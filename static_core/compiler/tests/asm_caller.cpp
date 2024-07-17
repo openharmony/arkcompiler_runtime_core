@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,41 +29,51 @@ class AsmCaller : public ::testing::Test {};
 #define STDOUT_PRINT
 #endif  // ENABLE_DEBUG_STDOUT_PRINT
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define EMITED_ONE_PARAM_INST_LIST(DEF)                               \
-    DEF(mov, [](auto param) { return param; })                        \
-    DEF(neg, [](auto param) { return -param; })                       \
-    DEF(abs, [](auto param) { return (param > 0) ? param : -param; }) \
-    DEF(not, [](auto param) { return -param - 1L; })
+template <typename T>
+static auto Abs(T param)
+{
+    return (param > 0) ? param : -param;
+}
+
+template <typename T>
+static auto Not(T param)
+{
+    return -param - 1U;
+}
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define EMITED_TWO_PARAM_INST_LIST(DEF)                                \
-    DEF(add, [](auto param1, auto param2) { return param1 + param2; }) \
-    DEF(sub, [](auto param1, auto param2) { return param1 - param2; }) \
-    DEF(mul, [](auto param1, auto param2) { return param1 * param2; }) \
-    DEF(and, [](auto param1, auto param2) { return param1 & param2; }) \
-    DEF(or, [](auto param1, auto param2) { return param1 | param2; })  \
-    DEF(xor, [](auto param1, auto param2) {                            \
-        return param1 ^ param2;                                        \
-    })
+#define EMITED_ONE_PARAM_INST_LIST(DEF) \
+    DEF(mov, +);                        \
+    DEF(neg, -);                        \
+    DEF(abs, Abs);                      \
+    DEF(not, Not)
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define EMITED_TWO_PARAM_INST_LIST(DEF) \
+    DEF(add, +);                        \
+    DEF(sub, -);                        \
+    DEF(mul, *);                        \
+    DEF(and, &);                        \
+    DEF(or, |);                         \
+    DEF(xor, ^)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define C_EXTERN_ONE_PARAM(opc, param)                       \
     extern "C" std::uint8_t test_##opc##_8(std::uint8_t);    \
     extern "C" std::uint16_t test_##opc##_16(std::uint16_t); \
     extern "C" std::uint32_t test_##opc##_32(std::uint32_t); \
-    extern "C" std::uint64_t test_##opc##_64(std::uint64_t);
+    extern "C" std::uint64_t test_##opc##_64(std::uint64_t)
 
-EMITED_ONE_PARAM_INST_LIST(C_EXTERN_ONE_PARAM)
+EMITED_ONE_PARAM_INST_LIST(C_EXTERN_ONE_PARAM);
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define C_EXTERN_TWO_PARAM(opc, param)                                      \
     extern "C" std::uint8_t test_##opc##_8(std::uint8_t, std::uint8_t);     \
     extern "C" std::uint16_t test_##opc##_16(std::uint16_t, std::uint16_t); \
     extern "C" std::uint32_t test_##opc##_32(std::uint32_t, std::uint32_t); \
-    extern "C" std::uint64_t test_##opc##_64(std::uint64_t, std::uint64_t);
+    extern "C" std::uint64_t test_##opc##_64(std::uint64_t, std::uint64_t)
 
-EMITED_TWO_PARAM_INST_LIST(C_EXTERN_TWO_PARAM)
+EMITED_TWO_PARAM_INST_LIST(C_EXTERN_TWO_PARAM);
 
 TEST_F(AsmCaller, CallMath)
 {
@@ -88,17 +98,17 @@ TEST_F(AsmCaller, CallMath)
     std::cerr << "ui32 result:" << std::hex << static_cast<uint64_t>(test_##opc##_32(ui32)) \
               << "  input:" << static_cast<uint64_t>(ui32) << "\n";                         \
     std::cerr << "ui64 result:" << std::hex << static_cast<uint64_t>(test_##opc##_64(ui64)) \
-              << "  input:" << static_cast<uint64_t>(ui64) << "\n";
+              << "  input:" << static_cast<uint64_t>(ui64) << "\n"
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CALL_ONE_PARAM_OUTPUT(opc, param)                                 \
     EXPECT_EQ(test_##opc##_8(ui8), static_cast<uint8_t>(param(ui8)));     \
     EXPECT_EQ(test_##opc##_16(ui16), static_cast<uint16_t>(param(ui16))); \
     EXPECT_EQ(test_##opc##_32(ui32), static_cast<uint32_t>(param(ui32))); \
-    EXPECT_EQ(test_##opc##_64(ui64), static_cast<uint64_t>(param(ui64)));
+    EXPECT_EQ(test_##opc##_64(ui64), static_cast<uint64_t>(param(ui64)))
 #endif
 
-    EMITED_ONE_PARAM_INST_LIST(CALL_ONE_PARAM_OUTPUT)
+    EMITED_ONE_PARAM_INST_LIST(CALL_ONE_PARAM_OUTPUT);
 
 #ifdef STDOUT_PRINT
 #define CALL_TWO_PARAM_OUTPUT(opc, param)                                                                            \
@@ -110,14 +120,14 @@ TEST_F(AsmCaller, CallMath)
     std::cerr << "ui32 result:" << std::hex << static_cast<uint64_t>(test_##opc##_32(ui32, ui32_2))                  \
               << "  input:" << static_cast<uint64_t>(ui32) << "  input_2:" << static_cast<uint64_t>(ui32_2) << "\n"; \
     std::cerr << "ui64 result:" << std::hex << static_cast<uint64_t>(test_##opc##_64(ui64, ui64_2))                  \
-              << "  input:" << static_cast<uint64_t>(ui64) << "  input_2:" << static_cast<uint64_t>(ui64_2) << "\n";
+              << "  input:" << static_cast<uint64_t>(ui64) << "  input_2:" << static_cast<uint64_t>(ui64_2) << "\n"
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CALL_TWO_PARAM_OUTPUT(opc, param)                                               \
-    EXPECT_EQ(test_##opc##_8(ui8, ui82), static_cast<uint8_t>(param(ui8, ui82)));       \
-    EXPECT_EQ(test_##opc##_16(ui16, ui162), static_cast<uint16_t>(param(ui16, ui162))); \
-    EXPECT_EQ(test_##opc##_32(ui32, ui322), static_cast<uint32_t>(param(ui32, ui322))); \
-    EXPECT_EQ(test_##opc##_64(ui64, ui642), static_cast<uint64_t>(param(ui64, ui642)));
+#define CALL_TWO_PARAM_OUTPUT(opc, param)                                             \
+    EXPECT_EQ(test_##opc##_8(ui8, ui82), static_cast<uint8_t>(ui8 param ui82));       \
+    EXPECT_EQ(test_##opc##_16(ui16, ui162), static_cast<uint16_t>(ui16 param ui162)); \
+    EXPECT_EQ(test_##opc##_32(ui32, ui322), static_cast<uint32_t>(ui32 param ui322)); \
+    EXPECT_EQ(test_##opc##_64(ui64, ui642), static_cast<uint64_t>(ui64 param ui642))
 #endif
-    EMITED_TWO_PARAM_INST_LIST(CALL_TWO_PARAM_OUTPUT)  // NOLINT(hicpp-signed-bitwise)
+    EMITED_TWO_PARAM_INST_LIST(CALL_TWO_PARAM_OUTPUT);  // NOLINT(hicpp-signed-bitwise)
 }

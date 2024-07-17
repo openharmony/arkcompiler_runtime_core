@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,9 +36,17 @@ static std::string g_outputDir = "asm_output";
 
 namespace ark::compiler {
 
-template <Arch ARCH>
-class PrinterTest : public ::testing::Test {
+enum ParamCount { ONE = 1, TWO = 2 };
+
+template <ParamCount PARAMS>
+using EncodeFuncType =
+    std::conditional_t<PARAMS == ParamCount::TWO, void (Encoder::*)(Reg, Reg, Reg), void (Encoder::*)(Reg, Reg)>;
+
+template <Arch ARCH, ParamCount PARAMS>
+class PrinterTest : public testing::TestWithParam<std::pair<std::string_view, EncodeFuncType<PARAMS>>> {
 public:
+    using Base = testing::TestWithParam<std::pair<std::string_view, EncodeFuncType<PARAMS>>>;
+
     PrinterTest()
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
@@ -54,6 +62,31 @@ public:
         encoder_ = Encoder::Create(allocator_, ARCH, true);
         encoder_->InitMasm();
         regfile_ = RegistersDescription::Create(allocator_, ARCH);
+        SetArch();
+        memStats_ = new BaseMemStats();
+        codeAlloc_ = new (std::nothrow) CodeAllocator(memStats_);
+        // Create dir if it is not exist
+        auto execPath = ark::os::file::File::GetExecutablePath();
+        ASSERT(execPath);
+        execPath_ = execPath.Value();
+        os::CreateDirectories(execPath_ + "/" + g_outputDir);
+        os::CreateDirectories(GetDir());
+    }
+
+    ~PrinterTest() override
+    {
+        Logger::Destroy();
+        encoder_->~Encoder();
+        delete allocator_;
+        delete codeAlloc_;
+        delete memStats_;
+        PoolManager::Finalize();
+        ark::mem::MemConfig::Finalize();
+        delete currStream_;
+    }
+
+    void SetArch()
+    {
         bool pabi = false;
         bool osr = false;
         bool dyn = false;
@@ -85,25 +118,6 @@ public:
             enc->GetEncoder()->SetRegfile(regfile_);
         }
 #endif
-        memStats_ = new BaseMemStats();
-        codeAlloc_ = new (std::nothrow) CodeAllocator(memStats_);
-        // Create dir if it is not exist
-        auto execPath = ark::os::file::File::GetExecutablePath();
-        ASSERT(execPath);
-        execPath_ = execPath.Value();
-        os::CreateDirectories(execPath_ + "/" + g_outputDir);
-        os::CreateDirectories(GetDir());
-    }
-    ~PrinterTest() override
-    {
-        Logger::Destroy();
-        encoder_->~Encoder();
-        delete allocator_;
-        delete codeAlloc_;
-        delete memStats_;
-        PoolManager::Finalize();
-        ark::mem::MemConfig::Finalize();
-        delete currStream_;
     }
 
     NO_MOVE_SEMANTIC(PrinterTest);
@@ -207,6 +221,32 @@ public:
         encoder_->Finalize();
     }
 
+    void DoTest(TypeInfo typeInfo, std::string_view opName, EncodeFuncType<PARAMS> encodeFunc)
+    {
+        SetTestName(std::string {opName} + "_" + std::to_string(typeInfo.GetSize()));
+        PreWork();
+        if constexpr (PARAMS == ParamCount::TWO) {
+            auto param1 = GetParameter(typeInfo, 0U);
+            auto param2 = GetParameter(typeInfo, 1U);
+            (GetEncoder()->*encodeFunc)(param1, param1, param2);
+        } else {
+            auto param = GetParameter(typeInfo);
+            (GetEncoder()->*encodeFunc)(param, param);
+        }
+        PostWork();
+        EXPECT_TRUE(GetEncoder()->GetResult());
+    }
+
+    void DoTest()
+    {
+        auto [opName, func] = Base::GetParam();
+        for (auto typeId : {TypeInfo::INT8, TypeInfo::INT16, TypeInfo::INT32, TypeInfo::INT64}) {
+            DoTest(TypeInfo {typeId}, opName, func);
+        }
+        SetTestName(std::string {opName});
+        FinalizeTest();
+    }
+
 #ifdef STDOUT_PRINT
     std::ostream *GetStream()
 #else
@@ -262,127 +302,54 @@ private:
     std::string dirSuffix_;
 };
 
-#ifdef PANDA_COMPILER_TARGET_AARCH32
-using PrinterAarch32Test = PrinterTest<Arch::AARCH32>;
+static auto Values1()
+{
+    std::vector<std::pair<std::string_view, EncodeFuncType<ONE>>> singleFunctions {{"mov", &Encoder::EncodeMov},
+                                                                                   {"neg", &Encoder::EncodeNeg},
+                                                                                   {"abs", &Encoder::EncodeAbs},
+                                                                                   {"not", &Encoder::EncodeNot}};
+    return testing::ValuesIn(singleFunctions);
+}
+
+static auto Values2()
+{
+    std::vector<std::pair<std::string_view, EncodeFuncType<TWO>>> doubleFunctions {
+        {"add", &Encoder::EncodeAdd}, {"sub", &Encoder::EncodeSub}, {"mul", &Encoder::EncodeMul},
+        {"shl", &Encoder::EncodeShl}, {"shr", &Encoder::EncodeShr}, {"ashr", &Encoder::EncodeAShr},
+        {"and", &Encoder::EncodeAnd}, {"or", &Encoder::EncodeOr},   {"xor", &Encoder::EncodeXor}};
+    return testing::ValuesIn(doubleFunctions);
+}
+
+struct GetGTestName {
+    template <typename T>
+    std::string operator()(const T &value)
+    {
+        return std::string {"test_"} + std::string {value.param.first};
+    }
+};
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CREATE_TEST(ARCH, PARAMS)                                                               \
+    using Printer_##ARCH##_##PARAMS = PrinterTest<Arch::ARCH, static_cast<ParamCount>(PARAMS)>; \
+    TEST_P(Printer_##ARCH##_##PARAMS, Test)                                                     \
+    {                                                                                           \
+        DoTest();                                                                               \
+    }                                                                                           \
+    INSTANTIATE_TEST_SUITE_P(Printer_##ARCH##_##PARAMS, Printer_##ARCH##_##PARAMS, Values##PARAMS(), GetGTestName {})
+
+#ifdef PANDA_COMPILER_TARGET_X86_64
+CREATE_TEST(X86_64, 1);
+CREATE_TEST(X86_64, 2);
 #endif
 
 #ifdef PANDA_COMPILER_TARGET_AARCH64
-using PrinterAarch64Test = PrinterTest<Arch::AARCH64>;
-#endif
-
-#ifdef PANDA_COMPILER_TARGET_X86_64
-using PrinterAmd64Test = PrinterTest<Arch::X86_64>;
-#endif
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define SINGLE_PARAM_TEST_TEMPLATE(test_name, encode_func) \
-    template <typename T, Arch arch>                       \
-    bool test_name(PrinterTest<arch> *test)                \
-    {                                                      \
-        test->PreWork();                                   \
-        auto param = test->GetParameter(TypeInfo(T(0)));   \
-        test->GetEncoder()->encode_func(param, param);     \
-        test->PostWork();                                  \
-        return test->GetEncoder()->GetResult();            \
-    }
-
-SINGLE_PARAM_TEST_TEMPLATE(TestMov, EncodeMov)
-SINGLE_PARAM_TEST_TEMPLATE(TestNeg, EncodeNeg)
-SINGLE_PARAM_TEST_TEMPLATE(TestAbs, EncodeAbs)
-SINGLE_PARAM_TEST_TEMPLATE(TestNot, EncodeNot)
-// SINGLE_PARAM_TEST_TEMPLATE(TestSqrt, EncodeSqrt)
-
-#undef SINGLE_PARAM_TEST_TEMPLATE
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DOUBLE_PARAM_TEST_TEMPLATE(test_name, encode_func)       \
-    template <typename T, Arch arch>                             \
-    bool test_name(PrinterTest<arch> *test)                      \
-    {                                                            \
-        test->PreWork();                                         \
-        auto param1 = test->GetParameter(TypeInfo(T(0)), 0);     \
-        auto param2 = test->GetParameter(TypeInfo(T(0)), 1);     \
-        test->GetEncoder()->encode_func(param1, param1, param2); \
-        test->PostWork();                                        \
-        return test->GetEncoder()->GetResult();                  \
-    }
-
-DOUBLE_PARAM_TEST_TEMPLATE(TestAdd, EncodeAdd)
-DOUBLE_PARAM_TEST_TEMPLATE(TestSub, EncodeSub)
-DOUBLE_PARAM_TEST_TEMPLATE(TestMul, EncodeMul)
-DOUBLE_PARAM_TEST_TEMPLATE(TestShl, EncodeShl)
-DOUBLE_PARAM_TEST_TEMPLATE(TestShr, EncodeShr)
-DOUBLE_PARAM_TEST_TEMPLATE(TestAShr, EncodeAShr)
-DOUBLE_PARAM_TEST_TEMPLATE(TestAnd, EncodeAnd)
-DOUBLE_PARAM_TEST_TEMPLATE(TestOr, EncodeOr)
-DOUBLE_PARAM_TEST_TEMPLATE(TestXor, EncodeXor)
-
-#undef DOUBLE_PARAM_TEST_TEMPLATE
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ONE_TEST_BODY(test_class, test_method, test_name, arch) \
-    TEST_F(test_class, test_method)                             \
-    {                                                           \
-        bool success = true;                                    \
-        SetTestName(#test_name "_8");                           \
-        success &= test_method<uint8_t, Arch::arch>(this);      \
-        SetTestName(#test_name "_16");                          \
-        success &= test_method<uint16_t, Arch::arch>(this);     \
-        SetTestName(#test_name "_32");                          \
-        success &= test_method<uint32_t, Arch::arch>(this);     \
-        SetTestName(#test_name "_64");                          \
-        success &= test_method<uint64_t, Arch::arch>(this);     \
-        SetTestName(#test_name);                                \
-        FinalizeTest();                                         \
-        EXPECT_TRUE(success);                                   \
-    }
-
-#ifdef PANDA_COMPILER_TARGET_AARCH64
-ONE_TEST_BODY(PrinterAarch64Test, TestMov, mov, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestNeg, neg, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestAbs, abs, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestNot, not, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestAdd, add, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestSub, sub, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestMul, mul, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestShl, shl, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestShr, shr, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestAShr, ashr, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestAnd, and, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestOr, or, AARCH64)
-ONE_TEST_BODY(PrinterAarch64Test, TestXor, xor, AARCH64)
+CREATE_TEST(AARCH64, 1);
+CREATE_TEST(AARCH64, 2);
 #endif
 
 #ifdef PANDA_COMPILER_TARGET_AARCH32
-ONE_TEST_BODY(PrinterAarch32Test, TestMov, mov, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestNeg, neg, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestAbs, abs, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestNot, not, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestAdd, add, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestSub, sub, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestMul, mul, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestShl, shl, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestShr, shr, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestAShr, ashr, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestAnd, and, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestOr, or, AARCH32)
-ONE_TEST_BODY(PrinterAarch32Test, TestXor, xor, AARCH32)
-#endif
-
-#ifdef PANDA_COMPILER_TARGET_X86_64
-ONE_TEST_BODY(PrinterAmd64Test, TestMov, mov, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestNeg, neg, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestAbs, abs, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestNot, not, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestAdd, add, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestSub, sub, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestMul, mul, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestShl, shl, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestShr, shr, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestAShr, ashr, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestAnd, and, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestOr, or, X86_64)
-ONE_TEST_BODY(PrinterAmd64Test, TestXor, xor, X86_64)
+CREATE_TEST(AARCH32, 1);
+CREATE_TEST(AARCH32, 2);
 #endif
 
 }  // namespace ark::compiler

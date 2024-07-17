@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,12 +17,15 @@
 #include "optimizer/optimizations/balance_expressions.h"
 
 namespace ark::compiler {
-class BalanceExpressionsTest : public GraphTest {};
+class BalanceExpressionsTest : public GraphTest {
+public:
+    void AddMulParallelBuildGraph();
+};
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(BalanceExpressionsTest, AddMulParallel)
+
+void BalanceExpressionsTest::AddMulParallelBuildGraph()
 {
-    // Check that independent expression are not mixed with each other and being considered sequentially:
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).u64();
@@ -69,6 +72,12 @@ TEST_F(BalanceExpressionsTest, AddMulParallel)
             INST(23U, Opcode::Return).u64().Inputs(22U);
         }
     }
+}
+
+TEST_F(BalanceExpressionsTest, AddMulParallel)
+{
+    // Check that independent expression are not mixed with each other and being considered sequentially:
+    AddMulParallelBuildGraph();
 
     ASSERT_TRUE(GetGraph()->RunPass<BalanceExpressions>());
     ASSERT_TRUE(CheckUsers(INS(20U), {22U}));

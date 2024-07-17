@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,10 @@ private:
     vixl::aarch64::Disassembler disasm_;
 };
 
-class CodegenCallerSavedRegistersTest : public VixlDisasmTest {};
+class CodegenCallerSavedRegistersTest : public VixlDisasmTest {
+public:
+    void BuildGraphSaveOnlyLiveRegisters(int argsCount);
+};
 
 class DecoderVisitor : public vixl::aarch64::DecoderVisitor {
 public:
@@ -80,36 +83,15 @@ class LoadStoreRegistersCollector : public DecoderVisitor {
 public:
     // use the same body for all VisitXXX methods to simplify visitor's implementation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE(A)                                                                                             \
-    void Visit##A(const vixl::aarch64::Instruction *instr) override                                            \
-    {                                                                                                          \
-        if (std::string(#A) == "LoadStorePairOffset") {                                                        \
-            if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_x) == vixl::aarch64::LoadStorePairOp::LDP_x || \
-                instr->Mask(vixl::aarch64::LoadStorePairOp::STP_x) == vixl::aarch64::LoadStorePairOp::STP_x) { \
-                regs_.set(instr->GetRt());                                                                     \
-                regs_.set(instr->GetRt2());                                                                    \
-                return;                                                                                        \
-            }                                                                                                  \
-            if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_d) == vixl::aarch64::LoadStorePairOp::LDP_d || \
-                instr->Mask(vixl::aarch64::LoadStorePairOp::STP_d) == vixl::aarch64::LoadStorePairOp::STP_d) { \
-                vregs_.set(instr->GetRt());                                                                    \
-                vregs_.set(instr->GetRt2());                                                                   \
-                return;                                                                                        \
-            }                                                                                                  \
-        }                                                                                                      \
-        if (std::string(#A) == "LoadStoreUnscaledOffset" || std::string(#A) == "LoadStoreUnsignedOffset" ||    \
-            std::string(#A) == "LoadStoreRegisterOffset") {                                                    \
-            if (instr->Mask(vixl::aarch64::LoadStoreOp::LDR_x) == vixl::aarch64::LoadStoreOp::LDR_x ||         \
-                instr->Mask(vixl::aarch64::LoadStoreOp::STR_x) == vixl::aarch64::LoadStoreOp::STR_x) {         \
-                regs_.set(instr->GetRt());                                                                     \
-                return;                                                                                        \
-            }                                                                                                  \
-            if (instr->Mask(vixl::aarch64::LoadStoreOp::LDR_d) == vixl::aarch64::LoadStoreOp::LDR_d ||         \
-                instr->Mask(vixl::aarch64::LoadStoreOp::STR_d) == vixl::aarch64::LoadStoreOp::STR_d) {         \
-                vregs_.set(instr->GetRt());                                                                    \
-                return;                                                                                        \
-            }                                                                                                  \
-        }                                                                                                      \
+#define DECLARE(A)                                                                                                 \
+    void Visit##A(const vixl::aarch64::Instruction *instr) override                                                \
+    {                                                                                                              \
+        if (std::string(#A) == "LoadStorePairOffset") {                                                            \
+            VisitLoadStorePair(instr);                                                                             \
+        } else if (std::string(#A) == "LoadStoreUnscaledOffset" || std::string(#A) == "LoadStoreUnsignedOffset" || \
+                   std::string(#A) == "LoadStoreRegisterOffset") {                                                 \
+            VisitLoadStore(instr);                                                                                 \
+        }                                                                                                          \
     }
 
     VISITOR_LIST(DECLARE)
@@ -125,6 +107,31 @@ public:
     }
 
 private:
+    void VisitLoadStorePair(const vixl::aarch64::Instruction *instr)
+    {
+        if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_x) == vixl::aarch64::LoadStorePairOp::LDP_x ||
+            instr->Mask(vixl::aarch64::LoadStorePairOp::STP_x) == vixl::aarch64::LoadStorePairOp::STP_x) {
+            regs_.set(instr->GetRt());
+            regs_.set(instr->GetRt2());
+        } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_d) == vixl::aarch64::LoadStorePairOp::LDP_d ||
+                   instr->Mask(vixl::aarch64::LoadStorePairOp::STP_d) == vixl::aarch64::LoadStorePairOp::STP_d) {
+            vregs_.set(instr->GetRt());
+            vregs_.set(instr->GetRt2());
+        }
+    }
+
+    void VisitLoadStore(const vixl::aarch64::Instruction *instr)
+    {
+        if (instr->Mask(vixl::aarch64::LoadStoreOp::LDR_x) == vixl::aarch64::LoadStoreOp::LDR_x ||
+            instr->Mask(vixl::aarch64::LoadStoreOp::STR_x) == vixl::aarch64::LoadStoreOp::STR_x) {
+            regs_.set(instr->GetRt());
+        } else if (instr->Mask(vixl::aarch64::LoadStoreOp::LDR_d) == vixl::aarch64::LoadStoreOp::LDR_d ||
+                   instr->Mask(vixl::aarch64::LoadStoreOp::STR_d) == vixl::aarch64::LoadStoreOp::STR_d) {
+            vregs_.set(instr->GetRt());
+        }
+    }
+
+private:
     RegMask regs_;
     VRegMask vregs_;
 };
@@ -132,28 +139,12 @@ private:
 class LoadStoreInstCollector : public DecoderVisitor {
 public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE(A)                                                                                                    \
-    void Visit##A(const vixl::aarch64::Instruction *instr) override                                                   \
-    {                                                                                                                 \
-        if (std::string(#A) == "LoadStorePairOffset") {                                                               \
-            if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_x) == vixl::aarch64::LoadStorePairOp::LDP_x) {        \
-                ldp_++;                                                                                               \
-                regs_.set(instr->GetRt());                                                                            \
-                regs_.set(instr->GetRt2());                                                                           \
-            } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::STP_x) == vixl::aarch64::LoadStorePairOp::STP_x) { \
-                stp_++;                                                                                               \
-                regs_.set(instr->GetRt());                                                                            \
-                regs_.set(instr->GetRt2());                                                                           \
-            } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_d) == vixl::aarch64::LoadStorePairOp::LDP_d) { \
-                ldpV_++;                                                                                              \
-                vregs_.set(instr->GetRt());                                                                           \
-                vregs_.set(instr->GetRt2());                                                                          \
-            } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::STP_d) == vixl::aarch64::LoadStorePairOp::STP_d) { \
-                stpV_++;                                                                                              \
-                vregs_.set(instr->GetRt());                                                                           \
-                vregs_.set(instr->GetRt2());                                                                          \
-            }                                                                                                         \
-        }                                                                                                             \
+#define DECLARE(A)                                                  \
+    void Visit##A(const vixl::aarch64::Instruction *instr) override \
+    {                                                               \
+        if (std::string(#A) == "LoadStorePairOffset") {             \
+            VisitLoadStorePair(instr);                              \
+        }                                                           \
     }
 
     VISITOR_LIST(DECLARE)
@@ -188,6 +179,27 @@ public:
         return vregs_;
     }
 
+    void VisitLoadStorePair(const vixl::aarch64::Instruction *instr)
+    {
+        if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_x) == vixl::aarch64::LoadStorePairOp::LDP_x) {
+            ldp_++;
+            regs_.set(instr->GetRt());
+            regs_.set(instr->GetRt2());
+        } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::STP_x) == vixl::aarch64::LoadStorePairOp::STP_x) {
+            stp_++;
+            regs_.set(instr->GetRt());
+            regs_.set(instr->GetRt2());
+        } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::LDP_d) == vixl::aarch64::LoadStorePairOp::LDP_d) {
+            ldpV_++;
+            vregs_.set(instr->GetRt());
+            vregs_.set(instr->GetRt2());
+        } else if (instr->Mask(vixl::aarch64::LoadStorePairOp::STP_d) == vixl::aarch64::LoadStorePairOp::STP_d) {
+            stpV_++;
+            vregs_.set(instr->GetRt());
+            vregs_.set(instr->GetRt2());
+        }
+    }
+
 private:
     size_t ldp_ {0};
     size_t stp_ {0};
@@ -198,17 +210,16 @@ private:
 };
 
 // NOLINTBEGIN(readability-magic-numbers,modernize-avoid-c-arrays)
-TEST_F(CodegenCallerSavedRegistersTest, SaveOnlyLiveRegisters)
+
+void CodegenCallerSavedRegistersTest::BuildGraphSaveOnlyLiveRegisters(int argsCount)
 {
-    g_options.SetCompilerSaveOnlyLiveRegisters(true);
-    constexpr auto ARGS_COUNT = 8;
     GRAPH(GetGraph())
     {
-        for (int i = 0; i < ARGS_COUNT; i++) {
+        for (int i = 0; i < argsCount; i++) {
             PARAMETER(i, i).u64();
         }
-        for (int i = 0; i < ARGS_COUNT; i++) {
-            PARAMETER(i + ARGS_COUNT, i + ARGS_COUNT).f64();
+        for (int i = 0; i < argsCount; i++) {
+            PARAMETER(i + argsCount, i + argsCount).f64();
         }
 
         BASIC_BLOCK(2U, -1)
@@ -235,6 +246,13 @@ TEST_F(CodegenCallerSavedRegistersTest, SaveOnlyLiveRegisters)
             INST(33U, Opcode::Return).ref().Inputs(32U);
         }
     }
+}
+
+TEST_F(CodegenCallerSavedRegistersTest, SaveOnlyLiveRegisters)
+{
+    g_options.SetCompilerSaveOnlyLiveRegisters(true);
+    constexpr auto ARGS_COUNT = 8;
+    BuildGraphSaveOnlyLiveRegisters(ARGS_COUNT);
 
     SetNumArgs(ARGS_COUNT * 2U);
     SetNumVirtRegs(0);
@@ -267,6 +285,19 @@ public:
         g_options.SetCompilerVerifyRegalloc(false);
     }
 
+    void FillSpillFillInst(unsigned int alignmentOffset)
+    {
+        auto sfInst = INS(0).CastToSpillFill();
+        sfInst->AddSpill(0U, 0U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(1U, 1U + alignmentOffset, DataType::Type::INT64);
+        sfInst->AddSpill(0U, 2U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddSpill(1U, 3U + alignmentOffset, DataType::Type::FLOAT64);
+        sfInst->AddFill(4U + alignmentOffset, 3U, DataType::Type::INT64);
+        sfInst->AddFill(5U + alignmentOffset, 2U, DataType::Type::INT64);
+        sfInst->AddFill(6U + alignmentOffset, 3U, DataType::Type::FLOAT64);
+        sfInst->AddFill(7U + alignmentOffset, 2U, DataType::Type::FLOAT64);
+    }
+
     void CheckSpillFillCoalescingForEvenRegsNumber(bool aligned)
     {
         GRAPH(GetGraph())
@@ -279,16 +310,7 @@ public:
         }
 
         unsigned int alignmentOffset = aligned ? 1 : 0;
-
-        auto sfInst = INS(0).CastToSpillFill();
-        sfInst->AddSpill(0U, 0U + alignmentOffset, DataType::Type::INT64);
-        sfInst->AddSpill(1U, 1U + alignmentOffset, DataType::Type::INT64);
-        sfInst->AddSpill(0U, 2U + alignmentOffset, DataType::Type::FLOAT64);
-        sfInst->AddSpill(1U, 3U + alignmentOffset, DataType::Type::FLOAT64);
-        sfInst->AddFill(4U + alignmentOffset, 3U, DataType::Type::INT64);
-        sfInst->AddFill(5U + alignmentOffset, 2U, DataType::Type::INT64);
-        sfInst->AddFill(6U + alignmentOffset, 3U, DataType::Type::FLOAT64);
-        sfInst->AddFill(7U + alignmentOffset, 2U, DataType::Type::FLOAT64);
+        FillSpillFillInst(alignmentOffset);
 
         SetNumArgs(0);
         SetNumVirtRegs(0);
@@ -415,6 +437,28 @@ public:
 #endif
     }
 
+    std::vector<std::string> CheckLeafPrologueExpectedAsm()
+    {
+        return {
+#ifdef PANDA_COMPILER_DEBUG_INFO
+            "stp x29, x30, [sp, #-16]!",  // prolog save FP and LR
+            "mov x29, sp",                // prolog set FP
+            "stur x19, [sp, #-72]",   // prolog save callee-saved
+#else
+            "stur x19, [sp, #-88]",   // prolog save callee-saved
+#endif
+            "ldr x19, [x1]",
+            "add x19, x19, #0x1 // (1)",
+            "str x19, [x1]",
+#ifdef PANDA_COMPILER_DEBUG_INFO
+            "ldur x19, [sp, #-72]",   // epilog restore callee-saved
+            "ldp x29, x30, [sp], #16",    // epilog restore FP and LR
+#else
+            "ldur x19, [sp, #-88]",   // epilog restore callee-saved
+#endif
+            "ret"};
+    }
+
     void CheckLeafPrologue()
     {
         // RedundantOps::inc()
@@ -435,24 +479,7 @@ public:
         }
         SetNumArgs(1);
 
-        std::vector<std::string> expectedAsm = {
-#ifdef PANDA_COMPILER_DEBUG_INFO
-            "stp x29, x30, [sp, #-16]!",  // prolog save FP and LR
-            "mov x29, sp",                // prolog set FP
-            "stur x19, [sp, #-72]",   // prolog save callee-saved
-#else
-            "stur x19, [sp, #-88]",   // prolog save callee-saved
-#endif
-            "ldr x19, [x1]",
-            "add x19, x19, #0x1 // (1)",
-            "str x19, [x1]",
-#ifdef PANDA_COMPILER_DEBUG_INFO
-            "ldur x19, [sp, #-72]",   // epilog restore callee-saved
-            "ldp x29, x30, [sp], #16",    // epilog restore FP and LR
-#else
-            "ldur x19, [sp, #-88]",   // epilog restore callee-saved
-#endif
-            "ret"};
+        auto expectedAsm = CheckLeafPrologueExpectedAsm();
 
         GraphChecker(GetGraph()).Check();
         GetGraph()->RunPass<RegAllocLinearScan>();
@@ -475,40 +502,11 @@ public:
         }
     }
 
-    void CheckLeafWithParamsOnStackPrologue()
+    std::vector<std::string> CheckLeafWithParamsOnStackPrologueExpectedAsm()
     {
-        // RedundantOps::sum()
-        RuntimeInterface::FieldPtr i = reinterpret_cast<void *>(0xDEADBEEF);  // NOLINT(modernize-use-auto)
-        GRAPH(GetGraph())
-        {
-            PARAMETER(0U, 0_I).ref();
-            PARAMETER(1U, 1_I).s64();
-            PARAMETER(2U, 2_I).s64();
-            PARAMETER(3U, 3_I).s64();
-            PARAMETER(4U, 4_I).s64();
-            PARAMETER(5U, 5_I).s64();
-            PARAMETER(6U, 6_I).s64();
-            PARAMETER(7U, 7_I).s64();
-            PARAMETER(8U, 8_I).s64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(10U, Opcode::Add).s64().Inputs(1U, 2_I);
-                INST(11U, Opcode::Add).s64().Inputs(3U, 4_I);
-                INST(12U, Opcode::Add).s64().Inputs(5U, 6_I);
-                INST(13U, Opcode::Add).s64().Inputs(7U, 8_I);
-                INST(14U, Opcode::Add).s64().Inputs(10U, 11_I);
-                INST(15U, Opcode::Add).s64().Inputs(12U, 13_I);
-                INST(16U, Opcode::Add).s64().Inputs(14U, 15_I);
-                INST(17U, Opcode::StoreObject).s64().Inputs(0, 16_I).TypeId(301U).ObjField(i);
-                INST(18U, Opcode::ReturnVoid);
-            }
-        }
-        SetNumArgs(9U);
-
         // In this case two parameters are passed on stack,
         // thus to address them SP needs to be adjusted in prolog/epilog.
-        std::vector<std::string> expectedAsm = {
+        return {
 #ifdef PANDA_COMPILER_DEBUG_INFO
             "stp x29, x30, [sp, #-16]!",    // prolog save FP and LR
             "mov x29, sp",                  // prolog set FP
@@ -542,6 +540,45 @@ public:
             "add sp, sp, #0x240 // (576)",  // epilog adjust SP
 #endif
             "ret"};
+    }
+
+    void CheckLeafWithParamsOnStackPrologueBuildGraph()
+    {
+        RuntimeInterface::FieldPtr i = reinterpret_cast<void *>(0xDEADBEEF);  // NOLINT(modernize-use-auto)
+        GRAPH(GetGraph())
+        {
+            PARAMETER(0U, 0_I).ref();
+            PARAMETER(1U, 1_I).s64();
+            PARAMETER(2U, 2_I).s64();
+            PARAMETER(3U, 3_I).s64();
+            PARAMETER(4U, 4_I).s64();
+            PARAMETER(5U, 5_I).s64();
+            PARAMETER(6U, 6_I).s64();
+            PARAMETER(7U, 7_I).s64();
+            PARAMETER(8U, 8_I).s64();
+
+            BASIC_BLOCK(2U, -1)
+            {
+                INST(10U, Opcode::Add).s64().Inputs(1U, 2_I);
+                INST(11U, Opcode::Add).s64().Inputs(3U, 4_I);
+                INST(12U, Opcode::Add).s64().Inputs(5U, 6_I);
+                INST(13U, Opcode::Add).s64().Inputs(7U, 8_I);
+                INST(14U, Opcode::Add).s64().Inputs(10U, 11_I);
+                INST(15U, Opcode::Add).s64().Inputs(12U, 13_I);
+                INST(16U, Opcode::Add).s64().Inputs(14U, 15_I);
+                INST(17U, Opcode::StoreObject).s64().Inputs(0, 16_I).TypeId(301U).ObjField(i);
+                INST(18U, Opcode::ReturnVoid);
+            }
+        }
+    }
+
+    void CheckLeafWithParamsOnStackPrologue()
+    {
+        // RedundantOps::sum()
+        CheckLeafWithParamsOnStackPrologueBuildGraph();
+        SetNumArgs(9U);
+
+        auto expectedAsm = CheckLeafWithParamsOnStackPrologueExpectedAsm();
 
         std::regex addRegex("^add[[:blank:]]+x[0-9]+,[[:blank:]]+x[0-9]+,[[:blank:]]+x[0-9]+",
                              std::regex::egrep | std::regex::icase);
@@ -666,203 +703,197 @@ TEST_F(CodegenTest, EncodeMemCopy)
     AssertCode(expectedCode);
 }
 
-TEST_F(CodegenTest, EncodeWithZeroReg)
+// MAdd a, b, c <=> c + a * b
+TEST_F(CodegenTest, EncodeMAddWithZeroRegA)
 {
-    // MAdd a, b, c <=> c + a * b
-
     // a = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1, 0).i64();
+        PARAMETER(2U, 1).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2U, 1).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MAdd).i64().Inputs(0U, 1_I, 2_I);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MAdd).i64().Inputs(0U, 1_I, 2_I);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mov x0, x2"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
 
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
+
+    const char *expectedCode[] = {"mov x0, x2"};
+    AssertCode(expectedCode);
+}
+
+TEST_F(CodegenTest, EncodeMAddWithZeroRegB)
+{
     // b = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1U, 0).i64();
+        PARAMETER(2U, 1).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1U, 0).i64();
-            PARAMETER(2U, 1).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MAdd).i64().Inputs(1, 0, 2_I);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MAdd).i64().Inputs(1, 0, 2_I);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mov x0, x2"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
 
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
+
+    const char *expectedCode[] = {"mov x0, x2"};
+    AssertCode(expectedCode);
+}
+
+TEST_F(CodegenTest, EncodeMAddWithZeroRegC)
+{
     // c = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1U, 0).i64();
+        PARAMETER(2U, 1).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1U, 0).i64();
-            PARAMETER(2U, 1).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MAdd).i64().Inputs(1, 2_I, 0);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MAdd).i64().Inputs(1, 2_I, 0);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mul x0, x1, x2"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
 
-    // MSub a, b, c <=> c - a * b
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
 
+    const char *expectedCode[] = {"mul x0, x1, x2"};
+    AssertCode(expectedCode);
+}
+
+// MSub a, b, c <=> c - a * b
+TEST_F(CodegenTest, EncodeMSubWithZeroRegA)
+{
     // a = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1U, 0).i64();
+        PARAMETER(2U, 1).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1U, 0).i64();
-            PARAMETER(2U, 1).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MSub).i64().Inputs(0, 1, 2_I);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MSub).i64().Inputs(0, 1, 2_I);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mov x0, x2"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
 
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
+
+    const char *expectedCode[] = {"mov x0, x2"};
+    AssertCode(expectedCode);
+}
+
+TEST_F(CodegenTest, EncodeMSubWithZeroRegB)
+{
     // b = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1U, 0).i64();
+        PARAMETER(2U, 1).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1U, 0).i64();
-            PARAMETER(2U, 1).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MSub).i64().Inputs(1, 0, 2_I);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MSub).i64().Inputs(1, 0, 2_I);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mov x0, x2"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
 
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
+
+    const char *expectedCode[] = {"mov x0, x2"};
+    AssertCode(expectedCode);
+}
+
+TEST_F(CodegenTest, EncodeMSubWithZeroRegC)
+{
     // c = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1, 0).i64();
+        PARAMETER(2U, 1).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-            PARAMETER(2U, 1).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MSub).i64().Inputs(1, 2_I, 0);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MSub).i64().Inputs(1, 2_I, 0);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mneg x0, x1, x2"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
 
-    // MNeg a, b <=> -(a * b)
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
 
+    const char *expectedCode[] = {"mneg x0, x1, x2"};
+    AssertCode(expectedCode);
+}
+
+// MNeg a, b <=> -(a * b)
+TEST_F(CodegenTest, EncodeMNegWithZeroRegA)
+{
     // a = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1, 0).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MNeg).i64().Inputs(0, 1);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MNeg).i64().Inputs(0, 1);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mov x0, #0"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
 
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
+
+    const char *expectedCode[] = {"mov x0, #0"};
+    AssertCode(expectedCode);
+}
+
+TEST_F(CodegenTest, EncodeMNegWithZeroRegB)
+{
     // b = 0
+    auto graph = GetGraph();
+    GRAPH(graph)
     {
-        auto graph = GetGraph();
-        GRAPH(graph)
+        CONSTANT(0, 0).i64();
+        PARAMETER(1, 0).i64();
+
+        BASIC_BLOCK(2U, -1)
         {
-            CONSTANT(0, 0).i64();
-            PARAMETER(1, 0).i64();
-
-            BASIC_BLOCK(2U, -1)
-            {
-                INST(3U, Opcode::MNeg).i64().Inputs(1, 0);
-                INST(4U, Opcode::Return).i64().Inputs(3U);
-            }
+            INST(3U, Opcode::MNeg).i64().Inputs(1, 0);
+            INST(4U, Opcode::Return).i64().Inputs(3U);
         }
-
-        EXPECT_TRUE(RegAlloc(graph));
-        EXPECT_TRUE(graph->RunPass<Codegen>());
-
-        const char *expectedCode[] = {"mov x0, #0"};
-        AssertCode(expectedCode);
-        ResetGraph();
     }
+
+    EXPECT_TRUE(RegAlloc(graph));
+    EXPECT_TRUE(graph->RunPass<Codegen>());
+
+    const char *expectedCode[] = {"mov x0, #0"};
+    AssertCode(expectedCode);
 }
 
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)

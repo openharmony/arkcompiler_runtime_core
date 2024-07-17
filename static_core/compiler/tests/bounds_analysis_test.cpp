@@ -31,15 +31,18 @@ public:
 
     // ll, lr, rl, rr - test bounds
     // rll, rlr, rrl, rrr - result bounds
-    void CCTest(ConditionCode cc, int64_t ll, int64_t lr, int64_t rl, int64_t rr, int64_t rll, int64_t rlr, int64_t rrl,
-                int64_t rrr)
+    void CCTest(ConditionCode cc, BoundsRange l, BoundsRange r, BoundsRange rl, BoundsRange rr)
     {
-        auto [nrl, nrr] = BoundsRange::TryNarrowBoundsByCC(cc, {BoundsRange(ll, lr), BoundsRange(rl, rr)});
-        ASSERT_EQ(nrl.GetLeft(), rll);
-        ASSERT_EQ(nrl.GetRight(), rlr);
-        ASSERT_EQ(nrr.GetLeft(), rrl);
-        ASSERT_EQ(nrr.GetRight(), rrr);
+        auto [nrl, nrr] = BoundsRange::TryNarrowBoundsByCC(cc, {l, r});
+        ASSERT_EQ(nrl.GetLeft(), rl.GetLeft());
+        ASSERT_EQ(nrl.GetRight(), rl.GetRight());
+        ASSERT_EQ(nrr.GetLeft(), rr.GetLeft());
+        ASSERT_EQ(nrr.GetRight(), rr.GetRight());
     }
+
+    using BR = BoundsRange;
+
+    void TypeFittingBuildGraph();
 
 private:
     Graph *graph_ {nullptr};
@@ -188,91 +191,94 @@ TEST_F(BoundsAnalysisTest, OverflowTest)
     ASSERT_NE(BoundsRange::MulWithOverflowCheck(UINT64_MAX / 2U, 2U), std::nullopt);
 }
 
-TEST_F(BoundsAnalysisTest, BoundsNarrowing)
+TEST_F(BoundsAnalysisTest, BoundsNarrowing1)
 {
     // case 1
-    CCTest(ConditionCode::CC_GT, 10U, 50U, 20U, 60U, 21U, 50U, 20U, 49U);
-    CCTest(ConditionCode::CC_A, 10U, 50U, 20U, 60U, 21U, 50U, 20U, 49U);
-    CCTest(ConditionCode::CC_GE, 10U, 50U, 20U, 60U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_AE, 10U, 50U, 20U, 60U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_LT, 10U, 50U, 20U, 60U, 10U, 50U, 20U, 60U);
-    CCTest(ConditionCode::CC_B, 10U, 50U, 20U, 60U, 10U, 50U, 20U, 60U);
-    CCTest(ConditionCode::CC_LE, 10U, 50U, 20U, 60U, 10U, 50U, 20U, 60U);
-    CCTest(ConditionCode::CC_BE, 10U, 50U, 20U, 60U, 10U, 50U, 20U, 60U);
-    CCTest(ConditionCode::CC_EQ, 10U, 50U, 20U, 60U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_NE, 10U, 50U, 20U, 60U, 10U, 50U, 20U, 60U);
+    CCTest(ConditionCode::CC_GT, BR(10U, 50U), BR(20U, 60U), BR(21U, 50U), BR(20U, 49U));
+    CCTest(ConditionCode::CC_A, BR(10U, 50U), BR(20U, 60U), BR(21U, 50U), BR(20U, 49U));
+    CCTest(ConditionCode::CC_GE, BR(10U, 50U), BR(20U, 60U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_AE, BR(10U, 50U), BR(20U, 60U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_LT, BR(10U, 50U), BR(20U, 60U), BR(10U, 50U), BR(20U, 60U));
+    CCTest(ConditionCode::CC_B, BR(10U, 50U), BR(20U, 60U), BR(10U, 50U), BR(20U, 60U));
+    CCTest(ConditionCode::CC_LE, BR(10U, 50U), BR(20U, 60U), BR(10U, 50U), BR(20U, 60U));
+    CCTest(ConditionCode::CC_BE, BR(10U, 50U), BR(20U, 60U), BR(10U, 50U), BR(20U, 60U));
+    CCTest(ConditionCode::CC_EQ, BR(10U, 50U), BR(20U, 60U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_NE, BR(10U, 50U), BR(20U, 60U), BR(10U, 50U), BR(20U, 60U));
 
     // case 2
-    CCTest(ConditionCode::CC_GT, 10U, 20U, 50U, 60U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_A, 10U, 20U, 50U, 60U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_GE, 10U, 20U, 50U, 60U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_AE, 10U, 20U, 50U, 60U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_LT, 10U, 20U, 50U, 60U, 10U, 20U, 50U, 60U);
-    CCTest(ConditionCode::CC_B, 10U, 20U, 50U, 60U, 10U, 20U, 50U, 60U);
-    CCTest(ConditionCode::CC_LE, 10U, 20U, 50U, 60U, 10U, 20U, 50U, 60U);
-    CCTest(ConditionCode::CC_BE, 10U, 20U, 50U, 60U, 10U, 20U, 50U, 60U);
-    CCTest(ConditionCode::CC_EQ, 10U, 20U, 50U, 60U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_NE, 10U, 20U, 50U, 60U, 10U, 20U, 50U, 60U);
+    CCTest(ConditionCode::CC_GT, BR(10U, 20U), BR(50U, 60U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_A, BR(10U, 20U), BR(50U, 60U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_GE, BR(10U, 20U), BR(50U, 60U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_AE, BR(10U, 20U), BR(50U, 60U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_LT, BR(10U, 20U), BR(50U, 60U), BR(10U, 20U), BR(50U, 60U));
+    CCTest(ConditionCode::CC_B, BR(10U, 20U), BR(50U, 60U), BR(10U, 20U), BR(50U, 60U));
+    CCTest(ConditionCode::CC_LE, BR(10U, 20U), BR(50U, 60U), BR(10U, 20U), BR(50U, 60U));
+    CCTest(ConditionCode::CC_BE, BR(10U, 20U), BR(50U, 60U), BR(10U, 20U), BR(50U, 60U));
+    CCTest(ConditionCode::CC_EQ, BR(10U, 20U), BR(50U, 60U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_NE, BR(10U, 20U), BR(50U, 60U), BR(10U, 20U), BR(50U, 60U));
 
     // case 3
-    CCTest(ConditionCode::CC_GT, 10U, 60U, 20U, 50U, 21U, 60U, 20U, 50U);
-    CCTest(ConditionCode::CC_A, 10U, 60U, 20U, 50U, 21U, 60U, 20U, 50U);
-    CCTest(ConditionCode::CC_GE, 10U, 60U, 20U, 50U, 20U, 60U, 20U, 50U);
-    CCTest(ConditionCode::CC_AE, 10U, 60U, 20U, 50U, 20U, 60U, 20U, 50U);
-    CCTest(ConditionCode::CC_LT, 10U, 60U, 20U, 50U, 10U, 49U, 20U, 50U);
-    CCTest(ConditionCode::CC_B, 10U, 60U, 20U, 50U, 10U, 49U, 20U, 50U);
-    CCTest(ConditionCode::CC_LE, 10U, 60U, 20U, 50U, 10U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_BE, 10U, 60U, 20U, 50U, 10U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_EQ, 10U, 60U, 20U, 50U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_NE, 10U, 60U, 20U, 50U, 10U, 60U, 20U, 50U);
+    CCTest(ConditionCode::CC_GT, BR(10U, 60U), BR(20U, 50U), BR(21U, 60U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_A, BR(10U, 60U), BR(20U, 50U), BR(21U, 60U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_GE, BR(10U, 60U), BR(20U, 50U), BR(20U, 60U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_AE, BR(10U, 60U), BR(20U, 50U), BR(20U, 60U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_LT, BR(10U, 60U), BR(20U, 50U), BR(10U, 49U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_B, BR(10U, 60U), BR(20U, 50U), BR(10U, 49U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_LE, BR(10U, 60U), BR(20U, 50U), BR(10U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_BE, BR(10U, 60U), BR(20U, 50U), BR(10U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_EQ, BR(10U, 60U), BR(20U, 50U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_NE, BR(10U, 60U), BR(20U, 50U), BR(10U, 60U), BR(20U, 50U));
+}
 
+TEST_F(BoundsAnalysisTest, BoundsNarrowing2)
+{
     // case 4
-    CCTest(ConditionCode::CC_GT, 20U, 60U, 10U, 50U, 20U, 60U, 10U, 50U);
-    CCTest(ConditionCode::CC_A, 20U, 60U, 10U, 50U, 20U, 60U, 10U, 50U);
-    CCTest(ConditionCode::CC_GE, 20U, 60U, 10U, 50U, 20U, 60U, 10U, 50U);
-    CCTest(ConditionCode::CC_AE, 20U, 60U, 10U, 50U, 20U, 60U, 10U, 50U);
-    CCTest(ConditionCode::CC_LT, 20U, 60U, 10U, 50U, 20U, 49U, 21U, 50U);
-    CCTest(ConditionCode::CC_B, 20U, 60U, 10U, 50U, 20U, 49U, 21U, 50U);
-    CCTest(ConditionCode::CC_LE, 20U, 60U, 10U, 50U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_BE, 20U, 60U, 10U, 50U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_EQ, 20U, 60U, 10U, 50U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_NE, 20U, 60U, 10U, 50U, 20U, 60U, 10U, 50U);
+    CCTest(ConditionCode::CC_GT, BR(20U, 60U), BR(10U, 50U), BR(20U, 60U), BR(10U, 50U));
+    CCTest(ConditionCode::CC_A, BR(20U, 60U), BR(10U, 50U), BR(20U, 60U), BR(10U, 50U));
+    CCTest(ConditionCode::CC_GE, BR(20U, 60U), BR(10U, 50U), BR(20U, 60U), BR(10U, 50U));
+    CCTest(ConditionCode::CC_AE, BR(20U, 60U), BR(10U, 50U), BR(20U, 60U), BR(10U, 50U));
+    CCTest(ConditionCode::CC_LT, BR(20U, 60U), BR(10U, 50U), BR(20U, 49U), BR(21U, 50U));
+    CCTest(ConditionCode::CC_B, BR(20U, 60U), BR(10U, 50U), BR(20U, 49U), BR(21U, 50U));
+    CCTest(ConditionCode::CC_LE, BR(20U, 60U), BR(10U, 50U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_BE, BR(20U, 60U), BR(10U, 50U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_EQ, BR(20U, 60U), BR(10U, 50U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_NE, BR(20U, 60U), BR(10U, 50U), BR(20U, 60U), BR(10U, 50U));
 
     // case 5
-    CCTest(ConditionCode::CC_GT, 50U, 60U, 10U, 20U, 50U, 60U, 10U, 20U);
-    CCTest(ConditionCode::CC_A, 50U, 60U, 10U, 20U, 50U, 60U, 10U, 20U);
-    CCTest(ConditionCode::CC_GE, 50U, 60U, 10U, 20U, 50U, 60U, 10U, 20U);
-    CCTest(ConditionCode::CC_AE, 50U, 60U, 10U, 20U, 50U, 60U, 10U, 20U);
-    CCTest(ConditionCode::CC_LT, 50U, 60U, 10U, 20U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_B, 50U, 60U, 10U, 20U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_LE, 50U, 60U, 10U, 20U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_BE, 50U, 60U, 10U, 20U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_EQ, 50U, 60U, 10U, 20U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_NE, 50U, 60U, 10U, 20U, 50U, 60U, 10U, 20U);
+    CCTest(ConditionCode::CC_GT, BR(50U, 60U), BR(10U, 20U), BR(50U, 60U), BR(10U, 20U));
+    CCTest(ConditionCode::CC_A, BR(50U, 60U), BR(10U, 20U), BR(50U, 60U), BR(10U, 20U));
+    CCTest(ConditionCode::CC_GE, BR(50U, 60U), BR(10U, 20U), BR(50U, 60U), BR(10U, 20U));
+    CCTest(ConditionCode::CC_AE, BR(50U, 60U), BR(10U, 20U), BR(50U, 60U), BR(10U, 20U));
+    CCTest(ConditionCode::CC_LT, BR(50U, 60U), BR(10U, 20U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_B, BR(50U, 60U), BR(10U, 20U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_LE, BR(50U, 60U), BR(10U, 20U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_BE, BR(50U, 60U), BR(10U, 20U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_EQ, BR(50U, 60U), BR(10U, 20U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_NE, BR(50U, 60U), BR(10U, 20U), BR(50U, 60U), BR(10U, 20U));
 
     // case 6
-    CCTest(ConditionCode::CC_GT, 20U, 50U, 10U, 60U, 20U, 50U, 10U, 49U);
-    CCTest(ConditionCode::CC_A, 20U, 50U, 10U, 60U, 20U, 50U, 10U, 49U);
-    CCTest(ConditionCode::CC_GE, 20U, 50U, 10U, 60U, 20U, 50U, 10U, 50U);
-    CCTest(ConditionCode::CC_AE, 20U, 50U, 10U, 60U, 20U, 50U, 10U, 50U);
-    CCTest(ConditionCode::CC_LT, 20U, 50U, 10U, 60U, 20U, 50U, 21U, 60U);
-    CCTest(ConditionCode::CC_B, 20U, 50U, 10U, 60U, 20U, 50U, 21U, 60U);
-    CCTest(ConditionCode::CC_LE, 20U, 50U, 10U, 60U, 20U, 50U, 20U, 60U);
-    CCTest(ConditionCode::CC_BE, 20U, 50U, 10U, 60U, 20U, 50U, 20U, 60U);
-    CCTest(ConditionCode::CC_EQ, 20U, 50U, 10U, 60U, 20U, 50U, 20U, 50U);
-    CCTest(ConditionCode::CC_NE, 20U, 50U, 10U, 60U, 20U, 50U, 10U, 60U);
+    CCTest(ConditionCode::CC_GT, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(10U, 49U));
+    CCTest(ConditionCode::CC_A, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(10U, 49U));
+    CCTest(ConditionCode::CC_GE, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(10U, 50U));
+    CCTest(ConditionCode::CC_AE, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(10U, 50U));
+    CCTest(ConditionCode::CC_LT, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(21U, 60U));
+    CCTest(ConditionCode::CC_B, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(21U, 60U));
+    CCTest(ConditionCode::CC_LE, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(20U, 60U));
+    CCTest(ConditionCode::CC_BE, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(20U, 60U));
+    CCTest(ConditionCode::CC_EQ, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(20U, 50U));
+    CCTest(ConditionCode::CC_NE, BR(20U, 50U), BR(10U, 60U), BR(20U, 50U), BR(10U, 60U));
 }
 
 TEST_F(BoundsAnalysisTest, IntervalCollisions)
 {
     // Bounds collision
-    CCTest(ConditionCode::CC_GT, -10L, -5L, -5L, 0U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_LT, -5L, 0U, -10L, -5L, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
+    CCTest(ConditionCode::CC_GT, BR(-10L, -5L), BR(-5L, 0U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_LT, BR(-5L, 0U), BR(-10L, -5L), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
     // Single value interval collision
-    CCTest(ConditionCode::CC_GT, 0U, 20U, 20U, 20U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_LT, 0U, 20U, 0U, 0U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_GT, 16U, 16U, 16U, 32U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
-    CCTest(ConditionCode::CC_LT, 32U, 32U, 16U, 32U, INT64_MIN, INT64_MAX, INT64_MIN, INT64_MAX);
+    CCTest(ConditionCode::CC_GT, BR(0U, 20U), BR(20U, 20U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_LT, BR(0U, 20U), BR(0U, 0U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_GT, BR(16U, 16U), BR(16U, 32U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
+    CCTest(ConditionCode::CC_LT, BR(32U, 32U), BR(16U, 32U), BR(INT64_MIN, INT64_MAX), BR(INT64_MIN, INT64_MAX));
 }
 
 TEST_F(BoundsAnalysisTest, UnionTest)
@@ -292,7 +298,7 @@ TEST_F(BoundsAnalysisTest, UnionTest)
     ASSERT_EQ(range.GetRight(), INT64_MAX);
 }
 
-TEST_F(BoundsAnalysisTest, TypeFitting)
+void BoundsAnalysisTest::TypeFittingBuildGraph()
 {
     GRAPH(GetGraph())
     {
@@ -332,6 +338,11 @@ TEST_F(BoundsAnalysisTest, TypeFitting)
             INST(14U, Opcode::ReturnI).u16().Imm(0x23U);
         }
     }
+}
+
+TEST_F(BoundsAnalysisTest, TypeFitting)
+{
+    TypeFittingBuildGraph();
     auto rinfo = GetGraph()->GetBoundsRangeInfo();
     BoundsRange range;
 

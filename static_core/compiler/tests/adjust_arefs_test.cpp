@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,11 +21,17 @@ namespace ark::compiler {
 class AdjustRefsTest : public GraphTest {
 public:
     AdjustRefsTest() = default;
+
+    Graph *BuildGraphOneBlockContinuousChain();
+    Graph *BuildGraphOneBlockBrokenChain();
+    Graph *BuildGraphMultipleBlockContinuousChain();
+    Graph *BuildGraphMultipleBlockBrokenChain();
+    Graph *BuildGraphProcessIndex(uint64_t offset1, uint64_t offset2, uint64_t offset3);
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
-/* One block, continuous chain */
-TEST_F(AdjustRefsTest, OneBlockContinuousChain)
+
+Graph *AdjustRefsTest::BuildGraphOneBlockContinuousChain()
 {
     auto graph = CreateEmptyFastpathGraph(RUNTIME_ARCH);
 #ifndef NDEBUG
@@ -57,6 +63,13 @@ TEST_F(AdjustRefsTest, OneBlockContinuousChain)
             INST(50U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
+
+/* One block, continuous chain */
+TEST_F(AdjustRefsTest, OneBlockContinuousChain)
+{
+    auto *graph = BuildGraphOneBlockContinuousChain();
 
     Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
     GRAPH(graphEt)
@@ -94,8 +107,7 @@ TEST_F(AdjustRefsTest, OneBlockContinuousChain)
     ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
-/* One block, broken chain */
-TEST_F(AdjustRefsTest, OneBlockBrokenChain)
+Graph *AdjustRefsTest::BuildGraphOneBlockBrokenChain()
 {
     auto graph = CreateEmptyFastpathGraph(RUNTIME_ARCH);
 #ifndef NDEBUG
@@ -128,7 +140,13 @@ TEST_F(AdjustRefsTest, OneBlockBrokenChain)
             INST(50U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
 
+/* One block, broken chain */
+TEST_F(AdjustRefsTest, OneBlockBrokenChain)
+{
+    auto *graph = BuildGraphOneBlockBrokenChain();
     Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
     GRAPH(graphEt)
     {
@@ -170,8 +188,7 @@ TEST_F(AdjustRefsTest, OneBlockBrokenChain)
     ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
-/* one head, the chain spans across multiple blocks, not broken */
-TEST_F(AdjustRefsTest, MultipleBlockContinuousChain)
+Graph *AdjustRefsTest::BuildGraphMultipleBlockContinuousChain()
 {
     auto graph = CreateEmptyFastpathGraph(RUNTIME_ARCH);
 #ifndef NDEBUG
@@ -213,6 +230,13 @@ TEST_F(AdjustRefsTest, MultipleBlockContinuousChain)
             INST(100U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
+
+/* one head, the chain spans across multiple blocks, not broken */
+TEST_F(AdjustRefsTest, MultipleBlockContinuousChain)
+{
+    auto *graph = BuildGraphMultipleBlockContinuousChain();
 
     Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
     GRAPH(graphEt)
@@ -258,9 +282,7 @@ TEST_F(AdjustRefsTest, MultipleBlockContinuousChain)
     ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
-/* one head, the chain spans across multiple blocks,
- * broken in one of the dominated basic blocks */
-TEST_F(AdjustRefsTest, MultipleBlockBrokenChain)
+Graph *AdjustRefsTest::BuildGraphMultipleBlockBrokenChain()
 {
     auto graph = CreateEmptyFastpathGraph(RUNTIME_ARCH);
 #ifndef NDEBUG
@@ -303,6 +325,14 @@ TEST_F(AdjustRefsTest, MultipleBlockBrokenChain)
             INST(100U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
+
+/* one head, the chain spans across multiple blocks,
+ * broken in one of the dominated basic blocks */
+TEST_F(AdjustRefsTest, MultipleBlockBrokenChain)
+{
+    auto *graph = BuildGraphMultipleBlockBrokenChain();
 
     Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
     GRAPH(graphEt)
@@ -349,15 +379,12 @@ TEST_F(AdjustRefsTest, MultipleBlockBrokenChain)
     ASSERT_TRUE(GraphComparator().Compare(graph, graphEt));
 }
 
-TEST_F(AdjustRefsTest, ProcessIndex)
+Graph *AdjustRefsTest::BuildGraphProcessIndex(uint64_t offset1, uint64_t offset2, uint64_t offset3)
 {
     auto graph = CreateEmptyFastpathGraph(RUNTIME_ARCH);
 #ifndef NDEBUG
     graph->SetLowLevelInstructionsEnabled();
 #endif
-    uint64_t offset1 = 10;
-    uint64_t offset2 = 1;
-    uint64_t offset3 = 20;
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
@@ -376,6 +403,15 @@ TEST_F(AdjustRefsTest, ProcessIndex)
             INST(100U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
+
+TEST_F(AdjustRefsTest, ProcessIndex)
+{
+    uint64_t offset1 = 10;
+    uint64_t offset2 = 1;
+    uint64_t offset3 = 20;
+    auto *graph = BuildGraphProcessIndex(offset1, offset2, offset3);
 
     Graph *graphEt = CreateEmptyFastpathGraph(RUNTIME_ARCH);
     auto arrData = graph->GetRuntime()->GetArrayDataOffset(graph->GetArch());

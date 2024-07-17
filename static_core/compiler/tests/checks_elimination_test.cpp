@@ -313,6 +313,49 @@ public:
 
     void BuildHoistRefTypeCheckGraph();
     void BuildHoistCheckCastGraph();
+    Graph *BuildGraphLoopWithUnknowLowerUpperValueDown(ConditionCode cc);
+    void BuildGraphNullCheckTest3();
+    void BuildGraphNullCheckTest4();
+    void BuildGraphHoistNegativeCheckTest();
+    void BuildGraphHoistZeroCheckTest();
+    void BuildGraphIfTestTrueBlock();
+    void BuildGraphIfTestFalseBlock();
+    void BuildGraphIfTestTrueBlock1();
+    void BuildGraphIfTestTrueBlock2();
+    void BuildGraphIfTestTrueBlock3();
+    void BuildGraphIfTestFalseBlock1();
+    void BuildGraphIfTestFalseBlock2();
+    void BuildGraphIfTestFalseBlock3();
+    void BuildGraphSimpleLoopTestInc();
+    void BuildGraphSimpleLoopTestIncAfterPeeling();
+    void BuildGraphSimpleLoopTestIncAfterPeeling1();
+    void BuildGraphSimpleLoopTestDec();
+    void BuildGraphLoopWithUnknowLowerUpperValue();
+    void BuildGraphUpperOOB();
+    void BuildGraphUpperWithDec();
+    void BuildGraphUnknownUpperWithDec();
+    void BuildGraphLoopWithUnknowLowerValue();
+    void BuildGraphLoopWithUnknowUpperValueLE();
+    void BuildGraphLoopWithUnknowUpperValueLT();
+    void BuildGraphLoopSeveralBoundsChecks();
+    void BuildGraphLoopSeveralIndexesBoundsChecks();
+    void BuildGraphHeadExitLoop();
+    void BuildGraphLoopTest1();
+    void BuildGraphBatchLoopTest();
+    void BuildGraphGroupedBoundsCheck();
+    void BuildGraphGroupedBoundsCheckConstIndex();
+    void BuildGraphRefTypeCheck();
+    void BuildGraphRefTypeCheckFirstNullCheckEliminated();
+    void BuildGraphBugWithNullCheck();
+    void BuildGraphNullAndBoundsChecksNestedLoop();
+    void BuildGraphLoopWithTwoPhi();
+    void BuildGraphLoopWithBigStepGE();
+    void BuildGraphLoopWithBigStepLE();
+    void BuildGraphLoopWithBigStepLT();
+    void BuildGraphLoopWithBoundsCheckUnderIfGE();
+    void BuildGraphLoopWithBoundsCheckUnderIfLT();
+    void BuildGraphCheckCastAfterIsInstance();
+    void BuildGraphOverflowCheckOptimize();
 
 private:
     Graph *graph_ {nullptr};
@@ -420,7 +463,7 @@ TEST_F(ChecksEliminationTest, NullCheckTest2)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(ChecksEliminationTest, NullCheckTest3)
+void ChecksEliminationTest::BuildGraphNullCheckTest3()
 {
     GRAPH(GetGraph())
     {
@@ -451,6 +494,11 @@ TEST_F(ChecksEliminationTest, NullCheckTest3)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, NullCheckTest3)
+{
+    BuildGraphNullCheckTest3();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -487,7 +535,7 @@ TEST_F(ChecksEliminationTest, NullCheckTest3)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, NullCheckTest4)
+void ChecksEliminationTest::BuildGraphNullCheckTest4()
 {
     GRAPH(GetGraph())
     {
@@ -516,6 +564,11 @@ TEST_F(ChecksEliminationTest, NullCheckTest4)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, NullCheckTest4)
+{
+    BuildGraphNullCheckTest4();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -703,7 +756,7 @@ TEST_F(ChecksEliminationTest, NegativeCheckTest4)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, HoistNegativeCheckTest)
+void ChecksEliminationTest::BuildGraphHoistNegativeCheckTest()
 {
     GRAPH(GetGraph())
     {
@@ -733,6 +786,11 @@ TEST_F(ChecksEliminationTest, HoistNegativeCheckTest)
             INST(12U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, HoistNegativeCheckTest)
+{
+    BuildGraphHoistNegativeCheckTest();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -934,38 +992,44 @@ TEST_F(ChecksEliminationTest, NegativeZeroCheckTest)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, HoistZeroCheckTest)
+void ChecksEliminationTest::BuildGraphHoistZeroCheckTest()
 {
-    GRAPH(GetGraph())
     {
-        CONSTANT(0U, 0U);  // initial
-        CONSTANT(1U, 1U);  // increment
-        CONSTANT(2U, 10U);
-        PARAMETER(3U, 0U).s32();
-        BASIC_BLOCK(2U, 3U, 5U)
+        GRAPH(GetGraph())
         {
-            INST(20U, Opcode::SaveStateDeoptimize).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 2U);  // 0 < 10
-            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
-        }
-        BASIC_BLOCK(3U, 3U, 5U)
-        {
-            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);   // i
-            INST(16U, Opcode::Phi).s32().Inputs(0U, 15U);  // s
-            INST(7U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
-            INST(8U, Opcode::ZeroCheck).s32().Inputs(3U, 7U);
-            INST(17U, Opcode::Div).s32().Inputs(4U, 8U);
-            INST(15U, Opcode::Add).s32().Inputs(16U, 17U);             // s += i / x
-            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);               // i++
-            INST(13U, Opcode::Compare).CC(CC_LT).b().Inputs(10U, 2U);  // i < 10
-            INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
-        }
-        BASIC_BLOCK(5U, 1U)
-        {
-            INST(18U, Opcode::Phi).s32().Inputs(0U, 16U);
-            INST(12U, Opcode::Return).s32().Inputs(18U);
+            CONSTANT(0U, 0U);  // initial
+            CONSTANT(1U, 1U);  // increment
+            CONSTANT(2U, 10U);
+            PARAMETER(3U, 0U).s32();
+            BASIC_BLOCK(2U, 3U, 5U)
+            {
+                INST(20U, Opcode::SaveStateDeoptimize).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+                INST(5U, Opcode::Compare).SrcType(DataType::INT32).CC(CC_LT).b().Inputs(0U, 2U);  // 0 < 10
+                INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
+            }
+            BASIC_BLOCK(3U, 3U, 5U)
+            {
+                INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);   // i
+                INST(16U, Opcode::Phi).s32().Inputs(0U, 15U);  // s
+                INST(7U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U).SrcVregs({0U, 1U, 2U, 3U});
+                INST(8U, Opcode::ZeroCheck).s32().Inputs(3U, 7U);
+                INST(17U, Opcode::Div).s32().Inputs(4U, 8U);
+                INST(15U, Opcode::Add).s32().Inputs(16U, 17U);             // s += i / x
+                INST(10U, Opcode::Add).s32().Inputs(4U, 1U);               // i++
+                INST(13U, Opcode::Compare).CC(CC_LT).b().Inputs(10U, 2U);  // i < 10
+                INST(14U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(13U);
+            }
+            BASIC_BLOCK(5U, 1U)
+            {
+                INST(18U, Opcode::Phi).s32().Inputs(0U, 16U);
+                INST(12U, Opcode::Return).s32().Inputs(18U);
+            }
         }
     }
+}
+TEST_F(ChecksEliminationTest, HoistZeroCheckTest)
+{
+    BuildGraphHoistZeroCheckTest();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1086,7 +1150,10 @@ TEST_F(ChecksEliminationTest, ArithmeticTest)
     ArithmeticTest<AppliedType::REMOVED>(101U, 20U, Opcode::Mod, 5U);
     ArithmeticTest<AppliedType::REMOVED>(205U, 20U, Opcode::Mod, 5U);
     ArithmeticTest<AppliedType::REMOVED>(16U, 5U, Opcode::Mod, 3U);
+}
 
+TEST_F(ChecksEliminationTest, ArithmeticTestMul)
+{
     ArithmeticTest<AppliedType::REMOVED>(5U, 20U, Opcode::Mul, 2U);
     ArithmeticTest<AppliedType::REMOVED>(-5L, 20U, Opcode::Mul, -2L);
     ArithmeticTest<AppliedType::REMOVED>(3U, 20U, Opcode::Mul, 5U);
@@ -1116,7 +1183,7 @@ TEST_F(ChecksEliminationTest, ModTest)
     ModTest<false>(10U, 20U);
 }
 
-TEST_F(ChecksEliminationTest, IfTestTrueBlock)
+void ChecksEliminationTest::BuildGraphIfTestTrueBlock()
 {
     // we can norrow bounds range for true block
     GRAPH(GetGraph())
@@ -1147,6 +1214,11 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock)
             INST(12U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, IfTestTrueBlock)
+{
+    BuildGraphIfTestTrueBlock();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1180,7 +1252,7 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, IfTestFalseBlock)
+void ChecksEliminationTest::BuildGraphIfTestFalseBlock()
 {
     // we can norrow bounds range for false block
     GRAPH(GetGraph())
@@ -1211,6 +1283,11 @@ TEST_F(ChecksEliminationTest, IfTestFalseBlock)
             INST(12U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, IfTestFalseBlock)
+{
+    BuildGraphIfTestFalseBlock();
     GetGraph()->RunPass<ChecksElimination>();
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1244,7 +1321,7 @@ TEST_F(ChecksEliminationTest, IfTestFalseBlock)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, IfTestTrueBlock1)
+void ChecksEliminationTest::BuildGraphIfTestTrueBlock1()
 {
     // we can norrow bounds range for true block
     GRAPH(GetGraph())
@@ -1275,6 +1352,11 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock1)
             INST(12U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, IfTestTrueBlock1)
+{
+    BuildGraphIfTestTrueBlock1();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1308,7 +1390,7 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock1)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, IfTestTrueBlock2)
+void ChecksEliminationTest::BuildGraphIfTestTrueBlock2()
 {
     // we can norrow bounds range for true block
     GRAPH(GetGraph())
@@ -1339,6 +1421,11 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock2)
             INST(12U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, IfTestTrueBlock2)
+{
+    BuildGraphIfTestTrueBlock2();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1372,7 +1459,7 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock2)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, IfTestTrueBlock3)
+void ChecksEliminationTest::BuildGraphIfTestTrueBlock3()
 {
     // we can norrow bounds range for true block
     GRAPH(GetGraph())
@@ -1403,6 +1490,11 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock3)
             INST(12U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, IfTestTrueBlock3)
+{
+    BuildGraphIfTestTrueBlock3();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1436,7 +1528,7 @@ TEST_F(ChecksEliminationTest, IfTestTrueBlock3)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, IfTestFalseBlock1)
+void ChecksEliminationTest::BuildGraphIfTestFalseBlock1()
 {
     // we can norrow bounds range for false block
     GRAPH(GetGraph())
@@ -1467,6 +1559,11 @@ TEST_F(ChecksEliminationTest, IfTestFalseBlock1)
             INST(12U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, IfTestFalseBlock1)
+{
+    BuildGraphIfTestFalseBlock1();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1498,39 +1595,44 @@ TEST_F(ChecksEliminationTest, IfTestFalseBlock1)
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+void ChecksEliminationTest::BuildGraphIfTestFalseBlock2()
+{
+    // we can norrow bounds range for false block
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).s32();  // index
+        PARAMETER(1U, 1U).ref();
+        CONSTANT(3U, 0U);
+        BASIC_BLOCK(2U, 5U, 3U)
+        {
+            INST(14U, Opcode::LenArray).s32().Inputs(1U);
+            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 3U);  // index < 0
+            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
+        }
+        BASIC_BLOCK(3U, 5U, 4U)
+        {
+            INST(6U, Opcode::Compare).b().CC(CC_GE).Inputs(0U, 14U);  // index >= len array
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
+        }
+        BASIC_BLOCK(4U, 1U)
+        {
+            INST(8U, Opcode::SaveState).Inputs(0U, 1U, 3U).SrcVregs({0U, 1U, 3U});
+            INST(9U, Opcode::BoundsCheck).s32().Inputs(14U, 0U, 8U);
+            INST(10U, Opcode::LoadArray).s32().Inputs(1U, 9U);
+            INST(11U, Opcode::Return).s32().Inputs(10U);
+        }
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(12U, Opcode::Return).s32().Inputs(3U);
+        }
+    }
 }
 
 TEST_F(ChecksEliminationTest, IfTestFalseBlock2)
 {
-    // we can norrow bounds range for false block
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s32();  // index
-        PARAMETER(1U, 1U).ref();
-        CONSTANT(3U, 0U);
-        BASIC_BLOCK(2U, 5U, 3U)
-        {
-            INST(14U, Opcode::LenArray).s32().Inputs(1U);
-            INST(4U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 3U);  // index < 0
-            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
-        }
-        BASIC_BLOCK(3U, 5U, 4U)
-        {
-            INST(6U, Opcode::Compare).b().CC(CC_GE).Inputs(0U, 14U);  // index >= len array
-            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
-        }
-        BASIC_BLOCK(4U, 1U)
-        {
-            INST(8U, Opcode::SaveState).Inputs(0U, 1U, 3U).SrcVregs({0U, 1U, 3U});
-            INST(9U, Opcode::BoundsCheck).s32().Inputs(14U, 0U, 8U);
-            INST(10U, Opcode::LoadArray).s32().Inputs(1U, 9U);
-            INST(11U, Opcode::Return).s32().Inputs(10U);
-        }
-        BASIC_BLOCK(5U, 1U)
-        {
-            INST(12U, Opcode::Return).s32().Inputs(3U);
-        }
-    }
+    BuildGraphIfTestFalseBlock2();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1564,7 +1666,7 @@ TEST_F(ChecksEliminationTest, IfTestFalseBlock2)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, IfTestFalseBlock3)
+void ChecksEliminationTest::BuildGraphIfTestFalseBlock3()
 {
     // we can norrow bounds range for false block
     GRAPH(GetGraph())
@@ -1595,6 +1697,11 @@ TEST_F(ChecksEliminationTest, IfTestFalseBlock3)
             INST(12U, Opcode::Return).s32().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, IfTestFalseBlock3)
+{
+    BuildGraphIfTestFalseBlock3();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1710,7 +1817,7 @@ TEST_F(ChecksEliminationTest, PhiTest)
     PhiTest<false>(5U, 10U, 11U);
 }
 
-TEST_F(ChecksEliminationTest, SimpleLoopTestInc)
+void ChecksEliminationTest::BuildGraphSimpleLoopTestInc()
 {
     // new_array(len_array)
     // For(int i = 0, i < len_array, i++) begin
@@ -1747,6 +1854,11 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestInc)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, SimpleLoopTestInc)
+{
+    BuildGraphSimpleLoopTestInc();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1781,7 +1893,7 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestInc)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling)
+void ChecksEliminationTest::BuildGraphSimpleLoopTestIncAfterPeeling()
 {
     // new_array(len_array)
     // For(int i = 0, i < len_array, i++) begin
@@ -1817,6 +1929,11 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling)
+{
+    BuildGraphSimpleLoopTestIncAfterPeeling();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1850,7 +1967,7 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling1)
+void ChecksEliminationTest::BuildGraphSimpleLoopTestIncAfterPeeling1()
 {
     // new_array(len_array)
     // For(int i = 0, i < len_array, i++) begin
@@ -1884,6 +2001,11 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling1)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling1)
+{
+    BuildGraphSimpleLoopTestIncAfterPeeling1();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1915,7 +2037,7 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestIncAfterPeeling1)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, SimpleLoopTestDec)
+void ChecksEliminationTest::BuildGraphSimpleLoopTestDec()
 {
     // new_array(len_array)
     // For(int i = len_array-1, i >= 0, i--) begin
@@ -1953,6 +2075,11 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestDec)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, SimpleLoopTestDec)
+{
+    BuildGraphSimpleLoopTestDec();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1988,7 +2115,7 @@ TEST_F(ChecksEliminationTest, SimpleLoopTestDec)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithUnknowLowerUpperValue)
+void ChecksEliminationTest::BuildGraphLoopWithUnknowLowerUpperValue()
 {
     // applied
     GRAPH(GetGraph())
@@ -2022,6 +2149,11 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowLowerUpperValue)
             INST(17U, Opcode::Return).s32().Inputs(16U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopWithUnknowLowerUpperValue)
+{
+    BuildGraphLoopWithUnknowLowerUpperValue();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -2063,42 +2195,48 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowLowerUpperValue)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
+Graph *ChecksEliminationTest::BuildGraphLoopWithUnknowLowerUpperValueDown(ConditionCode cc)
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 1U);         // increment
+        PARAMETER(1U, 0U).s32();  // lower
+        PARAMETER(2U, 1U).s32();  // upper
+        PARAMETER(3U, 2U).ref();  // array
+        BASIC_BLOCK(7U, 3U, 6U)
+        {
+            INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
+            INST(6U, Opcode::LenArray).s32().Inputs(5U);
+            INST(30U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
+            INST(7U, Opcode::Compare).CC(cc).b().Inputs(2U, 1U);  // upper >(>=) lower
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
+        }
+        BASIC_BLOCK(3U, 3U, 6U)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs(2U, 13U);
+            INST(10U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
+            INST(11U, Opcode::BoundsCheck).s32().Inputs(6U, 9U, 10U);
+            INST(12U, Opcode::StoreArray).s32().Inputs(3U, 11U, 0U);  // a[i] = 0
+            INST(13U, Opcode::Sub).s32().Inputs(9U, 0U);              // i--
+            INST(14U, Opcode::Compare).CC(cc).b().Inputs(13U, 1U);    // i >(>=) lower
+            INST(15U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(14U);
+        }
+        BASIC_BLOCK(6U, 1U)
+        {
+            INST(16U, Opcode::Phi).s32().Inputs(0U, 13U);
+            INST(17U, Opcode::Return).s32().Inputs(16U);
+        }
+    }
+    return graph;
+}
+
 TEST_F(ChecksEliminationTest, LoopWithUnknowLowerUpperValueDown)
 {
     for (auto cc : {CC_GT, CC_GE}) {
         // applied
-        auto graph = CreateEmptyGraph();
-        GRAPH(graph)
-        {
-            CONSTANT(0U, 1U);         // increment
-            PARAMETER(1U, 0U).s32();  // lower
-            PARAMETER(2U, 1U).s32();  // upper
-            PARAMETER(3U, 2U).ref();  // array
-            BASIC_BLOCK(7U, 3U, 6U)
-            {
-                INST(4U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
-                INST(5U, Opcode::NullCheck).ref().Inputs(3U, 4U);
-                INST(6U, Opcode::LenArray).s32().Inputs(5U);
-                INST(30U, Opcode::SaveStateDeoptimize).Inputs(0U).SrcVregs({0U});
-                INST(7U, Opcode::Compare).CC(cc).b().Inputs(2U, 1U);  // upper >(>=) lower
-                INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
-            }
-            BASIC_BLOCK(3U, 3U, 6U)
-            {
-                INST(9U, Opcode::Phi).s32().Inputs(2U, 13U);
-                INST(10U, Opcode::SaveState).Inputs(0U, 3U).SrcVregs({0U, 1U});
-                INST(11U, Opcode::BoundsCheck).s32().Inputs(6U, 9U, 10U);
-                INST(12U, Opcode::StoreArray).s32().Inputs(3U, 11U, 0U);  // a[i] = 0
-                INST(13U, Opcode::Sub).s32().Inputs(9U, 0U);              // i--
-                INST(14U, Opcode::Compare).CC(cc).b().Inputs(13U, 1U);    // i >(>=) lower
-                INST(15U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(14U);
-            }
-            BASIC_BLOCK(6U, 1U)
-            {
-                INST(16U, Opcode::Phi).s32().Inputs(0U, 13U);
-                INST(17U, Opcode::Return).s32().Inputs(16U);
-            }
-        }
+        auto *graph = BuildGraphLoopWithUnknowLowerUpperValueDown(cc);
         EXPECT_TRUE(graph->RunPass<ChecksElimination>());
         auto graph1 = CreateEmptyGraph();
         GRAPH(graph1)
@@ -2141,7 +2279,7 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowLowerUpperValueDown)
     }
 }
 
-TEST_F(ChecksEliminationTest, UpperOOB)
+void ChecksEliminationTest::BuildGraphUpperOOB()
 {
     GRAPH(GetGraph())
     {
@@ -2173,6 +2311,11 @@ TEST_F(ChecksEliminationTest, UpperOOB)
             INST(26U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, UpperOOB)
+{
+    BuildGraphUpperOOB();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -2213,7 +2356,7 @@ TEST_F(ChecksEliminationTest, UpperOOB)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, UpperWithDec)
+void ChecksEliminationTest::BuildGraphUpperWithDec()
 {
     GRAPH(GetGraph())
     {
@@ -2250,6 +2393,11 @@ TEST_F(ChecksEliminationTest, UpperWithDec)
             INST(26U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, UpperWithDec)
+{
+    BuildGraphUpperWithDec();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -2290,7 +2438,7 @@ TEST_F(ChecksEliminationTest, UpperWithDec)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, UnknownUpperWithDec)
+void ChecksEliminationTest::BuildGraphUnknownUpperWithDec()
 {
     GRAPH(GetGraph())
     {
@@ -2329,6 +2477,11 @@ TEST_F(ChecksEliminationTest, UnknownUpperWithDec)
             INST(26U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, UnknownUpperWithDec)
+{
+    BuildGraphUnknownUpperWithDec();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -2416,7 +2569,7 @@ TEST_F(ChecksEliminationTest, LoopWithoutPreHeaderCompare)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithUnknowLowerValue)
+void ChecksEliminationTest::BuildGraphLoopWithUnknowLowerValue()
 {
     // applied
     GRAPH(GetGraph())
@@ -2449,6 +2602,11 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowLowerValue)
             INST(17U, Opcode::Return).s32().Inputs(16U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopWithUnknowLowerValue)
+{
+    BuildGraphLoopWithUnknowLowerValue();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -2487,7 +2645,7 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowLowerValue)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLE)
+void ChecksEliminationTest::BuildGraphLoopWithUnknowUpperValueLE()
 {
     // applied
     GRAPH(GetGraph())
@@ -2522,7 +2680,11 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLE)
         }
     }
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
+}
 
+TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLE)
+{
+    BuildGraphLoopWithUnknowUpperValueLE();
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
@@ -2563,7 +2725,7 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLE)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLT)
+void ChecksEliminationTest::BuildGraphLoopWithUnknowUpperValueLT()
 {
     // applied
     GRAPH(GetGraph())
@@ -2597,6 +2759,11 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLT)
             INST(17U, Opcode::Return).s32().Inputs(16U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLT)
+{
+    BuildGraphLoopWithUnknowUpperValueLT();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
 
     auto graph1 = CreateEmptyGraph();
@@ -2636,7 +2803,7 @@ TEST_F(ChecksEliminationTest, LoopWithUnknowUpperValueLT)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, LoopSeveralBoundsChecks)
+void ChecksEliminationTest::BuildGraphLoopSeveralBoundsChecks()
 {
     // applied
     // array coping
@@ -2683,6 +2850,11 @@ TEST_F(ChecksEliminationTest, LoopSeveralBoundsChecks)
             INST(24U, Opcode::Return).s32().Inputs(23U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopSeveralBoundsChecks)
+{
+    BuildGraphLoopSeveralBoundsChecks();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -2735,7 +2907,7 @@ TEST_F(ChecksEliminationTest, LoopSeveralBoundsChecks)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, LoopSeveralIndexesBoundsChecks)
+void ChecksEliminationTest::BuildGraphLoopSeveralIndexesBoundsChecks()
 {
     // applied
     // array coping
@@ -2794,6 +2966,11 @@ TEST_F(ChecksEliminationTest, LoopSeveralIndexesBoundsChecks)
             INST(24U, Opcode::Return).s32().Inputs(23U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopSeveralIndexesBoundsChecks)
+{
+    BuildGraphLoopSeveralIndexesBoundsChecks();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -2861,7 +3038,7 @@ TEST_F(ChecksEliminationTest, LoopSeveralIndexesBoundsChecks)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, HeadExitLoop)
+void ChecksEliminationTest::BuildGraphHeadExitLoop()
 {
     GRAPH(GetGraph())
     {
@@ -2894,6 +3071,11 @@ TEST_F(ChecksEliminationTest, HeadExitLoop)
             INST(14U, Opcode::Return).ref().Inputs(5U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, HeadExitLoop)
+{
+    BuildGraphHeadExitLoop();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -2970,7 +3152,7 @@ TEST_F(ChecksEliminationTest, BoundsCheckInHeader)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(ChecksEliminationTest, LoopTest1)
+void ChecksEliminationTest::BuildGraphLoopTest1()
 {
     GRAPH(GetGraph())
     {
@@ -3002,6 +3184,11 @@ TEST_F(ChecksEliminationTest, LoopTest1)
             INST(12U, Opcode::Return).s32().Inputs(26U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopTest1)
+{
+    BuildGraphLoopTest1();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -3041,7 +3228,7 @@ TEST_F(ChecksEliminationTest, LoopTest1)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, BatchLoopTest)
+void ChecksEliminationTest::BuildGraphBatchLoopTest()
 {
     GRAPH(GetGraph())
     {
@@ -3085,6 +3272,11 @@ TEST_F(ChecksEliminationTest, BatchLoopTest)
             INST(23U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, BatchLoopTest)
+{
+    BuildGraphBatchLoopTest();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -3216,7 +3408,7 @@ TEST_F(ChecksEliminationTest, DominatedBoundsCheck)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, GroupedBoundsCheck)
+void ChecksEliminationTest::BuildGraphGroupedBoundsCheck()
 {
     GRAPH(GetGraph())
     {
@@ -3254,6 +3446,11 @@ TEST_F(ChecksEliminationTest, GroupedBoundsCheck)
             INST(26U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, GroupedBoundsCheck)
+{
+    BuildGraphGroupedBoundsCheck();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -3305,7 +3502,7 @@ TEST_F(ChecksEliminationTest, GroupedBoundsCheck)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, GroupedBoundsCheckConstIndex)
+void ChecksEliminationTest::BuildGraphGroupedBoundsCheckConstIndex()
 {
     GRAPH(GetGraph())
     {
@@ -3337,6 +3534,11 @@ TEST_F(ChecksEliminationTest, GroupedBoundsCheckConstIndex)
             INST(26U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, GroupedBoundsCheckConstIndex)
+{
+    BuildGraphGroupedBoundsCheckConstIndex();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -3479,7 +3681,7 @@ TEST_F(ChecksEliminationTest, DominatedChecksWithDifferentTypes)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
 }
 
-TEST_F(ChecksEliminationTest, RefTypeCheck)
+void ChecksEliminationTest::BuildGraphRefTypeCheck()
 {
     GRAPH(GetGraph())
     {
@@ -3515,9 +3717,13 @@ TEST_F(ChecksEliminationTest, RefTypeCheck)
             INST(6U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
-    // `24, Opcode::RefTypeCheck` is removed because `14, Opcode::RefTypeCheck` checks equal array and eqaul Reference
-    // `34, Opcode::RefTypeCheck` is removed because store value id NullPtr
+TEST_F(ChecksEliminationTest, RefTypeCheck)
+{
+    BuildGraphRefTypeCheck();
+    // `24, Opcode::RefTypeCheck` is removed because `14, Opcode::RefTypeCheck` checks equal array and eqaul
+    // Reference `34, Opcode::RefTypeCheck` is removed because store value id NullPtr
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -3557,7 +3763,7 @@ TEST_F(ChecksEliminationTest, RefTypeCheck)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, RefTypeCheckFirstNullCheckEliminated)
+void ChecksEliminationTest::BuildGraphRefTypeCheckFirstNullCheckEliminated()
 {
     GRAPH(GetGraph())
     {
@@ -3580,6 +3786,11 @@ TEST_F(ChecksEliminationTest, RefTypeCheckFirstNullCheckEliminated)
             INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, RefTypeCheckFirstNullCheckEliminated)
+{
+    BuildGraphRefTypeCheckFirstNullCheckEliminated();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -3747,7 +3958,7 @@ TEST_F(ChecksEliminationTest, NotLenArrayInput)
     ASSERT_TRUE(GraphComparator().Compare(clone, GetGraph()));
 }
 
-TEST_F(ChecksEliminationTest, BugWithNullCheck)
+void ChecksEliminationTest::BuildGraphBugWithNullCheck()
 {
     GRAPH(GetGraph())
     {
@@ -3781,6 +3992,11 @@ TEST_F(ChecksEliminationTest, BugWithNullCheck)
             INST(12U, Opcode::Return).s32().Inputs(26U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, BugWithNullCheck)
+{
+    BuildGraphBugWithNullCheck();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -3822,7 +4038,7 @@ TEST_F(ChecksEliminationTest, BugWithNullCheck)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, NullAndBoundsChecksNestedLoop)
+void ChecksEliminationTest::BuildGraphNullAndBoundsChecksNestedLoop()
 {
     GRAPH(GetGraph())
     {
@@ -3876,6 +4092,11 @@ TEST_F(ChecksEliminationTest, NullAndBoundsChecksNestedLoop)
             INST(34U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, NullAndBoundsChecksNestedLoop)
+{
+    BuildGraphNullAndBoundsChecksNestedLoop();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
 
     auto graph = CreateEmptyGraph();
@@ -3937,7 +4158,7 @@ TEST_F(ChecksEliminationTest, NullAndBoundsChecksNestedLoop)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithTwoPhi)
+void ChecksEliminationTest::BuildGraphLoopWithTwoPhi()
 {
     GRAPH(GetGraph())
     {
@@ -3975,6 +4196,11 @@ TEST_F(ChecksEliminationTest, LoopWithTwoPhi)
             INST(20U, Opcode::Return).s32().Inputs(18U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopWithTwoPhi)
+{
+    BuildGraphLoopWithTwoPhi();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -4016,7 +4242,7 @@ TEST_F(ChecksEliminationTest, LoopWithTwoPhi)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithBigStepGE)
+void ChecksEliminationTest::BuildGraphLoopWithBigStepGE()
 {
     GRAPH(GetGraph())
     {
@@ -4049,6 +4275,11 @@ TEST_F(ChecksEliminationTest, LoopWithBigStepGE)
             INST(12U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopWithBigStepGE)
+{
+    BuildGraphLoopWithBigStepGE();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -4090,7 +4321,7 @@ TEST_F(ChecksEliminationTest, LoopWithBigStepGE)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithBigStepLE)
+void ChecksEliminationTest::BuildGraphLoopWithBigStepLE()
 {
     GRAPH(GetGraph())
     {
@@ -4126,6 +4357,11 @@ TEST_F(ChecksEliminationTest, LoopWithBigStepLE)
             INST(12U, Opcode::Return).s32().Inputs(26U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopWithBigStepLE)
+{
+    BuildGraphLoopWithBigStepLE();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -4178,7 +4414,7 @@ TEST_F(ChecksEliminationTest, LoopWithBigStepLE)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(ChecksEliminationTest, LoopWithBigStepLT)
+void ChecksEliminationTest::BuildGraphLoopWithBigStepLT()
 {
     GRAPH(GetGraph())
     {
@@ -4214,6 +4450,11 @@ TEST_F(ChecksEliminationTest, LoopWithBigStepLT)
             INST(12U, Opcode::Return).s32().Inputs(26U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, LoopWithBigStepLT)
+{
+    BuildGraphLoopWithBigStepLT();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -4268,8 +4509,7 @@ TEST_F(ChecksEliminationTest, LoopWithBigStepLT)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-// Lower bound is correct in each branch based on BoundsAnalysis, build deoptimize only for upper bound
-TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
+void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfGE()
 {
     GRAPH(GetGraph())
     {
@@ -4324,6 +4564,12 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
             INST(26U, Opcode::Return).s32().Inputs(25U);
         }
     }
+}
+
+// Lower bound is correct in each branch based on BoundsAnalysis, build deoptimize only for upper bound
+TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
+{
+    BuildGraphLoopWithBoundsCheckUnderIfGE();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -4384,8 +4630,7 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-// Upper bound is correct in each branch based on BoundsAnalysis, build deoptimize only for lower bound
-TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
+void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfLT()
 {
     GRAPH(GetGraph())
     {
@@ -4438,6 +4683,12 @@ TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
             INST(27U, Opcode::Return).s32().Inputs(26U);
         }
     }
+}
+
+// Upper bound is correct in each branch based on BoundsAnalysis, build deoptimize only for lower bound
+TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
+{
+    BuildGraphLoopWithBoundsCheckUnderIfLT();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -4579,9 +4830,8 @@ TEST_F(ChecksEliminationTest, CheckCastDifferentInputs)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(ChecksEliminationTest, CheckCastAfterIsInstance)
+void ChecksEliminationTest::BuildGraphCheckCastAfterIsInstance()
 {
-    // CheckCast after successful IsInstance can be removed.
     GRAPH(GetGraph())
     {
         PARAMETER(0U, 0U).ref();
@@ -4607,6 +4857,13 @@ TEST_F(ChecksEliminationTest, CheckCastAfterIsInstance)
             INST(10U, Opcode::Return).ref().Inputs(9U);
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, CheckCastAfterIsInstance)
+{
+    // CheckCast after successful IsInstance can be removed.
+    BuildGraphCheckCastAfterIsInstance();
+
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     ASSERT_TRUE(INS(7U).CastToCheckCast()->GetOmitNullCheck());
 
@@ -4900,7 +5157,8 @@ TEST_F(ChecksEliminationTest, DoNotOmitNullCheck)
     ASSERT_FALSE(INS(11U).CastToIsInstance()->GetOmitNullCheck());
 }
 
-// NOTE(schernykh): It's possible to remove boundschecks from this test, but BoundsAnalysis must be upgrade for it.
+// NOTE(schernykh): It's possible to remove boundschecks from this test, but BoundsAnalysis must be upgrade for
+// it.
 TEST_F(ChecksEliminationTest, OptimizeBoundsCheckElimination)
 {
     GRAPH(GetGraph())
@@ -5026,7 +5284,7 @@ TEST_F(ChecksEliminationTest, AddSubOverflowCheckDom)
     ASSERT_TRUE(GraphComparator().Compare(graph, GetGraph()));
 }
 
-TEST_F(ChecksEliminationTest, OverflowCheckOptimize)
+void ChecksEliminationTest::BuildGraphOverflowCheckOptimize()
 {
     GRAPH(GetGraph())
     {
@@ -5076,6 +5334,11 @@ TEST_F(ChecksEliminationTest, OverflowCheckOptimize)
             INST(100U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(ChecksEliminationTest, OverflowCheckOptimize)
+{
+    BuildGraphOverflowCheckOptimize();
     ASSERT_TRUE(GetGraph()->RunPass<ChecksElimination>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
