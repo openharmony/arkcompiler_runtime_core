@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,6 @@ inline std::optional<T> FieldDataAccessor::GetValue()
     }
 
     auto v = GetValueInternal();
-
     if (!v.has_value()) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
@@ -91,7 +90,6 @@ inline std::optional<File::EntityId> FieldDataAccessor::GetValue()
     }
 
     auto v = GetValueInternal();
-
     if (!v.has_value()) {
         return {};
     }

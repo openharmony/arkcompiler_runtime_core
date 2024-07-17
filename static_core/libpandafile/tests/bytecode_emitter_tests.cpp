@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,7 +272,7 @@ static Opcode GetOpcode(size_t instSize)
  */
 static std::vector<uint8_t> EmitJmpFwdBwd(size_t n1, size_t n2)
 {
-    std::array<std::tuple<size_t, int32_t, int32_t>, 3> jmps {
+    std::array<std::tuple<size_t, int32_t, int32_t>, 3U> jmps {
         std::tuple {globals::IMM_2, std::numeric_limits<int8_t>::min(), std::numeric_limits<int8_t>::max()},
         std::tuple {globals::IMM_3, std::numeric_limits<int16_t>::min(), std::numeric_limits<int16_t>::max()},
         std::tuple {globals::IMM_5, std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()}};

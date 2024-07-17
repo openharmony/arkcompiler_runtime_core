@@ -690,7 +690,6 @@ bool CodeItem::CatchBlock::Write(Writer *writer)
     ASSERT(type_ == nullptr || type_->HasIndex(method_));
 
     uint32_t typeOff = type_ != nullptr ? type_->GetIndex(method_) + 1 : 0;
-
     if (!writer->WriteUleb128(typeOff)) {
         return false;
     }

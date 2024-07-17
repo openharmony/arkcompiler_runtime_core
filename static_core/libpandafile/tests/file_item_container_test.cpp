@@ -97,7 +97,8 @@ TEST(ItemContainer, TestFileFormatVersionTooOld)
         auto writer = FileWriter(fileName);
 
         File::Header header {};
-        memset(&header, 0, sizeof(header));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::fill(reinterpret_cast<uint8_t *>(&header), reinterpret_cast<uint8_t *>(&header) + sizeof(header), 0);
         header.magic = File::MAGIC;
 
         auto old = std::array<uint8_t, File::VERSION_SIZE>(MIN_VERSION);
@@ -122,7 +123,8 @@ TEST(ItemContainer, TestFileFormatVersionTooNew)
         auto writer = FileWriter(fileName);
 
         File::Header header {};
-        memset(&header, 0, sizeof(header));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::fill(reinterpret_cast<uint8_t *>(&header), reinterpret_cast<uint8_t *>(&header) + sizeof(header), 0);
         header.magic = File::MAGIC;
 
         auto newArr = std::array<uint8_t, File::VERSION_SIZE>(VERSION);
@@ -147,7 +149,8 @@ TEST(ItemContainer, TestFileFormatVersionValid)
         auto writer = FileWriter(fileName);
 
         File::Header header {};
-        memset(&header, 0, sizeof(header));
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::fill(reinterpret_cast<uint8_t *>(&header), reinterpret_cast<uint8_t *>(&header) + sizeof(header), 0);
         header.magic = File::MAGIC;
         header.version = {0, 0, 0, 5};
         header.fileSize = sizeof(File::Header);
@@ -436,7 +439,7 @@ void TestProtos(size_t n)
 
     params.emplace_back(container.GetOrCreatePrimitiveTypeItem(Type::TypeId::I32));
 
-    for (size_t i = 0; i < ELEM_PER16 * 2 - 2; i++) {
+    for (size_t i = 0; i < ELEM_PER16 * 2U - 2U; i++) {
         params.emplace_back(container.GetOrCreateClassItem("B"));
         types.push_back(Type::TypeId::REFERENCE);
         refTypes.push_back(container.GetOrCreateClassItem("B"));

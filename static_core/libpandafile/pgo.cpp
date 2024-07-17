@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,9 @@ std::string ProfileOptimizer::GetNameInfo(const std::unique_ptr<BaseItem> &item)
     std::string identity;
     if (item->GetName() == CLASS_ITEM) {
         identity = static_cast<ClassItem *>(item.get())->GetNameItem()->GetData();
-        ASSERT(identity.find('L') == 0);                        // the first character must be 'L'
-        ASSERT(identity.find(";\0") == identity.length() - 2);  // must end with ";\0"
-        identity = identity.substr(1, identity.length() - 3);   // remove 'L' and ";\0"
+        ASSERT(identity.find('L') == 0);                         // the first character must be 'L'
+        ASSERT(identity.find(";\0") == identity.length() - 2U);  // must end with ";\0"
+        identity = identity.substr(1, identity.length() - 3U);   // remove 'L' and ";\0"
         std::replace(identity.begin(), identity.end(), '/', '.');
     } else if (item->GetName() == STRING_ITEM) {
         identity = static_cast<StringItem *>(item.get())->GetData();
