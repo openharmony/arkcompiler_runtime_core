@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_LIBPANDABASE_OS_WINDOWS_TIME_H
 #define PANDA_LIBPANDABASE_OS_WINDOWS_TIME_H
 
+#include "libpandabase/macros.h"
 #include <chrono>
 #include <sys/time.h>
 
@@ -30,6 +31,13 @@ static uint64_t GetClockTime([[maybe_unused]] clockid_t clock)
         return std::chrono::duration_cast<T>(duration).count();
     }
     return 0;
+}
+
+template <class T>
+static uint64_t GetStartRealTime()
+{
+    // Unsupported on windows platform
+    UNREACHABLE();
 }
 
 }  // namespace ark::os::time

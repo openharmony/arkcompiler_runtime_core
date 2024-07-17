@@ -79,6 +79,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)

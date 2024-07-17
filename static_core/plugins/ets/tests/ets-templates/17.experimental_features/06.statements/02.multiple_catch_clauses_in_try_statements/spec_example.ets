@@ -26,7 +26,7 @@ function divide(a: int, b: int): int throws {
 
 const MaxInt = 2147483647
 
-function process(a: int, b: int): int {
+function processNumbers(a: int, b: int): int {
     try {
         let res = divide(a, b)
         return res
@@ -40,6 +40,6 @@ function process(a: int, b: int): int {
 }
 
 function main() {
-    assert process(4, 2) == 2
-    assert process(4, 0) == MaxInt
+    assert processNumbers(4, 2) == 2
+    assert processNumbers(4, 0) == MaxInt
 }

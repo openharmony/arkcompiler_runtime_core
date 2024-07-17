@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,29 @@
  * limitations under the License.
  */
 
-#include <unistd.h>
-#include "libpandabase/os/exec.h"
-#include "libpandabase/os/failure_retry.h"
+#ifndef LIBPANDABASE_OS_UNIX_EXEC_H
+#define LIBPANDABASE_OS_UNIX_EXEC_H
+
+#include <array>
 #include "sys/wait.h"
+#include <unistd.h>
+
+#include "libpandabase/macros.h"
+#include "libpandabase/os/error.h"
+#include "libpandabase/os/failure_retry.h"
+#include "libpandabase/utils/expected.h"
+#include "libpandabase/utils/span.h"
 
 namespace ark::os::exec {
 
-Expected<int, Error> ExecNoWait(Span<const char *> args)
+template <typename Callback>
+Expected<int, Error> ExecWithCallbackNoWait(Callback callback, Span<const char *> args)
 {
     ASSERT(!args.Empty());
     ASSERT_PRINT(args[args.Size() - 1] == nullptr, "Last argument must be a nullptr");
 
     if (pid_t pid = fork(); pid == 0) {
+        callback();
         setpgid(0, 0);
         execv(args[0], const_cast<char **>(args.Data()));
         _exit(1);
@@ -36,35 +46,26 @@ Expected<int, Error> ExecNoWait(Span<const char *> args)
     }
 }
 
-Expected<int, Error> Wait(int64_t process, bool testStatus)
+template <typename Callback>
+Expected<int, Error> ExecWithCallback(Callback callback, Span<const char *> args)
 {
-    auto pid = static_cast<pid_t>(process);
-    ASSERT(pid == process);
+    auto res = ExecWithCallbackNoWait(callback, args);
+    if (!res.HasValue()) {
+        return res;
+    }
+    pid_t pid = res.Value();
 
     int status = -1;
     pid_t resPid = PANDA_FAILURE_RETRY(waitpid(pid, &status, 0));
     if (resPid != pid) {
         return Unexpected(Error(errno));
     }
-
-    if (!testStatus) {
-        return status;
-    }
-
     if (WIFEXITED(status)) {         // NOLINT(hicpp-signed-bitwise)
         return WEXITSTATUS(status);  // NOLINT(hicpp-signed-bitwise)
     }
     return Unexpected(Error("Process finished improperly"));
 }
 
-Expected<int, Error> Exec(Span<const char *> args)
-{
-    auto res = ExecNoWait(args);
-    if (!res.HasValue()) {
-        return res;
-    }
-    pid_t pid = res.Value();
-    return Wait(pid, true);
-}
-
 }  // namespace ark::os::exec
+
+#endif  // LIBPANDABASE_OS_EXEC_H

@@ -36,6 +36,7 @@
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/threaded_coroutine_manager.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
+#include "plugins/ets/stdlib/native/init_native_methods.h"
 
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 
@@ -48,8 +49,8 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
         nullptr,                                      // register_finalize_reference_func
         options.GetMaxGlobalRefSize(),                // max_global_ref_size
         options.IsGlobalReferenceSizeCheckEnabled(),  // is_global_reference_size_check_enabled
-        // NOTE(konstanting, #I67QXC): implement MT_MODE_TASK in allocators and HeapOptions as is_single_thread is not
-        // enough
+        // NOTE(konstanting, #I67QXC): implement MT_MODE_TASK in allocators and HeapOptions as is_single_thread is
+        // not enough
         false,                              // is_single_thread
         options.IsUseTlabForAllocations(),  // is_use_tlab_for_allocations
         options.IsStartAsZygote(),          // is_start_as_zygote
@@ -250,6 +251,15 @@ bool PandaEtsVM::Initialize()
         (doubleToStringCache_ != nullptr && floatToStringCache_ != nullptr && longToStringCache_ != nullptr);
     LOG_IF(!cachesCreated, WARNING, ETS) << "Cannot initialize number-to-string caches";
     LOG_IF(cachesCreated, DEBUG, ETS) << "Initialized number-to-string caches";
+
+    // Check if Intrinsics/native methods should be initialized, we don't want to attempt to
+    // initialize  native methods in certain scenarios where we don't have ets stdlib at our disposal
+    if (Runtime::GetOptions().ShouldInitializeIntrinsics()) {
+        // NOTE(ksarychev, #18135): Implement napi module registration via loading a separate
+        // library
+        EtsEnv *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
+        ark::ets::stdlib::InitNativeMethods(env);
+    }
 
     return true;
 }

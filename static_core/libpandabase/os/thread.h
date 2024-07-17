@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,12 @@ WEAK_FOR_LTO_START
 
 PANDA_PUBLIC_API ThreadId GetCurrentThreadId();
 PANDA_PUBLIC_API int GetPid();
+PANDA_PUBLIC_API int GetPPid();
+PANDA_PUBLIC_API int GetUid();
+PANDA_PUBLIC_API int GetEuid();
+PANDA_PUBLIC_API uint32_t GetGid();
+PANDA_PUBLIC_API uint32_t GetEgid();
+PANDA_PUBLIC_API std::vector<uint32_t> GetGroups();
 PANDA_PUBLIC_API int SetThreadName(NativeHandleType pthreadHandle, const char *name);
 PANDA_PUBLIC_API NativeHandleType GetNativeHandle();
 PANDA_PUBLIC_API void Yield();
