@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -517,6 +517,63 @@ bool StackWalker::IsCompilerBoundFrame(SlotType *prev)
     return false;
 }
 
+Frame *StackWalker::GetFrameFromPrevFrame(Frame *prevFrame)
+{
+    auto vregList =
+        codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
+    auto method = GetMethod();
+    Frame *frame;
+    if (IsDynamicMethod()) {
+        /* If there is a usage of rest arguments in dynamic function, then a managed object to contain actual arguments
+         * is constructed in prologue. Thus there is no need to reconstruct rest arguments here
+         */
+        auto numActualArgs = method->GetNumArgs();
+        /* If there are no arguments-keeping object construction in execution path, the number of actual args may be
+         * retreived from cframe
+         */
+
+        size_t frameNumVregs = method->GetNumVregs() + numActualArgs;
+        frame = interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frameNumVregs, numActualArgs, method,
+                                                                               prevFrame);
+        frame->SetDynamic();
+        DynamicFrameHandler frameHandler(frame);
+        static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
+        for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
+            auto vreg = vregList[i];
+            if (!vreg.IsLive()) {
+                continue;
+            }
+            auto regRef = frameHandler.GetVReg(i);
+            GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
+        }
+        {
+            auto vreg = vregList[vregList.size() - ACC_OFFSET];
+            if (vreg.IsLive()) {
+                auto regRef = frameHandler.GetAccAsVReg();
+                GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
+            }
+        }
+        EnvData envData {vregList, GetCFrame(), codeInfo_, calleeStack_.stack.data()};
+        Thread::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
+    } else {
+        auto frameNumVregs = method->GetNumVregs() + method->GetNumArgs();
+        ASSERT((frameNumVregs + 1) >= vregList.size());
+        frame = interpreter::RuntimeInterface::CreateFrame(frameNumVregs, method, prevFrame);
+        StaticFrameHandler frameHandler(frame);
+        for (size_t i = 0; i < vregList.size(); i++) {
+            auto vreg = vregList[i];
+            if (!vreg.IsLive()) {
+                continue;
+            }
+
+            bool isAcc = i == (vregList.size() - 1);
+            auto regRef = isAcc ? frame->GetAccAsVReg() : frameHandler.GetVReg(i);
+            GetCFrame().GetVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
+        }
+    }
+    return frame;
+}
+
 Frame *StackWalker::ConvertToIFrame(FrameKind *prevFrameKind, uint32_t *numInlinedMethods)
 {
     if (!IsCFrame()) {
@@ -561,59 +618,7 @@ Frame *StackWalker::ConvertToIFrame(FrameKind *prevFrameKind, uint32_t *numInlin
         }
     }
     inlineDepth_ = inlineDepth;
-    auto vregList =
-        codeInfo_.GetVRegList(stackmap_, inlineDepth_, mem::InternalAllocator<>::GetInternalAllocatorFromRuntime());
-    auto method = GetMethod();
-    Frame *frame;
-
-    if (IsDynamicMethod()) {
-        /* If there is a usage of rest arguments in dynamic function, then a managed object to contain actual arguments
-         * is constructed in prologue. Thus there is no need to reconstruct rest arguments here
-         */
-        auto numActualArgs = method->GetNumArgs();
-        /* If there are no arguments-keeping object construction in execution path, the number of actual args may be
-         * retreived from cframe
-         */
-
-        size_t frameNumVregs = method->GetNumVregs() + numActualArgs;
-        frame = interpreter::RuntimeInterface::CreateFrameWithActualArgs<true>(frameNumVregs, numActualArgs, method,
-                                                                               reinterpret_cast<Frame *>(prevFrame));
-        frame->SetDynamic();
-        DynamicFrameHandler frameHandler(frame);
-        static constexpr uint8_t ACC_OFFSET = VRegInfo::ENV_COUNT + 1;
-        for (size_t i = 0; i < vregList.size() - ACC_OFFSET; i++) {
-            auto vreg = vregList[i];
-            if (!vreg.IsLive()) {
-                continue;
-            }
-            auto regRef = frameHandler.GetVReg(i);
-            GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
-        }
-        {
-            auto vreg = vregList[vregList.size() - ACC_OFFSET];
-            if (vreg.IsLive()) {
-                auto regRef = frameHandler.GetAccAsVReg();
-                GetCFrame().GetPackVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
-            }
-        }
-        EnvData envData {vregList, GetCFrame(), codeInfo_, calleeStack_.stack.data()};
-        Thread::GetCurrent()->GetVM()->GetLanguageContext().RestoreEnv(frame, envData);
-    } else {
-        auto frameNumVregs = method->GetNumVregs() + method->GetNumArgs();
-        ASSERT((frameNumVregs + 1) >= vregList.size());
-        frame = interpreter::RuntimeInterface::CreateFrame(frameNumVregs, method, reinterpret_cast<Frame *>(prevFrame));
-        StaticFrameHandler frameHandler(frame);
-        for (size_t i = 0; i < vregList.size(); i++) {
-            auto vreg = vregList[i];
-            if (!vreg.IsLive()) {
-                continue;
-            }
-
-            bool isAcc = i == (vregList.size() - 1);
-            auto regRef = isAcc ? frame->GetAccAsVReg() : frameHandler.GetVReg(i);
-            GetCFrame().GetVRegValue(vreg, codeInfo_, calleeStack_.stack.data(), regRef);
-        }
-    }
+    Frame *frame = GetFrameFromPrevFrame(reinterpret_cast<Frame *>(prevFrame));
 
     frame->SetDeoptimized();
     frame->SetBytecodeOffset(GetBytecodePc());
@@ -633,61 +638,130 @@ bool StackWalker::IsDynamicMethod() const
            ark::panda_file::IsDynamicLanguage(Runtime::GetCurrent()->GetLanguageContext(*GetMethod()).GetLanguage());
 }
 
+#ifndef NDEBUG
+void StackWalker::DebugSingleFrameVerify()
+{
+    ASSERT(GetMethod() != nullptr);
+    IterateVRegsWithInfo([this]([[maybe_unused]] const auto &regInfo, const auto &vreg) {
+        if (regInfo.GetType() == compiler::VRegInfo::Type::ANY) {
+            ASSERT(IsDynamicMethod());
+            return true;
+        }
+
+        if (!vreg.HasObject()) {
+            ASSERT(!regInfo.IsObject());
+            vreg.GetLong();
+            return true;
+        }
+        // Use Frame::VRegister::HasObject() to detect objects
+        ASSERT(regInfo.IsObject());
+        if (ObjectHeader *object = vreg.GetReference(); object != nullptr) {
+            auto *cls = object->ClassAddr<Class>();
+            if (!IsAddressInObjectsHeap(cls)) {
+                StackWalker::Create(ManagedThread::GetCurrent()).Dump(std::cerr, true);
+                // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+                LOG(FATAL, INTEROP) << "Wrong class " << cls << " for object " << object << "\n";
+            } else {
+                cls->GetDescriptor();
+            }
+        }
+        return true;
+    });
+
+    if (IsCFrame()) {
+        IterateObjects([this](const auto &vreg) {
+            if (IsDynamicMethod()) {
+                ASSERT(vreg.HasObject());
+                return true;
+            }
+
+            ASSERT(vreg.HasObject());
+            ObjectHeader *object = vreg.GetReference();
+            if (object == nullptr) {
+                return true;
+            }
+            ASSERT(IsAddressInObjectsHeap(object));
+            auto *cls = object->ClassAddr<Class>();
+            if (!IsAddressInObjectsHeap(cls)) {
+                StackWalker::Create(ManagedThread::GetCurrent()).Dump(std::cerr, true);
+                // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+                LOG(FATAL, INTEROP) << "Wrong class " << cls << " for object " << object << "\n";
+            } else {
+                cls->GetDescriptor();
+            }
+            return true;
+        });
+    }
+}
+#endif  // ifndef NDEBUG
+
 void StackWalker::Verify()
 {
     for (; HasFrame(); NextFrame()) {
 #ifndef NDEBUG
-        ASSERT(GetMethod() != nullptr);
-        IterateVRegsWithInfo([this]([[maybe_unused]] const auto &regInfo, const auto &vreg) {
-            if (regInfo.GetType() == compiler::VRegInfo::Type::ANY) {
-                ASSERT(IsDynamicMethod());
-                return true;
-            }
-
-            if (vreg.HasObject()) {
-                // Use Frame::VRegister::HasObject() to detect objects
-                ASSERT(regInfo.IsObject());
-                if (ObjectHeader *object = vreg.GetReference(); object != nullptr) {
-                    auto *cls = object->ClassAddr<Class>();
-                    if (!IsAddressInObjectsHeap(cls)) {
-                        StackWalker::Create(ManagedThread::GetCurrent()).Dump(std::cerr, true);
-                        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-                        LOG(FATAL, INTEROP) << "Wrong class " << cls << " for object " << object << "\n";
-                    } else {
-                        cls->GetDescriptor();
-                    }
-                }
-            } else {
-                ASSERT(!regInfo.IsObject());
-                vreg.GetLong();
-            }
-            return true;
-        });
-
-        if (IsCFrame()) {
-            IterateObjects([this](const auto &vreg) {
-                if (IsDynamicMethod()) {
-                    ASSERT(vreg.HasObject());
-                    return true;
-                }
-
-                ASSERT(vreg.HasObject());
-                if (ObjectHeader *object = vreg.GetReference(); object != nullptr) {
-                    ASSERT(IsAddressInObjectsHeap(object));
-                    auto *cls = object->ClassAddr<Class>();
-                    if (!IsAddressInObjectsHeap(cls)) {
-                        StackWalker::Create(ManagedThread::GetCurrent()).Dump(std::cerr, true);
-                        // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
-                        LOG(FATAL, INTEROP) << "Wrong class " << cls << " for object " << object << "\n";
-                    } else {
-                        cls->GetDescriptor();
-                    }
-                }
-                return true;
-            });
-        }
+        DebugSingleFrameVerify();
 #endif  // ifndef NDEBUG
     }
+}
+
+void StackWalker::DumpVRegLocation(std::ostream &os, VRegInfo &regInfo)
+{
+    [[maybe_unused]] static constexpr size_t WIDTH_LOCATION = 12;
+    os << std::setw(WIDTH_LOCATION) << std::setfill(' ') << regInfo.GetTypeString();  // NOLINT
+    if (IsCFrame()) {
+        os << regInfo.GetLocationString() << ":" << std::dec << helpers::ToSigned(regInfo.GetValue());
+    } else {
+        os << '-';
+    }
+}
+
+void StackWalker::DumpVRegs(std::ostream &os)
+{
+    [[maybe_unused]] static constexpr size_t WIDTH_REG = 10;
+    [[maybe_unused]] static constexpr size_t WIDTH_TYPE = 20;
+
+    IterateVRegsWithInfo([this, &os](auto regInfo, const auto &vreg) {
+        os << "     " << std::setw(WIDTH_REG) << std::setfill(' ') << std::right
+           << (regInfo.IsSpecialVReg() ? VRegInfo::VRegTypeToString(regInfo.GetVRegType())
+                                       : (std::string("v") + std::to_string(regInfo.GetIndex())));
+        os << " = ";
+        if (regInfo.GetType() == compiler::VRegInfo::Type::ANY) {
+            os << "0x";
+        }
+        os << std::left;
+        os << std::setw(WIDTH_TYPE) << std::setfill(' ');
+        switch (regInfo.GetType()) {
+            case compiler::VRegInfo::Type::INT64:
+            case compiler::VRegInfo::Type::INT32:
+                os << std::dec << vreg.GetLong();
+                break;
+            case compiler::VRegInfo::Type::FLOAT64:
+                os << vreg.GetDouble();
+                break;
+            case compiler::VRegInfo::Type::FLOAT32:
+                os << vreg.GetFloat();
+                break;
+            case compiler::VRegInfo::Type::BOOL:
+                os << (vreg.Get() ? "true" : "false");
+                break;
+            case compiler::VRegInfo::Type::OBJECT:
+                os << vreg.GetReference();
+                break;
+            case compiler::VRegInfo::Type::ANY: {
+                os << std::hex << static_cast<uint64_t>(vreg.GetValue());
+                break;
+            }
+            case compiler::VRegInfo::Type::UNDEFINED:
+                os << "undfined";
+                break;
+            default:
+                os << "unknown";
+                break;
+        }
+        DumpVRegLocation(os, regInfo);
+        os << std::endl;
+        return true;
+    });
 }
 
 // Dump function change StackWalker object-state, that's why it may be called only
@@ -695,10 +769,7 @@ void StackWalker::Verify()
 void StackWalker::Dump(std::ostream &os, bool printVregs /* = false */) &&
 {
     [[maybe_unused]] static constexpr size_t WIDTH_INDEX = 4;
-    [[maybe_unused]] static constexpr size_t WIDTH_REG = 10;
     [[maybe_unused]] static constexpr size_t WIDTH_FRAME = 8;
-    [[maybe_unused]] static constexpr size_t WIDTH_LOCATION = 12;
-    [[maybe_unused]] static constexpr size_t WIDTH_TYPE = 20;
 
     size_t frameIndex = 0;
     os << "Panda call stack:\n";
@@ -710,53 +781,7 @@ void StackWalker::Dump(std::ostream &os, bool printVregs /* = false */) &&
         DumpFrame(os);
         os << std::endl;
         if (printVregs) {
-            IterateVRegsWithInfo([this, &os](auto regInfo, const auto &vreg) {
-                os << "     " << std::setw(WIDTH_REG) << std::setfill(' ') << std::right
-                   << (regInfo.IsSpecialVReg() ? VRegInfo::VRegTypeToString(regInfo.GetVRegType())
-                                               : (std::string("v") + std::to_string(regInfo.GetIndex())));
-                os << " = ";
-                if (regInfo.GetType() == compiler::VRegInfo::Type::ANY) {
-                    os << "0x";
-                }
-                os << std::left;
-                os << std::setw(WIDTH_TYPE) << std::setfill(' ');
-                switch (regInfo.GetType()) {
-                    case compiler::VRegInfo::Type::INT64:
-                    case compiler::VRegInfo::Type::INT32:
-                        os << std::dec << vreg.GetLong();
-                        break;
-                    case compiler::VRegInfo::Type::FLOAT64:
-                        os << vreg.GetDouble();
-                        break;
-                    case compiler::VRegInfo::Type::FLOAT32:
-                        os << vreg.GetFloat();
-                        break;
-                    case compiler::VRegInfo::Type::BOOL:
-                        os << (vreg.Get() ? "true" : "false");
-                        break;
-                    case compiler::VRegInfo::Type::OBJECT:
-                        os << vreg.GetReference();
-                        break;
-                    case compiler::VRegInfo::Type::ANY: {
-                        os << std::hex << static_cast<uint64_t>(vreg.GetValue());
-                        break;
-                    }
-                    case compiler::VRegInfo::Type::UNDEFINED:
-                        os << "undfined";
-                        break;
-                    default:
-                        os << "unknown";
-                        break;
-                }
-                os << std::setw(WIDTH_LOCATION) << std::setfill(' ') << regInfo.GetTypeString();  // NOLINT
-                if (IsCFrame()) {
-                    os << regInfo.GetLocationString() << ":" << std::dec << helpers::ToSigned(regInfo.GetValue());
-                } else {
-                    os << '-';
-                }
-                os << std::endl;
-                return true;
-            });
+            DumpVRegs(os);
         }
         if (IsCFrame() && printVregs) {
             os << "roots:";
@@ -787,7 +812,6 @@ void StackWalker::DumpFrame(std::ostream &os)
                 codeInfo_.Dump(os, stackmap_);
             }
         }
-
     } else {
         os << " (managed)";
     }

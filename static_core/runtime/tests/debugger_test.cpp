@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,60 +78,13 @@ static void FreeFrame(Frame *frame)
     std::free(frame->GetExt());
 }
 
-TEST_F(DebuggerTest, Frame)
+struct VRegValue {
+    uint64_t value {};
+    bool isRef {};
+};
+
+static void SetVRegs(Frame *frame, std::vector<VRegValue> &regs)
 {
-    pandasm::Parser p;
-
-    auto source = R"(
-        .function void foo(i32 a0, i32 a1) {
-            movi v0, 1
-            movi v1, 2
-            return.void
-        }
-    )";
-
-    std::string srcFilename = "src.pa";
-    auto res = p.Parse(source, srcFilename);
-    ASSERT(p.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
-
-    auto filePtr = pandasm::AsmEmitter::Emit(res.Value());
-    ASSERT(filePtr != nullptr);
-
-    PandaString descriptor;
-    auto classId = filePtr->GetClassId(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
-    ASSERT_TRUE(classId.IsValid());
-
-    panda_file::ClassDataAccessor cda(*filePtr, classId);
-    panda_file::File::EntityId methodId;
-    panda_file::File::EntityId codeId;
-
-    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-        methodId = mda.GetMethodId();
-        ASSERT_TRUE(mda.GetCodeId());
-        codeId = mda.GetCodeId().value();
-    });
-
-    panda_file::CodeDataAccessor codeDataAccessor(*filePtr, codeId);
-    auto nargs = codeDataAccessor.GetNumArgs();
-    auto nregs = codeDataAccessor.GetNumVregs();
-
-    constexpr size_t BYTECODE_OFFSET = 0xeeff;
-
-    Method method(nullptr, filePtr.get(), methodId, codeId, 0, nargs, nullptr);
-    ark::Frame *frame = test::CreateFrame(nregs + nargs, &method, nullptr);
-    frame->SetBytecodeOffset(BYTECODE_OFFSET);
-
-    struct VRegValue {
-        uint64_t value {};
-        bool isRef {};
-    };
-
-    // NOLINTBEGIN(readability-magic-numbers)
-    std::vector<VRegValue> regs {{0x1111111122222222, false},
-                                 {FromPtr(ark::mem::AllocateNullifiedPayloadString(1)), true},
-                                 {0x3333333344444444, false},
-                                 {FromPtr(ark::mem::AllocateNullifiedPayloadString(1)), true}};
-    // NOLINTEND(readability-magic-numbers)
     auto frameHandler = StaticFrameHandler(frame);
     for (size_t i = 0; i < regs.size(); i++) {
         if (regs[i].isRef) {
@@ -140,6 +93,22 @@ TEST_F(DebuggerTest, Frame)
             frameHandler.GetVReg(i).SetPrimitive(static_cast<int64_t>(regs[i].value));
         }
     }
+}
+
+static constexpr size_t BYTECODE_OFFSET = 0xeeff;
+
+struct MethodInfo {
+    uint32_t nregs;
+    uint32_t nargs;
+    panda_file::File::EntityId methodId;
+};
+
+static void CheckFrame(Frame *frame, std::vector<VRegValue> &regs, const MethodInfo &methodInfo)
+{
+    SetVRegs(frame, regs);
+    auto nregs = methodInfo.nregs;
+    auto nargs = methodInfo.nargs;
+    auto methodId = methodInfo.methodId;
 
     {
         // NOLINTNEXTLINE(readability-magic-numbers)
@@ -191,6 +160,57 @@ TEST_F(DebuggerTest, Frame)
                                                                            : tooling::PtFrame::RegisterKind::PRIMITIVE);
         }
     }
+}
+
+TEST_F(DebuggerTest, Frame)
+{
+    pandasm::Parser p;
+
+    auto source = R"(
+        .function void foo(i32 a0, i32 a1) {
+            movi v0, 1
+            movi v1, 2
+            return.void
+        }
+    )";
+
+    std::string srcFilename = "src.pa";
+    auto res = p.Parse(source, srcFilename);
+    ASSERT(p.ShowError().err == pandasm::Error::ErrorType::ERR_NONE);
+
+    auto filePtr = pandasm::AsmEmitter::Emit(res.Value());
+    ASSERT(filePtr != nullptr);
+
+    PandaString descriptor;
+    auto classId = filePtr->GetClassId(ClassHelper::GetDescriptor(utf::CStringAsMutf8("_GLOBAL"), &descriptor));
+    ASSERT_TRUE(classId.IsValid());
+
+    panda_file::ClassDataAccessor cda(*filePtr, classId);
+    panda_file::File::EntityId methodId;
+    panda_file::File::EntityId codeId;
+
+    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
+        methodId = mda.GetMethodId();
+        ASSERT_TRUE(mda.GetCodeId());
+        codeId = mda.GetCodeId().value();
+    });
+
+    panda_file::CodeDataAccessor codeDataAccessor(*filePtr, codeId);
+    auto nargs = codeDataAccessor.GetNumArgs();
+    auto nregs = codeDataAccessor.GetNumVregs();
+
+    Method method(nullptr, filePtr.get(), methodId, codeId, 0, nargs, nullptr);
+    ark::Frame *frame = test::CreateFrame(nregs + nargs, &method, nullptr);
+    frame->SetBytecodeOffset(BYTECODE_OFFSET);
+
+    // NOLINTBEGIN(readability-magic-numbers)
+    std::vector<VRegValue> regs {{0x1111111122222222, false},
+                                 {FromPtr(ark::mem::AllocateNullifiedPayloadString(1)), true},
+                                 {0x3333333344444444, false},
+                                 {FromPtr(ark::mem::AllocateNullifiedPayloadString(1)), true}};
+    // NOLINTEND(readability-magic-numbers)
+    MethodInfo methodInfo {nregs, nargs, methodId};
+    CheckFrame(frame, regs, methodInfo);
 
     test::FreeFrame(frame);
 }

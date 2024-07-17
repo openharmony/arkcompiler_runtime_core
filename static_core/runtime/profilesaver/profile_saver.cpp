@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -180,47 +180,52 @@ bool ProfileSaver::ShuttingDown()
     return shuttingDown_;
 }
 
+static bool CallBackTranverseResolvedClassAndMethods(PandaSet<ExtractedResolvedClasses> &resolvedClasses,
+                                                     PandaVector<ExtractedMethod> &methods, Class *klass)
+{
+    const panda_file::File *pandafile = klass->GetPandaFile();
+    panda_file::File::EntityId classfieldid = klass->GetFileId();
+
+    if (pandafile == nullptr) {
+        LOG(INFO, RUNTIME) << "panda file is nullptr";
+        return false;
+    }
+    LOG(INFO, RUNTIME) << "      pandafile name = " << pandafile->GetFilename() << " classname = " << klass->GetName();
+
+    Span<Method> tmpMethods = klass->GetMethods();
+    LOG(INFO, RUNTIME) << "      methods size = " << tmpMethods.size();
+    for (int i = 0; i < static_cast<int>(tmpMethods.Size()); ++i) {
+        Method &method = tmpMethods[i];
+        if (!method.IsNative()) {
+            if (method.GetHotnessCounter() < Method::GetInitialHotnessCounter()) {
+                ASSERT(method.GetPandaFile() != nullptr);
+                LOG(INFO, RUNTIME) << "      method pandafile name = " << method.GetPandaFile()->GetFilename();
+                methods.emplace_back(ExtractedMethod(method.GetPandaFile(), method.GetFileId()));
+            }
+        }
+    }
+
+    ExtractedResolvedClasses tmpResolvedClasses(ConvertToString(pandafile->GetFilename()),
+                                                pandafile->GetHeader()->checksum);
+    LOG(INFO, RUNTIME) << "      Add class " << klass->GetName();
+    auto it = resolvedClasses.find(tmpResolvedClasses);
+    if (it != resolvedClasses.end()) {
+        it->AddClass(classfieldid.GetOffset());
+    } else {
+        tmpResolvedClasses.AddClass(classfieldid.GetOffset());
+        resolvedClasses.insert(tmpResolvedClasses);
+    }
+
+    return true;
+}
+
 void ProfileSaver::TranverseAndCacheResolvedClassAndMethods()
 {
     trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
     PandaSet<ExtractedResolvedClasses> resolvedClasses;
     PandaVector<ExtractedMethod> methods;
     auto callBack = [&resolvedClasses, &methods](Class *klass) -> bool {
-        const panda_file::File *pandafile = klass->GetPandaFile();
-        panda_file::File::EntityId classfieldid = klass->GetFileId();
-
-        if (pandafile == nullptr) {
-            LOG(INFO, RUNTIME) << "panda file is nullptr";
-            return false;
-        }
-        LOG(INFO, RUNTIME) << "      pandafile name = " << pandafile->GetFilename()
-                           << " classname = " << klass->GetName();
-
-        Span<Method> tmpMethods = klass->GetMethods();
-        LOG(INFO, RUNTIME) << "      methods size = " << tmpMethods.size();
-        for (int i = 0; i < static_cast<int>(tmpMethods.Size()); ++i) {
-            Method &method = tmpMethods[i];
-            if (!method.IsNative()) {
-                if (method.GetHotnessCounter() < Method::GetInitialHotnessCounter()) {
-                    ASSERT(method.GetPandaFile() != nullptr);
-                    LOG(INFO, RUNTIME) << "      method pandafile name = " << method.GetPandaFile()->GetFilename();
-                    methods.emplace_back(ExtractedMethod(method.GetPandaFile(), method.GetFileId()));
-                }
-            }
-        }
-
-        ExtractedResolvedClasses tmpResolvedClasses(ConvertToString(pandafile->GetFilename()),
-                                                    pandafile->GetHeader()->checksum);
-        LOG(INFO, RUNTIME) << "      Add class " << klass->GetName();
-        auto it = resolvedClasses.find(tmpResolvedClasses);
-        if (it != resolvedClasses.end()) {
-            it->AddClass(classfieldid.GetOffset());
-        } else {
-            tmpResolvedClasses.AddClass(classfieldid.GetOffset());
-            resolvedClasses.insert(tmpResolvedClasses);
-        }
-
-        return true;
+        return CallBackTranverseResolvedClassAndMethods(resolvedClasses, methods, klass);
     };
 
     // NB: classliner == nullptr

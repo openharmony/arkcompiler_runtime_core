@@ -46,7 +46,6 @@ std::pair<Method *, uint32_t> LanguageContextBase::GetCatchMethodAndOffset(Metho
             continue;
         }
         catchOffset = catchMethod->FindCatchBlock(thread->GetException()->ClassAddr<Class>(), stack.GetBytecodePc());
-
         if (catchOffset != panda_file::INVALID_OFFSET) {
             break;
         }

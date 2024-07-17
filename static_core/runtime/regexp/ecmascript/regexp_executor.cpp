@@ -84,15 +84,17 @@ bool RegExpExecutor::MatchFailed(bool isMatched)
         } else {
             isMatched = (state->type == StateType::STATE_MATCH_AHEAD && isMatched) ||
                         (state->type == StateType::STATE_NEGATIVE_MATCH_AHEAD && !isMatched);
-            if (isMatched) {
-                if (state->type == StateType::STATE_MATCH_AHEAD) {
-                    PopRegExpState(false);
-                    return false;
-                }
-                if (state->type == StateType::STATE_NEGATIVE_MATCH_AHEAD) {
-                    PopRegExpState();
-                    return false;
-                }
+            if (!isMatched) {
+                DropRegExpState();
+                continue;
+            }
+            if (state->type == StateType::STATE_MATCH_AHEAD) {
+                PopRegExpState(false);
+                return false;
+            }
+            if (state->type == StateType::STATE_NEGATIVE_MATCH_AHEAD) {
+                PopRegExpState();
+                return false;
             }
         }
         DropRegExpState();

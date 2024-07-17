@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -192,27 +192,7 @@ public:
             if ((TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::U64) || *shortyIt == TypeId::REFERENCE ||
                 *shortyIt == TypeId::TAGGED) {
                 signature << panda_file::Type(*shortyIt) << " a" << argNum;
-                if (TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::F64) {
-                    body << "fldai.64 " << bit_cast<double>(*argsIt) << '\n';
-                    body << "fcmpg.64 a" << argNum << '\n';
-                    body << "jnez fail\n";
-                } else if (TypeId::I64 <= *shortyIt && *shortyIt <= TypeId::U64) {
-                    body << "ldai.64 " << *argsIt << '\n';
-                    body << "cmp.64 a" << argNum << '\n';
-                    body << "jnez fail\n";
-                } else if (*shortyIt == TypeId::TAGGED) {
-                    if (argsIt == args.end()) {
-                        body << "call.short TestUtils.ldundefined\n";
-                    } else {
-                        body << "ldai.dyn " << *argsIt << '\n';
-                    }
-                    body << "sta.dyn v0\n";
-                    body << "call.short TestUtils.cmpDyn, v0, a" << argNum << '\n';
-                    body << "jnez fail\n";
-                } else {
-                    body << "lda.null\n";
-                    body << "jne.obj a" << argNum << ", fail\n";
-                }
+                body = GetBodyPrologue(shortyIt, argsIt, args, argNum);
             } else {
                 signature << "i32 a" << argNum;
                 body << "ldai " << *argsIt << '\n';
@@ -224,29 +204,10 @@ public:
             }
             ++argNum;
         }
-        if (retType == TypeId::TAGGED) {
-            body << "ldai.dyn 1\n";
-            body << "return.dyn\n";
-            body << "fail:\n";
-            body << "ldai.dyn 0\n";
-            body << "return.dyn\n";
-        } else {
-            body << "ldai 1\n";
-            body << "return\n";
-            body << "fail:\n";
-            body << "ldai 0\n";
-            body << "return\n";
-        }
 
-        out << ".language " << ctx << '\n';
-        out << ".record TestUtils <external>\n";
-        out << ".function i32 TestUtils.cmpDyn(any a0, any a1) <external>\n";
-        out << ".function any TestUtils.ldundefined() <external>\n";
-        out << ".record reference {}\n";
-        out << ".record Test {}\n";
-        out << ".function " << panda_file::Type(retType) << " Test.main(" << signature.str() << ") {\n";
-        out << body.str();
-        out << "}";
+        FillBodyEpilogue(retType, body);
+
+        out = GetFileWithInfo(ctx, retType, signature, body);
 
         pandasm::Parser p;
         auto res = p.Parse(out.str());
@@ -263,6 +224,68 @@ public:
     }
 
 private:
+    std::ostringstream GetBodyPrologue(std::initializer_list<TypeId>::const_iterator &shortyIt,
+                                       std::initializer_list<int64_t>::const_iterator &argsIt,
+                                       const std::initializer_list<int64_t> &args, uint32_t argNum)
+    {
+        std::ostringstream body;
+        if (TypeId::F32 <= *shortyIt && *shortyIt <= TypeId::F64) {
+            body << "fldai.64 " << bit_cast<double>(*argsIt) << '\n';
+            body << "fcmpg.64 a" << argNum << '\n';
+            body << "jnez fail\n";
+        } else if (TypeId::I64 <= *shortyIt && *shortyIt <= TypeId::U64) {
+            body << "ldai.64 " << *argsIt << '\n';
+            body << "cmp.64 a" << argNum << '\n';
+            body << "jnez fail\n";
+        } else if (*shortyIt == TypeId::TAGGED) {
+            if (argsIt == args.end()) {
+                body << "call.short TestUtils.ldundefined\n";
+            } else {
+                body << "ldai.dyn " << *argsIt << '\n';
+            }
+            body << "sta.dyn v0\n";
+            body << "call.short TestUtils.cmpDyn, v0, a" << argNum << '\n';
+            body << "jnez fail\n";
+        } else {
+            body << "lda.null\n";
+            body << "jne.obj a" << argNum << ", fail\n";
+        }
+        return body;
+    }
+
+    void FillBodyEpilogue(const TypeId &retType, std::ostringstream &body)
+    {
+        if (retType == TypeId::TAGGED) {
+            body << "ldai.dyn 1\n";
+            body << "return.dyn\n";
+            body << "fail:\n";
+            body << "ldai.dyn 0\n";
+            body << "return.dyn\n";
+        } else {
+            body << "ldai 1\n";
+            body << "return\n";
+            body << "fail:\n";
+            body << "ldai 0\n";
+            body << "return\n";
+        }
+    }
+
+    std::ostringstream GetFileWithInfo(LanguageContext &ctx, TypeId retType, const std::ostringstream &signature,
+                                       const std::ostringstream &body)
+    {
+        std::ostringstream out;
+        out << ".language " << ctx << '\n';
+        out << ".record TestUtils <external>\n";
+        out << ".function i32 TestUtils.cmpDyn(any a0, any a1) <external>\n";
+        out << ".function any TestUtils.ldundefined() <external>\n";
+        out << ".record reference {}\n";
+        out << ".record Test {}\n";
+        out << ".function " << panda_file::Type(retType) << " Test.main(" << signature.str() << ") {\n";
+        out << body.str();
+        out << "}";
+        return out;
+    }
+
     MTManagedThread *thread_ {nullptr};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
@@ -277,7 +300,7 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeIntNoArg)
 {
     auto method = MakeNoArgsMethod(TypeId::I32, 5L);
     auto res = InvokeEntryPoint<int32_t>(method);
-    ASSERT_EQ(res, 5);
+    ASSERT_EQ(res, 5L);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
@@ -285,7 +308,7 @@ TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeLongNoArg)
     auto method = MakeNoArgsMethod(TypeId::I64, 7L);
 
     auto res = InvokeEntryPoint<int64_t>(method);
-    ASSERT_EQ(res, 7);
+    ASSERT_EQ(res, 7L);
 }
 
 TEST_F(CompiledCodeToInterpreterBridgeTest, InvokeDoubleNoArg)

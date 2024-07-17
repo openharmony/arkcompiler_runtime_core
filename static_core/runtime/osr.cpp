@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,7 +67,6 @@ bool OsrEntry(uintptr_t loopHeadBc, const void *osrCode)
     LOG(DEBUG, INTEROP) << "OSR entry in method '" << stack.GetMethod()->GetFullName() << "': " << osrCode;
     CodeInfo codeInfo(CodeInfo::GetCodeOriginFromEntryPoint(osrCode));
     auto stackmap = codeInfo.FindOsrStackMap(loopHeadBc);
-
     if (!stackmap.IsValid()) {
 #if EVENT_OSR_ENTRY_ENABLED
         WriteOsrEventError(frame, stack.GetPreviousFrameKind(), loopHeadBc);
@@ -111,6 +110,25 @@ bool OsrEntry(uintptr_t loopHeadBc, const void *osrCode)
     return true;
 }
 
+static int64_t GetValueFromVregAcc(const Frame *iframe, LanguageContext &ctx, VRegInfo &vreg)
+{
+    int64_t value = 0;
+    if (vreg.IsAccumulator()) {
+        value = iframe->GetAcc().GetValue();
+    } else if (!vreg.IsSpecialVReg()) {
+        ASSERT(vreg.GetVRegType() == VRegInfo::VRegType::VREG);
+        value = iframe->GetVReg(vreg.GetIndex()).GetValue();
+    } else {
+        value = static_cast<int64_t>(ctx.GetOsrEnv(iframe, vreg));
+    }
+#ifdef PANDA_USE_32_BIT_POINTER
+    if (vreg.IsObject()) {
+        value = static_cast<int32_t>(value);
+    }
+#endif
+    return value;
+}
+
 extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const void *osrCode, void *cframePtr,
                                  uintptr_t *regBuffer, uintptr_t *fpRegBuffer)
 {
@@ -143,20 +161,7 @@ extern "C" void *PrepareOsrEntry(const Frame *iframe, uintptr_t bcOffset, const 
         if (!vreg.IsLive()) {
             continue;
         }
-        int64_t value = 0;
-        if (vreg.IsAccumulator()) {
-            value = iframe->GetAcc().GetValue();
-        } else if (!vreg.IsSpecialVReg()) {
-            ASSERT(vreg.GetVRegType() == VRegInfo::VRegType::VREG);
-            value = iframe->GetVReg(vreg.GetIndex()).GetValue();
-        } else {
-            value = static_cast<int64_t>(ctx.GetOsrEnv(iframe, vreg));
-        }
-#ifdef PANDA_USE_32_BIT_POINTER
-        if (vreg.IsObject()) {
-            value = static_cast<int32_t>(value);
-        }
-#endif
+        int64_t value = GetValueFromVregAcc(iframe, ctx, vreg);
         switch (vreg.GetLocation()) {
             case VRegInfo::Location::SLOT:
                 cframe.SetVRegValue(vreg, value, nullptr);
