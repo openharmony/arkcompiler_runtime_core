@@ -123,7 +123,7 @@ cases:
     # object literal
     - decl: |-
           class A {
-              f: string
+              f: string = ''
           }
       code: |-
           let v: number|string|boolean = 0.0

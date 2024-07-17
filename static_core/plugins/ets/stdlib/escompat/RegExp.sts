@@ -138,20 +138,20 @@ class RegExpStringIterator implements IterableIterator<RegExpMatchArray> {
  * Regular expression
  */
 export class RegExp extends Object {
-    private pattern_: String
+    private pattern_: String = ""
     public lastIndex: number
-    private source_: String
-    private flags_: String
+    private source_: String = ""
+    private flags_: String = ""
 
-    private static input_: String
-    private static lastMatch_: String
-    private static lastParen_: String
-    private static leftContext_: String
-    private static rightContext_: String
-    private static $1_: String, $2_: String, $3_: String, $4_: String, $5_: String, $6_: String, $7_: String, $8_: String, $9_: String
+    private static input_: String = ""
+    private static lastMatch_: String = ""
+    private static lastParen_: String = ""
+    private static leftContext_: String = ""
+    private static rightContext_: String = ""
+    private static $1_: String = "", $2_: String = "", $3_: String = "", $4_: String = "", $5_: String = "", $6_: String = "", $7_: String = "", $8_: String = "", $9_: String = ""
 
-    private groupNames: String[]
-    private buffer: int[]
+    private groupNames: String[] = []
+    private buffer: int[] = []
 
     // NOTE(shumilov-petr): Removing the following setter leads to unspecified behaviour of es2panda
     // The negative test '02.lexical_elements/07.keywords/types_n_12.sts' gets failed if remove this setter

@@ -28,7 +28,7 @@ cases:
  # use object literal
  - decl: |-
      class C {
-         p1: string;
+         p1: string = "";
          p2: int;
      }
      function foo(i: C) { return i.p2; }
@@ -40,7 +40,7 @@ cases:
  - tags: negative, compile-only
    decl: |-
      class C {
-         p1: string;
+         p1: string = "";
          p2: int;
      }
      function foo(i: C) { return i.p2; }

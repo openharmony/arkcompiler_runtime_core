@@ -18,7 +18,7 @@ package setter.test;
 type Union = number | boolean;
 
 class UnionSetter {
-   private _value: Union;
+   private _value: Union = 0;
 
    set value(arg: Union) {
       this._value = arg;
@@ -38,7 +38,7 @@ interface ISetter {
 }
 
 class InterfaceSetter implements ISetter {
-   _value: string;
+   _value: string = "";
 
    set value(arg: string) {
       this.value = arg;
@@ -50,7 +50,7 @@ class InterfaceSetter implements ISetter {
 }
 
 class BaseClass {
-   private _value: string;
+   private _value: string = "";
 
    set value(arg: string) {
       this._value = arg;
@@ -96,7 +96,7 @@ class SetterAnyType<T> {
 type Tuple = [number, string];
 
 class TupleSet {
-   private _value: Tuple;
+   private _value: Tuple = [0, ""];
 
    public set value(arg: Tuple) {
       this._value = arg;
@@ -108,7 +108,7 @@ class TupleSet {
 }
 
 abstract class AbstractSetter {
-   protected _value: string;
+   protected _value: string = "";
 
    abstract set value(arg: string);
 

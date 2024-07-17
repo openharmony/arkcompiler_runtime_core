@@ -152,6 +152,6 @@ export class NullableObjectArray {
         this.data[index] = e
     }
 
-    private data: NullableObject[]
+    private data: NullableObject[] = []
     private curSize: int
 }

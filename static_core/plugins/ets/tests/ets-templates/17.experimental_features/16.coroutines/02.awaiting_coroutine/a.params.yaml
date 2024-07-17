@@ -193,6 +193,8 @@ cases:
           class A {
               fld: Promise<string>
               constructor() {
+                  this.fld = launch foo('')
+                  await this.fld
               }
               constructor(p: Promise<string>) {
                   this.fld = p

@@ -20,7 +20,7 @@ desc: Name-value pairs of the class composite are then executed from left to rig
 let res: int;
 
 class Person {
-  name: String;
+  name: String = "";
   age: int;
 }
   

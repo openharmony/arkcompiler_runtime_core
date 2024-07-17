@@ -102,13 +102,13 @@ function testObject(): int {
 export class User {}
 
 class UserWithFields extends User {
-    id: Double
-    g: Boolean
-    name: String
+    id: Double = 0.0
+    g: Boolean = false
+    name: String = ""
 }
 
 class SuperUser extends UserWithFields {
-    users: UserWithFields[]
+    users: UserWithFields[] = []
 }
 
 function testStringifyParse(): int {
@@ -129,18 +129,20 @@ class ForbiddenPrimitives {
 }
 
 class CycleA {
-    x : CycleB
+    // x : CycleB = new CycleB()
+    x : CycleB|null
 }
 
 class CycleB {
-    x : CycleA
+    // x : CycleA = new CycleA()
+    x : CycleA|null
 }
 
 function testCheckParse(): int {
     let errors = 0
     errors += test(!JSON.isCorrectForParsing(Type.of(new NoConstructor(10.0) as Object)), "No constructor")
     errors += test(!JSON.isCorrectForParsing(Type.of(new ForbiddenPrimitives() as Object)), "Forbidden primitives")
-    errors += test(!JSON.isCorrectForParsing(Type.of(new CycleA() as Object)), "Cycle")
+    errors += test(!JSON.isCorrectForParsing(Type.of(new CycleA() as Object)), "Cycle") // NOTE(pantos) StackOverflowError
     return errors
 }
 

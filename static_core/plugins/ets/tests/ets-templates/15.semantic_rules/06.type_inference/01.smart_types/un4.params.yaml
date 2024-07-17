@@ -71,7 +71,7 @@ cases:
     # object literal
     - decl: |-
           class A {
-              f: X[]
+              f: X[] = []
           }
       code: |-
           let v: Object|undefined = new Int()

@@ -165,8 +165,8 @@ export class AccessModifier {
 /**
  * Runtime ArkTS type representation
  */
-export abstract class Type {
-    internal td: TypeDesc
+export abstract class Type extends Object {
+    internal td: TypeDesc = new TypeDesc()
 
 
     /**

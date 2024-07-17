@@ -19,7 +19,7 @@ tags: []
 ---*/
 
 abstract class A {
-  s: string
+  s: string = ""
 }
 
 abstract class B1 extends A {

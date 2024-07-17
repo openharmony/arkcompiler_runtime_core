@@ -19,7 +19,7 @@ desc: Composite context, class field, boxing conversion, implicit
 params: NaN conversion from {{c.from_type}} to {{c.to_type}}
 ---*/
 {%- for t in c['values'] %}
-class A{{loop.index}} { fld: {{c.to_type}} }
+class A{{loop.index}} { fld: {{c.to_type}} = {{c.init_value}} }
 let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 

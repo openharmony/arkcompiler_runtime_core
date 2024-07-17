@@ -19,7 +19,7 @@ tags: [compile-only, negative]
 ---*/
 
 class Person {
-  private name: String;
+  private name: String = "";
   age: int;
 }
 

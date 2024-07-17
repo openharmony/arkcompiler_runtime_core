@@ -17,119 +17,119 @@ cases:
       vals:
           - { type: number, expr: Number.MIN_VALUE as number }
           - { type: number, expr: Number.MAX_VALUE as number }
-          - { type: Number, expr: new Number(Number.MIN_VALUE as number) }
-          - { type: Number, expr: new Number(Number.MAX_VALUE as number) }
+          - { type: Number, init_value: 0, expr: new Number(Number.MIN_VALUE as number) }
+          - { type: Number, init_value: 0, expr: new Number(Number.MAX_VALUE as number) }
 
     - res: 'number'
       vals:
           - { type: byte, expr: Byte.MIN_VALUE as byte }
           - { type: byte, expr: Byte.MAX_VALUE as byte }
-          - { type: Byte, expr: new Byte(Byte.MIN_VALUE as byte) }
-          - { type: Byte, expr: new Byte(Byte.MAX_VALUE as byte) }
+          - { type: Byte, init_value: 0, expr: new Byte(Byte.MIN_VALUE as byte) }
+          - { type: Byte, init_value: 0, expr: new Byte(Byte.MAX_VALUE as byte) }
           - { type: short, expr: Short.MIN_VALUE as short }
           - { type: short, expr: Short.MAX_VALUE as short }
-          - { type: Short, expr: new Short(Short.MIN_VALUE as short) }
-          - { type: Short, expr: new Short(Short.MAX_VALUE as short) }
+          - { type: Short, init_value: 0, expr: new Short(Short.MIN_VALUE as short) }
+          - { type: Short, init_value: 0, expr: new Short(Short.MAX_VALUE as short) }
           - { type: int, expr: Int.MIN_VALUE as int }
           - { type: int, expr: Int.MAX_VALUE as int }
-          - { type: Int, expr: new Int(Int.MIN_VALUE as int) }
-          - { type: Int, expr: new Int(Int.MAX_VALUE as int) }
+          - { type: Int, init_value: 0, expr: new Int(Int.MIN_VALUE as int) }
+          - { type: Int, init_value: 0, expr: new Int(Int.MAX_VALUE as int) }
           - { type: long, expr: Long.MIN_VALUE as long }
           - { type: long, expr: Long.MAX_VALUE as long }
-          - { type: Long, expr: new Long(Long.MIN_VALUE as long) }
-          - { type: Long, expr: new Long(Long.MAX_VALUE as long) }
+          - { type: Long, init_value: 0, expr: new Long(Long.MIN_VALUE as long) }
+          - { type: Long, init_value: 0, expr: new Long(Long.MAX_VALUE as long) }
           - { type: float, expr: Float.MIN_VALUE as float }
           - { type: float, expr: Float.MAX_VALUE as float }
-          - { type: Float, expr: new Float(Float.MIN_VALUE as float) }
-          - { type: Float, expr: new Float(Float.MAX_VALUE as float) }
+          - { type: Float, init_value: 0.0f, expr: new Float(Float.MIN_VALUE as float) }
+          - { type: Float, init_value: 0.0f, expr: new Float(Float.MAX_VALUE as float) }
           - { type: double, expr: Double.MIN_VALUE as double }
           - { type: double, expr: Double.MAX_VALUE as double }
-          - { type: Double, expr: new Double(Double.MIN_VALUE as double) }
-          - { type: Double, expr: new Double(Double.MAX_VALUE as double) }
+          - { type: Double, init_value: 0.0, expr: new Double(Double.MIN_VALUE as double) }
+          - { type: Double, init_value: 0.0, expr: new Double(Double.MAX_VALUE as double) }
           - { type: char, expr: Char.MIN_VALUE as char }
           - { type: char, expr: Char.MAX_VALUE as char }
-          - { type: Char, expr: new Char(Char.MIN_VALUE as char) }
-          - { type: Char, expr: new Char(Char.MAX_VALUE as char) }
+          - { type: Char, init_value: "c'\\0'", expr: new Char(Char.MIN_VALUE as char) }
+          - { type: Char, init_value: "c'\\0'", expr: new Char(Char.MAX_VALUE as char) }
 
     - res: 'string'
       decl: |-
           let a = 42
       vals:
-          - { type: string, expr: '"ABC"' }
-          - { type: string, expr: "'' + '' + 'CDE'" }
-          - { type: string, expr: '`a = ${a}` + '''' + "CDE"' }
-          - { type: String, expr: 'new String("ABC")' }
-          - { type: String, expr: "new String('' + '' + 'CDE')" }
-          - { type: String, expr: 'new String(`a = ${a}` + '''' + "CDE")' }
-          - { type: Comparable<String>, expr: '"X"' }
+          - { type: string, init_value: '""', expr: '"ABC"' }
+          - { type: string, init_value: '""', expr: "'' + '' + 'CDE'" }
+          - { type: string, init_value: '""', expr: '`a = ${a}` + '''' + "CDE"' }
+          - { type: String, init_value: '""', expr: 'new String("ABC")' }
+          - { type: String, init_value: '""', expr: "new String('' + '' + 'CDE')" }
+          - { type: String, init_value: '""', expr: 'new String(`a = ${a}` + '''' + "CDE")' }
+          - { type: Comparable<String>, init_value: '""', expr: '"X"' }
 
     - res: 'boolean'
       vals:
           - { type: boolean, expr: 'true' }
           - { type: boolean, expr: 'false' }
-          - { type: Boolean, expr: 'new Boolean(true)' }
-          - { type: Boolean, expr: 'new Boolean(false)' }
-          - { type: Comparable<Boolean>, expr: 'new Boolean()' }
+          - { type: Boolean, init_value: 'false', expr: 'new Boolean(true)' }
+          - { type: Boolean, init_value: 'false', expr: 'new Boolean(false)' }
+          - { type: Comparable<Boolean>, init_value: 'false', expr: 'new Boolean()' }
 
     - res: 'bigint'
       vals:
-          - { type: bigint, expr: '123456789012345678901234567890n' }
-          - { type: bigint, expr: '999999999999999999999999999999n' }
-          - { type: BigInt, expr: 'new BigInt("123456789012345678901234567890")' }
-          - { type: BigInt, expr: 'new BigInt("999999999999999999999999999999")' }
+          - { type: bigint, init_value: 0n, expr: '123456789012345678901234567890n' }
+          - { type: bigint, init_value: 0n, expr: '999999999999999999999999999999n' }
+          - { type: BigInt, init_value: 0n, expr: 'new BigInt("123456789012345678901234567890")' }
+          - { type: BigInt, init_value: 0n, expr: 'new BigInt("999999999999999999999999999999")' }
 
     - res: 'object'
       decl: |-
           interface I {}
           class A implements I {}
       vals:
-          - { type: A, expr: '{}' }
-          - { type: I, expr: 'new A()' }
+          - { type: A, init_value: 'new A()', expr: '{}' }
+          - { type: I, init_value: 'new A()', expr: 'new A()' }
 
     - res: 'number'
       vals:
-          - { type: 'Floating', expr: 'new Float(3.14f)' }
-          - { type: 'Integral', expr: 'new Int(42)' }
-          - { type: 'Numeric', expr: 'new Number(3.14)' }
+          - { type: 'Floating', init_value: 0.0f, expr: 'new Float(3.14f)' }
+          - { type: 'Integral', init_value: 0, expr: 'new Int(42)' }
+          - { type: 'Numeric', init_value: 0, expr: 'new Number(3.14)' }
 
     - res: 'object'
       vals:
-          - { type: 'number[]', expr: '[Number.MIN_VALUE as number]' }
-          - { type: 'number[]', expr: '[Number.MAX_VALUE as number]' }
-          - { type: 'Number[]', expr: '[new Number(Number.MIN_VALUE as number)]' }
-          - { type: 'Number[]', expr: '[new Number(Number.MAX_VALUE as number)]' }
+          - { type: 'number[]', init_value: '[]', expr: '[Number.MIN_VALUE as number]' }
+          - { type: 'number[]', init_value: '[]', expr: '[Number.MAX_VALUE as number]' }
+          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MIN_VALUE as number)]' }
+          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MAX_VALUE as number)]' }
 
     - res: 'object'
       vals:
-          - { type: 'byte[]', expr: '[Byte.MIN_VALUE as byte]' }
-          - { type: 'Byte[]', expr: '[new Byte(Byte.MIN_VALUE as byte)]' }
-          - { type: 'short[]', expr: '[Short.MIN_VALUE as short]' }
-          - { type: 'Short[]', expr: '[new Short(Short.MIN_VALUE as short)]' }
-          - { type: 'int[]', expr: '[Int.MAX_VALUE as int]' }
-          - { type: 'Int[]', expr: '[new Int(Int.MIN_VALUE as int)]' }
-          - { type: 'long[]', expr: '[Long.MIN_VALUE as long]' }
-          - { type: 'Long[]', expr: '[new Long(Long.MIN_VALUE as long)]' }
-          - { type: 'float[]', expr: '[Float.MIN_VALUE as float]' }
-          - { type: 'Float[]', expr: '[new Float(Float.MIN_VALUE as float)]' }
-          - { type: 'double[]', expr: '[Double.MIN_VALUE as double]' }
-          - { type: 'Double[]', expr: '[new Double(Double.MIN_VALUE as double)]' }
-          - { type: 'char[]', expr: '[Char.MIN_VALUE as char]' }
-          - { type: 'Char[]', expr: '[new Char(Char.MAX_VALUE as char)]' }
+          - { type: 'byte[]', init_value: '[]', expr: '[Byte.MIN_VALUE as byte]' }
+          - { type: 'Byte[]', init_value: '[]', expr: '[new Byte(Byte.MIN_VALUE as byte)]' }
+          - { type: 'short[]', init_value: '[]', expr: '[Short.MIN_VALUE as short]' }
+          - { type: 'Short[]', init_value: '[]', expr: '[new Short(Short.MIN_VALUE as short)]' }
+          - { type: 'int[]', init_value: '[]', expr: '[Int.MAX_VALUE as int]' }
+          - { type: 'Int[]', init_value: '[]', expr: '[new Int(Int.MIN_VALUE as int)]' }
+          - { type: 'long[]', init_value: '[]', expr: '[Long.MIN_VALUE as long]' }
+          - { type: 'Long[]', init_value: '[]', expr: '[new Long(Long.MIN_VALUE as long)]' }
+          - { type: 'float[]', init_value: '[]', expr: '[Float.MIN_VALUE as float]' }
+          - { type: 'Float[]', init_value: '[]', expr: '[new Float(Float.MIN_VALUE as float)]' }
+          - { type: 'double[]', init_value: '[]', expr: '[Double.MIN_VALUE as double]' }
+          - { type: 'Double[]', init_value: '[]', expr: '[new Double(Double.MIN_VALUE as double)]' }
+          - { type: 'char[]', init_value: '[]', expr: '[Char.MIN_VALUE as char]' }
+          - { type: 'Char[]', init_value: '[]', expr: '[new Char(Char.MAX_VALUE as char)]' }
 
     - res: 'object'
       decl: |-
           interface I {}
           class A implements I {}
       vals:
-          - { type: 'A[]', expr: 'new A[1]' }
-          - { type: 'I[]', expr: 'new A[1]' }
-          - { type: 'Comparable<Float>[]', expr: '[new Float(3.14f)]' }
+          - { type: 'A[]', init_value: '[]', expr: 'new A[1]' }
+          - { type: 'I[]', init_value: '[]', expr: 'new A[1]' }
+          - { type: 'Comparable<Float>[]', init_value: '[]', expr: '[new Float(3.14f)]' }
 
     - res: 'object'
       vals:
-          - { type: 'Floating[]', expr: '[new Float(3.14f)]' }
-          - { type: 'Integral[]', expr: '[new Int(42)]' }
-          - { type: 'Numeric[]', expr: '[new Number(3.14)]' }
+          - { type: 'Floating[]', init_value: '[]', expr: '[new Float(3.14f)]' }
+          - { type: 'Integral[]', init_value: '[]', expr: '[new Int(42)]' }
+          - { type: 'Numeric[]', init_value: '[]', expr: '[new Number(3.14)]' }
 
     - res: 'function'
       decl: |-
@@ -139,11 +139,11 @@ cases:
           }
           let f: F = (p: int): int => { return p * p }
       vals:
-          - { type: F, expr: 'foo' }
-          - { type: '((p: int) => int)', expr: 'foo' }
-          - { type: F, expr: 'f' }
-          - { type: '((p: int) => int)', expr: 'f' }
-          - { type: '(() => void)', expr: '() => { console.log(1) }' }
+          - { type: F, init_value: '(p: int) => 0', expr: 'foo' }
+          - { type: '((p: int) => int)', init_value: '(p: int) => 0', expr: 'foo' }
+          - { type: F, init_value: '(p: int) => 0', expr: 'f' }
+          - { type: '((p: int) => int)', init_value: '(p: int) => 0', expr: 'f' }
+          - { type: '(() => void)', init_value: '() => {}', expr: '() => { console.log(1) }' }
 
     - res: 'undefined'
       vals:
@@ -172,28 +172,28 @@ cases:
           enum Color { Red, Green, Blue }
           enum Size { S, M, L, XL }
       vals:
-          - { type: Color, expr: Color.Red }
-          - { type: Size, expr: Size.XL }
+          - { type: Color, init_value: Color.Red, expr: Color.Red }
+          - { type: Size, init_value: Size.S, expr: Size.XL }
 
     - res: 'string'
       decl: |-
           enum Color { Red = "red", Green = "green", Blue = "blue" }
           enum Size { S = "small", M = "mid", L = "large", XL = "extra-large" }
       vals:
-          - { type: Color, expr: Color.Blue }
-          - { type: Size, expr: Size.L }
+          - { type: Color, init_value: Color.Red, expr: Color.Blue }
+          - { type: Size, init_value: Size.S, expr: Size.L }
 
     - res: 'boolean'
       vals:
-          - { type: 'number|string|boolean', expr: 'false' }
-          - { type: 'number|boolean', expr: 'true' }
-          - { type: 'boolean|never|long', expr: 'true' }
+          - { type: 'number|string|boolean', init_value: 0, expr: 'false' }
+          - { type: 'number|boolean', init_value: 0, expr: 'true' }
+          - { type: 'boolean|never|long', init_value: 'false', expr: 'true' }
 
     - res: 'string'
       vals:
-          - { type: 'number|string|boolean', expr: '"false"' }
-          - { type: 'number|string', expr: '"3.14"' }
-          - { type: 'boolean|never|long|string', expr: '"1234567890"' }
+          - { type: 'number|string|boolean', init_value: 0, expr: '"false"' }
+          - { type: 'number|string', init_value: 0, expr: '"3.14"' }
+          - { type: 'boolean|never|long|string', init_value: 'false', expr: '"1234567890"' }
 
     - res: 'object'
       decl: |-
@@ -201,7 +201,7 @@ cases:
           class B {}
           class C {}
       vals:
-          - { type: 'A|B|C', expr: 'new A()' }
+          - { type: 'A|B|C', init_value: 'new A()', expr: 'new A()' }
           - { type: 'B|never|undefined|A', expr: 'new A()' }
 
     - res: 'object'
@@ -216,9 +216,9 @@ cases:
               }
           }
       vals:
-          - { type: 'C<A>', expr: 'new C<A>(new A())' }
-          - { type: 'C<B>', expr: 'new C<B>(new B())' }
-          - { type: 'C<I>', expr: 'new C<I>(new B())' }
+          - { type: 'C<A>', init_value: 'new C<A>(new A())', expr: 'new C<A>(new A())' }
+          - { type: 'C<B>', init_value: 'new C<B>(new B())', expr: 'new C<B>(new B())' }
+          - { type: 'C<I>', init_value: 'new C<I>(new A())', expr: 'new C<I>(new B())' }
 
     - res: 'number'
       vals:

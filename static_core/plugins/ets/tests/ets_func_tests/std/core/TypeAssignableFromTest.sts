@@ -72,9 +72,13 @@ interface I2 extends I {}
 
 interface I3 extends I {}
 
+class BI2 extends AI implements I2 {}
+
+class BI3 extends AI implements I3 {}
+
 class AI23 {
-    i2: I2
-    i3: I3
+    i2: I2 = new BI2()
+    i3: I3 = new BI3()
 }
 
 function testInterfaceType(): int {

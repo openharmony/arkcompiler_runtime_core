@@ -15,15 +15,18 @@
 cases:
     - from_type: float
       to_type: Float
+      init_value: 0.0f
       values:
           - { expr: Float.NaN }
 
     - from_type: float
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: Float.NaN }
 
     - from_type: double
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: Double.NaN }

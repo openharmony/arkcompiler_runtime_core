@@ -21,7 +21,7 @@ params: from {{c.from_type}}
 {{c.decl}}
 
 {%- for t in c['values'] %}
-class A{{loop.index}} { fld: {{t.to_type}} }
+class A{{loop.index}} { fld: {{t.to_type}} {%- if t.init_value is defined %} = {{t.init_value}}{%- endif %} }
 let s{{loop.index}}: {{c.from_type}} = {{t.expr|safe}};
 {%- endfor %}
 

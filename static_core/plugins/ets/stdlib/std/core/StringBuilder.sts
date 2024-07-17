@@ -256,7 +256,7 @@ export final class StringBuilder {
 }
 
 final class DoubleToStringCacheElement {
-    string: string;
+    string: string = "";
     // `lock` here and below is internal field used to provide atomicity
     // and to align `number` by 8 bytes
     lock: int;
@@ -264,13 +264,13 @@ final class DoubleToStringCacheElement {
 }
 
 final class FloatToStringCacheElement {
-    string: string;
+    string: string = "";
     lock: int;
     number: float;
 }
 
 final class LongToStringCacheElement {
-    string: string;
+    string: string = "";
     lock: int;
     number: long;
 }

@@ -18,9 +18,9 @@ package std.core;
 /**
  * Represents parameter of function type
  */
-export final class Parameter {
-    private td: TypeDesc
-    private name: string
+export final class Parameter extends Object {
+    private td: TypeDesc = new TypeDesc()
+    private name: string = ""
     private attributes: int
 
     private constructor () {}

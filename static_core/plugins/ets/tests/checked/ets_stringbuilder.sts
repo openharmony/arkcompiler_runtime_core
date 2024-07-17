@@ -370,7 +370,7 @@ function toString5(str: String): String {
 }
 
 class A {
-    public sb: StringBuilder;
+    public sb: StringBuilder = new StringBuilder();
 }
 
 function doSmthWithA(a: A) : void {
@@ -385,7 +385,7 @@ function toString6(str: String): String {
     return sb.toString();                       // not applied, due to dominating StoreObject-instruction (a.sb = sb)
 }
 
-let sb: StringBuilder;
+let sb: StringBuilder = new StringBuilder();
 
 function toString7(str: String): String {
     sb = new StringBuilder(str);                // the object is a global variable

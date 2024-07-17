@@ -21,7 +21,7 @@ desc: >-
 ---*/
 class A {
 {%- for t in c['values'] %}
-    fld{{loop.index}}: bigint
+    fld{{loop.index}}: bigint = 0n
 {%- endfor %}
 }
 {%- for t in c['values'] %}

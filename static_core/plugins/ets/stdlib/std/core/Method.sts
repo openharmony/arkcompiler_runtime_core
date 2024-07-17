@@ -21,9 +21,9 @@ native function TypeAPIMethodInvokeConstructor(methodDesc: string, args: Nullish
 /**
  * Represents method of class or interface
  */
-export final class Method {
-    private td: TypeDesc
-    private name: string
+export final class Method extends Object {
+    private td: TypeDesc = new TypeDesc()
+    private name: string = ""
     private attributes: int
     private accessMod: byte
 

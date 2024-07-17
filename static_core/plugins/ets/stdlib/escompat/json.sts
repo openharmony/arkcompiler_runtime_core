@@ -1252,7 +1252,7 @@ export class JSONNumber extends JSONValue {
 }
 
 export class JSONString extends JSONValue {
-    value: String
+    value: String = ""
     readonly static START_CHAR = c'"'
     readonly static END_CHAR = c'"'
 

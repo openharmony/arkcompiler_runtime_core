@@ -22,11 +22,17 @@ tags: []
 class FunctionOwner<T> {
     field: () => T;
 
+    constructor(field: () => T) {
+        this.field = field;
+    }
 }
 
 function main(): void {
     let ff = () => { return ["12", 12.0] as [String, Number] }
-    let ct = new FunctionOwner<[String, Number]>();
-    ct.field = ff;
+    let ct = new FunctionOwner<[String, Number]>(ff);
 
+    let result = ct.field();
+
+    assert result[0] == "12";
+    assert result[1] == 12.0;
 }

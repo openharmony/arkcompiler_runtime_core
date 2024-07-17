@@ -17,9 +17,9 @@ package std.core;
 
 // synchronize with mirror class in runtime
 export class StackTraceElement {
-    private className: String
-    private methodName: String
-    private sourceFileName: String
+    private className: String = ""
+    private methodName: String = ""
+    private sourceFileName: String = ""
     private lineNumber: int
 
     private constructor () {}

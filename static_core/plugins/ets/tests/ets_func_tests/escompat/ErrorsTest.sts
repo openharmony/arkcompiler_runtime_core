@@ -17,7 +17,7 @@ const success = 0;
 const fail = 1;
 
 class ErrorCause {
-    reason: String;
+    reason: String = "";
 }
 
 function main(): int {

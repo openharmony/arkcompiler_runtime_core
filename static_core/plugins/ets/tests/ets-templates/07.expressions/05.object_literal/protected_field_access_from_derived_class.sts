@@ -18,7 +18,7 @@ desc: Checking a protected field from a derived class inside a composite class
 ---*/
 
 class Person {
-  protected name: String;
+  protected name: String = "";
   age: int;
   getName(): string {
     return this.name;

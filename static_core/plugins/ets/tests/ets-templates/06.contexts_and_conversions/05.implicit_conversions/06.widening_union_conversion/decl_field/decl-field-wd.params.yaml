@@ -20,6 +20,7 @@ cases:
           - { from_type: 'long|short|byte', ref_type: 'Long', expr: '0o777', eq: '==' }
 
     - to_type: Byte|Short|Int|Long
+      init_value: 0
       decl: |-
           let vByte: Byte = new Byte(127 as byte)
           let vInt: Int = new Int(-7)
@@ -38,6 +39,7 @@ cases:
           - { from_type: 'number|double', ref_type: 'Double', expr: '1234567e8', eq: '==' }
 
     - to_type: Float|Double|Number
+      init_value: 0.0
       decl: |-
           let vFloat: Float = new Float(3.5f)
           let vDouble: Double = new Double(-1.1E-20)
@@ -58,6 +60,7 @@ cases:
           - { from_type: 'number|byte', ref_type: 'Double', expr: '1234567e8', eq: '==' }
 
     - to_type: Byte|Short|Int|Long|Float|Double
+      init_value: 0
       decl: |-
           let vByte: Byte = new Byte(127 as byte)
           let vInt: Int = new Int(-7)
@@ -75,6 +78,7 @@ cases:
           - { from_type: 'Double|Int|Long', expr: vDouble, eq: '===' }
 
     - to_type: byte|short|int|long|boolean|char|float|double|bigint|string
+      init_value: 0
       values:
           - { from_type: 'byte|boolean|char', ref_type: Byte, expr: '127 as byte', eq: '==' }
           - { from_type: 'short|char|string|double', ref_type: Short, expr: '0xCAFE as short', eq: '==' }
@@ -94,6 +98,7 @@ cases:
           let b: B = {}
           let e: Error = {}
       to_type: A|B|Error
+      init_value: new A()
       values:
           - { from_type: 'A|Error', ref_type: '(Object|null)', expr: 'e', eq: '===' }
           - { from_type: 'B|A', ref_type: '(Object|null)', expr: 'a', eq: '===' }
@@ -166,6 +171,7 @@ cases:
           const b1: B<Error> = new B<Error>()
           const b2: B<Boolean> = new B<Boolean>()
       to_type: Error|A<Long>|A<Short>|B<Error>|B<Boolean>
+      init_value: new A<Long>()
       values:
           - { from_type: 'A<Long>|B<Boolean>|B<Error>', ref_type: 'A<Long>', expr: 'a1', eq: '===' }
           - { from_type: 'B<Error>|A<Short>|B<Boolean>', ref_type: 'A<Short>', expr: 'a2', eq: '===' }

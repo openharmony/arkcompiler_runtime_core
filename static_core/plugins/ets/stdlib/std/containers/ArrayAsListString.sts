@@ -306,6 +306,6 @@ export class ArrayAsListString implements ListString {
     }
 
 */
-    private data: String[];
+    private data: String[] = [];
     private curSize: int;
 }

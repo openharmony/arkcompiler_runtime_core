@@ -20,7 +20,7 @@ desc: >-
     (see Standard Library) class BigInt methods or constructors.
 ---*/
 class A {
-    private _fld: bigint
+    private _fld: bigint = 0n
     set(p: {{c.from_type}}) {
         this._fld = new BigInt(p)
     }

@@ -19,7 +19,7 @@ tags: [compile-only]
 ---*/
 
 class Person {
-  name: String;
+  name: String = "";
   age: int;
 }
   

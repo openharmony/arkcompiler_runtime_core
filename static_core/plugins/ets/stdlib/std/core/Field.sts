@@ -19,10 +19,10 @@ package std.core;
  * Represents field of class or interface
  *
  */
-export final class Field {
-    private td: TypeDesc
-    private ownerTD: TypeDesc
-    private name: string
+export final class Field extends Object {
+    private td: TypeDesc = new TypeDesc()
+    private ownerTD: TypeDesc = new TypeDesc()
+    private name: string = ""
     private attributes: int
     private accessMod: byte
 

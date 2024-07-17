@@ -30,7 +30,7 @@ class Base {
 
 class Tuple {
     index: int;
-    name: String;
+    name: String = "";
 }
 
 class Testee extends Base {

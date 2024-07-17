@@ -18,8 +18,8 @@ desc: Checking access of a protected field inside a composite class outside the 
 ---*/
 
 class Person {
-  name: String;
-  child: Child;
+  name: String = "";
+  child: Child = {};
 
 }
 

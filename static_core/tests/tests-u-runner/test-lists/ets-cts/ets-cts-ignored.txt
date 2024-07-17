@@ -1872,6 +1872,9 @@
 15.semantic_rules/06.type_inference/01.smart_types/un1_15.sts
 15.semantic_rules/06.type_inference/01.smart_types/un1_17.sts
 
+10.interfaces/05.interface_properties/external_interface_with_property_0.sts
+10.interfaces/05.interface_properties/external_interface_with_property_1.sts
+
 # 14673,16369, 14338 Function, method, constructor overload signatures
 15.semantic_rules/04.type_compatibility/classes_compatibility_2.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_6.sts

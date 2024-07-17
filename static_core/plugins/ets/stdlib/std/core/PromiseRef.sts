@@ -19,5 +19,5 @@ package std.core;
  * Class represents a result of an asynchronous operation in the future.
  */
 final class PromiseRef {
-    target: Object
+    target: Object = new Object()
 }
