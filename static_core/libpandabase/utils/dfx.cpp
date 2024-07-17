@@ -117,6 +117,51 @@ void DfxController::Initialize(std::map<DfxOptionHandler::DfxOption, uint8_t> op
     }
 }
 
+std::map<DfxOptionHandler::DfxOption, uint8_t> SetOption()
+{
+    std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap;
+    for (auto option = DfxOptionHandler::DfxOption(0); option < DfxOptionHandler::END_FLAG;
+         option = DfxOptionHandler::DfxOption(option + 1)) {
+        switch (option) {
+#ifdef PANDA_TARGET_UNIX
+            case DfxOptionHandler::COMPILER_NULLCHECK:
+                optionMap[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
+                break;
+            case DfxOptionHandler::REFERENCE_DUMP:
+                optionMap[DfxOptionHandler::REFERENCE_DUMP] = 1;
+                break;
+            case DfxOptionHandler::SIGNAL_CATCHER:
+                optionMap[DfxOptionHandler::SIGNAL_CATCHER] = 1;
+                break;
+            case DfxOptionHandler::SIGNAL_HANDLER:
+                optionMap[DfxOptionHandler::SIGNAL_HANDLER] = 1;
+                break;
+            case DfxOptionHandler::ARK_SIGQUIT:
+                optionMap[DfxOptionHandler::ARK_SIGQUIT] = 1;
+                break;
+            case DfxOptionHandler::ARK_SIGUSR1:
+                optionMap[DfxOptionHandler::ARK_SIGUSR1] = 1;
+                break;
+            case DfxOptionHandler::ARK_SIGUSR2:
+                optionMap[DfxOptionHandler::ARK_SIGUSR2] = 1;
+                break;
+            case DfxOptionHandler::MOBILE_LOG:
+                optionMap[DfxOptionHandler::MOBILE_LOG] = 1;
+                break;
+            case DfxOptionHandler::HUNG_UPDATE:
+                optionMap[DfxOptionHandler::HUNG_UPDATE] = 0;
+                break;
+#endif
+            case DfxOptionHandler::DFXLOG:
+                optionMap[DfxOptionHandler::DFXLOG] = 0;
+                break;
+            default:
+                break;
+        }
+    }
+    return optionMap;
+}
+
 /* static */
 void DfxController::Initialize()
 {
@@ -130,47 +175,8 @@ void DfxController::Initialize()
             dfxController_->SetDefaultOption();
             return;
         }
-        std::map<DfxOptionHandler::DfxOption, uint8_t> optionMap;
-        for (auto option = DfxOptionHandler::DfxOption(0); option < DfxOptionHandler::END_FLAG;
-             option = DfxOptionHandler::DfxOption(option + 1)) {
-            switch (option) {
-#ifdef PANDA_TARGET_UNIX
-                case DfxOptionHandler::COMPILER_NULLCHECK:
-                    optionMap[DfxOptionHandler::COMPILER_NULLCHECK] = 1;
-                    break;
-                case DfxOptionHandler::REFERENCE_DUMP:
-                    optionMap[DfxOptionHandler::REFERENCE_DUMP] = 1;
-                    break;
-                case DfxOptionHandler::SIGNAL_CATCHER:
-                    optionMap[DfxOptionHandler::SIGNAL_CATCHER] = 1;
-                    break;
-                case DfxOptionHandler::SIGNAL_HANDLER:
-                    optionMap[DfxOptionHandler::SIGNAL_HANDLER] = 1;
-                    break;
-                case DfxOptionHandler::ARK_SIGQUIT:
-                    optionMap[DfxOptionHandler::ARK_SIGQUIT] = 1;
-                    break;
-                case DfxOptionHandler::ARK_SIGUSR1:
-                    optionMap[DfxOptionHandler::ARK_SIGUSR1] = 1;
-                    break;
-                case DfxOptionHandler::ARK_SIGUSR2:
-                    optionMap[DfxOptionHandler::ARK_SIGUSR2] = 1;
-                    break;
-                case DfxOptionHandler::MOBILE_LOG:
-                    optionMap[DfxOptionHandler::MOBILE_LOG] = 1;
-                    break;
-                case DfxOptionHandler::HUNG_UPDATE:
-                    optionMap[DfxOptionHandler::HUNG_UPDATE] = 0;
-                    break;
-#endif
-                case DfxOptionHandler::DFXLOG:
-                    optionMap[DfxOptionHandler::DFXLOG] = 0;
-                    break;
-                default:
-                    break;
-            }
-        }
-        dfxController_ = new DfxController(std::move(optionMap));
+
+        dfxController_ = new DfxController(SetOption());
     }
 }
 

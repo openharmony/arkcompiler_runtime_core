@@ -117,6 +117,50 @@ TEST_F(BitVectorTest, Comparison)
 }
 
 template <typename T>
+void CheckIterator(T &vector)
+{
+    auto it = vector.begin();
+    ASSERT_EQ(*it, false);
+    ++it;
+    ASSERT_EQ(*it, true);
+    auto it1 = it++;
+    ASSERT_EQ(*it, false);
+    ASSERT_EQ(*it1, true);
+    ASSERT_TRUE(it1 < it);
+    it += 3U;
+    ASSERT_EQ(*it, true);
+    it -= 5U;
+    ASSERT_EQ(*it, false);
+    ASSERT_EQ(it, vector.begin());
+
+    it = it + 6U;
+    ASSERT_EQ(*it, false);
+    ASSERT_EQ(std::distance(vector.begin(), it), 6U);
+    ASSERT_EQ(it[1U], true);
+    it = it - 3L;
+    ASSERT_EQ(*it, true);
+    ASSERT_EQ(std::distance(vector.begin(), it), 3U);
+    --it;
+    ASSERT_EQ(*it, false);
+    it1 = it--;
+    ASSERT_EQ(*it, true);
+    ASSERT_EQ(*it1, false);
+    ASSERT_TRUE(it1 > it);
+    it = vector.begin() + 100U;
+    ASSERT_EQ(std::distance(vector.begin(), it), 100U);
+    ASSERT_TRUE(it + 2U > it);
+    ASSERT_TRUE(it + 2U >= it);
+    ASSERT_TRUE(it + 0U >= it);
+    ASSERT_TRUE(it - 2L < it);
+    ASSERT_TRUE(it - 2L <= it);
+
+    auto cit = vector.cbegin();
+    ASSERT_EQ(cit, vector.begin());
+    ASSERT_EQ(++cit, ++vector.begin());
+    ASSERT_EQ(vector.cend(), vector.end());
+}
+
+template <typename T>
 void TestIteration(T &vector, size_t bits)
 {
     int index = 0;
@@ -160,53 +204,15 @@ void TestIteration(T &vector, size_t bits)
     index = 1;
     for (uint32_t i : vector.GetSetBitsIndices()) {
         ASSERT_EQ(i, index);
-        index += 2;
+        index += 2U;
     }
     index = 0;
     for (uint32_t i : vector.GetZeroBitsIndices()) {
         ASSERT_EQ(i, index);
-        index += 2;
+        index += 2U;
     }
 
-    auto it = vector.begin();
-    ASSERT_EQ(*it, false);
-    ++it;
-    ASSERT_EQ(*it, true);
-    auto it1 = it++;
-    ASSERT_EQ(*it, false);
-    ASSERT_EQ(*it1, true);
-    ASSERT_TRUE(it1 < it);
-    it += 3;
-    ASSERT_EQ(*it, true);
-    it -= 5;
-    ASSERT_EQ(*it, false);
-    ASSERT_EQ(it, vector.begin());
-
-    it = it + 6U;
-    ASSERT_EQ(*it, false);
-    ASSERT_EQ(std::distance(vector.begin(), it), 6U);
-    ASSERT_EQ(it[1U], true);
-    it = it - 3L;
-    ASSERT_EQ(*it, true);
-    ASSERT_EQ(std::distance(vector.begin(), it), 3U);
-    --it;
-    ASSERT_EQ(*it, false);
-    it1 = it--;
-    ASSERT_EQ(*it, true);
-    ASSERT_EQ(*it1, false);
-    ASSERT_TRUE(it1 > it);
-    it = vector.begin() + 100U;
-    ASSERT_EQ(std::distance(vector.begin(), it), 100U);
-    ASSERT_TRUE(it + 2U > it);
-    ASSERT_TRUE(it + 2U >= it);
-    ASSERT_TRUE(it + 0U >= it);
-    ASSERT_TRUE(it - 2L < it);
-    ASSERT_TRUE(it - 2L <= it);
-
-    auto cit = vector.cbegin();
-    ASSERT_EQ(cit, vector.begin());
-    ASSERT_EQ(++cit, ++vector.begin());
-    ASSERT_EQ(vector.cend(), vector.end());
+    CheckIterator(vector);
 }
 
 TEST_F(BitVectorTest, Iteration)

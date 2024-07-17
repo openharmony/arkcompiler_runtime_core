@@ -36,7 +36,6 @@ Token::Type FindDelim(char c)
                                                                 {']', Token::Type::DEL_SQUARE_BRACKET_R}};
 
     auto iter = DELIM.find(c);
-
     if (iter == DELIM.end()) {
         return Token::Type::ID_BAD;
     }
@@ -56,7 +55,6 @@ Token::Type FindOperation(std::string_view s)
     };
 
     auto iter = OPERATIONS.find(s);
-
     if (iter == OPERATIONS.end()) {
         return Token::Type::ID_BAD;
     }
@@ -75,7 +73,6 @@ Token::Type Findkeyword(std::string_view s)
     };
 
     auto iter = KEYWORDS.find(s);
-
     if (iter == KEYWORDS.end()) {
         return Token::Type::ID_BAD;
     }
@@ -202,13 +199,11 @@ Token::Type Lexer::LexGetType(size_t beg, size_t end) const
     std::string_view p(&*(currLine_->buffer.begin() + beg), end - beg);
 
     Token::Type type = Findkeyword(p);
-
     if (type != Token::Type::ID_BAD) {
         return type;
     }
 
     type = FindOperation(p);
-
     if (type != Token::Type::ID_BAD) {
         return type;
     }
@@ -290,7 +285,6 @@ void Lexer::LexTokens()
     }
 
     size_t boundRight;
-
     size_t boundLeft;
 
     while (!Eol()) {
@@ -303,18 +297,7 @@ void Lexer::LexTokens()
                 return;
             }
         } else {
-            while (!Eol() && FindDelim(currLine_->buffer[currLine_->pos]) == Token::Type::ID_BAD &&
-                   isspace(currLine_->buffer[currLine_->pos]) == 0) {
-                ++(currLine_->pos);
-                size_t position = currLine_->pos;
-                while (FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
-                       FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
-                    position++;
-                }
-                if (isspace(currLine_->buffer[position]) == 0 && (position != currLine_->end)) {
-                    currLine_->pos = position;
-                }
-            }
+            LexBadTokens();
         }
 
         boundRight = currLine_->pos;
@@ -333,6 +316,22 @@ void Lexer::LexTokens()
     }
 
     LOG(DEBUG, ASSEMBLER) << "all tokens identified (line " << lines_.size() << ")";
+}
+
+void Lexer::LexBadTokens()
+{
+    while (!Eol() && FindDelim(currLine_->buffer[currLine_->pos]) == Token::Type::ID_BAD &&
+           isspace(currLine_->buffer[currLine_->pos]) == 0) {
+        ++(currLine_->pos);
+        size_t position = currLine_->pos;
+        while (FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_L ||
+               FindDelim(currLine_->buffer[position]) == Token::Type::DEL_SQUARE_BRACKET_R) {
+            position++;
+        }
+        if (isspace(currLine_->buffer[position]) == 0 && (position != currLine_->end)) {
+            currLine_->pos = position;
+        }
+    }
 }
 
 /*

@@ -24,7 +24,8 @@ namespace {
 struct Context {};
 struct smth;
 
-static const auto FOO = [](Action act, [[maybe_unused]] Context &, auto &it) {
+// NOLINTNEXTLINE (cppcoreguidelines-interfaces-global-init)
+const auto FOO = [](Action act, [[maybe_unused]] Context &, auto &it) {
     switch (act) {
         case Action::START:
             if (*it != 'f') {
@@ -52,7 +53,8 @@ static const auto FOO = [](Action act, [[maybe_unused]] Context &, auto &it) {
     }
 };
 
-static const auto BAR = [](Action act, [[maybe_unused]] Context &, auto &it) {
+// NOLINTNEXTLINE (cppcoreguidelines-interfaces-global-init)
+const auto BAR = [](Action act, [[maybe_unused]] Context &, auto &it) {
     switch (act) {
         case Action::START:
             if (*it != 'b') {
@@ -91,128 +93,142 @@ using P6 = typename P5::P;
 using It = const char *;
 }  // namespace
 
-TEST(VerifierParserTest, Parser)
+// NOLINTBEGIN(fuchsia-statically-constructed-objects,readability-identifier-naming)
+const std::string aBc("aBc");
+const std::string string("string");
+const std::string d("d");
+const std::string acstring("ACstring");
+const std::string fooAcB("fooAcB");
+const auto ABCP = P::OfCharset(Charset("abcABC"));
+const auto DEFP = P1::OfCharset(Charset("defDEF"));
+const auto STRINGP = P2::OfString("string");
+const auto ENDP = P3::End();
+// NOLINTEND(fuchsia-statically-constructed-objects,readability-identifier-naming)
+
+// NOLINTBEGIN(readability-magic-numbers)
+static void VerifierParserTest1(Context &cont, It &start, It &end)
 {
-    Context cont;
-
-    static const auto ABCP = P::OfCharset(Charset {"abcABC"});
-    static const auto DEFP = P1::OfCharset(Charset {"defDEF"});
-    static const auto STRINGP = P2::OfString("string");
-    std::string aBc {"aBc"};
-    It start = &(aBc[0]);
-    It end = &(aBc[3]);
-    EXPECT_TRUE(ABCP(cont, start, end));
-    start = &(aBc[1]);
-    EXPECT_TRUE(ABCP(cont, start, end));
-    start = &(aBc[0]);
-    EXPECT_FALSE(DEFP(cont, start, end));
-    start = &(aBc[0]);
-    EXPECT_FALSE(STRINGP(cont, start, end));
-    std::string string {"string"};
-    start = &(string[0]);
-    end = &(string[6]);
-    EXPECT_FALSE(ABCP(cont, start, end));
-    start = &(string[0]);
-    EXPECT_FALSE(DEFP(cont, start, end));
-    start = &(string[0]);
-    EXPECT_TRUE(STRINGP(cont, start, end));
-    std::string d {"d"};
-    start = &(d[0]);
-    end = &(d[1]);
-    EXPECT_FALSE(ABCP(cont, start, end));
-    start = &(d[0]);
-    EXPECT_TRUE(DEFP(cont, start, end));
-    start = &(d[0]);
-    EXPECT_FALSE(STRINGP(cont, start, end));
-    start = &(string[0]);
-    end = &(string[3]);
-    EXPECT_FALSE(ABCP(cont, start, end));
-    start = &(string[0]);
-    EXPECT_FALSE(DEFP(cont, start, end));
-    start = &(string[0]);
-    EXPECT_FALSE(STRINGP(cont, start, end));
-
-    static const auto ENDP = P3::End();
-    start = &(string[0]);
-    end = &(string[0]);
+    start = &(string[0U]);
+    end = &(string[0U]);
     EXPECT_TRUE(ENDP(cont, start, end));
-    end = &(string[2]);
+    end = &(string[2U]);
     EXPECT_FALSE(ENDP(cont, start, end));
 
     static const auto ACSTRINGP = ~ABCP >> STRINGP;
-    start = &(string[0]);
-    end = &(string[6]);
+    start = &(string[0U]);
+    end = &(string[6U]);
     EXPECT_TRUE(ACSTRINGP(cont, start, end));
-    std::string acstring {"ACstring"};
-    start = &(acstring[0]);
-    end = &(acstring[8]);
+    start = &(acstring[0U]);
+    end = &(acstring[8U]);
     EXPECT_TRUE(ACSTRINGP(cont, start, end));
-    end = &(acstring[7]);
+    end = &(acstring[7U]);
     EXPECT_FALSE(ACSTRINGP(cont, start, end));
 
     static const auto FOOABCP = ABCP |= FOO;
     static const auto BARABCP = ABCP |= BAR;
-    start = &(string[0]);
-    end = &(string[6]);
+    start = &(string[0U]);
+    end = &(string[6U]);
     EXPECT_FALSE(FOOABCP(cont, start, end));
-    std::string fooAcB {"fooAcB"};
-    start = &(fooAcB[0]);
-    end = &(fooAcB[6]);
+    start = &(fooAcB[0U]);
+    end = &(fooAcB[6U]);
     EXPECT_TRUE(FOOABCP(cont, start, end));
-    start = &(fooAcB[0]);
+    start = &(fooAcB[0U]);
     EXPECT_FALSE(BARABCP(cont, start, end));
 
     static const auto ABCDEFP = ABCP | DEFP;
-    start = &(aBc[0]);
-    end = &(aBc[3]);
+    start = &(aBc[0U]);
+    end = &(aBc[3U]);
     EXPECT_TRUE(ABCDEFP(cont, start, end));
-    start = &(string[0]);
-    end = &(string[6]);
+    start = &(string[0U]);
+    end = &(string[6U]);
     EXPECT_FALSE(ABCDEFP(cont, start, end));
-    start = &(d[0]);
-    end = &(d[1]);
+    start = &(d[0U]);
+    end = &(d[1U]);
     EXPECT_TRUE(ABCDEFP(cont, start, end));
+}
 
+static void VerifierParserTest2(Context &cont, It &start, It &end)
+{
     static const auto EMPTYP = ABCP & DEFP;
-    start = &(aBc[0]);
-    end = &(aBc[3]);
+    start = &(aBc[0U]);
+    end = &(aBc[3U]);
     EXPECT_FALSE(EMPTYP(cont, start, end));
-    start = &(string[0]);
-    end = &(string[6]);
+    start = &(string[0U]);
+    end = &(string[6U]);
     EXPECT_FALSE(EMPTYP(cont, start, end));
-    start = &(d[0]);
-    end = &(d[1]);
+    start = &(d[0U]);
+    end = &(d[1U]);
     EXPECT_FALSE(EMPTYP(cont, start, end));
 
     static const auto ABC2P = ABCP << STRINGP >> STRINGP;
-    start = &(acstring[0]);
-    end = &(acstring[8]);
+    start = &(acstring[0U]);
+    end = &(acstring[8U]);
     EXPECT_TRUE(ABC2P(cont, start, end));
-    start = &(string[0]);
-    end = &(string[6]);
+    start = &(string[0U]);
+    end = &(string[6U]);
     EXPECT_FALSE(ABC2P(cont, start, end));
-    start = &(d[0]);
-    end = &(d[1]);
+    start = &(d[0U]);
+    end = &(d[1U]);
     EXPECT_FALSE(ABC2P(cont, start, end));
 
     static const auto NOABCP = !ABCP;
-    start = &(aBc[0]);
-    end = &(aBc[3]);
+    start = &(aBc[0U]);
+    end = &(aBc[3U]);
     EXPECT_FALSE(NOABCP(cont, start, end));
-    start = &(string[0]);
-    end = &(string[6]);
+    start = &(string[0U]);
+    end = &(string[6U]);
     EXPECT_TRUE(NOABCP(cont, start, end));
-    start = &(d[0]);
-    end = &(d[1]);
+    start = &(d[0U]);
+    end = &(d[1U]);
     EXPECT_TRUE(NOABCP(cont, start, end));
 
     static const auto STRINGSTRINGENDP = *STRINGP >> ENDP;
     static const auto STRINGENDP = STRINGP >> ENDP;
     std::string stringstring {"stringstring"};
-    start = &(stringstring[0]);
-    end = &(stringstring[12]);
+    start = &(stringstring[0U]);
+    end = &(stringstring[12U]);
     EXPECT_FALSE(STRINGENDP(cont, start, end));
-    start = &(stringstring[0]);
+    start = &(stringstring[0U]);
     EXPECT_TRUE(STRINGSTRINGENDP(cont, start, end));
 }
+
+TEST(VerifierParserTest, Parser)
+{
+    Context cont;
+    It start = &(aBc[0U]);
+    It end = &(aBc[3U]);
+
+    EXPECT_TRUE(ABCP(cont, start, end));
+    start = &(aBc[1U]);
+    EXPECT_TRUE(ABCP(cont, start, end));
+    start = &(aBc[0U]);
+    EXPECT_FALSE(DEFP(cont, start, end));
+    start = &(aBc[0U]);
+    EXPECT_FALSE(STRINGP(cont, start, end));
+    start = &(string[0U]);
+    end = &(string[6U]);
+    EXPECT_FALSE(ABCP(cont, start, end));
+    start = &(string[0U]);
+    EXPECT_FALSE(DEFP(cont, start, end));
+    start = &(string[0U]);
+    EXPECT_TRUE(STRINGP(cont, start, end));
+    start = &(d[0U]);
+    end = &(d[1U]);
+    EXPECT_FALSE(ABCP(cont, start, end));
+    start = &(d[0U]);
+    EXPECT_TRUE(DEFP(cont, start, end));
+    start = &(d[0U]);
+    EXPECT_FALSE(STRINGP(cont, start, end));
+    start = &(string[0U]);
+    end = &(string[3U]);
+    EXPECT_FALSE(ABCP(cont, start, end));
+    start = &(string[0U]);
+    EXPECT_FALSE(DEFP(cont, start, end));
+    start = &(string[0U]);
+    EXPECT_FALSE(STRINGP(cont, start, end));
+
+    VerifierParserTest1(cont, start, end);
+    VerifierParserTest2(cont, start, end);
+}
+// NOLINTEND(readability-magic-numbers)
 }  // namespace ark::parser::test

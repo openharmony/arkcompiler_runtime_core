@@ -189,7 +189,7 @@ def _to_str(obj: Any, indent: int = 0) -> str:
 
 def _to_path(cli_value: Optional[str]) -> Optional[str]:
     if cli_value is None:
-        return None
+        return cli_value
     return path.abspath(path.expanduser(cli_value))
 
 

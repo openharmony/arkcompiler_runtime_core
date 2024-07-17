@@ -88,9 +88,9 @@ TEST(LiteralsTest, LiteralsTestValues)
     EXPECT_TRUE(ss.str().find(".record panda.String <external>") != std::string::npos);
 }
 
-TEST(LiteralsTest, LiteralsTestDynamicValues)
+static std::string GetDynamicVeluesSource()
 {
-    auto program = ark::pandasm::Parser().Parse(R"(
+    return R"(
 .record panda.String <external>
 
 .array array {
@@ -107,7 +107,12 @@ TEST(LiteralsTest, LiteralsTestDynamicValues)
     f64 -1.12345
     panda.String "panda.String"
 }
-    )");
+)";
+}
+
+TEST(LiteralsTest, LiteralsTestDynamicValues)
+{
+    auto program = ark::pandasm::Parser().Parse(GetDynamicVeluesSource());
     ASSERT(program);
     auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);

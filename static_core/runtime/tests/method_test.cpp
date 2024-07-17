@@ -135,11 +135,7 @@ static int32_t EntryPoint(Method * /* unused */)
     return 0;
 }
 
-TEST_F(MethodTest, Invoke)
-{
-    pandasm::Parser p;
-
-    auto source = R"(
+static auto g_invokeSource = R"(
         .function i32 g() {
             ldai 0
             return
@@ -155,6 +151,12 @@ TEST_F(MethodTest, Invoke)
             return.void
         }
     )";
+
+TEST_F(MethodTest, Invoke)
+{
+    pandasm::Parser p;
+
+    auto source = g_invokeSource;
 
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
@@ -470,12 +472,7 @@ static int32_t StackTraceEntryPoint(Method * /* unused */)
 }
 
 // NOLINTEND(readability-magic-numbers)
-
-TEST_F(MethodTest, StackTrace)
-{
-    pandasm::Parser p;
-
-    auto source = R"(                           # 1
+static auto g_stackTraceSource = R"(             # 1
         .record R1 {}                           # 2
                                                 # 3
         .record R2 {                            # 4
@@ -518,7 +515,13 @@ TEST_F(MethodTest, StackTrace)
             call f1                             # 41
             return                              # 42
         }                                       # 43
-    )";
+)";
+
+TEST_F(MethodTest, StackTrace)
+{
+    pandasm::Parser p;
+
+    auto source = g_stackTraceSource;
 
     auto res = p.Parse(source);
     ASSERT_TRUE(res) << res.Error().message;

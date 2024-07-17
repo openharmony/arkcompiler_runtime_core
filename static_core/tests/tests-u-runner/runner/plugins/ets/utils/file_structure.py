@@ -26,7 +26,6 @@ from typing import List, Optional, Iterator
 
 @dataclass
 class TestDirectory:
-    # id: int
     path: Path
     name: str
 

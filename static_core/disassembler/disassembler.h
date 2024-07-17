@@ -156,6 +156,19 @@ private:
     void SerializeLitArrays(std::ostream &os, bool addSeparators = false) const;
     void SerializeRecords(std::ostream &os, bool addSeparators = false, bool printInformation = false) const;
     void SerializeMethods(std::ostream &os, bool addSeparators = false, bool printInformation = false) const;
+    void SerializePrintStartInfo(const pandasm::Function &method, std::ostringstream &headerSs) const;
+    void SerializeCheckEnd(const pandasm::Function &method, std::ostream &os, bool printMethodInfo,
+                           const MethodInfo *&methodInfo) const;
+    size_t SerializeIfPrintMethodInfo(
+        const pandasm::Function &method, bool printMethodInfo, std::ostringstream &headerSs,
+        const MethodInfo *&methodInfo,
+        std::map<std::string, ark::disasm::MethodInfo>::const_iterator &methodInfoIt) const;
+
+    void EnumerateAnnotations(panda_file::AnnotationDataAccessor &annotationAccessor, AnnotationList &annList,
+                              const std::string &type, const panda_file::File::EntityId &annotationId);
+
+    void HandleArrayAnnotation(panda_file::AnnotationDataAccessor &annotationAccessor, AnnotationList &annList,
+                               size_t i);
 
     pandasm::Type PFTypeToPandasmType(const panda_file::Type &type, panda_file::ProtoDataAccessor &pda,
                                       size_t &refIdx) const;

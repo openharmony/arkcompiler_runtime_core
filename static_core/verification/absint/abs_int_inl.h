@@ -1738,7 +1738,6 @@ public:
     bool CheckCtor(Span<int> regs)
     {
         Type type = GetCachedType();
-
         if (UNLIKELY(type.IsClass() && type.GetClass()->IsArrayClass())) {
             if (job_->IsMethodPresentForOffset(inst_.GetOffset())) {
                 // Array constructors are synthetic methods; ClassLinker does not provide them.
@@ -1853,28 +1852,7 @@ public:
             return false;
         }
 
-        if (isStatic != field->IsStatic()) {
-            SHOW_MSG(ExpectedStaticOrInstanceField)
-            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(isStatic);
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(ExpectedStaticOrInstanceField, WARNING);
-            return false;
-        }
-
-        if (isVolatile != field->IsVolatile()) {
-            // if the inst is volatile but the field is not
-            if (isVolatile) {
-                SHOW_MSG(ExpectedVolatileField)
-                LOG_VERIFIER_EXPECTED_VOLATILE_FIELD();
-                END_SHOW_MSG();
-                SET_STATUS_FOR_MSG(ExpectedVolatileField, WARNING);
-                return false;
-            }
-            // if the instruction is not volatile but the field is
-            SHOW_MSG(ExpectedInstanceField)
-            LOG_VERIFIER_EXPECTED_INSTANCE_FIELD();
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(ExpectedInstanceField, ERROR);
+        if (!CheckFieldAccessStaticVolatile(isStatic, isVolatile, field)) {
             return false;
         }
 
@@ -1917,21 +1895,7 @@ public:
             return false;
         }
 
-        auto *plugin = job_->JobPlugin();
-        auto const *jobMethod = job_->JobMethod();
-        auto result = plugin->CheckFieldAccessViolation(field, jobMethod, GetTypeSystem());
-        if (!result.IsOk()) {
-            const auto &verifOpts = config->opts;
-            if (verifOpts.debug.allow.fieldAccessViolation && result.IsError()) {
-                result.status = VerificationStatus::WARNING;
-            }
-            LogInnerMessage(result);
-            LOG_VERIFIER_DEBUG_FIELD2(GetFieldName(field));
-            status_ = result.status;
-            return status_ != VerificationStatus::ERROR;
-        }
-
-        return !result.IsError();
+        return CheckFieldAccessPlugin(field);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2305,7 +2269,6 @@ public:
         }
 
         Type vsType = GetRegType(vs);
-
         if (!IsSubtype(vsType, fieldType, GetTypeSystem())) {
             SHOW_MSG(BadAccumulatorType)
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vsType), ToString(fieldType));
@@ -2749,45 +2712,9 @@ public:
     bool CheckFieldAccessByName(int regIdx, Type expectedFieldType)
     {
         Field const *rawField = GetCachedField();
-
-        if (rawField == nullptr) {
-            SET_STATUS_FOR_MSG(CannotResolveFieldId, OK);
-            return false;
-        }
-
-        if (rawField->IsStatic()) {
-            SHOW_MSG(ExpectedStaticOrInstanceField)
-            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(false);
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(ExpectedStaticOrInstanceField, WARNING);
-            return false;
-        }
-
-        Type rawFieldType = GetFieldType();
-        if (!rawFieldType.IsConsistent()) {
-            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_TYPE(GetFieldName(rawField));
-            return false;
-        }
-
-        if (!IsRegDefined(regIdx)) {
-            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
-            return false;
-        }
-        Type objType = GetRegType(regIdx);
-        if (objType == nullRefType_) {
-            // NOTE(vdyadov): redesign next code, after support exception handlers,
-            //                treat it as always throw NPE
-            SHOW_MSG(AlwaysNpe)
-            LOG_VERIFIER_ALWAYS_NPE(regIdx);
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(AlwaysNpe, OK);
-            return false;
-        }
-
-        if (!objType.IsClass()) {
-            SHOW_MSG(BadRegisterType)
-            LOG_VERIFIER_BAD_REGISTER_CLASS_TYPE(RegisterName(regIdx, true), ToString(objType));
-            END_SHOW_MSG();
+        Type objType;
+        Type fieldType;
+        if (!CheckFieldAccessByNameStartCheck(regIdx, rawField, objType)) {
             return false;
         }
 
@@ -2806,40 +2733,10 @@ public:
 
         auto objClass = objType.GetClass();
         auto field = objClass->LookupFieldByName(rawField->GetName());
-        Type fieldType;
         if (field != nullptr) {
             fieldType = Type::FromTypeId(field->GetTypeId());
         } else {
-            Method *method = nullptr;
-            if constexpr (IS_LOAD) {
-                switch (expectedFieldType.GetTypeWidth()) {
-                    case coretypes::INT32_BITS:
-                        method = objClass->LookupGetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
-                        break;
-                    case coretypes::INT64_BITS:
-                        method = objClass->LookupGetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
-                        break;
-                    case 0:
-                        method = objClass->LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
-                        break;
-                    default:
-                        UNREACHABLE();
-                }
-            } else {
-                switch (expectedFieldType.GetTypeWidth()) {
-                    case coretypes::INT32_BITS:
-                        method = objClass->LookupSetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
-                        break;
-                    case coretypes::INT64_BITS:
-                        method = objClass->LookupSetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
-                        break;
-                    case 0:
-                        method = objClass->LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
-                        break;
-                    default:
-                        UNREACHABLE();
-                }
-            }
+            Method *method = CheckFieldAccessByNameGetFieldType<IS_LOAD>(expectedFieldType, objClass, rawField);
             if (method == nullptr) {
                 SHOW_MSG(BadFieldNameOrBitWidth)
                 LOG_VERIFIER_BAD_FIELD_NAME_OR_BIT_WIDTH(GetFieldName(field), ToString(obj_type),
@@ -2872,8 +2769,7 @@ public:
             }
             LogInnerMessage(result);
             LOG_VERIFIER_DEBUG_FIELD2(GetFieldName(field));
-            status_ = result.status;
-            return status_ != VerificationStatus::ERROR;
+            return (status_ = result.status) != VerificationStatus::ERROR;
         }
 
         return !result.IsError();
@@ -2995,7 +2891,6 @@ public:
         }
 
         Type vsType = GetRegType(ACC);
-
         if (!IsSubtype(vsType, fieldType, GetTypeSystem())) {
             SHOW_MSG(BadAccumulatorType)
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE(ToString(vsType), ToString(fieldType));
@@ -3150,7 +3045,6 @@ public:
         }
 
         auto accType = GetAccType();
-
         if (!CheckType(accType, ReturnType())) {
             LOG_VERIFIER_BAD_ACCUMULATOR_RETURN_VALUE_TYPE_WITH_SUBTYPE(ToString(accType), ToString(ReturnType()));
             // NOTE(vdyadov) : after solving issues with set of types in LUB, uncomment next line
@@ -3183,26 +3077,12 @@ public:
         DBGBRK();
         Sync();
         Type cachedType = GetCachedType();
-        if (!cachedType.IsConsistent()) {
-            return false;
-        }
-        LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
-        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
-            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
-            LOG_VERIFIER_CHECK_CAST_TO_NON_OBJECT_TYPE(ToString(cachedType));
-            SET_STATUS_FOR_MSG(CheckCastToNonObjectType, WARNING);
-            return false;
-        }
-        if (!IsRegDefined(ACC)) {
-            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+        if (!CheckCastArrayObjectRegDef(cachedType)) {
             return false;
         }
         auto accType = GetAccType();
         // NOTE(vdyadov): remove this check after #2365
-        auto res = !IsSubtype(accType, refType_, GetTypeSystem()) && !IsSubtype(accType, arrayType_, GetTypeSystem());
-        if (res) {
-            LOG_VERIFIER_NON_OBJECT_ACCUMULATOR_TYPE();
-            SET_STATUS_FOR_MSG(NonObjectAccumulatorType, WARNING);
+        if (!CheckCastRefArrayType(accType)) {
             return false;
         }
 
@@ -3225,8 +3105,7 @@ public:
 
         if (IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
             auto eltType = cachedType.GetArrayElementType(GetTypeSystem());
-            res = !IsSubtype(accType, arrayType_, GetTypeSystem()) && !IsSubtype(cachedType, accType, GetTypeSystem());
-            if (res) {
+            if (!IsSubtype(accType, arrayType_, GetTypeSystem()) && !IsSubtype(cachedType, accType, GetTypeSystem())) {
                 LOG_VERIFIER_IMPOSSIBLE_CHECK_CAST(ToString(accType));
                 status_ = VerificationStatus::WARNING;
             } else if (IsSubtype(accType, arrayType_, GetTypeSystem())) {
@@ -3260,41 +3139,20 @@ public:
         DBGBRK();
         Sync();
         Type cachedType = GetCachedType();
-        if (!cachedType.IsConsistent()) {
-            return false;
-        }
-        LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
-        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
-            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
-            // !(type <= Types().ArrayType()) is redundant, because all arrays
-            // are subtypes of either panda.Object <: ObjectType or java.lang.Object <: ObjectType
-            // depending on selected language context
-            LOG_VERIFIER_BAD_IS_INSTANCE_INSTRUCTION(ToString(cachedType));
-            SET_STATUS_FOR_MSG(BadIsInstanceInstruction, WARNING);
-            return false;
-        }
-        if (!IsRegDefined(ACC)) {
-            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+        if (!CheckInstanceConsistentArrayObjectRegDef(cachedType)) {
             return false;
         }
 
         auto *plugin = job_->JobPlugin();
         auto const *jobMethod = job_->JobMethod();
-        auto result = CheckResult::ok;
-        if (cachedType.IsClass()) {
-            result = plugin->CheckClassAccessViolation(cachedType.GetClass(), jobMethod, GetTypeSystem());
-        }
-        if (!result.IsOk()) {
-            LogInnerMessage(CheckResult::protected_class);
-            LOG_VERIFIER_DEBUG_CALL_FROM_TO(job_->JobMethod()->GetClass()->GetName(), ToString(cachedType));
-            status_ = VerificationStatus::ERROR;
+
+        if (!CheckInstanceClass(cachedType, plugin, jobMethod)) {
             return false;
         }
 
         auto accType = GetAccType();
         // NOTE(vdyadov): remove this check after #2365
-        auto res = !IsSubtype(accType, refType_, GetTypeSystem()) && !IsSubtype(accType, arrayType_, GetTypeSystem());
-        if (res) {
+        if (!IsSubtype(accType, refType_, GetTypeSystem()) && !IsSubtype(accType, arrayType_, GetTypeSystem())) {
             LOG_VERIFIER_NON_OBJECT_ACCUMULATOR_TYPE();
             status_ = VerificationStatus::ERROR;
             return false;
@@ -3310,8 +3168,7 @@ public:
             auto eltType = cachedType.GetArrayElementType(GetTypeSystem());
             auto accEltType = accType.GetArrayElementType(GetTypeSystem());
             bool accEltTypeIsEmpty = accEltType.IsConsistent();
-            res = !IsSubtype(accEltType, eltType, GetTypeSystem()) && !IsSubtype(eltType, accEltType, GetTypeSystem());
-            if (res) {
+            if (!IsSubtype(accEltType, eltType, GetTypeSystem()) && !IsSubtype(eltType, accEltType, GetTypeSystem())) {
                 if (accEltTypeIsEmpty) {
                     LOG_VERIFIER_IMPOSSIBLE_IS_INSTANCE(ToString(accType));
                     SET_STATUS_FOR_MSG(ImpossibleIsInstance, OK);
@@ -3333,150 +3190,57 @@ public:
     template <typename NameGetter>
     bool CheckMethodArgs(NameGetter nameGetter, Method const *method, Span<int> regs, Type constructedType = Type {})
     {
-        bool checkingConstructor = !constructedType.IsNone();
-        auto const *sig = GetTypeSystem()->GetMethodSignature(method);
-        auto const &formalArgs = sig->args;
-        bool result = true;
+        auto const &formalArgs = GetTypeSystem()->GetMethodSignature(method)->args;
         if (formalArgs.empty()) {
             return true;
         }
 
-        size_t regsNeeded = checkingConstructor ? formalArgs.size() - 1 : formalArgs.size();
+        size_t regsNeeded = !constructedType.IsNone() ? formalArgs.size() - 1 : formalArgs.size();
         if (regs.size() < regsNeeded) {
-            SHOW_MSG(BadCallTooFewParameters)
-            LOG_VERIFIER_BAD_CALL_TOO_FEW_PARAMETERS(nameGetter());
-            END_SHOW_MSG();
-            SET_STATUS_FOR_MSG(BadCallTooFewParameters, WARNING);
-            return false;
+            return CheckMethodArgsTooFewParmeters<NameGetter>(nameGetter);
         }
         auto sigIter = formalArgs.cbegin();
         auto regsIter = regs.cbegin();
         for (size_t argnum = 0; argnum < formalArgs.size(); argnum++) {
-            auto regNum = (checkingConstructor && sigIter == formalArgs.cbegin()) ? INVALID_REG : *(regsIter++);
+            auto regNum = (!constructedType.IsNone() && sigIter == formalArgs.cbegin()) ? INVALID_REG : *(regsIter++);
             auto formalType = *(sigIter++);
-            auto const normType = GetTypeSystem()->NormalizedTypeOf(formalType);
 
             if (regNum != INVALID_REG && !IsRegDefined(regNum)) {
                 LOG_VERIFIER_BAD_CALL_UNDEFINED_REGISTER(nameGetter(), regNum);
                 SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
-                result = false;
-                break;
+                return false;
             }
             Type actualType = regNum == INVALID_REG ? constructedType : GetRegType(regNum);
-            Type normActualType = GetTypeSystem()->NormalizedTypeOf(actualType);
             // arg: NormalizedTypeOf(actual_type) <= norm_type
             // check of physical compatibility
             bool incompatibleTypes = false;
-            auto actualIsRef = IsSubtype(actualType, refType_, GetTypeSystem());
-            if (regNum != INVALID_REG && IsSubtype(formalType, refType_, GetTypeSystem()) &&
-                formalType != Type::Bot() && actualIsRef) {
-                if (IsSubtype(actualType, formalType, GetTypeSystem())) {
-                    continue;
-                }
-                if (!config->opts.debug.allow.wrongSubclassingInMethodArgs) {
-                    incompatibleTypes = true;
-                }
-            } else if (formalType != Type::Bot() && formalType != Type::Top() &&
-                       !IsSubtype(normActualType, normType, GetTypeSystem())) {
-                incompatibleTypes = true;
+            if (CheckMethodArgsNotFit(formalType, actualType, regNum, incompatibleTypes)) {
+                continue;
             }
             if (incompatibleTypes) {
-                PandaString regOrParam = regNum == INVALID_REG ? "Actual parameter" : RegisterName(regNum, true);
-                SHOW_MSG(BadCallIncompatibleParameter)
-                LOG_VERIFIER_BAD_CALL_INCOMPATIBLE_PARAMETER(nameGetter(), regOrParam, ToString(normActualType),
-                                                             ToString(normType));
-                END_SHOW_MSG();
-                SET_STATUS_FOR_MSG(BadCallIncompatibleParameter, WARNING);
-                return result = false;
+                return CheckMethodArgsIncompatibleTypes<NameGetter>(nameGetter, regNum, actualType, formalType);
             }
             if (formalType == Type::Bot()) {
-                if (actualType == Type::Bot()) {
-                    LOG_VERIFIER_CALL_FORMAL_ACTUAL_BOTH_BOT_OR_TOP("Bot");
-                    break;
-                }
-
-                SHOW_MSG(BadCallFormalIsBot)
-                LOG_VERIFIER_BAD_CALL_FORMAL_IS_BOT(nameGetter(), ToString(actualType));
-                END_SHOW_MSG();
-                SET_STATUS_FOR_MSG(BadCallFormalIsBot, WARNING);
-                return result = false;
+                return CheckMethodArgsBot<NameGetter>(nameGetter, actualType);
             }
             if (formalType == Type::Top()) {
-                if (actualType == Type::Top()) {
-                    LOG_VERIFIER_CALL_FORMAL_ACTUAL_BOTH_BOT_OR_TOP("Top");
-                    break;
-                }
-                SHOW_MSG(CallFormalTop)
-                LOG_VERIFIER_CALL_FORMAL_TOP();
-                END_SHOW_MSG();
-                break;
+                return CheckMethodArgsTop(actualType);
             }
             if (IsSubtype(formalType, primitive_, GetTypeSystem())) {
-                // check implicit conversion of primitive types
-                TypeId formalId = formalType.ToTypeId();
-                CheckResult checkResult = CheckResult::ok;
-
-                if (!IsSubtype(actualType, primitive_, GetTypeSystem())) {
-                    result = false;
-                    break;
-                }
-                // !!!!!! NOTE: need to check all possible TypeId-s against formal_id
-                TypeId actualId = actualType.ToTypeId();
-                if (actualId != TypeId::INVALID) {
-                    checkResult = ark::verifier::CheckMethodArgs(formalId, actualId);
-                } else {
-                    // special case, where type after contexts LUB operation is inexact one, like
-                    // integral32_Type()
-                    if ((IsSubtype(formalType, integral32_, GetTypeSystem()) &&
-                         IsSubtype(actualType, integral32_, GetTypeSystem())) ||
-                        (IsSubtype(formalType, integral64_, GetTypeSystem()) &&
-                         IsSubtype(actualType, integral64_, GetTypeSystem())) ||
-                        (IsSubtype(formalType, float64_, GetTypeSystem()) &&
-                         IsSubtype(actualType, float64_, GetTypeSystem()))) {
-                        SHOW_MSG(CallFormalActualDifferent)
-                        LOG_VERIFIER_CALL_FORMAL_ACTUAL_DIFFERENT(ToString(formalType), ToString(actualType));
-                        END_SHOW_MSG();
-                    } else {
-                        checkResult = ark::verifier::CheckMethodArgs(formalId, actualId);
-                    }
-                }
-                if (!checkResult.IsOk()) {
-                    SHOW_MSG(DebugCallParameterTypes)
-                    LogInnerMessage(checkResult);
-                    LOG_VERIFIER_DEBUG_CALL_PARAMETER_TYPES(
-                        nameGetter(),
-                        (regNum == INVALID_REG ? ""
-                                               : PandaString {"Actual parameter in "} + RegisterName(regNum) + ". "),
-                        ToString(actualType), ToString(formalType));
-                    END_SHOW_MSG();
-                    status_ = checkResult.status;
-                    if (status_ == VerificationStatus::ERROR) {
-                        result = false;
-                        break;
-                    }
+                if (!CheckMethodArgsSubtypePrimitive(nameGetter, formalType, actualType, regNum)) {
+                    return false;
                 }
                 continue;
             }
             if (!CheckType(actualType, formalType)) {
-                if (regNum == INVALID_REG) {
-                    SHOW_MSG(BadCallWrongParameter)
-                    LOG_VERIFIER_BAD_CALL_WRONG_PARAMETER(nameGetter(), ToString(actualType), ToString(formalType));
-                    END_SHOW_MSG();
-                    SET_STATUS_FOR_MSG(BadCallWrongParameter, WARNING);
-                } else {
-                    SHOW_MSG(BadCallWrongRegister)
-                    LOG_VERIFIER_BAD_CALL_WRONG_REGISTER(nameGetter(), regNum);
-                    END_SHOW_MSG();
-                    SET_STATUS_FOR_MSG(BadCallWrongRegister, WARNING);
-                }
+                CheckMethodArgsCheckType<NameGetter>(nameGetter, actualType, formalType, regNum);
                 if (!config->opts.debug.allow.wrongSubclassingInMethodArgs) {
                     status_ = VerificationStatus::ERROR;
-                    result = false;
-                    break;
+                    return false;
                 }
             }
         }
-        return result;
+        return true;
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -3968,7 +3732,6 @@ private:
             return false;
         }
         Type regType = GetRegType(v1);
-
         if (regType == nullRefType_) {
             // NOTE(vdyadov): redesign next code, after support exception handlers,
             //                treat it as always throw NPE
@@ -3981,7 +3744,6 @@ private:
         }
 
         auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
-
         if (!IsSubtype(arrEltType, expectedEltType, GetTypeSystem())) {
             SHOW_MSG(BadArrayElementType2)
             LOG_VERIFIER_BAD_ARRAY_ELEMENT_TYPE2(ToString(arrEltType), ToString(expectedEltType));
@@ -4018,7 +3780,6 @@ private:
             return false;
         }
         Type regType = GetRegType(v1);
-
         if (regType == nullRefType_) {
             SHOW_MSG(AlwaysNpe)
             LOG_VERIFIER_ALWAYS_NPE(v1);
@@ -4031,12 +3792,7 @@ private:
         auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
 
         auto find = [&expectedEltTypes](auto type) {
-            for (Type t : expectedEltTypes) {
-                if (type == t) {
-                    return true;
-                }
-            }
-            return false;
+            return std::find(expectedEltTypes.begin(), expectedEltTypes.end(), type) != expectedEltTypes.end();
         };
 
         if (!find(arrEltType)) {
@@ -4051,7 +3807,6 @@ private:
         }
 
         Type accType = GetAccType();
-
         if (!IsSubtype(accType, accSupertype, GetTypeSystem())) {
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE2(ToString(accType));
             SET_STATUS_FOR_MSG(BadArrayElementType, WARNING);
@@ -4061,9 +3816,7 @@ private:
         if (!find(accType)) {
             // array elt type is not expected one
             PandaVector<Type> expectedTypesVec;
-            for (auto et : expectedEltTypes) {
-                expectedTypesVec.push_back(et);
-            }
+            expectedTypesVec.insert(expectedTypesVec.end(), expectedEltTypes.begin(), expectedEltTypes.end());
             LOG_VERIFIER_BAD_ACCUMULATOR_TYPE3(ToString(accType), ToString(expectedTypesVec));
             if (status_ != VerificationStatus::ERROR) {
                 status_ = VerificationStatus::WARNING;
@@ -4405,6 +4158,342 @@ private:
             klass = klass->GetComponentType();
         }
         return res;
+    }
+
+    bool CheckFieldAccessStaticVolatile(bool isStatic, bool isVolatile, Field const *&field)
+    {
+        if (isStatic != field->IsStatic()) {
+            SHOW_MSG(ExpectedStaticOrInstanceField)
+            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(isStatic);
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(ExpectedStaticOrInstanceField, WARNING);
+            return false;
+        }
+
+        if (isVolatile != field->IsVolatile()) {
+            // if the inst is volatile but the field is not
+            if (isVolatile) {
+                SHOW_MSG(ExpectedVolatileField)
+                LOG_VERIFIER_EXPECTED_VOLATILE_FIELD();
+                END_SHOW_MSG();
+                SET_STATUS_FOR_MSG(ExpectedVolatileField, WARNING);
+                return false;
+            }
+            // if the instruction is not volatile but the field is
+            SHOW_MSG(ExpectedInstanceField)
+            LOG_VERIFIER_EXPECTED_INSTANCE_FIELD();
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(ExpectedInstanceField, ERROR);
+            return false;
+        }
+
+        return true;
+    }
+
+    bool CheckFieldAccessPlugin(Field const *&field)
+    {
+        auto *plugin = job_->JobPlugin();
+        auto const *jobMethod = job_->JobMethod();
+        auto result = plugin->CheckFieldAccessViolation(field, jobMethod, GetTypeSystem());
+        if (!result.IsOk()) {
+            const auto &verifOpts = config->opts;
+            if (verifOpts.debug.allow.fieldAccessViolation && result.IsError()) {
+                result.status = VerificationStatus::WARNING;
+            }
+            LogInnerMessage(result);
+            LOG_VERIFIER_DEBUG_FIELD2(GetFieldName(field));
+            status_ = result.status;
+            return status_ != VerificationStatus::ERROR;
+        }
+
+        return !result.IsError();
+    }
+
+    bool CheckFieldAccessByNameStartCheck(int regIdx, Field const *&rawField, Type &objType)
+    {
+        if (rawField == nullptr) {
+            SET_STATUS_FOR_MSG(CannotResolveFieldId, OK);
+            return false;
+        }
+
+        if (rawField->IsStatic()) {
+            SHOW_MSG(ExpectedStaticOrInstanceField)
+            LOG_VERIFIER_EXPECTED_STATIC_OR_INSTANCE_FIELD(false);
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(ExpectedStaticOrInstanceField, WARNING);
+            return false;
+        }
+
+        if (!GetFieldType().IsConsistent()) {
+            LOG_VERIFIER_CANNOT_RESOLVE_FIELD_TYPE(GetFieldName(rawField));
+            return false;
+        }
+
+        if (!IsRegDefined(regIdx)) {
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+        objType = GetRegType(regIdx);
+        if (objType == nullRefType_) {
+            // NOTE(vdyadov): redesign next code, after support exception handlers,
+            //                treat it as always throw NPE
+            SHOW_MSG(AlwaysNpe)
+            LOG_VERIFIER_ALWAYS_NPE(regIdx);
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(AlwaysNpe, OK);
+            return false;
+        }
+
+        if (!objType.IsClass()) {
+            SHOW_MSG(BadRegisterType)
+            LOG_VERIFIER_BAD_REGISTER_CLASS_TYPE(RegisterName(regIdx, true), ToString(objType));
+            END_SHOW_MSG();
+            return false;
+        }
+
+        return true;
+    }
+
+    template <bool IS_LOAD>
+    Method *CheckFieldAccessByNameGetFieldType(Type &expectedFieldType, Class const *&objClass, Field const *&rawField)
+    {
+        Method *method = nullptr;
+        if constexpr (IS_LOAD) {
+            switch (expectedFieldType.GetTypeWidth()) {
+                case coretypes::INT32_BITS:
+                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
+                    break;
+                case coretypes::INT64_BITS:
+                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
+                    break;
+                case 0:
+                    method = objClass->LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+        } else {
+            switch (expectedFieldType.GetTypeWidth()) {
+                case coretypes::INT32_BITS:
+                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::I32>(rawField->GetName());
+                    break;
+                case coretypes::INT64_BITS:
+                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::I64>(rawField->GetName());
+                    break;
+                case 0:
+                    method = objClass->LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(rawField->GetName());
+                    break;
+                default:
+                    UNREACHABLE();
+            }
+        }
+        return method;
+    }
+
+    bool CheckCastArrayObjectRegDef(Type &cachedType)
+    {
+        if (!cachedType.IsConsistent()) {
+            return false;
+        }
+        LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
+        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
+            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+            LOG_VERIFIER_CHECK_CAST_TO_NON_OBJECT_TYPE(ToString(cachedType));
+            SET_STATUS_FOR_MSG(CheckCastToNonObjectType, WARNING);
+            return false;
+        }
+        if (!IsRegDefined(ACC)) {
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        return true;
+    }
+
+    bool CheckCastRefArrayType(Type &accType)
+    {
+        if (!IsSubtype(accType, refType_, GetTypeSystem()) && !IsSubtype(accType, arrayType_, GetTypeSystem())) {
+            LOG_VERIFIER_NON_OBJECT_ACCUMULATOR_TYPE();
+            SET_STATUS_FOR_MSG(NonObjectAccumulatorType, WARNING);
+            return false;
+        }
+
+        return true;
+    }
+
+    bool CheckInstanceConsistentArrayObjectRegDef(Type &cachedType)
+    {
+        if (!cachedType.IsConsistent()) {
+            return false;
+        }
+        LOG_VERIFIER_DEBUG_TYPE(ToString(cachedType));
+        if (!IsSubtype(cachedType, objectType_, GetTypeSystem()) &&
+            !IsSubtype(cachedType, arrayType_, GetTypeSystem())) {
+            // !(type <= Types().ArrayType()) is redundant, because all arrays
+            // are subtypes of either panda.Object <: ObjectType or java.lang.Object <: ObjectType
+            // depending on selected language context
+            LOG_VERIFIER_BAD_IS_INSTANCE_INSTRUCTION(ToString(cachedType));
+            SET_STATUS_FOR_MSG(BadIsInstanceInstruction, WARNING);
+            return false;
+        }
+        if (!IsRegDefined(ACC)) {
+            SET_STATUS_FOR_MSG(UndefinedRegister, WARNING);
+            return false;
+        }
+
+        return true;
+    }
+
+    bool CheckInstanceClass(Type &cachedType, const plugin::Plugin *&plugin, Method const *&jobMethod)
+    {
+        auto result = CheckResult::ok;
+        if (cachedType.IsClass()) {
+            result = plugin->CheckClassAccessViolation(cachedType.GetClass(), jobMethod, GetTypeSystem());
+        }
+        if (!result.IsOk()) {
+            LogInnerMessage(CheckResult::protected_class);
+            LOG_VERIFIER_DEBUG_CALL_FROM_TO(job_->JobMethod()->GetClass()->GetName(), ToString(cachedType));
+            status_ = VerificationStatus::ERROR;
+            return false;
+        }
+
+        return true;
+    }
+
+    template <typename NameGetter>
+    bool CheckMethodArgsSubtypePrimitive(NameGetter &nameGetter, Type &formalType, Type &actualType, int regNum)
+    {
+        // check implicit conversion of primitive types
+        TypeId formalId = formalType.ToTypeId();
+        CheckResult checkResult = CheckResult::ok;
+
+        if (!IsSubtype(actualType, primitive_, GetTypeSystem())) {
+            return false;
+        }
+        // !!!!!! NOTE: need to check all possible TypeId-s against formal_id
+        TypeId actualId = actualType.ToTypeId();
+        if (actualId != TypeId::INVALID) {
+            checkResult = ark::verifier::CheckMethodArgs(formalId, actualId);
+        } else {
+            // special case, where type after contexts LUB operation is inexact one, like
+            // integral32_Type()
+            if ((IsSubtype(formalType, integral32_, GetTypeSystem()) &&
+                 IsSubtype(actualType, integral32_, GetTypeSystem())) ||
+                (IsSubtype(formalType, integral64_, GetTypeSystem()) &&
+                 IsSubtype(actualType, integral64_, GetTypeSystem())) ||
+                (IsSubtype(formalType, float64_, GetTypeSystem()) &&
+                 IsSubtype(actualType, float64_, GetTypeSystem()))) {
+                SHOW_MSG(CallFormalActualDifferent)
+                LOG_VERIFIER_CALL_FORMAL_ACTUAL_DIFFERENT(ToString(formalType), ToString(actualType));
+                END_SHOW_MSG();
+            } else {
+                checkResult = ark::verifier::CheckMethodArgs(formalId, actualId);
+            }
+        }
+        if (!checkResult.IsOk()) {
+            SHOW_MSG(DebugCallParameterTypes)
+            LogInnerMessage(checkResult);
+            LOG_VERIFIER_DEBUG_CALL_PARAMETER_TYPES(
+                nameGetter(),
+                (regNum == INVALID_REG ? "" : PandaString {"Actual parameter in "} + RegisterName(regNum) + ". "),
+                ToString(actualType), ToString(formalType));
+            END_SHOW_MSG();
+            status_ = checkResult.status;
+            if (status_ == VerificationStatus::ERROR) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    template <typename NameGetter>
+    bool CheckMethodArgsIncompatibleTypes(NameGetter &nameGetter, int regNum, Type &actualType, Type &formalType)
+    {
+        auto const normType = GetTypeSystem()->NormalizedTypeOf(formalType);
+        Type normActualType = GetTypeSystem()->NormalizedTypeOf(actualType);
+
+        PandaString regOrParam = regNum == INVALID_REG ? "Actual parameter" : RegisterName(regNum, true);
+        SHOW_MSG(BadCallIncompatibleParameter)
+        LOG_VERIFIER_BAD_CALL_INCOMPATIBLE_PARAMETER(nameGetter(), regOrParam, ToString(normActualType),
+                                                     ToString(normType));
+        END_SHOW_MSG();
+        SET_STATUS_FOR_MSG(BadCallIncompatibleParameter, WARNING);
+        return false;
+    }
+
+    template <typename NameGetter>
+    bool CheckMethodArgsBot(NameGetter &nameGetter, Type &actualType)
+    {
+        if (actualType == Type::Bot()) {
+            LOG_VERIFIER_CALL_FORMAL_ACTUAL_BOTH_BOT_OR_TOP("Bot");
+            return true;
+        }
+
+        SHOW_MSG(BadCallFormalIsBot)
+        LOG_VERIFIER_BAD_CALL_FORMAL_IS_BOT(nameGetter(), ToString(actualType));
+        END_SHOW_MSG();
+        SET_STATUS_FOR_MSG(BadCallFormalIsBot, WARNING);
+        return false;
+    }
+
+    bool CheckMethodArgsTop(Type &actualType)
+    {
+        if (actualType == Type::Top()) {
+            LOG_VERIFIER_CALL_FORMAL_ACTUAL_BOTH_BOT_OR_TOP("Top");
+            return true;
+        }
+        SHOW_MSG(CallFormalTop)
+        LOG_VERIFIER_CALL_FORMAL_TOP();
+        END_SHOW_MSG();
+        return true;
+    }
+
+    template <typename NameGetter>
+    void CheckMethodArgsCheckType(NameGetter &nameGetter, Type &actualType, Type &formalType, int regNum)
+    {
+        if (regNum == INVALID_REG) {
+            SHOW_MSG(BadCallWrongParameter)
+            LOG_VERIFIER_BAD_CALL_WRONG_PARAMETER(nameGetter(), ToString(actualType), ToString(formalType));
+            END_SHOW_MSG();
+            SET_STATUS_FOR_MSG(BadCallWrongParameter, WARNING);
+            return;
+        }
+        SHOW_MSG(BadCallWrongRegister)
+        LOG_VERIFIER_BAD_CALL_WRONG_REGISTER(nameGetter(), regNum);
+        END_SHOW_MSG();
+        SET_STATUS_FOR_MSG(BadCallWrongRegister, WARNING);
+    }
+
+    template <typename NameGetter>
+    bool CheckMethodArgsTooFewParmeters(NameGetter &nameGetter)
+    {
+        SHOW_MSG(BadCallTooFewParameters)
+        LOG_VERIFIER_BAD_CALL_TOO_FEW_PARAMETERS(nameGetter());
+        END_SHOW_MSG();
+        SET_STATUS_FOR_MSG(BadCallTooFewParameters, WARNING);
+        return false;
+    }
+
+    bool CheckMethodArgsNotFit(Type &formalType, Type &actualType, int regNum, bool &incompatibleTypes)
+    {
+        auto const normType = GetTypeSystem()->NormalizedTypeOf(formalType);
+        Type normActualType = GetTypeSystem()->NormalizedTypeOf(actualType);
+
+        if (regNum != INVALID_REG && IsSubtype(formalType, refType_, GetTypeSystem()) && formalType != Type::Bot() &&
+            IsSubtype(actualType, refType_, GetTypeSystem())) {
+            if (IsSubtype(actualType, formalType, GetTypeSystem())) {
+                return true;
+            }
+            if (!config->opts.debug.allow.wrongSubclassingInMethodArgs) {
+                incompatibleTypes = true;
+            }
+        } else if (formalType != Type::Bot() && formalType != Type::Top() &&
+                   !IsSubtype(normActualType, normType, GetTypeSystem())) {
+            incompatibleTypes = true;
+        }
+
+        return false;
     }
 
 private:

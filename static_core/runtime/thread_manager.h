@@ -171,18 +171,19 @@ public:
             int64_t lastTime = start;
             cb(self, os);
             for (const auto &thread : threads_) {
-                if (thread != self) {
-                    cb(thread, os);
-                    end = ark::os::time::GetClockTimeInThreadCpuTime();
-                    if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
-                        LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
-                                            << "timeout : " << (end - lastTime);
-                    }
-                    lastTime = end;
-                    if ((end - start) > K_MAX_DUMP_TIME_NS) {
-                        LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump timeout : " << end - start << "\n";
-                        break;
-                    }
+                if (thread == self) {
+                    continue;
+                }
+                cb(thread, os);
+                end = ark::os::time::GetClockTimeInThreadCpuTime();
+                if ((end - lastTime) > K_MAX_SINGLE_DUMP_TIME_NS) {
+                    LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump thread : " << thread->GetId()
+                                        << "timeout : " << (end - lastTime);
+                }
+                lastTime = end;
+                if ((end - start) > K_MAX_DUMP_TIME_NS) {
+                    LOG(ERROR, RUNTIME) << "signal catcher: thread_list_dump timeout : " << end - start << "\n";
+                    break;
                 }
             }
         }

@@ -21,6 +21,7 @@
 import json
 import io
 import contextlib
+from unittest import TestCase
 from statistics import mean
 
 from vmb.result import RunReport, TestResult, RunResult
@@ -251,23 +252,25 @@ REPORT2 = '''
 def test_load_report():
     obj = json.loads(REPORT)
     rep = RunReport.from_obj(**obj)
-    assert 2 == len(rep.tests)
-    assert 6 == len(rep.tests[0].execution_forks[0].iterations)
+    test = TestCase()
+    test.assertTrue(2 == len(rep.tests))
+    test.assertTrue(6 == len(rep.tests[0].execution_forks[0].iterations))
 
 
 def test_vmb_report():
     f = io.StringIO()
     lines = []
+    test = TestCase()
     with contextlib.redirect_stdout(f):
         vmb_rep = VMBReport.parse(REPORT)
         vmb_rep.text_report(full=True)
         lines = [line.strip() for line in
                  f.getvalue().split("\n") if line]
-    assert 'Test_One_Blah | 9.48e+04 | 9.74e+04 | 8.93e+04 | Passed  |' \
-        in lines
-    assert '2 tests; 0 failed; 0 excluded; ' \
+    test.assertTrue('Test_One_Blah | 9.48e+04 | 9.74e+04 | 8.93e+04 | Passed  |' \
+        in lines)
+    test.assertTrue('2 tests; 0 failed; 0 excluded; ' \
            'Time(GM): 94783.8 Size(GM): 97384.0 ' \
-           'RSS(GM): 89336.0' in lines
+           'RSS(GM): 89336.0' in lines)
 
 
 def test_vmb_compare():
@@ -279,9 +282,9 @@ def test_vmb_compare():
         cmp.print(full=True)
         lines = [line.strip() for line in
                  f.getvalue().split("\n") if line]
-    assert 'Test_Two     ; Time: 9.49e+04->9.49e+04(same); ' \
+    TestCase().assertTrue('Test_Two     ; Time: 9.49e+04->9.49e+04(same); ' \
            'Size: n/a; RSS: 8.93e+04->8.93e+04(same); new fail' \
-        in lines
+        in lines)
 
 
 def create_report(**iterations) -> VMBReport:
@@ -296,12 +299,13 @@ def create_report(**iterations) -> VMBReport:
 
 def test_vmb_report_sanity():
     vmb_rep = create_report(test1=[1.0, 3.0])
-    assert vmb_rep.total_cnt == 1
-    assert vmb_rep.fail_cnt == 0
-    assert vmb_rep.rss_gm == 0
-    assert vmb_rep.time_gm == 2.0
-    assert vmb_rep.summary == '1 tests; 0 failed; 0 excluded; ' \
-                              'Time(GM): 2.0 Size(GM): 0.0 RSS(GM): 0.0'
+    test = TestCase()
+    test.assertTrue(vmb_rep.total_cnt == 1)
+    test.assertTrue(vmb_rep.fail_cnt == 0)
+    test.assertTrue(vmb_rep.rss_gm == 0)
+    test.assertTrue(vmb_rep.time_gm == 2.0)
+    test.assertTrue(vmb_rep.summary == '1 tests; 0 failed; 0 excluded; ' \
+                              'Time(GM): 2.0 Size(GM): 0.0 RSS(GM): 0.0')
     vmb_rep.text_report(full=True)
 
 
@@ -315,5 +319,5 @@ def test_vmb_compare_flaky():
         cmp.print(full=True)
         lines = [line.strip() for line in
                  f.getvalue().split("\n") if line]
-    assert 'Time: 4.93e+00->5.19e+00(worse +5.3%); Size: n/a; RSS: n/a' \
-        in lines
+    TestCase().assertTrue('Time: 4.93e+00->5.19e+00(worse +5.3%); Size: n/a; RSS: n/a' \
+        in lines)

@@ -81,31 +81,36 @@ inline void ObjectHeader::SetFieldPrimitive(const Field &field, T value)
     ObjectAccessor::SetFieldPrimitive(this, field, value);
 }
 
-template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectHeader::GetFieldObject(const Field &field) const
 {
     return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(this, field);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectHeader::SetFieldObject(const Field &field, ObjectHeader *value)
 {
     ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, field, value);
 }
 
-template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectHeader::GetFieldObject(const ManagedThread *thread, const Field &field)
 {
     return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(thread, this, field);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectHeader::SetFieldObject(const ManagedThread *thread, const Field &field, ObjectHeader *value)
 {
     ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(thread, this, field, value);
 }
 
-template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// IS_VOLATILE = false , NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool IS_VOLATILE, bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectHeader::SetFieldObject(const ManagedThread *thread, size_t offset, ObjectHeader *value)
 {
     ObjectAccessor::SetObject<IS_VOLATILE, NEED_WRITE_BARRIER, IS_DYN>(thread, this, offset, value);
@@ -123,13 +128,15 @@ inline void ObjectHeader::SetFieldPrimitive(size_t offset, T value, std::memory_
     ObjectAccessor::SetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
-template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectHeader::GetFieldObject(size_t offset, std::memory_order memoryOrder) const
 {
     return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(this, offset, memoryOrder);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void ObjectHeader::SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, offset, value, memoryOrder);
@@ -142,7 +149,8 @@ inline bool ObjectHeader::CompareAndSetFieldPrimitive(size_t offset, T oldValue,
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).first;
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline bool ObjectHeader::CompareAndSetFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
                                                    std::memory_order memoryOrder, bool strong)
 {
@@ -158,7 +166,8 @@ inline T ObjectHeader::CompareAndExchangeFieldPrimitive(size_t offset, T oldValu
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).second;
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectHeader::CompareAndExchangeFieldObject(size_t offset, ObjectHeader *oldValue,
                                                                  ObjectHeader *newValue, std::memory_order memoryOrder,
                                                                  bool strong)
@@ -174,7 +183,8 @@ inline T ObjectHeader::GetAndSetFieldPrimitive(size_t offset, T value, std::memo
     return ObjectAccessor::GetAndSetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline ObjectHeader *ObjectHeader::GetAndSetFieldObject(size_t offset, ObjectHeader *value,
                                                         std::memory_order memoryOrder)
 {

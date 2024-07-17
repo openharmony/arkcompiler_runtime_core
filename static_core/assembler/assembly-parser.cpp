@@ -459,7 +459,6 @@ bool Parser::ParseArrayElementValueFloat()
     }
     if (currArrayElem_->IsFloatValue()) {
         currArrayElem_->value = static_cast<float>(n);
-
     } else {
         currArrayElem_->value = static_cast<double>(n);
     }
@@ -812,6 +811,7 @@ void Parser::ParseResetRecordTable()
         }
     }
 }
+
 void Parser::ParseResetTables()
 {
     if (err_.err != Error::ErrorType::ERR_NONE) {
@@ -1041,16 +1041,12 @@ Expected<Program, Error> Parser::Parse(TokenSet &vectorsTokens, const std::strin
 {
     bool isLangParsed = false;
     bool isFirstStatement = true;
-
     for (const auto &tokens : vectorsTokens) {
         ++lineStric_;
-
         if (tokens.empty()) {
             continue;
         }
-
         LOG(DEBUG, ASSEMBLER) << "started parsing of line " << lineStric_ << ": " << tokens[0].wholeLine;
-
         context_.Make(tokens);
 
         switch (*context_) {
@@ -1241,7 +1237,6 @@ bool Parser::ParseLabel()
                                   << ", but this label already exists";
 
             context_.err = GetError("This label already exists.", Error::ErrorType::ERR_BAD_LABEL_EXT);
-
         } else {
             LOG(DEBUG, ASSEMBLER) << "label with non-standard character is detected, attempt to create a label is "
                                      "supposed, but this cannot be any label name (line "
@@ -1800,7 +1795,6 @@ bool Parser::ParseOperandType(Type::VerificationType verType)
     }
 
     bool isObject = context_.GiveToken() != "]";
-
     if (isObject) {
         AddObjectInTable(false, program_.recordTable);
 
@@ -1893,7 +1887,6 @@ bool Parser::ParseOperandField()
     }
     auto itField = std::find_if(itRecord->second.fieldList.begin(), itRecord->second.fieldList.end(),
                                 [&fieldName](pandasm::Field &field) { return fieldName == field.name; });
-
     if (!fieldName.empty() && itField == itRecord->second.fieldList.end()) {
         itRecord->second.fieldList.emplace_back(program_.lang);
         auto &field = itRecord->second.fieldList.back();

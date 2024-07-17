@@ -76,21 +76,24 @@ class LangBase(ABC):
 
     def parse_param(self, line: str) -> Optional[Tuple[str, str]]:
         m = re.search(self.re_param, line)
+        ret = None
         if m:
             # actually type is not needed
             return m.group("param"), m.group("type")
-        return None
+        return ret
 
     def parse_func(self, line: str) -> Optional[Tuple[str, str]]:
         m = re.search(self.re_func, line)  # type: ignore
+        ret = None
         if m:
             return m.group("func"), m.group("type")
-        return None
+        return ret
 
     def parse_import(self, line: str) -> Optional[Tuple[str, str]]:
         m = re.search(self.re_import, line)  # type: ignore
+        ret = None
         if m:
             lib = m.group('lib')
             what = m.group('what')
             return lib, self.get_import_line(lib, what)
-        return None
+        return ret

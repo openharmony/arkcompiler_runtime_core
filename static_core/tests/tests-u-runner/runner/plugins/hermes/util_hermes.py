@@ -18,8 +18,9 @@
 import logging
 import re
 import subprocess
+import os
+from unittest import TestCase
 from glob import glob
-from os import getenv, path, makedirs
 from typing import Optional
 
 from runner.logger import Log
@@ -44,8 +45,8 @@ class UtilHermes:
 
         self.work_dir = work_dir
 
-        self.hermes_url: Optional[str] = getenv(HERMES_URL)
-        self.hermes_revision: Optional[str] = getenv(HERMES_REVISION)
+        self.hermes_url: Optional[str] = os.getenv(HERMES_URL)
+        self.hermes_revision: Optional[str] = os.getenv(HERMES_REVISION)
         if self.hermes_url is None:
             Log.exception_and_raise(_LOGGER, f"No {HERMES_URL} environment variable set", EnvironmentError)
         if self.hermes_revision is None:
@@ -55,33 +56,36 @@ class UtilHermes:
         stamp_name = f"hermes-{self.hermes_revision}"
         if self.jit and self.jit_preheat_repeats > 1:
             stamp_name += f"-jit-{self.jit_preheat_repeats}"
-        assert self.hermes_url is not None
-        assert self.hermes_revision is not None
-        return generate(
-            name="hermes",
-            stamp_name=stamp_name,
-            url=self.hermes_url,
-            revision=self.hermes_revision,
-            generated_root=self.work_dir.gen,
-            test_subdir="test/hermes",
-            show_progress=self.show_progress,
-            process_copy=self.process_copy,
-            force_download=self.force_download
-        )
+        test = TestCase()
+        if self.hermes_url is not None and self.hermes_revision is not None:
+            return generate(
+                name="hermes",
+                stamp_name=stamp_name,
+                url=self.hermes_url,
+                revision=self.hermes_revision,
+                generated_root=self.work_dir.gen,
+                test_subdir="test/hermes",
+                show_progress=self.show_progress,
+                process_copy=self.process_copy,
+                force_download=self.force_download
+            )
+        test.assertFalse(self.hermes_url is None)
+        test.assertFalse(self.hermes_revision is None)
+        return ""
 
     def process_copy(self, src_path: str, dst_path: str) -> None:
         Log.all(_LOGGER, "Generating tests")
 
-        glob_expression = path.join(src_path, "**/*.js")
+        glob_expression = os.path.join(src_path, "**/*.js")
         files = glob(glob_expression, recursive=True)
 
         for src_file in files:
             dest_file = src_file.replace(src_path, dst_path)
-            makedirs(path.dirname(dest_file), exist_ok=True)
+            os.makedirs(os.path.dirname(dest_file), exist_ok=True)
             self.create_file(src_file, dest_file)
 
     def create_file(self, src_file: str, dest_file: str) -> None:
-        with open(src_file, 'r', encoding="utf-8") as file_pointer:
+        with os.fdopen(os.open(src_file, os.O_RDONLY, 0o755), 'r', encoding="utf-8") as file_pointer:
             input_str = file_pointer.read()
 
         if self.jit and self.jit_preheat_repeats > 1:
@@ -98,7 +102,7 @@ class UtilHermes:
         if not re.match(self.check_expr, input_str):
             return True
 
-        assert actual_output is not None, "Expected some output to check"
+        TestCase().assertTrue(actual_output is not None, "Expected some output to check")
         cmd = ['FileCheck-14', test_file]
         with subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, stdin=subprocess.PIPE) as process:
             try:

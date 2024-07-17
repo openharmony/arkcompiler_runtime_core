@@ -114,7 +114,7 @@ def test_cmake_checker(directory):
             content = content.replace(function[1], function[0])
             content += function[0] + "\n"
 
-        with open(temp_file, 'w') as file:
+        with os.fdopen(os.open(temp_file, os.O_RDWR | os.O_CREAT, 0o755), 'w') as file:
             file.write(content)
 
         args = [sys.argv[0], directory]

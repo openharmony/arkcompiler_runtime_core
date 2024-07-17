@@ -47,5 +47,5 @@ class ETSUtils:
                 report_obj[package_name] = [test_name]
             else:
                 report_obj[package_name].append(test_name)
-        with open(report_path, 'w', encoding='utf-8') as file_handle:
+        with os.fdopen(os.open(report_path, os.O_WRONLY | os.O_CREAT, 0o755), "w", encoding="utf-8") as file_handle:
             yaml.dump(report_obj, file_handle)

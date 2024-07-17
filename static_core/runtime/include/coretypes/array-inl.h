@@ -25,25 +25,29 @@
 
 namespace ark::coretypes {
 
-template <class T, bool IS_VOLATILE /* = false */>
+// IS_VOLATILE = false
+template <class T, bool IS_VOLATILE>
 inline T Array::GetPrimitive(size_t offset) const
 {
     return ObjectAccessor::GetPrimitive<T, IS_VOLATILE>(this, GetDataOffset() + offset);
 }
 
-template <class T, bool IS_VOLATILE /* = false */>
+// IS_VOLATILE = false
+template <class T, bool IS_VOLATILE>
 inline void Array::SetPrimitive(size_t offset, T value)
 {
     ObjectAccessor::SetPrimitive<T, IS_VOLATILE>(this, GetDataOffset() + offset, value);
 }
 
-template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+//  IS_VOLATILE = false , NEED_READ_BARRIER = true , bool IS_DYN = false
+template <bool IS_VOLATILE, bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *Array::GetObject(int offset) const
 {
     return ObjectAccessor::GetObject<IS_VOLATILE, NEED_READ_BARRIER, IS_DYN>(this, GetDataOffset() + offset);
 }
 
-template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+//  IS_VOLATILE = false , NEED_READ_BARRIER = true , bool IS_DYN = false
+template <bool IS_VOLATILE, bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void Array::SetObject(size_t offset, ObjectHeader *value)
 {
     ObjectAccessor::SetObject<IS_VOLATILE, NEED_WRITE_BARRIER, IS_DYN>(this, GetDataOffset() + offset, value);
@@ -61,13 +65,15 @@ inline void Array::SetPrimitive(size_t offset, T value, std::memory_order memory
     ObjectAccessor::SetFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
-template <bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <bool NEED_READ_BARRIER, bool IS_DYN>
 inline ObjectHeader *Array::GetObject(size_t offset, std::memory_order memoryOrder) const
 {
     return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER, IS_DYN>(this, GetDataOffset() + offset, memoryOrder);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void Array::SetObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     ObjectAccessor::SetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, GetDataOffset() + offset, value, memoryOrder);
@@ -82,7 +88,8 @@ inline bool Array::CompareAndSetPrimitive(size_t offset, T oldValue, T newValue,
         .first;
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline bool Array::CompareAndSetObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
                                        std::memory_order memoryOrder, bool strong)
 {
@@ -101,7 +108,8 @@ inline T Array::CompareAndExchangePrimitive(size_t offset, T oldValue, T newValu
         .second;
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline ObjectHeader *Array::CompareAndExchangeObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
                                                      std::memory_order memoryOrder, bool strong)
 {
@@ -117,7 +125,8 @@ inline T Array::GetAndSetPrimitive(size_t offset, T value, std::memory_order mem
     return ObjectAccessor::GetAndSetFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline ObjectHeader *Array::GetAndSetObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     return ObjectAccessor::GetAndSetFieldObject<NEED_WRITE_BARRIER, IS_DYN>(this, GetDataOffset() + offset, value,
@@ -168,7 +177,8 @@ inline void Array::Set(ArraySizeT idx, T elem)
     }
 }
 
-template <class T, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <class T, bool NEED_READ_BARRIER, bool IS_DYN>
 inline T Array::Get(ArraySizeT idx) const
 {
     constexpr bool IS_REF = std::is_pointer_v<T> && std::is_base_of_v<ObjectHeader, std::remove_pointer_t<T>>;
@@ -198,7 +208,8 @@ T Array::GetBase()
     return reinterpret_cast<T>(ToUintPtr(this) + GetDataOffset());
 }
 
-template <class T, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_WRITE_BARRIER = true , IS_DYN = false
+template <class T, bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void Array::Set([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx, T elem)
 {
     constexpr bool IS_REF = std::is_pointer_v<T> && std::is_base_of_v<ObjectHeader, std::remove_pointer_t<T>>;
@@ -216,7 +227,8 @@ inline void Array::Set([[maybe_unused]] const ManagedThread *thread, ArraySizeT 
     }
 }
 
-template <class T, bool NEED_READ_BARRIER /* = true */, bool IS_DYN /* = false */>
+// NEED_READ_BARRIER = true , IS_DYN = false
+template <class T, bool NEED_READ_BARRIER, bool IS_DYN>
 inline T Array::Get([[maybe_unused]] const ManagedThread *thread, ArraySizeT idx) const
 {
     constexpr bool IS_REF = std::is_pointer_v<T> && std::is_base_of_v<ObjectHeader, std::remove_pointer_t<T>>;

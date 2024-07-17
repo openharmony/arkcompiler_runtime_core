@@ -156,7 +156,6 @@ Expected<size_t, const char *> BufferToType(const uint8_t *data, size_t size, st
     ASSERT(r.Value() <= size);
     data = ToUint8tPtr(ToUintPtr(data) + r.Value());
     size -= r.Value();
-
     // unpack data
     if (size < vectorSize || (vectorSize % sizeof(T))) {
         return Unexpected("Cannot deserialize vector, the buffer is too small.");

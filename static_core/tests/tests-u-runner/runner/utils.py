@@ -96,7 +96,8 @@ def generate(name: str, url: str, revision: str, generated_root: Path, *,
         copy(path.join(temp_path, test_subdir), dest_path)
 
     Log.summary(_LOGGER, f"Create stamp file {stamp_file}")
-    with open(stamp_file, 'w+', encoding="utf-8") as _:  # Create empty file-marker and close it at once
+    with os.fdopen(os.open(stamp_file, os.O_RDWR | os.O_CREAT, 0o755),
+                   'w+', encoding="utf-8") as _:  # Create empty file-marker and close it at once
         pass
 
     return dest_path
@@ -114,7 +115,7 @@ def copy(source_path: Union[Path, str], dest_path: Union[Path, str], remove_if_e
 
 
 def read_file(file_path: Union[Path, str]) -> str:
-    with open(file_path, "r", encoding='utf8') as f_handle:
+    with os.fdopen(os.open(file_path, os.O_RDONLY, 0o755), "r", encoding='utf8') as f_handle:
         text = f_handle.read()
     return text
 
@@ -124,7 +125,7 @@ def write_2_file(file_path: Union[Path, str], content: str) -> None:
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
     makedirs(path.dirname(file_path), exist_ok=True)
-    with open(file_path, mode='w+', encoding="utf-8") as f_handle:
+    with os.fdopen(os.open(file_path, os.O_RDWR | os.O_CREAT, 0o755), mode='w+', encoding="utf-8") as f_handle:
         f_handle.write(content)
 
 

@@ -63,6 +63,8 @@ public:
 
     void FreeClass(Class *klass) override;
 
+    void InitializeClassRoot();
+
     bool InitializeClass(Class *klass) override;
 
     const void *GetNativeEntryPointFor(Method *method) const override;

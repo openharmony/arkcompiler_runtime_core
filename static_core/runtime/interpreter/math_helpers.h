@@ -130,7 +130,6 @@ struct idivides {  // NOLINT(readability-identifier-naming)
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (std::is_signed_v<T>) {
             constexpr T MIN = std::numeric_limits<T>::min();
-
             if (UNLIKELY(x == MIN && y == -1)) {
                 return MIN;
             }
@@ -150,7 +149,6 @@ struct imodulus {  // NOLINT(readability-identifier-naming)
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
         if constexpr (std::is_signed_v<T>) {
             constexpr T MIN = std::numeric_limits<T>::min();
-
             if (UNLIKELY(x == MIN && y == -1)) {
                 return 0;
             }

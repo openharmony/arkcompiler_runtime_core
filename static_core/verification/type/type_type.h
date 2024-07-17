@@ -87,6 +87,8 @@ private:
 
     static Type Intersection(Span<Type> span, TypeSystem *tsys);
     static Type Union(Span<Type> span, TypeSystem *tsys);
+    PandaString IntersectionToString(TypeSystem const *&tsys) const;
+    PandaString UnionToString(TypeSystem const *&tsys) const;
 
 private:
     static int constexpr INTERSECTION_TAG = 1;
@@ -110,7 +112,8 @@ private:
 
     static uintptr_t ConstructPayload(size_t spanSize, size_t spanIndex)
     {
-        ASSERT(spanSize > 0 && spanSize <= MAX_SPAN_SIZE);
+        ASSERT(spanSize > 0);
+        ASSERT(spanSize <= MAX_SPAN_SIZE);
         return (spanIndex << BITS_FOR_SPAN_SIZE) | spanSize;
     }
 

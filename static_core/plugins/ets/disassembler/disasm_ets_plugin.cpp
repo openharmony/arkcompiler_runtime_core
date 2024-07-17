@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include "disassembler.h"
 
 namespace ark::disasm {
@@ -88,7 +89,6 @@ void Disassembler::SetETSAttributes(pandasm::Record *record, const panda_file::F
 
     panda_file::ClassDataAccessor classAccessor(*file_, recordId);
     uint32_t accFlags = classAccessor.GetAccessFlags();
-
     if ((accFlags & ACC_INTERFACE) != 0) {
         record->metadata->SetAttribute("ets.interface");
     }
@@ -207,48 +207,41 @@ void Disassembler::SetETSAttributes(pandasm::Field *field, const panda_file::Fil
     }
 }
 
-// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
-AnnotationList Disassembler::GetETSAnnotation(const panda_file::File::EntityId &annotationId, const std::string &type)
+void Disassembler::HandleArrayAnnotation(panda_file::AnnotationDataAccessor &annotationAccessor,
+                                         AnnotationList &annList, size_t i)
 {
-    LOG(DEBUG, DISASSEMBLER) << "[getting ets annotation]\nid: " << annotationId;
-    panda_file::AnnotationDataAccessor annotationAccessor(*file_, annotationId);
-    AnnotationList annList {};
-    // annotation
-
-    const auto className = GetFullRecordName(annotationAccessor.GetClassId());
-
-    if (annotationAccessor.GetCount() == 0) {
-        if (!type.empty()) {
-            annList.push_back({"ets.annotation.type", type});
+    const auto values = annotationAccessor.GetElement(i).GetArrayValue();
+    for (size_t idx = 0; idx < values.GetCount(); ++idx) {
+        const auto val = values.Get<panda_file::File::EntityId>(idx);
+        const auto annDefinition = GetETSAnnotation(val, "");
+        for (const auto &elem : annDefinition) {
+            annList.push_back(elem);
         }
-        annList.push_back({"ets.annotation.class", className});
-        annList.push_back({"ets.annotation.id", "id_" + std::to_string(annotationId.GetOffset())});
     }
+}
 
+void Disassembler::EnumerateAnnotations(panda_file::AnnotationDataAccessor &annotationAccessor, AnnotationList &annList,
+                                        const std::string &type, const panda_file::File::EntityId &annotationId)
+{
+    const auto className = GetFullRecordName(annotationAccessor.GetClassId());
     for (size_t i = 0; i < annotationAccessor.GetCount(); ++i) {
         // element
         const auto elemNameId = annotationAccessor.GetElement(i).GetNameId();
         auto elemType = AnnotationTagToString(annotationAccessor.GetTag(i).GetItem());
         const bool isArray = elemType.back() == ']';
-        const auto elemCompType =
-            elemType.substr(0, elemType.length() - 2);  // 2 last characters are '[' & ']' if annotation is an array
+
+        // 2 last characters are '[' & ']' if annotation is an array
+        const auto elemCompType = elemType.substr(0, elemType.length() - 2);
+
         // adding necessary annotations
         if (elemType == "annotations") {
             const auto val = annotationAccessor.GetElement(i).GetScalarValue().Get<panda_file::File::EntityId>();
-            const auto annDefinition = GetETSAnnotation(val, "");
-            for (const auto &elem : annDefinition) {
+            for (const auto &elem : GetETSAnnotation(val, "")) {
                 annList.push_back(elem);
             }
         }
         if (isArray && elemCompType == "annotation") {
-            const auto values = annotationAccessor.GetElement(i).GetArrayValue();
-            for (size_t idx = 0; idx < values.GetCount(); ++idx) {
-                const auto val = values.Get<panda_file::File::EntityId>(idx);
-                const auto annDefinition = GetETSAnnotation(val, "");
-                for (const auto &elem : annDefinition) {
-                    annList.push_back(elem);
-                }
-            }
+            HandleArrayAnnotation(annotationAccessor, annList, i);
         }
         if (!type.empty()) {
             annList.push_back({"ets.annotation.type", type});
@@ -277,6 +270,28 @@ AnnotationList Disassembler::GetETSAnnotation(const panda_file::File::EntityId &
             }
         }
     }
+}
+
+// CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
+AnnotationList Disassembler::GetETSAnnotation(const panda_file::File::EntityId &annotationId, const std::string &type)
+{
+    LOG(DEBUG, DISASSEMBLER) << "[getting ets annotation]\nid: " << annotationId;
+    panda_file::AnnotationDataAccessor annotationAccessor(*file_, annotationId);
+    AnnotationList annList {};
+    // annotation
+
+    const auto className = GetFullRecordName(annotationAccessor.GetClassId());
+
+    if (annotationAccessor.GetCount() == 0) {
+        if (!type.empty()) {
+            annList.push_back({"ets.annotation.type", type});
+        }
+        annList.push_back({"ets.annotation.class", className});
+        annList.push_back({"ets.annotation.id", "id_" + std::to_string(annotationId.GetOffset())});
+    }
+
+    EnumerateAnnotations(annotationAccessor, annList, type, annotationId);
+
     return annList;
 }
 

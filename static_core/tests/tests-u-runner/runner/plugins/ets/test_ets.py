@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+from unittest import TestCase
 from os import path, makedirs
 from pathlib import Path
 from typing import Tuple, Optional, Sequence, List
@@ -224,7 +225,8 @@ class TestETS(TestFileBased):
         return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 
     def _run_verifier(self, test_abc: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
-        assert path.exists(self.test_env.verifier), f"Verifier binary '{self.test_env.verifier}' is absent or not set"
+        TestCase().assertTrue(path.exists(self.test_env.verifier), \
+                              f"Verifier binary '{self.test_env.verifier}' is absent or not set")
         config_path = self.test_env.config.verifier.config
         if config_path is None:
             config_path = path.join(path.dirname(__file__), 'ets-verifier.config')

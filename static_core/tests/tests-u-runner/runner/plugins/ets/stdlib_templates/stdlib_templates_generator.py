@@ -17,6 +17,7 @@
 
 import logging
 import os
+from unittest import TestCase
 
 from pathlib import Path
 from typing import Tuple, Dict, List, Any
@@ -68,7 +69,7 @@ class StdlibTemplatesGenerator:
             template_relative_path = os.path.relpath(path, root_path)
             rendered_template = self.__render_template(template_relative_path, params)
             tests = self.__split_into_tests(rendered_template, path)
-            assert len(tests) > 0, "Internal error: there should be tests"
+            TestCase().assertTrue(len(tests) > 0, "Internal error: there should be tests")
             for key, test in tests.items():
                 output_filepath = outpath / f"{name_without_ext}_{key}{OUT_EXTENSION}"
                 write_2_file(file_path=output_filepath, content=test)

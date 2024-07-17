@@ -72,22 +72,26 @@ inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         uint32_t byte = *(p++);
         result = (result & PAYLOAD_MASK) | ((byte & PAYLOAD_MASK) << LEB128_BYTE2_SHIFT);
-        if (byte > PAYLOAD_MASK) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            byte = *(p++);
-            result |= (byte & PAYLOAD_MASK) << LEB128_BYTE3_SHIFT;
-            if (byte > PAYLOAD_MASK) {
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                byte = *(p++);
-                result |= (byte & PAYLOAD_MASK) << LEB128_BYTE4_SHIFT;
-                if (byte > PAYLOAD_MASK) {
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    byte = *(p++);
-                    valid = byte < (1U << LEB128_BYTE5_BIT_SIZE);
-                    result |= byte << LEB128_BYTE5_SHIFT;
-                }
-            }
+
+        if (byte <= PAYLOAD_MASK) {
+            return {result, p - data, valid};
         }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        byte = *(p++);
+        result |= (byte & PAYLOAD_MASK) << LEB128_BYTE3_SHIFT;
+        if (byte <= PAYLOAD_MASK) {
+            return {result, p - data, valid};
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        byte = *(p++);
+        result |= (byte & PAYLOAD_MASK) << LEB128_BYTE4_SHIFT;
+        if (byte <= PAYLOAD_MASK) {
+            return {result, p - data, valid};
+        }
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        byte = *(p++);
+        valid = byte < (1U << LEB128_BYTE5_BIT_SIZE);
+        result |= byte << LEB128_BYTE5_SHIFT;
     }
     return {result, p - data, valid};
 }

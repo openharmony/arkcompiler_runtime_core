@@ -286,8 +286,8 @@ protected:
           componentMask_(componentMask)
 #ifndef NDEBUG
           ,
-          // Means all the LOGs are allowed just as usual
           nestedAllowedLevel_(Level::LAST)
+    // Means all the LOGs are allowed just as usual
 #endif
     {
     }
@@ -443,11 +443,11 @@ private:
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_ONCE_HELPER() static LogOnceHelper MERGE_WORDS(log_once_helper, __LINE__);
+#define LOG_ONCE_HELPER() static LogOnceHelper MERGE_WORDS(log_once_helper, __LINE__)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_ONCE(level, component) \
-    LOG_ONCE_HELPER()              \
+    LOG_ONCE_HELPER();             \
     MERGE_WORDS(log_once_helper, __LINE__).IsFirstCall() && LOG(level, component)
 
 #ifndef NDEBUG

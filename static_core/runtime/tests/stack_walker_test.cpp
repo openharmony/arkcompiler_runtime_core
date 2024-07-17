@@ -119,42 +119,44 @@ int32_t ToCalleeFpRegister(size_t reg)
     return reg + GetFirstCalleeReg(ARCH, true);
 }
 
+static auto g_modifyVregSource = R"(
+    .function i32 main() {
+        movi.64 v0, 27
+    try_begin:
+        call.short testa, v0
+        jmp try_end
+    try_end:
+        return
+    .catchall try_begin, try_end, try_end
+    }
+    .function i32 testa(i64 a0) {
+        call.short testb, a0
+        return
+    }
+    .function i32 testb(i64 a0) {
+        call.short testc, a0
+        return
+    }
+    .function i32 testc(i64 a0) {
+        lda a0
+    try_begin:
+        call.short hook  # change vregs in all frames
+        jnez exit
+        call.short hook  # verify vregs in all frames
+        jmp exit
+    exit:
+        return
+    .catchall try_begin, exit, exit
+    }
+    .function i32 hook() {
+        ldai 1
+        return
+    }
+)";
+
 TEST_F(StackWalkerTest, ModifyVreg)
 {
-    auto source = R"(
-        .function i32 main() {
-            movi.64 v0, 27
-        try_begin:
-            call.short testa, v0
-            jmp try_end
-        try_end:
-            return
-        .catchall try_begin, try_end, try_end
-        }
-        .function i32 testa(i64 a0) {
-            call.short testb, a0
-            return
-        }
-        .function i32 testb(i64 a0) {
-            call.short testc, a0
-            return
-        }
-        .function i32 testc(i64 a0) {
-            lda a0
-        try_begin:
-            call.short hook  # change vregs in all frames
-            jnez exit
-            call.short hook  # verify vregs in all frames
-            jmp exit
-        exit:
-            return
-        .catchall try_begin, exit, exit
-        }
-        .function i32 hook() {
-            ldai 1
-            return
-        }
-    )";
+    auto source = g_modifyVregSource;
 
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(0);
@@ -241,81 +243,82 @@ TEST_F(StackWalkerTest, ModifyVreg)
     ASSERT_EQ(runCount, 2_I);
 }
 
+static auto g_testModifyManyVregsSource = R"(
+    .function i32 main() {
+        movi.64 v0, 5
+    try_begin:
+        call.short test
+        jmp try_end
+    try_end:
+        return
+
+    .catchall try_begin, try_end, try_end
+    }
+
+    .function i32 test() {
+        movi.64 v1, 1
+        movi.64 v2, 2
+        movi.64 v3, 3
+        movi.64 v4, 4
+        movi.64 v5, 5
+        movi.64 v6, 6
+        movi.64 v7, 7
+        movi.64 v8, 8
+        movi.64 v9, 9
+        movi.64 v10, 10
+        movi.64 v11, 11
+        movi.64 v12, 12
+        movi.64 v13, 13
+        movi.64 v14, 14
+        movi.64 v15, 15
+        movi.64 v16, 16
+        movi.64 v17, 17
+        movi.64 v18, 18
+        movi.64 v19, 19
+        movi.64 v20, 20
+        movi.64 v21, 21
+        movi.64 v22, 22
+        movi.64 v23, 23
+        movi.64 v24, 24
+        movi.64 v25, 25
+        movi.64 v26, 26
+        movi.64 v27, 27
+        movi.64 v28, 28
+        movi.64 v29, 29
+        movi.64 v30, 30
+        movi.64 v31, 31
+    try_begin:
+        mov v0, v31
+        newarr v0, v0, i32[]
+        call.short stub
+        jmp try_end
+    try_end:
+        return
+
+    .catchall try_begin, try_end, try_end
+    }
+
+    .function i32 stub() {
+    try_begin:
+        call.short hook  # change vregs in all frames
+        jnez exit
+        call.short hook  # verify vregs in all frames
+        jmp exit
+    exit:
+        return
+
+    .catchall try_begin, exit, exit
+    }
+
+    .function i32 hook() {
+        ldai 1
+        return
+    }
+)";
+
 void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
 {
-    auto source = R"(
-        .function i32 main() {
-            movi.64 v0, 5
-        try_begin:
-            call.short test
-            jmp try_end
-        try_end:
-            return
-
-        .catchall try_begin, try_end, try_end
-        }
-
-        .function i32 test() {
-            movi.64 v1, 1
-            movi.64 v2, 2
-            movi.64 v3, 3
-            movi.64 v4, 4
-            movi.64 v5, 5
-            movi.64 v6, 6
-            movi.64 v7, 7
-            movi.64 v8, 8
-            movi.64 v9, 9
-            movi.64 v10, 10
-            movi.64 v11, 11
-            movi.64 v12, 12
-            movi.64 v13, 13
-            movi.64 v14, 14
-            movi.64 v15, 15
-            movi.64 v16, 16
-            movi.64 v17, 17
-            movi.64 v18, 18
-            movi.64 v19, 19
-            movi.64 v20, 20
-            movi.64 v21, 21
-            movi.64 v22, 22
-            movi.64 v23, 23
-            movi.64 v24, 24
-            movi.64 v25, 25
-            movi.64 v26, 26
-            movi.64 v27, 27
-            movi.64 v28, 28
-            movi.64 v29, 29
-            movi.64 v30, 30
-            movi.64 v31, 31
-        try_begin:
-            mov v0, v31
-            newarr v0, v0, i32[]
-            call.short stub
-            jmp try_end
-        try_end:
-            return
-
-        .catchall try_begin, try_end, try_end
-        }
-
-        .function i32 stub() {
-        try_begin:
-            call.short hook  # change vregs in all frames
-            jnez exit
-            call.short hook  # verify vregs in all frames
-            jmp exit
-        exit:
-            return
-
-        .catchall try_begin, exit, exit
-        }
-
-        .function i32 hook() {
-            ldai 1
-            return
-        }
-    )";
-
+    auto source = g_testModifyManyVregsSource;
     static bool firstRun;
     static bool compiled;
 
@@ -399,9 +402,7 @@ TEST_F(StackWalkerTest, ModifyMultipleVregs)
     }
 }
 
-TEST_F(StackWalkerTest, ThrowExceptionThroughMultipleFrames)
-{
-    auto source = R"(
+static auto g_throwExceptionThroughMultipleFramesSource = R"(
         .record E {}
 
         .function u1 f4() {
@@ -446,6 +447,10 @@ TEST_F(StackWalkerTest, ThrowExceptionThroughMultipleFrames)
         .catch E, try_begin, try_end, catch_block1_begin
         }
     )";
+
+TEST_F(StackWalkerTest, ThrowExceptionThroughMultipleFrames)
+{
+    auto source = g_throwExceptionThroughMultipleFramesSource;
 
     PandaRunner runner;
     runner.GetRuntimeOptions().SetCompilerHotnessThreshold(0);

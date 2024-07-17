@@ -43,7 +43,6 @@ bool AbsIntInstructionHandler::CheckRegType(int reg, Type tgtType)
         return false;
     }
     auto type = GetRegType(reg);
-
     if (CheckType(type, tgtType)) {
         return true;
     }

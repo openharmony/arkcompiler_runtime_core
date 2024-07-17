@@ -21,6 +21,7 @@
 #include <cmath>
 
 #include "libpandabase/utils/bit_utils.h"
+#include "macros.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
 
@@ -74,7 +75,10 @@ int32_t ToInt32(double x)
 
     uint64_t d64;
     // NOTE(kirill-mitkin): can be __builtin_bit_cast() if defined
-    memcpy_s(&d64, sizeof(uint64_t), &x, sizeof(uint64_t));
+    if (memcpy_s(&d64, sizeof(uint64_t), &x, sizeof(uint64_t)) != 0) {
+        UNREACHABLE();
+    }
+
     int exponent = Exponent(d64);
     uint64_t significand = Significand(d64);
     uint64_t bits;

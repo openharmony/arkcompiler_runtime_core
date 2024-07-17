@@ -17,6 +17,7 @@
 import logging
 import re
 import subprocess
+from unittest import TestCase
 from abc import abstractmethod
 from datetime import datetime
 from functools import cached_property
@@ -230,8 +231,9 @@ class RunnerFileBased(Runner):
         results = [result for result in self.results if result.passed is not None]
 
         for test_result in results:
-            assert isinstance(test_result, TestFileBased)
-
+            if not isinstance(test_result, TestFileBased):
+                TestCase().assertTrue(isinstance(test_result, TestFileBased))
+                return self.failed
             if test_result.excluded:
                 self.excluded_after += 1
                 continue
@@ -245,9 +247,8 @@ class RunnerFileBased(Runner):
                 if test_result.path in self.excluded_tests:
                     excluded_but_passed.append(test_result)
 
-        total_tests = len(results) + self.excluded
         summary = Summary(
-            self.name, total_tests, self.passed, self.failed,
+            self.name, len(results) + self.excluded, self.passed, self.failed,
             self.ignored, len(ignored_but_passed), self.excluded, self.excluded_after
         )
 
@@ -333,8 +334,10 @@ class RunnerFileBased(Runner):
             self.excluded += 1
         else:
             self.failed += 1
-            assert test_result.fail_kind
-            fail_lists[test_result.fail_kind].append(test_result)
+            if test_result.fail_kind:
+                fail_lists[test_result.fail_kind].append(test_result)
+            else:
+                TestCase().assertTrue(test_result.fail_kind)
 
     def __generate_detailed_report(self, results: List[Test]) -> None:
         if self.config.report.detailed_report:

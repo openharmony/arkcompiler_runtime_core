@@ -152,26 +152,22 @@ private:
     MTManagedThread *thread_;
 };
 
-TEST_F(SignalHandlerTest, CallTest)
-{
-    auto source = R"(
+static auto g_callTestSource = R"(
     .record Math <external>
     .function f64 Math.pow (f64 a0, f64 a1) <external>
     .function f64 Math.absF64 (f64 a0) <external>
 
-    .function void main_short(){
+    .function void main_short() {
         movi v0, 100000           #loop_counter
         call.short main, v0
         return.void
     }
-
-    .function void main_long(){
+    .function void main_long() {
         movi v0, 10000000          #loop_counter
         call.short main, v0
         return.void
     }
-
-    .function i32 main(i64 a0){
+    .function i32 main(i64 a0) {
     movi v5, 0
     loop:
         lda v5
@@ -196,6 +192,10 @@ TEST_F(SignalHandlerTest, CallTest)
         return
     }
     )";
+
+TEST_F(SignalHandlerTest, CallTest)
+{
+    auto source = g_callTestSource;
 
     pandasm::Parser parser;
     auto res = parser.Parse(source);

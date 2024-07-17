@@ -118,7 +118,6 @@ public:
     std::optional<std::string> GetAttributeValue(const std::string &attribute) const
     {
         auto values = GetAttributeValues(attribute);
-
         if (!values.empty()) {
             return values.front();
         }

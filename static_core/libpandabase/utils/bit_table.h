@@ -274,11 +274,11 @@ struct BitTableDefault : public BitTableRow<NUM_COLUMNS, BitTableDefault<NUM_COL
     using BitTableRow<columns, name>::BitTableRow; \
     template <int Column, int Dummy>               \
     struct ColumnName;                             \
-    static constexpr const char *TABLE_NAME = #name;
+    static constexpr const char *TABLE_NAME = #name
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BIT_TABLE_COLUMN(index, name, upname)                                \
-    static constexpr size_t COLUMN_##upname = index;                         \
+    static constexpr size_t COLUMN_##upname = (index);                       \
     static constexpr const char COLUMN_NAME_##upname[] = #name; /* NOLINT */ \
     template <int Dummy>                                                     \
     struct ColumnName<index, Dummy> {                                        \

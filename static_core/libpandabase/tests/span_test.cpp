@@ -36,7 +36,7 @@ template <class T>
 Span<T> Double(Span<T> s)
 {
     for (auto &e : s) {
-        e *= 2;
+        e *= 2U;
     }
     return s;
 }

@@ -262,7 +262,6 @@ bool JsonObject::Parser::GetValue()
         case 'f':
             res = GetBool();
             break;
-
         case '0':
         case '1':
         case '2':

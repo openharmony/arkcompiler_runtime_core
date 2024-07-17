@@ -124,6 +124,36 @@ TEST(MetadataTest, ExternalFieldTest)
     EXPECT_EQ("\treturn.void", line);
 }
 
+static std::string GetTestSource1()
+{
+    return R"(
+.record A <access.record=public> {
+    i64 a
+}
+
+.record B <access.record=protected> { }
+
+.record C <access.record=private> {
+    B b
+}
+)";
+}
+
+static std::string GetTestSource2()
+{
+    return R"(
+.record A <access.record=protected> {
+    i32 pub <access.field=public>
+    i32 prt <access.field=protected>
+    i32 prv <access.field=private>
+}
+
+.function void f() <access.function=public> {}
+.function void A.g() <access.function=protected> {}
+.function void h() <access.function=private> {}
+)";
+}
+
 TEST(MetadataTest, Access)
 {
     auto matchString = [](const char *pattern, const std::string &str) {
@@ -135,17 +165,7 @@ TEST(MetadataTest, Access)
     };
 
     {
-        auto program = ark::pandasm::Parser().Parse(R"(
-        .record A <access.record=public> {
-            i64 a
-        }
-
-        .record B <access.record=protected> { }
-
-        .record C <access.record=private> {
-            B b
-        }
-    )");
+        auto program = ark::pandasm::Parser().Parse(GetTestSource1());
         ASSERT(program);
         auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
@@ -161,17 +181,7 @@ TEST(MetadataTest, Access)
         EXPECT_TRUE(matchString("[.record C][^.]*[.record=private]", ss.str()));
     }
     {
-        auto program = ark::pandasm::Parser().Parse(R"(
-        .record A <access.record=protected> {
-            i32 pub <access.field=public>
-            i32 prt <access.field=protected>
-            i32 prv <access.field=private>
-        }
-
-        .function void f() <access.function=public> {}
-        .function void A.g() <access.function=protected> {}
-        .function void h() <access.function=private> {}
-    )");
+        auto program = ark::pandasm::Parser().Parse(GetTestSource2());
         ASSERT(program);
         auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
@@ -193,6 +203,32 @@ TEST(MetadataTest, Access)
     }
 }
 
+static std::string GetTestFinalSource1()
+{
+    return R"(
+    .record A <final> {
+        i64 a
+    }
+)";
+}
+
+static std::string GetTestFinalSource2()
+{
+    return R"(
+    .record A {
+        i32 fld <final>
+    }
+)";
+}
+
+static std::string GetTestFinalSource3()
+{
+    return R"(
+    .record A { }
+    .function void A.f(A a0) <final> {}
+)";
+}
+
 TEST(MetadataTest, Final)
 {
     auto matchString = [](const char *pattern, const std::string &str) {
@@ -204,11 +240,7 @@ TEST(MetadataTest, Final)
     };
 
     {
-        auto program = ark::pandasm::Parser().Parse(R"(
-            .record A <final> {
-                i64 a
-            }
-        )");
+        auto program = ark::pandasm::Parser().Parse(GetTestFinalSource1());
         ASSERT(program);
         auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
@@ -222,11 +254,7 @@ TEST(MetadataTest, Final)
         EXPECT_TRUE(matchString("[.record A][^.]*[final]>", ss.str()));
     }
     {
-        auto program = ark::pandasm::Parser().Parse(R"(
-            .record A {
-                i32 fld <final>
-            }
-        )");
+        auto program = ark::pandasm::Parser().Parse(GetTestFinalSource2());
         ASSERT(program);
         auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);
@@ -241,10 +269,7 @@ TEST(MetadataTest, Final)
         EXPECT_TRUE(matchString("[i32 fld][^<]*[final]>", str));
     }
     {
-        auto program = ark::pandasm::Parser().Parse(R"(
-            .record A { }
-            .function void A.f(A a0) <final> {}
-        )");
+        auto program = ark::pandasm::Parser().Parse(GetTestFinalSource3());
         ASSERT(program);
         auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
         ASSERT(pf);

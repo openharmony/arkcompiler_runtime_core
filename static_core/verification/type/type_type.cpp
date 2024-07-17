@@ -40,6 +40,25 @@ constexpr uint32_t Bitmap(std::initializer_list<Builtin> vs)
 }
 
 template <size_t SZ>
+void TransitiveClosureNestedFunction(bool &changed, std::array<uint32_t, SZ> &result)
+{
+    changed = false;
+    for (size_t i = 0; i < SZ; i++) {
+        uint32_t pre = result[i];
+        uint32_t post = pre;
+        for (size_t j = 0; j < SZ; j++) {
+            if ((post & Bitmap({Builtin {j}})) != 0) {
+                post |= result[j];
+            }
+        }
+        if (post != pre) {
+            result[i] = post;
+            changed = true;
+        }
+    }
+}
+
+template <size_t SZ>
 std::array<uint32_t, SZ> TransitiveClosure(std::array<uint32_t, SZ> const *source)
 {
     std::array<uint32_t, SZ> result = *source;
@@ -49,57 +68,61 @@ std::array<uint32_t, SZ> TransitiveClosure(std::array<uint32_t, SZ> const *sourc
 
     bool changed = true;
     while (changed) {
-        changed = false;
-        for (size_t i = 0; i < SZ; i++) {
-            uint32_t pre = result[i];
-            uint32_t post = pre;
-            for (size_t j = 0; j < SZ; j++) {
-                if ((post & Bitmap({Builtin {j}})) != 0) {
-                    post |= result[j];
-                }
-            }
-            if (post != pre) {
-                result[i] = post;
-                changed = true;
-            }
-        }
+        TransitiveClosureNestedFunction(changed, result);
     }
     return result;
 }
 
 std::array<uint32_t, Builtin::LAST> builtin_supertypes_nontrans = {
-    /* undefined */ 0,
-    /* top */ 0,
-    /* u1 */ Bitmap({Builtin::U8, Builtin::I8}),
-    /* i8 */ Bitmap({Builtin::I16, Builtin::INTEGRAL8}),
-    /* u8 */ Bitmap({Builtin::U16, Builtin::I16, Builtin::INTEGRAL8}),
-    /* i16 */ Bitmap({Builtin::I32, Builtin::INTEGRAL16}),
-    /* u16 */ Bitmap({Builtin::I32, Builtin::U32, Builtin::INTEGRAL16}),
-    /* i32 */ Bitmap({Builtin::INTEGRAL32}),
-    /* u32 */ Bitmap({Builtin::INTEGRAL32}),
-    /* f32 */ Bitmap({Builtin::FLOAT32}),
-    /* f64 */ Bitmap({Builtin::FLOAT64}),
-    /* i64 */ Bitmap({Builtin::INTEGRAL64}),
-    /* u64 */ Bitmap({Builtin::INTEGRAL64}),
-    /* integral8 */ Bitmap({Builtin::INTEGRAL16}),
-    /* integral16 */ Bitmap({Builtin::INTEGRAL32}),
-    /* integral32 */ Bitmap({Builtin::BITS32}),
-    /* integral64 */ Bitmap({Builtin::BITS64}),
-    /* float32 */ Bitmap({Builtin::BITS32}),
-    /* float64 */ Bitmap({Builtin::BITS64}),
-    /* bits32 */ Bitmap({Builtin::PRIMITIVE}),
-    /* bits64 */ Bitmap({Builtin::PRIMITIVE}),
-    /* primitive */ Bitmap({Builtin::TOP}),
-    /* reference */ Bitmap({Builtin::TOP}),
-    /* null_reference */ Bitmap({Builtin::REFERENCE, Builtin::OBJECT, Builtin::TYPE_CLASS, Builtin::ARRAY}),
-    /* object */ Bitmap({Builtin::REFERENCE}),
-    /* type_class */ Bitmap({Builtin::REFERENCE}),
-    /* array */ Bitmap({Builtin::OBJECT}),
+    0,                                                                                  /* undefined */
+    0,                                                                                  /* top */
+    Bitmap({Builtin::U8, Builtin::I8}),                                                 /* u1 */
+    Bitmap({Builtin::I16, Builtin::INTEGRAL8}),                                         /* i8 */
+    Bitmap({Builtin::U16, Builtin::I16, Builtin::INTEGRAL8}),                           /* u8 */
+    Bitmap({Builtin::I32, Builtin::INTEGRAL16}),                                        /* i16 */
+    Bitmap({Builtin::I32, Builtin::U32, Builtin::INTEGRAL16}),                          /* u16 */
+    Bitmap({Builtin::INTEGRAL32}),                                                      /* i32 */
+    Bitmap({Builtin::INTEGRAL32}),                                                      /* u32 */
+    Bitmap({Builtin::FLOAT32}),                                                         /* f32 */
+    Bitmap({Builtin::FLOAT64}),                                                         /* f64 */
+    Bitmap({Builtin::INTEGRAL64}),                                                      /* i64 */
+    Bitmap({Builtin::INTEGRAL64}),                                                      /* u64 */
+    Bitmap({Builtin::INTEGRAL16}),                                                      /* integral8 */
+    Bitmap({Builtin::INTEGRAL32}),                                                      /* integral16 */
+    Bitmap({Builtin::BITS32}),                                                          /* integral32 */
+    Bitmap({Builtin::BITS64}),                                                          /* integral64 */
+    Bitmap({Builtin::BITS32}),                                                          /* float32 */
+    Bitmap({Builtin::BITS64}),                                                          /* float64 */
+    Bitmap({Builtin::PRIMITIVE}),                                                       /* bits32 */
+    Bitmap({Builtin::PRIMITIVE}),                                                       /* bits64 */
+    Bitmap({Builtin::TOP}),                                                             /* primitive */
+    Bitmap({Builtin::TOP}),                                                             /* reference */
+    Bitmap({Builtin::REFERENCE, Builtin::OBJECT, Builtin::TYPE_CLASS, Builtin::ARRAY}), /* null_reference */
+    Bitmap({Builtin::REFERENCE}),                                                       /* object */
+    Bitmap({Builtin::REFERENCE}),                                                       /* type_class */
+    Bitmap({Builtin::OBJECT}),                                                          /* array */
     /* bot */
     Bitmap({Builtin::U1, Builtin::I8, Builtin::U8, Builtin::I16, Builtin::U16, Builtin::I32, Builtin::U32, Builtin::F32,
             Builtin::F64, Builtin::I64, Builtin::U64, Builtin::NULL_REFERENCE, Builtin::OBJECT, Builtin::ARRAY})};
 
 std::array<uint32_t, Builtin::LAST> builtin_supertypes = TransitiveClosure(&builtin_supertypes_nontrans);
+
+void BuildBuiltinLeastUpperBoundsNestedFunction(std::array<uint32_t, Builtin::LAST> const &supertypes, size_t &lhs,
+                                                std::array<std::array<Builtin, Builtin::LAST>, Builtin::LAST> &result)
+{
+    for (size_t rhs = 1; rhs < lhs; rhs++) {
+        Builtin candidate = Builtin::TOP;
+        uint32_t supertype_bits = supertypes[lhs] & supertypes[rhs];
+        for (size_t cc = 1; cc < Builtin::LAST; cc++) {
+            if ((supertype_bits & Bitmap({Builtin {cc}})) != 0 && (supertypes[cc] & Bitmap({candidate})) != 0) {
+                candidate = Builtin {cc};
+            }
+        }
+        result[lhs][rhs] = candidate;
+        result[rhs][lhs] = candidate;
+    }
+    result[lhs][lhs] = Builtin {lhs};
+}
 
 std::array<std::array<Builtin, Builtin::LAST>, Builtin::LAST> BuildBuiltinLeastUpperBounds(
     std::array<uint32_t, Builtin::LAST> const &supertypes)
@@ -107,18 +130,7 @@ std::array<std::array<Builtin, Builtin::LAST>, Builtin::LAST> BuildBuiltinLeastU
     std::array<std::array<Builtin, Builtin::LAST>, Builtin::LAST> result {};
     // Ignore ununsed index 0
     for (size_t lhs = 1; lhs < Builtin::LAST; lhs++) {
-        for (size_t rhs = 1; rhs < lhs; rhs++) {
-            Builtin candidate = Builtin::TOP;
-            uint32_t supertype_bits = supertypes[lhs] & supertypes[rhs];
-            for (size_t cc = 1; cc < Builtin::LAST; cc++) {
-                if ((supertype_bits & Bitmap({Builtin {cc}})) != 0 && (supertypes[cc] & Bitmap({candidate})) != 0) {
-                    candidate = Builtin {cc};
-                }
-            }
-            result[lhs][rhs] = candidate;
-            result[rhs][lhs] = candidate;
-        }
-        result[lhs][lhs] = Builtin {lhs};
+        BuildBuiltinLeastUpperBoundsNestedFunction(supertypes, lhs, result);
     }
     return result;
 }
@@ -154,34 +166,34 @@ struct ClassSubtypingFuns {
 };
 
 std::array<ClassSubtypingFuns, Builtin::LAST> class_subtyping_funs {
-    /* undefined */ ClassSubtypingFuns {nullptr, nullptr},
-    /* top */ ClassSubtypingFuns {AlwaysTrue, nullptr},
-    /* u1 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i8 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u8 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i16 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u16 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* f32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* f64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* i64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* u64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral8 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral16 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* integral64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* float32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* float64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* bits32 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* bits64 */ ClassSubtypingFuns {nullptr, nullptr},
-    /* primitive */ ClassSubtypingFuns {nullptr, nullptr},
-    /* reference */ ClassSubtypingFuns {AlwaysTrue, nullptr},
-    /* null_reference */ ClassSubtypingFuns {nullptr, AlwaysTrue},
-    /* object */ ClassSubtypingFuns {AlwaysTrue, IsObjectClass},
-    /* type_class */ ClassSubtypingFuns {IsClassClass, nullptr},
-    /* array */ ClassSubtypingFuns {IsClassArray, nullptr},
-    /* bot */ ClassSubtypingFuns {nullptr, AlwaysTrue}};
+    ClassSubtypingFuns {nullptr, nullptr},          /* undefined */
+    ClassSubtypingFuns {AlwaysTrue, nullptr},       /* top */
+    ClassSubtypingFuns {nullptr, nullptr},          /* u1 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* i8 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* u8 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* i16 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* u16 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* i32 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* u32 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* f32 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* f64 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* i64 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* u64 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* integral8 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* integral16 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* integral32 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* integral64 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* float32 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* float64 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* bits32 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* bits64 */
+    ClassSubtypingFuns {nullptr, nullptr},          /* primitive */
+    ClassSubtypingFuns {AlwaysTrue, nullptr},       /* reference */
+    ClassSubtypingFuns {nullptr, AlwaysTrue},       /* null_reference */
+    ClassSubtypingFuns {AlwaysTrue, IsObjectClass}, /* object */
+    ClassSubtypingFuns {IsClassClass, nullptr},     /* type_class */
+    ClassSubtypingFuns {IsClassArray, nullptr},     /* array */
+    ClassSubtypingFuns {nullptr, AlwaysTrue}};      /* bot */
 
 [[maybe_unused]] bool InvariantHolds(Type tp, TypeSystem const *tsys)
 {
@@ -245,6 +257,44 @@ bool Type::IsConsistent() const
     return true;
 }
 
+PandaString Type::IntersectionToString(TypeSystem const *&tsys) const
+{
+    auto members = GetIntersectionMembers(tsys);
+    ASSERT(!members.empty());
+    std::stringstream ss;
+    ss << "(";
+    bool first = true;
+    for (auto t : members) {
+        if (!first) {
+            ss << " & ";
+        } else {
+            first = false;
+        }
+        ss << t.ToString(tsys);
+    }
+    ss << ")";
+    return PandaString(ss.str());
+}
+
+PandaString Type::UnionToString(TypeSystem const *&tsys) const
+{
+    auto members = GetUnionMembers(tsys);
+    ASSERT(!members.empty());
+    std::stringstream ss;
+    ss << "(";
+    bool first = true;
+    for (auto t : members) {
+        if (!first) {
+            ss << " | ";
+        } else {
+            first = false;
+        }
+        ss << t.ToString(tsys);
+    }
+    ss << ")";
+    return PandaString(ss.str());
+}
+
 PandaString Type::ToString(TypeSystem const *tsys) const
 {
     if (IsNone()) {
@@ -262,38 +312,10 @@ PandaString Type::ToString(TypeSystem const *tsys) const
         return PandaString {klass->GetName()};
     }
     if (IsIntersection()) {
-        auto members = GetIntersectionMembers(tsys);
-        ASSERT(!members.empty());
-        std::stringstream ss;
-        ss << "(";
-        bool first = true;
-        for (auto t : members) {
-            if (!first) {
-                ss << " & ";
-            } else {
-                first = false;
-            }
-            ss << t.ToString(tsys);
-        }
-        ss << ")";
-        return PandaString(ss.str());
+        return IntersectionToString(tsys);
     }
     if (IsUnion()) {
-        auto members = GetUnionMembers(tsys);
-        ASSERT(!members.empty());
-        std::stringstream ss;
-        ss << "(";
-        bool first = true;
-        for (auto t : members) {
-            if (!first) {
-                ss << " | ";
-            } else {
-                first = false;
-            }
-            ss << t.ToString(tsys);
-        }
-        ss << ")";
-        return PandaString(ss.str());
+        return UnionToString(tsys);
     }
     return "<unexpected kind of AbstractType>";
 }
@@ -553,12 +575,10 @@ static bool IsIntersectionReasonable(Span<Type> members)
                 // no meaningful intersection possible
                 return false;
             }
+            if (!cls->IsInterface() && haveClass) {
+                return false;
+            }
             if (!cls->IsInterface()) {
-                if (haveClass) {
-                    // no memaningful intersection between classes,
-                    // other than subtyping
-                    return false;
-                }
                 haveClass = true;
             }
         }

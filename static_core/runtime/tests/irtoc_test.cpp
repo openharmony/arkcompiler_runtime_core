@@ -113,7 +113,7 @@ TEST(Irtoc, SeqLabels)
 extern "C" int IrtocTestRelocations(int);
 extern "C" int TestCall(int n)
 {
-    return n + 2;
+    return n + 2U;
 }
 
 TEST(Irtoc, Relocations)

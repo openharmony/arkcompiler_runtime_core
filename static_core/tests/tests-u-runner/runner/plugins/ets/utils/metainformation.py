@@ -19,6 +19,7 @@
 # The entrypoint is the 'find_all_metas' function
 
 import re
+from unittest import TestCase
 from typing import Tuple, List, Dict
 
 import yaml
@@ -75,13 +76,16 @@ def __parse_meta(meta: str) -> Dict:
     Given a meta, a string that starts with '/*---', ends with '---*/' and contains a valid YAML in between,
     this function parses that meta and validating it.
     """
-    assert len(meta) > len(META_START_STRING) + len(META_END_STRING)
-    assert meta.startswith(META_START_STRING) and meta.endswith(META_END_STRING)
+    test = TestCase()
+    test.assertTrue(len(meta) > len(META_START_STRING) + len(META_END_STRING))
+    test.assertTrue(meta.startswith(META_START_STRING) and meta.endswith(META_END_STRING))
 
     yaml_string = meta[len(META_START_STRING):-len(META_END_STRING)]
     try:
         data = yaml.safe_load(yaml_string)
-        assert isinstance(data, dict), "Invalid data format"
-        return data
+        if isinstance(data, dict):
+            return data
+        test.assertTrue(isinstance(data, dict), "Invalid data format")
+        return {}
     except Exception as common_exp:
         raise InvalidMetaException(str(common_exp)) from common_exp

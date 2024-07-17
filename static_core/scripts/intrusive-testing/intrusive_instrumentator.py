@@ -185,11 +185,11 @@ class SyncPoint:
         self._cl = Util.blank_string_to_none(cl)
         self._method = Util.blank_string_to_none(method)
         self._source = Util.blank_string_to_none(source)
-    
+
     def __hash__(self):
         return hash((self.file, self.index, self.cl, self.method, self.source))
-    
-    def __eq__(self, other): 
+
+    def __eq__(self, other):
         if not isinstance(other, SyncPoint):
             return False
         return (self.file == other.file) \
@@ -276,7 +276,7 @@ class SourceFile:
     def __hash__(self):
         return hash(self._path)
 
-    def __eq__(self, other): 
+    def __eq__(self, other):
         if not isinstance(other, SourceFile):
             return False
         return self.path == other.path
@@ -296,7 +296,7 @@ class HeaderFile(SourceFile):
     def __hash__(self):
         return hash((self.path, self._including_source_file_path))
 
-    def __eq__(self, other): 
+    def __eq__(self, other):
         if not isinstance(other, HeaderFile):
             return False
         return super().__eq__(other) \
@@ -497,7 +497,7 @@ class Instrumentator:
             except KeyError:
                 print(f"no key {sp_ref}")
                 sys.exit(-1)
-                    
+
             sync_point_idx += 1
 
     def __rep_sync_actions_process(self, sp_ref, sync_point_code, sync_action, header_file_set):

@@ -2692,7 +2692,6 @@ public:
             ASSERT(thread->HasPendingException());
 
             uint32_t pcOffset = this->FindCatchBlock(thread->GetException(), this->GetBytecodeOffset());
-
             if (pcOffset != panda_file::INVALID_OFFSET) {
                 return pcOffset;
             }

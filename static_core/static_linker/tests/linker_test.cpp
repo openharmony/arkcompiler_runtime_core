@@ -179,6 +179,60 @@ void TestSingle(const std::string &path, bool isGood = true, const Config &conf 
     }
 }
 
+struct TestData {
+    std::string pathPrefix;
+    bool isGood = false;
+    Result *expected = nullptr;
+    std::string gold;
+};
+
+void PerformTest(TestData *data, const std::vector<std::string> &perms, const Config &conf,
+                 std::optional<std::vector<char>> expectedFile, size_t iteration)
+{
+    auto out = data->pathPrefix + "linked.";
+    auto files = std::vector<std::string> {};
+
+    for (const auto &f : perms) {
+        out += f;
+        out += ".";
+        files.emplace_back(data->pathPrefix + f + ".abc");
+    }
+    out += "it";
+    out += std::to_string(iteration);
+    out += ".abc";
+
+    SCOPED_TRACE(out);
+
+    auto linkRes = Link(conf, out, files);
+    if (linkRes.errors.empty() != data->isGood) {
+        auto errs = std::string();
+        for (auto &err : linkRes.errors) {
+            errs += err;
+            errs += "\n";
+        }
+        ASSERT_EQ(linkRes.errors.empty(), data->isGood) << errs;
+    }
+
+    if (data->expected != nullptr) {
+        ASSERT_EQ(linkRes.stats.deduplicatedForeigners, data->expected->stats.deduplicatedForeigners);
+    }
+
+    if (data->isGood) {
+        std::vector<char> gotFile;
+        ASSERT_TRUE(ReadFile<true>(out, gotFile));
+        if (!expectedFile.has_value()) {
+            expectedFile = std::move(gotFile);
+        } else {
+            (void)iteration;
+            ASSERT_EQ(expectedFile.value(), gotFile) << "on iteration: " << iteration;
+        }
+
+        auto res = ExecPanda(out);
+        ASSERT_EQ(res.first, 0);
+        ASSERT_EQ(res.second, data->gold);
+    }
+}
+
 void TestMultiple(const std::string &path, std::vector<std::string> perms, bool isGood = true,
                   const Config &conf = ark::static_linker::DefaultConfig(), Result *expected = nullptr)
 {
@@ -197,61 +251,17 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
         NormalizeGold(gold);
     }
 
-    auto out = std::string {};
-    auto files = std::vector<std::string> {};
-
     std::optional<std::vector<char>> expectedFile;
-
-    auto performTest = [&out, &pathPrefix, &files, &perms, &conf, &isGood, &expected, &expectedFile,
-                        &gold](size_t iteration) {
-        out = pathPrefix + "linked.";
-        files.clear();
-
-        for (const auto &f : perms) {
-            out += f;
-            out += ".";
-            files.emplace_back(pathPrefix + f + ".abc");
-        }
-        out += "it";
-        out += std::to_string(iteration);
-        out += ".abc";
-
-        SCOPED_TRACE(out);
-
-        auto linkRes = Link(conf, out, files);
-        if (linkRes.errors.empty() != isGood) {
-            auto errs = std::string();
-            for (auto &err : linkRes.errors) {
-                errs += err;
-                errs += "\n";
-            }
-            ASSERT_EQ(linkRes.errors.empty(), isGood) << errs;
-        }
-
-        if (expected != nullptr) {
-            ASSERT_EQ(linkRes.stats.deduplicatedForeigners, expected->stats.deduplicatedForeigners);
-        }
-
-        if (isGood) {
-            std::vector<char> gotFile;
-            ASSERT_TRUE(ReadFile<true>(out, gotFile));
-            if (!expectedFile.has_value()) {
-                expectedFile = std::move(gotFile);
-            } else {
-                (void)iteration;
-                ASSERT_EQ(expectedFile.value(), gotFile) << "on iteration: " << iteration;
-            }
-
-            auto res = ExecPanda(out);
-            ASSERT_EQ(res.first, 0);
-            ASSERT_EQ(res.second, gold);
-        }
-    };
 
     do {
         expectedFile = std::nullopt;
+        TestData data;
+        data.pathPrefix = pathPrefix;
+        data.isGood = isGood;
+        data.expected = expected;
+        data.gold = gold;
         for (size_t iteration = 0; iteration < TEST_REPEAT_COUNT; iteration++) {
-            performTest(iteration);
+            PerformTest(&data, perms, conf, expectedFile, iteration);
         }
     } while (std::next_permutation(perms.begin(), perms.end()));
 }

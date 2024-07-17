@@ -21,38 +21,7 @@
 #include "assembly-parser.h"
 #include "disassembler.h"
 
-static inline std::string ExtractFuncBody(const std::string &text, const std::string &header)
-{
-    auto beg = text.find(header);
-    auto end = text.find('}', beg);
-
-    ASSERT(beg != std::string::npos);
-    ASSERT(end != std::string::npos);
-
-    return text.substr(beg + header.length(), end - (beg + header.length()));
-}
-
-TEST(InstructionsTest, TestLanguagePandaAssembly)
-{
-    auto program = ark::pandasm::Parser().Parse(R"(
-        .record A {}
-    )");
-    ASSERT(program);
-    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
-    ASSERT(pf);
-
-    ark::disasm::Disassembler d {};
-    std::stringstream ss {};
-
-    d.Disassemble(pf);
-    d.Serialize(ss);
-
-    EXPECT_TRUE(ss.str().find(".language PandaAssembly") != std::string::npos);
-}
-
-TEST(InstructionsTest, TestCalls)
-{
-    auto program = ark::pandasm::Parser().Parse(R"(
+static auto g_testCallsSource = R"(
 .record B {}
 
 .function u8 B.Bhandler_unspec(B a0) {
@@ -131,6 +100,45 @@ TEST(InstructionsTest, TestCalls)
     call.acc.short handler_short2, a0, 1
     return
 }
+)";
+
+static std::string GetNewarrSource()
+{
+    return R"(
+.function u1 g(u1 a0) {
+    newarr v0, a0, u1[]
+    newarr v0, a0, i8[]
+    newarr v0, a0, u8[]
+    newarr v0, a0, i16[]
+    newarr v0, a0, u16[]
+    newarr v0, a0, i32[]
+    newarr v0, a0, u32[]
+    newarr v0, a0, f32[]
+    newarr v0, a0, f64[]
+    newarr v0, a0, i64[]
+    newarr v0, a0, u64[]
+
+    ldai 0
+    return
+}
+)";
+}
+
+static inline std::string ExtractFuncBody(const std::string &text, const std::string &header)
+{
+    auto beg = text.find(header);
+    auto end = text.find('}', beg);
+
+    ASSERT(beg != std::string::npos);
+    ASSERT(end != std::string::npos);
+
+    return text.substr(beg + header.length(), end - (beg + header.length()));
+}
+
+TEST(InstructionsTest, TestLanguagePandaAssembly)
+{
+    auto program = ark::pandasm::Parser().Parse(R"(
+        .record A {}
     )");
     ASSERT(program);
     auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
@@ -142,22 +150,11 @@ TEST(InstructionsTest, TestCalls)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    EXPECT_TRUE(
-        ss.str().find(".function u16 long_function(i8 a0, i16 a1, i32 a2, i8 a3, i16 a4, i32 a5, i64 a6, f32 a7)") !=
-        std::string::npos);
+    EXPECT_TRUE(ss.str().find(".language PandaAssembly") != std::string::npos);
+}
 
-    std::string bodyG = ExtractFuncBody(ss.str(), "g(u1 a0) <static> {\n");
-
-    std::string line;
-    std::stringstream g {bodyG};
-    std::getline(g, line);
-    EXPECT_EQ("\tcall.virt.short B.Bhandler_unspec:(B), v4", line);
-    std::getline(g, line);
-    EXPECT_EQ("\tcall.virt.short B.Bhandler_short:(B,u1), v4, v1", line);
-    std::getline(g, line);
-    EXPECT_EQ("\tcall.virt B.Bhandler_short2:(B,u1[],i64), v4, v1, v2", line);
-    std::getline(g, line);
-    EXPECT_EQ("\tcall.virt B.Bhandler_long:(B,i8,i16,i32), v4, v0, v1, v2", line);
+void CheckTestCalls(std::stringstream &g, std::string &line)
+{
     std::getline(g, line);
     EXPECT_EQ("\tcall.virt.range B.Bhandler_range:(B,i8,i16,i32,i8,i16,i32), v4", line);
     std::getline(g, line);
@@ -202,27 +199,43 @@ TEST(InstructionsTest, TestCalls)
     EXPECT_EQ("\tcall.acc.short handler_short2:(u1,i64), a0, 0x1", line);
 }
 
-TEST(InstructionsTest, TestNewarr)
+TEST(InstructionsTest, TestCalls)
 {
-    auto program = ark::pandasm::Parser().Parse(R"(
-.function u1 g(u1 a0) {
-    newarr v0, a0, u1[]
-    newarr v0, a0, i8[]
-    newarr v0, a0, u8[]
-    newarr v0, a0, i16[]
-    newarr v0, a0, u16[]
-    newarr v0, a0, i32[]
-    newarr v0, a0, u32[]
-    newarr v0, a0, f32[]
-    newarr v0, a0, f64[]
-    newarr v0, a0, i64[]
-    newarr v0, a0, u64[]
+    auto program = ark::pandasm::Parser().Parse(g_testCallsSource);
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
 
-    ldai 0
-    return
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    EXPECT_TRUE(
+        ss.str().find(".function u16 long_function(i8 a0, i16 a1, i32 a2, i8 a3, i16 a4, i32 a5, i64 a6, f32 a7)") !=
+        std::string::npos);
+
+    std::string bodyG = ExtractFuncBody(ss.str(), "g(u1 a0) <static> {\n");
+
+    std::string line;
+    std::stringstream g {bodyG};
+
+    std::getline(g, line);
+    EXPECT_EQ("\tcall.virt.short B.Bhandler_unspec:(B), v4", line);
+    std::getline(g, line);
+    EXPECT_EQ("\tcall.virt.short B.Bhandler_short:(B,u1), v4, v1", line);
+    std::getline(g, line);
+    EXPECT_EQ("\tcall.virt B.Bhandler_short2:(B,u1[],i64), v4, v1, v2", line);
+    std::getline(g, line);
+    EXPECT_EQ("\tcall.virt B.Bhandler_long:(B,i8,i16,i32), v4, v0, v1, v2", line);
+
+    CheckTestCalls(g, line);
 }
 
-    )");
+TEST(InstructionsTest, TestNewarr)
+{
+    auto program = ark::pandasm::Parser().Parse(GetNewarrSource());
     ASSERT(program);
     auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);

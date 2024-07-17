@@ -226,15 +226,11 @@ inline RegContext RcUnion(RegContext const *lhs, RegContext const *rhs, TypeSyst
 {
     RegContext result(std::max(lhs->regs_.size(), rhs->regs_.size()));
     auto resultIt = result.regs_.begin();
-    auto lhsIt = lhs->regs_.begin();
-    auto rhsIt = rhs->regs_.begin();
-    while (lhsIt != lhs->regs_.end() && rhsIt != rhs->regs_.end()) {
+    for (auto lhsIt = lhs->regs_.begin(), rhsIt = rhs->regs_.begin();
+         lhsIt != lhs->regs_.end() && rhsIt != rhs->regs_.end(); ++lhsIt, ++rhsIt, ++resultIt) {
         if (!(*lhsIt).IsNone() && !(*rhsIt).IsNone()) {
             *resultIt = AtvJoin(&*lhsIt, &*rhsIt, tsys);
         }
-        ++lhsIt;
-        ++rhsIt;
-        ++resultIt;
     }
     return result;
 }

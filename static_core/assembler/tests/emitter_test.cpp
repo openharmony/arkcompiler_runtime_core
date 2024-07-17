@@ -187,11 +187,7 @@ uint8_t GetSpecialOpcode(uint32_t pcInc, int32_t lineInc)
            (pcInc * panda_file::LineNumberProgramItem::LINE_RANGE) + panda_file::LineNumberProgramItem::OPCODE_BASE;
 }
 
-TEST(emittertests, debuginfo)
-{
-    Parser p;
-
-    auto source = R"(
+static auto g_debuginfo = R"(
         .function void main() {
             ldai.64 0   # line 3, pc 0
                         # line 4
@@ -210,8 +206,12 @@ TEST(emittertests, debuginfo)
         }
     )";
 
+TEST(emittertests, debuginfo)
+{
+    Parser p;
+
     std::string sourceFilename = "source.pa";
-    auto res = p.Parse(source, sourceFilename);
+    auto res = p.Parse(g_debuginfo, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -272,11 +272,7 @@ TEST(emittertests, debuginfo)
     });
 }
 
-TEST(emittertests, exceptions)
-{
-    Parser p;
-
-    auto source = R"(
+static auto g_exceptions = R"(
         .record Exception1 {}
         .record Exception2 {}
 
@@ -300,7 +296,11 @@ TEST(emittertests, exceptions)
         }
     )";
 
-    auto res = p.Parse(source);
+TEST(emittertests, exceptions)
+{
+    Parser p;
+
+    auto res = p.Parse(g_exceptions);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -510,11 +510,7 @@ TEST(emittertests, constructors)
     }
 }
 
-TEST(emittertests, field_value)
-{
-    Parser p;
-
-    auto source = R"(
+static auto g_fieldValue = R"(
         .record panda.String <external>
 
         .record R {
@@ -532,6 +528,10 @@ TEST(emittertests, field_value)
             panda.String f_str <value="str">
         }
     )";
+
+TEST(emittertests, field_value)
+{
+    Parser p;
 
     struct FieldData {
         std::string name;
@@ -555,7 +555,7 @@ TEST(emittertests, field_value)
         {"f_str", panda_file::Type::TypeId::REFERENCE, "str"}};
     // NOLINTEND(readability-magic-numbers)
 
-    auto res = p.Parse(source);
+    auto res = p.Parse(g_fieldValue);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());
@@ -813,11 +813,7 @@ TEST(emittertests, function_overloading_1)
     ASSERT_EQ(3, numMethods);
 }
 
-TEST(emittertests, access_modifiers)
-{
-    Parser p;
-
-    auto source = R"(
+static auto g_testAccessModifiers = R"(
         .record A <access.record=private> {}
 
         .record B <access.record=public> {
@@ -832,10 +828,14 @@ TEST(emittertests, access_modifiers)
         .function void A.f() <access.function=protected> {}
         .function void B.f() <access.function=private> {}
         .function void C.f() <access.function=public> {}
-    )";
+)";
+
+TEST(emittertests, access_modifiers)
+{
+    Parser p;
 
     std::string sourceFilename = "source.pa";
-    auto res = p.Parse(source, sourceFilename);
+    auto res = p.Parse(g_testAccessModifiers, sourceFilename);
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 
     auto pf = AsmEmitter::Emit(res.Value());

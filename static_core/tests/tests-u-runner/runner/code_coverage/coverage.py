@@ -110,7 +110,8 @@ class LlvmCov:
 
     def make_profdata_list_file(self) -> None:
         results = self.do_find(self.coverage_dir.profdata_dir, '*.profdata')
-        with open(self.coverage_dir.profdata_files_list_file, 'a', encoding="utf-8") as the_file:
+        with os.fdopen(os.open(self.coverage_dir.profdata_files_list_file, os.O_APPEND | os.O_CREAT, 0o755),
+                "a", encoding="utf-8") as the_file:
             for i in results:
                 the_file.write(str(i) + '\n')
 
@@ -143,7 +144,8 @@ class LlvmCov:
 
         command = self.llvm_cov_commands.llvm_cov_export_command(args)
 
-        with open(self.coverage_dir.info_file, "w", encoding="utf-8") as file_dot_info:
+        with os.fdopen(os.open(self.coverage_dir.info_file, os.O_WRONLY | os.O_CREAT, 0o755), \
+                       "w", encoding="utf-8") as file_dot_info:
             self.linux_commands.run_command(command, stdout=file_dot_info)
 
     def genhtml(self) -> None:

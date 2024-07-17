@@ -34,6 +34,46 @@ namespace ark::interpreter {
 
 enum InterpreterType { CPP = 0, IRTOC, LLVM };
 
+void ExecuteImplType(InterpreterType interpreterType, ManagedThread *thread, const uint8_t *pc, Frame *frame,
+                     bool jumpToEh)
+{
+    if (interpreterType == InterpreterType::LLVM) {
+#ifdef PANDA_LLVM_INTERPRETER
+        LOG(DEBUG, RUNTIME) << "Setting up LLVM Irtoc dispatch table";
+        auto dispathTable = SetupLLVMDispatchTableImpl();
+        if (jumpToEh) {
+            ExecuteImplFastEH_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+        } else {
+            ExecuteImplFast_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+        }
+#else
+        LOG(FATAL, RUNTIME) << "--interpreter-type=llvm is not supported in this configuration";
+#endif
+    } else if (interpreterType == InterpreterType::IRTOC) {
+#ifdef PANDA_WITH_IRTOC
+        LOG(DEBUG, RUNTIME) << "Setting up Irtoc dispatch table";
+        auto dispathTable = SetupDispatchTableImpl();
+        if (jumpToEh) {
+            ExecuteImplFastEH(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+        } else {
+            ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
+        }
+#else
+        LOG(FATAL, RUNTIME) << "--interpreter-type=irtoc is not supported in this configuration";
+#endif
+    } else {
+        if (frame->IsDynamic()) {
+            if (thread->GetVM()->IsBytecodeProfilingEnabled()) {
+                ExecuteImplInner<RuntimeInterface, true, true>(thread, pc, frame, jumpToEh);
+            } else {
+                ExecuteImplInner<RuntimeInterface, true, false>(thread, pc, frame, jumpToEh);
+            }
+        } else {
+            ExecuteImplInner<RuntimeInterface, false>(thread, pc, frame, jumpToEh);
+        }
+    }
+}
+
 void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool jumpToEh)
 {
     const uint8_t *inst = frame->GetMethod()->GetInstructions();
@@ -82,41 +122,7 @@ void ExecuteImpl(ManagedThread *thread, const uint8_t *pc, Frame *frame, bool ju
         }
     }
 #endif
-    if (interpreterType == InterpreterType::LLVM) {
-#ifdef PANDA_LLVM_INTERPRETER
-        LOG(DEBUG, RUNTIME) << "Setting up LLVM Irtoc dispatch table";
-        auto dispathTable = SetupLLVMDispatchTableImpl();
-        if (jumpToEh) {
-            ExecuteImplFastEH_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
-        } else {
-            ExecuteImplFast_LLVM(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
-        }
-#else
-        LOG(FATAL, RUNTIME) << "--interpreter-type=llvm is not supported in this configuration";
-#endif
-    } else if (interpreterType == InterpreterType::IRTOC) {
-#ifdef PANDA_WITH_IRTOC
-        LOG(DEBUG, RUNTIME) << "Setting up Irtoc dispatch table";
-        auto dispathTable = SetupDispatchTableImpl();
-        if (jumpToEh) {
-            ExecuteImplFastEH(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
-        } else {
-            ExecuteImplFast(thread, const_cast<uint8_t *>(pc), frame, dispathTable);
-        }
-#else
-        LOG(FATAL, RUNTIME) << "--interpreter-type=irtoc is not supported in this configuration";
-#endif
-    } else {
-        if (frame->IsDynamic()) {
-            if (thread->GetVM()->IsBytecodeProfilingEnabled()) {
-                ExecuteImplInner<RuntimeInterface, true, true>(thread, pc, frame, jumpToEh);
-            } else {
-                ExecuteImplInner<RuntimeInterface, true, false>(thread, pc, frame, jumpToEh);
-            }
-        } else {
-            ExecuteImplInner<RuntimeInterface, false>(thread, pc, frame, jumpToEh);
-        }
-    }
+    ExecuteImplType(interpreterType, thread, pc, frame, jumpToEh);
 }
 
 // Methods for debugging

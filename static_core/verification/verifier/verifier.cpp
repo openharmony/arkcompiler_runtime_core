@@ -287,6 +287,79 @@ void PrintHelp(const PandArgParser &paParser)
               << paParser.GetHelpString() << std::endl;
 }
 
+static int RunThreads(Options &cliOptions, RuntimeOptions &runtimeOptions)
+{
+    uint32_t threads = cliOptions.GetThreads();
+    if (threads == 0) {
+        threads = std::thread::hardware_concurrency();
+        // hardware_concurrency can return 0 if the value is not computable or well defined
+        if (threads == 0) {
+            threads = 1;
+        } else if (threads > MAX_THREADS) {
+            threads = MAX_THREADS;
+        }
+    }
+    runtimeOptions.SetVerificationThreads(threads);
+
+    if (!Runtime::Create(runtimeOptions)) {
+        std::cerr << "Error: cannot create runtime" << std::endl;
+        return -1;
+    }
+
+    int ret = RunVerifier(cliOptions) ? 0 : -1;
+
+    if (cliOptions.IsPrintMemoryStatistics()) {
+        std::cout << Runtime::GetCurrent()->GetMemoryStatistics();
+    }
+    if (!Runtime::Destroy()) {
+        std::cerr << "Error: cannot destroy runtime" << std::endl;
+        return -1;
+    }
+    return ret;
+}
+
+static int Run(Options &cliOptions, RuntimeOptions &runtimeOptions, base_options::Options &baseOptions,
+               PandArg<std::string> &file)
+{
+    auto bootPandaFiles = cliOptions.GetBootPandaFiles();
+    auto pandaFiles = cliOptions.GetPandaFiles();
+    std::string mainFileName = file.GetValue();
+    if (!mainFileName.empty()) {
+        if (pandaFiles.empty()) {
+            bootPandaFiles.push_back(mainFileName);
+        } else {
+            auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
+                                          [&mainFileName](auto &fileName) { return mainFileName == fileName; });
+            if (foundIter == pandaFiles.end()) {
+                pandaFiles.push_back(mainFileName);
+            }
+        }
+    }
+
+    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
+    runtimeOptions.SetPandaFiles(pandaFiles);
+    runtimeOptions.SetLoadRuntimes(cliOptions.GetLoadRuntimes());
+    runtimeOptions.SetGcType(cliOptions.GetGcType());
+
+    baseOptions.SetLogComponents(cliOptions.GetLogComponents());
+    baseOptions.SetLogLevel(cliOptions.GetLogLevel());
+    baseOptions.SetLogStream(cliOptions.GetLogStream());
+    baseOptions.SetLogFile(cliOptions.GetLogFile());
+    Logger::Initialize(baseOptions);
+
+    runtimeOptions.SetLimitStandardAlloc(cliOptions.IsLimitStandardAlloc());
+    runtimeOptions.SetInternalAllocatorType(cliOptions.GetInternalAllocatorType());
+    runtimeOptions.SetInternalMemorySizeLimit(cliOptions.GetInternalMemorySizeLimit());
+
+    runtimeOptions.SetVerificationMode(cliOptions.IsDebugMode() ? VerificationMode::DEBUG
+                                                                : VerificationMode::AHEAD_OF_TIME);
+    runtimeOptions.SetVerificationConfigFile(cliOptions.GetConfigFile());
+    runtimeOptions.SetVerificationCacheFile(cliOptions.GetCacheFile());
+    runtimeOptions.SetVerificationUpdateCache(cliOptions.IsUpdateCache());
+    runtimeOptions.SetVerifyRuntimeLibraries(cliOptions.IsVerifyRuntimeLibraries());
+    return RunThreads(cliOptions, runtimeOptions);
+}
+
 int Main(int argc, const char **argv)
 {
     Span<const char *> sp(argv, argc);
@@ -333,70 +406,7 @@ int Main(int argc, const char **argv)
         return 1;
     }
 
-    auto bootPandaFiles = cliOptions.GetBootPandaFiles();
-    auto pandaFiles = cliOptions.GetPandaFiles();
-    std::string mainFileName = file.GetValue();
-
-    if (!mainFileName.empty()) {
-        if (pandaFiles.empty()) {
-            bootPandaFiles.push_back(mainFileName);
-        } else {
-            auto foundIter = std::find_if(pandaFiles.begin(), pandaFiles.end(),
-                                          [&mainFileName](auto &fileName) { return mainFileName == fileName; });
-            if (foundIter == pandaFiles.end()) {
-                pandaFiles.push_back(mainFileName);
-            }
-        }
-    }
-
-    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
-    runtimeOptions.SetPandaFiles(pandaFiles);
-    runtimeOptions.SetLoadRuntimes(cliOptions.GetLoadRuntimes());
-    runtimeOptions.SetGcType(cliOptions.GetGcType());
-
-    baseOptions.SetLogComponents(cliOptions.GetLogComponents());
-    baseOptions.SetLogLevel(cliOptions.GetLogLevel());
-    baseOptions.SetLogStream(cliOptions.GetLogStream());
-    baseOptions.SetLogFile(cliOptions.GetLogFile());
-    Logger::Initialize(baseOptions);
-
-    runtimeOptions.SetLimitStandardAlloc(cliOptions.IsLimitStandardAlloc());
-    runtimeOptions.SetInternalAllocatorType(cliOptions.GetInternalAllocatorType());
-    runtimeOptions.SetInternalMemorySizeLimit(cliOptions.GetInternalMemorySizeLimit());
-
-    runtimeOptions.SetVerificationMode(cliOptions.IsDebugMode() ? VerificationMode::DEBUG
-                                                                : VerificationMode::AHEAD_OF_TIME);
-    runtimeOptions.SetVerificationConfigFile(cliOptions.GetConfigFile());
-    runtimeOptions.SetVerificationCacheFile(cliOptions.GetCacheFile());
-    runtimeOptions.SetVerificationUpdateCache(cliOptions.IsUpdateCache());
-    runtimeOptions.SetVerifyRuntimeLibraries(cliOptions.IsVerifyRuntimeLibraries());
-    uint32_t threads = cliOptions.GetThreads();
-    if (threads == 0) {
-        threads = std::thread::hardware_concurrency();
-        // hardware_concurrency can return 0 if the value is not computable or well defined
-        if (threads == 0) {
-            threads = 1;
-        } else if (threads > MAX_THREADS) {
-            threads = MAX_THREADS;
-        }
-    }
-    runtimeOptions.SetVerificationThreads(threads);
-
-    if (!Runtime::Create(runtimeOptions)) {
-        std::cerr << "Error: cannot create runtime" << std::endl;
-        return -1;
-    }
-
-    int ret = RunVerifier(cliOptions) ? 0 : -1;
-
-    if (cliOptions.IsPrintMemoryStatistics()) {
-        std::cout << Runtime::GetCurrent()->GetMemoryStatistics();
-    }
-    if (!Runtime::Destroy()) {
-        std::cerr << "Error: cannot destroy runtime" << std::endl;
-        return -1;
-    }
-    return ret;
+    return Run(cliOptions, runtimeOptions, baseOptions, file);
 }
 
 }  // namespace ark::verifier

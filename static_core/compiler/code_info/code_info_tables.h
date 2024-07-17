@@ -25,7 +25,7 @@ namespace ark::compiler {
 
 class StackMap : public BitTableRow<8U, StackMap> {
 public:
-    BIT_TABLE_HEADER(8, StackMap)
+    BIT_TABLE_HEADER(8, StackMap);
     BIT_TABLE_COLUMN(0, Properties, PROPERTIES)
     BIT_TABLE_COLUMN(1, NativePc, NATIVE_PC)
     BIT_TABLE_COLUMN(2, BytecodePc, BYTECODE_PC)
@@ -88,7 +88,7 @@ private:
 
 class InlineInfo : public BitTableRow<6U, InlineInfo> {
 public:
-    BIT_TABLE_HEADER(6, InlineInfo)
+    BIT_TABLE_HEADER(6, InlineInfo);
     BIT_TABLE_COLUMN(0, IsLast, IS_LAST)
     BIT_TABLE_COLUMN(1, BytecodePc, BYTECODE_PC)
     BIT_TABLE_COLUMN(2, MethodIdIndex, METHOD_ID_INDEX)
@@ -103,7 +103,7 @@ public:
 
 class RegisterMask : public BitTableRow<1, RegisterMask> {
 public:
-    BIT_TABLE_HEADER(1, RegisterMask)
+    BIT_TABLE_HEADER(1, RegisterMask);
     BIT_TABLE_COLUMN(0, Mask, MASK)
 
     DEFAULT_MOVE_SEMANTIC(RegisterMask);
@@ -113,7 +113,7 @@ public:
 
 class StackMask : public BitTableRow<1, StackMask> {
 public:
-    BIT_TABLE_HEADER(1, StackMask)
+    BIT_TABLE_HEADER(1, StackMask);
     BIT_TABLE_COLUMN(0, Mask, MASK)
 
     DEFAULT_MOVE_SEMANTIC(StackMask);
@@ -123,7 +123,7 @@ public:
 
 class VRegisterMask : public BitTableRow<1, VRegisterMask> {
 public:
-    BIT_TABLE_HEADER(1, VRegisterMask)
+    BIT_TABLE_HEADER(1, VRegisterMask);
     BIT_TABLE_COLUMN(0, Mask, MASK)
 
     DEFAULT_MOVE_SEMANTIC(VRegisterMask);
@@ -133,7 +133,7 @@ public:
 
 class MethodId : public BitTableRow<1, MethodId> {
 public:
-    BIT_TABLE_HEADER(1, MethodId)
+    BIT_TABLE_HEADER(1, MethodId);
     BIT_TABLE_COLUMN(0, Id, ID)
 
     DEFAULT_MOVE_SEMANTIC(MethodId);
@@ -143,7 +143,7 @@ public:
 
 class VRegisterCatalogueIndex : public BitTableRow<1, VRegisterCatalogueIndex> {
 public:
-    BIT_TABLE_HEADER(1, VRegisterCatalogueIndex)
+    BIT_TABLE_HEADER(1, VRegisterCatalogueIndex);
     BIT_TABLE_COLUMN(0, Index, INDEX)
 
     DEFAULT_MOVE_SEMANTIC(VRegisterCatalogueIndex);
@@ -153,7 +153,7 @@ public:
 
 class VRegisterInfo : public BitTableRow<2U, VRegisterInfo> {
 public:
-    BIT_TABLE_HEADER(2, VRegisterInfo)
+    BIT_TABLE_HEADER(2, VRegisterInfo);
     BIT_TABLE_COLUMN(0, Info, INFO)
     BIT_TABLE_COLUMN(1, Value, VALUE)
 
@@ -191,7 +191,7 @@ public:
 
 class ImplicitNullChecks : public BitTableRow<2U, ImplicitNullChecks> {
 public:
-    BIT_TABLE_HEADER(2, ImplicitNullChecks)
+    BIT_TABLE_HEADER(2, ImplicitNullChecks);
     BIT_TABLE_COLUMN(0, InstNativePc, INST_NATIVE_PC)
     BIT_TABLE_COLUMN(1, Offset, OFFSET)
 
@@ -202,7 +202,7 @@ public:
 
 class ConstantTable : public BitTableRow<1, ConstantTable> {
 public:
-    BIT_TABLE_HEADER(1, ConstantTable)
+    BIT_TABLE_HEADER(1, ConstantTable);
     BIT_TABLE_COLUMN(0, Value, VALUE)
 
     DEFAULT_MOVE_SEMANTIC(ConstantTable);

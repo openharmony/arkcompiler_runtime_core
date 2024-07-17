@@ -181,6 +181,12 @@ private:
 
     void MergeClass(const panda_file::FileReader *reader, panda_file::ClassItem *ni, panda_file::ClassItem *oi);
 
+    void AddRegularClasses();
+
+    void CheckClassRedifinition(const std::string &name, panda_file::FileReader *reader);
+
+    void FillRegularClasses();
+
     void MergeMethod(const panda_file::FileReader *reader, panda_file::ClassItem *clz, panda_file::MethodItem *oi);
 
     void MergeField(const panda_file::FileReader *reader, panda_file::ClassItem *clz, panda_file::FieldItem *oi);
@@ -194,6 +200,13 @@ private:
 
     void MergeForeignFieldCreate(const panda_file::FileReader *reader, panda_file::BaseClassItem *clz,
                                  panda_file::ForeignFieldItem *ff);
+
+    std::pair<bool, bool> UpdateDebugInfo(panda_file::MethodItem *ni, panda_file::MethodItem *oi);
+
+    void CreateTryBlocks(panda_file::MethodItem *ni, panda_file::CodeItem *nci, panda_file::MethodItem *oi,
+                         panda_file::CodeItem *oci);
+
+    bool IsSameProto(panda_file::ProtoItem *op1, panda_file::ProtoItem *op2);
 
     template <typename T>
     struct AddAnnotationImplData {

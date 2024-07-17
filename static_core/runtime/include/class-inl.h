@@ -631,20 +631,23 @@ inline size_t Class::GetIMTOffset() const
     return GetVTableOffset() + vtableSize_ * sizeof(uintptr_t);
 }
 
-template <class T, bool IS_VOLATILE /* = false */>
+// IS_VOLATILE = false
+template <class T, bool IS_VOLATILE>
 inline T Class::GetFieldPrimitive(size_t offset) const
 {
     ASSERT_DO(IsInitializing() || IsInitialized(), LOG(ERROR, RUNTIME) << "class state: " << state_);
     return ObjectAccessor::GetPrimitive<T, IS_VOLATILE>(this, offset);
 }
 
-template <class T, bool IS_VOLATILE /* = false */>
+// IS_VOLATILE = false
+template <class T, bool IS_VOLATILE>
 inline void Class::SetFieldPrimitive(size_t offset, T value)
 {
     ObjectAccessor::SetPrimitive<T, IS_VOLATILE>(this, offset, value);
 }
 
-template <bool IS_VOLATILE /* = false */, bool NEED_READ_BARRIER /* = true */>
+// IS_VOLATILE = false , bool NEED_READ_BARRIER = true
+template <bool IS_VOLATILE, bool NEED_READ_BARRIER>
 inline ObjectHeader *Class::GetFieldObject(size_t offset) const
 {
     // NOTE(alovkov): GC can skip classes which are IsErroneous #6458
@@ -654,7 +657,8 @@ inline ObjectHeader *Class::GetFieldObject(size_t offset) const
     return ObjectAccessor::GetObject<IS_VOLATILE, NEED_READ_BARRIER>(this, offset);
 }
 
-template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */>
+// IS_VOLATILE = false , bool NEED_WRITE_BARRIER = true
+template <bool IS_VOLATILE, bool NEED_WRITE_BARRIER>
 inline void Class::SetFieldObject(size_t offset, ObjectHeader *value)
 {
     auto object = GetManagedObject();
@@ -675,13 +679,15 @@ inline void Class::SetFieldPrimitive(const Field &field, T value)
     ObjectAccessor::SetFieldPrimitive(this, field, value);
 }
 
-template <bool NEED_READ_BARRIER /* = true */>
+// NEED_READ_BARRIER = true
+template <bool NEED_READ_BARRIER>
 inline ObjectHeader *Class::GetFieldObject(const Field &field) const
 {
     return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER>(this, field);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */>
+// NEED_WRITE_BARRIER = true
+template <bool NEED_WRITE_BARRIER>
 inline void Class::SetFieldObject(const Field &field, ObjectHeader *value)
 {
     auto object = GetManagedObject();
@@ -694,13 +700,15 @@ inline void Class::SetFieldObject(const Field &field, ObjectHeader *value)
     }
 }
 
-template <bool NEED_READ_BARRIER /* = true */>
+// NEED_READ_BARRIER = true
+template <bool NEED_READ_BARRIER>
 inline ObjectHeader *Class::GetFieldObject(ManagedThread *thread, const Field &field) const
 {
     return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER>(thread, this, field);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */>
+// NEED_WRITE_BARRIER = true
+template <bool NEED_WRITE_BARRIER>
 inline void Class::SetFieldObject(ManagedThread *thread, const Field &field, ObjectHeader *value)
 {
     auto object = GetManagedObject();
@@ -725,13 +733,15 @@ inline void Class::SetFieldPrimitive(size_t offset, T value, std::memory_order m
     ObjectAccessor::SetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
-template <bool NEED_READ_BARRIER /* = true */>
+// NEED_READ_BARRIER = true
+template <bool NEED_READ_BARRIER>
 inline ObjectHeader *Class::GetFieldObject(size_t offset, std::memory_order memoryOrder) const
 {
     return ObjectAccessor::GetFieldObject<NEED_READ_BARRIER>(this, offset, memoryOrder);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */>
+// NEED_WRITE_BARRIER = true
+template <bool NEED_WRITE_BARRIER>
 inline void Class::SetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     auto object = GetManagedObject();
@@ -747,7 +757,8 @@ inline bool Class::CompareAndSetFieldPrimitive(size_t offset, T oldValue, T newV
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).first;
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */>
+// NEED_WRITE_BARRIER = true
+template <bool NEED_WRITE_BARRIER>
 inline bool Class::CompareAndSetFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
                                             std::memory_order memoryOrder, bool strong)
 {
@@ -766,7 +777,8 @@ inline T Class::CompareAndExchangeFieldPrimitive(size_t offset, T oldValue, T ne
     return ObjectAccessor::CompareAndSetFieldPrimitive(this, offset, oldValue, newValue, memoryOrder, strong).second;
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */>
+// NEED_WRITE_BARRIER = true
+template <bool NEED_WRITE_BARRIER>
 inline ObjectHeader *Class::CompareAndExchangeFieldObject(size_t offset, ObjectHeader *oldValue, ObjectHeader *newValue,
                                                           std::memory_order memoryOrder, bool strong)
 {
@@ -784,7 +796,8 @@ inline T Class::GetAndSetFieldPrimitive(size_t offset, T value, std::memory_orde
     return ObjectAccessor::GetAndSetFieldPrimitive(this, offset, value, memoryOrder);
 }
 
-template <bool NEED_WRITE_BARRIER /* = true */>
+// NEED_WRITE_BARRIER = true
+template <bool NEED_WRITE_BARRIER>
 inline ObjectHeader *Class::GetAndSetFieldObject(size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     auto object = GetManagedObject();

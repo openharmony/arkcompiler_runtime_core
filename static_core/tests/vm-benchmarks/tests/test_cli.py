@@ -21,6 +21,7 @@
 import sys
 import pytest  # type: ignore
 
+from unittest import TestCase
 from vmb.cli import Args, Command
 from vmb.tool import OptFlags
 from unittest.mock import patch
@@ -31,19 +32,20 @@ def cmdline(line):
 
 
 def test_run_command():
+    test = TestCase()
     with cmdline('gen --langs blah /foo/bar'):
         args = Args()
-        assert args.command == Command.GEN
-        assert args.langs == {'blah'}
-        assert args.get('platform') is None
+        test.assertTrue(args.command == Command.GEN)
+        test.assertTrue(args.langs == {'blah'})
+        test.assertTrue(args.get('platform') is None)
     with cmdline('all -L ,,this,that -l blah,,foo -p fake /foo/bar'):
         args = Args()
-        assert args.command == Command.ALL
-        assert args.langs == {'blah', 'foo'}
-        assert args.src_langs == {'.this', '.that'}
-        assert args.tests == set()
-        assert args.tags == set()
-        assert args.get('platform') == 'fake'
+        test.assertTrue(args.command == Command.ALL)
+        test.assertTrue(args.langs == {'blah', 'foo'})
+        test.assertTrue(args.src_langs == {'.this', '.that'})
+        test.assertTrue(args.tests == set())
+        test.assertTrue(args.tags == set())
+        test.assertTrue(args.get('platform') == 'fake')
 
 
 def test_wrong_opts():
@@ -57,10 +59,11 @@ def test_optfalgs():
                  '--mode=jit --mode=int /foo/bar'):
         args = Args()
         flags = args.get_opts_flags()
-        assert OptFlags.INT in flags
-        assert OptFlags.JIT not in flags
-        assert OptFlags.AOT not in flags
-        assert OptFlags.GC_STATS not in flags
+        test = TestCase()
+        test.assertTrue(OptFlags.INT in flags)
+        test.assertTrue(OptFlags.JIT not in flags)
+        test.assertTrue(OptFlags.AOT not in flags)
+        test.assertTrue(OptFlags.GC_STATS not in flags)
 
 
 def test_custom_opts():
@@ -69,5 +72,5 @@ def test_custom_opts():
                  '--node-custom-option="--c=d" '
                  '/foo/bar'):
         args = Args()
-        assert '"--a=b" "--c=d"' == \
-            ' '.join(args.get('node_custom_option'))
+        TestCase().assertTrue('"--a=b" "--c=d"' == \
+            ' '.join(args.get('node_custom_option')))

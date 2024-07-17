@@ -20,6 +20,7 @@
 
 import json
 import inspect
+from unittest import TestCase
 from typing import Optional
 from dataclasses import dataclass, field
 from collections import namedtuple
@@ -35,12 +36,13 @@ def test_singleton() -> None:
 
     a = S()
     b = S()
-    assert a is b
+    TestCase().assertTrue(a is b)
 
 
 def test_prefix() -> None:
-    assert "There" == remove_prefix("HelloThere", "Hello")
-    assert "NotMatched" == remove_prefix("NotMatched", "nOT")
+    test = TestCase()
+    test.assertTrue("There" == remove_prefix("HelloThere", "Hello"))
+    test.assertTrue("NotMatched" == remove_prefix("NotMatched", "nOT"))
 
 
 def test_jsonable() -> None:
@@ -67,17 +69,18 @@ def test_jsonable() -> None:
         a: A = field(default_factory=A)
         b: str = 'BBB'
 
+    test = TestCase()
     a = A()
-    assert a.z.name == 'N'
-    assert a.z.value == 'V'
+    test.assertTrue(a.z.name == 'N')
+    test.assertTrue(a.z.value == 'V')
 
-    assert '{"a": {"x": "XXX", "y": 123, "z": ["N", "V"]}, "b": "BBB"}' == \
-        B().js(indent=None)
+    test.assertTrue('{"a": {"x": "XXX", "y": 123, "z": ["N", "V"]}, "b": "BBB"}' == \
+        B().js(indent=None))
 
     obj = json.loads('{"x": "ok", "y": 5, "z": [3, 4]}')
     a = A.from_obj(**obj)
-    assert a.z.name == 3
-    assert a.z.value == 4
+    test.assertTrue(a.z.name == 3)
+    test.assertTrue(a.z.value == 4)
 
 
 @dataclass
@@ -87,7 +90,8 @@ class C(Jsonable):
 
 
 def test_json_loads() -> None:
+    test = TestCase()
     obj = json.loads('{"n": 1, "m":2}')
-    assert C(**obj).n == 1
+    test.assertTrue(C(**obj).n == 1)
     obj = json.loads('{"n": null, "m":2}')
-    assert C(**obj).n is None
+    test.assertTrue(C(**obj).n is None)
