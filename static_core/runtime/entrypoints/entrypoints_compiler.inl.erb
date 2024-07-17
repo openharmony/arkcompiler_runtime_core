@@ -21,6 +21,7 @@ enum class EntrypointId : uint8_t {
     INVALID = COUNT
 };
 
+// NOLINTNEXTLINE(readability-function-size)
 constexpr const char* GetEntrypointName(EntrypointId id) {
     ASSERT(id < EntrypointId::COUNT);
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)

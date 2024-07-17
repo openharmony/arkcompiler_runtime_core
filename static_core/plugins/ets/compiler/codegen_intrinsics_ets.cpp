@@ -158,8 +158,8 @@ void Codegen::CreateStringBuilderAppendNumber(IntrinsicInst *inst, Reg dst, SRCR
 
 void Codegen::CreateStringBuilderAppendChar(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    auto entrypoint = IsCompressedStringsEnabled() ? EntrypointId::STRING_BUILDER_APPEND_CHAR_COMPRESSED
-                                                   : EntrypointId::STRING_BUILDER_APPEND_CHAR;
+    ASSERT(IsCompressedStringsEnabled());
+    auto entrypoint = EntrypointId::STRING_BUILDER_APPEND_CHAR_COMPRESSED;
     SbAppendArgs args(dst, src[FIRST_OPERAND], src[SECOND_OPERAND]);
     GenerateSbAppendCall(this, inst, args, entrypoint);
 }
@@ -218,7 +218,7 @@ static void EncodeSbAppendString(Codegen *cg, IntrinsicInst *inst, const SbAppen
     enc->EncodeLdr(reg1, false, MemRef(args.Value(), ark::coretypes::STRING_LENGTH_OFFSET));
     // Do nothing if length of string is equal to 0.
     // The least significant bit indicates COMPRESSED/UNCOMPRESSED,
-    // thus if (unpacked length <= 1) then the actual length is equal to 0.
+    // thus if (packed length <= 1) then the actual length is equal to 0.
     enc->EncodeJump(labelFastPathDone, reg1, Imm(1), Condition::LS);
     // Skip setting 'compress' to false if the string is compressed.
     enc->EncodeJumpTest(labelIncIndex, reg1, Imm(1), Condition::TST_EQ);
@@ -253,13 +253,9 @@ void Codegen::CreateStringBuilderAppendString(IntrinsicInst *inst, Reg dst, SRCR
     static_assert(TypeInfo::GetScalarTypeBySize(sizeof(ark::ArraySizeT) * CHAR_BIT) == INT32_TYPE);
     static_assert(TypeInfo::GetScalarTypeBySize(sizeof(StringLengthType) * CHAR_BIT) == INT32_TYPE);
     ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(IsCompressedStringsEnabled());
 
     auto *enc = GetEncoder();
-    if (!IsCompressedStringsEnabled()) {
-        LOG(WARNING, COMPILER) << "String compression must be enabled";
-        enc->SetFalseResult();
-        return;
-    }
     auto builder = src[FIRST_OPERAND];
     auto *strInst = inst->GetInput(1).GetInst();
     if (strInst->IsNullPtr()) {
@@ -289,10 +285,7 @@ void Codegen::CreateStringBuilderAppendString(IntrinsicInst *inst, Reg dst, SRCR
 
 void Codegen::CreateStringConcat([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    if (!GetRuntime()->IsCompressedStringsEnabled()) {
-        GetEncoder()->SetFalseResult();
-        return;
-    }
+    ASSERT(IsCompressedStringsEnabled());
     switch (inst->GetIntrinsicId()) {
         case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_CONCAT2: {
             auto str1 = src[FIRST_OPERAND];
@@ -327,12 +320,9 @@ void Codegen::CreateStringConcat([[maybe_unused]] IntrinsicInst *inst, Reg dst, 
 void Codegen::CreateStringBuilderToString(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(GetArch() != Arch::AARCH32);
+    ASSERT(IsCompressedStringsEnabled());
+
     auto *enc = GetEncoder();
-    if (!IsCompressedStringsEnabled()) {
-        LOG(WARNING, COMPILER) << "String compression must be enabled";
-        enc->SetFalseResult();
-        return;
-    }
     auto entrypoint = EntrypointId::STRING_BUILDER_TO_STRING;
     auto sb = src[FIRST_OPERAND];
     if (GetGraph()->IsAotMode()) {
@@ -354,6 +344,42 @@ void Codegen::CreateDoubleToStringDecimal(IntrinsicInst *inst, Reg dst, SRCREGS 
     auto unused = src[THIRD_OPERAND];
     auto entrypoint = EntrypointId::DOUBLE_TO_STRING_DECIMAL;
     CallFastPath(inst, entrypoint, dst, {}, cache, numAsInt, unused);
+}
+
+/* See utf::IsWhiteSpaceChar() for the details */
+void Codegen::CreateCharIsWhiteSpace([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(GetArch() != Arch::AARCH32);
+    auto entrypoint = RuntimeInterface::EntrypointId::CHAR_IS_WHITE_SPACE;
+    auto ch = src[FIRST_OPERAND];
+    CallFastPath(inst, entrypoint, dst, {}, ch.As(INT16_TYPE));
+}
+
+void Codegen::CreateStringTrimLeft(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto str = src[FIRST_OPERAND];
+    auto unused = TypedImm(0);
+    // llvm backend needs unused args to call 3-args slow_path from 1-arg fast_path.
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_TRIM_LEFT, dst, {}, str, unused, unused);
+}
+
+void Codegen::CreateStringTrimRight(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto str = src[FIRST_OPERAND];
+    auto unused = TypedImm(0);
+    // llvm backend needs unused args to call 3-args slow_path from 1-arg fast_path.
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_TRIM_RIGHT, dst, {}, str, unused, unused);
+}
+
+void Codegen::CreateStringTrim(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto str = src[FIRST_OPERAND];
+    auto unused = TypedImm(0);
+    // llvm backend needs unused args to call 3-args slow_path from 1-arg fast_path.
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_TRIM, dst, {}, str, unused, unused);
 }
 
 }  // namespace ark::compiler

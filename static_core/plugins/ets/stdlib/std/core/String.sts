@@ -875,74 +875,21 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns new trimmed string
      */
-    public trim(): String {
-        if (this.isEmpty()) {
-            return this;
-        }
-        let right: int = this.getLength() - 1;
-        let left: int = 0;
-        if (Char.isWhiteSpace(this.charAt(right))) {
-            right--;
-            while (left <= right && Char.isWhiteSpace(this.charAt(right))) {
-                right--;
-            }
-        } else {
-            if (right != 0) {
-                if (!Char.isWhiteSpace(this.charAt(left))) {
-                    return this;
-                } else {
-                    left++;
-                }
-            } else {
-                return this;
-            }
-        }
-
-        while (left <= right && Char.isWhiteSpace(this.charAt(left))) {
-            left++;
-        }
-
-        return this.substring(left, right + 1);
-    }
+    public native trim(): String;
 
     /**
      * Trims all whitespaces from the beginning of this String.
      *
      * @returns new left trimmed string
      */
-    public trimLeft(): String {
-        if (this.isEmpty() || !Char.isWhiteSpace(this.charAt(0))) {
-            return this;
-        }
-        let firstNotWhiteSpaceIdx: int = this.getLength();
-        for (let i: int = 1; i < this.getLength(); i++) {
-            if (!Char.isWhiteSpace(this.charAt(i))) {
-                firstNotWhiteSpaceIdx = i;
-                break;
-            }
-        }
-        return this.substring(firstNotWhiteSpaceIdx, this.getLength());
-    }
+    public native trimLeft(): String;
 
     /**
      * Trims all whitespaces from the end of this String.
      *
      * @returns new right trimmed string
      */
-    public trimRight(): String {
-        let last: int = this.getLength() - 1;
-        if (this.isEmpty() || !Char.isWhiteSpace(this.charAt(last))) {
-            return this;
-        }
-        let lastNotWhiteSpaceIdx: int = -1;
-        for (let i: int = last - 1; i >= 0; i--) {
-            if (!Char.isWhiteSpace(this.charAt(i))) {
-                lastNotWhiteSpaceIdx = i;
-                break;
-            }
-        }
-        return this.substring(0, lastNotWhiteSpaceIdx + 1);
-    }
+    public native trimRight(): String;
 
     /**
      * Checks whether the specified char is in the specified

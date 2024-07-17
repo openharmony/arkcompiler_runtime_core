@@ -272,8 +272,8 @@ private:
 #endif  // PANDA_LLVM_INTERPRETER
 #ifdef PANDA_LLVM_FASTPATH
     static constexpr std::array SKIPPED_FASTPATHS = {
-        "StringHashCode",  // NOTE: To investigate if LLVM code is better (no MAdd)
-        "StringHashCodeCompressed",
+        "StringHashCode",            // LLVM-15 generates non-optimal code, MAdd cost is not accurate.
+        "StringHashCodeCompressed",  //
     };
 #endif  // PANDA_LLVM_FASTPATH
 #endif  // PANDA_LLVM_IRTOC

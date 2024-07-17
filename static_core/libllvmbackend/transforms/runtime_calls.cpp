@@ -72,7 +72,7 @@ llvm::CallInst *CreateEntrypointCallCommon(llvm::IRBuilder<> *builder, llvm::Val
         llvm::CallingConv::ID cc = llvm::CallingConv::C;
         switch (arguments.size()) {
             case 0U:
-                cc = call->getType()->isVoidTy() ? llvm::CallingConv::ArkFast0 : llvm::CallingConv::ArkFast1;
+                cc = llvm::CallingConv::ArkFast0;
                 break;
             case 1U:
             case 2U:

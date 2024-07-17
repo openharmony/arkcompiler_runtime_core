@@ -351,3 +351,79 @@
     - uint64_t            # number
     - uint64_t            # unused
     - uint64_t            # unused
+
+- name: StringEmpty
+  entrypoint: StringEmpty
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (to obtain klass)
+
+- name: StringTrimLeft
+  entrypoint: StringTrimLeft
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimLeftBase
+  entrypoint: StringTrimLeftBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRight
+  entrypoint: StringTrimRight
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRightBase
+  entrypoint: StringTrimRightBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrim
+  entrypoint: StringTrim
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimBase
+  entrypoint: StringTrimBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: CharIsWhiteSpace
+  entrypoint: CharIsWhiteSpace
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t   # result (true/false)
+    - uint16_t  # char to test

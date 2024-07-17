@@ -452,4 +452,19 @@ ets_int StdCoreStringCompareTo(EtsString *str1, EtsString *str2)
     return str1->GetCoreType()->Compare(str2->GetCoreType());
 }
 
+EtsString *StdCoreStringTrimLeft(EtsString *thisStr)
+{
+    return thisStr->TrimLeft();
+}
+
+EtsString *StdCoreStringTrimRight(EtsString *thisStr)
+{
+    return thisStr->TrimRight();
+}
+
+EtsString *StdCoreStringTrim(EtsString *thisStr)
+{
+    return thisStr->Trim();
+}
+
 }  // namespace ark::ets::intrinsics

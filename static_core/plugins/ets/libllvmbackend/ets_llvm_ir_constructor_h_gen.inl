@@ -31,3 +31,7 @@ void StringBuilderAppendStringNull(Inst *inst, llvm::PHINode *result, llvm::Basi
 void StringBuilderAppendStringMain(Inst *inst, llvm::Value *sbIndexOffset, llvm::Value *sbIndex, llvm::Value *sbBuffer,
                                    llvm::BasicBlock *contBb);
 bool EmitDoubleToStringDecimal(Inst *inst);
+bool EmitStringTrim(Inst *inst);
+bool EmitStringTrimLeft(Inst *inst);
+bool EmitStringTrimRight(Inst *inst);
+bool EmitCharIsWhiteSpace(Inst *inst);

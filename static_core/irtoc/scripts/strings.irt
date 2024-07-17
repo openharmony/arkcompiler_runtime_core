@@ -379,3 +379,5 @@ Label(:Loop)
 Label(:NotEqual)
   Return(calculate_chars_difference(data1, data2, utf).i32).i32
 }
+
+include_plugin 'ets_string'

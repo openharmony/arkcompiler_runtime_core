@@ -635,4 +635,91 @@ void UInt64ToUtf16Array(uint64_t v, uint16_t *outUtf16Buf, uint32_t nDigits, boo
     }
 }
 
+static constexpr uint16_t C_SPACE = 0x0020;
+static constexpr uint16_t C_0009 = 0x0009;
+static constexpr uint16_t C_000D = 0x000D;
+static constexpr uint16_t C_000E = 0x000E;
+static constexpr uint16_t C_00A0 = 0x00A0;
+static constexpr uint16_t C_1680 = 0x1680;
+static constexpr uint16_t C_2000 = 0x2000;
+static constexpr uint16_t C_200A = 0x200A;
+static constexpr uint16_t C_2028 = 0x2028;
+static constexpr uint16_t C_2029 = 0x2029;
+static constexpr uint16_t C_202F = 0x202F;
+static constexpr uint16_t C_205F = 0x205F;
+static constexpr uint16_t C_3000 = 0x3000;
+static constexpr uint16_t C_FEFF = 0xFEFF;
+
+bool IsWhiteSpaceChar(uint16_t c)
+{
+    if (c == C_SPACE) {
+        return true;
+    }
+    // [0x000E, 0x009F] -- common non-whitespace characters
+    if (C_000E <= c && c < C_00A0) {
+        return false;
+    }
+    // 0x0009 -- horizontal tab
+    if (c < C_0009) {
+        return false;
+    }
+    // 0x000A -- line feed or new line
+    // 0x000B -- vertical tab
+    // 0x000C -- formfeed
+    // 0x000D -- carriage return
+    if (c <= C_000D) {
+        return true;
+    }
+    // 0x00A0 -- no-break space
+    if (c == C_00A0) {
+        return true;
+    }
+    // 0x1680 -- Ogham space mark
+    if (c == C_1680) {
+        return true;
+    }
+    // 0x2000 -- en quad
+    if (c < C_2000) {
+        return false;
+    }
+    // 0x2001 -- em quad
+    // 0x2002 -- en space
+    // 0x2003 -- em space
+    // 0x2004 -- three-per-em space
+    // 0x2005 -- four-per-em space
+    // 0x2006 -- six-per-em space
+    // 0x2007 -- figure space
+    // 0x2008 -- punctuation space
+    // 0x2009 -- thin space
+    // 0x200A -- hair space
+    if (c <= C_200A) {
+        return true;
+    }
+    // 0x2028 -- line separator
+    if (c == C_2028) {
+        return true;
+    }
+    // 0x2029 -- paragraph separator
+    if (c == C_2029) {
+        return true;
+    }
+    // 0x202F -- narrow no-break space
+    if (c == C_202F) {
+        return true;
+    }
+    // 0x205F -- medium mathematical space
+    if (c == C_205F) {
+        return true;
+    }
+    // 0xFEFF -- byte order mark
+    if (c == C_FEFF) {
+        return true;
+    }
+    // 0x3000 -- ideographic space
+    if (c == C_3000) {
+        return true;
+    }
+    return false;
+}
+
 }  // namespace ark::utf
