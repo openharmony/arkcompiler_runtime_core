@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,16 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+{%- for c in cases %}
 
-{% for c in cases %}
 /*---
-desc: Casting contexts doesn't allow the following conversion.
-tags: [{{c.tags}}]
+desc: >-
+    A casting conversion from union converts an expression of union type
+    to one of the types of the union, or to a type that is derived from such one type.
+params: from {{c.from_type|safe}}
 ---*/
+{{c.decl}}
+let src: {{c.from_type}}
 
 function main(): int {
-  let s: {{c.stype}} = {{c.sval|safe}};
-  let d: {{c.dtype}} = s as {{c.dtype}};
-  return 0;
+{%- for v in c['types'] %}
+    src = {{v.v}}
+    let d{{loop.index}} = src as {{v.type}}
+    if (d{{loop.index}} != {{v.v}}) {
+        return 1
+    }
+{%- endfor %}
+    return 0
 }
-{% endfor %}
+{%- endfor %}

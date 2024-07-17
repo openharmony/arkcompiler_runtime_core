@@ -1048,50 +1048,6 @@
 17.experimental_features/08.native_functions_and_methods/01.native_functions/nat8.ets
 17.experimental_features/15.exceptions/01.throwing_functions/lambda.ets
 
-# Cast sequence
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_100.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_101.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_108.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_109.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_110.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_111.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_112.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_113.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_120.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_121.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_122.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_123.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_124.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_125.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_48.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_49.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_50.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_51.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_52.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_53.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_60.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_61.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_62.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_63.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_64.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_65.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_72.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_73.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_74.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_75.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_76.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_77.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_84.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_85.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_86.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_87.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_88.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_89.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_96.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_97.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_98.ets
-06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_99.ets
-
 # Leftovers from bit operations on floats
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_61.ets
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_68.ets
@@ -2008,6 +1964,12 @@
 02.lexical_elements/07.keywords/types_10.ets
 02.lexical_elements/07.keywords/types_2.ets
 # end of es2panda fails
+
+# 18115 CTE on a union type variable in instanceof
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_union/un2_0.ets
+
+# 18118 No ClassCastError on casting to a wrong function type
+06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_union/cce_5.ets
 
 # 14673,16369, 14338 Function, method, constructor overload signatures
 15.semantic_rules/04.type_compatibility/classes_compatibility_2.ets
