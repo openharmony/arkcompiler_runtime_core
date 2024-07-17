@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -433,21 +433,54 @@ AliasType AliasAnalysis::CheckMemAddress(const Pointer &p1, const Pointer &p2) c
     return MAY_ALIAS;
 }
 
+static uint64_t CombineIdxAndImm(const Pointer *p)
+{
+    uint64_t sum = 0;
+    if (p->GetIdx() != nullptr) {
+        auto idx = p->GetIdx();
+        ASSERT(idx->IsConst());
+        ASSERT(!DataType::IsFloatType(idx->GetType()));
+        sum = idx->CastToConstant()->GetRawValue();
+    }
+    sum += p->GetImm();
+    return sum;
+}
+
+AliasType AliasAnalysis::AliasingTwoArrayPointers(const Pointer *p1, const Pointer *p2)
+{
+    // Structure of Pointer: base, idx, imm
+    // Base is same. We should compare fields in order: idx, combine {idx + imm}.
+    // Is necessary compare sum, because LoadArrayI (..., nullptr, 2) and StoreArray(..., Const{2}, 0) will alias,
+    // but in separate idx and imm are different.
+
+    // 1) Compare idx. If they same, compare Imm part -> MUST_ALIAS, NO_ALIAS
+    if (AliasAnalysis::IsSameOffsets(p1->GetIdx(), p2->GetIdx()) == Trilean::TRUE) {
+        return p1->GetImm() == p2->GetImm() ? MUST_ALIAS : NO_ALIAS;
+    }
+    // 2) If still one of indexes is not constant or nullptr -> MAY_ALIAS
+    for (auto *pointer : {p1, p2}) {
+        if (pointer->GetIdx() != nullptr && !pointer->GetIdx()->IsConst()) {
+            return MAY_ALIAS;
+        }
+    }
+    // 3) Combine idx(is constant) and imm for compare
+    if (CombineIdxAndImm(p1) == CombineIdxAndImm(p2)) {
+        return MUST_ALIAS;
+    }
+    return NO_ALIAS;
+}
+
 /// Checks aliasing if P1 and P2 point to the one single object.
 /* static */
 AliasType AliasAnalysis::SingleIntersectionAliasing(const Pointer &p1, const Pointer &p2, const Pointer *intersection)
 {
     ASSERT(p1.GetType() == p2.GetType());
     switch (p1.GetType()) {
-        case ARRAY_ELEMENT:
-            if (IsSameOffsets(p1.GetIdx(), p2.GetIdx()) != Trilean::TRUE) {
-                return MAY_ALIAS;
-            }
-            if (p1.GetImm() != p2.GetImm()) {
-                return NO_ALIAS;
-            }
-            break;
+        case ARRAY_ELEMENT: {
+            return AliasingTwoArrayPointers(&p1, &p2);
+        }
         case DICTIONARY_ELEMENT:
+            // It is dinamic case, there are less guarantees
             if (IsSameOffsets(p1.GetIdx(), p2.GetIdx()) != Trilean::TRUE) {
                 return MAY_ALIAS;
             }

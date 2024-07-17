@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,10 @@ enum PointerType {
     // Valid fields: imm, type_ptr
     STATIC_FIELD,
     // Array pointer
-    // Valid fields: base, idx
+    // Valid fields
+    // * in common: base, idx
+    // * in case LoadArrayPair/StoreArrayPair: base, idx, imm
+    // * in case LoadArrayPairI/StoreArrayPairI, LoadArrayI/StoreArrayI: base, imm
     ARRAY_ELEMENT,
     // Dictionary pointer
     // Valid fields: base, idx
@@ -416,6 +419,8 @@ private:
     static Pointer ParseDynamicField(Inst *inst);
 
     static Trilean IsSameOffsets(const Inst *off1, const Inst *off2);
+    static AliasType AliasingTwoArrayPointers(const Pointer *p1, const Pointer *p2);
+
     static AliasType SingleIntersectionAliasing(const Pointer &p1, const Pointer &p2, const Pointer *intersection);
     AliasType CheckMemAddressEmptyIntersectionCase(const PointerSet &aliases1, const PointerSet &aliases2,
                                                    const Pointer &p1, const Pointer &p2) const;

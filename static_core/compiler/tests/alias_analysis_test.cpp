@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1237,6 +1237,46 @@ TEST_F(AliasAnalysisTest, Select)
     ASSERT_EQ(alias.CheckRefAlias(&INS(1U), &INS(6U)), AliasType::MAY_ALIAS);
 }
 
+TEST_F(AliasAnalysisTest, SomeKindsLoadArray)
+{
+    GRAPH(GetGraph())
+    {
+        PARAMETER(0U, 0U).ref();
+        PARAMETER(1U, 1U).s64();
+
+        CONSTANT(2U, 0U).s64();
+        CONSTANT(3U, 1U).s64();
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(12U, Opcode::LoadArrayPair).s32().Inputs(0U, 1U);
+            INST(14U, Opcode::LoadPairPart).s32().Inputs(12U).Imm(0x0U);
+            INST(13U, Opcode::LoadPairPart).s32().Inputs(12U).Imm(0x1U);
+
+            INST(15U, Opcode::LoadArrayI).s32().Imm(0U).Inputs(0U);
+            INST(16U, Opcode::LoadArray).s32().Inputs(0U, 2U);
+
+            INST(19U, Opcode::LoadArrayI).s32().Imm(1U).Inputs(0U);
+            INST(20U, Opcode::LoadArray).s32().Inputs(0U, 3U);
+
+            INST(17U, Opcode::LoadArray).s32().Inputs(0U, 1U);
+            INST(18U, Opcode::Return).s32().Inputs(17U);
+        }
+    }
+
+    GetGraph()->RunPass<AliasAnalysis>();
+    EXPECT_TRUE(GetGraph()->IsAnalysisValid<AliasAnalysis>());
+    GraphChecker(GetGraph()).Check();
+
+    auto &alias = GetGraph()->GetAnalysis<AliasAnalysis>();
+    ASSERT_EQ(alias.CheckInstAlias(&INS(14U), &INS(15U)), AliasType::MAY_ALIAS);
+    ASSERT_EQ(alias.CheckInstAlias(&INS(15U), &INS(16U)), AliasType::MUST_ALIAS);
+    ASSERT_EQ(alias.CheckInstAlias(&INS(19U), &INS(20U)), AliasType::MUST_ALIAS);
+    ASSERT_EQ(alias.CheckInstAlias(&INS(15U), &INS(20U)), AliasType::NO_ALIAS);
+    ASSERT_EQ(alias.CheckInstAlias(&INS(16U), &INS(19U)), AliasType::NO_ALIAS);
+    ASSERT_EQ(alias.CheckInstAlias(&INS(15U), &INS(17U)), AliasType::MAY_ALIAS);
+    ASSERT_EQ(alias.CheckInstAlias(&INS(20U), &INS(17U)), AliasType::MAY_ALIAS);
+}
+
 TEST_F(AliasAnalysisTest, LoadPairObject)
 {
     GRAPH(GetGraph())
@@ -1517,7 +1557,7 @@ TEST_F(AliasAnalysisTest, DynamicMethods)
     auto &alias = graph->GetAnalysis<AliasAnalysis>();
     ASSERT_EQ(alias.CheckInstAlias(&INS(10U), &INS(11U)), AliasType::MUST_ALIAS);
     ASSERT_EQ(alias.CheckInstAlias(&INS(10U), &INS(12U)), AliasType::MAY_ALIAS);
-    ASSERT_EQ(alias.CheckInstAlias(&INS(12U), &INS(13U)), AliasType::MAY_ALIAS);
+    ASSERT_EQ(alias.CheckInstAlias(&INS(12U), &INS(13U)), AliasType::NO_ALIAS);
 
     ASSERT_EQ(alias.CheckInstAlias(&INS(10U), &INS(14U)), AliasType::NO_ALIAS);
 

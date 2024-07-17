@@ -25,11 +25,11 @@
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    "NewArray", 1
 //! INST_COUNT    "StoreArray", 4
-//! INST_COUNT    "LoadArray", 4
+//! INST_COUNT    "LoadArray", 3
 //! PASS_AFTER    "Escape"
 //! INST_COUNT    "NewArray", 1
 //! INST_COUNT    "StoreArray", 4
-//! INST_COUNT    "LoadArray", 4
+//! INST_COUNT    "LoadArray", 3
 //! METHOD        "ETSGLOBAL::test3"
 //! PASS_BEFORE   "Escape"
 //! INST_COUNT    "NewArray", 1
