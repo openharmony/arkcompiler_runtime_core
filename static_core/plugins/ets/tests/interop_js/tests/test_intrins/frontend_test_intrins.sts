@@ -85,6 +85,12 @@ function testObject(): boolean {
     let r = "object:[object Object]"
     return r == vstringify(identity(v));
 }
+function testBigint(): boolean {
+    let v: bigint = 1234567890123456789012345678901234567890n
+    let r = "bigint:1234567890123456789012345678901234567890";
+    v = identity(identity(v)) as BigInt;
+    return r == vstringify(identity(v));
+}
 
 function testStringOps(): boolean {
     let strv = "foo";

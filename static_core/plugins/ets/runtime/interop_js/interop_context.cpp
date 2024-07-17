@@ -171,6 +171,7 @@ void InteropCtx::CacheClasses(EtsClassLinker *etsClassLinker)
     jsErrorClass_ = CacheClass(etsClassLinker, descriptors::JS_ERROR);
     objectClass_ = CacheClass(etsClassLinker, descriptors::OBJECT);
     stringClass_ = CacheClass(etsClassLinker, descriptors::STRING);
+    bigintClass_ = CacheClass(etsClassLinker, descriptors::BIG_INT);
     undefinedClass_ = CacheClass(etsClassLinker, descriptors::INTERNAL_UNDEFINED);
     promiseClass_ = CacheClass(etsClassLinker, descriptors::PROMISE);
     errorClass_ = CacheClass(etsClassLinker, descriptors::ERROR);
@@ -182,6 +183,8 @@ void InteropCtx::CacheClasses(EtsClassLinker *etsClassLinker)
 
     arrayClass_ = CacheClass(etsClassLinker, descriptors::ARRAY);
     arraybufClass_ = CacheClass(etsClassLinker, descriptors::ARRAY_BUFFER);
+
+    arrayAsListIntClass_ = CacheClass(etsClassLinker, descriptors::ARRAY_AS_LIST_INT);
 
     for (auto descr : FUNCTION_INTERFACE_DESCRIPTORS) {
         functionalInterfaces_.insert(CacheClass(etsClassLinker, descr));

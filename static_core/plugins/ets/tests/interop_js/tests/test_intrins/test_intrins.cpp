@@ -55,7 +55,8 @@ TEST_F(EtsInteropJsIntrinsTest, test_convertors)
     ASSERT_EQ(true, CallEtsMethod<bool>("testNumber"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testString"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testObject"));
-    // NOTE(vpukhov): symbol, function, external, bigint
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBigint"));
+    // NOTE(vpukhov): symbol, function, external
 
     ASSERT_EQ(true, CallEtsMethod<bool>("testStringOps"));
 }

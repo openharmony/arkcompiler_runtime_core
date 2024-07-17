@@ -287,6 +287,16 @@ public:
         return stringClass_;
     }
 
+    Class *GetBigIntClass() const
+    {
+        return bigintClass_;
+    }
+
+    Class *GetArrayAsListIntClass() const
+    {
+        return arrayAsListIntClass_;
+    }
+
     Class *GetUndefinedClass() const
     {
         return undefinedClass_;
@@ -458,6 +468,8 @@ private:
     Class *jsErrorClass_ {};
     Class *objectClass_ {};
     Class *stringClass_ {};
+    Class *bigintClass_ {};
+    Class *arrayAsListIntClass_ {};
     Class *undefinedClass_ {};
     Class *promiseClass_ {};
     Class *errorClass_ {};

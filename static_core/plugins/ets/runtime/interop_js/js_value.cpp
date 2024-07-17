@@ -60,22 +60,18 @@ void JSValue::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
         case napi_function:
             NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), jsValue->GetNapiRef()));
             return;
+        case napi_bigint:
+            delete jsValue->GetBigInt();
+            return;
         default:
             InteropCtx::Fatal("Finalizer called for non-finalizable type: " + std::to_string(type));
     }
     UNREACHABLE();
 }
 
-JSValue *JSValue::Create(EtsCoroutine *coro, InteropCtx *ctx, napi_value nvalue)
+JSValue *JSValue::CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue, napi_valuetype jsType,
+                               JSValue *jsvalue)
 {
-    auto env = ctx->GetJSEnv();
-    napi_valuetype jsType = GetValueType(env, nvalue);
-
-    auto jsvalue = AllocUndefined(coro, ctx);
-    if (UNLIKELY(jsvalue == nullptr)) {
-        return nullptr;
-    }
-
     switch (jsType) {
         case napi_undefined: {
             jsvalue->SetUndefined();
@@ -102,6 +98,10 @@ JSValue *JSValue::Create(EtsCoroutine *coro, InteropCtx *ctx, napi_value nvalue)
             jsvalue->SetString(cachedStr);
             return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
         }
+        case napi_bigint: {
+            jsvalue->SetBigInt(interop::js::GetBigInt(env, nvalue));
+            return JSValue::AttachFinalizer(EtsCoroutine::GetCurrent(), jsvalue);
+        }
         case napi_symbol:
             [[fallthrough]];
         case napi_object:
@@ -117,6 +117,18 @@ JSValue *JSValue::Create(EtsCoroutine *coro, InteropCtx *ctx, napi_value nvalue)
         }
     }
     UNREACHABLE();
+}
+JSValue *JSValue::Create(EtsCoroutine *coro, InteropCtx *ctx, napi_value nvalue)
+{
+    auto env = ctx->GetJSEnv();
+    napi_valuetype jsType = GetValueType(env, nvalue);
+
+    auto jsvalue = AllocUndefined(coro, ctx);
+    if (UNLIKELY(jsvalue == nullptr)) {
+        return nullptr;
+    }
+
+    return CreateByType(ctx, env, nvalue, jsType, jsvalue);
 }
 
 napi_value JSValue::GetNapiValue(napi_env env)
@@ -144,6 +156,11 @@ napi_value JSValue::GetNapiValue(napi_env env)
         case napi_string: {
             std::string const *str = GetString().Data();
             NAPI_ASSERT_OK(napi_create_string_utf8(env, str->data(), str->size(), &jsValue));
+            return jsValue;
+        }
+        case napi_bigint: {
+            auto [words, signBit] = *GetBigInt();
+            NAPI_ASSERT_OK(napi_create_bigint_words(env, signBit, words.size(), words.data(), &jsValue));
             return jsValue;
         }
         case napi_symbol:
