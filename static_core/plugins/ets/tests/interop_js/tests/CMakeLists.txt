@@ -55,6 +55,7 @@ file(WRITE ${ETS_CONFIG_DECL}
     "      \"std\": [\"${PANDA_ROOT}/plugins/ets/stdlib/std\"]\n"
     "    },\n"
     "    \"dynamicPaths\": {\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/getter/ts_to_ets/getter.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/number_subtypes/module\": {\"language\": \"js\", \"hasDecl\": true},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/class_composite/js/class_composite\": {\"language\": \"js\", \"hasDecl\": true},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/instanceof/js/instanceof\": {\"language\": \"js\", \"hasDecl\": true},\n"
@@ -175,3 +176,4 @@ add_subdirectory(perf)
 add_subdirectory(compiler)
 add_subdirectory(scenarios)
 add_subdirectory(class_extension)
+add_subdirectory(getter)
