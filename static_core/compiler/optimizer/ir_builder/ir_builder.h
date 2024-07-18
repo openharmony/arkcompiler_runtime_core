@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef PANDA_IR_BUILDER_H
 #define PANDA_IR_BUILDER_H
 
+#include "bytecode_instruction.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/pass.h"
@@ -122,10 +123,12 @@ private:
 
     bool CheckMethodLimitations(const BytecodeInstructions &instructions, size_t vregsCount);
     void BuildBasicBlocks(const BytecodeInstructions &instructions);
-    bool CreateSaveStateForLoopBlocks(BasicBlock *bb, InstBuilder *instBuilder);
-    bool BuildBasicBlock(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf);
+    bool CreateSaveStateForLoopBlocks(BasicBlock *bb);
+    bool BuildBasicBlock(BasicBlock *bb, const uint8_t *instructionsBuf);
     template <bool NEED_SS_DEOPT>
-    bool BuildInstructionsForBB(BasicBlock *bb, InstBuilder *instBuilder, const uint8_t *instructionsBuf);
+    bool AddInstructionToBB(BasicBlock *bb, BytecodeInstruction &inst, size_t pc, bool *ssDeoptWasBuilded);
+    template <bool NEED_SS_DEOPT>
+    bool BuildInstructionsForBB(BasicBlock *bb, const uint8_t *instructionsBuf);
     void SplitConstant(ConstantInst *constInst);
     void ConnectBasicBlocks(const BytecodeInstructions &instructions);
     void CreateTryCatchBoundariesBlocks();
@@ -140,8 +143,17 @@ private:
     void EnumerateTryBlocksCoveredPc(uint32_t pc, const Callback &callback);
     void SetMemoryBarrierFlag();
     void ConnectTryCodeBlock(const TryCodeBlock &tryBlock, const ArenaMap<uint32_t, BasicBlock *> &catchBlocks);
-    void ProcessThrowableInstructions(InstBuilder *instBuilder, Inst *throwableInst);
+    void ProcessThrowableInstructions(Inst *throwableInst);
     void RestoreTryEnd(const TryCodeBlock &tryBlock);
+    void SetInstBuilder(InstBuilder *instBuilder)
+    {
+        instBuilder_ = instBuilder;
+        instBuilder_->Prepare(isInlinedGraph_);
+    }
+    InstBuilder *GetInstBuilder() const
+    {
+        return instBuilder_;
+    }
 
 private:
     ArenaVector<BasicBlock *> blocks_;
@@ -154,6 +166,7 @@ private:
     bool isInlinedGraph_ {false};
     CallInst *callerInst_ {nullptr};
     uint32_t inliningDepth_ {0};
+    InstBuilder *instBuilder_ {nullptr};
 };
 
 class IrBuilderInliningAnalysis : public Analysis {

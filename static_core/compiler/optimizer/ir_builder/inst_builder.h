@@ -142,6 +142,9 @@ public:
 
     auto CreateSafePoint(BasicBlock *bb)
     {
+#ifndef NDEBUG
+        ResetSafepointDistance();
+#endif
         return CreateSaveState(Opcode::SafePoint, bb->GetGuestPc());
     }
 
@@ -172,6 +175,28 @@ public:
     static void SetParamSpillFill(Graph *graph, ParameterInst *paramInst, size_t numArgs, size_t i,
                                   DataType::Type type);
 
+#ifndef NDEBUG
+    void TryInsertSafepoint(BasicBlock *bb = nullptr, bool insertSP = false)
+    {
+        auto curBb = bb != nullptr ? bb : currentBb_;
+        if (GetGraph()->IsBytecodeOptimizer() || curBb->IsOsrEntry() ||
+            !g_options.IsCompilerEnforceSafepointPlacement()) {
+            return;
+        }
+        if ((curBb->GetLastInst() == nullptr || curBb->GetLastInst()->GetOpcode() != Opcode::SafePoint) &&
+            (insertSP || --safepointDistance_ <= 0)) {
+            auto *sp = CreateSafePoint(curBb);
+            currentBb_->AppendInst(sp);
+#ifdef PANDA_COMPILER_DEBUG_INFO
+            if (sp->GetPc() != INVALID_PC) {
+                sp->SetCurrentMethod(method_);
+            }
+#endif
+            COMPILER_LOG(DEBUG, IR_BUILDER) << *sp;
+        }
+    }
+#endif
+
 private:
     void SyncWithGraph();
 
@@ -188,7 +213,6 @@ private:
     {
         ASSERT(currentBb_);
         currentBb_->AppendInst(inst);
-
 #ifdef PANDA_COMPILER_DEBUG_INFO
         if (inst->GetPc() != INVALID_PC) {
             inst->SetCurrentMethod(method_);
@@ -515,6 +539,13 @@ private:
     }
 #endif
 
+#ifndef NDEBUG
+    void ResetSafepointDistance()
+    {
+        safepointDistance_ = (int32_t)g_options.GetCompilerSafepointDistanceLimit();
+    }
+#endif
+
 private:
     static constexpr size_t ONE_FOR_OBJECT = 1;
     static constexpr size_t ONE_FOR_SSTATE = 1;
@@ -547,6 +578,9 @@ private:
     CallInst *callerInst_ {nullptr};
     uint32_t inliningDepth_ {0};
     size_t classId_;
+#ifndef NDEBUG
+    int32_t safepointDistance_ {0};
+#endif
 #include "intrinsics_ir_build.inl.h"
 };
 }  // namespace ark::compiler

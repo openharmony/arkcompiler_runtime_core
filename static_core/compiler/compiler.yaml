@@ -800,6 +800,18 @@ options:
   description: Maximum number of the IR instructions to be chosen for graph coloring algorithm of register allocator
   tags: [perf]
 
+- name: compiler-enforce-safepoint-placement
+  type: bool
+  default: false
+  description: Inserting safepoints at the beginning of every basic block and after every Nth IR instruction. N is determined by compiler-safepoint-distance-limit option
+  tags: [debug]
+
+- name: compiler-safepoint-distance-limit
+  type: uint32_t
+  default: 50
+  description: Distance limit between inserted safepoints
+  tags: [debug]
+
 events:
 - name: branch-elimination
   fields:
