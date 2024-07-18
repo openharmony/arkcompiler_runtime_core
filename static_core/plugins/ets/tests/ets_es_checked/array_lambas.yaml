@@ -21,6 +21,10 @@ sub:
     vars:
       bool_lambdas:
         - |
+          (): boolean => true
+        - |
+          (): boolean => false
+        - |
           (x: number): boolean => true
         - |
           (x: number): boolean => false
@@ -46,6 +50,15 @@ sub:
           (x: number, i: number, s: Array<number>): boolean => (x + i) < 0
         - |
           (x: number, i: number, s: Array<number>): boolean => (x + i) == 1
+      number_lambdas:
+        - |
+          (): number => 1234.0
+        - |
+          (x: number): number => x * 2.0
+        - |
+          (x: number, i: number): number => x + i
+        - |
+          (x: number, i: number, s: Array<number>): number => x + i + s[i]
     sub:
       - method: filter
         params:
@@ -73,8 +86,18 @@ sub:
         params:
           -
             - |
-              (v: number, i: number, slf: Array<number>): void => {
-                if (slf.length < 15) {
-                  slf.push(-v)
+              (value: number, index: number, array: Array<number>): void => {
+                if (array.length < 15) {
+                  array.push(-value)
                 }
               }
+            - |
+              (value: number, index: number): void => { value = value + index }
+            - |
+              (value: number): void => { value = value + value }
+            - |
+              (): void => {}
+      - method: map<number>
+        ret_type: Array<number>
+        params:
+          - paramOf *number_lambdas

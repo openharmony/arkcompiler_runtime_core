@@ -355,7 +355,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return obj
     }
 
-    // TODO(kprokopenko): remove when #14756 is fixed and rename below fucntion to push
+    // NOTE(kprokopenko): remove when #14756 is fixed and rename below fucntion to push
     public push(val: T): number {
         this.ensureUnusedCapacity(1)
         this.buffer[this.actualLength] = val
@@ -545,20 +545,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     // === methods with uncompatible implementation ===
     /**
-     * Constructs a new `Array` instance and populates it with
-     * portion of a given array, filtered down to just the elements from the
-     * given array that pass the test implemented by the provided function.
+     * Returns the elements of an array that meet the condition specified in a callback function.
      *
-     * @param fn test function, applied to each element of an array.
+     * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      *
-     * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+     * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(fn: (v: T, k: number) => boolean): Array<T> {
+    public override filter(predicate: (value: T, index: number) => boolean): Array<T> {
         const res = new Array<T>()
-
         for (let i: int = 0; i < this.actualLength; i++) {
             const val = this.$_get_unsafe(i)
-            if (fn(val, i as number)) {
+            if (predicate(val, i as number)) {
                 res.push(val)
             }
         }
@@ -841,7 +838,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return this;
     }
 
-    public override find(predicate: (value: T, i: number, self: Array<T>) => boolean): T | undefined {
+    /**
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise.
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined.
+     *
+     * @returns the value of the first element in the array or undefined
+     */
+    public override find(predicate: (value: T, index: number, array: Array<T>) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
             return undefined
@@ -850,15 +857,18 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Returns the index of the first element in an array that satisfies the provided testing function
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise.
      *
-     * @param fn testing function
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
      *
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(fn: (value: T, i: number, self: Array<T>) => boolean): number {
+    public override findIndex(predicate: (value: T, index: number, array: Array<T>) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get_unsafe(i), i as number, this)) {
+            if (predicate(this.$_get_unsafe(i), i as number, this)) {
                 return i;
             }
         }
@@ -869,14 +879,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Iterates the array in reverse order and returns the value of the first element
      * that satisfies the provided testing function
      *
-     * @param fn testing function
+     * @param predicate testing function
      *
      * @returns found element or undefined otherwise
      */
-    public override findLast(fn: (elem: T, i: number, self: Array<T>) => boolean): T | undefined {
+    public override findLast(predicate: (elem: T, index: number, array: Array<T>) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             const val = this.$_get_unsafe(i);
-            if (fn(val, i as number, this)) {
+            if (predicate(val, i as number, this)) {
                 return val;
             }
         }
@@ -884,17 +894,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Tests whether all elements in the array pass the test
-     * implemented by the provided function. It returns a Boolean value.
+     * Determines whether all the members of an array satisfy the specified test.
      *
-     * @param fn function to execute for each element in the array.
-     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     * @param predicate A function that accepts up to three arguments. The every method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value false, or until the end of the array.
      *
-     * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+     * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(fn: (v: T, i: number, self: Array<T>) => boolean): boolean {
+    public override every(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get_unsafe(i), i as number, this)) {
+            if (!predicate(this.$_get_unsafe(i), i as number, this)) {
                 return false
             }
         }
@@ -902,17 +912,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Tests whether at least one element in the array pass the test
-     * implemented by the provided function. It returns a Boolean value.
+     * Determines whether the specified callback function returns true for any element of an array.
      *
-     * @param fn function to execute for each element in the array.
-     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     * @param predicate A function that accepts up to three arguments. The some method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value true, or until the end of the array.
      *
-     * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public some(fn: (v: T, i: number, self: Array<T>) => boolean): boolean {
+    public override some(predicate: (value: T, index: number, array: Array<T>) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get_unsafe(i), i as number, this)) {
+            if (predicate(this.$_get_unsafe(i), i as number, this)) {
                 return true
             }
         }
@@ -920,16 +930,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Constructs a new `Array` instance and populates it with
-     * portion of a given array, filtered down to just the elements from the
-     * given array that pass the test implemented by the provided function.
+     * Returns the elements of an array that meet the condition specified in a callback function.
      *
-     * @param fn test function, applied to each element of an array.
+     * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      *
-     * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+     * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(fn: (v: T, i: number, self: Array<T>) => boolean): Array<T> {
-        return this.filter((v: T, i: number): boolean => fn(v, i as number, this));
+    public override filter(predicate: (value: T, index: number, array: Array<T>) => boolean): Array<T> {
+        return this.filter((value: T, index: number): boolean => predicate(value, index, this));
     }
 
     /**
@@ -937,13 +945,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * the first element that satisfies the provided testing function.
      * If no elements satisfy the testing function, -1 is returned.
      *
-     * @param fn testing function
+     * @param predicate testing function
      *
-     * @returns index of first element satisfying to fn, -1 if no such element
+     * @returns index of first element satisfying to predicate, -1 if no such element
      */
-    public override findLastIndex(fn: (element: T, i: number, self: Array<T>) => boolean): number {
+    public override findLastIndex(predicate: (element: T, index: number, array: Array<T>) => boolean): number {
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            if (fn(this.$_get_unsafe(i), i as number, this)) {
+            if (predicate(this.$_get_unsafe(i), i as number, this)) {
                 return i
             }
         }
@@ -951,100 +959,98 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce(fn: (a: T, b: T, i: number, self: Array<T>) => T): T {
+    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
         for (let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param initialValue initial value
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number, self: Array<T>) => U, initialValue: U): U {
+    public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T, i: number, self: Array<T>) => T): T {
+    public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number, array: Array<T>) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
         for (let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @param initVal start value
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight<U>(fn: (a: U, b: T, i: number, self: Array<T>) => U, initVal: U): U {
-        let acc = initVal
+    public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: number, array: Array<T>) => U, initialValue: U): U {
+        let acc = initialValue
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number, this)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number, this)
         }
         return acc
     }
 
     /**
-     * Executes a provided function once for each array element.
+     * Performs the specified action for each element in an array.
      *
-     * @param fn to apply for each element of the Array
+     * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      */
-    public override forEach(fn: (a: T, i: number, self: Array<T>) => void): void {
+    public override forEach(callbackfn: (value: T, index: number, array: Array<T>) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
-            fn(this.$_get_unsafe(i), i as number, this)
+            callbackfn(this.$_get_unsafe(i), i as number, this)
         }
     }
 
-    public override find(predicate: (value: T, i: number) => boolean): T | undefined {
+    /**
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise.
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined.
+     *
+     * @returns the value of the first element in the array or undefined
+     */
+    public override find(predicate: (value: T, index: number) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
             return undefined
@@ -1053,15 +1059,18 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Returns the index of the first element in an array that satisfies the provided testing function
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise.
      *
-     * @param fn testing function
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
      *
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(fn: (value: T, i: number) => boolean): number {
+    public override findIndex(predicate: (value: T, index: number) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get_unsafe(i), i as number)) {
+            if (predicate(this.$_get_unsafe(i), i as number)) {
                 return i;
             }
         }
@@ -1072,14 +1081,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Iterates the array in reverse order and returns the value of the first element
      * that satisfies the provided testing function
      *
-     * @param fn testing function
+     * @param predicate testing function
      *
      * @returns found element or undefined otherwise
      */
-    public override findLast(fn: (elem: T, i: number) => boolean): T | undefined {
+    public override findLast(predicate: (elem: T, index: number) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             const val = this.$_get_unsafe(i);
-            if (fn(val, i as number)) {
+            if (predicate(val, i as number)) {
                 return val;
             }
         }
@@ -1087,17 +1096,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Tests whether all elements in the array pass the test
-     * implemented by the provided function. It returns a Boolean value.
+     * Determines whether all the members of an array satisfy the specified test.
      *
-     * @param fn function to execute for each element in the array.
-     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     * @param predicate A function that accepts up to three arguments. The every method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value false, or until the end of the array.
      *
-     * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+     * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(fn: (v: T, i: number) => boolean): boolean {
+    public override every(predicate: (value: T, index: number) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get_unsafe(i), i as number)) {
+            if (!predicate(this.$_get_unsafe(i), i as number)) {
                 return false
             }
         }
@@ -1105,17 +1114,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Tests whether at least one element in the array pass the test
-     * implemented by the provided function. It returns a Boolean value.
+     * Determines whether the specified callback function returns true for any element of an array.
      *
-     * @param fn function to execute for each element in the array.
-     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     * @param predicate A function that accepts up to three arguments. The some method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value true, or until the end of the array.
      *
-     * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public some(fn: (v: T, i: number) => boolean): boolean {
+    public override some(predicate: (value: T, index: number) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get_unsafe(i), i as number)) {
+            if (predicate(this.$_get_unsafe(i), i as number)) {
                 return true
             }
         }
@@ -1127,13 +1136,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * the first element that satisfies the provided testing function.
      * If no elements satisfy the testing function, -1 is returned.
      *
-     * @param fn testing function
+     * @param predicate testing function
      *
-     * @returns index of first element satisfying to fn, -1 if no such element
+     * @returns index of first element satisfying to predicate, -1 if no such element
      */
-    public override findLastIndex(fn: (element: T, i: number) => boolean): number {
+    public override findLastIndex(predicate: (element: T, index: number) => boolean): number {
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            if (fn(this.$_get_unsafe(i), i as number)) {
+            if (predicate(this.$_get_unsafe(i), i as number)) {
                 return i
             }
         }
@@ -1141,99 +1150,97 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce(fn: (a: T, b: T, i: number) => T): T {
+    public override reduce(callbackfn: (previousValue: T, currentValue: T, index: number) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
         for (let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param initialValue initial value
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce<U = T>(fn: (previousValue: U, currentValue: T, i: number) => U, initialValue: U): U {
+    public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T, index: number) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T, i: number) => T): T {
+    public override reduceRight(callbackfn: (previousValue: T, currentValue: T, index: number) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
         for (let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @param initVal start value
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight<U>(fn: (a: U, b: T, i: number) => U, initVal: U): U {
-        let acc = initVal
+    public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T, index: number) => U, initialValue: U): U {
+        let acc = initialValue
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i), i as number)
+            acc = callbackfn(acc, this.$_get_unsafe(i), i as number)
         }
         return acc
     }
 
     /**
-     * Executes a provided function once for each array element.
+     * Performs the specified action for each element in an array.
      *
-     * @param fn to apply for each element of the Array
+     * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      */
-    public override forEach(fn: (a: T, i: number) => void): void {
+    public override forEach(callbackfn: (value: T, index: number) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
-            fn(this.$_get_unsafe(i), i as number)
+            callbackfn(this.$_get_unsafe(i), i as number)
         }
     }
 
+    /**
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise.
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined.
+     *
+     * @returns the value of the first element in the array or undefined
+     */
     public override find(predicate: (value: T) => boolean): T | undefined {
         const res = this.findIndex(predicate)
         if (res == -1) {
@@ -1243,15 +1250,18 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Returns the index of the first element in an array that satisfies the provided testing function
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise.
      *
-     * @param fn testing function
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
      *
      * @returns found element index or -1 otherwise
      */
-    public override findIndex(fn: (value: T) => boolean): number {
+    public override findIndex(predicate: (value: T) => boolean): number {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get_unsafe(i))) {
+            if (predicate(this.$_get_unsafe(i))) {
                 return i;
             }
         }
@@ -1262,14 +1272,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * Iterates the array in reverse order and returns the value of the first element
      * that satisfies the provided testing function
      *
-     * @param fn testing function
+     * @param predicate testing function
      *
      * @returns found element or undefined otherwise
      */
-    public override findLast(fn: (elem: T) => boolean): T | undefined {
+    public override findLast(predicate: (elem: T) => boolean): T | undefined {
         for (let i = this.actualLength - 1; i >= 0; i--) {
             const val = this.$_get_unsafe(i);
-            if (fn(val)) {
+            if (predicate(val)) {
                 return val;
             }
         }
@@ -1277,17 +1287,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Tests whether all elements in the array pass the test
-     * implemented by the provided function. It returns a Boolean value.
+     * Determines whether all the members of an array satisfy the specified test.
      *
-     * @param fn function to execute for each element in the array.
-     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     * @param predicate A function that accepts up to three arguments. The every method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value false, or until the end of the array.
      *
-     * @returns `true` if `fn` returns a `true` value for every array element. Otherwise, `false`.
+     * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
      */
-    public override every(fn: (v: T) => boolean): boolean {
+    public override every(predicate: (value: T) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (!fn(this.$_get_unsafe(i))) {
+            if (!predicate(this.$_get_unsafe(i))) {
                 return false
             }
         }
@@ -1295,17 +1305,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Tests whether at least one element in the array pass the test
-     * implemented by the provided function. It returns a Boolean value.
+     * Determines whether the specified callback function returns true for any element of an array.
      *
-     * @param fn function to execute for each element in the array.
-     * It should return a `true` to indicate the element passes the test, and a `false` value otherwise.
+     * @param predicate A function that accepts up to three arguments. The some method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value true, or until the end of the array.
      *
-     * @returns `true` if `fn` returns a `true` value for at least one array element. Otherwise, `false`.
+     * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
      */
-    public some(fn: (v: T) => boolean): boolean {
+    public override some(predicate: (value: T) => boolean): boolean {
         for (let i = 0; i < this.actualLength; i++) {
-            if (fn(this.$_get_unsafe(i))) {
+            if (predicate(this.$_get_unsafe(i))) {
                 return true
             }
         }
@@ -1313,16 +1323,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Constructs a new `Array` instance and populates it with
-     * portion of a given array, filtered down to just the elements from the
-     * given array that pass the test implemented by the provided function.
+     * Returns the elements of an array that meet the condition specified in a callback function.
      *
-     * @param fn test function, applied to each element of an array.
+     * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      *
-     * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+     * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(fn: (v: T) => boolean): Array<T> {
-        return this.filter((v: T, i: number): boolean => fn(v));
+    public override filter(predicate: (value: T) => boolean): Array<T> {
+        return this.filter((value: T, index: number): boolean => predicate(value));
     }
 
     /**
@@ -1330,13 +1338,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * the first element that satisfies the provided testing function.
      * If no elements satisfy the testing function, -1 is returned.
      *
-     * @param fn testing function
+     * @param predicate testing function
      *
-     * @returns index of first element satisfying to fn, -1 if no such element
+     * @returns index of first element satisfying to predicate, -1 if no such element
      */
-    public override findLastIndex(fn: (element: T) => boolean): number {
+    public override findLastIndex(predicate: (element: T) => boolean): number {
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            if (fn(this.$_get_unsafe(i))) {
+            if (predicate(this.$_get_unsafe(i))) {
                 return i
             }
         }
@@ -1344,96 +1352,84 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce(fn: (a: T, b: T) => T): T {
+    public override reduce(callbackfn: (previousValue: T, currentValue: T) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(0);
         for (let i = 1; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i))
+            acc = callbackfn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from left-to-right.
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
      *
-     * @param initialValue initial value
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduce<U = T>(fn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
+    public override reduce<U = T>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
         let acc = initialValue
         for (let i = 0; i < this.actualLength; i++) {
-            acc = fn(acc, this.$_get_unsafe(i))
+            acc = callbackfn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight(fn: (a: T, b: T) => T): T {
+    public override reduceRight(callbackfn: (previousValue: T, currentValue: T) => T): T {
         if (this.actualLength == 0) {
             throw new TypeError("Reduce of empty array with no initial value")
         }
         let acc: T = this.$_get_unsafe(this.actualLength - 1);
         for (let i = this.actualLength - 2; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i))
+            acc = callbackfn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
 
     /**
-     * Executes a user-supplied "reducer" callback function on each element of the array,
-     * in order, passing in the return value from the calculation on the preceding element.
-     * The final result of running the reducer across all elements of the array is a single value.
-     * Order is from right-to-left.
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
      *
-     * @param fn reduce function
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
      *
-     * @param initVal start value
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
      *
-     * @returns a result after applying fn over all elements of the Array
+     * @returns a result after applying callbackfn over all elements of the Array
      */
-    public override reduceRight<U>(fn: (a: U, b: T) => U, initVal: U): U {
-        let acc = initVal
+    public override reduceRight<U>(callbackfn: (previousValue: U, currentValue: T) => U, initialValue: U): U {
+        let acc = initialValue
         for (let i = this.actualLength - 1; i >= 0; i--) {
-            acc = fn(acc, this.$_get_unsafe(i))
+            acc = callbackfn(acc, this.$_get_unsafe(i))
         }
         return acc
     }
 
     /**
-     * Executes a provided function once for each array element.
+     * Performs the specified action for each element in an array.
      *
-     * @param fn to apply for each element of the Array
+     * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
      */
-    public override forEach(fn: (a: T) => void): void {
+    public override forEach(callbackfn: (value: T) => void): void {
         const len0 = this.actualLength;
         for (let i = 0; i < len0; i++) {
-            fn(this.$_get_unsafe(i))
+            callbackfn(this.$_get_unsafe(i))
         }
     }
 
@@ -1868,57 +1864,344 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     }
 
     /**
-     * Returns an iterator over all entries
+     * Returns an iterable of key, value pairs for every entry in the array
      */
-    public entries(): IterableIterator<[number, T]> {
+    public override entries(): IterableIterator<[number, T]> {
         return new ArrayEntriesIterator_T<T>(this);
     }
 
     /**
-     * Creates a new `Array` object and populates
-     * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+     * Determines whether all the members of an array satisfy the specified test.
      *
-     * @param fn mapping function, applied to each element of an array.
+     * @param predicate A function that accepts up to three arguments. The every method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value false, or until the end of the array.
+     *
+     * @returns `true` if `predicate` returns a `true` value for every array element. Otherwise, `false`.
+     */
+    public override every(predicate: () => boolean): boolean {
+        for (let i = 0; i < this.actualLength; i++) {
+            if (!predicate()) {
+                return false
+            }
+        }
+        return true
+    }
+
+    /**
+     * Returns the elements of an array that meet the condition specified in a callback function.
+     *
+     * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
+     *
+     * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
+     */
+    public override filter(predicate: () => boolean): Array<T> {
+        return this.filter((value: T, index: number): boolean => predicate());
+    }
+
+    /**
+     * Returns the value of the first element in the array where predicate is true, and undefined
+     * otherwise.
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found, find
+     * immediately returns that element value. Otherwise, find returns undefined.
+     *
+     * @returns the value of the first element in the array or undefined
+     */
+    public override find(predicate: () => boolean): T | undefined {
+        const res = this.findIndex(predicate)
+        if (res == -1) {
+            return undefined
+        }
+        return this.$_get_unsafe(res as int);
+    }
+
+    /**
+     * Returns the index of the first element in the array where predicate is true, and -1
+     * otherwise.
+     *
+     * @param predicate find calls predicate once for each element of the array, in ascending
+     * order, until it finds one where predicate returns true. If such an element is found,
+     * findIndex immediately returns that element index. Otherwise, findIndex returns -1.
+     *
+     * @returns found element index or -1 otherwise
+     */
+    public override findIndex(predicate: () => boolean): number {
+        for (let i = 0; i < this.actualLength; i++) {
+            if (predicate()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Performs the specified action for each element in an array.
+     *
+     * @param callbackfn A function that accepts up to three arguments. forEach calls the callbackfn function one time for each element in the array.
+     */
+    public override forEach(callbackfn: () => void): void {
+        const len0 = this.actualLength;
+        for (let i = 0; i < len0; i++) {
+            callbackfn()
+        }
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduce(callbackfn: (previousValue: T) => T): T {
+        if (this.actualLength == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+        let acc: T = this.$_get_unsafe(0);
+        for (let i = 1; i < this.actualLength; i++) {
+            acc = callbackfn(acc)
+        }
+        return acc
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduce(callbackfn: () => T): T {
+        if (this.actualLength == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+        let acc: T = this.$_get_unsafe(0);
+        for (let i = 1; i < this.actualLength; i++) {
+            acc = callbackfn()
+        }
+        return acc
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduce<U = T>(callbackfn: (previousValue: U) => U, initialValue: U): U {
+        let acc = initialValue
+        for (let i = 0; i < this.actualLength; i++) {
+            acc = callbackfn(acc)
+        }
+        return acc
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduce method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduce<U = T>(callbackfn: () => U, initialValue: U): U {
+        let acc = initialValue
+        for (let i = 0; i < this.actualLength; i++) {
+            acc = callbackfn()
+        }
+        return acc
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduceRight(callbackfn: (previousValue: T) => T): T {
+        if (this.actualLength == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+        let acc: T = this.$_get_unsafe(this.actualLength - 1);
+        for (let i = this.actualLength - 2; i >= 0; i--) {
+            acc = callbackfn(acc)
+        }
+        return acc
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduceRight(callbackfn: () => T): T {
+        if (this.actualLength == 0) {
+            throw new TypeError("Reduce of empty array with no initial value")
+        }
+        let acc: T = this.$_get_unsafe(this.actualLength - 1);
+        for (let i = this.actualLength - 2; i >= 0; i--) {
+            acc = callbackfn()
+        }
+        return acc
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduceRight<U>(callbackfn: (previousValue: U) => U, initialValue: U): U {
+        let acc = initialValue
+        for (let i = this.actualLength - 1; i >= 0; i--) {
+            acc = callbackfn(acc)
+        }
+        return acc
+    }
+
+    /**
+     * Calls the specified callback function for all the elements in an array, in descending order. The return value of the callback function is the accumulated result, and is provided as an argument in the next call to the callback function.
+     *
+     * @param callbackfn A function that accepts up to four arguments. The reduceRight method calls the callbackfn function one time for each element in the array.
+     *
+     * @param initialValue If initialValue is specified, it is used as the initial value to start the accumulation. The first call to the callbackfn function provides this value as an argument instead of an array value.
+     *
+     * @returns a result after applying callbackfn over all elements of the Array
+     */
+    public override reduceRight<U>(callbackfn: () => U, initialValue: U): U {
+        let acc = initialValue
+        for (let i = this.actualLength - 1; i >= 0; i--) {
+            acc = callbackfn()
+        }
+        return acc
+    }
+
+    /**
+     * Determines whether the specified callback function returns true for any element of an array.
+     *
+     * @param predicate A function that accepts up to three arguments. The some method calls
+     * the predicate function for each element in the array until the predicate returns a value
+     * which is coercible to the Boolean value true, or until the end of the array.
+     *
+     * @returns `true` if `predicate` returns a `true` value for at least one array element. Otherwise, `false`.
+     */
+    public override some(predicate: () => boolean): boolean {
+        for (let i = 0; i < this.actualLength; i++) {
+            if (predicate()) {
+                return true
+            }
+        }
+        return false
+    }
+
+    /**
+     * Iterates the array in reverse order and returns the value of the first element
+     * that satisfies the provided testing function
+     *
+     * @param predicate testing function
+     *
+     * @returns found element or undefined otherwise
+     */
+    public override findLast(predicate: () => boolean): T | undefined {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
+            const val = this.$_get_unsafe(i);
+            if (predicate()) {
+                return val;
+            }
+        }
+        return undefined;
+    }
+
+    /**
+     * Iterates the array in reverse order and returns the index of
+     * the first element that satisfies the provided testing function.
+     * If no elements satisfy the testing function, -1 is returned.
+     *
+     * @param predicate testing function
+     *
+     * @returns index of first element satisfying to predicate, -1 if no such element
+     */
+    public override findLastIndex(predicate: () => boolean): number {
+        for (let i = this.actualLength - 1; i >= 0; i--) {
+            if (predicate()) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    /**
+     * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+     *
+     * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(fn: (value: T, i: number, self: Array<T>) => U): Array<U> {
+    public override map<U>(callbackfn: (value: T, index: number, array: Array<T>) => U): Array<U> {
         const len = this.actualLength;
         let res = new NullishType[len];
         for (let i = 0; i < len; i++) {
-            res[i] = fn(this.$_get_unsafe(i), i as number, this);
+            res[i] = callbackfn(this.$_get_unsafe(i), i as number, this);
         }
         return new Array<U>(FROM_BUFFER, res);
     }
+
     /**
-     * Creates a new `Array` object and populates
-     * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+     * Calls a defined callback function on each element of an array, and returns an array that contains the results.
      *
-     * @param fn mapping function, applied to each element of an array.
+     * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(fn: (value: T, i: number) => U): Array<U> {
+    public override map<U>(callbackfn: (value: T, index: number) => U): Array<U> {
         const len = this.actualLength;
         let res = new NullishType[len];
         for (let i = 0; i < len; i++) {
-            res[i] = fn(this.$_get_unsafe(i), i as number);
+            res[i] = callbackfn(this.$_get_unsafe(i), i as number);
         }
         return new Array<U>(FROM_BUFFER, res);
     }
+
     /**
-     * Creates a new `Array` object and populates
-     * it with the results of calling a provided function on every element in `this` instance of `Array` class.
+     * Calls a defined callback function on each element of an array, and returns an array that contains the results.
      *
-     * @param fn mapping function, applied to each element of an array.
+     * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
      *
      * @returns `Array` instance, constructed from `this` and given function.
      */
-    public override map<U>(fn: (value: T) => U): Array<U> {
+    public override map<U>(callbackfn: (value: T) => U): Array<U> {
         const len = this.actualLength;
         let res = new NullishType[len];
         for (let i = 0; i < len; i++) {
-            res[i] = fn(this.$_get_unsafe(i));
+            res[i] = callbackfn(this.$_get_unsafe(i));
+        }
+        return new Array<U>(FROM_BUFFER, res);
+    }
+
+    /**
+     * Calls a defined callback function on each element of an array, and returns an array that contains the results.
+     *
+     * @param callbackfn A function that accepts up to three arguments. The map method calls the callbackfn function one time for each element in the array.
+     *
+     * @returns `Array` instance, constructed from `this` and given function.
+     */
+    public map<U>(callbackfn: () => U): Array<U> {
+        const len = this.actualLength;
+        let res = new NullishType[len];
+        for (let i = 0; i < len; i++) {
+            res[i] = callbackfn();
         }
         return new Array<U>(FROM_BUFFER, res);
     }

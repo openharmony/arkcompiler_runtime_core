@@ -24,18 +24,26 @@ sub:
       default_search: ["NaN", "-NaN", "Infinity", "-Infinity", 0.0, "-0.0", 100, 1]
       reduce_lamdbas:
         - |
+          (): number => 1234.0
+        - |
+          (x: number): number => x
+        - |
           (x: number, y: number): number => x * y
         - |
           (x: number, y: number, i: number): number => x - y + i
         - |
-          (x: number, y: number, i: number): number => y - x + i
+          (x: number, y: number, i: number, array: Array<number>): number => y - x + i + array[i]
       reduce_u_lamdbas:
+        - |
+          (): string => "1234.0"
+        - |
+          (x: string): string => x
         - |
           (x: string, y: number): string => x + y
         - |
           (x: string, y: number, i: number): string => x + y + i
         - |
-          (x: string, y: number, i: number): string => y + x + i
+          (x: string, y: number, i: number, array: Array<number>): string => y + x + i + array[i]
     sub:
       - method: "concat"
         rest:

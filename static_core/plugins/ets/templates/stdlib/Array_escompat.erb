@@ -338,7 +338,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return obj
     }
 
-    // TODO(kprokopenko): remove when #14756 is fixed and rename below fucntion to push
+    // NOTE(kprokopenko): remove when #14756 is fixed and rename below fucntion to push
     public push(val: T): number {
         this.ensureUnusedCapacity(1)
         this.buffer[this.actualLength] = val
@@ -528,20 +528,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
 
     // === methods with uncompatible implementation ===
     /**
-     * Constructs a new `Array` instance and populates it with
-     * portion of a given array, filtered down to just the elements from the
-     * given array that pass the test implemented by the provided function.
+     * Returns the elements of an array that meet the condition specified in a callback function.
      *
-     * @param fn test function, applied to each element of an array.
+     * @param predicate A function that accepts up to three arguments. The filter method calls the predicate function one time for each element in the array.
      *
-     * @returns New `Array` instance constructed from `this` with elements filtered using test function `fn`.
+     * @returns New `Array` instance constructed from `this` with elements filtered using test function `predicate`.
      */
-    public override filter(fn: (v: T, k: number) => boolean): Array<T> {
+    public override filter(predicate: (value: T, index: number) => boolean): Array<T> {
         const res = new Array<T>()
-
         for (let i: int = 0; i < this.actualLength; i++) {
             const val = this.$_get_unsafe(i)
-            if (fn(val, i as number)) {
+            if (predicate(val, i as number)) {
                 res.push(val)
             }
         }
