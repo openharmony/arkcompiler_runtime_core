@@ -1987,6 +1987,26 @@
 # 18118 No ClassCastError on casting to a wrong function type
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_union/cce_5.sts
 
+# 18335 Smart cast doesn't work in while statement
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_0.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_10.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_12.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_14.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_15.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_2.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_4.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_5.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_7.sts
+15.semantic_rules/06.type_inference/01.smart_types/while_stmt_9.sts
+
+# 18337 Smart cast doesn't work in for-of statement
+15.semantic_rules/06.type_inference/01.smart_types/for_of_stmt_0.sts
+15.semantic_rules/06.type_inference/01.smart_types/for_of_stmt_1.sts
+
+# 18272 Smart cast fails on lambda expression
+15.semantic_rules/06.type_inference/01.smart_types/un1_15.sts
+15.semantic_rules/06.type_inference/01.smart_types/un1_17.sts
+
 # 14673,16369, 14338 Function, method, constructor overload signatures
 15.semantic_rules/04.type_compatibility/classes_compatibility_2.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_6.sts
