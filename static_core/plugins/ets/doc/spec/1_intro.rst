@@ -90,17 +90,17 @@ The following major aspects characterize the |LANG| language as a whole:
 
    Some program entities in |LANG| can be *type-parameterized*. This means that
    an entity can represent a very high-level (abstract) concept. Providing more
-   concrete information makes the entity specialized for a particular use case.
+   concrete type information makes the entity instantiated for a particular use
+   case.
 
    A classical illustration is the notion of a list that represents the
    ‘idea’ of an abstract data structure. This abstract notion can be turned
    into a concrete list by providing additional information (i.e., the type of
    list elements).
 
-   Supported by many programming languages, a similar feature (*generics*
-   or *templates*) serves as the basis of the generic programming
-   paradigm. It enables making programs and program structures more
-   generic and reusable.
+   Supported by many programming languages, a similar feature (*generics* or
+   *templates*) serves as the basis of the generic programming paradigm. It
+   enables making programs and program structures more generic and reusable.
 
 .. index::
    abstract concept

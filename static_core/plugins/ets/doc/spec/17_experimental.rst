@@ -183,7 +183,6 @@ A ``char literal`` represents the following:
 -  A single escape sequence preceded by the characters *single quote* (U+0027)
    and '*c*' (U+0063), and followed by a *single quote* U+0027).
 
-|
 
 .. code-block:: abnf
 
@@ -267,14 +266,13 @@ An *array creation expression* creates new objects that are instances of arrays.
 The *array literal* expression is used to create an array instance, and to
 provide some initial values (see :ref:`Array Literal`).
 
-.. code-block:: typescript
-   :linenos:
+.. code-block:: abnf
 
       newArrayInstance:
-          'new' arrayElelementType dimensionExpression+ (arrayElement)?
+          'new' arrayElementType dimensionExpression+ (arrayElement)?
           ;
 
-      arrayElelementType:
+      arrayElementType:
           typeReference
           | '(' type ')'
           ;
@@ -285,7 +283,7 @@ provide some initial values (see :ref:`Array Literal`).
 
       arrayElement:
           '(' expression ')'
-
+          ;
 
 .. code-block:: typescript
    :linenos:
@@ -370,7 +368,7 @@ parameter:
          }
       }
 
-Creating an array with a known number of elements:
+Creating an array with a known number of elements is presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -394,7 +392,7 @@ Creating an array with a known number of elements:
             have initial value equal to the result of lambda function execution with
             different indices */
 
-Creating exotic arrays with the different kinds of element types:
+Creating exotic arrays with different kinds of element types is presented below:
 
 .. code-block:: typescript
    :linenos:
@@ -592,10 +590,12 @@ Iterable Types
 A class or an interface can be made *iterable*, meaning that their instances
 can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
-A type is *iterable* if it declares a parameterless function with name
-``$_iterator`` and signature ``(): ITER``, where ``ITER`` is a class that
-implements ``Iterator`` interface defined in the standard library (see
-:ref:`Standard Library`), or interface that extends this interface.
+A type *C* is *iterable* if it declares a parameterless function with name
+``$_iterator`` with the return type which is compatible (see
+:ref:`Type Compatibility`) with type ``Iterator``, defined in the standard
+library (see :ref:`Standard Library`). That guarantees that an object returned
+is of the class type which implements ``Iterator`` and thus, allows traversing
+of an object of the class type *C*.
 
 The example below defines *iterable* class *C*:
 
@@ -604,7 +604,7 @@ The example below defines *iterable* class *C*:
 
       class C {
         data: string[] = ['a', 'b', 'c']
-        $_iterator() {
+        $_iterator() { // Function type is inferred from its body
           return new CIterator(this)
         }
       }
@@ -1048,7 +1048,8 @@ own.
 
 No specific relationship is required between the return types, or between the
 ``throws`` clauses of the two functions with the same name but different
-signatures that are not *overload-equivalent*.
+signatures that are not *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`).
 
 When calling an overloaded function, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
@@ -1081,11 +1082,13 @@ Class Method Overloading
     frontend_status: Done
 
 If two or more methods within a class have the same name, and their signatures
-are not *overload-equivalent*, then such methods are considered *overloaded*.
+are not *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then
+such methods are considered *overloaded*.
 
 Method overloading declarations cause no :index:`compile-time error` on their
-own, except where a possible instantiation causes an *overload-equivalent*
-method in the instantiated class or interface:
+own, except where a possible instantiation causes an *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`) method in the instantiated class or
+interface:
 
 .. code-block:: typescript
    :linenos:
@@ -1107,9 +1110,9 @@ method in the instantiated class or interface:
 
 
 If the signatures of two or more methods with the same name are not
-*overload-equivalent*, then the return types of those methods, or the
-``throws`` or ``rethrows`` clauses of those methods can have any kind of
-relationship.
+*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then the
+return types of those methods, or the ``throws`` or ``rethrows`` clauses of
+those methods can have any kind of relationship.
 
 When calling an overloaded method, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
@@ -1220,7 +1223,6 @@ Native Functions and Methods
 .. meta:
     frontend_status: Done
 
-|
 
 .. _Native Functions:
 
@@ -1291,8 +1293,8 @@ Final Classes
 .. meta:
     frontend_status: Done
 
-A class may be declared ``final`` to prevent its extension. A class declared
-``final`` cannot have subclasses, and no method of a ``final`` class can be
+A class can be declared ``final`` to prevent extension, i.e., a class declared
+``final`` cannot have subclasses. No method of a ``final`` class can be
 overridden.
 
 If a class type *F* expression is declared *final*, then only a class *F*
@@ -2183,8 +2185,7 @@ Create and Launch a Coroutine
 The following expression is used to create and launch a coroutine based on
 a function or method call, or on a lambda expression:
 
-.. code-block:: typescript
-   :linenos:
+.. code-block:: abnf
 
       launchExpression:
         'launch' functionCallExpression|methodCallExpression|lambdaExpression;
@@ -2261,8 +2262,8 @@ Awaiting a Coroutine
 .. meta:
     frontend_status: Done
 
-The expressions ``await`` and ``wait`` are used while a previously launched
-coroutine finishes and returns a value:
+The ``await`` expressions are used while a previously launched coroutine
+finishes and returns a value:
 
 .. code-block:: abnf
 
@@ -2274,7 +2275,6 @@ A :index:`compile-time error` occurs if the expression type is not ``Promise<T>`
 
 .. index::
    expression await
-   expression wait
    launch
    coroutine
    expression type
@@ -2331,12 +2331,13 @@ Return types of ``await`` expressions are represented in the example below:
 .. meta:
     frontend_status: Done
 
-The class ``Promise<T>`` represents the values returned by launch expressions.
-It belongs to the core packages of the standard library (see
-:ref:`Standard Library`), and thus it is imported by default and may be used
-without any qualification.
+The class ``Promise<T>`` represents the values returned by launch expressions
+(see :ref:`Create and Launch a Coroutine`) and dynamic import expressions (see
+:ref:`Dynamic Import Expression`). It belongs to the core packages of the
+standard library (see :ref:`Standard Library`), and can be used without
+any qualification.
 
-The following methods are used as follows:
+The methods are used as follows:
 
 -  ``then`` takes two arguments (the first argument is the callback used if the
    promise is fulfilled, and the second if it is rejected), and returns
@@ -2790,7 +2791,7 @@ A :index:`compile-time error` occurs if:
 -  Package headers of two package modules in the same package have
    different identifiers.
 
-Every *package module* may directly use all exported entities from the core
+Every *package module* can directly use all exported entities from the core
 packages of the standard library (see :ref:`Standard Library Usage`).
 
 A *package module* can directly access all top-level entities declared in all
@@ -2904,9 +2905,10 @@ While importing functions, the following situations can occur:
    *overloading*. All such functions are accessible (see :ref:`Accessible`).
 
 -  A function (functions) of the current module and an imported function
-   (functions) have the same name and overload-equivalent signature. This
-   situation is a :index:`compile-time error` as declarations are duplicated.
-   Qualified import or alias in import can be used to access the imported entity.
+   (functions) have the same name and overload-equivalent signature (see
+   :ref:`Overload-Equivalent Signatures`). This situation is a
+   :index:`compile-time error` as declarations are duplicated. Qualified import
+   or alias in import can be used to access the imported entity.
 
 .. index::
    import

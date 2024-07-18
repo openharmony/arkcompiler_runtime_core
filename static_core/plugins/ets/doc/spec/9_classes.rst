@@ -697,8 +697,8 @@ Class members are as follows:
 -  Members declared in the class body (see :ref:`Class Body`).
 
 
-Class members declared *private* are not accessible (see :ref:`Accessible`) to
-all subclasses of the class.
+Class members declared ``private`` are not accessible (see :ref:`Accessible`)
+to all subclasses of the class.
 
 .. index::
    inheritance
@@ -710,9 +710,12 @@ all subclasses of the class.
    private
    subclass
 
-Class members declared *protected* or *public* are inherited by subclasses
+Class members declared ``protected`` or ``public`` are inherited by subclasses
 that are declared in a package other than the package containing the class
 declaration.
+
+Class members declared ``internal`` are accessible for the classes and
+interfaces of the package the current class resides in.
 
 Constructors and class initializers are not members, and are not inherited.
 
@@ -797,7 +800,7 @@ specified by the corresponding *access modifiers*:
         ;
 
 If no explicit modifier is provided, then a class member or a constructor
-is implicitly considered public by default.
+is implicitly considered ``public`` by default.
 
 .. index::
    access modifier
@@ -1688,7 +1691,7 @@ fields. A :index:`compile-time error` occurs if:
       // do something
     }
     p.age(17) // Compile-time error: setter is used as a method
-    let x = p.age() // Compile-time error: getter is used as a mehtod
+    let x = p.age() // Compile-time error: getter is used as a method
 
     class X {
         set x (p?: Object) {} // Compile-time error: setter has optional parameter
@@ -1727,9 +1730,9 @@ data (as in the example above).
     }
     console.log (new Person.fullName)
 
-An accessor name cannot be the same as that of a non-static field, or of a
+A name of an accessor cannot be the same as that of a non-static field, or of a
 method of a class or an interface. Otherwise, a :index:`compile-time error`
-occurs. Moreover, an accessor name cannot be the same as that of another
+occurs. Moreover, a name of an accessor cannot be the same as that of another
 accessor for overloading is not allowed:
 
 .. code-block:: typescript
@@ -1753,10 +1756,10 @@ accessor for overloading is not allowed:
     }
 
 
-In the process of inheriting and overriding (see :ref:`Overloading and Overriding`)
-accessors behave in the same manner as methods. The getter type follows the
-covariance pattern; the setter parameter type follows the contravariance
-pattern (see :ref:`Override-Compatible Signatures`):
+In the process of inheriting and overriding (see :ref:`Overloading and Overriding`),
+accessors behave as methods. The getter parameter type follows the covariance
+pattern, and the setter parameter type follows the contravariance pattern (see
+:ref:`Override-Compatible Signatures`):
 
 .. code-block:: typescript
    :linenos:
@@ -1793,8 +1796,7 @@ execution is from the top superclass to the current class. Class initializers
 :ref:`Field Initialization`) ensure that all static fields receive their
 initial values before the first use.
 
-.. code-block:: typescript
-   :linenos:
+.. code-block:: abnf
 
     classInitializer
         : 'static' block

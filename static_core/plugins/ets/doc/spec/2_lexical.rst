@@ -201,24 +201,31 @@ characters:
    
 .. code-block:: abnf
 
-    Identifier:
-      IdentifierStart IdentifierPart \*
+    identifier:
+      identifierStart identifierPart*
       ;
 
-    IdentifierStart:
+    identifierStart:
       UnicodeIDStart
       | '$'
       | '_'
       | '\\' EscapeSequence
       ;
 
-    IdentifierPart:
+    identifierPart:
       UnicodeIDContinue
       | '$'
-      | <ZWNJ>
-      | <ZWJ>
+      | ZWNJ
+      | ZWJ
       | '\\' EscapeSequence
       ;
+
+    ZWJ:
+     '\u200C'
+    ;
+    ZWNJ:
+     '\u200D'
+    ;
 
 |
 
@@ -492,6 +499,9 @@ declarations, an integer literal can be implicitly converted to another
 integer type or type ``char`` (see :ref:`Type Compatibility with Initializer`).
 An explicit cast must be used elsewhere (see :ref:`Cast Expressions`).
 
+A :index:`compile-time error` occurs if a non-zero integer literal is
+too large for its type.
+
 .. index::
    integer literal
    int
@@ -654,10 +664,9 @@ The two ``Boolean`` literal values are represented by the keywords
 ``true`` and ``false``.
 
 .. code-block:: abnf
-   :linenos:
 
     BooleanLiteral:
-        ’true’ | ’false’
+        'true' | 'false'
         ;
 
 ``Boolean`` literals are of type ``boolean``.
@@ -812,7 +821,7 @@ evaluated at compile time. The evaluation of a template string is called
         ;
 
     BacktickCharacter:
-        ~[`\\\r\n\]
+        ~['\\\r\n]
         | '\\' EscapeSequence
         | LineContinuation
         ;

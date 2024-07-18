@@ -65,7 +65,7 @@ Both situations are covered by the below syntax rule:
 .. code-block:: abnf
 
     qualifiedName:
-      Identifier ('.' Identifier )*
+      identifier ('.' identifier )*
       ;
 
 In a qualified name *N.x* (where *N* is a simple name, and ``x`` is an
@@ -128,11 +128,10 @@ Distinguishable Declarations
 Each declaration in the declaration scope must be *distinguishable*.
 A :index:`compile-time error` occurs otherwise.
 
-Declarations are *distinguishable* if:
+Declarations are *distinguishable* if they have:
 
--  They have different names.
--  They are distinguishable by signatures (see 
-   :ref:`Declaration Distinguishable by Signatures`).
+-  Different names,
+-  Different signatures (see :ref:`Declaration Distinguishable by Signatures`).
 
 .. index::
    distinguishable declaration
@@ -140,7 +139,7 @@ Declarations are *distinguishable* if:
    name
    signature
 
-The examples below are declarations distinguishable by names:
+The examples below represent declarations distinguishable by names:
 
 .. code-block:: typescript
    :linenos:
@@ -156,8 +155,11 @@ The examples below are declarations distinguishable by names:
         static field: number = PI + pi
     }
 
-If a declaration is indistinguishable by name, then a :index:`compile-time error`
-occurs:
+If a declaration is not distinguishable by name for functions, methods, or
+constructors (except a valid overloading as in
+:ref:`Function and Method Overloading` and
+:ref:`Declaration Distinguishable by Signatures`), then a
+:index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -178,9 +180,15 @@ occurs:
         }
     }
 
+    // Functions have the same name but they are distinguishable by signatures
+    function foo() {}
+    function foo(p: number) {}
+
+
 .. index::
    distinguishable declaration
    compile-time error
+   overloading
 
 |
 
@@ -194,8 +202,8 @@ Scopes
 
 Different entity declarations introduce new names in different *scopes*. Scope
 (see :ref:`Scopes`) is the region of program text where an entity is declared,
-and other regions it can be used in. The following entities are always referred
-to by their qualified names only:
+along with other regions it can be used in. The following entities are always
+referred to by their qualified names only:
 
 -  Class and interface members (both static and instance ones);
 -  Entities imported via qualified import.
@@ -275,7 +283,8 @@ The scope of an entity depends on the context the entity is declared in:
 .. _interface-access:
 
 -  A name declared inside an interface (*interface level scope*) is accessible
-   (see :ref:`Accessible`) inside and outside that interface (default public).
+   (see :ref:`Accessible`) inside and outside that interface (default
+   ``public``).
 
 .. index::
    name
@@ -308,7 +317,7 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. _function-access:
 
--  The scope of a name declared immediately inside the body of a function,
+-  The scope of a name declared immediately inside the body of a function
    or a method declaration is the body of that declaration from the point of
    declaration and up to the end of the body (*method* or *function scope*).
    This scope is also applied to function or method parameter names.
@@ -477,8 +486,8 @@ introduced by using type alias (particularly for a generic type).
     type Dictionary = Map<string, string>
     type MapOfString<T> = Map<T, string>
 
-A type alias acts as a new name only. It neither changes the meaning of the
-original type nor introduces a new type.
+A type alias acts as a new name only. It neither changes the original type
+meaning nor introduces a new type.
 
 .. code-block:: typescript
    :linenos:
@@ -503,7 +512,7 @@ In a type alias defined as ``type A = something``, *A* can be used recursively
 if it is one of the following:
 
 -  Array element type: ``type A = A[]``; or
--  Type argument of a generic type: type A = C<A>.
+-  Type argument of a generic type: ``type A = C<A>``.
 
 .. code-block:: typescript
    :linenos:
@@ -586,7 +595,7 @@ via initialization before the first usage:
 .. code-block:: abnf
 
     variableDeclarations:
-        'let' varDeclarationList
+        'let' variableDeclarationList
         ;
 
     variableDeclarationList:
@@ -602,17 +611,17 @@ via initialization before the first usage:
         '=' expression
         ;
 
-When a variable is introduced by a variable declaration, type *T* of the
+When a variable is introduced by a variable declaration, type ``T`` of the
 variable is determined as follows:
 
--  *T* is the type specified in a type annotation (if any) of the declaration.
+-  ``T`` is the type specified in a type annotation (if any) of the declaration.
 
    - If the name of the variable is followed by the '``?``' sign, then the
      type of the variable is semantically equivalent to ``type | undefined``.
    - If the declaration also has an initializer, then the initializer expression
-     type must be compatible with *T* (see :ref:`Type Compatibility with Initializer`).
+     type must be compatible with ``T`` (see :ref:`Type Compatibility with Initializer`).
 
--  If no type annotation is available, then *T* is inferred from the
+-  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
 
 .. index::
@@ -650,32 +659,32 @@ The initial value can be identified as follows:
 -  An exception parameter is initialized to the thrown object (see
    :ref:`Throw Statements`) that represents exception or error.
 
-- If a variable has an *initializer* explicitly specified, then its execution
-  produces the initial value for this variable.
+- If the *initializer* of a variable is specified explicitly, then its
+  execution produces the initial value for this variable.
 
-- Otherwise the following cases are possible
+- Otherwise, the following situations are possible:
 
-   + Each class or interface static variable is initialized as a result of
+   + Each static variable of class or interface is initialized by the
      execution of the class or interface initializer (see
      :ref:`Class Initializer`).
-   + Each class variable is initialized with either a *default value* (see
-     :ref:`Default Values for Types`) or as a result of class constructor (see
-     :ref:`Constructor Declaration`) execution.
+   + Each class variable is initialized either with a *default value* (see
+     :ref:`Default Values for Types`), or by the execution of a class
+     constructor (see :ref:`Constructor Declaration`).
    + Each local variable or array element is initialized with a *default value*
-     (see :ref:`Default Values for Types`) when it is created.
+     (see :ref:`Default Values for Types`) at the time it is created.
 
 Otherwise, the variable is not initialized, and a :index:`compile-time error`
 occurs.
 
-If an initializer expression is provided, then additional restrictions apply
-to the content of the expression as described in :ref:`Exceptions and Initialization Expression`.
+If an initializer expression is provided, then additional restrictions apply to
+the content of the expression as described in
+:ref:`Exceptions and Initialization Expression`.
 
 If the type of a variable declaration has the prefix ``readonly``, then the
-type must be of *array* kind, and the restrictions on its operations are
-applied to the variable as described in :ref:`Readonly Parameters`.
-
-A :index:`compile-time error` occurs if a non-array type has the prefix
-``readonly``.
+type must be of the *array* kind, and the restrictions on its operations
+apply to the variable as described in :ref:`Readonly Parameters`, and in
+:ref:`Contexts and Conversions`. If the prefix ``readonly`` is used with a
+non-array type, then a :index:`compile-time error` occurs:
 
 .. code-block-meta:
    expect-cte:
@@ -745,15 +754,15 @@ its properties or items can be modified.
         identifier (':' type)? initializer
         ;
 
-The type *T* of a constant declaration is determined as follows:
+The type ``T`` of a constant declaration is determined as follows:
 
--  If *T* is the type specified in a type annotation (if any) of the
+-  If ``T`` is the type specified in a type annotation (if any) of the
    declaration, then the initializer expression must be compatible with
-   *T* (see :ref:`Type Compatibility with Initializer`).
--  If no type annotation is available, then *T* is inferred from the
+   ``T`` (see :ref:`Type Compatibility with Initializer`).
+-  If no type annotation is available, then ``T`` is inferred from the
    initializer expression (see :ref:`Type Inference from Initializer`).
--  If '*?*' is used after the name of the constant, then the type of the
-   constant is ``T | undefined``, regardless of whether *T* is identified
+-  If '``?``' is used after the name of the constant, then the type of the
+   constant is ``T | undefined``, regardless of whether ``T`` is identified
    explicitly or via type inference.
 
 .. index::
@@ -792,9 +801,9 @@ Type Compatibility with Initializer
 .. meta:
     frontend_status: Done
 
-If a variable or constant declaration contains type annotation *T* and
-initializer expression *E*, then the type of *E* must be compatible with *T*, 
-see :ref:`Assignment-like Contexts`.
+If a variable or constant declaration contains type annotation ``T`` and
+initializer expression *E*, then the type of *E* must be compatible with ``T``
+(see :ref:`Assignment-like Contexts`).
 
 .. index::
    initializer expression
@@ -810,15 +819,15 @@ Type Inference from Initializer
 .. meta:
     frontend_status: Done
 
-If a declaration does not contain an explicit type annotation, then its type
+If a declaration contains no explicit type annotation, then its type
 is inferred from the initializer expression as follows:
 
--  If the initializer expression is of union type then the normalized union
-   type (see :ref:`Union Types Normalization`) will be used.
+-  If the initializer expression is of union type, then the normalized union
+   type (see :ref:`Union Types Normalization`) is used.
 
--  Otherwise the type inferred from the initializer expression will be used.
+-  Otherwise, the type is inferred from the initializer expression.
 
-If the type of the initializer expression cannot be inferred then a
+If the type of the initializer expression cannot be inferred, then a
 :index:`compile-time error` occurs (see :ref:`Object Literal`):
 
 .. index::
@@ -875,9 +884,9 @@ Function *overload signature* allows calling a function in different ways (see
 If a function is declared *generic* (see :ref:`Generics`), then its type
 parameters must be specified.
 
-The ``native`` modifier indicates that the function is 
-a *native function* (see :ref:`Native Functions` in Experimental Features).
-A :index:`compile-time error` occurs if a *native function* has a body.
+The modifier ``native`` indicates that the function is a *native function* (see
+:ref:`Native Functions` in Experimental Features). If a *native function* has a
+body, then a :index:`compile-time error` occurs.
 
 Functions must be declared on the top level (see :ref:`Top-Level Statements`).
 
@@ -957,7 +966,7 @@ Parameter List
 
 A signature may contain a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
-parameter must be explicitly defined. If *parameter list* is omitted then the
+parameter must be defined explicitly. If *parameter list* is omitted, then the
 function or method has no parameters. 
 
 .. code-block:: abnf
@@ -1023,21 +1032,28 @@ Readonly Parameters
     frontend_status: None
 
 If the parameter type is prefixed with ``readonly``, then the type must be of
-array type ``T[]``. Otherwise, a :index:`compile-time error` occurs.
+array type ``T[]`` (see :ref:`Array Types`) or tuple type ``[T1, T2, ..., Tn]``
+(see :ref:`Tuple Types`). Otherwise, a :index:`compile-time error` occurs.
 
-The *readonly* parameter indicates that the array content cannot be modified
-by a function or by a method body. A :index:`compile-time error` if the array
-content is modified by an operation:
+No function or method body can modify an array or tuple content that has the
+*readonly* parameter. A :index:`compile-time error` occurs if an operation
+modifies an array or tuple content that has the *readonly* parameter:
 
 .. code-block:: typescript
    :linenos:
 
-    function foo(array: readonly number[]) {
+    function foo(array: readonly number[], tuple: readonly [number, string]) {
         let element = array[0] // OK, one can get array element
         array[0] = element // Compile-time error, array is readonly
+
+        element = tuple[0] // OK, one can get tuple element
+        tuple[0] = element // Compile-time error, tuple is readonly
     }
 
-It applies to variables as discussed in :ref:`Variable Declarations`.
+This rule applies to variables as discussed in :ref:`Variable Declarations`.
+
+Any assignment of readonly parameters and variables must follow the limitations
+stated in :ref:`Contexts and Conversions`.
 
 |
 
@@ -1049,7 +1065,7 @@ Optional Parameters
 .. meta:
     frontend_status: Done
 
-There are two forms of *optional parameters*:
+*Optional parameters* can be of two forms as follows:
 
 .. code-block:: abnf
 
@@ -1063,10 +1079,10 @@ There are two forms of *optional parameters*:
         ;
 
 
-The first form contains an expression that specifies a *default value*. That
-is called a *parameter with default value*. The value of the parameter is set
+The first form contains an expression that specifies a *default value*. It is
+called a *parameter with default value*. The value of the parameter is set
 to the *default value* if the argument corresponding to that parameter is
-omitted in a function call.
+omitted in a function call:
 
 .. index::
    optional parameter
@@ -1090,7 +1106,7 @@ omitted in a function call.
 The second form is a short-cut notation and ``identifier '?' ':' type``
 effectively means that ``identifier`` has type ``T | undefined`` with the
 default value ``undefined``.
-If a type is of the value type kind, then implicit boxing (see
+If a type is of the *value* kind, then implicit boxing (see
 :ref:`Boxing Conversions`) must be applied (as in :ref:`Union Types`) as
 follows:
 ``identifier '?' ':' valueType`` is equivalent to
@@ -1139,9 +1155,9 @@ Rest Parameter
 .. meta:
     frontend_status: Done
 
-*Rest parameters* allow functions or methods to take an arbitrary number of
-arguments. *Rest parameters* have the symbol '``...``' mark before the
-parameter name:
+*Rest parameters* allow functions or methods to take arbitrary numbers of
+arguments. *Rest parameters* have the ``spread`` operator '``...``' as prefix
+before the parameter name:
 
 .. code-block:: typescript
    :linenos:
@@ -1159,7 +1175,8 @@ A :index:`compile-time error` occurs if a rest parameter:
 -  Has a type that is not an array type.
 
 A function with a rest parameter of type ``T[]`` can accept any number of
-arguments of types that are compatible (see :ref:`Type Compatibility`) with *T*:
+arguments of types that are compatible (see :ref:`Type Compatibility`) with
+``T``:
 
 .. index::
    rest parameter
@@ -1223,10 +1240,10 @@ Shadowing by Parameter
 .. meta:
     frontend_status: Done
 
-If the name of a parameter is identical to the name of a top-level
-variable accessible (see :ref:`Accessible`) within the body of a function or a
-method with that parameter, then the name of the parameter shadows the name of
-the top-level variable within the body of that function or method:
+If the name of a parameter is identical to the name of a top-level variable
+accessible (see :ref:`Accessible`) within the body of a function or a method
+with that parameter, then the name of the parameter shadows the name of the
+top-level variable within the body of that function or method:
 
 .. code-block:: typescript
    :linenos:
@@ -1266,18 +1283,19 @@ Return Type
 
 Function or method return type defines the static type of the result of the
 function or method execution (see :ref:`Function Call Expression` and
-:ref:`Method Call Expression`). During execution function or method can
-produce a value of type compatible (see :ref:`Type Compatibility`) to the
+:ref:`Method Call Expression`). During the execution, the function or method
+can produce a value of a type compatible (see :ref:`Type Compatibility`) to the
 return type.
 
-If the function or method return type is not ``void``  (see :ref:`Type void`),
-and the function or method body has an execution path without a return
-statement (see :ref:`Return Statements`), then a :index:`compile-time error`
-occurs.
+If function or method return type is not ``void`` (see :ref:`Type void`), and
+the execution path of the function or method body has no return statement (see
+:ref:`Return Statements`), then a :index:`compile-time error` occurs.
 
-If function or method return type is not specified then it is
-- inferred from its body (see :ref:`Return Type Inference`)
-- or is ``void`` (see :ref:`Type void`) is body is absent.
+If function or method return type is not specified, then it is inferred from
+its body (see :ref:`Return Type Inference`). If there is no body, then the
+function or method return type is ``void`` (see :ref:`Type void`).
+
+|
 
 .. _Return Type Inference:
 
@@ -1288,8 +1306,8 @@ Return Type Inference
     frontend_status: Done
 
 An omitted function or method return type can be inferred from the function,
-or the method body. A :index:`compile-time error` occurs if a return type is
-omitted in a native function (see :ref:`Native Functions`).
+or the method body. If the return type is omitted in a native function (see
+:ref:`Native Functions`), then a :index:`compile-time error` occurs.
 
 The current version of |LANG| allows inferring return types at least under
 the following conditions:
@@ -1297,20 +1315,19 @@ the following conditions:
 -  If there is no return statement, or if all return statements have no
    expressions, then the return type is ``void`` (see :ref:`Type void`).
 -  If there are *k* return statements (where *k* is 1 or more) with
-   the same type expression *R*, then the *R* is the return type.
+   the same type expression *R*, then ``R`` is the return type.
 -  If there are *k* return statements (where *k* is 2 or more) with
-   expressions of types (*T*:sub:`1`, ``...``, *T*:sub:`k`), and *R*
-   is the *union type* (see :ref:`Union Types`) of these types
-   (*T*:sub:`1` | ... | *T*:sub:`k`), 
-   and its normalized version (see :ref:`Union Types Normalization`) is the
-   return type.
+   expressions of types ``T``:sub:`1`, ``...``, ``T``:sub:`k`, then ``R`` is the
+   *union type* (see :ref:`Union Types`) of these types (``T``:sub:`1` | ... |
+   ``T``:sub:`k`), and its normalized version (see :ref:`Union Types Normalization`)
+   is the return type.
 -  If the function is ``async``, the return type is inferred by using the rules
-   above, and the type *T* is not of type ``Promise``, then the return type is
+   above, and the type ``T`` is not of type ``Promise``, then the return type is
    ``Promise<T>``.
 
 
 Future compiler implementations are to infer the return type in more cases.
-The type inference is presented in the example below:
+The example below represents type inference:
 
 .. index::
    return type
@@ -1350,7 +1367,7 @@ The type inference is presented in the example below:
     // That is a compile-time error as there is an execution path with no return
 
 
-If a particular type inference case is not recognized by the compiler, then
+If the compiler fails to recognize a particular type inference case, then
 a corresponding :index:`compile-time error` occurs.
 
 |
@@ -1364,9 +1381,8 @@ Function Overload Signatures
     frontend_status: None
     todo: implement TS overload signature #16181
 
-The |LANG| language allows specifying a function that can have several
-*overload signatures* with the same name followed by one implementation
-function body:
+|LANG| allows specifying a function that can have several *overload signatures*
+with the same name followed by one implementation function body:
 
 .. code-block:: abnf
 
@@ -1374,14 +1390,13 @@ function body:
       'async'? 'function' identifier typeParameters? signature
       ;
 
-A :index:`compile-time error` occurs if the function implementation is missing,
-or does not immediately follow the declaration.
-
 A call of a function with overload signatures is always a call of the
-implementation function.
+implementation function. If the function implementation is missing, or does
+not immediately follow the declaration, then a :index:`compile-time error`
+occurs.
 
-The example below has overload signatures defined (one is parameterless, and
-the other two have one parameter each):
+The example below has overload signatures defined (one overload signature is
+parameterless, and other two have one parameter each):
 
 .. index::
    function overload signature
@@ -1415,8 +1430,8 @@ of the implementation function with the ``x`` argument.
 The compatibility requirements of *overload signatures* are described in
 :ref:`Overload Signature Correctness Check`.
 
-A :index:`compile-time error` occurs unless all overload signatures are
-either exported or non-exported.
+If not all overload signatures are either exported or non-exported, then a
+:index:`compile-time error` occurs.
 
 .. index::
    call

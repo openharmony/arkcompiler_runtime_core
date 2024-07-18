@@ -203,7 +203,8 @@ Ambient Class Declarations
     ambientAccessModifier:
         'public' | 'protected'
         ;
-    
+
+|
 
 Ambient field declarations have no initializers:
 
@@ -248,7 +249,9 @@ Ambient constructor, method, and accessor declarations have no bodies:
         | 'set' identifier '(' parameter ')'
         )
         ;       
-       
+
+|
+
 .. _Ambient Indexer:
 
 Ambient Indexer
@@ -389,7 +392,7 @@ them to specify the platform API or a third-party library API.
 .. code-block:: abnf
 
     ambientNamespaceDeclaration:
-        'namespace' Identifier '{' ambientNamespaceElement* '}'
+        'namespace' identifier '{' ambientNamespaceElement* '}'
         ;
 
     ambientNamespaceElement:

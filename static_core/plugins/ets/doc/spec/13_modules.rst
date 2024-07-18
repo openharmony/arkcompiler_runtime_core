@@ -24,8 +24,11 @@ compilation units. Each compilation unit creates its own scope (see
 interfaces, or other declarations are only accessible (see :ref:`Accessible`)
 within such scope if not explicitly exported.
 
-A variable, function, class, interface, or other declarations exported from a
-different compilation unit must be imported first.
+A variable, function, class, interface, or other declarations exported from 
+some compilation unit must be imported first by the compilation unit that
+needs to use them. 
+
+.. Only exported declarations are available for the 3rd party tools and programs written in other programming languages.
 
 There are three kinds of compilation units:
 
@@ -88,7 +91,7 @@ can optionally consist of the following four parts:
         importDirective* (topDeclaration | topLevelStatements | exportDirective)*
         ;
 
-Every module may directly use all exported entities from the core packages of
+Every module can directly use all exported entities from the core packages of
 the standard library (see :ref:`Standard Library Usage`).
 
 .. code-block:: typescript
@@ -234,7 +237,7 @@ An import declaration has the following two parts:
         ;
 
     defaultBinding:
-        Identifier | ( '{' 'default' 'as' Identifier '}' )
+        identifier | ( '{' 'default' 'as' identifier '}' )
         ;
 
     typeBinding:
@@ -246,7 +249,7 @@ An import declaration has the following two parts:
         ;
 
     importAlias:
-        'as' Identifier
+        'as' identifier
         ;
 
     importPath:
@@ -382,8 +385,8 @@ The module’s import path is now irrelevant:
 | .. code-block:: typescript      |  | .. code-block:: typescript           |
 |                                 |  |                                      |
 |     import {sin as Sine} from " |  |     let x = Sine(1.0) // OK          |
-|         ..."                    |  |     let y = sin(1.0) /* Error ‘y’ is |
-|                                 |  |        not accessible */             |
+|         ..."                    |  |     let y = sin(1.0) /* Error ‘sin’  |
+|                                 |  |        is not accessible */          |
 +---------------------------------+--+--------------------------------------+
 
 A single import statement can list several names:
@@ -499,7 +502,7 @@ applied to a single name:
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
 | A name is explicitly used   |                            | Compile-time error.          |
-| with alias several times.   |                            | Or warning?                  |
+| with alias several times.   |                            |                              |
 |                             |     import {sin as Sine,   |                              |
 |                             |        sin as SIN}         |                              |
 |                             |        from "..."          |                              |
@@ -718,9 +721,9 @@ Standard Library Usage
     todo: fix stdlib and tests, then import only core by default
     todo: add escompat to spec and default
 
-Any compilation unit has all exported entities from the core packages of the
-standard library (see :ref:`Standard Library`) accessible (see
-:ref:`Accessible`) as simple names.
+All entities exported from the core packages of the standard library (see
+:ref:`Standard Library`) are accessible  as simple names (see :ref:`Accessible`)
+in any compilation unit.
 
 .. code-block:: typescript
    :linenos:
@@ -972,8 +975,7 @@ Selective Export Directive
 ==========================
 
 .. meta:
-    frontend_status: Partly
-    todo: export with alias isn't work properly
+    frontend_status: Done
 
 In addition, each exported declaration can be marked as *exported* by
 explicitly listing the names of exported declarations. Renaming is optional.
@@ -1023,7 +1025,7 @@ in the example below exports variable 'v' by its name:
 .. code-block:: abnf
 
     singleExportDirective:
-        'export' Identifier
+        'export' identifier
         ;
 
 
@@ -1174,7 +1176,7 @@ The sequence above is equal to the following:
   module.
 - If a separate module is used as a program, then top-level statements are used
   as a program entry point (see :ref:`Program Entry Point`). Note that an empty
-  set of top-level statements implies an empty program entry point which does
+  set of top-level statements implies an empty program entry point that does
   nothing. If the separate module has the ``main`` function, then it is
   executed after the execution of the top-level statements. 
 

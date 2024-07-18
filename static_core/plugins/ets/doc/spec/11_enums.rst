@@ -39,8 +39,8 @@ associated set of named constants that define its possible values:
    enumeration
    named constant
 
-``const enum`` is supported for the source-level compatibility with the |TS|
-and ``const`` is just skipped as it has no impact on enum semantics in the
+``const enum`` is supported for source-level compatibility with |TS|,
+and ``const`` is skipped as it has no impact on ``enum`` semantics in
 |LANG|.
 
 Qualification by type is mandatory to access the enumeration constant:

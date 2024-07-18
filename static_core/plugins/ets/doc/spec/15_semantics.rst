@@ -790,14 +790,14 @@ Overriding member may keep or extend the access modifier (see
 Semantic rules that work in various contexts are represented in the following
 table:
 
-+-------------------------------------+------------------------------------------+
-| **Context**                         | **Semantic Check**                       |
-+=====================================+==========================================+
-| Two *instance methods*,             | If signatures are *overload-equivalent*, |
-| two *static methods* with the same  | then a :index:`compile-time error`       |
-| name or, two *constructors* are     | occurs. Otherwise, *overloading* is used.|
-| defined in the same class.          |                                          |
-+-------------------------------------+------------------------------------------+
++-------------------------------------+----------------------------------------------+
+| **Context**                         | **Semantic Check**                           |
++=====================================+==============================================+
+| Two *instance methods*,             | If signatures are *overload-equivalent*,     |
+| two *static methods* with the same  | (see :ref:`Overload-Equivalent Signatures`), |
+| name or, two *constructors* are     | then a :index:`compile-time error`           |
+| defined in the same class.          | occurs. Otherwise, *overloading* is used.    |
++-------------------------------------+----------------------------------------------+
 
 .. code-block:: typescript
    :linenos:
@@ -824,12 +824,12 @@ table:
 
    }
 
-+-------------------------------------+------------------------------------------+
-| An *instance method* is defined     | If signatures are *override-compatible*, |
-| in a subclass with the same name    | then *overriding* is used.               |
-| as the *instance method* in a       | Otherwise, *overloading* is used.        |
-| superclass.                         |                                          |
-+-------------------------------------+------------------------------------------+
++-------------------------------------+---------------------------------------------+
+| An *instance method* is defined     | If signatures are *override-compatible*     |
+| in a subclass with the same name    | (see :ref:`Override-Compatible Signatures`),|
+| as the *instance method* in a       | then *overriding* is used.                  |
+| superclass.                         | Otherwise, *overloading* is used.           |
++-------------------------------------+---------------------------------------------+
 
 .. code-block:: typescript
    :linenos:
@@ -843,12 +843,13 @@ table:
       method_2(p: string) {} // overloading
    }
 
-+-------------------------------------+------------------------------------------+
-| A *static method* is defined        | If signatures are *overload-equivalent*, |
-| in a subclass with the same name    | then the static method in the subclass   |
-| as the *static method* in a         | *hides* the previous static method.      |
-| superclass.                         | Otherwise, *overloading* is used.        |
-+-------------------------------------+------------------------------------------+
++-------------------------------------+---------------------------------------------+
+| A *static method* is defined        | If signatures are *overload-equivalent*     |
+| in a subclass with the same name    | (see :ref:`Overload-Equivalent Signatures`),|
+| as the *static method* in a         | then the static method in the subclass      |
+| superclass.                         | *hides* the previous static method.         |
+|                                     | Otherwise, *overloading* is used.           |
++-------------------------------------+---------------------------------------------+
 
 .. code-block:: typescript
    :linenos:
@@ -892,14 +893,14 @@ Overloading and Overriding in Interfaces
 .. meta:
     frontend_status: Done
 
-+-------------------------------------+------------------------------------------+
-| **Context**                         | **Semantic Check**                       |
-+=====================================+==========================================+
-| A method is defined                 | If signatures are *override-compatible*, |
-| in a subinterface with the same     | then *overriding* is used. Otherwise,    |
-| name as the method in               | *overloading* is used.                   |
-| the superinterface.                 |                                          |
-+-------------------------------------+------------------------------------------+
++-------------------------------------+---------------------------------------------+
+| **Context**                         | **Semantic Check**                          |
++=====================================+=============================================+
+| A method is defined                 | If signatures are *override-compatible*     |
+| in a subinterface with the same     | (see :ref:`Override-Compatible Signatures`),|
+| name as the method in               | then *overriding* is used. Otherwise,       |
+| the superinterface.                 | *overloading* is used.                      |
++-------------------------------------+---------------------------------------------+
 
 .. code-block:: typescript
    :linenos:

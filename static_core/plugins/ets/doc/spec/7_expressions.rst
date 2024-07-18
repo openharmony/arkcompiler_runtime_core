@@ -81,7 +81,7 @@ expression rules:
 
     objectReference:
         typeReference
-        | super
+        | 'super'
         | primaryExpression
         ;
 
@@ -672,13 +672,12 @@ The type of an array literal is inferred by the following rules:
    array type
    type inference
 
--  If the context is available then the type is inferred from the context, if
-   sucsessfull then the type of an array literal is the inferred type ``T[]``
-   or ``Array<T>``.
--  Otherwise, the type is attempted to be inferred from the types of its
-   elements.
+-  If a context is available, then the type is inferred from the context. If
+   sucsessfull, then the type of the array literal is the inferred type:
+   ``T[]``, ``Array<T>``, or tuple.
+-  Otherwise, the type is to be inferred from the types of its elements.
 
-See for more details of both cases below.
+More details of both cases are presented below.
 
 .. index::
    type inference
@@ -775,18 +774,18 @@ at respective positions, then the type of the array literal is a tuple type.
 
     let incorrect: [number, string] = ["hello", 1] // compile-time error
 
-If the type used in the context is a *union type* (see :ref:`Union Types`) then
-it is necessary to try to infer the type of array literal from its elements 
-(see :ref:`Array Type Inference from Types of Elements`) and if sucseccfull
-then check if the inferred type is compatible with the union type. Otherwise, it is
-a :index:`compile-time error`.
+If the type used in the context is a *union type* (see :ref:`Union Types`), then
+it is necessary to try inferring the type of the array literal from its elements
+(see :ref:`Array Type Inference from Types of Elements`). If sucseccfull, then
+the type so inferred must be compatible with one of the types that form the
+union type. Otherwise, it is a :index:`compile-time error`:
 
 
 .. code-block:: typescript
    :linenos:
 
 
-    let union_of_arrays: number[] | string[] = [1, 2] // OK
+    let union_of_arrays: number[] | string[] = [1, 2] // OK, type of literal is number[]
     let incorrect_union_of_arrays: number[] | string[] = [1, 2, "string"]
      // compile-time error: number|string[] is not compatible with number[] | string[]
 
@@ -805,7 +804,7 @@ If the type of an array literal ``[`` ``expr``:sub:`1`, ``...`` , ``expr``:sub:`
 cannot be inferred from the context, then the following algorithm is to be
 used to infer it from the initialization expressions:
 
-..#. If there is no expression (*N == 0*), then the type is ``Object[]``.
+.. #. If there is no expression (*N == 0*), then the type is ``Object[]``.
 
 #. If there is no expression (*N == 0*), then the type  of the
    array literal cannot be inferred, and a :index:`compile-time error` occurs.
@@ -1053,7 +1052,8 @@ Object Literal of Interface Type
 ================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Partly
+    todo: implement generic types
 
 If the interface type *I* is inferred from the context, then the type of the
 object literal is an anonymous class implicitly created for interface *I*:
@@ -1988,6 +1988,9 @@ An array indexing expression evaluated at runtime behaves as follows:
 Record Indexing Expression
 ==========================
 
+.. meta:
+    frontend_status: Done
+
 For a ``Record<Key, Value>`` indexing (see :ref:`Record Utility Type`),
 the *index expression* must be of type ``Key``.
 
@@ -2385,9 +2388,9 @@ system, and the result of the ``instanceof`` expression cannot be determined.
         'typeof' expression
         ;
 
-Any ``typeof`` expression is of type ``string``. For the types presented below
-the value of ``typeof`` expression is known at compile-time and thus requires
-no evaluations at runtime:
+Any ``typeof`` expression is of type ``string``. The ``typeof`` expression
+values of the below types are known at compile time, and require no evaluation
+at runtime:
 
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
@@ -4867,7 +4870,7 @@ the value of *b* to *a*).
 .. code-block:: abnf
 
     assignmentExpression:
-        expression1 assignmentOperator expression2
+        lhsExpression assignmentOperator rhsExpression
         ;
 
     assignmentOperator
@@ -4877,8 +4880,17 @@ the value of *b* to *a*).
         | '&='  | '|='  | '^='
         ;
 
+    lhsExpression:
+        expression
+        ;
+
+    rhsExpression
+        expression
+        ;
+
+
 The result of the first operand in an assignment operator (represented by
-expression1) must be one of the following:
+*lhsExpression*) must be one of the following:
 
 -  Named variable, such as a local variable, or a field of the current
    object or class;
@@ -4901,10 +4913,10 @@ expression1) must be one of the following:
    indexing expression
    record component access
 
-A :index:`compile-time error` occurs if *expression1* contains the chaining
+A :index:`compile-time error` occurs if *lhsExpression* contains the chaining
 operator '``?.``' (see :ref:`Chaining Operator`).
 
-A :index:`compile-time error` occurs if the result of *expression1* is not a
+A :index:`compile-time error` occurs if the result of *lhsExpression* is not a
 variable.
 
 The type of the variable is the type of the assignment expression.
@@ -4931,17 +4943,17 @@ Simple Assignment Operator
     frontend_status: Done
 
 A :index:`compile-time error` occurs if the type of the right-hand operand
-(*expression2*) is not compatible (see :ref:`Type Compatibility`) with
-the type of the variable (see :ref:`Type Parameters`). Otherwise,
-the expression is evaluated at runtime in one of the following ways:
+(*rhsExpression*) is not compatible (see :ref:`Type Compatibility`) with
+the type of the variable. Otherwise, the expression is evaluated at runtime in
+one of the following ways:
 
-1. If the left-hand operand *expression1* is a field access expression
+1. If the left-hand operand *lhsExpression* is a field access expression
    *e.f* (see :ref:`Field Access Expression`), possibly enclosed in a
    pair of parentheses, then:
 
-   #. *expression1* *e* is evaluated: if the evaluation of *e*
+   #. *lhsExpression* *e* is evaluated: if the evaluation of *e*
       completes abruptly, then so does the assignment expression.
-   #. Right-hand operand *expression2* is evaluated: if the evaluation
+   #. Right-hand operand *rhsExpression* is evaluated: if the evaluation
       completes abruptly, then so does the assignment expression.
    #. Value of the right-hand operand as computed above is assigned
       to the variable denoted by *e.f*.
@@ -5090,8 +5102,13 @@ If none of the above is true, then the following three steps are required:
    operand is converted to the type of the left-hand variable.
    In that case, the result of the conversion is stored into the variable.
    A :index:`compile-time error` occurs if the type of the left-hand variable
-   is    a ``readonly`` array, while the converted type of the right-hand
-   operand is a non-``readonly`` array.
+   is one of the following:
+
+   - ``readonly`` array (see :ref:`Readonly Parameters`), while the
+     converted type of the right-hand operand is a non-``readonly`` array;
+   - ``readonly`` tuple (see :ref:`Readonly Parameters`), while the
+     converted type of the right-hand operand is a non-``readonly`` tuple.
+
 
 .. index::
    evaluation
@@ -5633,23 +5650,17 @@ The evaluation of a lambda expression is distinct from the execution of the
 lambda body.
 
 If completing normally at runtime, the evaluation of a lambda expression
-produces a reference to an object. In that case, it is similar to the evaluation
-of a class instance creation expression.
-
-The evaluation of a lambda expression:
-
--  Allocates and initializes a new instance of a class with the
-   properties below; or
-
--  Refers to an existing instance of a class with the properties below.
-
+produces a reference to an allocated and initialized new instance of a function
+type (see :ref:`Function Types`) that corresponds to the lambda signature.
+In that case, it is similar to the evaluation of a class instance creation
+expression (see :ref:`New Expressions`).
 
 If the available space is not sufficient for a new instance to be created,
 then the evaluation of the lambda expression completes abruptly, and
 ``OutOfMemoryError`` is thrown.
 
 During a lambda expression evaluation, the captured values of the
-lambda expression are saved to the internal state of the lambda.
+lambda expression are saved to the internal state of the created instance.
 
 .. index::
    runtime
@@ -5769,13 +5780,10 @@ and dynamically.
         ;
 
 The *expression* must be of type ``string`` that denotes the *path* to the
-module to be loaded.
-
-The result of this expression is ``Promise<DynamicObject>`` (see
-:ref:`Promise<T> Class` and :ref:`DynamicObject Type`).
-
-Methods of class ``Promise`` can be used to access the loaded unit, or to catch
-an error.
+module to be loaded. The result of this expression is ``Promise<DynamicObject>``
+(see :ref:`Promise<T> Class` and :ref:`DynamicObject Type`). Methods of class
+``Promise`` can be used to access the loaded module, or to handle an error
+that can occur while attempting to load the module.
 
 |
 
