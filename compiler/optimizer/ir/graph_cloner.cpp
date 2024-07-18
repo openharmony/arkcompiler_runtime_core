@@ -38,6 +38,7 @@ Graph *GraphCloner::CloneGraph()
     auto new_graph =
         allocator_->New<Graph>(allocator_, local_allocator_, GetGraph()->GetArch(), GetGraph()->GetMethod(),
                                GetGraph()->GetRuntime(), GetGraph()->GetParentGraph(), GetGraph()->GetMode());
+    CHECK_NOT_NULL(new_graph);
     new_graph->SetCurrentInstructionId(GetGraph()->GetCurrentInstructionId());
     CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, false>(GetGraph()->GetVectorBlocks(), new_graph);
     BuildControlFlow();
@@ -255,6 +256,7 @@ GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool c
     // Populate `LoopUnrollData`
     auto allocator = loop->GetHeader()->GetGraph()->GetLocalAllocator();
     auto unroll_data = allocator->New<LoopUnrollData>();
+    CHECK_NOT_NULL(unroll_data);
     unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
     unroll_data->blocks->resize(loop->GetBlocks().size());
     std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin());
@@ -818,9 +820,16 @@ GraphCloner::LoopClonerData *GraphCloner::PrepareLoopToClone(Loop *loop)
         outside_succ->GetLoop()->AppendBlock(block);
         outside_succ = block;
     }
+    return CreateLoopClonerData(loop, pre_header, outside_succ);
+}
+
+GraphCloner::LoopClonerData *GraphCloner::CreateLoopClonerData(Loop *loop, BasicBlock *pre_header,
+                                                               BasicBlock *outside_succ)
+{
     // Populate `LoopClonerData`
     auto allocator = GetGraph()->GetLocalAllocator();
     auto unroll_data = allocator->New<LoopClonerData>();
+    CHECK_NOT_NULL(unroll_data);
     unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
     unroll_data->blocks->resize(loop->GetBlocks().size() + 1);
     unroll_data->blocks->at(0) = pre_header;

@@ -50,6 +50,7 @@ void LoopAnalyzer::ResetLoopInfo()
 Loop *LoopAnalyzer::CreateNewLoop(BasicBlock *loop_header)
 {
     auto loop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), loop_header, loop_counter_++);
+    CHECK_NOT_NULL(loop);
     loop->AppendBlock(loop_header);
     return loop;
 }

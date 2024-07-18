@@ -48,6 +48,19 @@ public:
     GraphTest graph_test_;
 };
 
+using CompilerInstDeathTest = CompilerInstTest;
+
+class TestAllocationFailureAllocator : public ArenaAllocator {
+public:
+    explicit TestAllocationFailureAllocator(SpaceType space_type) : ArenaAllocator(space_type) {}
+    ~TestAllocationFailureAllocator() {}
+
+    void *Alloc(size_t size, Alignment align = DEFAULT_ARENA_ALIGNMENT) override
+    {
+        return nullptr;
+    }
+};
+
 /**
  * @tc.name: compiler_inst_test_001
  * @tc.desc: Verify the GetInverseConditionCode function.
@@ -1017,4 +1030,22 @@ HWTEST_F(CompilerInstTest, compiler_inst_test_036, TestSize.Level1)
     EXPECT_TRUE(user.GetVirtualRegister().IsAccumulator());
     EXPECT_TRUE(user.IsDynamic());
 }
+
+/**
+ * @tc.name: compiler_inst_test_037
+ * @tc.desc: Check nullptr when allocation fails.
+ * @tc.type: FUNC
+ * @tc.require: #I9TFIC
+ */
+HWTEST_F(CompilerInstDeathTest, compiler_inst_test_037, TestSize.Level1)
+{
+    TestAllocationFailureAllocator test_allocator {SpaceType::SPACE_TYPE_COMPILER};
+    CHECK_NOT_NULL(&test_allocator);
+    EXPECT_DEATH(CHECK_NOT_NULL(nullptr), "CHECK FAILED.*");
+    EXPECT_DEATH(Inst::New<SpillFillInst>(&test_allocator, Opcode::SpillFill), "CHECK FAILED.*");
+    EXPECT_DEATH(Inst::New<ConstantInst>(&test_allocator, Opcode::Constant), "CHECK FAILED.*");
+    EXPECT_DEATH(Inst::New<SaveStateInst>(&test_allocator, Opcode::SaveState), "CHECK FAILED.*");
+    EXPECT_DEATH(Inst::New<CompareInst>(&test_allocator, Opcode::Compare), "CHECK FAILED.*");
+}
+
 }  // namespace panda::compiler

@@ -160,6 +160,7 @@ private:
     void CloneAnalyses(Graph *new_graph);
     // Loop cloning
     LoopClonerData *PrepareLoopToClone(Loop *loop);
+    LoopClonerData *CreateLoopClonerData(Loop *loop, BasicBlock *pre_header, BasicBlock *outside_succ);
     BasicBlock *CreateNewOutsideSucc(BasicBlock *outside_succ, BasicBlock *back_edge, BasicBlock *pre_header);
     void BuildLoopCloneControlFlow(LoopClonerData *unroll_data);
     void BuildLoopCloneDataFlow(LoopClonerData *unroll_data);

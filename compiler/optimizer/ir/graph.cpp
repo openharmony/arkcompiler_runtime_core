@@ -151,6 +151,7 @@ void Graph::VisitAllInstructions(Callback callback)
 BasicBlock *Graph::CreateEmptyBlock(uint32_t guest_pc)
 {
     auto block = GetAllocator()->New<BasicBlock>(this, guest_pc);
+    CHECK_NOT_NULL(block);
     AddBlock(block);
     return block;
 }
@@ -170,6 +171,7 @@ BasicBlock *Graph::CreateEmptyBlock(BasicBlock *base_block)
 BasicBlock *Graph::CreateEmptyBlock(uint32_t id, uint32_t guest_pc)
 {
     auto block = GetAllocator()->New<BasicBlock>(this, guest_pc);
+    CHECK_NOT_NULL(block);
     AddBlock(block, id);
     return block;
 }

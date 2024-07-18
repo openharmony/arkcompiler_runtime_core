@@ -64,13 +64,13 @@ public:
     ArenaAllocatorT(OOMHandler oom_handler, SpaceType space_type, BaseMemStats *mem_stats = nullptr,
                     bool limit_alloc_size_by_pool = false);
 
-    ~ArenaAllocatorT();
+    virtual ~ArenaAllocatorT();
     ArenaAllocatorT(const ArenaAllocatorT &) = delete;
     ArenaAllocatorT(ArenaAllocatorT &&) = default;
     ArenaAllocatorT &operator=(const ArenaAllocatorT &) = delete;
     ArenaAllocatorT &operator=(ArenaAllocatorT &&) = default;
 
-    [[nodiscard]] void *Alloc(size_t size, Alignment align = DEFAULT_ARENA_ALIGNMENT);
+    [[nodiscard]] virtual void *Alloc(size_t size, Alignment align = DEFAULT_ARENA_ALIGNMENT);
 
     template <typename T, typename... Args>
     [[nodiscard]] std::enable_if_t<!std::is_array_v<T>, T *> New(Args &&... args)

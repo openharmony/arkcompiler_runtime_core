@@ -2870,19 +2870,19 @@ InstType *Inst::New(ArenaAllocator *allocator, Args &&... args)
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-branch-clone)
     if constexpr (std::is_same_v<InstType, SpillFillInst>) {
         auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(sizeof(InstType), DEFAULT_ALIGNMENT));
-        ASSERT(data != 0);
+        CHECK(data != 0);
         return new (reinterpret_cast<void *>(data)) InstType(allocator, std::forward<Args>(args)...);
         // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
     } else if constexpr (InstType::INPUT_COUNT == 0) {
         auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(sizeof(InstType), DEFAULT_ALIGNMENT));
-        ASSERT(data != 0);
+        CHECK(data != 0);
         return new (reinterpret_cast<void *>(data)) InstType(std::forward<Args>(args)...);
         // NOLINTNEXTLINE(readability-braces-around-statements, readability-misleading-indentation)
     } else if constexpr (InstType::INPUT_COUNT == MAX_STATIC_INPUTS) {
         constexpr size_t OPERANDS_SIZE = sizeof(DynamicOperands);
         static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
         auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(OPERANDS_SIZE + sizeof(InstType), DEFAULT_ALIGNMENT));
-        ASSERT(data != 0);
+        CHECK(data != 0);
         auto inst = new (reinterpret_cast<void *>(data + OPERANDS_SIZE)) InstType(std::forward<Args>(args)...);
         [[maybe_unused]] auto operands = new (reinterpret_cast<void *>(data)) DynamicOperands(allocator);
         static_cast<Inst *>(inst)->SetField<InputsCount>(InstType::INPUT_COUNT);
@@ -2892,7 +2892,7 @@ InstType *Inst::New(ArenaAllocator *allocator, Args &&... args)
         constexpr auto ALIGNMENT {GetLogAlignment(alignof(Operands<InstType::INPUT_COUNT>))};
         static_assert((OPERANDS_SIZE % alignof(InstType)) == 0);
         auto data = reinterpret_cast<uintptr_t>(allocator->Alloc(OPERANDS_SIZE + sizeof(InstType), ALIGNMENT));
-        ASSERT(data != 0);
+        CHECK(data != 0);
         auto inst = new (reinterpret_cast<void *>(data + OPERANDS_SIZE)) InstType(std::forward<Args>(args)...);
         auto operands = new (reinterpret_cast<void *>(data)) Operands<InstType::INPUT_COUNT>;
         static_cast<Inst *>(inst)->SetField<InputsCount>(InstType::INPUT_COUNT);
