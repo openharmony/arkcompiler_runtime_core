@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -163,6 +163,18 @@ ObjectHeader *ObjectHeader::Clone(ObjectHeader *src)
     return ObjectHeader::ShallowCopy(src);
 }
 
+static ObjectHeader *AllocateObjectAndGetDst(ObjectHeader *src, Class *objectClass, size_t objSize,
+                                             mem::HeapManager *heapManager)
+{
+    ObjectHeader *dst = nullptr;
+    if (PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(src) == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
+        dst = heapManager->AllocateNonMovableObject(objectClass, objSize);
+    } else {
+        dst = heapManager->AllocateObject(objectClass, objSize);
+    }
+    return dst;
+}
+
 ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
 {
     /*
@@ -179,13 +191,8 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<ObjectHeader> srcHandle(thread, src);
 
-    ObjectHeader *dst = nullptr;
     // Determine whether object is non-movable
-    if (PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(src) == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT) {
-        dst = heapManager->AllocateNonMovableObject(objectClass, objSize);
-    } else {
-        dst = heapManager->AllocateObject(objectClass, objSize);
-    }
+    ObjectHeader *dst = AllocateObjectAndGetDst(src, objectClass, objSize, heapManager);
     if (dst == nullptr) {
         return nullptr;
     }
@@ -229,8 +236,7 @@ ObjectHeader *ObjectHeader::ShallowCopy(ObjectHeader *src)
     auto *barrierSet = thread->GetBarrierSet();
     // We don't need pre barrier here because we don't change any links inside main object
     // Post barrier
-    auto gcPostBarrierType = barrierSet->GetPostType();
-    if (!mem::IsEmptyBarrier(gcPostBarrierType)) {
+    if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
         if (!objectClass->IsArrayClass() || !objectClass->GetComponentType()->IsPrimitive()) {
             barrierSet->PostBarrier(dst, 0, objSize);
         }

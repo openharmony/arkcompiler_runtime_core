@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -349,7 +349,6 @@ bool ProfileDumpInfo::Load(int fd)
     trace::ScopedTrace scopedTrace(__PRETTY_FUNCTION__);
     PandaString error;
     ProfileLoadSatus status = LoadInternal(fd, &error);
-
     if (status == PROFILE_LOAD_SUCCESS) {
         return true;
     }
@@ -511,6 +510,20 @@ bool ProfileDumpInfo::ProcessLine(SerializerBuffer &lineBuffer, uint32_t methodS
     return true;
 }
 
+bool ProfileDumpInfo::Save(const PandaString &filename, uint64_t *bytesWritten, int fd)
+{
+    bool result = Save(fd);
+    if (result) {
+        if (bytesWritten != nullptr) {
+            LOG(INFO, RUNTIME) << "      Profile Saver Bingo! and bytes written = " << bytesWritten;
+            *bytesWritten = GetFileSizeBytes(filename);
+        }
+    } else {
+        LOG(ERROR, RUNTIME) << "Failed to save profile info to " << filename;
+    }
+    return result;
+}
+
 bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytesWritten, bool force)
 {
     // NB! we using READWRITE mode to leave the creation job to framework layer.
@@ -527,17 +540,16 @@ bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytesW
     ProfileDumpInfo fileDumpInfo;
     ProfileLoadSatus status = fileDumpInfo.LoadInternal(fd, &error);
     if (status == PROFILE_LOAD_SUCCESS || status == PROFILE_LOAD_EMPTYFILE) {
-        if (MergeWith(fileDumpInfo)) {
-            if (dumpInfo_ == fileDumpInfo.dumpInfo_) {
-                if (bytesWritten != nullptr) {
-                    *bytesWritten = 0;
-                }
-                LOG(INFO, RUNTIME) << "  No Saving as no change byte_written = 0";
-                if (status != PROFILE_LOAD_EMPTYFILE) {
-                    return true;
-                }
+        bool isMergeWith = MergeWith(fileDumpInfo);
+        if (isMergeWith && dumpInfo_ == fileDumpInfo.dumpInfo_) {
+            if (bytesWritten != nullptr) {
+                *bytesWritten = 0;
             }
-        } else {
+            LOG(INFO, RUNTIME) << "  No Saving as no change byte_written = 0";
+            if (status != PROFILE_LOAD_EMPTYFILE) {
+                return true;
+            }
+        } else if (!isMergeWith) {
             LOG(INFO, RUNTIME) << "  No Saving as Could not merge previous profile data from file " << filename;
             if (!force) {
                 return false;
@@ -557,16 +569,7 @@ bool ProfileDumpInfo::MergeAndSave(const PandaString &filename, uint64_t *bytesW
         return false;
     }
 
-    bool result = Save(fd);
-    if (result) {
-        if (bytesWritten != nullptr) {
-            LOG(INFO, RUNTIME) << "      Profile Saver Bingo! and bytes written = " << bytesWritten;
-            *bytesWritten = GetFileSizeBytes(filename);
-        }
-    } else {
-        LOG(ERROR, RUNTIME) << "Failed to save profile info to " << filename;
-    }
-    return result;
+    return Save(filename, bytesWritten, fd);
 }
 
 }  // namespace ark

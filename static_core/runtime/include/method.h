@@ -858,6 +858,9 @@ public:
     }
 
 private:
+    inline void FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
+                                PandaVector<uint32_t> &branches, PandaVector<uint32_t> &throws) const;
+
     Value InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args);
 
     Value GetReturnValueFromTaggedValue(uint64_t retValue)

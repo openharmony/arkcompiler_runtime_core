@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,6 @@
 #include "unicode/uchar.h"
 #include "unicode/uniset.h"
 
-#define _NO_DEBUG_
 namespace {
 constexpr int INVALID_UNICODE_FROM_UTF8 = -1;
 
@@ -173,9 +172,6 @@ void RegExpParser::Parse()
     buffer_.PutU32(NUM_CAPTURE__OFFSET, captureCount_);
     buffer_.PutU32(NUM_STACK_OFFSET, stackCount_);
     buffer_.PutU32(FLAGS_OFFSET, flags_);
-#ifndef _NO_DEBUG_
-    RegExpOpCode::DumpRegExpOpCode(std::cout, buffer_);
-#endif
 }
 
 void RegExpParser::ParseDisjunction(bool isBackward)
@@ -749,11 +745,8 @@ bool RegExpParser::ParserIntervalQuantifier(int *pmin, int *pmax)
     return true;
 }
 
-void RegExpParser::ParseQuantifier(size_t atomBcStart, int captureStart, int captureEnd)
+bool RegExpParser::ParseQuantifierPrefix(int &min, int &max, bool &isGreedy)
 {
-    int min = -1;
-    int max = -1;
-    bool isGreedy = true;
     switch (c0_) {
         case '*':
             // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -781,11 +774,11 @@ void RegExpParser::ParseQuantifier(size_t atomBcStart, int captureStart, int cap
             if (!ParserIntervalQuantifier(&min, &max)) {
                 pc_ = start;
                 Advance();  // back to '{'
-                return;
+                return false;
             }
             if (min > max) {
                 ParseError("Invalid repetition count");
-                return;
+                return false;
             }
             break;
         }
@@ -799,6 +792,17 @@ void RegExpParser::ParseQuantifier(size_t atomBcStart, int captureStart, int cap
         Advance();
     } else if (c0_ == '?' || c0_ == '+' || c0_ == '*' || c0_ == '{') {
         ParseError("nothing to repeat");
+        return false;
+    }
+    return true;
+}
+
+void RegExpParser::ParseQuantifier(size_t atomBcStart, int captureStart, int captureEnd)
+{
+    int min = -1;
+    int max = -1;
+    bool isGreedy = true;
+    if (!ParseQuantifierPrefix(min, max, isGreedy)) {
         return;
     }
     if (min != -1 && max != -1) {
@@ -1485,15 +1489,7 @@ void RegExpParser::ParseUnicodePropertyValueCharacters(bool *isValue)
 // NOLINTNEXTLINE(cert-dcl50-cpp)
 void RegExpParser::PrintF(const char *fmt, ...)
 {
-#ifndef _NO_DEBUG_
-    va_list args;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg,)
-    va_start(args, fmt);
-    vprintf(fmt, args);
-    va_end(args);
-#else
     (void)fmt;
-#endif
 }
 
 void RegExpParser::ParseError(const char *errorMessage)

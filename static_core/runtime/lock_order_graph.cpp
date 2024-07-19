@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -82,6 +82,55 @@ bool LockOrderGraph::CheckForTerminationLoops(const PandaList<MTManagedThread *>
     return LockOrderGraph(nodes, edges).CheckForTerminationLoops();
 }
 
+void LockOrderGraph::CheckNodeForTerminationLoops(ThreadId node, PandaSet<ThreadId> &nodesInDeadlocks) const
+{
+    if (nodesInDeadlocks.count(node) != 0) {
+        // If this node belongs to some previously found loop, we ignore it.
+        return;
+    }
+    if (nodes_.at(node)) {
+        // This node is terminating, ignore it.
+        nodesInDeadlocks.insert(node);
+        return;
+    }
+
+    // explored_nodes contains nodes reachable from the node chosen in the outer loop.
+    PandaSet<ThreadId> exploredNodes = {node};
+    // front contains nodes which have not been explored yet.
+    PandaList<ThreadId> front = {node};
+    // On each iteration of the loop we take next unexplored node from the front and find all reachable nodes from
+    // it. If we find already explored node then there is a loop and we save it in nodes_in_deadlocks. Also we
+    // detect paths leading to nodes_in_deadlocks and to termination nodes.
+    while (!front.empty()) {
+        auto i = front.begin();
+        while (i != front.end()) {
+            ThreadId currentNode = *i;
+            i = front.erase(i);
+            if (edges_.count(currentNode) == 0) {
+                // No transitions from this node.
+                continue;
+            }
+            auto nextNode = edges_.at(currentNode);
+            // There is a rare case, in which a monitor may be entered recursively in a
+            // daemon thread. If a runtime calls DeregisterSuspendedThreads exactly when
+            // the daemon thread sets SetEnteringMonitor, then we create an edge from a thread
+            // to itself, i.e. a self-loop and, thus, falsely flag this situation as a deadlock.
+            // So here we ignore this self-loop as a false loop.
+            if (nextNode == currentNode) {
+                continue;
+            }
+            if (exploredNodes.count(nextNode) != 0 || nodesInDeadlocks.count(nextNode) != 0 || nodes_.at(nextNode)) {
+                // Loop or path to another loop or to terminating node was found
+                nodesInDeadlocks.merge(exploredNodes);
+                front.clear();
+                break;
+            }
+            exploredNodes.insert(nextNode);
+            front.push_back(nextNode);
+        }
+    }
+}
+
 bool LockOrderGraph::CheckForTerminationLoops() const
 {
     // This function returns true, if the following conditions are satisfied for each node:
@@ -90,53 +139,7 @@ bool LockOrderGraph::CheckForTerminationLoops() const
     // there is a path to a loop or to a terminating node.
     PandaSet<ThreadId> nodesInDeadlocks = {};
     for (auto const nodeElem : nodes_) {
-        auto node = nodeElem.first;
-        if (nodesInDeadlocks.count(node) != 0) {
-            // If this node belongs to some previously found loop, we ignore it.
-            continue;
-        }
-        if (nodes_.at(node)) {
-            // This node is terminating, ignore it.
-            nodesInDeadlocks.insert(node);
-            continue;
-        }
-
-        // explored_nodes contains nodes reachable from the node chosen in the outer loop.
-        PandaSet<ThreadId> exploredNodes = {node};
-        // front contains nodes which have not been explored yet.
-        PandaList<ThreadId> front = {node};
-        // On each iteration of the loop we take next unexplored node from the front and find all reachable nodes from
-        // it. If we find already explored node then there is a loop and we save it in nodes_in_deadlocks. Also we
-        // detect paths leading to nodes_in_deadlocks and to termination nodes.
-        while (!front.empty()) {
-            auto i = front.begin();
-            while (i != front.end()) {
-                ThreadId currentNode = *i;
-                i = front.erase(i);
-                if (edges_.count(currentNode) == 0) {
-                    // No transitions from this node.
-                    continue;
-                }
-                auto nextNode = edges_.at(currentNode);
-                // There is a rare case, in which a monitor may be entered recursively in a
-                // daemon thread. If a runtime calls DeregisterSuspendedThreads exactly when
-                // the daemon thread sets SetEnteringMonitor, then we create an edge from a thread
-                // to itself, i.e. a self-loop and, thus, falsely flag this situation as a deadlock.
-                // So here we ignore this self-loop as a false loop.
-                if (nextNode == currentNode) {
-                    continue;
-                }
-                if (exploredNodes.count(nextNode) != 0 || nodesInDeadlocks.count(nextNode) != 0 ||
-                    nodes_.at(nextNode)) {
-                    // Loop or path to another loop or to terminating node was found
-                    nodesInDeadlocks.merge(exploredNodes);
-                    front.clear();
-                    break;
-                }
-                exploredNodes.insert(nextNode);
-                front.push_back(nextNode);
-            }
-        }
+        CheckNodeForTerminationLoops(nodeElem.first, nodesInDeadlocks);
     }
     return nodesInDeadlocks.size() == nodes_.size();
 }

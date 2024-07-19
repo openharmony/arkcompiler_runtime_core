@@ -220,6 +220,7 @@ private:
         isError_ = true;
     }
 
+    bool ParseQuantifierPrefix(int &min, int &max, bool &isGreedy);
     void PrintF(const char *fmt, ...);
     uint8_t *base_ {nullptr};
     uint8_t *pc_ {nullptr};

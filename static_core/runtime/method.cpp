@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -505,6 +505,20 @@ bool Method::Verify()
     return verifier::Verify(service, this, mode) == verifier::Status::OK;
 }
 
+inline void Method::FillVecsByInsts(BytecodeInstruction &inst, PandaVector<uint32_t> &vcalls,
+                                    PandaVector<uint32_t> &branches, PandaVector<uint32_t> &throws) const
+{
+    if (inst.HasFlag(BytecodeInstruction::Flags::CALL_VIRT)) {
+        vcalls.push_back(inst.GetAddress() - GetInstructions());
+    }
+    if (inst.HasFlag(BytecodeInstruction::Flags::JUMP)) {
+        branches.push_back(inst.GetAddress() - GetInstructions());
+    }
+    if (inst.IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
+        throws.push_back(inst.GetAddress() - GetInstructions());
+    }
+}
+
 void Method::StartProfiling()
 {
 #ifdef PANDA_WITH_ECMASCRIPT
@@ -530,15 +544,7 @@ void Method::StartProfiling()
     Span<const uint8_t> instructions(GetInstructions(), GetCodeSize());
     for (BytecodeInstruction inst(instructions.begin()); inst.GetAddress() < instructions.end();
          inst = inst.GetNext()) {
-        if (inst.HasFlag(BytecodeInstruction::Flags::CALL_VIRT)) {
-            vcalls.push_back(inst.GetAddress() - GetInstructions());
-        }
-        if (inst.HasFlag(BytecodeInstruction::Flags::JUMP)) {
-            branches.push_back(inst.GetAddress() - GetInstructions());
-        }
-        if (inst.IsThrow(BytecodeInstruction::Exceptions::X_THROW)) {
-            throws.push_back(inst.GetAddress() - GetInstructions());
-        }
+        FillVecsByInsts(inst, vcalls, branches, throws);
     }
     if (vcalls.empty() && branches.empty() && throws.empty()) {
         return;
