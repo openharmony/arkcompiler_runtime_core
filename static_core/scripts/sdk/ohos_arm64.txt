@@ -3,6 +3,7 @@ bin/ark_aot
 lib/libarkaotmanager.so
 lib/libarkassembler.so
 lib/libarkbase.so
+lib/libarkbytecodeopt.so
 lib/libarkcompiler.so
 lib/libarkfile.so
 lib/libarkruntime.so
@@ -13,6 +14,7 @@ lib/libc_secshared.so
 lib/libdprof.a
 lib/libe2p_test_plugin.so
 lib/libes2panda-lib.so
+lib/libes2panda-public.so
 lib/libets_interop_js_napi.so
 lib/libhmicui18n.z.so
 lib/libhmicuuc.z.so

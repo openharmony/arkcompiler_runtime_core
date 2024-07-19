@@ -116,6 +116,7 @@ build-sdk/sdk/ohos_arm64/lib
 build-sdk/sdk/ohos_arm64/lib/libarkaotmanager.so
 build-sdk/sdk/ohos_arm64/lib/libarkassembler.so
 build-sdk/sdk/ohos_arm64/lib/libarkbase.so
+build-sdk/sdk/ohos_arm64/lib/libarkbytecodeopt.so
 build-sdk/sdk/ohos_arm64/lib/libarkcompiler.so
 build-sdk/sdk/ohos_arm64/lib/libarkfile.so
 build-sdk/sdk/ohos_arm64/lib/libarkruntime.so
@@ -125,6 +126,7 @@ build-sdk/sdk/ohos_arm64/lib/libc_secshared.so
 build-sdk/sdk/ohos_arm64/lib/libdprof.a
 build-sdk/sdk/ohos_arm64/lib/libe2p_test_plugin.so
 build-sdk/sdk/ohos_arm64/lib/libes2panda-lib.so
+build-sdk/sdk/ohos_arm64/lib/libes2panda-public.so
 build-sdk/sdk/ohos_arm64/lib/libetsnative.so
 build-sdk/sdk/ohos_arm64/lib/libets_interop_js_napi.so
 build-sdk/sdk/ohos_arm64/lib/libhmicui18n.z.so
