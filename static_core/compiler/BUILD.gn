@@ -227,7 +227,6 @@ ohos_shared_library("libarktscompiler") {
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":libarkcompiler_opcodes_h_savestate_optimization_call_visitors_inl",
     ":pipeline_includes_h",
-    ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase",
@@ -254,6 +253,7 @@ ohos_shared_library("libarktscompiler") {
       ":irtoc_builder_cpp",
       ":irtoc_generate_ir_inline",
       ":irtoc_interface_extensions_inl_h",
+      ":plugin_create_pipeline_inl",
     ]
   }
   if (enable_codegen) {
@@ -319,7 +319,6 @@ ohos_source_set("libarktscompiler_frontend_static") {
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":libarkcompiler_opcodes_h_savestate_optimization_call_visitors_inl",
     ":pipeline_includes_h",
-    ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
@@ -346,6 +345,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
       ":irtoc_builder_cpp",
       ":irtoc_generate_ir_inline",
       ":irtoc_interface_extensions_inl_h",
+      ":plugin_create_pipeline_inl",
     ]
   }
   if (enable_codegen) {
