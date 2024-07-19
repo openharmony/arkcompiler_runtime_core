@@ -302,7 +302,7 @@ inline uint8_t GetTypeByteSize(Type type, Arch arch)
     return 1U << ShiftByType(type, arch);
 }
 
-static bool NeedCastIntTypes(Arch arch, DataType::Type typeBefore, DataType::Type typeAfter)
+inline bool NeedCastIntTypes(Arch arch, DataType::Type typeBefore, DataType::Type typeAfter)
 {
     auto sizeBefore = DataType::GetTypeSize(typeBefore, arch);
     auto sizeAfter = DataType::GetTypeSize(typeAfter, arch);
