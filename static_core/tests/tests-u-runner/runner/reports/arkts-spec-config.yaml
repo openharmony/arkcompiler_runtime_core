@@ -264,19 +264,19 @@
   title: 'Type Parameters'
   status: 'Finished'
 
-'5.2':
+'5.1.1':
   title: 'Type Parameter Constraint'
   status: 'Finished'
 
-'5.3':
+'5.1.2':
   title: 'Type Parameter Default'
   status: 'Finished'
 
-'5.4':
+'5.2':
   title: 'Generic Instantiations'
   status: 'Finished'
 
-'5.5':
+'5.2.2':
   title: 'Type Arguments'
   status: 'Finished'
 
