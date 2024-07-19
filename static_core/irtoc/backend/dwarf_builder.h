@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,11 @@ public:
 
     DwarfBuilder(Arch arch, ELFIO::elfio *elf);
 
+    bool BuildGraphNestedFunction(unsigned symbol, const Function *func, Dwarf_Error &error, Dwarf_P_Die &die);
+
     bool BuildGraph(const Function *func, uint32_t codeOffset, unsigned symbol);
+
+    bool FinalizeNestedFunction(Dwarf_Error &error);
 
     bool Finalize(uint32_t codeSize);
 

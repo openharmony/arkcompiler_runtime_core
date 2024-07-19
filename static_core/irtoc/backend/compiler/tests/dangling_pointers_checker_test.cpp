@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -746,10 +746,12 @@ TEST_F(DanglingPointersCheckerTest, test11)
     ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
-// Use object after call:
-//    frame_live_in := LiveIn(frame)
-//    Call
-//    frame_use := LoadI(frame_live_in).Imm(frame_acc_offset).i64
+/*
+ * Use object after call
+ * frame_live_in := LiveIn(frame)
+ * Call
+ * frame_use := LoadI(frame_live_in).Imm(frame_acc_offset).i64
+ */
 TEST_F(DanglingPointersCheckerTest, test12)
 {
     auto arch = ark::RUNTIME_ARCH;
@@ -791,11 +793,13 @@ TEST_F(DanglingPointersCheckerTest, test12)
     ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
-// Use primitive after call:
-//    frame_live_in := LiveIn(frame)
-//    primitive := LoadI(frame_live_in).Imm(offset).u64
-//    Call
-//    primitive_use := AddI(not_object).Imm(10).u64
+/*
+ * Use primitive after call:
+ *    frame_live_in := LiveIn(frame)
+ *    primitive := LoadI(frame_live_in).Imm(offset).u64
+ *    Call
+ *    primitive_use := AddI(not_object).Imm(10).u64
+ */
 TEST_F(DanglingPointersCheckerTest, test13)
 {
     auto arch = ark::RUNTIME_ARCH;
@@ -885,10 +889,12 @@ TEST_F(DanglingPointersCheckerTest, test14)
     ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
-// Use ref inst after call:
-//    pointer := AddI(acc_live_in).Imm(10).ptr
-//    Call
-//    primitive := LoadI(pointer).Imm(0).u64
+/*
+ * Use ref inst after call:
+ *    pointer := AddI(acc_live_in).Imm(10).ptr
+ *    Call
+ *    primitive := LoadI(pointer).Imm(0).u64
+ */
 TEST_F(DanglingPointersCheckerTest, test15)
 {
     auto arch = ark::RUNTIME_ARCH;
@@ -932,12 +938,14 @@ TEST_F(DanglingPointersCheckerTest, test15)
     ASSERT_FALSE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
-// Correct load accumulator from frame:
-//    correct_acc_load      := LoadI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
-// Correct accumulatore and tag store:
-//    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
-//    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
-//    correct_acc_tag_store := StoreI(acc_ptr, LiveIn(acc_tag).u64).Imm(acc_tag_offset).u64
+/*
+ * Correct load accumulator from frame:
+ *    correct_acc_load      := LoadI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
+ * Correct accumulatore and tag store:
+ *    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
+ *    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
+ *    correct_acc_tag_store := StoreI(acc_ptr, LiveIn(acc_tag).u64).Imm(acc_tag_offset).u64
+ */
 TEST_F(DanglingPointersCheckerTest, test16)
 {
     auto arch = ark::RUNTIME_ARCH;
@@ -977,14 +985,16 @@ TEST_F(DanglingPointersCheckerTest, test16)
     ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
-// Correct load accumulator and tag:
-//    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
-//    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
-//    correct_acc_tag_load  := LoadI(acc_ptr).Imm(acc_tag_offset).u64
-// Correct accumulatore and tag store:
-//    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
-//    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
-//    correct_acc_tag_store := StoreI(acc_ptr, correct_acc_tag_load).Imm(acc_tag_offset).u64
+/*
+ * Correct load accumulator and tag:
+ *    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
+ *    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
+ *    correct_acc_tag_load  := LoadI(acc_ptr).Imm(acc_tag_offset).u64
+ * Correct accumulatore and tag store:
+ *    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
+ *    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
+ *    correct_acc_tag_store := StoreI(acc_ptr, correct_acc_tag_load).Imm(acc_tag_offset).u64
+ */
 TEST_F(DanglingPointersCheckerTest, test17)
 {
     auto arch = ark::RUNTIME_ARCH;
@@ -1025,15 +1035,17 @@ TEST_F(DanglingPointersCheckerTest, test17)
     ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
-// Correct load accumulator and tag:
-//    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
-//    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
-//    acc_tag_ptr           := AddI(acc_ptr).Imm(acc_tag_offset).ref
-//    correct_acc_tag_load  := LoadI(acc_tag_ptr).Imm(0).u64
-// Correct accumulatore and tag store:
-//    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
-//    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
-//    correct_acc_tag_store := StoreI(acc_ptr, correct_acc_tag_load).Imm(acc_tag_offset).u64
+/*
+ * Correct load accumulator and tag:
+ *    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
+ *    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
+ *    acc_tag_ptr           := AddI(acc_ptr).Imm(acc_tag_offset).ref
+ *    correct_acc_tag_load  := LoadI(acc_tag_ptr).Imm(0).u64
+ * Correct accumulatore and tag store:
+ *    correct_acc_store     := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
+ *    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
+ *    correct_acc_tag_store := StoreI(acc_ptr, correct_acc_tag_load).Imm(acc_tag_offset).u64
+ */
 TEST_F(DanglingPointersCheckerTest, test18)
 {
     auto arch = ark::RUNTIME_ARCH;
@@ -1075,15 +1087,17 @@ TEST_F(DanglingPointersCheckerTest, test18)
     ASSERT_TRUE(GetGraph()->RunPass<ark::compiler::DanglingPointersChecker>());
 }
 
-// Correct load accumulator and tag:
-//    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
-//    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
-//    acc_tag_ptr           := AddI(acc_ptr).Imm(acc_tag_offset).ref
-//    correct_acc_tag_load  := LoadI(acc_tag_ptr).Imm(0).u64
-// Correct accumulatore and tag store:
-//    correct_acc_store       := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
-//    acc_ptr                 := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
-//    incorrect_acc_tag_store := StoreI(acc_ptr, LiveIn(acc_tag).u64).Imm(acc_tag_offset).u64
+/*
+ * Correct load accumulator and tag:
+ *    acc_ptr               := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ptr
+ *    correct_acc_load      := LoadI(acc_ptr).Imm(frame_acc_offset).ref
+ *    acc_tag_ptr           := AddI(acc_ptr).Imm(acc_tag_offset).ref
+ *    correct_acc_tag_load  := LoadI(acc_tag_ptr).Imm(0).u64
+ * Correct accumulatore and tag store:
+ *    correct_acc_store       := StoreI(LiveIn(frame).ptr, correct_acc_load).Imm(frame_acc_offset).ref
+ *    acc_ptr                 := AddI(LiveIn(frame).ptr).Imm(frame_acc_offset).ref
+ *    incorrect_acc_tag_store := StoreI(acc_ptr, LiveIn(acc_tag).u64).Imm(acc_tag_offset).u64
+ */
 TEST_F(DanglingPointersCheckerTest, test19)
 {
     auto arch = ark::RUNTIME_ARCH;
