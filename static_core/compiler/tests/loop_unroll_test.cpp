@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,7 @@ public:
         return opcodesCount_.at(opcode);
     }
 
-    void CheckSimpleLoop(uint32_t instLimit, uint32_t unrollFactor, uint32_t expectedFactor)
+    Graph *BuildGraphSimpleLoop()
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
@@ -104,9 +104,14 @@ public:
                 INST(11U, Opcode::Return).u64().Inputs(10U);  // return (a - b)
             }
         }
+        return graph;
+    }
+
+    void CheckSimpleLoop(uint32_t instLimit, uint32_t unrollFactor, uint32_t expectedFactor)
+    {
+        auto graph = BuildGraphSimpleLoop();
         graph->RunPass<LoopUnroll>(instLimit, unrollFactor);
         graph->RunPass<Cleanup>();
-
         // Check number of instructions
         CountOpcodes(graph->GetBlocksRPO());
         EXPECT_EQ(GetOpcodeCount(Opcode::Add), expectedFactor);
@@ -161,7 +166,7 @@ public:
         }
     }
 
-    void CheckLoopWithPhiAndSafePoint(uint32_t instLimit, uint32_t unrollFactor, uint32_t expectedFactor)
+    Graph *BuildGraphCheckLoopWithPhiAndSafePoint()
     {
         auto graph = CreateEmptyGraph();
         GRAPH(graph)
@@ -204,6 +209,12 @@ public:
                 INST(19U, Opcode::Return).u64().Inputs(18U);   // return b
             }
         }
+        return graph;
+    }
+
+    void CheckLoopWithPhiAndSafePoint(uint32_t instLimit, uint32_t unrollFactor, uint32_t expectedFactor)
+    {
+        auto graph = BuildGraphCheckLoopWithPhiAndSafePoint();
         graph->RunPass<LoopUnroll>(instLimit, unrollFactor);
         GraphChecker(graph).Check();
 
@@ -251,8 +262,14 @@ public:
             EXPECT_EQ(BB(6U).GetPredsBlocks().size(), 1U);
             EXPECT_EQ(BB(6U).GetPredsBlocks()[0U], &BB(5U));
         }
-    }
+    };
 
+    Graph *BuildGraphInversedCompares1();
+    Graph *BuildGraphInversedCompares2();
+    Graph *BuildGraphPredsInversedOrder();
+    Graph *BuildExpectedPredsInversedOrder();
+    Graph *BuildGraphAddOverflowUnroll();
+    Graph *BuildGraphUnrollNeedSaveStateBridge();
     Graph *BuildGraphPhiInputOfAnotherPhi();
     Graph *BuildLoopWithIncrement(ConditionCode cc, std::optional<uint64_t> start, uint64_t stop, uint64_t step,
                                   DataType::Type type = DataType::INT32);
@@ -523,10 +540,9 @@ Graph *LoopUnrollTest::BuildGraphPhiInputOfAnotherPhi()
     return graph;
 }
 
-TEST_F(LoopUnrollTest, PhiInputOfAnotherPhi)
+TEST_F(LoopUnrollTest, PhiInputOfAnotherPhi2)
 {
     // Test with UNROLL_FACTOR = 2
-
     auto graph = BuildGraphPhiInputOfAnotherPhi();
 
     auto graphUnrollFactor2 = CreateEmptyGraph();
@@ -557,16 +573,17 @@ TEST_F(LoopUnrollTest, PhiInputOfAnotherPhi)
             INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
-
     static constexpr uint64_t PROGRAM_RESULT = 101;
     graph->RunPass<LoopUnroll>(INST_LIMIT, 2U);
     graph->RunPass<Cleanup>();
     EXPECT_TRUE(GraphComparator().Compare(graph, graphUnrollFactor2));
     EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graphUnrollFactor2, PROGRAM_RESULT));
+}
 
+TEST_F(LoopUnrollTest, PhiInputOfAnotherPhi4)
+{
     // Test with UNROLL_FACTOR = 4
-
-    graph = BuildGraphPhiInputOfAnotherPhi();
+    auto graph = BuildGraphPhiInputOfAnotherPhi();
 
     auto graphUnrollFactor4 = CreateEmptyGraph();
     GRAPH(graphUnrollFactor4)
@@ -609,6 +626,7 @@ TEST_F(LoopUnrollTest, PhiInputOfAnotherPhi)
         }
     }
 
+    static constexpr uint64_t PROGRAM_RESULT = 101;
     graph->RunPass<LoopUnroll>(INST_LIMIT, 4U);
     graph->RunPass<Cleanup>();
     EXPECT_TRUE(GraphComparator().Compare(graph, graphUnrollFactor4));
@@ -1017,6 +1035,12 @@ TEST_F(LoopUnrollTest, NonConstCountableLoopWithIncrement)
         // 3 + 4 + ... + 10
         EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 52U, 2U));
     }
+}
+
+TEST_F(LoopUnrollTest, NonConstCountableLoopWithIncrementCheckGraph)
+{
+    static constexpr uint32_t INC_STEP = 1;
+    static constexpr uint32_t INC_STOP = 10;
     static constexpr uint32_t UNROLL_FACTOR = 2;
     auto graph = BuildLoopWithIncrement(CC_LT, std::nullopt, INC_STOP, INC_STEP);
     graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
@@ -1171,7 +1195,11 @@ TEST_F(LoopUnrollTest, NonConstCountableLoopWithDecrement)
         graph->RunPass<LoopUnroll>(INST_LIMIT, unrollFactor);
         EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 55U, 10U));
     }
+}
 
+TEST_F(LoopUnrollTest, NonConstCountableLoopWithDecrementCheckGraph)
+{
+    static constexpr uint32_t DEC_STEP = 1;
     static constexpr uint32_t UNROLL_FACTOR = 2;
     auto graph = BuildLoopWithDecrement(CC_GT, std::nullopt, ZERO_STOP, DEC_STEP);
     graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
@@ -1297,7 +1325,7 @@ TEST_F(LoopUnrollTest, UnsignedCountableLoopWithDecrementLargeValues)
     }
 }
 
-TEST_F(LoopUnrollTest, InversedCompares)
+Graph *LoopUnrollTest::BuildGraphInversedCompares1()
 {
     // Case 1: if (a < 10 is false) goto exit
     auto graph = CreateEmptyGraph();
@@ -1327,7 +1355,12 @@ TEST_F(LoopUnrollTest, InversedCompares)
             INST(12U, Opcode::Return).s32().Inputs(11U);  // return b
         }
     }
+    return graph;
+}
 
+TEST_F(LoopUnrollTest, InversedCompares1)
+{
+    auto graph = BuildGraphInversedCompares1();
     static constexpr uint32_t UNROLL_FACTOR = 2;
     graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
     graph->RunPass<Cleanup>();
@@ -1378,10 +1411,13 @@ TEST_F(LoopUnrollTest, InversedCompares)
     }
     EXPECT_TRUE(GraphComparator().Compare(graph, graphUnroll));
     EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 45U, 0U));
+}
 
+Graph *LoopUnrollTest::BuildGraphInversedCompares2()
+{
     // Case 2: if (a >= 10 is false) goto loop
-    auto graph2 = CreateEmptyGraph();
-    GRAPH(graph2)
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
     {
         PARAMETER(13U, 0U).s32();  // a
         CONSTANT(0U, 10U);
@@ -1407,12 +1443,18 @@ TEST_F(LoopUnrollTest, InversedCompares)
             INST(12U, Opcode::Return).s32().Inputs(11U);  // return b
         }
     }
+    return graph;
+}
 
-    graph2->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
-    graph2->RunPass<Cleanup>();
+TEST_F(LoopUnrollTest, InversedCompares2)
+{
+    auto graph = BuildGraphInversedCompares2();
+    static constexpr uint32_t UNROLL_FACTOR = 2;
+    graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
+    graph->RunPass<Cleanup>();
 
-    auto graph2Unroll = CreateEmptyGraph();
-    GRAPH(graph2Unroll)
+    auto graphUnroll = CreateEmptyGraph();
+    GRAPH(graphUnroll)
     {
         PARAMETER(13U, 0U).s32();  // a
         CONSTANT(0U, 10U);
@@ -1455,9 +1497,12 @@ TEST_F(LoopUnrollTest, InversedCompares)
             INST(12U, Opcode::Return).s32().Inputs(31U);  // return b
         }
     }
-    EXPECT_TRUE(GraphComparator().Compare(graph2, graph2Unroll));
-    EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph2, 45U, 0U));
+    EXPECT_TRUE(GraphComparator().Compare(graph, graphUnroll));
+    EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, 45U, 0U));
+}
 
+TEST_F(LoopUnrollTest, InversedCompares3)
+{
     // Case 3 - if (10 != a) goto loop
     auto graph3 = CreateEmptyGraph();
     GRAPH(graph3)
@@ -1485,9 +1530,13 @@ TEST_F(LoopUnrollTest, InversedCompares)
             INST(12U, Opcode::Return).s32().Inputs(11U);  // return b
         }
     }
+    static constexpr uint32_t UNROLL_FACTOR = 2;
     graph3->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
     EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph3, 45U));
+}
 
+TEST_F(LoopUnrollTest, InversedCompares4)
+{
     // Case 4 (decrement): if (0 == a) goto out_loop
     auto graph4 = CreateEmptyGraph();
     GRAPH(graph4)
@@ -1516,16 +1565,16 @@ TEST_F(LoopUnrollTest, InversedCompares)
             INST(12U, Opcode::Return).s32().Inputs(11U);  // return b
         }
     }
+    static constexpr uint32_t UNROLL_FACTOR = 2;
     graph4->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
     EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph4, 45U));
 }
 
-TEST_F(LoopUnrollTest, LoopWithDifferentConstants)
+TEST_F(LoopUnrollTest, LoopWithDifferentConstantsIncrement)
 {
     static constexpr uint32_t UNROLL_FACTOR = 2;
-
-    // Chech increment
     static constexpr uint32_t INC_STOP = 100;
+
     for (size_t incStep = 1U; incStep <= 10U; incStep++) {
         // CC_LT
         size_t result = 0;
@@ -1558,9 +1607,13 @@ TEST_F(LoopUnrollTest, LoopWithDifferentConstants)
         EXPECT_TRUE(graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR));
         EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, result));
     }
+}
 
-    // Chech decrement
+TEST_F(LoopUnrollTest, LoopWithDifferentConstantsDecrement)
+{
+    static constexpr uint32_t UNROLL_FACTOR = 2;
     static constexpr uint32_t DEC_START = 100;
+
     for (size_t decStep = 1U; decStep <= 10U; decStep++) {
         // CC_GT
         int result = 0;
@@ -1581,7 +1634,7 @@ TEST_F(LoopUnrollTest, LoopWithDifferentConstants)
         EXPECT_TRUE(CheckRetOnVixlSimulator<uint64_t>(graph, result));
 
         // CC_NE
-        if (INC_STOP % decStep != 0U) {
+        if (DEC_START % decStep != 0U) {
             // Otherwise test loop with CC_NE will be infinite
             continue;
         }
@@ -1595,7 +1648,7 @@ TEST_F(LoopUnrollTest, LoopWithDifferentConstants)
     }
 }
 
-TEST_F(LoopUnrollTest, PredsInversedOrder)
+Graph *LoopUnrollTest::BuildGraphPredsInversedOrder()
 {
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1625,13 +1678,11 @@ TEST_F(LoopUnrollTest, PredsInversedOrder)
             INST(15U, Opcode::Return).s64().Inputs(12U);  // return b
         }
     }
-    // Swap BB4 preds
-    std::swap(BB(4U).GetPredsBlocks()[0U], BB(4U).GetPredsBlocks()[1U]);
-    INS(12U).SetInput(0U, &INS(6U));
-    INS(12U).SetInput(1U, &INS(10U));
-    graph->RunPass<LoopUnroll>(INST_LIMIT, 2U);
-    graph->RunPass<Cleanup>();
+    return graph;
+}
 
+Graph *LoopUnrollTest::BuildExpectedPredsInversedOrder()
+{
     auto expectedGraph = CreateEmptyGraph();
     GRAPH(expectedGraph)
     {
@@ -1677,6 +1728,20 @@ TEST_F(LoopUnrollTest, PredsInversedOrder)
             INST(15U, Opcode::Return).s64().Inputs(22U);  // return b
         }
     }
+    return expectedGraph;
+}
+
+TEST_F(LoopUnrollTest, PredsInversedOrder)
+{
+    auto graph = BuildGraphPredsInversedOrder();
+    // Swap BB4 preds
+    std::swap(BB(4U).GetPredsBlocks()[0U], BB(4U).GetPredsBlocks()[1U]);
+    INS(12U).SetInput(0U, &INS(6U));
+    INS(12U).SetInput(1U, &INS(10U));
+    graph->RunPass<LoopUnroll>(INST_LIMIT, 2U);
+    graph->RunPass<Cleanup>();
+
+    auto expectedGraph = BuildExpectedPredsInversedOrder();
     EXPECT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
@@ -1819,7 +1884,7 @@ TEST_F(LoopUnrollTest, UnrollWithCalls)
     g_options.SetCompilerUnrollLoopWithCalls(defaultIsUnrollWithCalls);
 }
 
-TEST_F(LoopUnrollTest, AddOverflowUnroll)
+Graph *LoopUnrollTest::BuildGraphAddOverflowUnroll()
 {
     // Alwayes make unroll with side exits for AddOverflowCheck instructions
     // Case 1: if (a < 10 is false) goto exit
@@ -1851,7 +1916,12 @@ TEST_F(LoopUnrollTest, AddOverflowUnroll)
             INST(12U, Opcode::Return).s32().Inputs(11U);  // return b
         }
     }
+    return graph;
+}
 
+TEST_F(LoopUnrollTest, AddOverflowUnroll)
+{
+    auto graph = BuildGraphAddOverflowUnroll();
     static constexpr uint32_t UNROLL_FACTOR = 2;
     graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR);
     graph->RunPass<Cleanup>();
@@ -1896,7 +1966,7 @@ TEST_F(LoopUnrollTest, AddOverflowUnroll)
     EXPECT_TRUE(GraphComparator().Compare(graph, graphUnroll));
 }
 
-TEST_F(LoopUnrollTest, UnrollNeedSaveStateBridge)
+Graph *LoopUnrollTest::BuildGraphUnrollNeedSaveStateBridge()
 {
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
@@ -1925,7 +1995,12 @@ TEST_F(LoopUnrollTest, UnrollNeedSaveStateBridge)
             INST(11U, Opcode::Return).u64().Inputs(10U);  // return arr[b]
         }
     }
+    return graph;
+}
 
+TEST_F(LoopUnrollTest, UnrollNeedSaveStateBridge)
+{
+    auto graph = BuildGraphUnrollNeedSaveStateBridge();
     static constexpr auto UNROLL_FACTOR = 2U;
     EXPECT_TRUE(graph->RunPass<LoopUnroll>(INST_LIMIT, UNROLL_FACTOR));
     graph->RunPass<Cleanup>();

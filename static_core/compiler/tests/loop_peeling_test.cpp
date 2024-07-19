@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,6 +143,15 @@ protected:
             }
         }
     }
+
+    void BuildGraphCloneBlock();
+    void BuildGraphSingleLoop();
+    void BuildGraphInnerLoop();
+    void BuildGraphLoopWithBranch();
+    void BuildGraphSingleBlockLoop();
+    void BuildGraphRepeatedCloneableInputs();
+    void BuildGraphMultiSafePointsLoop();
+    void BuildGraphNeedSaveStateBridge();
 };
 
 /*
@@ -156,7 +165,7 @@ protected:
  *                      |
  *                    [exit]
  */
-TEST_F(LoopPeelingTest, CloneBlock)
+void LoopPeelingTest::BuildGraphCloneBlock()
 {
     GRAPH(GetGraph())
     {
@@ -182,6 +191,11 @@ TEST_F(LoopPeelingTest, CloneBlock)
             INST(14U, Opcode::Return).u64().Inputs(13U);
         }
     }
+}
+
+TEST_F(LoopPeelingTest, CloneBlock)
+{
+    BuildGraphCloneBlock();
     GetGraph()->RunPass<LoopAnalyzer>();
     auto graphCloner = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator());
     graphCloner.CloneLoopHeader(&BB(2U), &BB(4U), BB(2U).GetLoop()->GetPreHeader());
@@ -253,7 +267,7 @@ TEST_F(LoopPeelingTest, CloneBlock)
  *                              v
  *                            [exit]
  */
-TEST_F(LoopPeelingTest, SingleLoop)
+void LoopPeelingTest::BuildGraphSingleLoop()
 {
     GRAPH(GetGraph())
     {
@@ -279,7 +293,11 @@ TEST_F(LoopPeelingTest, SingleLoop)
             INST(11U, Opcode::Return).u64().Inputs(4U);
         }
     }
+}
 
+TEST_F(LoopPeelingTest, SingleLoop)
+{
+    BuildGraphSingleLoop();
     auto expectedGraph = CreateEmptyGraph();
     GRAPH(expectedGraph)
     {
@@ -353,7 +371,7 @@ TEST_F(LoopPeelingTest, SingleLoop)
  *   \-------------------------[5]
  *
  */
-TEST_F(LoopPeelingTest, InnerLoop)
+void LoopPeelingTest::BuildGraphInnerLoop()
 {
     GRAPH(GetGraph())
     {
@@ -389,7 +407,11 @@ TEST_F(LoopPeelingTest, InnerLoop)
             INST(15U, Opcode::Return).u64().Inputs(4U);  // return count
         }
     }
+}
 
+TEST_F(LoopPeelingTest, InnerLoop)
+{
+    BuildGraphInnerLoop();
     auto expectedGraph = CreateEmptyGraph();
     GRAPH(expectedGraph)
     {
@@ -470,7 +492,7 @@ TEST_F(LoopPeelingTest, InnerLoop)
  *                             |
  *                           [exit]
  */
-TEST_F(LoopPeelingTest, LoopWithBranch)
+void LoopPeelingTest::BuildGraphLoopWithBranch()
 {
     GRAPH(GetGraph())
     {
@@ -505,7 +527,11 @@ TEST_F(LoopPeelingTest, LoopWithBranch)
             INST(10U, Opcode::Return).Inputs(3U).u64();
         }
     }
+}
 
+TEST_F(LoopPeelingTest, LoopWithBranch)
+{
+    BuildGraphLoopWithBranch();
     auto expectedGraph = CreateEmptyGraph();
     GRAPH(expectedGraph)
     {
@@ -671,7 +697,7 @@ TEST_F(LoopPeelingTest, RemoveDeadPhi)
     EXPECT_EQ(INS(3U).GetBasicBlock(), nullptr);
 }
 
-TEST_F(LoopPeelingTest, SingleBlockLoop)
+void LoopPeelingTest::BuildGraphSingleBlockLoop()
 {
     GRAPH(GetGraph())
     {
@@ -694,7 +720,11 @@ TEST_F(LoopPeelingTest, SingleBlockLoop)
             INST(9U, Opcode::Return).u64().Inputs(5U);
         }
     }
+}
 
+TEST_F(LoopPeelingTest, SingleBlockLoop)
+{
+    BuildGraphSingleBlockLoop();
     auto expectedGraph = CreateEmptyGraph();
     GRAPH(expectedGraph)
     {
@@ -732,8 +762,7 @@ TEST_F(LoopPeelingTest, SingleBlockLoop)
     EXPECT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
-// NOTE (apopov) Fix GraphComparator and enable test
-TEST_F(LoopPeelingTest, DISABLED_RepeatedCloneableInputs)
+void LoopPeelingTest::BuildGraphRepeatedCloneableInputs()
 {
     GRAPH(GetGraph())
     {
@@ -755,7 +784,11 @@ TEST_F(LoopPeelingTest, DISABLED_RepeatedCloneableInputs)
             INST(7U, Opcode::Return).u32().Inputs(2U);
         }
     }
+}
 
+TEST_F(LoopPeelingTest, RepeatedCloneableInputs)
+{
+    BuildGraphRepeatedCloneableInputs();
     auto expectedGraph = CreateEmptyGraph();
     GRAPH(expectedGraph)
     {
@@ -770,9 +803,6 @@ TEST_F(LoopPeelingTest, DISABLED_RepeatedCloneableInputs)
         }
         BASIC_BLOCK(2U, 2U, 7U)
         {
-            INST(13U, Opcode::Phi).u32().Inputs(9U, 2U);
-            INST(15U, Opcode::Phi).u32().Inputs(10U, 3U);
-            INST(6U, Opcode::SaveState).Inputs(1U, 13U, 13U, 15U).SrcVregs({0U, 1U, 2U, 3U});
             INST(2U, Opcode::LoadObject).u32().Inputs(0U);
             INST(3U, Opcode::Sub).u32().Inputs(2U, 1U);
             INST(4U, Opcode::Compare).CC(CC_EQ).b().Inputs(3U, 1U);
@@ -785,6 +815,7 @@ TEST_F(LoopPeelingTest, DISABLED_RepeatedCloneableInputs)
         }
     }
     EXPECT_TRUE(GetGraph()->RunPass<LoopPeeling>());
+    GetGraph()->RunPass<Cleanup>();
     EXPECT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
@@ -805,7 +836,7 @@ TEST_F(LoopPeelingTest, InfiniteLoop)
     EXPECT_FALSE(graph->RunPass<LoopPeeling>());
 }
 
-TEST_F(LoopPeelingTest, MultiSafePointsLoop)
+void LoopPeelingTest::BuildGraphMultiSafePointsLoop()
 {
     GRAPH(GetGraph())
     {
@@ -832,7 +863,11 @@ TEST_F(LoopPeelingTest, MultiSafePointsLoop)
             INST(11U, Opcode::Return).u64().Inputs(4U);
         }
     }
+}
 
+TEST_F(LoopPeelingTest, MultiSafePointsLoop)
+{
+    BuildGraphMultiSafePointsLoop();
     auto expectedGraph = CreateEmptyGraph();
     GRAPH(expectedGraph)
     {
@@ -895,7 +930,7 @@ TEST_F(LoopPeelingTest, LoopWithInlinedCall)
     ASSERT_FALSE(GetGraph()->RunPass<LoopPeeling>());
 }
 
-TEST_F(LoopPeelingTest, NeedSaveStateBridge)
+void LoopPeelingTest::BuildGraphNeedSaveStateBridge()
 {
     GRAPH(GetGraph())
     {
@@ -923,7 +958,11 @@ TEST_F(LoopPeelingTest, NeedSaveStateBridge)
             INST(11U, Opcode::Return).u64().Inputs(10U);  // return arr[b]
         }
     }
+}
 
+TEST_F(LoopPeelingTest, NeedSaveStateBridge)
+{
+    BuildGraphNeedSaveStateBridge();
     EXPECT_TRUE(GetGraph()->RunPass<LoopPeeling>());
     GetGraph()->RunPass<Cleanup>();
 

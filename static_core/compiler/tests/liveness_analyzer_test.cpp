@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,16 @@ public:
         }
         EXPECT_TRUE(subseqIter == subsequence.end());
     }
+
+    template <size_t ID>
+    void BuildIf(int trueBlock, int falseBlock, size_t inst)
+    {
+        BASIC_BLOCK(ID, trueBlock, falseBlock)
+        {
+            INST(inst, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
+            INST(inst + 1, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(inst);
+        }
+    }
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -74,32 +84,20 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
-        BASIC_BLOCK(2U, 4U, 3U)
-        {
-            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
-        }
+        BuildIf<2U>(4U, 3U, 2U);
+
         BASIC_BLOCK(3U, 6U) {}
-        BASIC_BLOCK(4U, 5U, 3U)
-        {
-            INST(5U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
-        }
+        BuildIf<4U>(5U, 3U, 5U);
+
         BASIC_BLOCK(5U, 11U) {}
         BASIC_BLOCK(6U, 7U) {}
         BASIC_BLOCK(7U, 8U) {}
-        BASIC_BLOCK(8U, 14U, 9U)
-        {
-            INST(10U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
-        }
+        BuildIf<8U>(14U, 9U, 10U);
+
         BASIC_BLOCK(9U, 10U) {}
         BASIC_BLOCK(10U, 6U) {}
-        BASIC_BLOCK(11U, 13U, 12U)
-        {
-            INST(14U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(15U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(14U);
-        }
+        BuildIf<11U>(13U, 12U, 14U);
+
         BASIC_BLOCK(12U, 4U) {}
         BASIC_BLOCK(13U, -1L)
         {
@@ -123,25 +121,13 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraph2)
         CONSTANT(1U, 1U);
 
         BASIC_BLOCK(100U, 6U) {}
-        BASIC_BLOCK(6U, 2U, 7U)
-        {
-            INST(2U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
-        }
+        BuildIf<6U>(2U, 7U, 2U);
 
         BASIC_BLOCK(2U, 5U) {}
-        BASIC_BLOCK(5U, 4U, 3U)
-        {
-            INST(4U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(4U);
-        }
+        BuildIf<5U>(4U, 3U, 4U);
 
         BASIC_BLOCK(4U, 21U) {}
-        BASIC_BLOCK(21U, 17U, 14U)
-        {
-            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
-        }
+        BuildIf<21U>(17U, 14U, 6U);
 
         BASIC_BLOCK(14U, 5U) {}
         BASIC_BLOCK(3U, 6U) {}
@@ -150,23 +136,11 @@ TEST_F(LivenessAnalyzerTest, LinearizeGraph2)
             INST(14U, Opcode::ReturnVoid);
         }
 
-        BASIC_BLOCK(17U, 18U, 19U)
-        {
-            INST(8U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(9U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U);
-        }
+        BuildIf<17U>(18U, 19U, 8U);
 
-        BASIC_BLOCK(18U, 24U, 31U)
-        {
-            INST(10U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
-        }
+        BuildIf<18U>(24U, 31U, 10U);
 
-        BASIC_BLOCK(19U, 36U, 43U)
-        {
-            INST(12U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0U, 1U);
-            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
-        }
+        BuildIf<19U>(36U, 43U, 12U);
 
         BASIC_BLOCK(24U, 20U) {}
         BASIC_BLOCK(36U, 20U) {}
@@ -679,7 +653,7 @@ TEST_F(LivenessAnalyzerTest, CatchProcessing)
     EXPECT_EQ(la.GetInstByLifeNumber(la.GetInstLifeIntervals(&INS(3U))->GetBegin()), &INS(3U));
 }
 
-TEST_F(LivenessAnalyzerTest, FirstIntersection)
+TEST_F(LivenessAnalyzerTest, FirstIntersection1)
 {
     // li:      [10-20]         [30-40]
     // other:           [21-25]         [45-100]
@@ -724,14 +698,17 @@ TEST_F(LivenessAnalyzerTest, FirstIntersection)
     otherLi.AppendRange({30U, 40U});
     otherLi.AppendRange({10U, 20U});
     EXPECT_EQ(li.GetFirstIntersectionWith(&otherLi), LifeNumber(15U));
+}
 
+TEST_F(LivenessAnalyzerTest, FirstIntersection2)
+{
     // li:               [25-35] [45    -    100]
     // other:   [10-20]              [50-60]
     // intersection: INVALID_LIFE_NUMBER
-    li.Clear();
+    LifeIntervals li(GetAllocator());
     li.AppendRange({45U, 100U});
     li.AppendRange({25U, 35U});
-    otherLi.Clear();
+    LifeIntervals otherLi(GetAllocator());
     otherLi.AppendRange({50U, 60U});
     otherLi.AppendRange({10U, 20U});
     EXPECT_EQ(li.GetFirstIntersectionWith(&otherLi), LifeNumber(50U));

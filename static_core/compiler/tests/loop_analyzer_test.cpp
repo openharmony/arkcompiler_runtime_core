@@ -81,6 +81,9 @@ public:
         return graph_;
     }
 
+    void BuildGraphLoopAnalyzer();
+    void BuildGraphPreheaderInsert();
+
 private:
     Graph *graph_;
 };
@@ -142,7 +145,7 @@ private:
  *      inner_loops: Loop1, Loop2
  *
  */
-TEST_F(LoopAnalyzerTest, LoopAnalyzer)
+void LoopAnalyzerTest::BuildGraphLoopAnalyzer()
 {
     GRAPH(GetGraph())
     {
@@ -191,7 +194,11 @@ TEST_F(LoopAnalyzerTest, LoopAnalyzer)
             INST(25U, Opcode::ReturnVoid);
         }
     }
+}
 
+TEST_F(LoopAnalyzerTest, LoopAnalyzer)
+{
+    BuildGraphLoopAnalyzer();
     auto loop1 = BB(4U).GetLoop();
     auto loop2 = BB(8U).GetLoop();
     auto loop3 = BB(3U).GetLoop();
@@ -277,7 +284,7 @@ TEST_F(LoopAnalyzerTest, LoopAnalyzer)
  *
  *
  */
-TEST_F(LoopAnalyzerTest, PreheaderInsert)
+void LoopAnalyzerTest::BuildGraphPreheaderInsert()
 {
     GRAPH(GetGraph())
     {
@@ -319,6 +326,11 @@ TEST_F(LoopAnalyzerTest, PreheaderInsert)
             INST(18U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(LoopAnalyzerTest, PreheaderInsert)
+{
+    BuildGraphPreheaderInsert();
 
     auto loop = BB(6U).GetLoop();
     ASSERT_NE(loop, nullptr);

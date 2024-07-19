@@ -1491,7 +1491,7 @@ private:
 #define GRAPH(GRAPH) if (auto __g = builder_->SetGraph(GRAPH).ScopedLife<Graph>(); true)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BASIC_BLOCK(ID, ...) \
-    if (auto __b = builder_->NewBlock<ID>().Succs({__VA_ARGS__}).ScopedLife<BasicBlock>(); true)
+    if (auto __b = builder_->NewBlock<ID>().Succs({__VA_ARGS__}).template ScopedLife<BasicBlock>(); true)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INST(ID, ...) builder_->NewInst(ID, __VA_ARGS__)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

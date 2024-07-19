@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,6 +73,8 @@ public:
             ASSERT_EQ(sibling->GetEnd(), expected.second);
         }
     }
+
+    std::vector<std::function<LifeIntervals *()>> IsSameLocationFactories(Graph *graph);
 
 private:
     Graph *graph_;
@@ -174,6 +176,53 @@ TEST_F(LifeIntervalsTest, Intersects)
     EXPECT_FALSE(interval->Intersects(LiveRange(12U, 20U)));
 }
 
+std::vector<std::function<LifeIntervals *()>> LifeIntervalsTest::IsSameLocationFactories(Graph *graph)
+{
+    auto con0 = &INS(0U);
+    auto con42 = &INS(1U);
+    auto add = &INS(2U);
+    return {[this, add]() {
+                auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
+                li->SetReg(0U);
+                return li;
+            },
+            [this, add]() {
+                auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
+                li->SetReg(1U);
+                return li;
+            },
+            [this, add]() {
+                auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
+                li->SetLocation(Location::MakeStackSlot(1U));
+                return li;
+            },
+            [this, add]() {
+                auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
+                li->SetLocation(Location::MakeStackSlot(2U));
+                return li;
+            },
+            [this, con42]() {
+                auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), con42);
+                li->SetLocation(Location::MakeConstant(0U));
+                return li;
+            },
+            [this, con42]() {
+                auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), con42);
+                li->SetLocation(Location::MakeConstant(1U));
+                return li;
+            },
+            [this, graph, con0]() {
+                auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), con0);
+                if (graph->GetZeroReg() == INVALID_REG) {
+                    ASSERT(graph->GetArch() != Arch::AARCH64);
+                    li->SetReg(31U);
+                } else {
+                    li->SetReg(graph->GetZeroReg());
+                }
+                return li;
+            }};
+}
+
 TEST_F(LifeIntervalsTest, IsSameLocation)
 {
     auto graph = CreateEmptyGraph();
@@ -189,51 +238,7 @@ TEST_F(LifeIntervalsTest, IsSameLocation)
         }
     };
 
-    auto con0 = &INS(0U);
-    auto con42 = &INS(1U);
-    auto add = &INS(2U);
-
-    std::vector<std::function<LifeIntervals *()>> factories = {
-        [&]() {
-            auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
-            li->SetReg(0U);
-            return li;
-        },
-        [&]() {
-            auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
-            li->SetReg(1U);
-            return li;
-        },
-        [&]() {
-            auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
-            li->SetLocation(Location::MakeStackSlot(1U));
-            return li;
-        },
-        [&]() {
-            auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), add);
-            li->SetLocation(Location::MakeStackSlot(2U));
-            return li;
-        },
-        [&]() {
-            auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), con42);
-            li->SetLocation(Location::MakeConstant(0U));
-            return li;
-        },
-        [&]() {
-            auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), con42);
-            li->SetLocation(Location::MakeConstant(1U));
-            return li;
-        },
-        [&]() {
-            auto li = GetAllocator()->New<LifeIntervals>(GetAllocator(), con0);
-            if (graph->GetZeroReg() == INVALID_REG) {
-                ASSERT(graph->GetArch() != Arch::AARCH64);
-                li->SetReg(31U);
-            } else {
-                li->SetReg(graph->GetZeroReg());
-            }
-            return li;
-        }};
+    auto factories = IsSameLocationFactories(graph);
 
     for (size_t l1Idx = 0; l1Idx < factories.size(); l1Idx++) {
         auto interval0 = factories[l1Idx]();
@@ -266,7 +271,7 @@ TEST_F(LifeIntervalsTest, LastUsageBefore)
     ASSERT_EQ(60U, interval.GetLastUsageBefore(100U));
 }
 
-TEST_F(LifeIntervalsTest, SplitAroundUses)
+TEST_F(LifeIntervalsTest, SplitAroundUsesUnsplittable)
 {
     // Unsplittable intervals
     {
@@ -295,7 +300,10 @@ TEST_F(LifeIntervalsTest, SplitAroundUses)
         li.SplitAroundUses(GetAllocator());
         EXPECT_EQ(li.GetSibling(), nullptr);
     }
+}
 
+TEST_F(LifeIntervalsTest, SplitAroundUsesAfterBegin)
+{
     // Split after begin
     {
         LifeIntervals li(GetAllocator());
@@ -323,7 +331,10 @@ TEST_F(LifeIntervalsTest, SplitAroundUses)
         li.SplitAroundUses(GetAllocator());
         CheckSiblingSequence(&li, {{10U, 12U}, {12U, 100U}});
     }
+}
 
+TEST_F(LifeIntervalsTest, SplitAroundUsesBeforeEnd)
+{
     // Split before end
     {
         LifeIntervals li(GetAllocator());
@@ -351,7 +362,10 @@ TEST_F(LifeIntervalsTest, SplitAroundUses)
         li.SplitAroundUses(GetAllocator());
         CheckSiblingSequence(&li, {{10U, 98U}, {98U, 100U}});
     }
+}
 
+TEST_F(LifeIntervalsTest, SplitAroundUsesBeginAndEnd)
+{
     // Split after begin and before end
     {
         LifeIntervals li(GetAllocator());
@@ -372,7 +386,10 @@ TEST_F(LifeIntervalsTest, SplitAroundUses)
         li.SplitAroundUses(GetAllocator());
         CheckSiblingSequence(&li, {{10U, 12U}, {12U, 98U}, {98U, 100U}});
     }
+}
 
+TEST_F(LifeIntervalsTest, SplitAroundUsesMultisplits)
+{
     // Multisplits
     {
         LifeIntervals li(GetAllocator());

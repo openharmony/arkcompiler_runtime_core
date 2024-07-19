@@ -24,6 +24,16 @@ public:
 
     void HoistResolverBeforeMovableObjectBuildInitialGraph();
     Graph *HoistResolverBeforeMovableObjectBuildExpectedGraph();
+
+    void BuildGraphPreHeaderWithIf();
+    void BuildGraphLicmResolver();
+    void BuildGraphLicmResolverIfHeaderIsNotExit();
+    void BuildGraphHoistLenArray();
+    Graph *BuildGraphLoadImmediate(RuntimeInterface::ClassPtr class1);
+    Graph *BuildGraphLoadObjFromConst(uintptr_t obj1);
+    Graph *BuildGraphFunctionImmediate(uintptr_t fptr);
+
+    Graph *BuildGraphLoadFromConstantPool();
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -249,7 +259,7 @@ TEST_F(LicmTest, EmptyPreHeaderWithPhi)
     ASSERT_EQ(INS(9U).GetBasicBlock(), BB(5U).GetLoop()->GetPreHeader());
 }
 
-TEST_F(LicmTest, PreHeaderWithIf)
+void LicmTest::BuildGraphPreHeaderWithIf()
 {
     GRAPH(GetGraph())
     {
@@ -275,7 +285,11 @@ TEST_F(LicmTest, PreHeaderWithIf)
         }
     }
     GetGraph()->RunPass<Licm>(HOST_LIMIT);
+}
 
+TEST_F(LicmTest, PreHeaderWithIf)
+{
+    BuildGraphPreHeaderWithIf();
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -306,7 +320,7 @@ TEST_F(LicmTest, PreHeaderWithIf)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(LicmTest, LicmResolver)
+void LicmTest::BuildGraphLicmResolver()
 {
     GRAPH(GetGraph())
     {
@@ -343,7 +357,11 @@ TEST_F(LicmTest, LicmResolver)
             INST(15U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
+TEST_F(LicmTest, LicmResolver)
+{
+    BuildGraphLicmResolver();
     ASSERT_TRUE(GetGraph()->RunPass<Licm>(HOST_LIMIT));
     GetGraph()->RunPass<Cleanup>();
 
@@ -383,7 +401,7 @@ TEST_F(LicmTest, LicmResolver)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(LicmTest, LicmResolverIfHeaderIsNotExit)
+void LicmTest::BuildGraphLicmResolverIfHeaderIsNotExit()
 {
     GRAPH(GetGraph())
     {
@@ -420,6 +438,11 @@ TEST_F(LicmTest, LicmResolverIfHeaderIsNotExit)
             INST(15U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(LicmTest, LicmResolverIfHeaderIsNotExit)
+{
+    BuildGraphLicmResolverIfHeaderIsNotExit();
     ASSERT_TRUE(GetGraph()->RunPass<Licm>(HOST_LIMIT));
 
     auto graph = CreateEmptyGraph();
@@ -761,7 +784,7 @@ TEST_F(LicmTest, DontHoistLenArray)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-TEST_F(LicmTest, HoistLenArray)
+void LicmTest::BuildGraphHoistLenArray()
 {
     GRAPH(GetGraph())
     {
@@ -789,7 +812,11 @@ TEST_F(LicmTest, HoistLenArray)
             INST(12U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
+TEST_F(LicmTest, HoistLenArray)
+{
+    BuildGraphHoistLenArray();
     ASSERT_TRUE(GetGraph()->RunPass<Licm>(HOST_LIMIT));
     auto graph = CreateEmptyGraph();
 
@@ -822,9 +849,8 @@ TEST_F(LicmTest, HoistLenArray)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(LicmTest, LoadImmediate)
+Graph *LicmTest::BuildGraphLoadImmediate(RuntimeInterface::ClassPtr class1)
 {
-    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -847,6 +873,13 @@ TEST_F(LicmTest, LoadImmediate)
             INST(17U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
+
+TEST_F(LicmTest, LoadImmediate)
+{
+    auto class1 = reinterpret_cast<RuntimeInterface::ClassPtr>(1U);
+    auto graph = BuildGraphLoadImmediate(class1);
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
@@ -876,9 +909,8 @@ TEST_F(LicmTest, LoadImmediate)
     ASSERT_TRUE(GraphComparator().Compare(graph, graph1));
 }
 
-TEST_F(LicmTest, LoadObjFromConst)
+Graph *LicmTest::BuildGraphLoadObjFromConst(uintptr_t obj1)
 {
-    auto obj1 = static_cast<uintptr_t>(1U);
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -901,6 +933,13 @@ TEST_F(LicmTest, LoadObjFromConst)
             INST(17U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
+
+TEST_F(LicmTest, LoadObjFromConst)
+{
+    auto obj1 = static_cast<uintptr_t>(1U);
+    auto graph = BuildGraphLoadObjFromConst(obj1);
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
     {
@@ -930,9 +969,8 @@ TEST_F(LicmTest, LoadObjFromConst)
     ASSERT_TRUE(GraphComparator().Compare(graph, graph1));
 }
 
-TEST_F(LicmTest, FunctionImmediate)
+Graph *LicmTest::BuildGraphFunctionImmediate(uintptr_t fptr)
 {
-    auto fptr = static_cast<uintptr_t>(1U);
     auto graph = CreateEmptyGraph();
     graph->SetDynamicMethod();
 #ifndef NDEBUG
@@ -959,6 +997,13 @@ TEST_F(LicmTest, FunctionImmediate)
             INST(17U, Opcode::ReturnVoid);
         }
     }
+    return graph;
+}
+
+TEST_F(LicmTest, FunctionImmediate)
+{
+    auto fptr = static_cast<uintptr_t>(1U);
+    auto graph = BuildGraphFunctionImmediate(fptr);
     auto graph1 = CreateEmptyGraph();
     graph1->SetDynamicMethod();
 #ifndef NDEBUG
@@ -992,7 +1037,7 @@ TEST_F(LicmTest, FunctionImmediate)
     ASSERT_TRUE(GraphComparator().Compare(graph, graph1));
 }
 
-TEST_F(LicmTest, LoadFromConstantPool)
+Graph *LicmTest::BuildGraphLoadFromConstantPool()
 {
     auto graph = CreateEmptyGraph();
     graph->SetDynamicMethod();
@@ -1021,7 +1066,12 @@ TEST_F(LicmTest, LoadFromConstantPool)
             INST(8U, Opcode::ReturnVoid).v0id();
         }
     }
+    return graph;
+}
 
+TEST_F(LicmTest, LoadFromConstantPool)
+{
+    auto graph = BuildGraphLoadFromConstantPool();
     ASSERT_TRUE(graph->RunPass<Licm>(HOST_LIMIT));
 
     auto graph1 = CreateEmptyGraph();
