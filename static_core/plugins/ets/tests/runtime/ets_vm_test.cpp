@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,6 +145,18 @@ static void AssertPrimitiveContainerClassRoot(EtsClassLinker *classLinker, EtsCl
     ASSERT_EQ(klass->GetBase(), classLinker->GetClassRoot(EtsClassRoot::OBJECT));
 }
 
+static void AssertPrimitiveClassRoots(EtsClassLinker *classLinker)
+{
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::BOOLEAN);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::BYTE);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::SHORT);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::CHAR);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::INT);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::LONG);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::FLOAT);
+    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::DOUBLE);
+}
+
 TEST_F(EtsVMTest, InitTest)
 {
     auto runtime = Runtime::GetCurrent();
@@ -167,14 +179,7 @@ TEST_F(EtsVMTest, InitTest)
 
     AssertCompoundContainerClassRoot(classLinker, EtsClassRoot::STRING_ARRAY);
 
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::BOOLEAN);
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::BYTE);
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::SHORT);
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::CHAR);
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::INT);
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::LONG);
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::FLOAT);
-    AssertPrimitiveClassRoot(classLinker, EtsClassRoot::DOUBLE);
+    AssertPrimitiveClassRoots(classLinker);
 
     AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::BOOLEAN_ARRAY);
     AssertPrimitiveContainerClassRoot(classLinker, EtsClassRoot::BYTE_ARRAY);

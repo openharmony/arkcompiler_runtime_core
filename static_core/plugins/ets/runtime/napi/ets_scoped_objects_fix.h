@@ -43,11 +43,11 @@ enum class EtsNapiException {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define RETURN_NULL_IF_NULL(ptr) \
-    do {                         \
+    {                            \
         if ((ptr) == nullptr) {  \
             return nullptr;      \
         }                        \
-    } while (false);
+    }
 
 class ManagedCodeAccessor {
 public:
