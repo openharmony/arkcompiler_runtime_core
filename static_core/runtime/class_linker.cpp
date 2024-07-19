@@ -699,7 +699,6 @@ bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool isStatic,
 
     for (auto &field : fields) {
         auto type = field.GetType();
-
         if (!type.IsPrimitive()) {
             refFields.push_back(&field);
             continue;
@@ -799,7 +798,6 @@ std::optional<Span<Class *>> ClassLinker::LoadInterfaces(panda_file::ClassDataAc
 {
     ASSERT(context != nullptr);
     size_t ifacesNum = cda->GetIfacesNumber();
-
     if (ifacesNum == 0) {
         return Span<Class *>(nullptr, ifacesNum);
     }
@@ -929,7 +927,6 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     ASSERT(context != nullptr);
     panda_file::ClassDataAccessor classDataAccessor(*pf, classId);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
-
     if (ctx.GetLanguage() != context->GetSourceLang()) {
         LanguageContext currentCtx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
         PandaStringStream ss;
@@ -1023,6 +1020,28 @@ static const uint8_t *CopyMutf8String(mem::InternalAllocatorPtr allocator, const
     return ptr;
 }
 
+bool ClassLinker::LinkEntitiesAndInitClass(Class *klass, ClassInfo *classInfo, ClassLinkerExtension *ext,
+                                           const uint8_t *descriptor)
+{
+    if (!LinkMethods(klass, classInfo, ext->GetErrorHandler())) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot link class methods '" << descriptor << "'";
+        return false;
+    }
+
+    if (!LinkFields(klass, ext->GetErrorHandler())) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot link class fields '" << descriptor << "'";
+        return false;
+    }
+
+    if (!ext->InitializeClass(klass)) {
+        LOG(ERROR, CLASS_LINKER) << "Language specific initialization for class '" << descriptor << "' failed";
+        FreeClass(klass);
+        return false;
+    }
+
+    return true;
+}
+
 Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescriptor, uint32_t accessFlags,
                                Span<Method> methods, Span<Field> fields, Class *baseClass, Span<Class *> interfaces,
                                ClassLinkerContext *context, bool isInterface)
@@ -1073,19 +1092,7 @@ Class *ClassLinker::BuildClass(const uint8_t *descriptor, bool needCopyDescripto
         field.SetClass(klass);
     }
 
-    if (!LinkMethods(klass, &classInfo, ext->GetErrorHandler())) {
-        LOG(ERROR, CLASS_LINKER) << "Cannot link class methods '" << descriptor << "'";
-        return nullptr;
-    }
-
-    if (!LinkFields(klass, ext->GetErrorHandler())) {
-        LOG(ERROR, CLASS_LINKER) << "Cannot link class fields '" << descriptor << "'";
-        return nullptr;
-    }
-
-    if (!ext->InitializeClass(klass)) {
-        LOG(ERROR, CLASS_LINKER) << "Language specific initialization for class '" << descriptor << "' failed";
-        FreeClass(klass);
+    if (!LinkEntitiesAndInitClass(klass, &classInfo, ext, descriptor)) {
         return nullptr;
     }
 

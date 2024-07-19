@@ -322,6 +322,9 @@ private:
         size_t numSfields;
     };
 
+    bool LinkEntitiesAndInitClass(Class *klass, ClassInfo *classInfo, ClassLinkerExtension *ext,
+                                  const uint8_t *descriptor);
+
     Field *GetFieldById(Class *klass, const panda_file::FieldDataAccessor &fieldDataAccessor,
                         ClassLinkerErrorHandler *errorHandler);
 

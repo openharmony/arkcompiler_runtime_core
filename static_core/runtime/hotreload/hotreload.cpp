@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -404,14 +404,15 @@ Type ArkHotreloadBase::MethodChangesCheck(ClassContainment *hCls)
         for (auto &oldMethod : oldMethods) {
             PandaString oldName = utf::Mutf8AsCString(oldMethod.GetName().data);
             PandaString newName = utf::Mutf8AsCString(newMethod.GetName().data);
-            if (oldName == newName) {
-                isNameFound = true;
-                if (oldMethod.GetProto() == newMethod.GetProto() &&
-                    GetFileAccessFlags(oldMethod) == GetFileAccessFlags(newMethod)) {
-                    methodsTable_[&oldMethod] = &newMethod;
-                    isExactFound = true;
-                    break;
-                }
+            if (oldName != newName) {
+                continue;
+            }
+            isNameFound = true;
+            if (oldMethod.GetProto() == newMethod.GetProto() &&
+                GetFileAccessFlags(oldMethod) == GetFileAccessFlags(newMethod)) {
+                methodsTable_[&oldMethod] = &newMethod;
+                isExactFound = true;
+                break;
             }
         }
 

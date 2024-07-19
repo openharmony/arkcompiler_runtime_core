@@ -88,7 +88,7 @@ private:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BEGIN_ENTRYPOINT() \
     CHECK_STACK_WALKER;    \
-    LOG_ENTRYPOINT();
+    LOG_ENTRYPOINT()
 
 extern "C" NO_ADDRESS_SANITIZE void InterpreterEntryPoint(Method *method, Frame *frame)
 {
@@ -1695,17 +1695,6 @@ static std::tuple<bool, ObjectHeader *, coretypes::String *> AssureCapacity(Obje
     return std::make_tuple(true, sb, str);
 }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define check_capacity_fast(sb, newsize)                                           \
-    {                                                                              \
-        auto success = false;                                                      \
-        std::tie(success, sb, std::ignore) = AssureCapacity(sb, newsize, nullptr); \
-                                                                                   \
-        if (!success) {                                                            \
-            return sb;                                                             \
-        }                                                                          \
-    }
-
 static ObjectHeader *StoreNumber(ObjectHeader *sb, int64_t n)
 {
     auto num = n < 0 ? -static_cast<uint64_t>(n) : static_cast<uint64_t>(n);
@@ -1713,7 +1702,11 @@ static ObjectHeader *StoreNumber(ObjectHeader *sb, int64_t n)
     auto count = GetCountValue(sb);
     auto newsize = count + size;
 
-    check_capacity_fast(sb, newsize);
+    auto success = false;
+    std::tie(success, sb, std::ignore) = AssureCapacity(sb, newsize, nullptr);
+    if (!success) {
+        return sb;
+    }
     utf::UInt64ToUtf16Array(num, GetStorageAddress(sb, count), size, n < 0);
     sb->SetFieldPrimitive<uint32_t>(SB_COUNT_OFFSET, newsize);
     return sb;
@@ -1739,7 +1732,11 @@ extern "C" ObjectHeader *CoreStringBuilderBool(ObjectHeader *sb, const uint8_t v
     auto size = 4U + (1U - v);  // v is actually u1
     auto newsize = count + size;
 
-    check_capacity_fast(sb, newsize);
+    auto success = false;
+    std::tie(success, sb, std::ignore) = AssureCapacity(sb, newsize, nullptr);
+    if (!success) {
+        return sb;
+    }
     auto dst = reinterpret_cast<uint64_t *>(GetStorageAddress(sb, count));
 
     if (v != 0) {
@@ -1760,7 +1757,11 @@ extern "C" ObjectHeader *CoreStringBuilderChar(ObjectHeader *sb, const uint16_t 
     auto count = GetCountValue(sb);
     auto newsize = count + 1;
 
-    check_capacity_fast(sb, newsize);
+    auto success = false;
+    std::tie(success, sb, std::ignore) = AssureCapacity(sb, newsize, nullptr);
+    if (!success) {
+        return sb;
+    }
     auto dst = GetStorageAddress(sb, count);
 
     *dst = c;
@@ -1774,7 +1775,6 @@ extern "C" ObjectHeader *CoreStringBuilderString(ObjectHeader *sb, void *s)
     auto str = static_cast<coretypes::String *>(s);
     auto isnull = str == nullptr;
     auto size = isnull ? sizeof(nullstr) / sizeof(uint16_t) : str->GetLength();
-
     if (size == 0) {
         return sb;
     }
@@ -1784,7 +1784,6 @@ extern "C" ObjectHeader *CoreStringBuilderString(ObjectHeader *sb, void *s)
 
     auto success = false;
     std::tie(success, sb, str) = AssureCapacity(sb, newsize, str);
-
     if (!success) {
         return sb;
     }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -74,7 +74,7 @@ using DisallowGarbageCollection = AssertGCScopeT<IS_GC_ALLOW_CHECK>;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DCHECK_ALLOW_GARBAGE_COLLECTION \
-    ASSERT_PRINT(AssertGCScopeT<IS_GC_ALLOW_CHECK>::IsAllowed(), "disallow execute garbage collection.");
+    ASSERT_PRINT(AssertGCScopeT<IS_GC_ALLOW_CHECK>::IsAllowed(), "disallow execute garbage collection.")
 }  // namespace ark
 
 #endif  // PANDA_RUNTIME_ASSERT_GC_SCOPE_H
