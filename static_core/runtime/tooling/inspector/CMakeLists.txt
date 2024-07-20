@@ -107,12 +107,13 @@ panda_add_gtest(
     NAME arkinspector_tests
     NO_CORES
     SOURCES
-        tests/source_manager.cpp
-        tests/session_manager.cpp
         tests/debug_info_cache.cpp
-        tests/thread_state.cpp
         tests/inspector_server.cpp
+        tests/json_object_matcher.cpp
         tests/object_repository.cpp
+        tests/session_manager.cpp
+        tests/source_manager.cpp
+        tests/thread_state.cpp
     INCLUDE_DIRS
         ${PANDA_ROOT}/runtime/tooling/inspector 
     LIBRARIES

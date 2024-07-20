@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,30 +230,6 @@ inline std::ostream &operator<<(std::ostream &os, const JsonObject::ArrayT &arra
     }
 
     return os << ']';
-}
-
-inline std::ostream &operator<<(std::ostream &os, const JsonObject::Value &value)
-{
-    if (auto *string = value.Get<JsonObject::StringT>()) {
-        return os << std::quoted(*string);
-    }
-    if (auto *number = value.Get<JsonObject::NumT>()) {
-        return os << *number;
-    }
-    if (auto *boolean = value.Get<JsonObject::BoolT>()) {
-        return os << std::boolalpha << *boolean;
-    }
-    if (auto *array = value.Get<JsonObject::ArrayT>()) {
-        return os << *array;
-    }
-    if (auto *object = value.Get<JsonObject::JsonObjPointer>()) {
-        if (*object) {
-            return os << **object;
-        }
-        return os << "null";
-    }
-
-    UNREACHABLE();
 }
 }  // namespace ark
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,22 +122,22 @@ public:
         return *(reinterpret_cast<SlotType **>(ptr));
     }
 
-    static bool IsMethodInBoundaryFrame(Method *method)
+    static bool IsMethodInBoundaryFrame(const Method *method)
     {
         return IsMethodInI2CFrame(method) || IsMethodInC2IFrame(method) || IsMethodInBPFrame(method);
     }
 
-    static bool IsMethodInI2CFrame(Method *method)
+    static bool IsMethodInI2CFrame(const Method *method)
     {
         return method == reinterpret_cast<void *>(FrameBridgeKind::INTERPRETER_TO_COMPILED_CODE);
     }
 
-    static bool IsMethodInC2IFrame(Method *method)
+    static bool IsMethodInC2IFrame(const Method *method)
     {
         return method == reinterpret_cast<void *>(FrameBridgeKind::COMPILED_CODE_TO_INTERPRETER);
     }
 
-    static bool IsMethodInBPFrame(Method *method)
+    static bool IsMethodInBPFrame(const Method *method)
     {
         return method == reinterpret_cast<void *>(FrameBridgeKind::BYPASS);
     }

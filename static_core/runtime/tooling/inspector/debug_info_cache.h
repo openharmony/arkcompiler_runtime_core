@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,23 +59,30 @@ private:
     {
         os::memory::LockHolder lock(debugInfosMutex_);
 
-        for (auto &[file, debug_info] : debugInfos_) {
-            if (!pandaFileFilter(file, debug_info)) {
+        for (auto &[file, debugInfo] : debugInfos_) {
+            if (!pandaFileFilter(file, debugInfo)) {
                 continue;
             }
 
-            for (auto methodId : debug_info.GetMethodIdList()) {
-                if (!methodFilter(file, debug_info, methodId)) {
+            for (auto methodId : debugInfo.GetMethodIdList()) {
+                if (!methodFilter(file, debugInfo, methodId)) {
                     continue;
                 }
 
-                auto &table = debug_info.GetLineNumberTable(methodId);
-                for (auto it = table.begin(); it != table.end(); ++it) {
-                    auto next = it + 1;
-                    if (!handler(file, debug_info, methodId, *it, next != table.end() ? &*next : nullptr)) {
-                        break;
-                    }
-                }
+                EnumerateLineEntries(file, debugInfo, methodId, std::forward<H>(handler));
+            }
+        }
+    }
+
+    template <typename H>
+    void EnumerateLineEntries(const panda_file::File *file, const disasm::DisasmBackedDebugInfoExtractor &debugInfo,
+                              panda_file::File::EntityId methodId, H &&handler) REQUIRES(debugInfosMutex_)
+    {
+        auto &table = debugInfo.GetLineNumberTable(methodId);
+        for (auto it = table.begin(); it != table.end(); ++it) {
+            auto next = it + 1;
+            if (!handler(file, debugInfo, methodId, *it, next != table.end() ? &*next : nullptr)) {
+                break;
             }
         }
     }

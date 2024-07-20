@@ -153,40 +153,39 @@ std::set<size_t> DebugInfoCache::GetValidLineNumbers(std::string_view sourceFile
 
         return true;
     };
-
-    if (restrictToFunction) {
-        auto methodFilter = [sourceFile, startLine](auto, auto &debugInfo, auto methodId) {
-            if (debugInfo.GetSourceFile(methodId) != sourceFile) {
-                return false;
-            }
-
-            bool hasLess = false;
-            bool hasGreater = false;
-            for (auto &entry : debugInfo.GetLineNumberTable(methodId)) {
-                if (entry.line <= startLine) {
-                    hasLess = true;
-                }
-
-                if (entry.line >= startLine) {
-                    hasGreater = true;
-                }
-
-                if (hasLess && hasGreater) {
-                    break;
-                }
-            }
-
-            return hasLess && hasGreater;
-        };
-        EnumerateLineEntries([](auto, auto &) { return true; }, methodFilter, lineHandler);
-    } else {
+    if (!restrictToFunction) {
         EnumerateLineEntries([](auto, auto &) { return true; },
                              [sourceFile](auto, auto &debugInfo, auto methodId) {
                                  return (debugInfo.GetSourceFile(methodId) == sourceFile);
                              },
                              lineHandler);
+        return lineNumbers;
     }
 
+    auto methodFilter = [sourceFile, startLine](auto, auto &debugInfo, auto methodId) {
+        if (debugInfo.GetSourceFile(methodId) != sourceFile) {
+            return false;
+        }
+
+        bool hasLess = false;
+        bool hasGreater = false;
+        for (auto &entry : debugInfo.GetLineNumberTable(methodId)) {
+            if (entry.line <= startLine) {
+                hasLess = true;
+            }
+
+            if (entry.line >= startLine) {
+                hasGreater = true;
+            }
+
+            if (hasLess && hasGreater) {
+                break;
+            }
+        }
+
+        return hasLess && hasGreater;
+    };
+    EnumerateLineEntries([](auto, auto &) { return true; }, methodFilter, lineHandler);
     return lineNumbers;
 }
 

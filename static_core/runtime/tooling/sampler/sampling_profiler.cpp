@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -283,6 +283,145 @@ void Sampler::CollectModules()
     runtime_->GetClassLinker()->EnumeratePandaFiles(callback, false);
 }
 
+static SampleInfo::ThreadStatus GetThreadStatus(ManagedThread *mthread)
+{
+    ASSERT(mthread != nullptr);
+
+    auto threadStatus = mthread->GetStatus();
+    if (threadStatus == ThreadStatus::RUNNING) {
+        return SampleInfo::ThreadStatus::RUNNING;
+    }
+
+    bool isCoroutineRunning = false;
+    if (Coroutine::ThreadIsCoroutine(mthread)) {
+        isCoroutineRunning = Coroutine::CastFromThread(mthread)->GetCoroutineStatus() == Coroutine::Status::RUNNING;
+    }
+    if (threadStatus == ThreadStatus::NATIVE && isCoroutineRunning) {
+        return SampleInfo::ThreadStatus::RUNNING;
+    }
+
+    return SampleInfo::ThreadStatus::SUSPENDED;
+}
+
+struct SamplerFrameInfo {
+    Frame *frame;
+    bool isCompiled;
+};
+
+/**
+ * @brief Collects samples from boundary frames.
+ * @returns true if bypass frame was found, false otherwise.
+ */
+static bool CollectBoundaryFrames(SamplerFrameInfo &frameInfo, SampleInfo &sample, size_t &stackCounter)
+{
+    ASSERT(frameInfo.frame != nullptr);
+
+    bool isFrameBoundary = true;
+    while (isFrameBoundary) {
+        auto *prevFrame = frameInfo.frame->GetPrevFrame();
+        const auto *method = frameInfo.frame->GetMethod();
+        if (StackWalkerBase::IsMethodInI2CFrame(method)) {
+            sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+            sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+            ++stackCounter;
+
+            frameInfo.frame = prevFrame;
+            frameInfo.isCompiled = false;
+        } else if (StackWalkerBase::IsMethodInC2IFrame(method)) {
+            sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+            sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+            ++stackCounter;
+
+            frameInfo.frame = prevFrame;
+            frameInfo.isCompiled = true;
+        } else if (StackWalkerBase::IsMethodInBPFrame(method)) {
+            g_sLostSamples++;
+            return true;
+        } else {
+            isFrameBoundary = false;
+        }
+    }
+    return false;
+}
+
+static void ProcessCompiledTopFrame(SamplerFrameInfo &frameInfo, SampleInfo &sample, size_t &stackCounter,
+                                    void *signalContextPtr)
+{
+    CFrame cframe(frameInfo.frame);
+    if (cframe.IsNative()) {
+        return;
+    }
+
+    auto signalContext = SignalContext(signalContextPtr);
+    auto fp = signalContext.GetFP();
+    if (fp == nullptr) {
+        sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+        sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+        ++stackCounter;
+
+        // fp is not set yet, so cframe not finished, currently in bridge, previous frame iframe
+        frameInfo.isCompiled = false;
+        return;
+    }
+
+    auto pc = signalContext.GetPC();
+    bool pcInCompiledCode = InAllocatedCodeRange(pc);
+    if (pcInCompiledCode) {
+        // Currently in compiled method so get it from fp
+        frameInfo.frame = reinterpret_cast<Frame *>(fp);
+    } else {
+        const LockFreeQueue &pfsQueue = Sampler::GetSampleQueuePF();
+        auto pfId = reinterpret_cast<uintptr_t>(frameInfo.frame->GetMethod()->GetPandaFile());
+        if (pfsQueue.FindValue(pfId)) {
+            sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
+            sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
+            ++stackCounter;
+
+            // pc not in jitted code, so fp is not up-to-date, currently not in cfame
+            frameInfo.isCompiled = false;
+        }
+    }
+}
+
+/**
+ * @brief Walk stack frames and collect samples.
+ * @returns true if invalid frame was encountered, false otherwise.
+ */
+static bool CollectFrames(SamplerFrameInfo &frameInfo, SampleInfo &sample, size_t &stackCounter)
+{
+    const LockFreeQueue &pfsQueue = Sampler::GetSampleQueuePF();
+    auto stackWalker = StackWalkerBase(frameInfo.frame, frameInfo.isCompiled);
+    while (stackWalker.HasFrame()) {
+        auto *method = stackWalker.GetMethod();
+        if (method == nullptr || IsInvalidPointer(reinterpret_cast<uintptr_t>(method))) {
+            g_sLostSamples++;
+            g_sLostInvalidSamples++;
+            return true;
+        }
+
+        auto *pf = method->GetPandaFile();
+        auto pfId = reinterpret_cast<uintptr_t>(pf);
+        if (!pfsQueue.FindValue(pfId)) {
+            g_sLostSamples++;
+            g_sLostNotFindSamples++;
+            return true;
+        }
+
+        sample.stackInfo.managedStack[stackCounter].pandaFilePtr = pfId;
+        sample.stackInfo.managedStack[stackCounter].fileId = method->GetFileId().GetOffset();
+
+        ++stackCounter;
+        stackWalker.NextFrame();
+
+        if (stackCounter == SampleInfo::StackInfo::MAX_STACK_DEPTH) {
+            // According to the limitations we should drop all frames that is higher than MAX_STACK_DEPTH
+            break;
+        }
+    }
+
+    return false;
+}
+
 void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]] siginfo_t *siginfo,
                                     [[maybe_unused]] void *ptr)
 {
@@ -297,35 +436,29 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
     ASSERT(mthread != nullptr);
 
     // Checking that code is being executed
-    auto framePtr = reinterpret_cast<CFrame::SlotType *>(mthread->GetCurrentFrame());
+    auto *framePtr = reinterpret_cast<CFrame::SlotType *>(mthread->GetCurrentFrame());
     if (framePtr == nullptr) {
         return;
     }
 
-    auto frame = mthread->GetCurrentFrame();
-    bool isCompiled = mthread->IsCurrentFrameCompiled();
-    auto threadStatus = mthread->GetStatus();
-
-    bool isCoroutineRunning = false;
-    if (Coroutine::ThreadIsCoroutine(mthread)) {
-        isCoroutineRunning = Coroutine::CastFromThread(mthread)->GetCoroutineStatus() == Coroutine::Status::RUNNING;
-    }
-
-    Method *topMethod = frame->GetMethod();
-
     g_sTotalSamples++;
 
-    const LockFreeQueue &pfsQueue = Sampler::GetSampleQueuePF();
+    // Note that optimized variables may end up with incorrect value as a consequence of a longjmp() operation
+    // - see "local variable clobbering and setjmp".
+    // Variables below are not volatile because they are not used after longjmp() is done.
+    SamplerFrameInfo frameInfo {mthread->GetCurrentFrame(), mthread->IsCurrentFrameCompiled()};
 
     SampleInfo sample {};
-    // Volatile because we don't need to optimize this variable to be able to use setjmp without clobbering
-    // Optimized variables may end up with incorrect value as a consequence of a longjmp() operation
-    volatile size_t stackCounter = 0;
+    // `mthread` is passed as non-const argument into `GetThreadStatus`, so call it before `setjmp`
+    // in order to bypass "variable might be clobbered by ‘longjmp’" compiler warning.
+    sample.threadInfo.threadStatus = GetThreadStatus(mthread);
+    size_t stackCounter = 0;
 
     ScopedThreadSampling scopedThreadSampling(mthread->GetPtThreadInfo()->GetSamplingInfo());
 
+    auto &sigSegvJmpBuf = mthread->GetPtThreadInfo()->GetSamplingInfo()->GetSigSegvJmpEnv();
     // NOLINTNEXTLINE(cert-err52-cpp)
-    if (setjmp(mthread->GetPtThreadInfo()->GetSamplingInfo()->GetSigSegvJmpEnv()) != 0) {
+    if (setjmp(sigSegvJmpBuf) != 0) {
         // This code executed after longjmp()
         // In case of SIGSEGV we lose the sample
         g_sLostSamples++;
@@ -333,101 +466,20 @@ void SigProfSamplingProfilerHandler([[maybe_unused]] int signum, [[maybe_unused]
         return;
     }
 
-    if (threadStatus == ThreadStatus::RUNNING) {
-        sample.threadInfo.threadStatus = SampleInfo::ThreadStatus::RUNNING;
-    } else if (threadStatus == ThreadStatus::NATIVE && isCoroutineRunning) {
-        sample.threadInfo.threadStatus = SampleInfo::ThreadStatus::RUNNING;
-    } else {
-        sample.threadInfo.threadStatus = SampleInfo::ThreadStatus::SUSPENDED;
-    }
-
-    if (StackWalkerBase::IsMethodInBoundaryFrame(topMethod)) {
-        bool isFrameBoundary = true;
-        while (isFrameBoundary) {
-            Method *method = frame->GetMethod();
-            Frame *prev = frame->GetPrevFrame();
-
-            if (StackWalkerBase::IsMethodInI2CFrame(method)) {
-                sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
-                sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
-                ++stackCounter;
-
-                frame = prev;
-                isCompiled = false;
-            } else if (StackWalkerBase::IsMethodInC2IFrame(method)) {
-                sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
-                sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
-                ++stackCounter;
-
-                frame = prev;
-                isCompiled = true;
-            } else if (StackWalkerBase::IsMethodInBPFrame(method)) {
-                g_sLostSamples++;
-                return;
-            } else {
-                isFrameBoundary = false;
-            }
-        }
-    } else if (isCompiled) {
-        auto signalContext = SignalContext(ptr);
-        auto pc = signalContext.GetPC();
-        auto fp = signalContext.GetFP();
-        bool pcInCompiled = InAllocatedCodeRange(pc);
-        CFrame cframe(frame);
-        bool isNative = cframe.IsNative();
-        if (!isNative && fp == nullptr) {
-            sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
-            sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
-            ++stackCounter;
-
-            // fp is not set yet, so cframe not finished, currently in bridge, previous frame iframe
-            isCompiled = false;
-        } else if (!isNative && fp != nullptr) {
-            auto pfId = reinterpret_cast<uintptr_t>(frame->GetMethod()->GetPandaFile());
-            if (pcInCompiled) {
-                // Currently in compiled method so get it from fp
-                frame = reinterpret_cast<Frame *>(fp);
-            } else if (pfsQueue.FindValue(pfId)) {
-                sample.stackInfo.managedStack[stackCounter].pandaFilePtr = helpers::ToUnderlying(FrameKind::BRIDGE);
-                sample.stackInfo.managedStack[stackCounter].fileId = helpers::ToUnderlying(FrameKind::BRIDGE);
-                ++stackCounter;
-
-                // pc not in jitted code, so fp is not up-to-date, currently not in cfame
-                isCompiled = false;
-            }
-        }
-    }
-
-    auto stackWalker = StackWalkerBase(frame, isCompiled);
-
-    while (stackWalker.HasFrame()) {
-        auto method = stackWalker.GetMethod();
-
-        if (method == nullptr || IsInvalidPointer(reinterpret_cast<uintptr_t>(method))) {
-            g_sLostSamples++;
-            g_sLostInvalidSamples++;
+    if (StackWalkerBase::IsMethodInBoundaryFrame(frameInfo.frame->GetMethod())) {
+        auto foundBypassFrame = CollectBoundaryFrames(frameInfo, sample, stackCounter);
+        if (foundBypassFrame) {
             return;
         }
-
-        auto pf = method->GetPandaFile();
-        auto pfId = reinterpret_cast<uintptr_t>(pf);
-        if (!pfsQueue.FindValue(pfId)) {
-            g_sLostSamples++;
-            g_sLostNotFindSamples++;
-            return;
-        }
-
-        sample.stackInfo.managedStack[stackCounter].pandaFilePtr = pfId;
-        sample.stackInfo.managedStack[stackCounter].fileId = method->GetFileId().GetOffset();
-
-        ++stackCounter;
-        stackWalker.NextFrame();
-
-        if (stackCounter == SampleInfo::StackInfo::MAX_STACK_DEPTH) {
-            // According to the limitations we should drop all frames that is higher than MAX_STACK_DEPTH
-            break;
-        }
+    } else if (frameInfo.isCompiled) {
+        ProcessCompiledTopFrame(frameInfo, sample, stackCounter, ptr);
     }
+
+    auto lostSample = CollectFrames(frameInfo, sample, stackCounter);
+    if (lostSample) {
+        return;
+    }
+
     if (stackCounter == 0) {
         return;
     }
@@ -464,7 +516,7 @@ void Sampler::SamplerThreadEntry()
     ++g_sCurrentHandlersCounter;
 
     auto pid = getpid();
-    // Atomic with relaxed order reason: data race with is_active_
+    // Atomic with relaxed order reason: data race with isActive_
     while (isActive_.load(std::memory_order_relaxed)) {
         {
             os::memory::LockHolder holder(managedThreadsLock_);
@@ -500,7 +552,7 @@ void Sampler::ListenerThreadEntry(std::string outputFile)
     WriteLoadedPandaFiles(writerPtr.get());
 
     SampleInfo bufferSample;
-    // Atomic with relaxed order reason: data race with is_active_
+    // Atomic with relaxed order reason: data race with isActive_
     while (isActive_.load(std::memory_order_relaxed)) {
         WriteLoadedPandaFiles(writerPtr.get());
         communicator_.ReadSample(&bufferSample);

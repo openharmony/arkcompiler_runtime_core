@@ -170,15 +170,16 @@ void Inspector::ThreadStart(PtThread thread)
     }
 
     // NOLINTBEGIN(modernize-avoid-bind)
-    auto [it, inserted] =
-        threads_.emplace(std::piecewise_construct, std::forward_as_tuple(thread),
-                         std::forward_as_tuple(
-                             thread.GetManagedThread(), [](auto &, auto &, auto) {},
-                             std::bind(&Inspector::DebuggableThreadPostSuspend, this, thread, _1, _2, _3),
-                             [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.Unlock(); },
-                             [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.ReadLock(); }, []() {},
-                             [this, thread]() { inspectorServer_.CallDebuggerResumed(thread); }));
+    auto callbacks = DebuggableThread::SuspensionCallbacks {
+        [](auto &, auto &, auto) {},
+        std::bind(&Inspector::DebuggableThreadPostSuspend, this, thread, _1, _2, _3),
+        [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.Unlock(); },
+        [this]() NO_THREAD_SAFETY_ANALYSIS { debuggerEventsLock_.ReadLock(); },
+        []() {},
+        [this, thread]() { inspectorServer_.CallDebuggerResumed(thread); }};
     // NOLINTEND(modernize-avoid-bind)
+    auto [it, inserted] = threads_.emplace(std::piecewise_construct, std::forward_as_tuple(thread),
+                                           std::forward_as_tuple(thread.GetManagedThread(), std::move(callbacks)));
     (void)inserted;
     ASSERT(inserted);
 

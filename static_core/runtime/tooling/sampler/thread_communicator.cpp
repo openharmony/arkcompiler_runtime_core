@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,8 @@ bool ThreadCommunicator::SendSample(const SampleInfo &sample) const
     if (syscallResult == -1) {
         return false;
     }
-    ASSERT(syscallResult == sizeof(SampleInfo));
+    LOG_IF(syscallResult != sizeof(SampleInfo), FATAL, PROFILER)
+        << "unexpected sample write - sended " << syscallResult << " bytes";
     return true;
 }
 
@@ -50,7 +51,8 @@ bool ThreadCommunicator::ReadSample(SampleInfo *sample) const
     if (syscallResult == -1) {
         return false;
     }
-    ASSERT(syscallResult == sizeof(SampleInfo));
+    LOG_IF(syscallResult != sizeof(SampleInfo), FATAL, PROFILER)
+        << "unexpected sample read - received " << syscallResult << " bytes";
     return true;
 }
 

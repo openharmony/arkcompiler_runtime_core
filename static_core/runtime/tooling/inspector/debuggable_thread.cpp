@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,19 +16,8 @@
 #include "runtime/tooling/inspector/debuggable_thread.h"
 
 namespace ark::tooling::inspector {
-DebuggableThread::DebuggableThread(
-    ManagedThread *thread,
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&preSuspend,
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&postSuspend,
-    std::function<void()> &&preWaitSuspension, std::function<void()> &&postWaitSuspension,
-    std::function<void()> &&preResume, std::function<void()> &&postResume)
-    : thread_(thread),
-      preSuspend_(std::move(preSuspend)),
-      postSuspend_(std::move(postSuspend)),
-      preWaitSuspension_(std::move(preWaitSuspension)),
-      postWaitSuspension_(std::move(postWaitSuspension)),
-      preResume_(std::move(preResume)),
-      postResume_(std::move(postResume))
+DebuggableThread::DebuggableThread(ManagedThread *thread, SuspensionCallbacks &&callbacks)
+    : thread_(thread), callbacks_(std::move(callbacks))
 {
     ASSERT(thread);
 }
@@ -193,19 +182,19 @@ void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::ve
     ASSERT(!suspended_);
     ASSERT(!request_.has_value());
 
-    preSuspend_(objectRepository, hitBreakpoints, exception);
+    callbacks_.preSuspend(objectRepository, hitBreakpoints, exception);
 
     suspended_ = true;
     thread_->Suspend();
 
-    postSuspend_(objectRepository, hitBreakpoints, exception);
+    callbacks_.postSuspend(objectRepository, hitBreakpoints, exception);
 
     while (suspended_) {
         mutex_.Unlock();
 
-        preWaitSuspension_();
+        callbacks_.preWaitSuspension();
         thread_->WaitSuspension();
-        postWaitSuspension_();
+        callbacks_.postWaitSuspension();
 
         mutex_.Lock();
 
@@ -244,11 +233,11 @@ void DebuggableThread::Resume()
 
     ASSERT(thread_->IsSuspended());
 
-    preResume_();
+    callbacks_.preResume();
 
     suspended_ = false;
     thread_->Resume();
 
-    postResume_();
+    callbacks_.postResume();
 }
 }  // namespace ark::tooling::inspector

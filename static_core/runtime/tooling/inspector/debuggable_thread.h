@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,14 +23,19 @@
 #include "runtime/tooling/inspector/types/pause_on_exceptions_state.h"
 
 namespace ark::tooling::inspector {
-class DebuggableThread {
+class DebuggableThread final {
 public:
-    DebuggableThread(
-        ManagedThread *thread,
-        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&preSuspend,
-        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> &&postSuspend,
-        std::function<void()> &&preWaitSuspension, std::function<void()> &&postWaitSuspension,
-        std::function<void()> &&preResume, std::function<void()> &&postResume);
+    struct SuspensionCallbacks final {
+        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> preSuspend;
+        std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> postSuspend;
+        std::function<void()> preWaitSuspension;
+        std::function<void()> postWaitSuspension;
+        std::function<void()> preResume;
+        std::function<void()> postResume;
+    };
+
+public:
+    DebuggableThread(ManagedThread *thread, SuspensionCallbacks &&callbacks);
     ~DebuggableThread() = default;
 
     NO_COPY_SEMANTIC(DebuggableThread);
@@ -108,12 +113,7 @@ private:
     void Resume() REQUIRES(mutex_);
 
     ManagedThread *thread_;
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> preSuspend_;
-    std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> postSuspend_;
-    std::function<void()> preWaitSuspension_;
-    std::function<void()> postWaitSuspension_;
-    std::function<void()> preResume_;
-    std::function<void()> postResume_;
+    SuspensionCallbacks callbacks_;
 
     os::memory::Mutex mutex_;
     ThreadState state_ GUARDED_BY(mutex_);

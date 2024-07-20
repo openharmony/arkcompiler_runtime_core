@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,57 +59,6 @@ int32_t TestUtil::GetValueRegister(Method *method, const char *varName, uint32_t
     }
 
     return -2;  // NOTE(maksenov): Replace with invalid register constant;
-}
-
-std::ostream &operator<<(std::ostream &out, DebugEvent value)
-{
-    const char *s = nullptr;
-
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ADD_CASE(entry) \
-    case (entry):       \
-        s = #entry;     \
-        break;
-
-    switch (value) {
-        ADD_CASE(DebugEvent::BREAKPOINT);
-        ADD_CASE(DebugEvent::LOAD_MODULE);
-        ADD_CASE(DebugEvent::PAUSED);
-        ADD_CASE(DebugEvent::EXCEPTION);
-        ADD_CASE(DebugEvent::EXCEPTION_CATCH);
-        ADD_CASE(DebugEvent::FIELD_ACCESS);
-        ADD_CASE(DebugEvent::FIELD_MODIFICATION);
-        ADD_CASE(DebugEvent::FRAME_POP);
-        ADD_CASE(DebugEvent::GARBAGE_COLLECTIION_START);
-        ADD_CASE(DebugEvent::GARBAGE_COLLECTIION_FINISH);
-        ADD_CASE(DebugEvent::METHOD_ENTRY);
-        ADD_CASE(DebugEvent::METHOD_EXIT);
-        ADD_CASE(DebugEvent::SINGLE_STEP);
-        ADD_CASE(DebugEvent::THREAD_START);
-        ADD_CASE(DebugEvent::THREAD_END);
-        ADD_CASE(DebugEvent::VM_START);
-        ADD_CASE(DebugEvent::VM_INITIALIZATION);
-        ADD_CASE(DebugEvent::VM_DEATH);
-        ADD_CASE(DebugEvent::EXCEPTION_REVOKED);
-        ADD_CASE(DebugEvent::EXECUTION_CONTEXT_CREATED);
-        ADD_CASE(DebugEvent::EXECUTION_CONTEXT_DESTROYED);
-        ADD_CASE(DebugEvent::EXECUTION_CONTEXT_CLEARED);
-        ADD_CASE(DebugEvent::INSPECT_REQUESTED);
-        ADD_CASE(DebugEvent::CLASS_LOAD);
-        ADD_CASE(DebugEvent::CLASS_PREPARE);
-        ADD_CASE(DebugEvent::MONITOR_WAIT);
-        ADD_CASE(DebugEvent::MONITOR_WAITED);
-        ADD_CASE(DebugEvent::MONITOR_CONTENDED_ENTER);
-        ADD_CASE(DebugEvent::MONITOR_CONTENDED_ENTERED);
-        ADD_CASE(DebugEvent::UNINITIALIZED);
-        default: {
-            ASSERT(false && "Unknown DebugEvent");  // NOLINT
-        }
-    }
-
-#undef ADD_CASE
-
-    return out << s;
 }
 
 #ifndef PANDA_TARGET_MOBILE
