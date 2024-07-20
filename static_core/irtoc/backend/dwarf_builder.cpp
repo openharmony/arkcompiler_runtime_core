@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,40 +96,9 @@ DwarfBuilder::DwarfBuilder(Arch arch, ELFIO::elfio *elf) : elfBuilder_(elf), arc
     }
 }
 
-bool DwarfBuilder::BuildGraph(const Function *func, uint32_t codeOffset, unsigned symbol)
+bool DwarfBuilder::BuildGraphNestedFunction(unsigned symbol, const Function *func, Dwarf_Error &error, Dwarf_P_Die &die)
 {
     auto graph = func->GetGraph();
-    if (!graph->IsLineDebugInfoEnabled()) {
-        return true;
-    }
-
-    Dwarf_Error error = nullptr;
-    auto die = dwarf_new_die(dwarf_, DW_TAG_subprogram, nullptr, nullptr, nullptr, nullptr, &error);
-    if (error != DW_DLV_OK || IsDwarfBadAddr(die)) {
-        LOG(ERROR, COMPILER) << "dwarf_new_die failed: " << dwarf_errmsg(error);
-        return false;
-    }
-
-    Dwarf_P_Die res;
-    if (prevProgramDie_ != nullptr) {
-        res = dwarf_die_link(die, nullptr, nullptr, prevProgramDie_, nullptr, &error);
-    } else {
-        res = dwarf_die_link(die, compileUnitDie_, nullptr, nullptr, nullptr, &error);
-    }
-    if (error != DW_DLV_OK || IsDwarfBadAddr(res)) {
-        LOG(ERROR, COMPILER) << "dwarf_die_link failed: " << dwarf_errmsg(error);
-    }
-    prevProgramDie_ = die;
-
-    Dwarf_P_Attribute a = dwarf_add_AT_name(die, const_cast<char *>(func->GetName()), &error);
-    if (error != DW_DLV_OK || IsDwarfBadAddr(a)) {
-        LOG(ERROR, COMPILER) << "dwarf_add_AT_targ_address_b failed: " << dwarf_errmsg(error);
-    }
-
-    a = dwarf_add_AT_flag(dwarf_, die, DW_AT_external, static_cast<Dwarf_Small>(true), &error);
-    if (error != DW_DLV_OK || IsDwarfBadAddr(a)) {
-        LOG(ERROR, COMPILER) << "dwarf_add_AT_flag failed: " << dwarf_errmsg(error);
-    }
 
     auto sourceDirs {func->GetSourceDirs()};
     auto sourceFiles {func->GetSourceFiles()};
@@ -175,7 +144,86 @@ bool DwarfBuilder::BuildGraph(const Function *func, uint32_t codeOffset, unsigne
         return false;
     }
 
+    return true;
+}
+
+bool DwarfBuilder::BuildGraph(const Function *func, uint32_t codeOffset, unsigned symbol)
+{
+    auto graph = func->GetGraph();
+    if (!graph->IsLineDebugInfoEnabled()) {
+        return true;
+    }
+
+    Dwarf_Error error = nullptr;
+    auto die = dwarf_new_die(dwarf_, DW_TAG_subprogram, nullptr, nullptr, nullptr, nullptr, &error);
+    if (error != DW_DLV_OK || IsDwarfBadAddr(die)) {
+        LOG(ERROR, COMPILER) << "dwarf_new_die failed: " << dwarf_errmsg(error);
+        return false;
+    }
+
+    Dwarf_P_Die res;
+    if (prevProgramDie_ != nullptr) {
+        res = dwarf_die_link(die, nullptr, nullptr, prevProgramDie_, nullptr, &error);
+    } else {
+        res = dwarf_die_link(die, compileUnitDie_, nullptr, nullptr, nullptr, &error);
+    }
+    if (error != DW_DLV_OK || IsDwarfBadAddr(res)) {
+        LOG(ERROR, COMPILER) << "dwarf_die_link failed: " << dwarf_errmsg(error);
+    }
+    prevProgramDie_ = die;
+
+    Dwarf_P_Attribute a = dwarf_add_AT_name(die, const_cast<char *>(func->GetName()), &error);
+    if (error != DW_DLV_OK || IsDwarfBadAddr(a)) {
+        LOG(ERROR, COMPILER) << "dwarf_add_AT_targ_address_b failed: " << dwarf_errmsg(error);
+    }
+
+    a = dwarf_add_AT_flag(dwarf_, die, DW_AT_external, static_cast<Dwarf_Small>(true), &error);
+    if (error != DW_DLV_OK || IsDwarfBadAddr(a)) {
+        LOG(ERROR, COMPILER) << "dwarf_add_AT_flag failed: " << dwarf_errmsg(error);
+    }
+
+    if (!BuildGraphNestedFunction(symbol, func, error, die)) {
+        return false;
+    }
+
     codeSize_ = codeOffset + graph->GetCode().size();
+    return true;
+}
+
+bool DwarfBuilder::FinalizeNestedFunction(Dwarf_Error &error)
+{
+    Dwarf_Unsigned relSectionsCount;
+    int bufVersion;
+    auto res = dwarf_get_relocation_info_count(dwarf_, &relSectionsCount, &bufVersion, &error);
+    if (res != DW_DLV_OK) {
+        LOG(ERROR, COMPILER) << "dwarf_get_relocation_info_count failed: " << dwarf_errmsg(error);
+        return false;
+    }
+    for (Dwarf_Unsigned i = 0; i < relSectionsCount; ++i) {
+        Dwarf_Signed elfIndex = 0;
+        Dwarf_Signed linkIndex = 0;
+        Dwarf_Unsigned bufCount;
+        Dwarf_Relocation_Data data;
+        if (dwarf_get_relocation_info(dwarf_, &elfIndex, &linkIndex, &bufCount, &data, &error) != DW_DLV_OK) {
+            LOG(ERROR, COMPILER) << "dwarf_get_relocation_info failed: " << dwarf_errmsg(error);
+            return false;
+        }
+        auto &relWriter = relMap_.at(elfIndex);
+        for (Dwarf_Unsigned j = 0; j < bufCount; j++, data++) {
+            if (data->drd_symbol_index == 0) {
+                continue;
+            }
+            relWriter.add_entry(data->drd_offset,
+                                // NOLINTNEXTLINE (hicpp-signed-bitwise)
+                                static_cast<ELFIO::Elf_Xword>(ELF64_R_INFO(data->drd_symbol_index, data->drd_type)));
+        }
+    }
+
+    if (dwarf_producer_finish(dwarf_, &error) != DW_DLV_OK) {
+        LOG(ERROR, COMPILER) << "dwarf_producer_finish failed: " << dwarf_errmsg(error);
+        return false;
+    }
+
     return true;
 }
 
@@ -210,39 +258,7 @@ bool DwarfBuilder::Finalize(uint32_t codeSize)
         sections_[indexMap_[elfIdx]]->append_data(bytes, len);
     }
 
-    Dwarf_Unsigned relSectionsCount;
-    int bufVersion;
-    auto res = dwarf_get_relocation_info_count(dwarf_, &relSectionsCount, &bufVersion, &error);
-    if (res != DW_DLV_OK) {
-        LOG(ERROR, COMPILER) << "dwarf_get_relocation_info_count failed: " << dwarf_errmsg(error);
-        return false;
-    }
-    for (Dwarf_Unsigned i = 0; i < relSectionsCount; ++i) {
-        Dwarf_Signed elfIndex = 0;
-        Dwarf_Signed linkIndex = 0;
-        Dwarf_Unsigned bufCount;
-        Dwarf_Relocation_Data data;
-        if (dwarf_get_relocation_info(dwarf_, &elfIndex, &linkIndex, &bufCount, &data, &error) != DW_DLV_OK) {
-            LOG(ERROR, COMPILER) << "dwarf_get_relocation_info failed: " << dwarf_errmsg(error);
-            return false;
-        }
-        auto &relWriter = relMap_.at(elfIndex);
-        for (Dwarf_Unsigned j = 0; j < bufCount; j++, data++) {
-            if (data->drd_symbol_index == 0) {
-                continue;
-            }
-            relWriter.add_entry(data->drd_offset,
-                                // NOLINTNEXTLINE (hicpp-signed-bitwise)
-                                static_cast<ELFIO::Elf_Xword>(ELF64_R_INFO(data->drd_symbol_index, data->drd_type)));
-        }
-    }
-
-    if (dwarf_producer_finish(dwarf_, &error) != DW_DLV_OK) {
-        LOG(ERROR, COMPILER) << "dwarf_producer_finish failed: " << dwarf_errmsg(error);
-        return false;
-    }
-
-    return true;
+    return FinalizeNestedFunction(error);
 }
 
 Dwarf_Unsigned DwarfBuilder::AddFile(const std::string &fname, Dwarf_Unsigned dirIndex)

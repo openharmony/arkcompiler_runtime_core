@@ -288,11 +288,7 @@ static bool RunIrtocInterpreterOptimizations(Graph *graph)
     }
 
     graph->RunPass<compiler::Cleanup>();
-    if (!compiler::RegAlloc(graph)) {
-        return false;
-    }
-
-    if (!graph->RunPass<compiler::DanglingPointersChecker>()) {
+    if (!compiler::RegAlloc(graph) || !graph->RunPass<compiler::DanglingPointersChecker>()) {
         return false;
     }
 
