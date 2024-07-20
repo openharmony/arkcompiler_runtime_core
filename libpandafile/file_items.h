@@ -105,8 +105,6 @@ static constexpr uint32_t FLAG_MASK = 0xFF;
 constexpr uint16_t INVALID_INDEX_16 = std::numeric_limits<uint16_t>::max();
 constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max() - 1;
 
-constexpr uint8_t API_12 = 12;
-
 constexpr uint32_t PGO_STRING_DEFAULT_COUNT = 5;
 constexpr uint32_t PGO_CLASS_DEFAULT_COUNT = 3;
 constexpr uint32_t PGO_CODE_DEFAULT_COUNT = 1;

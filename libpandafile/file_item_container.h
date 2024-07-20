@@ -214,12 +214,23 @@ public:
         ItemContainer::apiVersion = api;
     }
 
+    static void SetSubApi(std::string subApi)
+    {
+        ItemContainer::subApiVersion = subApi;
+    }
+
+    static std::string GetSubApi()
+    {
+        return ItemContainer::subApiVersion;
+    }
+
     static uint8_t GetApi()
     {
         return ItemContainer::apiVersion;
     }
 
     static uint8_t apiVersion;
+    static std::string subApiVersion;
 
 private:
     template <class T>
@@ -242,7 +253,7 @@ private:
         {
             ASSERT(type_ != IndexType::NONE);
 
-            const auto bc_version = GetVersionByApi(ItemContainer::GetApi());
+            const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
             if (bc_version.value().front() >= API_12 && (type == IndexType::FIELD || type == IndexType::PROTO)) {
                 SetNeedsEmit(false);
             }

@@ -23,8 +23,14 @@
 #include <set>
 
 #include "file.h"
+#include "utils/const_value.h"
 
 namespace panda::panda_file {
+constexpr uint8_t API_12 = 12;
+const std::string SUB_API_VERSION_1 = "beta1";
+const std::string SUB_API_VERSION_2 = "beta2";
+const std::string DEFAULT_SUB_API_VERSION = SUB_API_VERSION_1;
+
 constexpr std::array<uint8_t, File::VERSION_SIZE> version {<%= Panda::version.split('.').join(', ') %>};
 constexpr std::array<uint8_t, File::VERSION_SIZE> minVersion {<%= Panda::min_version.split('.').join(', ') %>};
 const std::set<std::array<uint8_t, File::VERSION_SIZE>> incompatibleVersion {
@@ -70,8 +76,12 @@ inline void PrintSupportedApi() {
     }
 }
 
-inline std::optional<const std::array<uint8_t, File::VERSION_SIZE>> GetVersionByApi(uint8_t api)
+inline std::optional<const std::array<uint8_t, File::VERSION_SIZE>> GetVersionByApi(uint8_t api, std::string subApi)
 {
+    if (api == API_12 && (subApi == SUB_API_VERSION_1 || subApi == SUB_API_VERSION_2)) {
+        return std::array<uint8_t, File::VERSION_SIZE> {12, 0, 2, 0};
+    }
+
     const auto iter = api_version_map.find(api);
     if (iter == api_version_map.end()) {
         // if there is no corresponding api version, the default branch is current version.

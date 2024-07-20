@@ -166,6 +166,7 @@ static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool is_fore
 
 /*static*/
 uint8_t ItemContainer::apiVersion = 0;
+std::string ItemContainer::subApiVersion = DEFAULT_SUB_API_VERSION;
 
 ItemContainer::ItemContainer()
 {
@@ -606,7 +607,7 @@ bool ItemContainer::WriteHeader(Writer *writer, ssize_t *checksum_offset)
     }
     writer->CountChecksum(true);
 
-    const auto bc_version = GetVersionByApi(ItemContainer::GetApi());
+    const auto bc_version = GetVersionByApi(ItemContainer::GetApi(), ItemContainer::GetSubApi());
     std::vector<uint8_t> versionVec(std::begin(bc_version.value()), std::end(bc_version.value()));
 
     if (!writer->WriteBytes(versionVec)) {
