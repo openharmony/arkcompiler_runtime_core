@@ -56,6 +56,10 @@ public:
         auto falseBlockRpoIndex = std::distance(blocksVector.begin(), falseBlockIt);
         EXPECT_TRUE((blockRpoIndex + 1 == falseBlockRpoIndex) || (block->NeedsJump()));
     }
+
+    void RemoveBlocksBuildGraph();
+    void SplitByPhi1BuildGraph();
+    Graph *IfLikelyUnlikelyTestBuildGraph();
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -81,9 +85,9 @@ public:
  *                        v
  *                      [exit]
  */
-TEST_F(BasicBlockTest, RemoveBlocks)
+
+void BasicBlockTest::RemoveBlocksBuildGraph()
 {
-    // build graph
     GRAPH(GetGraph())
     {
         CONSTANT(0U, 12U);
@@ -122,6 +126,12 @@ TEST_F(BasicBlockTest, RemoveBlocks)
             INST(16U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(BasicBlockTest, RemoveBlocks)
+{
+    // build graph
+    RemoveBlocksBuildGraph();
 
     EXPECT_EQ(INS(8U).GetInputsCount(), BB(9U).GetPredsBlocks().size());
     CheckVectorEqualBlocksIdSet(BB(IrConstructor::ID_ENTRY_BB).GetPredsBlocks(), {});
@@ -383,7 +393,7 @@ TEST_F(BasicBlockTest, Split)
     ASSERT_EQ(newBb->GetFalseSuccessor(), &BB(4U));
 }
 
-TEST_F(BasicBlockTest, SplitByPhi1)
+void BasicBlockTest::SplitByPhi1BuildGraph()
 {
     GRAPH(GetGraph())
     {
@@ -416,6 +426,12 @@ TEST_F(BasicBlockTest, SplitByPhi1)
             INST(12U, Opcode::Return).s32().Inputs(22U);
         }
     }
+}
+
+TEST_F(BasicBlockTest, SplitByPhi1)
+{
+    SplitByPhi1BuildGraph();
+
     BB(3U).SplitBlockAfterInstruction(&INS(20U), true);
     auto graph1 = CreateEmptyGraph();
     GRAPH(graph1)
@@ -487,15 +503,10 @@ TEST_F(BasicBlockTest, DisconnectPhiWithInputItself)
 }
 // NOLINTEND(readability-magic-numbers)
 
-TEST_F(BasicBlockTest, IfLikelyUnlikelyTest)
+Graph *BasicBlockTest::IfLikelyUnlikelyTestBuildGraph()
 {
-    // The arch isn`t supported
-    if (GetGraph()->GetCallingConvention() == nullptr) {
-        return;
-    }
-
-    auto graph1 = CreateEmptyGraph();
-    GRAPH(graph1)
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         CONSTANT(1U, 10U);
@@ -519,6 +530,16 @@ TEST_F(BasicBlockTest, IfLikelyUnlikelyTest)
             INST(8U, Opcode::Return).s64().Inputs(7U);
         }
     }
+    return graph;
+}
+
+TEST_F(BasicBlockTest, IfLikelyUnlikelyTest)
+{
+    // The arch isn`t supported
+    if (GetGraph()->GetCallingConvention() == nullptr) {
+        return;
+    }
+    auto *graph1 = IfLikelyUnlikelyTestBuildGraph();
 
     const auto &blocks1 = graph1->GetBlocksLinearOrder();
     ASSERT_EQ(&BB(2U), blocks1.at(1U));

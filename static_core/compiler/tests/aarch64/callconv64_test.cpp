@@ -80,7 +80,7 @@ private:
     BaseMemStats *memStats_ {nullptr};
 };
 
-TEST_F(Callconv64Test, NativeParams)
+TEST_F(Callconv64Test, NativeIntParams)
 {
     // Test for
     // std::variant<Reg, uint8_t> GetNativeParam(const ArenaVector<TypeInfo>& reg_list,
@@ -94,7 +94,7 @@ TEST_F(Callconv64Test, NativeParams)
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, INT8_TYPE));
 
-        for (uint32_t i = 1; i <= 7; ++i) {
+        for (uint32_t i = 1; i <= 7U; ++i) {
             ret = paramInfo->GetNativeParam(INT8_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
             EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
@@ -110,7 +110,7 @@ TEST_F(Callconv64Test, NativeParams)
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, INT32_TYPE));
 
-        for (uint32_t i = 1; i <= 7; ++i) {
+        for (uint32_t i = 1; i <= 7U; ++i) {
             ret = paramInfo->GetNativeParam(INT32_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
             EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
@@ -126,14 +126,17 @@ TEST_F(Callconv64Test, NativeParams)
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, INT64_TYPE));
 
-        for (uint32_t i = 1; i <= 7; ++i) {
+        for (uint32_t i = 1; i <= 7U; ++i) {
             ret = paramInfo->GetNativeParam(INT64_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
             EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
             EXPECT_EQ(std::get<Reg>(ret), Reg(i, INT64_TYPE));
         }
     }
+}
 
+TEST_F(Callconv64Test, NativeFloatParams)
+{
     // 8 float params - in registers
     {
         auto paramInfo = GetCallconv()->GetParameterInfo(0);
@@ -142,7 +145,7 @@ TEST_F(Callconv64Test, NativeParams)
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, FLOAT32_TYPE));
 
-        for (uint32_t i = 1; i <= 7; ++i) {
+        for (uint32_t i = 1; i <= 7U; ++i) {
             ret = paramInfo->GetNativeParam(FLOAT32_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
             EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
@@ -158,7 +161,7 @@ TEST_F(Callconv64Test, NativeParams)
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, FLOAT64_TYPE));
 
-        for (uint32_t i = 1; i <= 7; ++i) {
+        for (uint32_t i = 1; i <= 7U; ++i) {
             ret = paramInfo->GetNativeParam(FLOAT64_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
             EXPECT_EQ(std::get<Reg>(ret).GetId(), i);

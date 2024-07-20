@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,10 @@ public:
     void BuildContitionsCheckGraphElimTrueSucc(Graph *graph, ConditionCode dominantCode, ConditionCode code);
     template <DominantCondResult DOM_RESULT, SwapInputs SWAP_INPUTS>
     void BuildContitionsCheckGraphElimFalseSucc(Graph *graph, ConditionCode dominantCode, ConditionCode code);
+
+    void BuildGraphDisconnectPredecessors();
+    void BuildGraphCompareAndIfNotSameBlock(Graph *graph);
+    void BuildGraphDisconnectPhiWithInputItself(Graph *graph);
 
 protected:
     void InitBlockToBeDisconnected(std::vector<BasicBlock *> &&blocks)
@@ -494,7 +498,8 @@ TEST_F(BranchEliminationTest, RemoveEdgeAndWholeBlock)
  *
  * Remove branches [3-6], [4-7] and as a result remove block [9]
  */
-TEST_F(BranchEliminationTest, DisconnectPredecessors)
+
+void BranchEliminationTest::BuildGraphDisconnectPredecessors()
 {
     GRAPH(GetGraph())
     {
@@ -536,6 +541,11 @@ TEST_F(BranchEliminationTest, DisconnectPredecessors)
             INST(17U, Opcode::Return).u64().Inputs(16U);
         }
     }
+}
+
+TEST_F(BranchEliminationTest, DisconnectPredecessors)
+{
+    BuildGraphDisconnectPredecessors();
 
     InitBlockToBeDisconnected({&BB(6U), &BB(7U), &BB(9U)});
 
@@ -970,7 +980,7 @@ void BranchEliminationTest::BuildGraphAndCheckElimination(ConditionCode dominant
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(BranchEliminationTest, EliminateByDominatedCondition)
+TEST_F(BranchEliminationTest, EliminateByDominatedConditionEQ)
 {
     // dominant condition:  a op1 b,
     // dominated condition: a op2 b (reached from false successor)
@@ -1015,7 +1025,10 @@ TEST_F(BranchEliminationTest, EliminateByDominatedCondition)
                                                                                       ConditionCode::CC_A);
     BuildGraphAndCheckElimination<DominantCondResult::FALSE, RemainedSuccessor::BOTH>(ConditionCode::CC_EQ,
                                                                                       ConditionCode::CC_AE);
+}
 
+TEST_F(BranchEliminationTest, EliminateByDominatedConditionLT)
+{
     BuildGraphAndCheckElimination<DominantCondResult::TRUE, RemainedSuccessor::FALSE_SUCCESSOR>(ConditionCode::CC_LT,
                                                                                                 ConditionCode::CC_EQ);
     BuildGraphAndCheckElimination<DominantCondResult::TRUE, RemainedSuccessor::TRUE_SUCCESSOR>(ConditionCode::CC_LT,
@@ -1057,7 +1070,10 @@ TEST_F(BranchEliminationTest, EliminateByDominatedCondition)
                                                                                       ConditionCode::CC_A);
     BuildGraphAndCheckElimination<DominantCondResult::FALSE, RemainedSuccessor::BOTH>(ConditionCode::CC_LT,
                                                                                       ConditionCode::CC_AE);
+}
 
+TEST_F(BranchEliminationTest, EliminateByDominatedConditionLE)
+{
     BuildGraphAndCheckElimination<DominantCondResult::TRUE, RemainedSuccessor::BOTH>(ConditionCode::CC_LE,
                                                                                      ConditionCode::CC_EQ);
     BuildGraphAndCheckElimination<DominantCondResult::TRUE, RemainedSuccessor::BOTH>(ConditionCode::CC_LE,
@@ -1099,7 +1115,10 @@ TEST_F(BranchEliminationTest, EliminateByDominatedCondition)
                                                                                       ConditionCode::CC_A);
     BuildGraphAndCheckElimination<DominantCondResult::FALSE, RemainedSuccessor::BOTH>(ConditionCode::CC_LE,
                                                                                       ConditionCode::CC_AE);
+}
 
+TEST_F(BranchEliminationTest, EliminateByDominatedConditionSwapInputs)
+{
     // dominant condition:  b op1 a,
     // dominated condition: a op2 b (reached from false successor)
     BuildGraphAndCheckElimination<DominantCondResult::FALSE, RemainedSuccessor::BOTH, SwapInputs::TRUE>(
@@ -1333,7 +1352,7 @@ TEST_F(BranchEliminationTest, CascadeElimination)
     ASSERT_TRUE(GraphComparator().Compare(graphCase2, expectedGraph2));
 }
 
-TEST_F(BranchEliminationTest, ConditionEliminationNotApplied)
+TEST_F(BranchEliminationTest, ConditionEliminationNotApplied1)
 {
     /*
      * Case 1:
@@ -1395,7 +1414,10 @@ TEST_F(BranchEliminationTest, ConditionEliminationNotApplied)
     }
     graph->RunPass<BranchElimination>();
     EXPECT_EQ(BB(6U).GetSuccsBlocks().size(), 2U);
+}
 
+TEST_F(BranchEliminationTest, ConditionEliminationNotApplied2)
+{
     /*
      * Case 2
      *             [0]
@@ -1412,8 +1434,8 @@ TEST_F(BranchEliminationTest, ConditionEliminationNotApplied)
      *              v           |
      *            [exit]<-------/
      */
-    auto graph2 = CreateEmptyGraph();
-    GRAPH(graph2)
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -1448,7 +1470,7 @@ TEST_F(BranchEliminationTest, ConditionEliminationNotApplied)
             INST(15U, Opcode::Return).u64().Inputs(14U);
         }
     }
-    graph2->RunPass<BranchElimination>();
+    graph->RunPass<BranchElimination>();
     EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 2U);
 }
 
@@ -1555,9 +1577,8 @@ TEST_F(BranchEliminationTest, CreateInfiniteLoop)
  *            ...
  *        if_imm(compare1)
  */
-TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
+void BranchEliminationTest::BuildGraphCompareAndIfNotSameBlock(Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
@@ -1613,6 +1634,12 @@ TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
             INST(19U, Opcode::Return).u64().Inputs(18U);
         }
     }
+}
+
+TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
+{
+    auto graph = CreateEmptyGraph();
+    BuildGraphCompareAndIfNotSameBlock(graph);
     graph->RunPass<BranchElimination>();
     graph->RunPass<Cleanup>();
 
@@ -1659,9 +1686,8 @@ TEST_F(BranchEliminationTest, CompareAndIfNotSameBlock)
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
+void BranchEliminationTest::BuildGraphDisconnectPhiWithInputItself(Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -1702,6 +1728,13 @@ TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
             INST(21U, Opcode::Return).s64().Inputs(20U);
         }
     }
+}
+
+TEST_F(BranchEliminationTest, DisconnectPhiWithInputItself)
+{
+    auto graph = CreateEmptyGraph();
+    BuildGraphDisconnectPhiWithInputItself(graph);
+
     graph->RunPass<BranchElimination>();
     graph->RunPass<Cleanup>();
 

@@ -18,7 +18,11 @@
 #include "optimizer/analysis/alias_analysis.h"
 
 namespace ark::compiler {
-class AliasAnalysisTest : public GraphTest {};
+class AliasAnalysisTest : public GraphTest {
+public:
+    void BuildGraphCompleteLoadArray();
+    void BuildGraphDynamicMethods(Graph *graph);
+};
 
 // NOLINTBEGIN(readability-magic-numbers)
 
@@ -100,7 +104,7 @@ TEST_F(AliasAnalysisTest, SimpleLoad)
  *
  * arr[a1] must alias the second arr[a1] and may alias arr[a2]
  */
-TEST_F(AliasAnalysisTest, CompleteLoadArray)
+void AliasAnalysisTest::BuildGraphCompleteLoadArray()
 {
     GRAPH(GetGraph())
     {
@@ -151,7 +155,11 @@ TEST_F(AliasAnalysisTest, CompleteLoadArray)
             INST(31U, Opcode::Return).s32().Inputs(30U);
         }
     }
+}
 
+TEST_F(AliasAnalysisTest, CompleteLoadArray)
+{
+    BuildGraphCompleteLoadArray();
     GetGraph()->RunPass<AliasAnalysis>();
     EXPECT_TRUE(GetGraph()->IsAnalysisValid<AliasAnalysis>());
     GraphChecker(GetGraph()).Check();
@@ -1485,9 +1493,8 @@ TEST_F(AliasAnalysisTest, LoadObjectStatic)
     ASSERT_EQ(alias.CheckInstAlias(&INS(5U), &INS(6U)), AliasType::NO_ALIAS);
 }
 
-TEST_F(AliasAnalysisTest, DynamicMethods)
+void AliasAnalysisTest::BuildGraphDynamicMethods(Graph *graph)
 {
-    auto graph = CreateDynEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).any();
@@ -1549,6 +1556,12 @@ TEST_F(AliasAnalysisTest, DynamicMethods)
             INST(25U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(AliasAnalysisTest, DynamicMethods)
+{
+    auto graph = CreateDynEmptyGraph();
+    BuildGraphDynamicMethods(graph);
 
     graph->RunPass<AliasAnalysis>();
     EXPECT_TRUE(graph->IsAnalysisValid<AliasAnalysis>());

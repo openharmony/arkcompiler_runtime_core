@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,7 +149,6 @@ TEST_F(AotTest, PaocLocation)
             return
         }
     )";
-
     {
         pandasm::Parser parser;
         auto res = parser.Parse(source);
@@ -179,128 +178,152 @@ TEST_F(AotTest, PaocLocation)
 }
 #endif  // PANDA_COMPILER_TARGET_AARCH64
 
-TEST_F(AotTest, BuildAndLoad)
+class AotTestBuildAndCheck : public AsmTest {
+public:
+    void BuildAot(const char *tmpfilePn, mem::GCType gcType)
+    {
+        AotBuilder aotBuilder;
+        aotBuilder.SetArch(RUNTIME_ARCH);
+        auto runtime = Runtime::GetCurrent();
+        aotBuilder.SetGcType(static_cast<uint32_t>(gcType));
+        RuntimeInterfaceMock iruntime;
+        aotBuilder.SetRuntime(&iruntime);
+
+        aotBuilder.StartFile(tmpFilePf_, 0x12345678U);
+
+        auto thread = MTManagedThread::GetCurrent();
+        if (thread != nullptr) {
+            thread->ManagedCodeBegin();
+        }
+        auto etx = runtime->GetClassLinker()->GetExtension(runtime->GetLanguageContext(runtime->GetRuntimeType()));
+        auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(className_.data()), 0, 0,
+                                      AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
+        if (thread != nullptr) {
+            thread->ManagedCodeEnd();
+        }
+
+        klass->SetFileId(panda_file::File::EntityId(13U));
+        aotBuilder.StartClass(*klass);
+
+        Method method1(klass, nullptr, File::EntityId(method1Id_), File::EntityId(), 0U, 1U, nullptr);
+        {
+            CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
+            ArenaVector<uint8_t> data(GetAllocator()->Adapter());
+            codeBuilder.Encode(&data);
+            CompiledMethod compiledMethod1(RUNTIME_ARCH, &method1, 0U);
+            compiledMethod1.SetCode(
+                Span(reinterpret_cast<const uint8_t *>(methodName_.data()), methodName_.size() + 1U));
+            compiledMethod1.SetCodeInfo(Span(data).ToConst());
+            aotBuilder.AddMethod(compiledMethod1);
+        }
+
+        Method method2(klass, nullptr, File::EntityId(method2Id_), File::EntityId(), 0U, 1U, nullptr);
+        {
+            CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
+            ArenaVector<uint8_t> data(GetAllocator()->Adapter());
+            codeBuilder.Encode(&data);
+            CompiledMethod compiledMethod2(RUNTIME_ARCH, &method2, 1U);
+            compiledMethod2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86Add_.data()), x86Add_.size()));
+            compiledMethod2.SetCodeInfo(Span(data).ToConst());
+            aotBuilder.AddMethod(compiledMethod2);
+        }
+
+        aotBuilder.EndClass();
+        uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(className_.data()));
+        aotBuilder.InsertEntityPairHeader(hash, 13U);
+        aotBuilder.InsertClassHashTableSize(1U);
+        aotBuilder.EndFile();
+
+        aotBuilder.Write(cmdline_, tmpfilePn);
+    }
+
+    void DoChecks(AotManager *aotManager, const char *tmpfilePn)
+    {
+        auto aotFile = aotManager->GetFile(tmpfilePn);
+        ASSERT_TRUE(aotFile);
+        ASSERT_TRUE(strcmp(cmdline_, aotFile->GetCommandLine()) == 0U);
+        ASSERT_TRUE(strcmp(tmpfilePn, aotFile->GetFileName()) == 0U);
+        ASSERT_EQ(aotFile->GetFilesCount(), 1U);
+
+        auto pfile = aotManager->FindPandaFile(tmpFilePf_);
+        ASSERT_NE(pfile, nullptr);
+        auto cls = pfile->GetClass(13U);
+        ASSERT_TRUE(cls.IsValid());
+
+        {
+            auto code = cls.FindMethodCodeEntry(0U);
+            ASSERT_FALSE(code == nullptr);
+            ASSERT_EQ(methodName_, reinterpret_cast<const char *>(code));
+        }
+
+        {
+            auto code = cls.FindMethodCodeEntry(1U);
+            ASSERT_FALSE(code == nullptr);
+            ASSERT_EQ(std::memcmp(x86Add_.data(), code, x86Add_.size()), 0U);
+#ifdef PANDA_TARGET_AMD64
+            auto funcAdd = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
+            ASSERT_EQ(funcAdd(2U, 3U), 5U);
+#endif
+        }
+    }
+
+private:
+    const char *tmpFilePf_ = "test.pf";
+    const char *cmdline_ = "cmdline";
+    uint32_t method1Id_ = 42;
+    uint32_t method2Id_ = 43;
+    const std::string className_ {"Foo"};
+    std::string methodName_ {className_ + "::method"};
+    std::array<uint8_t, 4U> x86Add_ = {
+        0x8dU, 0x04U, 0x37U,  // lea    eax,[rdi+rdi*1]
+        0xc3U                 // ret
+    };
+};
+
+TEST_F(AotTestBuildAndCheck, BuildAndLoad)
 {
     if (RUNTIME_ARCH == Arch::AARCH32) {
-        // NOTE(msherstennikov): for some reason dlopen cannot open aot file in qemu-arm
+        // NOTE(compiler): for some reason dlopen cannot open aot file in qemu-arm
         return;
     }
     uint32_t tid = os::thread::GetCurrentThreadId();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     std::string tmpfile = helpers::string::Format("/tmp/tmpfile_%04x.pn", tid);
     const char *tmpfilePn = tmpfile.c_str();
-    static constexpr const char *TMPFILE_PF = "test.pf";
-    static constexpr const char *CMDLINE = "cmdline";
-    static constexpr uint32_t METHOD1_ID = 42;
-    static constexpr uint32_t METHOD2_ID = 43;
-    const std::string className("Foo");
-    std::string methodName(className + "::method");
-    std::array<uint8_t, 4U> x86Add = {
-        0x8dU, 0x04U, 0x37U,  // lea    eax,[rdi+rdi*1]
-        0xc3U                 // ret
-    };
 
-    AotBuilder aotBuilder;
-    aotBuilder.SetArch(RUNTIME_ARCH);
-    aotBuilder.SetGcType(static_cast<uint32_t>(mem::GCType::STW_GC));
-    RuntimeInterfaceMock iruntime;
-    aotBuilder.SetRuntime(&iruntime);
-
-    aotBuilder.StartFile(TMPFILE_PF, 0x12345678U);
-
-    auto thread = MTManagedThread::GetCurrent();
-    if (thread != nullptr) {
-        thread->ManagedCodeBegin();
-    }
-    auto runtime = Runtime::GetCurrent();
-    auto etx = runtime->GetClassLinker()->GetExtension(runtime->GetLanguageContext(runtime->GetRuntimeType()));
-    auto klass = etx->CreateClass(reinterpret_cast<const uint8_t *>(className.data()), 0, 0,
-                                  AlignUp(sizeof(Class), OBJECT_POINTER_SIZE));
-    if (thread != nullptr) {
-        thread->ManagedCodeEnd();
-    }
-
-    klass->SetFileId(panda_file::File::EntityId(13U));
-    aotBuilder.StartClass(*klass);
-
-    Method method1(klass, nullptr, File::EntityId(METHOD1_ID), File::EntityId(), 0U, 1U, nullptr);
-    {
-        CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
-        ArenaVector<uint8_t> data(GetAllocator()->Adapter());
-        codeBuilder.Encode(&data);
-        CompiledMethod compiledMethod1(RUNTIME_ARCH, &method1, 0U);
-        compiledMethod1.SetCode(Span(reinterpret_cast<const uint8_t *>(methodName.data()), methodName.size() + 1U));
-        compiledMethod1.SetCodeInfo(Span(data).ToConst());
-        aotBuilder.AddMethod(compiledMethod1);
-    }
-
-    Method method2(klass, nullptr, File::EntityId(METHOD2_ID), File::EntityId(), 0U, 1U, nullptr);
-    {
-        CodeInfoBuilder codeBuilder(RUNTIME_ARCH, GetAllocator());
-        ArenaVector<uint8_t> data(GetAllocator()->Adapter());
-        codeBuilder.Encode(&data);
-        CompiledMethod compiledMethod2(RUNTIME_ARCH, &method2, 1U);
-        compiledMethod2.SetCode(Span(reinterpret_cast<const uint8_t *>(x86Add.data()), x86Add.size()));
-        compiledMethod2.SetCodeInfo(Span(data).ToConst());
-        aotBuilder.AddMethod(compiledMethod2);
-    }
-
-    aotBuilder.EndClass();
-    uint32_t hash = GetHash32String(reinterpret_cast<const uint8_t *>(className.data()));
-    aotBuilder.InsertEntityPairHeader(hash, 13U);
-    aotBuilder.InsertClassHashTableSize(1U);
-    aotBuilder.EndFile();
-
-    aotBuilder.Write(CMDLINE, tmpfilePn);
-
+    BuildAot(tmpfilePn, mem::GCType::STW_GC);
     AotManager aotManager;
-    auto res = aotManager.AddFile(tmpfilePn, nullptr, static_cast<uint32_t>(mem::GCType::STW_GC));
-    ASSERT_TRUE(res) << res.Error();
-
-    auto aotFile = aotManager.GetFile(tmpfilePn);
-    ASSERT_TRUE(aotFile);
-    ASSERT_TRUE(strcmp(CMDLINE, aotFile->GetCommandLine()) == 0U);
-    ASSERT_TRUE(strcmp(tmpfilePn, aotFile->GetFileName()) == 0U);
-    ASSERT_EQ(aotFile->GetFilesCount(), 1U);
-
-    auto pfile = aotManager.FindPandaFile(TMPFILE_PF);
-    ASSERT_NE(pfile, nullptr);
-    auto cls = pfile->GetClass(13U);
-    ASSERT_TRUE(cls.IsValid());
-
     {
-        auto code = cls.FindMethodCodeEntry(0U);
-        ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(methodName, reinterpret_cast<const char *>(code));
+        auto res = aotManager.AddFile(tmpfilePn, nullptr, static_cast<uint32_t>(mem::GCType::STW_GC));
+        ASSERT_TRUE(res) << res.Error();
     }
-
-    {
-        auto code = cls.FindMethodCodeEntry(1U);
-        ASSERT_FALSE(code == nullptr);
-        ASSERT_EQ(std::memcmp(x86Add.data(), code, x86Add.size()), 0U);
-#ifdef PANDA_TARGET_AMD64
-        auto funcAdd = reinterpret_cast<int (*)(int, int)>(const_cast<void *>(code));
-        ASSERT_EQ(funcAdd(2U, 3U), 5U);
-#endif
-    }
+    DoChecks(&aotManager, tmpfilePn);
 }
 
-TEST_F(AotTest, PaocSpecifyMethods)
+TEST_F(AotTestBuildAndCheck, BuildAndLoadAn)
 {
-#ifndef PANDA_EVENTS_ENABLED
-    GTEST_SKIP();
-#endif
-
-    // Test basic functionality only in host mode.
-    if (RUNTIME_ARCH != Arch::X86_64) {
+    if (RUNTIME_ARCH == Arch::AARCH32) {
+        // NOTE(compiler): for some reason dlopen cannot open aot file in qemu-arm
         return;
     }
-    TmpFile pandaFname("test.pf");
-    TmpFile paocOutputName("events-out.csv");
+    uint32_t tid = os::thread::GetCurrentThreadId();
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::string tmpfile = helpers::string::Format("test.an", tid);
+    const char *tmpfilePn = tmpfile.c_str();
 
-    static const std::string LOCATION = "/data/local/tmp";
-    static const std::string PANDA_FILE_PATH = LOCATION + "/" + pandaFname.GetFileName();
+    auto runtime = Runtime::GetCurrent();
+    auto gcType = Runtime::GetGCType(runtime->GetOptions(), plugins::RuntimeTypeToLang(runtime->GetRuntimeType()));
+    BuildAot(tmpfilePn, gcType);
+    {
+        auto res = FileManager::LoadAnFile(tmpfilePn);
+        ASSERT_TRUE(res) << "Fail to load an file";
+    }
+    auto aotManager = Runtime::GetCurrent()->GetClassLinker()->GetAotManager();
+    DoChecks(aotManager, tmpfilePn);
+}
 
+static void PaocSpecifyMethodsEmit(const TmpFile &pandaFname)
+{
     auto source = R"(
         .record A {}
         .record B {}
@@ -330,13 +353,26 @@ TEST_F(AotTest, PaocSpecifyMethods)
             return
         }
     )";
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
 
-    {
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+TEST_F(AotTest, PaocSpecifyMethods)
+{
+#ifndef PANDA_EVENTS_ENABLED
+    GTEST_SKIP();
+#endif
+
+    // Test basic functionality only in host mode.
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        return;
     }
+    TmpFile pandaFname("test.pf");
+    TmpFile paocOutputName("events-out.csv");
+
+    PaocSpecifyMethodsEmit(pandaFname);
 
     {
         // paoc will try compiling all the methods from the panda-file that matches `--compiler-regex`
@@ -356,6 +392,39 @@ TEST_F(AotTest, PaocSpecifyMethods)
     }
 }
 
+static void PaocMultipleFilesEmitFirst(const TmpFile &pandaFname)
+{
+    auto source = R"(
+        .function f64 main() {
+            fldai.64 3.1415926
+            return.64
+        }
+    )";
+
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
+
+static void PaocMultipleFilesEmitSecond(const TmpFile &pandaFname)
+{
+    auto source = R"(
+        .record MyMath {
+        }
+
+        .function f64 MyMath.getPi() <static> {
+            fldai.64 3.1415926
+            return.64
+        }
+    )";
+
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
+
 TEST_F(AotTest, PaocMultipleFiles)
 {
     if (RUNTIME_ARCH != Arch::X86_64) {
@@ -366,36 +435,8 @@ TEST_F(AotTest, PaocMultipleFiles)
     TmpFile pandaFname1("test1.pf");
     TmpFile pandaFname2("test2.pf");
 
-    {
-        auto source = R"(
-            .function f64 main() {
-                fldai.64 3.1415926
-                return.64
-            }
-        )";
-
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname1.GetFileName(), res.Value()));
-    }
-
-    {
-        auto source = R"(
-            .record MyMath {
-            }
-
-            .function f64 MyMath.getPi() <static> {
-                fldai.64 3.1415926
-                return.64
-            }
-        )";
-
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname2.GetFileName(), res.Value()));
-    }
+    PaocMultipleFilesEmitFirst(pandaFname1);
+    PaocMultipleFilesEmitSecond(pandaFname2);
 
     {
         std::stringstream pandaFiles;
@@ -629,14 +670,8 @@ TEST_F(AotTest, FileManagerLoadAn)
     }
 }
 
-TEST_F(AotTest, PaocClusters)
+static void PaocClustersWriteJson(const TmpFile &paocClusters)
 {
-    // Test basic functionality only in host mode.
-    if (RUNTIME_ARCH != Arch::X86_64) {
-        return;
-    }
-
-    TmpFile paocClusters("clusters.json");
     std::ofstream(paocClusters.GetFileName()) <<
         R"(
     {
@@ -668,8 +703,10 @@ TEST_F(AotTest, PaocClusters)
         }
     }
     )";
+}
 
-    TmpFile pandaFname("test.pf");
+static void PaocClustersEmit(const TmpFile &pandaFname)
+{
     auto source = R"(
         .record A {}
         .record B {}
@@ -718,12 +755,24 @@ TEST_F(AotTest, PaocClusters)
         }
     )";
 
-    {
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
+
+TEST_F(AotTest, PaocClusters)
+{
+    // Test basic functionality only in host mode.
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        return;
     }
+
+    TmpFile paocClusters("clusters.json");
+    PaocClustersWriteJson(paocClusters);
+
+    TmpFile pandaFname("test.pf");
+    PaocClustersEmit(pandaFname);
 
     {
         TmpFile compilerEvents("events.csv");
@@ -759,6 +808,40 @@ TEST_F(AotTest, PaocClusters)
     }
 }
 
+static void PandaFilesEmitFirst(const TmpFile &pandaFname)
+{
+    auto source = R"(
+        .record Z {}
+        .function i32 Z.zoo() <static> {
+            ldai 45
+            return
+        }
+    )";
+
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
+
+static void PandaFilesEmitSecond(const TmpFile &pandaFname)
+{
+    auto source = R"(
+        .record Z <external>
+        .function i32 Z.zoo() <external, static>
+        .record X {}
+        .function i32 X.main() {
+            call.short Z.zoo
+            return
+        }
+    )";
+
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
+}
+
 TEST_F(AotTest, PandaFiles)
 {
 #ifndef PANDA_EVENTS_ENABLED
@@ -774,37 +857,8 @@ TEST_F(AotTest, PandaFiles)
     TmpFile pandaFname2("test2.pf");
     TmpFile paocOutputName("events-out.csv");
 
-    {
-        auto source = R"(
-            .record Z {}
-            .function i32 Z.zoo() <static> {
-                ldai 45
-                return
-            }
-        )";
-
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname1.GetFileName(), res.Value()));
-    }
-
-    {
-        auto source = R"(
-            .record Z <external>
-            .function i32 Z.zoo() <external, static>
-            .record X {}
-            .function i32 X.main() {
-                call.short Z.zoo
-                return
-            }
-        )";
-
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname2.GetFileName(), res.Value()));
-    }
+    PandaFilesEmitFirst(pandaFname1);
+    PandaFilesEmitSecond(pandaFname2);
 
     {
         std::stringstream pandaFiles;
