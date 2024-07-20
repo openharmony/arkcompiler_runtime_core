@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -69,50 +69,57 @@ NO_THREAD_SAFETY_ANALYSIS void GenerationalGC<LanguageConfig>::MarkImpl(Marker *
     MarkStack(marker, objectsStack, markPreprocess, refPred);
     {
         ScopedTiming t1("VisitInternalStringTable", *this->GetTiming());
-        this->GetPandaVm()->VisitStringTable(
-            [marker, objectsStack](ObjectHeader *str) {
-                if (marker->MarkIfNotMarked(str)) {
-                    ASSERT(str != nullptr);
-                    objectsStack->PushToStack(RootType::STRING_TABLE, str);
-                }
-            },
-            VisitGCRootFlags::ACCESS_ROOT_ALL | VisitGCRootFlags::START_RECORDING_NEW_ROOT);
+        auto visitor = [marker, objectsStack](ObjectHeader *str) {
+            if (marker->MarkIfNotMarked(str)) {
+                ASSERT(str != nullptr);
+                objectsStack->PushToStack(RootType::STRING_TABLE, str);
+            }
+        };
+        this->GetPandaVm()->VisitStringTable(visitor, VisitGCRootFlags::ACCESS_ROOT_ALL |
+                                                          VisitGCRootFlags::START_RECORDING_NEW_ROOT);
     }
     MarkStack(marker, objectsStack, markPreprocess, refPred);
 
     // concurrent visit card table
     if (visitCardTableRoots == CardTableVisitFlag::VISIT_ENABLED) {
-        GCRootVisitor gcMarkRoots = [this, marker, objectsStack, &refPred](const GCRoot &gcRoot) {
-            ObjectHeader *fromObject = gcRoot.GetFromObjectHeader();
-            if (UNLIKELY(fromObject != nullptr) &&
-                this->IsReference(fromObject->ClassAddr<BaseClass>(), fromObject, refPred)) {
-                LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(fromObject) << " to stack";
-                marker->Mark(fromObject);
-                this->ProcessReference(objectsStack, fromObject->ClassAddr<BaseClass>(), fromObject,
-                                       GC::EmptyReferenceProcessPredicate);
-            } else {
-                if (marker->MarkIfNotMarked(gcRoot.GetObjectHeader())) {
-                    objectsStack->PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
-                }
-            }
-        };
-
-        auto allocator = this->GetObjectAllocator();
-        MemRangeChecker rangeChecker = [&memRangeChecker](MemRange &memRange) -> bool {
-            return memRangeChecker(memRange);
-        };
-        ObjectChecker tenuredObjectChecker = [&allocator](const ObjectHeader *objectHeader) -> bool {
-            return !allocator->IsObjectInYoungSpace(objectHeader);
-        };
-        ObjectChecker fromObjectChecker = [marker](const ObjectHeader *objectHeader) -> bool {
-            return marker->IsMarked(objectHeader);
-        };
-        this->VisitCardTableRoots(this->GetCardTable(), gcMarkRoots, rangeChecker, tenuredObjectChecker,
-                                  fromObjectChecker,
-                                  CardTableProcessedFlag::VISIT_MARKED | CardTableProcessedFlag::VISIT_PROCESSED |
-                                      CardTableProcessedFlag::SET_PROCESSED);
-        MarkStack(marker, objectsStack, markPreprocess, refPred);
+        this->VisitCardTableConcurrent(marker, objectsStack, refPred, memRangeChecker, markPreprocess);
     }
+}
+
+template <class LanguageConfig>
+template <typename Marker>
+void GenerationalGC<LanguageConfig>::VisitCardTableConcurrent(Marker *marker, GCMarkingStackType *objectsStack,
+                                                              const ReferenceCheckPredicateT &refPred,
+                                                              const MemRangeChecker &memRangeChecker,
+                                                              const GC::MarkPreprocess &markPreprocess)
+{
+    GCRootVisitor gcMarkRoots = [this, marker, objectsStack, &refPred](const GCRoot &gcRoot) {
+        ObjectHeader *fromObject = gcRoot.GetFromObjectHeader();
+        if (UNLIKELY(fromObject != nullptr) &&
+            this->IsReference(fromObject->ClassAddr<BaseClass>(), fromObject, refPred)) {
+            LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(fromObject) << " to stack";
+            marker->Mark(fromObject);
+            this->ProcessReference(objectsStack, fromObject->ClassAddr<BaseClass>(), fromObject,
+                                   GC::EmptyReferenceProcessPredicate);
+        } else {
+            if (marker->MarkIfNotMarked(gcRoot.GetObjectHeader())) {
+                objectsStack->PushToStack(gcRoot.GetType(), gcRoot.GetObjectHeader());
+            }
+        }
+    };
+
+    auto allocator = this->GetObjectAllocator();
+    MemRangeChecker rangeChecker = [&memRangeChecker](MemRange &memRange) -> bool { return memRangeChecker(memRange); };
+    ObjectChecker tenuredObjectChecker = [&allocator](const ObjectHeader *objectHeader) -> bool {
+        return !allocator->IsObjectInYoungSpace(objectHeader);
+    };
+    ObjectChecker fromObjectChecker = [marker](const ObjectHeader *objectHeader) -> bool {
+        return marker->IsMarked(objectHeader);
+    };
+    this->VisitCardTableRoots(this->GetCardTable(), gcMarkRoots, rangeChecker, tenuredObjectChecker, fromObjectChecker,
+                              CardTableProcessedFlag::VISIT_MARKED | CardTableProcessedFlag::VISIT_PROCESSED |
+                                  CardTableProcessedFlag::SET_PROCESSED);
+    MarkStack(marker, objectsStack, markPreprocess, refPred);
 }
 
 }  // namespace ark::mem

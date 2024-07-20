@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -205,8 +205,7 @@ TEST_F(FreeListAllocatorTest, FailedLinksTest)
         void *mem = allocator.Alloc(MIN_ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
         size_t index = SetBytesFromByteArray(mem, MIN_ALLOC_SIZE);
-        std::pair<void *, size_t> newPair(mem, index);
-        memoryElements.at(i) = newPair;
+        memoryElements.at(i) = std::pair<void *, size_t> {mem, index};
     }
 
     pair = memoryElements[1];
@@ -221,16 +220,14 @@ TEST_F(FreeListAllocatorTest, FailedLinksTest)
         void *mem = allocator.Alloc(MIN_ALLOC_SIZE * 2U);
         ASSERT_TRUE(mem != nullptr);
         size_t index = SetBytesFromByteArray(mem, MIN_ALLOC_SIZE * 2U);
-        std::pair<void *, size_t> newPair(mem, index);
-        memoryElements.at(0) = newPair;
+        memoryElements.at(0) = std::pair<void *, size_t> {mem, index};
     }
 
     {
         void *mem = allocator.Alloc(MIN_ALLOC_SIZE);
         ASSERT_TRUE(mem != nullptr);
         size_t index = SetBytesFromByteArray(mem, MIN_ALLOC_SIZE);
-        std::pair<void *, size_t> newPair(mem, index);
-        memoryElements.at(1) = newPair;
+        memoryElements.at(1) = std::pair<void *, size_t> {mem, index};
     }
 
     {

@@ -330,8 +330,7 @@ TEST_F(G1GCTest, TestCollectTenured)
 // test that we don't have remset from humongous space after we reclaim humongous object
 TEST_F(G1GCTest, CheckRemsetToHumongousAfterReclaimHumongousObject)
 {
-    Runtime *runtime = Runtime::GetCurrent();
-    LanguageContext ctx = runtime->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
     MTManagedThread *thread = MTManagedThread::GetCurrent();
 
@@ -341,30 +340,24 @@ TEST_F(G1GCTest, CheckRemsetToHumongousAfterReclaimHumongousObject)
     // 1MB array
     static constexpr size_t HUMONGOUS_ARRAY_LENGTH = 262144LU;
     static constexpr size_t YOUNG_ARRAY_LENGTH = ((DEFAULT_REGION_SIZE - Region::HeadSize()) / 4U) - 16U;
-    coretypes::Array *humongousObj;
-    coretypes::Array *youngArr;
 
-    auto *gc = runtime->GetPandaVM()->GetGC();
+    auto *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
     auto regionPred = []([[maybe_unused]] Region *r) { return true; };
 
-    Class *klass;
-
-    klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
-                ->GetClass(ctx.GetStringArrayClassDescriptor());
+    Class *klass = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY)
+                       ->GetClass(ctx.GetStringArrayClassDescriptor());
     ASSERT_NE(klass, nullptr);
 
-    youngArr = coretypes::Array::Create(klass, YOUNG_ARRAY_LENGTH);
+    auto *youngArr = coretypes::Array::Create(klass, YOUNG_ARRAY_LENGTH);
     ASSERT_NE(youngArr, nullptr);
-    auto *region = ObjectToRegion(youngArr);
-    ASSERT_NE(region, nullptr);
+    ASSERT_NE(ObjectToRegion(youngArr), nullptr);
 
     VMHandle<coretypes::Array> youngObjPtr(thread, youngArr);
     GCTask task(GCTaskCause::EXPLICIT_CAUSE);
     {
         [[maybe_unused]] HandleScope<ObjectHeader *> scopeForHumongousObj(thread);
 
-        humongousObj = coretypes::Array::Create(klass, HUMONGOUS_ARRAY_LENGTH);
-
+        auto *humongousObj = coretypes::Array::Create(klass, HUMONGOUS_ARRAY_LENGTH);
         ASSERT_NE(humongousObj, nullptr);
         // add humongous object to our remset
         humongousObj->Set(0, youngObjPtr.GetPtr());
@@ -377,7 +370,7 @@ TEST_F(G1GCTest, CheckRemsetToHumongousAfterReclaimHumongousObject)
                 task.Run(*gc);
             }
 
-            auto arrayRegion = ObjectToRegion(youngObjPtr.GetPtr());
+            auto *arrayRegion = ObjectToRegion(youngObjPtr.GetPtr());
             PandaVector<Region *> regions;
             arrayRegion->GetRemSet()->Iterate(
                 regionPred, [&regions](Region *r, [[maybe_unused]] const MemRange &range) { regions.push_back(r); });
@@ -398,7 +391,7 @@ TEST_F(G1GCTest, CheckRemsetToHumongousAfterReclaimHumongousObject)
         task.Run(*gc);  // humongous object should be reclaimed
     }
 
-    auto arrayRegion = ObjectToRegion(youngObjPtr.GetPtr());
+    auto *arrayRegion = ObjectToRegion(youngObjPtr.GetPtr());
     PandaVector<Region *> regions;
     arrayRegion->GetRemSet()->Iterate(
         regionPred, [&regions](Region *r, [[maybe_unused]] const MemRange &range) { regions.push_back(r); });

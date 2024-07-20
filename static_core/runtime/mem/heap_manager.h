@@ -229,6 +229,15 @@ private:
         return (codeAllocator_ != nullptr) && (internalAllocator_ != nullptr) && (objectAllocator_ != nullptr);
     }
 
+    template <GCType GC_TYPE>
+    bool Initialize(MemStatsType *memStats, bool singleThreaded, bool createPygoteSpace)
+    {
+        if (singleThreaded) {
+            return Initialize<GC_TYPE, MT_MODE_SINGLE>(memStats, createPygoteSpace);
+        }
+        return Initialize<GC_TYPE, MT_MODE_MULTI>(memStats, createPygoteSpace);
+    }
+
     /**
      * Initialize GC bits and also zeroing memory for the whole Object memory
      * @param cls - class

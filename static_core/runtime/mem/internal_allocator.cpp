@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,75 +165,91 @@ void *AllocInRunSlots(AllocatorT *runslotsAllocator, size_t size, Alignment alig
 
 template <InternalAllocatorConfig CONFIG>
 template <AllocScope ALLOC_SCOPE_T>
+void *InternalAllocator<CONFIG>::AllocViaRunSlotsAllocator(size_t size, Alignment align)
+{
+    void *res = nullptr;
+    if constexpr (ALLOC_SCOPE_T == AllocScope::GLOBAL) {
+        LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use RunSlotsAllocator";
+        res = AllocInRunSlots(runslotsAllocator_, size, align, RunSlotsAllocatorT::GetMinPoolSize());
+    } else {
+        static_assert(ALLOC_SCOPE_T == AllocScope::LOCAL);
+        LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use thread-local RunSlotsAllocator";
+        ASSERT(ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator() != nullptr);
+        res = AllocInRunSlots(ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator(), size, align,
+                              LocalSmallObjectAllocator::GetMinPoolSize());
+    }
+    return res;
+}
+
+template <InternalAllocatorConfig CONFIG>
+void *InternalAllocator<CONFIG>::AllocViaFreeListAllocator(size_t size, Alignment align)
+{
+    LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use FreeListAllocator";
+    void *res = freelistAllocator_->Alloc(size, align);
+    if (res != nullptr) {
+        return res;
+    }
+    // Get rid of extra pool adding to the allocator
+    static os::memory::Mutex poolLock;
+    os::memory::LockHolder lock(poolLock);
+    while (true) {
+        res = freelistAllocator_->Alloc(size, align);
+        if (res != nullptr) {
+            break;
+        }
+        LOG_INTERNAL_ALLOCATOR(DEBUG) << "FreeListAllocator didn't allocate memory, try to add new pool";
+        size_t poolSize = FreeListAllocatorT::GetMinPoolSize();
+        auto pool = PoolManager::GetMmapMemPool()->AllocPool(poolSize, SpaceType::SPACE_TYPE_INTERNAL,
+                                                             AllocatorType::FREELIST_ALLOCATOR, freelistAllocator_);
+        if (UNLIKELY(pool.GetMem() == nullptr)) {
+            return nullptr;
+        }
+        freelistAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
+    }
+    return res;
+}
+
+template <InternalAllocatorConfig CONFIG>
+void *InternalAllocator<CONFIG>::AllocViaHumongousAllocator(size_t size, Alignment align)
+{
+    LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use HumongousObjAllocator";
+    void *res = humongousAllocator_->Alloc(size, align);
+    if (res != nullptr) {
+        return res;
+    }
+    // Get rid of extra pool adding to the allocator
+    static os::memory::Mutex poolLock;
+    os::memory::LockHolder lock(poolLock);
+    while (true) {
+        res = humongousAllocator_->Alloc(size, align);
+        if (res != nullptr) {
+            break;
+        }
+        LOG_INTERNAL_ALLOCATOR(DEBUG) << "HumongousObjAllocator didn't allocate memory, try to add new pool";
+        size_t poolSize = HumongousObjAllocatorT::GetMinPoolSize(size);
+        auto pool = PoolManager::GetMmapMemPool()->AllocPool(poolSize, SpaceType::SPACE_TYPE_INTERNAL,
+                                                             AllocatorType::HUMONGOUS_ALLOCATOR, humongousAllocator_);
+        if (UNLIKELY(pool.GetMem() == nullptr)) {
+            return nullptr;
+        }
+        humongousAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
+    }
+    return res;
+}
+
+template <InternalAllocatorConfig CONFIG>
+template <AllocScope ALLOC_SCOPE_T>
 void *InternalAllocator<CONFIG>::AllocViaPandaAllocators(size_t size, Alignment align)
 {
     void *res = nullptr;
     size_t alignedSize = AlignUp(size, GetAlignmentInBytes(align));
     static_assert(RunSlotsAllocatorT::GetMaxSize() == LocalSmallObjectAllocator::GetMaxSize());
     if (LIKELY(alignedSize <= RunSlotsAllocatorT::GetMaxSize())) {
-        // NOLINTNEXTLINE(readability-braces-around-statements)
-        if constexpr (ALLOC_SCOPE_T == AllocScope::GLOBAL) {
-            LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use RunSlotsAllocator";
-            res = AllocInRunSlots(runslotsAllocator_, size, align, RunSlotsAllocatorT::GetMinPoolSize());
-            if (res == nullptr) {
-                return nullptr;
-            }
-        } else {  // NOLINT(readability-misleading-indentation)
-            static_assert(ALLOC_SCOPE_T == AllocScope::LOCAL);
-            LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use thread-local RunSlotsAllocator";
-            ASSERT(ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator() != nullptr);
-            res = AllocInRunSlots(ark::ManagedThread::GetCurrent()->GetLocalInternalAllocator(), size, align,
-                                  LocalSmallObjectAllocator::GetMinPoolSize());
-            if (res == nullptr) {
-                return nullptr;
-            }
-        }
+        res = this->AllocViaRunSlotsAllocator<ALLOC_SCOPE_T>(size, align);
     } else if (alignedSize <= FreeListAllocatorT::GetMaxSize()) {
-        LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use FreeListAllocator";
-        res = freelistAllocator_->Alloc(size, align);
-        if (res != nullptr) {
-            return res;
-        }
-        // Get rid of extra pool adding to the allocator
-        static os::memory::Mutex poolLock;
-        os::memory::LockHolder lock(poolLock);
-        while (true) {
-            res = freelistAllocator_->Alloc(size, align);
-            if (res != nullptr) {
-                break;
-            }
-            LOG_INTERNAL_ALLOCATOR(DEBUG) << "FreeListAllocator didn't allocate memory, try to add new pool";
-            size_t poolSize = FreeListAllocatorT::GetMinPoolSize();
-            auto pool = PoolManager::GetMmapMemPool()->AllocPool(poolSize, SpaceType::SPACE_TYPE_INTERNAL,
-                                                                 AllocatorType::FREELIST_ALLOCATOR, freelistAllocator_);
-            if (UNLIKELY(pool.GetMem() == nullptr)) {
-                return nullptr;
-            }
-            freelistAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
-        }
+        res = this->AllocViaFreeListAllocator(size, align);
     } else {
-        LOG_INTERNAL_ALLOCATOR(DEBUG) << "Try to use HumongousObjAllocator";
-        res = humongousAllocator_->Alloc(size, align);
-        if (res != nullptr) {
-            return res;
-        }
-        // Get rid of extra pool adding to the allocator
-        static os::memory::Mutex poolLock;
-        os::memory::LockHolder lock(poolLock);
-        while (true) {
-            res = humongousAllocator_->Alloc(size, align);
-            if (res != nullptr) {
-                break;
-            }
-            LOG_INTERNAL_ALLOCATOR(DEBUG) << "HumongousObjAllocator didn't allocate memory, try to add new pool";
-            size_t poolSize = HumongousObjAllocatorT::GetMinPoolSize(size);
-            auto pool = PoolManager::GetMmapMemPool()->AllocPool(
-                poolSize, SpaceType::SPACE_TYPE_INTERNAL, AllocatorType::HUMONGOUS_ALLOCATOR, humongousAllocator_);
-            if (UNLIKELY(pool.GetMem() == nullptr)) {
-                return nullptr;
-            }
-            humongousAllocator_->AddMemoryPool(pool.GetMem(), pool.GetSize());
-        }
+        res = this->AllocViaHumongousAllocator(size, align);
     }
     return res;
 }

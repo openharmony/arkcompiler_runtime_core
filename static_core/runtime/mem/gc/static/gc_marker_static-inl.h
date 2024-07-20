@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,22 +27,24 @@ void GCMarker<Marker, LANG_TYPE_STATIC>::HandleObject(GCMarkingStackType *object
     while (cls != nullptr) {
         // Iterate over instance fields
         uint32_t refNum = cls->GetRefFieldsNum<false>();
-        if (refNum > 0) {
-            uint32_t offset = cls->GetRefFieldsOffset<false>();
-            uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<false>();
-            for (uint32_t i = 0; i < refVolatileNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
-                auto *fieldObject = object->GetFieldObject<true>(offset);
-                ValidateObject(object, fieldObject);
-                if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
-                    objectsStack->PushToStack(object, fieldObject);
-                }
+        if (refNum == 0) {
+            cls = cls->GetBase();
+            continue;
+        }
+        uint32_t offset = cls->GetRefFieldsOffset<false>();
+        uint32_t refVolatileNum = cls->GetVolatileRefFieldsNum<false>();
+        for (uint32_t i = 0; i < refVolatileNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+            auto *fieldObject = object->GetFieldObject<true>(offset);
+            ValidateObject(object, fieldObject);
+            if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
+                objectsStack->PushToStack(object, fieldObject);
             }
-            for (uint32_t i = refVolatileNum; i < refNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
-                auto *fieldObject = object->GetFieldObject<false>(offset);
-                ValidateObject(object, fieldObject);
-                if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
-                    objectsStack->PushToStack(object, fieldObject);
-                }
+        }
+        for (uint32_t i = refVolatileNum; i < refNum; i++, offset += ClassHelper::OBJECT_POINTER_SIZE) {
+            auto *fieldObject = object->GetFieldObject<false>(offset);
+            ValidateObject(object, fieldObject);
+            if (fieldObject != nullptr && AsMarker()->MarkIfNotMarked(fieldObject)) {
+                objectsStack->PushToStack(object, fieldObject);
             }
         }
         cls = cls->GetBase();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,15 @@ protected:
         return instance_;
     }
 
+    void FreePoolWithPolicy(MmapMemPool *memPool, OSPagesPolicy policy, Pool &pool)
+    {
+        if (policy == OSPagesPolicy::NO_RETURN) {
+            memPool->template FreePool<OSPagesPolicy::NO_RETURN>(pool.GetMem(), pool.GetSize());
+        } else {
+            memPool->template FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(pool.GetMem(), pool.GetSize());
+        }
+    }
+
     void ReturnedToOsTest(OSPagesPolicy firstPoolPolicy, OSPagesPolicy secondPoolPolicy, OSPagesPolicy thirdPoolPolicy,
                           bool needFourthPool, bool bigPoolRealloc)
     {
@@ -67,21 +76,9 @@ protected:
             FillMemory(fourthPool.GetMem(), fourthPool.GetSize());
         }
 
-        if (firstPoolPolicy == OSPagesPolicy::NO_RETURN) {
-            memPool->template FreePool<OSPagesPolicy::NO_RETURN>(pools[0U].GetMem(), pools[0U].GetSize());
-        } else {
-            memPool->template FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(pools[0U].GetMem(), pools[0U].GetSize());
-        }
-        if (thirdPoolPolicy == OSPagesPolicy::NO_RETURN) {
-            memPool->template FreePool<OSPagesPolicy::NO_RETURN>(pools[2U].GetMem(), pools[2U].GetSize());
-        } else {
-            memPool->template FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(pools[2U].GetMem(), pools[2U].GetSize());
-        }
-        if (secondPoolPolicy == OSPagesPolicy::NO_RETURN) {
-            memPool->template FreePool<OSPagesPolicy::NO_RETURN>(pools[1U].GetMem(), pools[1U].GetSize());
-        } else {
-            memPool->template FreePool<OSPagesPolicy::IMMEDIATE_RETURN>(pools[1U].GetMem(), pools[1U].GetSize());
-        }
+        FreePoolWithPolicy(memPool, firstPoolPolicy, pools[0U]);
+        FreePoolWithPolicy(memPool, thirdPoolPolicy, pools[2U]);
+        FreePoolWithPolicy(memPool, secondPoolPolicy, pools[1U]);
 
         if (bigPoolRealloc) {
             auto finalPool = memPool->template AllocPool<OSPagesAllocPolicy::ZEROED_MEMORY>(

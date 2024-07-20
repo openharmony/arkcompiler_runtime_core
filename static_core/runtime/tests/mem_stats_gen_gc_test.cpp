@@ -107,6 +107,13 @@ public:
         int count = 0;
     };
 
+    struct GcData {
+        size_t count;
+        size_t minSize;
+        size_t maxSize;
+        bool checkOom;
+    };
+
     struct MemOpReport {
         size_t allocatedCount;
         size_t allocatedBytes;
@@ -207,6 +214,25 @@ public:
     coretypes::Array *root = nullptr;
     size_t rootSize = 0;
     GCCounter *gccnt {};
+
+private:
+    template <MemStatsGenGCTest::TargetSpace SPACE>
+    auto CreateSpaceCheck();
+
+    template <MemStatsGenGCTest::TargetSpace SPACE>
+    bool InitG1Gc(MemStatsGenGCTest::GcData &gcData);
+
+    template <MemStatsGenGCTest::TargetSpace SPACE>
+    bool InitGenGc(MemStatsGenGCTest::GcData &gcData);
+
+    template <typename F, size_t REPEAT, MemStatsGenGCTest::TargetSpace SPACE, bool DO_SAVE>
+    void MakeAllocationsWithSingleRepeat(MemStatsGenGCTest::GcData &gcData, MemStatsGenGCTest::MemOpReport &report,
+                                         size_t &bytes, size_t &rawObjectsSize, [[maybe_unused]] F spaceCheck);
+
+    template <typename F, size_t REPEAT, MemStatsGenGCTest::TargetSpace SPACE, bool DO_SAVE>
+    void MakeAllocationsWithSeveralRepeat(MemStatsGenGCTest::GcData &gcData, MemStatsGenGCTest::MemOpReport &report,
+                                          size_t &bytes, size_t &rawObjectsSize, [[maybe_unused]] F spaceCheck);
+
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 };
 
@@ -266,6 +292,61 @@ MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t m
     return result;
 }
 
+template <typename F, size_t REPEAT, MemStatsGenGCTest::TargetSpace SPACE, bool DO_SAVE>
+void MemStatsGenGCTest::MakeAllocationsWithSingleRepeat(MemStatsGenGCTest::GcData &gcData,
+                                                        MemStatsGenGCTest::MemOpReport &report, size_t &bytes,
+                                                        size_t &rawObjectsSize, [[maybe_unused]] F spaceCheck)
+{
+    ObjVec ov1 = MakeAllocationsWithRepeats<F, REPEAT, SPACE>(gcData.minSize + 1, gcData.maxSize, 1, &bytes,
+                                                              &rawObjectsSize, spaceCheck, gcData.checkOom);
+    report.allocatedCount += 1;
+    report.allocatedBytes += bytes;
+    if constexpr (DO_SAVE) {
+        MakeObjectsAlive(ov1, 1);
+        report.savedCount = report.allocatedCount;
+        report.savedBytes = report.allocatedBytes;
+    }
+}
+
+template <typename F, size_t REPEAT, MemStatsGenGCTest::TargetSpace SPACE, bool DO_SAVE>
+void MemStatsGenGCTest::MakeAllocationsWithSeveralRepeat(MemStatsGenGCTest::GcData &gcData,
+                                                         MemStatsGenGCTest::MemOpReport &report, size_t &bytes,
+                                                         size_t &rawObjectsSize, [[maybe_unused]] F spaceCheck)
+{
+    ObjVec ov1 = MakeAllocationsWithRepeats<decltype(spaceCheck), 3U, SPACE>(
+        gcData.minSize, gcData.maxSize, gcData.count, &bytes, &rawObjectsSize, spaceCheck, gcData.checkOom);
+    report.allocatedCount += gcData.count * 3U;
+    report.allocatedBytes += bytes;
+    ObjVec ov2 = MakeAllocationsWithRepeats<decltype(spaceCheck), 3U, SPACE>(
+        gcData.minSize, gcData.maxSize, gcData.count, &bytes, &rawObjectsSize, spaceCheck, gcData.checkOom);
+    report.allocatedCount += gcData.count * 3U;
+    report.allocatedBytes += bytes;
+    if constexpr (DO_SAVE) {
+        MakeObjectsAlive(ov1, 3_I);
+        MakeObjectsAlive(ov2, 3_I);
+        report.savedCount = report.allocatedCount / 3U;
+        report.savedBytes = report.allocatedBytes / 3U;
+    }
+}
+
+template <MemStatsGenGCTest::TargetSpace SPACE>
+auto MemStatsGenGCTest::CreateSpaceCheck()
+{
+    auto spaceCheck = [this](uintptr_t addr) -> bool {
+        if constexpr (SPACE == TargetSpace::YOUNG) {
+            return IsInYoung(addr);
+        } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
+            return !IsInYoung(addr);
+        } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
+            return !IsInYoung(addr);
+        } else if constexpr (SPACE == TargetSpace::HUMONGOUS) {
+            return !IsInYoung(addr);
+        }
+        UNREACHABLE();
+    };
+    return spaceCheck;
+}
+
 void MemStatsGenGCTest::InitRoot()
 {
     ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
@@ -275,6 +356,78 @@ void MemStatsGenGCTest::InitRoot()
     root = coretypes::Array::Create(klass, ROOT_MAX_SIZE);
     rootSize = 0;
     MakeObjectsPermAlive({root});
+}
+
+template <MemStatsGenGCTest::TargetSpace SPACE>
+bool MemStatsGenGCTest::InitG1Gc(MemStatsGenGCTest::GcData &gcData)
+{
+    auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    gcData.count = 15U;
+    if constexpr (SPACE == TargetSpace::YOUNG) {
+        gcData.minSize = 0;
+        gcData.maxSize = g1Alloc->GetYoungAllocMaxSize();
+    } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
+        gcData.minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
+        gcData.maxSize = g1Alloc->GetRegularObjectMaxSize();
+        if (gcData.minSize >= gcData.maxSize) {
+            // Allocator configuration disallows allocating directly in this space
+            return false;
+        }
+    } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
+        gcData.minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
+        gcData.minSize = std::max(gcData.minSize, g1Alloc->GetRegularObjectMaxSize() + 1);
+        gcData.maxSize = g1Alloc->GetLargeObjectMaxSize();
+        if (gcData.minSize >= gcData.maxSize) {
+            // Allocator configuration disallows allocating directly in this space
+            return false;
+        }
+    } else {
+        ASSERT(SPACE == TargetSpace::HUMONGOUS);
+        gcData.count = 3U;
+        gcData.minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
+        gcData.minSize = std::max(gcData.minSize, g1Alloc->GetRegularObjectMaxSize() + 1);
+        gcData.minSize = std::max(gcData.minSize, g1Alloc->GetLargeObjectMaxSize() + 1);
+        gcData.maxSize = gcData.minSize * 3U;
+        gcData.checkOom = true;
+    }
+    return true;
+}
+
+template <MemStatsGenGCTest::TargetSpace SPACE>
+bool MemStatsGenGCTest::InitGenGc(MemStatsGenGCTest::GcData &gcData)
+{
+    auto genAlloc = reinterpret_cast<ObjectAllocatorGen<MT_MODE_MULTI> *>(objectAllocator);
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    gcData.count = 15U;
+    if constexpr (SPACE == TargetSpace::YOUNG) {
+        gcData.minSize = 0;
+        gcData.maxSize = genAlloc->GetYoungAllocMaxSize();
+    } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
+        gcData.minSize = genAlloc->GetYoungAllocMaxSize() + 1;
+        gcData.maxSize = genAlloc->GetRegularObjectMaxSize();
+        if (gcData.minSize >= gcData.maxSize) {
+            // Allocator configuration disallows allocating directly in this space
+            return false;
+        }
+    } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
+        gcData.minSize = genAlloc->GetYoungAllocMaxSize() + 1;
+        gcData.minSize = std::max(gcData.minSize, genAlloc->GetRegularObjectMaxSize() + 1);
+        gcData.maxSize = genAlloc->GetLargeObjectMaxSize();
+        if (gcData.minSize >= gcData.maxSize) {
+            // Allocator configuration disallows allocating directly in this space
+            return false;
+        }
+    } else {
+        ASSERT(SPACE == TargetSpace::HUMONGOUS);
+        gcData.count = 3U;
+        gcData.minSize = genAlloc->GetYoungAllocMaxSize() + 1;
+        gcData.minSize = std::max(gcData.minSize, genAlloc->GetRegularObjectMaxSize() + 1);
+        gcData.minSize = std::max(gcData.minSize, genAlloc->GetLargeObjectMaxSize() + 1);
+        gcData.maxSize = gcData.minSize * 3U;
+        gcData.checkOom = true;
+    }
+    return true;
 }
 
 void MemStatsGenGCTest::MakeObjectsAlive(const ObjVec &objects, int every)
@@ -408,77 +561,24 @@ typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
     report.savedBytes = 0;
     size_t bytes = 0;
     [[maybe_unused]] size_t rawObjectsSize;  // currently not tracked by memstats
-    size_t count = 0;
-    size_t minSize = 0;
-    size_t maxSize = 0;
-    bool checkOom = false;
+    MemStatsGenGCTest::GcData gcData {};
+    gcData.count = 0;
+    gcData.minSize = 0;
+    gcData.maxSize = 0;
+    gcData.checkOom = false;
     size_t youngSize = reinterpret_cast<GenerationalSpaces *>(
                            reinterpret_cast<ObjectAllocatorGenBase *>(objectAllocator)->GetHeapSpace())
                            ->GetCurrentYoungSize();
     switch (gcType) {
         case GCType::GEN_GC: {
-            auto genAlloc = reinterpret_cast<ObjectAllocatorGen<MT_MODE_MULTI> *>(objectAllocator);
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            count = 15U;
-            if constexpr (SPACE == TargetSpace::YOUNG) {
-                minSize = 0;
-                maxSize = genAlloc->GetYoungAllocMaxSize();
-            } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
-                minSize = genAlloc->GetYoungAllocMaxSize() + 1;
-                maxSize = genAlloc->GetRegularObjectMaxSize();
-                if (minSize >= maxSize) {
-                    // Allocator configuration disallows allocating directly in this space
-                    return report;
-                }
-            } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
-                minSize = genAlloc->GetYoungAllocMaxSize() + 1;
-                minSize = std::max(minSize, genAlloc->GetRegularObjectMaxSize() + 1);
-                maxSize = genAlloc->GetLargeObjectMaxSize();
-                if (minSize >= maxSize) {
-                    // Allocator configuration disallows allocating directly in this space
-                    return report;
-                }
-            } else {
-                ASSERT(SPACE == TargetSpace::HUMONGOUS);
-                count = 3U;
-                minSize = genAlloc->GetYoungAllocMaxSize() + 1;
-                minSize = std::max(minSize, genAlloc->GetRegularObjectMaxSize() + 1);
-                minSize = std::max(minSize, genAlloc->GetLargeObjectMaxSize() + 1);
-                maxSize = minSize * 3U;
-                checkOom = true;
+            if (!InitGenGc<SPACE>(gcData)) {
+                return report;
             }
             break;
         }
         case GCType::G1_GC: {
-            auto g1Alloc = reinterpret_cast<ObjectAllocatorG1<MT_MODE_MULTI> *>(objectAllocator);
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            count = 15U;
-            if constexpr (SPACE == TargetSpace::YOUNG) {
-                minSize = 0;
-                maxSize = g1Alloc->GetYoungAllocMaxSize();
-            } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
-                minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
-                maxSize = g1Alloc->GetRegularObjectMaxSize();
-                if (minSize >= maxSize) {
-                    // Allocator configuration disallows allocating directly in this space
-                    return report;
-                }
-            } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
-                minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
-                minSize = std::max(minSize, g1Alloc->GetRegularObjectMaxSize() + 1);
-                maxSize = g1Alloc->GetLargeObjectMaxSize();
-                if (minSize >= maxSize) {
-                    // Allocator configuration disallows allocating directly in this space
-                    return report;
-                }
-            } else {
-                ASSERT(SPACE == TargetSpace::HUMONGOUS);
-                count = 3U;
-                minSize = g1Alloc->GetYoungAllocMaxSize() + 1;
-                minSize = std::max(minSize, g1Alloc->GetRegularObjectMaxSize() + 1);
-                minSize = std::max(minSize, g1Alloc->GetLargeObjectMaxSize() + 1);
-                maxSize = minSize * 3U;
-                checkOom = true;
+            if (!InitG1Gc<SPACE>(gcData)) {
+                return report;
             }
             break;
         }
@@ -486,49 +586,19 @@ typename MemStatsGenGCTest::MemOpReport MemStatsGenGCTest::MakeAllocations()
             UNREACHABLE();
     }
 
-    auto spaceCheck = [this](uintptr_t addr) -> bool {
-        if constexpr (SPACE == TargetSpace::YOUNG) {
-            return IsInYoung(addr);
-        } else if constexpr (SPACE == TargetSpace::TENURED_REGULAR) {
-            return !IsInYoung(addr);
-        } else if constexpr (SPACE == TargetSpace::TENURED_LARGE) {
-            return !IsInYoung(addr);
-        } else if constexpr (SPACE == TargetSpace::HUMONGOUS) {
-            return !IsInYoung(addr);
-        }
-        UNREACHABLE();
-    };
+    auto spaceCheck = CreateSpaceCheck<SPACE>();
 
     if constexpr (SPACE == TargetSpace::YOUNG) {
         // To prevent Young GC collection while we're allocating
-        maxSize = std::min(youngSize / (count * 6U), maxSize);
+        gcData.maxSize = std::min(youngSize / (gcData.count * 6U), gcData.maxSize);
     }
 
     if (IS_SINGLE) {
-        ObjVec ov1 = MakeAllocationsWithRepeats<decltype(spaceCheck), 1, SPACE>(minSize + 1, maxSize, 1, &bytes,
-                                                                                &rawObjectsSize, spaceCheck, checkOom);
-        report.allocatedCount += 1;
-        report.allocatedBytes += bytes;
-        if constexpr (DO_SAVE) {
-            MakeObjectsAlive(ov1, 1);
-            report.savedCount = report.allocatedCount;
-            report.savedBytes = report.allocatedBytes;
-        }
+        MakeAllocationsWithSingleRepeat<decltype(spaceCheck), 1, SPACE, DO_SAVE>(gcData, report, bytes, rawObjectsSize,
+                                                                                 spaceCheck);
     } else {
-        ObjVec ov1 = MakeAllocationsWithRepeats<decltype(spaceCheck), 3U, SPACE>(minSize, maxSize, count, &bytes,
-                                                                                 &rawObjectsSize, spaceCheck, checkOom);
-        report.allocatedCount += count * 3U;
-        report.allocatedBytes += bytes;
-        ObjVec ov2 = MakeAllocationsWithRepeats<decltype(spaceCheck), 3U, SPACE>(minSize, maxSize, count, &bytes,
-                                                                                 &rawObjectsSize, spaceCheck, checkOom);
-        report.allocatedCount += count * 3U;
-        report.allocatedBytes += bytes;
-        if constexpr (DO_SAVE) {
-            MakeObjectsAlive(ov1, 3_I);
-            MakeObjectsAlive(ov2, 3_I);
-            report.savedCount = report.allocatedCount / 3U;
-            report.savedBytes = report.allocatedBytes / 3U;
-        }
+        MakeAllocationsWithSeveralRepeat<decltype(spaceCheck), 3U, SPACE, DO_SAVE>(gcData, report, bytes,
+                                                                                   rawObjectsSize, spaceCheck);
     }
 
     // We must not have uncounted GCs
@@ -594,7 +664,7 @@ MemStatsGenGCTest::RealStatsLocations MemStatsGenGCTest::GetGenMemStatsDetails(T
     return loc;
 }
 
-TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
+TEST_F(MemStatsGenGCTest, TrivialGarbageStatsGenGcTest)
 {
     for (int gctypeIdx = 0; static_cast<GCType>(gctypeIdx) <= GCType::GCTYPE_LAST; ++gctypeIdx) {
         auto gcTypeLocal = static_cast<GCType>(gctypeIdx);
@@ -619,7 +689,7 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make a trivial allocation of unaligned size and make it garbage
                 auto r = MakeAllocations<TargetSpace::YOUNG, false, true>();
                 gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-                ASSERT_EQ(2, gccnt->count);
+                ASSERT_EQ(2U, gccnt->count);
                 if (NeedToCheckYoungFreedCount()) {
                     ASSERT_EQ(*loc.youngFreedObjectsCount, r.allocatedCount);
                 }
@@ -636,11 +706,39 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 }
                 ASSERT_EQ(gcMs->GetLargeObjectsFreedCount(), 0);
                 ASSERT_EQ(gcMs->GetLargeObjectsFreedBytes(), 0);
+            }
+
+            ResetRuntime();
+        }
+    }
+}
+
+TEST_F(MemStatsGenGCTest, TrivialAliveAndTenuredStatsGenGcTest)
+{
+    for (int gctypeIdx = 0; static_cast<GCType>(gctypeIdx) <= GCType::GCTYPE_LAST; ++gctypeIdx) {
+        auto gcTypeLocal = static_cast<GCType>(gctypeIdx);
+        if (gcTypeLocal == GCType::EPSILON_G1_GC || gcTypeLocal == GCType::INVALID_GC) {
+            continue;
+        }
+        if (!IsGenerationalGCType(gcTypeLocal)) {
+            continue;
+        }
+        std::string gctype = static_cast<std::string>(GCStringFromType(gcTypeLocal));
+        for (MemStatsGenGCTest::Config cfg; !cfg.End(); ++cfg) {
+            SetupRuntime(gctype, cfg);
+
+            {
+                HandleScope<ObjectHeader *> scope(thread);
+                PrepareTest<ark::PandaAssemblyLanguageConfig>();
+                auto *genMs = GetGenMemStats<ark::PandaAssemblyLanguageConfig>();
+                RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
+
+                gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));  // Heap doesn't have unexpected garbage now
 
                 // Make a trivial allocation of unaligned size and make it alive
-                r = MakeAllocations<TargetSpace::YOUNG, true, true>();
+                auto r = MakeAllocations<TargetSpace::YOUNG, true, true>();
                 gc->WaitForGCInManaged(GCTask(GCTaskCause::YOUNG_GC_CAUSE));
-                ASSERT_EQ(3, gccnt->count);
+                ASSERT_EQ(2U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, r.savedCount);
@@ -652,18 +750,46 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make them garbage
                 MakeObjectsGarbage(0, rootSize);
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(4, gccnt->count);
+                ASSERT_EQ(3U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsSize, 0);
                 ASSERT_EQ(*loc.tenuredFreedObjectsCount, r.savedCount);
                 ASSERT_EQ(*loc.tenuredFreedObjectsSize, r.savedBytes);
+            }
+
+            ResetRuntime();
+        }
+    }
+}
+
+TEST_F(MemStatsGenGCTest, TrivialTenuredAndLargeStatsGenGcTest)
+{
+    for (int gctypeIdx = 0; static_cast<GCType>(gctypeIdx) <= GCType::GCTYPE_LAST; ++gctypeIdx) {
+        auto gcTypeLocal = static_cast<GCType>(gctypeIdx);
+        if (gcTypeLocal == GCType::EPSILON_G1_GC || gcTypeLocal == GCType::INVALID_GC) {
+            continue;
+        }
+        if (!IsGenerationalGCType(gcTypeLocal)) {
+            continue;
+        }
+        std::string gctype = static_cast<std::string>(GCStringFromType(gcTypeLocal));
+        for (MemStatsGenGCTest::Config cfg; !cfg.End(); ++cfg) {
+            SetupRuntime(gctype, cfg);
+
+            {
+                HandleScope<ObjectHeader *> scope(thread);
+                PrepareTest<ark::PandaAssemblyLanguageConfig>();
+                auto *genMs = GetGenMemStats<ark::PandaAssemblyLanguageConfig>();
+                RealStatsLocations loc = GetGenMemStatsDetails<decltype(genMs)>(genMs);
+
+                gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));  // Heap doesn't have unexpected garbage now
 
                 // Make a trivial allocation of unaligned size in tenured space and make it garbage
-                r = MakeAllocations<TargetSpace::TENURED_REGULAR, false, true>();
+                auto r = MakeAllocations<TargetSpace::TENURED_REGULAR, false, true>();
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(5, gccnt->count);
+                ASSERT_EQ(2U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, 0);
@@ -674,7 +800,7 @@ TEST_F(MemStatsGenGCTest, TrivialStatsGenGcTest)
                 // Make a trivial allocation of unaligned size large object and make it garbage
                 r = MakeAllocations<TargetSpace::TENURED_LARGE, false, true>();
                 gc->WaitForGCInManaged(GCTask(FULL_GC_CAUSE));
-                ASSERT_EQ(6, gccnt->count);
+                ASSERT_EQ(3U, gccnt->count);
                 ASSERT_EQ(*loc.youngFreedObjectsCount, 0);
                 ASSERT_EQ(*loc.youngFreedObjectsSize, 0);
                 ASSERT_EQ(*loc.youngMovedObjectsCount, 0);

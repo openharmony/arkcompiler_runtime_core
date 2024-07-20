@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,14 +121,29 @@ private:
     size_t counter_ {0};
 };
 
-TEST(SchedGCOnNthAllocTriggerTest, TestTrigger)
+static RuntimeOptions GetRuntimeOptions(const std::string &triggerType)
 {
     RuntimeOptions options;
     options.SetShouldLoadBootPandaFiles(false);
     options.SetShouldInitializeIntrinsics(false);
-    options.SetGcTriggerType("debug-never");
-    options.SetGcUseNthAllocTrigger(true);
-    Runtime::Create(options);
+    if (triggerType == "debug-never") {
+        options.SetGcTriggerType("debug-never");
+        options.SetGcUseNthAllocTrigger(true);
+    } else if (triggerType == "pause-time-goal-trigger") {
+        options.SetGcTriggerType("pause-time-goal-trigger");
+        options.SetRunGcInPlace(true);
+        constexpr size_t YOUNG_SIZE = 512 * 1024;
+        options.SetYoungSpaceSize(YOUNG_SIZE);
+        options.SetInitYoungSpaceSize(YOUNG_SIZE);
+    } else {
+        UNREACHABLE();
+    }
+    return options;
+}
+
+TEST(SchedGCOnNthAllocTriggerTest, TestTrigger)
+{
+    Runtime::Create(GetRuntimeOptions("debug-never"));
     ManagedThread *thread = ark::ManagedThread::GetCurrent();
     thread->ManagedCodeBegin();
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
@@ -153,15 +168,7 @@ TEST(SchedGCOnNthAllocTriggerTest, TestTrigger)
 
 TEST(PauseTimeGoalTriggerTest, TestTrigger)
 {
-    RuntimeOptions options;
-    options.SetShouldLoadBootPandaFiles(false);
-    options.SetShouldInitializeIntrinsics(false);
-    options.SetGcTriggerType("pause-time-goal-trigger");
-    options.SetRunGcInPlace(true);
-    constexpr size_t YOUNG_SIZE = 512 * 1024;
-    options.SetYoungSpaceSize(YOUNG_SIZE);
-    options.SetInitYoungSpaceSize(YOUNG_SIZE);
-    Runtime::Create(options);
+    Runtime::Create(GetRuntimeOptions("pause-time-goal-trigger"));
     auto *thread = ark::ManagedThread::GetCurrent();
     {
         ScopedManagedCodeThread s(thread);
@@ -187,11 +194,9 @@ TEST(PauseTimeGoalTriggerTest, TestTrigger)
         size_t expectedCounter = 1;
         size_t startIdx = 0;
         for (size_t i = 0; i < ARRAY_LENGTH; i++) {
-            auto *str = coretypes::String::CreateEmptyString(ctx, vm);
-            array->Set(i, str);
+            array->Set(i, coretypes::String::CreateEmptyString(ctx, vm));
 
-            auto collection = expectedCounter == checker.GetCounter();
-            if (collection) {
+            if (expectedCounter == checker.GetCounter()) {
                 // objects become garbage
                 for (size_t j = startIdx; j < i; j++) {
                     array->Set(j, dummy.GetPtr());

@@ -156,15 +156,11 @@ void CpuAffinityManager::Finalize()
     weakCpuSet_.Clear();
 }
 
-/* static */
-void CpuAffinityManager::LoadCpuFreq()
+static std::vector<CpuAffinityManager::CpuInfo> LoadCpuInfoFromSystem(size_t cpuCount)
 {
-    if (!IsCpuAffinityEnabled()) {
-        return;
-    }
-    std::vector<CpuInfo> cpu;
-    cpu.reserve(cpuCount_);
-    for (size_t cpuNumber = 0; cpuNumber < cpuCount_; ++cpuNumber) {
+    std::vector<CpuAffinityManager::CpuInfo> cpu;
+    cpu.reserve(cpuCount);
+    for (size_t cpuNumber = 0; cpuNumber < cpuCount; ++cpuNumber) {
         std::string cpuFreqPath =
             "/sys/devices/system/cpu/cpu" + std::to_string(cpuNumber) + "/cpufreq/cpuinfo_max_freq";
         std::ifstream cpuFreqFile(cpuFreqPath.c_str());
@@ -178,9 +174,22 @@ void CpuAffinityManager::LoadCpuFreq()
             cpuFreqFile.close();
         }
         if (freq == 0U) {
-            cpuCount_ = 0;
-            return;
+            return {};
         }
+    }
+    return cpu;
+}
+
+/* static */
+void CpuAffinityManager::LoadCpuFreq()
+{
+    if (!IsCpuAffinityEnabled()) {
+        return;
+    }
+    std::vector<CpuInfo> cpu = LoadCpuInfoFromSystem(cpuCount_);
+    if (cpu.empty()) {
+        cpuCount_ = 0U;
+        return;
     }
     // Sort by cpu frequency from best to weakest
     std::sort(cpu.begin(), cpu.end(), [](const CpuInfo &lhs, const CpuInfo &rhs) { return lhs.freq > rhs.freq; });

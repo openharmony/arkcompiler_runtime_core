@@ -43,27 +43,31 @@ bool HeapManager::Initialize(GCType gcType, bool singleThreaded, bool useTlab, M
     bool ret = false;
     memStats_ = memStats;
     internalAllocator_ = internalAllocator;
-    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FWD_GC_INIT(type, mem_stats)                                              \
-    case type:                                                                    \
-        if (singleThreaded) {                                                     \
-            ret = Initialize<type, MT_MODE_SINGLE>(mem_stats, createPygoteSpace); \
-        } else {                                                                  \
-            ret = Initialize<type, MT_MODE_MULTI>(mem_stats, createPygoteSpace);  \
-        }                                                                         \
-        break
-
     switch (gcType) {
-        FWD_GC_INIT(GCType::EPSILON_GC, memStats);
-        FWD_GC_INIT(GCType::EPSILON_G1_GC, memStats);
-        FWD_GC_INIT(GCType::STW_GC, memStats);
-        FWD_GC_INIT(GCType::GEN_GC, memStats);
-        FWD_GC_INIT(GCType::G1_GC, memStats);
+        case GCType::EPSILON_GC: {
+            ret = Initialize<GCType::EPSILON_GC>(memStats, singleThreaded, createPygoteSpace);
+            break;
+        }
+        case GCType::EPSILON_G1_GC: {
+            ret = Initialize<GCType::EPSILON_G1_GC>(memStats, singleThreaded, createPygoteSpace);
+            break;
+        }
+        case GCType::STW_GC: {
+            ret = Initialize<GCType::STW_GC>(memStats, singleThreaded, createPygoteSpace);
+            break;
+        }
+        case GCType::GEN_GC: {
+            ret = Initialize<GCType::GEN_GC>(memStats, singleThreaded, createPygoteSpace);
+            break;
+        }
+        case GCType::G1_GC: {
+            ret = Initialize<GCType::G1_GC>(memStats, singleThreaded, createPygoteSpace);
+            break;
+        }
         default:
             LOG(FATAL, GC) << "Invalid init for gc_type = " << static_cast<int>(gcType);
             break;
     }
-#undef FWD_GC_INIT
     // We want to use common allocate scenario in AOT/JIT/Irtoc code with option run-gc-every-safepoint
     // to check state of memory in TriggerGCIfNeeded
     if (!objectAllocator_.AsObjectAllocator()->IsTLABSupported() || Runtime::GetOptions().IsRunGcEverySafepoint()) {

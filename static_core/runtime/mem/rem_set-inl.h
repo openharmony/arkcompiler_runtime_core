@@ -216,7 +216,8 @@ template <typename LockConfigT>
 size_t RemSet<LockConfigT>::GetIdxInBitmap(uintptr_t addr, uintptr_t bitmapBeginAddr)
 {
     static constexpr size_t MEM_SIZE = DEFAULT_REGION_SIZE / Bitmap::GetNumBits();
-    ASSERT(bitmapBeginAddr <= addr && addr < bitmapBeginAddr + DEFAULT_REGION_SIZE);
+    ASSERT(bitmapBeginAddr <= addr);
+    ASSERT(addr < bitmapBeginAddr + DEFAULT_REGION_SIZE);
     return (addr - bitmapBeginAddr) / MEM_SIZE;
 }
 

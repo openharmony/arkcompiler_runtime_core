@@ -64,7 +64,9 @@ void CardTable::Initialize()
 void CardTable::ClearCards(CardPtr start, size_t cardCount)
 {
     static_assert(sizeof(Card) == sizeof(uint8_t));
-    std::memset(reinterpret_cast<uint8_t *>(start), Card::GetClearValue(), cardCount);
+    [[maybe_unused]] auto err =
+        memset_s(reinterpret_cast<uint8_t *>(start), cardsCount_, Card::GetClearValue(), cardCount);
+    ASSERT(err == EOK);
 }
 
 bool CardTable::IsMarked(uintptr_t addr) const

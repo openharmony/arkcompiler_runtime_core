@@ -131,6 +131,40 @@ void EtsPromiseCreateLink(EtsObject *source, EtsPromise *target)
     }
 }
 
+static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsPromise> &promiseHandle)
+{
+    /**
+     * This is a backed by JS equivalent promise.
+     * STS mode: error, no one can create such a promise!
+     * JS mode:
+     *      - add a callback to JQ, that will:
+     *          - resolve the promise with some value OR reject it
+     *          - unblock the coro via event
+     *          - schedule();
+     *      - create a blocker event and link it to the promise
+     *      - block current coroutine on the event
+     *      - Schedule();
+     *          (the last two steps are actually the cm->await()'s job)
+     *      - return promise.value() if resolved or throw() it if rejected
+     */
+    EtsPromiseCreateLink(promiseHandle->GetLinkedPromise(currentCoro), promiseHandle.GetPtr());
+
+    PandaUniquePtr<CoroutineEvent> e = MakePandaUnique<GenericEvent>();
+    e->Lock();
+    promiseHandle->SetEventPtr(e.get());
+    currentCoro->GetCoroutineManager()->Await(e.get());
+    // will get here after the JS callback is called
+    if (promiseHandle->IsResolved()) {
+        LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been resolved.";
+        return promiseHandle->GetValue(currentCoro);
+    }
+    // rejected
+    LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
+    auto *exc = promiseHandle->GetValue(currentCoro);
+    currentCoro->SetException(exc->GetCoreType());
+    return nullptr;
+}
+
 EtsObject *EtsAwaitPromise(EtsPromise *promise)
 {
     EtsCoroutine *currentCoro = EtsCoroutine::GetCurrent();
@@ -143,44 +177,14 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
 
     /* CASE 1. This is a converted JS promise */
-
     if (promiseHandle->IsProxy()) {
-        /**
-         * This is a backed by JS equivalent promise.
-         * STS mode: error, no one can create such a promise!
-         * JS mode:
-         *      - add a callback to JQ, that will:
-         *          - resolve the promise with some value OR reject it
-         *          - unblock the coro via event
-         *          - schedule();
-         *      - create a blocker event and link it to the promise
-         *      - block current coroutine on the event
-         *      - Schedule();
-         *          (the last two steps are actually the cm->await()'s job)
-         *      - return promise.value() if resolved or throw() it if rejected
-         */
-        EtsPromiseCreateLink(promiseHandle->GetLinkedPromise(currentCoro), promiseHandle.GetPtr());
-
-        PandaUniquePtr<CoroutineEvent> e = MakePandaUnique<GenericEvent>();
-        e->Lock();
-        promiseHandle->SetEventPtr(e.get());
-        currentCoro->GetCoroutineManager()->Await(e.get());
-        // will get here after the JS callback is called
-        if (promiseHandle->IsResolved()) {
-            LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been resolved.";
-            return promiseHandle->GetValue(currentCoro);
-        }
-        // rejected
-        LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been rejected.";
-        auto *exc = promiseHandle->GetValue(currentCoro);
-        currentCoro->SetException(exc->GetCoreType());
-        return nullptr;
+        return AwaitProxyPromise(currentCoro, promiseHandle);
     }
 
+    /* CASE 2. This is a native STS promise */
     while (true) {
         currentCoro->ProcessPresentCallbacks();
 
-        /* CASE 2. This is a native STS promise */
         promiseHandle->Lock();
         if (!promiseHandle->IsPending()) {
             // already settled!

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,7 @@
 #include <limits>
 
 #include <windows.h>
-#include <errno.h>
+#include <cerrno>
 #include <io.h>
 
 #include <sysinfoapi.h>
@@ -328,7 +328,8 @@ void *AlignedAlloc(size_t alignmentInBytes, size_t size)
     // aligned_alloc is not supported on MingW. instead we need to call _aligned_malloc.
     auto ret = _aligned_malloc(alignedSize, alignmentInBytes);
     // _aligned_malloc returns aligned pointer so just add assertion, no need to do runtime checks
-    ASSERT(reinterpret_cast<uintptr_t>(ret) == (reinterpret_cast<uintptr_t>(ret) & ~(alignmentInBytes - 1)));
+    ASSERT_PRINT(reinterpret_cast<uintptr_t>(ret) == (reinterpret_cast<uintptr_t>(ret) & ~(alignmentInBytes - 1)),
+                 "Address is not aligned");
     return ret;
 }
 

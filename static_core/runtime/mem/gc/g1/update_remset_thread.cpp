@@ -92,7 +92,6 @@ void UpdateRemsetThread<LanguageConfig>::ThreadLoop()
         ASSERT(!this->pausedByGcThread_);
         ASSERT(iterationFlag == UpdateRemsetWorker<LanguageConfig>::UpdateRemsetWorkerFlags::IS_PROCESS_CARD);
         auto processedCards = this->ProcessAllCards();
-
         if (processedCards < this->GetMinConcurrentCardsToProcess()) {
             Sleep();
         }

@@ -94,7 +94,8 @@ void StackfulCoroutineContext::CleanUp()
     affinityMask_ = stackful_coroutines::AFFINITY_MASK_NONE;
 }
 
-/*static*/ void StackfulCoroutineContext::CoroThreadProc(void *ctx)
+/*static*/
+void StackfulCoroutineContext::CoroThreadProc(void *ctx)
 {
     static_cast<StackfulCoroutineContext *>(ctx)->ThreadProcImpl();
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,7 +79,7 @@ static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::STW_GC)], "Stop-The-World GC
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::GEN_GC)], "Generation GC"));
 static_assert(StringsEqual(GC_NAMES[ToIndex(GCType::G1_GC)], "G1 GC"));
 
-inline GCType GCTypeFromString(std::string_view gcTypeStr)
+constexpr GCType GCTypeFromString(std::string_view gcTypeStr)
 {
     if (gcTypeStr == "epsilon") {
         return GCType::EPSILON_GC;

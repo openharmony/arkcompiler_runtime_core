@@ -114,7 +114,8 @@ public:
      */
     Pool GetAndClearUnreturnedPool(size_t size)
     {
-        ASSERT(pool_ != nullptr && (returnedToOsSize_ + size <= pool_->GetSize()));
+        ASSERT(pool_ != nullptr);
+        ASSERT(returnedToOsSize_ + size <= pool_->GetSize());
         auto unreturnedMem = ToVoidPtr(ToUintPtr(pool_->GetMem()) + returnedToOsSize_);
         returnedToOsSize_ += size;
         return Pool(size, unreturnedMem);
@@ -122,7 +123,8 @@ public:
 
     void SetReturnedToOS()
     {
-        ASSERT(pool_ != nullptr && (returnedToOsSize_ == pool_->GetSize()));
+        ASSERT(pool_ != nullptr);
+        ASSERT(returnedToOsSize_ == pool_->GetSize());
         pool_->SetReturnedToOS(true);
     }
 

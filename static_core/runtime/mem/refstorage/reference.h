@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ public:
         WEAK = 3,
         /// Global references which can be used without Frames. Addresses of references aren't changed
         GLOBAL_FIXED = LOCAL,
-        ENUM_SIZE
+        ENUM_SIZE = 4
     };
 
     DEFAULT_COPY_SEMANTIC(Reference);

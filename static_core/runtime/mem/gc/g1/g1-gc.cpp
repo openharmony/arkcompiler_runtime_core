@@ -1352,6 +1352,65 @@ void G1GC<LanguageConfig>::VerifyCollectAndMove(HeapVerifierIntoGC<LanguageConfi
 
 template <class LanguageConfig>
 template <bool FULL_GC>
+void G1GC<LanguageConfig>::UpdateRefsAndClear(const CollectionSet &collectionSet,
+                                              MovedObjectsContainer<FULL_GC> *movedObjectsContainer,
+                                              PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector,
+                                              HeapVerifierIntoGC<LanguageConfig> *collectVerifier)
+{
+    {
+        os::memory::LockHolder lock(queueLock_);
+        analytics_.ReportUpdateRefsStart(ark::time::GetCurrentTimeInNanos());
+        if (this->GetSettings()->ParallelRefUpdatingEnabled()) {
+            UpdateRefsToMovedObjects<FULL_GC, true>(movedObjectsContainer);
+        } else {
+            UpdateRefsToMovedObjects<FULL_GC, false>(movedObjectsContainer);
+        }
+        analytics_.ReportUpdateRefsEnd(ark::time::GetCurrentTimeInNanos());
+        ActualizeRemSets();
+    }
+
+    VerifyCollectAndMove(std::move(*collectVerifier), collectionSet);
+    SweepRegularVmRefs();
+
+    auto objectAllocator = this->GetG1ObjectAllocator();
+    if (!collectionSet.Young().empty()) {
+        objectAllocator->ResetYoungAllocator();
+    }
+    {
+        GCScope<TRACE_TIMING> resetRegions("ResetRegions", this);
+        if (!this->IsFullGC()) {
+            objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
+                                                   OSPagesPolicy::IMMEDIATE_RETURN, false>(collectionSet.Tenured());
+        } else {
+            objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
+                                                   OSPagesPolicy::NO_RETURN, false>(collectionSet.Tenured());
+        }
+    }
+    {
+        // Don't forget to delete all temporary elements
+        GCScope<TRACE_TIMING> clearMovedObjects("ClearMovedObjects", this);
+        auto internalAllocator = this->GetInternalAllocator();
+        if constexpr (FULL_GC) {
+            bool useGcWorkers = this->GetSettings()->ParallelCompactingEnabled();
+            if (useGcWorkers) {
+                for (auto r : *movedObjectsVector) {
+                    internalAllocator->Delete(r);
+                }
+            } else {
+                ASSERT(movedObjectsVector->size() == 1);
+                internalAllocator->Delete(movedObjectsVector->back());
+            }
+        } else {
+            for (auto r : mixedMarkedObjects_) {
+                internalAllocator->Delete(r);
+            }
+            mixedMarkedObjects_.clear();
+        }
+    }
+}
+
+template <class LanguageConfig>
+template <bool FULL_GC>
 // NOLINTNEXTLINE(readability-function-size)
 bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collectionSet)
 {
@@ -1392,54 +1451,7 @@ bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collectionSet)
         movedObjectsContainer = &mixedMarkedObjects_;
     }
 
-    {
-        os::memory::LockHolder lock(queueLock_);
-        analytics_.ReportUpdateRefsStart(ark::time::GetCurrentTimeInNanos());
-        if (this->GetSettings()->ParallelRefUpdatingEnabled()) {
-            UpdateRefsToMovedObjects<FULL_GC, true>(movedObjectsContainer);
-        } else {
-            UpdateRefsToMovedObjects<FULL_GC, false>(movedObjectsContainer);
-        }
-        analytics_.ReportUpdateRefsEnd(ark::time::GetCurrentTimeInNanos());
-        ActualizeRemSets();
-    }
-
-    VerifyCollectAndMove(std::move(collectVerifier), collectionSet);
-    SweepRegularVmRefs();
-
-    auto objectAllocator = this->GetG1ObjectAllocator();
-    if (!collectionSet.Young().empty()) {
-        objectAllocator->ResetYoungAllocator();
-    }
-    {
-        GCScope<TRACE_TIMING> resetRegions("ResetRegions", this);
-        if (!this->IsFullGC()) {
-            objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
-                                                   OSPagesPolicy::IMMEDIATE_RETURN, false>(collectionSet.Tenured());
-        } else {
-            objectAllocator->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::Release,
-                                                   OSPagesPolicy::NO_RETURN, false>(collectionSet.Tenured());
-        }
-    }
-    {
-        // Don't forget to delete all temporary elements
-        GCScope<TRACE_TIMING> clearMovedObjects("ClearMovedObjects", this);
-        if constexpr (FULL_GC) {
-            if (useGcWorkers) {
-                for (auto r : movedObjectsVector) {
-                    internalAllocator->Delete(r);
-                }
-            } else {
-                ASSERT(movedObjectsVector.size() == 1);
-                internalAllocator->Delete(movedObjectsVector.back());
-            }
-        } else {
-            for (auto r : mixedMarkedObjects_) {
-                internalAllocator->Delete(r);
-            }
-            mixedMarkedObjects_.clear();
-        }
-    }
+    UpdateRefsAndClear<FULL_GC>(collectionSet, movedObjectsContainer, &movedObjectsVector, &collectVerifier);
 
     LOG_DEBUG_GC << "== G1GC CollectAndMove end ==";
     return true;
@@ -1458,6 +1470,49 @@ G1GC<LanguageConfig>::CreateRefUpdater([[maybe_unused]] GCG1BarrierSet::ThreadLo
 }
 
 template <class LanguageConfig>
+template <class ObjectsContainer>
+void G1GC<LanguageConfig>::ProcessMovedObjects(ObjectsContainer *movedObjects)
+{
+    auto rangeBegin = movedObjects->begin();
+    auto rangeEnd = rangeBegin;
+    while (rangeBegin != movedObjects->end()) {
+        if (std::distance(rangeBegin, movedObjects->end()) < GCUpdateRefsWorkersTask<false>::RANGE_SIZE) {
+            rangeEnd = movedObjects->end();
+        } else {
+            std::advance(rangeEnd, GCUpdateRefsWorkersTask<false>::RANGE_SIZE);
+        }
+        auto *movedObjectsRange =
+            this->GetInternalAllocator()->template New<typename GCUpdateRefsWorkersTask<false>::MovedObjectsRange>(
+                rangeBegin, rangeEnd);
+        rangeBegin = rangeEnd;
+        GCUpdateRefsWorkersTask<false> gcWorkerTask(movedObjectsRange);
+        if (this->GetWorkersTaskPool()->AddTask(GCUpdateRefsWorkersTask<false>(gcWorkerTask))) {
+            continue;
+        }
+        // Couldn't add new task, so do task processing immediately
+        this->WorkerTaskProcessing(&gcWorkerTask, nullptr);
+    }
+}
+
+template <class LanguageConfig>
+template <bool FULL_GC, bool ENABLE_WORKERS, class Visitor>
+void G1GC<LanguageConfig>::UpdateMovedObjectsReferences(MovedObjectsContainer<FULL_GC> *movedObjectsContainer,
+                                                        const Visitor &refUpdater)
+{
+    ScopedTiming t("UpdateMovedObjectsReferences", *this->GetTiming());
+    for (auto *movedObjects : *movedObjectsContainer) {
+        if constexpr (ENABLE_WORKERS) {
+            ProcessMovedObjects(movedObjects);
+        } else {  // GC workers are not used
+            typename GCUpdateRefsWorkersTask<FULL_GC>::MovedObjectsRange movedObjectsRange(movedObjects->begin(),
+                                                                                           movedObjects->end());
+            DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(refUpdater), FULL_GC>(&movedObjectsRange,
+                                                                                                 refUpdater);
+        }
+    }
+}
+
+template <class LanguageConfig>
 template <bool FULL_GC, bool USE_WORKERS>
 void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_GC> *movedObjectsContainer)
 {
@@ -1471,37 +1526,7 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
     auto refUpdater = this->CreateRefUpdater<FULL_GC, ENABLE_WORKERS>(updatedRefQueue);
     //  update reference from objects which were moved while garbage collection
     LOG_DEBUG_GC << "=== Update ex-cset -> ex-cset references. START. ===";
-    {
-        ScopedTiming t("UpdateMovedObjectsReferences", *this->GetTiming());
-        for (auto *movedObjects : *movedObjectsContainer) {
-            if constexpr (ENABLE_WORKERS) {
-                auto rangeBegin = movedObjects->begin();
-                auto rangeEnd = rangeBegin;
-                while (rangeBegin != movedObjects->end()) {
-                    if (std::distance(rangeBegin, movedObjects->end()) < GCUpdateRefsWorkersTask<false>::RANGE_SIZE) {
-                        rangeEnd = movedObjects->end();
-                    } else {
-                        std::advance(rangeEnd, GCUpdateRefsWorkersTask<false>::RANGE_SIZE);
-                    }
-                    auto *movedObjectsRange =
-                        internalAllocator->template New<typename GCUpdateRefsWorkersTask<false>::MovedObjectsRange>(
-                            rangeBegin, rangeEnd);
-                    rangeBegin = rangeEnd;
-                    GCUpdateRefsWorkersTask<false> gcWorkerTask(movedObjectsRange);
-                    if (this->GetWorkersTaskPool()->AddTask(GCUpdateRefsWorkersTask<false>(gcWorkerTask))) {
-                        continue;
-                    }
-                    // Couldn't add new task, so do task processing immediately
-                    this->WorkerTaskProcessing(&gcWorkerTask, nullptr);
-                }
-            } else {  // GC workers are not used
-                typename GCUpdateRefsWorkersTask<FULL_GC>::MovedObjectsRange movedObjectsRange(movedObjects->begin(),
-                                                                                               movedObjects->end());
-                DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(refUpdater), FULL_GC>(&movedObjectsRange,
-                                                                                                     refUpdater);
-            }
-        }
-    }
+    UpdateMovedObjectsReferences<FULL_GC, ENABLE_WORKERS>(movedObjectsContainer, refUpdater);
     LOG_DEBUG_GC << "=== Update ex-cset -> ex-cset references. END. ===";
 
     // update references from objects which are not part of collection set
@@ -1519,7 +1544,7 @@ void G1GC<LanguageConfig>::UpdateRefsToMovedObjects(MovedObjectsContainer<FULL_G
         {
             os::memory::LockHolder lock(gcWorkerQueueLock_);
             updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefQueue->begin(), updatedRefQueue->end());
-            this->GetInternalAllocator()->Delete(updatedRefQueue);
+            internalAllocator->Delete(updatedRefQueue);
         }
         GCScope<TRACE_TIMING> waitingTiming("WaitUntilTasksEnd", this);
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
@@ -2453,11 +2478,9 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
         auto pauseTime = analytics_.PredictYoungCollectionTimeInMicros(edenLength);
         return pauseTime <= maxPause;
     };
-
     if (!edenLengthPredicate(minEdenLength)) {
         return minEdenLength;
     }
-
     if (edenLengthPredicate(maxEdenLength)) {
         return maxEdenLength;
     }

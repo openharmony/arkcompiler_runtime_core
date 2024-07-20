@@ -688,6 +688,15 @@ private:
     bool NeedRunGCAfterWaiting(size_t counterBeforeWaiting, const GCTask &task) const;
 
     /**
+     * @brief Making several setups before phases launch
+     * @return true if GC run is still needed
+     */
+    bool GCPhasesPreparation(const GCTask &task);
+
+    /// @brief Getting logs, heap dumps and launching PostGCHeapVerification after GC phases
+    void GCPhasesFinish(const GCTask &task);
+
+    /**
      * @brief Create GC worker if needed and set gc status to running (gc_running_ variable)
      * @see IsGCRunning
      */
