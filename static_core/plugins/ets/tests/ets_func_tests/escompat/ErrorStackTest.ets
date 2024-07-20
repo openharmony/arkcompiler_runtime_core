@@ -74,12 +74,12 @@ function rec(n : int) {
 function testImplicitConversion() {
     let cl = new Nirk();
     let str : String = "a" + cl;
-    assert(str)
+    assert(!!str)
 }
 
 function testConstructor() {
     let cl = new Plonk()
-    assert(cl)
+    assert(!!cl)
 }
 
 function testNestedFunc() {

@@ -645,3 +645,16 @@ spec/05.Generics/function_as_type_generic_0010.ets
 spec/05.Generics/function_as_type_generic_0020.ets
 spec/05.Generics/function_as_type_generic_0030.ets
 ### Issue 17725
+
+### Issue 18123
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0010.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0020.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0030.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0040.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0050.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0060.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0070.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0080.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0090.ets
+spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0100.ets
+### Issue 18123 end

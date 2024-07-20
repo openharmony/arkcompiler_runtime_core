@@ -28,5 +28,5 @@ class A {
 
 function main(): void {
   let i: A = new A();
-  assert A.a = 1;
+  assert A.a == 1;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,9 @@
  * limitations under the License.
  */
 
-/*---
-desc: If the result of the evaluation of e is not equal to null or undefined, then the result of e! is the outcome of the evaluation of e.
----*/
+import * as A from "./class_module.ets"
 
-function main(): void {
-  let i = (): Int|null => { return 5; }();
-  let ii = (): Int|null => { return null; } ();
-  assert !!(0 ? ii : i)!;
+function main() : void {
+  A.Class.foo();
+  A.Class.a;
 }

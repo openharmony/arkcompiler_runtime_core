@@ -30,5 +30,5 @@ class A {
 function main(): void {
   let i: A = new A();
   A.a = 2;
-  assert A.a = 2;
+  assert A.a == 2;
 }

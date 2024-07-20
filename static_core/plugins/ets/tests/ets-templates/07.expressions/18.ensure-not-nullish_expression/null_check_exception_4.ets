@@ -21,10 +21,10 @@ function main(): void {
   let i: Int|undefined = (): Int|undefined => { return undefined; }();
   try {
     let ii = i!;
-    assert 0;
+    assert false;
   } catch(npe: NullPointerError) {
-    assert 1;
+    assert true;
   } catch(e) {
-    assert 0;
+    assert false;
   }
 }

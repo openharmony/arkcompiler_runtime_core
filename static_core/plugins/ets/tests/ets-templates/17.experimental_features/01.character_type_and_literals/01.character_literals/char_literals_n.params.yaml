@@ -15,7 +15,7 @@
 cases:
     - "C'A'"
     - "c''"
-    - "'A'"
+    - "'AB'"
     - "null"
     - "undefined"
     - "c\"A\""

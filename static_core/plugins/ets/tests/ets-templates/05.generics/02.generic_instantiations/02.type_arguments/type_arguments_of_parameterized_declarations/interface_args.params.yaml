@@ -126,3 +126,7 @@ cases:
       let v: J<J<B>[]> = new A<J<B>[]>(new J<B>[0])
     decl: |-
       type B = X[]
+
+  # Boxed to Reference type
+  - use: |-
+      let v: J<int> = new A<int>(1)

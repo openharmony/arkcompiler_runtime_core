@@ -22,10 +22,10 @@ function main(): void {
   let ii: Int|undefined = undefined;
   try {
     (1 ? ii : i)!;
-    assert 0;
+    assert false;
   } catch(npe: NullPointerError) {
-    assert 1;
+    assert true;
   } catch(e) {
-    assert 0;
+    assert false;
   }
 }

@@ -83,7 +83,7 @@ function test3(): number {
         arr[1] = 2;
     } catch (e) {
         assert e instanceof ArrayIndexOutOfBoundsError :"Throwed not ArrayIndexOutOfBoundsError"
-        assert arr[0] = 1;
+        assert arr[0] == 1;
         return 0;
     }
     return 1;
