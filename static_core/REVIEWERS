@@ -12,22 +12,6 @@
 # limitations under the License.
 
 * @ctw-ian
-/abc2program/ @ctw-ian
-/assembler/ @ctw-ian
-/bytecode_optimizer/ @ctw-ian
-/compiler/ @ctw-ian
-/disassembler/ @ctw-ian
-/isa/ @ctw-ian
-/ldscripts/ @gitee-dakeQI
-/libark_defect_scan_aux/ @gitee-dakeQI
-/libpandabase/ @gitee-dakeQI
-/libpandafile/ @gitee-dakeQI
-/libziparchive/ @gitee-dakeQI
-/panda/ @gitee-dakeQI
-/pandastdlib/ @ctw-ian
-/platforms/ @gitee-dakeQI
-/templates/ @ctw-ian
-/verifier/ @ctw-ian
 
 static_core/ @dmitriitr @Prof1983 @igelhaus @ragnvald
 
@@ -141,3 +125,20 @@ static_core/plugins/ets/tests/runtime/tooling/                   @ragnvald
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp @konstanting @udav
 static_core/plugins/ets/stdlib/std/debug/concurrency/            @konstanting
 static_core/plugins/ets/tests/interop_js/tests/promise/          @udav
+
+/abc2program/ @ctw-ian
+/assembler/ @ctw-ian
+/bytecode_optimizer/ @ctw-ian
+/compiler/ @ctw-ian
+/disassembler/ @ctw-ian
+/isa/ @ctw-ian
+/ldscripts/ @gitee-dakeQI
+/libark_defect_scan_aux/ @gitee-dakeQI
+/libpandabase/ @gitee-dakeQI
+/libpandafile/ @gitee-dakeQI
+/libziparchive/ @gitee-dakeQI
+/panda/ @gitee-dakeQI
+/pandastdlib/ @ctw-ian
+/platforms/ @gitee-dakeQI
+/templates/ @ctw-ian
+/verifier/ @ctw-ian
