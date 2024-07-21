@@ -1715,7 +1715,15 @@ void Function::CollectLocalVariable(std::vector<Function::LocalVariablePair> &lo
     }
 
     std::sort(local_variable_info.begin(), local_variable_info.end(),
-        [&](const Function::LocalVariablePair &a, const Function::LocalVariablePair &b) {
+        [this](const Function::LocalVariablePair &a, const Function::LocalVariablePair &b) {
+        auto a_var = this->local_variable_debug[a.variable_index];
+        auto b_var = this->local_variable_debug[b.variable_index];
+        // If the same register is fisrt used by a_var, and then used by b_var, the ending position of a_var needs
+        // to be equal or less then the starting position of b_var. This is to keep the order in local_variable_debug
+        // to make sure that if the usage of a_var start first, it will end first.
+        if (a.insn_order == b.insn_order && a_var.reg == b_var.reg) {
+            return a_var.start < b_var.start;
+        }
         return a.insn_order < b.insn_order;
     });
 }
