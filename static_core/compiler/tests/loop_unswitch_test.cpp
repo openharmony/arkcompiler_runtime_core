@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,9 +157,24 @@ public:
             }
         }
     }
+
+    void BuildGraphSingleCondition();
+    Graph *BuildExpectedSingleCondition();
+
+    void BuildGraphSameCondition();
+    Graph *BuildExpectedSameCondition();
+
+    void BuildGraphMultipleConditionsLimitInstructions();
+    Graph *BuildExpectedMultipleConditionsLimitInstructions();
+
+    void BuildGraphMultipleConditionsLimitLevel();
+    Graph *BuildExpectedMultipleConditionsLimitLevel();
+
+    void BuildGraphMultipleConditions();
+    Graph *BuildExpectedMultipleConditions();
 };
 
-TEST_F(LoopUnswitchTest, TestSingleCondition)
+void LoopUnswitchTest::BuildGraphSingleCondition()
 {
     GRAPH(GetGraph())
     {
@@ -197,99 +212,72 @@ TEST_F(LoopUnswitchTest, TestSingleCondition)
             INST(15U, Opcode::Return).i64().Inputs(5U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LoopPeeling>());
-    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 100U));
-    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
+}
+
+Graph *LoopUnswitchTest::BuildExpectedSingleCondition()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
-        PARAMETER(1U, 1U).b();
         CONSTANT(2U, 100U).i64();
         CONSTANT(3U, 0U).i64();
         CONSTANT(4U, 1U).i64();
-
-        BASIC_BLOCK(14U, 27U) {}
 
         BASIC_BLOCK(27U, 16U, 18U)
         {
             INST(35U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0U).Inputs(0U);
         }
-        BASIC_BLOCK(18U, 25U, 19U)
+        BASIC_BLOCK(18U, 3U, 19U)
         {
             INST(22U, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_GE).Inputs(3U, 2U);
             INST(23U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(22U);
         }
-        BASIC_BLOCK(19U, 23U)
+        BASIC_BLOCK(19U, 3U, 19U)
         {
             INST(24U, Opcode::Phi).i64().Inputs(3U, 32U);
             INST(25U, Opcode::Phi).i64().Inputs(3U, 28U);
-        }
-        BASIC_BLOCK(23U, 22U)
-        {
-            // empty
-        }
-        BASIC_BLOCK(22U, 21U)
-        {
             INST(32U, Opcode::Sub).i64().Inputs(24U, 25U);
-        }
-        BASIC_BLOCK(21U, 20U)
-        {
             INST(28U, Opcode::Add).i64().Inputs(25U, 4U);
-        }
-        BASIC_BLOCK(20U, 25U, 19U)
-        {
             INST(26U, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_GE).Inputs(28U, 2U);
             INST(27U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(26U);
         }
-        BASIC_BLOCK(25U, 26U)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(33U, Opcode::Phi).i64().Inputs(3U, 32U);
+            INST(34U, Opcode::Phi).i64().Inputs({{2, 9U}, {19U, 32U}, {16U, 3U}, {18U, 3U}});
+            INST(15U, Opcode::Return).i64().Inputs(34U);
         }
-        BASIC_BLOCK(16U, 15U, 2U)
+        BASIC_BLOCK(16U, 3U, 2U)
         {
             INST(16U, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_GE).Inputs(3U, 2U);
             INST(17U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(16U);
         }
-        BASIC_BLOCK(2U, 4U)
+        BASIC_BLOCK(2U, 3U, 2U)
         {
             INST(5U, Opcode::Phi).i64().Inputs(3U, 9U);
             INST(6U, Opcode::Phi).i64().Inputs(3U, 12U);
-        }
-        BASIC_BLOCK(4U, 6U)
-        {
-            // empty
-        }
-        BASIC_BLOCK(6U, 8U)
-        {
             INST(9U, Opcode::Add).i64().Inputs(5U, 6U);
-        }
-        BASIC_BLOCK(8U, 17U)
-        {
             INST(12U, Opcode::Add).i64().Inputs(6U, 4U);
-        }
-        BASIC_BLOCK(17U, 15U, 2U)
-        {
             INST(7U, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_GE).Inputs(12U, 2U);
             INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
-        BASIC_BLOCK(15U, 26U)
-        {
-            INST(20U, Opcode::Phi).i64().Inputs(3U, 9U);
-        }
-        BASIC_BLOCK(26U, 3U)
-        {
-            INST(34U, Opcode::Phi).i64().Inputs(33U, 20U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(15U, Opcode::Return).i64().Inputs(34U);
-        }
     }
+    return graph;
+}
+
+TEST_F(LoopUnswitchTest, TestSingleCondition)
+{
+    BuildGraphSingleCondition();
+    ASSERT_TRUE(GetGraph()->RunPass<LoopPeeling>());
+    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 100U));
+    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = BuildExpectedSingleCondition();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(LoopUnswitchTest, TestSameCondition)
+void LoopUnswitchTest::BuildGraphSameCondition()
 {
     GRAPH(GetGraph())
     {
@@ -336,9 +324,10 @@ TEST_F(LoopUnswitchTest, TestSameCondition)
             INST(17U, Opcode::Return).i64().Inputs(6U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LoopPeeling>());
-    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 100U));
-    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
+}
+
+Graph *LoopUnswitchTest::BuildExpectedSameCondition()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -361,33 +350,18 @@ TEST_F(LoopUnswitchTest, TestSameCondition)
             INST(25U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(24U);
         }
 
-        BASIC_BLOCK(19U, 24U)
+        BASIC_BLOCK(19U, 25U)
         {
             INST(26U, Opcode::Phi).i64().Inputs(3U, 30U);
             INST(27U, Opcode::Phi).i64().Inputs(3U, 33U);
         }
 
-        BASIC_BLOCK(24U, 25U) {}
-
-        BASIC_BLOCK(25U, 23U)
+        BASIC_BLOCK(25U, 27U, 19U)
         {
             INST(36U, Opcode::Add).i64().Inputs(26U, 27U);
-        }
-
-        BASIC_BLOCK(23U, 22U)
-        {
             INST(33U, Opcode::Add).i64().Inputs(36U, 4U);
-        }
-
-        BASIC_BLOCK(22U, 21U) {}
-
-        BASIC_BLOCK(21U, 20U)
-        {
             INST(30U, Opcode::Add).i64().Inputs(26U, 4U);
-        }
 
-        BASIC_BLOCK(20U, 27U, 19U)
-        {
             INST(28U, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_GE).Inputs(30U, 2U);
             INST(29U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(28U);
         }
@@ -403,33 +377,14 @@ TEST_F(LoopUnswitchTest, TestSameCondition)
             INST(19U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
         }
 
-        BASIC_BLOCK(2U, 4U)
+        BASIC_BLOCK(2U, 15U, 2U)
         {
             INST(5U, Opcode::Phi).i64().Inputs(3U, 16U);
             INST(6U, Opcode::Phi).i64().Inputs(3U, 14U);
-        }
-
-        BASIC_BLOCK(4U, 5U) {}
-
-        BASIC_BLOCK(5U, 8U)
-        {
             INST(12U, Opcode::Add).i64().Inputs(5U, 4U);
-        }
-
-        BASIC_BLOCK(8U, 9U) {}
-
-        BASIC_BLOCK(9U, 10U)
-        {
             INST(14U, Opcode::Sub).i64().Inputs(12U, 6U);
-        }
-
-        BASIC_BLOCK(10U, 17U)
-        {
             INST(16U, Opcode::Add).i64().Inputs(5U, 4U);
-        }
 
-        BASIC_BLOCK(17U, 15U, 2U)
-        {
             INST(7U, Opcode::Compare).b().SrcType(DataType::Type::INT64).CC(CC_GE).Inputs(16U, 2U);
             INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
         }
@@ -439,20 +394,29 @@ TEST_F(LoopUnswitchTest, TestSameCondition)
             INST(23U, Opcode::Phi).i64().Inputs(3U, 14U);
         }
 
-        BASIC_BLOCK(28U, 3U)
+        BASIC_BLOCK(28U, -1L)
         {
             INST(39U, Opcode::Phi).i64().Inputs(38U, 23U);
-        }
-
-        BASIC_BLOCK(3U, -1L)
-        {
             INST(17U, Opcode::Return).i64().Inputs(39U);
         }
     }
+    return graph;
+}
+
+TEST_F(LoopUnswitchTest, TestSameCondition)
+{
+    BuildGraphSameCondition();
+    ASSERT_TRUE(GetGraph()->RunPass<LoopPeeling>());
+    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 100U));
+    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = BuildExpectedSameCondition();
+    graph->RunPass<Cleanup>();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(LoopUnswitchTest, TestMultipleConditions)
+void LoopUnswitchTest::BuildGraphMultipleConditions()
 {
     GRAPH(GetGraph())
     {
@@ -551,9 +515,10 @@ TEST_F(LoopUnswitchTest, TestMultipleConditions)
             INST(49U, Opcode::Return).i32().Inputs(55U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 100U));
-    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+}
+
+Graph *LoopUnswitchTest::BuildExpectedMultipleConditions()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -663,10 +628,21 @@ TEST_F(LoopUnswitchTest, TestMultipleConditions)
             INST(49U, Opcode::Return).i32().Inputs(77U);
         }
     }
+    return graph;
+}
+
+TEST_F(LoopUnswitchTest, TestMultipleConditions)
+{
+    BuildGraphMultipleConditions();
+    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 100U));
+    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = BuildExpectedMultipleConditions();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitLevel)
+void LoopUnswitchTest::BuildGraphMultipleConditionsLimitLevel()
 {
     GRAPH(GetGraph())
     {
@@ -765,9 +741,10 @@ TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitLevel)
             INST(49U, Opcode::Return).i32().Inputs(55U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(1U, 100U));
-    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+}
+
+Graph *LoopUnswitchTest::BuildExpectedMultipleConditionsLimitLevel()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -872,10 +849,20 @@ TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitLevel)
             INST(49U, Opcode::Return).i32().Inputs(77U);
         }
     }
+    return graph;
+}
+
+TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitLevel)
+{
+    BuildGraphMultipleConditionsLimitLevel();
+    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(1U, 100U));
+    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+    auto graph = BuildExpectedMultipleConditionsLimitLevel();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitInstructions)
+void LoopUnswitchTest::BuildGraphMultipleConditionsLimitInstructions()
 {
     GRAPH(GetGraph())
     {
@@ -974,9 +961,10 @@ TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitInstructions)
             INST(49U, Opcode::Return).i32().Inputs(55U);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 40U));
-    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
-    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+}
+
+Graph *LoopUnswitchTest::BuildExpectedMultipleConditionsLimitInstructions()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -1083,6 +1071,17 @@ TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitInstructions)
             INST(49U, Opcode::Return).i32().Inputs(77U);
         }
     }
+    return graph;
+}
+
+TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitInstructions)
+{
+    BuildGraphMultipleConditionsLimitInstructions();
+    ASSERT_TRUE(GetGraph()->RunPass<LoopUnswitch>(2U, 40U));
+    ASSERT_TRUE(GetGraph()->RunPass<BranchElimination>());
+    ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
+
+    auto graph = BuildExpectedMultipleConditionsLimitInstructions();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

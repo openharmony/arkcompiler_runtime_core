@@ -21,7 +21,7 @@
 namespace ark::compiler {
 class LoopIdiomsTest : public GraphTest {
 protected:
-    bool CheckFillArrayFull(DataType::Type arrayType, RuntimeInterface::IntrinsicId expectedIntrinsic)
+    Graph *CheckFillArrayFullInitial(DataType::Type arrayType)
     {
         auto initial = CreateEmptyGraph();
         GRAPH(initial)
@@ -56,13 +56,12 @@ protected:
             }
             // NOLINTEND(readability-magic-numbers)
         }
+        return initial;
+    }
 
-        if (!initial->RunPass<LoopIdioms>()) {
-            return false;
-        }
-        initial->RunPass<Cleanup>();
-
-        auto expected = CreateEmptyGraph();
+    void BuildExpectedFillArrayFull(Graph *expected, DataType::Type arrayType,
+                                    RuntimeInterface::IntrinsicId expectedIntrinsic)
+    {
         GRAPH(expected)
         {
             // NOLINTBEGIN(readability-magic-numbers)
@@ -118,9 +117,23 @@ protected:
             }
             // NOLINTEND(readability-magic-numbers)
         }
+    }
 
+    bool CheckFillArrayFull(DataType::Type arrayType, RuntimeInterface::IntrinsicId expectedIntrinsic)
+    {
+        auto initial = CheckFillArrayFullInitial(arrayType);
+        if (!initial->RunPass<LoopIdioms>()) {
+            return false;
+        }
+        initial->RunPass<Cleanup>();
+
+        auto expected = CreateEmptyGraph();
+        BuildExpectedFillArrayFull(expected, arrayType, expectedIntrinsic);
         return GraphComparator().Compare(initial, expected);
     }
+
+    void FillLargeArrayWithConstantIterationsCount();
+    Graph *FillLargeArrayWithConstantIterationsCountExpected();
 };
 
 TEST_F(LoopIdiomsTest, FillArray)
@@ -317,12 +330,8 @@ TEST_F(LoopIdiomsTest, FillTinyArray)
     ASSERT_FALSE(GetGraph()->RunPass<LoopIdioms>());
 }
 
-TEST_F(LoopIdiomsTest, FillLargeArrayWithConstantIterationsCount)
+void LoopIdiomsTest::FillLargeArrayWithConstantIterationsCount()
 {
-    if (GetGraph()->GetArch() == Arch::AARCH32) {
-        GTEST_SKIP();
-    }
-
     GRAPH(GetGraph())
     {
         // NOLINTBEGIN(readability-magic-numbers)
@@ -356,10 +365,10 @@ TEST_F(LoopIdiomsTest, FillLargeArrayWithConstantIterationsCount)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<LoopIdioms>());
-    GetGraph()->RunPass<Cleanup>();
-
+Graph *LoopIdiomsTest::FillLargeArrayWithConstantIterationsCountExpected()
+{
     auto expected = CreateEmptyGraph();
     GRAPH(expected)
     {
@@ -380,10 +389,11 @@ TEST_F(LoopIdiomsTest, FillLargeArrayWithConstantIterationsCount)
 
         BASIC_BLOCK(3U, 4U)
         {
+            std::initializer_list<std::pair<int, int>> inputs = {
+                {DataType::REFERENCE, 5U}, {DataType::INT32, 1U}, {DataType::INT32, 2U}, {DataType::INT32, 15U}};
             INST(17U, Opcode::Intrinsic)
                 .v0id()
-                .Inputs(
-                    {{DataType::REFERENCE, 5U}, {DataType::INT32, 1U}, {DataType::INT32, 2U}, {DataType::INT32, 15U}})
+                .Inputs(inputs)
                 .IntrinsicId(RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_32)
                 .SetFlag(compiler::inst_flags::NO_HOIST)
                 .SetFlag(compiler::inst_flags::NO_DCE)
@@ -400,7 +410,21 @@ TEST_F(LoopIdiomsTest, FillLargeArrayWithConstantIterationsCount)
         }
         // NOLINTEND(readability-magic-numbers)
     }
+    return expected;
+}
 
+// NOLINTEND(readability-magic-numbers)
+
+TEST_F(LoopIdiomsTest, FillLargeArrayWithConstantIterationsCount)
+{
+    if (GetGraph()->GetArch() == Arch::AARCH32) {
+        GTEST_SKIP();
+    }
+    FillLargeArrayWithConstantIterationsCount();
+    ASSERT_TRUE(GetGraph()->RunPass<LoopIdioms>());
+    GetGraph()->RunPass<Cleanup>();
+
+    auto expected = FillLargeArrayWithConstantIterationsCountExpected();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 }
 

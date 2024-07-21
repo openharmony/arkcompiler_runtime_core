@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,20 +223,23 @@ TEST_F(LinearOrderTest, LoopTransform)
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>(false));
     ASSERT_TRUE(GetGraph()->RunPass<LoopUnroll>(100U, 3U));
 
-    ASSERT_TRUE(CheckOrder(20U, {4U, 3U, 5U, 22U, 24U, 25U, 23U, 26U, 28U, 29U, 27U, 21U, 1U}))
-        << "Unexpected initial order";
+    if (!CheckOrder(20U, {4U, 3U, 5U, 22U, 24U, 25U, 23U, 26U, 28U, 29U, 27U, 21U, 1U})) {
+        FAIL() << "Unexpected initial order";
+    }
 
     StartProfiling();
     UpdateBranchTaken(0x10U, 10U);
     UpdateBranchNotTaken(0x10U);
 
-    ASSERT_TRUE(CheckOrder(20U, {3U, 5U, 22U, 25U, 23U, 26U, 29U, 27U, 21U, 28U, 24U, 4U, 1U}))
-        << "Unexpected order, threshold was exceeded";
+    if (!CheckOrder(20U, {3U, 5U, 22U, 25U, 23U, 26U, 29U, 27U, 21U, 28U, 24U, 4U, 1U})) {
+        FAIL() << "Unexpected order, threshold was exceeded";
+    }
 
     UpdateBranchNotTaken(0x10U, 20U);
 
-    ASSERT_TRUE(CheckOrder(20U, {4U, 5U, 22U, 24U, 23U, 26U, 28U, 27U, 21U, 29U, 25U, 3U, 1U}))
-        << "Unexpected order, another branch threshold was exceeded";
+    if (!CheckOrder(20U, {4U, 5U, 22U, 24U, 23U, 26U, 28U, 27U, 21U, 29U, 25U, 3U, 1U})) {
+        FAIL() << "Unexpected order, another branch threshold was exceeded";
+    }
 }
 
 TEST_F(LinearOrderTest, ThrowBlock1)
