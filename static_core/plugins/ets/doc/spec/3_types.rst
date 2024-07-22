@@ -1455,7 +1455,7 @@ is the *throwing function type*.
 If a function type has the '``?``' mark for a parameter name, then this
 parameter and all parameters that follow (if any) are optional. Otherwise, a
 :index:`compile-time error` occurs. The actual type of the parameter is then a
-union of the parameter declared type and ``undefined``. Note that this
+union of the parameter type and type ``undefined``. Note that this
 parameter has no default value.
 
 .. code-block:: typescript
