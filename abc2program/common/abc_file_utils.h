@@ -77,7 +77,6 @@ public:
     static bool IsArrayTypeName(const std::string &type_name);
     static bool IsSystemTypeName(const std::string &type_name);
     static bool IsESTypeAnnotationName(const std::string &type_name);
-    static bool IsLiteralTagArray(const panda_file::LiteralTag &tag);
     static std::string GetLabelNameByInstIdx(size_t inst_idx);
 };  // class AbcFileUtils
 
