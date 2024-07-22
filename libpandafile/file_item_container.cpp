@@ -406,6 +406,40 @@ void ItemContainer::DeduplicateItems(bool computeLayout)
     DeduplicateAnnotations();
 }
 
+static bool Compare(const std::unique_ptr<BaseItem> &item1, const std::unique_ptr<BaseItem> &item2)
+{
+    return item1->GetReLayoutRank() > item2->GetReLayoutRank();
+}
+
+void ItemContainer::ReLayout()
+{
+    for (auto &item : items_) {
+        if (!item->NeedsEmit()) {
+            continue;
+        }
+
+        /* Because only class items and func_main_0 will be accessed in runtime's initialization,
+         * the items in abc will be arranged in following order to increase cache hit rate:
+         *     class items -> string items(for field name) -> other items
+         */
+        switch (item->GetItemType()) {
+            case ItemTypes::CLASS_ITEM: {
+                item->SetReLayoutRank(ItemRank::CLASS_ITEM_RANK);
+                break;
+            }
+            case ItemTypes::STRING_ITEM: {
+                item->SetReLayoutRank(ItemRank::STRING_ITEM_RANK);
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+
+    items_.sort(Compare);
+}
+
 uint32_t ItemContainer::ComputeLayout()
 {
     uint32_t original_offset = 0;
