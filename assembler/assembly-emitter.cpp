@@ -1453,6 +1453,7 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
         }
     }
 
+    items.ReLayout();
     items.ComputeLayout();
 
     for (const auto *prog : progs) {
