@@ -13,42 +13,22 @@
 
 --- # List of string comparison conditions
 boolean_comparison:
-  - {type: "boolean", left: "false", right: "false", op: "<", result: "false"}
-  - {type: "boolean", left: "false", right: "true", op: "<", result: "true"}
-  - {type: "boolean", left: "true", right: "false", op: "<", result: "false"}
-  - {type: "boolean", left: "true", right: "true", op: "<", result: "false"}
+  - {xvalue: "false", yvalue: "false", op: "<", result: "false"}
+  - {xvalue: "false", yvalue: "true", op: "<", result: "true"}
+  - {xvalue: "true", yvalue: "false", op: "<", result: "false"}
+  - {xvalue: "true", yvalue: "true", op: "<", result: "false"}
 
-  - {type: "boolean", left: "false", right: "false", op: "<=", result: "true"}
-  - {type: "boolean", left: "false", right: "true", op: "<=", result: "true"}
-  - {type: "boolean", left: "true", right: "false", op: "<=", result: "false"}
-  - {type: "boolean", left: "true", right: "true", op: "<=", result: "true"}
+  - {xvalue: "false", yvalue: "false", op: "<=", result: "true"}
+  - {xvalue: "false", yvalue: "true", op: "<=", result: "true"}
+  - {xvalue: "true", yvalue: "false", op: "<=", result: "false"}
+  - {xvalue: "true", yvalue: "true", op: "<=", result: "true"}
 
-  - {type: "boolean", left: "false", right: "false", op: ">", result: "false"}
-  - {type: "boolean", left: "false", right: "true", op: ">", result: "false"}
-  - {type: "boolean", left: "true", right: "false", op: ">", result: "true"}
-  - {type: "boolean", left: "true", right: "true", op: ">", result: "false"}
+  - {xvalue: "false", yvalue: "false", op: ">", result: "false"}
+  - {xvalue: "false", yvalue: "true", op: ">", result: "false"}
+  - {xvalue: "true", yvalue: "false", op: ">", result: "true"}
+  - {xvalue: "true", yvalue: "true", op: ">", result: "false"}
 
-  - {type: "boolean", left: "false", right: "false", op: ">=", result: "true"}
-  - {type: "boolean", left: "false", right: "true", op: ">=", result: "false"}
-  - {type: "boolean", left: "true", right: "false", op: ">=", result: "true"}
-  - {type: "boolean", left: "true", right: "true", op: ">=", result: "true"}
-
-  - {type: "Boolean", left: "false", right: "false", op: "<", result: "false"}
-  - {type: "Boolean", left: "false", right: "true", op: "<", result: "true"}
-  - {type: "Boolean", left: "true", right: "false", op: "<", result: "false"}
-  - {type: "Boolean", left: "true", right: "true", op: "<", result: "false"}
-
-  - {type: "Boolean", left: "false", right: "false", op: "<=", result: "true"}
-  - {type: "Boolean", left: "false", right: "true", op: "<=", result: "true"}
-  - {type: "Boolean", left: "true", right: "false", op: "<=", result: "false"}
-  - {type: "Boolean", left: "true", right: "true", op: "<=", result: "true"}
-
-  - {type: "Boolean", left: "false", right: "false", op: ">", result: "false"}
-  - {type: "Boolean", left: "false", right: "true", op: ">", result: "false"}
-  - {type: "Boolean", left: "true", right: "false", op: ">", result: "true"}
-  - {type: "Boolean", left: "true", right: "true", op: ">", result: "false"}
-
-  - {type: "Boolean", left: "false", right: "false", op: ">=", result: "true"}
-  - {type: "Boolean", left: "false", right: "true", op: ">=", result: "false"}
-  - {type: "Boolean", left: "true", right: "false", op: ">=", result: "true"}
-  - {type: "Boolean", left: "true", right: "true", op: ">=", result: "true"}
+  - {xvalue: "false", yvalue: "false", op: ">=", result: "true"}
+  - {xvalue: "false", yvalue: "true", op: ">=", result: "false"}
+  - {xvalue: "true", yvalue: "false", op: ">=", result: "true"}
+  - {xvalue: "true", yvalue: "true", op: ">=", result: "true"}

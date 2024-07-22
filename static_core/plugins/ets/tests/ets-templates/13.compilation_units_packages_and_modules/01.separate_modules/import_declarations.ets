@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,23 @@
  * limitations under the License.
  */
 
-{% for ic in integer_comparison %}
+{% for c in cases %}
 
 /*---
-desc: Integer comparison {{ic.xvalue}} {{ic.op}} {{ic.yvalue}}
+desc: >-
+    A separate module is a module without a package header. A separate module can optionally consist of
+    - Top-level declarations
+files:
+- ./modules/declarations.ets
+tags: {{c.tags}}
 ---*/
 
+{{c.import}}
+
+{{c.decl}}
+
 function main(): void {
-  let x: {{ic.xtype}} = {{ic.xvalue}};
-  let bx: {{ic.xboxed}} = new {{ic.xboxed}}({{ic.xvalue}} as {{ic.xtype}});
-  let y: {{ic.ytype}} = {{ic.yvalue}};
-  let by: {{ic.yboxed}} = new {{ic.yboxed}}({{ic.yvalue}} as {{ic.ytype}});
-  assert (x {{ic.op}} y) == {{ic.result}};
-  assert (bx {{ic.op}} by) == {{ic.result}};
-  assert (x {{ic.op}} by) == {{ic.result}};
+  {{c.call}}
 }
 
 {% endfor %}

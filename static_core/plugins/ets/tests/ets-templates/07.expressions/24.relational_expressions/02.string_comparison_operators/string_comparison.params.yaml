@@ -29,6 +29,19 @@ string_comparison:
   - {left: '!@#$%^&*()_+-=`~\"\\|[]{}/?.><\\,', right: '!@#$%^&*()_+-=`~\"\\|[]{}/?.><\\, ', op: "<", result: "true"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', op: "<", result: "false"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x007\x00', op: "<", result: "true"}
+  # surrogate
+  - {left: '\u{D800}', right: '\u{D800}', op: "<", result: "false"}
+  - {left: '\u{D800}', right: '\u{D801}', op: "<", result: "true"}
+  - {left: '\u{DC00}', right: '\u{DC00}', op: "<", result: "false"}
+  - {left: '\u{DC00}', right: '\u{DC01}', op: "<", result: "true"}
+  - {left: '\u{DBFF}\u{DFFF}', right: '\u{DBFF}\u{DFFF}', op: "<", result: "false"}
+  - {left: '\u{DBFF}\u{DFFA}', right: '\u{DBFF}\u{DFFF}', op: "<", result: "true"}
+  # utf-16
+  - {left: '\u{A123}', right: '\u{A122}', op: "<", result: "false"}
+  - {left: '\u{A123}', right: '\u{A124}', op: "<", result: "true"}
+  # utf-32
+  - {left: '\u{00000069}', right: '\u{00000068}', op: "<", result: "false"}
+  - {left: '\u{00000068}', right: '\u{00000069}', op: "<", result: "true"}
 
   - {left: '', right: '', op: "<=", result: "true"}
   - {left: ' ', right: '', op: "<=", result: "false"}
@@ -46,6 +59,24 @@ string_comparison:
   - {left: '!@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\', right: '!@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\', op: "<=", result: "true"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', op: "<=", result: "true"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x007\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', op: "<=", result: "false"}
+  # surrogate
+  - {left: '\u{D800}', right: '\u{D800}', op: "<=", result: "true"}
+  - {left: '\u{D801}', right: '\u{D800}', op: "<=", result: "false"}
+  - {left: '\u{D800}', right: '\u{D801}', op: "<=", result: "true"}
+  - {left: '\u{DC00}', right: '\u{DC00}', op: "<=", result: "true"}
+  - {left: '\u{DC01}', right: '\u{DC00}', op: "<=", result: "false"}
+  - {left: '\u{DC00}', right: '\u{DC01}', op: "<=", result: "true"}
+  - {left: '\u{DBFF}\u{DFFF}', right: '\u{DBFF}\u{DFFF}', op: "<=", result: "true"}
+  - {left: '\u{DBFF}\u{DFFF}', right: '\u{DBFF}\u{DFFA}', op: "<=", result: "false"}
+  - {left: '\u{DBFA}\u{DFFF}', right: '\u{DBFF}\u{DFFF}', op: "<=", result: "true"}
+  # utf-16
+  - {left: '\u{A123}', right: '\u{A123}', op: "<=", result: "true"}
+  - {left: '\u{A123}', right: '\u{A122}', op: "<=", result: "false"}
+  - {left: '\u{A122}', right: '\u{A123}', op: "<=", result: "true"}
+  # utf-32
+  - {left: '\u{00000068}', right: '\u{00000068}', op: "<=", result: "true"}
+  - {left: '\u{00000069}', right: '\u{00000068}', op: "<=", result: "false"}
+  - {left: '\u{00000068}', right: '\u{00000069}', op: "<=", result: "true"}
 
   - {left: '', right: '', op: ">", result: "false"}
   - {left: ' ', right: '', op: ">", result: "true"}
@@ -63,6 +94,19 @@ string_comparison:
   - {left: '!@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\', right: '!@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\', op: ">", result: "false"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', op: ">", result: "false"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x007\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', op: ">", result: "true"}
+  # surrogate
+  - {left: '\u{D800}', right: '\u{D800}', op: ">", result: "false"}
+  - {left: '\u{D801}', right: '\u{D800}', op: ">", result: "true"}
+  - {left: '\u{DC00}', right: '\u{DC00}', op: ">", result: "false"}
+  - {left: '\u{DC01}', right: '\u{DC00}', op: ">", result: "true"}
+  - {left: '\u{DBFF}\u{DFFF}', right: '\u{DBFF}\u{DFFF}', op: ">", result: "false"}
+  - {left: '\u{DBFF}\u{DFFF}', right: '\u{DBFF}\u{DFFA}', op: ">", result: "true"}
+  # utf-16
+  - {left: '\u{A123}', right: '\u{A122}', op: ">", result: "true"}
+  - {left: '\u{A123}', right: '\u{A123}', op: ">", result: "false"}
+  # utf-32
+  - {left: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', right: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', op: ">", result: "false"}
+  - {left: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006d}\u{0000006f}', right: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', op: ">", result: "true"}
 
   - {left: '', right: '', op: ">=", result: "true"}
   - {left: ' ', right: '', op: ">=", result: "true"}
@@ -80,3 +124,21 @@ string_comparison:
   - {left: '!@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\', right: '!@#$%^&*()_+-=`~\"\\|[]{}/?.>,<\\', op: ">=", result: "true"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', op: ">=", result: "true"}
   - {left: '\xff\xfe\xac 1\x003\x00,\x005\x007\x00', right: '\xff\xfe\xac 1\x003\x00,\x005\x006\x00', op: ">=", result: "true"}
+# surrogate
+  - {left: '\u{D800}', right: '\u{D800}', op: ">=", result: "true"}
+  - {left: '\u{D801}', right: '\u{D800}', op: ">=", result: "true"}
+  - {left: '\u{D800}', right: '\u{D801}', op: ">=", result: "false"}
+  - {left: '\u{DC00}', right: '\u{DC00}', op: ">=", result: "true"}
+  - {left: '\u{DC01}', right: '\u{DC00}', op: ">=", result: "true"}
+  - {left: '\u{DC00}', right: '\u{DC01}', op: ">=", result: "false"}
+  - {left: '\u{DBFF}\u{DFFF}', right: '\u{DBFF}\u{DFFF}', op: ">=", result: "true"}
+  - {left: '\u{DBFF}\u{DFFF}', right: '\u{DBFF}\u{DFFA}', op: ">=", result: "true"}
+  - {left: '\u{DBFA}\u{DFFF}', right: '\u{DBFF}\u{DFFF}', op: ">=", result: "false"}
+# utf-16
+  - {left: '\u{A123}', right: '\u{A122}', op: ">=", result: "true"}
+  - {left: '\u{A123}', right: '\u{A123}', op: ">=", result: "true"}
+  - {left: '\u{A122}', right: '\u{A123}', op: ">=", result: "false"}
+# utf-32
+  - {left: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', right: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', op: ">=", result: "true"}
+  - {left: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006d}\u{0000006f}', right: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', op: ">=", result: "true"}
+  - {left: '\u{00000067}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', right: '\u{00000068}\u{00000065}\u{0000006c}\u{0000006c}\u{0000006f}', op: ">=", result: "false"}
