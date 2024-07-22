@@ -43,7 +43,6 @@ public:
     std::string GetFullMethodNameById(const panda_file::File::EntityId &method_id);
     void AddProgramString(const std::string &str) const;
 
-    std::unordered_set<uint32_t> GetLiteralArrayIdSet();
     const std::unordered_set<uint32_t> &GetMouleLiteralArrayIdSet() const;
     const std::unordered_set<uint32_t> &GetModuleRequestPhaseIdSet() const;
     const std::unordered_set<uint32_t> &GetUnnestedLiteralArrayIdSet() const;
@@ -54,7 +53,6 @@ public:
     void AddProcessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     void TryAddUnprocessedNestedLiteralArrayId(uint32_t nested_literal_array_id);
     std::string GetLiteralArrayIdName(uint32_t literal_array_id);
-    std::string GetAbcFileAbsolutePath() const;
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
 
 private:

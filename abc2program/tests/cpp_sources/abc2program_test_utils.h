@@ -30,9 +30,13 @@ public:
     static bool ValidateRecordNames(const std::vector<std::string> &record_names);
     static bool ValidateLiteralArrayKeys(const std::vector<std::string> &literal_array_keys);
     static bool ValidateLiteralsSizes(const std::set<size_t> &literals_sizes);
+    static bool ValidateDumpResult(const std::string &result_file_name, const std::string &expected_file_name);
+    static void RemoveDumpResultFile(const std::string &file_name);
 private:
     template <typename T>
     static bool ValidateStrings(const T &strings, const T &expected_strings);
+    static bool ValidateLine(const std::string &result_line, const std::string &expected_line);
+    static bool ValidateLiteralArrayName(const std::string &result, const std::string &expected);
     static std::set<std::string> helloworld_expected_program_strings_;
     static std::vector<std::string> helloworld_expected_record_names_;
     static std::vector<std::string> helloworld_expected_literal_array_keys_;

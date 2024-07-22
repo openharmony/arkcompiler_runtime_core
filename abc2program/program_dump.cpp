@@ -246,7 +246,9 @@ void PandasmProgramDumper::DumpFunctionAnnotations(std::ostream &os, const panda
 void PandasmProgramDumper::DumpFunctionHead(std::ostream &os, const pandasm::Function &function) const
 {
     os << DUMP_TITLE_FUNCTION;
+    DumpFunctionReturnType(os, function);
     DumpFunctionName(os, function);
+    DumpFunctionParams(os, function);
     os << DUMP_CONTENT_SPACE << DUMP_CONTENT_LEFT_CURLY_BRACKET << DUMP_CONTENT_SINGLE_ENDL;
 }
 
@@ -555,8 +557,12 @@ void PandasmProgramDumper::DumpFunctionDebugInfo(std::ostream &os, const pandasm
     }
 
     os << DUMP_CONTENT_SINGLE_ENDL;
+    if (local_variable_table.empty()) {
+        return;
+    }
+
     os << DUMP_TITLE_LOCAL_VAR_TABLE;
-    os << DUMP_CONTENT_DOUBLE_ENDL;
+    os << DUMP_CONTENT_SINGLE_ENDL;
     os << DUMP_CONTENT_LOCAL_VAR_TABLE;
     for (const auto &iter : local_variable_table) {
         const auto &variable_info = iter.second;
@@ -571,7 +577,6 @@ void PandasmProgramDumper::DumpFunctionDebugInfo(std::ostream &os, const pandasm
         }
         os << DUMP_CONTENT_SINGLE_ENDL;
     }
-    os << DUMP_CONTENT_DOUBLE_ENDL;
 }
 
 void PandasmProgramDumper::UpdateLocalVarMap(const pandasm::Function &function,
@@ -636,164 +641,16 @@ std::string PandasmProgramDumper::SerializeLiteralArray(const pandasm::LiteralAr
     }
     std::stringstream ss;
     ss << DUMP_CONTENT_LEFT_CURLY_BRACKET << DUMP_CONTENT_SPACE;
-    const auto &tag = lit_array.literals_[0].tag_;
-    if (AbcFileUtils::IsLiteralTagArray(tag)) {
-        ss << PandasmDumperUtils::LiteralTagToString(tag);
-    }
     ss << lit_array.literals_.size();
     ss << DUMP_CONTENT_SPACE << DUMP_CONTENT_LEFT_SQUARE_BRACKET << DUMP_CONTENT_SPACE;
     processing_literal_array_id_set_.emplace(id);
-    SerializeValues(lit_array, ss);
+    SerializeLiterals(lit_array, ss);
     processing_literal_array_id_set_.erase(id);
     ss << DUMP_CONTENT_RIGHT_SQUARE_BRACKET << DUMP_CONTENT_RIGHT_CURLY_BRACKET;
     return ss.str();
 }
 
-template <typename T>
-void PandasmProgramDumper::SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    const panda_file::LiteralTag &tag0 = lit_array.literals_[0].tag_;
-    switch (tag0) {
-        case panda_file::LiteralTag::ARRAY_U1:
-            SerializeValues4ArrayU1(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_U8:
-            SerializeValues4ArrayU8(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_I8:
-            SerializeValues4ArrayI8(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_U16:
-            SerializeValues4ArrayU16(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_I16:
-            SerializeValues4ArrayI16(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_U32:
-            SerializeValues4ArrayU32(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_I32:
-            SerializeValues4ArrayI32(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_U64:
-            SerializeValues4ArrayU64(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_I64:
-            SerializeValues4ArrayI64(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_F32:
-            SerializeValues4ArrayF32(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_F64:
-            SerializeValues4ArrayF64(lit_array, os);
-            break;
-        case panda_file::LiteralTag::ARRAY_STRING:
-            SerializeValues4ArrayString(lit_array, os);
-            break;
-        default:
-            SerializeLiterals(lit_array, os);
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayU1(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<bool>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayU8(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (static_cast<uint16_t>(std::get<uint8_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayI8(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (static_cast<int16_t>(bit_cast<int8_t>(std::get<uint8_t>(lit_array.literals_[i].value_)))) <<
-            DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayU16(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<uint16_t>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayI16(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (bit_cast<int16_t>(std::get<uint16_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayU32(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<uint32_t>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayI32(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (bit_cast<int32_t>(std::get<uint32_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayU64(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<uint64_t>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayI64(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (bit_cast<int64_t>(std::get<uint64_t>(lit_array.literals_[i].value_))) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayF32(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << (std::get<float>(lit_array.literals_[i].value_)) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayF64(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << std::get<double>(lit_array.literals_[i].value_) << DUMP_CONTENT_SPACE;
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeValues4ArrayString(const pandasm::LiteralArray &lit_array, T &os) const
-{
-    for (size_t i = 0; i < lit_array.literals_.size(); i++) {
-        os << "\"" << std::get<std::string>(lit_array.literals_[i].value_) << "\" ";
-    }
-}
-
-template <typename T>
-void PandasmProgramDumper::SerializeLiterals(const pandasm::LiteralArray &lit_array, T &os) const
+void PandasmProgramDumper::SerializeLiterals(const pandasm::LiteralArray &lit_array, std::stringstream &os) const
 {
     for (size_t i = 0; i < lit_array.literals_.size(); i++) {
         SerializeLiteralsAtIndex(lit_array, os, i);
@@ -801,8 +658,8 @@ void PandasmProgramDumper::SerializeLiterals(const pandasm::LiteralArray &lit_ar
     }
 }
 
-template <typename T>
-void PandasmProgramDumper::SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, T &os, size_t i) const
+void PandasmProgramDumper::SerializeLiteralsAtIndex(
+    const pandasm::LiteralArray &lit_array, std::stringstream &os, size_t i) const
 {
     const panda_file::LiteralTag &tag = lit_array.literals_[i].tag_;
     os << PandasmDumperUtils::LiteralTagToString(tag) << DUMP_CONTENT_COLON;
@@ -845,14 +702,12 @@ void PandasmProgramDumper::SerializeLiteralsAtIndex(const pandasm::LiteralArray 
             os << (static_cast<int16_t>(std::get<uint8_t>(val)));
             break;
         default:
-            LOG(FATAL, ABC2PROGRAM) << __PRETTY_FUNCTION__ << PandasmDumperUtils::LiteralTagToString(tag)
-                                    << " is unreachable!";
-            break;
+            UNREACHABLE();
     }
 }
 
-template <typename T>
-void PandasmProgramDumper::SerializeNestedLiteralArrayById(T &os, const std::string &literal_array_id_name) const
+void PandasmProgramDumper::SerializeNestedLiteralArrayById(
+    std::stringstream &os, const std::string &literal_array_id_name) const
 {
     if (dumper_source_ != PandasmDumperSource::ECMASCRIPT) {
         os << literal_array_id_name;

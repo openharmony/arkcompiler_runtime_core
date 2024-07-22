@@ -30,9 +30,6 @@ public:
 
 private:
     void GetLiteralArrayById(pandasm::LiteralArray *lit_array, panda_file::File::EntityId lit_array_id) const;
-    template <typename T>
-    void FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
-                              const panda_file::LiteralDataAccessor::LiteralValue &value) const;
     void FillLiteralData(pandasm::LiteralArray *lit_array, const panda_file::LiteralDataAccessor::LiteralValue &value,
                          const panda_file::LiteralTag &tag) const;
     panda_file::LiteralDataAccessor &literal_data_accessor_;

@@ -24,20 +24,20 @@ class HelloWorld {
 }
 
 class Lit {
-  *lit() {}
+  *lit(): Generator<never, void, unknown> {}
 }
 
 class NestedLiteralArray {
   num: number = 1;
-  NestedLiteralArray() {}
+  NestedLiteralArray(): void {}
   constructor() {
-    'use sendable'
+    'use sendable';
   }
 }
 
 msg : string = '';
 
-function foo() {
+function foo(): void {
   try {
     varA = 11;
     x = 22;
@@ -66,29 +66,25 @@ function foo() {
   }
 }
 
-function goo() {
+function goo(): void {}
 
-}
-
-function hoo() {
+function hoo(): void {
   varA = 1.23;
-  let obj = {async * method() {}};
+  let obj = {async * method(): AsyncGenerator<never, void, unknown> {}};
 }
 
-var add = (a, b) => a + b;
+let add = (a: number, b: number): number => a + b;
 add(1, 2);
 
-function* generateFunc() {
+function* generateFunc(): Generator<string, void, unknown> {
   yield 'hello';
 }
 
-async function* asyncGenerateFunc() {
+async function* asyncGenerateFunc(): AsyncGenerator<string, void, unknown> {
   yield 'hello';
 }
 
-const asyncArrowFunc = async () => {
-
-}
+const asyncArrowFunc = async (): Promise<void> => {}
 
 foo();
 
