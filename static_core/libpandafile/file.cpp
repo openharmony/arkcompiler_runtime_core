@@ -186,6 +186,59 @@ std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, 
     return file;
 }
 
+static std::unique_ptr<const panda_file::File> OpenZipPandaFile(FILE *fp, std::string_view location,
+                                                                std::string_view archiveFilename,
+                                                                panda_file::File::OpenMode openMode)
+{
+    // Open Zipfile and do the extraction.
+    ZipArchiveHandle zipfile = nullptr;
+    auto openError = OpenArchiveFile(zipfile, fp);
+    if (openError != ZIPARCHIVE_OK) {
+        LOG(ERROR, PANDAFILE) << "Can't open archive " << location;
+        return nullptr;
+    }
+    bool tryDefault = archiveFilename.empty();
+    if (!tryDefault) {
+        if (LocateFile(zipfile, archiveFilename.data()) != ZIPARCHIVE_OK) {
+            LOG(INFO, PANDAFILE) << "Can't find entry with name '" << archiveFilename << "', will try "
+                                 << ARCHIVE_FILENAME;
+            tryDefault = true;
+        }
+    }
+    if (tryDefault) {
+        if (LocateFile(zipfile, ARCHIVE_FILENAME) != ZIPARCHIVE_OK) {
+            OpenPandaFileFromZipErrorHandler(zipfile);
+            LOG(ERROR, PANDAFILE) << "Can't find entry with " << ARCHIVE_FILENAME;
+            fclose(fp);
+            return nullptr;
+        }
+    }
+
+    EntryFileStat entry = EntryFileStat();
+    if (GetCurrentFileInfo(zipfile, &entry) != ZIPARCHIVE_OK) {
+        OpenPandaFileFromZipErrorHandler(zipfile);
+        LOG(ERROR, PANDAFILE) << "GetCurrentFileInfo error";
+        return nullptr;
+    }
+    // check that file is not empty, otherwise crash at CloseArchiveFile
+    if (entry.GetUncompressedSize() == 0) {
+        OpenPandaFileFromZipErrorHandler(zipfile);
+        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << (tryDefault ? ARCHIVE_FILENAME : archiveFilename) << "'";
+        return nullptr;
+    }
+    if (OpenCurrentFile(zipfile) != ZIPARCHIVE_OK) {
+        CloseCurrentFile(zipfile);
+        OpenPandaFileFromZipErrorHandler(zipfile);
+        LOG(ERROR, PANDAFILE) << "Can't OpenCurrentFile!";
+        return nullptr;
+    }
+    GetCurrentFileOffset(zipfile, &entry);
+    auto file = HandleArchive(zipfile, fp, location, entry, archiveFilename, openMode);
+    CloseCurrentFile(zipfile);
+    OpenPandaFileFromZipErrorHandler(zipfile);
+    return file;
+}
+
 std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location, std::string_view archiveFilename,
                                                       panda_file::File::OpenMode openMode)
 {
@@ -212,52 +265,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFile(std::string_view location,
     fseek(fp, 0, SEEK_SET);
     std::unique_ptr<const panda_file::File> file;
     if (IsZipMagic(magic)) {
-        // Open Zipfile and do the extraction.
-        ZipArchiveHandle zipfile = nullptr;
-        auto openError = OpenArchiveFile(zipfile, fp);
-        if (openError != ZIPARCHIVE_OK) {
-            LOG(ERROR, PANDAFILE) << "Can't open archive " << location;
-            return nullptr;
-        }
-        bool tryDefault = archiveFilename.empty();
-        if (!tryDefault) {
-            if (LocateFile(zipfile, archiveFilename.data()) != ZIPARCHIVE_OK) {
-                LOG(INFO, PANDAFILE) << "Can't find entry with name '" << archiveFilename << "', will try "
-                                     << ARCHIVE_FILENAME;
-                tryDefault = true;
-            }
-        }
-        if (tryDefault) {
-            if (LocateFile(zipfile, ARCHIVE_FILENAME) != ZIPARCHIVE_OK) {
-                OpenPandaFileFromZipErrorHandler(zipfile);
-                LOG(ERROR, PANDAFILE) << "Can't find entry with " << ARCHIVE_FILENAME;
-                fclose(fp);
-                return nullptr;
-            }
-        }
-
-        EntryFileStat entry = EntryFileStat();
-        if (GetCurrentFileInfo(zipfile, &entry) != ZIPARCHIVE_OK) {
-            OpenPandaFileFromZipErrorHandler(zipfile);
-            LOG(ERROR, PANDAFILE) << "GetCurrentFileInfo error";
-            return nullptr;
-        }
-        // check that file is not empty, otherwise crash at CloseArchiveFile
-        if (entry.GetUncompressedSize() == 0) {
-            OpenPandaFileFromZipErrorHandler(zipfile);
-            LOG(ERROR, PANDAFILE) << "Invalid panda file '" << (tryDefault ? ARCHIVE_FILENAME : archiveFilename) << "'";
-            return nullptr;
-        }
-        if (OpenCurrentFile(zipfile) != ZIPARCHIVE_OK) {
-            CloseCurrentFile(zipfile);
-            OpenPandaFileFromZipErrorHandler(zipfile);
-            LOG(ERROR, PANDAFILE) << "Can't OpenCurrentFile!";
-            return nullptr;
-        }
-        GetCurrentFileOffset(zipfile, &entry);
-        file = HandleArchive(zipfile, fp, location, entry, archiveFilename, openMode);
-        CloseCurrentFile(zipfile);
-        OpenPandaFileFromZipErrorHandler(zipfile);
+        file = OpenZipPandaFile(fp, location, archiveFilename, openMode);
     } else {
         file = panda_file::File::Open(location, openMode);
     }
@@ -455,7 +463,6 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openM
     trace::ScopedTrace scopedTrace("Open panda file " + std::string(filename));
     os::file::Mode mode = GetMode(openMode);
     os::file::File file = os::file::Open(filename, mode);
-
     if (!file.IsValid()) {
         PLOG(ERROR, PANDAFILE) << "Failed to open panda file '" << filename << "'";
         return nullptr;
@@ -570,7 +577,6 @@ std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr, st
 File::EntityId File::GetClassId(const uint8_t *mutf8Name) const
 {
     auto classHashTable = GetClassHashTable();
-
     if (!classHashTable.empty()) {
         return GetClassIdFromClassHashTable(mutf8Name);
     }

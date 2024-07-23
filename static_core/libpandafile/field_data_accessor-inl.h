@@ -51,7 +51,6 @@ inline std::optional<T> FieldDataAccessor::GetValue()
     }
 
     auto v = GetValueInternal();
-
     if (!v.has_value()) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
@@ -91,7 +90,6 @@ inline std::optional<File::EntityId> FieldDataAccessor::GetValue()
     }
 
     auto v = GetValueInternal();
-
     if (!v.has_value()) {
         return {};
     }

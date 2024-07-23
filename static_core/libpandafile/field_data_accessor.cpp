@@ -34,7 +34,6 @@ FieldDataAccessor::FieldDataAccessor(const File &pandaFile, File::EntityId field
     nameOff_ = helpers::Read<ID_SIZE>(&sp);
 
     isExternal_ = pandaFile_.IsExternal(fieldId_);
-
     if (!isExternal_) {
         accessFlags_ = helpers::ReadULeb128(&sp);
         taggedValuesSp_ = sp;

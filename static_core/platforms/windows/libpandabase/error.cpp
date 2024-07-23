@@ -14,7 +14,7 @@
  */
 
 #include "os/error.h"
-#include <string.h>
+#include <cstring>
 
 namespace ark::os {
 

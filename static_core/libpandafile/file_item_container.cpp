@@ -691,11 +691,7 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
     }
 
     for (auto &item : foreignItems_) {
-        if (!writer->Align(item->Alignment())) {
-            return false;
-        }
-
-        if (!item->Write(writer)) {
+        if (!writer->Align(item->Alignment()) || !item->Write(writer)) {
             return false;
         }
     }
@@ -705,11 +701,7 @@ bool ItemContainer::Write(Writer *writer, bool deduplicateItems, bool computeLay
             continue;
         }
 
-        if (!writer->Align(item->Alignment())) {
-            return false;
-        }
-
-        if (!item->Write(writer)) {
+        if (!writer->Align(item->Alignment()) || !item->Write(writer)) {
             return false;
         }
     }

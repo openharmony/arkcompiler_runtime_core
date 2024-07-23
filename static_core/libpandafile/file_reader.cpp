@@ -968,18 +968,15 @@ ClassItem *FileReader::CreateClassItem(File::EntityId classId)
     }
 
     auto superClassId = classAcc.GetSuperClassId();
-
     if (superClassId.GetOffset() != 0) {
         if (superClassId.GetOffset() == classId.GetOffset()) {
             LOG(FATAL, PANDAFILE) << "Class " << className << " has cyclic inheritance";
         }
 
         if (file_->IsExternal(superClassId)) {
-            auto *superClassItem = CreateForeignClassItem(superClassId);
-            classItem->SetSuperClass(superClassItem);
+            classItem->SetSuperClass(CreateForeignClassItem(superClassId));
         } else {
-            auto *superClassItem = CreateClassItem(superClassId);
-            classItem->SetSuperClass(superClassItem);
+            classItem->SetSuperClass(CreateClassItem(superClassId));
         }
     }
 

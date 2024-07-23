@@ -46,7 +46,7 @@ std::string BuildNumber(int count)
     if (0 <= count && count < STACK_FORMAT) {
         ostr << "#0" << count;
     }
-    if (STACK_FORMAT <= count) {
+    if (count >= STACK_FORMAT) {
         ostr << "#" << count;
     }
     return ostr.str();

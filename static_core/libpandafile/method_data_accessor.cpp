@@ -33,7 +33,6 @@ MethodDataAccessor::MethodDataAccessor(const File &pandaFile, File::EntityId met
     accessFlags_ = helpers::ReadULeb128(&sp);
 
     isExternal_ = pandaFile_.IsExternal(methodId);
-
     if (!isExternal_) {
         taggedValuesSp_ = sp;
         size_ = 0;

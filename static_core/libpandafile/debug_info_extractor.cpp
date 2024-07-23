@@ -183,61 +183,57 @@ private:
 
 void DebugInfoExtractor::Extract(const File *pf)
 {
-    const auto &pandaFile = *pf;
     auto classes = pf->GetClasses();
     for (size_t i = 0; i < classes.Size(); i++) {
         File::EntityId id(classes[i]);
-        if (pandaFile.IsExternal(id)) {
+        if (pf->IsExternal(id)) {
             continue;
         }
 
-        ClassDataAccessor cda(pandaFile, id);
+        ClassDataAccessor cda(*pf, id);
 
         auto sourceFileId = cda.GetSourceFileId();
 
-        cda.EnumerateMethods([this, &pandaFile, &pf, &sourceFileId, &cda](MethodDataAccessor &mda) {
+        cda.EnumerateMethods([this, pf, &sourceFileId, &cda](MethodDataAccessor &mda) {
             auto debugInfoId = mda.GetDebugInfoId();
-
             if (!debugInfoId) {
                 return;
             }
 
-            DebugInfoDataAccessor dda(pandaFile, debugInfoId.value());
-            ProtoDataAccessor pda(pandaFile, mda.GetProtoId());
+            DebugInfoDataAccessor dda(*pf, debugInfoId.value());
+            ProtoDataAccessor pda(*pf, mda.GetProtoId());
 
             std::vector<ParamInfo> paramInfo;
 
             size_t idx = 0;
             size_t idxRef = pda.GetReturnType().IsReference() ? 1 : 0;
             bool firstParam = true;
-            const char *className = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
             dda.EnumerateParameters([&](File::EntityId &paramId) {
                 ParamInfo info;
-                if (paramId.IsValid()) {
-                    info.name = utf::Mutf8AsCString(pf->GetStringData(paramId).data);
-                    if (firstParam && !mda.IsStatic()) {
-                        info.signature = className;
+                if (!paramId.IsValid()) {
+                    return;
+                }
+                info.name = utf::Mutf8AsCString(pf->GetStringData(paramId).data);
+                if (firstParam && !mda.IsStatic()) {
+                    info.signature = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
+                } else {
+                    Type paramType = pda.GetArgType(idx++);
+                    if (paramType.IsPrimitive()) {
+                        info.signature = Type::GetSignatureByTypeId(paramType);
                     } else {
-                        Type paramType = pda.GetArgType(idx++);
-                        if (paramType.IsPrimitive()) {
-                            info.signature = Type::GetSignatureByTypeId(paramType);
-                        } else {
-                            auto refType = pda.GetReferenceType(idxRef++);
-                            info.signature = utf::Mutf8AsCString(pf->GetStringData(refType).data);
-                        }
+                        auto refType = pda.GetReferenceType(idxRef++);
+                        info.signature = utf::Mutf8AsCString(pf->GetStringData(refType).data);
                     }
                 }
                 firstParam = false;
                 paramInfo.emplace_back(info);
             });
 
-            const uint8_t *program = dda.GetLineNumberProgram();
-
-            LineProgramState state(pandaFile, sourceFileId.value_or(File::EntityId(0)), dda.GetLineStart(),
+            LineProgramState state(*pf, sourceFileId.value_or(File::EntityId(0)), dda.GetLineStart(),
                                    dda.GetConstantPool());
 
             LineNumberProgramHandler handler(&state);
-            LineNumberProgramProcessor<LineNumberProgramHandler> programProcessor(program, &handler);
+            LineNumberProgramProcessor<LineNumberProgramHandler> programProcessor(dda.GetLineNumberProgram(), &handler);
             programProcessor.Process();
 
             File::EntityId methodId = mda.GetMethodId();

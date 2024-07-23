@@ -200,6 +200,10 @@ public:
     }
 
 private:
+    template <class Callback, class Accessor>
+    void EnumerateClassElements(const File &pf, Span<const uint8_t> sp, size_t elemNum, const Callback &cb,
+                                Span<const uint8_t> *next);
+
     void SkipSourceLang();
 
     void SkipRuntimeAnnotations();

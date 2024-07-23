@@ -171,17 +171,17 @@ void MutexDestroy(struct fmutex *const m)
 
 bool MutexLock(struct fmutex *const m, bool trylock)
 {
-    if (current_tid == 0) {
-        current_tid = GET_CURRENT_THREAD;
-    }
-    if (m->recursiveMutex) {
-        if (IsHeld(m, current_tid)) {
-            m->recursiveCount++;
-            return true;
-        }
+    current_tid = current_tid == 0 ? GET_CURRENT_THREAD : current_tid;
+    if (m->recursiveMutex && IsHeld(m, current_tid)) {
+        m->recursiveCount++;
+        return true;
     }
 
-    ASSERT(!IsHeld(m, current_tid));
+#ifndef NDEBUG
+    [[maybe_unused]] bool isHeld = IsHeld(m, current_tid);
+    ASSERT(!isHeld);
+#endif
+
     bool done = false;
     while (!done) {
         // Atomic with relaxed order reason: mutex synchronization
@@ -213,11 +213,9 @@ bool MutexLock(struct fmutex *const m, bool trylock)
                     FutexWait(&m->stateAndWaiters, curState);
 #else
                     // NOLINTNEXTLINE(hicpp-signed-bitwise), NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
-                    if (futex(GetStateAddr(m), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0) {
-                        // NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
-                        if ((errno != EAGAIN) && (errno != EINTR)) {
-                            LOG(FATAL, COMMON) << "Futex wait failed!";
-                        }
+                    if (futex(GetStateAddr(m), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0 &&
+                        (errno != EAGAIN) && (errno != EINTR)) {
+                        LOG(FATAL, COMMON) << "Futex wait failed!";
                     }
 #endif
                     // Atomic with relaxed order reason: mutex synchronization

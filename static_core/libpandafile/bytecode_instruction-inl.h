@@ -27,15 +27,13 @@ inline auto BytecodeInst<MODE>::ReadHelper(size_t byteoffset, size_t bytecount, 
 {
     constexpr size_t BYTE_WIDTH = 8;
 
-    size_t rightShift = offset % BYTE_WIDTH;
-
     S v = 0;
     for (size_t i = 0; i < bytecount; i++) {
         S mask = static_cast<S>(ReadByte(byteoffset + i)) << (i * BYTE_WIDTH);
         v |= mask;
     }
 
-    v >>= rightShift;
+    v >>= offset % BYTE_WIDTH;
     size_t leftShift = sizeof(R) * BYTE_WIDTH - width;
 
     // Do sign extension using arithmetic shift. It's implementation defined
@@ -48,7 +46,7 @@ inline auto BytecodeInst<MODE>::ReadHelper(size_t byteoffset, size_t bytecount, 
 }
 
 template <const BytecodeInstMode MODE>
-template <size_t OFFSET, size_t WIDTH, bool IS_SIGNED /* = false */>
+template <size_t OFFSET, size_t WIDTH, bool IS_SIGNED>
 inline auto BytecodeInst<MODE>::Read() const
 {
     constexpr size_t BYTE_WIDTH = 8;
@@ -63,7 +61,7 @@ inline auto BytecodeInst<MODE>::Read() const
 }
 
 template <const BytecodeInstMode MODE>
-template <bool IS_SIGNED /* = false */>
+template <bool IS_SIGNED>
 inline auto BytecodeInst<MODE>::Read64(size_t offset, size_t width) const
 {
     constexpr size_t BIT64 = 64;

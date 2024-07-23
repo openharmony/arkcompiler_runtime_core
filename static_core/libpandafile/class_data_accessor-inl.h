@@ -163,8 +163,8 @@ inline std::optional<File::EntityId> ClassDataAccessor::GetSourceFileId()
 }
 
 template <class Callback, class Accessor>
-static void EnumerateClassElements(const File &pf, Span<const uint8_t> sp, size_t elemNum, const Callback &cb,
-                                   Span<const uint8_t> *next)
+inline void ClassDataAccessor::EnumerateClassElements(const File &pf, Span<const uint8_t> sp, size_t elemNum,
+                                                      const Callback &cb, Span<const uint8_t> *next)
 {
     for (size_t i = 0; i < elemNum; i++) {
         File::EntityId id = pf.GetIdFromPointer(sp.data());
