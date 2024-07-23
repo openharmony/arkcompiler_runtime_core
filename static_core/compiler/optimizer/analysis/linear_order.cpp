@@ -376,6 +376,17 @@ void LinearOrder::MarkSideExitsBlocks()
     }
 }
 
+void LinearOrder::DumpUnreachableBlocks()
+{
+    std::cerr << "There are unreachable blocks:\n";
+    for (auto bb : *GetGraph()) {
+        if (bb != nullptr && !bb->IsMarked(marker_)) {
+            bb->Dump(&std::cerr);
+        }
+    }
+    UNREACHABLE();
+}
+
 bool LinearOrder::RunImpl()
 {
     if (GetGraph()->IsBytecodeOptimizer()) {
@@ -397,13 +408,7 @@ bool LinearOrder::RunImpl()
         DFSAndDeferLeastFrequentBranches<true>(GetGraph()->GetStartBlock(), &blocksCount);
 #ifndef NDEBUG
         if (blocksCount != 0) {
-            std::cerr << "There are unreachable blocks:\n";
-            for (auto bb : *GetGraph()) {
-                if (bb != nullptr && !bb->IsMarked(marker_)) {
-                    bb->Dump(&std::cerr);
-                }
-            }
-            UNREACHABLE();
+            DumpUnreachableBlocks();
         }
 #endif  // NDEBUG
         MakeLinearOrder(reorderedBlocks_);

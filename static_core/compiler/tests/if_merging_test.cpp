@@ -20,9 +20,51 @@
 #include "optimizer/optimizations/branch_elimination.h"
 
 namespace ark::compiler {
-class IfMergingTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
+
+class IfMergingTest : public GraphTest {
+public:
+    Graph *CreateExpectedSameIfs(bool inverse);
+    Graph *CreateExpectedCheckInstsSplit();
+    Graph *CreateExpectedConstPhiIf();
+    Graph *CreateExpConstantEqualToAllPhiInputs();
+    Graph *CreateExpConstantNotEqualToPhiInputs();
+    void CreateInitialGraphDuplicatePhiInputs();
+    Graph *CreateExpectedSplitPhiIntoTwo();
+    Graph *CreateExpectedConstantPhiLoopBackEdge(bool inverse);
+};
+
+Graph *IfMergingTest::CreateExpectedSameIfs(bool inverse)
+{
+    auto graphExpected = CreateEmptyGraph();
+    GRAPH(graphExpected)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(8U, inverse ? Opcode::Sub : Opcode::Add).u64().Inputs(1U, 0U);
+        }
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(9U, inverse ? Opcode::Add : Opcode::Sub).u64().Inputs(2U, 0U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(10U, Opcode::Phi).u64().Inputs({{3U, 8U}, {4U, 9U}});
+            INST(11U, Opcode::Return).u64().Inputs(10U);
+        }
+    }
+    return graphExpected;
+}
+
 // Duplicate Ifs dominating each other can be merged
 TEST_F(IfMergingTest, SameIfs)
 {
@@ -62,31 +104,7 @@ TEST_F(IfMergingTest, SameIfs)
         ASSERT_TRUE(graph->RunPass<IfMerging>());
         ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graphExpected = CreateEmptyGraph();
-        GRAPH(graphExpected)
-        {
-            PARAMETER(0U, 0U).u64();
-            CONSTANT(1U, 0U);
-            CONSTANT(2U, 1U);
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
-                INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-            }
-            BASIC_BLOCK(3U, 5U)
-            {
-                INST(8U, inverse ? Opcode::Sub : Opcode::Add).u64().Inputs(1U, 0U);
-            }
-            BASIC_BLOCK(4U, 5U)
-            {
-                INST(9U, inverse ? Opcode::Add : Opcode::Sub).u64().Inputs(2U, 0U);
-            }
-            BASIC_BLOCK(5U, -1L)
-            {
-                INST(10U, Opcode::Phi).u64().Inputs({{3U, 8U}, {4U, 9U}});
-                INST(11U, Opcode::Return).u64().Inputs(10U);
-            }
-        }
+        auto graphExpected = CreateExpectedSameIfs(inverse);
         ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
     }
 }
@@ -172,6 +190,38 @@ TEST_F(IfMergingTest, InstUsedInBothBranches)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
+Graph *IfMergingTest::CreateExpectedCheckInstsSplit()
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
+            INST(10U, Opcode::Mul).u64().Inputs(2U, 2U);
+            INST(12U, Opcode::Add).u64().Inputs(10U, 2U);
+            INST(15U, Opcode::Return).u64().Inputs(12U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
+            INST(11U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(14U, Opcode::Return).u64().Inputs(11U);
+        }
+    }
+    return graph;
+}
+
 // Instruction in If block can be split to true and false branches
 TEST_F(IfMergingTest, CheckInstsSplit)
 {
@@ -216,33 +266,7 @@ TEST_F(IfMergingTest, CheckInstsSplit)
     ASSERT_TRUE(GetGraph()->RunPass<IfMerging>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).u64();
-        CONSTANT(1U, 0U);
-        CONSTANT(2U, 1U);
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(5U, Opcode::SaveState).NoVregs();
-            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
-            INST(10U, Opcode::Mul).u64().Inputs(2U, 2U);
-            INST(12U, Opcode::Add).u64().Inputs(10U, 2U);
-            INST(15U, Opcode::Return).u64().Inputs(12U);
-        }
-        BASIC_BLOCK(4U, -1L)
-        {
-            INST(7U, Opcode::SaveState).NoVregs();
-            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
-            INST(11U, Opcode::Sub).u64().Inputs(0U, 1U);
-            INST(14U, Opcode::Return).u64().Inputs(11U);
-        }
-    }
+    auto graph = CreateExpectedCheckInstsSplit();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -475,6 +499,35 @@ TEST_F(IfMergingTest, BlockWithOnePredecessor)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
+Graph *IfMergingTest::CreateExpectedConstPhiIf()
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(5U, Opcode::SaveState).NoVregs();
+            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
+            INST(13U, Opcode::Return).b().Inputs(2U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(7U, Opcode::SaveState).NoVregs();
+            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
+            INST(12U, Opcode::Return).b().Inputs(1U);
+        }
+    }
+    return graph;
+}
+
 TEST_F(IfMergingTest, ConstPhiIf)
 {
     GRAPH(GetGraph())
@@ -516,6 +569,12 @@ TEST_F(IfMergingTest, ConstPhiIf)
     ASSERT_TRUE(GetGraph()->RunPass<IfMerging>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
+    auto graph = CreateExpectedConstPhiIf();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+Graph *IfMergingTest::CreateExpConstantEqualToAllPhiInputs()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -527,20 +586,22 @@ TEST_F(IfMergingTest, ConstPhiIf)
             INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
             INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
         }
-        BASIC_BLOCK(3U, -1L)
+        BASIC_BLOCK(3U, 5U)
         {
             INST(5U, Opcode::SaveState).NoVregs();
             INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
-            INST(13U, Opcode::Return).b().Inputs(2U);
         }
-        BASIC_BLOCK(4U, -1L)
+        BASIC_BLOCK(4U, 5U)
         {
             INST(7U, Opcode::SaveState).NoVregs();
             INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
             INST(12U, Opcode::Return).b().Inputs(1U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+    return graph;
 }
 
 TEST_F(IfMergingTest, ConstantEqualToAllPhiInputs)
@@ -584,6 +645,12 @@ TEST_F(IfMergingTest, ConstantEqualToAllPhiInputs)
     ASSERT_TRUE(GetGraph()->RunPass<IfMerging>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
+    auto graph = CreateExpConstantEqualToAllPhiInputs();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+Graph *IfMergingTest::CreateExpConstantNotEqualToPhiInputs()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -607,10 +674,10 @@ TEST_F(IfMergingTest, ConstantEqualToAllPhiInputs)
         }
         BASIC_BLOCK(5U, -1L)
         {
-            INST(12U, Opcode::Return).b().Inputs(1U);
+            INST(13U, Opcode::Return).b().Inputs(2U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+    return graph;
 }
 
 TEST_F(IfMergingTest, ConstantNotEqualToPhiInputs)
@@ -655,32 +722,7 @@ TEST_F(IfMergingTest, ConstantNotEqualToPhiInputs)
     ASSERT_TRUE(GetGraph()->RunPass<IfMerging>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).u64();
-        CONSTANT(1U, 0U);
-        CONSTANT(2U, 1U);
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-        }
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(5U, Opcode::SaveState).NoVregs();
-            INST(6U, Opcode::CallStatic).v0id().InputsAutoType(1U, 5U);
-        }
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(7U, Opcode::SaveState).NoVregs();
-            INST(8U, Opcode::CallStatic).v0id().InputsAutoType(2U, 7U);
-        }
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(13U, Opcode::Return).b().Inputs(2U);
-        }
-    }
+    auto graph = CreateExpConstantNotEqualToPhiInputs();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -857,7 +899,7 @@ TEST_F(IfMergingTest, NestedIf)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(IfMergingTest, DuplicatePhiInputs)
+void IfMergingTest::CreateInitialGraphDuplicatePhiInputs()
 {
     GRAPH(GetGraph())
     {
@@ -905,6 +947,11 @@ TEST_F(IfMergingTest, DuplicatePhiInputs)
             INST(18U, Opcode::Return).b().Inputs(2U);
         }
     }
+}
+
+TEST_F(IfMergingTest, DuplicatePhiInputs)
+{
+    CreateInitialGraphDuplicatePhiInputs();
 
     ASSERT_TRUE(GetGraph()->RunPass<IfMerging>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
@@ -948,6 +995,46 @@ TEST_F(IfMergingTest, DuplicatePhiInputs)
         }
     }
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+Graph *IfMergingTest::CreateExpectedSplitPhiIntoTwo()
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 0U);
+        CONSTANT(2U, 1U);
+        CONSTANT(3U, 2U);
+        CONSTANT(4U, 3U);
+        BASIC_BLOCK(2U, 7U, 3U)
+        {
+            INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
+        }
+        BASIC_BLOCK(3U, 8U, 4U)
+        {
+            INST(7U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
+        }
+        BASIC_BLOCK(4U, 7U, 8U)
+        {
+            INST(9U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 3U);
+            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
+        }
+        BASIC_BLOCK(7U, -1L)
+        {
+            INST(17U, Opcode::Phi).u64().Inputs({{2U, 1U}, {4U, 2U}});
+            INST(15U, Opcode::Return).u64().Inputs(17U);
+        }
+        BASIC_BLOCK(8U, -1L)
+        {
+            INST(18U, Opcode::Phi).u64().Inputs({{3U, 3U}, {4U, 4U}});
+            INST(12U, Opcode::Add).u64().Inputs(18U, 0U);
+            INST(16U, Opcode::Return).u64().Inputs(12U);
+        }
+    }
+    return graph;
 }
 
 /*
@@ -1028,42 +1115,34 @@ TEST_F(IfMergingTest, SplitPhiIntoTwo)
     ASSERT_TRUE(GetGraph()->RunPass<IfMerging>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
+    auto graph = CreateExpectedSplitPhiIntoTwo();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+Graph *IfMergingTest::CreateExpectedConstantPhiLoopBackEdge(bool inverse)
+{
+    auto graphExpected = CreateEmptyGraph();
+    GRAPH(graphExpected)
     {
         PARAMETER(0U, 0U).u64();
         CONSTANT(1U, 0U);
-        CONSTANT(2U, 1U);
-        CONSTANT(3U, 2U);
-        CONSTANT(4U, 3U);
-        BASIC_BLOCK(2U, 7U, 3U)
-        {
-            INST(5U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
-            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
+        if (!inverse) {
+            CONSTANT(2U, 2U);
         }
-        BASIC_BLOCK(3U, 8U, 4U)
+        CONSTANT(3U, 1U);
+        BASIC_BLOCK(2U, 3U, 2U)
         {
-            INST(7U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 2U);
-            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U);
+            INST(4U, Opcode::Phi).u64().Inputs({{0U, 0U}, {2U, 5U}});
+            INST(5U, Opcode::Sub).u64().Inputs(4U, 3U);
+            INST(6U, Opcode::Compare).b().CC(CC_EQ).Inputs(5U, 1U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
-        BASIC_BLOCK(4U, 7U, 8U)
+        BASIC_BLOCK(3U, -1L)
         {
-            INST(9U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 3U);
-            INST(10U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(9U);
-        }
-        BASIC_BLOCK(7U, -1L)
-        {
-            INST(17U, Opcode::Phi).u64().Inputs({{2U, 1U}, {4U, 2U}});
-            INST(15U, Opcode::Return).u64().Inputs(17U);
-        }
-        BASIC_BLOCK(8U, -1L)
-        {
-            INST(18U, Opcode::Phi).u64().Inputs({{3U, 3U}, {4U, 4U}});
-            INST(12U, Opcode::Add).u64().Inputs(18U, 0U);
-            INST(16U, Opcode::Return).u64().Inputs(12U);
+            INST(11U, Opcode::Return).u64().Inputs(inverse ? 1U : 2U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+    return graphExpected;
 }
 
 /*
@@ -1124,27 +1203,7 @@ TEST_F(IfMergingTest, ConstantPhiLoopBackEdge)
         ASSERT_TRUE(graph->RunPass<IfMerging>());
         ASSERT_TRUE(graph->RunPass<Cleanup>());
 
-        auto graphExpected = CreateEmptyGraph();
-        GRAPH(graphExpected)
-        {
-            PARAMETER(0U, 0U).u64();
-            CONSTANT(1U, 0U);
-            if (!inverse) {
-                CONSTANT(2U, 2U);
-            }
-            CONSTANT(3U, 1U);
-            BASIC_BLOCK(2U, 3U, 2U)
-            {
-                INST(4U, Opcode::Phi).u64().Inputs({{0U, 0U}, {2U, 5U}});
-                INST(5U, Opcode::Sub).u64().Inputs(4U, 3U);
-                INST(6U, Opcode::Compare).b().CC(CC_EQ).Inputs(5U, 1U);
-                INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
-            }
-            BASIC_BLOCK(3U, -1L)
-            {
-                INST(11U, Opcode::Return).u64().Inputs(inverse ? 1U : 2U);
-            }
-        }
+        auto graphExpected = CreateExpectedConstantPhiLoopBackEdge(inverse);
         ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
     }
 }

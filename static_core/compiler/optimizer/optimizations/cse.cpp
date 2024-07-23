@@ -56,6 +56,19 @@ void Cse::LocalCse()
     RemoveInstsIn(&deletedInsts_);
 }
 
+void Cse::TryAddReplacePair(Inst *inst)
+{
+    if (!IsLegalExp(inst) || AllNotIn(candidates_, inst)) {
+        return;
+    }
+    Exp exp = NotIn(candidates_, GetExp(inst)) ? GetExpCommutative(inst) : GetExp(inst);
+    auto &cntainer = candidates_.at(exp);
+    auto iter = std::find_if(cntainer.begin(), cntainer.end(), Finder(inst));
+    if (iter != cntainer.end()) {
+        replacePair_.emplace_back(inst, *iter);
+    }
+}
+
 void Cse::CollectTreeForest()
 {
     replacePair_.clear();
@@ -84,15 +97,7 @@ void Cse::CollectTreeForest()
         }
         for (auto domed : bb->GetDominatedBlocks()) {
             for (auto inst : domed->Insts()) {
-                if (!IsLegalExp(inst) || AllNotIn(candidates_, inst)) {
-                    continue;
-                }
-                Exp exp = NotIn(candidates_, GetExp(inst)) ? GetExpCommutative(inst) : GetExp(inst);
-                auto &cntainer = candidates_.at(exp);
-                auto iter = std::find_if(cntainer.begin(), cntainer.end(), Finder(inst));
-                if (iter != cntainer.end()) {
-                    replacePair_.emplace_back(inst, *iter);
-                }
+                TryAddReplacePair(inst);
             }
         }
     }

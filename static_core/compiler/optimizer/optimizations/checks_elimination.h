@@ -163,6 +163,8 @@ private:
     void HoistLoopInvariantBoundsChecks(Inst *lenArray, GroupedBoundsChecks *indexBoundschecks, Loop *loop);
     Inst *FindSaveState(const InstVector &instsToDelete);
     void ReplaceBoundsCheckToDeoptimizationInLoop();
+    void ReplaceOneBoundsCheckToDeoptimizationInLoop(std::pair<Loop *, LoopNotFullyRedundantBoundsCheck> &item);
+
     void ReplaceCheckMustThrowByUnconditionalDeoptimize();
     void MoveCheckOutOfLoop();
 

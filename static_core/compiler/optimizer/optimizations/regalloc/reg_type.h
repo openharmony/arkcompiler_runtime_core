@@ -20,6 +20,20 @@
 
 namespace ark::compiler {
 
+inline DataType::Type ConvertRegTypeNotFloat(const Graph *graph, DataType::Type type)
+{
+    if (graph->IsBytecodeOptimizer() && type == DataType::REFERENCE) {
+        return type;
+    }
+
+    bool useReg32 = graph->IsRegScalarMapped() || graph->IsBytecodeOptimizer();
+    if (useReg32 && DataType::Is32Bits(type, graph->GetArch())) {
+        return DataType::Type::UINT32;
+    }
+
+    return DataType::Type::UINT64;
+}
+
 inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
 {
     if (DataType::IsFloatType(type)) {
@@ -31,16 +45,7 @@ inline DataType::Type ConvertRegType(const Graph *graph, DataType::Type type)
 
     ASSERT(GetCommonType(type) == DataType::INT64 || type == DataType::REFERENCE || type == DataType::POINTER ||
            type == DataType::ANY);
-    if (graph->IsBytecodeOptimizer() && type == DataType::REFERENCE) {
-        return type;
-    }
-
-    bool useReg32 = graph->IsRegScalarMapped() || graph->IsBytecodeOptimizer();
-    if (useReg32 && DataType::Is32Bits(type, graph->GetArch())) {
-        return DataType::Type::UINT32;
-    }
-
-    return DataType::Type::UINT64;
+    return ConvertRegTypeNotFloat(graph, type);
 }
 
 }  // namespace ark::compiler

@@ -1224,45 +1224,50 @@ Inst *ChecksElimination::FindSaveState(const InstVector &instsToDelete)
     return nullptr;
 }
 
+void ChecksElimination::ReplaceOneBoundsCheckToDeoptimizationInLoop(
+    std::pair<Loop *, LoopNotFullyRedundantBoundsCheck> &item)
+{
+    for (auto &[lenArray, indexBoundchecks] : item.second) {
+        for (auto &[index, instsToDelete, max, min] : indexBoundchecks) {
+            constexpr auto MIN_BOUNDSCHECKS_NUM = 2;
+            if (instsToDelete.size() <= MIN_BOUNDSCHECKS_NUM) {
+                COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Skip small group of BoundsChecks";
+                continue;
+            }
+            // Try to replace more than 2 bounds checks to deoptimization in loop
+            auto saveState = FindSaveState(instsToDelete);
+            if (saveState == nullptr) {
+                COMPILER_LOG(DEBUG, CHECKS_ELIM) << "SaveState isn't founded";
+                continue;
+            }
+            COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Replace group of BoundsChecks on deoptimization in loop";
+            auto insertAfter = lenArray->IsDominate(saveState) ? saveState : lenArray;
+            if (max != std::numeric_limits<int64_t>::min()) {
+                // Create deoptimize if max_index >= lenArray
+                InsertBoundsCheckDeoptimization(ConditionCode::CC_GE, index, max, lenArray, saveState, insertAfter);
+            }
+            if (index != nullptr && min != std::numeric_limits<int64_t>::max()) {
+                // Create deoptimize if min_index < 0
+                auto zeroConst = GetGraph()->FindOrCreateConstant(0);
+                InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, index, min, zeroConst, saveState, insertAfter);
+            } else {
+                // No lower check needed based on BoundsAnalysis
+                // if index is null, group of bounds checks consists of constants
+                ASSERT(min >= 0);
+            }
+            for (const auto &inst : instsToDelete) {
+                COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Delete group of BoundsChecks";
+                ReplaceUsersAndRemoveCheck(inst, inst->GetInput(1).GetInst());
+            }
+        }
+    }
+}
+
 void ChecksElimination::ReplaceBoundsCheckToDeoptimizationInLoop()
 {
     COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Start ReplaceBoundsCheckToDeoptimizationInLoop";
     for (auto &item : boundsChecks_) {
-        for (auto &[lenArray, indexBoundchecks] : item.second) {
-            for (auto &[index, instsToDelete, max, min] : indexBoundchecks) {
-                constexpr auto MIN_BOUNDSCHECKS_NUM = 2;
-                if (instsToDelete.size() <= MIN_BOUNDSCHECKS_NUM) {
-                    COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Skip small group of BoundsChecks";
-                    continue;
-                }
-                // Try to replace more than 2 bounds checks to deoptimization in loop
-                auto saveState = FindSaveState(instsToDelete);
-                if (saveState == nullptr) {
-                    COMPILER_LOG(DEBUG, CHECKS_ELIM) << "SaveState isn't founded";
-                    continue;
-                }
-                COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Replace group of BoundsChecks on deoptimization in loop";
-                auto insertAfter = lenArray->IsDominate(saveState) ? saveState : lenArray;
-                if (max != std::numeric_limits<int64_t>::min()) {
-                    // Create deoptimize if max_index >= lenArray
-                    InsertBoundsCheckDeoptimization(ConditionCode::CC_GE, index, max, lenArray, saveState, insertAfter);
-                }
-                if (index != nullptr && min != std::numeric_limits<int64_t>::max()) {
-                    // Create deoptimize if min_index < 0
-                    auto zeroConst = GetGraph()->FindOrCreateConstant(0);
-                    InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, index, min, zeroConst, saveState,
-                                                    insertAfter);
-                } else {
-                    // No lower check needed based on BoundsAnalysis
-                    // if index is null, group of bounds checks consists of constants
-                    ASSERT(min >= 0);
-                }
-                for (const auto &inst : instsToDelete) {
-                    COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Delete group of BoundsChecks";
-                    ReplaceUsersAndRemoveCheck(inst, inst->GetInput(1).GetInst());
-                }
-            }
-        }
+        ReplaceOneBoundsCheckToDeoptimizationInLoop(item);
     }
     COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Finish ReplaceBoundsCheckToDeoptimizationInLoop";
 }

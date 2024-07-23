@@ -353,6 +353,9 @@ public:
     }
 
 private:
+    template <size_t SIZE>
+    bool CheckNeighborsInClique(const ArenaVector<unsigned> &peo, SmallVector<Register, SIZE> &processedNbr) const;
+
     template <typename T>
     void MakeBusyBitmap(unsigned id, T *nbrColors, T *nbrBiasColors)
     {

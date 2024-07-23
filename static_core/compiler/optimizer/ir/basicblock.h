@@ -67,44 +67,17 @@ public:
     using SuccsVector = SmallVector<BasicBlock *, 2U, ArenaAllocatorT<false>, true>;
 
 public:
-    void SetId(uint32_t id)
-    {
-        bbId_ = id;
-    }
-    uint32_t GetId() const
-    {
-        return bbId_;
-    }
+    void SetId(uint32_t id);
+    uint32_t GetId() const;
 
-    ArenaVector<BasicBlock *> &GetPredsBlocks()
-    {
-        return preds_;
-    }
-    const ArenaVector<BasicBlock *> &GetPredsBlocks() const
-    {
-        return preds_;
-    }
+    ArenaVector<BasicBlock *> &GetPredsBlocks();
+    const ArenaVector<BasicBlock *> &GetPredsBlocks() const;
 
-    SuccsVector &GetSuccsBlocks()
-    {
-        return succs_;
-    }
-    const SuccsVector &GetSuccsBlocks() const
-    {
-        return succs_;
-    }
+    SuccsVector &GetSuccsBlocks();
+    const SuccsVector &GetSuccsBlocks() const;
 
-    BasicBlock *GetSuccessor(size_t index) const
-    {
-        ASSERT(index < succs_.size());
-        return succs_[index];
-    }
-
-    BasicBlock *GetPredecessor(size_t index) const
-    {
-        ASSERT(index < preds_.size());
-        return preds_[index];
-    }
+    BasicBlock *GetSuccessor(size_t index) const;
+    BasicBlock *GetPredecessor(size_t index) const;
 
     template <bool INVERT = false>
     void SwapTrueFalseSuccessors()
@@ -120,83 +93,31 @@ public:
         succs_[FALSE_SUCC_IDX]->InvalidateLoopIfIrreducible();
     }
 
-    bool IsInverted() const
-    {
-        return inverted_;
-    }
+    bool IsInverted() const;
 
-    void SetHotness(int64_t hotness)
-    {
-        hotness_ = hotness;
-    }
+    void SetHotness(int64_t hotness);
+    int64_t GetHotness() const;
 
-    auto GetHotness() const
-    {
-        return hotness_;
-    }
-
-    BasicBlock *GetTrueSuccessor() const
-    {
-        ASSERT(!succs_.empty());
-        return succs_[TRUE_SUCC_IDX];
-    }
-
-    BasicBlock *GetFalseSuccessor() const
-    {
-        ASSERT(succs_.size() > 1);
-        return succs_[FALSE_SUCC_IDX];
-    }
+    BasicBlock *GetTrueSuccessor() const;
+    BasicBlock *GetFalseSuccessor() const;
 
     // Get index of the given block in predecessor container
-    size_t GetPredBlockIndex(const BasicBlock *block) const
-    {
-        auto it = std::find(preds_.begin(), preds_.end(), block);
-        ASSERT(it != preds_.end());
-        ASSERT(std::find(it + 1, preds_.end(), block) == preds_.end());
-        return std::distance(preds_.begin(), it);
-    }
-
+    size_t GetPredBlockIndex(const BasicBlock *block) const;
     // Get index of the given block in successor container
-    size_t GetSuccBlockIndex(const BasicBlock *block) const
-    {
-        auto it = std::find(succs_.begin(), succs_.end(), block);
-        ASSERT(it != succs_.end());
-        ASSERT(std::find(it + 1, succs_.end(), block) == succs_.end());
-        return std::distance(succs_.begin(), it);
-    }
-
+    size_t GetSuccBlockIndex(const BasicBlock *block) const;
     // Get basic block by its index in predecessors container
-    BasicBlock *GetPredBlockByIndex(size_t index) const
-    {
-        ASSERT(index < preds_.size());
-        return preds_[index];
-    }
+    BasicBlock *GetPredBlockByIndex(size_t index) const;
 
     bool IsStartBlock() const;
     bool IsEndBlock() const;
     bool IsPseudoControlFlowBlock() const;
 
-    Graph *GetGraph()
-    {
-        return graph_;
-    }
-    const Graph *GetGraph() const
-    {
-        return graph_;
-    }
-    void SetGraph(Graph *graph)
-    {
-        graph_ = graph;
-    }
+    Graph *GetGraph();
+    const Graph *GetGraph() const;
+    void SetGraph(Graph *graph);
 
-    void SetGuestPc(uint32_t guestPc)
-    {
-        guestPc_ = guestPc;
-    }
-    uint32_t GetGuestPc() const
-    {
-        return guestPc_;
-    }
+    void SetGuestPc(uint32_t guestPc);
+    uint32_t GetGuestPc() const;
 
     /**
      * Split block after the given instruction. Current block will contain instructions before the splitting line and
@@ -209,33 +130,12 @@ public:
 
     // Add successor in the list
     void AddSucc(BasicBlock *succ, bool canAddEmptyBlock = false);
+    bool HasSucc(BasicBlock *succ);
 
-    bool HasSucc(BasicBlock *succ)
-    {
-        return std::find(succs_.begin(), succs_.end(), succ) != succs_.end();
-    }
-
-    void ReplacePred(BasicBlock *prevPred, BasicBlock *newPred)
-    {
-        preds_[GetPredBlockIndex(prevPred)] = newPred;
-        newPred->succs_.push_back(this);
-    }
-
+    void ReplacePred(BasicBlock *prevPred, BasicBlock *newPred);
     void ReplaceSucc(const BasicBlock *prevSucc, BasicBlock *newSucc, bool canAddEmptyBlock = false);
-
-    void ReplaceTrueSuccessor(BasicBlock *newSucc)
-    {
-        ASSERT(!succs_.empty());
-        succs_[TRUE_SUCC_IDX] = newSucc;
-        newSucc->preds_.push_back(this);
-    }
-
-    void ReplaceFalseSuccessor(BasicBlock *newSucc)
-    {
-        ASSERT(succs_.size() > 1);
-        succs_[FALSE_SUCC_IDX] = newSucc;
-        newSucc->preds_.push_back(this);
-    }
+    void ReplaceTrueSuccessor(BasicBlock *newSucc);
+    void ReplaceFalseSuccessor(BasicBlock *newSucc);
 
     BasicBlock *InsertNewBlockToSuccEdge(BasicBlock *succ);
     BasicBlock *InsertEmptyBlockBefore();
@@ -258,21 +158,10 @@ public:
     template <bool TO_END>
     void AddInst(Inst *inst);
     // Insert new instruction(NOT PHI) in BasicBlock at the start of instructions
-    void PrependInst(Inst *inst)
-    {
-        AddInst<false>(inst);
-    }
+    void PrependInst(Inst *inst);
     // Insert new instruction(NOT PHI) in BasicBlock at the end of instructions
-    void AppendInst(Inst *inst)
-    {
-        AddInst<true>(inst);
-    }
-    void AppendInsts(std::initializer_list<Inst *> &&insts)
-    {
-        for (auto inst : insts) {
-            AddInst<true>(inst);
-        }
-    }
+    void AppendInst(Inst *inst);
+    void AppendInsts(std::initializer_list<Inst *> &&insts);
     // Append range of instructions(NOT PHI) in BasicBlock at the end of instructions
     // It is implied that for instructions within range was already called correctly SetBasicBlock() and
     // range_last should dominate range_first.
@@ -298,121 +187,44 @@ public:
     // Replace inst with overflow check on corresponding inst (e.g. AddOverflowCheck -> Add)
     void RemoveOverflowCheck(Inst *inst);
     // Remove all instructions from bb
+
+    bool IsEndWithThrowOrDeoptimize() const;
+    Inst *GetFirstInst() const;
+    Inst *GetLastInst() const;
+    Inst *GetFirstPhi() const;
+
     void Clear();
+    bool IsEmpty() const;
+    bool HasPhi() const;
 
-    Inst *GetLastInst() const
-    {
-        return lastInst_;
-    }
-
-    bool IsEndWithThrowOrDeoptimize() const
-    {
-        if (lastInst_ == nullptr) {
-            return false;
-        }
-        return lastInst_->IsControlFlow() && lastInst_->CanThrow() && lastInst_->IsTerminator();
-    }
-
-    Inst *GetFirstInst() const
-    {
-        return firstInst_;
-    }
-
-    Inst *GetFirstPhi() const
-    {
-        return firstPhi_;
-    }
-
-    bool IsEmpty() const
-    {
-        return firstInst_ == nullptr;
-    }
-
-    bool HasPhi() const
-    {
-        return firstPhi_ != nullptr;
-    }
-
-    void SetDominator(BasicBlock *dominator)
-    {
-        dominator_ = dominator;
-    }
-    void ClearDominator()
-    {
-        dominator_ = nullptr;
-    }
-
+    void SetDominator(BasicBlock *dominator);
+    void ClearDominator();
     BasicBlock *CreateImmediateDominator();
 
-    void AddDominatedBlock(BasicBlock *block)
-    {
-        domBlocks_.push_back(block);
-    }
-    void RemoveDominatedBlock(BasicBlock *block)
-    {
-        domBlocks_.erase(std::find(domBlocks_.begin(), domBlocks_.end(), block));
-    }
-    void ClearDominatedBlocks()
-    {
-        domBlocks_.clear();
-    }
+    void AddDominatedBlock(BasicBlock *block);
+    void RemoveDominatedBlock(BasicBlock *block);
+    void ClearDominatedBlocks();
 
     BasicBlock *GetDominator() const;
     const ArenaVector<BasicBlock *> &GetDominatedBlocks() const;
     bool IsDominate(const BasicBlock *other) const;
 
-    void RemovePred(const BasicBlock *pred)
-    {
-        ASSERT(GetPredBlockIndex(pred) < preds_.size());
-        preds_[GetPredBlockIndex(pred)] = preds_.back();
-        preds_.pop_back();
-    }
-
-    void RemovePred(size_t index)
-    {
-        ASSERT(index < preds_.size());
-        preds_[index] = preds_.back();
-        preds_.pop_back();
-    }
-
-    void RemoveSucc(BasicBlock *succ)
-    {
-        auto it = std::find(succs_.begin(), succs_.end(), succ);
-        ASSERT(it != succs_.end());
-        succs_.erase(it);
-    }
+    void RemovePred(const BasicBlock *pred);
+    void RemovePred(size_t index);
+    void RemoveSucc(BasicBlock *succ);
 
     void Dump(std::ostream *out) const;
 
-    Loop *GetLoop() const
-    {
-        return loop_;
-    }
-    void SetLoop(Loop *loop)
-    {
-        loop_ = loop;
-    }
-    bool IsLoopValid() const
-    {
-        return GetLoop() != nullptr;
-    }
+    Loop *GetLoop() const;
+    void SetLoop(Loop *loop);
+    bool IsLoopValid() const;
     bool IsLoopHeader() const;
     bool IsLoopPostExit() const;
     bool IsTryCatch() const;
 
-    void SetNextLoop(Loop *loop)
-    {
-        nextLoop_ = loop;
-    }
-    Loop *GetNextLoop()
-    {
-        return nextLoop_;
-    }
-    bool IsLoopPreHeader() const
-    {
-        return (nextLoop_ != nullptr);
-    }
-
+    void SetNextLoop(Loop *loop);
+    Loop *GetNextLoop();
+    bool IsLoopPreHeader() const;
     void InsertBlockBefore(BasicBlock *block);
 
     template <typename Accessor>
@@ -427,136 +239,42 @@ public:
         Accessor::Set(value, &bitFields_);
     }
 
-    void SetAllFields(uint32_t bitFields)
-    {
-        bitFields_ = bitFields;
-    }
+    void SetAllFields(uint32_t bitFields);
+    uint32_t GetAllFields() const;
+    void SetMonitorEntryBlock(bool v);
+    bool GetMonitorEntryBlock();
 
-    uint32_t GetAllFields() const
-    {
-        return bitFields_;
-    }
+    void SetMonitorExitBlock(bool v);
+    bool GetMonitorExitBlock() const;
 
-    void SetMonitorEntryBlock(bool v)
-    {
-        SetField<MonitorEntryBlock>(v);
-    }
+    void SetMonitorBlock(bool v);
+    bool GetMonitorBlock() const;
 
-    bool GetMonitorEntryBlock()
-    {
-        return GetField<MonitorEntryBlock>();
-    }
+    void SetCatch(bool v);
+    bool IsCatch() const;
 
-    void SetMonitorExitBlock(bool v)
-    {
-        SetField<MonitorExitBlock>(v);
-    }
+    void SetCatchBegin(bool v);
+    bool IsCatchBegin() const;
 
-    bool GetMonitorExitBlock() const
-    {
-        return GetField<MonitorExitBlock>();
-    }
+    void SetCatchEnd(bool v);
+    bool IsCatchEnd() const;
 
-    void SetMonitorBlock(bool v)
-    {
-        SetField<MonitorBlock>(v);
-    }
+    void SetTry(bool v);
+    bool IsTry() const;
 
-    bool GetMonitorBlock() const
-    {
-        return GetField<MonitorBlock>();
-    }
+    void SetTryBegin(bool v);
+    bool IsTryBegin() const;
 
-    void SetCatch(bool v)
-    {
-        SetField<CatchBlock>(v);
-    }
+    void SetTryEnd(bool v);
+    bool IsTryEnd() const;
 
-    bool IsCatch() const
-    {
-        return GetField<CatchBlock>();
-    }
+    void SetOsrEntry(bool v);
+    bool IsOsrEntry() const;
 
-    void SetCatchBegin(bool v)
-    {
-        SetField<CatchBeginBlock>(v);
-    }
+    void CopyTryCatchProps(BasicBlock *block);
 
-    bool IsCatchBegin() const
-    {
-        return GetField<CatchBeginBlock>();
-    }
-
-    void SetCatchEnd(bool v)
-    {
-        SetField<CatchEndBlock>(v);
-    }
-
-    bool IsCatchEnd() const
-    {
-        return GetField<CatchEndBlock>();
-    }
-
-    void SetTry(bool v)
-    {
-        SetField<TryBlock>(v);
-    }
-
-    bool IsTry() const
-    {
-        return GetField<TryBlock>();
-    }
-
-    void SetTryBegin(bool v)
-    {
-        SetField<TryBeginBlock>(v);
-    }
-
-    bool IsTryBegin() const
-    {
-        return GetField<TryBeginBlock>();
-    }
-
-    void SetTryEnd(bool v)
-    {
-        SetField<TryEndBlock>(v);
-    }
-
-    bool IsTryEnd() const
-    {
-        return GetField<TryEndBlock>();
-    }
-
-    void SetOsrEntry(bool v)
-    {
-        SetField<OsrEntry>(v);
-    }
-
-    bool IsOsrEntry() const
-    {
-        return GetField<OsrEntry>();
-    }
-
-    void CopyTryCatchProps(BasicBlock *block)
-    {
-        if (block->IsTry()) {
-            SetTry(true);
-            SetTryId(block->GetTryId());
-        }
-        if (block->IsCatch()) {
-            SetCatch(true);
-        }
-    }
-
-    uint32_t GetTryId() const
-    {
-        return tryId_;
-    }
-
-    void SetTryId(uint32_t tryId)
-    {
-        tryId_ = tryId;
-    }
+    uint32_t GetTryId() const;
+    void SetTryId(uint32_t tryId);
 
     template <class Callback>
     void EnumerateCatchHandlers(const Callback &callback) const
@@ -581,25 +299,9 @@ public:
 
     BasicBlock *Clone(Graph *targetGraph) const;
 
-    void SetNeedsJump(bool v)
-    {
-        SetField<JumpFlag>(v);
-    }
-
-    bool NeedsJump() const
-    {
-        return GetField<JumpFlag>();
-    }
-
-    bool IsIfBlock() const
-    {
-        if (lastInst_ != nullptr) {
-            if (lastInst_->GetOpcode() == Opcode::If || lastInst_->GetOpcode() == Opcode::IfImm) {
-                return true;
-            }
-        }
-        return false;
-    }
+    void SetNeedsJump(bool v);
+    bool NeedsJump() const;
+    bool IsIfBlock() const;
 
     Inst *GetFistThrowableInst() const;
     Inst *FindSaveStateDeoptimize() const;

@@ -60,6 +60,7 @@ private:
     void HandleIfBlock(BasicBlock *ifTrueBlock, BasicBlock *nextBlock);
     template <class T>
     void MakeLinearOrder(const T &blocks);
+    void DumpUnreachableBlocks();
 
 private:
     BasicBlock *LeastLikelySuccessor(const BasicBlock *block);

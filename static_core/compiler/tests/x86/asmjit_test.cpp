@@ -87,7 +87,7 @@ TEST_F(AsmJitTest, Add)
     ASSERT_FALSE(err);
 
     size_t result {fn(size_t(2), size_t(3))};
-    ASSERT_EQ(size_t(5), result);
+    ASSERT_EQ(size_t(5U), result);
 }
 
 TEST_F(AsmJitTest, AddExplicit)
@@ -141,7 +141,7 @@ TEST_F(AsmJitTest, AddExplicit)
     Func fn = (Func)ro_ptr;
 
     size_t result {fn(size_t(2), size_t(3))};
-    ASSERT_EQ(size_t(5), result);
+    ASSERT_EQ(size_t(5U), result);
 
     err = allocator.release(ro_ptr);
     ASSERT_FALSE(err);

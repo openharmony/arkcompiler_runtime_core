@@ -135,6 +135,20 @@ namespace {
 constexpr size_t DEFAULT_VECTOR_SIZE = 64;
 }  // namespace
 
+template <>
+bool InterferenceGraph::CheckNeighborsInClique(const ArenaVector<unsigned> &peo,
+                                               SmallVector<Register, DEFAULT_VECTOR_SIZE> &processedNbr) const
+{
+    for (auto nbr1 : processedNbr) {
+        for (auto nbr2 : processedNbr) {
+            if (nbr1 != nbr2 && !HasEdge(peo[nbr1], peo[nbr2])) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 bool InterferenceGraph::IsChordal() const
 {
     const auto &peo = LexBFS();
@@ -151,12 +165,8 @@ bool InterferenceGraph::IsChordal() const
         }
 
         // Check that all processed neighbors in clique
-        for (auto nbr1 : processedNbr) {
-            for (auto nbr2 : processedNbr) {
-                if (nbr1 != nbr2 && !HasEdge(peo[nbr1], peo[nbr2])) {
-                    return false;
-                }
-            }
+        if (!CheckNeighborsInClique(peo, processedNbr)) {
+            return false;
         }
     }
 
@@ -219,13 +229,14 @@ void InterferenceGraph::Dump(const std::string &name, bool skipPhysical, std::os
 
     auto edgePrinter = [this, &out, skipPhysical](auto nodeNum) {
         for (unsigned j = 0; j < nodeNum; j++) {
-            if (!(skipPhysical && GetNode(j).IsPhysical()) && HasEdge(nodeNum, j)) {
-                if (GetNode(nodeNum).GetColor() == GetNode(j).GetColor() &&
-                    GetNode(nodeNum).GetColor() != INVALID_REG) {
-                    out << "Error: Same color\n";
-                }
-                out << nodeNum << "--" << j << "\n";
+            bool check = !(skipPhysical && GetNode(j).IsPhysical()) && HasEdge(nodeNum, j);
+            if (!check) {
+                continue;
             }
+            if (GetNode(nodeNum).GetColor() == GetNode(j).GetColor() && GetNode(nodeNum).GetColor() != INVALID_REG) {
+                out << "Error: Same color\n";
+            }
+            out << nodeNum << "--" << j << "\n";
         }
     };
 

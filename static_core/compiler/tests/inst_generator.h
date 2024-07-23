@@ -93,6 +93,20 @@ private:
     Graph *CreateGraphWithFourBasicBlock();
     ParameterInst *CreateParamInst(Graph *graph, DataType::Type type, uint8_t slot);
 
+    struct PackArgsForCkeckInst {
+        Opcode opcode;
+        DataType::Type type;
+        Inst *inst;
+        ParameterInst *param1;
+        ParameterInst *param2;
+
+        SaveStateInst *saveState;
+        BasicBlock *block;
+        Graph *graph;
+    };
+
+    Inst *CreateCheckInstByPackArgs(const PackArgsForCkeckInst &pack);
+
 private:
     // need to create graphs
     ArenaAllocator &allocator_;
@@ -156,6 +170,8 @@ private:
         inst->SetIntrinsicId(intrinsicId);
         insts_.push_back(inst);
     }
+
+    void SetFlagsNoCseNoHoistIfReference(Inst *inst, DataType::Type dstType);
 
     std::vector<DataType::Type> integerTypes_ {DataType::UINT8,  DataType::INT8,  DataType::UINT16, DataType::INT16,
                                                DataType::UINT32, DataType::INT32, DataType::UINT64, DataType::INT64};
@@ -315,6 +331,10 @@ public:
     }
 
     void GenerateHTMLPage(const std::string &fileName);
+
+private:
+    void FillHTMLPageHeadPart(std::ofstream &htmlPage);
+    void FillHTMLPageOpcodeStatistic(std::ofstream &htmlPage, Opcode opc);
 
 protected:
     InstGenerator &instGenerator_;

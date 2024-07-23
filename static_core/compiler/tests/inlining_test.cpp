@@ -634,7 +634,7 @@ private:
     std::vector<RuntimeInterface::ClassPtr> classes_;
 };
 
-TEST_F(InliningTest, PolymorphicInlineWithThrow)
+const char *CreateSourcePolymorphicInlineWithThrow()
 {
     auto source = R"(
         .record Base {}
@@ -669,7 +669,12 @@ TEST_F(InliningTest, PolymorphicInlineWithThrow)
             return
         }
     )";
+    return source;
+}
 
+TEST_F(InliningTest, PolymorphicInlineWithThrow)
+{
+    auto source = CreateSourcePolymorphicInlineWithThrow();
     auto skipThrow = g_options.IsCompilerInliningSkipThrowBlocks();
     auto skipThrowMethods = g_options.IsCompilerInliningSkipAlwaysThrowMethods();
     g_options.SetCompilerInliningSkipThrowBlocks(false);

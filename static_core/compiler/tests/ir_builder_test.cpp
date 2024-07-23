@@ -199,6 +199,30 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
+    Graph *ExpectedGraphCheckCondJump(DataType::Type type, ConditionCode cc)
+    {
+        auto graph = CreateGraphWithDefaultRuntime();
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(type);
+            PARAMETER(1U, 1U);
+            INS(1U).SetType(type);
+
+            BASIC_BLOCK(2U, 3U, 4U)
+            {
+                INST(2U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
+                INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
+            }
+            BASIC_BLOCK(3U, 4U) {}
+            BASIC_BLOCK(4U, -1L)
+            {
+                INST(4U, Opcode::ReturnVoid).v0id();
+            }
+        }
+        return graph;
+    }
+
     template <bool IS_OBJ>
     void CheckCondJump(ConditionCode cc)
     {
@@ -243,26 +267,7 @@ public:
         source += "return.void\n}";
 
         ASSERT_TRUE(ParseToGraph(source.c_str(), "main"));
-
-        auto graph = CreateGraphWithDefaultRuntime();
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U);
-            INS(0U).SetType(type);
-            PARAMETER(1U, 1U);
-            INS(1U).SetType(type);
-
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(2U, Opcode::Compare).b().CC(cc).Inputs(0U, 1U);
-                INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
-            }
-            BASIC_BLOCK(3U, 4U) {}
-            BASIC_BLOCK(4U, -1L)
-            {
-                INST(4U, Opcode::ReturnVoid).v0id();
-            }
-        }
+        auto graph = ExpectedGraphCheckCondJump(type, cc);
         ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
     }
 
@@ -5029,44 +5034,9 @@ TEST_F(IrBuilderTest, Isinstance)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(IrBuilderTest, SimpleTryCatch)
+OUT_GRAPH(SimpleTryCatch, Graph *graph)
 {
-    auto source = R"(
-    .record E1 {}
-
-    .function void foo() {
-    }
-
-    .function u1 main() {
-    try_begin:
-        call foo
-        ldai 2
-    try_end:
-        jmp exit
-
-    catch_block1_begin:
-        ldai 0
-        return
-
-    catch_block2_begin:
-        ldai 1
-        return
-
-    exit:
-        return
-
-    .catchall try_begin, try_end, catch_block1_begin
-    .catch E1, try_begin, try_end, catch_block2_begin
-
-    }
-    )";
-
-    // build IR with try-catch
-    auto graph = CreateGraph();
-    ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
-
-    auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         CONSTANT(0U, 2U);
         CONSTANT(1U, 1U);
@@ -5097,8 +5067,76 @@ TEST_F(IrBuilderTest, SimpleTryCatch)
             INST(13U, Opcode::Return).b().Inputs(1U);
         }
     }
+}
+
+TEST_F(IrBuilderTest, SimpleTryCatch)
+{
+    auto source = R"(
+    .record E1 {}
+
+    .function void foo() {
+    }
+
+    .function u1 main() {
+    try_begin:
+        call foo
+        ldai 2
+    try_end:
+        jmp exit
+
+    catch_block1_begin:
+        ldai 0
+        return
+
+    catch_block2_begin:
+        ldai 1
+        return
+
+    exit:
+        return
+
+    .catchall try_begin, try_end, catch_block1_begin
+    .catch E1, try_begin, try_end, catch_block2_begin
+    }
+    )";
+
+    // build IR with try-catch
+    auto graph = CreateGraph();
+    ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
+
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    out_graph::SimpleTryCatch::CREATE(expectedGraph);
     GraphChecker(expectedGraph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
+}
+
+OUT_GRAPH(TryCatchFinally, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 1U);
+        CONSTANT(1U, 3U);
+        CONSTANT(2U, 2U);
+
+        BASIC_BLOCK(2U, 7U, 4U, 5U)
+        {
+            INST(3U, Opcode::Try).CatchTypeIds({0x0U, 0xE1U});
+        }
+        BASIC_BLOCK(7U, 3U)
+        {
+            INST(4U, Opcode::SaveState).Inputs().SrcVregs({});
+            INST(5U, Opcode::CallStatic).v0id().InputsAutoType(4U);
+        }
+        BASIC_BLOCK(3U, 6U, 4U, 5U) {}  // Try-end
+        BASIC_BLOCK(4U, 6U) {}
+        BASIC_BLOCK(5U, 6U) {}
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(11U, Opcode::Phi).s32().Inputs({{3U, 0U}, {4U, 2U}, {5U, 1U}});
+            INST(12U, Opcode::Sub).s32().Inputs(11U, 0U);
+            INST(13U, Opcode::Return).b().Inputs(12U);
+        }
+    }
 }
 
 TEST_F(IrBuilderTest, TryCatchFinally)
@@ -5138,73 +5176,13 @@ TEST_F(IrBuilderTest, TryCatchFinally)
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
-    {
-        CONSTANT(0U, 1U);
-        CONSTANT(1U, 3U);
-        CONSTANT(2U, 2U);
-
-        BASIC_BLOCK(2U, 7U, 4U, 5U)
-        {
-            INST(3U, Opcode::Try).CatchTypeIds({0x0U, 0xE1U});
-        }
-        BASIC_BLOCK(7U, 3U)
-        {
-            INST(4U, Opcode::SaveState).Inputs().SrcVregs({});
-            INST(5U, Opcode::CallStatic).v0id().InputsAutoType(4U);
-        }
-        BASIC_BLOCK(3U, 6U, 4U, 5U) {}  // Try-end
-        BASIC_BLOCK(4U, 6U) {}
-        BASIC_BLOCK(5U, 6U) {}
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(11U, Opcode::Phi).s32().Inputs({{3U, 0U}, {4U, 2U}, {5U, 1U}});
-            INST(12U, Opcode::Sub).s32().Inputs(11U, 0U);
-            INST(13U, Opcode::Return).b().Inputs(12U);
-        }
-    }
+    out_graph::TryCatchFinally::CREATE(expectedGraph);
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(IrBuilderTest, CatchPhis)
+OUT_GRAPH(CatchPhis, Graph *graph)
 {
-    auto source = R"(
-    .record E1 {}
-    .record A {}
-
-    .function i64 main(i64 a0) {
-    try_begin:
-        movi.64 v0, 100
-        lda.64 v0
-        div2.64 a0
-        sta.64 v0
-        div2.64 a0
-    try_end:
-        jmp exit
-
-    catch_block1_begin:
-        lda.64 v0
-        return
-
-    catch_block2_begin:
-        lda.64 v0
-        return
-
-    exit:
-        return
-
-    .catch E1, try_begin, try_end, catch_block1_begin
-    .catchall try_begin, try_end, catch_block2_begin
-
-    }
-    )";
-
-    // build IR with try-catch
-    auto graph = CreateGraph();
-    ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
-
-    auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         CONSTANT(1U, 100U);
@@ -5244,49 +5222,53 @@ TEST_F(IrBuilderTest, CatchPhis)
             INST(13U, Opcode::Return).s64().Inputs(12U);
         }
     }
-    GraphChecker(expectedGraph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(IrBuilderTest, NestedTryCatch)
+TEST_F(IrBuilderTest, CatchPhis)
 {
     auto source = R"(
-    .record panda.ArithmeticException <external>
+    .record E1 {}
+    .record A {}
 
-    .function i32 main(i32 a0, i32 a1, i32 a2) {
+    .function i64 main(i64 a0) {
     try_begin:
-        lda a0
-        div2 a1
+        movi.64 v0, 100
+        lda.64 v0
+        div2.64 a0
+        sta.64 v0
+        div2.64 a0
     try_end:
-        jmp lbl
+        jmp exit
 
-    catch_block:
-    try_begin1:
-        lda a0
-        div2 a2
-    try_end1:
-        jmp lbl
-
-    catch_block1:
-        lda a0
-        addi 1
-
-    lbl:
+    catch_block1_begin:
+        lda.64 v0
         return
 
-    .catch panda.ArithmeticException, try_begin, try_end, catch_block
-    .catch panda.ArithmeticException, try_begin1, try_end1, catch_block1
+    catch_block2_begin:
+        lda.64 v0
+        return
 
+    exit:
+        return
+
+    .catch E1, try_begin, try_end, catch_block1_begin
+    .catchall try_begin, try_end, catch_block2_begin
     }
     )";
 
     // build IR with try-catch
     auto graph = CreateGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
-    ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    out_graph::CatchPhis::CREATE(expectedGraph);
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
+}
+
+OUT_GRAPH(NestedTryCatch, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -5326,6 +5308,46 @@ TEST_F(IrBuilderTest, NestedTryCatch)
             INST(18U, Opcode::Return).s32().Inputs(17U);
         }
     }
+}
+
+TEST_F(IrBuilderTest, NestedTryCatch)
+{
+    auto source = R"(
+    .record panda.ArithmeticException <external>
+
+    .function i32 main(i32 a0, i32 a1, i32 a2) {
+    try_begin:
+        lda a0
+        div2 a1
+    try_end:
+        jmp lbl
+
+    catch_block:
+    try_begin1:
+        lda a0
+        div2 a2
+    try_end1:
+        jmp lbl
+
+    catch_block1:
+        lda a0
+        addi 1
+
+    lbl:
+        return
+
+    .catch panda.ArithmeticException, try_begin, try_end, catch_block
+    .catch panda.ArithmeticException, try_begin1, try_end1, catch_block1
+    }
+    )";
+
+    // build IR with try-catch
+    auto graph = CreateGraph();
+    ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
+    ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
+
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    out_graph::NestedTryCatch::CREATE(expectedGraph);
     GraphChecker(expectedGraph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
@@ -5417,7 +5439,6 @@ TEST_F(IrBuilderTest, EmptyTryBlock)
 
     .catchall try_begin1, try_end1, catch_block1
     .catchall try_begin2, try_end2, catch_block2
-
     }
     )";
 
@@ -5438,40 +5459,9 @@ TEST_F(IrBuilderTest, EmptyTryBlock)
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(IrBuilderTest, CatchBlockWithCycle)
+OUT_GRAPH(CatchBlockWithCycle, Graph *graph)
 {
-    auto source = R"(
-    .record panda.ArithmeticException <external>
-
-    .function i32 main(i32 a0, i32 a1) {
-    try_begin:
-        lda a0
-        div2 a1
-        sta a0
-    try_end:
-        jmp exit
-
-    catch_block:
-        lda a0
-    loop:
-        jeqz exit
-        subi 1
-        jmp loop
-
-    exit:
-        return
-
-    .catch panda.ArithmeticException, try_begin, try_end, catch_block
-    }
-    )";
-
-    // build IR with try-catch
-    auto graph = CreateGraph();
-    ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
-    ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
-
-    auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -5512,37 +5502,34 @@ TEST_F(IrBuilderTest, CatchBlockWithCycle)
             INST(14U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    GraphChecker(expectedGraph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(IrBuilderTest, DeadBlocksAfterThrow)
+TEST_F(IrBuilderTest, CatchBlockWithCycle)
 {
     auto source = R"(
-.record E1 {}
+    .record panda.ArithmeticException <external>
 
-.function i32 main() {
-    newobj v1, E1
-begin1:
-    throw v1
-end1:
-    ldai 0
-loop:
-    addi 1
-    jnez loop
-    return
+    .function i32 main(i32 a0, i32 a1) {
+    try_begin:
+        lda a0
+        div2 a1
+        sta a0
+    try_end:
+        jmp exit
 
-catch1:
-    jeq.obj v1, ok
-    ldai 1
-    return
-ok:
-    ldai 0
-    return
+    catch_block:
+        lda a0
+    loop:
+        jeqz exit
+        subi 1
+        jmp loop
 
-.catch E1, begin1, end1, catch1
-}
-)";
+    exit:
+        return
+
+    .catch panda.ArithmeticException, try_begin, try_end, catch_block
+    }
+    )";
 
     // build IR with try-catch
     auto graph = CreateGraph();
@@ -5550,7 +5537,14 @@ ok:
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    out_graph::CatchBlockWithCycle::CREATE(expectedGraph);
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
+}
+
+OUT_GRAPH(DeadBlocksAfterThrow, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(11U, 1U);
         CONSTANT(13U, 0U);
@@ -5589,37 +5583,33 @@ ok:
             INST(15U, Opcode::Return).s32().Inputs(13U);
         }
     }
-    GraphChecker(expectedGraph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(IrBuilderTest, FallthroughBeforeTryBlockEnd)
+TEST_F(IrBuilderTest, DeadBlocksAfterThrow)
 {
     auto source = R"(
-.record panda.NullPointerException {}
+.record E1 {}
 
-.function i32 main(i32 a0, i32 a1, i32 a2) {
+.function i32 main() {
+    newobj v1, E1
 begin1:
-    lda a0
-    div2 a1
+    throw v1
 end1:
-    jeqz exit
-    lda a0
-begin2:
-    div2 a2
-end2:
-    jeqz exit
-    ldai 1
-    jmp exit
-catch1:
-    lda a0
+    ldai 0
+loop:
     addi 1
-    jmp exit
-exit:
+    jnez loop
     return
 
-.catch panda.NullPointerException, begin1, end1, catch1
-.catch panda.NullPointerException, begin2, end2, catch1
+catch1:
+    jeq.obj v1, ok
+    ldai 1
+    return
+ok:
+    ldai 0
+    return
+
+.catch E1, begin1, end1, catch1
 }
 )";
 
@@ -5629,7 +5619,14 @@ exit:
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    out_graph::DeadBlocksAfterThrow::CREATE(expectedGraph);
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
+}
+
+OUT_GRAPH(FallthroughBeforeTryBlockEnd, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(6U, 0U).s32();
         PARAMETER(7U, 1U).s32();
@@ -5681,36 +5678,35 @@ exit:
             INST(26U, Opcode::Return).s32().Inputs(25U);
         }
     }
-    GraphChecker(expectedGraph).Check();
-    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(IrBuilderTest, CatchWithFallthrough)
+TEST_F(IrBuilderTest, FallthroughBeforeTryBlockEnd)
 {
     auto source = R"(
-.record E1 {}
+.record panda.NullPointerException {}
 
-.function i32 main(i32 a0, i32 a1) {
+.function i32 main(i32 a0, i32 a1, i32 a2) {
 begin1:
     lda a0
     div2 a1
-    sta a0
 end1:
+    jeqz exit
+    lda a0
+begin2:
+    div2 a2
+end2:
+    jeqz exit
+    ldai 1
     jmp exit
-
 catch1:
     lda a0
-    jeqz label
-    subi 1
+    addi 1
     jmp exit
-label:
-    ldai 0
-    return
-
 exit:
     return
 
-.catch E1, begin1, end1, catch1
+.catch panda.NullPointerException, begin1, end1, catch1
+.catch panda.NullPointerException, begin2, end2, catch1
 }
 )";
 
@@ -5720,7 +5716,14 @@ exit:
     ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    out_graph::FallthroughBeforeTryBlockEnd::CREATE(expectedGraph);
+    GraphChecker(expectedGraph).Check();
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
+}
+
+OUT_GRAPH(CatchWithFallthrough, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -5758,6 +5761,44 @@ exit:
             INST(15U, Opcode::Return).s32().Inputs(14U);
         }
     }
+}
+
+TEST_F(IrBuilderTest, CatchWithFallthrough)
+{
+    auto source = R"(
+.record E1 {}
+
+.function i32 main(i32 a0, i32 a1) {
+begin1:
+    lda a0
+    div2 a1
+    sta a0
+end1:
+    jmp exit
+
+catch1:
+    lda a0
+    jeqz label
+    subi 1
+    jmp exit
+label:
+    ldai 0
+    return
+
+exit:
+    return
+
+.catch E1, begin1, end1, catch1
+}
+)";
+
+    // build IR with try-catch
+    auto graph = CreateGraph();
+    ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
+    ASSERT_TRUE(RegAllocResolver(graph).ResolveCatchPhis());
+
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    out_graph::CatchWithFallthrough::CREATE(expectedGraph);
     GraphChecker(expectedGraph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
@@ -5886,31 +5927,9 @@ TEST_F(IrBuilderTest, InfiniteLoop)
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
-TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
+OUT_GRAPH(TestSaveStateDeoptimizeAuxiliaryBlock, Graph *graph)
 {
-    auto source = R"(
-    .function u32 foo(i32 a0) {
-        ldai 0
-        jne a0, test
-        jmp end_test
-    test:
-        ldai 10
-        jmp loop
-    end_test:
-        lda a0
-    loop:
-        jlez exit
-        subi 1
-        jmp loop
-    exit:
-        return
-    }
-    )";
-
-    ASSERT_TRUE(ParseToGraph(source, "foo"));
-    EXPECT_TRUE(GetGraph()->RunPass<Cleanup>());
-    auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0U);
@@ -5944,6 +5963,33 @@ TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
             INST(8U, Opcode::Return).u32().Inputs(3U);
         }
     }
+}
+
+TEST_F(IrBuilderTest, TestSaveStateDeoptimizeAuxiliaryBlock)
+{
+    auto source = R"(
+    .function u32 foo(i32 a0) {
+        ldai 0
+        jne a0, test
+        jmp end_test
+    test:
+        ldai 10
+        jmp loop
+    end_test:
+        lda a0
+    loop:
+        jlez exit
+        subi 1
+        jmp loop
+    exit:
+        return
+    }
+    )";
+
+    ASSERT_TRUE(ParseToGraph(source, "foo"));
+    EXPECT_TRUE(GetGraph()->RunPass<Cleanup>());
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    out_graph::TestSaveStateDeoptimizeAuxiliaryBlock::CREATE(expectedGraph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
@@ -5989,44 +6035,9 @@ TEST_F(IrBuilderTest, TestEmptyLoop)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
-TEST_F(IrBuilderTest, MultiThrowTryBlock)
+OUT_GRAPH(MultiThrowTryBlock, Graph *graph)
 {
-    auto source = R"(
-    .record E1 {}
-    .record E2 {}
-
-
-    .function i32 main(i32 a0) {
-    try_begin:
-        lda a0
-        jeqz label
-        newobj v0, E1
-        throw v0
-    label:
-        newobj v0, E2
-        throw v0
-    try_end:
-        ldai 0
-        jmp exit
-    catch1:
-        ldai 1
-        jmp exit
-    catch2:
-        ldai 2
-        jmp exit
-
-    exit:
-        return
-
-    .catch E1, try_begin, try_end, catch1
-    .catch E2, try_begin, try_end, catch2
-    }
-    )";
-
-    ASSERT_TRUE(ParseToGraph<true>(source, "main"));
-
-    auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0U);
@@ -6067,41 +6078,51 @@ TEST_F(IrBuilderTest, MultiThrowTryBlock)
             INST(21U, Opcode::Return).s32().Inputs(20U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
-TEST_F(IrBuilderTest, JumpToCatchHandler)
+TEST_F(IrBuilderTest, MultiThrowTryBlock)
 {
     auto source = R"(
-    .record E0 {}
     .record E1 {}
-
-    .function void foo() {
-        return.void
-    }
+    .record E2 {}
 
     .function i32 main(i32 a0) {
-    try_begin1:
+    try_begin:
         lda a0
-        jeqz try_end
-        call.short foo
-    try_begin2:
-        newobj v1, E1
-        throw v1
+        jeqz label
+        newobj v0, E1
+        throw v0
+    label:
+        newobj v0, E2
+        throw v0
     try_end:
-    catch_begin:
         ldai 0
+        jmp exit
+    catch1:
+        ldai 1
+        jmp exit
+    catch2:
+        ldai 2
+        jmp exit
+
+    exit:
         return
 
-    .catch E0, try_begin1, try_end, catch_begin
-    .catch E1, try_begin2, try_end, catch_begin
+    .catch E1, try_begin, try_end, catch1
+    .catch E2, try_begin, try_end, catch2
     }
     )";
 
     ASSERT_TRUE(ParseToGraph<true>(source, "main"));
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
-    GRAPH(expectedGraph)
+    out_graph::MultiThrowTryBlock::CREATE(expectedGraph);
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
+}
+
+OUT_GRAPH(JumpToCatchHandler, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(6U, 0U).s32();
         CONSTANT(8U, 0x0U).s64();
@@ -6140,6 +6161,40 @@ TEST_F(IrBuilderTest, JumpToCatchHandler)
             INST(19U, Opcode::Return).s32().Inputs(8U);
         }
     }
+}
+
+TEST_F(IrBuilderTest, JumpToCatchHandler)
+{
+    auto source = R"(
+    .record E0 {}
+    .record E1 {}
+
+    .function void foo() {
+        return.void
+    }
+
+    .function i32 main(i32 a0) {
+    try_begin1:
+        lda a0
+        jeqz try_end
+        call.short foo
+    try_begin2:
+        newobj v1, E1
+        throw v1
+    try_end:
+    catch_begin:
+        ldai 0
+        return
+
+    .catch E0, try_begin1, try_end, catch_begin
+    .catch E1, try_begin2, try_end, catch_begin
+    }
+    )";
+
+    ASSERT_TRUE(ParseToGraph<true>(source, "main"));
+
+    auto expectedGraph = CreateGraphWithDefaultRuntime();
+    out_graph::JumpToCatchHandler::CREATE(expectedGraph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expectedGraph));
 }
 
@@ -6189,34 +6244,9 @@ TEST_F(IrBuilderTest, GroupOfThrowableInstructions)
     }
 }
 
-TEST_F(IrBuilderTest, InfiniteLoopInsideTryBlock)
+OUT_GRAPH(InfiniteLoopInsideTryBlock, Graph *graph)
 {
-    auto source = R"(
-    .record E {}
-
-    .function void foo() {
-        return.void
-    }
-
-    .function u1 main() {
-        movi v0, 0x0
-        mov v2, v0
-    try_begin:
-        movi v0, 0x2
-        call.short foo
-        mov.obj v3, v0
-        inci v2, 0x1
-        jmp try_begin
-    try_end:
-        lda v2
-        return
-
-    .catch E, try_begin, try_end, try_end
-    }
-    )";
-    ASSERT_TRUE(ParseToGraph<true>(source, "main"));
-    auto expected = CreateGraphWithDefaultRuntime();
-    GRAPH(expected)
+    GRAPH(graph)
     {
         CONSTANT(7U, 0U);
         CONSTANT(14U, 1U);
@@ -6248,6 +6278,36 @@ TEST_F(IrBuilderTest, InfiniteLoopInsideTryBlock)
             INST(15U, Opcode::Return).b().Inputs(3U);
         }
     }
+}
+
+TEST_F(IrBuilderTest, InfiniteLoopInsideTryBlock)
+{
+    auto source = R"(
+    .record E {}
+
+    .function void foo() {
+        return.void
+    }
+
+    .function u1 main() {
+        movi v0, 0x0
+        mov v2, v0
+    try_begin:
+        movi v0, 0x2
+        call.short foo
+        mov.obj v3, v0
+        inci v2, 0x1
+        jmp try_begin
+    try_end:
+        lda v2
+        return
+
+    .catch E, try_begin, try_end, try_end
+    }
+    )";
+    ASSERT_TRUE(ParseToGraph<true>(source, "main"));
+    auto expected = CreateGraphWithDefaultRuntime();
+    out_graph::InfiniteLoopInsideTryBlock::CREATE(expected);
     GraphChecker(expected).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), expected));
 }

@@ -27,6 +27,11 @@ public:
         GetGraph()->SetLowLevelInstructionsEnabled();
 #endif
     }
+    Graph *CreateExpectedJointTriangleImm();
+    Graph *CreateExpJointTriangleWithTrickFloatPhi();
+    Graph *CreateExpectedJointDiamondImm();
+    Graph *CreateExpectedJointDiamond();
+    Graph *CreateExpJointDiamondWithDroppedSelect();
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -218,6 +223,35 @@ TEST_F(IfConversionTest, TriangleFalse)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+Graph *IfConversionTest::CreateExpectedJointTriangleImm()
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(1U, 10U);
+        CONSTANT(2U, 2U);
+        BASIC_BLOCK(2U, 3U, 5U)
+        {
+            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(5U, Opcode::Mul).u64().Inputs(0U, 2U);
+            INST(6U, Opcode::Compare).b().Inputs(5U, 1U);
+            INST(8U, Opcode::Mul).u64().Inputs(5U, 2U);
+            INST(7U, Opcode::SelectImm).u64().SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U, 5U, 6U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(9U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 7U}});
+            INST(10U, Opcode::Return).u64().Inputs(9U);
+        }
+    }
+    return graph;
+}
+
 /*
  * Test Graph:
  *              [entry}
@@ -263,30 +297,7 @@ TEST_F(IfConversionTest, JointTriangleImm)
 
     GetGraph()->RunPass<IfConversion>();
 
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).u64();
-        CONSTANT(1U, 10U);
-        CONSTANT(2U, 2U);
-        BASIC_BLOCK(2U, 3U, 5U)
-        {
-            INST(3U, Opcode::Compare).b().Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(3U);
-        }
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(5U, Opcode::Mul).u64().Inputs(0U, 2U);
-            INST(6U, Opcode::Compare).b().Inputs(5U, 1U);
-            INST(8U, Opcode::Mul).u64().Inputs(5U, 2U);
-            INST(7U, Opcode::SelectImm).u64().SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(8U, 5U, 6U);
-        }
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(9U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 7U}});
-            INST(10U, Opcode::Return).u64().Inputs(9U);
-        }
-    }
+    auto graph = CreateExpectedJointTriangleImm();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -337,6 +348,38 @@ TEST_F(IfConversionTest, TriangleTwice)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+Graph *IfConversionTest::CreateExpJointTriangleWithTrickFloatPhi()
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).f64();
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(2U, 3U, 5U)
+        {
+            INST(3U, Opcode::If).SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 2U);
+        }
+        BASIC_BLOCK(3U, 5U)
+        {
+            INST(4U, Opcode::Mul).f64().Inputs(1U, 1U);
+            INST(5U, Opcode::Mul).u64().Inputs(0U, 2U);
+            INST(7U, Opcode::Mul).u64().Inputs(5U, 2U);
+            INST(6U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(CC_NE).Inputs(7U, 5U, 5U, 2U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(8U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
+            INST(9U, Opcode::Phi).f64().Inputs({{2U, 1U}, {3U, 4U}});
+            INST(10U, Opcode::Mul).f64().Inputs(9U, 9U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(11U, Opcode::CallStatic).u64().InputsAutoType(8U, 10U, 20U);
+            INST(12U, Opcode::Return).u64().Inputs(11U);
+        }
+    }
+    return graph;
+}
+
 TEST_F(IfConversionTest, JointTriangleWithTrickFloatPhi)
 {
     GRAPH(GetGraph())
@@ -370,33 +413,8 @@ TEST_F(IfConversionTest, JointTriangleWithTrickFloatPhi)
     }
 
     GetGraph()->RunPass<IfConversion>();
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).u64();
-        PARAMETER(1U, 1U).f64();
-        CONSTANT(2U, 10U);
-        BASIC_BLOCK(2U, 3U, 5U)
-        {
-            INST(3U, Opcode::If).SrcType(DataType::UINT64).CC(CC_NE).Inputs(0U, 2U);
-        }
-        BASIC_BLOCK(3U, 5U)
-        {
-            INST(4U, Opcode::Mul).f64().Inputs(1U, 1U);
-            INST(5U, Opcode::Mul).u64().Inputs(0U, 2U);
-            INST(7U, Opcode::Mul).u64().Inputs(5U, 2U);
-            INST(6U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(CC_NE).Inputs(7U, 5U, 5U, 2U);
-        }
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(8U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
-            INST(9U, Opcode::Phi).f64().Inputs({{2U, 1U}, {3U, 4U}});
-            INST(10U, Opcode::Mul).f64().Inputs(9U, 9U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(11U, Opcode::CallStatic).u64().InputsAutoType(8U, 10U, 20U);
-            INST(12U, Opcode::Return).u64().Inputs(11U);
-        }
-    }
+
+    auto graph = CreateExpJointTriangleWithTrickFloatPhi();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -459,6 +477,35 @@ TEST_F(IfConversionTest, DiamondImm)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+Graph *IfConversionTest::CreateExpectedJointDiamondImm()
+{
+    auto graph = CreateEmptyGraph();
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        BASIC_BLOCK(2U, 3U, 6U)
+        {
+            INST(2U, Opcode::Compare).b().Inputs(0U, 1U);
+            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
+        }
+        BASIC_BLOCK(3U, 6U)
+        {
+            INST(4U, Opcode::Mul).u64().Inputs(0U, 0U);
+            INST(5U, Opcode::Compare).b().Inputs(4U, 1U);
+            INST(7U, Opcode::Mul).u64().Inputs(4U, 1U);
+            INST(8U, Opcode::Mul).u64().Inputs(4U, 0U);
+            INST(6U, Opcode::SelectImm).u64().SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U, 8U, 5U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(9U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
+            INST(10U, Opcode::Return).u64().Inputs(9U);
+        }
+    }
+    return graph;
+}
+
 /*
  * Test Graph:
  *              [entry}
@@ -507,6 +554,12 @@ TEST_F(IfConversionTest, JointDiamondImm)
 
     GetGraph()->RunPass<IfConversion>();
 
+    auto graph = CreateExpectedJointDiamondImm();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+Graph *IfConversionTest::CreateExpectedJointDiamond()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -514,24 +567,22 @@ TEST_F(IfConversionTest, JointDiamondImm)
         PARAMETER(1U, 1U).u64();
         BASIC_BLOCK(2U, 3U, 6U)
         {
-            INST(2U, Opcode::Compare).b().Inputs(0U, 1U);
-            INST(3U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(2U);
+            INST(2U, Opcode::If).SrcType(DataType::UINT64).CC(CC_GE).Inputs(0U, 1U);
         }
         BASIC_BLOCK(3U, 6U)
         {
-            INST(4U, Opcode::Mul).u64().Inputs(0U, 0U);
-            INST(5U, Opcode::Compare).b().Inputs(4U, 1U);
-            INST(7U, Opcode::Mul).u64().Inputs(4U, 1U);
-            INST(8U, Opcode::Mul).u64().Inputs(4U, 0U);
-            INST(6U, Opcode::SelectImm).u64().SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(7U, 8U, 5U);
+            INST(3U, Opcode::Mul).u64().Inputs(0U, 0U);
+            INST(5U, Opcode::Mul).u64().Inputs(3U, 1U);
+            INST(6U, Opcode::Mul).u64().Inputs(3U, 0U);
+            INST(4U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(CC_GT).Inputs(5U, 6U, 3U, 1U);
         }
         BASIC_BLOCK(6U, -1L)
         {
-            INST(9U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 6U}});
-            INST(10U, Opcode::Return).u64().Inputs(9U);
+            INST(7U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 4U}});
+            INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+    return graph;
 }
 
 TEST_F(IfConversionTest, JointDiamond)
@@ -566,6 +617,12 @@ TEST_F(IfConversionTest, JointDiamond)
 
     GetGraph()->RunPass<IfConversion>();
 
+    auto graph = CreateExpectedJointDiamond();
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
+Graph *IfConversionTest::CreateExpJointDiamondWithDroppedSelect()
+{
     auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
@@ -581,14 +638,17 @@ TEST_F(IfConversionTest, JointDiamond)
             INST(5U, Opcode::Mul).u64().Inputs(3U, 1U);
             INST(6U, Opcode::Mul).u64().Inputs(3U, 0U);
             INST(4U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(CC_GT).Inputs(5U, 6U, 3U, 1U);
+            // Second Select not needed
         }
         BASIC_BLOCK(6U, -1L)
         {
             INST(7U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 4U}});
-            INST(8U, Opcode::Return).u64().Inputs(7U);
+            INST(8U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 3U}});
+            INST(9U, Opcode::Add).u64().Inputs(7U, 8U);
+            INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+    return graph;
 }
 
 TEST_F(IfConversionTest, JointDiamondWithDroppedSelect)
@@ -625,31 +685,7 @@ TEST_F(IfConversionTest, JointDiamondWithDroppedSelect)
 
     GetGraph()->RunPass<IfConversion>();
 
-    auto graph = CreateEmptyGraph();
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).u64();
-        PARAMETER(1U, 1U).u64();
-        BASIC_BLOCK(2U, 3U, 6U)
-        {
-            INST(2U, Opcode::If).SrcType(DataType::UINT64).CC(CC_GE).Inputs(0U, 1U);
-        }
-        BASIC_BLOCK(3U, 6U)
-        {
-            INST(3U, Opcode::Mul).u64().Inputs(0U, 0U);
-            INST(5U, Opcode::Mul).u64().Inputs(3U, 1U);
-            INST(6U, Opcode::Mul).u64().Inputs(3U, 0U);
-            INST(4U, Opcode::Select).u64().SrcType(DataType::UINT64).CC(CC_GT).Inputs(5U, 6U, 3U, 1U);
-            // Second Select not needed
-        }
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(7U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 4U}});
-            INST(8U, Opcode::Phi).u64().Inputs({{2U, 0U}, {3U, 3U}});
-            INST(9U, Opcode::Add).u64().Inputs(7U, 8U);
-            INST(10U, Opcode::Return).u64().Inputs(9U);
-        }
-    }
+    auto graph = CreateExpJointDiamondWithDroppedSelect();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

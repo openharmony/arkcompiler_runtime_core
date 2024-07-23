@@ -238,7 +238,6 @@ bool IfConversion::IsPhisAllowed(BasicBlock *bb, BasicBlock *pred1, BasicBlock *
 
         auto inst1 = phi->GetInput(index1).GetInst();
         auto inst2 = phi->GetInput(index2).GetInst();
-
         if (inst1 == inst2) {
             // Otherwise DCE should remove Phi
             [[maybe_unused]] constexpr auto IMM_2 = 2;

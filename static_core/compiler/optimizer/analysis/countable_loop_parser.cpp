@@ -38,10 +38,7 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
         return std::nullopt;
     }
     auto loopExit = FindLoopExitBlock();
-    if (loopExit->IsEmpty()) {
-        return std::nullopt;
-    }
-    if (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]) {
+    if (loopExit->IsEmpty() || (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0])) {
         return std::nullopt;
     }
     isHeadLoopExit_ = (loopExit == loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]);

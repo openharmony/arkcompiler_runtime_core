@@ -71,6 +71,7 @@ private:
     void RunAotMode(const ark::Span<const char *> &args);
     void StartAotFile(const panda_file::File &pfileRef);
     bool CompileFiles();
+    bool TryLoadPandaFile(const std::string &fileName, PandaVM *vm);
     bool CompilePandaFile(const panda_file::File &pfileRef);
     ark::Class *ResolveClass(const panda_file::File &pfileRef, panda_file::File::EntityId classId);
     bool PossibleToCompile(const panda_file::File &pfileRef, const ark::Class *klass,

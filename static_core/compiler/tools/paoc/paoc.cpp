@@ -177,7 +177,7 @@ private:
         return 0;
     }
 
-    void ValidateCompilerOptions()
+    void CheckOptionsErr()
     {
         auto compilerOptionsErr = ark::compiler::g_options.Validate();
         if (compilerOptionsErr) {
@@ -187,7 +187,11 @@ private:
         if (paocOptionsErr) {
             LOG_PAOC(FATAL) << paocOptionsErr.value().GetMessage();
         }
+    }
 
+    void ValidateCompilerOptions()
+    {
+        CheckOptionsErr();
         paoc_->ValidateExtraOptions();
 
         if (paoc_->paocOptions_->WasSetPaocOutput() && paoc_->paocOptions_->WasSetPaocBootOutput()) {
@@ -423,6 +427,43 @@ void Paoc::StartAotFile(const panda_file::File &pfileRef)
     aotBuilder_->StartFile(filename, pfileRef.GetHeader()->checksum);
 }
 
+bool Paoc::TryLoadPandaFile(const std::string &fileName, PandaVM *vm)
+{
+    const panda_file::File *pfile;
+    bool errorOccurred = false;
+
+    auto filePath = GetFilePath(fileName);
+    if (preloadedFiles_.find(filePath) != preloadedFiles_.end()) {
+        pfile = preloadedFiles_[filePath];
+    } else {
+        auto file = vm->OpenPandaFile(fileName);
+        if (!file) {
+            if (!ShouldIgnoreFailures()) {
+                LOG_PAOC(FATAL) << "Can not open file: " << fileName;
+            }
+            LOG_PAOC(WARNING) << "Can not open file: " << fileName;
+            return false;
+        }
+        pfile = file.get();
+        loader_->AddPandaFile(std::move(file));
+        LOG_PAOC(DEBUG) << "Added panda file: " << fileName;
+    }
+    auto &pfileRef = *pfile;
+
+    if (IsAotMode()) {
+        StartAotFile(pfileRef);
+    }
+
+    if (!CompilePandaFile(pfileRef)) {
+        errorOccurred = true;
+    }
+
+    if (IsAotMode()) {
+        aotBuilder_->EndFile();
+    }
+    return !errorOccurred || ShouldIgnoreFailures();
+}
+
 /**
  * Iterate over `--paoc-panda-files`.
  * @return `false` on error.
@@ -430,47 +471,13 @@ void Paoc::StartAotFile(const panda_file::File &pfileRef)
 bool Paoc::CompileFiles()
 {
     auto pfiles = paocOptions_->GetPaocPandaFiles();
-    bool errorOccurred = false;
     auto *vm = ark::Runtime::GetCurrent()->GetPandaVM();
     for (auto &fileName : pfiles) {
-        // Load panda file
-        const panda_file::File *pfile;
-
-        auto filePath = GetFilePath(fileName);
-        if (preloadedFiles_.find(filePath) != preloadedFiles_.end()) {
-            pfile = preloadedFiles_[filePath];
-        } else {
-            auto file = vm->OpenPandaFile(fileName);
-            if (!file) {
-                errorOccurred = true;
-                if (!ShouldIgnoreFailures()) {
-                    LOG_PAOC(FATAL) << "Can not open file: " << fileName;
-                }
-                LOG_PAOC(WARNING) << "Can not open file: " << fileName;
-                continue;
-            }
-            pfile = file.get();
-            loader_->AddPandaFile(std::move(file));
-            LOG_PAOC(DEBUG) << "Added panda file: " << fileName;
-        }
-        auto &pfileRef = *pfile;
-
-        if (IsAotMode()) {
-            StartAotFile(pfileRef);
-        }
-
-        if (!CompilePandaFile(pfileRef)) {
-            errorOccurred = true;
-        }
-
-        if (IsAotMode()) {
-            aotBuilder_->EndFile();
-        }
-        if (errorOccurred && !ShouldIgnoreFailures()) {
+        if (!TryLoadPandaFile(fileName, vm)) {
             return false;
         }
     }
-    return !errorOccurred;
+    return true;
 }
 
 std::string Paoc::GetFilePath(std::string fileName)

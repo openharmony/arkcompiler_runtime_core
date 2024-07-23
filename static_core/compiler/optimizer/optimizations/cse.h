@@ -263,6 +263,7 @@ private:
     void ConvertTreeForestToStarForest();
     void EliminateAlongDomTree();
     void CollectTreeForest();
+    void TryAddReplacePair(Inst *inst);
     void BuildSetOfPairs(BasicBlock *block);
 
 private:

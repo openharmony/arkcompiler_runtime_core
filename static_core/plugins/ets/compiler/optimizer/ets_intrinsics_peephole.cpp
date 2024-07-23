@@ -456,7 +456,6 @@ bool Peepholes::PeepholeResolveQualifiedJSCall([[maybe_unused]] GraphVisitor *v,
     }
     auto qnameStartInst = intrinsic->GetInput(1).GetInst();
     auto qnameLenInst = intrinsic->GetInput(2U).GetInst();
-
     if (!qnameStartInst->IsConst() || !qnameLenInst->IsConst()) {
         // qnameStart and qnameLen are always constant, but may be e.g. Phi instructions after BCO
         return false;

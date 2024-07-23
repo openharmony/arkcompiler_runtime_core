@@ -72,16 +72,20 @@ static inline vixl::aarch32::Register VixlRegU(Reg reg)
     UNREACHABLE();
     return vixl::aarch32::Register();
 }
+static inline vixl::aarch32::VRegister VixlVRegCaseWordSize(Reg reg)
+{
+    // Aarch32 Vreg map double regs for 2 single-word registers
+    auto vixlVreg = vixl::aarch32::SRegister(reg.GetId());
+    ASSERT(vixlVreg.IsValid());
+    return vixlVreg;
+}
 
 static inline vixl::aarch32::VRegister VixlVReg(Reg reg)
 {
     ASSERT(reg.IsValid());
     ASSERT(reg.IsFloat());
     if (reg.GetSize() == WORD_SIZE) {
-        // Aarch32 Vreg map double regs for 2 single-word registers
-        auto vixlVreg = vixl::aarch32::SRegister(reg.GetId());
-        ASSERT(vixlVreg.IsValid());
-        return vixlVreg;
+        return VixlVRegCaseWordSize(reg);
     }
     ASSERT(reg.GetSize() == DOUBLE_WORD_SIZE);
     ASSERT(reg.GetId() % 2U == 0);

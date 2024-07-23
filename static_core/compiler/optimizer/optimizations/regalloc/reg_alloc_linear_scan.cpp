@@ -244,7 +244,6 @@ bool RegAllocLinearScan::TryToAssignRegister(LifeIntervals *currentInterval)
     // Try to assign blocked register
     auto [blocked_reg, next_blocked_use] = GetBlockedRegister(currentInterval);
     auto nextUse = currentInterval->GetNextUsage(currentInterval->GetBegin());
-
     // Spill current interval if its first use later than use of blocked register
     if (blocked_reg != INVALID_REG && next_blocked_use < nextUse && !IsNonSpillableConstInterval(currentInterval)) {
         SplitBeforeUse<IS_FP>(currentInterval, nextUse);

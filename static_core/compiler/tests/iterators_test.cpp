@@ -23,14 +23,9 @@ public:
     static constexpr size_t INST_COUNT = 10;
 
 public:
-    void Check(std::vector<Inst *> &testedInstructions)
+    void CheckInstForwardIterator(BasicBlock *block, std::vector<Inst *> &result)
     {
-        auto block = &BB(0U);
-        PopulateBlock(block, testedInstructions);
-        InitExpectData(testedInstructions);
-
-        // Check InstForwardIterator
-        std::vector<Inst *> result;
+        result.clear();
         for (auto inst : block->PhiInsts()) {
             result.push_back(inst);
         }
@@ -47,8 +42,10 @@ public:
             result.push_back(inst);
         }
         EXPECT_EQ(result, expectAll_);
+    }
 
-        // Check InstForwardValidIterator
+    void CheckInstForwardValidIterator(BasicBlock *block, std::vector<Inst *> &result)
+    {
         result.clear();
         for (auto inst : block->PhiInstsSafe()) {
             result.push_back(inst);
@@ -66,8 +63,10 @@ public:
             result.push_back(inst);
         }
         EXPECT_EQ(result, expectAll_);
+    }
 
-        // Check InstBackwardValidIterator
+    void CheckInstBackwardValidIterator(BasicBlock *block, std::vector<Inst *> &result)
+    {
         result.clear();
         for (auto inst : block->PhiInstsSafeReverse()) {
             result.push_back(inst);
@@ -88,66 +87,88 @@ public:
         }
         std::reverse(result.begin(), result.end());
         EXPECT_EQ(result, expectAll_);
+    }
 
+    void CheckInstForwardValidIteratorWithErasing(BasicBlock *block, std::vector<Inst *> &result,
+                                                  std::vector<Inst *> &testedInstructions)
+    {
+        result.clear();
+        for (auto inst : block->PhiInstsSafe()) {
+            result.push_back(inst);
+            block->EraseInst(inst);
+        }
+        EXPECT_EQ(result, expectPhis_);
+
+        result.clear();
+        for (auto inst : block->InstsSafe()) {
+            result.push_back(inst);
+            block->EraseInst(inst);
+        }
+        EXPECT_EQ(result, expectInsts_);
+
+        result.clear();
+        for (auto inst : block->AllInstsSafe()) {
+            result.push_back(inst);
+        }
+        EXPECT_EQ(result.size(), 0U);
+
+        PopulateBlock(block, testedInstructions);
+        for (auto inst : block->AllInstsSafe()) {
+            result.push_back(inst);
+            block->EraseInst(inst);
+        }
+        EXPECT_EQ(result, expectAll_);
+    }
+
+    void CheckInstBackwardValidIteratorWithErasing(BasicBlock *block, std::vector<Inst *> &result,
+                                                   std::vector<Inst *> &testedInstructions)
+    {
+        PopulateBlock(block, testedInstructions);
+        result.clear();
+        for (auto inst : block->PhiInstsSafeReverse()) {
+            result.push_back(inst);
+            block->EraseInst(inst);
+        }
+        std::reverse(result.begin(), result.end());
+        EXPECT_EQ(result, expectPhis_);
+
+        result.clear();
+        for (auto inst : block->InstsSafeReverse()) {
+            result.push_back(inst);
+            block->EraseInst(inst);
+        }
+        std::reverse(result.begin(), result.end());
+        EXPECT_EQ(result, expectInsts_);
+
+        result.clear();
+        for (auto inst : block->AllInstsSafeReverse()) {
+            result.push_back(inst);
+        }
+        EXPECT_EQ(result.size(), 0U);
+
+        PopulateBlock(block, testedInstructions);
+        for (auto inst : block->AllInstsSafeReverse()) {
+            result.push_back(inst);
+            block->EraseInst(inst);
+        }
+        std::reverse(result.begin(), result.end());
+        EXPECT_EQ(result, expectAll_);
+    }
+
+    void Check(std::vector<Inst *> &testedInstructions)
+    {
+        auto block = &BB(0U);
+        PopulateBlock(block, testedInstructions);
+        InitExpectData(testedInstructions);
+
+        std::vector<Inst *> result;
+        CheckInstForwardIterator(block, result);
+        CheckInstForwardValidIterator(block, result);
+        CheckInstBackwardValidIterator(block, result);
         // Check InstForwardValidIterator with erasing instructions
-        result.clear();
-        for (auto inst : block->PhiInstsSafe()) {
-            result.push_back(inst);
-            block->EraseInst(inst);
-        }
-        EXPECT_EQ(result, expectPhis_);
-
-        result.clear();
-        for (auto inst : block->InstsSafe()) {
-            result.push_back(inst);
-            block->EraseInst(inst);
-        }
-        EXPECT_EQ(result, expectInsts_);
-
-        result.clear();
-        for (auto inst : block->AllInstsSafe()) {
-            result.push_back(inst);
-        }
-        EXPECT_EQ(result.size(), 0U);
-
-        PopulateBlock(block, testedInstructions);
-        for (auto inst : block->AllInstsSafe()) {
-            result.push_back(inst);
-            block->EraseInst(inst);
-        }
-        EXPECT_EQ(result, expectAll_);
-
+        CheckInstForwardValidIteratorWithErasing(block, result, testedInstructions);
         // Check InstBackwardValidIterator with erasing instructions
-        PopulateBlock(block, testedInstructions);
-        result.clear();
-        for (auto inst : block->PhiInstsSafeReverse()) {
-            result.push_back(inst);
-            block->EraseInst(inst);
-        }
-        std::reverse(result.begin(), result.end());
-        EXPECT_EQ(result, expectPhis_);
-
-        result.clear();
-        for (auto inst : block->InstsSafeReverse()) {
-            result.push_back(inst);
-            block->EraseInst(inst);
-        }
-        std::reverse(result.begin(), result.end());
-        EXPECT_EQ(result, expectInsts_);
-
-        result.clear();
-        for (auto inst : block->AllInstsSafeReverse()) {
-            result.push_back(inst);
-        }
-        EXPECT_EQ(result.size(), 0U);
-
-        PopulateBlock(block, testedInstructions);
-        for (auto inst : block->AllInstsSafeReverse()) {
-            result.push_back(inst);
-            block->EraseInst(inst);
-        }
-        std::reverse(result.begin(), result.end());
-        EXPECT_EQ(result, expectAll_);
+        CheckInstBackwardValidIteratorWithErasing(block, result, testedInstructions);
     }
 
 private:

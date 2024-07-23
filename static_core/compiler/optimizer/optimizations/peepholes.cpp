@@ -1461,6 +1461,24 @@ void Peepholes::VisitCastValueToAnyType(GraphVisitor *v, Inst *inst)
     }
 }
 
+static bool TryPrepareEliminatePrecedingStoreOpcCast(Inst *inst, Arch arch, uint64_t &imm)
+{
+    auto size = DataType::GetTypeSize(inst->GetType(), arch);
+    if (size >= DOUBLE_WORD_SIZE) {
+        return false;
+    }
+    auto inputTypeMismatch = IsInputTypeMismatch(inst, 0, arch);
+#ifndef NDEBUG
+    ASSERT(!inputTypeMismatch);
+#else
+    if (inputTypeMismatch) {
+        return false;
+    }
+#endif
+    imm = (1ULL << size) - 1;
+    return true;
+}
+
 template <typename T>
 void Peepholes::EliminateInstPrecedingStore(GraphVisitor *v, Inst *inst)
 {
@@ -1485,19 +1503,9 @@ void Peepholes::EliminateInstPrecedingStore(GraphVisitor *v, Inst *inst)
                 break;
             }
             case Opcode::Cast: {
-                auto size = DataType::GetTypeSize(storeValueInst->GetType(), arch);
-                if (size >= DOUBLE_WORD_SIZE) {
+                if (!TryPrepareEliminatePrecedingStoreOpcCast(storeValueInst, arch, imm)) {
                     return;
                 }
-                auto inputTypeMismatch = IsInputTypeMismatch(storeValueInst, 0, arch);
-#ifndef NDEBUG
-                ASSERT(!inputTypeMismatch);
-#else
-                if (inputTypeMismatch) {
-                    return;
-                }
-#endif
-                imm = (1ULL << size) - 1;
                 break;
             }
             default:
@@ -1697,7 +1705,6 @@ bool Peepholes::TrySimplifyAddSubWithZeroInput(Inst *inst)
 {
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
-
     if (input1->IsConst()) {
         auto cnst = input1->CastToConstant();
         if (cnst->IsEqualConstAllTypes(0)) {
@@ -1882,6 +1889,41 @@ bool Peepholes::TrySimplifySubAddAdd(Inst *inst, Inst *input0, Inst *input1)
     return false;
 }
 
+static bool CanReassociateShlShlAddSub(Inst *inst)
+{
+    if (inst->GetOpcode() != Opcode::Sub && inst->GetOpcode() != Opcode::Add) {
+        return false;
+    }
+    if (IsFloatType(inst->GetType())) {
+        return false;
+    }
+    auto input1 = inst->GetInput(1).GetInst();
+    if (input1->GetOpcode() != Opcode::Sub && input1->GetOpcode() != Opcode::Add) {
+        return false;
+    }
+    // Potentially inst and input1 can have different types (e.g. UINT32 and UINT16).
+    if (input1->GetType() != inst->GetType()) {
+        return false;
+    }
+    if (!input1->HasSingleUser()) {
+        return false;
+    }
+    auto shl0 = input1->GetInput(0).GetInst();
+    if (shl0->GetOpcode() != Opcode::Shl || !shl0->HasSingleUser()) {
+        return false;
+    }
+    auto shl1 = input1->GetInput(1).GetInst();
+    if (shl1->GetOpcode() != Opcode::Shl || !shl1->HasSingleUser() || shl1->GetInput(0) != shl0->GetInput(0)) {
+        return false;
+    }
+    if (!shl0->GetInput(1).GetInst()->IsConst() || !shl1->GetInput(1).GetInst()->IsConst()) {
+        return false;
+    }
+    auto input0 = inst->GetInput(0).GetInst();
+    bool check = !input0->IsConst() && !input0->IsParameter() && !input0->IsDominate(input1);
+    return !check;
+}
+
 /**
  * The goal is to transform the following sequence:
  *
@@ -1918,40 +1960,14 @@ bool Peepholes::TrySimplifySubAddAdd(Inst *inst, Inst *input0, Inst *input1)
  */
 bool Peepholes::TryReassociateShlShlAddSub(Inst *inst)
 {
-    if (inst->GetOpcode() != Opcode::Sub && inst->GetOpcode() != Opcode::Add) {
-        return false;
-    }
-    if (IsFloatType(inst->GetType())) {
-        return false;
-    }
-    auto input1 = inst->GetInput(1).GetInst();
-    if (input1->GetOpcode() != Opcode::Sub && input1->GetOpcode() != Opcode::Add) {
-        return false;
-    }
-    // Potentially inst and input1 can have different types (e.g. UINT32 and UINT16).
-    if (input1->GetType() != inst->GetType()) {
-        return false;
-    }
-    if (!input1->HasSingleUser()) {
-        return false;
-    }
-    auto shl0 = input1->GetInput(0).GetInst();
-    if (shl0->GetOpcode() != Opcode::Shl || !shl0->HasSingleUser()) {
-        return false;
-    }
-    auto shl1 = input1->GetInput(1).GetInst();
-    if (shl1->GetOpcode() != Opcode::Shl || !shl1->HasSingleUser() || shl1->GetInput(0) != shl0->GetInput(0)) {
-        return false;
-    }
-    if (!shl0->GetInput(1).GetInst()->IsConst() || !shl1->GetInput(1).GetInst()->IsConst()) {
+    if (!CanReassociateShlShlAddSub(inst)) {
         return false;
     }
     auto input0 = inst->GetInput(0).GetInst();
-    if (!input0->IsConst() && !input0->IsParameter() && !input0->IsDominate(input1)) {
-        return false;
-    }
-
-    Opcode opInput1 = input1->GetOpcode();
+    auto input1 = inst->GetInput(1).GetInst();
+    auto shl0 = input1->GetInput(0).GetInst();
+    auto shl1 = input1->GetInput(1).GetInst();
+    Opcode opInput1 = inst->GetInput(1).GetInst()->GetOpcode();
     Opcode opInst = inst->GetOpcode();
     if (opInst == Opcode::Sub && opInput1 == Opcode::Add) {
         // input0 - (shl0 + shl1) -> (input0 - shl0) - shl1
@@ -2325,8 +2341,8 @@ bool Peepholes::TrySimplifyCompareLenArrayWithZero(Inst *inst)
     if (input->GetOpcode() != Opcode::LenArray || !constInput->IsEqualConstAllTypes(0)) {
         return false;
     }
-    ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
 
+    ConditionCode cc = swap ? SwapOperandsConditionCode(compare->GetCc()) : compare->GetCc();
     if (cc == CC_GE || cc == CC_LT) {
         // We create constant, so we don't need to check SaveStateOSR between insts
         compare->ReplaceUsers(ConstFoldingCreateIntConst(compare, cc == CC_GE ? 1 : 0));

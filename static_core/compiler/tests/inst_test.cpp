@@ -22,28 +22,9 @@ namespace ark::compiler {
 class InstTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(InstTest, Dataflow)
+SRC_GRAPH(Dataflow, Graph *graph)
 {
-    /**
-     * '=' is a definition
-     *
-     *           [2]
-     *            |
-     *    /---------------\
-     *    |               |
-     *   [3]=            [4]=
-     *    |               |
-     *    |          /---------\
-     *   [5]         |         |
-     *    |          |        [6] (need for removing #6)
-     *    |          |         |
-     *    |          |        [7]=
-     *    |          |         |
-     *    \---------[8]--------/
-     *          PHI(1,2,4)
-     *
-     */
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 12U);
         CONSTANT(1U, 13U);
@@ -79,6 +60,30 @@ TEST_F(InstTest, Dataflow)
             INST(16U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(InstTest, Dataflow)
+{
+    /**
+     * '=' is a definition
+     *
+     *           [2]
+     *            |
+     *    /---------------\
+     *    |               |
+     *   [3]=            [4]=
+     *    |               |
+     *    |          /---------\
+     *   [5]         |         |
+     *    |          |        [6] (need for removing #6)
+     *    |          |         |
+     *    |          |        [7]=
+     *    |          |         |
+     *    \---------[8]--------/
+     *          PHI(1,2,4)
+     *
+     */
+    src_graph::Dataflow::CREATE(GetGraph());
 
     // Check constructed dataflow
     ASSERT_TRUE(CheckUsers(INS(0U), {2U, 3U, 8U, 11U}));
@@ -173,17 +178,22 @@ TEST_F(InstTest, Memory)
     }
 }
 
-TEST_F(InstTest, Const)
+SRC_GRAPH(Const, Graph *graph)
 {
-    std::array<int32_t, 3U> int32Const {-5L, 0U, 5U};
-    std::array<int64_t, 3U> int64Const {-5L, 0U, 5U};
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         BASIC_BLOCK(2U, -1L)
         {
             INST(0U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(InstTest, Const)
+{
+    std::array<int32_t, 3U> int32Const {-5L, 0U, 5U};
+    std::array<int64_t, 3U> int64Const {-5L, 0U, 5U};
+    src_graph::Const::CREATE(GetGraph());
     auto start = GetGraph()->GetStartBlock();
     for (size_t i = 0; i < 3U; i++) {
         int32_t val = int32Const[i];
