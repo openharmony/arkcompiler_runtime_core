@@ -36,6 +36,7 @@ ohos_executable("arkts_bin") {
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:libarktsfile",
+    "$ark_root/platforms/target_defaults:arktarget_options",
     "$ark_root/runtime:libarkruntime",
   ]
 

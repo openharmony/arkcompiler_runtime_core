@@ -16,12 +16,12 @@
 #ifndef PANDA_LIBPANDABASE_UTILS_LOGGER_H_
 #define PANDA_LIBPANDABASE_UTILS_LOGGER_H_
 
-#include "macros.h"
-#include "globals.h"
-#include "os/error.h"
-#include "os/mutex.h"
-#include "os/thread.h"
-#include "utils/dfx.h"
+#include "libpandabase/macros.h"
+#include "libpandabase/globals.h"
+#include "libpandabase/os/error.h"
+#include "libpandabase/os/mutex.h"
+#include "libpandabase/os/thread.h"
+#include "libpandabase/utils/dfx.h"
 
 #include <cstdint>
 

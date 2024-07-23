@@ -25,6 +25,7 @@
                 "bounds_checking_function",
                 "ets_runtime",
                 "hilog",
+                "init",
                 "napi",
                 "toolchain",
                 "zlib",
