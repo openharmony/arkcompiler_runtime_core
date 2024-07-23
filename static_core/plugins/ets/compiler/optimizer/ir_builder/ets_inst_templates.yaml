@@ -18,7 +18,7 @@
     %   is_range = inst.opcode.include? 'range'
     %   is_virtual = inst.opcode.include? 'virt'
     %   acc_read = inst.acc_read?
-    BuildLaunch<Opcode::<%= is_virtual ? 'CallLaunchVirtual' : 'CallLaunchStatic' %>>(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>);
+    BuildLaunch<Opcode::<%= is_virtual ? 'CallLaunchVirtual' : 'CallLaunchStatic' %>, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>>(instruction);
     % when "LDOBJ"
     BuildLdObjByName(instruction, <%= get_type(inst.dtype) %>);
     % when "STOBJ"

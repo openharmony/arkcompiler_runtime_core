@@ -132,6 +132,8 @@ public:
 
     void Prepare(bool isInlinedGraph);
 
+    void FixType(PhiInst *inst, BasicBlock *bb);
+    void FixType(Inst *inst);
     void FixInstructions();
     void ResolveConstants();
     void SplitConstant(ConstantInst *constInst);
@@ -365,36 +367,70 @@ private:
 
     NewObjectInst *CreateNewObjectInst(size_t pc, uint32_t typeId, SaveStateInst *saveState, Inst *initClass)
     {
-        auto newObj =
-            graph_->CreateInstNewObject(DataType::REFERENCE, pc, initClass, saveState, typeId, graph_->GetMethod());
+        auto newObj = graph_->CreateInstNewObject(DataType::REFERENCE, pc, initClass, saveState,
+                                                  TypeIdMixin {typeId, graph_->GetMethod()});
         return newObj;
     }
 
-    template <Opcode OPCODE>
-    void BuildCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead, Inst *additionalInput = nullptr);
-    template <Opcode OPCODE>
-    CallInst *BuildCallInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc, Inst **resolver,
-                            uint32_t classId);
-    template <Opcode OPCODE>
-    CallInst *BuildCallStaticInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc, Inst **resolver,
-                                  [[maybe_unused]] uint32_t classId);
-    template <Opcode OPCODE>
-    CallInst *BuildCallVirtualInst(RuntimeInterface::MethodPtr method, uint32_t methodId, size_t pc, Inst **resolver);
-    void BuildInitClassInstForCallStatic(RuntimeInterface::MethodPtr method, uint32_t classId, size_t pc,
-                                         Inst *saveState);
-    template <typename T>
-    void SetCallArgs(const BytecodeInstruction *bcInst, bool isRange, bool accRead, Inst *resolver, T *call,
-                     Inst *nullCheck, SaveStateInst *saveState, bool hasImplicitArg, uint32_t methodId,
-                     Inst *additionalInput = nullptr);
+    template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+    class BuildCallHelper {
+    public:
+        BuildCallHelper(const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput = nullptr);
+
+        void BuildIntrinsic();
+        void BuildDefaultIntrinsic(RuntimeInterface::IntrinsicId intrinsicId, bool isVirtual);
+        void BuildDefaultStaticIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);
+        void BuildDefaultVirtualCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);
+        void BuildMonitorIntrinsic(bool isEnter);
+
+        void BuildStaticCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);
+        void BuildVirtualCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);
+
+        void BuildCallInst(uint32_t classId);
+        void BuildCallStaticInst(uint32_t classId);
+        void BuildInitClassInstForCallStatic(uint32_t classId);
+
+        void BuildCallVirtualInst();
+        void SetCallArgs(Inst *additionalInput = nullptr);
+        auto GetGraph()
+        {
+            return builder_->GetGraph();
+        }
+        auto GetRuntime()
+        {
+            return builder_->GetRuntime();
+        }
+        auto GetMethod()
+        {
+            return builder_->GetMethod();
+        }
+        auto Builder()
+        {
+            return builder_;
+        }
+
+    private:
+        InstBuilder *builder_ {};
+        const BytecodeInstruction *bcInst_ {};
+        RuntimeInterface::MethodPtr method_ {};
+        uint32_t methodId_ {};
+        uint32_t pc_ {};
+        InputTypesMixin<DynamicInputsInst> *call_ {};
+        Inst *resolver_ {};
+        Inst *nullCheck_ {};
+        SaveStateInst *saveState_ {};
+        bool hasImplicitArg_ {};
+    };
     Inst *GetArgDefinition(const BytecodeInstruction *bcInst, size_t idx, bool accRead, bool isRange = false);
     Inst *GetArgDefinitionRange(const BytecodeInstruction *bcInst, size_t idx);
     template <bool IS_VIRTUAL>
     void AddArgNullcheckIfNeeded(RuntimeInterface::IntrinsicId intrinsic, Inst *inst, Inst *saveState, size_t bcAddr);
     void BuildMonitor(const BytecodeInstruction *bcInst, Inst *def, bool isEnter);
     Inst *BuildFloatInst(const BytecodeInstruction *bcInst);
+    template <bool IS_RANGE, bool ACC_READ>
     void BuildIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
-    void BuildDefaultIntrinsic(bool isVirtual, const BytecodeInstruction *bcInst, bool isRange, bool accRead);
-    void BuildStaticCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
+    template <bool IS_RANGE, bool ACC_READ>
+    void BuildDefaultIntrinsic(bool isVirtual, const BytecodeInstruction *bcInst);
     void BuildAbsIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
     template <Opcode OPCODE>
     void BuildBinaryOperationIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
@@ -407,9 +443,6 @@ private:
     void BuildCharIsLowerCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
     void BuildCharToLowerCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
     void BuildMonitorIntrinsic(const BytecodeInstruction *bcInst, bool isEnter, bool accRead);
-    void BuildDefaultStaticIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
-    void BuildDefaultVirtualCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
-    void BuildVirtualCallIntrinsic(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
     void BuildThrow(const BytecodeInstruction *bcInst);
     void BuildLenArray(const BytecodeInstruction *bcInst);
     void BuildNewArray(const BytecodeInstruction *bcInst);
@@ -435,12 +468,12 @@ private:
     template <bool IS_ACC_READ>
     void BuildStoreObject(const BytecodeInstruction *bcInst, DataType::Type type);
     Inst *BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataType::Type type, RuntimeInterface::FieldPtr field,
-                               size_t fieldId, Inst **resolveInst);
+                               uint32_t fieldId, Inst **resolveInst);
     void BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type);
-    Inst *BuildLoadStaticInst(size_t pc, DataType::Type type, size_t typeId, Inst *saveState);
+    Inst *BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t typeId, Inst *saveState);
     void BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::Type type);
-    Inst *BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, size_t typeId, Inst *storeInput,
-                               Inst *saveState);
+    Inst *BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, uint32_t typeId,
+                               Inst *storeInput, Inst *saveState);
     void BuildCheckCast(const BytecodeInstruction *bcInst);
     void BuildIsInstance(const BytecodeInstruction *bcInst);
     Inst *BuildLoadClass(RuntimeInterface::IdType typeId, size_t pc, Inst *saveState);
@@ -449,15 +482,21 @@ private:
     template <bool CREATE_REF_CHECK>
     void BuildStoreArrayInst(const BytecodeInstruction *bcInst, DataType::Type type, Inst *arrayRef, Inst *index,
                              Inst *value);
-    void BuildChecksBeforeArray(size_t pc, Inst *arrayRef, Inst **ss, Inst **nc, Inst **al, Inst **bc,
-                                bool withNullcheck = true);
+    std::tuple<SaveStateInst *, Inst *, LengthMethodInst *, BoundsCheckInst *> BuildChecksBeforeArray(
+        size_t pc, Inst *arrayRef, bool withNullcheck = true);
     template <Opcode OPCODE>
     void BuildLoadFromPool(const BytecodeInstruction *bcInst);
     void BuildCastToAnyString(const BytecodeInstruction *bcInst);
     void BuildCastToAnyNumber(const BytecodeInstruction *bcInst);
-    Inst *BuildAnyTypeCheckInst(size_t bcAddr, Inst *input, Inst *saveState,
-                                AnyBaseType type = AnyBaseType::UNDEFINED_TYPE, bool typeWasProfiled = false,
-                                profiling::AnyInputType allowedInputType = {});
+    AnyTypeCheckInst *BuildAnyTypeCheckInst(size_t bcAddr, Inst *input, Inst *saveState,
+                                            AnyBaseType type = AnyBaseType::UNDEFINED_TYPE);
+    void InitAnyTypeCheckInst(AnyTypeCheckInst *anyCheck, bool typeWasProfiled = false,
+                              profiling::AnyInputType allowedInputType = {})
+    {
+        anyCheck->SetAllowedInputType(allowedInputType);
+        anyCheck->SetIsTypeWasProfiled(typeWasProfiled);
+    }
+
     bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 #include "inst_builder_extensions.inl.h"
 
@@ -481,7 +520,7 @@ private:
         return runtime_;
     }
 
-    auto GetMethod() const
+    RuntimeInterface::MethodPtr GetMethod() const
     {
         return method_;
     }

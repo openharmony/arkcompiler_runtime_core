@@ -350,8 +350,8 @@ bool Inlining::DoInlineMonomorphic(CallInst *callInst, RuntimeInterface::ClassPt
     auto loadClsInst = GetGraph()->CreateInstLoadImmediate(DataType::REFERENCE, callInst->GetPc(), receiver);
     auto cmpInst = GetGraph()->CreateInstCompare(DataType::BOOL, callInst->GetPc(), getClsInst, loadClsInst,
                                                  DataType::REFERENCE, ConditionCode::CC_NE);
-    auto deoptInst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, callInst->GetPc(), cmpInst, saveState,
-                                                        DeoptimizeType::INLINE_IC);
+    auto deoptInst =
+        GetGraph()->CreateInstDeoptimizeIf(callInst->GetPc(), cmpInst, saveState, DeoptimizeType::INLINE_IC);
     if (IsIntrinsic(&ctx)) {
         callInst->InsertBefore(loadClsInst);
         callInst->InsertBefore(getClsInst);
@@ -395,8 +395,8 @@ void Inlining::InsertDeoptimizeInst(CallInst *callInst, BasicBlock *callBb, Deop
     ASSERT(compareInst != nullptr && compareInst->GetCc() == ConditionCode::CC_EQ);
     compareInst->SetCc(ConditionCode::CC_NE);
 
-    auto deoptInst = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, callInst->GetPc(), compareInst,
-                                                        callInst->GetSaveState(), deoptType);
+    auto deoptInst =
+        GetGraph()->CreateInstDeoptimizeIf(callInst->GetPc(), compareInst, callInst->GetSaveState(), deoptType);
 
     callBb->RemoveInst(ifInst);
     callBb->AppendInst(deoptInst);
@@ -872,7 +872,7 @@ bool Inlining::DoInlineIntrinsic(CallInst *callInst, InlineContext *ctx)
 
     auto inputs = callInst->GetInputs();
     for (size_t i = 0; i < inputsCount; ++i) {
-        inst->AppendInputAndType(inputs[i].GetInst(), callInst->GetInputType(i));
+        inst->AppendInput(inputs[i].GetInst(), callInst->GetInputType(i));
     }
 
     auto method = ctx->method;
@@ -1567,8 +1567,8 @@ void Inlining::InsertChaGuard(CallInst *callInst)
 {
     auto saveState = callInst->GetSaveState();
     auto checkDeopt = GetGraph()->CreateInstIsMustDeoptimize(DataType::BOOL, callInst->GetPc());
-    auto deopt = GetGraph()->CreateInstDeoptimizeIf(DataType::NO_TYPE, callInst->GetPc(), checkDeopt, saveState,
-                                                    DeoptimizeType::INLINE_CHA);
+    auto deopt =
+        GetGraph()->CreateInstDeoptimizeIf(callInst->GetPc(), checkDeopt, saveState, DeoptimizeType::INLINE_CHA);
     callInst->InsertBefore(deopt);
     deopt->InsertBefore(checkDeopt);
 }

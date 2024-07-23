@@ -21,9 +21,9 @@ namespace ark::compiler {
 class MemoryBarrierTest : public GraphTest {};
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(MemoryBarrierTest, Test1)
+SRC_GRAPH(Test1, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0x2aU).s64();
         BASIC_BLOCK(2U, -1L)
@@ -45,6 +45,11 @@ TEST_F(MemoryBarrierTest, Test1)
             INST(13U, Opcode::Return).ref().Inputs(10U);
         }
     }
+}
+
+TEST_F(MemoryBarrierTest, Test1)
+{
+    src_graph::Test1::CREATE(GetGraph());
     ASSERT_EQ(INS(0U).GetFlag(inst_flags::MEM_BARRIER), false);
     ASSERT_EQ(INS(1U).GetFlag(inst_flags::MEM_BARRIER), false);
     ASSERT_EQ(INS(2U).GetFlag(inst_flags::MEM_BARRIER), true);

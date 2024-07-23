@@ -187,18 +187,18 @@ public:
         return reinterpret_cast<ClassPtr>(fda.GetClassId().GetOffset());
     }
 
-    size_t GetClassIdForMethod(MethodPtr method) const override
+    uint32_t GetClassIdForMethod(MethodPtr method) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, MethodCast(method));
 
-        return static_cast<size_t>(mda.GetClassId().GetOffset());
+        return mda.GetClassId().GetOffset();
     }
 
-    size_t GetClassIdForMethod([[maybe_unused]] MethodPtr caller, size_t methodId) const override
+    uint32_t GetClassIdForMethod([[maybe_unused]] MethodPtr caller, size_t methodId) const override
     {
         panda_file::MethodDataAccessor mda(pandaFile_, panda_file::File::EntityId(methodId));
 
-        return static_cast<size_t>(mda.GetClassId().GetOffset());
+        return mda.GetClassId().GetOffset();
     }
 
     bool IsMethodExternal([[maybe_unused]] MethodPtr caller, MethodPtr callee) const override

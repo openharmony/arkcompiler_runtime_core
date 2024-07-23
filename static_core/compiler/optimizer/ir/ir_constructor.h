@@ -1239,6 +1239,27 @@ public:
         }
     }
 
+    void ConstructInput(Inst *inst, size_t inputIdx, const std::vector<int> &vregs, size_t idx)
+    {
+        ASSERT_DO(instMap_.find(inputIdx) != instMap_.end(),
+                  std::cerr << "Input with Id " << inputIdx << " isn't found, inst: " << *inst << std::endl);
+        auto inputInst = instMap_.at(inputIdx);
+        auto op = inst->GetOpcode();
+        if (!inputInst->IsConst() && (op == Opcode::Cmp || op == Opcode::Compare || op == Opcode::If ||
+                                      op == Opcode::IfImm || op == Opcode::Select || op == Opcode::SelectImm)) {
+            CheckInputType(inst, inputInst, idx);
+        }
+        if (inst->IsOperandsDynamic()) {
+            inst->AppendInput(inputInst);
+            if (inst->IsSaveState()) {
+                static_cast<SaveStateInst *>(inst)->SetVirtualRegister(idx,
+                                                                       VirtualRegister(vregs[idx], VRegType::VREG));
+            }
+        } else {
+            inst->SetInput(idx, inputInst);
+        }
+    }
+
     void ConstructDataFlow()
     {
         for (auto [insti, inputs] : instInputsMap_) {
@@ -1250,23 +1271,7 @@ public:
                 inst->ReserveInputs(inputs.size());
             }
             for (auto inputIdx : inputs) {
-                ASSERT_DO(instMap_.find(inputIdx) != instMap_.end(),
-                          std::cerr << "Input with Id " << inputIdx << " isn't found, inst: " << *inst << std::endl);
-                auto inputInst = instMap_.at(inputIdx);
-                auto op = inst->GetOpcode();
-                if (!inputInst->IsConst() && (op == Opcode::Cmp || op == Opcode::Compare || op == Opcode::If ||
-                                              op == Opcode::IfImm || op == Opcode::Select || op == Opcode::SelectImm)) {
-                    CheckInputType(inst, inputInst, idx);
-                }
-                if (inst->IsOperandsDynamic()) {
-                    inst->AppendInput(inputInst);
-                    if (inst->IsSaveState()) {
-                        static_cast<SaveStateInst *>(inst)->SetVirtualRegister(
-                            idx, VirtualRegister(vregs[idx], VRegType::VREG));
-                    }
-                } else {
-                    inst->SetInput(idx, inputInst);
-                }
+                ConstructInput(inst, inputIdx, vregs, idx);
                 ++idx;
             }
         }

@@ -246,13 +246,13 @@ public:
 
     ClassPtr GetClassForField(FieldPtr field) const override;
 
-    size_t GetClassIdForMethod(MethodPtr method) const override
+    uint32_t GetClassIdForMethod(MethodPtr method) const override
     {
         auto mda = panda_file::MethodDataAccessor(*MethodCast(method)->GetPandaFile(), MethodCast(method)->GetFileId());
         return mda.GetClassId().GetOffset();
     }
 
-    size_t GetClassIdForMethod(MethodPtr parentMethod, size_t methodId) const override
+    uint32_t GetClassIdForMethod(MethodPtr parentMethod, size_t methodId) const override
     {
         auto mda = panda_file::MethodDataAccessor(*MethodCast(parentMethod)->GetPandaFile(),
                                                   panda_file::File::EntityId(methodId));

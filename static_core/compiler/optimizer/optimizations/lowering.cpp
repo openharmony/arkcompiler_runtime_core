@@ -454,12 +454,12 @@ void Lowering::ReplaceSignedModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst
     }
     Inst *selectInst;
     if (graph->GetEncoder()->CanEncodeImmAddSubCmp(0, size, true)) {
-        selectInst =
-            graph->CreateInstSelectImm(inst, addInst, input0, input0, 0, inst->GetType(), ConditionCode::CC_LT);
+        selectInst = graph->CreateInstSelectImm(inst, std::array<Inst *, 3U> {addInst, input0, input0}, 0,
+                                                inst->GetType(), ConditionCode::CC_LT);
     } else {
         auto zeroCnst = graph->FindOrCreateConstant(0);
-        selectInst =
-            graph->CreateInstSelect(inst, addInst, input0, input0, zeroCnst, inst->GetType(), ConditionCode::CC_LT);
+        selectInst = graph->CreateInstSelect(inst, std::array<Inst *, 4U> {addInst, input0, input0, zeroCnst},
+                                             inst->GetType(), ConditionCode::CC_LT);
     }
     auto maskValue = ~static_cast<uint64_t>(valueMinus1);
     Inst *andInst;

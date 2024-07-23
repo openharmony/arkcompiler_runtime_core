@@ -755,8 +755,10 @@ private:
         ASSERT(second->GetOpcode() == Opcode::StoreArray);
 
         auto pstore = graph_->CreateInstStoreArrayPair(
-            first->GetType(), INVALID_PC, first->GetInput(0).GetInst(), first->CastToStoreArray()->GetIndex(),
-            first->CastToStoreArray()->GetStoredValue(), second->CastToStoreArray()->GetStoredValue());
+            first->GetType(), INVALID_PC,
+            std::array<Inst *, 4U> {first->GetInput(0).GetInst(), first->CastToStoreArray()->GetIndex(),
+                                    first->CastToStoreArray()->GetStoredValue(),
+                                    second->CastToStoreArray()->GetStoredValue()});
         pstore->CastToStoreArrayPair()->SetNeedBarrier(first->CastToStoreArray()->GetNeedBarrier() ||
                                                        second->CastToStoreArray()->GetNeedBarrier());
         insertAfter->InsertAfter(pstore);

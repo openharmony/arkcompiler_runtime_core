@@ -122,18 +122,9 @@ TEST_F(ClassHashTableTest, AddClassHashTable)
     ASSERT_EQ(classHashTablesSize, entityPairHeaders->size());
 }
 
-TEST_F(ClassHashTableTest, GetClassHashTable)
+void GetClassHashTableABC1(const std::string &fn)
 {
-    if (RUNTIME_ARCH != Arch::X86_64) {
-        GTEST_SKIP();
-    }
-
-    TmpFile aotFname("TestTwo.an");
-    TmpFile pandaFname1("Animal.abc");
-    TmpFile pandaFname2("Cat.abc");
-
-    {
-        auto source = R"(
+    auto source = R"(
             .record Animal {}
             .function i32 Animal.fun() <static> {
                 ldai 1
@@ -141,14 +132,15 @@ TEST_F(ClassHashTableTest, GetClassHashTable)
             }
         )";
 
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname1.GetFileName(), res.Value()));
-    }
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(fn, res.Value()));
+}
 
-    {
-        auto source = R"(
+void GetClassHashTableABC2(const std::string &fn)
+{
+    auto source = R"(
             .record Animal <external>
             .record Cat {}
             .record Dog {}
@@ -160,19 +152,35 @@ TEST_F(ClassHashTableTest, GetClassHashTable)
             }
         )";
 
-        pandasm::Parser parser;
-        auto res = parser.Parse(source);
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname2.GetFileName(), res.Value()));
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(fn, res.Value()));
+}
+
+void GetClassHashTableAN(const std::string &fn1, const std::string &fn2, const std::string &fnAot,
+                         const std::string &fnPaoc, const std::string &stdlib)
+{
+    auto res = os::exec::Exec(fnPaoc.c_str(), "--paoc-panda-files", fn2.c_str(), "--panda-files", fn1.c_str(),
+                              "--paoc-output", fnAot.c_str(), "--boot-panda-files", stdlib.c_str());
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res.Value(), 0U);
+}
+
+TEST_F(ClassHashTableTest, GetClassHashTable)
+{
+    if (RUNTIME_ARCH != Arch::X86_64) {
+        GTEST_SKIP();
     }
 
-    {
-        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname2.GetFileName(), "--panda-files",
-                                  pandaFname1.GetFileName(), "--paoc-output", aotFname.GetFileName(),
-                                  "--boot-panda-files", GetPandaStdLibFile());
-        ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0U);
-    }
+    TmpFile aotFname("TestTwo.an");
+    TmpFile pandaFname1("Animal.abc");
+    TmpFile pandaFname2("Cat.abc");
+
+    GetClassHashTableABC1(pandaFname1.GetFileName());
+    GetClassHashTableABC2(pandaFname2.GetFileName());
+    GetClassHashTableAN(pandaFname1.GetFileName(), pandaFname2.GetFileName(), aotFname.GetFileName(), GetPaocFile(),
+                        GetPandaStdLibFile());
 
     std::string filename = os::GetAbsolutePath(aotFname.GetFileName());
     auto aotFileRet = AotFile::Open(filename, 0U, true);
@@ -307,6 +315,23 @@ TEST_F(ClassHashTableTest, LoadAbcFileCanLoadClassHashTable)
     ASSERT(!pfPtr->GetClassHashTable().empty());
 }
 
+void GetClassIdFromClassHashTableABC(const std::string &source, const std::string &fnOut)
+{
+    pandasm::Parser parser;
+    auto res = parser.Parse(source);
+    ASSERT_TRUE(res);
+    ASSERT_TRUE(pandasm::AsmEmitter::Emit(fnOut, res.Value()));
+}
+
+void GetClassIdFromClassHashTableAN(const std::string &fn, const std::string &fnAot, const std::string &fnPaoc,
+                                    const std::string &stdlib)
+{
+    auto res = os::exec::Exec(fnPaoc.c_str(), "--gc-type=epsilon", "--paoc-panda-files", fn.c_str(), "--paoc-output",
+                              fnAot.c_str(), "--boot-panda-files", stdlib.c_str());
+    ASSERT_TRUE(res);
+    ASSERT_EQ(res.Value(), 0U);
+}
+
 TEST_F(ClassHashTableTest, GetClassIdFromClassHashTable)
 {
     if (RUNTIME_ARCH != Arch::X86_64) {
@@ -316,12 +341,7 @@ TEST_F(ClassHashTableTest, GetClassIdFromClassHashTable)
     TmpFile pandaFname("GetClassIdFromClassHashTableTest.abc");
     TmpFile aotFname("GetClassIdFromClassHashTableTest.an");
 
-    {
-        pandasm::Parser parser;
-        auto res = parser.Parse(GetSourceCode());
-        ASSERT_TRUE(res);
-        ASSERT_TRUE(pandasm::AsmEmitter::Emit(pandaFname.GetFileName(), res.Value()));
-    }
+    GetClassIdFromClassHashTableABC(GetSourceCode(), pandaFname.GetFileName());
 
     auto pfile = panda_file::OpenPandaFile(pandaFname.GetFileName());
 
@@ -337,12 +357,8 @@ TEST_F(ClassHashTableTest, GetClassIdFromClassHashTable)
     auto classId1D = pfile->GetClassId(descriptorD);
     auto classId1E = pfile->GetClassId(descriptorE);
 
-    {
-        auto res = os::exec::Exec(GetPaocFile(), "--gc-type=epsilon", "--paoc-panda-files", pandaFname.GetFileName(),
-                                  "--paoc-output", aotFname.GetFileName(), "--boot-panda-files", GetPandaStdLibFile());
-        ASSERT_TRUE(res);
-        ASSERT_EQ(res.Value(), 0U);
-    }
+    GetClassIdFromClassHashTableAN(pandaFname.GetFileName(), aotFname.GetFileName(), GetPaocFile(),
+                                   GetPandaStdLibFile());
 
     std::string filename = os::GetAbsolutePath(pandaFname.GetFileName());
     auto res = FileManager::LoadAbcFile(filename, panda_file::File::READ_ONLY);

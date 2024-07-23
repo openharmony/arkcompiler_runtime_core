@@ -403,7 +403,6 @@ for (auto inst : block->InstsSafe()) {
 ....
     ExampleVisitor visitor(graph);
     visitor.VisitGraph();
-    visitor.VisitGraphGrouped();
 ```
 
 

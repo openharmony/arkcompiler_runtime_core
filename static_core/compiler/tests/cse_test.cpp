@@ -39,10 +39,9 @@ private:
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(CSETest, CSETestApply1)
+SRC_GRAPH(CSETestApply1, Graph *graph)
 {
-    // Remove duplicate arithmetic instructions in one basicblock
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -90,10 +89,11 @@ TEST_F(CSETest, CSETestApply1)
             INST(33U, Opcode::ReturnVoid);
         }
     }
+}
 
-    // delete insts 10, 11, 12, 13, 23, 24, 25, 26, 27, 28, 29, 30, 31
-    Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
+OUT_GRAPH(CSETestApply1, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -126,16 +126,25 @@ TEST_F(CSETest, CSETestApply1)
             INST(33U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CSETest, CSETestApply1)
+{
+    // Remove duplicate arithmetic instructions in one basicblock
+    src_graph::CSETestApply1::CREATE(GetGraph());
+
+    // delete insts 10, 11, 12, 13, 23, 24, 25, 26, 27, 28, 29, 30, 31
+    Graph *graphCsed = CreateEmptyGraph();
+    out_graph::CSETestApply1::CREATE(graphCsed);
 
     GetGraph()->RunPass<Cse>();
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
-TEST_F(CSETest, CSETestApply2)
+SRC_GRAPH(CSETestApply2, Graph *graph)
 {
-    // Remove duplicate arithmetic instructions along dominator tree
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -175,10 +184,11 @@ TEST_F(CSETest, CSETestApply2)
             INST(20U, Opcode::ReturnVoid);
         }
     }
+}
 
-    // Delete Insts 12, 14, 16, 18
-    Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
+OUT_GRAPH(CSETestApply2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -214,16 +224,25 @@ TEST_F(CSETest, CSETestApply2)
             INST(20U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CSETest, CSETestApply2)
+{
+    // Remove duplicate arithmetic instructions along dominator tree
+    src_graph::CSETestApply2::CREATE(GetGraph());
+
+    // Delete Insts 12, 14, 16, 18
+    Graph *graphCsed = CreateEmptyGraph();
+    out_graph::CSETestApply2::CREATE(graphCsed);
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
-TEST_F(CSETest, CSETestApply3)
+SRC_GRAPH(CSETestApply3, Graph *graph)
 {
-    // use Phi to replace the arithmetic instruction which has appeared in the two preds of its block.
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -271,10 +290,11 @@ TEST_F(CSETest, CSETestApply3)
             INST(21U, Opcode::ReturnVoid);
         }
     }
+}
 
-    // Add Phi 30, 31, 32, 33; Delete Inst 16, 17, 18, 19
-    Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
+OUT_GRAPH(CSETestApply3, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -322,16 +342,25 @@ TEST_F(CSETest, CSETestApply3)
             INST(21U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CSETest, CSETestApply3)
+{
+    // use Phi to replace the arithmetic instruction which has appeared in the two preds of its block.
+    src_graph::CSETestApply3::CREATE(GetGraph());
+
+    // Add Phi 30, 31, 32, 33; Delete Inst 16, 17, 18, 19
+    Graph *graphCsed = CreateEmptyGraph();
+    out_graph::CSETestApply3::CREATE(graphCsed);
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
-TEST_F(CSETest, CSETestApply4)
+SRC_GRAPH(CSETestApply4, Graph *graph)
 {
-    // Remove duplicate arithmetic instructions in one basicblock (commutative)
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -366,10 +395,11 @@ TEST_F(CSETest, CSETestApply4)
             INST(21U, Opcode::ReturnVoid);
         }
     }
+}
 
-    // delete insts 8, 9, 15, 16, 17, 18, 19
-    Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
+OUT_GRAPH(CSETestApply4, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -395,16 +425,25 @@ TEST_F(CSETest, CSETestApply4)
             INST(21U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CSETest, CSETestApply4)
+{
+    // Remove duplicate arithmetic instructions in one basicblock (commutative)
+    src_graph::CSETestApply4::CREATE(GetGraph());
+
+    // delete insts 8, 9, 15, 16, 17, 18, 19
+    Graph *graphCsed = CreateEmptyGraph();
+    out_graph::CSETestApply4::CREATE(graphCsed);
 
     GetGraph()->RunPass<Cse>();
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
-TEST_F(CSETest, CSETestApply5)
+SRC_GRAPH(CSETestApply5, Graph *graph)
 {
-    // Remove duplicate arithmetic instructions along dominator tree(commutative)
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -444,10 +483,11 @@ TEST_F(CSETest, CSETestApply5)
             INST(20U, Opcode::ReturnVoid);
         }
     }
+}
 
-    // Delete Insts 12, 14, 16, 18
-    Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
+OUT_GRAPH(CSETestApply5, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).s32();
@@ -483,16 +523,25 @@ TEST_F(CSETest, CSETestApply5)
             INST(20U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CSETest, CSETestApply5)
+{
+    // Remove duplicate arithmetic instructions along dominator tree(commutative)
+    src_graph::CSETestApply5::CREATE(GetGraph());
+
+    // Delete Insts 12, 14, 16, 18
+    Graph *graphCsed = CreateEmptyGraph();
+    out_graph::CSETestApply5::CREATE(graphCsed);
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
-TEST_F(CSETest, CSETestApply6)
+SRC_GRAPH(CSETestApply6, Graph *graph)
 {
-    // use Phi to replace the arithmetic instruction which has appeared in the two preds of its block (commutative).
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -540,10 +589,11 @@ TEST_F(CSETest, CSETestApply6)
             INST(21U, Opcode::ReturnVoid);
         }
     }
+}
 
-    // Add Phi 30, 31, 32, 33; Delete Inst 16, 17, 18, 19
-    Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
+OUT_GRAPH(CSETestApply6, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -591,16 +641,25 @@ TEST_F(CSETest, CSETestApply6)
             INST(21U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CSETest, CSETestApply6)
+{
+    // use Phi to replace the arithmetic instruction which has appeared in the two preds of its block (commutative).
+    src_graph::CSETestApply6::CREATE(GetGraph());
+
+    // Add Phi 30, 31, 32, 33; Delete Inst 16, 17, 18, 19
+    Graph *graphCsed = CreateEmptyGraph();
+    out_graph::CSETestApply6::CREATE(graphCsed);
 
     ASSERT_TRUE(GetGraph()->RunPass<Cse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
-TEST_F(CSETest, CSETestNotApply1)
+SRC_GRAPH(CSETestNotApply1, Graph *graph)
 {
-    // Instructions has different type, inputs, opcodes
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -624,9 +683,11 @@ TEST_F(CSETest, CSETestNotApply1)
             INST(14U, Opcode::ReturnVoid);
         }
     }
-    // graph does not change
-    Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
+}
+
+OUT_GRAPH(CSETestNotApply1, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -650,86 +711,105 @@ TEST_F(CSETest, CSETestNotApply1)
             INST(14U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(CSETest, CSETestNotApply1)
+{
+    // Instructions has different type, inputs, opcodes
+    src_graph::CSETestNotApply1::CREATE(GetGraph());
+    // graph does not change
+    Graph *graphCsed = CreateEmptyGraph();
+    out_graph::CSETestNotApply1::CREATE(graphCsed);
 
     GraphChecker(GetGraph()).Check();
     ASSERT_FALSE(GetGraph()->RunPass<Cse>());
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphCsed));
 }
 
+SRC_GRAPH(CSETestNotApply2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 2U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(3U);
+        }
+
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(5U, Opcode::Add).s32().Inputs(1U, 0U);
+        }
+
+        BASIC_BLOCK(3U, 5U, 6U)
+        {
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(1U, 0U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(6U);
+        }
+
+        BASIC_BLOCK(6U, 5U)
+        {
+            INST(8U, Opcode::Add).s32().Inputs(1U, 0U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs({{4U, 5U}, {3U, 2U}, {6U, 8U}});
+            INST(10U, Opcode::Return).s32().Inputs(9U);
+        }
+    }
+}
+
+OUT_GRAPH(CSETestNotApply2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        PARAMETER(1U, 1U).s32();
+        PARAMETER(2U, 2U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(0U, 1U);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(3U);
+        }
+
+        BASIC_BLOCK(4U, 5U)
+        {
+            INST(5U, Opcode::Add).s32().Inputs(1U, 0U);
+        }
+
+        BASIC_BLOCK(3U, 5U, 6U)
+        {
+            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(1U, 0U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(6U);
+        }
+
+        BASIC_BLOCK(6U, 5U)
+        {
+            INST(8U, Opcode::Add).s32().Inputs(1U, 0U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(9U, Opcode::Phi).s32().Inputs({{4U, 5U}, {3U, 2U}, {6U, 8U}});
+            INST(10U, Opcode::Return).s32().Inputs(9U);
+        }
+    }
+}
+
 TEST_F(CSETest, CSETestNotApply2)
 {
     // Instructions in different blocks between which there is no dominating relationship.
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s32();
-        PARAMETER(1U, 1U).s32();
-        PARAMETER(2U, 2U).s32();
-
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(3U);
-        }
-
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(5U, Opcode::Add).s32().Inputs(1U, 0U);
-        }
-
-        BASIC_BLOCK(3U, 5U, 6U)
-        {
-            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(1U, 0U);
-            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(6U);
-        }
-
-        BASIC_BLOCK(6U, 5U)
-        {
-            INST(8U, Opcode::Add).s32().Inputs(1U, 0U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(9U, Opcode::Phi).s32().Inputs({{4U, 5U}, {3U, 2U}, {6U, 8U}});
-            INST(10U, Opcode::Return).s32().Inputs(9U);
-        }
-    }
+    src_graph::CSETestNotApply2::CREATE(GetGraph());
 
     // Graph does not change
     Graph *graphCsed = CreateEmptyGraph();
-    GRAPH(graphCsed)
-    {
-        PARAMETER(0U, 0U).s32();
-        PARAMETER(1U, 1U).s32();
-        PARAMETER(2U, 2U).s32();
-
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(0U, 1U);
-            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(3U);
-        }
-
-        BASIC_BLOCK(4U, 5U)
-        {
-            INST(5U, Opcode::Add).s32().Inputs(1U, 0U);
-        }
-
-        BASIC_BLOCK(3U, 5U, 6U)
-        {
-            INST(6U, Opcode::Compare).b().SrcType(DataType::Type::INT32).Inputs(1U, 0U);
-            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_GE).Imm(0U).Inputs(6U);
-        }
-
-        BASIC_BLOCK(6U, 5U)
-        {
-            INST(8U, Opcode::Add).s32().Inputs(1U, 0U);
-        }
-
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(9U, Opcode::Phi).s32().Inputs({{4U, 5U}, {3U, 2U}, {6U, 8U}});
-            INST(10U, Opcode::Return).s32().Inputs(9U);
-        }
-    }
+    out_graph::CSETestNotApply2::CREATE(graphCsed);
 
     GraphChecker(GetGraph()).Check();
     ASSERT_FALSE(GetGraph()->RunPass<Cse>());

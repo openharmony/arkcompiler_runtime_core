@@ -937,13 +937,13 @@ public:
     }
 
     // returns Class Id for Method
-    virtual size_t GetClassIdForMethod([[maybe_unused]] MethodPtr method) const
+    virtual uint32_t GetClassIdForMethod([[maybe_unused]] MethodPtr method) const
     {
         return 0;
     }
 
     // returns Class Id for Method
-    virtual size_t GetClassIdForMethod([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t unused) const
+    virtual uint32_t GetClassIdForMethod([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t unused) const
     {
         return 0;
     }
@@ -1576,31 +1576,31 @@ enum class DeoptimizeType : uint8_t {
     COUNT
 };
 
+inline constexpr auto DEOPT_COUNT = static_cast<uint8_t>(DeoptimizeType::COUNT);
+
+inline constexpr std::array<const char *, DEOPT_COUNT> DEOPT_TYPE_NAMES = {"INVALID_TYPE",
+                                                                           "INLINE_CHA",
+                                                                           "NULL_CHECK",
+                                                                           "BOUNDS_CHECK",
+                                                                           "ZERO_CHECK",
+                                                                           "NEGATIVE_CHECK",
+                                                                           "CHECK_CAST",
+                                                                           "ANY_TYPE_CHECK",
+                                                                           "OVERFLOW",
+                                                                           "HOLE ",
+                                                                           "NOT_NUMBER",
+                                                                           "NOT_SMALL_INT",
+                                                                           "BOUNDS_CHECK_WITH_DEOPT",
+                                                                           "DOUBLE_WITH_INT",
+                                                                           "INLINE_IC",
+                                                                           "INLINE_DYN",
+                                                                           "NOT_PROFILED",
+                                                                           "IFIMM_TRY"};
+
 inline const char *DeoptimizeTypeToString(DeoptimizeType deoptType)
 {
-    static constexpr auto COUNT = static_cast<uint8_t>(DeoptimizeType::COUNT);
-
-    static constexpr std::array<const char *, COUNT> DEOPT_TYPE_NAMES = {"INVALID_TYPE",
-                                                                         "INLINE_CHA",
-                                                                         "NULL_CHECK",
-                                                                         "BOUNDS_CHECK",
-                                                                         "ZERO_CHECK",
-                                                                         "NEGATIVE_CHECK",
-                                                                         "CHECK_CAST",
-                                                                         "ANY_TYPE_CHECK",
-                                                                         "OVERFLOW",
-                                                                         "HOLE ",
-                                                                         "NOT_NUMBER",
-                                                                         "NOT_SMALL_INT",
-                                                                         "BOUNDS_CHECK_WITH_DEOPT",
-                                                                         "DOUBLE_WITH_INT",
-                                                                         "INLINE_IC",
-                                                                         "INLINE_DYN",
-                                                                         "NOT_PROFILED",
-                                                                         "IFIMM_TRY"};
-
     auto idx = static_cast<uint8_t>(deoptType);
-    ASSERT(idx < COUNT);
+    ASSERT(idx < DEOPT_COUNT);
     return DEOPT_TYPE_NAMES[idx];
 }
 }  // namespace ark::compiler

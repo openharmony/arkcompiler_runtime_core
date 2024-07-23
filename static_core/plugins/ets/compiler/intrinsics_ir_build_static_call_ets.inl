@@ -15,7 +15,7 @@
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_DOUBLE_IS_NAN:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_FLOAT_IS_NAN: {
-    BuildIsNanIntrinsic(bcInst, accRead);
+    Builder()->BuildIsNanIntrinsic(bcInst_, ACC_READ);
     break;
 }
 
@@ -26,25 +26,25 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_FLOAT_IS_FINITE: {
      * deal with 64-bits data (double type), so, for for 32-bit archs
      * (e.g. ARM32) it is just better to use c++ implementation */
     if (Is64BitsArch(GetGraph()->GetArch())) {
-        BuildIsFiniteIntrinsic(bcInst, accRead);
+        Builder()->BuildIsFiniteIntrinsic(bcInst_, ACC_READ);
     } else {
-        BuildDefaultStaticIntrinsic(bcInst, false, accRead);
+        BuildDefaultStaticIntrinsic(intrinsicId);
     }
     break;
 }
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_ABS: {
-    BuildAbsIntrinsic(bcInst, accRead);
+    Builder()->BuildAbsIntrinsic(bcInst_, ACC_READ);
     break;
 }
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_SQRT: {
-    BuildSqrtIntrinsic(bcInst, accRead);
+    Builder()->BuildSqrtIntrinsic(bcInst_, ACC_READ);
     break;
 }
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_SIGNBIT: {
-    BuildSignbitIntrinsic(bcInst, accRead);
+    Builder()->BuildSignbitIntrinsic(bcInst_, ACC_READ);
     break;
 }
 
@@ -52,7 +52,7 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_I32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_I64:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_F32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_F64: {
-    BuildBinaryOperationIntrinsic<Opcode::Max>(bcInst, accRead);
+    Builder()->template BuildBinaryOperationIntrinsic<Opcode::Max>(bcInst_, ACC_READ);
     break;
 }
 
@@ -60,28 +60,28 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_I32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_I64:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_F32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_F64: {
-    BuildBinaryOperationIntrinsic<Opcode::Min>(bcInst, accRead);
+    Builder()->template BuildBinaryOperationIntrinsic<Opcode::Min>(bcInst_, ACC_READ);
     break;
 }
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MOD: {
-    BuildBinaryOperationIntrinsic<Opcode::Mod>(bcInst, accRead);
+    Builder()->template BuildBinaryOperationIntrinsic<Opcode::Mod>(bcInst_, ACC_READ);
     break;
 }
 
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_CHAR_IS_UPPER_CASE: {
-    BuildCharIsUpperCaseIntrinsic(bcInst, accRead);
+    Builder()->BuildCharIsUpperCaseIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_CHAR_TO_UPPER_CASE: {
-    BuildCharToUpperCaseIntrinsic(bcInst, accRead);
+    Builder()->BuildCharToUpperCaseIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_CHAR_IS_LOWER_CASE: {
-    BuildCharIsLowerCaseIntrinsic(bcInst, accRead);
+    Builder()->BuildCharIsLowerCaseIntrinsic(bcInst_, ACC_READ);
     break;
 }
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_CHAR_TO_LOWER_CASE: {
-    BuildCharToLowerCaseIntrinsic(bcInst, accRead);
+    Builder()->BuildCharToLowerCaseIntrinsic(bcInst_, ACC_READ);
     break;
 }

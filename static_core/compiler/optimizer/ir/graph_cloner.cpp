@@ -170,6 +170,26 @@ void GraphCloner::BuildDataFlow()
     }
 }
 
+void PopulateResolverBlock(Loop *loop, BasicBlock *resolver, Inst *inst)
+{
+    Inst *phiResolver = nullptr;
+    auto userIt = inst->GetUsers().begin();
+    while (userIt != inst->GetUsers().end()) {
+        auto user = userIt->GetInst();
+        auto inputIdx = userIt->GetIndex();
+        ++userIt;
+        ASSERT(user->GetBasicBlock() != nullptr);
+        if (user->GetBasicBlock()->GetLoop() != loop) {
+            if (phiResolver == nullptr) {
+                phiResolver = inst->GetBasicBlock()->GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
+                phiResolver->AppendInput(inst);
+                resolver->AppendPhi(phiResolver);
+            }
+            user->SetInput(inputIdx, phiResolver);
+        }
+    }
+}
+
 /*
  * Create resolver-block - common successor for all loop side-exits
  */
@@ -181,22 +201,7 @@ BasicBlock *GraphCloner::CreateResolverBlock(Loop *loop, BasicBlock *backEdge)
     // Populate resolver-block with phis for each instruction which has outside-loop user
     for (auto block : loop->GetBlocks()) {
         for (auto inst : block->AllInsts()) {
-            Inst *phiResolver = nullptr;
-            auto userIt = inst->GetUsers().begin();
-            while (userIt != inst->GetUsers().end()) {
-                auto user = userIt->GetInst();
-                auto inputIdx = userIt->GetIndex();
-                ++userIt;
-                ASSERT(user->GetBasicBlock() != nullptr);
-                if (user->GetBasicBlock()->GetLoop() != loop) {
-                    if (phiResolver == nullptr) {
-                        phiResolver = GetGraph()->CreateInstPhi(inst->GetType(), inst->GetPc());
-                        phiResolver->AppendInput(inst);
-                        resolver->AppendPhi(phiResolver);
-                    }
-                    user->SetInput(inputIdx, phiResolver);
-                }
-            }
+            PopulateResolverBlock(loop, resolver, inst);
         }
     }
     return resolver;
@@ -305,16 +310,7 @@ void GraphCloner::UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unroll
     // update outloop users
     for (auto block : *unrollData->blocks) {
         for (auto inst : block->AllInsts()) {
-            auto userIt = inst->GetUsers().begin();
-            while (userIt != inst->GetUsers().end()) {
-                auto user = userIt->GetInst();
-                auto inputIdx = userIt->GetIndex();
-                ++userIt;
-                ASSERT(user->GetBasicBlock() != nullptr);
-                if (user->GetBasicBlock()->GetLoop() != loop) {
-                    user->SetInput(inputIdx, GetClone(inst));
-                }
-            }
+            UpdateOutloopUsers(loop, inst);
         }
     }
 
@@ -326,6 +322,20 @@ void GraphCloner::UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unroll
         auto headerPhi = outerPhi->CastToPhi()->GetPhiInput(unrollData->backedge);
         if (headerPhi->IsPhi() && headerPhi->GetBasicBlock() == unrollData->header) {
             outerPhi->ReplaceInput(headerPhi, headerPhi->CastToPhi()->GetPhiInput(unrollData->backedge));
+        }
+    }
+}
+
+void GraphCloner::UpdateOutloopUsers(Loop *loop, Inst *inst)
+{
+    auto userIt = inst->GetUsers().begin();
+    while (userIt != inst->GetUsers().end()) {
+        auto user = userIt->GetInst();
+        auto inputIdx = userIt->GetIndex();
+        ++userIt;
+        ASSERT(user->GetBasicBlock() != nullptr);
+        if (user->GetBasicBlock()->GetLoop() != loop) {
+            user->SetInput(inputIdx, GetClone(inst));
         }
     }
 }

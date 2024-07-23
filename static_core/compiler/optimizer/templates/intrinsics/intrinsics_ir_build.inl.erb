@@ -74,20 +74,16 @@ inline bool IsVirtual([[maybe_unused]] RuntimeInterface::IntrinsicId intrinsic)
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-void InstBuilder::BuildVirtualCallIntrinsic([[maybe_unused]] const BytecodeInstruction *bcInst,
-                                            [[maybe_unused]] bool isRange, [[maybe_unused]] bool accRead)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildVirtualCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId)
 {
 % if Compiler::ext_intrinsic_spaces.any?
-    auto methodIndex = bcInst->GetId(0).AsIndex();
-    auto methodId = GetRuntime()->ResolveMethodIndex(GetMethod(), methodIndex);
-    auto method = GetRuntime()->GetMethodById(GetMethod(), methodId);
-    auto intrinsicId = GetRuntime()->GetIntrinsicId(method);
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)
     switch (intrinsicId) {
 #include "intrinsics_ir_build_virtual_call.inl"
         default: {
 % end
-            return BuildDefaultVirtualCallIntrinsic(bcInst, isRange, accRead);  // not supported case
+            return BuildDefaultVirtualCallIntrinsic(intrinsicId);  // not supported case
 % if Compiler::ext_intrinsic_spaces.any?
         }
     }

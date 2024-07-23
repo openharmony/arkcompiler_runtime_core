@@ -120,33 +120,8 @@ TEST_F(RedundantLoopEliminationTest, SimpleLoopTest2)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(RedundantLoopEliminationTest, SimpleLoopTest3)
+SRC_GRAPH(SimpleLoopTest3, Graph *graph)
 {
-    // not applied, loop contains not removable inst
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0U);
-        CONSTANT(1U, 1U);
-        CONSTANT(2U, 10U);
-        BASIC_BLOCK(3U, 4U, 5U)
-        {
-            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
-            INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
-            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
-        }
-        BASIC_BLOCK(4U, 3U)
-        {
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(13U, Opcode::CallStatic).s32().InputsAutoType(20U);
-            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
-        }
-        BASIC_BLOCK(5U, 1U)
-        {
-            INST(12U, Opcode::ReturnVoid);
-        }
-    }
-    ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -169,6 +144,41 @@ TEST_F(RedundantLoopEliminationTest, SimpleLoopTest3)
             INST(12U, Opcode::ReturnVoid);
         }
     }
+}
+
+OUT_GRAPH(SimpleLoopTest3, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        CONSTANT(2U, 10U);
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(4U, Opcode::Phi).s32().Inputs(0U, 10U);
+            INST(5U, Opcode::Compare).CC(CC_LT).b().Inputs(4U, 2U);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(5U);
+        }
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(13U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(10U, Opcode::Add).s32().Inputs(4U, 1U);
+        }
+        BASIC_BLOCK(5U, 1U)
+        {
+            INST(12U, Opcode::ReturnVoid);
+        }
+    }
+}
+
+TEST_F(RedundantLoopEliminationTest, SimpleLoopTest3)
+{
+    // not applied, loop contains not removable inst
+    src_graph::SimpleLoopTest3::CREATE(GetGraph());
+    ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::SimpleLoopTest3::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -223,44 +233,8 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest1)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(RedundantLoopEliminationTest, InnerLoopsTest2)
+SRC_GRAPH(InnerLoopsTest2, Graph *graph)
 {
-    // not applied, inner loop contains not removable inst
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0U);
-        CONSTANT(1U, 1U);
-        PARAMETER(3U, 0U).s32();
-        PARAMETER(4U, 1U).s32();
-        BASIC_BLOCK(2U, 5U, 4U)
-        {
-            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
-            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
-            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
-        }
-        BASIC_BLOCK(5U, 6U, 3U)
-        {
-            INST(10U, Opcode::Phi).s32().Inputs(0U, 13U);
-            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10U, 3U);
-            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
-        }
-        BASIC_BLOCK(6U, 5U)
-        {
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
-            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
-        }
-        BASIC_BLOCK(3U, 2U)
-        {
-            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
-        }
-        BASIC_BLOCK(4U, 1U)
-        {
-            INST(9U, Opcode::ReturnVoid);
-        }
-    }
-    ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -294,13 +268,58 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest2)
             INST(9U, Opcode::ReturnVoid);
         }
     }
+}
+
+OUT_GRAPH(InnerLoopsTest2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        CONSTANT(0U, 0U);
+        CONSTANT(1U, 1U);
+        PARAMETER(3U, 0U).s32();
+        PARAMETER(4U, 1U).s32();
+        BASIC_BLOCK(2U, 5U, 4U)
+        {
+            INST(5U, Opcode::Phi).s32().Inputs(0U, 8U);
+            INST(6U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(5U, 4U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
+        }
+        BASIC_BLOCK(5U, 6U, 3U)
+        {
+            INST(10U, Opcode::Phi).s32().Inputs(0U, 13U);
+            INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_LT).Inputs(10U, 3U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
+        }
+        BASIC_BLOCK(6U, 5U)
+        {
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).s32().InputsAutoType(20U);
+            INST(13U, Opcode::Add).s32().Inputs(10U, 1U);
+        }
+        BASIC_BLOCK(3U, 2U)
+        {
+            INST(8U, Opcode::Add).s32().Inputs(5U, 1U);
+        }
+        BASIC_BLOCK(4U, 1U)
+        {
+            INST(9U, Opcode::ReturnVoid);
+        }
+    }
+}
+
+TEST_F(RedundantLoopEliminationTest, InnerLoopsTest2)
+{
+    // not applied, inner loop contains not removable inst
+    src_graph::InnerLoopsTest2::CREATE(GetGraph());
+    ASSERT_FALSE(GetGraph()->RunPass<RedundantLoopElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::InnerLoopsTest2::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(RedundantLoopEliminationTest, InnerLoopsTest3)
+SRC_GRAPH(InnerLoopsTest3, Graph *graph)
 {
-    // applied, outher loop contains not removable inst, but inner loop
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -333,9 +352,10 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest3)
             INST(9U, Opcode::ReturnVoid);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
-    GraphChecker(GetGraph()).Check();
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(InnerLoopsTest3, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -359,14 +379,22 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTest3)
             INST(9U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(RedundantLoopEliminationTest, InnerLoopsTest3)
+{
+    // applied, outher loop contains not removable inst, but inner loop
+    src_graph::InnerLoopsTest3::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
+    GraphChecker(GetGraph()).Check();
+    auto graph = CreateEmptyGraph();
+    out_graph::InnerLoopsTest3::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(RedundantLoopEliminationTest, InnerLoopsTestPhiInOuterBlock)
+SRC_GRAPH(InnerLoopsTestPhiInOuterBlock, Graph *graph)
 {
-    // applied for inner loop
-    // outer block of inner loop is head of outer loop, check that Phi inputs in it are updated correctly
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -399,8 +427,10 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTestPhiInOuterBlock)
             INST(9U, Opcode::ReturnVoid);
         }
     }
-    ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(InnerLoopsTestPhiInOuterBlock, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -424,6 +454,16 @@ TEST_F(RedundantLoopEliminationTest, InnerLoopsTestPhiInOuterBlock)
             INST(9U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(RedundantLoopEliminationTest, InnerLoopsTestPhiInOuterBlock)
+{
+    // applied for inner loop
+    // outer block of inner loop is head of outer loop, check that Phi inputs in it are updated correctly
+    src_graph::InnerLoopsTestPhiInOuterBlock::CREATE(GetGraph());
+    ASSERT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::InnerLoopsTestPhiInOuterBlock::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -476,11 +516,9 @@ TEST_F(RedundantLoopEliminationTest, SimpleLoopTestIncAfterPeeling)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(RedundantLoopEliminationTest, TestLoopWithPhiInOuterBlock)
+SRC_GRAPH(TestLoopWithPhiInOuterBlock, Graph *graph)
 {
-    // applied for loop with exit from backedge
-    // check that inputs of Phi in outer block are updated correctly
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);
         CONSTANT(1U, 1U);
@@ -506,8 +544,10 @@ TEST_F(RedundantLoopEliminationTest, TestLoopWithPhiInOuterBlock)
             INST(13U, Opcode::Return).s32().Inputs(12U);
         }
     }
-    EXPECT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
-    auto graph = CreateEmptyGraph();
+}
+
+OUT_GRAPH(TestLoopWithPhiInOuterBlock, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(0U, 0U);
@@ -525,6 +565,16 @@ TEST_F(RedundantLoopEliminationTest, TestLoopWithPhiInOuterBlock)
             INST(13U, Opcode::Return).s32().Inputs(12U);
         }
     }
+}
+
+TEST_F(RedundantLoopEliminationTest, TestLoopWithPhiInOuterBlock)
+{
+    // applied for loop with exit from backedge
+    // check that inputs of Phi in outer block are updated correctly
+    src_graph::TestLoopWithPhiInOuterBlock::CREATE(GetGraph());
+    EXPECT_TRUE(GetGraph()->RunPass<RedundantLoopElimination>());
+    auto graph = CreateEmptyGraph();
+    out_graph::TestLoopWithPhiInOuterBlock::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 

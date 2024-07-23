@@ -33,7 +33,8 @@ class GetAnyTypeNameInst;
 class AnyTypeCheckInst;
 class EncodeVisitor;
 class Inst;
-class FixedInputsInst2;
+template <size_t N>
+class FixedInputsInst;
 class HclassCheckInst;
 
 inline AnyBaseType NumericDataTypeToAnyType([[maybe_unused]] ark::compiler::DataType::Type type,
@@ -218,7 +219,7 @@ inline bool TryIsDynHeapObject([[maybe_unused]] compiler::AnyBaseType type) {
     return false;
 }
 
-inline bool TryObjByIndexCheckPluginGen([[maybe_unused]] const ark::compiler::FixedInputsInst2 *checkInst,
+inline bool TryObjByIndexCheckPluginGen([[maybe_unused]] const ark::compiler::FixedInputsInst<2U> *checkInst,
                                         [[maybe_unused]] ark::compiler::EncodeVisitor *enc,
                                         [[maybe_unused]] LabelHolder::LabelId id) {
 

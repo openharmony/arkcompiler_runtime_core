@@ -35,10 +35,9 @@ private:
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(VNTest, VnTestApply1)
+SRC_GRAPH(VnTestApply1, Graph *graph)
 {
-    // Remove duplicate arithmetic instructions
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -62,8 +61,11 @@ TEST_F(VNTest, VnTestApply1)
             INST(15U, Opcode::ReturnVoid);
         }
     }
-    Graph *graphEt = CreateGraphWithDefaultRuntime();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(VnTestApply1, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -87,16 +89,23 @@ TEST_F(VNTest, VnTestApply1)
             INST(15U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(VNTest, VnTestApply1)
+{
+    // Remove duplicate arithmetic instructions
+    src_graph::VnTestApply1::CREATE(GetGraph());
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    out_graph::VnTestApply1::CREATE(graphEt);
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(VNTest, VnTestApply2)
+SRC_GRAPH(VnTestApply2, Graph *graph)
 {
-    // Remove duplicate Cast,  AddI, Fcmp and Cmp instructions
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -140,8 +149,11 @@ TEST_F(VNTest, VnTestApply2)
             INST(22U, Opcode::ReturnVoid);
         }
     }
-    Graph *graphEt = CreateGraphWithDefaultRuntime();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(VnTestApply2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -185,73 +197,187 @@ TEST_F(VNTest, VnTestApply2)
             INST(22U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(VNTest, VnTestApply2)
+{
+    // Remove duplicate Cast,  AddI, Fcmp and Cmp instructions
+    src_graph::VnTestApply2::CREATE(GetGraph());
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    out_graph::VnTestApply2::CREATE(graphEt);
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
+SRC_GRAPH(VnTestNotApply1, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+        PARAMETER(4U, 4U).f32();
+        PARAMETER(5U, 5U).f32();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(6U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(7U, Opcode::Add).u16().Inputs(0U, 1U);
+            INST(8U, Opcode::Add).u32().Inputs(0U, 7U);
+            INST(9U, Opcode::Div).f64().Inputs(2U, 3U);
+            INST(10U, Opcode::Div).f64().Inputs(3U, 2U);
+            INST(11U, Opcode::Mul).f64().Inputs(2U, 3U);
+            INST(12U, Opcode::Sub).f32().Inputs(4U, 5U);
+            INST(13U, Opcode::Sub).f32().Inputs(5U, 4U);
+            INST(14U, Opcode::Abs).f32().Inputs(4U);
+            INST(15U, Opcode::Neg).f32().Inputs(4U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(16U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 20U);
+            INST(17U, Opcode::ReturnVoid);
+        }
+    }
+}
+
+OUT_GRAPH(VnTestNotApply1, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+        PARAMETER(4U, 4U).f32();
+        PARAMETER(5U, 5U).f32();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(6U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(7U, Opcode::Add).u16().Inputs(0U, 1U);
+            INST(8U, Opcode::Add).u32().Inputs(0U, 7U);
+            INST(9U, Opcode::Div).f64().Inputs(2U, 3U);
+            INST(10U, Opcode::Div).f64().Inputs(3U, 2U);
+            INST(11U, Opcode::Mul).f64().Inputs(2U, 3U);
+            INST(12U, Opcode::Sub).f32().Inputs(4U, 5U);
+            INST(13U, Opcode::Sub).f32().Inputs(5U, 4U);
+            INST(14U, Opcode::Abs).f32().Inputs(4U);
+            INST(15U, Opcode::Neg).f32().Inputs(4U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(16U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 20U);
+            INST(17U, Opcode::ReturnVoid);
+        }
+    }
+}
+
 TEST_F(VNTest, VnTestNotApply1)
 {
     // Arithmetic instructions has different type, inputs, opcodes
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).u64();
-        PARAMETER(1U, 1U).u64();
-        PARAMETER(2U, 2U).f64();
-        PARAMETER(3U, 3U).f64();
-        PARAMETER(4U, 4U).f32();
-        PARAMETER(5U, 5U).f32();
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(6U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(7U, Opcode::Add).u16().Inputs(0U, 1U);
-            INST(8U, Opcode::Add).u32().Inputs(0U, 7U);
-            INST(9U, Opcode::Div).f64().Inputs(2U, 3U);
-            INST(10U, Opcode::Div).f64().Inputs(3U, 2U);
-            INST(11U, Opcode::Mul).f64().Inputs(2U, 3U);
-            INST(12U, Opcode::Sub).f32().Inputs(4U, 5U);
-            INST(13U, Opcode::Sub).f32().Inputs(5U, 4U);
-            INST(14U, Opcode::Abs).f32().Inputs(4U);
-            INST(15U, Opcode::Neg).f32().Inputs(4U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(16U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 20U);
-            INST(17U, Opcode::ReturnVoid);
-        }
-    }
+    src_graph::VnTestNotApply1::CREATE(GetGraph());
     Graph *graphEt = CreateGraphWithDefaultRuntime();
     // graph_et is equal the graph
-    GRAPH(graphEt)
-    {
-        PARAMETER(0U, 0U).u64();
-        PARAMETER(1U, 1U).u64();
-        PARAMETER(2U, 2U).f64();
-        PARAMETER(3U, 3U).f64();
-        PARAMETER(4U, 4U).f32();
-        PARAMETER(5U, 5U).f32();
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(6U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(7U, Opcode::Add).u16().Inputs(0U, 1U);
-            INST(8U, Opcode::Add).u32().Inputs(0U, 7U);
-            INST(9U, Opcode::Div).f64().Inputs(2U, 3U);
-            INST(10U, Opcode::Div).f64().Inputs(3U, 2U);
-            INST(11U, Opcode::Mul).f64().Inputs(2U, 3U);
-            INST(12U, Opcode::Sub).f32().Inputs(4U, 5U);
-            INST(13U, Opcode::Sub).f32().Inputs(5U, 4U);
-            INST(14U, Opcode::Abs).f32().Inputs(4U);
-            INST(15U, Opcode::Neg).f32().Inputs(4U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(16U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 14U, 15U, 20U);
-            INST(17U, Opcode::ReturnVoid);
-        }
-    }
+    out_graph::VnTestNotApply1::CREATE(graphEt);
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
+}
+
+SRC_GRAPH(VnTestNotApply2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+        PARAMETER(4U, 4U).f32();
+        PARAMETER(5U, 5U).f32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(6U, Opcode::Cast).u32().SrcType(DataType::FLOAT64).Inputs(2U);
+            INST(7U, Opcode::AddI).u32().Imm(9ULL).Inputs(1U);
+            INST(8U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(false).Inputs(2U, 3U);
+            INST(9U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(true).Inputs(4U, 5U);
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 1U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(23U, Opcode::SaveState).NoVregs();
+            INST(12U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 23U);
+            INST(13U, Opcode::ReturnVoid);
+        }
+        BASIC_BLOCK(4U, 5U, 6U)
+        {
+            INST(14U, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(2U);
+            INST(15U, Opcode::AddI).u32().Imm(10ULL).Inputs(1U);
+            INST(16U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(true).Inputs(2U, 3U);
+            INST(17U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(false).Inputs(4U, 5U);
+            INST(18U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(19U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(24U, Opcode::SaveState).NoVregs();
+            INST(20U, Opcode::CallStatic).b().InputsAutoType(17U, 16U, 15U, 14U, 24U);
+            INST(21U, Opcode::ReturnVoid);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(22U, Opcode::ReturnVoid);
+        }
+    }
+}
+
+OUT_GRAPH(VnTestNotApply2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+        PARAMETER(4U, 4U).f32();
+        PARAMETER(5U, 5U).f32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(6U, Opcode::Cast).u32().SrcType(DataType::FLOAT64).Inputs(2U);
+            INST(7U, Opcode::AddI).u32().Imm(9ULL).Inputs(1U);
+            INST(8U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(false).Inputs(2U, 3U);
+            INST(9U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(true).Inputs(4U, 5U);
+            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 1U);
+            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(23U, Opcode::SaveState).NoVregs();
+            INST(12U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 23U);
+            INST(13U, Opcode::ReturnVoid);
+        }
+        BASIC_BLOCK(4U, 5U, 6U)
+        {
+            INST(14U, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(2U);
+            INST(15U, Opcode::AddI).u32().Imm(10ULL).Inputs(1U);
+            INST(16U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(true).Inputs(2U, 3U);
+            INST(17U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(false).Inputs(4U, 5U);
+            INST(18U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
+            INST(19U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(24U, Opcode::SaveState).NoVregs();
+            INST(20U, Opcode::CallStatic).b().InputsAutoType(17U, 16U, 15U, 14U, 24U);
+            INST(21U, Opcode::ReturnVoid);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(22U, Opcode::ReturnVoid);
+        }
+    }
 }
 
 TEST_F(VNTest, VnTestNotApply2)
@@ -261,108 +387,19 @@ TEST_F(VNTest, VnTestNotApply2)
     //  - AddI instructions have different constant
     //  - Fcmp instructions have different fcmpg flag
     //  - Cmp instructions have different CC
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).u64();
-        PARAMETER(1U, 1U).u64();
-        PARAMETER(2U, 2U).f64();
-        PARAMETER(3U, 3U).f64();
-        PARAMETER(4U, 4U).f32();
-        PARAMETER(5U, 5U).f32();
-
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(6U, Opcode::Cast).u32().SrcType(DataType::FLOAT64).Inputs(2U);
-            INST(7U, Opcode::AddI).u32().Imm(9ULL).Inputs(1U);
-            INST(8U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(false).Inputs(2U, 3U);
-            INST(9U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(true).Inputs(4U, 5U);
-            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 1U);
-            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(23U, Opcode::SaveState).NoVregs();
-            INST(12U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 23U);
-            INST(13U, Opcode::ReturnVoid);
-        }
-        BASIC_BLOCK(4U, 5U, 6U)
-        {
-            INST(14U, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(2U);
-            INST(15U, Opcode::AddI).u32().Imm(10ULL).Inputs(1U);
-            INST(16U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(true).Inputs(2U, 3U);
-            INST(17U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(false).Inputs(4U, 5U);
-            INST(18U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
-            INST(19U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
-        }
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(24U, Opcode::SaveState).NoVregs();
-            INST(20U, Opcode::CallStatic).b().InputsAutoType(17U, 16U, 15U, 14U, 24U);
-            INST(21U, Opcode::ReturnVoid);
-        }
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(22U, Opcode::ReturnVoid);
-        }
-    }
+    src_graph::VnTestNotApply2::CREATE(GetGraph());
     Graph *graphEt = CreateGraphWithDefaultRuntime();
     // graph_et is equal the graph
-    GRAPH(graphEt)
-    {
-        PARAMETER(0U, 0U).u64();
-        PARAMETER(1U, 1U).u64();
-        PARAMETER(2U, 2U).f64();
-        PARAMETER(3U, 3U).f64();
-        PARAMETER(4U, 4U).f32();
-        PARAMETER(5U, 5U).f32();
-
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(6U, Opcode::Cast).u32().SrcType(DataType::FLOAT64).Inputs(2U);
-            INST(7U, Opcode::AddI).u32().Imm(9ULL).Inputs(1U);
-            INST(8U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(false).Inputs(2U, 3U);
-            INST(9U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(true).Inputs(4U, 5U);
-            INST(10U, Opcode::Compare).b().CC(CC_LT).Inputs(0U, 1U);
-            INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(23U, Opcode::SaveState).NoVregs();
-            INST(12U, Opcode::CallStatic).b().InputsAutoType(6U, 7U, 8U, 9U, 23U);
-            INST(13U, Opcode::ReturnVoid);
-        }
-        BASIC_BLOCK(4U, 5U, 6U)
-        {
-            INST(14U, Opcode::Cast).u64().SrcType(DataType::FLOAT64).Inputs(2U);
-            INST(15U, Opcode::AddI).u32().Imm(10ULL).Inputs(1U);
-            INST(16U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT64).Fcmpg(true).Inputs(2U, 3U);
-            INST(17U, Opcode::Cmp).s32().SrcType(DataType::Type::FLOAT32).Fcmpg(false).Inputs(4U, 5U);
-            INST(18U, Opcode::Compare).b().CC(CC_EQ).Inputs(0U, 1U);
-            INST(19U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(18U);
-        }
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(24U, Opcode::SaveState).NoVregs();
-            INST(20U, Opcode::CallStatic).b().InputsAutoType(17U, 16U, 15U, 14U, 24U);
-            INST(21U, Opcode::ReturnVoid);
-        }
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(22U, Opcode::ReturnVoid);
-        }
-    }
+    out_graph::VnTestNotApply2::CREATE(graphEt);
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(VNTest, VnTestNotApply3)
+SRC_GRAPH(VnTestNotApply3, Graph *graph)
 {
-    // Can't applies:
-    //  - Arithmetic instructions aren't dominate
-    //  - CallStatic, LoadArray and StoreArray has NO_CSE
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -403,6 +440,59 @@ TEST_F(VNTest, VnTestNotApply3)
             INST(25U, Opcode::ReturnVoid);
         }
     }
+}
+
+OUT_GRAPH(VnTestNotApply3, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(1U, 1U).u64();
+        PARAMETER(2U, 2U).f64();
+        PARAMETER(3U, 3U).f64();
+        PARAMETER(4U, 4U).ref();
+        PARAMETER(5U, 5U).ref();
+        PARAMETER(6U, 6U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(7U, Opcode::LoadArray).u64().Inputs(5U, 6U);
+            INST(8U, Opcode::LoadArray).u64().Inputs(5U, 6U);
+            INST(9U, Opcode::StoreArray).f64().Inputs(4U, 6U, 3U);
+            INST(10U, Opcode::StoreArray).f64().Inputs(4U, 6U, 3U);
+            INST(11U, Opcode::Compare).b().CC(CC_LT).Inputs(7U, 8U);
+            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
+        }
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(13U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(14U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(15U, Opcode::Mul).f64().Inputs(2U, 3U);
+            INST(16U, Opcode::Div).f64().Inputs(2U, 3U);
+            INST(30U, Opcode::SaveState).NoVregs();
+            INST(17U, Opcode::CallStatic).b().InputsAutoType(13U, 14U, 15U, 16U, 30U);
+            INST(18U, Opcode::CallStatic).b().InputsAutoType(13U, 14U, 15U, 16U, 30U);
+            INST(19U, Opcode::ReturnVoid);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(20U, Opcode::Add).u64().Inputs(0U, 1U);
+            INST(21U, Opcode::Sub).u64().Inputs(0U, 1U);
+            INST(22U, Opcode::Mul).f64().Inputs(2U, 3U);
+            INST(23U, Opcode::Div).f64().Inputs(2U, 3U);
+            INST(31U, Opcode::SaveState).NoVregs();
+            INST(24U, Opcode::CallStatic).b().InputsAutoType(20U, 21U, 22U, 23U, 31U);
+            INST(25U, Opcode::ReturnVoid);
+        }
+    }
+}
+
+TEST_F(VNTest, VnTestNotApply3)
+{
+    // Can't applies:
+    //  - Arithmetic instructions aren't dominate
+    //  - CallStatic, LoadArray and StoreArray has NO_CSE
+    src_graph::VnTestNotApply3::CREATE(GetGraph());
 
     GetGraph()->RunPass<ValNum>();
     GraphChecker(GetGraph()).Check();
@@ -413,54 +503,14 @@ TEST_F(VNTest, VnTestNotApply3)
 
     Graph *graphEt = CreateGraphWithDefaultRuntime();
     // graph_et is equal the graph
-    GRAPH(graphEt)
-    {
-        PARAMETER(0U, 0U).u64();
-        PARAMETER(1U, 1U).u64();
-        PARAMETER(2U, 2U).f64();
-        PARAMETER(3U, 3U).f64();
-        PARAMETER(4U, 4U).ref();
-        PARAMETER(5U, 5U).ref();
-        PARAMETER(6U, 6U).s32();
-
-        BASIC_BLOCK(2U, 3U, 4U)
-        {
-            INST(7U, Opcode::LoadArray).u64().Inputs(5U, 6U);
-            INST(8U, Opcode::LoadArray).u64().Inputs(5U, 6U);
-            INST(9U, Opcode::StoreArray).f64().Inputs(4U, 6U, 3U);
-            INST(10U, Opcode::StoreArray).f64().Inputs(4U, 6U, 3U);
-            INST(11U, Opcode::Compare).b().CC(CC_LT).Inputs(7U, 8U);
-            INST(12U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(11U);
-        }
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(13U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(14U, Opcode::Sub).u64().Inputs(0U, 1U);
-            INST(15U, Opcode::Mul).f64().Inputs(2U, 3U);
-            INST(16U, Opcode::Div).f64().Inputs(2U, 3U);
-            INST(30U, Opcode::SaveState).NoVregs();
-            INST(17U, Opcode::CallStatic).b().InputsAutoType(13U, 14U, 15U, 16U, 30U);
-            INST(18U, Opcode::CallStatic).b().InputsAutoType(13U, 14U, 15U, 16U, 30U);
-            INST(19U, Opcode::ReturnVoid);
-        }
-        BASIC_BLOCK(4U, -1L)
-        {
-            INST(20U, Opcode::Add).u64().Inputs(0U, 1U);
-            INST(21U, Opcode::Sub).u64().Inputs(0U, 1U);
-            INST(22U, Opcode::Mul).f64().Inputs(2U, 3U);
-            INST(23U, Opcode::Div).f64().Inputs(2U, 3U);
-            INST(31U, Opcode::SaveState).NoVregs();
-            INST(24U, Opcode::CallStatic).b().InputsAutoType(20U, 21U, 22U, 23U, 31U);
-            INST(25U, Opcode::ReturnVoid);
-        }
-    }
+    out_graph::VnTestNotApply3::CREATE(graphEt);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(VNTest, VnTestApply3)
+SRC_GRAPH(VnTestApply3, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(1U, 0U);
@@ -492,13 +542,11 @@ TEST_F(VNTest, VnTestApply3)
             INST(23U, Opcode::Return).ref().Inputs(0U);
         }
     }
-    GetGraph()->RunPass<ValNum>();
-    GraphChecker(GetGraph()).Check();
-    ASSERT_EQ(INS(5U).GetVN(), INS(17U).GetVN());
+}
 
-    Graph *graphEt = CreateGraphWithDefaultRuntime();
-    // graph_et is equal the graph
-    GRAPH(graphEt)
+OUT_GRAPH(VnTestApply3, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(1U, 0U);
@@ -530,6 +578,18 @@ TEST_F(VNTest, VnTestApply3)
             INST(23U, Opcode::Return).ref().Inputs(0U);
         }
     }
+}
+
+TEST_F(VNTest, VnTestApply3)
+{
+    src_graph::VnTestApply3::CREATE(GetGraph());
+    GetGraph()->RunPass<ValNum>();
+    GraphChecker(GetGraph()).Check();
+    ASSERT_EQ(INS(5U).GetVN(), INS(17U).GetVN());
+
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    // graph_et is equal the graph
+    out_graph::VnTestApply3::CREATE(graphEt);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
@@ -579,9 +639,9 @@ TEST_F(VNTest, CleanupTrigger)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(VNTest, OSR)
+SRC_GRAPH(OSR, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -606,14 +666,10 @@ TEST_F(VNTest, OSR)
             INST(12U, Opcode::Return).u64().Inputs(11U);
         }
     }
+}
 
-    // Remove Inst 11 without OSR
-
-    GetGraph()->RunPass<ValNum>();
-    GetGraph()->RunPass<Cleanup>();
-
-    auto graph = CreateGraphWithDefaultRuntime();
-
+OUT_GRAPH(OSR, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -638,6 +694,19 @@ TEST_F(VNTest, OSR)
             INST(12U, Opcode::Return).u64().Inputs(11U);
         }
     }
+}
+
+TEST_F(VNTest, OSR)
+{
+    src_graph::OSR::CREATE(GetGraph());
+
+    // Remove Inst 11 without OSR
+
+    GetGraph()->RunPass<ValNum>();
+    GetGraph()->RunPass<Cleanup>();
+
+    auto graph = CreateGraphWithDefaultRuntime();
+    out_graph::OSR::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 
@@ -686,10 +755,9 @@ TEST_F(VNTest, OSR)
     ASSERT_TRUE(GraphComparator().Compare(cloneOsr, graphOsr));
 }
 
-TEST_F(VNTest, VnTestCommutative)
+SRC_GRAPH(VnTestCommutative, Graph *graph)
 {
-    // Remove commutative arithmetic instructions(See 2516)
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -717,8 +785,11 @@ TEST_F(VNTest, VnTestCommutative)
             INST(17U, Opcode::ReturnVoid);
         }
     }
-    Graph *graphEt = CreateGraphWithDefaultRuntime();
-    GRAPH(graphEt)
+}
+
+OUT_GRAPH(VnTestCommutative, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -739,6 +810,14 @@ TEST_F(VNTest, VnTestCommutative)
             INST(17U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(VNTest, VnTestCommutative)
+{
+    // Remove commutative arithmetic instructions(See 2516)
+    src_graph::VnTestCommutative::CREATE(GetGraph());
+    Graph *graphEt = CreateGraphWithDefaultRuntime();
+    out_graph::VnTestCommutative::CREATE(graphEt);
 
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
@@ -746,58 +825,68 @@ TEST_F(VNTest, VnTestCommutative)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
+SRC_GRAPH(VnTestCommutativeNotAppliedNoApplied, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).f64();
+        PARAMETER(1U, 1U).f64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::Add).f64().Inputs(0U, 1U);
+            INST(5U, Opcode::Mul).f64().Inputs(0U, 1U);
+            INST(6U, Opcode::Min).f64().Inputs(0U, 1U);
+            INST(7U, Opcode::Max).f64().Inputs(0U, 1U);
+            INST(8U, Opcode::Sub).u64().Inputs(2U, 3U);
+            INST(9U, Opcode::Add).f64().Inputs(1U, 0U);
+            INST(10U, Opcode::Mul).f64().Inputs(1U, 0U);
+            INST(11U, Opcode::Min).f64().Inputs(1U, 0U);
+            INST(12U, Opcode::Max).f64().Inputs(1U, 0U);
+            INST(13U, Opcode::Sub).u64().Inputs(3U, 2U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).b().InputsAutoType(2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 20U);
+            INST(15U, Opcode::ReturnVoid);
+        }
+    }
+}
+
+OUT_GRAPH(VnTestCommutativeNotAppliedNoApplied, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).f64();
+        PARAMETER(1U, 1U).f64();
+        PARAMETER(2U, 2U).u64();
+        PARAMETER(3U, 3U).u64();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(4U, Opcode::Add).f64().Inputs(0U, 1U);
+            INST(5U, Opcode::Mul).f64().Inputs(0U, 1U);
+            INST(6U, Opcode::Min).f64().Inputs(0U, 1U);
+            INST(7U, Opcode::Max).f64().Inputs(0U, 1U);
+            INST(8U, Opcode::Sub).u64().Inputs(2U, 3U);
+            INST(9U, Opcode::Add).f64().Inputs(1U, 0U);
+            INST(10U, Opcode::Mul).f64().Inputs(1U, 0U);
+            INST(11U, Opcode::Min).f64().Inputs(1U, 0U);
+            INST(12U, Opcode::Max).f64().Inputs(1U, 0U);
+            INST(13U, Opcode::Sub).u64().Inputs(3U, 2U);
+            INST(20U, Opcode::SaveState).NoVregs();
+            INST(14U, Opcode::CallStatic).b().InputsAutoType(2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 20U);
+            INST(15U, Opcode::ReturnVoid);
+        }
+    }
+}
+
 TEST_F(VNTest, VnTestCommutativeNotAppliedNoApplied)
 {
     // We don't remove float commutative arithmetic instructions and not commutative instruction(sub)
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).f64();
-        PARAMETER(1U, 1U).f64();
-        PARAMETER(2U, 2U).u64();
-        PARAMETER(3U, 3U).u64();
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(4U, Opcode::Add).f64().Inputs(0U, 1U);
-            INST(5U, Opcode::Mul).f64().Inputs(0U, 1U);
-            INST(6U, Opcode::Min).f64().Inputs(0U, 1U);
-            INST(7U, Opcode::Max).f64().Inputs(0U, 1U);
-            INST(8U, Opcode::Sub).u64().Inputs(2U, 3U);
-            INST(9U, Opcode::Add).f64().Inputs(1U, 0U);
-            INST(10U, Opcode::Mul).f64().Inputs(1U, 0U);
-            INST(11U, Opcode::Min).f64().Inputs(1U, 0U);
-            INST(12U, Opcode::Max).f64().Inputs(1U, 0U);
-            INST(13U, Opcode::Sub).u64().Inputs(3U, 2U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(14U, Opcode::CallStatic).b().InputsAutoType(2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 20U);
-            INST(15U, Opcode::ReturnVoid);
-        }
-    }
+    src_graph::VnTestCommutativeNotAppliedNoApplied::CREATE(GetGraph());
     Graph *graphEt = CreateGraphWithDefaultRuntime();
-    GRAPH(graphEt)
-    {
-        PARAMETER(0U, 0U).f64();
-        PARAMETER(1U, 1U).f64();
-        PARAMETER(2U, 2U).u64();
-        PARAMETER(3U, 3U).u64();
-
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(4U, Opcode::Add).f64().Inputs(0U, 1U);
-            INST(5U, Opcode::Mul).f64().Inputs(0U, 1U);
-            INST(6U, Opcode::Min).f64().Inputs(0U, 1U);
-            INST(7U, Opcode::Max).f64().Inputs(0U, 1U);
-            INST(8U, Opcode::Sub).u64().Inputs(2U, 3U);
-            INST(9U, Opcode::Add).f64().Inputs(1U, 0U);
-            INST(10U, Opcode::Mul).f64().Inputs(1U, 0U);
-            INST(11U, Opcode::Min).f64().Inputs(1U, 0U);
-            INST(12U, Opcode::Max).f64().Inputs(1U, 0U);
-            INST(13U, Opcode::Sub).u64().Inputs(3U, 2U);
-            INST(20U, Opcode::SaveState).NoVregs();
-            INST(14U, Opcode::CallStatic).b().InputsAutoType(2U, 3U, 4U, 5U, 6U, 7U, 8U, 9U, 10U, 11U, 12U, 13U, 20U);
-            INST(15U, Opcode::ReturnVoid);
-        }
-    }
+    out_graph::VnTestCommutativeNotAppliedNoApplied::CREATE(graphEt);
 
     GetGraph()->RunPass<ValNum>();
     GetGraph()->RunPass<Cleanup>();
@@ -1028,9 +1117,9 @@ TEST_F(VNTest, VnTestLoadAndInit)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphEt));
 }
 
-TEST_F(VNTest, Domination)
+SRC_GRAPH(Domination, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
         PARAMETER(1U, 1U).s64();
@@ -1064,13 +1153,10 @@ TEST_F(VNTest, Domination)
             INST(13U, Opcode::Return).s64().Inputs(12U);
         }
     }
+}
 
-    GraphChecker(GetGraph()).Check();
-    GetGraph()->RunPass<ValNum>();
-    GetGraph()->RunPass<Cleanup>();
-    GraphChecker(GetGraph()).Check();
-
-    Graph *graph = CreateGraphWithDefaultRuntime();
+OUT_GRAPH(Domination, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s64();
@@ -1103,6 +1189,19 @@ TEST_F(VNTest, Domination)
             INST(13U, Opcode::Return).s64().Inputs(12U);
         }
     }
+}
+
+TEST_F(VNTest, Domination)
+{
+    src_graph::Domination::CREATE(GetGraph());
+
+    GraphChecker(GetGraph()).Check();
+    GetGraph()->RunPass<ValNum>();
+    GetGraph()->RunPass<Cleanup>();
+    GraphChecker(GetGraph()).Check();
+
+    Graph *graph = CreateGraphWithDefaultRuntime();
+    out_graph::Domination::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
@@ -1198,9 +1297,9 @@ TEST_F(VNTest, DISABLED_BridgeCreatorExceptionInstNotApplied)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), cloneGraph));
 }
 
-TEST_F(VNTest, VNMethodResolver)
+SRC_GRAPH(VNMethodResolver, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -1222,11 +1321,10 @@ TEST_F(VNTest, VNMethodResolver)
             INST(12U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<ValNum>());
-    GetGraph()->RunPass<Cleanup>();
-
-    auto graph = CreateGraphWithDefaultRuntime();
+OUT_GRAPH(VNMethodResolver, Graph *graph)
+{
     GRAPH(graph)
     {
         BASIC_BLOCK(2U, -1L)
@@ -1248,6 +1346,17 @@ TEST_F(VNTest, VNMethodResolver)
             INST(12U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(VNTest, VNMethodResolver)
+{
+    src_graph::VNMethodResolver::CREATE(GetGraph());
+
+    ASSERT_TRUE(GetGraph()->RunPass<ValNum>());
+    GetGraph()->RunPass<Cleanup>();
+
+    auto graph = CreateGraphWithDefaultRuntime();
+    out_graph::VNMethodResolver::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1285,9 +1394,9 @@ TEST_F(VNTest, DontVNMethodResolverThroughTry)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(VNTest, VNFieldResolver)
+SRC_GRAPH(VNFieldResolver, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(22U, 0x1U);
         CONSTANT(23U, 0x2U);
@@ -1318,11 +1427,10 @@ TEST_F(VNTest, VNFieldResolver)
             INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<ValNum>());
-    GetGraph()->RunPass<Cleanup>();
-
-    auto graph = CreateGraphWithDefaultRuntime();
+OUT_GRAPH(VNFieldResolver, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(22U, 0x1U);
@@ -1352,6 +1460,17 @@ TEST_F(VNTest, VNFieldResolver)
             INST(18U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(VNTest, VNFieldResolver)
+{
+    src_graph::VNFieldResolver::CREATE(GetGraph());
+
+    ASSERT_TRUE(GetGraph()->RunPass<ValNum>());
+    GetGraph()->RunPass<Cleanup>();
+
+    auto graph = CreateGraphWithDefaultRuntime();
+    out_graph::VNFieldResolver::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
@@ -1503,15 +1622,10 @@ TEST_F(VNTest, LoadObjFromConstCseApplied)
     ASSERT_TRUE(GraphComparator().Compare(graph2, graph3));
 }
 
-TEST_F(VNTest, FunctionImmediateCseApplied)
+SRC_GRAPH(FunctionImmediateCseApplied, Graph *graph)
 {
     auto fptr = static_cast<uintptr_t>(1U);
-    auto graph1 = CreateGraphWithDefaultRuntime();
-    graph1->SetDynamicMethod();
-#ifndef NDEBUG
-    graph1->SetDynUnitTestFlag();
-#endif
-    GRAPH(graph1)
+    GRAPH(graph)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -1520,14 +1634,12 @@ TEST_F(VNTest, FunctionImmediateCseApplied)
             INST(3U, Opcode::ReturnVoid);
         }
     }
-    GraphChecker(graph1).Check();
-    ASSERT_TRUE(graph1->RunPass<ValNum>());
-    auto graph2 = CreateGraphWithDefaultRuntime();
-    graph2->SetDynamicMethod();
-#ifndef NDEBUG
-    graph2->SetDynUnitTestFlag();
-#endif
-    GRAPH(graph2)
+}
+
+OUT_GRAPH(FunctionImmediateCseApplied, Graph *graph)
+{
+    auto fptr = static_cast<uintptr_t>(1U);
+    GRAPH(graph)
     {
         BASIC_BLOCK(2U, -1L)
         {
@@ -1538,6 +1650,24 @@ TEST_F(VNTest, FunctionImmediateCseApplied)
             INST(3U, Opcode::ReturnVoid);
         }
     }
+}
+
+TEST_F(VNTest, FunctionImmediateCseApplied)
+{
+    auto graph1 = CreateGraphWithDefaultRuntime();
+    graph1->SetDynamicMethod();
+#ifndef NDEBUG
+    graph1->SetDynUnitTestFlag();
+#endif
+    src_graph::FunctionImmediateCseApplied::CREATE(graph1);
+    GraphChecker(graph1).Check();
+    ASSERT_TRUE(graph1->RunPass<ValNum>());
+    auto graph2 = CreateGraphWithDefaultRuntime();
+    graph2->SetDynamicMethod();
+#ifndef NDEBUG
+    graph2->SetDynUnitTestFlag();
+#endif
+    out_graph::FunctionImmediateCseApplied::CREATE(graph2);
     GraphChecker(graph2).Check();
     ASSERT_TRUE(graph2->RunPass<ValNum>());
     ASSERT_TRUE(graph2->RunPass<Cleanup>());
@@ -1546,6 +1676,7 @@ TEST_F(VNTest, FunctionImmediateCseApplied)
 #ifndef NDEBUG
     graph3->SetDynUnitTestFlag();
 #endif
+    auto fptr = static_cast<uintptr_t>(1U);
     GRAPH(graph3)
     {
         BASIC_BLOCK(2U, -1L)
@@ -1686,13 +1817,8 @@ TEST_F(VNTest, FunctionImmediateBridgeCreator)
     ASSERT_TRUE(GraphComparator().Compare(graph, graphAfter));
 }
 
-TEST_F(VNTest, LoadFromConstantPool)
+SRC_GRAPH(LoadFromConstantPool, Graph *graph)
 {
-    auto graph = CreateGraphWithDefaultRuntime();
-    graph->SetDynamicMethod();
-#ifndef NDEBUG
-    graph->SetDynUnitTestFlag();
-#endif
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).any();
@@ -1721,16 +1847,11 @@ TEST_F(VNTest, LoadFromConstantPool)
             INST(16U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
-    ASSERT_TRUE(graph->RunPass<ValNum>());
-    ASSERT_TRUE(graph->RunPass<Cleanup>());
-
-    auto graph1 = CreateGraphWithDefaultRuntime();
-    graph1->SetDynamicMethod();
-#ifndef NDEBUG
-    graph1->SetDynUnitTestFlag();
-#endif
-    GRAPH(graph1)
+OUT_GRAPH(LoadFromConstantPool, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).any();
         PARAMETER(1U, 1U).any();
@@ -1757,12 +1878,31 @@ TEST_F(VNTest, LoadFromConstantPool)
             INST(16U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(VNTest, LoadFromConstantPool)
+{
+    auto graph = CreateGraphWithDefaultRuntime();
+    graph->SetDynamicMethod();
+#ifndef NDEBUG
+    graph->SetDynUnitTestFlag();
+#endif
+    src_graph::LoadFromConstantPool::CREATE(graph);
+
+    ASSERT_TRUE(graph->RunPass<ValNum>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+
+    auto graph1 = CreateGraphWithDefaultRuntime();
+    graph1->SetDynamicMethod();
+#ifndef NDEBUG
+    graph1->SetDynUnitTestFlag();
+#endif
+    out_graph::LoadFromConstantPool::CREATE(graph1);
     ASSERT_TRUE(GraphComparator().Compare(graph, graph1));
 }
 
-TEST_F(VNTest, AddressArithmetic)
+SRC_GRAPH(AddressArithmetic, Graph *graph)
 {
-    auto graph = CreateGraphWithDefaultRuntime();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
@@ -1784,13 +1924,11 @@ TEST_F(VNTest, AddressArithmetic)
             INST(14U, Opcode::Return).ref().Inputs(0U);
         }
     }
-    GraphChecker(graph).Check();
+}
 
-    ASSERT_TRUE(graph->RunPass<ValNum>());
-    ASSERT_TRUE(graph->RunPass<Cleanup>());
-
-    auto graph1 = CreateGraphWithDefaultRuntime();
-    GRAPH(graph1)
+OUT_GRAPH(AddressArithmetic, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).i32();
@@ -1810,6 +1948,19 @@ TEST_F(VNTest, AddressArithmetic)
             INST(14U, Opcode::Return).ref().Inputs(0U);
         }
     }
+}
+
+TEST_F(VNTest, AddressArithmetic)
+{
+    auto graph = CreateGraphWithDefaultRuntime();
+    src_graph::AddressArithmetic::CREATE(graph);
+    GraphChecker(graph).Check();
+
+    ASSERT_TRUE(graph->RunPass<ValNum>());
+    ASSERT_TRUE(graph->RunPass<Cleanup>());
+
+    auto graph1 = CreateGraphWithDefaultRuntime();
+    out_graph::AddressArithmetic::CREATE(graph1);
     GraphChecker(graph1).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, graph1));
 }

@@ -97,6 +97,7 @@ private:
     bool CheckInstHasUser(Inst *inst, Inst *user);
     void CheckCallReturnInlined();
     void CheckSaveStateCaller(SaveStateInst *savestate);
+    bool FindCaller(Inst *caller, BasicBlock *domBlock, ArenaStack<Inst *> *inlinedCalls);
     void CheckSpillFillHolder(Inst *inst);
     bool CheckInstRegUsageSaved(const Inst *inst, Register reg) const;
     void MarkBlocksInLoop(Loop *loop, Marker mrk);
@@ -114,9 +115,11 @@ private:
     void PrepareUsers(Inst *inst, ArenaVector<User *> *users);
     bool IsPhiSafeToSkipObjectCheck(Inst *inst, Marker visited);
     bool IsPhiUserSafeToSkipObjectCheck(Inst *inst, Marker visited);
+    void CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users);
 #endif  // !NDEBUG
     void CheckSaveStateInputs();
     void CheckSaveStatesWithRuntimeCallUsers();
+    void CheckSaveStatesWithRuntimeCallUsers(BasicBlock *block, SaveStateInst *ss);
     void CheckSaveStateOsrRec(const Inst *inst, const Inst *user, BasicBlock *block, Marker visited);
 
     Graph *GetGraph() const

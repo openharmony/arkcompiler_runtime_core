@@ -1311,7 +1311,7 @@ TEST_F(ConstFoldingTest, MinDoubleNaNTest)
     GRAPH(GetGraph())
     {
         CONSTANT(0U, std::numeric_limits<double>::quiet_NaN());
-        CONSTANT(1U, 1.3);
+        CONSTANT(1U, 1.3_D);
         BASIC_BLOCK(2U, 1U)
         {
             INST(2U, Opcode::Min).f64().Inputs(0U, 1U);

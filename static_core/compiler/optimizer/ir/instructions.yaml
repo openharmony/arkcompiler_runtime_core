@@ -108,7 +108,7 @@ instructions:
       - $verify_binary
 
   - opcode: MulOverflowCheck
-    base: FixedInputsInst3
+    base: FixedInputsInst<3>
     signature: [d-int, int, int, save_state]
     flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
@@ -257,7 +257,7 @@ instructions:
       - start_block_instruction
 
   - opcode: NullPtr
-    base: FixedInputsInst0
+    base: FixedInputsInst<0>
     signature: [d-ref]
     flags: [no_cse, no_hoist, ifcvt]
     description: Null pointer.
@@ -265,7 +265,7 @@ instructions:
       - start_block_instruction
 
   - opcode: LoadUndefined
-    base: FixedInputsInst0
+    base: FixedInputsInst<0>
     signature: [d-ref]
     flags: [load]
     description: Load Undefined object from TLS
@@ -300,7 +300,7 @@ instructions:
       - type_id: TypeId
 
   - opcode: InitEmptyString
-    base: FixedInputsInst1
+    base: FixedInputsInst<1>
     signature: [d-ref, save_state]
     flags: [can_throw, no_dce, no_hoist, no_cse, alloc, require_state, runtime_call, acc_write]
     description: Create and initialize empty string.
@@ -486,13 +486,13 @@ instructions:
     description: Creates a new constant array by id and fills its contents (array elements are literals).
 
   - opcode: LoadConstantPool
-    base: FixedInputsInst1
+    base: FixedInputsInst<1>
     signature: [d-any, any]
     flags: [load]
     description: Load constant pool from function object
 
   - opcode: LoadLexicalEnv
-    base: FixedInputsInst1
+    base: FixedInputsInst<1>
     signature: [d-any, any]
     flags: [load]
     description: Load lexical environment from function object
@@ -579,7 +579,7 @@ instructions:
       - type_id: TypeId
 
   - opcode: GetInstanceClass
-    base: FixedInputsInst1
+    base: FixedInputsInst<1>
     signature: [d-ref, ref]
     flags: [ref_special]
     description: >-
@@ -631,31 +631,31 @@ instructions:
     description: Check that value is within specified bounds.
 
   - opcode: RefTypeCheck
-    base: FixedInputsInst3
+    base: FixedInputsInst<3>
     signature: [d-ref-pseudo, ref, ref, save_state]
     flags: [can_throw, no_dce, is_check, no_hoist, no_cse, require_state, runtime_call]
     description: Check that the type of the stored Reference matches the type of the array.
 
   - opcode: ZeroCheck
-    base: FixedInputsInst2
+    base: FixedInputsInst<2>
     signature: [d-int-pseudo, int, save_state]
     flags: [can_throw, is_check, no_dce, no_cse, no_hoist, require_state]
     description: Check that integer value is not zero.
 
   - opcode: NegativeCheck
-    base: FixedInputsInst2
+    base: FixedInputsInst<2>
     signature: [d-int-pseudo, int, save_state]
     flags: [can_throw, is_check, no_dce, no_cse, no_hoist, require_state]
     description: Check that integer value is less than zero.
 
   - opcode: NotPositiveCheck
-    base: FixedInputsInst2
+    base: FixedInputsInst<2>
     signature: [d-int-pseudo, int, save_state]
     flags: [can_throw, is_check, no_dce, no_cse, no_hoist, require_state]
     description: Check that integer value is less or equal than zero.
 
   - opcode: ObjByIndexCheck
-    base: FixedInputsInst2
+    base: FixedInputsInst<2>
     signature: [d-any-pseudo, any, save_state]
     flags: [can_throw, is_check, no_dce, no_cse, no_hoist, require_state, can_deoptimize]
     description: Check that access to an object by index is access to an array
@@ -711,13 +711,13 @@ instructions:
     # Control flow instructions
     #
   - opcode: ReturnVoid
-    base: FixedInputsInst0
+    base: FixedInputsInst<0>
     signature: []
     flags: [cf, no_dce, no_hoist, no_cse, barrier, terminator]
     description: Return from method.
 
   - opcode: Return
-    base: FixedInputsInst1
+    base: FixedInputsInst<1>
     signature: [real-any]
     flags: [cf, no_dce, no_hoist, no_cse, barrier, acc_read, terminator]
     description: Return value from method.
@@ -917,14 +917,14 @@ instructions:
     description: Bitwise XOR.
 
   - opcode: MAdd
-    base: FixedInputsInst3
+    base: FixedInputsInst<3>
     signature: [d-number, number, number, number]
     flags: [low_level, ifcvt]
     modes: [jit_aot, irtoc]
     description: Multiply-accumulate.
 
   - opcode: MSub
-    base: FixedInputsInst3
+    base: FixedInputsInst<3>
     signature: [d-number, number, number, number]
     flags: [low_level, ifcvt]
     modes: [jit_aot, irtoc]
@@ -1182,21 +1182,21 @@ instructions:
     description: Sub two values and check result to Overflow, in case of overflow and CC is EQ jump to true edge
 
   - opcode: AddOverflowCheck
-    base: FixedInputsInst3
+    base: FixedInputsInst<3>
     signature: [d-int, int, int, save_state]
     flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
     description: Add two values, deoptimize if overflow occurred.
 
   - opcode: SubOverflowCheck
-    base: FixedInputsInst3
+    base: FixedInputsInst<3>
     signature: [d-int, int, int, save_state]
     flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
     description: Sub two values, deoptimize if overflow occurred.
 
   - opcode: NegOverflowAndZeroCheck
-    base: FixedInputsInst2
+    base: FixedInputsInst<2>
     signature: [d-int, int, save_state]
     flags: [no_dce, no_hoist, no_cse, barrier, acc_read, require_state, can_deoptimize]
     modes: [jit_aot]
@@ -1215,7 +1215,7 @@ instructions:
     description: Performs compare with immediate and jump.
 
   - opcode: NOP
-    base: FixedInputsInst0
+    base: FixedInputsInst<0>
     signature: []
     flags: [no_dst, ifcvt, no_hoist]
     description: Pseudo instruction, that replaces instruction to be deleted.
@@ -1244,7 +1244,7 @@ instructions:
     description: Pseudo instruction, that define live-in register.
 
   - opcode: LiveOut
-    base: FixedInputsInst1
+    base: FixedInputsInst<1>
     signature: [d-real, real-any]
     flags: [no_dce, no_hoist, no_cse, low_level]
     modes: [irtoc]

@@ -115,9 +115,9 @@ TEST_F(LSETest, SimpleStore)
 }
 
 /// Store comes from previous basic block
-TEST_F(LSETest, PreviousBlocks)
+SRC_GRAPH(PreviousBlocks, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -141,8 +141,11 @@ TEST_F(LSETest, PreviousBlocks)
             INST(23U, Opcode::Return).s32().Inputs(22U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(PreviousBlocks, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -164,6 +167,13 @@ TEST_F(LSETest, PreviousBlocks)
             INST(23U, Opcode::Return).s32().Inputs(22U);
         }
     }
+}
+
+TEST_F(LSETest, PreviousBlocks)
+{
+    src_graph::PreviousBlocks::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::PreviousBlocks::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -506,9 +516,9 @@ TEST_F(LSETest, StoreReplacementDominatesStoreEliminable)
 }
 
 /// Load elimination in loop by means of a dominated load
-TEST_F(LSETest, LoopElimination)
+SRC_GRAPH(LoopElimination, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(7U, 0x0U).s64();
@@ -543,8 +553,11 @@ TEST_F(LSETest, LoopElimination)
             INST(29U, Opcode::Return).s32().Inputs(35U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(LoopElimination, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(7U, 0x0U).s64();
@@ -577,15 +590,22 @@ TEST_F(LSETest, LoopElimination)
             INST(29U, Opcode::Return).s32().Inputs(35U);
         }
     }
+}
+
+TEST_F(LSETest, LoopElimination)
+{
+    src_graph::LoopElimination::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::LoopElimination::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Loop of multiple blocks
-TEST_F(LSETest, LoopBranches)
+SRC_GRAPH(LoopBranches, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(7U, 0x0U).s64();
@@ -637,8 +657,11 @@ TEST_F(LSETest, LoopBranches)
             INST(47U, Opcode::Return).s32().Inputs(51U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(LoopBranches, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(7U, 0x0U).s64();
@@ -688,15 +711,22 @@ TEST_F(LSETest, LoopBranches)
             INST(47U, Opcode::Return).s32().Inputs(51U);
         }
     }
+}
+
+TEST_F(LSETest, LoopBranches)
+{
+    src_graph::LoopBranches::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::LoopBranches::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Nested loop elimination
-TEST_F(LSETest, NestedLoopElimination)
+SRC_GRAPH(NestedLoopElimination, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -752,8 +782,11 @@ TEST_F(LSETest, NestedLoopElimination)
             INST(64U, Opcode::Return).s32().Inputs(15U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(NestedLoopElimination, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -807,6 +840,13 @@ TEST_F(LSETest, NestedLoopElimination)
             INST(64U, Opcode::Return).s32().Inputs(15U);
         }
     }
+}
+
+TEST_F(LSETest, NestedLoopElimination)
+{
+    src_graph::NestedLoopElimination::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::NestedLoopElimination::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -814,9 +854,9 @@ TEST_F(LSETest, NestedLoopElimination)
 
 // Replace MUST_ALIASed accesses
 // Move out of loop NO_ALIASed accesses
-TEST_F(LSETest, LoopWithMayAliasesAndNoAlias)
+SRC_GRAPH(LoopWithMayAliases, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();  // i32[][]
         CONSTANT(1U, 0x0U).s64();
@@ -851,8 +891,11 @@ TEST_F(LSETest, LoopWithMayAliasesAndNoAlias)
             INST(44U, Opcode::Return).s32().Inputs(48U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(LoopWithMayAliases, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();  // i32[][]
         CONSTANT(1U, 0x0U).s64();
@@ -887,15 +930,22 @@ TEST_F(LSETest, LoopWithMayAliasesAndNoAlias)
             INST(44U, Opcode::Return).s32().Inputs(48U);
         }
     }
+}
+
+TEST_F(LSETest, LoopWithMayAliases)
+{
+    src_graph::LoopWithMayAliases::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::LoopWithMayAliases::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Loop elimination combined with regular elimination
-TEST_F(LSETest, CombinedWithLoop)
+SRC_GRAPH(CombinedWithLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();  // i32[][]
         CONSTANT(1U, 0x0U).s64();
@@ -929,8 +979,11 @@ TEST_F(LSETest, CombinedWithLoop)
             INST(44U, Opcode::Return).s32().Inputs(48U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(CombinedWithLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();  // i32[][]
         CONSTANT(1U, 0x0U).s64();
@@ -961,15 +1014,22 @@ TEST_F(LSETest, CombinedWithLoop)
             INST(44U, Opcode::Return).s32().Inputs(48U);
         }
     }
+}
+
+TEST_F(LSETest, CombinedWithLoop)
+{
+    src_graph::CombinedWithLoop::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::CombinedWithLoop::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Phi candidates are the origins of values on the heap
-TEST_F(LSETest, OverwrittenPhiCandidates)
+SRC_GRAPH(OverwrittenPhiCandidates, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -1005,8 +1065,11 @@ TEST_F(LSETest, OverwrittenPhiCandidates)
             INST(51U, Opcode::Return).s32().Inputs(55U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(OverwrittenPhiCandidates, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -1038,6 +1101,13 @@ TEST_F(LSETest, OverwrittenPhiCandidates)
             INST(51U, Opcode::Return).s32().Inputs(55U);
         }
     }
+}
+
+TEST_F(LSETest, OverwrittenPhiCandidates)
+{
+    src_graph::OverwrittenPhiCandidates::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::OverwrittenPhiCandidates::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>(false));
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -1055,9 +1125,9 @@ TEST_F(LSETest, OverwrittenPhiCandidates)
  *       |
  *     [exit]
  */
-TEST_F(LSETest, DeletedPhiCandidate)
+SRC_GRAPH(DeletedPhiCandidate, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(9U, 0x0U).s64();
         CONSTANT(47U, 0x1U).s64();
@@ -1091,8 +1161,11 @@ TEST_F(LSETest, DeletedPhiCandidate)
             INST(88U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(DeletedPhiCandidate, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(9U, 0x0U).s64();
         CONSTANT(47U, 0x1U).s64();
@@ -1122,6 +1195,13 @@ TEST_F(LSETest, DeletedPhiCandidate)
             INST(88U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(LSETest, DeletedPhiCandidate)
+{
+    src_graph::DeletedPhiCandidate::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::DeletedPhiCandidate::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>(false));
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -1167,9 +1247,8 @@ TEST_F(LSETest, PrimitiveTypeCasting)
  * Stored value might be casted therefore we should cast if types are different
  * To avoid inappropriate Cast, skip the elimination of some loadobj inst
  */
-TEST_F(LSETest, PrimitiveInt8TypeCasting)
+SRC_GRAPH(PrimitiveInt8TypeCasting, Graph *graph)
 {
-    auto graph = CreateEmptyBytecodeGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
@@ -1193,8 +1272,11 @@ TEST_F(LSETest, PrimitiveInt8TypeCasting)
             INST(19U, Opcode::Return).s32().Inputs(23U);
         }
     }
-    auto graphLsed = CreateEmptyBytecodeGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(PrimitiveInt8TypeCasting, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -1220,15 +1302,23 @@ TEST_F(LSETest, PrimitiveInt8TypeCasting)
             INST(19U, Opcode::Return).s32().Inputs(23U);
         }
     }
+}
+
+TEST_F(LSETest, PrimitiveInt8TypeCasting)
+{
+    auto graph = CreateEmptyBytecodeGraph();
+    src_graph::PrimitiveInt8TypeCasting::CREATE(graph);
+    auto graphLsed = CreateEmptyBytecodeGraph();
+    out_graph::PrimitiveInt8TypeCasting::CREATE(graphLsed);
     ASSERT_TRUE(graph->RunPass<Lse>());
     GraphChecker(graph).Check();
     ASSERT_TRUE(GraphComparator().Compare(graph, graphLsed));
 }
 
 /// Overwritten load in loop
-TEST_F(LSETest, LoopWithOverwrite)
+SRC_GRAPH(LoopWithOverwrite, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(7U, 0x0U).s64();
@@ -1263,8 +1353,11 @@ TEST_F(LSETest, LoopWithOverwrite)
             INST(29U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(LoopWithOverwrite, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(7U, 0x0U).s64();
@@ -1299,6 +1392,13 @@ TEST_F(LSETest, LoopWithOverwrite)
             INST(29U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(LSETest, LoopWithOverwrite)
+{
+    src_graph::LoopWithOverwrite::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::LoopWithOverwrite::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -1431,9 +1531,9 @@ TEST_F(LSETest, MemEscaping)
  *            |
  *          [exit]
  */
-TEST_F(LSETest, ReplaceByDominated)
+SRC_GRAPH(ReplaceByDominated, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0x2U).s64();
@@ -1475,8 +1575,11 @@ TEST_F(LSETest, ReplaceByDominated)
             INST(46U, Opcode::Return).s32().Inputs(45U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(ReplaceByDominated, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0x2U).s64();
@@ -1516,6 +1619,13 @@ TEST_F(LSETest, ReplaceByDominated)
             INST(46U, Opcode::Return).s32().Inputs(45U);
         }
     }
+}
+
+TEST_F(LSETest, ReplaceByDominated)
+{
+    src_graph::ReplaceByDominated::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::ReplaceByDominated::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -1601,9 +1711,9 @@ TEST_F(LSETest, ReorderableVolatileStoreWithOutBridge)
 }
 
 /// v9 and v12 MAY_ALIAS each other. But after elimination of v11 they have NO_ALIAS.
-TEST_F(LSETest, PhiCandidatesWithUpdatedAA)
+SRC_GRAPH(PhiCandidatesWithUpdatedAA, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).f32();
         CONSTANT(1U, 0x2U);
@@ -1634,8 +1744,11 @@ TEST_F(LSETest, PhiCandidatesWithUpdatedAA)
             INST(20U, Opcode::Return).f32().Inputs(15U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(PhiCandidatesWithUpdatedAA, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).f32();
         CONSTANT(1U, 0x2U);
@@ -1665,6 +1778,13 @@ TEST_F(LSETest, PhiCandidatesWithUpdatedAA)
             INST(20U, Opcode::Return).f32().Inputs(15U);
         }
     }
+}
+
+TEST_F(LSETest, PhiCandidatesWithUpdatedAA)
+{
+    src_graph::PhiCandidatesWithUpdatedAA::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::PhiCandidatesWithUpdatedAA::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>(false));
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -1727,9 +1847,9 @@ TEST_F(LSETest, EliminationOrderMatters)
  *
  * Here v19 may be erroneously replaced by v15.
  */
-TEST_F(LSETest, EliminationOrderMattersLoops)
+SRC_GRAPH(EliminationOrderMattersLoops, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(10U, 0x0U).s64();
@@ -1762,8 +1882,11 @@ TEST_F(LSETest, EliminationOrderMattersLoops)
             INST(23U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(EliminationOrderMattersLoops, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(10U, 0x0U).s64();
@@ -1791,6 +1914,13 @@ TEST_F(LSETest, EliminationOrderMattersLoops)
             INST(23U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(LSETest, EliminationOrderMattersLoops)
+{
+    src_graph::EliminationOrderMattersLoops::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::EliminationOrderMattersLoops::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -1906,9 +2036,9 @@ TEST_F(LSETest, EliminatedWithSafePointNeedBridge)
 }
 
 /// Not aliased array acceses, since array cannot overlap each other
-TEST_F(LSETest, SameArrayAccesses)
+SRC_GRAPH(SameArrayAccesses, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(5U, 0x1U).s64();
@@ -1925,14 +2055,14 @@ TEST_F(LSETest, SameArrayAccesses)
             INST(23U, Opcode::Or).s64().Inputs(14U, 22U);
             INST(28U, Opcode::StoreArray).s64().Inputs(4U, 5U, 23U);
 
-            // Same to 14, in spite of possible aliasing of v4 and v8, they
+            // Same to 14, in spite of possible aliasing of i4 and i8, they
             // have been accessed at different indices
             INST(40U, Opcode::LoadArray).s64().Inputs(8U, 9U);
             INST(48U, Opcode::LoadArray).s64().Inputs(8U, 32U);
             INST(49U, Opcode::Or).s64().Inputs(40U, 48U);
             INST(54U, Opcode::StoreArray).s64().Inputs(4U, 32U, 49U);
 
-            // Same to 14 and 40, in spite of possible aliasing of v4 and v8,
+            // Same to 14 and 40, in spite of possible aliasing of i4 and i8,
             // they have been accessed at different indices
             INST(66U, Opcode::LoadArray).s64().Inputs(8U, 9U);
             INST(74U, Opcode::LoadArray).s64().Inputs(8U, 58U);
@@ -1942,8 +2072,11 @@ TEST_F(LSETest, SameArrayAccesses)
             INST(81U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(SameArrayAccesses, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         CONSTANT(5U, 0x1U).s64();
@@ -1971,15 +2104,22 @@ TEST_F(LSETest, SameArrayAccesses)
             INST(81U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(LSETest, SameArrayAccesses)
+{
+    src_graph::SameArrayAccesses::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::SameArrayAccesses::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Eliminate in case of inlined virtual calls
-TEST_F(LSETest, OverInlinedVirtualCall)
+SRC_GRAPH(OverInlinedVirtualCall, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).ref();
@@ -2008,8 +2148,11 @@ TEST_F(LSETest, OverInlinedVirtualCall)
             INST(13U, Opcode::Return).i32().Inputs(12U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(OverInlinedVirtualCall, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).b();
         PARAMETER(1U, 1U).ref();
@@ -2035,6 +2178,13 @@ TEST_F(LSETest, OverInlinedVirtualCall)
             INST(13U, Opcode::Return).i32().Inputs(2U);
         }
     }
+}
+
+TEST_F(LSETest, OverInlinedVirtualCall)
+{
+    src_graph::OverInlinedVirtualCall::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::OverInlinedVirtualCall::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -2060,7 +2210,7 @@ TEST_F(LSETest, SameArrayAccessesWithOverwrite)
             INST(23U, Opcode::Or).s64().Inputs(14U, 22U);
             INST(28U, Opcode::StoreArray).s64().Inputs(4U, 9U, 23U);
 
-            // Same to 14 but v4 and v8 may be aliased and v28 may overwrite
+            // Same to 14 but i4 and i8 may be aliased and v28 may overwrite
             // previous load
             INST(40U, Opcode::LoadArray).s64().Inputs(8U, 9U);
             INST(48U, Opcode::LoadArray).s64().Inputs(8U, 32U);
@@ -2141,9 +2291,9 @@ TEST_F(LSETest, NoDominationHere)
     ASSERT_TRUE(GraphComparator().Compare(equalGraphs[0U], equalGraphs[1U]));
 }
 
-TEST_F(LSETest, EliminateMonitoredStores)
+SRC_GRAPH(EliminateMonitoredStores, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -2166,8 +2316,11 @@ TEST_F(LSETest, EliminateMonitoredStores)
             INST(14U, Opcode::ReturnVoid).v0id();
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(EliminateMonitoredStores, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s64();
@@ -2188,6 +2341,13 @@ TEST_F(LSETest, EliminateMonitoredStores)
             INST(14U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(LSETest, EliminateMonitoredStores)
+{
+    src_graph::EliminateMonitoredStores::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::EliminateMonitoredStores::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -2290,9 +2450,9 @@ TEST_F(LSETest, NotEliminableMonitoredLoadStore)
 }
 
 /// Inner loop overwrites outer loop reference. No elimination
-TEST_F(LSETest, InnerOverwrite)
+SRC_GRAPH(InnerOverwrite, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -2346,6 +2506,11 @@ TEST_F(LSETest, InnerOverwrite)
             INST(64U, Opcode::Return).s32().Inputs(12U);
         }
     }
+}
+
+TEST_F(LSETest, InnerOverwrite)
+{
+    src_graph::InnerOverwrite::CREATE(GetGraph());
     auto initial = GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
     ASSERT_FALSE(GetGraph()->RunPass<Lse>(false));
     GraphChecker(GetGraph()).Check();
@@ -2353,9 +2518,9 @@ TEST_F(LSETest, InnerOverwrite)
 }
 
 /// Outer loop overwrites inner loop reference.
-TEST_F(LSETest, OuterOverwrite)
+SRC_GRAPH(OuterOverwrite, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -2408,8 +2573,11 @@ TEST_F(LSETest, OuterOverwrite)
             INST(56U, Opcode::Return).s32().Inputs(12U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(OuterOverwrite, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -2462,6 +2630,13 @@ TEST_F(LSETest, OuterOverwrite)
             INST(56U, Opcode::Return).s32().Inputs(12U);
         }
     }
+}
+
+TEST_F(LSETest, OuterOverwrite)
+{
+    src_graph::OuterOverwrite::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::OuterOverwrite::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -2735,9 +2910,9 @@ TEST_F(LSETest, HoistFromLoopWithSafepoint)
 }
 
 /// Store that is not read, but overwritten on all paths is removed
-TEST_F(LSETest, RemoveShadowedStore)
+SRC_GRAPH(RemoveShadowedStore, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -2764,8 +2939,11 @@ TEST_F(LSETest, RemoveShadowedStore)
             INST(23U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(RemoveShadowedStore, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -2791,6 +2969,13 @@ TEST_F(LSETest, RemoveShadowedStore)
             INST(23U, Opcode::Return).s32().Inputs(2U);
         }
     }
+}
+
+TEST_F(LSETest, RemoveShadowedStore)
+{
+    src_graph::RemoveShadowedStore::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::RemoveShadowedStore::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -2827,9 +3012,9 @@ TEST_F(LSETest, DontRemoveStoreIfPathWithoutShadowExists)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
 }
 
-TEST_F(LSETest, DISABLED_ShadowInInnerLoop)
+SRC_GRAPH(DISABLED_ShadowInInnerLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -2859,8 +3044,11 @@ TEST_F(LSETest, DISABLED_ShadowInInnerLoop)
             INST(23U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(DISABLED_ShadowInInnerLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -2889,15 +3077,22 @@ TEST_F(LSETest, DISABLED_ShadowInInnerLoop)
             INST(23U, Opcode::Return).s32().Inputs(2U);
         }
     }
+}
+
+TEST_F(LSETest, DISABLED_ShadowInInnerLoop)
+{
+    src_graph::DISABLED_ShadowInInnerLoop::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::DISABLED_ShadowInInnerLoop::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Stores are not removed from loops, unless they're shadowed in the same loop
-TEST_F(LSETest, ShadowedStoresInLoop)
+SRC_GRAPH(ShadowedStoresInLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -2936,8 +3131,11 @@ TEST_F(LSETest, ShadowedStoresInLoop)
             INST(23U, Opcode::Return).s32().Inputs(2U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(ShadowedStoresInLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -2974,6 +3172,13 @@ TEST_F(LSETest, ShadowedStoresInLoop)
             INST(23U, Opcode::Return).s32().Inputs(2U);
         }
     }
+}
+
+TEST_F(LSETest, ShadowedStoresInLoop)
+{
+    src_graph::ShadowedStoresInLoop::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::ShadowedStoresInLoop::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -3252,146 +3457,166 @@ TEST_F(LSETest, DontHoistIfNotAliveTriangle)
 }
 
 /// Double hoist
+SRC_GRAPH(HoistInnerLoop, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x2U).s64();
+        CONSTANT(2U, 0x1U).s64();
+        CONSTANT(6U, 0x10U).s64();
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
+        }
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {4U, 25U}});
+            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
+        }
+        BASIC_BLOCK(4U, 4U, 3U)
+        {
+            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
+            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
+            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
+            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
+            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(46U, Opcode::Return).s32().Inputs(45U);
+        }
+    }
+}
+
+OUT_GRAPH(HoistInnerLoop, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x2U).s64();
+        CONSTANT(2U, 0x1U).s64();
+        CONSTANT(6U, 0x10U).s64();
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
+            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
+        }
+        BASIC_BLOCK(3U, 4U, 5U)
+        {
+            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {4U, 25U}});
+            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
+        }
+        BASIC_BLOCK(4U, 4U, 3U)
+        {
+            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
+            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
+            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
+            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
+        }
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(46U, Opcode::Return).s32().Inputs(45U);
+        }
+    }
+}
+
 TEST_F(LSETest, HoistInnerLoop)
 {
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 0x2U).s64();
-        CONSTANT(2U, 0x1U).s64();
-        CONSTANT(6U, 0x10U).s64();
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
-        }
-        BASIC_BLOCK(3U, 4U, 5U)
-        {
-            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {4U, 25U}});
-            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
-            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
-        }
-        BASIC_BLOCK(4U, 4U, 3U)
-        {
-            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
-            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
-            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
-            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
-            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
-        }
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(46U, Opcode::Return).s32().Inputs(45U);
-        }
-    }
+    src_graph::HoistInnerLoop::CREATE(GetGraph());
     Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
-    {
-        PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 0x2U).s64();
-        CONSTANT(2U, 0x1U).s64();
-        CONSTANT(6U, 0x10U).s64();
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
-            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
-        }
-        BASIC_BLOCK(3U, 4U, 5U)
-        {
-            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {4U, 25U}});
-            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
-            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
-        }
-        BASIC_BLOCK(4U, 4U, 3U)
-        {
-            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
-            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
-            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
-            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
-        }
-        BASIC_BLOCK(5U, -1L)
-        {
-            INST(46U, Opcode::Return).s32().Inputs(45U);
-        }
-    }
+    out_graph::HoistInnerLoop::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Single hoist
+SRC_GRAPH(HoistInnerLoop2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x2U).s64();
+        CONSTANT(2U, 0x1U).s64();
+        CONSTANT(6U, 0x10U).s64();
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
+        }
+        BASIC_BLOCK(3U, 4U, 6U)
+        {
+            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {5U, 25U}});
+            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
+        }
+        BASIC_BLOCK(4U, 4U, 5U)
+        {
+            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
+            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
+            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
+            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
+            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
+        }
+        BASIC_BLOCK(5U, 3U)
+        {
+            INST(17U, Opcode::StoreStatic).s64().Inputs(30U, 25U).TypeId(83U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(46U, Opcode::Return).s32().Inputs(45U);
+        }
+    }
+}
+
+OUT_GRAPH(HoistInnerLoop2, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).s32();
+        CONSTANT(1U, 0x2U).s64();
+        CONSTANT(2U, 0x1U).s64();
+        CONSTANT(6U, 0x10U).s64();
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
+        }
+        BASIC_BLOCK(3U, 4U, 6U)
+        {
+            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {5U, 25U}});
+            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
+            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
+        }
+        BASIC_BLOCK(4U, 4U, 5U)
+        {
+            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
+            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
+            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
+            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
+        }
+        BASIC_BLOCK(5U, 3U)
+        {
+            INST(17U, Opcode::StoreStatic).s64().Inputs(30U, 25U).TypeId(83U);
+        }
+        BASIC_BLOCK(6U, -1L)
+        {
+            INST(46U, Opcode::Return).s32().Inputs(45U);
+        }
+    }
+}
+
 TEST_F(LSETest, HoistInnerLoop2)
 {
-    GRAPH(GetGraph())
-    {
-        PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 0x2U).s64();
-        CONSTANT(2U, 0x1U).s64();
-        CONSTANT(6U, 0x10U).s64();
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
-        }
-        BASIC_BLOCK(3U, 4U, 6U)
-        {
-            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {5U, 25U}});
-            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
-            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
-        }
-        BASIC_BLOCK(4U, 4U, 5U)
-        {
-            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
-            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
-            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
-            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
-            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
-        }
-        BASIC_BLOCK(5U, 3U)
-        {
-            INST(17U, Opcode::StoreStatic).s64().Inputs(30U, 25U).TypeId(83U);
-        }
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(46U, Opcode::Return).s32().Inputs(45U);
-        }
-    }
+    src_graph::HoistInnerLoop2::CREATE(GetGraph());
     Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
-    {
-        PARAMETER(0U, 0U).s32();
-        CONSTANT(1U, 0x2U).s64();
-        CONSTANT(2U, 0x1U).s64();
-        CONSTANT(6U, 0x10U).s64();
-        BASIC_BLOCK(2U, 3U)
-        {
-            INST(40U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-            INST(30U, Opcode::LoadAndInitClass).ref().Inputs(40U).TypeId(0U);
-        }
-        BASIC_BLOCK(3U, 4U, 6U)
-        {
-            INST(45U, Opcode::Phi).s64().Inputs({{2U, 1U}, {5U, 25U}});
-            INST(21U, Opcode::Compare).b().CC(CC_LT).Inputs(45U, 6U);
-            INST(16U, Opcode::LoadStatic).s64().Inputs(30U).TypeId(83U);
-            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(21U);
-        }
-        BASIC_BLOCK(4U, 4U, 5U)
-        {
-            INST(35U, Opcode::Phi).s64().Inputs({{3U, 45U}, {4U, 25U}});
-            INST(25U, Opcode::Add).s64().Inputs(45U, 16U);
-            INST(31U, Opcode::Compare).b().CC(CC_GE).Inputs(16U, 2U);
-            INST(32U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0x0U).Inputs(31U);
-        }
-        BASIC_BLOCK(5U, 3U)
-        {
-            INST(17U, Opcode::StoreStatic).s64().Inputs(30U, 25U).TypeId(83U);
-        }
-        BASIC_BLOCK(6U, -1L)
-        {
-            INST(46U, Opcode::Return).s32().Inputs(45U);
-        }
-    }
+    out_graph::HoistInnerLoop2::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -3474,9 +3699,9 @@ TEST_F(LSETest, DontHoistFromOsrLoop)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
 }
 
-TEST_F(LSETest, AliveLoadInBackedge)
+SRC_GRAPH(AliveLoadInBackedge, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0x2U).s64();
@@ -3515,8 +3740,11 @@ TEST_F(LSETest, AliveLoadInBackedge)
             INST(46U, Opcode::Return).s32().Inputs(45U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(AliveLoadInBackedge, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0x2U).s64();
@@ -3555,14 +3783,21 @@ TEST_F(LSETest, AliveLoadInBackedge)
             INST(46U, Opcode::Return).s32().Inputs(45U);
         }
     }
+}
+
+TEST_F(LSETest, AliveLoadInBackedge)
+{
+    src_graph::AliveLoadInBackedge::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::AliveLoadInBackedge::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
-TEST_F(LSETest, AliveLoadInBackedgeInnerLoop)
+SRC_GRAPH(AliveLoadInBackedgeInnerLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0x2U).s64();
@@ -3598,8 +3833,11 @@ TEST_F(LSETest, AliveLoadInBackedgeInnerLoop)
             INST(46U, Opcode::Return).s32().Inputs(45U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(AliveLoadInBackedgeInnerLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         CONSTANT(1U, 0x2U).s64();
@@ -3634,15 +3872,22 @@ TEST_F(LSETest, AliveLoadInBackedgeInnerLoop)
             INST(46U, Opcode::Return).s32().Inputs(45U);
         }
     }
+}
+
+TEST_F(LSETest, AliveLoadInBackedgeInnerLoop)
+{
+    src_graph::AliveLoadInBackedgeInnerLoop::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::AliveLoadInBackedgeInnerLoop::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Do not eliminate loads over runtime calls due to GC relocations
-TEST_F(LSETest, PhiOverSaveStates)
+SRC_GRAPH(PhiOverSaveStates, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -3669,9 +3914,11 @@ TEST_F(LSETest, PhiOverSaveStates)
             INST(23U, Opcode::ReturnVoid).v0id();
         }
     }
+}
 
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+OUT_GRAPH(PhiOverSaveStates, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -3698,15 +3945,23 @@ TEST_F(LSETest, PhiOverSaveStates)
             INST(23U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+TEST_F(LSETest, PhiOverSaveStates)
+{
+    src_graph::PhiOverSaveStates::CREATE(GetGraph());
+
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::PhiOverSaveStates::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Simple condition phi
-TEST_F(LSETest, SimpleConditionPhi)
+SRC_GRAPH(SimpleConditionPhi, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -3729,8 +3984,11 @@ TEST_F(LSETest, SimpleConditionPhi)
             INST(23U, Opcode::Return).s32().Inputs(22U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(SimpleConditionPhi, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -3753,15 +4011,22 @@ TEST_F(LSETest, SimpleConditionPhi)
             INST(23U, Opcode::Return).s32().Inputs(25U);
         }
     }
+}
+
+TEST_F(LSETest, SimpleConditionPhi)
+{
+    src_graph::SimpleConditionPhi::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::SimpleConditionPhi::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// Simple condition phi
-TEST_F(LSETest, SimpleConditionPhi2)
+SRC_GRAPH(SimpleConditionPhi2, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -3789,8 +4054,11 @@ TEST_F(LSETest, SimpleConditionPhi2)
             INST(23U, Opcode::Return).s32().Inputs(22U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(SimpleConditionPhi2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).s32();
@@ -3818,6 +4086,13 @@ TEST_F(LSETest, SimpleConditionPhi2)
             INST(23U, Opcode::Return).s32().Inputs(25U);
         }
     }
+}
+
+TEST_F(LSETest, SimpleConditionPhi2)
+{
+    src_graph::SimpleConditionPhi2::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::SimpleConditionPhi2::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
@@ -3856,9 +4131,9 @@ TEST_F(LSETest, SimpleConditionPhiMayAlias)
 }
 
 /// Simple condition phi, check bridges
-TEST_F(LSETest, SimpleConditionPhiWithRefInputs)
+SRC_GRAPH(SimpleConditionPhiWithRefInputs, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).ref();
@@ -3885,8 +4160,11 @@ TEST_F(LSETest, SimpleConditionPhiWithRefInputs)
             INST(25U, Opcode::Return).ref().Inputs(22U);
         }
     }
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+}
+
+OUT_GRAPH(SimpleConditionPhiWithRefInputs, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();
         PARAMETER(1U, 1U).ref();
@@ -3913,15 +4191,22 @@ TEST_F(LSETest, SimpleConditionPhiWithRefInputs)
             INST(25U, Opcode::Return).ref().Inputs(26U);
         }
     }
+}
+
+TEST_F(LSETest, SimpleConditionPhiWithRefInputs)
+{
+    src_graph::SimpleConditionPhiWithRefInputs::CREATE(GetGraph());
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::SimpleConditionPhiWithRefInputs::CREATE(graphLsed);
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graphLsed));
 }
 
 /// SaveStateDeoptimize does not prevent elimination and does not need bridges
-TEST_F(LSETest, EliminateOverSaveStateDeoptimize)
+SRC_GRAPH(EliminateOverSaveStateDeoptimize, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -3944,9 +4229,11 @@ TEST_F(LSETest, EliminateOverSaveStateDeoptimize)
             INST(10U, Opcode::Return).ref().Inputs(17U);
         }
     }
+}
 
-    Graph *graphLsed = CreateEmptyGraph();
-    GRAPH(graphLsed)
+OUT_GRAPH(EliminateOverSaveStateDeoptimize, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).ref();
@@ -3966,6 +4253,14 @@ TEST_F(LSETest, EliminateOverSaveStateDeoptimize)
             INST(10U, Opcode::Return).ref().Inputs(17U);
         }
     }
+}
+
+TEST_F(LSETest, EliminateOverSaveStateDeoptimize)
+{
+    src_graph::EliminateOverSaveStateDeoptimize::CREATE(GetGraph());
+
+    Graph *graphLsed = CreateEmptyGraph();
+    out_graph::EliminateOverSaveStateDeoptimize::CREATE(graphLsed);
 
     ASSERT_TRUE(GetGraph()->RunPass<Lse>());
     GraphChecker(GetGraph()).Check();

@@ -296,6 +296,7 @@ private:
     BasicBlock *CreateResolverBlock(Loop *loop, BasicBlock *backEdge);
     BasicBlock *SplitBackEdge(LoopUnrollData *unrollData, Loop *loop, BasicBlock *backEdge);
     void UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unrollData);
+    void UpdateOutloopUsers(Loop *loop, Inst *inst);
     void BuildLoopUnrollControlFlow(LoopUnrollData *unrollData);
     void BuildLoopUnrollDataFlow(LoopUnrollData *unrollData);
     void RemoveLoopBackEdge(const LoopUnrollData *unrollData);

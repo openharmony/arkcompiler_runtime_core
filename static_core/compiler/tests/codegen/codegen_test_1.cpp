@@ -278,7 +278,7 @@ SRC_GRAPH(CheckStoreArrayPair, Graph *graph, DataType::Type type, bool imm)
         stpArr = graph->CreateInstStoreArrayPairI(type, INVALID_PC, array, val0, val1, 2U);
         block->AppendInst(stpArr);
     } else {
-        stpArr = graph->CreateInstStoreArrayPair(type, INVALID_PC, array, index, val0, val1);
+        stpArr = graph->CreateInstStoreArrayPair(type, INVALID_PC, std::array<Inst *, 4U> {array, index, val0, val1});
         block->AppendInst(stpArr);
     }
 
@@ -441,16 +441,11 @@ SRC_GRAPH(CheckBounds, Graph *graph, DataType::Type type, uint64_t count)
     graph->ResetParameterInfo();
     param->SetLocationData(graph->GetDataForNativeParam(type));
 
-    BinaryImmOperation *lastInst = nullptr;
+    Inst *lastInst = param;
     // instruction_count + parameter + return
     for (uint64_t i = count - 1U; i > 1U; --i) {
-        auto addInst = graph->CreateInstAddI(type, 0U, 1U);
+        auto addInst = graph->CreateInstAddI(type, 0U, lastInst, 1U);
         block->AppendInst(addInst);
-        if (lastInst == nullptr) {
-            addInst->SetInput(0U, param);
-        } else {
-            addInst->SetInput(0U, lastInst);
-        }
         lastInst = addInst;
     }
     auto ret = graph->CreateInst(Opcode::Return);

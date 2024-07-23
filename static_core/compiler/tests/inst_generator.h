@@ -57,6 +57,26 @@ public:
 
 private:
     Graph *CreateGraph();
+
+    Inst *PopulateLoadArrayPair(Graph *graph, BasicBlock *block, Inst *inst, Opcode opc);
+    void PopulateStoreArrayPair(Graph *graph, Inst *inst, Opcode opc);
+    void PopulateReturnInlined(Graph *graph, BasicBlock *block, Inst *inst, int32_t n);
+    void PopulateCall(Graph *graph, BasicBlock *block, Inst *inst, DataType::Type type, int32_t n);
+    void PopulateLoadStoreArray(Graph *graph, Inst *inst, DataType::Type type, int32_t n);
+    void PopulateLoadStoreArrayI(Graph *graph, Inst *inst, DataType::Type type, int32_t n);
+    void PopulateSelect(Graph *graph, Inst *inst, DataType::Type type, int32_t n);
+    void PopulateSelectI(Graph *graph, Inst *inst, DataType::Type type, int32_t n);
+    void PopulateStoreStatic(Graph *graph, BasicBlock *block, Inst *inst, DataType::Type type);
+    void PopulateLoadStatic(Graph *graph, BasicBlock *block, Inst *inst);
+    void PopulateMonitor(Graph *graph, BasicBlock *block, Inst *inst);
+    void PopulateLoadType(Graph *graph, BasicBlock *block, Inst *inst);
+    void PopulateIsInstance(Graph *graph, BasicBlock *block, Inst *inst);
+    void PopulateNewArray(Graph *graph, BasicBlock *block, Inst *inst, int32_t n);
+    void PopulateNewObject(Graph *graph, BasicBlock *block, Inst *inst, int32_t n);
+    void PopulateDefault(Graph *graph, Inst *inst, DataType::Type type, int32_t n);
+    void PopulateGraph(Graph *graph, Inst *inst, int32_t n);
+    void Finalize(Graph *graph, BasicBlock *block, Inst *inst);
+
     Graph *GenerateOperation(Inst *inst, int32_t n);
     Graph *GenerateCheckOperation(Inst *inst);
     Graph *GenerateSSOperation(Inst *inst);

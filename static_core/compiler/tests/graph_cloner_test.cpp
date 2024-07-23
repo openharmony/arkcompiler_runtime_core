@@ -30,9 +30,9 @@ private:
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
-TEST_F(GraphClonerTest, LoopCopingSimpleLoop)
+SRC_GRAPH(LoopCopingSimpleLoop, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);          // initial
         CONSTANT(1U, 1U);          // increment
@@ -61,10 +61,11 @@ TEST_F(GraphClonerTest, LoopCopingSimpleLoop)
             INST(12U, Opcode::Return).s32().Inputs(16U);
         }
     }
+}
 
-    GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneLoop(BB(3U).GetLoop());
-    auto graph1 = CreateEmptyGraph();
-    GRAPH(graph1)
+OUT_GRAPH(LoopCopingSimpleLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);          // initial
         CONSTANT(1U, 1U);          // increment
@@ -118,12 +119,21 @@ TEST_F(GraphClonerTest, LoopCopingSimpleLoop)
             INST(12U, Opcode::Return).s32().Inputs(27U);
         }
     }
+}
+
+TEST_F(GraphClonerTest, LoopCopingSimpleLoop)
+{
+    src_graph::LoopCopingSimpleLoop::CREATE(GetGraph());
+
+    GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneLoop(BB(3U).GetLoop());
+    auto graph1 = CreateEmptyGraph();
+    out_graph::LoopCopingSimpleLoop::CREATE(graph1);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
-TEST_F(GraphClonerTest, LoopCopingLoopSum)
+SRC_GRAPH(LoopCopingLoopSum, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);          // initial
         CONSTANT(1U, 1U);          // increment
@@ -161,9 +171,11 @@ TEST_F(GraphClonerTest, LoopCopingLoopSum)
             INST(12U, Opcode::Return).s32().Inputs(22U);
         }
     }
-    GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneLoop(BB(3U).GetLoop());
-    auto graph1 = CreateEmptyGraph();
-    GRAPH(graph1)
+}
+
+OUT_GRAPH(LoopCopingLoopSum, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);          // initial
         CONSTANT(1U, 1U);          // increment
@@ -223,6 +235,14 @@ TEST_F(GraphClonerTest, LoopCopingLoopSum)
             INST(12U, Opcode::Return).s32().Inputs(36U);
         }
     }
+}
+
+TEST_F(GraphClonerTest, LoopCopingLoopSum)
+{
+    src_graph::LoopCopingLoopSum::CREATE(GetGraph());
+    GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneLoop(BB(3U).GetLoop());
+    auto graph1 = CreateEmptyGraph();
+    out_graph::LoopCopingLoopSum::CREATE(graph1);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
@@ -318,9 +338,9 @@ TEST_F(GraphClonerTest, LoopCopingHeadExit)
     ASSERT_FALSE(IsLoopSingleBackEdgeExitPoint((BB(2U).GetLoop())));
 }
 
-TEST_F(GraphClonerTest, LoopCopingWithoutIndexResolver)
+SRC_GRAPH(LoopCopingWithoutIndexResolver, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);          // initial
         CONSTANT(1U, 1U);          // increment
@@ -351,9 +371,11 @@ TEST_F(GraphClonerTest, LoopCopingWithoutIndexResolver)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
-    GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneLoop(BB(3U).GetLoop());
-    auto graph1 = CreateEmptyGraph();
-    GRAPH(graph1)
+}
+
+OUT_GRAPH(LoopCopingWithoutIndexResolver, Graph *graph)
+{
+    GRAPH(graph)
     {
         CONSTANT(0U, 0U);          // initial
         CONSTANT(1U, 1U);          // increment
@@ -404,6 +426,14 @@ TEST_F(GraphClonerTest, LoopCopingWithoutIndexResolver)
             INST(12U, Opcode::Return).ref().Inputs(3U);
         }
     }
+}
+
+TEST_F(GraphClonerTest, LoopCopingWithoutIndexResolver)
+{
+    src_graph::LoopCopingWithoutIndexResolver::CREATE(GetGraph());
+    GraphCloner(GetGraph(), GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneLoop(BB(3U).GetLoop());
+    auto graph1 = CreateEmptyGraph();
+    out_graph::LoopCopingWithoutIndexResolver::CREATE(graph1);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 // NOLINTEND(readability-magic-numbers)

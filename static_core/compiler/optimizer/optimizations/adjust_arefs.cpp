@@ -151,21 +151,18 @@ void AdjustRefs::WalkChainDown(BasicBlock *bb, Inst *startFrom, Inst *head)
         if (succ->GetLoop() != loop_ || succ->IsMarked(blockEntered_)) {
             continue;
         }
-        auto allPredsVisited = true;
+
         if (head != nullptr) {
-            for (auto pred : succ->GetPredsBlocks()) {
-                if (!pred->IsMarked(blockProcessed_)) {
-                    allPredsVisited = false;
-                    break;
-                }
+            auto blockNotProcessed = [this](BasicBlock *b) { return !b->IsMarked(blockProcessed_); };
+            auto it = std::find_if(succ->GetPredsBlocks().begin(), succ->GetPredsBlocks().end(), blockNotProcessed);
+            if (it != succ->GetPredsBlocks().end()) {
+                continue;
             }
         }
         // If all predecessors of succ were walked with the current value of head,
         // we can be sure that there are no SafePoints or runtime calls
         // on any path from block with head to succ
-        if (allPredsVisited) {
-            WalkChainDown(succ, succ->GetFirstInst(), head);
-        }
+        WalkChainDown(succ, succ->GetFirstInst(), head);
     }
 }
 

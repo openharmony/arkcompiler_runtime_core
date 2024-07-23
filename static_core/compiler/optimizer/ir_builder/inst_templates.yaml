@@ -106,18 +106,17 @@ templates:
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
   if: |-
-    auto inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), <%= get_cc(inst) %>);
-    inst->SetOperandsType(<%= get_type(inst.type(0)) %>);
+    Inst *input0 = GetDefinitionAcc();
     % if inst.acc_and_operands.size > 2
-    inst->SetInput(1, GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));
+    Inst *input1 = GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>());
     % else
     %   if inst.mnemonic.include? "obj"
-    inst->SetInput(1, graph_->GetOrCreateNullPtr());
+    Inst *input1 = graph_->GetOrCreateNullPtr();
     %   else
-    inst->SetInput(1, FindOrCreateConstant(0));
+    Inst *input1 = FindOrCreateConstant(0);
     %   end
     % end
-    inst->SetInput(0, GetDefinitionAcc());
+    auto inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), input0, input1, <%= get_type(inst.type(0)) %>, <%= get_cc(inst) %>);
     auto inst_jump = graph_->CreateInstIfImm(DataType::NO_TYPE, GetPc(instruction->GetAddress()), inst, 0, 
                                              DataType::BOOL, ConditionCode::CC_NE, graph_->GetMethod());
     AddInstruction(inst);
@@ -216,7 +215,7 @@ templates:
     % is_virtual = inst.opcode.include? 'virt'
     % acc_read = inst.acc_read?
     if (!TryBuildInteropCall(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>)) {
-      BuildCall<Opcode::<%= is_virtual ? 'CallVirtual' : 'CallStatic' %>>(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>);
+      BuildCallHelper<Opcode::<%= is_virtual ? 'CallVirtual' : 'CallStatic' %>, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>>(instruction, this);
     }
   monitor: |-
     % is_enter = inst.mnemonic.end_with?('enter')

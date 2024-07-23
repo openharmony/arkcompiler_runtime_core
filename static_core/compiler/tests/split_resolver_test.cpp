@@ -144,10 +144,9 @@ TEST_F(SplitResolverTest, ConnectSiblingsWithSameBlock)
     CheckSpillFills(INS(1U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0U, 1U}});
 }
 
-TEST_F(SplitResolverTest, ConnectSiblingsInDifferentBlocks)
+SRC_GRAPH(ConnectSiblingsInDifferentBlocks, Graph *graph)
 {
-    auto expectedGraph = CreateEmptyGraph();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
 
@@ -180,9 +179,11 @@ TEST_F(SplitResolverTest, ConnectSiblingsInDifferentBlocks)
             INST(7U, Opcode::Return).u64().Inputs(0U);
         }
     }
+}
 
-    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
-    GRAPH(initialGraph)
+OUT_GRAPH(ConnectSiblingsInDifferentBlocks, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
 
@@ -209,6 +210,15 @@ TEST_F(SplitResolverTest, ConnectSiblingsInDifferentBlocks)
             INST(7U, Opcode::Return).u64().Inputs(0U);
         }
     }
+}
+
+TEST_F(SplitResolverTest, ConnectSiblingsInDifferentBlocks)
+{
+    auto expectedGraph = CreateEmptyGraph();
+    src_graph::ConnectSiblingsInDifferentBlocks::CREATE(expectedGraph);
+
+    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
+    out_graph::ConnectSiblingsInDifferentBlocks::CREATE(initialGraph);
 
     auto la = RunLivenessAnalysis(initialGraph);
 
@@ -227,11 +237,9 @@ TEST_F(SplitResolverTest, ConnectSiblingsInDifferentBlocks)
                     {{LocationType::REGISTER, LocationType::STACK, 0U, 0U}});
 }
 
-TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
+SRC_GRAPH(ConnectSiblingsHavingCriticalEdgeBetweenBlocks, Graph *graph)
 {
-    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
-    auto expectedGraph = CreateEmptyGraph();
-    GRAPH(initialGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
 
@@ -252,19 +260,11 @@ TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
             INST(5U, Opcode::Return).u64().Inputs(0U);
         }
     }
+}
 
-    auto la = RunLivenessAnalysis(initialGraph);
-
-    auto param = la->GetInstLifeIntervals(&INS(0U));
-    auto call = la->GetInstLifeIntervals(&INS(4U));
-    param->SetReg(0U);
-
-    SplitAssignSlot(param, call->GetBegin(), 0U);
-
-    SplitResolver resolver(initialGraph, la);
-    resolver.Run();
-
-    GRAPH(expectedGraph)
+OUT_GRAPH(ConnectSiblingsHavingCriticalEdgeBetweenBlocks, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
 
@@ -291,6 +291,25 @@ TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
             INST(5U, Opcode::Return).u64().Inputs(0U);
         }
     }
+}
+
+TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
+{
+    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
+    auto expectedGraph = CreateEmptyGraph();
+    src_graph::ConnectSiblingsHavingCriticalEdgeBetweenBlocks::CREATE(initialGraph);
+
+    auto la = RunLivenessAnalysis(initialGraph);
+    auto param = la->GetInstLifeIntervals(&INS(0U));
+    auto call = la->GetInstLifeIntervals(&INS(4U));
+    param->SetReg(0U);
+
+    SplitAssignSlot(param, call->GetBegin(), 0U);
+
+    SplitResolver resolver(initialGraph, la);
+    resolver.Run();
+
+    out_graph::ConnectSiblingsHavingCriticalEdgeBetweenBlocks::CREATE(expectedGraph);
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
     size_t spillFills = 0;
@@ -308,10 +327,9 @@ TEST_F(SplitResolverTest, ConnectSiblingsHavingCriticalEdgeBetweenBlocks)
     EXPECT_EQ(spillFills, 2U);
 }
 
-TEST_F(SplitResolverTest, SplitAtTheEndOfBlock)
+SRC_GRAPH(SplitAtTheEndOfBlock, Graph *graph)
 {
-    auto expectedGraph = CreateEmptyGraph();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
 
@@ -348,9 +366,11 @@ TEST_F(SplitResolverTest, SplitAtTheEndOfBlock)
             INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
+}
 
-    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
-    GRAPH(initialGraph)
+OUT_GRAPH(SplitAtTheEndOfBlock, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
 
@@ -381,6 +401,15 @@ TEST_F(SplitResolverTest, SplitAtTheEndOfBlock)
             INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
+}
+
+TEST_F(SplitResolverTest, SplitAtTheEndOfBlock)
+{
+    auto expectedGraph = CreateEmptyGraph();
+    src_graph::SplitAtTheEndOfBlock::CREATE(expectedGraph);
+
+    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
+    out_graph::SplitAtTheEndOfBlock::CREATE(initialGraph);
 
     auto la = RunLivenessAnalysis(initialGraph);
     auto param = la->GetInstLifeIntervals(&INS(0U));
@@ -438,10 +467,10 @@ TEST_F(SplitResolverTest, ReuseExistingSpillFillWithinBlock)
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(3).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(3).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(3U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(3U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 // If there are spill fills inserted to load instn's operand or spill instn's result
@@ -499,10 +528,10 @@ TEST_F(SplitResolverTest, DontReuseInstructionSpillFills)
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(4).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(7).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(4U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(7U).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
 TEST_F(SplitResolverTest, DoNotReuseExistingSpillFillBeforeInstruction)
@@ -605,10 +634,9 @@ TEST_F(SplitResolverTest, ReuseExistingSpillFillAtTheEndOfBlock)
     CheckSpillFills(INS(5U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 1U, 0U}});
 }
 
-TEST_F(SplitResolverTest, ConnectSplitAtTheEndOfBlock)
+SRC_GRAPH(ConnectSplitAtTheEndOfBlock, Graph *graph)
 {
-    auto expectedGraph = CreateEmptyGraph();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -645,9 +673,11 @@ TEST_F(SplitResolverTest, ConnectSplitAtTheEndOfBlock)
             INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
+}
 
-    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
-    GRAPH(initialGraph)
+OUT_GRAPH(ConnectSplitAtTheEndOfBlock, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -676,9 +706,17 @@ TEST_F(SplitResolverTest, ConnectSplitAtTheEndOfBlock)
             INST(8U, Opcode::Return).u64().Inputs(7U);
         }
     }
+}
+
+TEST_F(SplitResolverTest, ConnectSplitAtTheEndOfBlock)
+{
+    auto expectedGraph = CreateEmptyGraph();
+    src_graph::ConnectSplitAtTheEndOfBlock::CREATE(expectedGraph);
+
+    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
+    out_graph::ConnectSplitAtTheEndOfBlock::CREATE(initialGraph);
 
     auto la = RunLivenessAnalysis(initialGraph);
-
     auto phi = la->GetInstLifeIntervals(&INS(6U));
     phi->SetReg(3U);
     auto add = la->GetInstLifeIntervals(&INS(4U));
@@ -703,10 +741,9 @@ TEST_F(SplitResolverTest, ConnectSplitAtTheEndOfBlock)
     CheckSpillFills(INS(4U).GetNext(), {{LocationType::REGISTER, LocationType::STACK, 1U, 0U}});
 }
 
-TEST_F(SplitResolverTest, GracefullyHandlePhiResolverBlocks)
+SRC_GRAPH(GracefullyHandlePhiResolverBlocks, Graph *graph)
 {
-    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
-    GRAPH(initialGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -740,30 +777,11 @@ TEST_F(SplitResolverTest, GracefullyHandlePhiResolverBlocks)
             INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
+}
 
-    auto la = RunLivenessAnalysis(initialGraph);
-    auto pred = &BB(5U);
-    auto succ = &BB(6U);
-    auto phiResolver = pred->InsertNewBlockToSuccEdge(succ);
-    auto sf0 = initialGraph->CreateInstSpillFill();
-    sf0->SetSpillFillType(SpillFillType::SPLIT_MOVE);
-    phiResolver->PrependInst(sf0);
-
-    auto param0 = la->GetInstLifeIntervals(&INS(0U));
-    param0->SetReg(0U);
-    auto sub = la->GetInstLifeIntervals(&INS(7U));
-    SplitAssignReg(param0, sub->GetBegin(), 4U);
-
-    // Assign reg to the phi and its inputs
-    la->GetInstLifeIntervals(&INS(6U))->SetReg(1U);
-    la->GetInstLifeIntervals(&INS(7U))->SetReg(1U);
-    la->GetInstLifeIntervals(&INS(8U))->SetReg(1U);
-
-    SplitResolver resolver(initialGraph, la);
-    resolver.Run();
-
-    auto expectedGraph = CreateEmptyGraph();
-    GRAPH(expectedGraph)
+OUT_GRAPH(GracefullyHandlePhiResolverBlocks, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -804,16 +822,45 @@ TEST_F(SplitResolverTest, GracefullyHandlePhiResolverBlocks)
             INST(10U, Opcode::Return).u64().Inputs(9U);
         }
     }
+}
+
+TEST_F(SplitResolverTest, GracefullyHandlePhiResolverBlocks)
+{
+    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
+    src_graph::GracefullyHandlePhiResolverBlocks::CREATE(initialGraph);
+
+    auto la = RunLivenessAnalysis(initialGraph);
+    auto pred = &BB(5U);
+    auto succ = &BB(6U);
+    auto phiResolver = pred->InsertNewBlockToSuccEdge(succ);
+    auto sf0 = initialGraph->CreateInstSpillFill();
+    sf0->SetSpillFillType(SpillFillType::SPLIT_MOVE);
+    phiResolver->PrependInst(sf0);
+
+    auto param0 = la->GetInstLifeIntervals(&INS(0U));
+    param0->SetReg(0U);
+    auto sub = la->GetInstLifeIntervals(&INS(7U));
+    SplitAssignReg(param0, sub->GetBegin(), 4U);
+
+    // Assign reg to the phi and its inputs
+    la->GetInstLifeIntervals(&INS(6U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(7U))->SetReg(1U);
+    la->GetInstLifeIntervals(&INS(8U))->SetReg(1U);
+
+    SplitResolver resolver(initialGraph, la);
+    resolver.Run();
+
+    auto expectedGraph = CreateEmptyGraph();
+    out_graph::GracefullyHandlePhiResolverBlocks::CREATE(expectedGraph);
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
     CheckSpillFills(sf0, {{LocationType::REGISTER, LocationType::REGISTER, 0U, 4U}});
     CheckSpillFills(sub->GetInst()->GetPrev(), {{LocationType::REGISTER, LocationType::REGISTER, 0U, 4U}});
 }
 
-TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
+SRC_GRAPH(ResolveSplitWithinLoop, Graph *graph)
 {
-    auto expectedGraph = CreateEmptyGraph();
-    GRAPH(expectedGraph)
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -844,9 +891,11 @@ TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
             INST(14U, Opcode::SpillFill);
         }
     }
+}
 
-    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
-    GRAPH(initialGraph)
+OUT_GRAPH(ResolveSplitWithinLoop, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -870,27 +919,36 @@ TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
             INST(11U, Opcode::Return).u64().Inputs(7U);
         }
     }
+}
+
+TEST_F(SplitResolverTest, ResolveSplitWithinLoop)
+{
+    auto expectedGraph = CreateEmptyGraph();
+    src_graph::ResolveSplitWithinLoop::CREATE(expectedGraph);
+
+    auto initialGraph = InitUsedRegs(CreateEmptyGraph());
+    out_graph::ResolveSplitWithinLoop::CREATE(initialGraph);
 
     auto la = RunLivenessAnalysis(initialGraph);
     auto var0 = la->GetInstLifeIntervals(&INS(4U));
     var0->SetLocation(Location::MakeStackSlot(0U));
-    SplitAssignSlot(SplitAssignReg(var0, la->GetInstLifeIntervals(&INS(6))->GetBegin(), 4),
-                    la->GetInstLifeIntervals(&INS(8))->GetBegin(), 0);
+    SplitAssignSlot(SplitAssignReg(var0, la->GetInstLifeIntervals(&INS(6U))->GetBegin(), 4U),
+                    la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 0);
     auto var1 = la->GetInstLifeIntervals(&INS(5U));
     var1->SetLocation(Location::MakeStackSlot(1U));
-    SplitAssignSlot(SplitAssignReg(var1, la->GetInstLifeIntervals(&INS(6))->GetBegin(), 5),
-                    la->GetInstLifeIntervals(&INS(8))->GetBegin(), 1);
+    SplitAssignSlot(SplitAssignReg(var1, la->GetInstLifeIntervals(&INS(6U))->GetBegin(), 5U),
+                    la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 1);
 
     SplitResolver resolver(initialGraph, la);
     resolver.Run();
 
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(6).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 4},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
-    CheckSpillFills(INS(8).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 4, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 5U, 1U}});
+    CheckSpillFills(INS(6U).GetPrev(), {{LocationType::STACK, LocationType::REGISTER, 0, 4U},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
+    CheckSpillFills(INS(8U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 4U, 0},
+                                        {LocationType::REGISTER, LocationType::STACK, 5U, 1U}});
     auto resolverBlock = initialGraph->GetVectorBlocks().back();
-    CheckSpillFills(resolverBlock->GetLastInst(), {{LocationType::STACK, LocationType::REGISTER, 0, 4},
+    CheckSpillFills(resolverBlock->GetLastInst(), {{LocationType::STACK, LocationType::REGISTER, 0, 4U},
                                                    {LocationType::STACK, LocationType::REGISTER, 1U, 5U}});
 }
 
@@ -985,8 +1043,8 @@ TEST_F(SplitResolverTest, ConnectIntervalsForConstantWithinBlock)
     auto con = la->GetInstLifeIntervals(&INS(0U));
     con->SetReg(0U);
     SplitAssignReg(SplitAssignImmSlot(SplitAssignImmSlot(con, la->GetInstLifeIntervals(&INS(1))->GetBegin(), 0),
-                                      la->GetInstLifeIntervals(&INS(2))->GetBegin(), 0),
-                   la->GetInstLifeIntervals(&INS(3))->GetBegin(), 0);
+                                      la->GetInstLifeIntervals(&INS(2U))->GetBegin(), 0),
+                   la->GetInstLifeIntervals(&INS(3U))->GetBegin(), 0);
 
     SplitResolver resolver(initialGraph, la);
     resolver.Run();
@@ -1039,8 +1097,8 @@ TEST_F(SplitResolverTest, ConnectIntervalsForConstantBetweenBlock)
     con0->SetReg(0U);
     con1->SetReg(1U);
     SplitAssignImmSlot(con0, la->GetInstLifeIntervals(&INS(7U))->GetBegin(), 0U);
-    SplitAssignReg(SplitAssignImmSlot(con1, la->GetInstLifeIntervals(&INS(3))->GetBegin(), 0),
-                   la->GetInstLifeIntervals(&INS(7))->GetBegin(), 2);
+    SplitAssignReg(SplitAssignImmSlot(con1, la->GetInstLifeIntervals(&INS(3U))->GetBegin(), 0),
+                   la->GetInstLifeIntervals(&INS(7U))->GetBegin(), 2U);
     // Assign reg to the phi and its inputs
     la->GetInstLifeIntervals(&INS(5U))->SetReg(2U);
     la->GetInstLifeIntervals(&INS(6U))->SetReg(2U);
@@ -1166,12 +1224,8 @@ TEST_F(SplitResolverTest, SplitAfterLastInstruction)
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
 }
 
-// NOTE (a.popov) Merge equal spill-fills
-TEST_F(SplitResolverTest, MultipleEndBlockMoves)
+SRC_GRAPH(MultipleEndBlockMoves, [[maybe_unused]] Graph *unused, Graph *initialGraph, Graph *expectedGraph)
 {
-    auto initialGraph = CreateEmptyGraph();
-    auto expectedGraph = CreateEmptyGraph();
-
     INITIALIZE_GRAPHS(initialGraph, expectedGraph)
     {
         PARAMETER(0U, 0U).u64();
@@ -1207,16 +1261,25 @@ TEST_F(SplitResolverTest, MultipleEndBlockMoves)
             INST(11U, Opcode::Return).u64().Inputs(10U);
         }
     }
+}
+
+// NOTE (a.popov) Merge equal spill-fills
+TEST_F(SplitResolverTest, MultipleEndBlockMoves)
+{
+    auto initialGraph = CreateEmptyGraph();
+    auto expectedGraph = CreateEmptyGraph();
+
+    src_graph::MultipleEndBlockMoves::CREATE(GetGraph(), initialGraph, expectedGraph);
 
     auto la = RunLivenessAnalysis(initialGraph);
     auto p0 = la->GetInstLifeIntervals(&INS(0U));
     auto p1 = la->GetInstLifeIntervals(&INS(1U));
     p0->SetReg(0U);
     p1->SetReg(1U);
-    SplitAssignReg(SplitAssignSlot(p0, la->GetInstLifeIntervals(&INS(5))->GetEnd(), 0),
-                   la->GetInstLifeIntervals(&INS(8))->GetBegin(), 0);
-    SplitAssignReg(SplitAssignSlot(p1, la->GetInstLifeIntervals(&INS(5))->GetEnd(), 1),
-                   la->GetInstLifeIntervals(&INS(8))->GetBegin(), 1);
+    SplitAssignReg(SplitAssignSlot(p0, la->GetInstLifeIntervals(&INS(5U))->GetEnd(), 0),
+                   la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 0);
+    SplitAssignReg(SplitAssignSlot(p1, la->GetInstLifeIntervals(&INS(5U))->GetEnd(), 1),
+                   la->GetInstLifeIntervals(&INS(8U))->GetBegin(), 1);
     // Assign reg to the phi and its inputs
     la->GetInstLifeIntervals(&INS(6U))->SetReg(2U);
     la->GetInstLifeIntervals(&INS(7U))->SetReg(2U);
@@ -1227,24 +1290,19 @@ TEST_F(SplitResolverTest, MultipleEndBlockMoves)
     resolver.Run();
     initialGraph->RunPass<Cleanup>();
     ASSERT_TRUE(GraphComparator().Compare(initialGraph, expectedGraph));
-    CheckSpillFills(INS(6).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(6).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
-    CheckSpillFills(INS(7).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
-                                       {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
-    CheckSpillFills(INS(7).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
-                                       {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(6U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(6U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
+    CheckSpillFills(INS(7U).GetPrev(), {{LocationType::REGISTER, LocationType::STACK, 0, 0},
+                                        {LocationType::REGISTER, LocationType::STACK, 1U, 1U}});
+    CheckSpillFills(INS(7U).GetNext(), {{LocationType::STACK, LocationType::REGISTER, 0, 0},
+                                        {LocationType::STACK, LocationType::REGISTER, 1U, 1U}});
 }
 
-TEST_F(SplitResolverTest, SwapCallInputs)
+SRC_GRAPH(SwapCallInputs, Graph *graph)
 {
-    auto initialGraph = CreateEmptyGraph();
-    if (initialGraph->GetCallingConvention() == nullptr) {
-        return;
-    }
-
-    GRAPH(initialGraph)
+    GRAPH(graph)
     {
         CONSTANT(0U, 1U).s32();
         CONSTANT(1U, 10U).s32();
@@ -1256,6 +1314,16 @@ TEST_F(SplitResolverTest, SwapCallInputs)
             INST(5U, Opcode::Return).s32().Inputs(4U);
         }
     }
+}
+
+TEST_F(SplitResolverTest, SwapCallInputs)
+{
+    auto initialGraph = CreateEmptyGraph();
+    if (initialGraph->GetCallingConvention() == nullptr) {
+        return;
+    }
+
+    src_graph::SwapCallInputs::CREATE(initialGraph);
 
     InitUsedRegs(initialGraph);
     auto la = RunLivenessAnalysis(initialGraph);

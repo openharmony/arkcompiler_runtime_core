@@ -972,55 +972,55 @@ public:
     {
         switch (opc) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(OPCODE, BASE, ...)                                      \
+#define RETURN_INST(OPCODE, BASE, ...)                                      \
             case Opcode::OPCODE: {                                       \
                 auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE); \
                 inst->SetId(instrCurrentId_++);                        \
                 return inst;                                             \
             }
-            OPCODE_LIST(INST_DEF)
+            OPCODE_LIST(RETURN_INST)
 
-#undef INST_DEF
+#undef RETURN_INST
             default:
                 return nullptr;
         }
     }
     /// Define creation methods for all opcodes
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(OPCODE, BASE, ...)                                               \
-    template <typename... Args>                                                   \
-    [[nodiscard]] BASE* CreateInst##OPCODE(Args&&... args) const {                \
+#define RETURN_INST(OPCODE, BASE, ...)                                                                     \
+    template <typename... Args>                                                                         \
+    [[nodiscard]] BASE* CreateInst##OPCODE(Args&&... args) const {     \
         auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE, std::forward<Args>(args)...);  \
-        inst->SetId(instrCurrentId_++); \
-        return inst; \
+        inst->SetId(instrCurrentId_++);                                                             \
+        return inst;                                                    \
     }
-    OPCODE_LIST(INST_DEF)
+    OPCODE_LIST(RETURN_INST)
 
-#undef INST_DEF
+#undef RETURN_INST
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(OPCODE, BASE, ...)                                               \
+#define RETURN_INST(OPCODE, BASE, ...)                                               \
     template <typename... Args>                                                   \
     [[nodiscard]] BASE* CreateInst##OPCODE(Inst* inst, Args&&... args) const {    \
         auto new_inst = CreateInst##OPCODE(inst->GetType(), inst->GetPc(), std::forward<Args>(args)...);  \
         new_inst->SetCurrentMethod(inst->GetCurrentMethod());                     \
         return new_inst;                                                          \
     }
-    OPCODE_LIST(INST_DEF)
+    OPCODE_LIST(RETURN_INST)
 
-#undef INST_DEF
+#undef RETURN_INST
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define INST_DEF(OPCODE, BASE, ...)                                               \
+#define RETURN_INST(OPCODE, BASE, ...)                                               \
     template <typename... Args>                                                   \
     [[nodiscard]] BASE* CreateInst##OPCODE(Inst* inst, Args&&... args) const {    \
         auto new_inst = CreateInst##OPCODE(inst->GetType(), inst->GetPc(), std::forward<Args>(args)...);  \
         return new_inst;                                                          \
     }
-    OPCODE_LIST(INST_DEF)
+    OPCODE_LIST(RETURN_INST)
 
-#undef INST_DEF
+#undef RETURN_INST
 #endif
 
     // clang-format on

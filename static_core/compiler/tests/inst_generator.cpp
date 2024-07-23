@@ -183,9 +183,13 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         graph = CreateGraphWithOneBasicBlock();
     }
     ASSERT(graph->GetVectorBlocks().size() > 2U);
-    auto block = graph->GetVectorBlocks()[2U];
-    DataType::Type type;
-    switch (opc) {
+    PopulateGraph(graph, inst, n);
+    return graph;
+}
+
+auto DataTypeByOpcode(Inst *inst)
+{
+    switch (inst->GetOpcode()) {
         case Opcode::IsInstance:
         case Opcode::LenArray:
         case Opcode::SaveState:
@@ -195,227 +199,319 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
         case Opcode::NewArray:
         case Opcode::LoadObject:
         case Opcode::Monitor:
-            type = DataType::REFERENCE;
-            break;
+            return DataType::REFERENCE;
         case Opcode::IfImm:
-            type = inst->CastToIfImm()->GetOperandsType();
-            break;
+            return inst->CastToIfImm()->GetOperandsType();
         case Opcode::If:
-            type = inst->CastToIf()->GetOperandsType();
-            break;
+            return inst->CastToIf()->GetOperandsType();
         case Opcode::Compare:
-            type = inst->CastToCompare()->GetOperandsType();
-            break;
+            return inst->CastToCompare()->GetOperandsType();
         case Opcode::Cmp:
-            type = inst->CastToCmp()->GetOperandsType();
-            break;
+            return inst->CastToCmp()->GetOperandsType();
         default:
-            type = inst->GetType();
+            return inst->GetType();
     }
-    if (opc == Opcode::LoadArrayPair || opc == Opcode::LoadArrayPairI) {
-        auto array = CreateParamInst(graph, DataType::REFERENCE, 0U);
-        Inst *index = nullptr;
-        if (opc == Opcode::LoadArrayPair) {
-            index = CreateParamInst(graph, DataType::INT32, 1U);
-        }
-        inst->SetInput(0U, array);
-        if (opc == Opcode::LoadArrayPair) {
-            inst->SetInput(1U, index);
-        }
-        block->AppendInst(inst);
-        auto loadPairPart0 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 0U);
-        auto loadPairPart1 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 1U);
-        block->AppendInst(loadPairPart0);
-        inst = loadPairPart1;
-    } else if (opc == Opcode::StoreArrayPairI || opc == Opcode::StoreArrayPair) {
-        int stackSlot = 0;
-        auto array = CreateParamInst(graph, DataType::REFERENCE, stackSlot++);
-        Inst *index = nullptr;
-        if (opc == Opcode::StoreArrayPair) {
-            index = CreateParamInst(graph, DataType::INT32, stackSlot++);
-        }
-        auto val1 = CreateParamInst(graph, inst->GetType(), stackSlot++);
-        auto val2 = CreateParamInst(graph, inst->GetType(), stackSlot++);
-        int idx = 0;
-        inst->SetInput(idx++, array);
-        if (opc == Opcode::StoreArrayPair) {
-            inst->SetInput(idx++, index);
-        }
-        inst->SetInput(idx++, val1);
-        inst->SetInput(idx++, val2);
-    } else if (opc == Opcode::ReturnInlined) {
-        ASSERT(n == -1L);
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        block->AppendInst(saveState);
+}
 
-        auto callInst = static_cast<CallInst *>(graph->CreateInstCallStatic());
-        callInst->SetType(DataType::VOID);
-        callInst->SetInlined(true);
-        callInst->SetInputs(&allocator_, {{saveState, DataType::NO_TYPE}});
-        block->AppendInst(callInst);
+Inst *GraphCreator::PopulateLoadArrayPair(Graph *graph, BasicBlock *block, Inst *inst, Opcode opc)
+{
+    auto array = CreateParamInst(graph, DataType::REFERENCE, 0U);
+    Inst *index = nullptr;
+    if (opc == Opcode::LoadArrayPair) {
+        index = CreateParamInst(graph, DataType::INT32, 1U);
+    }
+    inst->SetInput(0U, array);
+    if (opc == Opcode::LoadArrayPair) {
+        inst->SetInput(1U, index);
+    }
+    block->AppendInst(inst);
+    auto loadPairPart0 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 0U);
+    auto loadPairPart1 = graph->CreateInstLoadPairPart(inst->GetType(), INVALID_PC, inst, 1U);
+    block->AppendInst(loadPairPart0);
+    return loadPairPart1;
+}
 
-        inst->SetInput(0U, saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else if (opc == Opcode::CallStatic || opc == Opcode::CallVirtual) {
-        ASSERT(n >= 0);
-        auto callInst = static_cast<CallInst *>(inst);
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        callInst->SetCallMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        block->PrependInst(saveState);
-        callInst->AllocateInputTypes(&allocator_, n + 1);
-        for (int32_t i = 0; i < n; ++i) {
-            auto param = CreateParamInst(graph, type, i);
-            callInst->AppendInputAndType(param, type);
-            saveState->AppendInput(param);
-        }
-        for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
-            saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
-        }
-        callInst->AppendInputAndType(saveState, DataType::NO_TYPE);
-        SetNumVRegsArgs(0, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1);
-    } else if (opc == Opcode::LoadArray || opc == Opcode::StoreArray) {
-        ASSERT(n == -1L);
-        auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);  // array
-        auto param2 = CreateParamInst(graph, DataType::INT32, 1U);      // index
-        inst->SetInput(0U, param1);
+void GraphCreator::PopulateStoreArrayPair(Graph *graph, Inst *inst, Opcode opc)
+{
+    int stackSlot = 0;
+    auto array = CreateParamInst(graph, DataType::REFERENCE, stackSlot++);
+    Inst *index = nullptr;
+    if (opc == Opcode::StoreArrayPair) {
+        index = CreateParamInst(graph, DataType::INT32, stackSlot++);
+    }
+    auto val1 = CreateParamInst(graph, inst->GetType(), stackSlot++);
+    auto val2 = CreateParamInst(graph, inst->GetType(), stackSlot++);
+    int idx = 0;
+    inst->SetInput(idx++, array);
+    if (opc == Opcode::StoreArrayPair) {
+        inst->SetInput(idx++, index);
+    }
+    inst->SetInput(idx++, val1);
+    inst->SetInput(idx++, val2);
+}
+
+void GraphCreator::PopulateReturnInlined(Graph *graph, BasicBlock *block, Inst *inst, [[maybe_unused]] int32_t n)
+{
+    ASSERT(n == -1L);
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    block->AppendInst(saveState);
+
+    auto callInst = static_cast<CallInst *>(graph->CreateInstCallStatic());
+    callInst->SetType(DataType::VOID);
+    callInst->SetInlined(true);
+    callInst->SetInputs(&allocator_, {{saveState, DataType::NO_TYPE}});
+    block->AppendInst(callInst);
+
+    inst->SetInput(0U, saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateCall(Graph *graph, BasicBlock *block, Inst *inst, DataType::Type type, int32_t n)
+{
+    ASSERT(n >= 0);
+    auto callInst = static_cast<CallInst *>(inst);
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    callInst->SetCallMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    block->PrependInst(saveState);
+    callInst->AllocateInputTypes(&allocator_, n + 1);
+    for (int32_t i = 0; i < n; ++i) {
+        auto param = CreateParamInst(graph, type, i);
+        callInst->AppendInput(param, type);
+        saveState->AppendInput(param);
+    }
+    for (size_t i = 0; i < saveState->GetInputsCount(); ++i) {
+        saveState->SetVirtualRegister(i, VirtualRegister(i, VRegType::VREG));
+    }
+    callInst->AppendInput(saveState, DataType::NO_TYPE);
+    SetNumVRegsArgs(0, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1);
+}
+
+void GraphCreator::PopulateLoadStoreArray(Graph *graph, Inst *inst, DataType::Type type, [[maybe_unused]] int32_t n)
+{
+    ASSERT(n == -1L);
+    auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);  // array
+    auto param2 = CreateParamInst(graph, DataType::INT32, 1U);      // index
+    inst->SetInput(0U, param1);
+    inst->SetInput(1U, param2);
+    if (inst->GetOpcode() == Opcode::StoreArray) {
+        auto param3 = CreateParamInst(graph, type, 2U);
+        inst->SetInput(2U, param3);
+    }
+}
+
+void GraphCreator::PopulateLoadStoreArrayI(Graph *graph, Inst *inst, DataType::Type type, [[maybe_unused]] int32_t n)
+{
+    ASSERT(n == -1L);
+    auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);  // array/object
+    inst->SetInput(0U, param1);
+    if (inst->GetOpcode() != Opcode::LoadArrayI) {
+        auto param2 = CreateParamInst(graph, type, 1U);
         inst->SetInput(1U, param2);
-        if (inst->GetOpcode() == Opcode::StoreArray) {
-            auto param3 = CreateParamInst(graph, type, 2U);
-            inst->SetInput(2U, param3);
-        }
-    } else if (opc == Opcode::LoadArrayI || opc == Opcode::StoreArrayI || opc == Opcode::StoreObject) {
-        ASSERT(n == -1L);
-        auto param1 = CreateParamInst(graph, DataType::REFERENCE, 0U);  // array/object
-        inst->SetInput(0U, param1);
-        if (inst->GetOpcode() != Opcode::LoadArrayI) {
-            auto param2 = CreateParamInst(graph, type, 1U);
-            inst->SetInput(1U, param2);
-        }
-    } else if (opc == Opcode::Select) {
-        ASSERT(n == -1L);
-        auto cmpType = inst->CastToSelect()->GetOperandsType();
-        auto param0 = CreateParamInst(graph, type, 0U);
-        auto param1 = CreateParamInst(graph, type, 1U);
-        auto param2 = CreateParamInst(graph, cmpType, 2U);
-        auto param3 = CreateParamInst(graph, cmpType, 3U);
-        inst->SetInput(0U, param0);
-        inst->SetInput(1U, param1);
-        inst->SetInput(2U, param2);
-        inst->SetInput(3U, param3);
-    } else if (opc == Opcode::SelectImm) {
-        ASSERT(n == -1L);
-        auto cmpType = inst->CastToSelectImm()->GetOperandsType();
-        auto param0 = CreateParamInst(graph, type, 0U);
-        auto param1 = CreateParamInst(graph, type, 1U);
-        auto param2 = CreateParamInst(graph, cmpType, 2U);
-        inst->SetInput(0U, param0);
-        inst->SetInput(1U, param1);
-        inst->SetInput(2U, param2);
-    } else if (opc == Opcode::StoreStatic) {
-        auto param0 = CreateParamInst(graph, type, 0U);
-        inst->SetInput(1U, param0);
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        saveState->AppendInput(param0);
-        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
-        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
-                                                          inst->CastToStoreStatic()->GetTypeId(), nullptr, nullptr);
-        inst->SetInput(0U, initInst);
-        block->PrependInst(initInst);
-        block->PrependInst(saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else if (opc == Opcode::LoadStatic) {
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
-                                                          inst->CastToLoadStatic()->GetTypeId(), nullptr, nullptr);
-        inst->SetInput(0U, initInst);
-        block->PrependInst(initInst);
-        block->PrependInst(saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else if (opc == Opcode::Monitor) {
-        auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
-        inst->SetInput(0U, param0);
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        saveState->AppendInput(param0);
-        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
-        inst->SetInput(1U, saveState);
-        block->PrependInst(saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else if (opc == Opcode::LoadType || opc == Opcode::LoadString) {
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        inst->SetInput(0U, saveState);
-        block->PrependInst(saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else if (opc == Opcode::IsInstance) {
-        auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        saveState->AppendInput(param0);
-        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
-        auto loadClass = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, saveState, 0, nullptr,
-                                                    reinterpret_cast<RuntimeInterface::ClassPtr>(1));
-        inst->SetInput(0U, param0);
-        inst->SetInput(1U, loadClass);
-        inst->SetSaveState(saveState);
-        block->PrependInst(loadClass);
-        block->PrependInst(saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else if (opc == Opcode::NewArray) {
-        ASSERT(n == -1L);
-        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
-        inst->SetInput(NewArrayInst::INDEX_CLASS, initInst);
+    }
+}
 
-        auto param0 = CreateParamInst(graph, DataType::INT32, 0U);
-        inst->SetInput(NewArrayInst::INDEX_SIZE, param0);
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        saveState->AppendInput(param0);
-        saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+void GraphCreator::PopulateSelect(Graph *graph, Inst *inst, DataType::Type type, [[maybe_unused]] int32_t n)
+{
+    ASSERT(n == -1L);
+    auto cmpType = inst->CastToSelect()->GetOperandsType();
+    auto param0 = CreateParamInst(graph, type, 0U);
+    auto param1 = CreateParamInst(graph, type, 1U);
+    auto param2 = CreateParamInst(graph, cmpType, 2U);
+    auto param3 = CreateParamInst(graph, cmpType, 3U);
+    inst->SetInput(0U, param0);
+    inst->SetInput(1U, param1);
+    inst->SetInput(2U, param2);
+    inst->SetInput(3U, param3);
+}
 
-        initInst->SetTypeId(inst->CastToNewArray()->GetTypeId());
-        initInst->SetInput(0U, saveState);
+void GraphCreator::PopulateSelectI(Graph *graph, Inst *inst, DataType::Type type, [[maybe_unused]] int32_t n)
+{
+    ASSERT(n == -1L);
+    auto cmpType = inst->CastToSelectImm()->GetOperandsType();
+    auto param0 = CreateParamInst(graph, type, 0U);
+    auto param1 = CreateParamInst(graph, type, 1U);
+    auto param2 = CreateParamInst(graph, cmpType, 2U);
+    inst->SetInput(0U, param0);
+    inst->SetInput(1U, param1);
+    inst->SetInput(2U, param2);
+}
 
-        inst->SetInput(NewArrayInst::INDEX_SAVE_STATE, saveState);
-        block->PrependInst(initInst);
-        block->PrependInst(saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else if (opc == Opcode::NewObject) {
-        ASSERT(n == -1L);
-        auto saveState = graph->CreateInstSaveState()->CastToSaveState();
-        saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
-        auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
-                                                          inst->CastToNewObject()->GetTypeId(), nullptr, nullptr);
-        inst->SetInput(0U, initInst);
-        inst->SetInput(0U, initInst);
-        inst->SetInput(1U, saveState);
-        block->PrependInst(initInst);
-        block->PrependInst(saveState);
-        SetNumVRegsArgs(0U, saveState->GetInputsCount());
-        graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
-    } else {
-        ASSERT(n >= 0);
-        for (int32_t i = 0; i < n; ++i) {
-            auto param = CreateParamInst(graph, type, i);
-            if (!inst->IsOperandsDynamic()) {
-                inst->SetInput(i, param);
-            } else {
-                inst->AppendInput(param);
-            }
+void GraphCreator::PopulateStoreStatic(Graph *graph, BasicBlock *block, Inst *inst, DataType::Type type)
+{
+    auto param0 = CreateParamInst(graph, type, 0U);
+    inst->SetInput(1U, param0);
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    saveState->AppendInput(param0);
+    saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+    auto initInst =
+        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
+                                          TypeIdMixin {inst->CastToStoreStatic()->GetTypeId(), nullptr}, nullptr);
+    inst->SetInput(0U, initInst);
+    block->PrependInst(initInst);
+    block->PrependInst(saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateLoadStatic(Graph *graph, BasicBlock *block, Inst *inst)
+{
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    auto initInst =
+        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
+                                          TypeIdMixin {inst->CastToLoadStatic()->GetTypeId(), nullptr}, nullptr);
+    inst->SetInput(0U, initInst);
+    block->PrependInst(initInst);
+    block->PrependInst(saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateMonitor(Graph *graph, BasicBlock *block, Inst *inst)
+{
+    auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
+    inst->SetInput(0U, param0);
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    saveState->AppendInput(param0);
+    saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+    inst->SetInput(1U, saveState);
+    block->PrependInst(saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateLoadType(Graph *graph, BasicBlock *block, Inst *inst)
+{
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    inst->SetInput(0U, saveState);
+    block->PrependInst(saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateIsInstance(Graph *graph, BasicBlock *block, Inst *inst)
+{
+    auto param0 = CreateParamInst(graph, DataType::REFERENCE, 0U);
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    saveState->AppendInput(param0);
+    saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+    auto loadClass = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, saveState, TypeIdMixin {0, nullptr},
+                                                reinterpret_cast<RuntimeInterface::ClassPtr>(1));
+    inst->SetInput(0U, param0);
+    inst->SetInput(1U, loadClass);
+    inst->SetSaveState(saveState);
+    block->PrependInst(loadClass);
+    block->PrependInst(saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateNewArray(Graph *graph, BasicBlock *block, Inst *inst, [[maybe_unused]] int32_t n)
+{
+    ASSERT(n == -1L);
+    auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC);
+    inst->SetInput(NewArrayInst::INDEX_CLASS, initInst);
+
+    auto param0 = CreateParamInst(graph, DataType::INT32, 0U);
+    inst->SetInput(NewArrayInst::INDEX_SIZE, param0);
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    saveState->AppendInput(param0);
+    saveState->SetVirtualRegister(0U, VirtualRegister(0U, VRegType::VREG));
+
+    initInst->SetTypeId(inst->CastToNewArray()->GetTypeId());
+    initInst->SetInput(0U, saveState);
+
+    inst->SetInput(NewArrayInst::INDEX_SAVE_STATE, saveState);
+    block->PrependInst(initInst);
+    block->PrependInst(saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateNewObject(Graph *graph, BasicBlock *block, Inst *inst, [[maybe_unused]] int32_t n)
+{
+    ASSERT(n == -1L);
+    auto saveState = graph->CreateInstSaveState()->CastToSaveState();
+    saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
+    auto initInst =
+        graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
+                                          TypeIdMixin {inst->CastToNewObject()->GetTypeId(), nullptr}, nullptr);
+    inst->SetInput(0U, initInst);
+    inst->SetInput(0U, initInst);
+    inst->SetInput(1U, saveState);
+    block->PrependInst(initInst);
+    block->PrependInst(saveState);
+    SetNumVRegsArgs(0U, saveState->GetInputsCount());
+    graph->SetVRegsCount(saveState->GetInputsCount() + 1U);
+}
+
+void GraphCreator::PopulateDefault(Graph *graph, Inst *inst, DataType::Type type, int32_t n)
+{
+    ASSERT(n >= 0);
+    for (int32_t i = 0; i < n; ++i) {
+        auto param = CreateParamInst(graph, type, i);
+        if (!inst->IsOperandsDynamic()) {
+            inst->SetInput(i, param);
+        } else {
+            inst->AppendInput(param);
         }
     }
+}
+
+void GraphCreator::PopulateGraph(Graph *graph, Inst *inst, int32_t n)
+{
+    auto type = DataTypeByOpcode(inst);
+    auto block = graph->GetVectorBlocks()[2U];
+    auto opc = inst->GetOpcode();
+    if (opc == Opcode::LoadArrayPair || opc == Opcode::LoadArrayPairI) {
+        inst = PopulateLoadArrayPair(graph, block, inst, opc);
+    } else if (opc == Opcode::StoreArrayPairI || opc == Opcode::StoreArrayPair) {
+        PopulateStoreArrayPair(graph, inst, opc);
+    } else if (opc == Opcode::ReturnInlined) {
+        PopulateReturnInlined(graph, block, inst, n);
+    } else if (opc == Opcode::CallStatic || opc == Opcode::CallVirtual) {
+        PopulateCall(graph, block, inst, type, n);
+    } else if (opc == Opcode::LoadArray || opc == Opcode::StoreArray) {
+        PopulateLoadStoreArray(graph, inst, type, n);
+    } else if (opc == Opcode::LoadArrayI || opc == Opcode::StoreArrayI || opc == Opcode::StoreObject) {
+        PopulateLoadStoreArrayI(graph, inst, type, n);
+    } else if (opc == Opcode::Select) {
+        PopulateSelect(graph, inst, type, n);
+    } else if (opc == Opcode::SelectImm) {
+        PopulateSelectI(graph, inst, type, n);
+    } else if (opc == Opcode::StoreStatic) {
+        PopulateStoreStatic(graph, block, inst, type);
+    } else if (opc == Opcode::LoadStatic) {
+        PopulateLoadStatic(graph, block, inst);
+    } else if (opc == Opcode::Monitor) {
+        PopulateMonitor(graph, block, inst);
+    } else if (opc == Opcode::LoadType || opc == Opcode::LoadString) {
+        PopulateLoadType(graph, block, inst);
+    } else if (opc == Opcode::IsInstance) {
+        PopulateIsInstance(graph, block, inst);
+    } else if (opc == Opcode::NewArray) {
+        PopulateNewArray(graph, block, inst, n);
+    } else if (opc == Opcode::NewObject) {
+        PopulateNewObject(graph, block, inst, n);
+    } else {
+        PopulateDefault(graph, inst, type, n);
+    }
+
+    Finalize(graph, block, inst);
+}
+
+void GraphCreator::Finalize(Graph *graph, BasicBlock *block, Inst *inst)
+{
+    auto opc = inst->GetOpcode();
     if (opc == Opcode::Constant || opc == Opcode::Parameter || opc == Opcode::NullPtr) {
         graph->GetStartBlock()->AppendInst(inst);
     } else {
@@ -459,7 +555,6 @@ Graph *GraphCreator::GenerateOperation(Inst *inst, int32_t n)
             inst->CastToStoreArrayPairI()->SetNeedBarrier(true);
         }
     }
-    return graph;
 }
 
 Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
@@ -497,7 +592,7 @@ Graph *GraphCreator::GenerateCheckOperation(Inst *inst)
     inst->SetSaveState(saveState);
     inst->SetType(type);
     if (inst->GetOpcode() == Opcode::CheckCast) {
-        auto loadClass = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, nullptr, 0, nullptr,
+        auto loadClass = graph->CreateInstLoadClass(DataType::REFERENCE, INVALID_PC, nullptr, TypeIdMixin {0, nullptr},
                                                     reinterpret_cast<RuntimeInterface::ClassPtr>(1));
         loadClass->SetSaveState(saveState);
         block->AppendInst(loadClass);
@@ -634,7 +729,8 @@ Graph *GraphCreator::GenerateMultiArrayOperation(Inst *inst)
     saveState->SetMethod(reinterpret_cast<RuntimeInterface::MethodPtr>(runtime_.METHOD));
     block->AppendInst(saveState);
 
-    auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState, 0U, nullptr, nullptr);
+    auto initInst = graph->CreateInstLoadAndInitClass(DataType::REFERENCE, INVALID_PC, saveState,
+                                                      TypeIdMixin {0U, nullptr}, nullptr);
     auto arraysInst = inst->CastToMultiArray();
     arraysInst->SetInputs(&allocator_, {{initInst, DataType::REFERENCE},
                                         {param1, DataType::INT32},

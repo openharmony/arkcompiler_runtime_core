@@ -210,9 +210,9 @@ TEST_F(SchedulerTest, FixSSInBBAfterScheduler)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-TEST_F(SchedulerTest, FixSSInBBAfterSchedulerOutToBlock)
+SRC_GRAPH(FixSSInBBAfterSchedulerOutToBlock, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         CONSTANT(1U, 1U).s32();
         CONSTANT(2U, 2U).s32();
@@ -235,10 +235,10 @@ TEST_F(SchedulerTest, FixSSInBBAfterSchedulerOutToBlock)
             INST(12U, Opcode::Return).s32().Inputs(9U);
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<Scheduler>());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(FixSSInBBAfterSchedulerOutToBlock, Graph *graph)
+{
     GRAPH(graph)
     {
         CONSTANT(1U, 1U).s32();
@@ -262,6 +262,16 @@ TEST_F(SchedulerTest, FixSSInBBAfterSchedulerOutToBlock)
             INST(12U, Opcode::Return).s32().Inputs(9U);
         }
     }
+}
+
+TEST_F(SchedulerTest, FixSSInBBAfterSchedulerOutToBlock)
+{
+    src_graph::FixSSInBBAfterSchedulerOutToBlock::CREATE(GetGraph());
+
+    ASSERT_TRUE(GetGraph()->RunPass<Scheduler>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::FixSSInBBAfterSchedulerOutToBlock::CREATE(graph);
 
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
@@ -354,9 +364,9 @@ TEST_F(SchedulerTest, MustAliasLoadI)
     ASSERT_FALSE(GetGraph()->RunPass<Scheduler>());
 }
 
-TEST_F(SchedulerTest, LoadPair)
+SRC_GRAPH(LoadPair, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();  // index
         PARAMETER(1U, 1U).ref();
@@ -404,10 +414,10 @@ TEST_F(SchedulerTest, LoadPair)
             INST(62U, Opcode::Return).u64().Inputs(61U);
         }
     }
+}
 
-    ASSERT_TRUE(GetGraph()->RunPass<Scheduler>());
-
-    auto graph = CreateEmptyGraph();
+OUT_GRAPH(LoadPair, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).s32();  // index
@@ -454,6 +464,16 @@ TEST_F(SchedulerTest, LoadPair)
             INST(62U, Opcode::Return).u64().Inputs(61U);
         }
     }
+}
+
+TEST_F(SchedulerTest, LoadPair)
+{
+    src_graph::LoadPair::CREATE(GetGraph());
+
+    ASSERT_TRUE(GetGraph()->RunPass<Scheduler>());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::LoadPair::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
