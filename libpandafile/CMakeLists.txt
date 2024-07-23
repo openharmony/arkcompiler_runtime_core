@@ -49,6 +49,7 @@ add_custom_command(OUTPUT "${OUTFILE}"
 set(SOURCES
     annotation_data_accessor.cpp
     bytecode_emitter.cpp
+    data_protect.cpp
     debug_data_accessor.cpp
     field_data_accessor.cpp
     file.cpp

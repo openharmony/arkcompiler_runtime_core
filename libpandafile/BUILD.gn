@@ -57,6 +57,7 @@ libarkfile_sources = [
   "bytecode_emitter.cpp",
   "class_data_accessor.cpp",
   "code_data_accessor.cpp",
+  "data_protect.cpp",
   "debug_data_accessor.cpp",
   "debug_info_extractor.cpp",
   "field_data_accessor.cpp",
