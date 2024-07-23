@@ -16,53 +16,53 @@ cases:
     - decl: |-
           enum Enum { first, second, third }
       use: |-
-          assert Enum.first.getValue() == 0
-          assert Enum.second.getValue() == 1
-          assert Enum.third.getValue() == 2
+          assert Enum.first.valueOf() == 0
+          assert Enum.second.valueOf() == 1
+          assert Enum.third.valueOf() == 2
 
     - decl: |-
           enum Enum { first, second = -2147483648, third}
       use: |-
-          assert Enum.first.getValue() == 0
-          assert Enum.second.getValue() == -2147483648
-          assert Enum.third.getValue() == -2147483647
+          assert Enum.first.valueOf() == 0
+          assert Enum.second.valueOf() == -2147483648
+          assert Enum.third.valueOf() == -2147483647
 
     - decl: |-
           enum Enum { first = 0x7fffffff - 2, second, third }
       use: |-
-          assert Enum.first.getValue() == 2147483645
-          assert Enum.second.getValue() == 2147483646
-          assert Enum.third.getValue() == 2147483647  // Int.MAX_VALUE
+          assert Enum.first.valueOf() == 2147483645
+          assert Enum.second.valueOf() == 2147483646
+          assert Enum.third.valueOf() == 2147483647  // Int.MAX_VALUE
 
     - decl: |-
           const a: int = 2147483647
           const b: int = 2147483647 - 1
           enum Enum { first = a, second = b, third = b - 1 }
       use: |-
-          assert Enum.first.getValue() == a
-          assert Enum.second.getValue() == b
-          assert Enum.third.getValue() == b - 1
+          assert Enum.first.valueOf() == a
+          assert Enum.second.valueOf() == b
+          assert Enum.third.valueOf() == b - 1
 
     - decl: |-
           enum Enum { first, second = -1, third }
       use: |-
-          assert Enum.first.getValue() == 0
-          assert Enum.second.getValue() == -1
+          assert Enum.first.valueOf() == 0
+          assert Enum.second.valueOf() == -1
           assert Enum.third == Enum.first
 
     - decl: |-
           enum Enum { first = 0x7fffffff - 1, second, third }  // int overflow
       use: |-
-          assert Enum.first.getValue() == 0x7ffffffe
-          assert Enum.second.getValue() == 0x7fffffff
-          assert Enum.third.getValue() == 0x80000000
+          assert Enum.first.valueOf() == 0x7ffffffe
+          assert Enum.second.valueOf() == 0x7fffffff
+          assert Enum.third.valueOf() == 0x80000000
 
     - decl: |-
           enum Enum { first = -1, second, third = -42 }
       use: |-
-          assert Enum.first as int == -1
-          assert Enum.second as int == 0
-          assert Enum.third as int == -42
+          assert Enum.first == -1
+          assert Enum.second == 0
+          assert Enum.third == -42
 
     - decl: |-
           enum Enum { first = -1, second, third = -42 }

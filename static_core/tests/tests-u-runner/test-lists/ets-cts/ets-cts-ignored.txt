@@ -12,13 +12,6 @@
 17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_7.sts
 # end of es2panda fails
 
-# 16761 Compiler fails on typeof of string-based enum
-07.expressions/17.typeof_expression/tof_const_16.sts
-07.expressions/17.typeof_expression/tof_vars_16.sts
-07.expressions/17.typeof_expression/tof_func_16.sts
-07.expressions/17.typeof_expression/tof_meth_16.sts
-07.expressions/17.typeof_expression/tof_obj_16.sts
-
 # 16343 Improve typeof result inference, move it to ETSAnalyzer
 07.expressions/17.typeof_expression/tof_const_1.sts
 07.expressions/17.typeof_expression/tof_vars_1.sts
@@ -869,11 +862,6 @@
 07.expressions/25.equality_expressions/eq_8.sts
 # end of es2panda fails
 
-# 15297 Enum constants equality behavior is different from TS
-07.expressions/25.equality_expressions/05.enumeration_equality_operators/enum_equality_1.sts
-07.expressions/25.equality_expressions/05.enumeration_equality_operators/enum_equality_3.sts
-11.enumerations/01.enumeration_integer_values/enum_int_4.sts
-
 # 14654 Cannot use constant expressions in enum initialization
 11.enumerations/01.enumeration_integer_values/enum_int_2.sts
 11.enumerations/01.enumeration_integer_values/enum_int_3.sts
@@ -884,20 +872,7 @@
 
 # 13917 Casting of enum doesn't work as expected
 11.enumerations/01.enumeration_integer_values/enum_int_6.sts
-11.enumerations/01.enumeration_integer_values/enum_int_7.sts
-11.enumerations/01.enumeration_integer_values/enum_int_8.sts
 11.enumerations/02.enumeration_string_values/enum_str_4.sts
-11.enumerations/02.enumeration_string_values/enum_str_8.sts
-11.enumerations/02.enumeration_string_values/enum_str_9.sts
-11.enumerations/02.enumeration_string_values/enum_str_2.sts
-11.enumerations/02.enumeration_string_values/enum_str_3.sts
-
-# (Not implemented yet) Getting enumeration member name doesn't work as defined in 11.3
-11.enumerations/03.enumeration_operations/enum_member_name1.sts
-11.enumerations/03.enumeration_operations/enum_member_name2.sts
-11.enumerations/03.enumeration_operations/enum_member_name3.sts
-11.enumerations/03.enumeration_operations/enum_member_name4.sts
-11.enumerations/03.enumeration_operations/enum_member_name5.sts
 
 # es2panda fails: panda:14545 es2panda aborts on casting union type value with unboxing
 # es2panda fails: panda#14496 Compiler takes two methods with different rest parameters as the same
@@ -1110,10 +1085,6 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_4.sts
 17.experimental_features/07.function_and_method_overloading/01.function_overloading/fn_overloading_n_10.sts
 
-# 14443 Big refactoring and fixup for enum
-17.experimental_features/14.enumeration_methods/enum_type_methods_getvalueof.sts
-17.experimental_features/14.enumeration_methods/enum_type_methods_getvalueof_1.sts
-
 # #15600 overloading methods with tuples in parameters
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over1_10.sts
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over1_9.sts
@@ -1235,9 +1206,6 @@
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over1_14.sts
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over2_11.sts
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_8.sts
-
-# 16022 Failed compilation of Enumeration-Operations
-11.enumerations/03.enumeration_operations/enum_type_methods_valueof.sts
 
 # Null type annotation is allowed now, these test are incorrect
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.sts
@@ -1422,63 +1390,6 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_4.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_5.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.sts
-
-# 14443 Enum cannot be assigned to int, long, float, double
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/assn_var/assn-var_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/assn_var/assn-var_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/assn_var/assn-var_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/assn_var/assn-var_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/assn_var/assn-var_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_cons/call-cons_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_cons/call-cons_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_cons/call-cons_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_cons/call-cons_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_cons/call-cons_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_lmbd/call-lmbd_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_lmbd/call-lmbd_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_lmbd/call-lmbd_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_lmbd/call-lmbd_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_lmbd/call-lmbd_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_arr/comp-arr_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_arr/comp-arr_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_arr/comp-arr_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_arr/comp-arr_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_arr/comp-arr_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-clss_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-clss_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-clss_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-clss_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-clss_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-field_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-field_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-field_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-field_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-field_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-st-field_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-st-field_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-st-field_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-st-field_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_field/decl-st-field_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_28.sts
 
 # 13947 Object Literal of Interface Type is not implemented
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-nan.sts
@@ -1683,32 +1594,6 @@
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/assn-var.sts
 06.contexts_and_conversions/05.implicit_conversions/08.char_to_string_conversion/comp-clss.sts
 
-# enum to int conversion is not implemented
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_0.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_1.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_10.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_2.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_3.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_4.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_5.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_6.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_7.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_8.sts
-06.contexts_and_conversions/05.implicit_conversions/12.enum_to_int_conversion/enum2int_9.sts
-
-# enum to string conversion is not implemented
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_0.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_1.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_10.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_2.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_3.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_4.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_5.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_6.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_7.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_8.sts
-06.contexts_and_conversions/05.implicit_conversions/13.enum_to_string_conversion/enum2str_9.sts
-
 # union of literals is not supported yet
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_0.sts
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/assn_var/assn-var-lit_1.sts
@@ -1866,24 +1751,8 @@
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_obj/comp-clss_6.sts
 
 # 15648 Instance of Enum type must be assignable in Object
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/assn_var/assn-var_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/assn_var/assn-var_14.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_cons/call-cons_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_cons/call-cons_14.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_func/call-func_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_func/call-func_14.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_lmbd/call-lmbd_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_lmbd/call-lmbd_14.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_meth/call-meth_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/call_meth/call-meth_14.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr_14.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_obj/comp-clss_13.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_obj/comp-clss_14.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_field/decl-field_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_field/decl-field_14.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_var/decl-var_13.sts
-06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/decl_var/decl-var_14.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_7.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq_8.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/ne_10.sts

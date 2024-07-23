@@ -27,5 +27,5 @@ function test(val: Int) {
 }
 
 function main(): void {
-    test(MyEnum.N1.getValue());
+    test(MyEnum.N1.valueOf());
 }

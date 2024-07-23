@@ -236,3 +236,14 @@ cases:
       call: |-
           assert foo() == undefined
           assert foo('test') == 'test'
+
+    - decl: |-
+          enum Color {Red, Green, Blue}
+          function foo(c?: Color) {}
+      call: foo(Color.Blue)
+
+    - decl: |-
+          enum Color {Red, Green, Blue}
+          type XYZ=Color
+          function foo(c?: XYZ) {}
+      call: foo(Color.Blue)

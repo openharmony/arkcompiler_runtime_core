@@ -16,7 +16,7 @@ limitations under the License.
 /*---
 desc: 11. Enumerations
 name: spec/enum/issue14633.sts
-tags: [negative, compile-only]
+tags: [compile-only]
 ---*/
 
 enum MyEnum {

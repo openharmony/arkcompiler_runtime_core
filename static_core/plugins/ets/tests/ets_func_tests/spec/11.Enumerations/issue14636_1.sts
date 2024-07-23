@@ -24,7 +24,7 @@ enum MyEnum {
 }
 
 function test(param: MyEnum = MyEnum.N1): Int {
-    return param.getValue();
+    return param.valueOf();
 }
 
 function main(): void {

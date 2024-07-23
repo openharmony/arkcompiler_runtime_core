@@ -51,7 +51,7 @@ cases:
           assert v == 155
 
     - decl: |-
-          let s: number = 42
+          let s: int = 42
           class A {
               fld1: int = Color.Red
               fld2: number = Color.Blue + Color.Green
@@ -82,7 +82,7 @@ cases:
           assert a.fld3 == 143
 
     - decl: |-
-          let s: number = 42
+          let s: int = 42
           function foo(p: int): number {
               return p + 1
           }
@@ -90,7 +90,7 @@ cases:
           // call context, function
           assert foo(Color.Red) == 1
           assert foo(Color.Green + Color.Blue) == 202
-          assert foo(s + Color.Blue + 2) == 145
+          assert foo(s + Color.Blue + 2) == 146
 
     - decl: |-
           let s: number = 42.0
@@ -103,8 +103,8 @@ cases:
           // call context, method
           let a: A = new A()
           assert a.meth(Color.Red) == 2.0
-          assert a.meth(Color.Green + Color.Blue) == 103.0
-          assert a.meth(s + Color.Blue) == 143.0
+          assert a.meth(Color.Green + Color.Blue) == 203.0
+          assert a.meth(s + Color.Blue) == 145.0
 
     - decl: |-
           let s: int = 42
@@ -141,20 +141,6 @@ cases:
           assert a.fld == 201
           a = { fld: s + Color.Blue + 1 }
           assert a.fld == 144
-
-    - decl: |-
-          let s: number = 42
-          interface I {
-              fld: number
-          }
-      use: |-
-          // composite interface
-          let i: I = { fld: Color.Red }
-          assert i.fld == 0
-          i = { fld: Color.Blue + Color.Green }
-          assert i.fld == 201
-          i = { fld: s + Color.Blue + 2 }
-          assert i.fld == 145
 
     - decl: |-
           let s: number = 42.0

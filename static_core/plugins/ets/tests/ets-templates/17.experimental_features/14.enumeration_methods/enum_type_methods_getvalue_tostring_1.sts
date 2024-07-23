@@ -14,12 +14,12 @@ limitations under the License.
 ---*/
 
 /*---
-desc: c.toString() returns the same value as c.getValue().toString().
+desc: c.toString() returns the same value as c.valueOf().toString().
 ---*/
 
 enum Color {Red = 1, Green = 2, Blue}
 
 function main(): void {
   let c: Color = Color.Green
-  assert c.toString() == (c.getValue() as Int).toString()
+  assert c.toString() == (c.valueOf() as Int).toString()
 }

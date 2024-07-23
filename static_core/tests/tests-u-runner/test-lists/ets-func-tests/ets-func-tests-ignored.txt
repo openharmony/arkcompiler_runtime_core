@@ -173,8 +173,6 @@ spec/11.Enumerations/enum_const_expr_01_03.sts
 spec/11.Enumerations/enum_const_expr_01_04.sts
 spec/11.Enumerations/enum_const_expr_01_05.sts
 spec/11.Enumerations/enum_const_expr_02_01.sts
-### Issue 14633
-spec/11.Enumerations/issue14633_1.sts
 ### Issue 14636
 ### End enum
 

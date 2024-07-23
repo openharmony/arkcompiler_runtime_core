@@ -87,8 +87,8 @@ cases:
         import {ENUM} from "./modules/declarations.sts"  // Enum
         import {RENUM} from "./modules/reexported_directives.sts"  // Enum
     call: |-
-        assert(ENUM.Red.getValue() == RENUM.Red.getValue());
-        assert(ENUM.Blue.getValue() == RENUM.Blue.getValue());
+        assert(ENUM.Red.valueOf() == RENUM.Red.valueOf());
+        assert(ENUM.Blue.valueOf() == RENUM.Blue.valueOf());
 
   - import: |-
         import {A} from "./modules/declarations.sts"  // Base class
