@@ -378,7 +378,6 @@ protected:
 
         constexpr size_t WRITE_BYTES = std::max(sizeof(T), PTR_SIZE);
         gpArgBytesWritten_ = RoundUp(gpArgBytesWritten_, WRITE_BYTES);
-
         if (gpArgBytesWritten_ < ExtArchTraits<A>::GP_ARG_NUM_BYTES) {
             ArgWriterBase<A>::RegisterValueWrite(v);
             gpArgBytesWritten_ += WRITE_BYTES;

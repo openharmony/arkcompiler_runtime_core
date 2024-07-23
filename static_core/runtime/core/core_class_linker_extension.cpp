@@ -57,6 +57,37 @@ void CoreClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, c
     }
 }
 
+void CoreClassLinkerExtension::InitializeClassRoots(const LanguageContext &ctx)
+{
+    InitializePrimitiveClassRoot(ClassRoot::U1, Type::TypeId::U1, "Z");
+    InitializePrimitiveClassRoot(ClassRoot::I8, Type::TypeId::I8, "B");
+    InitializePrimitiveClassRoot(ClassRoot::U8, Type::TypeId::U8, "H");
+    InitializePrimitiveClassRoot(ClassRoot::I16, Type::TypeId::I16, "S");
+    InitializePrimitiveClassRoot(ClassRoot::U16, Type::TypeId::U16, "C");
+    InitializePrimitiveClassRoot(ClassRoot::I32, Type::TypeId::I32, "I");
+    InitializePrimitiveClassRoot(ClassRoot::U32, Type::TypeId::U32, "U");
+    InitializePrimitiveClassRoot(ClassRoot::I64, Type::TypeId::I64, "J");
+    InitializePrimitiveClassRoot(ClassRoot::U64, Type::TypeId::U64, "Q");
+    InitializePrimitiveClassRoot(ClassRoot::F32, Type::TypeId::F32, "F");
+    InitializePrimitiveClassRoot(ClassRoot::F64, Type::TypeId::F64, "D");
+    InitializePrimitiveClassRoot(ClassRoot::TAGGED, Type::TypeId::TAGGED, "A");
+
+    InitializeArrayClassRoot(ClassRoot::ARRAY_U1, ClassRoot::U1, "[Z");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_I8, ClassRoot::I8, "[B");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_U8, ClassRoot::U8, "[H");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_I16, ClassRoot::I16, "[S");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_U16, ClassRoot::U16, "[C");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_I32, ClassRoot::I32, "[I");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_U32, ClassRoot::U32, "[U");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_I64, ClassRoot::I64, "[J");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_U64, ClassRoot::U64, "[Q");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_F32, ClassRoot::F32, "[F");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_F64, ClassRoot::F64, "[D");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_TAGGED, ClassRoot::TAGGED, "[A");
+    InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
+                             utf::Mutf8AsCString(ctx.GetStringArrayClassDescriptor()));
+}
+
 bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
 {
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(GetLanguage());
@@ -93,34 +124,7 @@ bool CoreClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     InitializeArrayClassRoot(ClassRoot::ARRAY_CLASS, ClassRoot::CLASS,
                              utf::Mutf8AsCString(ctx.GetClassArrayClassDescriptor()));
 
-    InitializePrimitiveClassRoot(ClassRoot::U1, Type::TypeId::U1, "Z");
-    InitializePrimitiveClassRoot(ClassRoot::I8, Type::TypeId::I8, "B");
-    InitializePrimitiveClassRoot(ClassRoot::U8, Type::TypeId::U8, "H");
-    InitializePrimitiveClassRoot(ClassRoot::I16, Type::TypeId::I16, "S");
-    InitializePrimitiveClassRoot(ClassRoot::U16, Type::TypeId::U16, "C");
-    InitializePrimitiveClassRoot(ClassRoot::I32, Type::TypeId::I32, "I");
-    InitializePrimitiveClassRoot(ClassRoot::U32, Type::TypeId::U32, "U");
-    InitializePrimitiveClassRoot(ClassRoot::I64, Type::TypeId::I64, "J");
-    InitializePrimitiveClassRoot(ClassRoot::U64, Type::TypeId::U64, "Q");
-    InitializePrimitiveClassRoot(ClassRoot::F32, Type::TypeId::F32, "F");
-    InitializePrimitiveClassRoot(ClassRoot::F64, Type::TypeId::F64, "D");
-    InitializePrimitiveClassRoot(ClassRoot::TAGGED, Type::TypeId::TAGGED, "A");
-
-    InitializeArrayClassRoot(ClassRoot::ARRAY_U1, ClassRoot::U1, "[Z");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_I8, ClassRoot::I8, "[B");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_U8, ClassRoot::U8, "[H");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_I16, ClassRoot::I16, "[S");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_U16, ClassRoot::U16, "[C");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_I32, ClassRoot::I32, "[I");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_U32, ClassRoot::U32, "[U");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_I64, ClassRoot::I64, "[J");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_U64, ClassRoot::U64, "[Q");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_F32, ClassRoot::F32, "[F");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_F64, ClassRoot::F64, "[D");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_TAGGED, ClassRoot::TAGGED, "[A");
-    InitializeArrayClassRoot(ClassRoot::ARRAY_STRING, ClassRoot::STRING,
-                             utf::Mutf8AsCString(ctx.GetStringArrayClassDescriptor()));
-
+    InitializeClassRoots(ctx);
     return true;
 }
 

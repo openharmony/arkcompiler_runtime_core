@@ -404,14 +404,15 @@ Type ArkHotreloadBase::MethodChangesCheck(ClassContainment *hCls)
         for (auto &oldMethod : oldMethods) {
             PandaString oldName = utf::Mutf8AsCString(oldMethod.GetName().data);
             PandaString newName = utf::Mutf8AsCString(newMethod.GetName().data);
-            if (oldName == newName) {
-                isNameFound = true;
-                if (oldMethod.GetProto() == newMethod.GetProto() &&
-                    GetFileAccessFlags(oldMethod) == GetFileAccessFlags(newMethod)) {
-                    methodsTable_[&oldMethod] = &newMethod;
-                    isExactFound = true;
-                    break;
-                }
+            if (oldName != newName) {
+                continue;
+            }
+            isNameFound = true;
+            if (oldMethod.GetProto() == newMethod.GetProto() &&
+                GetFileAccessFlags(oldMethod) == GetFileAccessFlags(newMethod)) {
+                methodsTable_[&oldMethod] = &newMethod;
+                isExactFound = true;
+                break;
             }
         }
 

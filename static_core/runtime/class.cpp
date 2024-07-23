@@ -71,7 +71,7 @@ Class::UniqId Class::CalcUniqId(const panda_file::File *file, panda_file::File::
 
 Class::UniqId Class::CalcUniqId(const uint8_t *descriptor)
 {
-    uint64_t uid;
+    uint64_t uid = 0;
     uid = GetHash32String(descriptor);
     constexpr uint64_t HALF = 32ULL;
     constexpr uint64_t NO_FILE = 0xFFFFFFFFULL << HALF;

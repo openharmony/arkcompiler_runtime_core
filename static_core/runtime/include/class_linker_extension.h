@@ -116,6 +116,23 @@ public:
         return canInitializeClasses_;
     }
 
+    void RecordNewRoot(mem::VisitGCRootFlags flags)
+    {
+        ASSERT(BitCount(flags & (mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT |
+                                 mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT)) <= 1);
+        if ((flags & mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT) != 0) {
+            // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
+            // consistent order where threads observe all modifications in the same order
+            recordNewClass_.store(true, std::memory_order_seq_cst);
+        } else if ((flags & mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT) != 0) {
+            // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
+            // consistent order where threads observe all modifications in the same order
+            recordNewClass_.store(false, std::memory_order_seq_cst);
+            os::memory::LockHolder lock(newClassesLock_);
+            newClasses_.clear();
+        }
+    }
+
     template <class Callback>
     bool EnumerateClasses(const Callback &cb, mem::VisitGCRootFlags flags = mem::VisitGCRootFlags::ACCESS_ROOT_ALL)
     {
@@ -163,19 +180,7 @@ public:
             }
         }
 
-        ASSERT(BitCount(flags & (mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT |
-                                 mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT)) <= 1);
-        if ((flags & mem::VisitGCRootFlags::START_RECORDING_NEW_ROOT) != 0) {
-            // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
-            // consistent order where threads observe all modifications in the same order
-            recordNewClass_.store(true, std::memory_order_seq_cst);
-        } else if ((flags & mem::VisitGCRootFlags::END_RECORDING_NEW_ROOT) != 0) {
-            // Atomic with seq_cst order reason: data race with record_new_class_ with requirement for sequentially
-            // consistent order where threads observe all modifications in the same order
-            recordNewClass_.store(false, std::memory_order_seq_cst);
-            os::memory::LockHolder lock(newClassesLock_);
-            newClasses_.clear();
-        }
+        RecordNewRoot(flags);
 
         return true;
     }

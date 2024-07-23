@@ -154,7 +154,6 @@ inline size_t ClzInSwappedBytes<PandaWideUintT>(PandaWideUintT val)
 {
     uint64_t hi = __builtin_bswap64(static_cast<uint64_t>(val >> BITS_PER_UINT64));
     uint64_t lo = __builtin_bswap64(static_cast<uint64_t>(val));
-
     if (lo == 0) {
         return BITS_PER_UINT64 + Clz(hi);
     }

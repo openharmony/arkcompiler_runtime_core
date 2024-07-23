@@ -28,7 +28,6 @@ static Array *AllocateArray(ark::BaseClass *arrayClass, size_t elemSize, ArraySi
                             bool pinned = false, const PandaVM *vm = Thread::GetCurrent()->GetVM())
 {
     size_t size = Array::ComputeSize(elemSize, length);
-
     if (UNLIKELY(size == 0)) {
         LOG(ERROR, RUNTIME) << "Illegal array size: element size: " << elemSize << " array length: " << length;
         ThrowOutOfMemoryError("OOM when allocating array");

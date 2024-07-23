@@ -71,6 +71,7 @@ public:
 
 private:
     bool InitializeImpl(bool compressedStringEnabled) override;
+    void InitializeClassRoots(const LanguageContext &ctx);
 
     class ErrorHandler : public ClassLinkerErrorHandler {
     public:

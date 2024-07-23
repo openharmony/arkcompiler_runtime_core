@@ -77,6 +77,9 @@ PANDA_PUBLIC_API void ThrowOutOfMemoryError(const PandaString &msg);
 
 void FindCatchBlockInCallStack(ManagedThread *thread);
 
+void DropCFrameIfNecessary(ManagedThread *thread, StackWalker *stack, Frame *origFrame, FrameAccessor nextFrame,
+                           Method *method);
+
 void FindCatchBlockInCFrames(ManagedThread *thread, StackWalker *stack, Frame *origFrame);
 
 void ThrowIllegalAccessException(const PandaString &msg);

@@ -76,9 +76,7 @@ void ThrowArrayIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::
 void ThrowArrayIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::ArraySizeT length,
                                          const LanguageContext &ctx, ManagedThread *thread)
 {
-    PandaString msg;
-    msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
-
+    PandaString msg {"idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length)};
     ThrowException(ctx, thread, ctx.GetArrayIndexOutOfBoundsExceptionClassDescriptor(),
                    utf::CStringAsMutf8(msg.c_str()));
     SetExceptionEvent(events::ExceptionType::BOUND_CHECK, thread);
@@ -88,10 +86,7 @@ void ThrowIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes::Array
 {
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
-
-    PandaString msg;
-    msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
-
+    PandaString msg {"idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length)};
     ThrowException(ctx, thread, ctx.GetIndexOutOfBoundsExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
@@ -106,10 +101,7 @@ void ThrowStringIndexOutOfBoundsException(coretypes::ArraySsizeT idx, coretypes:
 {
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
-
-    PandaString msg;
-    msg = "idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length);
-
+    PandaString msg {"idx = " + ToPandaString(idx) + "; length = " + ToPandaString(length)};
     ThrowException(ctx, thread, ctx.GetStringIndexOutOfBoundsExceptionClassDescriptor(),
                    utf::CStringAsMutf8(msg.c_str()));
     SetExceptionEvent(events::ExceptionType::BOUND_CHECK, thread);
@@ -119,10 +111,7 @@ void ThrowNegativeArraySizeException(coretypes::ArraySsizeT size)
 {
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
-
-    PandaString msg;
-    msg = "size = " + ToPandaString(size);
-
+    PandaString msg {"size = " + ToPandaString(size)};
     ThrowException(ctx, thread, ctx.GetNegativeArraySizeExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
@@ -146,10 +135,7 @@ void ThrowClassCastException(const Class *dstType, const Class *srcType)
 {
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
-
-    PandaString msg;
-    msg = srcType->GetName() + " cannot be cast to " + dstType->GetName();
-
+    PandaString msg {srcType->GetName() + " cannot be cast to " + dstType->GetName()};
     ThrowException(ctx, thread, ctx.GetClassCastExceptionClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
     SetExceptionEvent(events::ExceptionType::CAST_CHECK, thread);
 }
@@ -158,12 +144,9 @@ void ThrowAbstractMethodError(const Method *method)
 {
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
-
-    PandaString msg;
-    msg = "abstract method \"" + method->GetClass()->GetName() + ".";
+    PandaString msg {"abstract method \"" + method->GetClass()->GetName() + "."};
     msg += utf::Mutf8AsCString(method->GetName().data);
     msg += "\"";
-
     ThrowException(ctx, thread, ctx.GetAbstractMethodErrorClassDescriptor(), utf::CStringAsMutf8(msg.c_str()));
     SetExceptionEvent(events::ExceptionType::ABSTRACT_METHOD, thread);
 }
@@ -172,12 +155,9 @@ void ThrowIncompatibleClassChangeErrorForMethodConflict(const Method *method)
 {
     auto *thread = ManagedThread::GetCurrent();
     auto ctx = GetLanguageContext(thread);
-
-    PandaString msg;
-    msg = "Conflicting default method implementations \"" + method->GetClass()->GetName() + ".";
+    PandaString msg {"Conflicting default method implementations \"" + method->GetClass()->GetName() + "."};
     msg += utf::Mutf8AsCString(method->GetName().data);
     msg += "\"";
-
     ThrowException(ctx, thread, ctx.GetIncompatibleClassChangeErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
     SetExceptionEvent(events::ExceptionType::ICCE_METHOD_CONFLICT, thread);
 }
@@ -220,6 +200,38 @@ void ThrowClassCircularityError(const PandaString &className, const LanguageCont
     ThrowException(ctx, thread, ctx.GetClassCircularityErrorDescriptor(), utf::CStringAsMutf8(msg.c_str()));
 }
 
+NO_ADDRESS_SANITIZE void DropCFrameIfNecessary(ManagedThread *thread, StackWalker *stack, Frame *origFrame,
+                                               FrameAccessor nextFrame, Method *method)
+{
+    if (!nextFrame.IsCFrame()) {
+        if (origFrame != nullptr) {
+            FreeFrame(origFrame);
+        }
+        thread->SetCurrentFrame(nextFrame.GetIFrame());
+        LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame isn't CFrame";
+        DropCompiledFrame(stack);
+        UNREACHABLE();
+    }
+
+    if (nextFrame.GetCFrame().IsNative()) {
+        if (origFrame != nullptr) {
+            FreeFrame(origFrame);
+        }
+        LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is NATIVE";
+        DropCompiledFrame(stack);
+        UNREACHABLE();
+    }
+
+    if (method->IsStaticConstructor()) {
+        if (origFrame != nullptr) {
+            FreeFrame(origFrame);
+        }
+        LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is StaticConstructor";
+        DropCompiledFrame(stack);
+        UNREACHABLE();
+    }
+}
+
 /**
  * The function finds the corresponding catch block for the exception in the thread.
  * The function uses thread as an exception storage because:
@@ -237,7 +249,6 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWal
         auto *method = stack->GetMethod();
         ASSERT(method != nullptr);
         uint32_t pcOffset = method->FindCatchBlock(thread->GetException()->ClassAddr<Class>(), pc);
-
         if (pcOffset != panda_file::INVALID_OFFSET) {
             if (origFrame != nullptr) {
                 FreeFrame(origFrame);
@@ -251,49 +262,25 @@ NO_ADDRESS_SANITIZE void FindCatchBlockInCFrames(ManagedThread *thread, StackWal
 
         thread->GetVM()->HandleReturnFrame();
 
-        if (!nextFrame.IsCFrame()) {
+        DropCFrameIfNecessary(thread, stack, origFrame, nextFrame, method);
+
+        if (stack->IsInlined()) {
+            continue;
+        }
+
+        auto prev = stack->GetCFrame().GetPrevFrame();
+        if (stack->GetBoundaryFrameMethod<FrameKind::COMPILER>(prev) == FrameBridgeKind::BYPASS) {
+            /**
+             * There is bypass bridge and current frame is not inlined, hence we are going to exit compiled
+             * function. Dynamic languages may do c2c call through runtime, so it's necessary to return to exit
+             * active function properly.
+             */
             if (origFrame != nullptr) {
                 FreeFrame(origFrame);
             }
-            thread->SetCurrentFrame(nextFrame.GetIFrame());
-            LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame isn't CFrame";
+            LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is caller's cframe";
             DropCompiledFrame(stack);
             UNREACHABLE();
-        }
-
-        if (nextFrame.GetCFrame().IsNative()) {
-            if (origFrame != nullptr) {
-                FreeFrame(origFrame);
-            }
-            LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is NATIVE";
-            DropCompiledFrame(stack);
-            UNREACHABLE();
-        }
-
-        if (method->IsStaticConstructor()) {
-            if (origFrame != nullptr) {
-                FreeFrame(origFrame);
-            }
-            LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is StaticConstructor";
-            DropCompiledFrame(stack);
-            UNREACHABLE();
-        }
-
-        if (!stack->IsInlined()) {
-            auto prev = stack->GetCFrame().GetPrevFrame();
-            if (stack->GetBoundaryFrameMethod<FrameKind::COMPILER>(prev) == FrameBridgeKind::BYPASS) {
-                /**
-                 * There is bypass bridge and current frame is not inlined, hence we are going to exit compiled
-                 * function. Dynamic languages may do c2c call through runtime, so it's necessary to return to exit
-                 * active function properly.
-                 */
-                if (origFrame != nullptr) {
-                    FreeFrame(origFrame);
-                }
-                LOG(DEBUG, INTEROP) << "DropCompiledFrameAndReturn. Next frame is caller's cframe";
-                DropCompiledFrame(stack);
-                UNREACHABLE();
-            }
         }
     }
 
