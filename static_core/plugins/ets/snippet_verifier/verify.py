@@ -65,9 +65,9 @@ def write_snippet_line(line, space_len, ets_file, ts_file=None):
 
 
 def write_code_meta(expect_cte, frontend_status, expect_subset, file):
-    file.write("// " + expect_cte + "\n")
-    file.write("// " + frontend_status + "\n")
-    file.write("// " + expect_subset + "\n")
+    file.write("//" + expect_cte + "\n")
+    file.write("//" + frontend_status + "\n")
+    file.write("//" + expect_subset + "\n")
 
 
 def write_snippet(rst_lines, snippet_name, snippet_meta, previous_snippet_name, frontend_statuses):

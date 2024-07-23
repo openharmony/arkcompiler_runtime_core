@@ -21,31 +21,8 @@
 
 namespace ark::ets::test {
 
-// NOTE(a.urakov): move initialization to a common internal objects testing base class
-class EtsMethodSignatureTest : public testing::Test {
-public:
-    EtsMethodSignatureTest()
-    {
-        RuntimeOptions options;
-        options.SetShouldLoadBootPandaFiles(false);
-        options.SetShouldInitializeIntrinsics(false);
-        options.SetCompilerEnableJit(false);
-        options.SetGcType("epsilon");
-        options.SetLoadRuntimes({"ets"});
-
-        Runtime::Create(options);
-    }
-
-    ~EtsMethodSignatureTest() override
-    {
-        Runtime::Destroy();
-    }
-
-    NO_COPY_SEMANTIC(EtsMethodSignatureTest);
-    NO_MOVE_SEMANTIC(EtsMethodSignatureTest);
-};
-
-TEST_F(EtsMethodSignatureTest, MethodSignature)
+namespace {
+void MethodSignaturePrologue()
 {
     EtsMethodSignature minimal(":V");
     EXPECT_EQ(minimal.GetProto(), Method::Proto(
@@ -74,6 +51,38 @@ TEST_F(EtsMethodSignatureTest, MethodSignature)
                                          panda_file::Type {panda_file::Type::TypeId::F64},
                                      },
                                      Method::Proto::RefTypeVector {}));
+}
+
+}  // namespace
+
+// NOTE(a.urakov): move initialization to a common internal objects testing base class
+class EtsMethodSignatureTest : public testing::Test {
+public:
+    EtsMethodSignatureTest()
+    {
+        RuntimeOptions options;
+        options.SetShouldLoadBootPandaFiles(false);
+        options.SetShouldInitializeIntrinsics(false);
+        options.SetCompilerEnableJit(false);
+        options.SetGcType("epsilon");
+        options.SetLoadRuntimes({"ets"});
+
+        Runtime::Create(options);
+    }
+
+    ~EtsMethodSignatureTest() override
+    {
+        Runtime::Destroy();
+    }
+
+    NO_COPY_SEMANTIC(EtsMethodSignatureTest);
+    NO_MOVE_SEMANTIC(EtsMethodSignatureTest);
+};
+
+TEST_F(EtsMethodSignatureTest, MethodSignature)
+{
+    MethodSignaturePrologue();
+
     EtsMethodSignature arrays("SB[J[Lstd/core/String;I:LT;");
     EXPECT_EQ(arrays.GetProto(), Method::Proto(
                                      Method::Proto::ShortyVector {

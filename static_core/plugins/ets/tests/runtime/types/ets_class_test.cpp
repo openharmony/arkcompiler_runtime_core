@@ -25,6 +25,48 @@
 
 namespace ark::ets::test {
 
+namespace {
+
+void InSamePackagePrologue()
+{
+    {
+        const char *source = R"(
+            .language eTS
+            .record Test {}
+        )";
+
+        EtsClass *klass = GetTestClass(source, "LTest;");
+        ASSERT_NE(klass, nullptr);
+
+        EtsArray *array1 = EtsObjectArray::Create(klass, 1000U);
+        EtsArray *array2 = EtsFloatArray::Create(1000U);
+        ASSERT_NE(array1, nullptr);
+        ASSERT_NE(array2, nullptr);
+
+        EtsClass *klass1 = array1->GetClass();
+        EtsClass *klass2 = array2->GetClass();
+        ASSERT_NE(klass1, nullptr);
+        ASSERT_NE(klass2, nullptr);
+
+        ASSERT_TRUE(klass1->IsInSamePackage(klass2));
+    }
+    {
+        EtsArray *array1 = EtsFloatArray::Create(1000U);
+        EtsArray *array2 = EtsIntArray::Create(1000U);
+        ASSERT_NE(array1, nullptr);
+        ASSERT_NE(array2, nullptr);
+
+        EtsClass *klass1 = array1->GetClass();
+        EtsClass *klass2 = array2->GetClass();
+        ASSERT_NE(klass1, nullptr);
+        ASSERT_NE(klass2, nullptr);
+
+        ASSERT_TRUE(klass1->IsInSamePackage(klass2));
+    }
+}
+
+}  // namespace
+
 class EtsClassTest : public testing::Test {
 public:
     EtsClassTest()
@@ -668,40 +710,8 @@ TEST_F(EtsClassTest, IsInSamePackage)
     ASSERT_FALSE(EtsClass::IsInSamePackage("LA/B;", "LA/B/C;"));
     ASSERT_FALSE(EtsClass::IsInSamePackage("LA/B/C;", "LA/B;"));
 
-    {
-        const char *source = R"(
-            .language eTS
-            .record Test {}
-        )";
+    InSamePackagePrologue();
 
-        EtsClass *klass = GetTestClass(source, "LTest;");
-        ASSERT_NE(klass, nullptr);
-
-        EtsArray *array1 = EtsObjectArray::Create(klass, 1000);
-        EtsArray *array2 = EtsFloatArray::Create(1000);
-        ASSERT_NE(array1, nullptr);
-        ASSERT_NE(array2, nullptr);
-
-        EtsClass *klass1 = array1->GetClass();
-        EtsClass *klass2 = array2->GetClass();
-        ASSERT_NE(klass1, nullptr);
-        ASSERT_NE(klass2, nullptr);
-
-        ASSERT_TRUE(klass1->IsInSamePackage(klass2));
-    }
-    {
-        EtsArray *array1 = EtsFloatArray::Create(1000);
-        EtsArray *array2 = EtsIntArray::Create(1000);
-        ASSERT_NE(array1, nullptr);
-        ASSERT_NE(array2, nullptr);
-
-        EtsClass *klass1 = array1->GetClass();
-        EtsClass *klass2 = array2->GetClass();
-        ASSERT_NE(klass1, nullptr);
-        ASSERT_NE(klass2, nullptr);
-
-        ASSERT_TRUE(klass1->IsInSamePackage(klass2));
-    }
     {
         const char *source = R"(
             .language eTS

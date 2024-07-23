@@ -93,7 +93,7 @@ TEST_F(EffectiveTypeTest, TestGetStaticMethod)
 {
     ets_class testClass = env->FindClass("EffectiveTypes");
     ASSERT_NE(testClass, nullptr);
-    std::array<EtsNativeMethod, 4> native_methods {
+    std::array<EtsNativeMethod, 4U> native_methods {
         EtsNativeMethod {"foo", "I:I", reinterpret_cast<void *>(effective_types_foo_I)},
         EtsNativeMethod {"foo", "D:I", reinterpret_cast<void *>(effective_types_foo_D)},
         EtsNativeMethod {"foo", ":D", reinterpret_cast<void *>(effective_types_foo)},

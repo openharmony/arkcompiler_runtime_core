@@ -98,8 +98,9 @@ class EtsBenchmarksRunner:
         self.aot_opts = aot_opts
 
     def dump_output_to_file(self, pipe, file_ext):
-        dumpfile = open(os.path.join(self.host_output_dir,
-                        self.current_bench_name, f"test.{file_ext}"), "w")
+        dumpfile = os.fdopen(os.open(os.path.join(self.host_output_dir,
+                                     self.current_bench_name, f"test.{file_ext}"),
+                                     os.O_RDWR|os.O_CREAT, 0o755), "w")
         dumpfile.write(pipe.decode('ascii'))
         dumpfile.close()
 
@@ -170,8 +171,13 @@ class EtsBenchmarksRunner:
             self.host_output_dir, self.current_bench_name)
         tmp_asm_file_path = os.path.join(current_output_dir, "test.pa")
         os.system(f"mkdir -p {current_output_dir}")
-        open(tmp_asm_file_path, "w").write(open(self.wrapper_asm_filepath, "r").read() +
-                                           open(base_asm_file_path, "r").read())
+        fd_read = os.open(self.wrapper_asm_filepath, os.O_RDONLY, 0o755)
+        fd_read_two = os.open(base_asm_file_path, os.O_RDONLY, 0o755)
+        file_to_read = os.fdopen(fd_read, "r")
+        file_to_read_two = os.fdopen(fd_read_two, "r")
+        os.fdopen(os.open(tmp_asm_file_path, os.O_WRONLY | os.O_CREAT, 0o755), "w").write(file_to_read.read() +
+                                                                             file_to_read_two.read())
+
         if self.is_device:
             device_current_output_dir = os.path.join(
                 self.device_output_dir, self.current_bench_name)
