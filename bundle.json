@@ -32,10 +32,8 @@
                 "vixl"
             ],
             "third_party": [
-                "bounds_checking_function",
                 "icu",
                 "musl",
-                "zlib",
                 "vixl"
             ]
         },
