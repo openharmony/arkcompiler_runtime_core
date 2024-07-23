@@ -15,16 +15,16 @@
 
 class Student {
   constructor() {
-    let flag = false
+    let flag = false;
     if (flag) {
-        flag = !flag
+        flag = !flag;
     }
   }
 }
 
 function test() {
-  let flag = false
+  let flag = false;
   if (flag) {
-    flag = !flag
+    flag = !flag;
   }
 }

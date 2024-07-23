@@ -15,38 +15,38 @@
 
 class Student {
   constructor() {
-    let flag = false
+    let flag = false;
     if (flag) {
-        flag = !falg
+        flag = !falg;
     }
   }
 }
 
 function test() {
-  let flag = false
+  let flag = false;
   if (flag) {
-    flag = !flag
+    flag = !flag;
   }
 }
 
 async function asyncTest() {
-  let flag = false
+  let flag = false;
   if (flag) {
     await Promise.resolve('a');
   }
 }
 
 function* generatorFunction() {
-  let flag = false
+  let flag = false;
   if (flag) {
-    yield flag
+    yield flag;
   }
 }
 
 async function* asyncGeneratorFunction() {
-  let flag = false
+  let flag = false;
   if (flag) {
-    let test = await Promise.resolve('a')
-    yield test
+    let test = await Promise.resolve('a');
+    yield test;
   }
 }

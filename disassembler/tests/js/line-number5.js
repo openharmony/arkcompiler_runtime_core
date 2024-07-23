@@ -14,9 +14,9 @@
  */
 
 async function* asyncGeneratorFunction() {
-    let flag = false
+    let flag = false;
     if (flag) {
-      let test = await Promise.resolve('a')
-      yield test
+      let test = await Promise.resolve('a');
+      yield test;
     }
 }

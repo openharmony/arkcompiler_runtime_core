@@ -51,7 +51,7 @@ function foo() {
       throw 'null';
     }
     if (x > 100) {
-      throw 'max'
+      throw 'max';
     } else {
       throw 'min';
     }
@@ -87,7 +87,7 @@ async function* asyncGenerateFunc() {
 }
 
 const asyncArrowFunc = async () => {
-  
+
 }
 
 foo();

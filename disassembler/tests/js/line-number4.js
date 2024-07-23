@@ -14,8 +14,8 @@
  */
 
 function* generatorFunction() {
-    let flag = false
+    let flag = false;
     if (flag) {
-      yield flag
+      yield flag;
     }
 }
