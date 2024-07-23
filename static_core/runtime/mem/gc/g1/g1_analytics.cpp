@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -91,6 +91,30 @@ void G1Analytics::ReportLiveObjects(size_t num)
     liveObjects_.fetch_add(num, std::memory_order_relaxed);
 }
 
+void G1Analytics::ReportSurvivedBytesRatio(const CollectionSet &collectionSet)
+{
+    if (!collectionSet.Young().empty()) {
+        auto liveBytes = static_cast<double>(GetPromotedRegions() * DEFAULT_REGION_SIZE + GetEvacuatedBytes());
+        auto totalSize = collectionSet.Young().size() * DEFAULT_REGION_SIZE;
+        auto ratio = liveBytes / totalSize;
+        survivedBytesRatioSeq_.Add(ratio);
+    }
+}
+
+size_t G1Analytics::GetPromotedRegions() const
+{
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    return promotedRegions_.load(std::memory_order_relaxed);
+}
+
+size_t G1Analytics::GetEvacuatedBytes() const
+{
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    return copiedBytes_.load(std::memory_order_relaxed);
+}
+
 double G1Analytics::PredictAllocationRate() const
 {
     return predictor_.Predict(allocationRateSeq_);
@@ -99,9 +123,15 @@ double G1Analytics::PredictAllocationRate() const
 void G1Analytics::ReportCollectionStart(uint64_t time)
 {
     currentYoungCollectionStart_ = time;
-    copiedBytes_ = 0;
-    promotedRegions_ = 0;
-    liveObjects_ = 0;
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    copiedBytes_.store(0, std::memory_order_relaxed);
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    promotedRegions_.store(0, std::memory_order_relaxed);
+    // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
+    // on other reads or writes
+    liveObjects_.store(0, std::memory_order_relaxed);
     remsetSize_ = 0;
     remsetRefsCount_ = 0;
     totalRemsetRefsCount_ = 0;
@@ -333,5 +363,10 @@ uint64_t G1Analytics::PredictMarkingTimeInMicros(size_t liveObjects, size_t rems
 uint64_t G1Analytics::PredictCopyingTimeInMicros(size_t copiedBytes) const
 {
     return PredictTime(copiedBytes, copyingBytesRateSeq_);
+}
+
+double G1Analytics::PredictSurvivedBytesRatio() const
+{
+    return predictor_.Predict(survivedBytesRatioSeq_);
 }
 }  // namespace ark::mem

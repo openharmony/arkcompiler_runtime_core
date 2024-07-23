@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -42,13 +42,14 @@ public:
     void ReportUpdateRefsEnd(uint64_t time);
     void ReportPromotedRegion();
     void ReportLiveObjects(size_t num);
-
+    void ReportSurvivedBytesRatio(const CollectionSet &collectionSet);
     double PredictAllocationRate() const;
     uint64_t PredictYoungCollectionTimeInMicros(size_t edenLength) const;
     uint64_t PredictYoungCollectionTimeInMicros(const CollectionSet &collectionSet) const;
     uint64_t PredictOldCollectionTimeInMicros(size_t remsetSize, size_t liveBytes, size_t liveObjects) const;
     uint64_t PredictOldCollectionTimeInMicros(Region *region) const;
     uint64_t PredictScanDirtyCardsTime(size_t dirtyCardsCount) const;
+    double PredictSurvivedBytesRatio() const;
 
     void ReportPredictedMixedPause(uint64_t time)
     {
@@ -56,6 +57,8 @@ public:
     }
 
 private:
+    size_t GetPromotedRegions() const;
+    size_t GetEvacuatedBytes() const;
     double PredictPromotedRegions(size_t edenLength) const;
     uint64_t EstimatePromotionTimeInMicros(size_t promotedRegions) const;
     uint64_t PredictUpdateRefsTimeInMicros(size_t liveObjects, size_t remsetRefsCount) const;
@@ -100,6 +103,7 @@ private:
     ark::Sequence otherSeq_;
     ark::Sequence liveObjectsSeq_;
     ark::Sequence scanDirtyCardsRateSeq_;
+    ark::Sequence survivedBytesRatioSeq_;
     static constexpr double DEFAULT_CONFIDENCE_FACTOR = 0.5;
     G1Predictor predictor_ {DEFAULT_CONFIDENCE_FACTOR};
     std::atomic<size_t> copiedBytes_ {0};

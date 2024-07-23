@@ -656,11 +656,8 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
     size_t bytesInHeapBeforeMove = this->GetPandaVm()->GetMemStats()->GetFootprintHeap();
     {
         ScopedTiming t("G1 GC", *this->GetTiming());
-        uint64_t startCollectionTime = 0;
-        if (this->GetSettings()->G1EnablePauseTimeGoal()) {
-            startCollectionTime = ark::time::GetCurrentTimeInNanos();
-            analytics_.ReportCollectionStart(startCollectionTime);
-        }
+        auto startCollectionTime = ark::time::GetCurrentTimeInNanos();
+        analytics_.ReportCollectionStart(startCollectionTime);
         {
             GCScopedPauseStats scopedPauseStats(this->GetPandaVm()->GetGCStats());
             this->memStats_.Reset();
@@ -1107,6 +1104,8 @@ void G1GC<LanguageConfig>::EvacuateCollectionSet(const GCTask &task)
     parallelCompactionTask.FlushDirtyCards(updatedRefsQueue_);
     parallelCompactionTask.Finish();
 
+    analytics_.ReportEvacuatedBytes(parallelCompactionTask.GetCopiedBytesYoung());
+
     this->memStats_.template RecordSizeMovedYoung<false>(parallelCompactionTask.GetCopiedBytesYoung());
     this->memStats_.template RecordCountMovedYoung<false>(parallelCompactionTask.GetCopiedObjectsYoung());
     this->memStats_.template RecordSizeMovedTenured<false>(parallelCompactionTask.GetCopiedBytesOld());
@@ -1192,6 +1191,7 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
             ClearTenuredCards(collectibleRegions);
             CollectAndMove<false>(collectibleRegions);
         }
+        analytics_.ReportSurvivedBytesRatio(collectibleRegions);
         ClearRefsFromRemsetsCache();
         this->GetObjectGenAllocator()->InvalidateSpaceData();
     }
@@ -1227,7 +1227,14 @@ bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
         }
     }
 
-    return true;
+    auto predictedSurvivedBytesRatio = analytics_.PredictSurvivedBytesRatio();
+    if (predictedSurvivedBytesRatio == 0) {
+        // threre are not statistics, starts with GC which is able to promote whole regions
+        return false;
+    }
+
+    // uses single pass collection for low survival ratio
+    return predictedSurvivedBytesRatio * PERCENT_100_D < g1PromotionRegionAliveRate_;
 }
 
 template <class LanguageConfig>
