@@ -121,11 +121,11 @@ final class MapIterator<K, V, R> implements IterableIterator<R> {
     }
 
     override next(): IteratorResult<R> {
-        this.node = this.node.next
-        if (__runtimeIsSameReference(this.node, this.tail)) {
+        const nextNode = this.node.next
+        if (__runtimeIsSameReference(nextNode, this.tail)) {
             return new IteratorResult<R>()
         }
-
+        this.node = nextNode
         return new IteratorResult<R>(this.mapper(this.node))
     }
 

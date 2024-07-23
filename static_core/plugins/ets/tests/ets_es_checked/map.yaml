@@ -74,3 +74,11 @@ sub:
               Array.of<[number, string]>([0, ""] as [number, string])
             - |
               new Set<[number, string]>(Array.of<[number, string]>([0, "123"] as [number, string], [0, "132"] as [number, string], [0, "312"] as [number, string]))
+      - expr: res
+        setup: |
+            let x = new Map<string, number>()
+            x.set("key1", 1)
+            let iter = x.entries()
+            iter.next()
+            let res = iter.next().done
+            res = res && iter.next().done

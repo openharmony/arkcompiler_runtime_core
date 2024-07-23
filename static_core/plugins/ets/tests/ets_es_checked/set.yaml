@@ -89,3 +89,11 @@ sub:
               'a\uDFB7'
             - |
               'a𠮷b'
+      - expr: res
+        setup: |
+            let x = new Set<String>()
+            x.add("key1")
+            let iter = x.values()
+            iter.next()
+            let res = iter.next().done
+            res = res && iter.next().done
