@@ -49,6 +49,6 @@ function main(): void {
     assert(foo(new Number[2]) == 18);
     assert(foo(tpl) == 19);
     assert(foo<Number, String>(new Number(), new String()) == 20);
-    assert(foo( () => { return false); } ) == 21);
+    assert(foo( () => { return false; } ) == 21);
     assert(foo(1, 1.2, "who`s there?" ) == 22);
 }

@@ -27,7 +27,7 @@ files:
 import {foo} from "./modules/function_export_all.ets"
 
 function main(): void {
-    assert(foo() == 1));
+    assert(foo() == 1);
     assert(foo(true) == 2);
     assert(foo(new Boolean()) == 3);
     assert(foo(c'A') == 4);

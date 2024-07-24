@@ -22,7 +22,9 @@ desc: String comparison {{str.left}} {{str.op}} {{str.right}}
 function main(): void {
   let x: string = "{{str.left}}"
   let y: string = "{{str.right}}"
+  let z: String = new String("{{str.right}}")
   assert ( x {{str.op}} y) == {{str.result}};
+  assert ( x {{str.op}} z) == {{str.result}};
 }
 
 {% endfor %}

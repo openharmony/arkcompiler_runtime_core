@@ -20,10 +20,15 @@ desc: Boolean comparison {{case.left}} {{case.op}} {{case.right}}
 ---*/
 
 function main(): void {
-  let x: {{case.type}} = {{case.left}}
-  let y: {{case.type}} = {{case.right}}
-  assert ( {{case.left}} {{case.op}} {{case.right}} ) == {{case.result}}
-  assert ( x {{case.op}} y) == {{case.result}}
+    let x: boolean = {{case.xvalue}}
+    let bx: Boolean = new Boolean({{case.xvalue}})
+    let y: boolean = {{case.yvalue}}
+    let by: Boolean = new Boolean({{case.yvalue}})
+
+    assert ( {{case.xvalue}} {{case.op}} {{case.yvalue}} ) == {{case.result}}
+    assert ( x {{case.op}} y) == {{case.result}}
+    assert ( bx {{case.op}} by) == {{case.result}}
+    assert ( x {{case.op}} by) == {{case.result}}
 }
 
 {% endfor %}
