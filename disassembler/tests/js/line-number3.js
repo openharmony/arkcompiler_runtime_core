@@ -14,5 +14,5 @@
  */
 
 async function asyncLineTest() {
-  await new Promise("test");
+  await new Promise('test');
 }

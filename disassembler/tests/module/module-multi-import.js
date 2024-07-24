@@ -28,7 +28,7 @@ import ee, * as n from './module-multi-export.js';
 import * as ns from './module-multi-export.js';
 
 import { f as ff } from './module-multi-export.js';
-import { g , h as hh } from './module-multi-export.js';
+import { g, h as hh } from './module-multi-export.js';
 
 import './module-multi-export.js';
 
