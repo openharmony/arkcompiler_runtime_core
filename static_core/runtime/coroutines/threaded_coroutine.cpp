@@ -114,7 +114,6 @@ void ThreadedCoroutineContext::ThreadProc(ThreadedCoroutineContext *ctx)
         Value res = co->GetManagedEntrypoint()->Invoke(co, args.data());
         LOG(DEBUG, COROUTINES) << "ThreadProc: invoke() finished for the EP of coro " << co->GetName();
         co->RequestCompletion(res);
-        threadManager->UnblockWaiters(co->GetCompletionEvent());
         co->ProcessPresentAndAnnouncedCallbacks();
     }
     ctx->SetStatus(Coroutine::Status::TERMINATING);

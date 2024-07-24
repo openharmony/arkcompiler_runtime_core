@@ -62,8 +62,9 @@ public:
                                              MIRROR_FIELD_INFO(EtsPromise, coroPtrQueue_, "coroPtrQueue"),
                                              MIRROR_FIELD_INFO(EtsPromise, interopObject_, "interopObject"),
                                              MIRROR_FIELD_INFO(EtsPromise, linkedPromise_, "linkedPromise"),
-                                             MIRROR_FIELD_INFO(EtsPromise, event_, "eventPtr"),
                                              MIRROR_FIELD_INFO(EtsPromise, queueSize_, "queueSize"),
+                                             MIRROR_FIELD_INFO(EtsPromise, event_, "eventPtr"),
+                                             MIRROR_FIELD_INFO(EtsPromise, eventRefCounter_, "eventRefCounter"),
                                              MIRROR_FIELD_INFO(EtsPromise, state_, "state")};
     }
 

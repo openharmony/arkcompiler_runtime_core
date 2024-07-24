@@ -327,6 +327,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     private linkedPromise: Object | null = null;
     private queueSize: int = 0;
     private eventPtr: long;
+    private eventRefCounter: int = 0;
     private state: int = Promise.STATE_PENDING;
 }
 

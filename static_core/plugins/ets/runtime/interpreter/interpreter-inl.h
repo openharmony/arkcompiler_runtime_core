@@ -569,8 +569,9 @@ private:
             return;
         }
         PandaEtsVM *etsVm = coroutine->GetPandaVM();
+        auto *coroManager = coroutine->GetCoroutineManager();
         auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
-        auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef);
+        auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
         promise->SetEventPtr(evt);
 
         // create the coro and put it to the ready queue

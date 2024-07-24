@@ -73,48 +73,55 @@ void EtsCoroutine::FreeInternalMemory()
 
 void EtsCoroutine::RequestCompletion(Value returnValue)
 {
-    auto promiseRef = GetCompletionEvent()->GetPromise();
-    auto promise = reinterpret_cast<EtsPromise *>(GetVM()->GetGlobalObjectStorage()->Get(promiseRef));
-    if (promise != nullptr) {
-        [[maybe_unused]] EtsHandleScope scope(this);
-        EtsHandle<EtsPromise> hpromise(this, promise);
-        EtsObject *retObject = nullptr;
-        if (!HasPendingException()) {
-            panda_file::Type returnType = GetReturnType();
-            retObject = GetReturnValueAsObject(returnType, returnValue);
-            if (retObject != nullptr) {
-                if (returnType.IsVoid()) {
-                    LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed";
-                } else if (returnType.IsPrimitive()) {
-                    LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed with return value 0x"
-                                           << std::hex << returnValue.GetAs<uint64_t>();
-                } else {
-                    LOG(DEBUG, COROUTINES)
-                        << "Coroutine " << GetName() << " has completed with return value = ObjectPtr<"
-                        << returnValue.GetAs<ObjectHeader *>() << ">";
-                }
-            }
-        }
-        if (HasPendingException()) {
-            // An exception may occur while boxin primitive return value in GetReturnValueAsObject
-            auto *exc = GetException();
-            ClearException();
-            LOG(INFO, COROUTINES) << "Coroutine " << GetName()
-                                  << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
-            intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc));
-        } else {
-            if (retObject != nullptr && retObject->IsInstanceOf(GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
-                retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
-            }
-            intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject);
-        }
-    } else {
+    EtsPromise *promise = nullptr;
+    {
+        auto *coroEvent = GetCompletionEvent();
+        auto *storage = GetVM()->GetGlobalObjectStorage();
+        os::memory::LockHolder lh(*coroEvent);
+        auto *promiseRef = coroEvent->ReleasePromise();
+        ASSERT(promiseRef != nullptr);
+        promise = reinterpret_cast<EtsPromise *>(storage->Get(promiseRef));
+        storage->Remove(promiseRef);
+    }
+    if (promise == nullptr) {
         LOG(DEBUG, COROUTINES)
             << "Coroutine " << GetName()
             << " has completed, but the associated promise has been already collected by the GC. Exception thrown: "
             << HasPendingException();
+        Coroutine::RequestCompletion(returnValue);
+        return;
     }
-    Coroutine::RequestCompletion(returnValue);
+    [[maybe_unused]] EtsHandleScope scope(this);
+    EtsHandle<EtsPromise> hpromise(this, promise);
+    EtsObject *retObject = nullptr;
+    if (!HasPendingException()) {
+        panda_file::Type returnType = GetReturnType();
+        retObject = GetReturnValueAsObject(returnType, returnValue);
+        if (retObject != nullptr) {
+            if (returnType.IsVoid()) {
+                LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed";
+            } else if (returnType.IsPrimitive()) {
+                LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed with return value 0x" << std::hex
+                                       << returnValue.GetAs<uint64_t>();
+            } else {
+                LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed with return value = ObjectPtr<"
+                                       << returnValue.GetAs<ObjectHeader *>() << ">";
+            }
+        }
+    }
+    if (HasPendingException()) {
+        // An exception may occur while boxin primitive return value in GetReturnValueAsObject
+        auto *exc = GetException();
+        ClearException();
+        LOG(INFO, COROUTINES) << "Coroutine " << GetName()
+                              << " completed with an exception: " << exc->ClassAddr<Class>()->GetName();
+        intrinsics::EtsPromiseReject(hpromise.GetPtr(), EtsObject::FromCoreType(exc));
+        return;
+    }
+    if (retObject != nullptr && retObject->IsInstanceOf(GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
+        retObject = GetValueFromPromiseSync(EtsPromise::FromEtsObject(retObject));
+    }
+    intrinsics::EtsPromiseResolve(hpromise.GetPtr(), retObject);
 }
 
 EtsObject *EtsCoroutine::GetValueFromPromiseSync(EtsPromise *promise)

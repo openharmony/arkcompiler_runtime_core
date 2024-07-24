@@ -20,6 +20,8 @@
 
 namespace ark {
 
+class CoroutineManager;
+
 /**
  * @brief The base class for coroutine events. Cannot be instantiated directly.
  *
@@ -51,12 +53,8 @@ public:
         return happened_;
     }
 
-    void SetHappened()
-    {
-        Lock();
-        happened_ = true;
-        Unlock();
-    }
+    /// Set event happened and unblock waiters
+    void Happen();
 
     void SetNotHappened()
     {
@@ -78,7 +76,7 @@ public:
     }
 
 protected:
-    explicit CoroutineEvent(Type t) : type_(t)
+    explicit CoroutineEvent(Type t, CoroutineManager *coroManager) : type_(t), coroManager_(coroManager)
     {
         mutex_ = Runtime::GetCurrent()->GetInternalAllocator()->New<os::memory::Mutex>();
     }
@@ -88,10 +86,18 @@ protected:
         return locked_;
     }
 
+    void SetHappened()
+    {
+        Lock();
+        happened_ = true;
+        Unlock();
+    }
+
 private:
     Type type_ = Type::NONE;
     bool happened_ GUARDED_BY(this) = false;
     bool locked_ = false;
+    CoroutineManager *coroManager_ = nullptr;
 
     os::memory::Mutex *mutex_;
 };
@@ -106,7 +112,7 @@ public:
     NO_COPY_SEMANTIC(GenericEvent);
     NO_MOVE_SEMANTIC(GenericEvent);
 
-    explicit GenericEvent() : CoroutineEvent(Type::GENERIC) {}
+    explicit GenericEvent(CoroutineManager *coroManager) : CoroutineEvent(Type::GENERIC, coroManager) {}
     ~GenericEvent() override = default;
 
 private:
@@ -122,12 +128,21 @@ public:
      * @param promise A weak reference (from global storage) to the language-dependent promise object that will hold
      * the coroutine return value.
      */
-    explicit CompletionEvent(mem::Reference *promise) : CoroutineEvent(Type::COMPLETION), promise_(promise) {}
+    explicit CompletionEvent(mem::Reference *promise, CoroutineManager *coroManager)
+        : CoroutineEvent(Type::COMPLETION, coroManager), promise_(promise)
+    {
+    }
     ~CompletionEvent() override = default;
 
-    mem::Reference *GetPromise()
+    mem::Reference *ReleasePromise()
     {
-        return promise_;
+        return std::exchange(promise_, nullptr);
+    }
+
+    void SetPromise(mem::Reference *promise)
+    {
+        ASSERT(promise_ == nullptr);
+        promise_ = promise;
     }
 
 private:

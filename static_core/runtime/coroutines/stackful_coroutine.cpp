@@ -111,7 +111,6 @@ void StackfulCoroutineContext::ThreadProcImpl()
         PandaVector<Value> args = std::move(co->GetManagedEntrypointArguments());
         Value result = co->GetManagedEntrypoint()->Invoke(co, args.data());
         co->RequestCompletion(result);
-        coroutineManager->UnblockWaiters(co->GetCompletionEvent());
         co->ProcessPresentAndAnnouncedCallbacks();
     } else if (co->HasNativeEntrypoint()) {
         co->GetNativeEntrypoint()(co->GetNativeEntrypointParam());

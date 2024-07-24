@@ -322,3 +322,19 @@ add_ets_coroutines_test(FILE callback_coro_id.ets
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
 )
+
+add_ets_coroutines_test(FILE wake_for_another_event.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "THREADED" "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "JIT" "AOT"
+)
+
+add_ets_coroutines_test(FILE await_standalone_promise.ets
+                        SKIP_ARM32_COMPILER
+                        IMPL "THREADED" "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT" "JIT" "AOT"
+)
