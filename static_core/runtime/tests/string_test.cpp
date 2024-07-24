@@ -601,7 +601,7 @@ TEST_F(StringTest, IndexOfTest2)
     }
 }
 
-TEST_F(StringTest, CompareTest)
+TEST_F(StringTest, CompareTestUtf8)
 {
     // utf8
     std::vector<uint8_t> data1 {'a', 'b', 'c', 'd', 'z', 0};
@@ -637,28 +637,41 @@ TEST_F(StringTest, CompareTest)
     ASSERT_LT(string4->Compare(string5), 0);
     ASSERT_GT(string5->Compare(string4), 0);
 
-    // utf16 vs utf16
-    std::vector<uint16_t> data6 {'a', 0xab, 0xab, 0};
-    String *string6 = String::CreateFromUtf16(data6.data(), data6.size() - 1, GetLanguageContext(),
-                                              Runtime::GetCurrent()->GetPandaVM());
-    String *string7 = String::CreateFromUtf16(data6.data(), data6.size() - 1, GetLanguageContext(),
-                                              Runtime::GetCurrent()->GetPandaVM());
-    ASSERT_EQ(true, string6->IsUtf16());
-    ASSERT_EQ(true, string7->IsUtf16());
-    ASSERT_LT(string5->Compare(string6), 0);
-    ASSERT_GT(string6->Compare(string5), 0);
-    ASSERT_EQ(string6->Compare(string7), 0);
-    ASSERT_EQ(string7->Compare(string6), 0);
-
     // compare with self
     ASSERT_EQ(string1->Compare(string1), 0);
     ASSERT_EQ(string2->Compare(string2), 0);
     ASSERT_EQ(string3->Compare(string3), 0);
     ASSERT_EQ(string4->Compare(string4), 0);
     ASSERT_EQ(string5->Compare(string5), 0);
+}
+
+TEST_F(StringTest, CompareTestUtf16)
+{
+    std::vector<uint16_t> data5 {'a', 'b', 0xab, 0xdc, 'z', 0};
+    String *string5 = String::CreateFromUtf16(data5.data(), data5.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    std::vector<uint16_t> data6 {'a', 0xab, 0xab, 0};
+    String *string6 = String::CreateFromUtf16(data6.data(), data6.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    String *string7 = String::CreateFromUtf16(data6.data(), data6.size() - 1, GetLanguageContext(),
+                                              Runtime::GetCurrent()->GetPandaVM());
+    ASSERT_EQ(true, string5->IsUtf16());
+    ASSERT_EQ(true, string6->IsUtf16());
+    ASSERT_EQ(true, string7->IsUtf16());
+
+    ASSERT_LT(string5->Compare(string6), 0);
+    ASSERT_GT(string6->Compare(string5), 0);
+    ASSERT_EQ(string6->Compare(string7), 0);
+    ASSERT_EQ(string7->Compare(string6), 0);
+
+    // compare with self
+    ASSERT_EQ(string5->Compare(string5), 0);
     ASSERT_EQ(string6->Compare(string6), 0);
     ASSERT_EQ(string7->Compare(string7), 0);
+}
 
+TEST_F(StringTest, CompareTestLongUtf8)
+{
     // long utf8 string vs long utf8 string
     // utf8
     std::vector<uint8_t> data8(16U, 'a');
@@ -703,7 +716,10 @@ TEST_F(StringTest, CompareTest)
     ASSERT_GT(string11->Compare(string10), 0);
     ASSERT_LT(string10->Compare(string9), 0);
     ASSERT_GT(string9->Compare(string10), 0);
+}
 
+TEST_F(StringTest, CompareTestLongUtf16)
+{
     // long utf16 string vs long utf16 string
     // utf16
     std::vector<uint16_t> data14(16U, 0xab);

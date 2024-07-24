@@ -24,5 +24,8 @@ void SetETSAttributes(pandasm::Function *method, const panda_file::File::EntityI
 void GetETSMetadata(pandasm::Field *field, const panda_file::File::EntityId &fieldId);
 void SetETSAttributes(pandasm::Field *field, const panda_file::File::EntityId &fieldId) const;
 AnnotationList GetETSAnnotation(const panda_file::File::EntityId &id, const std::string &type = "");
-
+void GetETSAnnotationIteration(const panda_file::File::EntityId &annotationId, const std::string &type,
+                               panda_file::AnnotationDataAccessor &annotationAccessor, AnnotationList &annList,
+                               const std::string &className);
+void GetETSAnnotationIteration(const panda_file::ArrayValue &values, AnnotationList &annList);
 #endif

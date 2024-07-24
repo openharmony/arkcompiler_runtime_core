@@ -109,6 +109,31 @@ public:
         return IsInMsgClass(msgNum, MethodOption::MsgClass::ERROR);
     }
 
+    template <typename Flag>
+    static bool EnumerateFlagsHandler(PandaString &result, Flag flag)
+    {
+        switch (flag) {
+            case MethodOption::InfoType::CONTEXT:
+                result += "'context' ";
+                break;
+            case MethodOption::InfoType::REG_CHANGES:
+                result += "'reg-changes' ";
+                break;
+            case MethodOption::InfoType::CFLOW:
+                result += "'cflow' ";
+                break;
+            case MethodOption::InfoType::JOBFILL:
+                result += "'jobfill' ";
+                break;
+            default:
+                result += "<unknown>(";
+                result += std::to_string(static_cast<size_t>(flag));
+                result += ") ";
+                break;
+        }
+        return true;
+    }
+
     PandaString Image() const
     {
         PandaString result {"\n"};
@@ -119,28 +144,7 @@ public:
         }
         result += "\n";
         result += "  Show: ";
-        showInfo_.EnumerateFlags([&](auto flag) {
-            switch (flag) {
-                case MethodOption::InfoType::CONTEXT:
-                    result += "'context' ";
-                    break;
-                case MethodOption::InfoType::REG_CHANGES:
-                    result += "'reg-changes' ";
-                    break;
-                case MethodOption::InfoType::CFLOW:
-                    result += "'cflow' ";
-                    break;
-                case MethodOption::InfoType::JOBFILL:
-                    result += "'jobfill' ";
-                    break;
-                default:
-                    result += "<unknown>(";
-                    result += std::to_string(static_cast<size_t>(flag));
-                    result += ") ";
-                    break;
-            }
-            return true;
-        });
+        showInfo_.EnumerateFlags([&](auto flag) { return MethodOptions::EnumerateFlagsHandler(result, flag); });
         result += "\n";
         result += "  Checks: ";
         enabledCheck_.EnumerateValues([&](auto flag) {

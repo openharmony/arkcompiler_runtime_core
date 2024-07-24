@@ -837,7 +837,7 @@ TEST(libpandargs, TestAPI)
     }
 }
 
-TEST(libpandargs, CompoundArgs)
+TEST(libpandargs, NoSubArgs)
 {
     PandArg<bool> subBoolArg("bool", false, "Sample boolean argument");
     // NOLINTNEXTLINE(readability-magic-numbers)
@@ -876,54 +876,78 @@ TEST(libpandargs, CompoundArgs)
         ASSERT_EQ(subDoubleArg.GetValue(), 54.321);
         ASSERT_EQ(subStringArg.GetValue(), "World");
     }
+}
+
+TEST(libpandargs, ResetSubArgs)
+{
+    PandArg<bool> subBoolArg("bool", false, "Sample boolean argument");
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    PandArg<int> subIntArg("int", 12U, "Sample integer argument");
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    PandArg<double> subDoubleArg("double", 123.45, "Sample rational argument");
+    PandArg<std::string> subStringArg("string", "Hello", "Sample string argument");
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    PandArg<int> intArg("global_int", 123U, "Global integer argument");
+    PandArgCompound parent("compound", "Sample boolean argument",
+                           {&subBoolArg, &subIntArg, &subDoubleArg, &subStringArg});
+
+    PandArgParser paParser;
+    ASSERT_TRUE(paParser.Add(&intArg));
+    ASSERT_TRUE(paParser.Add(&parent));
 
     /* ResetDefaultValue should reset all sub arguments */
-    {
-        parent.ResetDefaultValue();
-        ASSERT_EQ(parent.GetValue(), false);
-        ASSERT_EQ(subBoolArg.GetValue(), false);
-        ASSERT_EQ(subIntArg.GetValue(), 12U);
-        ASSERT_EQ(subDoubleArg.GetValue(), 123.45);
-        ASSERT_EQ(subStringArg.GetValue(), "Hello");
-    }
+    parent.ResetDefaultValue();
+    ASSERT_EQ(parent.GetValue(), false);
+    ASSERT_EQ(subBoolArg.GetValue(), false);
+    ASSERT_EQ(subIntArg.GetValue(), 12U);
+    ASSERT_EQ(subDoubleArg.GetValue(), 123.45);
+    ASSERT_EQ(subStringArg.GetValue(), "Hello");
 
-    {
-        static const char *argv[] = {"gtest_app", "--compound:bool=true"};
-        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
-        ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(subBoolArg.GetValue(), true);
-    }
+    static const char *argv1[] = {"gtest_app", "--compound:bool=true"};
+    ASSERT_TRUE(paParser.Parse(2U, argv1)) << paParser.GetErrorString();
+    ASSERT_EQ(parent.GetValue(), true);
+    ASSERT_EQ(subBoolArg.GetValue(), true);
 
-    {
-        parent.ResetDefaultValue();
-        static const char *argv[] = {"gtest_app", "--compound:bool"};
-        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
-        ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(subBoolArg.GetValue(), true);
-    }
+    parent.ResetDefaultValue();
+    static const char *argv2[] = {"gtest_app", "--compound:bool"};
+    ASSERT_TRUE(paParser.Parse(2U, argv2)) << paParser.GetErrorString();
+    ASSERT_EQ(parent.GetValue(), true);
+    ASSERT_EQ(subBoolArg.GetValue(), true);
 
-    {
-        static const char *argv[] = {"gtest_app", "--compound:bool=false"};
-        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
-        ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(subBoolArg.GetValue(), false);
-    }
+    static const char *argv3[] = {"gtest_app", "--compound:bool=false"};
+    ASSERT_TRUE(paParser.Parse(2U, argv3)) << paParser.GetErrorString();
+    ASSERT_EQ(parent.GetValue(), true);
+    ASSERT_EQ(subBoolArg.GetValue(), false);
 
-    {
-        parent.ResetDefaultValue();
-        static const char *argv[] = {"gtest_app", "--global_int=321"};
-        ASSERT_TRUE(paParser.Parse(2U, argv)) << paParser.GetErrorString();
-        ASSERT_EQ(parent.GetValue(), false);
-        ASSERT_EQ(intArg.GetValue(), 321U);
-    }
+    parent.ResetDefaultValue();
+    static const char *argv4[] = {"gtest_app", "--global_int=321"};
+    ASSERT_TRUE(paParser.Parse(2U, argv4)) << paParser.GetErrorString();
+    ASSERT_EQ(parent.GetValue(), false);
+    ASSERT_EQ(intArg.GetValue(), 321U);
 
-    {
-        parent.ResetDefaultValue();
-        static const char *argv[] = {"gtest_app", "--compound", "--global_int", "321"};
-        ASSERT_TRUE(paParser.Parse(4U, argv)) << paParser.GetErrorString();
-        ASSERT_EQ(parent.GetValue(), true);
-        ASSERT_EQ(intArg.GetValue(), 321U);
-    }
+    parent.ResetDefaultValue();
+    static const char *argv5[] = {"gtest_app", "--compound", "--global_int", "321"};
+    ASSERT_TRUE(paParser.Parse(4U, argv5)) << paParser.GetErrorString();
+    ASSERT_EQ(parent.GetValue(), true);
+    ASSERT_EQ(intArg.GetValue(), 321U);
+}
+
+TEST(libpandargs, SubArgsVisibility)
+{
+    PandArg<bool> subBoolArg("bool", false, "Sample boolean argument");
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    PandArg<int> subIntArg("int", 12U, "Sample integer argument");
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    PandArg<double> subDoubleArg("double", 123.45, "Sample rational argument");
+    PandArg<std::string> subStringArg("string", "Hello", "Sample string argument");
+    // NOLINTNEXTLINE(readability-magic-numbers)
+    PandArg<int> intArg("global_int", 123U, "Global integer argument");
+    PandArgCompound parent("compound", "Sample boolean argument",
+                           {&subBoolArg, &subIntArg, &subDoubleArg, &subStringArg});
+
+    PandArgParser paParser;
+    ASSERT_TRUE(paParser.Add(&intArg));
+    ASSERT_TRUE(paParser.Add(&parent));
 
     /* Test that sub arguments are not visible in the global space */
     {

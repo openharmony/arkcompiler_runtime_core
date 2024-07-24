@@ -34,7 +34,8 @@ public:
 
     static size_t GetIndexFor(Int i)
     {
-        ASSERT(MIN_INT <= i && i <= MAX_INT);
+        ASSERT(MIN_INT <= i);
+        ASSERT(i <= MAX_INT);
         return i - MIN_INT;
     }
 

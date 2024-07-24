@@ -16,6 +16,7 @@
 #
 
 import logging
+from unittest import TestCase
 from pathlib import Path
 from typing import List
 
@@ -46,7 +47,7 @@ class Benchmark:
         template = Template(self.__input, params)
         Log.all(_LOGGER, f"Starting generate test template: {self.__name}")
         rendered_tests = template.render_template()
-        assert len(rendered_tests) > 0, f"Internal error: there should be tests in {self.__name}"
+        TestCase().assertTrue(len(rendered_tests) > 0, f"Internal error: there should be tests in {self.__name}")
 
         tests = []
         for i, test in enumerate(rendered_tests):

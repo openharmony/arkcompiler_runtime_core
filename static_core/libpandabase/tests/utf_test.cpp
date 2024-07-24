@@ -35,6 +35,34 @@ static uint16_t U16Tail(uint32_t codepoint)
     return (codepoint & 0x3ffU) | 0xdc00U;
 }
 
+TEST(Utf, ConvertMUtf8ToUtf16Double)
+{
+    // double 3-byte mutf-8: 11101101 1010xxxx 10xxxxxx 11101101 1011xxxx 10xxxxxx
+    {
+        const std::vector<uint8_t> in {0xedU, 0xa0U, 0x81U, 0xedU, 0xb0U, 0xb7U, 0x00U};
+        const std::vector<uint16_t> res {0xd801U, 0xdc37U};
+        std::vector<uint16_t> out(res.size());
+        ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
+        EXPECT_EQ(out, res);
+    }
+
+    {
+        const std::vector<uint8_t> in {0x5bU, 0x61U, 0x62U, 0x63U, 0xedU, 0xa3U, 0x92U, 0x5dU, 0x00U};
+        const std::vector<uint16_t> res {0x5bU, 0x61U, 0x62U, 0x63U, 0xd8d2U, 0x5dU};
+        std::vector<uint16_t> out(res.size());
+        ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
+        EXPECT_EQ(out, res);
+    }
+
+    {
+        const std::vector<uint8_t> in {0xF0U, 0x9FU, 0x91U, 0xB3U, 0x00U};
+        const std::vector<uint16_t> res {0xD83DU, 0xDC73U};
+        std::vector<uint16_t> out(res.size());
+        ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
+        EXPECT_EQ(out, res);
+    }
+}
+
 TEST(Utf, ConvertMUtf8ToUtf16)
 {
     // 2-byte mutf-8 U+0000
@@ -68,31 +96,6 @@ TEST(Utf, ConvertMUtf8ToUtf16)
     {
         const std::vector<uint8_t> in {0xefU, 0xbfU, 0x83U, 0x33U, 0x00U};
         const std::vector<uint16_t> res {0xffc3U, 0x33U};
-        std::vector<uint16_t> out(res.size());
-        ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
-        EXPECT_EQ(out, res);
-    }
-
-    // double 3-byte mutf-8: 11101101 1010xxxx 10xxxxxx 11101101 1011xxxx 10xxxxxx
-    {
-        const std::vector<uint8_t> in {0xedU, 0xa0U, 0x81U, 0xedU, 0xb0U, 0xb7U, 0x00U};
-        const std::vector<uint16_t> res {0xd801U, 0xdc37U};
-        std::vector<uint16_t> out(res.size());
-        ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
-        EXPECT_EQ(out, res);
-    }
-
-    {
-        const std::vector<uint8_t> in {0x5bU, 0x61U, 0x62U, 0x63U, 0xedU, 0xa3U, 0x92U, 0x5dU, 0x00U};
-        const std::vector<uint16_t> res {0x5bU, 0x61U, 0x62U, 0x63U, 0xd8d2U, 0x5dU};
-        std::vector<uint16_t> out(res.size());
-        ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
-        EXPECT_EQ(out, res);
-    }
-
-    {
-        const std::vector<uint8_t> in {0xF0U, 0x9FU, 0x91U, 0xB3U, 0x00U};
-        const std::vector<uint16_t> res {0xD83DU, 0xDC73U};
         std::vector<uint16_t> out(res.size());
         ConvertMUtf8ToUtf16(in.data(), utf::Mutf8Size(in.data()), out.data());
         EXPECT_EQ(out, res);
@@ -137,7 +140,21 @@ TEST(Utf, Utf16ToMUtf8Size)
     }
 }
 
-TEST(Utf, ConvertRegionUtf16ToMUtf8)
+TEST(Utf, ConvertRegionUtf16ToMUtf8_1b)
+{
+    // 1-byte mutf-8: 0xxxxxxx
+    {
+        const std::vector<uint16_t> in {0x7fU};
+        const std::vector<uint8_t> res {0x7fU, 0x00U};
+        std::vector<uint8_t> out(res.size());
+        size_t sz = ConvertRegionUtf16ToMUtf8(in.data(), out.data(), in.size(), out.size() - 1L, 0U);
+        EXPECT_EQ(sz, 1U);
+        out[out.size() - 1L] = '\0';
+        EXPECT_EQ(out, res);
+    }
+}
+
+TEST(Utf, ConvertRegionUtf16ToMUtf8_2b)
 {
     // 2-byte mutf-8 U+0000
     {
@@ -146,17 +163,6 @@ TEST(Utf, ConvertRegionUtf16ToMUtf8)
         std::vector<uint8_t> out(res.size());
         size_t sz = ConvertRegionUtf16ToMUtf8(in.data(), out.data(), in.size(), out.size() - 1L, 0U);
         EXPECT_EQ(sz, 2U);
-        out[out.size() - 1L] = '\0';
-        EXPECT_EQ(out, res);
-    }
-
-    // 1-byte mutf-8: 0xxxxxxx
-    {
-        const std::vector<uint16_t> in {0x7fU};
-        const std::vector<uint8_t> res {0x7fU, 0x00U};
-        std::vector<uint8_t> out(res.size());
-        size_t sz = ConvertRegionUtf16ToMUtf8(in.data(), out.data(), in.size(), out.size() - 1L, 0U);
-        EXPECT_EQ(sz, 1U);
         out[out.size() - 1L] = '\0';
         EXPECT_EQ(out, res);
     }
@@ -171,7 +177,10 @@ TEST(Utf, ConvertRegionUtf16ToMUtf8)
         out[out.size() - 1L] = '\0';
         EXPECT_EQ(out, res);
     }
+}
 
+TEST(Utf, ConvertRegionUtf16ToMUtf8_3b)
+{
     // 3-byte mutf-8: 1110xxxx 10xxxxxx 10xxxxxx
     {
         const std::vector<uint16_t> in {0xffc3U, 0x33U};
@@ -219,7 +228,7 @@ TEST(Utf, ConvertRegionUtf16ToMUtf8)
     }
 }
 
-TEST(Utf, CompareMUtf8ToMUtf8)
+TEST(Utf, CompareMUtf8ToMUtf8_1b)
 {
     // 1-byte utf-8: 0xxxxxxx
     {
@@ -251,7 +260,10 @@ TEST(Utf, CompareMUtf8ToMUtf8)
         const std::vector<uint8_t> v2 {0x01U, 0x73U, 0x00U};
         EXPECT_TRUE(CompareMUtf8ToMUtf8(v1.data(), v2.data()) < 0L);
     }
+}
 
+TEST(Utf, CompareMUtf8ToMUtf8_2b)
+{
     // 2-byte utf-8: 110xxxxx 10xxxxxx
     {
         const std::vector<uint8_t> v1 {0xdfU, 0xbfU, 0x03U, 0x00U};
@@ -270,7 +282,10 @@ TEST(Utf, CompareMUtf8ToMUtf8)
         const std::vector<uint8_t> v2 {0xdfU, 0xb0U, 0x03U, 0x00U};
         EXPECT_TRUE(CompareMUtf8ToMUtf8(v1.data(), v2.data()) < 0L);
     }
+}
 
+TEST(Utf, CompareMUtf8ToMUtf8_3b)
+{
     // 3-byte utf-8: 1110xxxx 10xxxxxx 10xxxxxx
     {
         const std::vector<uint8_t> v1 {0xefU, 0xbfU, 0x03U, 0x04U, 0x00U};
@@ -289,7 +304,10 @@ TEST(Utf, CompareMUtf8ToMUtf8)
         const std::vector<uint8_t> v2 {0xefU, 0xbfU, 0x05U, 0x04U, 0x00U};
         EXPECT_TRUE(CompareMUtf8ToMUtf8(v1.data(), v2.data()) < 0L);
     }
+}
 
+TEST(Utf, CompareMUtf8ToMUtf8_4b)
+{
     // 4-byte utf-8: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
     {
         const std::vector<uint8_t> v1 {0xf7U, 0xbfU, 0xbfU, 0x04U, 0x05U, 0x00U};
@@ -310,7 +328,7 @@ TEST(Utf, CompareMUtf8ToMUtf8)
     }
 }
 
-TEST(Utf, CompareUtf8ToUtf8)
+TEST(Utf, CompareUtf8ToUtf8_1b)
 {
     // 1-byte utf-8: 0xxxxxxx
     {
@@ -342,7 +360,10 @@ TEST(Utf, CompareUtf8ToUtf8)
         const std::vector<uint8_t> v2 {0x01U, 0x73U, 0x00U};
         EXPECT_TRUE(CompareUtf8ToUtf8(v1.data(), v1.size(), v2.data(), v2.size()) < 0L);
     }
+}
 
+TEST(Utf, CompareUtf8ToUtf8_2b)
+{
     // 2-byte utf-8: 110xxxxx 10xxxxxx
     {
         const std::vector<uint8_t> v1 {0xdfU, 0xbfU, 0x03U, 0x00U};
@@ -361,7 +382,10 @@ TEST(Utf, CompareUtf8ToUtf8)
         const std::vector<uint8_t> v2 {0xdfU, 0xb0U, 0x03U, 0x00U};
         EXPECT_TRUE(CompareUtf8ToUtf8(v1.data(), v1.size(), v2.data(), v2.size()) < 0L);
     }
+}
 
+TEST(Utf, CompareUtf8ToUtf8_3b)
+{
     // 3-byte utf-8: 1110xxxx 10xxxxxx 10xxxxxx
     {
         const std::vector<uint8_t> v1 {0xefU, 0xbfU, 0x03U, 0x04U, 0x00U};
@@ -380,7 +404,10 @@ TEST(Utf, CompareUtf8ToUtf8)
         const std::vector<uint8_t> v2 {0xefU, 0xbfU, 0x05U, 0x04U, 0x00U};
         EXPECT_TRUE(CompareUtf8ToUtf8(v1.data(), v1.size(), v2.data(), v2.size()) < 0L);
     }
+}
 
+TEST(Utf, CompareUtf8ToUtf8_4b)
+{
     // 4-byte utf-8: 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
     {
         const std::vector<uint8_t> v1 {0xf7U, 0xbfU, 0xbfU, 0x04U, 0x05U, 0x00U};

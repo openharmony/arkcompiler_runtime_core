@@ -20,6 +20,7 @@
 
 import os
 import pytest  # type: ignore
+from unittest import TestCase
 from subprocess import TimeoutExpired
 from vmb.shell import ShellUnix, ShellAdb
 
@@ -36,7 +37,7 @@ def test_unix_ls() -> None:
     only_posix()
     this_file = os.path.basename(__file__)
     res = sh.run(f'ls -1 {here}')
-    assert res.grep(this_file) == this_file
+    TestCase().assertTrue(res.grep(this_file) == this_file)
 
 
 def test_unix_cwd() -> None:
@@ -44,14 +45,15 @@ def test_unix_cwd() -> None:
     this_file = os.path.basename(__file__)
     this_dir = os.path.dirname(__file__)
     res = sh.run(f'ls -1 .', cwd=this_dir)
-    assert res.grep(this_file) == this_file
+    TestCase().assertTrue(res.grep(this_file) == this_file)
 
 
 def test_unix_measure_time() -> None:
     only_posix()
     res = sh.run('sleep 1', measure_time=True, timeout=3)
-    assert res.tm > 0.9
-    assert res.rss > 0
+    test = TestCase()
+    test.assertTrue(res.tm > 0.9)
+    test.assertTrue(res.rss > 0)
 
 
 def test_unix_timeout() -> None:

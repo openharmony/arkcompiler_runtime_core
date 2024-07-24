@@ -61,6 +61,42 @@ PandaString GetKeys(const M &map)
 
 using ark::verifier::config::Section;
 
+static bool RegisterConfigHandlerOptionsVerifierOptionLine(
+    const struct Section &s, const PandaUnorderedMap<PandaString, StructField<VerificationOptions, bool>> &sectionFlags,
+    VerificationOptions &verifOpts, PandaVector<PandaString> &c)
+{
+    if (!c.empty()) {
+        for (const auto &l : c) {
+            if (sectionFlags.count(l) == 0) {
+                LOG_VERIFIER_DEBUG_CONFIG_WRONG_OPTION_FOR_SECTION(l, s.name, GetKeys(sectionFlags));
+                return false;
+            }
+            sectionFlags.at(l).Of(verifOpts) = true;
+            LOG_VERIFIER_DEBUG_CONFIG_OPTION_IS_ACTIVE_INFO(s.name, l);
+        }
+    }
+    return true;
+}
+
+static bool RegisterConfigHandlerOptionsVerifierForSection(
+    const PandaUnorderedMap<PandaString, StructField<VerificationOptions, bool>> &sectionFlags,
+    VerificationOptions &verifOpts, const struct Section &s)
+{
+    for (const auto &i : s.items) {
+        PandaVector<PandaString> c;
+        const char *start = i.c_str();
+        const char *end = i.c_str() + i.length();  // NOLINT
+        if (!LiteralsParser()(c, start, end)) {
+            LOG_VERIFIER_DEBUG_CONFIG_WRONG_OPTIONS_LINE(i);
+            return false;
+        }
+        if (!RegisterConfigHandlerOptionsVerifierOptionLine(s, sectionFlags, verifOpts, c)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void RegisterConfigHandlerOptions(Config *dcfg)
 {
     static const auto CONFIG_DEBUG_OPTIONS_VERIFIER = [](Config *config, const Section &section) {
@@ -96,24 +132,8 @@ void RegisterConfigHandlerOptions(Config *dcfg)
                 return false;
             }
             const auto &sectionFlags = flags.at(s.name);
-            for (const auto &i : s.items) {
-                PandaVector<PandaString> c;
-                const char *start = i.c_str();
-                const char *end = i.c_str() + i.length();  // NOLINT
-                if (!LiteralsParser()(c, start, end)) {
-                    LOG_VERIFIER_DEBUG_CONFIG_WRONG_OPTIONS_LINE(i);
-                    return false;
-                }
-                if (!c.empty()) {
-                    for (const auto &l : c) {
-                        if (sectionFlags.count(l) == 0) {
-                            LOG_VERIFIER_DEBUG_CONFIG_WRONG_OPTION_FOR_SECTION(l, s.name, GetKeys(sectionFlags));
-                            return false;
-                        }
-                        sectionFlags.at(l).Of(verifOpts) = true;
-                        LOG_VERIFIER_DEBUG_CONFIG_OPTION_IS_ACTIVE_INFO(s.name, l);
-                    }
-                }
+            if (!RegisterConfigHandlerOptionsVerifierForSection(sectionFlags, verifOpts, s)) {
+                return false;
             }
         }
         return true;

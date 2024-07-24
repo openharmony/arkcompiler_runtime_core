@@ -34,7 +34,6 @@ TEST(ExtractorTest, LineNumberTable)
             jmp label
 
             return
-
         }
     )");
     ASSERT(program);

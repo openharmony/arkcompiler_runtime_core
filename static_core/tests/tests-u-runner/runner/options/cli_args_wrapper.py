@@ -38,7 +38,7 @@ class CliArgsWrapper:
         if name in dir(CliArgsWrapper.args):
             value = getattr(CliArgsWrapper.args, name)
             if value is None:
-                return None
+                return value
             if isinstance(value, list):
                 return value
             return str(value)

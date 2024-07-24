@@ -89,7 +89,7 @@ public:
 
     // Use static method to be able to ASSERT(thread->IsRuntimeCallEnabled()) before StackWalker construction to avoid
     // crash in constructor, e.g. while GetTopFrameFromFp()
-    PANDA_PUBLIC_API static StackWalker Create(const ManagedThread *thread, UnwindPolicy policy = UnwindPolicy::ALL);
+    static PANDA_PUBLIC_API StackWalker Create(const ManagedThread *thread, UnwindPolicy policy = UnwindPolicy::ALL);
 
     StackWalker() = default;
     StackWalker(void *fp, bool isFrameCompiled, uintptr_t npc, UnwindPolicy policy = UnwindPolicy::ALL);

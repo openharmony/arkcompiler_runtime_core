@@ -19,6 +19,7 @@
 # pylint: skip-file
 
 import pytest  # type: ignore
+from unittest import TestCase
 
 from vmb.unit import BenchUnit
 from vmb.shell import ShellResult
@@ -63,28 +64,30 @@ def set_unit(out: str, err: str) -> BenchUnit:
 def test_unit_1() -> None:
     bu = set_unit(out=OUT_1, err=ERR_1)
     res: TestResult = bu.result
-    assert -13 == res.execution_status
-    assert 1 == res.iterations_count
-    assert 1168 == res.mem_bytes
-    assert 0 == res.code_size
-    assert 0.0 == res.compile_time
-    assert 90.999 == res.mean_time
+    test = TestCase()
+    test.assertTrue(-13 == res.execution_status)
+    test.assertTrue(1 == res.iterations_count)
+    test.assertTrue(1168 == res.mem_bytes)
+    test.assertTrue(0 == res.code_size)
+    test.assertTrue(0.0 == res.compile_time)
+    test.assertTrue(90.999 == res.mean_time)
     run: RunResult = res.execution_forks[0]
-    assert 95.587 == run.avg_time
-    assert 90.999 == run.iterations[0]
-    assert 0 == len(run.warmup)
-    assert 'ns/op' == run.unit
+    test.assertTrue(95.587 == run.avg_time)
+    test.assertTrue(90.999 == run.iterations[0])
+    test.assertTrue(0 == len(run.warmup))
+    test.assertTrue('ns/op' == run.unit)
 
 
 def test_unit_2() -> None:
     bu = set_unit(out=OUT_2, err=ERR_2)
     res: TestResult = bu.result
-    assert 0 == res.execution_status
-    assert 888 == res.mem_bytes
-    assert 2 == res.iterations_count
-    assert (100.0 + 99.0)/2 == res.mean_time
+    test = TestCase()
+    test.assertTrue(0 == res.execution_status)
+    test.assertTrue(888 == res.mem_bytes)
+    test.assertTrue(2 == res.iterations_count)
+    test.assertTrue((100.0 + 99.0)/2 == res.mean_time)
     run: RunResult = res.execution_forks[0]
-    assert 101.1 == run.avg_time
-    assert 100.0 == run.iterations[0]
-    assert 1 == len(run.warmup)
-    assert 'ns/op' == run.unit
+    test.assertTrue(101.1 == run.avg_time)
+    test.assertTrue(100.0 == run.iterations[0])
+    test.assertTrue(1 == len(run.warmup))
+    test.assertTrue('ns/op' == run.unit)

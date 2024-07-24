@@ -20,6 +20,7 @@ import logging
 import multiprocessing
 import re
 import argparse
+from unittest import TestCase
 from abc import abstractmethod, ABC
 from collections import Counter
 from datetime import datetime
@@ -227,7 +228,7 @@ class Runner(ABC):
         for list_name in lists:
             list_path = correct_path(self.list_root, list_name)
             Log.summary(_LOGGER, f"Loading tests from the list {list_path}")
-            assert self.test_root, "TEST_ROOT not set to correct value"
+            TestCase().assertTrue(self.test_root, "TEST_ROOT not set to correct value")
             tests.extend(load_list(self.test_root, list_path))
         return tests
 

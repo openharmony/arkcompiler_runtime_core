@@ -497,11 +497,9 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
             if (func.IsHeapObject()) {
                 [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
                 VMHandle<ObjectHeader> handleFunc(thread, func.GetHeapObject());
-                if (!TryVerify<IS_CALL>()) {
-                    return false;
-                }
-                return runtime->GetPandaVM()->GetCompiler()->CompileMethod(this, bytecodeOffset, osr,
-                                                                           TaggedValue(handleFunc.GetPtr()));
+                return TryVerify<IS_CALL>() ? runtime->GetPandaVM()->GetCompiler()->CompileMethod(
+                                                  this, bytecodeOffset, osr, TaggedValue(handleFunc.GetPtr()))
+                                            : false;
             }
             if (!TryVerify<IS_CALL>()) {
                 return false;

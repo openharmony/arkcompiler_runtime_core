@@ -62,9 +62,10 @@ class Lang(LangBase):
         if m:
             return m.group("func"), m.group("type")
         m = re.search(self.__re_func_void, line)  # type: ignore
+        ret = None
         if m:
             return m.group("func"), "void"
-        return None
+        return ret
 
     def get_method_call(self, name: str, typ: str) -> str:
         if typ and typ != 'void':

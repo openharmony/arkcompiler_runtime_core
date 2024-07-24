@@ -62,7 +62,6 @@ int main(int argc, const char *argv[])
         ark::Logger::ComponentMask().set(ark::Logger::Component::STATIC_LINKER).set(ark::Logger::Component::PANDAFILE));
 
     const auto files = paParser.GetRemainder();
-
     if (files.empty()) {
         std::cerr << "must have at least one file" << std::endl;
         return PrintHelp(paParser);

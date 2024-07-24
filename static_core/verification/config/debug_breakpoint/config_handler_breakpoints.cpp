@@ -89,29 +89,36 @@ const auto &BreakpointParser()
     return BREAKPOINT;
 }
 
+static bool RegisterConfigHandlerBreakpointsVerifierAnalyzer(const struct Section &s, Config *&cfg)
+{
+    for (const auto &i : s.items) {
+        Context c;
+        const char *start = i.c_str();
+        const char *end = i.c_str() + i.length();  // NOLINT
+        if (!BreakpointParser()(c, start, end)) {
+            LOG_VERIFIER_DEBUG_BREAKPOINT_WRONG_CFG_LINE(i);
+            return false;
+        }
+        if (!c.method.empty()) {
+            if (c.offsets.empty()) {
+                c.offsets.push_back(0);
+            }
+            for (auto o : c.offsets) {
+                cfg->debugCfg.AddBreakpointConfig(c.method, o);
+            }
+        }
+    }
+    return true;
+}
+
 void RegisterConfigHandlerBreakpoints(Config *dcfg)
 {
     static const auto CONFIG_DEBUG_BREAKPOINTS = [](Config *cfg, const Section &section) {
         for (const auto &s : section.sections) {
-            if (s.name == "verifier") {
-                for (const auto &i : s.items) {
-                    Context c;
-                    const char *start = i.c_str();
-                    const char *end = i.c_str() + i.length();  // NOLINT
-                    if (!BreakpointParser()(c, start, end)) {
-                        LOG_VERIFIER_DEBUG_BREAKPOINT_WRONG_CFG_LINE(i);
-                        return false;
-                    }
-                    if (!c.method.empty()) {
-                        if (c.offsets.empty()) {
-                            c.offsets.push_back(0);
-                        }
-                        for (auto o : c.offsets) {
-                            cfg->debugCfg.AddBreakpointConfig(c.method, o);
-                        }
-                    }
-                }
-            } else {
+            if (s.name == "verifier" && !RegisterConfigHandlerBreakpointsVerifierAnalyzer(s, cfg)) {
+                return false;
+            }
+            if (s.name != "verifier") {
                 LOG_VERIFIER_DEBUG_BREAKPOINT_WRONG_SECTION(s.name);
                 return false;
             }

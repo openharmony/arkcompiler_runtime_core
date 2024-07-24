@@ -56,9 +56,9 @@ TEST(RecordTest, EmptyRecord)
     EXPECT_EQ("}", line);
 }
 
-TEST(RecordTest, RecordWithFields)
+static std::string GetRecordWithFieldsSource()
 {
-    auto program = ark::pandasm::Parser().Parse(R"(
+    return R"(
 .record A {
     u1 a
     i8 b
@@ -72,7 +72,12 @@ TEST(RecordTest, RecordWithFields)
     i64 j
     u64 k
 }
-    )");
+)";
+}
+
+TEST(RecordTest, RecordWithFields)
+{
+    auto program = ark::pandasm::Parser().Parse(GetRecordWithFieldsSource());
     ASSERT(program);
     auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
     ASSERT(pf);

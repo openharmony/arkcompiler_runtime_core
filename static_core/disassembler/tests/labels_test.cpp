@@ -62,43 +62,9 @@ catch_block2_begin:
     )";
 }
 
-TEST(LabelTest, test1)
+static std::string GetTest2Source()
 {
-    auto program = ark::pandasm::Parser().Parse(R"(
-.function u1 g() {
-    start:
-    jmp start
-
-    return
-}
-
-.function u1 gg() {
-    jmp start
-    start:
-
-    return
-}
-    )");
-    ASSERT(program);
-    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
-    ASSERT(pf);
-
-    ark::disasm::Disassembler d {};
-    std::stringstream ss {};
-
-    d.Disassemble(pf);
-    d.Serialize(ss);
-
-    std::string bodyG = ExtractFuncBody(ss.str(), "u1 g() <static> {\n");
-    std::string bodyGg = ExtractFuncBody(ss.str(), "u1 gg() <static> {\n");
-
-    EXPECT_EQ(bodyG, "jump_label_0:\n\tjmp jump_label_0\n\treturn\n");
-    EXPECT_EQ(bodyGg, "\tjmp jump_label_0\njump_label_0:\n\treturn\n");
-}
-
-TEST(LabelTest, test2)
-{
-    auto program = ark::pandasm::Parser().Parse(R"(
+    return R"(
 .function u1 g() {
     label_0:
     movi v0, 0
@@ -128,6 +94,25 @@ TEST(LabelTest, test2)
 
     return
 }
+)";
+}
+
+TEST(LabelTest, test1)
+{
+    auto program = ark::pandasm::Parser().Parse(R"(
+.function u1 g() {
+    start:
+    jmp start
+
+    return
+}
+
+.function u1 gg() {
+    jmp start
+    start:
+
+    return
+}
     )");
     ASSERT(program);
     auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
@@ -139,11 +124,14 @@ TEST(LabelTest, test2)
     d.Disassemble(pf);
     d.Serialize(ss);
 
-    std::string bodyG = ExtractFuncBody(ss.str(), "g() <static> {\n");
+    std::string bodyG = ExtractFuncBody(ss.str(), "u1 g() <static> {\n");
+    std::string bodyGg = ExtractFuncBody(ss.str(), "u1 gg() <static> {\n");
+    EXPECT_EQ(bodyG, "jump_label_0:\n\tjmp jump_label_0\n\treturn\n");
+    EXPECT_EQ(bodyGg, "\tjmp jump_label_0\njump_label_0:\n\treturn\n");
+}
 
-    std::string line;
-    std::stringstream g {bodyG};
-
+void CheckTest2(std::stringstream &g, std::string &line)
+{
     std::getline(g, line);
     EXPECT_EQ("jump_label_0:", line);
     std::getline(g, line);
@@ -192,6 +180,25 @@ TEST(LabelTest, test2)
     EXPECT_EQ("\tjmp jump_label_6", line);
     std::getline(g, line);
     EXPECT_EQ("\tjmp jump_label_7", line);
+}
+
+TEST(LabelTest, test2)
+{
+    auto program = ark::pandasm::Parser().Parse(GetTest2Source());
+    ASSERT(program);
+    auto pf = ark::pandasm::AsmEmitter::Emit(program.Value());
+    ASSERT(pf);
+
+    ark::disasm::Disassembler d {};
+    std::stringstream ss {};
+
+    d.Disassemble(pf);
+    d.Serialize(ss);
+
+    std::string line;
+    std::string bodyG = ExtractFuncBody(ss.str(), "g() <static> {\n");
+    std::stringstream g {bodyG};
+    CheckTest2(g, line);
 }
 
 TEST(LabelTest, TestExceptions)

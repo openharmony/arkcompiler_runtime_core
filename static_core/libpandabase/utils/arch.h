@@ -227,6 +227,7 @@ inline constexpr RegMask GetCalleeRegsMask(Arch arch, bool isFp, bool irtocOptim
         case Arch::AARCH32:
             return isFp ? ArchTraits<Arch::AARCH32>::CALLEE_FP_REG_MASK : ArchTraits<Arch::AARCH32>::CALLEE_REG_MASK;
         case Arch::AARCH64:
+            // return AARCH64Case(arch, isFp, irtocOptimized)
             static_assert((~ArchTraits<Arch::AARCH64>::CALLEE_FP_REG_MASK &
                            ArchTraits<Arch::AARCH64>::IRTOC_OPTIMIZED_CALLEE_FP_REG_MASK) == 0);
             static_assert((~ArchTraits<Arch::AARCH64>::CALLEE_REG_MASK &

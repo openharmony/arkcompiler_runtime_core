@@ -214,10 +214,8 @@ public:
 
             auto method = LookupGetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
-                                          /* is_dynamic = */ false,
-                                          /* is_range= */ false, /* accept_acc= */ false,
-                                          /* initobj= */ false, /* call = */ false>(method);
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
+                                          false>(method);
                 return;
             }
             auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
@@ -258,10 +256,8 @@ public:
 
             auto method = LookupGetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
-                                          /* is_dynamic = */ false,
-                                          /* is_range= */ false, /* accept_acc= */ false,
-                                          /* initobj= */ false, /* call = */ false>(method);
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
+                                          false>(method);
                 return;
             }
             auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
@@ -304,10 +300,8 @@ public:
 
             auto method = LookupGetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
-                                          /* is_dynamic = */ false,
-                                          /* is_range= */ false, /* accept_acc= */ false,
-                                          /* initobj= */ false, /* call = */ false>(method);
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
+                                          false>(method);
                 return;
             }
             auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
@@ -348,10 +342,8 @@ public:
 
             auto method = LookupSetterByName<panda_file::Type::TypeId::I32>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
-                                          /* is_dynamic = */ false,
-                                          /* is_range= */ false, /* accept_acc= */ false,
-                                          /* initobj= */ false, /* call = */ false>(method);
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
+                                          false>(method);
                 return;
             }
             auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
@@ -392,10 +384,8 @@ public:
 
             auto method = LookupSetterByName<panda_file::Type::TypeId::I64>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
-                                          /* is_dynamic = */ false,
-                                          /* is_range= */ false, /* accept_acc= */ false,
-                                          /* initobj= */ false, /* call = */ false>(method);
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
+                                          false>(method);
                 return;
             }
             auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +
@@ -438,10 +428,8 @@ public:
 
             auto method = LookupSetterByName<panda_file::Type::TypeId::REFERENCE>(klass, rawField);
             if (method != nullptr) {
-                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT,
-                                          /* is_dynamic = */ false,
-                                          /* is_range= */ false, /* accept_acc= */ false,
-                                          /* initobj= */ false, /* call = */ false>(method);
+                this->template HandleCall<ark::interpreter::FrameHelperDefault, FORMAT, false, false, false, false,
+                                          false>(method);
                 return;
             }
             auto errorMsg = "Class " + ark::ConvertToString(klass->GetName()) +

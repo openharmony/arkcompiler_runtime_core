@@ -35,149 +35,161 @@ struct Pool : public ObjPool<S, std::vector, I, C> {
 
 }  // namespace
 
-TEST(VerifierTest_ObjPool, Basic)
+template <typename I, typename C>
+static void VerifierTestObjPool1(Pool<I, C> &pool, int &result)
 {
-    int result = 0;
-
-    auto &&h = [&result](S &s, size_t idx) {
-        s.a = idx;
-        result += idx;
-    };
-    Pool pool {h, [&result](S &s) { result -= s.a; }};
-
     {
         auto q = pool.New();
         auto p = pool.New();
-        EXPECT_EQ(pool.Count(), 2);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 2);
-        EXPECT_EQ(result, 1);
+        EXPECT_EQ(pool.Count(), 2U);
+        EXPECT_EQ(pool.FreeCount(), 0U);
+        EXPECT_EQ(pool.AccCount(), 2U);
+        EXPECT_EQ(result, 1U);
     }
 
-    EXPECT_EQ(pool.Count(), 2);
-    EXPECT_EQ(pool.FreeCount(), 2);
-    EXPECT_EQ(pool.AccCount(), 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(pool.Count(), 2U);
+    EXPECT_EQ(pool.FreeCount(), 2U);
+    EXPECT_EQ(pool.AccCount(), 0U);
+    EXPECT_EQ(result, 0U);
 
     {
         auto q = pool.New();
         auto w = pool.New();
-        EXPECT_EQ(pool.Count(), 2);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 2);
-        EXPECT_EQ(result, 1);
+        EXPECT_EQ(pool.Count(), 2U);
+        EXPECT_EQ(pool.FreeCount(), 0U);
+        EXPECT_EQ(pool.AccCount(), 2U);
+        EXPECT_EQ(result, 1U);
     }
 
     {
         auto q = pool.New();
         auto w = pool.New();
-        EXPECT_EQ(pool.Count(), 2);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 2);
-        EXPECT_EQ(result, 1);
+        EXPECT_EQ(pool.Count(), 2U);
+        EXPECT_EQ(pool.FreeCount(), 0U);
+        EXPECT_EQ(pool.AccCount(), 2U);
+        EXPECT_EQ(result, 1U);
         {
             auto p = pool.New();
-            EXPECT_EQ(pool.Count(), 3);
-            EXPECT_EQ(pool.FreeCount(), 0);
-            EXPECT_EQ(pool.AccCount(), 3);
-            EXPECT_EQ(result, 3);
+            EXPECT_EQ(pool.Count(), 3U);
+            EXPECT_EQ(pool.FreeCount(), 0U);
+            EXPECT_EQ(pool.AccCount(), 3U);
+            EXPECT_EQ(result, 3U);
         }
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 1);
-        EXPECT_EQ(pool.AccCount(), 2);
-        EXPECT_EQ(result, 1);
+        EXPECT_EQ(pool.Count(), 3U);
+        EXPECT_EQ(pool.FreeCount(), 1U);
+        EXPECT_EQ(pool.AccCount(), 2U);
+        EXPECT_EQ(result, 1U);
         {
             auto p = pool.New();
-            EXPECT_EQ(pool.Count(), 3);
-            EXPECT_EQ(pool.FreeCount(), 0);
-            EXPECT_EQ(pool.AccCount(), 3);
-            EXPECT_EQ(result, 3);
+            EXPECT_EQ(pool.Count(), 3U);
+            EXPECT_EQ(pool.FreeCount(), 0U);
+            EXPECT_EQ(pool.AccCount(), 3U);
+            EXPECT_EQ(result, 3U);
         }
     }
+}
 
-    EXPECT_EQ(pool.Count(), 3);
-    EXPECT_EQ(pool.FreeCount(), 3);
-    EXPECT_EQ(pool.AccCount(), 0);
-    EXPECT_EQ(result, 0);
+template <typename I, typename C>
+static void VerifierTestObjPool2(Pool<I, C> &pool, int &result)
+{
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 3U);
+    EXPECT_EQ(pool.AccCount(), 0U);
+    EXPECT_EQ(result, 0U);
 
     {
         auto q = pool.New();
         auto w = pool.New();
         pool.ShrinkToFit();
-        EXPECT_EQ(pool.Count(), 2);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 2);
-        EXPECT_EQ(result, 1);
+        EXPECT_EQ(pool.Count(), 2U);
+        EXPECT_EQ(pool.FreeCount(), 0U);
+        EXPECT_EQ(pool.AccCount(), 2U);
+        EXPECT_EQ(result, 1U);
     }
 
-    EXPECT_EQ(pool.Count(), 2);
-    EXPECT_EQ(pool.FreeCount(), 2);
-    EXPECT_EQ(pool.AccCount(), 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(pool.Count(), 2U);
+    EXPECT_EQ(pool.FreeCount(), 2U);
+    EXPECT_EQ(pool.AccCount(), 0U);
+    EXPECT_EQ(result, 0U);
+}
 
-    {
-        auto q = pool.New();
-        auto w = pool.New();
-        auto p = pool.New();
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 3);
-        EXPECT_EQ(result, 3);
+template <typename I, typename C>
+static void VerifierTestObjPool3(Pool<I, C> &pool, int &result)
+{
+    auto q = pool.New();
+    auto w = pool.New();
+    auto p = pool.New();
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 0U);
+    EXPECT_EQ(pool.AccCount(), 3U);
+    EXPECT_EQ(result, 3U);
 
-        auto u {p};
+    auto u {p};
 
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 4);
-        EXPECT_EQ(result, 3);
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 0U);
+    EXPECT_EQ(pool.AccCount(), 4U);
+    EXPECT_EQ(result, 3U);
 
-        auto e {std::move(p)};
+    auto e {std::move(p)};
 
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 4);
-        EXPECT_EQ(result, 3);
-        // NOLINTNEXTLINE(bugprone-use-after-move)
-        EXPECT_FALSE(p);
-        EXPECT_TRUE(u);
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 0U);
+    EXPECT_EQ(pool.AccCount(), 4U);
+    EXPECT_EQ(result, 3U);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_FALSE(p);
+    EXPECT_TRUE(u);
 
-        p = e;
+    p = e;
 
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 0);
-        EXPECT_EQ(pool.AccCount(), 5);
-        EXPECT_EQ(result, 3);
-        EXPECT_TRUE(p);
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 0U);
+    EXPECT_EQ(pool.AccCount(), 5U);
+    EXPECT_EQ(result, 3U);
+    EXPECT_TRUE(p);
 
-        q = e;
+    q = e;
 
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 1);
-        EXPECT_EQ(pool.AccCount(), 5);
-        EXPECT_EQ(result, 3);
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 1U);
+    EXPECT_EQ(pool.AccCount(), 5U);
+    EXPECT_EQ(result, 3U);
 
-        w = std::move(e);
+    w = std::move(e);
 
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 2);
-        EXPECT_EQ(pool.AccCount(), 4);
-        EXPECT_EQ(result, 2);
-        // NOLINTNEXTLINE(bugprone-use-after-move)
-        EXPECT_FALSE(e);
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 2U);
+    EXPECT_EQ(pool.AccCount(), 4U);
+    EXPECT_EQ(result, 2U);
+    // NOLINTNEXTLINE(bugprone-use-after-move)
+    EXPECT_FALSE(e);
 
-        EXPECT_EQ((*w).a, 2);
-    }
+    EXPECT_EQ((*w).a, 2U);
+}
 
-    EXPECT_EQ(pool.Count(), 3);
-    EXPECT_EQ(pool.FreeCount(), 3);
-    EXPECT_EQ(pool.AccCount(), 0);
-    EXPECT_EQ(result, 0);
+TEST(VerifierTest_ObjPool, Basic)
+{
+    int result = 0;
+    auto &&h = [&result](S &s, size_t idx) {
+        s.a = idx;
+        result += idx;
+    };
+    Pool pool {h, [&result](S &s) { result -= s.a; }};
+    VerifierTestObjPool1(pool, result);
+    VerifierTestObjPool2(pool, result);
+    VerifierTestObjPool3(pool, result);
+
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 3U);
+    EXPECT_EQ(pool.AccCount(), 0U);
+    EXPECT_EQ(result, 0U);
 
     pool.ShrinkToFit();
-    EXPECT_EQ(pool.Count(), 0);
-    EXPECT_EQ(pool.FreeCount(), 0);
-    EXPECT_EQ(pool.AccCount(), 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(pool.Count(), 0U);
+    EXPECT_EQ(pool.FreeCount(), 0U);
+    EXPECT_EQ(pool.AccCount(), 0U);
+    EXPECT_EQ(result, 0U);
 
     {
         auto q = pool.New();
@@ -187,10 +199,10 @@ TEST(VerifierTest_ObjPool, Basic)
         // NOLINTNEXTLINE(performance-unnecessary-copy-initialization)
         auto e = p;
 
-        EXPECT_EQ(pool.Count(), 3);
-        EXPECT_EQ(pool.FreeCount(), 1);
-        EXPECT_EQ(pool.AccCount(), 3);
-        EXPECT_EQ(result, 3);
+        EXPECT_EQ(pool.Count(), 3U);
+        EXPECT_EQ(pool.FreeCount(), 1U);
+        EXPECT_EQ(pool.AccCount(), 3U);
+        EXPECT_EQ(result, 3U);
 
         int sum = 0;
         int prod = 1;
@@ -203,15 +215,15 @@ TEST(VerifierTest_ObjPool, Basic)
             ++num;
         }
 
-        EXPECT_EQ(sum, 3);
-        EXPECT_EQ(prod, 2);
-        EXPECT_EQ(num, 2);
+        EXPECT_EQ(sum, 3U);
+        EXPECT_EQ(prod, 2U);
+        EXPECT_EQ(num, 2U);
     }
 
-    EXPECT_EQ(pool.Count(), 3);
-    EXPECT_EQ(pool.FreeCount(), 3);
-    EXPECT_EQ(pool.AccCount(), 0);
-    EXPECT_EQ(result, 0);
+    EXPECT_EQ(pool.Count(), 3U);
+    EXPECT_EQ(pool.FreeCount(), 3U);
+    EXPECT_EQ(pool.AccCount(), 0U);
+    EXPECT_EQ(result, 0U);
 }
 
 }  // namespace ark::verifier::test

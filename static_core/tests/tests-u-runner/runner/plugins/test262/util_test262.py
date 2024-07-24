@@ -15,8 +15,9 @@
 # limitations under the License.
 import logging
 import re
+import os
+from unittest import TestCase
 from glob import glob
-from os import path, getenv, makedirs
 from typing import Optional, Tuple, Dict, Any
 
 from runner.descriptor import Descriptor
@@ -39,8 +40,8 @@ class UtilTest262:
         self.jit_preheat_repeats = config.ark.jit.num_repeats
         self.show_progress = config.general.show_progress
         self.work_dir = work_dir
-        self.test262_url: Optional[str] = getenv(TEST262_URL)
-        self.test262_revision: Optional[str] = getenv(TEST262_REVISION)
+        self.test262_url: Optional[str] = os.getenv(TEST262_URL)
+        self.test262_revision: Optional[str] = os.getenv(TEST262_REVISION)
         if self.test262_url is None:
             Log.exception_and_raise(_LOGGER, f"No {TEST262_URL} environment variable set", EnvironmentError)
         if self.test262_revision is None:
@@ -89,33 +90,36 @@ class UtilTest262:
         stamp_name = f"test262-{self.test262_revision}"
         if self.jit and self.jit_preheat_repeats > 1:
             stamp_name += f"-jit-{self.jit_preheat_repeats}"
-        assert self.test262_url is not None
-        assert self.test262_revision is not None
-        return generate(
-            name="test262",
-            stamp_name=stamp_name,
-            url=self.test262_url,
-            revision=self.test262_revision,
-            generated_root=self.work_dir.gen,
-            test_subdir="test",
-            show_progress=self.show_progress,
-            process_copy=lambda src, dst: self.prepare_tests(src, dst, harness_path, path.dirname(src)),
-            force_download=self.force_download
-        )
+        test = TestCase()
+        if self.test262_url is not None and self.test262_revision is not None:
+            return generate(
+                name="test262",
+                stamp_name=stamp_name,
+                url=self.test262_url,
+                revision=self.test262_revision,
+                generated_root=self.work_dir.gen,
+                test_subdir="test",
+                show_progress=self.show_progress,
+                process_copy=lambda src, dst: self.prepare_tests(src, dst, harness_path, os.path.dirname(src)),
+                force_download=self.force_download
+            )
+        test.assertFalse(self.test262_url is None)
+        test.assertFalse(self.test262_revision is None)
+        return ""
 
     def prepare_tests(self, src_path: str, dest_path: str, harness_path: str, test262_path: str) -> None:
-        glob_expression = path.join(src_path, "**/*.js")
+        glob_expression = os.path.join(src_path, "**/*.js")
         files = glob(glob_expression, recursive=True)
         files = [file for file in files if not file.endswith("FIXTURE.js")]
 
-        with open(harness_path, 'r', encoding="utf-8") as file_handler:
+        with os.fdopen(os.open(harness_path, os.O_RDONLY, 0o755), 'r', encoding="utf-8") as file_handler:
             harness = file_handler.read()
 
         harness = harness.replace('$SOURCE', f'`{harness}`')
 
         for src_file in files:
             dest_file = src_file.replace(src_path, dest_path)
-            makedirs(path.dirname(dest_file), exist_ok=True)
+            os.makedirs(os.path.dirname(dest_file), exist_ok=True)
             self.create_file(src_file, dest_file, harness, test262_path)
 
     def create_file(self, input_file: str, output_file: str, harness: str, test262_dir: str) -> None:
@@ -128,8 +132,8 @@ class UtilTest262:
 
         for include in desc['includes']:
             out_str += f"//------------ {include} start ------------\n"
-            include_file = path.join(test262_dir, 'harness', include)
-            with open(include_file, 'r', encoding="utf-8") as file_handler:
+            include_file = os.path.join(test262_dir, 'harness', include)
+            with os.fdopen(os.open(include_file, os.O_RDONLY, 0o755), 'r', encoding="utf-8") as file_handler:
                 harness_str = file_handler.read()
             out_str += harness_str
             out_str += f"//------------ {include} end ------------\n"
@@ -140,7 +144,7 @@ class UtilTest262:
         else:
             out_str += descriptor.get_content()
 
-        with open(output_file, 'w', encoding="utf-8") as output:
+        with os.fdopen(os.open(output_file, os.O_WRONLY | os.O_CREAT, 0o755), 'w', encoding="utf-8") as output:
             output.write(out_str)
 
     def validate_runtime_result(self, return_code: int, std_err: str, desc: Dict[str, Any], out: str) -> bool:

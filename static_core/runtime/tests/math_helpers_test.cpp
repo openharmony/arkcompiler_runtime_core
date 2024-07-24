@@ -55,7 +55,7 @@ void TestBitShl()
         T v = 1;
         size_t shift = std::numeric_limits<UnsignedType>::digits + 2;
         T res = bit_shl<T>()(v, shift);
-        EXPECT_EQ(res, v << 2) << ss.str();
+        EXPECT_EQ(res, v << 2U) << ss.str();
     }
 }
 
@@ -95,7 +95,7 @@ void TestBitShr()
         T v = 20;
         T shift = std::numeric_limits<UnsignedType>::digits + 2;
         T res = bit_shr<T>()(v, shift);
-        EXPECT_EQ(res, v >> 2) << ss.str();
+        EXPECT_EQ(res, v >> 2U) << ss.str();
     }
 }
 
@@ -135,7 +135,7 @@ void TestBitAshr()
         T v = 20;
         T shift = std::numeric_limits<UnsignedType>::digits + 2;
         T res = bit_ashr<T>()(v, shift);
-        EXPECT_EQ(res, v >> 2) << ss.str();
+        EXPECT_EQ(res, v >> 2U) << ss.str();
     }
 }
 

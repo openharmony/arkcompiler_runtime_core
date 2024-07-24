@@ -147,7 +147,6 @@ double StdCoreDoubleParseInt(EtsString *s, int32_t radix)
 EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 {
     double objValue = helpers::GetStdDoubleArgument(obj);
-
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -181,7 +180,6 @@ EtsString *StdCoreDoubleToExponential(ObjectHeader *obj, double d)
 EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 {
     double objValue = helpers::GetStdDoubleArgument(obj);
-
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");
@@ -215,7 +213,6 @@ EtsString *StdCoreDoubleToPrecision(ObjectHeader *obj, double d)
 EtsString *StdCoreDoubleToFixed(ObjectHeader *obj, double d)
 {
     double objValue = helpers::GetStdDoubleArgument(obj);
-
     // If x is NaN, return the String "NaN".
     if (std::isnan(objValue)) {
         return EtsString::CreateFromMUtf8("NaN");

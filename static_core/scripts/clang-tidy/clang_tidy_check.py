@@ -427,14 +427,14 @@ def check_headers_in_es2panda_sources(panda_dir):
 
 
 def check_file_list_for_system_headers_includes(file_list: list):
-    system_headers = []
+    system_headers_ = []
     regexp = re.compile("-I[^ ]*/third_party[^ ]*")
     for path, compile_args in file_list:
         match = regexp.search(compile_args)
         if match:
-            system_headers.append((path, match.group()))
+            system_headers_.append((path, match.group()))
 
-    return system_headers
+    return system_headers_
 
 
 def get_proc_count(cmd_ard : int) -> int:

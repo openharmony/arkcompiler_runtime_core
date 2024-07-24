@@ -116,6 +116,57 @@ bool ProcessSectionCheck(const Literals &checks, MethodOptions *options)
 
 }  // namespace
 
+static bool MethodOptionsProcessorProcessSection(const struct Section &s, const Section &section,
+                                                 MethodOptionsConfig &allOptions, MethodOptions &options)
+{
+    const PandaString &name = s.name;
+    PandaString items;
+    for (const auto &item : s.items) {
+        items += item;
+        items += " ";
+    }
+
+    if (name == "error") {
+        if (!ProcessSectionMsg(MethodOption::MsgClass::ERROR, items, &options)) {
+            return false;
+        }
+    } else if (name == "warning") {
+        if (!ProcessSectionMsg(MethodOption::MsgClass::WARNING, items, &options)) {
+            return false;
+        }
+    } else if (name == "hidden") {
+        if (!ProcessSectionMsg(MethodOption::MsgClass::HIDDEN, items, &options)) {
+            return false;
+        }
+    } else {
+        Literals literals;
+        const char *start = items.c_str();
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (!LiteralsParser()(literals, start, start + items.length())) {
+            LOG(ERROR, VERIFIER) << "Failed to parse '" << name << "' under '" << section.name << "'";
+            return false;
+        }
+
+        if (name == "show") {
+            if (!ProcessSectionShow(literals, &options)) {
+                return false;
+            }
+        } else if (name == "uplevel") {
+            if (!ProcessSectionUplevel(literals, allOptions, &options)) {
+                return false;
+            }
+        } else if (name == "check") {
+            if (!ProcessSectionCheck(literals, &options)) {
+                return false;
+            }
+        } else {
+            LOG(ERROR, VERIFIER) << "Unexpected section name: '" << name << "' under '" << section.name << "'";
+            return false;
+        }
+    }
+    return true;
+}
+
 const auto &MethodOptionsProcessor()
 {
     static const auto PROCESS_METHOD_OPTIONS = [](Config *cfg, const Section &section) {
@@ -123,50 +174,8 @@ const auto &MethodOptionsProcessor()
         MethodOptions &options = allOptions.NewOptions(section.name);
 
         for (const auto &s : section.sections) {
-            const PandaString &name = s.name;
-            PandaString items;
-            for (const auto &item : s.items) {
-                items += item;
-                items += " ";
-            }
-
-            if (name == "error") {
-                if (!ProcessSectionMsg(MethodOption::MsgClass::ERROR, items, &options)) {
-                    return false;
-                }
-            } else if (name == "warning") {
-                if (!ProcessSectionMsg(MethodOption::MsgClass::WARNING, items, &options)) {
-                    return false;
-                }
-            } else if (name == "hidden") {
-                if (!ProcessSectionMsg(MethodOption::MsgClass::HIDDEN, items, &options)) {
-                    return false;
-                }
-            } else {
-                Literals literals;
-                const char *start = items.c_str();
-                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                if (!LiteralsParser()(literals, start, start + items.length())) {
-                    LOG(ERROR, VERIFIER) << "Failed to parse '" << name << "' under '" << section.name << "'";
-                    return false;
-                }
-
-                if (name == "show") {
-                    if (!ProcessSectionShow(literals, &options)) {
-                        return false;
-                    }
-                } else if (name == "uplevel") {
-                    if (!ProcessSectionUplevel(literals, allOptions, &options)) {
-                        return false;
-                    }
-                } else if (name == "check") {
-                    if (!ProcessSectionCheck(literals, &options)) {
-                        return false;
-                    }
-                } else {
-                    LOG(ERROR, VERIFIER) << "Unexpected section name: '" << name << "' under '" << section.name << "'";
-                    return false;
-                }
+            if (!MethodOptionsProcessorProcessSection(s, section, allOptions, options)) {
+                return false;
             }
         }
 

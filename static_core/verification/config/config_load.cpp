@@ -45,7 +45,6 @@ bool ProcessConfigFile(ark::verifier::Config *cfg, const char *text)
 
     bool result =
         ark::verifier::config::ParseConfig(text, section) && ark::verifier::config::ProcessConfig(cfg, section);
-
     if (result) {
         LOG(DEBUG, VERIFIER) << "Verifier debug configuration: \n" << section.Image();
         ark::verifier::debug::SetDefaultMethodOptions(cfg);

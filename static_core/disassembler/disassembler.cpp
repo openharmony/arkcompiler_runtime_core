@@ -189,10 +189,8 @@ void Disassembler::Serialize(std::ostream &os, bool addSeparators, bool printInf
     SerializeMethods(os, addSeparators, printInformation);
 }
 
-void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, bool printInformation,
-                             panda_file::LineNumberTable *lineTable) const
+void Disassembler::SerializePrintStartInfo(const pandasm::Function &method, std::ostringstream &headerSs) const
 {
-    std::ostringstream headerSs;
     headerSs << ".function " << method.returnType.GetPandasmName() << " " << method.name << "(";
 
     if (!method.params.empty()) {
@@ -203,9 +201,56 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
         }
     }
     headerSs << ")";
+}
 
+void Disassembler::SerializeCheckEnd(const pandasm::Function &method, std::ostream &os, bool printMethodInfo,
+                                     const MethodInfo *&methodInfo) const
+{
+    if (!method.catchBlocks.empty()) {
+        os << "\n";
+
+        for (const auto &catchBlock : method.catchBlocks) {
+            Serialize(catchBlock, os);
+            os << "\n";
+        }
+    }
+
+    if (printMethodInfo) {
+        ASSERT(methodInfo != nullptr);
+        SerializeLineNumberTable(methodInfo->lineNumberTable, os);
+        SerializeLocalVariableTable(methodInfo->localVariableTable, method, os);
+    }
+
+    os << "}\n\n";
+}
+
+size_t Disassembler::SerializeIfPrintMethodInfo(
+    const pandasm::Function &method, bool printMethodInfo, std::ostringstream &headerSs, const MethodInfo *&methodInfo,
+    std::map<std::string, ark::disasm::MethodInfo>::const_iterator &methodInfoIt) const
+{
+    size_t width = 0;
+    if (printMethodInfo) {
+        methodInfo = &methodInfoIt->second;
+
+        for (const auto &i : method.ins) {
+            if (i.ToString().size() > width) {
+                width = i.ToString().size();
+            }
+        }
+
+        headerSs << " # " << methodInfo->methodInfo << "\n#   CODE:";
+    }
+
+    headerSs << "\n";
+    return width;
+}
+
+void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, bool printInformation,
+                             panda_file::LineNumberTable *lineTable) const
+{
+    std::ostringstream headerSs;
+    SerializePrintStartInfo(method, headerSs);
     const std::string signature = pandasm::GetFunctionSignatureFromName(method.name, method.params);
-
     const auto methodIter = progAnn_.methodAnnotations.find(signature);
     if (methodIter != progAnn_.methodAnnotations.end()) {
         Serialize(*method.metadata, methodIter->second, headerSs);
@@ -221,24 +266,10 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
 
     headerSs << " {";
 
-    size_t width;
-    const MethodInfo *methodInfo;
+    const MethodInfo *methodInfo = nullptr;
     auto methodInfoIt = progInfo_.methodsInfo.find(signature);
     bool printMethodInfo = printInformation && methodInfoIt != progInfo_.methodsInfo.end();
-    if (printMethodInfo) {
-        methodInfo = &methodInfoIt->second;
-
-        width = 0;
-        for (const auto &i : method.ins) {
-            if (i.ToString().size() > width) {
-                width = i.ToString().size();
-            }
-        }
-
-        headerSs << " # " << methodInfo->methodInfo << "\n#   CODE:";
-    }
-
-    headerSs << "\n";
+    size_t width = SerializeIfPrintMethodInfo(method, printMethodInfo, headerSs, methodInfo, methodInfoIt);
 
     auto headerSsStr = headerSs.str();
     size_t lineNumber = std::count(headerSsStr.begin(), headerSsStr.end(), '\n') + 1;
@@ -250,12 +281,8 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
 
         std::string ins = method.ins[i].ToString("", method.GetParamsNum() != 0, method.regsNum);
         if (method.ins[i].setLabel) {
-            std::string delim = ": ";
-            size_t pos = ins.find(delim);
-            std::string label = ins.substr(0, pos);
-            ins.erase(0, pos + delim.length());
-
-            insSs << label << ":\n";
+            insSs << ins.substr(0, ins.find(": ")) << ":\n";
+            ins.erase(0, ins.find(": ") + std::string(": ").length());
         }
 
         insSs << "\t";
@@ -280,23 +307,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
         os << insSsStr;
     }
 
-    if (!method.catchBlocks.empty()) {
-        os << "\n";
-
-        for (const auto &catchBlock : method.catchBlocks) {
-            Serialize(catchBlock, os);
-
-            os << "\n";
-        }
-    }
-
-    if (printMethodInfo) {
-        ASSERT(methodInfo != nullptr);
-        SerializeLineNumberTable(methodInfo->lineNumberTable, os);
-        SerializeLocalVariableTable(methodInfo->localVariableTable, method, os);
-    }
-
-    os << "}\n\n";
+    SerializeCheckEnd(method, os, printMethodInfo, methodInfo);
 }
 
 inline bool Disassembler::IsSystemType(const std::string &typeName)
@@ -462,8 +473,8 @@ void Disassembler::GetLiteralArray(pandasm::LiteralArray *litArray, const size_t
 
     // clang-format off
     litArrayAccessor.EnumerateLiteralVals(index,
-                                        [this, litArray](const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                         const panda_file::LiteralTag &tag) {
+                                          [this, litArray](const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                                           const panda_file::LiteralTag &tag) {
                                             switch (tag) {
                                                 case panda_file::LiteralTag::ARRAY_U1: {
                                                     FillLiteralArrayData<bool>(litArray, tag, value);
@@ -1444,17 +1455,15 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
             ss << "\t";
         }
         ss << f.type.GetPandasmName() << " " << f.name;
-        if (!isUnion) {
-            if (recordInTable) {
-                const auto fieldIter = recordIter->second.fieldAnnotations.find(f.name);
-                if (fieldIter != recordIter->second.fieldAnnotations.end()) {
-                    Serialize(*f.metadata, fieldIter->second, ss);
-                } else {
-                    Serialize(*f.metadata, {}, ss);
-                }
+        if (!isUnion && recordInTable) {
+            const auto fieldIter = recordIter->second.fieldAnnotations.find(f.name);
+            if (fieldIter != recordIter->second.fieldAnnotations.end()) {
+                Serialize(*f.metadata, fieldIter->second, ss);
             } else {
                 Serialize(*f.metadata, {}, ss);
             }
+        } else if (!isUnion && !recordInTable) {
+            Serialize(*f.metadata, {}, ss);
         }
 
         if (printInformation) {

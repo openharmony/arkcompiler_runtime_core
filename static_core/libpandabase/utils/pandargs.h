@@ -659,7 +659,6 @@ private:
                     errstr_ += "pandargs: Too many tail arguments given\n";
                 }
             }
-
         } else {
             errstr_.append("pandargs: Invalid option \"");
             errstr_.append(argstr);

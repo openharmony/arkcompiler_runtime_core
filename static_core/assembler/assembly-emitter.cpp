@@ -613,24 +613,15 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
 
         ASSERT(tagType != '0');
 
-        auto functionName = record.name + "." + name;
-
-        functionName = GetMethodSignatureFromProgram(functionName, program);
-
-        if (record.HasImplementation()) {
-            auto funcIt = program.functionTable.find(functionName);
-            if (funcIt == program.functionTable.cend()) {
-                // Definitions of the system annotations may be absent.
-                // So print message and continue if corresponding function isn't found.
-                LOG(INFO, ASSEMBLER) << "Function " << functionName << " not found";
-            } else {
-                auto &function = funcIt->second;
-
-                if (!CheckValue(value, function.returnType, program)) {
-                    SetLastError("Incorrect annotation element " + functionName + ": " + GetLastError());
-                    return nullptr;
-                }
-            }
+        auto functionName = GetMethodSignatureFromProgram(record.name + "." + name, program);
+        auto funcIt = program.functionTable.find(functionName);
+        if (record.HasImplementation() && funcIt == program.functionTable.cend()) {
+            // Definitions of the system annotations may be absent.
+            // So print message and continue if corresponding function isn't found.
+            LOG(INFO, ASSEMBLER) << "Function " << functionName << " not found";
+        } else if (record.HasImplementation() && !CheckValue(value, funcIt->second.returnType, program)) {
+            SetLastError("Incorrect annotation element " + functionName + ": " + GetLastError());
+            return nullptr;
         }
 
         auto *item = CreateValueItem(container, value, program, classes, fields, methods);

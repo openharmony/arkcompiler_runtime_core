@@ -84,15 +84,12 @@ bool PrepareArgs(ark::PandArgParser &paParser, const ark::PandArg<std::string> &
     }
 
     if (verbose.GetValue()) {
+        ark::Logger::ComponentMask componentMask;
+        componentMask.set(ark::Logger::Component::ASSEMBLER);
+        componentMask.set(ark::Logger::Component::BYTECODE_OPTIMIZER);
         if (logFile.GetValue().empty()) {
-            ark::Logger::ComponentMask componentMask;
-            componentMask.set(ark::Logger::Component::ASSEMBLER);
-            componentMask.set(ark::Logger::Component::BYTECODE_OPTIMIZER);
             ark::Logger::InitializeStdLogging(ark::Logger::Level::DEBUG, componentMask);
         } else {
-            ark::Logger::ComponentMask componentMask;
-            componentMask.set(ark::Logger::Component::ASSEMBLER);
-            componentMask.set(ark::Logger::Component::BYTECODE_OPTIMIZER);
             ark::Logger::InitializeFileLogging(logFile.GetValue(), ark::Logger::Level::DEBUG, componentMask);
         }
     }

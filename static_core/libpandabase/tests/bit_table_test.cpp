@@ -200,14 +200,14 @@ TEST_F(BitTableTest, CustomAccessor)
     Builder builder(GetAllocator());
     {
         Builder::Entry entry;
-        entry[TestAccessor::FIELD0] = 1;
-        entry[TestAccessor::FIELD1] = 2;
+        entry[TestAccessor::FIELD0] = 1U;
+        entry[TestAccessor::FIELD1] = 2U;
         builder.Emplace(entry);
     }
     {
         Builder::Entry entry;
-        entry[TestAccessor::FIELD0] = 3;
-        entry[TestAccessor::FIELD1] = 4;
+        entry[TestAccessor::FIELD0] = 3U;
+        entry[TestAccessor::FIELD1] = 4U;
         builder.Emplace(entry);
     }
 
@@ -230,6 +230,67 @@ TEST_F(BitTableTest, CustomAccessor)
             ASSERT_EQ(row.Get(i), idx++);
         }
     }
+}
+void GetRange(BitTable<TestAccessor> table, std::array<std::array<uint32_t, 2U>, 10U> values)
+{
+    auto range = table.GetRangeReversed(4U, 10U);
+    ASSERT_EQ(range[0U].GetField0(), values[9U][0U]);
+    ASSERT_EQ(range[0U].GetField1(), values[9U][1U]);
+    ASSERT_EQ(range[1U].GetField0(), values[8U][0U]);
+    ASSERT_EQ(range[1U].GetField1(), values[8U][1U]);
+    ASSERT_EQ(range[2U].GetField0(), values[7U][0U]);
+    ASSERT_EQ(range[2U].GetField1(), values[7U][1U]);
+    ASSERT_EQ(range[3U].GetField0(), values[6U][0U]);
+    ASSERT_EQ(range[3U].GetField1(), values[6U][1U]);
+    ASSERT_EQ(range[4U].GetField0(), values[5U][0U]);
+    ASSERT_EQ(range[4U].GetField1(), values[5U][1U]);
+
+    int i = 10U;
+    for (auto &v : table.GetRangeReversed(4U, 10U)) {
+        ASSERT_EQ(v.GetField0(), values[i - 1L][0U]);
+        ASSERT_EQ(v.GetField1(), values[i - 1L][1U]);
+        i--;
+    }
+    ASSERT_EQ(i, 4U);
+
+    i = 10U;
+    for (auto &v : table.GetRangeReversed()) {
+        ASSERT_EQ(v.GetField0(), values[i - 1L][0U]);
+        ASSERT_EQ(v.GetField1(), values[i - 1L][1U]);
+        i--;
+    }
+    ASSERT_EQ(i, 0U);
+}
+
+void GetReversedRange(BitTable<TestAccessor> table, std::array<std::array<uint32_t, 2U>, 10U> values)
+{
+    auto range = table.GetRangeReversed(4U, 10U);
+    ASSERT_EQ(range[0U].GetField0(), values[9U][0U]);
+    ASSERT_EQ(range[0U].GetField1(), values[9U][1U]);
+    ASSERT_EQ(range[1U].GetField0(), values[8U][0U]);
+    ASSERT_EQ(range[1U].GetField1(), values[8U][1U]);
+    ASSERT_EQ(range[2U].GetField0(), values[7U][0U]);
+    ASSERT_EQ(range[2U].GetField1(), values[7U][1U]);
+    ASSERT_EQ(range[3U].GetField0(), values[6U][0U]);
+    ASSERT_EQ(range[3U].GetField1(), values[6U][1U]);
+    ASSERT_EQ(range[4U].GetField0(), values[5U][0U]);
+    ASSERT_EQ(range[4U].GetField1(), values[5U][1U]);
+
+    int i = 10U;
+    for (auto &v : table.GetRangeReversed(4U, 10U)) {
+        ASSERT_EQ(v.GetField0(), values[i - 1L][0U]);
+        ASSERT_EQ(v.GetField1(), values[i - 1L][1U]);
+        i--;
+    }
+    ASSERT_EQ(i, 4U);
+
+    i = 10U;
+    for (auto &v : table.GetRangeReversed()) {
+        ASSERT_EQ(v.GetField0(), values[i - 1L][0U]);
+        ASSERT_EQ(v.GetField1(), values[i - 1L][1U]);
+        i--;
+    }
+    ASSERT_EQ(i, 0U);
 }
 
 TEST_F(BitTableTest, Ranges)
@@ -256,66 +317,36 @@ TEST_F(BitTableTest, Ranges)
     ASSERT_EQ(table.GetColumnsCount(), 2U);
 
     {
-        auto range = table.GetRange(0U, 6U);
-        ASSERT_EQ(range[0U].GetField0(), values[0U][0U]);
-        ASSERT_EQ(range[0U].GetField1(), values[0U][1U]);
-        ASSERT_EQ(range[1U].GetField0(), values[1U][0U]);
-        ASSERT_EQ(range[1U].GetField1(), values[1U][1U]);
-        ASSERT_EQ(range[2U].GetField0(), values[2U][0U]);
-        ASSERT_EQ(range[2U].GetField1(), values[2U][1U]);
-        ASSERT_EQ(range[3U].GetField0(), values[3U][0U]);
-        ASSERT_EQ(range[3U].GetField1(), values[3U][1U]);
-        ASSERT_EQ(range[4U].GetField0(), values[4U][0U]);
-        ASSERT_EQ(range[4U].GetField1(), values[4U][1U]);
-        ASSERT_EQ(range[5U].GetField0(), values[5U][0U]);
-        ASSERT_EQ(range[5U].GetField1(), values[5U][1U]);
-
-        size_t i = 0;
-        for (auto &v : table.GetRange(0U, 6U)) {
-            ASSERT_EQ(v.GetField0(), values[i][0U]);
-            ASSERT_EQ(v.GetField1(), values[i][1U]);
-            i++;
-        }
-        ASSERT_EQ(i, 6U);
-
-        i = 0;
-        for (auto &v : table) {
-            ASSERT_EQ(v.GetField0(), values[i][0U]);
-            ASSERT_EQ(v.GetField1(), values[i][1U]);
-            i++;
-        }
-        ASSERT_EQ(i, 10U);
+        GetRange(table, values);
     }
 
     {
-        auto range = table.GetRangeReversed(4U, 10U);
-        ASSERT_EQ(range[0U].GetField0(), values[9U][0U]);
-        ASSERT_EQ(range[0U].GetField1(), values[9U][1U]);
-        ASSERT_EQ(range[1U].GetField0(), values[8U][0U]);
-        ASSERT_EQ(range[1U].GetField1(), values[8U][1U]);
-        ASSERT_EQ(range[2U].GetField0(), values[7U][0U]);
-        ASSERT_EQ(range[2U].GetField1(), values[7U][1U]);
-        ASSERT_EQ(range[3U].GetField0(), values[6U][0U]);
-        ASSERT_EQ(range[3U].GetField1(), values[6U][1U]);
-        ASSERT_EQ(range[4U].GetField0(), values[5U][0U]);
-        ASSERT_EQ(range[4U].GetField1(), values[5U][1U]);
-
-        int i = 10;
-        for (auto &v : table.GetRangeReversed(4U, 10U)) {
-            ASSERT_EQ(v.GetField0(), values[i - 1L][0U]);
-            ASSERT_EQ(v.GetField1(), values[i - 1L][1U]);
-            i--;
-        }
-        ASSERT_EQ(i, 4U);
-
-        i = 10;
-        for (auto &v : table.GetRangeReversed()) {
-            ASSERT_EQ(v.GetField0(), values[i - 1L][0U]);
-            ASSERT_EQ(v.GetField1(), values[i - 1L][1U]);
-            i--;
-        }
-        ASSERT_EQ(i, 0U);
+        GetReversedRange(table, values);
     }
+}
+
+TEST_F(BitTableTest, GetRanges)
+{
+    ArenaVector<uint8_t> data(GetAllocator()->Adapter());
+    data.reserve(1_KB);
+
+    std::array<std::array<uint32_t, 2U>, 10U> values = {
+        {{0U, 10U}, {1U, 11U}, {2U, 12U}, {3U, 13U}, {4U, 14U}, {5U, 15U}, {6U, 16U}, {7U, 17U}, {8U, 18U}, {9U, 19U}}};
+
+    BitTableBuilder<TestAccessor> builder(GetAllocator());
+    for (auto &v : values) {
+        builder.Emplace(CreateEntry<decltype(builder)>(v));
+    }
+
+    BitMemoryStreamOut out(&data);
+    builder.Encode(out);
+
+    BitMemoryStreamIn in(data.data(), 0U, data.size() * BITS_PER_BYTE);
+    BitTable<TestAccessor> table;
+    table.Decode(&in);
+
+    ASSERT_EQ(table.GetRowsCount(), 10U);
+    ASSERT_EQ(table.GetColumnsCount(), 2U);
 
     {
         auto range = table.GetRange(0U, 0U);
@@ -373,7 +404,7 @@ TEST_F(BitTableTest, Bitmap)
     BitmapTableBuilder builder(GetAllocator());
 
     ArenaVector<std::pair<uint32_t, uint64_t>> values(GetAllocator()->Adapter());
-    for (size_t i = 0; i <= 64; i++) {
+    for (size_t i = 0; i <= 64U; i++) {
         uint64_t mask = (i == 64U) ? std::numeric_limits<uint64_t>::max() : ((1ULL << i) - 1L);
         uint64_t value = pattern & mask;
         BitVector<ArenaAllocator> vec(MinimumBitsToStore(value), GetAllocator());

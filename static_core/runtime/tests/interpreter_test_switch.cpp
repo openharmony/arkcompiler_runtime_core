@@ -58,26 +58,50 @@ static int32_t EntryPoint(Method * /* unused */)
     return RET;
 }
 
+class SwitchToDebugListener : public RuntimeListener {
+public:
+    struct Event {
+        ManagedThread *thread;
+        Method *method;
+        uint32_t bcOffset;
+    };
+
+    void BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bcOffset) override
+    {
+        events_.push_back({thread, method, bcOffset});
+    }
+
+    auto &GetEvents() const
+    {
+        return events_;
+    }
+
+private:
+    std::vector<Event> events_ {};
+};
+
+static auto g_switchToDebugSource = R"(
+    .function i32 f() {
+        ldai 10
+        return
+    }
+
+    .function i32 g() {
+        call f
+        return
+    }
+
+    .function i32 main() {
+        call g
+        return
+    }
+)";
+
 TEST_F(InterpreterTestSwitch, SwitchToDebug)
 {
     pandasm::Parser p;
 
-    auto source = R"(
-        .function i32 f() {
-            ldai 10
-            return
-        }
-
-        .function i32 g() {
-            call f
-            return
-        }
-
-        .function i32 main() {
-            call g
-            return
-        }
-    )";
+    auto source = g_switchToDebugSource;
 
     auto res = p.Parse(source);
     auto pf = pandasm::AsmEmitter::Emit(res.Value());
@@ -87,29 +111,7 @@ TEST_F(InterpreterTestSwitch, SwitchToDebug)
     classLinker->AddPandaFile(std::move(pf));
     auto *extension = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
 
-    class Listener : public RuntimeListener {
-    public:
-        struct Event {
-            ManagedThread *thread;
-            Method *method;
-            uint32_t bcOffset;
-        };
-
-        void BytecodePcChanged(ManagedThread *thread, Method *method, uint32_t bcOffset) override
-        {
-            events_.push_back({thread, method, bcOffset});
-        }
-
-        auto &GetEvents() const
-        {
-            return events_;
-        }
-
-    private:
-        std::vector<Event> events_ {};
-    };
-
-    Listener listener {};
+    SwitchToDebugListener listener {};
 
     auto *notificationManager = Runtime::GetCurrent()->GetNotificationManager();
     notificationManager->AddListener(&listener, RuntimeNotificationManager::BYTECODE_PC_CHANGED);

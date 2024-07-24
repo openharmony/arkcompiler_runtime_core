@@ -112,7 +112,6 @@ static std::pair<std::unique_ptr<const ark::panda_file::File>, ark::panda_file::
             jmp label
 
             return
-
         }
     )");
     ASSERT(program);

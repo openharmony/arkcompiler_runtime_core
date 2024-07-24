@@ -97,34 +97,43 @@ TEST_F(SmallVectorTest, Growing)
 }
 
 template <typename Vector>
+void CheckIteration(Vector &vector)
+{
+    auto it = std::find(vector.begin(), vector.end(), 30U);
+    ASSERT_NE(it, vector.end());
+    ASSERT_EQ(*it, 30U);
+    ASSERT_EQ(std::distance(vector.begin(), it), 2U);
+    it = std::find(vector.begin(), vector.end(), 50U);
+    ASSERT_EQ(it, vector.end());
+}
+
+template <typename Vector>
+void CheckReverseIteration(Vector &vector)
+{
+    auto it = std::find(vector.rbegin(), vector.rend(), 30U);
+    ASSERT_NE(it, vector.rend());
+    ASSERT_EQ(*it, 30U);
+    ASSERT_EQ(std::distance(vector.rbegin(), it), 1U);
+    it = std::find(vector.rbegin(), vector.rend(), 50U);
+    ASSERT_EQ(it, vector.rend());
+}
+
+template <typename Vector>
 void TestVectorIteration(Vector &vector)
 {
     std::array values = {10U, 20U, 30U, 40U, 50U, 60U, 70U, 80U, 90U, 100U};
     ASSERT_EQ(vector.size(), 0U);
-
     std::copy(values.begin(), values.begin() + 4U, std::back_inserter(vector));
     ASSERT_TRUE(vector.IsStatic());
     ASSERT_EQ(vector.size(), 4U);
     ASSERT_TRUE(std::equal(vector.begin(), vector.end(), values.begin()));
 
     {
-        auto it = std::find(vector.begin(), vector.end(), 30U);
-        ASSERT_NE(it, vector.end());
-        ASSERT_EQ(*it, 30U);
-        ASSERT_EQ(std::distance(vector.begin(), it), 2U);
-
-        it = std::find(vector.begin(), vector.end(), 50U);
-        ASSERT_EQ(it, vector.end());
+        CheckIteration(vector);
     }
 
     {
-        auto it = std::find(vector.rbegin(), vector.rend(), 30U);
-        ASSERT_NE(it, vector.rend());
-        ASSERT_EQ(*it, 30U);
-        ASSERT_EQ(std::distance(vector.rbegin(), it), 1U);
-
-        it = std::find(vector.rbegin(), vector.rend(), 50U);
-        ASSERT_EQ(it, vector.rend());
+        CheckReverseIteration(vector);
     }
 
     {
@@ -153,7 +162,7 @@ void TestVectorIteration(Vector &vector)
         ASSERT_EQ(*(it + 3U), vector[3U]);
         std::advance(it, 8U);
         ASSERT_EQ(*it, vector[8U]);
-        it -= 3;
+        it -= 3U;
         ASSERT_EQ(*it, vector[5U]);
         ASSERT_EQ(*(it - 3L), vector[2U]);
         it++;
@@ -327,9 +336,7 @@ TEST_F(SmallVectorTest, ResizeDynamicWithValue)
     ASSERT_FALSE(vector.IsStatic());
 }
 
-// NOLINTEND(readability-magic-numbers)
-
-TEST_F(SmallVectorTest, Constructing)
+TEST_F(SmallVectorTest, ConstructingStaticToDynamic)
 {
     std::array values = {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U};
 
@@ -348,19 +355,6 @@ TEST_F(SmallVectorTest, Constructing)
         vector1.push_back(values[2U]);
         ASSERT_FALSE(vector1.IsStatic());
     }
-    // Assign from dynamic vector to static
-    {
-        SmallVector<int, 2U> vector1;
-        SmallVector<int, 2U> vector2;
-        std::copy(values.begin(), values.end(), std::back_inserter(vector2));
-        vector1.push_back(values[0U]);
-        vector1.push_back(values[1U]);
-
-        vector1 = vector2;
-        ASSERT_EQ(vector1.size(), values.size());
-        ASSERT_FALSE(vector1.IsStatic());
-        ASSERT_TRUE(std::equal(vector1.begin(), vector1.end(), vector2.begin()));
-    }
 
     // Move assign from static vector to dynamic
     {
@@ -378,6 +372,51 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_TRUE(vector1.IsStatic());
         ASSERT_TRUE(std::equal(vector1.begin(), vector1.end(), values.begin()));
     }
+
+    // Copy constructor from static
+    {
+        SmallVector<int, 2U> vector1;
+        std::copy(values.begin(), values.begin() + 2U, std::back_inserter(vector1));
+        ASSERT_TRUE(vector1.IsStatic());
+        SmallVector<int, 2U> vector2(vector1);
+        ASSERT_EQ(vector1.size(), 2U);
+        ASSERT_EQ(vector2.size(), 2U);
+        ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), vector1.begin()));
+    }
+
+    // Move constructor from static
+    {
+        SmallVector<int, 2U> vector1;
+        std::copy(values.begin(), values.begin() + 2U, std::back_inserter(vector1));
+        ASSERT_TRUE(vector1.IsStatic());
+        SmallVector<int, 2U> vector2(std::move(vector1));
+        // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
+        ASSERT_EQ(vector1.size(), 0U);
+        ASSERT_EQ(vector2.size(), 2U);
+        ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), values.begin()));
+    }
+}
+
+// NOLINTEND(readability-magic-numbers)
+
+TEST_F(SmallVectorTest, ConstructingDynamicToStatic)
+{
+    std::array values = {0U, 1U, 2U, 3U, 4U, 5U, 6U, 7U};
+
+    // Assign from dynamic vector to static
+    {
+        SmallVector<int, 2U> vector1;
+        SmallVector<int, 2U> vector2;
+        std::copy(values.begin(), values.end(), std::back_inserter(vector2));
+        vector1.push_back(values[0U]);
+        vector1.push_back(values[1U]);
+
+        vector1 = vector2;
+        ASSERT_EQ(vector1.size(), values.size());
+        ASSERT_FALSE(vector1.IsStatic());
+        ASSERT_TRUE(std::equal(vector1.begin(), vector1.end(), vector2.begin()));
+    }
+
     // Move assign from dynamic vector to static
     {
         SmallVector<int, 2U> vector1;
@@ -406,16 +445,6 @@ TEST_F(SmallVectorTest, Constructing)
         ASSERT_EQ(vector2.size(), values.size());
         ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), vector1.begin()));
     }
-    // Copy constructor from static
-    {
-        SmallVector<int, 2U> vector1;
-        std::copy(values.begin(), values.begin() + 2U, std::back_inserter(vector1));
-        ASSERT_TRUE(vector1.IsStatic());
-        SmallVector<int, 2U> vector2(vector1);
-        ASSERT_EQ(vector1.size(), 2U);
-        ASSERT_EQ(vector2.size(), 2U);
-        ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), vector1.begin()));
-    }
 
     // Move constructor from dynamic
     {
@@ -427,17 +456,6 @@ TEST_F(SmallVectorTest, Constructing)
         // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
         ASSERT_EQ(vector1.size(), 0U);
         ASSERT_EQ(vector2.size(), values.size());
-        ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), values.begin()));
-    }
-    // Move constructor from static
-    {
-        SmallVector<int, 2U> vector1;
-        std::copy(values.begin(), values.begin() + 2U, std::back_inserter(vector1));
-        ASSERT_TRUE(vector1.IsStatic());
-        SmallVector<int, 2U> vector2(std::move(vector1));
-        // NOLINTNEXTLINE(bugprone-use-after-move,clang-analyzer-cplusplus.Move)
-        ASSERT_EQ(vector1.size(), 0U);
-        ASSERT_EQ(vector2.size(), 2U);
         ASSERT_TRUE(std::equal(vector2.begin(), vector2.end(), values.begin()));
     }
 }

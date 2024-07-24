@@ -17,6 +17,7 @@
 
 import logging
 import subprocess
+from unittest import TestCase
 from copy import deepcopy
 from os import path, remove
 from typing import List, Callable, Tuple, Optional
@@ -180,18 +181,19 @@ class TestFileBased(Test):
         if path.isfile(test_an):
             remove(test_an)
 
-        assert self.test_env.ark_aot is not None
-        params = Params(
-            timeout=self.test_env.config.ark_aot.timeout,
-            executor=self.test_env.ark_aot,
-            flags=aot_flags,
-            env=self.test_env.cmd_env,
-            fail_kind_fail=FailKind.AOT_FAIL,
-            fail_kind_timeout=FailKind.AOT_TIMEOUT,
-            fail_kind_other=FailKind.AOT_OTHER,
-        )
-
-        return self.run_one_step("ark_aot", params, result_validator)
+        if self.test_env.ark_aot is not None:
+            params = Params(
+                timeout=self.test_env.config.ark_aot.timeout,
+                executor=self.test_env.ark_aot,
+                flags=aot_flags,
+                env=self.test_env.cmd_env,
+                fail_kind_fail=FailKind.AOT_FAIL,
+                fail_kind_timeout=FailKind.AOT_TIMEOUT,
+                fail_kind_other=FailKind.AOT_OTHER,
+            )
+            return self.run_one_step("ark_aot", params, result_validator)
+        TestCase().assertFalse(self.test_env.ark_aot is None)
+        return False, TestReport("", "", 0), FailKind.AOT_OTHER
 
     def run_ark_quick(self, flags: List[str], test_abc: str, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind], str]:

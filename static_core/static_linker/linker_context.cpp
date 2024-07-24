@@ -61,29 +61,7 @@ void Context::Merge()
         }
     }
 
-    // add regular classes
-    for (auto &reader : readers_) {
-        auto *ic = reader.GetContainerPtr();
-        auto &classes = *ic->GetClassMap();
-
-        knownItems_.reserve(reader.GetItems()->size());
-
-        for (auto [name, i] : classes) {
-            if (i->IsForeign()) {
-                continue;
-            }
-            ASSERT(name == GetStr(i->GetNameItem()));
-
-            if (conf_.partial.count(name) == 0) {
-                if (auto iter = cm.find(name); iter != cm.end()) {
-                    Error("Class redefinition", {ErrorDetail("original", iter->second)}, &reader);
-                }
-            }
-            auto clz = cont_.GetOrCreateClassItem(name);
-            knownItems_[i] = clz;
-            cameFrom_.emplace(clz, &reader);
-        }
-    }
+    AddRegularClasses();
 
     // find all referenced foreign classes
     for (auto &reader : readers_) {
@@ -105,21 +83,7 @@ void Context::Merge()
         }
     }
 
-    // fill regular classes
-    for (auto &reader : readers_) {
-        auto *ic = reader.GetContainerPtr();
-        auto &classes = *ic->GetClassMap();
-
-        for (auto [name, i] : classes) {
-            if (i->IsForeign()) {
-                continue;
-            }
-            ASSERT(cm.find(name) != cm.end());
-            auto ni = static_cast<panda_file::ClassItem *>(cm[name]);
-            auto oi = static_cast<panda_file::ClassItem *>(i);
-            MergeClass(&reader, ni, oi);
-        }
-    }
+    FillRegularClasses();
 
     // scrap all indexable items
     for (auto &reader : readers_) {
@@ -143,6 +107,59 @@ void Context::Merge()
         f();
     }
     deferredFailedAnnotations_.clear();
+}
+
+void Context::CheckClassRedifinition(const std::string &name, panda_file::FileReader *reader)
+{
+    auto &cm = *cont_.GetClassMap();
+    if (conf_.partial.count(name) == 0) {
+        if (auto iter = cm.find(name); iter != cm.end()) {
+            Error("Class redefinition", {ErrorDetail("original", iter->second)}, reader);
+        }
+    }
+}
+
+void Context::AddRegularClasses()
+{
+    for (auto &reader : readers_) {
+        auto *ic = reader.GetContainerPtr();
+        auto &classes = *ic->GetClassMap();
+
+        knownItems_.reserve(reader.GetItems()->size());
+
+        for (auto [name, i] : classes) {
+            if (i->IsForeign()) {
+                continue;
+            }
+            ASSERT(name == GetStr(i->GetNameItem()));
+
+            CheckClassRedifinition(name, &reader);
+
+            auto clz = cont_.GetOrCreateClassItem(name);
+            knownItems_[i] = clz;
+            cameFrom_.emplace(clz, &reader);
+        }
+    }
+}
+
+void Context::FillRegularClasses()
+{
+    auto &cm = *cont_.GetClassMap();
+
+    for (auto &reader : readers_) {
+        auto *ic = reader.GetContainerPtr();
+        auto &classes = *ic->GetClassMap();
+
+        for (auto [name, i] : classes) {
+            if (i->IsForeign()) {
+                continue;
+            }
+            ASSERT(cm.find(name) != cm.end());
+            auto ni = static_cast<panda_file::ClassItem *>(cm[name]);
+            auto oi = static_cast<panda_file::ClassItem *>(i);
+            MergeClass(&reader, ni, oi);
+        }
+    }
 }
 
 void Context::MergeClass(const panda_file::FileReader *reader, panda_file::ClassItem *ni, panda_file::ClassItem *oi)
@@ -215,9 +232,34 @@ void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::Clas
         cont_.CreateItem<panda_file::ParamAnnotationsItem>(ni, false);
     }
 
-    auto shouldSave = false;
     std::vector<uint8_t> *instructions = nullptr;
 
+    auto [shouldSave, patchLnp] = UpdateDebugInfo(ni, oi);
+
+    if (auto oci = oi->GetCode(); oci != nullptr) {
+        shouldSave = true;
+        result_.stats.codeCount++;
+
+        auto nci = cont_.CreateItem<panda_file::CodeItem>();
+        ni->SetCode(nci);
+        nci->SetPGORank(oci->GetPGORank());
+        nci->SetNumArgs(oci->GetNumArgs());
+        nci->SetNumVregs(oci->GetNumVregs());
+        *nci->GetInstructions() = *oci->GetInstructions();
+        instructions = nci->GetInstructions();
+        nci->SetNumInstructions(oci->GetNumInstructions());
+
+        CreateTryBlocks(ni, nci, oi, oci);
+    }
+
+    if (shouldSave) {
+        codeDatas_.push_back(CodeData {instructions, oi, ni, reader, patchLnp});
+    }
+}
+
+std::pair<bool, bool> Context::UpdateDebugInfo(panda_file::MethodItem *ni, panda_file::MethodItem *oi)
+{
+    auto shouldSave = false;
     auto patchLnp = false;
 
     if (auto odbg = oi->GetDebugInfo(); !conf_.stripDebugInfo && odbg != nullptr) {
@@ -244,38 +286,26 @@ void Context::MergeMethod(const panda_file::FileReader *reader, panda_file::Clas
         }
     }
 
-    if (auto oci = oi->GetCode(); oci != nullptr) {
-        shouldSave = true;
-        result_.stats.codeCount++;
+    return {shouldSave, patchLnp};
+}
 
-        auto nci = cont_.CreateItem<panda_file::CodeItem>();
-        ni->SetCode(nci);
-        nci->SetPGORank(oci->GetPGORank());
-        nci->SetNumArgs(oci->GetNumArgs());
-        nci->SetNumVregs(oci->GetNumVregs());
-        *nci->GetInstructions() = *oci->GetInstructions();
-        instructions = nci->GetInstructions();
-        nci->SetNumInstructions(oci->GetNumInstructions());
-
-        for (const auto &otb : oci->GetTryBlocks()) {
-            auto ncbs = std::vector<panda_file::CodeItem::CatchBlock>();
-            const auto &ocbs = otb.GetCatchBlocks();
-            ncbs.reserve(ocbs.size());
-            for (const auto &ocb : ocbs) {
-                ASSERT(ocb.GetMethod() == oi);
-                auto excKlass = ClassFromOld(ocb.GetType());
-                if (excKlass != nullptr) {
-                    ni->AddIndexDependency(excKlass);
-                }
-                ncbs.emplace_back(ni, excKlass, ocb.GetHandlerPc(), ocb.GetCodeSize());
+void Context::CreateTryBlocks(panda_file::MethodItem *ni, panda_file::CodeItem *nci,
+                              [[maybe_unused]] panda_file::MethodItem *oi, panda_file::CodeItem *oci)
+{
+    for (const auto &otb : oci->GetTryBlocks()) {
+        auto ncbs = std::vector<panda_file::CodeItem::CatchBlock>();
+        const auto &ocbs = otb.GetCatchBlocks();
+        ncbs.reserve(ocbs.size());
+        for (const auto &ocb : ocbs) {
+            ASSERT(ocb.GetMethod() == oi);
+            auto excKlass = ClassFromOld(ocb.GetType());
+            if (excKlass != nullptr) {
+                ni->AddIndexDependency(excKlass);
             }
-            auto ntb = panda_file::CodeItem::TryBlock(otb.GetStartPc(), otb.GetLength(), ncbs);
-            nci->AddTryBlock(ntb);
+            ncbs.emplace_back(ni, excKlass, ocb.GetHandlerPc(), ocb.GetCodeSize());
         }
-    }
-
-    if (shouldSave) {
-        codeDatas_.push_back(CodeData {instructions, oi, ni, reader, patchLnp});
+        auto ntb = panda_file::CodeItem::TryBlock(otb.GetStartPc(), otb.GetLength(), ncbs);
+        nci->AddTryBlock(ntb);
     }
 }
 
@@ -314,23 +344,7 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
 
         relatedItems->emplace_back("candidate", nm);
 
-        if (op->GetRefTypes().size() != np->GetRefTypes().size()) {
-            continue;
-        }
-
-        if (op->GetShorty() != np->GetShorty()) {
-            continue;
-        }
-
-        bool ok = true;
-        for (size_t i = 0; i < op->GetRefTypes().size(); i++) {
-            if (!IsSameType(np->GetRefTypes()[i], op->GetRefTypes()[i])) {
-                ok = false;
-                break;
-            }
-        }
-
-        if (ok) {
+        if (IsSameProto(op, np)) {
             return nm;
         }
     }
@@ -353,6 +367,25 @@ std::variant<bool, panda_file::MethodItem *> Context::TryFindMethod(panda_file::
         searchIn = kls->GetInterfaces()[idx++];
     }
     return false;
+}
+
+bool Context::IsSameProto(panda_file::ProtoItem *op1, panda_file::ProtoItem *op2)
+{
+    if (op1->GetRefTypes().size() != op2->GetRefTypes().size()) {
+        return false;
+    }
+
+    if (op1->GetShorty() != op2->GetShorty()) {
+        return false;
+    }
+
+    for (size_t i = 0; i < op1->GetRefTypes().size(); i++) {
+        if (!IsSameType(op2->GetRefTypes()[i], op1->GetRefTypes()[i])) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void Context::MergeForeignMethod(const panda_file::FileReader *reader, panda_file::ForeignMethodItem *fm)

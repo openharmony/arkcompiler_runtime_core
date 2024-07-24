@@ -57,37 +57,45 @@ const auto &WhitelistMethodParser()
     return WHITELIST_METHOD;
 }
 
+static bool RegisterConfigHandlerWhitelistSectionHandler(Config *config, const struct Section &s)
+{
+    WhitelistKind kind;
+    if (s.name == "class") {
+        kind = WhitelistKind::CLASS;
+    } else if (s.name == "method") {
+        kind = WhitelistKind::METHOD;
+    } else if (s.name == "method_call") {
+        kind = WhitelistKind::METHOD_CALL;
+    } else {
+        LOG(DEBUG, VERIFIER) << "Wrong debug verifier whitelist section: '" << s.name << "'";
+        return false;
+    }
+    for (const auto &i : s.items) {
+        PandaString c;
+        const char *start = i.c_str();
+        const char *end = i.c_str() + i.length();  // NOLINT
+        if (!WhitelistMethodParser()(c, start, end)) {
+            LOG(DEBUG, VERIFIER) << "Wrong whitelist line: '" << i << "'";
+            return false;
+        }
+        if (!c.empty()) {
+            if (kind == WhitelistKind::CLASS) {
+                LOG(DEBUG, VERIFIER) << "Added to whitelist config '" << s.name << "' methods from class " << c;
+            } else {
+                LOG(DEBUG, VERIFIER) << "Added to whitelist config '" << s.name << "' methods named " << c;
+            }
+            config->debugCfg.AddWhitelistMethodConfig(kind, c);
+        }
+    }
+    return true;
+}
+
 void RegisterConfigHandlerWhitelist(Config *dcfg)
 {
     static const auto CONFIG_DEBUG_WHITELIST_VERIFIER = [](Config *config, const Section &section) {
         for (const auto &s : section.sections) {
-            WhitelistKind kind;
-            if (s.name == "class") {
-                kind = WhitelistKind::CLASS;
-            } else if (s.name == "method") {
-                kind = WhitelistKind::METHOD;
-            } else if (s.name == "method_call") {
-                kind = WhitelistKind::METHOD_CALL;
-            } else {
-                LOG(DEBUG, VERIFIER) << "Wrong debug verifier whitelist section: '" << s.name << "'";
+            if (!RegisterConfigHandlerWhitelistSectionHandler(config, s)) {
                 return false;
-            }
-            for (const auto &i : s.items) {
-                PandaString c;
-                const char *start = i.c_str();
-                const char *end = i.c_str() + i.length();  // NOLINT
-                if (!WhitelistMethodParser()(c, start, end)) {
-                    LOG(DEBUG, VERIFIER) << "Wrong whitelist line: '" << i << "'";
-                    return false;
-                }
-                if (!c.empty()) {
-                    if (kind == WhitelistKind::CLASS) {
-                        LOG(DEBUG, VERIFIER) << "Added to whitelist config '" << s.name << "' methods from class " << c;
-                    } else {
-                        LOG(DEBUG, VERIFIER) << "Added to whitelist config '" << s.name << "' methods named " << c;
-                    }
-                    config->debugCfg.AddWhitelistMethodConfig(kind, c);
-                }
             }
         }
         return true;

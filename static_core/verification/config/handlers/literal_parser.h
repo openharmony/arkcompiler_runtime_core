@@ -49,28 +49,17 @@ const auto &LiteralParser(Handler &handler)
 
 inline const auto &LiteralsParser()
 {
-    using ark::parser::Action;
-    using ark::parser::Charset;
     using ark::parser::Parser;
+    using P = typename Parser<PandaVector<PandaString>, const char, const char *>::template Next<struct Literals>;
 
-    struct Literals;
-
-    using Context = PandaVector<PandaString>;
-
-    using P = typename Parser<Context, const char, const char *>::template Next<Literals>;
-    using P1 = typename P::P;
-    using P2 = typename P1::P;
-
-    static const auto WS = P::OfCharset(" \t");
-    static const auto COMMA = P1::OfCharset(",");
-
-    static const auto LITERAL_HANDLER = [](Context &c, PandaString &&str) {
+    static const auto LITERAL_HANDLER = [](PandaVector<PandaString> &c, PandaString &&str) {
         c.emplace_back(std::move(str));
         return true;
     };
 
-    static const auto LITERALS = ~WS >> *(~WS >> LiteralParser<P2>(LITERAL_HANDLER) >> ~WS >> ~COMMA) >> P::End();
-
+    static const auto WS = P::OfCharset(" \t");
+    static const auto LITERALS =
+        ~WS >> *(~WS >> LiteralParser<P::P::P>(LITERAL_HANDLER) >> ~WS >> ~P::P::OfCharset(",")) >> P::End();
     return LITERALS;
 }
 

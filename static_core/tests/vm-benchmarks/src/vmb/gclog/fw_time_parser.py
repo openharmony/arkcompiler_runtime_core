@@ -30,6 +30,7 @@ class FwTimeParser:
 
     def parse_text(self, text: str) -> Optional[Dict[str, float]]:
         m = self.PATTERN.search(text)
+        ret = None
         if m:
             return {
                 # to ns
@@ -38,4 +39,4 @@ class FwTimeParser:
                 'fw_end_time': int(m.group('fw_end')) * 1000.0 * 1000.0,
                 'vm_start_time': int(m.group('vm_start'))
             }
-        return None
+        return ret
