@@ -2176,3 +2176,6 @@
 
 # 17488: Separate module initializer not implemented yet 
 13.compilation_units_packages_and_modules/02.separate_module_initializer/import_statements.ets
+
+# es2panda: #18344 Invalid test, ArkTS doesn't have intersection type
+06.contexts_and_conversions/01.assignment-like_contexts/identity2_11.ets
