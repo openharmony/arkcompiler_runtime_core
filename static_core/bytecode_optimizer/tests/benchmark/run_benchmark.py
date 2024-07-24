@@ -75,7 +75,7 @@ def print_sizes_dict(sizes):
 def calc_statistics(sizes):
     total = len(sizes)
     if total == 0:
-        return None
+        return {}
     keys = sizes[0].keys()
     avgs = dict.fromkeys(keys, 0)
     mins = dict.fromkeys(keys, sys.maxsize)

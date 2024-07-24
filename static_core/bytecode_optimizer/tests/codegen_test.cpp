@@ -1528,7 +1528,6 @@ TEST_F(AsmTest, CatchPhi)
 
     .catch E1, try_begin, try_end, catch_block1_begin
     .catchall try_begin, try_end, catch_block2_begin
-
     }
     )";
 

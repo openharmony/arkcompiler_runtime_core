@@ -133,6 +133,7 @@ public:
     static void VisitLoadStatic(GraphVisitor *v, Inst *instBase);
     static void VisitLoadString(GraphVisitor *v, Inst *instBase);
     static void VisitReturn(GraphVisitor *v, Inst *instBase);
+    static void VisitReturnAny(GraphVisitor *v, Inst *instBase);
 
     static void VisitCastValueToAnyType(GraphVisitor *v, Inst *instBase);
 

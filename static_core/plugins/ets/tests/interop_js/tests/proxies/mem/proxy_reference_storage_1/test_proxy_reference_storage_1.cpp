@@ -28,7 +28,7 @@ public:
         auto ctx = InteropCtx::Current();
         ctx->SetJSEnv(GetJsEnv());
 
-        memset(&objectArray_, 0, sizeof(objectArray_));
+        memset_s(&objectArray_, sizeof(objectArray_), 0, sizeof(objectArray_));
         nextFreeIdx_ = 0;
     }
 

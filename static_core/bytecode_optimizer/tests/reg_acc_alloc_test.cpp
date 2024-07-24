@@ -402,9 +402,7 @@ TEST_F(RegAccAllocTest, PhiInstructionInLoop)
 
 /*
  * Test multiple branches.
- *
  * Test Graph:
- *
  *            /---[2]---\
  *            |         |
  *            v         v
@@ -453,9 +451,7 @@ TEST_F(RegAccAllocTest, MultipleBranches)
 /*
  * Test Phi with multiple inputs.
  * Phi cannot be optimized because one of the inputs is a CONSTANT.
- *
  * Test Graph:
- *
  *          /---[2]---\
  *          |         |
  *          v         |

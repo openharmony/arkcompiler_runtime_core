@@ -51,6 +51,10 @@ private:
 
     bool CanUserReadAcc(compiler::Inst *inst, compiler::Inst *user) const;
     bool IsPhiAccReady(compiler::Inst *phi) const;
+    void MarkPhiInstructions() const;
+    void MarkInstructions();
+    void MarkInstruction(compiler::Inst *inst);
+    void ClearAccForInstAndUsers(compiler::Inst *inst);
     void SetNeedLda(compiler::Inst *inst, bool need);
 
     compiler::Marker accMarker_ {0};
