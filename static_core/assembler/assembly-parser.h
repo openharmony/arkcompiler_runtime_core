@@ -213,7 +213,9 @@ private:
     void ParseResetFunctionLabelsAndParams();
     void ParseResetTables();
     void ParseResetFunctionTable();
+    void ParseInsFromFuncTable(ark::pandasm::Function &func);
     void ParseResetRecordTable();
+    void ParseResetRecords(const ark::pandasm::Record &record);
     void ParseResetArrayTable();
     void ParseAsLanguageDirective();
     Function::CatchBlock PrepareCatchBlock(bool isCatchall, size_t size, size_t catchallTokensNum,

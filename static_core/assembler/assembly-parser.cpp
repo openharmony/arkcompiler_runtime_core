@@ -707,107 +707,117 @@ void Parser::ParseResetFunctionLabelsAndParams()
         currFunc_->regsNum = static_cast<size_t>(currFunc_->valueOfFirstParam + 1);
 
         for (const auto &v : t.second) {
-            if (!currFunc_->ins.empty() && currFunc_->ins.size() >= v.first &&
-                !currFunc_->ins[v.first - 1].regs.empty()) {
-                currFunc_->ins[v.first - 1].regs[v.second] += static_cast<uint16_t>(currFunc_->valueOfFirstParam + 1);
-                // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                size_t maxRegNumber = (1 << currFunc_->ins[v.first - 1].MaxRegEncodingWidth());
-                if (currFunc_->ins[v.first - 1].regs[v.second] >= maxRegNumber) {
-                    const auto &debug = currFunc_->ins[v.first - 1].insDebug;
-                    context_.err =
-                        Error("Register width mismatch.", debug.lineNumber, Error::ErrorType::ERR_BAD_NAME_REG, "",
-                              debug.boundLeft, debug.boundRight, debug.wholeLine);
-                    SetError();
-                    break;
-                }
+            if (currFunc_->ins.empty() && currFunc_->ins.size() < v.first && currFunc_->ins[v.first - 1].regs.empty()) {
+                continue;
             }
+            currFunc_->ins[v.first - 1].regs[v.second] += static_cast<uint16_t>(currFunc_->valueOfFirstParam + 1);
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
+            size_t maxRegNumber = (1 << currFunc_->ins[v.first - 1].MaxRegEncodingWidth());
+            if (currFunc_->ins[v.first - 1].regs[v.second] >= maxRegNumber) {
+                const auto &debug = currFunc_->ins[v.first - 1].insDebug;
+                context_.err = Error("Register width mismatch.", debug.lineNumber, Error::ErrorType::ERR_BAD_NAME_REG,
+                                     "", debug.boundLeft, debug.boundRight, debug.wholeLine);
+                SetError();
+                break;
+            }
+        }
+    }
+}
+
+void Parser::ParseInsFromFuncTable(ark::pandasm::Function &func)
+{
+    for (auto &insn : func.ins) {
+        if (!insn.HasFlag(InstFlags::METHOD_ID)) {
+            // we need to correct all method_id's
+            continue;
+        }
+
+        bool isInitobj = insn.opcode == Opcode::INITOBJ || insn.opcode == Opcode::INITOBJ_SHORT ||
+                         insn.opcode == Opcode::INITOBJ_RANGE;
+        size_t diff = isInitobj ? 0 : 1;
+        auto funcName = insn.ids[0];
+
+        if (!IsSignatureOrMangled(funcName)) {
+            const auto itSynonym = program_.functionSynonyms.find(funcName);
+            if (itSynonym == program_.functionSynonyms.end()) {
+                continue;
+            }
+
+            if (itSynonym->second.size() > 1) {
+                const auto &debug = insn.insDebug;
+                context_.err = Error("Unable to resolve ambiguous function call", debug.lineNumber,
+                                     Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.boundLeft,
+                                     debug.boundRight, debug.wholeLine);
+                SetError();
+                break;
+            }
+
+            insn.ids[0] = program_.functionSynonyms.at(funcName)[0];
+        }
+
+        if (insn.OperandListLength() - diff < program_.functionTable.at(insn.ids[0]).GetParamsNum()) {
+            if (insn.IsCallRange() && (static_cast<int>(insn.regs.size()) - static_cast<int>(diff) >= 0)) {
+                continue;
+            }
+
+            const auto &debug = insn.insDebug;
+            context_.err =
+                Error("Function argument mismatch.", debug.lineNumber, Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH,
+                      "", debug.boundLeft, debug.boundRight, debug.wholeLine);
+            SetError();
         }
     }
 }
 
 void Parser::ParseResetFunctionTable()
 {
-    for (auto &k : program_.functionTable) {
-        if (!k.second.fileLocation->isDefined) {
-            context_.err = Error("This function does not exist.", k.second.fileLocation->lineNumber,
-                                 Error::ErrorType::ERR_BAD_ID_FUNCTION, "", k.second.fileLocation->boundLeft,
-                                 k.second.fileLocation->boundRight, k.second.fileLocation->wholeLine);
+    for (auto &[unusedKey, func] : program_.functionTable) {
+        (void)unusedKey;
+        if (!func.fileLocation->isDefined) {
+            context_.err = Error("This function does not exist.", func.fileLocation->lineNumber,
+                                 Error::ErrorType::ERR_BAD_ID_FUNCTION, "", func.fileLocation->boundLeft,
+                                 func.fileLocation->boundRight, func.fileLocation->wholeLine);
             SetError();
-        } else if (k.second.HasImplementation() != k.second.bodyPresence) {
-            context_.err = Error("Inconsistency of the definition of the function and its metadata.",
-                                 k.second.fileLocation->lineNumber, Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "",
-                                 k.second.fileLocation->boundLeft, k.second.fileLocation->boundRight,
-                                 k.second.fileLocation->wholeLine);
+        } else if (func.HasImplementation() != func.bodyPresence) {
+            context_.err =
+                Error("Inconsistency of the definition of the function and its metadata.",
+                      func.fileLocation->lineNumber, Error::ErrorType::ERR_BAD_DEFINITION_FUNCTION, "",
+                      func.fileLocation->boundLeft, func.fileLocation->boundRight, func.fileLocation->wholeLine);
             SetError();
         } else {
-            for (auto &insn : k.second.ins) {
-                if (!insn.HasFlag(InstFlags::METHOD_ID)) {
-                    // we need to correct all method_id's
-                    continue;
-                }
+            ParseInsFromFuncTable(func);
+        }
+    }
+}
 
-                bool isInitobj = insn.opcode == Opcode::INITOBJ || insn.opcode == Opcode::INITOBJ_SHORT ||
-                                 insn.opcode == Opcode::INITOBJ_RANGE;
-                size_t diff = isInitobj ? 0 : 1;
-                auto funcName = insn.ids[0];
-
-                if (!IsSignatureOrMangled(funcName)) {
-                    const auto itSynonym = program_.functionSynonyms.find(funcName);
-                    if (itSynonym == program_.functionSynonyms.end()) {
-                        continue;
-                    }
-
-                    if (itSynonym->second.size() > 1) {
-                        const auto &debug = insn.insDebug;
-                        context_.err = Error("Unable to resolve ambiguous function call", debug.lineNumber,
-                                             Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.boundLeft,
-                                             debug.boundRight, debug.wholeLine);
-                        SetError();
-                        break;
-                    }
-
-                    insn.ids[0] = program_.functionSynonyms.at(funcName)[0];
-                }
-
-                if (insn.OperandListLength() - diff < program_.functionTable.at(insn.ids[0]).GetParamsNum()) {
-                    if (insn.IsCallRange() && (static_cast<int>(insn.regs.size()) - static_cast<int>(diff) >= 0)) {
-                        continue;
-                    }
-
-                    const auto &debug = insn.insDebug;
-                    context_.err = Error("Function argument mismatch.", debug.lineNumber,
-                                         Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.boundLeft,
-                                         debug.boundRight, debug.wholeLine);
-                    SetError();
-                }
-            }
+void Parser::ParseResetRecords(const ark::pandasm::Record &record)
+{
+    for (const auto &fld : record.fieldList) {
+        if (!record.HasImplementation() && !fld.metadata->IsForeign()) {
+            context_.err =
+                Error("External record may have only external fields", fld.lineOfDef,
+                      Error::ErrorType::ERR_BAD_FIELD_METADATA, "", fld.boundLeft, fld.boundRight, fld.wholeLine);
+            SetError();
+        }
+        if (!fld.isDefined) {
+            context_.err = Error("This field does not exist.", fld.lineOfDef, Error::ErrorType::ERR_BAD_ID_FIELD, "",
+                                 fld.boundLeft, fld.boundRight, fld.wholeLine);
+            SetError();
         }
     }
 }
 
 void Parser::ParseResetRecordTable()
 {
-    for (const auto &k : program_.recordTable) {
-        if (!k.second.fileLocation->isDefined) {
-            context_.err = Error("This record does not exist.", k.second.fileLocation->lineNumber,
-                                 Error::ErrorType::ERR_BAD_ID_RECORD, "", k.second.fileLocation->boundLeft,
-                                 k.second.fileLocation->boundRight, k.second.fileLocation->wholeLine);
+    for (const auto &[unusedKey, record] : program_.recordTable) {
+        (void)unusedKey;
+        if (!record.fileLocation->isDefined) {
+            context_.err = Error("This record does not exist.", record.fileLocation->lineNumber,
+                                 Error::ErrorType::ERR_BAD_ID_RECORD, "", record.fileLocation->boundLeft,
+                                 record.fileLocation->boundRight, record.fileLocation->wholeLine);
             SetError();
         } else {
-            for (const auto &fld : k.second.fieldList) {
-                if (!k.second.HasImplementation() && !fld.metadata->IsForeign()) {
-                    context_.err = Error("External record may have only external fields", fld.lineOfDef,
-                                         Error::ErrorType::ERR_BAD_FIELD_METADATA, "", fld.boundLeft, fld.boundRight,
-                                         fld.wholeLine);
-                    SetError();
-                }
-                if (!fld.isDefined) {
-                    context_.err =
-                        Error("This field does not exist.", fld.lineOfDef, Error::ErrorType::ERR_BAD_ID_FIELD, "",
-                              fld.boundLeft, fld.boundRight, fld.wholeLine);
-                    SetError();
-                }
-            }
+            ParseResetRecords(record);
         }
     }
 }
