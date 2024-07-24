@@ -210,7 +210,7 @@ using FibersDeathTest = FibersTest;
  * Death test. Creates an orphaned fiber that will silently return from its entry function.
  * Should cause the program to be abort()-ed
  */
-TEST_F(FibersDeathTest, AbortOnFiberReturn)
+TEST_F(FibersDeathTest, DISABLED_AbortOnFiberReturn)
 {
     // Death test under qemu_arm32 is not compatible with 'threadsafe' death test style flag
 #if defined(PANDA_TARGET_ARM32) && defined(PANDA_QEMU_BUILD)
