@@ -15,6 +15,7 @@
 
 #include "code_info_builder.h"
 #include "utils/bit_memory_region-inl.h"
+#include "optimizer/ir/inst.h"
 
 namespace ark::compiler {
 
@@ -42,8 +43,7 @@ void CodeInfoBuilder::EndMethod()
 #endif
 }
 
-void CodeInfoBuilder::BeginStackMap(uint32_t bpc, uint32_t npc, ArenaBitVector *stackRoots, uint32_t regsRoots,
-                                    bool requireVregMap, bool isOsr)
+void CodeInfoBuilder::BeginStackMap(uint32_t bpc, uint32_t npc, SaveStateInst *ss, bool requireVregMap)
 {
 #ifndef NDEBUG
     ASSERT(wasMethodBegin_);
@@ -51,6 +51,10 @@ void CodeInfoBuilder::BeginStackMap(uint32_t bpc, uint32_t npc, ArenaBitVector *
     ASSERT(!wasInlineInfoBegin_);
     wasStackMapBegin_ = true;
 #endif
+    ArenaBitVector *stackRoots = ss->GetRootsStackMask();
+    uint32_t regsRoots = ss->GetRootsRegsMask().to_ulong();
+    bool isOsr = ss->GetOpcode() == Opcode::SaveStateOsr;
+
     inlineInfoStack_.clear();
     currentVregs_.clear();
 

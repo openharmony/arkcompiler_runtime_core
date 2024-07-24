@@ -22,6 +22,8 @@
 
 namespace ark::compiler {
 
+class SaveStateInst;
+
 class CodeInfoBuilder {
 public:
     CodeInfoBuilder(Arch arch, ArenaAllocator *allocator)
@@ -53,8 +55,7 @@ public:
 
     void EndMethod();
 
-    void BeginStackMap(uint32_t bpc, uint32_t npc, ArenaBitVector *stackRoots, uint32_t regsRoots, bool requireVregMap,
-                       bool isOsr);
+    void BeginStackMap(uint32_t bpc, uint32_t npc, SaveStateInst *ss, bool requireVregMap);
 
     void EndStackMap();
 

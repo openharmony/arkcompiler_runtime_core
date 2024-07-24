@@ -46,6 +46,7 @@ public:
     ~CountableLoopParser() = default;
 
     std::optional<CountableLoopInfo> Parse();
+    bool ParseLoopExit();
     static bool HasPreHeaderCompare(Loop *loop, const CountableLoopInfo &loopInfo);
     static std::optional<uint64_t> GetLoopIterations(const CountableLoopInfo &loopInfo);
 

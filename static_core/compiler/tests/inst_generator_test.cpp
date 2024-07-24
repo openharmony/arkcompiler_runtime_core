@@ -21,6 +21,8 @@
 #include "optimizer/optimizations/locations_builder.h"
 #include "optimizer/optimizations/regalloc/reg_alloc_linear_scan.h"
 
+#include <optional>
+
 namespace ark::compiler {
 class InstGeneratorTest : public GraphTest {
 public:
@@ -331,6 +333,59 @@ public:
     }
 
     template <class ParamType>
+    std::optional<ParamType> ExecModule(Graph *graph, Opcode opc, ParamType param1, ParamType param2, ParamType param3)
+    {
+        graph->RunPass<RegAllocLinearScan>();
+        if (!graph->RunPass<Codegen>()) {
+            return std::nullopt;
+        };
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        execModule_.SetInstructions(codeEntry, codeExit);
+
+        execModule_.SetDump(true);
+
+        execModule_.SetParameter(0U, param1);
+
+        if (!IsImmOps(opc)) {
+            execModule_.SetParameter(1U, param2);
+        }
+
+        if (IsTernary(opc)) {
+            execModule_.SetParameter(2U, param3);
+        }
+
+        execModule_.Execute();
+        return execModule_.GetRetValue<ParamType>();
+    }
+
+    template <class ParamType>
+    void CheckData(ParamType calcData, ParamType retData, std::tuple<ParamType, ParamType, ParamType> vals, Inst *inst)
+    {
+        if (calcData != retData) {
+            auto param1 = std::get<0U>(vals);
+            auto param2 = std::get<1U>(vals);
+            auto param3 = std::get<2U>(vals);
+            std::cout << "  data " << retData << " sizeof type  " << static_cast<uint64_t>(sizeof(ParamType) * 8U)
+                      << " \n";
+            std::cout << std::hex << "parameter_1 = " << param1 << " parameter_2 = " << param2
+                      << "parameter_3 = " << param3 << "\n";
+            inst->Dump(&std::cerr);
+            std::cout << "calculated = " << calcData << " returned " << retData << "\n";
+            execModule_.SetDump(true);
+            execModule_.PrintInstructions();
+            execModule_.SetParameter(0U, param1);
+            execModule_.SetParameter(1U, param2);
+            execModule_.SetParameter(2U, param3);
+            execModule_.Execute();
+            execModule_.SetDump(false);
+        }
+        ASSERT_EQ(calcData, retData);
+    }
+
+    template <class ParamType>
     void Generate(Opcode opc, std::tuple<ParamType, ParamType, ParamType> vals)
     {
         auto it = instGenerator_.Generate(opc);
@@ -360,56 +415,74 @@ public:
                 }
             };
             std::unique_ptr<void, decltype(finalizer)> fin(&finalizer, finalizer);
-
-            graph->RunPass<RegAllocLinearScan>();
-            if (!graph->RunPass<Codegen>()) {
+            auto retData = ExecModule(graph, opc, param1, param2, param3);
+            if (!retData.has_value()) {
                 return;
-            };
-            auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            auto codeExit = codeEntry + graph->GetCode().Size();
-            ASSERT(codeEntry != nullptr && codeExit != nullptr);
-            execModule_.SetInstructions(codeEntry, codeExit);
-
-            execModule_.SetDump(false);
-
-            execModule_.SetParameter(0U, param1);
-
-            if (!IsImmOps(opc)) {
-                execModule_.SetParameter(1U, param2);
             }
-
-            if (IsTernary(opc)) {
-                execModule_.SetParameter(2U, param3);
-            }
-
-            execModule_.Execute();
-
-            struct RetValue {
-                uint64_t data;
-                uint64_t type;
-            };
-
-            auto retData = execModule_.GetRetValue<ParamType>();
             auto calcData = DoLogic<ParamType>(opc, param1, param2, param3, shiftType,
                                                DataType::GetTypeSize(type, graph->GetArch()));
-            if (calcData != retData) {
-                std::cout << "  data " << retData << " sizeof type  " << static_cast<uint64_t>(sizeof(ParamType) * 8U)
-                          << " \n";
-                std::cout << std::hex << "parameter_1 = " << param1 << " parameter_2 = " << param2
-                          << "parameter_3 = " << param3 << "\n";
-                inst->Dump(&std::cerr);
-                std::cout << "calculated = " << calcData << " returned " << retData << "\n";
-                execModule_.SetDump(true);
-                execModule_.PrintInstructions();
-                execModule_.SetParameter(0U, param1);
-                execModule_.SetParameter(1U, param2);
-                execModule_.SetParameter(2U, param3);
-                execModule_.Execute();
-                execModule_.SetDump(false);
-            }
-            ASSERT_EQ(calcData, retData);
+            CheckData<ParamType>(calcData, retData.value(), vals, inst);
         }
+    }
+
+    template <class ParamType, class ResultType>
+    std::optional<ResultType> ExecModule(Graph *graph, ParamType param1)
+    {
+        graph->RunPass<RegAllocLinearScan>();
+        if (!graph->RunPass<Codegen>()) {
+            return std::nullopt;
+        };
+        auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto codeExit = codeEntry + graph->GetCode().Size();
+        ASSERT(codeEntry != nullptr && codeExit != nullptr);
+        execModule_.SetInstructions(codeEntry, codeExit);
+
+        execModule_.SetDump(false);
+        execModule_.SetParameter(0U, param1);
+        execModule_.Execute();
+
+        return execModule_.GetRetValue<ResultType>();
+    }
+
+    template <class ParamType, class ResultType>
+    ResultType DoCast(ParamType param1)
+    {
+        if constexpr ((GetCommonType(VixlExecModule::GetType<ResultType>()) == DataType::Type::INT64) &&
+                      (std::is_same_v<ParamType, float> || std::is_same_v<ParamType, double>)) {
+            if (param1 > static_cast<ParamType>(std::numeric_limits<ResultType>::max())) {
+                return std::numeric_limits<ResultType>::max();
+            }
+            if (param1 < static_cast<ParamType>(std::numeric_limits<ResultType>::min())) {
+                return std::numeric_limits<ResultType>::min();
+            }
+            return static_cast<ResultType>(param1);
+        }
+        return static_cast<ResultType>(param1);
+    }
+
+    template <class ParamType, class ResultType>
+    void CheckData(ResultType calcData, ResultType retData, ParamType param1, Inst *inst)
+    {
+        if (calcData != retData) {
+            if constexpr (std::is_same_v<ResultType, double> || std::is_same_v<ParamType, double>) {
+                std::cout << std::hex << " in parameter = " << param1 << "\n";
+                std::cout << std::hex << "parameter_1 = " << static_cast<double>(param1) << "\n";
+            }
+
+#ifndef NDEBUG
+            std::cout << " cast from " << DataType::ToString(VixlExecModule::GetType<ParamType>()) << " to "
+                      << DataType::ToString(VixlExecModule::GetType<ResultType>()) << "\n";
+#endif
+            std::cout << "  data " << retData << " sizeof type  " << static_cast<uint64_t>(sizeof(ParamType) * 8U)
+                      << " \n";
+            inst->Dump(&std::cerr);
+            execModule_.SetDump(true);
+            execModule_.SetParameter(0U, param1);
+            execModule_.Execute();
+            execModule_.SetDump(false);
+        }
+        ASSERT_EQ(calcData, retData);
     }
 
     template <class ParamType, class ResultType>
@@ -440,55 +513,12 @@ public:
             for (auto &iter : inst->GetUsers()) {
                 iter.GetInst()->SetType(VixlExecModule::GetType<ResultType>());
             }
-            graph->RunPass<RegAllocLinearScan>();
-            if (!graph->RunPass<Codegen>()) {
+            auto retData = ExecModule<ParamType, ResultType>(graph, param1);
+            if (!retData.has_value()) {
                 return;
-            };
-            auto codeEntry = reinterpret_cast<char *>(graph->GetCode().Data());
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            auto codeExit = codeEntry + graph->GetCode().Size();
-            ASSERT(codeEntry != nullptr && codeExit != nullptr);
-            execModule_.SetInstructions(codeEntry, codeExit);
-
-            execModule_.SetDump(false);
-            execModule_.SetParameter(0U, param1);
-            execModule_.Execute();
-
-            auto retData = execModule_.GetRetValue<ResultType>();
-            ResultType calcData;
-
-            if constexpr ((GetCommonType(VixlExecModule::GetType<ResultType>()) == DataType::Type::INT64) &&
-                          (std::is_same_v<ParamType, float> || std::is_same_v<ParamType, double>)) {
-                if (param1 > (ParamType)std::numeric_limits<ResultType>::max()) {
-                    calcData = std::numeric_limits<ResultType>::max();
-                } else if (param1 < (ParamType)std::numeric_limits<ResultType>::min()) {
-                    calcData = std::numeric_limits<ResultType>::min();
-                } else {
-                    calcData = static_cast<ResultType>(param1);
-                }
-            } else {
-                calcData = static_cast<ResultType>(param1);
             }
-
-            if (calcData != retData) {
-                if constexpr (std::is_same_v<ResultType, double> || std::is_same_v<ParamType, double>) {
-                    std::cout << std::hex << " in parameter = " << param1 << "\n";
-                    std::cout << std::hex << "parameter_1 = " << static_cast<double>(param1) << "\n";
-                }
-
-#ifndef NDEBUG
-                std::cout << " cast from " << DataType::ToString(VixlExecModule::GetType<ParamType>()) << " to "
-                          << DataType::ToString(VixlExecModule::GetType<ResultType>()) << "\n";
-#endif
-                std::cout << "  data " << retData << " sizeof type  " << static_cast<uint64_t>(sizeof(ParamType) * 8U)
-                          << " \n";
-                inst->Dump(&std::cerr);
-                execModule_.SetDump(true);
-                execModule_.SetParameter(0U, param1);
-                execModule_.Execute();
-                execModule_.SetDump(false);
-            }
-            ASSERT_EQ(calcData, retData);
+            auto calcData = DoCast<ParamType, ResultType>(param1);
+            CheckData(calcData, retData.value(), param1, inst);
         }
     }
 

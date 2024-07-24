@@ -85,7 +85,8 @@ private:
     void CheckEndBlock();
     void CheckControlFlow(BasicBlock *block);
     void CheckDataFlow(BasicBlock *block);
-    void CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block, Graph *graph);
+    void CheckUserOfInt32(BasicBlock *block, Inst *inst, User &user);
+    void CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block);
     void CheckPhiInputs(Inst *phiInst);
     void CheckInstsRegisters(BasicBlock *block);
     void CheckPhisRegisters(BasicBlock *block);

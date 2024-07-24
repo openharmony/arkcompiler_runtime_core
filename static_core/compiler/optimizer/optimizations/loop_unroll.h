@@ -55,6 +55,8 @@ public:
 
 private:
     bool TransformLoop(Loop *loop) override;
+    bool UnrollWithBranching(uint32_t unrollFactor, Loop *loop, std::optional<CountableLoopInfo> loopInfo,
+                             std::optional<uint64_t> optIterations);
     UnrollParams GetUnrollParams(Loop *loop);
     void TransformLoopImpl(Loop *loop, std::optional<uint64_t> optIterations, bool noSideExits, uint32_t unrollFactor,
                            std::optional<CountableLoopInfo> loopInfo);

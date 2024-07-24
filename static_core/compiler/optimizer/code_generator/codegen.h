@@ -299,8 +299,6 @@ public:
                                          LabelHolder::LabelId label);
     void CreateDebugRuntimeCallsForNewObject(Inst *inst, Reg regTlabStart, size_t allocSize, RegMask preserved);
     void CreateDebugRuntimeCallsForObjectClone(Inst *inst, Reg dst);
-    void CallFastCreateStringFromCharArrayTlab(Inst *inst, Reg dst, Reg offset, Reg count, Reg array,
-                                               std::variant<Reg, TypedImm> klass);
     void CreateReturn(const Inst *inst);
     template <typename T>
     void CreateUnaryCheck(Inst *inst, RuntimeInterface::EntrypointId id, DeoptimizeType type, Condition cc);
@@ -365,11 +363,8 @@ protected:
     template <typename... Args>
     void FillCallParams(Args &&...params);
 
-    template <size_t IMM_ARRAY_SIZE, typename Arg, typename... Args>
-    ALWAYS_INLINE inline void FillCallParamsHandleOperands(
-        ParameterInfo *paramInfo, SpillFillInst *regMoves, ArenaVector<Reg> *spMoves,
-        [[maybe_unused]] typename std::array<std::pair<Reg, Imm>, IMM_ARRAY_SIZE>::iterator immsIter, Arg &&arg,
-        Args &&...params);
+    template <size_t IMM_ARRAY_SIZE>
+    class FillCallParamsHelper;
 
     void EmitJump(const BasicBlock *bb);
     bool EmitCallRuntimeCode(Inst *inst, std::variant<EntrypointId, Reg> entrypoint);
@@ -422,6 +417,7 @@ protected:
     virtual void IntrinsicTailCall(IntrinsicInst *inst);
     virtual void IntrinsicSaveTlabStatsSafe(IntrinsicInst *inst, Reg src1, Reg src2, Reg tmp);
 
+    void CreateStringFromCharArrayTlab(Inst *inst, Reg dst, SRCREGS src);
 #include "codegen_language_extensions.h"
 #include "intrinsics_codegen.inl.h"
 

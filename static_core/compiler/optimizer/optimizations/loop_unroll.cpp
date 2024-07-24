@@ -172,6 +172,14 @@ bool LoopUnroll::TransformLoop(Loop *loop)
         return true;
     }
 
+    return UnrollWithBranching(unrollFactor, loop, loopInfo, optIterations);
+}
+
+bool LoopUnroll::UnrollWithBranching(uint32_t unrollFactor, Loop *loop, std::optional<CountableLoopInfo> loopInfo,
+                                     std::optional<uint64_t> optIterations)
+{
+    auto unrollParams = GetUnrollParams(loop);
+
     if (unrollFactor <= 1U) {
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
             << "Loop isn't unrolled due to unroll factor = " << unrollFactor << ". Loop id = " << loop->GetId();

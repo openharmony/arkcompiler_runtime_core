@@ -108,6 +108,8 @@ public:
     void BuildExpectedLowerMoveScaleInLoadStoreAmd64(Graph *graphExpected);
 
     void BuildGraphLowerUnsignedCast(Graph *graph);
+
+    void DoTestCompareBoolConstZero(ConditionCode code, bool swap);
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -2144,6 +2146,38 @@ TEST_F(LoweringTest, BitwiseInstructionsWithInvertedShiftedOperandWithIncompatib
     }
 }
 
+SRC_GRAPH(NegWithShiftedOperand, Graph *graph, ShiftOp shiftOp, std::pair<DataType::Type, DataType::Type> types)
+{
+    auto type = types.first;
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).type(types.second);
+        CONSTANT(1U, 5U);
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(2U, shiftOp.first).type(type).Inputs(0U, 1U);
+            INST(3U, Opcode::Neg).type(type).Inputs(2U);
+            INST(4U, Opcode::Return).type(type).Inputs(3U);
+        }
+    }
+}
+
+OUT_GRAPH(NegWithShiftedOperand, Graph *graph, ShiftOp shiftOp, std::pair<DataType::Type, DataType::Type> types)
+{
+    auto type = types.first;
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).type(types.second);
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::NegSR).Shift(shiftOp.second, 5U).type(type).Inputs(0U);
+            INST(2U, Opcode::Return).type(type).Inputs(1U);
+        }
+    }
+}
+
 TEST_F(LoweringTest, NegWithShiftedOperand)
 {
     if (GetGraph()->GetArch() != Arch::AARCH64) {
@@ -2160,35 +2194,14 @@ TEST_F(LoweringTest, NegWithShiftedOperand)
         {DataType::UINT64, DataType::UINT64}};
     for (auto &types : typeCombinations) {
         for (auto &shiftOp : shiftOps) {
-            auto type = types.first;
             auto graph = CreateEmptyLowLevelGraph();
-            GRAPH(graph)
-            {
-                PARAMETER(0U, 0U).type(types.second);
-                CONSTANT(1U, 5U);
-
-                BASIC_BLOCK(2U, -1L)
-                {
-                    INST(2U, shiftOp.first).type(type).Inputs(0U, 1U);
-                    INST(3U, Opcode::Neg).type(type).Inputs(2U);
-                    INST(4U, Opcode::Return).type(type).Inputs(3U);
-                }
-            }
+            src_graph::NegWithShiftedOperand::CREATE(graph, shiftOp, types);
 
             EXPECT_TRUE(graph->RunPass<Lowering>());
             EXPECT_TRUE(graph->RunPass<Cleanup>());
 
             auto graphExpected = CreateEmptyGraph();
-            GRAPH(graphExpected)
-            {
-                PARAMETER(0U, 0U).type(types.second);
-
-                BASIC_BLOCK(2U, -1L)
-                {
-                    INST(1U, Opcode::NegSR).Shift(shiftOp.second, 5U).type(type).Inputs(0U);
-                    INST(2U, Opcode::Return).type(type).Inputs(1U);
-                }
-            }
+            out_graph::NegWithShiftedOperand::CREATE(graphExpected, shiftOp, types);
 
             ASSERT_TRUE(GraphComparator().Compare(graph, graphExpected));
         }
@@ -2813,48 +2826,62 @@ TEST_F(LoweringTest, UnsignedModPowerOfTwo)
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
 }
 
+SRC_GRAPH(CompareBoolConstZero, Graph *graph, ConditionCode code, bool swap)
+{
+    GRAPH(graph)
+    {
+        CONSTANT(1U, 0U).s64();
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::CallStatic).b().InputsAutoType(2U);
+            if (swap) {
+                INST(4U, Opcode::Compare).b().Inputs(1U, 3U).CC(code);
+            } else {
+                INST(4U, Opcode::Compare).b().Inputs(3U, 1U).CC(code);
+            }
+            INST(5U, Opcode::Return).b().Inputs(4U);
+        }
+    }
+}
+
+OUT_GRAPH(CompareBoolConstZero, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        BASIC_BLOCK(2U, 1U)
+        {
+            INST(2U, Opcode::SaveState).NoVregs();
+            INST(3U, Opcode::CallStatic).b().InputsAutoType(2U);
+            INST(8U, Opcode::XorI).b().Inputs(3U).Imm(1U);
+            INST(5U, Opcode::Return).b().Inputs(8U);
+        }
+    }
+}
+
+void LoweringTest::DoTestCompareBoolConstZero(ConditionCode code, bool swap)
+{
+    auto graph = CreateEmptyLowLevelGraph();
+    src_graph::CompareBoolConstZero::CREATE(graph, code, swap);
+    ASSERT_TRUE(graph->RunPass<Lowering>());
+    graph->RunPass<Cleanup>();
+
+    if (code == ConditionCode::CC_EQ) {
+        auto graphFinal = CreateEmptyGraph();
+        out_graph::CompareBoolConstZero::CREATE(graphFinal);
+        ASSERT_TRUE(GraphComparator().Compare(graph, graphFinal));
+    } else {
+        auto clearGraph = GraphCloner(graph, GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
+        ASSERT_TRUE(GraphComparator().Compare(graph, clearGraph));
+    }
+}
+
 TEST_F(LoweringTest, CompareBoolConstZero)
 {
     std::array<ConditionCode, 3U> codes {ConditionCode::CC_NE, ConditionCode::CC_EQ, ConditionCode::CC_BE};
     for (auto code : codes) {
         for (auto swap : {true, false}) {
-            auto graph = CreateEmptyLowLevelGraph();
-            GRAPH(graph)
-            {
-                CONSTANT(1U, 0U).s64();
-                BASIC_BLOCK(2U, 1U)
-                {
-                    INST(2U, Opcode::SaveState).NoVregs();
-                    INST(3U, Opcode::CallStatic).b().InputsAutoType(2U);
-                    if (swap) {
-                        INST(4U, Opcode::Compare).b().Inputs(1U, 3U).CC(code);
-                    } else {
-                        INST(4U, Opcode::Compare).b().Inputs(3U, 1U).CC(code);
-                    }
-                    INST(5U, Opcode::Return).b().Inputs(4U);
-                }
-            }
-            ASSERT_TRUE(graph->RunPass<Lowering>());
-            graph->RunPass<Cleanup>();
-
-            if (code == ConditionCode::CC_EQ) {
-                auto graphFinal = CreateEmptyGraph();
-                GRAPH(graphFinal)
-                {
-                    BASIC_BLOCK(2U, 1U)
-                    {
-                        INST(2U, Opcode::SaveState).NoVregs();
-                        INST(3U, Opcode::CallStatic).b().InputsAutoType(2U);
-                        INST(8U, Opcode::XorI).b().Inputs(3U).Imm(1U);
-                        INST(5U, Opcode::Return).b().Inputs(8U);
-                    }
-                }
-                ASSERT_TRUE(GraphComparator().Compare(graph, graphFinal));
-            } else {
-                auto clearGraph =
-                    GraphCloner(graph, GetGraph()->GetAllocator(), GetGraph()->GetLocalAllocator()).CloneGraph();
-                ASSERT_TRUE(GraphComparator().Compare(graph, clearGraph));
-            }
+            DoTestCompareBoolConstZero(code, swap);
         }
     }
 }

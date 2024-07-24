@@ -56,6 +56,29 @@ struct ScopeEvents {
     NO_MOVE_SEMANTIC(ScopeEvents);
 };
 
+class ScopedDontSkipThrow {
+public:
+    ScopedDontSkipThrow()
+        : skipThrow_(g_options.IsCompilerInliningSkipThrowBlocks()),
+          skipThrowMethods_(g_options.IsCompilerInliningSkipAlwaysThrowMethods())
+    {
+        g_options.SetCompilerInliningSkipThrowBlocks(false);
+        g_options.SetCompilerInliningSkipAlwaysThrowMethods(false);
+    }
+    NO_COPY_SEMANTIC(ScopedDontSkipThrow);
+    NO_MOVE_SEMANTIC(ScopedDontSkipThrow);
+
+    ~ScopedDontSkipThrow()
+    {
+        g_options.SetCompilerInliningSkipThrowBlocks(skipThrow_);
+        g_options.SetCompilerInliningSkipAlwaysThrowMethods(skipThrowMethods_);
+    }
+
+private:
+    bool skipThrow_;
+    bool skipThrowMethods_;
+};
+
 auto PopulateInstructionMap(Graph *graph)
 {
     ArenaUnorderedMap<Opcode, ArenaVector<Inst *>> res(graph->GetLocalAllocator()->Adapter());
@@ -600,17 +623,11 @@ TEST_F(InliningTest, InlineThrow)
         }
     )";
 
-    auto skipThrow = g_options.IsCompilerInliningSkipThrowBlocks();
-    auto skipThrowMethods = g_options.IsCompilerInliningSkipAlwaysThrowMethods();
-    g_options.SetCompilerInliningSkipThrowBlocks(false);
-    g_options.SetCompilerInliningSkipAlwaysThrowMethods(false);
+    [[maybe_unused]] ScopedDontSkipThrow dontSkipThrow {};
 
     ASSERT_TRUE(ParseToGraph(source, "main"));
     ASSERT_TRUE(GetGraph()->RunPass<Inlining>());
     ASSERT_EQ(GetGraph()->GetPassManager()->GetStatistics()->GetInlinedMethods(), 1U);
-
-    g_options.SetCompilerInliningSkipThrowBlocks(skipThrow);
-    g_options.SetCompilerInliningSkipAlwaysThrowMethods(skipThrowMethods);
 }
 
 class InlineCachesMock : public InlineCachesInterface {
@@ -672,13 +689,33 @@ const char *CreateSourcePolymorphicInlineWithThrow()
     return source;
 }
 
+static void CheckOneReturnInlined(BasicBlock *bb)
+{
+    auto retInlWithinBlock = 0;
+    for (auto inst : bb->AllInsts()) {
+        if (inst->GetOpcode() == Opcode::ReturnInlined) {
+            retInlWithinBlock++;
+        }
+    }
+    EXPECT_EQ(retInlWithinBlock, 1U) << "BB " << bb->GetId() << "should contain 1 ReturnInlined, but contains "
+                                     << retInlWithinBlock;
+}
+
+static InlineCachesMock PolymorphicInlineWithThrowICM(ClassLinkerExtension *ext)
+{
+    return {InlineCachesInterface::CallKind::POLYMORPHIC,
+            {
+                reinterpret_cast<RuntimeInterface::ClassPtr>(
+                    ext->GetClass(reinterpret_cast<const uint8_t *>("LA;"), false)),
+                reinterpret_cast<RuntimeInterface::ClassPtr>(
+                    ext->GetClass(reinterpret_cast<const uint8_t *>("LB;"), false)),
+            }};
+}
+
 TEST_F(InliningTest, PolymorphicInlineWithThrow)
 {
     auto source = CreateSourcePolymorphicInlineWithThrow();
-    auto skipThrow = g_options.IsCompilerInliningSkipThrowBlocks();
-    auto skipThrowMethods = g_options.IsCompilerInliningSkipAlwaysThrowMethods();
-    g_options.SetCompilerInliningSkipThrowBlocks(false);
-    g_options.SetCompilerInliningSkipAlwaysThrowMethods(false);
+    [[maybe_unused]] ScopedDontSkipThrow dontSkipThrow {};
 
     ASSERT_TRUE(ParseToGraph(source, "run"));
     auto cl = GetClassLinker();
@@ -686,13 +723,7 @@ TEST_F(InliningTest, PolymorphicInlineWithThrow)
 
     // Cannot use ScopedManagedCodeThread here
     MTManagedThread::GetCurrent()->ManagedCodeBegin();
-    InlineCachesMock icm {InlineCachesInterface::CallKind::POLYMORPHIC,
-                          {
-                              reinterpret_cast<RuntimeInterface::ClassPtr>(
-                                  ext->GetClass(reinterpret_cast<const uint8_t *>("LA;"), false)),
-                              reinterpret_cast<RuntimeInterface::ClassPtr>(
-                                  ext->GetClass(reinterpret_cast<const uint8_t *>("LB;"), false)),
-                          }};
+    auto icm = PolymorphicInlineWithThrowICM(ext);
     SetInlineCaches(&icm);
     MTManagedThread::GetCurrent()->ManagedCodeEnd();
 
@@ -706,19 +737,9 @@ TEST_F(InliningTest, PolymorphicInlineWithThrow)
             continue;
         }
         throwBlocks++;
-        auto retInlWithinBlock = 0;
-        for (auto inst : bb->AllInsts()) {
-            if (inst->GetOpcode() == Opcode::ReturnInlined) {
-                retInlWithinBlock++;
-            }
-        }
-        EXPECT_EQ(retInlWithinBlock, 1U) << "BB " << bb->GetId() << "should contain 1 ReturnInlined, but contains "
-                                         << retInlWithinBlock;
+        CheckOneReturnInlined(bb);
     }
     EXPECT_EQ(throwBlocks, 2U) << "There should be two throw blocks, from A::process and from B::process";
-
-    g_options.SetCompilerInliningSkipThrowBlocks(skipThrow);
-    g_options.SetCompilerInliningSkipAlwaysThrowMethods(skipThrowMethods);
 }
 
 }  // namespace ark::compiler

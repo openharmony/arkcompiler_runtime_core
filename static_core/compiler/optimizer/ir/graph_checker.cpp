@@ -289,7 +289,34 @@ uint32_t GetInliningDepth(Inst *inst)
     return inliningDepth;
 }
 
-void GraphChecker::CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block, Graph *graph)
+void GraphChecker::CheckUserOfInt32([[maybe_unused]] BasicBlock *block, Inst *inst, User &user)
+{
+    ASSERT(DataType::Is32Bits(inst->GetType(), GetGraph()->GetArch()));
+    auto *userInst = user.GetInst();
+    if (!userInst->HasType()) {
+        return;
+    }
+    auto arch = GetGraph()->GetArch();
+
+    // Unsigned Load in AARCH64 zerod all high bits
+#ifndef NDEBUG
+    if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64 &&
+        GetGraph()->IsLowLevelInstructionsEnabled()) {
+#else
+    if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64) {
+#endif  // !NDEBUG
+        return;
+    }
+    [[maybe_unused]] auto userInputType = userInst->GetInputType(user.GetIndex());
+    [[maybe_unused]] bool refToPtr = userInputType == DataType::POINTER && inst->GetType() == DataType::REFERENCE;
+    ASSERT_DO_EXT(DataType::Is32Bits(userInputType, arch) || refToPtr ||
+                      (block->GetGraph()->IsDynamicMethod() && userInputType == DataType::ANY),
+                  std::cerr << "Undefined high-part of input instruction for its user\n"
+                            << "input: " << *inst << std::endl
+                            << "user:  " << *userInst << std::endl);
+}
+
+void GraphChecker::CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block)
 {
     for ([[maybe_unused]] auto &user : inst->GetUsers()) {
         auto userInst = user.GetInst();
@@ -304,39 +331,18 @@ void GraphChecker::CheckInstUsers(Inst *inst, [[maybe_unused]] BasicBlock *block
                                     << "input: bb " << inst->GetBasicBlock()->GetId() << *inst << std::endl
                                     << "user: bb " << userInst->GetBasicBlock()->GetId() << *userInst << std::endl);
         }
-        auto arch = graph->GetArch();
-        if (DataType::Is32Bits(inst->GetType(), arch)) {
-            if (!userInst->HasType()) {
-                continue;
-            }
-            // Unsigned Load in AARCH64 zerod all high bits
-#ifndef NDEBUG
-            if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64 &&
-                graph->IsLowLevelInstructionsEnabled()) {
-#else
-            if (inst->IsLoad() && !DataType::IsTypeSigned(inst->GetType()) && arch == Arch::AARCH64) {
-#endif  // !NDEBUG
-                continue;
-            }
-            [[maybe_unused]] auto userInputType = userInst->GetInputType(user.GetIndex());
-            [[maybe_unused]] bool refToPtr =
-                userInputType == DataType::POINTER && inst->GetType() == DataType::REFERENCE;
-            ASSERT_DO_EXT(DataType::Is32Bits(userInputType, arch) || refToPtr ||
-                              (block->GetGraph()->IsDynamicMethod() && userInputType == DataType::ANY),
-                          std::cerr << "Undefined high-part of input instruction for its user\n"
-                                    << "input: " << *inst << std::endl
-                                    << "user:  " << *userInst << std::endl);
+        if (DataType::Is32Bits(inst->GetType(), GetGraph()->GetArch())) {
+            CheckUserOfInt32(block, inst, user);
         }
     }
 }
 
 void GraphChecker::CheckDataFlow(BasicBlock *block)
 {
-    auto graph = block->GetGraph();
     for (auto inst : block->AllInsts()) {
         ASSERT_DO_EXT(inst->GetBasicBlock() == block,
                       std::cerr << "Instruction block's pointer isn't correct" << *inst << std::endl);
-        if (block != graph->GetStartBlock()) {
+        if (block != GetGraph()->GetStartBlock()) {
             ASSERT_DO_EXT(inst->GetOpcode() != Opcode::Parameter,
                           std::cerr << "Not entry block can't contain Parameter instructions" << *inst << std::endl);
         }
@@ -357,7 +363,7 @@ void GraphChecker::CheckDataFlow(BasicBlock *block)
                                     << "Correct depth = " << GetInliningDepth(inst) << std::endl);
         }
 #endif
-        CheckInstUsers(inst, block, graph);
+        CheckInstUsers(inst, block);
 
         for ([[maybe_unused]] auto input : inst->GetInputs()) {
             ASSERT_DO_EXT(CheckInstHasUser(input.GetInst(), inst), std::cerr
@@ -1005,6 +1011,82 @@ bool GraphChecker::IsPhiUserSafeToSkipObjectCheck(Inst *inst, Marker visited)
     return true;
 }
 
+// Checks if object is correctly used in SaveStates between it and user
+class ObjectSSChecker {
+public:
+    explicit ObjectSSChecker(Inst *object) : object_(object), visited_(object->GetBasicBlock()->GetGraph()) {}
+
+    bool Run(const Inst *user, const BasicBlock *block, Inst *startFrom)
+    {
+        if (startFrom != nullptr) {
+            auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, startFrom);
+            for (; it != block->AllInstsSafeReverse().end(); ++it) {
+                auto inst = *it;
+                if (inst == nullptr) {
+                    break;
+                }
+                if (inst->SetMarker(visited_.GetMarker()) || inst == object_ || inst == user) {
+                    return true;
+                }
+                if (!FindAndRemindObjectInSaveState(inst)) {
+                    return false;
+                }
+            }
+        }
+        for (auto pred : block->GetPredsBlocks()) {
+            // Catch-begin block has edge from try-end block, and all try-blocks should be visited from this edge.
+            // `object` can be placed inside try-block - after try-begin, so that visiting try-begin is wrong
+            if (block->IsCatchBegin() && pred->IsTryBegin()) {
+                continue;
+            }
+            if (!Run(user, pred, pred->GetLastInst())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    Inst *FailedSS()
+    {
+        return failedSs_;
+    }
+
+private:
+    static bool FindObjectInSaveState(Inst *object, Inst *ss)
+    {
+        if (!object->IsMovableObject()) {
+            return true;
+        }
+        while (ss != nullptr && object->IsDominate(ss)) {
+            auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(), [object, ss](Input input) {
+                return ss->GetDataFlowInput(input.GetInst()) == object;
+            });
+            if (it != ss->GetInputs().end()) {
+                return true;
+            }
+            auto caller = static_cast<SaveStateInst *>(ss)->GetCallerInst();
+            if (caller == nullptr) {
+                break;
+            }
+            ss = caller->GetSaveState();
+        }
+        return false;
+    }
+
+    bool FindAndRemindObjectInSaveState(Inst *inst)
+    {
+        if (IsSaveStateForGc(inst) && !FindObjectInSaveState(object_, inst)) {
+            failedSs_ = inst;
+            return false;
+        }
+        return true;
+    }
+
+    Inst *object_;
+    Inst *failedSs_ {};
+    MarkerHolder visited_;
+};
+
 void GraphChecker::CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users)
 {
     if (!inst->IsMovableObject()) {
@@ -1019,8 +1101,7 @@ void GraphChecker::CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users)
 
     PrepareUsers(inst, users);
 
-    Inst *failedSs = nullptr;
-    MarkerHolder objectVisited(GetGraph());
+    ObjectSSChecker objectSSChecker(inst);
     MarkerHolder osrVisited(GetGraph());
     for (auto &it : *users) {
         auto user = it->GetInst();
@@ -1042,14 +1123,14 @@ void GraphChecker::CheckSaveStateInputs(Inst *inst, ArenaVector<User *> *users)
             startBb = user->GetBasicBlock();
             startInst = user->GetPrev();
         }
-        ASSERT_DO_EXT(skipObjCheck || skipObjCheckUser ||
-                          CheckObjectRec(inst, user, startBb, startInst, objectVisited.GetMarker(), &failedSs),
+        ASSERT_DO_EXT(skipObjCheck || skipObjCheckUser || objectSSChecker.Run(user, startBb, startInst),
                       std::cerr << "Object v" << inst->GetId() << " used in v" << user->GetId()
-                                << ", but not found on the path between them in the " << failedSs->GetOpcodeStr()
-                                << " v" << failedSs->GetId() << ":\n"
+                                << ", but not found on the path between them in the "
+                                << objectSSChecker.FailedSS()->GetOpcodeStr() << " v"
+                                << objectSSChecker.FailedSS()->GetId() << ":\n"
                                 << *inst << std::endl
                                 << *user << std::endl
-                                << *failedSs << std::endl);
+                                << *objectSSChecker.FailedSS() << std::endl);
         CheckSaveStateOsrRec(inst, user, startBb, osrVisited.GetMarker());
     }
     users->clear();

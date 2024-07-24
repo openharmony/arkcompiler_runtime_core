@@ -79,7 +79,7 @@ void Scheduler::AddDep(uint32_t *prio, Inst *from, Inst *to, uint32_t latency, I
 bool Scheduler::BuildAllDeps(BasicBlock *bb)
 {
     auto markerHolder = MarkerHolder(GetGraph());
-    auto mrk = markerHolder.GetMarker();
+    mrk_ = markerHolder.GetMarker();
 
     oprev_ = 0;
     numBarriers_ = 0;
@@ -91,7 +91,7 @@ bool Scheduler::BuildAllDeps(BasicBlock *bb)
     uint32_t numSpecial = 0;
     Inst *lastBarrier = nullptr;
     for (auto inst : bb->InstsSafeReverse()) {
-        ProcessInst(inst, mrk, &numInst, &numBetween, &numSpecial, &lastBarrier);
+        ProcessInst(inst, &numInst, &numBetween, &numSpecial, &lastBarrier);
 
         if (numSpecial > TOO_LONG_BB || numBetween > TOO_LONG_BB) {
             COMPILER_LOG(DEBUG, SCHEDULER) << "Block " << bb->GetId() << " seems too big for scheduling, skipping";
@@ -103,7 +103,7 @@ bool Scheduler::BuildAllDeps(BasicBlock *bb)
 }
 
 // One instruction deps
-void Scheduler::ProcessInst(Inst *inst, Marker mrk, uint32_t *numInst, uint32_t *numBetween, uint32_t *numSpecial,
+void Scheduler::ProcessInst(Inst *inst, uint32_t *numInst, uint32_t *numBetween, uint32_t *numSpecial,
                             Inst **lastBarrier)
 {
     uint32_t prio = 0;
@@ -135,7 +135,7 @@ void Scheduler::ProcessInst(Inst *inst, Marker mrk, uint32_t *numInst, uint32_t 
     // Users
     for (auto &userItem : inst->GetUsers()) {
         auto user = userItem.GetInst();
-        if (user->IsMarked(mrk)) {
+        if (user->IsMarked(mrk_)) {
             AddDep(&prio, inst, user, instLatency, *lastBarrier);
         }
     }
@@ -158,7 +158,7 @@ void Scheduler::ProcessInst(Inst *inst, Marker mrk, uint32_t *numInst, uint32_t 
         (*numSpecial)++;
     }
 
-    inst->SetMarker(mrk);
+    inst->SetMarker(mrk_);
     prio_.insert({inst, prio});
     maxPrio_ = std::max(maxPrio_, prio);
     oprev_ = ocycle_[inst];

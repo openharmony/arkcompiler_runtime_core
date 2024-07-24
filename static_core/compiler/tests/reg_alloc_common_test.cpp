@@ -186,6 +186,18 @@ TEST_F(RegAllocCommonTest, ParametersLocation)
     TestParametersLocations<DataType::UINT32>();
 }
 
+static void LocationsNoSplitsCheckBB(BasicBlock *bb)
+{
+    for (auto inst : bb->AllInsts()) {
+        EXPECT_FALSE(inst->IsSpillFill());
+        if (inst->NoDest()) {
+            ASSERT(inst->IsSaveState() || inst->GetOpcode() == Opcode::Return);
+        } else {
+            EXPECT_NE(inst->GetDstReg(), INVALID_REG);
+        }
+    }
+}
+
 TEST_F(RegAllocCommonTest, LocationsNoSplits)
 {
     auto graph = CreateEmptyGraph();
@@ -212,13 +224,7 @@ TEST_F(RegAllocCommonTest, LocationsNoSplits)
     // Check that there are no spill-fills in the graph
     RunRegAllocatorsAndCheck(graph, [](Graph *checkGraph) {
         for (auto bb : checkGraph->GetBlocksRPO()) {
-            for (auto inst : bb->AllInsts()) {
-                EXPECT_FALSE(inst->IsSpillFill());
-                if (inst->NoDest()) {
-                    return;
-                }
-                EXPECT_NE(inst->GetDstReg(), INVALID_REG);
-            }
+            LocationsNoSplitsCheckBB(bb);
         }
     });
 }

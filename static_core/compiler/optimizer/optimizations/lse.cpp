@@ -86,6 +86,17 @@ public:
         }
     }
 
+    bool CheckMustAlias(Inst *baseObject)
+    {
+        for (auto disabledObject : disabledObjects_) {
+            aliasCalls_++;
+            if (aa_.CheckRefAlias(baseObject, disabledObject) == MUST_ALIAS) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void VisitStore(Inst *inst, Inst *val)
     {
         if (val == nullptr) {
@@ -93,11 +104,8 @@ public:
             return;
         }
         auto baseObject = inst->GetDataFlowInput(0);
-        for (auto disabledObject : disabledObjects_) {
-            aliasCalls_++;
-            if (aa_.CheckRefAlias(baseObject, disabledObject) == MUST_ALIAS) {
-                return;
-            }
+        if (CheckMustAlias(baseObject)) {
+            return;
         }
         auto hvalue = GetHeapValue(inst);
         /* Value can be eliminated already */

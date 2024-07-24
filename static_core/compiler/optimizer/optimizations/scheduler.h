@@ -59,8 +59,7 @@ private:
     bool ScheduleBasicBlock(BasicBlock *bb);
     bool BuildAllDeps(BasicBlock *bb);
 
-    void ProcessInst(Inst *inst, Marker mrk, uint32_t *numInst, uint32_t *numBetween, uint32_t *numSpecial,
-                     Inst **lastBarrier);
+    void ProcessInst(Inst *inst, uint32_t *numInst, uint32_t *numBetween, uint32_t *numSpecial, Inst **lastBarrier);
     void ProcessMemory(Inst *inst, uint32_t *prio, Inst *lastBarrier);
     void ProcessSpecial(Inst *inst, uint32_t *prio, Inst *lastBarrier);
     void ProcessSpecialBoundsCheckI(Inst *inst, uint32_t *prio, Inst *lastBarrier);
@@ -75,6 +74,7 @@ private:
     using SchedulerPriorityQueue = std::priority_queue<Inst *, InstVector, std::function<bool(Inst *, Inst *)>>;
     uint32_t SchedWithGlued(Inst *inst, SchedulerPriorityQueue *waiting, uint32_t cycle);
 
+    Marker mrk_ {};
     uint32_t oprev_ {0};
     uint32_t numBarriers_ {0};
     uint32_t maxPrio_ {0};

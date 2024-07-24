@@ -2128,18 +2128,8 @@ void EncodeVisitor::VisitInitString(GraphVisitor *visitor, Inst *inst)
         auto mem = MemRef(ctorArg, static_cast<int64_t>(runtime->GetArrayLengthOffset(cg->GetArch())));
         ScopedTmpReg lengthReg(enc);
         enc->EncodeLdr(lengthReg, IsTypeSigned(initStr->GetType()), mem);
-        if (cg->GetGraph()->IsAotMode()) {
-            auto klassOffs = runtime->GetStringClassPointerTlsOffset(cg->GetArch());
-            ScopedTmpReg klassReg(enc);
-            enc->EncodeLdr(klassReg, false, MemRef(cg->ThreadReg(), klassOffs));
-            cg->CallFastCreateStringFromCharArrayTlab(initStr, dst, cg->GetRegfile()->GetZeroReg(), lengthReg, ctorArg,
-                                                      klassReg);
-        } else {
-            auto klassPtr = runtime->GetStringClass(cg->GetGraph()->GetMethod());
-            auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(klassPtr));
-            cg->CallFastCreateStringFromCharArrayTlab(initStr, dst, cg->GetRegfile()->GetZeroReg(), lengthReg, ctorArg,
-                                                      klassImm);
-        }
+        cg->CreateStringFromCharArrayTlab(initStr, dst,
+                                          Codegen::SRCREGS {cg->GetRegfile()->GetZeroReg(), lengthReg, ctorArg});
     }
 }
 

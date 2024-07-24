@@ -91,11 +91,10 @@ public:
 
     enum AppliedType { NOT_APPLIED, REMOVED, REPLACED };
 
-    template <AppliedType APPLIED_TYPE>
-    void ArithmeticTest(int32_t index, int32_t arrayLen, Opcode opc, int32_t val)
+    Graph *ArithmeticTestInput(int32_t index, int32_t arrayLen, Opcode opc, int32_t val)
     {
-        auto graph1 = CreateEmptyGraph();
-        GRAPH(graph1)
+        auto graph = CreateEmptyGraph();
+        GRAPH(graph)
         {
             CONSTANT(0U, arrayLen);
             CONSTANT(1U, index);
@@ -111,42 +110,66 @@ public:
                 INST(8U, Opcode::Return).s32().Inputs(7U);
             }
         }
+        return graph;
+    }
+
+    Graph *ArithmeticTestOutput1(int32_t index, int32_t arrayLen, Opcode opc, int32_t val)
+    {
+        auto graph = CreateEmptyGraph();
+
+        GRAPH(graph)
+        {
+            CONSTANT(0U, arrayLen);
+            CONSTANT(1U, index);
+            CONSTANT(2U, val);
+            BASIC_BLOCK(2U, 1U)
+            {
+                INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+                INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+                INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+                INST(5U, opc).s32().Inputs(1U, 2U);
+                INST(6U, Opcode::NOP);
+                INST(7U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+                INST(8U, Opcode::Return).s32().Inputs(7U);
+            }
+        }
+
+        return graph;
+    }
+
+    Graph *ArithmeticTestOutput2(int32_t index, int32_t arrayLen, Opcode opc, int32_t val)
+    {
+        auto graph = CreateEmptyGraph();
+
+        GRAPH(graph)
+        {
+            CONSTANT(0U, arrayLen);
+            CONSTANT(1U, index);
+            CONSTANT(2U, val);
+            BASIC_BLOCK(2U, 1U)
+            {
+                INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+                INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+                INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+                INST(5U, opc).s32().Inputs(1U, 2U);
+                INST(6U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(3U);
+            }
+        }
+        return graph;
+    }
+
+    template <AppliedType APPLIED_TYPE>
+    void ArithmeticTest(int32_t index, int32_t arrayLen, Opcode opc, int32_t val)
+    {
+        auto graph1 = ArithmeticTestInput(index, arrayLen, opc, val);
         auto clone = GraphCloner(graph1, graph1->GetAllocator(), graph1->GetLocalAllocator()).CloneGraph();
         bool result = graph1->RunPass<ChecksElimination>();
-        auto graph2 = CreateEmptyGraph();
+        Graph *graph2 = nullptr;
         if constexpr (APPLIED_TYPE == AppliedType::REMOVED) {
-            GRAPH(graph2)
-            {
-                CONSTANT(0U, arrayLen);
-                CONSTANT(1U, index);
-                CONSTANT(2U, val);
-                BASIC_BLOCK(2U, 1U)
-                {
-                    INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-                    INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
-                    INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
-                    INST(5U, opc).s32().Inputs(1U, 2U);
-                    INST(6U, Opcode::NOP);
-                    INST(7U, Opcode::LoadArray).s32().Inputs(4U, 5U);
-                    INST(8U, Opcode::Return).s32().Inputs(7U);
-                }
-            }
+            graph2 = ArithmeticTestOutput1(index, arrayLen, opc, val);
             ASSERT_TRUE(result);
         } else if constexpr (APPLIED_TYPE == AppliedType::REPLACED) {
-            GRAPH(graph2)
-            {
-                CONSTANT(0U, arrayLen);
-                CONSTANT(1U, index);
-                CONSTANT(2U, val);
-                BASIC_BLOCK(2U, 1U)
-                {
-                    INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-                    INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
-                    INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
-                    INST(5U, opc).s32().Inputs(1U, 2U);
-                    INST(6U, Opcode::Deoptimize).DeoptimizeType(DeoptimizeType::BOUNDS_CHECK).Inputs(3U);
-                }
-            }
+            graph2 = ArithmeticTestOutput2(index, arrayLen, opc, val);
             ASSERT_TRUE(result);
         } else {
             ASSERT_FALSE(result);
@@ -154,11 +177,11 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(graph1, (APPLIED_TYPE == AppliedType::NOT_APPLIED) ? clone : graph2));
     }
 
-    template <bool IS_APPLIED>
-    void ModTest(int32_t arrayLen, int32_t mod)
+    Graph *ModTestInput(int32_t arrayLen, int32_t mod)
     {
-        auto graph1 = CreateEmptyGraph();
-        GRAPH(graph1)
+        auto graph = CreateEmptyGraph();
+
+        GRAPH(graph)
         {
             CONSTANT(0U, arrayLen);
             CONSTANT(1U, mod);
@@ -184,34 +207,51 @@ public:
                 INST(9U, Opcode::Return).s32().Inputs(1U);
             }
         }
-        auto graph2 = CreateEmptyGraph();
-        if constexpr (IS_APPLIED) {
-            GRAPH(graph2)
+
+        return graph;
+    }
+
+    Graph *ModTestOutput(int32_t arrayLen, int32_t mod)
+    {
+        auto graph = CreateEmptyGraph();
+
+        GRAPH(graph)
+        {
+            CONSTANT(0U, arrayLen);
+            CONSTANT(1U, mod);
+            CONSTANT(12U, 0U);
+            PARAMETER(2U, 0U).s32();
+            BASIC_BLOCK(2U, 3U, 4U)
             {
-                CONSTANT(0U, arrayLen);
-                CONSTANT(1U, mod);
-                CONSTANT(12U, 0U);
-                PARAMETER(2U, 0U).s32();
-                BASIC_BLOCK(2U, 3U, 4U)
-                {
-                    INST(10U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(2U, 12U);
-                    INST(11U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(10U);
-                }
-                BASIC_BLOCK(3U, 1U)
-                {
-                    INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
-                    INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
-                    INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
-                    INST(5U, Opcode::Mod).s32().Inputs(2U, 1U);
-                    INST(6U, Opcode::NOP);
-                    INST(7U, Opcode::LoadArray).s32().Inputs(4U, 5U);
-                    INST(8U, Opcode::Return).s32().Inputs(7U);
-                }
-                BASIC_BLOCK(4U, 1U)
-                {
-                    INST(9U, Opcode::Return).s32().Inputs(1U);
-                }
+                INST(10U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(2U, 12U);
+                INST(11U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(10U);
             }
+            BASIC_BLOCK(3U, 1U)
+            {
+                INST(3U, Opcode::SaveState).Inputs(0U, 1U, 2U).SrcVregs({0U, 1U, 2U});
+                INST(44U, Opcode::LoadAndInitClass).ref().Inputs(3U).TypeId(68U);
+                INST(4U, Opcode::NewArray).ref().Inputs(44U, 0U, 3U);
+                INST(5U, Opcode::Mod).s32().Inputs(2U, 1U);
+                INST(6U, Opcode::NOP);
+                INST(7U, Opcode::LoadArray).s32().Inputs(4U, 5U);
+                INST(8U, Opcode::Return).s32().Inputs(7U);
+            }
+            BASIC_BLOCK(4U, 1U)
+            {
+                INST(9U, Opcode::Return).s32().Inputs(1U);
+            }
+        }
+        return graph;
+    }
+
+    template <bool IS_APPLIED>
+    void ModTest(int32_t arrayLen, int32_t mod)
+    {
+        auto graph1 = ModTestInput(arrayLen, mod);
+
+        Graph *graph2 = nullptr;
+        if constexpr (IS_APPLIED) {
+            graph2 = ModTestOutput(arrayLen, mod);
         } else {
             graph2 = GraphCloner(graph1, graph1->GetAllocator(), graph1->GetLocalAllocator()).CloneGraph();
         }
@@ -219,11 +259,11 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
     }
 
-    template <bool IS_APPLIED>
-    void PhiTest(int32_t index, int32_t lenArray, int32_t mod)
+    Graph *PhiTestInput(int32_t index, int32_t lenArray, int32_t mod)
     {
-        auto graph1 = CreateEmptyGraph();
-        GRAPH(graph1)
+        auto graph = CreateEmptyGraph();
+
+        GRAPH(graph)
         {
             PARAMETER(0U, 0U).b();
             PARAMETER(1U, 1U).s32();
@@ -250,64 +290,55 @@ public:
                 INST(11U, Opcode::Return).s32().Inputs(10U);
             }
         }
+
+        return graph;
+    }
+    Graph *PhiTestOutput1(int32_t index, int32_t lenArray, int32_t mod)
+    {
+        auto graph = CreateEmptyGraph();
+
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 0U).b();
+            PARAMETER(1U, 1U).s32();  // index 1
+            CONSTANT(2U, lenArray);   // len array
+            CONSTANT(3U, index);      // index 2
+            CONSTANT(12U, mod);
+            BASIC_BLOCK(2U, 3U, 4U)
+            {
+                INST(43U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+                INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
+                INST(4U, Opcode::NewArray).ref().Inputs(44U, 2U, 43U);
+                INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(0U);
+            }
+            BASIC_BLOCK(3U, 4U)
+            {
+                INST(6U, Opcode::Mod).s32().Inputs(1U, 12U);
+            }
+            BASIC_BLOCK(4U, 1U)
+            {
+                INST(7U, Opcode::Phi).s32().Inputs(3U, 6U);
+                INST(8U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U).SrcVregs({0U, 1U, 2U, 3U, 4U});
+                INST(9U, Opcode::NOP);
+                INST(10U, Opcode::LoadArray).s32().Inputs(4U, 7U);
+                INST(11U, Opcode::Return).s32().Inputs(10U);
+            }
+        }
+
+        return graph;
+    }
+
+    template <bool IS_APPLIED>
+    void PhiTest(int32_t index, int32_t lenArray, int32_t mod)
+    {
+        auto graph1 = PhiTestInput(index, lenArray, mod);
+
         graph1->RunPass<ChecksElimination>();
-        auto graph2 = CreateEmptyGraph();
+        [[maybe_unused]] Graph *graph2 = nullptr;
         if constexpr (IS_APPLIED) {
-            GRAPH(graph2)
-            {
-                PARAMETER(0U, 0U).b();
-                PARAMETER(1U, 1U).s32();  // index 1
-                CONSTANT(2U, lenArray);   // len array
-                CONSTANT(3U, index);      // index 2
-                CONSTANT(12U, mod);
-                BASIC_BLOCK(2U, 3U, 4U)
-                {
-                    INST(43U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-                    INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
-                    INST(4U, Opcode::NewArray).ref().Inputs(44U, 2U, 43U);
-                    INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(0U);
-                }
-                BASIC_BLOCK(3U, 4U)
-                {
-                    INST(6U, Opcode::Mod).s32().Inputs(1U, 12U);
-                }
-                BASIC_BLOCK(4U, 1U)
-                {
-                    INST(7U, Opcode::Phi).s32().Inputs(3U, 6U);
-                    INST(8U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U).SrcVregs({0U, 1U, 2U, 3U, 4U});
-                    INST(9U, Opcode::NOP);
-                    INST(10U, Opcode::LoadArray).s32().Inputs(4U, 7U);
-                    INST(11U, Opcode::Return).s32().Inputs(10U);
-                }
-            }
+            graph2 = PhiTestOutput1(index, lenArray, mod);
         } else {
-            GRAPH(graph2)
-            {
-                PARAMETER(0U, 0U).b();
-                PARAMETER(1U, 1U).s32();
-                CONSTANT(2U, lenArray);  // len array
-                CONSTANT(3U, index);     // index 2
-                CONSTANT(12U, mod);
-                BASIC_BLOCK(2U, 3U, 4U)
-                {
-                    INST(43U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
-                    INST(44U, Opcode::LoadAndInitClass).ref().Inputs().TypeId(68U);
-                    INST(4U, Opcode::NewArray).ref().Inputs(44U, 2U, 43U);
-                    INST(5U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(0U);
-                }
-                BASIC_BLOCK(3U, 4U)
-                {
-                    INST(6U, Opcode::Mod).s32().Inputs(1U, 12U);
-                }
-                BASIC_BLOCK(4U, 1U)
-                {
-                    INST(7U, Opcode::Phi).s32().Inputs(3U, 6U);
-                    INST(8U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U).SrcVregs({0U, 1U, 2U, 3U, 4U});
-                    INST(9U, Opcode::BoundsCheck).s32().Inputs(2U, 7U, 8U);
-                    INST(10U, Opcode::LoadArray).s32().Inputs(4U, 9U);
-                    INST(11U, Opcode::Return).s32().Inputs(10U);
-                }
-            }
+            graph2 = PhiTestInput(index, lenArray, mod);
         }
     }
 

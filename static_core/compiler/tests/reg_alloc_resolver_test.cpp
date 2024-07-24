@@ -35,12 +35,13 @@ protected:
         graph->InitUsedRegs<DataType::FLOAT64>(&regs);
         graph->SetStackSlotsCount(MAX_NUM_STACK_SLOTS);
     }
+
+    void ResolveFixedInputsRunLiveness();
 };
 
-// NOLINTBEGIN(readability-magic-numbers)
-TEST_F(RegAllocResolverTest, ResolveFixedInputs)
+SRC_GRAPH(RegAllocResolverTest, Graph *graph)
 {
-    GRAPH(GetGraph())
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
         PARAMETER(1U, 1U).i32();
@@ -53,27 +54,12 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
             INST(4U, Opcode::Return).u64().Inputs(5U);
         }
     }
+}
 
-    /*
-     * Manually split intervals and allocate registers as follows:
-     * - set fixed registers for v3's parameters: r0, r2 and r1 respectively;
-     * - move v1 to r2 before v5;
-     * - spill v0 from r0 to stack before v3;
-     * - move v2 to some reg before v5 and then to r0 before v3.
-     *
-     * RegAllocResolver may choose r0-split for v0, because it ends right before v3,
-     * but it's incorrect because r0 will be overridden by v2 (and SplitResolver will
-     * create separate SpillFill for it).
-     * This, correct moves for v3 params are:
-     * - load v0 from stack slot into r0;
-     * - move v2 from r0 into r1;
-     */
+void RegAllocResolverTest::ResolveFixedInputsRunLiveness()
+{
     Target target(GetGraph()->GetArch());
     auto storeInst = &INS(3U);
-    storeInst->SetLocation(0U, Location::MakeRegister(target.GetParamRegId(0U)));
-    storeInst->SetLocation(1U, Location::MakeRegister(target.GetParamRegId(2U)));
-    storeInst->SetLocation(2U, Location::MakeRegister(target.GetParamRegId(1U)));
-
     auto &la = GetGraph()->GetAnalysis<LivenessAnalyzer>();
     ASSERT_TRUE(la.Run());
 
@@ -102,7 +88,34 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
     p2Split2->SetLocation(Location::MakeRegister(target.GetParamRegId(0U)));
     la.GetInstLifeIntervals(&INS(4U))->SetLocation(Location::MakeRegister(target.GetReturnRegId()));
     la.GetTmpRegInterval(storeInst)->SetLocation(Location::MakeRegister(8U));
+}
 
+// NOLINTBEGIN(readability-magic-numbers)
+TEST_F(RegAllocResolverTest, ResolveFixedInputs)
+{
+    src_graph::RegAllocResolverTest::CREATE(GetGraph());
+
+    /*
+     * Manually split intervals and allocate registers as follows:
+     * - set fixed registers for v3's parameters: r0, r2 and r1 respectively;
+     * - move v1 to r2 before v5;
+     * - spill v0 from r0 to stack before v3;
+     * - move v2 to some reg before v5 and then to r0 before v3.
+     *
+     * RegAllocResolver may choose r0-split for v0, because it ends right before v3,
+     * but it's incorrect because r0 will be overridden by v2 (and SplitResolver will
+     * create separate SpillFill for it).
+     * This, correct moves for v3 params are:
+     * - load v0 from stack slot into r0;
+     * - move v2 from r0 into r1;
+     */
+    Target target(GetGraph()->GetArch());
+    auto storeInst = &INS(3U);
+    storeInst->SetLocation(0U, Location::MakeRegister(target.GetParamRegId(0U)));
+    storeInst->SetLocation(1U, Location::MakeRegister(target.GetParamRegId(2U)));
+    storeInst->SetLocation(2U, Location::MakeRegister(target.GetParamRegId(1U)));
+
+    ResolveFixedInputsRunLiveness();
     InitUsedRegs(GetGraph());
     RegAllocResolver resolver(GetGraph());
     resolver.Resolve();
