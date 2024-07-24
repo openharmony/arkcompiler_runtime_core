@@ -737,7 +737,13 @@ public:
         return 0;
     }
 
-    virtual ClassPtr GetStringClass([[maybe_unused]] MethodPtr method) const
+    virtual ClassPtr GetStringClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] uint32_t *typeId) const
+    {
+        return nullptr;
+    }
+
+    virtual ClassPtr GetNumberClass([[maybe_unused]] MethodPtr method, [[maybe_unused]] const char *name,
+                                    [[maybe_unused]] uint32_t *typeId) const
     {
         return nullptr;
     }
@@ -783,6 +789,11 @@ public:
     static constexpr uint32_t GetSbCompressOffset()
     {
         return GetSbLengthOffset() + sizeof(int32_t);
+    }
+
+    virtual std::string GetStringValue([[maybe_unused]] MethodPtr method, [[maybe_unused]] size_t id) const
+    {
+        return std::string("");
     }
 
     /// managed Thread object information

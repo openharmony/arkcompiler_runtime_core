@@ -403,7 +403,16 @@ public:
 
     ObjectPointerType GetNonMovableString(MethodPtr method, StringId id) const override;
 
-    ClassPtr GetStringClass(MethodPtr method) const override;
+    ClassPtr GetStringClass(MethodPtr method, uint32_t *typeId) const override;
+    ClassPtr GetNumberClass(MethodPtr method, const char *name, uint32_t *typeId) const override;
+
+    std::string GetStringValue(MethodPtr method, size_t id) const override
+    {
+        ScopedMutatorLock lock;
+        panda_file::File::EntityId cid(id);
+        auto *pf = MethodCast(method)->GetPandaFile();
+        return utf::Mutf8AsCString(pf->GetStringData(cid).data);
+    }
 
     /**********************************************************************************/
     /// TLAB information

@@ -18,6 +18,7 @@
 #include "intrinsics.h"
 #include "libpandafile/bytecode_instruction.h"
 #include "libpandafile/type_helper.h"
+#include "optimizer/ir/runtime_interface.h"
 #include "runtime/cha.h"
 #include "runtime/jit/profiling_data.h"
 #include "runtime/include/class_linker-inl.h"
@@ -143,12 +144,29 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetClass(MethodPtr m
         *caller->GetPandaFile(), panda_file::File::EntityId(id), caller->GetClass()->GetLoadContext(), &handler);
 }
 
-compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetStringClass(MethodPtr method) const
+compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetStringClass(MethodPtr method, uint32_t *typeId) const
 {
     ScopedMutatorLock lock;
     auto *caller = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
-    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
+    auto classPtr = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
+    if (typeId != nullptr) {
+        *typeId = classPtr->GetFileId().GetOffset();
+    }
+    return classPtr;
+}
+
+compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetNumberClass(MethodPtr method, const char *name,
+                                                                           uint32_t *typeId) const
+{
+    ScopedMutatorLock lock;
+    auto *caller = MethodCast(method);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
+    const uint8_t *classDescriptor = utf::CStringAsMutf8(name);
+    auto classLinker = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx);
+    auto *classPtr = classLinker->GetClass(classDescriptor, false, classLinker->GetBootContext(), nullptr);
+    *typeId = classPtr->GetFileId().GetOffset();
+    return classPtr;
 }
 
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayU16Class(MethodPtr method) const
