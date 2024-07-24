@@ -249,7 +249,7 @@ export final class Set<K> implements ReadonlySet<K> {
      *
      * @returns number of unique elements in the Set
      */
-    get size(): number {
+    override get size(): number {
         return this.sizeVal;
     }
 

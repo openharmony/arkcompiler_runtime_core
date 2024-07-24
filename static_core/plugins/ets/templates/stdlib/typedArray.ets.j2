@@ -489,7 +489,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): {{subsetTypeValues}} {
+    public override $_get(index: number): {{subsetTypeValues}} {
         return this.$_get(index as int) as {{subsetTypeValues}}
     }
 

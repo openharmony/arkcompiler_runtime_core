@@ -431,7 +431,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -2943,7 +2943,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -5432,7 +5432,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -7948,7 +7948,7 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): BigInt {
+    public override $_get(index: number): BigInt {
         return this.$_get(index as int) as BigInt
     }
 
@@ -10402,7 +10402,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -12873,7 +12873,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 

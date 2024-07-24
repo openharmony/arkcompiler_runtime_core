@@ -441,7 +441,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): {{element['subsetTypeValues']}} {
+    public override $_get(index: number): {{element['subsetTypeValues']}} {
         return this.$_get(index as int) as {{element['subsetTypeValues']}}
     }
 
