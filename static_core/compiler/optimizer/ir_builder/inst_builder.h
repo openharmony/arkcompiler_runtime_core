@@ -37,43 +37,7 @@ class InstBuilder {
     VREGS_ENV_TYPE_DEFS(ENV_IDX)
 #undef ENV_IDX
 public:
-    InstBuilder(Graph *graph, RuntimeInterface::MethodPtr method, CallInst *callerInst, uint32_t inliningDepth)
-        : graph_(graph),
-          runtime_(graph->GetRuntime()),
-          defs_(graph->GetLocalAllocator()->Adapter()),
-          method_(method),
-          vregsAndArgsCount_(graph->GetRuntime()->GetMethodRegistersCount(method) +
-                             graph->GetRuntime()->GetMethodTotalArgumentsCount(method)),
-          instructionsBuf_(GetGraph()->GetRuntime()->GetMethodCode(GetGraph()->GetMethod())),
-          callerInst_(callerInst),
-          inliningDepth_(inliningDepth),
-          classId_ {runtime_->GetClassIdForMethod(method_)}
-    {
-        noTypeMarker_ = GetGraph()->NewMarker();
-        visitedBlockMarker_ = GetGraph()->NewMarker();
-
-        defs_.resize(graph_->GetVectorBlocks().size(), InstVector(graph->GetLocalAllocator()->Adapter()));
-        for (auto &v : defs_) {
-            v.resize(GetVRegsCount());
-        }
-
-        for (auto bb : graph->GetBlocksRPO()) {
-            if (bb->IsCatchBegin()) {
-                for (size_t vreg = 0; vreg < GetVRegsCount(); vreg++) {
-                    auto catchPhi = GetGraph()->CreateInstCatchPhi(DataType::NO_TYPE, bb->GetGuestPc());
-                    catchPhi->SetMarker(GetNoTypeMarker());
-                    bb->AppendInst(catchPhi);
-                    COMPILER_LOG(DEBUG, IR_BUILDER)
-                        << "Creat catchphi " << catchPhi->GetId() << " for bb(" << bb->GetId() << ")";
-                    if (vreg == vregsAndArgsCount_) {
-                        catchPhi->SetIsAcc();
-                    } else if (vreg > vregsAndArgsCount_) {
-                        catchPhi->SetType(DataType::ANY);
-                    }
-                }
-            }
-        }
-    }
+    InstBuilder(Graph *graph, RuntimeInterface::MethodPtr method, CallInst *callerInst, uint32_t inliningDepth);
 
     NO_COPY_SEMANTIC(InstBuilder);
     NO_MOVE_SEMANTIC(InstBuilder);
@@ -89,21 +53,7 @@ public:
      */
     void BuildInstruction(const BytecodeInstruction *instruction);
 
-    void InitEnv(BasicBlock *bb)
-    {
-        auto thisFunc = GetGraph()->FindParameter(0);
-        auto cp = GetGraph()->CreateInstLoadConstantPool(DataType::ANY, INVALID_PC, thisFunc);
-        bb->AppendInst(cp);
-
-        auto lexEnv = GetGraph()->CreateInstLoadLexicalEnv(DataType::ANY, INVALID_PC, thisFunc);
-        bb->AppendInst(lexEnv);
-
-        defs_[bb->GetId()][vregsAndArgsCount_ + 1 + THIS_FUNC_IDX] = thisFunc;
-        defs_[bb->GetId()][vregsAndArgsCount_ + 1 + CONST_POOL_IDX] = cp;
-        defs_[bb->GetId()][vregsAndArgsCount_ + 1 + LEX_ENV_IDX] = lexEnv;
-        COMPILER_LOG(DEBUG, IR_BUILDER) << "Init environment this_func = " << thisFunc->GetId()
-                                        << ", const_pool = " << cp->GetId() << ", lex_env = " << lexEnv->GetId();
-    }
+    void InitEnv(BasicBlock *bb);
 
     bool IsFailed() const
     {
@@ -113,17 +63,7 @@ public:
     /// Return jump offset for instruction `inst`, 0 if it is not jump instruction.
     static int64_t GetInstructionJumpOffset(const BytecodeInstruction *inst);
 
-    void SetCurrentBlock(BasicBlock *bb)
-    {
-        if (GetGraph()->IsDynamicMethod() && !GetGraph()->IsBytecodeOptimizer() &&
-            currentBb_ != GetGraph()->GetStartBlock() && currentDefs_ != nullptr) {
-            ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + THIS_FUNC_IDX] != nullptr);
-            ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + CONST_POOL_IDX] != nullptr);
-            ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX] != nullptr);
-        }
-        currentBb_ = bb;
-        currentDefs_ = &defs_[bb->GetId()];
-    }
+    void SetCurrentBlock(BasicBlock *bb);
 
     BasicBlock *GetCurrentBlock() const
     {
@@ -230,123 +170,18 @@ private:
         AddInstruction(insts...);
     }
 
-    void UpdateDefinition(size_t vreg, Inst *inst)
-    {
-        ASSERT(vreg < currentDefs_->size());
-        COMPILER_LOG(DEBUG, IR_BUILDER) << "update def for r" << vreg << " from "
-                                        << ((*currentDefs_)[vreg] != nullptr
-                                                ? std::to_string((*currentDefs_)[vreg]->GetId())
-                                                : "null")
-                                        << " to " << inst->GetId();
-        (*currentDefs_)[vreg] = inst;
-    }
+    void UpdateDefinition(size_t vreg, Inst *inst);
+    void UpdateDefinitionAcc(Inst *inst);
+    void UpdateDefinitionLexEnv(Inst *inst);
+    Inst *GetDefinition(size_t vreg);
+    Inst *GetDefinitionAcc();
+    Inst *GetEnvDefinition(uint8_t envIdx);
 
-    void UpdateDefinitionAcc(Inst *inst)
-    {
-        if (inst == nullptr) {
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "reset accumulator definition";
-        } else {
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "update accumulator from "
-                                            << ((*currentDefs_)[vregsAndArgsCount_] != nullptr
-                                                    ? std::to_string((*currentDefs_)[vregsAndArgsCount_]->GetId())
-                                                    : "null")
-                                            << " to " << inst->GetId();
-        }
-        (*currentDefs_)[vregsAndArgsCount_] = inst;
-    }
-
-    void UpdateDefinitionLexEnv(Inst *inst)
-    {
-        ASSERT(inst != nullptr);
-        ASSERT((*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX] != nullptr);
-        COMPILER_LOG(DEBUG, IR_BUILDER) << "update lexical environment from "
-                                        << std::to_string(
-                                               (*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX]->GetId())
-                                        << " to " << inst->GetId();
-        (*currentDefs_)[vregsAndArgsCount_ + 1 + LEX_ENV_IDX] = inst;
-    }
-
-    Inst *GetDefinition(size_t vreg)
-    {
-        ASSERT(vreg < currentDefs_->size());
-        ASSERT((*currentDefs_)[vreg] != nullptr);
-
-        if (vreg >= currentDefs_->size() || (*currentDefs_)[vreg] == nullptr) {
-            failed_ = true;
-            COMPILER_LOG(ERROR, IR_BUILDER) << "GetDefinition failed for verg " << vreg;
-            return nullptr;
-        }
-        return (*currentDefs_)[vreg];
-    }
-
-    Inst *GetDefinitionAcc()
-    {
-        auto *accInst = (*currentDefs_)[vregsAndArgsCount_];
-        ASSERT(accInst != nullptr);
-
-        if (accInst == nullptr) {
-            failed_ = true;
-            COMPILER_LOG(ERROR, IR_BUILDER) << "GetDefinitionAcc failed";
-        }
-        return accInst;
-    }
-
-    Inst *GetEnvDefinition(uint8_t envIdx)
-    {
-        auto *inst = (*currentDefs_)[vregsAndArgsCount_ + 1 + envIdx];
-        ASSERT(inst != nullptr);
-
-        if (inst == nullptr) {
-            failed_ = true;
-        }
-        return inst;
-    }
-
-    auto FindOrCreate32BitConstant(uint32_t value)
-    {
-        auto inst = GetGraph()->FindOrCreateConstant<uint32_t>(value);
-        if (inst->GetId() == GetGraph()->GetCurrentInstructionId() - 1) {
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "create new constant: value=" << value << ", inst=" << inst->GetId();
-        }
-        return inst;
-    }
-
-    auto FindOrCreateConstant(uint64_t value)
-    {
-        auto inst = GetGraph()->FindOrCreateConstant<uint64_t>(value);
-        if (inst->GetId() == GetGraph()->GetCurrentInstructionId() - 1) {
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "create new constant: value=" << value << ", inst=" << inst->GetId();
-        }
-        return inst;
-    }
-
-    auto FindOrCreateAnyConstant(DataType::Any value)
-    {
-        auto inst = GetGraph()->FindOrCreateConstant(value);
-        if (inst->GetId() == GetGraph()->GetCurrentInstructionId() - 1) {
-            COMPILER_LOG(DEBUG, IR_BUILDER)
-                << "create new constant: value=" << value.Raw() << ", inst=" << inst->GetId();
-        }
-        return inst;
-    }
-
-    auto FindOrCreateDoubleConstant(double value)
-    {
-        auto inst = GetGraph()->FindOrCreateConstant<double>(value);
-        if (inst->GetId() == GetGraph()->GetCurrentInstructionId() - 1) {
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "create new constant: value=" << value << ", inst=" << inst->GetId();
-        }
-        return inst;
-    }
-
-    auto FindOrCreateFloatConstant(float value)
-    {
-        auto inst = GetGraph()->FindOrCreateConstant<float>(value);
-        if (inst->GetId() == GetGraph()->GetCurrentInstructionId() - 1) {
-            COMPILER_LOG(DEBUG, IR_BUILDER) << "create new constant: value=" << value << ", inst=" << inst->GetId();
-        }
-        return inst;
-    }
+    ConstantInst *FindOrCreate32BitConstant(uint32_t value);
+    ConstantInst *FindOrCreateConstant(uint64_t value);
+    ConstantInst *FindOrCreateAnyConstant(DataType::Any value);
+    ConstantInst *FindOrCreateDoubleConstant(double value);
+    ConstantInst *FindOrCreateFloatConstant(float value);
 
     enum SaveStateType {
         CHECK = 0,  // side_exit = true,  move_to_side_exit = true
@@ -581,7 +416,7 @@ private:
 #ifndef NDEBUG
     void ResetSafepointDistance()
     {
-        safepointDistance_ = (int32_t)g_options.GetCompilerSafepointDistanceLimit();
+        safepointDistance_ = static_cast<int32_t>(g_options.GetCompilerSafepointDistanceLimit());
     }
 #endif
 

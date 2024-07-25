@@ -15,7 +15,6 @@
 
 // Gcc lib-helpers:
 #ifdef __arm__
-// NOLINTBEGIN(readability-identifier-naming, misc-definitions-in-headers)
 
 // defined in libgcc_s.so
 extern "C" uint64_t __aeabi_uldivmod(uint64_t numerator, uint64_t denominator);
@@ -34,8 +33,66 @@ extern "C" uint64_t __aeabi_f2ulz(float data);
 extern "C" int64_t __aeabi_d2lz(double data);
 extern "C" uint64_t __aeabi_d2ulz(double data);
 
-// NOLINTEND(readability-identifier-naming, misc-definitions-in-headers)
+auto AEABIuldivmod(uint64_t numerator, uint64_t denominator)
+{
+    return __aeabi_uldivmod(numerator, denominator);
+}
+auto AEABIldivmod(int64_t numerator, int64_t denominator)
+{
+    return __aeabi_ldivmod(numerator, denominator);
+}
+
+auto AEABIuidivmod(uint32_t numerator, uint32_t denominator)
+{
+    return __aeabi_uidivmod(numerator, denominator);
+}
+auto AEABIidivmod(int32_t numerator, int32_t denominator)
+{
+    return __aeabi_idivmod(numerator, denominator);
+}
+
+float AEABIl2f(int64_t data)
+{
+    return __aeabi_l2f(data);
+}
+
+float AEABIul2f(uint64_t data)
+{
+    return __aeabi_ul2f(data);
+}
+
+double AEABIl2d(int64_t data)
+{
+    return __aeabi_l2d(data);
+}
+
+double AEABIul2d(uint64_t data)
+{
+    return __aeabi_ul2d(data);
+}
+
+int64_t AEABIf2lz(float data)
+{
+    return __aeabi_f2lz(data);
+}
+
+uint64_t AEABIf2ulz(float data)
+{
+    return __aeabi_f2ulz(data);
+}
+
+int64_t AEABId2lz(double data)
+{
+    return __aeabi_d2lz(data);
+}
+
+uint64_t AEABId2ulz(double data)
+{
+    return __aeabi_d2ulz(data);
+}
+
 #else
+
 struct DivLUResult {
     uint64_t quotient;
     uint64_t remainder;
@@ -46,8 +103,7 @@ struct DivLSResult {
     int64_t remainder;
 };
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-DivLUResult __aeabi_uldivmod(uint64_t numerator, uint64_t denominator)
+auto AEABIuldivmod(uint64_t numerator, uint64_t denominator)
 {
     ASSERT(denominator != 0);
     DivLUResult res {0, 0};
@@ -55,8 +111,7 @@ DivLUResult __aeabi_uldivmod(uint64_t numerator, uint64_t denominator)
     res.remainder = numerator % denominator;
     return res;
 }
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-DivLSResult __aeabi_ldivmod(int64_t numerator, int64_t denominator)
+auto AEABIldivmod(int64_t numerator, int64_t denominator)
 {
     ASSERT(denominator != 0);
     DivLSResult res {0, 0};
@@ -75,8 +130,7 @@ struct DivSResult {
     int32_t remainder;
 };
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-DivUResult __aeabi_uidivmod(uint32_t numerator, uint32_t denominator)
+auto AEABIuidivmod(uint32_t numerator, uint32_t denominator)
 {
     ASSERT(denominator != 0);
     DivUResult res {0, 0};
@@ -84,8 +138,7 @@ DivUResult __aeabi_uidivmod(uint32_t numerator, uint32_t denominator)
     res.remainder = numerator % denominator;
     return res;
 }
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-DivSResult __aeabi_idivmod(int32_t numerator, int32_t denominator)
+DivSResult AEABIidivmod(int32_t numerator, int32_t denominator)
 {
     ASSERT(denominator != 0);
     DivSResult res {0, 0};
@@ -94,50 +147,42 @@ DivSResult __aeabi_idivmod(int32_t numerator, int32_t denominator)
     return res;
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-float __aeabi_l2f(int64_t data)
+float AEABIl2f(int64_t data)
 {
     return static_cast<float>(data);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-float __aeabi_ul2f(uint64_t data)
+float AEABIul2f(uint64_t data)
 {
     return static_cast<float>(data);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-double __aeabi_l2d(int64_t data)
+double AEABIl2d(int64_t data)
 {
     return static_cast<double>(data);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-double __aeabi_ul2d(uint64_t data)
+double AEABIul2d(uint64_t data)
 {
     return static_cast<double>(data);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-int64_t __aeabi_f2lz(float data)
+int64_t AEABIf2lz(float data)
 {
     return static_cast<int64_t>(data);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-uint64_t __aeabi_f2ulz(float data)
+uint64_t AEABIf2ulz(float data)
 {
     return static_cast<uint64_t>(data);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-int64_t __aeabi_d2lz(double data)
+int64_t AEABId2lz(double data)
 {
     return static_cast<int64_t>(data);
 }
 
-// NOLINTNEXTLINE(readability-identifier-naming,misc-definitions-in-headers)
-uint64_t __aeabi_d2ulz(double data)
+uint64_t AEABId2ulz(double data)
 {
     return static_cast<uint64_t>(data);
 }

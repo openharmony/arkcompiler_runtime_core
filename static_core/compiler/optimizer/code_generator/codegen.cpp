@@ -20,7 +20,6 @@ Codegen Hi-Level implementation
 #include "codegen.h"
 #include "encode_visitor.h"
 #include "compiler_options.h"
-#include "lib_call_inst.h"
 #include "relocations.h"
 #include "include/compiler_interface.h"
 #include "ir-dyn-base-types.h"
@@ -403,7 +402,8 @@ void Codegen::GeneratePrologue()
         // Create stack overflow check
         GetEncoder()->EncodeStackOverflowCheck(-GetRuntime()->GetStackOverflowCheckOffset());
         // Create empty stackmap for the stack overflow check
-        GetCodeBuilder()->BeginStackMap(0, 0, nullptr, 0, false, false);
+        SaveStateInst ss(Opcode::SaveState, 0, nullptr, nullptr, 0);
+        GetCodeBuilder()->BeginStackMap(0, 0, &ss, false);
         GetCodeBuilder()->EndStackMap();
     }
 
@@ -879,9 +879,7 @@ void Codegen::CreateStackMap(Inst *inst, Inst *user)
          callInst = callInst->GetSaveState()->GetCallerInst()) {
         outerBpc = callInst->GetPc();
     }
-    codeBuilder_->BeginStackMap(outerBpc, GetEncoder()->GetCursorOffset(), saveState->GetRootsStackMask(),
-                                saveState->GetRootsRegsMask().to_ulong(), requireVregMap,
-                                saveState->GetOpcode() == Opcode::SaveStateOsr);
+    codeBuilder_->BeginStackMap(outerBpc, GetEncoder()->GetCursorOffset(), saveState, requireVregMap);
     if (user == nullptr) {
         user = inst;
         if (inst == saveState && inst->HasUsers()) {
@@ -2349,44 +2347,44 @@ void Codegen::CreateStringBuilderString(IntrinsicInst *inst, [[maybe_unused]] Re
     CallFastPath(inst, entrypointId, dst, RegMask::GetZeroMask(), src[0], src[1U]);
 }
 
-void Codegen::CallFastCreateStringFromCharArrayTlab(Inst *inst, Reg dst, Reg offset, Reg count, Reg array,
-                                                    std::variant<Reg, TypedImm> klass)
+void Codegen::CreateStringFromCharArrayTlab(IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
-    if (GetRegfile()->GetZeroReg().GetId() == offset.GetId()) {
-        auto entryId = GetRuntime()->IsCompressedStringsEnabled()
-                           ? EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB_COMPRESSED
-                           : EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB;
-        if (std::holds_alternative<TypedImm>(klass)) {
-            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), count, array, std::get<TypedImm>(klass));
-        } else {
-            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), count, array, std::get<Reg>(klass));
-        }
-    } else {
-        auto entryId = GetRuntime()->IsCompressedStringsEnabled()
-                           ? EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB_COMPRESSED
-                           : EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB;
-        if (std::holds_alternative<TypedImm>(klass)) {
-            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), offset, count, array, std::get<TypedImm>(klass));
-        } else {
-            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), offset, count, array, std::get<Reg>(klass));
-        }
-    }
+    CreateStringFromCharArrayTlab(static_cast<Inst *>(inst), dst, src);
 }
 
-void Codegen::CreateStringFromCharArrayTlab(IntrinsicInst *inst, Reg dst, SRCREGS src)
+void Codegen::CreateStringFromCharArrayTlab(Inst *inst, Reg dst, SRCREGS src)
 {
     auto runtime = GetGraph()->GetRuntime();
     auto offset = src[FIRST_OPERAND];
     auto count = src[SECOND_OPERAND];
     auto array = src[THIRD_OPERAND];
+
+    auto entryId = GetRuntime()->IsCompressedStringsEnabled()
+                       ? EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB_COMPRESSED
+                       : EntrypointId::CREATE_STRING_FROM_CHAR_ARRAY_TLAB;
+
+    if (GetRegfile()->GetZeroReg().GetId() == offset.GetId()) {
+        entryId = GetRuntime()->IsCompressedStringsEnabled()
+                      ? EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB_COMPRESSED
+                      : EntrypointId::CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_TLAB;
+    }
+
     if (GetGraph()->IsAotMode()) {
         ScopedTmpReg klassReg(GetEncoder());
         GetEncoder()->EncodeLdr(klassReg, false,
                                 MemRef(ThreadReg(), runtime->GetStringClassPointerTlsOffset(GetArch())));
-        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klassReg);
+        if (GetRegfile()->GetZeroReg().GetId() == offset.GetId()) {
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), count, array, klassReg);
+        } else {
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), offset, count, array, klassReg);
+        }
     } else {
         auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetStringClass(GetGraph()->GetMethod())));
-        CallFastCreateStringFromCharArrayTlab(inst, dst, offset, count, array, klassImm);
+        if (GetRegfile()->GetZeroReg().GetId() == offset.GetId()) {
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), count, array, klassImm);
+        } else {
+            CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), offset, count, array, klassImm);
+        }
     }
 }
 

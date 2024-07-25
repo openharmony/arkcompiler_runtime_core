@@ -3901,10 +3901,19 @@ public:
     {
         return rootsStackMask_;
     }
+    void SetRootsStackMask(ArenaBitVector *rootsStackMask)
+    {
+        rootsStackMask_ = rootsStackMask;
+    }
 
     auto &GetRootsRegsMask()
     {
         return rootsRegsMask_;
+    }
+
+    void SetRootsRegsMask(uint32_t rootsRegsMask)
+    {
+        rootsRegsMask_ = rootsRegsMask;
     }
 
     void CreateRootsStackMask(ArenaAllocator *allocator)

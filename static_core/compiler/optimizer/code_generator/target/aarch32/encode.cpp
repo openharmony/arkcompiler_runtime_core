@@ -1478,18 +1478,18 @@ void Aarch32Encoder::EncodeCastScalarToFloat(Reg dst, Reg src, bool srcSigned)
             if (dst.GetSize() == WORD_SIZE) {
                 if (srcSigned) {
                     // int64 -> float
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_l2f));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABIl2f));
                 } else {
                     // uint64 -> float
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_ul2f));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABIul2f));
                 }
             } else {
                 if (srcSigned) {
                     // int64 -> double
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_l2d));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABIl2d));
                 } else {
                     // uint64 -> double
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_ul2d));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABIul2d));
                 }
             }
             break;
@@ -1531,7 +1531,7 @@ void Aarch32Encoder::EncodeCastFloatToScalar(Reg dst, bool dstSigned, Reg src)
                     EncodeCastFloatToInt64(dst, src);
                 } else {
                     // float -> uint64
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_f2ulz));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABIf2ulz));
                 }
             } else {
                 if (dstSigned) {
@@ -1539,7 +1539,7 @@ void Aarch32Encoder::EncodeCastFloatToScalar(Reg dst, bool dstSigned, Reg src)
                     EncodeCastDoubleToInt64(dst, src);
                 } else {
                     // double -> uint64
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_d2ulz));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABId2ulz));
                 }
             }
             break;
@@ -1578,7 +1578,7 @@ void Aarch32Encoder::EncodeCastFloatToScalarWithSmallDst(Reg dst, bool dstSigned
                     EncodeCastFloatToInt64(dst, src);
                 } else {
                     // float -> uint64
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_f2ulz));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABIf2ulz));
                 }
             } else {
                 if (dstSigned) {
@@ -1586,7 +1586,7 @@ void Aarch32Encoder::EncodeCastFloatToScalarWithSmallDst(Reg dst, bool dstSigned
                     EncodeCastDoubleToInt64(dst, src);
                 } else {
                     // double -> uint64
-                    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_d2ulz));
+                    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABId2ulz));
                 }
             }
             break;
@@ -1638,7 +1638,7 @@ void Aarch32Encoder::EncodeCastDoubleToInt64(Reg dst, Reg src)
     GetMasm()->Cmp(VixlReg(tmpReg1), VixlImm(POSSIBLE_EXP_DOUBLE));
     // If greater than or equal, branch to "label_not_nan"
     GetMasm()->B(vixl::aarch32::hs, static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(labelCheckNan));
-    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_d2lz));
+    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABId2lz));
     EncodeJump(labelExit);
 
     BindLabel(labelCheckNan);
@@ -1682,7 +1682,7 @@ void Aarch32Encoder::EncodeCastFloatToInt64(Reg dst, Reg src)
     GetMasm()->Cmp(VixlReg(tmpReg), VixlImm(POSSIBLE_EXP_FLOAT));
     // If greater than or equal, branch to "label_not_nan"
     GetMasm()->B(vixl::aarch32::hs, static_cast<Aarch32LabelHolder *>(GetLabels())->GetLabel(labelCheckNan));
-    MakeLibCall(dst, src, reinterpret_cast<void *>(__aeabi_f2lz));
+    MakeLibCall(dst, src, reinterpret_cast<void *>(AEABIf2lz));
     EncodeJump(labelExit);
 
     BindLabel(labelCheckNan);
@@ -2094,9 +2094,9 @@ void Aarch32Encoder::EncodeDiv(Reg dst, bool dstSigned, Reg src0, Reg src1)
         return;
     }
     if (dstSigned) {
-        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(__aeabi_ldivmod));
+        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(AEABIldivmod));
     } else {
-        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(__aeabi_uldivmod));
+        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(AEABIuldivmod));
     }
 }
 
@@ -2115,9 +2115,9 @@ void Aarch32Encoder::EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1)
 
     if (dst.GetSize() <= WORD_SIZE) {
         if (dstSigned) {
-            MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(__aeabi_idivmod), true);
+            MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(AEABIidivmod), true);
         } else {
-            MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(__aeabi_uidivmod), true);
+            MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(AEABIuidivmod), true);
         }
 
         // dst = -(tmp * src0) + src1
@@ -2132,9 +2132,9 @@ void Aarch32Encoder::EncodeMod(Reg dst, bool dstSigned, Reg src0, Reg src1)
 
     // Call lib-method
     if (dstSigned) {
-        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(__aeabi_ldivmod), true);
+        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(AEABIldivmod), true);
     } else {
-        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(__aeabi_uldivmod), true);
+        MakeLibCall(dst, src0, src1, reinterpret_cast<void *>(AEABIuldivmod), true);
     }
 }
 

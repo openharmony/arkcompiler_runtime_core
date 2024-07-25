@@ -168,6 +168,46 @@ public:
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
     }
 
+    Graph *BuildCheckCastResJoined(DataType::Type srcType, DataType::Type mdlType, DataType::Type tgtType)
+    {
+        auto graph = CreateEmptyGraph();
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(srcType);
+            BASIC_BLOCK(2U, 1U)
+            {
+                INST(1U, Opcode::Cast).SrcType(srcType).Inputs(0U);
+                INS(1U).SetType(mdlType);
+                INST(2U, Opcode::Cast).SrcType(srcType).Inputs(0U);
+                INS(2U).SetType(tgtType);
+                INST(3U, Opcode::Return).Inputs(2U);
+                INS(3U).SetType(tgtType);
+            }
+        }
+        return graph;
+    }
+
+    Graph *BuildCheckCastResNotJoined(DataType::Type srcType, DataType::Type mdlType, DataType::Type tgtType)
+    {
+        auto graph = CreateEmptyGraph();
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 0U);
+            INS(0U).SetType(srcType);
+            BASIC_BLOCK(2U, 1U)
+            {
+                INST(1U, Opcode::Cast).SrcType(srcType).Inputs(0U);
+                INS(1U).SetType(mdlType);
+                INST(2U, Opcode::Cast).SrcType(mdlType).Inputs(1U);
+                INS(2U).SetType(tgtType);
+                INST(3U, Opcode::Return).Inputs(0U);
+                INS(3U).SetType(srcType);
+            }
+        }
+        return graph;
+    }
+
     void CheckCast(DataType::Type srcType, DataType::Type mdlType, DataType::Type tgtType, bool applied, bool joinCast)
     {
         if (srcType == DataType::REFERENCE || tgtType == DataType::REFERENCE || mdlType == DataType::REFERENCE) {
@@ -188,54 +228,13 @@ public:
                 INS(3U).SetType(tgtType);
             }
         }
-        auto graph2 = CreateEmptyGraph();
-        if (applied) {
-            if (joinCast) {
-                GRAPH(graph2)
-                {
-                    PARAMETER(0U, 0U);
-                    INS(0U).SetType(srcType);
-                    BASIC_BLOCK(2U, 1U)
-                    {
-                        INST(1U, Opcode::Cast).SrcType(srcType).Inputs(0U);
-                        INS(1U).SetType(mdlType);
-                        INST(2U, Opcode::Cast).SrcType(srcType).Inputs(0U);
-                        INS(2U).SetType(tgtType);
-                        INST(3U, Opcode::Return).Inputs(2U);
-                        INS(3U).SetType(tgtType);
-                    }
-                }
-            } else {
-                GRAPH(graph2)
-                {
-                    PARAMETER(0U, 0U);
-                    INS(0U).SetType(srcType);
-                    BASIC_BLOCK(2U, 1U)
-                    {
-                        INST(1U, Opcode::Cast).SrcType(srcType).Inputs(0U);
-                        INS(1U).SetType(mdlType);
-                        INST(2U, Opcode::Cast).SrcType(mdlType).Inputs(1U);
-                        INS(2U).SetType(tgtType);
-                        INST(3U, Opcode::Return).Inputs(0U);
-                        INS(3U).SetType(srcType);
-                    }
-                }
-            }
+        Graph *graph2;
+        if (applied && joinCast) {
+            graph2 = BuildCheckCastResJoined(srcType, mdlType, tgtType);
+        } else if (applied) {
+            graph2 = BuildCheckCastResNotJoined(srcType, mdlType, tgtType);
         } else {
-            GRAPH(graph2)
-            {
-                PARAMETER(0U, 0U);
-                INS(0U).SetType(srcType);
-                BASIC_BLOCK(2U, 1U)
-                {
-                    INST(1U, Opcode::Cast).SrcType(srcType).Inputs(0U);
-                    INS(1U).SetType(mdlType);
-                    INST(2U, Opcode::Cast).SrcType(mdlType).Inputs(1U);
-                    INS(2U).SetType(tgtType);
-                    INST(3U, Opcode::Return).Inputs(2U);
-                    INS(3U).SetType(tgtType);
-                }
-            }
+            graph2 = GraphCloner(graph1, GetAllocator(), GetLocalAllocator()).CloneGraph();
         }
         ASSERT_EQ(graph1->RunPass<Peepholes>(), applied);
         ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
@@ -396,6 +395,8 @@ public:
 
         ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
     }
+
+    void CastTest2Addition1MainLoop(int i, int j);
 
 private:
     Graph *graph_ {nullptr};
@@ -4004,56 +4005,40 @@ TEST_F(PeepholesTest, CompareTest3)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+static bool CompareBoolWithConst(ConditionCode cc, bool input, int cst)
+{
+    switch (cc) {
+        case CC_EQ:
+            return static_cast<int>(input) == cst;
+        case CC_NE:
+            return static_cast<int>(input) != cst;
+        case CC_LT:
+            return static_cast<int>(input) < cst;
+        case CC_LE:
+            return static_cast<int>(input) <= cst;
+        case CC_GT:
+            return static_cast<int>(input) > cst;
+        case CC_GE:
+            return static_cast<int>(input) >= cst;
+        case CC_B:
+            return static_cast<uint64_t>(input) < static_cast<uint64_t>(cst);
+        case CC_BE:
+            return static_cast<uint64_t>(input) <= static_cast<uint64_t>(cst);
+        case CC_A:
+            return static_cast<uint64_t>(input) > static_cast<uint64_t>(cst);
+        case CC_AE:
+            return static_cast<uint64_t>(input) >= static_cast<uint64_t>(cst);
+        default:
+            UNREACHABLE();
+    }
+}
+
 TEST_F(PeepholesTest, CompareTest4)
 {
     for (auto cc : {CC_EQ, CC_NE, CC_LT, CC_LE, CC_GT, CC_GE, CC_B, CC_BE, CC_A, CC_AE}) {
         for (auto cst : {-2L, -1L, 0L, 1L, 2L}) {
-            bool inputTrue = true;
-            bool inputFalse = false;
-            switch (cc) {
-                case CC_EQ:
-                    inputTrue = static_cast<int>(inputTrue) == cst;
-                    inputFalse = static_cast<int>(inputFalse) == cst;
-                    break;
-                case CC_NE:
-                    inputTrue = static_cast<int>(inputTrue) != cst;
-                    inputFalse = static_cast<int>(inputFalse) != cst;
-                    break;
-                case CC_LT:
-                    inputTrue = static_cast<int>(inputTrue) < cst;
-                    inputFalse = static_cast<int>(inputFalse) < cst;
-                    break;
-                case CC_LE:
-                    inputTrue = static_cast<int>(inputTrue) <= cst;
-                    inputFalse = static_cast<int>(inputFalse) <= cst;
-                    break;
-                case CC_GT:
-                    inputTrue = static_cast<int>(inputTrue) > cst;
-                    inputFalse = static_cast<int>(inputFalse) > cst;
-                    break;
-                case CC_GE:
-                    inputTrue = static_cast<int>(inputTrue) >= cst;
-                    inputFalse = static_cast<int>(inputFalse) >= cst;
-                    break;
-                case CC_B:
-                    inputTrue = static_cast<uint64_t>(inputTrue) < static_cast<uint64_t>(cst);
-                    inputFalse = static_cast<uint64_t>(inputFalse) < static_cast<uint64_t>(cst);
-                    break;
-                case CC_BE:
-                    inputTrue = static_cast<uint64_t>(inputTrue) <= static_cast<uint64_t>(cst);
-                    inputFalse = static_cast<uint64_t>(inputFalse) <= static_cast<uint64_t>(cst);
-                    break;
-                case CC_A:
-                    inputTrue = static_cast<uint64_t>(inputTrue) > static_cast<uint64_t>(cst);
-                    inputFalse = static_cast<uint64_t>(inputFalse) > static_cast<uint64_t>(cst);
-                    break;
-                case CC_AE:
-                    inputTrue = static_cast<uint64_t>(inputTrue) >= static_cast<uint64_t>(cst);
-                    inputFalse = static_cast<uint64_t>(inputFalse) >= static_cast<uint64_t>(cst);
-                    break;
-                default:
-                    UNREACHABLE();
-            }
+            auto inputTrue = CompareBoolWithConst(cc, true, cst);
+            auto inputFalse = CompareBoolWithConst(cc, false, cst);
             if (inputTrue && inputFalse) {
                 CheckCompare(cc, cst, {1U}, false);
             } else if (!inputTrue && !inputFalse) {
@@ -4179,17 +4164,22 @@ TEST_F(PeepholesTest, CastTest1)
     }
 }
 
+void PeepholesTest::CastTest2Addition1MainLoop(int i, int j)
+{
+    for (int k = 1; k < DataType::LAST - 5L; ++k) {
+        if ((i == DataType::FLOAT32 || i == DataType::FLOAT64) && j >= DataType::BOOL && j <= DataType::INT16) {
+            continue;
+        }
+        CheckCast(i, j, k);
+    }
+}
+
 // cast case 2
 TEST_F(PeepholesTest, CastTest2Addition1)
 {
     for (int i = 1; i < DataType::LAST - 5L; ++i) {
         for (int j = 1; j < DataType::LAST - 5L; ++j) {
-            for (int k = 1; k < DataType::LAST - 5L; ++k) {
-                if ((i == DataType::FLOAT32 || i == DataType::FLOAT64) && j >= DataType::BOOL && j <= DataType::INT16) {
-                    continue;
-                }
-                CheckCast(i, j, k);
-            }
+            CastTest2Addition1MainLoop(i, j);
         }
     }
 }
@@ -5691,35 +5681,63 @@ TEST_F(PeepholesTest, ConstCombineMul)
     ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
 }
 
+SRC_GRAPH(ConditionalAssignment, Graph *graph, bool inverse)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).b();
+        CONSTANT(2U, 0x0U).s64();
+        CONSTANT(4U, 0x1U).s32();
+        CONSTANT(5U, 0x0U).s32();
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(1U, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0U, 2U);
+            INST(3U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0U).Inputs(1U);
+        }
+
+        BASIC_BLOCK(4U, 3U) {}
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(6U, Opcode::Phi).b().Inputs(5U, 4U);
+            INST(7U, Opcode::Return).b().Inputs(6U);
+        }
+    }
+}
+
+OUT_GRAPH(ConditionalAssignment, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).b();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(7U, Opcode::Return).b().Inputs(0U);
+        }
+    }
+}
+
+OUT_GRAPH(ConditionalAssignmentInverse, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).b();
+
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(10U, Opcode::XorI).b().Inputs(0U).Imm(1U);
+            INST(7U, Opcode::Return).b().Inputs(10U);
+        }
+    }
+}
+
 TEST_F(PeepholesTest, ConditionalAssignment)
 {
     for (auto inverse : {true, false}) {
         auto graph = CreateEmptyBytecodeGraph();
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).b();
-            CONSTANT(2U, 0x0U).s64();
-            CONSTANT(4U, 0x1U).s32();
-            CONSTANT(5U, 0x0U).s32();
-
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(1U, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0U, 2U);
-                INST(3U, Opcode::IfImm)
-                    .SrcType(compiler::DataType::BOOL)
-                    .CC(inverse ? CC_NE : CC_EQ)
-                    .Imm(0U)
-                    .Inputs(1U);
-            }
-
-            BASIC_BLOCK(4U, 3U) {}
-
-            BASIC_BLOCK(3U, -1L)
-            {
-                INST(6U, Opcode::Phi).b().Inputs(5U, 4U);
-                INST(7U, Opcode::Return).b().Inputs(6U);
-            }
-        }
+        src_graph::ConditionalAssignment::CREATE(graph, inverse);
 
 #ifndef NDEBUG
         graph->SetLowLevelInstructionsEnabled();
@@ -5732,28 +5750,73 @@ TEST_F(PeepholesTest, ConditionalAssignment)
 
         auto expected = CreateEmptyBytecodeGraph();
         if (inverse) {
-            GRAPH(expected)
-            {
-                PARAMETER(0U, 0U).b();
-
-                BASIC_BLOCK(2U, -1L)
-                {
-                    INST(10U, Opcode::XorI).b().Inputs(0U).Imm(1U);
-                    INST(7U, Opcode::Return).b().Inputs(10U);
-                }
-            }
+            out_graph::ConditionalAssignmentInverse::CREATE(expected);
         } else {
-            GRAPH(expected)
-            {
-                PARAMETER(0U, 0U).b();
-
-                BASIC_BLOCK(2U, -1L)
-                {
-                    INST(7U, Opcode::Return).b().Inputs(0U);
-                }
-            }
+            out_graph::ConditionalAssignment::CREATE(expected);
         }
         EXPECT_TRUE(GraphComparator().Compare(graph, expected));
+    }
+}
+
+SRC_GRAPH(ConditionalAssignmentPreserveIf, Graph *graph, bool inverse)
+{
+    GRAPH(graph)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(4U, 1U);
+        CONSTANT(5U, 0U);
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(1U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0U, 4U);
+            INST(3U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0U).Inputs(1U);
+        }
+
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(8U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::CallStatic).u64().InputsAutoType(8U);
+        }
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            INST(6U, Opcode::Phi).b().Inputs(5U, 4U);
+            INST(7U, Opcode::Return).b().Inputs(6U);
+        }
+    }
+}
+
+OUT_GRAPH(ConditionalAssignmentPreserveIf, Graph *expected, bool inverse)
+{
+    GRAPH(expected)
+    {
+        PARAMETER(0U, 0U).u64();
+        CONSTANT(4U, 1U);
+        if (inverse) {
+            CONSTANT(5U, 0U);
+        }
+
+        BASIC_BLOCK(2U, 3U, 4U)
+        {
+            INST(1U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0U, 4U);
+            INST(3U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0U).Inputs(1U);
+        }
+
+        BASIC_BLOCK(4U, 3U)
+        {
+            INST(8U, Opcode::SaveState).NoVregs();
+            INST(9U, Opcode::CallStatic).u64().InputsAutoType(8U);
+        }
+
+        BASIC_BLOCK(3U, -1L)
+        {
+            if (inverse) {
+                INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SetType(DataType::BOOL).Inputs(1U, 5U);
+                INST(7U, Opcode::Return).b().Inputs(11U);
+            } else {
+                INST(7U, Opcode::Return).b().Inputs(1U);
+            }
+        }
     }
 }
 
@@ -5761,74 +5824,13 @@ TEST_F(PeepholesTest, ConditionalAssignmentPreserveIf)
 {
     for (auto inverse : {true, false}) {
         auto graph = CreateEmptyGraph();
-        GRAPH(graph)
-        {
-            PARAMETER(0U, 0U).u64();
-            CONSTANT(4U, 1U);
-            CONSTANT(5U, 0U);
-
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(1U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0U, 4U);
-                INST(3U, Opcode::IfImm)
-                    .SrcType(compiler::DataType::BOOL)
-                    .CC(inverse ? CC_NE : CC_EQ)
-                    .Imm(0U)
-                    .Inputs(1U);
-            }
-
-            BASIC_BLOCK(4U, 3U)
-            {
-                INST(8U, Opcode::SaveState).NoVregs();
-                INST(9U, Opcode::CallStatic).u64().InputsAutoType(8U);
-            }
-
-            BASIC_BLOCK(3U, -1L)
-            {
-                INST(6U, Opcode::Phi).b().Inputs(5U, 4U);
-                INST(7U, Opcode::Return).b().Inputs(6U);
-            }
-        }
+        src_graph::ConditionalAssignmentPreserveIf::CREATE(graph, inverse);
 
         ASSERT_TRUE(graph->RunPass<Peepholes>());
         ASSERT_TRUE(graph->RunPass<Cleanup>());
 
         auto expected = CreateEmptyGraph();
-
-        GRAPH(expected)
-        {
-            PARAMETER(0U, 0U).u64();
-            CONSTANT(4U, 1U);
-            if (inverse) {
-                CONSTANT(5U, 0U);
-            }
-
-            BASIC_BLOCK(2U, 3U, 4U)
-            {
-                INST(1U, Opcode::Compare).b().SrcType(DataType::UINT64).CC(CC_GT).Inputs(0U, 4U);
-                INST(3U, Opcode::IfImm)
-                    .SrcType(compiler::DataType::BOOL)
-                    .CC(inverse ? CC_NE : CC_EQ)
-                    .Imm(0U)
-                    .Inputs(1U);
-            }
-
-            BASIC_BLOCK(4U, 3U)
-            {
-                INST(8U, Opcode::SaveState).NoVregs();
-                INST(9U, Opcode::CallStatic).u64().InputsAutoType(8U);
-            }
-
-            BASIC_BLOCK(3U, -1L)
-            {
-                if (inverse) {
-                    INST(11U, Opcode::Compare).b().CC(ConditionCode::CC_EQ).SetType(DataType::BOOL).Inputs(1U, 5U);
-                    INST(7U, Opcode::Return).b().Inputs(11U);
-                } else {
-                    INST(7U, Opcode::Return).b().Inputs(1U);
-                }
-            }
-        }
+        out_graph::ConditionalAssignmentPreserveIf::CREATE(expected, inverse);
 
         EXPECT_TRUE(GraphComparator().Compare(graph, expected));
     }

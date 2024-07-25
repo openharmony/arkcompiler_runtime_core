@@ -42,8 +42,6 @@ bool IsCastAllowedInBytecode(const Inst *inst);
 bool IsInputTypeMismatch(Inst *inst, int32_t inputIndex, Arch arch);
 bool ApplyForCastJoin(Inst *cast, Inst *input, Inst *origInst, Arch arch);
 SaveStateInst *CopySaveState(Graph *graph, SaveStateInst *inst);
-bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Inst *startFrom, Marker visited,
-                    Inst **failedSs = nullptr);
 std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm);
 
 // If object input has known class, return pointer to the class, else returns nullptr
@@ -65,6 +63,8 @@ class IsSaveStateCanTriggerGc;
 template <typename T = IsSaveState>
 bool HasSaveStateBetween(Inst *domInst, Inst *inst);
 
+bool IsSaveStateForGc(const Inst *inst);
+
 /**
  * Functions below are using for create bridge in SaveStates between source instruction and target instruction.
  * It use in GVN etc. It inserts `source` instruction into `SaveStates` on each path between `source` and
@@ -75,20 +75,19 @@ class SaveStateBridgesBuilder {
 public:
     ArenaVector<Inst *> *SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
                                                       Inst *stopSearch = nullptr, BasicBlock *targetBlock = nullptr);
-    void CreateBridgeInSS(Inst *source, ArenaVector<Inst *> *bridges);
+    void CreateBridgeInSS(Inst *source);
     void SearchAndCreateMissingObjInSaveState(Graph *graph, Inst *source, Inst *target, Inst *stopSearchInst = nullptr,
                                               BasicBlock *targetBlock = nullptr);
     void FixInstUsageInSS(Graph *graph, Inst *inst);
     void FixSaveStatesInBB(BasicBlock *block);
     void FixPhisWithCheckInputs(BasicBlock *block);
-    void DumpBridges(std::ostream &out, Inst *source, ArenaVector<Inst *> *bridges);
+    void DumpBridges(std::ostream &out, Inst *source);
 
 private:
-    void SearchSSOnWay(BasicBlock *block, Inst *startFrom, Inst *sourceInst, Marker visited,
-                       ArenaVector<Inst *> *bridges, Inst *stopSearch);
+    void SearchSSOnWay(BasicBlock *block, Inst *startFrom, Inst *sourceInst, Marker visited, Inst *stopSearch);
     bool IsSaveStateForGc(Inst *inst);
     void ProcessSSUserPreds(Graph *graph, Inst *inst, Inst *targetInst);
-    void SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searchedInst, ArenaVector<Inst *> *bridges);
+    void SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searchedInst);
     void FixUsageInstInOtherBB(BasicBlock *block, Inst *inst);
     void FixUsagePhiInBB(BasicBlock *block, Inst *inst);
     void DeleteUnrealObjInSaveState(Inst *ss);

@@ -1211,53 +1211,68 @@ void PrintLoopInfo(std::ostream *out, Loop *loop)
     }
 }
 
-void BlockProps(const BasicBlock *block, std::ostream *out)
+static void CheckStartEnd(const BasicBlock *block, std::ostream *out, bool *printPropsFlag)
 {
-    bool printPropsFlag = false;
     if (block->IsStartBlock()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "start";
     }
     if (block->IsEndBlock()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "end";
     }
+}
+
+static void CheckLoop(const BasicBlock *block, std::ostream *out, bool *printPropsFlag)
+{
     if (block->IsLoopPreHeader()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "prehead";
     }
     if (block->IsLoopValid() && !block->GetLoop()->IsRoot()) {
         if (block->IsLoopHeader()) {
-            CheckPrintPropsFlag(out, &printPropsFlag);
+            CheckPrintPropsFlag(out, printPropsFlag);
             (*out) << "head";
         }
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         PrintLoopInfo(out, block->GetLoop());
     }
+}
+
+static void CheckTryCatch(const BasicBlock *block, std::ostream *out, bool *printPropsFlag)
+{
     if (block->IsTryBegin()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "try_begin (id " << block->GetTryId() << ")";
     }
     if (block->IsTry()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "try (id " << block->GetTryId() << ")";
     }
     if (block->IsTryEnd()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "try_end (id " << block->GetTryId() << ")";
     }
     if (block->IsCatchBegin()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "catch_begin";
     }
     if (block->IsCatch()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "catch";
     }
     if (block->IsCatchEnd()) {
-        CheckPrintPropsFlag(out, &printPropsFlag);
+        CheckPrintPropsFlag(out, printPropsFlag);
         (*out) << "catch_end";
     }
+}
+
+void BlockProps(const BasicBlock *block, std::ostream *out)
+{
+    bool printPropsFlag = false;
+    CheckStartEnd(block, out, &printPropsFlag);
+    CheckLoop(block, out, &printPropsFlag);
+    CheckTryCatch(block, out, &printPropsFlag);
 
     if (block->GetGuestPc() != INVALID_PC) {
         CheckPrintPropsFlag(out, &printPropsFlag);

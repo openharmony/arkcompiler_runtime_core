@@ -37,27 +37,11 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
         loop_.IsRoot() || loop_.IsInfinite()) {
         return std::nullopt;
     }
-    auto loopExit = FindLoopExitBlock();
-    if (loopExit->IsEmpty() || (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0])) {
+
+    if (!ParseLoopExit()) {
         return std::nullopt;
     }
-    isHeadLoopExit_ = (loopExit == loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]);
-    loopInfo_.ifImm = loopExit->GetLastInst();
-    if (loopInfo_.ifImm->GetOpcode() != Opcode::IfImm && loopInfo_.ifImm->GetOpcode() != Opcode::If) {
-        return std::nullopt;
-    }
-    auto loopExitCmp = loopInfo_.ifImm->GetInput(0).GetInst();
-    if (loopExitCmp->GetOpcode() != Opcode::Compare) {
-        return std::nullopt;
-    }
-    if (isHeadLoopExit_ && !loopExitCmp->GetInput(0).GetInst()->IsPhi() &&
-        !loopExitCmp->GetInput(1).GetInst()->IsPhi()) {
-        return std::nullopt;
-    }
-    auto cmpType = loopExitCmp->CastToCompare()->GetOperandsType();
-    if (DataType::GetCommonType(cmpType) != DataType::INT64) {
-        return std::nullopt;
-    }
+
     if (!SetUpdateAndTestInputs()) {
         return std::nullopt;
     }
@@ -74,6 +58,29 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
         return std::nullopt;
     }
     return loopInfo_;
+}
+
+bool CountableLoopParser::ParseLoopExit()
+{
+    auto loopExit = FindLoopExitBlock();
+    if (loopExit->IsEmpty() || (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0])) {
+        return false;
+    }
+    isHeadLoopExit_ = (loopExit == loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0]);
+    loopInfo_.ifImm = loopExit->GetLastInst();
+    if (loopInfo_.ifImm->GetOpcode() != Opcode::IfImm && loopInfo_.ifImm->GetOpcode() != Opcode::If) {
+        return false;
+    }
+    auto loopExitCmp = loopInfo_.ifImm->GetInput(0).GetInst();
+    if (loopExitCmp->GetOpcode() != Opcode::Compare) {
+        return false;
+    }
+    if (isHeadLoopExit_ && !loopExitCmp->GetInput(0).GetInst()->IsPhi() &&
+        !loopExitCmp->GetInput(1).GetInst()->IsPhi()) {
+        return false;
+    }
+    auto cmpType = loopExitCmp->CastToCompare()->GetOperandsType();
+    return DataType::GetCommonType(cmpType) == DataType::INT64;
 }
 
 bool CountableLoopParser::TryProcessBackEdge()

@@ -1135,41 +1135,8 @@ TEST_F(BranchEliminationTest, EliminateByDominatedConditionSwapInputs)
         ConditionCode::CC_NE, ConditionCode::CC_EQ);
 }
 
-TEST_F(BranchEliminationTest, CascadeElimination)
+SRC_GRAPH(CascadeElimination1, Graph *graph)
 {
-    /*
-     * Case 1
-     *
-     *             [0]
-     *          T   |  F
-     *        /----[2]----\
-     *        |           |
-     *        v        T  v  F
-     *       [3]    /----[4]----\
-     *        |     |       T   |  F
-     *        |    [5]    /----[6]----\
-     *        |     |     |           |
-     *        |     |    [7]         [8]
-     *        v     v     v           v
-     *      [exit]<-------------------/
-     *
-     *  ---->
-     *
-     *             [0]
-     *              |
-     *        /----[2]----\
-     *        |           |
-     *        v           v
-     *       [3]         [4]
-     *        |           |
-     *        |          [6]
-     *        |           |
-     *        |          [8]
-     *        v           |
-     *      [exit]<-------/
-     */
-
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -1213,11 +1180,11 @@ TEST_F(BranchEliminationTest, CascadeElimination)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    graph->RunPass<BranchElimination>();
-    graph->RunPass<Cleanup>();
+}
 
-    auto expectedGraph = CreateEmptyGraph();
-    GRAPH(expectedGraph)
+OUT_GRAPH(CascadeElimination1, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -1242,13 +1209,15 @@ TEST_F(BranchEliminationTest, CascadeElimination)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
+}
 
+TEST_F(BranchEliminationTest, CascadeElimination1)
+{
     /*
-     * Case 2
+     * Case 1
      *
      *             [0]
-     *          F   |  T
+     *          T   |  F
      *        /----[2]----\
      *        |           |
      *        v        T  v  F
@@ -1260,24 +1229,35 @@ TEST_F(BranchEliminationTest, CascadeElimination)
      *        v     v     v           v
      *      [exit]<-------------------/
      *
-     * ---->
+     *  ---->
      *
      *             [0]
-     *          T   |  F
+     *              |
      *        /----[2]----\
      *        |           |
      *        v           v
      *       [3]         [4]
      *        |           |
-     *        |          [5]
+     *        |          [6]
      *        |           |
-     *        |           |
+     *        |          [8]
      *        v           |
      *      [exit]<-------/
-     *
      */
-    auto graphCase2 = CreateEmptyGraph();
-    GRAPH(graphCase2)
+
+    auto graph = CreateEmptyGraph();
+    src_graph::CascadeElimination1::CREATE(graph);
+    graph->RunPass<BranchElimination>();
+    graph->RunPass<Cleanup>();
+
+    auto expectedGraph = CreateEmptyGraph();
+    out_graph::CascadeElimination1::CREATE(expectedGraph);
+    ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
+}
+
+SRC_GRAPH(CascadeElimination2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -1320,11 +1300,11 @@ TEST_F(BranchEliminationTest, CascadeElimination)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    graphCase2->RunPass<BranchElimination>();
-    graphCase2->RunPass<Cleanup>();
+}
 
-    auto expectedGraph2 = CreateEmptyGraph();
-    GRAPH(expectedGraph2)
+OUT_GRAPH(CascadeElimination2, Graph *graph)
+{
+    GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
         PARAMETER(1U, 1U).u64();
@@ -1349,30 +1329,54 @@ TEST_F(BranchEliminationTest, CascadeElimination)
             INST(18U, Opcode::Return).u64().Inputs(17U);
         }
     }
-    ASSERT_TRUE(GraphComparator().Compare(graphCase2, expectedGraph2));
 }
 
-TEST_F(BranchEliminationTest, ConditionEliminationNotApplied1)
+TEST_F(BranchEliminationTest, CascadeElimination2)
 {
     /*
-     * Case 1:
+     * Case 2
+     *
      *             [0]
-     *              |
+     *          F   |  T
+     *        /----[2]----\
+     *        |           |
+     *        v        T  v  F
+     *       [3]    /----[4]----\
+     *        |     |       T   |  F
+     *        |    [5]    /----[6]----\
+     *        |     |     |           |
+     *        |     |    [7]         [8]
+     *        v     v     v           v
+     *      [exit]<-------------------/
+     *
+     * ---->
+     *
+     *             [0]
+     *          T   |  F
      *        /----[2]----\
      *        |           |
      *        v           v
      *       [3]         [4]
      *        |           |
-     *        \-----------/
-     *              |
-     *        /----[6]----\
+     *        |          [5]
      *        |           |
-     *       [7]         [8]
      *        |           |
      *        v           |
      *      [exit]<-------/
+     *
      */
-    auto graph = CreateEmptyGraph();
+    auto graphCase2 = CreateEmptyGraph();
+    src_graph::CascadeElimination2::CREATE(graphCase2);
+    graphCase2->RunPass<BranchElimination>();
+    graphCase2->RunPass<Cleanup>();
+
+    auto expectedGraph2 = CreateEmptyGraph();
+    out_graph::CascadeElimination2::CREATE(expectedGraph2);
+    ASSERT_TRUE(GraphComparator().Compare(graphCase2, expectedGraph2));
+}
+
+SRC_GRAPH(ConditionEliminationNotApplied1, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -1412,29 +1416,36 @@ TEST_F(BranchEliminationTest, ConditionEliminationNotApplied1)
             INST(17U, Opcode::Return).u64().Inputs(16U);
         }
     }
-    graph->RunPass<BranchElimination>();
-    EXPECT_EQ(BB(6U).GetSuccsBlocks().size(), 2U);
 }
 
-TEST_F(BranchEliminationTest, ConditionEliminationNotApplied2)
+TEST_F(BranchEliminationTest, ConditionEliminationNotApplied1)
 {
     /*
-     * Case 2
+     * Case 1:
      *             [0]
      *              |
      *        /----[2]----\
      *        |           |
+     *        v           v
+     *       [3]         [4]
      *        |           |
-     *       [3]--------->|
-     *                    v
-     *              /----[4]----\
-     *              |           |
-     *             [5]         [6]
-     *              |           |
-     *              v           |
-     *            [exit]<-------/
+     *        \-----------/
+     *              |
+     *        /----[6]----\
+     *        |           |
+     *       [7]         [8]
+     *        |           |
+     *        v           |
+     *      [exit]<-------/
      */
     auto graph = CreateEmptyGraph();
+    src_graph::ConditionEliminationNotApplied1::CREATE(graph);
+    graph->RunPass<BranchElimination>();
+    EXPECT_EQ(BB(6U).GetSuccsBlocks().size(), 2U);
+}
+
+SRC_GRAPH(ConditionEliminationNotApplied2, Graph *graph)
+{
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -1470,6 +1481,28 @@ TEST_F(BranchEliminationTest, ConditionEliminationNotApplied2)
             INST(15U, Opcode::Return).u64().Inputs(14U);
         }
     }
+}
+
+TEST_F(BranchEliminationTest, ConditionEliminationNotApplied2)
+{
+    /*
+     * Case 2
+     *             [0]
+     *              |
+     *        /----[2]----\
+     *        |           |
+     *        |           |
+     *       [3]--------->|
+     *                    v
+     *              /----[4]----\
+     *              |           |
+     *             [5]         [6]
+     *              |           |
+     *              v           |
+     *            [exit]<-------/
+     */
+    auto graph = CreateEmptyGraph();
+    src_graph::ConditionEliminationNotApplied2::CREATE(graph);
     graph->RunPass<BranchElimination>();
     EXPECT_EQ(BB(4U).GetSuccsBlocks().size(), 2U);
 }

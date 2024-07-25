@@ -19,7 +19,13 @@
 #include <algorithm>
 
 namespace ark::compiler {
-class RegAllocInterferenceTest : public GraphTest {};
+class RegAllocInterferenceTest : public GraphTest {
+protected:
+    // To prevent adding "remove edge" interfaces to main code, edge removing is simulated via building new graph
+    // without it.
+    InterferenceGraph BuildSubgraph(InterferenceGraph &origGr, unsigned count, ArenaVector<unsigned> &peo,
+                                    unsigned peoCount);
+};
 
 namespace {
 constexpr unsigned DEFAULT_CAPACITY1 = 10;
@@ -121,28 +127,6 @@ const unsigned DEFAULT_EDGES2 = 6;
 ::std::pair<unsigned, unsigned> g_testEdgeS2[DEFAULT_EDGES2] = {{0U, 1U}, {1U, 2U}, {2U, 0U},
                                                                 {0U, 3U}, {2U, 3U}, {3U, 4U}};
 
-// To prevent adding "remove edge" interfaces to main code, edge removing is simulated via building new graph without
-// it.
-InterferenceGraph BuildSubgraph(InterferenceGraph &origGr, ArenaAllocator *alloc,
-                                ::std::pair<unsigned, unsigned> *edges, unsigned count, ArenaVector<unsigned> &peo,
-                                unsigned peoCount)
-{
-    InterferenceGraph gr(alloc);
-    gr.Reserve(origGr.Size());
-
-    for (unsigned i = 0; i < count; i++) {
-        auto x = edges[i].first;   // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        auto y = edges[i].second;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        for (unsigned j = 0; j < peoCount; j++) {
-            if (x == peo[j] || y == peo[j]) {
-                continue;
-            }
-        }
-        gr.AddEdge(x, y);
-    }
-
-    return gr;
-}
 }  // namespace
 
 TEST_F(RegAllocInterferenceTest, LexBFSSimple)
@@ -158,6 +142,28 @@ TEST_F(RegAllocInterferenceTest, LexBFSSimple)
     EXPECT_EQ(peo.size(), 2U);
     EXPECT_EQ(peo[0U], 0U);
     EXPECT_EQ(peo[1U], 1U);
+}
+
+// To prevent adding "remove edge" interfaces to main code, edge removing is simulated via building new graph without
+// it.
+InterferenceGraph RegAllocInterferenceTest::BuildSubgraph(InterferenceGraph &origGr, unsigned count,
+                                                          ArenaVector<unsigned> &peo, unsigned peoCount)
+{
+    InterferenceGraph gr(GetLocalAllocator());
+    gr.Reserve(origGr.Size());
+
+    for (unsigned i = 0; i < count; i++) {
+        auto x = g_testEdgeS2[i].first;   // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        auto y = g_testEdgeS2[i].second;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        for (unsigned j = 0; j < peoCount; j++) {
+            if (x == peo[j] || y == peo[j]) {
+                continue;
+            }
+        }
+        gr.AddEdge(x, y);
+    }
+
+    return gr;
 }
 
 TEST_F(RegAllocInterferenceTest, LexBFS)
@@ -181,7 +187,7 @@ TEST_F(RegAllocInterferenceTest, LexBFS)
     std::reverse(peo.begin(), peo.end());
 
     for (unsigned i = 0; i < (DEFAULT_CAPACITY2 - 1L); i++) {
-        auto gr2 = BuildSubgraph(gr, GetLocalAllocator(), g_testEdgeS2, DEFAULT_EDGES2, peo, i);
+        auto gr2 = BuildSubgraph(gr, DEFAULT_EDGES2, peo, i);
         EXPECT_TRUE(gr2.IsChordal());
     }
 }

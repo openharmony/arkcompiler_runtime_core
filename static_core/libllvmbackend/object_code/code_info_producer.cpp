@@ -15,6 +15,7 @@
 
 #include "compiler/code_info/code_info_builder.h"
 #include "compiler/optimizer/code_generator/target_info.h"
+#include "compiler/optimizer/ir/inst.h"
 
 #include "llvm_ark_interface.h"
 #include "llvm_logger.h"
@@ -65,7 +66,8 @@ void CodeInfoProducer::Produce(Method *method, compiler::CodeInfoBuilder *builde
     builder->BeginMethod(0, compilation_->GetVirtualRegistersCount(method));
 
     // Create empty stackmap for the stack overflow check
-    builder->BeginStackMap(0, 0, nullptr, 0, false, false);
+    compiler::SaveStateInst ss(compiler::Opcode::SaveState, 0, nullptr, nullptr, 0);
+    builder->BeginStackMap(0, 0, &ss, false);
     builder->EndStackMap();
 
     ConvertStackMaps(method, builder);
@@ -311,7 +313,10 @@ void CodeInfoProducer::ConvertStackMaps(Method *method, CodeInfoBuilder *builder
         } else {
             bpc = record.getID();
         }
-        builder->BeginStackMap(bpc, npc, &stackRoots, regMap, needRegmap, false);
+        compiler::SaveStateInst ss(compiler::Opcode::SaveState, 0, nullptr, nullptr, 0);
+        ss.SetRootsStackMask(&stackRoots);
+        ss.SetRootsRegsMask(regMap);
+        builder->BeginStackMap(bpc, npc, &ss, needRegmap);
 
         LLVM_LOG(DEBUG, STACKMAPS) << "RegMap:";
         BuildRegMap(builder, record, stackSize);

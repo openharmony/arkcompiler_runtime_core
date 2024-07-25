@@ -374,39 +374,54 @@ void Codegen::EncodeImms(const T &imms, bool skipFirstLocation)
 template <typename... Args>
 void FillPostWrbCallParams(MemRef mem, Args &&...params);
 
-template <size_t IMM_ARRAY_SIZE, typename Arg, typename... Args>
-ALWAYS_INLINE void Codegen::FillCallParamsHandleOperands(
-    ParameterInfo *paramInfo, SpillFillInst *regMoves, ArenaVector<Reg> *spMoves,
-    [[maybe_unused]] typename std::array<std::pair<Reg, Imm>, IMM_ARRAY_SIZE>::iterator immsIter, Arg &&arg,
-    Args &&...params)
-{
-    Location dst;
-    auto type = arg.GetType().ToDataType();
-    dst = paramInfo->GetNextLocation(type);
-    if (dst.IsStackArgument()) {
-        GetEncoder()->SetFalseResult();
-        UNREACHABLE();  // Move to BoundaryFrame
+template <size_t IMM_ARRAY_SIZE>
+class Codegen::FillCallParamsHelper {
+public:
+    using ImmsIter = typename std::array<std::pair<Reg, Imm>, IMM_ARRAY_SIZE>::iterator;
+
+    FillCallParamsHelper(Codegen *cg, ParameterInfo *paramInfo, SpillFillInst *regMoves, ArenaVector<Reg> *spMoves,
+                         ImmsIter immsIter)
+        : cg_(cg), paramInfo_(paramInfo), regMoves_(regMoves), spMoves_(spMoves), immsIter_(immsIter)
+    {
     }
 
-    static_assert(std::is_same_v<std::decay_t<Arg>, TypedImm> || std::is_convertible_v<Arg, Reg>);
-    if constexpr (std::is_same_v<std::decay_t<Arg>, TypedImm>) {
-        auto reg = ConvertRegister(dst.GetValue(), type);
-        *immsIter = {reg, arg.GetImm()};
-        immsIter++;
-    } else {
-        Reg reg(std::forward<Arg>(arg));
-        if (reg == SpReg()) {
-            // SP should be handled separately, since on the ARM64 target it has ID out of range
-            spMoves->emplace_back(ConvertRegister(dst.GetValue(), type));
+    template <typename Arg, typename... Args>
+    ALWAYS_INLINE void FillCallParamsHandleOperands(Arg &&arg, Args &&...params)
+    {
+        Location dst;
+        auto type = arg.GetType().ToDataType();
+        dst = paramInfo_->GetNextLocation(type);
+        if (dst.IsStackArgument()) {
+            cg_->GetEncoder()->SetFalseResult();
+            UNREACHABLE();  // Move to BoundaryFrame
+        }
+
+        static_assert(std::is_same_v<std::decay_t<Arg>, TypedImm> || std::is_convertible_v<Arg, Reg>);
+        if constexpr (std::is_same_v<std::decay_t<Arg>, TypedImm>) {
+            auto reg = cg_->ConvertRegister(dst.GetValue(), type);
+            *immsIter_ = {reg, arg.GetImm()};
+            immsIter_++;
         } else {
-            regMoves->AddSpillFill(Location::MakeRegister(reg.GetId(), type), dst, type);
+            Reg reg(std::forward<Arg>(arg));
+            if (reg == cg_->SpReg()) {
+                // SP should be handled separately, since on the ARM64 target it has ID out of range
+                spMoves_->emplace_back(cg_->ConvertRegister(dst.GetValue(), type));
+            } else {
+                regMoves_->AddSpillFill(Location::MakeRegister(reg.GetId(), type), dst, type);
+            }
+        }
+        if constexpr (sizeof...(Args) != 0) {
+            FillCallParamsHandleOperands(std::forward<Args>(params)...);
         }
     }
-    if constexpr (sizeof...(Args) != 0) {
-        FillCallParamsHandleOperands<IMM_ARRAY_SIZE>(paramInfo, regMoves, spMoves, immsIter,
-                                                     std::forward<Args>(params)...);
-    }
-}
+
+private:
+    Codegen *cg_ {};
+    ParameterInfo *paramInfo_ {};
+    SpillFillInst *regMoves_ {};
+    ArenaVector<Reg> *spMoves_ {};
+    ImmsIter immsIter_ {};
+};
 
 template <typename T, typename... Args>
 constexpr std::pair<size_t, size_t> CountParameters()
@@ -439,8 +454,8 @@ void Codegen::FillCallParams(Args &&...params)
         spMoves.reserve(REGS_COUNT);
         regMoves->GetSpillFills().reserve(REGS_COUNT);
 
-        FillCallParamsHandleOperands<IMMEDIATES_COUNT>(paramInfo, regMoves, &spMoves, immediates.begin(),
-                                                       std::forward<Args>(params)...);
+        FillCallParamsHelper<IMMEDIATES_COUNT> h {this, paramInfo, regMoves, &spMoves, immediates.begin()};
+        h.FillCallParamsHandleOperands(std::forward<Args>(params)...);
 
         // Resolve registers move order and encode
         spillFillsResolver_.ResolveIfRequired(regMoves);

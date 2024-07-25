@@ -47,8 +47,6 @@ public:
     }
 };
 
-static bool IsSaveStateForGc(const Inst *inst);
-
 class IsSaveStateCanTriggerGc {
 public:
     bool operator()(const Inst *inst) const
@@ -458,28 +456,8 @@ bool IsInstNotNull(const Inst *inst)
     return false;
 }
 
-static bool FindObjectInSaveState(Inst *object, Inst *ss)
-{
-    if (!object->IsMovableObject()) {
-        return true;
-    }
-    while (ss != nullptr && object->IsDominate(ss)) {
-        auto it = std::find_if(ss->GetInputs().begin(), ss->GetInputs().end(),
-                               [object, ss](Input input) { return ss->GetDataFlowInput(input.GetInst()) == object; });
-        if (it != ss->GetInputs().end()) {
-            return true;
-        }
-        auto caller = static_cast<SaveStateInst *>(ss)->GetCallerInst();
-        if (caller == nullptr) {
-            break;
-        }
-        ss = caller->GetSaveState();
-    }
-    return false;
-}
-
 // Returns true if GC can be triggered at this point
-static bool IsSaveStateForGc(const Inst *inst)
+bool IsSaveStateForGc(const Inst *inst)
 {
     if (inst->GetOpcode() == Opcode::SafePoint) {
         return true;
@@ -492,49 +470,6 @@ static bool IsSaveStateForGc(const Inst *inst)
         }
     }
     return false;
-}
-
-bool FindAndRemindObjectInSaveState(Inst *object, Inst *inst, Inst **failedSs)
-{
-    if (IsSaveStateForGc(inst) && !FindObjectInSaveState(object, inst)) {
-        if (failedSs != nullptr) {
-            *failedSs = inst;
-        }
-        return false;
-    }
-    return true;
-}
-
-// Checks if object is correctly used in SaveStates between it and user
-bool CheckObjectRec(Inst *object, const Inst *user, const BasicBlock *block, Inst *startFrom, Marker visited,
-                    Inst **failedSs)
-{
-    if (startFrom != nullptr) {
-        auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, startFrom);
-        for (; it != block->AllInstsSafeReverse().end(); ++it) {
-            auto inst = *it;
-            if (inst == nullptr) {
-                break;
-            }
-            if (inst->SetMarker(visited) || inst == object || inst == user) {
-                return true;
-            }
-            if (!FindAndRemindObjectInSaveState(object, inst, failedSs)) {
-                return false;
-            }
-        }
-    }
-    for (auto pred : block->GetPredsBlocks()) {
-        // Catch-begin block has edge from try-end block, and all try-blocks should be visited from this edge.
-        // `object` can be placed inside try-block - after try-begin, so that visiting try-begin is wrong
-        if (block->IsCatchBegin() && pred->IsTryBegin()) {
-            continue;
-        }
-        if (!CheckObjectRec(object, user, pred, pred->GetLastInst(), visited, failedSs)) {
-            return false;
-        }
-    }
-    return true;
 }
 
 // Checks if input edges of phi_block come from different branches of dominating if_imm instruction
@@ -576,6 +511,7 @@ std::optional<bool> IsIfInverted(BasicBlock *phiBlock, IfImmInst *ifImm)
     // True and false branches intersect
     return std::nullopt;
 }
+
 ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph *graph, Inst *source, Inst *target,
                                                                            Inst *stopSearch, BasicBlock *targetBlock)
 {
@@ -591,17 +527,17 @@ ArenaVector<Inst *> *SaveStateBridgesBuilder::SearchMissingObjInSaveStates(Graph
         bridges_->clear();
     }
     auto visited = graph->NewMarker();
-    SearchSSOnWay(targetBlock, target, source, visited, bridges_, stopSearch);
+    SearchSSOnWay(targetBlock, target, source, visited, stopSearch);
     graph->EraseMarker(visited);
     return bridges_;
 }
 
 void SaveStateBridgesBuilder::SearchSSOnWay(BasicBlock *block, Inst *startFrom, Inst *sourceInst, Marker visited,
-                                            ArenaVector<Inst *> *bridges, Inst *stopSearch)
+                                            Inst *stopSearch)
 {
     ASSERT(block != nullptr);
     ASSERT(sourceInst != nullptr);
-    ASSERT(bridges != nullptr);
+    ASSERT(bridges_ != nullptr);
 
     if (startFrom != nullptr) {
         auto it = InstSafeIterator<IterationType::ALL, IterationDirection::BACKWARD>(*block, startFrom);
@@ -615,9 +551,9 @@ void SaveStateBridgesBuilder::SearchSSOnWay(BasicBlock *block, Inst *startFrom, 
             if (inst->SetMarker(visited)) {
                 return;
             }
-            if (IsSaveStateForGc(inst)) {
+            if (SaveStateBridgesBuilder::IsSaveStateForGc(inst)) {
                 COMPILER_LOG(DEBUG, BRIDGES_SS) << "\tSearch in SS";
-                SearchInSaveStateAndFillBridgeVector(inst, sourceInst, bridges);
+                SearchInSaveStateAndFillBridgeVector(inst, sourceInst);
             }
             // When "stop_search" is nullptr second clause never causes early exit here
             if (inst == sourceInst || inst == stopSearch) {
@@ -626,22 +562,21 @@ void SaveStateBridgesBuilder::SearchSSOnWay(BasicBlock *block, Inst *startFrom, 
         }
     }
     for (auto pred : block->GetPredsBlocks()) {
-        SearchSSOnWay(pred, pred->GetLastInst(), sourceInst, visited, bridges, stopSearch);
+        SearchSSOnWay(pred, pred->GetLastInst(), sourceInst, visited, stopSearch);
     }
 }
 
-void SaveStateBridgesBuilder::SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searchedInst,
-                                                                   ArenaVector<Inst *> *bridges)
+void SaveStateBridgesBuilder::SearchInSaveStateAndFillBridgeVector(Inst *inst, Inst *searchedInst)
 {
     ASSERT(inst != nullptr);
     ASSERT(searchedInst != nullptr);
-    ASSERT(bridges != nullptr);
+    ASSERT(bridges_ != nullptr);
     auto user = std::find_if(inst->GetInputs().begin(), inst->GetInputs().end(), [searchedInst, inst](Input input) {
         return inst->GetDataFlowInput(input.GetInst()) == searchedInst;
     });
     if (user == inst->GetInputs().end()) {
         COMPILER_LOG(DEBUG, BRIDGES_SS) << "\tNot found";
-        bridges->push_back(inst);
+        bridges_->push_back(inst);
     }
 }
 
@@ -745,13 +680,13 @@ bool SaveStateBridgesBuilder::IsSaveStateForGc(Inst *inst)
     return inst->GetOpcode() == Opcode::SafePoint || inst->GetOpcode() == Opcode::SaveState;
 }
 
-void SaveStateBridgesBuilder::CreateBridgeInSS(Inst *source, ArenaVector<Inst *> *bridges)
+void SaveStateBridgesBuilder::CreateBridgeInSS(Inst *source)
 {
-    ASSERT(bridges != nullptr);
+    ASSERT(bridges_ != nullptr);
     ASSERT(source != nullptr);
     ASSERT(source->IsMovableObject());
 
-    for (Inst *ss : *bridges) {
+    for (Inst *ss : *bridges_) {
         static_cast<SaveStateInst *>(ss)->AppendBridge(source);
     }
 }
@@ -774,9 +709,9 @@ void SaveStateBridgesBuilder::SearchAndCreateMissingObjInSaveState(Graph *graph,
         // if target is nullptr, we won't traverse the target block
         ASSERT(target == nullptr || target->GetBasicBlock() == targetBlock);
     }
-    auto bridges = SearchMissingObjInSaveStates(graph, source, target, stopSearchInst, targetBlock);
-    if (!bridges->empty()) {
-        CreateBridgeInSS(source, bridges);
+    SearchMissingObjInSaveStates(graph, source, target, stopSearchInst, targetBlock);
+    if (!bridges_->empty()) {
+        CreateBridgeInSS(source);
         COMPILER_LOG(DEBUG, BRIDGES_SS) << " Created bridge(s)";
     }
 }
@@ -828,14 +763,14 @@ void SaveStateBridgesBuilder::FixPhisWithCheckInputs(BasicBlock *block)
     }
 }
 
-void SaveStateBridgesBuilder::DumpBridges(std::ostream &out, Inst *source, ArenaVector<Inst *> *bridges)
+void SaveStateBridgesBuilder::DumpBridges(std::ostream &out, Inst *source)
 {
     ASSERT(source != nullptr);
-    ASSERT(bridges != nullptr);
+    ASSERT(bridges_ != nullptr);
     out << "Inst id " << source->GetId() << " with type ";
     source->DumpOpcode(&out);
     out << "need bridge in SS id: ";
-    for (auto ss : *bridges) {
+    for (auto ss : *bridges_) {
         out << ss->GetId() << " ";
     }
     out << '\n';
