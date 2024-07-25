@@ -1859,33 +1859,60 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     /**
      * Sorts in-place
      *
-     * @param fn comparator —  used to determine the order of the elements.
-     * fn returns a negative value if first argument is less than second argument,
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted {{N}}Array
      */
-    public sort(fn?: (a: {{elType}}, b: {{elType}}) => number): {{N}}Array {
+    public sort(compareFn?: (a: {{elType}}, b: {{elType}}) => number): this {
         let arr: {{T}}[] = new {{T}}[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
-        if (fn == undefined) {
-            // NOTE (ikorobkov): needs to add signature for sort({{T}}[])
-            //sort(arr)
-            for (let i = 0; i < this.lengthInt; ++i) {
-                this.set(i, arr[i])
+        let cmp = (l: {{T}}, r: {{T}}): number => {
+                return (l - r) as number
             }
-        } else {
-            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            // let mustPrecede: (a: {{T}}, b: {{T}}) => boolean =
-            //     (a: {{T}}, b: {{T}}): boolean => { return (fn(a, b) <= 0) }
-            // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.lengthInt; ++i) {
-            //     this.set(i, arr[i])
-            // }
+        if (compareFn != undefined) {
+            cmp = (l: {{T}}, r: {{T}}): number => {
+                return compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+            }  
         }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted {{N}}Array
+     */
+    public sort(compareFn: (a: {{elType}}) => number): this {
+        let cmp = (a: {{elType}}, b: {{elType}}) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted {{N}}Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: {{elType}}, b: {{elType}}) => { return compareFn()}
+        this.sort(cmp)
         return this
     }
         {%- endif %}{#- comment: end-condition for if not skip  #}

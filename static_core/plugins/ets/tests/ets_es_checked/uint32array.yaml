@@ -164,3 +164,13 @@ sub:
       - method: "valueOf"
         params: []
       - method: toLocaleString
+      - method: sort
+        self:
+          - Uint32Array.of(0, 0.0, 4, 1, 2, -1, 1, 21, 111, 0, 0.0, -Infinity, Infinity, NaN)
+        setup: |
+          const fn1 = (a: number, b: number): number => b - a
+          const fn2 = (a: number, b: number): number => a - b
+          const fn3 = (a: number): number => 0
+          const fn4 = (): number => 0
+        params:
+          - paramOf 'fn1', 'fn2', undefined, 'fn3', 'fn4'

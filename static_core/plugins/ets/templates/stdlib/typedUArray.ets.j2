@@ -1462,15 +1462,64 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
     }
 
     /**
-     * Sorts in-place according to the numeric ordering
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted {{element['name']}}Array
      */
-    public sort(): {{element['name']}}Array {
-        let newF = (a: {{element['subsetType']}}, b: {{element['subsetType']}}): number => { throw new Error("not implemented") }
-        return this.sort(newF)
+    public sort(compareFn?: (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => number): this {
+        let arr: {{element['etsType']}}[] = new {{element['etsType']}}[this.lengthInt]
+        for (let i = 0; i < this.lengthInt; ++i) {
+            arr[i] = this.getUnsafe(i)
+        }
+        let cmp = (l: {{element['etsType']}}, r: {{element['etsType']}}): number => {
+                return (l - r) as number
+            }
+        if (compareFn != undefined) {
+            cmp = (l: {{element['etsType']}}, r: {{element['etsType']}}): number => {
+                return compareFn!({{asElementCompat % 'l'}}, {{asElementCompat % 'r'}})
+            }  
+        }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
     }
 
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted {{element['name']}}Array
+     */
+    public sort(compareFn: (a: {{element['subsetType']}}) => number): this {
+        let cmp = (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted {{element['name']}}Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: {{element['subsetType']}}, b: {{element['subsetType']}}) => { return compareFn()}
+        this.sort(cmp)
+        return this
+    }
     /**
      * Creates a {{element['name']}}Array with the same underlying Buffer
      *
@@ -1821,28 +1870,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      */
     public some(predicate: (element: {{elType}}) => boolean): boolean {
         return this.some((element: {{elType}}, index: number, array: {{element['name']}}Array): boolean => predicate(element))
-    }
-
-    /**
-     * Sorts in-place
-     *
-     * @param fn comparator
-     *
-     * @returns sorted {{element['name']}}Array
-     */
-    public sort(fn: (a: {{elType}}, b: {{elType}}) => number): {{element['name']}}Array {
-        let arr: {{element['etsType']}}[] = new {{element['etsType']}}[this.lengthInt]
-        for (let i = 0; i < this.lengthInt; i++) {
-            arr[i] = this.getUnsafe(i)
-        }
-        // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-        // let mustPrecede: (a: {{element['etsType']}}, b: {{element['etsType']}}) => boolean =
-        //     (a: {{element['etsType']}}, b: {{element['etsType']}}): boolean => { return (fn(a, b) <= 0) }
-        // sort(arr, mustPrecede)
-        // for (let i = 0; i < this.lengthInt; i++) {
-        //     this.setUnsafe(i, arr[i])
-        // }
-        return this
     }
 
     /**

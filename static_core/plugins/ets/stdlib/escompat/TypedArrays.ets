@@ -1650,33 +1650,60 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param fn comparator —  used to determine the order of the elements.
-     * fn returns a negative value if first argument is less than second argument,
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int8Array
      */
-    public sort(fn?: (a: number, b: number) => number): Int8Array {
+    public sort(compareFn?: (a: number, b: number) => number): this {
         let arr: byte[] = new byte[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
-        if (fn == undefined) {
-            // NOTE (ikorobkov): needs to add signature for sort(byte[])
-            //sort(arr)
-            for (let i = 0; i < this.lengthInt; ++i) {
-                this.set(i, arr[i])
+        let cmp = (l: byte, r: byte): number => {
+                return (l - r) as number
             }
-        } else {
-            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            // let mustPrecede: (a: byte, b: byte) => boolean =
-            //     (a: byte, b: byte): boolean => { return (fn(a, b) <= 0) }
-            // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.lengthInt; ++i) {
-            //     this.set(i, arr[i])
-            // }
+        if (compareFn != undefined) {
+            cmp = (l: byte, r: byte): number => {
+                return compareFn!(l as number, r as number)
+            }  
         }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Int8Array
+     */
+    public sort(compareFn: (a: number) => number): this {
+        let cmp = (a: number, b: number) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Int8Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: number, b: number) => { return compareFn()}
+        this.sort(cmp)
         return this
     }
 
@@ -4162,33 +4189,60 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param fn comparator —  used to determine the order of the elements.
-     * fn returns a negative value if first argument is less than second argument,
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int16Array
      */
-    public sort(fn?: (a: number, b: number) => number): Int16Array {
+    public sort(compareFn?: (a: number, b: number) => number): this {
         let arr: short[] = new short[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
-        if (fn == undefined) {
-            // NOTE (ikorobkov): needs to add signature for sort(short[])
-            //sort(arr)
-            for (let i = 0; i < this.lengthInt; ++i) {
-                this.set(i, arr[i])
+        let cmp = (l: short, r: short): number => {
+                return (l - r) as number
             }
-        } else {
-            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            // let mustPrecede: (a: short, b: short) => boolean =
-            //     (a: short, b: short): boolean => { return (fn(a, b) <= 0) }
-            // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.lengthInt; ++i) {
-            //     this.set(i, arr[i])
-            // }
+        if (compareFn != undefined) {
+            cmp = (l: short, r: short): number => {
+                return compareFn!(l as number, r as number)
+            }  
         }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Int16Array
+     */
+    public sort(compareFn: (a: number) => number): this {
+        let cmp = (a: number, b: number) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Int16Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: number, b: number) => { return compareFn()}
+        this.sort(cmp)
         return this
     }
 
@@ -6651,33 +6705,60 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param fn comparator —  used to determine the order of the elements.
-     * fn returns a negative value if first argument is less than second argument,
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Int32Array
      */
-    public sort(fn?: (a: number, b: number) => number): Int32Array {
+    public sort(compareFn?: (a: number, b: number) => number): this {
         let arr: int[] = new int[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
-        if (fn == undefined) {
-            // NOTE (ikorobkov): needs to add signature for sort(int[])
-            //sort(arr)
-            for (let i = 0; i < this.lengthInt; ++i) {
-                this.set(i, arr[i])
+        let cmp = (l: int, r: int): number => {
+                return (l - r) as number
             }
-        } else {
-            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            // let mustPrecede: (a: int, b: int) => boolean =
-            //     (a: int, b: int): boolean => { return (fn(a, b) <= 0) }
-            // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.lengthInt; ++i) {
-            //     this.set(i, arr[i])
-            // }
+        if (compareFn != undefined) {
+            cmp = (l: int, r: int): number => {
+                return compareFn!(l as number, r as number)
+            }  
         }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Int32Array
+     */
+    public sort(compareFn: (a: number) => number): this {
+        let cmp = (a: number, b: number) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Int32Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: number, b: number) => { return compareFn()}
+        this.sort(cmp)
         return this
     }
 
@@ -9122,33 +9203,60 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     /**
      * Sorts in-place
      *
-     * @param fn comparator —  used to determine the order of the elements.
-     * fn returns a negative value if first argument is less than second argument,
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted BigInt64Array
      */
-    public sort(fn?: (a: BigInt, b: BigInt) => number): BigInt64Array {
+    public sort(compareFn?: (a: BigInt, b: BigInt) => number): this {
         let arr: long[] = new long[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
-        if (fn == undefined) {
-            // NOTE (ikorobkov): needs to add signature for sort(long[])
-            //sort(arr)
-            for (let i = 0; i < this.lengthInt; ++i) {
-                this.set(i, arr[i])
+        let cmp = (l: long, r: long): number => {
+                return (l - r) as number
             }
-        } else {
-            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            // let mustPrecede: (a: long, b: long) => boolean =
-            //     (a: long, b: long): boolean => { return (fn(a, b) <= 0) }
-            // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.lengthInt; ++i) {
-            //     this.set(i, arr[i])
-            // }
+        if (compareFn != undefined) {
+            cmp = (l: long, r: long): number => {
+                return compareFn!(new BigInt(l), new BigInt(r))
+            }  
         }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted BigInt64Array
+     */
+    public sort(compareFn: (a: BigInt) => number): this {
+        let cmp = (a: BigInt, b: BigInt) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted BigInt64Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: BigInt, b: BigInt) => { return compareFn()}
+        this.sort(cmp)
         return this
     }
 
@@ -11619,33 +11727,60 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param fn comparator —  used to determine the order of the elements.
-     * fn returns a negative value if first argument is less than second argument,
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Float32Array
      */
-    public sort(fn?: (a: number, b: number) => number): Float32Array {
+    public sort(compareFn?: (a: number, b: number) => number): this {
         let arr: float[] = new float[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
-        if (fn == undefined) {
-            // NOTE (ikorobkov): needs to add signature for sort(float[])
-            //sort(arr)
-            for (let i = 0; i < this.lengthInt; ++i) {
-                this.set(i, arr[i])
+        let cmp = (l: float, r: float): number => {
+                return (l - r) as number
             }
-        } else {
-            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            // let mustPrecede: (a: float, b: float) => boolean =
-            //     (a: float, b: float): boolean => { return (fn(a, b) <= 0) }
-            // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.lengthInt; ++i) {
-            //     this.set(i, arr[i])
-            // }
+        if (compareFn != undefined) {
+            cmp = (l: float, r: float): number => {
+                return compareFn!(l as number, r as number)
+            }  
         }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Float32Array
+     */
+    public sort(compareFn: (a: number) => number): this {
+        let cmp = (a: number, b: number) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Float32Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: number, b: number) => { return compareFn()}
+        this.sort(cmp)
         return this
     }
 
@@ -13995,33 +14130,60 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     /**
      * Sorts in-place
      *
-     * @param fn comparator —  used to determine the order of the elements.
-     * fn returns a negative value if first argument is less than second argument,
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
      * zero if they're equal and a positive value otherwise.
      * If omitted, the elements are sorted in ascending order.
      *
      * @returns sorted Float64Array
      */
-    public sort(fn?: (a: number, b: number) => number): Float64Array {
+    public sort(compareFn?: (a: number, b: number) => number): this {
         let arr: double[] = new double[this.lengthInt]
         for (let i = 0; i < this.lengthInt; ++i) {
             arr[i] = this.getUnsafe(i)
         }
-        if (fn == undefined) {
-            // NOTE (ikorobkov): needs to add signature for sort(double[])
-            //sort(arr)
-            for (let i = 0; i < this.lengthInt; ++i) {
-                this.set(i, arr[i])
+        let cmp = (l: double, r: double): number => {
+                return (l - r) as number
             }
-        } else {
-            // NOTE(ivan-tyulyandin): unresolved reference i in for loop, blocked by internal issue 12961
-            // let mustPrecede: (a: double, b: double) => boolean =
-            //     (a: double, b: double): boolean => { return (fn(a, b) <= 0) }
-            // sort(arr, mustPrecede)
-            // for (let i = 0; i < this.lengthInt; ++i) {
-            //     this.set(i, arr[i])
-            // }
+        if (compareFn != undefined) {
+            cmp = (l: double, r: double): number => {
+                return compareFn!(l as number, r as number)
+            }  
         }
+        sort(arr, cmp)
+        for (let i = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, arr[i])
+        }
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param compareFn comparator —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Float64Array
+     */
+    public sort(compareFn: (a: number) => number): this {
+        let cmp = (a: number, b: number) => { return compareFn(a)}
+        this.sort(cmp)
+        return this
+    }
+
+    /**
+     * Sorts in-place
+     *
+     * @param fn compareFn —  used to determine the order of the elements.
+     * compareFn returns a negative value if first argument is less than second argument,
+     * zero if they're equal and a positive value otherwise.
+     *
+     * @returns sorted Float64Array
+     */
+    public sort(compareFn: () => number): this {
+        let cmp = (a: number, b: number) => { return compareFn()}
+        this.sort(cmp)
         return this
     }
 
