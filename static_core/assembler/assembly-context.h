@@ -58,6 +58,7 @@ struct Context {
     void Make(const std::vector<ark::pandasm::Token> &t);
     void UpSignOperation();
     bool ValidateRegisterName(char c, size_t n = 0) const;
+    bool ValidateFoundedRegisterName(char c, size_t n) const;
     bool ValidateParameterName(size_t numberOfParamsAlreadyIs) const;
     bool ValidateLabel();
     bool Mask();

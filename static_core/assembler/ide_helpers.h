@@ -44,7 +44,8 @@ struct SourceLocation {
         std::stringstream ss;
         ss << "{ "
            << "\"begin\": " << begin.JsonSerialize() << ", "
-           << "\"end\": " << end.JsonSerialize() << " }";
+           << "\"end\": " << end.JsonSerialize();
+        ss << " }";
         return ss.str();
     }
 };

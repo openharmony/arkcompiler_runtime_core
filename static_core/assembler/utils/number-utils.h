@@ -28,6 +28,47 @@ constexpr size_t BIN_BASE = 2;
 
 constexpr size_t MAX_DWORD = 65536;
 
+inline bool ValidateXToken(std::string_view token, size_t shift)
+{
+    token.remove_prefix(shift);
+
+    for (auto i : token) {
+        if (!((i >= '0' && i <= '9') || (i >= 'A' && i <= 'F') || (i >= 'a' && i <= 'f'))) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+inline bool ValidateBToken(std::string_view token, size_t shift)
+{
+    token.remove_prefix(shift);
+    if (token.empty()) {
+        return false;
+    }
+    for (auto i : token) {
+        if (!(i == '0' || i == '1')) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+inline bool ValidateZeroToTenToken(std::string_view token)
+{
+    token.remove_prefix(1);
+
+    for (auto i : token) {
+        if (!(i >= '0' && i <= '7')) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 inline bool ValidateInteger(std::string_view p)
 {
     constexpr size_t GENERAL_SHIFT = 2;
@@ -44,41 +85,15 @@ inline bool ValidateInteger(std::string_view p)
 
     if (token[0] == '0' && token.size() > 1 && token.find('.') == std::string::npos) {
         if (token[1] == 'x') {
-            token.remove_prefix(GENERAL_SHIFT);
-
-            for (auto i : token) {
-                if (!((i >= '0' && i <= '9') || (i >= 'A' && i <= 'F') || (i >= 'a' && i <= 'f'))) {
-                    return false;
-                }
-            }
-
-            return true;
+            return ValidateXToken(token, GENERAL_SHIFT);
         }
 
         if (token[1] == 'b') {
-            token.remove_prefix(GENERAL_SHIFT);
-            if (token.empty()) {
-                return false;
-            }
-            for (auto i : token) {
-                if (!(i == '0' || i == '1')) {
-                    return false;
-                }
-            }
-
-            return true;
+            return ValidateBToken(token, GENERAL_SHIFT);
         }
 
         if (token[1] >= '0' && token[1] <= '9' && token.find('e') == std::string::npos) {
-            token.remove_prefix(1);
-
-            for (auto i : token) {
-                if (!(i >= '0' && i <= '7')) {
-                    return false;
-                }
-            }
-
-            return true;
+            return ValidateZeroToTenToken(token);
         }
     }
 

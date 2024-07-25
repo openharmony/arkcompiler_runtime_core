@@ -42,30 +42,35 @@ size_t Context::Len() const
     return token.size();
 }
 
-bool Context::ValidateRegisterName(char c, size_t n) const
+bool Context::ValidateFoundedRegisterName(char c, size_t n) const
 {
-    if (token[0] == c) {
-        std::string_view p = token;
+    std::string_view p = token;
 
-        p.remove_prefix(1);
+    p.remove_prefix(1);
 
-        if (p.empty() || (p.size() > 1 && p[0] == '0')) {
-            return false;
-        }
+    if (p.empty() || (p.size() > 1 && p[0] == '0')) {
+        return false;
+    }
 
-        if (c != 'a') {
-            for (const auto &ch : p) {
-                if (std::isdigit(ch) == 0) {
-                    return false;
-                }
-            }
-        } else {
-            if (ToNumber(p) > n) {
+    if (c != 'a') {
+        for (const auto &ch : p) {
+            if (std::isdigit(ch) == 0) {
                 return false;
             }
         }
+    } else {
+        if (ToNumber(p) > n) {
+            return false;
+        }
+    }
 
-        return true;
+    return true;
+}
+
+bool Context::ValidateRegisterName(char c, size_t n) const
+{
+    if (token[0] == c) {
+        return ValidateFoundedRegisterName(c, n);
     }
 
     return false;
