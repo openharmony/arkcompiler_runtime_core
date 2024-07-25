@@ -264,7 +264,6 @@ bool RegEncoder::RenumberArgRegs()
 
     auto numLocals = CalculateNumLocals(usageMask, numNonArgs);
     auto numTemps = CalculateNumTemps(usageMask, numNonArgs, numLocals);
-
     if (numLocals + numTemps > numNonArgs - numMaxRangeInput_) {
         LOG(DEBUG, BYTECODE_OPTIMIZER) << "RegEncoder: The free regs for range call are not enough";
         return false;
