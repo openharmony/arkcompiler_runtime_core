@@ -98,26 +98,6 @@ cases:
       let i: int = foo(null);
 
   - defs: |-
-      function foo(a: int, ...p: int[]): int {
-          return 1;
-      }
-      function foo(...p: int[]): int {
-          return 2;
-      }
-    use: |-
-      let i: int = foo(1)
-
-  - defs: |-
-      function foo(a: Object, ...p: Object[]): int {
-          return 1;
-      }
-      function foo(...p: Object[]): int {
-          return 2;
-      }
-    use: |-
-      let i: int = foo(new Object[1])
-
-  - defs: |-
       function foo(...p: int[]): int {
           return 1;
       }
@@ -152,16 +132,6 @@ cases:
            return 1;
        }
        function foo(...p: boolean[]): int {
-           return 2;
-       }
-    use: |-
-      let i: int = foo()
-
-  - defs: |-
-       function foo(...p: int[]): int {
-           return 1;
-       }
-       function foo(a: int, ...p: int[]): int {
            return 2;
        }
     use: |-
