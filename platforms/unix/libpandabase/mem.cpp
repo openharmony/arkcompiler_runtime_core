@@ -106,7 +106,8 @@ uintptr_t AlignDownToPageSize(uintptr_t addr)
 void *AlignedAlloc(size_t alignment_in_bytes, size_t size)
 {
     size_t aligned_size = (size + alignment_in_bytes - 1) & ~(alignment_in_bytes - 1);
-#if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_MACOS || defined PANDA_TARGET_IOS || defined PANDA_TARGET_ARKUI_X
+#if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_MACOS || defined PANDA_TARGET_IOS || \
+    defined PANDA_TARGET_ARKUI_X
     void *ret = nullptr;
     int r = posix_memalign(reinterpret_cast<void **>(&ret), alignment_in_bytes, aligned_size);
     if (r != 0) {
