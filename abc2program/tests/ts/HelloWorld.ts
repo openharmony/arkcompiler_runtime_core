@@ -84,7 +84,7 @@ async function* asyncGenerateFunc(): AsyncGenerator<string, void, unknown> {
   yield 'hello';
 }
 
-const asyncArrowFunc = async (): Promise<void> => {}
+const asyncArrowFunc = async (): Promise<void> => {};
 
 foo();
 

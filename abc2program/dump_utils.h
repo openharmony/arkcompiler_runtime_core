@@ -73,11 +73,6 @@ constexpr std::string_view DUMP_CONTENT_TRY_END_LABEL = "try_end_label : ";
 constexpr std::string_view DUMP_CONTENT_CATCH_BEGIN_LABEL = "catch_begin_label : ";
 constexpr std::string_view DUMP_CONTENT_CATCH_END_LABEL = "catch_end_label : ";
 
-enum class PandasmDumperSource {
-    ECMASCRIPT = 0,
-    PANDA_ASSEMBLY = 1,
-};
-
 class PandasmDumperUtils {
 public:
     static std::string GetFunctionKindString(panda_file::FunctionKind function_kind);

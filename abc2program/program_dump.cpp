@@ -33,11 +33,6 @@ void PandasmProgramDumper::Dump(std::ostream &os, const pandasm::Program &progra
     DumpStrings(os);
 }
 
-void PandasmProgramDumper::SetDumperSource(PandasmDumperSource dumper_source)
-{
-    dumper_source_ = dumper_source;
-}
-
 void PandasmProgramDumper::SetAbcFilePath(const std::string &abc_file_path)
 {
     abc_file_path_ = abc_file_path;
@@ -70,13 +65,26 @@ void PandasmProgramDumper::DumpLiteralArrayTable(std::ostream &os) const
     os << DUMP_CONTENT_DOUBLE_ENDL;
     auto it = program_->literalarray_table.begin();
     auto end = program_->literalarray_table.end();
-    for (; it != end; ++it) {
-        if (dumper_source_ == PandasmDumperSource::PANDA_ASSEMBLY) {
-            os << it->first << DUMP_CONTENT_SPACE;
+    // In normalized mode, sort dump result of literal arrays before output.
+    if (is_normalized_) {
+        std::vector<std::string> literal_arrays;
+        for (; it != end; ++it) {
+            auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(it->first);
+            auto lit_arr = SerializeLiteralArray(it->second, id);
+            lit_arr += DUMP_CONTENT_DOUBLE_ENDL;
+            literal_arrays.emplace_back(lit_arr);
         }
-        auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(it->first);
-        os << SerializeLiteralArray(it->second, id);
-        os << DUMP_CONTENT_DOUBLE_ENDL;
+        std::sort(literal_arrays.begin(), literal_arrays.end());
+        for (auto &str : literal_arrays) {
+            os << str;
+        }
+    } else {
+        for (; it != end; ++it) {
+            os << it->first << DUMP_CONTENT_SPACE;
+            auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(it->first);
+            os << SerializeLiteralArray(it->second, id);
+            os << DUMP_CONTENT_DOUBLE_ENDL;
+        }
     }
     os << DUMP_CONTENT_DOUBLE_ENDL;
 }
@@ -87,6 +95,9 @@ void PandasmProgramDumper::DumpRecordTable(std::ostream &os) const
     os << DUMP_TITLE_RECORDS;
     os << DUMP_CONTENT_DOUBLE_ENDL;
     for (const auto &it : program_->record_table) {
+        if (is_normalized_ && is_debug_ && it.first == SLOT_NUMBER_RECORD_NAME) {
+            continue;
+        }
         DumpRecord(os, it.second);
     }
     os << DUMP_CONTENT_SINGLE_ENDL;
@@ -94,7 +105,7 @@ void PandasmProgramDumper::DumpRecordTable(std::ostream &os) const
 
 void PandasmProgramDumper::DumpRecord(std::ostream &os, const pandasm::Record &record) const
 {
-    if (dumper_source_ == PandasmDumperSource::ECMASCRIPT) {
+    if (is_normalized_) {
         if (AbcFileUtils::IsGlobalTypeName(record.name)) {
             return;
         }
@@ -188,7 +199,15 @@ void PandasmProgramDumper::DumpScalarValue(std::ostream &os, const pandasm::Scal
         case pandasm::Value::Type::METHOD:
         case pandasm::Value::Type::ENUM:
         case pandasm::Value::Type::LITERALARRAY: {
-            os << DUMP_CONTENT_SPACE << scalar.GetValue<std::string>();
+            if (!is_normalized_) {
+                os << DUMP_CONTENT_SPACE << scalar.GetValue<std::string>();
+            } else {
+                auto literal_array_id_name = scalar.GetValue<std::string>();
+                auto it = program_->literalarray_table.find(literal_array_id_name);
+                ASSERT(it != program_->literalarray_table.end());
+                auto id = PandasmDumperUtils::GetLiteralArrayIdFromName(literal_array_id_name);
+                os << DUMP_CONTENT_SPACE << SerializeLiteralArray(it->second, id);
+            }
             break;
         }
         case pandasm::Value::Type::RECORD: {
@@ -224,7 +243,9 @@ void PandasmProgramDumper::DumpFunction(std::ostream &os, const pandasm::Functio
 {
     regs_num_ = function.regs_num;
     DumpFunctionKind(os, function);
-    DumpFunctionAnnotations(os, function);
+    if (!is_normalized_ || !is_debug_) {
+        DumpFunctionAnnotations(os, function);
+    }
     DumpFunctionHead(os, function);
     DumpFunctionBody(os, function);
 }
@@ -297,14 +318,14 @@ void PandasmProgramDumper::DumpFunctionBody(std::ostream &os, const pandasm::Fun
 
 void PandasmProgramDumper::DumpFunctionIns(std::ostream &os, const pandasm::Function &function)
 {
-    if (dumper_source_ == PandasmDumperSource::ECMASCRIPT) {
-        DumpFunctionIns4EcmaScript(os, function);
+    if (is_normalized_) {
+        DumpNormalizedFunctionIns(os, function);
     } else {
-        DumpFunctionIns4PandaAssembly(os, function);
+        DumpOriginalFunctionIns(os, function);
     }
 }
 
-void PandasmProgramDumper::DumpFunctionIns4PandaAssembly(std::ostream &os, const pandasm::Function &function)
+void PandasmProgramDumper::DumpOriginalFunctionIns(std::ostream &os, const pandasm::Function &function)
 {
     for (const pandasm::Ins &pa_ins : function.ins) {
         std::string insStr = pa_ins.ToString("", true, regs_num_);
@@ -317,7 +338,7 @@ void PandasmProgramDumper::DumpFunctionIns4PandaAssembly(std::ostream &os, const
     }
 }
 
-void PandasmProgramDumper::DumpFunctionIns4EcmaScript(std::ostream &os, const pandasm::Function &function)
+void PandasmProgramDumper::DumpNormalizedFunctionIns(std::ostream &os, const pandasm::Function &function)
 {
     GetOriginalDumpIns(function);
     GetInvalidOpLabelMap();
@@ -472,23 +493,23 @@ void PandasmProgramDumper::HandleFinalLabelAtIndex(size_t idx)
 
 void PandasmProgramDumper::DumpFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const
 {
-    if (dumper_source_ == PandasmDumperSource::ECMASCRIPT) {
-        DumpFunctionCatchBlocks4EcmaScript(os, function);
+    if (is_normalized_) {
+        DumpNormalizedFunctionCatchBlocks(os, function);
     } else {
-        DumpFunctionCatchBlocks4PandaAssembly(os, function);
+        DumpOriginalFunctionCatchBlocks(os, function);
     }
 }
 
-void PandasmProgramDumper::DumpFunctionCatchBlocks4PandaAssembly(std::ostream &os,
-                                                                 const pandasm::Function &function) const
+void PandasmProgramDumper::DumpOriginalFunctionCatchBlocks(std::ostream &os,
+                                                           const pandasm::Function &function) const
 {
     for (const pandasm::Function::CatchBlock &catch_block : function.catch_blocks) {
         DumpCatchBlock(os, catch_block);
     }
 }
 
-void PandasmProgramDumper::DumpFunctionCatchBlocks4EcmaScript(std::ostream &os,
-                                                              const pandasm::Function &function) const
+void PandasmProgramDumper::DumpNormalizedFunctionCatchBlocks(std::ostream &os,
+                                                             const pandasm::Function &function) const
 {
     std::vector<pandasm::Function::CatchBlock> catch_blocks;
     for (const pandasm::Function::CatchBlock &catch_block : function.catch_blocks) {
@@ -536,7 +557,7 @@ void PandasmProgramDumper::DumpCatchBlock(std::ostream &os, const pandasm::Funct
        << catch_block.try_end_label << DUMP_CONTENT_SINGLE_ENDL;
     os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_BEGIN_LABEL
        << catch_block.catch_begin_label << DUMP_CONTENT_SINGLE_ENDL;
-    if (dumper_source_ == PandasmDumperSource::PANDA_ASSEMBLY) {
+    if (!is_normalized_) {
         os << DUMP_CONTENT_TAB << DUMP_CONTENT_CATCH_END_LABEL
            << catch_block.catch_end_label << DUMP_CONTENT_SINGLE_ENDL;
     }
@@ -548,7 +569,7 @@ void PandasmProgramDumper::DumpFunctionDebugInfo(std::ostream &os, const pandasm
         return;
     }
     std::map<int32_t, panda::pandasm::debuginfo::LocalVariable> local_variable_table;
-    if (dumper_source_ == PandasmDumperSource::ECMASCRIPT) {
+    if (is_normalized_) {
         UpdateLocalVarMap(function, local_variable_table);
     } else {
         for (const auto &variable_info : function.local_variable_debug) {
@@ -612,7 +633,7 @@ void PandasmProgramDumper::UpdateLocalVarMap(const pandasm::Function &function,
 
 void PandasmProgramDumper::DumpStrings(std::ostream &os) const
 {
-    if (dumper_source_ == PandasmDumperSource::ECMASCRIPT) {
+    if (is_normalized_) {
         return;
     }
     os << DUMP_TITLE_SEPARATOR;
@@ -709,7 +730,7 @@ void PandasmProgramDumper::SerializeLiteralsAtIndex(
 void PandasmProgramDumper::SerializeNestedLiteralArrayById(
     std::stringstream &os, const std::string &literal_array_id_name) const
 {
-    if (dumper_source_ != PandasmDumperSource::ECMASCRIPT) {
+    if (!is_normalized_) {
         os << literal_array_id_name;
         return;
     }

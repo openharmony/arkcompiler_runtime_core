@@ -24,8 +24,9 @@ namespace panda::abc2program {
 
 class PandasmProgramDumper {
 public:
+    PandasmProgramDumper() {}
+    PandasmProgramDumper(bool is_normalized, bool is_debug) : is_normalized_(is_normalized), is_debug_(is_debug) {}
     void Dump(std::ostream &os, const pandasm::Program &program);
-    void SetDumperSource(PandasmDumperSource dumper_source);
     void SetAbcFilePath(const std::string &abc_file_path);
 
 private:
@@ -51,8 +52,8 @@ private:
     void DumpFunctionAttributes(std::ostream &os, const pandasm::Function &function) const;
     void DumpFunctionBody(std::ostream &os, const pandasm::Function &function);
     void DumpFunctionIns(std::ostream &os, const pandasm::Function &function);
-    void DumpFunctionIns4PandaAssembly(std::ostream &os, const pandasm::Function &function);
-    void DumpFunctionIns4EcmaScript(std::ostream &os, const pandasm::Function &function);
+    void DumpOriginalFunctionIns(std::ostream &os, const pandasm::Function &function);
+    void DumpNormalizedFunctionIns(std::ostream &os, const pandasm::Function &function);
     void DumpFunctionDebugInfo(std::ostream &os, const pandasm::Function &function);
     void UpdateLocalVarMap(const pandasm::Function &function,
         std::map<int32_t, panda::pandasm::debuginfo::LocalVariable>& local_variable_table);
@@ -72,8 +73,8 @@ private:
     void HandleFinalLabelAtIndex(size_t idx);
     void DumpFinalIns(std::ostream &os);
     void DumpFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const;
-    void DumpFunctionCatchBlocks4PandaAssembly(std::ostream &os, const pandasm::Function &function) const;
-    void DumpFunctionCatchBlocks4EcmaScript(std::ostream &os, const pandasm::Function &function) const;
+    void DumpOriginalFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const;
+    void DumpNormalizedFunctionCatchBlocks(std::ostream &os, const pandasm::Function &function) const;
     void DumpCatchBlock(std::ostream &os, const pandasm::Function::CatchBlock &catch_block) const;
     void UpdateCatchBlock(pandasm::Function::CatchBlock &catch_block) const;
     std::string GetUpdatedCatchBlockLabel(const std::string &orignal_label) const;
@@ -83,7 +84,11 @@ private:
     void SerializeLiterals(const pandasm::LiteralArray &lit_array, std::stringstream &os) const;
     void SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, std::stringstream &os, size_t i) const;
     void SerializeNestedLiteralArrayById(std::stringstream &os, const std::string &literal_array_id_name) const;
-    PandasmDumperSource dumper_source_ = PandasmDumperSource::PANDA_ASSEMBLY;
+    // True when the option 'dump-normalized-asm-program' is enabled. See option description for details
+    bool is_normalized_ = false;
+    // True when the option 'debug-info' is enabled. When both it and is_normalized_ are true, skip dump
+    // of function annotation and the record with name '_ESSlotNumberAnnotation'
+    bool is_debug_ = false;
     std::string abc_file_path_;
     std::vector<pandasm::Ins> original_dump_ins_;
     std::vector<pandasm::Ins*> original_dump_ins_ptrs_;
