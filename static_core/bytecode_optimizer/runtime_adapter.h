@@ -365,13 +365,11 @@ public:
                     return;
                 }
 
-                if (fieldType.IsReference()) {
-                    if (pf.GetStringData(panda_file::File::EntityId(fda.GetType())) !=
-                        pf.GetStringData(panda_file::File::EntityId(fieldDataAccessor.GetType()))) {
-                        return;
-                    }
+                if (fieldType.IsReference() &&
+                    (pf.GetStringData(panda_file::File::EntityId(fda.GetType())) !=
+                     pf.GetStringData(panda_file::File::EntityId(fieldDataAccessor.GetType())))) {
+                    return;
                 }
-
                 fieldId = fieldDataAccessor.GetFieldId();
             });
 
