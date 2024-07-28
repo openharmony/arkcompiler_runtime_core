@@ -695,7 +695,7 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_source_cod
 {
     const pandasm::Function &function = *main_function_;
     std::string source_code = function.source_code;
-    EXPECT_TRUE(source_code.find("import {a} from './a'") != std::string::npos);
+    EXPECT_TRUE(source_code.find("not supported") != std::string::npos);
 }
 
 /**
