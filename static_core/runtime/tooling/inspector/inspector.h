@@ -29,6 +29,7 @@
 #include "tooling/pt_thread.h"
 
 #include <array>
+#include <atomic>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -110,7 +111,10 @@ private:
         return false;
     }
 
-    void LogDebuggerNotPaused(const char *methodName) const;
+    /// @brief Get verbose information about the raised exception.
+    std::optional<ExceptionDetails> CreateExceptionDetails(PtThread thread, RemoteObject &&exception);
+
+    size_t GetNewExceptionId();
 
 private:
     bool breakOnStart_;
@@ -122,6 +126,8 @@ private:
     DebugInterface &debugger_;
     DebugInfoCache debugInfoCache_;
     std::map<PtThread, DebuggableThread> threads_;
+
+    std::atomic_size_t currentExceptionId_ {0};
 
     os::memory::RWLock vmDeathLock_;
     bool isVmDead_ GUARDED_BY(vmDeathLock_) {false};

@@ -81,10 +81,6 @@ def add_sts_test_suite_args(parser: argparse.ArgumentParser) -> None:
         default=None,
         help='run ets-system-tests')
     ets_mutex_group.add_argument(
-        '--evaluate', action='store_true', dest='evaluate',
-        default=None,
-        help='run ETS evaluate tests')
-    ets_mutex_group.add_argument(
         '--ets-func-tests', action='store_true', dest='ets_func_tests',
         default=None, help='run test against ETS STDLIB TEMPLATES and manual written ETS tests')
     ets_mutex_group.add_argument(

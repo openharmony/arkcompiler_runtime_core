@@ -33,6 +33,11 @@
 using namespace std::placeholders;  // NOLINT(google-build-using-namespace)
 
 namespace ark::tooling::inspector {
+static void LogDebuggerNotPaused(std::string_view methodName)
+{
+    LOG(WARNING, DEBUGGER) << "Inspector method '" << methodName << "' must be called on pause";
+}
+
 Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart)
     : breakOnStart_(breakOnStart), inspectorServer_(server), debugger_(debugger)
 {
@@ -517,11 +522,33 @@ EvaluationResult Inspector::Evaluate(PtThread thread, const std::string &bcFragm
         return EvaluationResult({}, {});
     }
 
-    return it->second.Evaluate(bcFragment);
+    auto [optResult, optExceptionObject] = it->second.Evaluate(bcFragment);
+    std::optional<ExceptionDetails> optException;
+    if (optExceptionObject) {
+        optException = CreateExceptionDetails(thread, std::move(optExceptionObject.value()));
+    }
+    return std::make_pair(optResult, optException);
 }
 
-void Inspector::LogDebuggerNotPaused(const char *methodName) const
+std::optional<ExceptionDetails> Inspector::CreateExceptionDetails(PtThread thread, RemoteObject &&exception)
 {
-    LOG(WARNING, DEBUGGER) << "Inspector method '" << methodName << "' must be called on pause";
+    auto frame = debugger_.GetCurrentFrame(thread);
+    if (frame) {
+        std::string_view sourceFile;
+        std::string_view methodName;
+        size_t lineNumber;
+        debugInfoCache_.GetSourceLocation(*frame.Value(), sourceFile, methodName, lineNumber);
+
+        ExceptionDetails exceptionDetails(GetNewExceptionId(), "", lineNumber, 0);
+        return exceptionDetails.SetUrl(sourceFile).SetExceptionObject(std::move(exception));
+    }
+    HandleError(frame.Error());
+    return {};
+}
+
+size_t Inspector::GetNewExceptionId()
+{
+    // Atomic with relaxed order reason: data race on concurrent exceptions happening in conditional breakpoints.
+    return currentExceptionId_.fetch_add(1, std::memory_order_relaxed);
 }
 }  // namespace ark::tooling::inspector

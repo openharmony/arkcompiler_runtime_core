@@ -109,6 +109,7 @@ panda_add_gtest(
     NAME arkinspector_tests
     NO_CORES
     SOURCES
+        tests/base64.cpp
         tests/debug_info_cache.cpp
         tests/inspector_server.cpp
         tests/json_object_matcher.cpp

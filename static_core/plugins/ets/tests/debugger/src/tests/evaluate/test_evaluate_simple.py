@@ -30,7 +30,6 @@ AFTER_EVAL_MESSAGE: LiteralString = "After eval : "
 pytestmark = mark.evaluate
 
 
-@mark.xfail(reason="Runtime.evaluate is not implemented yet")
 async def test_evaluate_no_args(
     breakpoint_walker: BreakpointWalkerType,
 ):
@@ -61,7 +60,6 @@ function main() {{
         assert walker.capture.stdout[-1] == arkts_str(AFTER_EVAL_MESSAGE)
 
 
-@mark.xfail(reason="Runtime.evaluate is not implemented yet")
 async def test_evaluate_local_primitive(
     breakpoint_walker: BreakpointWalkerType,
 ):
@@ -95,7 +93,6 @@ function main() {{
         assert walker.capture.stdout[-1] == arkts_str(f"{AFTER_EVAL_MESSAGE}{expected_number}")
 
 
-@mark.xfail(reason="Runtime.evaluate is not implemented yet")
 async def test_evaluate_local_string(
     breakpoint_walker: BreakpointWalkerType,
 ):
@@ -205,7 +202,7 @@ function main() {
         "const o = new BaseClass(); o.method();",  # No such method in the base class
     ],
 )
-@mark.xfail(reason="Runtime.evaluate is not implemented yet", raises=CompileError)
+@mark.xfail(reason="Must not be compiled in evaluation mode", raises=CompileError)
 async def test_compilation_error(
     breakpoint_walker: BreakpointWalkerType,
     expression_evaluation_base: ScriptFile,

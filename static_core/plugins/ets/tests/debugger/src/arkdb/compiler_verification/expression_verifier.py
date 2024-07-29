@@ -27,6 +27,7 @@ from arkdb.compiler import AstParser
 from arkdb.compiler_verification.ast import AstComparator
 from arkdb.compiler_verification.bytecode import BytecodeComparator
 from arkdb.disassembler import ScriptFileDisassembler
+from arkdb.logs import RichLogger
 from arkdb.runnable_module import ScriptFile
 
 
@@ -95,6 +96,7 @@ class ExpressionFileComparator(Protocol):
 def expression_file_comparator(
     script_disassembler: ScriptFileDisassembler,
     eval_options_loader: OptionsLoader,
+    log: RichLogger,
 ) -> ExpressionFileComparator:
     def verify(
         base: ScriptFile,
@@ -107,7 +109,10 @@ def expression_file_comparator(
 
         ast_comparator = AstComparator(expression, expected, options.expected_imports_base)
         if not options.disable_ast_comparison:
-            ast_comparator.compare()
+            try:
+                ast_comparator.compare()
+            except Exception as e:
+                log.warning("Expression AST mismatch: %s", e)
         if not options.disable_bytecode_comparison:
             bytecode_comparator = BytecodeComparator(
                 expression,

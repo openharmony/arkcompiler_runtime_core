@@ -304,9 +304,9 @@ std::map<std::string, TypedValue> DebugInfoCache::GetLocals(const PtFrame &frame
     }
 
     auto &variables = debugInfo.GetLocalVariableTable(methodId);
+    auto frameOffset = frame.GetBytecodeOffset();
     for (auto &variable : variables) {
-        auto frameOffset = frame.GetBytecodeOffset();
-        if (variable.startOffset <= frameOffset && frameOffset < variable.endOffset) {
+        if (variable.IsAccessibleAt(frameOffset)) {
             localHandler(variable.name, variable.typeSignature,
                          // We introduced a hack in DisasmBackedDebugInfoExtractor, assigning -1 to Accumulator
                          variable.regNumber == -1 ? frame.GetAccumulator() : frame.GetVReg(variable.regNumber),

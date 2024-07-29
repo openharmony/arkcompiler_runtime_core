@@ -61,9 +61,6 @@ class TestEnv:
     verifier: str
     verifier_args: List[str]
 
-    # Path of ark_disasm binary
-    ark_disasm: str
-
     util: Any = None
 
 

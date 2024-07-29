@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 #ifndef PANDA_TOOLING_INSPECTOR_EXCEPTION_DETAILS_H
 #define PANDA_TOOLING_INSPECTOR_EXCEPTION_DETAILS_H
 
+#include "macros.h"
 #include "numeric_id.h"
 #include "remote_object.h"
 
@@ -78,7 +79,7 @@ public:
         return url_.value();
     }
 
-    ExceptionDetails &SetUrl(const std::string &url)
+    ExceptionDetails &SetUrl(std::string_view url)
     {
         url_ = url;
         return *this;
@@ -94,7 +95,7 @@ public:
         return exception_;
     }
 
-    ExceptionDetails &SetExceptionObject(RemoteObject exception)
+    ExceptionDetails &SetExceptionObject(RemoteObject &&exception)
     {
         exception_ = std::move(exception);
         return *this;

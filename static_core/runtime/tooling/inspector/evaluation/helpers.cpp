@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "libpandabase/utils/span.h"
 #include "libpandafile/class_data_accessor.h"
 #include "runtime/include/runtime.h"
 #include "runtime/tooling/inspector/evaluation/base64.h"
@@ -24,7 +25,7 @@ namespace {
 
 bool ValidateEvaluationMethod(Method *method)
 {
-    if (!method) {
+    if (method == nullptr) {
         LOG(WARNING, DEBUGGER) << "Evaluate failed to find method";
         return false;
     }
@@ -51,6 +52,7 @@ bool ValidateEvaluationMethod(Method *method)
 std::optional<std::string> FindEvaluationMethodName(std::string_view demangledClassName)
 {
     static constexpr std::string_view SUFFIX = "_eval";
+    // CC-OFFNXT(G.NAM.03) project code style
     static constexpr char DELIMITER = '.';
 
     // Evaluation class fully-qualified name must consist of package and class
@@ -59,6 +61,7 @@ std::optional<std::string> FindEvaluationMethodName(std::string_view demangledCl
     if (iter == demangledClassName.end()) {
         return {};
     }
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     if (std::find(iter + 1, demangledClassName.end(), DELIMITER) != demangledClassName.end()) {
         return {};
     }
@@ -78,10 +81,9 @@ std::optional<std::string> FindEvaluationMethodName(std::string_view demangledCl
 /**
  * @brief Finds evaluation class according to naming convention.
  * @param pf received panda file.
- * @returns pair of optional evaluation method name and source language. Note that the first one
- * contains value on success, whereas the second might be empty.
+ * @returns pair of evaluation method name and class data accessor on success, nullopt otherwise.
  */
-std::pair<std::optional<std::string>, std::optional<panda_file::SourceLang>> FindEvaluationMethodClass(
+std::optional<std::pair<std::string, panda_file::ClassDataAccessor>> FindEvaluationMethodClass(
     const panda_file::File *pf)
 {
     for (uint32_t id : pf->GetClasses()) {
@@ -94,46 +96,61 @@ std::pair<std::optional<std::string>, std::optional<panda_file::SourceLang>> Fin
         std::string className = cda.DemangledName();
         auto expectedMethodName = FindEvaluationMethodName(className);
         if (expectedMethodName) {
-            auto optLang = cda.GetSourceLang();
-            return {expectedMethodName, optLang};
+            return std::make_pair(*expectedMethodName, cda);
         }
     }
-    return {{}, {}};
+    return {};
 }
 
 Method *LoadFileAndGetEntryMethod(ClassLinkerContext *ctx, std::unique_ptr<const panda_file::File> &&pf)
 {
     // Extract information about evaluation entry method. By convention, the passed
     // bytecode must contain a class with a static method, which both have the same names as panda file has.
-    auto [optMethodName, optLang] = FindEvaluationMethodClass(pf.get());
-    if (!optMethodName) {
+    auto optEvalClassInfo = FindEvaluationMethodClass(pf.get());
+    if (!optEvalClassInfo) {
         LOG(WARNING, DEBUGGER) << "Evaluate failed to find entry class";
         return nullptr;
     }
-    const auto &methodName = optMethodName.value();
-    auto classDescriptor = [methodName]() {
-        std::stringstream ss;
-        ss << "L" << methodName << "/" << methodName << ";";
-        return ss.str();
-    }();
-    LOG(INFO, DEBUGGER) << "Evaluation class and method name: " << methodName;
+    auto [methodName, cda] = *optEvalClassInfo;
+    auto evalClassId = cda.GetClassId();
+    const auto *descriptor = pf->GetStringData(evalClassId).data;
+
+    // Check that the class is not loaded yet.
+    auto *linker = Runtime::GetCurrent()->GetClassLinker();
+    if (linker->GetClass(*pf, evalClassId, ctx, nullptr) != nullptr) {
+        LOG(WARNING, DEBUGGER) << "Evaluation class is already loaded, which is not supported";
+        return nullptr;
+    }
 
     // Add panda file into context of the target thread.
-    auto *linker = Runtime::GetCurrent()->GetClassLinker();
-    // TODO: verify that the panda file was not loaded before.
     linker->AddPandaFile(std::move(pf), ctx);
-    ClassLinkerExtension *extension = linker->GetExtension(optLang.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
+
+    auto sourceLang = cda.GetSourceLang().value_or(panda_file::SourceLang::PANDA_ASSEMBLY);
+    ClassLinkerExtension *extension = linker->GetExtension(sourceLang);
     ASSERT(extension != nullptr);
 
-    // TODO: may use `GetClass` which accepts panda file as argument, as it can be faster.
     // Linker must accept nullptr as error handler, otherwise managed exception will occur on failure.
-    auto *klass = linker->GetClass(utf::CStringAsMutf8(classDescriptor.c_str()), true, extension->ResolveContext(ctx));
+    auto *klass = linker->GetClass(descriptor, true, extension->ResolveContext(ctx), nullptr);
     if (klass == nullptr) {
-        // TODO: may unload file on error.
         LOG(WARNING, DEBUGGER) << "Evaluate failed to load class";
         return nullptr;
     }
     return klass->GetDirectMethod(utf::CStringAsMutf8(methodName.c_str()));
+}
+
+bool DecodeBase64Bytecode(const std::string &encoded, std::vector<uint8_t> &decoded)
+{
+    ASSERT(!encoded.empty());
+
+    auto sz = encoded.size();
+    Span encodingInput(reinterpret_cast<const uint8_t *>(encoded.c_str()), sz);
+    auto bytecodeSize = Base64Decoder::DecodedSize(encodingInput);
+    if (!bytecodeSize) {
+        LOG(WARNING, DEBUGGER) << "Invalid base64 encoding of expression";
+        return false;
+    }
+    decoded.resize(*bytecodeSize);
+    return Base64Decoder::Decode(decoded.data(), encodingInput);
 }
 
 }  // namespace
@@ -143,10 +160,13 @@ Method *LoadEvaluationPatch(ClassLinkerContext *ctx, const std::string &encodedB
     ASSERT(ctx != nullptr);
     ASSERT(!encodedBytecodeFragment.empty());
 
-    auto sz = encodedBytecodeFragment.size();
-    std::string binaryBytecode(PtBase64::DecodedSize(sz), 0);
-    PtBase64::Decode(binaryBytecode.data(), encodedBytecodeFragment.c_str(), sz);
-    auto pf = ark::panda_file::OpenPandaFileFromMemory(binaryBytecode.c_str(), binaryBytecode.size());
+    std::vector<uint8_t> binaryBytecode;
+    if (!DecodeBase64Bytecode(encodedBytecodeFragment, binaryBytecode)) {
+        LOG(WARNING, DEBUGGER) << "Failed to decode base64 expression";
+        return nullptr;
+    }
+
+    auto pf = ark::panda_file::OpenPandaFileFromMemory(binaryBytecode.data(), binaryBytecode.size());
     if (pf == nullptr) {
         LOG(WARNING, DEBUGGER) << "Evaluate failed to read bytecode";
         return nullptr;

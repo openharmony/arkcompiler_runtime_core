@@ -44,7 +44,7 @@ def get_expression_path(ets_file_path: Path, lang_extension: str):
 
 
 def get_expected_path(ets_file_path: Path, lang_extension: str):
-    return replace_suffixes(ets_file_path, f".expected.{lang_extension}")
+    return ets_file_path.parent / "expected" / replace_suffixes(ets_file_path, f".expected.{lang_extension}").name
 
 
 def get_verifier(
@@ -65,7 +65,6 @@ def get_verifier(
     return get_expression_verifier(expression_file_comparator, base, expected, ast_parser)
 
 
-@mark.xfail(reason="Runtime.evaluate is not implemented yet")
 @mark.parametrize(
     "base_ets_file",
     [

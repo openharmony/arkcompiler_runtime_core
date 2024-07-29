@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,32 +40,11 @@ static void SetRuntimeException(EtsLong regNumber, EtsCoroutine *coroutine, std:
     ark::ets::ThrowEtsException(coroutine, panda_file_items::class_descriptors::ERROR, errorMsg);
 }
 
-// template <typename T>
-// static panda_file::LocalVariableTable::const_iterator FindLocalVariable(
-//     const panda_file::LocalVariableTable &localVariables, EtsLong regNumber)
-// {
-//     panda_file::LocalVariableTable::const_iterator found = localVariables.end();
-//     for (auto iter : localVariables) {
-//         if (iter.regNumber != regNumber) {
-//             continue;
-//         }
-
-//         auto typeId =
-//             iter.signature.empty() ? panda_file::Type::TypeId::INVALID : GetTypeIdBySignature(iter.signature[0]);
-//         if (IsEqual<T>(typeId)) {
-//             // Must take variable from the most nested scope.
-//             if (found == localVariables.end() ||
-//                 found.startOffset < iter.startOffset && iter.endOffset <= found.endOffset) {
-//                 found = iter;
-//             }
-//         }
-//     }
-//     return found;
-// }
-
 template <typename T>
 static T DebuggerAPIGetLocal(EtsCoroutine *coroutine, EtsLong regNumber)
 {
+    static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
+
     ASSERT(coroutine);
 
     if (regNumber < 0) {
@@ -74,7 +53,8 @@ static T DebuggerAPIGetLocal(EtsCoroutine *coroutine, EtsLong regNumber)
 
     ark::tooling::VRegValue vregValue;
     auto &debugger = Runtime::GetCurrent()->StartDebugSession()->GetDebugger();
-    auto err = debugger.GetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), 1, regNumber, &vregValue);
+    auto err = debugger.GetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), PREVIOUS_FRAME_DEPTH, regNumber,
+                                    &vregValue);
     if (err) {
         LOG(ERROR, DEBUGGER) << "Failed to get local variable: " << err.value().GetMessage();
         SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
@@ -134,26 +114,30 @@ EtsLong DebuggerAPIGetLocalLong(EtsLong regNumber)
 EtsObject *DebuggerAPIGetLocalObject(EtsLong regNumber)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
-    // TODO: verify handles are correct.
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
 
     auto *obj = DebuggerAPIGetLocal<ObjectHeader *>(coroutine, regNumber);
     obj = (obj == nullptr) ? coroutine->GetUndefinedObject() : obj;
-    return EtsObject::FromCoreType(obj);
+    VMHandle<ObjectHeader> objHandle(coroutine, obj);
+    return EtsObject::FromCoreType(objHandle.GetPtr());
 }
 
 template <typename T>
 static void DebuggerAPISetLocal(EtsCoroutine *coroutine, EtsLong regNumber, T value)
 {
+    static constexpr uint32_t PREVIOUS_FRAME_DEPTH = 1;
+
     ASSERT(coroutine);
 
     if (regNumber < 0) {
         SetNotFoundException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
+        return;
     }
 
     auto vregValue = ark::ets::tooling::EtsValueToVRegValue<T>(value);
     auto &debugger = Runtime::GetCurrent()->StartDebugSession()->GetDebugger();
-    auto err = debugger.SetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), 1, regNumber, vregValue);
+    auto err = debugger.SetVariable(ark::ets::tooling::CoroutineToPtThread(coroutine), PREVIOUS_FRAME_DEPTH, regNumber,
+                                    vregValue);
     if (err) {
         LOG(ERROR, DEBUGGER) << "Failed to set local variable: " << err.value().GetMessage();
         SetRuntimeException(regNumber, coroutine, ark::ets::tooling::EtsTypeName<T>::NAME);
@@ -211,7 +195,6 @@ void DebuggerAPISetLocalLong(EtsLong regNumber, EtsLong value)
 void DebuggerAPISetLocalObject(EtsLong regNumber, EtsObject *value)
 {
     auto coroutine = EtsCoroutine::GetCurrent();
-    // TODO: verify handles are correct.
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     VMHandle<EtsObject> objHandle(coroutine, value->GetCoreType());
 

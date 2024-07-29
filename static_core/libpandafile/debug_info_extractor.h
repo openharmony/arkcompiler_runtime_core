@@ -39,12 +39,19 @@ using LineNumberTable = std::vector<LineTableEntry>;
 using ColumnNumberTable = std::vector<ColumnTableEntry>;
 
 struct LocalVariableInfo {
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     std::string name;
     std::string type;
     std::string typeSignature;
     int32_t regNumber;
     uint32_t startOffset;
     uint32_t endOffset;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
+
+    bool IsAccessibleAt(uint32_t offset) const
+    {
+        return startOffset <= offset && offset <= endOffset;
+    }
 };
 
 using LocalVariableTable = std::vector<LocalVariableInfo>;

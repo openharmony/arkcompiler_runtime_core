@@ -531,29 +531,31 @@ void InspectorServer::OnCallRuntimeRunIfWaitingForDebugger(std::function<void(Pt
 
 void InspectorServer::OnCallRuntimeEvaluate(std::function<EvaluationResult(PtThread, const std::string &)> &&handler)
 {
+    // clang-format off
     server_.OnCall("Runtime.evaluate",
-                   [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
-                       auto thread = sessionManager_.GetThreadBySessionId(sessionId);
+        [this, handler = std::move(handler)](auto &sessionId, auto &result, const JsonObject &params) {
+            auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
-                       auto expressionStr = params.GetValue<JsonObject::StringT>("expression");
-                       if (expressionStr == nullptr) {
-                           LOG(INFO, DEBUGGER) << "No 'expression' property";
-                           return;
-                       }
+            auto expressionStr = params.GetValue<JsonObject::StringT>("expression");
+            if (expressionStr == nullptr || expressionStr->empty()) {
+                LOG(INFO, DEBUGGER) << "'expression' property is absent or empty";
+                return;
+            }
 
-                       auto [evalResult, exceptionDetails] = handler(thread, *expressionStr);
+            auto [evalResult, exceptionDetails] = handler(thread, *expressionStr);
 
-                       if (!evalResult) {
-                           // NOTE(dslynko): might return error instead of `undefined`.
-                           LOG(DEBUG, DEBUGGER) << "Evaluation failed for expression: " << *expressionStr;
-                           evalResult.emplace(RemoteObject::Undefined());
-                       }
-                       result.AddProperty("result", evalResult->ToJson());
+            if (!evalResult) {
+                // NOTE(dslynko): might return error instead of `undefined`.
+                LOG(DEBUG, DEBUGGER) << "Evaluation failed for expression: " << *expressionStr;
+                evalResult.emplace(RemoteObject::Undefined());
+            }
+            result.AddProperty("result", evalResult->ToJson());
 
-                       if (exceptionDetails) {
-                           result.AddProperty("exceptionDetails", exceptionDetails->ToJson());
-                       }
-                   });
+            if (exceptionDetails) {
+                result.AddProperty("exceptionDetails", exceptionDetails->ToJson());
+            }
+        });
+    // clang-format on
 }
 
 void InspectorServer::SendTargetAttachedToTarget(const std::string &sessionId)

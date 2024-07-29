@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TOOLING_HELPERS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TOOLING_HELPERS_H
 
+#include "libpandabase/utils/bit_utils.h"
 #include "runtime/include/tooling/pt_thread.h"
 #include "type.h"
 #include "types/ets_primitives.h"
@@ -28,6 +29,8 @@ template <typename T>
 struct EtsTypeName {
 };
 
+// CC-OFFNXT(G.PRE.02) code generation
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ETS_TYPE_NAME(TYPE_NAME)                             \
     template <>                                              \
     struct EtsTypeName<TYPE_NAME> {                          \
@@ -50,147 +53,57 @@ struct EtsTypeName<ObjectHeader *> {
     static constexpr std::string_view NAME = "EtsObject";
 };
 
-template <typename T>
-constexpr bool IsEqual(panda_file::Type::TypeId typeId);
-
-template <>
-constexpr bool IsEqual<EtsBoolean>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::U1;
-}
-
-template <>
-constexpr bool IsEqual<EtsByte>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::I8;
-}
-
-template <>
-constexpr bool IsEqual<EtsShort>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::I16;
-}
-
-template <>
-constexpr bool IsEqual<EtsChar>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::U16;
-}
-
-template <>
-constexpr bool IsEqual<EtsInt>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::I32;
-}
-
-template <>
-constexpr bool IsEqual<EtsFloat>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::F32;
-}
-
-template <>
-constexpr bool IsEqual<EtsDouble>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::F64;
-}
-
-template <>
-constexpr bool IsEqual<EtsLong>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::I64;
-}
-
-template <>
-constexpr bool IsEqual<ObjectHeader *>(panda_file::Type::TypeId typeId)
-{
-    return typeId == panda_file::Type::TypeId::REFERENCE;
-}
-
-constexpr panda_file::Type::TypeId GetTypeIdBySignature(char signature)
-{
-    switch (signature) {
-        case 'V':
-            return panda_file::Type::TypeId::VOID;
-        case 'Z':
-            return panda_file::Type::TypeId::U1;
-        case 'B':
-            return panda_file::Type::TypeId::I8;
-        case 'H':
-            return panda_file::Type::TypeId::U8;
-        case 'S':
-            return panda_file::Type::TypeId::I16;
-        case 'C':
-            return panda_file::Type::TypeId::U16;
-        case 'I':
-            return panda_file::Type::TypeId::I32;
-        case 'U':
-            return panda_file::Type::TypeId::U32;
-        case 'F':
-            return panda_file::Type::TypeId::F32;
-        case 'D':
-            return panda_file::Type::TypeId::F64;
-        case 'J':
-            return panda_file::Type::TypeId::I64;
-        case 'Q':
-            return panda_file::Type::TypeId::U64;
-        case 'A':
-            return panda_file::Type::TypeId::TAGGED;
-        case 'L':
-        case '[':
-            return panda_file::Type::TypeId::REFERENCE;
-        default:
-            return panda_file::Type::TypeId::INVALID;
-    }
-}
-
 template <typename T, typename std::enable_if_t<std::is_same_v<EtsBoolean, T> || std::is_same_v<EtsByte, T> ||
-                                                std::is_same_v<EtsShort, T> || std::is_same_v<EtsChar, T> ||
-                                                std::is_same_v<EtsInt, T> || std::is_same_v<EtsLong, T>> * = nullptr>
+                                                    std::is_same_v<EtsShort, T> || std::is_same_v<EtsChar, T> ||
+                                                    std::is_same_v<EtsInt, T> || std::is_same_v<EtsLong, T>,
+                                                int> = 0>
 constexpr T VRegValueToEtsValue(ark::tooling::VRegValue value)
 {
     return static_cast<T>(value.GetValue());
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<EtsFloat, T>> * = nullptr>
+template <typename T, typename std::enable_if_t<std::is_same_v<EtsFloat, T>, int> = 0>
 constexpr EtsFloat VRegValueToEtsValue(ark::tooling::VRegValue value)
 {
-    return bit_cast<EtsFloat>(static_cast<int32_t>(value.GetValue() & 0xffffffffULL));
+    size_t bitsCount = sizeof(EtsFloat) * 8U;
+    return bit_cast<EtsFloat>(
+        static_cast<int32_t>(ExtractBits(static_cast<uint64_t>(value.GetValue()), 0U, bitsCount)));
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<EtsDouble, T>> * = nullptr>
+template <typename T, typename std::enable_if_t<std::is_same_v<EtsDouble, T>, int> = 0>
 constexpr EtsDouble VRegValueToEtsValue(ark::tooling::VRegValue value)
 {
-    return bit_cast<EtsDouble>(value.GetValue() & 0xffffffffULL);
+    return bit_cast<EtsDouble>(value.GetValue());
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<ObjectHeader *, T>> * = nullptr>
+template <typename T, typename std::enable_if_t<std::is_same_v<ObjectHeader *, T>, int> = 0>
 constexpr ObjectHeader *VRegValueToEtsValue(ark::tooling::VRegValue value)
 {
     return reinterpret_cast<ObjectHeader *>(value.GetValue());
 }
 
 template <typename T, typename std::enable_if_t<std::is_same_v<EtsBoolean, T> || std::is_same_v<EtsByte, T> ||
-                                                std::is_same_v<EtsShort, T> || std::is_same_v<EtsChar, T> ||
-                                                std::is_same_v<EtsInt, T> || std::is_same_v<EtsLong, T>> * = nullptr>
+                                                    std::is_same_v<EtsShort, T> || std::is_same_v<EtsChar, T> ||
+                                                    std::is_same_v<EtsInt, T> || std::is_same_v<EtsLong, T>,
+                                                int> = 0>
 constexpr ark::tooling::VRegValue EtsValueToVRegValue(T value)
 {
     return ark::tooling::VRegValue(value);
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<EtsFloat, T>> * = nullptr>
+template <typename T, typename std::enable_if_t<std::is_same_v<EtsFloat, T>, int> = 0>
 constexpr ark::tooling::VRegValue EtsValueToVRegValue(EtsFloat value)
 {
     return ark::tooling::VRegValue(bit_cast<int32_t>(value));
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<EtsDouble, T>> * = nullptr>
+template <typename T, typename std::enable_if_t<std::is_same_v<EtsDouble, T>, int> = 0>
 constexpr ark::tooling::VRegValue EtsValueToVRegValue(EtsDouble value)
 {
     return ark::tooling::VRegValue(bit_cast<int64_t>(value));
 }
 
-template <typename T, typename std::enable_if_t<std::is_same_v<ObjectHeader *, T>> * = nullptr>
+template <typename T, typename std::enable_if_t<std::is_same_v<ObjectHeader *, T>, int> = 0>
 constexpr ark::tooling::VRegValue EtsValueToVRegValue(ObjectHeader *value)
 {
     return ark::tooling::VRegValue(reinterpret_cast<int64_t>(value));

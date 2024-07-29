@@ -97,10 +97,6 @@ class PandaBinaries:
         return self.__get_binary_path('ark_aot')
 
     @property
-    def ark_disasm(self) -> str:
-        return self.__get_binary_path('ark_disasm')
-
-    @property
     def ark_quick(self) -> str:
         return ""
 
@@ -150,8 +146,7 @@ class RunnerFileBased(Runner):
             report_formats={self.config.report.report_format},
             work_dir=self.work_dir,
             verifier=self.binaries.verifier,
-            verifier_args=self.verifier_args,
-            ark_disasm=self.binaries.ark_disasm
+            verifier_args=self.verifier_args
         )
 
     @property

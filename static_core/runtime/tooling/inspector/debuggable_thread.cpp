@@ -136,13 +136,13 @@ bool DebuggableThread::RequestToObjectRepository(std::function<void(ObjectReposi
     return true;
 }
 
-EvaluationResult DebuggableThread::Evaluate(const std::string &bcFragment)
+std::pair<std::optional<RemoteObject>, std::optional<RemoteObject>> DebuggableThread::Evaluate(
+    const std::string &bcFragment)
 {
     std::optional<RemoteObject> optResult;
-    std::optional<ExceptionDetails> optException;
+    std::optional<RemoteObject> optException;
 
-    // TODO: ensure that evaluation is done in proper context.
-    RequestToObjectRepository([this, bcFragment, &optResult, &optException](ObjectRepository &objectRepo) {
+    RequestToObjectRepository([this, &bcFragment, &optResult, &optException](ObjectRepository &objectRepo) {
         ASSERT(thread_->GetCurrentFrame());
         auto *ctx = thread_->GetCurrentFrame()->GetMethod()->GetClass()->GetLoadContext();
 
@@ -154,7 +154,7 @@ EvaluationResult DebuggableThread::Evaluate(const std::string &bcFragment)
         auto [result, exception] = InvokeEvaluationMethod(method);
 
         if (exception != nullptr) {
-            optException.emplace(CreateExceptionDetails(objectRepo, exception));
+            optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exception)));
         }
 
         auto resultTypeId = method->GetReturnType().GetId();
@@ -167,8 +167,7 @@ EvaluationResult DebuggableThread::Evaluate(const std::string &bcFragment)
 std::pair<Value, ObjectHeader *> DebuggableThread::InvokeEvaluationMethod(Method *method)
 {
     ASSERT(method);
-
-    auto *prevException = thread_->GetException();
+    ASSERT(!thread_->HasPendingException());
 
     // Some debugger functionality must be disabled in evaluation mode.
     evaluationMode_ = true;
@@ -177,13 +176,13 @@ std::pair<Value, ObjectHeader *> DebuggableThread::InvokeEvaluationMethod(Method
     evaluationMode_ = false;
 
     ObjectHeader *newException = nullptr;
-    if (thread_->HasPendingException() && thread_->GetException() != prevException) {
+    if (thread_->HasPendingException()) {
         newException = thread_->GetException();
         LOG(WARNING, DEBUGGER) << "Evaluation has completed with a exception "
-                               << thread_->GetException()->ClassAddr<Class>()->GetName();
+                               << newException->ClassAddr<Class>()->GetName();
+        // Restore the previous exception.
+        thread_->SetException(nullptr);
     }
-    // Restore the previous exception.
-    thread_->SetException(prevException);
 
     return std::make_pair(result, newException);
 }
@@ -309,36 +308,5 @@ void DebuggableThread::Resume()
     thread_->Resume();
 
     callbacks_.postResume();
-}
-
-ExceptionDetails DebuggableThread::CreateExceptionDetails(ObjectRepository &objectRepo, ObjectHeader *exception)
-{
-    ASSERT(exception);
-
-    const char *source = nullptr;
-    size_t lineNum = 0;
-    auto walker = StackWalker::Create(thread_);
-    if (walker.HasFrame()) {
-        auto *method = walker.GetMethod();
-        source = utf::Mutf8AsCString(method->GetClassSourceFile().data);
-        lineNum = method->GetLineNumFromBytecodeOffset(walker.GetBytecodePc());
-    }
-
-    // Yet unable to retrieve column number by bytecode, so pass 0.
-    // NOTE(dslynko): must retrieve exception message in language agnostic manner.
-    ExceptionDetails exceptionDetails(GetNewExceptionId(), "", lineNum, 0);
-    if (source != nullptr) {
-        exceptionDetails.SetUrl(source);
-    }
-
-    auto exceptionRemoteObject = objectRepo.CreateObject(TypedValue::Reference(exception));
-    exceptionDetails.SetExceptionObject(exceptionRemoteObject);
-
-    return exceptionDetails;
-}
-
-size_t DebuggableThread::GetNewExceptionId()
-{
-    return currentExceptionId_++;
 }
 }  // namespace ark::tooling::inspector

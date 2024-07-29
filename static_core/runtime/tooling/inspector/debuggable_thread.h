@@ -97,9 +97,9 @@ public:
      * File must contain public class with equally named static method taking no arguments.
      * Name of both class and method must equal source code file name, path to which must be included into binary.
      * @param bcFragment base64 encoded panda file.
-     * @returns pair of optional result and exception details if it was raised by evaluated code.
+     * @returns pair of optional result and exception objects if it was raised by evaluated code.
      */
-    EvaluationResult Evaluate(const std::string &bcFragment);
+    std::pair<std::optional<RemoteObject>, std::optional<RemoteObject>> Evaluate(const std::string &bcFragment);
 
     /// The following methods should be called on an application thread
 
@@ -134,13 +134,6 @@ private:
     // Marks a paused thread as not suspended. Should be called on the server thread
     void Resume() REQUIRES(mutex_);
 
-    /**
-     * @brief Get verbose information about the raised exception.
-     */
-    ExceptionDetails CreateExceptionDetails(ObjectRepository &objectRepo, ObjectHeader *exception);
-
-    size_t GetNewExceptionId();
-
 private:
     ManagedThread *thread_;
     SuspensionCallbacks callbacks_;
@@ -151,7 +144,6 @@ private:
     bool evaluationMode_ {false};
     std::optional<std::function<void(ObjectRepository &)>> request_ GUARDED_BY(mutex_);
     os::memory::ConditionVariable requestDone_ GUARDED_BY(mutex_);
-    size_t currentExceptionId_ {0};
 };
 }  // namespace ark::tooling::inspector
 
