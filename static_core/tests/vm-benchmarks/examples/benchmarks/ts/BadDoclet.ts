@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-export function randomString(size) {
-    let s = '';
-    for (var i = 0; i < size; i++) {
-        s += String.fromCharCode((25 * Math.random()) + 97);
-    }
-    return s;
-}
+/**
+ * @State
+ * @Param 1, 2
+ */
+class BadDoclet {
 
-export function randomNumber(size) {
-    return Math.floor(Math.random() * size);
+    /**
+     * @Benchmark
+     */
+    test() : int {
+        return 42
+    }
 }

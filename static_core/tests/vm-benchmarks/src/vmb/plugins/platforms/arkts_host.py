@@ -50,7 +50,9 @@ class Platform(PlatformBase):
                 self.ext_info['etsstdlib'] = {}
             self.ext_info['etsstdlib']['etsstdlib.an'] = \
                 AOTStatsLib(time=res.tm * 1e9,
-                            size=self.x_sh.get_filesize(an))
+                            size=self.x_sh.get_filesize(an),
+                            aot_stats=self.paoc.get_aot_stats(
+                                an, self.paoc.libs))
 
     @property
     def name(self) -> str:
@@ -74,8 +76,8 @@ class Platform(PlatformBase):
 
     def run_unit(self, bu: BenchUnit) -> None:
         self.es2panda(bu)
-        if OptFlags.DRY_RUN in self.flags:
-            return
         if OptFlags.AOT in self.flags:
             self.paoc(bu)
+        if self.dry_run_stop(bu):
+            return
         self.ark(bu)

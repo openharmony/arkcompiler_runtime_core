@@ -23,16 +23,17 @@ class Lang(LangBase):
     name = 'Swift'
     short_name = 'swift'
     __re_state = re.compile(
+        # State class should not be generic
         r'^\s*(export)?\s*'
         r'class\s+(?P<class>\w+)\s*'
         r'({)?\s*$')
     __re_func = re.compile(
-        r'^\s*func\s+(?P<func>\w+)'
+        r'^\s*func\s+(?P<func>[<>\w]+)'
         r'\(\s*\)'
-        r'\s*(async)?\s*(throws)?\s*(?P<type>->\s*\w+)?\s*({)?\s*$')
+        r'\s*(async)?\s*(throws)?\s*(?P<type>->\s*[<>\w]+)?\s*({)?\s*$')
     __re_param = re.compile(
         r'^\s*var\s*(?P<param>\w+)\s*'
-        r'(:|\=)?\s*(?P<type>\w+)(\?)?\s*$')
+        r'(:|\=)?\s*(?P<type>[<>\w]+)(\?)?\s*$')
 
     def __init__(self):
         super().__init__()

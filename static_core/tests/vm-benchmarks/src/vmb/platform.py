@@ -20,7 +20,7 @@ import logging
 from typing import List, Optional, Type  # noqa
 from abc import ABC, abstractmethod
 from pathlib import Path
-from vmb.tool import ToolBase
+from vmb.tool import ToolBase, OptFlags
 from vmb.target import Target
 from vmb.unit import BenchUnit, UNIT_PREFIX
 from vmb.helpers import get_plugins, get_plugin, die
@@ -28,11 +28,13 @@ from vmb.cli import Args
 from vmb.shell import ShellUnix, ShellAdb, ShellHdc, ShellDevice
 from vmb.result import ExtInfo
 from vmb.x_shell import CrossShell
+from vmb.gensettings import GenSettings
 
 
 log = logging.getLogger('vmb')
 
 
+# pylint: disable-next=too-many-public-methods
 class PlatformBase(CrossShell, ABC):
     """Platform Base."""
 
@@ -56,7 +58,7 @@ class PlatformBase(CrossShell, ABC):
         ToolBase.hdc_ = self.hdc
         ToolBase.dev_dir = self.dev_dir
         # dir with shared libs (init before the suite)
-        ToolBase.libs = Path(args.get_shared_path()).joinpath('libs')
+        ToolBase.libs = Path(args.get_shared_path()).joinpath('libs').resolve()
         ToolBase.libs.mkdir(parents=True, exist_ok=True)
         # init all the tools
         tool_plugins = get_plugins(
@@ -75,11 +77,13 @@ class PlatformBase(CrossShell, ABC):
     @property
     @abstractmethod
     def name(self) -> str:
+        """Name of platform."""
         return ''
 
     @property
     @abstractmethod
     def required_tools(self) -> List[str]:
+        """Expose tools required by platform."""
         return []
 
     @property
@@ -89,19 +93,28 @@ class PlatformBase(CrossShell, ABC):
         return []
 
     @property
+    def template(self) -> Optional[GenSettings]:
+        """Override generation settings. Default is use of `lang`."""
+        return None
+
+    @property
     def required_hooks(self) -> List[str]:
+        """List of hooks requred by platform."""
         return []
 
     @property
     def dev_dir(self) -> Path:
+        """Remote working dirrectory."""
         return self.__dev_dir
 
     @property
     def sh(self) -> ShellUnix:
+        """Posix shell."""
         return self.__sh
 
     @property
     def andb(self) -> ShellDevice:
+        """HOS remote shell."""
         if self.__andb is not None:
             return self.__andb
         # fake object for host platforms
@@ -109,6 +122,7 @@ class PlatformBase(CrossShell, ABC):
 
     @property
     def hdc(self) -> ShellDevice:
+        """OHOS remote shell."""
         if self.__hdc is not None:
             return self.__hdc
         # fake object for host platforms
@@ -117,10 +131,12 @@ class PlatformBase(CrossShell, ABC):
     @property
     @abstractmethod
     def target(self) -> Target:
+        """Default target is host."""
         return Target.HOST
 
     @property
     def gc_parcer(self) -> Optional[Type]:
+        """GC parcer class."""
         return None
 
     @staticmethod
@@ -159,6 +175,9 @@ class PlatformBase(CrossShell, ABC):
 
     def cleanup(self, bu: BenchUnit) -> None:
         """Do default cleanup."""
+        for binary in bu.binaries:
+            log.trace('Deleting: %s', binary)
+            binary.unlink(missing_ok=True)
         if Target.HOST != self.target:
             self.device_cleanup(bu)
 
@@ -174,6 +193,13 @@ class PlatformBase(CrossShell, ABC):
                 continue
             p = f.resolve()
             self.x_sh.push(p, bu.device_path.joinpath(f.name))
+        resources = bu.path.joinpath('resources')
+        if resources.exists():
+            device_resources = bu.device_path.joinpath('resources')
+            self.x_sh.run(f'mkdir -p {device_resources}')
+            for f in resources.glob('*'):
+                p = f.resolve()
+                self.x_sh.push(p, device_resources.joinpath(f.name))
 
     def push_libs(self) -> None:
         if Target.HOST == self.target:
@@ -185,6 +211,16 @@ class PlatformBase(CrossShell, ABC):
             return  # Bench Unit wasn't pused to device
         log.trace('Cleaning: %s', bu.device_path)
         self.x_sh.run(f'rm -rf {bu.device_path}')
+
+    def set_affinity(self, arg: str) -> None:
+        self.x_sh.set_affinity(arg)
+
+    def dry_run_stop(self, bu: BenchUnit) -> bool:
+        if OptFlags.DRY_RUN in self.flags:
+            for binary in bu.binaries:
+                log.info('Path to binary: %s', binary)
+            return True
+        return False
 
     def tools_get(self, name: str) -> ToolBase:
         tool = self.tools.get(name)

@@ -13,7 +13,7 @@
 
 [project]
 name = "vmb"
-version = "0.0.1"
+version = "0.0.3"
 description = "Virtual Machine Benchmarks"
 readme = "readme.md"
 requires-python = ">=3.7"
@@ -27,7 +27,7 @@ classifiers = [
 ]
 
 [project.urls]
-"Source" = "https://gitee.com/openharmony/arkcompiler_runtime_core/tree/master/static_core/tests"
+"Source" = "https://gitee.com/openharmony/arkcompiler_runtime_core/tree/master/static_core/tests/vm-benchmarks"
 
 [project.scripts]
 vmb = "vmb:main"

@@ -15,11 +15,14 @@
 # limitations under the License.
 #
 
-import os
-
+import logging
+from pathlib import Path
 from vmb.target import Target
 from vmb.tool import ToolBase, OptFlags
 from vmb.unit import BenchUnit
+from vmb.result import JITStat
+
+log = logging.getLogger('vmb')
 
 
 class Tool(ToolBase):
@@ -27,8 +30,7 @@ class Tool(ToolBase):
     def __init__(self, *args) -> None:
         super().__init__(*args)
         if Target.HOST == self.target:
-            panda_root = self.ensure_dir(
-                os.environ.get('PANDA_BUILD', ''))
+            panda_root = self.ensure_dir_env('PANDA_BUILD')
             self.ark = self.ensure_file(panda_root, 'bin', 'ark')
             self.ark_lib = self.ensure_dir(panda_root, 'lib')
             self.etsstdlib = self.ensure_file(
@@ -52,6 +54,8 @@ class Tool(ToolBase):
             opts += '--print-gc-statistics --log-components=gc ' \
                     '--log-level=info --log-stream=file ' \
                     '--log-file={gclog} '
+        if OptFlags.JIT_STATS in self.flags:
+            opts += '--compiler-dump-jit-stats-csv={abc}.dump.csv '
         if OptFlags.AOT in self.flags:
             an_files.append('{an}')
         if an_files:
@@ -67,6 +71,7 @@ class Tool(ToolBase):
         return 'Ark VM'
 
     def exec(self, bu: BenchUnit) -> None:
+        bu_flags, _ = self.get_bu_opts(bu)
         gclog = ''
         libs = ':'.join([str(f) for f in self.x_libs(bu, '.abc')])
         options = f'--panda-files={libs} ' if libs else ''
@@ -74,12 +79,23 @@ class Tool(ToolBase):
         an_files = [str(f) for f in self.x_libs(bu, '.an')] + \
                    [str(abc.with_suffix('.an'))]
         an = ':'.join(an_files) if an_files else ''
-        if OptFlags.GC_STATS in self.flags:
+        if OptFlags.DISABLE_INLINING in bu_flags:
+            options += '--compiler-inlining=false '
+        if OptFlags.GC_STATS in bu_flags:
             gclog = str(abc.with_suffix('.gclog.txt'))
         arkts_cmd = self.cmd.format(
             abc=abc, options=options, gclog=gclog, an=an)
         res = self.x_run(arkts_cmd)
         bu.parse_run_output(res)
+        if OptFlags.JIT_STATS in bu_flags:
+            csv = Path(f'{abc}.dump.csv')
+            if self.target != Target.HOST:
+                self.x_sh.pull(csv, bu.path)
+                csv = bu.path.joinpath(csv.name)
+            if csv.exists():
+                bu.result.jit_stats = JITStat.from_csv(csv)
+            else:
+                log.error('JIT stats dump missed: %s', str(csv))
 
     def kill(self) -> None:
         self.x_sh.run('pkill ark')

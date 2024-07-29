@@ -15,9 +15,7 @@
 # limitations under the License.
 #
 
-import os
-
-from vmb.tool import ToolBase, VmbToolExecError
+from vmb.tool import ToolBase, OptFlags, VmbToolExecError
 from vmb.target import Target
 from vmb.unit import BenchUnit
 
@@ -26,7 +24,7 @@ class Tool(ToolBase):
 
     def __init__(self, *args) -> None:
         super().__init__(*args)
-        self.sdk = self.ensure_dir(os.environ.get('OHOS_SDK', ''))
+        self.sdk = self.ensure_dir_env('OHOS_SDK')
         if Target.HOST == self.target:
             self.ark_js_vm = self.ensure_file(
                 self.sdk, 'out/x64.release/arkcompiler/ets_runtime/ark_js_vm')
@@ -43,7 +41,7 @@ class Tool(ToolBase):
         name = bu.src('.abc').with_suffix('').name
         bu_path = bu.path if self.target == Target.HOST \
             else bu.device_path
-        aot = ''
+        aot = f'--aot-file={name} ' if OptFlags.AOT in self.flags else ''
         res = self.x_run(
             f'{self.ark_js_vm} --entry-point={name} '
             f'{aot}{self.custom} ./{name}.abc',
@@ -64,7 +62,10 @@ class Tool(ToolBase):
         )
         res = self.x_run(ark_cmd, cwd=str(cwd))
         if res.ret != 0:
-            raise VmbToolExecError(f'{self.name} failed')
+            raise VmbToolExecError(f'{self.name} failed', res)
+        ap = bu.path.joinpath(name).with_suffix('.ap')
+        if ap not in bu.binaries:
+            bu.binaries.append(ap)
 
     def kill(self) -> None:
         self.x_sh.run('pkill ark_js_vm')

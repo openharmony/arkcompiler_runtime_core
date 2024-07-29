@@ -34,12 +34,12 @@ class Tool(ToolBase):
         )
         self.opts = '--gen-stdlib=false --extension=sts --opt-level=2 ' \
             f'--arktsconfig={self.panda_root}' \
-            f'/tools/es2panda/generated/arktsconfig.json'
+            f'/tools/es2panda/generated/arktsconfig.json {self.custom}'
         self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
 
     @property
     def name(self) -> str:
-        return 'ES to Panda compiler'
+        return 'ES to Panda compiler (ArkTS mode)'
 
     def exec(self, bu: BenchUnit) -> None:
         for lib in bu.libs('.ts', '.sts'):
@@ -54,6 +54,7 @@ class Tool(ToolBase):
         abc_size = self.sh.get_filesize(abc)
         bu.result.build.append(
             BuildResult('es2panda', abc_size, res.tm, res.rss))
+        bu.binaries.append(abc)
 
     def run_es2panda(self,
                      src: Path,
@@ -67,5 +68,5 @@ class Tool(ToolBase):
             measure_time=True)
         if res.ret != 0 or not abc.is_file():
             bu.status = BUStatus.COMPILATION_FAILED
-            raise VmbToolExecError(f'{self.name} failed: {src}')
+            raise VmbToolExecError(f'{self.name} failed: {src}', res)
         return res

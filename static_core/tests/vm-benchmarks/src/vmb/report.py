@@ -90,7 +90,7 @@ class VMBReport(Jsonable):
     rss_gm: float = 0.0
     total_cnt: int = 0
     excluded_cnt: int = 0
-    fail_cnt: float = 0.0
+    fail_cnt: int = 0
     _name_len: int = 0
 
     @staticmethod
@@ -145,11 +145,11 @@ class VMBReport(Jsonable):
                 sizes2.append(t2.code_size)
                 rss1.append(t1.mem_bytes)
                 rss2.append(t2.mem_bytes)
-        for t in tests2.difference(tests1):
+        for t in tests1.difference(tests2):
             comparison._regressions += 1
             missed += 1
             comparison.add(t, VMBDiff('n/a', 'n/a', 'n/a', 'missed'))
-        for t in tests1.difference(tests2):
+        for t in tests2.difference(tests1):
             comparison.add(t, VMBDiff('n/a', 'n/a', 'n/a', 'new'))
             new += 1
         comparison.title = f'Comparison: {short_title(r1.title, r2.title)}'
@@ -171,6 +171,10 @@ class VMBReport(Jsonable):
         vmb_rep.recalc(exclude=exclude)
         return vmb_rep
 
+    def get_exit_code(self) -> int:
+        passed_cnt = self.total_cnt - self.excluded_cnt - self.fail_cnt
+        return 0 if passed_cnt > 0 and self.fail_cnt == 0 else 1
+
     def recalc(self, exclude: OptList = None) -> None:
         times, sizes, rsss = [], [], []
         self.total_cnt, self.excluded_cnt, self.fail_cnt = 0, 0, 0
@@ -187,7 +191,8 @@ class VMBReport(Jsonable):
                 self.fail_cnt += 1
                 continue
             t._status = BUStatus.PASS  # pylint: disable=protected-access
-            times.append(mean(e.avg_time for e in t.execution_forks))
+            times.append(mean(e.avg_time for e in t.execution_forks
+                              if e.avg_time is not None))
             sizes.append(t.code_size)
             rsss.append(t.mem_bytes)
         self.time_gm = safe_geomean(times)
@@ -255,6 +260,24 @@ class AOTPassesDiff(Jsonable):
     time: str
 
 
+@dataclass
+class GCDiff(Jsonable):
+    bench_time: str
+    throughput: str
+    avg_time: str
+    max_time: str
+
+
+class GCComparison(Jsonable):
+    def __init__(self):
+        self.title = ''
+        self.summary = ''
+        self.tests = {}
+
+    def add(self, t, diff):
+        self.tests[t] = diff
+
+
 class AOTStatsComparison(Jsonable):
     def __init__(self):
         self.title = ''
@@ -277,10 +300,10 @@ class AOTPassesComparison(Jsonable):
         }
 
 
-def safe_geomean(numbers: Iterable[float]) -> float:
+def safe_geomean(numbers: Iterable[Optional[float]]) -> float:
     if not numbers:
         return 0.0
-    res = [x for x in numbers if x]
+    res = [x for x in numbers if x and x > 0]
     if not res:
         return 0.0
     return geometric_mean(res)
@@ -313,6 +336,8 @@ def short_title(t1, t2):
 def diff_str(x, y, less_is_better=True):
     if not x or not y:
         # cannot compare if one of the results is missing
+        return 'n/a'
+    if x < 0 or y < 0:
         return 'n/a'
     try:  # just to make linter happy
         diff_percent = (y / x - 1.0) * 100
@@ -350,9 +375,9 @@ def print_flaky(flaky):
 
 def get_common_aotstats(r1: VMBReport, r2: VMBReport
                         ) -> Tuple[AotStatEntry, AotStatEntry]:
-    libname = 'eststdlib'
-    if 'eststdlib' in r1.report.ext_info and 'eststdlib' in r2.report.ext_info:
-        return r1.report.ext_info[libname], r2.report.ext_info[libname]
+    for lib in ('etsstdlib', f'lib{"core"}'):
+        if lib in r1.report.ext_info and lib in r2.report.ext_info:
+            return r1.report.ext_info[lib], r2.report.ext_info[lib]
     raise ValueError('Bad ext_info in aot report!')
 
 
@@ -443,6 +468,80 @@ def compare_aot_passes(r_1: VMBReport, r_2: VMBReport) -> AOTPassesComparison:
     return comparison
 
 
+def get_gc_stats(name: str, results: List[TestResult]) -> Dict[str, float]:
+    stats = None
+    score, tp, avg, mx = 0.0, 0.0, 0.0, 0.0
+    for t in results:
+        if t.name == name:
+            score = float(mean(float(f.avg_time) for f in t.execution_forks
+                          if f.avg_time is not None))
+            stats = t.gc_stats
+            break
+    if stats:
+        total = stats.gc_total_time
+        total_sum = stats.gc_total_time_sum
+        vm = stats.gc_vm_time
+        avg = stats.gc_avg_time
+        mx = stats.gc_max_time
+        total = total if total > 0 else 0.0
+        vm = vm if vm > total else 0.0
+        avg = avg if avg > 0 else 0.0
+        mx = mx if mx > 0 else 0.0
+        total_sum = total_sum if total_sum > 0 else 0.0
+        tp = (vm - total_sum) / vm if vm > 0 else 0.0
+    return {
+        'bench_time': score,
+        'throughput': tp,
+        'avg_time': avg,
+        'max_time': mx
+    }
+
+
+def compare_gc_stats(r1: VMBReport, r2: VMBReport) -> GCComparison:
+    comparison = GCComparison()
+    comparison.title = \
+        f'Comparison GC stats: {short_title(r1.title, r2.title)}'
+    sc1, tp1, avg1, max1, sc2, tp2, avg2, max2 = [], [], [], [], [], [], [], []
+    # only for tests present in both reports
+    gc_tests_1 = [t.name for t in r1.report.tests
+                  if t.gc_stats and t.execution_status == 0]
+    gc_tests_2 = [t.name for t in r2.report.tests
+                  if t.gc_stats and t.execution_status == 0]
+    for t in set(gc_tests_1).intersection(set(gc_tests_2)):
+        t1 = get_gc_stats(t, r1.report.tests)
+        t2 = get_gc_stats(t, r2.report.tests)
+        sc1.append(t1.get('bench_time'))
+        sc2.append(t2.get('bench_time'))
+        tp1.append(t1.get('throughput'))
+        tp2.append(t2.get('throughput'))
+        avg1.append(t1.get('avg_time'))
+        avg2.append(t2.get('avg_time'))
+        max1.append(t1.get('max_time'))
+        max2.append(t2.get('max_time'))
+        score_diff = diff_str(t1.get('bench_time'), t2.get('bench_time'))
+        through_diff = diff_str(t1.get('throughput'), t2.get('throughput'),
+                                less_is_better=False)
+        avg_diff = diff_str(t1.get('avg_time'), t2.get('avg_time'))
+        max_diff = diff_str(t1.get('max_time'), t2.get('max_time'))
+        comparison.add(t, GCDiff(score_diff, through_diff, avg_diff, max_diff))
+    gm_sc1 = safe_geomean(sc1)
+    gm_sc2 = safe_geomean(sc2)
+    sc_diff = diff_str(gm_sc1, gm_sc2)
+    gm_tp1 = safe_geomean(tp1)
+    gm_tp2 = safe_geomean(tp2)
+    tp_diff = diff_str(gm_tp1, gm_tp2, less_is_better=False)
+    gm_avg1 = safe_geomean(avg1)
+    gm_avg2 = safe_geomean(avg2)
+    avg_diff = diff_str(gm_avg1, gm_avg2)
+    gm_max1 = safe_geomean(max1)
+    gm_max2 = safe_geomean(max2)
+    max_diff = diff_str(gm_max1, gm_max2)
+    comparison.summary = \
+        f'Time: {sc_diff}; Throughput: {tp_diff}; ' \
+        f'AvgTime: {avg_diff}; MaxTime: {max_diff}'
+    return comparison
+
+
 def compare_reports(args):
     if len(args.paths) != 2:
         print('Need 2 reports for comparison')
@@ -465,6 +564,9 @@ def compare_reports(args):
         if args.aot_passes_json:
             cmp_passes = compare_aot_passes(r1, r2)
             cmp_passes.save(args.aot_passes_json)
+        if args.gc_stats_json:
+            cmp_gc = compare_gc_stats(r1, r2)
+            cmp_gc.save(args.gc_stats_json)
         print_flaky(flaky)
         sys.exit(  # pylint: disable-next=protected-access
             0 if len(cmp_vmb.tests) > 0 and cmp_vmb._regressions == 0
@@ -484,14 +586,16 @@ def report_main(args: Args,
         if not name:
             name = '-'.join([args.platform, args.mode])
         info = MachineMeta(name=name)
-        rep = RunReport(machine=info,
-                        tests=[bu.result for bu in bus],
-                        ext_info=ext_info)
+        # skipping not run tests for the backward compatibility
+        rep = RunReport(ext_info=ext_info, machine=info,
+                        tests=[bu.result for bu in bus
+                               if bu.status not in (BUStatus.NOT_RUN,
+                                                    BUStatus.SKIPPED)])
         if timer:
-            rep.run.start_time = str(timer.begin)
-            rep.run.end_time = str(timer.end)
+            rep.run.start_time = Timer.format(timer.begin)
+            rep.run.end_time = Timer.format(timer.end)
         else:
-            rep.run.end_time = str(datetime.now(timezone.utc))
+            rep.run.end_time = Timer.format(datetime.now(timezone.utc))
         vmb_rep = VMBReport(report=rep)
         if args.report_json:
             compact = args.get('report_json_compact', False)
@@ -499,7 +603,7 @@ def report_main(args: Args,
         if args.report_csv:
             vmb_rep.csv_report(args.report_csv)
         vmb_rep.text_report(full=True, exclude=args.exclude_list)
-        return
+        sys.exit(vmb_rep.get_exit_code())
     # if called standalone
     if not args.paths:
         print('Report files (paths) missed')

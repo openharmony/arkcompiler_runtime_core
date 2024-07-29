@@ -24,8 +24,8 @@ from unittest import TestCase
 from typing import Optional
 from dataclasses import dataclass, field
 from collections import namedtuple
-from vmb.helpers import Singleton, remove_prefix, read_list_file, Jsonable
-
+from vmb.helpers import Singleton, remove_prefix, Jsonable
+from vmb.plugins.hooks.cpumask import parse_bitmask
 
 NameVal = namedtuple("NameVal", "name value")
 
@@ -95,3 +95,11 @@ def test_json_loads() -> None:
     test.assertTrue(C(**obj).n == 1)
     obj = json.loads('{"n": null, "m":2}')
     test.assertTrue(C(**obj).n is None)
+
+
+def test_bitmask():
+    test = TestCase()
+    test.assertTrue(parse_bitmask('0x03')[1] == [True] * 2 + [False] * 6)
+    test.assertTrue(parse_bitmask('0xF0')[1] == [False] * 4 + [True] * 4)
+    test.assertTrue(
+        parse_bitmask('0x100')[1] == [False] * 8 + [True] + [False] * 3)

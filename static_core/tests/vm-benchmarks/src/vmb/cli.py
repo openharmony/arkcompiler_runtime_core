@@ -18,9 +18,10 @@
 import argparse
 import sys
 import logging
-from typing import Any, List, Set
+import re
+from typing import Any, List, Dict, Set
 from pathlib import Path
-from vmb.helpers import StringEnum, split_params, read_list_file
+from vmb.helpers import StringEnum, split_params, read_list_file, die
 from vmb.tool import ToolMode, OptFlags
 
 LOG_LEVELS = ('fatal', 'pass', 'error', 'warn', 'info', 'debug', 'trace')
@@ -59,6 +60,14 @@ def add_measurement_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('-gc', '--sys-gc-pause', default=None, type=int,
                         help='If <val> >= 0 invoke GC twice '
                         'and wait <val> ms before iteration')
+    parser.add_argument("-aot-co", "--aot-compiler-options", default=[],
+                        type=str, action="append", help="aot-compiler options")
+    parser.add_argument("-c", "--concurrency-level",
+                        default=None, type=str,
+                        help="Concurrency level (DEPRECATED)")
+    parser.add_argument("-compiler-inlning", "--compiler-inlining",
+                        default=None, type=str,
+                        help="enable compiler inlining")
 
 
 def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
@@ -73,6 +82,10 @@ def add_gen_opts(parser: argparse.ArgumentParser, command: Command) -> None:
                         default=set(),
                         type=comma_separated_list,
                         help='Filter by tag (comma-separated list)')
+    parser.add_argument('-ST', '--skip-tags',
+                        default=set(),
+                        type=comma_separated_list,
+                        help='Skip if tagged (comma-separated list)')
     parser.add_argument('-t', '--tests',
                         default=set(),
                         type=comma_separated_list,
@@ -120,8 +133,18 @@ def add_run_opts(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('--exclude-list', default='', type=str,
                         metavar='EXCLUDE_LIST',
                         help='Path to exclude list')
+    parser.add_argument('--fail-logs', default='', type=str,
+                        metavar='FAIL_LOGS_DIR',
+                        help='Save failure messages to folder')
     parser.add_argument('--cpumask', default='', type=str,
                         help='Use cores mask. F.e. 11110000 = low cores')
+    parser.add_argument('--aot-stats', action='store_true',
+                        help='Collect aot compilation data')
+    parser.add_argument('--jit-stats', action='store_true',
+                        help='Collect jit compilation data')
+    parser.add_argument('--aot-whitelist', default='', type=str,
+                        metavar='FILE_NAME',
+                        help='Get methods names from FILE_NAME')
 
 
 def add_report_opts(parser: argparse.ArgumentParser) -> None:
@@ -134,6 +157,8 @@ def add_report_opts(parser: argparse.ArgumentParser) -> None:
                         help='File path to save aot stats comparison')
     parser.add_argument('--aot-passes-json', default='', type=str,
                         help='File path to save aot passes comparison')
+    parser.add_argument("--gc-stats-json", default='', type=str,
+                        help='File path to save GC stats comparison')
     parser.add_argument('--compare', action='store_true',
                         help='Compare 2 reports')
     parser.add_argument('--flaky-list', default='', type=str,
@@ -152,7 +177,7 @@ class _ArgumentParser(argparse.ArgumentParser):
         )
         # Options common for all commands
         self.add_argument('paths', nargs='*', help='Dirs or files')
-        self.add_argument('--extra-plugins', default=None,
+        self.add_argument('-e', '--extra-plugins', default=None,
                           help='Path to extra plugins')
         self.add_argument('-v', '--log-level', default='info',
                           choices=LOG_LEVELS,
@@ -168,16 +193,6 @@ class _ArgumentParser(argparse.ArgumentParser):
         # Runner-specific options
         if command in (Command.RUN, Command.ALL):
             add_run_opts(self)
-            # add 'custom-option' for some 'well-known' tools.
-            # names hardcoded, because platforms and tools lists
-            # will be available only after parsing args.
-            for tool in ('ark', 'ark_js_vm', 'es2panda', 'es2abc',
-                         'paoc', 'node', 'swiftc', 'tsc', 'v_8'):
-                self.add_argument(
-                    f'--{tool}-custom-option', default=[],
-                    type=str, action='append',
-                    help=f'Additional options for {tool}. '
-                         '(Possibly several opts in one command)')
         if command in (Command.REPORT,):
             add_report_opts(self)
 
@@ -192,6 +207,7 @@ class Args(argparse.Namespace):
     def __init__(self) -> None:
         super().__init__()
         self.command = None
+        self.custom_opts: Dict[str, List[str]] = {}
         if len(sys.argv) < 2 \
             or sys.argv[1] == 'help' \
                 or sys.argv[1] not in Command.getall():
@@ -207,7 +223,9 @@ class Args(argparse.Namespace):
             sys.exit(1)
         self.command = Command(sys.argv[1])
         args = sys.argv[2:]
-        _ArgumentParser(self.command).parse_args(args, namespace=self)
+        _, unknown = _ArgumentParser(self.command).parse_known_args(
+            args, namespace=self)
+        self.process_custom_opts(unknown)
         # provide some defaults
         self.paths: List[Path] = [Path(p) for p in self.paths] if self.paths \
             else [Path.cwd()]
@@ -219,6 +237,10 @@ class Args(argparse.Namespace):
             self.extra_plugins = Path(self.extra_plugins)  # type: ignore
         excl = self.get('exclude_list', None)
         self.exclude_list = read_list_file(excl) if excl else []
+        self.dry_run = self.get('dry_run', False)
+        self.fail_logs = self.get('fail_logs', '')
+        if self.fail_logs:
+            Path(self.fail_logs).mkdir(exist_ok=True)
 
     def __repr__(self) -> str:
         return '\n'.join(super().__repr__().split(','))
@@ -227,6 +249,20 @@ class Args(argparse.Namespace):
     def print_help(cmd: Command) -> None:
         """Print usage for VMB command."""
         _ArgumentParser(cmd).parse_args(['--help'])
+
+    def process_custom_opts(self, custom: List[str]) -> None:
+        re_custom = re.compile(r'^--(?P<tool>\w+)-custom-option=(?P<opt>.+)$')
+        for opt in custom:
+            m = re.search(re_custom, opt)
+            if m:
+                tool = m.group('tool')
+                custom_opt = m.group('opt')
+                if not self.custom_opts.get(tool):
+                    self.custom_opts[tool] = [custom_opt]
+                else:
+                    self.custom_opts[tool].append(custom_opt)
+            else:
+                die(not m, f'Unknown option: {opt}')
 
     def get(self, arg: str, default=None) -> Any:
         return vars(self).get(arg, default)
@@ -246,10 +282,17 @@ class Args(argparse.Namespace):
             flags |= OptFlags.AOT_SKIP_LIBS
         if self.get('enable_gc_logs', False):
             flags |= OptFlags.GC_STATS
+        if self.get('aot_stats', False):
+            flags |= OptFlags.AOT_STATS
+        if self.get('jit_stats', False):
+            flags |= OptFlags.JIT_STATS
+        # backward compatibility
+        if 'false' == self.get('compiler_inlining', ''):
+            flags |= OptFlags.DISABLE_INLINING
         return flags
 
     def get_custom_opts(self, name: str) -> str:
-        opts = self.get(f'{name}_custom_option', [])
+        opts = self.custom_opts.get(name, [])
         return ' '.join(opts)
 
     def get_shared_path(self) -> str:
