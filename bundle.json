@@ -32,9 +32,7 @@
                 "vixl"
             ],
             "third_party": [
-                "icu",
-                "musl",
-                "vixl"
+                "musl"
             ]
         },
         "build": {
