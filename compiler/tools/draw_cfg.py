@@ -34,14 +34,14 @@ import argparse
 
 
 class BasicBlock:
-    def __init__(self, id: int) -> None:
-        self.id = id
+    def __init__(self, ident: int) -> None:
+        self.id = ident
         self.insts = []
         self.preds = []
         self.succs = []
         self.props = []
 
-    def text(self, no_insts = False) -> str:
+    def text(self, no_insts=False) -> str:
         s = 'BB ' + str(self.id) + '\n'
         s += 'props: '
         for i, prop in enumerate(self.props):
@@ -129,7 +129,7 @@ class GraphDumpParser:
         return self.functions
 
 
-def draw_function(function: Function, out_dir = None, no_insts = False):
+def draw_function(function: Function, out_dir=None, no_insts=False):
     dot = gv.Digraph(format='png')
     for block in function.blocks:
         dot.node(str(block.id), block.text(no_insts), shape='box')
@@ -140,6 +140,7 @@ def draw_function(function: Function, out_dir = None, no_insts = False):
     dotfile_path = os.path.join(out_dir, basename)
     dot.render(basename, out_dir, format="png")
     os.rename(dotfile_path, dotfile_path + '.dot')
+
 
 def main():
     parser = argparse.ArgumentParser(description="A tool for drawing CFGs by reading ir dump from stdin")
