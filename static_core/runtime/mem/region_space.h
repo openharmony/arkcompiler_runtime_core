@@ -155,6 +155,13 @@ public:
         allocatedObjects_++;
     }
 
+    size_t UpdateAllocatedObjects()
+    {
+        size_t aliveCount = GetMarkBitmap()->GetSetBitCount();
+        SetAllocatedObjects(aliveCount);
+        return aliveCount;
+    }
+
     size_t GetAllocatedObjects()
     {
         ASSERT(HasFlag(RegionFlag::IS_OLD));
@@ -369,6 +376,13 @@ public:
     }
 
 private:
+    void SetAllocatedObjects(size_t allocatedObjects)
+    {
+        // We can call it from the promoted region
+        ASSERT(liveBitmap_ != nullptr);
+        allocatedObjects_ = allocatedObjects;
+    }
+
     DListNode node_;
     RegionSpace *space_;
     uintptr_t begin_;

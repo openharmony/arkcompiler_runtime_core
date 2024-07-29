@@ -190,11 +190,13 @@ public:
             region, deathChecker, moveChecker);
     }
 
-    template <bool USE_MARKBITMAP>
-    void PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker, const ObjectVisitor &promotionChecker)
+    template <bool USE_MARKBITMAP, bool FULL_GC>
+    size_t PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker,
+                              const ObjectVisitor &promotionChecker)
     {
         ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
-        objectAllocator_->template PromoteYoungRegion<USE_MARKBITMAP>(region, deathChecker, promotionChecker);
+        return objectAllocator_->template PromoteYoungRegion<USE_MARKBITMAP, FULL_GC>(region, deathChecker,
+                                                                                      promotionChecker);
     }
 
     void CompactTenuredRegions(const PandaVector<Region *> &regions, const GCObjectVisitor &deathChecker,

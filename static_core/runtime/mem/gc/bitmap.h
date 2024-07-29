@@ -52,6 +52,15 @@ public:
         return bitmap_;
     }
 
+    size_t GetSetBitCount()
+    {
+        size_t countMarkBits = 0;
+        for (BitmapWordType word : bitmap_) {
+            countMarkBits += Popcount(word);
+        }
+        return countMarkBits;
+    }
+
     static const size_t BITSPERBYTE = 8;
     static const size_t BITSPERWORD = BITSPERBYTE * sizeof(BitmapWordType);
     static constexpr size_t LOG_BITSPERBYTE = ark::helpers::math::GetIntLog2(static_cast<uint64_t>(BITSPERBYTE));

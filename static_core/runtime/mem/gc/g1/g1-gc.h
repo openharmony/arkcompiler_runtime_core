@@ -185,10 +185,10 @@ private:
 
     bool NeedToPromote(const Region *region) const;
 
-    template <bool ATOMIC, RegionFlag REGION_TYPE>
+    template <bool ATOMIC, RegionFlag REGION_TYPE, bool FULL_GC>
     void RegionCompactingImpl(Region *region, const ObjectVisitor &movedObjectSaver);
 
-    template <bool ATOMIC>
+    template <bool ATOMIC, bool FULL_GC>
     void RegionPromotionImpl(Region *region, const ObjectVisitor &movedObjectSaver);
 
     // Return whether all cross region references were processed in mem_range

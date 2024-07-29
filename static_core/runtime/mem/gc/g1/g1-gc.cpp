@@ -155,10 +155,10 @@ void G1GC<LanguageConfig>::DoRegionCompacting(Region *region, bool useGcWorkers,
         if (!this->GetWorkersTaskPool()->AddTask(GCRegionCompactWorkersTask(storage))) {
             // We couldn't send a task to workers. Therefore, do it here.
             internalAllocator->Delete(storage);
-            RegionCompactingImpl<true, REGION_TYPE>(region, movedObjectSaver);
+            RegionCompactingImpl<true, REGION_TYPE, FULL_GC>(region, movedObjectSaver);
         }
     } else {
-        RegionCompactingImpl<false, REGION_TYPE>(region, movedObjectSaver);
+        RegionCompactingImpl<false, REGION_TYPE, FULL_GC>(region, movedObjectSaver);
     }
 }
 
@@ -216,7 +216,7 @@ private:
 };
 
 template <class LanguageConfig>
-template <bool ATOMIC>
+template <bool ATOMIC, bool FULL_GC>
 void G1GC<LanguageConfig>::RegionPromotionImpl(Region *region, const ObjectVisitor &movedObjectSaver)
 {
     size_t moveSize = region->GetAllocatedBytes();
@@ -240,9 +240,11 @@ void G1GC<LanguageConfig>::RegionPromotionImpl(Region *region, const ObjectVisit
     ScopedRegionCollectionInfo collectionInfo(this, "Region promoted", region, true, moveSize);
     if (g1TrackFreedObjects_) {
         // We want to track all moved objects (including), therefore, iterate over all objects in region.
-        objectAllocator->template PromoteYoungRegion<false>(region, promotionDeathChecker, promotionMoveChecker);
+        objectAllocator->template PromoteYoungRegion<false, FULL_GC>(region, promotionDeathChecker,
+                                                                     promotionMoveChecker);
     } else {
-        objectAllocator->template PromoteYoungRegion<true>(region, promotionDeathChecker, promotionMoveChecker);
+        aliveMoveCount += objectAllocator->template PromoteYoungRegion<true, FULL_GC>(region, promotionDeathChecker,
+                                                                                      promotionMoveChecker);
         ASSERT(deadMoveCount == 0);
     }
     region->RmvFlag(RegionFlag::IS_COLLECTION_SET);
@@ -440,7 +442,7 @@ bool G1GC<LanguageConfig>::NeedToPromote(const Region *region) const
 }
 
 template <class LanguageConfig>
-template <bool ATOMIC, RegionFlag REGION_TYPE>
+template <bool ATOMIC, RegionFlag REGION_TYPE, bool FULL_GC>
 void G1GC<LanguageConfig>::RegionCompactingImpl(Region *region, const ObjectVisitor &movedObjectSaver)
 {
     auto objectAllocator = this->GetG1ObjectAllocator();
@@ -492,7 +494,7 @@ void G1GC<LanguageConfig>::RegionCompactingImpl(Region *region, const ObjectVisi
             analytics_.ReportEvacuatedBytes(moveSize);
             analytics_.ReportLiveObjects(moveCount);
         } else {
-            RegionPromotionImpl<ATOMIC>(region, movedObjectSaver);
+            RegionPromotionImpl<ATOMIC, FULL_GC>(region, movedObjectSaver);
         }
     } else {
         ScopedRegionCollectionInfo collectionInfo(this, "Region compacted", region, false, moveSize);
@@ -602,9 +604,13 @@ template <class LanguageConfig>
 void G1GC<LanguageConfig>::ExecuteCompactingTask(Region *region, const ObjectVisitor &movedObjectsSaver)
 {
     if (region->HasFlag(RegionFlag::IS_EDEN)) {
-        RegionCompactingImpl<true, RegionFlag::IS_EDEN>(region, movedObjectsSaver);
+        if (this->IsFullGC()) {
+            RegionCompactingImpl<true, RegionFlag::IS_EDEN, true>(region, movedObjectsSaver);
+        } else {
+            RegionCompactingImpl<true, RegionFlag::IS_EDEN, false>(region, movedObjectsSaver);
+        }
     } else if (region->HasFlag(RegionFlag::IS_OLD)) {
-        RegionCompactingImpl<true, RegionFlag::IS_OLD>(region, movedObjectsSaver);
+        RegionCompactingImpl<true, RegionFlag::IS_OLD, false>(region, movedObjectsSaver);
     } else {
         LOG(FATAL, GC) << "Unsupported region type";
     }
