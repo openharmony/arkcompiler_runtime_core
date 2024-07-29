@@ -1,0 +1,135 @@
+/**
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+import { getArrey, returnCustomArray, createStringRecord,createInt8Array, RecordObject,handler} from "indexed_type"
+import {createProxy} from "proxy"
+
+const arr = ['A','B','C'];
+
+function getArrValueByIndex():boolean{
+    const jsArrey = getArrey(arr) as string[];
+    return jsArrey[0] == 'A';
+}
+
+function changeArrValueByIndex():boolean{
+    let jsArrey = getArrey(arr) as string[];
+    jsArrey[0] = 'D';
+    return jsArrey[0] == 'D';
+}
+
+function checkLengthArr():boolean{
+    const jsArrey:string[] = getArrey(arr) as string[];
+    return jsArrey.length as number == arr.length as number
+}
+function checkAllArrValue():boolean{
+    const jsArrey:string[] = getArrey(arr) as string[];
+    return jsArrey[0] == 'A' && jsArrey[1] == 'B' && jsArrey[2] == 'C'
+}
+
+
+function getCustomArrValueByIndex():boolean{
+    const jsArrey = returnCustomArray(arr);
+    return jsArrey[0] == 'A';
+}
+
+function changeCustomArrValueByIndex():boolean{
+    let jsArrey = returnCustomArray(arr) as string[];
+    jsArrey[0] = 'D';
+    return jsArrey[0] == 'D';
+}
+function checkLengthCustomArr():boolean{
+    const jsArrey:string[] = returnCustomArray(arr);
+    return jsArrey.length as number == arr.length as number;
+}
+
+function checkAllCustomArrValue():boolean{
+    const jsArrey:string[] = returnCustomArray(arr);
+    return jsArrey[0] == 'A' && jsArrey[1] == 'B' && jsArrey[2] == 'C';
+}
+
+function getRecordValue():boolean{
+   const recordObj = createStringRecord();
+   return recordObj.key1 == 'A';
+}
+
+function changeRecordValue():boolean{
+    let recordObj = createStringRecord();
+    recordObj.key1 = 'D';
+    return recordObj.key1 == 'D';
+ }
+// NOTE(andreypetukhov) enable after fixibng #17821
+//  function getRecordValueIndex():boolean{
+//     const recordObj:Record<string, string> = createStringRecord();
+//     return recordObj['key1'] == 'A'
+//  }
+// NOTE(andreypetukhov) enable after fixibng #17821
+//  function changeRecordValueIndex():boolean{
+//     let recordObj:Record<string, string> = createStringRecord();
+//     recordObj['key1'] = 'F';
+//     return recordObj['key1'] == 'F';
+//  }
+// NOTE(andreypetukhov) enable after fixibng #17821
+// function checkRecordValueLength():boolean{
+//     const recordObj:Record<string, string> = createStringRecord();
+//     return Object.entries(recordObj).length as number == 3
+//  }
+
+// NOTE(andreypetukhov) enable after fixibng #17821
+//  function checkRecordValue():boolean{
+//   const recordObj:Record<string, string> = createStringRecord();
+//   return recordObj['key1'] === 'A' && recordObj['key2'] === 'B' && recordObj['key3'] === 'C'
+// }
+
+function getTypedArreyValueByIndex():boolean{
+    const jsTypedArrey = createInt8Array(3);
+    return jsTypedArrey[0] as number == 0;
+}
+// NOTE(andreypetukhov) enable after fixibng #18131
+// function changeTypedArreyValueByIndex():boolean{
+//     const jsTypedArrey = createInt8Array(3) as Int8Array;
+//     jsTypedArrey[1] = 99;
+//     return jsTypedArrey[1] as number == 99;
+// }
+
+function checkLengthTypedArrey():boolean{
+    const jsTypedArrey = createInt8Array(3) as Int8Array;
+    return jsTypedArrey.length as number == 3 as number
+}
+
+function checkAllTypedArreyValue():boolean{
+    const jsTypedArrey = createInt8Array(3) as Int8Array;
+    return jsTypedArrey[0] as number == 0 && jsTypedArrey[1] as number == 1 && jsTypedArrey[2] as number == 2
+ }
+
+ const testObj:RecordObject = {
+    'keyA':'A',
+    'keyB':'B'
+ }
+
+ function getValueFromProxyRecord():boolean{
+    const proxyRecord = createProxy(testObj,handler)
+    console.log(proxyRecord.keyA)
+    return proxyRecord.keyA == 'A'
+ }
+
+ function changeValueFromProxyRecord():boolean{
+    const proxyRecord = createProxy(testObj,handler)
+    proxyRecord.keyB = 'T'
+    return proxyRecord.keyB == 'T'
+ }
+// NOTE(andreypetukhov) enable after fixibng #18238
+//  function getValueFromProxyByKeyRecord():boolean{
+//     const proxyRecord = createProxy(testObj,handler)
+//     return proxyRecord['keyA'] as string == 'A'
+//  }
