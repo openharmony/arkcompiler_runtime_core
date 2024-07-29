@@ -50,7 +50,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: NullishType[]
     internal actualLength: int
 
-    /* override */ get length(): number {
+    override get length(): number {
         return this.actualLength as number
     }
 
@@ -62,7 +62,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = len
     }
 
-    public /* override */ $_get(index: number): T {
+    public override $_get(index: number): T {
         return this.$_get(index as int)
     }
 
@@ -515,7 +515,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Returns an iterator over all indices
      */
-    public /* override */ keys(): IterableIterator<Number> {
+    public override keys(): IterableIterator<Number> {
         return new ArrayKeysIterator<T>(this)
     }
 

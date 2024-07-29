@@ -67,7 +67,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     private buffer: NullishType[]
     internal actualLength: int
 
-    /* override */ get length(): number {
+    override get length(): number {
         return this.actualLength as number
     }
 
@@ -79,7 +79,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         this.actualLength = len
     }
 
-    public /* override */ $_get(index: number): T {
+    public override $_get(index: number): T {
         return this.$_get(index as int)
     }
 
@@ -532,7 +532,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Returns an iterator over all indices
      */
-    public /* override */ keys(): IterableIterator<Number> {
+    public override keys(): IterableIterator<Number> {
         return new ArrayKeysIterator<T>(this)
     }
 
@@ -653,7 +653,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns The element in the array matching the given index.
      * Returns undefined if `index` < `-length()` or `index` >= `length()`.
      */
-    public at(index: number): T | undefined {
+    public override at(index: number): T | undefined {
         return this.at(index as int)
     }
 
@@ -1443,7 +1443,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns `Array` instance, constructed from extracted elements of `this` instance.
      */
-    public slice(start?: Number, end?: Number): Array<T> {
+    public override slice(start?: Number, end?: Number): Array<T> {
         const len: int = this.actualLength;
         return this.slice(asIntOrDefault(start, 0), asIntOrDefault(end, len))
     }
@@ -1570,7 +1570,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
      */
-    public join(sep?: String): string {
+    public override join(sep?: String): string {
         const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
         let sb = new StringBuilder();
         for (let i: int = 0; i < this.actualLength; i++) {
@@ -1588,7 +1588,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns string representation
      */
-    public toString(): string {
+    public override toString(): string {
         return this.join(",");
     }
 
@@ -1621,7 +1621,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns string representation
      */
-    public toLocaleString(): string {
+    public override toLocaleString(): string {
         const sb = new StringBuilder()
         const len = this.actualLength;
         for (let i = 0; i < len; i++) {
@@ -1718,7 +1718,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns true if val is in Array
      */
-    public includes(val: T, fromIndex?: Number): boolean {
+    public override includes(val: T, fromIndex?: Number): boolean {
         const len = this.actualLength;
         const fi = normalizeIndex(asIntOrDefault(fromIndex, 0), len);
         for (let i = fi; i < len; i++) {
@@ -1759,7 +1759,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      *
      * @returns index of val, -1 otherwise
      */
-    public indexOf(val: T, fromIndex?: Number): number {
+    public override indexOf(val: T, fromIndex?: Number): number {
         return this.indexOf(val, asIntOrDefault(fromIndex, 0))
     }
 
@@ -1859,7 +1859,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
     /**
      * Returns an iterator over all values
      */
-    public values(): IterableIterator<T> {
+    public override values(): IterableIterator<T> {
         return new ArrayValuesIterator_T<T>(this);
     }
 

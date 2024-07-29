@@ -161,7 +161,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      *
      * @returns number of Entries with unique keys in the Map
      */
-    get size(): number {
+    override get size(): number {
         return this.s.size
     }
 

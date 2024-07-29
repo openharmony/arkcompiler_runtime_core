@@ -377,7 +377,7 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -2902,7 +2902,7 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -5437,7 +5437,7 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -7972,7 +7972,7 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): Number {
+    public override $_get(index: number): Number {
         return this.$_get(index as int) as Number
     }
 
@@ -10534,7 +10534,7 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      *
      * @returns a primitive at index
      */
-    public $_get(index: number): BigInt {
+    public override $_get(index: number): BigInt {
         return this.$_get(index as int) as BigInt
     }
 
