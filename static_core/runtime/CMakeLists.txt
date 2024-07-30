@@ -857,11 +857,13 @@ add_gtests(
 
 add_gtests(
     arkruntime_memory_management_pygote_space_allocator_gen_test
+    tests/pygote_space_allocator_test_base.cpp
     tests/pygote_space_allocator_gen_test.cpp
 )
 
 add_gtests(
     arkruntime_memory_management_pygote_space_allocator_stw_test
+    tests/pygote_space_allocator_test_base.cpp
     tests/pygote_space_allocator_stw_test.cpp
 )
 

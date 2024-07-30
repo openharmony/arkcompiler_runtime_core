@@ -22,8 +22,8 @@
 #include <tuple>
 #include <vector>
 
-// NOLINTNEXTLINE(google-build-using-namespace)
-using namespace ark;
+namespace ark::panda_file::test {
+
 using Opcode = BytecodeInstruction::Opcode;
 
 using Tuple16 = std::tuple<uint8_t, uint8_t>;
@@ -801,3 +801,5 @@ static void TestNoneFormat(Opcode opcode, const std::function<void(BytecodeEmitt
 // NOLINTEND(readability-magic-numbers,hicpp-signed-bitwise)
 
 #include <bytecode_emitter_tests_gen.h>
+
+}  // namespace ark::panda_file::test

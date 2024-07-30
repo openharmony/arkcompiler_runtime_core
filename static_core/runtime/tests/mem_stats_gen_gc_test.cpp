@@ -265,8 +265,8 @@ MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t m
             // Leaving 5MB in tenured seems OK
             auto free =
                 reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
-            // NOLINTNEXTLINE(readability-magic-numbers)
-            if (size + 5000000U > free) {
+            constexpr size_t FIVE_MB = 5000000U;
+            if (size + FIVE_MB > free) {
                 return result;
             }
         }

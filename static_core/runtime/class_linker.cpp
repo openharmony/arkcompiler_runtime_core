@@ -580,16 +580,16 @@ static uint32_t LayoutReferenceFields(size_t size, size_t *offset, const PandaVe
     return volatileFieldsNum;
 }
 
+constexpr size_t SIZE_64 = sizeof(uint64_t);
+constexpr size_t SIZE_32 = sizeof(uint32_t);
+constexpr size_t SIZE_16 = sizeof(uint16_t);
+constexpr size_t SIZE_8 = sizeof(uint8_t);
+
 static size_t LayoutFieldsInBaseClassPadding(Class *klass, PandaVector<Field *> *taggedFields,
                                              PandaVector<Field *> *fields64, PandaVector<Field *> *fields32,
                                              PandaVector<Field *> *fields16, PandaVector<Field *> *fields8,
                                              PandaVector<Field *> *refFields, bool isStatic)
 {
-    constexpr size_t SIZE_64 = sizeof(uint64_t);
-    constexpr size_t SIZE_32 = sizeof(uint32_t);
-    constexpr size_t SIZE_16 = sizeof(uint16_t);
-    constexpr size_t SIZE_8 = sizeof(uint8_t);
-
     size_t offset;
 
     if (isStatic) {
@@ -623,11 +623,6 @@ static size_t LayoutFields(Class *klass, PandaVector<Field *> *taggedFields, Pan
                            PandaVector<Field *> *fields32, PandaVector<Field *> *fields16,
                            PandaVector<Field *> *fields8, PandaVector<Field *> *refFields, bool isStatic)
 {
-    constexpr size_t SIZE_64 = sizeof(uint64_t);
-    constexpr size_t SIZE_32 = sizeof(uint32_t);
-    constexpr size_t SIZE_16 = sizeof(uint16_t);
-    constexpr size_t SIZE_8 = sizeof(uint8_t);
-
     size_t offset =
         LayoutFieldsInBaseClassPadding(klass, taggedFields, fields64, fields32, fields16, fields8, refFields, isStatic);
     if (!refFields->empty()) {

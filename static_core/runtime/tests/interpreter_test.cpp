@@ -2570,7 +2570,7 @@ static void MakeShorty(size_t numArgs, std::vector<uint16_t> *buf)
             count = 0;
         }
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        val |= I64 << ELEM_SIZE * count;
+        val |= (I64 << (ELEM_SIZE * count));
         ++count;
         --numArgs;
     }

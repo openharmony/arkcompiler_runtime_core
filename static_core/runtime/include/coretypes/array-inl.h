@@ -157,7 +157,7 @@ inline T Array::GetAndBitwiseXorPrimitive(size_t offset, T value, std::memory_or
     return ObjectAccessor::GetAndBitwiseXorFieldPrimitive(this, GetDataOffset() + offset, value, memoryOrder);
 }
 
-template <class T, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+template <class T, bool NEED_WRITE_BARRIER, bool IS_DYN>
 inline void Array::Set(ArraySizeT idx, T elem)
 {
     constexpr bool IS_REF = std::is_pointer_v<T> && std::is_base_of_v<ObjectHeader, std::remove_pointer_t<T>>;

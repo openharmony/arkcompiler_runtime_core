@@ -73,8 +73,7 @@ public:
         if (LIKELY(lazyLink.IsResolved())) {
             return lazyLink.GetResolved();
         }
-        EtsMethodSet *etsMethodSet = lazyLink.GetUnresolved();
-        EtsMethodWrapper *wrapper = EtsMethodWrapper::GetMethod(ctx, etsMethodSet);
+        EtsMethodWrapper *wrapper = EtsMethodWrapper::GetMethod(ctx, lazyLink.GetUnresolved());
         if (UNLIKELY(wrapper == nullptr)) {
             return nullptr;
         }
