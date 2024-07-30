@@ -43,7 +43,7 @@ export class DeclgenCLI extends CLI<DeclgenCLIOptions> {
 
     const cliParser = new Command();
 
-    cliParser.name('declgen').description('Declarations generator for ets.');
+    cliParser.name('declgen').description('Declarations generator for ArkTS.');
     cliParser.option('-o, --out <outDir>', 'Directory where to put generated declarations.');
     cliParser.option('-p, --project <tsconfigPath>', 'path to TS project config file');
     cliParser.option(

@@ -44,7 +44,7 @@ class RunnerDeclgenParser(RunnerJS):
             if not es2panda_test.exists():
                 raise Exception(f'There is no path {es2panda_test}')
 
-        declgen_root = static_core_root / "plugins" / "ets" / "tools" / "declgen_ts2ets"
+        declgen_root = static_core_root / "plugins" / "ets" / "tools" / "declgen_ts2sts"
         self.default_list_root = declgen_root / "test" / "test-lists"
         self.list_root = self.list_root if self.list_root else self.default_list_root
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")

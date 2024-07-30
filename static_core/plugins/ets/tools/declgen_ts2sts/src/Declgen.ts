@@ -23,6 +23,7 @@ import { Logger } from '../utils/logger/Logger';
 import { Transformer } from './ASTTransformer';
 import { Autofixer } from './ASTAutofixer';
 import { Checker } from './ASTChecker';
+import { Extension } from './utils/Extension';
 
 export type CheckerResult = ts.Diagnostic[];
 
@@ -132,7 +133,12 @@ export class Declgen {
       ) {
         const parsedPath = path.parse(fileName);
         fallbackWriteFile(
-          path.join(parsedPath.dir, `${parsedPath.name}.sts`),
+
+          /*
+           * Since `.d` part of `.d.ts` extension is a part of the parsedPath.name,
+           * use `Extension.Ets` for output file name generation.
+           */
+          path.join(parsedPath.dir, `${parsedPath.name}${Extension.STS}`),
           text,
           writeByteOrderMark,
           onError,

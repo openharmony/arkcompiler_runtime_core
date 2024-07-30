@@ -28,6 +28,7 @@ import { TestRunnerCLI } from './cli/TestRunnerCLI';
 import type { CheckerResult } from './Declgen';
 import { Declgen } from './Declgen';
 import type { FaultID } from '../utils/lib/FaultId';
+import { Extension } from './utils/Extension';
 
 interface Test {
   suite: string;
@@ -159,7 +160,7 @@ function compareExpectedAndActualOutputs(test: Test, emitResult: ts.EmitResult):
   void emitResult;
 
   const expected = fs.readFileSync(test.expectedOutput).toString().replace(copyright, '');
-  const actualPath = path.join(test.outDir, `${test.name}.d.sts`);
+  const actualPath = path.join(test.outDir, `${test.name}${Extension.DSTS}`);
   const actual = fs.readFileSync(actualPath).toString();
 
   if (expected !== actual) {
@@ -263,7 +264,7 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
   for (const name of basenames) {
     const testSource = `${name}${ts.Extension.Ts}`;
     const expectedReport = `${name}${ts.Extension.Json}`;
-    const expectedOutput = `${name}.d.sts`;
+    const expectedOutput = `${name}${Extension.DSTS}`;
 
     if (!dirContents.includes(testSource)) {
       throw new Error(`Test ${name} is missing it's source file <${testSource}>!`);

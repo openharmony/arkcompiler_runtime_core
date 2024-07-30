@@ -101,7 +101,7 @@ static_core/plugins/ets/templates/stdlib/                                     @i
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin
-static_core/plugins/ets/tools/declgen_ts2ets/                                 @semenovaleksandr
+static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr
 static_core/tests/tests-u-runner/tools/generate-es-checked/      @ivan-tyulyandin
 static_core/plugins/ets/stdlib/std/core/Coroutine.sts            @dmitriitr @konstanting
 static_core/plugins/ets/stdlib/std/core/EnumConstant.sts         @shumilov-petr

@@ -16,15 +16,15 @@
 let path = require('path');
 
 module.exports = {
-	mode: "development",
-    	target: "node",
+	mode: 'development',
+    	target: 'node',
 	entry: './build/src/main.js',
 	externalsType: 'commonjs',
 	externals: {
-		typescript: "typescript",
-		log4js: "log4js"
+		typescript: 'typescript',
+		log4js: 'log4js'
 	},
 	output: {
-		filename: "declgen.js"
+		filename: 'declgen.js'
 	}
 }
