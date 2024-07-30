@@ -140,7 +140,7 @@ ohos_executable("ark_disasm") {
   external_deps = [ sdk_libc_secshared_dep ]
 
   libs = platform_libs
-  if (!is_mac && !is_mingw && (is_build_sdk && !is_ohos)) {
+  if (!is_mac && !is_mingw) {
     ldflags = platform_ldflags
   }
 
