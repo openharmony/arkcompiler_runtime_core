@@ -95,8 +95,8 @@ public:
     IntrinsicId GetIntrinsicId(const llvm::Instruction *inst) const;
     llvm::Intrinsic::ID GetLLVMIntrinsicId(const llvm::Instruction *inst) const;
 
-    const char *GetIntrinsicRuntimeFunctionName(IntrinsicId id) const;
-    const char *GetEntrypointRuntimeFunctionName(EntrypointId id) const;
+    const char *GetIntrinsicRuntimeFunctionName(LLVMArkInterface::IntrinsicId id) const;
+    const char *GetEntrypointRuntimeFunctionName(LLVMArkInterface::EntrypointId id) const;
     BridgeType GetBridgeType(EntrypointId id) const;
 
     llvm::StringRef GetRuntimeFunctionName(LLVMArkInterface::RuntimeCallType callType, IntrinsicId id);
