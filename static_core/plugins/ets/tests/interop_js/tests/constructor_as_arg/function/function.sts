@@ -14,84 +14,84 @@
  */
 
 import {
-    ts_int,
+    tsInt,
     MainClass,
     ParentClass,
     ChildClass,
     AnonymousClass,
     IIFEClass,
-    create_class_function,
-    create_class_arrow_function,
-    check_instance,
+    createClassFunction,
+    createClassArrowFunction,
+    checkInstance,
 } from "main_js"
 
 
-function check_create_class_function_main(): boolean {
-    const TSClass = create_class_function(MainClass, ts_int);
+function checkCreateClassFunctionMain(): boolean {
+    const TSClass = createClassFunction(MainClass, tsInt);
 
-    return check_instance(MainClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(MainClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_create_class_function_parent(): boolean {
-    const TSClass = create_class_function(ParentClass, MainClass);
+function checkCreateClassFunctionParent(): boolean {
+    const TSClass = createClassFunction(ParentClass, MainClass);
 
-    return check_instance(ParentClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ParentClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_class_function_child(): boolean {
-    const TSClass = create_class_function(ChildClass, MainClass);
+function checkCreateClassFunctionChild(): boolean {
+    const TSClass = createClassFunction(ChildClass, MainClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_class_function_anonymous(): boolean {
-    const TSClass = create_class_function(AnonymousClass, ts_int);
-
-    return check_instance(AnonymousClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+function checkCreateClassFunctionAnonymous(): boolean {
+    const TSClass = createClassFunction(AnonymousClass, tsInt);
+    console.log('reached')
+    return checkInstance(AnonymousClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_create_class_function_IIFE(): boolean {
-    const TSClass = create_class_function(IIFEClass, ts_int);
+function checkCreateClassFunctionIIFE(): boolean {
+    const TSClass = createClassFunction(IIFEClass, tsInt);
 
-    return check_instance(IIFEClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(IIFEClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_create_class_arrow_function_main(): boolean {
-    const TSClass = create_class_arrow_function(MainClass, ts_int);
+function checkCreateClassArrowFunctionMain(): boolean {
+    const TSClass = createClassArrowFunction(MainClass, tsInt);
 
-    return check_instance(MainClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(MainClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_create_class_arrow_function_parent(): boolean {
-    const TSClass = create_class_arrow_function(ParentClass, MainClass);
+function checkCreateClassArrowFunctionParent(): boolean {
+    const TSClass = createClassArrowFunction(ParentClass, MainClass);
 
-    return check_instance(ParentClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ParentClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_class_arrow_function_child(): boolean {
-    const TSClass = create_class_arrow_function(ChildClass, MainClass);
+function checkCreateClassArrowFunctionChild(): boolean {
+    const TSClass = createClassArrowFunction(ChildClass, MainClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_class_arrow_function_anonymous(): boolean {
-    const TSClass = create_class_arrow_function(AnonymousClass, ts_int);
+function checkCreateClassArrowFunctionAnonymous(): boolean {
+    const TSClass = createClassArrowFunction(AnonymousClass, tsInt);
 
-    return check_instance(AnonymousClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(AnonymousClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_create_class_arrow_function_IIFE(): boolean {
-    const TSClass = create_class_arrow_function(IIFEClass, ts_int);
+function checkCreateClassArrowFunctionIIFE(): boolean {
+    const TSClass = createClassArrowFunction(IIFEClass, tsInt);
 
-    return check_instance(IIFEClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(IIFEClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }

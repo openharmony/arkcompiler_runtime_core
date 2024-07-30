@@ -14,20 +14,20 @@
  */
 
 const {
-    num,
-    SubsetByRefClass,
-    subset_by_ref_interface,
-    call_subset_by_ref_interface_from_ets,
+	num,
+	SubsetByRefClass,
+	subsetByRefInterface,
+	callSubsetByRefInterfaceFromEts,
 } = require('interface_method.test.js');
 
-function check_subset_by_ref_interface_method() {
-    const obj = new SubsetByRefClass();
-    ASSERT_TRUE(subset_by_ref_interface(obj) === num);
+function checkSubsetByRefInterfaceMethod() {
+	const obj = new SubsetByRefClass();
+	ASSERT_TRUE(subsetByRefInterface(obj) === num);
 }
 
-function check_call_subset_by_ref_interface_from_ets() {
-    ASSERT_TRUE(call_subset_by_ref_interface_from_ets() === num);
+function checkCallSubsetByRefInterfaceFromEts() {
+	ASSERT_TRUE(callSubsetByRefInterfaceFromEts() === num);
 }
 
-check_subset_by_ref_interface_method();
-check_call_subset_by_ref_interface_from_ets();
+checkSubsetByRefInterfaceMethod();
+checkCallSubsetByRefInterfaceFromEts();

@@ -13,44 +13,42 @@
  * limitations under the License.
  */
 
-const etsVm = require("lib/module/ets_interop_js_napi");
+const etsVm = require('lib/module/ets_interop_js_napi');
 
-let EtsGenericValueHandle = etsVm.getClass("Lgeneric_types/test/EtsGenericValueHandle;");
-let EtsGenericErrorHandle = etsVm.getClass("Lgeneric_types/test/EtsGenericErrorHandle;");
-let ets_get_generic_value_identity = etsVm.getFunction("Lgeneric_types/test/ETSGLOBAL;", "ets_get_generic_value_identity");
-let ets_get_generic_error_identity = etsVm.getFunction("Lgeneric_types/test/ETSGLOBAL;", "ets_get_generic_error_identity");
+let EtsGenericValueHandle = etsVm.getClass('Lgeneric_types/test/EtsGenericValueHandle;');
+let EtsGenericErrorHandle = etsVm.getClass('Lgeneric_types/test/EtsGenericErrorHandle;');
+let etsGetGenericValueIdentity = etsVm.getFunction('Lgeneric_types/test/ETSGLOBAL;', 'etsGetGenericValueIdentity');
+let etsGetGenericErrorIdentity = etsVm.getFunction('Lgeneric_types/test/ETSGLOBAL;', 'etsGetGenericErrorIdentity');
 
-
-function check_generic_value_for_function(v) {
-    // Check the parameter and the return value of the function
-    let gen_value = ets_get_generic_value_identity(v);
-    ASSERT_EQ(v, gen_value);
+function checkGenericValueForFunction(v) {
+	// Check the parameter and the return value of the function
+	let genValue = etsGetGenericValueIdentity(v);
+	ASSERT_EQ(v, genValue);
 }
 
-function check_generic_value_for_instance(v) {
-    let gen_handle = new EtsGenericValueHandle(v);
+function checkGenericValueForInstance(v) {
+	let genHandle = new EtsGenericValueHandle(v);
 
-    // Check the parameter and the return value of the class method
-    let value = gen_handle.get_value();
-    ASSERT_EQ(v, value);
+	// Check the parameter and the return value of the class method
+	let value = genHandle.getValue();
+	ASSERT_EQ(v, value);
 
-    gen_handle.set_value(new ets.Object());
+	genHandle.setValue(new ets.Object());
 
-    // Check access to generic field
-    gen_handle.value = v;
-    let field_value = gen_handle.value;
-    ASSERT_EQ(v, field_value);
+	// Check access to generic field
+	genHandle.value = v;
+	let fieldValue = genHandle.value;
+	ASSERT_EQ(v, fieldValue);
 }
 
-function check_generic_value(v) {
-    check_generic_value_for_function(v);
-    check_generic_value_for_instance(v);
+function checkGenericValue(v) {
+	checkGenericValueForFunction(v);
+	checkGenericValueForInstance(v);
 }
-
 
 module.exports = {
-    EtsGenericValueHandle,
-    EtsGenericErrorHandle,
-    check_generic_value,
-    ets_get_generic_error_identity,
-}
+	EtsGenericValueHandle,
+	EtsGenericErrorHandle,
+	checkGenericValue,
+	etsGetGenericErrorIdentity,
+};

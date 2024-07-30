@@ -18,7 +18,7 @@ const TEN = 10;
 const TWENTY = 20;
 const PRECISION = 3;
 
-import { DynObjWrapper, C } from './lib1';
+import { DynObjWrapper, C } from "./lib1";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);
@@ -35,7 +35,7 @@ function testImports() {
   const o = new C();
   AssertEq(o.o1.val, 323);
   AssertEq(o.o2.val, 324);
-  AssertEq(o.v1.toFixed(PRECISION), (ONE).toFixed(PRECISION));
+  AssertEq(o.v1.toFixed(PRECISION), ONE.toFixed(PRECISION));
 
   const dynObjWrapper = new DynObjWrapper();
   AssertEq(dynObjWrapper.dynObj_.val, TEN);

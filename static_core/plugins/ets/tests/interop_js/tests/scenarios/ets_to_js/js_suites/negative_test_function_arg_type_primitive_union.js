@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypePrimitiveUnionEts = etsMod.getFunction('function_arg_type_primitive_union');
+const functionArgTypePrimitiveUnionEts = etsMod.getFunction('functionArgTypePrimitiveUnion');
 
 {
-  let arr = [10, 20, 30];
-  ASSERT_THROWS(TypeError, () => functionArgTypePrimitiveUnionEts(arr));
+	let arr = [10, 20, 30];
+	ASSERT_THROWS(TypeError, () => functionArgTypePrimitiveUnionEts(arr));
 }
 
 GCJSRuntimeCleanup();

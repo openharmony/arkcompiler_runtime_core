@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-import { bouncing_pandas } from "/plugins/ets/tests/interop_js/tests/bouncing_pandas/bouncing_pandas.js"
+import { bouncingPandas } from "/plugins/ets/tests/interop_js/tests/bouncing_pandas/bouncing_pandas.js";
 
 function Test1(): boolean {
-    let ret = bouncing_pandas()
-    if(ret as number == 1) {
-        return false
-    } else {
-        return true
-    }
+  let ret = bouncingPandas();
+  if ((ret as number) == 1) {
+    return false;
+  } else {
+    return true;
+  }
 }

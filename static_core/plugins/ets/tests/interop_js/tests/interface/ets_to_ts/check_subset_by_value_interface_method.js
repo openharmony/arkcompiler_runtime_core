@@ -14,24 +14,22 @@
  */
 
 const {
-    num,
-    SubsetByValueClass,
-    create_subset_by_value_class_from_ets,
+	num,
+	SubsetByValueClass,
+	createSubsetByValueClassFromEts,
 } = require('interface_method.test');
 
-function check_subset_by_value_interface_method() {
-    const IClass = new SubsetByValueClass();
+function checkSubsetByValueInterfaceMethod() {
+	const IClass = new SubsetByValueClass();
 
-    ASSERT_TRUE(IClass.get().value === num);
+	ASSERT_TRUE(IClass.get().value === num);
 }
 
-function check_create_subset_by_value_class_from_ets() {
-    const IClass = create_subset_by_value_class_from_ets();
+function checkCreateSubsetByValueClassFromEts() {
+	const IClass = createSubsetByValueClassFromEts();
 
-    ASSERT_TRUE(IClass.get().value === num);
+	ASSERT_TRUE(IClass.get().value === num);
 }
 
-
-
-check_subset_by_value_interface_method();
-check_create_subset_by_value_class_from_ets();
+checkSubsetByValueInterfaceMethod();
+checkCreateSubsetByValueClassFromEts();

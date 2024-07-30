@@ -13,31 +13,26 @@
  * limitations under the License.
  */
 
-
 let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
 const etsOpts = {
-    'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-    'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
-    'gc-trigger-type': 'heap-trigger',
-    'load-runtimes': 'ets',
-    'compiler-enable-jit': 'false',
-    'run-gc-in-place': 'true',
+	'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+	'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
+	'gc-trigger-type': 'heap-trigger',
+	'load-runtimes': 'ets',
+	'compiler-enable-jit': 'false',
+	'run-gc-in-place': 'true',
 };
 const res = etsVm.createRuntime(etsOpts);
 if (!res) {
-    console.log('Cannot create ETS runtime');
-    process.exit(1);
+	console.log('Cannot create ETS runtime');
+	process.exit(1);
 }
 
-
-const Point = etsVm.getClass("Lproxy_reference_storage_2/test/Point;");
-
+const Point = etsVm.getClass('Lproxy_reference_storage_2/test/Point;');
 
 // Call SharedReferenceStorage::CreateObjectEtsWrapper() method
-for (let i = 0; i < 4*4096; ++i) {
-    let p = new Point(i, i);
+for (let i = 0; i < 4 * 4096; ++i) {
+	let p = new Point(i, i);
 }
-
-
 
 // Method SharedReferenceStorage::RemoveSharedReference() will be called before the virtual machine is terminated

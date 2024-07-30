@@ -22,7 +22,7 @@ const FIVE = 5;
 const FIFTEEN = 15;
 const PRECISION = 3;
 
-import { Methods } from './lib';
+import { Methods } from "./lib";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);
@@ -36,14 +36,17 @@ export function main() {
 }
 
 function testMethods() {
-  AssertEq(Methods.StaticSumDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
+  AssertEq(
+    Methods.StaticSumDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
+    (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
+  );
 
   const o = new Methods();
   AssertEq(o.IsTrue(false), false);
 
-  AssertEq(o.SumString('Hello from ', 'Panda!!!!'), 'Hello from Panda!!!!');
+  AssertEq(o.SumString("Hello from ", "Panda!!!!"), "Hello from Panda!!!!");
   AssertEq(o.SumIntArray([ONE, TWO, THREE, FOUR, FIVE]), FIFTEEN);
-  AssertEq(o.OptionalString('Optional string'), 'Optional string');
+  AssertEq(o.OptionalString("Optional string"), "Optional string");
 
   // NOTE(ivagin): enable when supported by runtime #12808
   // NOTE(vpukhov): optional methods produce overload sets
@@ -54,6 +57,9 @@ function testMethods() {
 
   // NOTE(ivagin): enable when supported by interop #12808
   if (false) {
-    AssertEq(o.SumIntVariadic(ONE, TWO, THREE, FOUR, FIVE).toFixed(PRECISION), (FIFTEEN).toFixed(PRECISION));
+    AssertEq(
+      o.SumIntVariadic(ONE, TWO, THREE, FOUR, FIVE).toFixed(PRECISION),
+      FIFTEEN.toFixed(PRECISION),
+    );
   }
 }

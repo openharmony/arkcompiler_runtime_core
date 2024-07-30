@@ -16,25 +16,27 @@
 declare const process: any;
 declare const require: any;
 
-const PANDA_FILES = 'panda-files';
-const BOOT_PANDA_FILES = 'boot-panda-files';
-const LOAD_RUNTIMES = 'load-runtimes';
+const PANDA_FILES = "panda-files";
+const BOOT_PANDA_FILES = "boot-panda-files";
+const LOAD_RUNTIMES = "load-runtimes";
 
-(globalThis as any).Panda = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+(globalThis as any).Panda = require(
+  process.env.MODULE_PATH + "/ets_interop_js_napi.node",
+);
 
 const etsOpts = {
   [PANDA_FILES]: process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
   [BOOT_PANDA_FILES]: `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
-  [LOAD_RUNTIMES]: 'ets',
+  [LOAD_RUNTIMES]: "ets",
 };
 const createRes = (globalThis as any).Panda.createRuntime(etsOpts);
 if (!createRes) {
-  console.log('Cannot create ETS runtime');
+  console.log("Cannot create ETS runtime");
   process.exit(1);
 }
 
 (globalThis as any).require = require;
 
-import { main } from './imports';
+import { main } from "./imports";
 
 main();

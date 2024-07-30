@@ -13,120 +13,118 @@
  * limitations under the License.
  */
 
-
-export const ts_string = 'string';
+export const ts_string = "string";
 export const ts_number = 1;
 type UnionType = string | number;
 
-
-type LiteralType = 1 | 'string';
+type LiteralType = 1 | "string";
 
 export class LiteralClass<T extends LiteralType> {
-   private _value: T;
+  private _value: T;
 
-   constructor(value: T) {
-      this._value = value;
-   }
+  constructor(value: T) {
+    this._value = value;
+  }
 
-   set(arg: T): void {
-      this._value = arg;
-   }
+  set(arg: T): void {
+    this._value = arg;
+  }
 
-   get(): T {
-      return this._value;
-   }
+  get(): T {
+    return this._value;
+  }
 }
 
 export class UnionClass<T extends UnionType> {
-   private _value: T;
+  private _value: T;
 
-   constructor(value: T) {
-      this._value = value;
-   }
+  constructor(value: T) {
+    this._value = value;
+  }
 
-   set(arg: T): void {
-      this._value = arg;
-   }
+  set(arg: T): void {
+    this._value = arg;
+  }
 
-   get(): T {
-      return this._value;
-   }
+  get(): T {
+    return this._value;
+  }
 }
 
 interface GInterface<T> {
-   value: T
+  value: T;
 }
 
 export class InterfaceClass<T> implements GInterface<T> {
-   public value: T;
+  public value: T;
 
-   constructor(value: T) {
-      this.value = value;
-   }
+  constructor(value: T) {
+    this.value = value;
+  }
 
-   set(arg: T): void {
-      this.value = arg;
-   }
+  set(arg: T): void {
+    this.value = arg;
+  }
 
-   get(): T {
-      return this.value;
-   }
+  get(): T {
+    return this.value;
+  }
 }
 
 export abstract class GAbstract<T> {
-   private _value: T
+  private _value: T;
 
-   constructor(value: T) {
-      this._value = value;
-   }
+  constructor(value: T) {
+    this._value = value;
+  }
 
-   set(arg: T): void {
-      this._value = arg;
-   }
+  set(arg: T): void {
+    this._value = arg;
+  }
 
-   get(): T {
-      return this._value;
-   }
+  get(): T {
+    return this._value;
+  }
 }
 
 export class AbstractClass<T> extends GAbstract<T> {
-   constructor(value: T) {
-      super(value);
-   }
+  constructor(value: T) {
+    super(value);
+  }
 }
 
 export class GClass<T> {
-   public content: T;
+  public content: T;
 
-   constructor(content: T) {
-      this.content = content;
-   }
+  constructor(content: T) {
+    this.content = content;
+  }
 
-   public get(): T {
-      return this.content;
-   }
+  public get(): T {
+    return this.content;
+  }
 }
 
 export function generic_function<T>(arg: T): T {
-   return arg;
+  return arg;
 }
 
 export function tuple_declared_type<T, U>(items: [T, U]): [T, U] {
-   return items;
+  return items;
 }
 
 interface Data {
-   data: string
-};
+  data: string;
+}
 
 export function generic_subset_ref<T extends Data>(items: T): T {
-   return items;
+  return items;
 }
 
 type TGenericFn<T> = () => T;
 
 export const explicitly_declared_type: TGenericFn<string> = () => {
-   return ts_string;
+  return ts_string;
 };
 
 export const literalClass = new LiteralClass(ts_string);

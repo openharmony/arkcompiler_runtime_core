@@ -13,12 +13,34 @@
  * limitations under the License.
  */
 function regularFunc() {
-    return 123
+	return 123;
 }
 exports.RegularFunc = regularFunc;
-exports.Lambda = () => 123
-exports.Foo = {foo() { return {foo() {return 123; }};}}
-exports.MultipleCall = () => ()=> 123
-exports.ArrayOfFoo = [{foo() { return 123;}}]
-exports.DoubleArrayOfFoo = [[{foo() { return 123;}}]]
-exports.ArrayOfLambda = [() => 123]
+exports.Lambda = () => 123;
+exports.Foo = {
+	foo() {
+		return {
+			foo() {
+				return 123;
+			},
+		};
+	},
+};
+exports.MultipleCall = () => () => 123;
+exports.ArrayOfFoo = [
+	{
+		foo() {
+			return 123;
+		},
+	},
+];
+exports.DoubleArrayOfFoo = [
+	[
+		{
+			foo() {
+				return 123;
+			},
+		},
+	],
+];
+exports.ArrayOfLambda = [() => 123];

@@ -21,14 +21,16 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSWith = etsMod.getFunction('Array_TestJSWith');
 
-{ // Test JS Array<FooClass>
-  TestJSWith(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSWith(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  let arr1 = arr.with(1, 'three');
-  ASSERT_EQ(arr1.at(1), 'three');
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	let arr1 = arr.with(1, 'three');
+	ASSERT_EQ(arr1.at(1), 'three');
 }
 
 GCJSRuntimeCleanup();

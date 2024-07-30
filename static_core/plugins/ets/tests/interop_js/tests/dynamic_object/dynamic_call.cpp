@@ -25,25 +25,25 @@ public:
 
 TEST_F(DynamicFunctionalCall, RegularFunc)
 {
-    auto ret = CallEtsMethod<int>("regular_func");
+    auto ret = CallEtsMethod<int>("regularFunc");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, DynamicField)
 {
-    auto ret = CallEtsMethod<int>("dynamic_field");
+    auto ret = CallEtsMethod<int>("dynamicField");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, MethodCall)
 {
-    auto ret = CallEtsMethod<int>("method_call");
+    auto ret = CallEtsMethod<int>("methodCall");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, MultipleCall)
 {
-    auto ret = CallEtsMethod<int>("multiple_call");
+    auto ret = CallEtsMethod<int>("multipleCall");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
@@ -55,19 +55,19 @@ TEST_F(DynamicFunctionalCall, Lambda)
 
 TEST_F(DynamicFunctionalCall, SimpleArray)
 {
-    auto ret = CallEtsMethod<int>("simple_arr");
+    auto ret = CallEtsMethod<int>("simpleArr");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, MultiDimArray)
 {
-    auto ret = CallEtsMethod<int>("multidim_array");
+    auto ret = CallEtsMethod<int>("multidimArray");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 
 TEST_F(DynamicFunctionalCall, LambdaArray)
 {
-    auto ret = CallEtsMethod<int>("lambda_arr_call");
+    auto ret = CallEtsMethod<int>("lambdaArrCall");
     ASSERT_EQ(ret.value(), jsReturnValue_);
 }
 

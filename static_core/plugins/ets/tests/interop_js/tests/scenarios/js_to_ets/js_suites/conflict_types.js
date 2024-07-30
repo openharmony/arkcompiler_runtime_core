@@ -15,67 +15,67 @@
 'use strict';
 
 function functionArgTypeConflictArray() {
-  const SAMPLE_INT = 123;
-  const SAMPLE_STRING = 'foo';
+	const SAMPLE_INT = 123;
+	const SAMPLE_STRING = 'foo';
 
-  const array = Array.of(SAMPLE_INT, SAMPLE_STRING);
-  return array;
+	const array = Array.of(SAMPLE_INT, SAMPLE_STRING);
+	return array;
 }
 
 function functionArgTypeConflictArrayBuffer() {
-  const BUFFER_SIZE = 8;
-  const VALUE_AS_INT32 = 123;
+	const BUFFER_SIZE = 8;
+	const VALUE_AS_INT32 = 123;
 
-  const buffer = new ArrayBuffer(BUFFER_SIZE);
-  const view = new Int32Array(buffer);
+	const buffer = new ArrayBuffer(BUFFER_SIZE);
+	const view = new Int32Array(buffer);
 
-  view.set([VALUE_AS_INT32], 0);
+	view.set([VALUE_AS_INT32], 0);
 
-  return buffer;
+	return buffer;
 }
 
 function functionArgTypeConflictBoolean() {
-  return new Boolean(true);
+	return new Boolean(true);
 }
 
 function functionArgTypeConflictDataView() {
-  const BUFFER_SIZE = 8;
-  const VALUE_AS_INT32 = 123;
+	const BUFFER_SIZE = 8;
+	const VALUE_AS_INT32 = 123;
 
-  const buffer = new ArrayBuffer(BUFFER_SIZE);
-  const view = new DataView(buffer);
-  view.setInt32(0, VALUE_AS_INT32);
+	const buffer = new ArrayBuffer(BUFFER_SIZE);
+	const view = new DataView(buffer);
+	view.setInt32(0, VALUE_AS_INT32);
 
-  return view;
+	return view;
 }
 
 function functionArgTypeConflictDate() {
-  return new Date(1);
+	return new Date(1);
 }
 
 function functionArgTypeConflictError() {
-  const SAMPLE_STRING = 'foo';
+	const SAMPLE_STRING = 'foo';
 
-  return new Error(SAMPLE_STRING);
+	return new Error(SAMPLE_STRING);
 }
 
 function functionArgTypeConflictMap() {
-  const dataMap = new Map();
-  const KEY = 'foo';
-  const VALUE = 'bar';
+	const dataMap = new Map();
+	const KEY = 'foo';
+	const VALUE = 'bar';
 
-  dataMap.set(KEY, VALUE);
+	dataMap.set(KEY, VALUE);
 
-  return dataMap;
+	return dataMap;
 }
 
 function functionArgTypeConflictObject() {
-  return new Object();
+	return new Object();
 }
 
 function functionArgTypeConflictString() {
-  const SAMPLE_STRING = 'foo';
-  return SAMPLE_STRING;
+	const SAMPLE_STRING = 'foo';
+	return SAMPLE_STRING;
 }
 
 exports.functionArgTypeConflictArray = functionArgTypeConflictArray;

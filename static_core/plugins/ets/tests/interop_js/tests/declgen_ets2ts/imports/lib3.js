@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 class DynClass {
-  val = 10;
-  GetDynVal() {
-    return 20;
-  }
+	val = 10;
+	GetDynVal() {
+		return 20;
+	}
 }
 
 exports.DynClass = DynClass;

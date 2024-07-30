@@ -15,7 +15,7 @@
 
 const TWO = 2;
 
-import { C } from './lib';
+import { C } from "./lib";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);

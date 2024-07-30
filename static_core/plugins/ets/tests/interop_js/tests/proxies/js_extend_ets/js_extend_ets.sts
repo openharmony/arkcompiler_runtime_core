@@ -30,12 +30,12 @@ class FooBase {
         return "FooBase toString";
     }
 
-    public fn_base(): String { return "fn_base"; }
-    public static sfn_base(): String { return "sfn_base"; }
+    public fnBase(): String { return "fn_base"; }
+    public static sfnBase(): String { return "sfn_base"; }
 
-    public self_fn(): String { return this.fn(); }
+    public selfFn(): String { return this.fn(); }
 
-    public final something_final(): void { }
+    public final somethingFinal(): void { }
 };
 
 class FooDerived extends FooBase {

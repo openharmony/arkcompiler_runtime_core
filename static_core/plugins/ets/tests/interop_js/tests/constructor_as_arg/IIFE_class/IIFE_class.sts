@@ -14,34 +14,34 @@
  */
 
 import {
-    ts_int,
+    tsInt,
     IIFECreateClassMain,
     MainClass,
     IIFECreateClassAnonymous,
     AnonymousClass,
     IIFECreateClass,
     IIFEClass,
-    check_instance,
+    checkInstance,
 } from "main_js"
 
 
-function check_IIFE_create_class_main(): boolean {
+function checkIIFECreateClassMain(): boolean {
     const TSClass = IIFECreateClassMain;
 
-    return check_instance(MainClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(MainClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_IIFE_create_class_anonymous(): boolean {
+function checkIIFECreateClassAnonymous(): boolean {
     const TSClass = IIFECreateClassAnonymous;
 
-    return check_instance(AnonymousClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(AnonymousClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_IIFE_create_class_IIFE(): boolean {
+function checkIIFECreateClassIIFE(): boolean {
     const TSClass = IIFECreateClass;
 
-    return check_instance(IIFEClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(IIFEClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }

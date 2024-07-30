@@ -16,7 +16,7 @@
 const TWO = 2;
 const THREE = 3;
 
-import { Derived } from './lib';
+import { Derived } from "./lib";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);

@@ -14,25 +14,24 @@
  */
 
 const {
-    SubsetRefSet,
-    create_subset_ref_set_class,
-    string,
-} = require("setter.test.js");
+	SubsetRefSet,
+	createSubsetRefSetClass,
+	string,
+} = require('setter.test.js');
 
-function check_setter_subset_ref() {
-    const extraSet = new SubsetRefSet();
-    extraSet.value = string
+function checkSetterSubsetRef() {
+	const extraSet = new SubsetRefSet();
+	extraSet.value = string;
 
-    ASSERT_EQ(typeof string, typeof extraSet.value);
+	ASSERT_EQ(typeof string, typeof extraSet.value);
 }
 
-function check_setter_subset_ref_class_from_ets() {
-    const extraSet = create_subset_ref_set_class();
-    extraSet.value = string
+function checkSetterSubsetRefClassFromEts() {
+	const extraSet = createSubsetRefSetClass();
+	extraSet.value = string;
 
-    ASSERT_EQ(typeof string, typeof extraSet.value);
+	ASSERT_EQ(typeof string, typeof extraSet.value);
 }
 
-
-check_setter_subset_ref();
-check_setter_subset_ref_class_from_ets();
+checkSetterSubsetRef();
+checkSetterSubsetRefClassFromEts();

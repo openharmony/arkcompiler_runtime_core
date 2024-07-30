@@ -20,10 +20,8 @@ const etsMod = getTestModule('scenarios_test');
 const ClassWithMethodEts = etsMod.getClass('ClassWithMethodEts');
 const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
-
 {
-  const obj = new ClassWithMethodEts()
+	const obj = new ClassWithMethodEts();
 
-  ASSERT_THROWS(TypeError, () => functionArgIsInterface(obj));
-
+	ASSERT_THROWS(TypeError, () => functionArgIsInterface(obj));
 }

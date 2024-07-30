@@ -13,88 +13,94 @@
  * limitations under the License.
  */
 
-
 //@ts-ignore -- to avoid @types/node missing
 import { EventEmitter } from "stream";
 //@ts-ignore -- to avoid @types/node missing
 const etsVm = require("lib/module/ets_interop_js_napi");
 
-const ETS_MODULE_NAME: string = 'interop_class_extension';
-const makePrefix = (packageName: string) => 'L' + packageName.replace('\.', '/') + '/';
+const ETS_MODULE_NAME: string = "interop_class_extension";
+const makePrefix = (packageName: string) =>
+  "L" + packageName.replace(".", "/") + "/";
 
-const getClass = (name: string, packageName?: string) => etsVm.getClass(makePrefix(packageName ?? ETS_MODULE_NAME) + name + ';')
-const getFunction = (name: string, packageName?: string) => etsVm.getFunction(makePrefix(packageName ?? ETS_MODULE_NAME )+ 'ETSGLOBAL;', name);
+const getClass = (name: string, packageName?: string) =>
+  etsVm.getClass(makePrefix(packageName ?? ETS_MODULE_NAME) + name + ";");
+const getFunction = (name: string, packageName?: string) =>
+  etsVm.getFunction(
+    makePrefix(packageName ?? ETS_MODULE_NAME) + "ETSGLOBAL;",
+    name,
+  );
 
-export const DEFAULT_STRING_VALUE = 'Panda';
+export const DEFAULT_STRING_VALUE = "Panda";
 //@ts-ignore -- to avoid @types/node missing
-export const DEFAULT_NUMERIC_VALUE = Math.round(Math.random() * Number!.MAX_SAFE_INTEGER)
+export const DEFAULT_NUMERIC_VALUE = Math.round(
+  Math.random() * Number!.MAX_SAFE_INTEGER,
+);
 
 export const helperIsJSInstanceOf = (obj: any, classObj: Function) => {
-    return obj instanceof classObj;
-}
+  return obj instanceof classObj;
+};
 
 export class TestUserClass {
-    private _privateValue: string = DEFAULT_STRING_VALUE;
-    protected protectedValue: string = DEFAULT_STRING_VALUE;
-    public publicValue: string = DEFAULT_STRING_VALUE;
-    public readonly readonlyValue: string = DEFAULT_STRING_VALUE;
-    public readonly constructorSetValue: string;
+  private _privateValue: string = DEFAULT_STRING_VALUE;
+  protected protectedValue: string = DEFAULT_STRING_VALUE;
+  public publicValue: string = DEFAULT_STRING_VALUE;
+  public readonly readonlyValue: string = DEFAULT_STRING_VALUE;
+  public readonly constructorSetValue: string;
 
-    static isMyInstance(obj: any) {
-        return obj instanceof TestUserClass; 
-    }
-    
-    constructor(constructorArg: string){
-        this.constructorSetValue = constructorArg;
-    }
+  static isMyInstance(obj: any) {
+    return obj instanceof TestUserClass;
+  }
+
+  constructor(constructorArg: string) {
+    this.constructorSetValue = constructorArg;
+  }
 }
 
-export const TestNativeClass = EventEmitter
+export const TestNativeClass = EventEmitter;
 
 export const extendUserClass = () => {
-    const TSTestUserClass = getClass('TSTestUserClass');
-    class ExtendedEtsUserClass extends TSTestUserClass {}; 
-    const classInstance = new ExtendedEtsUserClass();
-    return classInstance instanceof ExtendedEtsUserClass;
-}
+  const TSTestUserClass = getClass("TSTestUserClass");
+  class ExtendedEtsUserClass extends TSTestUserClass {}
+  const classInstance = new ExtendedEtsUserClass();
+  return classInstance instanceof ExtendedEtsUserClass;
+};
 
 export const extendNativeClass = () => {
-    const TSTestNativeClass = getClass('ArrayBuffer', 'escompat');
-    class ExtendedEtsNativeClass extends TSTestNativeClass {
-        constructor(length: 2){
-            super(length)
-        }
-    }; 
-    const classInstance = new ExtendedEtsNativeClass(2);
-    return classInstance instanceof TSTestNativeClass;
-}
+  const TSTestNativeClass = getClass("ArrayBuffer", "escompat");
+  class ExtendedEtsNativeClass extends TSTestNativeClass {
+    constructor(length: 2) {
+      super(length);
+    }
+  }
+  const classInstance = new ExtendedEtsNativeClass(2);
+  return classInstance instanceof TSTestNativeClass;
+};
 
 export const jsRespectsProtectedModifier = () => {
-    const TSTestUserClass = getClass('TSTestUserClass');
-    try {
-        class ExtendedEtsUserClass extends TSTestUserClass {
-            constructor(){
-                super()
-                //@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime
-                this.protectedProperty = 'redefinedProtected';
-            }
+  const TSTestUserClass = getClass("TSTestUserClass");
+  try {
+    class ExtendedEtsUserClass extends TSTestUserClass {
+      constructor() {
+        super();
+        //@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime
+        this.protectedProperty = "redefinedProtected";
+      }
 
-            validProtectedGetter() {
-                //@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime
-                return this.protectedProperty
-            }
-        };
-        const classInstance = new ExtendedEtsUserClass()
-        return classInstance.validProtectedGetter() === 'redefinedProtected'
-    } catch (e) {
-        return false
+      validProtectedGetter() {
+        //@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime
+        return this.protectedProperty;
+      }
     }
-
-}
+    const classInstance = new ExtendedEtsUserClass();
+    return classInstance.validProtectedGetter() === "redefinedProtected";
+  } catch (e) {
+    return false;
+  }
+};
 
 export const jsRespectsStaticModifier = () => {
-    const TSTestUserClass = getClass('TSTestUserClass');
-    class ExtendedEtsUserClass extends TSTestUserClass {};
-    //@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime
-    return ExtendedEtsUserClass?.staticProperty === 'static';
-}
+  const TSTestUserClass = getClass("TSTestUserClass");
+  class ExtendedEtsUserClass extends TSTestUserClass {}
+  //@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime
+  return ExtendedEtsUserClass?.staticProperty === "static";
+};

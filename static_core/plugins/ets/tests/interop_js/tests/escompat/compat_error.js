@@ -19,17 +19,19 @@ const etsMod = getTestModule('escompat_test');
 const CreateEtsSample = etsMod.getFunction('Error_CreateEtsSample');
 const TestJSSample = etsMod.getFunction('Error_TestJSSample');
 
-{ // Test JS Error
-  TestJSSample(new Error('foo'));
+{
+	// Test JS Error
+	TestJSSample(new Error('foo'));
 }
 
-{ // Test ETS Error
-    let v = CreateEtsSample();
-  ASSERT_TRUE(v instanceof Error);
+{
+	// Test ETS Error
+	let v = CreateEtsSample();
+	ASSERT_TRUE(v instanceof Error);
 
-  ASSERT_EQ(String(v.message), 'bar');
+	ASSERT_EQ(String(v.message), 'bar');
 
-  ASSERT_EQ(v.cause, undefined);
+	ASSERT_EQ(v.cause, undefined);
 
-  ASSERT_TRUE(String(v["<get>stack"]()).includes('CreateEtsSample'));
+	ASSERT_TRUE(String(v['<get>stack']()).includes('CreateEtsSample'));
 }

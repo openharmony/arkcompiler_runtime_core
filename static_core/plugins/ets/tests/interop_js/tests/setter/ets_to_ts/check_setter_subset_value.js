@@ -14,22 +14,22 @@
  */
 
 const {
-    SubsetValueSet,
-    string,
-    create_subset_value_set_class,
-} = require("setter.test.js");
+	SubsetValueSet,
+	string,
+	createSubsetValueSetClass,
+} = require('setter.test.js');
 
-function check_setter_subset_value() {
-    const subsetValueSet = new SubsetValueSet();
+function checkSetterSubsetValue() {
+	const subsetValueSet = new SubsetValueSet();
 
-    ASSERT_EQ(typeof string, typeof subsetValueSet.value);
+	ASSERT_EQ(typeof string, typeof subsetValueSet.value);
 }
 
-function check_setter_subset_value_class_from_ets() {
-    const subsetValueSet = create_subset_value_set_class();
+function checkSetterSubsetValueClassFromEts() {
+	const subsetValueSet = createSubsetValueSetClass();
 
-    ASSERT_EQ(typeof string, typeof subsetValueSet.value);
+	ASSERT_EQ(typeof string, typeof subsetValueSet.value);
 }
 
-check_setter_subset_value();
-check_setter_subset_value_class_from_ets();
+checkSetterSubsetValue();
+checkSetterSubsetValueClassFromEts();

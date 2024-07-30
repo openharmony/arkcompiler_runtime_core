@@ -16,12 +16,12 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypeConflictEts = etsMod.getFunction('function_arg_type_conflict_dataview');
+const functionArgTypeConflictEts = etsMod.getFunction('functionArgTypeConflictDataview');
 
 {
-  let result = functionArgTypeConflictEts();
-  ASSERT_TRUE(result instanceof DataView);
+	let result = functionArgTypeConflictEts();
+	ASSERT_TRUE(result instanceof DataView);
 
-  const EXPECTED_VALUE = 123;
-  ASSERT_EQ(result.at(0), EXPECTED_VALUE);
+	const EXPECTED_VALUE = 123;
+	ASSERT_EQ(result.at(0), EXPECTED_VALUE);
 }

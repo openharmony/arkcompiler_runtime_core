@@ -14,28 +14,28 @@
  */
 
 import {
-    EvaluateNumber,
-    ExampleClass,
-    ClassWithEmptyConstructor,
-    EvaluateObject,
-    MyNamespace,
-    EvaluateArray
-} from "/plugins/ets/tests/interop_js/tests/number_subtypes/module.js"
+	EvaluateNumber,
+	ExampleClass,
+	ClassWithEmptyConstructor,
+	EvaluateObject,
+	MyNamespace,
+	EvaluateArray,
+} from '/plugins/ets/tests/interop_js/tests/number_subtypes/module.js';
 
-//! CHECKER      jscall_empty JIT
-//! RUN          force_jit: true, entry: "jscall_empty", options: "--compiler-regex=ETSGLOBAL::jscall_empty"
-//! METHOD       "jscall_empty"
+//! CHECKER      jscallEmpty JIT
+//! RUN          force_jit: true, entry: "jscallEmpty", options: "--compiler-regex=ETSGLOBAL::jscallEmpty"
+//! METHOD       "jscallEmpty"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jscall::invoke/
 
-function jscall_empty(): int {
-    EvaluateNumber();
-    return 0;
+function jscallEmpty(): int {
+	EvaluateNumber();
+	return 0;
 }
 
-//! CHECKER      jsnew_empty JIT
-//! RUN          force_jit: true, entry: "jsnew_empty", options: "--compiler-regex=ETSGLOBAL::jsnew_empty"
-//! METHOD       "jsnew_empty"
+//! CHECKER      jsnewEmpty JIT
+//! RUN          force_jit: true, entry: "jsnewEmpty", options: "--compiler-regex=ETSGLOBAL::jsnewEmpty"
+//! METHOD       "jsnewEmpty"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
@@ -44,31 +44,31 @@ function jscall_empty(): int {
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
 //! INST_COUNT   /i32.*Cast f64/, 2
 
-function jsnew_empty(): int {
-    let res_obj = new ClassWithEmptyConstructor();
-    let res_get_v0 = res_obj.v0 as int;
-    let res_get_v1 = res_obj.v1 as int;
-    if (res_get_v0 == 42 && res_get_v1 == 42) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jsnewEmpty(): int {
+	let resObj = new ClassWithEmptyConstructor();
+	let resGetV0 = resObj.v0 as int;
+	let resGetV1 = resObj.v1 as int;
+	if (resGetV0 == 42 && resGetV1 == 42) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jscall_static_method_empty JIT
-//! RUN          force_jit: true, entry: "jscall_static_method_empty", options: "--compiler-regex=ETSGLOBAL::jscall_static_method_empty"
-//! METHOD       "jscall_static_method_empty"
+//! CHECKER      jscallStaticMethodEmpty JIT
+//! RUN          force_jit: true, entry: "jscallStaticMethodEmpty", options: "--compiler-regex=ETSGLOBAL::jscallStaticMethodEmpty"
+//! METHOD       "jscallStaticMethodEmpty"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jscall::invoke/
 
-function jscall_static_method_empty(): int {
-    ExampleClass.EmptyMethod();
-    return 0;
+function jscallStaticMethodEmpty(): int {
+	ExampleClass.EmptyMethod();
+	return 0;
 }
 
-//! CHECKER      jscall_object JIT
-//! RUN          force_jit: true, entry: "jscall_object", options: "--compiler-regex=ETSGLOBAL::jscall_object"
-//! METHOD       "jscall_object"
+//! CHECKER      jscallObject JIT
+//! RUN          force_jit: true, entry: "jscallObject", options: "--compiler-regex=ETSGLOBAL::jscallObject"
+//! METHOD       "jscallObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     /CallStatic.*jscall::invoke/
@@ -77,123 +77,121 @@ function jscall_static_method_empty(): int {
 //! INST_NEXT    "Intrinsic.JSRuntimeGetPropertyDouble"
 //! INST_NEXT    /i32.*Cast f64/
 
-function jscall_object(): int {
-    let res_obj = new ExampleClass(42, 42);
-    let res = EvaluateObject(res_obj);
-    let res_get_v0 = res.v0 as int;
-    let res_get_v1 = res.v1 as int;
-    if (res_get_v0 == 84 && res_get_v1 == 84) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jscallObject(): int {
+	let resObj = new ExampleClass(42, 42);
+	let res = EvaluateObject(resObj);
+	let resGetV0 = res.v0 as int;
+	let resGetV1 = res.v1 as int;
+	if (resGetV0 == 84 && resGetV1 == 84) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jsnew_object JIT
-//! RUN          force_jit: true, entry: "jsnew_object", options: "--compiler-regex=ETSGLOBAL::jsnew_object"
-//! METHOD       "jsnew_object"
+//! CHECKER      jsnewObject JIT
+//! RUN          force_jit: true, entry: "jsnewObject", options: "--compiler-regex=ETSGLOBAL::jsnewObject"
+//! METHOD       "jsnewObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
 
-function jsnew_object(): int {
-    let res_obj = new ExampleClass(42, 42);
-    let res = new ExampleClass(res_obj, res_obj);
-    let res_get_v0 = res.v0;
-    let res_get_v1 = res.v1;
-    if (res_get_v0.v0 as int == 42 && res_get_v0.v1 as int == 42 &&
-        res_get_v1.v0 as int == 42 && res_get_v1.v1 as int == 42) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jsnewObject(): int {
+	let resObj = new ExampleClass(42, 42);
+	let res = new ExampleClass(resObj, resObj);
+	let resGetV0 = res.v0;
+	let resGetV1 = res.v1;
+	if ((resGetV0.v0 as int) == 42 && (resGetV0.v1 as int) == 42 && (resGetV1.v0 as int) == 42 && (resGetV1.v1 as int) == 42) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jsnew_setproperty_object JIT
-//! RUN          force_jit: true, entry: "jsnew_setproperty_object", options: "--compiler-regex=ETSGLOBAL::jsnew_setproperty_object"
-//! METHOD       "jsnew_setproperty_object"
+//! CHECKER      jsnewSetPropertyObject JIT
+//! RUN          force_jit: true, entry: "jsnewSetPropertyObject", options: "--compiler-regex=ETSGLOBAL::jsnewSetPropertyObject"
+//! METHOD       "jsnewSetPropertyObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeSetPropertyJSValue", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 4
 
-function jsnew_setproperty_object(): int {
-    let res_obj = new ClassWithEmptyConstructor();
-    let res = new ClassWithEmptyConstructor();
-    res_obj.v0 = res;
-    res_obj.v1 = res;
-    let res_get_v0 = res_obj.v0;
-    let res_get_v1 = res_obj.v1;
-    if (res_get_v0.v0 as int == 42 && res_get_v0.v1 as int == 42 &&
-        res_get_v1.v0 as int == 42 && res_get_v1.v1 as int == 42) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jsnewSetPropertyObject(): int {
+	let resObj = new ClassWithEmptyConstructor();
+	let res = new ClassWithEmptyConstructor();
+	resObj.v0 = res;
+	resObj.v1 = res;
+	let resGetV0 = resObj.v0;
+	let resGetV1 = resObj.v1;
+	if ((resGetV0.v0 as int) == 42 && (resGetV0.v1 as int) == 42 && (resGetV1.v0 as int) == 42 && (resGetV1.v1 as int) == 42) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jscall_method_object JIT
-//! RUN          force_jit: true, entry: "jscall_method_object", options: "--compiler-regex=ETSGLOBAL::jscall_method_object"
-//! METHOD       "jscall_method_object"
+//! CHECKER      jscallMethodObject JIT
+//! RUN          force_jit: true, entry: "jscallMethodObject", options: "--compiler-regex=ETSGLOBAL::jscallMethodObject"
+//! METHOD       "jscallMethodObject"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST_COUNT   "Intrinsic.JSRuntimeGetPropertyDouble", 2
 
-function jscall_method_object(): int {
-    let res_obj = new ExampleClass(42, 42);
-    let res = EvaluateObject(res_obj);
-    let res_get_v0 = res.v0 as int;
-    let res_get_v1 = res.v1 as int;
-    if (res_get_v0 == 84 && res_get_v1 == 84) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jscallMethodObject(): int {
+	let resObj = new ExampleClass(42, 42);
+	let res = EvaluateObject(resObj);
+	let resGetV0 = res.v0 as int;
+	let resGetV1 = res.v1 as int;
+	if (resGetV0 == 84 && resGetV1 == 84) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jscall_method_simple JIT
-//! RUN          force_jit: true, entry: "jscall_method_simple", options: "--compiler-regex=ETSGLOBAL::jscall_method_simple"
-//! METHOD       "jscall_method_simple"
+//! CHECKER      jscallMethodSimple JIT
+//! RUN          force_jit: true, entry: "jscallMethodSimple", options: "--compiler-regex=ETSGLOBAL::jscallMethodSimple"
+//! METHOD       "jscallMethodSimple"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     /CallStatic.*jscall::invoke/
 
-function jscall_method_simple(): int {
-    let res_obj = new ExampleClass(42, 42);
-    let res = res_obj.InstanceEvaluateNumber() as int;
-    if (res == 84) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jscallMethodSimple(): int {
+	let resObj = new ExampleClass(42, 42);
+	let res = resObj.InstanceEvaluateNumber() as int;
+	if (res == 84) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jscall_string JIT
-//! RUN          force_jit: true, entry: "jscall_string", options: "--compiler-regex=ETSGLOBAL::jscall_string"
-//! METHOD       "jscall_string"
+//! CHECKER      jscallString JIT
+//! RUN          force_jit: true, entry: "jscallString", options: "--compiler-regex=ETSGLOBAL::jscallString"
+//! METHOD       "jscallString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST         "Intrinsic.JSRuntimeGetValueString"
 //! INST_NEXT    "Intrinsic.StdCoreStringEquals"
 
-function jscall_string(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let res = EvaluateNumber(v0, v1) as String;
-    if (res == "helloworld") {
-        return 0;
-    } else {
-        return 1;
-    }
+function jscallString(): int {
+	let v0: String = 'hello';
+	let v1: String = 'world';
+	let res = EvaluateNumber(v0, v1) as String;
+	if (res == 'helloworld') {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jsnew_string JIT
-//! RUN          force_jit: true, entry: "jsnew_string", options: "--compiler-regex=ETSGLOBAL::jsnew_string"
-//! METHOD       "jsnew_string"
+//! CHECKER      jsnewString JIT
+//! RUN          force_jit: true, entry: "jsnewString", options: "--compiler-regex=ETSGLOBAL::jsnewString"
+//! METHOD       "jsnewString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST_NOT     /CallStatic.*jsnew::invoke/
@@ -201,22 +199,22 @@ function jscall_string(): int {
 //! INST_NOT     "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NOT     "Intrinsic.JSRuntimeGetValueString"
 
-function jsnew_string(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let res_obj = new ExampleClass(v0, v1);
-    let res_get_v0 = res_obj.v0 as String;
-    let res_get_v1 = res_obj.v1 as String;
-    if (res_get_v0 == v0 && res_get_v1 == v1) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jsnewString(): int {
+	let v0: String = 'hello';
+	let v1: String = 'world';
+	let resObj = new ExampleClass(v0, v1);
+	let resGetV0 = resObj.v0 as String;
+	let resGetV1 = resObj.v1 as String;
+	if (resGetV0 == v0 && resGetV1 == v1) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! DISABLED_CHECKER      jsnew_setproperty_string JIT
-//! RUN          force_jit: true, entry: "jsnew_setproperty_string", options: "--compiler-regex=ETSGLOBAL::jsnew_setproperty_string"
-//! METHOD       "jsnew_setproperty_string"
+//! DISABLED_CHECKER      jsnewSetPropertyString JIT
+//! RUN          force_jit: true, entry: "jsnewSetPropertyString", options: "--compiler-regex=ETSGLOBAL::jsnewSetPropertyString"
+//! METHOD       "jsnewSetPropertyString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST_NOT     /CallStatic.*jsnew::invoke/
@@ -229,120 +227,120 @@ function jsnew_string(): int {
 //! PASS_AFTER   "Cleanup"
 //! INST_NOT     "Intrinsic.JSRuntimeNewJSValueString"
 
-function jsnew_setproperty_string(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let res_obj = new ClassWithEmptyConstructor();
-    res_obj.v0 = v0;
-    res_obj.v1 = v1;
-    let res_get_v0 = res_obj.v0 as String;
-    let res_get_v1 = res_obj.v1 as String;
-    if (res_get_v0 == v0 && res_get_v1 == v1) {
-        return 0;
-    } else {
-        return 1;
-    }
+function jsnewSetPropertyString(): int {
+	let v0: String = 'hello';
+	let v1: String = 'world';
+	let resObj = new ClassWithEmptyConstructor();
+	resObj.v0 = v0;
+	resObj.v1 = v1;
+	let resGetV0 = resObj.v0 as String;
+	let resGetV1 = resObj.v1 as String;
+	if (resGetV0 == v0 && resGetV1 == v1) {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-//! CHECKER      jscall_static_method_string JIT
-//! RUN          force_jit: true, entry: "jscall_static_method_string", options: "--compiler-regex=ETSGLOBAL::jscall_static_method_string"
-//! METHOD       "jscall_static_method_string"
+//! CHECKER      jscallStaticMethodString JIT
+//! RUN          force_jit: true, entry: "jscallStaticMethodString", options: "--compiler-regex=ETSGLOBAL::jscallStaticMethodString"
+//! METHOD       "jscallStaticMethodString"
 //! PASS_AFTER   "IrBuilder"
 //! INST_NOT     /CallStatic.*jsnew::invoke/
 //! INST_NOT     "Intrinsic.JSRuntimeNewJSValueString"
 //! INST_NOT     /CallStatic.*jscall::invoke/
 //! INST    "Intrinsic.JSRuntimeGetValueString"
 
-function jscall_static_method_string(): int {
-    let v0: String = "hello";
-    let v1: String = "world";
-    let res = ExampleClass.EvaluateNumber(v0, v1) as String;
-    if (res == "helloworld") {
-        return 0;
-    } else {
-        return 1;
-    }
+function jscallStaticMethodString(): int {
+	let v0: String = 'hello';
+	let v1: String = 'world';
+	let res = ExampleClass.EvaluateNumber(v0, v1) as String;
+	if (res == 'helloworld') {
+		return 0;
+	} else {
+		return 1;
+	}
 }
 
-function jscall_array(): int {
-    let v0: int[] = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+function jscallArray(): int {
+	let v0: int[] = new int[10];
+	for (let i = 0; i < 10; ++i) {
+		v0[i] = i * i;
+	}
 
-    let res = EvaluateArray(v0, 10);
-    for (let i = 0; i < 10; ++i) {
-        if (res[i] as int != 2 * i * i) {
-            return 1;
-        }
-    }
+	let res = EvaluateArray(v0, 10);
+	for (let i = 0; i < 10; ++i) {
+		if ((res[i] as int) != 2 * i * i) {
+			return 1;
+		}
+	}
 
-    return 0;
+	return 0;
 }
 
-function jsnew_array(): int {
-    let v0: int[] = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+function jsnewArray(): int {
+	let v0: int[] = new int[10];
+	for (let i = 0; i < 10; ++i) {
+		v0[i] = i * i;
+	}
 
-    let res_obj = new ExampleClass(v0, v0);
-    let res_get_v0 = res_obj.v0;
-    let res_get_v1 = res_obj.v1;
+	let resObj = new ExampleClass(v0, v0);
+	let resGetV0 = resObj.v0;
+	let resGetV1 = resObj.v1;
 
-    for (let i = 0; i < 10; ++i) {
-        if (res_get_v0[i] as int != v0[i] || res_get_v1[i] as int != v0[i]) {
-            return 1;
-        }
-    }
-    return 0;
+	for (let i = 0; i < 10; ++i) {
+		if ((resGetV0[i] as int) != v0[i] || (resGetV1[i] as int) != v0[i]) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
-function jsnew_setproperty_array(): int {
-    let v0: int[] = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+function jsnewSetPropertyArray(): int {
+	let v0: int[] = new int[10];
+	for (let i = 0; i < 10; ++i) {
+		v0[i] = i * i;
+	}
 
-    let res_obj = new ClassWithEmptyConstructor();
+	let resObj = new ClassWithEmptyConstructor();
 
-    res_obj.v0 = v0;
-    res_obj.v1 = v0;
-    let res_get_v0 = res_obj.v0;
-    let res_get_v1 = res_obj.v1;
+	resObj.v0 = v0;
+	resObj.v1 = v0;
+	let resGetV0 = resObj.v0;
+	let resGetV1 = resObj.v1;
 
-    for (let i = 0; i < 10; ++i) {
-        if (res_get_v0[i] as int != v0[i] || res_get_v1[i] as int != v0[i]) {
-            return 1;
-        }
-    }
-    return 0;
+	for (let i = 0; i < 10; ++i) {
+		if ((resGetV0[i] as int) != v0[i] || (resGetV1[i] as int) != v0[i]) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
-function jscall_static_method_array(): int {
-    let v0: int[] = new int[10];
-    for (let i = 0; i < 10; ++i) {
-        v0[i] = i * i;
-    }
+function jscallStaticMethodArray(): int {
+	let v0: int[] = new int[10];
+	for (let i = 0; i < 10; ++i) {
+		v0[i] = i * i;
+	}
 
-    let res = ExampleClass.EvaluateArray(v0, 10);
-    for (let i = 0; i < 10; ++i) {
-        if (res[i] as int != 2 * i * i) {
-            return 1;
-        }
-    }
-    return 0;
+	let res = ExampleClass.EvaluateArray(v0, 10);
+	for (let i = 0; i < 10; ++i) {
+		if ((res[i] as int) != 2 * i * i) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
-function test_namespace(): int {
-    let v0: int = 1;
-    let v1: String = "Pinky";
-    let res_obj = MyNamespace.create_kitten(v0, v1);
-    let res_id = res_obj.id as int;
-    let res_name = res_obj.name as String;
-    if (res_id == v0 && res_name == v1) {
-        return 0;
-    } else {
-        return 1;
-    }
+function testNamespace(): int {
+	let v0: int = 1;
+	let v1: String = 'Pinky';
+	let resObj = MyNamespace.createKitten(v0, v1);
+	let resId = resObj.id as int;
+	let resName = resObj.name as String;
+	if (resId == v0 && resName == v1) {
+		return 0;
+	} else {
+		return 1;
+	}
 }

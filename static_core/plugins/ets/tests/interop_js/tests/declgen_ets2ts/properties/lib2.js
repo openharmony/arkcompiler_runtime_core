@@ -15,21 +15,21 @@
 'use strict';
 
 class DynProperties {
-  SetPropertyInternal(prop, value) {
-    this[prop] = value;
-  }
+	SetPropertyInternal(prop, value) {
+		this[prop] = value;
+	}
 
-  GetPropertyInternal(prop) {
-    return this[prop];
-  }
+	GetPropertyInternal(prop) {
+		return this[prop];
+	}
 }
 
 function SetPropertyExternal(obj, key, value) {
-  obj[key] = value;
+	obj[key] = value;
 }
 
 function GetPropertyExternal(obj, key) {
-  return obj[key];
+	return obj[key];
 }
 
 exports.DynProperties = DynProperties;

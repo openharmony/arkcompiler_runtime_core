@@ -16,14 +16,16 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const ClassWithUnionGetterSetterEts = etsMod.getClass('ClassWithUnionGetterSetterEts');
+const ClassWithUnionGetterSetterEts = etsMod.getClass(
+	'ClassWithUnionGetterSetterEts',
+);
 
 {
-  let obj = new ClassWithUnionGetterSetterEts();
-  obj.value = 42;
-  ASSERT_EQ(obj.value, 42);
-  obj.value = "abc";
-  ASSERT_EQ(obj.value, "abc");
+	let obj = new ClassWithUnionGetterSetterEts();
+	obj.value = 42;
+	ASSERT_EQ(obj.value, 42);
+	obj.value = 'abc';
+	ASSERT_EQ(obj.value, 'abc');
 }
 
 GCJSRuntimeCleanup();

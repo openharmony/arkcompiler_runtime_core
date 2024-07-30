@@ -21,14 +21,14 @@ if (HEAVY_RUN)
 endif()
 
 list(APPEND PERF_TESTS
-    "void_call"
-    "void_call_10str"
-    "void_call_10dbl"
-    "str_call"
-    "anystr_call"
-    "dbl_call"
-    "anydbl_call"
-    "anyobj_call"
+    "voidCall"
+    "voidCall10str"
+    "voidCall10dbl"
+    "strCall"
+    "anystrCall"
+    "dblCall"
+    "anydblCall"
+    "anyobjCall"
 )
 
 add_custom_target(ets_interop_js_perf_tests COMMENT "Running all js interop perf tests")

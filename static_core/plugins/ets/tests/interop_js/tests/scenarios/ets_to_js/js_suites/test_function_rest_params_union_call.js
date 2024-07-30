@@ -16,10 +16,10 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const function_rest_params_union = etsMod.getFunction('function_rest_params_union');
+const functionRestParamsUnion = etsMod.getFunction('functionRestParamsUnion');
 
 {
-  ASSERT_EQ(function_rest_params_union(1, 2, 'abc', 4), '1,2,"abc",4');
+	ASSERT_EQ(functionRestParamsUnion(1, 2, 'abc', 4), '1,2,"abc",4');
 }
 
 GCJSRuntimeCleanup();

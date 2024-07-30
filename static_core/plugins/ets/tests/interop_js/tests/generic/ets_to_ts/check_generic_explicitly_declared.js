@@ -14,11 +14,11 @@
  */
 
 const {
-    // explicitly_declared_type,
-} = require("generic.test.js");
+	// explicitlyeclaredype,
+} = require('generic.test.js');
 
-function check_explicitly_declared_type() {
-    // explicitly_declared_type();
+function checkExplicitlyDeclaredType() {
+	// explicitlyeclaredype();
 }
 
-check_explicitly_declared_type();
+checkExplicitlyDeclaredType();

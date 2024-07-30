@@ -12,89 +12,89 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 function EvaluateNumber(v0, v1) {
-    return v0 + v1;
+	return v0 + v1;
 }
 
 function EmptyFunction() {
-    console.log("Hello from empty function");
+	console.log('Hello from empty function');
 }
 
 function EvaluateObject(obj) {
-    return new ExampleClass(obj.v0 + obj.v1, obj.v0 + obj.v1);
+	return new ExampleClass(obj.v0 + obj.v1, obj.v0 + obj.v1);
 }
 
 function EvaluateArray(arr, size) {
-    let result = [];
-    for (let i = 0; i < size; i++) {
-        result[i] = arr[i] + i * i;
-    }
-    return result;
+	let result = [];
+	for (let i = 0; i < size; i++) {
+		result[i] = arr[i] + i * i;
+	}
+	return result;
 }
 
 class ExampleClass {
-    constructor(v0, v1) {
-        this.v0 = v0;
-        this.v1 = v1;
-    }
+	constructor(v0, v1) {
+		this.v0 = v0;
+		this.v1 = v1;
+	}
 
-    static EvaluateNumber(v2, v3) {
-        return v2 + v3;
-    }
+	static EvaluateNumber(v2, v3) {
+		return v2 + v3;
+	}
 
-    static EvaluateArray(arr, size) {
-        let result = [];
-        for (let i = 0; i < size; i++) {
-            result[i] = arr[i] + i * i;
-        }
-        return result;
-    }
+	static EvaluateArray(arr, size) {
+		let result = [];
+		for (let i = 0; i < size; i++) {
+			result[i] = arr[i] + i * i;
+		}
+		return result;
+	}
 
-    InstanceEvaluateNumber() {
-        // without "this" also not working
-        return this.v0 + this.v1;
-    }
+	InstanceEvaluateNumber() {
+		// without "this" also not working
+		return this.v0 + this.v1;
+	}
 
-    EvaluateObject(obj) {
-        return new ExampleClass(obj.v0 + this.v1, this.v0 + obj.v1);
-    }
+	EvaluateObject(obj) {
+		return new ExampleClass(obj.v0 + this.v1, this.v0 + obj.v1);
+	}
 
-    GetV0() {
-        return this.v0
-    }
+	GetV0() {
+		return this.v0;
+	}
 
-    GetV1() {
-        return this.v1
-    }
+	GetV1() {
+		return this.v1;
+	}
 
-    static EmptyMethod() {
-        console.log("Hello from empty method");
-    }
-};
+	static EmptyMethod() {
+		console.log('Hello from empty method');
+	}
+}
 
 class ClassWithEmptyConstructor {
-    constructor() {
-        this.v0 = 42;
-        this.v1 = 42;
-    }
+	constructor() {
+		this.v0 = 42;
+		this.v1 = 42;
+	}
 
-    varify_properties(v0_expected, v1_expected) {
-        if (this.v0 == v0_expected && this.v1 == v1_expected) {
-            return 0;
-        } else {
-            return 1;
-        }
-    }
+	verifyProperties(v0Expected, v1Expected) {
+		if (this.v0 == v0Expected && this.v1 == v1Expected) {
+			return 0;
+		} else {
+			return 1;
+		}
+	}
 
-    GetV0() {
-        return this.v0
-    }
+	GetV0() {
+		return this.v0;
+	}
 
-    GetV1() {
-        return this.v1
-    }
+	GetV1() {
+		return this.v1;
+	}
 }
 
 // this is TS namespace
@@ -109,25 +109,25 @@ class ClassWithEmptyConstructor {
 //         name: string;
 //     }
 
-//     export function create_kitten(id: number, name: string) {
+//     export function createKitten(id: number, name: string) {
 //         return new Kitten(id, name);
 //     }
 // }
 
 var MyNamespace;
 (function (MyNamespace) {
-    var Kitten = /** @class */ (function () {
-        function Kitten(id, name) {
-            this.id = id;
-            this.name = name;
-        }
-        return Kitten;
-    }());
-    function create_kitten(id, name) {
-        return new Kitten(id, name);
-    }
-    MyNamespace.create_kitten = create_kitten;
-})(MyNamespace = exports.MyNamespace || (exports.MyNamespace = {}));
+	var Kitten = /** @class */ (function () {
+		function Kitten(id, name) {
+			this.id = id;
+			this.name = name;
+		}
+		return Kitten;
+	})();
+	function createKitten(id, name) {
+		return new Kitten(id, name);
+	}
+	MyNamespace.createKitten = createKitten;
+})((MyNamespace = exports.MyNamespace || (exports.MyNamespace = {})));
 
 exports.EvaluateNumber = EvaluateNumber;
 exports.ExampleClass = ExampleClass;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { CONSTANT, Bibka } from './lib';
+import { CONSTANT, Bibka } from "./lib";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);

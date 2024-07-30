@@ -13,65 +13,68 @@
  * limitations under the License.
  */
 
-const { getTestClass } = require("ets_proxy.test.js");
-const ListNode = getTestClass("ListNode");
+const { getTestClass } = require('ets_proxy.test.js');
+const ListNode = getTestClass('ListNode');
 
-{   // test proxy-ctor capabilities
-    ASSERT_TRUE(Object.isSealed(ListNode));
+{
+	// test proxy-ctor capabilities
+	ASSERT_TRUE(Object.isSealed(ListNode));
 
-    let expected = ['next', 'tag', 'get_next', 'set_next', 'constructor'];
-    let props = Object.getOwnPropertyNames(ListNode.prototype);
-    ASSERT_TRUE(expected.every(p => props.includes(p)));
+	let expected = ['next', 'tag', 'getNext', 'setNext', 'constructor'];
+	let props = Object.getOwnPropertyNames(ListNode.prototype);
+	ASSERT_TRUE(expected.every((p) => props.includes(p)));
 
-    ASSERT_TRUE(!ListNode.hasOwnProperty('<cctor>'));
+	ASSERT_TRUE(!ListNode.hasOwnProperty('<cctor>'));
 }
 
-{   // test basic proxy-object capabilities
-    let n1 = new ListNode(1, null);
-    ASSERT_EQ(n1.tag, 1);
-    ASSERT_EQ(n1.next, null);
+{
+	// test basic proxy-object capabilities
+	let n1 = new ListNode(1, null);
+	ASSERT_EQ(n1.tag, 1);
+	ASSERT_EQ(n1.next, null);
 
-    ASSERT_TRUE(Object.getOwnPropertyNames(n1).length == 0);
-    ASSERT_TRUE(Object.isSealed(n1));
+	ASSERT_TRUE(Object.getOwnPropertyNames(n1).length === 0);
+	ASSERT_TRUE(Object.isSealed(n1));
 }
 
-{   // test proxy-reference wrap/unwrap invariant
-    let n1 = new ListNode(1, null);
-    let n2 = new ListNode(2, n1);
-    ASSERT_EQ(n2.tag, 2);
-    ASSERT_EQ(n2.next, n1);
-    ASSERT_EQ(n2.get_next(), n1);
-    n2.set_next(n1);
-    ASSERT_EQ(n2.next, n1);
+{
+	// test proxy-reference wrap/unwrap invariant
+	let n1 = new ListNode(1, null);
+	let n2 = new ListNode(2, n1);
+	ASSERT_EQ(n2.tag, 2);
+	ASSERT_EQ(n2.next, n1);
+	ASSERT_EQ(n2.getNext(), n1);
+	n2.setNext(n1);
+	ASSERT_EQ(n2.next, n1);
 }
 
-{   // create loop and walk it
-    let head = new ListNode(0, null);
-    head.next =
-        new ListNode(1,
-            new ListNode(2,
-                new ListNode(3, head)));
+{
+	// create loop and walk it
+	let head = new ListNode(0, null);
+	head.next = new ListNode(1, new ListNode(2, new ListNode(3, head)));
 
-    for (let n = head, i = 0; i < 256; ++i, n = n.next) {
-        ASSERT_EQ(n.tag, i % 4);
-    }
+	for (let n = head, i = 0; i < 256; ++i, n = n.next) {
+		ASSERT_EQ(n.tag, i % 4);
+	}
 }
 
-{   // proxy-object escape ctor
-    const ProxyEscapeCtor = getTestClass("ProxyEscapeCtor");
-    let capt;
-    let obj = new ProxyEscapeCtor((x) => (capt = x));
-    ASSERT_EQ(capt, obj);
+{
+	// proxy-object escape ctor
+	const ProxyEscapeCtor = getTestClass('ProxyEscapeCtor');
+	let capt;
+	let obj = new ProxyEscapeCtor((x) => (capt = x));
+	ASSERT_EQ(capt, obj);
 }
 
-{   // proxy-method throws
-    const ProxyClassCalls = getTestClass("ProxyClassCalls");
-    class TestErr extends Error { };
-    let do_throw = function () { throw new TestErr() };
+{
+	// proxy-method throws
+	const ProxyClassCalls = getTestClass('ProxyClassCalls');
+	class TestErr extends Error {}
+	let doThrow = function () {
+		throw new TestErr();
+	};
 
-    ASSERT_THROWS(TestErr, () => (
-        new ProxyClassCalls(do_throw)));
+	ASSERT_THROWS(TestErr, () => new ProxyClassCalls(doThrow));
 
-    ASSERT_THROWS(TestErr, () => (
-        ProxyClassCalls.call(do_throw)));
+	ASSERT_THROWS(TestErr, () => ProxyClassCalls.call(doThrow));
 }

@@ -14,54 +14,54 @@
  */
 
 import {
-    ts_int,
+    tsInt,
     MainClass,
     MethodClass,
     ParentClass,
     ChildClass,
     AnonymousClass,
     IIFEClass,
-    check_instance,
+    checkInstance,
 } from "main_js"
 
 
-function check_method_constructor_main_class(): boolean {
+function checkMethodConstructorMainClass(): boolean {
     const MClass = new MethodClass();
-    const TSClass = MClass.init(MainClass, ts_int);
+    const TSClass = MClass.init(MainClass, tsInt);
 
 
-    return check_instance(MainClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(MainClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_method_class_parent_class(): boolean {
+function checkMethodClassParentClass(): boolean {
     const MClass = new MethodClass();
     const TSClass = MClass.init(ParentClass, MainClass);
 
-    return check_instance(ParentClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ParentClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_method_class_child_class(): boolean {
+function checkMethodClassChildClass(): boolean {
     const MClass = new MethodClass();
     const TSClass = MClass.init(ChildClass, MainClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_method_class_anonymous_class(): boolean {
+function checkMethodClassAnonymousClass(): boolean {
     const MClass = new MethodClass();
-    const TSClass = MClass.init(AnonymousClass, ts_int);
+    const TSClass = MClass.init(AnonymousClass, tsInt);
 
-    return check_instance(AnonymousClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(AnonymousClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }
 
-function check_method_class_IIFE_class(): boolean {
+function checkMethodClassIIFEClass(): boolean {
     const MClass = new MethodClass();
-    const TSClass = MClass.init(IIFEClass, ts_int);
+    const TSClass = MClass.init(IIFEClass, tsInt);
 
-    return check_instance(IIFEClass, TSClass) as boolean
-        && TSClass._value as int == ts_int as int;
+    return checkInstance(IIFEClass, TSClass) as boolean
+        && TSClass._value as int == tsInt as int;
 }

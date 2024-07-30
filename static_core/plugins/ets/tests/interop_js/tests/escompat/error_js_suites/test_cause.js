@@ -16,20 +16,24 @@
 const { etsVm, getTestModule } = require('escompat.test.js');
 
 const etsMod = getTestModule('escompat_test');
-const CreateEtsSampleWithCause = etsMod.getFunction('Error_CreateEtsSampleWithCause');
+const CreateEtsSampleWithCause = etsMod.getFunction(
+	'Error_CreateEtsSampleWithCause',
+);
 const TestJSWithCause = etsMod.getFunction('Error_TestJSWithCause');
 
-{ // Test JS Error
-  TestJSWithCause(new Error('message', 'cause'));
+{
+	// Test JS Error
+	TestJSWithCause(new Error('message', 'cause'));
 }
 
-{ // Test ETS Error
-  let v = CreateEtsSampleWithCause();
-  ASSERT_TRUE(v instanceof Error);
+{
+	// Test ETS Error
+	let v = CreateEtsSampleWithCause();
+	ASSERT_TRUE(v instanceof Error);
 
-  ASSERT_EQ(String(v.message), 'message');
+	ASSERT_EQ(String(v.message), 'message');
 
-  ASSERT_EQ(String(v.cause), 'cause');
+	ASSERT_EQ(String(v.cause), 'cause');
 
-  ASSERT_TRUE(String(v["<get>stack"]()).includes('CreateEtsSampleWithCause'));
+	ASSERT_TRUE(String(v['<get>stack']()).includes('CreateEtsSampleWithCause'));
 }

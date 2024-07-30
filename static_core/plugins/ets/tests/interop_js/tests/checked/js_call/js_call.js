@@ -13,100 +13,100 @@
  * limitations under the License.
  */
 
-"use strict";
+'use strict';
 
 function cons(value, tail) {
-    return {value: value, tail: tail};
+	return { value: value, tail: tail };
 }
 
 function car(node) {
-    return node.value;
+	return node.value;
 }
 
 function cdr(node) {
-    return node.tail;
+	return node.tail;
 }
 
 function sum(a, b) {
-    return a + b;
+	return a + b;
 }
 
 class TreeNode {
-    value;
-    left;
-    right;
+	value;
+	left;
+	right;
 
-    constructor(value, left, right) {
-        this.value = value;
-        this.left = left;
-        this.right = right;
-    }
+	constructor(value, left, right) {
+		this.value = value;
+		this.left = left;
+		this.right = right;
+	}
 
-    sum() {
-        let res = this.value;
-        if (this.left) {
-            res += this.left.sum();
-        }
-        if (this.right) {
-            res += this.right.sum();
-        }
-        return res;
-    }
+	sum() {
+		let res = this.value;
+		if (this.left) {
+			res += this.left.sum();
+		}
+		if (this.right) {
+			res += this.right.sum();
+		}
+		return res;
+	}
 }
 
 function DynObject(x) {
-    this.v0 = {value: x};
+	this.v0 = { value: x };
 }
 
 function Empty() {}
 
-function make_swappable(obj) {
-    obj.swap = function() {
-        let tmp = this.first;
-        this.first = this.second;
-        this.second = tmp;
-    }
+function makeSwappable(obj) {
+	obj.swap = function () {
+		let tmp = this.first;
+		this.first = this.second;
+		this.second = tmp;
+	};
 }
 
 class StaticClass {
-    static staticProperty = 10;
-    static staticMethod() {
-        return this.staticProperty + 100;
-    }
+	static staticProperty = 10;
+	static staticMethod() {
+		return this.staticProperty + 100;
+	}
 }
 
-function extract_squared_int(obj) {
-    let x = obj.int_value;
-    return x * x;
+function extractSquaredInt(obj) {
+	let x = obj.intValue;
+	return x * x;
 }
 
 function ObjectWithPrototype() {
-    this.overridden_value = 4;
-    this.overridden_function = function() {
-        return "overridden";
-    }
+	this.overriddenValue = 4;
+	this.overriddenFunction = function () {
+		return 'overridden';
+	};
 }
 
 let o1 = new ObjectWithPrototype();
 
-ObjectWithPrototype.prototype.overridden_value = -1;
-ObjectWithPrototype.prototype.overridden_function = function() {
-    return "should be overridden";
+ObjectWithPrototype.prototype.overriddenValue = -1;
+ObjectWithPrototype.prototype.overriddenFunction = function () {
+	return 'should be overridden';
 };
-ObjectWithPrototype.prototype.prototype_value = 5;
-ObjectWithPrototype.prototype.prototype_function = function() {
-    return "prototype function";
+ObjectWithPrototype.prototype.prototypeValue = 5;
+ObjectWithPrototype.prototype.prototypeFunction = function () {
+	return 'prototype function';
 };
 
-let dyn_storage = {
-    str: "abcd",
-    dbl: 1.9,
-    integer: 6,
-    bool_true: true,
-    bool_false: false,
-    verify: function() {
-        return (this.str === "dcba") + (this.dbl === 2.4) + (this.integer === 31) + (this.bool_true === false);
-    }
+let dynStorage = {
+	str: 'abcd',
+	dbl: 1.9,
+	integer: 6,
+	boolTrue: true,
+	boolFalse: false,
+	verify: function () {
+		return (this.str === 'dcba') + (this.dbl === 2.4) + (this.integer === 31) + (this.boolTrue === false);
+	},
 };
 
 exports.cons = cons;
@@ -116,9 +116,9 @@ exports.sum = sum;
 exports.TreeNode = TreeNode;
 exports.DynObject = DynObject;
 exports.Empty = Empty;
-exports.make_swappable = make_swappable;
+exports.makeSwappable = makeSwappable;
 exports.StaticClass = StaticClass;
-exports.extract_squared_int = extract_squared_int;
+exports.extractSquaredInt = extractSquaredInt;
 exports.ObjectWithPrototype = ObjectWithPrototype;
-exports.dyn_storage = dyn_storage;
+exports.dynStorage = dynStorage;
 exports.vundefined = undefined;

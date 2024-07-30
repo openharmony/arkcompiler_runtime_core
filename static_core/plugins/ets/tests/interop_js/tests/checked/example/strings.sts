@@ -69,10 +69,10 @@
 //! RUN          entry: "testString"
 //! EVENT        /AotManager,.*,ADDED/
 
-import { add_string } from "/plugins/ets/tests/interop_js/tests/checked/example/strings.js"
+import { addString } from "/plugins/ets/tests/interop_js/tests/checked/example/strings.js"
 
 function testString(): int {
-    let res = add_string("abc");
+    let res = addString("abc");
     if (JSRuntime.getValueString(res) != "abc abc") {
         return 1;
     }

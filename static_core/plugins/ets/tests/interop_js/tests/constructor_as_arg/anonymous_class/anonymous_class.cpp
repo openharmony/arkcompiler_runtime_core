@@ -22,32 +22,32 @@ class EtsAnonymousClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_anonymous_class_create_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_anonymous_class_create_class"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassCreateClass"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_create_anonymous_class_create_class_with_arg_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_anonymous_class_create_class_with_arg_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassCreateClassWithArgFromTs"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_create_anonymous_class_create_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_anonymous_class_create_class_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassCreateClassFromTs"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_anonymous_class_create_main_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_anonymous_class_create_main_instance"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassCreateMainInstance"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_create_anonymous_class_create_IIFE_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_anonymous_class_create_IIFE_class_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassCreateIIFEClassFromTs"));
 }
 
 TEST_F(EtsAnonymousClassTsToEtsTest, check_anonymous_class_create_IIFE_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_anonymous_class_create_IIFE_instance"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassCreateIIFEInstance"));
 }
 
 }  // namespace ark::ets::interop::js::testing

@@ -13,56 +13,68 @@
  * limitations under the License.
  */
 
-const etsVm = require("lib/module/ets_interop_js_napi");
-function getTestClass(name) { return etsVm.getClass("Ljs_proxy/test/" + name + ";") }
-function getTestFunction(name) { return etsVm.getFunction("Ljs_proxy/test/ETSGLOBAL;", name) }
-
-const FooBase = getTestClass("FooBase");
-const FooDerived = getTestClass("FooDerived");
-
-{   // Verify prototype chain and properties
-    class ExtFooBase extends FooBase { }
-    class ExtFooDerived extends FooDerived { }
-    let ebase = new ExtFooBase();
-    let ederived = new ExtFooDerived();
-
-    ASSERT_TRUE(ebase instanceof ExtFooBase);
-    ASSERT_TRUE(ebase instanceof FooBase);
-    ASSERT_TRUE(ederived instanceof ExtFooDerived);
-    ASSERT_TRUE(ederived instanceof FooDerived);
-    ASSERT_TRUE(ederived instanceof FooBase);
-    ASSERT_TRUE(!(ederived instanceof ExtFooBase));
-
-    ASSERT_EQ(Object.getPrototypeOf(ExtFooDerived), FooDerived);
-
-    ASSERT_EQ(ebase.fn(), "fn_base");
-    ASSERT_EQ(ExtFooBase.sfn(), "sfn_base");
-
-    ASSERT_EQ(ederived.fn(), "fn_derived");
-    ASSERT_EQ(ExtFooDerived.sfn(), "sfn_derived");
-    ASSERT_EQ(ederived.fn_base(), "fn_base");
-    ASSERT_EQ(ExtFooDerived.sfn_base(), "sfn_base");
+const etsVm = require('lib/module/ets_interop_js_napi');
+function getTestClass(name) {
+	return etsVm.getClass('Ljs_proxy/test/' + name + ';');
+}
+function getTestFunction(name) {
+	return etsVm.getFunction('Ljs_proxy/test/ETSGLOBAL;', name);
 }
 
-{   // Overriding methods
-    class ExtFooDerived extends FooDerived {
-        static sfn() { return "sfn_extderived"; }
-        fn() { return "fn_extderived"; }
-    }
+const FooBase = getTestClass('FooBase');
+const FooDerived = getTestClass('FooDerived');
 
-    let ederived = new ExtFooDerived();
+{
+	// Verify prototype chain and properties
+	class ExtFooBase extends FooBase {}
+	class ExtFooDerived extends FooDerived {}
+	let ebase = new ExtFooBase();
+	let ederived = new ExtFooDerived();
 
-    ASSERT_EQ(ederived.fn(), "fn_extderived");
-    ASSERT_EQ(ExtFooDerived.sfn(), "sfn_extderived");
+	ASSERT_TRUE(ebase instanceof ExtFooBase);
+	ASSERT_TRUE(ebase instanceof FooBase);
+	ASSERT_TRUE(ederived instanceof ExtFooDerived);
+	ASSERT_TRUE(ederived instanceof FooDerived);
+	ASSERT_TRUE(ederived instanceof FooBase);
+	ASSERT_TRUE(!(ederived instanceof ExtFooBase));
 
-    ASSERT_EQ(ederived.self_fn(), "fn_extderived");
+	ASSERT_EQ(Object.getPrototypeOf(ExtFooDerived), FooDerived);
+
+	ASSERT_EQ(ebase.fn(), 'fn_base');
+	ASSERT_EQ(ExtFooBase.sfn(), 'sfn_base');
+
+	ASSERT_EQ(ederived.fn(), 'fn_derived');
+	ASSERT_EQ(ExtFooDerived.sfn(), 'sfn_derived');
+	ASSERT_EQ(ederived.fnBase(), 'fn_base');
+	ASSERT_EQ(ExtFooDerived.sfnBase(), 'sfn_base');
 }
 
-{   // TODO(vpukhov): overriding accessors
+{
+	// Overriding methods
+	class ExtFooDerived extends FooDerived {
+		static sfn() {
+			return 'sfn_extderived';
+		}
+		fn() {
+			return 'fn_extderived';
+		}
+	}
+
+	let ederived = new ExtFooDerived();
+
+	ASSERT_EQ(ederived.fn(), 'fn_extderived');
+	ASSERT_EQ(ExtFooDerived.sfn(), 'sfn_extderived');
+
+	ASSERT_EQ(ederived.selfFn(), 'fn_extderived');
 }
 
-{   // TODO(vpukhov): prevent final methods overriding
-    class ExtFooDerived extends FooDerived {
-        something_final() { }
-    }
+{
+	// TODO(vpukhov): overriding accessors
+}
+
+{
+	// TODO(vpukhov): prevent final methods overriding
+	class ExtFooDerived extends FooDerived {
+		somethingFinal() {}
+	}
 }

@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-import { cons, car, cdr, sum, TreeNode, DynObject, Empty, make_swappable, StaticClass, extract_squared_int, ObjectWithPrototype, vundefined, dyn_storage }
+import { cons, car, cdr, sum, TreeNode, DynObject, Empty, makeSwappable, StaticClass, extractSquaredInt, ObjectWithPrototype, vundefined, dynStorage }
     from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
 
 //! CHECKER         Fuse getProperty and cast to string in BCO
-//! RUN_BCO         method: "ETSGLOBAL.js_load_and_cast_str"
-//! METHOD          "js_load_and_cast_str"
+//! RUN_BCO         method: "ETSGLOBAL.jsLoadAndCastStr"
+//! METHOD          "jsLoadAndCastStr"
 //! PASS_AFTER      "IrBuilder"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 1
 //! INST_NEXT       "Intrinsic.JSRuntimeGetPropertyString"
-//! BC_METHOD       "ETSGLOBAL.js_load_and_cast_str"
+//! BC_METHOD       "ETSGLOBAL.jsLoadAndCastStr"
 //! INST_COUNT      /call.* std.interop.js.JSRuntime.getPropertyJSValue:std.interop.js.JSValue;std.core.String;std.interop.js.JSValue;/, 1
 //! INST_COUNT      /call.* std.interop.js.JSRuntime.getPropertyString:std.interop.js.JSValue;std.core.String;std.core.String;/, 1
-//! RUN             entry: "js_load_and_cast_str"
+//! RUN             entry: "jsLoadAndCastStr"
 
-function js_load_and_cast_str(): int {
-    let v = dyn_storage.str;
+function jsLoadAndCastStr(): int {
+    let v = dynStorage.str;
     if (v as String != "abcd") {
         return 1;
     }
@@ -39,30 +39,30 @@ function js_load_and_cast_str(): int {
 }
 
 //! CHECKER         Fuse getProperty and cast to double in BCO
-//! RUN_BCO         method: "ETSGLOBAL.js_load_and_cast_dbl"
-//! METHOD          "js_load_and_cast_dbl"
+//! RUN_BCO         method: "ETSGLOBAL.jsLoadAndCastDbl"
+//! METHOD          "jsLoadAndCastDbl"
 //! PASS_AFTER      "IrBuilder"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! PASS_AFTER      "Peepholes"
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 1
 //! INST_NEXT       "Intrinsic.JSRuntimeGetPropertyDouble"
-//! BC_METHOD       "ETSGLOBAL.js_load_and_cast_dbl"
+//! BC_METHOD       "ETSGLOBAL.jsLoadAndCastDbl"
 //! INST_COUNT      /call.*JSRuntime.getPropertyJSValue:std.interop.js.JSValue;std.core.String;std.interop.js.JSValue;/, 1
 //! INST_COUNT      /call.*JSRuntime.getPropertyDouble:std.interop.js.JSValue;std.core.String;f64;/, 1
-//! RUN             entry: "js_load_and_cast_dbl"
-//! RUN             entry: "js_load_and_cast_int_to_dbl"
+//! RUN             entry: "jsLoadAndCastDbl"
+//! RUN             entry: "jsLoadAndCastDbl"
 
-function js_load_and_cast_dbl(): int {
-    let v = dyn_storage.dbl;
+function jsLoadAndCastDbl(): int {
+    let v = dynStorage.dbl;
     if (v as double != 1.9) {
         return 1;
     }
     return 0;
 }
 
-function js_load_and_cast_int_to_dbl(): int {
-    let v = dyn_storage.integer;
+function jsLoadAndCastIntToDbl(): int {
+    let v = dynStorage.integer;
     if (v as double != 6) {
         return 1;
     }
@@ -70,8 +70,8 @@ function js_load_and_cast_int_to_dbl(): int {
 }
 
 //! CHECKER         Fuse getProperty and cast to int in BCO
-//! RUN_BCO         method: "ETSGLOBAL.js_load_and_cast_int"
-//! METHOD          "js_load_and_cast_int"
+//! RUN_BCO         method: "ETSGLOBAL.jsLoadAndCastInt"
+//! METHOD          "jsLoadAndCastInt"
 //! PASS_AFTER      "IrBuilder"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! INST            "Intrinsic.JSRuntimeGetValueDouble"
@@ -80,13 +80,13 @@ function js_load_and_cast_int_to_dbl(): int {
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 1
 //! INST_NEXT       "Intrinsic.JSRuntimeGetPropertyDouble"
-//! BC_METHOD       "ETSGLOBAL.js_load_and_cast_int"
+//! BC_METHOD       "ETSGLOBAL.jsLoadAndCastInt"
 //! INST_COUNT      /call.*JSRuntime.getPropertyJSValue:std.interop.js.JSValue;std.core.String;std.interop.js.JSValue;/, 1
 //! INST_COUNT      /call.*JSRuntime.getPropertyDouble:std.interop.js.JSValue;std.core.String;f64;/, 1
-//! RUN             entry: "js_load_and_cast_int"
+//! RUN             entry: "jsLoadAndCastInt"
 
-function js_load_and_cast_int(): int {
-    let v = dyn_storage.integer;
+function jsLoadAndCastInt(): int {
+    let v = dynStorage.integer;
     if (v as int != 6) {
         return 1;
     }
@@ -94,8 +94,8 @@ function js_load_and_cast_int(): int {
 }
 
 //! CHECKER         Fuse getProperty and cast to boolean in BCO
-//! RUN_BCO         method: "ETSGLOBAL.js_load_and_cast_bool"
-//! METHOD          "js_load_and_cast_bool"
+//! RUN_BCO         method: "ETSGLOBAL.jsLoadAndCastBool"
+//! METHOD          "jsLoadAndCastBool"
 //! PASS_AFTER      "IrBuilder"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 4
 //! INST_COUNT      "Intrinsic.JSRuntimeGetValueBoolean", 2
@@ -103,23 +103,23 @@ function js_load_and_cast_int(): int {
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST_COUNT      "Intrinsic.JSRuntimeGetPropertyJSValue", 2
 //! INST_NEXT       "Intrinsic.JSRuntimeGetPropertyBoolean"
-//! BC_METHOD       "ETSGLOBAL.js_load_and_cast_bool"
+//! BC_METHOD       "ETSGLOBAL.jsLoadAndCastBool"
 //! INST_COUNT      /call.*JSRuntime.getPropertyJSValue:std.interop.js.JSValue;std.core.String;std.interop.js.JSValue;/, 2
 //! INST_COUNT      /call.*JSRuntime.getPropertyBoolean:std.interop.js.JSValue;std.core.String;u1;/, 2
-//! RUN             entry: "js_load_and_cast_bool"
+//! RUN             entry: "jsLoadAndCastBool"
 
-function js_load_and_cast_bool(): int {
-    let bool_false = dyn_storage.bool_false as boolean;
-    let bool_true = dyn_storage.bool_true as boolean;
-    if (bool_false || !bool_true) {
+function jsLoadAndCastBool(): int {
+    let boolFalse = dynStorage.boolFalse as boolean;
+    let boolTrue = dynStorage.boolTrue as boolean;
+    if (boolFalse || !boolTrue) {
         return 1;
     }
     return 0;
 }
 
 //! CHECKER         Fuse cast from string to JSValue and setProperty in BCO
-//! RUN_BCO         method: "ETSGLOBAL.js_store_str"
-//! METHOD          "js_store_str"
+//! RUN_BCO         method: "ETSGLOBAL.jsStoreStr"
+//! METHOD          "jsStoreStr"
 //! PASS_AFTER      "IrBuilder"
 //! INST            "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT       "Intrinsic.JSRuntimeNewJSValueString"
@@ -128,34 +128,34 @@ function js_load_and_cast_bool(): int {
 //! PASS_AFTER_NEXT "Cleanup"
 //! INST            "Intrinsic.JSRuntimeGetPropertyJSValue"
 //! INST_NEXT       "Intrinsic.JSRuntimeSetPropertyString"
-//! BC_METHOD       "ETSGLOBAL.js_store_str"
+//! BC_METHOD       "ETSGLOBAL.jsStoreStr"
 //! INST_COUNT      /call.*JSRuntime.getPropertyJSValue:std.interop.js.JSValue;std.core.String;std.interop.js.JSValue;/, 1
 //! INST_COUNT      /call.*JSRuntime.setPropertyString:std.interop.js.JSValue;std.core.String;std.core.String;/, 1
 //! INST_NOT        /JSRuntime.setPropertyJSValue/
-//! RUN             entry: "check_js_store"
+//! RUN             entry: "checkJsStore"
 
-function js_store_str() {
-    dyn_storage.str = "dcba";
+function jsStoreStr() {
+    dynStorage.str = "dcba";
 }
 
-function js_store_dbl() {
-    dyn_storage.dbl = 2.4;
+function jsStoreDbl() {
+    dynStorage.dbl = 2.4;
 }
 
-function js_store_int() {
-    dyn_storage.integer = 31;
+function jsStoreInt() {
+    dynStorage.integer = 31;
 }
 
-function js_store_bool() {
-    dyn_storage.bool_true = false;
+function jsStoreBool() {
+    dynStorage.boolTrue = false;
 }
 
-function check_js_store(): int {
-    js_store_str();
-    js_store_dbl();
-    js_store_int();
-    js_store_bool();
-    if (dyn_storage.verify() as int != 4) {
+function checkJsStore(): int {
+    jsStoreStr();
+    jsStoreDbl();
+    jsStoreInt();
+    jsStoreBool();
+    if (dynStorage.verify() as int != 4) {
         return 1;
     }
     return 0;

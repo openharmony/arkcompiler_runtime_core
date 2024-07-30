@@ -14,37 +14,37 @@
  */
 
 const {
-    string,
-    PublicGetterClass,
-    SubsetByValueClass,
-    create_subset_by_value_getter_class_from_ets,
-} = require("getter.test.js");
+	string,
+	PublicGetterClass,
+	SubsetByValueClass,
+	createubsetyalueetterlassromts,
+} = require('getter.test.js');
 
-function check_subset_by_value_getter_class() {
-    const GClass = new SubsetByValueClass(new PublicGetterClass().value);
+function checkubsetyalueetterlass() {
+	const GClass = new SubsetByValueClass(new PublicGetterClass().value);
 
-    ASSERT_TRUE(GClass._value === string)
+	ASSERT_TRUE(GClass.alue === string);
 }
 
-function check_subset_by_value_getter_value_class() {
-    const GClass = new SubsetByValueClass(new PublicGetterClass().value);
+function checkubsetyalueetteraluelass() {
+	const GClass = new SubsetByValueClass(new PublicGetterClass().value);
 
-    ASSERT_TRUE(GClass.value === string)
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_create_subset_by_value_getter_value_class_from_ets() {
-    const GClass = new create_subset_by_value_getter_class_from_ets();
+function checkreateubsetyalueetteraluelassromts() {
+	const GClass = new createubsetyalueetterlassromts();
 
-    ASSERT_TRUE(GClass._value === string)
+	ASSERT_TRUE(GClass.alue === string);
 }
 
-function check_create_subset_by_value_getter_class_from_ets() {
-    const GClass = new create_subset_by_value_getter_class_from_ets();
+function checkreateubsetyalueetterlassromts() {
+	const GClass = new createubsetyalueetterlassromts();
 
-    ASSERT_TRUE(GClass.value === string)
+	ASSERT_TRUE(GClass.value === string);
 }
 
-check_subset_by_value_getter_class();
-check_subset_by_value_getter_value_class();
-check_create_subset_by_value_getter_value_class_from_ets();
-check_create_subset_by_value_getter_class_from_ets();
+checkubsetyalueetterlass();
+checkubsetyalueetteraluelass();
+checkreateubsetyalueetteraluelassromts();
+checkreateubsetyalueetterlassromts();

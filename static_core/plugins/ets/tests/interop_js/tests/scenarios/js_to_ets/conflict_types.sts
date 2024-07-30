@@ -15,7 +15,7 @@
 
 import * as js from "pure_js_conflict"
 
-function Test_function_arg_type_conflict_array(): boolean {
+function TestFunctionArgTypeConflictArray(): boolean {
     const array:Array<Object> = js.functionArgTypeConflictArray() as Array<Object>;
     const EXPECTED_LENGTH = 2;
     const EXPECTED_INT = 123;
@@ -26,7 +26,7 @@ function Test_function_arg_type_conflict_array(): boolean {
     return (array.at(0) as Number == EXPECTED_INT) && (array.at(1) as string == EXPECTED_STRING);
 }
 
-function Test_function_arg_type_conflict_arraybuffer(): boolean {
+function TestFunctionArgTypeConflictArraybuffer(): boolean {
     const buffer = js.functionArgTypeConflictArrayBuffer() as ArrayBuffer;
     const view = new Int32Array(buffer);
     const EXPECTED_INT = 123;
@@ -34,31 +34,31 @@ function Test_function_arg_type_conflict_arraybuffer(): boolean {
     return view.at(0) == EXPECTED_INT;
 }
 
-function Test_function_arg_type_conflict_boolean(): boolean {
+function TestFunctionArgTypeConflictBoolean(): boolean {
     const value = js.functionArgTypeConflictBoolean() as Boolean;
     return value == true;
 }
 
-function Test_function_arg_type_conflict_dataview(): boolean {
+function TestFunctionArgTypeConflictDataview(): boolean {
     const view = js.functionArgTypeConflictDataView() as DataView;
     const EXPECTED_INT = 123;
 
     return view.getInt32(0) == EXPECTED_INT;
 }
 
-function Test_function_arg_type_conflict_date(): boolean {
+function TestFunctionArgTypeConflictDate(): boolean {
     const date = js.functionArgTypeConflictDate() as Date;
     return date.valueOf() == 1;
 }
 
-function Test_function_arg_type_conflict_error(): boolean {
+function TestFunctionArgTypeConflictError(): boolean {
     const error = js.functionArgTypeConflictError() as Error;
     const EXPECTED_STRING = 'foo';
 
     return error.message == EXPECTED_STRING;
 }
 
-function Test_function_arg_type_conflict_map(): boolean {
+function TestFunctionArgTypeConflictMap(): boolean {
     const dataMap = js.functionArgTypeConflictMap() as Map<string, string>;
     const KEY = 'foo';
     const EXPECTED_VALUE = 'bar';
@@ -66,12 +66,12 @@ function Test_function_arg_type_conflict_map(): boolean {
     return dataMap.get(KEY) == EXPECTED_VALUE;
 }
 
-function Test_function_arg_type_conflict_object(): boolean {
+function TestFunctionArgTypeConflictObject(): boolean {
     const object = js.functionArgTypeConflictObject() as Object;
     return typeof object == 'object' && object instanceof Object;
 }
 
-function Test_function_arg_type_conflict_string(): boolean {
+function TestFunctionArgTypeConflictString(): boolean {
     const value = js.functionArgTypeConflictString() as string;
     const EXPECTED_STRING = 'foo';
 

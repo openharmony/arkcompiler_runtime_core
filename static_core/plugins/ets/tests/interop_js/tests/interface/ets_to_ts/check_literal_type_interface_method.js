@@ -14,65 +14,65 @@
  */
 
 const {
-    num,
-    string,
-    LiteralValueMethodClass,
-    create_interface_literal_value_class_from_ets,
+	num,
+	string,
+	LiteralValueMethodClass,
+	createInterfaceLiteralValueClassFromEts,
 } = require('interface_method.test.js');
 
-function check_literal_type_method_class_interface_int() {
-    const IClass = new LiteralValueMethodClass();
+function checkLiteralTypeMethodClassInterfaceInt() {
+	const IClass = new LiteralValueMethodClass();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_literal_type_method_class_interface_string() {
-    const IClass = new LiteralValueMethodClass();
+function checkLiteralTypeMethodClassInterfaceString() {
+	const IClass = new LiteralValueMethodClass();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_literal_interface_object_from_ets_int() {
-    const IClass = new create_interface_literal_value_class_from_ets();
+function checkLiteralInterfaceObjectFromEtsInt() {
+	const IClass = new createInterfaceLiteralValueClassFromEts();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_literal_interface_object_from_ets_string() {
-    const IClass = new create_interface_literal_value_class_from_ets();
+function checkLiteralInterfaceObjectFromEtsString() {
+	const IClass = new createInterfaceLiteralValueClassFromEts();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_literal_value_type_method_class_interface_int() {
-    const IClass = new LiteralValueMethodClass();
+function checkLiteralValueTypeMethodClassInterfaceInt() {
+	const IClass = new LiteralValueMethodClass();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_literal_value_type_method_class_interface_string() {
-    const IClass = new LiteralValueMethodClass();
+function checkLiteralValueTypeMethodClassInterfaceString() {
+	const IClass = new LiteralValueMethodClass();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_literal_value_interface_object_from_ets_int() {
-    const IClass = new create_interface_literal_value_class_from_ets();
+function checkLiteralValueInterfaceObjectFromEtsInt() {
+	const IClass = new createInterfaceLiteralValueClassFromEts();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_literal_value_interface_object_from_ets_string() {
-    const IClass = new create_interface_literal_value_class_from_ets();
+function checkLiteralValueInterfaceObjectFromEtsString() {
+	const IClass = new createInterfaceLiteralValueClassFromEts();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-check_literal_type_method_class_interface_int();
-check_literal_type_method_class_interface_string();
-check_literal_interface_object_from_ets_int();
-check_literal_interface_object_from_ets_string();
-check_literal_value_type_method_class_interface_int();
-check_literal_value_type_method_class_interface_string();
-check_literal_value_interface_object_from_ets_int();
-check_literal_value_interface_object_from_ets_string();
+checkLiteralTypeMethodClassInterfaceInt();
+checkLiteralTypeMethodClassInterfaceString();
+checkLiteralInterfaceObjectFromEtsInt();
+checkLiteralInterfaceObjectFromEtsString();
+checkLiteralValueTypeMethodClassInterfaceInt();
+checkLiteralValueTypeMethodClassInterfaceString();
+checkLiteralValueInterfaceObjectFromEtsInt();
+checkLiteralValueInterfaceObjectFromEtsString();

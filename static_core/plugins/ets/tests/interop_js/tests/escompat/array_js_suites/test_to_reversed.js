@@ -21,15 +21,17 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSToReversed = etsMod.getFunction('Array_TestJSToReversed');
 
-{ // Test JS Array<FooClass>
-  TestJSToReversed(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSToReversed(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  let reversedCopy = arr.toReversed();
-  ASSERT_EQ(arr.at(0), reversedCopy.at(1));
-  ASSERT_EQ(arr.at(1), reversedCopy.at(0));
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	let reversedCopy = arr.toReversed();
+	ASSERT_EQ(arr.at(0), reversedCopy.at(1));
+	ASSERT_EQ(arr.at(1), reversedCopy.at(0));
 }
 
 GCJSRuntimeCleanup();

@@ -21,21 +21,23 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSCopyWithin = etsMod.getFunction('Array_TestJSCopyWithin');
 
-{ // Test JS Array<FooClass>
-  TestJSCopyWithin(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSCopyWithin(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  arr.push('something');
-  ASSERT_EQ(arr.at(2), 'something');
-  arr.copyWithin(2, 0);
-  ASSERT_EQ(arr.at(2), 123);
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	arr.push('something');
+	ASSERT_EQ(arr.at(2), 'something');
+	arr.copyWithin(2, 0);
+	ASSERT_EQ(arr.at(2), 123);
 
-  ASSERT_EQ(arr.at(1), 'foo');
-  // NOTE(oignatenko) uncomment below after interop will be supported for this method signature
-  // arr.copyWithin(1);
-  // ASSERT_EQ(arr.at(1), 123);
+	ASSERT_EQ(arr.at(1), 'foo');
+	// NOTE(oignatenko) uncomment below after interop will be supported for this method signature
+	// arr.copyWithin(1);
+	// ASSERT_EQ(arr.at(1), 123);
 }
 
 GCJSRuntimeCleanup();

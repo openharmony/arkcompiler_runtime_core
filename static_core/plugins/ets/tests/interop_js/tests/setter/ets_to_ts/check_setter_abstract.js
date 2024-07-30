@@ -14,24 +14,24 @@
  */
 
 const {
-    AbstractClass,
-    create_abstratc_class,
-    string,
-} = require("setter.test.js");
+	AbstractClass,
+	createAbstractClass,
+	string,
+} = require('setter.test.js');
 
-function check_setter_abstract() {
-    const abstractClass = new AbstractClass();
-    abstractClass.value = string;
+function checkSetterAbstract() {
+	const abstractClass = new AbstractClass();
+	abstractClass.value = string;
 
-    ASSERT_EQ(typeof string, typeof abstractClass.value);
+	ASSERT_EQ(typeof string, typeof abstractClass.value);
 }
 
-function check_setter_abstract_class_from_ets() {
-    const abstractClass = create_abstratc_class();
-    abstractClass.value = string;
+function checkSetterAbstractClassFromEts() {
+	const abstractClass = createAbstractClass();
+	abstractClass.value = string;
 
-    ASSERT_EQ(typeof string, typeof abstractClass.value);
+	ASSERT_EQ(typeof string, typeof abstractClass.value);
 }
 
-check_setter_abstract();
-check_setter_abstract_class_from_ets();
+checkSetterAbstract();
+checkSetterAbstractClassFromEts();

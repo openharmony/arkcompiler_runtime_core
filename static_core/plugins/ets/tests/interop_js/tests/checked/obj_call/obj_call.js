@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-
-exports.get_ret_obj = function (obj) {
-    obj.int_value = 5;
-    return obj;
-}
+exports.getRetObj = function (obj) {
+	obj.intValue = 5;
+	return obj;
+};

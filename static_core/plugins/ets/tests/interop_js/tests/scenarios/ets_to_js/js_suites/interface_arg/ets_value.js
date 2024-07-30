@@ -15,27 +15,31 @@
 const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
-const ClassImplementingInterfaceWithPropsAndMethod = etsMod.getClass('ClassImplementingInterfaceWithPropsAndMethod');
+const ClassImplementingInterfaceWithPropsAndMethod = etsMod.getClass(
+	'ClassImplementingInterfaceWithPropsAndMethod',
+);
 const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
-
 {
-  const INT_VALUE = 222;
-  const STRING_VALUE = 'hehehe';
+	const INT_VALUE = 222;
+	const STRING_VALUE = 'hehehe';
 
-  // Method 'foo' invocation from function will change field value
-  const CHANGED_INT_VALUE = INT_VALUE * 2;
+	// Method 'foo' invocation from function will change field value
+	const CHANGED_INT_VALUE = INT_VALUE * 2;
 
-  // Concatenation of various class field values and '123'
-  const RESULT_VALUE = STRING_VALUE + ' ' + CHANGED_INT_VALUE + ' 123';
+	// Concatenation of various class field values and '123'
+	const RESULT_VALUE = STRING_VALUE + ' ' + CHANGED_INT_VALUE + ' 123';
 
-  const obj = new ClassImplementingInterfaceWithPropsAndMethod(INT_VALUE, STRING_VALUE);
+	const obj = new ClassImplementingInterfaceWithPropsAndMethod(
+		INT_VALUE,
+		STRING_VALUE,
+	);
 
-  let ret = functionArgIsInterface(obj);
-  ASSERT_EQ(ret, RESULT_VALUE);
+	let ret = functionArgIsInterface(obj);
+	ASSERT_EQ(ret, RESULT_VALUE);
 
-  // NOTE replace with direct 'numVal' access after property access will be
-  //      implemented for ETS classes
-  let changedNumValue = obj.getNumVal();
-  ASSERT_EQ(changedNumValue, CHANGED_INT_VALUE);
+	// NOTE replace with direct 'numVal' access after property access will be
+	//      implemented for ETS classes
+	let changedNumValue = obj.getNumVal();
+	ASSERT_EQ(changedNumValue, CHANGED_INT_VALUE);
 }

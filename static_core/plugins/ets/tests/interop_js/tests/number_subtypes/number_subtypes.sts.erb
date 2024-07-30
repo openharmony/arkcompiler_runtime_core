@@ -15,9 +15,9 @@
 
 class jsvars {
     static global = JSRuntime.getGlobal();
-    static gtest_env = JSRuntime.getPropertyJSValue(jsvars.global, "gtest_env");
+    static gtestEnv = JSRuntime.getPropertyJSValue(jsvars.global, "gtest_env");
 
-    static m = JSRuntime.getPropertyJSValue(jsvars.gtest_env, "module");
+    static m = JSRuntime.getPropertyJSValue(jsvars.gtestEnv, "module");
 };
 
 class jscall {
@@ -32,9 +32,9 @@ class jsnew {
 };
 
 % @integral_primitives.each do |primitive|
-function jscall_<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+function jscall<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName.capitalize() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName.capitalize() %> = <%= primitive.getMax() %>;
     let res = jscall.num$(jsvars.m, ".EvaluateNumber", v0, v1);
     if (res == <%= primitive.getSum() %>) {
         return 0;
@@ -43,9 +43,9 @@ function jscall_<%= primitive.getName() %>(): int {
     }
 }
 
-function jsnew_getproperty<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;;
+function jsnewGetProperty<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName.capitalize() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName.capitalize() %> = <%= primitive.getMax() %>;;
     let res_obj = jsnew.$(jsvars.m, ".ExampleClass", v0, v1);
     let res_get_v0 = JSRuntime.getPropertyDouble(res_obj, "v0");
     let res_get_v1 = JSRuntime.getPropertyDouble(res_obj, "v1");
@@ -57,15 +57,15 @@ function jsnew_getproperty<%= primitive.getName() %>(): int {
     }
 }
 
-function jsnew_setproperty<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;;
+function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName.capitalize() %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName.capitalize() %> = <%= primitive.getMax() %>;;
     let res_obj = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
     JSRuntime.setPropertyDouble(res_obj, "v0", v0);
     JSRuntime.setPropertyDouble(res_obj, "v1", v1);
     // TODO(itrubachev) enable it after interop upgrade
-    // let test_js = JSRuntime.getPropertyJSValue(res_obj, "varify_properties");
-    // let check_js = jscall.num$(res_obj, ".varify_properties", v0, v1);
+    // let test_js = JSRuntime.getPropertyJSValue(res_obj, "verifyProperties");
+    // let check_js = jscall.num$(res_obj, ".verifyProperties", v0, v1);
     // if (check_js == 1) {
     //     return 1;
     // }
@@ -79,9 +79,9 @@ function jsnew_setproperty<%= primitive.getName() %>(): int {
     }
 }
 
-function jscall_static_method_<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
     let res = jscall.num$(jsvars.m, ".ExampleClass.EvaluateNumber", v0, v1);
     if (res == <%= primitive.getSum() %>) {
         return 0;
@@ -93,9 +93,9 @@ function jscall_static_method_<%= primitive.getName() %>(): int {
 % end
 
 % @float_primitives.each do |primitive|
-function jscall_<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+function jscall<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
     let res = jscall.num$(jsvars.m, ".ExampleClass.EvaluateNumber", v0, v1);
     if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
         return 0;
@@ -104,9 +104,9 @@ function jscall_<%= primitive.getName() %>(): int {
     }
 }
 
-function jsnew_getproperty<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;;
+function jsnewGetProperty<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;;
     let res_obj = jsnew.$(jsvars.m, ".ExampleClass", v0, v1);
     let res_get_v0 = JSRuntime.getPropertyDouble(res_obj, "v0");
     let res_get_v1 = JSRuntime.getPropertyDouble(res_obj, "v1");
@@ -118,9 +118,10 @@ function jsnew_getproperty<%= primitive.getName() %>(): int {
     }
 }
 
-function jsnew_setproperty<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;;
+function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName
+     %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;;
     let res_obj = jsnew.$(jsvars.m, ".ClassWithEmptyConstructor");
     JSRuntime.setPropertyDouble(res_obj, "v0", v0);
     JSRuntime.setPropertyDouble(res_obj, "v1", v1);
@@ -134,9 +135,9 @@ function jsnew_setproperty<%= primitive.getName() %>(): int {
     }
 }
 
-function jscall_static_method_<%= primitive.getName() %>(): int {
-    let v0: <%= primitive.getName() %> = <%= primitive.getMin() %>;
-    let v1: <%= primitive.getName() %> = <%= primitive.getMax() %>;
+function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
+    let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
+    let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
     let res = jscall.num$(jsvars.m, ".ExampleClass.EvaluateNumber", v0, v1);
     if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
         return 0;

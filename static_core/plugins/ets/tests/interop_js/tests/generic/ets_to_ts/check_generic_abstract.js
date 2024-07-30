@@ -14,22 +14,22 @@
  */
 
 const {
-    AbstractClass,
-    create_abstract_object_from_ets,
-    num,
-    str,
-} = require("generic.test.js");
+	AbstractClass,
+	createAbstractObjectFromEts,
+	num,
+	str,
+} = require('generic.test.js');
 
-function check_abstract_class() {
-    const abstarctClass = new AbstractClass(num);
-    ASSERT_EQ(typeof num, typeof abstarctClass.get());
+function checkAbstractClass() {
+	const abstarctClass = new AbstractClass(num);
+	ASSERT_EQ(typeof num, typeof abstarctClass.get());
 }
 
-function check_create_abstract_object_from_ets() {
-    const abstarctClass = create_abstract_object_from_ets();
+function checkCreateAbstractObjectFromEts() {
+	const abstarctClass = createAbstractObjectFromEts();
 
-    ASSERT_EQ(typeof str, typeof abstarctClass.get());
+	ASSERT_EQ(typeof str, typeof abstarctClass.get());
 }
 
-check_abstract_class();
-check_create_abstract_object_from_ets();
+checkAbstractClass();
+checkCreateAbstractObjectFromEts();
