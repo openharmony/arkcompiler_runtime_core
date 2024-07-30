@@ -292,7 +292,7 @@ HWTEST(BytecodeEmitter, <%= emitter_name %>_<%= i.format.pretty.upcase %>_AUTO, 
 %               vals = []
 %               p.each_with_index do |v, index|
 %                   op = ops[index]
-%                   is_signed = op.name.start_with?('imm')
+%                   is_signed = i.operands[index].is_signed_imm? || i.operands[index].is_float_imm?
 %                   arg = v == 'min' ? get_min(op.width, is_signed) : get_max(op.width, is_signed)
 %                   args.push(arg)
 %                   if op.width <= 8

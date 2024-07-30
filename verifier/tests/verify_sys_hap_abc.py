@@ -19,6 +19,7 @@ import os
 import shutil
 import subprocess
 import zipfile
+import shutil
 
 
 def parse_args():
@@ -126,6 +127,8 @@ def main():
         print("\nFailed abc files:")
         for failed_abc in failed_abc_list:
             print(f"  - {failed_abc}")
+
+    shutil.rmtree(out_folder)
 
 
 if __name__ == "__main__":
