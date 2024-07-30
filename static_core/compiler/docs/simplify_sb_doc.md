@@ -229,7 +229,7 @@ function MatchConcatenationLoop(loop: Loop)
         add match to matches array
     return matches
 
-function ReconnectInstructions(match: Match)    
+function ReconnectInstructions(match: Match)
     match.preheader.appendAcc.setInput(0, match.preheader.instance)
     match.preheader.appendAcc.setInput(1, be match.initialValue)
     match.exit.toStringCall.setInput(0, match.preheader.instance)
@@ -469,7 +469,6 @@ prop: end
     * [simplify_string_builder.h](../optimizer/optimizations/simplify_string_builder.h)
     * [simplify_string_builder.cpp](../optimizer/optimizations/simplify_string_builder.cpp)
 * Tests
-    * [ets_string_builder.ets](../../plugins/ets/tests/checked/ets_string_builder.ets)
-    * [ets_string_concat.ets](../../plugins/ets/tests/checked/ets_string_concat.ets)
-    * [ets_string_concat_loop.ets](../../plugins/ets/tests/checked/ets_string_concat_loop.ets)
-
+    * [ets_string_builder.sts](../../plugins/ets/tests/checked/ets_string_builder.sts)
+    * [ets_string_concat.sts](../../plugins/ets/tests/checked/ets_string_concat.sts)
+    * [ets_string_concat_loop.sts](../../plugins/ets/tests/checked/ets_string_concat_loop.sts)

@@ -15,7 +15,7 @@
 
 chapters:
   - ch1:
-      - folder1/file1.ets
+      - folder1/file1.sts
       - exclude
         - folder2
-        - folder3/file*.ets
+        - folder3/file*.sts

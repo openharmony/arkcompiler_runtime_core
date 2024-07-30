@@ -1,6 +1,6 @@
-# DECLGEN TOOL FOR `.d.ets` FILES GENERATION
+# DECLGEN TOOL FOR `.d.sts` FILES GENERATION
 
-This tool generates `.d.ets` files with declarations in `ets` for given TypeScript source code files.
+This tool generates `.d.sts` files with declarations in `ets` for given TypeScript source code files.
 
 It
 * is based on rules from the "TS to ETS cookbook,
@@ -32,7 +32,7 @@ npm run build
 npm run declgen -- -f my_file.ts
 ```
 
-This generates a file `my_file.d.ets` with `ets` declarations for `my_file.ts`.
+This generates a file `my_file.d.sts` with `ets` declarations for `my_file.ts`.
 
 ## Options
 To see all available options, run the following command:

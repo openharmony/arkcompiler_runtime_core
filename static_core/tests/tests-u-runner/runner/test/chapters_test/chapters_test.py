@@ -29,17 +29,17 @@ class ChapterTest(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.base_folder = ''
         cls.files = [
-            'folder1/file1.ets',
-            'folder1/file2.ets',
-            'folder1/file3.ets',
-            'folder2/file1.ets',
-            'folder2/file2.ets',
-            'folder2/file3.ets',
-            'folder3/file1.ets',
-            'folder3/file2.ets',
-            'folder3/test2.ets',
-            'folder4/file1.ets',
-            'fol-der 1/fi_le 1.ets',
+            'folder1/file1.sts',
+            'folder1/file2.sts',
+            'folder1/file3.sts',
+            'folder2/file1.sts',
+            'folder2/file2.sts',
+            'folder2/file3.sts',
+            'folder3/file1.sts',
+            'folder3/file2.sts',
+            'folder3/test2.sts',
+            'folder4/file1.sts',
+            'fol-der 1/fi_le 1.sts',
         ]
         cls.chapters = Chapters(os.path.join(cls.current_folder, 'chapters_test.yaml'))
 
@@ -47,16 +47,16 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch1',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
-            'folder2/file1.ets',
-            'folder2/file2.ets',
-            'folder2/file3.ets',
-            'folder3/file1.ets',
-            'folder3/file2.ets'
+            'folder1/file1.sts',
+            'folder2/file1.sts',
+            'folder2/file2.sts',
+            'folder2/file3.sts',
+            'folder3/file1.sts',
+            'folder3/file2.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -64,16 +64,16 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch2',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
-            'folder2/file1.ets',
-            'folder2/file2.ets',
-            'folder2/file3.ets',
-            'folder3/file1.ets',
-            'folder3/file2.ets'
+            'folder1/file1.sts',
+            'folder2/file1.sts',
+            'folder2/file2.sts',
+            'folder2/file3.sts',
+            'folder3/file1.sts',
+            'folder3/file2.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -81,15 +81,15 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch3',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file2.ets',
-            'folder1/file3.ets',
-            'folder3/test2.ets',
-            'folder4/file1.ets',
-            'fol-der 1/fi_le 1.ets'
+            'folder1/file2.sts',
+            'folder1/file3.sts',
+            'folder3/test2.sts',
+            'folder4/file1.sts',
+            'fol-der 1/fi_le 1.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -97,11 +97,11 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch4_1',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
+            'folder1/file1.sts',
         }
         self.assertSetEqual(actual, expected)
 
@@ -109,12 +109,12 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch4',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
-            'folder1/file2.ets',
+            'folder1/file1.sts',
+            'folder1/file2.sts',
         }
         self.assertSetEqual(actual, expected)
 
@@ -122,12 +122,12 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch5',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder3/file1.ets',
-            'folder3/file2.ets',
+            'folder3/file1.sts',
+            'folder3/file2.sts',
         }
         self.assertSetEqual(actual, expected)
 
@@ -135,21 +135,21 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch6',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
-            'folder1/file2.ets',
-            'folder1/file3.ets',
-            'folder2/file1.ets',
-            'folder2/file2.ets',
-            'folder2/file3.ets',
-            'folder3/file1.ets',
-            'folder3/file2.ets',
-            'folder3/test2.ets',
-            'folder4/file1.ets',
-            'fol-der 1/fi_le 1.ets'
+            'folder1/file1.sts',
+            'folder1/file2.sts',
+            'folder1/file3.sts',
+            'folder2/file1.sts',
+            'folder2/file2.sts',
+            'folder2/file3.sts',
+            'folder3/file1.sts',
+            'folder3/file2.sts',
+            'folder3/test2.sts',
+            'folder4/file1.sts',
+            'fol-der 1/fi_le 1.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -157,7 +157,7 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch7',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = set()
@@ -167,15 +167,15 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch8',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
-            'folder2/file2.ets',
-            'folder2/file3.ets',
-            'folder3/file1.ets',
-            'folder3/file2.ets'
+            'folder1/file1.sts',
+            'folder2/file2.sts',
+            'folder2/file3.sts',
+            'folder3/file1.sts',
+            'folder3/file2.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -183,14 +183,14 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch9',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
-            'folder3/file1.ets',
-            'folder3/file2.ets',
-            'folder4/file1.ets'
+            'folder1/file1.sts',
+            'folder3/file1.sts',
+            'folder3/file2.sts',
+            'folder4/file1.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -198,11 +198,11 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch10',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder4/file1.ets'
+            'folder4/file1.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -210,13 +210,13 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch11',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'folder1/file1.ets',
-            'folder3/file1.ets',
-            'folder3/file2.ets',
+            'folder1/file1.sts',
+            'folder3/file1.sts',
+            'folder3/file2.sts',
         }
         self.assertSetEqual(actual, expected)
 
@@ -224,7 +224,7 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch12',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = set()
@@ -234,7 +234,7 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch13',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = set()
@@ -244,7 +244,7 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch14',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = set()
@@ -254,7 +254,7 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch15',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = set()
@@ -264,11 +264,11 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='ch16',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = {
-            'fol-der 1/fi_le 1.ets'
+            'fol-der 1/fi_le 1.sts'
         }
         self.assertSetEqual(actual, expected)
 
@@ -276,7 +276,7 @@ class ChapterTest(unittest.TestCase):
         actual = ChapterTest.chapters.filter_by_chapter(
             chapter_name='non-exist',
             base_folder=ChapterTest.base_folder,
-            extension="ets",
+            extension="sts",
             files=ChapterTest.files
         )
         expected: Set[str] = set()

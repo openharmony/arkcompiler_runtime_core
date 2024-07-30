@@ -132,7 +132,7 @@ export class Declgen {
       ) {
         const parsedPath = path.parse(fileName);
         fallbackWriteFile(
-          path.join(parsedPath.dir, `${parsedPath.name}.ets`),
+          path.join(parsedPath.dir, `${parsedPath.name}.sts`),
           text,
           writeByteOrderMark,
           onError,

@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_gtest(ets_interop_js_test__js_extend_ets
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js_extend_ets.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js_extend_ets.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/js_extend_ets.sts
 )

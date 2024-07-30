@@ -159,7 +159,7 @@ function compareExpectedAndActualOutputs(test: Test, emitResult: ts.EmitResult):
   void emitResult;
 
   const expected = fs.readFileSync(test.expectedOutput).toString().replace(copyright, '');
-  const actualPath = path.join(test.outDir, `${test.name}.d.ets`);
+  const actualPath = path.join(test.outDir, `${test.name}.d.sts`);
   const actual = fs.readFileSync(actualPath).toString();
 
   if (expected !== actual) {
@@ -263,7 +263,7 @@ function collectTests(testSuite: string, opts: TestRunnerCLIOptions): Test[] {
   for (const name of basenames) {
     const testSource = `${name}${ts.Extension.Ts}`;
     const expectedReport = `${name}${ts.Extension.Json}`;
-    const expectedOutput = `${name}.d.ets`;
+    const expectedOutput = `${name}.d.sts`;
 
     if (!dirContents.includes(testSource)) {
       throw new Error(`Test ${name} is missing it's source file <${testSource}>!`);

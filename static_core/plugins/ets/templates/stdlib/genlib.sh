@@ -33,35 +33,35 @@ mkdir -p "${GEN_ESCOMPAT_PATH}"
 mkdir -p "${GEN_STDCORE_PATH}"
 
 # Generate Array
-readonly ARR="${GEN_ESCOMPAT_PATH}/Array.ets"
+readonly ARR="${GEN_ESCOMPAT_PATH}/Array.sts"
 echo "Generating ${ARR}"
 erb Array_escompat.erb | format_file > "${ARR}"
 
-readonly BLT_ARR="${GEN_STDCORE_PATH}/BuiltinArray.ets"
+readonly BLT_ARR="${GEN_STDCORE_PATH}/BuiltinArray.sts"
 echo "Generating ${BLT_ARR}"
 erb Array_builtin.erb | format_file > "${BLT_ARR}"
 
-readonly BLT_ARR_SORT="${GEN_STDCORE_PATH}/BuiltinArraySort.ets"
+readonly BLT_ARR_SORT="${GEN_STDCORE_PATH}/BuiltinArraySort.sts"
 echo "Generating ${BLT_ARR_SORT}"
-"${JINJA_PATH}" Array_builtin_sort.ets.j2 | format_file > "${BLT_ARR_SORT}"
+"${JINJA_PATH}" Array_builtin_sort.sts.j2 | format_file > "${BLT_ARR_SORT}"
 
-readonly BLT_ARR_ARG="${GEN_STDCORE_PATH}/BuiltinArrayAlgorithms.ets"
+readonly BLT_ARR_ARG="${GEN_STDCORE_PATH}/BuiltinArrayAlgorithms.sts"
 echo "Generating ${BLT_ARR_ARG}"
-"${JINJA_PATH}" Array_builtin_algorithms.ets.j2 | format_file > "${BLT_ARR_ARG}"
+"${JINJA_PATH}" Array_builtin_algorithms.sts.j2 | format_file > "${BLT_ARR_ARG}"
 
 # Generate TypedArrays
-echo "Generating $GEN_ESCOMPAT_PATH/DataView.ets"
-"${JINJA_PATH}" "${SCRIPT_DIR}/DataView.ets.j2" -o "$GEN_ESCOMPAT_PATH/DataView.ets"
+echo "Generating $GEN_ESCOMPAT_PATH/DataView.sts"
+"${JINJA_PATH}" "${SCRIPT_DIR}/DataView.sts.j2" -o "$GEN_ESCOMPAT_PATH/DataView.sts"
 
-echo "Generating $GEN_ESCOMPAT_PATH/TypedArrays.ets"
-"${JINJA_PATH}" "${SCRIPT_DIR}/typedArray.ets.j2" -o "$GEN_ESCOMPAT_PATH/TypedArrays.ets"
+echo "Generating $GEN_ESCOMPAT_PATH/TypedArrays.sts"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedArray.sts.j2" -o "$GEN_ESCOMPAT_PATH/TypedArrays.sts"
 
-echo "Generating $GEN_ESCOMPAT_PATH/TypedUArrays.ets"
-"${JINJA_PATH}" "${SCRIPT_DIR}/typedUArray.ets.j2" -o "$GEN_ESCOMPAT_PATH/TypedUArrays.ets"
+echo "Generating $GEN_ESCOMPAT_PATH/TypedUArrays.sts"
+"${JINJA_PATH}" "${SCRIPT_DIR}/typedUArray.sts.j2" -o "$GEN_ESCOMPAT_PATH/TypedUArrays.sts"
 
 # Generate Functions
-readonly FUNC="$GEN_STDCORE_PATH/Function.ets"
+readonly FUNC="$GEN_STDCORE_PATH/Function.sts"
 echo "Generating ${FUNC}"
-"${JINJA_PATH}" "${SCRIPT_DIR}/Function.ets.j2" -o "${FUNC}"
+"${JINJA_PATH}" "${SCRIPT_DIR}/Function.sts.j2" -o "${FUNC}"
 
 exit 0

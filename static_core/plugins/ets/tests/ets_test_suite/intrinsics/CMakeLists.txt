@@ -50,7 +50,7 @@ add_custom_target(ets_test_suite_intrinsics)
 foreach(test ${intrinsics_tests})
     set(test_out_dir "${intrinsics_tests_out_dir}/${test}")
 
-    set(test_in "${intrinsics_tests_in_dir}/${test}.ets")
+    set(test_in "${intrinsics_tests_in_dir}/${test}.sts")
     set(target ets_test_suite_intrinsics_${test})
     set(extra_options "")
 
@@ -62,4 +62,3 @@ foreach(test ${intrinsics_tests})
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target} ${extra_options})
     add_dependencies(ets_test_suite_intrinsics ${target})
 endforeach()
-

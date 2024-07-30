@@ -16,109 +16,109 @@ add_custom_target(ets_test_napi_mock_run)
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_1
     CPP_SOURCE calling_methods_test_1.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_2
     CPP_SOURCE calling_methods_test_2.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_3
     CPP_SOURCE calling_methods_test_3.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_4
     CPP_SOURCE calling_methods_test_4.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_5
     CPP_SOURCE calling_methods_test_5.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_6
     CPP_SOURCE calling_methods_test_6.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_7
     CPP_SOURCE calling_methods_test_7.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME calling_methods_test_8
     CPP_SOURCE calling_methods_test_8.cpp
-    ETS_SOURCE CallingMethodsTest.ets
+    ETS_SOURCE CallingMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME accessing_objects_fields_test_1
     CPP_SOURCE accessing_objects_fields_test_1.cpp
-    ETS_SOURCE AccessingObjectsFieldsTest.ets
+    ETS_SOURCE AccessingObjectsFieldsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME accessing_objects_fields_test_2
     CPP_SOURCE accessing_objects_fields_test_2.cpp
-    ETS_SOURCE AccessingObjectsFieldsTest.ets
+    ETS_SOURCE AccessingObjectsFieldsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME accessing_objects_fields_test_3
     CPP_SOURCE accessing_objects_fields_test_3.cpp
-    ETS_SOURCE AccessingObjectsFieldsTest.ets
+    ETS_SOURCE AccessingObjectsFieldsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME clinit_native_test
     CPP_SOURCE clinit_native_test.cpp
-    ETS_SOURCE ClinitNativeTest.ets
+    ETS_SOURCE ClinitNativeTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME effective_types_test
     CPP_SOURCE effective_types_test.cpp
-    ETS_SOURCE EffectiveTypesTest.ets
+    ETS_SOURCE EffectiveTypesTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME final_field_native_test
     CPP_SOURCE final_field_native_test.cpp
-    ETS_SOURCE FinalFieldNativeTest.ets
+    ETS_SOURCE FinalFieldNativeTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME registering_native_methods_test
     CPP_SOURCE registering_native_methods_test.cpp
-    ETS_SOURCE RegisteringNativeMethodsTest.ets
+    ETS_SOURCE RegisteringNativeMethodsTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME register_native_allocation_test
     CPP_SOURCE register_native_allocation_test.cpp
-    ETS_SOURCE RegisterNativeAllocationTest.ets
+    ETS_SOURCE RegisterNativeAllocationTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME stack_reference_check_test
     CPP_SOURCE stack_reference_check_test.cpp
-    ETS_SOURCE StackReferenceCheckTest.ets
+    ETS_SOURCE StackReferenceCheckTest.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME stack_trace_test
     CPP_SOURCE stack_trace_test.cpp
-    ETS_SOURCE StackTraceTest.ets
+    ETS_SOURCE StackTraceTest.sts
 )
 
 panda_ets_napi_add_gtest(
@@ -139,11 +139,11 @@ panda_ets_napi_add_gtest(
 panda_ets_napi_add_gtest(
     NAME js_mode_launch
     CPP_SOURCE js_mode_launch.cpp
-    ETS_SOURCE js_mode_launch.ets
+    ETS_SOURCE js_mode_launch.sts
 )
 
 panda_ets_napi_add_gtest(
     NAME coroswitch_in_cctor
     CPP_SOURCE coroswitch_in_cctor.cpp
-    ETS_SOURCE coroswitch_in_cctor.ets
+    ETS_SOURCE coroswitch_in_cctor.sts
 )

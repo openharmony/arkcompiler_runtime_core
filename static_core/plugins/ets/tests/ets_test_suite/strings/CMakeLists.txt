@@ -24,7 +24,7 @@ add_custom_target(ets_test_suite_strings)
 foreach(test ${strings_tests})
     set(test_out_dir "${strings_tests_out_dir}/${test}")
 
-    set(test_in "${strings_tests_in_dir}/${test}.ets")
+    set(test_in "${strings_tests_in_dir}/${test}.sts")
     set(target ets_test_suite_strings_${test})
 
     if (PANDA_TARGET_ARM32)
@@ -40,4 +40,3 @@ foreach(test ${strings_tests})
         add_dependencies(ets_test_suite_strings ${target}-ets-aot)
     endif()
 endforeach()
-

@@ -61,10 +61,10 @@ class RunnerDeclgenParser(RunnerJS):
         return Path("/tmp") / "declgenparser"
 
     def add_directories(self) -> None:
-        flags = ["--extension=ets"]
+        flags = ["--extension=sts"]
         for test_dir in self.TEST_DIRS:
             dir_path = path.join(self.test_root, test_dir)
-            self.add_directory(dir_path, "ets", flags)
+            self.add_directory(dir_path, "sts", flags)
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenParser:
         test = TestDeclgenParser(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))

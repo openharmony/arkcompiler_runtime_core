@@ -118,7 +118,7 @@ class BenchGenerator:
 
     @staticmethod
     def check_common_files(full: Path, lang_name: str) -> str:
-        """Check if there is 'common' code at ../common/ets/*.ets.
+        """Check if there is 'common' code at ../common/ets/*.sts.
 
         This feature is actually meaningless now
         and added only for the compatibility with existing tests

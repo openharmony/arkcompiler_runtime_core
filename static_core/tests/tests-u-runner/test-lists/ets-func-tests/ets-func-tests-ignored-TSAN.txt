@@ -1,7 +1,3 @@
 ### Undefined type
-spec/undefined-type/undefined-union-array-type_2.ets
+spec/undefined-type/undefined-union-array-type_2.sts
 ### End of Undefined type
-
-
-
-

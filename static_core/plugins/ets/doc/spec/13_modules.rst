@@ -59,7 +59,7 @@ system or a database (see :ref:`Compilation Units in Host System`).
    access
    separate module
    package
-   
+
 |
 
 .. _Separate Modules:
@@ -515,7 +515,7 @@ applied to a single name:
    import
    alias
    access
-   
+
 |
 
 .. _Default Import Binding:
@@ -528,7 +528,7 @@ Default Import Binding
 
 Default import binding allows importing a declaration exported from some
 module as default export. Knowing the actual name of the declaration is not
-required as the new name is given at importing. 
+required as the new name is given at importing.
 A :index:`compile-time error` occurs if another form of import is used to
 import an entity initially exported as default.
 
@@ -576,18 +576,18 @@ which were exported, and the second imports only exported types.
 .. code-block:: typescript
    :linenos:
 
-    // File module.ets
+    // File module.sts
     console.log ("Module initialization code")
 
     export class Class1 {/*body*/}
 
     class Class2 {}
-    export type {Class2} 
+    export type {Class2}
 
-    // MainProgram.ets
+    // MainProgram.sts
 
-    import {Class1} from "./module.ets"
-    import type {Class2} from "./module.ets"
+    import {Class1} from "./module.sts"
+    import type {Class2} from "./module.sts"
 
     let c1 = new Class1() // OK
     let c2 = new Class2() // OK, the same
@@ -767,7 +767,7 @@ elsewhere.
 .. code-block:: abnf
 
     declarationModule:
-        importDirective* 
+        importDirective*
         ( 'export'? ambientDeclaration
         | 'export'? typeAlias
         | selectiveExportDirective
@@ -1303,4 +1303,3 @@ below:
 .. raw:: pdf
 
    PageBreak
-

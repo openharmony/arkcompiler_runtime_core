@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_gtest(ets_interop_js__test_ets_function_proxy
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_function_proxy.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_function_proxy.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/ets_function_proxy.sts
 )

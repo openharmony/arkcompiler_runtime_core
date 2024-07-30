@@ -60,8 +60,8 @@ class RunnerJSParser(RunnerJS):
         if self.config.general.with_js:
             self.add_directory("compiler/js", "js", flags=["--extension=js", "--output=/dev/null"])
         self.add_directory("compiler/ts", "ts", flags=["--extension=ts", ])
-        self.add_directory("compiler/ets", "ets", flags=[
-            "--extension=ets",
+        self.add_directory("compiler/ets", "sts", flags=[
+            "--extension=sts",
             "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
         ])
@@ -70,8 +70,8 @@ class RunnerJSParser(RunnerJS):
             self.add_directory("parser/js", "js", flags=["--parse-only"])
         self.add_directory("parser/ts", "ts", flags=["--parse-only", '--extension=ts'])
         self.add_directory("parser/as", "ts", flags=["--parse-only", "--extension=as"])
-        self.add_directory("parser/ets", "ets", flags=[
-            "--extension=ets",
+        self.add_directory("parser/ets", "sts", flags=[
+            "--extension=sts",
             "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
         ])

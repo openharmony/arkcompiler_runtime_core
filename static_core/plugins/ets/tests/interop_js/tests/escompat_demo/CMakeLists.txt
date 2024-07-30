@@ -12,6 +12,6 @@
 # limitations under the License.
 
 panda_ets_interop_js_test(ets_interop_js__test_escompat_demo
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/foo.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/foo.sts
     JS_LAUNCHER ${CMAKE_CURRENT_SOURCE_DIR}/out/main.js
 )
