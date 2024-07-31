@@ -990,6 +990,10 @@
 13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_6.sts
 13.compilation_units_packages_and_modules/09.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 
+# 18493
+13.compilation_units_packages_and_modules/08.top-level_declarations/bad_top_level_declarations_2.sts
+# end
+
 # 15095
 09.classes/06.method_declarations/hiding_by_class_methods/hiding_instance_static_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
