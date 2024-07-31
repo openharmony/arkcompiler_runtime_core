@@ -229,6 +229,12 @@ config("ark_config") {
     configs += [ "$ark_root/plugins/$plugin:ark_config" ]
   }
 
+  if (enabled_pac_data_protect) {
+    cflags_c += [ "-march=armv8.4-a" ]
+    cflags_cc += [ "-march=armv8.4-a" ]
+    defines += [ "PANDA_ENABLE_DATA_PROTECT" ]
+  }
+
   if (current_cpu == "arm") {
     cflags_cc += [
       "-march=armv7-a",

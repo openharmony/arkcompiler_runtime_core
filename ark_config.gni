@@ -21,6 +21,13 @@ if (is_standard_system) {
 
 declare_args() {
   enabled_plugins = default_enabled_plugins
+  pandas_support_pac_oh_pac_data_protect = false
+  enabled_pac_data_protect = false
+}
+
+if (defined(target_cpu) && target_cpu == "arm64" &&
+    pandas_support_pac_oh_pac_data_protect && !is_emulator) {
+  enabled_pac_data_protect = true
 }
 
 if (current_cpu == "arm") {
