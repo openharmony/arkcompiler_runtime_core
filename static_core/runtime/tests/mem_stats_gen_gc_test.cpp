@@ -266,7 +266,7 @@ MemStatsGenGCTest::ObjVec MemStatsGenGCTest::MakeAllocationsWithRepeats(size_t m
             auto free =
                 reinterpret_cast<GenerationalSpaces *>(objectAllocator->GetHeapSpace())->GetCurrentFreeTenuredSize();
             // NOLINTNEXTLINE(readability-magic-numbers)
-            if (size + 5000000 > free) {
+            if (size + 5000000U > free) {
                 return result;
             }
         }
