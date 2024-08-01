@@ -29,7 +29,7 @@
         GC pause (ms):        $gc (N/A)
 */
 
-$imports
+$imports;
 
 // map ets numerical types to number
 type int = number;
@@ -62,7 +62,7 @@ class Consumer {
     static localObjs: Object[] = [new Object()];
     static pseudorand: number = Date.now();
 
-    static consume_boolean (boolc: boolean): void {
+    static consume_boolean(boolc: boolean): void {
         if (boolc === this.boola && boolc === this.boolb) {
             throw new Error();
         }
@@ -97,24 +97,24 @@ class Consumer {
     }
 }
 
-function log(msg: string) {
+function log(msg: string): void {
     print(msg);
 }
 
-$common
+$common;
 
-$src
+$src;
 
 let bench = new $state_name();
-$state_params
-$state_setup
+$state_params;
+$state_setup;
 
-var loopCount1: number;
-var totalOps: number = 0;
-var totalMs: number = 0;
-var iter: number;
+let loopCount1: number;
+let totalOps: number = 0;
+let totalMs: number = 0;
+let iter: number;
 
-function tune() {
+function tune(): void {
     let iterMs: number = 1 * S2MS;
     let loopMs: number = 0;
     let loopCount: number = 1;
@@ -122,63 +122,65 @@ function tune() {
         loopCount = loopCount * 2;
         let start: number = Date.now();
         for (let i: number = 0; i < loopCount; i++) {
-            $method_call
+            $method_call;
         }
         loopMs = Date.now() - start;
     }
     loopCount1 = loopCount * iterMs / loopMs >> 0;
-    if (loopCount1 == 0) loopCount1++;
-    log("Tuning: " + loopCount + " ops, " +
-        loopMs*MS2NS/loopCount + " ns/op => " +
-        loopCount1 + " reps");
+    if (loopCount1 === 0) {
+        loopCount1++;
+    }
+    log('Tuning: ' + loopCount + ' ops, ' +
+        loopMs * MS2NS / loopCount + ' ns/op => ' +
+        loopCount1 + ' reps');
 }
 
-function runIters(phase: string, count: number, time: number) {
+function runIters(phase: string, count: number, time: number): void {
     let iterMs = time * S2MS;
     totalOps = 0;
-    totalMs = 1/Infinity; // make sure zero is encoded as double to avoid deoptimization on overflow later
+    totalMs = 1 / Infinity; // make sure zero is encoded as double to avoid de-optimization on overflow later
     for (let k = 0; k < count; k++, iter++) {
         let ops = 0;
         let elapsedMs = 0;
         let start = Date.now();
         while (elapsedMs < iterMs) {
             for (let i = 0; i < loopCount1; i++) {
-                $method_call
+                $method_call;
             }
             elapsedMs = Date.now() - start;
             ops += loopCount1;
         }
         totalOps += ops;
         totalMs += elapsedMs;
-        log(phase + " " + iter + ":" + ops + " ops, " + elapsedMs*MS2NS/ops + " ns/op");
+        log(phase + ' ' + iter + ':' + ops + ' ops, ' + elapsedMs * MS2NS / ops + ' ns/op');
     }
 }
 
-log("Startup execution started: " + Date.now() * MS2NS);
+log('Startup execution started: ' + Date.now() * MS2NS);
 if (FI > 0) {
     let start = Date.now();
     for (let i = 0; i < FI; i++) {
-        $method_call
+        $method_call;
     }
     let elapsed = Date.now() - start;
     if (elapsed <= 0) {
-        elapsed = 1;  // 0 is invalid result
+        elapsed = 1; // 0 is invalid result
     }
-    log("Benchmark result: $bench_name " + elapsed*MS2NS / FI);
+    log('Benchmark result: $bench_name ' + elapsed * MS2NS / FI);
 } else {
     tune();
     if (WI > 0) {
         iter = 1;
         // Re-entering runIters in warmup loop to allow profiler complete the method.
-        // Possible deoptimizations and recompilations is done in warmup instead of measure phase.
+        // Possible de-optimizations and recompilations is done in warmup instead of measure phase.
         for (let wi = 0; wi < WI; ++wi) {
-            runIters("Warmup", 1, WT);
+            runIters('Warmup', 1, WT);
         }
     }
     iter = 1;
-    var measure_iters = MI >> 0; // make sure it has int type
-    runIters("Iter", measure_iters, IT);
-    log("Benchmark result: $bench_name " + totalMs*MS2NS/totalOps);
+    let measure_iters = MI >> 0; // make sure it has int type
+    runIters('Iter', measure_iters, IT);
+    log('Benchmark result: $bench_name ' + totalMs * MS2NS / totalOps);
 }
 
 Consumer.consume_Object(bench);

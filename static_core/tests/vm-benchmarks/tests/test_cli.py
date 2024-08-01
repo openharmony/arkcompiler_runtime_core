@@ -33,12 +33,12 @@ def cmdline(line):
 
 def test_run_command():
     test = TestCase()
-    with cmdline('gen --langs blah /foo/bar'):
+    with cmdline('gen --langs blah foo/bar'):
         args = Args()
         test.assertTrue(args.command == Command.GEN)
         test.assertTrue(args.langs == {'blah'})
         test.assertTrue(args.get('platform') is None)
-    with cmdline('all -L ,,this,that -l blah,,foo -p fake /foo/bar'):
+    with cmdline('all -L ,,this,that -l blah,,foo -p fake foo/bar'):
         args = Args()
         test.assertTrue(args.command == Command.ALL)
         test.assertTrue(args.langs == {'blah', 'foo'})
@@ -56,7 +56,7 @@ def test_wrong_opts():
 
 def test_optfalgs():
     with cmdline('all --lang=blah --platform=xxx '
-                 '--mode=jit --mode=int /foo/bar'):
+                 '--mode=jit --mode=int foo/bar'):
         args = Args()
         flags = args.get_opts_flags()
         test = TestCase()
@@ -70,7 +70,7 @@ def test_custom_opts():
     with cmdline('all --lang=blah --platform=xxx '
                  '--node-custom-option="--a=b" '
                  '--node-custom-option="--c=d" '
-                 '/foo/bar'):
+                 'foo/bar'):
         args = Args()
         TestCase().assertTrue('"--a=b" "--c=d"' == \
             ' '.join(args.get('node_custom_option')))

@@ -20,7 +20,7 @@
 /**
  * @State
  */
-function UsingLib() {
+function usingLib() {
 
   /**
    * @Param 128

@@ -51,7 +51,7 @@ class A1 {
         for (let i = 0; i < this.loopCount; i++) {
             result = result.concat(this.concatString);
         }
-        return result.substring(this.loopCount/2, this.loopCount);
+        return result.substring(this.loopCount / 2, this.loopCount);
     }
 
 }
