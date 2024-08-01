@@ -92,6 +92,7 @@ ohos_static_library("libarkbytecodeopt_frontend_static") {
     "$ark_root/compiler:libarkcompiler_frontend_static",
     "$ark_root/libpandabase:libarkbase_frontend_static",
     "$ark_root/libpandafile:libarkfile_frontend_static",
+    "//third_party/bounds_checking_function:libsec_static",
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
