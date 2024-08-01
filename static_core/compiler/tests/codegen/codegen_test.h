@@ -103,7 +103,8 @@ void CodegenTest::CheckReturnValue(Graph *graph, [[maybe_unused]] T expectedValu
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     auto codeExit = codeEntry + graph->GetCode().Size();
 
-    ASSERT(codeEntry != nullptr && codeExit != nullptr);
+    ASSERT(codeEntry != nullptr);
+    ASSERT(codeExit != nullptr);
 
     GetExecModule().SetInstructions(codeEntry, codeExit);
     GetExecModule().SetDump(false);

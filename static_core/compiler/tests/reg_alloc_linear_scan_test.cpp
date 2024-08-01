@@ -73,6 +73,15 @@ public:
 
     template <DataType::Type REG_TYPE>
     void TestPhiMovesOverwriting(Graph *graph, SpillFillInst *sf, SpillFillInst *expectedSf);
+    template <DataType::Type REG_TYPE>
+    void TestPhiMovesOverwritingCyclic(Graph *graph, SpillFillsResolver &resolver, SpillFillInst *sf,
+                                       SpillFillInst *expectedSf);
+    template <DataType::Type REG_TYPE>
+    void TestPhiMovesOverwritingNotApplied(SpillFillsResolver &resolver, SpillFillInst *sf, SpillFillInst *expectedSf);
+    template <DataType::Type REG_TYPE>
+    void TestPhiMovesOverwritingComplex(SpillFillsResolver &resolver, SpillFillInst *sf, SpillFillInst *expectedSf);
+    void PhiMovesOverwritingMixed(SpillFillsResolver &resolver, SpillFillInst *sf, SpillFillInst *expectedSf);
+    void PhiMovesOverwriting2(SpillFillsResolver &resolver, SpillFillInst *sf, SpillFillInst *expectedSf);
     template <unsigned int CONSTANTS_NUM>
     bool FillGraphWithConstants(Graph *graph);
 
@@ -372,6 +381,15 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expectedSf);
 
+    TestPhiMovesOverwritingCyclic<REG_TYPE>(graph, resolver, sf, expectedSf);
+    TestPhiMovesOverwritingNotApplied<REG_TYPE>(resolver, sf, expectedSf);
+    TestPhiMovesOverwritingComplex<REG_TYPE>(resolver, sf, expectedSf);
+}
+
+template <DataType::Type REG_TYPE>
+void RegAllocLinearScanTest::TestPhiMovesOverwritingCyclic(Graph *graph, SpillFillsResolver &resolver,
+                                                           SpillFillInst *sf, SpillFillInst *expectedSf)
+{
     // cyclical sf with memcopy
     sf->ClearSpillFills();
     sf->AddMemCopy(4U, 5U, REG_TYPE);
@@ -414,10 +432,14 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
         expectedSf->AddSpill(5U, 10U, REG_TYPE);
         expectedSf->AddFill(tempSlot, 5U, REG_TYPE);
     }
-
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expectedSf);
+}
 
+template <DataType::Type REG_TYPE>
+void RegAllocLinearScanTest::TestPhiMovesOverwritingNotApplied(SpillFillsResolver &resolver, SpillFillInst *sf,
+                                                               SpillFillInst *expectedSf)
+{
     // not applied
     sf->ClearSpillFills();
     sf->AddMove(4U, 5U, REG_TYPE);
@@ -427,7 +449,12 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
     expectedSf->AddMove(6U, 7U, REG_TYPE);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expectedSf);
+}
 
+template <DataType::Type REG_TYPE>
+void RegAllocLinearScanTest::TestPhiMovesOverwritingComplex(SpillFillsResolver &resolver, SpillFillInst *sf,
+                                                            SpillFillInst *expectedSf)
+{
     // comlex sf
     sf->ClearSpillFills();
     sf->AddFill(1U, 15U, REG_TYPE);
@@ -463,44 +490,9 @@ void RegAllocLinearScanTest::TestPhiMovesOverwriting(Graph *graph, SpillFillInst
     CompareSpillFillInsts(sf, expectedSf);
 }
 
-TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
+void RegAllocLinearScanTest::PhiMovesOverwritingMixed(SpillFillsResolver &resolver, SpillFillInst *sf,
+                                                      SpillFillInst *expectedSf)
 {
-    GRAPH(GetGraph())
-    {
-        CONSTANT(0U, 0U);
-        BASIC_BLOCK(2U, -1L)
-        {
-            INST(1U, Opcode::Return).u64().Inputs(0U);
-        }
-    }
-
-    InitUsedRegs(GetGraph());
-    auto resolver = SpillFillsResolver(GetGraph());
-    // Use the last available register as a temp
-    auto sf = GetGraph()->CreateInstSpillFill();
-    auto expectedSf = GetGraph()->CreateInstSpillFill();
-    TestPhiMovesOverwriting<DataType::UINT32>(GetGraph(), sf, expectedSf);
-    TestPhiMovesOverwriting<DataType::UINT64>(GetGraph(), sf, expectedSf);
-    TestPhiMovesOverwriting<DataType::FLOAT64>(GetGraph(), sf, expectedSf);
-
-    // not applied
-    sf->ClearSpillFills();
-    sf->AddMove(4U, 5U, DataType::UINT64);
-    sf->AddMove(5U, 4U, DataType::FLOAT64);
-    expectedSf->ClearSpillFills();
-    expectedSf->AddMove(4U, 5U, DataType::UINT64);
-    expectedSf->AddMove(5U, 4U, DataType::FLOAT64);
-    resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expectedSf);
-
-    // not applied
-    sf->ClearSpillFills();
-    sf->AddMemCopy(0U, 1U, DataType::UINT64);
-    expectedSf->ClearSpillFills();
-    expectedSf->AddMemCopy(0U, 1U, DataType::UINT64);
-    resolver.Resolve(sf);
-    CompareSpillFillInsts(sf, expectedSf);
-
     // mixed reg-types sf
     sf->ClearSpillFills();
     sf->AddFill(1U, 5U, DataType::FLOAT64);
@@ -550,7 +542,11 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
 
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expectedSf);
+}
 
+void RegAllocLinearScanTest::PhiMovesOverwriting2(SpillFillsResolver &resolver, SpillFillInst *sf,
+                                                  SpillFillInst *expectedSf)
+{
     // zero-reg reordering
     sf->ClearSpillFills();
     sf->AddMove(31U, 5U, DataType::UINT64);
@@ -600,6 +596,48 @@ TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
     expectedSf->AddMove(7U, 10U, DataType::UINT64);
     resolver.Resolve(sf);
     CompareSpillFillInsts(sf, expectedSf);
+}
+
+TEST_F(RegAllocLinearScanTest, PhiMovesOverwriting)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0U, 0U);
+        BASIC_BLOCK(2U, -1L)
+        {
+            INST(1U, Opcode::Return).u64().Inputs(0U);
+        }
+    }
+
+    InitUsedRegs(GetGraph());
+    auto resolver = SpillFillsResolver(GetGraph());
+    // Use the last available register as a temp
+    auto sf = GetGraph()->CreateInstSpillFill();
+    auto expectedSf = GetGraph()->CreateInstSpillFill();
+    TestPhiMovesOverwriting<DataType::UINT32>(GetGraph(), sf, expectedSf);
+    TestPhiMovesOverwriting<DataType::UINT64>(GetGraph(), sf, expectedSf);
+    TestPhiMovesOverwriting<DataType::FLOAT64>(GetGraph(), sf, expectedSf);
+
+    // not applied
+    sf->ClearSpillFills();
+    sf->AddMove(4U, 5U, DataType::UINT64);
+    sf->AddMove(5U, 4U, DataType::FLOAT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMove(4U, 5U, DataType::UINT64);
+    expectedSf->AddMove(5U, 4U, DataType::FLOAT64);
+    resolver.Resolve(sf);
+    CompareSpillFillInsts(sf, expectedSf);
+
+    // not applied
+    sf->ClearSpillFills();
+    sf->AddMemCopy(0U, 1U, DataType::UINT64);
+    expectedSf->ClearSpillFills();
+    expectedSf->AddMemCopy(0U, 1U, DataType::UINT64);
+    resolver.Resolve(sf);
+    CompareSpillFillInsts(sf, expectedSf);
+
+    PhiMovesOverwritingMixed(resolver, sf, expectedSf);
+    PhiMovesOverwriting2(resolver, sf, expectedSf);
 }
 
 TEST_F(RegAllocLinearScanTest, DynPhiMovesOverwriting)
@@ -952,9 +990,8 @@ TEST_F(RegAllocLinearScanTest, MultiDestInLoop)
     EXPECT_EQ(regs.size(), 4U);
 }
 
-TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
+SRC_GRAPH(ResolveSegmentedCallInputs, Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -970,6 +1007,12 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
             INST(6U, Opcode::Return).u64().Inputs(5U);
         }
     }
+}
+
+TEST_F(RegAllocLinearScanTest, ResolveSegmentedCallInputs)
+{
+    auto graph = CreateEmptyGraph();
+    src_graph::ResolveSegmentedCallInputs::CREATE(graph);
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
@@ -1133,9 +1176,8 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedSafePointInput)
     ASSERT_TRUE(result);
 }
 
-TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
+SRC_GRAPH(ResolveSegmentedPhiInput, Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).u64();
@@ -1165,6 +1207,12 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
             INST(9U, Opcode::Return).u64().Inputs(8U);
         }
     }
+}
+
+TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
+{
+    auto graph = CreateEmptyGraph();
+    src_graph::ResolveSegmentedPhiInput::CREATE(graph);
 
     graph->RunPass<LivenessAnalyzer>();
     auto &la = graph->GetAnalysis<LivenessAnalyzer>();
@@ -1197,13 +1245,8 @@ TEST_F(RegAllocLinearScanTest, ResolveSegmentedPhiInput)
     ASSERT_TRUE(spillFillFound);
 }
 
-/**
- *  Currently `CatchPhi` can be visited by `LinearScan` in the `BytecodeOptimizer` mode only, where splits are not
- * posible, so that there is assertion in the `LinearScan` that interval in not splitted, which breaks this tests
- */
-TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
+SRC_GRAPH(DISABLED_ResolveSegmentedCatchPhiInputs, Graph *graph)
 {
-    auto graph = CreateEmptyBytecodeGraph();
     GRAPH(graph)
     {
         PARAMETER(0U, 0U).ref();
@@ -1237,6 +1280,16 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
             INST(6U, Opcode::Return).b().Inputs(5U);
         }
     }
+}
+
+/**
+ *  Currently `CatchPhi` can be visited by `LinearScan` in the `BytecodeOptimizer` mode only, where splits are not
+ * posible, so that there is assertion in the `LinearScan` that interval in not splitted, which breaks this tests
+ */
+TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
+{
+    auto graph = CreateEmptyBytecodeGraph();
+    src_graph::DISABLED_ResolveSegmentedCatchPhiInputs::CREATE(graph);
 
     BB(2U).SetTryId(0U);
     BB(3U).SetTryId(0U);
@@ -1280,9 +1333,8 @@ TEST_F(RegAllocLinearScanTest, DISABLED_ResolveSegmentedCatchPhiInputs)
               1U);
 }
 
-TEST_F(RegAllocLinearScanTest, RematConstants)
+SRC_GRAPH(RematConstants, Graph *graph)
 {
-    auto graph = CreateEmptyGraph();
     GRAPH(graph)
     {
         CONSTANT(0U, 0U).s32();
@@ -1309,6 +1361,12 @@ TEST_F(RegAllocLinearScanTest, RematConstants)
             INST(12U, Opcode::Return).f64().Inputs(11U);
         }
     }
+}
+
+TEST_F(RegAllocLinearScanTest, RematConstants)
+{
+    auto graph = CreateEmptyGraph();
+    src_graph::RematConstants::CREATE(graph);
 
     auto regalloc = RegAllocLinearScan(graph);
     uint32_t regMask = GetGraph()->GetArch() != Arch::AARCH32 ? 0xFFFFFFE1U : 0xFABFFFFFU;
