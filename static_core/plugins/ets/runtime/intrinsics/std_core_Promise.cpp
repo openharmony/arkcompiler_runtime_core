@@ -52,6 +52,7 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
 
 static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
 {
+    ASSERT(hpromise->IsLocked());
     int queueLength = hpromise->GetCallbackQueue(coro) == nullptr ? 0 : hpromise->GetCallbackQueue(coro)->GetLength();
     if (hpromise->GetQueueSize() != queueLength) {
         return;
@@ -82,28 +83,28 @@ void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
         ThrowNullPointerException(ctx, coro);
         return;
     }
-    // NOTE: actually we need to lock(*promise) in case of concurrent resolve/reject
-    if (promise->GetState() != EtsPromise::STATE_PENDING) {
-        return;
-    }
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
-
-    if (value != nullptr && value->IsInstanceOf(coro->GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
-        auto internalPromise = EtsPromise::FromEtsObject(value);
+    EtsHandle<EtsObject> hvalue(coro, value);
+    EtsMutex::LockHolder lh(hpromise);
+    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
+        return;
+    }
+    if (hvalue.GetPtr() != nullptr && hvalue->IsInstanceOf(coro->GetPandaVM()->GetClassLinker()->GetPromiseClass())) {
+        auto internalPromise = EtsPromise::FromEtsObject(hvalue.GetPtr());
         EtsHandle<EtsPromise> hInternalPromise(coro, internalPromise);
         if (hInternalPromise->IsPending() || coro->GetCoroutineManager()->IsJsMode()) {
             SubscribePromiseOnResultObject(hpromise.GetPtr(), hInternalPromise.GetPtr());
             return;
         }
         if (hInternalPromise->IsRejected()) {
-            EtsPromiseReject(hpromise.GetPtr(), hInternalPromise->GetValue(coro));
+            hpromise->Reject(coro, hInternalPromise->GetValue(coro));
             return;
         }
         // We can use internal promise's value as return value
-        value = hInternalPromise->GetValue(coro);
+        hvalue = EtsHandle<EtsObject>(coro, hInternalPromise->GetValue(coro));
     }
-    hpromise->Resolve(coro, value);
+    hpromise->Resolve(coro, hvalue.GetPtr());
 }
 
 void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
@@ -114,10 +115,14 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
         ThrowNullPointerException(ctx, coro);
         return;
     }
-    if (promise->GetState() != EtsPromise::STATE_PENDING) {
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    EtsHandle<EtsPromise> hpromise(coro, promise);
+    EtsHandle<EtsObject> herror(coro, error);
+    EtsMutex::LockHolder lh(hpromise);
+    if (hpromise->GetState() != EtsPromise::STATE_PENDING) {
         return;
     }
-    promise->Reject(coro, error);
+    hpromise->Reject(coro, herror.GetPtr());
 }
 
 void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
@@ -129,18 +134,16 @@ void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hcallback(coro, callback);
-    hpromise->Lock();
+    EtsMutex::LockHolder lh(hpromise);
     if (hpromise->GetState() == EtsPromise::STATE_PENDING) {
         EnsureCapacity(coro, hpromise);
         hpromise->SubmitCallback(coro, hcallback.GetPtr(), launchMode);
-        hpromise->Unlock();
         return;
     }
     ASSERT(hpromise->GetQueueSize() == 0);
     ASSERT(hpromise->GetCallbackQueue(coro) == nullptr);
     ASSERT(hpromise->GetLaunchModeQueue(coro) == nullptr);
     EtsPromise::LaunchCallback(coro, hcallback.GetPtr(), launchMode);
-    hpromise->Unlock();
 }
 
 void EtsPromiseCreateLink(EtsObject *source, EtsPromise *target)
@@ -170,11 +173,9 @@ static EtsObject *AwaitProxyPromise(EtsCoroutine *currentCoro, EtsHandle<EtsProm
      */
     EtsPromiseCreateLink(promiseHandle->GetLinkedPromise(currentCoro), promiseHandle.GetPtr());
 
-    auto *coroManager = currentCoro->GetCoroutineManager();
-    PandaUniquePtr<CoroutineEvent> e = MakePandaUnique<GenericEvent>(coroManager);
-    e->Lock();
-    promiseHandle->SetEventPtr(e.get());
-    coroManager->Await(e.get());
+    promiseHandle->Wait();
+    ASSERT(!promiseHandle->IsPending());
+
     // will get here after the JS callback is called
     if (promiseHandle->IsResolved()) {
         LOG(DEBUG, COROUTINES) << "Promise::await: await() finished, promise has been resolved.";
@@ -204,48 +205,29 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
     }
 
     /* CASE 2. This is a native STS promise */
-    while (true) {
-        promiseHandle->Lock();
-        if (!promiseHandle->IsPending()) {
-            // already settled!
-            promiseHandle->Unlock();
+    LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a promise...";
+    promiseHandle->Wait();
+    ASSERT(!promiseHandle->IsPending());
+    LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
 
-            /**
-             * The promise is already resolved of rejected. Further actions:
-             *      STS mode:
-             *          if resolved: return Promise.value
-             *          if rejected: throw Promise.value
-             *      JS mode: NOTE!
-             *          - suspend coro, create resolved JS promise and put it to the Q, on callback resume the coro
-             *            and possibly throw
-             *          - JQ::put(current_coro, promise)
-             *
-             */
-            if (promiseHandle->IsResolved()) {
-                LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
-                return promiseHandle->GetValue(currentCoro);
-            }
-            LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
-            auto *exc = promiseHandle->GetValue(currentCoro);
-            currentCoro->SetException(exc->GetCoreType());
-            return nullptr;
-        }
-
-        // the promise is not resolved yet
-        CoroutineEvent *e = promiseHandle->GetOrCreateEventPtr();
-        // it is necessary to check the type of event here under lock,
-        // because otherwise resolvee coro may destroy resources
-        auto isGeneric = e->GetType() == CoroutineEvent::Type::GENERIC;
-        // NOTE(konstanting, #I67QXC): try to make the Promise/Event locking sequence easier for understanding
-        e->Lock();
-        promiseHandle->Unlock();
-        LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a pending promise...";
-        ASSERT(!e->Happened());
-        currentCoro->GetCoroutineManager()->Await(e);  // will unlock the event
-        LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
-        if (isGeneric) {
-            promiseHandle->RetireEventPtr(e);
-        }
+    /**
+     * The promise is already resolved or rejected. Further actions:
+     *      STS mode:
+     *          if resolved: return Promise.value
+     *          if rejected: throw Promise.value
+     *      JS mode: NOTE!
+     *          - suspend coro, create resolved JS promise and put it to the Q, on callback resume the coro
+     *            and possibly throw
+     *          - JQ::put(current_coro, promise)
+     *
+     */
+    if (promiseHandle->IsResolved()) {
+        LOG(DEBUG, COROUTINES) << "Promise::await: promise is already resolved!";
+        return promiseHandle->GetValue(currentCoro);
     }
+    LOG(DEBUG, COROUTINES) << "Promise::await: promise is already rejected!";
+    auto *exc = promiseHandle->GetValue(currentCoro);
+    currentCoro->SetException(exc->GetCoreType());
+    return nullptr;
 }
 }  // namespace ark::ets::intrinsics

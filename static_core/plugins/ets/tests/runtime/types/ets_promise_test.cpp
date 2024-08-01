@@ -58,13 +58,13 @@ public:
     static std::vector<MirrorFieldInfo> GetPromiseMembers()
     {
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsPromise, value_, "value"),
+                                             MIRROR_FIELD_INFO(EtsPromise, mutex_, "mutex"),
+                                             MIRROR_FIELD_INFO(EtsPromise, event_, "event"),
                                              MIRROR_FIELD_INFO(EtsPromise, callbackQueue_, "callbackQueue"),
                                              MIRROR_FIELD_INFO(EtsPromise, launchModeQueue_, "launchModeQueue"),
                                              MIRROR_FIELD_INFO(EtsPromise, interopObject_, "interopObject"),
                                              MIRROR_FIELD_INFO(EtsPromise, linkedPromise_, "linkedPromise"),
                                              MIRROR_FIELD_INFO(EtsPromise, queueSize_, "queueSize"),
-                                             MIRROR_FIELD_INFO(EtsPromise, event_, "eventPtr"),
-                                             MIRROR_FIELD_INFO(EtsPromise, eventRefCounter_, "eventRefCounter"),
                                              MIRROR_FIELD_INFO(EtsPromise, state_, "state")};
     }
 

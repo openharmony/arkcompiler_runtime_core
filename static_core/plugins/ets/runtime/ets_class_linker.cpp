@@ -102,6 +102,21 @@ EtsClass *EtsClassLinker::GetPromiseRefClass()
     return EtsClass::FromRuntimeClass(ext_->GetPromiseRefClass());
 }
 
+EtsClass *EtsClassLinker::GetWaitersListClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetWaitersListClass());
+}
+
+EtsClass *EtsClassLinker::GetMutexClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetMutexClass());
+}
+
+EtsClass *EtsClassLinker::GetEventClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetEventClass());
+}
+
 EtsClass *EtsClassLinker::GetArrayClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetArrayClass());

@@ -73,18 +73,14 @@ void EtsCoroutine::FreeInternalMemory()
 
 void EtsCoroutine::RequestCompletion(Value returnValue)
 {
-    mem::Reference *promiseRef = nullptr;
-    {
-        auto *coroEvent = GetCompletionEvent();
-        os::memory::LockHolder lh(*coroEvent);
-        promiseRef = coroEvent->ReleasePromise();
-    }
+    auto *promiseRef = GetCompletionEvent()->ReleasePromise();
     if (promiseRef == nullptr) {
         Coroutine::RequestCompletion(returnValue);
         return;
     }
-    auto *promise = EtsPromise::FromCoreType(GetVM()->GetGlobalObjectStorage()->Get(promiseRef));
-    GetVM()->GetGlobalObjectStorage()->Remove(promiseRef);
+    auto *storage = GetVM()->GetGlobalObjectStorage();
+    auto *promise = EtsPromise::FromCoreType(storage->Get(promiseRef));
+    storage->Remove(promiseRef);
     if (promise == nullptr) {
         LOG(DEBUG, COROUTINES)
             << "Coroutine " << GetName()

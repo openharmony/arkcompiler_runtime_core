@@ -558,9 +558,8 @@ private:
         }
         PandaEtsVM *etsVm = coroutine->GetPandaVM();
         auto *coroManager = coroutine->GetCoroutineManager();
-        auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
+        auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
         auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
-        promise->SetEventPtr(evt);
 
         // create the coro and put it to the ready queue
         [[maybe_unused]] EtsHandleScope scope(coroutine);
@@ -577,7 +576,6 @@ private:
             coroutine->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
         if (UNLIKELY(coro == nullptr)) {
             // OOM
-            promiseHandle.GetPtr()->SetEventPtr(nullptr);
             Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
             this->MoveToExceptionHandler();
             return;

@@ -48,6 +48,11 @@ coretypes:
 - managed_class: std.core.ErrorOptions
   mirror_class: ark::ets::EtsErrorOptions
 
+- managed_class: std.core.Mutex
+  mirror_class: ark::ets::EtsMutex
+
+- managed_class: std.core.Event
+  mirror_class: ark::ets::EtsEvent
 
 intrinsics_namespace: ark::ets::intrinsics
 
@@ -2197,6 +2202,52 @@ intrinsics:
       ret: void
       args: []
     impl: ark::ets::intrinsics::StdSystemScheduleCoroutine
+
+######################
+# std.core.Mutex #
+######################
+  - name: StdMutexLock
+    space: ets
+    class_name: std.core.Mutex
+    method_name: lock
+    static: false
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::EtsMutexLock
+
+  - name: StdMutexUnlock
+    space: ets
+    class_name: std.core.Mutex
+    method_name: unlock
+    static: false
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::EtsMutexUnlock
+
+######################
+# std.core.Event #
+######################
+  - name: StdEventWait
+    space: ets
+    class_name: std.core.Event
+    method_name: wait
+    static: false
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::EtsEventWait
+
+  - name: StdEventFire
+    space: ets
+    class_name: std.core.Event
+    method_name: fire
+    static: false
+    signature:
+      ret: void
+      args: []
+    impl: ark::ets::intrinsics::EtsEventFire
 
 ############################
 #   escompat.SharedMemory  #

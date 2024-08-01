@@ -104,6 +104,21 @@ public:
         return promiseRefClass_;
     }
 
+    Class *GetWaitersListClass()
+    {
+        return waiterListClass_;
+    }
+
+    Class *GetMutexClass()
+    {
+        return mutexClass_;
+    }
+
+    Class *GetEventClass()
+    {
+        return eventClass_;
+    }
+
     Class *GetBigIntClass()
     {
         return bigintClass_;
@@ -272,6 +287,9 @@ private:
     Class *promiseClass_ = nullptr;
     Method *subscribeOnAnotherPromiseMethod_ = nullptr;
     Class *promiseRefClass_ = nullptr;
+    Class *waiterListClass_ = nullptr;
+    Class *mutexClass_ = nullptr;
+    Class *eventClass_ = nullptr;
     Class *arrayClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;

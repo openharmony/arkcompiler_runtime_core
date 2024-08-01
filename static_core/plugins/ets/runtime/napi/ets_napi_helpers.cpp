@@ -397,9 +397,8 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
         return 0;
     }
     auto *coroManager = currentCoro->GetCoroutineManager();
-    auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::WEAK);
+    auto promiseRef = vm->GetGlobalObjectStorage()->Add(promise, mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
-    promise->SetEventPtr(evt);
 
     auto *cm = currentCoro->GetCoroutineManager();
 
@@ -432,7 +431,6 @@ extern "C" ObjectPointerType EtsAsyncCall(Method *method, EtsCoroutine *currentC
     if (UNLIKELY(coro == nullptr)) {
         ASSERT(currentCoro->HasPendingException());
         // OOM is thrown by Launch
-        promiseHandle.GetPtr()->SetEventPtr(nullptr);
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         return 0;
     }

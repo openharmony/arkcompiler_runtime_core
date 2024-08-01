@@ -50,14 +50,12 @@ static inline bool Launch(EtsCoroutine *currentCoro, Method *method, const EtsHa
     ASSERT(currentCoro != nullptr);
     PandaEtsVM *etsVm = currentCoro->GetPandaVM();
     auto *coroManager = currentCoro->GetCoroutineManager();
-    auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::WEAK);
+    auto promiseRef = etsVm->GetGlobalObjectStorage()->Add(promiseHandle.GetPtr(), mem::Reference::ObjectType::GLOBAL);
     auto evt = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(promiseRef, coroManager);
-    promiseHandle.GetPtr()->SetEventPtr(evt);
     // create the coro and put it to the ready queue
     auto *coro = currentCoro->GetCoroutineManager()->Launch(evt, method, std::move(args), CoroutineLaunchMode::DEFAULT);
     if (UNLIKELY(coro == nullptr)) {
         // OOM
-        promiseHandle.GetPtr()->SetEventPtr(nullptr);
         Runtime::GetCurrent()->GetInternalAllocator()->Delete(evt);
         return false;
     }
@@ -84,6 +82,14 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
     auto *currentCoro = EtsCoroutine::GetCurrent();
     [[maybe_unused]] EtsHandleScope scope(currentCoro);
     EtsHandle<EtsPromise> promiseHandle(currentCoro, promise);
+    // NOTE(panferovi): should be fixed in #19443
+    ASSERT(promiseHandle->GetMutex(currentCoro) == nullptr);
+    ASSERT(promiseHandle->GetEvent(currentCoro) == nullptr);
+    // NOTE(panferovi): issue with raw args and thisObj??
+    auto *mutex = EtsMutex::Create(currentCoro);
+    promiseHandle->SetMutex(currentCoro, mutex);
+    auto *event = EtsEvent::Create(currentCoro);
+    promiseHandle->SetEvent(currentCoro, event);
     bool successfulLaunch = Launch(currentCoro, method, promiseHandle, std::move(values));
     if (UNLIKELY(!successfulLaunch)) {
         HandlePendingException();

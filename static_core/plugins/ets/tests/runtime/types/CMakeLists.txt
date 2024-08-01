@@ -42,6 +42,7 @@ panda_ets_add_gtest(
     NAME ets_internal_objects_tests
     SOURCES
         ets_promise_test.cpp
+        ets_sync_primitives_test.cpp
         ets_arraybuf_test.cpp
         ets_arrayobj_test.cpp
         ets_string_builder_members_test.cpp
