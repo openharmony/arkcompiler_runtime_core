@@ -15,4 +15,4 @@ if (PANDA_TARGET_ARM32)
     return()
 endif()
 
-run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/import_selective_exported.ets ${CMAKE_CURRENT_BINARY_DIR} selective_export_with_alias EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/selective_export.ets)
+run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/import_selective_exported.sts ${CMAKE_CURRENT_BINARY_DIR} selective_export_with_alias EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/selective_export.sts)

@@ -14,8 +14,8 @@
  */
 
 
-import { foo } from './source1.ets'
-import { foo } from './source2.ets'
+import { foo } from './source1.sts'
+import { foo } from './source2.sts'
 
 function foo(p: int): int {
     return p * 2
