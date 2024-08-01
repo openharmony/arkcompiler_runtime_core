@@ -24,10 +24,10 @@ class VoidBench {
     /**
      * @Benchmark
      */
-    test() {
+    test(): void {
         for (let i = 1; i < this.n; i++) {
             for (let j = i; j < this.n; j++) {
-                this.s0 += j%i;
+                this.s0 += j % i;
             }
         }
     }

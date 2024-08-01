@@ -40,7 +40,7 @@ class PlatformBase(CrossShell, ABC):
         self.__sh = ShellUnix(args.timeout)
         self.__andb = None
         self.__hdc = None
-        self.__dev_dir = Path(args.get('device_dir', '/foo/bar'))
+        self.__dev_dir = Path(args.get('device_dir', 'unknown'))
         self.args_langs = args.get('langs', set())
         self.ext_info: ExtInfo = {}
         if self.target == Target.DEVICE:
@@ -152,7 +152,7 @@ class PlatformBase(CrossShell, ABC):
         except Exception as e:  # pylint: disable=broad-exception-caught
             die(True, 'Plugin load error: %s', e)
         return platform
-    
+
     @abstractmethod
     def run_unit(self, bu: BenchUnit) -> None:
         pass
