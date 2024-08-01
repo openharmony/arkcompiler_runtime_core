@@ -302,6 +302,53 @@ inline auto BytecodeInst<Mode>::GetImm64(size_t idx /* = 0 */) const {
     UNREACHABLE();
 }
 
+template<const BytecodeInstMode Mode>
+inline auto BytecodeInst<Mode>::GetImmData(size_t idx /* = 0 */) const {
+    Format format = GetFormat();
+    ASSERT_PRINT(HasImm(format, idx), "Instruction doesn't have imm operand with such index");
+
+    if (!HasImm(format, idx)) {
+        return static_cast<int64_t>(0);
+    }
+
+    int64_t imm = 0;
+
+    switch (GetOpcode()) {
+% Panda::instructions.each do |inst|
+%   imm_count = 0
+    case BytecodeInst<Mode>::Opcode::<%= inst.opcode.upcase %>:
+%
+%   inst.operands.each do |op|
+%     if op.imm?
+%         if op.is_float_imm?
+        if (idx == <%=imm_count%>) {
+            // Note: If the immediate value is a floating-point number,
+            // converting it to int64_t may result in precision loss.
+            imm = static_cast<int64_t>(GetImm<BytecodeInstruction::Format::<%=inst.format.pretty.upcase%>, <%=imm_count%>, true>());
+        }
+%         elsif op.is_signed_imm?
+        if (idx == <%=imm_count%>) {
+            imm = static_cast<int64_t>(GetImm<BytecodeInstruction::Format::<%=inst.format.pretty.upcase%>, <%=imm_count%>, true>());
+        }
+%         elsif op.is_unsigned_imm?
+        if (idx == <%=imm_count%>) {
+            imm = static_cast<int64_t>(GetImm<BytecodeInstruction::Format::<%=inst.format.pretty.upcase%>, <%=imm_count%>, false>());
+        }
+%         else
+%            raise "Incorrect imm type #{op.type}"
+%         end
+%         imm_count += 1
+%     end   
+%   end
+        break;
+% end
+    default:
+        break;
+    }
+
+    return imm;
+}
+
 template <const BytecodeInstMode Mode>
 inline typename BytecodeInst<Mode>::Opcode BytecodeInst<Mode>::GetOpcode() const {
     uint8_t primary = GetPrimaryOpcode();

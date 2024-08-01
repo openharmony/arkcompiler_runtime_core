@@ -94,4 +94,48 @@ HWTEST_F(VerifierRegisterTest, verifier_register_002, TestSize.Level1)
         EXPECT_FALSE(ver.VerifyRegisterIndex());
     }
 }
+
+/**
+* @tc.name: verifier_test_003
+* @tc.desc: Verify the range register index of the abc file.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(VerifierRegisterTest, verifier_register_003, TestSize.Level1)
+{
+    const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_register_index.abc";
+    {
+        panda::verifier::Verifier ver {base_file_name};
+        ver.CollectIdInfos();
+        EXPECT_TRUE(ver.VerifyRegisterIndex());
+    }
+    // the new range register number
+    const uint8_t new_range_reg_num = 0x0c;
+
+    std::ifstream base_file(base_file_name, std::ios::binary);
+    if (!base_file.is_open()) {
+        LOG(ERROR, VERIFIER) << "Failed to open file " << base_file_name;
+        EXPECT_TRUE(base_file.is_open());
+    }
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+    // the known range instruction in the abc file
+    const std::vector<uint8_t> inst = {0x08, 0x09, 0x03, 0x03};
+
+    for (size_t i = 0; i < buffer.size() - 4; i++) {
+        if (buffer[i] == inst[0] && buffer[i+1] == inst[1] &&
+            buffer[i+2] == inst[2] && buffer[i+3] == inst[3]) {
+            buffer[i + 2] = static_cast<unsigned char>(new_range_reg_num);
+        }
+    }
+
+    const std::string tar_file_name = GRAPH_TEST_ABC_DIR "verifier_register_003.abc";
+    GenerateModifiedAbc(buffer, tar_file_name);
+    base_file.close();
+
+    {
+        panda::verifier::Verifier ver {tar_file_name};
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyRegisterIndex());
+    }
+}
 } // namespace panda::verifier

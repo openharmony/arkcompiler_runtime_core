@@ -17,7 +17,7 @@
 import os
 import yaml
 
-current_version = "12.0.6.0"
+current_version = "13.0.0.0"
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 

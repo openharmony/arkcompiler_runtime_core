@@ -30,9 +30,11 @@ Verifier::Verifier(const std::string &filename)
 
 bool Verifier::Verify()
 {
-    CollectIdInfos();
-
     if (!VerifyChecksum()) {
+        return false;
+    }
+
+    if (!CollectIdInfos()) {
         return false;
     }
 
@@ -40,28 +42,26 @@ bool Verifier::Verify()
         return false;
     }
 
-    if (!VerifyRegisterIndex()) {
-        return false;
-    }
-
     return true;
 }
 
-void Verifier::CollectIdInfos()
+bool Verifier::CollectIdInfos()
 {
     if (file_ == nullptr) {
-        return;
+        LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
+        return false;
     }
     GetConstantPoolIds();
     if (include_literal_array_ids) {
         GetLiteralIds();
     }
-    CheckConstantPool(verifier::ActionType::COLLECTINFOS);
+    return CheckConstantPool(verifier::ActionType::COLLECTINFOS);
 }
 
 bool Verifier::VerifyChecksum()
 {
     if (file_ == nullptr) {
+        LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
         return false;
     }
     uint32_t file_size = file_->GetHeader()->file_size;
@@ -73,6 +73,7 @@ bool Verifier::VerifyChecksum()
 bool Verifier::VerifyConstantPool()
 {
     if (file_ == nullptr) {
+        LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
         return false;
     }
 
@@ -94,6 +95,7 @@ bool Verifier::VerifyConstantPool()
 bool Verifier::VerifyRegisterIndex()
 {
     if (file_ == nullptr) {
+        LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
         return false;
     }
 
@@ -104,9 +106,17 @@ bool Verifier::VerifyRegisterIndex()
             continue;
         }
         panda_file::CodeDataAccessor code_data(*file_, method_accessor.GetCodeId().value());
-        const uint32_t reg_nums = code_data.GetNumVregs();
-        const uint32_t arg_nums = code_data.GetNumArgs();
-        const uint32_t max_reg_idx = reg_nums + arg_nums;
+        const uint64_t reg_nums = code_data.GetNumVregs();
+        const uint64_t arg_nums = code_data.GetNumArgs();
+        const std::optional<uint64_t> valid_regs_num = SafeAdd(reg_nums, arg_nums);
+        if (!valid_regs_num.has_value()) {
+            LOG(ERROR, VERIFIER) << "Integer overflow detected during register index calculation!";
+            return false;
+        }
+        if (valid_regs_num.value() > MAX_REGISTER_INDEX + 1) {
+            LOG(ERROR, VERIFIER) << "Register index exceeds the maximum allowable value (0xffff)!";
+            return false;
+        }
         auto bc_ins = BytecodeInstruction(code_data.GetInstructions());
         const auto bc_ins_last = bc_ins.JumpTo(code_data.GetCodeSize());
         ASSERT(arg_nums >= DEFAULT_ARGUMENT_NUMBER);
@@ -116,7 +126,7 @@ bool Verifier::VerifyRegisterIndex()
                 bc_ins = bc_ins.GetNext();
                 continue;
             }
-            if (!CheckVRegIdx(bc_ins, count, max_reg_idx)) {
+            if (!CheckVRegIdx(bc_ins, count, valid_regs_num.value())) {
                 return false;
             }
             bc_ins = bc_ins.GetNext();
@@ -128,6 +138,7 @@ bool Verifier::VerifyRegisterIndex()
 bool Verifier::VerifyConstantPoolIndex()
 {
     if (file_ == nullptr) {
+        LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
         return false;
     }
 
@@ -141,6 +152,7 @@ bool Verifier::VerifyConstantPoolIndex()
 bool Verifier::VerifyConstantPoolContent()
 {
     if (file_ == nullptr) {
+        LOG(ERROR, VERIFIER) << "Failed to verify empty abc file!";
         return false;
     }
 
@@ -227,10 +239,12 @@ bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_
             return false;
         }
         if (bc_ins.HasFlag(BytecodeInstruction::Flags::LITERALARRAY_ID)) {
-            // the idx of any instruction with a literal id is 0 except defineclasswithbuffer
+            // the idx of any instruction with a literal id is 0
+            // except defineclasswithbuffer/callruntime.definesendableclass
             size_t idx = 0;
-            if (bc_ins.GetOpcode() == BytecodeInstruction::Opcode::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
-                bc_ins.GetOpcode() == BytecodeInstruction::Opcode::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
+            if (bc_ins.GetOpcode() == Opcode::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
+                bc_ins.GetOpcode() == Opcode::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8 ||
+                bc_ins.GetOpcode() == Opcode::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8) {
                 idx = 1;
             }
             const auto arg_literal_idx = bc_ins.GetId(idx).AsIndex();
@@ -302,13 +316,149 @@ size_t Verifier::GetVRegCount(const BytecodeInstruction &bc_ins)
     return idx;
 }
 
-bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, const uint32_t max_reg_idx)
+bool Verifier::IsRangeInstruction(const Opcode &ins_opcode)
 {
+    switch (ins_opcode) {
+        case Opcode::WIDE_NEWOBJRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_CALLRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_SUPERCALLTHISRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8:
+        case Opcode::CREATEOBJECTWITHEXCLUDEDKEYS_IMM8_V8_V8:
+        case Opcode::WIDE_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8:
+        case Opcode::WIDE_CALLTHISRANGE_PREF_IMM16_V8:
+        case Opcode::NEWOBJRANGE_IMM8_IMM8_V8:
+        case Opcode::NEWOBJRANGE_IMM16_IMM8_V8:
+        case Opcode::CALLTHISRANGE_IMM8_IMM8_V8:
+        case Opcode::SUPERCALLTHISRANGE_IMM8_IMM8_V8:
+        case Opcode::CALLRANGE_IMM8_IMM8_V8:
+        case Opcode::SUPERCALLARROWRANGE_IMM8_IMM8_V8: {
+            return true;
+        }
+        default: {
+            return false;
+        }
+    }
+}
+
+bool Verifier::IsRangeInstAndHasInvalidRegIdx(const BytecodeInstruction &bc_ins,
+                                              const size_t count, uint64_t valid_regs_num)
+{
+    Opcode ins_opcode = bc_ins.GetOpcode();
+    ASSERT(IsRangeInstruction(ins_opcode));
+
+    uint64_t reg_idx = bc_ins.GetVReg(FIRST_INDEX);
+    if (IsRegIdxOutOfBounds(reg_idx, valid_regs_num)) { // for [format: +AA/+AAAA vBB vCC], vBB can be verified here
+        return true;
+    }
+
+    std::optional<uint64_t> range_reg_num = GetRangeRegNum(bc_ins, ins_opcode);
+    if (!range_reg_num.has_value()) {
+        LOG(ERROR, VERIFIER) << "Failed to get range register number!";
+        return true;
+    }
+
+    std::optional<uint64_t> max_ins_reg_idx_opt = CalculateMaxRegIdx(bc_ins, ins_opcode, range_reg_num.value());
+    if (!max_ins_reg_idx_opt.has_value()) {
+        LOG(ERROR, VERIFIER) << "Integer overflow detected during register index calculation!";
+        return true;
+    }
+
+    reg_idx = max_ins_reg_idx_opt.value();
+    if (IsRegIdxOutOfBounds(reg_idx, valid_regs_num)) {
+        return true;
+    }
+
+    return false;
+}
+
+std::optional<uint64_t> Verifier::GetRangeRegNum(const BytecodeInstruction &bc_ins, Opcode ins_opcode)
+{
+    // For the range instruction, where A stores the number of registers
+    // The actual register indexes are divided into three categories: 0~B+A-1 / 0~B+A / 0~C+A
+    switch (ins_opcode) {
+        // format: +AA vBB -> max register idx: B+A-1
+        case Opcode::WIDE_NEWOBJRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_CALLRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_SUPERCALLTHISRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8:
+        // format: +AA/+AAAA vBB vCC -> max register idx: C+A
+        case Opcode::CREATEOBJECTWITHEXCLUDEDKEYS_IMM8_V8_V8:
+        case Opcode::WIDE_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8:
+        // format: +AAAA vBB -> max register idx: B+A
+        case Opcode::WIDE_CALLTHISRANGE_PREF_IMM16_V8:
+            return bc_ins.GetImmData(FIRST_INDEX);
+        // format: ic +AA vBB -> max register idx: B+A-1
+        case Opcode::NEWOBJRANGE_IMM8_IMM8_V8:
+        case Opcode::NEWOBJRANGE_IMM16_IMM8_V8:
+        case Opcode::CALLTHISRANGE_IMM8_IMM8_V8:
+        case Opcode::SUPERCALLTHISRANGE_IMM8_IMM8_V8:
+        case Opcode::CALLRANGE_IMM8_IMM8_V8:
+        case Opcode::SUPERCALLARROWRANGE_IMM8_IMM8_V8:
+            return bc_ins.GetImmData(SECOND_INDEX);
+        default:
+            LOG(ERROR, VERIFIER) << "Instruction processing error: There is an unprocessed range instruction!";
+            return std::nullopt;
+    }
+}
+
+bool Verifier::IsRegIdxOutOfBounds(uint64_t reg_idx, uint64_t valid_regs_num)
+{
+    if (reg_idx >= valid_regs_num) {
+        LOG(ERROR, VERIFIER) << "Register index out of bounds: 0x" << std::hex
+                             << reg_idx << ", Max allowed: 0x" << std::hex << valid_regs_num;
+        return true;
+    }
+    return false;
+}
+
+std::optional<uint64_t> Verifier::CalculateMaxRegIdx(const BytecodeInstruction &bc_ins,
+                                                     Opcode ins_opcode, uint64_t range_reg_num)
+{
+    switch (ins_opcode) {
+        // format: +AA vBB -> max register idx: B+A-1
+        case Opcode::WIDE_NEWOBJRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_CALLRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_SUPERCALLTHISRANGE_PREF_IMM16_V8:
+        case Opcode::WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8:
+            if (range_reg_num > 0) {
+                return SafeAdd(bc_ins.GetVReg(FIRST_INDEX), range_reg_num - 1);
+            }
+            return SafeAdd(bc_ins.GetVReg(FIRST_INDEX), range_reg_num);
+        // format: +AAAA vBB -> max register idx: B+A
+        case Opcode::WIDE_CALLTHISRANGE_PREF_IMM16_V8:
+            return SafeAdd(bc_ins.GetVReg(FIRST_INDEX), range_reg_num);
+        // format: ic +AA vBB -> max register idx: B+A-1
+        case Opcode::NEWOBJRANGE_IMM8_IMM8_V8:
+        case Opcode::NEWOBJRANGE_IMM16_IMM8_V8:
+        case Opcode::CALLTHISRANGE_IMM8_IMM8_V8:
+        case Opcode::SUPERCALLTHISRANGE_IMM8_IMM8_V8:
+        case Opcode::CALLRANGE_IMM8_IMM8_V8:
+        case Opcode::SUPERCALLARROWRANGE_IMM8_IMM8_V8:
+            if (range_reg_num > 0) {
+                return SafeAdd(bc_ins.GetVReg(FIRST_INDEX), range_reg_num - 1);
+            }
+            return SafeAdd(bc_ins.GetVReg(FIRST_INDEX), range_reg_num);
+        // format: +AA/+AAAA vBB vCC -> max register idx: C+A
+        case Opcode::CREATEOBJECTWITHEXCLUDEDKEYS_IMM8_V8_V8:
+        case Opcode::WIDE_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8:
+            return SafeAdd(bc_ins.GetVReg(SECOND_INDEX), range_reg_num);
+        default:
+            LOG(ERROR, VERIFIER) << "Instruction processing error: Unprocessed range instruction!";
+            return std::nullopt;
+    }
+}
+
+bool Verifier::CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, uint64_t valid_regs_num)
+{
+    if (IsRangeInstruction(bc_ins.GetOpcode()) &&
+        IsRangeInstAndHasInvalidRegIdx(bc_ins, count, valid_regs_num)) {
+        return false;
+    }
     for (size_t idx = 0; idx < count; idx++) { // Represents the idxTH register index in an instruction
         uint16_t reg_idx = bc_ins.GetVReg(idx);
-        if (reg_idx >= max_reg_idx) {
-            LOG(ERROR, VERIFIER) << "register index out of bounds. register index is (0x" << std::hex
-                                 << reg_idx << ")" << std::endl;
+        if (reg_idx >= valid_regs_num) {
+            LOG(ERROR, VERIFIER) << "Register index out of bounds: 0x" << std::hex
+                                 << reg_idx << ", Max allowed: 0x" << std::hex << valid_regs_num;
             return false;
         }
     }
@@ -329,8 +479,10 @@ bool Verifier::VerifyMethodId(const uint32_t &method_id) const
 
 bool Verifier::VerifyLiteralId(const uint32_t &literal_id) const
 {
-    auto iter = std::find(literal_ids_.begin(), literal_ids_.end(), literal_id);
-    if (iter == literal_ids_.end()) {
+    auto iter = std::find(constant_pool_ids_.begin(), constant_pool_ids_.end(), literal_id);
+    if (iter == constant_pool_ids_.end() ||
+        (std::find(all_method_ids_.begin(), all_method_ids_.end(), literal_id) != all_method_ids_.end()) ||
+        ins_string_ids_.count(literal_id)) {
         LOG(ERROR, VERIFIER) << "Fail to verify literal id. literal_id(0x" << std::hex << literal_id << ")!";
         return false;
     }
@@ -449,7 +601,12 @@ bool Verifier::VerifySingleLiteralArray(const panda_file::File::EntityId &litera
                 break;
             }
             case panda_file::LiteralTag::DOUBLE: {
-                sp = sp.SubSpan(sizeof(uint64_t));
+                const auto value = bit_cast<double>(panda_file::helpers::Read<sizeof(uint64_t)>(&sp));
+                // true: High 16-bit of double value >= 0xffff
+                if (IsImpureNaN(value)) {
+                    LOG(ERROR, VERIFIER) << "Fail to verify double value " << value << " in literal array";
+                    return false;
+                }
                 break;
             }
             case panda_file::LiteralTag::ARRAY_U1:
@@ -564,17 +721,62 @@ bool Verifier::IsJumpInstruction(const Opcode &ins_opcode)
     return valid;
 }
 
+bool Verifier::IsReturnAndThrowInstruction(const Opcode &ins_opcode)
+{
+    switch (ins_opcode) {
+        case Opcode::RETURN:
+        case Opcode::RETURNUNDEFINED:
+        case Opcode::THROW_PREF_NONE:
+        case Opcode::THROW_NOTEXISTS_PREF_NONE:
+        case Opcode::THROW_PATTERNNONCOERCIBLE_PREF_NONE:
+        case Opcode::THROW_DELETESUPERPROPERTY_PREF_NONE:
+        case Opcode::THROW_CONSTASSIGNMENT_PREF_V8: {
+            return true;
+        }
+        default: {
+            break;
+        }
+    }
+    return false;
+}
+
+bool Verifier::PrecomputeInstructionIndices(const BytecodeInstruction &bc_ins_start,
+                                            const BytecodeInstruction &bc_ins_last)
+{
+    instruction_index_map_.clear();
+    size_t index = 0;
+    auto current_ins = bc_ins_start;
+    instruction_index_map_[current_ins.GetAddress()] = index;
+    
+    while (current_ins.GetAddress() < bc_ins_last.GetAddress()) {
+        //Must keep IsPrimaryOpcodeValid is the first check item
+        if (!current_ins.IsPrimaryOpcodeValid()) {
+            LOG(ERROR, VERIFIER) << "Fail to verify primary opcode!";
+            return false;
+        }
+        current_ins = current_ins.GetNext();
+        index++;
+        instruction_index_map_[current_ins.GetAddress()] = index;
+    }
+    return true;
+}
+
+bool Verifier::IsMethodBytecodeInstruction(const BytecodeInstruction &bc_ins_cur)
+{
+    if (instruction_index_map_.find(bc_ins_cur.GetAddress()) != instruction_index_map_.end()) {
+        return true;
+    }
+    return false;
+}
+
 bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last,
-                                     const BytecodeInstruction &bc_ins_first)
+                                     const BytecodeInstruction &bc_ins_first, const uint8_t *ins_arr,
+                                     panda_file::File::EntityId code_id)
 {
     // update maximum forward offset
     const auto bc_ins_forward_size = bc_ins_last.GetAddress() - bc_ins.GetAddress();
     // update maximum backward offset
     const auto bc_ins_backward_size = bc_ins.GetAddress() - bc_ins_first.GetAddress();
-    if (!bc_ins.IsPrimaryOpcodeValid()) {
-        LOG(ERROR, VERIFIER) << "Fail to verify primary opcode!";
-        return false;
-    }
 
     Opcode ins_opcode = bc_ins.GetOpcode();
     if (IsJumpInstruction(ins_opcode)) {
@@ -591,7 +793,21 @@ bool Verifier::VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const By
             LOG(ERROR, VERIFIER) << "Jump backward out of boundary";
             return false;
         }
+
+        const auto bc_ins_dest = bc_ins.JumpTo(immdata.value());
+        if (!bc_ins_dest.IsPrimaryOpcodeValid()) {
+            LOG(ERROR, VERIFIER) << "Fail to verify target jump primary opcode!";
+            return false;
+        }
+        if (!IsMethodBytecodeInstruction(bc_ins_dest)) {
+            LOG(ERROR, VERIFIER) << "> error encountered at " << code_id << " (0x" << std::hex << code_id
+                                 << "). incorrect instruction at offset: 0x" << (bc_ins.GetAddress() - ins_arr)
+                                 << ": invalid jump offset 0x" << immdata.value()
+                                 << " - jumping in the middle of another instruction!";
+            return false;
+        }
     }
+
     return true;
 }
 
@@ -622,6 +838,105 @@ bool Verifier::GetIcSlotFromInstruction(const BytecodeInstruction &bc_ins, uint3
     return true;
 }
 
+bool Verifier::VerifyCatchBlocks(panda_file::CodeDataAccessor::TryBlock &try_block, const BytecodeInstruction &bc_ins,
+                                 const BytecodeInstruction &bc_ins_last)
+{
+    bool result = true;
+
+    try_block.EnumerateCatchBlocks([&](panda_file::CodeDataAccessor::CatchBlock &catch_block) {
+        const auto handler_begin_offset = catch_block.GetHandlerPc();
+        // GetCodeSize() returns a unsigned long value, which is always >= 0,
+        // so handler_end_offset is guaranteed to be >= handler_begin_offset
+        const auto handler_end_offset = handler_begin_offset + catch_block.GetCodeSize();
+
+        const auto handler_begin_bc_ins = bc_ins.JumpTo(handler_begin_offset);
+        const auto handler_end_bc_ins = bc_ins.JumpTo(handler_end_offset);
+
+        const bool handler_begin_offset_in_range = bc_ins_last.GetAddress() > handler_begin_bc_ins.GetAddress();
+        const bool handler_end_offset_in_range = bc_ins_last.GetAddress() >= handler_end_bc_ins.GetAddress();
+
+        if (!handler_begin_offset_in_range) {
+            LOG(ERROR, VERIFIER) << "> Invalid catch block begin offset range! address is: 0x" << std::hex
+                                 << handler_begin_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+        if (!IsMethodBytecodeInstruction(handler_begin_bc_ins)) {
+            LOG(ERROR, VERIFIER) << "> Invalid catch block begin offset validity! address is: 0x" << std::hex
+                                 << handler_begin_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+        if (!handler_end_offset_in_range) {
+            LOG(ERROR, VERIFIER) << "> Invalid catch block end offset range! address is: 0x" << std::hex
+                                 << handler_end_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+        if (!IsMethodBytecodeInstruction(handler_end_bc_ins)) {
+            LOG(ERROR, VERIFIER) << "> Invalid catch block end offset validity! address is: 0x" << std::hex
+                                 << handler_end_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+
+        return true;
+    });
+
+    return result;
+}
+
+bool Verifier::VerifyTryBlocks(panda_file::CodeDataAccessor &code_accessor, const BytecodeInstruction &bc_ins,
+                               const BytecodeInstruction &bc_ins_last)
+{
+    bool result = true;
+
+    code_accessor.EnumerateTryBlocks([&](panda_file::CodeDataAccessor::TryBlock &try_block) {
+        const auto try_begin_bc_ins = bc_ins.JumpTo(try_block.GetStartPc());
+        // GetLength() returns a uint32 value, which is always >= 0,
+        // so try_end_bc_ins is guaranteed to be >= try_begin_bc_ins
+        const auto try_end_bc_ins = bc_ins.JumpTo(try_block.GetStartPc() + try_block.GetLength());
+
+        const bool try_begin_offset_in_range = bc_ins_last.GetAddress() > try_begin_bc_ins.GetAddress();
+        const bool try_end_offset_in_range = bc_ins_last.GetAddress() >= try_end_bc_ins.GetAddress();
+
+        if (!try_begin_offset_in_range) {
+            LOG(ERROR, VERIFIER) << "> Invalid try block begin offset range! address is: 0x" << std::hex
+                                 << try_begin_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+        if (!IsMethodBytecodeInstruction(try_begin_bc_ins)) {
+            LOG(ERROR, VERIFIER) << "> Invalid try block begin offset validity! address is: 0x" << std::hex
+                                 << try_begin_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+        if (!try_end_offset_in_range) {
+            LOG(ERROR, VERIFIER) << "> Invalid try block end offset range! address is: 0x" << std::hex
+                                 << try_end_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+        if (!IsMethodBytecodeInstruction(try_end_bc_ins)) {
+            LOG(ERROR, VERIFIER) << "> Invalid try block end offset validity! address is: 0x" << std::hex
+                                 << try_end_bc_ins.GetAddress();
+            result = false;
+            return false;
+        }
+        if (!VerifyCatchBlocks(try_block, bc_ins, bc_ins_last)) {
+            LOG(ERROR, VERIFIER) << "Catch block validation failed!";
+            result = false;
+            return false;
+        }
+
+        return true;
+    });
+
+    return result;
+}
+
+
 bool Verifier::VerifySlotNumber(panda_file::MethodDataAccessor &method_accessor, const uint32_t &slot_number,
                                 const panda_file::File::EntityId &method_id)
 {
@@ -639,39 +954,114 @@ bool Verifier::VerifySlotNumber(panda_file::MethodDataAccessor &method_accessor,
     return false;
 }
 
+bool Verifier::VerifyMethodRegisterIndex(panda_file::CodeDataAccessor &code_accessor,
+                                         std::optional<uint64_t> &valid_regs_num)
+{
+    const uint64_t reg_nums = code_accessor.GetNumVregs();
+    const uint64_t arg_nums = code_accessor.GetNumArgs();
+    valid_regs_num = SafeAdd(reg_nums, arg_nums);
+    if (!valid_regs_num.has_value()) {
+        LOG(ERROR, VERIFIER) << "Integer overflow detected during register index calculation!";
+        return false;
+    }
+    if (valid_regs_num.value() > MAX_REGISTER_INDEX + 1) {
+        LOG(ERROR, VERIFIER) << "Register index exceeds the maximum allowable value (0xffff)!";
+        return false;
+    }
+    return true;
+}
+
+bool Verifier::VerifyMethodInstructions(const VerifyMethodParams &params)
+{
+    while (params.bc_ins.GetAddress() != params.bc_ins_last.GetAddress()) {
+        if (params.bc_ins.GetAddress() > params.bc_ins_last.GetAddress()) {
+            LOG(ERROR, VERIFIER) << "> error encountered at " << params.method_accessor.GetCodeId().value()
+                                 << " (0x" << std::hex << params.method_accessor.GetCodeId().value()
+                                 << "). bytecode instructions sequence corrupted for method "
+                                 << params.method_id
+                                 << "! went out of bounds";
+            return false;
+        }
+        Opcode ins_opcode = params.bc_ins.GetOpcode();
+        if (!IsJumpInstruction(ins_opcode) && !IsReturnAndThrowInstruction(ins_opcode)
+            && params.bc_ins.GetNext().GetAddress() == params.bc_ins_last.GetAddress()) {
+            LOG(ERROR, VERIFIER) << "> error encountered at " << params.method_accessor.GetCodeId().value()
+                                 << " (0x" << std::hex << params.method_accessor.GetCodeId().value()
+                                 << "). bytecode instructions sequence corrupted for method "
+                                 << params.method_id
+                                 << "! went out of bounds";
+            return false;
+        }
+        const size_t count = GetVRegCount(params.bc_ins);
+        if (count != 0 && !CheckVRegIdx(params.bc_ins, count, params.valid_regs_num.value())) {
+            return false;
+        }
+        if (!VerifyJumpInstruction(params.bc_ins, params.bc_ins_last,
+                                   params.bc_ins_init, params.ins_arr,
+                                   params.method_accessor.GetCodeId().value())) {
+            LOG(ERROR, VERIFIER) << "Invalid target position of jump instruction";
+            return false;
+        }
+        if (!GetIcSlotFromInstruction(params.bc_ins, params.ins_slot_num,
+                                      params.has_slot, params.is_two_slot)) {
+            LOG(ERROR, VERIFIER) << "Fail to get first slot index!";
+            return false;
+        }
+        params.bc_ins = params.bc_ins.GetNext();
+    }
+
+    return true;
+}
+
+
 bool Verifier::CheckConstantPoolMethodContent(const panda_file::File::EntityId &method_id)
 {
     panda_file::MethodDataAccessor method_accessor(*file_, method_id);
-    ASSERT(method_accessor.GetCodeId().has_value());
+    if (!method_accessor.GetCodeId().has_value()) {
+        LOG(ERROR, VERIFIER) << "Fail to get code id!";
+        return false;
+    }
     panda_file::CodeDataAccessor code_accessor(*file_, method_accessor.GetCodeId().value());
     const auto ins_size = code_accessor.GetCodeSize();
     const auto ins_arr = code_accessor.GetInstructions();
     auto bc_ins = BytecodeInstruction(ins_arr);
     const auto bc_ins_last = bc_ins.JumpTo(ins_size);
     const auto bc_ins_init = bc_ins; // initial PC value
-    uint32_t ins_slot_num = 0;
+    uint32_t ins_slot_num = 0; // For ic slot index verification
     bool has_slot = false;
     bool is_two_slot = false;
-
-    while (bc_ins.GetAddress() < bc_ins_last.GetAddress()) {
-        if (!VerifyJumpInstruction(bc_ins, bc_ins_last, bc_ins_init)) {
-            LOG(ERROR, VERIFIER) << "Invalid target position of jump instruction";
-            return false;
-        }
-        if (!GetIcSlotFromInstruction(bc_ins, ins_slot_num, has_slot, is_two_slot)) {
-            LOG(ERROR, VERIFIER) << "Fail to get first slot index!";
-            return false;
-        }
-        bc_ins = bc_ins.GetNext();
+    std::optional<uint64_t> valid_regs_num = 0;
+    VerifyMethodParams params = {bc_ins_init, bc_ins, bc_ins_last, method_accessor, method_id,
+                                 valid_regs_num, ins_arr, ins_slot_num, has_slot, is_two_slot};
+    if (ins_size <= 0) {
+        LOG(ERROR, VERIFIER) << "Fail to verify code size!";
+        return false;
     }
-
+    if (!VerifyMethodRegisterIndex(code_accessor, valid_regs_num)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify method register index!";
+        return false;
+    }
+    if (!PrecomputeInstructionIndices(bc_ins, bc_ins_last)) {
+        LOG(ERROR, VERIFIER) << "Fail to precompute instruction indices!";
+        return false;
+    }
+    if (!IsMethodBytecodeInstruction(bc_ins)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify method first bytecode instruction!";
+    }
+    if (!VerifyTryBlocks(code_accessor, bc_ins, bc_ins_last)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify try blocks or catch blocks!";
+        return false;
+    }
+    if (!VerifyMethodInstructions(params)) {
+        LOG(ERROR, VERIFIER) << "Fail to verify method instructions!";
+        return false;
+    }
     if (has_slot) {
         if (is_two_slot) {
             ins_slot_num += 1; // when there are two slots for the last instruction, the slot index increases
         }
         ins_slot_num += 1; // slot index starts with zero
     }
-
     return true;
 }
 
@@ -696,5 +1086,13 @@ bool Verifier::CheckConstantPoolIndex() const
     }
 
     return true;
+}
+
+std::optional<uint64_t> Verifier::SafeAdd(uint64_t a, uint64_t b) const
+{
+    if (a > std::numeric_limits<uint64_t>::max() - b) {
+        return std::nullopt;
+    }
+    return a + b;
 }
 } // namespace panda::verifier
