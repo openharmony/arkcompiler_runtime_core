@@ -43,7 +43,7 @@ python3 $PROJECT/tests/tests-u-runner/main.py <test-suite-name> --build-dir $BUI
     Tests folders:
       - `ets_frontend/ets2panda/test/parser/ets`
       - `ets_frontend/ets2panda/test/compiler/ets`
--   `--ets-func-tests` - tests for ArkTS: standard library and ets func tests
+-   `--ets-func-tests` - tests for ArkTS: standard library and sts func tests
     Tests folder: `plugins/ets/tests/ets_func_tests/`
     Chapters:
       - `all`
@@ -176,10 +176,10 @@ In any test list the test is specified as path to the test file relative from th
 
 -   array-large.js
 -   built-ins/Date/UTC/fp-evaluation-order.js
--   tests/stdlib/std/math/sqrt-negative-01.ets
+-   tests/stdlib/std/math/sqrt-negative-01.sts
 
 Test file specified in the option `--test-file` should be set in this format too.
-By default, ignored or excluded lists are located in corresponded runner plugin folder (for example for ArkTS should be `$PROJECT/tests/tests-u-runner/runner/plugins/ets`)
+By default, ignored or excluded lists are located in correspondent project folder (for example for ArkTS should be `runtime_core/static_core/tests/tests-u-runner/test-lists`)
 
 All test lists are loaded automatically from the specified `LIST_ROOT` and based on following options:
 - architecture:
@@ -315,7 +315,7 @@ If you want to run arbitrary set of ETS tests with URunner you can use a custom 
 
 where:
 - SUITE_NAME - a tag used to name the suite
-- TEST_ROOT - a path to the folder with tests (*.ets files or templates)
+- TEST_ROOT - a path to the folder with tests (*.sts files or templates)
 - LIST_ROOT - a path to the folder with ignored/excluded lists. Note: SUITE_NAME is used as a <test-suite-name> in the name of the test list (see #Test lists for details)
 
 In yaml configuration file these options can be specified as:

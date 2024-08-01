@@ -2,9 +2,9 @@
 
 1. Build the application (along with ArkTS standard library if required)
 ```
-es2panda --extension=ets \
+es2panda --extension=sts \
          [--arktsconfig path/to/your/arktsconfig.json] \
-         application.ets
+         application.sts
 
 ninja etsstdlib
 ```

@@ -35,7 +35,7 @@ cases:
       arg1: '[new A(), new A()], [new B(), new B()]'
       arg2: '[new A(), new A()], [new A(), new A()]'
       decl: |-
-          import { A, B } from './pkg_a/pkg_3.ets'
+          import { A, B } from './pkg_a/pkg_3.sts'
 
     # 4
     - sig1: 'p1: [int, string], p2: [string, int]'
@@ -65,28 +65,28 @@ cases:
       arg1: 'Size.XL, Color.Red'
       arg2: 'Color.Red, Color.Green'
       decl: |-
-          import { Color, Size } from './pkg_a/pkg_7.ets'
+          import { Color, Size } from './pkg_a/pkg_7.sts'
 
     # 8
     - sig1: 'p1: B, p2?: Object'
       arg1: 'new B(), new A()'
       arg2: 'new A(), new B()'
       decl: |-
-          import { A, B } from './pkg_a/pkg_8.ets'
+          import { A, B } from './pkg_a/pkg_8.sts'
 
     # 9
     - sig1: 'p1: A, p2?: A'
       arg1: 'new A()'
       arg2: 'new B()'
       decl: |-
-          import { A, B } from './pkg_a/pkg_9.ets'
+          import { A, B } from './pkg_a/pkg_9.sts'
 
     # 10
     - sig1: 'p1: A, p2: A = new A()'
       arg1: 'new A()'
       arg2: 'new B()'
       decl: |-
-          import { A, B } from './pkg_a/pkg_10.ets'
+          import { A, B } from './pkg_a/pkg_10.sts'
 
     # 11
     - sig1: 'p1: Object, ...p2: boolean[]'
@@ -138,7 +138,7 @@ cases:
       arg1: 'new B(), new B()'
       arg2: 'new A(), new A()'
       decl: |-
-          import { A, B } from './pkg_a/pkg_20.ets'
+          import { A, B } from './pkg_a/pkg_20.sts'
 
     # 21
     - sig1: 'p1: string|boolean, p2: boolean|number, p3: number|string[], p4: string[]|boolean[], p5: boolean[]|number[], p6: number[]|undefined|null'
@@ -158,4 +158,4 @@ cases:
       arg1: '{ f1: 1, f2: 2 } as A'
       arg2: '{ f1: 1 as long, f2: 2 as long } as B'
       decl: |-
-          import { A, B } from './pkg_a/pkg_23.ets'
+          import { A, B } from './pkg_a/pkg_23.sts'

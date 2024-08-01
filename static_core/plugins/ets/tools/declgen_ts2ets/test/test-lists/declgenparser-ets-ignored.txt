@@ -1,2 +1,0 @@
-# TODO: no 'any' type
-cookbook_tests/arkts-no-private-identifiers.d.ets

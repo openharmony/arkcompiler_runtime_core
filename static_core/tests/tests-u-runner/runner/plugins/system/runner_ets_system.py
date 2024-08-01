@@ -70,7 +70,7 @@ class RunnerETSSystem(RunnerJS):
         self.collect_ignored_test_lists()
 
         ets_flags = [
-            "--extension=ets",
+            "--extension=sts",
             "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
         ]
@@ -85,15 +85,15 @@ class RunnerETSSystem(RunnerJS):
         werror_tests = ets_flags + SystemArkTSFlags.WERROR_TESTS.value
 
         if config.es2panda.system:
-            self.add_directory("all_warnings_tests", "ets", flags=all_warnings)
-            self.add_directory("boost_equal_statements_tests", "ets", flags=boost_equality_statements)
-            self.add_directory("implicit_boxing_unboxing_tests", "ets", flags=implicit_boxing_unboxing)
-            self.add_directory("prohibit_top_level_statements_tests", "ets", flags=prohibit_top_level)
-            self.add_directory("remove_async_tests", "ets", flags=remove_async)
-            self.add_directory("remove_lambda_tests", "ets", flags=remove_lambda)
-            self.add_directory("suggest_final_tests", "ets", flags=suggest_final)
-            self.add_directory("warnings_suppresion_tests", "ets", flags=suppression_tests)
-            self.add_directory("werror_tests", "ets", flags=werror_tests)
+            self.add_directory("all_warnings_tests", "sts", flags=all_warnings)
+            self.add_directory("boost_equal_statements_tests", "sts", flags=boost_equality_statements)
+            self.add_directory("implicit_boxing_unboxing_tests", "sts", flags=implicit_boxing_unboxing)
+            self.add_directory("prohibit_top_level_statements_tests", "sts", flags=prohibit_top_level)
+            self.add_directory("remove_async_tests", "sts", flags=remove_async)
+            self.add_directory("remove_lambda_tests", "sts", flags=remove_lambda)
+            self.add_directory("suggest_final_tests", "sts", flags=suggest_final)
+            self.add_directory("warnings_suppresion_tests", "sts", flags=suppression_tests)
+            self.add_directory("werror_tests", "sts", flags=werror_tests)
 
     @property
     def default_work_dir_root(self) -> Path:

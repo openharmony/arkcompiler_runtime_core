@@ -87,7 +87,7 @@ def write_snippet(rst_lines, snippet_name, snippet_meta, previous_snippet_name, 
 
     expect_cte = "cte" if snippet_meta["expect-cte"] else "sc"
     expect_subset = "ns" if sm["not-subset"] else ""
-    snippet_ets = os.fdopen(os.open("snippets/" + current_snippet_name + ".ets", os.O_WRONLY, 0o755), "w+")
+    snippet_ets = os.fdopen(os.open("snippets/" + current_snippet_name + ".sts", os.O_WRONLY, 0o755), "w+")
     write_code_meta(expect_cte, frontend_status, expect_subset, snippet_ets)
 
     if not snippet_meta["not-subset"] and not snippet_meta["expect-cte"]:

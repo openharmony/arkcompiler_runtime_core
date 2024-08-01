@@ -22,7 +22,7 @@ add_dependencies(ets_gtests ets_native_gtests)
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
 #     ETS_SOURCES
-#       tests/unit1_test.ets
+#       tests/unit1_test.sts
 #     LIBRARIES
 #       lib_target1
 #       lib_target2

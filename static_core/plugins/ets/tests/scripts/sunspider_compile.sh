@@ -28,12 +28,12 @@ script_path=$(cd "$script_path" && pwd)
 tests_path=$(cd "$script_path/../Sunspider" && pwd)
 
 cd "$build"
-"${build}/bin/es2panda" --extension=ets --output=etsstdlib.abc --gen-stdlib=true
-for f in $tests_path/*.ets; do
-    name=$(basename "$f" .ets)
+"${build}/bin/es2panda" --extension=sts --output=etsstdlib.abc --gen-stdlib=true
+for f in $tests_path/*.sts; do
+    name=$(basename "$f" .sts)
     echo "$name"
 
-    "${build}/bin/es2panda" --extension=ets --output=out.abc \
+    "${build}/bin/es2panda" --extension=sts --output=out.abc \
     --gen-stdlib=false "$f"
 
     "${build}/bin/ark" --boot-panda-files=etsstdlib.abc --load-runtimes=ets out.abc ETSGLOBAL::main

@@ -1,5 +1,5 @@
 ### Issue I8MB96 begin
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-3.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.ets
-spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.ets
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-3.sts
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-4.sts
+spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands-5.sts
 ### Issue I8MB96 end

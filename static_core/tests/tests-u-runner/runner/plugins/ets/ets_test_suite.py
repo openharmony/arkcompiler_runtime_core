@@ -161,7 +161,7 @@ class CustomEtsTestSuite(EtsTestSuite):
                 test_source_path=self.config.custom.test_root,
                 test_gen_path=self.test_root,
                 config=self.config,
-                extension="ets"
+                extension="sts"
             ))
             copy_source_path = self.test_root
         else:

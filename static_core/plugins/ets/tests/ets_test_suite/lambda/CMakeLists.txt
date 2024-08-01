@@ -22,10 +22,9 @@ set(lambda_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 foreach(test ${lambda_tests})
     set(test_out_dir "${lambda_tests_out_dir}/${test}")
 
-    set(test_src "${lambda_tests_in_dir}/${test}.ets")
+    set(test_src "${lambda_tests_in_dir}/${test}.sts")
     set(target ets_test_suite_lambda_${test})
 
     run_ets_code_verifier(${test_src} ${test_out_dir} ${target}-ets-verifier)
     run_int_jit_aot_ets_code(${test_src} ${test_out_dir} ${target})
 endforeach()
-

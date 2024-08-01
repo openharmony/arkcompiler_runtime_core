@@ -13,5 +13,5 @@
 
 panda_ets_native_add_gtest(register_native_methods_test
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/register_native_methods_test.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/register_native_methods_test.ets
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/register_native_methods_test.sts
 )

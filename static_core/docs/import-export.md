@@ -38,10 +38,10 @@ function main() {
 }
 ```
 
-It is ensured currently via the *ETSParser::ParseDefaultSources* method, which parse an internally created ets file  named "<default_import>.ets", that contains ```import * from "stdlibPath"``` import declarations for every stdlib path. What might stands out here is that in the case of import with allBinding: ```import * as M from "..."``` it would be necessary to specify an alias, but it is allowed internally for stdlibs to enable calls by simple name.
+It is ensured currently via the *ETSParser::ParseDefaultSources* method, which parse an internally created ets file  named "<default_import>.sts", that contains ```import * from "stdlibPath"``` import declarations for every stdlib path. What might stands out here is that in the case of import with allBinding: ```import * as M from "..."``` it would be necessary to specify an alias, but it is allowed internally for stdlibs to enable calls by simple name.
 
 ```
-// <default_import>.ets
+// <default_import>.sts
 import * from "std/core";
 import * from "std/math";
 // ...
@@ -70,13 +70,13 @@ Which paths included in this list are stored in a vector that can be retrieved v
 ### 3.1. Minor changes in the compiling process of a module
 
 The fact that the given program is now a separate module or package module is revealed during the parsing process of the package directive and is set with the module name, which is either the package name or the name of the given file. The way the modules are managed now may need some minor changes:
-    - The declaration module is not handled now, which is a special kind of compilation units that contains ambient declarations and type alias declaration only. 
+    - The declaration module is not handled now, which is a special kind of compilation units that contains ambient declarations and type alias declaration only.
     - Currently external separate modules are specified via the --ets-module compiler option. If it is not specified, the module name will not be stored in the record table. The naming ot this option should be renamed accordingly with the related code parts (like --ets-module to --external or something similar, omitModuleName in ModuleInfo to isExternal, etc.)
 
 The following examples are showing what these cases looks like in the assembly code:
 
 ```
-    // test.ets
+    // test.sts
     let a: Int = 2;
 
 function foo() {}
@@ -156,9 +156,9 @@ Currently there is no package level scope, packages are handled almost exactly t
  throughout the entire module only, and only if it exported can be accessed in other modules/compilation units, including another package module belonging to the same package (compilation unit).
 
 
-### 3.3. Build each package separately and link them into one abc 
+### 3.3. Build each package separately and link them into one abc
 
-The **ark_link** target links a common abc from multiple abc files, which is useful for packages. This would allows to run runtime tests which using packages, 
+The **ark_link** target links a common abc from multiple abc files, which is useful for packages. This would allows to run runtime tests which using packages,
 and it can also be used when generating the etssdlib source, which currently creates a large etsstdlib.abc at runtime, ignoring that each lib element belongs to a separate package like std.math and std.time. It might be a good solution to specify the given package folder in the **artksconfig.json** configuration file, the goal of which is to generate an abc-t from its contents.
 
 
@@ -184,23 +184,23 @@ So, all the variables in global scope are inserted into **bindings_**, and also 
 ### 4.2. How to import variables
 
 When importing variables from an external source, only the global scope of the external source is checked for the variables. Only those variables can be imported, that are not foreign (name of the variable is in `foreignBindings_` with `false` value) and marked for export.
-This **foreignBinding_** member helps to eliminate "export waterfall" that symbolizes the following example: 
+This **foreignBinding_** member helps to eliminate "export waterfall" that symbolizes the following example:
 
 
 ```
-// C.ets
+// C.sts
 export let a = 2
 ```
 
-```b.ets
-// B.ets
-import { a } from c.ets  // 'a' marked as foreign
+```b.sts
+// B.sts
+import { a } from c.sts  // 'a' marked as foreign
 ```
 
 ```
-// A.ets
-import { a } from b.ets
-// 'a' is not visible here, since 'a' is foreign in B.ets
+// A.sts
+import { a } from b.sts
+// 'a' is not visible here, since 'a' is foreign in B.sts
 ```
 
 ### 4.3. Improvement possibilities/suggestions
@@ -223,9 +223,9 @@ Import directive use the following form:
 
 ## 5.1. Resolving importPath
 
-The *importPath* is a string literal which can be points to a module (separate module | package module) or a folder (package folder, or a folder which contains an index.ts/index.ets file). It can be specified with a relative or an absolute path, with or without a file extension, and must be able to manage the paths entered in arktsconfig as well.  
-Resolving these paths within the compiler is the responsibility of the *importPathManager*. In the process of parsing an import path, the string literal will be passed to the importPathManager which will resolve it as an absolute path and adds it to an own list, called *parseList_.*  
-The latter list serves to let the compiler know what still needs to be parsed (handle and avoid duplications), and this list will be requested and traversed during the *ParseSources* call. The importPathManager also handles errors that can be caught before parsing, for example non-existent, incorrectly specified import paths, but not errors that can only be found after parsing (for example, the package folder should contains only package files that use the same package directive, etc.)  
+The *importPath* is a string literal which can be points to a module (separate module | package module) or a folder (package folder, or a folder which contains an index.ts/index.sts file). It can be specified with a relative or an absolute path, with or without a file extension, and must be able to manage the paths entered in arktsconfig as well.
+Resolving these paths within the compiler is the responsibility of the *importPathManager*. In the process of parsing an import path, the string literal will be passed to the importPathManager which will resolve it as an absolute path and adds it to an own list, called *parseList_.*
+The latter list serves to let the compiler know what still needs to be parsed (handle and avoid duplications), and this list will be requested and traversed during the *ParseSources* call. The importPathManager also handles errors that can be caught before parsing, for example non-existent, incorrectly specified import paths, but not errors that can only be found after parsing (for example, the package folder should contains only package files that use the same package directive, etc.)
 
 The importPath with the resolved path and two additional information - which is the language information and whether the imported element has a declaration or not - , will be stored in an ImportSource instance. The latter two information can be set under the dynamicPaths tag in arktsconfig.json, otherwise they will be assigned a default value (the lang member will be specified from the extension, hasDecl member will be true). This instance will be passed as a parameter during the allocation of the *ETSImportDeclaration* AST node, as well as the specifiers list resolved from the binding forms explained in the next section and the import kind (type or value).
 
@@ -237,22 +237,22 @@ The import specifier list will be filled until an import directive can be found,
 
 ```import * as N from "./test"```
 
- It is mandatory to add importAlias, but there is a temporary exception due to stdlib sources, which will have to be handled later and eliminate from the current implementation.  
+ It is mandatory to add importAlias, but there is a temporary exception due to stdlib sources, which will have to be handled later and eliminate from the current implementation.
 The name of a compilation unit will be introduced as a result of import * as N where N is an identifier. In this case, it will be parsed by the *ParseNameSpaceSpecifier* (outdated/deprecated name, left from an old version of the standard). The allocated ImportNamespaceSpecifier AST node will be created here with the imported token, and that will be added to the specifier list.
 
 ### 5.2.2. selectiveBindings: '{' importBinding (',' importBinding)* '}'
 
-The same bound entities can use several import bindings. The same bound entities can use one import directive, or several import directives with the same import path.  
+The same bound entities can use several import bindings. The same bound entities can use one import directive, or several import directives with the same import path.
 ```import {sin as Sine, PI} from "..."```
 
 The *ParseNamedSpecifiers* method will create the *ImportSpecifier* AST Node with local name, which in case of import alias it will be a different identifier than the imported token. This specifier will be added to the specifier list.
 
 ### 5.2.3 defaultBinding: Identifier | ( '{' 'default' 'as' Identifier '}' );
 
-Default import binding allows importing a declaration exported from some module as default export. Knowing the actual name of the declaration is not required as the new name is given at importing. A compile-time error occurs if another form of import is used to import an entity initially exported as default. As for now the compiler only support the following default import syntax:  
-```import ident from "...""```  
-but not the  
-```import { default as ident} from "..." "```  
+Default import binding allows importing a declaration exported from some module as default export. Knowing the actual name of the declaration is not required as the new name is given at importing. A compile-time error occurs if another form of import is used to import an entity initially exported as default. As for now the compiler only support the following default import syntax:
+```import ident from "...""```
+but not the
+```import { default as ident} from "..." "```
 The latest one recently added to the standard.
 
 The *ParseImportDefaultSpecifier* will create an *ImportDefaultSpecifier* AST node with the imported identifier member, and it will be added to the specifiers list.
@@ -325,10 +325,10 @@ In nutshell, when a top-level declaration is exported, the following happens:
 Default import binding allows importing a declaration exported from some module as default export
 
 ```
-//export.ets
+//export.sts
 export default class TestClass {}
 
-//import.ets
+//import.sts
 import ImportedClass from "./export"
 ```
 
@@ -399,7 +399,7 @@ As it has been mentioned above, renaming inside selective export is still under 
 
     * It will support renaming, as expected
     * It will checks for clashing names, when the given alias is a name, which is also exported, like:
-    
+
         ```
         export function foo(): void {}
         let tmp_var = "hello"
@@ -410,20 +410,20 @@ As it has been mentioned above, renaming inside selective export is still under 
     * A compile time error will be thrown, if something is being imported using its original name, but it was exported with an alias
     * Similar behaviour will occur if something is being referred by its original name after being imported with a namespace import:
         ```
-        //export.ets
+        //export.sts
         function test_func(): void {}
 
         export {test_func as foo}
 
-        //import.ets
+        //import.sts
         import * as all from "./export
         all.test_func() //A compile time error will be thrown at this point, since 'test_func' has an alias 'foo'
         ```
     * Support for exporting an imported program element will also be added at some point:
         ```
-        //export.ets
+        //export.sts
         export function foo(): void {}
-        //export_imported.ets
+        //export_imported.sts
         import {foo} from "./export"
 
         export {foo}
@@ -446,10 +446,10 @@ reExportDirective:
 ```
 
     ```
-    //export.ets
+    //export.sts
     export function foo(): void {}
 
-    //re-export.ets
+    //re-export.sts
     export {foo} from "./export"
     ```
 
@@ -466,38 +466,38 @@ A brief description how it works:
  * It will resolve the importPath in the same way as in the case of import declarations.
  * Instead of storing this specifiers in an *ExportNamedDeclaration* AST node, it will create an *ETSImportDeclaration* node passing the specifiers and the resolved path.
  * An *ETSReExportDeclaration* AST node will be created, which will contains this *ETSImportDeclaration* node and the current program path which contains the reexport directive.
- * So the binder's BuildImportDeclaration method will be called for every ETSImportDeclaration nodes which will import these foreign bindings specified in the specifiers and insert it to the appropriate global scope's variable map, retrieving the *ETSReExportDeclaration* nodes, making sure that the specifiers are not available in the place where the reexport directive is. 
+ * So the binder's BuildImportDeclaration method will be called for every ETSImportDeclaration nodes which will import these foreign bindings specified in the specifiers and insert it to the appropriate global scope's variable map, retrieving the *ETSReExportDeclaration* nodes, making sure that the specifiers are not available in the place where the reexport directive is.
  * In case of '*',  ```import * as A from '...'```, the compiler create for re-exports an **ETSObjectType** each. If there is a call to a member within *A*, and cannot find it, the search will be extended with *SearchReExportsType* function that finds the right 'ETSObjectType' if it exists.
- 
+
 **Improvement possibilities**
 
 Currently, re-export is a bit tweaked. See the following example, that is a typical usage of re-export:
 
 ```
-// C.ets
+// C.sts
 export let a = 3
 
-// B.ets
-export {a} from "./C.ets"
+// B.sts
+export {a} from "./C.sts"
 
-// A.ets
-import {a} from "./B.ets"
+// A.sts
+import {a} from "./B.sts"
 ```
 
-On a very high level view, the engine copies the path of C.ets (that is defined in B.ets for re-export", and creates a direct import call to C.ets from A.ets. The following code symbolizes it:
+On a very high level view, the engine copies the path of C.sts (that is defined in B.sts for re-export", and creates a direct import call to C.sts from A.sts. The following code symbolizes it:
 
 ```
-// C.ets
+// C.sts
 export let a = 3
 
-// B.ets
-export {a} from "./C.ets"
+// B.sts
+export {a} from "./C.sts"
 
-// A.ets
-import {a} from "./C.ets"  <---- here, a direct import call is executed to C.ets, that works, but not correct.
+// A.sts
+import {a} from "./C.sts"  <---- here, a direct import call is executed to C.sts, that works, but not correct.
 ```
 
-Instead, B.ets should import all variables from C.ets and all re-exported variables should be stored in a separated re-exported-variables variable map in B. These variables are not visible in B.ets (for usage) since they are treated for re-export only. After that, A.ets can import all exported variables from B.ets including re-exported-variables.
+Instead, B.sts should import all variables from C.sts and all re-exported variables should be stored in a separated re-exported-variables variable map in B. These variables are not visible in B.sts (for usage) since they are treated for re-export only. After that, A.sts can import all exported variables from B.sts including re-exported-variables.
 
 
 ### 6.6. Type exports
