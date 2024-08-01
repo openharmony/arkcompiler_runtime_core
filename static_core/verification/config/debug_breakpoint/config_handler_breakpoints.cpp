@@ -66,7 +66,7 @@ const auto &BreakpointParser()
         return true;
     };
 
-    static const auto OFFSET = P4::OfString("0x") >> HEX | DEC |= OFFSET_HANDLER;
+    static const auto OFFSET = (P4::OfString("0x") >> HEX) | DEC |= OFFSET_HANDLER;
 
     static const auto METHOD_NAME_HANDLER = [](Action a, Context &c, auto from, auto to) {
         if (a == Action::PARSED) {
@@ -84,8 +84,8 @@ const auto &BreakpointParser()
     };
 
     static const auto METHOD_NAME = P5::OfCharset(!Charset {" \t,"}) |= METHOD_NAME_HANDLER;
-    static const auto BREAKPOINT = ~WS >> METHOD_NAME >> *(~WS >> COMMA >> ~WS >> OFFSET) >> ~WS >> P::End() |
-                                   ~WS >> P::End() |= BREAKPOINT_HANDLER;  // NOLINT
+    static const auto BREAKPOINT = (~WS >> METHOD_NAME >> *(~WS >> COMMA >> ~WS >> OFFSET) >> ~WS >> P::End()) |
+                                   (~WS >> P::End()) |= BREAKPOINT_HANDLER;  // NOLINT
     return BREAKPOINT;
 }
 

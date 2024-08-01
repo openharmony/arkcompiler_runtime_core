@@ -130,7 +130,7 @@ TEST(LabelTest, test1)
     EXPECT_EQ(bodyGg, "\tjmp jump_label_0\njump_label_0:\n\treturn\n");
 }
 
-void CheckTest2(std::stringstream &g, std::string &line)
+static void CheckTest2(std::stringstream &g, std::string &line)
 {
     std::getline(g, line);
     EXPECT_EQ("jump_label_0:", line);

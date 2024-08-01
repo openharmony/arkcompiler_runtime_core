@@ -2064,8 +2064,8 @@ public:
         return ProcessFieldLoadVolatile<FORMAT>(vd, vs, refType_, false);
     }
 
-    template <BytecodeInstructionSafe::Format FORMAT, typename Check>
-    bool ProcessStoreField(int vs, int vd, Type expectedFieldType, bool isStatic, Check check, bool isVolatile = false)
+    template <BytecodeInstructionSafe::Format FORMAT, bool IS_VOLATILE = false, typename Check>
+    bool ProcessStoreField(int vs, int vd, Type expectedFieldType, bool isStatic, Check check)
     {
         if (!CheckRegType(vs, expectedFieldType)) {
             SET_STATUS_FOR_MSG(BadRegisterType, WARNING);
@@ -2073,7 +2073,7 @@ public:
             return false;
         }
 
-        if (!CheckFieldAccess(vd, expectedFieldType, isStatic, isVolatile)) {
+        if (!CheckFieldAccess(vd, expectedFieldType, isStatic, IS_VOLATILE)) {
             return false;
         }
 
@@ -2118,7 +2118,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjVolatile(int vs, int vd, bool isStatic)
     {
-        return ProcessStoreField<FORMAT>(vs, vd, bits32_, isStatic, CheckStobj, true);
+        return ProcessStoreField<FORMAT, true>(vs, vd, bits32_, isStatic, CheckStobj);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
@@ -2188,7 +2188,7 @@ public:
     template <BytecodeInstructionSafe::Format FORMAT>
     bool ProcessStobjVolatileWide(int vs, int vd, bool isStatic)
     {
-        return ProcessStoreField<FORMAT>(vs, vd, bits64_, isStatic, CheckStobjWide, true);
+        return ProcessStoreField<FORMAT, true>(vs, vd, bits64_, isStatic, CheckStobjWide);
     }
 
     template <BytecodeInstructionSafe::Format FORMAT>
