@@ -129,18 +129,52 @@ export class JSON {
     public static stringify(d: String): String {
         let sb = new StringBuilder([c'\"'])
         let len = d.getLength()
+
+        let prevChar: char = 0
         for (let i = 0; i < len; ++i) {
-            let c = d.charAt(i)
-            let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, c, JSON.ESCAPED_CHARS.length)
-            if (escapedCharIndex != -1) {
-                sb.append(c'\\')
-                sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
+            let currChar = d.charAt(i)
+
+            if (Char.isHighSurrogate(currChar)) {
+                if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                    JSON.appendCharHex(sb, prevChar)
+                }
+            } else if (Char.isLowSurrogate(currChar)) {
+                if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                    sb.append(prevChar)
+                    sb.append(currChar)
+                } else {
+                    JSON.appendCharHex(sb, currChar)
+                }
             } else {
-                sb.append(c)
+                if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                    JSON.appendCharHex(sb, prevChar)
+                }
+
+                let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, currChar, JSON.ESCAPED_CHARS.length)
+                if (escapedCharIndex != -1) {
+                    sb.append(c'\\')
+                    sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
+                } else {
+                    sb.append(currChar)
+                }
+            }
+
+            prevChar = currChar
+        }
+
+        if (len > 0) {
+            if (Char.isHighSurrogate(prevChar)) {
+                JSON.appendCharHex(sb, prevChar)
             }
         }
+
         sb.append(c'\"')
         return sb.toString()
+    }
+
+    private static appendCharHex(buffer: StringBuilder, chr: char): StringBuilder {
+        buffer.append("\\u").append(new Int(chr).toString(16))
+        return buffer
     }
 
     /**

@@ -381,6 +381,33 @@ function testStringifyNullUndefined(): int {
     return testResult
 }
 
+function testStringifyUnicodeStrings(): int {
+    let testResult = test('"\\ud83d"' == JSON.stringify("\ud83d"), "unpaired high surrogate")
+    
+    testResult += test('"\\t\\ud83d"' == JSON.stringify("\t\ud83d"), "unpaired high surrogate with prefix")
+    testResult += test('"\\ud83d\\t"' == JSON.stringify("\ud83d\t"), "unpaired high surrogate with suffix")
+    testResult += test('"\\udc99"' == JSON.stringify("\udc99"), "unpaired low surrogate")
+    testResult += test('"\\t\\udc99"' == JSON.stringify("\t\udc99"), "unpaired low surrogate with prefix")
+    testResult += test('"\\udc99\\t"' == JSON.stringify("\udc99\t"), "unpaired low surrogate with suffix")
+    testResult += test('"\\udc99\\ud83d"' == JSON.stringify("\udc99\ud83d"), "reversed surrogate pair")
+    testResult += test('"\ud83d\udc99"' == JSON.stringify("\ud83d\udc99"), "valid surrogate pair")
+
+    testResult += test(JSON.stringify("\uD834") == '"\\ud834"', 'JSON.stringify("\\uD834")')
+    testResult += test(JSON.stringify("\uDF06") == '"\\udf06"', 'JSON.stringify("\\uDF06")')
+    testResult += test(JSON.stringify ("\uD834\uDF06") == '"𝌆"', 'JSON.stringify("\\uD834\\uDF06")')
+    testResult += test(JSON.stringify("\uD834\uD834\uDF06\uD834") == '"\\ud834𝌆\\ud834"', 'JSON.stringify("\\uD834\\uD834\\uDF06\\uD834")')
+    testResult += test(JSON.stringify("\uDF06\uD834\uDF06\uD834") == '"\\udf06𝌆\\ud834"', 'JSON.stringify("\\uDF06\\uD834\\uDF06\\uD834")')
+    testResult += test(JSON.stringify("\uDF06\uD834\uDF06\uD834") == '"\\udf06𝌆\\ud834"', 'JSON.stringify("\\uDF06\\uD834\\uDF06\\uD834")')
+    testResult += test(JSON.stringify("\uDF06\uD834\uDF06\uDF06") == '"\\udf06𝌆\\udf06"', 'JSON.stringify("\\uDF06\\uD834\\uDF06\\uDF06")')
+    testResult += test(JSON.stringify("\uDF06\uD834") == '"\\udf06\\ud834"', 'JSON.stringify("\\uDF06\\uD834")')
+    testResult += test(JSON.stringify("\uD834\uDF06\uD834\uD834") == '"𝌆\\ud834\\ud834"', 'JSON.stringify("\\uD834\\uDF06\\uD834\\uD834")')
+    testResult += test(JSON.stringify("\uD834\uDF06\uD834\uDF06") == '"𝌆𝌆"', 'JSON.stringify("\\uD834\\uDF06\\uD834\\uDF06")')
+    testResult += test(JSON.stringify("\uDF06\uDF06\uD834\uD834") == '"\\udf06\\udf06\\ud834\\ud834"', 'JSON.stringify("\\uDF06\\uDF06\\uD834\\uD834")')
+    testResult += test(JSON.stringify ("\uDF06\uDF06\uD834\uDF06") == '"\\udf06\\udf06𝌆"', 'JSON.stringify("\\uDF06\\uDF06\\uD834\\uDF06")')
+
+    return testResult
+}
+
 function main(): int {
     let failures = 0
     failures += testNull()
@@ -407,6 +434,7 @@ function main(): int {
     failures += testStringifyInterface()
     failures += testStringifyEnum()
     failures += testStringifyNullUndefined()
+    failures += testStringifyUnicodeStrings()
 
     if (failures == 0) {
         console.println("PASSED: All tests run")
