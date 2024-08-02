@@ -234,6 +234,8 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
                 let w = y as int
                 return Array.defaultComparatorInts(z, w)
             }
+        } else if (a instanceof String && b instanceof String) {
+            return a.compareTo(b)
         }
         let sa = new String(a)
         let sb = new String(b)
@@ -270,6 +272,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return (aDigs - bDigs)
     }
 
+    private static defaultComparatorStr(a: String, b: String) {
+        return a.compareTo(b)
+    }
+
     /**
      * Helper function preparing copy of `this` instance of `Array` class' data array.
      *
@@ -282,6 +288,60 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             res[i] = this.$_get_unsafe(i)
         }
         return res
+    }
+
+    private wrap_default_sort(): void {
+        let idxNonUndef = 0
+        type arrType = String | null
+        try {
+            let strArr = new arrType[this.actualLength]
+            for (let i = 0; i < this.actualLength; i++) {
+                const vl = this.$_get_unsafe(i)
+                // NOTE(aleksander-sotov) We can't use === to compare with undefined due to 18518
+                if (!__runtimeIsSameReference(vl, undefined)) {
+                    if (vl == null) {
+                        this.$_set_unsafe(idxNonUndef, vl as T)
+                        strArr[idxNonUndef] = "null"
+                    } else {
+                        this.$_set_unsafe(idxNonUndef, vl)
+                        strArr[idxNonUndef] = vl.toString()
+                    }
+                    idxNonUndef++
+                }
+            }
+            let sortTo = idxNonUndef
+            for (let i = idxNonUndef; i < this.actualLength; i++) {
+                this.$_set_unsafe(i, undefined as T)
+            }
+
+            sort_default<NullishType>(this.buffer, strArr, 0, sortTo)
+        }
+        catch (e) {
+            if (e instanceof OutOfMemoryError) {
+                this.slow_default_sort()
+            } else {
+                throw e as Error
+            }
+        }
+    }
+
+    private slow_default_sort(): void {
+        let idxNonUndef = 0
+        const cmp: (l: NullishType, r: NullishType) => number = (l: NullishType, r: NullishType): number => {
+            return Array.defaultComparator(l, r)
+        }
+        for (let i = 0; i < this.actualLength; i++) {
+            const vl = this.$_get_unsafe(i)
+            if (!__runtimeIsSameReference(vl, undefined)) {
+                this.$_set_unsafe(idxNonUndef, vl)
+                idxNonUndef++
+            }
+        }
+        let sortTo = idxNonUndef
+        for (let i = idxNonUndef; i < this.actualLength; i++) {
+            this.$_set_unsafe(i, undefined as T)
+        }
+        sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
     }
 
     /**
@@ -302,23 +362,10 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             cmp = (l: NullishType, r: NullishType): number => {
                 return comparator!(l as T, r as T)
             }
+            sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
         } else {
-            let idxNonUndef = 0
-            let undefCount = 0
-            for (let i = 0; i < this.actualLength; i++) {
-                const vl = this.$_get_unsafe(i)
-                if (__runtimeIsSameReference(vl, undefined)) {
-                    undefCount++
-                } else {
-                    this.$_set_unsafe(idxNonUndef++, vl)
-                }
-            }
-            sortTo = idxNonUndef
-            for (let i = idxNonUndef; i < this.actualLength; i++) {
-                this.$_set_unsafe(i, undefined as T)
-            }
+            this.wrap_default_sort()
         }
-        sort_stable<NullishType>(this.buffer, 0, sortTo, cmp)
         return this
     }
 
@@ -1572,12 +1619,19 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public override join(sep?: String): string {
         const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-        let sb = new StringBuilder();
+        let sb = new StringBuilder()
         for (let i: int = 0; i < this.actualLength; i++) {
+            const tmp = this.$_get_unsafe(i)
+            // NOTE(aleksander-sotov) We can't move if from loop due to 18709
             if (i != 0) {
                 sb.append(sepReal);
             }
-            sb.append(new String(this.$_get_unsafe(i)));
+            // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
+            if (!__runtimeIsSameReference(tmp, undefined)) {
+                sb.append(new String(tmp))
+            } else {
+                sb.append("undefined")
+            }
         }
 
         return sb.toString();

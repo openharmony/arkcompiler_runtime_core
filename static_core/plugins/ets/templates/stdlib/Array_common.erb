@@ -607,12 +607,19 @@
  */
 <%= access_public %> <%= override %> join<%= this_generic %>(<%= this_arg %>sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < <%= this_len_int %>; i++) {
+        const tmp = <%= get_unsafe.(this, 'i') %>
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(<%= get_unsafe.(this, 'i') %>));
+        <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583  
+        if (!__runtimeIsSameReference(tmp, undefined)) {
+            sb.append(new String(tmp))
+        } else {
+            sb.append("undefined")
+        }<% else %>sb.append(tmp)<% end %>
     }
 
     return sb.toString();

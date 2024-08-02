@@ -979,12 +979,14 @@ export function lastIndexOf(self: boolean[], element: boolean, fromIndex?: Numbe
  */
 export function join(self: boolean[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -2649,12 +2651,14 @@ export function lastIndexOf(self: byte[], element: byte, fromIndex?: Number): nu
  */
 export function join(self: byte[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -4319,12 +4323,14 @@ export function lastIndexOf(self: short[], element: short, fromIndex?: Number): 
  */
 export function join(self: short[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -5989,12 +5995,14 @@ export function lastIndexOf(self: int[], element: int, fromIndex?: Number): numb
  */
 export function join(self: int[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -7659,12 +7667,14 @@ export function lastIndexOf(self: long[], element: long, fromIndex?: Number): nu
  */
 export function join(self: long[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -9329,12 +9339,14 @@ export function lastIndexOf(self: float[], element: float, fromIndex?: Number): 
  */
 export function join(self: float[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -11007,12 +11019,14 @@ export function lastIndexOf(self: double[], element: double, fromIndex?: Number)
  */
 export function join(self: double[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -12685,12 +12699,14 @@ export function lastIndexOf(self: char[], element: char, fromIndex?: Number): nu
  */
 export function join(self: char[], sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < self.length; i++) {
+        const tmp = self[i]
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(self[i]));
+        sb.append(tmp)
     }
 
     return sb.toString();
@@ -13519,6 +13535,107 @@ export function sort_stable<T>(arr: T[], startIndex: int, endIndex: int, comp: (
             // Merge sub array arr[left.....mid] and arr[mid+1....right]
             if (mid < right) {
                 perform_merge(arr, left, mid, right, comp);
+            }
+        }
+    }
+}
+
+function defaultComparatorStr(a: String, b: String): number {
+    return a.compareTo(b)
+}
+
+type buffStr = String | null
+function stringified_insertion_sort<T>(arr: T[], arrStr: buffStr[], startIndex: int, endIndex: int): void {
+    for (let i = startIndex + 1; i < endIndex; i++) {
+        const tmp = arr[i]
+        const tmpStr = arrStr[i];
+        if (defaultComparatorStr(tmpStr!, arrStr[startIndex]!) < 0) {
+            for (let j = i; j > startIndex; j--) {
+                arr[j] = arr[j - 1]
+                arrStr[j] = arrStr[j - 1]
+            }
+            arrStr[startIndex] = tmpStr
+            arr[startIndex] = tmp
+        } else {
+            let j = i - 1;
+            while (defaultComparatorStr(tmpStr!, arrStr[j]!) < 0) {
+                arr[j + 1] = arr[j];
+                arrStr[j + 1] = arrStr[j]
+                j--;
+            }
+            arr[j + 1] = tmp;
+            arrStr[j + 1] = tmpStr
+        }
+    }
+}
+
+function stringified_perform_merge<T>(arr: T[], arrStr: buffStr[], startIndex: int, midIndex: int, endIndex: int): void {
+    const len1 = midIndex - startIndex + 1;
+    const len2 = endIndex - midIndex;
+    type buffType = T | null
+    let left = new buffType[len1]
+    let right = new buffType[len2]
+    let leftStr = new buffStr[len1]
+    let rightStr = new buffStr[len2]
+    for (let i = 0; i < len1; i++) {
+        left[i] = arr[startIndex + i]
+        leftStr[i] = arrStr[startIndex + i]
+    }
+    for (let i = 0; i < len2; i++) {
+        right[i] = arr[midIndex + 1 + i]
+        rightStr[i] = arrStr[midIndex + 1 + i]
+    }
+    let i = 0;
+    let j = 0;
+    let k = startIndex;
+    while (i < len1 && j < len2) {
+        if (defaultComparatorStr(leftStr[i]!, rightStr[j]!) <= 0) {
+            arr[k] = left[i]!;
+            arrStr[k] = leftStr[i]!;
+            i++;
+        } else {
+            arr[k] = right[j]!;
+            arrStr[k] = rightStr[j]!;
+            j++;
+        }
+        k++;
+    }
+    while (i < len1) {
+        arr[k] = left[i]!;
+        arrStr[k] = leftStr[i]!;
+        k++;
+        i++;
+    }
+    while (j < len2) {
+        arr[k] = right[j]!;
+        arrStr[k] = rightStr[j]!;
+        k++;
+        j++;
+    }
+}
+
+export function sort_default<T>(arr: T[], arrStr: buffStr[], startIndex: int, endIndex: int): void {
+    if (endIndex <= startIndex) {
+        return;
+    }
+    const INS_SORT_DELTA = 16
+    for (let i = startIndex; i < endIndex; i += INS_SORT_DELTA ) {
+        stringified_insertion_sort<T>(arr, arrStr, i, min(i + INS_SORT_DELTA , endIndex))
+    }
+
+    if ((endIndex - startIndex) < INS_SORT_DELTA) {
+        return;
+    }
+    for (let size = INS_SORT_DELTA; size < endIndex; size = 2 * size) {
+        for (let left = startIndex; left < endIndex; left += 2 * size) {
+
+            // Find ending point of left subarray and right subarray
+            const mid = min(left + size - 1, endIndex - 1);
+            const right = min((left + 2 * size - 1), (endIndex - 1));
+
+            // Merge sub array arr[left.....mid] and arr[mid+1....right]
+            if (mid < right) {
+                stringified_perform_merge(arr, arrStr, left, mid, right);
             }
         }
     }
