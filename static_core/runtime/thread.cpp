@@ -258,10 +258,10 @@ ManagedThread::~ManagedThread()
     // ManagedThread::ShutDown() may not be called when exiting js_thread, so need set current_thread = nullptr
     // NB! ThreadManager is expected to store finished threads in separate list and GC destroys them,
     // current_thread should be nullified in Destroy()
+    // We should register TLAB size for MemStats during thread destroy.
     // (zero_tlab == nullptr means that we destroyed Runtime and do not need to register TLAB)
     if (zeroTlab_ != nullptr) {
-        // We should register TLAB size for MemStats during thread destroy.
-        GetVM()->GetHeapManager()->RegisterTLAB(GetTLAB());
+        ASSERT(tlab_ == zeroTlab_);
     }
 
     mem::InternalAllocatorPtr allocator = GetInternalAllocator(this);
@@ -899,6 +899,13 @@ void MTManagedThread::FreeInternalMemory()
     ptReferenceStorage_.reset();
 
     ManagedThread::FreeInternalMemory();
+}
+
+void ManagedThread::CollectTLABMetrics()
+{
+    if (zeroTlab_ != nullptr) {
+        GetVM()->GetHeapManager()->RegisterTLAB(GetTLAB());
+    }
 }
 
 void ManagedThread::DestroyInternalResources()

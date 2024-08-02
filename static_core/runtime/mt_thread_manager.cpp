@@ -285,6 +285,8 @@ bool MTThreadManager::UnregisterExitedThread(MTManagedThread *thread)
             threadLock_.Lock();
         }
 
+        thread->CollectTLABMetrics();
+        thread->ClearTLAB();
         thread->DestroyInternalResources();
 
         LOG(DEBUG, RUNTIME) << "Stopping thread " << thread->GetId();
