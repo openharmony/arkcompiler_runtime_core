@@ -93,7 +93,7 @@ class UtilHermes:
         else:
             out_str = input_str
 
-        with open(dest_file, 'w', encoding="utf-8") as output:
+        with os.fdopen(os.open(dest_file, os.O_RDWR | os.O_CREAT, 0o755), 'w', encoding="utf-8") as output:
             output.write(out_str)
 
     def run_filecheck(self, test_file: str, actual_output: str) -> bool:

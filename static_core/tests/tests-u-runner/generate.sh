@@ -14,7 +14,7 @@
 
 set -e
 
-if [[ -z $1 ]]; then
+if [[ -z "$1" ]]; then
     echo "Usage: generate.sh <generator options>"
     echo "    <generator options> options to main.py. To see full list use --help"
 

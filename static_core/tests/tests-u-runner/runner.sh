@@ -14,7 +14,7 @@
 
 set -e
 
-if [[ -z $1 ]]; then
+if [[ -z "$1" ]]; then
     echo "Usage: runner.sh <runner options>"
     echo "    <runner options> options to main.py. To see full list use --help"
 
