@@ -12,25 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-{%- for c in cases %}
 
+{% for c in cases %}
 /*---
-desc: Composite context, interface field, widening primitive conversion, implicit
-params: from {{c.from_type}} to {{c.to_type}}
+desc: >-
+    If a class or an interface declares one or two functions with names
+    $_get and $_set, and signatures (index: Type1): Type2 and
+    (index: Type1, value: Type2) respectively, then an indexing expression
+    can be applied to variables of such types
+tags: [{{c.tags}}]
 ---*/
-{{c.defs}}
-{%- for v in c['values'] %}
-interface J{{loop.index}} { fld: {{c.to_type}} }
-let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}};
-{%- endfor %}
+{{c.decl}}
 
 function main(): int {
-{%- for v in c['values'] %}
-    let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
-    if (d{{loop.index}}.fld != {{v.val}}) {
-        return 1
-    }
-{%- endfor %}
+    {{c.code|indent}}
     return 0
 }
-{%- endfor %}
+{% endfor %}

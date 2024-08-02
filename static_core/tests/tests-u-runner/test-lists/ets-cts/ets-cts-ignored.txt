@@ -1424,6 +1424,13 @@
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_7.sts
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_8.sts
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_9.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_0.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_1.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_2.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_3.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_4.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_5.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_6.sts
 06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf-nan_0.sts
 06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf-nan_1.sts
 06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf-nan_2.sts
@@ -2040,6 +2047,36 @@
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_7.sts
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_8.sts
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_9.sts
+
+# 18550 es2panda aborts on implicit number conversion
+17.experimental_features/03.indexable_types/ind_interface_4.sts
+17.experimental_features/03.indexable_types/ind_interface_5.sts
+17.experimental_features/03.indexable_types/ind_interface_6.sts
+17.experimental_features/03.indexable_types/ind_interface_7.sts
+17.experimental_features/03.indexable_types/ind_class_4.sts
+17.experimental_features/03.indexable_types/ind_class_5.sts
+17.experimental_features/03.indexable_types/ind_class_6.sts
+17.experimental_features/03.indexable_types/ind_class_7.sts
+17.experimental_features/03.indexable_types/ind_interface_12.sts
+17.experimental_features/03.indexable_types/ind_interface_13.sts
+17.experimental_features/03.indexable_types/ind_class_12.sts
+17.experimental_features/03.indexable_types/ind_class_13.sts
+17.experimental_features/03.indexable_types/ind_interface_16.sts
+17.experimental_features/03.indexable_types/ind_class_16.sts
+17.experimental_features/03.indexable_types/ind_class_26.sts
+17.experimental_features/03.indexable_types/ind_expr_26.sts
+
+# 18553 Int.MIN_VALUE is interpreted as long
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_cons/call-cons-ident_2.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func-ident_2.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_lmbd/call-lmbd-ident_2.sts
+06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth-ident_2.sts
+
+# 18589 es2panda segfault with protected $_get and $_set
+17.experimental_features/03.indexable_types/cte_14.sts
+
+# 18590 Cannot use private $_get and $_set
+17.experimental_features/03.indexable_types/cte_15.sts
 
 # es2panda: #17635: Smart cast problem
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_4.sts

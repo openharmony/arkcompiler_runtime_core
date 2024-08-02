@@ -15,19 +15,15 @@
 {%- for c in cases %}
 
 /*---
-desc: Composite context, interface field, widening primitive conversion, implicit
+desc: Declaration context, variable declaration, widening primitive conversion, implicit
 params: from {{c.from_type}} to {{c.to_type}}
 ---*/
 {{c.defs}}
-{%- for v in c['values'] %}
-interface J{{loop.index}} { fld: {{c.to_type}} }
-let s{{loop.index}}: {{c.from_type}} = {{v.expr|safe}};
-{%- endfor %}
 
 function main(): int {
 {%- for v in c['values'] %}
-    let d{{loop.index}}: J{{loop.index}} = { fld: s{{loop.index}} }
-    if (d{{loop.index}}.fld != {{v.val}}) {
+    let d{{loop.index}}: {{c.to_type}} = {{v.expr|safe}}
+    if (d{{loop.index}} != {{v.val}}) {
         return 1
     }
 {%- endfor %}
