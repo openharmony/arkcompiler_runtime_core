@@ -221,8 +221,6 @@ export class JSON {
 
     public static native stringify(d: JSValue): String;
 
-    private static native stringifyObj(d: Object): String
-
     //--------------------------
     //          arrays
     //--------------------------

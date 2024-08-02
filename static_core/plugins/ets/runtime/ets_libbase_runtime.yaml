@@ -3005,20 +3005,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeTypeof
     clear_flags: [ ]
 
-##########################
-# std.serialization.JSON #
-##########################
-
-  - name: escompatJSONStringifyObj
-    space: ets
-    class_name: escompat.JSON
-    method_name: stringifyObj
-    static: true
-    signature:
-      ret: std.core.String
-      args: [std.core.Object]
-    impl: ark::ets::intrinsics::EscompatJSONStringifyObj
-
 ###################
 # std.core.RegExp #
 ###################
