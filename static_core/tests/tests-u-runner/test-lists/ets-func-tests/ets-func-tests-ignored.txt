@@ -524,6 +524,11 @@ spec/10.Interfaces/method_overload7.sts
 ### BigInt64Array
 std/core/std_core_typedarrays__BigInt64Array.sts
 ### BigInt64Array end
+### Issue 17680
+std/core/std_core_typedarrays_bignum__BigInt64Array.ets
+std/core/std_core_typedarrays_bignum__BigUint64Array.ets
+### Issue 17680
+
 
 ### Failures #15642
 # Type violation in type erasure
