@@ -13,16 +13,7 @@
  * limitations under the License.
  */
 
-#include <fstream>
-#include <method_data_accessor.h>
-#include "compiler_logger.h"
-#include "pbc_iterator.h"
-#include "bytecode_instruction.h"
-#include "code_data_accessor.h"
 #include "code_data_accessor-inl.h"
-#include "method_data_accessor.h"
-#include "optimizer/analysis/dominators_tree.h"
-#include "optimizer/analysis/loop_analyzer.h"
 #include "method_data_accessor-inl.h"
 #include "ir_builder.h"
 

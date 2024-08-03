@@ -15,11 +15,7 @@
 
 #include "reg_alloc_resolver.h"
 #include "reg_type.h"
-#include "compiler/optimizer/ir/inst.h"
-#include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/basicblock.h"
-#include "compiler/optimizer/analysis/dominators_tree.h"
-#include "optimizer/analysis/loop_analyzer.h"
 
 namespace panda::compiler {
 /*

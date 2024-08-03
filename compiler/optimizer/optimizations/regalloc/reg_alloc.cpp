@@ -14,7 +14,6 @@
  */
 
 #include "reg_alloc.h"
-#include "optimizer/ir/basicblock.h"
 #include "optimizer/optimizations/cleanup.h"
 #include "reg_alloc_graph_coloring.h"
 #include "reg_alloc_resolver.h"

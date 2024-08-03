@@ -14,7 +14,6 @@
  */
 
 #include "pass.h"
-#include "optimizer/ir/graph.h"
 
 namespace panda::compiler {
 bool Pass::Run()
