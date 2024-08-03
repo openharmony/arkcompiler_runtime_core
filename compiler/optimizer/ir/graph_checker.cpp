@@ -13,15 +13,8 @@
  * limitations under the License.
  */
 
-#include "compiler_options.h"
 #include "graph_cloner.h"
-#include "compiler_options.h"
-#include "optimizer/analysis/dominators_tree.h"
-#include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/linear_order.h"
-#include "optimizer/analysis/loop_analyzer.h"
-#include "optimizer/ir/datatype.h"
-#include "optimizer/optimizations/cleanup.h"
 #include "inst_checker_gen.h"
 #include "graph_checker.h"
 

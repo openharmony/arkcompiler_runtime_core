@@ -14,8 +14,6 @@
  */
 
 #include "split_resolver.h"
-#include "compiler/optimizer/ir/inst.h"
-#include "compiler/optimizer/ir/graph.h"
 #include "compiler/optimizer/ir/basicblock.h"
 #include "compiler/optimizer/analysis/dominators_tree.h"
 #include "compiler/optimizer/analysis/loop_analyzer.h"

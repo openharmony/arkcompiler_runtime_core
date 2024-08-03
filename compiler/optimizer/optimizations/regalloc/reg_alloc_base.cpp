@@ -15,10 +15,6 @@
 
 #include "reg_alloc_base.h"
 #include "reg_type.h"
-#include "optimizer/ir/basicblock.h"
-#include "optimizer/ir/datatype.h"
-#include "optimizer/ir/graph.h"
-#include "optimizer/analysis/dominators_tree.h"
 #include "split_resolver.h"
 #include "spill_fills_resolver.h"
 #include "reg_alloc_resolver.h"

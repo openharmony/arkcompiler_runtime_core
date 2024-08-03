@@ -18,8 +18,6 @@
 #include "optimizer/ir/basicblock.h"
 #include "pass_manager_statistics.h"
 
-#include <iomanip>
-
 namespace panda::compiler {
 PassManagerStatistics::PassManagerStatistics(Graph *graph)
     : graph_(graph),

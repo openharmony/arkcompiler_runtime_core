@@ -13,16 +13,9 @@
  * limitations under the License.
  */
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <string>
 #include "basicblock.h"
-#include "compiler_options.h"
-#include "inst.h"
 #include "graph.h"
 #include "optimizer/analysis/linear_order.h"
-#include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "dump.h"
 
