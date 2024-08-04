@@ -605,6 +605,7 @@ public:
 
     User *GetUser(unsigned index)
     {
+        CHECK_GE(capacity_ - 1, index);
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         return &users_[capacity_ - index - 1];
     }
