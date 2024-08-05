@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -241,13 +241,13 @@ def parse_methods():
             exit_fail('Failed to parse IR dumps')
         parts = re.split('(?<!_)_(?!_*$)', method)
         if parts[-1] in ['_ctor_', '_cctor_']:
-            parts[-1] = '<' + parts[-1].strip('_') + '>'
+            parts[-1] = f'<{parts[-1].strip("_")}>'
 
         dest = compiled
         if parts[0] == 'inlined':
             dest = inlined
             parts.pop(0)
-        qname = '.'.join(parts[:-1]) + '::' + parts[-1]
+        qname = '::'.join(('.'.join(parts[:-1]), parts[-1]))
         dest.add(qname)
     return (compiled, inlined)
 
