@@ -17,10 +17,9 @@
 #include <atomic>
 
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "include/runtime.h"
-#include "macros.h"
+#include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -30,13 +29,15 @@
 #include "plugins/ets/runtime/napi/ets_mangle.h"
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/compiler.h"
+#include "runtime/include/runtime.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/init_icu.h"
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/threaded_coroutine_manager.h"
-#include "plugins/ets/runtime/types/ets_promise.h"
+#include "runtime/mem/lock_config_helper.h"
 #include "plugins/ets/stdlib/native/init_native_methods.h"
 
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
@@ -50,11 +51,9 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
         nullptr,                                      // register_finalize_reference_func
         options.GetMaxGlobalRefSize(),                // max_global_ref_size
         options.IsGlobalReferenceSizeCheckEnabled(),  // is_global_reference_size_check_enabled
-        // NOTE(konstanting, #I67QXC): implement MT_MODE_TASK in allocators and HeapOptions as is_single_thread is
-        // not enough
-        false,                              // is_single_thread
-        options.IsUseTlabForAllocations(),  // is_use_tlab_for_allocations
-        options.IsStartAsZygote(),          // is_start_as_zygote
+        MT_MODE_TASK,                                 // multithreading mode
+        options.IsUseTlabForAllocations(),            // is_use_tlab_for_allocations
+        options.IsStartAsZygote(),                    // is_start_as_zygote
     };
 
     auto ctx = runtime->GetLanguageContext(panda_file::SourceLang::ETS);
