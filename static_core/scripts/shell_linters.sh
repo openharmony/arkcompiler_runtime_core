@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [[ -z $1 ]]; then
+set -e
+
+if [[ -z "$1" ]]; then
     echo "Usage: $0 <sources>"
     echo "    <sources> path where the sources to be checked are located"
     echo

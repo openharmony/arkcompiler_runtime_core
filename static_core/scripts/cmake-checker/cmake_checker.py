@@ -112,7 +112,7 @@ def test_cmake_checker(directory):
         # in case we don't have them in main CMakeLists.txt
         for function in function_list:
             content = content.replace(function[1], function[0])
-            content += function[0] + "\n"
+            content = f"{content}{function[0]}\n"
 
         with os.fdopen(os.open(temp_file, os.O_RDWR | os.O_CREAT, 0o755), 'w') as file:
             file.write(content)
