@@ -45,9 +45,9 @@ execution:
 
 This specification uses the terms as follows:
 
--  *error* to denote runtime errors, and
+-  *Error* to denote runtime errors, and
 
--  *exception* to denote failures.
+-  *Exception* to denote failures.
 
 
 The difference between these two terms is that *exceptions* are the

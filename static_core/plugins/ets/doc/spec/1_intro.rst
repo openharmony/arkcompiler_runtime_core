@@ -285,7 +285,8 @@ sequence of *expression*\ s separated by the terminal ‘``,``’ symbol. The
 sequence must have at least one *expression*. The list is optionally
 terminated by the terminal ‘``,``’ symbol.
 
-All grammar rules are presented in the Grammar section of this specification.
+All grammar rules are presented in the Grammar section (see
+:ref:`Grammar Summary`) of this specification.
 
 .. index::
    terminal

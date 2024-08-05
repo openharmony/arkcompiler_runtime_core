@@ -47,15 +47,14 @@ Normal and Abrupt Statement Execution
     frontend_status: Done
 
 The actions that every statement performs in a normal mode of execution are
-specific for the particular kind of that statement. The normal modes of
+specific for the particular kind of statement. The normal modes of
 evaluation for each kind of statement are described in the following
 sections.
 
 A statement execution is considered to *complete normally* if the desired
-action is performed without an exception or an error being thrown.
-
-On the contrary, a statement execution is considered to *complete abruptly*
-if it causes an exception or an error to be thrown.
+action is performed without an exception or an error being thrown. On the
+contrary, a statement execution is considered to *complete abruptly* if it
+causes an exception or an error to be thrown.
 
 .. index::
    statement execution
@@ -68,7 +67,7 @@ if it causes an exception or an error to be thrown.
    exception
    error
 
-   
+
 |
 
 .. _Expression Statements:
@@ -286,8 +285,9 @@ below:
 
 A ``while`` statement and a ``do`` statement evaluate an expression and
 execute the statement repeatedly till the expression value is ``true``.
-The key difference is that ``whileStatement`` first evaluates and checks the
-expression value, and ``doStatement`` first executes the statement:
+The key difference is that ``whileStatement`` starts from evaluating and
+checking the expression value, and ``doStatement`` starts from executing
+the statement:
 
 .. index::
    while statement
@@ -390,7 +390,7 @@ of *iterable* class or interface (see :ref:`Iterable Types`):
 A :index:`compile-time error` occurs if the type of an expression is not
 ``array``, ``string``, or iterable type.
 
-The execution of a ``for-of`` loop starts with the evaluation of ``expression``.
+The execution of a ``for-of`` loop starts from the evaluation of ``expression``.
 If the evaluation is successful, then the resultant expression is used for
 loop iterations (execution of the ``statement``). On each iteration,
 ``forVariable`` is set to successive elements of the ``array``, ``string``, or
@@ -477,13 +477,13 @@ or ``switchStatement``:
 
 A ``break`` statement with the label *identifier* transfers control out of the
 enclosing statement with the same label *identifier*. A
-:index:`compile-time error` occurs if such a statement is not found within the
-body of the surrounding function or method.
+:index:`compile-time error` occurs if a ``break`` statement is not found within
+the body of the surrounding function or method.
 
 A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement.
 
-A :index:`compile-time error` occurs if the ``breakStatement`` is not found
+A :index:`compile-time error` occurs if ``breakStatement`` is not found
 within ``loopStatment`` or ``switchStatement``.
 
 .. index::
@@ -525,10 +525,10 @@ exit conditions depend on the kind of the loop.
 
 A ``continue`` statement with the label *identifier* transfers control out
 of the enclosing loop statement with the same label *identifier*.
-A :index:`compile-time error` occurs if such a statement is not found within
-the body of the surrounding function or method.
+A :index:`compile-time error` occurs if a ``continue`` statement is not found
+within the body of the surrounding function or method.
 
-A :index:`compile-time error` occurs if no ``continueStatement`` is found
+A :index:`compile-time error` occurs if ``continueStatement`` is not found
 within ``loopStatment``.
 
 .. index::
@@ -582,9 +582,9 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
 -  Top-level statements (see :ref:`Top-Level Statements`);
 -  Class initializers (see :ref:`Class Initializer`) and constructors (see
    :ref:`Constructor Declaration`), where it has an expression;
--  A function or a method with return type ``void`` (see :ref:`Type void`),
-   where it has    an expression;
--  A function or a method with a non-``void`` return type, where it has no
+-  Functions or methods with return type ``void`` (see :ref:`Type void`)
+   that have an expression;
+-  Functions or methods with a non-``void`` return type that have no
    expression.
 
 .. index::
@@ -689,7 +689,7 @@ A :index:`compile-time error` occurs if not **all** of the following is true:
 
 -  Every case expression type associated with a ``switch`` statement is
    compatible (see :ref:`Type Compatibility`) with the type of the ``switch``
-   statement’s expression.
+   statement expression.
 
 -  In a ``switch`` statement expression of type ``enum``, every case expression
    associated with the ``switch`` statement is of type ``enum``.

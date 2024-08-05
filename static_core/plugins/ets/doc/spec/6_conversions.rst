@@ -525,7 +525,7 @@ from union* converts an expression of type ``U`` to some type ``TT`` (*target ty
 ..
    line 472 initially was *U* = *T*:sub:`1` | ... | *T*:sub:`N`
 
-A :index:`compile-time error` occurs if the target type ``TT`` is not one of
+A :index:`compile-time error` occurs if target type ``TT`` is not one of
 ``T``:sub:`i`, and not derived from one of ``T``:sub:`i`.
 
 .. code-block-meta:
@@ -560,7 +560,7 @@ Another form of *conversion from union* is implicit conversion from union type
 to the target type. The conversion is only possible if each type in a union is
 compatible (see :ref:`Type Compatibility`) with the target type. If so, the
 conversion never causes a runtime error. If at least one type of a union is not
-compatible with the target type, then conversion causes a
+compatible with the target type, then the conversion causes a
 :index:`compile-time error`:
 
 .. code-block-meta:
@@ -815,7 +815,7 @@ Widening Union Conversions
     frontend_status: Partly
     todo: adapt it after literal types are implemented
 
-There are three options of *widening union conversions*:
+There are three options of *widening union conversion* as follows:
 
 - Conversion from a union type to a wider union type;
 - Conversion from a non-union type to a union type;
@@ -992,7 +992,7 @@ Character to String Conversions
     frontend_status: Done
 
 *Character to string conversion* converts a value of type ``char`` to type
-``string``. The resultant new string has the length equal to 1. The converted
+``string``. The length of the resultant new string equals 1. The converted
 ``char`` is the single element of the new string:
 
 .. code-block:: typescript
@@ -1016,7 +1016,8 @@ Constant String to Character Conversions
 
 *Constant string to character conversion* converts an expression of type
 ``string`` to type ``char``. The initial type ``string`` expression must be a
-constant expression (see :ref:`Constant Expressions`) with a length equal to 1.
+constant expression (see :ref:`Constant Expressions`). The length of this
+espression equals 1.
 
 The resultant ``char`` is the first and only character of the converted
 ``string``.

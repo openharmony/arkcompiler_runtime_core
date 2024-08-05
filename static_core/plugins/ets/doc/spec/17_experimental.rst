@@ -299,7 +299,7 @@ a :index:`compile-time error` occurs.
 
 A numeric conversion (see :ref:`Primitive Types Conversions`) is performed
 on each ``dimensionExpression`` to ensure that the resultant type is ``int``.
-Otherwise, :index:`compile-time error` occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 A :index:`compile-time error` occurs if any ``dimensionExpression`` is a
 constant expression that is evaluated at compile time to a negative integer

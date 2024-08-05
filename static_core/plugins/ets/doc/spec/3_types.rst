@@ -1277,13 +1277,13 @@ Array Types
 
 *Array type* is the built-in type characterized by the following:
 
--  Any object of array type contains elements indexed by integer position
+-  Any object of array type contains elements indexed by integer position 
    starting from *0*;
 -  Access to any array element is performed within the same time;
--  If passed to non-|LANG| environment, an array is represented
-   as a contiguous memory location;
--  Types of all array elements are upper-bounded by the element type
-   specified in the array declaration.
+-  If passed to non-|LANG| environment, an array is represented as a contiguous
+   memory location;
+-  Types of all array elements are upper-bounded by the element type specified
+   in the array declaration.
 
 .. index::
    array type
@@ -1409,15 +1409,15 @@ A function type consists of the following:
         ;
 
     ftParameterList:
-        ftParameter (',' ftParameter)* (',' restParameter)?
-        | restParameter
+        ftParameter (',' ftParameter)* (',' ftRestParameter)?
+        | ftRestParameter
         ;
 
     ftParameter:
         identifier ('?')? ':' type
         ;
 
-    restParameter:
+    ftRestParameter:
         '...' ftParameter
         ;
 
@@ -1982,7 +1982,7 @@ Nullish Types
 .. code-block:: abnf
 
     nullishType:
-          type '|' 'null' (| 'undefined')?
+          type '|' 'null' ('|' 'undefined')?
         | type '|' 'undefined' ('|' 'null')?
         ;
 

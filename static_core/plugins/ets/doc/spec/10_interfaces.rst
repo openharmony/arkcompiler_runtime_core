@@ -71,7 +71,7 @@ The value of a variable declared as an interface type can be a reference
 to any instance of the class that implements the specified interface.
 However, it is not enough for the class to implement all methods of the
 interface. The class or one of its superclasses must be actually
-declared to implement the interface. Otherwise such class is not
+declared to implement the interface. Otherwise, such class is not
 considered to implement the interface.
 
 Interfaces without ``interfaceExtendsClause`` are compatible with the class
@@ -196,7 +196,7 @@ If an interface declaration (possibly generic) ``I`` <``F``:sub:`1` ``,...,
 F``:sub:`n`> (:math:`n\geq{}0`) contains an ``extends`` clause, then the
 *direct superinterfaces* of the interface type ``I`` <``F``:sub:`1` ``,...,
 F``:sub:`n`> are the types given in the ``extends`` clause of the declaration
-of *I*.
+of ``I``.
 
 The *direct superinterfaces* of the parameterized interface type ``I``
 <``T``:sub:`1` ``,..., T``:sub:`n`> are all types ``J``
@@ -226,7 +226,7 @@ of *K*.
 The interface *K* is a superinterface of the interface *I* if:
 
 -  *I* is a direct subinterface of *K*; or
--  *K* is a superinterface of some interface *J* of which *I* is, in its turn,
+-  *K* is a superinterface of some interface *J* of which *I* is, in turn,
    a subinterface.
 
 .. index::
@@ -249,11 +249,11 @@ If superinterfaces have default implementations (see
 - The current interface that extends these interfaces must have method ``m``
   declared with an override-compatible signature (see
   :ref:`Override-Compatible Signatures`); or
-- all these methods refer to the same implementation, and this default
+- All these methods refer to the same implementation, and this default
   implementation is the current class method.
 
 
-Otherwise a :index:`compile-time error` occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 .. code-block:: typescript
    :linenos:
@@ -276,7 +276,6 @@ Otherwise a :index:`compile-time error` occurs.
 .. index::
    compile-time error
    interface
-   runtime
 
 |
 
@@ -299,7 +298,7 @@ properties (see :ref:`Interface Properties`) and methods (see
         | interfaceMethodDeclaration
         ;
 
-The scope of declaration of a member *m* that the interface type *I*
+The scope of declaration of a member *m* that the interface type ``I``
 declares or inherits is specified in :ref:`Scopes`.
 
 .. index::
@@ -328,9 +327,9 @@ Interface type members are as follows:
 -  Members inherited from a direct superinterface (see
    :ref:`Superinterfaces and Subinterfaces`).
 
-A :index:`compile-time error` occurs if the names of the method explicitly declared
-by the interface, and of the ``Object``’s ``public`` method are the same,
-but their signatures are different.
+A :index:`compile-time error` occurs if the names of the method explicitly
+declared by the interface, and of the ``Object``'s ``public`` method are the
+same, but their signatures are different.
 
 .. index::
    interface member
@@ -488,7 +487,7 @@ overload-equivalent (see :ref:`Overload-Equivalent Signatures`).
 A class that implements such interface can use :ref:`Class Method Overloading`
 or :ref:`Method Overload Signatures`. *Method overloading* is recommended.
 
-In the example below, overloading methods are used in a class:
+Overloading methods used in a class are represented in the example below:
 
 .. code-block-meta:
 
@@ -509,8 +508,7 @@ In the example below, overloading methods are used in a class:
        i.foo("aa")       // ok, 2nd method is called
     }
 
-In the example below, overload signatures are used:
-
+Overload signatures are represented in the example below:
 
 .. code-block-meta:
 

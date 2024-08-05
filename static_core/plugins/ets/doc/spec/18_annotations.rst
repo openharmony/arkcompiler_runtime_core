@@ -77,9 +77,9 @@ keyword ``interface`` is prefixed with the symbol ``@``:
         '@interface' identifier '{' annotationField* '}'
         ;
     annotationField:
-        identifier ':' type initializer?
+        identifier ':' type constInitializer?
         ;
-    initializer:
+    constInitializer:
         '=' constantExpression
         ;
 
@@ -151,7 +151,7 @@ and to define the values of annotation fields:
         '@' qualifiedName annotationValues?
         ;
     annotationValues:
-        '(' (objectLiteral | constExpression)? ')'
+        '(' (objectLiteral | constantExpression)? ')'
         ;
 
 An annotation declaration is presented in the example below:

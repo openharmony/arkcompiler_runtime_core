@@ -653,7 +653,7 @@ Utility Types
 *************
 
 |LANG| supports several embedded types, called *utility* types.
-They allow constructing new types, and extend their functionality.
+They allow constructing new types, adjusting properties of the inital types.
 
 .. index::
    embedded type
@@ -704,6 +704,27 @@ analogous type:
 Type ``T`` is not compatible with ``Partial<T>`` (see :ref:`Type Compatibility`),
 and variables of ``Partial<T>`` are to be initialized with valid object
 literals.
+
+**Note**: If class ``T`` has a user-defined getter, setter, or both, then none
+of those is called when object literal is used with ``Partial<T>`` variables.
+Object literal has its own built-in getters and setters to modify its variables:
+
+.. code-block:: typescript
+   :linenos:
+
+    interface I {
+        property: number
+    }
+    class A implements I {
+        set property(property: number) { console.log ("Setter called") ... }
+        get property(): number { console.log ("Getter called") ... }
+    }
+    function foo (partial: Partial<A>) {
+        partial.property = 666 // setter to be called
+        console.log(partial.property) // getter to be called
+    }
+    foo ({property: new SomeType}) // No getter or setter from class A is called
+    // 666 is printed as object literal has its own setter and getter
 
 |
 
