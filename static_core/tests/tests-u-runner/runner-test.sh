@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
 
 SCRIPT_DIR=$(realpath "$(dirname "${0}")")
 ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}

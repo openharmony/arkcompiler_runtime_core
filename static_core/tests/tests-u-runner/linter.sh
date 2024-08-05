@@ -19,7 +19,7 @@ ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
 
 
 function save_exit_code() {
-    EXIT_CODE=$(($1 + $2))
+    return $(($1 + $2))
 }
 
 source "${ROOT_DIR}/scripts/python/venv-utils.sh"
@@ -34,12 +34,15 @@ cd "${RUNNER_DIR}"
 
 pylint --rcfile .pylintrc runner main.py runner_test.py
 save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 mypy main.py
 save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 mypy -p runner
 save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 set -e
 
