@@ -29,15 +29,19 @@ static void PrintHelp(ark::PandArgParser &pa_parser)
     std::cerr << pa_parser.GetHelpString() << std::endl;
 }
 
-static bool ProcessArgs(ark::PandArgParser &pa_parser, const ark::PandArg<std::string> &input,
-                        const ark::PandArg<std::string> &output, const ark::PandArg<bool> &help, int argc,
-                        const char **argv)
+static bool ParseArgs(ark::PandArgParser &pa_parser, int argc, const char **argv)
 {
     if (!pa_parser.Parse(argc, argv)) {
         PrintHelp(pa_parser);
         return false;
     }
 
+    return true;
+}
+
+static bool ProcessArgs(ark::PandArgParser &pa_parser, const ark::PandArg<std::string> &input,
+                        const ark::PandArg<std::string> &output, const ark::PandArg<bool> &help)
+{
     if (input.GetValue().empty() || output.GetValue().empty() || help.GetValue()) {
         PrintHelp(pa_parser);
         return false;
@@ -63,7 +67,11 @@ int main(int argc, const char **argv)
     pa_parser.PushBackTail(&output);
     pa_parser.EnableTail();
 
-    if (!ProcessArgs(pa_parser, input, output, help, argc, argv)) {
+    if (!ParseArgs(pa_parser, argc, argv)) {
+        return 1;
+    }
+
+    if (!ProcessArgs(pa_parser, input, output, help)) {
         return 1;
     }
 

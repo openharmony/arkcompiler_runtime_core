@@ -17,6 +17,7 @@
 #define PANDA_LIBZIPARCHIVE_ZIP_ARCHIVE_H_
 
 #include <cstdint>
+#include <vector>
 #include "unzip.h"
 #include "zip.h"
 
@@ -167,7 +168,7 @@ int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t bufSize);
  *
  * Returns 0 on success and 1 on failure.
  */
-int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void *pbuf, size_t bufSize,
+int CreateOrAddFileIntoZip(const char *zipname, const char *filename, std::vector<uint8_t> *buf,
                            int append = APPEND_STATUS_CREATE, int level = Z_BEST_COMPRESSION);
 }  // namespace ark
 

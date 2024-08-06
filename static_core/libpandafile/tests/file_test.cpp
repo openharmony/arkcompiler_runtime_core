@@ -68,7 +68,7 @@ static std::vector<uint8_t> GetEmptyPandaFileBytes()
 int CreateOrAddZipPandaFile(std::vector<uint8_t> *data, const char *zipArchiveName, const char *filename, int append,
                             int level)
 {
-    return CreateOrAddFileIntoZip(zipArchiveName, filename, (*data).data(), (*data).size(), append, level);
+    return CreateOrAddFileIntoZip(zipArchiveName, filename, data, append, level);
 }
 
 bool CheckAnonMemoryName([[maybe_unused]] const char *zipArchiveName)
