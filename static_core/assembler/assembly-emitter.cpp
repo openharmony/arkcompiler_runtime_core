@@ -1322,7 +1322,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
         auto &paramItem = paramItems[protoIdx];
         if (!AddAnnotations(&paramItem, items, *param.metadata, program, entities.classItems, entities.fieldItems,
                             entities.methodItems)) {
-            SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + "of function " +
+            SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + " of function " +
                          func.name + ": " + GetLastError());
             return false;
         }
@@ -1536,7 +1536,7 @@ bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::
 {
     auto writer = FileWriter(filename);
     if (!writer) {
-        SetLastError("Unable to open" + filename + " for writing");
+        SetLastError("Unable to open " + filename + " for writing");
         return false;
     }
     return Emit(&writer, program, stat, maps, debugInfo, profileOpt);
