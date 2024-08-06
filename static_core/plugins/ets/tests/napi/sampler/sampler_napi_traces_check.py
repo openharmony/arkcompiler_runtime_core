@@ -27,8 +27,6 @@ trace_list = ["LETSGLOBAL::CallNativeSlowFunction; LETSGLOBAL::NativeSlowFunctio
     "LETSGLOBAL::CallNativeNAPIFastFunction; LETSGLOBAL::NativeNAPIFastFunction;",
     "LETSGLOBAL::CallNativeNAPISlowFunction; LETSGLOBAL::NativeNAPISlowFunction; LETSGLOBAL::SlowETSFunction;"]
 
-trace_list_ignored = []
-
 ALL_TRACES_FOUND = True
 
 with open(file_name, 'r') as my_file:

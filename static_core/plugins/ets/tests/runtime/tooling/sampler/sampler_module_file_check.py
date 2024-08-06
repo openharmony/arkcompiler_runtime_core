@@ -22,43 +22,40 @@ import argparse
 import numpy as np
 
 
-class ModulesDumpTest():
-    _file_name = ""
-    _binary_dir = ""
-    _checksum_name_map = {}
+class ModulesDumpTest:
+    _file_name: str
+    _binary_dir: str
+    _checksum_name_map: dict[str, np.uint32]
 
-    def __init__(self, args):
+    def __init__(self, args) -> None:
         self._file_name = args.file
         self._binary_dir = args.bindir
+        self._checksum_name_map = dict()
 
     @staticmethod
     def parse_args():
         parser = argparse.ArgumentParser(description="Sampler module file check test")
-        required = parser.add_argument_group('required arguments')
+        required = parser.add_argument_group("required arguments")
         required.add_argument("--file", type=str, required=True)
         required.add_argument("--bindir", type=str, required=True)
-        
+
         args = parser.parse_args()
 
         return args
 
-    def get_checksum_from_abc_file(self, module_path):
+    def get_checksum_from_abc_file(self, module_path) -> np.uint32:
         checksum_offset = 8 # bytes
-        checksum_size = 4 # bytes
 
-        file = open(module_path, 'r+')
-        checksum = np.fromfile(file, dtype=np.uint32, count=1, sep='', offset=checksum_offset)
+        with open(module_path, mode="r+") as file:
+            checksum = np.fromfile(file, dtype=np.uint32, count=1, sep='', offset=checksum_offset)
+            return checksum[0]
 
-        return checksum[0]
-
-    def fill_map(self, modules_list):
+    def fill_map(self, modules_list: list[str]):
         for module in modules_list:
             checksum = self.get_checksum_from_abc_file(module)
             self._checksum_name_map[module] = checksum
 
-        return
-
-    def module_file_check(self):
+    def module_file_check(self) -> bool:
         etsstdlib_abc_path = os.path.join(self._binary_dir, "plugins", "ets", "etsstdlib.abc")
         sampler_test_abc_path = os.path.join(self._binary_dir,
                                              "plugins",
@@ -78,18 +75,18 @@ class ModulesDumpTest():
 
         modules_from_file = []
 
-        with open(self._file_name, 'r') as my_file:
+        with open(self._file_name, "r") as my_file:
             while line := my_file.readline():
-                line = line.rstrip('\n')
-                line_content = line.split(' ')
+                line = line.rstrip("\n")
+                line_content = line.split(" ")
 
                 pathname: str = os.path.realpath(line_content[1])
                 modules_from_file.append(pathname)
 
-                checksum: numpy.uint32 = np.uint32(line_content[0])
-                expected_checksum: numpy.uint32 = self._checksum_name_map.get(pathname, -1)
-                
-                if (expected_checksum == -1):
+                checksum: np.uint32 = np.uint32(line_content[0])
+                expected_checksum: np.uint32 | None = self._checksum_name_map.get(pathname, None)
+
+                if (expected_checksum is None):
                     print("sampler_module_file_check: can not find expected checksum for ", pathname)
                     return False
 
@@ -103,8 +100,11 @@ class ModulesDumpTest():
                     return False
 
         if (len(modules_from_file) != len(modules_list)):
-            print("sampler_module_file_check: wrong number of modules in module file " \
-            "expected", len(modules_list), ", in file", len(modules_from_file))
+            error_message = (
+                "sampler_module_file_check: wrong number of modules in module file: "
+                f"expected {len(modules_list)}, in file {len(modules_from_file)}"
+            )
+            print(error_message)
             return False
 
         return True
