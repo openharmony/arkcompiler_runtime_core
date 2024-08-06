@@ -251,10 +251,9 @@ def write_snippets_from_rst(rst_lines, filename, skiplist):
 
 
 def parse_skiplist():
-    skiplist = open('skiplist', 'r')
-    global SKIP_NAMES
-    SKIP_NAMES = skiplist.readlines()
-    skiplist.close()
+    with open('skiplist', 'r') as skiplist:
+        global SKIP_NAMES
+        SKIP_NAMES = skiplist.readlines()
     return SKIP_NAMES
 
 
@@ -272,11 +271,10 @@ def parse_file(skiped_names, file, path=""):
     filename = os.fsdecode(file)
     result = True
     if filename.endswith(".rst"):
-        rst_file = open(path)
-        if not write_snippets_from_rst(rst_file.readlines(), os.path.splitext(filename)[0], skiped_names):
-            result = False
-        write_snippets_from_rst(rst_file.readlines(), os.path.splitext(filename)[0], skiped_names)
-        rst_file.close()
+        with open(path) as rst_file:
+            if not write_snippets_from_rst(rst_file.readlines(), os.path.splitext(filename)[0], skiped_names):
+                result = False
+            write_snippets_from_rst(rst_file.readlines(), os.path.splitext(filename)[0], skiped_names)
     return result
 
 SKIP_NAMES = parse_skiplist()

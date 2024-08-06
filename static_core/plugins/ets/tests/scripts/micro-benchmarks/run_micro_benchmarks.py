@@ -227,9 +227,8 @@ class EtsBenchmarksRunner:
             return stats
 
         if args.test_list is not None:
-            testlist_file = open(args.test_list, "r")
-            testlist = [line.strip() for line in testlist_file]
-            testlist_file.close()
+            with open(args.test_list, "r") as testlist_file:
+                testlist = [line.strip() for line in testlist_file]
             for test_name in testlist:
                 self.run_separate_bench(test_name + ".pa", stats)
             return stats
@@ -260,9 +259,8 @@ def dump_time_stats(logger, stats):
 
 def dump_pass_rate(logger, skiplist_name, passed_tests, failed_tests):
     if os.path.isfile(skiplist_name):
-        skiplist = open(skiplist_name, "r")
-        skipset = set([line.strip() for line in skiplist])
-        skiplist.close()
+        with open(skiplist_name, "r") as skiplist:
+            skipset = set([line.strip() for line in skiplist])
     else:
         skipset = set()
     new_failed = set(failed_tests) - skipset

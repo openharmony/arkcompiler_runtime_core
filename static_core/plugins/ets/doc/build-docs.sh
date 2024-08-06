@@ -137,7 +137,7 @@ fi
 
 BUILD_SOMETHING=no
 for i in "$@"; do
-    case $i in
+    case "$i" in
     -h|--help)
         print_help
         exit 0
