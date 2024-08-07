@@ -30,13 +30,13 @@ abc2prog_test_deps = [
   "$ark_root/libpandafile:libarkfile_static",
 ]
 
-test_ts_path = "//arkcompiler/runtime_core/abc2program/tests/ts/"
+test_ts_dir = "//arkcompiler/runtime_core/abc2program/tests/ts/"
 
 abc2prog_test_ts_files = [ "HelloWorld" ]
 
 foreach(file, abc2prog_test_ts_files) {
   es2abc_gen_abc("gen_${file}_abc") {
-    test_ts = "${test_ts_path}${file}.ts"
+    test_ts = "${test_ts_dir}${file}.ts"
     test_abc = "$target_out_dir/${file}.abc"
 
     src_js = rebase_path(test_ts)
@@ -51,7 +51,7 @@ abc2prog_debug_test_ts_files = [ "HelloWorld" ]
 
 foreach(file, abc2prog_debug_test_ts_files) {
   es2abc_gen_abc("gen_${file}_debug_abc") {
-    test_ts = "${test_ts_path}${file}.ts"
+    test_ts = "${test_ts_dir}${file}.ts"
     test_abc = "$target_out_dir/${file}Debug.abc"
 
     src_js = rebase_path(test_ts)
@@ -85,7 +85,11 @@ host_unittest_action("Abc2ProgScriptTest") {
   configs = abc2prog_test_configs
   deps = abc2prog_test_deps
   test_abc_dir = rebase_path(target_out_dir)
-  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+  test_abc_dump_dir = rebase_path(test_ts_dir)
+  defines = [
+    "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"",
+    "GRAPH_TEST_ABC_DUMP_DIR=\"${test_abc_dump_dir}/\"",
+  ]
 
   foreach(file, abc2prog_test_ts_files) {
     deps += [ ":gen_${file}_abc" ]

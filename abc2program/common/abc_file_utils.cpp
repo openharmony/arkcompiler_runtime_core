@@ -39,27 +39,6 @@ bool AbcFileUtils::IsSystemTypeName(const std::string &type_name)
     return (IsGlobalTypeName(type_name) || IsArrayTypeName(type_name));
 }
 
-bool AbcFileUtils::IsLiteralTagArray(const panda_file::LiteralTag &tag)
-{
-    switch (tag) {
-        case panda_file::LiteralTag::ARRAY_U1:
-        case panda_file::LiteralTag::ARRAY_U8:
-        case panda_file::LiteralTag::ARRAY_I8:
-        case panda_file::LiteralTag::ARRAY_U16:
-        case panda_file::LiteralTag::ARRAY_I16:
-        case panda_file::LiteralTag::ARRAY_U32:
-        case panda_file::LiteralTag::ARRAY_I32:
-        case panda_file::LiteralTag::ARRAY_U64:
-        case panda_file::LiteralTag::ARRAY_I64:
-        case panda_file::LiteralTag::ARRAY_F32:
-        case panda_file::LiteralTag::ARRAY_F64:
-        case panda_file::LiteralTag::ARRAY_STRING:
-            return true;
-        default:
-            return false;
-    }
-}
-
 std::string AbcFileUtils::GetLabelNameByInstIdx(size_t inst_idx)
 {
     std::stringstream name;
