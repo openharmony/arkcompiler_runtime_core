@@ -97,6 +97,8 @@ static std::string GetTest2Source()
 )";
 }
 
+namespace ark::disasm::test {
+
 TEST(LabelTest, test1)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -255,3 +257,5 @@ TEST(LabelTest, TestExceptions)
 }
 
 #undef DISASM_BIN_DIR
+
+}  // namespace ark::disasm::test

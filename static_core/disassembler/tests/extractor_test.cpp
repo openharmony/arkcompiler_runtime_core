@@ -20,6 +20,8 @@
 #include "assembly-parser.h"
 #include "disasm_backed_debug_info_extractor.h"
 
+namespace ark::disasm::test {
+
 TEST(ExtractorTest, LineNumberTable)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -72,3 +74,5 @@ TEST(ExtractorTest, LineNumberTable)
     ASSERT_EQ(lineTable[3].offset, 4);
     ASSERT_EQ(lineTable[3].line, 6);
 }
+
+}  // namespace ark::disasm::test

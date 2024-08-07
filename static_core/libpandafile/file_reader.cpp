@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include <cstdint>
 
 #include "annotation_data_accessor.h"
 #include "bytecode_instruction.h"
+#include "code_data_accessor.h"
 #include "field_data_accessor.h"
 #include "file.h"
 #include "debug_info_updater-inl.h"
@@ -33,6 +35,7 @@
 #include "libpandafile/method_data_accessor-inl.h"
 
 #include "libpandabase/utils/utf.h"
+#include "proto_data_accessor.h"
 
 namespace ark::panda_file {
 
@@ -83,6 +86,125 @@ bool FileReader::ReadContainer(bool shouldRebuildIndices)
     return true;
 }
 
+void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &literalArray,
+                                    const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                    const panda_file::LiteralTag &tag)
+{
+    literalArray.emplace_back(static_cast<uint8_t>(tag));
+    switch (tag) {
+        case panda_file::LiteralTag::BOOL: {
+            literalArray.emplace_back(static_cast<uint8_t>(std::get<bool>(value)));
+            break;
+        }
+        case panda_file::LiteralTag::TAGVALUE:
+        case panda_file::LiteralTag::ACCESSOR:
+        case panda_file::LiteralTag::NULLVALUE: {
+            literalArray.emplace_back(std::get<uint8_t>(value));
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_U1:
+        case panda_file::LiteralTag::ARRAY_I8:
+        case panda_file::LiteralTag::ARRAY_U8: {
+            File::EntityId id(std::get<uint32_t>(value));
+            auto sp = file_->GetSpanFromId(id);
+            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+            literalArray.emplace_back(len);
+            for (size_t i = 0; i < len; i++) {
+                auto v = helpers::Read<sizeof(uint8_t)>(&sp);
+                literalArray.emplace_back(v);
+            }
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I16:
+        case panda_file::LiteralTag::ARRAY_U16: {
+            File::EntityId id(std::get<uint32_t>(value));
+            auto sp = file_->GetSpanFromId(id);
+            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+            literalArray.emplace_back(len);
+            for (size_t i = 0; i < len; i++) {
+                auto v = helpers::Read<sizeof(uint16_t)>(&sp);
+                literalArray.emplace_back(v);
+            }
+            break;
+        }
+        case panda_file::LiteralTag::INTEGER: {
+            literalArray.emplace_back(std::get<uint32_t>(value));
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I32:
+        case panda_file::LiteralTag::ARRAY_U32:
+        case panda_file::LiteralTag::ARRAY_F32: {
+            File::EntityId id(std::get<uint32_t>(value));
+            auto sp = file_->GetSpanFromId(id);
+            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+            literalArray.emplace_back(len);
+            for (size_t i = 0; i < len; i++) {
+                auto v = helpers::Read<sizeof(uint32_t)>(&sp);
+                literalArray.emplace_back(v);
+            }
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I64:
+        case panda_file::LiteralTag::ARRAY_U64:
+        case panda_file::LiteralTag::ARRAY_F64: {
+            File::EntityId id(std::get<uint32_t>(value));
+            auto sp = file_->GetSpanFromId(id);
+            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+            literalArray.emplace_back(len);
+            for (size_t i = 0; i < len; i++) {
+                auto v = helpers::Read<sizeof(uint64_t)>(&sp);
+                literalArray.emplace_back(v);
+            }
+            break;
+        }
+        case panda_file::LiteralTag::FLOAT: {
+            literalArray.emplace_back(bit_cast<uint32_t>(std::get<float>(value)));
+            break;
+        }
+        case panda_file::LiteralTag::DOUBLE: {
+            literalArray.emplace_back(bit_cast<uint64_t>(std::get<double>(value)));
+            break;
+        }
+        case panda_file::LiteralTag::STRING: {
+            File::EntityId id(std::get<uint32_t>(value));
+            auto data = file_->GetStringData(id);
+            std::string itemStr(utf::Mutf8AsCString(data.data));
+            auto *stringItem = container_.GetOrCreateStringItem(itemStr);
+            literalArray.emplace_back(stringItem);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_STRING: {
+            File::EntityId id(std::get<uint32_t>(value));
+            auto sp = file_->GetSpanFromId(id);
+            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+            literalArray.emplace_back(len);
+            for (size_t i = 0; i < len; i++) {
+                File::EntityId strId(helpers::Read<sizeof(uint32_t)>(&sp));
+                auto data = file_->GetStringData(strId);
+                std::string itemStr(utf::Mutf8AsCString(data.data));
+                auto *stringItem = container_.GetOrCreateStringItem(itemStr);
+                literalArray.emplace_back(stringItem);
+            }
+            break;
+        }
+        case panda_file::LiteralTag::METHOD:
+        case panda_file::LiteralTag::GENERATORMETHOD:
+        case panda_file::LiteralTag::ASYNCMETHOD:
+        case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
+            File::EntityId methodId(std::get<uint32_t>(value));
+            MethodDataAccessor methodAcc(*file_, methodId);
+            auto name = methodAcc.GetName();
+            (void)name;
+            File::EntityId classId(methodAcc.GetClassId());
+            auto *classItem = CreateClassItem(classId);
+            literalArray.emplace_back(CreateMethodItem(classItem, methodId));
+            break;
+        }
+        default:
+            UNREACHABLE();
+    }
+}
+
 /* static */
 bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, File::EntityId arrayId, uint32_t index)
 {
@@ -99,119 +221,7 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, F
     litArrayAccessor->EnumerateLiteralVals(
         arrayId, [&literalArray, this](const panda_file::LiteralDataAccessor::LiteralValue &value,
                                        const panda_file::LiteralTag &tag) {
-            literalArray.emplace_back(static_cast<uint8_t>(tag));
-            switch (tag) {
-                case panda_file::LiteralTag::BOOL: {
-                    literalArray.emplace_back(static_cast<uint8_t>(std::get<bool>(value)));
-                    break;
-                }
-                case panda_file::LiteralTag::TAGVALUE:
-                case panda_file::LiteralTag::ACCESSOR:
-                case panda_file::LiteralTag::NULLVALUE: {
-                    literalArray.emplace_back(std::get<uint8_t>(value));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_U1:
-                case panda_file::LiteralTag::ARRAY_I8:
-                case panda_file::LiteralTag::ARRAY_U8: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint8_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I16:
-                case panda_file::LiteralTag::ARRAY_U16: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint16_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::INTEGER: {
-                    literalArray.emplace_back(std::get<uint32_t>(value));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I32:
-                case panda_file::LiteralTag::ARRAY_U32:
-                case panda_file::LiteralTag::ARRAY_F32: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint32_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I64:
-                case panda_file::LiteralTag::ARRAY_U64:
-                case panda_file::LiteralTag::ARRAY_F64: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint64_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::FLOAT: {
-                    literalArray.emplace_back(bit_cast<uint32_t>(std::get<float>(value)));
-                    break;
-                }
-                case panda_file::LiteralTag::DOUBLE: {
-                    literalArray.emplace_back(bit_cast<uint64_t>(std::get<double>(value)));
-                    break;
-                }
-                case panda_file::LiteralTag::STRING: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto data = file_->GetStringData(id);
-                    std::string itemStr(utf::Mutf8AsCString(data.data));
-                    auto *stringItem = container_.GetOrCreateStringItem(itemStr);
-                    literalArray.emplace_back(stringItem);
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_STRING: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        File::EntityId strId(helpers::Read<sizeof(uint32_t)>(&sp));
-                        auto data = file_->GetStringData(strId);
-                        std::string itemStr(utf::Mutf8AsCString(data.data));
-                        auto *stringItem = container_.GetOrCreateStringItem(itemStr);
-                        literalArray.emplace_back(stringItem);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::METHOD:
-                case panda_file::LiteralTag::GENERATORMETHOD:
-                case panda_file::LiteralTag::ASYNCMETHOD:
-                case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
-                    File::EntityId methodId(std::get<uint32_t>(value));
-                    MethodDataAccessor methodAcc(*file_, methodId);
-                    auto name = methodAcc.GetName();
-                    (void)name;
-                    File::EntityId classId(methodAcc.GetClassId());
-                    auto *classItem = CreateClassItem(classId);
-                    literalArray.emplace_back(CreateMethodItem(classItem, methodId));
-                    break;
-                }
-                default:
-                    UNREACHABLE();
-            }
+            this->EmplaceLiteralVals(literalArray, value, tag);
         });
 
     item->AddItems(literalArray);
@@ -628,6 +638,68 @@ DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debugInfoId)
     return debugInfoItem;
 }
 
+BaseClassItem *FileReader::GetCatchTypeItem(CodeDataAccessor::CatchBlock &catchBlock, File::EntityId methodId,
+                                            MethodItem *methodItem)
+{
+    BaseClassItem *catchTypeItem = nullptr;
+    auto typeIdx = catchBlock.GetTypeIdx();
+    if (typeIdx != panda_file::INVALID_INDEX) {
+        File::EntityId catchClsId = file_->ResolveClassIndex(methodId, catchBlock.GetTypeIdx());
+        if (file_->IsExternal(catchClsId)) {
+            catchTypeItem = CreateForeignClassItem(catchClsId);
+        } else {
+            catchTypeItem = CreateClassItem(catchClsId);
+        }
+        methodItem->AddIndexDependency(catchTypeItem);
+    }
+    return catchTypeItem;
+}
+
+void FileReader::SetMethodCodeIfPresent(std::optional<File::EntityId> &codeId, MethodItem *methodItem,
+                                        File::EntityId &methodId)
+{
+    CodeDataAccessor codeAcc(*file_, codeId.value());
+    std::vector<uint8_t> instructions(codeAcc.GetCodeSize());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    instructions.assign(codeAcc.GetInstructions(), codeAcc.GetInstructions() + codeAcc.GetCodeSize());
+    auto *codeItem =
+        container_.CreateItem<CodeItem>(codeAcc.GetNumVregs(), codeAcc.GetNumArgs(), std::move(instructions));
+
+    codeAcc.EnumerateTryBlocks([this, &methodItem, &methodId, &codeItem](CodeDataAccessor::TryBlock &tryBlock) {
+        std::vector<CodeItem::CatchBlock> catchBlocks;
+        tryBlock.EnumerateCatchBlocks(
+            [this, &methodItem, &methodId, &catchBlocks](CodeDataAccessor::CatchBlock &catchBlock) {
+                BaseClassItem *catchTypeItem = this->GetCatchTypeItem(catchBlock, methodId, methodItem);
+                catchBlocks.emplace_back(CodeItem::CatchBlock(methodItem, catchTypeItem, catchBlock.GetHandlerPc(),
+                                                              catchBlock.GetCodeSize()));
+                return true;
+            });
+        codeItem->AddTryBlock(CodeItem::TryBlock(tryBlock.GetStartPc(), tryBlock.GetLength(), std::move(catchBlocks)));
+        return true;
+    });
+
+    methodItem->SetCode(codeItem);
+}
+
+TypeItem *FileReader::SetRetType(ProtoDataAccessor &protoAcc, size_t &referenceNum)
+
+{
+    Type retType = protoAcc.GetReturnType();
+    TypeItem *retTypeItem = nullptr;
+    if (retType.IsPrimitive()) {
+        retTypeItem = container_.GetOrCreatePrimitiveTypeItem(retType);
+    } else {
+        const File::EntityId typeClsId = protoAcc.GetReferenceType(referenceNum);
+        if (file_->IsExternal(typeClsId)) {
+            retTypeItem = CreateForeignClassItem(typeClsId);
+        } else {
+            retTypeItem = CreateClassItem(typeClsId);
+        }
+        referenceNum++;
+    }
+    return retTypeItem;
+}
+
 MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId)
 {
     auto it = itemsDone_.find(methodId);
@@ -641,20 +713,8 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId
     auto *methodStrItem = container_.GetOrCreateStringItem(methodName);
 
     ProtoDataAccessor protoAcc(*file_, methodAcc.GetProtoId());
-    Type retType = protoAcc.GetReturnType();
     size_t referenceNum = 0;
-    TypeItem *retTypeItem = nullptr;
-    if (retType.IsPrimitive()) {
-        retTypeItem = container_.GetOrCreatePrimitiveTypeItem(retType);
-    } else {
-        const File::EntityId typeClsId = protoAcc.GetReferenceType(referenceNum);
-        if (file_->IsExternal(typeClsId)) {
-            retTypeItem = CreateForeignClassItem(typeClsId);
-        } else {
-            retTypeItem = CreateClassItem(typeClsId);
-        }
-        referenceNum++;
-    }
+    TypeItem *retTypeItem = SetRetType(protoAcc, referenceNum);
     ASSERT(retTypeItem != nullptr);
     auto paramItems = CreateMethodParamItems(&protoAcc, &methodAcc, referenceNum);
     // Double check if we done this method while computing params
@@ -691,38 +751,7 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId
 
     auto codeId = methodAcc.GetCodeId();
     if (codeId) {
-        CodeDataAccessor codeAcc(*file_, codeId.value());
-        std::vector<uint8_t> instructions(codeAcc.GetCodeSize());
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        instructions.assign(codeAcc.GetInstructions(), codeAcc.GetInstructions() + codeAcc.GetCodeSize());
-        auto *codeItem =
-            container_.CreateItem<CodeItem>(codeAcc.GetNumVregs(), codeAcc.GetNumArgs(), std::move(instructions));
-
-        codeAcc.EnumerateTryBlocks([this, &methodItem, &methodId, &codeItem](CodeDataAccessor::TryBlock &tryBlock) {
-            std::vector<CodeItem::CatchBlock> catchBlocks;
-            tryBlock.EnumerateCatchBlocks(
-                [this, &methodItem, &methodId, &catchBlocks](CodeDataAccessor::CatchBlock &catchBlock) {
-                    BaseClassItem *catchTypeItem = nullptr;
-                    auto typeIdx = catchBlock.GetTypeIdx();
-                    if (typeIdx != panda_file::INVALID_INDEX) {
-                        File::EntityId catchClsId = file_->ResolveClassIndex(methodId, catchBlock.GetTypeIdx());
-                        if (file_->IsExternal(catchClsId)) {
-                            catchTypeItem = CreateForeignClassItem(catchClsId);
-                        } else {
-                            catchTypeItem = CreateClassItem(catchClsId);
-                        }
-                        methodItem->AddIndexDependency(catchTypeItem);
-                    }
-                    catchBlocks.emplace_back(CodeItem::CatchBlock(methodItem, catchTypeItem, catchBlock.GetHandlerPc(),
-                                                                  catchBlock.GetCodeSize()));
-                    return true;
-                });
-            codeItem->AddTryBlock(
-                CodeItem::TryBlock(tryBlock.GetStartPc(), tryBlock.GetLength(), std::move(catchBlocks)));
-            return true;
-        });
-
-        methodItem->SetCode(codeItem);
+        SetMethodCodeIfPresent(codeId, methodItem, methodId);
     }
 
     auto debugInfoId = methodAcc.GetDebugInfoId();

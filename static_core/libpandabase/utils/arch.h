@@ -205,7 +205,7 @@ constexpr const char *GetArchString(Arch arch)
     }
 }
 
-inline constexpr RegMask GetCallerRegsMask(Arch arch, bool isFp)
+constexpr RegMask GetCallerRegsMask(Arch arch, bool isFp)
 {
     switch (arch) {
         case Arch::AARCH32:
@@ -221,7 +221,7 @@ inline constexpr RegMask GetCallerRegsMask(Arch arch, bool isFp)
     }
 }
 
-inline constexpr RegMask GetCalleeRegsMask(Arch arch, bool isFp, bool irtocOptimized = false)
+constexpr RegMask GetCalleeRegsMask(Arch arch, bool isFp, bool irtocOptimized = false)
 {
     switch (arch) {
         case Arch::AARCH32:

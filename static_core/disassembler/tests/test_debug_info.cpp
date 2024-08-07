@@ -32,6 +32,8 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
 
+namespace ark::disasm::test {
+
 TEST(TestDebugInfo, TestDebugInfo)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -97,3 +99,5 @@ TEST(TestDebugInfo, TestDebugInfo)
     // There should be no local variables for panda assembler
     ASSERT_EQ(bodyG.find("#   LOCAL_VARIABLE_TABLE:"), std::string::npos);
 }
+
+}  // namespace ark::disasm::test

@@ -135,6 +135,8 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
 
+namespace ark::disasm::test {
+
 TEST(InstructionsTest, TestLanguagePandaAssembly)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -316,3 +318,5 @@ TEST(InstructionsTest, TestCorrectReg)
 }
 
 #undef DISASM_BIN_DIR
+
+}  // namespace ark::disasm::test
