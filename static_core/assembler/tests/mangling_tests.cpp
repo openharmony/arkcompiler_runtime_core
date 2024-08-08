@@ -18,6 +18,8 @@
 #include "assembly-function.h"
 #include "extensions/extensions.h"
 
+namespace ark::test {
+
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark::pandasm;
 
@@ -58,3 +60,5 @@ TEST(ManglingTests, GetFunctionNameFromSignature)
     std::string name = "Asm.main:(type1,type2,type3,type4)";
     ASSERT_EQ(GetFunctionNameFromSignature(name), "Asm.main");
 }
+
+}  // namespace ark::test

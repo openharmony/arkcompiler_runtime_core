@@ -250,12 +250,8 @@ PandaString DecimalsToString(FpType *numberInteger, FpType fraction, int radix, 
         if (fraction > HALF && fraction + delta > 1) {
             size_t fractionEnd = result.size() - 1;
             result[fractionEnd] = Carry(*result.rbegin(), radix);
-            for (; fractionEnd > 0; fractionEnd--) {
-                if (result[fractionEnd] == '0') {
-                    result[fractionEnd - 1] = Carry(result[fractionEnd - 1], radix);
-                } else {
-                    break;
-                }
+            for (; fractionEnd > 0 && result[fractionEnd] == '0'; fractionEnd--) {
+                result[fractionEnd - 1] = Carry(result[fractionEnd - 1], radix);
             }
             if (fractionEnd == 0) {
                 (*numberInteger)++;

@@ -19,6 +19,8 @@
 #include <gtest/gtest.h>
 #include <string>
 
+namespace ark::test {
+
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark::pandasm;
 
@@ -4055,7 +4057,7 @@ TEST(parsertests, test_function_overloading_1)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
         )";
 
     auto res = p.Parse(source);
@@ -4079,7 +4081,7 @@ TEST(parsertests, test_function_overloading_2)
     Parser p;
     std::string source = R"(
             .function u1 f(i8 a0) {}
-            .function i8 f(i8 a0) {} 
+            .function i8 f(i8 a0) {}
         )";
 
     auto res = p.Parse(source);
@@ -4109,7 +4111,7 @@ TEST(parsertests, test_function_overloading_4)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
 
             .function void main(u1 a0) {
                 call f:(), a0
@@ -4171,7 +4173,7 @@ TEST(parsertests, test_function_overloading_7)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
 
             .function void main(u1 a0) {
                 call f:(u1,)
@@ -4188,7 +4190,7 @@ TEST(parsertests, test_function_overloading_8)
     Parser p;
     std::string source = R"(
             .function u1 f(u1 a0) {}
-            .function u1 f(i8 a0, u8 a1) {} 
+            .function u1 f(i8 a0, u8 a1) {}
 
             .function void main(u1 a0) {
                 call f:(i8, u8), a0
@@ -4236,7 +4238,7 @@ TEST(parsertests, test_function_overloading_10)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
 
             .function void main(u1 a0) {
                 call f:(i8, u1
@@ -4253,7 +4255,7 @@ TEST(parsertests, test_function_overloading_11)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
 
             .function void main(u1 a0) {
                 call f:
@@ -4548,3 +4550,5 @@ TEST(parsertests, test_final)
         ASSERT_EQ(err.err, Error::ErrorType::ERR_NONE);
     }
 }
+
+}  // namespace ark::test

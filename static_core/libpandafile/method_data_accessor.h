@@ -189,6 +189,9 @@ public:
     uint32_t GetTypeAnnotationsNumber();
     uint32_t GetRuntimeTypeAnnotationsNumber();
 
+    template <std::size_t SIZE>
+    void NumAnnonationProcess(uint32_t &result, File::EntityId &annotationId,
+                              std::array<const char *, SIZE> elemNameTable, uint32_t fieldId);
     uint32_t GetNumericalAnnotation(uint32_t fieldId);
 
 private:

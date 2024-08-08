@@ -49,8 +49,7 @@ protected:
 #ifdef PANDA_NIGHTLY_TEST_ON
         seed_ = std::time(NULL);
 #else
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        seed_ = 123456U;
+        seed_ = RANDOM_SEED;
 #endif
         RuntimeOptions options;
         // NOLINTNEXTLINE(readability-magic-numbers)
@@ -162,6 +161,8 @@ private:
     InternalAllocatorPtr internalAllocator_;
     unsigned int seed_ {};
     ark::MTManagedThread *thread_ {};
+
+    static const unsigned int RANDOM_SEED = 123456U;
 };
 
 TEST_F(CardTableTest, MarkTest)

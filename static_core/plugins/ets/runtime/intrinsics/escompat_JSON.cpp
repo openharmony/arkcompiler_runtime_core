@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021 - 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -356,19 +356,19 @@ EtsString *EscompatJSONStringifyObj(EtsObject *d)
         if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BOOLEAN) {
             ss << static_cast<bool>(ark::ets::EtsBoxPrimitive<ark::ets::EtsBoolean>::FromCoreType(d)->GetValue());
         } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BYTE) {
-            ss << ark::ets::EtsBoxPrimitive<ark::ets::EtsByte>::FromCoreType(d)->GetValue();
+            ss << (ark::ets::EtsBoxPrimitive<ark::ets::EtsByte>::FromCoreType(d)->GetValue());
         } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_CHAR) {
-            ss << ark::ets::EtsBoxPrimitive<ark::ets::EtsChar>::FromCoreType(d)->GetValue();
+            ss << (ark::ets::EtsBoxPrimitive<ark::ets::EtsChar>::FromCoreType(d)->GetValue());
         } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_SHORT) {
-            ss << ark::ets::EtsBoxPrimitive<ark::ets::EtsShort>::FromCoreType(d)->GetValue();
+            ss << (ark::ets::EtsBoxPrimitive<ark::ets::EtsShort>::FromCoreType(d)->GetValue());
         } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_INT) {
-            ss << ark::ets::EtsBoxPrimitive<ark::ets::EtsInt>::FromCoreType(d)->GetValue();
+            ss << (ark::ets::EtsBoxPrimitive<ark::ets::EtsInt>::FromCoreType(d)->GetValue());
         } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_LONG) {
-            ss << ark::ets::EtsBoxPrimitive<ark::ets::EtsLong>::FromCoreType(d)->GetValue();
+            ss << (ark::ets::EtsBoxPrimitive<ark::ets::EtsLong>::FromCoreType(d)->GetValue());
         } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_FLOAT) {
-            ss << ark::ets::EtsBoxPrimitive<ark::ets::EtsFloat>::FromCoreType(d)->GetValue();
+            ss << (ark::ets::EtsBoxPrimitive<ark::ets::EtsFloat>::FromCoreType(d)->GetValue());
         } else if (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_DOUBLE) {
-            ss << ark::ets::EtsBoxPrimitive<ark::ets::EtsDouble>::FromCoreType(d)->GetValue();
+            ss << (ark::ets::EtsBoxPrimitive<ark::ets::EtsDouble>::FromCoreType(d)->GetValue());
         } else {
             UNREACHABLE();
         }

@@ -14,7 +14,10 @@
  */
 
 #include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
+#include <chrono>
+#include <string_view>
 
+#include "ets_coroutine.h"
 #include "interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/js_value.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
@@ -620,6 +623,33 @@ private:
     napi_value jsRet_ {};
 };
 
+void ThrowProperError(napi_env env, EtsCoroutine *coro)
+{
+    NapiScope jsHandleScope(env);
+    ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
+
+    auto exc = coro->GetException();
+    auto klass = exc->ClassAddr<ark::Class>();
+    auto data = EtsConvertorRef::ValVariant(ToObjRoot(ark::VMHandle<ark::ObjectHeader>(coro, exc).GetAddress()));
+    coro->ClearException();
+
+    EtsToJsConvertor ets2js(env, &data);
+    ets2js.VisitClass(klass);
+    if (ets2js.Error()) {
+        InteropCtx::ThrowJSError(env, std::string("InvokeEtsMethod: ets2js error while converting pending exception: " +
+                                                  ets2js.Error().value()));
+        return;
+    }
+    InteropCtx::ThrowJSValue(env, ets2js.GetResult());
+}
+
+static void GetConverterResult(std::string_view converterType, std::chrono::steady_clock::time_point begin)
+{
+    auto end = std::chrono::steady_clock::now();
+    int64_t t = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
+    INTEROP_LOG(INFO) << "InvokeEtsMethod: " << converterType << "elapsed time: " << t << "us";
+}
+
 napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck)
 {
     auto coro = EtsCoroutine::GetCurrent();
@@ -670,31 +700,14 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
             InteropCtx::ThrowJSError(env, std::string("InvokeEtsMethod: js2ets error: ") + js2ets.Error().value());
             return nullptr;
         }
+
         args = js2ets.GetResult();
-        auto end = std::chrono::steady_clock::now();
-        int64_t t = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-        INTEROP_LOG(INFO) << "InvokeEtsMethod: js2ets elapsed time: " << t << "us";
+        GetConverterResult("js2ets", begin);
     }
 
     ark::Value etsRes = method->Invoke(coro, args.data());
     if (UNLIKELY(coro->HasPendingException())) {
-        NapiScope jsHandleScope(env);
-        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
-
-        auto exc = coro->GetException();
-        auto klass = exc->ClassAddr<ark::Class>();
-        auto data = EtsConvertorRef::ValVariant(ToObjRoot(ark::VMHandle<ark::ObjectHeader>(coro, exc).GetAddress()));
-        coro->ClearException();
-
-        EtsToJsConvertor ets2js(env, &data);
-        ets2js.VisitClass(klass);
-        if (ets2js.Error()) {
-            InteropCtx::ThrowJSError(env,
-                                     std::string("InvokeEtsMethod: ets2js error while converting pending exception: " +
-                                                 ets2js.Error().value()));
-            return nullptr;
-        }
-        InteropCtx::ThrowJSValue(env, ets2js.GetResult());
+        ThrowProperError(env, coro);
         return nullptr;
     }
 
@@ -711,9 +724,7 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
             return nullptr;
         }
         jsRes = ets2js.GetResult();
-        auto end = std::chrono::steady_clock::now();
-        int64_t t = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
-        INTEROP_LOG(INFO) << "InvokeEtsMethod: ets2js elapsed time: " << t << "us";
+        GetConverterResult("ets2js", begin);
 
         // Check that the method has a return value
         panda_file::Type retType = method->GetProto().GetReturnType();
