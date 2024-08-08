@@ -1047,6 +1047,50 @@ Expected<Program, Error> Parser::ParseAfterMainLoop(const std::string &fileName)
     return std::move(program_);
 }
 
+void Parser::ParseContextByType(const std::vector<Token> &tokens, bool &isLangParsed, bool &isFirstStatement)
+{
+    switch (*context_) {
+        case Token::Type::ID_CATCH:
+        case Token::Type::ID_CATCHALL: {
+            ParseAsCatchall(tokens);
+            break;
+        }
+        case Token::Type::ID_LANG: {
+            ParseAsLanguage(tokens, isLangParsed, isFirstStatement);
+            break;
+        }
+        case Token::Type::ID_REC: {
+            ParseAsRecord(tokens);
+            break;
+        }
+        case Token::Type::ID_FUN: {
+            ParseAsFunction(tokens);
+            break;
+        }
+        case Token::Type::ID_UNION: {
+            ParseAsUnionField(tokens);
+            break;
+        }
+        case Token::Type::ID_ARR: {
+            ParseAsArray(tokens);
+            break;
+        }
+        case Token::Type::DEL_BRACE_R: {
+            ParseAsBraceRight(tokens);
+            break;
+        }
+        default: {
+            if (funcDef_) {
+                ParseFunctionCode();
+            } else if (recordDef_) {
+                ParseRecordFields();
+            } else if (arrayDef_) {
+                ParseArrayElements();
+            }
+        }
+    }
+}
+
 Expected<Program, Error> Parser::Parse(TokenSet &vectorsTokens, const std::string &fileName)
 {
     bool isLangParsed = false;
@@ -1059,46 +1103,8 @@ Expected<Program, Error> Parser::Parse(TokenSet &vectorsTokens, const std::strin
         LOG(DEBUG, ASSEMBLER) << "started parsing of line " << lineStric_ << ": " << tokens[0].wholeLine;
         context_.Make(tokens);
 
-        switch (*context_) {
-            case Token::Type::ID_CATCH:
-            case Token::Type::ID_CATCHALL: {
-                ParseAsCatchall(tokens);
-                break;
-            }
-            case Token::Type::ID_LANG: {
-                ParseAsLanguage(tokens, isLangParsed, isFirstStatement);
-                break;
-            }
-            case Token::Type::ID_REC: {
-                ParseAsRecord(tokens);
-                break;
-            }
-            case Token::Type::ID_FUN: {
-                ParseAsFunction(tokens);
-                break;
-            }
-            case Token::Type::ID_UNION: {
-                ParseAsUnionField(tokens);
-                break;
-            }
-            case Token::Type::ID_ARR: {
-                ParseAsArray(tokens);
-                break;
-            }
-            case Token::Type::DEL_BRACE_R: {
-                ParseAsBraceRight(tokens);
-                break;
-            }
-            default: {
-                if (funcDef_) {
-                    ParseFunctionCode();
-                } else if (recordDef_) {
-                    ParseRecordFields();
-                } else if (arrayDef_) {
-                    ParseArrayElements();
-                }
-            }
-        }
+        ParseContextByType(tokens, isLangParsed, isFirstStatement);
+
         if (!ParseAfterLine(isFirstStatement)) {
             break;
         }

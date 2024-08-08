@@ -209,6 +209,7 @@ private:
     void ParseAsUnionField(const std::vector<Token> &tokens);
     void ParseAsBraceRight(const std::vector<Token> &tokens);
     bool ParseAfterLine(bool &isFirstStatement);
+    void ParseContextByType(const std::vector<Token> &tokens, bool &isLangParsed, bool &isFirstStatement);
     Expected<Program, Error> ParseAfterMainLoop(const std::string &fileName);
     void ParseResetFunctionLabelsAndParams();
     void ParseResetTables();

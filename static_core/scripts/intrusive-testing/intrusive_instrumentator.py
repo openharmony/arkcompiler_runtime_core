@@ -149,11 +149,8 @@ class Util:
     # raise: OSError
     @staticmethod
     def read_file_lines(file_path):
-        fd = open(file_path, "r")
-        try:
+        with open(file_path, "r") as fd:
             lines = fd.readlines()
-        finally:
-            fd.close()
         return lines
 
     # raise: OSError
@@ -313,11 +310,8 @@ class BindingsFileParser:
     # raise: OSError
     def __init__(self, file):
         self.__file = file
-        f = open(file, "r")
-        try:
+        with open(file, "r") as f:
             self.__obj = yaml.safe_load(f)
-        finally:
-            f.close()
 
     #raise: yamale.YamaleError
     def validate(self, schema_file):

@@ -64,7 +64,7 @@ function run_tests() {
 
 function clear_dir() {
     TARGET_DIR=$1
-    if [[ -d $TARGET_DIR ]]; then
+    if [[ -d "$TARGET_DIR" ]]; then
         if [[ "$CLEAR_BUILD_DIRS" = true ]]; then
             rm -rf "$TARGET_DIR"
         else

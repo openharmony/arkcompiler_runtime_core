@@ -141,7 +141,7 @@ def process_log(phases_list: List[str], gc_log_file: str, result_md_file: str) -
         min_str = "| min |"
         for phase in sorted(phases.keys()):
             title_str += f" {phase} |"
-            delim_table_str += ":----:|"
+            delim_table_str = f"{delim_table_str}:----:|"
             count_str += f" {phases.get(phase).get_count()} / {phases.get(phase).get_count()} |"
             avg_str += f" {phases.get(phase).get_thread_avg()} / {phases.get(phase).get_cpu_avg()} |"
             median_str += f" {phases.get(phase).get_thread_median()} / {phases.get(phase).get_cpu_median()} |"
