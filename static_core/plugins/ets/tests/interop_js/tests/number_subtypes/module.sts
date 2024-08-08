@@ -54,7 +54,7 @@ export declare class ClassWithEmptyConstructor {
 
     constructor();
 
-    varify_properties(v0_expected: JSValue, v1_expected: JSValue): JSValue;
+    verifyProperties(v0Expected: JSValue, v1Expected: JSValue): JSValue;
 
     GetV0(): int[];
 
@@ -73,7 +73,7 @@ export declare class ClassWithEmptyConstructor {
 //         name: string;
 //     }
 
-//     export function create_kitten(id: number, name: string) {
+//     export function createKitten(id: number, name: string) {
 //         return new Kitten(id, name);
 //     }
 // }
@@ -88,5 +88,5 @@ export declare class Kitten {
 }
 
 export declare class MyNamespace {
-    static create_kitten(id: int, name: string): Kitten;
+    static createKitten(id: int, name: string): Kitten;
 }

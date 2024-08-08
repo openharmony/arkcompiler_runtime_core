@@ -14,29 +14,29 @@
  */
 
 const {
-    string,
-    PublicGetterClass,
-    create_public_getter_class_from_ets,
-} = require("getter.test.js");
+	string,
+	PublicGetterClass,
+	createublicetterlassromts,
+} = require('getter.test.js');
 
-function check_public_getter_class_value() {
-    const GClass = new PublicGetterClass();
+function checkublicetterlassalue() {
+	const GClass = new PublicGetterClass();
 
-    ASSERT_TRUE(GClass._value === undefined);
+	ASSERT_TRUE(GClass.alue === undefined);
 }
 
-function check_public_getter_class() {
-    const GClass = new PublicGetterClass();
+function checkublicetterlass() {
+	const GClass = new PublicGetterClass();
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_create_public_getter_class_from_ets() {
-    const GClass = create_public_getter_class_from_ets();
+function checkreateublicetterlassromts() {
+	const GClass = createublicetterlassromts();
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-check_public_getter_class_value();
-check_public_getter_class();
-check_create_public_getter_class_from_ets();
+checkublicetterlassalue();
+checkublicetterlass();
+checkreateublicetterlassromts();

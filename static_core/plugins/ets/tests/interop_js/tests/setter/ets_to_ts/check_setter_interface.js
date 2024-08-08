@@ -14,24 +14,24 @@
  */
 
 const {
-    InterfaceSetter,
-    string,
-    create_interface_class,
-} = require("setter.test.js");
+	InterfaceSetter,
+	string,
+	createInterfaceClass,
+} = require('setter.test.js');
 
-function check_setter_interface() {
-    const interfaceSetter = new InterfaceSetter();
-    interfaceSetter.value = string;
+function checkSetterInterface() {
+	const interfaceSetter = new InterfaceSetter();
+	interfaceSetter.value = string;
 
-    ASSERT_EQ(typeof string, typeof interfaceSetter.value);
+	ASSERT_EQ(typeof string, typeof interfaceSetter.value);
 }
 
-function check_setter_interface_class_from_ets() {
-    const interfaceSetter = create_interface_class();
-    interfaceSetter.value = string;
+function checkSetterInterfaceClassFromEts() {
+	const interfaceSetter = createInterfaceClass();
+	interfaceSetter.value = string;
 
-    ASSERT_EQ(typeof string, typeof interfaceSetter.value);
+	ASSERT_EQ(typeof string, typeof interfaceSetter.value);
 }
 
-check_setter_interface();
-check_setter_interface_class_from_ets();
+checkSetterInterface();
+checkSetterInterfaceClassFromEts();

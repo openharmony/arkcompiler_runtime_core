@@ -14,66 +14,65 @@
  */
 
 const {
-    string,
-    number,
-    UnionTypeClass,
-    create_union_type_getter_class_from_ets,
-} = require("getter.test.js");
+	string,
+	number,
+	UnionTypeClass,
+	createnionypeetterlassromts,
+} = require('getter.test.js');
 
-function check_union_type_getter_class_value_string() {
-    const GClass = new UnionTypeClass(string);
+function checknionypeetterlassaluetring() {
+	const GClass = new UnionTypeClass(string);
 
-    ASSERT_TRUE(GClass._value === string);
+	ASSERT_TRUE(GClass.alue === string);
 }
 
-function check_union_type_getter_class_value_number() {
-    const GClass = new UnionTypeClass(number);
+function checknionypeetterlassalueumber() {
+	const GClass = new UnionTypeClass(number);
 
-    ASSERT_TRUE(GClass._value === number);
+	ASSERT_TRUE(GClass.alue === number);
 }
 
-function check_create_union_type_getter_class_from_ets_value_string() {
-    const GClass = create_union_type_getter_class_from_ets(string);
+function checkreatenionypeetterlassromtsaluetring() {
+	const GClass = createnionypeetterlassromts(string);
 
-    ASSERT_TRUE(GClass._value === string);
+	ASSERT_TRUE(GClass.alue === string);
 }
 
-function check_create_union_type_getter_class_from_ets_value_number() {
-    const GClass = create_union_type_getter_class_from_ets(number);
+function checkreatenionypeetterlassromtsalueumber() {
+	const GClass = createnionypeetterlassromts(number);
 
-    ASSERT_TRUE(GClass._value === number);
+	ASSERT_TRUE(GClass.alue === number);
 }
 
-function check_union_type_getter_class_string() {
-    const GClass = new UnionTypeClass(string);
+function checknionypeetterlasstring() {
+	const GClass = new UnionTypeClass(string);
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
+function checknionypeetterlassumber() {
+	const GClass = new UnionTypeClass(number);
 
-function check_union_type_getter_class_number() {
-    const GClass = new UnionTypeClass(number);
-
-    ASSERT_TRUE(GClass.value === number);
+	ASSERT_TRUE(GClass.value === number);
 }
 
-function check_create_union_type_getter_class_from_ets_string() {
-    const GClass = create_union_type_getter_class_from_ets(string);
+function checkreatenionypeetterlassromtstring() {
+	const GClass = createnionypeetterlassromts(string);
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_create_union_type_getter_class_from_ets_number() {
-    const GClass = create_union_type_getter_class_from_ets(number);
+function checkreatenionypeetterlassromtsumber() {
+	const GClass = createnionypeetterlassromts(number);
 
-    ASSERT_TRUE(GClass.value === number);
+	ASSERT_TRUE(GClass.value === number);
 }
 
-check_union_type_getter_class_value_string();
-check_union_type_getter_class_value_number();
-check_create_union_type_getter_class_from_ets_value_string();
-check_create_union_type_getter_class_from_ets_value_number();
-check_union_type_getter_class_string();
-check_union_type_getter_class_number();
-check_create_union_type_getter_class_from_ets_string();
-check_create_union_type_getter_class_from_ets_number();
+checknionypeetterlassaluetring();
+checknionypeetterlassalueumber();
+checkreatenionypeetterlassromtsaluetring();
+checkreatenionypeetterlassromtsalueumber();
+checknionypeetterlasstring();
+checknionypeetterlassumber();
+checkreatenionypeetterlassromtstring();
+checkreatenionypeetterlassromtsumber();

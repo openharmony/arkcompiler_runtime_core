@@ -15,11 +15,11 @@
 
 class jsvars {
     static global = JSRuntime.getGlobal();
-    static js_code = JSRuntime.getPropertyJSValue(jsvars.global, "js_code");
+    static jsCode = JSRuntime.getPropertyJSValue(jsvars.global, "jsCode");
 };
 
 class $jscall {
-    static _init = JSRuntime.__initJSCallClass("L$jscall;");
+    static Init = JSRuntime.__initJSCallClass("L$jscall;");
 
     native static void$(top: JSValue, qname: String): void;
     // CHECKER_IGNORE_NEXTLINE(AF0012)
@@ -32,17 +32,17 @@ class $jscall {
     native static num$(top: JSValue, qname: String): double;
 };
 class $jsnew {
-    static _init = JSRuntime.__initJSNewClass("L$jsnew;");
+    static Init = JSRuntime.__initJSNewClass("L$jsnew;");
 };
 
-function void_call(iters: int): boolean {
+function voidCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        $jscall.void$(jsvars.js_code, ".Nop");
+        $jscall.void$(jsvars.jsCode, ".Nop");
     }
     return true;
 }
 
-function void_call_10str(iters: int): boolean {
+function voidCall10str(iters: int): boolean {
     let u0: String = "foo0";
     let u1: String = "foo1";
     let u2: String = "foo2";
@@ -54,12 +54,12 @@ function void_call_10str(iters: int): boolean {
     let u8: String = "foo8";
     let u9: String = "foo9";
     for (let i = 0; i < iters; ++i) {
-        $jscall.void$10s(jsvars.js_code, ".Nop", u0, u1, u2, u3, u4, u5, u6, u7, u8, u9);
+        $jscall.void$10s(jsvars.jsCode, ".Nop", u0, u1, u2, u3, u4, u5, u6, u7, u8, u9);
     }
     return true;
 }
 
-function void_call_10dbl(iters: int): boolean {
+function voidCall10dbl(iters: int): boolean {
     let u0: double = 0;
     let u1: double = 1;
     let u2: double = 2;
@@ -71,7 +71,7 @@ function void_call_10dbl(iters: int): boolean {
     let u8: double = 8;
     let u9: double = 9;
     for (let i = 0; i < iters; ++i) {
-        $jscall.void$10d(jsvars.js_code, ".Nop", u0, u1, u2, u3, u4, u5, u6, u7, u8, u9);
+        $jscall.void$10d(jsvars.jsCode, ".Nop", u0, u1, u2, u3, u4, u5, u6, u7, u8, u9);
     }
     return true;
 }
@@ -79,37 +79,37 @@ function void_call_10dbl(iters: int): boolean {
 class Empty {
 };
 
-function str_call(iters: int): boolean {
+function strCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = $jscall.str$(jsvars.js_code, ".GetString");
+        let r = $jscall.str$(jsvars.jsCode, ".GetString");
     }
     return true;
 }
 
-function anystr_call(iters: int): boolean {
+function anystrCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = $jscall.any$(jsvars.js_code, ".GetString");
+        let r = $jscall.any$(jsvars.jsCode, ".GetString");
     }
     return true;
 }
 
-function dbl_call(iters: int): boolean {
+function dblCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = $jscall.num$(jsvars.js_code, ".GetNumber");
+        let r = $jscall.num$(jsvars.jsCode, ".GetNumber");
     }
     return true;
 }
 
-function anydbl_call(iters: int): boolean {
+function anydblCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = $jscall.any$(jsvars.js_code, ".GetNumber");
+        let r = $jscall.any$(jsvars.jsCode, ".GetNumber");
     }
     return true;
 }
 
-function anyobj_call(iters: int): boolean {
+function anyobjCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
-        let r = $jscall.any$(jsvars.js_code, ".GetObject");
+        let r = $jscall.any$(jsvars.jsCode, ".GetObject");
     }
     return true;
 }

@@ -21,14 +21,14 @@ function jsvalue2double(v: JSValue): double {
     return v;
 }
 
-function get_property_from_jsvalue(obj: JSValue): double {
+function getPropertyFromJsvalue(obj: JSValue): double {
     return obj.prop;
 }
 
-function get_property_from_jsvalue2(obj: JSValue): double {
+function getPropertyFromJsvalue2(obj: JSValue): double {
     return obj.prop_1.prop_2;
 }
 
-function set_property_to_jsvalue(obj: JSValue, v: double): void {
+function setPropertyToJsvalue(obj: JSValue, v: double): void {
     obj.prop = v;
 }

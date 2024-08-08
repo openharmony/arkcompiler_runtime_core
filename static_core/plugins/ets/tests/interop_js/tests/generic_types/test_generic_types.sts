@@ -20,10 +20,10 @@ class EtsGenericValueHandle<T> {
     constructor(value: T) {
         this.value = value;
     }
-    public set_value(value: T) {
+    public setValue(value: T) {
         this.value = value;
     }
-    public get_value(): T {
+    public getValue(): T {
         return this.value;
     }
     public value: T;
@@ -33,16 +33,16 @@ class EtsGenericErrorHandle<T extends Error> {
     constructor(err: T) {
         this.err = err;
     }
-    public get_error_message(): String {
+    public getErrorMessage(): String {
         return this.err.message;
     }
     public err: T;
 }
 
-function ets_get_generic_value_identity<T>(v: T): T {
+function etsGetGenericValueIdentity<T>(v: T): T {
     return v;
 }
 
-function ets_get_generic_error_identity<T extends Error>(e: T): T {
+function etsGetGenericErrorIdentity<T extends Error>(e: T): T {
     return e;
 }

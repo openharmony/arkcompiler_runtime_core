@@ -21,24 +21,26 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSLastIndexOf = etsMod.getFunction('Array_TestJSLastIndexOf');
 
-{ // Test JS Array<FooClass>
-  TestJSLastIndexOf(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSLastIndexOf(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  arr.push('foo');
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	arr.push('foo');
 
-  const EXPECT_2 = 2;
-  const EXPECT_MINUS_1 = -1
+	const EXPECT_2 = 2;
+	const EXPECT_MINUS_1 = -1;
 
-  // TODO(kprokopenko) after #14765 no undefined must be passed
-  ASSERT_EQ(arr.lastIndexOf('foo', undefined), EXPECT_MINUS_1);
-  ASSERT_EQ(arr.lastIndexOf('not in array', undefined), EXPECT_MINUS_1);
+	// TODO(kprokopenko) after #14765 no undefined must be passed
+	ASSERT_EQ(arr.lastIndexOf('foo', undefined), EXPECT_MINUS_1);
+	ASSERT_EQ(arr.lastIndexOf('not in array', undefined), EXPECT_MINUS_1);
 
-  const IDX_2 = 2;
-  ASSERT_EQ(arr.lastIndexOf('foo', IDX_2), EXPECT_2);
-  ASSERT_EQ(arr.lastIndexOf('not in array', IDX_2), EXPECT_MINUS_1);
+	const IDX_2 = 2;
+	ASSERT_EQ(arr.lastIndexOf('foo', IDX_2), EXPECT_2);
+	ASSERT_EQ(arr.lastIndexOf('not in array', IDX_2), EXPECT_MINUS_1);
 }
 
 GCJSRuntimeCleanup();

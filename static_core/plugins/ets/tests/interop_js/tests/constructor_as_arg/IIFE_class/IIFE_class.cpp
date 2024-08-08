@@ -22,17 +22,17 @@ class EtsIIFEClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsIIFEClassTsToEtsTest, check_IIFE_create_class_main)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_IIFE_create_class_main"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFECreateClassMain"));
 }
 
 TEST_F(EtsIIFEClassTsToEtsTest, check_IIFE_create_class_anonymous)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_IIFE_create_class_anonymous"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFECreateClassAnonymous"));
 }
 
 TEST_F(EtsIIFEClassTsToEtsTest, check_IIFE_create_class_IIFE)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_IIFE_create_class_IIFE"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFECreateClassIIFE"));
 }
 
 }  // namespace ark::ets::interop::js::testing

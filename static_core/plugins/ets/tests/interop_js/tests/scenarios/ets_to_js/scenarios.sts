@@ -21,7 +21,7 @@ const INT_VALUE2 = 2;
 const INT_VALUE3 = 3;
 const FLOAT_VALUE = 1.0;
 
-function standalone_function_ets(): int {
+function standaloneFunctionEts(): int {
     return 1;
 }
 
@@ -59,15 +59,15 @@ class ClassWithGetterSetterEts {
     }
 }
 
-let lambda_function_ets: () => int = () => {
+let lambdaFunctionEts: () => int = () => {
     return 1;
 }
 
-function get_lambda_function_ets(): () => int {
-    return lambda_function_ets;
+function getLambdaFunctionEts(): () => int {
+    return lambdaFunctionEts;
 }
 
-function generic_function_ets<T>(arg: T): T {
+function genericFunctionEts<T>(arg: T): T {
     return arg;
 }
 
@@ -77,104 +77,104 @@ class ClassToExtendEts {
     }
 }
 
-function function_arg_type_any_ets(arg: JSValue): JSValue {
+function functionArgTypeAnyEts(arg: JSValue): JSValue {
     return arg;
 }
 
-function function_arg_type_unknown_ets(arg: JSValue): JSValue {
+function functionArgTypeUnknownEts(arg: JSValue): JSValue {
     return arg;
 }
 
-function function_arg_type_undefined_ets(arg: JSValue): JSValue {
+function functionArgTypeUndefinedEts(arg: JSValue): JSValue {
     return arg;
 }
 
-function function_arg_type_tuple_ets(arg: [number, string]): number {
+function functionArgTypeTupleEts(arg: [number, string]): number {
     return arg[0];
 }
 
-function function_arg_type_callable_ets(function_to_call: () => JSValue): JSValue {
-    return function_to_call();
+function functionArgTypeCallableEts(functionToCall: () => JSValue): JSValue {
+    return functionToCall();
 }
 
-function generic_type_parameter_ets<T>(arg: T): String {
+function genericTypeParameterEts<T>(arg: T): String {
     return arg!.toString();
 }
 
-function generic_type_return_value_ets<T>(arg: int, value: T): T {
+function genericTypeReturnValueEts<T>(arg: int, value: T): T {
     let arr: T[] = [value, value, value];
     return arr[arg];
 }
 
 class ClassWithDefaultParameterMethods {
-    public int_parameter_method(arg: int = 1): int {
+    public intParameterMethod(arg: int = 1): int {
         return arg;
     }
 
-    public static int_parameter_static_method(arg: int = 1): int {
+    public static intParameterStaticMethod(arg: int = 1): int {
         return arg;
     }
 
-    public undefined_parameter_method(arg: JSValue | undefined = undefined): JSValue | undefined {
+    public undefinedParameterMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
         return arg;
     }
 
-    public static undefined_parameter_static_method(arg: JSValue | undefined = undefined): JSValue | undefined {
+    public static undefinedParameterStaticMethod(arg: JSValue | undefined = undefined): JSValue | undefined {
         return arg;
     }
 
-    public overloaded_method(arg: int) {
+    public overloadedMethod(arg: int) {
         // do nothing
     }
 
-    public overloaded_method(arg: string) {
+    public overloadedMethod(arg: string) {
         // do nothing
     }
 
-    public overloaded_static_method(arg: int) {
+    public overloadedStaticMethod(arg: int) {
         // do nothing
     }
 
-    public overloaded_static_method(arg: string) {
+    public overloadedStaticMethod(arg: string) {
         // do nothing
     }
 }
 
 class DerivedClassWithDefaultParameterMethods extends ClassWithDefaultParameterMethods {
-    public int_parameter_method(arg: int): int {
+    public intParameterMethod(arg: int): int {
         return -arg;
     }
 }
 
-function overloaded_function(arg: int) {
+function overloadedFunction(arg: int) {
     // do nothing
 }
 
-function overloaded_function(arg: string) {
+function overloadedFunction(arg: string) {
     // do nothing
 }
 
-function default_int_parameter_function(arg: int = 1): int {
+function defaultIntParameterFunction(arg: int = 1): int {
     return arg;
 }
 
-function default_undefined_parameter_function(arg: JSValue | undefined = undefined): JSValue | undefined {
+function defaultUndefinedParameterFunction(arg: JSValue | undefined = undefined): JSValue | undefined {
     return arg;
 }
 
-function function_arg_type_optional_primitive(arg?: Number): Number | undefined {
+function functionArgTypeOptionalPrimitive(arg?: Number): Number | undefined {
     return arg;
 }
 
-function function_arg_type_primitive(arg: number): number {
+function functionArgTypePrimitive(arg: number): number {
     return arg;
 }
 
-function function_return_type_primitive(): number {
+function functionReturnTypePrimitive(): number {
     return 1;
 }
 
-function ets_sum_rest_params(...args: number[]): number {
+function etsSumRestParams(...args: number[]): number {
     let sum = 0;
     for (let n of args) {
         sum += n;
@@ -182,7 +182,7 @@ function ets_sum_rest_params(...args: number[]): number {
     return sum;
 }
 
-function ets_multiply_1arg_by_sum_rest_params(arg0: number, ...args: number[]): number {
+function etsMultiplyLargBySumRestParams(arg0: number, ...args: number[]): number {
     let sum = 0;
     for (let n of args) {
         sum += n;
@@ -190,7 +190,7 @@ function ets_multiply_1arg_by_sum_rest_params(arg0: number, ...args: number[]): 
     return arg0 * sum;
 }
 
-function ets_multiply_sum2args_by_sum_rest_params(arg0: number, arg1: number, ...args: number[]): number {
+function etsMultiplySum2argsBySumRestParams(arg0: number, arg1: number, ...args: number[]): number {
     let sum = 0;
     for (let n of args) {
         sum += n;
@@ -203,7 +203,7 @@ class RestParamsTest {
     foo() {
         return 1;
     }
-    sum_ints(...args: Int[]) {
+    sumInts(...args: Int[]) {
         let sum = 0;
         for (let n of args) {
             sum += n;
@@ -212,7 +212,7 @@ class RestParamsTest {
     }
 };
 
-function ets_call_foo_rest_params(...args: RestParamsTest[]): number {
+function etsCallFooRestParams(...args: RestParamsTest[]): number {
     let sum = 0;
     for (let s of args) {
         sum += s.foo();
@@ -221,7 +221,7 @@ function ets_call_foo_rest_params(...args: RestParamsTest[]): number {
     return sum;
 }
 
-function ets_concat_strings_rest_params(...args: String[]): String {
+function etsConcatStringsRestParams(...args: String[]): String {
     let str = "";
     for (let s of args) {
         str += s;
@@ -229,57 +229,57 @@ function ets_concat_strings_rest_params(...args: String[]): String {
     return str;
 }
 
-function function_arg_type_conflict_array(): Array<Object> {
+function functionArgTypeConflictArray(): Array<Object> {
     let arr = new Array<Object>();
     arr.push(123);
     arr.push("foo");
     return arr;
 }
 
-function function_arg_type_conflict_boolean(): Boolean {
+function functionArgTypeConflictBoolean(): Boolean {
     return Boolean.valueOf(true);
 }
 
-function function_arg_type_conflict_string(): string {
+function functionArgTypeConflictString(): string {
     return 'foo';
 }
 
-function function_arg_type_conflict_arraybuffer(): ArrayBuffer {
+function functionArgTypeConflictArraybuffer(): ArrayBuffer {
     let arr = new ArrayBuffer(10);
     //arr.set(0, 123 as byte);
     return arr;
 }
 
-function function_arg_type_conflict_dataview(): DataView {
+function functionArgTypeConflictDataview(): DataView {
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
     view.setInt32(0, 123);
     return view;
 }
 
-function function_arg_type_conflict_date(): Date {
+function functionArgTypeConflictDate(): Date {
     return new Date(1);
 }
 
-function function_arg_type_conflict_error(): Error {
+function functionArgTypeConflictError(): Error {
     return new Error("foo");
 }
 
-function function_arg_type_conflict_map(): Map<string, string> {
+function functionArgTypeConflictMap(): Map<string, string> {
     const map = new Map<string, string>();
     map.set('foo', 'bar');
     return map;
 }
 
-function function_arg_type_conflict_object(): Object {
+function functionArgTypeConflictObject(): Object {
     return new Object();
 }
 
 function GCJSRuntimeCleanup(): void {
     try {
         // trigger FinalizationRegistry cleanup
-        let full_gc_id = GC.startGC(GC.FULL_CAUSE);
-        GC.waitForFinishGC(full_gc_id);
+        let fullGcId = GC.startGC(GC.FULL_CAUSE);
+        GC.waitForFinishGC(fullGcId);
     } catch (e) {
         assert false : "Unexpected exception during GC";
     }
@@ -311,7 +311,7 @@ class ClassImplementingInterfaceWithPropsAndMethod implements InterfaceWithProps
     }
 }
 
-function function_arg_is_interface(arg: InterfaceWithPropsAndMethod): string {
+function functionArgIsInterface(arg: InterfaceWithPropsAndMethod): string {
     let stringVal = arg.stringVal;
     let numVal = arg.numVal;
     arg.numVal = numVal * 2;
@@ -334,7 +334,7 @@ class Boxx<T> implements Unpackable<T> {
     }
 }
 
-function unpack_value<T>(arg: Unpackable<T>): T {
+function unpackValue<T>(arg: Unpackable<T>): T {
     let result = arg.getValue();
     return result;
 }
@@ -365,58 +365,58 @@ class ClassWithUnionGetterSetterEts {
     }
 }
 
-function function_arg_type_primitive_union(arg: number | string): number | string {
+function functionArgTypePrimitiveUnion(arg: number | string): number | string {
     return arg;
 }
 
-function generic_function_with_union_ets<T extends string | number>(arg: T): T {
+function genericFunctionWithUnionEts<T extends string | number>(arg: T): T {
     return arg;
 }
 
-function function_rest_params(...numbers: number[]): string {
+function functionRestParams(...numbers: number[]): string {
     return numbers.toString();
 }
 
-function function_spread_params(arr: number[]): string {
-    return function_rest_params(...arr)
+function functionSpreadParams(arr: number[]): string {
+    return functionRestParams(...arr)
 }
 
-function function_rest_params_union(...restParams: (number | string)[]): string {
+function functionRestParamsUnion(...restParams: (number | string)[]): string {
     return restParams.toString();
 }
 
-function function_arg_type_optional_primitive_union(arg?: int | boolean): int | boolean | undefined {
+function functionArgTypeOptionalPrimitiveUnion(arg?: int | boolean): int | boolean | undefined {
     return arg;
 }
 
-async function async_function_literal(): Promise<int> {
+async function asyncFunctionLiteral(): Promise<int> {
     return 1;
 }
 
-async function async_function_any(arg: JSValue): Promise<JSValue> {
+async function asyncFunctionAny(arg: JSValue): Promise<JSValue> {
     return arg;
 }
 
-async function async_function_extra_set(tuple: [number, string]): Promise<number> {
+async function asyncFunctionExtraSet(tuple: [number, string]): Promise<number> {
     return tuple[0];
 }
 
-async function async_function_subset_by_ref(func: () => JSValue): Promise<JSValue> {
+async function asyncFunctionSubsetByRef(func: () => JSValue): Promise<JSValue> {
     return func;
 }
 
-async function async_function_subset_by_value(num: Number): Promise<Number> {
+async function asyncFunctionSubsetByValue(num: Number): Promise<Number> {
     return num;
 }
 
-async function async_function_user_class(obj: ClassWithMethodEts): Promise<ClassWithMethodEts> {
+async function asyncFunctionUserClass(obj: ClassWithMethodEts): Promise<ClassWithMethodEts> {
     return obj;
 }
 
-async function async_newInterfaceWithMethodEts(): Promise<InterfaceWithMethodEts> {
+async function asyncNewInterfaceWithMethodEts(): Promise<InterfaceWithMethodEts> {
     return newInterfaceWithMethodEts();
 }
 
-async function async_function_user_interface(obj: InterfaceWithMethodEts): Promise<int> {
+async function asyncFunctionUserInterface(obj: InterfaceWithMethodEts): Promise<int> {
     return obj.methodInInterface();
 }

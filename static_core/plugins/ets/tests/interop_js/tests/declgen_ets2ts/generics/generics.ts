@@ -20,8 +20,8 @@ const THREE = 3;
 const FIVE = 5;
 const PRECISION = 3;
 
-import { GenericClass, BaseGeneric, Identity, ForEach} from './lib';
-import type { IGeneric0, IGeneric1 } from './lib';
+import { GenericClass, BaseGeneric, Identity, ForEach } from "./lib";
+import type { IGeneric0, IGeneric1 } from "./lib";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);
@@ -34,29 +34,39 @@ export function main() {
   testGenerics();
 }
 
-export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGeneric0<U>, IGeneric1<IGeneric0<V>> {
-  I0Method(a: U): U { return a; };
-  I1Method(a: IGeneric0<V>): IGeneric0<V> { return a; };
+export class DerivedGeneric<T, U, V>
+  extends BaseGeneric<T, U>
+  implements IGeneric0<U>, IGeneric1<IGeneric0<V>>
+{
+  I0Method(a: U): U {
+    return a;
+  }
+  I1Method(a: IGeneric0<V>): IGeneric0<V> {
+    return a;
+  }
 }
 
 function testGenerics() {
   const tStr = new GenericClass<String>();
-  AssertEq(tStr.identity('Test generic class'), 'Test generic class');
+  AssertEq(tStr.identity("Test generic class"), "Test generic class");
   const tNumber = new GenericClass<Number>();
-  AssertEq(tNumber.identity(FIVE).toFixed(PRECISION), (FIVE).toFixed(PRECISION));
+  AssertEq(tNumber.identity(FIVE).toFixed(PRECISION), FIVE.toFixed(PRECISION));
 
-  AssertEq(Identity(THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
-  AssertEq(Identity('Panda identity string'), 'Panda identity string');
+  AssertEq(
+    Identity(THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
+    (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
+  );
+  AssertEq(Identity("Panda identity string"), "Panda identity string");
 
   // NOTE(ivagin): enable when supported by interop #12808
   if (false) {
     const intArr = [ONE, TWO, THREE];
     ForEach(intArr, (e: number, idx: number) => {
       AssertEq(e, intArr[idx]);
-    })
-    const intStr = ['1', '2', '3'];
+    });
+    const intStr = ["1", "2", "3"];
     ForEach(intStr, (e: string, idx: number) => {
       AssertEq(e, intStr[idx]);
-    })
+    });
   }
 }

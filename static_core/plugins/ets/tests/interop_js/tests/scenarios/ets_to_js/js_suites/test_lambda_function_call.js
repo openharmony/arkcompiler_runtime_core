@@ -16,12 +16,12 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const getLambdaFunctionEts = etsMod.getFunction('get_lambda_function_ets');
+const getLambdaFunctionEts = etsMod.getFunction('getLambdaFunctionEts');
 
 {
-  let lambdaFunctionEts = getLambdaFunctionEts();
-  let ret = lambdaFunctionEts();
-  ASSERT_EQ(ret, 1);
+	let lambdaFunctionEts = getLambdaFunctionEts();
+	let ret = lambdaFunctionEts();
+	ASSERT_EQ(ret, 1);
 }
 
 GCJSRuntimeCleanup();

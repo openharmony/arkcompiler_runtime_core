@@ -14,16 +14,16 @@
  */
 
 class A {
-    bar(func, ...args) {
-        switch (args.length) {
-            case 0:
-                return func();
-            case 1:
-                return func(args[0]);
-            case 2:
-                return func(args[0], args[1]);
-        }
-    }
+	bar(func, ...args) {
+		switch (args.length) {
+		case 0:
+			return func();
+		case 1:
+			return func(args[0]);
+		case 2:
+			return func(args[0], args[1]);
+		}
+	}
 }
 
 exports.A = A;

@@ -12,31 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
-function makeEnum(arr){
-    let obj = Object.create(null);
-    for (let val of arr){
-        obj[val] = Symbol(val);
-    }
-    return Object.freeze(obj);
+function makeEnum(arr) {
+	let obj = Object.create(null);
+	for (let val of arr) {
+		obj[val] = Symbol(val);
+	}
+	return Object.freeze(obj);
 }
 
-function jsEnum(){
-    const Direction = {
-        Up: 'Up',
-        Down: 'Down',
-        Left: 'Left',
-        Right: 'Right'
-      };
-    return Direction;
+function jsEnum() {
+	const Direction = {
+		Up: 'Up',
+		Down: 'Down',
+		Left: 'Left',
+		Right: 'Right',
+	};
+	return Direction;
 }
 
-function isEq(val1, val2){
-    if(val1 === val2) {
-        return true;
-    }
-    return false;
+function isEq(val1, val2) {
+	if (val1 === val2) {
+		return true;
+	}
+	return false;
 }
 
 exports.makeEnum = makeEnum;

@@ -12,27 +12,51 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 let etsVm = gtest.etsVm;
 exports.etsVm = etsVm;
 
-exports.Nop = function () { }
-exports.Identity = function (v) { return v }
-exports.StringifyValue = function (v) { return typeof v + ":" + v }
-exports.StringifyArgs = function (...args) { return args.toString() }
-exports.GetProtoConstructor = function (v) { return Object.getPrototypeOf(v).constructor }
-exports.ApplyArgs = function (fn, ...args) { return fn(...args) }
-exports.ThrowValue = function (v) { throw v; }
-exports.Log = function (...args) { console.log(...args) }
-exports.GetProp = function (v, p) { return v[p] }
+exports.Nop = function () {};
+exports.Identity = function (v) {
+	return v;
+};
+exports.StringifyValue = function (v) {
+	return typeof v + ':' + v;
+};
+exports.StringifyArgs = function (...args) {
+	return args.toString();
+};
+exports.GetProtoConstructor = function (v) {
+	return Object.getPrototypeOf(v).constructor;
+};
+exports.ApplyArgs = function (fn, ...args) {
+	return fn(...args);
+};
+exports.ThrowValue = function (v) {
+	throw v;
+};
+exports.Log = function (...args) {
+	console.log(...args);
+};
+exports.GetProp = function (v, p) {
+	return v[p];
+};
 
-exports.Sum = function (a, b) { return a + b }
-exports.Car = function (v) { this.color = v }
+exports.Sum = function (a, b) {
+	return a + b;
+};
+exports.Car = function (v) {
+	this.color = v;
+};
 
 exports.TestProxy = function () {
-    Object.defineProperty(this, "foo", {
-        get: function () { throw Error("get exception") },
-        set: function () { throw Error("set exception") }
-    });
-}
+	Object.defineProperty(this, 'foo', {
+		get: function () {
+			throw Error('get exception');
+		},
+		set: function () {
+			throw Error('set exception');
+		},
+	});
+};

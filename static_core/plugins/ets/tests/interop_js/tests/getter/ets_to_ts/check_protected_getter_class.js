@@ -14,29 +14,29 @@
  */
 
 const {
-    string,
-    ProtectedGetterOrigenClass,
-    create_protected_getter_origen_class_from_ets,
-} = require("getter.test.js");
+	string,
+	ProtectedGetterOrigenClass,
+	createrotectedetterrigenlassromts,
+} = require('getter.test.js');
 
-function check_protected_getter_class_value() {
-    const GClass = new ProtectedGetterOrigenClass();
+function checkrotectedetterlassalue() {
+	const GClass = new ProtectedGetterOrigenClass();
 
-    ASSERT_TRUE(GClass._value === undefined);
+	ASSERT_TRUE(GClass.alue === undefined);
 }
 
-function check_protected_getter_class() {
-    const GClass = new ProtectedGetterOrigenClass();
+function checkrotectedetterlass() {
+	const GClass = new ProtectedGetterOrigenClass();
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_create_protected_getter_class_from_ets() {
-    const GClass = create_protected_getter_origen_class_from_ets();
+function checkreaterotectedetterlassromts() {
+	const GClass = createrotectedetterrigenlassromts();
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-check_protected_getter_class_value();
-check_protected_getter_class();
-check_create_protected_getter_class_from_ets();
+checkrotectedetterlassalue();
+checkrotectedetterlass();
+checkreaterotectedetterlassromts();

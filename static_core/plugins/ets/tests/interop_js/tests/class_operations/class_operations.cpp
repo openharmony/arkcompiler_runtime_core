@@ -33,105 +33,105 @@ public:
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallEmpty)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_empty");
+    auto ret = CallEtsMethod<int64_t>("jscallEmpty");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewEmpty)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnew_empty");
+    auto ret = CallEtsMethod<int64_t>("jsnewEmpty");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticEmpty)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_static_method_empty");
+    auto ret = CallEtsMethod<int64_t>("jscallStaticMethodEmpty");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallObject)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_object");
+    auto ret = CallEtsMethod<int64_t>("jscallObject");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewObject)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnew_object");
+    auto ret = CallEtsMethod<int64_t>("jsnewObject");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewObjectSetPropery)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnew_setproperty_object");
+    auto ret = CallEtsMethod<int64_t>("jsnewSetPropertyObject");
     ASSERT_EQ(ret, 0);
 }
 
 // returns nan
 TEST_F(EtsInteropClassOperationsTest, TestJSCallMethodObject)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_method_object");
+    auto ret = CallEtsMethod<int64_t>("jscallMethodObject");
     ASSERT_EQ(ret, 0);
 }
 
 // simplification of previous failure
 TEST_F(EtsInteropClassOperationsTest, TestJSCallMethodObjectSimple)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_method_simple");
+    auto ret = CallEtsMethod<int64_t>("jscallMethodSimple");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallString)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_string");
+    auto ret = CallEtsMethod<int64_t>("jscallString");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewString)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnew_string");
+    auto ret = CallEtsMethod<int64_t>("jsnewString");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, TestJSNewSetPropertyString)
+TEST_F(EtsInteropClassOperationsTest, TestjsnewSetPropertyString)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnew_setproperty_string");
+    auto ret = CallEtsMethod<int64_t>("jsnewSetPropertyString");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticString)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_static_method_string");
+    auto ret = CallEtsMethod<int64_t>("jscallStaticMethodString");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_array");
+    auto ret = CallEtsMethod<int64_t>("jscallArray");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSNewArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnew_array");
+    auto ret = CallEtsMethod<int64_t>("jsnewArray");
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, TestJSNewSetPropertyArray)
+TEST_F(EtsInteropClassOperationsTest, TestjsnewSetPropertyArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jsnew_setproperty_array");
+    auto ret = CallEtsMethod<int64_t>("jsnewSetPropertyArray");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestJSCallStaticArray)
 {
-    auto ret = CallEtsMethod<int64_t>("jscall_static_method_array");
+    auto ret = CallEtsMethod<int64_t>("jscallStaticMethodArray");
     ASSERT_EQ(ret, 0);
 }
 
 TEST_F(EtsInteropClassOperationsTest, TestNamespace)
 {
-    auto ret = CallEtsMethod<int64_t>("test_namespace");
+    auto ret = CallEtsMethod<int64_t>("testNamespace");
     ASSERT_EQ(ret, 0);
 }
 

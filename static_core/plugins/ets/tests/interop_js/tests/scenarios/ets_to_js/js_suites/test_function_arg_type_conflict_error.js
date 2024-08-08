@@ -16,10 +16,10 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypeConflictEts = etsMod.getFunction('function_arg_type_conflict_error');
+const functionArgTypeConflictEts = etsMod.getFunction('functionArgTypeConflictError');
 
 {
-  let result = functionArgTypeConflictEts();
-  ASSERT_TRUE(result instanceof Error);
-  ASSERT_EQ(result.message, 'foo');
+	let result = functionArgTypeConflictEts();
+	ASSERT_TRUE(result instanceof Error);
+	ASSERT_EQ(result.message, 'foo');
 }

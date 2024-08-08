@@ -15,14 +15,14 @@
 
 import { GetObject, GetNumber, GetString, Nop } from "/plugins/ets/tests/interop_js/tests/perf/code.js";
 
-function void_call(iters: int): boolean {
+function voidCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
         Nop();
     }
     return true;
 }
 
-function void_call_10str(iters: int): boolean {
+function voidCall10str(iters: int): boolean {
     let u0: String = "foo0";
     let u1: String = "foo1";
     let u2: String = "foo2";
@@ -39,7 +39,7 @@ function void_call_10str(iters: int): boolean {
     return true;
 }
 
-function void_call_10dbl(iters: int): boolean {
+function voidCall10dbl(iters: int): boolean {
     let u0: double = 0;
     let u1: double = 1;
     let u2: double = 2;
@@ -59,35 +59,35 @@ function void_call_10dbl(iters: int): boolean {
 class Empty {
 };
 
-function str_call(iters: int): boolean {
+function strCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
         let r = GetString() as String;
     }
     return true;
 }
 
-function anystr_call(iters: int): boolean {
+function anystrCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
         let r = GetString();
     }
     return true;
 }
 
-function dbl_call(iters: int): boolean {
+function dblCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
         let r = GetNumber() as number;
     }
     return true;
 }
 
-function anydbl_call(iters: int): boolean {
+function anydblCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
         let r = GetNumber();
     }
     return true;
 }
 
-function anyobj_call(iters: int): boolean {
+function anyobjCall(iters: int): boolean {
     for (let i = 0; i < iters; ++i) {
         let r = GetObject();
     }

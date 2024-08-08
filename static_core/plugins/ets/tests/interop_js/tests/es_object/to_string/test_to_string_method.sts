@@ -30,7 +30,7 @@ function vstringify(val: JSValue): String {
     return StringifyValue(val) as String;
 }
 
-function cast_to_object(x: Object) : Object {
+function castToObject(x: Object) : Object {
     return x;
 }
 
@@ -40,48 +40,49 @@ class A {
     };
 }
 
-function ets_jsvalue_to_str() {
+function etsJsvalueToStr() {
     let x: JSValue = Identity(new A());
     return x + "A";
 }
 
-function ets_object_to_str() {
+function etsObjectToStr() {
     let x: JSValue = Identity(new A());
-    let y = cast_to_object(x);
+    let y = castToObject(x);
     return y + "A";
 }
 
-function jsval_object_to_str(): String {
+function jsvalObjectToStr(): String {
     let x: JSValue = Curry(123);
     try {
         let z: String = x.toString();
         assert(false);
     } catch (z: JSError) {
-        let y = cast_to_object(x);
+        let y = castToObject(x);
         return y + "A";
     }
     return "Unreachable"
 }
 
-function implicit_to_string(): String {
+function implicitToString(): String {
     let x = Optional(false);
-    assert(vstringify(x) == "string:optional_val")
+    console.log(123, x)
+    assert(vstringify(x) == "string:optionalVal")
     return x + "A";
 }
 
-function test_functional1() : String {
+function testFunctional1() : String {
     return Curry("Str1") + "A";
 }
 
-function test_functional2() : String {
+function testFunctional2() : String {
     return CurryToString(123) + "A";
 }
 
-function test_nan_call() : String {
+function testNanCall() : String {
     return Curry(NaN) + "A";
 }
 
-function test_throwing() : String {
+function testThrowing() : String {
     try {
         return Throwing(123) + "A";
     } catch (e: JSError) {
@@ -89,24 +90,24 @@ function test_throwing() : String {
     }
 }
 
-function concat_null_to_string(): String {
+function concatNullToString(): String {
     let x = NullVal() as JSValue | null;
     return x + "A";
 }
 
-function concat_undefined_to_string(): String {
+function concatUndefinedToString(): String {
    let x = UndefinedVal();
    let y = x + "A";
    return y;
 }
 
-function concat_nan_to_string(): String {
+function concatNanToString(): String {
     let x = NanVal();
     let y = x + "A";
     return y;
 }
 
-function explicit_optional_to_string(): String {
+function explicitOptionalToString(): String {
     try {
         return Optional(true) + "A";
     } catch (e: NullPointerError) {

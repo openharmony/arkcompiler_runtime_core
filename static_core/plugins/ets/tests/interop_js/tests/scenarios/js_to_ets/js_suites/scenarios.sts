@@ -13,5 +13,5 @@
  * limitations under the License.
  */
 
-export declare function optional_call(x?: Int, y?: Int, z?: int): Int;
-export declare function single_required(x: Int, y?: Int, z?: Int): Int;
+export declare function optionalCall(x?: Int, y?: Int, z?: int): Int;
+export declare function singleRequired(x: Int, y?: Int, z?: Int): Int;

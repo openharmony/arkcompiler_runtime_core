@@ -14,262 +14,253 @@
  */
 
 import {
-    ts_number,
-    ts_string,
-    AnyTypeMethodClass,
-    create_interface_class_any_type_method,
-    UnionTypeMethodClass,
-    create_interface_class_union_type_method,
-    unionTypeMethodInstanceClass,
-    subset_by_ref_interface,
-    SubsetByValueClass,
-    create_subset_by_value_class_from_ts,
-    subsetByValueInstanceClass,
-    TupleTypeMethodClass,
-    create_interface_class_tuple_type_method_from_ts,
-    tupleInstanceClass,
-    WithOptionalMethodClass,
-    WithoutOptionalMethodClass,
-    create_class_with_optional_method,
-    create_class_without_optional_method,
-    withoutOptionalMethodInstanceClass,
-    withOptionalMethodInstanceClass,
-    optional_arg,
-    optional_arg_array,
-} from '/plugins/ets/tests/interop_js/tests/interface/ts_to_ets/interface_method.js';
+	tsNumber,
+	tsString,
+	AnyTypeMethodClass,
+	createInterfaceClassAnyTypeMethod,
+	UnionTypeMethodClass,
+	createInterfaceClassUnionTypeMethod,
+	unionTypeMethodInstanceClass,
+	subsetByRefInterface,
+	SubsetByValueClass,
+	createSubsetByValueClassFromTs,
+	subsetByValueInstanceClass,
+	TupleTypeMethodClass,
+	createInterfaceClassTupleTypeMethodFromTs,
+	tupleInstanceClass,
+	WithOptionalMethodClass,
+	WithoutOptionalMethodClass,
+	createClassWithOptionalMethod,
+	createClassWithoutOptionalMethod,
+	withoutOptionalMethodInstanceClass,
+	withOptionalMethodInstanceClass,
+	optionalArg,
+	optionalArgArray,
+} from '/plugins/ets/tests/interop_js/tests/interface/ts_to_ets/interface_method.js'
 
-const str = 'string';
-const bool = true;
-const num = 1;
-const arr = [];
-const obj: Object = {};
-const arrTuple: [int, string] = [num, str];
+const str = 'string'
+const bool = true
+const num = 1
+const arr = []
+const obj: Object = {}
+const arrTuple: [int, string] = [num, str]
 
 class ObjMethod {
-    get(): int {
-        return num;
-    }
+	get(): int {
+		return num
+	}
 }
 
-function check_any_type_interface_class_string(): boolean {
-    const anyTypeMethodClass = new AnyTypeMethodClass();
+function checkAnyTypeInterfaceClassString(): boolean {
+	const anyTypeMethodClass = new AnyTypeMethodClass()
 
-    return str as string == anyTypeMethodClass.get(str) as string;
+	return (str as string) == (anyTypeMethodClass.get(str) as string)
 }
 
-function check_any_type_interface_class_int(): boolean {
-    const anyTypeMethodClass = new AnyTypeMethodClass();
+function checkAnyTypeInterfaceClassInt(): boolean {
+	const anyTypeMethodClass = new AnyTypeMethodClass()
 
-    return num as int == anyTypeMethodClass.get(num) as int;
+	return (num as int) == (anyTypeMethodClass.get(num) as int)
 }
 
-function check_any_type_interface_class_bool(): boolean {
-    const anyTypeMethodClass = new AnyTypeMethodClass();
+function checkAnyTypeInterfaceClassBool(): boolean {
+	const anyTypeMethodClass = new AnyTypeMethodClass()
 
-    return bool as boolean == anyTypeMethodClass.get(bool) as boolean;
+	return (bool as boolean) == (anyTypeMethodClass.get(bool) as boolean)
 }
 
-function check_any_type_interface_class_array(): boolean {
-    const anyTypeMethodClass = new AnyTypeMethodClass();
+function checkAnyTypeInterfaceClassArray(): boolean {
+	const anyTypeMethodClass = new AnyTypeMethodClass()
 
-    return anyTypeMethodClass.get(arr) as Array<int> instanceof Array;
+	return (anyTypeMethodClass.get(arr) as Array<int>) instanceof Array
 }
 
-function check_any_type_interface_class_object(): boolean {
-    const anyTypeMethodClass = new AnyTypeMethodClass();
+function checkAnyTypeInterfaceClassObject(): boolean {
+	const anyTypeMethodClass = new AnyTypeMethodClass()
 
-    return 'object' == typeof anyTypeMethodClass.get(obj) as Object;
+	return 'object' == (typeof anyTypeMethodClass.get(obj) as Object)
 }
 
-function check_create_interface_class_any_type_method_string(): boolean {
-    const anyTypeMethodClass = create_interface_class_any_type_method();
+function checkCreateInterfaceClassAnyTypeMethodString(): boolean {
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
 
-    return str as string == anyTypeMethodClass.get(str) as string;
+	return (str as string) == (anyTypeMethodClass.get(str) as string)
 }
 
-function check_create_interface_class_any_type_method_int(): boolean {
-    const anyTypeMethodClass = create_interface_class_any_type_method();
+function checkCreateInterfaceClassAnyTypeMethodInt(): boolean {
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
 
-    return num as int == anyTypeMethodClass.get(num) as int;
+	return (num as int) == (anyTypeMethodClass.get(num) as int)
 }
 
-function check_create_interface_class_any_type_method_bool(): boolean {
-    const anyTypeMethodClass = create_interface_class_any_type_method();
+function checkCreateInterfaceClassAnyTypeMethodBool(): boolean {
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
 
-    return bool as boolean == anyTypeMethodClass.get(bool) as boolean;
+	return (bool as boolean) == (anyTypeMethodClass.get(bool) as boolean)
 }
 
-function check_create_interface_class_any_type_method_array(): boolean {
-    const anyTypeMethodClass = create_interface_class_any_type_method();
+function checkCreateInterfaceClassAnyTypeMethodArray(): boolean {
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
 
-    return anyTypeMethodClass.get(arr) as Array<int> instanceof Array;
+	return (anyTypeMethodClass.get(arr) as Array<int>) instanceof Array
 }
 
-function check_create_interface_class_any_type_method_object(): boolean {
-    const anyTypeMethodClass = create_interface_class_any_type_method();
+function checkCreateInterfaceClassAnyTypeMethodObject(): boolean {
+	const anyTypeMethodClass = createInterfaceClassAnyTypeMethod()
 
-    return 'object' == typeof anyTypeMethodClass.get(obj) as Object;
+	return 'object' == (typeof anyTypeMethodClass.get(obj) as Object)
 }
 
-function check_union_type_interface_class_string(): boolean {
-    const unionTypeMethodClass = new UnionTypeMethodClass();
+function checkUnionTypeInterfaceClassString(): boolean {
+	const unionTypeMethodClass = new UnionTypeMethodClass()
 
-    return str as string == unionTypeMethodClass.get(str) as string;
+	return (str as string) == (unionTypeMethodClass.get(str) as string)
 }
 
-function check_union_type_interface_class_int(): boolean {
-    const unionTypeMethodClass = new UnionTypeMethodClass();
+function checkUnionTypeInterfaceClassInt(): boolean {
+	const unionTypeMethodClass = new UnionTypeMethodClass()
 
-    return num as int == unionTypeMethodClass.get(num) as int;
+	return (num as int) == (unionTypeMethodClass.get(num) as int)
 }
 
-function check_create_interface_class_union_type_method_string(): boolean {
-    const unionTypeMethodClass = create_interface_class_union_type_method();
+function checkCreateInterfaceClassUnionTypeMethodString(): boolean {
+	const unionTypeMethodClass = createInterfaceClassUnionTypeMethod()
 
-    return str as string == unionTypeMethodClass.get(str) as string;
+	return (str as string) == (unionTypeMethodClass.get(str) as string)
 }
 
-function check_create_interface_class_union_type_method_int(): boolean {
-    const unionTypeMethodClass = create_interface_class_union_type_method();
+function checkCreateInterfaceClassUnionTypeMethodInt(): boolean {
+	const unionTypeMethodClass = createInterfaceClassUnionTypeMethod()
 
-    return num as int == unionTypeMethodClass.get(num) as int;
+	return (num as int) == (unionTypeMethodClass.get(num) as int)
 }
 
-function check_instance_interface_class_union_type_method_string(): boolean {
-    return str as string == unionTypeMethodInstanceClass.get(str) as string;
+function checkInstanceInterfaceClassUnionTypeMethodString(): boolean {
+	return (str as string) == (unionTypeMethodInstanceClass.get(str) as string)
 }
 
-function check_instance_interface_class_union_type_method_int(): boolean {
-    return num as int == unionTypeMethodInstanceClass.get(num) as int;
+function checkInstanceInterfaceClassUnionTypeMethodInt(): boolean {
+	return (num as int) == (unionTypeMethodInstanceClass.get(num) as int)
 }
 
-function check_subset_by_ref_interface(): boolean {
-    return num as int == subset_by_ref_interface(new ObjMethod()) as int;
+function checkSubsetByRefInterface(): boolean {
+	return (num as int) == (subsetByRefInterface(new ObjMethod()) as int)
 }
 
-function check_subset_by_ref_interface_error(): boolean {
-    try {
-        subset_by_ref_interface(obj);
+function checkSubsetByRefInterfaceError(): boolean {
+	try {
+		subsetByRefInterface(obj)
 
-        return false;
-    } catch (e) {
-        return true;
-    }
+		return false
+	} catch (e) {
+		return true
+	}
 }
 
-function check_subset_by_value_class(): boolean {
-    const subsetByValueClass = new SubsetByValueClass();
-    const userClass = subsetByValueClass.get();
+function checkSubsetByValueClass(): boolean {
+	const subsetByValueClass = new SubsetByValueClass()
+	const userClass = subsetByValueClass.get()
 
-    return ts_number as int == userClass.value as int;
+	return (tsNumber as int) == (userClass.value as int)
 }
 
-function check_create_subset_by_value_class_from_ts(): boolean {
-    const subsetByValueClass = create_subset_by_value_class_from_ts();
-    const userClass = subsetByValueClass.get();
+function checkCreateSubsetByValueClassFromTs(): boolean {
+	const subsetByValueClass = createSubsetByValueClassFromTs()
+	const userClass = subsetByValueClass.get()
 
-    return ts_number as int == userClass.value as int;
+	return (tsNumber as int) == (userClass.value as int)
 }
 
-function check_instance_subset_by_value_class_from_ts(): boolean {
-    const userClass = subsetByValueInstanceClass.get();
+function checkInstanceSubsetByValueClassFromTs(): boolean {
+	const userClass = subsetByValueInstanceClass.get()
 
-    return ts_number as int == userClass.value as int;
+	return (tsNumber as int) == (userClass.value as int)
 }
 
-function check_tuple_type_class(): boolean {
-    const tupleClass = new TupleTypeMethodClass();
+function checkTupleTypeClass(): boolean {
+	const tupleClass = new TupleTypeMethodClass()
 
-    const result = tupleClass.get(arrTuple);
-    return result as Array<[int, string]> instanceof Array
-        && result[0] as int == num as int
-        && result[1] as string == str as string;
+	const result = tupleClass.get(arrTuple)
+	return (result as Array<[int, string]>) instanceof Array && (result[0] as int) == (num as int) && (result[1] as string) == (str as string)
 }
 
-function check_create_tuple_class_from_ts(): boolean {
-    const tupleClass = create_interface_class_tuple_type_method_from_ts();
+function checkCreateTupleClassFromTs(): boolean {
+	const tupleClass = createInterfaceClassTupleTypeMethodFromTs()
 
-    const result = tupleClass.get(arrTuple);
-    return result as Array<[int, string]> instanceof Array
-        && result[0] as int == num as int
-        && result[1] as string == str as string;
+	const result = tupleClass.get(arrTuple)
+	return (result as Array<[int, string]>) instanceof Array && (result[0] as int) == (num as int) && (result[1] as string) == (str as string)
 }
 
-function check_instance_tuple_class_from_ts(): boolean {
-    const result = tupleInstanceClass.get(arrTuple);
-    return result as Array<[int, string]> instanceof Array
-        && result[0] as int == num as int
-        && result[1] as string == str as string;
+function checkInstanceTupleClassFromTs(): boolean {
+	const result = tupleInstanceClass.get(arrTuple)
+	return (result as Array<[int, string]>) instanceof Array && (result[0] as int) == (num as int) && (result[1] as string) == (str as string)
 }
 
-function check_with_optional_method_class(): boolean {
-    const optionalClass = new WithOptionalMethodClass();
+function checkWithOptionalMethodClass(): boolean {
+	const optionalClass = new WithOptionalMethodClass()
 
-    return optionalClass.getNum() as int == ts_number as int
-        && optionalClass.getStr() as string == ts_string as string;
+	return (optionalClass.getNum() as int) == (tsNumber as int) && (optionalClass.getStr() as string) == (tsString as string)
 }
 
-function check_without_optional_method_class(): boolean {
-    const optionalClass = new WithoutOptionalMethodClass();
+function checkWithoutOptionalMethodClass(): boolean {
+	const optionalClass = new WithoutOptionalMethodClass()
 
-    return optionalClass.getStr() as string == ts_string as string;
+	return (optionalClass.getStr() as string) == (tsString as string)
 }
 
-function check_create_class_with_optional_method() {
-    const optionalClass = create_class_with_optional_method();
+function checkCreateClassWithOptionalMethod() {
+	const optionalClass = createClassWithOptionalMethod()
 
-    return optionalClass.getNum() as int == ts_number as int
-        && optionalClass.getStr() as string == ts_string as string;
+	return (optionalClass.getNum() as int) == (tsNumber as int) && (optionalClass.getStr() as string) == (tsString as string)
 }
 
-function check_create_class_without_optional_method() {
-    const optionalClass = create_class_without_optional_method();
+function checkCreateClassWithoutOptionalMethod() {
+	const optionalClass = createClassWithoutOptionalMethod()
 
-    return optionalClass.getStr() as string == ts_string as string;
+	return (optionalClass.getStr() as string) == (tsString as string)
 }
 
-function check_with_optional_method_instance_class(): boolean {
-    return withOptionalMethodInstanceClass.getNum() as int == ts_number as int
-        && withOptionalMethodInstanceClass.getStr() as string == ts_string as string;
+function checkWithOptionalMethodInstanceClass(): boolean {
+	return (withOptionalMethodInstanceClass.getNum() as int) == (tsNumber as int) && (withOptionalMethodInstanceClass.getStr() as string) == (tsString as string)
 }
 
-function check_without_optional_method_instance_class() {
-    return withoutOptionalMethodInstanceClass.getStr() as string == ts_string as string;
+function checkWithoutOptionalMethodInstanceClass() {
+	return (withoutOptionalMethodInstanceClass.getStr() as string) == (tsString as string)
 }
 
-function check_optional_arg_with_all_args(): boolean {
-    const result = optional_arg(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass);
+function checkOptionalArgWithAllArgs(): boolean {
+	const result = optionalArg(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass)
 
-    return !!result.with && !!result.without;
+	return !!result.with && !!result.without
 }
 
-function check_optional_arg_with_one_args(): boolean {
-    const result = optional_arg(withOptionalMethodInstanceClass);
+function checkOptionalArgWithOneArgs(): boolean {
+	const result = optionalArg(withOptionalMethodInstanceClass)
 
-    return !!result.with;
+	return !!result.with
 }
 
-// NOTE (issues 17772) fix spread operator and 
-// uncomment function in check_spread_operator_arg_with_all_args
+// NOTE (issues 17772) fix spread operator and
+// uncomment function in checkSpreadOperatorArgWithAllArgs
 
-// function check_spread_operator_arg_with_all_args(): boolean {
+// function checkSpreadOperatorArgWithAllArgs(): boolean {
 //     const arr: (WithoutOptionalMethodClass | withoutOptionalMethodInstanceClass)[] = [withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass];
-//     const result = optional_arg_array(...arr);
+//     const result = optionalArgArray(...arr);
 //     return !!result.with && !!result.without;
 // }
 
-// function check_spread_operator_arg_with_one_args(): boolean {
+// function checkSpreadOperatorArgWithOneArgs(): boolean {
 //     const arr: (WithoutOptionalMethodClass | WithoutOptionalMethodClass)[] = [withOptionalMethodInstanceClass];
-//     const result = optional_arg_array(...arr);
+//     const result = optionalArgArray(...arr);
 //     return !!result.with;
 // }
 
-function check_without_spread_operator_arg_with_all_args(): boolean {
-    const result = optional_arg_array(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass);
-    return !!result.with && !!result.without;
+function checkWithoutSpreadOperatorArgWithAllArgs(): boolean {
+	const result = optionalArgArray(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass)
+	return !!result.with && !!result.without
 }
 
-function check_without_spread_operator_arg_with_one_args(): boolean {
-    const result = optional_arg_array(withOptionalMethodInstanceClass);
-    return !!result.with;
+function checkWithoutSpreadOperatorArgWithOneArgs(): boolean {
+	const result = optionalArgArray(withOptionalMethodInstanceClass)
+	return !!result.with
 }

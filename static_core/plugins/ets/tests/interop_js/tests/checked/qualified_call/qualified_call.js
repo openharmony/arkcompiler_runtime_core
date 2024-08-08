@@ -13,27 +13,27 @@
  * limitations under the License.
  */
 
-"use strict";
+'use strict';
 
 class Outer {
-    constructor(x) {
-        this.inner = {
-            getInt: function() {
-                return x;
-            },
-            getDoubledInt: function() {
-                return x * 2;
-            }
-        }
-    }
+	constructor(x) {
+		this.inner = {
+			getInt: function () {
+				return x;
+			},
+			getDoubledInt: function () {
+				return x * 2;
+			},
+		};
+	}
 }
 
 exports.Outer = Outer;
 exports.outerObj = {
-    inner: {
-        innerOuter: new Outer(123),
-        getStr: function(inputStr) {
-            return `getStr with ${inputStr}`
-        }
-    }
-}
+	inner: {
+		innerOuter: new Outer(123),
+		getStr: function (inputStr) {
+			return `getStr with ${inputStr}`;
+		},
+	},
+};

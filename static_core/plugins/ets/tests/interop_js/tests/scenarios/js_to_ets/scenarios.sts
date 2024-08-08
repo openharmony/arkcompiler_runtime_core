@@ -19,54 +19,54 @@ import {
 } from "pure_js"
 
 import {
-    optional_call,
-    single_required,
+    optionalCall,
+    singleRequired,
 } from "decl_js"
 
 function testOptionals() {
-    let x = optional_call(123, 321, 5)
+    let x = optionalCall(123, 321, 5)
     assert(x == 123 + 321 + 5);
-    x = optional_call(100)
+    x = optionalCall(100)
     assert(x == 100 + 130 + 1);
-    x = optional_call()
+    x = optionalCall()
     assert(x == 123 + 130 + 1);
 
-    x = single_required(123, 321)
+    x = singleRequired(123, 321)
     assert(x == 123 + 321 + 123);
-    x = single_required(100)
+    x = singleRequired(100)
     assert(x == 100 + 123 + 123);
     return true;
 }
 
-function Test_standalone_function_call(): boolean {
+function TestStandaloneFunctionCall(): boolean {
     return js.standaloneFunctionJs() as int == 1;
 }
 
-function Test_class_method_call(): boolean {
+function TestClassMethodCall(): boolean {
     let classWithMethodJs = new ClassWithMethodJs();
     return classWithMethodJs.methodInClassJs() as int == 1;
 }
 
-function Test_interface_method_call(): boolean {
-    let interface_method: () => int = js.newInterfaceWithMethod().methodInInterface as () => int;
-    return interface_method() == 1;
+function TestInterfaceMethodCall(): boolean {
+    let interfaceMethod: () => int = js.newInterfaceWithMethod().methodInInterface as () => int;
+    return interfaceMethod() == 1;
 }
 
-function Test_class_getter(): boolean {
+function TestClassGetter(): boolean {
     return (new ClassWithGetterSetter()).value as int == 1;
 }
 
-function Test_class_setter(): boolean {
+function TestClassSetter(): boolean {
     let classWithGetterSetter: ClassWithGetterSetter = new ClassWithGetterSetter();
     classWithGetterSetter.value = 2;
     return classWithGetterSetter.value as int == 2;
 }
 
-function Test_lambda_function_call(): boolean {
+function TestLambdaFunctionCall(): boolean {
     return js.lambdaFunction() as int == 1;
 }
 
-function Test_generic_function_call(): boolean {
+function TestGenericFunctionCall(): boolean {
     return js.genericFunction(1) as int == 1;
 }
 
@@ -78,40 +78,40 @@ class ClassToExtend1 {
 
 // NOTE(oignatenko) uncomment below after interop is implemented in this direction
 // class Child extends ClassToExtend {}
-function Test_extend_class(): boolean {
+function TestExtendClass(): boolean {
     // return (new ClassToExtend()).value() as int == 1;
     return false;
 }
 
-function Test_function_arg_type_any(): boolean {
+function TestFunctionArgTypeAny(): boolean {
     let arg: JSValue = 1;
     return js.functionArgTypeAny(arg) as int == 1;
 }
 
-function Test_function_arg_type_unknown(): boolean {
+function TestFunctionArgTypeUnknown(): boolean {
     let arg: JSValue = 1;
     return js.functionArgTypeUnknown(arg) as int == 1;
 }
 
-function Test_function_arg_type_undefined(): boolean {
+function TestFunctionArgTypeUndefined(): boolean {
     let arg: JSValue = 1;
     return js.functionArgTypeUndefined(arg) as int == 1;
 }
 
-function Test_function_arg_type_tuple(): boolean {
+function TestFunctionArgTypeTuple(): boolean {
     let arg: [int, String] = [1, "one"];
     return js.functionArgTypeTuple(arg) as int == 1;
 }
 
-function Test_function_return_type_any(): boolean {
+function TestFunctionReturnTypeAny(): boolean {
     return js.functionReturnTypeAny() as int == 1;
 }
 
-function Test_function_return_type_unknown(): boolean {
+function TestFunctionReturnTypeUnknown(): boolean {
     return js.functionReturnTypeUnknown() as int == 1;
 }
 
-function Test_function_return_type_undefined(): boolean {
+function TestFunctionReturnTypeUndefined(): boolean {
     return js.functionReturnTypeUndefined() as int == 1;
 }
 
@@ -119,58 +119,59 @@ function callable(): int {
     return 1;
 }
 
-function Test_function_arg_type_callable(): boolean {
+function TestFunctionArgTypeCallable(): boolean {
     return false;
     // NOTE #1646 extract this to separate ets file
     // NOTE #15891 uncomment below after interop is implemented in this direction
     // return functionArgTypeCallable(callable) as int == 1;
 }
 
-function Test_default_value_int_define_for_parameter(): boolean {
+function TestDefaultValueIntDefineForParameter(): boolean {
     return js.functionDefaultIntParameterFunction() as int == 1;
 }
 
-function Test_default_value_define_for_parameter(): boolean {
+function TestDefaultValueDefineForParameter(): boolean {
     return js.functionDefaultParameterFunction() as int == 1;
 }
 
-function Test_generic_type_as_parameter(): boolean {
+function TestGenericTypeAsParameter(): boolean {
     return js.genericTypeParameter(1) as String == "1";
 }
 
-function Test_generic_type_as_return_value(): boolean {
+function TestGenericTypeAsReturnValue(): boolean {
     return js.genericTypeReturnValue(1) as int == 1;
 }
 
-function Test_function_arg_type_optional_primitive_explicit(): boolean {
+function TestFunctionArgTypeOptionalPrimitiveExplicit(): boolean {
     return js.functionArgTypeOptionalPrimitive(1) as int == 1;
 }
 
-function Test_function_arg_type_optional_primitive_default(): boolean {
+function TestFunctionArgTypeOptionalPrimitiveDefault(): boolean {
     return js.functionArgTypeOptionalPrimitive() as int == 1;
 }
 
-function Test_function_arg_type_primitive(): boolean {
+function TestFunctionArgTypePrimitive(): boolean {
     let arg: int = 1;
     return js.functionArgTypePrimitive(arg) as int == 1;
 }
 
-function Test_function_return_type_primitive(): boolean {
+function TestFunctionReturnTypePrimitive(): boolean {
     let res: boolean = js.functionReturnTypePrimitive() as boolean;
     return typeof res === "boolean";
 }
 
-function Test_rest_params() {
+function TestRestParams() {
     // NOTE: casts due to bug in frontend
-    assert js.js_sum_rest_params(1, 2, 3) as Int == (1 + 2 + 3)
-    assert js.js_multiply_1arg_by_sum_rest_params(1, 2, 3, 4) as Int == (1) * (2 + 3 + 4)
-    assert js.js_multiply_sum2args_by_sum_rest_params(1, 2, 3, 4, 5) as Int == (1 + 2) * (3 + 4 + 5);
-    assert js.js_concat_strings_rest_params() as String == "";
-    assert js.js_concat_strings_rest_params("a", "b", "c") as String == "abc";
+
+    assert js.jsSumRestParams(1, 2, 3) as Int == (1 + 2 + 3)
+    assert js.jsMultiplyArgBySumRestParams(1, 2, 3, 4) as Int == (1) * (2 + 3 + 4)
+    assert js.jsMultiplySumArgsBySumRestParams(1, 2, 3, 4, 5) as Int == (1 + 2) * (3 + 4 + 5);
+    assert js.jsConcatStringsRestParams() as String == "";
+    assert js.jsConcatStringsRestParams("a", "b", "c") as String == "abc";
     return true;
 }
 
-function Test_function_arg_type_union(): boolean {
+function TestFunctionArgTypeUnion(): boolean {
     let i: (number | string) = 1;
     let s: (number | string) = "1";
     if (js.functionArgTypeUnion(i) as int != 0) {
@@ -182,7 +183,7 @@ function Test_function_arg_type_union(): boolean {
     return true;
 }
 
-function Test_function_return_type_union(): boolean {
+function TestFunctionReturnTypeUnion(): boolean {
     let res: (number | string) = js.functionReturnTypeUnion(0) as (number | string);
     if (typeof res != "number" || res as number != 1) {
         return false;
@@ -194,7 +195,7 @@ function Test_function_return_type_union(): boolean {
     return true;
 }
 
-function Test_class_method_arg_type_union(): boolean {
+function TestClassMethodArgTypeUnion(): boolean {
     let i: (number | string) = 1;
     let s: (number | string) = "1";
     let obj = new UnionTestClassJs();
@@ -207,7 +208,7 @@ function Test_class_method_arg_type_union(): boolean {
     return true;
 }
 
-function Test_class_method_return_type_union(): boolean {
+function TestClassMethodReturnTypeUnion(): boolean {
     let obj = new UnionTestClassJs();
     let res: (number | string) = obj.methodReturnTypeUnion(0) as (number | string);
     if (typeof res != "number" || res as number != 1) {
@@ -220,7 +221,7 @@ function Test_class_method_return_type_union(): boolean {
     return true;
 }
 
-function Test_interface_method_call_return_type_union(): boolean {
+function TestInterfaceMethodCallReturnTypeUnion(): boolean {
     let obj = js.newInterfaceWithUnion();
     let res: (number | string) = obj.methodInInterface(0) as (number | string);
     if (typeof res != "number" || res as number != 1) {
@@ -233,11 +234,11 @@ function Test_interface_method_call_return_type_union(): boolean {
     return true;
 }
 
-function Test_static_method_call(): boolean {
+function TestStaticMethodCall(): boolean {
     return js.ClassWithStaticMethod.staticMethod(1) as int == 1;
 }
 
-function Test_static_method_call_return_type_union(): boolean {
+function TestStaticMethodCallReturnTypeUnion(): boolean {
     let res: (number | string) = js.ClassWithStaticMethod.staticMethodReturnTypeUnion(0) as (number | string);
     if (typeof res != "number" || res as number != 1) {
         return false;

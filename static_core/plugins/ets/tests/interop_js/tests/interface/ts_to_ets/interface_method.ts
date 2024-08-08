@@ -14,136 +14,138 @@
  */
 
 export const ts_number = 1;
-export const ts_string = 'string';
+export const ts_string = "string";
 interface AnyTypeMethod<T> {
-    get(a: T): T
+  get(a: T): T;
 }
 
 export class AnyTypeMethodClass<T> implements AnyTypeMethod<T> {
-    get(a: T): T {
-        return a;
-    }
+  get(a: T): T {
+    return a;
+  }
 }
 
 export function create_interface_class_any_type_method(): AnyTypeMethodClass<unknown> {
-    return new AnyTypeMethodClass<unknown>();
+  return new AnyTypeMethodClass<unknown>();
 }
 
 type UnionType = string | number;
 
 interface UnionTypeMethod {
-    get(a: UnionType): UnionType
+  get(a: UnionType): UnionType;
 }
 
 export class UnionTypeMethodClass implements UnionTypeMethod {
-    get(a: UnionType): UnionType {
-        return a;
-    }
+  get(a: UnionType): UnionType {
+    return a;
+  }
 }
 
 export function create_interface_class_union_type_method(): AnyTypeMethodClass<number> {
-    return new AnyTypeMethodClass<number>();
+  return new AnyTypeMethodClass<number>();
 }
 
 interface ArgInterface {
-    get(): number
+  get(): number;
 }
 
 export function subset_by_ref_interface(obj: ArgInterface): number {
-    return obj.get()
+  return obj.get();
 }
 
-
 class UserClass {
-    public value = 1;
+  public value = 1;
 }
 
 interface SubsetByValue {
-    get(): UserClass
+  get(): UserClass;
 }
 
 export class SubsetByValueClass implements SubsetByValue {
-    get(): UserClass {
-        return new UserClass();
-    }
+  get(): UserClass {
+    return new UserClass();
+  }
 }
 
 export function create_subset_by_value_class_from_ts(): SubsetByValueClass {
-    return new SubsetByValueClass();
+  return new SubsetByValueClass();
 }
 
 interface OptionalMethod {
-    getNum?(): number,
-    getStr(): string;
+  getNum?(): number;
+  getStr(): string;
 }
 
 export class WithOptionalMethodClass implements OptionalMethod {
-    getNum(): number {
-        return ts_number;
-    }
+  getNum(): number {
+    return ts_number;
+  }
 
-    getStr(): string {
-        return ts_string;
-    }
+  getStr(): string {
+    return ts_string;
+  }
 }
 
 export class WithoutOptionalMethodClass implements OptionalMethod {
-    getStr(): string {
-        return ts_string;
-    }
+  getStr(): string {
+    return ts_string;
+  }
 }
 
 export function create_class_with_optional_method(): WithOptionalMethodClass {
-    return new WithOptionalMethodClass();
+  return new WithOptionalMethodClass();
 }
 
 export function create_class_without_optional_method(): WithoutOptionalMethodClass {
-    return new WithoutOptionalMethodClass();
+  return new WithoutOptionalMethodClass();
 }
 
 interface OptionalArgResult {
-    with: WithOptionalMethodClass,
-    without?: WithoutOptionalMethodClass
+  with: WithOptionalMethodClass;
+  without?: WithoutOptionalMethodClass;
 }
 
-export function optional_arg(arg: WithOptionalMethodClass, optional?: WithoutOptionalMethodClass): OptionalArgResult {
-    if (optional) {
-        return { with: arg, without: optional }
-    }
+export function optional_arg(
+  arg: WithOptionalMethodClass,
+  optional?: WithoutOptionalMethodClass,
+): OptionalArgResult {
+  if (optional) {
+    return { with: arg, without: optional };
+  }
 
-    return { with: arg }
+  return { with: arg };
 }
 
 type ArrayArg = (WithOptionalMethodClass | WithoutOptionalMethodClass)[];
 
 export function optional_arg_array(...arg: ArrayArg): OptionalArgResult {
-    const withOptional = arg[0] as WithOptionalMethodClass;
-    const withoutOptional = arg[1] as WithoutOptionalMethodClass;
+  const withOptional = arg[0] as WithOptionalMethodClass;
+  const withoutOptional = arg[1] as WithoutOptionalMethodClass;
 
-    if (withoutOptional) {
-        return { with: withOptional, without: withoutOptional };
-    }
+  if (withoutOptional) {
+    return { with: withOptional, without: withoutOptional };
+  }
 
-    return { with: withOptional };
+  return { with: withOptional };
 }
 
 interface TupleType {
-    get(arg: [number, string]): [number, string];
+  get(arg: [number, string]): [number, string];
 }
 
-
 export class TupleTypeMethodClass implements TupleType {
-    get(arg: [number, string]): [number, string] {
-        return arg;
-    }
+  get(arg: [number, string]): [number, string] {
+    return arg;
+  }
 }
 
 export function create_interface_class_tuple_type_method_from_ts(): TupleTypeMethodClass {
-    return new TupleTypeMethodClass();
+  return new TupleTypeMethodClass();
 }
 
 export const unionTypeMethodInstanceClass = new UnionTypeMethodClass();
 export const subsetByValueInstanceClass = new SubsetByValueClass();
 export const tupleInstanceClass = new TupleTypeMethodClass();
-export const withoutOptionalMethodInstanceClass = new WithoutOptionalMethodClass();
+export const withoutOptionalMethodInstanceClass =
+  new WithoutOptionalMethodClass();
 export const withOptionalMethodInstanceClass = new WithOptionalMethodClass();

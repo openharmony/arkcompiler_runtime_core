@@ -14,11 +14,11 @@
  */
 
 import {
-    ts_int,
+    tsInt,
     ParentClass,
     ChildClass,
     MethodClass,
-    create_class_function,
+    createClassFunction,
 } from "main_js"
 
 const int = 1;
@@ -27,9 +27,9 @@ const foo = () => { }
 const obj: object = {}
 const arr: int[] = []
 
-function check_create_class_function_int(): boolean {
+function checkCreateClassFunctionInt(): boolean {
     try {
-        const TSClass = create_class_function(int, ts_int);
+        const TSClass = createClassFunction(int, tsInt);
 
         return false;
     } catch (e) {
@@ -37,9 +37,9 @@ function check_create_class_function_int(): boolean {
     }
 }
 
-function check_create_class_function_string(): boolean {
+function checkCreateClassFunctionString(): boolean {
     try {
-        const TSClass = create_class_function(str, ts_int);
+        const TSClass = createClassFunction(str, tsInt);
 
         return false;
     } catch (e) {
@@ -47,9 +47,9 @@ function check_create_class_function_string(): boolean {
     }
 }
 
-function check_create_class_function_obj(): boolean {
+function checkCreateClassFunctionObj(): boolean {
     try {
-        const TSClass = create_class_function(obj, ts_int);
+        const TSClass = createClassFunction(obj, tsInt);
 
         return false;
     } catch (e) {
@@ -57,9 +57,9 @@ function check_create_class_function_obj(): boolean {
     }
 }
 
-function check_create_class_function_arr(): boolean {
+function checkCreateClassFunctionArr(): boolean {
     try {
-        const TSClass = create_class_function(arr, ts_int);
+        const TSClass = createClassFunction(arr, tsInt);
 
         return false;
     } catch (e) {
@@ -67,9 +67,9 @@ function check_create_class_function_arr(): boolean {
     }
 }
 
-function check_create_class_function_arrow(): boolean {
+function checkCreateClassFunctionArrow(): boolean {
     try {
-        create_class_function(foo, ts_int);
+        createClassFunction(foo, tsInt);
 
         return false;
     } catch (e) {
@@ -77,9 +77,9 @@ function check_create_class_function_arrow(): boolean {
     }
 }
 
-function check_create_class_arrow_function_int(): boolean {
+function checkCreateClassArrowFunctionInt(): boolean {
     try {
-        const TSClass = create_class_function(int, ts_int);
+        const TSClass = createClassFunction(int, tsInt);
 
         return false;
     } catch (e) {
@@ -87,9 +87,9 @@ function check_create_class_arrow_function_int(): boolean {
     }
 }
 
-function check_create_class_arrow_function_string(): boolean {
+function checkCreateClassArrowFunctionString(): boolean {
     try {
-        const TSClass = create_class_function(str, ts_int);
+        const TSClass = createClassFunction(str, tsInt);
 
         return false;
     } catch (e) {
@@ -97,9 +97,9 @@ function check_create_class_arrow_function_string(): boolean {
     }
 }
 
-function check_create_class_arrow_function_obj(): boolean {
+function checkCreateClassArrowFunctionObj(): boolean {
     try {
-        const TSClass = create_class_function(obj, ts_int);
+        const TSClass = createClassFunction(obj, tsInt);
 
         return false;
     } catch (e) {
@@ -107,9 +107,9 @@ function check_create_class_arrow_function_obj(): boolean {
     }
 }
 
-function check_create_class_arrow_function_arr(): boolean {
+function checkCreateClassArrowFunctionArr(): boolean {
     try {
-        const TSClass = create_class_function(arr, ts_int);
+        const TSClass = createClassFunction(arr, tsInt);
 
         return false;
     } catch (e) {
@@ -117,9 +117,9 @@ function check_create_class_arrow_function_arr(): boolean {
     }
 }
 
-function check_create_class_arrow_function_arrow(): boolean {
+function checkCreateClassArrowFunctionArrow(): boolean {
     try {
-        create_class_function(foo, ts_int);
+        createClassFunction(foo, tsInt);
 
         return false;
     } catch (e) {
@@ -127,7 +127,7 @@ function check_create_class_arrow_function_arrow(): boolean {
     }
 }
 
-function check_parent_class_int(): boolean {
+function checkParentClassInt(): boolean {
     try {
         new ParentClass(int);
 
@@ -137,7 +137,7 @@ function check_parent_class_int(): boolean {
     }
 }
 
-function check_parent_class_string(): boolean {
+function checkParentClassString(): boolean {
     try {
         new ParentClass(str);
 
@@ -147,7 +147,7 @@ function check_parent_class_string(): boolean {
     }
 }
 
-function check_parent_class_array(): boolean {
+function checkParentClassArray(): boolean {
     try {
         new ParentClass(arr);
 
@@ -157,7 +157,7 @@ function check_parent_class_array(): boolean {
     }
 }
 
-function check_parent_class_obj(): boolean {
+function checkParentClassObj(): boolean {
     try {
         new ParentClass(obj);
 
@@ -167,7 +167,7 @@ function check_parent_class_obj(): boolean {
     }
 }
 
-function check_parent_class_arrow(): boolean {
+function checkParentClassArrow(): boolean {
     try {
         new ParentClass(foo);
 
@@ -177,7 +177,7 @@ function check_parent_class_arrow(): boolean {
     }
 }
 
-function check_child_class_int(): boolean {
+function checkChildClassInt(): boolean {
     try {
         new ChildClass(int);
 
@@ -187,7 +187,7 @@ function check_child_class_int(): boolean {
     }
 }
 
-function check_child_class_string(): boolean {
+function checkChildClassString(): boolean {
     try {
         new ChildClass(str);
 
@@ -197,7 +197,7 @@ function check_child_class_string(): boolean {
     }
 }
 
-function check_child_class_array(): boolean {
+function checkChildClassArray(): boolean {
     try {
         new ChildClass(arr);
 
@@ -207,7 +207,7 @@ function check_child_class_array(): boolean {
     }
 }
 
-function check_child_class_obj(): boolean {
+function checkChildClassObj(): boolean {
     try {
         new ChildClass(obj);
 
@@ -217,7 +217,7 @@ function check_child_class_obj(): boolean {
     }
 }
 
-function check_child_class_arrow(): boolean {
+function checkChildClassArrow(): boolean {
     try {
         new ChildClass(foo);
 
@@ -227,7 +227,7 @@ function check_child_class_arrow(): boolean {
     }
 }
 
-function check_method_class_int(): boolean {
+function checkMethodClassInt(): boolean {
     try {
         const TSClass = new MethodClass();
         TSClass.init(int, int);
@@ -238,7 +238,7 @@ function check_method_class_int(): boolean {
     }
 }
 
-function check_method_class_string(): boolean {
+function checkMethodClassString(): boolean {
     try {
         const TSClass = new MethodClass();
         TSClass.init(str, int);
@@ -249,7 +249,7 @@ function check_method_class_string(): boolean {
     }
 }
 
-function check_method_class_arr(): boolean {
+function checkMethodClassArr(): boolean {
     try {
         const TSClass = new MethodClass();
         TSClass.init(arr, int);
@@ -260,7 +260,7 @@ function check_method_class_arr(): boolean {
     }
 }
 
-function check_method_class_obj(): boolean {
+function checkMethodClassObj(): boolean {
     try {
         const TSClass = new MethodClass();
         TSClass.init(obj, int);
@@ -271,7 +271,7 @@ function check_method_class_obj(): boolean {
     }
 }
 
-function check_method_class_arrow(): boolean {
+function checkMethodClassArrow(): boolean {
     try {
         const TSClass = new MethodClass();
         TSClass.init(foo, int);

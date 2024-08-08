@@ -13,25 +13,21 @@
  * limitations under the License.
  */
 
-const {
-    UnionSetter,
-    num,
-    create_union_class,
-} = require("setter.test.js");
+const { UnionSetter, num, createUnionClass } = require('setter.test.js');
 
-function check_setter_union() {
-    const unionSetter = new UnionSetter();
-    unionSetter.value = num;
+function checkSetterUnion() {
+	const unionSetter = new UnionSetter();
+	unionSetter.value = num;
 
-    ASSERT_EQ(num, setterUnion.value);
+	ASSERT_EQ(num, setterUnion.value);
 }
 
-function check_setter_union_class_from_ets() {
-    const unionSetter = create_union_class();
-    unionSetter.value = num;
+function checkSetterUnionClassFromEts() {
+	const unionSetter = createUnionClass();
+	unionSetter.value = num;
 
-    ASSERT_EQ(num, setterUnion.value);
+	ASSERT_EQ(num, setterUnion.value);
 }
 
-check_setter_union();
-check_setter_union_class_from_ets();
+checkSetterUnion();
+checkSetterUnionClassFromEts();

@@ -20,14 +20,16 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const CreateEtsSample = etsMod.getFunction('ArrayBuffer_CreateEtsSample');
 const TestJSResize = etsMod.getFunction('ArrayBuffer_TestJSResize');
 
-{ // Test JS ArrayBuffer
-  const LENGTH = 32;
-  TestJSResize(new ArrayBuffer(LENGTH));
+{
+	// Test JS ArrayBuffer
+	const LENGTH = 32;
+	TestJSResize(new ArrayBuffer(LENGTH));
 }
 
-{ // Test ETS ArrayBuffer
-  let arr = CreateEtsSample();
-  ASSERT_TRUE(!arr.resizable);
+{
+	// Test ETS ArrayBuffer
+	let arr = CreateEtsSample();
+	ASSERT_TRUE(!arr.resizable);
 }
 
 GCJSRuntimeCleanup();

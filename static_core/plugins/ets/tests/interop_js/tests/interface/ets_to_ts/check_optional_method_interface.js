@@ -14,68 +14,78 @@
  */
 
 const {
-    num,
-    string,
-    WithOptionalMethodClass,
-    create_class_with_optional_method,
-    WithoutOptionalMethodClass,
-    create_class_without_optional_method,
-    optional_arg,
-    optional_arg_array,
+	num,
+	string,
+	WithOptionalMethodClass,
+	createClassWithOptionalMethod,
+	WithoutOptionalMethodClass,
+	createClassWithoutOptionalMethod,
+	optionalArg,
+	optionalArgArray,
 } = require('interface_method.test.js');
 
-function check_with_optional_method_class() {
-    const optionalClass = new WithOptionalMethodClass();
+function checkWithOptionalMethodClass() {
+	const optionalClass = new WithOptionalMethodClass();
 
-    ASSERT_TRUE(optionalClass.getNum() == num
-        && optionalClass.getStr() == string);
+	ASSERT_TRUE(
+		optionalClass.getNum() === num && optionalClass.getStr() === string
+	);
 }
-function check_without_optional_method_class() {
-    const optionalClass = new WithoutOptionalMethodClass();
+function checkWithoutOptionalMethodClass() {
+	const optionalClass = new WithoutOptionalMethodClass();
 
-    ASSERT_TRUE(optionalClass.getStr() == string);
-}
-
-function check_create_class_with_optional_method() {
-    const optionalClass = create_class_with_optional_method();
-
-    ASSERT_TRUE(optionalClass.getNum() == num
-        && optionalClass.getStr() == string);
-}
-function check_create_class_without_optional_method() {
-    const optionalClass = create_class_without_optional_method();
-
-    ASSERT_TRUE(optionalClass.getStr() == string);
+	ASSERT_TRUE(optionalClass.getStr() === string);
 }
 
-function check_with_optional_method_instance_class() {
-    ASSERT_TRUE(withOptionalMethodInstanceClass.getNum() == ts_number
-        && withOptionalMethodInstanceClass.getStr() == ts_string);
+function checkCreateClassWithOptionalMethod() {
+	const optionalClass = createClassWithOptionalMethod();
+
+	ASSERT_TRUE(
+		optionalClass.getNum() === num && optionalClass.getStr() === string
+	);
+}
+function checkCreateClassWithoutOptionalMethod() {
+	const optionalClass = createClassWithoutOptionalMethod();
+
+	ASSERT_TRUE(optionalClass.getStr() === string);
 }
 
-function check_without_optional_method_instance_class() {
-    ASSERT_TRUE(withoutOptionalMethodInstanceClass.getStr() == ts_string);
+function checkWithOptionalMethodInstanceClass() {
+	ASSERT_TRUE(
+		withOptionalMethodInstanceClass.getNum() === tsNumber &&
+      withOptionalMethodInstanceClass.getStr() === tsString
+	);
 }
 
-function check_optional_arg_with_all_args() {
-    const result = optional_arg(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass);
-    ASSERT_TRUE(!!result.with && !!result.without);
+function checkWithoutOptionalMethodInstanceClass() {
+	ASSERT_TRUE(withoutOptionalMethodInstanceClass.getStr() === tsString);
 }
 
-function check_optional_arg_with_one_args() {
-    const result = optional_arg(withOptionalMethodInstanceClass);
-
-    ASSERT_TRUE(!!result.with);
+function checkOptionalArgWithAllArgs() {
+	const result = optionalArg(
+		withOptionalMethodInstanceClass,
+		withoutOptionalMethodInstanceClass
+	);
+	ASSERT_TRUE(!!result.with && !!result.without);
 }
 
-function check_spread_operator_arg_with_all_args() {
-    const arr = [withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass];
-    const result = optional_arg_array(...arr);
-    ASSERT_TRUE(!!result.with && !!result.without);
+function checkOptionalArgWithOneArgs() {
+	const result = optionalArg(withOptionalMethodInstanceClass);
+
+	ASSERT_TRUE(!!result.with);
 }
 
-function check_spread_operator_arg_with_one_args() {
-    const arr = [withOptionalMethodInstanceClass];
-    const result = optional_arg_array(...arr);
-    ASSERT_TRUE(!!result.with);
+function checkSpreadOperatorArgWithAllArgs() {
+	const arr = [
+		withOptionalMethodInstanceClass,
+		withoutOptionalMethodInstanceClass,
+	];
+	const result = optionalArgArray(...arr);
+	ASSERT_TRUE(!!result.with && !!result.without);
+}
+
+function checkSpreadOperatorArgWithOneArgs() {
+	const arr = [withOptionalMethodInstanceClass];
+	const result = optionalArgArray(...arr);
+	ASSERT_TRUE(!!result.with);
 }

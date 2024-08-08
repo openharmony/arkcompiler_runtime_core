@@ -22,57 +22,57 @@ class EtsParentClassTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsParentClassTsToEtsTest, check_main_class_as_arg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_main_class_as_arg"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkMainClassAsArg"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_anonymous_class_as_arg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_anonymous_class_as_arg"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassAsArg"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_IIFE_class_as_arg)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_IIFE_class_as_arg"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkIIFEClassAsArg"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_main_class_with_arg_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_main_class_with_arg_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateMainClassWithArgFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_main_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_main_class_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateMainClassFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_main_class_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_main_class_instance"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkMainClassInstance"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_anonymous_class_with_arg_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_anonymous_class_with_arg_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassWithArgFromTs"));
 }
 
-TEST_F(EtsParentClassTsToEtsTest, check_create_anonymous_class_from_ts)
+TEST_F(EtsParentClassTsToEtsTest, checkCreateAnonymousClassFromTs)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_anonymous_class_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateAnonymousClassFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_anonymous_class_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_anonymous_class_instance"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkAnonymousClassInstance"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_create_iife_class_from_ts)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_iife_class_from_ts"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateIifeClassFromTs"));
 }
 
 TEST_F(EtsParentClassTsToEtsTest, check_iife_class_instance)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_iife_class_instance"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkIifeClassInstance"));
 }
 
 }  // namespace ark::ets::interop::js::testing

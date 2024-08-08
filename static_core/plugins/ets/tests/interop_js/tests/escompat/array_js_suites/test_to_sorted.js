@@ -21,18 +21,20 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSToSorted = etsMod.getFunction('Array_TestJSToSorted');
 
-{ // Test JS Array<FooClass>
-  TestJSToSorted(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSToSorted(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  function comparator(a, b) {
-    return a.toString().localeCompare(b.toString());
-  }
-  arr.push(111);
-  let toSorted = arr.toSorted(comparator);
-  ASSERT_EQ(toSorted.at(2), 'foo');
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	function comparator(a, b) {
+		return a.toString().localeCompare(b.toString());
+	}
+	arr.push(111);
+	let toSorted = arr.toSorted(comparator);
+	ASSERT_EQ(toSorted.at(2), 'foo');
 }
 
 GCJSRuntimeCleanup();

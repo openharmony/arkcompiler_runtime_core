@@ -17,9 +17,9 @@ const ZERO = 0;
 const ONE = 1;
 const TWO = 2;
 const ONE_HUNDRED = 100;
-const NINETY_NINE = 99
+const NINETY_NINE = 99;
 
-import { Color, Letter/*, Name*/ } from './lib';
+import { Color, Letter /*, Name*/ } from "./lib";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);

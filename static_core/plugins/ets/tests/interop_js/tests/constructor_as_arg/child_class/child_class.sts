@@ -14,101 +14,101 @@
  */
 
 import {
-    ts_int,
+    tsInt,
     MainClass,
     AnonymousClass,
     ChildClass,
-    create_child_class_with_arg_from_ts,
-    create_child_class_with_main_from_ts,
+    createChildClassWithArgFromTs,
+    createChildClassWithMainFromTs,
     childClassWithMainInstance,
-    create_child_class_with_anonymous_from_ts,
+    createChildClassWithAnonymousFromTs,
     childClassWithAnonymousInstance,
-    create_child_class_with_IIFE_from_ts,
+    createChildClassWithIIFEFromTs,
     childClassWithIIFEInstance,
     IIFEClass,
-    check_instance,
+    checkInstance,
 } from "main_js"
 
-function check_inheritor_class_main(): boolean {
+function checkInheritorClassMain(): boolean {
     const TSClass = new ChildClass(MainClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_inheritor_class_anonymous(): boolean {
+function checkInheritorClassAnonymous(): boolean {
     const TSClass = new ChildClass(AnonymousClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_inheritor_class_IIFE(): boolean {
+function checkInheritorClassIIFE(): boolean {
     const TSClass = new ChildClass(IIFEClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_child_class_with_arg_main_from_ts(): boolean {
-    const TSClass = create_child_class_with_arg_from_ts(MainClass);
+function checkCreateChildClassWithArgMainFromTs(): boolean {
+    const TSClass = createChildClassWithArgFromTs(MainClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_child_class_with_arg_anonymous_from_ts(): boolean {
-    const TSClass = create_child_class_with_arg_from_ts(AnonymousClass);
+function checkCreateChildClassWithArgAnonymousFromTs(): boolean {
+    const TSClass = createChildClassWithArgFromTs(AnonymousClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_child_class_with_arg_IIFE_from_ts(): boolean {
-    const TSClass = create_child_class_with_arg_from_ts(IIFEClass);
+function checkCreateChildClassWithArgIIFEFromTs(): boolean {
+    const TSClass = createChildClassWithArgFromTs(IIFEClass);
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_child_class_with_main_from_ts(): boolean {
-    const TSClass = create_child_class_with_main_from_ts();
+function checkCreateChildClassWithMainFromTs(): boolean {
+    const TSClass = createChildClassWithMainFromTs();
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_child_class_with_main_instance(): boolean {
+function checkChildClassWithMainInstance(): boolean {
     const TSClass = childClassWithMainInstance;
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_child_class_with_anonymous_from_ts(): boolean {
-    const TSClass = create_child_class_with_anonymous_from_ts();
+function checkCreateChildClassWithAnonymousFromTs(): boolean {
+    const TSClass = createChildClassWithAnonymousFromTs();
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_child_class_with_anonymous_instance(): boolean {
+function checkChildClassWithAnonymousInstance(): boolean {
     const TSClass = childClassWithAnonymousInstance;
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_create_child_class_with_IIFE_from_ts(): boolean {
-    const TSClass = create_child_class_with_IIFE_from_ts();
+function checkCreateChildClassWithIIFEFromTs(): boolean {
+    const TSClass = createChildClassWithIIFEFromTs();
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }
 
-function check_child_class_with_IIFE_instance(): boolean {
+function checkChildClassWithIIFEInstance(): boolean {
     const TSClass = childClassWithIIFEInstance;
 
-    return check_instance(ChildClass, TSClass) as boolean
-        && TSClass._other_class._value as int == ts_int as int;
+    return checkInstance(ChildClass, TSClass) as boolean
+        && TSClass.OtherClass._value as int == tsInt as int;
 }

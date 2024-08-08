@@ -14,27 +14,31 @@
  */
 
 const {
-    num,
-    string,
-    TupleTypeMethodClass,
-    create_interface_class_tuple_type_method,
+	num,
+	string,
+	TupleTypeMethodClass,
+	createInterfaceClassTupleTypeMethod,
 } = require('interface_method.test');
 
 const arr = [num, string];
 
-function check_tuple_type_interface_method() {
-    const IClass = new TupleTypeMethodClass();
+function checkTupleTypeInterfaceMethod() {
+	const IClass = new TupleTypeMethodClass();
 
-    const result = IClass.get(arr);
-    ASSERT_TRUE(Array.isArray(result) && result[0] == num && result[1] == string);
+	const result = IClass.get(arr);
+	ASSERT_TRUE(
+		Array.isArray(result) && result[0] === num && result[1] === string
+	);
 }
 
-function check_create_tuple_type_class_from_ets() {
-    const IClass = create_interface_class_tuple_type_method();
+function checkCreateTupleTypeClassFromEts() {
+	const IClass = createInterfaceClassTupleTypeMethod();
 
-    const result = IClass.get(arr);
-    ASSERT_TRUE(Array.isArray(result) && result[0] == num && result[1] == string);
+	const result = IClass.get(arr);
+	ASSERT_TRUE(
+		Array.isArray(result) && result[0] === num && result[1] === string
+	);
 }
 
-check_tuple_type_interface_method();
-check_create_tuple_type_class_from_ets();
+checkTupleTypeInterfaceMethod();
+checkCreateTupleTypeClassFromEts();

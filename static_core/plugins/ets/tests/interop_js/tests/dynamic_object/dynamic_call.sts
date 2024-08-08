@@ -16,7 +16,7 @@
 import { RegularFunc, Foo, MultipleCall, Lambda, ArrayOfFoo, DoubleArrayOfFoo, ArrayOfLambda } from "/plugins/ets/tests/interop_js/tests/dynamic_object/dynamic_call.js"
 
 
-function regular_func(): int {
+function regularFunc(): int {
     let x = RegularFunc() as Int;
     let callee = RegularFunc;
     assert(x == callee() as Int)
@@ -40,18 +40,18 @@ class DynFieldHelper {
     }
 }
 
-function dynamic_field(): Int {
+function dynamicField(): Int {
     return (new DynFieldHelper()).x;
 }
 
-function method_call(): int {
+function methodCall(): int {
     let x = Foo.foo().foo() as Int;
     let callee = Foo;
     assert(x == callee.foo().foo() as Int)
     return x
 }
 
-function multiple_call(): int {
+function multipleCall(): int {
     let x = MultipleCall()() as Int;
     let callee = MultipleCall;
     assert(x == callee()() as Int)
@@ -65,21 +65,21 @@ function lambda(): int {
     return x;
 }
 
-function simple_arr(): int {
+function simpleArr(): int {
     let x = ArrayOfFoo[0].foo() as Int;
     let callee = ArrayOfFoo
     assert(x == callee[0].foo() as Int)
     return x;
 }
 
-function multidim_array(): int {
+function multidimArray(): int {
     let x = DoubleArrayOfFoo[0][0].foo() as Int;
     let callee = DoubleArrayOfFoo
     assert(x == callee[0][0].foo() as Int)
     return x;
 }
 
-function lambda_arr_call(): int {
+function lambdaArrCall(): int {
     let x = ArrayOfLambda[0]() as Int;
     let callee = ArrayOfLambda
     assert(x == callee[0]() as Int)

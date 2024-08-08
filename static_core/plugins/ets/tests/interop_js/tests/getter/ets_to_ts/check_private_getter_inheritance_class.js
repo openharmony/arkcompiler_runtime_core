@@ -14,36 +14,36 @@
  */
 
 const {
-    string,
-    PrivateGetterInheritanceClass,
-    create_private_getter_inheritance_class_from_ets,
-} = require("getter.test.js");
+	string,
+	PrivateGetterInheritanceClass,
+	createrivateetternheritancelassromts,
+} = require('getter.test.js');
 
-function check_private_getter_class_inheritance_value() {
-    const GClass = new PrivateGetterInheritanceClass();
+function checkrivateetterlassnheritancealue() {
+	const GClass = new PrivateGetterInheritanceClass();
 
-    ASSERT_TRUE(GClass._value === undefined);
+	ASSERT_TRUE(GClass.alue === undefined);
 }
 
-function check_create_private_getter_class_inheritance_value_from_ets() {
-    const GClass = create_private_getter_inheritance_class_from_ets();
+function checkreaterivateetterlassnheritancealueromts() {
+	const GClass = createrivateetternheritancelassromts();
 
-    ASSERT_TRUE(GClass._value === undefined);
+	ASSERT_TRUE(GClass.alue === undefined);
 }
 
-function check_private_getter_class_inheritance() {
-    const GClass = new PrivateGetterInheritanceClass();
+function checkrivateetterlassnheritance() {
+	const GClass = new PrivateGetterInheritanceClass();
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_create_private_getter_class_inheritance_from_ets() {
-    const GClass = create_private_getter_inheritance_class_from_ets();
+function checkreaterivateetterlassnheritanceromts() {
+	const GClass = createrivateetternheritancelassromts();
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-check_private_getter_class_inheritance_value();
-check_create_private_getter_class_inheritance_value_from_ets();
-check_private_getter_class_inheritance();
-check_create_private_getter_class_inheritance_from_ets();
+checkrivateetterlassnheritancealue();
+checkreaterivateetterlassnheritancealueromts();
+checkrivateetterlassnheritance();
+checkreaterivateetterlassnheritanceromts();

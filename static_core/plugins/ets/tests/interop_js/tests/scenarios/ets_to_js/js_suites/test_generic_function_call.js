@@ -16,12 +16,12 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const genericFunctionEts = etsMod.getFunction('generic_function_ets');
+const genericFunctionEts = etsMod.getFunction('genericFunctionEts');
 
 {
-  let ret = genericFunctionEts(1);
-  ASSERT_EQ(typeof ret, 'number');
-  ASSERT_EQ(ret, 1);
+	let ret = genericFunctionEts(1);
+	ASSERT_EQ(typeof ret, 'number');
+	ASSERT_EQ(ret, 1);
 }
 
 GCJSRuntimeCleanup();

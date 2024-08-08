@@ -26,7 +26,7 @@ const FIVE = 5;
 const SIX = 6;
 const PRECISION = 3;
 
-import { Fields } from './lib';
+import { Fields } from "./lib";
 
 function AssertEq<T>(a: T, b: T) {
   console.log(`AssertEq: '${a}' === '${b}'`);
@@ -42,11 +42,26 @@ export function main() {
 function testFields() {
   const fields = new Fields();
   AssertEq(fields.readonlyBoolean_, true);
-  AssertEq(Fields.staticFloat_.toFixed(PRECISION), (ONE + ONE_TENTH).toFixed(PRECISION));
-  AssertEq(fields.number_.toFixed(PRECISION), (TWO + TWO_TENTH).toFixed(PRECISION));
-  AssertEq(fields.Number_.toFixed(PRECISION), (THREE + THREE_TENTH).toFixed(PRECISION));
-  AssertEq(fields.double_.toFixed(PRECISION), (FOUR + FOUR_TENTH).toFixed(PRECISION));
-  AssertEq(fields.Double_.toFixed(PRECISION), (FIVE + FIVE_TENTH).toFixed(PRECISION));
+  AssertEq(
+    Fields.staticFloat_.toFixed(PRECISION),
+    (ONE + ONE_TENTH).toFixed(PRECISION),
+  );
+  AssertEq(
+    fields.number_.toFixed(PRECISION),
+    (TWO + TWO_TENTH).toFixed(PRECISION),
+  );
+  AssertEq(
+    fields.Number_.toFixed(PRECISION),
+    (THREE + THREE_TENTH).toFixed(PRECISION),
+  );
+  AssertEq(
+    fields.double_.toFixed(PRECISION),
+    (FOUR + FOUR_TENTH).toFixed(PRECISION),
+  );
+  AssertEq(
+    fields.Double_.toFixed(PRECISION),
+    (FIVE + FIVE_TENTH).toFixed(PRECISION),
+  );
   AssertEq(fields.int_, SIX);
   // NOTE(ivagin): enable when supported by interop #12808
   if (false) {
@@ -57,8 +72,8 @@ function testFields() {
     AssertEq(fields.uint32Array_ instanceof Int32Array, true);
   }
 
-  AssertEq(fields.string_, 'Panda string!!');
-  AssertEq(fields.nullableString_, 'nullable string');
+  AssertEq(fields.string_, "Panda string!!");
+  AssertEq(fields.nullableString_, "nullable string");
   fields.nullableString_ = null;
   AssertEq(fields.nullableString_, null);
 }

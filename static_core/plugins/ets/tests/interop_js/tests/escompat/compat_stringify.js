@@ -19,45 +19,46 @@ const etsMod = getTestModule('escompat_test');
 const StringifyJSValue = etsMod.getFunction('JSON_stringify_jsv');
 const StringifyObject = etsMod.getFunction('JSON_stringify_obj');
 const StringifyField = etsMod.getFunction('JSON_stringify_field');
-const FooClass = etsMod.getClass("FooClass");
+const FooClass = etsMod.getClass('FooClass');
 
 class B {
-    z = 123
+	z = 123;
 }
 class A {
-    x = "123"
-    y = new B()
+	x = '123';
+	y = new B();
 }
 
 class C {
-    toJSON() {
-        throw 123;
-    }
+	toJSON() {
+		throw 123;
+	}
 }
 
 function tmp() {}
 
-{ // Test ETS stringify
-    let err = null
-    try {
-        StringifyJSValue(tmp); // JSON.stringify(function) returns undefined (not a string!). We throw exception
-    } catch (e) {
-        err = e
-    }
-    ASSERT_EQ(String(err.message), 'String expected');
+{
+	// Test ETS stringify
+	let err = null;
+	try {
+		StringifyJSValue(tmp); // JSON.stringify(function) returns undefined (not a string!). We throw exception
+	} catch (e) {
+		err = e;
+	}
+	ASSERT_EQ(String(err.message), 'String expected');
 
-    let jsv = StringifyJSValue(new A());
-    let obj = StringifyObject(new A());
-    let jsv_as_field = StringifyField(new A())
-    ASSERT_EQ(jsv, '{"x":"123","y":{"z":123}}');
-    ASSERT_EQ(obj, '{"x":"123","y":{"z":123}}');
+	let jsv = StringifyJSValue(new A());
+	let obj = StringifyObject(new A());
+	let jsvsield = StringifyField(new A());
+	ASSERT_EQ(jsv, '{"x":"123","y":{"z":123}}');
+	ASSERT_EQ(obj, '{"x":"123","y":{"z":123}}');
 
-    ASSERT_EQ(jsv_as_field, '{"x":{"x":"123","y":{"z":123}}}');
+	ASSERT_EQ(jsvsield, '{"x":{"x":"123","y":{"z":123}}}');
 
-    try {
-        let etsCodeFromJson = StringifyJSValue(new C());
-        throw 124;
-    } catch (e) {
-        ASSERT_EQ(e, 123)
-    }
+	try {
+		let etsCodeFromJson = StringifyJSValue(new C());
+		throw 124;
+	} catch (e) {
+		ASSERT_EQ(e, 123);
+	}
 }
