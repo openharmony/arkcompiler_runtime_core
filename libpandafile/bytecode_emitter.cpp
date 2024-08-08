@@ -252,6 +252,11 @@ int32_t BytecodeEmitter::EstimateMaxDistance(uint32_t insn_pc, uint32_t target_p
     int32_t distance = 0;
     uint32_t end_pc = 0;
     std::map<uint32_t, Label>::const_iterator it;
+    if (static_cast<int64_t>(target_pc) < static_cast<int64_t>(insn_pc) + INT32_MIN ||
+        static_cast<int64_t>(target_pc) > static_cast<int64_t>(insn_pc) + INT32_MAX) {
+        LOG(ERROR, ASSEMBLER) << "Failed to emit jmp/jcc with displacement not fitting into imm32";
+    }
+
     if (target_pc > insn_pc) {
         it = branches_.lower_bound(insn_pc - bias);
         distance = static_cast<int32_t>(target_pc - insn_pc);
