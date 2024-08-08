@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	SubsetRefSet,
-	createSubsetRefSetClass,
-	string,
-} = require('setter.test.js');
+const { SubsetRefSet, createSubsetRefSetClass, string } = require('setter.test.js');
 
 function checkSetterSubsetRef() {
 	const extraSet = new SubsetRefSet();

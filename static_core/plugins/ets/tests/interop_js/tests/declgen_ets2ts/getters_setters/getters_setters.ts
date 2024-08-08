@@ -15,27 +15,27 @@
 
 const TWO = 2;
 
-import { C } from "./lib";
+import { C } from './lib';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  test();
+	test();
 }
 
 function test() {
-  const c1 = new C();
-  // NOTE(ivagin): enable when supported by interop #12808
-  if (false) {
-    AssertEq(c1.x, 0);
-    AssertEq(c1.val, 0);
-    c1.x = 1;
-    AssertEq(c1.x, 1);
-    AssertEq(c1.val, 1);
-  }
+	const c1 = new C();
+	// NOTE(ivagin): enable when supported by interop #12808
+	if (false) {
+		AssertEq(c1.x, 0);
+		AssertEq(c1.val, 0);
+		c1.x = 1;
+		AssertEq(c1.x, 1);
+		AssertEq(c1.val, 1);
+	}
 }

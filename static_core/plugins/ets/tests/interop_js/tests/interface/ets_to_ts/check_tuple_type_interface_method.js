@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	num,
-	string,
-	TupleTypeMethodClass,
-	createInterfaceClassTupleTypeMethod,
-} = require('interface_method.test');
+const { num, string, TupleTypeMethodClass, createInterfaceClassTupleTypeMethod } = require('interface_method.test');
 
 const arr = [num, string];
 
@@ -26,18 +21,14 @@ function checkTupleTypeInterfaceMethod() {
 	const IClass = new TupleTypeMethodClass();
 
 	const result = IClass.get(arr);
-	ASSERT_TRUE(
-		Array.isArray(result) && result[0] === num && result[1] === string
-	);
+	ASSERT_TRUE(Array.isArray(result) && result[0] === num && result[1] === string);
 }
 
 function checkCreateTupleTypeClassFromEts() {
 	const IClass = createInterfaceClassTupleTypeMethod();
 
 	const result = IClass.get(arr);
-	ASSERT_TRUE(
-		Array.isArray(result) && result[0] === num && result[1] === string
-	);
+	ASSERT_TRUE(Array.isArray(result) && result[0] === num && result[1] === string);
 }
 
 checkTupleTypeInterfaceMethod();

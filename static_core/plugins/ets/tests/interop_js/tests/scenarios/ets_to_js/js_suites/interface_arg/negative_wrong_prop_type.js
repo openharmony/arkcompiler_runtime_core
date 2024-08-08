@@ -31,6 +31,6 @@ function foo(x) {
 			foo: foo,
 			numVal: INT_VALUE,
 			stringVal: INT_VALUE,
-		}),
+		})
 	);
 }

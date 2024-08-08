@@ -27,9 +27,7 @@ const {
 function checkWithOptionalMethodClass() {
 	const optionalClass = new WithOptionalMethodClass();
 
-	ASSERT_TRUE(
-		optionalClass.getNum() === num && optionalClass.getStr() === string
-	);
+	ASSERT_TRUE(optionalClass.getNum() === num && optionalClass.getStr() === string);
 }
 function checkWithoutOptionalMethodClass() {
 	const optionalClass = new WithoutOptionalMethodClass();
@@ -40,9 +38,7 @@ function checkWithoutOptionalMethodClass() {
 function checkCreateClassWithOptionalMethod() {
 	const optionalClass = createClassWithOptionalMethod();
 
-	ASSERT_TRUE(
-		optionalClass.getNum() === num && optionalClass.getStr() === string
-	);
+	ASSERT_TRUE(optionalClass.getNum() === num && optionalClass.getStr() === string);
 }
 function checkCreateClassWithoutOptionalMethod() {
 	const optionalClass = createClassWithoutOptionalMethod();
@@ -51,10 +47,7 @@ function checkCreateClassWithoutOptionalMethod() {
 }
 
 function checkWithOptionalMethodInstanceClass() {
-	ASSERT_TRUE(
-		withOptionalMethodInstanceClass.getNum() === tsNumber &&
-      withOptionalMethodInstanceClass.getStr() === tsString
-	);
+	ASSERT_TRUE(withOptionalMethodInstanceClass.getNum() === tsNumber && withOptionalMethodInstanceClass.getStr() === tsString);
 }
 
 function checkWithoutOptionalMethodInstanceClass() {
@@ -62,10 +55,7 @@ function checkWithoutOptionalMethodInstanceClass() {
 }
 
 function checkOptionalArgWithAllArgs() {
-	const result = optionalArg(
-		withOptionalMethodInstanceClass,
-		withoutOptionalMethodInstanceClass
-	);
+	const result = optionalArg(withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass);
 	ASSERT_TRUE(!!result.with && !!result.without);
 }
 
@@ -76,10 +66,7 @@ function checkOptionalArgWithOneArgs() {
 }
 
 function checkSpreadOperatorArgWithAllArgs() {
-	const arr = [
-		withOptionalMethodInstanceClass,
-		withoutOptionalMethodInstanceClass,
-	];
+	const arr = [withOptionalMethodInstanceClass, withoutOptionalMethodInstanceClass];
 	const result = optionalArgArray(...arr);
 	ASSERT_TRUE(!!result.with && !!result.without);
 }

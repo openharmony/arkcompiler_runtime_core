@@ -14,32 +14,32 @@
  */
 
 function main() {
-  globalThis.test = {};
+	globalThis.test = {};
 
-  globalThis.test.etsVm = requireNapiPreview("ets_interop_js_napi", true);
+	globalThis.test.etsVm = requireNapiPreview('ets_interop_js_napi', true);
 
-  const etsVmRes = globalThis.test.etsVm.createRuntime({
-    "log-level": "info",
-    "load-runtimes": "ets",
-    "log-components": "ets_interop_js",
-    "boot-panda-files": "../plugins/ets/etsstdlib.abc",
-    "gc-trigger-type": "heap-trigger",
-    "compiler-enable-jit": "false",
-    "run-gc-in-place": "true",
-  });
-  print("etsVm.version()=" + globalThis.test.etsVm.version());
+	const etsVmRes = globalThis.test.etsVm.createRuntime({
+		'log-level': 'info',
+		'load-runtimes': 'ets',
+		'log-components': 'ets_interop_js',
+		'boot-panda-files': '../plugins/ets/etsstdlib.abc',
+		'gc-trigger-type': 'heap-trigger',
+		'compiler-enable-jit': 'false',
+		'run-gc-in-place': 'true',
+	});
+	print('etsVm.version()=' + globalThis.test.etsVm.version());
 
-  if (!etsVmRes) {
-    throw new Error("Failed to create ETS runtime");
-  } else {
-    print("ETS runtime created");
-  }
+	if (!etsVmRes) {
+		throw new Error('Failed to create ETS runtime');
+	} else {
+		print('ETS runtime created');
+	}
 
-  if (!etsVmRes) {
-    throw new Error("Failed to create ETS runtime");
-  } else {
-    print("ETS runtime created");
-  }
+	if (!etsVmRes) {
+		throw new Error('Failed to create ETS runtime');
+	} else {
+		print('ETS runtime created');
+	}
 }
 
 main();

@@ -15,33 +15,26 @@
  */
 Object.defineProperty(exports, '__esModule', { value: true });
 exports.jsRespectsStaticModifier =
-  exports.jsRespectsProtectedModifier =
-  exports.extendNativeClass =
-  exports.extendUserClass =
-  exports.TestNativeClass =
-  exports.TestUserClass =
-  exports.helperIsJSInstanceOf =
-  exports.DEFAULT_NUMERIC_VALUE =
-  exports.DEFAULT_STRING_VALUE =
-    void 0;
+	exports.jsRespectsProtectedModifier =
+	exports.extendNativeClass =
+	exports.extendUserClass =
+	exports.TestNativeClass =
+	exports.TestUserClass =
+	exports.helperIsJSInstanceOf =
+	exports.DEFAULT_NUMERIC_VALUE =
+	exports.DEFAULT_STRING_VALUE =
+		void 0;
 //@ts-ignore -- to avoid @types/node missing
 const stream1 = require('stream');
 //@ts-ignore -- to avoid @types/node missing
 const etsVm = require('lib/module/ets_interop_js_napi');
 const ETS_MODULE_NAME = 'interop_class_extension';
 const makePrefix = (packageName) => 'L' + packageName.replace('.', '/') + '/';
-const getClass = (name, packageName) =>
-	etsVm.getClass(makePrefix(packageName ?? ETS_MODULE_NAME) + name + ';');
-const getFunction = (name, packageName) =>
-	etsVm.getFunction(
-		makePrefix(packageName ?? ETS_MODULE_NAME) + 'ETSGLOBAL;',
-		name
-	);
+const getClass = (name, packageName) => etsVm.getClass(makePrefix(packageName ?? ETS_MODULE_NAME) + name + ';');
+const getFunction = (name, packageName) => etsVm.getFunction(makePrefix(packageName ?? ETS_MODULE_NAME) + 'ETSGLOBAL;', name);
 exports.DEFAULT_STRING_VALUE = 'Panda';
 //@ts-ignore -- to avoid @types/node missing
-exports.DEFAULT_NUMERIC_VALUE = Math.round(
-	Math.random() * Number.MAX_SAFE_INTEGER
-);
+exports.DEFAULT_NUMERIC_VALUE = Math.round(Math.random() * Number.MAX_SAFE_INTEGER);
 const helperIsJSInstanceOf = (obj, classObj) => {
 	return obj instanceof classObj;
 };

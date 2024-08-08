@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	AbstractClass,
-	createAbstractClass,
-	string,
-} = require('setter.test.js');
+const { AbstractClass, createAbstractClass, string } = require('setter.test.js');
 
 function checkSetterAbstract() {
 	const abstractClass = new AbstractClass();

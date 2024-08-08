@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	SubsetByRef,
-	createubsetyefetterlassromts,
-} = require('getter.test.js');
+const { string, SubsetByRef, createubsetyefetterlassromts } = require('getter.test.js');
 
 function checkubsetyefetterlass() {
 	const GClass = new SubsetByRef();

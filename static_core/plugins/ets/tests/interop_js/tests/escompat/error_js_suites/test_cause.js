@@ -16,9 +16,7 @@
 const { etsVm, getTestModule } = require('escompat.test.js');
 
 const etsMod = getTestModule('escompat_test');
-const CreateEtsSampleWithCause = etsMod.getFunction(
-	'Error_CreateEtsSampleWithCause',
-);
+const CreateEtsSampleWithCause = etsMod.getFunction('Error_CreateEtsSampleWithCause');
 const TestJSWithCause = etsMod.getFunction('Error_TestJSWithCause');
 
 {

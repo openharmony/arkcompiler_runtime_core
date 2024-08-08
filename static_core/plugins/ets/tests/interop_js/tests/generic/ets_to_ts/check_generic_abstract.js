@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	AbstractClass,
-	createAbstractObjectFromEts,
-	num,
-	str,
-} = require('generic.test.js');
+const { AbstractClass, createAbstractObjectFromEts, num, str } = require('generic.test.js');
 
 function checkAbstractClass() {
 	const abstarctClass = new AbstractClass(num);

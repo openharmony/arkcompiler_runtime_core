@@ -16,20 +16,14 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const ClassWithDefaultParameterMethods = etsMod.getClass(
-	'ClassWithDefaultParameterMethods',
-);
+const ClassWithDefaultParameterMethods = etsMod.getClass('ClassWithDefaultParameterMethods');
 
 {
 	const INT_VALUE = 1;
 	const STRING_VALUE = 'Hello';
 
-	ASSERT_THROWS(TypeError, () =>
-		ClassWithDefaultParameterMethods.overloaded_static_method(INT_VALUE),
-	);
-	ASSERT_THROWS(TypeError, () =>
-		ClassWithDefaultParameterMethods.overloaded_static_method(STRING_VALUE),
-	);
+	ASSERT_THROWS(TypeError, () => ClassWithDefaultParameterMethods.overloaded_static_method(INT_VALUE));
+	ASSERT_THROWS(TypeError, () => ClassWithDefaultParameterMethods.overloaded_static_method(STRING_VALUE));
 }
 
 GCJSRuntimeCleanup();

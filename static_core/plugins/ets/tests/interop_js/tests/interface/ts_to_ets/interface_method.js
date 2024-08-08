@@ -15,28 +15,28 @@
  */
 Object.defineProperty(exports, '__esModule', { value: true });
 exports.withOptionalMethodInstanceClass =
-  exports.withoutOptionalMethodInstanceClass =
-  exports.tupleInstanceClass =
-  exports.subsetByValueInstanceClass =
-  exports.unionTypeMethodInstanceClass =
-  exports.createInterfaceClassTupleTypeMethodFromTs =
-  exports.TupleTypeMethodClass =
-  exports.optionalArgArray =
-  exports.optionalArg =
-  exports.createClassWithoutOptionalMethod =
-  exports.createClassWithOptionalMethod =
-  exports.WithoutOptionalMethodClass =
-  exports.WithOptionalMethodClass =
-  exports.createSubsetByValueClassFromTs =
-  exports.SubsetByValueClass =
-  exports.subsetByRefInterface =
-  exports.createInterfaceClassUnionTypeMethod =
-  exports.UnionTypeMethodClass =
-  exports.createInterfaceClassAnyTypeMethod =
-  exports.AnyTypeMethodClass =
-  exports.tsString =
-  exports.tsNumber =
-    void 0;
+	exports.withoutOptionalMethodInstanceClass =
+	exports.tupleInstanceClass =
+	exports.subsetByValueInstanceClass =
+	exports.unionTypeMethodInstanceClass =
+	exports.createInterfaceClassTupleTypeMethodFromTs =
+	exports.TupleTypeMethodClass =
+	exports.optionalArgArray =
+	exports.optionalArg =
+	exports.createClassWithoutOptionalMethod =
+	exports.createClassWithOptionalMethod =
+	exports.WithoutOptionalMethodClass =
+	exports.WithOptionalMethodClass =
+	exports.createSubsetByValueClassFromTs =
+	exports.SubsetByValueClass =
+	exports.subsetByRefInterface =
+	exports.createInterfaceClassUnionTypeMethod =
+	exports.UnionTypeMethodClass =
+	exports.createInterfaceClassAnyTypeMethod =
+	exports.AnyTypeMethodClass =
+	exports.tsString =
+	exports.tsNumber =
+		void 0;
 exports.tsNumber = 1;
 exports.tsString = 'string';
 var AnyTypeMethodClass = /** @class */ (function () {
@@ -62,8 +62,7 @@ exports.UnionTypeMethodClass = UnionTypeMethodClass;
 function createInterfaceClassUnionTypeMethod() {
 	return new AnyTypeMethodClass();
 }
-exports.createInterfaceClassUnionTypeMethod =
-  createInterfaceClassUnionTypeMethod;
+exports.createInterfaceClassUnionTypeMethod = createInterfaceClassUnionTypeMethod;
 function subsetByRefInterface(obj) {
 	return obj.get();
 }
@@ -144,8 +143,7 @@ exports.TupleTypeMethodClass = TupleTypeMethodClass;
 function createInterfaceClassTupleTypeMethodFromTs() {
 	return new TupleTypeMethodClass();
 }
-exports.createInterfaceClassTupleTypeMethodFromTs =
-  createInterfaceClassTupleTypeMethodFromTs;
+exports.createInterfaceClassTupleTypeMethodFromTs = createInterfaceClassTupleTypeMethodFromTs;
 exports.unionTypeMethodInstanceClass = new UnionTypeMethodClass();
 exports.subsetByValueInstanceClass = new SubsetByValueClass();
 exports.tupleInstanceClass = new TupleTypeMethodClass();

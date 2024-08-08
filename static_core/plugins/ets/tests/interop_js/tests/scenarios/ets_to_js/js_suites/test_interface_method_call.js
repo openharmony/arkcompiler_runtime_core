@@ -16,9 +16,7 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const newInterfaceWithMethodEts = etsMod.getFunction(
-	'newInterfaceWithMethodEts',
-);
+const newInterfaceWithMethodEts = etsMod.getFunction('newInterfaceWithMethodEts');
 
 {
 	ASSERT_EQ(newInterfaceWithMethodEts().methodInInterface(), 1);

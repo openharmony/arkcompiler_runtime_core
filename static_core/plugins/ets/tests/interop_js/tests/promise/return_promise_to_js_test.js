@@ -28,16 +28,9 @@ function equal(actual, expected) {
 }
 
 function runTest(test, iter) {
-	console.log('Running test \'' + test + '\'');
+	console.log("Running test '" + test + "'");
 	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (
-		!etsVm.createEtsRuntime(
-			process.env.ARK_ETS_STDLIB_PATH,
-			process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-			false,
-			false
-		)
-	) {
+	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
 		console.log('Cannot create ETS runtime');
 		process.exit(1);
 	}
@@ -47,9 +40,7 @@ function runTest(test, iter) {
 		process.exit(1);
 	}
 	if (res.constructor.name !== 'Promise') {
-		console.log(
-			'Expect result type \'Promise\' but get \'' + res.constructor.name + '\''
-		);
+		console.log("Expect result type 'Promise' but get '" + res.constructor.name + "'");
 		process.exit(1);
 	}
 	let testSuccess = false;
@@ -57,17 +48,7 @@ function runTest(test, iter) {
 		if (equal(value, expectedValue)) {
 			testSuccess = true;
 		} else {
-			console.log(
-				'Wrong value: ' +
-          value +
-          ' (' +
-          typeof value +
-          ') !== ' +
-          expectedValue +
-          ' (' +
-          typeof expectedValue +
-          ')'
-			);
+			console.log('Wrong value: ' + value + ' (' + typeof value + ') !== ' + expectedValue + ' (' + typeof expectedValue + ')');
 		}
 	});
 	let callback = () => {

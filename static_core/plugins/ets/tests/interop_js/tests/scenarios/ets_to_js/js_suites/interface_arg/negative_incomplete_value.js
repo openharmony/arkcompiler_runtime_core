@@ -22,7 +22,5 @@ const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
 	// Interface requires to have 3 fields: 'foo', 'numVal' and 'stringVal',
 	// but only 2 fields are given
-	ASSERT_THROWS(TypeError, () =>
-		functionArgIsInterface({ numVal: INT_VALUE, stringVal: 'hehehe' }),
-	);
+	ASSERT_THROWS(TypeError, () => functionArgIsInterface({ numVal: INT_VALUE, stringVal: 'hehehe' }));
 }

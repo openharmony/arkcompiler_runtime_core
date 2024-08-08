@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	num,
-	SubsetByRefClass,
-	subsetByRefInterface,
-	callSubsetByRefInterfaceFromEts,
-} = require('interface_method.test.js');
+const { num, SubsetByRefClass, subsetByRefInterface, callSubsetByRefInterfaceFromEts } = require('interface_method.test.js');
 
 function checkSubsetByRefInterfaceMethod() {
 	const obj = new SubsetByRefClass();

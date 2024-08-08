@@ -38,9 +38,7 @@ const TestJSFromAsync = etsMod.getFunction('Array_TestJSFromAsync');
 
 	Array.fromAsync(arr).then((array) => ASSERT_EQ(array.at(0), arr.at(0)));
 	Array.fromAsync(arr, fnMap).then((array) => ASSERT_EQ(array.at(0), 'String'));
-	Array.fromAsync(arr, fnMap1).then((array) =>
-		ASSERT_EQ(array.at(0), 'String1'),
-	);
+	Array.fromAsync(arr, fnMap1).then((array) => ASSERT_EQ(array.at(0), 'String1'));
 }
 
 GCJSRuntimeCleanup();

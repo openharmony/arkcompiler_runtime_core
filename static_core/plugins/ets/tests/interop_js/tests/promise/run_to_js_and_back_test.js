@@ -17,14 +17,7 @@ function runTest() {
 	let test = 'toJsAndBack';
 	console.log('Running test ' + test);
 	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (
-		!etsVm.createEtsRuntime(
-			process.env.ARK_ETS_STDLIB_PATH,
-			process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-			false,
-			false,
-		)
-	) {
+	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
 		console.log('Cannot create ETS runtime');
 		process.exit(1);
 	}

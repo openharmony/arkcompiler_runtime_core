@@ -13,16 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	num,
-	string,
-	bool,
-	arr,
-	obj,
-	isObject,
-	AnyTypeMethodClass,
-	createInterfaceClassAnyTypeMethod,
-} = require('interface_method.test.js');
+const { num, string, bool, arr, obj, isObject, AnyTypeMethodClass, createInterfaceClassAnyTypeMethod } = require('interface_method.test.js');
 
 function checkAnyTypeMethodClassInterfaceInt() {
 	const IClass = new AnyTypeMethodClass();

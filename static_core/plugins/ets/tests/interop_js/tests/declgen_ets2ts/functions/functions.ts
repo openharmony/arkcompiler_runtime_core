@@ -20,43 +20,27 @@ const TWO = 2;
 const THREE = 3;
 const PRECISION = 3;
 
-import {
-  Simple,
-  SumDouble,
-  SumBoxedDouble,
-  SumString,
-  ReplaceFirst,
-} from "./lib";
+import { Simple, SumDouble, SumBoxedDouble, SumString, ReplaceFirst } from './lib';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  testFunctions();
+	testFunctions();
 }
 
 function testFunctions() {
-  AssertEq(
-    SumDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
-    (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
-  );
-  AssertEq(
-    SumBoxedDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
-    (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION),
-  );
-  AssertEq(SumString("Hello from ", "Panda!!"), "Hello from Panda!!");
+	AssertEq(SumDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
+	AssertEq(SumBoxedDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
+	AssertEq(SumString('Hello from ', 'Panda!!'), 'Hello from Panda!!');
 
-  let simpleArray: Simple[] = [
-    new Simple(ZERO),
-    new Simple(ONE),
-    new Simple(TWO),
-  ];
-  simpleArray.forEach((e: Simple, idx: number) => {
-    AssertEq(e.val, idx);
-  });
-  AssertEq(ReplaceFirst(simpleArray, new Simple(THREE))[0].val, THREE);
+	let simpleArray: Simple[] = [new Simple(ZERO), new Simple(ONE), new Simple(TWO)];
+	simpleArray.forEach((e: Simple, idx: number) => {
+		AssertEq(e.val, idx);
+	});
+	AssertEq(ReplaceFirst(simpleArray, new Simple(THREE))[0].val, THREE);
 }

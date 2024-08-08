@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	ProtectedGetterInheritanceClass,
-	createrotectedetternheritancelassromts,
-} = require('getter.test.js');
+const { string, ProtectedGetterInheritanceClass, createrotectedetternheritancelassromts } = require('getter.test.js');
 
 function checkrotectedetternheritancelassalue() {
 	const GClass = new ProtectedGetterInheritanceClass();

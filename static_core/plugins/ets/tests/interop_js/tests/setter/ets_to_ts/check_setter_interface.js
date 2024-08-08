@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	InterfaceSetter,
-	string,
-	createInterfaceClass,
-} = require('setter.test.js');
+const { InterfaceSetter, string, createInterfaceClass } = require('setter.test.js');
 
 function checkSetterInterface() {
 	const interfaceSetter = new InterfaceSetter();
