@@ -385,7 +385,6 @@ Type ArkHotreloadBase::MethodChangesCheck(ClassContainment *hCls)
 
     auto oldMethods = runtimeClass->GetMethods();
     auto newMethods = tmpClass->GetMethods();
-
     if (newMethods.size() > oldMethods.size() ||
         tmpClass->GetNumVirtualMethods() > runtimeClass->GetNumVirtualMethods()) {
         hCls->fChanges |= ChangesFlags::F_METHOD_ADDED;

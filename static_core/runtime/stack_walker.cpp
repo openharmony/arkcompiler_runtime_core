@@ -601,19 +601,17 @@ Frame *StackWalker::ConvertToIFrame(FrameKind *prevFrameKind, uint32_t *numInlin
         if (prev == nullptr) {
             *prevFrameKind = FrameKind::NONE;
             prevFrame = nullptr;
+        } else if (IsCompilerBoundFrame(prev)) {
+            isInvoke = true;
+            prevFrame =
+                reinterpret_cast<Frame *>(StackWalker::GetPrevFromBoundary<FrameKind::COMPILER>(cframe.GetPrevFrame()));
+            if (prevFrameKind != nullptr) {
+                *prevFrameKind = FrameKind::INTERPRETER;
+            }
         } else {
-            if (IsCompilerBoundFrame(prev)) {
-                isInvoke = true;
-                prevFrame = reinterpret_cast<Frame *>(
-                    StackWalker::GetPrevFromBoundary<FrameKind::COMPILER>(cframe.GetPrevFrame()));
-                if (prevFrameKind != nullptr) {
-                    *prevFrameKind = FrameKind::INTERPRETER;
-                }
-            } else {
-                prevFrame = cframe.GetPrevFrame();
-                if (prevFrameKind != nullptr) {
-                    *prevFrameKind = FrameKind::COMPILER;
-                }
+            prevFrame = cframe.GetPrevFrame();
+            if (prevFrameKind != nullptr) {
+                *prevFrameKind = FrameKind::COMPILER;
             }
         }
     }

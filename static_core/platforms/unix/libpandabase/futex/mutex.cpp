@@ -18,6 +18,7 @@
 #include "utils/logger.h"
 #include "utils/type_helpers.h"
 
+#include <cstdint>
 #include <cstring>
 #include <cerrno>
 #include <ctime>
@@ -129,6 +130,24 @@ RWLock::~RWLock()
 #endif  // PANDA_TARGET_MOBILE
 }
 
+void RWLock::FutexWait(int32_t curState)
+{
+    IncrementWaiters();
+    // Retry wait until lock not held. If we have more than one reader, curState check fail
+    // doesn't mean this lock is unlocked.
+    while (curState != UNLOCKED) {
+        // NOLINTNEXTLINE(hicpp-signed-bitwise)
+        if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0) {
+            if ((errno != EAGAIN) && (errno != EINTR)) {
+                LOG(FATAL, COMMON) << "Futex wait failed!";
+            }
+        }
+        // Atomic with relaxed order reason: mutex synchronization
+        curState = state_.load(std::memory_order_relaxed);
+    }
+    DecrementWaiters();
+}
+
 void RWLock::WriteLock()
 {
     if (current_tid == 0) {
@@ -147,20 +166,7 @@ void RWLock::WriteLock()
             if (!WaitBrieflyFor(&state_, [](int32_t state) { return state == UNLOCKED; })) {
                 // WaitBrieflyFor failed, go to futex wait
                 // Increment waiters count.
-                IncrementWaiters();
-                // Retry wait until lock not held. If we have more than one reader, curState check fail
-                // doesn't mean this lock is unlocked.
-                while (curState != UNLOCKED) {
-                    // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                    if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0) {
-                        if ((errno != EAGAIN) && (errno != EINTR)) {
-                            LOG(FATAL, COMMON) << "Futex wait failed!";
-                        }
-                    }
-                    // Atomic with relaxed order reason: mutex synchronization
-                    curState = state_.load(std::memory_order_relaxed);
-                }
-                DecrementWaiters();
+                FutexWait(curState);
             }
         }
     }
