@@ -34,6 +34,7 @@ function runTest(test, pandaptions) {
 	if (res !== 0) {
 		throw 'test failed: ' + res;
 	}
+	return 0;
 }
 
 let args = process.argv;

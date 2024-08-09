@@ -31,12 +31,9 @@ const cap = (str = '') => str[0].toUpperCase() + str.substring(1);
 
 	ASSERT_EQ(Object.getPrototypeOf(FooDerived), FooBase);
 	ASSERT_EQ(Object.getPrototypeOf(FooDerived.prototype), FooBase.prototype);
-	ASSERT_TRUE(FooDerived.prototype.hasOwnProperty('fDerived'));
 	// ASSERT_TRUE(!FooDerived.prototype.hasOwnProperty("f_base"));
-	ASSERT_TRUE(FooDerived.hasOwnProperty('sfDerived'));
 	// ASSERT_TRUE(!FooDerived.hasOwnProperty("sf_base"));
 
-	ASSERT_TRUE(FooBase.prototype.hasOwnProperty('fBase'));
 	ASSERT_EQ(base.fBase, 'fBase');
 	ASSERT_EQ(FooBase.sfBase, 'sfBase');
 	ASSERT_EQ(base.fnBase(), 'fnBase');

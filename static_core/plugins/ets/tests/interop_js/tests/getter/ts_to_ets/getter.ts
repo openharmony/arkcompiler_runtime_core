@@ -17,7 +17,7 @@ export const tsString = 'string';
 export const tsNumber = 1;
 
 export class PublicGetterClass {
-	Value = tsString;
+	_value = tsString;
 
 	get value(): string {
 		return this._value;
@@ -31,7 +31,7 @@ export function createPublicGetterClassFromTs(): PublicGetterClass {
 export const publicGetterInstanceClass = new PublicGetterClass();
 
 export class ProtectedGetterOrigenClass {
-	protected Value = tsString;
+	protected _value = tsString;
 
 	protected get value(): string {
 		return this._value;
@@ -53,7 +53,7 @@ export function createProtectedGetterInheritanceClassFromTs(): ProtectedGetterIn
 export const protectedGetterInstanceInheritanceClass = new ProtectedGetterInheritanceClass();
 
 export class PrivateGetterClass {
-	private Value = tsString;
+	private _value = tsString;
 
 	private get value(): string {
 		return this._value;
@@ -69,7 +69,7 @@ export const privateGetterInstanceClass = new PrivateGetterClass();
 export type UnionType = number | string;
 
 export class UnionTypeClass {
-	private Value: UnionType;
+	private _value: UnionType;
 
 	constructor(value: UnionType) {
 		this._value = value;
@@ -90,13 +90,13 @@ export const unionTypeGetterInstanceClassString = new UnionTypeClass(tsString);
 export type LiteralValue = 1 | 'string';
 
 export class LiteralClass {
-	private Value: LiteralValue;
+	private _value?: LiteralValue;
 
 	constructor(value: LiteralValue) {
 		this._value = value;
 	}
 
-	public get value(): LiteralValue {
+	public get value(): LiteralValue | undefined {
 		return this._value;
 	}
 }
@@ -111,7 +111,7 @@ export const literalTypeGetterInstanceClassString = new LiteralClass(tsString);
 export type TupleType = [number, string];
 
 export class TupleTypeClass {
-	private Value: TupleType;
+	private _value: TupleType;
 
 	constructor(value: TupleType) {
 		this._value = value;
@@ -129,14 +129,14 @@ export function createTupleTypeGetterClassFromTs(arg: TupleType): TupleTypeClass
 export const tupleTypeGetterInstanceClass = new TupleTypeClass([tsNumber, tsString]);
 
 export class AnyTypeClass<T> {
-	public Value: T;
+	public _value?: T;
 
-	public get value(): T {
+	public get value(): T | undefined {
 		return this._value;
 	}
 }
 
-export function createAnyTypeGetterClassFromTs(): AnyTypeClass<any> {
+export function createAnyTypeGetterClassFromTs(): AnyTypeClass<{}> {
 	return new AnyTypeClass();
 }
 
@@ -162,7 +162,7 @@ export function createSubsetByRefGetterClassFromTs(): SubsetByRef {
 export const subsetByRefInstanceClass = new SubsetByRef();
 
 export class SubsetByValueClass {
-	public Value: string;
+	public _value: string;
 
 	constructor(value: string) {
 		this._value = value;

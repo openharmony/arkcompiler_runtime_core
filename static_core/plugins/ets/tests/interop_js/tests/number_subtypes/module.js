@@ -81,7 +81,7 @@ class ClassWithEmptyConstructor {
 	}
 
 	verifyProperties(v0Expected, v1Expected) {
-		if (this.v0 == v0Expected && this.v1 == v1Expected) {
+		if (this.v0 === v0Expected && this.v1 === v1Expected) {
 			return 0;
 		} else {
 			return 1;
@@ -114,9 +114,9 @@ class ClassWithEmptyConstructor {
 //     }
 // }
 
-var MyNamespace;
+let MyNamespace;
 (function (MyNamespace) {
-	var Kitten = /** @class */ (function () {
+	const Kitten = /** @class */ (function () {
 		function Kitten(id, name) {
 			this.id = id;
 			this.name = name;

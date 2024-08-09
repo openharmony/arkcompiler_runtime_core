@@ -30,40 +30,40 @@ function checkAnonymousClassCreateClass(): boolean {
     const TSClass = new AnonymousClassCreateClass(MainClass);
 
     return checkInstance(AnonymousClassCreateClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkCreateAnonymousClassCreateClassWithArgFromTs(): boolean {
     const TSClass = createAnonymousClassCreateClassWithArgFromTs(MainClass);
 
     return checkInstance(AnonymousClassCreateClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkCreateAnonymousClassCreateClassFromTs(): boolean {
     const TSClass = createAnonymousClassCreateClassFromTs();
 
     return checkInstance(AnonymousClassCreateClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkAnonymousClassCreateMainInstance(): boolean {
     const TSClass = anonymousClassCreateMainInstance;
 
     return checkInstance(AnonymousClassCreateClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkCreateAnonymousClassCreateIIFEClassFromTs(): boolean {
     const TSClass = createAnonymousClassCreateIIFEClassFromTs();
 
     return checkInstance(AnonymousClassCreateClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkAnonymousClassCreateIIFEInstance(): boolean {
     const TSClass = anonymousClassCreateIIFEInstance;
 
     return checkInstance(AnonymousClassCreateClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }

@@ -31,11 +31,11 @@ class SBody {
 }
 
 function bouncingPandas() {
-	var vec = new Vec2(1200, 800);
-	var countSB = 512;
-	var arrSBody = [];
-	var step = 13;
-	for (var i = 0; i < countSB; ++i) {
+	const vec = new Vec2(1200, 800);
+	const countSB = 512;
+	const arrSBody = [];
+	const step = 13;
+	for (let i = 0; i < countSB; ++i) {
 		arrSBody[i] = new SBody();
 		arrSBody[i].rad = 11;
 		arrSBody[i].m = 11 * 11;
@@ -44,8 +44,8 @@ function bouncingPandas() {
 		arrSBody[i].v.x = 5;
 		arrSBody[i].v.y = 5;
 	}
-	var resArr = gtest.etsVm.callWithCopy('bouncing_pandas.recomputeFrameSBody', arrSBody, vec);
-	var resultHash = 0;
+	const resArr = gtest.etsVm.callWithCopy('bouncing_pandas.recomputeFrameSBody', arrSBody, vec);
+	let resultHash = 0;
 	for (let i = 0; i < countSB; ++i) {
 		resultHash += resArr[i].r.x + resArr[i].r.y + resArr[i].v.x + resArr[i].v.y + resArr[i].rad + resArr[i].m;
 	}

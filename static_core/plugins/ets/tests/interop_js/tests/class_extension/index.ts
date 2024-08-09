@@ -18,17 +18,20 @@ import { EventEmitter } from 'stream';
 //@ts-ignore -- to avoid @types/node missing
 const etsVm = require('lib/module/ets_interop_js_napi');
 
-const ETS_MODULE_NAME: string = 'interop_class_extension';
-const makePrefix = (packageName: string) => 'L' + packageName.replace('.', '/') + '/';
+type ClassType = new (...args: {}[]) => {};
 
-const getClass = (name: string, packageName?: string) => etsVm.getClass(makePrefix(packageName ?? ETS_MODULE_NAME) + name + ';');
-const getFunction = (name: string, packageName?: string) => etsVm.getFunction(makePrefix(packageName ?? ETS_MODULE_NAME) + 'ETSGLOBAL;', name);
+const ETS_MODULE_NAME: string = 'interop_class_extension';
+const makePrefix = (packageName: string): string => 'L' + packageName.replace('.', '/') + '/';
+
+const getClass = (name: string, packageName?: string): ClassType => etsVm.getClass(makePrefix(packageName ?? ETS_MODULE_NAME) + name + ';');
 
 export const DEFAULT_STRING_VALUE = 'Panda';
 //@ts-ignore -- to avoid @types/node missing
 export const DEFAULT_NUMERIC_VALUE = Math.round(Math.random() * Number!.MAX_SAFE_INTEGER);
 
-export const helperIsJSInstanceOf = (obj: any, classObj: Function) => {
+type AnyType = {};
+
+export const helperIsJSInstanceOf = (obj: AnyType, classObj: Function): boolean => {
 	return obj instanceof classObj;
 };
 
