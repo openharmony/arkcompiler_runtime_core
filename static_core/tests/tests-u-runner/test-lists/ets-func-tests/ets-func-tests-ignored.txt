@@ -97,11 +97,6 @@ spec/03.types/References_Types/unions/union_generics_02.sts
 spec/03.types/References_Types/unions/union_cast_n_01.sts
 spec/03.types/References_Types/unions/union_cast_n_02.sts
 spec/03.types/References_Types/unions/union_cast_n_03.sts
-# panda#15005: skip to stabilize fe_dev_202312
-spec/03.types/References_Types/unions/union_compare_02_05.sts
-spec/03.types/References_Types/unions/union_compare_02_07.sts
-spec/03.types/References_Types/unions/union_compare_06.sts
-# End of panda#15005
 spec/03.types/References_Types/unions/union_compare_n_10.sts
 spec/03.types/References_Types/unions/union_param_n_01.sts
 spec/03.types/References_Types/unions/union_param_n_02.sts
