@@ -31,12 +31,23 @@ ohos_source_set("libarkziparchive_static") {
 
   deps = [ "$ark_root/libpandabase:libarkbase_static" ]
 
-  external_deps = [ sdk_libc_secshared_dep ]
-
-  if (ark_standalone_build || is_arkui_x) {
-    external_deps += [ "zlib:libz" ]
+  if (is_arkui_x) {
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/zlib:libz",
+    ]
   } else {
-    public_external_deps = [ "zlib:shared_libz" ]
+    if (ark_standalone_build) {
+      external_deps = [
+        "zlib:shared_libz",
+        sdk_libc_secshared_dep,
+      ]
+    } else {
+      public_external_deps = [
+        "zlib:shared_libz",
+        sdk_libc_secshared_dep,
+      ]
+    }
   }
 
   if (enable_hilog) {
@@ -73,10 +84,17 @@ ohos_source_set("libarkziparchive_frontend_set_static") {
 
   deps = [ "$ark_root/libpandabase:libarkbase_frontend_static" ]
 
-  external_deps = [
-    "zlib:libz",
-    sdk_libc_secshared_dep,
-  ]
+  if (is_arkui_x) {
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/zlib:libz",
+    ]
+  } else {
+    external_deps = [
+      "zlib:libz",
+      sdk_libc_secshared_dep,
+    ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
