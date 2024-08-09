@@ -54,7 +54,7 @@ export final class String extends Object implements Comparable<String>, JSONable
 
     /**
      * Creates a new instance of a String
-     * 
+     *
      * @returns A new String instance
      */
     static invoke(): string {
@@ -65,7 +65,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * Creates a new instance of a String
      *
      * @param value The value to be converted to a string. Can be an Object or null.
-     * 
+     *
      * @returns A new String instance
      */
     static invoke(value: Object | null | undefined): string {
@@ -180,15 +180,13 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @param index index of the potential surrogate pair
      *
-     * @throws StringIndexOutOfBoundsError if index is negative or >= length
-     *
      * @returns the codepoint at the specified index
      */
     public codePointAt(index: number): Number | undefined {
         if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
             return undefined
         }
-        return this.codePointAt(index as int) as number
+        return this.codePointAtInt(index as int) as number;
     }
 
     /**
@@ -200,11 +198,27 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @param index index of the potential surrogate pair
      *
-     * @throws StringIndexOutOfBoundsError if index is negative or >= length
+     * @returns the codepoint at the specified index
+     */
+    public codePointAt(index: int): Number | undefined {
+        if (index < 0 || index >= this.getLength() || this.getLength() == 0) {
+            return undefined
+        }
+        return this.codePointAtInt(index) as number;
+    }
+
+    /**
+     * Gets the codepoint at the specified index in this string.
+     * Is similar to charAt(index), but if the character at the
+     * index is the beginning of a surrogate pair, the int
+     * representation for this codepoint is returned. Otherwise,
+     * the character at the index is returned.
+     *
+     * @param index index of the potential surrogate pair
      *
      * @returns the codepoint at the specified index
      */
-    public codePointAt(index: int): int {
+    private codePointAtInt(index: int): int {
         assert index >= 0 && index < this.getLength(): "Index is out of bound";
         let highValue: char = this.charAt(index);
         if (!Char.isHighSurrogate(highValue) || ++index == this.getLength()) {
@@ -734,11 +748,11 @@ export final class String extends Object implements Comparable<String>, JSONable
             return q;
         }
         for (let i = 0; i < rLength - 1; ++i) {
-            if (s.codePointAt(q + i) != r.codePointAt(i)) {
+            if (s.codePointAtInt(q + i) != r.codePointAtInt(i)) {
                 return -1;
             }
         }
-        if (s.codePointAt(q + rLength - 1) != r.codePointAt(rLength - 1) as int) {
+        if (s.codePointAtInt(q + rLength - 1) != r.codePointAtInt(rLength - 1) as int) {
             // For making algorithm compiler-friendly
             // should be removed after BoundsAnalysis improvement
             return -1;
