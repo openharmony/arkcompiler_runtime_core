@@ -14,9 +14,7 @@
  */
 
 /*---
-desc: null safety -> Not-null operator
-assert: A compile-time error occurs if e is not a nullable type.
-tags: [negative, compile-only]
+desc: if the expression 'e' is not a nullable type, then the operator '!' has no effect.
 ---*/
 
 function main(): void {
