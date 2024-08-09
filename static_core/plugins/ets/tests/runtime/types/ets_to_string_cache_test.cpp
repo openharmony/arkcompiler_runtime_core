@@ -378,7 +378,6 @@ TEST_F(EtsToStringCacheTest, BitcastTestFloat)
     for (uint32_t i = 0; i < TEST_ARRAY_SIZE; i++) {
         auto intValue = dis(engine);
         auto value = bit_cast<float>(intValue);
-
         if (std::isnan(value)) {
             continue;
         }

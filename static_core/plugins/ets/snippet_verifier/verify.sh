@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 args=$(getopt -a -o s:b:r --long spec:,build:,rst: -- "$@")
 
 if [ $? -ne 0 ]; then
@@ -21,7 +23,7 @@ fi
 eval set -- "${args}"
 
 while :; do
-    case $1 in
+    case "$1" in
     -b | --build)
         export build=$2
         shift 2
@@ -57,7 +59,7 @@ WARNING_COLOR=11
 
 function echo_color_text() {
     COLOR_CODE=$1
-    if [[ $3 ]]; then
+    if [[ "$3" ]]; then
         tabs="\t";
     else
         tabs="\n"; fi
@@ -84,9 +86,9 @@ mkdir snippets; mkdir snippets/abc; mkdir results
 touch snippets/_output; touch results/main_results
 chmod a+rwx -R snippets
 
-if [[ $spec ]]; then
+if [[ "$spec" ]]; then
     python3 verify.py --spec="$spec" 2> ./.verifier_error; fi
-if [[ $rst_file ]]; then
+if [[ "$rst_file" ]]; then
     python3 verify.py --rst="$rst_file" 2> ./.verifier_error; fi
 
 if [[ $(cat ./.verifier_error) ]]; then
@@ -167,10 +169,10 @@ function check() {
         expect_status=1
         expect_subset_status=1
 
-        if [[ $expect_cte = "// cte" ]]; then
+        if [[ "$expect_cte" = "// cte" ]]; then
             expect_status=0
         fi
-        if [[ $expect_subset = "// ns" ]]; then
+        if [[ "$expect_subset" = "// ns" ]]; then
             expect_subset_status=0
         fi
 
@@ -184,9 +186,9 @@ function check() {
         fi
 
         ets_compile_status=1; ts_compile_status=1
-        if [[ $ets_compile_return != '' ]]; then
+        if [[ "$ets_compile_return" != '' ]]; then
             ets_compile_status=0; fi
-        if [[ $ts_compile_return != '' ]]; then
+        if [[ "$ts_compile_return" != '' ]]; then
             ts_compile_status=0; fi
 
         ts_subset=$((! $ets_compile_status ^ $ts_compile_status))
