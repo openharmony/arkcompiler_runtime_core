@@ -13,57 +13,55 @@
  * limitations under the License.
  */
 
-export const tsString = "string";
+export const tsString = 'string';
 export const tsNumber = 1;
 
 export class PublicGetterClass {
-  Value = tsString;
+	Value = tsString;
 
-  get value(): string {
-    return this._value;
-  }
+	get value(): string {
+		return this._value;
+	}
 }
 
 export function createPublicGetterClassFromTs(): PublicGetterClass {
-  return new PublicGetterClass();
+	return new PublicGetterClass();
 }
 
 export const publicGetterInstanceClass = new PublicGetterClass();
 
 export class ProtectedGetterOrigenClass {
-  protected Value = tsString;
+	protected Value = tsString;
 
-  protected get value(): string {
-    return this._value;
-  }
+	protected get value(): string {
+		return this._value;
+	}
 }
 
 export function createProtectedGetterOrigenClassFromTs(): ProtectedGetterOrigenClass {
-  return new ProtectedGetterOrigenClass();
+	return new ProtectedGetterOrigenClass();
 }
 
-export const protectedGetterOrigenInstanceClass =
-  new ProtectedGetterOrigenClass();
+export const protectedGetterOrigenInstanceClass = new ProtectedGetterOrigenClass();
 
 export class ProtectedGetterInheritanceClass extends ProtectedGetterOrigenClass {}
 
 export function createProtectedGetterInheritanceClassFromTs(): ProtectedGetterInheritanceClass {
-  return new ProtectedGetterInheritanceClass();
+	return new ProtectedGetterInheritanceClass();
 }
 
-export const protectedGetterInstanceInheritanceClass =
-  new ProtectedGetterInheritanceClass();
+export const protectedGetterInstanceInheritanceClass = new ProtectedGetterInheritanceClass();
 
 export class PrivateGetterClass {
-  private Value = tsString;
+	private Value = tsString;
 
-  private get value(): string {
-    return this._value;
-  }
+	private get value(): string {
+		return this._value;
+	}
 }
 
 export function createPrivateGetterClassFromTs(): PrivateGetterClass {
-  return new PrivateGetterClass();
+	return new PrivateGetterClass();
 }
 
 export const privateGetterInstanceClass = new PrivateGetterClass();
@@ -71,44 +69,40 @@ export const privateGetterInstanceClass = new PrivateGetterClass();
 export type UnionType = number | string;
 
 export class UnionTypeClass {
-  private Value: UnionType;
+	private Value: UnionType;
 
-  constructor(value: UnionType) {
-    this._value = value;
-  }
+	constructor(value: UnionType) {
+		this._value = value;
+	}
 
-  public get value(): UnionType {
-    return this._value;
-  }
+	public get value(): UnionType {
+		return this._value;
+	}
 }
 
-export function createUnionTypeGetterClassFromTs(
-  arg: UnionType,
-): UnionTypeClass {
-  return new UnionTypeClass(arg);
+export function createUnionTypeGetterClassFromTs(arg: UnionType): UnionTypeClass {
+	return new UnionTypeClass(arg);
 }
 
 export const unionTypeGetterInstanceClassInt = new UnionTypeClass(tsNumber);
 export const unionTypeGetterInstanceClassString = new UnionTypeClass(tsString);
 
-export type LiteralValue = 1 | "string";
+export type LiteralValue = 1 | 'string';
 
 export class LiteralClass {
-  private Value: LiteralValue;
+	private Value: LiteralValue;
 
-  constructor(value: LiteralValue) {
-    this._value = value;
-  }
+	constructor(value: LiteralValue) {
+		this._value = value;
+	}
 
-  public get value(): LiteralValue {
-    return this._value;
-  }
+	public get value(): LiteralValue {
+		return this._value;
+	}
 }
 
-export function createLiteralTypeGetterClassFromTs(
-  arg: LiteralValue,
-): LiteralClass {
-  return new LiteralClass(arg);
+export function createLiteralTypeGetterClassFromTs(arg: LiteralValue): LiteralClass {
+	return new LiteralClass(arg);
 }
 
 export const literalTypeGetterInstanceClassInt = new LiteralClass(tsNumber);
@@ -117,77 +111,72 @@ export const literalTypeGetterInstanceClassString = new LiteralClass(tsString);
 export type TupleType = [number, string];
 
 export class TupleTypeClass {
-  private Value: TupleType;
+	private Value: TupleType;
 
-  constructor(value: TupleType) {
-    this._value = value;
-  }
+	constructor(value: TupleType) {
+		this._value = value;
+	}
 
-  public get value(): TupleType {
-    return this._value;
-  }
+	public get value(): TupleType {
+		return this._value;
+	}
 }
 
-export function createTupleTypeGetterClassFromTs(
-  arg: TupleType,
-): TupleTypeClass {
-  return new TupleTypeClass(arg);
+export function createTupleTypeGetterClassFromTs(arg: TupleType): TupleTypeClass {
+	return new TupleTypeClass(arg);
 }
 
-export const tupleTypeGetterInstanceClass = new TupleTypeClass([
-  tsNumber,
-  tsString,
-]);
+export const tupleTypeGetterInstanceClass = new TupleTypeClass([tsNumber, tsString]);
 
 export class AnyTypeClass<T> {
-  public Value: T;
+	public Value: T;
 
-  public get value(): T {
-    return this._value;
-  }
+	public get value(): T {
+		return this._value;
+	}
 }
 
 export function createAnyTypeGetterClassFromTs(): AnyTypeClass<any> {
-  return new AnyTypeClass();
+	return new AnyTypeClass();
 }
 
 export const anyTypeGetterInstanceClass = new AnyTypeClass();
 export const anyTypeExplicitGetterInstanceClass = new AnyTypeClass<string>();
 
 export class SubsetByRef {
-  private RefClass: PublicGetterClass;
+	private RefClass: PublicGetterClass;
 
-  constructor() {
-    this.RefClass = new PublicGetterClass();
-  }
+	constructor() {
+		this.RefClass = new PublicGetterClass();
+	}
 
-  public get value(): string {
-    return this.RefClass.value;
-  }
+	public get value(): string {
+		return this.RefClass.value;
+	}
 }
 
 export function createSubsetByRefGetterClassFromTs(): SubsetByRef {
-  return new SubsetByRef();
+	return new SubsetByRef();
 }
 
 export const subsetByRefInstanceClass = new SubsetByRef();
 
 export class SubsetByValueClass {
-  public Value: string;
+	public Value: string;
 
-  constructor(value: string) {
-    this._value = value;
-  }
+	constructor(value: string) {
+		this._value = value;
+	}
 
-  get value(): string {
-    return this._value;
-  }
+	get value(): string {
+		return this._value;
+	}
 }
 
 const GClass = new PublicGetterClass();
 
 export function createSubsetByValueGetterClassFromTs(): SubsetByValueClass {
-  return new SubsetByValueClass(GClass.value);
+	return new SubsetByValueClass(GClass.value);
 }
 
 export const subsetByValueInstanceClass = new SubsetByValueClass(GClass.value);

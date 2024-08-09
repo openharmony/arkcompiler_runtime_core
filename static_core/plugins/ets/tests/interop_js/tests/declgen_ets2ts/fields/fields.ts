@@ -26,54 +26,39 @@ const FIVE = 5;
 const SIX = 6;
 const PRECISION = 3;
 
-import { Fields } from "./lib";
+import { Fields } from './lib';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  testFields();
+	testFields();
 }
 
 function testFields() {
-  const fields = new Fields();
-  AssertEq(fields.readonlyBoolean_, true);
-  AssertEq(
-    Fields.staticFloat_.toFixed(PRECISION),
-    (ONE + ONE_TENTH).toFixed(PRECISION),
-  );
-  AssertEq(
-    fields.number_.toFixed(PRECISION),
-    (TWO + TWO_TENTH).toFixed(PRECISION),
-  );
-  AssertEq(
-    fields.Number_.toFixed(PRECISION),
-    (THREE + THREE_TENTH).toFixed(PRECISION),
-  );
-  AssertEq(
-    fields.double_.toFixed(PRECISION),
-    (FOUR + FOUR_TENTH).toFixed(PRECISION),
-  );
-  AssertEq(
-    fields.Double_.toFixed(PRECISION),
-    (FIVE + FIVE_TENTH).toFixed(PRECISION),
-  );
-  AssertEq(fields.int_, SIX);
-  // NOTE(ivagin): enable when supported by interop #12808
-  if (false) {
-    AssertEq(fields.object_ instanceof Object, true);
-    AssertEq(fields.rangeError_ instanceof RangeError, true);
-    AssertEq(fields.uint8Array_ instanceof Int8Array, true);
-    AssertEq(fields.uint16Array_ instanceof Int16Array, true);
-    AssertEq(fields.uint32Array_ instanceof Int32Array, true);
-  }
+	const fields = new Fields();
+	AssertEq(fields.readonlyBoolean_, true);
+	AssertEq(Fields.staticFloat_.toFixed(PRECISION), (ONE + ONE_TENTH).toFixed(PRECISION));
+	AssertEq(fields.number_.toFixed(PRECISION), (TWO + TWO_TENTH).toFixed(PRECISION));
+	AssertEq(fields.Number_.toFixed(PRECISION), (THREE + THREE_TENTH).toFixed(PRECISION));
+	AssertEq(fields.double_.toFixed(PRECISION), (FOUR + FOUR_TENTH).toFixed(PRECISION));
+	AssertEq(fields.Double_.toFixed(PRECISION), (FIVE + FIVE_TENTH).toFixed(PRECISION));
+	AssertEq(fields.int_, SIX);
+	// NOTE(ivagin): enable when supported by interop #12808
+	if (false) {
+		AssertEq(fields.object_ instanceof Object, true);
+		AssertEq(fields.rangeError_ instanceof RangeError, true);
+		AssertEq(fields.uint8Array_ instanceof Int8Array, true);
+		AssertEq(fields.uint16Array_ instanceof Int16Array, true);
+		AssertEq(fields.uint32Array_ instanceof Int32Array, true);
+	}
 
-  AssertEq(fields.string_, "Panda string!!");
-  AssertEq(fields.nullableString_, "nullable string");
-  fields.nullableString_ = null;
-  AssertEq(fields.nullableString_, null);
+	AssertEq(fields.string_, 'Panda string!!');
+	AssertEq(fields.nullableString_, 'nullable string');
+	fields.nullableString_ = null;
+	AssertEq(fields.nullableString_, null);
 }

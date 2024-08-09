@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	PrivateGetterClass,
-	createrivateetterlassromts,
-} = require('getter.test.js');
+const { string, PrivateGetterClass, createrivateetterlassromts } = require('getter.test.js');
 
 function checkrivateetterlassalue() {
 	const GClass = new PrivateGetterClass();

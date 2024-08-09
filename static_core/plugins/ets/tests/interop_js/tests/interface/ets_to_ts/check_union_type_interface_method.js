@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	num,
-	string,
-	UnionTypeMethodClass,
-	createInterfaceClassUnionTypeMethod,
-} = require('interface_method.test.js');
+const { num, string, UnionTypeMethodClass, createInterfaceClassUnionTypeMethod } = require('interface_method.test.js');
 
 function checkUnionTypeMethodClassInterfaceInt() {
 	const IClass = new UnionTypeMethodClass();

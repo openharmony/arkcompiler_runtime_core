@@ -17,14 +17,7 @@ let testSuccess = false;
 
 function init() {
 	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-	if (
-		!etsVm.createEtsRuntime(
-			process.env.ARK_ETS_STDLIB_PATH,
-			process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-			false,
-			false
-		)
-	) {
+	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
 		process.exit(1);
 	}
 	return etsVm;
@@ -37,9 +30,7 @@ function callEts(etsVm) {
 		process.exit(1);
 	}
 	if (res.constructor.name !== 'Promise') {
-		console.log(
-			'Expect result type \'Promise\' but get \'' + res.constructor.name + '\''
-		);
+		console.log("Expect result type 'Promise' but get '" + res.constructor.name + "'");
 		process.exit(1);
 	}
 	return res;
@@ -67,7 +58,7 @@ function queueTasks(etsVm) {
 			process.exit(1);
 		}
 		if (!etsVm.call('resolvePendingPromise')) {
-			console.log('Call of \'resolvePendingPromise\' return false');
+			console.log("Call of 'resolvePendingPromise' return false");
 		} else {
 			queueMicrotask(() => {
 				if (testSuccess) {

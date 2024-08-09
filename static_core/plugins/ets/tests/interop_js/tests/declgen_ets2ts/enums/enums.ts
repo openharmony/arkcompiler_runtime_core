@@ -19,30 +19,30 @@ const TWO = 2;
 const ONE_HUNDRED = 100;
 const NINETY_NINE = 99;
 
-import { Color, Letter /*, Name*/ } from "./lib";
+import { Color, Letter /*, Name*/ } from './lib';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  testClasses();
+	testClasses();
 }
 
 function testClasses() {
-  AssertEq(Letter.A, ZERO);
-  AssertEq(Letter.B, ONE);
-  AssertEq(Letter.C, TWO);
+	AssertEq(Letter.A, ZERO);
+	AssertEq(Letter.B, ONE);
+	AssertEq(Letter.C, TWO);
 
-  AssertEq(Color.Red, ZERO);
-  AssertEq(Color.Green, -ONE_HUNDRED);
-  AssertEq(Color.Blue, -NINETY_NINE);
-  AssertEq(Color.White, ZERO);
+	AssertEq(Color.Red, ZERO);
+	AssertEq(Color.Green, -ONE_HUNDRED);
+	AssertEq(Color.Blue, -NINETY_NINE);
+	AssertEq(Color.White, ZERO);
 
-  // NOTE(ivagin): enable when supported by declgen #12808
-  // AssertEq(Name.Ivan, "Ivan");
-  // AssertEq(Name.Li, "Li");
+	// NOTE(ivagin): enable when supported by declgen #12808
+	// AssertEq(Name.Ivan, "Ivan");
+	// AssertEq(Name.Li, "Li");
 }

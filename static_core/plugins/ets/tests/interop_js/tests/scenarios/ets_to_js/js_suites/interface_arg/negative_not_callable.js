@@ -26,6 +26,6 @@ const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 			foo: 123,
 			numVal: INT_VALUE,
 			stringVal: 'hehehe',
-		}),
+		})
 	);
 }

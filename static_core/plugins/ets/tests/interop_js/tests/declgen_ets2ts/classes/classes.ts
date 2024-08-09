@@ -16,21 +16,21 @@
 const TWO = 2;
 const THREE = 3;
 
-import { Derived } from "./lib";
+import { Derived } from './lib';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  testClasses();
+	testClasses();
 }
 
 function testClasses() {
-  const d = new Derived(TWO, THREE);
-  AssertEq(d.a, TWO);
-  AssertEq(d.b, THREE);
+	const d = new Derived(TWO, THREE);
+	AssertEq(d.a, TWO);
+	AssertEq(d.b, THREE);
 }

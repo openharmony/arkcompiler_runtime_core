@@ -15,9 +15,7 @@
 const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
-const ClassImplementingInterfaceWithPropsAndMethod = etsMod.getClass(
-	'ClassImplementingInterfaceWithPropsAndMethod',
-);
+const ClassImplementingInterfaceWithPropsAndMethod = etsMod.getClass('ClassImplementingInterfaceWithPropsAndMethod');
 const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
 {
@@ -30,10 +28,7 @@ const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 	// Concatenation of various class field values and '123'
 	const RESULT_VALUE = STRING_VALUE + ' ' + CHANGED_INT_VALUE + ' 123';
 
-	const obj = new ClassImplementingInterfaceWithPropsAndMethod(
-		INT_VALUE,
-		STRING_VALUE,
-	);
+	const obj = new ClassImplementingInterfaceWithPropsAndMethod(INT_VALUE, STRING_VALUE);
 
 	let ret = functionArgIsInterface(obj);
 	ASSERT_EQ(ret, RESULT_VALUE);

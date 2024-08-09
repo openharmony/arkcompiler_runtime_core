@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	ProtectedGetterOrigenClass,
-	createrotectedetterrigenlassromts,
-} = require('getter.test.js');
+const { string, ProtectedGetterOrigenClass, createrotectedetterrigenlassromts } = require('getter.test.js');
 
 function checkrotectedetterlassalue() {
 	const GClass = new ProtectedGetterOrigenClass();

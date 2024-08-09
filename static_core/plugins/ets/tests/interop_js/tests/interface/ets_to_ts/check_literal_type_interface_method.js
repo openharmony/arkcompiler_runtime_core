@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	num,
-	string,
-	LiteralValueMethodClass,
-	createInterfaceLiteralValueClassFromEts,
-} = require('interface_method.test.js');
+const { num, string, LiteralValueMethodClass, createInterfaceLiteralValueClassFromEts } = require('interface_method.test.js');
 
 function checkLiteralTypeMethodClassInterfaceInt() {
 	const IClass = new LiteralValueMethodClass();

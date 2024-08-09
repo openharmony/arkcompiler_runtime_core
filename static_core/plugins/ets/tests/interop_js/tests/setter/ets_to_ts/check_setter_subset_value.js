@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	SubsetValueSet,
-	string,
-	createSubsetValueSetClass,
-} = require('setter.test.js');
+const { SubsetValueSet, string, createSubsetValueSetClass } = require('setter.test.js');
 
 function checkSetterSubsetValue() {
 	const subsetValueSet = new SubsetValueSet();

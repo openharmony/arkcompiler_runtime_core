@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	GIClass,
-	createInterfaceObjectFromEts,
-	num,
-	str,
-} = require('generic.test.js');
+const { GIClass, createInterfaceObjectFromEts, num, str } = require('generic.test.js');
 
 function checkInterfaceClass() {
 	const interfaceClass = new GIClass(num);

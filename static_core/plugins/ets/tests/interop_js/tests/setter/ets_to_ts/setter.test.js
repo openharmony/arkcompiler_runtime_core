@@ -27,38 +27,14 @@ const SetterAnyType = etsVm.getClass('Lsetter/test/SetterAnyType;');
 const TupleSet = etsVm.getClass('Lsetter/test/TupleSet;');
 const AbstractClass = etsVm.getClass('Lsetter/test/AbstractClass;');
 
-const createAbstractClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_abstratc_class'
-);
-const createBaseClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_base_class'
-);
-const createUnionClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_union_class'
-);
-const createInterfaceClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_interface_class'
-);
-const createSubsetRefSetClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_subset_ref_set_class'
-);
-const createSubsetValueSetClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_subset_value_set_class'
-);
-const createSetterAnyTypeClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_setter_any_type_class'
-);
-const createTupleSetClass = etsVm.getFunction(
-	'Lsetter/test/ETSGLOBAL;',
-	'create_tuple_set_class'
-);
+const createAbstractClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_abstratc_class');
+const createBaseClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_base_class');
+const createUnionClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_union_class');
+const createInterfaceClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_interface_class');
+const createSubsetRefSetClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_subset_ref_set_class');
+const createSubsetValueSetClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_subset_value_set_class');
+const createSetterAnyTypeClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_setter_any_type_class');
+const createTupleSetClass = etsVm.getFunction('Lsetter/test/ETSGLOBAL;', 'create_tuple_set_class');
 
 module.exports = {
 	UnionSetter,

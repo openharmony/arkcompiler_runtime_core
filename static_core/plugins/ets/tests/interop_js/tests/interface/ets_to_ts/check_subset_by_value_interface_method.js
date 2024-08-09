@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	num,
-	SubsetByValueClass,
-	createSubsetByValueClassFromEts,
-} = require('interface_method.test');
+const { num, SubsetByValueClass, createSubsetByValueClassFromEts } = require('interface_method.test');
 
 function checkSubsetByValueInterfaceMethod() {
 	const IClass = new SubsetByValueClass();

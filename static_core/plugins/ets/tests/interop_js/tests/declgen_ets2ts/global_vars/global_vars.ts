@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-import { CONSTANT, Bibka } from "./lib";
+import { CONSTANT, Bibka } from './lib';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  testGlobalVars();
+	testGlobalVars();
 }
 
 function testGlobalVars() {
-  AssertEq(CONSTANT, 228);
-  AssertEq(Bibka.NOT_GLOBAL, 1337);
+	AssertEq(CONSTANT, 228);
+	AssertEq(Bibka.NOT_GLOBAL, 1337);
 }

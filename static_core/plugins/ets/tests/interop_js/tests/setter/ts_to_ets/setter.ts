@@ -16,113 +16,113 @@
 type Union = number | boolean;
 
 export class UnionSetter {
-  private _value: Union;
+	private _value: Union;
 
-  set value(arg: Union) {
-    this._value = arg;
-  }
+	set value(arg: Union) {
+		this._value = arg;
+	}
 
-  get value(): Union {
-    return this._value;
-  }
+	get value(): Union {
+		return this._value;
+	}
 }
 
 interface ISetter {
-  _value: string;
+	_value: string;
 
-  set value(arg: string);
+	set value(arg: string);
 
-  get value(): string;
+	get value(): string;
 }
 
 export class InterfaceSetter implements ISetter {
-  _value: string;
+	_value: string;
 
-  set value(arg: string) {
-    this._value = arg;
-  }
+	set value(arg: string) {
+		this._value = arg;
+	}
 
-  get value(): string {
-    return this._value;
-  }
+	get value(): string {
+		return this._value;
+	}
 }
 
 export class BaseClass {
-  private _value: string;
+	private _value: string;
 
-  set value(arg: string) {
-    this._value = arg;
-  }
+	set value(arg: string) {
+		this._value = arg;
+	}
 
-  get value(): string {
-    return this._value;
-  }
+	get value(): string {
+		return this._value;
+	}
 }
 
 export class SubsetRefSet extends BaseClass {}
 
-export const tsTestString = "ts_test_string";
+export const tsTestString = 'ts_test_string';
 
 class ValueSetter {
-  protected _value = tsTestString;
+	protected _value = tsTestString;
 }
 
 export class SubsetValueSet extends ValueSetter {
-  constructor() {
-    super();
-  }
+	constructor() {
+		super();
+	}
 
-  set value(arg: string) {
-    this._value = arg;
-  }
+	set value(arg: string) {
+		this._value = arg;
+	}
 
-  get value(): string {
-    return this._value;
-  }
+	get value(): string {
+		return this._value;
+	}
 }
 
 export class SetterAnyType<T> {
-  private _value: T;
+	private _value: T;
 
-  set value(arg: T) {
-    this._value = arg;
-  }
+	set value(arg: T) {
+		this._value = arg;
+	}
 
-  get value(): T {
-    return this._value;
-  }
+	get value(): T {
+		return this._value;
+	}
 }
 
 type Tuple = [number, string];
 
 export class TupleSet {
-  private _value: Tuple;
+	private _value: Tuple;
 
-  public set value(arg: Tuple) {
-    this._value = arg;
-  }
+	public set value(arg: Tuple) {
+		this._value = arg;
+	}
 
-  public get value(): Tuple {
-    return this._value;
-  }
+	public get value(): Tuple {
+		return this._value;
+	}
 }
 
 abstract class AbstractSetter {
-  protected _value: string;
+	protected _value: string;
 
-  abstract set value(arg: string);
+	abstract set value(arg: string);
 
-  abstract get value(): string;
+	abstract get value(): string;
 }
 
 export class AbstractClass extends AbstractSetter {
-  override set value(arg: string) {
-    this._value = arg;
-  }
+	override set value(arg: string) {
+		this._value = arg;
+	}
 
-  override get value(): string {
-    return this._value;
-  }
+	override get value(): string {
+		return this._value;
+	}
 }
 
 export const AbstractClassObject = new AbstractClass();

@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	UnionClass,
-	createUnionObjectFromEts,
-	num,
-	str,
-} = require('generic.test.js');
+const { UnionClass, createUnionObjectFromEts, num, str } = require('generic.test.js');
 
 function checkUnionClass() {
 	const unionClass = new UnionClass(num);

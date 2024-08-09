@@ -18,32 +18,29 @@ const TEN = 10;
 const TWENTY = 20;
 const PRECISION = 3;
 
-import { DynPropertiesWrapper } from "./lib1";
+import { DynPropertiesWrapper } from './lib1';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  testDynProperties();
+	testDynProperties();
 }
 
 function testDynProperties() {
-  const dynPropsWrapper = new DynPropertiesWrapper();
-  const KEY_EXTERNAL = "key_external";
-  const VALUE_EXTERNAL = "value_external";
-  const KEY_INTERNAL = "key_internal";
-  const VALUE_INTERNAL = "value_internal";
+	const dynPropsWrapper = new DynPropertiesWrapper();
+	const KEY_EXTERNAL = 'key_external';
+	const VALUE_EXTERNAL = 'value_external';
+	const KEY_INTERNAL = 'key_internal';
+	const VALUE_INTERNAL = 'value_internal';
 
-  dynPropsWrapper.SetPropertyExternal(KEY_EXTERNAL, VALUE_EXTERNAL);
-  AssertEq(dynPropsWrapper.GetPropertyExternal(KEY_EXTERNAL), VALUE_EXTERNAL);
+	dynPropsWrapper.SetPropertyExternal(KEY_EXTERNAL, VALUE_EXTERNAL);
+	AssertEq(dynPropsWrapper.GetPropertyExternal(KEY_EXTERNAL), VALUE_EXTERNAL);
 
-  dynPropsWrapper.dynProps_.SetPropertyInternal(KEY_INTERNAL, VALUE_INTERNAL);
-  AssertEq(
-    dynPropsWrapper.dynProps_.GetPropertyInternal(KEY_INTERNAL),
-    VALUE_INTERNAL,
-  );
+	dynPropsWrapper.dynProps_.SetPropertyInternal(KEY_INTERNAL, VALUE_INTERNAL);
+	AssertEq(dynPropsWrapper.dynProps_.GetPropertyInternal(KEY_INTERNAL), VALUE_INTERNAL);
 }

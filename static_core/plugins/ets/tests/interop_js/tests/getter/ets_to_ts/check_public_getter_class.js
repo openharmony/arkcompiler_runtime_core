@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	PublicGetterClass,
-	createublicetterlassromts,
-} = require('getter.test.js');
+const { string, PublicGetterClass, createublicetterlassromts } = require('getter.test.js');
 
 function checkublicetterlassalue() {
 	const GClass = new PublicGetterClass();

@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	PrivateGetterInheritanceClass,
-	createrivateetternheritancelassromts,
-} = require('getter.test.js');
+const { string, PrivateGetterInheritanceClass, createrivateetternheritancelassromts } = require('getter.test.js');
 
 function checkrivateetterlassnheritancealue() {
 	const GClass = new PrivateGetterInheritanceClass();

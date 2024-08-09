@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	SetterAnyType,
-	string,
-	createSetterAnyTypeClass,
-} = require('setter.test.js');
+const { SetterAnyType, string, createSetterAnyTypeClass } = require('setter.test.js');
 
 function checkSetterAnyType() {
 	const setterAnyType = new SetterAnyType();

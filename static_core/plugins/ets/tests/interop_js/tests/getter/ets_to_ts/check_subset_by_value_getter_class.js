@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	PublicGetterClass,
-	SubsetByValueClass,
-	createubsetyalueetterlassromts,
-} = require('getter.test.js');
+const { string, PublicGetterClass, SubsetByValueClass, createubsetyalueetterlassromts } = require('getter.test.js');
 
 function checkubsetyalueetterlass() {
 	const GClass = new SubsetByValueClass(new PublicGetterClass().value);

@@ -14,23 +14,22 @@
  */
 
 let penv = process.env;
-globalThis.etsVm = require(penv.MODULE_PATH + "/ets_interop_js_napi.node");
+globalThis.etsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
 
 const etsVmRes = globalThis.etsVm.createRuntime({
-  "log-level": "error",
-  "log-components": "ets_interop_js",
-  "boot-panda-files":
-    penv.ARK_ETS_STDLIB_PATH + ":" + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-  "panda-files": penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-  "gc-trigger-type": "heap-trigger",
-  "compiler-enable-jit": "false",
-  "run-gc-in-place": "true",
+	'log-level': 'error',
+	'log-components': 'ets_interop_js',
+	'boot-panda-files': penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+	'panda-files': penv.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+	'gc-trigger-type': 'heap-trigger',
+	'compiler-enable-jit': 'false',
+	'run-gc-in-place': 'true',
 });
 
 if (!etsVmRes) {
-  console.error(`Failed to create ETS runtime`);
-  // eslint-disable-next-line
-  return 1;
+	console.error(`Failed to create ETS runtime`);
+	// eslint-disable-next-line
+	return 1;
 }
 
-require("./demo");
+require('./demo');

@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	TupleSet,
-	num,
-	string,
-	createTupleSetClass,
-} = require('setter.test.js');
+const { TupleSet, num, string, createTupleSetClass } = require('setter.test.js');
 
 function checkSetterTuple() {
 	const tupleSet = new TupleSet();

@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-const {
-	string,
-	number,
-	UnionTypeClass,
-	createnionypeetterlassromts,
-} = require('getter.test.js');
+const { string, number, UnionTypeClass, createnionypeetterlassromts } = require('getter.test.js');
 
 function checknionypeetterlassaluetring() {
 	const GClass = new UnionTypeClass(string);

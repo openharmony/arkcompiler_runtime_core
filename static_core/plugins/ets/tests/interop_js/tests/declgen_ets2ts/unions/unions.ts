@@ -15,21 +15,21 @@
 
 const TWO = 2;
 
-import { NumberOrStringEquality } from "./lib";
+import { NumberOrStringEquality } from './lib';
 
 function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+	console.log(`AssertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+	}
 }
 
 export function main() {
-  testUnions();
+	testUnions();
 }
 
 function testUnions() {
-  AssertEq(NumberOrStringEquality(TWO, TWO), true);
-  AssertEq(NumberOrStringEquality(TWO, "2"), false);
-  AssertEq(NumberOrStringEquality("2", "2"), true);
+	AssertEq(NumberOrStringEquality(TWO, TWO), true);
+	AssertEq(NumberOrStringEquality(TWO, '2'), false);
+	AssertEq(NumberOrStringEquality('2', '2'), true);
 }
