@@ -13,18 +13,18 @@
 
 
 panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_ref
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_ref.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_ref.sts
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_ref/indirect_ref.sts
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_value
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_value.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_value.sts
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_value/indirect_value.sts
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_scenarios_ets_to_js_indirect_union
-    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_union.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/indirect_union.sts
+    CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.cpp
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/package_indirect_union/indirect_union.sts
 )
 
 add_custom_target(ets_interop_js_scenarios_ets_to_js_indirect)

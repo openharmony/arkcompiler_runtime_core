@@ -196,8 +196,6 @@
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_interface_access_in_package.sts
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_2.sts
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_3.sts
-09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_in_package_2.sts
-09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_in_package_3.sts
 09.classes/04.access_modifiers/03.protected_access_modifier/protected_interface_access_in_class.sts
 09.classes/04.access_modifiers/03.protected_access_modifier/protected_interface_access_in_derived_class.sts
 09.classes/04.access_modifiers/03.protected_access_modifier/protected_member_access_in_class_2.sts

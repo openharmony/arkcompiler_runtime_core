@@ -23,17 +23,21 @@ tags: [compile-only]
 
 package test;
 
-class Clazz {
+class Clazz{{loop.index0}} {
   static staticField: int;
   static staticMethod(): void {}
   field: int;
   method(): void {}
 }
 
-let instance: Clazz = new Clazz();
+let instance{{loop.index0}}: Clazz{{loop.index0}} = new Clazz{{loop.index0}}();
 
+
+{% if loop.last %}
 function main(): void {
-  {{qname}}
+    {% for qname1 in qualified_name %}
+    {{qname1}}
+    {% endfor %}
 }
-
+{% endif %}
 {% endfor %}

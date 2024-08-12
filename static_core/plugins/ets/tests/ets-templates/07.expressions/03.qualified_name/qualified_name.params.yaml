@@ -11,13 +11,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
---- # All possible qualified names 
+--- # All possible qualified names
 qualified_name:
-  - test.Clazz;
-  - test.instance;
-  - Clazz.staticField;
-  - Clazz.staticMethod();
-  - test.Clazz.staticField;
-  - test.Clazz.staticMethod();
-  - instance.field;
-  - instance.method();
+  #0
+  - Clazz0.staticField;
+  #1
+  - Clazz1.staticMethod();
+  #2
+  - instance2.field;
+  #3
+  - instance3.method();

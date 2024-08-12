@@ -20,17 +20,17 @@ files: ['./pkg_a/pkg_{{loop.index0}}.sts']
 tags: [{{c.tags}}]
 ---*/
 
-import { foo } from './pkg_a/pkg_{{loop.index0}}.sts'
+import { foo{{loop.index0}} } from './pkg_a/pkg_{{loop.index0}}.sts'
 
 {{c.decl}}
 
-function foo({{c.sig1}}): int {
+function foo{{loop.index0}}({{c.sig1}}): int {
     return 1
 }
 
 function main(): int {
-    let v1 = foo({{c.arg1}})
-    let v2 = foo({{c.arg2}})
+    let v1 = foo{{loop.index0}}({{c.arg1}})
+    let v2 = foo{{loop.index0}}({{c.arg2}})
     return v1 == 1 && v2 == 2 ? 0 : 1
 }
 {%- endfor %}

@@ -18,8 +18,6 @@ desc: A declared name is considered private if not exported; a private declared 
 tags: [compile-only, negative]
 ---*/
 
-package ets.tests;
-
 import * as Time from "std/time"
 
 function main() {
