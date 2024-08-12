@@ -1,7 +1,10 @@
-### **描述**
+### Issue
 
+### 描述/Description
 
-### **Issue**
+### 原因/Reason
+
+### 修改方案/Scheme
 
 
 ### **[测试项](https://gitee.com/openharmony/arkcompiler_runtime_core/wikis)**
@@ -50,3 +53,9 @@
 
 1. UT
 2. 测试脚本
+
+##### **八、指令/abc格式修改自检，需联系下方邮箱，同步至相关领域**
+- [ ] 涉及，已同步
+- [ ] 不涉及
+
+**Email:** chenqiuyao@huawei.com
