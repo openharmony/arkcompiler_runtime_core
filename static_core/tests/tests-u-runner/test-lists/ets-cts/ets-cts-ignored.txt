@@ -670,9 +670,6 @@
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_15.sts
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_25.sts
 
-# Iterable type not yet implemented
-17.experimental_features/06.statements/01.for-of_type_annotation/for_of_27.sts
-
 # es2panda fails: 7.6.2 Object Literal of Interface Type is not implemented
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_0.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_1.sts
@@ -1274,10 +1271,6 @@
 07.expressions/25.equality_expressions/08.equality_with_null_or_undefined/null_and_undefined_equality_12.sts
 # end of 16655
 
-# es2panda: 16676 CTE in for-of with iterable class
-08.statements/09.for_of_statements/for_of_27.sts
-# end of 16676
-
 # 18445 No CTE when compared union types have no overlapping values
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/cte_0.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/cte_1.sts
@@ -1733,6 +1726,20 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_7.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_8.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_9.sts
+
+# 18763 es2panda aborts on for-of over a union type array
+08.statements/09.for_of_statements/for_of_28.sts
+17.experimental_features/04.iterable_types/it_11.sts
+17.experimental_features/04.iterable_types/it_12.sts
+
+# 18589 SegFault on protected $_iterator
+17.experimental_features/04.iterable_types/it_5.sts
+
+# 18590 Signature $_iterator(): C is not visible here
+17.experimental_features/04.iterable_types/it_6.sts
+
+# 18767 Cannot use $_iterator from superclass
+17.experimental_features/04.iterable_types/it_4.sts
 
 # 16518 CTE expected on assignment of incompatible union types
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/spec2.sts

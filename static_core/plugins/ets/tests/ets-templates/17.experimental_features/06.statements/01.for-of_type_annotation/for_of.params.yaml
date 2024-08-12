@@ -278,7 +278,7 @@ cases:
               next(): IteratorResult<Number> {
                   return {
                       done: this.index >= data.length,
-                      value: data[this.index++]
+                      value: this.index >= data.length ? undefined : data[this.index++]
                   }
               }
           }

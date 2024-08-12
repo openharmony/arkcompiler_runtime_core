@@ -214,7 +214,7 @@ cases:
               next(): IteratorResult<string> {
                   return {
                     done: this.index >= this.base.data.length,
-                    value: this.base.data[this.index++]
+                    value: this.index >= this.base.data.length ? undefined : this.base.data[this.index++]
                   }
               }
           }
@@ -222,3 +222,14 @@ cases:
           let a = new A();
           for (let x of a) res += x;
           assert res == "abc";
+
+    - decl: |-
+          type UT = string[] | string
+      use: |-
+          let ua: UT[] = [['abc', 'def'] as string[], 'ghi']
+          for (let x of ua) {
+              for (let y of x) {
+                  res += y
+              }
+          }
+          assert(res == 'abcdefghi')
