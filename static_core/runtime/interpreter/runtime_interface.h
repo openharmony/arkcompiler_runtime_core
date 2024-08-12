@@ -284,7 +284,8 @@ public:
     static void Safepoint(ManagedThread *thread)
     {
 #ifndef NDEBUG
-        if (Runtime::GetOptions().IsRunGcEverySafepoint()) {
+        // NOTE(sarychevkonstantin, #I9624): achieve consistency between mutator lock ownership and IsManaged method
+        if (Runtime::GetOptions().IsRunGcEverySafepoint() && Thread::GetCurrent()->GetMutatorLock()->HasLock()) {
             auto *vm = ManagedThread::GetCurrent()->GetVM();
             vm->GetGCTrigger()->TriggerGcIfNeeded(vm->GetGC());
         }

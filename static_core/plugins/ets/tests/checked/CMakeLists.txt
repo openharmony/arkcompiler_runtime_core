@@ -74,7 +74,7 @@ function(panda_add_checked_test_ets)
     else()
         set(COMMAND_TOKEN "#!")
     endif()
-    set(OPTIONS "--load-runtimes=ets" "--run-gc-in-place" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
+    set(OPTIONS "--load-runtimes=ets" "--run-gc-in-place" "--coroutine-workers-count=1" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
     set(ES2PANDA_OPTIONS --thread=0 --extension=sts)
 
     if (PANDA_LLVM_AOT)

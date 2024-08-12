@@ -51,7 +51,7 @@ function(:DoubleToStringDecimal,
   cachedData := LoadI(elem).Imm(Constants::ELEM_DATA_OFFSET).Volatile.u64
   cachedNumber := LoadI(elem).Imm(Constants::ELEM_NUMBER_OFFSET).Volatile.f64
 
-  flag := Cast(ShlI(cachedData).Imm(32).u64).u32
+  flag := Cast(ShrI(cachedData).Imm(32).u64).u32
   If(And(flag, 1).u32, 0).NE.Unlikely {
     # elem is already being updated
     Goto(:SlowPathNoCache)

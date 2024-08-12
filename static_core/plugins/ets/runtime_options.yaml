@@ -180,7 +180,7 @@ options:
   lang:
     - ets
   type: std::string
-  default: threaded
+  default: stackful
   possible_values:
     - threaded
     - stackful
@@ -190,7 +190,7 @@ options:
   lang:
     - ets
   type: uint32_t
-  default: 1
+  default: 0
   description: Number of worker threads for the NxM coroutine scheme (use 0 for auto)
 
 - name: coroutine-js-mode
