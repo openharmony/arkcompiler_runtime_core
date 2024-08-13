@@ -354,13 +354,13 @@ template("ark_asm_gen") {
 template("es2panda_gen") {
   action(target_name) {
     es2panda_root_out =
-        get_label_info("$ark_es2panda_root/aot:es2panda(${host_toolchain})",
+        get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
                        "root_out_dir")
     script = es2panda_root_out + "/arkcompiler/ets_frontend/es2panda"
     if (ark_standalone_build) {
-      deps = [ "$ark_es2panda_root/aot:es2panda" ]
+      deps = [ "$ark_es2panda_root/aot:ets2panda" ]
     } else {
-      external_deps = [ "ets_frontend:es2panda(${host_toolchain})" ]
+      external_deps = [ "ets_frontend:ets2panda(${host_toolchain})" ]
     }
 
     inputs = invoker.inputs

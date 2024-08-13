@@ -26,9 +26,9 @@ group("ark_packages") {
   deps = [ "runtime/napi/etsnative:etsnative" ]
 
   if (ark_standalone_build) {
-    deps += [ "$ark_es2panda_root/aot:es2panda" ]
+    deps += [ "$ark_es2panda_root/aot:ets2panda" ]
   } else {
-    external_deps = [ "ets_frontend:es2panda" ]
+    external_deps = [ "ets_frontend:ets2panda" ]
   }
 
   if (with_stdlib) {
@@ -123,7 +123,7 @@ if (with_stdlib) {
     ]
 
     default_arktsconfig =
-        get_label_info("$ark_es2panda_root/aot:es2panda(${host_toolchain})",
+        get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
                        "root_out_dir")
     default_arktsconfig += "/arkcompiler/ets_frontend"
 
