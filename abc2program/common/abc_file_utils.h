@@ -29,6 +29,7 @@ constexpr std::string_view ANY_TYPE_NAME = "any";
 constexpr std::string_view ES_TYPE_ANNOTATION_NAME = "_ESTypeAnnotation";
 constexpr std::string_view ES_MODULE_RECORD = "_ESModuleRecord";
 constexpr std::string_view ES_SCOPE_NAMES_RECORD = "_ESScopeNamesRecord";
+constexpr std::string_view JSON_FILE_CONTENT = "jsonFileContent";
 constexpr std::string_view MODULE_RECORD_IDX = "moduleRecordIdx";
 constexpr std::string_view SCOPE_NAMES = "scopeNames";
 constexpr std::string_view MODULE_REQUEST_PAHSE_IDX = "moduleRequestPhaseIdx";
