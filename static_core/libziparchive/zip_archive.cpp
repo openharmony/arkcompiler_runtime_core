@@ -153,8 +153,7 @@ int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t bufSize)
     return ZIPARCHIVE_OK;
 }
 
-int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void *pbuf, size_t bufSize, int append,
-                           int level)
+int CreateOrAddFileIntoZip(const char *zipname, const char *filename, std::vector<uint8_t> *buf, int append, int level)
 {
     zipFile zfile = nullptr;
     zfile = zipOpen(zipname, append);
@@ -169,7 +168,7 @@ int CreateOrAddFileIntoZip(const char *zipname, const char *filename, const void
         LOG(ERROR, ZIPARCHIVE) << "zipOpenNewFileInZip failed!, zipname is" << zipname << ", filename is " << filename;
         return ZIPARCHIVE_ERR;
     }
-    err = zipWriteInFileInZip(zfile, pbuf, bufSize);
+    err = zipWriteInFileInZip(zfile, buf->data(), buf->size());
     if (err != UNZ_OK) {
         LOG(ERROR, ZIPARCHIVE) << "zipWriteInFileInZip failed!, zipname is" << zipname << ", filename is " << filename;
         success = ZIPARCHIVE_ERR;
