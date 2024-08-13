@@ -55,19 +55,16 @@ void OpenUncompressedArchiveFuzzTest(const uint8_t *data, size_t size)
     }
     if (panda::LocateFile(zipfile, filename) != panda::ZIPARCHIVE_OK) {
         CloseAndRemoveZipFile(zipfile, fp, zip_filename);
-        (void)fclose(fp);
         return;
     }
     panda::EntryFileStat entry;
     if (panda::GetCurrentFileInfo(zipfile, &entry) != panda::ZIPARCHIVE_OK) {
         CloseAndRemoveZipFile(zipfile, fp, zip_filename);
-        (void)fclose(fp);
         return;
     }
     if (panda::OpenCurrentFile(zipfile) != panda::ZIPARCHIVE_OK) {
         panda::CloseCurrentFile(zipfile);
         CloseAndRemoveZipFile(zipfile, fp, zip_filename);
-        (void)fclose(fp);
         return;
     }
     panda::GetCurrentFileOffset(zipfile, &entry);
