@@ -33,14 +33,8 @@ extern "C" uint64_t __aeabi_f2ulz(float data);
 extern "C" int64_t __aeabi_d2lz(double data);
 extern "C" uint64_t __aeabi_d2ulz(double data);
 
-auto AEABIuldivmod(uint64_t numerator, uint64_t denominator)
-{
-    return __aeabi_uldivmod(numerator, denominator);
-}
-auto AEABIldivmod(int64_t numerator, int64_t denominator)
-{
-    return __aeabi_ldivmod(numerator, denominator);
-}
+#define AEABIuldivmod __aeabi_uldivmod // __aeabi_uldivmod returns two consecutive uint64_t
+#define AEABIldivmod __aeabi_ldivmod   // __aeabi_uldivmod returns two consecutive int64_t
 
 auto AEABIuidivmod(uint32_t numerator, uint32_t denominator)
 {
