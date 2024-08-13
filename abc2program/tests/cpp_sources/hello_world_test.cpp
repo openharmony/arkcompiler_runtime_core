@@ -45,6 +45,8 @@ struct FuncName {
 const FuncName FUNC_NAME;
 const std::string HELLO_WORLD_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorld.abc";
 const std::string HELLO_WORLD_DEBUG_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorldDebug.abc";
+const std::string JSON_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "JsonTest.abc";
+const std::string JSON_TEST_FILE_NAME = "JsonTest";
 const bool REMOVE_DUMP_RESULT_FILES = true;
 const std::string HELLO_WORLD_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDumpResult.txt";
 const std::string HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpResult.txt";
@@ -127,6 +129,22 @@ public:
     const pandasm::Program *prog_ = nullptr;
     const pandasm::Function *foo_function_ = nullptr;
     const pandasm::Function *main_function_ = nullptr;
+};
+
+class Abc2ProgramJsonTest : public testing::Test {
+public:
+    static void SetUpTestCase(void) {}
+    static void TearDownTestCase(void) {}
+    void SetUp()
+    {
+        (void)driver_.Compile(JSON_ABC_TEST_FILE_NAME);
+        prog_ = &(driver_.GetProgram());
+    }
+
+    void TearDown() {}
+
+    Abc2ProgramDriver driver_;
+    const pandasm::Program *prog_ = nullptr;
 };
 
 /*------------------------------------- Cases of release mode below -------------------------------------*/
@@ -780,5 +798,29 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_ins_debug,
     EXPECT_TRUE(pa_ins_str5 == "label@5: ldai 0xb");
     EXPECT_TRUE(ins5.ins_debug.line_number == 41);
     EXPECT_TRUE(ins5.ins_debug.column_number == 11);
+}
+
+/*-------------------------------------- Cases of debug mode above --------------------------------------*/
+/*------------------------------------- Case of json file below -------------------------------------*/
+
+/**
+ * @tc.name: abc2program_json_field_test
+ * @tc.desc: get json field metadata
+ * @tc.type: FUNC
+ * @tc.require: issueIAJKTS
+ */
+HWTEST_F(Abc2ProgramJsonTest, abc2program_json_field_test, TestSize.Level1)
+{
+    auto it = prog_->record_table.find(JSON_TEST_FILE_NAME);
+    ASSERT(it != prog_->record_table.end());
+    const pandasm::Record &record = it->second;
+    const std::vector<pandasm::Field> &field_list = record.field_list;
+    EXPECT_EQ(field_list.size(), 1);
+    const pandasm::Field &field = field_list[0];
+    EXPECT_EQ(field.name, JSON_FILE_CONTENT);
+    std::optional<pandasm::ScalarValue> val = field.metadata->GetValue();
+    EXPECT_TRUE(val.has_value());
+    auto content = val.value().GetValue<std::string>();
+    EXPECT_EQ(content, "{\n  \"name\" : \"Import json\"\n}");
 }
 };  // panda::abc2program
