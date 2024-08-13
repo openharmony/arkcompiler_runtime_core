@@ -226,7 +226,7 @@ export final class Console {
         for (let i = 0; i < len; i++) {
             this.print(vals[i])
             if (i != len - 1) {
-                this.print(", ")
+                this.print(" ")
             }
         }
         this.println()

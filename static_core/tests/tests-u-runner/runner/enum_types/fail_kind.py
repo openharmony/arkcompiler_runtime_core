@@ -40,6 +40,7 @@ class FailKind(Enum):
     VERIFIER_OTHER = 15
 
     COMPARE_FAIL = 16
+    COMPARE_OUTPUT_FAIL = 17
 
     TS_NODE_FAIL = 20
     TS_NODE_TIMEOUT = 21

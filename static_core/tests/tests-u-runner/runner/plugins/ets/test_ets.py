@@ -47,6 +47,7 @@ class TestETS(TestFileBased):
         makedirs(self.bytecode_path, exist_ok=True)
         self.test_abc = path.join(self.bytecode_path, f"{self.test_id}.abc")
         self.test_an = path.join(self.bytecode_path, f"{self.test_id}.an")
+        self.test_expected = path.join(test_env.work_dir.gen, f"{self.test_id}.expected")
         makedirs(path.dirname(self.test_abc), exist_ok=True)
 
     @property
@@ -69,6 +70,11 @@ class TestETS(TestFileBased):
     def is_valid_test(self) -> bool:
         """ True if a test is valid """
         return not self.metadata.tags.not_a_test
+
+    @property
+    def has_expected(self) -> bool:
+        """True if test.expected file exists"""
+        return path.isfile(self.test_expected)
 
     @property
     def ark_extra_options(self) -> List[str]:
@@ -161,7 +167,41 @@ class TestETS(TestFileBased):
             self.test_an,
             self.test_abc,
             lambda _, _2, rc: self._runtime_result_validator(rc))
+
+        if self.has_expected and self.passed:
+            self.passed, self.report, self.fail_kind = self._compare_output_with_expected()
         return self
+
+    def _read_expected_file(self) -> None:
+        with open(self.test_expected, 'r', encoding="utf-8") as file_pointer:
+            expected = ""
+            for line in file_pointer.readlines():
+                if line.startswith("#"):
+                    continue
+                expected += line
+
+            self.expected = expected
+
+
+    def _compare_output_with_expected(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
+        "Compares test output with expected"
+        fail_kind = None
+        if not self.report:
+            return False, TestReport(output="", error="No test report to compare output", return_code=1), fail_kind
+        report = self.report
+        try:
+            self._read_expected_file()
+            if not self.test_env.config.ark.jit.enable:
+                passed = self.expected == self.report.output + '\n' and self.report.return_code in [0, 1]
+            else:
+                passed = self.expected in self.report.output + '\n' and self.report.return_code in [0, 1]
+        except OSError as error:
+            passed = False
+            report = TestReport(error=str(error), output=self.report.output, return_code=self.report.return_code)
+
+        if not passed:
+            fail_kind = FailKind.COMPARE_OUTPUT_FAIL
+        return passed, report, fail_kind
 
     def _run_compare_mode(self) -> TestETS:
         files = []
