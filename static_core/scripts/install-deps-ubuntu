@@ -16,6 +16,12 @@
 # Aux functions
 #
 
+function build_and_install_vmb
+{
+    make -C "${SCRIPT_DIR}/../tests/vm-benchmarks/" vmb
+
+}
+
 function enable_llvm_repo
 {
     set -x
@@ -101,6 +107,8 @@ function print_help
     --install=doc-dev            | -i=doc-dev             Install tools for documentation development
 
     --install=test               | -i=test                Install python dependencies for tests running
+
+    --install=vmb                | -i=vmb                 Installs VMB framework to run benchmarks from CLI
     "
 
     if [[ -n "${EXTRA_OPTIONS}" ]]
@@ -299,6 +307,7 @@ INSTALL_CROSS_ARM_ALL=no
 INSTALL_CROSS_LIBS=no
 INSTALL_DOC_DEV=no
 INSTALL_TEST=no
+INSTALL_VMB=no
 ADD_TOOLCHAIN_REPOS=no
 SRC_LIST_STR='# This file is generated automatically by Panda install-deps-ubuntu script. DO NOT EDIT!!!\n'
 
@@ -343,6 +352,9 @@ do
         fi
         if [[ $FLAG_ARG == "test" ]] ; then
             INSTALL_TEST=yes
+        fi
+        if [[ $FLAG_ARG == "vmb" ]] ; then
+            INSTALL_VMB=yes
         fi
       ;;
     *)
@@ -481,4 +493,11 @@ fi
 
 if [[ "x$INSTALL_TEST" == "xyes" ]]; then
     install_python_dependencies
+fi
+
+
+if [[ "x$INSTALL_VMB" == "xyes" ]]; then
+    install_python_dependencies
+    install_pip_dep "${SCRIPT_DIR}/dep-lists/requirements-vmb"
+    build_and_install_vmb
 fi

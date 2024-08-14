@@ -62,8 +62,10 @@ class Platform(PlatformBase):
                            link_to_src=True)
 
     def run_unit(self, bu: BenchUnit) -> None:
-        self.es2panda(bu)
         abc = bu.src('.abc')
+        if not abc.is_file():
+            self.es2panda(bu)
+            abc = bu.src('.abc')
         if self.dry_run_stop(bu):
             return
         abc.rename(abc.parent.joinpath('classes.abc'))
