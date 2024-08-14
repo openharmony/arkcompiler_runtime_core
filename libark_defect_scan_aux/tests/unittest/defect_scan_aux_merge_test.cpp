@@ -75,6 +75,8 @@ HWTEST(DefectScanAuxMergeTest, AcrossAbcTest_0, testing::ext::TestSize.Level0)
 
     auto ex_func2 = abc_file->GetExportFunctionByExportName("default", "Ldatabase;");
     EXPECT_EQ(ex_func2->GetFunctionName(), "Ldatabase;#*#getblankInstance2");
+    EXPECT_NE(abc_file->GetDefinedFunctionByIndex(0), nullptr);
+    EXPECT_NE(abc_file->GetDefinedClassByIndex(0), nullptr);
 }
 
 HWTEST(DefectScanAuxMergeTest, AcrossAbcTest_1, testing::ext::TestSize.Level0)

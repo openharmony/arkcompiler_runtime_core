@@ -113,6 +113,7 @@ HWTEST_F(VerifierTest, verifier_checksum_003, TestSize.Level1)
     {
         panda::verifier::Verifier ver {target_file_name};
         EXPECT_FALSE(ver.VerifyChecksum());
+        EXPECT_FALSE(ver.Verify());
     }
 }
 

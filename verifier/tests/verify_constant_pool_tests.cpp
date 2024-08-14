@@ -47,6 +47,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_001, TestSize.Level1)
     panda::verifier::Verifier ver {file_name};
     ver.CollectIdInfos();
     EXPECT_TRUE(ver.VerifyConstantPoolIndex());
+    EXPECT_TRUE(ver.Verify());
 }
 
 /**
@@ -87,6 +88,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
         panda::verifier::Verifier ver {target_file_name};
         ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+        EXPECT_FALSE(ver.VerifyConstantPool());
     }
 }
 
@@ -123,7 +125,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_003.abc";
 
     GenerateModifiedAbc(buffer, target_file_name);
-    
+
     base_file.close();
 
     {
@@ -359,4 +361,20 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_011, TestSize.Level1)
     }
 }
 
+/**
+* @tc.name: verifier_null_file
+* @tc.desc: verify not-exist abc file.
+* @tc.type: FUNC
+* @tc.require: file path and name
+*/
+HWTEST_F(VerifierConstantPool, verifier_not_exist, TestSize.Level1)
+{
+    const std::string not_exist_file_name = GRAPH_TEST_ABC_DIR "test_not_exist_file.abc";
+    panda::verifier::Verifier ver {not_exist_file_name};
+    ver.CollectIdInfos();
+    EXPECT_FALSE(ver.VerifyConstantPool());
+    EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+    EXPECT_FALSE(ver.VerifyConstantPoolContent());
+    EXPECT_FALSE(ver.Verify());
+}
 }; // namespace panda::verifier

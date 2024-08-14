@@ -49,6 +49,7 @@ HWTEST_F(VerifierRegisterTest, verifier_register_001, TestSize.Level1)
     panda::verifier::Verifier ver {file_name};
     ver.CollectIdInfos();
     EXPECT_TRUE(ver.VerifyRegisterIndex());
+    EXPECT_TRUE(ver.Verify());
 }
 
 /**
