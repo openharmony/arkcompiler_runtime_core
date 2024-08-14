@@ -31,6 +31,7 @@ abc2prog_test_deps = [
 ]
 
 test_ts_dir = "//arkcompiler/runtime_core/abc2program/tests/ts/"
+test_json_dir = "//arkcompiler/runtime_core/abc2program/tests/json/"
 
 abc2prog_test_ts_files = [ "HelloWorld" ]
 
@@ -61,6 +62,24 @@ foreach(file, abc2prog_debug_test_ts_files) {
       "--module",
     ]
     in_puts = [ test_ts ]
+    out_puts = [ test_abc ]
+  }
+}
+
+abc2prog_test_json_files = [ "JsonTest" ]
+
+foreach(file, abc2prog_test_json_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_json = "${test_json_dir}${file}.json"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    src_js = rebase_path(test_json)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--module",
+      "--merge-abc",
+    ]
+    in_puts = [ test_json ]
     out_puts = [ test_abc ]
   }
 }
@@ -96,6 +115,9 @@ host_unittest_action("Abc2ProgScriptTest") {
   }
   foreach(file, abc2prog_debug_test_ts_files) {
     deps += [ ":gen_${file}_debug_abc" ]
+  }
+  foreach(file, abc2prog_test_json_files) {
+    deps += [ ":gen_${file}_abc" ]
   }
 }
 
