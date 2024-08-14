@@ -15,7 +15,6 @@
 
 #include "inst_builder.h"
 #include "phi_resolver.h"
-#include "compiler_logger.h"
 
 namespace panda::compiler {
 void InstBuilder::Prepare()

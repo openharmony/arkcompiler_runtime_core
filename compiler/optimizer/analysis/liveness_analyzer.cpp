@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "optimizer/ir/inst.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 #include "liveness_analyzer.h"

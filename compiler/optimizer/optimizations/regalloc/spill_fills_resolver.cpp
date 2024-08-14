@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "optimizer/ir/graph.h"
 #include "reg_alloc_base.h"
 #include "spill_fills_resolver.h"
 

@@ -15,11 +15,9 @@
 
 #include "branch_elimination.h"
 #include "compiler_logger.h"
-#include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/ir/basicblock.h"
-#include "optimizer/ir/inst.h"
 
 namespace panda::compiler {
 /**

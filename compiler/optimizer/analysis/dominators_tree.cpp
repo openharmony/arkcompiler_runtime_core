@@ -15,7 +15,6 @@
 
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
-#include "optimizer/analysis/rpo.h"
 #include "dominators_tree.h"
 
 namespace panda::compiler {

@@ -15,7 +15,6 @@
 
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
-#include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/rpo.h"
 #include "loop_analyzer.h"
 

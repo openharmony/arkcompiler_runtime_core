@@ -14,7 +14,6 @@
  */
 
 #include "reg_alloc_stat.h"
-#include "optimizer/ir/datatype.h"
 
 namespace panda::compiler {
 RegAllocStat::RegAllocStat(const ArenaVector<LifeIntervals *> &intervals)

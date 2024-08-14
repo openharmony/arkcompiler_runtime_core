@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <array>
-#include "optimizer/ir/basicblock.h"
 #include "lowering.h"
 
 namespace panda::compiler {

@@ -15,7 +15,6 @@
 
 #include "graph.h"
 #include "basicblock.h"
-#include "inst.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/rpo.h"
 #include "optimizer/analysis/linear_order.h"
