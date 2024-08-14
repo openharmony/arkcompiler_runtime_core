@@ -37,17 +37,15 @@ function checkMethodConstructorMainClass(): boolean {
 function checkMethodClassParentClass(): boolean {
     const MClass = new MethodClass();
     const TSClass = MClass.init(ParentClass, MainClass);
-
     return checkInstance(ParentClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkMethodClassChildClass(): boolean {
     const MClass = new MethodClass();
     const TSClass = MClass.init(ChildClass, MainClass);
-
     return checkInstance(ChildClass, TSClass) as boolean
-        && TSClass.OtherClass._value as int == tsInt as int;
+        && TSClass._otherClass._value as int == tsInt as int;
 }
 
 function checkMethodClassAnonymousClass(): boolean {

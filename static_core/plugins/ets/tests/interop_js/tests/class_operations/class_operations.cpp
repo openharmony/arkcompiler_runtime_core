@@ -61,7 +61,7 @@ TEST_F(EtsInteropClassOperationsTest, TestJSNewObject)
     ASSERT_EQ(ret, 0);
 }
 
-TEST_F(EtsInteropClassOperationsTest, TestJSNewObjectSetPropery)
+TEST_F(EtsInteropClassOperationsTest, TestJSNewObjectSetProperty)
 {
     auto ret = CallEtsMethod<int64_t>("jsnewSetPropertyObject");
     ASSERT_EQ(ret, 0);

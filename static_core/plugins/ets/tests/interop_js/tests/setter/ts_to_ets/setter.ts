@@ -16,45 +16,45 @@
 type Union = number | boolean;
 
 export class UnionSetter {
-	private _value: Union;
+	private _value?: Union;
 
 	set value(arg: Union) {
 		this._value = arg;
 	}
 
-	get value(): Union {
+	get value(): Union | undefined {
 		return this._value;
 	}
 }
 
 interface ISetter {
-	_value: string;
+	_value?: string;
 
 	set value(arg: string);
 
-	get value(): string;
+	get value(): string | undefined;
 }
 
 export class InterfaceSetter implements ISetter {
-	_value: string;
+	_value?: string;
 
 	set value(arg: string) {
 		this._value = arg;
 	}
 
-	get value(): string {
+	get value(): string | undefined {
 		return this._value;
 	}
 }
 
 export class BaseClass {
-	private _value: string;
+	private _value?: string;
 
 	set value(arg: string) {
 		this._value = arg;
 	}
 
-	get value(): string {
+	get value(): string | undefined {
 		return this._value;
 	}
 }
@@ -82,13 +82,13 @@ export class SubsetValueSet extends ValueSetter {
 }
 
 export class SetterAnyType<T> {
-	private _value: T;
+	private _value?: T;
 
 	set value(arg: T) {
 		this._value = arg;
 	}
 
-	get value(): T {
+	get value(): T | undefined {
 		return this._value;
 	}
 }
@@ -96,23 +96,23 @@ export class SetterAnyType<T> {
 type Tuple = [number, string];
 
 export class TupleSet {
-	private _value: Tuple;
+	private _value?: Tuple;
 
 	public set value(arg: Tuple) {
 		this._value = arg;
 	}
 
-	public get value(): Tuple {
+	public get value(): Tuple | undefined {
 		return this._value;
 	}
 }
 
 abstract class AbstractSetter {
-	protected _value: string;
+	protected _value?: string;
 
 	abstract set value(arg: string);
 
-	abstract get value(): string;
+	abstract get value(): string | undefined;
 }
 
 export class AbstractClass extends AbstractSetter {
@@ -120,7 +120,7 @@ export class AbstractClass extends AbstractSetter {
 		this._value = arg;
 	}
 
-	override get value(): string {
+	override get value(): string | undefined {
 		return this._value;
 	}
 }

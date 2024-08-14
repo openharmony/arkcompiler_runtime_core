@@ -89,7 +89,7 @@ function main() {
 
 	// Run gtest
 	console.log(`Run ets_interop_js_gtest module: ${gtestName}`);
-	var etsGtest = require(`${gtestDir}/lib/module/${gtestName}`);
+	const etsGtest = require(`${gtestDir}/lib/module/${gtestName}`);
 	let args = process.argv.slice(2);
 	try {
 		return etsGtest.main(args);

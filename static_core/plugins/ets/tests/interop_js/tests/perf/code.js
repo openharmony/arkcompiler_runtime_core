@@ -14,7 +14,7 @@
  */
 'use strict';
 
-var o = { a: 1, b: '2', c: {} };
+const o = { a: 1, b: '2', c: {} };
 
 exports.GetObject = function () {
 	return o;

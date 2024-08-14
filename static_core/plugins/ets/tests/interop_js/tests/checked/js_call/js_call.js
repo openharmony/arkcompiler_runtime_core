@@ -105,7 +105,11 @@ let dynStorage = {
 	boolTrue: true,
 	boolFalse: false,
 	verify: function () {
-		return (this.str === 'dcba') + (this.dbl === 2.4) + (this.integer === 31) + (this.boolTrue === false);
+		const isStringValid = Number(this.str === 'dcba');
+		const isFloatValid = Number(Math.abs(this.dbl - 2.4) < Number.EPSILON);
+		const isIntegerValid = Number(this.integer === 31);
+		const isBooleanValid = Number(this.boolTrue === false);
+		return isStringValid + isFloatValid + isIntegerValid + isBooleanValid;
 	},
 };
 

@@ -23,7 +23,7 @@ export class MainClass {
 	}
 }
 
-export const IIFEClass = (function () {
+export const IIFEClass: ClassConstructor = (function (): ClassConstructor {
 	return class {
 		_value: number;
 
@@ -42,8 +42,9 @@ export const AnonymousClass = class {
 };
 
 interface ClassConstructor {
-	new (value: number): any;
+	new (value: number): {};
 }
+type ClassType = new (...args: {}[]) => {};
 
 export class ParentClass {
 	_other_class: any;
@@ -115,11 +116,11 @@ export function create_anonymous_class_create_class_with_arg_from_ts(arg: ClassC
 	return new AnonymousClassCreateClass(arg);
 }
 
-export function create_anonymous_class_create_class_from_ts() {
+export function create_anonymous_class_create_class_from_ts(): Object {
 	return new AnonymousClassCreateClass(MainClass);
 }
 
-export function create_anonymous_class_createIIFE_class_from_ts() {
+export function create_anonymous_class_createIIFE_class_from_ts(): Object {
 	return new AnonymousClassCreateClass(IIFEClass);
 }
 
@@ -127,15 +128,15 @@ export const anonymousClassCreateMainInstance = new AnonymousClassCreateClass(Ma
 
 export const anonymousClassCreateIIFEInstance = new AnonymousClassCreateClass(IIFEClass);
 
-export const IIFECreateClassMain = (function (ctor: new (_value: number) => MainClass, value: number) {
+export const IIFECreateClassMain = (function (ctor: new (_value: number) => MainClass, value: number): Object {
 	return new ctor(value);
 })(MainClass, ts_int);
 
-export const IIFECreateClassAnonymous = (function (ctor: new (_value: number) => InstanceType<typeof AnonymousClass>, value: number) {
+export const IIFECreateClassAnonymous = (function (ctor: new (_value: number) => InstanceType<typeof AnonymousClass>, value: number): Object {
 	return new ctor(value);
 })(AnonymousClass, ts_int);
 
-export const IIFECreateClass = (function (ctor: new (_value: number) => InstanceType<typeof IIFEClass>, value: number) {
+export const IIFECreateClass = (function (ctor: new (_value: number) => InstanceType<typeof IIFEClass>, value: number): Object {
 	return new ctor(value);
 })(IIFEClass, ts_int);
 
