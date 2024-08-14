@@ -207,14 +207,13 @@ void Cse::GlobalCse()
             }
             Exp exp = NotIn(sameExpPair_, GetExp(inst)) ? GetExpCommutative(inst) : GetExp(inst);
             auto &pair = sameExpPair_.find(exp)->second;
-            for (auto instl : pair.first) {
-                // If one decides to enable Cse in OSR mode then
-                // ensure that inst's basic block is not OsrEntry.
-                deletedInsts_.emplace_back(inst);
-                auto lrpair = std::make_pair(instl, *(pair.second.begin()));
-                matchedTuple_.emplace_back(inst, std::move(lrpair));
-                break;
-            }
+            ASSERT(!pair.first.empty());
+            auto instl = *pair.first.begin();
+            // If one decides to enable Cse in OSR mode then
+            // ensure that inst's basic block is not OsrEntry.
+            deletedInsts_.emplace_back(inst);
+            auto lrpair = std::make_pair(instl, *(pair.second.begin()));
+            matchedTuple_.emplace_back(inst, std::move(lrpair));
         }
     }
     // Add phi instruction
