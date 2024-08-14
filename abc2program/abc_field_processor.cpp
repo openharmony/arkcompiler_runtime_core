@@ -89,6 +89,10 @@ void AbcFieldProcessor::FillMetaDataValue()
                 auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
                 field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
                     module_literal_array_id_name));
+            } else if (field_.name == JSON_FILE_CONTENT) {
+                auto json_string_id = panda_file::File::EntityId(val);
+                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(
+                    entity_container_.GetStringById(json_string_id)));
             } else {
                 field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(val));
             }
