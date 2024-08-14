@@ -2815,12 +2815,12 @@ export final class UnionType extends Type {
         return false
     }
 
-    public make(default: Type): Object {
+    public make(defaultType: Type): Object {
         // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }
 
-    public make(default: Value): Object {
+    public make(defaultValue: Value): Object {
         // NOTE(shumilov-petr): not implemented
         throw new Error("not implemented")
     }

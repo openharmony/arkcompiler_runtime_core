@@ -13,6 +13,7 @@
 
 add_subdirectory(bouncing_peas)
 add_subdirectory(bouncing_pandas)
+add_subdirectory(default_import)
 add_subdirectory(export)
 add_subdirectory(export_with_alias)
 add_subdirectory(import_static_member)
