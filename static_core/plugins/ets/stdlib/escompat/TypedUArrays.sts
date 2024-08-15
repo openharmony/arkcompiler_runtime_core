@@ -799,7 +799,6 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         this.set(arr, 0)
     }
 
-
     /**
      * Copies elements from an ArrayLike object to the Uint8ClampedArray.
      *
@@ -822,14 +821,55 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param items a set of elements to include in the new array object.
      *
-     * @returns new Array
+     * @returns new Uint8ClampedArray
      */
     public static of(...items: number[]): Uint8ClampedArray {
-        let res = new Uint8ClampedArray(items.length)
+        let res = new Uint8ClampedArray(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafeClamp(i, items[i] as int)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint8ClampedArray
+     */
+    public static of(...items: int[]): Uint8ClampedArray {
+        let res = new Uint8ClampedArray(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint8ClampedArray
+     */
+    public static of(...items: short[]): Uint8ClampedArray {
+        let res = new Uint8ClampedArray(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, items[i] as int)
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint8ClampedArray
+     */
+    public static of(): Uint8ClampedArray {
+        return new Uint8ClampedArray(0 as int)
     }
 
     /**
@@ -3332,7 +3372,6 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         this.set(arr, 0)
     }
 
-
     /**
      * Copies elements from an ArrayLike object to the Uint8Array.
      *
@@ -3356,14 +3395,55 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param items a set of elements to include in the new array object.
      *
-     * @returns new Array
+     * @returns new Uint8Array
      */
     public static of(...items: number[]): Uint8Array {
-        let res = new Uint8Array(items.length)
+        let res = new Uint8Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafeClamp(i, res.zeroIfInfinity(items[i]) as int)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint8Array
+     */
+    public static of(...items: int[]): Uint8Array {
+        let res = new Uint8Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint8Array
+     */
+    public static of(...items: short[]): Uint8Array {
+        let res = new Uint8Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, items[i] as int)
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint8Array
+     */
+    public static of(): Uint8Array {
+        return new Uint8Array(0 as int)
     }
 
     /**
@@ -5867,7 +5947,6 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         this.set(arr, 0)
     }
 
-
     /**
      * Copies elements from an ArrayLike object to the Uint16Array.
      *
@@ -5891,14 +5970,40 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param items a set of elements to include in the new array object.
      *
-     * @returns new Array
+     * @returns new Uint16Array
      */
     public static of(...items: number[]): Uint16Array {
-        let res = new Uint16Array(items.length)
+        let res = new Uint16Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafeClamp(i, res.zeroIfInfinity(items[i]) as int)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint16Array
+     */
+    public static of(...items: int[]): Uint16Array {
+        let res = new Uint16Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint16Array
+     */
+    public static of(): Uint16Array {
+        return new Uint16Array(0 as int)
     }
 
     /**
@@ -8429,7 +8534,6 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         this.set(arr, 0)
     }
 
-
     /**
      * Copies elements from an ArrayLike object to the Uint32Array.
      *
@@ -8453,14 +8557,55 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @param items a set of elements to include in the new array object.
      *
-     * @returns new Array
+     * @returns new Uint32Array
      */
     public static of(...items: number[]): Uint32Array {
-        let res = new Uint32Array(items.length)
+        let res = new Uint32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafeClamp(i, res.zeroIfInfinity(items[i]) as long)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint32Array
+     */
+    public static of(...items: int[]): Uint32Array {
+        let res = new Uint32Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, items[i] as long)
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint32Array
+     */
+    public static of(...items: long[]): Uint32Array {
+        let res = new Uint32Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafeClamp(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Uint32Array
+     */
+    public static of(): Uint32Array {
+        return new Uint32Array(0 as int)
     }
 
     /**
@@ -10991,7 +11136,6 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
         this.set(arr, 0)
     }
 
-
     /**
      * Copies elements from an ArrayLike object to the BigUint64Array.
      *
@@ -11015,10 +11159,43 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      *
      * @param items a set of elements to include in the new array object.
      *
-     * @returns new Array
+     * @returns new BigUint64Array
      */
     public static of(...items: number[]): BigUint64Array {
         throw new Error("Array.of: not implemented")
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigUint64Array
+     */
+    public static of(...items: int[]): BigUint64Array {
+        throw new Error("Array.of: not implemented")
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigUint64Array
+     */
+    public static of(...items: long[]): BigUint64Array {
+        throw new Error("Array.of: not implemented")
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigUint64Array
+     */
+    public static of(): BigUint64Array {
+        return new BigUint64Array(0 as int)
     }
 
     /**
