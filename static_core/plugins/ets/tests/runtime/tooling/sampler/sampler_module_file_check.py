@@ -25,7 +25,7 @@ import numpy as np
 class ModulesDumpTest:
     _file_name: str
     _binary_dir: str
-    _checksum_name_map: dict[str, np.uint32]
+    _checksum_name_map: dict
 
     def __init__(self, args) -> None:
         self._file_name = args.file
@@ -50,7 +50,7 @@ class ModulesDumpTest:
             checksum = np.fromfile(file, dtype=np.uint32, count=1, sep='', offset=checksum_offset)
             return checksum[0]
 
-    def fill_map(self, modules_list: list[str]):
+    def fill_map(self, modules_list: list):
         for module in modules_list:
             checksum = self.get_checksum_from_abc_file(module)
             self._checksum_name_map[module] = checksum
