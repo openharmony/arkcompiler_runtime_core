@@ -40,12 +40,6 @@ std/core/std_core_typeduarrays_function1__Uint16Array.sts
 std/core/std_core_typedarrays__BigInt64Array.sts
 # #16217
 std/core/std_core_typedarrays__Int16Array.sts
-# #17892
-std/core/std_core_typedarrays_function1__Int32Array.sts
-# #17863
-std/core/std_core_typedarrays_function1__Int8Array.sts
-# #17854
-std/core/std_core_typedarrays_function1__Float64Array.sts
 ### Issue 11474 ###
 ### Issue 11544 begin
 std/math/std_math_tan_double.sts
