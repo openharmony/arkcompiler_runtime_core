@@ -270,6 +270,12 @@ public:
             CONSTANT(2U, lenArray);  // len array
             CONSTANT(3U, index);     // index 2
             CONSTANT(12U, mod);
+            CONSTANT(13U, 0U);
+            BASIC_BLOCK(11U, 2U, 5U)
+            {
+                INST(41U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(1U, 13U);
+                INST(42U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(41U);
+            }
             BASIC_BLOCK(2U, 3U, 4U)
             {
                 INST(43U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
@@ -281,13 +287,17 @@ public:
             {
                 INST(6U, Opcode::Mod).s32().Inputs(1U, 12U);
             }
-            BASIC_BLOCK(4U, 1U)
+            BASIC_BLOCK(4U, -1)
             {
                 INST(7U, Opcode::Phi).s32().Inputs(3U, 6U);
                 INST(8U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U).SrcVregs({0U, 1U, 2U, 3U, 4U});
                 INST(9U, Opcode::BoundsCheck).s32().Inputs(2U, 7U, 8U);
                 INST(10U, Opcode::LoadArray).s32().Inputs(4U, 9U);
                 INST(11U, Opcode::Return).s32().Inputs(10U);
+            }
+            BASIC_BLOCK(5U, -1)
+            {
+                INST(19U, Opcode::Return).s32().Inputs(1U);
             }
         }
 
@@ -304,6 +314,12 @@ public:
             CONSTANT(2U, lenArray);   // len array
             CONSTANT(3U, index);      // index 2
             CONSTANT(12U, mod);
+            CONSTANT(13U, 0U);
+            BASIC_BLOCK(11U, 2U, 5U)
+            {
+                INST(41U, Opcode::Compare).b().CC(CC_GE).SrcType(DataType::Type::INT32).Inputs(1U, 13U);
+                INST(42U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(compiler::CC_NE).Imm(0U).Inputs(41U);
+            }
             BASIC_BLOCK(2U, 3U, 4U)
             {
                 INST(43U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
@@ -315,13 +331,17 @@ public:
             {
                 INST(6U, Opcode::Mod).s32().Inputs(1U, 12U);
             }
-            BASIC_BLOCK(4U, 1U)
+            BASIC_BLOCK(4U, -1)
             {
                 INST(7U, Opcode::Phi).s32().Inputs(3U, 6U);
                 INST(8U, Opcode::SaveState).Inputs(0U, 1U, 2U, 3U, 4U).SrcVregs({0U, 1U, 2U, 3U, 4U});
                 INST(9U, Opcode::NOP);
                 INST(10U, Opcode::LoadArray).s32().Inputs(4U, 7U);
                 INST(11U, Opcode::Return).s32().Inputs(10U);
+            }
+            BASIC_BLOCK(5U, -1)
+            {
+                INST(19U, Opcode::Return).s32().Inputs(1U);
             }
         }
 
@@ -332,14 +352,15 @@ public:
     void PhiTest(int32_t index, int32_t lenArray, int32_t mod)
     {
         auto graph1 = PhiTestInput(index, lenArray, mod);
-
-        graph1->RunPass<ChecksElimination>();
         [[maybe_unused]] Graph *graph2 = nullptr;
         if constexpr (IS_APPLIED) {
+            ASSERT_TRUE(graph1->RunPass<ChecksElimination>());
             graph2 = PhiTestOutput1(index, lenArray, mod);
         } else {
+            ASSERT_FALSE(graph1->RunPass<ChecksElimination>());
             graph2 = PhiTestInput(index, lenArray, mod);
         }
+        ASSERT_TRUE(GraphComparator().Compare(graph1, graph2));
     }
 
     void BuildHoistRefTypeCheckGraph();
