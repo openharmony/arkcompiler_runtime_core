@@ -639,3 +639,7 @@ spec/03.types/References_Types/Array_Types/array_constructors_optional_params_00
 spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0090.sts
 spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0100.sts
 ### Issue 18123 end
+
+### Issue 18766 begin
+spec/partial_type/partialType_main.sts
+### Issue 18766 end
