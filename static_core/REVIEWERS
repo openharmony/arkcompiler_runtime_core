@@ -13,6 +13,12 @@
 
 * @ctw-ian
 
+.gitattributes       @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald @ipetrov
+.gitignore           @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald @ipetrov
+CODEOWNERS           @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald
+bundle.json          @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald @ipetrov
+static_vm_config.gni @ctw-ian @dmitriitr @Prof1983 @igelhaus @ragnvald @ipetrov
+
 static_core/ @dmitriitr @Prof1983 @igelhaus @ragnvald
 
 static_core/assembler/                @igelhaus
