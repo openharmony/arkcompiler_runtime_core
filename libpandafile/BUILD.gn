@@ -105,14 +105,19 @@ ohos_static_library("libarkfile_static") {
     "$ark_root/libziparchive:libarkziparchive_static",
   ]
 
-  if (!ark_standalone_build) {
-    public_external_deps = [
-      "zlib:libz",
+  if (is_arkui_x) {
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/zlib:libz",
+    ]
+  } else if (ark_standalone_build) {
+    external_deps = [
+      "zlib:shared_libz",
       sdk_libc_secshared_dep,
     ]
   } else {
-    external_deps = [
-      "zlib:libz",
+    public_external_deps = [
+      "zlib:shared_libz",
       sdk_libc_secshared_dep,
     ]
   }
@@ -204,11 +209,21 @@ ohos_source_set("libarkfile_frontend_set_static") {
     "$ark_root/libziparchive:libarkziparchive_frontend_static",
   ]
 
-  external_deps = [ sdk_libc_secshared_dep ]
-  if (!ark_standalone_build) {
-    public_external_deps = [ "zlib:libz" ]
+  if (is_arkui_x) {
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/zlib:libz",
+    ]
+  } else if (ark_standalone_build) {
+    external_deps = [
+      "zlib:libz",
+      sdk_libc_secshared_dep,
+    ]
   } else {
-    external_deps += [ "zlib:libz" ]
+    public_external_deps = [
+      "zlib:libz",
+      sdk_libc_secshared_dep,
+    ]
   }
 
   part_name = "runtime_core"
