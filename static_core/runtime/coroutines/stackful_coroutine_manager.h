@@ -19,6 +19,7 @@
 #include "runtime/coroutines/stackful_common.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/stackful_coroutine_worker.h"
+#include "runtime/coroutines/coroutine_stats.h"
 
 namespace ark {
 
@@ -82,6 +83,12 @@ public:
     bool IsCoroutineSwitchDisabled() override;
     bool IsJsMode() override;
 
+    /* profiling tools */
+    CoroutineStats &GetPerfStats()
+    {
+        return stats_;
+    }
+
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
@@ -129,8 +136,14 @@ private:
     void CheckProgramCompletion();
     /// call when main coroutine is done executing its managed EP
     void MainCoroutineCompleted();
+    /// wait till all the non-main coroutines with managed EP finish execution
+    void WaitForNonMainCoroutinesCompletion();
     /// @return number of running worker loop coroutines
-    size_t GetActiveWorkersCount();
+    size_t GetActiveWorkersCount() const;
+    /// @return number of existing worker instances
+    size_t GetExistingWorkersCount() const;
+    /// dump coroutine stats to stdout
+    void DumpCoroutineStats() const;
 
     /* resource management */
     uint8_t *AllocCoroutineStack();
@@ -164,6 +177,9 @@ private:
      */
     PandaVector<Coroutine *> coroutinePool_ GUARDED_BY(coroPoolLock_);
     mutable os::memory::Mutex coroPoolLock_;
+
+    // stats
+    CoroutineStats stats_;
 };
 
 }  // namespace ark

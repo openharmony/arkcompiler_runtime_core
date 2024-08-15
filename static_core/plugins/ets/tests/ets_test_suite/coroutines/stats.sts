@@ -13,17 +13,28 @@
  * limitations under the License.
  */
 
-// This test checks that nested promises are returned and awaited correctly
+// This test checks if the coroutine statistics engine works correctly.
 
-function foo(p: string): string {
-    return p + p;
+function sync_f(a: int): String {
+    return "Some dummy string:" + a
 }
 
-function bar(): Promise<string> {
-    return launch foo('A');
+async function async_f(a: int): Promise<String> {
+    return "Some dummy string:" + a
 }
 
-function main() {
-    let res: Promise<Promise<string>> = launch bar();
-    assert (await res) == 'AA';
+export function main(): int {
+    for (let i = 0; i < 10; ++i) {
+        launch sync_f(5);
+    }
+    for (let i = 0; i < 10; ++i) {
+        await launch sync_f(5);
+    }
+    for (let i = 0; i < 10; ++i) {
+        async_f(5);
+    }
+    for (let i = 0; i < 10; ++i) {
+        await async_f(5);
+    }
+    return 0;
 }

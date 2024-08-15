@@ -69,6 +69,8 @@ function(add_ets_coroutines_test)
                     set(additional_options "--use-coroutine-pool=true")
                 elseif(option_set STREQUAL "JS_POOL")
                     set(additional_options "--coroutine-js-mode=true" "--use-coroutine-pool=true")
+                elseif(option_set STREQUAL "STATS")
+                    set(additional_options "--coroutine-dump-stats=true")
                 endif()
                 string(TOLOWER "${option_set}" options_name)
 
@@ -338,3 +340,12 @@ add_ets_coroutines_test(FILE await_standalone_promise.sts
                         WORKERS "AUTO"
                         MODE "INT" "JIT" "AOT"
 )
+
+add_ets_coroutines_test(FILE stats.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "STATS"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
