@@ -267,6 +267,7 @@ private:
 
 private:
     bool loopsRevisiting_ {false};
+    Marker visited_ {UNDEF_MARKER};
     BoundsRangeInfo boundsRangeInfo_;
     ArenaUnorderedMap<Loop *, std::optional<LoopIterationsInfo>> loopsInfoTable_;
 };
