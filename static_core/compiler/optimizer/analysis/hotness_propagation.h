@@ -18,6 +18,7 @@
 
 #include <optional>
 #include "optimizer/ir/graph.h"
+#include "optimizer/ir/inst.h"
 
 namespace ark::compiler {
 
@@ -61,7 +62,9 @@ private:
             // Check all preds are resolved, if not - come back here later via currently unresolved pred:
             for (auto *p : bb->GetPredsBlocks()) {
                 ASSERT(p->GetSuccsBlocks().size() != 2U || p->IsTryBegin() || p->IsTryCatch() ||
-                       p->GetLastInst()->GetOpcode() == Opcode::IfImm || p->GetLastInst()->GetOpcode() == Opcode::If);
+                       p->GetLastInst()->GetOpcode() == Opcode::IfImm || p->GetLastInst()->GetOpcode() == Opcode::If ||
+                       p->GetLastInst()->GetOpcode() == Opcode::AddOverflow ||
+                       p->GetLastInst()->GetOpcode() == Opcode::SubOverflow);
 
                 auto predLastOpcode = p->GetLastInst() == nullptr ? Opcode::INVALID : p->GetLastInst()->GetOpcode();
                 bool predIsBranch = (predLastOpcode == Opcode::IfImm) || (predLastOpcode == Opcode::If);
@@ -197,13 +200,20 @@ private:
             // Try-end and try-begin are transitive blocks:
             return std::nullopt;
         }
+        auto pli = pred->GetLastInst();
+        if (pli != nullptr && (pli->GetOpcode() == Opcode::AddOverflow || pli->GetOpcode() == Opcode::SubOverflow)) {
+            if (pred->GetTrueSuccessor() == succ) {
+                return 0;
+            }
+            ASSERT(pred->GetFalseSuccessor() == succ);
+            return std::nullopt;
+        }
         switch (pred->GetSuccsBlocks().size()) {
             case 0:
             case 1: {
                 return std::nullopt;
             }
             case 2U: {
-                [[maybe_unused]] auto pli = pred->GetLastInst();
                 if (pred->GetGraph()->IsThrowApplied() && pli->GetOpcode() == Opcode::Throw) {
                     return 0;
                 }
