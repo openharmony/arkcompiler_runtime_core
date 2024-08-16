@@ -16,17 +16,17 @@ const { etsVm, getTestModule } = require('indirect_call.test.js');
 
 const etsMod = getTestModule('indirect_call_test_type_value');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const function_type_value_string = etsMod.getFunction('function_type_value_string');
+const functionTypeValueString = etsMod.getFunction('function_type_value_string');
 
-function test_function_type_value_string_bind_with_arg() {
+function testFunctionValueTypeStringBindWithArg() {
 	const ARG = 'foo';
 	const EXPECTED = ''.concat(ARG, ARG);
 
-	let boundWithArg = function_type_value_string.bind(null, ARG);
+	let boundWithArg = functionTypeValueString.bind(null, ARG);
 
 	ASSERT_EQ(boundWithArg(), EXPECTED);
 }
 
-test_function_type_value_string_bind_with_arg();
+testFunctionValueTypeStringBindWithArg();
 
 GCJSRuntimeCleanup();

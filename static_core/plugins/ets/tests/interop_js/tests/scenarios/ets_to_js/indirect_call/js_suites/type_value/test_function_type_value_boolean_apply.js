@@ -16,14 +16,14 @@ const { etsVm, getTestModule } = require('indirect_call.test.js');
 
 const etsMod = getTestModule('indirect_call_test_type_value');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const function_type_value_boolean = etsMod.getFunction('function_type_value_boolean');
+const functionTypeValueBoolean = etsMod.getFunction('function_type_value_boolean');
 
-function test_function_type_value_boolean_apply() {
-	let result = function_type_value_boolean.apply(null, [true]);
+function testFunctionValueTypeBooleanApply() {
+	let result = functionTypeValueBoolean.apply(null, [true]);
 
 	ASSERT_EQ(result, false);
 }
 
-test_function_type_value_boolean_apply();
+testFunctionValueTypeBooleanApply();
 
 GCJSRuntimeCleanup();

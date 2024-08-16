@@ -16,20 +16,20 @@ const { etsVm, getTestModule } = require('indirect_call.test.js');
 
 const etsMod = getTestModule('indirect_call_test_type_ref');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const function_type_ref_map = etsMod.getFunction('function_type_ref_map');
+const functionTypeRefMap = etsMod.getFunction('function_type_ref_map');
 
-function test_function_type_ref_map_bind_without_arg() {
+function testFunctionTypeRefMapBindWithoutArg() {
 	const KEY1 = 'key1';
 	const KEY2 = 'key2';
 	const EXPECTED_VALUE = 2;
 
 	let arg = new Map();
 	arg.set(KEY1, 1);
-	let boundWithoutArg = function_type_ref_map.bind(null);
+	let boundWithoutArg = functionTypeRefMap.bind(null);
 
 	ASSERT_EQ(boundWithoutArg(arg).get(KEY2), EXPECTED_VALUE);
 }
 
-test_function_type_ref_map_bind_without_arg();
+testFunctionTypeRefMapBindWithoutArg();
 
 GCJSRuntimeCleanup();

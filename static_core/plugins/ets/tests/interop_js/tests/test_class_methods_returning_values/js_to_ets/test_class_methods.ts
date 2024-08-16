@@ -13,154 +13,154 @@
  * limitations under the License.
  */
 
-const TEST_STRING = 'This is a test string'
-const TEST_LONG_INT = 9007199254740991
-const TEST_INT = 100
-const TEST_BIG_INT = 10000000n
-const TEST_BOOLEAN = true
-const TEST_MAP = new Map([[TEST_STRING.toUpperCase(), TEST_STRING.toLowerCase()]])
-const TEST_SET = new Set([TEST_STRING.toUpperCase(), TEST_STRING.toLowerCase()])
-const TEST_CHANGEABLE_MAP = new Map([['1', 'Test']])
+const TEST_STRING = 'This is a test string';
+const TEST_LONG_INT = 9007199254740991;
+const TEST_INT = 100;
+const TEST_BIG_INT = 10000000n;
+const TEST_BOOLEAN = true;
+const TEST_MAP = new Map([[TEST_STRING.toUpperCase(), TEST_STRING.toLowerCase()]]);
+const TEST_SET = new Set([TEST_STRING.toUpperCase(), TEST_STRING.toLowerCase()]);
+const TEST_CHANGEABLE_MAP = new Map([['1', 'Test']]);
 
-type STRING_LITERAL = 'Test'
-type INTEGER_LITERAL = 1
-type BOOLEAN_LITERAL = false
-type BIGN_LITERAL = 100n
+type STRING_LITERAL = 'Test';
+type INTEGER_LITERAL = 1;
+type BOOLEAN_LITERAL = false;
+type BIGN_LITERAL = 100n;
 
 export type UnionNumberOrString = number | string;
 
-export type TTuple = [ string, number, boolean ]
+export type TTuple = [string, number, boolean];
 
 interface TestInterface {
     testNumber: number;
     testString: string;
 }
 
-export type TFunctionReturningValue<T> = () => T
+export type TFunctionReturningValue<T> = () => T;
 
-export type TReturnsAny = TFunctionReturningValue<any>
-export type TReturnsStrLiteral = TFunctionReturningValue<STRING_LITERAL>
-export type TReturnsIntLiteral = TFunctionReturningValue<INTEGER_LITERAL>
-export type TReturnsBoolLiteral = TFunctionReturningValue<BOOLEAN_LITERAL>
-export type TReturnsBigNLiteral = TFunctionReturningValue<BIGN_LITERAL>
-export type TReturnsMap = TFunctionReturningValue<Map<string, string>>
-export type TReturnsSet = TFunctionReturningValue<Set<string>>
-export type TReturnsTuple = TFunctionReturningValue<TTuple>
-export type TReturnsString = TFunctionReturningValue<string>
-export type TTestClass = TFunctionReturningValue<TestClass>
-export type TTestInterface = TFunctionReturningValue<TestInterface>
+export type TReturnsAny = TFunctionReturningValue<any>;
+export type TReturnsStrLiteral = TFunctionReturningValue<STRING_LITERAL>;
+export type TReturnsIntLiteral = TFunctionReturningValue<INTEGER_LITERAL>;
+export type TReturnsBoolLiteral = TFunctionReturningValue<BOOLEAN_LITERAL>;
+export type TReturnsBigNLiteral = TFunctionReturningValue<BIGN_LITERAL>;
+export type TReturnsMap = TFunctionReturningValue<Map<string, string>>;
+export type TReturnsSet = TFunctionReturningValue<Set<string>>;
+export type TReturnsTuple = TFunctionReturningValue<TTuple>;
+export type TReturnsString = TFunctionReturningValue<string>;
+export type TTestClass = TFunctionReturningValue<TestClass>;
+export type TTestInterface = TFunctionReturningValue<TestInterface>;
 
 
-export const returnIntegerAsAny: TReturnsAny = function returnInteger() {
-    return TEST_INT
-}
+export const returnIntegerAsAny: TReturnsAny = function returnInteger(): object {
+    return TEST_INT;
+};
 
-export const returnStringAsAny: TReturnsAny = function returnString() {
-    return TEST_STRING
-}
+export const returnStringAsAny: TReturnsAny = function returnString(): object {
+    return TEST_STRING;
+};
 
-export const returnBigIntegerAsAny: TReturnsAny = function returnBigInteger() {
-    return TEST_BIG_INT
-}
+export const returnBigIntegerAsAny: TReturnsAny = function returnBigInteger(): object {
+    return TEST_BIG_INT;
+};
 
-export const returnBooleanAsAny: TReturnsAny = function returnBoolean() {
-    return TEST_BOOLEAN
-}
+export const returnBooleanAsAny: TReturnsAny = function returnBoolean(): object {
+    return TEST_BOOLEAN;
+};
 
-export const returnUndefinedAsAny: TReturnsAny = function returnUndefined() {
-    return
-}
+export const returnUndefinedAsAny: TReturnsAny = function returnUndefined(): object {
+    return;
+};
 
-export const returnNullAsAny: TReturnsAny = function returnNull() {
-    return null
-}
+export const returnNullAsAny: TReturnsAny = function returnNull(): object {
+    return null;
+};
 
-export const returnMapAsAny: TReturnsAny = function returnMap() {
-    return TEST_MAP
-}
+export const returnMapAsAny: TReturnsAny = function returnMap(): object {
+    return TEST_MAP;
+};
 
-export const returnSetAsAny: TReturnsAny = function returnSet() {
-    return TEST_SET
-}
+export const returnSetAsAny: TReturnsAny = function returnSet(): object {
+    return TEST_SET;
+};
 
-export const returnStrLiteral: TReturnsStrLiteral = function returnStrLiteral() {
-    const literalValue: STRING_LITERAL = 'Test'
-    return literalValue
-}
+export const returnStrLiteral: TReturnsStrLiteral = function returnStrLiteral(): object {
+    const literalValue: STRING_LITERAL = 'Test';
+    return literalValue;
+};
 
-export const returnIntLiteral: TReturnsIntLiteral = function returnIntLiteral() {
-    const literalValue: INTEGER_LITERAL = 1
-    return literalValue
-}
+export const returnIntLiteral: TReturnsIntLiteral = function returnIntLiteral(): object {
+    const literalValue: INTEGER_LITERAL = 1;
+    return literalValue;
+};
 
-export const returnBoolLiteral: TReturnsBoolLiteral = function returnBoolLiteral() {
-    const literalValue: BOOLEAN_LITERAL = false
-    return literalValue
-}
+export const returnBoolLiteral: TReturnsBoolLiteral = function returnBoolLiteral(): object {
+    const literalValue: BOOLEAN_LITERAL = false;
+    return literalValue;
+};
 
-export const returnsBigNLiteral: TReturnsBigNLiteral = function returnsBigNLiteral() {
-    const literalValue: BIGN_LITERAL = 100n
-    return literalValue
-}
+export const returnsBigNLiteral: TReturnsBigNLiteral = function returnsBigNLiteral(): object {
+    const literalValue: BIGN_LITERAL = 100n;
+    return literalValue;
+};
 
-export const returnMap: TReturnsMap = function returnMap() {
-    return TEST_MAP
-}
+export const returnMap: TReturnsMap = function returnMap(): object {
+    return TEST_MAP;
+};
 
-export const returnSet: TReturnsSet = function returnSet() {
-    return TEST_SET
-}
+export const returnSet: TReturnsSet = function returnSet(): object {
+    return TEST_SET;
+};
 
-export const returnTuple: TReturnsTuple = function returnTuple(){
-    return [ TEST_STRING, TEST_LONG_INT, TEST_BOOLEAN ]
-}
+export const returnTuple: TReturnsTuple = function returnTuple(): object {
+    return [TEST_STRING, TEST_LONG_INT, TEST_BOOLEAN];
+};
 
 export const isTTupleTS = (testedVar: any): testedVar is TTuple => {
-    return Array.isArray(<any>testedVar)
-        && testedVar.length === 3
-        && typeof testedVar[0] === 'string'
-        && typeof testedVar[1] === 'number'
-        && typeof testedVar[2] === 'boolean'
-}
+    return Array.isArray(<any>testedVar) &&
+        testedVar.length === 3 &&
+        typeof testedVar[0] === 'string' &&
+        typeof testedVar[1] === 'number' &&
+        typeof testedVar[2] === 'boolean';
+};
 
-export const returnStringSubsetByRef: TReturnsString = function returnStringSubsetByRef(){
-    return TEST_STRING
-}
+export const returnStringSubsetByRef: TReturnsString = function returnStringSubsetByRef(): object {
+    return TEST_STRING;
+};
 
-export const returnMapSubsetByRef: TReturnsMap = function returnMapSubsetByRef(){
-    return TEST_CHANGEABLE_MAP
-}
+export const returnMapSubsetByRef: TReturnsMap = function returnMapSubsetByRef(): object {
+    return TEST_CHANGEABLE_MAP;
+};
 
-export const returnStringSubsetByValue = function returnString(){
-    return TEST_STRING
-}
+export const returnStringSubsetByValue = function returnString(): object {
+    return TEST_STRING;
+};
 
-export const returnLongIntSubsetByValue = function returnInteger(){
-    return TEST_LONG_INT
-}
+export const returnLongIntSubsetByValue = function returnInteger(): object {
+    return TEST_LONG_INT;
+};
 
-export const returnIntSubsetByValue = function returnInteger(){
-    return TEST_INT
-}
+export const returnIntSubsetByValue = function returnInteger(): object {
+    return TEST_INT;
+};
 
-export const returnBoolSubsetByValue = function returnBoolean(){
-    return TEST_BOOLEAN
-}
+export const returnBoolSubsetByValue = function returnBoolean(): object {
+    return TEST_BOOLEAN;
+};
 
-export const returnUndefinedSubsetByValue = function returnUndefined(){
+export const returnUndefinedSubsetByValue = function returnUndefined(): object {
     return;
-}
+};
 
-export const returnNullSubsetByValue = function returnNull(){
-    return null
-}
+export const returnNullSubsetByValue = function returnNull(): object {
+    return null;
+};
 
-export const returnUnion = function returnUnion(is_str: boolean): UnionNumberOrString{
+export const returnUnion = function returnUnion(is_str: boolean): UnionNumberOrString {
     if (is_str) {
-        return '1000'
+        return '1000';
     }
-    return 1000
-}
+    return 1000;
+};
 
 export class TestClass {
     testNumber: number;
@@ -172,26 +172,26 @@ export class TestClass {
     }
     
     testFunction(): number {
-       return this.testNumber
+       return this.testNumber;
     }
 
     public static isTestClass(instance: TestClass): boolean {
-        return instance instanceof TestClass
+        return instance instanceof TestClass;
     }
 }
 
-export const returnClass: TTestClass = function returnClass(){
-    const testClass : TestClass = new TestClass(1, 'Test')
-    return testClass
-}
+export const returnClass: TTestClass = function returnClass() {
+    const testClass : TestClass = new TestClass(1, 'Test');
+    return testClass;
+};
 
-export const returnInterface: TTestInterface = function returnInterface(){
+export const returnInterface: TTestInterface = function returnInterface() {
     const testInterface: TestInterface = {
         testNumber: 100,
         testString: 'Test',
-    }
-    return testInterface
-}
+    };
+    return testInterface;
+};
 
 export class ReturnTestClass {
     public returnIntegerAsAny = returnIntegerAsAny.bind(this);
@@ -226,11 +226,10 @@ export class ReturnTestClass {
     public returnInterface = returnInterface.bind(this);
 }
 
-export type TReturnTestClass = ReturnTestClass
-export const returnTestClassInstance = new ReturnTestClass()
+export type TReturnTestClass = ReturnTestClass;
+export const returnTestClassInstance = new ReturnTestClass();
 
-
-const testAny = () => {
+const testAny = (): void => {
     console.log([
         returnIntegerAsAny,
         returnStringAsAny,
@@ -240,27 +239,27 @@ const testAny = () => {
         returnNullAsAny,
         returnMapAsAny,
         returnSetAsAny
-    ].map(x => x()))
-}
+    ].map(x => x()));
+};
 
-const testLiterals = () => {
+const testLiterals = (): void => {
     console.log([
         returnStrLiteral,
         returnIntLiteral,
         returnBoolLiteral,
         returnsBigNLiteral
-    ].map(x => x()))
-}
+    ].map(x => x()));
+};
 
-const testExtraSet = () => {
+const testExtraSet = (): void => {
     console.log([
         returnMap,
         returnSet,
         returnTuple
-    ].map(x => x()))
-} 
+    ].map(x => x()));
+};
 
-const testSubset = () => {
+const testSubset = (): void => {
     console.log([
         returnStringSubsetByRef,
         returnMapSubsetByRef,
@@ -270,22 +269,22 @@ const testSubset = () => {
         returnBoolSubsetByValue,
         returnUndefinedSubsetByValue,
         returnNullSubsetByValue
-    ].map(x => x()))
-}
+    ].map(x => x()));
+};
 
-const testUnion = () => {
+const testUnion = (): void => {
     console.log(
         returnUnion(true),
         returnUnion(false)
-    )
-} 
+    );
+};
 
-const testClassInterface = () => {
+const testClassInterface = (): void => {
     console.log([
         returnClass,
         returnInterface
-    ].map(x => x()))
-}
+    ].map(x => x()));
+};
 
 testAny();
 testLiterals();

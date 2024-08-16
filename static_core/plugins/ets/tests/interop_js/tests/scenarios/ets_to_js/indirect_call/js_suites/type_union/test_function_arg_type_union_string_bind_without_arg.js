@@ -18,7 +18,7 @@ const etsMod = getTestModule('indirect_call_test_type_union');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const indirectCallArgTypeUnion = etsMod.getFunction('indirectCallArgTypeUnion');
 
-function test_function_arg_type_union_string_bind_without_arg() {
+function testFunctionArgTypeUnionStringBindWithoutArg() {
 	const ARG = 'foo';
 	const EXPECTED = 1;
 
@@ -27,6 +27,6 @@ function test_function_arg_type_union_string_bind_without_arg() {
 	ASSERT_EQ(boundWithoutArg(ARG), EXPECTED);
 }
 
-test_function_arg_type_union_string_bind_without_arg();
+testFunctionArgTypeUnionStringBindWithoutArg();
 
 GCJSRuntimeCleanup();

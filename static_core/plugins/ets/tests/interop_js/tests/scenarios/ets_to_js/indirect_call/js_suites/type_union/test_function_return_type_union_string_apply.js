@@ -18,7 +18,7 @@ const etsMod = getTestModule('indirect_call_test_type_union');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const indirectCallReturnTypeUnion = etsMod.getFunction('indirectCallReturnTypeUnion');
 
-function test_function_return_type_union_string_apply() {
+function testFunctionReturnTypeUnionStringApply() {
 	const ARG = 1;
 	const EXPECTED_TYPE = 'string';
 	const EXPECTED_VALUE = 'foo';
@@ -29,6 +29,6 @@ function test_function_return_type_union_string_apply() {
 	ASSERT_EQ(result, EXPECTED_VALUE);
 }
 
-test_function_return_type_union_string_apply();
+testFunctionReturnTypeUnionStringApply();
 
 GCJSRuntimeCleanup();
