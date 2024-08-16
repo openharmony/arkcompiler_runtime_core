@@ -26,3 +26,5 @@ panda_ets_interop_js_gtest(ets_interop_js_scenarios_js_to_ets_conflict_types
     ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/conflict_types.sts
     ETS_CONFIG ${ETS_CONFIG}
 )
+
+add_subdirectory(indirect_call)
