@@ -59,7 +59,6 @@ bool TryCatchResolving::RunImpl()
     }
     GetGraph()->RemoveUnreachableBlocks();
     GetGraph()->ClearTryCatchInfo();
-    GetGraph()->EraseMarker(marker_);
     InvalidateAnalyses();
     // Cleanup should be done inside pass, to satisfy GraphChecker
     GetGraph()->RunPass<Cleanup>();
@@ -125,7 +124,7 @@ BasicBlock *TryCatchResolving::FindCatchBeginBlock(BasicBlock *bb)
 void TryCatchResolving::CollectCandidates()
 {
     for (auto bb : GetGraph()->GetBlocksRPO()) {
-        if (bb->IsCatch() && !(bb->IsCatchBegin() || bb->IsCatchEnd() || bb->IsTryBegin() || bb->IsTryEnd())) {
+        if (bb->IsCatch() && !(bb->IsCatchBegin() || bb->IsTryBegin() || bb->IsTryEnd())) {
             catchBlocks_.emplace(bb->GetGuestPc(), bb);
             BasicBlock *cblPred = FindCatchBeginBlock(bb);
             if (cblPred != nullptr) {

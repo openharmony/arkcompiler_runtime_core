@@ -123,7 +123,7 @@ bool BytecodeGen::RunImpl()
     Reserve(function_->ins.size());
     for (auto *bb : GetGraph()->GetBlocksLinearOrder()) {
         EmitLabel(BytecodeGen::LabelName(bb->GetId()));
-        if (bb->IsTryEnd() || bb->IsCatchEnd()) {
+        if (bb->IsTryEnd()) {
             auto label = "end_" + BytecodeGen::LabelName(bb->GetId());
             EmitLabel(label);
         }

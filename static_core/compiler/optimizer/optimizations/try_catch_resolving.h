@@ -57,7 +57,6 @@ private:
     void RemoveCatchPhisImpl(CatchPhiInst *catchPhi, BasicBlock *catchBlock, Inst *throwInst);
 
 private:
-    Marker marker_ {UNDEF_MARKER};
     ArenaVector<BasicBlock *> tryBlocks_;
     ArenaVector<Inst *> throwInsts_;
     ArenaVector<Inst *> throwInsts0_;

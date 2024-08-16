@@ -247,7 +247,7 @@ BasicBlock *Graph::CreateEndBlock(uint32_t guestPc)
     return block;
 }
 
-void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rmPred)
+void Graph::RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rmPred)
 {
     constexpr auto IMM_2 = 2;
     if (block->GetPredsBlocks().size() == IMM_2) {
@@ -294,7 +294,8 @@ void Graph::RemovePredecessors(BasicBlock *block, bool removeLastInst)
             if (pred->GetSuccsBlocks().size() == 2U) {
                 auto last = pred->GetLastInst();
                 ASSERT(last->GetOpcode() == Opcode::If || last->GetOpcode() == Opcode::IfImm ||
-                       last->GetOpcode() == Opcode::AddOverflow || last->GetOpcode() == Opcode::SubOverflow);
+                       last->GetOpcode() == Opcode::AddOverflow || last->GetOpcode() == Opcode::SubOverflow ||
+                       last->GetOpcode() == Opcode::Throw);
                 pred->RemoveInst(last);
             } else {
                 ASSERT(pred->GetSuccsBlocks().size() == 1 && pred->GetSuccessor(0) == block);
@@ -719,6 +720,9 @@ void Graph::RemoveThrowableInst(const Inst *inst)
             }
             auto catchPhi = catchInst->CastToCatchPhi();
             const auto &vregs = catchPhi->GetThrowableInsts();
+            if (vregs == nullptr || vregs->empty()) {
+                continue;
+            }
             auto it = std::find(vregs->begin(), vregs->end(), inst);
             if (it != vregs->end()) {
                 int index = std::distance(vregs->begin(), it);
@@ -885,4 +889,5 @@ size_t GetObjectOffset(const Graph *graph, ObjectType objType, RuntimeInterface:
             return graph->GetRuntime()->GetFieldOffset(field);
     }
 }
+
 }  // namespace ark::compiler

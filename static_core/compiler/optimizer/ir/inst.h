@@ -16,7 +16,6 @@
 #ifndef COMPILER_OPTIMIZER_IR_INST_H
 #define COMPILER_OPTIMIZER_IR_INST_H
 
-#include <array>
 #include <vector>
 #include <iostream>
 #include "constants.h"

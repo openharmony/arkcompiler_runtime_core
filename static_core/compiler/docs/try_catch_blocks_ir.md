@@ -154,3 +154,59 @@ Currently the folowing algorithm is implemented:
 
 - RegAlloc reserves unique dst-register for each catch-phi in the graph;
 - Before each throwable instruction RegAlloc adds move from related catch-phi's input to the reserved catch-phi's dst-register;
+
+## Throw arcs in bytecode optimizer
+
+Currently in the bytecode optimizer blocks with throw instructions at their end are connected with catch begins block if there is the catcher that processes appropriate exceptions. If it is not known for certain that any of the exceptions will be processed, then another arc from the throw block is added to the final block of the program graph. So there can be three cases: 1. When we know, that the certain exception is processed by the catch block, the only arc is provided from throw block to catch begin block; 2. When we know, that there aren't catch blocks that processed this exception, the only arc is provided from throw block to the final block of the program graph; 3. When we know that some catch block may process the exception, two arcs are provided from throw block to the catch begin block and the final block.
+
+Case 1 (catch block for the exception is determined)
+```
+                /--------------\
+                | throw bb     |
+                |   throw inst |
+                \--------------/
+                      |
+                      v
+               /-------------\
+               | Catch Begin |
+               \-------------/
+                     |
+                     v
+               /----------------\
+               | Catch block    |
+               | that processes |
+               | the exception  |
+               \----------------/
+```
+
+Case 2 (catch block for the exception isn't determined)
+```
+                /--------------\
+                | throw bb     |
+                |   throw inst |
+                \--------------/
+                      |
+                      v
+               /-------------\
+               | Final block |
+               \-------------/
+```
+Case 3 (some catch block may process the exception)
+```
+                /--------------\
+                | throw block  |      /-------------\
+                |   throw inst | ---> | Final block |
+                \--------------/      \-------------/
+                      |
+                      v
+               /-------------\
+               | Catch Begin |
+               \-------------/
+                     |
+                     v
+               /------------------\
+               | Catch block      |
+               | that may process |
+               | the exception    |
+               \------------------/
+```
