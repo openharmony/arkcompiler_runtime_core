@@ -899,12 +899,10 @@ options:
   default: 4
   description: Number of worker threads for the taskmanager. Option is used only for --worker-type=taskmanager
 
-- name: task-statistics-impl-type
+- name: task-stats-type
   type: std::string
-  default: no-stat
+  default: no-task-stats
   possible_values:
-  - simple
-  - fine-grained
-  - lock-free
-  - no-stat
-  description: Set type of task statistics implementation that will be used to store information about tasks, if use set `no-stat` there will be no statistics usage
+  - no-task-stats
+  - light-task-stats
+  description: Set type of task stats that will collect task manager metrics, if use set `no-task-stats` there will be no stats collection

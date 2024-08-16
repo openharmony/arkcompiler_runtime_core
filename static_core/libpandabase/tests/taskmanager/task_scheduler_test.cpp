@@ -21,10 +21,10 @@
 
 namespace ark::taskmanager {
 
-constexpr size_t DEFAULT_SEED = 123456;
-constexpr size_t TIMEOUT = 1;
+constexpr size_t DEFAULT_SEED = 123456U;
+constexpr size_t TIMEOUT = 1U;
 
-class TaskSchedulerTest : public testing::TestWithParam<TaskStatisticsImplType> {
+class TaskSchedulerTest : public testing::TestWithParam<TaskTimeStatsType> {
 public:
     static constexpr TaskProperties GC_STATIC_VM_BACKGROUND_PROPERTIES {TaskType::GC, VMType::STATIC_VM,
                                                                         TaskExecutionMode::BACKGROUND};
@@ -45,7 +45,7 @@ public:
     NO_COPY_SEMANTIC(TaskSchedulerTest);
     NO_MOVE_SEMANTIC(TaskSchedulerTest);
 
-    static constexpr size_t THREADED_TASKS_COUNT = 100'000;
+    static constexpr size_t THREADED_TASKS_COUNT = 100'000U;
 
     std::thread *CreateTaskProducerThread(TaskQueueInterface *queue, TaskExecutionMode mode)
     {
@@ -99,21 +99,20 @@ public:
 private:
     os::memory::Mutex lock_;
     os::memory::ConditionVariable condVar_;
-    std::atomic_size_t globalCounter_ = 0;
+    std::atomic_size_t globalCounter_ = 0U;
 
-    size_t tasksCount_ = 0;
-    std::atomic_size_t tasksSetAdded_ = 0;
+    size_t tasksCount_ = 0U;
+    std::atomic_size_t tasksSetAdded_ = 0U;
     os::memory::Mutex tasksMutex_;
     os::memory::ConditionVariable tasksCondVar_;
 
     size_t seed_ = 0;
 };
 
-TEST_P(TaskSchedulerTest, TaskQueueRegistration)
+TEST_F(TaskSchedulerTest, TaskQueueRegistration)
 {
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     TaskQueueInterface *queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     EXPECT_NE(queue, nullptr);
@@ -122,13 +121,12 @@ TEST_P(TaskSchedulerTest, TaskQueueRegistration)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TaskQueuesFillingFromOwner)
+TEST_F(TaskSchedulerTest, TaskQueuesFillingFromOwner)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -136,20 +134,20 @@ TEST_P(TaskSchedulerTest, TaskQueuesFillingFromOwner)
     // Initialize tm workers
     tm->Initialize();
     // Fill queues with tasks that increment counter with its type.
-    constexpr size_t COUNT_OF_TASK = 10;
-    std::array<std::atomic_size_t, 2> counters = {0, 0};
-    for (size_t i = 0; i < COUNT_OF_TASK; i++) {
+    constexpr size_t COUNT_OF_TASK = 10U;
+    std::array<std::atomic_size_t, 2U> counters = {0U, 0U};
+    for (size_t i = 0U; i < COUNT_OF_TASK; i++) {
         gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&counters]() {
-            constexpr size_t GC_COUNTER = 0;
+            constexpr size_t GC_COUNTER = 0U;
             // Atomic with relaxed order reason: data race with counters[GC_COUNTER] with no synchronization or ordering
             // constraints
-            counters[GC_COUNTER].fetch_add(1, std::memory_order_relaxed);
+            counters[GC_COUNTER].fetch_add(1U, std::memory_order_relaxed);
         }));
         jitQueue->AddTask(Task::Create(JIT_STATIC_VM_BACKGROUND_PROPERTIES, [&counters]() {
-            constexpr size_t JIT_COUNTER = 1;
+            constexpr size_t JIT_COUNTER = 1U;
             // Atomic with relaxed order reason: data race with counters[JIT_COUNTER] with no synchronization or
             // ordering constraints
-            counters[JIT_COUNTER].fetch_add(1, std::memory_order_relaxed);
+            counters[JIT_COUNTER].fetch_add(1U, std::memory_order_relaxed);
         }));
     }
     tm->Finalize();
@@ -161,13 +159,12 @@ TEST_P(TaskSchedulerTest, TaskQueuesFillingFromOwner)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, ForegroundQueueTest)
+TEST_F(TaskSchedulerTest, ForegroundQueueTest)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 1;  // IMPORTANT: only one worker to see effect of using foreground execution mode
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 1U;  // IMPORTANT: only one worker to see effect of using foreground execution mode
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -200,13 +197,12 @@ TEST_P(TaskSchedulerTest, ForegroundQueueTest)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TaskCreateTask)
+TEST_F(TaskSchedulerTest, TaskCreateTask)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -215,20 +211,20 @@ TEST_P(TaskSchedulerTest, TaskCreateTask)
     // Initialize tm workers
     tm->Initialize();
     // Fill queues with tasks that increment counter with its type. GC task will add JIT task in MT.
-    std::array<std::atomic_size_t, 2> counters = {0, 0};
-    constexpr size_t COUNT_OF_TASK = 10;
+    std::array<std::atomic_size_t, 2U> counters = {0U, 0U};
+    constexpr size_t COUNT_OF_TASK = 10U;
     for (size_t i = 0; i < COUNT_OF_TASK; i++) {
         gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&counters, &jitQueue]() {
-            constexpr size_t GC_COUNTER = 0;
+            constexpr size_t GC_COUNTER = 0U;
             // Atomic with relaxed order reason: data race with counters[GC_COUNTER] with no synchronization or ordering
             // constraints
-            counters[GC_COUNTER].fetch_add(1, std::memory_order_relaxed);
+            counters[GC_COUNTER].fetch_add(1U, std::memory_order_relaxed);
             jitQueue->AddTask(
                 Task::Create({TaskType::JIT, VMType::STATIC_VM, TaskExecutionMode::BACKGROUND}, [&counters]() {
-                    constexpr size_t JIT_COUNTER = 1;
+                    constexpr size_t JIT_COUNTER = 1U;
                     // Atomic with relaxed order reason: data race with counters[JIT_COUNTER] with no synchronization or
                     // ordering constraints
-                    counters[JIT_COUNTER].fetch_add(1, std::memory_order_relaxed);
+                    counters[JIT_COUNTER].fetch_add(1U, std::memory_order_relaxed);
                 }));
         }));
     }
@@ -241,15 +237,14 @@ TEST_P(TaskSchedulerTest, TaskCreateTask)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, MultithreadingUsage)
+TEST_F(TaskSchedulerTest, MultithreadingUsage)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create 4 thread. Each thread create, register and fill queues
-    constexpr size_t PRODUCER_THREADS_COUNT = 3;
+    constexpr size_t PRODUCER_THREADS_COUNT = 3U;
     SetTasksSetCount(PRODUCER_THREADS_COUNT);
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     auto *jitStaticQueue = tm->CreateAndRegisterTaskQueue(TaskType::JIT, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -281,40 +276,38 @@ TEST_P(TaskSchedulerTest, MultithreadingUsage)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TaskSchedulerGetTask)
+TEST_F(TaskSchedulerTest, TaskSchedulerGetTask)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 1;  // Worker will not be used in this test
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 1U;  // Worker will not be used in this test
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     auto queue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     std::queue<TaskType> globalQueue;
-    constexpr size_t COUNT_OF_TASKS = 100;
-    for (size_t i = 0; i < COUNT_OF_TASKS; i++) {
+    constexpr size_t COUNT_OF_TASKS = 100U;
+    for (size_t i = 0U; i < COUNT_OF_TASKS; i++) {
         queue->AddTask(
             Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&globalQueue]() { globalQueue.push(TaskType::GC); }));
     }
-    for (size_t i = 0; i < COUNT_OF_TASKS;) {
+    for (size_t i = 0U; i < COUNT_OF_TASKS;) {
         i += tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES);
     }
-    ASSERT_EQ(tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0) << "seed:" << GetSeed();
+    ASSERT_EQ(tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0U) << "seed:" << GetSeed();
     ASSERT_EQ(globalQueue.size(), COUNT_OF_TASKS) << "seed:" << GetSeed();
     tm->Initialize();
     tm->Finalize();
-    ASSERT_EQ(tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0) << "seed:" << GetSeed();
+    ASSERT_EQ(tm->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES), 0U) << "seed:" << GetSeed();
     tm->UnregisterAndDestroyTaskQueue<>(queue);
     tm->Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TasksWithMutex)
+TEST_F(TaskSchedulerTest, TasksWithMutex)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
@@ -322,17 +315,17 @@ TEST_P(TaskSchedulerTest, TasksWithMutex)
     // Initialize tm workers
     tm->Initialize();
     // Fill queues with tasks that increment counter with its type.
-    constexpr size_t COUNT_OF_TASK = 1000;
-    std::array<size_t, 2> counters = {0, 0};
+    constexpr size_t COUNT_OF_TASK = 1000U;
+    std::array<size_t, 2U> counters = {0U, 0U};
     os::memory::Mutex mainMutex;
-    for (size_t i = 0; i < COUNT_OF_TASK; i++) {
+    for (size_t i = 0U; i < COUNT_OF_TASK; i++) {
         gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&mainMutex, &counters]() {
-            constexpr size_t GC_COUNTER = 0;
+            constexpr size_t GC_COUNTER = 0U;
             os::memory::LockHolder lockHolder(mainMutex);
             counters[GC_COUNTER]++;
         }));
         jitQueue->AddTask(Task::Create(JIT_STATIC_VM_BACKGROUND_PROPERTIES, [&mainMutex, &counters]() {
-            constexpr size_t JIT_COUNTER = 1;
+            constexpr size_t JIT_COUNTER = 1U;
             os::memory::LockHolder lockHolder(mainMutex);
             counters[JIT_COUNTER]++;
         }));
@@ -346,37 +339,36 @@ TEST_P(TaskSchedulerTest, TasksWithMutex)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TaskCreateTaskRecursively)
+TEST_F(TaskSchedulerTest, TaskCreateTaskRecursively)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
 
     // Initialize tm workers
     tm->Initialize();
-    std::atomic_size_t counter = 0;
-    constexpr size_t COUNT_OF_TASK = 10;
-    constexpr size_t COUNT_OF_REPLICAS = 6;
-    constexpr size_t MAX_RECURSION_DEPTH = 5;
+    std::atomic_size_t counter = 0U;
+    constexpr size_t COUNT_OF_TASK = 10U;
+    constexpr size_t COUNT_OF_REPLICAS = 6U;
+    constexpr size_t MAX_RECURSION_DEPTH = 5U;
     std::function<void(size_t)> runner;
     runner = [&counter, &runner, &gcQueue](size_t recursionDepth) {
         if (recursionDepth < MAX_RECURSION_DEPTH) {
             for (size_t j = 0; j < COUNT_OF_REPLICAS; j++) {
                 gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES,
-                                              [runner, recursionDepth]() { runner(recursionDepth + 1); }));
+                                              [runner, recursionDepth]() { runner(recursionDepth + 1U); }));
             }
             // Atomic with relaxed order reason: data race with counter with no synchronization or ordering
             // constraints
-            counter.fetch_add(1, std::memory_order_relaxed);
+            counter.fetch_add(1U, std::memory_order_relaxed);
         }
     };
-    for (size_t i = 0; i < COUNT_OF_TASK; i++) {
-        gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [runner]() { runner(0); }));
+    for (size_t i = 0U; i < COUNT_OF_TASK; i++) {
+        gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [runner]() { runner(0U); }));
     }
     tm->Finalize();
     ASSERT_TRUE(gcQueue->IsEmpty());
@@ -384,40 +376,39 @@ TEST_P(TaskSchedulerTest, TaskCreateTaskRecursively)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TaskSchedulerTaskGetTask)
+TEST_F(TaskSchedulerTest, TaskSchedulerTaskGetTask)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::MAX_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
 
     // Initialize tm workers
     tm->Initialize();
-    std::atomic_size_t counter = 0;
-    constexpr size_t COUNT_OF_TASK = 100'000;
+    std::atomic_size_t counter = 0U;
+    constexpr size_t COUNT_OF_TASK = 100'000U;
     gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, []() {
-        size_t executedTasksCount = 0;
+        size_t executedTasksCount = 0U;
         while (true) {  // wait for valid task;
             executedTasksCount =
                 TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES);
-            if (executedTasksCount > 0) {
+            if (executedTasksCount > 0U) {
                 break;
             }
         }
-        for (size_t i = 0; i < COUNT_OF_TASK; i++) {
+        for (size_t i = 0U; i < COUNT_OF_TASK; i++) {
             executedTasksCount +=
                 TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(GC_STATIC_VM_BACKGROUND_PROPERTIES);
         }
     }));
-    for (size_t i = 0; i < COUNT_OF_TASK; i++) {
+    for (size_t i = 0U; i < COUNT_OF_TASK; i++) {
         gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&counter]() {
             // Atomic with relaxed order reason: data race with counter with no synchronization or ordering
             // constraints
-            counter.fetch_add(1, std::memory_order_relaxed);
+            counter.fetch_add(1U, std::memory_order_relaxed);
         }));
     }
     tm->Finalize();
@@ -426,38 +417,37 @@ TEST_P(TaskSchedulerTest, TaskSchedulerTaskGetTask)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
+TEST_F(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 4;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 4U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     TaskQueueInterface *jitQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::JIT, VMType::STATIC_VM, QUEUE_PRIORITY);
     // Fill queues with tasks that increment counter with its type.
-    constexpr size_t COUNT_OF_TASK = 10'000;
-    std::array<std::atomic_size_t, 3U> counters = {0, 0, 0};
-    for (size_t i = 0; i < COUNT_OF_TASK; i++) {
+    constexpr size_t COUNT_OF_TASK = 10'000U;
+    std::array<std::atomic_size_t, 3U> counters = {0U, 0U, 0U};
+    for (size_t i = 0U; i < COUNT_OF_TASK; i++) {
         gcQueue->AddTask(Task::Create(GC_STATIC_VM_BACKGROUND_PROPERTIES, [&counters]() {
-            constexpr size_t GC_BACKGROUND_COUNTER = 0;
+            constexpr size_t GC_BACKGROUND_COUNTER = 0U;
             // Atomic with relaxed order reason: data race with counters[GC_BACKGROUND_COUNTER] with no synchronization
             // or ordering constraints
-            counters[GC_BACKGROUND_COUNTER].fetch_add(1, std::memory_order_relaxed);
+            counters[GC_BACKGROUND_COUNTER].fetch_add(1U, std::memory_order_relaxed);
         }));
         gcQueue->AddTask(Task::Create(GC_STATIC_VM_FOREGROUND_PROPERTIES, [&counters]() {
-            constexpr size_t GC_FOREGROUND_COUNTER = 1;
+            constexpr size_t GC_FOREGROUND_COUNTER = 1U;
             // Atomic with relaxed order reason: data race with counters[GC_FOREGROUND_COUNTER] with no synchronization
             // or ordering constraints
-            counters[GC_FOREGROUND_COUNTER].fetch_add(1, std::memory_order_relaxed);
+            counters[GC_FOREGROUND_COUNTER].fetch_add(1U, std::memory_order_relaxed);
         }));
         jitQueue->AddTask(Task::Create(JIT_STATIC_VM_BACKGROUND_PROPERTIES, [&counters]() {
-            constexpr size_t JIT_COUNTER = 2;
+            constexpr size_t JIT_COUNTER = 2U;
             // Atomic with relaxed order reason: data race with counters[JIT_COUNTER] with no synchronization or
             // ordering constraints
-            counters[JIT_COUNTER].fetch_add(1, std::memory_order_relaxed);
+            counters[JIT_COUNTER].fetch_add(1U, std::memory_order_relaxed);
         }));
     }
     // Initialize tm workers
@@ -477,21 +467,20 @@ TEST_P(TaskSchedulerTest, TaskSchedulerWaitForFinishAllTaskFromQueue)
     TaskScheduler::Destroy();
 }
 
-TEST_P(TaskSchedulerTest, TaskSchedulerAddTaskToWaitListWithTimeTest)
+TEST_F(TaskSchedulerTest, TaskSchedulerAddTaskToWaitListWithTimeTest)
 {
     srand(GetSeed());
     // Create TaskScheduler
-    constexpr size_t THREADS_COUNT = 1;
-    auto taskStatisticsType = GetParam();
-    auto *tm = TaskScheduler::Create(THREADS_COUNT, taskStatisticsType);
+    constexpr size_t THREADS_COUNT = 1U;
+    auto *tm = TaskScheduler::Create(THREADS_COUNT);
     // Create and register 2 queues
     constexpr uint8_t QUEUE_PRIORITY = TaskQueueInterface::DEFAULT_PRIORITY;
     TaskQueueInterface *gcQueue = tm->CreateAndRegisterTaskQueue<>(TaskType::GC, VMType::STATIC_VM, QUEUE_PRIORITY);
     // Initialize tm workers
     tm->Initialize();
 
-    constexpr size_t WAIT_LIST_USAGE_COUNT = 5;
-    std::atomic_size_t sleepCount = 0;
+    constexpr size_t WAIT_LIST_USAGE_COUNT = 5U;
+    std::atomic_size_t sleepCount = 0U;
     std::function<void()> taskRunner = [tm, &sleepCount, &taskRunner]() {
         if (sleepCount < WAIT_LIST_USAGE_COUNT) {
             sleepCount++;
@@ -507,9 +496,5 @@ TEST_P(TaskSchedulerTest, TaskSchedulerAddTaskToWaitListWithTimeTest)
     tm->UnregisterAndDestroyTaskQueue<>(gcQueue);
     TaskScheduler::Destroy();
 }
-
-INSTANTIATE_TEST_SUITE_P(TaskStatisticsTypeSet, TaskSchedulerTest,
-                         ::testing::Values(TaskStatisticsImplType::SIMPLE, TaskStatisticsImplType::FINE_GRAINED,
-                                           TaskStatisticsImplType::LOCK_FREE, TaskStatisticsImplType::NO_STAT));
 
 }  // namespace ark::taskmanager

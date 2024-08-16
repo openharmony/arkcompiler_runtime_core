@@ -74,8 +74,7 @@ bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
     if (options.GetWorkersType() == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
         auto *taskScheduler = taskmanager::TaskScheduler::Create(
-            options.GetTaskmanagerWorkersCount(),
-            taskmanager::TaskStatisticsImplTypeFromString(options.GetTaskStatisticsImplType()));
+            options.GetTaskmanagerWorkersCount(), taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
         if (taskScheduler == nullptr) {
             return false;
         }

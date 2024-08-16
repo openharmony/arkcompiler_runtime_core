@@ -107,7 +107,7 @@ public:
 
     void SetUp() override
     {
-        TaskScheduler::Create(COUNT_OF_WORKERS, TaskStatisticsImplType::LOCK_FREE);
+        TaskScheduler::Create(COUNT_OF_WORKERS, TaskTimeStatsType::NO_STATISTICS);
     }
 
     void TearDown() override

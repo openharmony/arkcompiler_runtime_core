@@ -47,11 +47,8 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/taskmanager/task.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_scheduler.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/worker_thread.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/task_statistics.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/utils/task_selector.cpp
+    ${PANDA_ROOT}/libpandabase/taskmanager/utils/task_time_stats.cpp
     ${ARKBASE_LTO_SOURCES}
 )
 
@@ -431,7 +428,7 @@ panda_add_gtest(
     SOURCES
         tests/taskmanager/task_test.cpp
         tests/taskmanager/task_scheduler_test.cpp
-        tests/taskmanager/task_statistics_test.cpp
+        tests/taskmanager/task_sheduler_logging_test.cpp
     LIBRARIES
         arkbase_static
     SANITIZERS

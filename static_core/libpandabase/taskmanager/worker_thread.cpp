@@ -14,6 +14,7 @@
  */
 
 #include "libpandabase/taskmanager/task_scheduler.h"
+#include "libpandabase/taskmanager/task.h"
 #include "libpandabase/utils/logger.h"
 #include "libpandabase/os/thread.h"
 
@@ -55,6 +56,11 @@ size_t WorkerThread::CountOfTasksWithProperties(TaskProperties properties) const
 
 void WorkerThread::WorkerLoop()
 {
+    auto *scheduler = TaskScheduler::GetTaskScheduler();
+    ASSERT(scheduler != nullptr);
+    if (scheduler->IsTaskLifetimeStatisticsUsed()) {
+        TaskScheduler::GetTaskScheduler()->GetTaskTimeStats()->RegisterWorkerThread();
+    }
     WaitForStart();
     auto finishCond = false;
     while (!finishCond) {

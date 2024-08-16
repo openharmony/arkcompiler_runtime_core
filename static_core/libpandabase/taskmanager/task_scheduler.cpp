@@ -15,28 +15,19 @@
 
 #include "libpandabase/taskmanager/task_scheduler.h"
 #include "libpandabase/utils/logger.h"
-#include "libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.h"
-#include "libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.h"
-#include "libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.h"
 
 namespace ark::taskmanager {
 
 TaskScheduler *TaskScheduler::instance_ = nullptr;
 
-TaskScheduler::TaskScheduler(size_t workersCount, TaskStatisticsImplType taskStatisticsType)
-    : workersCount_(workersCount), selector_(taskQueues_)
+TaskScheduler::TaskScheduler(size_t workersCount, TaskTimeStatsType taskTimeStatsType)
+    : workersCount_(workersCount), taskTimeStatsType_(taskTimeStatsType), selector_(taskQueues_)
 {
-    switch (taskStatisticsType) {
-        case TaskStatisticsImplType::FINE_GRAINED:
-            taskStatistics_ = new FineGrainedTaskStatisticsImpl();
+    switch (taskTimeStatsType) {
+        case TaskTimeStatsType::LIGHT_STATISTICS:
+            taskTimeStats_ = new internal::LightTaskTimeTimeStats(workersCount);
             break;
-        case TaskStatisticsImplType::SIMPLE:
-            taskStatistics_ = new SimpleTaskStatisticsImpl();
-            break;
-        case TaskStatisticsImplType::LOCK_FREE:
-            taskStatistics_ = new LockFreeTaskStatisticsImpl();
-            break;
-        case TaskStatisticsImplType::NO_STAT:
+        case TaskTimeStatsType::NO_STATISTICS:
             break;
         default:
             UNREACHABLE();
@@ -44,11 +35,11 @@ TaskScheduler::TaskScheduler(size_t workersCount, TaskStatisticsImplType taskSta
 }
 
 /* static */
-TaskScheduler *TaskScheduler::Create(size_t threadsCount, TaskStatisticsImplType taskStatisticsType)
+TaskScheduler *TaskScheduler::Create(size_t threadsCount, TaskTimeStatsType taskTimeStatsType)
 {
     ASSERT(instance_ == nullptr);
     ASSERT(threadsCount > 0);
-    instance_ = new TaskScheduler(threadsCount, taskStatisticsType);
+    instance_ = new TaskScheduler(threadsCount, taskTimeStatsType);
     return instance_;
 }
 
@@ -232,9 +223,6 @@ size_t TaskScheduler::HelpWorkersWithTasks(TaskProperties properties)
     }
     LOG(DEBUG, TASK_MANAGER) << "Helper: executed tasks: " << executedTasksCount << ";";
     DecrementCountOfTasksInSystem(properties, executedTasksCount);
-    if (UNLIKELY(taskStatistics_ != nullptr)) {
-        taskStatistics_->IncrementCount(TaskStatus::POPPED, properties, executedTasksCount);
-    }
 
     // Atomic with acquire order reason: get correct value
     auto waitToFinish = waitToFinish_.load(std::memory_order_acquire);
@@ -304,13 +292,6 @@ void TaskScheduler::WaitForFinishAllTasksWithProperties(TaskProperties propertie
     }
     // Atomic with acq_rel order reason: other thread should see correct value
     waitToFinish_.fetch_sub(1, std::memory_order_acq_rel);
-    if (UNLIKELY(taskStatistics_ != nullptr)) {
-        LOG(DEBUG, TASK_MANAGER) << "After waiting tasks with properties: " << properties
-                                 << " {added: " << taskStatistics_->GetCount(TaskStatus::ADDED, properties)
-                                 << ", executed: " << taskStatistics_->GetCount(TaskStatus::EXECUTED, properties)
-                                 << ", popped: " << taskStatistics_->GetCount(TaskStatus::POPPED, properties) << "}";
-        taskStatistics_->ResetCountersWithTaskProperties(properties);
-    }
 }
 
 void TaskScheduler::Finalize()
@@ -339,8 +320,11 @@ void TaskScheduler::Finalize()
     for (auto *worker : workers_) {
         delete worker;
     }
-    if (UNLIKELY(taskStatistics_ != nullptr)) {
-        taskStatistics_->ResetAllCounters();
+
+    if (IsTaskLifetimeStatisticsUsed()) {
+        for (const auto &line : taskTimeStats_->GetTaskStatistics()) {
+            LOG(INFO, TASK_MANAGER) << line;
+        }
     }
     LOG(DEBUG, TASK_MANAGER) << "TaskScheduler: Finalized";
 }
@@ -348,9 +332,6 @@ void TaskScheduler::Finalize()
 void TaskScheduler::IncrementCounterOfAddedTasks(TaskProperties properties, size_t ivalue)
 {
     IncrementCountOfTasksInSystem(properties, ivalue);
-    if (UNLIKELY(taskStatistics_ != nullptr)) {
-        taskStatistics_->IncrementCount(TaskStatus::ADDED, properties, ivalue);
-    }
 }
 
 size_t TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounterMap &counterMap)
@@ -359,9 +340,6 @@ size_t TaskScheduler::IncrementCounterOfExecutedTasks(const TaskPropertiesCounte
     for (const auto &[properties, count] : counterMap) {
         countOfTasks += count;
         DecrementCountOfTasksInSystem(properties, count);
-        if (UNLIKELY(taskStatistics_ != nullptr)) {
-            taskStatistics_->IncrementCount(TaskStatus::EXECUTED, properties, count);
-        }
         // Atomic with acquire order reason: get correct value
         auto waitToFinish = waitToFinish_.load(std::memory_order_acquire);
         if (waitToFinish > 0 && GetCountOfTasksInSystemWithTaskProperties(properties) == 0) {
@@ -444,9 +422,7 @@ TaskScheduler::~TaskScheduler()
     ASSERT(start_ == finish_);
     // Check if all task queue was deleted
     ASSERT(taskQueues_.empty());
-    if (UNLIKELY(taskStatistics_ != nullptr)) {
-        delete taskStatistics_;
-    }
+    delete taskTimeStats_;
 }
 
 void TaskScheduler::IncrementCountOfTasksInSystem(TaskProperties prop, size_t count)
@@ -475,6 +451,16 @@ size_t TaskScheduler::GetCountOfTasksInSystem() const
         sumCount += counter.load(std::memory_order_acquire);
     }
     return sumCount;
+}
+
+bool TaskScheduler::IsTaskLifetimeStatisticsUsed() const
+{
+    return taskTimeStatsType_ != TaskTimeStatsType::NO_STATISTICS;
+}
+
+TaskTimeStatsBase *TaskScheduler::GetTaskTimeStats() const
+{
+    return taskTimeStats_;
 }
 
 }  // namespace ark::taskmanager

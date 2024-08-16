@@ -14,8 +14,30 @@
  */
 
 #include "libpandabase/taskmanager/task.h"
+#include "libpandabase/taskmanager/task_scheduler.h"
 
 namespace ark::taskmanager {
+
+void TaskLifeTimeAggregator::GetAndStoreTimeOfTaskAddingToQueue()
+{
+    addingToQueueTime_ = time::GetCurrentTimeInMicros(false);
+}
+
+void TaskLifeTimeAggregator::GetAndStoreTimeOfTaskExecutionStart()
+{
+    startExecutionTime_ = time::GetCurrentTimeInMicros(false);
+}
+
+void TaskLifeTimeAggregator::GetTimeOfTaskExecutionFinishAndStoreTimeStats(TaskProperties prop)
+{
+    auto *scheduler = TaskScheduler::GetTaskScheduler();
+    ASSERT(scheduler != nullptr);
+    auto *taskTimeStats = scheduler->GetTaskTimeStats();
+    ASSERT(taskTimeStats != nullptr);
+    auto endExecutionTime = time::GetCurrentTimeInMicros(false);
+    taskTimeStats->CollectLifeAndExecutionTimes(prop, endExecutionTime - addingToQueueTime_,
+                                                endExecutionTime - startExecutionTime_);
+}
 
 /* static */
 Task Task::Create(TaskProperties properties, RunnerCallback runner)
@@ -32,9 +54,9 @@ TaskProperties Task::GetTaskProperties() const
 void Task::RunTask()
 {
     ASSERT(!IsInvalid());
-    lifeTimeScope_.IndicateTaskExecutionStart();
+    EventOnStartExecution();
     runner_();
-    lifeTimeScope_.IndicateTaskExecutionEnd();
+    EventOnEndExecution();
 }
 
 void Task::MakeInvalid()
@@ -46,6 +68,39 @@ void Task::MakeInvalid()
 bool Task::IsInvalid() const
 {
     return properties_ == INVALID_TASK_PROPERTIES;
+}
+
+void Task::EventOnTaskAdding()
+{
+    auto *scheduler = TaskScheduler::GetTaskScheduler();
+    if UNLIKELY (scheduler == nullptr) {
+        return;
+    }
+    if (scheduler->IsTaskLifetimeStatisticsUsed()) {
+        lifeTimeStorage_.GetAndStoreTimeOfTaskAddingToQueue();
+    }
+}
+
+void Task::EventOnStartExecution()
+{
+    auto *scheduler = TaskScheduler::GetTaskScheduler();
+    if UNLIKELY (scheduler == nullptr) {
+        return;
+    }
+    if (scheduler->IsTaskLifetimeStatisticsUsed()) {
+        lifeTimeStorage_.GetAndStoreTimeOfTaskExecutionStart();
+    }
+}
+
+void Task::EventOnEndExecution()
+{
+    auto *scheduler = TaskScheduler::GetTaskScheduler();
+    if UNLIKELY (scheduler == nullptr) {
+        return;
+    }
+    if (scheduler->IsTaskLifetimeStatisticsUsed()) {
+        lifeTimeStorage_.GetTimeOfTaskExecutionFinishAndStoreTimeStats(properties_);
+    }
 }
 
 std::ostream &operator<<(std::ostream &os, TaskType type)
