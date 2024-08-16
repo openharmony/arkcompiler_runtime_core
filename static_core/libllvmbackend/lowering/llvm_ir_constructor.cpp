@@ -299,7 +299,6 @@ static DeoptimizeType GetDeoptimizationType(Inst *inst)
 
 static llvm::CallingConv::ID GetFastPathCallingConv(uint32_t numArgs)
 {
-    ASSERT(numArgs <= 5U);
     switch (numArgs) {
         case 0U:
             return llvm::CallingConv::ArkFast0;
@@ -521,6 +520,7 @@ bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
     auto frameRegPtr = builder_.CreateIntToPtr(GetRealFrameRegValue(), builder_.getPtrTy());
     args.push_back(threadRegPtr);
     args.push_back(frameRegPtr);
+    ASSERT(args.size() <= func_->arg_size());
 
     ASSERT(inst->CastToIntrinsic()->HasImms() && inst->CastToIntrinsic()->GetImms().size() == 2U);
     uint32_t externalId = inst->CastToIntrinsic()->GetImms()[1];
@@ -539,10 +539,11 @@ bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
         argTypes.push_back(builder_.getPtrTy());
         auto ftype = llvm::FunctionType::get(GetType(inst->GetType()), argTypes, false);
         callee = llvm::Function::Create(ftype, llvm::Function::ExternalLinkage, externalName, func_->getParent());
+        callee->setCallingConv(GetFastPathCallingConv(inst->GetInputs().Size()));
     }
 
     auto call = builder_.CreateCall(callee->getFunctionType(), callee, args);
-    call->setCallingConv(func_->getCallingConv());
+    call->setCallingConv(callee->getCallingConv());
     call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_Tail);
     call->addFnAttr(llvm::Attribute::get(call->getContext(), "ark-tail-call"));
     if (call->getType()->isVoidTy()) {
@@ -1156,7 +1157,6 @@ llvm::CallInst *LLVMIrConstructor::CreateFastPathCall(Inst *inst, RuntimeInterfa
                                                       llvm::ArrayRef<llvm::Value *> args)
 {
     auto call = CreateEntrypointCall(eid, inst, args);
-    ASSERT_PRINT(!args.empty(), "For zero arguments convention should be chosen in more accurate way");
     ASSERT(call->getCallingConv() == llvm::CallingConv::C);
     call->setCallingConv(GetFastPathCallingConv(args.size()));
     WrapArkCall(inst, call);
@@ -4739,6 +4739,7 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
       cc_(graph->GetLocalAllocator()->Adapter()),
       ccValues_(graph->GetLocalAllocator()->Adapter())
 {
+    llvm::CallingConv::ID callingConv = llvm::CallingConv::C;
     // Assign regmaps
     if (graph->GetMode().IsInterpreter()) {
         if (graph->GetArch() == Arch::AARCH64) {
@@ -4750,11 +4751,14 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
         } else {
             LLVM_LOG(FATAL, IR) << "Unsupported architecture for arkintcc";
         }
+        callingConv = llvm::CallingConv::ArkInt;
     } else if (graph->GetMode().IsFastPath()) {
         ASSERT(graph->GetArch() == Arch::AARCH64);
         for (size_t i = 0; i < graph->GetRuntime()->GetMethodTotalArgumentsCount(graph->GetMethod()); i++) {
             cc_.push_back(i);
         }
+        // Get calling convention excluding thread and frame registers
+        callingConv = GetFastPathCallingConv(cc_.size());
         cc_.push_back(GetThreadReg(Arch::AARCH64));
         cc_.push_back(AARCH64_REAL_FP);
     }
@@ -4764,6 +4768,11 @@ LLVMIrConstructor::LLVMIrConstructor(Graph *graph, llvm::Module *module, llvm::L
     auto funcProto = GetEntryFunctionType();
     auto methodName = arkInterface_->GetUniqMethodName(graph_->GetMethod());
     func_ = CreateFunctionDeclaration(funcProto, methodName, module);
+    ASSERT(func_->getCallingConv() == llvm::CallingConv::C);
+    func_->setCallingConv(callingConv);
+
+    // Scenario of code generation for FastPath having zero arguments and return value is not tested
+    ASSERT(callingConv != llvm::CallingConv::ArkFast0 || func_->getReturnType()->isVoidTy());
 
     if (graph->SupportManagedCode()) {
         func_->setGC(std::string {llvmbackend::LLVMArkInterface::GC_STRATEGY});

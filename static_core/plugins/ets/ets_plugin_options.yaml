@@ -57,6 +57,7 @@
         - plugins_interpreter_handlers: plugins/ets/irtoc_scripts/interpreter_handlers.irt
         - plugins_main_loop: plugins/ets/irtoc_scripts/interpreter_main_loop.irt
         - plugins_string_builder: plugins/ets/irtoc_scripts/string_builder.irt
+        - plugins_string: plugins/ets/irtoc_scripts/string.irt
 
       Metadatas:
         - RecordMetadata:

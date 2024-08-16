@@ -68,6 +68,7 @@ irtoc_plugins = [
   "irtoc_scripts/interpreter_handlers.irt",
   "irtoc_scripts/interpreter_main_loop.irt",
   "irtoc_scripts/string_builder.irt",
+  "irtoc_scripts/string.irt",
 ]
 
 arkbytecodeopt_deps =

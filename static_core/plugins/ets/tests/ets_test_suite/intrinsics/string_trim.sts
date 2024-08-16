@@ -1,0 +1,142 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* White space charcodes:
+    0x0020 -- space
+    0x0009 -- horizontal tab
+    0x000A -- line feed or new line
+    0x000B -- vertical tab
+    0x000C -- formfeed
+    0x000D -- horizontal tab
+    0x00A0 -- no-break space
+    0x1680 -- Ogham space mark
+    0x2000 -- en quad
+    0x2001 -- em quad
+    0x2002 -- en space
+    0x2003 -- em space
+    0x2004 -- three-per-em space
+    0x2005 -- four-per-em space
+    0x2006 -- six-per-em space
+    0x2007 -- figure space
+    0x2008 -- punctuation space
+    0x2009 -- thin space
+    0x200A -- hair space
+    0x2028 -- line separator
+    0x2029 -- paragraph separator
+    0x202F -- narrow no-break space
+    0x205F -- medium mathematical space
+    0xFEFF -- byte order mark
+    0x3000 -- ideographic space
+*/
+const Wss: String =
+'\u0020\u0009\u000A\u000B\u000C\u000D\u00A0\u1680\
+\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\
+\u2008\u2009\u200A\u2028\u2029\u202F\u205F\uFEFF\u3000';
+
+const Empty: String = '';
+const Ws: String = ' ';
+const X: String = 'x';
+const XWs: String = X + Ws;
+const WsX: String = Ws + X;
+const WsXWs: String = Ws + X + Ws;
+const Xy: String = 'Xy';
+const WsXy: String = Ws + 'Xy';
+const XyWs: String = 'Xy' + Ws;
+const WsXyWs: String = Ws + 'Xy' + Ws;
+const Z: String = '\u01B5';  // 'Ƶ'
+const ZWs: String = Z + Ws;
+const WsZ: String = Ws + Z;
+const WsZWs: String = Ws + Z + Ws;
+const Abc: String = 'abc';
+const AwsBwsC: String = 'a b c';
+const WsAbc: String = ' ' + Abc;
+const AbcWs: String = Abc + ' ';
+const WsAbcWs: String = ' ' + Abc + ' ';
+const WssAbc: String = Wss + Abc;
+const AbcWss: String = Abc + Wss;
+const WssAbcWss: String = Wss + Abc + Wss;
+const AbcWssAbc: String = Abc + Wss + Abc;
+const Esc: String = ' \t\n\v';
+const RusChars: String = 'Русские буквы';
+
+function main(): int {
+
+    let wssCount: int = 0;
+    for (let i = 0; i <= 0xFFFF; ++i) {
+        let c = i as char;
+        if (Char.isWhiteSpace(c)) {
+            ++wssCount;
+            assert Wss.indexOf(c) != -1: 'Bad char code is encountered: ' + i;
+        }
+    }
+    assert wssCount == Wss.length: 'Wrong number of u16 whitespaces: ' + wssCount;
+
+    // trim
+    assert Empty.trim() == "";
+    assert Ws.trim() == Empty;
+    assert Wss.trim() == Empty;
+    assert Xy.trim() == Xy;
+    assert WsXy.trim() == Xy;
+    assert XyWs.trim() == Xy;
+    assert WsXyWs.trim() == Xy;
+    assert Abc.trim() == Abc;
+    assert WsAbc.trim() == Abc;
+    assert AbcWs.trim() == Abc;
+    assert WsAbcWs.trim() == Abc;
+    assert AwsBwsC.trim() == AwsBwsC;
+    assert WssAbc.trim() == Abc;
+    assert AbcWss.trim() == Abc;
+    assert WssAbcWss.trim() == Abc;
+    assert AbcWssAbc.trim() == AbcWssAbc;
+    assert X.trim() == X;
+    assert WsX.trim() == X;
+    assert XWs.trim() == X;
+    assert Z.trim() == Z;
+    assert WsZ.trim() == Z;
+    assert ZWs.trim() == Z;
+    assert Esc.trim() == Empty;
+    assert RusChars.trim() == RusChars;
+    // trimLeft
+    assert Ws.trimLeft() == Empty;
+    assert Wss.trimLeft() == Empty;
+    assert WsAbcWs.trimLeft() == AbcWs;
+    assert AwsBwsC.trimLeft() == AwsBwsC;
+    assert WssAbcWss.trimLeft() == AbcWss;
+    assert X.trimLeft() == X;
+    assert WsX.trimLeft() == X;
+    assert XWs.trimLeft() == XWs;
+    assert Z.trimLeft() == Z;
+    assert WsZ.trimLeft() == Z;
+    assert ZWs.trimLeft() == ZWs;
+    assert Esc.trimLeft() == Empty;
+    assert RusChars.trimLeft() == RusChars;
+    // trimRight
+    assert Ws.trimRight() == Empty;
+    assert Wss.trimRight() == Empty;
+    assert WsAbcWs.trimRight() == WsAbc;
+    assert AwsBwsC.trimRight() == AwsBwsC;
+    assert WssAbcWss.trimRight() == WssAbc;
+    assert X.trimRight() == X;
+    assert WsX.trimRight() == WsX;
+    assert XWs.trimRight() == X;
+    assert Z.trimRight() == Z;
+    assert WsZ.trimRight() == WsZ;
+    assert ZWs.trimRight() == Z;
+    assert Esc.trimRight() == Empty;
+    assert RusChars.trimRight() == RusChars;
+
+    console.println("PASS");
+    return 0;
+}

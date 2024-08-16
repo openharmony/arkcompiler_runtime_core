@@ -372,6 +372,15 @@ bool Codegen::BeginMethod()
     // After this - encoder aborted, if allocated too much size.
     GetEncoder()->SetMaxAllocatedBytes(g_options.GetCompilerMaxGenCodeSize());
 
+    if (!IsCompressedStringsEnabled()) {
+#ifndef NDEBUG
+        LOG(FATAL, COMPILER) << "String compression must be enabled";
+#else
+        LOG(ERROR, COMPILER) << "String compression must be enabled";
+#endif
+        return false;
+    }
+
     if (GetGraph()->IsAotMode()) {
         GetEncoder()->SetCodeOffset(GetGraph()->GetAotData()->GetCodeOffset() + CodeInfo::GetCodeOffset(GetArch()));
     } else {

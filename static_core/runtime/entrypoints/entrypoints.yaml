@@ -172,6 +172,13 @@ entrypoints:
   signature:
   - ark::coretypes::String*
 
+- name: CreateEmptyStringSlowPath
+  entrypoint: CreateEmptyStringEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+  - ark::coretypes::String*
+
 - name: CreateStringFromChars
   entrypoint: CreateStringFromCharsEntrypoint
   bridge: entrypoint

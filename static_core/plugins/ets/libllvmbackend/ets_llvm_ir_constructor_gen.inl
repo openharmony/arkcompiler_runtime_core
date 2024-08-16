@@ -256,3 +256,32 @@ bool LLVMIrConstructor::EmitDoubleToStringDecimal(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::DOUBLE_TO_STRING_DECIMAL, 3U);
 }
+
+bool LLVMIrConstructor::EmitStringTrimLeft(Inst *inst)
+{
+    auto eid = RuntimeInterface::EntrypointId::STRING_TRIM_LEFT;
+    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), builder_.getInt32(0), builder_.getInt32(0)});
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringTrimRight(Inst *inst)
+{
+    auto eid = RuntimeInterface::EntrypointId::STRING_TRIM_RIGHT;
+    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), builder_.getInt32(0), builder_.getInt32(0)});
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringTrim(Inst *inst)
+{
+    auto eid = RuntimeInterface::EntrypointId::STRING_TRIM;
+    auto call = CreateFastPathCall(inst, eid, {GetInputValue(inst, 0), builder_.getInt32(0), builder_.getInt32(0)});
+    ValueMapAdd(inst, call);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitCharIsWhiteSpace(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::CHAR_IS_WHITE_SPACE, 1U);
+}
