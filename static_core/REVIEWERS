@@ -90,6 +90,7 @@ static_core/runtime/include/mem/                         @dmitriitr @udav
 static_core/runtime/include/tooling/                     @ragnvald
 static_core/runtime/tests/tooling/                       @ragnvald
 static_core/plugins/ets/runtime/interop_js/*promise*                          @dmitriitr @konstanting
+static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @Prof1983
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         @ivan-tyulyandin
 static_core/plugins/ets/runtime/intrinsics/std_*                              @ivan-tyulyandin
 static_core/plugins/ets/runtime/intrinsics/std_containers_BlockingQueue.cpp   @konstanting
@@ -133,6 +134,8 @@ static_core/plugins/ets/tests/native/promise/                                 @k
 static_core/plugins/ets/tests/runtime/tooling/                                @ragnvald
 static_core/plugins/ets/tests/runtime/types/ets_promise_test.cpp              @konstanting @udav
 static_core/plugins/ets/stdlib/std/debug/concurrency/                         @konstanting
+static_core/plugins/ets/tests/interop_js/tests/checked/                       @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov @Prof1983
+static_core/plugins/ets/tests/interop_js/tests/compiler/                      @igelhaus @semenovaleksandr @ignatenkooleg @igorlegalov @Prof1983
 static_core/plugins/ets/tests/interop_js/tests/promise/                       @udav
 
 /abc2program/ @ctw-ian
