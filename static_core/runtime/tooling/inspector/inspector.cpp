@@ -91,6 +91,7 @@ Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart
 
 Inspector::~Inspector()
 {
+    NotifyExecutionEnded();
     inspectorServer_.Kill();
     serverThread_.join();
     HandleError(debugger_.UnregisterHooks());
@@ -378,5 +379,10 @@ void Inspector::DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &o
                     return true;
                 }));
         });
+}
+
+void Inspector::NotifyExecutionEnded()
+{
+    inspectorServer_.CallRuntimeExecutionContextsCleared();
 }
 }  // namespace ark::tooling::inspector

@@ -65,6 +65,7 @@ public:
     void CallRuntimeConsoleApiCalled(PtThread thread, ConsoleCallType type, uint64_t timestamp,
                                      const std::vector<RemoteObject> &arguments);
     void CallRuntimeExecutionContextCreated(PtThread thread);
+    void CallRuntimeExecutionContextsCleared();
     void CallTargetAttachedToTarget(PtThread thread);
     void CallTargetDetachedFromTarget(PtThread thread);
 
@@ -106,10 +107,12 @@ private:
                              const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
     void AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
                           const std::vector<Scope> &scopeChain, PtThread thread);
-    static void AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
-                                  const std::vector<BreakpointId> &hitBreakpoints);
     void AddBreakpointByUrlLocations(JsonArrayBuilder &locations, const std::set<std::string_view> &sourceFiles,
                                      size_t lineNumber, PtThread thread);
+
+    static void AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
+                                  const std::vector<BreakpointId> &hitBreakpoints);
+    static std::string GetExecutionContextUniqueId(const PtThread &thread);
 
     Server &server_;
     SessionManager sessionManager_;

@@ -65,7 +65,6 @@ class RuntimeNotificationManager;
 class Trace;
 
 namespace tooling {
-class Debugger;
 class MemoryAllocationDumper;
 }  // namespace tooling
 
@@ -477,6 +476,13 @@ private:
     void CheckBootPandaFiles();
 
     bool IsEnableMemoryHooks() const;
+
+    /**
+     * @brief Unload debugger library and destroy debug session.
+     * As side effect, `Debugger` instance will be destroyed. Hence the method must be called
+     * during runtime destruction after sending `VmDeath` event and before uninitializing threads.
+     */
+    void UnloadDebugger();
 
     static void CreateDfxController(const RuntimeOptions &options);
 

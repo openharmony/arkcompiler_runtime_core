@@ -177,8 +177,14 @@ void InspectorServer::CallRuntimeExecutionContextCreated(PtThread thread)
             context.AddProperty("id", thread.GetId());
             context.AddProperty("origin", "");
             context.AddProperty("name", name);
+            context.AddProperty("uniqueId", GetExecutionContextUniqueId(thread));
         });
     });
+}
+
+void InspectorServer::CallRuntimeExecutionContextsCleared()
+{
+    server_.Call("Runtime.executionContextsCleared");
 }
 
 void InspectorServer::CallTargetAttachedToTarget(PtThread thread)
@@ -574,15 +580,6 @@ void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallF
     });
 }
 
-/* static */
-void InspectorServer::AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
-                                        const std::vector<BreakpointId> &hitBreakpoints)
-{
-    for (auto id : hitBreakpoints) {
-        hitBreakpointsBuilder.Add(std::to_string(id));
-    }
-}
-
 void InspectorServer::AddBreakpointByUrlLocations(JsonArrayBuilder &locations,
                                                   const std::set<std::string_view> &sourceFiles, size_t lineNumber,
                                                   PtThread thread)
@@ -598,5 +595,23 @@ void InspectorServer::AddBreakpointByUrlLocations(JsonArrayBuilder &locations,
             Location(scriptId, lineNumber).ToJson()(location);
         });
     }
+}
+
+/* static */
+void InspectorServer::AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
+                                        const std::vector<BreakpointId> &hitBreakpoints)
+{
+    for (auto id : hitBreakpoints) {
+        hitBreakpointsBuilder.Add(std::to_string(id));
+    }
+}
+
+/* static */
+std::string InspectorServer::GetExecutionContextUniqueId(const PtThread &thread)
+{
+    static int pid = os::thread::GetPid();
+    std::stringstream ss;
+    ss << pid << ':' << thread.GetId();
+    return ss.str();
 }
 }  // namespace ark::tooling::inspector
