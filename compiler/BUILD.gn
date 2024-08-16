@@ -219,7 +219,11 @@ ohos_static_library(
 
   deps = libarkcompiler_frontend_static_common_deps
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  if (is_arkui_x) {
+    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+  } else {
+    external_deps = [ sdk_libc_secshared_dep ]
+  }
 
   include_dirs = [ "$ark_root/compiler/optimizer" ]
 
