@@ -25,6 +25,9 @@ function isObject(variable) {
 	return variable !== null && typeof variable === 'object' && !Array.isArray(variable);
 }
 
+// NOTE #1835 #17769 set "true" when literal types and optional methods are fully fixed
+const FIXES_IMPLEMENTED = false;
+
 const MODULE_PATH = 'Linterface_method/test/ETSGLOBAL;';
 
 const AnyTypeMethodClass = etsVm.getClass('Linterface_method/test/AnyTypeMethodClass;');
@@ -32,11 +35,6 @@ const createInterfaceClassAnyTypeMethod = etsVm.getFunction(MODULE_PATH, 'create
 
 const UnionTypeMethodClass = etsVm.getClass('Linterface_method/test/UnionTypeMethodClass;');
 const createInterfaceClassUnionTypeMethod = etsVm.getFunction(MODULE_PATH, 'create_interface_class_union_type_method');
-
-// NOTE: issue (1835) fix Literal type
-// const LiteralValueMethodClass = etsVm.getClass("Linterface_method/test/LiteralValueMethodClass;");
-// const etsFnInterfaceLiteralValueClass = 'create_interface_literal_value_class_from_ets';
-// const createInterfaceLiteralValueClassFromEts = etsVm.getFunction(MODULE_PATH, etsFnInterfaceLiteralValueClass);
 
 const TupleTypeMethodClass = etsVm.getClass('Linterface_method/test/TupleTypeMethodClass;');
 const createInterfaceClassTupleTypeMethod = etsVm.getFunction(MODULE_PATH, 'create_interface_class_tuple_type_method');
@@ -48,17 +46,19 @@ const callSubsetByRefInterfaceFromEts = etsVm.getFunction(MODULE_PATH, 'call_sub
 const SubsetByValueClass = etsVm.getClass('Linterface_method/test/SubsetByValueClass;');
 const createSubsetByValueClassFromEts = etsVm.getFunction(MODULE_PATH, 'create_subset_by_value_class_from_ets');
 
-// NOTE (issues 17769) fix optional method in interface
-// const WithOptionalMethodClass = etsVm.getClass("Linterface_method/test/WithOptionalMethodClass;");
-// const createClassWithOptionalMethod =
-// etsVm.getFunction("Linterface_method/test/ETSGLOBAL;", "create_class_with_optional_method");
-// const WithoutOptionalMethodClass = etsVm.getClass("Linterface_method/test/TupleClass;");
-// const createClassWOOptionals =
-// etsVm.getFunction("Linterface_method/test/ETSGLOBAL;", "create_class_without_optional_method");
-// const optionalArg = etsVm.getFunction("Linterface_method/test/ETSGLOBAL;", "optional_arg");
-// const optionalArgArray = etsVm.getFunction("Linterface_method/test/ETSGLOBAL;", "optional_arg_array");
+getExtras = () => ({
+	WithOptionalMethodClass: etsVm.getClass('Linterface_method/test/WithOptionalMethodClass;'),
+	createClassWithOptionalMethod: etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'create_class_with_optional_method'),
+	WithoutOptionalMethodClass: etsVm.getClass('Linterface_method/test/TupleClass;'),
+	createClassWOOptionals: getFunction('Linterface_method/test/ETSGLOBAL;', 'create_class_without_optional_method'),
+	optionalArg: etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'optional_arg'),
+	optionalArgArray: etsVm.getFunction('Linterface_method/test/ETSGLOBAL;', 'optional_arg_array'),
+	LiteralValueMethodClass: etsVm.getClass('Linterface_method/test/LiteralValueMethodClass;'),
+	etsFnInterfaceLiteralValueClass: 'create_interface_literal_value_class_from_ets',
+	createInterfaceLiteralValueClassFromEts: etsVm.getFunction(MODULE_PATH, etsFnInterfaceLiteralValueClass),
+});
 
-module.exports = {
+const exposedValues = {
 	num,
 	string,
 	bool,
@@ -69,8 +69,6 @@ module.exports = {
 	createInterfaceClassAnyTypeMethod,
 	UnionTypeMethodClass,
 	createInterfaceClassUnionTypeMethod,
-	// createInterfaceLiteralValueClassFromEts,
-	// LiteralValueMethodClass,
 	SubsetByRefClass,
 	subsetByRefInterface,
 	callSubsetByRefInterfaceFromEts,
@@ -78,10 +76,6 @@ module.exports = {
 	createSubsetByValueClassFromEts,
 	TupleTypeMethodClass,
 	createInterfaceClassTupleTypeMethod,
-	// WithOptionalMethodClass,
-	// createClassWithOptionalMethod,
-	// WithoutOptionalMethodClass,
-	// createClassWithoutOptionalMethod,
-	// optionalArg,
-	// optionalArgArray,
 };
+
+module.exports = Object.assign(exposedValues, FIXES_IMPLEMENTED ? getExtras() : {});

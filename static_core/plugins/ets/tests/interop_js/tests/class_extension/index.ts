@@ -42,7 +42,7 @@ export class TestUserClass {
 	public readonly readonlyValue: string = DEFAULT_STRING_VALUE;
 	public readonly constructorSetValue: string;
 
-	static isMyInstance(obj: any) {
+	static isMyInstance(obj: {}): boolean {
 		return obj instanceof TestUserClass;
 	}
 
@@ -53,14 +53,14 @@ export class TestUserClass {
 
 export const TestNativeClass = EventEmitter;
 
-export const extendUserClass = () => {
+export const extendUserClass = (): boolean => {
 	const TSTestUserClass = getClass('TSTestUserClass');
 	class ExtendedEtsUserClass extends TSTestUserClass {}
 	const classInstance = new ExtendedEtsUserClass();
 	return classInstance instanceof ExtendedEtsUserClass;
 };
 
-export const extendNativeClass = () => {
+export const extendNativeClass = (): boolean => {
 	const TSTestNativeClass = getClass('ArrayBuffer', 'escompat');
 	class ExtendedEtsNativeClass extends TSTestNativeClass {
 		constructor(length: 2) {
@@ -71,7 +71,7 @@ export const extendNativeClass = () => {
 	return classInstance instanceof TSTestNativeClass;
 };
 
-export const jsRespectsProtectedModifier = () => {
+export const jsRespectsProtectedModifier = (): boolean => {
 	const TSTestUserClass = getClass('TSTestUserClass');
 	try {
 		class ExtendedEtsUserClass extends TSTestUserClass {
@@ -81,7 +81,7 @@ export const jsRespectsProtectedModifier = () => {
 				this.protectedProperty = 'redefinedProtected';
 			}
 
-			validProtectedGetter() {
+			validProtectedGetter(): string {
 				//@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime
 				return this.protectedProperty;
 			}
@@ -93,7 +93,7 @@ export const jsRespectsProtectedModifier = () => {
 	}
 };
 
-export const jsRespectsStaticModifier = () => {
+export const jsRespectsStaticModifier = (): boolean => {
 	const TSTestUserClass = getClass('TSTestUserClass');
 	class ExtendedEtsUserClass extends TSTestUserClass {}
 	//@ts-ignore -- to ignore compile-time check, as TSTestUserClass is only acquired in runtime

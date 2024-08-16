@@ -18,9 +18,9 @@ const etsMod = getTestModule('class_methods_test');
 const functionReturnIntEts = etsMod.getFunction('functionReturnIntSubsetByValue');
 
 {
-  const EXPECTED_INT = 100;
-  const testVal = functionReturnIntEts();
+	const EXPECTED_INT = 100;
+	const testVal = functionReturnIntEts();
 
-  ASSERT_EQ(testVal, EXPECTED_INT);
-  ASSERT_EQ(typeof testVal, 'number');
+	ASSERT_EQ(testVal, EXPECTED_INT);
+	ASSERT_EQ(typeof testVal, 'number');
 }

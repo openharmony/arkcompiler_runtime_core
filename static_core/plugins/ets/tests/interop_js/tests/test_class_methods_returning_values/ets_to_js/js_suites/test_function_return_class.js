@@ -12,17 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {getTestModule } = require('test_class_methods.js');
+const { getTestModule } = require('test_class_methods.js');
 
 const etsMod = getTestModule('class_methods_test');
 const functionReturnClassEts = etsMod.getFunction('functionReturnClass');
 const TestClassEts = etsMod.getClass('TestClass');
 
 {
-  const testClassVal = functionReturnClassEts();
+	const testClassVal = functionReturnClassEts();
 
-  ASSERT_EQ(testClassVal.testString, 'Test');
-  ASSERT_EQ(testClassVal.testNumber, 1);
-  ASSERT_EQ(testClassVal.testFunction(), 1);
-  ASSERT_EQ(TestClassEts.isTestClass(testClassVal), true);
+	ASSERT_EQ(testClassVal.testString, 'Test');
+	ASSERT_EQ(testClassVal.testNumber, 1);
+	ASSERT_EQ(testClassVal.testFunction(), 1);
+	ASSERT_EQ(TestClassEts.isTestClass(testClassVal), true);
 }

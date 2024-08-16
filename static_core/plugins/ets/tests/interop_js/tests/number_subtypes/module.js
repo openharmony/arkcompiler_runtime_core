@@ -14,19 +14,19 @@
  */
 'use strict';
 
-function EvaluateNumber(v0, v1) {
+function evaluateNumber(v0, v1) {
 	return v0 + v1;
 }
 
-function EmptyFunction() {
+function emptyFunction() {
 	console.log('Hello from empty function');
 }
 
-function EvaluateObject(obj) {
+function evaluateObject(obj) {
 	return new ExampleClass(obj.v0 + obj.v1, obj.v0 + obj.v1);
 }
 
-function EvaluateArray(arr, size) {
+function evaluateArray(arr, size) {
 	let result = [];
 	for (let i = 0; i < size; i++) {
 		result[i] = arr[i] + i * i;
@@ -40,11 +40,11 @@ class ExampleClass {
 		this.v1 = v1;
 	}
 
-	static EvaluateNumber(v2, v3) {
+	static evaluateNumber(v2, v3) {
 		return v2 + v3;
 	}
 
-	static EvaluateArray(arr, size) {
+	static evaluateArray(arr, size) {
 		let result = [];
 		for (let i = 0; i < size; i++) {
 			result[i] = arr[i] + i * i;
@@ -52,24 +52,24 @@ class ExampleClass {
 		return result;
 	}
 
-	InstanceEvaluateNumber() {
+	instanceEvaluateNumber() {
 		// without "this" also not working
 		return this.v0 + this.v1;
 	}
 
-	EvaluateObject(obj) {
+	evaluateObject(obj) {
 		return new ExampleClass(obj.v0 + this.v1, this.v0 + obj.v1);
 	}
 
-	GetV0() {
+	getV0() {
 		return this.v0;
 	}
 
-	GetV1() {
+	getV1() {
 		return this.v1;
 	}
 
-	static EmptyMethod() {
+	static emptyMethod() {
 		console.log('Hello from empty method');
 	}
 }
@@ -88,40 +88,43 @@ class ClassWithEmptyConstructor {
 		}
 	}
 
-	GetV0() {
+	getV0() {
 		return this.v0;
 	}
 
-	GetV1() {
+	getV1() {
 		return this.v1;
 	}
 }
 
-// this is TS namespace
-// export namespace MyNamespace {
-//     class Kitten {
-//         constructor(id: number, name: string) {
-//             this.id = id;
-//             this.name = name;
-//         }
-
-//         id: number;
-//         name: string;
-//     }
-
-//     export function createKitten(id: number, name: string) {
-//         return new Kitten(id, name);
-//     }
-// }
+/**
+ * TS Namespace for reference
+ *
+ * export namespace MyNamespace {
+ *     class Kitten {
+ *         constructor(id: number, name: string) {
+ *             this.id = id;
+ *             this.name = name;
+ *         }
+ *
+ *         id: number;
+ *         name: string;
+ *     }
+ *
+ *     export function createKitten(id: number, name: string) {
+ *         return new Kitten(id, name);
+ *     }
+ * }
+ */
 
 let MyNamespace;
 (function (MyNamespace) {
 	const Kitten = /** @class */ (function () {
-		function Kitten(id, name) {
+		function kitten(id, name) {
 			this.id = id;
 			this.name = name;
 		}
-		return Kitten;
+		return kitten;
 	})();
 	function createKitten(id, name) {
 		return new Kitten(id, name);
@@ -129,9 +132,9 @@ let MyNamespace;
 	MyNamespace.createKitten = createKitten;
 })((MyNamespace = exports.MyNamespace || (exports.MyNamespace = {})));
 
-exports.EvaluateNumber = EvaluateNumber;
+exports.evaluateNumber = evaluateNumber;
 exports.ExampleClass = ExampleClass;
-exports.EmptyFunction = EmptyFunction;
-exports.EvaluateObject = EvaluateObject;
+exports.emptyFunction = emptyFunction;
+exports.evaluateObject = evaluateObject;
 exports.ClassWithEmptyConstructor = ClassWithEmptyConstructor;
-exports.EvaluateArray = EvaluateArray;
+exports.evaluateArray = evaluateArray;

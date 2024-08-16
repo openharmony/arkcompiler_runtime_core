@@ -28,6 +28,6 @@ export enum Color {
 
 // NOTE(ivagin): enable when supported by declgen #12808
 // export enum Name {
-//     Ivan = "Ivan",
-//     Li = "Li"
+//        Ivan = "Ivan",
+//        Li = "Li"
 // };

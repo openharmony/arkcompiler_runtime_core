@@ -28,37 +28,37 @@ const PRECISION = 3;
 
 import { Fields } from './lib';
 
-function AssertEq<T>(a: T, b: T) {
-	console.log(`AssertEq: '${a}' === '${b}'`);
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
 	if (a !== b) {
-		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
 	}
 }
 
-export function main() {
+export function main(): void {
 	testFields();
 }
 
-function testFields() {
+function testFields(): void {
 	const fields = new Fields();
-	AssertEq(fields.readonlyBoolean_, true);
-	AssertEq(Fields.staticFloat_.toFixed(PRECISION), (ONE + ONE_TENTH).toFixed(PRECISION));
-	AssertEq(fields.number_.toFixed(PRECISION), (TWO + TWO_TENTH).toFixed(PRECISION));
-	AssertEq(fields.Number_.toFixed(PRECISION), (THREE + THREE_TENTH).toFixed(PRECISION));
-	AssertEq(fields.double_.toFixed(PRECISION), (FOUR + FOUR_TENTH).toFixed(PRECISION));
-	AssertEq(fields.Double_.toFixed(PRECISION), (FIVE + FIVE_TENTH).toFixed(PRECISION));
-	AssertEq(fields.int_, SIX);
+	assertEq(fields.readonlyBoolean_, true);
+	assertEq(Fields.staticFloat_.toFixed(PRECISION), (ONE + ONE_TENTH).toFixed(PRECISION));
+	assertEq(fields.number_.toFixed(PRECISION), (TWO + TWO_TENTH).toFixed(PRECISION));
+	assertEq(fields.Number_.toFixed(PRECISION), (THREE + THREE_TENTH).toFixed(PRECISION));
+	assertEq(fields.double_.toFixed(PRECISION), (FOUR + FOUR_TENTH).toFixed(PRECISION));
+	assertEq(fields.Double_.toFixed(PRECISION), (FIVE + FIVE_TENTH).toFixed(PRECISION));
+	assertEq(fields.int_, SIX);
 	// NOTE(ivagin): enable when supported by interop #12808
 	if (false) {
-		AssertEq(fields.object_ instanceof Object, true);
-		AssertEq(fields.rangeError_ instanceof RangeError, true);
-		AssertEq(fields.uint8Array_ instanceof Int8Array, true);
-		AssertEq(fields.uint16Array_ instanceof Int16Array, true);
-		AssertEq(fields.uint32Array_ instanceof Int32Array, true);
+		assertEq(fields.object_ instanceof Object, true);
+		assertEq(fields.rangeError_ instanceof RangeError, true);
+		assertEq(fields.uint8Array_ instanceof Int8Array, true);
+		assertEq(fields.uint16Array_ instanceof Int16Array, true);
+		assertEq(fields.uint32Array_ instanceof Int32Array, true);
 	}
 
-	AssertEq(fields.string_, 'Panda string!!');
-	AssertEq(fields.nullableString_, 'nullable string');
+	assertEq(fields.string_, 'Panda string!!');
+	assertEq(fields.nullableString_, 'nullable string');
 	fields.nullableString_ = null;
-	AssertEq(fields.nullableString_, null);
+	assertEq(fields.nullableString_, null);
 }

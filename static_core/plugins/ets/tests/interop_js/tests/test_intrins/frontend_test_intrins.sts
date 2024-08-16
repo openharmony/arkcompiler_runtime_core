@@ -14,45 +14,45 @@
  */
 
 import {
-    Identity,
-    Sum,
-    StringifyValue,
-    Car,
-    ApplyArgs,
-    ThrowValue,
-    Log,
-    TestProxy,
-    StringifyArgs,
-    GetProp,
-    Nop,
-    Nonexisting
+    identity,
+    sum,
+    stringifyValue,
+    makeCar,
+    applyArgs,
+    throwValue,
+    log,
+    makeTestProxy,
+    stringifyArgs,
+    getProp,
+    nop,
+    nonexisting
 } from "/plugins/ets/tests/interop_js/tests/test_intrins/test_intrins.js";
 
 function vstringify(val: JSValue): String {
-    return StringifyValue(val) as String;
+    return stringifyValue(val) as String;
 }
 function unreachable(): Error {
-    Log("unreachable reached!");
+    log("unreachable reached!");
     return new Error("unreachable");
 }
 function throwmsg(msg: String): boolean {
     throw new Error(msg);
 }
 class BadClass {
-    static Init: boolean = throwmsg("error from BadClass static ctor");
+    _init: boolean = throwmsg("error from BadClass static ctor");
 };
 
 function jsSumWrapperNumNum(a: double, b: double): double {
-    return Sum(a, b);
+    return sum(a, b);
 }
 function jsSumWrapperNumStr(a: double, b: String): String {
-    return Sum(a, b) as String;
+    return sum(a, b) as String;
 }
 
 function testUndefined(): boolean {
     let v = JSRuntime.getUndefined();
     let r = "undefined:undefined";
-    if (Identity(v) as NullishType !== undefined) {
+    if (identity(v) as NullishType !== undefined) {
         return false;
     }
     return r == vstringify(v);
@@ -60,30 +60,30 @@ function testUndefined(): boolean {
 function testNull(): boolean {
     let v = JSRuntime.getNull();
     let r = "object:null";
-    return r == vstringify(Identity(v));
+    return r == vstringify(identity(v));
 }
 function testBoolean(): boolean {
     let v = true;
     let r = "boolean:true";
-    v = Identity(Identity(v)) as boolean;
-    return r == vstringify(Identity(v));
+    v = identity(identity(v)) as boolean;
+    return r == vstringify(identity(v));
 }
 function testNumber(): boolean {
     let v: double = 42.24;
     let r = "number:42.24";
-    v = Identity(Identity(v)) as double;
-    return r == vstringify(Identity(v));
+    v = identity(identity(v)) as double;
+    return r == vstringify(identity(v));
 }
 function testString(): boolean {
     let v = "foo12345678901234567890"
     let r = "string:foo12345678901234567890";
-    v = Identity(Identity(v)) as String;
-    return r == vstringify(Identity(v));
+    v = identity(identity(v)) as String;
+    return r == vstringify(identity(v));
 }
 function testObject(): boolean {
     let v = JSRuntime.createObject();
     let r = "object:[object Object]"
-    return r == vstringify(Identity(v));
+    return r == vstringify(identity(v));
 }
 
 function testStringOps(): boolean {
@@ -92,10 +92,10 @@ function testStringOps(): boolean {
     if (v1 as String != strv) {
         return false;
     }
-    if (GetProp(strv, "length") as double != strv.length) {
+    if (getProp(strv, "length") as double != strv.length) {
         return false;
     }
-    if (Identity(Identity(strv)) as String != strv) {
+    if (identity(identity(strv)) as String != strv) {
         return false;
     }
     return true;
@@ -104,50 +104,50 @@ function testStringOps(): boolean {
 function testBuiltinArrayAny(): boolean {
     let v: JSValue[] = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
     let r = "object:,1.23,foo,[object Object]";
-    // v = Identity(Identity(v)) as JSValue[]; // TODO(vpukhov): jscast
-    let v1 = Identity(Identity(v));
-    return r == vstringify(Identity(v1));
+    // v = identity(identity(v)) as JSValue[]; // TODO(vpukhov): jscast
+    let v1 = identity(identity(v));
+    return r == vstringify(identity(v1));
 }
 function testBuiltinArrayBoolean(): boolean {
     let v: boolean[] = [true, false, true];
     let r = "object:true,false,true";
-    let v1 = Identity(Identity(v));
-    return r == vstringify(Identity(v1));
+    let v1 = identity(identity(v));
+    return r == vstringify(identity(v1));
 }
 function testBuiltinArrayInt(): boolean {
     let v: int[] = [111, 222];
     let r = "object:111,222";
-    let v1 = Identity(Identity(v));
-    return r == vstringify(Identity(v1));
+    let v1 = identity(identity(v));
+    return r == vstringify(identity(v1));
 }
 function testBuiltinArrayNumber(): boolean {
     let v: double[] = [11.1, 22.2];
     let r = "object:11.1,22.2";
-    let v1 = Identity(Identity(v));
-    return r == vstringify(Identity(v1));
+    let v1 = identity(identity(v));
+    return r == vstringify(identity(v1));
 }
 function testBuiltinArrayString(): boolean {
     let v: String[] = ["foo0", "foo1"];
     let r = "object:foo0,foo1";
-    let v1 = Identity(Identity(v));
-    return r == vstringify(Identity(v1));
+    let v1 = identity(identity(v));
+    return r == vstringify(identity(v1));
 }
 function testBuiltinArrayObject(): boolean {
     let v: Object[] = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1];
     let r = "object:,[object Object],foo,1";
-    let v1 = Identity(Identity(v));
-    return r == vstringify(Identity(v1));
+    let v1 = identity(identity(v));
+    return r == vstringify(identity(v1));
 }
 function testBuiltinArrayMultidim(): boolean {
     let v: double[][] = [[11.1, 22.2], [33.3, 44.4]];
     let r = "object:11.1,22.2,33.3,44.4";
-    let v1 = Identity(Identity(v));
-    return r == vstringify(Identity(v1));
+    let v1 = identity(identity(v));
+    return r == vstringify(identity(v1));
 }
 function testBuiltinArrayInstanceof(): boolean {
     let v: int[] = [111, 222];
     let ctor = JSRuntime.getGlobal().Array;
-    return JSRuntime.instanceOfDynamic(Identity(v), ctor);
+    return JSRuntime.instanceOfDynamic(identity(v), ctor);
 }
 function testInitArrayComponent(): boolean {
     // TODO(vpukhov): relies on jscast BadClass[]
@@ -163,19 +163,19 @@ function testNamedAccess(): boolean {
 
 function testNewcall(): boolean {
     let color = "Cyan";
-    let car = new Car(color);
-    return color == car.color as String;
+    let makeCar = new makeCar(color);
+    return color == makeCar.color as String;
 }
 
 function testValueCall(): boolean {
-    return 123.4 == Identity(123.4) as double;
+    return 123.4 == identity(123.4) as double;
 }
 
 function testCallStress(): boolean {
     let workload = 128;
     let u = JSRuntime.getUndefined();
     for (let i = 0; i < workload; ++i) {
-        Nop(u, u, u, u)
+        nop(u, u, u, u)
     }
     return true;
 }
@@ -184,7 +184,7 @@ function testCallStress(): boolean {
 function testUndefinedCastBug(): boolean {
     let v = JSRuntime.getUndefined();
     let r = "undefined:undefined";
-    return r == vstringify(Identity(v));
+    return r == vstringify(identity(v));
 }
 
 function testLambdaProxy(): boolean {
@@ -192,22 +192,22 @@ function testLambdaProxy(): boolean {
         return x;
     }
 
-    let res = ApplyArgs(etsfn, 123) as int;
+    let res = applyArgs(etsfn, 123) as int;
     return res == 123;
 }
 
 function testLambdaProxyRecursive(): boolean {
     let etsfn: (x: double, y: String) => String = (x: double, y: String): String => {
-        return StringifyArgs(x, y) as String;
+        return stringifyArgs(x, y) as String;
     }
 
-    let res = ApplyArgs(etsfn, 123, "foo") as String;
+    let res = applyArgs(etsfn, 123, "foo") as String;
     return res == "123,foo";
 }
 
 function testExceptionForwardingFromjs(): boolean {
     try {
-        ThrowValue(123.321);
+        throwValue(123.321);
     } catch (e: JSError) {
         return "number:123.321" == vstringify(e.getValue());
     }
@@ -220,7 +220,7 @@ function testExceptionForwardingFromets(): boolean {
     }
 
     try {
-        ApplyArgs(etsfn, 12345.6);
+        applyArgs(etsfn, 12345.6);
     } catch (e: JSError) {
         return "number:12345.6" == vstringify(e.getValue());
     }
@@ -229,12 +229,12 @@ function testExceptionForwardingFromets(): boolean {
 
 function testExceptionForwardingRecursive(): boolean {
     let etsfn: (v: JSValue) => void = (v: JSValue): void => {
-        ThrowValue(v);
+        throwValue(v);
         throw unreachable();
     }
 
     try {
-        ApplyArgs(etsfn, 123.456);
+        applyArgs(etsfn, 123.456);
     } catch (e: JSError) {
         return "number:123.456" == vstringify(e.getValue());
     }
@@ -247,14 +247,14 @@ function testCoreErrorForwarding(): boolean {
     }
 
     try {
-        ApplyArgs(etsfn);
+        applyArgs(etsfn);
     } catch (e: Error) {
         return e.message == "funny message";
     }
     throw unreachable();
 }
 
-function testTypecheckGetprop(): boolean {
+function testTypecheckGetProp(): boolean {
     let obj = JSRuntime.createObject();
     obj.prop = 1.23;
     try {
@@ -267,7 +267,7 @@ function testTypecheckGetprop(): boolean {
 
 function testTypecheckJscall(): boolean {
     try {
-        Identity(123) as String;
+        identity(123) as String;
     } catch (e: JSError) {
         return "object:TypeError: String expected" == vstringify(e.getValue());
     }
@@ -280,7 +280,7 @@ function testTypecheckCallets(): boolean {
             throw unreachable();
         }
 
-        ApplyArgs(etsfn, 123);
+        applyArgs(etsfn, 123);
     } catch (e: JSError) {
         return "object:TypeError: String expected" == vstringify(e.getValue());
     }
@@ -288,7 +288,7 @@ function testTypecheckCallets(): boolean {
 }
 
 function testGetThrows(): boolean {
-    let obj = new TestProxy();
+    let obj = new makeTestProxy();
     try {
         obj.foo as double;
     } catch (e: JSError) {
@@ -298,7 +298,7 @@ function testGetThrows(): boolean {
 }
 
 function testSetThrows(): boolean {
-    let obj = new TestProxy();
+    let obj = new makeTestProxy();
     try {
         obj.foo = 123;
     } catch (e: JSError) {
@@ -309,7 +309,7 @@ function testSetThrows(): boolean {
 
 function testJscallResolutionThrows1(): boolean {
     try {
-        Nonexisting();
+        nonexisting();
     } catch (e: JSError) {
         return "object:TypeError: call target is not a function" == vstringify(e.getValue());
     }
@@ -318,7 +318,7 @@ function testJscallResolutionThrows1(): boolean {
 
 function testJscallResolutionThrows2(): boolean {
     try {
-        Nonexisting.Nonexisting();
+        nonexisting.nonexisting();
     } catch (e: JSError) {
         return "object:TypeError: Cannot convert undefined or null to object" == vstringify(e.getValue());
     }
@@ -326,7 +326,7 @@ function testJscallResolutionThrows2(): boolean {
 }
 
 function testJscallResolutionThrows3(): boolean {
-    let obj = new TestProxy();
+    let obj = new makeTestProxy();
     try {
         obj.foo();
     } catch (e: JSError) {

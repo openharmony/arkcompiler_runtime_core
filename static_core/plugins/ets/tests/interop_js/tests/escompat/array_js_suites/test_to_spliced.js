@@ -24,6 +24,9 @@ const TestJSToSpliced = etsMod.getFunction('Array_TestJSToSpliced');
 // NOTE(kprokopenko): change to `x.length` when interop support properties
 const etsArrLen = (x) => x['<get>length'].call(x);
 
+// NOTE(oignatenko) enable after interop will be supported for this method signature
+const FIXES_IMPLEMENTED = false;
+
 {
 	// Test JS Array<FooClass>
 	TestJSToSpliced(new Array(new FooClass('zero'), new FooClass('one')));
@@ -36,18 +39,17 @@ const etsArrLen = (x) => x['<get>length'].call(x);
 	arr.push('spliced');
 	ASSERT_EQ(etsArrLen(arr), EXPECT_3);
 	let toSpliced = arr.toSpliced(1, 1);
-	// NOTE(oignatenko) uncomment below after recent regression making it work in place is fixed
-	// ASSERT_EQ(toSpliced.at(0), 123);
-	// ASSERT_EQ(toSpliced.at(1), 'spliced');
-	// ASSERT_EQ(toSpliced.length(), 2);
+	ASSERT_EQ(toSpliced.at(1), 'spliced');
+	ASSERT_EQ(etsArrLen(toSpliced), 2);
 
-	let arr1 = CreateEtsSample();
-	arr1.push('spliced');
-	ASSERT_EQ(etsArrLen(arr1), EXPECT_3);
-	// NOTE(oignatenko) uncomment below after interop will be supported for this method signature
-	// let toSpliced1 = arr.toSpliced(1);
-	// ASSERT_EQ(toSpliced1.at(0), 123);
-	// ASSERT_EQ(toSpliced1.length(), 1);
+	if (FIXES_IMPLEMENTED) {
+		let arr1 = CreateEtsSample();
+		arr1.push('spliced');
+		ASSERT_EQ(etsArrLen(arr1), EXPECT_3);
+		let toSpliced1 = arr.toSpliced(1);
+		ASSERT_EQ(toSpliced1.at(0), 123);
+		ASSERT_EQ(toSpliced1.length, 1);
+	}
 }
 
 GCJSRuntimeCleanup();

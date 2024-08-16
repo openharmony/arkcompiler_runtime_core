@@ -23,14 +23,14 @@ const PRECISION = 3;
 import { GenericClass, BaseGeneric, Identity, ForEach } from './lib';
 import type { IGeneric0, IGeneric1 } from './lib';
 
-function AssertEq<T>(a: T, b: T) {
-	console.log(`AssertEq: '${a}' === '${b}'`);
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
 	if (a !== b) {
-		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
 	}
 }
 
-export function main() {
+export function main(): void {
 	testGenerics();
 }
 
@@ -43,24 +43,24 @@ export class DerivedGeneric<T, U, V> extends BaseGeneric<T, U> implements IGener
 	}
 }
 
-function testGenerics() {
+function testGenerics(): void {
 	const tStr = new GenericClass<String>();
-	AssertEq(tStr.identity('Test generic class'), 'Test generic class');
+	assertEq(tStr.identity('Test generic class'), 'Test generic class');
 	const tNumber = new GenericClass<Number>();
-	AssertEq(tNumber.identity(FIVE).toFixed(PRECISION), FIVE.toFixed(PRECISION));
+	assertEq(tNumber.identity(FIVE).toFixed(PRECISION), FIVE.toFixed(PRECISION));
 
-	AssertEq(Identity(THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
-	AssertEq(Identity('Panda identity string'), 'Panda identity string');
+	assertEq(Identity(THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
+	assertEq(Identity('Panda identity string'), 'Panda identity string');
 
 	// NOTE(ivagin): enable when supported by interop #12808
 	if (false) {
 		const intArr = [ONE, TWO, THREE];
 		ForEach(intArr, (e: number, idx: number) => {
-			AssertEq(e, intArr[idx]);
+			assertEq(e, intArr[idx]);
 		});
 		const intStr = ['1', '2', '3'];
 		ForEach(intStr, (e: string, idx: number) => {
-			AssertEq(e, intStr[idx]);
+			assertEq(e, intStr[idx]);
 		});
 	}
 }

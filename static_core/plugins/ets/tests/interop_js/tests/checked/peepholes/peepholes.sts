@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { cons, car, cdr, sum, TreeNode, DynObject, Empty, makeSwappable, StaticClass, extractSquaredInt, ObjectWithPrototype, vundefined, dynStorage }
+import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable, StaticClass, extractSquaredInt, ObjectWithPrototype, vundefined, dynStorage }
     from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
 
 //! CHECKER         Fuse getProperty and cast to string in BCO

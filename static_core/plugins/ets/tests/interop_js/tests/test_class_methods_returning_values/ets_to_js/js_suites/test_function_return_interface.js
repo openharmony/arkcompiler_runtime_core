@@ -12,26 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {getTestModule } = require('test_class_methods.js');
+const { getTestModule } = require('test_class_methods.js');
 
 const etsMod = getTestModule('class_methods_test');
 
-// Note: The following code for using of interface is commented until #17878 is not resolved
-//const functionReturnInterfaceEts = etsMod.getFunction('functionReturnInterface');
-/*
-{
-  const testInterfaceVal = functionReturnInterfaceEts();
+// Note: Enable when #17878 is resolved
+const FIX_17878 = false;
 
-  ASSERT_EQ(testInterfaceVal.testNumber, 100);
-  ASSERT_EQ(testInterfaceVal.testString, 'Test');
-}
-*/
+if (FIX_17878) {
+  const functionReturnInterfaceEts = etsMod.getFunction('functionReturnInterface');
+  {
+    const testInterfaceVal = functionReturnInterfaceEts();
 
-// Note: Using this code for interface is a workaround until #17878 is not resolved
-const newInterfaceWithMethodEts = etsMod.getFunction('newInterfaceWithMethodEts');
+    ASSERT_EQ(testInterfaceVal.testNumber, 100);
+    ASSERT_EQ(testInterfaceVal.testString, 'Test');
+  }
+} else {
+  const newInterfaceWithMethodEts = etsMod.getFunction('newInterfaceWithMethodEts');
 
-{
-  const testInterfaceVal = newInterfaceWithMethodEts();
-
-  ASSERT_EQ(testInterfaceVal.methodInInterface(), 100);
+  {
+    const testInterfaceVal = newInterfaceWithMethodEts();
+  
+    ASSERT_EQ(testInterfaceVal.methodInInterface(), 100);
+  }
+  
 }

@@ -20,13 +20,19 @@ class TestModule {
 		this.descriptorPrefix = 'L' + name.replaceAll('.', '/') + '/';
 	}
 
-	getClass(name) { return etsVm.getClass(this.descriptorPrefix + name + ';'); }
-	getFunction(name) { return etsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name); }
+	getClass(name) {
+		return etsVm.getClass(this.descriptorPrefix + name + ';');
+	}
+	getFunction(name) {
+		return etsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name);
+	}
 
 	static descriptorPrefix;
-};
+}
 
-function getTestModule(name) { return new TestModule(name); }
+function getTestModule(name) {
+	return new TestModule(name);
+}
 
 module.exports = {
 	etsVm,

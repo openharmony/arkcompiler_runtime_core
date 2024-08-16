@@ -54,7 +54,7 @@ function interfaceFunc(): UserInterface {
 */
 class UserInterfaceImpl {
 	interfaceMethod(arg) {
-			return arg;
+		return arg;
 	}
 }
 

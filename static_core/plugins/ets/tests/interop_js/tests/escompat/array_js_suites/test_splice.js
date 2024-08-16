@@ -21,6 +21,12 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSSplice = etsMod.getFunction('Array_TestJSSplice');
 
+// NOTE(kprokopenko) enable when #14756 is fixed (varargs)
+const FIX_14756 = false;
+
+// NOTE(oignatenko) enable after interop will be supported for this method signature
+const FIXES_IMPLEMENTED = false;
+
 // NOTE(kprokopenko): change to `x.length` when interop support properties
 const etsArrLen = (x) => x['<get>length'].call(x);
 
@@ -30,25 +36,28 @@ const etsArrLen = (x) => x['<get>length'].call(x);
 }
 
 {
-	// Test ETS Array<Object>
 	let arr = CreateEtsSample();
 	const EXPECT_2 = 2;
 	const EXPECT_3 = 3;
 	arr.push('spliced');
 	ASSERT_EQ(etsArrLen(arr), EXPECT_3);
-	// NOTE(kprokopenko) uncomment when #14756 is fixed (varargs)
-	// arr.splice(1, 1);
-	// ASSERT_EQ(arr.at(0), 123);
-	// ASSERT_EQ(arr.at(1), 'spliced');
-	// ASSERT_EQ(etsArrLen(arr), EXPECT_2);
+	if (FIX_14756) {
+		arr.splice(1, 1);
+		ASSERT_EQ(arr.at(0), 123);
+		ASSERT_EQ(arr.at(1), 'spliced');
+		ASSERT_EQ(etsArrLen(arr), EXPECT_2);
+	}
 
 	let arr1 = CreateEtsSample();
 	arr1.push('spliced');
 	ASSERT_EQ(etsArrLen(arr1), EXPECT_3);
-	// NOTE(oignatenko) uncomment below after interop will be supported for this method signature
-	// arr1.splice(1);
-	// ASSERT_EQ(arr1.at(0), 123);
-	// ASSERT_EQ(arr1.length(), 1);
+
+	if (FIXES_IMPLEMENTED) {
+		arr1.splice(1);
+		ASSERT_EQ(arr1.at(0), 123);
+		ASSERT_EQ(arr1.length, 1);
+	}
+
 }
 
 GCJSRuntimeCleanup();

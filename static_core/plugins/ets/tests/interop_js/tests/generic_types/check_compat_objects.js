@@ -15,6 +15,9 @@
 
 const { EtsGenericErrorHandle, checkGenericValue, etsGetGenericErrorIdentity } = require('generic_types.test.js');
 
+// NOTE enable when error typing is enabled
+const FIXES_IMPLEMENTED = false;
+
 function checkErrorMessage(err, errMsg) {
 	checkGenericValue(err);
 
@@ -46,9 +49,9 @@ function checkIncorrectEtsObject() {
 // TODO(v.cherkashin): Enable when implemented
 // Check js/ets errors
 checkErrorMessage(new ets.Error('ets Error message', undefined), 'ets Error message');
-// checkErrorMessage(new Error("js Error message"), "js Error message");
-// checkErrorMessage(new ets.TypeError("ets TypeError message"), "ets TypeError message");
-// checkErrorMessage(new TypeError("js TypeError message"), "js TypeError message");
+FIXES_IMPLEMENTED && checkErrorMessage(new Error('js Error message'), 'js Error message');
+FIXES_IMPLEMENTED && checkErrorMessage(new ets.TypeError('ets TypeError message'), 'ets TypeError message');
+FIXES_IMPLEMENTED && checkErrorMessage(new TypeError('js TypeError message'), 'js TypeError message');
 
 checkIncorrectEtsObject();
 checkIncorrectJsObject();

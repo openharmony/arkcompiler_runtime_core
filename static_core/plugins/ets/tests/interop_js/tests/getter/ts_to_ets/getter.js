@@ -37,10 +37,10 @@ const __extends =
 				throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null');
 			}
 			extendStatics(d, b);
-			function AdhocConstruct() {
+			function adhocConstruct() {
 				this.constructor = d;
 			}
-			d.prototype = b === null ? Object.create(b) : ((AdhocConstruct.prototype = b.prototype), new AdhocConstruct());
+			d.prototype = b === null ? Object.create(b) : ((adhocConstruct.prototype = b.prototype), new adhocConstruct());
 		};
 	})();
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -83,17 +83,17 @@ exports.subsetByValueInstanceClass =
 exports.tsString = 'string';
 exports.tsNumber = 1;
 const PublicGetterClass = /** @class */ (function () {
-	function PublicGetterClass() {
+	function publicGetterClass() {
 		this._value = exports.tsString;
 	}
-	Object.defineProperty(PublicGetterClass.prototype, 'value', {
+	Object.defineProperty(publicGetterClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return PublicGetterClass;
+	return publicGetterClass;
 })();
 exports.PublicGetterClass = PublicGetterClass;
 function createPublicGetterClassFromTs() {
@@ -102,17 +102,17 @@ function createPublicGetterClassFromTs() {
 exports.createPublicGetterClassFromTs = createPublicGetterClassFromTs;
 exports.publicGetterInstanceClass = new PublicGetterClass();
 const ProtectedGetterOrigenClass = /** @class */ (function () {
-	function ProtectedGetterOrigenClass() {
+	function protectedGetterOrigenClass() {
 		this._value = exports.tsString;
 	}
-	Object.defineProperty(ProtectedGetterOrigenClass.prototype, 'value', {
+	Object.defineProperty(protectedGetterOrigenClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return ProtectedGetterOrigenClass;
+	return protectedGetterOrigenClass;
 })();
 exports.ProtectedGetterOrigenClass = ProtectedGetterOrigenClass;
 function createProtectedGetterOrigenClassFromTs() {
@@ -121,11 +121,11 @@ function createProtectedGetterOrigenClassFromTs() {
 exports.createProtectedGetterOrigenClassFromTs = createProtectedGetterOrigenClassFromTs;
 exports.protectedGetterOrigenInstanceClass = new ProtectedGetterOrigenClass();
 const ProtectedGetterInheritanceClass = /** @class */ (function (_super) {
-	__extends(ProtectedGetterInheritanceClass, _super);
-	function ProtectedGetterInheritanceClass(...args) {
+	__extends(exports.protectedGetterOrigenInstanceClass, _super);
+	function protectedGetterInheritanceClass(...args) {
 		return (_super !== null && _super.apply(this, args)) || this;
 	}
-	return ProtectedGetterInheritanceClass;
+	return protectedGetterInheritanceClass;
 })(ProtectedGetterOrigenClass);
 exports.ProtectedGetterInheritanceClass = ProtectedGetterInheritanceClass;
 function createProtectedGetterInheritanceClassFromTs() {
@@ -134,17 +134,17 @@ function createProtectedGetterInheritanceClassFromTs() {
 exports.createProtectedGetterInheritanceClassFromTs = createProtectedGetterInheritanceClassFromTs;
 exports.protectedGetterInstanceInheritanceClass = new ProtectedGetterInheritanceClass();
 const PrivateGetterClass = /** @class */ (function () {
-	function PrivateGetterClass() {
+	function privateGetterClass() {
 		this._value = exports.tsString;
 	}
-	Object.defineProperty(PrivateGetterClass.prototype, 'value', {
+	Object.defineProperty(privateGetterClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return PrivateGetterClass;
+	return privateGetterClass;
 })();
 exports.PrivateGetterClass = PrivateGetterClass;
 function createPrivateGetterClassFromTs() {
@@ -153,17 +153,17 @@ function createPrivateGetterClassFromTs() {
 exports.createPrivateGetterClassFromTs = createPrivateGetterClassFromTs;
 exports.privateGetterInstanceClass = new PrivateGetterClass();
 const UnionTypeClass = /** @class */ (function () {
-	function UnionTypeClass(value) {
+	function unionTypeClass(value) {
 		this._value = value;
 	}
-	Object.defineProperty(UnionTypeClass.prototype, 'value', {
+	Object.defineProperty(unionTypeClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return UnionTypeClass;
+	return unionTypeClass;
 })();
 exports.UnionTypeClass = UnionTypeClass;
 function createUnionTypeGetterClassFromTs(arg) {
@@ -173,17 +173,17 @@ exports.createUnionTypeGetterClassFromTs = createUnionTypeGetterClassFromTs;
 exports.unionTypeGetterInstanceClassInt = new UnionTypeClass(exports.tsNumber);
 exports.unionTypeGetterInstanceClassString = new UnionTypeClass(exports.tsString);
 const LiteralClass = /** @class */ (function () {
-	function LiteralClass(value) {
+	function literalClass(value) {
 		this._value = value;
 	}
-	Object.defineProperty(LiteralClass.prototype, 'value', {
+	Object.defineProperty(literalClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return LiteralClass;
+	return literalClass;
 })();
 exports.LiteralClass = LiteralClass;
 function createLiteralTypeGetterClassFromTs(arg) {
@@ -193,17 +193,17 @@ exports.createLiteralTypeGetterClassFromTs = createLiteralTypeGetterClassFromTs;
 exports.literalTypeGetterInstanceClassInt = new LiteralClass(exports.tsNumber);
 exports.literalTypeGetterInstanceClassString = new LiteralClass(exports.tsString);
 const TupleTypeClass = /** @class */ (function () {
-	function TupleTypeClass(value) {
+	function tupleTypeClass(value) {
 		this._value = value;
 	}
-	Object.defineProperty(TupleTypeClass.prototype, 'value', {
+	Object.defineProperty(tupleTypeClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return TupleTypeClass;
+	return tupleTypeClass;
 })();
 exports.TupleTypeClass = TupleTypeClass;
 function createTupleTypeGetterClassFromTs(arg) {
@@ -212,15 +212,15 @@ function createTupleTypeGetterClassFromTs(arg) {
 exports.createTupleTypeGetterClassFromTs = createTupleTypeGetterClassFromTs;
 exports.tupleTypeGetterInstanceClass = new TupleTypeClass([exports.tsNumber, exports.tsString]);
 const AnyTypeClass = /** @class */ (function () {
-	function AnyTypeClass() {}
-	Object.defineProperty(AnyTypeClass.prototype, 'value', {
+	function anyTypeClass() {}
+	Object.defineProperty(anyTypeClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return AnyTypeClass;
+	return anyTypeClass;
 })();
 exports.AnyTypeClass = AnyTypeClass;
 function createAnyTypeGetterClassFromTs() {
@@ -230,17 +230,17 @@ exports.createAnyTypeGetterClassFromTs = createAnyTypeGetterClassFromTs;
 exports.anyTypeGetterInstanceClass = new AnyTypeClass();
 exports.anyTypeExplicitGetterInstanceClass = new AnyTypeClass();
 const SubsetByRef = /** @class */ (function () {
-	function SubsetByRef() {
+	function subsetByRef() {
 		this.RefClass = new PublicGetterClass();
 	}
-	Object.defineProperty(SubsetByRef.prototype, 'value', {
+	Object.defineProperty(subsetByRef.prototype, 'value', {
 		get: function () {
 			return this.RefClass.value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return SubsetByRef;
+	return subsetByRef;
 })();
 exports.SubsetByRef = SubsetByRef;
 function createSubsetByRefGetterClassFromTs() {
@@ -249,17 +249,17 @@ function createSubsetByRefGetterClassFromTs() {
 exports.createSubsetByRefGetterClassFromTs = createSubsetByRefGetterClassFromTs;
 exports.subsetByRefInstanceClass = new SubsetByRef();
 const SubsetByValueClass = /** @class */ (function () {
-	function SubsetByValueClass(value) {
+	function subsetByValueClass(value) {
 		this._value = value;
 	}
-	Object.defineProperty(SubsetByValueClass.prototype, 'value', {
+	Object.defineProperty(subsetByValueClass.prototype, 'value', {
 		get: function () {
 			return this._value;
 		},
 		enumerable: false,
 		configurable: true,
 	});
-	return SubsetByValueClass;
+	return subsetByValueClass;
 })();
 exports.SubsetByValueClass = SubsetByValueClass;
 const GClass = new PublicGetterClass();

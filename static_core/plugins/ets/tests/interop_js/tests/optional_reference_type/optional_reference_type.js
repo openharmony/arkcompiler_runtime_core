@@ -19,19 +19,19 @@ exports.fnWithAnyParamObject = exports.fnWithUserInterface = exports.fnWithUserC
   exports.fnWithExtraSetParam = exports.fnWithLiteralParam = exports.fnWithAnyParams = void 0;
 
 function fnWithAnyParams(arr) {
-    return arr ? arr[0] : 'Argument not found';
+	return arr ? arr[0] : 'Argument not found';
 }
 
 exports.fnWithAnyParams = fnWithAnyParams;
 
 function fnWithLiteralParam(arr) {
-    return arr ? arr[0] : 'Argument not found';
+	return arr ? arr[0] : 'Argument not found';
 }
 
 exports.fnWithLiteralParam = fnWithLiteralParam;
 
 function fnWithExtraSetParam(arr) {
-    return arr ? arr[0] : 'Argument not found';
+	return arr ? arr[0] : 'Argument not found';
 }
 
 exports.fnWithExtraSetParam = fnWithExtraSetParam;
@@ -77,19 +77,19 @@ let TestUserClass = /** @class */ (function () {
 exports.TestUserClass = TestUserClass;
 
 function fnWithUserClass(obj) {
-    return obj ? obj.name : 'Class was not passed';
+	return obj ? obj.name : 'Class was not passed';
 }
 
 exports.fnWithUserClass = fnWithUserClass;
 
 function fnWithUserInterface(obj) {
-    return obj ? obj.name : 'Object was not passed';
+	return obj ? obj.name : 'Object was not passed';
 }
 
 exports.fnWithUserInterface = fnWithUserInterface;
 
 function fnWithAnyParamObject(obj) {
-    return obj.arr ? obj.arr[0] : obj.id;
+	return obj.arr ? obj.arr[0] : obj.id;
 }
 
 exports.fnWithAnyParamObject = fnWithAnyParamObject;

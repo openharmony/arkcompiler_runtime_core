@@ -40,11 +40,11 @@ exports.withOptionalMethodInstanceClass =
 exports.tsNumber = 1;
 exports.tsString = 'string';
 const AnyTypeMethodClass = /** @class */ (function () {
-	function AnyTypeMethodClass() {}
-	AnyTypeMethodClass.prototype.get = function (a) {
+	function anyTypeMethodClass() {}
+	anyTypeMethodClass.prototype.get = function (a) {
 		return a;
 	};
-	return AnyTypeMethodClass;
+	return anyTypeMethodClass;
 })();
 exports.AnyTypeMethodClass = AnyTypeMethodClass;
 function createInterfaceClassAnyTypeMethod() {
@@ -52,11 +52,11 @@ function createInterfaceClassAnyTypeMethod() {
 }
 exports.createInterfaceClassAnyTypeMethod = createInterfaceClassAnyTypeMethod;
 const UnionTypeMethodClass = /** @class */ (function () {
-	function UnionTypeMethodClass() {}
-	UnionTypeMethodClass.prototype.get = function (a) {
+	function unionTypeMethodClass() {}
+	unionTypeMethodClass.prototype.get = function (a) {
 		return a;
 	};
-	return UnionTypeMethodClass;
+	return unionTypeMethodClass;
 })();
 exports.UnionTypeMethodClass = UnionTypeMethodClass;
 function createInterfaceClassUnionTypeMethod() {
@@ -68,17 +68,17 @@ function subsetByRefInterface(obj) {
 }
 exports.subsetByRefInterface = subsetByRefInterface;
 const UserClass = /** @class */ (function () {
-	function UserClass() {
+	function userClass() {
 		this.value = 1;
 	}
-	return UserClass;
+	return userClass;
 })();
 const SubsetByValueClass = /** @class */ (function () {
-	function SubsetByValueClass() {}
-	SubsetByValueClass.prototype.get = function () {
+	function subsetByValueClass() {}
+	subsetByValueClass.prototype.get = function () {
 		return new UserClass();
 	};
-	return SubsetByValueClass;
+	return subsetByValueClass;
 })();
 exports.SubsetByValueClass = SubsetByValueClass;
 function createSubsetByValueClassFromTs() {
@@ -86,22 +86,22 @@ function createSubsetByValueClassFromTs() {
 }
 exports.createSubsetByValueClassFromTs = createSubsetByValueClassFromTs;
 const WithOptionalMethodClass = /** @class */ (function () {
-	function WithOptionalMethodClass() {}
-	WithOptionalMethodClass.prototype.getNum = function () {
+	function withOptionalMethodClass() {}
+	withOptionalMethodClass.prototype.getNum = function () {
 		return exports.tsNumber;
 	};
-	WithOptionalMethodClass.prototype.getStr = function () {
+	withOptionalMethodClass.prototype.getStr = function () {
 		return exports.tsString;
 	};
-	return WithOptionalMethodClass;
+	return withOptionalMethodClass;
 })();
 exports.WithOptionalMethodClass = WithOptionalMethodClass;
 const WithoutOptionalMethodClass = /** @class */ (function () {
-	function WithoutOptionalMethodClass() {}
-	WithoutOptionalMethodClass.prototype.getStr = function () {
+	function withoutOptionalMethodClass() {}
+	withoutOptionalMethodClass.prototype.getStr = function () {
 		return exports.tsString;
 	};
-	return WithoutOptionalMethodClass;
+	return withoutOptionalMethodClass;
 })();
 exports.WithoutOptionalMethodClass = WithoutOptionalMethodClass;
 function createClassWithOptionalMethod() {
@@ -133,11 +133,11 @@ function optionalArgArray(...args) {
 }
 exports.optionalArgArray = optionalArgArray;
 const TupleTypeMethodClass = /** @class */ (function () {
-	function TupleTypeMethodClass() {}
-	TupleTypeMethodClass.prototype.get = function (arg) {
+	function tupleTypeMethodClass() {}
+	tupleTypeMethodClass.prototype.get = function (arg) {
 		return arg;
 	};
-	return TupleTypeMethodClass;
+	return tupleTypeMethodClass;
 })();
 exports.TupleTypeMethodClass = TupleTypeMethodClass;
 function createInterfaceClassTupleTypeMethodFromTs() {

@@ -15,6 +15,9 @@
 
 const { checkGenericValue } = require('generic_types.test.js');
 
+// NOTE (v.cherkashin): Enable when bigInt is implemented
+const FIX_BIGINT = false;
+
 // Null
 checkGenericValue(null);
 
@@ -34,9 +37,8 @@ checkGenericValue(new Number(34));
 checkGenericValue(new Number(-643.23566));
 
 // BigInt
-// TODO(v.cherkashin): Enable when implemented
-// checkGenericValue(9007199254740991n);
-// checkGenericValue(new BigInt("0b11010101"));
+FIX_BIGINT && checkGenericValue(9007199254740991n);
+FIX_BIGINT && checkGenericValue(new BigInt('0b11010101'));
 
 // String
 checkGenericValue('abcdefg');

@@ -12,16 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-const {getTestModule } = require('test_class_methods.js');
+const { getTestModule } = require('test_class_methods.js');
 
 const etsMod = getTestModule('class_methods_test');
 const functionReturnUnionEts = etsMod.getFunction('functionReturnUnion');
 
 {
-  const EXPECTED_NUMBER = 1000;
-  const EXPECTED_STRING = '1000';
-  const testValStr = functionReturnUnionEts(true);
-  ASSERT_EQ(testValStr, EXPECTED_STRING);
-  const testValNum = functionReturnUnionEts(false);
-  ASSERT_EQ(testValNum, EXPECTED_NUMBER);
+	const EXPECTED_NUMBER = 1000;
+	const EXPECTED_STRING = '1000';
+	const testValStr = functionReturnUnionEts(true);
+	ASSERT_EQ(testValStr, EXPECTED_STRING);
+	const testValNum = functionReturnUnionEts(false);
+	ASSERT_EQ(testValNum, EXPECTED_NUMBER);
 }

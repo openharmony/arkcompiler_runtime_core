@@ -136,7 +136,7 @@ export class AnyTypeClass<T> {
 	}
 }
 
-export function createAnyTypeGetterClassFromTs(): AnyTypeClass<{}> {
+export function createAnyTypeGetterClassFromTs(): anyTypeClass<{}> {
 	return new AnyTypeClass();
 }
 

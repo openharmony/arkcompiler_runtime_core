@@ -17,40 +17,40 @@
 let etsVm = gtest.etsVm;
 exports.etsVm = etsVm;
 
-exports.Nop = function () {};
-exports.Identity = function (v) {
+exports.nop = function () {};
+exports.identity = function (v) {
 	return v;
 };
-exports.StringifyValue = function (v) {
+exports.stringifyValue = function (v) {
 	return typeof v + ':' + v;
 };
-exports.StringifyArgs = function (...args) {
+exports.stringifyArgs = function (...args) {
 	return args.toString();
 };
-exports.GetProtoConstructor = function (v) {
+exports.setProtoConstructor = function (v) {
 	return Object.getPrototypeOf(v).constructor;
 };
-exports.ApplyArgs = function (fn, ...args) {
+exports.applyArgs = function (fn, ...args) {
 	return fn(...args);
 };
-exports.ThrowValue = function (v) {
+exports.throwValue = function (v) {
 	throw v;
 };
-exports.Log = function (...args) {
+exports.log = function (...args) {
 	console.log(...args);
 };
-exports.GetProp = function (v, p) {
+exports.getProp = function (v, p) {
 	return v[p];
 };
 
-exports.Sum = function (a, b) {
+exports.sum = function (a, b) {
 	return a + b;
 };
-exports.Car = function (v) {
+exports.makeCar = function (v) {
 	this.color = v;
 };
 
-exports.TestProxy = function () {
+exports.makeTestProxy = function () {
 	Object.defineProperty(this, 'foo', {
 		get: function () {
 			throw Error('get exception');

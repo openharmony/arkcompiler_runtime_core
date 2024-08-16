@@ -18,9 +18,9 @@ const etsMod = getTestModule('class_methods_test');
 const functionReturnUndefinedEts = etsMod.getFunction('functionReturnUndefinedSubsetByValue');
 
 {
-  const EXPECTED_VALUE = undefined;
-  const testVal = functionReturnUndefinedEts();
+	const EXPECTED_VALUE = undefined;
+	const testVal = functionReturnUndefinedEts();
 
-  ASSERT_EQ(testVal, EXPECTED_VALUE);
-  ASSERT_EQ(typeof testVal, 'undefined');
+	ASSERT_EQ(testVal, EXPECTED_VALUE);
+	ASSERT_EQ(typeof testVal, 'undefined');
 }

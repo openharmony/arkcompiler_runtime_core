@@ -14,17 +14,17 @@
  */
 
 import {
-    DynProperties, SetPropertyExternal, GetPropertyExternal
+    DynProperties, setPropertyExternal, getPropertyExternal
 } from '/plugins/ets/tests/interop_js/tests/declgen_ets2ts/properties/lib2.js'
 
 export class DynPropertiesWrapper {
     dynProps_: DynProperties = new DynProperties();
 
-    SetPropertyExternal(key: string, value: string): void {
-        SetPropertyExternal(this.dynProps_, key, value);
+    setPropertyExternal(key: string, value: string): void {
+        setPropertyExternal(this.dynProps_, key, value);
     }
 
-    GetPropertyExternal(key: string): string {
-        return GetPropertyExternal(this.dynProps_, key) as string;
+    getPropertyExternal(key: string): string {
+        return getPropertyExternal(this.dynProps_, key) as string;
     }
 };

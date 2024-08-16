@@ -22,8 +22,8 @@ _$init$_();
 
 class DynPropertiesWrapper {
     public dynProps_: any = {} as any;
-    public SetPropertyExternal(key: string, value: string): void { return {} as any; };
-    public GetPropertyExternal(key: string): string { return {} as any; };
+    public setPropertyExternal(key: string, value: string): void { return {} as any; };
+    public getPropertyExternal(key: string): string { return {} as any; };
     constructor() {};
 };
 (DynPropertiesWrapper as any) = (globalThis as any).Panda.getClass('LDynPropertiesWrapper;');

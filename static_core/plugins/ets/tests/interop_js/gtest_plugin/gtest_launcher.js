@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-globalThis.ASSERT_TRUE = function ASSERT_TRUE(v, msg = '') {
+globalThis.ASSERT_TRUE = function aSSERT_TRUE(v, msg = '') {
 	if (v !== true) {
 		msg = 'ASSERTION FAILED: ' + msg;
 		throw Error(msg);
 	}
 };
 
-globalThis.ASSERT_EQ = function ASSERT_EQ(v0, v1) {
+globalThis.ASSERT_EQ = function aSSERT_EQ(v0, v1) {
 	if (!Object.is(v0, v1)) {
 		let msg = `ASSERTION FAILED: ${v0}[${typeof v0}] !== ${v1}[${typeof v1}]`;
 		throw Error(msg);
 	}
 };
 
-globalThis.ASSERT_THROWS = function ASSERT_THROWS(ctor, fn) {
+globalThis.ASSERT_THROWS = function aSSERT_THROWS(ctor, fn) {
 	ASSERT_TRUE(ctor !== undefined && fn !== undefined);
 	try {
 		fn();
@@ -40,7 +40,7 @@ globalThis.ASSERT_THROWS = function ASSERT_THROWS(ctor, fn) {
 	throw Error('ASSERT_THROWS: nothing was thrown');
 };
 
-globalThis.LOG_PROTO_CHAIN = function LOG_PROTO_CHAIN(o) {
+globalThis.LOG_PROTO_CHAIN = function lOG_PROTO_CHAIN(o) {
 	console.log('===== LOG_PROTO_CHAIN of ' + o + ' =====');
 	for (let p = o.__proto__; p !== null; p = p.__proto__) {
 		console.log(p.constructor + '\n[' + Object.getOwnPropertyNames(p) + ']');

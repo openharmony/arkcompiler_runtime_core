@@ -17,7 +17,7 @@ import { A } from "/plugins/ets/tests/interop_js/tests/dynamic_with_lambda/dynam
 
 function TestArgs0(): int {
     let a = new A();
-    let f: () => int = (): int => { return 25; }
+    let f: () => int = (): int => { return 25 as int; }
     let res = a.bar(f) as int;
     return res;
 }
