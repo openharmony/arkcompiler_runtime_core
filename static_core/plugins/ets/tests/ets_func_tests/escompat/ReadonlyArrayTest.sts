@@ -70,6 +70,9 @@ function main(): int {
     failedTestsCount += runTest("reduceRightFuncArg4ReadonlyArrayWithInitialValue", reduceRightFuncArg4ReadonlyArrayWithInitialValue);
     failedTestsCount += runTest("forEachFuncArg3ReadonlyArray", forEachFuncArg3ReadonlyArray);
 
+    failedTestsCount += runTest("testIteratorWithEmptyReadonlyArray", testIteratorWithEmptyReadonlyArray);
+    failedTestsCount += runTest("testIteratorWithNonEmptyReadonlyArray", testIteratorWithNonEmptyReadonlyArray);
+   
     return printReport("ReadonlyArrayTest failures: ", failedTestsCount);
 }
 
@@ -272,6 +275,43 @@ function runTest(testName: string, testBody: () => int): int {
         console.println("FAILED: " + testName + " => Exception catched: " + e);
         return RESULT_FAILURE;
     }
+}
+
+function testIteratorWithEmptyReadonlyArray(): int {
+    const emptyArray: ReadonlyArray<Number> = new Array<Number>;
+    const iterator = emptyArray.$_iterator();
+    const v = iterator.next();
+    if (!v.done) {
+        return RESULT_FAILURE;
+    }
+    return RESULT_SUCCESS;
+}
+
+function testIteratorWithNonEmptyReadonlyArray(): int {
+    const arr: ReadonlyArray<Number> = new Array<Number>(1, 2, 3);
+    const iterator = arr.$_iterator();
+
+    let v = iterator.next();
+    if (v.done || v.value != 1) {
+        return RESULT_FAILURE;
+    }
+
+    v = iterator.next();
+    if (v.done || v.value != 2) {
+        return RESULT_FAILURE;
+    }
+
+    v = iterator.next();
+    if (v.done || v.value != 3) {
+        return RESULT_FAILURE;
+    }
+
+    v = iterator.next();
+    if (!v.done) {
+        return RESULT_FAILURE;
+    }
+
+    return RESULT_SUCCESS;
 }
 
 function printReport(banner: string, failedTestsCount: int): int {
