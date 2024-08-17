@@ -62,15 +62,18 @@ def emitter_signature(group, is_jump)
   group.each do |insn|
     insn.operands.each_with_index do |o, i|
       sig[i].width = [o.width, sig[i].width].max
+      if o.is_signed_imm? || o.is_float_imm?
+        if is_jump
+          sig[i].type, sig[i].name = ['const Label &', 'label']
+        else
+          sig[i].type = "int#{sig[i].width}_t"
+        end
+      else
+        sig[i].type = "uint#{sig[i].width}_t"
+      end
     end
   end
-  sig.each do |o|
-    if o.name.start_with?('imm')
-      o.type, o.name = is_jump ? ['const Label &', 'label'] : ["int#{o.width}_t", o.name]
-    else
-      o.type = "uint#{o.width}_t"
-    end
-  end
+  return sig
 end
 
 def insns_uniq_sort_fmts

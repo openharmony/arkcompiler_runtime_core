@@ -83,10 +83,10 @@ void BytecodeEmitter::<%= emitter_name %>(<%= signature_str %>) {
 %       signature.each do |arg|
 %           v = '%s_bitlen' % arg.name
 %           bitlen_vars.push(v)
-%           if arg.name.start_with?('imm')
-    auto <%= v %> = GetBitLengthSigned(<%= arg.name %>);
-%           else
+%           if arg.type.start_with?('u')
     auto <%= v %> = GetBitLengthUnsigned(<%= arg.name %>);
+%           else
+    auto <%= v %> = GetBitLengthSigned(<%= arg.name %>);
 %           end
 %       end
 %
