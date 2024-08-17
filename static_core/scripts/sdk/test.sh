@@ -58,7 +58,7 @@ build-sdk/ohos_arm64
 build-sdk/panda-sdk-$SDK_VERSION.tgz
 build-sdk/sdk
 build-sdk/windows_host_tools" >"$EXPECTED"
-/usr/bin/diff "$ACTUAL" "$EXPECTED"
+diff "$ACTUAL" "$EXPECTED"
 
 # Test 2
 find build-sdk/sdk/ -maxdepth 3 | sort --version-sort >"$ACTUAL"
@@ -146,6 +146,6 @@ build-sdk/sdk/windows_host_tools
 build-sdk/sdk/windows_host_tools/bin
 build-sdk/sdk/windows_host_tools/bin/ark_link.exe
 build-sdk/sdk/windows_host_tools/bin/es2panda.exe' >"$EXPECTED"
-/usr/bin/diff "$ACTUAL" "$EXPECTED"
+diff "$ACTUAL" "$EXPECTED"
 
 rm "$ACTUAL" "$EXPECTED"

@@ -70,8 +70,8 @@ cases:
   - import: |-
         import {ENUM} from "./modules/declarations.sts"  // Enum
     call: |-
-        assert(ENUM.Red.getValue() == 0);
-        assert(ENUM.Blue.getValue() == 1);
+        assert(ENUM.Red.valueOf() == 0);
+        assert(ENUM.Blue.valueOf() == 1);
 
   - import: |-
         import {A} from "./modules/declarations.sts"  // Base class

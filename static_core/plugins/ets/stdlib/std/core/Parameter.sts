@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents parameter of function type
  */
-export final class Parameter extends Object {
+export final class Parameter {
     private td: TypeDesc
     private name: string
     private attributes: int
@@ -49,7 +49,7 @@ export final class Parameter extends Object {
         return this.getName() + ": " + this.getType().toString()
     }
 
-    public override equals(oth: NullishType): boolean {
+    public equals(oth: NullishType): boolean {
         return oth instanceof Parameter &&
                 this.td == (oth as Parameter).td &&
                 this.name == (oth as Parameter).name &&

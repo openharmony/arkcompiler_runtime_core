@@ -19,7 +19,5 @@ function main(): int {
     assert str != null_str: "String must not be equal to null";
     assert null_str != str: "Null string must not be equal to non-null one";
     assert null_str == null_str: "Null values of type String must be equal";
-    let str_arr: String[] = [str];
-    assert str != str_arr: "String must not be equal to object of other type";
     return 0;
 }

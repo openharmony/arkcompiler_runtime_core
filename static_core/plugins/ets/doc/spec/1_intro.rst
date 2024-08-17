@@ -90,17 +90,17 @@ The following major aspects characterize the |LANG| language as a whole:
 
    Some program entities in |LANG| can be *type-parameterized*. This means that
    an entity can represent a very high-level (abstract) concept. Providing more
-   concrete information makes the entity specialized for a particular use case.
+   concrete type information makes the entity instantiated for a particular use
+   case.
 
    A classical illustration is the notion of a list that represents the
    ‘idea’ of an abstract data structure. This abstract notion can be turned
    into a concrete list by providing additional information (i.e., the type of
    list elements).
 
-   Supported by many programming languages, a similar feature (*generics*
-   or *templates*) serves as the basis of the generic programming
-   paradigm. It enables making programs and program structures more
-   generic and reusable.
+   Supported by many programming languages, a similar feature (*generics* or
+   *templates*) serves as the basis of the generic programming paradigm. It
+   enables making programs and program structures more generic and reusable.
 
 .. index::
    abstract concept
@@ -313,7 +313,7 @@ as used in other languages, application areas, or industries.
    operator (in programming languages)
      -- the term can have several meanings.
 
-     (1) token that denotes the action to be performed on a value (addition,
+     (1) a token that denotes the action to be performed on a value (addition,
      subtraction, comparison, etc.).
      
      (2) a syntactic construct that denotes an elementary calculation within
@@ -341,7 +341,7 @@ as used in other languages, application areas, or industries.
    operation sign
      -- a language token that signifies an operator and conventionally
      denotes a usual mathematical operator, for example, '``+``' for addition
-     operator, '``/``' for division etc. However, some languages allow using
+     operator, '``/``' for division, etc. However, some languages allow using
      identifiers to denote operators, and/or arbitrarily combining characters
      that are not tokens in the alphabet of that language, i.e., operator
      signs.
@@ -353,7 +353,7 @@ as used in other languages, application areas, or industries.
      ('priorities') are higher than the preference of the given operator.
 
    operation
-     -- the informal notion that means an action or a process of operator
+     -- an informal notion that means an action or a process of operator
      evaluation.
 
    metasymbol
@@ -362,7 +362,7 @@ as used in other languages, application areas, or industries.
      side of a grammar production.
 
    goal symbol
-     -- sentence that consists of a single distinguished nonterminal
+     -- a sentence that consists of a single distinguished nonterminal
      (*compilationUnit*). The *goal symbol* describes how sequences of
      tokens can form syntactically correct programs.
 
@@ -378,12 +378,12 @@ as used in other languages, application areas, or industries.
      by the machine.
 
    punctuator
-     -- token that serves for separating, completing, or otherwise organizing
+     -- a token that serves for separating, completing, or otherwise organizing
      program elements and parts: commas, semicolons, parentheses, square
      brackets, etc.
 
    literal
-     -- representation of a certain value type.
+     -- a representation of a certain value type.
 
    comment
      -- a piece of text, insignificant for the syntactic grammar, that is
@@ -394,13 +394,13 @@ as used in other languages, application areas, or industries.
       are reserved, and cannot be used for user-defined type names.
 
    generic type
-     -- named type (class or interface) that has type parameters.
+     -- a named type (class or interface) that has type parameters.
 
    generic
      -- see *generic type*.
 
    non-generic type
-     -- named type (class or interface) that has no type parameters.
+     -- a named type (class or interface) that has no type parameters.
 
    non-generic
      -- see *non-generic type*.
@@ -411,26 +411,26 @@ as used in other languages, application areas, or industries.
      parameters of the named type.
 
    nullable type 
-     -- variable declared to have the value ``null``, or ``type T | null``
+     -- a variable declared to have the value ``null``, or ``type T | null``
      that can hold values of type ``T`` and its derived types.
 
    nullish value
-     -- reference which is null or undefined.
+     -- a reference which is null or undefined.
 
    simple name
-     -- name that consists of a single identifier.
+     -- a name that consists of a single identifier.
      
    qualified name
-     -- name that consists of a sequence of identifiers separated with the
+     -- a name that consists of a sequence of identifiers separated with the
      token ‘``.``’.
 
    scope of a name
-     -- region of the program code within which the entity---as declared by
+     -- a region of program code within which an entity---as declared by
      that name---can be accessed or referred to by its simple name without
      any qualification.
 
    function declaration
-     -- declaration that specifies names, signatures, and bodies when
+     -- a declaration that specifies names, signatures, and bodies when
      introducing a named function.
 
    terminal symbol
@@ -442,7 +442,7 @@ as used in other languages, application areas, or industries.
      -- see *terminal symbol*.
 
    nonterminal symbol
-     -- syntactically variable token that results from the successive
+     -- a syntactically variable token that results from the successive
      application of the production rules.
 
    context-free grammar
@@ -460,18 +460,18 @@ as used in other languages, application areas, or industries.
      -- see *variable declaration*.
 
    variable declaration
-     -- declaration that introduces a new named variable a modifiable
+     -- a declaration that introduces a new named variable a modifiable
      initial value can be assigned to.
 
    constant
      -- see *constant declaration*.
 
    constant declaration
-     -- declaration that introduces a new variable to which an immutable
+     -- a declaration that introduces a new variable to which an immutable
      initial value can be assigned only once at the time of instantiation.
 
    grammar
-     -- set of rules that describe what possible sequences of terminal and
+     -- a set of rules that describe what possible sequences of terminal and
      nonterminal symbols a programming language interprets as correct.
 
      Grammar is a range of productions. Each production comprises an
@@ -494,11 +494,11 @@ as used in other languages, application areas, or industries.
       name and different signatures, and are followed by one implementation.
 
    widening conversion
-     -- conversion that causes no loss of information about the overall
+     -- a conversion that causes no loss of information about the overall
      magnitude of a numeric value.
 
    narrowing conversion
-     -- conversion that can cause a loss information about the overall
+     -- a conversion that can cause a loss information about the overall
      magnitude of a numeric value, and potentially a loss of precision
      and range.
 
@@ -523,7 +523,7 @@ as used in other languages, application areas, or industries.
      expression of a non-void type as ``Truthy`` or ``Falsy``, depending on
      the kind of the value type.
 
-   default *catch* clause
+   default ``catch`` clause
      -- ``catch`` clause that has its exception parameter type omitted, and can
      handle any exception or error that is not handled by a preceding clause.
 
@@ -536,33 +536,27 @@ as used in other languages, application areas, or industries.
      that of its base class.
 
    package level scope
-      -- name that is declared on the package level, and accessible throughout
+      -- a name that is declared on the package level, and accessible throughout
       the entire package, and in other packages if exported.
 
    module level scope
-     -- name that is applicable for separate modules only. It is accessible
+     -- a name that is applicable for separate modules only. It is accessible
      throughout the entire module and in other packages if exported.
 
    class level scope
-     -- name declared inside a class. It is accessible inside and sometimes---by
+     -- a name declared inside a class. It is accessible inside and sometimes---by
      means of an access modifier, or via a derived class---outside  that class.
   
    interface level scope
-     -- name declared inside an interface. It is accessible inside and outside
+     -- a name declared inside an interface. It is accessible inside and outside
      that interface.
 
-   enum level scope
-     -- scope of enumeration that defines a type inside a package or module.
-     Enum level scope is identical to a corresponding package or module level
-     scope. An enumeration constant scope is identical to the enumeration
-     itself.
-
    function parameter scope
-     -- scope of a type parameter name in a function declaration. It is
+     -- the scope of a type parameter name in a function declaration. It is
      identical to that entire declaration.
 
    method scope
-     -- scope of a name declared immediately inside the body of a method
+     -- the scope of a name declared immediately inside the body of a method
      (function) declaration. Method scope is identical to the body of that
      method (function) declaration from the place of declaration, and up to
      the end of the body.
@@ -571,8 +565,8 @@ as used in other languages, application areas, or industries.
      -- same as *method scope*.
 
    type parameter scope
-     -- name of a type parameter declared in a class or an interface. The type
-     parameter scope is identical to the entire declaration (except static
+     -- the name of a type parameter declared in a class or an interface. The
+     type parameter scope is identical to the entire declaration (except static
      member declarations).
 
    static member
@@ -589,19 +583,19 @@ as used in other languages, application areas, or industries.
      -- belong, or be implicitly convertible (see :ref:`Widening Primitive Conversions`)
      to an entity.
 
-   match
+   match (v.)
      -- correspond to an entity.
 
-   own
+   own (adj.)
      -- of a member textually declared in a class, interface, type, etc., as
      opposed to members inherited from base class (superclass), base interfaces
      (superinterface), base type (supertype), etc.
 
    supercomponent (base component, parent component)
-     -- component from which another component is derived.
+     -- a component from which another component is derived.
 
    subcomponent (derived component, child component)
-     -- component produced by, inherited from, and dependent from another
+     -- a component produced by, inherited from, and dependent from another
      component.
 
 

@@ -16,9 +16,9 @@ cases:
     - decl: |-
           enum Enum { first = "A", second = "B", third = "B" }
       use: |-
-          assert Enum.first.getValue() == "A"
-          assert Enum.second.getValue() == "B"
-          assert Enum.third.getValue() == "B"
+          assert Enum.first.valueOf() == "A"
+          assert Enum.second.valueOf() == "B"
+          assert Enum.third.valueOf() == "B"
 
     - decl: |-
           enum Enum { _first = "A", _second = "B", _third = "B" }

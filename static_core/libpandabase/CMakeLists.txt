@@ -225,6 +225,12 @@ add_dependencies(arkbase_obj coherency_line_size_h)
 
 
 # Version
+set(ARK_VERSION_DATE)
+execute_process(
+    COMMAND date "+%Y-%m-%d %H:%M:%S"
+    OUTPUT_VARIABLE ARK_VERSION_DATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 find_package(Git)
 if(Git_FOUND)
     message(STATUS "Git found: ${GIT_EXECUTABLE}")

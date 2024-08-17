@@ -18,8 +18,6 @@
 
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_primitives.h"
-#include "plugins/ets/runtime/types/ets_arrayaslist_int.h"
 
 namespace ark::ets {
 
@@ -34,24 +32,14 @@ public:
         return reinterpret_cast<EtsBigInt *>(etsObj);
     }
 
-    EtsArrayAsListInt *GetBytes()
+    EtsBoxedIntArray *GetBytes()
     {
-        return reinterpret_cast<EtsArrayAsListInt *>(GetFieldObject(GetBytesOffset()));
-    }
-
-    EtsBoolean GetSign()
-    {
-        return GetFieldPrimitive<EtsBoolean>(GetSignOffset());
+        return reinterpret_cast<EtsBoxedIntArray *>(GetFieldObject(GetBytesOffset()));
     }
 
     static constexpr size_t GetBytesOffset()
     {
         return MEMBER_OFFSET(EtsBigInt, bytes_);
-    }
-
-    static constexpr size_t GetSignOffset()
-    {
-        return MEMBER_OFFSET(EtsBigInt, sign_);
     }
 
     EtsBigInt() = delete;
@@ -61,8 +49,7 @@ private:
     NO_COPY_SEMANTIC(EtsBigInt);
     NO_MOVE_SEMANTIC(EtsBigInt);
 
-    ObjectPointer<EtsArrayAsListInt> bytes_;
-    EtsBoolean sign_;
+    ObjectPointer<EtsBoxedIntArray> bytes_;
 
     friend class test::EtsBigIntMembers;
 };

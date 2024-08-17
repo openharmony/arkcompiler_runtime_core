@@ -19,7 +19,11 @@ Introduction
 Welcome to the "System |LANG|" guide. This document provides brief suggestions
 on how to rewrite your |LANG| code by using System |LANG| warnings.
 
-The next chapters will help you learn how to easily boost the performance of
-your |LANG| code.
+The chapters that follow will help you learn how to easily boost the
+performance of your |LANG| applications.
+
+Each chapter describes a feature and contains the results of
+application of System |LANG| suggestions. All the numerical data were obtained
+from synthetic benchmarks. Values in other applications may vary.
 
 |

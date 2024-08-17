@@ -17,8 +17,6 @@
 #define PANDA_RUNTIME_ETS_FFI_CLASSES_ETS_BOX_CLASSES_H_
 
 #include "plugins/ets/runtime/types/ets_object.h"
-#include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_primitives.h"
 
 namespace ark::ets {
 

@@ -196,14 +196,23 @@ certain conditions:
 .. code-block:: abnf
 
     ifStatement:
-        'if' '(' expression ')' statement1
-        ('else' statement2)?
+        'if' '(' expression ')' thenStatement
+        ('else' elseStatement)?
         ;
 
+    thenStatement:
+        statement
+        ;
+
+    elseStatement:
+        statement
+        ;
+
+
 If an expression represents a condition and is successfully evaluated as
-``true``, then *statement1* is executed. Otherwise, *statement2* is executed
-(if provided). A :index:`compile-time error` occurs if the expression type is
-not ``boolean``.
+``true``, then *thenStatement* is executed. Otherwise, *elseStatement* is
+executed (if provided). A :index:`compile-time error` occurs if the expression
+type is not ``boolean``.
 
 Any ``else`` corresponds to the first ``if`` of an ``if`` statement:
 

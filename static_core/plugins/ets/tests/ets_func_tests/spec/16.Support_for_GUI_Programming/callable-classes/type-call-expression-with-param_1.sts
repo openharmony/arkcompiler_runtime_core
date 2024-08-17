@@ -18,7 +18,6 @@ desc: 16.6 Callable Types
 name: type-call-expression-with-param_1.sts
 tags:
 - compile-only
-- negative
 ---*/
 
 let counter: int = 0;

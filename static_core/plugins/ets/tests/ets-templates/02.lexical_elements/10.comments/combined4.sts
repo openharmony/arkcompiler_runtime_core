@@ -15,10 +15,12 @@ limitations under the License.
 
 /*---
 desc: Combined comments
-params: multi-line over one-liner
+params: multi-line over one-liner with multi-line
+tags: [compile-only, negative]
 ---*/
 
 function main(): int {
+    // CTE - nested multi-line comments are prohibited
     let i: int =
       /*
           // /* comment */

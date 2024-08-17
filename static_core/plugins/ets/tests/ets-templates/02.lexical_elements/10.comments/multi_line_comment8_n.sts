@@ -22,7 +22,7 @@ function main(): int {
     let i: int =
     /*
       /*
-            nested comment, opening is missing
+            nested comment are prohibited
         */
       */
     */

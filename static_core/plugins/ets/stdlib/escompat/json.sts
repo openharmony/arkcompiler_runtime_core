@@ -129,18 +129,52 @@ export class JSON {
     public static stringify(d: String): String {
         let sb = new StringBuilder([c'\"'])
         let len = d.getLength()
+
+        let prevChar: char = 0
         for (let i = 0; i < len; ++i) {
-            let c = d.charAt(i)
-            let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, c, JSON.ESCAPED_CHARS.length)
-            if (escapedCharIndex != -1) {
-                sb.append(c'\\')
-                sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
+            let currChar = d.charAt(i)
+
+            if (Char.isHighSurrogate(currChar)) {
+                if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                    JSON.appendCharHex(sb, prevChar)
+                }
+            } else if (Char.isLowSurrogate(currChar)) {
+                if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                    sb.append(prevChar)
+                    sb.append(currChar)
+                } else {
+                    JSON.appendCharHex(sb, currChar)
+                }
             } else {
-                sb.append(c)
+                if (i != 0 && Char.isHighSurrogate(prevChar)) {
+                    JSON.appendCharHex(sb, prevChar)
+                }
+
+                let escapedCharIndex = lastIndexOf(JSON.ESCAPED_CHARS, currChar, JSON.ESCAPED_CHARS.length)
+                if (escapedCharIndex != -1) {
+                    sb.append(c'\\')
+                    sb.append(JSON.NON_ESCAPED_CHARS[escapedCharIndex])
+                } else {
+                    sb.append(currChar)
+                }
+            }
+
+            prevChar = currChar
+        }
+
+        if (len > 0) {
+            if (Char.isHighSurrogate(prevChar)) {
+                JSON.appendCharHex(sb, prevChar)
             }
         }
+
         sb.append(c'\"')
         return sb.toString()
+    }
+
+    private static appendCharHex(buffer: StringBuilder, chr: char): StringBuilder {
+        buffer.append("\\u").append(new Int(chr).toString(16))
+        return buffer
     }
 
     /**
@@ -220,8 +254,6 @@ export class JSON {
     }
 
     public static native stringify(d: JSValue): String;
-
-    private static native stringifyObj(d: Object): String
 
     //--------------------------
     //          arrays
@@ -412,7 +444,7 @@ export class JSON {
     // TODO(kirill-mitkin): Map<Long, Long> blocked by internal issue
     private static checkType(typ: Type, used: Array<TypeColor>): boolean {
         let id = typ.getId()
-        let ind = used.indexOf(new TypeColor(id, 0))
+        let ind = used.findIndex((tc: TypeColor) => tc.typeID == id)
         if (ind != -1) {
             return (used.at(ind) as TypeColor).color == TypeColor.VISITED
         }
@@ -815,9 +847,6 @@ class TypeColor {
     constructor(typeID: long, color: int) {
         this.typeID = typeID
         this.color = color
-    }
-    override equals(oth: NullishType): boolean {
-        return (oth instanceof Object) && (oth as TypeColor).typeID == this.typeID
     }
 }
 
@@ -1229,10 +1258,6 @@ export class JSONString extends JSONValue {
 
     public override toString(): String {
         return this.value
-    }
-
-    public override equals(to: NullishType): boolean {
-        return (to instanceof JSONString) && this.value == (to as JSONString).value
     }
 }
 

@@ -16,15 +16,14 @@ How to Use System ArkTS
 The main goal of "System |LANG|" is to help developers make their ArkTS code
 more efficient.
 
-System ArkTS provides tips to boost the performance--i.e., if the performance
-of the feature a developer chose to use is poor, then System |LANG| gives them
-an appropriate warning, and suggests what other features a developer can use
+System ArkTS provides tips to focus on the performance. System |LANG| gives
+an appropriate warning and suggests what other features a developer can use
 to rewrite the code.
 
 All "System |LANG|" warnings are divided into the following categories:
 
 #. **Subset warnings**: Part of |LANG| that is common with |TS|.
-   The original code requires modifications to keep the code within the Common
+   The original code requires modifications that keep the code within the Common
    Subset with |TS|.
 #. **Non-subset warnings**: Part of |LANG| that differs from |TS|.
    The original code requires modifications that are not within the Common
@@ -33,15 +32,14 @@ All "System |LANG|" warnings are divided into the following categories:
 Possible options are as follows:
 
 * **ets-subset-warnings**              : Enable all ETS-warnings to keep the code in subset with |TS|.
-* **ets-werror**                       : Treat all enabled ETS-warnings as errors.
 * **ets-non-subset-warnings**          : Enable all ETS-warnings that are not in subset with |TS|.
 * **ets-warnings-all**                 : Enable all ETS-warnings in "System |LANG|".
+* **ets-werror**                       : Treat all enabled ETS-warnings as errors.
 
 * **ets-implicit-boxing-unboxing**     : Check if a program contains implicit boxing or unboxing. ETS Subset Warning.
-* **ets-boost-equality-statement**     : Suggest boosting Equality Statements. ETS Subset Warning.
-* **ets-phohibit-top-level-statements**: Prohibit Top-Level statements. ETS Subset Warning.
+* **ets-boost-equality-expression**    : Suggest boosting equality expressions. ETS Subset Warning.
 * **ets-remove-async**                 : Suggest replacing async functions with coroutines. ETS Non-subset Warning.
-* **ets-suggest-final**                : Suggest final keyword warning. ETS Non-subset Warning.
+* **ets-suggest-final**                : Suggest using the keyword ``final``. ETS Non-subset Warning.
 * **ets-remove-lambda**                : Suggestions to replace lambda with regular functions. ETS Subset Warning.
 
 
@@ -74,11 +72,11 @@ Usage Example
 4. Look through the ETS-Warnings in the output. For the code in the example
    above, "System |LANG|" gives the following warnings:
 
-    * ``ETS Warning: Suggest 'final' modifier for class. [Test.sts:7:11]``
+    * ``ETS Warning: Suggest 'final' modifier for class 'K'. [usage.sts:7:11]``
 
-    * ``ETS Warning: Suggest 'final' modifier for method. [Test.sts:8:23]``
+    * ``ETS Warning: Suggest 'final' modifier for method 'foo_to_suggest'. [usage.sts:8:23]``
 
-    * ``ETS Warning: Suggest 'final' modifier for method. [Test.sts:9:21]``
+    * ``ETS Warning: Suggest 'final' modifier for method 'foo'. [usage.sts:9:21]``
 
 5. Rewrite the code as suggested by "System |LANG|". After rewriting |LANG|,
    the code is as follows:
@@ -111,11 +109,9 @@ continuing the example as above:
 
 .. code-block:: typescript
 
-    class I { // No final - inheritance
-    }
+    class I { // No final - inheritance }
 
-    class A extends I { // Suggest final
-    }
+    class A extends I { // Suggest final }
 
 2. Specify an option to the compiler and enable ``ets-werror``. E.g., add ``--ets-suggest-final --ets-werror``;
 3. Compile your file or project with the options so added, and a compile-time error occurs;
@@ -130,11 +126,9 @@ continuing the example as above:
 .. code:: typescript
 
 
-    class I { // No final - inheritance
-    }
+    class I { // No final - inheritance }
 
-    final class A extends I { // Suggest final
-    }
+    final class A extends I { }
 
 |
 
@@ -147,7 +141,7 @@ investigate into the following possible performance leaks:
 
 * Union usage;
 * Nullable types;
-* Rest parameters check vs. Array usage; and
+* Rest parameters check vs. Array usage
 * Non-throwing function.
 
 See status updates in the following releases.

@@ -46,7 +46,7 @@ function main(): int {
     if (0 == foo() &&
         1 == new C().xyz &&
         2 == new D().xyz() &&
-        3 == Enum.xyz.getValue() &&
+        3 == Enum.xyz.valueOf() &&
         4 == xyz &&
         5 == I.xyz()
     ) {

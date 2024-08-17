@@ -72,18 +72,23 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
     }
 
     /**
-     * equals(Object) compares two Chars by their underlying primitive chars.
-     *
-     * @param other a reference to object to be compared with.
-     *
-     * @returns comparison result of underlying primitive chars.
-     * Returns false if the argument is not an instance of Char.
-     */
-    public override equals(other: NullishType): boolean {
-        if (other instanceof Char) {
-            return this.value == (other as Char).unboxed();
+    * equals(Object) compares two Chars by their underlying primitive chars.
+    *
+    * @param other a reference to object to be compared with.
+    *
+    * @returns comparison result of underlying primitive chars.
+    * Returns false if the argument is not an instance of Char.
+    */
+    public equals(other: NullishType): boolean {
+        if (__runtimeIsSameReference(this, other)) {
+            return true
         }
-        return false;
+
+        if (!(other instanceof Char)) {
+            return false
+        }
+
+        return this.value == (other as Char).value
     }
 
     /**

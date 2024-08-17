@@ -53,6 +53,7 @@ public:
     Method *GetAsyncImplMethod(Method *method, EtsCoroutine *coroutine);
     EtsClass *GetPromiseClass();
     EtsClass *GetPromiseRefClass();
+    EtsClass *GetArrayClass();
     EtsClass *GetArrayBufferClass();
     EtsClass *GetStringBuilderClass();
     EtsClass *GetSharedMemoryClass();

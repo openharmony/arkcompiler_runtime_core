@@ -23,7 +23,7 @@ enum MyEnum {
     N1 = 80
 }
 
-const W = new Number(MyEnum.N1.getValue());
+const W = new Number(MyEnum.N1.valueOf());
 
 function main(): void {
     assert W == 80;

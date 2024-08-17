@@ -13,12 +13,19 @@
  * limitations under the License.
  */
 
-/*---
- desc: Partial type import test exported class
- name: partialType_lib
- tags: [not-a-test, compile-only]
- ---*/
+{% for case in cases %}
 
-export class ClassToBePartial {
-    fld: number = 7;
+/*---
+desc: Compile-time error test for String equality
+tags: [negative, compile-only]
+---*/
+
+class TestClass {}
+
+function main(): void {
+    let x: {{case.ltype}} = {{case.lval}}
+    let y: {{case.rtype}} = {{case.rval}}
+    x {{case.op}} y
 }
+
+{% endfor %}

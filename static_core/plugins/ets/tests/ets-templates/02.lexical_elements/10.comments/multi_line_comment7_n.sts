@@ -15,7 +15,6 @@ limitations under the License.
 
 /*---
 desc: Multi-line comments
-tags: [compile-only, negative]
 ---*/
 
 function main(): int {
@@ -23,10 +22,9 @@ function main(): int {
     /*
       /*
         /*
-            nested comment, closing is missing
-      */
+          comment
     */
     5;
 
-    return i;
+    return i-5;
 }

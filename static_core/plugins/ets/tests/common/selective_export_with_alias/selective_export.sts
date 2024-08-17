@@ -13,16 +13,26 @@
  * limitations under the License.
  */
 
-/*---
- desc: Partial type import test
- name: partialType_main
- tags: []
- files: [./partialType_lib.sts]
- ---*/
+function test_func(): void {}
 
-import { ClassToBePartial } from './partialType_lib'
+let msg = "hello";
 
-function main(): void {
-    let asd: Partial<ClassToBePartial> = {};
-    assert asd.fld === undefined
+class TestClass {
+    test_member = "test_member";
+
+    test_method(): void {}
+}
+
+class AliasClass {
+    alias_class_method(): void {
+        console.print("alias_class_method");
+    }
+}
+
+type aliased = AliasClass;
+
+export {
+    test_func as func, msg,
+    TestClass as tc,
+    aliased
 }

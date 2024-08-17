@@ -57,8 +57,8 @@ function createArrayBufferOfVariousLengths(): int {
 function sliceArrayBufferInt(): int {
   let a = new ArrayBuffer(8);
   
-  let start = 5;
-  let end = 4;
+  let start: number = 5;
+  let end: number = 4;
   if (a.slice(start, end).byteLength != 0)
     return 1;
   

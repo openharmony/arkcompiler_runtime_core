@@ -17,7 +17,7 @@
 #define LIBPANDAFILE_EXTERNAL_FILE_EXT_H
 
 #include <string>
-#include <vector>
+#include <cstdint>
 
 #ifdef __cplusplus
 extern "C" {

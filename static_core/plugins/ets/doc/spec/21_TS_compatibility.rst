@@ -181,6 +181,27 @@ by compiler-generated compile-time errors:
 
 |
 
+.. _Function types compatibility:
+
+Function types compatibility
+****************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| allows more relaxed assignments into variables of function type. While
+|LANG| follows more strict rules stated in (:ref:`Function Types Conversions`).
+
+.. code-block:: typescript
+   :linenos:
+
+    type FuncType = (p: string) => void
+    let f1: FuncType = (p: string): number => { return 0 } // compile-time error in ArkTS
+    let f1: FuncType = (p: string): string => { return "" } // compile-time error in ArkTS
+
+
+|
+
 .. _Compatibility for utility types:
 
 Compatibility for Utility Types

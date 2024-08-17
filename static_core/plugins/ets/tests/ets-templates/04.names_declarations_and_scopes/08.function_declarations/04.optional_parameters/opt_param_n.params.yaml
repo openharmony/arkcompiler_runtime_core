@@ -19,17 +19,6 @@ cases:
       call: foo(1.55)
 
     - decl: |-
-          enum Color {Red, Green, Blue}
-          function foo(c?: Color) {}  // CTE, enums are not references
-      call: foo(Color.Blue)
-
-    - decl: |-
-          enum Color {Red, Green, Blue}
-          type XYZ=Color
-          function foo(c?: XYZ) {} // CTE, enums are not references
-      call: foo(Color.Blue)
-
-    - decl: |-
           function foo(p?: Object, q: Object) {}  // CTE, default before required
       call: foo(new Object(), new Object())
 

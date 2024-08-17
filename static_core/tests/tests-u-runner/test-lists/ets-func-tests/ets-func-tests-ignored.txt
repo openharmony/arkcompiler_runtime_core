@@ -92,17 +92,11 @@ spec/03.types/References_Types/unions/union_assignment_12_03.sts
 ### undefined not supported yet
 spec/03.types/References_Types/unions/union_generics_03.sts
 ### generics + unions not everything supported yet
-spec/03.types/References_Types/unions/union_generics_01.sts
 spec/03.types/References_Types/unions/union_generics_02.sts
 ### Negative tests
 spec/03.types/References_Types/unions/union_cast_n_01.sts
 spec/03.types/References_Types/unions/union_cast_n_02.sts
 spec/03.types/References_Types/unions/union_cast_n_03.sts
-# panda#15005: skip to stabilize fe_dev_202312
-spec/03.types/References_Types/unions/union_compare_02_05.sts
-spec/03.types/References_Types/unions/union_compare_02_07.sts
-spec/03.types/References_Types/unions/union_compare_06.sts
-# End of panda#15005
 spec/03.types/References_Types/unions/union_compare_n_10.sts
 spec/03.types/References_Types/unions/union_param_n_01.sts
 spec/03.types/References_Types/unions/union_param_n_02.sts
@@ -179,8 +173,6 @@ spec/11.Enumerations/enum_const_expr_01_03.sts
 spec/11.Enumerations/enum_const_expr_01_04.sts
 spec/11.Enumerations/enum_const_expr_01_05.sts
 spec/11.Enumerations/enum_const_expr_02_01.sts
-### Issue 14633
-spec/11.Enumerations/issue14633_1.sts
 ### Issue 14636
 ### End enum
 

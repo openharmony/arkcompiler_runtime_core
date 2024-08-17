@@ -24,7 +24,7 @@ using ``ETSNOLINT``. Possible warning-suppressions are as follows:
 
 * ``ETSNOLINT``:                               Applies to the current line;
 * ``ETSNOLINT-NEXTLINE``:                      Applies to the next line; and
-* ``ETSNOLINT-BEGIN`` with ``ETSNOLINT-END``:  Applies to all lines (including the line where the directive is located) until closed by the corresponding ``ETSNOLINT-END``.
+* ``ETSNOLINT-BEGIN`` with ``ETSNOLINT-END``:  Applies to all lines (including the line with the directive) until closed by the corresponding ``ETSNOLINT-END``.
 
 
 **Note**: ``ETSNOLINT-END`` reset the impact of ``ETSNOLINT-BEGIN`` in
@@ -36,13 +36,13 @@ found, e.g. ``ETSNOLINT-END(ets-remove-lambda)``.
 All types of ``ETSNOLINT`` can be used either with or without arguments.
 Arguments must be separated with commas without whitespaces.
 Only the specified warning types are suppressed.
-Any warning without an argument is also suppressed.
+If there is no argument, then all warnings will be suppressed.
 
-* ``ETSNOLINT(ets-suggest-final)``:                     Disable ``ets-suggest-final``. Applies to the current line.
+* ``ETSNOLINT(ets-suggest-final)``: Disable ``ets-suggest-final``. Applies to the current line.
 * ``ETSNOLINT-NEXTLINE(ets-implicit-boxing-unboxing)``: Disable ``ets-implicit-boxing-unboxing``. Applies to the next line.
-* ``ETSNOLINT-BEGIN(ets-implicit-boxing-unboxing,ets-suggest-final)``: Disable ``ets-implicit-boxing-unboxing`` and ``ets-suggest-final`` checks. Applied to all lines (including the line where the directive is located) until closed by the corresponding ``ETSNOLINT-END``, .
+* ``ETSNOLINT-BEGIN(ets-implicit-boxing-unboxing,ets-suggest-final)``: Disable ``ets-implicit-boxing-unboxing`` and ``ets-suggest-final`` checks. Applied to all lines (including the line with the directive) until closed by the corresponding ``ETSNOLINT-END``.
 
-Other combinations are also valid. The list of possible arguments is the same as the list of ets-warnings. Add any type of suppression to single-line
+Other combinations are also valid. The list of possible arguments is the same as the list of ETS-warnings. Add any type of suppression to single-line
 or multi-line comments.
 
 Appropriate examples with |LANG| code are provided below:
@@ -52,13 +52,21 @@ Appropriate examples with |LANG| code are provided below:
 
 .. code-block:: typescript
 
-    let k: Int = 5; /* ETSNOLINT */
+    class A { /* ETSNOLINT */
+        foo(): String {
+            return "foo";
+        };
+    }
 
 or
 
 .. code-block:: typescript
 
-    let k: Int = 5; // ETSNOLINT
+    class A { // ETSNOLINT
+        foo(): String {
+            return "foo";
+        };
+    }
 
 |LANG| Warning Suppression Special
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
