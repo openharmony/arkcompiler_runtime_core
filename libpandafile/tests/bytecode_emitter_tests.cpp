@@ -135,7 +135,7 @@ HWTEST(BytecodeEmitter, JmpFwd_IMM8, testing::ext::TestSize.Level0)
     std::vector<uint8_t> out;
     ASSERT_EQ(BytecodeEmitter::ErrorCode::SUCCESS, emitter.Build(&out));
     std::vector<uint8_t> expected;
-    expected << Opcode::JMP_IMM8 << num_ret + globals::IMM_2;
+    expected << Opcode::JMP_IMM8 << (num_ret + globals::IMM_2);
     for (int i = 0; i < num_ret + 1; ++i) {
         expected << Opcode::RETURN;
     }
