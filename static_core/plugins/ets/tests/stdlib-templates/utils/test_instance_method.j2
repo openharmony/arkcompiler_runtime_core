@@ -76,7 +76,18 @@ function main(): int {
   {% else %}
       let actual: {{.item.method_return_type}}{%- if item.init_object_init_value is defined %} = {{.item.init_object_init_value}}{%- endif %};
       {% if item.method_throws == true %} try { {%- endif %}
+        {%- if item.method_name == "codePointAt" %}
+      let tmp: Number | undefined = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
+      if (tmp == undefined) {
+        console.print("FAILED");
+        console.println();
+        exp_idx++;
+        continue;
+      }
+      actual = tmp.doubleValue();
+        {%- else %}
       actual = obj{{.item.object_type}}.{{.item.method_name}}({{.item.param_list.keys()|list|join(', ')}});
+        {%- endif %}
       {% if item.method_throws == true %} } catch (e) { console.println("Unexpected exception in positive test"); } {%- endif %}
   {%- endif %}
   {%- for number, param in item.param_list.items() %}

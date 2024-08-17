@@ -134,7 +134,7 @@ function encodeURIImpl(uri: string, ok: boolean[]): string {
     while (i < uri.getLength()) {
         let d: int
         try {
-            d = uri.codePointAt(i)
+            d = uri.codePointAt(i) as int
         } catch (e) {
             throw new URIError("malformed URI sequence")
         }
