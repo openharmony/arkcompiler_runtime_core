@@ -26,9 +26,10 @@
 #include "runtime/include/object_header.h"
 #include "runtime/include/thread.h"
 #include "runtime/mem/frame_allocator-inl.h"
-#include "runtime/mem/heap_verifier.h"
-#include "runtime/mem/tlab.h"
 #include "runtime/mem/gc/heap-space-misc/crossing_map_singleton.h"
+#include "runtime/mem/heap_verifier.h"
+#include "runtime/mem/lock_config_helper.h"
+#include "runtime/mem/tlab.h"
 
 namespace ark {
 // Forward declaration
@@ -44,7 +45,7 @@ class MemoryManager;
 
 class HeapManager {
 public:
-    bool Initialize(GCType gcType, bool singleThreaded, bool useTlab, MemStatsType *memStats,
+    bool Initialize(GCType gcType, MTModeT multithreadingMode, bool useTlab, MemStatsType *memStats,
                     InternalAllocatorPtr internalAllocator, bool createPygoteSpace);
 
     bool Finalize();
@@ -230,12 +231,22 @@ private:
     }
 
     template <GCType GC_TYPE>
-    bool Initialize(MemStatsType *memStats, bool singleThreaded, bool createPygoteSpace)
+    bool Initialize(MemStatsType *memStats, MTModeT multithreadingMode, bool createPygoteSpace)
     {
-        if (singleThreaded) {
-            return Initialize<GC_TYPE, MT_MODE_SINGLE>(memStats, createPygoteSpace);
+        switch (multithreadingMode) {
+            case MT_MODE_SINGLE: {
+                return Initialize<GC_TYPE, MT_MODE_SINGLE>(memStats, createPygoteSpace);
+            }
+            case MT_MODE_MULTI: {
+                return Initialize<GC_TYPE, MT_MODE_MULTI>(memStats, createPygoteSpace);
+            }
+            case MT_MODE_TASK: {
+                return Initialize<GC_TYPE, MT_MODE_TASK>(memStats, createPygoteSpace);
+            }
+            default: {
+                UNREACHABLE();
+            }
         }
-        return Initialize<GC_TYPE, MT_MODE_MULTI>(memStats, createPygoteSpace);
     }
 
     /**

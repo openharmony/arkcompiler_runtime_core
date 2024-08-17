@@ -755,7 +755,9 @@ void ObjectAllocatorGenBase::InvalidateSpaceData()
 
 template class ObjectAllocatorGen<MT_MODE_SINGLE>;
 template class ObjectAllocatorGen<MT_MODE_MULTI>;
+template class ObjectAllocatorGen<MT_MODE_TASK>;
 template class ObjectAllocatorNoGen<MT_MODE_SINGLE>;
 template class ObjectAllocatorNoGen<MT_MODE_MULTI>;
+template class ObjectAllocatorNoGen<MT_MODE_TASK>;
 
 }  // namespace ark::mem

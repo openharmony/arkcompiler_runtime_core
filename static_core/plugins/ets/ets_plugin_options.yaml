@@ -22,7 +22,7 @@
       additional_interpter_inl: plugins/ets/runtime/interpreter/interpreter-inl.h
       language_config:
         lang_type: static
-        mt_mode: multi
+        mt_mode: task
         has_value_object_types: false
       ctor_name: <ctor>
       cctor_name: <cctor>

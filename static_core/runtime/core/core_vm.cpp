@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include "core_vm.h"
-#include "utils/expected.h"
+#include "libpandabase/utils/expected.h"
 #include "runtime/compiler.h"
+#include "runtime/core/core_vm.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/include/thread.h"
 #include "runtime/include/class_linker.h"
-#include "runtime/single_thread_manager.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/mem/gc/reference-processor/empty_reference_processor.h"
+#include "runtime/mem/lock_config_helper.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
+#include "runtime/single_thread_manager.h"
 
 namespace ark::core {
 
@@ -35,7 +36,7 @@ static mem::MemoryManager *CreateMM(const LanguageContext &ctx, mem::InternalAll
         nullptr,                                      // register_finalize_reference_func
         options.GetMaxGlobalRefSize(),                // max_global_ref_size
         options.IsGlobalReferenceSizeCheckEnabled(),  // is_global_reference_size_check_enabled
-        false,                                        // is_single_thread
+        MT_MODE_MULTI,                                // multithreading mode
         options.IsUseTlabForAllocations(),            // is_use_tlab_for_allocations
         options.IsStartAsZygote(),                    // is_start_as_zygote
     };
