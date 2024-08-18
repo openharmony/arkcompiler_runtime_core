@@ -18,7 +18,7 @@ package std.core;
 /**
  * Can be implemented by any type that supports comparison.
  */
-export interface Comparable<T> {
+export interface Comparable<in T> {
 
     /**
      * Compares this instance to other object, treated as a `T`

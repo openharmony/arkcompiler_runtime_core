@@ -33,3 +33,7 @@ cases:
       class Base { foo<T, U = T[]>(): BiConsumer<T, U> { return new BiConsumer<T, U>() } }
     use: |-
       new Base().foo<SomeType>().accept(new SomeType(), [new SomeType()])
+  - decl: |-
+      class Base { foo<T = "string">(): Consumer<T> { return new Consumer<T>() } }
+    use: |-
+      new Base().foo().accept("string")

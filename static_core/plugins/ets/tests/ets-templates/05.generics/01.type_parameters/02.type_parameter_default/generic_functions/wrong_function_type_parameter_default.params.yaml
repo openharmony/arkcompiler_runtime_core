@@ -17,4 +17,4 @@ cases:
   - function foo<T, T = SomeType>() {}
   - function foo<T = SomeType, U>() {}
   - function foo<T = 10>() {}
-  - function foo<T = "string">() {}
+  - function foo<T = string1>() {}

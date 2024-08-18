@@ -17,4 +17,4 @@ cases:
   - class Base { foo<T, T = SomeType>() {} }
   - class Base { foo<T = SomeType, U>() {} }
   - class Base { foo<T = 10>() {} }
-  - class Base { foo<T = "string">() {} }
+  - class Base { foo<T = string1>() {} }
