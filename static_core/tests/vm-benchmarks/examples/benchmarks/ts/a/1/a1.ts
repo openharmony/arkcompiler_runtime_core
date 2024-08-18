@@ -31,8 +31,8 @@ class A1 {
    * @Param 100
    */
     loopCount: number;
-    startString: string = "";
-    concatString: string = "Ab";
+    startString: string = '';
+    concatString: string = 'Ab';
 
   /**
    * @Setup
