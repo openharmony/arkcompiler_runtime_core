@@ -86,6 +86,48 @@ bool FileReader::ReadContainer(bool shouldRebuildIndices)
     return true;
 }
 
+template <typename T>
+static void EmplaceLiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                std::vector<panda_file::LiteralItem> &literalArray, std::unique_ptr<const File> &file)
+{
+    File::EntityId id(std::get<uint32_t>(value));
+    auto sp = file->GetSpanFromId(id);
+    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+    literalArray.emplace_back(len);
+    for (size_t i = 0; i < len; i++) {
+        auto v = helpers::Read<sizeof(T)>(&sp);
+        literalArray.emplace_back(v);
+    }
+}
+
+static void EmplaceLiteralString(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                 std::vector<panda_file::LiteralItem> &literalArray, std::unique_ptr<const File> &file,
+                                 ItemContainer &container)
+{
+    File::EntityId id(std::get<uint32_t>(value));
+    auto data = file->GetStringData(id);
+    std::string itemStr(utf::Mutf8AsCString(data.data));
+    auto *stringItem = container.GetOrCreateStringItem(itemStr);
+    literalArray.emplace_back(stringItem);
+}
+
+static void EmplaceLiteralArrayString(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                      std::vector<panda_file::LiteralItem> &literalArray,
+                                      std::unique_ptr<const File> &file, ItemContainer &container)
+{
+    File::EntityId id(std::get<uint32_t>(value));
+    auto sp = file->GetSpanFromId(id);
+    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+    literalArray.emplace_back(len);
+    for (size_t i = 0; i < len; i++) {
+        File::EntityId strId(helpers::Read<sizeof(uint32_t)>(&sp));
+        auto data = file->GetStringData(strId);
+        std::string itemStr(utf::Mutf8AsCString(data.data));
+        auto *stringItem = container.GetOrCreateStringItem(itemStr);
+        literalArray.emplace_back(stringItem);
+    }
+}
+
 void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &literalArray,
                                     const panda_file::LiteralDataAccessor::LiteralValue &value,
                                     const panda_file::LiteralTag &tag)
@@ -105,26 +147,12 @@ void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &litera
         case panda_file::LiteralTag::ARRAY_U1:
         case panda_file::LiteralTag::ARRAY_I8:
         case panda_file::LiteralTag::ARRAY_U8: {
-            File::EntityId id(std::get<uint32_t>(value));
-            auto sp = file_->GetSpanFromId(id);
-            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-            literalArray.emplace_back(len);
-            for (size_t i = 0; i < len; i++) {
-                auto v = helpers::Read<sizeof(uint8_t)>(&sp);
-                literalArray.emplace_back(v);
-            }
+            EmplaceLiteralArray<uint8_t>(value, literalArray, file_);
             break;
         }
         case panda_file::LiteralTag::ARRAY_I16:
         case panda_file::LiteralTag::ARRAY_U16: {
-            File::EntityId id(std::get<uint32_t>(value));
-            auto sp = file_->GetSpanFromId(id);
-            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-            literalArray.emplace_back(len);
-            for (size_t i = 0; i < len; i++) {
-                auto v = helpers::Read<sizeof(uint16_t)>(&sp);
-                literalArray.emplace_back(v);
-            }
+            EmplaceLiteralArray<uint16_t>(value, literalArray, file_);
             break;
         }
         case panda_file::LiteralTag::INTEGER: {
@@ -134,27 +162,13 @@ void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &litera
         case panda_file::LiteralTag::ARRAY_I32:
         case panda_file::LiteralTag::ARRAY_U32:
         case panda_file::LiteralTag::ARRAY_F32: {
-            File::EntityId id(std::get<uint32_t>(value));
-            auto sp = file_->GetSpanFromId(id);
-            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-            literalArray.emplace_back(len);
-            for (size_t i = 0; i < len; i++) {
-                auto v = helpers::Read<sizeof(uint32_t)>(&sp);
-                literalArray.emplace_back(v);
-            }
+            EmplaceLiteralArray<uint32_t>(value, literalArray, file_);
             break;
         }
         case panda_file::LiteralTag::ARRAY_I64:
         case panda_file::LiteralTag::ARRAY_U64:
         case panda_file::LiteralTag::ARRAY_F64: {
-            File::EntityId id(std::get<uint32_t>(value));
-            auto sp = file_->GetSpanFromId(id);
-            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-            literalArray.emplace_back(len);
-            for (size_t i = 0; i < len; i++) {
-                auto v = helpers::Read<sizeof(uint64_t)>(&sp);
-                literalArray.emplace_back(v);
-            }
+            EmplaceLiteralArray<uint64_t>(value, literalArray, file_);
             break;
         }
         case panda_file::LiteralTag::FLOAT: {
@@ -166,25 +180,11 @@ void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &litera
             break;
         }
         case panda_file::LiteralTag::STRING: {
-            File::EntityId id(std::get<uint32_t>(value));
-            auto data = file_->GetStringData(id);
-            std::string itemStr(utf::Mutf8AsCString(data.data));
-            auto *stringItem = container_.GetOrCreateStringItem(itemStr);
-            literalArray.emplace_back(stringItem);
+            EmplaceLiteralString(value, literalArray, file_, container_);
             break;
         }
         case panda_file::LiteralTag::ARRAY_STRING: {
-            File::EntityId id(std::get<uint32_t>(value));
-            auto sp = file_->GetSpanFromId(id);
-            auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-            literalArray.emplace_back(len);
-            for (size_t i = 0; i < len; i++) {
-                File::EntityId strId(helpers::Read<sizeof(uint32_t)>(&sp));
-                auto data = file_->GetStringData(strId);
-                std::string itemStr(utf::Mutf8AsCString(data.data));
-                auto *stringItem = container_.GetOrCreateStringItem(itemStr);
-                literalArray.emplace_back(stringItem);
-            }
+            EmplaceLiteralArrayString(value, literalArray, file_, container_);
             break;
         }
         case panda_file::LiteralTag::METHOD:
@@ -193,8 +193,6 @@ void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &litera
         case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
             File::EntityId methodId(std::get<uint32_t>(value));
             MethodDataAccessor methodAcc(*file_, methodId);
-            auto name = methodAcc.GetName();
-            (void)name;
             File::EntityId classId(methodAcc.GetClassId());
             auto *classItem = CreateClassItem(classId);
             literalArray.emplace_back(CreateMethodItem(classItem, methodId));
@@ -227,6 +225,32 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, F
     item->AddItems(literalArray);
 
     return true;
+}
+
+template <typename T>
+static ValueItem *GeneratePrimitiveItemLesserInt32(AnnotationDataAccessor::Elem &annElem, ItemContainer &container,
+                                                   ark::panda_file::Type::TypeId typeId)
+{
+    auto array = annElem.GetArrayValue();
+    std::vector<ScalarValueItem> items;
+    for (size_t j = 0; j < array.GetCount(); j++) {
+        ScalarValueItem scalar(static_cast<uint32_t>(array.Get<T>(j)));
+        items.emplace_back(std::move(scalar));
+    }
+    return static_cast<ValueItem *>(container.CreateItem<ArrayValueItem>(Type(typeId), std::move(items)));
+}
+
+template <typename T>
+static ValueItem *GeneratePrimitiveItem(AnnotationDataAccessor::Elem &annElem, ItemContainer &container,
+                                        ark::panda_file::Type::TypeId typeId)
+{
+    auto array = annElem.GetArrayValue();
+    std::vector<ScalarValueItem> items;
+    for (size_t j = 0; j < array.GetCount(); j++) {
+        ScalarValueItem scalar(array.Get<T>(j));
+        items.emplace_back(std::move(scalar));
+    }
+    return static_cast<ValueItem *>(container.CreateItem<ArrayValueItem>(Type(typeId), std::move(items)));
 }
 
 // NOLINTNEXTLINE(readability-function-size)
@@ -302,114 +326,37 @@ ValueItem *FileReader::SetElemValueItem(AnnotationDataAccessor::Tag &annTag, Ann
             return container_.GetOrCreateIntegerValueItem(0);
         }
         case 'K': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U1), std::move(items)));
+            return GeneratePrimitiveItemLesserInt32<uint8_t>(annElem, container_, Type::TypeId::U1);
         }
         case 'L': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I8), std::move(items)));
+            return GeneratePrimitiveItemLesserInt32<uint8_t>(annElem, container_, Type::TypeId::I8);
         }
         case 'M': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U8), std::move(items)));
+            return GeneratePrimitiveItemLesserInt32<uint8_t>(annElem, container_, Type::TypeId::U8);
         }
         case 'N': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint16_t>(j)));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I16), std::move(items)));
+            return GeneratePrimitiveItemLesserInt32<uint16_t>(annElem, container_, Type::TypeId::I16);
         }
         case 'O': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint16_t>(j)));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U16), std::move(items)));
+            return GeneratePrimitiveItemLesserInt32<uint16_t>(annElem, container_, Type::TypeId::U16);
         }
         case 'P': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(array.Get<uint32_t>(j));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I32), std::move(items)));
+            return GeneratePrimitiveItem<uint32_t>(annElem, container_, Type::TypeId::I32);
         }
         case 'Q': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(array.Get<uint32_t>(j));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U32), std::move(items)));
+            return GeneratePrimitiveItem<uint32_t>(annElem, container_, Type::TypeId::U32);
         }
         case 'R': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(array.Get<uint64_t>(j));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I64), std::move(items)));
+            return GeneratePrimitiveItem<uint64_t>(annElem, container_, Type::TypeId::I64);
         }
         case 'S': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(array.Get<uint64_t>(j));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U64), std::move(items)));
+            return GeneratePrimitiveItem<uint64_t>(annElem, container_, Type::TypeId::U64);
         }
         case 'T': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(array.Get<float>(j));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::F32), std::move(items)));
+            return GeneratePrimitiveItem<float>(annElem, container_, Type::TypeId::F32);
         }
         case 'U': {
-            auto array = annElem.GetArrayValue();
-            std::vector<ScalarValueItem> items;
-            for (size_t j = 0; j < array.GetCount(); j++) {
-                ScalarValueItem scalar(array.Get<double>(j));
-                items.emplace_back(std::move(scalar));
-            }
-            return static_cast<ValueItem *>(
-                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::F64), std::move(items)));
+            return GeneratePrimitiveItem<double>(annElem, container_, Type::TypeId::F64);
         }
         case 'V': {
             auto array = annElem.GetArrayValue();

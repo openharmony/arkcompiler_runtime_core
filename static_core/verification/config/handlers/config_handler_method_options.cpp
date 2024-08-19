@@ -39,23 +39,11 @@ namespace {
 
 using Literals = PandaVector<PandaString>;
 
-const auto &MessageSetParser()
+auto GetNameHandler()
 {
     using ark::parser::Action;
-    using ark::parser::Charset;
-    using ark::parser::Parser;
 
-    using P = Parser<MessageSetContext, const char, const char *>;
-    using P1 = typename P::P;
-    using P2 = typename P1::P;
-    using P3 = typename P2::P;
-    using P4 = typename P3::P;
-
-    static const auto WS = P::OfCharset(" \t\r\n");
-    static const auto COMMA = P1::OfCharset(",");
-    static const auto DEC = P2::OfCharset("0123456789");
-
-    static const auto NAME_HANDLER = [](Action a, MessageSetContext &c, auto from, auto to) {
+    return [](Action a, MessageSetContext &c, auto from, auto to) {
         if (a == Action::PARSED) {
             std::string_view name {from, static_cast<size_t>(to - from)};
             auto num = static_cast<size_t>(ark::verifier::StringToVerifierMessage(name));
@@ -63,16 +51,26 @@ const auto &MessageSetParser()
         }
         return true;
     };
+}
 
-    static const auto NUM_HANDLER = [](Action a, MessageSetContext &c, auto from) {
+auto GetNumHandler()
+{
+    using ark::parser::Action;
+
+    return [](Action a, MessageSetContext &c, auto from) {
         if (a == Action::PARSED) {
             auto num = static_cast<size_t>(std::strtol(from, nullptr, 0));
             c.stack.push_back(std::make_pair(num, num));
         }
         return true;
     };
+}
 
-    static const auto RANGE_HANDLER = [](Action a, MessageSetContext &c) {
+auto GetRangeHandler()
+{
+    using ark::parser::Action;
+
+    return [](Action a, MessageSetContext &c) {
         if (a == Action::PARSED) {
             auto numEnd = c.stack.back();
             c.stack.pop_back();
@@ -83,8 +81,13 @@ const auto &MessageSetParser()
         }
         return true;
     };
+}
 
-    static const auto ITEM_HANDLER = [](Action a, MessageSetContext &c) {
+auto GetItemHandler()
+{
+    using ark::parser::Action;
+
+    return [](Action a, MessageSetContext &c) {
         if (a == Action::START) {
             c.stack.clear();
         }
@@ -98,6 +101,28 @@ const auto &MessageSetParser()
         }
         return true;
     };
+}
+
+const auto &MessageSetParser()
+{
+    using ark::parser::Parser;
+
+    using P = Parser<MessageSetContext, const char, const char *>;
+    using P1 = typename P::P;
+    using P2 = typename P1::P;
+    using P3 = typename P2::P;
+    using P4 = typename P3::P;
+
+    static const auto WS = P::OfCharset(" \t\r\n");
+    static const auto COMMA = P1::OfCharset(",");
+    static const auto DEC = P2::OfCharset("0123456789");
+
+    static const auto NAME_HANDLER = GetNameHandler();
+    static const auto NUM_HANDLER = GetNumHandler();
+
+    static const auto RANGE_HANDLER = GetRangeHandler();
+
+    static const auto ITEM_HANDLER = GetItemHandler();
 
     static const auto NAME = P3::OfCharset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789") |=
         NAME_HANDLER;

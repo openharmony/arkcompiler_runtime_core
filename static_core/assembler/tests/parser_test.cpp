@@ -4094,7 +4094,7 @@ TEST(parsertests, test_function_overloading_3)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
 
             .function void main(u1 a0) {
                 call f
@@ -4156,7 +4156,7 @@ TEST(parsertests, test_function_overloading_6)
     Parser p;
     std::string source = R"(
             .function u1 f() {}
-            .function u1 f(i8 a0) {} 
+            .function u1 f(i8 a0) {}
 
             .function void main(u1 a0) {
                 call f:(u1)

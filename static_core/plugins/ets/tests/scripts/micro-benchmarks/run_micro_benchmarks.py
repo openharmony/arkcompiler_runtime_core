@@ -100,7 +100,7 @@ class EtsBenchmarksRunner:
     def dump_output_to_file(self, pipe, file_ext):
         dumpfile = os.fdopen(os.open(os.path.join(self.host_output_dir,
                                      self.current_bench_name, f"test.{file_ext}"),
-                                     os.O_RDWR|os.O_CREAT, 0o755), "w")
+                                     os.O_RDWR | os.O_CREAT, 0o755), "w")
         dumpfile.write(pipe.decode('ascii'))
         dumpfile.close()
 
