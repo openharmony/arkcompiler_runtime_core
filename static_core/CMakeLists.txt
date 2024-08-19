@@ -72,6 +72,7 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Werror -Wshadow")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-rtti -fno-exceptions")
 
+# CC-OFFNXT(bc-40028) FP
 include(cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
 if(ENABLE_UNIT_TESTS_FULL_COVERAGE)
