@@ -20,12 +20,28 @@ package escompat;
  * in the WeakSet may only occur once. It is unique in the WeakSet's
  * collection.
  */
-export final class WeakSet<K> {
+export final class WeakSet<K extends Object> {
+    // NOTE(cheezzario) move creation to constructor
+    private readonly elements: WeakMap<K, null> = new WeakMap<K, null>()
+
     /**
      * The WeakSet() constructor creates WeakSet objects.
      */
-    constructor() {
+    constructor(elements?: K[] | null) {
+        if (elements != null) {
+            for (const element of elements) {
+                this.add(element)
+            }
+        }
+    }
 
+    /**
+     * The WeakSet() constructor creates WeakSet objects.
+     */
+    constructor(elements: Iterable<K>) {
+        iteratorForEach<K>(elements.$_iterator(), (elem: K) => {
+            this.add(elem)
+        })
     }
 
     /**
@@ -33,7 +49,8 @@ export final class WeakSet<K> {
      * object.
      */
     add(v: K): WeakSet<K>{
-        throw new Error("Not implemented");
+        this.elements.set(v, null)
+        return this
     }
 
     /**
@@ -41,7 +58,7 @@ export final class WeakSet<K> {
      * exists in a WeakSet or not.
      */
     has(v: K): boolean {
-        throw new Error("Not implemented");
+        return this.elements.has(v)
     }
 
     /**
@@ -49,6 +66,6 @@ export final class WeakSet<K> {
      * a WeakSet object.
      */
     delete(v: K): boolean {
-        throw new Error("Not implemented");
+        return this.elements.delete(v)
     }
 }
