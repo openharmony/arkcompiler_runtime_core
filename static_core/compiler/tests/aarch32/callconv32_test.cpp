@@ -311,14 +311,14 @@ TEST_F(Callconv32Test, NativeParams)
 
     // 4 float params - in registers
     {
-        auto param_info = GetCallconv()->GetParameterInfo(0);
-        auto ret = param_info->GetNativeParam(FLOAT32_TYPE);
+        auto paramInfo = GetCallconv()->GetParameterInfo(0);
+        auto ret = paramInfo->GetNativeParam(FLOAT32_TYPE);
         EXPECT_TRUE(std::holds_alternative<Reg>(ret));
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, FLOAT_PARAM_TYPE));
 
         for (uint32_t i = 1; i <= 3U; ++i) {
-            ret = param_info->GetNativeParam(FLOAT32_TYPE);
+            ret = paramInfo->GetNativeParam(FLOAT32_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
             EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
             EXPECT_EQ(std::get<Reg>(ret), Reg(i, FLOAT_PARAM_TYPE));
@@ -327,13 +327,13 @@ TEST_F(Callconv32Test, NativeParams)
 
     // 2 double params - in registers
     {
-        auto param_info = GetCallconv()->GetParameterInfo(0);
-        auto ret = param_info->GetNativeParam(FLOAT64_TYPE);
+        auto paramInfo = GetCallconv()->GetParameterInfo(0);
+        auto ret = paramInfo->GetNativeParam(FLOAT64_TYPE);
         EXPECT_TRUE(std::holds_alternative<Reg>(ret));
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, DOUBLE_PARAM_TYPE));
 
-        ret = param_info->GetNativeParam(FLOAT64_TYPE);
+        ret = paramInfo->GetNativeParam(FLOAT64_TYPE);
         EXPECT_TRUE(std::holds_alternative<Reg>(ret));
         EXPECT_EQ(std::get<Reg>(ret).GetId(), 2U);
         EXPECT_EQ(std::get<Reg>(ret), Reg(2U, DOUBLE_PARAM_TYPE));
