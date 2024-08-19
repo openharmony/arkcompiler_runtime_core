@@ -1,0 +1,299 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+    - decl: |-
+          // no parameters
+          abstract class C {
+              static invoke(): number { return 42.0 }
+          }
+      use: |-
+          let x = C()
+          if (x != 42.0) return 1
+
+    - decl: |-
+          // no parameters
+          class C {
+              static invoke(): number { return 42.0 }
+          }
+      use: |-
+          if (C.invoke() != 42.0) return 1
+
+    - decl: |-
+          // no parameters, use type alias
+          type A = C
+          class C {
+              static invoke(): number { return 42.0 }
+          }
+      use: |-
+          let x = A()
+          if (x != 42.0) return 1
+
+    - decl: |-
+          // no parameters, use type alias
+          type A = C
+          abstract class C {
+              static invoke(): number { return 42.0 }
+          }
+      use: |-
+          let x = A.invoke()
+          if (x != 42.0) return 1
+
+    - decl: |-
+          // void return, implicit type
+          class C {
+              static res = 0
+              static invoke() { C.res = 1 }
+          }
+      use: |-
+          C.res = 0
+          C()
+          if (C.res != 1) return 1
+
+    - decl: |-
+          // void return, explicit type
+          class C {
+              static res = 0
+              static invoke(): void { C.res = 1 }
+          }
+      use: |-
+          C.res = 0
+          C()
+          if (C.res != 1) return 1
+
+    - decl: |-
+          // singleton
+          class C {
+              static instance: C|null|undefined = undefined
+              static invoke(): C {
+                  if (C.instance == undefined) {
+                      C.instance = new C()
+                  }
+                  return C.instance!
+              }
+          }
+      use: |-
+          if (C() != C() || C.invoke() != C.invoke() || C.invoke() != C()) return 1
+
+    - decl: |-
+          // with parameters
+          class Add {
+              static invoke(a: number, b: number): number { return a + b }
+          }
+          class Sub {
+              static invoke(a: number, b: number): number { return a - b }
+          }
+          class Mul {
+              static invoke(a: number, b: number): number { return a * b }
+          }
+          class Div {
+              static invoke(a: number, b: number): number { return a / b }
+          }
+      use: |-
+          let x = Div(Mul(Add(1.0, 2.0), 3.0), 2.0)
+          if (x != (1.0 + 2.0) * 3.0 / 2.0) return 1
+          let y = Div.invoke(Mul.invoke(Add.invoke(1.0, 2.0), 3.0), 2.0)
+          if (y != x) return 1
+
+    - decl: |-
+          // arbitrary number of parameters
+          class Sum {
+              static invoke(...numbers: number[]): number {
+                  let sum = 0.0
+                  for (let n of numbers) sum += n
+                  return sum
+              }
+          }
+      use: |-
+          if (Sum() != 0.0) return 1
+          if (Sum(11.0) != 11.0) return 1
+          if (Sum(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3) != 118.0) return 1
+
+          if (Sum.invoke() != 0.0) return 1
+          if (Sum.invoke(11.0) != 11.0) return 1
+          if (Sum.invoke(12, 13, 14, 15, 16, 17, 18, 19, -1, -2, -3) != 118.0) return 1
+
+    - decl: |-
+          // shadowed invoke
+          class A<T> {
+              static invoke(): string { return 'A' }
+          }
+          class B<T> extends A<T> {
+              static invoke(): string { return 'B' }
+          }
+          class C<T> extends B<T> {
+              static invoke(): string { return 'C' }
+          }
+      use: |-
+          if (C() != 'C') return 1
+          if (B() != 'B') return 1
+          if (A() != 'A') return 1
+
+    - decl: |-
+          // overloaded invoke
+          class B {
+              static invoke(n: number): number { return n + n }
+              static invoke(p: string): string { return p }
+          }
+          class C extends B {
+              static invoke(p: string): string { return p + p }
+              static invoke(p: string, q: boolean): string { return p + q }
+          }
+      use: |-
+          if (C(33.0) != 66.0) return 1
+          if (C('abc') != 'abcabc') return 1
+          if (C('abc', false) != 'abcfalse') return 1
+
+          if (B(42.0) != 84.0) return 1
+          if (B('abc') != 'abc') return 1
+
+    - decl: |-
+          // overloaded invoke
+          class B {
+              static invoke(n: number): number { return n + n }
+              static invoke(p: string): string { return p }
+          }
+          class C extends B {
+              static invoke(p: string): string { return p + p }
+              static invoke(p: string, q: boolean): string { return p + q }
+          }
+      use: |-
+          if (C(33.0) != 66.0) return 1
+          if (C('abc') != 'abcabc') return 1
+          if (C('abc', false) != 'abcfalse') return 1
+
+          if (B(42.0) != 84.0) return 1
+          if (B('abc') != 'abc') return 1
+
+    - decl: |-
+          // mix of static and instance invoke
+          class A {
+              static invoke(): string { return 'A' }
+          }
+          class B extends A {
+              invoke(): string { return 'B' }
+          }
+          class C extends B {
+              invoke(): string { return 'C' }
+          }
+      use: |-
+          if (C() != 'A') return 1
+          if (B() != 'A') return 1
+          if (A() != 'A') return 1
+
+          if (new C().invoke() != 'C') return 1
+          if (new B().invoke() != 'B') return 1
+
+    - decl: |-
+          // mix of static and instance invoke
+          class B {
+              static invoke(): string { return 'B' }
+              invoke(): string { return 'b' }
+          }
+          class C extends B {
+              static invoke(): C { return new C() }
+          }
+      use: |-
+          if (C().invoke() != 'b') return 1
+          if (B.invoke() != 'B') return 1
+          if (new B().invoke() != 'b') return 1
+
+    - decl: |-
+          // error propagation from invoke
+          class B {
+              static invoke(p: boolean): string {
+                  if (p) {
+                      throw new Error('invoke error')
+                  }
+                  return 'B'
+              }
+          }
+          class C extends B {
+              invoke(): C { return new C() }
+          }
+          function foo(p: boolean): string {
+              return C(p)
+          }
+      use: |-
+          let x: string
+          try {
+              x = foo(true)
+              return 1
+          } catch (e: Error) {
+              if (e.message != 'invoke error') return 1
+          }
+
+    - decl: |-
+          // exception propagation from invoke
+          class MyException extends Exception {}
+          class B {
+              static invoke(p: boolean): string throws {
+                  if (p) {
+                      throw new MyException()
+                  }
+                  return 'B'
+              }
+          }
+          class C extends B {
+              invoke(): C { return new C() }
+          }
+          function foo(p: boolean): string throws {
+              return C(p)
+          }
+      use: |-
+          let x: string
+          try {
+              x = foo(true)
+              return 1
+          } catch (e) {
+              if (!(e instanceof MyException)) return 1
+          }
+
+    - decl: |-
+          // call chain of invoke
+          class A<T> {
+              static invoke(): number { return 42.0 }
+          }
+          class B<T> {
+              static invoke() { return A() }
+          }
+          class C<T> {
+              static invoke() { return B() }
+          }
+      use: |-
+          if (C() != 42.0) return 1
+
+    - decl: |-
+          // invoke calls another invoke
+          class C {
+              static invoke() { return C('abc') }
+              static invoke(p: string) { return p }
+          }
+      use: |-
+          if (C() != 'abc') return 1
+
+    - decl: |-
+          // invoke returns array
+          class C {
+              static invoke(...numbers: number[]): number[] {
+                    return numbers
+              }
+          }
+      use: |-
+          if (C().length != 0) return 1
+
+          if (C(1.0)[0] != 1.0) return 1
+          if (C(1.0, 2.0, 3.0)[2] != 3.0) return 1
+
+          if (C.invoke(1.0)[0] != 1.0) return 1
+          if (C.invoke(1.0, 2.0, 3.0)[1] != 2.0) return 1
