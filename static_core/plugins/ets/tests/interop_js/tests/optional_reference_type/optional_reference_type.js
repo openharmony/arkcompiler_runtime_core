@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,62 +14,82 @@
  * limitations under the License.
  */
 exports.__esModule = true;
-exports.fnWithAnyParamObject = exports.fnWithUserInterface = exports.fnWithUserClass = exports.TestUserClass = exports.fnWithUnionParam = exports.fnWithSubsetPartial = exports.fnWithSubsetOmit = exports.fnWithSubsetPick = exports.fnWithExtraSetParam = exports.fnWithLiteralParam = exports.fnWithAnyParams = void 0;
+exports.fnWithAnyParamObject = exports.fnWithUserInterface = exports.fnWithUserClass = exports.TestUserClass =
+ exports.fnWithUnionParam = exports.fnWithSubsetPartial = exports.fnWithSubsetOmit = exports.fnWithSubsetPick =
+  exports.fnWithExtraSetParam = exports.fnWithLiteralParam = exports.fnWithAnyParams = void 0;
+
 function fnWithAnyParams(arr) {
     return arr ? arr[0] : 'Argument not found';
 }
+
 exports.fnWithAnyParams = fnWithAnyParams;
+
 function fnWithLiteralParam(arr) {
     return arr ? arr[0] : 'Argument not found';
 }
+
 exports.fnWithLiteralParam = fnWithLiteralParam;
+
 function fnWithExtraSetParam(arr) {
     return arr ? arr[0] : 'Argument not found';
 }
+
 exports.fnWithExtraSetParam = fnWithExtraSetParam;
+
 function fnWithSubsetPick(obj) {
-    return obj.address ? obj.address.city : 'Adress not found';
+    return obj.address ? obj.address.city : 'Address not found';
 }
+
 exports.fnWithSubsetPick = fnWithSubsetPick;
+
 function fnWithSubsetOmit(obj) {
-    return obj.address ? obj.address.city : 'Adress not found';
+    return obj.address ? obj.address.city : 'Address not found';
 }
+
 exports.fnWithSubsetOmit = fnWithSubsetOmit;
+
 function fnWithSubsetPartial(obj) {
-    return obj.address ? obj.address.city : 'Adress not found';
+    return obj.address ? obj.address.city : 'Address not found';
 }
+
 exports.fnWithSubsetPartial = fnWithSubsetPartial;
+
 function fnWithUnionParam(obj) {
     if (obj) {
         if (Array.isArray(obj)) {
-            return "This is an array";
+            return 'This is an array';
         }
-        else if (typeof obj === 'object') {
-            return "This is an object";
-        }
+        return 'This is an object';
     }
-    else {
-        return 'Argument not found';
-    }
+    return 'Argument not found';
 }
+
 exports.fnWithUnionParam = fnWithUnionParam;
-var TestUserClass = /** @class */ (function () {
-    function TestUserClass(id, name) {
+
+let TestUserClass = /** @class */ (function () {
+    function testUserClass(id, name) {
         this.id = id;
         this.name = name;
     }
-    return TestUserClass;
+    return testUserClass;
 }());
+
 exports.TestUserClass = TestUserClass;
+
 function fnWithUserClass(obj) {
     return obj ? obj.name : 'Class was not passed';
 }
+
 exports.fnWithUserClass = fnWithUserClass;
+
 function fnWithUserInterface(obj) {
     return obj ? obj.name : 'Object was not passed';
 }
+
 exports.fnWithUserInterface = fnWithUserInterface;
+
 function fnWithAnyParamObject(obj) {
     return obj.arr ? obj.arr[0] : obj.id;
 }
+
 exports.fnWithAnyParamObject = fnWithAnyParamObject;

@@ -16,15 +16,15 @@ const { etsVm, getTestModule } = require('indirect_call.test.js');
 
 const etsMod = getTestModule('indirect_call_test_type_ref');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const function_type_ref_array = etsMod.getFunction('function_type_ref_array');
+const functionTypeRefArray = etsMod.getFunction('function_type_ref_array');
 
-function test_function_type_ref_array_bind_with_arg() {
+function testFunctionTypeRefArrayBindWithArg() {
 	const ARG = [42, 73];
-	let boundWithArg = function_type_ref_array.bind(null, ARG);
+	let boundWithArg = functionTypeRefArray.bind(null, ARG);
 
 	ASSERT_EQ(JSON.stringify(boundWithArg()), JSON.stringify(ARG));
 }
 
-test_function_type_ref_array_bind_with_arg();
+testFunctionTypeRefArrayBindWithArg();
 
 GCJSRuntimeCleanup();
