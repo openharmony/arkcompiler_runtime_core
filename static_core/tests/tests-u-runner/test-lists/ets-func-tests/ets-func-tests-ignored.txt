@@ -517,9 +517,9 @@ spec/10.Interfaces/method_overload7.sts
 std/core/std_core_typedarrays__BigInt64Array.sts
 ### BigInt64Array end
 ### Issue 17680
-std/core/std_core_typedarrays_bignum__BigInt64Array.ets
-std/core/std_core_typedarrays_bignum__BigUint64Array.ets
-### Issue 17680
+std/core/std_core_typedarrays_bignum__BigInt64Array.sts
+std/core/std_core_typedarrays_bignum__BigUint64Array.sts
+### Issue 17680 end
 
 
 ### Failures #15642
