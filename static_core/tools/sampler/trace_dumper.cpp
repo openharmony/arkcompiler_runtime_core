@@ -27,6 +27,10 @@ void TraceDumper::DumpTraces(const SampleInfo &sample, size_t count)
 
         std::string fullMethodName;
         if (pfId == helpers::ToUnderlying(FrameKind::BRIDGE)) {
+            if (!buildSystemFrames_) {
+                continue;
+            }
+
             fullMethodName = "System_Frame";
         } else {
             const panda_file::File *pf = nullptr;
@@ -40,6 +44,11 @@ void TraceDumper::DumpTraces(const SampleInfo &sample, size_t count)
         stream << fullMethodName << "; ";
     }
     stream << count << "\n";
+}
+
+void TraceDumper::SetBuildSystemFrames(bool buildSystemFrames)
+{
+    buildSystemFrames_ = buildSystemFrames;
 }
 
 /* static */

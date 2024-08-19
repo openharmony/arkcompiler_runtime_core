@@ -110,6 +110,9 @@ bool AsptConverter::DumpResolvedTracesAsCSV(const char *filename)
         default:
             UNREACHABLE();
     }
+
+    dumper->SetBuildSystemFrames(buildSystemFrames_);
+
     for (auto &[sample, count] : stackTraces_) {
         ASSERT(sample.stackInfo.managedStackSize <= SampleInfo::StackInfo::MAX_STACK_DEPTH);
         dumper->DumpTraces(sample, count);
@@ -240,6 +243,7 @@ bool AsptConverter::RunWithOptions(const Options &cliOptions)
 
     dumpType_ = GetDumpTypeFromOptions(cliOptions);
     buildColdGraph_ = cliOptions.IsColdGraphEnable();
+    buildSystemFrames_ = cliOptions.IsDumpSystemFrames();
 
     if (cliOptions.IsSubstituteModuleDir()) {
         substituteDirectories_ = {cliOptions.GetSubstituteSourceStr(), cliOptions.GetSubstituteDestinationStr()};

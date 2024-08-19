@@ -50,6 +50,8 @@ public:
 
     void DumpTraces(const SampleInfo &sample, size_t count);
 
+    void SetBuildSystemFrames(bool buildSystemFrames);
+
 protected:
     static void WriteThreadId(std::ofstream &stream, uint32_t threadId);
     static void WriteThreadStatus(std::ofstream &stream, SampleInfo::ThreadStatus threadStatus);
@@ -62,6 +64,8 @@ private:
 private:
     ModuleMap *modulesMap_ {nullptr};
     MethodMap *methodsMap_ {nullptr};
+
+    bool buildSystemFrames_ {false};
 };
 
 class SingleCSVDumper final : public TraceDumper {

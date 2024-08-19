@@ -38,6 +38,7 @@ If option `--sampling-profiler-collect-stats` passed on ark launch it creates fi
 | --substitute-source-str         | {dir1}, {dir2}                    | Substring that will be replaced with substitude-destination |
 | --substitute-destination-str    | {dir_target1}, {dir_target2}      | Substring that will be places instead of substitude-source  |
 | --dump-modules                  | true/false (by default: false)    | In this mode converter only dump modules paths to outfile   |
+| --dump-system-frames            | true/false (by default: false)    | Add system frame in dump                                    |
 
 Note: In substitution parameters (source and destination str) number of strings should be equal and i-th string from source changes only to i-th from destination.
 
