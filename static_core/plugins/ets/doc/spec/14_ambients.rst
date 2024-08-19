@@ -79,7 +79,7 @@ Ambient Constant Declarations
 *****************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
     
 .. code-block:: abnf
 
@@ -226,7 +226,7 @@ Ambient constructor, method, and accessor declarations have no bodies:
 .. code-block:: abnf
 
     ambientConstructorDeclaration:
-        'constructor' '(' parameterList? ')' throwMark?
+        'constructor' parameters throwMark?
         ;
 
     ambientMethodDeclaration:

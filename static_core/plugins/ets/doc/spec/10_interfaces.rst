@@ -434,8 +434,7 @@ Interface Method Declarations
 *****************************
 
 .. meta:
-    frontend_status: Partly
-    todo: implement  TS overload signature - #16181
+    frontend_status: Done
 
 An ordinary interface method declaration that specifies the method's name and
 signature is called *abstract*.

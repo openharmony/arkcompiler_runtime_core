@@ -62,7 +62,7 @@ system or a database (see :ref:`Compilation Units in Host System`).
    access
    separate module
    package
-
+   
 |
 
 .. _Separate Modules:
@@ -127,7 +127,7 @@ Separate Module Initializer
 ***************************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 If used for import, a *separate module* is initialized only once with the
 details listed in :ref:`Compilation Unit Initialization`. The initialization process
@@ -154,8 +154,7 @@ Compilation Units in Host System
 **********************************
 
 .. meta:
-    frontend_status: Partly
-    todo: Implement compiling a package module as a single compilation unit - #16267
+    frontend_status: Done
 
 Modules and packages are created and stored in a manner determined by the
 host system. The exact manner modules and packages are stored in a file
@@ -208,6 +207,9 @@ An import declaration has two parts as follows:
 -  Import binding that defines what entities, and in what form---qualified
    or unqualified---the current compilation unit can use.
 
+Alternatively, a module can be imported without biding simply in order to
+run the initialization code.
+
 .. index::
    import directive
    compilation unit
@@ -224,8 +226,9 @@ An import declaration has two parts as follows:
 .. code-block:: abnf
 
     importDirective:
-        'import' allBinding|selectiveBindigns|defaultBinding|typeBinding
-        'from' importPath
+        'import' 
+        (allBinding|selectiveBindigns|defaultBinding|typeBinding 'from')?
+        importPath
         ;
 
     allBinding:
@@ -263,7 +266,7 @@ distinguishable in the declaration scope (see
 
 -  A declaration added to the scope of a module or a package by a binding is
    not distinguishable;
--  If ``importPath`` refers to the file the current module is stored in.
+-  ``importPath`` refers to the file the current module is stored in.
 
 
 **Note**: Import directives are handled by the compiler during compilation, and
@@ -516,7 +519,7 @@ applied to a single name:
    import
    alias
    access
-
+   
 |
 
 .. _Default Import Binding:
@@ -583,7 +586,7 @@ and the latter imports only exported types.
     export class Class1 {/*body*/}
 
     class Class2 {}
-    export type {Class2}
+    export type {Class2} 
 
     // MainProgram.sts
 
@@ -592,6 +595,43 @@ and the latter imports only exported types.
 
     let c1 = new Class1() // OK
     let c2 = new Class2() // OK, the same
+
+
+|
+
+.. _Import with No Binding:
+
+Import with No Binding
+======================
+
+.. meta:
+    frontend_status: None
+
+Import with No Binding allows initializing the imported module or package
+intialization code right before the code of the current module starts:
+
+.. code-block:: typescript
+   :linenos:
+
+    // File module.sts
+    console.log ("Module initialization code")
+
+    // Folder PackageFolder
+       // File package.sts
+       package P
+       console.log ("Package initialization code")
+
+    // MainProgram.sts
+
+    import "./module.sts"
+    import "./PackageFolder"
+    console.log ("MainProgram code")
+
+The output of Import with No Binding is as follows:
+
+- Module initialization code;
+- Package initialization code; or
+- MainProgram code.
 
 
 |
@@ -756,7 +796,7 @@ Declaration Modules
 *******************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 A *declaration module* is a special kind of compilation units that can be
 imported by using :ref:`Import Directives`. A declaration module contains
@@ -768,7 +808,7 @@ elsewhere.
 .. code-block:: abnf
 
     declarationModule:
-        importDirective*
+        importDirective* 
         ( 'export'? ambientDeclaration
         | 'export'? typeAlias
         | selectiveExportDirective
@@ -826,7 +866,7 @@ Compilation Unit Initialization
 *******************************
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 A *compilation unit* is a separate module (see :ref:`Separate Module Initializer`)
 or a package (see :ref:`Package Initializer`) that is initialized once before
@@ -1258,10 +1298,10 @@ Separate modules can act as programs (applications). The two kinds of program
 - Top-level statements (see :ref:`Top-Level Statements`);
 - Top-level ``main`` function (see below).
 
-Thus, a separate module may have:
+Thus, a separate module can have:
 
-- Only a top-level ``main`` function (that is the entry point);
-- Only top-level statements (the first statement in the top-level statements
+- Sole top-level ``main`` function (that is the entry point);
+- Sole top-level statements (the first statement in the top-level statements
   is the entry point);
 - Both top-level statements and ``main`` function (same as above, plus ``main``
   is called after the top-level statements execution is completed).
@@ -1346,7 +1386,7 @@ In both cases, the control is passed to the |LANG| runtime system, which ensures
 that all coroutines (see :ref:`Coroutines`) created during the program execution
 are terminated.
 
-If an unhandled error or exception occurr, then proper diagnostics is displayed.
+If an unhandled error or exception occur, then proper diagnostics is displayed.
 
 This is the end of the program exit process.
 
@@ -1354,3 +1394,4 @@ This is the end of the program exit process.
 .. raw:: pdf
 
    PageBreak
+

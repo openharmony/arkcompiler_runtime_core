@@ -18,7 +18,7 @@ Annotations
 An *annotation* is a special language element that changes the semantics of
 the declaration it is applied to by adding metadata.
 
-The example below illustrates the declaring and using of an annotation:
+The example below illustrates the declaration and use of an annotation:
 
 .. code-block:: typescript
    :linenos:
@@ -167,7 +167,7 @@ An annotation declaration is presented in the example below:
 
 In general, annotation field values are set by an *object literal*. In a
 special case, annotation field values are set by using an expression (see
-:ref:`Using Single Field Annotations`.
+:ref:`Using Single Field Annotations`).
 
 All values in an *object literal* must be constant expressions. Otherwise,
 a :index:`compile-time error` occurs.
@@ -204,7 +204,7 @@ Otherwise, a :index:`compile-time error` occurs:
     abstract class A {} // compile-time error
 
 Repeatable annotations are not supported, i.e., an annotation cannot be applied
-to an entity more than once):
+to an entity more than once:
 
 .. code-block:: typescript
    :linenos:
@@ -325,8 +325,8 @@ Unqualified import is also allowed:
     @MyAnno
     class C {/*body*/}
 
-As an annotation is not a type, it is forbidden to export or import annotations
-by using ``export type`` or ``import type`` notations:
+An annotation is not a type. Exporting or importing annotations by using
+``export type`` or ``import type`` notations is forbidden:
 
 .. code-block:: typescript
    :linenos:
@@ -381,8 +381,8 @@ identical, including field initialization:
     // a.sts
     export @interface NameAnno{name: string = ""} // ok
 
-The code in the example below is incorrect as the ambient declaration is not
-identical to the annotation declaration:
+The code in the example below is incorrect because the ambient declaration is
+not identical to the annotation declaration:
 
 .. code-block:: typescript
    :linenos:

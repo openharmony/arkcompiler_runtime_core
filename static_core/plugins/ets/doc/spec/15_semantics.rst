@@ -117,6 +117,9 @@ constraint of that type parameter.
 Supertyping
 ***********
 
+.. meta:
+    frontend_status: Done
+
 The *supertype* relationship between the two types ``T`` and ``S``, where ``T``
 is a supertype of ``T`` (recorded as ``T>:S``) is opposite to subtyping (see
 :ref:`Subtyping`). *Supertyping* means that any object of type ``S`` can be
@@ -189,7 +192,7 @@ If class ``Base`` is defined as follows:
       method_three(p: Derived): Derived {}
    }
 
---then the code below is valid:
+---then the code below is valid:
 
 .. code-block:: typescript
    :linenos:
@@ -244,6 +247,7 @@ Type ``T``:sub:`1` is compatible with type ``T``:sub:`2` if:
 is compatible with type ``T``:sub:`2` does not imply that ``T``:sub:`2` is
 compatible with type ``T``:sub:`1`.
 
+
 .. index::
    type compatibility
    conversion
@@ -296,7 +300,7 @@ Type Inference
 **************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 In spite of the fact that |LANG| supports strong typing, it allows not to
 burden the programmer to specify type annotations everywhere. Smart compiler
@@ -377,8 +381,8 @@ Other examples are explicit calls to ``instanceof``
 In cases like this, the smart compiler can deduce the smart type of an entity
 without requiring unnecessary ``as`` conversions (see :ref:`Cast Expressions`).
 
-Tricky cases related to overloading (see :ref:`Function and Method Overloading`)
-are possible, when a smart type can lead to the call of a function or a method
+Overloading (see :ref:`Function and Method Overloading`) can cause tricky
+situations when a smart type leads to the call of a function or a method
 (see :ref:`Overload Resolution`) that suits the smart type rather than the
 static type of an argument:
 
@@ -447,15 +451,15 @@ parameters are *overload-equivalent* if:
    in *S*:sub:`2` is any reference type or type parameter;
 
 -  Parameter type at some position in *S*:sub:`1` is *generic type*
-   ``G``<``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
+   ``G`` <``T``:sub:`1`, ``...``, ``T``:sub:`n`>, and a parameter type at the
    same position in *S*:sub:`2` is also ``G`` with any list of type arguments
    (see :ref:`Type Arguments`);
 
 -  All other parameter types in *S*:sub:`1` are equal to parameter types
    in the same positions in *S*:sub:`2`.
 
-Parameter names and return types do not influence *overload-equivalence*. The
-signatures in the following series are *overload-equivalent*:
+Parameter names and return types do not influence *overload-equivalence*.
+Signatures in the following series are *overload-equivalent*:
 
 .. code-block-meta:
 
@@ -465,7 +469,6 @@ signatures in the following series are *overload-equivalent*:
    (x: number): void
    (y: number): void
 
-|
 
 .. code-block-meta:
 
@@ -475,7 +478,6 @@ signatures in the following series are *overload-equivalent*:
    (x: number): void
    (y: number): number
 
-|
 
 .. code-block-meta:
 
@@ -486,7 +488,6 @@ signatures in the following series are *overload-equivalent*:
    (y: Number): void
    (x: T): void
 
-|
 
 .. code-block-meta:
 
@@ -497,7 +498,6 @@ signatures in the following series are *overload-equivalent*:
    (y: G<Number>): void
    (x: G<T>): void
 
-|
 
 .. code-block-meta:
 
@@ -508,7 +508,7 @@ signatures in the following series are *overload-equivalent*:
    (y: T): void
    (x: S): void
 
-The signatures in the following series are not *overload-equivalent*:
+Signatures in the following series are not *overload-equivalent*:
 
 .. code-block-meta:
 
@@ -518,7 +518,6 @@ The signatures in the following series are not *overload-equivalent*:
    (x: number): void
    (y: string): void
 
-|
 
 .. code-block-meta:
 
@@ -556,7 +555,7 @@ example below:
        override foo <W1, ... Wl> (p1: T1, ... pm: Tm): Tm+1
     }
 
-The signature *S*:sub:`2` is override-compatible with *S*:sub:`1` only
+The signature ``S``:sub:`2` is override-compatible with ``S``:sub:`1` only
 if **all** of the following conditions are met:
 
 1. Number of parameters of both methods is the same, i.e., ``n = m``.

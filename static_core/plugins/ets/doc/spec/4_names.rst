@@ -836,13 +836,18 @@ Type Inference from Initializer
 .. meta:
     frontend_status: Done
 
-If a declaration contains no explicit type annotation, then its type
-is inferred from the initializer expression as follows:
+The type of a declaration that contains no explicit type annotation is inferred
+from the initializer expression as follows:
 
--  If the initializer expression is of union type, then the normalized union
-   type (see :ref:`Union Types Normalization`) is used.
+-  In a variable declaration (not in a constant declaration, though), if the
+   initializer expression is of a literal type, then the literal type is
+   replaced for its supertype.
+   If the initializer expression is of a union type that contains literal types,
+   then each literal type is replaced for its supertype, and then normalized (see
+   :ref:`Union Types Normalization`).
 
--  Otherwise, the type is inferred from the initializer expression.
+-  Otherwise, the type of a declaration is inferred from the initializer
+   expression.
 
 If the type of the initializer expression cannot be inferred, then a
 :index:`compile-time error` occurs (see :ref:`Object Literal`):
@@ -858,14 +863,20 @@ If the type of the initializer expression cannot be inferred, then a
    :linenos:
 
     let a = null                // type of 'a' is null
-    let aa = undefined          // type of 'a' is undefined
-    let arr = [null, undefined] // type of 'arr' is null|undefined[]
+    let aa = undefined          // type of 'aa' is undefined
+    let arr = [null, undefined] // type of 'arr' is (null | undefined)[]
 
-    let cond: boolean = /*something*/
-    let b = cond ? 1 : 2 // type of 'b' is int
-    let c = cond ? 3 : 3.14 // type of 'b' is double
-    let d = cond ? "one" : "two" // type of 'c' is string
-    let e = cond ? 1 : "one" // type of 'e' is 1 | "one"
+    let cond: boolean = /*some initialization*/
+
+    let b = cond ? 1 : 2         // type of 'b' is int
+    let c = cond ? 3 : 3.14      // type of 'c' is double
+    let d = cond ? "one" : "two" // type of 'd' is string
+    let e = cond ? 1 : "one"     // type of 'e' is int | string
+
+    const bb = cond ? 1 : 2         // type of 'bb' is 1 | 2
+    const cc = cond ? 3 : 3.14      // type of 'cc' is 3 | 3.14
+    const dd = cond ? "one" : "two" // type of 'dd' is "one" | "two"
+    const ee = cond ? 1 : "one"     // type of 'ee' is 1 | "one"
 
     let f = {name: "aa"} // compile-time error
 
@@ -919,7 +930,6 @@ Functions must be declared on the top level (see :ref:`Top-Level Statements`).
    generic function
    type parameter
    top-level statement
-   lambda
 
 |
 
@@ -937,7 +947,11 @@ of a function, method, or constructor.
 .. code-block:: abnf
 
     signature:
-        '(' parameterList? ')' returnType? throwMark?
+        parameters returnType? throwMark?
+        ;
+
+    parameters:
+        '(' parameterList? ')'
         ;
 
     returnType:
@@ -978,8 +992,7 @@ Parameter List
 ==============
 
 .. meta:
-    frontend_status: Partly
-    todo: implement readonly parameters - #14468
+    frontend_status: Done
 
 A signature may contain a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each

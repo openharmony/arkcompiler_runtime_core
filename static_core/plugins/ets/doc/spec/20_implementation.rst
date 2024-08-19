@@ -53,7 +53,7 @@ How to Get Type Via Reflection
 The |LANG| standard library (see :ref:`Standard Library`) provides a pseudo
 generic static method ``Type.for<T>()`` to be processed by the compiler in a
 specific way during compilation. A call to this method allows getting a
-variable of type *Type* that represents type *T* at runtime. Type *T* can
+variable of type ``Type`` that represents type ``T`` at runtime. Type ``T`` can
 be any valid type.
 
 .. code-block:: typescript

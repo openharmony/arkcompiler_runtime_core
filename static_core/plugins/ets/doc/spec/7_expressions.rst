@@ -550,6 +550,9 @@ A *qualifiedName* that is not a *simple name* refers to the following:
 -  An entity imported from a compilation unit, or
 -  A member of some class or interface.
 
+A :index:`compile-time error` occurs if *qualifiedName* refers to a name that
+is undefined or inaccessible, or if ambiguity occurs while resolving the name.
+
 
 .. index::
    qualified name
@@ -578,7 +581,15 @@ A *qualifiedName* that is not a *simple name* refers to the following:
           form of simple name */
       local = compilationUnitName.someExportedVariable /* qualifiedName here
           refers to a variable imported from a compilation unit */
+      let func = foo /* foo is a simple name of the function declared in this
+          module */
+
+      goo() // goo is a undefined name - compile-time error
+      let bar_ref = bar // bar is an ambiguious reference - compile-time error
     }
+
+    function bar (p: string) {}
+    function bar (p: number) {}
 
 |
 
@@ -643,7 +654,7 @@ are initialized to the values specified by initializer expressions.
 
 On the contrary, the evaluation of the array initializer completes abruptly if:
 
--  The space allocated for the new array is insufficient, and
+-  The space allocated for the new array is insufficient, and 
    ``OutOfMemoryError`` is thrown; or
 -  Some initialization expression completes abruptly.
 
@@ -673,7 +684,7 @@ The type of an array literal is inferred by the following rules:
    type inference
 
 -  If a context is available, then the type is inferred from the context. If
-   sucsessfull, then the type of the array literal is the inferred type
+   successful, then the type of the array literal is the inferred type
    ``T[]``, ``Array<T>``, or tuple.
 -  Otherwise, the type is to be inferred from the types of its elements.
 
@@ -776,7 +787,7 @@ at respective positions, then the type of the array literal is a tuple type.
 
 If the type used in the context is a *union type* (see :ref:`Union Types`), then
 it is necessary to try inferring the type of the array literal from its elements
-(see :ref:`Array Type Inference from Types of Elements`). If sucseccfull, then
+(see :ref:`Array Type Inference from Types of Elements`). If successful, then
 the type so inferred must be compatible with one of the types that form the
 union type. Otherwise, it is a :index:`compile-time error`:
 
@@ -903,7 +914,7 @@ expression:
     let b : Person = {name: "Bob", age: 25}
     let a : Person = {name: "Alice", age: 18, } //ok, trailing comma is ignored
 
-The type of an object literal is always some class *C* that is inferred from
+The type of an object literal is always some class ``C`` that is inferred from
 the context. A type inferred from the context can be either a named class (see
 :ref:`Object Literal of Class Type`), or an anonymous class created for the
 inferred interface type (see :ref:`Object Literal of Interface Type`).
@@ -962,8 +973,8 @@ literal is ``C``:
     foo({name: "Alice", age: 18}) // ok, parameter type is used
 
 
-An identifier in each *name-value pair* must name a field of the class *C*,
-or a field of any superclass of class *C*.
+An identifier in each *name-value pair* must name a field of the class ``C``,
+or a field of any superclass of class ``C``.
 
 A :index:`compile-time error` occurs if the identifier does not name an
 *accessible member field* (see :ref:`Accessible`) in the type ``C``:
@@ -999,13 +1010,13 @@ field type:
     let f: Friend = {name: 123 /* compile-time error - type of right hand-side
     is not compatible to the type of the left hand-side */
 
-If class *C* is to be used in an object literal, then it must have a
+If class ``C`` is to be used in an object literal, then it must have a
 *parameterless* constructor (explicit or default) that is *accessible*
 (see :ref:`Accessible`) in the class composite context.
 
 A :index:`compile-time error` occurs if:
 
--  *C* does not contain a parameterless constructor; or
+-  ``C`` does not contain a parameterless constructor; or
 -  No constructor is accessible (see :ref:`Accessible`).
 
 These situations are presented in the examples below:
@@ -1194,7 +1205,7 @@ a named class type or an anonymous class type created for the interface)
 is to be performed by the following steps:
 
 -  A parameterless constructor is executed to produce an instance *x* of
-   the class *C*. The execution of the object literal completes abruptly
+   the class ``C``. The execution of the object literal completes abruptly
    if so does the execution of the constructor.
 
 -  Name-value pairs of the object literal are then executed from left to
@@ -1540,16 +1551,16 @@ A :index:`compile-time error` occurs if forms with the keyword ``super`` are fou
 -  In the declaration of class ``Object`` (since ``Object`` has no superclass).
 
 The field access expression *super.f* is handled in the same way as the
-expression *this.f* in the body of class *S*. Assuming that *super.f*
-appears within class *C*, *f* is accessible (see :ref:`Accessible`) in *S* from
-class *C* while:
+expression *this.f* in the body of class ``S``. Assuming that *super.f*
+appears within class ``C``, *f* is accessible (see :ref:`Accessible`) in *S* from
+class ``C`` while:
 
--  The direct superclass of *C* is class *S*;
--  The direct superclass of the class denoted by *T* is a class with *S*
+-  The direct superclass of ``C`` is class ``S``;
+-  The direct superclass of the class denoted by ``T`` is a class with ``S``
    as its fully qualified name.
 
 A :index:`compile-time error` occurs otherwise (particularly if the current
-class is not *T*).
+class is not ``T``).
 
 .. index::
    access
@@ -1644,7 +1655,7 @@ Three forms of *object reference* are available:
     **Form of object reference**   **Type to use**
    ============================== =================================================================
    ``typeReference``               Type denoted by ``typeReference``.
-   ``expression`` of type *T*      *T* if *T* is a class, interface, or union; *T*’s constraint (:ref:`Type Parameter Constraint`) if *T* is a type parameter. A :index:`compile-time error` occurs otherwise.
+   ``expression`` of type *T*      ``T`` if ``T`` is a class, interface, or union; ``T``’s constraint (:ref:`Type Parameter Constraint`) if ``T`` is a type parameter. A :index:`compile-time error` occurs otherwise.
    ``super``                       The superclass of the class that contains the method call.
    ============================== =================================================================
 
@@ -1726,8 +1737,7 @@ Function Call Expression
 ************************
 
 .. meta:
-    frontend_status: Partly
-    todo: Adapt recent spec changes in "Overload Resolution" section to the es2panda implementation
+    frontend_status: Done
 
 A *function call expression* is used to call a function (see
 :ref:`Function Declarations`), a variable of a function type
@@ -1811,8 +1821,7 @@ Indexing Expressions
 ********************
 
 .. meta:
-    frontend_status: Partly
-    todo: finish array indexing expressions
+    frontend_status: Done
 
 Indexing expressions are used to access elements of arrays (see
 :ref:`Array Types`) and ``Record`` instances (see :ref:`Record Utility Type`).
@@ -2375,7 +2384,7 @@ system, and the result of the ``instanceof`` expression cannot be determined.
 *********************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 .. code-block:: abnf
 
@@ -5009,12 +5018,12 @@ one of the following ways:
 
         If the |LANG| compiler cannot guarantee at compile time that the array
         element is exactly of type ``TC``, then a check must be performed
-        at runtime to ensure that class *RC*---i.e., the class of the
+        at runtime to ensure that class ``RC``---i.e., the class of the
         object referred to by the value of the right-hand operand at
-        runtime---is compatible with the actual type *SC* of the array element
+        runtime---is compatible with the actual type ``SC`` of the array element
         (see :ref:`Type Compatibility with Initializer`).
 
-        If class *RC* is not assignable to type ``SC``, then ``ArrayStoreError``
+        If class ``RC`` is not assignable to type ``SC``, then ``ArrayStoreError``
         is thrown, and the assignment does not occur.
 
         Otherwise, the reference value of the right-hand operand is stored in
@@ -5219,11 +5228,11 @@ of the following ways:
         operation converts to the type of the selected array element.
         The result of the conversion is stored into the array element.
 
-      - If ``T`` is a reference type, then it must be *string*.
+      - If ``T`` is a reference type, then it must be ``string``.
 
-        ``S`` must also be a *string* because the class *string* is the *final*
-        class. The saved value of the array element, and the value of the
-        right-hand operand are used to perform the binary operation (string
+        ``S`` must also be a ``string`` because the class ``string`` is the
+        *final* class. The saved value of the array element, and the value of
+        the right-hand operand are used to perform the binary operation (string
         concatenation) of the compound assignment operator '``+=``'. If
         this operation completes abruptly, then so does the assignment
         expression.
@@ -5450,15 +5459,18 @@ Lambda Expressions
 .. meta:
     frontend_status: Done
 
-*Lambda expression* is a short block of code that takes in parameters and
-can return a value. *Lambda expressions* are generally similar to functions,
-but do not need names. *Lambda expressions* can be implemented immediately
-within expressions:
+*Lambda expression* fully defines an instance of a function type (see
+:ref:`Function Types`) by providing optional ``async`` mark, type parameters
+(see :ref:`Type Parameters`), mandatory signature, and lambda body. The
+definition of *lambda expression* is generally similar to that a function
+declaration (see :ref:`Function Declarations`) but has no function name
+specified:
+
 
 .. code-block:: abnf
 
     lambdaExpression:
-        'async'? signature '=>' lambdaBody
+        ('async'|typeParameters)? signature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -5470,27 +5482,16 @@ within expressions:
 
     (x: number): number => { return Math.sin(x) }
     (x: number) => Math.sin(x) // expression as lambda body
+    <T> (x: T, y: T) => { let local = x } // generic lambda
 
-A *lambda expression* evaluation:
-
--  Produces an instance of a function type (see :ref:`Function Types`).
-
--  Does *not* cause the execution of the expression body. However, the
-   expression body can be executed later if a function call expression
-   is used on the produced instance.
-
-
-See :ref:`Throwing Functions` for the details of ``throws``, and
-:ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
+A *lambda expression* evaluation creates an instance of a function type (see
+:ref:`Function Types`) as described in detail in
+:ref:`Runtime Evaluation of Lambda Expressions`.
 
 .. index::
    lambda expression
    block of code
    parameter
-   throwing function
-   rethrowing function
-   throws mark
-   rethrows mark
    instance
    function type
    execution
@@ -5507,9 +5508,9 @@ Lambda Signature
 .. meta:
     frontend_status: Done
 
-*Lambda signatures* are composed of formal parameters and return types of
-lambda expressions and function declarations (see :ref:`Function Declarations`).
-Lambda expressions and function declarations have the same syntax and semantics.
+Similarly to function declarations (see :ref:`Function Declarations`),
+*lambda signatures* are composed of formal parameters, return types, and
+``throw``/``rethrow`` marks as defined in a lambda expression.
 
 See :ref:`Scopes` for the specification of the scope, and
 :ref:`Shadowing by Parameter` for the shadowing details of formal parameter
@@ -5521,6 +5522,10 @@ parameters with the same name.
 As a lambda expression is evaluated, the values of actual argument expressions
 initialize the newly created parameter variables of the declared type before
 the execution of the lambda body.
+
+See :ref:`Throwing Functions` for the details of ``throws``, and
+:ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
+
 
 .. index::
    lambda signature
@@ -5538,6 +5543,10 @@ the execution of the lambda body.
    variable
    execution
    lambda body
+   throws mark
+   rethrows mark
+   throwing function
+   rethrowing function
 
 |
 
@@ -5643,14 +5652,12 @@ Runtime Evaluation of Lambda Expressions
 .. meta:
     frontend_status: Done
 
-The evaluation of a lambda expression is distinct from the execution of the
-lambda body.
-
-If completing normally at runtime, the evaluation of a lambda expression
-produces a reference to an allocated and initialized new instance of a function
-type (see :ref:`Function Types`) that corresponds to the lambda signature.
-In that case, it is similar to the evaluation of a class instance creation
-expression (see :ref:`New Expressions`).
+The evaluation of a lambda expression itself never causes the execution of the
+lambda body. If completing normally at runtime, the evaluation of a lambda
+expression produces a reference to an allocated and initialized new instance
+of a function type (see :ref:`Function Types`) that corresponds to the lambda
+signature. In that case, it is similar to the evaluation of a class instance
+creation expression (see :ref:`New Expressions`).
 
 If the available space is not sufficient for a new instance to be created,
 then the evaluation of the lambda expression completes abruptly, and

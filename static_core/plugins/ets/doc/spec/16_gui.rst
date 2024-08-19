@@ -138,14 +138,14 @@ The following syntax conventions apply to any builder function (component’s
 main builder, component’s custom builder, or stand-alone global custom builder):
 
 -  The required result of ``C({...})`` for any predefined or custom component
-   *C* is to initialize the component with the data from the ``{...}`` block,
-   and to render it. Concrete semantics depends on the implementation. For
+   *C* is to initialize and render the component with the data from the
+   ``{...}`` block. Specific semantics depends on the implementation. For
    illustrative purposes, it can be expressed as ``(new C({...})).build()``,
    where the object literal ``{...}`` is handled as an initializer of the
    component’s fields.
 
 -  The required result of ``C() {...}`` for any predefined or custom component
-   *C* is to initialize the component, and to render it by passing the data
+   *C* is to initialize and render the component by passing the data
    from the ``{...}`` block to the component’s builder function. Specific
    semantics depends on the implementation. For illustrative purposes, it can
    be expressed as ``new C().build({...})``, where the ``{...}`` block is
@@ -170,12 +170,12 @@ Builder Function Restrictions
 *****************************
 
 Restrictions apply to any builder function (component’s main builder,
-component’s custom builder, or stand-alone global custom builder), and
-the following is not allowed:
+component’s custom builder, or stand-alone global custom builder). The
+following is not allowed:
 
--  Declaring local variables.
+-  Declaring local variables;
 
--  Constructing new objects.
+-  Constructing new objects; and
 
 -  Function calls, except the following:
 
@@ -187,7 +187,7 @@ the following is not allowed:
     -  Calling a predefined builder ``ForEach`` for iterative rendering.
 
     -  Calling a function that does not mutate the program state (note that all
-       logging functions are thus prohibited, as they mutate the state).
+       logging functions mutate the state, and thus are prohibited).
 
     - Using conditional ``if ... else`` syntax.
 
@@ -261,7 +261,7 @@ The return type of an overridden method in a subclass must also be ``this``:
     let x = new C().foo() // type of 'x' is 'C'
     let y = new D().foo() // type of 'y' is 'D'
 
-Otherwise, :index:`compile-time error` occurs.
+Otherwise, a :index:`compile-time error` occurs.
 
 |
 

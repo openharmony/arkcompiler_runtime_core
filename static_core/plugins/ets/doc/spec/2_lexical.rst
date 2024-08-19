@@ -191,7 +191,7 @@ characters:
 
 -  '``$``' (\\U+0024),
 -  'Zero-Width Non-Joiner' (<ZWNJ>, \\U+200C), or
--  'Zero-Width Joiner' (<ZWNJ>, \\U+200D).
+-  'Zero-Width Joiner' (<ZWJ>, \\U+200D).
 
 .. index::
    identifier
@@ -228,6 +228,37 @@ characters:
      '\u200D'
     ;
 
+    UnicodeIDStart
+      : Letter
+      | ['$']
+      | '\\' UnicodeEscapeSequence;
+
+    UnicodeIDContinue
+      : UnicodeIDStart
+      | UnicodeDigit
+      | '\u200C'
+      | '\u200D';
+
+    UnicodeEscapeSequence:
+      'u' HexDigit HexDigit HexDigit HexDigit
+      | 'u' '{' HexDigit HexDigit+ '}'
+      ;
+
+    Letter
+      : UNICODE_CLASS_LU
+      | UNICODE_CLASS_LL
+      | UNICODE_CLASS_LT
+      | UNICODE_CLASS_LM
+      | UNICODE_CLASS_LO
+      ;
+    UnicodeDigit
+      : UNICODE_CLASS_ND
+      ;
+
+See :ref:`Grammar Summary` for the Unicode character categories *UNICODE_CLASS_LU*,
+*UNICODE_CLASS_LL*, *UNICODE_CLASS_LT*, *UNICODE_CLASS_LM*, *UNICODE_CLASS_LO*,
+and *UNICODE_CLASS_ND*.
+
 |
 
 .. _Keywords:
@@ -256,29 +287,29 @@ cannot be used as identifiers:
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
-|   ``abstract``     |   ``enum``        |   ``launch``     |   ``switch``     |
+|   ``abstract``     |   ``else``        |   ``internal``   |   ``static``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``as``           |   ``export``      |   ``let``        |   ``super``      |
+|   ``as``           |   ``enum``        |   ``launch``     |   ``switch``     |
 +--------------------+-------------------+------------------+------------------+
-|   ``async``        |   ``extends``     |   ``native``     |   ``this``       |
+|   ``async``        |   ``export``      |   ``let``        |   ``super``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``await``        |   ``false``       |   ``new``        |   ``throw``      |
+|   ``await``        |   ``extends``     |   ``native``     |   ``this``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``break``        |   ``final``       |   ``null``       |   ``true``       |
+|   ``break``        |   ``false``       |   ``new``        |   ``throw``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``case``         |   ``for``         |   ``override``   |   ``try``        |
+|   ``case``         |   ``final``       |   ``null``       |   ``true``       |
 +--------------------+-------------------+------------------+------------------+
-|   ``class``        |   ``function``    |   ``package``    |   ``undefined``  |
+|   ``class``        |   ``for``         |   ``override``   |   ``try``        |
 +--------------------+-------------------+------------------+------------------+
-|   ``const``        |   ``if``          |   ``private``    |   ``while``      |
+|   ``const``        |   ``function``    |   ``package``    |   ``undefined``  |
 +--------------------+-------------------+------------------+------------------+
-|   ``constructor``  |   ``implements``  |   ``protected``  |                  |
+|   ``constructor``  |   ``if``          |   ``private``    |   ``while``      |
 +--------------------+-------------------+------------------+------------------+
-|   ``continue``     |   ``import``      |   ``public``     |                  |
+|   ``continue``     |   ``implements``  |   ``protected``  |                  |
++--------------------+-------------------+------------------+------------------+
+|   ``default``      |   ``import``      |   ``public``     |                  |
 +--------------------+-------------------+------------------+------------------+
 |   ``do``           |   ``interface``   |   ``return``     |                  |
-+--------------------+-------------------+------------------+------------------+
-|   ``else``         |   ``internal``    |   ``static``     |                  |
 +--------------------+-------------------+------------------+------------------+
 
 2. The following words have special meaning in certain contexts (*soft
@@ -292,15 +323,15 @@ keywords*) but are valid identifiers elsewhere:
 +-----------------+--------------------+-------------------+-------------------+
 |                 |                    |                   |                   |
 +=================+====================+===================+===================+
-|    ``catch``    |    ``get``         |    ``of``         |    ``struct``     |
+|   ``catch``     |    ``get``         |    ``of``         |    ``struct``     |
 +-----------------+--------------------+-------------------+-------------------+
-|    ``declare``  |    ``in``          |    ``out``        |    ``throws``     |
+|   ``declare``   |    ``in``          |    ``out``        |    ``throws``     |
 +-----------------+--------------------+-------------------+-------------------+
-|    ``default``  |   ``instanceof``   |    ``readonly``   |    ``type``       |
+|   ``instanceof``|    ``readonly``    |    ``type``       |    ``finally``    |   
 +-----------------+--------------------+-------------------+-------------------+
-|    ``finally``  |    ``keyof``       |    ``rethrows``   |    ``typeof``     |
+|   ``keyof``     |    ``rethrows``    |    ``typeof``     |    ``from``       |
 +-----------------+--------------------+-------------------+-------------------+
-|    ``from``     |    ``namespace``   |    ``set``        |                   |
+|   ``namespace`` |    ``set``         |                   |                   |
 +-----------------+--------------------+-------------------+-------------------+
 
 
@@ -409,6 +440,11 @@ Literals
 
 See :ref:`Character Literals` for the experimental ``char literal``.
 
+Each literal is of the literal type (see :ref:`Literal Types`). The type name
+is the same as that of the literal itlsef. If an operator is applied to the
+literal, then the literal type is replaced for its supertype, i.e., one of the
+predefined types (see :ref:`Predefined Types`) that correspond to the literal.
+
 .. index::
    literal
    value type
@@ -512,11 +548,18 @@ last symbol of an integer literal.
    integer
    underscore character
 
-Integer literals are of type ``int`` if the value can be represented by a
-32-bit number. Otherwise, it is of type ``long``. In variable and constant
-declarations, an integer literal can be implicitly converted to another
-integer type or type ``char`` (see :ref:`Type Compatibility with Initializer`).
-An explicit cast must be used elsewhere (see :ref:`Cast Expressions`).
+Integer literals are of literal types that match the literals. If an operator
+is applied to a literal, then the literal type is replaced for the following
+types:
+
+- ``int`` if the literal value can be represented by a 32-bit number; or
+- ``long`` otherwise.
+
+
+In variable and constant declarations, an integer literal can be implicitly
+converted to another integer type or type ``char`` (see
+:ref:`Type Compatibility with Initializer`). An explicit cast must be used
+elsewhere (see :ref:`Cast Expressions`).
 
 A :index:`compile-time error` occurs if a non-zero integer literal is
 too large for its type.
@@ -561,7 +604,7 @@ a float type suffix as follows:
 
     FractionalPart:
         DecimalDigit
-        | DecimalDigit (DecimalDigit | '|')* DecimalDigit
+        | DecimalDigit (DecimalDigit | '_')* DecimalDigit
         ;
     FloatTypeSuffix:
         'f'
@@ -585,8 +628,13 @@ Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
 last symbol of an integer literal.
 
-A floating-point literal is of type ``float`` if *float type suffix* is present.
-Otherwise, it is of type ``double`` (type ``number`` is an alias to ``double``).
+Floating-point literals are of the literal type that corresponds to the literal
+itself.  If an operator is applied to the literal, then the literal type is
+replaced for the following types:
+
+- ``float`` if *float type suffix* is present; or
+- ``double`` otherwise (type ``number`` is an alias to ``double``).
+
 
 A :index:`compile-time error` occurs if a non-zero floating-point literal is
 too large for its type.
@@ -615,7 +663,9 @@ converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
 ``BigInt`` literals represent integer numbers with unlimited number of digits.
 ``BigInt`` literals use decimal base only. 
 
-``BigInt`` literals are always of type ``bigint`` (see :ref:`BigInt Type`).
+``BigInt`` literals are always of the literal type that corresponds to the
+literal itself. If an operator is applied to the literal, then the literal type
+is replaced for ``bigint`` (see :ref:`BigInt Type`).
 
 A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
 
@@ -688,7 +738,9 @@ The two ``Boolean`` literal values are represented by the keywords
         'true' | 'false'
         ;
 
-``Boolean`` literals are of type ``boolean``.
+``Boolean`` literals are of the literal type that corresponds to the literal.
+If an operator is applied to the literal, then the literal type is replaced
+for ``boolean``.
 
 .. index::
    keyword
@@ -709,8 +761,10 @@ The two ``Boolean`` literal values are represented by the keywords
 single or double quotes. A special form of string literals is
 *template literal* (see :ref:`Template Literals`).
 
-``String`` literals are of type ``string``. Type ``string`` is a predefined
-reference type (see :ref:`Type String`):
+``String`` literals are of the literal type that corresponds to the literal.
+If an operator is applied to the literal, then the literal type is replaced
+for ``string`` (see :ref:`Type String`).
+
 
 .. index::
    string literal
@@ -858,8 +912,9 @@ An example of a multi-line string is provided below:
                     which should be enclosed in 
                     backticks`
 
-*Template* literals are of type ``string``. Type ``string`` is a predefined
-reference type (see :ref:`Type string`).
+*Template* literals are of the literal type that corresponds to the literal.
+If an operator is applied to the literal, then the literal type is replaced
+for ``string`` (see :ref:`Type String`).
 
 |
 
@@ -871,8 +926,9 @@ reference type (see :ref:`Type string`).
 .. meta:
     frontend_status: Done
 
-*Null literal* is the only literal to denote a reference without pointing
-at any entity. The null literal is represented by the keyword ``null``:
+*Null literal* is the only literal of type ``null`` (see :ref:`Type null`) to
+denote a reference without pointing at any entity. The null literal is
+represented by the keyword ``null``:
 
 .. code-block:: abnf
 
@@ -880,10 +936,8 @@ at any entity. The null literal is represented by the keyword ``null``:
         'null' 
         ;
 
-The *null literal* denotes the null reference that represents the absence
-of a value. The *null literal* is, by definition, the only value of type
-``null`` (see :ref:`Type null`). This value is valid only for types ``T | null``
-(see :ref:`Nullish Types`).
+
+Typically value is used for types like ``T | null`` (see :ref:`Nullish Types`).
 
 .. index::
    null literal
@@ -901,10 +955,9 @@ of a value. The *null literal* is, by definition, the only value of type
 .. meta:
     frontend_status: Done
 
-*Undefined literal* is the only literal to denote a reference with a value
-that is not defined. *Undefined literal* is the only value of type
-``undefined`` (see :ref:`Type undefined`). The undefined literal is
-represented by the keyword ``undefined``:
+*Undefined literal* is the only literal of type ``undefined`` (see
+:ref:`Type undefined`) to denote a reference with a value that is not defined.
+The undefined literal is represented by the keyword ``undefined``:
 
 .. code-block:: abnf
 
