@@ -94,7 +94,11 @@ ohos_static_library("libarkbytecodeopt_frontend_static") {
     "$ark_root/libpandafile:libarkfile_frontend_static",
   ]
 
-  external_deps = [ sdk_libc_secshared_dep ]
+  if (is_arkui_x) {
+    deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
+  } else {
+    external_deps = [ sdk_libc_secshared_dep ]
+  }
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
