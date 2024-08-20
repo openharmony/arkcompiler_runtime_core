@@ -548,15 +548,16 @@ void InspectorServer::SendTargetAttachedToTarget(const std::string &sessionId)
 void InspectorServer::EnumerateCallFrames(JsonArrayBuilder &callFrames, PtThread thread,
                                           const std::function<void(const FrameInfoHandler &)> &enumerateFrames)
 {
-    enumerateFrames(
-        [this, thread, &callFrames](auto frameId, auto methodName, auto sourceFile, auto lineNumber, auto &scopeChain) {
-            CallFrameInfo callFrameInfo {frameId, sourceFile, methodName, lineNumber};
-            AddCallFrameInfo(callFrames, callFrameInfo, scopeChain, thread);
-        });
+    enumerateFrames([this, thread, &callFrames](auto frameId, auto methodName, auto sourceFile, auto lineNumber,
+                                                auto &scopeChain, auto &objThis) {
+        CallFrameInfo callFrameInfo {frameId, sourceFile, methodName, lineNumber};
+        AddCallFrameInfo(callFrames, callFrameInfo, scopeChain, thread, objThis);
+    });
 }
 
 void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
-                                       const std::vector<Scope> &scopeChain, PtThread thread)
+                                       const std::vector<Scope> &scopeChain, PtThread thread,
+                                       const std::optional<RemoteObject> &objThis)
 {
     callFrames.Add([&](JsonObjectBuilder &callFrame) {
         auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, callFrameInfo.sourceFile);
@@ -576,6 +577,7 @@ void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallF
             }
         });
 
+        callFrame.AddProperty("this", objThis.value_or(RemoteObject::Undefined()).ToJson());
         callFrame.AddProperty("canBeRestarted", true);
     });
 }

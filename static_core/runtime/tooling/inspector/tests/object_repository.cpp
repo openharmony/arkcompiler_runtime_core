@@ -158,8 +158,11 @@ TEST_F(ObjectRepositoryTest, S)
     std::map<std::string, TypedValue> locals;
     locals.emplace("a", TypedValue::U16(56U));
     locals.emplace("ref", TypedValue::Reference(clsObject));
+    // "this" parameter for static languages. Note that ArkTS uses "=t" instead of "this".
+    locals.emplace("this", TypedValue::Reference(clsObject));
 
-    auto frameObj = obj.CreateFrameObject(frame, locals);
+    std::optional<RemoteObject> objThis;
+    auto frameObj = obj.CreateFrameObject(frame, locals, objThis);
     ASSERT_EQ(frameObj.GetObjectId().value(), RemoteObjectId(2UL));
 
     auto properties = obj.GetProperties(frameObj.GetObjectId().value(), true);
@@ -172,6 +175,32 @@ TEST_F(ObjectRepositoryTest, S)
         GetFrameObjectProperties("a", testing::Pointee(GetPrimitiveProperties<JsonObject::NumT>("number", 56U))));
     ASSERT_THAT(ToObject(properties[1].ToJson()),
                 GetFrameObjectProperties("ref", testing::Pointee(GetObjectProperties(testing::_, testing::_, "1"))));
+
+    // Call to "CreateFrameObject" must find and fill "this" parameter.
+    ASSERT_TRUE(objThis.has_value());
+    auto idThis = objThis->GetObjectId();
+    ASSERT_TRUE(idThis.has_value());
+    ASSERT_EQ(idThis.value(), 1U);
+}
+
+TEST_F(ObjectRepositoryTest, TestFrameObjectNoThis)
+{
+    ObjectRepository obj;
+
+    PtDebugFrame frame(methodFoo, nullptr);
+    std::map<std::string, TypedValue> locals;
+    locals.emplace("a", TypedValue::U16(56U));
+    locals.emplace("ref", TypedValue::Reference(clsObject));
+
+    std::optional<RemoteObject> objThis;
+    auto frameObj = obj.CreateFrameObject(frame, locals, objThis);
+    ASSERT_EQ(frameObj.GetObjectId().value(), RemoteObjectId(2UL));
+
+    auto properties = obj.GetProperties(frameObj.GetObjectId().value(), true);
+    ASSERT_EQ(properties.size(), 2UL);
+
+    // No "this" parameter was provided.
+    ASSERT_FALSE(objThis.has_value());
 }
 }  // namespace ark::tooling::inspector::test
 

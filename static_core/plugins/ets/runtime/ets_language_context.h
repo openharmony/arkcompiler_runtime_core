@@ -39,6 +39,7 @@
 #include "runtime/mem/gc/gc_settings.h"
 #include "runtime/include/mem/allocator.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
+#include "plugins/ets/runtime/tooling/ets_inspector_extension.h"
 
 #include "ets_class_linker_extension.h"
 #include "ets_vm.h"
@@ -328,6 +329,11 @@ public:
     void WrapClassInitializerException([[maybe_unused]] ClassLinker *classLinker,
                                        [[maybe_unused]] ManagedThread *thread) const override
     {
+    }
+
+    std::unique_ptr<tooling::InspectorExtension> CreateInspectorExtension() const override
+    {
+        return std::make_unique<EtsInspectorExtension>();
     }
 };
 

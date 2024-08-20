@@ -41,8 +41,8 @@ class Server;  // NOLINT(fuchsia-virtual-inheritance)
 
 class InspectorServer final {
 public:
-    using FrameInfoHandler =
-        std::function<void(FrameId, std::string_view, std::string_view, size_t, const std::vector<Scope> &)>;
+    using FrameInfoHandler = std::function<void(FrameId, std::string_view, std::string_view, size_t,
+                                                const std::vector<Scope> &, const std::optional<RemoteObject> &)>;
 
     explicit InspectorServer(Server &server);
     ~InspectorServer() = default;
@@ -106,10 +106,10 @@ private:
     void EnumerateCallFrames(JsonArrayBuilder &callFrames, PtThread thread,
                              const std::function<void(const FrameInfoHandler &)> &enumerateFrames);
     void AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallFrameInfo &callFrameInfo,
-                          const std::vector<Scope> &scopeChain, PtThread thread);
+                          const std::vector<Scope> &scopeChain, PtThread thread,
+                          const std::optional<RemoteObject> &objThis);
     void AddBreakpointByUrlLocations(JsonArrayBuilder &locations, const std::set<std::string_view> &sourceFiles,
                                      size_t lineNumber, PtThread thread);
-
     static void AddHitBreakpoints(JsonArrayBuilder &hitBreakpointsBuilder,
                                   const std::vector<BreakpointId> &hitBreakpoints);
     static std::string GetExecutionContextUniqueId(const PtThread &thread);
