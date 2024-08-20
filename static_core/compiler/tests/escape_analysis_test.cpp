@@ -3152,4 +3152,101 @@ TEST_F(EscapeAnalysisTest, FixPhiInputTypes)
     out_graph::FixPhiInputTypes::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
+
+SRC_GRAPH(CorrectlyHandleSingleUsedRefInLoops, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(18U, 1U).u64();
+        CONSTANT(1U, 1U);
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(15U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(16U, Opcode::LoadAndInitClass).ref().Inputs(15U);
+            INST(17U, Opcode::NewObject).ref().Inputs(16U, 15U);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+        }
+
+        BASIC_BLOCK(3U, 3U, 5U)
+        {
+            INST(5U, Opcode::Phi).u64().Inputs(0U, 6U);
+
+            INST(8U, Opcode::SaveState).SrcVregs({4U}).Inputs(4U);
+            INST(12U, Opcode::Load).ref().Inputs(4U, 1U);
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(12U, 8U);
+
+            // Check that Load 12 is not filled in SaveState 13
+            INST(13U, Opcode::SaveState).SrcVregs({4U}).Inputs(4U);
+            INST(19U, Opcode::CallStatic).u64().InputsAutoType(18U, 13U);
+            INST(6U, Opcode::Sub).u64().Inputs(5U, 19U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(6U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(9U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(10U, Opcode::Throw).Inputs(4U, 9U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+OUT_GRAPH(CorrectlyHandleSingleUsedRefInLoops, Graph *graph)
+{
+    GRAPH(graph)
+    {
+        // NOLINTBEGIN(readability-magic-numbers)
+        PARAMETER(0U, 0U).u64();
+        PARAMETER(18U, 1U).u64();
+        CONSTANT(1U, 1U);
+
+        BASIC_BLOCK(2U, 3U)
+        {
+            INST(15U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(16U, Opcode::LoadAndInitClass).ref().Inputs(15U);
+            INST(2U, Opcode::SaveState).Inputs(0U).SrcVregs({0U});
+            INST(3U, Opcode::LoadAndInitClass).ref().Inputs(2U);
+            INST(4U, Opcode::NewObject).ref().Inputs(3U, 2U);
+        }
+
+        BASIC_BLOCK(3U, 3U, 5U)
+        {
+            INST(5U, Opcode::Phi).u64().Inputs(0U, 6U);
+
+            INST(8U, Opcode::SaveState).SrcVregs({4U}).Inputs(4U);
+            INST(12U, Opcode::Load).ref().Inputs(4U, 1U);
+            INST(11U, Opcode::CallStatic).v0id().InputsAutoType(12U, 8U);
+
+            // Check that Load 12 is not filled in SaveState 13
+            INST(13U, Opcode::SaveState).SrcVregs({4U}).Inputs(4U);
+            INST(19U, Opcode::CallStatic).u64().InputsAutoType(18U, 13U);
+            INST(6U, Opcode::Sub).u64().Inputs(5U, 19U);
+            INST(7U, Opcode::IfImm).SrcType(DataType::UINT64).Imm(0U).CC(CC_NE).Inputs(6U);
+        }
+
+        BASIC_BLOCK(5U, -1L)
+        {
+            INST(9U, Opcode::SaveState).Inputs(4U).SrcVregs({0U});
+            INST(10U, Opcode::Throw).Inputs(4U, 9U);
+        }
+        // NOLINTEND(readability-magic-numbers)
+    }
+}
+
+TEST_F(EscapeAnalysisTest, CorrectlyHandleSingleUsedRefInLoops)
+{
+    src_graph::CorrectlyHandleSingleUsedRefInLoops::CREATE(GetGraph());
+    ASSERT_TRUE(Run());
+
+    auto graph = CreateEmptyGraph();
+    out_graph::CorrectlyHandleSingleUsedRefInLoops::CREATE(graph);
+
+    ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
+}
+
 }  // namespace ark::compiler
