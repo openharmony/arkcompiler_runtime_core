@@ -97,6 +97,11 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_rest_params_union_call)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_rest_params_union_call.js"));
 }
 
+TEST_F(EtsInteropScenariosEtsToJs, test_function_spread_params_union_call)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_spread_params_union_call.js"));
+}
+
 TEST_F(EtsInteropScenariosEtsToJs, test_extend_class)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_extend_class.js"));
@@ -380,14 +385,12 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_object)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_object.js"));
 }
 
-// NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_rest_parameter)
+TEST_F(EtsInteropScenariosEtsToJs, test_rest_parameter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_rest_parameter.js"));
 }
 
-// NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_spread_parameter)
+TEST_F(EtsInteropScenariosEtsToJs, test_spread_parameter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_spread_parameter.js"));
 }

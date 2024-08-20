@@ -187,8 +187,7 @@ private:
             {utf::CStringAsMutf8("fill"), "Lstd/core/Object;Lstd/core/Object;Lstd/core/Object;:Lescompat/Array;"},
             {utf::CStringAsMutf8("flat"), ":Lescompat/Array;"},
             {utf::CStringAsMutf8("join"), "Lstd/core/Object;:Lstd/core/String;"},
-            // NOTE(kprokopenko) make [Lstd/core/Object;:D when #14756 is fixed
-            {utf::CStringAsMutf8("push"), "Lstd/core/Object;:D"},
+            {utf::CStringAsMutf8("push"), "[Lstd/core/Object;:D"},
             {utf::CStringAsMutf8("some"), "Lstd/core/Function1;:Z"},
             {utf::CStringAsMutf8("sort"), ":Lescompat/Array;"},
             {utf::CStringAsMutf8("every"), "Lstd/core/Function1;:Z"},

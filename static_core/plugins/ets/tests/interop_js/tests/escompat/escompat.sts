@@ -295,8 +295,7 @@ function Array_TestJSFromAsync(arr: Array<FooClass>): void {
 
 function Array_CreateEtsSample(): Array<Object> {
     let arr = new Array<Object>();
-    arr.push(123);
-    arr.push("foo");
+    arr.push(123, "foo");
     return arr;
 }
 

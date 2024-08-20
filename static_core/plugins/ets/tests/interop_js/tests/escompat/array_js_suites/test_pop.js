@@ -35,7 +35,7 @@ const etsArrLen = (x) => x['<get>length'].call(x);
 	const EXPECT_2 = 2;
 	ASSERT_EQ(etsArrLen(arr), EXPECT_2);
 	let something = {};
-	arr.push(something);
+	arr.push(5, something);
 	let popped = arr.pop();
 	ASSERT_EQ(popped, something);
 }

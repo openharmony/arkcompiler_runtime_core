@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include "macros.h"
+#include "runtime/mem/local_object_handle.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/call/arg_convertors.h"
 #include "plugins/ets/runtime/interop_js/call/proto_reader.h"
@@ -100,6 +102,12 @@ private:
     template <bool IS_NEWCALL>
     ALWAYS_INLINE std::optional<napi_value> ConvertArgsAndCall();
 
+    template <bool IS_NEWCALL, typename FRead>
+    ALWAYS_INLINE inline std::optional<napi_value> ConvertVarargsAndCall(FRead &readVal, Span<napi_value> jsargs);
+
+    template <bool IS_NEWCALL>
+    ALWAYS_INLINE std::optional<napi_value> CallConverted(Span<napi_value> jsargs);
+
     template <bool IS_NEWCALL>
     ALWAYS_INLINE std::optional<Value> ConvertRetval(napi_value jsRet);
 
@@ -142,27 +150,61 @@ ALWAYS_INLINE inline uint64_t CallJSHandler::Handle()
     return static_cast<uint64_t>(etsRes.value().GetAsLong());
 }
 
+template <bool IS_NEWCALL, typename FRead>
+ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertVarargsAndCall(FRead &readVal,
+                                                                                    Span<napi_value> jsargs)
+{
+    auto *ref = readVal(helpers::TypeIdentity<ObjectHeader *>());
+    auto *klass = ref->template ClassAddr<Class>();
+    ASSERT(klass->IsArrayClass());
+    LocalObjectHandle<coretypes::Array> etsArr(coro_, ref);
+    auto compTy = klass->GetComponentType();
+    auto refConv = JSRefConvertResolve(ctx_, compTy);
+
+    auto allJsArgs = ctx_->GetTempArgs<napi_value>(etsArr->GetLength() + jsargs.size());
+    for (uint32_t el = 0; el < jsargs.size(); ++el) {
+        allJsArgs[el] = jsargs[el];
+    }
+    for (uint32_t el = 0; el < etsArr->GetLength(); ++el) {
+        auto *etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(el));
+        allJsArgs[el + jsargs.size()] = refConv->Wrap(ctx_, etsElem);
+    }
+    return CallConverted<IS_NEWCALL>(*allJsArgs);
+}
+
 template <bool IS_NEWCALL>
 ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::ConvertArgsAndCall()
 {
-    napi_env env = ctx_->GetJSEnv();
-    auto jsargs = ctx_->GetTempArgs<napi_value>(numArgs_);
+    bool isVarArgs = UNLIKELY(protoReader_.GetMethod()->HasVarArgs());
+    auto readVal = [this](auto typeTag) { return argReader_.template Read<typename decltype(typeTag)::type>(); };
+    auto const numNonRest = numArgs_ - (isVarArgs ? 1 : 0);
+    auto jsargs = ctx_->GetTempArgs<napi_value>(numNonRest);
 
-    for (uint32_t argIdx = 0; argIdx < numArgs_; ++argIdx, protoReader_.Advance()) {
-        auto readVal = [this](auto typeTag) { return argReader_.template Read<typename decltype(typeTag)::type>(); };
+    for (uint32_t argIdx = 0; argIdx < numNonRest; ++argIdx, protoReader_.Advance()) {
         if (UNLIKELY(!ConvertArgToJS(ctx_, protoReader_, &jsargs[argIdx], readVal))) {
             return std::nullopt;
         }
     }
 
+    if (isVarArgs) {
+        return ConvertVarargsAndCall<IS_NEWCALL>(readVal, *jsargs);
+    }
+
+    return CallConverted<IS_NEWCALL>(*jsargs);
+}
+
+template <bool IS_NEWCALL>
+ALWAYS_INLINE inline std::optional<napi_value> CallJSHandler::CallConverted(Span<napi_value> jsargs)
+{
+    napi_env env = ctx_->GetJSEnv();
     napi_value jsRetval;
     napi_status jsStatus;
     {
         ScopedNativeCodeThread nativeScope(coro_);
         if constexpr (IS_NEWCALL) {
-            jsStatus = napi_new_instance(env, jsFn_, jsargs->size(), jsargs->data(), &jsRetval);
+            jsStatus = napi_new_instance(env, jsFn_, jsargs.size(), jsargs.data(), &jsRetval);
         } else {
-            jsStatus = napi_call_function(env, jsThis_, jsFn_, jsargs->size(), jsargs->data(), &jsRetval);
+            jsStatus = napi_call_function(env, jsThis_, jsFn_, jsargs.size(), jsargs.data(), &jsRetval);
         }
     }
     if (UNLIKELY(jsStatus != napi_ok)) {
