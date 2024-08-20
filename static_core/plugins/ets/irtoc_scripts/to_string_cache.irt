@@ -73,8 +73,8 @@ Label(:SlowPathStore)
   Intrinsic(:SLOW_PATH_ENTRY, elem, numInt, cachedData).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimalStoreOddSavedBridge").Terminator.ptr
 Label(:SlowPath)
   ep_offset = get_entrypoint_offset("DOUBLE_TO_STRING_DECIMAL_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, cache, numInt, 0).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimalOddSavedBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, cache, numInt).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimal3ArgBridge").Terminator.ptr
 Label(:SlowPathNoCache)
   ep_offset = get_entrypoint_offset("DOUBLE_TO_STRING_DECIMAL_NO_CACHE_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, numInt, 0, 0).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimalNoCacheOddSavedBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, numInt).AddImm(ep_offset).MethodAsImm("DoubleToStringDecimalNoCache3ArgBridge").Terminator.ptr
 }

@@ -40,6 +40,7 @@ public:
     bool ParseModulePasses(StringRef name, llvm::ModulePassManager &modulePm, const LLVMCompilerOptions &options);
     bool ParseFunctionPasses(StringRef name, llvm::FunctionPassManager &functionPm, const LLVMCompilerOptions &options);
     bool ParseSCCPasses(StringRef name, llvm::CGSCCPassManager &sccPm, const LLVMCompilerOptions &options);
+    bool ParseLoopPasses(StringRef name, llvm::LoopPassManager &sccPm, const LLVMCompilerOptions &options);
 
     void RegisterParserCallbacks(llvm::PassBuilder &builder, const ark::llvmbackend::LLVMCompilerOptions &options)
     {
@@ -54,6 +55,10 @@ public:
         builder.registerPipelineParsingCallback(
         [&](StringRef name, llvm::CGSCCPassManager &sccPm, PipelineElements /*unused*/) -> bool {
             return ParseSCCPasses(name, sccPm, options);
+        });
+        builder.registerPipelineParsingCallback(
+        [&](StringRef name, llvm::LoopPassManager &sccPm, PipelineElements /*unused*/) -> bool {
+            return ParseLoopPasses(name, sccPm, options);
         });
     }
 private:
@@ -114,6 +119,27 @@ bool PassParser::ParseSCCPasses(StringRef name, llvm::CGSCCPassManager &sccPm, c
     namespace pass = <%= PassRegistry::passes_namespace %>;
 
 % PassRegistry::llvm_passes.select{|p| p.type.include? 'scc'}.each do |pass|
+    if (name.equals(pass::<%= pass.name %>::ARG_NAME)) {
+        if (pass::<%= pass.name %>::ShouldInsert(&options)) {
+% if pass.setup == 'default'
+            pm.addPass(pass::<%= pass.name %>());
+% else
+            pm.addPass(pass::<%= pass.name %>::Create(arkInterface_, &options));
+% end
+        }
+        return true;
+    }
+% end
+
+    return false;
+}
+
+bool PassParser::ParseLoopPasses(StringRef name, llvm::LoopPassManager &loopPm, const LLVMCompilerOptions &options)
+{
+    auto &pm = loopPm;
+    namespace pass = <%= PassRegistry::passes_namespace %>;
+
+% PassRegistry::llvm_passes.select{|p| p.type.include? 'loop'}.each do |pass|
     if (name.equals(pass::<%= pass.name %>::ARG_NAME)) {
         if (pass::<%= pass.name %>::ShouldInsert(&options)) {
 % if pass.setup == 'default'

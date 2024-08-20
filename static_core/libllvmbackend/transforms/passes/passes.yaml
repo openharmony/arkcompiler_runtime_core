@@ -160,3 +160,21 @@ llvm_passes:
     Replace `select -1, neg, sdiv/srem` instructions with `sdiv/srem` on AArch64
   type: [function]
   setup: custom
+
+- name: InferFlags
+  description: >
+    Infer nsw flags
+  type: [function]
+  setup: default
+
+- name: ArkLoopPeeling
+  description: >
+    Run llvm loop peeling
+  type: [loop]
+  setup: default
+
+- name: PropagateLenArray
+  description: >
+    Replace builtin for LenArray with size
+  type: [function]
+  setup: default

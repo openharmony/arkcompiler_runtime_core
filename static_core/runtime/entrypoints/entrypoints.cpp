@@ -237,8 +237,7 @@ extern "C" coretypes::String *CreateStringFromCharsEntrypoint(ObjectHeader *obj)
 }
 
 extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t offset, uint32_t length,
-                                                                        ObjectHeader *obj,
-                                                                        [[maybe_unused]] Class *stringKlass)
+                                                                        ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
     auto vm = ManagedThread::GetCurrent()->GetVM();
@@ -251,8 +250,7 @@ extern "C" coretypes::String *CreateStringFromCharsWithOffsetEntrypoint(uint32_t
     return str;
 }
 
-extern "C" coretypes::String *CreateStringFromCharsZeroOffsetEntrypoint(uint32_t length, ObjectHeader *obj,
-                                                                        [[maybe_unused]] Class *stringKlass)
+extern "C" coretypes::String *CreateStringFromCharsZeroOffsetEntrypoint(uint32_t length, ObjectHeader *obj)
 {
     BEGIN_ENTRYPOINT();
     auto vm = ManagedThread::GetCurrent()->GetVM();
@@ -281,8 +279,7 @@ extern "C" coretypes::String *SubStringFromStringEntrypoint(ObjectHeader *obj, i
     return substr;
 }
 
-extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t begin, int32_t end,
-                                                      [[maybe_unused]] Class *stringKlass)
+extern "C" coretypes::Array *StringGetCharsEntrypoint(ObjectHeader *obj, int32_t begin, int32_t end)
 {
     BEGIN_ENTRYPOINT();
 

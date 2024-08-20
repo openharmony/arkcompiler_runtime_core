@@ -33,6 +33,7 @@ declare_args() {
   if (!defined(is_standard_system)) {
     is_standard_system = true
   }
+
   if (!defined(is_llvmbackend)) {
     is_llvmbackend = false
   }
@@ -41,6 +42,18 @@ declare_args() {
     ark_ets_interop_js = true
   } else {
     ark_ets_interop_js = false
+  }
+}
+
+declare_args() {
+  if (!defined(is_llvm_interpreter)) {
+    is_llvm_interpreter = is_llvmbackend
+  }
+  if (!defined(is_llvm_fastpath)) {
+    is_llvm_fastpath = is_llvmbackend && target_cpu == "arm64"
+  }
+  if (!defined(is_llvm_aot)) {
+    is_llvm_aot = is_llvmbackend
   }
 }
 
@@ -69,10 +82,29 @@ if (!ark_standalone_build && (target_cpu == "x64" || target_cpu == "x86_64")) {
   enable_irtoc = false
   enable_codegen = false
   is_llvmbackend = false
+  is_llvm_interpreter = false
+  is_llvm_fastpath = false
+  is_llvm_aot = false
 }
 if (target_cpu == "arm") {
   is_llvmbackend = false
+  is_llvm_interpreter = false
+  is_llvm_fastpath = false
+  is_llvm_aot = false
 }
+
+if (!is_llvmbackend) {
+  assert(!is_llvm_interpreter,
+         "LLVM Irtoc Interpreter requires is_llvmbackend=true")
+  assert(!is_llvm_fastpath,
+         "LLVM Fastpath compilation feature requires is_llvmbackend=true")
+  assert(!is_llvm_aot,
+         "LLVM AOT compilation feature requires is_llvmbackend=true")
+} else {
+  assert(!is_llvm_fastpath || target_cpu == "arm64",
+         "LLVM Fastpath compilation available only for arm64 target")
+}
+
 ark_enable_global_register_variables = true
 enable_bytecode_optimizer = true
 enable_relayout_profile = false

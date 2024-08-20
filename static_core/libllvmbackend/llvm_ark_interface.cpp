@@ -119,9 +119,10 @@ const char *LLVMArkInterface::GetThreadRegister() const
 int32_t LLVMArkInterface::CreateIntfInlineCacheSlotId(const llvm::Function *caller) const
 {
     llvm::sys::ScopedLock scopedLock {*lock_};
-    auto callerOriginFile = functionOrigins_.lookup(caller);
+    auto callerName = caller->getName();
+    auto callerOriginFile = functionOrigins_.lookup(callerName);
     ASSERT_PRINT(callerOriginFile != nullptr,
-                 std::string("No origin for function = '") + caller->getName().str() +
+                 std::string("No origin for function = '") + callerName.str() +
                      "'. Use RememberFunctionOrigin to store the origin before calling CreateIntfInlineCacheId");
     auto aotData = GetAotDataFromBuilder(callerOriginFile, aotBuilder_);
     uint64_t intfInlineCacheIndex = aotData.GetIntfInlineCacheIndex();
@@ -481,6 +482,9 @@ llvm::StringRef LLVMArkInterface::GetRuntimeFunctionName(LLVMArkInterface::Runti
 
 llvm::FunctionType *LLVMArkInterface::GetRuntimeFunctionType(llvm::StringRef name) const
 {
+#ifndef NDEBUG
+    ASSERT_PRINT(!compiled_, "Attempt to call GetRuntimeFunctionType after module is compiled");
+#endif
     return runtimeFunctionTypes_.lookup(name);
 }
 
@@ -488,6 +492,9 @@ llvm::FunctionType *LLVMArkInterface::GetOrCreateRuntimeFunctionType(llvm::LLVMC
                                                                      LLVMArkInterface::RuntimeCallType callType,
                                                                      LLVMArkInterface::IntrinsicId id)
 {
+#ifndef NDEBUG
+    ASSERT_PRINT(!compiled_, "Attempt to call GetOrCreateRuntimeFunctionType after module is compiled");
+#endif
     auto rtFunctionName = GetRuntimeFunctionName(callType, id);
     auto rtFunctionTy = GetRuntimeFunctionType(rtFunctionName);
     if (rtFunctionTy != nullptr) {
@@ -506,6 +513,14 @@ llvm::FunctionType *LLVMArkInterface::GetOrCreateRuntimeFunctionType(llvm::LLVMC
     runtimeFunctionTypes_.insert({rtFunctionName, rtFunctionTy});
     return rtFunctionTy;
 }
+
+#ifndef NDEBUG
+void LLVMArkInterface::MarkAsCompiled()
+{
+    runtimeFunctionTypes_.clear();
+    compiled_ = true;
+}
+#endif
 
 void LLVMArkInterface::CreateRequiredIntrinsicFunctionTypes(llvm::LLVMContext &ctx)
 {
@@ -533,12 +548,12 @@ void LLVMArkInterface::RememberFunctionOrigin(const llvm::Function *function, Me
 {
     ASSERT(function != nullptr);
     ASSERT(methodPtr != nullptr);
-
+    auto funcName = function->getName();
     auto file = static_cast<panda_file::File *>(runtime_->GetBinaryFileForMethod(methodPtr));
-    [[maybe_unused]] auto insertionResultFunctionOrigins = functionOrigins_.insert({function, file});
+    [[maybe_unused]] auto insertionResultFunctionOrigins = functionOrigins_.insert({funcName, file});
     ASSERT(insertionResultFunctionOrigins.second);
-    LLVM_LOG(DEBUG, INFRA) << function->getName().data() << " defined in " << runtime_->GetFileName(methodPtr);
-    [[maybe_unused]] auto insertionResultMethodPtrs = methodPtrs_.insert({function, methodPtr});
+    LLVM_LOG(DEBUG, INFRA) << funcName.data() << " defined in " << runtime_->GetFileName(methodPtr);
+    [[maybe_unused]] auto insertionResultMethodPtrs = methodPtrs_.insert({funcName, methodPtr});
     ASSERT(insertionResultMethodPtrs.second);
 }
 
@@ -547,14 +562,17 @@ LLVMArkInterface::MethodId LLVMArkInterface::GetMethodId(const llvm::Function *c
 {
     ASSERT(callee != nullptr);
     ASSERT(caller != nullptr);
-
-    auto callerOriginFile = functionOrigins_.lookup(caller);
+    auto callerName = caller->getName();
+    auto callerOriginFile = functionOrigins_.lookup(callerName);
     ASSERT_PRINT(callerOriginFile != nullptr,
-                 std::string("No origin for function = '") + caller->getName().str() +
+                 std::string("No origin for function = '") + callerName.str() +
                      "'. Use RememberFunctionOrigin to store the origin before calling GetMethodId");
-    auto methodIdIterator = methodIds_.find({callee, callerOriginFile});
-    ASSERT_PRINT(methodIdIterator != methodIds_.end(),
-                 std::string(callee->getName()) + " was not declared in callerOriginFile");
+    auto calleeName = callee->getName();
+    auto callerOriginFileIterator = methodIds_.find(callerOriginFile);
+    ASSERT_PRINT(callerOriginFileIterator != methodIds_.end(), "No method ids were declared in callerOriginFile");
+    auto methodIdIterator = callerOriginFileIterator->second.find(calleeName);
+    ASSERT_PRINT(methodIdIterator != callerOriginFileIterator->second.end(),
+                 std::string(calleeName) + " was not declared in callerOriginFile");
 
     return methodIdIterator->second;
 }
@@ -564,13 +582,14 @@ void LLVMArkInterface::RememberFunctionCall(const llvm::Function *caller, const 
 {
     ASSERT(callee != nullptr);
     ASSERT(caller != nullptr);
-
-    auto pandaFile = functionOrigins_.lookup(caller);
+    auto callerName = caller->getName();
+    auto pandaFile = functionOrigins_.lookup(callerName);
     ASSERT_PRINT(pandaFile != nullptr,
-                 std::string("No origin for function = '") + caller->getName().str() +
+                 std::string("No origin for function = '") + callerName.str() +
                      "'. Use RememberFunctionOrigin to store the origin before calling RememberFunctionCall");
     // Assuming it is ok to declare extern function twice
-    methodIds_.insert({{callee, pandaFile}, methodId});
+    auto &pandaFileMap = methodIds_[pandaFile];
+    pandaFileMap.insert({callee->getName(), methodId});
 }
 
 bool ark::llvmbackend::LLVMArkInterface::IsRememberedCall(const llvm::Function *caller,
@@ -578,13 +597,14 @@ bool ark::llvmbackend::LLVMArkInterface::IsRememberedCall(const llvm::Function *
 {
     ASSERT(caller != nullptr);
     ASSERT(callee != nullptr);
-
-    auto callerOriginFile = functionOrigins_.find(caller);
+    auto callerName = caller->getName();
+    auto callerOriginFile = functionOrigins_.find(callerName);
     ASSERT_PRINT(callerOriginFile != functionOrigins_.end(),
-                 caller->getName().str() + " has no origin panda file. Use RememberFunctionOrigin for " +
-                     caller->getName().str() + " before calling IsRememberedCall");
-
-    return methodIds_.find({callee, callerOriginFile->second}) != methodIds_.end();
+                 callerName.str() + " has no origin panda file. Use RememberFunctionOrigin for " + callerName.str() +
+                     " before calling IsRememberedCall");
+    auto callerOriginFileIterator = methodIds_.find(callerOriginFile->second);
+    return callerOriginFileIterator != methodIds_.end() &&
+           callerOriginFileIterator->second.find(callee->getName()) != callerOriginFileIterator->second.end();
 }
 
 int32_t ark::llvmbackend::LLVMArkInterface::GetObjectClassOffset() const
@@ -595,25 +615,25 @@ int32_t ark::llvmbackend::LLVMArkInterface::GetObjectClassOffset() const
 
 bool ark::llvmbackend::LLVMArkInterface::IsExternal(llvm::CallInst *call)
 {
-    auto caller = methodPtrs_.find(call->getFunction());
+    auto caller = methodPtrs_.find(call->getFunction()->getName());
     ASSERT(caller != methodPtrs_.end());
-    auto callee = methodPtrs_.find(call->getCalledFunction());
+    auto callee = methodPtrs_.find(call->getCalledFunction()->getName());
     ASSERT(callee != methodPtrs_.end());
     return runtime_->IsMethodExternal(caller->second, callee->second);
 }
 
 LLVMArkInterface::MethodPtr ark::llvmbackend::LLVMArkInterface::ResolveVirtual(uint32_t classId, llvm::CallInst *call)
 {
-    auto caller = methodPtrs_.find(call->getFunction());
+    auto caller = methodPtrs_.find(call->getFunction()->getName());
     ASSERT(caller != methodPtrs_.end());
     auto klass = runtime_->GetClass(caller->second, classId);
     if (klass == nullptr) {
         return nullptr;
     }
-    auto callee = methodPtrs_.find(call->getCalledFunction());
+    auto callee = methodPtrs_.find(call->getCalledFunction()->getName());
     ASSERT(callee != methodPtrs_.end());
-    auto calleeClassId = runtime_->GetClassIdForMethod(callee->getSecond());
-    auto calleeClass = runtime_->GetClass(callee->getSecond(), calleeClassId);
+    auto calleeClassId = runtime_->GetClassIdForMethod(callee->second);
+    auto calleeClass = runtime_->GetClass(callee->second, calleeClassId);
     if (!runtime_->IsAssignableFrom(calleeClass, klass)) {
         return nullptr;
     }
@@ -625,11 +645,11 @@ int32_t LLVMArkInterface::GetPltSlotId(const llvm::Function *caller, const llvm:
 {
     ASSERT(caller != nullptr);
     ASSERT(callee != nullptr);
-
+    auto callerName = caller->getName();
     llvm::sys::ScopedLock scopedLock {*lock_};
-    auto callerOriginFile = functionOrigins_.lookup(caller);
+    auto callerOriginFile = functionOrigins_.lookup(callerName);
     ASSERT_PRINT(callerOriginFile != nullptr,
-                 std::string("No origin for function = '") + caller->getName().str() +
+                 std::string("No origin for function = '") + callerName.str() +
                      "'. Use RememberFunctionOrigin to store the origin before calling GetPltSlotId");
     return GetAotDataFromBuilder(callerOriginFile, aotBuilder_).GetPltSlotId(GetMethodId(caller, callee));
 }
@@ -672,12 +692,12 @@ void LLVMArkInterface::PutVirtualFunction(LLVMArkInterface::MethodPtr methodPtr,
     ASSERT(function != nullptr);
     ASSERT(methodPtr != nullptr);
 
-    methodPtrs_.insert({function, methodPtr});
+    methodPtrs_.insert({function->getName(), methodPtr});
 }
 
 uint32_t LLVMArkInterface::GetVTableOffset(llvm::Function *caller, uint32_t methodId) const
 {
-    auto arkCaller = methodPtrs_.find(caller);
+    auto arkCaller = methodPtrs_.find(caller->getName());
     auto callee = runtime_->GetMethodById(arkCaller->second, methodId);
 
     auto arch = LLVMArchToArkArch(triple_.getArch());
@@ -689,7 +709,7 @@ uint32_t LLVMArkInterface::GetVTableOffset(llvm::Function *caller, uint32_t meth
 bool LLVMArkInterface::IsInterfaceMethod(llvm::CallInst *call)
 {
     auto methodId = utils::GetMethodIdFromAttr(call);
-    auto caller = methodPtrs_.find(call->getFunction());
+    auto caller = methodPtrs_.find(call->getFunction()->getName());
     auto callee = runtime_->GetMethodById(caller->second, methodId);
 
     return runtime_->IsInterfaceMethod(callee);

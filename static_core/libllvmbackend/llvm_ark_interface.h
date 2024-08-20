@@ -57,6 +57,10 @@ namespace ark::llvmbackend {
 enum class BridgeType {
     NONE,        //
     ODD_SAVED,   //
+    ODD_SAVED1,  //
+    ODD_SAVED2,  //
+    ODD_SAVED3,  //
+    ODD_SAVED4,  //
     ENTRYPOINT,  //
     SLOW_PATH,   //
 };
@@ -103,6 +107,9 @@ public:
     llvm::FunctionType *GetRuntimeFunctionType(llvm::StringRef name) const;
     llvm::FunctionType *GetOrCreateRuntimeFunctionType(llvm::LLVMContext &ctx, llvm::Module *module,
                                                        LLVMArkInterface::RuntimeCallType callType, IntrinsicId id);
+#ifndef NDEBUG
+    void MarkAsCompiled();
+#endif
 
     void CreateRequiredIntrinsicFunctionTypes(llvm::LLVMContext &ctx);
 
@@ -223,14 +230,17 @@ private:
     ark::compiler::RuntimeInterface *runtime_;
     llvm::Triple triple_;
     llvm::StringMap<llvm::FunctionType *> runtimeFunctionTypes_;
-    llvm::ValueMap<const llvm::Function *, const panda_file::File *> functionOrigins_;
-    llvm::DenseMap<std::pair<const llvm::Function *, const panda_file::File *>, MethodId> methodIds_;
-    llvm::DenseMap<const llvm::Function *, MethodPtr> methodPtrs_;
+    llvm::StringMap<const panda_file::File *> functionOrigins_;
+    llvm::DenseMap<const panda_file::File *, llvm::StringMap<MethodId>> methodIds_;
+    llvm::StringMap<MethodPtr> methodPtrs_;
     llvm::StringMap<uint64_t> llvmStackSizes_;
     llvm::StringMap<RegMasks> calleeSavedRegisters_;
     ark::compiler::AotBuilder *aotBuilder_;
     std::vector<llvm::StringRef> irtocReturnHandlers_;
     mutable llvm::sys::Mutex *lock_;
+#ifndef NDEBUG
+    bool compiled_ = false;
+#endif
 };
 }  // namespace ark::llvmbackend
 #endif  // LIBLLVMBACKEND_LLVM_ARK_INTERFACE_H

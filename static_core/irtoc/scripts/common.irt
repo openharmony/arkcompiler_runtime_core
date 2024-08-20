@@ -82,7 +82,6 @@ module Constants
     TLAB_MEMORY_END_ADDR_OFFSET = "cross_values::GetTlabMemoryEndAddrOffset(GetArch())"
     OBJECT_CLASS_OFFSET = "cross_values::GetObjectHeaderClassPointerOffset(GetArch())"
     WRITE_TLAB_STATS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE)"
-    WRITE_TLAB_STATS = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::WRITE_TLAB_STATS)"
     ANNOTATE_SANITIZERS_NO_BRIDGE = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::ANNOTATE_SANITIZERS_NO_BRIDGE)"
     GET_CALLEE_METHOD = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::GET_CALLEE_METHOD_DIRECT)"
     INITIALIZE_CLASS_BY_ID = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::INITIALIZE_CLASS_BY_ID_DIRECT)"
@@ -104,7 +103,6 @@ module Constants
     GET_ACC_MIRROR_OFFSET = "cross_values::GetFrameAccMirrorOffset(GetArch())"
     GET_HOTNESS_COUNTER_OFFSET = "cross_values::GetMethodHotnessCounterOffset(GetArch())"
     GET_FRAME_KIND_OFFSET = "cross_values::GetManagedThreadFrameKindOffset(GetArch())"
-    RESOLVE_VIRTUAL_CALL_AOT = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::RESOLVE_VIRTUAL_CALL_AOT)"
     GET_CLASS_METHODS_OFFSET = "cross_values::GetClassMethodsOffset(GetArch())"
     METHOD_NUM_ARGS_OFFSET = "cross_values::GetMethodNumArgsOffset(GetArch())"
     METHOD_CLASS_OFFSET = "cross_values::GetMethodClassOffset(GetArch())"
@@ -199,9 +197,6 @@ module Constants
     COMPILER_UINT64 = "compiler::DataType::UINT64"
     COMPILER_INT32 = "compiler::DataType::INT32"
     COMPILER_PTR = "compiler::DataType::POINTER"
-
-    POST_INTER_REGION_BARRIER_SLOW = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::POST_INTER_REGION_BARRIER_SLOW)"
-    POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW = "cross_values::GetManagedThreadEntrypointOffset(GetArch(), EntrypointId::POST_INTER_REGION_BARRIER_TWO_CARDS_SLOW)"
 
     STRING_CLASS_SIZE = "sizeof(coretypes::String)"
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"

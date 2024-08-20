@@ -134,13 +134,18 @@ config("ark_config") {
   if (is_emulator) {
     defines += [ "PANDA_TARGET_EMULATOR" ]
   }
-  if (is_llvmbackend) {
-    defines += [
-      "PANDA_LLVM_IRTOC",
-      "PANDA_LLVM_INTERPRETER",
-      "PANDA_LLVM_FASTPATH",
-      "PANDA_LLVM_AOT",
-    ]
+
+  if (is_llvm_interpreter || is_llvm_fastpath) {
+    defines += [ "PANDA_LLVM_IRTOC" ]
+    if (is_llvm_interpreter) {
+      defines += [ "PANDA_LLVM_INTERPRETER" ]
+    }
+    if (is_llvm_fastpath) {
+      defines += [ "PANDA_LLVM_FASTPATH" ]
+    }
+  }
+  if (is_llvm_aot) {
+    defines += [ "PANDA_LLVM_AOT" ]
   }
 
   if (is_ohos && is_standard_system) {

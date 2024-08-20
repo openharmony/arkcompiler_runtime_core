@@ -139,7 +139,7 @@ function(:StringBuilderAppendLong,
   Return(sb).ref
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_LONG_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).MethodAsImm("StringBuilderAppendLongOddSavedBridge").Terminator.ref
+  Intrinsic(:SLOW_PATH_ENTRY, sb, v).AddImm(entrypoint).MethodAsImm("StringBuilderAppendLong3ArgBridge").Terminator.ref
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -188,7 +188,7 @@ function(:StringBuilderAppendBool,
   Return(sb).ref
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_BOOL_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, v, array_klass).AddImm(entrypoint).MethodAsImm("StringBuilderAppendBoolOddSavedBridge").Terminator.ref
+  Intrinsic(:SLOW_PATH_ENTRY, sb, v).AddImm(entrypoint).MethodAsImm("StringBuilderAppendBool3ArgBridge").Terminator.ref
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
@@ -244,7 +244,7 @@ def GenerateStringBuilderAppendChar(string_compression_enabled)
   Return(sb).ref
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_CHAR_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, ch, array_klass).AddImm(entrypoint).MethodAsImm("StringBuilderAppendCharOddSavedBridge").Terminator.ref
+  Intrinsic(:SLOW_PATH_ENTRY, sb, ch).AddImm(entrypoint).MethodAsImm("StringBuilderAppendChar3ArgBridge").Terminator.ref
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 end
@@ -359,6 +359,6 @@ Label(:NextObject)
   # SlowPath if new string can not be allocated in TLAB
 Label(:SlowPathEntrypoint)
   entrypoint = get_entrypoint_offset("STRING_BUILDER_TO_STRING_SLOW_PATH")
-  Intrinsic(:SLOW_PATH_ENTRY, sb, string_klass).AddImm(entrypoint).MethodAsImm("StringBuilderToStringUsualBridge").Terminator.ptr
+  Intrinsic(:SLOW_PATH_ENTRY, sb).AddImm(entrypoint).MethodAsImm("StringBuilderToString2ArgBridge").Terminator.ptr
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }

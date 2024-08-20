@@ -719,7 +719,7 @@ def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_ARRAY_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, char_offset, char_count, char_array, string_klass).AddImm(entrypoint).MethodAsImm("CreateStringFromCharArrayUsualBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, char_offset, char_count, char_array).AddImm(entrypoint).MethodAsImm("CreateStringFromCharArray4ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromCharArrayTlab
@@ -779,7 +779,7 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, char_count, char_array, string_klass).AddImm(entrypoint).MethodAsImm("CreateStringFromZeroBasedCharArrayOddSavedBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, char_count, char_array).AddImm(entrypoint).MethodAsImm("CreateStringFromZeroBasedCharArray3ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromZeroBasedCharArrayTlab
@@ -963,7 +963,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("STRING_GET_CHARS_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index, array_klass).AddImm(entrypoint).MethodAsImm("StringGetCharsUsualBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetChars4ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateStringGetCharsTlab

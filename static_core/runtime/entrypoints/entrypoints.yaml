@@ -65,6 +65,15 @@ entrypoints:
   - const ark::ObjectHeader*
   - ark::Class*
 
+- name: CheckCastSlowPath
+  entrypoint: CheckCastEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+  - void
+  - const ark::ObjectHeader*
+  - ark::Class*
+
 - name: CheckCastDeoptimize
   entrypoint: CheckCastDeoptimizeEntrypoint
   bridge: entrypoint
@@ -175,6 +184,13 @@ entrypoints:
 - name: CreateEmptyStringSlowPath
   entrypoint: CreateEmptyStringEntrypoint
   bridge: slow_path
+  properties: []
+  signature:
+  - ark::coretypes::String*
+
+- name: CreateEmptyString1Arg
+  entrypoint: CreateEmptyStringEntrypoint
+  bridge: odd_saved1
   properties: []
   signature:
   - ark::coretypes::String*
@@ -416,6 +432,17 @@ entrypoints:
 - name: ResolveVirtualCallAot
   entrypoint: ResolveVirtualCallAotEntrypoint
   bridge: entrypoint
+  properties: []
+  signature:
+  - uintptr_t
+  - const ark::Method*
+  - ark::ObjectHeader*
+  - size_t
+  - uintptr_t
+
+- name: ResolveVirtualCallAotSlowPath
+  entrypoint: ResolveVirtualCallAotEntrypoint
+  bridge: slow_path
   properties: []
   signature:
   - uintptr_t
@@ -959,18 +986,16 @@ entrypoints:
     - uint32_t                 # offset
     - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::Class*              # string class pointer
 
-- name: CreateStringFromCharArrayUsual
+- name: CreateStringFromCharArray4Arg
   entrypoint: CreateStringFromCharsWithOffsetEntrypoint
-  bridge: entrypoint
+  bridge: odd_saved4
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
     - uint32_t                 # offset
     - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::Class*              # string class pointer
 
 - name: CreateStringFromZeroBasedCharArrayTlab
   entrypoint: CreateStringFromZeroBasedCharArrayTlab
@@ -1000,17 +1025,15 @@ entrypoints:
     - ark::coretypes::String*  # resulting string
     - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::Class*              # string class pointer
 
-- name: CreateStringFromZeroBasedCharArrayOddSaved
+- name: CreateStringFromZeroBasedCharArray3Arg
   entrypoint: CreateStringFromCharsZeroOffsetEntrypoint
-  bridge: odd_saved
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::coretypes::String*  # resulting string
     - uint32_t                 # length
     - ark::ObjectHeader*       # u16 array
-    - ark::Class*              # string class pointer
 
 - name: SubStringFromStringTlab
   entrypoint: SubStringFromStringTlab
@@ -1083,18 +1106,16 @@ entrypoints:
     - ark::ObjectHeader*       # src string
     - int32_t                  # begin index
     - int32_t                  # end index
-    - ark::Class*              # Array u16 class pointer
 
-- name: StringGetCharsUsual
+- name: StringGetChars4Arg
   entrypoint: StringGetCharsEntrypoint
-  bridge: entrypoint
+  bridge: odd_saved4
   properties: []
   signature:
     - ark::coretypes::Array*   # resulting array of utf16 chars
     - ark::ObjectHeader*       # src string
     - int32_t                  # begin index
     - int32_t                  # end index
-    - ark::Class*              # Array u16 class pointer
 
 - name: MemmoveInterposer        # "bridge" to avoid generating the excessive prologue
   entrypoint: MemmoveInterposer
