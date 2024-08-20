@@ -46,13 +46,31 @@ class VmbRunner:
         self.abort_on_fail = args.abort_on_fail
         self.dry_run = args.dry_run
         self.exclude_list = args.exclude_list
+        self.fail_logs = args.fail_logs
+
+    def process_error(self, bu: BenchUnit, e: Exception) -> None:
+        msg = str(e)
+        if isinstance(e, VmbToolExecError):
+            msg = e.out
+            if BUStatus.COMPILATION_FAILED == bu.status:
+                bu.result.compile_status = 1
+                log.error('%s: compilation failed', bu.name)
+            else:
+                bu.status = BUStatus.EXECUTION_FAILED
+        if isinstance(e, RuntimeError):
+            bu.status = BUStatus.ERROR
+        elif isinstance(e, TimeoutExpired):
+            bu.status = BUStatus.TIMEOUT
+        if self.fail_logs:
+            bu.save_fail_log(self.fail_logs, msg)
+        log.error(e)
 
     def run(self,
             bench_units: List[BenchUnit]
             ) -> Tuple[List[BenchUnit], ExtInfo, Timer]:
         log.info("Starting RUN phase...")
-        timer = Timer()
-        t0 = Timer()
+        timer_suite = Timer()
+        timer_unit = Timer()
         self.hooks.run_before_suite(self.platform)
         for bu in bench_units:
             if bu.name in self.exclude_list:
@@ -62,35 +80,39 @@ class VmbRunner:
             log.info('Starting bench unit: %s', bu.name)
             try:
                 self.hooks.run_before_unit(bu)
-                t0.start()
+                timer_unit.start()
                 self.platform.run_unit(bu)  # do actual work
-                t0.finish()
-                log.trace('Bench total time: %s %f', bu.name,
-                          t0.elapsed().total_seconds())
                 self.hooks.run_after_unit(bu)
                 if BUStatus.PASS == bu.status:
                     log.passed('%s: %f', bu.name, bu.result.get_avg_time())
                 elif BUStatus.COMPILATION_FAILED == bu.status:
-                    log.warning('%s: compilation failed', bu.name)
+                    bu.result.compile_status = 1
+                    log.error('%s: compilation failed', bu.name)
+                elif len(bu.result.execution_forks) == 0 and not self.dry_run:
+                    raise VmbToolExecError('No benchmark iterations!')
                 elif not self.dry_run:
-                    log.warning('%s: failed', bu.name)
+                    log.error('%s: failed', bu.name)
             except (VmbToolExecError, TimeoutExpired, RuntimeError) as e:
-                if isinstance(e, RuntimeError):
-                    bu.status = BUStatus.ERROR
-                elif isinstance(e, TimeoutExpired):
-                    bu.status = BUStatus.TIMEOUT
-                log.error(e)
+                self.process_error(bu, e)
                 if self.abort_on_fail:
                     log.fatal('Aborting on first fail...')
                     break
             except KeyboardInterrupt:
                 break
             finally:
-                self.platform.cleanup(bu)
+                if not self.dry_run:
+                    self.platform.cleanup(bu)
+                timer_unit.finish()
+                log.trace('Bench total time: %s %f', bu.name,
+                          timer_unit.elapsed().total_seconds())
         self.hooks.run_after_suite(self.platform)
-        timer.finish()
-        log.passed('Run took %s', timer.elapsed())
-        return bench_units, self.platform.ext_info, timer
+        timer_suite.finish()
+        elapsed = timer_suite.elapsed()
+        if self.dry_run:
+            log.passed('Dry run finished in %s', elapsed)
+        else:
+            log.passed('Run took %s', elapsed)
+        return bench_units, self.platform.ext_info, timer_suite
 
 
 if __name__ == '__main__':

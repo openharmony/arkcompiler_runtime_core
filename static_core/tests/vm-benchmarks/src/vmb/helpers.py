@@ -126,7 +126,8 @@ def get_plugin(plug_type: str,
     """Return plugin."""
     # try extra dir first
     if extra:
-        die(extra.is_dir(), 'Extra plugins dir "%s" does not exist!', extra)
+        die(not extra.is_dir(),
+            'Extra plugins dir "%s" does not exist!', extra)
         py = extra.joinpath(plug_type, f'{plug_name}.py')
         if py.is_file():
             return import_module(plug_name, str(py))
@@ -155,9 +156,18 @@ def get_plugins(plug_type: str,
 class Timer:
     """Simple struct for begin-end."""
 
+    tz = datetime.now(timezone.utc).astimezone().tzinfo
+    tm_format = "%Y-%m-%dT%H:%M:%S.00000%z"
+
     def __init__(self) -> None:
         self.begin = datetime.now(timezone.utc)
         self.end = self.begin
+
+    @staticmethod
+    def format(t) -> str:
+        if not isinstance(t, datetime):
+            return 'unknown'
+        return t.astimezone(Timer.tz).strftime(Timer.tm_format)
 
     def start(self) -> None:
         self.begin = datetime.now(timezone.utc)
@@ -210,7 +220,7 @@ class Jsonable:
              if isinstance(value, property)})
         return props
 
-    def js(self, sort_keys=False, indent=4):
+    def js(self, sort_keys=False, indent=4) -> str:
         """Serialize object to json."""
         return json.dumps(
             self,
@@ -260,6 +270,12 @@ def create_file(path: Union[str, Path]):
     return os.fdopen(
         os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o664),
         mode='w', encoding='utf-8')
+
+
+def force_link(link: Path, dest: Path) -> None:
+    if link.exists():
+        link.unlink()
+    link.symlink_to(dest)
 
 
 def die(condition: bool, *msg) -> None:

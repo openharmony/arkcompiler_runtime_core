@@ -14,7 +14,7 @@
  */
 
 /**
- * @Import { StringUtil } from "../../shared/libStringUtil.ts"
+ * @Import { StringUtil } from '../../shared/libStringUtil.ts'
  */
 
 /**

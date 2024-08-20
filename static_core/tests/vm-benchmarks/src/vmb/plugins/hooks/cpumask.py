@@ -17,7 +17,7 @@
 
 import os
 import logging
-from typing import Dict
+from typing import Dict, List, Tuple, Optional
 
 from vmb.platform import PlatformBase
 from vmb.cli import Args
@@ -34,6 +34,14 @@ all_props = (
 )
 
 
+def parse_bitmask(mask_s: Optional[str]) -> Tuple[str, List[bool]]:
+    if not mask_s:
+        return '', []
+    mask_s = mask_s[2:] if mask_s.startswith('0x') else mask_s
+    mask_i = int(f'0x{mask_s}', base=16)
+    return mask_s, [0 != mask_i & (1 << i) for i in range(len(mask_s) * 4)]
+
+
 class Hook(HookBase):
     """Hook cpumask. Set cpu online/offline and freqs."""
 
@@ -42,10 +50,14 @@ class Hook(HookBase):
     def __init__(self, args: Args) -> None:
         super().__init__(args)
         self.saved_state: Dict[int, Dict[str, str]] = {}
-        mask = args.get('cpumask', '')
-        self.cpumask = list(map(lambda x: x == '1', mask))
+        mask = args.get('cpumask')
+        m_s, m_b = parse_bitmask(mask)
+        self.taskset_arg = m_s
+        self.cpumask = m_b
         if not any(self.cpumask):
             raise ValueError(f'Wrong cpumask: {mask}')
+        log.info("Enabling CPU's: %s",
+                 ','.join(str(i) for i, use in enumerate(m_b) if use))
 
     @property
     def name(self) -> str:
@@ -75,7 +87,7 @@ class Hook(HookBase):
         all_cores = sorted([
             int(remove_prefix(os.path.split(c)[1], 'cpu'))
             for c in r.out.split("\n") if self.cpu_root in c])
-        log.debug(all_cores)
+        log.trace(all_cores)
         if len(all_cores) > len(self.cpumask):
             log.warning('Wrong cpumask length for '
                         '%d cores: %s', len(all_cores), self.cpumask)
@@ -90,8 +102,8 @@ class Hook(HookBase):
                     self.saved_state[c][p] = get_prop(c, p)
                 except KeyError as e:
                     raise RuntimeError from e
-        log.debug(max_freqs)
-        log.debug(self.saved_state)
+        log.trace(max_freqs)
+        log.trace(self.saved_state)
         # update cpu settings
         on_cores = [index for index, on in enumerate(self.cpumask) if on]
         off_cores = [index for index, on in enumerate(self.cpumask) if not on]
@@ -113,6 +125,7 @@ class Hook(HookBase):
                 f'{self.cpu_root}/cpu{c}/cpufreq/scaling_min_freq')
         for c in off_cores:
             set_prop(c, 'online', '0')
+        platform.set_affinity(self.taskset_arg)
         # actually defined in base class
         self.done = True  # pylint: disable=attribute-defined-outside-init
 

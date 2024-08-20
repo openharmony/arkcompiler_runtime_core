@@ -31,7 +31,7 @@ class Lang(LangBase):
     __re_func = re.compile(
         r'^\s*(public\s+)?(override\s+)?'
         r'(?P<func>\w+)\s*'
-        r'\(\s*\)\s*:?\s*(?P<type>\w+)?\s*(throws)?\s*({)?\s*$')
+        r'\(\s*\)\s*:?\s*(?P<type>[<>\w]+)?\s*(throws)?\s*({)?\s*$')
     __re_param = re.compile(
         r'^\s*(public\s+)?(static\s+)?'
         r'(?P<param>\w+)\s*'

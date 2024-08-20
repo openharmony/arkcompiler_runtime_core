@@ -72,5 +72,5 @@ def test_custom_opts():
                  '--node-custom-option="--c=d" '
                  'foo/bar'):
         args = Args()
-        TestCase().assertTrue('"--a=b" "--c=d"' == \
-            ' '.join(args.get('node_custom_option')))
+        TestCase().assertTrue(
+            '"--a=b" "--c=d"' == args.get_custom_opts('node'))

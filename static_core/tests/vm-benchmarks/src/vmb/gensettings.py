@@ -15,28 +15,20 @@
 # limitations under the License.
 #
 
-from vmb.tool import ToolBase
-from vmb.unit import BenchUnit
+from dataclasses import dataclass
+from typing import Set
 
 
-class Tool(ToolBase):
+@dataclass
+class GenSettings:
+    """Template overrides class.
 
-    def __init__(self, *args):
-        super().__init__(*args)
-        self.node = ToolBase.get_cmd_path('node', 'NODE')
+    In most cases template name, source and bench file extentions
+    are set by selected lang, but for some platforms these defaults needs
+    to be overriden.
+    """
 
-    @property
-    def name(self) -> str:
-        return 'Node'
-
-    @property
-    def version(self) -> str:
-        return self.sh.run(
-            f'{self.node} --version').grep(r'v([0-9\.]+)')
-
-    def exec(self, bu: BenchUnit) -> None:
-        mjs = bu.src('.mjs')
-        res = self.x_run(
-            f'{self.node} {self.custom} {mjs}',
-            measure_time=True)
-        bu.parse_run_output(res)
+    src: Set[str]
+    template: str
+    out: str
+    link_to_src: bool

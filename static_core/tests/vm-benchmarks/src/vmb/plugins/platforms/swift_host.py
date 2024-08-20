@@ -18,7 +18,6 @@
 # pylint: disable=duplicate-code
 import logging
 from typing import List
-from vmb.cli import OptFlags
 from vmb.platform import PlatformBase
 from vmb.target import Target
 from vmb.unit import BenchUnit
@@ -52,6 +51,6 @@ class Platform(PlatformBase):
 
     def run_unit(self, bu: BenchUnit) -> None:
         self.swiftc(bu)
-        if OptFlags.DRY_RUN in self.flags:
+        if self.dry_run_stop(bu):
             return
         self.exe(bu)

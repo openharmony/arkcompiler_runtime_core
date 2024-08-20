@@ -32,7 +32,9 @@
 $imports;
 
 // map ets numerical types to number
+type long = number;
 type int = number;
+type short = number;
 type float = number;
 type double = number;
 type byte = number;

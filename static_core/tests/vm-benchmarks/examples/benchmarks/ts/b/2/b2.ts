@@ -14,8 +14,8 @@
  */
 
 /**
- * @Import { StringUtil } from "../../shared/libStringUtil.ts"
- * @Import { dummy } from "../moreshared/libDummy.ts"
+ * @Import { StringUtil } from '../../shared/libStringUtil.ts'
+ * @Import { dummy } from '../moreshared/libDummy.ts'
  */
 
 /**

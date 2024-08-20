@@ -73,6 +73,7 @@ class Doclet(StringEnum):
     IMPORT = "Import"
     TAGS = "Tags"
     BUGS = "Bugs"
+    GENERATOR = "Generator"  # Legacy code generation
 
     @staticmethod
     def exclusive_doclets() -> Iterable[Doclet]:
@@ -98,6 +99,7 @@ class BenchClass:
     imports: List[str] = field(default_factory=list)
     tags: List[str] = field(default_factory=list)
     bugs: List[str] = field(default_factory=list)
+    generator: Optional[str] = None
 
 
 class DocletParser(LineParser):
@@ -129,7 +131,8 @@ class DocletParser(LineParser):
                 continue
             if doclet_names.count(d1.value) > 0 and \
                     doclet_names.count(d2.value) > 0:
-                raise ValueError(f'@{d1} and @{d2} doclets in same comment')
+                raise ValueError(
+                    f'@{d1.value} and @{d2.value} doclets in same comment')
 
     @staticmethod
     def ensure_value(val: Optional[str]) -> str:
@@ -167,7 +170,8 @@ class DocletParser(LineParser):
                 raise ValueError(f'Unknown arg to @Benchmark: {unknown}')
         return overrides
 
-    def process_state(self, benchmarks: List[NameVal]) -> None:
+    def process_state(self, benchmarks: List[NameVal],
+                      generators: List[NameVal]) -> None:
         self.skip_empty()
         class_name = self.lang.parse_state(self.current)
         if not class_name:
@@ -180,6 +184,8 @@ class DocletParser(LineParser):
         # check if there are overrides for whole class
         for _, value in benchmarks:
             self.state.bench_args = self.parse_bench_overrides(value)
+        if generators:
+            self.state.generator = generators[0].value
 
     def process_benchmark(self, value: str, returns: List[NameVal]) -> None:
         self.skip_empty()
@@ -241,6 +247,7 @@ class DocletParser(LineParser):
 
         states = filter_doclets(Doclet.STATE)[:1]
         benchmarks = filter_doclets(Doclet.BENCHMARK)[:1]
+        generators = filter_doclets(Doclet.GENERATOR)[:1]
         for _, value in filter_doclets(Doclet.TAGS):
             self.process_tag(value, states)
         for _, value in filter_doclets(Doclet.BUGS):
@@ -251,7 +258,7 @@ class DocletParser(LineParser):
             else:
                 self.__pending_imports.append(value)
         for _ in states:
-            self.process_state(benchmarks)
+            self.process_state(benchmarks, generators)
             return
         for _, param_values in filter_doclets(Doclet.PARAM)[:1]:
             self.process_param(param_values)
@@ -308,6 +315,7 @@ class TemplateVars:  # pylint: disable=invalid-name
     method_rettype: str = ''
     method_call: str = ''
     bench_name: str = ''
+    bench_path: str = ''
     common: str = ''  # common feature is obsoleted
     # this should be the only place with defaults
     mi: int = 3
@@ -319,6 +327,10 @@ class TemplateVars:  # pylint: disable=invalid-name
     tags: Any = None
     bugs: Any = None
     imports: Any = None
+    generator: str = ''
+    config: Dict[str, Any] = field(default_factory=dict)
+    aot_opts: str = ''
+    disable_inlining: bool = False
 
     @classmethod
     def params_from_parsed(cls,
@@ -329,6 +341,7 @@ class TemplateVars:  # pylint: disable=invalid-name
         """Produce all combinations of Benches and Params."""
         tags_filter = args.tags if args else []
         tests_filter = args.tests if args else []
+        skip_tags = args.skip_tags if args else set()
         # list of lists of tuples (param_name, param_value)
         # sorting by param name to keep fixture indexing
         params = [
@@ -340,6 +353,8 @@ class TemplateVars:  # pylint: disable=invalid-name
         for b in parsed.benches:
             # check tags filter:
             tags = set(parsed.tags + b.tags)  # @State::@Tags + @Bench::@Tags
+            if skip_tags and set.intersection(tags, skip_tags):
+                continue
             if tags_filter and not set.intersection(tags, tags_filter):
                 continue
             # if no params fixtures will be [()]
@@ -347,6 +362,8 @@ class TemplateVars:  # pylint: disable=invalid-name
             for f in fixtures:
                 tp = cls(src, parsed.name)
                 fix_str = ';'.join([f'{x[0]}={x[1]}' for x in f])
+                tp.generator = parsed.generator if parsed.generator else ''
+                tp.config = {x[0]: x[1] for x in f}
                 if not fix_str:
                     fix_str = 'No Params'
                 tp.method_name = b.name
@@ -391,3 +408,9 @@ class TemplateVars:  # pylint: disable=invalid-name
                 self.fi = ovr.fast_iters
             if ovr.sys_gc_pause is not None:
                 self.gc = ovr.sys_gc_pause
+            if ovr.compiler_inlining == 'false':
+                self.disable_inlining = True
+                self.config.update({'disable_inlining': True})
+            if ovr.aot_compiler_options:
+                self.aot_opts += ' '.join(ovr.aot_compiler_options) + ' '
+                self.config.update({'aot_opts': self.aot_opts})

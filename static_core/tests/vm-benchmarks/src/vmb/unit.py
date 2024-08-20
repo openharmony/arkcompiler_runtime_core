@@ -20,7 +20,7 @@ import logging
 from typing import Optional, List, Union, Iterable
 from pathlib import Path
 from vmb.shell import ShellResult
-from vmb.helpers import remove_prefix, norm_list
+from vmb.helpers import remove_prefix, norm_list, create_file
 from vmb.result import TestResult, RunResult, BUStatus
 
 BENCH_PREFIX = 'bench_'
@@ -58,12 +58,18 @@ class BenchUnit:
         self.__libs: List[Path] = [
             self.path.joinpath(lib) for lib in libs] if libs else []
         self.name: str = remove_prefix(self.path.name, UNIT_PREFIX)
+        self.binaries: List[Path] = []
         self.device_path: Optional[Path] = None
         self.result: TestResult = TestResult(
             self.name,
             tags=norm_list(tags),
             bugs=norm_list(bugs))
         self.run_out: str = ''
+        self.crash_info: str = ''
+
+    @property
+    def doclet_src(self) -> Optional[Path]:
+        return self.__src
 
     @property
     def status(self) -> BUStatus:
@@ -85,7 +91,7 @@ class BenchUnit:
     def parse_run_output(self, res: ShellResult) -> None:
         if not res.out:
             return
-        self.run_out = res.out
+        self.run_out = res.out + "\n" + res.err
         mtch = re.search(self.__result_patt, res.out)
         if mtch:
             if mtch.groups()[0] != self.name:
@@ -104,7 +110,8 @@ class BenchUnit:
         self.result.execution_status = \
             int(res.ret) if res.ret is not None else -1
         self.status = BUStatus.PASS \
-            if 0 == self.result.execution_status \
+            if (0 == self.result.execution_status
+                and len(self.result.execution_forks) > 0) \
             else BUStatus.EXECUTION_FAILED
         if not res.err:
             return
@@ -112,8 +119,6 @@ class BenchUnit:
         self.result._ext_time = self.parse_ext_time(res.err)
 
     def src(self, *ext) -> Path:
-        if self.__src:
-            return self.__src  # regardless of ext
         files = [f for f in self.path.glob(f'{BENCH_PREFIX}{self.name}*')
                  if (not ext or f.suffix in ext)]
         if files:
@@ -138,3 +143,11 @@ class BenchUnit:
         if self.device_path is None:
             raise RuntimeError(f'Device path not set for {self.name}')
         return [self.device_path.joinpath(lib.name) for lib in self.libs(*ext)]
+
+    def save_fail_log(self, root: str, msg: str = '') -> None:
+        fail_log = Path(root).joinpath(self.name).with_suffix('.txt')
+        msg = msg if msg else self.run_out
+        with create_file(fail_log) as f:
+            f.write(msg)
+            if self.crash_info:
+                f.write(self.crash_info)

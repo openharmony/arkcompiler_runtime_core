@@ -14,7 +14,7 @@
  */
 
 /**
- * @Import { randomNumber } from "./libOne.mjs"
+ * @Import { randomNumber } from './libOne.mjs'
  */
 
 /**

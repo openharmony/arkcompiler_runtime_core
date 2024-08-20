@@ -61,7 +61,7 @@ class Platform(PlatformBase):
 
     def run_unit(self, bu: BenchUnit) -> None:
         self.es2abc(bu)
-        if OptFlags.DRY_RUN in self.flags:
+        if self.dry_run_stop(bu):
             return
         if OptFlags.AOT in self.flags:
             self.ark_js_vm.profile(bu)

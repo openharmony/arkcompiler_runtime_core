@@ -50,8 +50,11 @@ class Tool(ToolBase):
             f'echo "quit();"|{self.d_8}').grep(r'version\s*([0-9\.]+)')
 
     def exec(self, bu: BenchUnit) -> None:
+        bu_flags, _ = self.get_bu_opts(bu)
+        opts = '--max-inlined-bytecode-size=0 ' \
+            if OptFlags.DISABLE_INLINING in bu_flags else ''
         mjs = self.x_src(bu, '.mjs')
-        res = self.x_run(f'{self.d_8} {mjs}')
+        res = self.x_run(f'{self.d_8} {opts}{mjs}')
         bu.parse_run_output(res)
 
     def kill(self) -> None:
