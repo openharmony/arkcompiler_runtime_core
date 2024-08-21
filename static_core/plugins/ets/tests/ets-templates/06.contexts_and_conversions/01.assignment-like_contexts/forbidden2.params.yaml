@@ -61,9 +61,3 @@ cases:
     sval: foo
     dtype: Object[]
 
-  - defs: |-
-      type funcA = (a: int) => int;
-      type funcB = (a: int, b: int) => int;
-    stype: funcA[]
-    sval: new funcA[10]
-    dtype: funcB[]

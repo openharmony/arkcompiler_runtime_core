@@ -59,30 +59,12 @@ cases:
       let v: J<X[]|null> = new A<X[]|null>(null)
 
   - use: |-
-      let v: J<J<X>[]> = new A<J<X>[]>(new J<X>[0])
-
-  - use: |-
-      let v: J<J<X[]>[]> = new A<J<X[]>[]>(new J<X[]>[0])
-
-  - use: |-
       let v: J<I[]> = new A<I[]>(new I[0])
     bound: ' extends Object[]'
 
   - use: |-
-      let v: J<J<I>[]> = new A<J<I>[]>(new J<I>[0])
-
-  - use: |-
-      let v: J<J<I[]>[]> = new A<J<I[]>[]>(new J<I[]>[0])
-
-  - use: |-
-      let v: J<J<I[]|null>[]> = new A<J<I[]|null>[]>(new J<I[]|null>[0])
-
-  - use: |-
       let v: J<Color[]> = new A<Color[]>(new Color[0])
     bound: ' extends Color[]|null'
-
-  - use: |-
-      let v: J<J<Color[]>[]> = new A<J<Color[]>[]>(new J<Color[]>[0])
 
   # type argument is alias
   - use: |-
@@ -109,21 +91,6 @@ cases:
 
   - use: |-
       let v: J<B> = new A<B>(new X[0])
-    decl: |-
-      type B = X[]
-
-  - use: |-
-      let v: J<B> = new A<B>(new J<X>[0])
-    decl: |-
-      type B = J<X>[]
-
-  - use: |-
-      let v: J<B> = new A<B>(new J<X[]>[0])
-    decl: |-
-      type B = J<X[]>[]
-
-  - use: |-
-      let v: J<J<B>[]> = new A<J<B>[]>(new J<B>[0])
     decl: |-
       type B = X[]
 

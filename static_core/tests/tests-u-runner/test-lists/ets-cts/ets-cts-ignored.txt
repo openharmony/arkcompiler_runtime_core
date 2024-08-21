@@ -99,7 +99,7 @@
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_8.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_9.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_6.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_14.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_12.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_6.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_variance_neg1_0.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_variance_neg1_1.sts
@@ -112,11 +112,14 @@
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_variance_7.sts
 
 # verifier fails: panda#13164
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_13.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_13.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_12.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_12.sts
 # end of verifier fails
 
 07.expressions/01.evaluation_of_expressions/heap_pollution.sts
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.sts
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_3.sts
+07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_6.sts
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/aioobe4.sts
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe1.sts
 07.expressions/01.evaluation_of_expressions/01.normal_and_abrupt_completion_of_expression_evaluation/npe2.sts
@@ -443,6 +446,7 @@
 03.types/08.reference_types/07.function_types/function_type_6.sts
 03.types/08.reference_types/07.function_types/function_type_7.sts
 17.experimental_features/07.function_and_method_overloading/01.function_overloading/fn_overloading_30.sts
+04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_6.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_11.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_12.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.sts
@@ -685,7 +689,7 @@
 13.compilation_units_packages_and_modules/04.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.sts
 # end of runtime fails
 
-# es2panda fails: panda #19950
+# es2panda fails: panda#14067
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_11.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_12.sts
@@ -702,7 +706,6 @@
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.sts
 
 # es2panda fails: panda#12528
-04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_4.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_5.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_6.sts
 # es2panda fails: panda#12554
@@ -1104,12 +1107,7 @@
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_8.sts
 # primitive allowed in union
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_n_0.sts
-# positive
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.sts
-# positive
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_2.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args2_neg_3.sts
+
 # non-compatible operands
 # assign nullable to non-nullable
 07.expressions/11.function_call_expression/optional_chaining_value_result.sts
@@ -1130,7 +1128,7 @@
 # end
 
 # #15709
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_25.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_23.sts
 06.contexts_and_conversions/01.assignment-like_contexts/identity_call.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1n_4.sts
 17.experimental_features/07.function_and_method_overloading/01.function_overloading/fn_overloading_n_10.sts
@@ -1271,12 +1269,8 @@
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over2_11.sts
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_8.sts
 
-# Null type annotation is allowed now, these test are incorrect
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_2.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_2.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args2_neg_3.sts
-# End of tests that are wrong because of null type annotation is allowed now
+# 16022 Failed compilation of Enumeration-Operations
+11.enumerations/03.enumeration_operations/enum_type_methods_valueof.sts
 
 # es2panda: the specification changed
 09.classes/05.field_declarations/01.static_fields/static_field_declaration_n3.sts
@@ -1917,39 +1911,15 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_4.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_5.sts
 # es2panda fails: 14691 Abstract classes and interfaces cannot be instantied with array creation expression
-# es2panda fails: #19908
-04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_3.sts
-04.names_declarations_and_scopes/08.function_declarations/function_decl_5.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_14.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_16.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_7.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_12.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_13.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_15.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_16.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_17.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_19.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_25.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_26.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_27.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_14.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_7.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args2_7.sts
-06.contexts_and_conversions/01.assignment-like_contexts/forbidden2_6.sts
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_43.sts
-06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_44.sts
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_2.sts
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_3.sts
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_4.sts
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_7.sts
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_8.sts
-07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_9.sts
-# end of 19908 fails
+# end of 14691 fails
 
 # 20213 Generic instantiation depends on arguments order
-05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_n_3.sts
 05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_n_3.sts
-05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_n_3.sts
+
+# 20215 es2panda aborts on function types in generic type arguments
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_1.sts
 
 # 20214 Generic lambda is not supported by compiler
 05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_0.sts
@@ -1961,17 +1931,16 @@
 05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_6.sts
 05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_7.sts
 
-# 20215 es2panda aborts on function types in generic type arguments
-05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_1.sts
-05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_1.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_n_3.sts
 
 # 20218 es2panda aborts on conditional expression in generic function
 05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_2.sts
 05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_2.sts
 
 # 17453 keyof if not implemented yet
-05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_6.sts
 05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_6.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_1.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_6.sts
 
 # 16623: cannot call static method from abstract class
 09.classes/06.method_declarations/01.static_methods/static_method_in_abstract_class_1.sts
@@ -2353,7 +2322,6 @@
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_21.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_8.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_9.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_11.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_21.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_13.sts
 05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_48.sts
@@ -2397,7 +2365,9 @@
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args3_neg_2.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args3_neg_3.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_8.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_10.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_8.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_11.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_0.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_1.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_2.sts

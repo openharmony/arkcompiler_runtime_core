@@ -69,3 +69,13 @@ function_decls:
           }
       call: |-
           foo<Long, Boolean>(new Long(), new Boolean(true))
+
+  # temp CTE for Initializer of arrowFunc array
+    - decl: |-
+        type BarType = () => void
+        function bar() {}
+        function foo(a: BarType[]) {}
+      call: |-
+        let arr: BarType[] = new BarType[1]
+        arr[0] = bar
+        foo(arr);

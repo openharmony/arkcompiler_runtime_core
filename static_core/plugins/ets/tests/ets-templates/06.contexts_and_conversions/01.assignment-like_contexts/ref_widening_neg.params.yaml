@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,21 +13,17 @@
 
 ---
 cases:
-    - use: |-
-          let a: number[] = ["a", "b"]  // wrong types
+  # create array with interfaces
+  - defs: |-
+      interface I {}
+      class A implements I {}
+    stype: 'I[]'
+    src: 'new I[1]'
+    dtype: Object
 
-    - use: |-
-          let a: int[] = [true]  // wrong type
-
-    - use: |-
-          let a: string[] = ["a", null]  // wrong type
-
-    - decl: |-
-        class A {}
-        class B extends A {}
-        class C extends B {}
-        function foo(p: B[]): int {
-            return p.length
-        }
-      use: |-
-        assert foo([new B(), new C()] as A[]) == 2 // A[] is super type of B[]
+  - defs: |-
+      interface I {}
+      class A implements I {}
+    stype: 'I[]'
+    src: 'new I[1]'
+    dtype: 'Object[]'

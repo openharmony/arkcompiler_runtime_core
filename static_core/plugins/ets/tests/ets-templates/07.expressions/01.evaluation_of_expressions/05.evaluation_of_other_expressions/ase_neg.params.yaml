@@ -13,21 +13,6 @@
 
 ---
 cases:
-    - use: |-
-          let a: number[] = ["a", "b"]  // wrong types
-
-    - use: |-
-          let a: int[] = [true]  // wrong type
-
-    - use: |-
-          let a: string[] = ["a", null]  // wrong type
-
-    - decl: |-
-        class A {}
-        class B extends A {}
-        class C extends B {}
-        function foo(p: B[]): int {
-            return p.length
-        }
-      use: |-
-        assert foo([new B(), new C()] as A[]) == 2 // A[] is super type of B[]
+  - { init: 'new I[1]', expr: 'new A()', fail: 0 }
+  - { init: 'new I[1]', expr: 'new B()', fail: 0 }
+  - { init: 'new J[1]', expr: 'new B()', fail: 0 }

@@ -48,20 +48,6 @@ function_decls:
         let f: () => void = foo();
         assert f instanceof (() => void);
 
-    # no params, return function array
-    - decl: |-
-        type BarType = () => void
-        function bar() {}
-        function foo(): BarType[] {
-            let arr: BarType[] = new BarType[1]
-            arr[0] = bar
-            return arr;
-        }
-      call: |-
-        let f: BarType[] = foo();
-        assert f instanceof BarType[] && f.length == 1;
-
-
     # no params, return reference type
     - decl: |-
         function foo(): Long { return new Long(); }

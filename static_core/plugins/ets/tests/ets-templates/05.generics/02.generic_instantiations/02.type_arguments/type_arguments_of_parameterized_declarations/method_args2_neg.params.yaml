@@ -33,12 +33,6 @@ cases:
       }
     bound: ' extends I'
 
-  - use: |-
-      if (a.meth <null|X> (new X(), null) !== null) {  // syntax error
-          return 1;
-      }
-    bound: ' extends Object|null'
-
   # type argument is interface
   - use: |-
       let v = new Y()
@@ -98,3 +92,10 @@ cases:
       }
     decl: |-
       type B = X[][]|null
+
+  # create array with interfaces
+  - use: |-
+      let v: I[] = new I[0] // cannot use array creation expression with interfaces
+      if (a.meth <I[]> (new X(), v) !== v) {
+          return 1;
+      }

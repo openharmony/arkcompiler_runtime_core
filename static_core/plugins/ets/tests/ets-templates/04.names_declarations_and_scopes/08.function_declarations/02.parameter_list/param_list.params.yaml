@@ -35,16 +35,6 @@ function_decls:
       call: |-
           foo(bar);
 
-    # function array param, void return
-    - decl: |-
-          type BarType = () => void
-          function bar() {}
-          function foo(a: BarType[]) {}
-      call: |-
-          let arr: BarType[] = new BarType[1]
-          arr[0] = bar
-          foo(arr);
-
     # reference type param, void return
     - decl: |-
           function foo(a: Long) {}

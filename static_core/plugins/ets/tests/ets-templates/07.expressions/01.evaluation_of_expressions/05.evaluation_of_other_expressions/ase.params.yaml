@@ -15,12 +15,8 @@
 cases:
   - { init: 'new A[1]', expr: 'new A()', fail: 0 }
   - { init: 'new B[1]', expr: 'new A()', fail: 1 }
-  - { init: 'new I[1]', expr: 'new A()', fail: 0 }
   - { init: 'new J[1]', expr: 'new A()', fail: 1 }
   - { init: 'new K[1]', expr: 'new A()', fail: 1 }
-
   - { init: 'new A[1]', expr: 'new B()', fail: 0 }
   - { init: 'new B[1]', expr: 'new B()', fail: 0 }
-  - { init: 'new I[1]', expr: 'new B()', fail: 0 }
-  - { init: 'new J[1]', expr: 'new B()', fail: 0 }
   - { init: 'new K[1]', expr: 'new B()', fail: 1 }

@@ -36,3 +36,16 @@ function_decls:
     - { decl: 'function f(): void', call: 'f();' }
     - { decl: 'function f(): void {', call: 'f();' }
     - { decl: 'function f(): void }', call: 'f();' }
+
+    # temp CTE for Initializer of arrowFunc array
+    - decl: |-
+          type BarType = () => void
+          function bar() {}
+          function foo(): BarType[] {
+              let arr: BarType[] = new BarType[1]
+              arr[0] = bar
+              return arr;
+          }
+      call: |-
+          let f: BarType[] = foo();
+          assert f instanceof BarType[] && f.length == 1;

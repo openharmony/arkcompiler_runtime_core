@@ -31,10 +31,10 @@ cases:
 
   - decl: 'const obj = new Object[1];  // inferred array of Objects'
     use: 'obj[0] = new Long(Long.MAX_VALUE);'
-    assert: obj instanceof Object[] && obj[0] instanceof Long && obj[0].unboxed() == Long.MAX_VALUE
+    assert: obj instanceof Object[] && obj[0] instanceof Long && (obj[0] as Long).unboxed() == Long.MAX_VALUE
 
   - decl: 'let arr = new byte[1][2][3];  // inferred three-dimensional array of bytes'
-    assert: arr instanceof byte[][][] and byte[0][0][0] == 0
+    assert: arr instanceof byte[][][] && arr[0][0][0] == 0
 
   - decl: |-
       enum Color { Red, Green, Blue }
