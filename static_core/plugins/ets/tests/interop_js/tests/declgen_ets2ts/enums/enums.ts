@@ -47,7 +47,7 @@ function testClasses(): void {
 	assertEq(Color.Blue, -NINETY_NINE);
 	assertEq(Color.White, ZERO);
 	if (FIX_12808) {
-		const workaroundImport = { Ivan: 'John', Li: 'Yuan',  ...imported };
+		const workaroundImport = { Ivan: 'John', Li: 'Yuan', ...imported };
 		// @ts-ignore -- remove when #12808 is fixed
 		const Name = FIX_12808 ? workaroundImport.Name : { Ivan: 'John', Li: 'Yuan' };
 		assertEq(Name.Ivan, 'Ivan');

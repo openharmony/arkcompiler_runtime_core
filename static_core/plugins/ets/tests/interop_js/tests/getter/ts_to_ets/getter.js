@@ -37,10 +37,10 @@ const __extends =
 				throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null');
 			}
 			extendStatics(d, b);
-			function adhocConstruct() {
+			function AdhocConstruct() {
 				this.constructor = d;
 			}
-			d.prototype = b === null ? Object.create(b) : ((adhocConstruct.prototype = b.prototype), new adhocConstruct());
+			d.prototype = b === null ? Object.create(b) : ((AdhocConstruct.prototype = b.prototype), new AdhocConstruct());
 		};
 	})();
 Object.defineProperty(exports, '__esModule', { value: true });

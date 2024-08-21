@@ -38,7 +38,7 @@ interface TestInterface {
 
 export type TFunctionReturningValue<T> = () => T;
 
-export type TReturnsAny = TFunctionReturningValue<{}|void|null>;
+export type TReturnsAny = TFunctionReturningValue<{} | void | null>;
 export type TReturnsStrLiteral = TFunctionReturningValue<STRING_LITERAL>;
 export type TReturnsIntLiteral = TFunctionReturningValue<INTEGER_LITERAL>;
 export type TReturnsBoolLiteral = TFunctionReturningValue<BOOLEAN_LITERAL>;
@@ -124,35 +124,35 @@ export const isTTupleTS = (testedVar: unknown): testedVar is TTuple => {
 	);
 };
 
-export const returnStringSubsetByRef: TReturnsString = function returnStringSubsetByRef() {
+export const returnStringSubsetByRef: TReturnsString = function returnStringSubsetByRef(): Object {
 	return TEST_STRING;
 };
 
-export const returnMapSubsetByRef: TReturnsMap = function returnMapSubsetByRef() {
+export const returnMapSubsetByRef: TReturnsMap = function returnMapSubsetByRef(): Object {
 	return TEST_CHANGEABLE_MAP;
 };
 
-export const returnStringSubsetByValue = function returnString() {
+export const returnStringSubsetByValue = function returnString(): Object {
 	return TEST_STRING;
 };
 
-export const returnLongIntSubsetByValue = function returnInteger() {
+export const returnLongIntSubsetByValue = function returnInteger(): Object {
 	return TEST_LONG_INT;
 };
 
-export const returnIntSubsetByValue = function returnInteger() {
+export const returnIntSubsetByValue = function returnInteger(): Object {
 	return TEST_INT;
 };
 
-export const returnBoolSubsetByValue = function returnBoolean() {
+export const returnBoolSubsetByValue = function returnBoolean(): Object {
 	return TEST_BOOLEAN;
 };
 
-export const returnUndefinedSubsetByValue = function returnUndefined() {
+export const returnUndefinedSubsetByValue = function returnUndefined(): Object {
 	return;
 };
 
-export const returnNullSubsetByValue = function returnNull() {
+export const returnNullSubsetByValue = function returnNull(): Object {
 	return null;
 };
 
@@ -230,7 +230,7 @@ export class ReturnTestClass {
 export type TReturnTestClass = ReturnTestClass;
 export const returnTestClassInstance = new ReturnTestClass();
 
-const testAny = () => {
+const testAny = (): void => {
 	console.log(
 		[
 			returnIntegerAsAny,
@@ -245,15 +245,15 @@ const testAny = () => {
 	);
 };
 
-const testLiterals = () => {
+const testLiterals = (): void => {
 	console.log([returnStrLiteral, returnIntLiteral, returnBoolLiteral, returnsBigNLiteral].map((x) => x()));
 };
 
-const testExtraSet = () => {
+const testExtraSet = (): void => {
 	console.log([returnMap, returnSet, returnTuple].map((x) => x()));
 };
 
-const testSubset = () => {
+const testSubset = (): void => {
 	console.log(
 		[
 			returnStringSubsetByRef,
@@ -268,11 +268,11 @@ const testSubset = () => {
 	);
 };
 
-const testUnion = () => {
+const testUnion = (): void => {
 	console.log(returnUnion(true), returnUnion(false));
 };
 
-const testClassInterface = () => {
+const testClassInterface = (): void => {
 	console.log([returnClass, returnInterface].map((x) => x()));
 };
 

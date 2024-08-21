@@ -59,21 +59,29 @@ function queueTasks(etsVm) {
 		}
 		if (!etsVm.call('resolvePendingPromise')) {
 			console.log("Call of 'resolvePendingPromise' return false");
-		} else {
-			queueMicrotask(() => {
-				if (testSuccess) {
-					console.log('Promise must not be resolved');
-					process.exit(1);
-				}
-				queueMicrotask(() => {
-					if (!testSuccess) {
-						console.log('Promise is not resolved or value is wrong');
-						process.exit(1);
-					}
-				});
-			});
+			return null;
 		}
+        queueMicrotask(() => {
+            if (testSuccess) {
+                console.log('Promise must not be resolved');
+                process.exit(1);
+            }
+            queueMicrotask(() => {
+                queueTasksHelper(testSuccess);
+                return null;
+            });
+            return null;
+        });
+        return null;
 	});
+}
+
+function queueTasksHelper(testSuccess) {
+    if (!testSuccess) {
+        console.log('Promise is not resolved or value is wrong');
+        process.exit(1);
+    }
+    return null;
 }
 
 function runAwaitTest() {

@@ -141,17 +141,17 @@ export const IIFECreateClass = (function (ctor: new (_value: number) => Instance
 })(IIFEClass, tsInt);
 
 export class MethodClass {
-	init(anyClass: ClassConstructor<number>, value: number) {
+	init(anyClass: ClassConstructor<number>, value: number): Object {
 		return new anyClass(value);
 	}
 }
 
-export function createClassFunction(arg: ClassConstructor<number>, val: number): Object {
-	return new arg(val);
+export function createClassFunction(Arg: ClassConstructor<number>, val: number): Object {
+	return new Arg(val);
 }
 
-export function createClassArrowFunction(arg: ClassConstructor<number>, val: number): Object {
-	return new arg(val);
+export function createClassArrowFunction(Arg: ClassConstructor<number>, val: number): Object {
+	return new Arg(val);
 }
 
 export function checkInstance<T, U>(mainClass: new (...args: {}[]) => T, instance: U): boolean {
