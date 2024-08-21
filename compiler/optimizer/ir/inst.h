@@ -1958,7 +1958,9 @@ public:
 
     Inst *Clone(const Graph *targetGraph) const override
     {
-        auto clone = FixedInputsInst::Clone(targetGraph)->CastToCastAnyTypeValue();
+        auto targetGraphClone = FixedInputsInst::Clone(targetGraph);
+        CHECK_NOT_NULL(targetGraphClone);
+        auto clone = targetGraphClone->CastToCastAnyTypeValue();
         AnyBaseType any_type = GetAnyType();
         clone->SetAnyType(any_type);
         clone->SetType(GetType());

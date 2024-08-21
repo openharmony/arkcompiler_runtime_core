@@ -263,7 +263,7 @@ int32_t BytecodeEmitter::EstimateMaxDistance(uint32_t insn_pc, uint32_t target_p
         end_pc = target_pc - bias;
     } else if (target_pc < insn_pc) {
         it = branches_.lower_bound(target_pc - bias);
-        distance = static_cast<int32_t>(target_pc - insn_pc);
+        distance = static_cast<int32_t>(static_cast<int64_t>(target_pc) - static_cast<int64_t>(insn_pc));
         end_pc = insn_pc - bias;
     } else {
         // Do we support branch to itself?
