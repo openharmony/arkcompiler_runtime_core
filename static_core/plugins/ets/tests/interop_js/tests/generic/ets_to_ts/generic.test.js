@@ -32,14 +32,17 @@ const genericFunction = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'generic_f
 const tupleDeclaredType = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'tuple_declared_type');
 
 const genericSubsetRef = etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'generic_subset_ref');
-// const explicitlyeclaredype = etsVm.getFunction("Lgeneric/test/ETSGLOBAL;", "explicitly_declared_type");
 
 const num = 1;
 const bool = true;
 const data = { data: 'string' };
 const str = 'string';
 
-module.exports = {
+const getIssueExtras = () => ({
+	explicitlyDeclaredType: etsVm.getFunction('Lgeneric/test/ETSGLOBAL;', 'explicitly_declared_type'),
+});
+
+const exported = {
 	UnionClass,
 	createUnionObjectFromEts,
 	GIClass,
@@ -50,10 +53,11 @@ module.exports = {
 	tupleDeclaredType,
 	genericSubsetRef,
 	AbstractClass,
-	// explicitlyDeclaredType,
 	createInterfaceObjectFromEts,
 	num,
 	bool,
 	data,
 	str,
 };
+
+module.exports = Object.assign(exported, false ? getIssueExtras() : {});

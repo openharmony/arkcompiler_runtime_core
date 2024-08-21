@@ -83,7 +83,7 @@ class jsnew {
 };
 
 function vstringify(val: JSValue): String {
-    return jscall.str$a(jsvars.m, ".StringifyValue", val);
+    return jscall.str$a(jsvars.m, ".stringifyValue", val);
 }
 function vlog(val: JSValue): void {
     jscall.void$a(jsvars.m, ".Log", val);
@@ -103,16 +103,16 @@ class BadClass {
 };
 
 function jsSumWrapperNumNum(a: double, b: double): double {
-    return jscall.num$nn(jsvars.m, ".Sum", a, b);
+    return jscall.num$nn(jsvars.m, ".sum", a, b);
 }
 function jsSumWrapperNumStr(a: double, b: String): String {
-    return jscall.str$ns(jsvars.m, ".Sum", a, b);
+    return jscall.str$ns(jsvars.m, ".sum", a, b);
 }
 
 function testUndefined(): boolean {
     let v = JSRuntime.getUndefined();
     let r = "undefined:undefined";
-    if (jscall.any$a$obj(jsvars.m, ".Identity", v) !== undefined) {
+    if (jscall.any$a$obj(jsvars.m, ".identity", v) !== undefined) {
         return false;
     }
     return r == vstringify(v);
@@ -121,7 +121,7 @@ function testUndefined(): boolean {
 function testNull(): boolean {
     let v = JSRuntime.getNull();
     let r = "object:null";
-    if (jscall.any$a(jsvars.m, ".Identity", v) as NullishType !== null) {
+    if (jscall.any$a(jsvars.m, ".identity", v) as NullishType !== null) {
         return false;
     }
     return r == vstringify(v);
@@ -129,25 +129,25 @@ function testNull(): boolean {
 function testBoolean(): boolean {
     let v = true;
     let r = "boolean:true";
-    v = jscall.bool$a(jsvars.m, ".Identity", jscall.any$b(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$b(jsvars.m, ".Identity", v));
+    v = jscall.bool$a(jsvars.m, ".identity", jscall.any$b(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$b(jsvars.m, ".identity", v));
 }
 function testNumber(): boolean {
     let v: double = 42.24;
     let r = "number:42.24";
-    v = jscall.num$a(jsvars.m, ".Identity", jscall.any$n(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$n(jsvars.m, ".Identity", v));
+    v = jscall.num$a(jsvars.m, ".identity", jscall.any$n(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$n(jsvars.m, ".identity", v));
 }
 function testString(): boolean {
     let v = "foo12345678901234567890";
     let r = "string:foo12345678901234567890";
-    v = jscall.str$a(jsvars.m, ".Identity", jscall.any$s(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$s(jsvars.m, ".Identity", v));
+    v = jscall.str$a(jsvars.m, ".identity", jscall.any$s(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$s(jsvars.m, ".identity", v));
 }
 function testObject(): boolean {
     let v = JSRuntime.createObject();
     let r = "object:[object Object]";
-    return r == vstringify(jscall.any$a(jsvars.m, ".Identity", v));
+    return r == vstringify(jscall.any$a(jsvars.m, ".identity", v));
 }
 
 function testStringOps(): boolean {
@@ -156,10 +156,10 @@ function testStringOps(): boolean {
     if (JSRuntime.getValueString(v1) != strv) {
         return false;
     }
-    if (jscall.num$ss(jsvars.m, ".GetProp", strv, "length") != strv.length) {
+    if (jscall.num$ss(jsvars.m, ".getProp", strv, "length") != strv.length) {
         return false;
     }
-    if (jscall.str$a(jsvars.m, ".Identity", jscall.any$s(jsvars.m, ".Identity", strv)) != strv) {
+    if (jscall.str$a(jsvars.m, ".identity", jscall.any$s(jsvars.m, ".identity", strv)) != strv) {
         return false;
     }
     return true;
@@ -168,53 +168,53 @@ function testStringOps(): boolean {
 function testBuiltinArrayAny(): boolean {
     let v: JSValue[] = [JSRuntime.getUndefined(), JSRuntime.newJSValueDouble(1.23), JSRuntime.newJSValueString("foo"), JSRuntime.createObject()];
     let r = "object:,1.23,foo,[object Object]";
-    v = jscall.Aa$a(jsvars.m, ".Identity", jscall.any$Aa(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$Aa(jsvars.m, ".Identity", v));
+    v = jscall.Aa$a(jsvars.m, ".identity", jscall.any$Aa(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$Aa(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayBoolean(): boolean {
     let v: boolean[] = [true, false, true];
     let r = "object:true,false,true";
-    v = jscall.Ab$a(jsvars.m, ".Identity", jscall.any$Ab(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$Ab(jsvars.m, ".Identity", v));
+    v = jscall.Ab$a(jsvars.m, ".identity", jscall.any$Ab(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$Ab(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayInt(): boolean {
     let v: int[] = [111, 222];
     let r = "object:111,222";
-    v = jscall.Ai$a(jsvars.m, ".Identity", jscall.any$Ai(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$Ai(jsvars.m, ".Identity", v));
+    v = jscall.Ai$a(jsvars.m, ".identity", jscall.any$Ai(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$Ai(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayNumber(): boolean {
     let v: double[] = [11.1, 22.2];
     let r = "object:11.1,22.2";
-    v = jscall.An$a(jsvars.m, ".Identity", jscall.any$An(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$An(jsvars.m, ".Identity", v));
+    v = jscall.An$a(jsvars.m, ".identity", jscall.any$An(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$An(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayString(): boolean {
     let v: String[] = ["foo0", "foo1"];
     let r = "object:foo0,foo1";
-    v = jscall.As$a(jsvars.m, ".Identity", jscall.any$As(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$As(jsvars.m, ".Identity", v));
+    v = jscall.As$a(jsvars.m, ".identity", jscall.any$As(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$As(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayObject(): boolean {
     let v: Object[] = [JSRuntime.getUndefined(), JSRuntime.createObject(), "foo", 1, jsnew.$(jsvars.global, ".Number")];
     let r = "object:,[object Object],foo,1,0";
-    v = jscall.Ao$a(jsvars.m, ".Identity", jscall.any$Ao(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$Ao(jsvars.m, ".Identity", v));
+    v = jscall.Ao$a(jsvars.m, ".identity", jscall.any$Ao(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$Ao(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayMultidim(): boolean {
     let v: double[][] = [[11.1, 22.2], [33.3, 44.4]];
     let r = "object:11.1,22.2,33.3,44.4";
-    v = jscall.AAn$a(jsvars.m, ".Identity", jscall.any$AAn(jsvars.m, ".Identity", v));
-    return r == vstringify(jscall.any$AAn(jsvars.m, ".Identity", v));
+    v = jscall.AAn$a(jsvars.m, ".identity", jscall.any$AAn(jsvars.m, ".identity", v));
+    return r == vstringify(jscall.any$AAn(jsvars.m, ".identity", v));
 }
 function testBuiltinArrayInstanceof(): boolean {
     let v: int[] = [111, 222];
     let ctor = JSRuntime.getPropertyJSValue(jsvars.global, "Array");
-    return JSRuntime.instanceOfDynamic(jscall.any$Ai(jsvars.m, ".Identity", v), ctor);
+    return JSRuntime.instanceOfDynamic(jscall.any$Ai(jsvars.m, ".identity", v), ctor);
 }
 function testInitArrayComponent(): boolean {
     let v: JSValue[] = [JSRuntime.getNull()];
-    let x = jscall.ALBadClass$a(jsvars.m, ".Identity", jscall.any$Aa(jsvars.m, ".Identity", v));
+    let x = jscall.ALBadClass$a(jsvars.m, ".identity", jscall.any$Aa(jsvars.m, ".identity", v));
     return true;
 }
 
@@ -227,12 +227,12 @@ function testNamedAccess(): boolean {
 
 function testNewcall(): boolean {
     let color = "Cyan";
-    let car = jsnew.$s(jsvars.m, ".Car", color);
+    let car = jsnew.$s(jsvars.m, ".makeCar", color);
     return color == JSRuntime.getPropertyString(car, "color");
 }
 
 function testValueCall(): boolean {
-    let fn = JSRuntime.getPropertyJSValue(jsvars.m, "Identity");
+    let fn = JSRuntime.getPropertyJSValue(jsvars.m, "identity");
     return 123.4 == jscall.num$vn(fn, JSRuntime.getUndefined(), 123.4);
 }
 
@@ -240,7 +240,7 @@ function testCallStress(): boolean {
     let workload = 128;
     let u = JSRuntime.getUndefined();
     for (let i = 0; i < workload; ++i) {
-        jscall.any$aaaa(jsvars.m, ".Nop", u, u, u, u);
+        jscall.any$aaaa(jsvars.m, ".nop", u, u, u, u);
     }
     return true;
 }
@@ -249,7 +249,7 @@ function testCallStress(): boolean {
 function testUndefinedCastBug(): boolean {
     let v = JSRuntime.getUndefined();
     let r = "undefined:undefined";
-    return r == vstringify(jscall.any$(jsvars.m, ".Identity", v));
+    return r == vstringify(jscall.any$(jsvars.m, ".identity", v));
 }
 
 function testLambdaProxy(): boolean {
@@ -257,22 +257,22 @@ function testLambdaProxy(): boolean {
         return x;
     }
 
-    let res = jscall.num$an(jsvars.m, ".ApplyArgs", etsfn, 123);
+    let res = jscall.num$an(jsvars.m, ".applyArgs", etsfn, 123);
     return res == 123;
 }
 
 function testLambdaProxyRecursive(): boolean {
     let etsfn: (x: double, y: String) => String = (x: double, y: String): String => {
-        return jscall.str$ns(jsvars.m, ".StringifyArgs", x, y);
+        return jscall.str$ns(jsvars.m, ".stringifyArgs", x, y);
     }
 
-    let res = jscall.str$ans(jsvars.m, ".ApplyArgs", etsfn, 123, "foo");
+    let res = jscall.str$ans(jsvars.m, ".applyArgs", etsfn, 123, "foo");
     return res == "123,foo";
 }
 
 function testExceptionForwardingFromjs(): boolean {
     try {
-        jscall.void$n(jsvars.m, ".ThrowValue", 123.321);
+        jscall.void$n(jsvars.m, ".throwValue", 123.321);
     } catch (e: JSError) {
         return "number:123.321" == vstringify(e.getValue());
     }
@@ -285,7 +285,7 @@ function testExceptionForwardingFromets(): boolean {
     }
 
     try {
-        jscall.void$an(jsvars.m, ".ApplyArgs", etsfn, 12345.6);
+        jscall.void$an(jsvars.m, ".applyArgs", etsfn, 12345.6);
     } catch (e: JSError) {
         return "number:12345.6" == vstringify(e.getValue());
     }
@@ -294,12 +294,12 @@ function testExceptionForwardingFromets(): boolean {
 
 function testExceptionForwardingRecursive(): boolean {
     let etsfn: (v: JSValue) => void = (v: JSValue): void => {
-        jscall.void$a(jsvars.m, ".ThrowValue", v);
+        jscall.void$a(jsvars.m, ".throwValue", v);
         throw unreachable();
     }
 
     try {
-        jscall.void$an(jsvars.m, ".ApplyArgs", etsfn, 123.456);
+        jscall.void$an(jsvars.m, ".applyArgs", etsfn, 123.456);
     } catch (e: JSError) {
         return "number:123.456" == vstringify(e.getValue());
     }
@@ -312,14 +312,14 @@ function testCoreErrorForwarding(): boolean {
     }
 
     try {
-        jscall.void$a(jsvars.m, ".ApplyArgs", etsfn);
+        jscall.void$a(jsvars.m, ".applyArgs", etsfn);
     } catch (e: Error) {
         return e.message == "funny message";
     }
     throw unreachable();
 }
 
-function testTypecheckGetprop(): boolean {
+function testTypecheckGetProp(): boolean {
     let obj = JSRuntime.createObject();
     JSRuntime.setPropertyDouble(obj, "prop", 1.23);
     try {
@@ -332,7 +332,7 @@ function testTypecheckGetprop(): boolean {
 
 function testTypecheckJscall(): boolean {
     try {
-        jscall.str$n(jsvars.m, ".Identity", 123);
+        jscall.str$n(jsvars.m, ".identity", 123);
     } catch (e: JSError) {
         return "object:TypeError: String expected" == vstringify(e.getValue());
     }
@@ -345,7 +345,7 @@ function testTypecheckCallets(): boolean {
             throw unreachable();
         }
 
-        jscall.num$an(jsvars.m, ".ApplyArgs", etsfn, 123);
+        jscall.num$an(jsvars.m, ".applyArgs", etsfn, 123);
     } catch (e: JSError) {
         return "object:TypeError: String expected" == vstringify(e.getValue());
     }
@@ -353,7 +353,7 @@ function testTypecheckCallets(): boolean {
 }
 
 function testGetThrows(): boolean {
-    let obj = jsnew.$(jsvars.m, ".TestProxy");
+    let obj = jsnew.$(jsvars.m, ".makeTestProxy");
     try {
         JSRuntime.getPropertyDouble(obj, "foo");
     } catch (e: JSError) {
@@ -363,7 +363,7 @@ function testGetThrows(): boolean {
 }
 
 function testSetThrows(): boolean {
-    let obj = jsnew.$(jsvars.m, ".TestProxy");
+    let obj = jsnew.$(jsvars.m, ".makeTestProxy");
     try {
         JSRuntime.setPropertyDouble(obj, "foo", 123);
     } catch (e: JSError) {
@@ -391,7 +391,7 @@ function testJscallResolutionThrows2(): boolean {
 }
 
 function testJscallResolutionThrows3(): boolean {
-    let obj = jsnew.$(jsvars.m, ".TestProxy");
+    let obj = jsnew.$(jsvars.m, ".makeTestProxy");
     try {
         jscall.void$(obj, ".foo");
     } catch (e: JSError) {

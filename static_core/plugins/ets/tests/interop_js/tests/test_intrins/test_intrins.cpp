@@ -115,7 +115,7 @@ TEST_F(EtsInteropJsIntrinsTest, test_exception_forwarding)
 
 TEST_F(EtsInteropJsIntrinsTest, test_typechecks)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("testTypecheckGetprop"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testTypecheckGetProp"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testTypecheckJscall"));
     ASSERT_EQ(true, CallEtsMethod<bool>("testTypecheckCallets"));
 }

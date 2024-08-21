@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-export const ts_string = 'string';
-export const ts_number = 1;
+export const tsString = 'string';
+export const tsNumber = 1;
 type UnionType = string | number;
 
 type LiteralType = 1 | 'string';
@@ -105,11 +105,11 @@ export class GClass<T> {
 	}
 }
 
-export function generic_function<T>(arg: T): T {
+export function genericFunction<T>(arg: T): T {
 	return arg;
 }
 
-export function tuple_declared_type<T, U>(items: [T, U]): [T, U] {
+export function tupleDeclaredType<T, U>(items: [T, U]): [T, U] {
 	return items;
 }
 
@@ -117,17 +117,17 @@ interface Data {
 	data: string;
 }
 
-export function generic_subset_ref<T extends Data>(items: T): T {
+export function genericSubsetRef<T extends Data>(items: T): T {
 	return items;
 }
 
 type TGenericFn<T> = () => T;
 
-export const explicitly_declared_type: TGenericFn<string> = () => {
-	return ts_string;
+export const explicitlyDeclaredType: TGenericFn<string> = () => {
+	return tsString;
 };
 
-export const literalClass = new LiteralClass(ts_string);
-export const unionClass = new UnionClass<string>(ts_string);
-export const interfaceClass = new InterfaceClass<string>(ts_string);
-export const abstractClass = new AbstractClass<string>(ts_string);
+export const literalClass = new LiteralClass(tsString);
+export const unionClass = new UnionClass<string>(tsString);
+export const interfaceClass = new InterfaceClass<string>(tsString);
+export const abstractClass = new AbstractClass<string>(tsString);

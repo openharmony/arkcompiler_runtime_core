@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-export declare function EvaluateNumber(): void;
+export declare function evaluateNumber(): void;
 
-export declare function EvaluateNumber(v0: int, v1: int): int;
+export declare function evaluateNumber(v0: int, v1: int): int;
 
-export declare function EvaluateNumber(v0: string, v1: string): string;
+export declare function evaluateNumber(v0: string, v1: string): string;
 
-export declare function EmptyFunction(): void;
+export declare function emptyFunction(): void;
 
-export declare function EvaluateObject(obj: ExampleClass): ExampleClass;
+export declare function evaluateObject(obj: ExampleClass): ExampleClass;
 
-export declare function EvaluateArray(arr: int[], size: int): int[];
+export declare function evaluateArray(arr: int[], size: int): int[];
 
 export declare class ExampleClass {
     v0: JSValue;
@@ -31,21 +31,21 @@ export declare class ExampleClass {
 
     constructor(v0: JSValue, v1: JSValue);
 
-    static EvaluateNumber(v2: int, v3: int): int;
+    static evaluateNumber(v2: int, v3: int): int;
 
-    static EvaluateNumber(v2: string, v3: string): string;
+    static evaluateNumber(v2: string, v3: string): string;
 
-    static EvaluateArray(arr: int[], size: int): int[];
+    static evaluateArray(arr: int[], size: int): int[];
 
-    InstanceEvaluateNumber(): JSValue;
+    instanceEvaluateNumber(): JSValue;
 
-    EvaluateObject(obj: ExampleClass): ExampleClass;
+    evaluateObject(obj: ExampleClass): ExampleClass;
 
-    GetV0(): int[];
+    getV0(): int[];
 
-    GetV1(): int[];
+    getV1(): int[];
 
-    static EmptyMethod(): void;
+    static emptyMethod(): void;
 };
 
 export declare class ClassWithEmptyConstructor {
@@ -56,27 +56,30 @@ export declare class ClassWithEmptyConstructor {
 
     verifyProperties(v0Expected: JSValue, v1Expected: JSValue): JSValue;
 
-    GetV0(): int[];
+    getV0(): int[];
 
-    GetV1(): int[];
+    getV1(): int[];
 }
 
-// this is TS namespace
-// export namespace MyNamespace {
-//     class Kitten {
-//         constructor(id: number, name: string) {
-//             this.id = id;
-//             this.name = name;
-//         }
-
-//         id: number;
-//         name: string;
-//     }
-
-//     export function createKitten(id: number, name: string) {
-//         return new Kitten(id, name);
-//     }
-// }
+/**
+ * TS Namespace for reference
+ * 
+ * export namespace MyNamespace {
+ *     class Kitten {
+ *         constructor(id: number, name: string) {
+ *             this.id = id;
+ *             this.name = name;
+ *         }
+ *
+ *         id: number;
+ *         name: string;
+ *     }
+ *
+ *     export function createKitten(id: number, name: string) {
+ *         return new Kitten(id, name);
+ *     }
+ * }
+ */
 
 
 // TODO: support namespaces in front-end

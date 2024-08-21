@@ -25,8 +25,8 @@ const cap = (str = '') => str[0].toUpperCase() + str.substring(1);
 
 {
 	// Test property accessors
-	function TestAccessors(tname, ...values) {
-		function TestAccessorsOf(o, tname, ...values) {
+	function testAccessors(tname, ...values) {
+		function testAccessorsOf(o, tname, ...values) {
 			for (let v of values) {
 				o['f' + cap(tname)] = v;
 				ASSERT_EQ(o['getf' + cap(tname)](), v);
@@ -34,31 +34,31 @@ const cap = (str = '') => str[0].toUpperCase() + str.substring(1);
 				ASSERT_EQ(o['f' + cap(tname)], v);
 			}
 		}
-		TestAccessorsOf(pa, tname, ...values);
-		TestAccessorsOf(pas, tname, ...values);
+		testAccessorsOf(pa, tname, ...values);
+		testAccessorsOf(pas, tname, ...values);
 	}
 
-	function IntBit(exp) {
-		ASSERT_TRUE(exp < 53, 'IntBit overflow');
+	function intBit(exp) {
+		ASSERT_TRUE(exp < 53, 'intBit overflow');
 		return (1 << exp % 30) * (1 << (exp - (exp % 30)));
 	}
-	function TestSInt(tname, bits) {
+	function testSInt(tname, bits) {
 		let msb = bits - 1;
-		TestAccessors(tname, 0, 1, -1, IntBit(msb) - 1, -IntBit(msb));
+		testAccessors(tname, 0, 1, -1, intBit(msb) - 1, -intBit(msb));
 	}
-	function TestUInt(tname, bits) {
+	function testUInt(tname, bits) {
 		let msb = bits - 1;
-		TestAccessors(tname, 0, 1, IntBit(msb), IntBit(msb + 1) - 1);
+		testAccessors(tname, 0, 1, intBit(msb), intBit(msb + 1) - 1);
 	}
 
-	TestSInt('byte', 8);
-	TestSInt('short', 16);
-	TestSInt('int', 32);
-	TestSInt('long', 53);
-	TestAccessors('float', 0, 1, 1.25, 0x1234 / 256, Infinity, NaN);
-	TestAccessors('double', 0, 1, 1.33333, 0x123456789a / 256, Infinity, NaN);
-	TestUInt('char', 16);
-	TestAccessors('boolean', false, true);
+	testSInt('byte', 8);
+	testSInt('short', 16);
+	testSInt('int', 32);
+	testSInt('long', 53);
+	testAccessors('float', 0, 1, 1.25, 0x1234 / 256, Infinity, NaN);
+	testAccessors('double', 0, 1, 1.33333, 0x123456789a / 256, Infinity, NaN);
+	testUInt('char', 16);
+	testAccessors('boolean', false, true);
 }
 
 {

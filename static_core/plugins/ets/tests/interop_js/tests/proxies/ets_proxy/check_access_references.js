@@ -23,10 +23,13 @@ const cap = (str = '') => str[0].toUpperCase() + str.substring(1);
 let ra = new ReferencesAccess();
 let ras = ReferencesAccessStatic;
 
+// NOTE enable when Promise is fully implemented
+const PROMISE_IMPLEMENTED = false;
+
 {
 	// Test property accessors
-	function TestAccessors(tname, ...values) {
-		function TestAccessorsOf(o, tname, ...values) {
+	function testAccessors(tname, ...values) {
+		function testAccessorsOf(o, tname, ...values) {
 			for (let v of values) {
 				o['f' + cap(tname)] = v;
 				ASSERT_EQ(o['getf' + cap(tname)](), v);
@@ -34,14 +37,22 @@ let ras = ReferencesAccessStatic;
 				ASSERT_EQ(o['f' + cap(tname)], v);
 			}
 		}
-		TestAccessorsOf(ra, tname, ...values);
-		TestAccessorsOf(ras, tname, ...values);
+		testAccessorsOf(ra, tname, ...values);
+		testAccessorsOf(ras, tname, ...values);
 	}
 
-	TestAccessors('UClass1', null, new UClass1());
-	TestAccessors('String', null, 'fooo', '0123456789abcdef');
-	TestAccessors('JSValue', null, 1234, 'fooo', {}, new UClass1());
-	// TestAccessors("Promise", null, new Promise(function () { }, function () { })); // TODO(konstanting): enable
+	testAccessors('UClass1', null, new UClass1());
+	testAccessors('String', null, 'fooo', '0123456789abcdef');
+	testAccessors('JSValue', null, 1234, 'fooo', {}, new UClass1());
+	PROMISE_IMPLEMENTED &&
+		testAccessors(
+			'Promise',
+			null,
+			new Promise(
+				function () {},
+				function () {}
+			)
+		); // TODO(konstanting): enable
 
 	{
 		let arr = ['a', 'bb', 'ccc'];
@@ -58,7 +69,7 @@ let ras = ReferencesAccessStatic;
 
 {
 	// Test typechecks
-	function TestTypecheck(tname, ...values) {
+	function testTypecheck(tname, ...values) {
 		function check(o, v) {
 			ASSERT_THROWS(TypeError, () => (o['f' + cap(tname)] = v));
 		}
@@ -68,10 +79,10 @@ let ras = ReferencesAccessStatic;
 		}
 	}
 
-	TestTypecheck('UClass1', NaN, {}, new UClass2());
-	TestTypecheck('String', NaN, {}, new UClass1());
-	// TestTypecheck("Promise", NaN, {}, new UClass1()); // TODO(konstanting): enable
+	testTypecheck('UClass1', NaN, {}, new UClass2());
+	testTypecheck('String', NaN, {}, new UClass1());
+	PROMISE_IMPLEMENTED && testTypecheck('Promise', NaN, {}, new UClass1()); // TODO(konstanting): enable
 
-	TestTypecheck('AString', NaN, {}, [1], ['1', 1], [{}], [new UClass2()]);
-	TestTypecheck('AUClass1', NaN, {}, [1], ['1', 1], [{}], [new UClass2()]);
+	testTypecheck('AString', NaN, {}, [1], ['1', 1], [{}], [new UClass2()]);
+	testTypecheck('AUClass1', NaN, {}, [1], ['1', 1], [{}], [new UClass2()]);
 }

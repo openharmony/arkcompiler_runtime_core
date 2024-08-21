@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-export const ts_number = 1;
-export const ts_string = 'string';
+export const tsNumber = 1;
+export const tsString = 'string';
 interface AnyTypeMethod<T> {
 	get(a: T): T;
 }
@@ -25,7 +25,7 @@ export class AnyTypeMethodClass<T> implements AnyTypeMethod<T> {
 	}
 }
 
-export function create_interface_class_any_type_method(): AnyTypeMethodClass<unknown> {
+export function createInterfaceClassAnyTypeMethod(): anyTypeMethodClass<unknown> {
 	return new AnyTypeMethodClass<unknown>();
 }
 
@@ -41,7 +41,7 @@ export class UnionTypeMethodClass implements UnionTypeMethod {
 	}
 }
 
-export function create_interface_class_union_type_method(): AnyTypeMethodClass<number> {
+export function createInterfaceClassUnionTypeMethod(): anyTypeMethodClass<number> {
 	return new AnyTypeMethodClass<number>();
 }
 
@@ -49,7 +49,7 @@ interface ArgInterface {
 	get(): number;
 }
 
-export function subset_by_ref_interface(obj: ArgInterface): number {
+export function subsetByRefInterface(obj: ArgInterface): number {
 	return obj.get();
 }
 
@@ -67,7 +67,7 @@ export class SubsetByValueClass implements SubsetByValue {
 	}
 }
 
-export function create_subset_by_value_class_from_ts(): SubsetByValueClass {
+export function createSubsetByValueClassFromTs(): SubsetByValueClass {
 	return new SubsetByValueClass();
 }
 
@@ -78,25 +78,25 @@ interface OptionalMethod {
 
 export class WithOptionalMethodClass implements OptionalMethod {
 	getNum(): number {
-		return ts_number;
+		return tsNumber;
 	}
 
 	getStr(): string {
-		return ts_string;
+		return tsString;
 	}
 }
 
 export class WithoutOptionalMethodClass implements OptionalMethod {
 	getStr(): string {
-		return ts_string;
+		return tsString;
 	}
 }
 
-export function create_class_with_optional_method(): WithOptionalMethodClass {
+export function createClassWithOptionalMethod(): WithOptionalMethodClass {
 	return new WithOptionalMethodClass();
 }
 
-export function create_class_without_optional_method(): WithoutOptionalMethodClass {
+export function createClassWithoutOptionalMethod(): WithoutOptionalMethodClass {
 	return new WithoutOptionalMethodClass();
 }
 
@@ -105,7 +105,7 @@ interface OptionalArgResult {
 	without?: WithoutOptionalMethodClass;
 }
 
-export function optional_arg(arg: WithOptionalMethodClass, optional?: WithoutOptionalMethodClass): OptionalArgResult {
+export function optionalArg(arg: WithOptionalMethodClass, optional?: WithoutOptionalMethodClass): OptionalArgResult {
 	if (optional) {
 		return { with: arg, without: optional };
 	}
@@ -115,7 +115,7 @@ export function optional_arg(arg: WithOptionalMethodClass, optional?: WithoutOpt
 
 type ArrayArg = (WithOptionalMethodClass | WithoutOptionalMethodClass)[];
 
-export function optional_arg_array(...arg: ArrayArg): OptionalArgResult {
+export function optionalArgArray(...arg: ArrayArg): OptionalArgResult {
 	const withOptional = arg[0] as WithOptionalMethodClass;
 	const withoutOptional = arg[1] as WithoutOptionalMethodClass;
 
@@ -136,7 +136,7 @@ export class TupleTypeMethodClass implements TupleType {
 	}
 }
 
-export function create_interface_class_tuple_type_method_from_ts(): TupleTypeMethodClass {
+export function createInterfaceClassTupleTypeMethodFromTs(): TupleTypeMethodClass {
 	return new TupleTypeMethodClass();
 }
 

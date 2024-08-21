@@ -15,18 +15,18 @@
 
 import { CONSTANT, Bibka } from './lib';
 
-function AssertEq<T>(a: T, b: T) {
-	console.log(`AssertEq: '${a}' === '${b}'`);
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
 	if (a !== b) {
-		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
 	}
 }
 
-export function main() {
+export function main(): void {
 	testGlobalVars();
 }
 
-function testGlobalVars() {
-	AssertEq(CONSTANT, 228);
-	AssertEq(Bibka.NOT_GLOBAL, 1337);
+function testGlobalVars(): void {
+	assertEq(CONSTANT, 228);
+	assertEq(Bibka.NOT_GLOBAL, 1337);
 }

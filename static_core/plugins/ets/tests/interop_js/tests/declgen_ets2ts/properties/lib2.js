@@ -24,14 +24,14 @@ class DynProperties {
 	}
 }
 
-function SetPropertyExternal(obj, key, value) {
+function setPropertyExternal(obj, key, value) {
 	obj[key] = value;
 }
 
-function GetPropertyExternal(obj, key) {
+function getPropertyExternal(obj, key) {
 	return obj[key];
 }
 
 exports.DynProperties = DynProperties;
-exports.SetPropertyExternal = SetPropertyExternal;
-exports.GetPropertyExternal = GetPropertyExternal;
+exports.setPropertyExternal = setPropertyExternal;
+exports.getPropertyExternal = getPropertyExternal;

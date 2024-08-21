@@ -18,18 +18,18 @@ const etsMod = getTestModule('class_methods_test');
 const functionReturnMapEts = etsMod.getFunction('functionReturnMapSubsetByRef');
 
 {
-  const initialMap = functionReturnMapEts();
-  const changedMap = functionReturnMapEts();
+	const initialMap = functionReturnMapEts();
+	const changedMap = functionReturnMapEts();
 
-  const initialInitialMapSize = initialMap.size;
-  const initialChangedMapSize = changedMap.size;
-  changedMap.set(3, 'Test');
-  const finalInitialMapSize = initialMap.size;
-  const finalChangedMapSize = changedMap.size;
+	const initialInitialMapSize = initialMap.size;
+	const initialChangedMapSize = changedMap.size;
+	changedMap.set(3, 'Test');
+	const finalInitialMapSize = initialMap.size;
+	const finalChangedMapSize = changedMap.size;
 
-  ASSERT_EQ(initialInitialMapSize, 2);
-  ASSERT_EQ(initialChangedMapSize, 2);
-  ASSERT_EQ(initialMap.has(3), true);
-  ASSERT_EQ(finalInitialMapSize, 3);
-  ASSERT_EQ(finalChangedMapSize, 3);
+	ASSERT_EQ(initialInitialMapSize, 2);
+	ASSERT_EQ(initialChangedMapSize, 2);
+	ASSERT_EQ(initialMap.has(3), true);
+	ASSERT_EQ(finalInitialMapSize, 3);
+	ASSERT_EQ(finalChangedMapSize, 3);
 }

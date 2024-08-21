@@ -19,30 +19,38 @@ const TWO = 2;
 const ONE_HUNDRED = 100;
 const NINETY_NINE = 99;
 
-import { Color, Letter /*, Name*/ } from './lib';
+// NOTE (ivagin) #12808 enable when supported by declgen
+const FIX_12808 = false;
 
-function AssertEq<T>(a: T, b: T) {
-	console.log(`AssertEq: '${a}' === '${b}'`);
+import * as imported from './lib';
+
+const { Color, Letter } = imported;
+
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
 	if (a !== b) {
-		throw new Error(`AssertEq failed: '${a}' === '${b}'`);
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
 	}
 }
 
-export function main() {
+export function main(): void {
 	testClasses();
 }
 
-function testClasses() {
-	AssertEq(Letter.A, ZERO);
-	AssertEq(Letter.B, ONE);
-	AssertEq(Letter.C, TWO);
+function testClasses(): void {
+	assertEq(Letter.A, ZERO);
+	assertEq(Letter.B, ONE);
+	assertEq(Letter.C, TWO);
 
-	AssertEq(Color.Red, ZERO);
-	AssertEq(Color.Green, -ONE_HUNDRED);
-	AssertEq(Color.Blue, -NINETY_NINE);
-	AssertEq(Color.White, ZERO);
-
-	// NOTE(ivagin): enable when supported by declgen #12808
-	// AssertEq(Name.Ivan, "Ivan");
-	// AssertEq(Name.Li, "Li");
+	assertEq(Color.Red, ZERO);
+	assertEq(Color.Green, -ONE_HUNDRED);
+	assertEq(Color.Blue, -NINETY_NINE);
+	assertEq(Color.White, ZERO);
+	if (FIX_12808) {
+		const workaroundImport = { Ivan: 'John', Li: 'Yuan',  ...imported };
+		// @ts-ignore -- remove when #12808 is fixed
+		const Name = FIX_12808 ? workaroundImport.Name : { Ivan: 'John', Li: 'Yuan' };
+		assertEq(Name.Ivan, 'Ivan');
+		assertEq(Name.Li, 'Li');
+	}
 }

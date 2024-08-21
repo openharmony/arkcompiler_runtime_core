@@ -18,9 +18,9 @@ const etsMod = getTestModule('class_methods_test');
 const functionReturnStringEts = etsMod.getFunction('functionReturnStringSubsetByRef');
 
 {
-  const EXPECTED_STRING = 'This is a test string';
-  const testVal = functionReturnStringEts();
+	const EXPECTED_STRING = 'This is a test string';
+	const testVal = functionReturnStringEts();
 
-  ASSERT_EQ(testVal, EXPECTED_STRING);
-  ASSERT_EQ(typeof testVal, 'string');
+	ASSERT_EQ(testVal, EXPECTED_STRING);
+	ASSERT_EQ(typeof testVal, 'string');
 }

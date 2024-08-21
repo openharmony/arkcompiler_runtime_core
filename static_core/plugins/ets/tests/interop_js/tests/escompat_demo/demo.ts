@@ -15,7 +15,7 @@
 
 import { FooClass, FooFunction, BarFunction } from './foo';
 
-function test() {
+function test(): void {
 	let arr = new Array<FooClass>();
 	arr.push(new FooClass('zero'));
 	arr.push(new FooClass('one'));

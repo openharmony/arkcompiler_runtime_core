@@ -54,11 +54,11 @@ class TreeNode {
 	}
 }
 
-function DynObject(x) {
+function makeDynObject(x) {
 	this.v0 = { value: x };
 }
 
-function Empty() {}
+function doNothing() {}
 
 function makeSwappable(obj) {
 	obj.swap = function () {
@@ -80,21 +80,22 @@ function extractSquaredInt(obj) {
 	return x * x;
 }
 
-function ObjectWithPrototype() {
+
+function makeObjectWithPrototype() {
 	this.overriddenValue = 4;
 	this.overriddenFunction = function () {
 		return 'overridden';
 	};
 }
 
-let o1 = new ObjectWithPrototype();
+let o1 = new makeObjectWithPrototype();
 
-ObjectWithPrototype.prototype.overriddenValue = -1;
-ObjectWithPrototype.prototype.overriddenFunction = function () {
+makeObjectWithPrototype.prototype.overriddenValue = -1;
+makeObjectWithPrototype.prototype.overriddenFunction = function () {
 	return 'should be overridden';
 };
-ObjectWithPrototype.prototype.prototypeValue = 5;
-ObjectWithPrototype.prototype.prototypeFunction = function () {
+makeObjectWithPrototype.prototype.prototypeValue = 5;
+makeObjectWithPrototype.prototype.prototypeFunction = function () {
 	return 'prototype function';
 };
 
@@ -118,11 +119,11 @@ exports.car = car;
 exports.cdr = cdr;
 exports.sum = sum;
 exports.TreeNode = TreeNode;
-exports.DynObject = DynObject;
-exports.Empty = Empty;
+exports.makeDynObject = makeDynObject;
+exports.doNothing = doNothing;
 exports.makeSwappable = makeSwappable;
 exports.StaticClass = StaticClass;
 exports.extractSquaredInt = extractSquaredInt;
-exports.ObjectWithPrototype = ObjectWithPrototype;
+exports.ObjectWithPrototype = makeObjectWithPrototype;
 exports.dynStorage = dynStorage;
 exports.vundefined = undefined;

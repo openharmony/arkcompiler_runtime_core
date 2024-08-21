@@ -13,16 +13,13 @@
  * limitations under the License.
  */
 
+const MAX_ARGUMENTS = 2;
 class A {
 	bar(func, ...args) {
-		switch (args.length) {
-			case 0:
-				return func();
-			case 1:
-				return func(args[0]);
-			case 2:
-				return func(args[0], args[1]);
+		if (args.length > MAX_ARGUMENTS) {
+			throw new Error('Too many method arguments');
 		}
+		return func(...args.slice(0, MAX_ARGUMENTS));
 	}
 }
 

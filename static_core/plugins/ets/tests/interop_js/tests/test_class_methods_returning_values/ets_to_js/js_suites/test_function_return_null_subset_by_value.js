@@ -18,8 +18,8 @@ const etsMod = getTestModule('class_methods_test');
 const functionReturnNullEts = etsMod.getFunction('functionReturnNullSubsetByValue');
 
 {
-  const EXPECTED_VALUE = null;
-  const testVal = functionReturnNullEts();
+	const EXPECTED_VALUE = null;
+	const testVal = functionReturnNullEts();
 
-  ASSERT_EQ(testVal, EXPECTED_VALUE);
+	ASSERT_EQ(testVal, EXPECTED_VALUE);
 }

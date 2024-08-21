@@ -35,7 +35,7 @@ export class Methods {
         return res;
     }
 
-    OptionalString(a: string | null): string | null {
+    OptionalString(a: string | undefined): string | undefined {
         return a;
     }
 

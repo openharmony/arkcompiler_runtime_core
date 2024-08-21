@@ -14,7 +14,7 @@
  */
 
 import {
-    EvaluateNumber,
+    evaluateNumber,
     ExampleClass,
     ClassWithEmptyConstructor
 } from "/plugins/ets/tests/interop_js/tests/number_subtypes/module.js"
@@ -59,7 +59,7 @@ import {
 function jscall<%= primitive.getName.capitalize() %>(): int {
     let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
     let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
-    let res = EvaluateNumber(v0, v1) as double;
+    let res = evaluateNumber(v0, v1) as double;
     if (res == <%= primitive.getSum() %>) {
         return 0;
     } else {
@@ -107,7 +107,7 @@ function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
 function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
     let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
     let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
-    let res = ExampleClass.EvaluateNumber(v0, v1) as double;
+    let res = ExampleClass.evaluateNumber(v0, v1) as double;
     if (res == <%= primitive.getSum() %>) {
         return 0;
     } else {
@@ -121,7 +121,7 @@ function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
 function jscall<%= primitive.getName.capitalize() %>(): int {
     let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
     let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
-    let res = ExampleClass.EvaluateNumber(v0, v1) as double;
+    let res = ExampleClass.evaluateNumber(v0, v1) as double;
     if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
         return 0;
     } else {
@@ -162,7 +162,7 @@ function jsnewSetProperty<%= primitive.getName.capitalize() %>(): int {
 function jscallStaticMethod<%= primitive.getName.capitalize() %>(): int {
     let v0: <%= primitive.getName %> = <%= primitive.getMin() %>;
     let v1: <%= primitive.getName %> = <%= primitive.getMax() %>;
-    let res = ExampleClass.EvaluateNumber(v0, v1) as double;
+    let res = ExampleClass.evaluateNumber(v0, v1) as double;
     if (abs(res - <%= primitive.getSum() %>) < 0.000001) {
         return 0;
     } else {

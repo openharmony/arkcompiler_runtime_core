@@ -21,6 +21,8 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSCopyWithin = etsMod.getFunction('Array_TestJSCopyWithin');
 
+// NOTE (oignatenko) enable when arr.at is fully supported
+const FIXES_IMPLEMENTED = false;
 {
 	// Test JS Array<FooClass>
 	TestJSCopyWithin(new Array(new FooClass('zero'), new FooClass('one')));
@@ -35,9 +37,10 @@ const TestJSCopyWithin = etsMod.getFunction('Array_TestJSCopyWithin');
 	ASSERT_EQ(arr.at(2), 123);
 
 	ASSERT_EQ(arr.at(1), 'foo');
-	// NOTE(oignatenko) uncomment below after interop will be supported for this method signature
-	// arr.copyWithin(1);
-	// ASSERT_EQ(arr.at(1), 123);
+	if (FIXES_IMPLEMENTED) {
+		arr.copyWithin(1);
+		ASSERT_EQ(arr.at(1), 123);
+	}
 }
 
 GCJSRuntimeCleanup();

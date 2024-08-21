@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { cons, car, cdr, sum, TreeNode, DynObject, Empty, makeSwappable, StaticClass, extractSquaredInt, ObjectWithPrototype, vundefined}
+import { cons, car, cdr, sum, TreeNode, makeDynObject, doNothing, makeSwappable, StaticClass, extractSquaredInt, ObjectWithPrototype, vundefined}
     from "/plugins/ets/tests/interop_js/tests/checked/js_call/js_call.js"
 
 //! CHECKER      Several js function calls JIT (slow)
@@ -385,7 +385,7 @@ function newChain(): int {
 
 function loadStoreChain(): int {
     for (let i = 0; i < 10; i++) {
-        let obj = new DynObject(i);
+        let obj = new makeDynObject(i);
         obj.v1 = obj.v0;
         obj.v2 = obj.v1;
         if (obj.v2 !== obj.v0) {
@@ -461,7 +461,7 @@ function loadStoreChain(): int {
 
 function methodCall(): int {
     for (let i = 0; i < 5; i++) {
-        let pair = new Empty();
+        let pair = new doNothing();
         pair.first = -i;
         pair.second = i;
         makeSwappable(pair);

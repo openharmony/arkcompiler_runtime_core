@@ -18,9 +18,9 @@ const etsMod = getTestModule('class_methods_test');
 const functionReturnBoolEts = etsMod.getFunction('functionReturnBoolSubsetByValue');
 
 {
-  const EXPECTED_VALUE = true;
-  const testVal = functionReturnBoolEts();
+	const EXPECTED_VALUE = true;
+	const testVal = functionReturnBoolEts();
 
-  ASSERT_EQ(testVal, EXPECTED_VALUE);
-  ASSERT_EQ(typeof testVal, 'boolean');
+	ASSERT_EQ(testVal, EXPECTED_VALUE);
+	ASSERT_EQ(typeof testVal, 'boolean');
 }

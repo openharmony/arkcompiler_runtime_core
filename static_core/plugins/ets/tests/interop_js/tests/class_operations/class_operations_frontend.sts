@@ -14,12 +14,12 @@
  */
 
 import {
-	EvaluateNumber,
+	evaluateNumber,
 	ExampleClass,
 	ClassWithEmptyConstructor,
-	EvaluateObject,
+	evaluateObject,
 	MyNamespace,
-	EvaluateArray,
+	evaluateArray,
 } from '/plugins/ets/tests/interop_js/tests/number_subtypes/module.js';
 
 //! CHECKER      jscallEmpty JIT
@@ -29,7 +29,7 @@ import {
 //! INST_NOT     /CallStatic.*jscall::invoke/
 
 function jscallEmpty(): int {
-	EvaluateNumber();
+	evaluateNumber();
 	return 0;
 }
 
@@ -62,7 +62,7 @@ function jsnewEmpty(): int {
 //! INST_NOT     /CallStatic.*jscall::invoke/
 
 function jscallStaticMethodEmpty(): int {
-	ExampleClass.EmptyMethod();
+	ExampleClass.emptyMethod();
 	return 0;
 }
 
@@ -79,7 +79,7 @@ function jscallStaticMethodEmpty(): int {
 
 function jscallObject(): int {
 	let resObj = new ExampleClass(42, 42);
-	let res = EvaluateObject(resObj);
+	let res = evaluateObject(resObj);
 	let resGetV0 = res.v0 as int;
 	let resGetV1 = res.v1 as int;
 	if (resGetV0 == 84 && resGetV1 == 84) {
@@ -142,7 +142,7 @@ function jsnewSetPropertyObject(): int {
 
 function jscallMethodObject(): int {
 	let resObj = new ExampleClass(42, 42);
-	let res = EvaluateObject(resObj);
+	let res = evaluateObject(resObj);
 	let resGetV0 = res.v0 as int;
 	let resGetV1 = res.v1 as int;
 	if (resGetV0 == 84 && resGetV1 == 84) {
@@ -161,7 +161,7 @@ function jscallMethodObject(): int {
 
 function jscallMethodSimple(): int {
 	let resObj = new ExampleClass(42, 42);
-	let res = resObj.InstanceEvaluateNumber() as int;
+	let res = resObj.instanceEvaluateNumber() as int;
 	if (res == 84) {
 		return 0;
 	} else {
@@ -181,7 +181,7 @@ function jscallMethodSimple(): int {
 function jscallString(): int {
 	let v0: String = 'hello';
 	let v1: String = 'world';
-	let res = EvaluateNumber(v0, v1) as String;
+	let res = evaluateNumber(v0, v1) as String;
 	if (res == 'helloworld') {
 		return 0;
 	} else {
@@ -254,7 +254,7 @@ function jsnewSetPropertyString(): int {
 function jscallStaticMethodString(): int {
 	let v0: String = 'hello';
 	let v1: String = 'world';
-	let res = ExampleClass.EvaluateNumber(v0, v1) as String;
+	let res = ExampleClass.evaluateNumber(v0, v1) as String;
 	if (res == 'helloworld') {
 		return 0;
 	} else {
@@ -268,7 +268,7 @@ function jscallArray(): int {
 		v0[i] = i * i;
 	}
 
-	let res = EvaluateArray(v0, 10);
+	let res = evaluateArray(v0, 10);
 	for (let i = 0; i < 10; ++i) {
 		if ((res[i] as int) != 2 * i * i) {
 			return 1;
@@ -323,7 +323,7 @@ function jscallStaticMethodArray(): int {
 		v0[i] = i * i;
 	}
 
-	let res = ExampleClass.EvaluateArray(v0, 10);
+	let res = ExampleClass.evaluateArray(v0, 10);
 	for (let i = 0; i < 10; ++i) {
 		if ((res[i] as int) != 2 * i * i) {
 			return 1;

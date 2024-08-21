@@ -74,6 +74,7 @@ function(panda_ets_interop_js_gtest TARGET)
             "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip"
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARR_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
+            "FIXED_ISSUES=${FIXED_ISSUES}"
         LAUNCHER ${NODE_BINARY} gtest_launcher.js ${TARGET}
         DEPS_TARGETS ${TARGET} ets_interop_js_gtest_launcher
         TEST_RUN_DIR ${INTEROP_TESTS_DIR}
