@@ -27,52 +27,43 @@ bool Abc2ProgramOptions::Parse(int argc, const char **argv)
                                            "(--debug-file FILENAME) set debug file name. default is std::cout");
     panda::PandArg<std::string> input_file("input_file", "", "Path to the source binary code");
     panda::PandArg<std::string> output_file("output_file", "", "Path to the generated assembly code");
-    help_arg_ = &help;
-    debug_arg_ = &debug;
-    debug_file_arg_ = &debug_file;
-    input_file_arg_ = &input_file;
-    output_file_arg_ = &output_file;
     pa_parser_.Add(&help);
     pa_parser_.Add(&debug);
     pa_parser_.Add(&debug_file);
     pa_parser_.PushBackTail(&input_file);
     pa_parser_.PushBackTail(&output_file);
     pa_parser_.EnableTail();
-    if (!ProcessArgs(argc, argv)) {
+
+    if (!pa_parser_.Parse(argc, argv)) {
+        ConstructErrorMsg();
         PrintErrorMsg();
         pa_parser_.DisableTail();
         return false;
     }
-    pa_parser_.DisableTail();
-    return true;
-}
-
-bool Abc2ProgramOptions::ProcessArgs(int argc, const char **argv)
-{
-    if (!pa_parser_.Parse(argc, argv)) {
-        ConstructErrorMsg();
-        return false;
-    }
-    if (debug_arg_->GetValue()) {
-        if (debug_file_arg_->GetValue().empty()) {
+    if (debug.GetValue()) {
+        if (debug_file.GetValue().empty()) {
             panda::Logger::InitializeStdLogging(
                 panda::Logger::Level::DEBUG,
                 panda::Logger::ComponentMask().set(panda::Logger::Component::ABC2PROGRAM));
         } else {
             panda::Logger::InitializeFileLogging(
-                debug_file_arg_->GetValue(), panda::Logger::Level::DEBUG,
+                debug_file.GetValue(), panda::Logger::Level::DEBUG,
                 panda::Logger::ComponentMask().set(panda::Logger::Component::ABC2PROGRAM));
         }
     } else {
         panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR,
                                             panda::Logger::ComponentMask().set(panda::Logger::Component::ABC2PROGRAM));
     }
-    input_file_path_ = input_file_arg_->GetValue();
-    output_file_path_ = output_file_arg_->GetValue();
+    input_file_path_ = input_file.GetValue();
+    output_file_path_ = output_file.GetValue();
     if (input_file_path_.empty() || output_file_path_.empty()) {
         ConstructErrorMsg();
+        PrintErrorMsg();
+        pa_parser_.DisableTail();
         return false;
     }
+
+    pa_parser_.DisableTail();
     return true;
 }
 
