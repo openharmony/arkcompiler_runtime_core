@@ -38,8 +38,9 @@ function main() {
     bench.setup();
     // (almost) everything runs in sts
     bench.testLoop(1000);
-    let time_ns = (Date.now() - start) * MS2NS;
-    console.log('Benchmark result: CRC32 ' + time_ns);
+    let timeNs = (Date.now() - start) * MS2NS;
+    console.log('Benchmark result: CRC32 ' + timeNs);
+    return 0;
 }
 
-main();
+process.exit(main());

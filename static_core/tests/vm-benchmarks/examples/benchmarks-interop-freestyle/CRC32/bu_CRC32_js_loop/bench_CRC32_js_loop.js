@@ -37,11 +37,12 @@ function main() {
     let bench = new State();
     bench.setup();
     // interop: js calls sts function
-    for (var i=0; i<1000; i++) {
+    for (let i = 0; i < 1000; i++) {
         bench.test();
     }
-    let time_ns = (Date.now() - start) * MS2NS;
-    console.log('Benchmark result: CRC32 ' + time_ns);
+    let timeNs = (Date.now() - start) * MS2NS;
+    console.log('Benchmark result: CRC32 ' + timeNs);
+    return 0;
 }
 
-main();
+process.exit(main());

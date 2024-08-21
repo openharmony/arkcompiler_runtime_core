@@ -14,12 +14,12 @@
  */
 
 function setup() {
-    var c = 0;
-    var table = [];
-    for(var n = 0; n < 256; n++) {
+    let c = 0;
+    let table = [];
+    for (let n = 0; n < 256; n++) {
         c = n;
-        for(var k = 0; k < 8; k++) {
-            c = ((c&1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
+        for (let k = 0; k < 8; k++) {
+            c = ((c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1));
         }
         table[n] = c;
     }
@@ -27,8 +27,8 @@ function setup() {
 }
 
 function test(str, table) {
-    var crc = 0 ^ (-1);
-    for (var i = 0; i < str.length; i++ ) {
+    let crc = 0 ^ (-1);
+    for (let i = 0; i < str.length; i++ ) {
         crc = (crc >>> 8) ^ table[(crc ^ str.charCodeAt(i)) & 0xFF];
     }
     return (crc ^ (-1)) >>> 0;
@@ -55,13 +55,14 @@ function main() {
 
     const MS2NS = 1000000;
     let start = Date.now();
-    var table = setup();
+    let table = setup();
     // (almost) everything runs in js
-    for (var i=0; i<1000; i++) {
+    for (let i = 0; i < 1000; i++) {
         test('Lorem ipsum dolor sit amet, consectetur adipiscing elit', table);
     }
-    let time_ns = (Date.now() - start) * MS2NS;
-    console.log('Benchmark result: CRC32 ' + time_ns);
+    let timeNs = (Date.now() - start) * MS2NS;
+    console.log('Benchmark result: CRC32 ' + timeNs);
+    return 0;
 }
 
-main();
+process.exit(main());
