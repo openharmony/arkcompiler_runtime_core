@@ -81,17 +81,17 @@ if [[ "x${BUILD_AARCH64_DEBUG}" == "xtrue" || "x${BUILD_AARCH64_RELEASE}" == "xt
     fi
 fi
 
-if [[ -z ${OHOS_SDK} && "x${BUILD_OHOS_RELEASE}" == "xtrue" ]]; then
+if [[ -z "${OHOS_SDK}" && "x${BUILD_OHOS_RELEASE}" == "xtrue" ]]; then
     echo "OHOS_SDK variable must be provided for OHOS build"
     exit 1
 fi
 
-if [[ -z ${OHOS_SDK} && "x${BUILD_OHOS_RELEASE_GN}" == "xtrue" ]]; then
+if [[ -z "${OHOS_SDK}" && "x${BUILD_OHOS_RELEASE_GN}" == "xtrue" ]]; then
     echo "OHOS_SDK variable must be provided for OHOS GN build"
     exit 1
 fi
 
-if [[ -z ${OHOS_PREBUILTS} && "x${BUILD_OHOS_RELEASE_GN}" == "xtrue" ]]; then
+if [[ -z "${OHOS_PREBUILTS}" && "x${BUILD_OHOS_RELEASE_GN}" == "xtrue" ]]; then
     echo "OHOS_PREBUILTS variable must be provided for OHOS GN build"
     exit 1
 fi
@@ -332,7 +332,7 @@ if [[ "x${BUILD_OHOS_RELEASE}" == "xtrue" ]]; then
         "${LLVM_SOURCES}"
 
     ninja distribution
-    if [[ -n ${INSTALL_DIR} ]]; then
+    if [[ -n "${INSTALL_DIR}" ]]; then
         install "${INSTALL_PREFIX}" "${DO_STRIPPING}" "${DO_TARS}"
     fi
 fi
