@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,13 +14,14 @@
  */
 
 /*---
-desc: Import a default exported variable.
+desc: Import entity from module A, imported from module B.
 files:
-- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable.sts
+- ../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level.sts
 ---*/
 
-import test_var from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_variable"
+import VAR_i from "../../08.top-level_declarations/01.exported_declarations/default_exported_declarations/default_export_type_2_level"
 
-function main(): void {
-    assert(test_var == "default_variable");
+function main() {
+    let c: VAR_i = 3;
+    assert( c == 3 );
 }

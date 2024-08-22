@@ -2047,6 +2047,33 @@
 
 # 17488: Separate module initializer not implemented yet
 13.compilation_units_packages_and_modules/02.separate_module_initializer/import_statements.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_abstract_class.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_const_var.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_enum.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_function_gen.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_generic_class.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_interface.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_tuple.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_type.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_union.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_default_export.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_3.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_export.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_abstract_class.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_class_same_name.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_var_boxed.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_var_default.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_var_primitive.sts
 
 # es2panda: #18344 Invalid test, ArkTS doesn't have intersection type
 06.contexts_and_conversions/01.assignment-like_contexts/identity2_11.sts
+
+# es2panda: #18598 import type with the same name as not imported module entity
+13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_class_same_name_2.sts
+
+# es2panda: #18603 export entity as default, imported from another module as non-default 
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_2.sts
+
+# test runner: #18046 Update compilation process with modules for AOT mode
+17.experimental_features/14.enumeration_methods/enum_type_methods_pipeline.sts
