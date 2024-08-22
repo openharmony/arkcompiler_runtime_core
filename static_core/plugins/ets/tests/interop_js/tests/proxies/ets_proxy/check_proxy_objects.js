@@ -24,7 +24,7 @@ const ListNode = getTestClass('ListNode');
 	let props = Object.getOwnPropertyNames(ListNode.prototype);
 	ASSERT_TRUE(expected.every((p) => props.includes(p)));
 
-	ASSERT_TRUE(!ListNode.hasOwnProperty('<cctor>'));
+	ASSERT_TRUE(!Object.hasOwn(ListNode, '<cctor>'));
 }
 
 {
