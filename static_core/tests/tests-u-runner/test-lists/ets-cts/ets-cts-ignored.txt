@@ -1533,11 +1533,8 @@
 # 6.5.9 Constant String to Character Conversions not yet supported
 06.contexts_and_conversions/05.implicit_conversions/09.constant_string_to_char_conversion/str2char_7.sts
 
-# 16304 Byte to char widening conversion issues
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func_6.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth_6.sts
+# 18550 [ArkTS frontend] es2panda aborts on implicit number conversion
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_6.sts
 
 # enum cannot be assigned to type Object - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_20.sts
