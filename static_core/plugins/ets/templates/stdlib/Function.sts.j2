@@ -18,10 +18,26 @@ package std.core;
 
 export interface Function<R> {}
 {% for narg in range(17) %}
-export interface Function{{ narg }}<{% for i in range(narg) %}in P{{i + 1}}, {% endfor %}out R> extends Function<R> {
+export interface ThrowingFunction{{ narg }}<{% for i in range(narg) %}in P{{i + 1}}, {% endfor %}out R> extends Function<R> {
+    invoke0({% for i in range(narg) %}p{{i + 1}}: P{{i + 1}}{% if not loop.last %}, {% endif %}{% endfor %}): R throws;
+}
+{% endfor %}
+export interface ThrowingFunctionN<R> extends Function<R> {
+    invoke0(...p: (Object|null|undefined)[]): R throws;
+}
+{% for narg in range(17) %}
+export interface RethrowingFunction{{ narg }}<{% for i in range(narg) %}in P{{i + 1}}, {% endfor %}out R> extends ThrowingFunction{{ narg }}<{% for i in range(narg) %}P{{i + 1}}, {% endfor %} R> {
+    invoke0({% for i in range(narg) %}p{{i + 1}}: P{{i + 1}}{% if not loop.last %},{% endif %}{% endfor %}): R{% if narg > 0 %} rethrows{% endif %};
+}
+{% endfor %}
+export interface RethrowingFunctionN<R> extends ThrowingFunctionN<R> {
+    invoke0(...p: (Object|null|undefined)[]): R rethrows;
+}
+{% for narg in range(17) %}
+export interface Function{{ narg }}<{% for i in range(narg) %}in P{{i + 1}}, {% endfor %}out R> extends RethrowingFunction{{ narg }}<{% for i in range(narg) %}P{{i + 1}}, {% endfor %} R> {
     invoke0({% for i in range(narg) %}p{{i + 1}}: P{{i + 1}}{% if not loop.last %}, {% endif %}{% endfor %}): R;
 }
 {% endfor %}
-export interface FunctionN<R> extends Function<R> {
+export interface FunctionN<R> extends RethrowingFunctionN<R> {
     invoke0(...p: (Object|null|undefined)[]): R;
 }

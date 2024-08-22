@@ -27,14 +27,18 @@ let q{{loop.index}}: {{t.type}} throws;
 {% endfor %}
 
 function main() {
+    try {
 {% for t in c['to'] %}
-    w{{loop.index}} = foo
-    assert w{{loop.index}}{{t.call}}
+        w{{loop.index}} = foo
+        assert w{{loop.index}}{{t.call}}
 {% endfor %}
 
 {% for t in c['to'] %}
-    q{{loop.index}} = foo
-    assert q{{loop.index}}{{t.call}}
+        q{{loop.index}} = foo
+        assert q{{loop.index}}{{t.call}}
 {% endfor %}
+    } catch (e) {
+        assert(false)
+    }
 }
 {%- endfor %}

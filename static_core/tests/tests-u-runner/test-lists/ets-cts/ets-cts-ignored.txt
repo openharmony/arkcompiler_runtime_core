@@ -2072,8 +2072,13 @@
 # es2panda: #18598 import type with the same name as not imported module entity
 13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_class_same_name_2.sts
 
-# es2panda: #18603 export entity as default, imported from another module as non-default 
+# es2panda: #18603 export entity as default, imported from another module as non-default
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_2.sts
 
 # test runner: #18046 Update compilation process with modules for AOT mode
 17.experimental_features/14.enumeration_methods/enum_type_methods_pipeline.sts
+
+# es2panda: #15667 Invalid tests, This cases should be allowed
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.sts
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_hided_method.sts
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_overrided_method.sts
