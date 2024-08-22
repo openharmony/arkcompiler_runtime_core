@@ -18,6 +18,8 @@
 
 #include <string>
 #include <cstdarg>
+#include <securec.h>
+#include "libpandabase/mem/mem.h"
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
@@ -42,7 +44,7 @@ inline std::string EtsLogMakeString(const char *fmt, ...)
     va_start(ap, fmt);
     va_copy(apCopy, ap);
 
-    int len = vsnprintf(nullptr, 0, fmt, ap);
+    int len = vsnprintf_s(nullptr, 0, PAGE_SIZE, fmt, ap);
     if (len < 0) {
         LOG(FATAL, ETS) << "interop_js: Cannot convert message to log buffer";
         UNREACHABLE();
@@ -50,7 +52,7 @@ inline std::string EtsLogMakeString(const char *fmt, ...)
 
     std::string res;
     res.resize(static_cast<size_t>(len));
-    if (vsnprintf(res.data(), len + 1, fmt, apCopy) < 0) {
+    if (vsnprintf_s(res.data(), len + 1, len, fmt, apCopy) < 0) {
         LOG(FATAL, ETS) << "interop_js: Cannot convert message to result string";
         UNREACHABLE();
     }

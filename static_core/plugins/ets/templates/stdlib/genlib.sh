@@ -15,11 +15,13 @@
 set -e -o pipefail
 
 readonly SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-cd "$SCRIPT_DIR"
 readonly GENPATH="${SCRIPT_DIR}/../../stdlib"
 readonly GEN_ESCOMPAT_PATH="${1:-${GENPATH}}/escompat"
 readonly GEN_STDCORE_PATH="${1:-${GENPATH}}/std/core"
 readonly VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
+
+cd "$SCRIPT_DIR"
+
 JINJA_PATH="${VENV_DIR}/bin/jinja2"
 if ! [[ -f "${JINJA_PATH}" ]]; then
     JINJA_PATH="jinja2"
