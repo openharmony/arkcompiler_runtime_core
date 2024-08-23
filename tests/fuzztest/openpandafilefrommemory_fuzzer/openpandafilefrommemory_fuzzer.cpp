@@ -21,6 +21,11 @@ void OpenPandaFileFromMemoryFuzzTest(const uint8_t *data, size_t size)
 {
     panda::panda_file::OpenPandaFileFromMemory(data, size);
 }
+
+void CheckSecureMemFuzzTest(const uint8_t *data, size_t size)
+{
+    panda::panda_file::CheckSecureMem(reinterpret_cast<uintptr_t>(data), size);
+}
 }  // namespace OHOS
 
 /* Fuzzer entry point */
@@ -28,5 +33,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
     /* Run your code on data */
     OHOS::OpenPandaFileFromMemoryFuzzTest(data, size);
+    OHOS::CheckSecureMemFuzzTest(data, size);
     return 0;
 }
