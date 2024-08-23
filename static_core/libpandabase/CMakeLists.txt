@@ -398,20 +398,22 @@ if (PANDA_USE_FUTEX)
         )
 endif()
 
-panda_add_gtest(
-    NO_CORES
-    NO_WARNING_FILTER
-    NAME arkbase_tests
-    SOURCES
-        ${ARKBASE_TESTS_SOURCES}
-    LIBRARIES
-        arkbase_static
-        gmock
-    SANITIZERS
-        ${PANDA_SANITIZERS_LIST}
-)
-if (TARGET arkbase_tests)
-    panda_target_compile_options(arkbase_tests PUBLIC "-Wno-unused")
+if (PANDA_CI_TESTING_MODE STREQUAL "Nightly" OR NOT PANDA_TARGET_ARM32)
+    panda_add_gtest(
+        NO_CORES
+        NO_WARNING_FILTER
+        NAME arkbase_tests
+        SOURCES
+            ${ARKBASE_TESTS_SOURCES}
+        LIBRARIES
+            arkbase_static
+            gmock
+        SANITIZERS
+            ${PANDA_SANITIZERS_LIST}
+    )
+    if (TARGET arkbase_tests)
+        panda_target_compile_options(arkbase_tests PUBLIC "-Wno-unused")
+    endif()
 endif()
 
 panda_add_gtest(
