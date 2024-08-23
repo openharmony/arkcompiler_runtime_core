@@ -1,6 +1,5 @@
-{%- for c in cases %}
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,25 +13,14 @@
  * limitations under the License.
  */
 
-/*---
+ /*---
 desc: >-
-    ArkTS provides extended semantics for conditional-and and conditional-or expressions for better alignment.
+    Type aliases provide names for anonymous types (array, function or nullable types)
+    or alternative names for existing types.
 ---*/
 
-{{c.decl}}
-
-let retcode: int
+type A<T> = string | Array<A<T>> // ok, A<T> is used as a type argument
 
 function main(): int {
-    let v: {{c.type}} = {{c.val}}
-    retcode = 1
-
-    for (let i: int = 0; v; i++) {  // truthy
-        if (i == 0) {
-            retcode = 0
-            break
-        }
-    }
-    return retcode
+    return 0
 }
-{%- endfor %}

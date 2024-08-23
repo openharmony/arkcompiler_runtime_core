@@ -21,9 +21,11 @@ desc: >-
 
 {{c.decl}}
 
+let retcode: int
+
 function main(): int {
     let v: {{c.type}} = {{c.val}}
-    let retcode: int = 1
+    retcode = 1
 
     while (v) {  // truthy
         if (retcode == 1) {

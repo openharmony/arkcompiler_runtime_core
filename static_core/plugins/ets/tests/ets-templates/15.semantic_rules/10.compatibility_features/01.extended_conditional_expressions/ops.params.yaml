@@ -18,35 +18,35 @@ cases:
     - { val: 'Long.MAX_VALUE', type: 'long', truthy: true }
 
     - { val: 'new Long(Long.MIN_VALUE)', type: 'Long', truthy: true }
-    - { val: 'new Long()', type: 'Long', truthy: true }
+    - { val: 'new Long()', type: 'Long', truthy: false }
     - { val: 'new Long(Long.MAX_VALUE)', type: 'Long', truthy: true }
 
     - { val: 'Number.POSITIVE_INFINITY', type: 'number', truthy: true }
     - { val: 'Number.NEGATIVE_INFINITY', type: 'number', truthy: true }
     - { val: 'Number.MIN_VALUE', type: 'number', truthy: true }
     - { val: 'Number.MAX_VALUE', type: 'number', truthy: true }
-    - { val: 'Number.NaN', type: 'number', truthy: false, nan: true }
+    - { val: 'Number.NaN', type: 'number', truthy: false }
     - { val: '-0.0', type: 'number', truthy: false }
 
     - { val: 'new Number(Number.POSITIVE_INFINITY)', type: 'Number', truthy: true }
     - { val: 'new Number(Number.NEGATIVE_INFINITY)', type: 'Number', truthy: true }
     - { val: 'new Number(Number.MIN_VALUE)', type: 'Number', truthy: true }
     - { val: 'new Number(Number.MAX_VALUE)', type: 'Number', truthy: true }
-    - { val: 'new Number(Number.NaN)', type: 'Number', truthy: true }
-    - { val: 'new Number(0.0)', type: 'Number', truthy: true }
+    - { val: 'new Number(Number.NaN)', type: 'Number', truthy: false }
+    - { val: 'new Number(0.0)', type: 'Number', truthy: false }
 
     - { val: 'new String("\u0000\u0000").substring(0, 0)', type: 'string', truthy: false }
     - { val: 'new String("\u0000\u0000").substring(0, 1)', type: 'string', truthy: true }
 
     - { val: "c'\\u0000'", type: 'char', truthy: false }
     - { val: "c' '", type: 'char', truthy: true }
-    - { val: "new Char(c'\\u0000')", type: 'Char', truthy: true }
+    - { val: "new Char(c'\\u0000')", type: 'Char', truthy: false }
     - { val: "new Char(c' ')", type: 'Char', truthy: true }
 
     - { val: '!false', type: 'boolean', truthy: true }
     - { val: '!true', type: 'boolean', truthy: false }
     - { val: 'new Boolean(!false)', type: 'Boolean', truthy: true }
-    - { val: 'new Boolean(!true)', type: 'Boolean', truthy: true }
+    - { val: 'new Boolean(!true)', type: 'Boolean', truthy: false }
 
     - { val: '[]', type: 'number[]', truthy: true }
     - { val: 'new string[0]', type: 'string[]', truthy: true }
