@@ -413,8 +413,8 @@ pandasm::Ins *PandasmProgramDumper::GetNearestValidopIns4InvalidopIns(size_t inv
         }
     }
     // search upwards
-    for (size_t i = invalid_op_ins_idx - 1; i >= 0; --i) {
-        pandasm::Ins &curr_ins = original_dump_ins_[i];
+    for (size_t i = 0; i < invalid_op_ins_idx; ++i) {
+        pandasm::Ins &curr_ins = original_dump_ins_[invalid_op_ins_idx - i - 1];
         if (curr_ins.opcode != pandasm::Opcode::INVALID) {
             return &curr_ins;
         }
