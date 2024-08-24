@@ -845,11 +845,52 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int8Array
      */
     public static of(...items: number[]): Int8Array {
-        let res = new Int8Array(items.length)
+        let res = new Int8Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, res.zeroIfInfinity(items[i]) as byte)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int8Array
+     */
+    public static of(...items: int[]): Int8Array {
+        let res = new Int8Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i] as byte)
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int8Array
+     */
+    public static of(...items: byte[]): Int8Array {
+        let res = new Int8Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int8Array
+     */
+    public static of(): Int8Array {
+        return new Int8Array(0 as int)
     }
 
     /**
@@ -3384,11 +3425,52 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int16Array
      */
     public static of(...items: number[]): Int16Array {
-        let res = new Int16Array(items.length)
+        let res = new Int16Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, res.zeroIfInfinity(items[i]) as short)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int16Array
+     */
+    public static of(...items: int[]): Int16Array {
+        let res = new Int16Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i] as short)
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int16Array
+     */
+    public static of(...items: short[]): Int16Array {
+        let res = new Int16Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int16Array
+     */
+    public static of(): Int16Array {
+        return new Int16Array(0 as int)
     }
 
     /**
@@ -5900,11 +5982,37 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Int32Array
      */
     public static of(...items: number[]): Int32Array {
-        let res = new Int32Array(items.length)
+        let res = new Int32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, res.zeroIfInfinity(items[i]) as int)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int32Array
+     */
+    public static of(...items: int[]): Int32Array {
+        let res = new Int32Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Int32Array
+     */
+    public static of(): Int32Array {
+        return new Int32Array(0 as int)
     }
 
     /**
@@ -8447,6 +8555,39 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigInt64Array
+     */
+    public static of(...items: int[]): BigInt64Array {
+        throw new Error("BigInt64Array.of: not implemented")
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigInt64Array
+     */
+    public static of(...items: long[]): BigInt64Array {
+        throw new Error("BigInt64Array.of: not implemented")
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigInt64Array
+     */
+    public static of(): BigInt64Array {
+        return new BigInt64Array(0 as int)
+    }
+
+    /**
      * Creates an array from an array-like or iterable object.
      *
      * @param arrayLike An array-like or iterable object to convert to an array.
@@ -10916,11 +11057,52 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float32Array
      */
     public static of(...items: number[]): Float32Array {
-        let res = new Float32Array(items.length)
+        let res = new Float32Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as float)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Float32Array
+     */
+    public static of(...items: int[]): Float32Array {
+        let res = new Float32Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i] as float)
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Float32Array
+     */
+    public static of(...items: float[]): Float32Array {
+        let res = new Float32Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Float32Array
+     */
+    public static of(): Float32Array {
+        return new Float32Array(0 as int)
     }
 
     /**
@@ -13345,11 +13527,37 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * @returns new Float64Array
      */
     public static of(...items: number[]): Float64Array {
-        let res = new Float64Array(items.length)
+        let res = new Float64Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Float64Array
+     */
+    public static of(...items: int[]): Float64Array {
+        let res = new Float64Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
             res.setUnsafe(i, items[i] as double)
         }
         return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new Float64Array
+     */
+    public static of(): Float64Array {
+        return new Float64Array(0 as int)
     }
 
     /**
