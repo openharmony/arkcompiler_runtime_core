@@ -81,21 +81,21 @@ function extractSquaredInt(obj) {
 }
 
 
-function makeObjectWithPrototype() {
+function MakeObjectWithPrototype() {
 	this.overriddenValue = 4;
 	this.overriddenFunction = function () {
 		return 'overridden';
 	};
 }
 
-let o1 = new makeObjectWithPrototype();
+let o1 = new MakeObjectWithPrototype();
 
-makeObjectWithPrototype.prototype.overriddenValue = -1;
-makeObjectWithPrototype.prototype.overriddenFunction = function () {
+MakeObjectWithPrototype.prototype.overriddenValue = -1;
+MakeObjectWithPrototype.prototype.overriddenFunction = function () {
 	return 'should be overridden';
 };
-makeObjectWithPrototype.prototype.prototypeValue = 5;
-makeObjectWithPrototype.prototype.prototypeFunction = function () {
+MakeObjectWithPrototype.prototype.prototypeValue = 5;
+MakeObjectWithPrototype.prototype.prototypeFunction = function () {
 	return 'prototype function';
 };
 
@@ -124,6 +124,6 @@ exports.doNothing = doNothing;
 exports.makeSwappable = makeSwappable;
 exports.StaticClass = StaticClass;
 exports.extractSquaredInt = extractSquaredInt;
-exports.ObjectWithPrototype = makeObjectWithPrototype;
+exports.ObjectWithPrototype = MakeObjectWithPrototype;
 exports.dynStorage = dynStorage;
 exports.vundefined = undefined;

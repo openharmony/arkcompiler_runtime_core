@@ -206,8 +206,8 @@ const returnNullSubsetByValue = function returnNull() {
 };
 
 exports.returnNullSubsetByValue = returnNullSubsetByValue;
-const returnUnion = function returnUnion(is_str) {
-	if (is_str) {
+const returnUnion = function returnUnion(isStr) {
+	if (isStr) {
 		return '1000';
 	}
 	return 1000;

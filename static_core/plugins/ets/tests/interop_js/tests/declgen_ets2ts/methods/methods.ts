@@ -50,7 +50,7 @@ function testMethods(): void {
 
 	if (FIX_12808) {
 		assertEq(o.OptionalString(undefined), undefined);
-		(new Function('assertEq(o.OptionalString(), undefined)'))()
+		// NOTE(ivagin): add one more check like this: "assertEq(o.OptionalString(), undefined);"
 		assertEq(o.SumIntVariadic(ONE, TWO, THREE, FOUR, FIVE).toFixed(PRECISION), FIFTEEN.toFixed(PRECISION));
 	}
 }

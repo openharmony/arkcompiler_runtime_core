@@ -44,6 +44,8 @@ function runTest(test, warmup, iters) {
 	etsVm.call(test, iters);
 	let timeNs = (Date.now() - start) * MS2NS;
 	console.log('js interop test ' + test + ': ' + timeNs / iters + ' ns/iter, iters: ' + iters);
+
+	return null;
 }
 
 let args = process.argv;

@@ -32,8 +32,8 @@ if (FIX_17878) {
 
   {
     const testInterfaceVal = newInterfaceWithMethodEts();
-  
+
     ASSERT_EQ(testInterfaceVal.methodInInterface(), 100);
   }
-  
+
 }
