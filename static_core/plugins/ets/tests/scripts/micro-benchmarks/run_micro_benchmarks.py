@@ -170,7 +170,7 @@ class EtsBenchmarksRunner:
         current_output_dir = os.path.join(
             self.host_output_dir, self.current_bench_name)
         tmp_asm_file_path = os.path.join(current_output_dir, "test.pa")
-        os.system(f"mkdir -p {current_output_dir}")
+        subprocess.run(["mkdir", "-p", current_output_dir])
         fd_read = os.open(self.wrapper_asm_filepath, os.O_RDONLY, 0o755)
         fd_read_two = os.open(base_asm_file_path, os.O_RDONLY, 0o755)
         file_to_read = os.fdopen(fd_read, "r")
@@ -181,9 +181,9 @@ class EtsBenchmarksRunner:
         if self.is_device:
             device_current_output_dir = os.path.join(
                 self.device_output_dir, self.current_bench_name)
-            os.system(f"adb shell mkdir -p {device_current_output_dir}")
-            os.system(
-                f"adb push {tmp_asm_file_path} {device_current_output_dir}/")
+            subprocess.run(["adb", "shell", f"mkdir -p {device_current_output_dir}"])
+            subprocess.run(
+                ["adb", "push", tmp_asm_file_path, f"{device_current_output_dir}/"])
             tmp_asm_file_path = os.path.join(
                 device_current_output_dir, "test.pa")
         return tmp_asm_file_path
@@ -218,9 +218,9 @@ class EtsBenchmarksRunner:
         stats = RunStats()
 
         if self.is_device:
-            os.system(f"adb shell mkdir -p {self.device_output_dir}")
+            subprocess.run(["adb", "shell", f"mkdir -p {self.device_output_dir}"])
         else:
-            os.system(f"mkdir -p {self.host_output_dir}")
+            subprocess.run(["mkdir", "-p", self.host_output_dir])
 
         if args.test_name is not None:
             self.run_separate_bench(args.test_name + ".pa", stats)
@@ -254,7 +254,7 @@ def dump_time_stats(logger, stats):
             logger.info(name.split(".")[0].ljust(
                 max_width + 5) + str(round(stats.time[name], 3)))
         else:
-            logger.info(name.split(".")[0].ljust(max_width + 5) + "None")
+            logger.info(f"{name.split('.')[0].ljust(max_width + 5)}None")
 
 
 def dump_pass_rate(logger, skiplist_name, passed_tests, failed_tests):

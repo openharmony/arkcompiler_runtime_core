@@ -25,17 +25,17 @@ eval set -- "${args}"
 while :; do
     case "$1" in
     -b | --build)
-        export build=$2
+        export BUILD=$2
         shift 2
         ;;
 
     -s | --spec)
-        export spec=$2
+        export SPEC=$2
         shift 2
         ;;
 
     -r | --rst)
-        export rst_file=$2
+        export RST_FILE=$2
         shift 2
         ;;
 
@@ -70,13 +70,13 @@ function echo_color_text() {
     printf "${C}${TEXT}${NC}${tabs}"
 }
 
-es2panda=$build/bin/es2panda
+es2panda=$BUILD/bin/es2panda
 # echo $es2panda
-if ! test -f "$build"; then
+if ! test -f "$BUILD"; then
     echo_color_text $WARNING_COLOR "please check your path to es2panda: \n $es2panda"
     exit; fi
 
-if [ "$spec" ] && [ "$rst_file" ]; then
+if [ "$SPEC" ] && [ "$RST_FILE" ]; then
     echo_color_text $WARNING_COLOR "please specify correctly"
     exit
 fi
@@ -86,10 +86,10 @@ mkdir snippets; mkdir snippets/abc; mkdir results
 touch snippets/_output; touch results/main_results
 chmod a+rwx -R snippets
 
-if [[ "$spec" ]]; then
-    python3 verify.py --spec="$spec" 2> ./.verifier_error; fi
-if [[ "$rst_file" ]]; then
-    python3 verify.py --rst="$rst_file" 2> ./.verifier_error; fi
+if [[ "$SPEC" ]]; then
+    python3 verify.py --spec="$SPEC" 2> ./.verifier_error; fi
+if [[ "$RST_FILE" ]]; then
+    python3 verify.py --rst="$RST_FILE" 2> ./.verifier_error; fi
 
 if [[ $(cat ./.verifier_error) ]]; then
     echo_color_text $WARNING_COLOR "please fix the snippets meta or check error in .verifier_error"
@@ -150,7 +150,7 @@ function write_results() {
 function check() {
     ets_count=$(ls "$snippets"/*.sts 2> /dev/null | wc -l)
     if [ "$ets_count" = 0 ]; then
-        echo_color_text $OK_COLOR "There is no snippets in $rst_file $spec :)"
+        echo_color_text $OK_COLOR "There is no snippets in $RST_FILE $SPEC :)"
         exit
     fi
     chmod a+x "$snippets"
@@ -165,7 +165,7 @@ function check() {
         frontend_status_comment=$(sed -n '2p' "$snippet_ets")
         expect_subset=$(sed -n '3p' "$snippet_ets")
 
-        frontend_status=${frontend_status_comment##* }
+        frontend_status_formated=${frontend_status_comment##* }
         expect_status=1
         expect_subset_status=1
 
@@ -194,7 +194,7 @@ function check() {
         ts_subset=$((! $ets_compile_status ^ $ts_compile_status))
         # ets_compile=$((! $ets_compile_status))
 
-        write_results "$snippet_name" $expect_subset_status $ts_subset $expect_status $ets_compile_status "$frontend_status"
+        write_results "$snippet_name" $expect_subset_status $ts_subset $expect_status $ets_compile_status "$frontend_status_formated"
 
     done
     for md_result in results/*.md; do

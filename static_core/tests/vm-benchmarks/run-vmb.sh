@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 here=$(realpath $(dirname "$BASH_SOURCE"))
 echo
 echo "!!! Invoking VMB as a script"
