@@ -441,6 +441,7 @@ public:
             UNREACHABLE();
         }
         ASSERT(reg < graph_regs->size());
+        CHECK_NOT_NULL(graph_regs);
         (*graph_regs)[reg] = true;
     }
 
@@ -462,6 +463,7 @@ public:
         } else {
             UNREACHABLE();
         }
+        CHECK_NOT_NULL(graph_regs);
         graph_regs->resize(used_regs->size());
         std::copy(used_regs->begin(), used_regs->end(), graph_regs->begin());
     }
