@@ -371,4 +371,21 @@ HWTEST(File, OpenUncompressedArchive, testing::ext::TestSize.Level0)
     remove(ABC_FILE);
 }
 
+HWTEST(File, CheckSecureMem, testing::ext::TestSize.Level0)
+{
+    uint8_t *data1 = nullptr;
+    uintptr_t value1 = reinterpret_cast<uintptr_t>(data1);
+    bool res1 = CheckSecureMem(value1, 0); // 0: size
+    EXPECT_TRUE(res1);
+
+    int data2 = 256;
+    uintptr_t value2 = reinterpret_cast<uintptr_t>(&data2);
+    bool res2 = CheckSecureMem(value2, 1000);
+    EXPECT_TRUE(res2);
+
+    int data3 = 41235235;
+    uintptr_t value3 = reinterpret_cast<uintptr_t>(&data3);
+    bool res3 = CheckSecureMem(value3, static_cast<size_t>(243423423523));
+    EXPECT_TRUE(res3);
+}
 }  // namespace panda::panda_file::test

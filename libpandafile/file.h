@@ -16,20 +16,21 @@
 #ifndef LIBPANDAFILE_FILE_H
 #define LIBPANDAFILE_FILE_H
 
+#include <array>
 #include <cstdint>
 #include <fcntl.h>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <string_view>
+
+#include "data_protect.h"
 #include "helpers.h"
 #include "os/mem.h"
 #include "os/filesystem.h"
 #include "utils/span.h"
 #include "utils/utf.h"
 #include "utils/logger.h"
-
-#include <array>
-#include <iostream>
-#include <memory>
-#include <string>
-#include <string_view>
 
 namespace panda {
 struct EntryFileStat;
@@ -471,47 +472,49 @@ inline bool operator<(const File::StringData &string_data1, const File::StringDa
     return string_data1.utf16_length < string_data2.utf16_length;
 }
 
-inline bool CheckSecureMem(uintptr_t mem)
+inline bool CheckSecureMem(uintptr_t mem, size_t size)
 {
-    static bool hasOpen = false;
-    static uintptr_t secureMemStart = 0;
-    static uintptr_t secureMemEnd = 0;
-    if (!hasOpen) {
+    static bool has_open = false;
+    static DataProtect start = DataProtect();
+    static DataProtect end = DataProtect();
+    uintptr_t secure_mem_start;
+    uintptr_t secure_mem_end;
+    if (!has_open) {
         int fd = open(PROC_SELF_XPM_REGION_PATH, O_RDONLY);
         if (fd < 0) {
             LOG(ERROR, PANDAFILE) << "Can not open xpm proc file, do not check secure memory anymore.";
             // No verification is performed when a file fails to be opened.
-            hasOpen = true;
+            has_open = true;
             return true;
         }
-
-        char xpmValidateRegion[XPM_PROC_LENGTH] = {0};
-        int ret = read(fd, xpmValidateRegion, sizeof(xpmValidateRegion));
+        char xpm_validate_region[XPM_PROC_LENGTH] = {0};
+        int ret = read(fd, xpm_validate_region, sizeof(xpm_validate_region));
         if (ret <= 0) {
             LOG(ERROR, PANDAFILE) << "Read xpm proc file failed";
             close(fd);
             return false;
         }
         close(fd);
-
-        if (sscanf_s(xpmValidateRegion, "%lx-%lx", &secureMemStart, &secureMemEnd) <= 0) {
+        if (sscanf_s(xpm_validate_region, "%lx-%lx", &secure_mem_start, &secure_mem_end) <= 0) {
             LOG(ERROR, PANDAFILE) << "sscanf_s xpm validate region failed";
             return false;
         }
         // The check is not performed when the file is already opened.
-        hasOpen = true;
+        has_open = true;
+        LOG(DEBUG, PANDAFILE) << "Successfully open xpm region.";
+        start.Update(secure_mem_start);
+        end.Update(secure_mem_end);
     }
-
+    secure_mem_start = start.GetOriginPointer();
+    secure_mem_end = end.GetOriginPointer();
     // xpm proc does not exist, the read value is 0, and the check is not performed.
-    if (secureMemStart == 0 && secureMemEnd == 0) {
+    if (secure_mem_start == 0 && secure_mem_end == 0) {
         LOG(ERROR, PANDAFILE) << "Secure memory check: xpm proc does not exist, do not check secure memory anymore.";
         return true;
     }
-
-    LOG(DEBUG, PANDAFILE) << "Secure memory check in memory start: " << std::hex << secureMemStart
-                   << " memory end: " << secureMemEnd;
-    if (mem < secureMemStart || mem >= secureMemEnd) {
-        LOG(ERROR, PANDAFILE) << "Secure memory check failed, mem out of secure memory, mem: " << std::hex << mem;
+    if (mem < secure_mem_start || (size > (std::numeric_limits<uintptr_t>::max() - mem)) ||
+        (mem + size) > secure_mem_end) {
+        LOG(ERROR, PANDAFILE) << "Secure memory check failed, mem out of secure memory region.";
         return false;
     }
     return true;
