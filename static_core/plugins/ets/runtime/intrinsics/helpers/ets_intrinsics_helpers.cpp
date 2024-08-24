@@ -516,11 +516,13 @@ template <typename FpType>
 template <typename FpType>
 int GetMinimumDigits(FpType d, int *decpt, Span<char> buf)
 {
-    int digits;
     if (std::is_same_v<FpType, double>) {
-        DtoaHelper::Dtoa(d, buf.begin() + 1, decpt, &digits);
-        return digits;
+        DtoaHelper helper(buf.begin() + 1);
+        helper.Dtoa(d);
+        *decpt = helper.GetPoint();
+        return helper.GetDigits();
     }
+    int digits;
     if constexpr (USE_GET_BASE_FAST) {
         digits = GetBaseFast(d, decpt, buf);
     } else {
