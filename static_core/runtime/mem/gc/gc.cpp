@@ -715,6 +715,7 @@ bool GC::WaitForGC(GCTask task)
     Runtime::GetCurrent()->GetNotificationManager()->GarbageCollectorFinishEvent();
     this->GetPandaVm()->HandleGCFinished();
     this->GetPandaVm()->HandleEnqueueReferences();
+    this->GetPandaVm()->ProcessReferenceFinalizers();
     return true;
 }
 

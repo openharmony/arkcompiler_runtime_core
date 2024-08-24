@@ -19,6 +19,10 @@
 
 namespace ark::ets {
 
+namespace test {
+class EtsFinalizableWeakRefTest;
+}  // namespace test
+
 /// @class EtsWeakReference represent std.core.WeakRef class
 class EtsWeakReference : public EtsObject {
 public:
@@ -39,6 +43,8 @@ public:
 private:
     // Such field has the same layout as referent in std.core.WeakRef class
     ObjectPointer<EtsObject> referent_;
+
+    friend class test::EtsFinalizableWeakRefTest;
 };
 
 }  // namespace ark::ets

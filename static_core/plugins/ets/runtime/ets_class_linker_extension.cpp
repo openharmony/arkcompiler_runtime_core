@@ -556,6 +556,10 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     ifuncClass_ = CacheClass(IFUNCTION);
     sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
     jsvalueClass_ = CacheClass(JS_VALUE);
+    finalizableWeakClass_ = CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
+        c->SetFinalizeReference();
+        c->SetWeakReference();
+    });
     CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
 
     auto coro = EtsCoroutine::GetCurrent();

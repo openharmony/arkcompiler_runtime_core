@@ -142,6 +142,11 @@ EtsClass *EtsClassLinker::GetIFunctionClass()
     return EtsClass::FromRuntimeClass(ext_->GetIFunctionClass());
 }
 
+EtsClass *EtsClassLinker::GetFinalizableWeakRefClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetFinalizableWeakRefClass());
+}
+
 Method *EtsClassLinker::GetSubscribeOnAnotherPromiseMethod()
 {
     return ext_->GetSubscribeOnAnotherPromiseMethod();
