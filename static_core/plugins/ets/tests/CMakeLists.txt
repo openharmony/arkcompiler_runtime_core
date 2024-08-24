@@ -266,7 +266,7 @@ function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
         --compiler-enable-jit=true
         --compiler-hotness-threshold=2
         --compiler-enable-osr=true
-        --compiler-ignore-failures=false
+        --compiler-ignore-failures=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}
         ETSGLOBAL::main
