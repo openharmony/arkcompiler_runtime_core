@@ -357,12 +357,8 @@ void GcIntrusion::CopySinglePredRelocs(GcRefLiveness *liveness, BasicBlock *bloc
 
 void GcIntrusion::ReplaceWithPhi(Value *var, BasicBlock *block, GcIntrusionContext *gcContext)
 {
+    ASSERT(var != nullptr);
     auto &varBlocks = gcContext->relocs.FindAndConstruct(var).second;
-
-    // tidy workaround...
-    if (var == nullptr) {
-        llvm_unreachable("Clang was right!\n");
-    }
 
     PHINode *phi = PHINode::Create(var->getType(), pred_size(block), "", &(*block->begin()));
     if (var->hasName()) {
