@@ -23,6 +23,6 @@ class BadDoclet {
      * @Benchmark
      */
     test() : int {
-        return 42
+        return 42;
     }
 }
