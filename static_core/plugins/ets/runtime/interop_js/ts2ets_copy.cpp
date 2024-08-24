@@ -650,6 +650,53 @@ static void GetConverterResult(std::string_view converterType, std::chrono::stea
     INTEROP_LOG(INFO) << "InvokeEtsMethod: " << converterType << "elapsed time: " << t << "us";
 }
 
+static napi_value GetJsRef(napi_env env, const ark::Value &etsRes, Method *method)
+{
+    NapiEscapableScope jsHandleScope(env);
+    ark::HandleScope<ark::ObjectHeader *> etsHandleScope(EtsCoroutine::GetCurrent());
+
+    auto begin = std::chrono::steady_clock::now();
+    EtsToJsRetConvertor ets2js(method, env, etsRes);
+    ets2js.Process();
+    if (ets2js.Error()) {
+        InteropCtx::ThrowJSError(env, std::string("InvokeEtsMethod: ets2js error: ") + ets2js.Error().value());
+        return nullptr;
+    }
+    napi_value jsRes = ets2js.GetResult();
+    GetConverterResult("ets2js", begin);
+
+    // Check that the method has a return value
+    panda_file::Type retType = method->GetProto().GetReturnType();
+    if (retType.GetId() != panda_file::Type::TypeId::VOID) {
+        ASSERT(jsRes != nullptr);
+        jsHandleScope.Escape(jsRes);
+    } else {
+        ASSERT(jsRes == nullptr);
+    }
+
+    return jsRes;
+}
+
+static std::optional<std::vector<ark::Value>> GetArgs(napi_env env, Method *method, napi_value *jsargv, uint32_t jsargc)
+{
+    JsToEtsArgsConvertor js2ets(method, env, jsargv, jsargc - 1, 1);
+
+    NapiScope jsHandleScope(env);
+    ark::HandleScope<ark::ObjectHeader *> etsHandleScope(EtsCoroutine::GetCurrent());
+
+    auto begin = std::chrono::steady_clock::now();
+    js2ets.Process();
+    if (js2ets.Error()) {
+        InteropCtx::ThrowJSError(env, std::string("InvokeEtsMethod: js2ets error: ") + js2ets.Error().value());
+        return std::nullopt;
+    }
+
+    std::vector<ark::Value> args = js2ets.GetResult();
+    GetConverterResult("js2ets", begin);
+
+    return args;
+}
+
 napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc, bool doClscheck)
 {
     auto coro = EtsCoroutine::GetCurrent();
@@ -687,55 +734,18 @@ napi_value InvokeEtsMethodImpl(napi_env env, napi_value *jsargv, uint32_t jsargc
         return nullptr;
     }
 
-    std::vector<ark::Value> args;
-    {
-        JsToEtsArgsConvertor js2ets(method, env, jsargv, jsargc - 1, 1);
-
-        NapiScope jsHandleScope(env);
-        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
-
-        auto begin = std::chrono::steady_clock::now();
-        js2ets.Process();
-        if (js2ets.Error()) {
-            InteropCtx::ThrowJSError(env, std::string("InvokeEtsMethod: js2ets error: ") + js2ets.Error().value());
-            return nullptr;
-        }
-
-        args = js2ets.GetResult();
-        GetConverterResult("js2ets", begin);
+    auto args = GetArgs(env, method, jsargv, jsargc);
+    if (!args.has_value()) {
+        return nullptr;
     }
 
-    ark::Value etsRes = method->Invoke(coro, args.data());
+    ark::Value etsRes = method->Invoke(coro, args.value().data());
     if (UNLIKELY(coro->HasPendingException())) {
         ThrowProperError(env, coro);
         return nullptr;
     }
 
-    napi_value jsRes;
-    {
-        NapiEscapableScope jsHandleScope(env);
-        ark::HandleScope<ark::ObjectHeader *> etsHandleScope(coro);
-
-        auto begin = std::chrono::steady_clock::now();
-        EtsToJsRetConvertor ets2js(method, env, etsRes);
-        ets2js.Process();
-        if (ets2js.Error()) {
-            InteropCtx::ThrowJSError(env, std::string("InvokeEtsMethod: ets2js error: ") + ets2js.Error().value());
-            return nullptr;
-        }
-        jsRes = ets2js.GetResult();
-        GetConverterResult("ets2js", begin);
-
-        // Check that the method has a return value
-        panda_file::Type retType = method->GetProto().GetReturnType();
-        if (retType.GetId() != panda_file::Type::TypeId::VOID) {
-            ASSERT(jsRes != nullptr);
-            jsHandleScope.Escape(jsRes);
-        } else {
-            ASSERT(jsRes == nullptr);
-        }
-    }
-    return jsRes;
+    return GetJsRef(env, etsRes, method);
 }
 
 }  // namespace ark::ets::interop::js

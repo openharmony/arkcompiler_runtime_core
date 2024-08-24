@@ -27,17 +27,19 @@ ALWAYS_INLINE inline bool EtsReferenceNullish(EtsCoroutine *coro, EtsObject *ref
     return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetUndefinedObject());
 }
 
+ALWAYS_INLINE inline bool IsRefNullish(EtsCoroutine *coro, EtsObject *ref)
+{
+    return ref == nullptr || ref == EtsObject::FromCoreType(coro->GetUndefinedObject());
+}
+
 ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1, EtsObject *ref2)
 {
     if (UNLIKELY(ref1 == ref2)) {
         return true;
     }
 
-    auto undef = EtsObject::FromCoreType(coro->GetUndefinedObject());
-    auto ref1nullish = ref1 == nullptr || ref1 == undef;
-    auto ref2nullish = ref2 == nullptr || ref2 == undef;
-    if (ref1nullish || ref2nullish) {
-        return ref1nullish && ref2nullish;
+    if (IsRefNullish(coro, ref1) || IsRefNullish(coro, ref2)) {
+        return IsRefNullish(coro, ref1) && IsRefNullish(coro, ref2);
     }
 
     if (LIKELY(!(ref1->GetClass()->IsValueTyped() && ref2->GetClass()->IsValueTyped()))) {

@@ -134,6 +134,99 @@ void Monitor::InflateThinLock(MTManagedThread *thread, [[maybe_unused]] const VM
 #endif
 }
 
+std::optional<ark::Monitor::State> Monitor::HandleLightLockedState(MarkWord &mark, MTManagedThread *thread,
+                                                                   VMHandle<ObjectHeader> &objHandle,
+                                                                   uint32_t &lightlockRetryCount,
+                                                                   [[maybe_unused]] bool &shouldInflate, bool trylock)
+{
+    os::thread::ThreadId ownerThreadId = mark.GetThreadId();
+    if (ownerThreadId == thread->GetInternalId()) {
+        uint32_t newCount = mark.GetLockCount() + 1;
+        if (newCount < MarkWord::LIGHT_LOCK_LOCK_MAX_COUNT) {
+            auto newMark = mark.DecodeFromLightLock(thread->GetInternalId(), newCount);
+            // Strong CAS as the loop iteration is large
+            bool ret = objHandle.GetPtr()->AtomicSetMark(mark, newMark);
+            if (ret) {
+                LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully recursively acquired";
+                Monitor::TraceMonitorLock(objHandle.GetPtr(), false);
+                thread->PushLocalObjectLocked(objHandle.GetPtr());
+                return Monitor::State::OK;
+            }
+        } else {
+            Monitor::Inflate(objHandle.GetPtr(), thread);
+            // Inflate set up recursive counter to just current amount, loop again.
+        }
+    } else {
+        // Lock acquired by other thread.
+        if (trylock) {
+            return Monitor::State::ILLEGAL;
+        }
+
+        // Retry acquiring light lock in loop first to avoid excessive inflation
+        static constexpr uint32_t MAX_TRYLOCK_RETRY = 100;
+        static constexpr uint32_t YIELD_AFTER = 50;
+
+        lightlockRetryCount++;
+        if (lightlockRetryCount < MAX_TRYLOCK_RETRY) {
+            if (lightlockRetryCount > YIELD_AFTER) {
+                MTManagedThread::Yield();
+            }
+        } else {
+            // Retried acquiring light lock for too long, do inflation
+
+            thread->SetEnterMonitorObject(objHandle.GetPtr());
+            thread->SetWaitingMonitorOldStatus(ThreadStatus::IS_WAITING_INFLATION);
+            Monitor::InflateThinLock(thread, objHandle);
+#if defined(PANDA_USE_FUTEX)
+            lightlockRetryCount = 0;
+#else
+            shouldInflate = true;
+#endif
+        }
+    }
+    // Couldn't update mark.
+    if (trylock) {
+        return Monitor::State::ILLEGAL;
+    }
+
+    return std::nullopt;
+}
+
+std::optional<ark::Monitor::State> Monitor::HandleUnlockedState(MarkWord &mark, MTManagedThread *thread,
+                                                                VMHandle<ObjectHeader> &objHandle, bool &shouldInflate,
+                                                                bool trylock)
+{
+    if (shouldInflate) {
+        if (Monitor::Inflate(objHandle.GetPtr(), thread)) {
+            thread->PushLocalObjectLocked(objHandle.GetPtr());
+            return Monitor::State::OK;
+        }
+        // Couldn't inflate.
+        if (trylock) {
+            return Monitor::State::ILLEGAL;
+        }
+
+        return std::nullopt;
+    }
+
+    ASSERT(thread->GetInternalId() <= MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT);
+    auto newMark = mark.DecodeFromLightLock(thread->GetInternalId(), 1);
+    // Strong CAS as the loop iteration is large
+    auto ret = objHandle.GetPtr()->AtomicSetMark(mark, newMark);
+    if (ret) {
+        LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully acquired for the first time";
+        Monitor::TraceMonitorLock(objHandle.GetPtr(), false);
+        thread->PushLocalObjectLocked(objHandle.GetPtr());
+        return Monitor::State::OK;
+    }
+    // Couldn't update mark.
+    if (trylock) {
+        return Monitor::State::ILLEGAL;
+    }
+
+    return std::nullopt;
+}
+
 /**
  * Static call, which implements the basic functionality of monitors:
  * heavyweight, lightweight and so on.
@@ -150,13 +243,11 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
     // so we need to use handle to get updated header pointer
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<ObjectHeader> objHandle(thread, obj);
-    bool ret = false;
     bool shouldInflate = false;
     uint32_t lightlockRetryCount = 0;
 
     while (true) {
         MarkWord mark = objHandle.GetPtr()->AtomicGetMark();
-        MarkWord newMark = mark;
         MarkWord::ObjectState state = mark.GetState();
 
         LOG(DEBUG, RUNTIME) << "Try to enter monitor " << std::hex << obj << "  with state " << std::dec << state;
@@ -168,61 +259,17 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
                     // Not sure if it is possible
                     return State::ILLEGAL;
                 }
-                ret = monitor->Acquire(thread, objHandle, trylock);
+                bool ret = monitor->Acquire(thread, objHandle, trylock);
                 if (ret) {
                     thread->PushLocalObjectLocked(objHandle.GetPtr());
                 }
                 return ret ? State::OK : State::ILLEGAL;
             }
             case MarkWord::STATE_LIGHT_LOCKED: {
-                os::thread::ThreadId ownerThreadId = mark.GetThreadId();
-                if (ownerThreadId == thread->GetInternalId()) {
-                    uint32_t newCount = mark.GetLockCount() + 1;
-                    if (newCount < MarkWord::LIGHT_LOCK_LOCK_MAX_COUNT) {
-                        newMark = mark.DecodeFromLightLock(thread->GetInternalId(), newCount);
-                        // Strong CAS as the loop iteration is large
-                        ret = objHandle.GetPtr()->AtomicSetMark(mark, newMark);
-                        if (ret) {
-                            LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully recursively acquired";
-                            TraceMonitorLock(objHandle.GetPtr(), false);
-                            thread->PushLocalObjectLocked(objHandle.GetPtr());
-                            return State::OK;
-                        }
-                    } else {
-                        Inflate(objHandle.GetPtr(), thread);
-                        // Inflate set up recursive counter to just current amount, loop again.
-                    }
-                } else {
-                    // Lock acquired by other thread.
-                    if (trylock) {
-                        return State::ILLEGAL;
-                    }
-
-                    // Retry acquiring light lock in loop first to avoid excessive inflation
-                    static constexpr uint32_t MAX_TRYLOCK_RETRY = 100;
-                    static constexpr uint32_t YIELD_AFTER = 50;
-
-                    lightlockRetryCount++;
-                    if (lightlockRetryCount < MAX_TRYLOCK_RETRY) {
-                        if (lightlockRetryCount > YIELD_AFTER) {
-                            MTManagedThread::Yield();
-                        }
-                    } else {
-                        // Retried acquiring light lock for too long, do inflation
-
-                        thread->SetEnterMonitorObject(objHandle.GetPtr());
-                        thread->SetWaitingMonitorOldStatus(ThreadStatus::IS_WAITING_INFLATION);
-                        InflateThinLock(thread, objHandle);
-#if defined(PANDA_USE_FUTEX)
-                        lightlockRetryCount = 0;
-#else
-                        shouldInflate = true;
-#endif
-                    }
-                }
-                // Couldn't update mark.
-                if (trylock) {
-                    return State::ILLEGAL;
+                auto retState =
+                    HandleLightLockedState(mark, thread, objHandle, lightlockRetryCount, shouldInflate, trylock);
+                if (retState.has_value()) {
+                    return retState.value();
                 }
                 // Go to the next iteration
                 continue;
@@ -238,36 +285,14 @@ Monitor::State Monitor::MonitorEnter(ObjectHeader *obj, bool trylock)
                 }
                 // Go to the next iteration
                 continue;
-            case MarkWord::STATE_UNLOCKED:
-                if (shouldInflate) {
-                    if (Inflate(objHandle.GetPtr(), thread)) {
-                        thread->PushLocalObjectLocked(objHandle.GetPtr());
-                        return State::OK;
-                    }
-                    // Couldn't inflate.
-                    if (trylock) {
-                        return State::ILLEGAL;
-                    }
-                    // Go to the next iteration
-                    continue;
-                }
-
-                ASSERT(thread->GetInternalId() <= MarkWord::LIGHT_LOCK_THREADID_MAX_COUNT);
-                newMark = mark.DecodeFromLightLock(thread->GetInternalId(), 1);
-                // Strong CAS as the loop iteration is large
-                ret = objHandle.GetPtr()->AtomicSetMark(mark, newMark);
-                if (ret) {
-                    LOG(DEBUG, RUNTIME) << "The lightweight monitor was successfully acquired for the first time";
-                    TraceMonitorLock(objHandle.GetPtr(), false);
-                    thread->PushLocalObjectLocked(objHandle.GetPtr());
-                    return State::OK;
-                }
-                // Couldn't update mark.
-                if (trylock) {
-                    return State::ILLEGAL;
+            case MarkWord::STATE_UNLOCKED: {
+                auto retState = HandleUnlockedState(mark, thread, objHandle, shouldInflate, trylock);
+                if (retState.has_value()) {
+                    return retState.value();
                 }
                 // Go to the next iteration
                 continue;
+            }
             case MarkWord::STATE_GC:
                 LOG(FATAL, RUNTIME) << "Not yet implemented";
                 return State::ILLEGAL;

@@ -16,6 +16,7 @@
 #define PANDA_RUNTIME_MONITOR_H_
 
 #include <atomic>
+#include <optional>
 
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/utils/list.h"
@@ -28,6 +29,7 @@ class MTManagedThread;
 class ObjectHeader;
 template <class T>
 class VMHandle;
+class MarkWord;
 
 /// To avoid inheritance in the `Thread` class we don't use `List` (it forces list element to inherit `ListNode`).
 template <typename T>
@@ -205,6 +207,16 @@ private:
     {
         return owner_.compare_exchange_strong(expected, thread);
     }
+
+    static std::optional<ark::Monitor::State> HandleLightLockedState(MarkWord &mark, MTManagedThread *thread,
+                                                                     VMHandle<ObjectHeader> &objHandle,
+                                                                     uint32_t &lightlockRetryCount,
+                                                                     [[maybe_unused]] bool &shouldInflate,
+                                                                     bool trylock);
+
+    static std::optional<ark::Monitor::State> HandleUnlockedState(MarkWord &mark, MTManagedThread *thread,
+                                                                  VMHandle<ObjectHeader> &objHandle,
+                                                                  bool &shouldInflate, bool trylock);
 
     MTManagedThread *GetOwner()
     {
