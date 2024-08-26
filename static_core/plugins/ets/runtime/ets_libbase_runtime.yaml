@@ -1010,6 +1010,31 @@ intrinsics:
     codegen_func: CreateStringTrim
     llvm_codegen_func: EmitStringTrim
 
+  - name: StdCoreStringStartsWith
+    space: ets
+    class_name: std.core.String
+    method_name: startsWith
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.String, i32 ]
+    impl: ark::ets::intrinsics::StdCoreStringStartsWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateStringStartsWith
+    llvm_codegen_func: EmitStringStartsWith
+
+  - name: StdCoreStringEndsWith
+    space: ets
+    class_name: std.core.String
+    method_name: endsWith
+    static: false
+    signature:
+      ret: u1
+      args: [ std.core.String, i32 ]
+    impl: ark::ets::intrinsics::StdCoreStringEndsWith
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateStringEndsWith
+    llvm_codegen_func: EmitStringEndsWith
 
 ##########################
 # std.core.StringBuilder #

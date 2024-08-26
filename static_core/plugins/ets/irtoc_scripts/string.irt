@@ -574,3 +574,199 @@ Label(:FirstCharWhitespace)
   entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
 }
+
+
+scoped_macro(:at) do |str_data, index, not_compressed|
+  If(not_compressed, 0).EQ.Likely.b {
+    # String contains 8-bit chars
+    c8 := Cast(Load(str_data, index).u8).u16
+    Goto(:Done)
+  }
+  # String contains 16-bit chars
+  c16 := Load(str_data, ShlI(index).Imm(1).i32).u16
+Label(:Done)
+  c := Phi(c8, c16).u16
+end
+
+
+function(:StringStartsWithBase,
+          params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  str_not_compressed := AndI(str_len_packed).Imm(1).i32
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  pfx_len := ShrI(pfx_len_packed).Imm(1).i32
+  pfx_not_compressed := AndI(pfx_len_packed).Imm(1).i32
+  pfx_data := Add(Cast(pfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+
+  pfx_i1 := 0
+Label(:Loop)
+  str_i := Phi(from_index, str_i1).i32
+  pfx_i := Phi(pfx_i1, pfx_i2).i32
+  If(pfx_i, pfx_len).GE.Unlikely.b {
+    Goto(:Done)
+  }
+  s := at(str_data, str_i, str_not_compressed)
+  p := at(pfx_data, pfx_i, pfx_not_compressed)
+  If(s, p).NE.Likely.b {
+    Return(0).b
+  }
+  pfx_i2 := AddI(pfx_i).Imm(1).i32
+  str_i1 := AddI(str_i).Imm(1).i32
+  Goto(:Loop)
+Label(:Done)
+  Return(1).b
+}
+
+
+function(:StringStartsWith,
+          params: {str: 'ref', pfx: 'ref', from_index: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  pfx_len_packed := LoadI(pfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # Return 'true' if prefix is empty
+  # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
+  # thus if (packed length <= 1) then the actual length is equal to 0.
+  If(pfx_len_packed, 1).LE.Unlikely.b {
+    Return(1).b
+  }
+
+  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # Return 'false' if 'str' is empty as 'prefix' is not empty.
+  If(str_len_packed, 1).LE.Unlikely.b {
+    Return(0).b
+  }
+
+  # If 'from_index' is less than zero then make it zero.
+  IfImm(Compare(from_index, 0).LT.b).Imm(0).NE.Unlikely.b {
+    from_index1 := Cast(0).i32
+  }
+  from_index2 := Phi(from_index, from_index1).i32
+
+  str_len := ShrI(str_len_packed).Imm(1).i32
+  pfx_len := ShrI(pfx_len_packed).Imm(1).i32
+
+  If(from_index2, Sub(str_len, pfx_len).i32).GT.Unlikely.b {
+    # Return 'false' in this case, as we know that 'pfx' is not empty
+    # and it is longer than the part of 'str' to be checked.
+    Return(0).b
+  }
+
+  LiveOut(str).DstReg(regmap[:arg0]).ref
+  LiveOut(pfx).DstReg(regmap[:arg1]).ref
+  LiveOut(from_index2).DstReg(regmap[:arg2]).i32
+  entrypoint = get_entrypoint_offset("STRING_STARTS_WITH_BASE")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringStartsWithBase").Terminator.b
+}
+
+
+function(:StringEndsWithBase,
+          params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  str_not_compressed := AndI(str_len_packed).Imm(1).i32
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  sfx_not_compressed := AndI(sfx_len_packed).Imm(1).i32
+  sfx_data := Add(Cast(sfx).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  sfx_len := ShrI(sfx_len_packed).Imm(1).i32
+  from_index := Sub(end_index, sfx_len).i32;
+
+  sfx_i1 := 0
+Label(:Loop)
+  str_i := Phi(from_index, str_i1).i32
+  sfx_i := Phi(sfx_i1, sfx_i2).i32
+  If(sfx_i, sfx_len).GE.Unlikely.b {
+    Goto(:Done)
+  }
+  s := at(str_data, str_i, str_not_compressed)
+  p := at(sfx_data, sfx_i, sfx_not_compressed)
+  If(s, p).NE.Likely.b {
+    Return(0).b
+  }
+  sfx_i2 := AddI(sfx_i).Imm(1).i32
+  str_i1 := AddI(str_i).Imm(1).i32
+  Goto(:Loop)
+
+Label(:Done)
+  Return(1).b
+}
+
+
+function(:StringEndsWith,
+          params: {str: 'ref', sfx: 'ref', end_index: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  sfx_len_packed := LoadI(sfx).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # Return 'true' if suffix is empty
+  # The least significant bit indicates COMPRESSED/UNCOMPRESSED,
+  # thus if (packed length <= 1) then the actual length is equal to 0.
+  If(sfx_len_packed, 1).LE.Unlikely.b {
+    Return(1).b
+  }
+
+  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # Return 'false' if 'str' is empty as 'suffix' is not empty.
+  If(str_len_packed, 1).LE.Unlikely.b {
+    Return(0).b
+  }
+  # If 'end_index' is less or equal to zero then return false.
+  IfImm(Compare(end_index, 0).LE.b).Imm(0).NE.Unlikely.b {
+    Return(0).b
+  }
+
+  str_len := ShrI(str_len_packed).Imm(1).i32
+  # If 'end_index' is greater than length of 'str' make it equal to length of 'str'.
+  If(end_index, str_len).GT.Unlikely.b {
+    end_index1 := str_len
+  }
+  end_index2 := Phi(end_index, end_index1).i32
+
+  sfx_len := ShrI(sfx_len_packed).Imm(1).i32
+  from_index := Sub(end_index2, sfx_len).i32;
+  IfImm(Compare(from_index, 0).LT.b).Imm(0).NE.Unlikely.b {
+    # Return 'false' in this case, as 'sfx' length is greater than 'end_index'.
+    Return(0).b
+  }
+
+  LiveOut(str).DstReg(regmap[:arg0]).ref
+  LiveOut(sfx).DstReg(regmap[:arg1]).ref
+  LiveOut(end_index2).DstReg(regmap[:arg2]).i32
+  entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase").Terminator.b
+}

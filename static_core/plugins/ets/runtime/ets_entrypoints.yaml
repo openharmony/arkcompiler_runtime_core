@@ -578,3 +578,43 @@
   signature:
     - uint8_t   # result (true/false)
     - uint16_t  # char to test
+
+- name: StringStartsWith
+  entrypoint: StringStartsWith
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringStartsWithBase
+  entrypoint: StringStartsWithBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # prefix to check
+    - int32_t             # index to start from
+
+- name: StringEndsWith
+  entrypoint: StringEndsWith
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # suffix to check
+    - int32_t             # index of char to stop at
+
+- name: StringEndsWithBase
+  entrypoint: StringEndsWithBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t             # boolean (result)
+    - ark::ObjectHeader*  # string to check
+    - ark::ObjectHeader*  # suffix to check
+    - int32_t             # index of char to stop at

@@ -224,6 +224,58 @@ public:
         return EtsString::FastSubString(this, left, static_cast<uint32_t>(right - left + 1));
     }
 
+    EtsBoolean StartsWith(EtsString *prefix, EtsInt fromIndex)
+    {
+        ASSERT(prefix != nullptr);
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        auto prefixLen = prefix->GetLength();
+        if (fromIndex > GetLength() - prefixLen) {
+            return ToEtsBoolean(prefix->IsEmpty());
+        }
+        auto *thisCoreType = GetCoreType();
+        auto *prefCoreType = prefix->GetCoreType();
+        for (EtsInt i = 0; i < prefixLen; ++i) {
+            if (thisCoreType->At<false>(fromIndex + i) != prefCoreType->At<false>(i)) {
+                return ToEtsBoolean(false);
+            }
+        }
+        return ToEtsBoolean(true);
+    }
+
+    EtsBoolean EndsWith(EtsString *suffix, EtsInt endIndex)
+    {
+        ASSERT(suffix != nullptr);
+        if (suffix->IsEmpty()) {
+            return ToEtsBoolean(true);
+        }
+        auto strLen = GetLength();
+        if (strLen == 0) {
+            return ToEtsBoolean(false);
+        }
+        if (endIndex <= 0) {
+            return ToEtsBoolean(false);
+        }
+        if (endIndex > strLen) {
+            endIndex = strLen;
+        }
+        ASSERT(endIndex > 0);
+        auto suffixLen = suffix->GetLength();
+        auto fromIndex = endIndex - suffixLen;
+        if (fromIndex < 0) {
+            return ToEtsBoolean(false);
+        }
+        auto *thisCoreType = GetCoreType();
+        auto *suffCoreType = suffix->GetCoreType();
+        for (EtsInt i = 0; i < suffixLen; ++i) {
+            if (thisCoreType->At<false>(fromIndex + i) != suffCoreType->At<false>(i)) {
+                return ToEtsBoolean(false);
+            }
+        }
+        return ToEtsBoolean(true);
+    }
+
     int32_t Compare(EtsString *rhs)
     {
         return GetCoreType()->Compare(rhs->GetCoreType());

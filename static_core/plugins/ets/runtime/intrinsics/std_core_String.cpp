@@ -467,4 +467,16 @@ EtsString *StdCoreStringTrim(EtsString *thisStr)
     return thisStr->Trim();
 }
 
+EtsBoolean StdCoreStringStartsWith(EtsString *thisStr, EtsString *prefix, EtsInt fromIndex)
+{
+    ASSERT(thisStr != nullptr);
+    return thisStr->StartsWith(prefix, fromIndex);
+}
+
+EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt endIndex)
+{
+    ASSERT(thisStr != nullptr);
+    return thisStr->EndsWith(suffix, endIndex);
+}
+
 }  // namespace ark::ets::intrinsics

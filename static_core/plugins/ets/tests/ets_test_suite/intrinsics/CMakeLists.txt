@@ -26,6 +26,8 @@ set(intrinsics_tests
     string_hashcode
     string_concat
     string_trim
+    string_startswith
+    string_endswith
     char_isuppercase
     abs
     min
