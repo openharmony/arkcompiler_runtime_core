@@ -486,9 +486,9 @@ extern "C" {
 #define ETS_IMPORT
 #define ETS_CALL
 
-ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vmArgs);
-ets_int ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *nVms);
-ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs);
+ETS_EXPORT ets_int ETS_GetDefaultVMInitArgs(EtsVMInitArgs *vmArgs);
+ETS_EXPORT ets_int ETS_GetCreatedVMs(EtsVM **vmBuf, ets_size bufLen, ets_size *nVms);
+ETS_EXPORT ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArgs);
 
 #ifdef __cplusplus
 }
