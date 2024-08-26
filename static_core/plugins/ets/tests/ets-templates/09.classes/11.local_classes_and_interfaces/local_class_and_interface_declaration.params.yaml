@@ -26,7 +26,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.getInner() == 1;
+        assert(a.getInner() == 1);
       }
 
   - decl: |-
@@ -42,7 +42,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.getInner() == 1;
+        assert(a.getInner() == 1);
       }
 
   - decl: |-
@@ -52,10 +52,10 @@ cases:
           i: int = 1;
 
           class C {
-            v: int = 2;
+            i: int = 2;
           }
           getInner(): int {
-            return new C().v;
+            return new C().i;
           }
         }
 
@@ -67,7 +67,36 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.getInner() == 3;
+        assert(a.getInner() == 3);
+      }
+
+  - decl: |-
+      // Deep interface declaration in class body inside another local class.
+      class A {
+        class B {
+          i: int = 1;
+
+          interface I {
+            i: int;
+          }
+          
+          getInner(): int {
+            class C implements I {
+              i = 2;
+            }
+            return new C().i;
+          }
+        }
+
+        getInner(): int {
+          b = new B();
+          return b.i + b.getInner();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assert(a.getInner() == 3);
       }
 
   - decl: |-
@@ -84,7 +113,26 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.bar() == 1;
+        assert(a.bar() == 1);
+      }
+
+  - decl: |-
+      // Local interface declaration inside class method
+      class A {
+        public bar(): int {
+          interface I {
+            i: int;
+          }
+          class B implements I {
+            i = 2;
+          }
+          return new B().b;
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assert(a.bar() == 2);
       }
 
   - decl: |-
@@ -105,7 +153,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A(1);
-        assert a.i == 3;
+        assert(a.i == 3);
       }
 
   - decl: |-
@@ -128,7 +176,37 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.bar() == 1;
+        assert(a.bar() == 1);
+      }
+
+  - decl: |-
+      // Deep local interface declaration inside interface method inside another local class.
+      interface I {
+        foo(): int {
+      
+          class B {
+            interface I {
+              i: int;
+            }
+            getInner(): int {
+              class C implements I {
+                i = 3;
+              }
+              return new C().i;
+            }
+          }
+      
+          b = new B();
+          return B.getInner();
+        }
+      }
+      
+      class A implements I {}
+
+    check: |-
+      function main() {
+        let a: A = new A();
+        assert(a.bar() == 3);
       }
 
   - decl: |-
@@ -144,7 +222,7 @@ cases:
       }
     check: |-
       function main() {
-        assert foo() == 2;
+        assert(foo() == 2);
       }
 
   - decl: |-
@@ -153,7 +231,19 @@ cases:
         class A {
           i: int = 1;
         }
-        assert new A().i == 1;
+        assert(new A().i == 1);
+      }
+
+  - decl: |-
+      // Local interface declaration inside main()
+      function main() {
+        interface I {
+          let i: int;
+        }
+        class A implements I {
+          i = 1;
+        }
+        assert(new A().i == 1);
       }
 
   - decl: |-
@@ -181,7 +271,38 @@ cases:
       }
     check: |-
       function main() {
-        assert foo() == 7;
+        assert(foo() == 7);
+      }
+
+  - decl: |-
+      // Deep local interface declaration inside a function and multiple local classes
+      function foo: int {
+        class A {
+          i: int = 1;
+
+          class B {
+            i: int = 2;
+            foo(): int {
+              interface I {
+                i: int;
+              }
+              class C implements I {
+                i 4;
+              }
+              return new C().i;
+            }
+          }
+
+          getInner(): int {
+            b = new B();
+            return b.i + b.foo() + this.i;
+          }
+        }
+        return new A().getInner();
+      }
+    check: |-
+      function main() {
+        assert(foo() == 7);
       }
 
   - decl: |-
@@ -200,7 +321,7 @@ cases:
       }
     check: |-
       function main() {
-        assert foo().bar() == 1;
+        assert(foo().bar() == 1);
       }
 
   - decl: |-
@@ -222,7 +343,7 @@ cases:
     check: |-
       function main() {
         let a = new A();
-        assert a.foo().bar() == 1;
+        assert(a.foo().bar() == 1);
       }
 
   - decl: |-
@@ -238,7 +359,7 @@ cases:
     check: |-
       function main() {
         let a = new A();
-        assert a.foo();
+        assert(a.foo());
       }
 
   - decl: |-
@@ -254,7 +375,7 @@ cases:
     check: |-
       function main() {
         let a = new A();
-        assert a.foo();
+        assert(a.foo());
       }
 
   - decl: |-
@@ -267,7 +388,7 @@ cases:
       }
     check: |-
       function main() {
-        assert foo();
+        assert(foo());
       }
 
   - decl: |-
@@ -276,11 +397,11 @@ cases:
         interface I {}
         class B implements I {}
         let b = new B();
-        assert b instanceof I;
+        assert(b instanceof I);
       }
 
   - decl: |-
-      // Local class inside for loop
+      // Local class and interface inside for loop
       abstract class A {
         bar(): int;
       }
@@ -288,8 +409,11 @@ cases:
       function foo(): A {
         let a: A;
         for (i = 0; i < 4; i++) {
-          class B {
+          interface I {
             i: int;
+          }
+          class B implements I extends A {
+            i = -1;
             constructor(i: int) {
               this.i = i;
             }
@@ -303,11 +427,11 @@ cases:
       }
     check: |-
       function main() {
-        assert foo().bar() == 3;
+        assert(foo().bar() == 3);
       }
 
   - decl: |-
-      // Local class inside while loop
+      // Local class and interface inside while loop
       abstract class A {
         bar(): int;
       }
@@ -316,8 +440,11 @@ cases:
         let a: A;
         let i = 0;
         while( i < 4) {
-          class B {
+          interface I {
             i: int;
+          }
+          class B implements I extends A {
+            i = 0;
             constructor(i: int) {
               this.i = i;
             }
@@ -331,11 +458,11 @@ cases:
       }
     check: |-
       function main() {
-        assert foo().bar() == 3;
+        assert(foo().bar() == 3);
       }
 
   - decl: |-
-      // Local class inside do-while loop
+      // Local class and interface inside do-while loop
       abstract class A {
         bar(): int;
       }
@@ -344,8 +471,11 @@ cases:
         let a: A;
         let i = 0;
         do {
-          class B {
+          interface I {
             i: int;
+          }
+          class B implements I extends A {
+            i = 0;
             constructor(i: int) {
               this.i = i;
             }
@@ -359,7 +489,7 @@ cases:
       }
     check: |-
       function main() {
-        assert foo().bar() == 3;
+        assert(foo().bar() == 3);
       }
 
   - decl: |-
@@ -377,7 +507,7 @@ cases:
           interface I {}
           class A implements I {};
           let a: A = new A();
-          assert a instanceof I;
+          assert(a instanceof I);
         }
       }
 
@@ -386,9 +516,9 @@ cases:
       function main() {
         try {
           class B {};
-          assert true;
+          assert(true);
         } catch(e) {
-          assert false;
+          assert(false);
         }
       }
 
@@ -399,9 +529,27 @@ cases:
           interface I {}
           class A implements I {};
           let a: A = new A();
-          assert a instanceof I;
+          assert(a instanceof I);
         } catch(e) {
-          assert false;
+          assert(false);
+        }
+      }
+
+  - decl: |-
+      // Inner class and interface inside switch operator
+      function main() {
+        switch(1) {
+          case 1:
+            interface I {
+              i: int;
+            }
+            class A implements I {
+              i = 5;
+            }
+            assert(new A().i == 5);
+            break;
+          default:
+            assert(false);
         }
       }
 
@@ -417,7 +565,7 @@ cases:
       }
     check: |-
       function main() {
-        assert A.bar();
+        assert(A.bar());
       }
 
   - decl: |-
@@ -433,7 +581,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.getInner() == 1;
+        assert(a.getInner() == 1);
       }
 
   - decl: |-
@@ -451,7 +599,46 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.getInner() == 1;
+        assert(a.getInner() == 1);
+      }
+
+  - decl: |-
+      // Local interface with a static method declaration inside class body
+      class A {
+        interface I {
+          static foo(): int {
+            return 1;
+          }
+        }
+        getInner(): int {
+          return I.foo();
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assert(a.getInner() == 1);
+      }
+
+  - decl: |-
+      // Local class gets access to static method of the local interface inside class body
+      class A {
+        interface I {
+          static foo(): int {
+            return 1;
+          }
+        }
+        class B {
+          i: int = I.foo();
+        }
+        getInner(): int {
+          return new B().i;
+        }
+      }
+    check: |-
+      function main() {
+        let a: A = new A();
+        assert(a.getInner() == 1);
       }
 
   - decl: |-
@@ -470,7 +657,7 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.getInner() == 1;
+        assert(a.getInner() == 1);
       }
 
   - decl: |-
@@ -490,5 +677,5 @@ cases:
     check: |-
       function main() {
         let a: A = new A();
-        assert a.foo() == 1;
+        assert(a.foo() == 1);
       }
