@@ -1025,32 +1025,50 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // Calc length of items inside arrayLike, save length into i variable
-        let i: long = 0
+
         let iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                break
+        // NOTE: This code section is responsible for optimizing for some types
+        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
+        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  we can make one pass through the iterator without the need for memory reallocation.
+        const maybeLength = tryGetIteratorLength(arrayLike)
+        if (maybeLength) {
+            const result = new {{element['name']}}Array(maybeLength)
+            for (let i = 0; i < maybeLength; ++i) {
+                const x: number = iter.next().value!
+                {%- if element.get('name') != 'Uint8Clamped' %}
+                result.setUnsafeClamp(i, result.zeroIfInfinity((mapfn)!(x, i as number)) as {{element['primitiveType']}})
+                {%- else %}
+                result.setUnsafeClamp(i, (mapfn)!(x, i as number) as {{element['primitiveType']}})
+                {%- endif %}
             }
-            i++
+            return result
         }
 
-        let res = new {{element['name']}}Array(i as int)
-        i = 0
-        iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                return res
+        // NOTE: Create builtin array as buffer
+        let temp = new {{element['name']}}Array(6)
+        let index = new int[1]
+        index[0] = 0
+
+        iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
+            if (index[0] + 1 > temp.lengthInt) {
+                // NOTE: Progressive reallocation
+                const curLength = (temp.buffer as Buffer).getByteLength()
+                const tb = new ArrayBuffer(curLength * 2)
+                for (let i = 0; i < curLength; ++i) {
+                    tb.set(i, (temp.buffer as Buffer).at(i))
+                }
+                temp = new {{element['name']}}Array(tb)
             }
-        {%- if element.get('name') != 'Uint8Clamped' %}
-            res.setUnsafeClamp(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)) as {{element['primitiveType']}})
-        {%- else %}
-            res.setUnsafeClamp(i as int, (mapfn)!(v.value as number, i as number) as {{element['primitiveType']}})
-        {%- endif %}
-            i++
-        }
+            {%- if element.get('name') != 'Uint8Clamped' %}
+            temp.setUnsafeClamp(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)) as {{element['primitiveType']}})
+            {%- else %}
+            temp.setUnsafeClamp(index[0], (mapfn)!(x, index[0] as number) as {{element['primitiveType']}})
+            {%- endif %}
+            index[0]++
+        })
+
+        return new {{element['name']}}Array(temp.buffer, new Number(0), new Number(index[0]))
     {%- else %}
         throw new Error("{{element['name']}}Array.from: not implemented")
     {%- endif %}

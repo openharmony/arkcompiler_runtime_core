@@ -1038,32 +1038,49 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // Calc length of items inside arrayLike, save length into i variable
-        let i: long = 0
+
         let iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                break
+        // NOTE: This code section is responsible for optimizing for some types
+        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
+        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  we can make one pass through the iterator without the need for memory reallocation.
+        const maybeLength = tryGetIteratorLength(arrayLike)
+        if (maybeLength) {
+            const result = new {{N}}Array(maybeLength)
+            for (let i = 0; i < maybeLength; ++i) {
+                const x: number = iter.next().value!
+                {%- if (N != 'Float32') and (N != 'Float64') %}
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x, i as number)){{fromElementCompat}})
+                {%- else %}
+                result.setUnsafe(i, (mapfn)!(x, i as number){{fromElementCompat}})
+                {%- endif %}
             }
-            i++
+            return result
         }
 
-        let res = new {{N}}Array(i as int)
-        i = 0
-        iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                return res
+        // NOTE: Create builtin array as buffer
+        let temp = new {{N}}Array(6)
+        let index = new int[1]
+        index[0] = 0
+
+        iteratorForEach<number>(iter, (x: number): void => {
+            if (index[0] + 1 > temp.lengthInt) {
+                // NOTE: Progressive reallocation
+                const curLength = (temp.buffer as Buffer).getByteLength()
+                const tb = new ArrayBuffer(curLength * 2)
+                for (let i = 0; i < curLength; ++i) {
+                    tb.set(i, (temp.buffer as Buffer).at(i))
+                }
+                temp = new {{N}}Array(tb)
             }
             {%- if (N != 'Float32') and (N != 'Float64') %}
-            res.setUnsafe(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)){{fromElementCompat}})
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)){{fromElementCompat}})
             {%- else %}
-            res.setUnsafe(i as int, (mapfn)!(v.value as number, i as number){{fromElementCompat}})
+            temp.setUnsafe(index[0], (mapfn)!(x, index[0] as number){{fromElementCompat}})
             {%- endif %}
-            i++
-        }
+            index[0]++
+        })
+        return new {{N}}Array(temp.buffer, new Number(0), new Number(index[0]))
     {%- else %}
         throw new Error("{{N}}Array.from: not implemented")
     {%- endif %}

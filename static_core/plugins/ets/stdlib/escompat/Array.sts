@@ -2280,6 +2280,10 @@ class ArrayValuesIterator_T<T> implements IterableIterator<T> {
     override $_iterator(): IterableIterator<T> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_T<T> implements IterableIterator<[number, T]> {
@@ -2301,5 +2305,9 @@ class ArrayEntriesIterator_T<T> implements IterableIterator<[number, T]> {
 
     override $_iterator(): IterableIterator<[number, T]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }

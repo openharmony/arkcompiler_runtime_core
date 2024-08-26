@@ -33,6 +33,8 @@ function main(): int {
     failures += check(testLastIndexOf4(), "Try to find last item at 4");
     failures += check(testLastIndexOf3(), "Try to find last item at 3");
 
+    failures += check(testTAFromWithSizeableIterator(), "Try use .from method with `Sizeable` iterator")
+
 
     failures += check(testMap(), "Try to Array map function");
     {% for ci in copyWithin -%}
@@ -374,6 +376,58 @@ function testMap(): int {
         }
     }
     return success;
+}
+
+class SimpleIterator implements IterableIterator<number> {
+    public isCalledLengthMethod: boolean = false
+    private idx: number = 0
+    private retval: number
+
+    constructor (retval: number) {
+        this.retval = retval
+    }
+
+    override $_iterator(): IterableIterator<number> {
+        return this;
+    }
+
+    override next(): IteratorResult<number> {
+        if (this.idx >= 5) {
+            return new IteratorResult<number>()
+        }
+        this.idx++
+        return new IteratorResult<number>(false, this.retval)
+    }
+
+    public __Iterator_getLength(): int {
+        this.isCalledLengthMethod = true
+        return 5
+    }
+
+}
+
+function testTAFromWithSizeableIterator(): int {
+    let retval = 9
+    let it = new SimpleIterator(retval)
+    if (it.isCalledLengthMethod) {
+        console.log("Error: Test iterator has called length method")
+        return fail
+    }
+    let tar = {{.item.objectType}}.from(it)
+    if (!it.isCalledLengthMethod) {
+        console.log("Error: Test iterator length method doesn't called in TA .from method")
+        return fail
+    }
+    for (let i = 0; i < it.__Iterator_getLength(); ++i) {
+        if (tar[i] != retval) {
+            console.log(
+                "Error: final typedarray has incorrect value as position: " +
+                 i + ", expected: " + retval + ", but got" + tar[i]
+            )
+            return fail
+        }
+    }
+    return success
 }
 
 function createFromSource(source: {{.item.primitiveType}}[]): {{.item.objectType}} throws {

@@ -896,28 +896,42 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // Calc length of items inside arrayLike, save length into i variable
-        let i: long = 0
+
         let iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                break
+        // NOTE: This code section is responsible for optimizing for some types
+        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
+        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  we can make one pass through the iterator without the need for memory reallocation.
+        const maybeLength = tryGetIteratorLength(arrayLike)
+        if (maybeLength) {
+            const result = new Uint8ClampedArray(maybeLength)
+            for (let i = 0; i < maybeLength; ++i) {
+                const x: number = iter.next().value!
+                result.setUnsafeClamp(i, (mapfn)!(x, i as number) as int)
             }
-            i++
+            return result
         }
 
-        let res = new Uint8ClampedArray(i as int)
-        i = 0
-        iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                return res
+        // NOTE: Create builtin array as buffer
+        let temp = new Uint8ClampedArray(6)
+        let index = new int[1]
+        index[0] = 0
+
+        iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
+            if (index[0] + 1 > temp.lengthInt) {
+                // NOTE: Progressive reallocation
+                const curLength = (temp.buffer as Buffer).getByteLength()
+                const tb = new ArrayBuffer(curLength * 2)
+                for (let i = 0; i < curLength; ++i) {
+                    tb.set(i, (temp.buffer as Buffer).at(i))
+                }
+                temp = new Uint8ClampedArray(tb)
             }
-            res.setUnsafeClamp(i as int, (mapfn)!(v.value as number, i as number) as int)
-            i++
-        }
+            temp.setUnsafeClamp(index[0], (mapfn)!(x, index[0] as number) as int)
+            index[0]++
+        })
+
+        return new Uint8ClampedArray(temp.buffer, new Number(0), new Number(index[0]))
     }
 
     /**
@@ -3470,28 +3484,42 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // Calc length of items inside arrayLike, save length into i variable
-        let i: long = 0
+
         let iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                break
+        // NOTE: This code section is responsible for optimizing for some types
+        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
+        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  we can make one pass through the iterator without the need for memory reallocation.
+        const maybeLength = tryGetIteratorLength(arrayLike)
+        if (maybeLength) {
+            const result = new Uint8Array(maybeLength)
+            for (let i = 0; i < maybeLength; ++i) {
+                const x: number = iter.next().value!
+                result.setUnsafeClamp(i, result.zeroIfInfinity((mapfn)!(x, i as number)) as int)
             }
-            i++
+            return result
         }
 
-        let res = new Uint8Array(i as int)
-        i = 0
-        iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                return res
+        // NOTE: Create builtin array as buffer
+        let temp = new Uint8Array(6)
+        let index = new int[1]
+        index[0] = 0
+
+        iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
+            if (index[0] + 1 > temp.lengthInt) {
+                // NOTE: Progressive reallocation
+                const curLength = (temp.buffer as Buffer).getByteLength()
+                const tb = new ArrayBuffer(curLength * 2)
+                for (let i = 0; i < curLength; ++i) {
+                    tb.set(i, (temp.buffer as Buffer).at(i))
+                }
+                temp = new Uint8Array(tb)
             }
-            res.setUnsafeClamp(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)) as int)
-            i++
-        }
+            temp.setUnsafeClamp(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)) as int)
+            index[0]++
+        })
+
+        return new Uint8Array(temp.buffer, new Number(0), new Number(index[0]))
     }
 
     /**
@@ -6030,28 +6058,42 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // Calc length of items inside arrayLike, save length into i variable
-        let i: long = 0
+
         let iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                break
+        // NOTE: This code section is responsible for optimizing for some types
+        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
+        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  we can make one pass through the iterator without the need for memory reallocation.
+        const maybeLength = tryGetIteratorLength(arrayLike)
+        if (maybeLength) {
+            const result = new Uint16Array(maybeLength)
+            for (let i = 0; i < maybeLength; ++i) {
+                const x: number = iter.next().value!
+                result.setUnsafeClamp(i, result.zeroIfInfinity((mapfn)!(x, i as number)) as int)
             }
-            i++
+            return result
         }
 
-        let res = new Uint16Array(i as int)
-        i = 0
-        iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                return res
+        // NOTE: Create builtin array as buffer
+        let temp = new Uint16Array(6)
+        let index = new int[1]
+        index[0] = 0
+
+        iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
+            if (index[0] + 1 > temp.lengthInt) {
+                // NOTE: Progressive reallocation
+                const curLength = (temp.buffer as Buffer).getByteLength()
+                const tb = new ArrayBuffer(curLength * 2)
+                for (let i = 0; i < curLength; ++i) {
+                    tb.set(i, (temp.buffer as Buffer).at(i))
+                }
+                temp = new Uint16Array(tb)
             }
-            res.setUnsafeClamp(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)) as int)
-            i++
-        }
+            temp.setUnsafeClamp(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)) as int)
+            index[0]++
+        })
+
+        return new Uint16Array(temp.buffer, new Number(0), new Number(index[0]))
     }
 
     /**
@@ -8632,28 +8674,42 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
         if (mapfn == undefined) {
             mapfn = (v: number, k: number): number => { return v }
         }
-        // Calc length of items inside arrayLike, save length into i variable
-        let i: long = 0
+
         let iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                break
+        // NOTE: This code section is responsible for optimizing for some types
+        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
+        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  we can make one pass through the iterator without the need for memory reallocation.
+        const maybeLength = tryGetIteratorLength(arrayLike)
+        if (maybeLength) {
+            const result = new Uint32Array(maybeLength)
+            for (let i = 0; i < maybeLength; ++i) {
+                const x: number = iter.next().value!
+                result.setUnsafeClamp(i, result.zeroIfInfinity((mapfn)!(x, i as number)) as long)
             }
-            i++
+            return result
         }
 
-        let res = new Uint32Array(i as int)
-        i = 0
-        iter = arrayLike.$_iterator()
-        while (true) {
-            const v = iter.next()
-            if (v.done) {
-                return res
+        // NOTE: Create builtin array as buffer
+        let temp = new Uint32Array(6)
+        let index = new int[1]
+        index[0] = 0
+
+        iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
+            if (index[0] + 1 > temp.lengthInt) {
+                // NOTE: Progressive reallocation
+                const curLength = (temp.buffer as Buffer).getByteLength()
+                const tb = new ArrayBuffer(curLength * 2)
+                for (let i = 0; i < curLength; ++i) {
+                    tb.set(i, (temp.buffer as Buffer).at(i))
+                }
+                temp = new Uint32Array(tb)
             }
-            res.setUnsafeClamp(i as int, res.zeroIfInfinity((mapfn)!(v.value as number, i as number)) as long)
-            i++
-        }
+            temp.setUnsafeClamp(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)) as long)
+            index[0]++
+        })
+
+        return new Uint32Array(temp.buffer, new Number(0), new Number(index[0]))
     }
 
     /**

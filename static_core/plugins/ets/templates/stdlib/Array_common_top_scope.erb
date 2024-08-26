@@ -31,6 +31,10 @@ class ArrayValuesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx
     override $_iterator(): IterableIterator<<%= ctx.el_type %>> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ctx.this_generic %> implements IterableIterator<[number, <%= ctx.el_type %>]> {
@@ -52,5 +56,9 @@ class ArrayEntriesIterator_<%= ctx.el_type %><%= ctx.this_iterator_generic || ct
 
     override $_iterator(): IterableIterator<[number, <%= ctx.el_type %>]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
