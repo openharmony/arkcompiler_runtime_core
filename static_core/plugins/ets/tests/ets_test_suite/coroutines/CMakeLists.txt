@@ -309,22 +309,6 @@ add_ets_coroutines_test(FILE affinity.sts
                         MODE "INT"
 )
 
-add_ets_coroutines_test(FILE promise_then_sequence.sts
-                        SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
-                        OPTION_SETS_STACKFUL "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
-add_ets_coroutines_test(FILE callback_coro_id.sts
-                        SKIP_ARM32_COMPILER
-                        IMPL "THREADED" "STACKFUL"
-                        OPTION_SETS_STACKFUL "DEFAULT"
-                        WORKERS "AUTO"
-                        MODE "INT" "JIT" "AOT"
-)
-
 add_ets_coroutines_test(FILE wake_for_another_event.sts
                         SKIP_ARM32_COMPILER
                         IMPL "THREADED" "STACKFUL"

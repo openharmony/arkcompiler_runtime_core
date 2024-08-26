@@ -322,7 +322,7 @@ export final class Promise<out T> implements PromiseLike<T> {
     // filling alignment holes
     private value: T | null = null;
     private callbackQueue: Object[] | null = null;
-    private coroPtrQueue: long[] | null = null;
+    private launchModeQueue: int[] | null = null;
     private interopObject: Object|null = null;
     private linkedPromise: Object | null = null;
     private queueSize: int = 0;

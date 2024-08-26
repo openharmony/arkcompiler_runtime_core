@@ -19,7 +19,6 @@
 #include "plugins/ets/runtime/ets_napi_env.h"
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_manager.h"
-#include "runtime/coroutines/coro_callback_queue.h"
 
 namespace ark::ets {
 class PandaEtsVM;
@@ -42,9 +41,8 @@ public:
                      std::optional<EntrypointInfo> &&epInfo = std::nullopt)
     {
         mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
-        auto *callbackQueue = allocator->New<CoroCallbackQueue>();
         auto co = allocator->New<EtsCoroutine>(os::thread::GetCurrentThreadId(), allocator, vm, std::move(name),
-                                               context, callbackQueue, std::move(epInfo));
+                                               context, std::move(epInfo));
         co->Initialize();
         return co;
     }
@@ -106,7 +104,7 @@ public:
 protected:
     // we would like everyone to use the factory to create a EtsCoroutine
     explicit EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                          CoroutineContext *context, CallbackQueue *queue, std::optional<EntrypointInfo> &&epInfo);
+                          CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo);
 
 private:
     panda_file::Type GetReturnType();

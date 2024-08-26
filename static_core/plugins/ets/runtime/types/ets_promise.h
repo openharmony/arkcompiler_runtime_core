@@ -77,10 +77,21 @@ public:
             ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_)));
     }
 
-    EtsLongArray *GetCoroPtrQueue(EtsCoroutine *coro)
+    void SetCallbackQueue(EtsCoroutine *coro, EtsObjectArray *callbackQueue)
     {
-        return reinterpret_cast<EtsLongArray *>(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, coroPtrQueue_)));
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), callbackQueue->GetCoreType());
+    }
+
+    EtsIntArray *GetLaunchModeQueue(EtsCoroutine *coro)
+    {
+        return reinterpret_cast<EtsIntArray *>(
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_)));
+    }
+
+    void SetLaunchModeQueue(EtsCoroutine *coro, EtsIntArray *launchModeQueue)
+    {
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_),
+                                  launchModeQueue->GetCoreType());
     }
 
     EtsInt GetQueueSize()
@@ -159,16 +170,16 @@ public:
         OnPromiseCompletion(coro);
     }
 
-    void SubmitCallback(EtsCoroutine *coro, const EtsHandle<EtsObject> &hcallback)
+    void SubmitCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode)
     {
         ASSERT(IsLocked());
+        ASSERT(queueSize_ < static_cast<int>(GetCallbackQueue(coro)->GetLength()));
         // We need to promote weak reference to promise to prevent GC from collecting promise
         PromotePromiseRef(coro);
-        EnsureCapacity(coro);
         auto *cbQueue = GetCallbackQueue(coro);
-        auto *coroQueue = GetCoroPtrQueue(coro);
-        coroQueue->Set(queueSize_, ToUintPtr(coro));
-        cbQueue->Set(queueSize_, hcallback.GetPtr());
+        auto *launchModeQueue = GetLaunchModeQueue(coro);
+        launchModeQueue->Set(queueSize_, static_cast<int>(launchMode));
+        cbQueue->Set(queueSize_, callback);
         queueSize_++;
     }
 
@@ -260,24 +271,26 @@ public:
      */
     void RetireEventPtr(CoroutineEvent *event);
 
+    // launch promise then/catch callback: void()
+    static void LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode);
+
 private:
-    void EnsureCapacity(EtsCoroutine *coro);
     void OnPromiseCompletion(EtsCoroutine *coro);
     void PromotePromiseRef(EtsCoroutine *coro);
 
     void ClearQueues(EtsCoroutine *coro)
     {
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), nullptr);
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, coroPtrQueue_), nullptr);
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, launchModeQueue_), nullptr);
         queueSize_ = 0;
     }
 
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
     ObjectPointer<EtsObjectArray>
         callbackQueue_;  // the queue of 'then and catch' calbacks which will be called when the Promise gets fulfilled
-    ObjectPointer<EtsLongArray> coroPtrQueue_;  // the queue of Coroutine pointers associated with callbacks
-    ObjectPointer<EtsObject> interopObject_;    // internal object used in js interop
-    ObjectPointer<EtsObject> linkedPromise_;    // linked JS promise as JSValue (if exists)
+    ObjectPointer<EtsIntArray> launchModeQueue_;  // the queue of callbacks' launch mode
+    ObjectPointer<EtsObject> interopObject_;      // internal object used in js interop
+    ObjectPointer<EtsObject> linkedPromise_;      // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
     EtsLong event_;
     EtsInt eventRefCounter_;

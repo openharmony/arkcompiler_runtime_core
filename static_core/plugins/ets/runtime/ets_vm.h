@@ -284,7 +284,6 @@ public:
     {
         ASSERT(jobQueue_ == nullptr);
         jobQueue_.reset(jobQueue);
-        Coroutine::GetCurrent()->SetCallbackQueue(jobQueue);
     }
 
     std::mt19937 &GetRandomEngine()
