@@ -16,8 +16,17 @@
 package escompat;
 
 // NOTE(ipetrov, #16281): Make taskpool.Task when namespaces will be supported
+/**
+ * @class Task provides an interface to create a task to execute in the taskpool
+ */
 export class taskpoolTask {
     // NOTE(ipetrov, #17246, #17339): support arguments after es2apnda support spread expressions and common function super-type
+    /**
+     * Create a Task instance
+     *
+     * @param name The name of task
+     * @param func Concurrent function to execute in the taskpool
+     */
     constructor(name: string, func: Function0<NullishType>) {
         this.name = name;
         this.func = func;
@@ -30,6 +39,11 @@ export class taskpoolTask {
         this.id = taskpoolTask.generateId();
     }
 
+    /**
+     * Create a Task instance
+     *
+     * @param func Concurrent function to execute in the taskpool
+     */
     constructor(func: Function0<NullishType>) {
         this("", func);
     }
@@ -41,16 +55,22 @@ export class taskpoolTask {
      */
     static native isCancel(): boolean;
 
+    internal checkExecution(): void {
+        if (this.groupId != 0) {
+            throw new Error("taskpool:: groupTask cannot execute outside");
+        }
+    }
+
     internal execute(): NullishType {
-        if (!taskpool.taskStarted(this.id)) {
-            throw new Error("taskpool:: task has been canceled");
+        if (!taskpool.taskStarted(this.id, this.groupId)) {
+            throw (this.groupId == 0) ? new Error("taskpool:: task has been canceled") : new Error("taskpool:: taskGroup has been canceled");
         }
         let result: NullishType = null;
         try {
             result = this.func();
         } finally {
-            if (!taskpool.taskFinished(this.id)) {
-                throw new Error("taskpool:: task has been canceled");
+            if (!taskpool.taskFinished(this.id, this.groupId)) {
+                throw (this.groupId == 0) ? new Error("taskpool:: task has been canceled") : new Error("taskpool:: taskGroup has been canceled");
             }
         }
         return result;
@@ -58,13 +78,108 @@ export class taskpoolTask {
 
     private static native generateId(): long;
 
-    internal readonly id: long;
     totalDuration: number;
     ioDuration: number;
     cpuDuration: number;
     func: Function0<NullishType>;
     args: NullishType[];
     name: string;
+
+    internal readonly id: long;
+    internal groupId: long = 0;
+    internal isSubmitted: boolean = false;
+}
+
+// NOTE(ipetrov, #16281): Make taskpool.LongTask when namespaces will be supported
+/**
+ * @class LongTask provides an interface to create a long executing task.
+ * The such task can be executed only once
+ * @extends Task 
+ */
+export class taskpoolLongTask extends taskpoolTask {
+    constructor(name: string, func: Function0<NullishType>) {
+        super(name, func);
+    }
+    constructor(func: Function0<NullishType>) {
+        super("", func);
+    }
+
+    internal override checkExecution(): void {
+        super.checkExecution();
+        if (this.isSubmitted) {
+            throw new Error("taskpool:: The long task can only be executed once");
+        }
+    }
+}
+
+// NOTE(ipetrov, #16281): Make taskpool.TaskGroup when namespaces will be supported
+/**
+ * @class TaskGroup provides an interface to create a task group
+ */
+export class taskpoolTaskGroup {
+    /**
+     * Create a TaskGroup instance
+     */
+    constructor() {
+        this("");
+    }
+
+    /**
+     * Create a TaskGroup instance
+     * @param name The name of TaskGroup
+     */
+    constructor(name: string) {
+        this.name = name;
+        this.id = taskpoolTaskGroup.generateGroupId();
+        this.tasks = new Array<taskpoolTask>();
+    }
+
+    /**
+     * Add a concurrent function into task group
+     *
+     * @param func the concurrent function to add to the task group
+     */
+    addTask(func: Function0<NullishType>): void {
+        this.addTask(new taskpoolTask(func));
+    }
+
+    /**
+     * Add a task into task group
+     *
+     * @param task the task to add to the task group
+     * @throws Error if
+     *     - task was already added to any group
+     *     - task is LongTask
+     *     - task was executed outside the group
+     *     - task executed via SequenceRunner
+     */
+    addTask(task: taskpoolTask): void {
+        if (task.groupId != 0) {
+            throw new Error("taskpool:: taskGroup cannot add groupTask");
+        } else if (task instanceof taskpoolLongTask) {
+            throw new Error("taskpool:: The interface does not support the long task");
+        } else if (task.isSubmitted) {
+            throw new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
+        }
+        task.groupId = this.id;
+        this.tasks.push(task);
+    }
+
+    /**
+     * Generate unique identifier for the group
+     * @see TaskGroup.constructor
+     * @return unique group identifier for a new Taskgroup instance 
+     */
+    private static native generateGroupId(): long;
+
+    /**
+     * TaskGroup name
+     */
+    name: string;
+
+    internal readonly id: long;
+    internal tasks: Array<taskpoolTask>;
+    internal isSubmitted: boolean = false;
 }
 
 // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
@@ -128,8 +243,32 @@ export class taskpool {
      * @returns Promise for result of executed task
      */
     static execute(task: taskpoolTask): Promise<NullishType> {
+        task.checkExecution();
+        task.isSubmitted = true;
         taskpool.taskSubmitted(task.id);
         return launch task.execute();
+    }
+
+    /**
+     * Execute a concurrent task group
+     *
+     * @param group The task group for execution
+     * @returns Promise for array of results of executed tasks from the group
+     */
+    static execute(group: taskpoolTaskGroup): Promise<NullishType[]> {
+        let tasksCount: long = group.tasks.length as long;
+        if (tasksCount == 0) {
+            group.isSubmitted = true;
+            return Promise.resolve(new NullishType[0]);
+        }
+        taskpool.taskGroupSubmitted(group.id, tasksCount);
+        let promises = new Array<Promise<NullishType>>();
+        group.tasks.forEach((task: taskpoolTask, i: number) => {
+            task.isSubmitted = true;
+            promises.push(launch task.execute());
+        });
+        group.isSubmitted = true;
+        return Promise.all<NullishType>(promises);
     }
 
     /**
@@ -143,7 +282,28 @@ export class taskpool {
         taskpool.cancelImpl(task.id);
     }
 
+    /**
+     * Cancel a concurrent task group
+     *
+     * @param group The group for canceling
+     * @throws Error if the task group does not exist when it is canceled
+     */
+    static cancel(group: taskpoolTaskGroup): void {
+        taskpool.cancelGroupImpl(group.id);
+    }
+
+    /**
+     * Terminate a long task.
+     *
+     * @param longTask The long task for terminating
+     * @note This method is needed for compatibilty with OHOS API. For coroutines in static ArkTS it is not required 
+     */
+    static terminateTask(longTask: taskpoolLongTask): void {}
+
     private static native cancelImpl(taskId: long): void;
+
+    private static native cancelGroupImpl(groupId: long): void;
+
     /**
      * @brief Submit task to the taskpool on the execute method
      * @see taskpool.execute
@@ -152,22 +312,32 @@ export class taskpool {
     private static native taskSubmitted(taskId: long): void;
 
     /**
+     * @brief Submit group of tasks to the taskpool on the execute method
+     * @see taskpool.execute
+     * @param groupId identifier of the submitted group
+     * @param tasksCount count of tasks in the passed group 
+     */
+    private static native taskGroupSubmitted(groupId: long, tasksCount: long): void;
+
+    /**
      * @brief Notify the taskpool that the task is started on a coroutine
      * @param taskId identifier of the started task
+     * @param groupId group identifier of the passed task (0 means task is not group task)
      * @returns true if task is not cancled by cancel method, false - otherwise
      *
      * @see taskpool.Task.execute
      * @see taskpool.cancel
      */
-    internal static native taskStarted(taskId: long): boolean;
+    internal static native taskStarted(taskId: long, groupId: long): boolean;
 
     /**
      * @brief Notify the taskpool that the task is finished on a coroutine
      * @param taskId identifier of the finished task
+     * @param groupId group identifier of the passed task (0 means task is not group task)
      * @returns true if task is not cancled by cancel method, false - otherwise
      *
      * @see taskpool.Task.execute
      * @see taskpool.cancel
      */
-    internal static native taskFinished(taskId: long): boolean;
+    internal static native taskFinished(taskId: long, groupId: long): boolean;
 }

@@ -25,6 +25,13 @@ extern "C" EtsLong GenerateTaskId()
     return coroutine->GetPandaVM()->GetTaskpool()->GenerateTaskId();
 }
 
+extern "C" EtsLong GenerateGroupId()
+{
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+    return coroutine->GetPandaVM()->GetTaskpool()->GenerateTaskGroupId();
+}
+
 extern "C" void TaskpoolTaskSubmitted(EtsLong taskId)
 {
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
@@ -32,18 +39,28 @@ extern "C" void TaskpoolTaskSubmitted(EtsLong taskId)
     coroutine->GetPandaVM()->GetTaskpool()->TaskSubmitted(taskId);
 }
 
-extern "C" EtsBoolean TaskpoolTaskStarted(EtsLong taskId)
+extern "C" void TaskpoolGroupSubmitted(EtsLong groupId, EtsLong tasksCount)
 {
+    ASSERT(tasksCount > 0);
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    return EtsBoolean(coroutine->GetPandaVM()->GetTaskpool()->TaskStarted(coroutine->GetCoroutineId(), taskId));
+    coroutine->GetPandaVM()->GetTaskpool()->GroupSubmitted(groupId, static_cast<size_t>(tasksCount));
 }
 
-extern "C" EtsBoolean TaskpoolTaskFinished(EtsLong taskId)
+extern "C" EtsBoolean TaskpoolTaskStarted(EtsLong taskId, EtsLong groupId)
 {
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    return EtsBoolean(coroutine->GetPandaVM()->GetTaskpool()->TaskFinished(coroutine->GetCoroutineId(), taskId));
+    return EtsBoolean(
+        coroutine->GetPandaVM()->GetTaskpool()->TaskStarted(coroutine->GetCoroutineId(), taskId, groupId));
+}
+
+extern "C" EtsBoolean TaskpoolTaskFinished(EtsLong taskId, EtsLong groupId)
+{
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+    return EtsBoolean(
+        coroutine->GetPandaVM()->GetTaskpool()->TaskFinished(coroutine->GetCoroutineId(), taskId, groupId));
 }
 
 extern "C" void TaskpoolCancelTask(EtsLong taskId)
@@ -53,6 +70,16 @@ extern "C" void TaskpoolCancelTask(EtsLong taskId)
     if (!coroutine->GetPandaVM()->GetTaskpool()->CancelTask(taskId)) {
         ThrowEtsException(coroutine, panda_file_items::class_descriptors::ERROR,
                           "taskpool:: task is not executed or has been executed");
+    }
+}
+
+extern "C" void TaskpoolCancelGroup(EtsLong groupId)
+{
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+    if (!coroutine->GetPandaVM()->GetTaskpool()->CancelGroup(groupId)) {
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ERROR,
+                          "taskpool:: taskGroup is not executed or has been executed");
     }
 }
 
