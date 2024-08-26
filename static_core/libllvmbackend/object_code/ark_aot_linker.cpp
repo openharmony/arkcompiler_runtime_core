@@ -61,7 +61,7 @@ void PandaSectionMemoryManager::RememberAllocation(llvm::StringRef sectionName, 
 {
     static constexpr std::array SECTIONS_PREFIXES_TO_REMEMBER = {
         TEXT_SECTION_PREFIX,     // .text.
-        RO_DATA_SECTION_PREFIX,  // .ro
+        RO_DATA_SECTION_PREFIX,  // .rodata
         AOT_GOT_SECTION,         // .aot_got
     };
 

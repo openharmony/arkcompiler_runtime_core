@@ -573,11 +573,7 @@ bool LLVMIrConstructor::EmitSlowPathEntry(Inst *inst)
     call->setCallingConv(callee->getCallingConv());
     call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_Tail);
     call->addFnAttr(llvm::Attribute::get(call->getContext(), "ark-tail-call"));
-    if (call->getType()->isVoidTy()) {
-        builder_.CreateRetVoid();
-    } else {
-        builder_.CreateRet(call);
-    }
+    CreateReturn(call);
     return true;
 }
 
@@ -695,11 +691,7 @@ bool LLVMIrConstructor::EmitTailCall(Inst *inst)
     }
     call->setTailCallKind(llvm::CallInst::TailCallKind::TCK_Tail);
     call->addFnAttr(llvm::Attribute::get(call->getContext(), "ark-tail-call"));
-    if (func_->getReturnType()->isVoidTy()) {
-        builder_.CreateRetVoid();
-    } else {
-        builder_.CreateRet(call);
-    }
+    CreateReturn(call);
     std::fill(ccValues_.begin(), ccValues_.end(), nullptr);
     return true;
 }
@@ -1997,26 +1989,51 @@ void LLVMIrConstructor::CreateDeoptimizationBranch(Inst *inst, llvm::Value *deop
     /* Creating throw block */
     SetCurrentBasicBlock(throwPath);
 
+    auto call = CreateDeoptimizeCall(inst, arguments, exception);
+
+    /* Set metadata for implicit null check */
+    if (!inst->CanDeoptimize() && exception == RuntimeInterface::EntrypointId::NULL_POINTER_EXCEPTION &&
+        g_options.IsCompilerImplicitNullCheck()) {
+        ASSERT(inst->IsNullCheck());
+        auto *metadata = llvm::MDNode::get(ctx, {});
+        branch->setMetadata(llvm::LLVMContext::MD_make_implicit, metadata);
+    }
+
+    /* Create 'ret' after llvm.experimental.deoptimize call */
+    CreateReturn(call);
+    WrapArkCall(inst, call);
+
+    /* Continue */
+    SetCurrentBasicBlock(continuation);
+}
+
+llvm::CallInst *LLVMIrConstructor::CreateDeoptimizeCall(Inst *inst, llvm::ArrayRef<llvm::Value *> arguments,
+                                                        RuntimeInterface::EntrypointId exception)
+{
+    auto deoptimizeDeclaration = llvm::Intrinsic::getDeclaration(
+        func_->getParent(), llvm::Intrinsic::experimental_deoptimize, {func_->getReturnType()});
+    llvm::CallInst *call;
     if (inst->CanDeoptimize()) {
         // If inst CanDeoptimize then call Deoptimize to bail out into interpreter, do not throw exception
         exception = RuntimeInterface::EntrypointId::DEOPTIMIZE;
         auto type = helpers::ToUnderlying(GetDeoptimizationType(inst)) |
                     (inst->GetId() << MinimumBitsToStore(DeoptimizeType::COUNT));
-        auto call = CreateEntrypointCall(exception, inst, {builder_.getInt64(type)});
+        ASSERT(GetGraph()->GetRuntime()->IsEntrypointNoreturn(exception));
+        call = builder_.CreateCall(
+            {deoptimizeDeclaration}, {builder_.getInt64(type), builder_.getInt32(static_cast<uint32_t>(exception))},
+            CreateSaveStateBundle(inst, GetGraph()->GetRuntime()->IsEntrypointNoreturn(exception)));
         call->addFnAttr(llvm::Attribute::get(call->getContext(), "may-deoptimize"));
     } else {
-        if (exception == RuntimeInterface::EntrypointId::NULL_POINTER_EXCEPTION &&
-            compiler::g_options.IsCompilerImplicitNullCheck()) {
-            ASSERT(inst->IsNullCheck());
-            auto *metadata = llvm::MDNode::get(ctx, {});
-            branch->setMetadata(llvm::LLVMContext::MD_make_implicit, metadata);
-        }
-        CreateEntrypointCall(exception, inst, arguments);
+        std::vector<llvm::Value *> args = arguments;
+        args.push_back(builder_.getInt32(static_cast<uint32_t>(exception)));
+        call =
+            builder_.CreateCall({deoptimizeDeclaration}, args,
+                                CreateSaveStateBundle(inst, GetGraph()->GetRuntime()->IsEntrypointNoreturn(exception)));
     }
-    builder_.CreateUnreachable();
-
-    /* Continue */
-    SetCurrentBasicBlock(continuation);
+    arkInterface_->GetOrCreateRuntimeFunctionType(func_->getContext(), func_->getParent(),
+                                                  LLVMArkInterface::RuntimeCallType::ENTRYPOINT,
+                                                  static_cast<LLVMArkInterface::EntrypointId>(exception));
+    return call;
 }
 
 ArenaVector<llvm::OperandBundleDef> LLVMIrConstructor::CreateSaveStateBundle(Inst *inst, bool noReturn)
@@ -2208,6 +2225,15 @@ void LLVMIrConstructor::CreateIf(Inst *inst, llvm::Value *cond, bool likely, boo
     }
     builder_.CreateCondBr(cond, GetHeadBlock(inst->GetBasicBlock()->GetTrueSuccessor()),
                           GetHeadBlock(inst->GetBasicBlock()->GetFalseSuccessor()), weights);
+}
+
+llvm::Value *LLVMIrConstructor::CreateReturn(llvm::Value *value)
+{
+    ASSERT(value != nullptr);
+    if (value->getType()->isVoidTy()) {
+        return builder_.CreateRetVoid();
+    }
+    return builder_.CreateRet(value);
 }
 
 llvm::CallInst *LLVMIrConstructor::CreateTailCallFastPath(Inst *inst)
@@ -2861,6 +2887,7 @@ void LLVMIrConstructor::FillValueMapForUsers(ArenaUnorderedMap<DataType::Type, l
 
 void LLVMIrConstructor::WrapArkCall(Inst *orig, llvm::CallInst *call)
 {
+    ASSERT(orig->RequireState());
     ASSERT_PRINT(!call->getDebugLoc(), "Debug info must be unset");
     // Ark calls may call GC inside, so add statepoint
     debugData_->SetLocation(call, orig->GetPc());

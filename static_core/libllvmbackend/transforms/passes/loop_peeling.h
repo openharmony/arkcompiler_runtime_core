@@ -42,7 +42,7 @@ public:
     static bool ShouldInsert(const ark::llvmbackend::LLVMCompilerOptions *options);
 
 private:
-    bool ContainsGvnBuiltin(llvm::Loop *loop);
+    bool ContainsDeoptimize(llvm::Loop *loop);
 
 public:
     static constexpr llvm::StringRef ARG_NAME = "ark-loop-peeling";

@@ -47,12 +47,12 @@ public:
     llvm::PreservedAnalyses run(llvm::Function &function, llvm::FunctionAnalysisManager &am);
 
 private:
-    llvm::Value *CreateLoadMethodUsingVTable(llvm::Value *thiz, llvm::CallInst *call, llvm::IRBuilder<> *builder);
     llvm::Value *GetMethodOrResolverPtr(llvm::IRBuilder<> *builder, llvm::CallInst *inst);
     bool NeedsToBeLowered(llvm::CallInst *call);
     void LowerBuiltin(llvm::CallInst *inst);
     void LowerCallStatic(llvm::CallInst *inst);
     void LowerCallVirtual(llvm::CallInst *inst);
+    void LowerDeoptimizeIntrinsic(llvm::CallInst *deoptimize);
 
 private:
     LLVMArkInterface *arkInterface_;

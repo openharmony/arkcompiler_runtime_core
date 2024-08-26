@@ -71,7 +71,8 @@ llvm::PreservedAnalyses Devirt::run(llvm::Function &function, llvm::FunctionAnal
     for (auto &block : function) {
         for (auto &instruction : block) {
             auto *call = llvm::dyn_cast<llvm::CallInst>(&instruction);
-            if (call == nullptr || call->getCalledFunction() == nullptr || call->arg_size() < 2U) {
+            if (call == nullptr || call->getCalledFunction() == nullptr || call->arg_size() < 2U ||
+                call->getCalledFunction()->isIntrinsic()) {
                 continue;
             }
 

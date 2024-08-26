@@ -267,11 +267,8 @@ Value *GepPropagation::GetConstantOffset(Constant *offset, Type *type)
         auto offsetRaw = offset->getOperand(0);
         return llvm::ConstantInt::getSigned(type, llvm::cast<llvm::ConstantInt>(offsetRaw)->getSExtValue());
     }
-    if (offset->isNullValue()) {
-        return llvm::ConstantInt::getSigned(type, 0);
-    }
-    if (llvm::isa<llvm::PoisonValue>(offset)) {
-        return llvm::PoisonValue::get(type);
+    if (offset->isNullValue() || llvm::isa<llvm::PoisonValue, llvm::UndefValue>(offset)) {
+        return llvm::ConstantInt::getNullValue(type);
     }
 
     return llvm::ConstantInt::getSigned(type, llvm::cast<llvm::ConstantInt>(offset)->getSExtValue());

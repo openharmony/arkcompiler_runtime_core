@@ -27,9 +27,9 @@
 
 #define DEBUG_TYPE "ark-loop-peeling"
 
-// Peel only loops with GVNable builtins
+// Peel only loops with llvm.experimental.deoptimize calls
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
-static llvm::cl::opt<bool> g_gvnOnly("ark-loop-peeling-gvn-only", llvm::cl::Hidden, llvm::cl::init(false));
+static llvm::cl::opt<bool> g_deoptimizeOnly("ark-loop-peeling-deoptimize-only", llvm::cl::Hidden, llvm::cl::init(true));
 
 namespace ark::llvmbackend::passes {
 
@@ -39,7 +39,7 @@ llvm::PreservedAnalyses ArkLoopPeeling::run(llvm::Loop &loop,
                                             [[maybe_unused]] llvm::LPMUpdater &lpmUpdater)
 {
     if (llvm::canPeel(&loop)) {
-        if (!g_gvnOnly || ContainsGvnBuiltin(&loop)) {
+        if (!g_deoptimizeOnly || ContainsDeoptimize(&loop)) {
             [[maybe_unused]] bool result =
                 llvm::peelLoop(&loop, 1U, &loopStandardAnalysisResults.LI, &loopStandardAnalysisResults.SE,
                                loopStandardAnalysisResults.DT, nullptr, true);
@@ -51,21 +51,16 @@ llvm::PreservedAnalyses ArkLoopPeeling::run(llvm::Loop &loop,
     return llvm::PreservedAnalyses::all();
 }
 
-bool ArkLoopPeeling::ContainsGvnBuiltin(llvm::Loop *loop)
+bool ArkLoopPeeling::ContainsDeoptimize(llvm::Loop *loop)
 {
     ASSERT(loop->getHeader() != nullptr);
-    auto module = loop->getHeader()->getModule();
-    std::array builtins = {llvmbackend::builtins::LoadClass(module), llvmbackend::builtins::LoadInitClass(module),
-                           llvmbackend::builtins::LoadString(module), llvmbackend::builtins::ResolveVirtual(module)};
-
     for (auto &block : loop->blocks()) {
         for (auto &inst : *block) {
             auto call = llvm::dyn_cast<llvm::CallInst>(&inst);
             if (call == nullptr) {
                 continue;
             }
-            auto function = call->getCalledFunction();
-            if (std::find(builtins.cbegin(), builtins.cend(), function) != builtins.cend()) {
+            if (call->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize) {
                 return true;
             }
         }

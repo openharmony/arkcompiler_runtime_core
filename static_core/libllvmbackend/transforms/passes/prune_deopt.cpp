@@ -74,7 +74,8 @@ CallInst *PruneDeopt::GetUpdatedCallInst(CallInst *call, const OperandBundleUse 
     if (!IsCaughtDeoptimization(bundle.Inputs) && !call->hasFnAttr("may-deoptimize")) {
         LLVM_DEBUG(llvm::dbgs() << "Pruning deopt for: " << *call << "\n");
         ASSERT(call->getNumOperandBundles() == 1);
-        updated = CallInst::Create(call, llvm::None);
+        OperandBundleDef emptyBundle {"deopt", llvm::None};
+        updated = CallInst::Create(call, emptyBundle);
         auto iinfo = GetInlineInfo(bundle.Inputs);
         if (!iinfo.empty()) {
             updated->addFnAttr(llvm::Attribute::get(updated->getContext(), "inline-info", iinfo));
@@ -186,15 +187,24 @@ void PruneDeopt::MakeUnreachableAfter(BasicBlock *block, Instruction *after) con
             }
         }
     }
+    auto maybeCall = llvm::dyn_cast<llvm::CallInst>(after);
+    auto deoptimize = maybeCall != nullptr && maybeCall->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize;
+
     // Remove all instructions after AFTER
     for (auto iter = block->rbegin(); (&(*iter) != after);) {
         auto &toRemove = *iter++;
         Instruction *inst = &toRemove;
+        // Do not remove ret instruction after deoptimize call
+        if (deoptimize && toRemove.isTerminator()) {
+            continue;
+        }
         inst->replaceAllUsesWith(llvm::UndefValue::get(inst->getType()));
         inst->eraseFromParent();
     }
-    // Create unreachable after AFTER
-    llvm::IRBuilder<> builder(block);
-    builder.CreateUnreachable();
+    if (!deoptimize) {
+        // Create unreachable after AFTER
+        llvm::IRBuilder<> builder(block);
+        builder.CreateUnreachable();
+    }
 }
 }  // namespace ark::llvmbackend::passes

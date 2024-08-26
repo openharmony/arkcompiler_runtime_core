@@ -481,7 +481,7 @@ void GcIntrusion::RewriteWithGc(CallInst *call, GcRefLiveness *liveness, SetVect
     std::vector<Value *> gced(refs->begin(), refs->end());
     const auto &bundle = call->getOperandBundle(llvm::LLVMContext::OB_deopt);
     CallInst *gcCall = nullptr;
-    if (bundle) {
+    if (bundle && !bundle->Inputs.empty()) {
         ASSERT(!call->hasFnAttr("inline-info"));
         gcCall = builder.CreateGCStatepointCall(GetStatepointId(*call), 0,
                                                 llvm::FunctionCallee(call->getFunctionType(), call->getCalledOperand()),
