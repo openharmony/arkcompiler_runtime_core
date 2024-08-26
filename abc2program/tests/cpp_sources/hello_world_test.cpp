@@ -21,6 +21,7 @@
 #include "abc2program_driver.h"
 #include "abc2program_test_utils.h"
 #include "common/abc_file_utils.h"
+#include "dump_utils.h"
 #include "modifiers.h"
 
 using namespace testing::ext;
@@ -403,7 +404,7 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_code_test_function_foo_part2, Te
 {
     const pandasm::Function &function = *foo_function_;
     size_t regs_num = function.regs_num;
-    
+
     // check ins[12]
     const pandasm::Ins &ins12 = function.ins[12];
     std::string pa_ins_str12 = ins12.ToString("", true, regs_num);
@@ -823,4 +824,65 @@ HWTEST_F(Abc2ProgramJsonTest, abc2program_json_field_test, TestSize.Level1)
     auto content = val.value().GetValue<std::string>();
     EXPECT_EQ(content, "{\n  \"name\" : \"Import json\"\n}");
 }
+
+/**
+ * @tc.name: abc2program_hello_world_test_open_abc_file
+ * @tc.desc: open a non-existent abc file
+ * @tc.type: FUNC
+ * @tc.require: issueI9DT0V
+ */
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_open_abc_file, TestSize.Level1)
+{
+    std::string file_path = "invalid_file_path";
+    EXPECT_FALSE(driver_.Compile(file_path));
+}
+
+/**
+ * @tc.name: abc2program_hello_world_test_driver_run
+ * @tc.desc: driver run different parameters
+ * @tc.type: FUNC
+ * @tc.require: issueI9DT0V
+ */
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_driver_run, TestSize.Level1)
+{
+    EXPECT_TRUE(driver_.Run(0, nullptr));
+    int argc1 = 2;
+    const char* args1[] = {"--param1", "--param2"};
+    EXPECT_TRUE(driver_.Run(argc1, args1));
+    int argc2 = 2;
+    const char* args2[] = {"abc2program_options", "input_file_path"};
+    EXPECT_TRUE(driver_.Run(argc2, args2));
+    int argc3 = 3;
+    const char* args3[] = {"abc2program_options", "input_file_path", "output_file_path"};
+    EXPECT_TRUE(driver_.Run(argc3, args3));
+    int argc4 = 2;
+    const char* args4[] = {"abc2program_options", "--debug"};
+    EXPECT_TRUE(driver_.Run(argc4, args4));
+    int argc5 = 4;
+    const char* args5[] = {"abc2program_options", "--debug", "--debug-file", "debug_file_path"};
+    EXPECT_TRUE(driver_.Run(argc5, args5));
+    int argc6 = 3;
+    const char* args6[] = {"abc2program_options", HELLO_WORLD_ABC_TEST_FILE_NAME.c_str(),
+                            HELLO_WORLD_DUMP_RESULT_FILE_NAME.c_str()};
+    EXPECT_FALSE(driver_.Run(argc6, args6));
+}
+
+/**
+ * @tc.name: abc2program_hello_world_test_Label
+ * @tc.desc: label found in the map
+ * @tc.type: FUNC
+ * @tc.require: issueI9DT0V
+ */
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_Label, TestSize.Level1)
+{
+    LabelMap label_map = {{"first_label", "first_mapped_label"}, {"second_label", "second_mapped_label"}};
+    std::string label1 = "second_label";
+    std::string label2 = "third_label";
+    PandasmDumperUtils test = PandasmDumperUtils();
+    std::string result_found = test.GetMappedLabel(label1, label_map);
+    std::string result_null = test.GetMappedLabel(label2, label_map);
+    EXPECT_EQ(result_found, "second_mapped_label");
+    EXPECT_EQ(result_null, "");
+}
+
 };  // panda::abc2program

@@ -235,6 +235,9 @@ HWTEST(DefectScanAuxTest, DebugInfoTest, testing::ext::TestSize.Level0)
     // check debug info, whether the line number obtained from call inst is correct
     auto f0 = abc_file->GetFunctionByName("#*#foo");
     ASSERT_NE(f0, nullptr);
+    EXPECT_NE(abc_file->GetDefinedFunctionByIndex(0), nullptr);
+    EXPECT_NE(abc_file->GetAbcFileName(), "");
+    EXPECT_NE(abc_file->GetDefinedClassByIndex(0), nullptr);
     EXPECT_EQ(f0->GetCalleeInfoCount(), 3U);
     auto ci0_0 = f0->GetCalleeInfoByIndex(0);
     ASSERT_NE(ci0_0, nullptr);
@@ -279,6 +282,7 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest1, testing::ext::TestSize.Level0)
     // foo
     auto f0 = abc_file->GetFunctionByName("#*#foo");
     ASSERT_NE(abc_file, nullptr);
+    ASSERT_EQ(abc_file->GetFunctionByName(""), nullptr);
     size_t ci_cnt0 = f0->GetCalleeInfoCount();
     EXPECT_EQ(ci_cnt0, 6U);
     auto ci0_0 = f0->GetCalleeInfoByIndex(0);
@@ -352,6 +356,7 @@ HWTEST(DefectScanAuxTest, CalleeInfoTest2, testing::ext::TestSize.Level0)
     ASSERT_TRUE(ci2_0->IsCalleeDefinite());
     ASSERT_TRUE(ci2_0->GetClass() == abc_file->GetClassByName("#~@2=#Point"));
     ASSERT_TRUE(ci2_0->GetCallee() == abc_file->GetFunctionByName("#~@2=#Point"));
+    EXPECT_EQ(abc_file->GetClassByName(""), nullptr);
     // func6
     auto f3 = abc_file->GetFunctionByName("#*#func6");
     ASSERT_NE(f3, nullptr);
@@ -700,6 +705,9 @@ HWTEST(DefectScanAuxTest, AsyncFunctionTest, testing::ext::TestSize.Level0)
 {
     std::string test_name = DEFECT_SCAN_AUX_TEST_ABC_DIR "async_function_test.abc";
     auto abc_file = panda::defect_scan_aux::AbcFile::Open(test_name);
+    std::string test_name1 = DEFECT_SCAN_AUX_TEST_ABC_DIR;
+    auto abc_file1 = panda::defect_scan_aux::AbcFile::Open(test_name1);
+    EXPECT_EQ(abc_file1, nullptr);
     ASSERT(abc_file != nullptr);
 
     auto func_main = abc_file->GetFunctionByName("func_main_0");

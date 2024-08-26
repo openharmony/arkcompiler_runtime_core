@@ -32,7 +32,10 @@ a = localVar4;
 
 // export variable
 export let var5;
+var5++;
+
 let var6 = 100;
+var6 = var6 + 1;
 export { var6 };
 
 // export class
@@ -45,8 +48,14 @@ class UserInput extends InnerUserInput {
 export { UserInput as UInput };
 
 // export function
-function func3() { }
+function func3(num1, num2) {
+  return num1 + num2;
+}
+
+v6 = func3(v5 + v6);
+
 export { func3 as exFunc3 };
+
 export default function func1() { }
 export function func2() { }
 
