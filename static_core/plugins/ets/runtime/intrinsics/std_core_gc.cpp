@@ -160,15 +160,16 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
  * The function triggers specific GC.
  * @param cause - integer denotes type of GC. Possible values are: YOUNG_CAUSE = 0, THRESHOLD_CAUSE = 1,
  *                MIXED_CAUSE = 2, FULL_CAUSE = 3
+ * @param isRunGcInPlace - option to run GC in place
  * @return gc id. The id should be passed to waitForFinishGC to ensure the GC is finished.
  *  - The function may return 0 in case the GC is executed in-place. It means there is no need to wait such GC.
  *  - The function may return -1 in case the task is canceled.
  */
-extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback)
+extern "C" EtsLong StdGCStartGC(EtsInt cause, EtsObject *callback, EtsBoolean isRunGcInPlace)
 {
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    bool runGcInPlace = Runtime::GetOptions().IsRunGcInPlace("ets");
+    bool runGcInPlace = (isRunGcInPlace == 1) ? true : Runtime::GetOptions().IsRunGcInPlace("ets");
 
     GCTaskCause reason = GCCauseFromInt(cause);
     if (reason == GCTaskCause::INVALID_CAUSE) {
