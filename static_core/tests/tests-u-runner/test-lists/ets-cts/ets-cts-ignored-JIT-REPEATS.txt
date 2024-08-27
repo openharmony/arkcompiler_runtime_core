@@ -2,10 +2,15 @@
 06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_8.sts
 # panda#17450
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-un_6.sts
+# panda#17445
+06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-wd_6.ets
 
 # 17669 JIT-optimized code gives wrong result
 06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-clss_26.sts
 06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_arr/comp-arr_26.sts
+
+# 18707
+07.expressions/25.equality_expressions/03.bigint_equality_operators/ne2_17.sts
 
 # 17142 Compilation fails on multiple then/catch in Promise chain
 17.experimental_features/16.coroutines/03.promise_class/p_5.sts

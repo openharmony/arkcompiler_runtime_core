@@ -30,8 +30,6 @@ std/core/std_core_typeduarrays__Uint8Array.sts
 std/core/std_core_typeduarrays__Uint16Array.sts
 std/core/std_core_typeduarrays__Uint32Array.sts
 ### Issue I8PRJS end
-# #16400
-std/core/std_core_typeduarrays_function1__Uint32Array.sts
 # #17897
 std/core/std_core_typeduarrays_function1__Uint8ClampedArray.sts
 # #17894
