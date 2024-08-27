@@ -1086,7 +1086,7 @@ public:
      */
     unsigned AppendInput(Inst *input)
     {
-        ASSERT(input != nullptr);
+        CHECK_NOT_NULL(input);
         ASSERT(IsOperandsDynamic());
         DynamicOperands *operands = GetDynamicOperands();
         return operands->Append(input);
@@ -2476,6 +2476,7 @@ public:
     {
         ASSERT(roots_stack_mask_ == nullptr);
         roots_stack_mask_ = allocator->New<ArenaBitVector>(allocator);
+        CHECK_NOT_NULL(roots_stack_mask_);
         roots_stack_mask_->Reset();
     }
 
@@ -2555,6 +2556,7 @@ public:
     {
         if (imms_ == nullptr) {
             imms_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+            CHECK_NOT_NULL(imms_);
         }
         imms_->push_back(imm);
     }

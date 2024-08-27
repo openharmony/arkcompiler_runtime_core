@@ -59,6 +59,7 @@ void LoopAnalyzer::CreateRootLoop()
 {
     ASSERT(GetGraph()->GetRootLoop() == nullptr);
     auto root_loop = GetGraph()->GetAllocator()->New<Loop>(GetGraph()->GetAllocator(), nullptr, loop_counter_++);
+    CHECK_NOT_NULL(root_loop);
     root_loop->SetAsRoot();
     GetGraph()->SetRootLoop(root_loop);
 }
