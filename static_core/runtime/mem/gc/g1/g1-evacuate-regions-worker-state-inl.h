@@ -20,21 +20,42 @@
 #include "runtime/mem/region_space.h"
 #include "libpandabase/utils/type_converter.h"
 #include "runtime/mem/object-references-iterator-inl.h"
+#include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 
 namespace ark::mem {
 
 template <typename LanguageConfig>
-G1EvacuateRegionsWorkerState<LanguageConfig>::G1EvacuateRegionsWorkerState(G1GC<LanguageConfig> *gc, uint id,
-                                                                           PandaVector<Ref> *queue, SharedState *shared)
+G1EvacuateRegionsWorkerState<LanguageConfig>::G1EvacuateRegionsWorkerState(G1GC<LanguageConfig> *gc,
+                                                                           GCEvacuateRegionsTaskStack<Ref> *refStack)
     : gc_(gc),
       objectAllocator_(gc_->GetG1ObjectAllocator()),
       cardTable_(gc->GetCardTable()),
       regionSizeBits_(gc_->regionSizeBits_),
-      id_(id),
-      shared_(shared),
-      queue_(queue),
+      refStack_(refStack),
       evacuationObjectPointerHandler_(this)
 {
+    regionTo_ = GetNextRegion();
+}
+
+template <typename LanguageConfig>
+G1EvacuateRegionsWorkerState<LanguageConfig>::~G1EvacuateRegionsWorkerState()
+{
+    os::memory::LockHolder lock(gc_->gcWorkerQueueLock_);
+
+    gc_->memStats_.template RecordCountMovedYoung<false>(GetCopiedObjectsYoung());
+    gc_->memStats_.template RecordCountMovedTenured<false>(GetCopiedObjectsOld());
+    gc_->copiedBytesYoung_ += GetCopiedBytesYoung();
+    gc_->copiedBytesOld_ += GetCopiedBytesOld();
+
+    VisitCards([this](auto *card) {
+        if (!card->IsMarked()) {
+            card->Mark();
+            gc_->updatedRefsQueueTemp_->push_back(card);
+        }
+    });
+    GetRegionTo()->SetLiveBytes(GetRegionTo()->GetLiveBytes() + GetLiveBytes());
+    auto *objectAllocator = gc_->GetG1ObjectAllocator();
+    objectAllocator->template PushToOldRegionQueue<true>(GetRegionTo());
 }
 
 template <typename LanguageConfig>
@@ -140,114 +161,45 @@ ObjectHeader *G1EvacuateRegionsWorkerState<LanguageConfig>::SetForwardAddress(Ob
 }
 
 template <typename LanguageConfig>
-void G1EvacuateRegionsWorkerState<LanguageConfig>::StartWork()
-{
-    taskStart_ = ark::time::GetCurrentTimeInNanos();
-}
-
-template <typename LanguageConfig>
-void G1EvacuateRegionsWorkerState<LanguageConfig>::EndWork()
-{
-    taskEnd_ = ark::time::GetCurrentTimeInNanos();
-}
-
-template <typename LanguageConfig>
 void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateNonHeapRoots()
 {
-    time::Timer timer(&scanNonHeapRootsDuration_);
-    if (GetShared()->GetWorkersCount() == 1 || GetId() == 0) {
-        // Only first worker processes roots, currently it is not parallized
-        GCRootVisitor gcMarkCollectionSet = [this](const GCRoot &gcRoot) {
-            ASSERT(gcRoot.GetFromObjectHeader() == nullptr);
-            auto *rootObject = gcRoot.GetObjectHeader();
-            ASSERT(rootObject != nullptr);
-            LOG(DEBUG, GC) << "Handle root " << GetDebugInfoAboutObject(rootObject) << " from: " << gcRoot.GetType();
-            if (!GetGC()->InGCSweepRange(rootObject)) {
-                // Skip non-collection-set roots
-                return;
-            }
-            MarkWord markWord = rootObject->AtomicGetMark(std::memory_order_relaxed);
-            if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
-                // already evacuated by concurrent worker
-                return;
-            }
-            LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(rootObject);
-            Evacuate(rootObject, markWord);
-        };
-        GetGC()->VisitRoots(gcMarkCollectionSet, VisitGCRootFlags::ACCESS_ROOT_NONE);
-    }
-}
-
-class ConcurrentRemSetDistributor {
-public:
-    explicit ConcurrentRemSetDistributor(std::atomic_size_t &counter) : counter_(counter) {}
-
-    bool Distribute()
-    {
-        if (claimed_) {
-            // Atomic with seq_cst order reason: full order is required to synchronize workers
-            indexToProcess_ = counter_.fetch_add(1, std::memory_order_seq_cst);
+    GCRootVisitor gcMarkCollectionSet = [this](const GCRoot &gcRoot) {
+        ASSERT(gcRoot.GetFromObjectHeader() == nullptr);
+        auto *rootObject = gcRoot.GetObjectHeader();
+        ASSERT(rootObject != nullptr);
+        LOG(DEBUG, GC) << "Handle root " << GetDebugInfoAboutObject(rootObject) << " from: " << gcRoot.GetType();
+        if (!gc_->InGCSweepRange(rootObject)) {
+            // Skip non-collection-set roots
+            return;
         }
-
-        claimed_ = currentIndex_ == indexToProcess_;
-        currentIndex_++;
-        return claimed_;
-    }
-
-private:
-    size_t currentIndex_ {0};
-    size_t indexToProcess_ {0};
-    bool claimed_ {true};
-    std::atomic_size_t &counter_;
-};
-
-class EvenRemSetDistributor {
-public:
-    EvenRemSetDistributor(uint64_t id, size_t totalCount) : id_(id), totalCount_(totalCount) {}
-
-    bool Distribute()
-    {
-        auto oldvalue = currentIndex_++;
-        return oldvalue % totalCount_ == id_;
-    }
-
-private:
-    const uint64_t id_;
-    const size_t totalCount_;
-    size_t currentIndex_ {0};
-};
-
-template <typename LanguageConfig>
-void G1EvacuateRegionsWorkerState<LanguageConfig>::ScanRemset()
-{
-    time::Timer timer(&scanRemsetDuration_);
-    size_t total = 0;
-    EvenRemSetDistributor distributor(GetId(), GetShared()->GetWorkersCount());
-    auto remsetVisitor = [this, &distributor, &total](Region *r, const MemRange &range) {
-        if (distributor.Distribute()) {
-            IterateRefsInMemRange(range, r, &evacuationObjectPointerHandler_);
-            total++;
+        MarkWord markWord = rootObject->AtomicGetMark(std::memory_order_relaxed);
+        if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
+            return;
         }
+        LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(rootObject);
+        Evacuate(rootObject, markWord);
     };
 
-    GetShared()->GetRemset()->Iterate([](Region *r) { return !r->HasFlag(IS_COLLECTION_SET); }, remsetVisitor);
-    remsetCount_ = total;
+    gc_->VisitRoots(gcMarkCollectionSet, VisitGCRootFlags::ACCESS_ROOT_NONE);
+}
 
-    reenqueueCardsCount_ = cardQueue_.size();
+template <typename LanguageConfig>
+void G1EvacuateRegionsWorkerState<LanguageConfig>::ScanRemset(const RemSet<> &remset)
+{
+    auto remsetVisitor = [this](Region *region, const MemRange &range) { IterateRefsInMemRange(range, region); };
+    remset.Iterate([](Region *r) { return !r->HasFlag(IS_COLLECTION_SET); }, remsetVisitor);
 }
 
 template <class LanguageConfig>
-template <typename Visitor>
-void G1EvacuateRegionsWorkerState<LanguageConfig>::IterateRefsInMemRange(const MemRange &memRange, Region *region,
-                                                                         Visitor *visitor)
+void G1EvacuateRegionsWorkerState<LanguageConfig>::IterateRefsInMemRange(const MemRange &memRange, Region *region)
 {
     // Use MarkBitmap instead of LiveBitmap because it concurrently updated during evacuation
     MarkBitmap *bitmap = region->GetMarkBitmap();
     auto *startAddress = ToVoidPtr(memRange.GetStartAddress());
     auto *endAddress = ToVoidPtr(memRange.GetEndAddress());
-    auto wrapper = [this, visitor, startAddress, endAddress](void *mem) {
+    auto wrapper = [this, startAddress, endAddress](void *mem) {
         ObjectIterator<LanguageConfig::LANG_TYPE>::template IterateAndDiscoverReferences(
-            GetGC(), static_cast<ObjectHeader *>(mem), visitor, startAddress, endAddress);
+            GetGC(), static_cast<ObjectHeader *>(mem), &evacuationObjectPointerHandler_, startAddress, endAddress);
     };
     if (region->HasFlag(RegionFlag::IS_LARGE_OBJECT)) {
         bitmap->CallForMarkedChunkInHumongousRegion<false>(ToVoidPtr(region->Begin()), wrapper);
@@ -259,10 +211,7 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::IterateRefsInMemRange(const M
 template <typename LanguageConfig>
 void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateLiveObjects()
 {
-    time::Timer timer(&evacuationDuration_);
-    ProcessQueue();
-
-    evacuationAddCardsCount_ = cardQueue_.size() - reenqueueCardsCount_;
+    refStack_->TraverseObjects(*this);
 }
 }  // namespace ark::mem
 #endif

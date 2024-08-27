@@ -23,6 +23,7 @@
 #include "runtime/mem/gc/static/gc_marker_static-inl.h"
 #include "runtime/mem/gc/dynamic/gc_marker_dynamic-inl.h"
 #include "runtime/mem/gc/generational-gc-base-inl.h"
+#include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 
 namespace ark::mem {
 

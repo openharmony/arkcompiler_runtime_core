@@ -38,7 +38,7 @@
 #include "runtime/mem/gc/gc_barrier_set.h"
 #include "runtime/mem/gc/gc_phase.h"
 #include "runtime/mem/gc/gc_root.h"
-#include "runtime/mem/gc/gc_adaptive_stack.h"
+#include "runtime/mem/gc/gc_adaptive_marking_stack.h"
 #include "runtime/mem/gc/gc_scope.h"
 #include "runtime/mem/gc/gc_scoped_phase.h"
 #include "runtime/mem/gc/gc_stats.h"

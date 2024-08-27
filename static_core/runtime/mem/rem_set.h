@@ -49,9 +49,9 @@ public:
     void AddRef(const void *fromAddr);
 
     template <typename RegionPred, typename MemVisitor>
-    void Iterate(const RegionPred &regionPred, const MemVisitor &visitor);
+    void Iterate(const RegionPred &regionPred, const MemVisitor &visitor) const;
     template <typename Visitor>
-    void IterateOverObjects(const Visitor &visitor);
+    void IterateOverObjects(const Visitor &visitor) const;
 
     void Clear();
 

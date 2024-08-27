@@ -35,9 +35,9 @@ class ManagedThread;
 
 namespace ark::mem {
 
-class GCAdaptiveStack;
+class GCAdaptiveMarkingStack;
 
-using GCMarkingStackType = GCAdaptiveStack;
+using GCMarkingStackType = GCAdaptiveMarkingStack;
 
 enum class VisitGCRootFlags : uint32_t {
     ACCESS_ROOT_ALL = 1U,

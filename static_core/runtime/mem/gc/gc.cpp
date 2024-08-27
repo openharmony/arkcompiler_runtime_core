@@ -43,6 +43,7 @@
 #include "runtime/include/object_accessor-inl.h"
 #include "runtime/include/coretypes/class.h"
 #include "runtime/thread_manager.h"
+#include "runtime/mem/gc/gc_adaptive_stack_inl.h"
 
 namespace ark::mem {
 using TaggedValue = coretypes::TaggedValue;
