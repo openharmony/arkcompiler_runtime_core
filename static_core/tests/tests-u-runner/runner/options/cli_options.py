@@ -63,37 +63,23 @@ def is_enum_value(value: str, enum_class: Type[EnumT], option_name: str) -> Enum
     return enum_value
 
 
-def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
-    # Test suite options
-    parser.add_argument(
-        '--test-suite', action='append', dest='test_suites',
-        default=None,
-        help='names of test suites to run')
+def add_js_test_suite_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--test262', '-t', action='store_true', dest='test262',
         default=None,
         help='run test262 tests')
     parser.add_argument(
-        '--parser', action='store_true', dest='parser',
-        default=None,
-        help='run parser tests (ex --regression')
-    parser.add_argument(
-        '--declgenparser', action='store_true', dest='declgenparser',
-        default=None,
-        help="run declgen parser tests")
-    parser.add_argument(
         '--hermes', action='store_true', dest='hermes',
         default=None,
         help='run Hermes tests')
-    parser.add_argument(
-        '--astchecker', action='store_true', dest='astchecker',
-        default=None,
-        help='run ast checker tests')
-    parser.add_argument(
+
+
+def add_sts_test_suite_args(parser: argparse.ArgumentParser) -> None:
+    ets_mutex_group = parser.add_mutually_exclusive_group(required=False)
+    ets_mutex_group.add_argument(
         '--ets-system-tests', action='store_true', dest='system',
         default=None,
         help='run ets-system-tests')
-    ets_mutex_group = parser.add_mutually_exclusive_group(required=False)
     ets_mutex_group.add_argument(
         '--ets-func-tests', action='store_true', dest='ets_func_tests',
         default=None, help='run test against ETS STDLIB TEMPLATES and manual written ETS tests')
@@ -114,6 +100,35 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
     ets_mutex_group.add_argument(
         '--ets-custom', action='store_true', dest='ets_custom',
         default=None, help='run custom ETS suite test')
+    ets_mutex_group.add_argument(
+        '--sts-ts-subset', action='store_true', dest='sts_ts_subset',
+        default=None, help='run comparing static VM vs dynamic one on TS subset suite test')
+
+
+def add_other_test_suite_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument(
+        '--parser', action='store_true', dest='parser',
+        default=None,
+        help='run parser tests (ex --regression')
+    parser.add_argument(
+        '--declgenparser', action='store_true', dest='declgenparser',
+        default=None,
+        help="run declgen parser tests")
+    parser.add_argument(
+        '--astchecker', action='store_true', dest='astchecker',
+        default=None,
+        help='run ast checker tests')
+
+
+def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
+    # Test suite options
+    parser.add_argument(
+        '--test-suite', action='append', dest='test_suites',
+        default=None,
+        help='names of test suites to run')
+    add_js_test_suite_args(parser)
+    add_sts_test_suite_args(parser)
+    add_other_test_suite_args(parser)
 
 
 def add_ets_args(parser: argparse.ArgumentParser) -> None:

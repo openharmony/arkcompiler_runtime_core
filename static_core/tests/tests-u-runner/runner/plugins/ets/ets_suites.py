@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,9 @@ from enum import Enum
 
 class EtsSuites(Enum):
     CTS = "ets-cts"
-    FUNC = "ets-func-tests"
-    RUNTIME = "ets-runtime"
-    GCSTRESS = "ets-gc-stress"
-    ESCHECKED = "ets-es-checked"
     CUSTOM = "ets-custom"
+    ESCHECKED = "ets-es-checked"
+    FUNC = "ets-func-tests"
+    GCSTRESS = "ets-gc-stress"
+    RUNTIME = "ets-runtime"
+    TS_SUBSET = "sts-ts-subset"

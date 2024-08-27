@@ -27,8 +27,10 @@ from runner.options.config import Config
 from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_suite import EtsTestSuite
 from runner.plugins.ets.test_ets import TestETS
+from runner.plugins.ets.test_sts_ts_subset import TestTSSubset
 from runner.runner_base import get_test_id, correct_path
 from runner.runner_file_based import RunnerFileBased
+
 
 _LOGGER = logging.getLogger("runner.plugins.ets.runner_ets")
 
@@ -85,7 +87,10 @@ class RunnerETS(RunnerFileBased):
         return Path("/tmp") / "ets" / self.__ets_suite_name
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestETS:
-        test = TestETS(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
+        if self.__ets_suite_name != EtsSuites.TS_SUBSET.value:
+            test = TestETS(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
+        else:
+            test = TestTSSubset(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test
 
@@ -103,6 +108,8 @@ class RunnerETS(RunnerFileBased):
             name = EtsSuites.ESCHECKED.value
         elif 'ets_custom' in test_suites:
             name = EtsSuites.CUSTOM.value
+        elif 'sts_ts_subset' in test_suites:
+            name = EtsSuites.TS_SUBSET.value
         else:
             Log.exception_and_raise(_LOGGER, f"Unsupported test suite: {self.config.test_suites}")
         return name

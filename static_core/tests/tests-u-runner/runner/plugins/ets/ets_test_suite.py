@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+#
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,6 +68,7 @@ class EtsTestSuite(ABC):
             EtsSuites.GCSTRESS.value: GCStressEtsTestSuite,
             EtsSuites.ESCHECKED.value: ESCheckedEtsTestSuite,
             EtsSuites.CUSTOM.value: CustomEtsTestSuite,
+            EtsSuites.TS_SUBSET.value: TsSubsetEtsTestSuite,
         }
         return name_to_class.get(ets_suite_name)
 
@@ -137,6 +138,27 @@ class GCStressEtsTestSuite(EtsTestSuite):
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(CopyStep(
             test_source_path=self._ets_test_dir.gc_stress,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        if self._is_jit:
+            self._preparation_steps.append(JitStep(
+                test_source_path=self.test_root,
+                test_gen_path=self.test_root,
+                config=self.config,
+                num_repeats=self._jit.num_repeats
+            ))
+
+
+class TsSubsetEtsTestSuite(EtsTestSuite):
+    def __init__(self, config: Config, work_dir: WorkDir, default_list_root: str):
+        super().__init__(config, work_dir, EtsSuites.TS_SUBSET.value, default_list_root)
+        self._ets_test_dir = EtsTestDir(config.general.static_core_root, config.general.test_root)
+        self.set_preparation_steps()
+
+    def set_preparation_steps(self) -> None:
+        self._preparation_steps.append(CopyStep(
+            test_source_path=self._ets_test_dir.sts_ts_subset,
             test_gen_path=self.test_root,
             config=self.config
         ))
