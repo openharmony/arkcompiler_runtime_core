@@ -440,8 +440,8 @@ public:
         } else {
             UNREACHABLE();
         }
-        ASSERT(reg < graph_regs->size());
         CHECK_NOT_NULL(graph_regs);
+        ASSERT(reg < graph_regs->size());
         (*graph_regs)[reg] = true;
     }
 

@@ -62,6 +62,7 @@ void DynamicOperands::Reallocate([[maybe_unused]] size_t new_capacity /* =0 */)
     }
     auto size = new_capacity * (sizeof(User) + sizeof(Inst *)) + sizeof(Inst *);
     auto new_stor = reinterpret_cast<uintptr_t>(allocator_->Alloc(size));
+    CHECK(new_stor != 0);
 
     auto owner_inst {GetOwnerInst()};
     // Set pointer to owned instruction into new storage NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -263,6 +264,7 @@ Inst *Inst::Clone(const Graph *targetGraph) const
 {
     ASSERT(targetGraph != nullptr);
     auto clone = targetGraph->CreateInst(GetOpcode());
+    CHECK_NOT_NULL(clone);
     clone->bit_fields_ = GetAllFields();
     clone->pc_ = GetPc();
 #ifndef NDEBUG
@@ -388,6 +390,7 @@ void SaveStateInst::AppendImmediate(uint64_t imm, uint16_t vreg, DataType::Type 
 void SaveStateInst::AllocateImmediates(ArenaAllocator *allocator, size_t size)
 {
     immediates_ = allocator->New<ArenaVector<SaveStateImm>>(allocator->Adapter());
+    CHECK_NOT_NULL(immediates_);
     immediates_->resize(size);
 }
 
@@ -399,6 +402,8 @@ void TryInst::AppendCatchTypeId(uint32_t id, uint32_t catch_edge_index)
         auto allocator = GetBasicBlock()->GetGraph()->GetAllocator();
         catch_type_ids_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
         catch_edge_indexes_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+        CHECK_NOT_NULL(catch_type_ids_);
+        CHECK_NOT_NULL(catch_edge_indexes_);
     }
     catch_type_ids_->push_back(id);
     catch_edge_indexes_->push_back(catch_edge_index);
@@ -410,6 +415,7 @@ void CatchPhiInst::AppendThrowableInst(const Inst *inst)
         ASSERT(GetBasicBlock() != nullptr);
         auto allocator = GetBasicBlock()->GetGraph()->GetAllocator();
         throw_insts_ = allocator->New<ArenaVector<const Inst *>>(allocator->Adapter());
+        CHECK_NOT_NULL(throw_insts_);
     }
     throw_insts_->push_back(inst);
 }
@@ -437,6 +443,7 @@ Inst *TryInst::Clone(const Graph *targetGraph) const
             auto allocator = targetGraph->GetAllocator();
             clone->catch_type_ids_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
             clone->catch_edge_indexes_ = allocator->New<ArenaVector<uint32_t>>(allocator->Adapter());
+            CHECK_NOT_NULL(clone->catch_edge_indexes_);
         }
         clone->catch_type_ids_->resize(ids_count);
         clone->catch_edge_indexes_->resize(ids_count);
