@@ -131,8 +131,8 @@ and cannot be changed at runtime.
 
 .. _R003:
 
-|CB_R| Private '#' identifiers are not supported
-------------------------------------------------
+|CB_R| Private '``#``' identifiers are not supported
+----------------------------------------------------
 
 |CB_RULE| ``arkts-no-private-identifiers``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -142,7 +142,7 @@ and cannot be changed at runtime.
 
 |CB_ERROR|
 
-|LANG| does not use private identifiers starting with the symbol ``#``.
+|LANG| does not use private identifiers starting with the character '``#``'.
 Use the keyword ``private`` instead.
 
 |CB_BAD|
@@ -575,35 +575,39 @@ as a workaround.
 
 .. _R021:
 
-|CB_R| Type notation using ``this`` is not supported
-----------------------------------------------------
+|CB_R| ``this`` typing is supported only for methods with explicit ``this`` return
+----------------------------------------------------------------------------------
 
-|CB_RULE| ``arkts-no-typing-with-this``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+|CB_RULE| ``arkts-this-typing``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. meta:
-    :keywords: ThisType
+    :keywords: ThisTyping
 
 |CB_ERROR|
 
-|LANG| does not support type notation that uses the keyword  ``this`` (e.g.,
-specifying a method return type ``this`` is not allowed). Use explicit type
-instead.
+|LANG| allows type notation using the ``this`` keyword only for a return type
+of an instance method of a class or struct.
+Such methods can only return ``this`` explicitly (``return this``).
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    interface ListItem {
-        getHead(): this
-    }
-
     class C {
         n: number = 0
 
         m(c: this) {
             console.log(c)
+        }
+
+        foo(): this {
+            return this.bar();
+        }
+
+        bar(): this {
+            return this;
         }
     }
 
@@ -612,15 +616,19 @@ instead.
 
 .. code-block:: typescript
 
-    interface ListItem {
-        getHead(): ListItem
-    }
-
     class C {
         n: number = 0
 
         m(c: C) {
             console.log(c)
+        }
+
+        foo(): this {
+            return this;
+        }
+
+        bar(): this {
+            return this;
         }
     }
 
@@ -1627,8 +1635,8 @@ Do not use JSX since no alternative is provided to rewrite it.
 
 .. _R055:
 
-|CB_R| Unary operators ``+``, ``-``, and ``~`` work only on numbers
--------------------------------------------------------------------
+|CB_R| Unary operators '``+``', '``-``', and '``~``' work only on numbers
+-------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-polymorphic-unops``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1962,8 +1970,8 @@ destructuring and spread operator are not supported. Use other idioms
 
 .. _R071:
 
-|CB_R| The comma operator ``,`` is supported only in ``for`` loops
-------------------------------------------------------------------
+|CB_R| The comma operator '``,``' is supported only in ``for`` loops
+--------------------------------------------------------------------
 
 |CB_RULE| ``arkts-no-comma-outside-loops``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1973,7 +1981,7 @@ destructuring and spread operator are not supported. Use other idioms
 
 |CB_ERROR|
 
-|LANG| supports the comma operator ``,`` only in ``for`` loops. It is
+|LANG| supports the comma operator '``,``' only in ``for`` loops. It is
 useless otherwise as it makes the execution order harder to understand.
 
 Note that this rule is applied to the "comma operator" only. Comma is allowed
@@ -3349,7 +3357,7 @@ Use ordinary export syntax instead.
 |CB_ERROR|
 
 |LANG| does not support universal module definitions (UMD) because the language
-has no concept of 'script' (as opposed to 'module'). Besides, import is not
+has no concept of *script* (as opposed to *module*). Besides, import is not
 a runtime but a compile-time feature in |LANG|. Use ordinary syntax for
 ``export`` and ``import`` instead.
 
@@ -3497,7 +3505,7 @@ Use declaration with initialization instead.
 Prototype assignment is not supported because |LANG| has no concept of
 runtime prototype inheritance. This feature is considered not applicable
 to static typing. Use the classes and / or interfaces mechanism instead
-to statically 'combine' methods to data.
+to statically *combine* methods to data.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3601,8 +3609,8 @@ Currently, |LANG| does not support utility types from |TS| extensions to the
 standard library, except ``Partial``, ``Required``, ``Readonly``, and
 ``Record``.
 
-For type *Record<K, V>*, an indexing expression *rec[index]* is of type
-*V | undefined*.
+For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
+``V | undefined``.
 
 |CB_BAD|
 ~~~~~~~~
@@ -4422,8 +4430,8 @@ classes.
 
 .. _R154:
 
-|CB_R| Properties in ``Sendable`` classes and interfaces must have a Sendable data type
----------------------------------------------------------------------------------------
+|CB_R| Properties in ``Sendable`` classes and interfaces must have a ``Sendable data`` type
+-------------------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-sendable-prop-types``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -4436,9 +4444,9 @@ classes.
 **Note: This rule describes the restrictions of an ArkTS-specific feature**
 
 All properties of ``Sendable`` classes or interfaces must have
-``Sendable data types`` in |LANG|.
+``Sendable data`` types in |LANG|.
 
-The ``Sendable data`` is data of a type that belongs to one of the following
+``Sendable data`` is data of a type that belongs to one of the following
 categories:
 
 * Primitive types: ``boolean``, ``number``, ``string``, ``bigint``,
@@ -4547,7 +4555,7 @@ categories:
 
 .. _R156:
 
-|CB_R| Type arguments of generic ``Sendable`` type must be a ``Sendable`` data type
+|CB_R| Type arguments of generic ``Sendable`` type must be a ``Sendable data`` type
 -----------------------------------------------------------------------------------
 
 |CB_RULE| ``arkts-sendable-generic-types``
@@ -4560,7 +4568,7 @@ categories:
 
 **Note: This rule describes the restrictions of an ArkTS-specific feature**
 
-Only ``Sendable`` data types are allowed as type arguments of generic
+Only ``Sendable data`` types are allowed as type arguments of generic
 ``Sendable`` types in |LANG|.
 
 |CB_NON_COMPLIANT_CODE|
@@ -5070,3 +5078,97 @@ entities must be explicitly specified.
     See https://gitee.com/openharmony/arkcompiler_ets_frontend/pulls/2397
 
 .. :comment-end:
+
+.. _R165:
+
+|CB_R| Object literal properties can only contain name-value pairs
+------------------------------------------------------------------
+
+|CB_RULE| ``arkts-obj-literal-props``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: ObjectLiteralProperty
+
+|CB_ERROR|
+
+In |LANG| an object literal is a comma-separated list of name-value pairs
+enclosed in curly braces '``{``' and '``}``'. Each name-value pair
+consists of an identifier and an expression.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    class C {
+        a: string = ""
+        b: number = 0
+    }
+    const a = "Alice";
+    const b = 42;
+
+    let c: C = {
+        a,
+        b,
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    class C {
+        a: string = ""
+        b: number = 0
+    }
+    const a = "Alice";
+    const b = 42;
+
+    let c: C = {
+        a: a,
+        b: b,
+    }
+
+.. _R183:
+
+|CB_R| Optional methods are not supported
+-----------------------------------------
+
+|CB_RULE| ``arkts-no-optional-methods``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. meta:
+    :keywords: OptionalMethod
+
+|CB_ERROR|
+
+|LANG| does not support optional methods, unlike |TS| where methods with '``?``'
+are allowed to be not overriden in method overloading, or to be implemented
+in interface implementation.
+
+|CB_BAD|
+~~~~~~~~
+
+.. code-block:: typescript
+
+    class X {
+        throw?() {};
+    }
+
+    interface Y {
+        throw?(): void;
+    }
+
+|CB_OK|
+~~~~~~~
+
+.. code-block:: typescript
+
+    class X {
+        throw() {};
+    }
+
+    interface Y {
+        throw(): void;
+    }
