@@ -110,7 +110,7 @@ void EtsReferenceProcessor::HandleReference(GC *gc, GCMarkingStackType *objectsS
     os::memory::LockHolder lock(weakRefLock_);
     LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
     weakReferences_.insert(const_cast<ObjectHeader *>(object));
-    HandleOtherFields(cls, object, [gc, objectsStack, object](void *reference) {
+    HandleOtherFields<false>(cls, object, [gc, objectsStack, object](void *reference) {
         auto *refObject = reinterpret_cast<ObjectHeader *>(reference);
         if (gc->MarkObjectIfNotMarked(refObject)) {
             objectsStack->PushToStack(object, refObject);
@@ -124,17 +124,36 @@ void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, const BaseC
     os::memory::LockHolder lock(weakRefLock_);
     LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
     weakReferences_.insert(const_cast<ObjectHeader *>(object));
-    HandleOtherFields(cls, object, processor);
+    HandleOtherFields<true>(cls, object, processor);
 }
 
+template <bool USE_OBJECT_REF>
 void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const ObjectHeader *object,
                                               const ReferenceProcessorT &processor)
 {
     auto *etsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(cls));
-    if (etsClass->IsFinalizerReference()) {
-        ASSERT(etsClass->IsWeakReference());
-        auto *coro = ark::ets::EtsCoroutine::GetCurrent();
-        auto *finalizableWeakRef = ark::ets::EtsFinalizableWeakRef::FromCoreType(object);
+    if (!etsClass->IsFinalizerReference()) {
+        return;
+    }
+    // Currently, only finalizer references' other fields are handled
+    ASSERT(etsClass->IsWeakReference());
+    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
+    auto *finalizableWeakRef = ark::ets::EtsFinalizableWeakRef::FromCoreType(object);
+    if constexpr (USE_OBJECT_REF) {
+        auto refHandler = [this, coro, processor, finalizableWeakRef](auto *ref, size_t offset) {
+            if (ref == nullptr) {
+                return;
+            }
+            ASSERT(ref->GetReferent() != nullptr);
+            if (ref->GetReferent() == undefinedObject_) {
+                coro->GetPandaVM()->UnlinkFinalizableReference(coro, ref);
+                return;
+            }
+            processor(ToVoidPtr(ToUintPtr(finalizableWeakRef) + offset));
+        };
+        refHandler(finalizableWeakRef->GetPrev(coro), ark::ets::EtsFinalizableWeakRef::GetPrevOffset());
+        refHandler(finalizableWeakRef->GetNext(coro), ark::ets::EtsFinalizableWeakRef::GetNextOffset());
+    } else {
         auto refHandler = [this, coro, processor](auto *ref) {
             if (ref == nullptr) {
                 return;

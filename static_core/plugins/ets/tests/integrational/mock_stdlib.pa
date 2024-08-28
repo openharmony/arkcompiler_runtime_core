@@ -21,7 +21,14 @@
 .record std.core.DoubleToStringCacheElement
 .record std.core.FloatToStringCacheElement
 .record std.core.LongToStringCacheElement
-.record std.core.FinalizableWeakRef
+
+.record std.core.FinalizableWeakRef {
+    std.core.Object referent
+    std.core.Object prevRef
+    std.core.Object nextRef
+    i64 finalizerPtr
+    i64 finalizerArgPtr
+}
 
 .record std.core.OutOfMemoryError {
     std.core.String message

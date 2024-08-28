@@ -95,6 +95,7 @@ public:
     virtual void HandleLdaStr(Frame *frame, BytecodeId stringId);
     virtual void HandleReturnFrame() {}
     virtual void ProcessReferenceFinalizers();
+    virtual void BeforeShutdown() {}
 
     virtual mem::GCStats *GetGCStats() const = 0;
     virtual mem::HeapManager *GetHeapManager() const = 0;

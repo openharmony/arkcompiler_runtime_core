@@ -102,6 +102,18 @@ public:
         return reinterpret_cast<List *>(intrusiveList);
     }
 
+    void TraverseAndFinalize(EtsCoroutine *coro)
+    {
+        auto *weakRef = GetHead(coro);
+        while (weakRef != nullptr) {
+            auto finalizer = weakRef->ReleaseFinalizer();
+            if (!finalizer.IsEmpty()) {
+                finalizer.Run();
+            }
+            weakRef = weakRef->GetNext(coro);
+        }
+    }
+
 private:
     Node *GetHead(EtsCoroutine *coro) const
     {

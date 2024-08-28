@@ -1693,8 +1693,13 @@ void G1GC<LanguageConfig>::ConcurrentMarking(ark::GCTask &task)
         InitialMark(concurrentMarkingStack_);
     }
 
-    LOG_DEBUG_GC << "Concurrent marking started";
-    ConcurrentMark(&concurrentMarkingStack_);
+    if (UNLIKELY(task.reason == GCTaskCause::NATIVE_ALLOC_CAUSE)) {
+        LOG_DEBUG_GC << "Concurrent marking with weak refs processing started";
+        ConcurrentMark<true>(&concurrentMarkingStack_);
+    } else {
+        LOG_DEBUG_GC << "Concurrent marking without weak refs processing started";
+        ConcurrentMark<false>(&concurrentMarkingStack_);
+    }
     PauseTimeGoalDelay();
     // weak refs shouldn't be added to the queue on concurrent-mark
     ASSERT(this->GetReferenceProcessor()->GetReferenceQueueSize() == 0);
@@ -1792,11 +1797,12 @@ void G1GC<LanguageConfig>::InitialMark(GCMarkingStackType &markingStack)
 }
 
 template <class LanguageConfig>
+template <bool PROCESS_WEAK_REFS>
 void G1GC<LanguageConfig>::ConcurrentMark(GCMarkingStackType *objectsStack)
 {
     ConcurrentScope concurrentScope(this);
     GCScope<TRACE_TIMING_PHASE> scope(__FUNCTION__, this, GCPhase::GC_PHASE_MARK);
-    this->ConcurentMarkImpl(objectsStack);
+    this->ConcurrentMarkImpl<PROCESS_WEAK_REFS>(objectsStack);
 }
 
 template <class LanguageConfig>
@@ -2571,7 +2577,8 @@ size_t G1GC<LanguageConfig>::CalculateDesiredEdenLengthByPauseDuration()
 }
 
 template <class LanguageConfig>
-NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurentMarkImpl(GCMarkingStackType *objectsStack)
+template <bool PROCESS_WEAK_REFS>
+NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurrentMarkImpl(GCMarkingStackType *objectsStack)
 {
     {
         ScopedTiming t("VisitClassRoots", *this->GetTiming());
@@ -2607,7 +2614,12 @@ NO_THREAD_SAFETY_ANALYSIS void G1GC<LanguageConfig>::ConcurentMarkImpl(GCMarking
 
         ASSERT(!object->IsForwarded());
         CalcLiveBytesNotAtomicallyMarkPreprocess(object, objectClass);
-        concMarker_.MarkInstance(objectsStack, object, objectClass);
+        if constexpr (PROCESS_WEAK_REFS) {
+            auto refPred = [this](const ObjectHeader *obj) { return InGCSweepRange(obj); };
+            concMarker_.MarkInstance(objectsStack, object, objectClass, refPred);
+        } else {
+            concMarker_.MarkInstance(objectsStack, object, objectClass);
+        }
     }
 }
 

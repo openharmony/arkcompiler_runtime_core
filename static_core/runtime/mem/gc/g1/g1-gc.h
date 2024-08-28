@@ -256,7 +256,7 @@ private:
 
     /**
      * Mark predicate with calculation of live bytes in region, not atomically
-     * @see ConcurentMarkImpl
+     * @see ConcurrentMarkImpl
      *
      * @param object marked object from marking-stack
      */
@@ -351,7 +351,8 @@ private:
     void ConcurrentMarking(ark::GCTask &task);
 
     /// Iterate over roots and mark them concurrently
-    NO_THREAD_SAFETY_ANALYSIS void ConcurentMarkImpl(GCMarkingStackType *objectsStack);
+    template <bool PROCESS_WEAK_REFS>
+    NO_THREAD_SAFETY_ANALYSIS void ConcurrentMarkImpl(GCMarkingStackType *objectsStack);
 
     void PauseTimeGoalDelay();
 
@@ -360,6 +361,7 @@ private:
     /*
      * Mark the heap in concurrent mode and calculate live bytes
      */
+    template <bool PROCESS_WEAK_REFS>
     void ConcurrentMark(GCMarkingStackType *objectsStack);
 
     /// ReMarks objects after Concurrent marking and actualize information about live bytes

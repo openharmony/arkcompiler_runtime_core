@@ -86,10 +86,20 @@ public:
         return FromCoreType(prev);
     }
 
+    static constexpr size_t GetPrevOffset()
+    {
+        return MEMBER_OFFSET(EtsFinalizableWeakRef, prev_);
+    }
+
     EtsFinalizableWeakRef *GetNext(EtsCoroutine *coro) const
     {
         auto *next = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsFinalizableWeakRef, next_));
         return FromCoreType(next);
+    }
+
+    static constexpr size_t GetNextOffset()
+    {
+        return MEMBER_OFFSET(EtsFinalizableWeakRef, next_);
     }
 
     void SetPrev(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef)

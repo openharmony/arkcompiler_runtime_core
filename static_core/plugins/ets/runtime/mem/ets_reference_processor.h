@@ -79,6 +79,7 @@ private:
     void EnqueueFinalizer(ark::ets::EtsWeakReference *weakRef);
 
     /// Handle fields of references
+    template <bool USE_OBJECT_REF>
     void HandleOtherFields(const BaseClass *cls, const ObjectHeader *object, const ReferenceProcessorT &processor)
         REQUIRES(weakRefLock_);
 

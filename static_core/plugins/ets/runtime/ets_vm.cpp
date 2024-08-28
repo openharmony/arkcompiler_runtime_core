@@ -783,6 +783,14 @@ void PandaEtsVM::CleanFinalizableReferenceList()
     weakRefList->UnlinkClearedReferences(EtsCoroutine::GetCurrent());
 }
 
+void PandaEtsVM::BeforeShutdown()
+{
+    auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
+    auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
+    os::memory::LockHolder lh(finalizableWeakRefListLock_);
+    weakRefList->TraverseAndFinalize(EtsCoroutine::GetCurrent());
+}
+
 /* static */
 void PandaEtsVM::Abort(const char *message /* = nullptr */)
 {
