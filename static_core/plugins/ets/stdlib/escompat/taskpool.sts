@@ -15,6 +15,10 @@
 
 package escompat;
 
+export type taskpoolCallbackFunction = () => void;
+
+export type taskpoolCallbackFunctionWithError = (e: Error) => void;
+
 // NOTE(ipetrov, #16281): Make taskpool.Task when namespaces will be supported
 /**
  * @class Task provides an interface to create a task to execute in the taskpool
@@ -55,25 +59,114 @@ export class taskpoolTask {
      */
     static native isCancel(): boolean;
 
+    /**
+     * Register a callback and call it when the task is enqueued
+     * 
+     * @param callback Callback to be registered and executed when the task is enqueued
+     * @throws Error if task is executed. It does not support the registration of listeners
+     */
+    onEnqueued(callback: taskpoolCallbackFunction): void {
+        this.throwIfCallbackCannotBeAdded();
+        this.onEnqueueCallback = callback;
+    }
+
+    /**
+     * Register a callback and call it before the task execution
+     * 
+     * @param callback Callback to be registered and executed before the task execution
+     * @throws Error if task is executed. It does not support the registration of listeners
+     */
+    onStartExecution(callback: taskpoolCallbackFunction): void {
+        this.throwIfCallbackCannotBeAdded();
+        this.onStartCallback = callback;
+    }
+
+    /**
+     * Register a callback and call it when the task fails to execute
+     * 
+     * @param callback Callback to be registered and executed when the task fails to execute
+     * @throws Error if task is executed. It does not support the registration of listeners
+     */
+    onExecutionFailed(callback: taskpoolCallbackFunctionWithError): void {
+        this.throwIfCallbackCannotBeAdded();
+        this.onFailCallback = callback;
+    }
+
+    /**
+     * Register a callback and call it when the task successfully executed
+     * 
+     * @param callback Callback to be registered and executed when the task successfully executed
+     * @throws Error if task is executed. It does not support the registration of listeners
+     */
+    onExecutionSucceeded(callback: taskpoolCallbackFunction): void {
+        this.throwIfCallbackCannotBeAdded();
+        this.onSuccessCallback = callback;
+    }
+
+    /**
+     * @returns true if the task has been completed, false - otherwise
+     */
+    isDone(): boolean {
+        // NOTE(ipetrov, #15499): Need to support, potentially need to refactor native implementation
+        throw new Error("Does not support");
+    }
+
     internal checkExecution(): void {
         if (this.groupId != 0) {
             throw new Error("taskpool:: groupTask cannot execute outside");
+        }
+        if (this.seqId != 0) {
+            throw new Error("taskpool:: seqRunnerTask cannot execute outside");
         }
     }
 
     internal execute(): NullishType {
         if (!taskpool.taskStarted(this.id, this.groupId)) {
-            throw (this.groupId == 0) ? new Error("taskpool:: task has been canceled") : new Error("taskpool:: taskGroup has been canceled");
+            this.throwCancelTaskError();
         }
+        this.callUserCallback(this.onStartCallback);
         let result: NullishType = null;
         try {
             result = this.func();
+        } catch (e: Error) {
+            try {
+                this.onFailCallback?.(e);
+            } catch (callbackError) {}
+            throw e;
         } finally {
             if (!taskpool.taskFinished(this.id, this.groupId)) {
-                throw (this.groupId == 0) ? new Error("taskpool:: task has been canceled") : new Error("taskpool:: taskGroup has been canceled");
+                this.throwCancelTaskError();
             }
         }
+        this.callUserCallback(this.onSuccessCallback);
         return result;
+    }
+
+    private throwCancelTaskError(): void {
+        if (this.groupId != 0) {
+            throw new Error("taskpool:: taskGroup has been canceled");
+        }
+        if (this.seqId != 0) {
+            throw new Error("taskpool:: sequenceRunner task has been canceled");
+        }
+        throw new Error("taskpool:: task has been canceled");
+    }
+
+    private throwIfCallbackCannotBeAdded() {
+        if (this.isSubmitted) {
+            throw new Error("taskpool:: The executed task does not support the registration of listeners.");
+        }
+    }
+
+    private callUserCallback(callback: taskpoolCallbackFunction | undefined): void {
+        try {
+            callback?.();
+        } catch (e) {}
+    }
+
+    internal enqueue(): void {
+        this.isSubmitted = true;
+        this.callUserCallback(this.onEnqueueCallback);
     }
 
     private static native generateId(): long;
@@ -87,7 +180,13 @@ export class taskpoolTask {
 
     internal readonly id: long;
     internal groupId: long = 0;
+    internal seqId: long = 0;
     internal isSubmitted: boolean = false;
+
+    private onEnqueueCallback?: taskpoolCallbackFunction;
+    private onStartCallback?: taskpoolCallbackFunction;
+    private onFailCallback?: taskpoolCallbackFunctionWithError;
+    private onSuccessCallback?: taskpoolCallbackFunction;
 }
 
 // NOTE(ipetrov, #16281): Make taskpool.LongTask when namespaces will be supported
@@ -158,7 +257,7 @@ export class taskpoolTaskGroup {
             throw new Error("taskpool:: taskGroup cannot add groupTask");
         } else if (task instanceof taskpoolLongTask) {
             throw new Error("taskpool:: The interface does not support the long task");
-        } else if (task.isSubmitted) {
+        } else if (task.isSubmitted || task.seqId != 0) {
             throw new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
         }
         task.groupId = this.id;
@@ -180,6 +279,46 @@ export class taskpoolTaskGroup {
     internal readonly id: long;
     internal tasks: Array<taskpoolTask>;
     internal isSubmitted: boolean = false;
+}
+
+// NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
+/**
+ * @class SequenceRunner provides a queue, in which all tasks are executed in sequence
+ */
+export class taskpoolSequenceRunner {
+    /**
+     * Create a SequenceRunner instance
+     */
+    constructor(/* priority?: Priority */) {
+        this.id = taskpoolSequenceRunner.generateSeqRunnerId();
+        this.seqPromise = Promise.resolve<NullishType>(new Object());
+    }
+
+    execute(task: taskpoolTask): Promise<NullishType> {
+        this.checkExecution(task);
+        task.seqId = this.id;
+        taskpool.taskSubmitted(task.id);
+        task.enqueue();
+        let taskRunner = (value: NullishType): NullishType => {
+            return task.execute();
+        };
+        this.seqPromise = this.seqPromise.then<NullishType, NullishType>(taskRunner, taskRunner);
+        return this.seqPromise;
+    }
+
+    private static native generateSeqRunnerId(): long;
+
+    private checkExecution(task: taskpoolTask) {
+        if (task.groupId != 0) {
+            throw new Error("taskpool:: SequenceRunner cannot execute groupTask");
+        }
+        if (task.isSubmitted || task.seqId != 0) {
+            throw new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask");
+        }
+    }
+
+    internal readonly id: long;
+    private seqPromise: Promise<NullishType>;
 }
 
 // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
@@ -242,10 +381,10 @@ export class taskpool {
      * @param task The task for executing
      * @returns Promise for result of executed task
      */
-    static execute(task: taskpoolTask): Promise<NullishType> {
+    static execute(task: taskpoolTask /*, priority?: Priority */): Promise<NullishType> {
         task.checkExecution();
-        task.isSubmitted = true;
         taskpool.taskSubmitted(task.id);
+        task.enqueue();
         return launch task.execute();
     }
 
@@ -255,7 +394,7 @@ export class taskpool {
      * @param group The task group for execution
      * @returns Promise for array of results of executed tasks from the group
      */
-    static execute(group: taskpoolTaskGroup): Promise<NullishType[]> {
+    static execute(group: taskpoolTaskGroup /*, priority?: Priority */): Promise<NullishType[]> {
         let tasksCount: long = group.tasks.length as long;
         if (tasksCount == 0) {
             group.isSubmitted = true;
@@ -264,7 +403,7 @@ export class taskpool {
         taskpool.taskGroupSubmitted(group.id, tasksCount);
         let promises = new Array<Promise<NullishType>>();
         group.tasks.forEach((task: taskpoolTask, i: number) => {
-            task.isSubmitted = true;
+            task.enqueue();
             promises.push(launch task.execute());
         });
         group.isSubmitted = true;
@@ -279,7 +418,7 @@ export class taskpool {
      * @see Task.isCancel
      */
     static cancel(task: taskpoolTask): void {
-        taskpool.cancelImpl(task.id);
+        taskpool.cancelImpl(task.id, task.seqId);
     }
 
     /**
@@ -300,16 +439,17 @@ export class taskpool {
      */
     static terminateTask(longTask: taskpoolLongTask): void {}
 
-    private static native cancelImpl(taskId: long): void;
+    private static native cancelImpl(taskId: long, seqId: long): void;
 
     private static native cancelGroupImpl(groupId: long): void;
 
     /**
      * @brief Submit task to the taskpool on the execute method
      * @see taskpool.execute
+     * @see taskpool.SequenceRunner.execute
      * @param taskId identifier of the submitted task
      */
-    private static native taskSubmitted(taskId: long): void;
+    internal static native taskSubmitted(taskId: long): void;
 
     /**
      * @brief Submit group of tasks to the taskpool on the execute method

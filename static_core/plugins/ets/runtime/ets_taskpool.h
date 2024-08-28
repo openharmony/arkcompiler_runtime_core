@@ -44,6 +44,12 @@ public:
     EtsLong GenerateTaskGroupId();
 
     /**
+     * @see taskpool.SequenceRunner.constructor
+     * @return new unique identifier for creating task sequence runner
+     */
+    EtsLong GenerateSeqRunnerId();
+
+    /**
      * @brief Notify taskpool about execution request for task
      * @param taskId requested task identifier
      */
@@ -143,6 +149,7 @@ private:
 
     std::atomic<EtsLong> taskId_ {1};
     std::atomic<EtsLong> taskGroupId_ {1};
+    std::atomic<EtsLong> seqRunnerId_ {1};
     mutable os::memory::Mutex taskpoolLock_;
     // key is task id, value is count of associated tasks
     PandaUnorderedMap<EtsLong, size_t> waitingTasks_ GUARDED_BY(taskpoolLock_);

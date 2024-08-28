@@ -14,11 +14,11 @@
  */
 
 function returnAbc(): string {
-    return "a" + "b" + "c";
+    return (() => "a")() + (() => "b")() + (() => "c")();
 }
 
 function returnDef(): string {
-    return "de" + "f";
+    return (() => "de")() + (() => "f")();
 }
 
 function TaskpoolTaskGroupTest() {
@@ -180,6 +180,21 @@ function TaskpoolTaskGroupTestAddTaskTwiceToOneGroup() {
     assert(isErrorOccurred);
 }
 
+function TaskpoolTaskGroupTestAddTaskFromSeqRunner() {
+    let group = new taskpoolTaskGroup();
+    let task = new taskpoolTask(returnAbc);
+    let runner = new taskpoolSequenceRunner(); 
+    runner.execute(task);
+    let isErrorOccurred = false;
+    try {
+        group.addTask(task);
+    } catch(e: Error) {
+        isErrorOccurred = true;
+        assert(e.message == "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
+    }
+    assert(isErrorOccurred);
+}
+
 function main(): int {
     TaskpoolTaskGroupTest();
     TaskpoolTaskGroupTestExecuteSeveral();
@@ -190,5 +205,6 @@ function main(): int {
     TaskpoolTaskGroupTestAddLongTask();
     TaskpoolTaskGroupTestAddTaskFromAnotherGroup();
     TaskpoolTaskGroupTestAddTaskTwiceToOneGroup();
+    TaskpoolTaskGroupTestAddTaskFromSeqRunner();
     return 0;
 }
