@@ -39,6 +39,7 @@ file(WRITE ${ETS_CONFIG}
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/perf/code.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/dynamic_object/dynamic_call.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/optional_reference_type/optional_reference_type.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
+    "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/objects_passing/objects_passing.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"${PANDA_ROOT}/plugins/ets/tests/interop_js/tests/bouncing_pandas/bouncing_pandas.js\": {\"language\": \"js\", \"hasDecl\": false},\n"
     "      \"convert.js\": {\"language\": \"js\", \"hasDecl\": false}\n"
     "    }\n"
@@ -163,6 +164,18 @@ panda_ets_interop_js_gtest(ets_interop_js_dynamic_enum
 panda_ets_interop_js_gtest(ets_interop_js_optional_reference_type
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/optional_reference_type/optional_reference_type.cpp
     ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/optional_reference_type/optional_reference_type.sts
+    ETS_CONFIG ${ETS_CONFIG}
+)
+
+panda_ets_interop_js_gtest(ets_interop_js_objects_passing
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/objects_passing/objects_passing.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/objects_passing/objects_passing.sts
+    ETS_CONFIG ${ETS_CONFIG}
+)
+
+panda_ets_interop_js_gtest(ets_interop_js_objects_passing_sts
+    CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/objects_passing/objects_passing_sts.cpp
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/objects_passing/objects_passing_sts.sts
     ETS_CONFIG ${ETS_CONFIG}
 )
 
