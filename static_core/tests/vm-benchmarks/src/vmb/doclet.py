@@ -412,5 +412,6 @@ class TemplateVars:  # pylint: disable=invalid-name
                 self.disable_inlining = True
                 self.config.update({'disable_inlining': True})
             if ovr.aot_compiler_options:
-                self.aot_opts += ' '.join(ovr.aot_compiler_options) + ' '
+                opts = ' '.join(ovr.aot_compiler_options)
+                self.aot_opts = f'{self.aot_opts} {opts} '
                 self.config.update({'aot_opts': self.aot_opts})
