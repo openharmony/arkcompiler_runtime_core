@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-import os
 import logging
 import json
 from typing import List, Iterable, Set, Optional
@@ -31,6 +30,7 @@ from vmb.cli import Args
 from vmb.lang import LangBase
 from vmb.doclet import DocletParser, TemplateVars
 from vmb.gensettings import GenSettings
+from vmb.shell import ShellUnix
 
 SrcPath = namedtuple("SrcPath", "full rel")
 log = logging.getLogger('vmb')
@@ -176,7 +176,7 @@ class BenchGenerator:
         script = src_full.parent.joinpath(values.generator)
         cmd = f'{script} {bench_dir} bench_{values.bench_name}{ext}'
         log.trace('Test generator: %s', script)
-        os.system(cmd)
+        ShellUnix().run(cmd)
 
     @staticmethod
     def emit_bench_variant(values: TemplateVars,
