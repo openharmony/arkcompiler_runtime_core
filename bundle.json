@@ -59,6 +59,13 @@
                     }
                 },
                 {
+                    "name": "//arkcompiler/runtime_core/libpandabase:libarkbase",
+                    "header": {
+                        "header_files": [],
+                        "header_base": "//arkcompiler/runtime_core/libpandabase"
+                    }
+                },
+                {
                     "name": "//arkcompiler/runtime_core/libpandabase:libarkbase_static",
                     "header": {
                         "header_files": [],
