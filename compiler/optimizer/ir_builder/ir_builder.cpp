@@ -91,6 +91,7 @@ bool IrBuilder::CheckMethodLimitations(const BytecodeInstructions &instructions,
     }
 
     auto panda_file = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    CHECK_NOT_NULL(panda_file);
     panda_file::MethodDataAccessor mda(*panda_file,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
     panda_file::CodeDataAccessor cda(*panda_file, mda.GetCodeId().value());
@@ -254,6 +255,7 @@ IrBuilder::TryCodeBlock *IrBuilder::InsertTryBlockInfo(const Boundaries &try_bou
 void IrBuilder::CreateTryCatchBoundariesBlocks()
 {
     auto panda_file = static_cast<panda_file::File *>(GetGraph()->GetRuntime()->GetBinaryFileForMethod(GetMethod()));
+    CHECK_NOT_NULL(panda_file);
     panda_file::MethodDataAccessor mda(*panda_file,
                                        panda_file::File::EntityId(GetGraph()->GetRuntime()->GetMethodId(GetMethod())));
     panda_file::CodeDataAccessor cda(*panda_file, mda.GetCodeId().value());

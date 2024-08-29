@@ -104,6 +104,7 @@ bool RunOptimizations(compiler::Graph *graph, BytecodeOptIrInterface *iface)
 void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir_interface,
                          const compiler::Graph *graph, compiler::RuntimeInterface::MethodPtr method_ptr)
 {
+    CHECK_NOT_NULL(graph);
     function.local_variable_debug.clear();
     auto *pc_ins_map = ir_interface.GetPcInsMap();
     pc_ins_map->reserve(function.ins.size());

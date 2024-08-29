@@ -157,6 +157,13 @@ void DominatorsTree::Init(size_t blocks_count)
     parents_ = allocator->New<BlocksVector>(allocator->Adapter());
     semi_ = allocator->New<ArenaVector<int32_t>>(allocator->Adapter());
     vertices_ = allocator->New<BlocksVector>(allocator->Adapter());
+    CHECK_NOT_NULL(ancestors_);
+    CHECK_NOT_NULL(buckets_);
+    CHECK_NOT_NULL(idoms_);
+    CHECK_NOT_NULL(labels_);
+    CHECK_NOT_NULL(parents_);
+    CHECK_NOT_NULL(semi_);
+    CHECK_NOT_NULL(vertices_);
 
     ancestors_->resize(blocks_count);
     idoms_->resize(blocks_count);
