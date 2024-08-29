@@ -173,6 +173,11 @@ public:
      */
     size_t GetObjectUsedBytes() const;
 
+    void SetUseCompilerSpaceSizeLimit(bool use_limit)
+    {
+        use_compiler_space_size_limit_ = use_limit;
+    }
+
 private:
     template <class ArenaT = Arena>
     ArenaT *AllocArenaImpl(size_t size, SpaceType space_type, AllocatorType allocator_type, const void *allocator_addr);
@@ -266,6 +271,8 @@ private:
     size_t code_space_max_size_ {0};
     size_t compiler_space_max_size_ {0};
     size_t internal_space_max_size_ {0};
+
+    bool use_compiler_space_size_limit_ {false};
 
     // Map for non object pools allocated via mmap
     std::map<const void *, std::tuple<Pool, AllocatorInfo, SpaceType>> non_object_mmaped_pools_;
