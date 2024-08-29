@@ -37,18 +37,6 @@ bool Abc2ProgramCompiler::OpenAbcFile(const std::string &file_path)
     return true;
 }
 
-bool Abc2ProgramCompiler::IsVersionLessEqual(
-    const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_1,
-    const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_2) const
-{
-    for (size_t i = 0; i < panda_file::File::VERSION_SIZE; ++i) {
-        if (version_1[i] != version_2[i]) {
-            return version_1[i] < version_2[i];
-        }
-    }
-    return true;
-}
-
 bool Abc2ProgramCompiler::CheckFileVersionIsSupported(std::array<uint8_t, panda_file::File::VERSION_SIZE> min_version,
                                                       uint8_t target_api_version,
                                                       std::string target_api_sub_version) const
@@ -58,8 +46,8 @@ bool Abc2ProgramCompiler::CheckFileVersionIsSupported(std::array<uint8_t, panda_
         return false;
     }
     const auto &file_version = file_->GetHeader()->version;
-    return IsVersionLessEqual(min_version, file_version) &&
-        IsVersionLessEqual(file_version, target_version.value());
+    return panda::panda_file::IsVersionLessOrEqual(min_version, file_version) &&
+        panda::panda_file::IsVersionLessOrEqual(file_version, target_version.value());
 }
 
 const panda_file::File &Abc2ProgramCompiler::GetAbcFile() const

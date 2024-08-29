@@ -86,6 +86,7 @@ public:
 
 private:
     void GetLiteralArrays();
+    void FillLiteralArrayTable(panda_file::File::EntityId &id, size_t index);
     void FillLiteralData(pandasm::LiteralArray *lit_array, const panda_file::LiteralDataAccessor::LiteralValue &value,
                          const panda_file::LiteralTag &tag) const;
     void GetRecords();

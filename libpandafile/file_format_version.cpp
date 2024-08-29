@@ -34,4 +34,15 @@ std::string GetVersion(const std::array<uint8_t, File::VERSION_SIZE> &v)
     return versionstr;
 }
 
+bool IsVersionLessOrEqual(const std::array<uint8_t, File::VERSION_SIZE> &currrent_version,
+                          const std::array<uint8_t, File::VERSION_SIZE> &target_version)
+{
+    for (size_t i = 0; i < File::VERSION_SIZE; ++i) {
+        if (currrent_version[i] != target_version[i]) {
+            return currrent_version[i] < target_version[i];
+        }
+    }
+    return true;
+}
+
 }  // namespace panda::panda_file

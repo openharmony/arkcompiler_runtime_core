@@ -36,8 +36,6 @@ public:
     bool CheckClassId(uint32_t class_id, size_t offset) const;
 
 private:
-    bool IsVersionLessEqual(const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_1,
-        const std::array<uint8_t, panda_file::File::VERSION_SIZE> &version_2) const;
     std::unique_ptr<const panda_file::File> file_;
     std::unique_ptr<panda_file::DebugInfoExtractor> debug_info_extractor_;
     // the single whole program compiled from the abc file, only used in non-parallel mode

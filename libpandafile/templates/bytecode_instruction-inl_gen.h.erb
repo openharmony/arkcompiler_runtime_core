@@ -496,3 +496,28 @@ inline bool BytecodeInst<Mode>::IsPrimaryOpcodeValid() const
     }
     return true;
 }
+
+// NOLINTNEXTLINE(readability-function-size)
+template<const BytecodeInstMode Mode> inline size_t BytecodeInst<Mode>::GetLiteralIndex() const {
+    switch(GetOpcode()) {
+% Panda::instructions.each do |i|
+%   flag_array = i.real_properties.map {|prop| prop.upcase}
+%   flag_array = [] if flag_array.empty?
+%   count = -1
+%   flag_array.each do |f|
+%     if f == "STRING_ID" || f == "METHOD_ID" || f == "LITERALARRAY_ID"
+%       count += 1
+%     end
+%     if f == "LITERALARRAY_ID"
+%       break
+%     end
+%   end
+    case BytecodeInst<Mode>::Opcode::<%= i.opcode.upcase %>:
+        return <%= count %>;
+        break;
+% end
+    default:
+        return -1;
+        break;
+    }
+}

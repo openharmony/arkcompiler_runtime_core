@@ -33,6 +33,14 @@ public:
     static void TearDownTestCase(void) {};
     void SetUp() {};
     void TearDown() {};
+    // The known method id in the abc file
+    std::vector<uint8_t> method_id_in_test_constant_pool = {0x4e, 0x02};
+    // The known string id in the abc file
+    std::vector<uint8_t> string_id_in_test_constant_pool = {0xe6, 0x00};
+    // The known literal id in the abc file
+    std::vector<uint8_t> literal_id_in_test_constant_pool = {0x8e, 0x02};
+    // The known jump instruction in the abc file
+    std::vector<uint8_t> jump_ins_id_in_test_constant_pool = {0x4f, 0x0c};
 };
 
 /**
@@ -59,18 +67,20 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_001, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
+    std::vector<uint32_t> literal_ids;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolIndex());
+        std::copy(ver.literal_ids_.begin(), ver.literal_ids_.end(), std::back_inserter(literal_ids));
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    std::vector<uint8_t> new_method_id = {0x0c, 0x00}; // The known string id in the abc file
-    std::vector<uint8_t> method_id = {0x0e, 0x00}; // The known method id in the abc file
+    std::vector<uint8_t> new_method_id = string_id_in_test_constant_pool;
+    std::vector<uint8_t> method_id = method_id_in_test_constant_pool;
 
     for (size_t i = buffer.size() - 1; i >= 0; --i) {
         if (buffer[i] == method_id[0] && buffer[i + 1] == method_id[1]) {
@@ -86,6 +96,25 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.include_literal_array_ids = false;
+        ver.CollectIdInfos();
+        ver.literal_ids_ = literal_ids;
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+    }
+
+    std::ifstream base_file_02(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file_02.is_open());
+    std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
+    buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
+    buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
+    buffer_0[15] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[3]);
+    const std::string target_file_name_02 = GRAPH_TEST_ABC_DIR "verifier_constant_pool_002_2.abc";
+    GenerateModifiedAbc(buffer_0, target_file_name_02);
+    base_file_02.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name_02};
         ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolIndex());
         EXPECT_FALSE(ver.VerifyConstantPool());
@@ -101,18 +130,20 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
+    std::vector<uint32_t> literal_ids;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolIndex());
+        std::copy(ver.literal_ids_.begin(), ver.literal_ids_.end(), std::back_inserter(literal_ids));
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    std::vector<uint8_t> new_literal_id = {0x0e, 0x00}; // The known method id in the abc file
-    std::vector<uint8_t> literal_id = {0x0f, 0x00}; // The known literal id in the abc file
+    std::vector<uint8_t> new_literal_id = method_id_in_test_constant_pool;
+    std::vector<uint8_t> literal_id = literal_id_in_test_constant_pool;
 
     for (size_t i = 0; i < buffer.size(); ++i) {
         if (buffer[i] == literal_id[0] && buffer[i + 1] == literal_id[1]) {
@@ -123,13 +154,30 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
     }
 
     const std::string target_file_name = GRAPH_TEST_ABC_DIR "verifier_constant_pool_003.abc";
-
     GenerateModifiedAbc(buffer, target_file_name);
-
     base_file.close();
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.include_literal_array_ids = false;
+        ver.CollectIdInfos();
+        ver.literal_ids_ = literal_ids;
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+    }
+
+    std::ifstream base_file_02(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file_02.is_open());
+    std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
+    buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
+    buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
+    buffer_0[15] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[3]);
+    const std::string target_file_name_02 = GRAPH_TEST_ABC_DIR "verifier_constant_pool_003_2.abc";
+    GenerateModifiedAbc(buffer_0, target_file_name_02);
+    base_file_02.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name_02};
         ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolIndex());
     }
@@ -144,18 +192,20 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool.abc";
+    std::vector<uint32_t> literal_ids;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolIndex());
+        std::copy(ver.literal_ids_.begin(), ver.literal_ids_.end(), std::back_inserter(literal_ids));
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
 
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
-    std::vector<uint8_t> new_string_id = {0x0f, 0x00}; // The known literal id in the abc file
-    std::vector<uint8_t> string_id = {0x0c, 0x00}; // The known string id in the abc file
+    std::vector<uint8_t> new_string_id = literal_id_in_test_constant_pool;
+    std::vector<uint8_t> string_id = string_id_in_test_constant_pool;
 
     for (size_t i = sizeof(panda_file::File::Header); i < buffer.size(); ++i) {
         if (buffer[i] == string_id[0] && buffer[i + 1] == string_id[1]) {
@@ -171,6 +221,25 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.include_literal_array_ids = false;
+        ver.CollectIdInfos();
+        ver.literal_ids_ = literal_ids;
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+    }
+
+    std::ifstream base_file_02(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file_02.is_open());
+    std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
+    buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
+    buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
+    buffer_0[15] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[3]);
+    const std::string target_file_name_02 = GRAPH_TEST_ABC_DIR "verifier_constant_pool_004_2.abc";
+    GenerateModifiedAbc(buffer_0, target_file_name_02);
+    base_file_02.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name_02};
         ver.CollectIdInfos();
         EXPECT_FALSE(ver.VerifyConstantPoolIndex());
     }
@@ -185,10 +254,12 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
+    std::vector<uint32_t> literal_ids;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
+        std::copy(ver.literal_ids_.begin(), ver.literal_ids_.end(), std::back_inserter(literal_ids));
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
@@ -196,7 +267,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
     unsigned char new_opcode = 0xff;
-    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x13}; // The known instruction in the abc file
+    std::vector<unsigned char> opcode_imm8 =
+        jump_ins_id_in_test_constant_pool;
     for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
         if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
             buffer[i] = new_opcode;
@@ -210,8 +282,27 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.include_literal_array_ids = false;
         ver.CollectIdInfos();
+        ver.literal_ids_ = literal_ids;
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
+    }
+
+    std::ifstream base_file_02(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file_02.is_open());
+    std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
+    buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
+    buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
+    buffer_0[15] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[3]);
+    const std::string target_file_name_02 = GRAPH_TEST_ABC_DIR "verifier_constant_pool_006_2.abc";
+    GenerateModifiedAbc(buffer_0, target_file_name_02);
+    base_file_02.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name_02};
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
     }
 }
 
@@ -224,10 +315,12 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
 HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
 {
     const std::string base_file_name = GRAPH_TEST_ABC_DIR "test_constant_pool_content.abc";
+    std::vector<uint32_t> literal_ids;
     {
         panda::verifier::Verifier ver {base_file_name};
         ver.CollectIdInfos();
         EXPECT_TRUE(ver.VerifyConstantPoolContent());
+        std::copy(ver.literal_ids_.begin(), ver.literal_ids_.end(), std::back_inserter(literal_ids));
     }
     std::ifstream base_file(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file.is_open());
@@ -235,7 +328,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_007, TestSize.Level1)
     std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
 
     unsigned char new_imm8 = 0x4f;
-    std::vector<unsigned char> opcode_imm8 = {0x4f, 0x13}; // The known jump instruction in the abc file
+    std::vector<unsigned char> opcode_imm8 = jump_ins_id_in_test_constant_pool;
     for (size_t i = 0; i < buffer.size() - opcode_imm8.size(); ++i) {
         if (buffer[i] == opcode_imm8[0] && buffer[i + 1] == opcode_imm8[1]) {
             buffer[i + 1] = new_imm8;
@@ -288,8 +381,27 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
 
     {
         panda::verifier::Verifier ver {target_file_name};
+        ver.include_literal_array_ids = false;
         ver.CollectIdInfos();
+        ver.literal_ids_ = literal_ids;
         EXPECT_FALSE(ver.VerifyConstantPoolContent());
+    }
+
+    std::ifstream base_file_02(base_file_name, std::ios::binary);
+    EXPECT_TRUE(base_file_02.is_open());
+    std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
+    buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
+    buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
+    buffer_0[15] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[3]);
+    const std::string target_file_name_02 = GRAPH_TEST_ABC_DIR "verifier_constant_pool_008_2.abc";
+    GenerateModifiedAbc(buffer_0, target_file_name_02);
+    base_file_02.close();
+
+    {
+        panda::verifier::Verifier ver {target_file_name_02};
+        ver.CollectIdInfos();
+        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
     }
 }
 

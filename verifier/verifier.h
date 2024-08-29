@@ -51,12 +51,15 @@ public:
     bool VerifyConstantPoolIndex();
     bool VerifyConstantPoolContent();
 
+    bool include_literal_array_ids = true;
     std::vector<uint32_t> literal_ids_;
     std::unordered_map<uint32_t, uint32_t> inner_literal_map_;
     std::unordered_map<uint32_t, uint32_t> inner_method_map_;
 
 private:
     void GetLiteralIds();
+    template <typename T>
+    void PushToLiteralIds(T &ids);
     void GetConstantPoolIds();
     bool CollectIdInInstructions(const panda_file::File::EntityId &method_id);
     void CollectModuleLiteralId(const panda_file::File::EntityId &field_id);
