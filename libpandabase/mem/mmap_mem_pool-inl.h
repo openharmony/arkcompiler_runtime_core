@@ -214,7 +214,7 @@ inline void MmapMemPool::FreeArenaImpl(ArenaT *arena)
 inline void *MmapMemPool::AllocRawMemCompilerImpl(size_t size)
 {
     void *mem = nullptr;
-    if (LIKELY(compiler_space_max_size_ >= compiler_space_current_size_ + size)) {
+    if (LIKELY(compiler_space_max_size_ >= compiler_space_current_size_ + size || !use_compiler_space_size_limit_)) {
         mem = panda::os::mem::MapRWAnonymousWithAlignmentRaw(size, PANDA_POOL_ALIGNMENT_IN_BYTES);
         if (mem != nullptr) {
             compiler_space_current_size_ += size;
