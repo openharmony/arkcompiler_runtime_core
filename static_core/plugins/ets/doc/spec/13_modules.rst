@@ -207,7 +207,7 @@ An import declaration has two parts as follows:
 -  Import binding that defines what entities, and in what form---qualified
    or unqualified---the current compilation unit can use.
 
-Alternatively, a module can be imported without biding simply in order to
+Alternatively, a module can be imported without binding simply in order to
 run the initialization code.
 
 .. index::

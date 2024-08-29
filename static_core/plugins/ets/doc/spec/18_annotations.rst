@@ -198,9 +198,6 @@ Otherwise, a :index:`compile-time error` occurs:
    :linenos:
 
     @MyAnno()
-    function foo() {/*body*/} // compile-time error
-
-    @MyAnno()
     abstract class A {} // compile-time error
 
 Repeatable annotations are not supported, i.e., an annotation cannot be applied

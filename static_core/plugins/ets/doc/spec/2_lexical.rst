@@ -432,7 +432,7 @@ Literals
       | BigIntLiteral
       | BooleanLiteral
       | StringLiteral
-      | TemplateLiteral
+      | MultilineStringLiteral
       | NullLiteral
       | UndefinedLiteral
       | CharLiteral
@@ -759,7 +759,7 @@ for ``boolean``.
 
 ``String`` literals consist of zero or more characters enclosed between
 single or double quotes. A special form of string literals is
-*template literal* (see :ref:`Template Literals`).
+*multiline string* literal (see :ref:`Multiline String Literal`).
 
 ``String`` literals are of the literal type that corresponds to the literal.
 If an operator is applied to the literal, then the literal type is replaced
@@ -768,7 +768,6 @@ for ``string`` (see :ref:`Type String`).
 
 .. index::
    string literal
-   template literal
    predefined reference type
 
 
@@ -863,34 +862,29 @@ The examples are provided below:
 
 |
 
-.. _Template Literals:
+.. _Multiline String Literal:
 
-Template Literals
-=================
+Multiline String Literal
+========================
 
 .. meta:
     frontend_status: Done
 
-Multi-line string literals that can include embedded expressions are called
-*template literals*.
-
-A *template* literal with an embedded expression is a *template string*.
-
-A *template string* is not exactly a literal because its value cannot be
-evaluated at compile time. The evaluation of a template string is called
-*string interpolation* (see :ref:`String Interpolation Expressions`).
+*Multiline strings* can contain arbitrary text delimited by backtick characters
+'\`'. Multiline strings can contain any character, except the escape character
+'``\``'. Multiline strings can contain newline characters:
 
 .. index::
    string literal
-   template literal
-   template string
+   multiline string literal
+   multiline string
    string interpolation
    multi-line string
 
 .. code-block:: abnf
 
-    TemplateLiteral:
-        '`' (BacktickCharacter | embeddedExpression)* '`'
+    MultilineStringLiteral:
+        '`' (BacktickCharacter)* '`'
         ;
 
     BacktickCharacter:
@@ -898,6 +892,11 @@ evaluated at compile time. The evaluation of a template string is called
         | '\\' EscapeSequence
         | LineContinuation
         ;
+
+     LineContinuation:
+        '\\' [\r\n\u2028\u2029]+
+        ;
+
 
 The grammar of *embeddedExpression* is described in
 :ref:`String Interpolation Expressions`.
@@ -912,7 +911,7 @@ An example of a multi-line string is provided below:
                     which should be enclosed in 
                     backticks`
 
-*Template* literals are of the literal type that corresponds to the literal.
+*MultilineString* literals are of the literal type that corresponds to the literal.
 If an operator is applied to the literal, then the literal type is replaced
 for ``string`` (see :ref:`Type String`).
 

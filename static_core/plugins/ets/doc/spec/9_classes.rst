@@ -741,7 +741,7 @@ Members can be as follows:
 
 -  Static members that are not part of class instances, and can be accessed
    by using a qualified name notation (see :ref:`Names`) anywhere the class
-   name or the interface name is accessible (see :ref:`Accessible`); and
+   name is accessible (see :ref:`Accessible`); and
 -  Non-static, or instance members that belong to any instance of the class.
 
 
@@ -1006,8 +1006,8 @@ superclasses of the class for they are in fact different fields:
    superclass
    class declaration body
 
-Any static field can be accessed only with the qualification of a superclass or
-of a superinterface name (see :ref:`Field Access Expression`).
+Any static field can be accessed only with the qualification of a superclass
+name (see :ref:`Field Access Expression`).
 
 In case of *shadowing*, a class can access all non-private fields of a
 superclass and superinterfaces from its direct superclass and direct
@@ -1048,7 +1048,7 @@ Static Fields
 .. meta:
     frontend_status: Done
 
-There are two categories of class or interface fields as follows:
+There are two categories of class fields as follows:
 
 - Static fields
 
@@ -1058,7 +1058,7 @@ There are two categories of class or interface fields as follows:
   eventually created.
 
   Static fields are always accessed by using a qualified name notation
-  wherever the class or interface name is accessible (see :ref:`Accessible`).
+  wherever the class name is accessible (see :ref:`Accessible`).
 
 - Instance, or non-static fields
 
@@ -2394,7 +2394,6 @@ hides the inherited field:
 
    interface Interface {
       foo()
-      static foo() { /* some method body */ }
    }
    class Base {
       foo() { /* Base class method body */ }
@@ -2407,15 +2406,13 @@ hides the inherited field:
       // foo() is both 
       //   - overridden in class Derived, and
       //   - implements foo() from the Interface
-
-      // static foo() inherited from Base hides static foo() from Interface
+      static foo () { /* Derived class static method body */ }
    }
 
    let target: Interface = new Derived
    target.foo()  // this is a call to an instance method foo() overridden in class Derived
 
-   Interface.foo()  // this is a call to a static method foo() declared in Interface
-   Base.foo()  // this is a call to a static method foo() declared in Base
+   Base.foo()    // this is a call to a static method foo() declared in Base
    Derived.foo() // this is a call to a static method foo() declared in Derived
   
 

@@ -272,7 +272,7 @@ A type can be referred to in source code by the following:
         | 'object' | 'string' | 'void' | 'never' |'undefined'
         ;
 
-    literalType
+    literalType:
         Literal
         ;
 
@@ -1751,7 +1751,7 @@ Union Types
 
 A *union* type is a reference type created as a combination of other
 types. Valid values of all types the union is created from are the values of a
-union type.
+*union* type.
 
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
@@ -1760,6 +1760,9 @@ If a *union* uses a primitive type (see *Primitive types* in
 :ref:`Types by Category`) or a literal type (see :ref:`Literal Types`), then
 automatic boxing (see :ref:`Boxing Conversions`) occurs to keep the reference
 nature of the type.
+
+A :index:`compile-time error` occurs if a *union* type contains more than one
+numeric type.
 
 The reduced form of *union* types allows defining a type that has one literal
 type (see :ref:`Literal Types`) only:
@@ -1781,6 +1784,13 @@ type (see :ref:`Literal Types`) only:
    type T = 3    // Literal type aliased
    let t1: T = 3 // OK
    let t2: T = 2 // Compile-time error
+
+   type BadUnion1 = int | double // Compile-time error
+   type BadUnion2 = Int | Double // Compile-time error
+   type BadUnion3 = int | Double // Compile-time error
+   let x = cond? new Int (): new Double /* Compile-time error as conditional
+        expression contains an invalid union type */
+
 
 A typical example of the *union* type usage is represented below:
 
@@ -1906,14 +1916,8 @@ another:
 #. If at least one type in the union is ``Object``, then all other non-nullish
    types are removed.
 #. If there is type ``never`` among union types, then it is removed.
-#. If there is a non-empty group of numeric types in a union, then the largest
-   numeric type (see :ref:`Numeric Types Hierarchy`) is to stay in the union,
-   while others are removed. Any numeric literal type is removed if its value
-   fits into the largest numeric type in a union.
-#. If there is a non-empty group of boxed numeric types (see
-   :ref:`Boxed Types`) in a union, then the largest boxed numeric type
-   (Byte->Short->Int->Long->Float->Double) is to stay in the union, while
-   others are removed.
+#. Any numeric literal type is removed if its value fits into the numeric
+   type in a union.
 #. If after boxing (see :ref:`Boxing Conversions`) a primitive type equals
    another union type, then the initial type is removed.
 #. If the value of the literal type in a union type belongs to the values of a
