@@ -56,6 +56,9 @@ class RunnerASTChecker(RunnerJS):
         self.test_env.util = self.util
 
         if self.config.general.with_js:
+            self.add_directory('ark_tests/ast/parser/js', 'js', flags=['--parse-only'])
+
+        if self.config.general.with_js:
             self.add_directory('ast/compiler/js', 'js', flags=['--extension=js', '--output=/dev/null'])
         self.add_directory('ast/compiler/ts', 'ts', flags=['--extension=ts'])
         self.add_directory('ast/compiler/ets', 'sts', flags=[
