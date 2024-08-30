@@ -252,6 +252,7 @@ InstLiveSet *LivenessAnalyzer::GetInitInstLiveSet(BasicBlock *block)
 {
     unsigned instruction_count = inst_life_intervals_.size();
     auto live_set = GetAllocator()->New<InstLiveSet>(instruction_count, GetAllocator());
+    CHECK_NOT_NULL(live_set);
     for (auto succ : block->GetSuccsBlocks()) {
         // catch-begin is pseudo successor, its live set will be processed for blocks with throwable instructions
         if (succ->IsCatchBegin()) {
@@ -589,6 +590,7 @@ LifeIntervals *LifeIntervals::SplitAt(LifeNumber ln, ArenaAllocator *alloc)
     ASSERT(!IsPhysical());
     ASSERT(ln > GetBegin() && ln <= GetEnd());
     auto split_child = alloc->New<LifeIntervals>(alloc, GetInst());
+    CHECK_NOT_NULL(split_child);
     if (sibling_ != nullptr) {
         split_child->sibling_ = sibling_;
     }

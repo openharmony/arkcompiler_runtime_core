@@ -287,6 +287,7 @@ GraphCloner::LoopUnrollData *GraphCloner::PrepareLoopToUnroll(Loop *loop, bool c
     // Save replaceable phi inputs
 
     unroll_data->phi_update_inputs = allocator->New<InstVector>(allocator->Adapter());
+    CHECK_NOT_NULL(unroll_data->phi_update_inputs);
     for (auto phi : header_block->PhiInsts()) {
         unroll_data->phi_update_inputs->push_back(phi->CastToPhi()->GetPhiInput(back_edge));
     }
@@ -831,6 +832,7 @@ GraphCloner::LoopClonerData *GraphCloner::CreateLoopClonerData(Loop *loop, Basic
     auto unroll_data = allocator->New<LoopClonerData>();
     CHECK_NOT_NULL(unroll_data);
     unroll_data->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
+    CHECK_NOT_NULL(unroll_data->blocks);
     unroll_data->blocks->resize(loop->GetBlocks().size() + 1);
     unroll_data->blocks->at(0) = pre_header;
     std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unroll_data->blocks->begin() + 1);

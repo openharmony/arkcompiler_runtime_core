@@ -130,6 +130,7 @@ void ValNum::FindEqualVnOrCreateNew(Inst *inst)
         return;
     }
     auto obj = GetGraph()->GetLocalAllocator()->New<VnObject>();
+    CHECK_NOT_NULL(obj);
     obj->Add(inst);
     COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are searched for inst with id " << inst->GetId();
     auto it = map_insts_.find(obj);
