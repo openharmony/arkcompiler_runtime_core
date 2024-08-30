@@ -21,6 +21,12 @@ module Constants
     ETS_SB_COMPRESS_OFFSET = ETS_SB_LENGTH_OFFSET + " + sizeof(int32_t)"
 end
 
+class SynchronizationType
+  :Sync
+  :Async
+  :AsyncManual
+end
+
 #
 # Counts a number of digits in the long v (+1 for the sign if v is negative)
 #
@@ -98,6 +104,22 @@ Label(:BoolFalse)
 Label(:Done)
 end
 
+macro(:ref_is_null) do |obj|
+  Compare(obj, 0).SrcType(Constants::COMPILER_REFERENCE).EQ.b
+end
+
+scoped_macro(:store_with_barrier) do |buffer, buffer_uint, offset, obj, sync_type|
+  Store(buffer, offset, obj).SetNeedBarrier(sync_type == :Async).ref
+  if sync_type == :AsyncManual
+    min_addr := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_MIN_ADDR_OFFSET).word
+    cards := LoadI(%tr).Imm(Constants::TLS_CARD_TABLE_ADDR_OFFSET).ptr
+
+    mem_word := Cast(buffer_uint).SrcType(Constants::REF_UINT).word
+    card_offset := ShrI(Sub(mem_word, min_addr).word).Imm(Constants::CARD_TABLE_CARD_BITS).word
+    card := Add(cards, card_offset).ptr
+    StoreI(card, Constants::CARD_DIRTY_VALUE).Imm(Constants::CARD_VALUE_OFFSET).u8
+  end
+end
 
 function(:StringBuilderAppendLong,
          params: {sb: 'ref', v: 'i64', array_klass: 'ref'},
@@ -252,6 +274,198 @@ end
 GenerateStringBuilderAppendChar(true)
 GenerateStringBuilderAppendChar(false)
 
+def GenerateStringBuilderAppendStrings(num_args, sync_type)
+  case num_args
+    when 1
+      params = {sb: 'ref', str0: 'ref'}
+    when 2
+      params = {sb: 'ref', str0: 'ref', str1: 'ref'}
+    when 3
+      params = {sb: 'ref', str0: 'ref', str1: 'ref', str2: 'ref'}
+    when 4
+      params = {sb: 'ref', str0: 'ref', str1: 'ref', str2: 'ref', str3: 'ref'}
+    else
+      raise "Unexpected number of arguments: #{num_args}"
+  end
+  function("StringBuilderAppendString#{num_args}#{sync_type}".to_sym,
+            params: params,
+            regmap: $full_regmap,
+            regalloc_set: $panda_mask,
+            mode: [:FastPath]) {
+
+  # Arm32 is not supported
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).void.Terminator
+    next
+  end
+
+  # 1. Check if any input string is null
+  if num_args > 0
+    str_is_null := ref_is_null(str0)
+  end
+  if num_args > 1
+    str_is_null := Or(str_is_null, ref_is_null(str1)).b
+  end
+  if num_args > 2
+    str_is_null := Or(str_is_null, ref_is_null(str2)).b
+  end
+  if num_args > 3
+    str_is_null := Or(str_is_null, ref_is_null(str3)).b
+  end
+  IfImm(str_is_null).Imm(0).SrcType(Constants::COMPILER_BOOL).NE.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+
+  # 2. Check if there is a free slot in the buffer
+  if num_args > 0
+    index0 := LoadI(sb).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+  end
+  if num_args > 1
+    index1 := AddI(index0).Imm(1).i32
+  end
+  if num_args > 2
+    index2 := AddI(index1).Imm(1).i32
+  end
+  if num_args > 3
+    index3 := AddI(index2).Imm(1).i32
+  end
+  case num_args
+    when 1
+      index := index0
+    when 2
+      index := index1
+    when 3
+      index := index2
+    when 4
+      index := index3
+    else
+      raise "Unexpected number of arguments: #{num_args}"
+  end
+
+  buffer := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref
+  If(index, LoadI(buffer).Imm(Constants::ARRAY_LENGTH_OFFSET).i32).GE.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  buffer_uint := LoadI(sb).Imm(Constants::ETS_SB_BUFFER_OFFSET).ref_uint
+
+  # 3. Increment 'index' field
+  StoreI(sb, AddI(index).Imm(1).i32).Imm(Constants::ETS_SB_INDEX_OFFSET).i32
+
+  # 4. Store input strings into buffer
+  if num_args > 0
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    offset0 := AddI(ShlI(index0).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+    store_with_barrier(buffer, buffer_uint, offset0, str0, sync_type)
+  end
+  if num_args > 1
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    offset1 := AddI(ShlI(index1).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+    store_with_barrier(buffer, buffer_uint, offset1, str1, sync_type)
+  end
+  if num_args > 2
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    offset2 := AddI(ShlI(index2).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+    store_with_barrier(buffer, buffer_uint, offset2, str2, sync_type)
+  end
+  if num_args > 3
+    Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+    offset3 := AddI(ShlI(index3).Imm(Constants::REFERENCE_TYPE_SHIFT).i32).Imm(Constants::ARRAY_DATA_OFFSET).i32
+    store_with_barrier(buffer, buffer_uint, offset3, str3, sync_type)
+  end
+
+  # 5. Load raw string 'length' field
+  if num_args > 0
+    length0 := LoadI(str0).Imm(Constants::STRING_LENGTH_OFFSET).i32
+  end
+  if num_args > 1
+    length1 := LoadI(str1).Imm(Constants::STRING_LENGTH_OFFSET).i32
+  end
+  if num_args > 2
+    length2 := LoadI(str2).Imm(Constants::STRING_LENGTH_OFFSET).i32
+  end
+  if num_args > 3
+    length3 := LoadI(str3).Imm(Constants::STRING_LENGTH_OFFSET).i32
+  end
+
+  # 6. Update 'compress' field
+  compress := LoadI(sb).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+  If(compress, 0).NE.Likely.b {
+    if num_args > 0
+      compress0 := XorI(length0).Imm(1).i32
+      compress  := And(compress, compress0).i32
+    end
+    if num_args > 1
+      compress1 := XorI(length1).Imm(1).i32
+      compress  := And(compress, compress1).i32
+    end
+    if num_args > 2
+      compress2 := XorI(length2).Imm(1).i32
+      compress  := And(compress, compress2).i32
+    end
+    if num_args > 3
+      compress3 := XorI(length3).Imm(1).i32
+      compress  := And(compress, compress3).i32
+    end
+    If(compress, 0).EQ.Unlikely.b {
+      StoreI(sb, 0).Imm(Constants::ETS_SB_COMPRESS_OFFSET).u8
+    }
+  }
+
+  # 7. Update 'length' field
+  length := LoadI(sb).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+  if num_args > 0
+    length0 := ShrI(length0).Imm(1).i32
+    length := Add(length, length0).i32
+  end
+  if num_args > 1
+    length1 := ShrI(length1).Imm(1).i32
+    length := Add(length, length1).i32
+  end
+  if num_args > 2
+    length2 := ShrI(length2).Imm(1).i32
+    length := Add(length, length2).i32
+  end
+  if num_args > 3
+    length3 := ShrI(length3).Imm(1).i32
+    length := Add(length, length3).i32
+  end
+
+  StoreI(sb, length).Imm(Constants::ETS_SB_LENGTH_OFFSET).i32
+
+  Return(sb).ref
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_BUILDER_APPEND_STRING#{num_args}_SLOW_PATH")
+  case num_args
+    when 1
+      method = "StringBuilderAppendString#{num_args}UsualBridge"
+      Intrinsic(:SLOW_PATH_ENTRY, sb, str0).AddImm(entrypoint).MethodAsImm(method).Terminator.ref
+    when 2
+      method = "StringBuilderAppendString#{num_args}OddSavedBridge"
+      Intrinsic(:SLOW_PATH_ENTRY, sb, str0, str1).AddImm(entrypoint).MethodAsImm(method).Terminator.ref
+    when 3
+      method = "StringBuilderAppendString#{num_args}UsualBridge"
+      Intrinsic(:SLOW_PATH_ENTRY, sb, str0, str1, str2).AddImm(entrypoint).MethodAsImm(method).Terminator.ref
+    when 4
+      method = "StringBuilderAppendString#{num_args}OddSavedBridge"
+      Intrinsic(:SLOW_PATH_ENTRY, sb, str0, str1, str2, str3).AddImm(entrypoint).MethodAsImm(method).Terminator.ref
+    else
+      raise "Unexpected number of arguments: #{num_args}"
+  end
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+end
+
+GenerateStringBuilderAppendStrings(2, :Sync)
+GenerateStringBuilderAppendStrings(3, :Sync)
+GenerateStringBuilderAppendStrings(4, :Sync)
+
+GenerateStringBuilderAppendStrings(2, :Async)
+GenerateStringBuilderAppendStrings(3, :Async)
+GenerateStringBuilderAppendStrings(4, :Async)
+
+GenerateStringBuilderAppendStrings(2, :AsyncManual)
+GenerateStringBuilderAppendStrings(3, :AsyncManual)
+GenerateStringBuilderAppendStrings(4, :AsyncManual)
 
 #
 # StringBuilder.toString

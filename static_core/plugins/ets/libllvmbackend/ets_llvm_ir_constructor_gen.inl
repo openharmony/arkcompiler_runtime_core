@@ -106,6 +106,63 @@ bool LLVMIrConstructor::EmitStringBuilderAppendString(Inst *inst)
     return true;
 }
 
+RuntimeInterface::EntrypointId GetAppendStringsEntrypoint(uint32_t numArgs, mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER: {  // Gen GC
+            std::array<EntrypointId, 5U> entrypoints {
+                EntrypointId::INVALID,  // numArgs = 0
+                EntrypointId::INVALID,  // numArgs = 1
+                EntrypointId::STRING_BUILDER_APPEND_STRING2_ASYNC_MANUAL,
+                EntrypointId::STRING_BUILDER_APPEND_STRING3_ASYNC_MANUAL,
+                EntrypointId::STRING_BUILDER_APPEND_STRING4_ASYNC_MANUAL,
+            };
+            return entrypoints[numArgs];
+        }
+        case mem::BarrierType::POST_INTERREGION_BARRIER: {  // G1 GC
+            std::array<EntrypointId, 5U> entrypoints {
+                EntrypointId::INVALID,  // numArgs = 0
+                EntrypointId::INVALID,  // numArgs = 1
+                EntrypointId::STRING_BUILDER_APPEND_STRING2_ASYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING3_ASYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING4_ASYNC,
+            };
+            return entrypoints[numArgs];
+        }
+        default: {  // STW GC
+            std::array<EntrypointId, 5U> entrypoints {
+                EntrypointId::INVALID,  // numArgs = 0
+                EntrypointId::INVALID,  // numArgs = 1
+                EntrypointId::STRING_BUILDER_APPEND_STRING2_SYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING3_SYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING4_SYNC,
+            };
+            return entrypoints[numArgs];
+        }
+    }
+}
+
+bool LLVMIrConstructor::EmitStringBuilderAppendStrings(Inst *inst)
+{
+    ASSERT(GetGraph()->GetRuntime()->IsCompressedStringsEnabled());
+    RuntimeInterface::EntrypointId eid = RuntimeInterface::EntrypointId::INVALID;
+    switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING2:
+            eid = GetAppendStringsEntrypoint(2U, GetGraph()->GetRuntime()->GetPostType());
+            break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING3:
+            eid = GetAppendStringsEntrypoint(3U, GetGraph()->GetRuntime()->GetPostType());
+            break;
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING4:
+            eid = GetAppendStringsEntrypoint(4U, GetGraph()->GetRuntime()->GetPostType());
+            break;
+        default:
+            UNREACHABLE();
+    }
+    return EmitFastPath(inst, eid, inst->GetInputsCount() - 1U);  // -1 to skip save state
+}
+
 bool LLVMIrConstructor::EmitStringBuilderToString(Inst *inst)
 {
     auto offset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());

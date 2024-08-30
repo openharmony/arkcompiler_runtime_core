@@ -23,7 +23,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
@@ -33,7 +33,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
@@ -49,7 +49,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -67,7 +67,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /NullCheck/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
@@ -81,10 +81,9 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT_NOT /SaveState/
 //! INST_NEXT_NOT /NullCheck/
@@ -99,13 +98,11 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT_NOT /SaveState/
-//! INST_NEXT_NOT /NOP/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString6"
@@ -117,13 +114,11 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT_NOT /SaveState/
-//! INST_NEXT_NOT /NOP/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString7"
@@ -135,10 +130,9 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -150,7 +144,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendInt/
@@ -161,7 +155,7 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
@@ -176,7 +170,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
@@ -186,7 +180,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /StringBuilder::toString/
 //!
@@ -202,7 +196,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -220,7 +214,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_NOT      /StringBuilder::<ctor>/
 //! INST_NOT      /NullCheck/
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
@@ -234,10 +228,9 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT_NOT /SaveState/
 //! INST_NEXT_NOT /NullCheck/
@@ -252,13 +245,11 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT_NOT /SaveState/
-//! INST_NEXT_NOT /NOP/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString6"
@@ -270,13 +261,11 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT_NOT /SaveState/
-//! INST_NEXT_NOT /NOP/
 //! INST_NEXT_NOT /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::toString7"
@@ -288,10 +277,9 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
-//! INST_NEXT     /NOP/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
@@ -303,7 +291,7 @@
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /NullCheck/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_NEXT     /SaveState/
 //! INST_NEXT     /Intrinsic.StdCoreSbAppendInt/
@@ -314,7 +302,7 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,6
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST_COUNT    /StringBuilder::<ctor>/,2
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
 //!
@@ -322,7 +310,7 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,3
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 //!
@@ -330,7 +318,7 @@
 //! PASS_BEFORE   "BranchElimination"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,2
-//! PASS_AFTER    "ChecksElimination"
+//! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /StringBuilder::<ctor>/
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
 

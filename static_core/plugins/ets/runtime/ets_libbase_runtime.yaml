@@ -1198,6 +1198,45 @@ intrinsics:
     llvm_codegen_func: EmitStringBuilderAppendString
     codegen_arch: [arm64, amd64]
 
+  - name: StdCoreSbAppendString2
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    signature:
+      ret: std.core.StringBuilder
+      args: [std.core.String, std.core.String]
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendString2
+    codegen_func: CreateStringBuilderAppendStrings
+    llvm_codegen_func: EmitStringBuilderAppendStrings
+    codegen_arch: [arm64, amd64]
+
+  - name: StdCoreSbAppendString3
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    signature:
+      ret: std.core.StringBuilder
+      args: [std.core.String, std.core.String, std.core.String]
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendString3
+    codegen_func: CreateStringBuilderAppendStrings
+    llvm_codegen_func: EmitStringBuilderAppendStrings
+    codegen_arch: [arm64, amd64]
+
+  - name: StdCoreSbAppendString4
+    space: ets
+    class_name: std.core.StringBuilder
+    method_name: append
+    static: false
+    signature:
+      ret: std.core.StringBuilder
+      args: [std.core.String, std.core.String, std.core.String, std.core.String]
+    impl: ark::ets::intrinsics::StdCoreStringBuilderAppendString4
+    codegen_func: CreateStringBuilderAppendStrings
+    llvm_codegen_func: EmitStringBuilderAppendStrings
+    codegen_arch: [arm64, amd64]
+
   - name: StdCoreSbToString
     space: ets
     class_name: std.core.StringBuilder

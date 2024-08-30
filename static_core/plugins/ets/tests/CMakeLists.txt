@@ -389,6 +389,16 @@ function(run_int_jit_aot_ets_code ETS_SRC WORK_DIR TARGET)
     endif()
 endfunction()
 
+function(run_int_jit_aot_ets_code_foreach_gc PARENT_TARGET ETS_SRC WORK_DIR TARGET)
+    set(gc_types g1-gc gen-gc stw)
+
+    foreach(gc_type ${gc_types})
+        set(extra_options RUNTIME_EXTRA_OPTIONS "--gc-type=${gc_type}")
+        run_int_jit_aot_ets_code(${ETS_SRC} ${WORK_DIR}-${gc_type} ${TARGET}-${gc_type} ${extra_options})
+        add_dependencies(${PARENT_TARGET} ${TARGET}-${gc_type})
+    endforeach()
+endfunction()
+
 set (COMPILER_OPTIONS_OSR "--compiler-ignore-failures=true" ${COMPILER_OPTIONS})
 
 function(compile_stdlib TARGET_ARCH)

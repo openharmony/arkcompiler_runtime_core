@@ -21,6 +21,7 @@
 #include "optimizer/analysis/bounds_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/ir/analysis.h"
+#include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/inst.h"
 
 #include "optimizer/optimizations/cleanup.h"
@@ -34,7 +35,8 @@ SimplifyStringBuilder::SimplifyStringBuilder(Graph *graph)
       instructionsVector_ {graph->GetLocalAllocator()->Adapter()},
       inputDescriptors_ {graph->GetLocalAllocator()->Adapter()},
       usages_ {graph->GetLocalAllocator()->Adapter()},
-      matches_ {graph->GetLocalAllocator()->Adapter()}
+      matches_ {graph->GetLocalAllocator()->Adapter()},
+      stringBuilderCalls_ {graph->GetLocalAllocator()->Adapter()}
 {
 }
 
@@ -65,12 +67,16 @@ bool SimplifyStringBuilder::RunImpl()
         }
     }
 
+    // Cleanup should be done before block optimizations, to erase instruction marked as dead
+    GetGraph()->RunPass<compiler::Cleanup>();
+
     for (auto block : GetGraph()->GetBlocksRPO()) {
         if (block->IsEmpty()) {
             continue;
         }
         OptimizeStringBuilderToString(block);
         OptimizeStringConcatenation(block);
+        OptimizeStringBuilderAppendChain(block);
     }
 
     COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Simplify StringBuilder complete";
@@ -232,16 +238,6 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
     return concatIntrinsic;
 }
 
-bool SimplifyStringBuilder::IsIntrinsicStringBuilderAppendString(Inst *inst) const
-{
-    if (!inst->IsIntrinsic()) {
-        return false;
-    }
-
-    auto runtime = GetGraph()->GetRuntime();
-    return runtime->IsIntrinsicStringBuilderAppendString(inst->CastToIntrinsic()->GetIntrinsicId());
-}
-
 bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match)
 {
     // Walk instruction range [begin, end) and fill the match structure with StringBuilder usage instructions found
@@ -249,10 +245,24 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
     auto instance = match.instance;
 
     if (IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
-        return false;
+        return false;  // Unsupported case: doesn't look like concatenation pattern
     }
 
-    int toStringCallsCount = 0;
+    auto toStringCount = CountUsers(instance, [](auto &user) { return IsStringBuilderToString(user.GetInst()); });
+    if (toStringCount != 1) {
+        return false;  // Unsupported case: doesn't look like concatenation pattern
+    }
+
+    auto appendCount = CountUsers(instance, [](auto &user) { return IsStringBuilderAppend(user.GetInst()); });
+    auto appendStringCount =
+        CountUsers(instance, [](auto &user) { return IsIntrinsicStringBuilderAppendString(user.GetInst()); });
+    if (appendCount != appendStringCount) {
+        return false;  // Unsupported case: arguments must be strings
+    }
+    if (appendCount <= 1 || appendCount > match.appendIntrinsics.size()) {
+        return false;  // Unsupported case: too many strings concatenated
+    }
+
     for (; begin != end; ++begin) {
         if ((*begin)->IsSaveState()) {
             continue;
@@ -277,13 +287,9 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
         }
 
         if (IsIntrinsicStringBuilderAppendString(inst)) {
-            if (match.appendCount >= match.appendIntrinsics.size()) {
-                return false;  // Unsupported case: too many arguments concatenated
-            }
             auto intrinsic = inst->CastToIntrinsic();
             match.appendIntrinsics[match.appendCount++] = intrinsic;
         } else if (IsStringBuilderToString(inst)) {
-            toStringCallsCount++;
             match.toStringCall = *begin;
         } else {
             break;
@@ -292,7 +298,7 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
 
     // Supported case: number of toString-calls is one,
     // number of append calls is between 2 and 4
-    return toStringCallsCount == 1 && match.appendCount > 1;
+    return true;
 }
 
 void SimplifyStringBuilder::FixBrokenSaveStates(Inst *source, Inst *target)
@@ -344,7 +350,7 @@ void SimplifyStringBuilder::InsertIntrinsicAndFixSaveStates(
     }
 }
 
-void SimplifyStringBuilder::ReplaceWithIntrinsic(const ConcatenationMatch &match)
+void SimplifyStringBuilder::ReplaceWithConcatIntrinsic(const ConcatenationMatch &match)
 {
     auto &appendIntrinsics = match.appendIntrinsics;
     auto toStringCall = match.toStringCall;
@@ -397,7 +403,7 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(BasicBlock *block)
             // Check if current StringBuilder instance can be optimized
             if (MatchConcatenation(inst, block->Insts().end(), match)) {
                 Check(match);
-                ReplaceWithIntrinsic(match);
+                ReplaceWithConcatIntrinsic(match);
                 Cleanup(match);
 
                 instance->SetMarker(visited);
@@ -586,19 +592,23 @@ BasicBlock *GetLoopPostExit(Loop *loop)
     return nullptr;
 }
 
+IntrinsicInst *CreateIntrinsic(Graph *graph, RuntimeInterface::IntrinsicId intrinsicId, DataType::Type type,
+                               const std::initializer_list<std::pair<Inst *, DataType::Type>> &args)
+{
+    auto intrinsic = graph->CreateInstIntrinsic(intrinsicId);
+
+    intrinsic->SetType(type);
+    intrinsic->SetInputs(graph->GetAllocator(), args);
+
+    return intrinsic;
+}
+
 IntrinsicInst *SimplifyStringBuilder::CreateIntrinsicStringBuilderAppendString(Inst *instance, Inst *arg,
                                                                                SaveStateInst *saveState)
 {
-    auto appendIntrinsic = GetGraph()->CreateInstIntrinsic(
-        GetGraph()->GetRuntime()->ConvertTypeToStringBuilderAppendIntrinsicId(DataType::REFERENCE));
-    ASSERT(appendIntrinsic->RequireState());
-
-    appendIntrinsic->SetType(instance->GetType());
-    appendIntrinsic->SetInputs(
-        GetGraph()->GetAllocator(),
-        {{instance, instance->GetType()}, {arg, arg->GetType()}, {saveState, saveState->GetType()}});
-
-    return appendIntrinsic;
+    return CreateIntrinsic(GetGraph(), GetGraph()->GetRuntime()->GetStringBuilderAppendStringsIntrinsicId(1U),
+                           DataType::REFERENCE,
+                           {{instance, instance->GetType()}, {arg, arg->GetType()}, {saveState, saveState->GetType()}});
 }
 
 void SimplifyStringBuilder::NormalizeStringBuilderAppendInstructionUsers(Inst *instance, SaveStateInst *saveState)
@@ -612,7 +622,7 @@ void SimplifyStringBuilder::NormalizeStringBuilderAppendInstructionUsers(Inst *i
             ASSERT(ctorCall == nullptr);
             ctorCall = userInst;
             auto ctorArg = ctorCall->GetInput(1).GetInst();
-            CreateIntrinsicStringBuilderAppendString(instance, ctorArg, saveState);
+            CreateIntrinsicStringBuilderAppendString(instance, ctorArg, CopySaveState(GetGraph(), saveState));
         } else if (IsMethodStringBuilderDefaultConstructor(userInst)) {
             ASSERT(ctorCall == nullptr);
             ctorCall = userInst;
@@ -1695,6 +1705,205 @@ void SimplifyStringBuilder::OptimizeStringConcatenation(Loop *loop)
         isApplied_ = true;
     }
     Cleanup(loop);
+}
+
+IntrinsicInst *SimplifyStringBuilder::CreateIntrinsicStringBuilderAppendStrings(const ConcatenationMatch &match,
+                                                                                SaveStateInst *saveState)
+{
+    auto arg0 = match.appendIntrinsics[0U]->GetInput(1U).GetInst();
+    auto arg1 = match.appendIntrinsics[1U]->GetInput(1U).GetInst();
+
+    switch (match.appendCount) {
+        case 2U: {
+            return CreateIntrinsic(
+                GetGraph(), GetGraph()->GetRuntime()->GetStringBuilderAppendStringsIntrinsicId(match.appendCount),
+                DataType::REFERENCE,
+                {{match.instance, match.instance->GetType()},
+                 {arg0, arg0->GetType()},
+                 {arg1, arg1->GetType()},
+                 {saveState, saveState->GetType()}});
+        }
+        case 3U: {
+            auto arg2 = match.appendIntrinsics[2U]->GetInput(1U).GetInst();
+
+            return CreateIntrinsic(
+                GetGraph(), GetGraph()->GetRuntime()->GetStringBuilderAppendStringsIntrinsicId(match.appendCount),
+                DataType::REFERENCE,
+                {{match.instance, match.instance->GetType()},
+                 {arg0, arg0->GetType()},
+                 {arg1, arg1->GetType()},
+                 {arg2, arg2->GetType()},
+                 {saveState, saveState->GetType()}});
+        }
+        case 4U: {
+            auto arg2 = match.appendIntrinsics[2U]->GetInput(1U).GetInst();
+            auto arg3 = match.appendIntrinsics[3U]->GetInput(1U).GetInst();
+
+            return CreateIntrinsic(
+                GetGraph(), GetGraph()->GetRuntime()->GetStringBuilderAppendStringsIntrinsicId(match.appendCount),
+                DataType::REFERENCE,
+                {{match.instance, match.instance->GetType()},
+                 {arg0, arg0->GetType()},
+                 {arg1, arg1->GetType()},
+                 {arg2, arg2->GetType()},
+                 {arg3, arg3->GetType()},
+                 {saveState, saveState->GetType()}});
+        }
+        default:
+            UNREACHABLE();
+    }
+}
+
+void SimplifyStringBuilder::ReplaceWithAppendIntrinsic(const ConcatenationMatch &match)
+{
+    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << match.appendCount << " consecutive append string intrinsics found IDs: ";
+    for (size_t index = 0; index < match.appendCount; ++index) {
+        COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "\t" << match.appendIntrinsics[index]->GetId();
+    }
+    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "for instance id=" << match.instance->GetId() << " ("
+                                     << GetOpcodeString(match.instance->GetOpcode()) << "), applying";
+
+    auto lastAppendIntrinsic = match.appendIntrinsics[match.appendCount - 1U];
+    auto appendNIntrinsic = CreateIntrinsicStringBuilderAppendStrings(
+        match, CopySaveState(GetGraph(), lastAppendIntrinsic->GetSaveState()));
+
+    InsertBeforeWithSaveState(appendNIntrinsic, lastAppendIntrinsic);
+
+    for (size_t index = 0; index < match.appendCount; ++index) {
+        auto appendIntrinsic = match.appendIntrinsics[index];
+        FixBrokenSaveStates(appendIntrinsic->GetDataFlowInput(1), appendNIntrinsic);
+        appendIntrinsic->ClearFlag(inst_flags::NO_DCE);
+    }
+
+    COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "Replaced with append" << match.appendCount
+                                     << " intrinsic id=" << appendNIntrinsic->GetId();
+
+    isApplied_ = true;
+}
+
+bool BreakStringBuilderAppendChains(BasicBlock *block)
+{
+    // StringBuilder append-call returns 'this' (instance)
+    // Replace all users of append-call with instance itself to support chain calls
+    // like: sb.append(s0).append(s1)...
+    bool isApplied = false;
+    for (auto inst : block->Insts()) {
+        if (!IsStringBuilderAppend(inst) && !IsStringBuilderToString(inst)) {
+            continue;
+        }
+
+        auto instance = inst->GetDataFlowInput(0);
+        for (auto &user : instance->GetUsers()) {
+            auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
+            if (IsStringBuilderAppend(userInst)) {
+                userInst->ReplaceUsers(instance);
+                isApplied = true;
+            }
+        }
+    }
+    return isApplied;
+}
+
+bool HasPhiOfStringBuilders(BasicBlock *block)
+{
+    for (auto phi : block->PhiInsts()) {
+        MarkerHolder visited {block->GetGraph()};
+        if (HasInputPhiRecursively(phi, visited.GetMarker(),
+                                   [](auto &input) { return IsStringBuilderInstance(input.GetInst()); })) {
+            return true;
+        }
+    }
+    return false;
+}
+
+const SimplifyStringBuilder::StringBuilderCallsMap &SimplifyStringBuilder::CollectStringBuilderCalls(BasicBlock *block)
+{
+    auto &calls = stringBuilderCalls_;
+    calls.clear();
+
+    // Skip blocks with Phi of String Builders
+    if (HasPhiOfStringBuilders(block)) {
+        return calls;
+    }
+
+    auto current = calls.end();
+    for (auto inst : block->Insts()) {
+        if (inst->IsSaveState() || inst->IsCheck()) {
+            continue;
+        }
+
+        for (size_t index = 0; index < inst->GetInputsCount(); ++index) {
+            auto instance = inst->GetDataFlowInput(index);
+            if (!IsStringBuilderInstance(instance)) {
+                continue;
+            }
+
+            if (current->first != instance) {
+                current = calls.find(instance);
+            }
+            if (current == calls.end()) {
+                current = calls.emplace(instance, InstVector {GetGraph()->GetLocalAllocator()->Adapter()}).first;
+            }
+            current->second.push_back(inst);
+        }
+    }
+    return calls;
+}
+
+size_t CountStringBuilderAppendString(const InstVector &calls, size_t from)
+{
+    auto to = std::min(from + SB_APPEND_STRING_MAX_ARGS, calls.size());
+    for (auto index = from; index < to; ++index) {
+        if (IsIntrinsicStringBuilderAppendString(calls[index])) {
+            continue;
+        }
+        return index;
+    }
+    return to;
+}
+
+void SimplifyStringBuilder::ReplaceWithAppendIntrinsic(Inst *instance, const InstVector &calls, size_t from, size_t to)
+{
+    auto appendCount = to - from;
+    ASSERT(0 < appendCount && appendCount <= SB_APPEND_STRING_MAX_ARGS);
+    if (appendCount == 1) {
+        COMPILER_LOG(DEBUG, SIMPLIFY_SB) << "One consecutive append string intrinsic found id=" << calls[from]->GetId()
+                                         << " for instance id=" << instance->GetId() << " ("
+                                         << GetOpcodeString(instance->GetOpcode()) << "), skipping";
+    } else {
+        ConcatenationMatch match {instance, nullptr, nullptr, appendCount};
+        for (size_t index = 0; index < appendCount; ++index) {
+            match.appendIntrinsics[index] = calls[from + index]->CastToIntrinsic();
+        }
+        ReplaceWithAppendIntrinsic(match);
+    }
+}
+
+void SimplifyStringBuilder::OptimizeStringBuilderAppendChain(BasicBlock *block)
+{
+    // StringBuilder::append(s0, s1, ...) implemented with Irtoc functions with number of arguments more than 4, and
+    // requires pre/post-write barriers to be supported. AARCH32 does not support neither barriers, nor so much
+    // arguments in Irtoc functions.
+    if (!GetGraph()->SupportsIrtocBarriers()) {
+        return;
+    }
+
+    isApplied_ |= BreakStringBuilderAppendChains(block);
+
+    for (auto &[instance, calls] : CollectStringBuilderCalls(block)) {
+        for (size_t from = 0; from < calls.size();) {
+            if (!IsIntrinsicStringBuilderAppendString(calls[from])) {
+                ++from;
+                continue;
+            }
+
+            size_t to = CountStringBuilderAppendString(calls, from);
+            ReplaceWithAppendIntrinsic(instance, calls, from, to);
+
+            ASSERT(from < to);
+            from = to;
+        }
+    }
 }
 
 }  // namespace ark::compiler

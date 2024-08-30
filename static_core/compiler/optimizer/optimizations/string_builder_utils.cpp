@@ -222,6 +222,23 @@ bool HasUserPhiRecursively(Inst *inst, Marker visited, const FindUserPredicate &
     return false;
 }
 
+size_t CountUsers(Inst *inst, const FindUserPredicate &predicate)
+{
+    size_t count = 0;
+    for (auto &user : inst->GetUsers()) {
+        if (predicate(user)) {
+            ++count;
+        }
+
+        auto userInst = user.GetInst();
+        if (userInst->IsCheck()) {
+            count += CountUsers(userInst, predicate);
+        }
+    }
+
+    return count;
+}
+
 void ResetUserMarkersRecursively(Inst *inst, Marker visited)
 {
     // Reset marker for an instruction and all it's users recursively
@@ -244,6 +261,16 @@ Inst *SkipSingleUserCheckInstruction(Inst *inst)
         inst = inst->GetUsers().Front().GetInst();
     }
     return inst;
+}
+
+bool IsIntrinsicStringBuilderAppendString(Inst *inst)
+{
+    if (!inst->IsIntrinsic()) {
+        return false;
+    }
+
+    auto runtime = inst->GetBasicBlock()->GetGraph()->GetRuntime();
+    return runtime->IsIntrinsicStringBuilderAppendString(inst->CastToIntrinsic()->GetIntrinsicId());
 }
 
 }  // namespace ark::compiler

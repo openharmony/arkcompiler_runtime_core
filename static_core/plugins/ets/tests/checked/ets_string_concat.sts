@@ -142,8 +142,7 @@
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
+//! INST_NEXT     /Intrinsic.StdCoreSbAppendString2/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat10"
@@ -155,7 +154,8 @@
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat11"
@@ -167,7 +167,8 @@
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppend/,3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat12"
@@ -337,8 +338,7 @@
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
-//! INST_NEXT     /Intrinsic.StdCoreSbAppendString/
+//! INST_NEXT     /Intrinsic.StdCoreSbAppendString2/
 //! INST_NEXT     /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat10"
@@ -350,7 +350,8 @@
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat11"
@@ -362,7 +363,8 @@
 //! PASS_AFTER    "ChecksElimination"
 //! INST_NOT      /Intrinsic.StdCoreStringConcat/
 //! INST          /StringBuilder::<ctor>/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppend/,3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",1
 //! INST          /Intrinsic.StdCoreSbToString/
 //!
 //! METHOD        "ETSGLOBAL::concat12"
@@ -496,15 +498,12 @@ function main() {
     assert concat3("abc", "de") == "abcde": "Wrong result at concat3";
     assert concat4("ab", "c", "de") == "abcde": "Wrong result at concat4";
     assert concat5("ab", "c", "d", "e") == "abcde": "Wrong result at concat5";
-    console.log(concat6("ab", "c", "d", "e"))
-//    assert concat6("ab", "c", "d", "e") == "abcde": "Wrong result at concat6";
-    console.log(concat7("ab", "c", "d", "e"))
+    assert concat6("ab", "c", "d", "e") == "abcde": "Wrong result at concat6";
     assert concat7("ab", "c", "d", "e") == "abcde": "Wrong result at concat7";
     assert concat8("abc", "de") == "abcde": "Wrong result at concat8";
     assert concat9("abc", "de") == "abcde": "Wrong result at concat9";
     assert concat10("a", "b", "c", "d", "e") == "abcde": "Wrong result at concat10";
     assert concat11("abc", "de") == "abcde1": "Wrong result at concat11";
-    console.log(concat12("ab", "c", "d", "e"))
     assert concat12("ab", "c", "d", "e") == "abcde": "Wrong result at concat12";
     assert concat13() == "1": "Wrong result at concat13";
     assert concat14(null) == "null": "Wrong result at concat14";

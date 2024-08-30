@@ -277,6 +277,28 @@ extern "C" ObjectHeader *StringBuilderAppendStringEntrypoint(ObjectHeader *sb, O
     return StringBuilderAppendString(sb, reinterpret_cast<EtsString *>(str));
 }
 
+extern "C" ObjectHeader *StringBuilderAppendString2Entrypoint(ObjectHeader *sb, ObjectHeader *str0, ObjectHeader *str1)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendStrings(sb, reinterpret_cast<EtsString *>(str0), reinterpret_cast<EtsString *>(str1));
+}
+
+extern "C" ObjectHeader *StringBuilderAppendString3Entrypoint(ObjectHeader *sb, ObjectHeader *str0, ObjectHeader *str1,
+                                                              ObjectHeader *str2)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendStrings(sb, reinterpret_cast<EtsString *>(str0), reinterpret_cast<EtsString *>(str1),
+                                      reinterpret_cast<EtsString *>(str2));
+}
+
+extern "C" ObjectHeader *StringBuilderAppendString4Entrypoint(ObjectHeader *sb, ObjectHeader *str0, ObjectHeader *str1,
+                                                              ObjectHeader *str2, ObjectHeader *str3)
+{
+    ASSERT(sb != nullptr);
+    return StringBuilderAppendStrings(sb, reinterpret_cast<EtsString *>(str0), reinterpret_cast<EtsString *>(str1),
+                                      reinterpret_cast<EtsString *>(str2), reinterpret_cast<EtsString *>(str3));
+}
+
 extern "C" ObjectHeader *StringBuilderAppendNullStringEntrypoint(ObjectHeader *sb)
 {
     ASSERT(sb != nullptr);

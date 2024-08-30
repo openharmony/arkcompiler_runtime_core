@@ -115,7 +115,7 @@
 //! INST          /Intrinsic.StdCoreSbAppendString/
 //! PASS_AFTER    "ChecksElimination"
 //! IN_BLOCK      /loop/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /Intrinsic.StdCoreSbToString/
@@ -132,7 +132,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
 //! PASS_AFTER    "ChecksElimination"
 //! IN_BLOCK      /loop/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
@@ -149,7 +149,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
 //! PASS_AFTER    "ChecksElimination"
 //! IN_BLOCK      /loop/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
@@ -638,7 +638,7 @@
 //! INST          /Intrinsic.StdCoreSbAppendString/
 //! PASS_AFTER    "ChecksElimination"
 //! IN_BLOCK      /loop/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "SimplifyStringBuilder"
 //! INST          /Intrinsic.StdCoreSbToString/
@@ -655,7 +655,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
 //! PASS_AFTER    "ChecksElimination"
 //! IN_BLOCK      /loop/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1
@@ -672,7 +672,7 @@
 //! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,1
 //! PASS_AFTER    "ChecksElimination"
 //! IN_BLOCK      /loop/
-//! INST_COUNT    /Intrinsic.StdCoreSbAppendString/,2
+//! INST_COUNT    /Intrinsic.StdCoreSbAppendString2/,1
 //! INST_NOT      /Intrinsic.StdCoreSbToString/
 //! PASS_AFTER    "ChecksElimination"
 //! INST_COUNT    /Intrinsic.StdCoreSbToString/,1

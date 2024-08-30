@@ -283,6 +283,77 @@ void Codegen::CreateStringBuilderAppendString(IntrinsicInst *inst, Reg dst, SRCR
     enc->BindLabel(labelReturn);
 }
 
+RuntimeInterface::EntrypointId GetStringBuilderAppendStringsEntrypointId(uint32_t numArgs, mem::BarrierType barrierType)
+{
+    using EntrypointId = RuntimeInterface::EntrypointId;
+    switch (barrierType) {
+        case mem::BarrierType::POST_INTERGENERATIONAL_BARRIER: {  // Gen GC
+            std::array<EntrypointId, 5U> entrypoints {
+                EntrypointId::INVALID,  // numArgs = 0
+                EntrypointId::INVALID,  // numArgs = 1
+                EntrypointId::STRING_BUILDER_APPEND_STRING2_ASYNC_MANUAL,
+                EntrypointId::STRING_BUILDER_APPEND_STRING3_ASYNC_MANUAL,
+                EntrypointId::STRING_BUILDER_APPEND_STRING4_ASYNC_MANUAL,
+            };
+            return entrypoints[numArgs];
+        }
+        case mem::BarrierType::POST_INTERREGION_BARRIER: {  // G1 GC
+            std::array<EntrypointId, 5U> entrypoints {
+                EntrypointId::INVALID,  // numArgs = 0
+                EntrypointId::INVALID,  // numArgs = 1
+                EntrypointId::STRING_BUILDER_APPEND_STRING2_ASYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING3_ASYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING4_ASYNC,
+            };
+            return entrypoints[numArgs];
+        }
+        default: {  // STW GC
+            std::array<EntrypointId, 5U> entrypoints {
+                EntrypointId::INVALID,  // numArgs = 0
+                EntrypointId::INVALID,  // numArgs = 1
+                EntrypointId::STRING_BUILDER_APPEND_STRING2_SYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING3_SYNC,
+                EntrypointId::STRING_BUILDER_APPEND_STRING4_SYNC,
+            };
+            return entrypoints[numArgs];
+        }
+    }
+}
+
+void Codegen::CreateStringBuilderAppendStrings(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto builder = src[FIRST_OPERAND];
+    auto str0 = src[SECOND_OPERAND];
+    auto str1 = src[THIRD_OPERAND];
+    switch (inst->GetIntrinsicId()) {
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING2: {
+            auto entrypoint = GetStringBuilderAppendStringsEntrypointId(2U, GetGraph()->GetRuntime()->GetPostType());
+            CallFastPath(inst, entrypoint, dst, {}, builder, str0, str1);
+            break;
+        }
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING3: {
+            auto str2 = src[FOURTH_OPERAND];
+            auto entrypoint = GetStringBuilderAppendStringsEntrypointId(3U, GetGraph()->GetRuntime()->GetPostType());
+            CallFastPath(inst, entrypoint, dst, {}, builder, str0, str1, str2);
+            break;
+        }
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_SB_APPEND_STRING4: {
+            auto str2 = src[FOURTH_OPERAND];
+            auto str3 = src[FIFTH_OPERAND];
+            auto entrypoint = GetStringBuilderAppendStringsEntrypointId(4U, GetGraph()->GetRuntime()->GetPostType());
+            CallFastPath(inst, entrypoint, dst, {}, builder, str0, str1, str2, str3);
+            break;
+        }
+
+        default:
+            UNREACHABLE();
+            break;
+    }
+}
+
 void Codegen::CreateStringConcat([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     ASSERT(IsCompressedStringsEnabled());
