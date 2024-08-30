@@ -157,6 +157,9 @@ public:
                 if (UNLIKELY(elemConv == nullptr)) {
                     return nullptr;
                 }
+                // Need to read element pointer again, since it could have been moved by GC
+                etsElem = EtsObject::FromCoreType(etsArr->Get<ObjectHeader *>(idx));
+                ASSERT(etsElem != nullptr);
                 jsElem = elemConv->Wrap(ctx, etsElem);
                 if (UNLIKELY(jsElem == nullptr)) {
                     return nullptr;

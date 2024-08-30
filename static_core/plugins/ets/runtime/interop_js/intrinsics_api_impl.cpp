@@ -597,6 +597,7 @@ EtsObject *CompilerConvertLocalToRefType(void *klassPtr, void *value)
             ctx->ForwardJSException(coro);
         }
         ASSERT(ctx->SanityETSExceptionPending());
+        return nullptr;
     }
     return EtsObject::FromCoreType(res);
 }

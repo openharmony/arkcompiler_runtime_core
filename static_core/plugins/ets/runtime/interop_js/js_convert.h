@@ -364,15 +364,15 @@ JSCONVERT_WRAP(Promise)
     uint32_t state = hpromise->GetState();
     hpromise->Unlock();
     if (state != EtsPromise::STATE_PENDING) {
-        EtsObject *value = hpromise->GetValue(coro);
+        EtsHandle<EtsObject> value(coro, hpromise->GetValue(coro));
         napi_value completionValue;
-        if (value == nullptr) {
+        if (value.GetPtr() == nullptr) {
             completionValue = GetNull(env);
         } else {
             auto refconv = JSRefConvertResolve(ctx, value->GetClass()->GetRuntimeClass());
-            completionValue = refconv->Wrap(ctx, value);
+            completionValue = refconv->Wrap(ctx, value.GetPtr());
         }
-        if (etsVal->IsResolved()) {
+        if (hpromise->IsResolved()) {
             NAPI_CHECK_FATAL(napi_resolve_deferred(env, deferred, completionValue));
         } else {
             NAPI_CHECK_FATAL(napi_reject_deferred(env, deferred, completionValue));
@@ -447,7 +447,8 @@ JSCONVERT_UNWRAP(ArrayBuffer)
     EtsHandle<EtsArrayBuffer> buf(currentCoro,
                                   reinterpret_cast<EtsArrayBuffer *>(EtsObject::Create(currentCoro, arraybufKlass)));
     buf->SetByteLength(static_cast<EtsInt>(byteLength));
-    buf->SetData(currentCoro, EtsByteArray::Create(byteLength));
+    EtsHandle<EtsByteArray> byteArray(currentCoro, reinterpret_cast<EtsByteArray *>(EtsByteArray::Create(byteLength)));
+    buf->SetData(currentCoro, byteArray.GetPtr());
     std::copy_n(reinterpret_cast<uint8_t *>(data), byteLength, buf->GetData()->GetData<EtsByte>());
     return buf.GetPtr();
 }
