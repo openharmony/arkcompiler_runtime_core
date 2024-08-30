@@ -178,23 +178,26 @@ static bool RegisterTimerModule(napi_env jsEnv)
     return TimerModule::Init(etsEnv, jsEnv);
 }
 
-static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
+static std::vector<napi_value> GetArgs(napi_env env, napi_callback_info info)
 {
-    napi_value napiFalse;
-    [[maybe_unused]] napi_status status = napi_get_boolean(env, false, &napiFalse);
-    ASSERT(status == napi_ok);
-
     size_t argc = 0;
-    status = napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
-    ASSERT(status == napi_ok);
+    NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr));
 
     std::vector<napi_value> argv(argc);
     napi_value thisArg {};
     void *data = nullptr;
-    status = napi_get_cb_info(env, info, &argc, argv.data(), &thisArg, &data);
-    ASSERT(status == napi_ok);
+    NAPI_ASSERT_OK(napi_get_cb_info(env, info, &argc, argv.data(), &thisArg, &data));
 
-    if (argc != 4U) {
+    return argv;
+}
+
+static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
+{
+    napi_value napiFalse;
+    NAPI_ASSERT_OK(napi_get_boolean(env, false, &napiFalse));
+
+    auto argv = GetArgs(env, info);
+    if (argv.size() != 4U) {
         LogError("CreateEtsRuntime: exactly 4 arguments are required");
         return napiFalse;
     }
@@ -240,9 +243,79 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
         InteropCtx::Init(coro, env);
     }
     napi_value napiRes;
-    status = napi_get_boolean(env, res, &napiRes);
-    ASSERT(status == napi_ok);
+    NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));
     return napiRes;
+}
+
+static std::optional<std::vector<std::string>> GetArgStrings(napi_env env, napi_value options)
+{
+    uint32_t numOptions;
+    std::vector<std::string> argStrings;
+    if (napi_get_array_length(env, options, &numOptions) == napi_ok) {
+        // options passed as an array
+        argStrings.reserve(numOptions + 1);
+        argStrings.emplace_back("argv[0] placeholder");
+
+        for (uint32_t i = 0; i < numOptions; ++i) {
+            napi_value option;
+            NAPI_ASSERT_OK(napi_get_element(env, options, i, &option));
+            if (napi_coerce_to_string(env, option, &option) != napi_ok) {
+                LogError("Option values must be coercible to string");
+                return std::nullopt;
+            }
+            argStrings.push_back(GetString(env, option));
+        }
+    } else {
+        // options passed as a map
+        napi_value propNames;
+        NAPI_ASSERT_OK(napi_get_property_names(env, options, &propNames));
+        NAPI_ASSERT_OK(napi_get_array_length(env, propNames, &numOptions));
+
+        argStrings.reserve(numOptions + 1);
+        argStrings.emplace_back("argv[0] placeholder");
+
+        for (uint32_t i = 0; i < numOptions; ++i) {
+            napi_value key;
+            napi_value value;
+            NAPI_ASSERT_OK(napi_get_element(env, propNames, i, &key));
+            NAPI_ASSERT_OK(napi_get_property(env, options, key, &value));
+            if (napi_coerce_to_string(env, value, &value) != napi_ok) {
+                LogError("Option values must be coercible to string");
+                return std::nullopt;
+            }
+            argStrings.push_back("--" + GetString(env, key) + "=" + GetString(env, value));
+        }
+    }
+
+    return argStrings;
+}
+
+static bool AddOptions(base_options::Options *baseOptions, ark::RuntimeOptions *runtimeOptions,
+                       const std::vector<std::string> &argStrings)
+{
+    ark::PandArgParser paParser;
+    baseOptions->AddOptions(&paParser);
+    runtimeOptions->AddOptions(&paParser);
+    ark::compiler::g_options.AddOptions(&paParser);
+
+    std::vector<const char *> fakeArgv;
+    fakeArgv.reserve(argStrings.size());
+    for (auto const &arg : argStrings) {
+        fakeArgv.push_back(arg.c_str());  // Be careful, do not reallocate referenced strings
+    }
+
+    if (!paParser.Parse(fakeArgv.size(), fakeArgv.data())) {
+        LogError("Parse options failed. Optional arguments:\n" + paParser.GetHelpString());
+        return false;
+    }
+
+    auto runtimeOptionsErr = runtimeOptions->Validate();
+    if (runtimeOptionsErr) {
+        LogError("Parse options failed: " + runtimeOptionsErr.value().GetMessage());
+        return false;
+    }
+    ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
+    return true;
 }
 
 static napi_value CreateRuntime(napi_env env, napi_callback_info info)
@@ -267,69 +340,13 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
         return napiFalse;
     }
 
-    uint32_t numOptions;
-    std::vector<std::string> argStrings;
-
-    if (napi_get_array_length(env, options, &numOptions) == napi_ok) {
-        // options passed as an array
-        argStrings.reserve(numOptions + 1);
-        argStrings.emplace_back("argv[0] placeholder");
-
-        for (uint32_t i = 0; i < numOptions; ++i) {
-            napi_value option;
-            NAPI_ASSERT_OK(napi_get_element(env, options, i, &option));
-            if (napi_coerce_to_string(env, option, &option) != napi_ok) {
-                LogError("Option values must be coercible to string");
-                return napiFalse;
-            }
-            argStrings.push_back(GetString(env, option));
-        }
-    } else {
-        // options passed as a map
-        napi_value propNames;
-        NAPI_ASSERT_OK(napi_get_property_names(env, options, &propNames));
-        NAPI_ASSERT_OK(napi_get_array_length(env, propNames, &numOptions));
-
-        argStrings.reserve(numOptions + 1);
-        argStrings.emplace_back("argv[0] placeholder");
-
-        for (uint32_t i = 0; i < numOptions; ++i) {
-            napi_value key;
-            napi_value value;
-            NAPI_ASSERT_OK(napi_get_element(env, propNames, i, &key));
-            NAPI_ASSERT_OK(napi_get_property(env, options, key, &value));
-            if (napi_coerce_to_string(env, value, &value) != napi_ok) {
-                LogError("Option values must be coercible to string");
-                return napiFalse;
-            }
-            argStrings.push_back("--" + GetString(env, key) + "=" + GetString(env, value));
-        }
+    auto argStrings = GetArgStrings(env, options);
+    if (argStrings == std::nullopt) {
+        return napiFalse;
     }
 
     auto addOpts = [&argStrings](base_options::Options *baseOptions, ark::RuntimeOptions *runtimeOptions) {
-        ark::PandArgParser paParser;
-        baseOptions->AddOptions(&paParser);
-        runtimeOptions->AddOptions(&paParser);
-        ark::compiler::g_options.AddOptions(&paParser);
-
-        std::vector<const char *> fakeArgv;
-        fakeArgv.reserve(argStrings.size());
-        for (auto const &arg : argStrings) {
-            fakeArgv.push_back(arg.c_str());  // Be careful, do not reallocate referenced strings
-        }
-
-        if (!paParser.Parse(fakeArgv.size(), fakeArgv.data())) {
-            LogError("Parse options failed. Optional arguments:\n" + paParser.GetHelpString());
-            return false;
-        }
-
-        auto runtimeOptionsErr = runtimeOptions->Validate();
-        if (runtimeOptionsErr) {
-            LogError("Parse options failed: " + runtimeOptionsErr.value().GetMessage());
-            return false;
-        }
-        ark::compiler::CompilerLogger::SetComponents(ark::compiler::g_options.GetCompilerLog());
-        return true;
+        return AddOptions(baseOptions, runtimeOptions, argStrings.value());
     };
 
     bool res = ets::CreateRuntime(addOpts);
