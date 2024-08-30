@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-const etsVm = require("lib/module/ets_interop_js_napi");
+const etsVm = require('lib/module/ets_interop_js_napi');
 
 class TestModule {
     constructor(name) {
-        this.descriptor_prefix = 'L' + name.replaceAll('.', '/') + '/';
+        this.descriptorPrefix = 'L' + name.replaceAll('.', '/') + '/';
     }
 
-    getClass(name) { return etsVm.getClass(this.descriptor_prefix + name + ";") }
-    getFunction(name) { return etsVm.getFunction(this.descriptor_prefix + "ETSGLOBAL;", name) }
+    getClass(name) { return etsVm.getClass(this.descriptorPrefix + name + ';'); }
+    getFunction(name) { return etsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name); }
 
-    static descriptor_prefix;
+    static descriptorPrefix;
 };
 
-function getTestModule(name) { return new TestModule(name) }
+function getTestModule(name) { return new TestModule(name); }
 
 module.exports = {
     etsVm,
     getTestModule,
-}
+};
