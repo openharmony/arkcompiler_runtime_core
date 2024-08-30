@@ -29,6 +29,7 @@
 #include "runtime/mem/gc/g1/g1_analytics.h"
 #include "runtime/mem/gc/g1/update_remset_worker.h"
 #include "runtime/mem/gc/g1/object_ref.h"
+#include "runtime/mem/gc/g1/g1-evacuate-regions-task.h"
 #include "runtime/mem/gc/g1/gc_evacuate_regions_task_stack.h"
 
 namespace ark {
@@ -467,6 +468,13 @@ private:
     void EnsurePreWrbDisabledInThreads();
 
     size_t GetUniqueRemsetRefsCount() const;
+
+    void ExecuteMarkingTask(GCMarkWorkersTask::StackType *objectsStack);
+    void ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack);
+    void ExecuteFullMarkingTask(GCMarkWorkersTask::StackType *objectsStack);
+    void ExecuteCompactingTask(Region *region, const ObjectVisitor &movedObjectsSaver);
+    void ExecuteEnqueueRemsetsTask(GCUpdateRefsWorkersTask<false>::MovedObjectsRange *movedObjectsRange);
+    void ExecuteEvacuateTask(typename G1EvacuateRegionsTask<Ref>::StackType *stack);
 
     G1GCPauseMarker<LanguageConfig> marker_;
     G1GCConcurrentMarker<LanguageConfig> concMarker_;

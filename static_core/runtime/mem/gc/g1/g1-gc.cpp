@@ -39,7 +39,6 @@
 #include "runtime/include/stack_walker-inl.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "runtime/mem/gc/g1/g1-evacuate-regions-worker-state-inl.h"
-#include "runtime/mem/gc/g1/g1-evacuate-regions-task.h"
 
 namespace ark::mem {
 
@@ -533,41 +532,20 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
 {
     switch (task->GetType()) {
         case GCWorkersTaskTypes::TASK_MARKING: {
-            auto objectsStack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
-            MarkStackMixed(objectsStack);
-            ASSERT(objectsStack->Empty());
-            this->GetInternalAllocator()->Delete(objectsStack);
+            ExecuteMarkingTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack());
             break;
         }
         case GCWorkersTaskTypes::TASK_REMARK: {
-            auto *objectsStack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
-            this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess);
-            ASSERT(objectsStack->Empty());
-            this->GetInternalAllocator()->Delete(objectsStack);
+            ExecuteRemarkTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack());
             break;
         }
         case GCWorkersTaskTypes::TASK_FULL_MARK: {
-            const ReferenceCheckPredicateT &refEnablePred = []([[maybe_unused]] const ObjectHeader *obj) {
-                // process all refs
-                return true;
-            };
-            auto *objectsStack = task->Cast<GCMarkWorkersTask>()->GetMarkingStack();
-            this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess, refEnablePred);
-            ASSERT(objectsStack->Empty());
-            this->GetInternalAllocator()->Delete(objectsStack);
+            ExecuteFullMarkingTask(task->Cast<GCMarkWorkersTask>()->GetMarkingStack());
             break;
         }
         case GCWorkersTaskTypes::TASK_REGION_COMPACTING: {
             auto *data = task->Cast<GCRegionCompactWorkersTask>()->GetRegionData();
-            Region *region = data->first;
-            const ObjectVisitor &movedObjectsSaver = data->second;
-            if (region->HasFlag(RegionFlag::IS_EDEN)) {
-                RegionCompactingImpl<true, RegionFlag::IS_EDEN>(region, movedObjectsSaver);
-            } else if (region->HasFlag(RegionFlag::IS_OLD)) {
-                RegionCompactingImpl<true, RegionFlag::IS_OLD>(region, movedObjectsSaver);
-            } else {
-                LOG(FATAL, GC) << "Unsupported region type";
-            }
+            ExecuteCompactingTask(data->first, data->second);
             this->GetInternalAllocator()->Delete(data);
             break;
         }
@@ -579,34 +557,81 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             break;
         }
         case GCWorkersTaskTypes::TASK_ENQUEUE_REMSET_REFS: {
-            auto *movedObjectsRange = task->Cast<GCUpdateRefsWorkersTask<false>>()->GetMovedObjectsRange();
-            auto *taskUpdatedRefsQueue =
-                this->GetInternalAllocator()->template New<GCG1BarrierSet::ThreadLocalCardQueues>();
-            EnqueueRemsetRefUpdater<LanguageConfig> refUpdater(this->GetCardTable(), taskUpdatedRefsQueue,
-                                                               regionSizeBits_);
-            DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(refUpdater), false>(movedObjectsRange,
-                                                                                               refUpdater);
-            {
-                os::memory::LockHolder lock(gcWorkerQueueLock_);
-                updatedRefsQueue_->insert(updatedRefsQueue_->end(), taskUpdatedRefsQueue->begin(),
-                                          taskUpdatedRefsQueue->end());
-            }
-            this->GetInternalAllocator()->Delete(movedObjectsRange);
-            this->GetInternalAllocator()->Delete(taskUpdatedRefsQueue);
+            ExecuteEnqueueRemsetsTask(task->Cast<GCUpdateRefsWorkersTask<false>>()->GetMovedObjectsRange());
             break;
         }
         case GCWorkersTaskTypes::TASK_EVACUATE_REGIONS: {
-            auto *stack = task->Cast<G1EvacuateRegionsTask<Ref>>()->GetMarkingStack();
-            G1EvacuateRegionsWorkerState<LanguageConfig> state(this, stack);
-            state.EvacuateLiveObjects();
-            ASSERT(stack->Empty());
-            this->GetInternalAllocator()->Delete(stack);
+            ExecuteEvacuateTask(task->Cast<G1EvacuateRegionsTask<Ref>>()->GetMarkingStack());
             break;
         }
         default:
             LOG(FATAL, GC) << "Unimplemented for " << GCWorkersTaskTypesToString(task->GetType());
             UNREACHABLE();
     }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ExecuteMarkingTask(GCMarkWorkersTask::StackType *objectsStack)
+{
+    MarkStackMixed(objectsStack);
+    ASSERT(objectsStack->Empty());
+    this->GetInternalAllocator()->Delete(objectsStack);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ExecuteRemarkTask(GCMarkWorkersTask::StackType *objectsStack)
+{
+    this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess);
+    ASSERT(objectsStack->Empty());
+    this->GetInternalAllocator()->Delete(objectsStack);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ExecuteFullMarkingTask(GCMarkWorkersTask::StackType *objectsStack)
+{
+    const ReferenceCheckPredicateT &refEnablePred = []([[maybe_unused]] const ObjectHeader *obj) {
+        // process all refs
+        return true;
+    };
+    this->MarkStack(&marker_, objectsStack, CalcLiveBytesMarkPreprocess, refEnablePred);
+    ASSERT(objectsStack->Empty());
+    this->GetInternalAllocator()->Delete(objectsStack);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ExecuteCompactingTask(Region *region, const ObjectVisitor &movedObjectsSaver)
+{
+    if (region->HasFlag(RegionFlag::IS_EDEN)) {
+        RegionCompactingImpl<true, RegionFlag::IS_EDEN>(region, movedObjectsSaver);
+    } else if (region->HasFlag(RegionFlag::IS_OLD)) {
+        RegionCompactingImpl<true, RegionFlag::IS_OLD>(region, movedObjectsSaver);
+    } else {
+        LOG(FATAL, GC) << "Unsupported region type";
+    }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ExecuteEnqueueRemsetsTask(
+    GCUpdateRefsWorkersTask<false>::MovedObjectsRange *movedObjectsRange)
+{
+    auto *taskUpdatedRefsQueue = this->GetInternalAllocator()->template New<GCG1BarrierSet::ThreadLocalCardQueues>();
+    EnqueueRemsetRefUpdater<LanguageConfig> refUpdater(this->GetCardTable(), taskUpdatedRefsQueue, regionSizeBits_);
+    DoUpdateReferencesToMovedObjectsRange<LanguageConfig, decltype(refUpdater), false>(movedObjectsRange, refUpdater);
+    {
+        os::memory::LockHolder lock(gcWorkerQueueLock_);
+        updatedRefsQueue_->insert(updatedRefsQueue_->end(), taskUpdatedRefsQueue->begin(), taskUpdatedRefsQueue->end());
+    }
+    this->GetInternalAllocator()->Delete(movedObjectsRange);
+    this->GetInternalAllocator()->Delete(taskUpdatedRefsQueue);
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::ExecuteEvacuateTask(typename G1EvacuateRegionsTask<Ref>::StackType *stack)
+{
+    G1EvacuateRegionsWorkerState<LanguageConfig> state(this, stack);
+    state.EvacuateLiveObjects();
+    ASSERT(stack->Empty());
+    this->GetInternalAllocator()->Delete(stack);
 }
 
 template <class LanguageConfig>
