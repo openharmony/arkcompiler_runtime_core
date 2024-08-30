@@ -216,4 +216,22 @@ HWTEST_F(MMapMemPoolTest, CheckEnoughPoolsTest, testing::ext::TestSize.Level0)
     ASSERT_FALSE(memPool->HaveEnoughPoolsInObjectSpace(3, POOL_SIZE));
 }
 
+/**
+ * @tc.name: UpdateCompilerMemoryLimitTest
+ * @tc.desc: check UpdateCompilerMemoryLimit function
+ * @tc.type: FUNC
+ * @tc.require:
+ */
+HWTEST_F(MMapMemPoolTest, UpdateCompilerMemoryLimitTest, testing::ext::TestSize.Level0) {
+    MmapMemPool *memPool = CreateMMapMemPool(0, 0, 1_MB, 0);
+    auto arena1 = memPool->AllocArena(4_MB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_NE(arena1, nullptr);
+    memPool->SetUseCompilerSpaceSizeLimit(true);
+    auto arena2 = memPool->AllocArena(4_MB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_EQ(arena2, nullptr);
+    memPool->SetUseCompilerSpaceSizeLimit(false);
+    auto arena3 = memPool->AllocArena(4_MB, SpaceType::SPACE_TYPE_COMPILER, AllocatorType::HUMONGOUS_ALLOCATOR);
+    ASSERT_NE(arena3, nullptr);
+}
+
 }  // namespace panda
