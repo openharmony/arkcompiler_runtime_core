@@ -96,7 +96,7 @@ Ambient Constant Declarations
         ;
 
 The initializer expression for an ambient constant
-must be a numeric or a string literal.
+must be a numeric or string literal.
 
 .. index::
    ambient constant declaration
@@ -204,7 +204,6 @@ Ambient Class Declarations
         'public' | 'protected'
         ;
 
-|
 
 Ambient field declarations have no initializers:
 
@@ -261,7 +260,7 @@ Ambient Indexer
     frontend_status: Done
        
 Ambient indexer declarations specify the indexing of a class instance
-in an ambient context. This feature is provided for compatibility with |TS|:
+in an ambient context. This feature is provided for |TS| compatibility:
 
 .. code-block:: abnf
 
@@ -292,7 +291,7 @@ Ambient Call Signature
     frontend_status: Done
        
 Ambient call signature declarations used to specify *callable types*
-in an ambient context. This feature is provided for compatibility with |TS|:
+in an ambient context. This feature is provided for |TS| compatibility:
 
 .. code-block:: abnf
 
@@ -307,9 +306,9 @@ in an ambient context. This feature is provided for compatibility with |TS|:
         (someArg: number): boolean
     }
 
-**Note**: *Ambient class signature declaration* is supported in ambient contexts only.
-If ambient class implementation is written in |LANG|, then it must conform to
-:ref:`Callable Types with Invoke Method`.
+**Note**: *Ambient class signature declaration* is supported in ambient contexts
+only. If ambient class implementation is written in |LANG|, then it must conform
+to :ref:`Callable Types with Invoke Method`.
 
 .. _Ambient Iterable:
 
@@ -319,9 +318,9 @@ Ambient Iterable
 .. meta:
     frontend_status: Done
        
-Ambient iterable declarations defines that a class instance is iterable.
-This feature is provided for compatibility with |TS|
-and can be used in an ambient context only:
+An ambient iterable declaration indicates that a class instance is iterable.
+This feature is provided for |TS| compatibility, and can be used in ambient
+contexts only:
 
 .. code-block:: abnf
 
@@ -386,7 +385,7 @@ Ambient Namespace Declarations
     frontend_status: Done
 
 Namespaces are used to logically group multiple entities. |LANG| supports
-ambient namespaces to provide better compatibility with |TS| that often uses
+ambient namespaces to provide better |TS| compatibility as |TS| often uses
 them to specify the platform API or a third-party library API.
 
 .. code-block:: abnf

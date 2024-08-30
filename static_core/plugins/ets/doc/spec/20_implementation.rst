@@ -78,8 +78,15 @@ Methods for ``T[]`` Types
 
 Some methods defined for ``Array<T>`` can be used for ``T[]`` (e.g., ``at``).
 It does not mean that ``T[]`` is a class type, but rather that the compiler
-must use appropriate lowering to implement such methods by using library
-function calls.
+supports the syntactical form of the method call for the ``T[]`` variables.
+The list of supported methods is defined by the compiler implementation.
+
+.. code-block:: typescript
+   :linenos:
+
+    let built_in_array: number[] = [1,2,3]
+    built_in_array.at (0) // That will be a valid call
+
 
 
 .. _Generic and Function Types Peculiarities:

@@ -157,7 +157,7 @@ Compilation Units in Host System
     frontend_status: Partly
     todo: Implement compiling a package module as a single compilation unit - #16267
 
-Modules and packages are created and stored in a manner that is determined by a
+Modules and packages are created and stored in a manner determined by the
 host system. The exact manner modules and packages are stored in a file
 system is determined by a particular implementation of the compiler and other
 tools.
@@ -201,12 +201,12 @@ Import directives make entities exported from other compilation units (see
 also :ref:`Declaration Modules`) available for use in the current compilation
 unit by using different binding forms.
 
-An import declaration has the following two parts:
+An import declaration has two parts as follows:
 
 -  Import path that determines a compilation unit to import from;
 
 -  Import binding that defines what entities, and in what form---qualified
-   or unqualified---can be used by the current compilation unit.
+   or unqualified---the current compilation unit can use.
 
 .. index::
    import directive
@@ -229,11 +229,11 @@ An import declaration has the following two parts:
         ;
 
     allBinding:
-        '*' importAlias
+        '*' bindingAlias
         ;
 
     selectiveBindigns:
-        '{' importBinding (',' importBinding)* '}'
+        '{' nameBinding (',' nameBinding)* '}'
         ;
 
     defaultBinding:
@@ -244,11 +244,11 @@ An import declaration has the following two parts:
         'type' selectiveBindigns
         ;
 
-    importBinding:
-        qualifiedName importAlias?
+    nameBinding:
+        qualifiedName bindingAlias?
         ;
 
-    importAlias:
+    bindingAlias:
         'as' identifier
         ;
 
@@ -257,15 +257,17 @@ An import declaration has the following two parts:
         ;
 
 Each binding adds a declaration or declarations to the scope of a module
-or a package (see :ref:`Scopes`).
-Any declaration added so must be distinguishable in the declaration scope (see
-:ref:`Distinguishable Declarations`). Otherwise, a :index:`compile-time error`
-occurs.
-Also ``importPath`` cannot refer to the file the current module is stored in.
-Otherwise, a :index:`compile-time error` occurs.
+or a package (see :ref:`Scopes`). Any declaration added so must be
+distinguishable in the declaration scope (see
+:ref:`Distinguishable Declarations`). A :index:`compile-time error` occurs if:
 
-It is noteworthy that import directives are handled by the compiler
-during compilation and have no effect during program execution.
+-  A declaration added to the scope of a module or a package by a binding is
+   not distinguishable;
+-  If ``importPath`` refers to the file the current module is stored in.
+
+
+**Note**: Import directives are handled by the compiler during compilation, and
+have no effect during program execution.
 
 .. index::
    binding
@@ -286,9 +288,9 @@ Bind All with Qualified Access
 The import binding ``* as A`` binds the single named entity *A* to the
 declaration scope of the current module.
 
-A qualified name, which consists of *A* and the name of entity ``A.name``,
-is used to access any entity exported from the compilation unit as defined
-by the *import path*.
+A qualified name consisting of *A* and the name of entity ``A.name`` is used
+to access any entity exported from the compilation unit as defined by the
+*import path*.
 
 +---------------------------------+--+-------------------------------+
 | **Import**                      |  | **Usage**                     |
@@ -301,7 +303,7 @@ by the *import path*.
 +---------------------------------+--+-------------------------------+
 
 This form of import is recommended because it simplifies the reading and
-understanding of the source code, when all exported entities are prefixed with
+understanding of the source code when all exported entities are prefixed with
 the name of the imported compilation unit.
 
 .. index::
@@ -345,7 +347,7 @@ The import binding ``ident as A`` binds an exported entity (entities) with the
 name *A* to the declaration scope of the current module.
 
 The bound entity is not accessible (see :ref:`Accessible`) as ``ident`` because
-this binding does not bind ``ident``.
+this binding does not bind ``ident``. It is shown in the following module:
 
 .. index::
    import binding
@@ -360,15 +362,13 @@ this binding does not bind ``ident``.
    bound entity
    binding
 
-This is shown in the following module:
-
 .. code-block:: typescript
    :linenos:
 
     export const PI = 3.14
     export function sin(d: number): number {}
 
-The module’s import path is now irrelevant:
+The import path of the module is now irrelevant:
 
 +---------------------------------+--+--------------------------------------+
 | **Import**                      |  | **Usage**                            |
@@ -426,9 +426,11 @@ Several Bindings for One Import Path
 .. meta:
     frontend_status: Done
 
-The same bound entities can use several import bindings. The same bound
-entities can use one import directive, or several import directives with
-the same import path.
+The same bound entities can use the following:
+
+- Several import bindings,
+- One import directive, or several import directives with the same import path:
+
 
 +---------------------------------+-----------------------------------+
 |                                 |                                   |
@@ -466,34 +468,34 @@ applied to a single name:
 | **Case**                    | **Sample**                 | **Rule**                     |
 +=============================+============================+==============================+
 |                             | .. code-block:: typescript |                              |
-| A name is explicitly used   |                            | Ok. The compile-time         |
+| A name is explicitly used   |                            | OK. The compile-time         |
 | without an alias in several |      import {sin, sin}     | warning is recommended.      |
 | bindings.                   |         from "..."         |                              |
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
-| A name is used explicitly   |                            | Ok. No warning.              |
+| A name is used explicitly   |                            | OK. No warning.              |
 | without alias in one        |     import {sin}           |                              |
 | binding.                    |        from "..."          |                              |
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
-| A name is explicitly used   |                            | Ok. Both the name and        |
-| without alias and implicitly|     import {sin}           | qualified name can be used:  |
-| with alias.                 |        from "..."          |                              |
+| A name is explicitly used   |                            | OK. Both the name and        |
+| without alias, and          |     import {sin}           | qualified name can be used:  |
+| implicitly with alias.      |        from "..."          |                              |
 |                             |                            | sin and M.sin are            |
 |                             |     import * as M          | accessible.                  |
 |                             |        from "..."          |                              |
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
-| A name is explicitly used   |                            | Ok. Only alias is accessible |
+| A name is explicitly used   |                            | OK. Only alias is accessible |
 | with alias.                 |                            | for the name, but not the    |
-|                             |     import {sin as Sine}   | original one:                |
+|                             |     import {sin as Sine}   | original name:               |
 |                             |       from "..."           |                              |
 |                             |                            | - Sine is accessible;        |
 |                             |                            | - sin is not accessible.     |
 +-----------------------------+----------------------------+------------------------------+
 |                             | .. code-block:: typescript |                              |
-| A name is explicitly        |                            | Ok. Both variants can be     |
-| used with alias and         |                            | used:                        |
+| A name is explicitly        |                            | OK. Both options can be      |
+| used with alias, and        |                            | used:                        |
 | implicitly with alias.      |     import {sin as Sine}   |                              |
 |                             |        from "..."          | - Sine is accessible;        |
 |                             |                            |                              |
@@ -567,10 +569,10 @@ Type Binding
     frontend_status: Done
 
 Type import binding allows importing only the type declarations exported from
-some module or package. These declarations can be exported normally, or by
+a module or a package. These declarations can be exported normally, or by
 using the *export type* form. The difference between *import* and
-*import type* is that the first form imports all top-level declarations
-which were exported, and the second imports only exported types.
+*import type* is that the former imports all exported top-level declarations,
+and the latter imports only exported types.
 
 .. code-block:: typescript
    :linenos:
@@ -814,7 +816,7 @@ and cannot be used by modules that import this declaration module:
 
 
 The exact manner declaration modules are stored in the file system, and how
-they differ from separate modules is determined by a particular implementation.
+they differ from separate modules, is determined by a particular implementation.
 
 |
 
@@ -826,7 +828,7 @@ Compilation Unit Initialization
 .. meta:
     frontend_status: None
 
-A compilation unit is a separate module (see :ref:`Separate Module Initializer`)
+A *compilation unit* is a separate module (see :ref:`Separate Module Initializer`)
 or a package (see :ref:`Package Initializer`) that is initialized once before
 the first use of an entity (function, variable, or type) exported from the
 compilation unit.
@@ -836,6 +838,23 @@ unit (separate or package) is initialized before the entry point (see
 :ref:`Program Entry Point`) code starts.
 If different compilation units are not connected by import, then the order
 of initialization of the compilation units is not determined.
+If there is a cyclic dependency between top-level variable declarations, then a
+:index:`compile-time error` occurs.
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+    // Source file 1
+    import {x} from "Source file 2"
+    let y = x // y uses x for its initialization
+
+
+    // Source file 2
+    import {y} from "Source file 1"
+    let x = y // x uses y for its initialization
 
 .. index::
    binding
@@ -950,14 +969,17 @@ The *export directive* allows the following:
 -  Specifying a selective list of exported declarations with optional
    renaming; or
 -  Specifying a name of one declaration; or
--  Re-exporting declarations from other compilation units; or
--  Exporting a type.
+-  Exporting a type; or
+-  Re-exporting declarations from other compilation units.
 
 
 .. code-block:: abnf
 
     exportDirective:
-        selectiveExportDirective | singleExportDirective | reExportDirective | exportTypeDirective
+        selectiveExportDirective 
+        | singleExportDirective 
+        | exportTypeDirective 
+        | reExportDirective
         ;
 
 .. index::
@@ -977,8 +999,10 @@ Selective Export Directive
 .. meta:
     frontend_status: Done
 
-In addition, each exported declaration can be marked as *exported* by
-explicitly listing the names of exported declarations. Renaming is optional.
+Top-level declarations can be made *exported* by using a selective export
+directive. The selective export directive provides an explicit list of names
+of the declarations to be exported. Optional renaming allows having the
+declarations exported with new names.
 
 .. code-block:: abnf
 
@@ -986,8 +1010,8 @@ explicitly listing the names of exported declarations. Renaming is optional.
         'export' selectiveBindigns
         ;
 
-An export list directive uses the same syntax as an import directive with
-*selective bindings*:
+A selective export directive uses the same *selective bindings* as an import
+directive:
 
 .. code-block:: typescript
    :linenos:
@@ -1002,7 +1026,6 @@ module.
    selective export directive
    exported declaration
    renaming
-   export list directive
    import directive
    selective binding
    module
@@ -1016,10 +1039,10 @@ Single Export Directive
 =======================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
-Single export directive allows specifying the declaration that is to be
-exported from the current compilation unit using its own name. The directive
+A single export directive allows specifying the declaration to be exported from
+the current compilation unit by using the declaration's own name. The directive
 in the example below exports variable 'v' by its name:
 
 .. code-block:: abnf
@@ -1046,10 +1069,10 @@ Export Type Directive
 .. meta:
     frontend_status: Done
 
-In addition to export that is attached to some declaration, a programmer can
-use the *export type* directive in order to do the following:
+In addition to export that is attached to some declaration, the *export type*
+directive can be used in order to do the following:
 
--  Export as a type a particular class or interface already declared; or
+-  Export *as a type* a particular class or interface already declared; or
 -  Export an already declared type under a different name.
 
 The appropriate syntax is presented below:
@@ -1064,11 +1087,9 @@ If a class or an interface is exported in this manner, then its usage is
 limited similarly to the limitations described for *import type* directives
 (see :ref:`Type Binding`).
 
-A :index:`compile-time error` occurs if a class or interface is declared
-exported, but then *export type* is applied to the same class or interface
-name.
-
-The following example is an illustration of how this can be used:
+If a class or interface is declared exported, but *export type* is applied
+to the same class or interface name, then a :index:`compile-time error` occurs.
+This situation is represented in the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -1097,9 +1118,8 @@ limited re-export possibilities are currently supported.
 
 It is possible to re-export a particular declaration or all declarations
 from a module. When re-exporting, new names can be given. This action is
-similar to importing but with the opposite direction.
-
-The appropriate grammar is presented below:
+similar to importing but with the opposite direction. The appropriate grammar
+is presented below:
 
 .. code-block:: abnf
 
@@ -1111,7 +1131,7 @@ An ``importPath`` cannot refer to the file the current module is stored in.
 Otherwise, a :index:`compile-time error` occurs.
 
 
-The following examples illustrate the re-exporting in practice:
+The re-exporting practice is represented in the following examples:
 
 .. code-block:: typescript
    :linenos:
@@ -1230,7 +1250,7 @@ Program Entry Point
 *******************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Separate modules can act as programs (applications). The two kinds of program
 (application) entry points are as follows:
@@ -1241,16 +1261,17 @@ Separate modules can act as programs (applications). The two kinds of program
 Thus, a separate module may have:
 
 - Only a top-level ``main`` function (that is the entry point);
-- Only top-level statements (that are entry points);
-- Both top-level ``main`` function and statements (same as above, plus ``main``
-  is called after the top-level statement execution is completed).
+- Only top-level statements (the first statement in the top-level statements
+  is the entry point);
+- Both top-level statements and ``main`` function (same as above, plus ``main``
+  is called after the top-level statements execution is completed).
 
-The top-level ``main`` function must have either no parameters, or one
-parameter of string  type ``[]`` that provides access to the arguments of
+A top-level ``main`` function must have either no parameters, or one
+parameter of string type ``[]`` that provides access to the arguments of
 program command-line. Its return type is either ``void`` (see :ref:`Type void`)
 or ``int``. No overloading is allowed for an entry point function.
 
-Different forms of valid and invalid entry points are shown in the example
+Different forms of valid and invalid entry points are represented in the example
 below:
 
 .. code-block-meta:
@@ -1298,6 +1319,37 @@ below:
    overloading
    entry point function
    entry point
+
+.. _Program Exit:
+
+Program Exit
+************
+
+.. meta:
+    frontend_status: Done
+
+Separate modules can act as programs (applications). Thus, a separate module
+can have:
+
+- Only a top-level ``main`` function;
+- Only top-level statements;
+- Both top-level statements and ``main`` function.
+
+A program exit takes place when:
+
+- All top-level statements and statements of the ``main`` function body, if any,
+  complete normally.
+- An unhandled error or exception (see :ref:`Error Handling`, :ref:`Exceptions`)
+  occurs during the program execution.
+
+In both cases, the control is passed to the |LANG| runtime system, which ensures
+that all coroutines (see :ref:`Coroutines`) created during the program execution
+are terminated.
+
+If an unhandled error or exception occurr, then proper diagnostics is displayed.
+
+This is the end of the program exit process.
+
 
 .. raw:: pdf
 

@@ -678,7 +678,24 @@ occurs.
 
 If an initializer expression is provided, then additional restrictions apply to
 the content of the expression as described in
-:ref:`Exceptions and Initialization Expression`.
+:ref:`Exceptions and Initialization Expression`. An initializer expression
+must not lead to cyclic dependencies caused by the use of non-initialized
+variables. Otherwise, a :index:`compile-time error` occurs.
+
+.. code-block-meta:
+   expect-cte:
+
+.. code-block:: typescript
+   :linenos:
+
+   let a = b // a uses b for its initialization
+   let b = a // b uses a for its initialization
+   
+   class A {
+     a = this.b // a uses b for its initialization
+     b = this.a // b uses a for its initialization
+   }
+
 
 If the type of a variable declaration has the prefix ``readonly``, then the
 type must be of the *array* kind, and the restrictions on its operations

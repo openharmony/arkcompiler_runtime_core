@@ -90,8 +90,8 @@ White spaces include the following:
 
 
 White spaces improve source code readability and help avoiding ambiguities.
-White spaces are ignored by the syntactic grammar. White spaces never occur
-within a single token, but can occur within a comment.
+White spaces are ignored by the syntactic grammar (see :ref:`Grammar Summary`).
+White spaces never occur within a single token, but can occur within a comment.
 
 .. index::
    lexical input element
@@ -144,11 +144,12 @@ Tokens form the vocabulary of the language. There are four classes of tokens:
 
 
 Token is the only lexical input element that can act as a terminal symbol
-of the syntactic grammar. In the process of tokenization, the next token is
-always the longest sequence of characters that form a valid token. Tokens
-are separated by white spaces (see :ref:`White spaces`). Without white spaces,
-tokens merge into a single token. White spaces are ignored by the syntactic
-grammar.
+of the syntactic grammar (see :ref:`Grammar Summary`). In the process of
+tokenization, the next token is always the longest sequence of characters that
+form a valid token. Tokens are separated by white spaces (see
+:ref:`White spaces`), operators, or punctuators (see
+:ref:`Operators and Punctuators`). White spaces are ignored by the syntactic
+grammar (see :ref:`Grammar Summary`).
 
 Line separators are often treated as white spaces, except where line
 separators have special meanings. See :ref:`Semicolons` for more details.
@@ -201,18 +202,18 @@ characters:
    
 .. code-block:: abnf
 
-    identifier:
-      identifierStart identifierPart*
+    Identifier:
+      IdentifierStart IdentifierPart*
       ;
 
-    identifierStart:
+    IdentifierStart:
       UnicodeIDStart
       | '$'
       | '_'
       | '\\' EscapeSequence
       ;
 
-    identifierPart:
+    IdentifierPart:
       UnicodeIDContinue
       | '$'
       | ZWNJ
@@ -447,7 +448,15 @@ an exponential part. Integer literals can be written with bases 16
 
     DecimalIntegerLiteral:
       '0'
-      | [1-9] ('_'? [0-9])* 
+      | DecimalDigitNotNull ('_'? DecimalDigit)*
+      ;
+
+    DecimalDigit:
+      [0-9]
+      ;
+
+    DecimalDigitNotNull:
+      [1-9]
       ;
 
     HexIntegerLiteral:
@@ -461,11 +470,21 @@ an exponential part. Integer literals can be written with bases 16
       ;
 
     OctalIntegerLiteral:
-      '0' [oO] ( [0-7] | [0-7] [0-7_]* [0-7] )
+      '0' [oO] ( OctalDigit
+      | OctalDigit (OctalDigit | '_')* OctalDigit )
+      ;
+
+    OctalDigit:
+      [0-7]
       ;
 
     BinaryIntegerLiteral:
-      '0' [bB] ( [01] | [01] [01_]* [01] )
+      '0' [bB] ( BinaryDigit
+      | BinaryDigit (BinaryDigit | '_')* BinaryDigit )
+      ;
+
+    BinaryDigit:
+      [0-1]
       ;
 
 Integral literals with different bases are represented by the examples below:
@@ -541,8 +560,8 @@ a float type suffix as follows:
         ;
 
     FractionalPart:
-        [0-9]
-        | [0-9] [0-9_]* [0-9]
+        DecimalDigit
+        | DecimalDigit (DecimalDigit | '|')* DecimalDigit
         ;
     FloatTypeSuffix:
         'f'
@@ -909,7 +928,8 @@ Comments
     frontend_status: Done
 
 *Comment* is a piece of text added in the stream to document and compliment
-the source code. Comments are insignificant for the syntactic grammar.
+the source code. Comments are insignificant for the syntactic grammar (see
+:ref:`Grammar Summary`).
 
 *Line comments* begin with the sequence of characters '``//``' (as seen in the
 example below) and end with the line separator character. Any character

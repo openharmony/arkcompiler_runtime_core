@@ -147,7 +147,7 @@ The result of a program expression *evaluation* denotes the following:
 -  A variable (the term *variable* is used here in the general, non-terminological
    sense to denote a modifiable lvalue in the left-hand side of an assignment);
    or
--  A value (results found in all other places).
+-  A value (results found elsewhere).
 
 .. index::
    evaluation
@@ -218,7 +218,7 @@ follows:
 -  If an *array reference expression* has the value ``null``, then an *array
    indexing expression* (see :ref:`Array Indexing Expression`) throws
    ``NullPointerError``.
--  If the value of an array index expression is negative, or greater than or
+-  If the value of an array index expression is negative, or greater than, or
    equal to the length of the array, then an *array indexing expression* (see
    :ref:`Array Indexing Expression`) throws ``ArrayIndexOutOfBoundsError``.
 -  If a cast cannot be performed at runtime, then a *cast expression* (see
@@ -673,7 +673,7 @@ The type of an array literal is inferred by the following rules:
    type inference
 
 -  If a context is available, then the type is inferred from the context. If
-   sucsessfull, then the type of the array literal is the inferred type:
+   sucsessfull, then the type of the array literal is the inferred type
    ``T[]``, ``Array<T>``, or tuple.
 -  Otherwise, the type is to be inferred from the types of its elements.
 
@@ -812,14 +812,14 @@ used to infer it from the initialization expressions:
 #. If the type of the expression cannot be determined, then the type of the
    array literal cannot be inferred, and a :index:`compile-time error` occurs.
 
-#. If each initialization expression is of some numeric type, then the
+#. If each initialization expression is of a numeric type, then the
    type is ``number[]``.
 
-#. If all initialization expressions are of the same type *T*, then the
+#. If all initialization expressions are of the same type ``T``, then the
    type is ``T[]``.
 
 #. Otherwise, the type is constructed as the union type ``T``:sub:`1` ``| ... |
-   T``:sub:`N`, where *T*:sub:`i` is the type of *expr*:sub:`i`.
+   T``:sub:`N`, where ``T``:sub:`i` is the type of *expr*:sub:`i`.
    Union type normalization (see :ref:`Union Types Normalization`) is applied
    to this union type.
 
@@ -939,8 +939,8 @@ Object Literal of Class Type
 .. meta:
     frontend_status: Done
 
-If the class type *C* is inferred from the context, then the type of object
-literal is *C*:
+If the class type ``C`` is inferred from the context, then the type of object
+literal is ``C``:
 
 .. index::
    object literal
@@ -966,7 +966,7 @@ An identifier in each *name-value pair* must name a field of the class *C*,
 or a field of any superclass of class *C*.
 
 A :index:`compile-time error` occurs if the identifier does not name an
-*accessible member field* (see :ref:`Accessible`) in the type *C*:
+*accessible member field* (see :ref:`Accessible`) in the type ``C``:
 
 .. index::
    identifier
@@ -1008,7 +1008,7 @@ A :index:`compile-time error` occurs if:
 -  *C* does not contain a parameterless constructor; or
 -  No constructor is accessible (see :ref:`Accessible`).
 
-This is presented in the examples below:
+These situations are presented in the examples below:
 
 .. index::
    compile-time error
@@ -1055,7 +1055,7 @@ Object Literal of Interface Type
     frontend_status: Partly
     todo: implement generic types
 
-If the interface type *I* is inferred from the context, then the type of the
+If the interface type ``I`` is inferred from the context, then the type of the
 object literal is an anonymous class implicitly created for interface *I*:
 
 .. code-block:: typescript
@@ -1067,11 +1067,11 @@ object literal is an anonymous class implicitly created for interface *I*:
     }
     let b : Person = {name: "Bob", age: 25}
 
-In this example, the type of *b* is an anonymous class that contains the
+In the example above, the type of *b* is an anonymous class that contains the
 same fields as the interface *I*.
 
-The interface type *I* must contain fields only. A :index:`compile-time error`
-occurs if the interface type *I* contains a method:
+The interface type ``I`` must contain fields only. A :index:`compile-time error`
+occurs if the interface type ``I`` contains a method:
 
 .. index::
    object literal
@@ -1189,7 +1189,7 @@ Object Literal Evaluation
 .. meta:
     frontend_status: Done
 
-The evaluation of an object literal of type *C* (where *C* is either
+The evaluation of an object literal of type ``C`` (where ``C`` is either
 a named class type or an anonymous class type created for the interface)
 is to be performed by the following steps:
 
@@ -1376,9 +1376,9 @@ reference to the following:
 The value denoted by ``this`` in a lambda body and in the surrounding context
 is the same.
 
-The class of the actual object referred to at runtime can be *T* if *T*
+The class of the actual object referred to at runtime can be ``T`` if ``T``
 is a class type, or a class that is compatible (see :ref:`Type Compatibility`)
-with *T*.
+with ``T``.
 
 .. index::
    keyword this
@@ -1428,10 +1428,10 @@ If object reference evaluation completes abruptly, then so does the entire
 field access expression.
 
 An object reference used for Field Access must be a non-nullish reference
-type *T*. Otherwise, a :index:`compile-time error` occurs.
+type ``T``. Otherwise, a :index:`compile-time error` occurs.
 
 Field access expression is valid if the identifier refers to an accessible
-(see :ref:`Accessible`) member field in type *T*. A :index:`compile-time error`
+(see :ref:`Accessible`) member field in type ``T``. A :index:`compile-time error`
 occurs otherwise.
 
 .. index::
@@ -1491,8 +1491,8 @@ b. *Instance* field access (*objectReference* is evaluated in the form *primaryE
 The evaluation of *primaryExpression* is performed. The result of the *field
 access expression* of an instance field in the class or interface is as follows:
 
--  ``variable`` if the field is not ``readonly``. The resultant value can
-   then be changed.
+-  ``variable`` if the field is not ``readonly``. Then the resultant value can
+   be changed.
 
 -  ``value`` if the field is ``readonly``, except where the *field access*
    occurs in a constructor (see :ref:`Constructor Declaration`).
@@ -1534,20 +1534,7 @@ The forms that use the keyword ``super`` are valid only in:
 -  Constructors of a class; or
 -  Initializers of an instance variable of a class.
 
-.. index::
-   access
-   superclass field
-   class type
-   identifier
-   instance
-   superclass
-   constructor
-   instance variable
-   keyword super
-   instance initializer
-   initializer
-
-A :index:`compile-time error` occurs if forms with the keyword ``super`` occur:
+A :index:`compile-time error` occurs if forms with the keyword ``super`` are found:
 
 -  Elsewhere;
 -  In the declaration of class ``Object`` (since ``Object`` has no superclass).
@@ -1565,12 +1552,20 @@ A :index:`compile-time error` occurs otherwise (particularly if the current
 class is not *T*).
 
 .. index::
-   compile-time error
-   keyword super
-   Object
-   superclass
-   field access expression
    access
+   superclass field
+   class type
+   identifier
+   instance
+   superclass
+   constructor
+   instance variable
+   keyword super
+   instance initializer
+   initializer
+   compile-time error
+   Object
+   field access expression
    direct superclass
    qualified name
 
@@ -1900,13 +1895,13 @@ Otherwise, a :index:`compile-time error` occurs.
 If the chaining operator '``?.``' (see :ref:`Chaining Operator`) is present,
 and after its application the type of *object reference expression* is an array
 type ``T[]``, then it makes a valid *array reference expression*, and the type
-of the array indexing expression is *T*.
+of the array indexing expression is ``T``.
 
-The result of an array indexing expression is a variable of type *T* (i.e., an
+The result of an array indexing expression is a variable of type ``T`` (i.e., an
 element of the array selected by the value of that *index expression*).
 
-It is essential that, if type *T* is a reference type, then the fields of array
-elements can be modified by changing the resultant variable fields:
+It is essential that, if type ``T`` is a reference type, then the fields of
+array elements can be modified by changing the resultant variable fields:
 
 .. index::
    array indexing expression
@@ -1959,7 +1954,7 @@ An array indexing expression evaluated at runtime behaves as follows:
 -  If the index expression value of an array is less than zero, greater than
    or equal to that array’s *length*, then the ``ArrayIndexOutOfBoundsError``
    is thrown.
--  Otherwise, the result of the array access is a type *T* variable within
+-  Otherwise, the result of the array access is a type ``T`` variable within
    the array selected by the value of the index expression.
 
 .. code-block:: typescript
@@ -2414,6 +2409,12 @@ at runtime:
 |                                 |                         |  let B: Boolean             |
 |                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
+
+(table cont'd)
+
++---------------------------------+-------------------------+-----------------------------+
+|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
++=================================+=========================+=============================+
 | ``bigint``/``BigInt``           | "bigint"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let b: bigint              |
@@ -2451,12 +2452,6 @@ at runtime:
 |                                 |                         |  let c: C                   |
 |                                 |                         |  typeof c                   |
 +---------------------------------+-------------------------+-----------------------------+
-
-(table cont'd)
-
-+---------------------------------+-------------------------+-----------------------------+
-|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
-+=================================+=========================+=============================+
 | All high-performance numeric    | "number"                | .. code-block:: typescript  |
 | value types and their boxed     |                         |                             |
 | versions:                       |                         |  let x: byte                |
@@ -2572,7 +2567,7 @@ equals the *nullish* value:
    of a nullish-coalescing expression.
 -  If not so, then the left-hand-side expression evaluation result is
    the result of a nullish-coalescing expression, and the right-hand-side
-   expression is not evaluated (the operator '``??``' is thus **lazy**).
+   expression is not evaluated (the operator '``??``' is thus *lazy*).
 
 .. index::
    nullish-coalescing expression
@@ -2867,10 +2862,8 @@ If evaluation of the operand expression completes normally at runtime, then:
 -  The sum is stored back into the variable.
 
 Otherwise, the prefix decrement expression completes abruptly, and no
-decrementation occurs.
-
-The value of the prefix decrement expression is the value of the variable
-*before* the new value is stored.
+decrementation occurs. The value of the prefix decrement expression remains
+the value of the variable *before* a new value is stored.
 
 .. index::
    evaluation
@@ -3205,8 +3198,8 @@ IEEE 754 arithmetic:
 
 -  If the result is not ``NaN``, then the sign of the result is as follows:
 
-   -  Positive if both operands have the same sign; and
-   -  Negative if the operands have different signs.
+   -  Positive, where both operands have the same sign; and
+   -  Negative, where the operands have different signs.
 
 
 -  If infinity is multiplied by a finite value, then the multiplication results
@@ -3268,9 +3261,9 @@ satisfies :math:`|d\cdot{}q|\leq{}|n|`.
 
 Note that *q* is:
 
--  Positive when \|n| :math:`\geq{}` \|d|, while *n* and *d* have the same sign;
+-  Positive, where \|n| :math:`\geq{}` \|d|, and *n* and *d* have the same sign;
    but
--  Negative when \|n| :math:`\geq{}` \|d|, while *n* and *d* have opposite signs.
+-  Negative, where \|n| :math:`\geq{}` \|d|, and *n* and *d* have opposite signs.
 
 
 .. index::
@@ -3288,10 +3281,8 @@ Note that *q* is:
 Only a single special case does not comply with this rule: the integer overflow
 occurs, and the result equals the dividend if the dividend is a negative
 integer of the largest possible magnitude for its type, while the divisor
-is *-1*.
-
-This case throws no exception or error despite the overflow. However, if in
-an integer division the divisor value is *0*, then ``ArithmeticError`` is
+is *-1*. This case throws no exception or error despite the overflow. However,
+if in an integer division the divisor value is *0*, then ``ArithmeticError`` is
 thrown.
 
 A floating-point division result is determined in compliance with the IEEE 754
@@ -3322,8 +3313,8 @@ arithmetic:
 
 -  If the result is not ``NaN``, then the sign of the result is:
 
-   -  Positive if both operands have the same sign; or
-   -  Negative if the operands have different signs.
+   -  Positive, where both operands have the same sign; or
+   -  Negative, where the operands have different signs.
 
 
 -  Division produces a signed infinity (the sign is determined by
@@ -3419,9 +3410,8 @@ value, i.e., :math:`(a/b)*b+(a\%b)` equals *a*.
 
 This equality holds even in the special case where the dividend is a negative
 integer of the largest possible magnitude of its type, and the divisor is *-1*
-(the remainder is then *0*).
-
-According to this rule, the result of the remainder operation can only be:
+(the remainder is then *0*). According to this rule, the result of the remainder
+operation can only be:
 
 -  Negative if the dividend is negative; or
 -  Positive if the dividend is positive.
@@ -3436,8 +3426,8 @@ A floating-point remainder operation result as computed by the operator '``%``'
 is different than that produced by the remainder operation defined by IEEE 754.
 The IEEE 754 remainder operation computes the remainder from a rounding
 division (not a truncating division), and its behavior is different from that
-of the usual integer remainder operator. Contrarily, |LANG| presumes that on
-floating-point operations the operator '``%``' behaves in the same manner as
+of the usual integer remainder operator. On the contrary, |LANG| presumes that
+on floating-point operations the operator '``%``' behaves in the same manner as
 the integer remainder operator (comparable to the C library function *fmod*).
 The standard library (see :ref:`Standard Library`) routine ``Math.IEEEremainder``
 can compute the IEEE 754 remainder operation.
@@ -3484,7 +3474,7 @@ with the IEEE 754 arithmetic:
 
 -  If infinity, zero, or ``NaN`` are not involved, then the floating-point remainder
    *r* from the division of the dividend *n* by the divisor *d* is determined
-   by the mathematical relation :math:`r=n-(d\cdot{}q)`, in which *q* is an
+   by the mathematical relation :math:`r=n-(d\cdot{}q)`, where *q* is an
    integer that is only:
 
    -  Negative if :math:`n/d` is negative, or
@@ -3535,8 +3525,8 @@ other cases, the type of each operand of the operator '``+``' must be
 convertible (see :ref:`Primitive Types Conversions`) to a numeric type.
 Otherwise, a :index:`compile-time error` occurs.
 
-The type of each operand of the binary operator '``-``' in all cases must be
-convertible (see :ref:`Primitive Types Conversions`) to a numeric type.
+The type of each operand of the binary operator '``-``' must be convertible
+(see :ref:`Primitive Types Conversions`) to a numeric type in all cases.
 Otherwise, a :index:`compile-time error` occurs.
 
 .. index::
@@ -3645,7 +3635,7 @@ If overflow occurs on an integer addition, then:
 
 
 The result of a floating-point addition is determined in compliance with the
-IEEE 754 arithmetic:
+IEEE 754 arithmetic as follows:
 
 .. index::
    operand expression
@@ -3766,12 +3756,13 @@ separately on each operand to ensure that both operands are of primitive
 integer type.
 
 **Note**: If the initial type of one or both operands is ``double`` or
-``float``, then such operand or operands are  first truncated to appropriate
-integer type. If both operands are of type *bigint*, then shift operator
+``float``, then such operand or operands are  first truncated to the appropriate
+integer type. If both operands are of type ``bigint``, then shift operator
 is applied to bigint operands.
 
 A :index:`compile-time error` occurs if either operand in a shift operator
-(after unary numeric promotion) is not a primitive integer type or bigint.
+(after unary numeric promotion) is not a primitive ``integer`` or ``bigint``
+type.
 
 .. index::
    shift expression
@@ -3793,8 +3784,8 @@ The shift expression type is the promoted type of the left-hand operand.
 If the left-hand operand is of the promoted type ``int``, then only five
 lowest-order bits of the right-hand operand specify the shift distance
 (as if using a bitwise logical AND operator '``&``' with the mask value *0x1f*
-or *0b11111* on the right-hand operand), and thus it is always within
-the inclusive range of *0* through *31*.
+or *0b11111* on the right-hand operand). Thus, it is always within the
+inclusive range of *0* through *31*.
 
 If the left-hand operand is of the promoted type ``long``, then only six
 lowest-order bits of the right-hand operand specify the shift distance
@@ -3987,8 +3978,8 @@ Results of all string comparisons are defined as follows:
    operand is lexicographically greater than the string value of the right-hand
    operand, or ``false`` otherwise.
 -  Operator '``>=``' delivers ``true`` if the string value of the left-hand
-   operand is lexicographically greater than or equal to the string value of the
-   right-hand operand, or ``false`` otherwise.
+   operand is lexicographically greater than or equal to the string value of
+   the right-hand operand, or ``false`` otherwise.
 
 .. index::
    operator
@@ -4340,8 +4331,8 @@ If the other operand is of another type, then the static type of the first
 operand is used for evaluation.
 
 If actual types of objects are compatible, then the corresponding evaluation of
-equality operator is used. Otherwise, the result of the operators ``==`` and
-``===`` is ``false``.
+equality operator is used. Otherwise, the result of the operators '``==``' and
+'``===``' is ``false``.
 
 |
 
@@ -4406,10 +4397,11 @@ The following example illustrates an equality with a value of type ``Object``:
 Union Equality Operators
 ------------------------
 
-Where one operand is of type *T*:sub:`1`, and the other operand is of type
-*T*:sub:`2`, while *T*:sub:`1`, *T*:sub:`2`, or both are a union type, then a
-:index:`compile-time error` occurs if *T*:sub:`1` and *T*:sub:`2` have no
-overlap (i.e., if no value belongs to both *T*:sub:`1` and *T*:sub:`2`).
+Where one operand is of type ``T``:sub:`1`, and the other operand is of type
+``T``:sub:`2`, while ``T``:sub:`1`, ``T``:sub:`2`, or both are a union type,
+then a :index:`compile-time error` occurs if ``T``:sub:`1` and ``T``:sub:`2`
+have no overlap (i.e., if no value belongs to both ``T``:sub:`1` and
+``T``:sub:`2`).
 
 **Note**: Any union type has an overlap with a value of type ``Object``.
 
@@ -4428,8 +4420,8 @@ The following example illustrates an equality with values of two union types:
 
 
 If actual types of values are compatible, then the corresponding evaluation of
-an equality operator is used. Otherwise, the result of the operators ``==`` and
-``===`` is ``false``:
+an equality operator is used. Otherwise, the result of the operators '``==``'
+and '``===``' is ``false``:
 
 .. code-block:: typescript
    :linenos:
@@ -4456,8 +4448,8 @@ If one operand is a type parameter, then the other operand can be of any
 reference type, including type parameter.
 
 If actual object types are compatible, then the corresponding evaluation of an
-equality operator is used. Otherwise, the result of the operators ``==`` and
-``===`` is ``false``:
+equality operator is used. Otherwise, the result of the operators '``==``' and
+'``===``' is ``false``:
 
 .. code-block:: typescript
    :linenos:
@@ -4542,11 +4534,11 @@ Extended Equality with ``null`` or ``undefined``
 |LANG| provides extended semantics for equalities with ``null`` and ``undefined``
 to ensure better alignment with |TS|.
 
-Any entity can be compared to ``null`` by using the operators ``==`` and ``!=``.
-This comparison can return ``true`` only for the entities of *nullable* types
-if they actually have the ``null`` value during the program execution.
-In all other cases the comparison to ``null`` returns ``false``. This
-situation is to be known at compile time.
+Any entity can be compared to ``null`` by using the operators '``==``' and
+'``!=``'. This comparison can return ``true`` only for the entities of
+*nullable* types if they actually have the ``null`` value during the program
+execution. In all other cases the comparison to ``null`` returns ``false``.
+This situation is to be known at compile time.
 
 Similarly, a comparison to ``undefined`` returns ``false`` if the variable
 being compared is neither type ``undefined`` nor a union type with ``undefined``
@@ -4580,9 +4572,13 @@ The following comparison is evaluated at runtime:
 .. code-block:: typescript
    :linenos:
 
-    function foo(x: string | undefined) {
-        return x == undefined
+    function foo<T> (p1: string | null, p2: T) {
+        console.log (p1 == undefined, p1 == null, p2 == undefined, p2 == null)
     }
+    let nullable: string|null = "a string"
+    let undefinedable: Object|undefined = undefined
+
+    foo (nullable, undefinedable) // Output: false false true true
 
 |
 
@@ -4647,12 +4643,12 @@ Integer Bitwise Operators
     frontend_status: Done
 
 The numeric types conversion (see :ref:`Primitive Types Conversions`)
-is first performed on the operands of an operator '``&``', '``^``', or '``|``'
+is performed first on the operands of an operator '``&``', '``^``', or '``|``'
 if both operands are of a type convertible (see :ref:`Implicit Conversions`)
 to a primitive integer type.
 
 **Note**: If the initial type of one or both operands is ``double`` or
-``float``, then that operand or operands are first truncated to the appropriate
+``float``, then that operand or operands are truncated first to the appropriate
 integer type. If both operands are of type ``bigint``, then no conversion is
 required.
 
@@ -4725,7 +4721,7 @@ The *conditional-and* operator '``&&``' is similar to '``&``' (see
 operand only if the left-hand operand’s value is ``true``.
 
 The computation results of '``&&``' and '``&``' on ``boolean`` operands are
-the same, but the right-hand operand in '``&&``' can be not evaluated.
+the same, but the right-hand operand in '``&&``' cannot be evaluated.
 
 .. code-block:: abnf
 
@@ -4837,7 +4833,7 @@ follows:
    *conditional-or* expression.
 
 The computation results of '``||``' and '``|``' on ``boolean`` operands are
-the same, but the right-hand operand in '``||``' can be not evaluated.
+the same, but the right-hand operand in '``||``' cannot be evaluated.
 
 .. index::
    conditional-or expression
@@ -4884,7 +4880,7 @@ the value of *b* to *a*).
         expression
         ;
 
-    rhsExpression
+    rhsExpression:
         expression
         ;
 
@@ -4913,15 +4909,16 @@ The result of the first operand in an assignment operator (represented by
    indexing expression
    record component access
 
-A :index:`compile-time error` occurs if *lhsExpression* contains the chaining
-operator '``?.``' (see :ref:`Chaining Operator`).
+A :index:`compile-time error` occurs if:
 
-A :index:`compile-time error` occurs if the result of *lhsExpression* is not a
-variable.
+-  *lhsExpression* contains the chaining operator '``?.``' (see
+   :ref:`Chaining Operator`);
+-  the result of *lhsExpression* is not a variable.
+
 
 The type of the variable is the type of the assignment expression.
 
-The result of the assignment expression at runtime is not itself a variable
+The result of the assignment expression at runtime is not a variable itself
 but the value of a variable after the assignment.
 
 .. index::
@@ -4995,11 +4992,11 @@ one of the following ways:
       subexpression.
 
 
-      That element is a variable of type *SC*. If *TC* is the type of the
+      That element is a variable of type ``SC``. If ``TC`` is the type of the
       left-hand operand of the assignment operator determined at compile
       time, then there are two options:
 
-      - If *TC* is a primitive type, then *SC* can only be the same as *TC*.
+      - If ``TC`` is a primitive type, then ``SC`` can only be the same as ``TC``.
 
 
         The value of the right-hand operand is converted to the type of the
@@ -5007,17 +5004,17 @@ one of the following ways:
         :ref:`Implicit Conversions`) is performed to convert it to the
         appropriate standard value set (not an extended-exponent value set).
         The result of the conversion is stored into the array element.
-      - If *TC* is a reference type, then *SC* can be the same as *TC* or
-        a type that extends or implements *TC*.
+      - If ``TC`` is a reference type, then ``SC`` can be the same as ``TC`` or
+        a type that extends or implements ``TC``.
 
         If the |LANG| compiler cannot guarantee at compile time that the array
-        element is exactly of type *TC*, then a check must be performed
+        element is exactly of type ``TC``, then a check must be performed
         at runtime to ensure that class *RC*---i.e., the class of the
         object referred to by the value of the right-hand operand at
         runtime---is compatible with the actual type *SC* of the array element
         (see :ref:`Type Compatibility with Initializer`).
 
-        If class *RC* is not assignable to type *SC*, then ``ArrayStoreError``
+        If class *RC* is not assignable to type ``SC``, then ``ArrayStoreError``
         is thrown, and the assignment does not occur.
 
         Otherwise, the reference value of the right-hand operand is stored in
@@ -5130,7 +5127,7 @@ Compound Assignment Operators
     frontend_status: Done
 
 A compound assignment expression in the form *E1 op= E2* is equivalent to
-*E1 = ((E1) op (E2)) as T*, where *T* is the type of *E1*, except that *E1*
+*E1 = ((E1) op (E2)) as T*, where ``T`` is the type of *E1*, except that *E1*
 is evaluated only once. This expression can be evaluated at runtime in one
 of the following ways:
 
@@ -5204,11 +5201,11 @@ of the following ways:
 
    -  If the evaluation completes normally, consideration must be given
       to the saved value of the array element selected in the previous
-      step. While this element is a variable of type *S*, and *T* is
+      step. While this element is a variable of type ``S``, and ``T`` is
       the type of the left-hand operand of the assignment operator
       determined at compile time:
 
-      - If *T* is a primitive type, then *S* is the same as *T*.
+      - If ``T`` is a primitive type, then ``S`` is the same as ``T``.
 
         The saved value of the array element, and the value of the right-hand
         operand are used to perform the binary operation of the compound
@@ -5222,9 +5219,9 @@ of the following ways:
         operation converts to the type of the selected array element.
         The result of the conversion is stored into the array element.
 
-      - If *T* is a reference type, then it must be *string*.
+      - If ``T`` is a reference type, then it must be *string*.
 
-        *S* must also be a *string* because the class *string* is the *final*
+        ``S`` must also be a *string* because the class *string* is the *final*
         class. The saved value of the array element, and the value of the
         right-hand operand are used to perform the binary operation (string
         concatenation) of the compound assignment operator '``+=``'. If
