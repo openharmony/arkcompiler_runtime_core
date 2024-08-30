@@ -1,0 +1,403 @@
+/**
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+
+const success: number = 0;
+const fail: number = 1;
+
+function main(): int {
+    let failures: number = 0;
+
+    failures += check(testBytePerElement(),"test BytePerElement for {{.item.objectType}}");
+    failures += check(testTypedArrayIterator(),"test {{.item.objectType}} Iterator");
+    failures += check(testTypedArrayIteratorEmptyArray(), "test {{.item.objectType}} Iterator Empty Array");
+    failures += check(testTypedArrayIteratorSingleElement(), "test {{.item.objectType}} Iterator Single Element");
+    failures += check(testTypedArrayIteratorAfterModification(), "test {{.item.objectType}} Iterator After Modification");
+    failures += check(testTypedArrayIteratorAfterCompletion(), "test {{.item.objectType}} Iterator After Completion");
+
+    failures += check(testEmptyTypedArrayToString(), "Try to Empty Array toString");
+    failures += check(testNonEmptyTypedArrayToString(), "Try to Nonempty Array toString");
+
+    failures += check(testEmptyTypedArrayAt(), "Test to Empty Array at");
+    failures += check(testNonEmptyTypedArrayAt(), "Test to Nonempty Array at");
+    
+    failures += check(testNonEmptyTypedArrayReverse(), "Test NonEmpty Array Reverse");
+    failures += check(testEmptyTypedArrayReverse(), "Test Empty Array Reverse");
+
+    if (failures > 0){
+        console.log("failed");
+        return fail;
+    }
+
+    console.log("All passed");
+    return success;
+}
+
+function check(result: int, message: String): number {
+    if (result == 0) {
+        return success;
+    }
+    console.log("\nFAILED: " + message);
+    return fail;
+}
+
+function check(result: number, message: String): number {
+    if (result == 0) {
+        return success;
+    }
+    console.log("\nFAILED: " + message);
+    return fail;
+}
+
+const source: {{.item.primitiveType}}[] = {{.item.data}};
+const abnormalSource: {{.item.primitiveType}}[] = {{.item.abnormalData}};
+
+function testBytePerElement(): number {
+    if ({{.item.objectType}}.BYTES_PER_ELEMENT as int == {{.item.primitiveSizeBytes}}) return success;
+    return fail;
+}
+
+function testTypedArrayIterator(): number {
+    let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    let length = typedArray.length;
+
+    try {
+        typedArray[0] = 1 as number;
+        typedArray[1] = 2 as number;
+        typedArray[2] = 3 as number;
+        typedArray[3] = 4 as number;
+        typedArray[4] = 5 as number;
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    let arrayIterator = typedArray.$_iterator();
+    let next = arrayIterator.next();
+    let counter: int = 0;
+    while (!next.done) {
+        if (next.value == undefined) {
+                return fail;
+        }
+        if (typedArray[counter] as number != (next.value) as number) {    
+                return fail;
+        }
+        next = arrayIterator.next()
+        counter++
+    }
+
+    if (counter != typedArray.length) { 
+        return fail;
+    }
+
+    return success;
+}
+
+
+
+function testEmptyTypedArrayToString(): number {
+    let ss = new ArrayBuffer(0); 
+    let typedArray: {{.item.objectType}};
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    const toStringResult = typedArray.toString();
+    console.log("toString result: " + toStringResult);
+    // Assertion
+    if (toStringResult == "") {
+        console.log("testEmptyTypedArrayToString test passed.");
+        return success;
+    } else {
+        console.log("toString test failed.");
+        return fail;
+    }
+}
+
+function testNonEmptyTypedArrayToString(): number {
+    let source1: number[] = [1, 2, 3, 4, 5];
+    let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+        typedArray.set(source1);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    const toStringResult = typedArray.toString();
+    console.log("toString result: " + toStringResult);
+    // Assertion
+    if (toStringResult == "1,2,3,4,5") {
+        console.log("toString test passed.");
+        return success;
+    } else {
+        console.log("testNonEmptyTypedArrayToString test failed.");
+        return fail;
+    }
+}
+
+function testNonEmptyTypedArrayAt(): number {
+    //let source: number[] = [1, 2, 3, 4, 5];
+    let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+        typedArray.set(source);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    let index = 0;
+    let length = typedArray.length;
+    let atResult = typedArray.at(index);
+    console.log("testNonEmptyTypedArrayAt result: " + atResult);
+    // Assertion
+    if (atResult == new Number(source[index])) {
+        console.log("testNonEmptyTypedArrayAt test passed.");
+    } else {
+        console.log("testNonEmptyTypedArrayAt test failed.");
+        return fail;
+    }
+
+    index = -1;
+    atResult = typedArray.at(index);
+    console.log("testNonEmptyTypedArrayAt result: " + atResult);
+    // Assertion
+    if (atResult == new Number(source[index + length as int])) {
+        console.log("testNonEmptyTypedArrayAt test passed.");
+    } else {
+        console.log("testNonEmptyTypedArrayAt test failed.");
+        return fail;
+    }
+
+    index = typedArray.length as int;
+    atResult = typedArray.at(index);
+    console.log("testNonEmptyTypedArrayAt result: " + atResult);
+    // Assertion
+    if (atResult == undefined) {
+        console.log("testNonEmptyTypedArrayAt test passed.");
+    } else {
+        console.log("testNonEmptyTypedArrayAt test failed.");
+        return fail;
+    }
+    return success;
+}
+
+function testEmptyTypedArrayAt(): number {
+    let ss = new ArrayBuffer(0); 
+    let typedArray: {{.item.objectType}};
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    let atResult = typedArray.at(0);
+    console.log("testEmptyTypedArrayAt result: " + atResult);
+    // Assertion
+    if (atResult == undefined) {
+        console.log("testEmptyTypedArrayAt test passed.");
+        return success;
+    } else {
+        console.log("testEmptyTypedArrayAt test failed.");
+        return fail;
+    }
+}
+
+function testNonEmptyTypedArrayReverse(): number {
+    let source1: {{.item.primitiveType}}[] = [5, 3, 1, 4, 2];
+    let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+        typedArray.set(source1);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    // Test toReversed function
+    let reversedArray: {{.item.objectType}} = typedArray.reverse();
+    let expectedArray: {{.item.primitiveType}}[] = [2, 4, 1, 3, 5];
+    for (let i = 0; i < reversedArray.length; i++) {
+        if (reversedArray[i] != expectedArray[i]) {
+            console.log("Test failed. testNonEmptyTypedArrayReverse: " + JSON.stringify(reversedArray[i]));
+            return fail;
+        }
+    }
+    return success;
+}
+
+function testEmptyTypedArrayReverse(): number {
+    let ss = new ArrayBuffer(0);
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    // Test toReversed function
+    let reversedArray: {{.item.objectType}} = typedArray.reverse();
+
+    if (reversedArray != typedArray || reversedArray.length != 0) {
+        console.log("Test failed. testEmptyTypedArrayReverse: " + reversedArray);
+        return fail;
+    }
+
+    return success;
+}
+
+function testTypedArrayIteratorEmptyArray(): number {
+    let emptyArray = new {{.item.objectType}}(new ArrayBuffer(0));
+    let emptyIterator = emptyArray.$_iterator();
+    let emptyNext = emptyIterator.next();
+
+    if (!emptyNext.done || emptyNext.value != undefined) {
+        return fail;
+    }
+
+    return success;
+}
+
+function testTypedArrayIteratorSingleElement(): number {
+    let singleArray = new {{.item.objectType}}(new ArrayBuffer(1 *  {{.item.primitiveSizeBytes}}));
+
+    try {
+        singleArray[0] = 99;
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    let singleIterator = singleArray.$_iterator();
+    let singleNext = singleIterator.next();
+
+    if (singleNext.done || singleNext.value != 99) {
+        return fail;
+    }
+
+    singleNext = singleIterator.next();
+    if (!singleNext.done || singleNext.value != undefined) {
+        return fail;
+    }
+
+    return success;
+}
+
+function testTypedArrayIteratorAfterModification(): number {
+  let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});
+  let typedArray: {{.item.objectType}};
+
+  try {
+      typedArray = new {{.item.objectType}}(ss);
+  } catch(e) {
+      console.log(e);
+      return fail;
+  }
+
+  try {
+      typedArray[0] = 1;
+      typedArray[1] = 2;
+      typedArray[2] = 3;
+      typedArray[3] = 4;
+      typedArray[4] = 5;
+  } catch(e) {
+      console.log(e);
+      return fail;
+  }
+
+    // Testing iterator after modification
+    let arrayIterator = typedArray.$_iterator();
+    let next = arrayIterator.next();
+    let expectedValues = [1, 2, 3, 4, 5];
+    let counter: int = 0;
+
+    while (!next.done) {
+      if (next.value == undefined) {
+          return fail;
+      }
+      if (expectedValues[counter] != next.value) {
+          return fail;
+      }
+      next = arrayIterator.next();
+      counter++;
+    }
+
+    if (counter != typedArray.length) {
+        return fail;
+    }
+
+    // Modify a value
+    typedArray[0] = 99;
+    if (typedArray.$_iterator().next().value != 99) {
+        return fail;
+    }
+    return success;
+}
+
+function testTypedArrayIteratorAfterCompletion(): number {
+    let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});
+    let typedArray: {{.item.objectType}};
+
+    try {
+        typedArray = new {{.item.objectType}}(ss);
+    } catch(e) {
+        console.log(e);
+        return fail;
+    }
+
+    typedArray[0] = 1;
+    typedArray[1] = 2;
+    typedArray[2] = 3;
+    typedArray[3] = 4;
+    typedArray[4] = 5;
+
+    let arrayIterator = typedArray.$_iterator();
+    let next = arrayIterator.next();
+
+    while (!next.done) {
+        next = arrayIterator.next();
+    }
+
+    // Check iterator after completion
+    next = arrayIterator.next();
+    if (!next.done || next.value != undefined) {
+        return fail;
+    }
+
+    return success;
+}
