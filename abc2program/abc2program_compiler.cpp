@@ -16,6 +16,7 @@
 #include "abc2program_compiler.h"
 #include "abc_class_processor.h"
 #include "file_format_version.h"
+#include "utils/timers.h"
 
 namespace panda::abc2program {
 
@@ -65,23 +66,27 @@ pandasm::Program *Abc2ProgramCompiler::CompileAbcFile()
     prog_ = new pandasm::Program();
     prog_->lang = LANG_ECMA;
     auto classes = file_->GetClasses();
+    std::string record_name = "";
     for (size_t i = 0; i < classes.size(); i++) {
         panda_file::File::EntityId record_id(classes[i]);
         if (file_->IsExternal(record_id)) {
             UNREACHABLE();
         }
-        CompileAbcClass(record_id, *prog_);
+        CompileAbcClass(record_id, *prog_, record_name);
     }
     return prog_;
 }
 
 void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &record_id,
-                                          pandasm::Program &program)
+                                          pandasm::Program &program, std::string &record_name)
 {
     ASSERT(!file_->IsExternal(record_id));
     Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset());
+    record_name = entity_container.GetFullRecordNameById(record_id);
+    panda::Timer::timerStart(EVENT_COMPILE_ABC_FILE_RECORD, record_name);
     AbcClassProcessor class_processor(record_id, entity_container);
     class_processor.FillProgramData();
+    panda::Timer::timerEnd(EVENT_COMPILE_ABC_FILE_RECORD, record_name);
 }
 
 bool Abc2ProgramCompiler::CheckClassId(uint32_t class_id, size_t offset) const

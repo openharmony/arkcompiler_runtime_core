@@ -32,7 +32,10 @@ public:
     const panda_file::File &GetAbcFile() const;
     const panda_file::DebugInfoExtractor &GetDebugInfoExtractor() const;
     pandasm::Program *CompileAbcFile();
-    void CompileAbcClass(const panda_file::File::EntityId &record_id, pandasm::Program &program);
+    void CompileAbcClass(
+        const panda_file::File::EntityId &record_id,
+        pandasm::Program &program,
+        std::string &record_name);
     bool CheckClassId(uint32_t class_id, size_t offset) const;
 
 private:
