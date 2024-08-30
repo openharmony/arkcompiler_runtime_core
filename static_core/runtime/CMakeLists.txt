@@ -56,7 +56,7 @@ set(SOURCES
     mem/gc/epsilon-g1/epsilon-g1.cpp
     mem/gc/epsilon/epsilon_barrier.cpp
     mem/gc/gc.cpp
-    mem/gc/gc_adaptive_stack.cpp
+    mem/gc/gc_adaptive_marking_stack.cpp
     mem/gc/gc_settings.cpp
     mem/gc/lang/gc_lang.cpp
     mem/gc/gc_queue.cpp

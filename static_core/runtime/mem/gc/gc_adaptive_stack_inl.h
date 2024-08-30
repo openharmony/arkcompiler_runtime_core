@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
+#ifndef PANDA_RUNTIME_MEM_GC_GC_ADAPTIVE_STACK_INL_H
+#define PANDA_RUNTIME_MEM_GC_GC_ADAPTIVE_STACK_INL_H
+
 #include "runtime/mem/gc/gc_adaptive_stack.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/gc/workers/gc_workers_task_pool.h"
 
 namespace ark::mem {
 
-GCAdaptiveStack::GCAdaptiveStack(GC *gc, size_t stackSizeLimit, size_t newTaskStackSizeLimit, GCWorkersTaskTypes task,
-                                 uint64_t timeLimitForNewTaskCreation, PandaDeque<ObjectHeader *> *stackSrc)
+template <typename Ref>
+GCAdaptiveStack<Ref>::GCAdaptiveStack(GC *gc, size_t stackSizeLimit, size_t newTaskStackSizeLimit,
+                                      GCWorkersTaskTypes task, uint64_t timeLimitForNewTaskCreation,
+                                      PandaDeque<Ref> *stackSrc)
     : stackSizeLimit_(stackSizeLimit),
       newTaskStackSizeLimit_(newTaskStackSizeLimit),
       timeLimitForNewTaskCreation_(timeLimitForNewTaskCreation),
@@ -33,51 +38,41 @@ GCAdaptiveStack::GCAdaptiveStack(GC *gc, size_t stackSizeLimit, size_t newTaskSt
     if (stackSrc != nullptr) {
         stackSrc_ = stackSrc;
     } else {
-        stackSrc_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+        stackSrc_ = allocator->template New<PandaDeque<Ref>>(allocator->Adapter());
     }
-    stackDst_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+    stackDst_ = allocator->template New<PandaDeque<Ref>>(allocator->Adapter());
 }
 
-GCAdaptiveStack::~GCAdaptiveStack()
+template <typename Ref>
+GCAdaptiveStack<Ref>::~GCAdaptiveStack()
 {
     gc_->GetInternalAllocator()->Delete(stackSrc_);
     gc_->GetInternalAllocator()->Delete(stackDst_);
 }
 
-bool GCAdaptiveStack::Empty()
+template <typename Ref>
+bool GCAdaptiveStack<Ref>::Empty() const
 {
     return stackSrc_->empty() && stackDst_->empty();
 }
 
-size_t GCAdaptiveStack::Size()
+template <typename Ref>
+size_t GCAdaptiveStack<Ref>::Size() const
 {
     return stackSrc_->size() + stackDst_->size();
 }
 
-PandaDeque<ObjectHeader *> *GCAdaptiveStack::MoveStacksPointers()
+template <typename Ref>
+PandaDeque<Ref> *GCAdaptiveStack<Ref>::MoveStacksPointers()
 {
     ASSERT(stackSrc_ != nullptr);
-    PandaDeque<ObjectHeader *> *returnValue = stackSrc_;
+    auto *returnValue = stackSrc_;
     stackSrc_ = nullptr;
     return returnValue;
 }
 
-void GCAdaptiveStack::PushToStack(const ObjectHeader *fromObject, ObjectHeader *object)
-{
-    LOG(DEBUG, GC) << "Add object to stack: " << GetDebugInfoAboutObject(object)
-                   << " accessed from object: " << fromObject;
-    ValidateObject(fromObject, object);
-    PushToStack(object);
-}
-
-void GCAdaptiveStack::PushToStack(RootType rootType, ObjectHeader *object)
-{
-    LOG(DEBUG, GC) << "Add object to stack: " << GetDebugInfoAboutObject(object) << " accessed as a root: " << rootType;
-    ValidateObject(rootType, object);
-    PushToStack(object);
-}
-
-void GCAdaptiveStack::PushToStack(ObjectHeader *element)
+template <typename Ref>
+void GCAdaptiveStack<Ref>::PushToStack(Ref element)
 {
     ASSERT_PRINT(IsAddressInObjectsHeap(element), element);
     if ((stackSizeLimit_ > 0) && ((stackDst_->size() + 1) == stackSizeLimit_)) {
@@ -88,13 +83,11 @@ void GCAdaptiveStack::PushToStack(ObjectHeader *element)
         ASSERT(gc_->GetWorkersTaskPool() != nullptr);
         ASSERT(taskType_ != GCWorkersTaskTypes::TASK_EMPTY);
         auto allocator = gc_->GetInternalAllocator();
-        // New tasks will be created with the same new_task_stack_size_limit_ and stack_size_limit_
-        auto *newStack = allocator->New<GCAdaptiveStack>(gc_, newTaskStackSizeLimit_, newTaskStackSizeLimit_, taskType_,
-                                                         timeLimitForNewTaskCreation_, stackDst_);
-        if (gc_->GetWorkersTaskPool()->AddTask(GCMarkWorkersTask(taskType_, newStack))) {
+        auto *newStack = CreateStack();
+        if (gc_->GetWorkersTaskPool()->AddTask(CreateTask(newStack))) {
             LOG(DEBUG, GC) << "GCAdaptiveStack: Successfully add new task " << GCWorkersTaskTypesToString(taskType_)
                            << " for worker";
-            stackDst_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
+            stackDst_ = allocator->template New<PandaDeque<Ref>>(allocator->Adapter());
         } else {
             // We will try to create a new task later
             stackSizeLimit_ += stackSizeLimit_;
@@ -111,7 +104,8 @@ void GCAdaptiveStack::PushToStack(ObjectHeader *element)
     stackDst_->push_back(element);
 }
 
-bool GCAdaptiveStack::IsHighTaskCreationRate()
+template <typename Ref>
+bool GCAdaptiveStack<Ref>::IsHighTaskCreationRate()
 {
     if (createdTasks_ == 0) {
         startTime_ = ark::os::time::GetClockTimeInThreadCpuTime();
@@ -132,7 +126,8 @@ bool GCAdaptiveStack::IsHighTaskCreationRate()
     return false;
 }
 
-ObjectHeader *GCAdaptiveStack::PopFromStack()
+template <typename Ref>
+Ref GCAdaptiveStack<Ref>::PopFromStack()
 {
     if (stackSrc_->empty()) {
         ASSERT(!stackDst_->empty());
@@ -145,55 +140,41 @@ ObjectHeader *GCAdaptiveStack::PopFromStack()
         }
     }
     ASSERT(!stackSrc_->empty());
-    ObjectHeader *element = stackSrc_->back();
+    auto *element = stackSrc_->back();
     stackSrc_->pop_back();
     return element;
 }
 
-GCAdaptiveStack::MarkedObjects GCAdaptiveStack::TraverseObjects(const GCAdaptiveStack::ObjectVisitor &visitor)
+template <typename Ref>
+template <typename Handler>
+void GCAdaptiveStack<Ref>::TraverseObjects(Handler &handler)
 {
-    // We need this to avoid allocation of new stack and fragmentation
-    static constexpr size_t BUCKET_SIZE = 16;
-    auto allocator = gc_->GetInternalAllocator();
-    MarkedObjects markedObjects;
-    PandaDeque<ObjectHeader *> *tailMarkedObjects =
-        allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
     if (stackSrc_->empty()) {
         std::swap(stackSrc_, stackDst_);
     }
     while (!Empty()) {
         [[maybe_unused]] auto stackSrcSize = stackSrc_->size();
-        for (auto *object : *stackSrc_) {
-            visitor(object);
+        for (auto ref : *stackSrc_) {
+            handler.ProcessRef(ref);
             // visitor mustn't pop from stack
             ASSERT(stackSrcSize == stackSrc_->size());
         }
-        if (LIKELY(stackSrc_->size() > BUCKET_SIZE)) {
-            markedObjects.push_back(stackSrc_);
-            stackSrc_ = allocator->template New<PandaDeque<ObjectHeader *>>(allocator->Adapter());
-        } else {
-            tailMarkedObjects->insert(tailMarkedObjects->end(), stackSrc_->begin(), stackSrc_->end());
-            stackSrc_->clear();
-        }
+        stackSrc_->clear();
         std::swap(stackSrc_, stackDst_);
     }
-    if (!tailMarkedObjects->empty()) {
-        markedObjects.push_back(tailMarkedObjects);
-    } else {
-        allocator->Delete(tailMarkedObjects);
-    }
-    return markedObjects;
 }
 
-bool GCAdaptiveStack::IsWorkersTaskSupported()
+template <typename Ref>
+bool GCAdaptiveStack<Ref>::IsWorkersTaskSupported() const
 {
     return taskType_ != GCWorkersTaskTypes::TASK_EMPTY;
 }
 
-void GCAdaptiveStack::Clear()
+template <typename Ref>
+void GCAdaptiveStack<Ref>::Clear()
 {
-    *stackSrc_ = PandaDeque<ObjectHeader *>();
-    *stackDst_ = PandaDeque<ObjectHeader *>();
+    *stackSrc_ = PandaDeque<Ref>();
+    *stackDst_ = PandaDeque<Ref>();
 }
-
 }  // namespace ark::mem
+#endif  // PANDA_RUNTIME_MEM_GC_GC_ADAPTIVE_STACK_INL_H

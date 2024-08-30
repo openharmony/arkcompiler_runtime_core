@@ -21,20 +21,9 @@
 #include "runtime/mem/region_allocator.h"
 #include "runtime/mem/rem_set-inl.h"
 #include "runtime/mem/gc/g1/g1-gc.h"
+#include "runtime/mem/gc/g1/object_ref.h"
 
 namespace ark::mem {
-template <LangTypeT LANG_TYPE>
-struct ObjectReference;
-
-template <>
-struct ObjectReference<LANG_TYPE_STATIC> {
-    using Type = ObjectPointerType *;
-};
-
-template <>
-struct ObjectReference<LANG_TYPE_DYNAMIC> {
-    using Type = coretypes::TaggedType *;
-};
 
 template <typename LanguageConfig>
 class G1GC;

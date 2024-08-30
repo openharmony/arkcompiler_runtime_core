@@ -81,6 +81,7 @@ G1GC<LanguageConfig>::G1GC(ObjectAllocatorBase *objectAllocator, const GCSetting
     this->SetType(GCType::G1_GC);
     this->SetTLABsSupported();
     updatedRefsQueue_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
+    updatedRefsQueueTemp_ = allocator->New<GCG1BarrierSet::ThreadLocalCardQueues>();
     auto *firstRefVector = allocator->New<RefVector>();
     firstRefVector->reserve(MAX_REFS);
     uniqueRefsFromRemsets_.push_back(firstRefVector);
@@ -97,6 +98,7 @@ G1GC<LanguageConfig>::~G1GC()
         }
     }
     allocator->Delete(updatedRefsQueue_);
+    allocator->Delete(updatedRefsQueueTemp_);
     ASSERT(uniqueRefsFromRemsets_.size() == 1);
     allocator->Delete(uniqueRefsFromRemsets_.front());
     uniqueRefsFromRemsets_.clear();
@@ -594,8 +596,11 @@ void G1GC<LanguageConfig>::WorkerTaskProcessing(GCWorkersTask *task, [[maybe_unu
             break;
         }
         case GCWorkersTaskTypes::TASK_EVACUATE_REGIONS: {
-            auto *evacuationTask = task->Cast<G1EvacuateRegionsTask<LanguageConfig>>();
-            evacuationTask->Work();
+            auto *stack = task->Cast<G1EvacuateRegionsTask<Ref>>()->GetMarkingStack();
+            G1EvacuateRegionsWorkerState<LanguageConfig> state(this, stack);
+            state.EvacuateLiveObjects();
+            ASSERT(stack->Empty());
+            this->GetInternalAllocator()->Delete(stack);
             break;
         }
         default:
@@ -1030,7 +1035,7 @@ void G1GC<LanguageConfig>::MarkStackMixed(GCMarkingStackType *stack)
         mixedMarker_.MarkInstance(stack, object, objectClass, refPred);
     };
     {
-        auto markedObjects = stack->TraverseObjects(visitor);
+        auto markedObjects = stack->MarkObjects(visitor);
         os::memory::LockHolder lh(mixedMarkedObjectsMutex_);
         if (mixedMarkedObjects_.empty()) {
             mixedMarkedObjects_ = std::move(markedObjects);
@@ -1082,7 +1087,7 @@ static bool RemsetRegionPredicate(const Region *r)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::EvacuateCollectionSet(const GCTask &task)
+void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     RemSet<> remset;
@@ -1093,30 +1098,59 @@ void G1GC<LanguageConfig>::EvacuateCollectionSet(const GCTask &task)
         region->GetLiveBitmap()->CopyTo(region->GetMarkBitmap());
     }
 
-    ParallelCompactionTask<LanguageConfig> parallelCompactionTask(this, this->GetG1ObjectAllocator(), &remset,
-                                                                  collectionSet_);
-    parallelCompactionTask.Run();
+    size_t allocatedBytesYoung = 0;
+    size_t allocatedBytesOld = 0;
+    for (auto *region : collectionSet_) {
+        auto allocated = region->GetAllocatedBytes();
+        if (region->HasFlag(RegionFlag::IS_EDEN)) {
+            allocatedBytesYoung += allocated;
+        } else {
+            allocatedBytesOld += allocated;
+        }
+    }
+
+    copiedBytesYoung_ = 0;
+    copiedBytesOld_ = 0;
+
+    EvacuateCollectionSet(remset);
 
     this->CommonUpdateRefsToMovedObjects();
     HandleReferences(task);
     ActualizeRemSets();
 
-    parallelCompactionTask.FlushDirtyCards(updatedRefsQueue_);
-    parallelCompactionTask.Finish();
+    analytics_.ReportEvacuatedBytes(copiedBytesYoung_);
 
-    analytics_.ReportEvacuatedBytes(parallelCompactionTask.GetCopiedBytesYoung());
+    this->memStats_.template RecordSizeMovedYoung<false>(copiedBytesYoung_);
+    this->memStats_.template RecordSizeMovedTenured<false>(copiedBytesOld_);
+    this->memStats_.template RecordSizeFreedYoung<false>(allocatedBytesYoung - copiedBytesYoung_);
+    this->memStats_.template RecordSizeFreedTenured<false>(allocatedBytesOld - copiedBytesOld_);
 
-    this->memStats_.template RecordSizeMovedYoung<false>(parallelCompactionTask.GetCopiedBytesYoung());
-    this->memStats_.template RecordCountMovedYoung<false>(parallelCompactionTask.GetCopiedObjectsYoung());
-    this->memStats_.template RecordSizeMovedTenured<false>(parallelCompactionTask.GetCopiedBytesOld());
-    this->memStats_.template RecordCountMovedTenured<false>(parallelCompactionTask.GetCopiedObjectsOld());
-    this->memStats_.template RecordSizeFreedYoung<false>(parallelCompactionTask.GetFreedBytesYoung());
-    this->memStats_.template RecordSizeFreedTenured<false>(parallelCompactionTask.GetFreedBytesOld());
+    updatedRefsQueue_->insert(updatedRefsQueue_->end(), updatedRefsQueueTemp_->begin(), updatedRefsQueueTemp_->end());
+    updatedRefsQueueTemp_->clear();
 
     this->GetPandaVm()->UpdateMovedStrings();
     SweepRegularVmRefs();
 
     ResetRegionAfterMixedGC();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::EvacuateCollectionSet(const RemSet<> &remset)
+{
+    auto useGcWorkers = this->GetSettings()->ParallelCompactingEnabled();
+    GCEvacuateRegionsTaskStack<Ref> refStack(this, useGcWorkers ? this->GetSettings()->GCRootMarkingStackMaxSize() : 0,
+                                             useGcWorkers ? this->GetSettings()->GCWorkersMarkingStackMaxSize() : 0,
+                                             GCWorkersTaskTypes::TASK_REGION_COMPACTING,
+                                             this->GetSettings()->GCMarkingStackNewTasksFrequency());
+    G1EvacuateRegionsWorkerState<LanguageConfig> state(this, &refStack);
+    state.EvacuateNonHeapRoots();
+    state.ScanRemset(remset);
+    state.EvacuateLiveObjects();
+
+    ASSERT(refStack.Empty());
+    if (useGcWorkers) {
+        this->GetWorkersTaskPool()->WaitUntilTasksEnd();
+    }
 }
 
 template <class LanguageConfig>
@@ -1184,7 +1218,7 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
     {
         time::Timer timer(&youngPauseTime, true);
         if (SinglePassCompactionAvailable()) {
-            EvacuateCollectionSet(task);
+            CollectInSinglePass(task);
         } else {
             MixedMarkAndCacheRefs(task, collectibleRegions);
             ClearYoungCards(collectibleRegions);
@@ -2071,7 +2105,7 @@ void G1GC<LanguageConfig>::PostZygoteFork()
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveStack *objectStack)
+void G1GC<LanguageConfig>::DrainSatb(GCAdaptiveMarkingStack *objectStack)
 {
     ScopedTiming scopedTiming(__FUNCTION__, *this->GetTiming());
     // Process satb buffers of the active threads

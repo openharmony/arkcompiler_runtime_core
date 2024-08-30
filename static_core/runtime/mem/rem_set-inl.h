@@ -154,7 +154,7 @@ void RemSet<LockConfigT>::AddRefWithAddr(RemSet<> *fromRemset, const void *fromA
 
 template <typename LockConfigT>
 template <typename RegionPred, typename MemVisitor>
-inline void RemSet<LockConfigT>::Iterate(const RegionPred &regionPred, const MemVisitor &visitor)
+inline void RemSet<LockConfigT>::Iterate(const RegionPred &regionPred, const MemVisitor &visitor) const
 {
     for (auto &[bitmapBeginAddr, bitmap] : bitmaps_) {
         auto *region = AddrToRegion(ToVoidPtr(bitmapBeginAddr));
@@ -167,7 +167,7 @@ inline void RemSet<LockConfigT>::Iterate(const RegionPred &regionPred, const Mem
 
 template <typename LockConfigT>
 template <typename Visitor>
-inline void RemSet<LockConfigT>::IterateOverObjects(const Visitor &visitor)
+inline void RemSet<LockConfigT>::IterateOverObjects(const Visitor &visitor) const
 {
     auto regionPred = []([[maybe_unused]] Region *region) { return true; };
     Iterate(regionPred, [visitor](Region *region, const MemRange &range) {

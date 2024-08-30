@@ -18,6 +18,7 @@
 #include "runtime/mem/gc/gc_root_type.h"
 #include "runtime/mem/gc/workers/gc_workers_tasks.h"
 #include "runtime/include/mem/panda_containers.h"
+#include "runtime/mem/gc/g1/object_ref.h"
 
 namespace ark::mem {
 
@@ -30,72 +31,91 @@ class GC;
  * we will create a new task for worker.
  * If stack limit is equal to zero, it means that the destination stack is unlimited.
  */
+template <typename Ref>
 class GCAdaptiveStack {
 public:
-    using ObjectVisitor = std::function<void(const ObjectHeader *)>;
-    using MarkedObjects = PandaVector<PandaDeque<ObjectHeader *> *>;
-
     explicit GCAdaptiveStack(GC *gc, size_t stackSizeLimit = 0, size_t newTaskStackSizeLimit = 0,
                              GCWorkersTaskTypes task = GCWorkersTaskTypes::TASK_EMPTY,
-                             uint64_t timeLimitForNewTaskCreation = 0, PandaDeque<ObjectHeader *> *stackSrc = nullptr);
+                             uint64_t timeLimitForNewTaskCreation = 0, PandaDeque<Ref> *stackSrc = nullptr);
 
-    ~GCAdaptiveStack();
+    virtual ~GCAdaptiveStack();
     NO_COPY_SEMANTIC(GCAdaptiveStack);
-    DEFAULT_MOVE_SEMANTIC(GCAdaptiveStack);
-
-    /**
-     * This method should be used when we find new object by field from another object.
-     * @param from_object from which object we found object by reference, nullptr for roots
-     * @param object object which will be added to the stack
-     */
-    void PushToStack(const ObjectHeader *fromObject, ObjectHeader *object);
-
-    /**
-     * This method should be used when we find new object as a root
-     * @param root_type type of the root which we found
-     * @param object object which will be added to the stack
-     */
-    void PushToStack(RootType rootType, ObjectHeader *object);
-
-    /**
-     * @brief Pop an object from source stack.
-     * If the source stack is empty, we will swap it with destination stack
-     * and return an object from it.
-     */
-    ObjectHeader *PopFromStack();
-
-    /**
-     * @brief Travers objects in stack via visitor and return marked objects.
-     * Visitor can push in stack, but mustn't pop from it.
-     */
-    MarkedObjects TraverseObjects(const ObjectVisitor &visitor);
-
-    /// @brief Check that destination or source stack has at least one object.
-    bool Empty();
-    /// @brief Returns the sum of destination and source stacks sizes.
-    size_t Size();
-
-    /**
-     * @brief Set the src stack pointer to nullptr.
-     * Should be used if we decide to free it not on destructor of this instance.
-     */
-    PandaDeque<ObjectHeader *> *MoveStacksPointers();
-
-    /// @brief Returns true if stack supports parallel workers, false otherwise
-    bool IsWorkersTaskSupported();
-
-    /// @brief Remove all elements from stack
-    void Clear();
-
-private:
-    static constexpr size_t DEFAULT_TASKS_FOR_TIME_CHECK = 10;
+    NO_MOVE_SEMANTIC(GCAdaptiveStack);
 
     /**
      * @brief Add new object into destination stack.
      * If we set the limit for stack, we will create a new task for
      * GC workers with it.
      */
-    void PushToStack(ObjectHeader *element);
+    void PushToStack(Ref element);
+
+    /**
+     * @brief Pop an object from source stack.
+     * If the source stack is empty, we will swap it with destination stack
+     * and return an object from it.
+     */
+    Ref PopFromStack();
+
+    /**
+     * @brief Travers objects in stack via visitor and return marked objects.
+     * Visitor can push in stack, but mustn't pop from it.
+     */
+    template <typename Handler>
+    void TraverseObjects(Handler &handler);
+
+    /// @brief Check that destination or source stack has at least one object.
+    bool Empty() const;
+    /// @brief Returns the sum of destination and source stacks sizes.
+    size_t Size() const;
+
+    /**
+     * @brief Set the src stack pointer to nullptr.
+     * Should be used if we decide to free it not on destructor of this instance.
+     */
+    PandaDeque<Ref> *MoveStacksPointers();
+
+    /// @brief Returns true if stack supports parallel workers, false otherwise
+    bool IsWorkersTaskSupported() const;
+
+    /// @brief Remove all elements from stack
+    void Clear();
+
+protected:
+    virtual GCAdaptiveStack<Ref> *CreateStack() = 0;
+    virtual GCWorkersTask CreateTask(GCAdaptiveStack<Ref> *stack) = 0;
+
+    PandaDeque<Ref> *&GetStackSrc()
+    {
+        return stackSrc_;
+    }
+
+    PandaDeque<Ref> *&GetStackDst()
+    {
+        return stackDst_;
+    }
+
+    GCWorkersTaskTypes GetTaskType() const
+    {
+        return taskType_;
+    }
+
+    GC *GetGC()
+    {
+        return gc_;
+    }
+
+    size_t GetNewTaskStackSizeLimit() const
+    {
+        return newTaskStackSizeLimit_;
+    }
+
+    uint64_t GetTimeLimitForNewTaskCreation() const
+    {
+        return timeLimitForNewTaskCreation_;
+    }
+
+private:
+    static constexpr size_t DEFAULT_TASKS_FOR_TIME_CHECK = 10;
 
     /**
      * @brief Check tasks creation rate.
@@ -104,8 +124,8 @@ private:
     bool IsHighTaskCreationRate();
 
 private:
-    PandaDeque<ObjectHeader *> *stackSrc_;
-    PandaDeque<ObjectHeader *> *stackDst_;
+    PandaDeque<Ref> *stackSrc_;
+    PandaDeque<Ref> *stackDst_;
     size_t stackSizeLimit_ {0};
     size_t initialStackSizeLimit_ {0};
     size_t newTaskStackSizeLimit_ {0};
@@ -116,7 +136,6 @@ private:
     GCWorkersTaskTypes taskType_;
     GC *gc_;
 };
-
 }  // namespace ark::mem
 
-#endif  // PANDA_RUNTIME_MEM_GC_GC_H
+#endif  // PANDA_RUNTIME_MEM_GC_GC_ADAPTIVE_STACK_H

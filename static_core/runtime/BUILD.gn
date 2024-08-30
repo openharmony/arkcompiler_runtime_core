@@ -177,7 +177,7 @@ ohos_source_set("libarkruntime_set_static") {
     "mem/gc/g1/update_remset_worker.cpp",
     "mem/gc/gc-hung/gc_hung.cpp",
     "mem/gc/gc.cpp",
-    "mem/gc/gc_adaptive_stack.cpp",
+    "mem/gc/gc_adaptive_marking_stack.cpp",
     "mem/gc/gc_barrier_set.cpp",
     "mem/gc/gc_queue.cpp",
     "mem/gc/gc_root.cpp",

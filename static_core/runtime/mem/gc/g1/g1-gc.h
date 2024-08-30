@@ -28,11 +28,16 @@
 #include "runtime/mem/gc/g1/g1_pause_tracker.h"
 #include "runtime/mem/gc/g1/g1_analytics.h"
 #include "runtime/mem/gc/g1/update_remset_worker.h"
+#include "runtime/mem/gc/g1/object_ref.h"
+#include "runtime/mem/gc/g1/gc_evacuate_regions_task_stack.h"
 
 namespace ark {
 class ManagedThread;
 }  // namespace ark
 namespace ark::mem {
+
+template <typename LanguageConfig>
+class G1EvacuateRegionsWorkerState;
 
 /// @brief Class for reference informantion collecting for rem-sets in G1 GC
 class RefInfo {
@@ -151,6 +156,7 @@ protected:
     // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
     /// Queue with updated refs info
     GCG1BarrierSet::ThreadLocalCardQueues *updatedRefsQueue_ {nullptr};
+    GCG1BarrierSet::ThreadLocalCardQueues *updatedRefsQueueTemp_ {nullptr};
     os::memory::Mutex queueLock_;
     os::memory::Mutex gcWorkerQueueLock_;
     // NOLINTEND(misc-non-private-member-variables-in-classes)
@@ -225,8 +231,11 @@ private:
      * Return true if garbage can be collected in single pass (VM supports it, no pinned objects, GC is not postponed
      * etc) otherwise false
      */
+    using Ref = typename ObjectReference<LanguageConfig::LANG_TYPE>::Type;
+
     bool SinglePassCompactionAvailable();
-    void EvacuateCollectionSet(const GCTask &task);
+    void CollectInSinglePass(const GCTask &task);
+    void EvacuateCollectionSet(const RemSet<> &remset);
     void MergeRemSet(RemSet<> *remset);
     void HandleReferences(const GCTask &task);
     void ResetRegionAfterMixedGC();
@@ -393,7 +402,7 @@ private:
      * Add data from SATB buffer to the object stack
      * @param object_stack - stack to add data to
      */
-    void DrainSatb(GCAdaptiveStack *objectStack);
+    void DrainSatb(GCAdaptiveMarkingStack *objectStack);
 
     void HandlePendingDirtyCards();
 
@@ -514,6 +523,9 @@ private:
 
     /// Flag indicates if we need to interrupt release physical pages to OS
     std::atomic<ReleasePagesStatus> releasePagesInterruptFlag_ {ReleasePagesStatus::FINISHED};
+
+    size_t copiedBytesYoung_ {0};
+    size_t copiedBytesOld_ {0};
 
     template <class>
     friend class RefCacheBuilder;
