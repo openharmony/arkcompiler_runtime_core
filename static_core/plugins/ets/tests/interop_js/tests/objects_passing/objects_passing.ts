@@ -30,21 +30,18 @@ export class TestUserClass {
         this.id = id;
         this.description = description;
         this.education = education;
-
     }
 
     public getDetails(): string {
         return `Name: ${this.name}, Age: ${this.age}, ID: ${this.id}, Description: ${this.description}`;
     }
 
-
     protected getProtectedInfo(): string {
         return `ID: ${this.id}`;
     }
+};
 
-}
-
-export class TestSecondClass extends TestUserClass{
+export class TestSecondClass extends TestUserClass {
     public getProtectedId(): number {
         return this.id; 
     }
@@ -52,70 +49,62 @@ export class TestSecondClass extends TestUserClass{
     public getInfo(): string {
         return this.getProtectedInfo(); 
     }
-}
+};
 
 export interface TestObjectType {
     name: string;
-    id: number
-
-}
+    id: number;
+};
 
 export const testObject:TestObjectType = {
     name:'TestName',
     id: 555
-  
+};
+
+
+
+
+export function getName(obj: TestUserClass): string {
+    return obj.name;
+}
+
+export function getDetails(obj: TestUserClass): string {
+    return obj.getDetails();
+}
+
+export function changeName(obj: TestUserClass, name: string): Object {
+    obj.name = name;
+    return obj.name;
+}
+
+export function getEdu(obj: TestUserClass): string {
+    return obj.education;
 }
 
 
-
-
-export function getName(obj:TestUserClass):string{
-    return obj.name 
+export function getId(obj: TestSecondClass): number {
+    return obj.getProtectedId();
 }
 
-export function getDetailse(obj:TestUserClass):string{
-    return obj.getDetails() 
+export function getObjectName(obj: TestObjectType): Object {
+    return obj.name;
 }
 
-export function changeName(obj:TestUserClass, name:string){
-    obj.name = name
-    return obj.name
+export function getObjectId(obj: TestSecondClass): Object {
+    return obj.getProtectedId();
 }
-
-export function getEdu(obj:TestUserClass):string{
-    return obj.education
-}
-
-
-export function getId(obj:TestSecondClass):number{
-    return obj.getProtectedId()
-}
-
-
-export function getObjectName(obj:TestObjectType){
-    return obj.name
-}
-
-export function getObjectId(obj:TestSecondClass){
-    return obj.getProtectedId()
-}
-
-
-
-
 
 export const testObjCls = new TestUserClass('TestName', 30, 456, 'testEdu', 'testDescription');
 export const testSecondObjCls = new TestSecondClass('TestNameTwo', 40, 789, 'testEdu1', 'testDescription1');
 
-const testInnerObject = {'id':123}
+const testInnerObject = {'id': 123};
 
-export const testOuterObject = {'id':456, testInnerObject:testInnerObject}
+export const testOuterObject = {'id':456, testInnerObject:t estInnerObject};
 
-export function getOuterObj(obj){
-    return obj.testInnerObject.id
+export function getOuterObj(obj): Object {
+    return obj.testInnerObject.id;
 }
 
-export function updateObjectId(obj:TestObjectType, newId:number){
-    obj.id = newId
-
+export function updateObjectId(obj:TestObjectType, newId:number): void {
+    obj.id = newId;
 }

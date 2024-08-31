@@ -23,37 +23,28 @@ const getOuterObject = etsMod.getFunction('getOuterObject');
 
 
 const testObject = {
-    name:'TestName'
-
+    name: 'TestName';
 }
 
 const testInnerObject = {
-    id:123
-
+    id: 123;
 }
 
 const testOuterObject = {
-    id:456,
+    id: 456,
     testInnerObject:testInnerObject
-
 }
 
-
-
 {
-
     let ret = getValueObject(testObject);
-    console.log(ret)
+    console.log(ret);
     ASSERT_EQ(ret, 'TestName');
-
   }
 
   {
-
     let ret = getOuterObject(testOuterObject);
-    console.log(ret)
+    console.log(ret);
     ASSERT_EQ(ret, 456);
-
   }
   
 

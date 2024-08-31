@@ -93,27 +93,27 @@ TEST_F(EtsIndexedType, DISABLED_checkRecordValue)
     auto ret = CallEtsMethod<bool>("checkRecordValue");
     ASSERT_EQ(ret, true);
 }
-TEST_F(EtsIndexedType, getTypedArreyValueByIndex)
+TEST_F(EtsIndexedType, getTypedArrayValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("getTypedArreyValueByIndex");
+    auto ret = CallEtsMethod<bool>("getTypedArrayValueByIndex");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #18131
-TEST_F(EtsIndexedType, DISABLED_changeTypedArreyValueByIndex)
+TEST_F(EtsIndexedType, DISABLED_changeTypedArrayValueByIndex)
 {
-    auto ret = CallEtsMethod<bool>("changeTypedArreyValueByIndex");
+    auto ret = CallEtsMethod<bool>("changeTypedArrayValueByIndex");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #18131
-TEST_F(EtsIndexedType, DISABLED_checkLengthTypedArrey)
+TEST_F(EtsIndexedType, DISABLED_checkLengthTypedArray)
 {
-    auto ret = CallEtsMethod<bool>("checkLengthTypedArrey");
+    auto ret = CallEtsMethod<bool>("checkLengthTypedArray");
     ASSERT_EQ(ret, true);
 }
 // NOTE(andreypetukhov) enable after fixibng #18131
-TEST_F(EtsIndexedType, DISABLED_checkAllTypedArreyValue)
+TEST_F(EtsIndexedType, DISABLED_checkAllTypedArrayValue)
 {
-    auto ret = CallEtsMethod<bool>("checkAllTypedArreyValue");
+    auto ret = CallEtsMethod<bool>("checkAllTypedArrayValue");
     ASSERT_EQ(ret, true);
 }
 TEST_F(EtsIndexedType, getValueFromProxyRecord)

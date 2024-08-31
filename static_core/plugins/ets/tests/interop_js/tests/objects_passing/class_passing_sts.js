@@ -24,14 +24,14 @@ const getUserInfo = etsMod.getFunction('getClassUserInfo');
 
 // Passing class to ets function
 
-class TestUser{
-    constructor(name, age){
-        this.name = name
-        this.age = age
+class TestUser {
+    Constructor(name, age) {
+        this.name = name;
+        this.age = age;
     }
 
-    showInfo(){
-        return `User name: ${this.name}, age: ${this.age}`
+    showInfo() {
+        return `User name: ${this.name}, age: ${this.age}`;
     }
 }
 
@@ -40,22 +40,19 @@ const testUser = new TestUser('TestName', 30);
 
 {
     let ret = getUserName(testUser);
-    console.log(ret)
+    console.log(ret);
     ASSERT_EQ(ret, 'TestName');
-
 }
 
 {
     let ret = getUserAge(testUser);
-    console.log(ret)
+    console.log(ret);
     ASSERT_EQ(ret, 30);
-
 }
 
 {
     let ret = getUserInfo(testUser);
-    console.log(ret)
+    console.log(ret);
     ASSERT_EQ(ret, 'User name: TestName, age: 30');
-
 }
 

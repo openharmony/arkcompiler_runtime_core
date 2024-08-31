@@ -22,7 +22,7 @@ export let callAnonymousFunction = function (x: number, y: number): number {
     return x + y;
 };
 
-export let callArrowFunction = (x: number, y: number) => x + y;
+export let callArrowFunction = (x: number, y: number): Object => x + y;
 
 export const callConstructedFunction = new Function('a', 'b', 'return a + b');
 
@@ -36,17 +36,17 @@ export class CallableTestClass {
     public callBoundFunction = callBoundFunction.bind(this);
 }
 
-export type TCallableTestClass = CallableTestClass
-export const callableTestClassInstance = new CallableTestClass()
+export type TCallableTestClass = CallableTestClass;
+export const callableTestClassInstance = new CallableTestClass();
 
-const test = () => {
+const test = (): void => {
     console.log([
         callNamedFunction,
         callAnonymousFunction,
         callArrowFunction,
         callConstructedFunction,
         callBoundFunction
-    ].map(x => x(10,5)))
-} 
+    ].map(x => x(10, 5)));
+};
 
 test();

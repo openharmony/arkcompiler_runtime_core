@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -13,17 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.compositeTypesTestClassInstance = exports.CompositeTypesTestClass = exports.returnInterface = exports.returnRecord = exports.returnNumArray = exports.returnStrArray = exports.returnTuple = exports.isTTupleTS = void 0;
+Object.defineProperty(exports, '__esModule', { value: true });
+exports.compositeTypesTestClassInstance = exports.CompositeTypesTestClass = exports.returnInterface =
+    exports.returnRecord = exports.returnNumArray = exports.returnStrArray = exports.returnTuple =
+    exports.isTTupleTS = void 0;
+
 const TEST_STRING = 'This is a test string';
 const TEST_INT = 100;
 const TEST_BOOLEAN = true;
 const isTTupleTS = (testedVar) => {
-    return Array.isArray(testedVar)
-        && testedVar.length === 3
-        && typeof testedVar[0] === 'string'
-        && typeof testedVar[1] === 'number'
-        && typeof testedVar[2] === 'boolean';
+    return Array.isArray(testedVar) &&
+        testedVar.length === 3 &&
+        typeof testedVar[0] === 'string' &&
+        typeof testedVar[1] === 'number' &&
+        typeof testedVar[2] === 'boolean';
 };
 exports.isTTupleTS = isTTupleTS;
 const testTuple = [TEST_STRING, TEST_INT, TEST_BOOLEAN];
@@ -32,7 +35,7 @@ const returnTuple = function returnTuple() {
 };
 exports.returnTuple = returnTuple;
 const returnStrArray = function returnArray() {
-    const testArray = ["One", "Two", "Three"];
+    const testArray = ['One', 'Two', 'Three'];
     return testArray;
 };
 exports.returnStrArray = returnStrArray;

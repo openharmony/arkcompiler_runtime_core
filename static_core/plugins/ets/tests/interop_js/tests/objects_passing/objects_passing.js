@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,24 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
+let __extends = (this && this.__extends) || (function () {
+    let extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+            function (d, b) { for (let p in b) { if (Object.prototype.hasOwnProperty.call(b, p)) { d[p] = b[p]; } } };
         return extendStatics(d, b);
     };
     return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        if (typeof b !== 'function' && b !== null) {
+            throw new TypeError('Class extends value ' + String(b) + ' is not a constructor or null');
+        }
         extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+        function Ctor() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (Ctor.prototype = b.prototype, new Ctor());
     };
 })();
 exports.__esModule = true;
-exports.updateObjectId = exports.getOuterObj = exports.testOuterObject = exports.testSecondObjCls = exports.testObjCls = exports.getObjectId = exports.getObjectName = exports.getId = exports.getEdu = exports.changeName = exports.getDetailse = exports.getName = exports.testObject = exports.TestSecondClass = exports.TestUserClass = void 0;
-var TestUserClass = /** @class */ (function () {
+exports.updateObjectId = exports.getOuterObj = exports.testOuterObject = exports.testSecondObjCls =
+    exports.testObjCls = exports.getObjectId = exports.getObjectName = exports.getId = exports.getEdu =
+    exports.changeName = exports.getDetails = exports.getName = exports.testObject = exports.TestSecondClass =
+    exports.TestUserClass = void 0;
+let TestUserClass = /** @class */ (function () {
     function TestUserClass(name, age, id, education, description) {
         this.name = name;
         this.age = age;
@@ -39,18 +43,19 @@ var TestUserClass = /** @class */ (function () {
         this.education = education;
     }
     TestUserClass.prototype.getDetails = function () {
-        return "Name: ".concat(this.name, ", Age: ").concat(this.age, ", ID: ").concat(this.id, ", Description: ").concat(this.description);
+        return 'Name: '.concat(this.name, ', Age: ').concat(this.age, ', ID: ').
+            concat(this.id, ', Description: ').concat(this.description);
     };
     TestUserClass.prototype.getProtectedInfo = function () {
-        return "ID: ".concat(this.id);
+        return 'ID: '.concat(this.id);
     };
     return TestUserClass;
 }());
 exports.TestUserClass = TestUserClass;
-var TestSecondClass = /** @class */ (function (_super) {
+let TestSecondClass = /** @class */ (function (_super) {
     __extends(TestSecondClass, _super);
-    function TestSecondClass() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function TestSecondClass(...args) {
+        return _super !== null && _super.apply(this, args) || this;
     }
     TestSecondClass.prototype.getProtectedId = function () {
         return this.id;
@@ -69,10 +74,10 @@ function getName(obj) {
     return obj.name;
 }
 exports.getName = getName;
-function getDetailse(obj) {
+function getDetails(obj) {
     return obj.getDetails();
 }
-exports.getDetailse = getDetailse;
+exports.getDetails = getDetails;
 function changeName(obj, name) {
     obj.name = name;
     return obj.name;
@@ -96,7 +101,7 @@ function getObjectId(obj) {
 exports.getObjectId = getObjectId;
 exports.testObjCls = new TestUserClass('TestName', 30, 456, 'testEdu', 'testDescription');
 exports.testSecondObjCls = new TestSecondClass('TestNameTwo', 40, 789, 'testEdu1', 'testDescription1');
-var testInnerObject = { 'id': 123 };
+let testInnerObject = { 'id': 123 };
 exports.testOuterObject = { 'id': 456, testInnerObject: testInnerObject };
 function getOuterObj(obj) {
     return obj.testInnerObject.id;

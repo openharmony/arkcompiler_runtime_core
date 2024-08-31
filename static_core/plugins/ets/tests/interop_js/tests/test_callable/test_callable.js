@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the 'License');
@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.callableTestClassInstance = exports.CallableTestClass = exports.callBoundFunction = exports.callConstructedFunction = exports.callArrowFunction = exports.callAnonymousFunction = exports.callNamedFunction = void 0;
+Object.defineProperty(exports, '__esModule', { value: true });
+exports.callableTestClassInstance = exports.CallableTestClass = exports.callBoundFunction =
+    exports.callConstructedFunction = exports.callArrowFunction = exports.callAnonymousFunction =
+    exports.callNamedFunction = void 0;
 function callNamedFunction(x, y) {
     return x + y;
 }

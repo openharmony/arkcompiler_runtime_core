@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export function getArrey(arr:string[]):string[]{
-    return arr
+export function getArray(arr:string[]): string[] {
+    return arr;
 }
 
 export class CustomArray<T> extends Array<T> {
@@ -29,9 +29,9 @@ export function returnCustomArray<T>(array: CustomArray<T>): CustomArray<T> {
 
 export function createStringRecord(): Record<string, string> {
     const data: Record<string, string> = {
-        'key1': "A",
-        'key2': "B",
-        'key3': "C"
+        'key1': 'A',
+        'key2': 'B',
+        'key3': 'C'
     };
     return data;
 }
@@ -46,18 +46,19 @@ export function createInt8Array(length: number): Int8Array {
 
 type RecordObject = Record<string, string>;
 
+type AnyType = {};
 
 export const handler = {
-  get: function(target: RecordObject, property: string) {
+  get: function(target: RecordObject, property: string): Object {
     if (property in target) {
       return target[property];
     } else {
       return undefined;
     }
   },
-  set: function(target: RecordObject, property: string, value: any) {
+  set: function(target: RecordObject, property: string, value: AnyType): Object {
     if (typeof value === 'string') {
-      target[property] =  value;
+      target[property] = value;
       return true;
     } else {
       throw new TypeError('The value must be a string');
