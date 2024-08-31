@@ -120,8 +120,9 @@ sub:
       - expr: Uint8Array.from(pars)
         params:
           -
-            - Array.of<number>(1, 2, 3, NaN)
-            - new Set<number>(Array.of<number>(1, 2, 3, NaN))
+            - Array.of<number>(1, 65535, -65535, NaN, Infinity)
+            - new Set<number>(Array.of<number>(1, 65535, -65535, NaN, Infinity))
+            - Array.of<number>(1, 65535, -65535, NaN, Infinity).values()
       - expr: Uint8Array.from<number>(pars)
         params:
           -

@@ -1714,6 +1714,10 @@ class ArrayValuesIterator_boolean implements IterableIterator<boolean> {
     override $_iterator(): IterableIterator<boolean> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]> {
@@ -1735,6 +1739,10 @@ class ArrayEntriesIterator_boolean implements IterableIterator<[number, boolean]
 
     override $_iterator(): IterableIterator<[number, boolean]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
@@ -3386,6 +3394,10 @@ class ArrayValuesIterator_byte implements IterableIterator<byte> {
     override $_iterator(): IterableIterator<byte> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
@@ -3407,6 +3419,10 @@ class ArrayEntriesIterator_byte implements IterableIterator<[number, byte]> {
 
     override $_iterator(): IterableIterator<[number, byte]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
@@ -5058,6 +5074,10 @@ class ArrayValuesIterator_short implements IterableIterator<short> {
     override $_iterator(): IterableIterator<short> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
@@ -5079,6 +5099,10 @@ class ArrayEntriesIterator_short implements IterableIterator<[number, short]> {
 
     override $_iterator(): IterableIterator<[number, short]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
@@ -6730,6 +6754,10 @@ class ArrayValuesIterator_int implements IterableIterator<int> {
     override $_iterator(): IterableIterator<int> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
@@ -6751,6 +6779,10 @@ class ArrayEntriesIterator_int implements IterableIterator<[number, int]> {
 
     override $_iterator(): IterableIterator<[number, int]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
@@ -8402,6 +8434,10 @@ class ArrayValuesIterator_long implements IterableIterator<long> {
     override $_iterator(): IterableIterator<long> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
@@ -8423,6 +8459,10 @@ class ArrayEntriesIterator_long implements IterableIterator<[number, long]> {
 
     override $_iterator(): IterableIterator<[number, long]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
@@ -10082,6 +10122,10 @@ class ArrayValuesIterator_float implements IterableIterator<float> {
     override $_iterator(): IterableIterator<float> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
@@ -10103,6 +10147,10 @@ class ArrayEntriesIterator_float implements IterableIterator<[number, float]> {
 
     override $_iterator(): IterableIterator<[number, float]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
@@ -11762,6 +11810,10 @@ class ArrayValuesIterator_double implements IterableIterator<double> {
     override $_iterator(): IterableIterator<double> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_double implements IterableIterator<[number, double]> {
@@ -11783,6 +11835,10 @@ class ArrayEntriesIterator_double implements IterableIterator<[number, double]> 
 
     override $_iterator(): IterableIterator<[number, double]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
@@ -13434,6 +13490,10 @@ class ArrayValuesIterator_char implements IterableIterator<char> {
     override $_iterator(): IterableIterator<char> {
         return this;
     }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
+    }
 }
 
 class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
@@ -13455,6 +13515,10 @@ class ArrayEntriesIterator_char implements IterableIterator<[number, char]> {
 
     override $_iterator(): IterableIterator<[number, char]> {
         return this;
+    }
+
+    public __Iterator_getLength(): int {
+        return this.parent.length as int
     }
 }
 
