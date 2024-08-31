@@ -93,7 +93,7 @@ class EtsBenchmarksRunner:
         self.ark_aot = os.path.join(args.bindir, "ark_aot")
         self.ark = os.path.join(args.bindir, "ark")
         self.prefix = [
-            "adb", "shell", f"LD_LIBRARY_PATH={args.libdir}"] if self.is_device else []
+            "hdc", "shell", f"LD_LIBRARY_PATH={args.libdir}"] if self.is_device else []
         self.ark_opts = ark_opts
         self.aot_opts = aot_opts
 
@@ -181,9 +181,9 @@ class EtsBenchmarksRunner:
         if self.is_device:
             device_current_output_dir = os.path.join(
                 self.device_output_dir, self.current_bench_name)
-            subprocess.run(["adb", "shell", f"mkdir -p {device_current_output_dir}"])
+            subprocess.run(["hdc", "shell", f"mkdir -p {device_current_output_dir}"])
             subprocess.run(
-                ["adb", "push", tmp_asm_file_path, f"{device_current_output_dir}/"])
+                ["hdc", "file", "send", tmp_asm_file_path, f"{device_current_output_dir}/"])
             tmp_asm_file_path = os.path.join(
                 device_current_output_dir, "test.pa")
         return tmp_asm_file_path
@@ -218,7 +218,7 @@ class EtsBenchmarksRunner:
         stats = RunStats()
 
         if self.is_device:
-            subprocess.run(["adb", "shell", f"mkdir -p {self.device_output_dir}"])
+            subprocess.run(["hdc", "shell", f"mkdir -p {self.device_output_dir}"])
         else:
             subprocess.run(["mkdir", "-p", self.host_output_dir])
 
