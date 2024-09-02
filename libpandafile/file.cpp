@@ -13,31 +13,31 @@
  * limitations under the License.
  */
 
+#include <algorithm>
+#include <cerrno>
+#include <cstdio>
+#include <cstring>
+#include <map>
+#include <memory>
+#include <string>
+#include <variant>
+
+#include "data_protect.h"
 #include "file_format_version.h"
 #include "file-inl.h"
-#include "os/file.h"
-#include "os/mem.h"
-#include "os/filesystem.h"
 #include "mem/mem.h"
+#include "os/file.h"
+#include "os/filesystem.h"
+#include "os/mem.h"
 #include "panda_cache.h"
-
+#include "securec.h"
+#include "trace/trace.h"
 #include "utils/hash.h"
 #include "utils/logger.h"
 #include "utils/utf.h"
 #include "utils/span.h"
 #include "zip_archive.h"
-#include "trace/trace.h"
-#include "securec.h"
 
-#include <cerrno>
-#include <cstring>
-
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <variant>
-#include <cstdio>
-#include <map>
 namespace panda::panda_file {
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
 const char *ARCHIVE_FILENAME = "classes.abc";
@@ -304,7 +304,7 @@ std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_
         return nullptr;
     }
 
-    if (!CheckSecureMem(reinterpret_cast<uintptr_t>(buffer))) {
+    if (!CheckSecureMem(reinterpret_cast<uintptr_t>(buffer), size)) {
         PLOG(ERROR, PANDAFILE) << "Secure memory check failed, please execute in secure memory.";
         return nullptr;
     }
@@ -318,6 +318,54 @@ std::unique_ptr<const File> OpenPandaFileFromSecureMemory(uint8_t *buffer, size_
 
     std::hash<std::byte *> hash;
     return panda_file::File::OpenFromMemory(std::move(ptr), std::to_string(hash(mem)));
+}
+
+inline bool CheckSecureMem(uintptr_t mem, size_t size)
+{
+    static bool has_open = false;
+    static DataProtect start = DataProtect();
+    static DataProtect end = DataProtect();
+    uintptr_t secure_mem_start;
+    uintptr_t secure_mem_end;
+    if (!has_open) {
+        int fd = open(PROC_SELF_XPM_REGION_PATH, O_RDONLY);
+        if (fd < 0) {
+            LOG(ERROR, PANDAFILE) << "Can not open xpm proc file, do not check secure memory anymore.";
+            // No verification is performed when a file fails to be opened.
+            has_open = true;
+            return true;
+        }
+        char xpm_validate_region[XPM_PROC_LENGTH] = {0};
+        int ret = read(fd, xpm_validate_region, sizeof(xpm_validate_region));
+        if (ret <= 0) {
+            LOG(ERROR, PANDAFILE) << "Read xpm proc file failed";
+            close(fd);
+            return false;
+        }
+        close(fd);
+        if (sscanf_s(xpm_validate_region, "%lx-%lx", &secure_mem_start, &secure_mem_end) <= 0) {
+            LOG(ERROR, PANDAFILE) << "sscanf_s xpm validate region failed";
+            return false;
+        }
+        // The check is not performed when the file is already opened.
+        has_open = true;
+        LOG(DEBUG, PANDAFILE) << "Successfully open xpm region.";
+        start.Update(secure_mem_start);
+        end.Update(secure_mem_end);
+    }
+    secure_mem_start = start.GetOriginPointer();
+    secure_mem_end = end.GetOriginPointer();
+    // xpm proc does not exist, the read value is 0, and the check is not performed.
+    if (secure_mem_start == 0 && secure_mem_end == 0) {
+        LOG(ERROR, PANDAFILE) << "Secure memory check: xpm proc does not exist, do not check secure memory anymore.";
+        return true;
+    }
+    if (mem < secure_mem_start || (size > (std::numeric_limits<uintptr_t>::max() - mem)) ||
+        (mem + size) > secure_mem_end) {
+        LOG(ERROR, PANDAFILE) << "Secure memory check failed, mem out of secure memory region.";
+        return false;
+    }
+    return true;
 }
 
 class ClassIdxIterator {
