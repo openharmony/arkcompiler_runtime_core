@@ -499,7 +499,6 @@
 03.types/08.reference_types/11.union_types/ut_11.sts
 03.types/08.reference_types/11.union_types/ut_12.sts
 03.types/08.reference_types/11.union_types/ut_2.sts
-03.types/08.reference_types/11.union_types/ut_21.sts
 03.types/08.reference_types/11.union_types/ut_23.sts
 03.types/08.reference_types/11.union_types/ut_24.sts
 03.types/08.reference_types/11.union_types/ut_25.sts
