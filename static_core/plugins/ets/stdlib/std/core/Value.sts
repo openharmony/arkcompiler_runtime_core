@@ -1060,11 +1060,11 @@ export final class StringValue extends Value {
     }
 
     public override toPrint(depth: int): string {
-        return new StringBuilder("\"").append(this.data).append("\"").toString()
+        return new StringBuilder().append(this.data).toString()
     }
 
     public override toString(): string {
-        return new StringBuilder("\"").append(this.data).append("\"").toString()
+        return new StringBuilder().append(this.data).toString()
     }
 
     public override toLocaleString(): string {

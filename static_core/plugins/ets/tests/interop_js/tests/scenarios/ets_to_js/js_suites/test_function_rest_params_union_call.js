@@ -19,7 +19,7 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const functionRestParamsUnion = etsMod.getFunction('functionRestParamsUnion');
 
 {
-	ASSERT_EQ(functionRestParamsUnion(1, 2, 'abc', 4), '1,2,"abc",4');
+	ASSERT_EQ(functionRestParamsUnion(1, 2, 'abc', 4), '1,2,abc,4');
 }
 
 GCJSRuntimeCleanup();
