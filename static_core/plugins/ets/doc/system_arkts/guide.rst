@@ -74,11 +74,11 @@ Usage Example
 4. Look through the ETS-Warnings in the output. For the code in the example
    above, "System |LANG|" gives the following warnings:
 
-    * ``ETS Warning: Suggest 'final' modifier for class. [Test.sts:7:11]``
+    * ``ETS Warning: Suggest 'final' modifier for class. [Test.ets:7:11]``
 
-    * ``ETS Warning: Suggest 'final' modifier for method. [Test.sts:8:23]``
+    * ``ETS Warning: Suggest 'final' modifier for method. [Test.ets:8:23]``
 
-    * ``ETS Warning: Suggest 'final' modifier for method. [Test.sts:9:21]``
+    * ``ETS Warning: Suggest 'final' modifier for method. [Test.ets:9:21]``
 
 5. Rewrite the code as suggested by "System |LANG|". After rewriting |LANG|,
    the code is as follows:
@@ -122,7 +122,7 @@ continuing the example as above:
 4. Look through the ETS-Warnings in the output. For the code in the example
    above, "System |LANG|" gives the following warnings:
 
-    * ``System ArkTS. Warning treated as error: Suggest 'final' modifier for class [werror.sts:4:11]``
+    * ``System ArkTS. Warning treated as error: Suggest 'final' modifier for class [werror.ets:4:11]``
 
 5. Rewrite the code as suggested by "System |LANG|". After rewriting |LANG|,
    the code is as follows:

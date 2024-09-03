@@ -111,6 +111,5 @@ class Config:
             "ark": self.ark.to_dict(),
             "time-report": self.time_report.to_dict(),
             "test-lists": self.test_lists.to_dict(),
-            "ets": self.ets.to_dict(),
-            "sts": self.ets.to_dict()
+            "ets": self.ets.to_dict()
         }

@@ -32,14 +32,14 @@ Import Path Lookup
 If an import path ``<some path>/name`` is resolved to a path in the folder
 '*name*', then  the compiler executes the following lookup sequence:
 
--   If the folder contains the file ``index.sts``, then this file is imported
+-   If the folder contains the file ``index.ets``, then this file is imported
     as a separate module written in |LANG|;
 
 -   If the folder contains the file ``index.ts``, then this file is imported
     as a separated module written in |TS|;
 
 -   Otherwise, the compiler imports the package constituted by files
-    ``name/*.sts``.
+    ``name/*.ets``.
 
 
 .. _How to get type via reflection:
@@ -97,3 +97,5 @@ the compile-time errors list in :ref:`InstanceOf Expression`.
 .. raw:: pdf
 
    PageBreak
+
+

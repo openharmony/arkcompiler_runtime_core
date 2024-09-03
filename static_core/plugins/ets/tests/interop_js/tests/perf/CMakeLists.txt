@@ -35,14 +35,14 @@ add_custom_target(ets_interop_js_perf_tests COMMENT "Running all js interop perf
 
 foreach(TEST ${PERF_TESTS})
     panda_ets_interop_js_test(ets_interop_js_perf_test_${TEST}
-        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test.sts
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test.ets
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_test.js
         LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
     )
     add_dependencies(ets_interop_js_perf_tests ets_interop_js_perf_test_${TEST})
 
     panda_ets_interop_js_test(ets_interop_js_perf_test_frontend_${TEST}
-        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.sts
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.ets
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_test.js
         LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
         ETS_CONFIG "${PANDA_BINARY_ROOT}/tests/ets_interop_js/arktsconfig.json"

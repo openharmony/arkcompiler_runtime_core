@@ -369,21 +369,21 @@ Creating array with known number of elements:
 .. code-block:: typescript
    :linenos:
 
-      class A {}
+      class A {} 
          // It has no default value or parametereless constructor defined
 
       let array_size = 5
 
-      let array1 = new A[array_size] (new A)
+      let array1 = new A[array_size] (new A) 
          /* Create array of 'array_size' elements and all of them will have
             initial value equal to an object created by new A expression */
 
-      let array2 = new A[array_size] ((index): A => { return new A })
+      let array2 = new A[array_size] ((index): A => { return new A }) 
          /* Create array of `array_size` elements and all of them will have
             initial value equal to the result of lambda function execution with
             different indices */
-
-      let array2 = new A[2][3] ((index1, index2): A => { return new A })
+     
+      let array2 = new A[2][3] ((index1, index2): A => { return new A }) 
          /* Create two-dimensional array of 6 elements total and all of them will
             have initial value equal to the result of lambda function execution with
             different indices */
@@ -468,7 +468,7 @@ value: Type2)* respectively, then an indexing expression (see
 
 .. code-block:: typescript
    :linenos:
-
+   
     class SomeClass {
        $_get (index: number): SomeClass { return this }
        $_set (index: number, value: SomeClass) { }
@@ -498,7 +498,7 @@ expressions (see :ref:`Indexing Expressions`) is available:
     }
     let setClass = new ClassWithSet
     setClass = setClass[0] // Error - no $_get function available
-    setClass[0] = setClass
+    setClass[0] = setClass 
 
 Type ``string`` can be used as a type of the index parameter:
 
@@ -512,9 +512,9 @@ Type ``string`` can be used as a type of the index parameter:
        $_set (index: string, value: SomeClass) { }
     }
     let x = new SomeClass
-    x = x["index string"]
+    x = x["index string"] 
        // This notation implies a call: x = x.$_get ("index string")
-    x["index string"] = x
+    x["index string"] = x 
        // This notation implies a call: x.$_set ("index string", x)
 
 Functions ``$_get`` and ``$_set`` are ordinary functions with compiler-known
@@ -532,7 +532,7 @@ A :index:`compile-time error` occurs if these functions are marked as
 
 .. code-block:: typescript
    :linenos:
-
+   
     interface ReadonlyIndexable<K, V> {
        $_get (index: K): V
     }
@@ -608,8 +608,8 @@ The example below defines *iterable* class *C*:
       }
 
       let c = new C()
-      for (let x of c) {
-            console.log(x)
+      for (let x of c) { 
+            console.log(x) 
       }
 
 In the example above, class *C* function ``$_iterator`` returns
@@ -639,7 +639,7 @@ A :index:`compile-time error` occurs if this function is marked as ``async``.
    :linenos:
 
       class C {
-        data: string[] = ['a', 'b', 'c'];
+        data: string[] = ['a', 'b', 'c']; 
         [Symbol.iterator]() {
           return new CIterator(this)
         }
@@ -674,7 +674,7 @@ defined or inherited:
     }
     C() // prints: invoked
     C.invoke() // also prints: invoked
-
+    
 In the above example, ``C()`` is a *type call expression*. It is the short
 form of the normal method call ``C.invoke()``. Using an explicit call is always
 valid for the methods ``invoke`` and ``instantiate``.
@@ -719,12 +719,12 @@ parameters, then the call must contain corresponding arguments.
    :linenos:
 
     class Add {
-        static invoke(a: number, b: number): number {
+        static invoke(a: number, b: number): number { 
             return a + b
         }
     }
     console.log(Add(2, 2)) // prints: 4
-
+    
 |
 
 .. _Callable Types with Instantiate Method:
@@ -750,12 +750,12 @@ parameter is passed implicitly:
    :linenos:
 
     class C {
-        static instantiate(factory: () => C): C {
+        static instantiate(factory: () => C): C { 
             return factory()
         }
     }
     let x = C() // factory is passed implicitly
-
+    
     // Explicit call of 'instantiate' requires explicit 'factory':
     let y = C.instantiate(() => { return new C()})
 
@@ -767,7 +767,7 @@ contain corresponding arguments:
 
     class C {
         name = ""
-        static instantiate(factory: () => C, name: string): C {
+        static instantiate(factory: () => C, name: string): C { 
             let x = factory()
             x.name = name
             return x
@@ -789,7 +789,7 @@ if:
    :linenos:
 
     class C {
-        static instantiate(factory: string): C {
+        static instantiate(factory: string): C { 
             return factory()
         }
     }
@@ -1078,7 +1078,7 @@ method in the instantiated class or interface:
         foo (p: number) { ... }
         foo (p: T) { ... }
      }
-     let instantiation: Template<number>
+     let instantiation: Template<number> 
        // Leads to two *overload-equivalent* methods
 
      interface ITemplate<T> {
@@ -1147,7 +1147,7 @@ Declarations with the same name are distinguishable by signatures if such
 declarations are one of the following:
 
 -  Functions with the same name and signatures that are not
-   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and
+   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and 
    :ref:`Function Overloading`).
 
 -  Methods with the same name and signatures that are not
@@ -1425,7 +1425,7 @@ members are not accessible (see :ref:`Accessible`) within the bodies of their
           protected member_1 ...
           private member_2 ...
       }
-      function A.bar () { ...
+      function A.bar () { ... 
          this.foo() // Method foo() is accessible as it is public
          this.member_1 // Compile-time error as member_1 is not accessible
          this.member_2 // Compile-time error as member_2 is not accessible
@@ -1474,7 +1474,7 @@ declaring. This affects the kind of receiver to be used for the call:
          A.goo() // Other static extension function is called with class name receiver
          ...
       }
-      static function A.goo () { ...
+      static function A.goo () { ... 
          this.foo() // Compile-time error as instance members are not accessible
          this.bar() // Compile-time error as instance extension functions are not accessible
          ...
@@ -1511,8 +1511,8 @@ As illustrated by the examples below, an *extension function* can be:
 .. code-block:: typescript
    :linenos:
 
-      // file a.sts
-      import {bar} from "a.sts" // import name 'bar'
+      // file a.ets
+      import {bar} from "a.ets" // import name 'bar'
       class A {
           foo () { ...
              this.bar() // Non-static extension function is called with this.
@@ -1521,8 +1521,8 @@ As illustrated by the examples below, an *extension function* can be:
           }
       }
 
-      // file ext.sts
-      import {A} from "a.sts" // import name 'A'
+      // file ext.ets
+      import {A} from "a.ets" // import name 'A'
       function A.bar () { ...
          this.foo() // Method foo() is called
          ...
@@ -1535,7 +1535,7 @@ then calls to that name are routed to the method:
    :linenos:
 
       class A {
-          foo () { console.log ("Method A.foo is called") }
+          foo () { console.log ("Method A.foo is called") } 
       }
       function A.foo () { console.log ("Extension A.foo is called") }
       let a = new A()
@@ -1628,7 +1628,7 @@ The formal syntax of the *trailing lambda* is presented below:
 .. code-block:: abnf
 
     trailingLambdaCall:
-        ( objectReference '.' identifier typeArguments?
+        ( objectReference '.' identifier typeArguments? 
         | expression ('?.' | typeArguments)?
         )
         arguments block
@@ -1694,7 +1694,7 @@ argument (see :ref:`Optional Parameters`).
 
      bar(5) { console.log ("after call of 'bar' this block is executed") }
 
-     foo(() => { console.log ("function lambda argument is activated") })
+     foo(() => { console.log ("function lambda argument is activated") }) 
      { console.log ("after call of 'foo' this block is executed") }
      /* here, function foo receives lambda as an argument and a block after
       the call is just a block, not a trailing lambda. */
@@ -2029,7 +2029,7 @@ argument cannot throw an exception:
       }
 
       // calling rethrowing function:
-        foo(canThrow) // exception can be thrown
+        foo(canThrow) // exception can be thrown 
         foo(cannotThrow) // exception-free
 
 A call is exception-free if:
@@ -2288,10 +2288,10 @@ Return types of ``await`` expressions are represented in the example below:
 .. code-block:: typescript
    :linenos:
 
-       // if p has type Promise<Promise<string>>,
+       // if p has type Promise<Promise<string>>, 
        // await p returns string
        let x : string = await p;
-
+       
        // if p2 has type Promise<Promise<string> | number>,
        // await p2 returns string | number
        let y : string | number = await p2;
@@ -2630,7 +2630,7 @@ The indexing access expression *D[index]*, where *D* is of type
    :linenos:
 
    function foo(d: DynamicObject) {
-      let x = d[0]
+      let x = d[0] 
    }
 
 The wrapper must raise an error if:
@@ -2665,7 +2665,7 @@ as the actual type of the returned value is not known at compile time.
    :linenos:
 
    function foo(d: DynamicObject) {
-      let x = new d()
+      let x = new d() 
    }
 
 The wrapper must raise an error if:
@@ -2689,7 +2689,7 @@ The wrapper must raise an error if:
 
 .. meta:
     frontend_status: None
-
+    
 The cast expression *D as T* (see :ref:`Cast Expressions`), where *D* is of
 type ``DynamicObject``, is handled as an attempt to cast the underlying object
 to a static type *T*.
@@ -3008,3 +3008,5 @@ possibility:
 .. raw:: pdf
 
    PageBreak
+
+

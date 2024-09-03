@@ -38,7 +38,6 @@
         "build": {
             "sub_component": [
                 "//arkcompiler/runtime_core:arkcompiler_params",
-                "//arkcompiler/runtime_core/arkplatform:arkplatform_packages",
                 "//arkcompiler/runtime_core/static_core:ark_packages",
                 "//arkcompiler/runtime_core:ark_device_packages"
             ],

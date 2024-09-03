@@ -23,7 +23,7 @@ from vmb.lang import LangBase
 class Lang(LangBase):
 
     name = 'ArkTS'
-    short_name = 'sts'
+    short_name = 'ets'
     __re_state = re.compile(
         r'^\s*(export)?\s*'
         r'class\s+(?P<class>\w+)\s*'
@@ -40,8 +40,8 @@ class Lang(LangBase):
 
     def __init__(self) -> None:
         super().__init__()
-        self.src = {'.sts', '.ts'}
-        self.ext = '.sts'
+        self.src = {'.ets', '.ts'}
+        self.ext = '.ets'
 
     @property
     def re_state(self) -> re.Pattern:

@@ -44,7 +44,7 @@ class RunnerDeclgenParser(RunnerJS):
             if not es2panda_test.exists():
                 raise Exception(f'There is no path {es2panda_test}')
 
-        declgen_root = static_core_root / "plugins" / "ets" / "tools" / "declgen_ts2sts"
+        declgen_root = static_core_root / "plugins" / "ets" / "tools" / "declgen_ts2ets"
         self.default_list_root = declgen_root / "test" / "test-lists"
         self.list_root = self.list_root if self.list_root else self.default_list_root
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
@@ -61,10 +61,10 @@ class RunnerDeclgenParser(RunnerJS):
         return Path("/tmp") / "declgenparser"
 
     def add_directories(self) -> None:
-        flags = ["--extension=sts"]
+        flags = ["--extension=ets"]
         for test_dir in self.TEST_DIRS:
             dir_path = path.join(self.test_root, test_dir)
-            self.add_directory(dir_path, "sts", flags)
+            self.add_directory(dir_path, "ets", flags)
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenParser:
         test = TestDeclgenParser(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))

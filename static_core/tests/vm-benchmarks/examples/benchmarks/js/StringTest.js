@@ -17,7 +17,7 @@
  * @State
  * @Tags strings
  */
-function stringTest() {
+function StringTest() {
 
     /**
      * @Param 8, 100
@@ -29,8 +29,8 @@ function stringTest() {
      */
     this.loops;
 
-    this.str = '';
-    this.suffix = 'ok';
+    this.str = "";
+    this.suffix = "ok";
 
     /**
      * @Setup
@@ -46,11 +46,11 @@ function stringTest() {
      * @Tags sanity, example
      */
     this.testA = function () {
-        let result = this.str;
-        for (let i = 0; i < stringTest.loops; i++) {
+        var result = this.str;
+        for (var i = 0; i < StringTest.loops; i++) {
             result = result.concat(this.suffix);
         }
-        return result.substring(this.loops / 2, this.loops);
+        return result.substring(this.loops/2, this.loops);
     };
 
     /**
@@ -58,10 +58,10 @@ function stringTest() {
      * @returns {Obj}
      */
     this.testB = function () {
-        let result = this.str;
-        for (let i = 0; i < stringTest.loops; i++) {
+        var result = this.str;
+        for (var i = 0; i < StringTest.loops; i++) {
             result += this.suffix;
         }
-        return result.substring(this.loops / 2, this.loops);
+        return result.substring(this.loops/2, this.loops);
     };
 }

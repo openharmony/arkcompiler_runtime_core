@@ -24,7 +24,6 @@ void BuildLaunch(const BytecodeInstruction *bcInst);
 #endif
 
 void BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::Type type);
-IntrinsicInst *CreateStObjByNameIntrinsic(size_t pc, DataType::Type type);
 void BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type);
 
 void BuildEquals(const BytecodeInstruction *bcInst);

@@ -70,98 +70,98 @@ file(WRITE ${ETS_CONFIG_DECL}
 
 panda_ets_interop_js_gtest(ets_interop_js_test__sample
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/sample/test_sample.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/sample/test_sample.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/sample/test_sample.ets
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test__map_mirror_classes
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/map_mirror_classes/test_map_mirror_classes.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/map_mirror_classes/test_map_mirror_classes.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/map_mirror_classes/test_map_mirror_classes.ets
     LIBRARIES arkruntime
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test_bouncing_pandas
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/bouncing_pandas/bouncing_pandas.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/bouncing_pandas/bouncing_pandas_test.sts
-                ${PANDA_ETS_PLUGIN_SOURCE}/tests/common/bouncing_pandas/bouncing_pandas.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/bouncing_pandas/bouncing_pandas_test.ets
+                ${PANDA_ETS_PLUGIN_SOURCE}/tests/common/bouncing_pandas/bouncing_pandas.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test_intrins
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_intrins/test_intrins.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_intrins/test_intrins.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_intrins/test_intrins.ets
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_frontend_test_intrins
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_intrins/test_intrins.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_intrins/frontend_test_intrins.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_intrins/frontend_test_intrins.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_frontend_test_frontend_package
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_frontend/test_frontend_package.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_frontend/test_frontend_package.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_frontend/test_frontend_package.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test__dynamic_object
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_object.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_object.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_object.ets
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_class_operations
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.ets
 )
 panda_ets_interop_js_gtest(ets_interop_js_frontend_class_operations
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_frontend.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_frontend.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 panda_ets_interop_js_gtest(ets_interop_js_class_operations_decl
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_decl.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_operations/class_operations_decl.ets
     ETS_CONFIG ${ETS_CONFIG_DECL}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_strict_equality
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/strict_equality/strict_equality.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/strict_equality/strict_equality.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/strict_equality/strict_equality.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_class_composite
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_class_composite_decl
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite_decl.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/class_composite/class_composite_decl.ets
     ETS_CONFIG ${ETS_CONFIG_DECL}
 )
 
 panda_ets_interop_js_gtest(ets_interop_dynamic_with_lambda
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_with_lambda/dynamic_with_lambda.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test_dynamic_call
         CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_call.cpp
-        ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_call.sts
+        ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_object/dynamic_call.ets
         ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_dynamic_enum
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_enum/dynamic_enum.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_enum/dynamic_enum.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/dynamic_enum/dynamic_enum.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test_undefined
     CPP_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_undefined/test_undefined.cpp
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_undefined/test_undefined.sts
+    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/test_undefined/test_undefined.ets
     ETS_CONFIG ${ETS_CONFIG}
 )
 

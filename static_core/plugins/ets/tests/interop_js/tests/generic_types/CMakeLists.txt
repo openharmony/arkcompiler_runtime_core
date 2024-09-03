@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_gtest(ets_interop_js__ets_proxy_test_generic_types
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_generic_types.ets
 )

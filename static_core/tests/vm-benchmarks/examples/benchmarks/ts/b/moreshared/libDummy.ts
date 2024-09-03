@@ -14,5 +14,5 @@
  */
 
 export function dummy() : string {
-    return 'Hello dummy';
+    return "Hello dummy";
 }

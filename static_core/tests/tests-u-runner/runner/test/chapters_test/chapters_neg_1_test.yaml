@@ -15,6 +15,6 @@
 
 chapters1:
   - ch1:
-      - folder1/file1.sts
+      - folder1/file1.ets
       - folder2
-      - folder3/file*.sts
+      - folder3/file*.ets

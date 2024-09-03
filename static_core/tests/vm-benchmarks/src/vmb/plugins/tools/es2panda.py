@@ -32,7 +32,7 @@ class Tool(ToolBase):
             os.environ.get('PANDA_BUILD', ''),
             err='Please set $PANDA_BUILD env var'
         )
-        self.opts = '--gen-stdlib=false --extension=sts --opt-level=2 ' \
+        self.opts = '--gen-stdlib=false --extension=ets --opt-level=2 ' \
             f'--arktsconfig={self.panda_root}' \
             f'/tools/es2panda/generated/arktsconfig.json'
         self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
@@ -42,13 +42,13 @@ class Tool(ToolBase):
         return 'ES to Panda compiler'
 
     def exec(self, bu: BenchUnit) -> None:
-        for lib in bu.libs('.ts', '.sts'):
+        for lib in bu.libs('.ts', '.ets'):
             abc = lib.with_suffix('.abc')
             if abc.is_file():
                 continue
             opts = '--ets-module ' + self.opts
             self.run_es2panda(lib, abc, opts, bu)
-        src = bu.src('.ts', '.sts')
+        src = bu.src('.ts', '.ets')
         abc = src.with_suffix('.abc')
         res = self.run_es2panda(src, abc, self.opts, bu)
         abc_size = self.sh.get_filesize(abc)

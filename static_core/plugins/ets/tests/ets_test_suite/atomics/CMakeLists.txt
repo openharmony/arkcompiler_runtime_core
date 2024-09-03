@@ -29,7 +29,7 @@ set(atomics_tests
     nonconcurrent_wait_i32_not_equal
     nonconcurrent_wait_i64_not_equal
     nonconcurrent_waitasync_store_notify
-
+    
     # --- Concurrent wait/notify tests
     concurrent_wait_store_notify
     concurrent_countdownlatch
@@ -62,7 +62,7 @@ function(run_atomics_tests ETS_SRC WORK_DIR TARGET)
 endfunction()
 
 foreach(test ${atomics_tests})
-    set(test_in "${tests_in_dir}/${test}.sts")
+    set(test_in "${tests_in_dir}/${test}.ets")
     set(test_out_dir "${tests_out_dir}/${test}")
     file(MAKE_DIRECTORY ${test_out_dir})
     set(target ets_test_suite_atomics_${test})

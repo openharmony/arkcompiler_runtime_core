@@ -24,7 +24,7 @@ The example below illustrates the declaring and using of an annotation:
     // Annotation declaration:
     @interface ClassAuthor {
         authorName: string
-    }
+    }   
 
     // Annotation use:
     @ClassAuthor({authorName: "Bob"})
@@ -37,10 +37,10 @@ An annotation must be placed immediately before the declaration it is applied to
 The annotation usage can include arguments as in the example above.
 
 For an annotation to be used, its name must be prefixed with the symbol ``@``
-(e.g., ``@MyAnno``).
+(e.g., ``@MyAnno``). 
 Spaces and line separators between the symbol ``@`` and the name are not allowed:
 
-.. code-block::
+.. code-block:: 
    :linenos:
 
     ClassAuthor({authorName: "Bob"}) // compile-time error, no '@'
@@ -60,7 +60,7 @@ Multiple annotations can be applied to one declaration:
     class MyClass {/*body*/}
 
 
-As annotations is not |TS| feature in can be used only in ``.sts/.d.sts`` files.
+As annotations is not |TS| feature in can be used only in ``.ets/.d.ets`` files.
 
 |
 
@@ -91,14 +91,14 @@ As any other declarated entity, an annotation can be exported, using ``export`` 
 
 A ``TypeNode`` in the annotation field is restricted (see :ref:`Types of Annotation Fields`).
 
-The default value of an *annotation field* can be specified
+The default value of an *annotation field* can be specified 
 using *initializer* as *constant expression*. A compile-time occurs in the value
 of this expression cannot be evaluated in compile-time.
 
 An *user-defined annotation* must be defined at top-level,
 otherwise a compile-time error occurs.
 
-An *user-defined annotation* cannot be extended (inheritance is not supported).
+An *user-defined annotation* cannot be extended (inheritance is not supported). 
 
 The name of an *user-defined annotation* cannot coincide with a name of other entity.
 
@@ -106,7 +106,7 @@ The name of an *user-defined annotation* cannot coincide with a name of other en
    :linenos:
 
     @interface Position {/*properties*/}
-
+  
     class Position {/*body*/} // compile-time error: duplicate identifier
 
 An annotation declaration does not define a type, so a type alias
@@ -117,7 +117,7 @@ cannot be applied to the annotation and it cannot be used as an interface:
 
     @interface Position {}
     type Pos = Position // compile-time error
-
+    
     class A implements Position {} // compile-time error
 
 |
@@ -144,13 +144,13 @@ Using of User-Defined Annotation
 ================================
 
 The following syntax is used to apply an
-annotation to a declaration,
+annotation to a declaration, 
 and to define the values of annotation properties:
 
 .. code-block:: abnf
 
     userDefinedAnnotationUsage:
-        '@' qualifiedName userDefinedAnnotationParamList?
+        '@' qualifiedName userDefinedAnnotationParamList? 
         ;
     qualifiedName:
         Identifier ('.' Identifier)*
@@ -171,7 +171,7 @@ An annotation declaration is presented in the example below:
     @interface MyAnno{}
 
 
-All values in an *object literal expression* must be constant expressions,
+All values in an *object literal expression* must be constant expressions, 
 otherwise a compile-time error occurs.
 
 Annotation usage is presented in the example below:
@@ -198,11 +198,11 @@ Otherwise, a compile-time error occurs:
 
     @MyAnno()
     function foo() {/*body*/} // compile-time error
-
+    
     @MyAnno()
     abstract class A {} // compile-time error
 
-Repeatable annotations
+Repeatable annotations 
 (applying the same annotation more than once to the entity)
 are not supported:
 
@@ -211,7 +211,7 @@ are not supported:
 
     @ClassPreamble({authorName: "John"})
     @ClassPreamble({authorName: "Bob"}) // compile-time error
-    class C {/*body*/}
+    class C {/*body*/}    
 
 The order of properties does not matter in an annotation usage:
 
@@ -221,7 +221,7 @@ The order of properties does not matter in an annotation usage:
     @ClassPreamble({authorName: "John", revision: 2})
     // the same as:
     @ClassPreamble({revision: 2, authorName: "John"})
-
+    
 
 When using an annotation, all fields without default values must be listed.
 Otherwise, a compile-time error occurs:
@@ -245,7 +245,7 @@ literal syntax is used to set its value:
     }
 
     @ClassPreamble(
-        {authorName: "Alice",
+        {authorName: "Alice", 
         reviewers: ["Bob", "Clara"]}
     )
     class C3 {/*body*/}
@@ -264,7 +264,7 @@ if there is no need to set annotation properties:
 Exporting and Importing Annotations
 ===================================
 
-An annotation can be exported and imported,
+An annotation can be exported and imported, 
 only few forms of export and import directives are supported.
 
 To export an annotation its declaration must be marked with ``export`` keyword:
@@ -272,7 +272,7 @@ To export an annotation its declaration must be marked with ``export`` keyword:
 .. code-block:: typescript
    :linenos:
 
-    // a.sts
+    // a.ets
     export @interface MyAnno {}
 
 An annotation can be imported as part of the imported module. In this case
@@ -281,7 +281,7 @@ it is accessed by qualified name:
 .. code-block:: typescript
    :linenos:
 
-    // b.sts
+    // b.ets
     import * as ns from "./a"
 
     @ns.MyAnno
@@ -292,19 +292,19 @@ Unqualified import is also allowed:
 .. code-block:: typescript
    :linenos:
 
-    // b.sts
+    // b.ets
     import { MyAnno } from "./a"
 
     @MyAnno
     class C {/*body*/}
 
-As an annotation is not a type, it is forbidden to export or import
+As an annotation is not a type, it is forbidden to export or import 
 using ``export type`` or ``import type`` notations:
 
 .. code-block:: typescript
    :linenos:
 
-    import type { MyAnno } from "./a" // compile-time error
+    import type { MyAnno } from "./a" // compile-time error 
 
 
 The following cases are forbidden for annotations:
@@ -323,12 +323,12 @@ The following cases are forbidden for annotations:
     import {MyAnno as Anno} from "./a" // compile-time error
 
 
-.. _Annotations in .d.sts Files:
+.. _Annotations in .d.ets Files:
 
-Annotations in .d.sts Files
+Annotations in .d.ets Files
 ===========================
 
-Ambient annotations can be declared in .d.sts file.
+Ambient annotations can be declared in .d.ets file. 
 
 .. code-block:: abnf
 
@@ -337,20 +337,20 @@ Ambient annotations can be declared in .d.sts file.
         ;
 
 Such declaration does not introduce a new annotation, but provides type information
-for using annotation that must be defined somewhere else.
-A runtime error occurs, if there no annotation that corresponds to the ambient annotation,
-used in the program.
+for using annotation that must be defined somewhere else. 
+A runtime error occurs, if there no annotation that corresponds to the ambient annotation, 
+used in the program. 
 
-The ambient declaration and annotation that implements it must be exactly the same,
+The ambient declaration and annotation that implements it must be exactly the same, 
 including fields initialization:
 
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface NameAnno{name: string = ""}
 
-    // a.sts
+    // a.ets
     export @interface NameAnno{name: string = ""} // ok
 
 The following example shows incorrect code,
@@ -359,11 +359,11 @@ as ambient declaration is not the same as annotation declaration:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface VersionAnno{version: number} // initialization is missing
 
-    // a.sts
-    export @interface VersionAnno{version: number = 1}
+    // a.ets
+    export @interface VersionAnno{version: number = 1} 
 
 
 An ambient declaration can be imported and used exactly the same way as a regular annotation.
@@ -371,16 +371,16 @@ An ambient declaration can be imported and used exactly the same way as a regula
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface MyAnno {}
 
-    // b.sts
+    // b.ets
     import { MyAnno } from "./a"
 
     @MyAnno
     class C {/*body*/}
 
-If an annotation is applied to an ambient declaration in .d.sts file
+If an annotation is applied to an ambient declaration in .d.ets file
 (see the example below),
 it is not automatically applied to the declaration that implements
 this ambient declaration.
@@ -389,8 +389,10 @@ It is up to the developer to apply it to the implementation declaration.
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface MyAnno {}
-
+    
     @MyAnno
     declare class C {}
+
+

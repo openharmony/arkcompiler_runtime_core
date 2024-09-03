@@ -299,7 +299,7 @@ To export an annotation, its declaration must be marked with the keyword
 .. code-block:: typescript
    :linenos:
 
-    // a.sts
+    // a.ets
     export @interface MyAnno {}
 
 If an annotation is imported as part of an imported module, then the annotation
@@ -308,7 +308,7 @@ is accessed by its qualified name:
 .. code-block:: typescript
    :linenos:
 
-    // b.sts
+    // b.ets
     import * as ns from "./a"
 
     @ns.MyAnno
@@ -319,7 +319,7 @@ Unqualified import is also allowed:
 .. code-block:: typescript
    :linenos:
 
-    // b.sts
+    // b.ets
     import { MyAnno } from "./a"
 
     @MyAnno
@@ -375,10 +375,10 @@ identical, including field initialization:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface NameAnno{name: string = ""}
 
-    // a.sts
+    // a.ets
     export @interface NameAnno{name: string = ""} // ok
 
 The code in the example below is incorrect as the ambient declaration is not
@@ -387,10 +387,10 @@ identical to the annotation declaration:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface VersionAnno{version: number} // initialization is missing
 
-    // a.sts
+    // a.ets
     export @interface VersionAnno{version: number = 1}
 
 
@@ -400,16 +400,16 @@ as a regular annotation:
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface MyAnno {}
 
-    // b.sts
+    // b.ets
     import { MyAnno } from "./a"
 
     @MyAnno
     class C {/*body*/}
 
-If an annotation is applied to an ambient declaration in the *.d.sts* file (see
+If an annotation is applied to an ambient declaration in the *.d.ets* file (see
 the example below), then the developer is to apply the annotation to the
 implementation declaration manually, because as the annotation is not
 automatically applied to the declaration that implements the ambient declaration:
@@ -417,7 +417,7 @@ automatically applied to the declaration that implements the ambient declaration
 .. code-block:: typescript
    :linenos:
 
-    // a.d.sts
+    // a.d.ets
     export declare @interface MyAnno {}
 
     @MyAnno
@@ -454,14 +454,14 @@ ambient context:
 .. code-block:: typescript
    :linenos:
 
-    //=== io.d.sts
+    //=== io.d.ets
     declare namespace IO {
         class File {}
 
         function open(filename: string): File
     }
 
-    //=== files.sts
+    //=== files.ets
 
     @namespace("IO")
     class File {/*body*/}
@@ -474,3 +474,5 @@ ambient context:
 .. raw:: pdf
 
    PageBreak
+
+

@@ -55,7 +55,7 @@ function(panda_ets_interop_js_checked_test)
     file(MAKE_DIRECTORY "${TEST_DIR}")
     SET(OPTIONS "--run-gc-in-place")
     set(PAOC_OPTIONS ${OPTIONS} "--load-runtimes=ets" "--boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc")
-    set(ES2PANDA_OPTIONS --thread=0 --extension=sts --arktsconfig=${ETS_CONFIG} --verifier-errors=${ETS_VERIFICATOR_ERRORS})
+    set(ES2PANDA_OPTIONS --thread=0 --extension=ets --arktsconfig=${ETS_CONFIG} --verifier-errors=${ETS_VERIFICATOR_ERRORS})
 
     if (PANDA_LLVM_AOT)
         set(WITH_LLVM "--with-llvm")

@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_gtest(ets_interop_js__getter_ets_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/getter.ets
 )
