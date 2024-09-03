@@ -195,6 +195,119 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return new Array<T>(FROM_BUFFER, ret)
     }
 
+    private searchUndefined(fi: int, len: int): boolean {
+        for (let i = fi; i < len; i++) {
+            if (this.$_get_unsafe(i) instanceof undefined) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private searchNull(fi: int, len: int): boolean {
+        for (let i = fi; i < len; i++) {
+            if (this.$_get_unsafe(i) instanceof null) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private searchString(val: String, fi: int, len: int): boolean {
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof String) {
+                if (tmp == val) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    private searchNumber(val: Number, fi: int, len: int): boolean {
+        const unboxedVal: number = val.valueOf()
+        if (isNaN(unboxedVal)) {
+            for (let i = fi; i < len; i++) {
+                const tmp = this.$_get_unsafe(i)
+                if (tmp instanceof Number) {
+                    if (isNaN(tmp.valueOf())) {
+                        return true
+                    }
+                }
+            }
+        } else {
+            for (let i = fi; i < len; i++) {
+                const tmp = this.$_get_unsafe(i)
+                if (tmp instanceof Number) {
+                    if (unboxedVal == tmp.unboxed()) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    private searchFloat(val: Float, fi: int, len: int): boolean {
+        const unboxedVal: float = val.unboxed()
+        if (isNaN(unboxedVal)) {
+            for (let i = fi; i < len; i++) {
+                const tmp = this.$_get_unsafe(i)
+                if (tmp instanceof Float) {
+                    if (isNaN(tmp.unboxed())) {
+                        return true
+                    }
+                }
+            }
+        } else {
+            for (let i = fi; i < len; i++) {
+                const tmp = this.$_get_unsafe(i)
+                if (tmp instanceof Float) {
+                    if (unboxedVal == tmp.unboxed()) {
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+    private searchLong(val: Long, fi: int, len: int): boolean {
+        const unboxedVal: long = val.unboxed()
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Long) {
+                if (tmp == unboxedVal) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private searchInt(val: Int, fi: int, len: int): boolean {
+        const unboxedVal: int = val.unboxed()
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Int) {
+                if (tmp == unboxedVal) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private searchCommon(val: T, fi: int, len: int): boolean {
+        for (let i = fi; i < len; i++) {
+            if (val == this.$_get_unsafe(i)) {
+                return true;
+            }
+        }
+        return false
+    }
+
     /**
      * Default comparison function for sort algorithm.
      * Objects are compared as string. Both objects are convereted to string

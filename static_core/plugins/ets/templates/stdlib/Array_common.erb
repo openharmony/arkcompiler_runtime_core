@@ -779,14 +779,33 @@
             return true;
         }
     }
+    return false;
+% elsif el_type == 'T'
+    if (val instanceof String) {
+        return this.searchString(val, fi, len)
+    } else if (val instanceof Number) {
+        return this.searchNumber(val, fi, len)
+    } else if (val instanceof Float) {
+        return this.searchFloat(val, fi, len)
+    } else if (val instanceof Long) {
+        return this.searchLong(val, fi, len)
+    } else if (val instanceof Int) {
+        return this.searchInt(val, fi, len)
+    } else if (__runtimeIsSameReference(val, undefined)) {
+        return this.searchUndefined(fi, len)
+    } else if (val == null) {
+        return this.searchNull(fi, len)
+    } else {
+        return this.searchCommon(val, fi, len) 
+    }
 % else
     for (let i = fi; i < len; i++) {
         if (__runtimeSameValueZero(val, <%= get_unsafe.(this, 'i') %>)) {
             return true;
         }
     }
-% end
     return false;
+% end
 }
 
 /**
