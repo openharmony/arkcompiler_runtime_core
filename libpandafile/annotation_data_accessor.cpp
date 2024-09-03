@@ -29,7 +29,7 @@ AnnotationDataAccessor::AnnotationDataAccessor(const File &panda_file, File::Ent
 
     elements_sp_ = sp;
     size_t size = count_ * (ID_SIZE + VALUE_SIZE);
-    THROW_IF(sp.Size() < size, File::INVALID_FILE_OFFSET);
+    panda_file_.ThrowIfWithCheck(sp.Size() < size, File::INVALID_FILE_OFFSET, File::ANNOTATION_DATA_ACCESSOR);
     elements_tags_ = sp.SubSpan(size);
 }
 

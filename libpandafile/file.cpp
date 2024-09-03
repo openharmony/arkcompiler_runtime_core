@@ -38,6 +38,7 @@
 #include "utils/utf.h"
 #include "utils/span.h"
 #include "zip_archive.h"
+#include "zlib.h"
 
 namespace panda::panda_file {
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
@@ -776,6 +777,33 @@ File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8_name) con
 bool ContainsLiteralArrayInHeader(const std::array<uint8_t, File::VERSION_SIZE> &version)
 {
     return panda::panda_file::IsVersionLessOrEqual(version, LAST_CONTAINS_LITERAL_IN_HEADER_VERSION);
+}
+
+bool File::ValidateChecksum() const
+{
+    constexpr uint32_t MAGIC_SIZE = 8U;
+    constexpr uint32_t CHECKSUM_SIZE = 4U;
+    // The checksum calculation does not include magic or checksum, so the offset needs to be added
+    constexpr uint32_t FILE_CONTENT_OFFSET = MAGIC_SIZE + CHECKSUM_SIZE;
+    uint32_t file_size = GetHeader()->file_size;
+    uint32_t cal_checksum = adler32(1, GetBase() + FILE_CONTENT_OFFSET, file_size - FILE_CONTENT_OFFSET);
+    return GetHeader()->checksum == cal_checksum;
+}
+
+void File::ThrowIfWithCheck(bool cond, const std::string& msg, const std::string& tag) const
+{
+    if (UNLIKELY(cond)) {
+        bool is_checksum_match = ValidateChecksum();
+        if (!is_checksum_match) {
+            LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted.";
+        }
+
+        if (!tag.empty()) {
+            LOG(FATAL, PANDAFILE) << msg << ", from method: " << tag;
+        } else {
+            LOG(FATAL, PANDAFILE) << msg;
+        }
+    }
 }
 
 }  // namespace panda::panda_file

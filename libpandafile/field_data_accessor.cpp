@@ -46,18 +46,18 @@ FieldDataAccessor::FieldDataAccessor(const File &panda_file, File::EntityId fiel
 
 std::optional<FieldDataAccessor::FieldValue> FieldDataAccessor::GetValueInternal()
 {
-    THROW_IF(tagged_values_sp_.Size() == 0U, File::INVALID_FILE_OFFSET);
+    panda_file_.ThrowIfWithCheck(tagged_values_sp_.Size() == 0U, File::INVALID_FILE_OFFSET, File::FIELD_DATA_ACCESSOR);
 
     auto sp = tagged_values_sp_;
     auto tag = static_cast<FieldTag>(sp[0]);
     FieldValue value;
 
     if (tag == FieldTag::INT_VALUE) {
-        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::FIELD_DATA_ACCESSOR);
         sp = sp.SubSpan(1);
         value = static_cast<uint32_t>(helpers::ReadLeb128(&sp));
     } else if (tag == FieldTag::VALUE) {
-        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::FIELD_DATA_ACCESSOR);
         sp = sp.SubSpan(1);
 
         switch (GetType()) {

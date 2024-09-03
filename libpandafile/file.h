@@ -182,7 +182,8 @@ public:
     {
         const Header *header = GetHeader();
         Span file(GetBase(), header->file_size);
-        THROW_IF(!id.IsValid() || id.GetOffset() >= file.size(), File::INVALID_FILE_OFFSET);
+        ThrowIfWithCheck(!id.IsValid() || id.GetOffset() >= file.size(), File::INVALID_FILE_OFFSET,
+                         File::GET_SPAN_FROM_ID);
         return file.Last(file.size() - id.GetOffset());
     }
 
@@ -227,13 +228,14 @@ public:
 
     Span<const EntityId> GetClassIndex(const IndexHeader *index_header) const
     {
-        THROW_IF(index_header == nullptr, "index_header is null");
+        ThrowIfWithCheck(index_header == nullptr, File::NULL_INDEX_HEADER, File::GET_CLASS_INDEX);
         auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
         ASSERT(index_header != nullptr);
         auto class_idx_size = index_header->class_idx_size * EntityId::GetSize();
-        THROW_IF(index_header->class_idx_off > header->file_size || class_idx_size > header->file_size ||
-            index_header->class_idx_off > header->file_size - class_idx_size, "index_header is invalid");
+        ThrowIfWithCheck(index_header->class_idx_off > header->file_size || class_idx_size > header->file_size ||
+            index_header->class_idx_off > header->file_size - class_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_CLASS_INDEX);
         auto sp = file.SubSpan(index_header->class_idx_off, index_header->class_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->class_idx_size);
     }
@@ -246,13 +248,14 @@ public:
 
     Span<const EntityId> GetMethodIndex(const IndexHeader *index_header) const
     {
-        THROW_IF(index_header == nullptr, "index_header is null");
+        ThrowIfWithCheck(index_header == nullptr, File::NULL_INDEX_HEADER, File::GET_METHOD_INDEX);
         auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
         ASSERT(index_header != nullptr);
         auto method_idx_size = index_header->method_idx_size * EntityId::GetSize();
-        THROW_IF(index_header->method_idx_off > header->file_size || method_idx_size > header->file_size ||
-            index_header->method_idx_off > header->file_size - method_idx_size, "index_header is invalid");
+        ThrowIfWithCheck(index_header->method_idx_off > header->file_size || method_idx_size > header->file_size ||
+            index_header->method_idx_off > header->file_size - method_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_METHOD_INDEX);
         auto sp = file.SubSpan(index_header->method_idx_off, index_header->method_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->method_idx_size);
     }
@@ -265,13 +268,14 @@ public:
 
     Span<const EntityId> GetFieldIndex(const IndexHeader *index_header) const
     {
-        THROW_IF(index_header == nullptr, "index_header is null");
+        ThrowIfWithCheck(index_header == nullptr, File::NULL_INDEX_HEADER, File::GET_FIELD_INDEX);
         auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
         ASSERT(index_header != nullptr);
         auto field_idx_size = index_header->field_idx_size * EntityId::GetSize();
-        THROW_IF(index_header->field_idx_off > header->file_size || field_idx_size > header->file_size ||
-            index_header->field_idx_off > header->file_size - field_idx_size, "index_header is invalid");
+        ThrowIfWithCheck(index_header->field_idx_off > header->file_size || field_idx_size > header->file_size ||
+            index_header->field_idx_off > header->file_size - field_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_FIELD_INDEX);
         auto sp = file.SubSpan(index_header->field_idx_off, index_header->field_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->field_idx_size);
     }
@@ -284,13 +288,14 @@ public:
 
     Span<const EntityId> GetProtoIndex(const IndexHeader *index_header) const
     {
-        THROW_IF(index_header == nullptr, "index_header is null");
+        ThrowIfWithCheck(index_header == nullptr, File::NULL_INDEX_HEADER, File::GET_PROTO_INDEX);
         auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
         ASSERT(index_header != nullptr);
         auto proto_idx_size = index_header->proto_idx_size * EntityId::GetSize();
-        THROW_IF(index_header->proto_idx_off > header->file_size || proto_idx_size > header->file_size ||
-            index_header->proto_idx_off > header->file_size - proto_idx_size, "index_header is invalid");
+        ThrowIfWithCheck(index_header->proto_idx_off > header->file_size || proto_idx_size > header->file_size ||
+            index_header->proto_idx_off > header->file_size - proto_idx_size, File::INVALID_INDEX_HEADER,
+            File::GET_PROTO_INDEX);
         auto sp = file.SubSpan(index_header->proto_idx_off, index_header->proto_idx_size * EntityId::GetSize());
         return Span(reinterpret_cast<const EntityId *>(sp.data()), index_header->proto_idx_size);
     }
@@ -425,8 +430,25 @@ public:
         class_hash_table_ = class_hash_table;
     }
 
-    static constexpr const char *INVALID_FILE_OFFSET = "Invalid file offset";
+    bool ValidateChecksum() const;
 
+    void ThrowIfWithCheck(bool cond, const std::string& msg, const std::string& tag = "") const;
+
+    static constexpr const char *INVALID_FILE_OFFSET = "Invalid file offset";
+    static constexpr const char *NULL_INDEX_HEADER = "index_header is null";
+    static constexpr const char *INVALID_INDEX_HEADER = "index_header is invalid";
+
+    static constexpr const char *GET_CLASS_INDEX = "GetClassIndex";
+    static constexpr const char *GET_METHOD_INDEX = "GetMethodIndex";
+    static constexpr const char *GET_FIELD_INDEX = "GetFieldIndex";
+    static constexpr const char *GET_PROTO_INDEX = "GetProtoIndex";
+
+    static constexpr const char *ANNOTATION_DATA_ACCESSOR = "AnnotationDataAccessor";
+    static constexpr const char *CLASS_DATA_ACCESSOR = "ClassDataAccessor";
+    static constexpr const char *CODE_DATA_ACCESSOR = "CodeDataAccessor";
+    static constexpr const char *FIELD_DATA_ACCESSOR = "FieldDataAccessor";
+    static constexpr const char *GET_SPAN_FROM_ID = "GetSpanFromId";
+    
     ~File();
 
     NO_COPY_SEMANTIC(File);
