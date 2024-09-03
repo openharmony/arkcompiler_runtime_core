@@ -334,8 +334,7 @@ std::string AbcFile::GetStringByInst(const Inst &inst) const
         case InstType::DEFINEMETHOD_IMM8_ID16_IMM8:
         case InstType::DEFINEMETHOD_IMM16_ID16_IMM8:
         case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
-        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8:
-        case InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8: {
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
             uint32_t method_id = inst.GetImms()[1];
             return GetStringByMethodId(EntityId(method_id));
         }
@@ -719,8 +718,7 @@ void AbcFile::ExtractClassAndFunctionInfo(Function *func)
         auto type = inst.GetType();
         switch (type) {
             case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
-            case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8:
-            case InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8: {
+            case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
                 auto def_class = ResolveDefineClassWithBufferInst(func, inst);
                 AddDefinedClass(std::move(def_class));
                 break;
@@ -739,10 +737,6 @@ void AbcFile::ExtractClassAndFunctionInfo(Function *func)
                 ResolveDefineMethodInst(member_func, inst);
                 break;
             }
-            case InstType::CALLRUNTIME_CREATEPRIVATEPROPERTY_PREF_IMM16_ID16: {
-                ResolveDefineMethodWithBufferInst(func, inst);
-                break;
-            }
             default:
                 break;
         }
@@ -757,8 +751,7 @@ void AbcFile::ExtractMergedClassAndFunctionInfo(Function *func)
         auto type = inst.GetType();
         switch (type) {
             case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
-            case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8:
-            case InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8: {
+            case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
                 auto def_class = ResolveDefineClassWithBufferInst(func, inst);
                 AddMergedDefinedClass(std::move(def_class), record_name);
                 break;
@@ -777,10 +770,6 @@ void AbcFile::ExtractMergedClassAndFunctionInfo(Function *func)
                 ResolveDefineMethodInst(member_func, inst);
                 break;
             }
-            case InstType::CALLRUNTIME_CREATEPRIVATEPROPERTY_PREF_IMM16_ID16: {
-                ResolveDefineMethodWithBufferInst(func, inst);
-                break;
-            }
             default:
                 break;
         }
@@ -793,8 +782,7 @@ void AbcFile::ExtractClassInheritInfo(Function *func) const
     std::string record_name = func->GetRecordName();
     graph.VisitAllInstructions([&](const Inst &inst) {
         if (inst.GetType() != InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 &&
-            inst.GetType() != InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8 &&
-            inst.GetType() != InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8) {
+            inst.GetType() != InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
             return;
         }
 
@@ -1011,8 +999,7 @@ void AbcFile::AddExportListForMerge(const Function *func_main, const Inst &inst)
             break;
         }
         case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
-        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8:
-        case InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8: {
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
             Class *export_clazz = GetClassByNameImpl(record_name + GetStringByInst(st_module_input0));
             ASSERT(export_clazz != nullptr);
             if (merge_export_class_map_.find(record_name) == merge_export_class_map_.end()) {
@@ -1057,8 +1044,7 @@ void AbcFile::AddExportListForSingle(const Function *func_main, const Inst &inst
             break;
         }
         case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
-        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8:
-        case InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8: {
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
             Class *export_clazz = GetClassByNameImpl(GetStringByInst(st_module_input0));
             ASSERT(export_clazz != nullptr);
             export_class_list_.push_back(export_clazz);
@@ -1096,8 +1082,7 @@ ResolveResult AbcFile::ResolveInstCommon(Function *func, Inst inst) const
             return std::make_tuple(func, EMPTY_STR, ResolveType::FUNCTION_OBJECT);
         }
         case InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8:
-        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8:
-        case InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8: {
+        case InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8: {
             std::string class_name = record_name + GetStringByInst(inst);
             const Class *clazz = GetClassByName(class_name);
             ASSERT(clazz != nullptr);
@@ -1299,55 +1284,6 @@ std::unique_ptr<Class> AbcFile::ResolveDefineClassWithBufferInst(Function *func,
     return def_class;
 }
 
-void AbcFile::ResolveDefineMethodWithBufferInst(Function *func, const Inst &define_class_inst) const
-{
-    auto imms = define_class_inst.GetImms();
-    auto literal_array_id = EntityId(imms[1]);
-    std::string record_name = func->GetRecordName();
-
-    panda_file::LiteralDataAccessor lit_array_accessor(*panda_file_, panda_file_->GetLiteralArraysId());
-    lit_array_accessor.EnumerateLiteralVals(
-        literal_array_id, [&](const panda_file::LiteralDataAccessor::LiteralValue &value, const LiteralTag &tag) {
-            if (tag == LiteralTag::METHOD || tag == panda_file::LiteralTag::GETTER ||
-                tag == panda_file::LiteralTag::SETTER || tag == LiteralTag::GENERATORMETHOD ||
-                tag == LiteralTag::ASYNCGENERATORMETHOD) {
-                auto method_id = EntityId(std::get<uint32_t>(value));
-                std::string member_func_name = record_name + GetStringByMethodId(method_id);
-                Class *def_class = GetClassFromMemberFunctionName(member_func_name);
-                if (def_class == nullptr) {
-                    LOG(ERROR, DEFECT_SCAN_AUX) << "Unable to find class for private property '" <<
-                                                   member_func_name << "'";
-                    return;
-                }
-                HandleMemberFunctionFromClassBuf(member_func_name, func, def_class);
-            }
-        });
-}
-
-Class *AbcFile::GetClassFromMemberFunctionName(const std::string &member_func_name) const
-{
-    // The character > indicates the instance function scope of a class
-    // The character < indicates the static function scope of a class
-    size_t pos = member_func_name.find_first_of("><");
-    if (pos == std::string::npos) {
-        return nullptr;
-    }
-    std::string processed_name = member_func_name.substr(0, pos);
-    // Concatenate constructor prefixes
-    // The character = represents the constructor scope of a class
-    processed_name += '=';
-
-    std::vector<std::shared_ptr<Class>> class_list = GetClassList();
-    for (const auto &cls : class_list) {
-        const std::string &class_name = cls->GetClassName();
-        if (class_name.find(processed_name) == 0) {
-            return cls.get();
-        }
-    }
-
-    return nullptr;
-}
-
 std::unique_ptr<CalleeInfo> AbcFile::ResolveCallInstCommon(Function *func, const Inst &call_inst,
                                                            uint32_t func_obj_idx) const
 {
@@ -1419,8 +1355,7 @@ void AbcFile::ResolveDefineMethodInst(Function *member_func, const Inst &define_
         GetStringByInst(def_method_input0) == PROTOTYPE) {
         Inst ld_obj_input0 = def_method_input0.GetInputInsts()[0];
         if (ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM8_ID16_ID16_IMM16_V8 ||
-            ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8 ||
-            ld_obj_input0.GetType() == InstType::CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8) {
+            ld_obj_input0.GetType() == InstType::DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8) {
             auto clazz = GetClassByNameImpl(record_name + GetStringByInst(ld_obj_input0));
             if (clazz != nullptr) {
                 BuildClassAndMemberFuncRelation(clazz, member_func);

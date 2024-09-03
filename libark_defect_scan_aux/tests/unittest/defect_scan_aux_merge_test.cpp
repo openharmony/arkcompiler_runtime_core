@@ -96,43 +96,4 @@ HWTEST(DefectScanAuxMergeTest, AcrossAbcTest_1, testing::ext::TestSize.Level0)
     EXPECT_EQ(callee_info->GetClass(), abc_file->GetClassByName("Ldatabase;#~@0=#Database"));
     EXPECT_EQ(callee_info->GetCallee(), abc_file->GetFunctionByName("Ldatabase;#~@0>#addData"));
 }
-
-HWTEST(DefectScanAuxMergeTest, SendableClassMergeAbcTest, testing::ext::TestSize.Level0)
-{
-    std::string name = DEFECT_SCAN_AUX_TEST_MERGE_ABC_DIR "sendable_class_merge_abc_test.abc";
-    auto abc_file = panda::defect_scan_aux::AbcFile::Open(name);
-    ASSERT(abc_file != nullptr);
-
-    // base.func_main_0
-    auto f0 = abc_file->GetFunctionByName("Lbase;func_main_0");
-    size_t def_class_cnt = f0->GetDefinedClassCount();
-    EXPECT_EQ(def_class_cnt, 1U);
-    EXPECT_EQ(f0->GetDefinedClassByIndex(0)->GetClassName(), "Lbase;#~A=#A");
-
-    // check each defined class
-    // Lbase;#~A=#A
-    auto *class0 = abc_file->GetClassByName("Lbase;#~A=#A");
-    ASSERT_TRUE(class0->GetParentClass() == nullptr);
-    ASSERT_TRUE(class0->GetDefiningFunction() == f0);
-    EXPECT_EQ(class0->GetMemberFunctionByName("Lbase;#~A=#A"),
-              class0->GetMemberFunctionByIndex(0));
-    EXPECT_EQ(class0->GetMemberFunctionByName("Lbase;#~A>#add"),
-              class0->GetMemberFunctionByIndex(1));
-
-    // merge_test.func_main_0
-    auto f1 = abc_file->GetFunctionByName("Lmerge_test;func_main_0");
-    size_t def_class_cnt1  = f1->GetDefinedClassCount();
-    EXPECT_EQ(def_class_cnt1, 1U);
-    EXPECT_EQ(f1->GetDefinedClassByIndex(0)->GetClassName(), "Lmerge_test;#~B=#B");
-
-    // check each defined class
-    // Lmerge_test;#~B=#B
-    auto *class1 = abc_file->GetClassByName("Lmerge_test;#~B=#B");
-    ASSERT_TRUE(class1->GetParentClass() == nullptr);
-    ASSERT_TRUE(class1->GetDefiningFunction() == f1);
-    EXPECT_EQ(class1->GetMemberFunctionByName("Lmerge_test;#~B=#B"),
-              class1->GetMemberFunctionByIndex(0));
-    EXPECT_EQ(class1->GetMemberFunctionByName("Lmerge_test;#~B>#get"),
-              class1->GetMemberFunctionByIndex(1));
-}
 }  // namespace panda::defect_scan_aux::test
