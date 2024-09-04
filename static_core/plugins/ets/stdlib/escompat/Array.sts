@@ -325,6 +325,102 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return false
     }
 
+    private indexOfUndefined(fi: int, len: int): int {
+        for (let i = fi; i < len; i++) {
+            if (this.$_get_unsafe(i) instanceof undefined) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private indexOfNull(fi: int, len: int): int {
+        for (let i = fi; i < len; i++) {
+            if (this.$_get_unsafe(i) instanceof null) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private indexOfString(val: String, fi: int, len: int): int {
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof String) {
+                if (tmp == val) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private indexOfNumber(val: Number, fi: int, len: int): int {
+        const unboxedVal: number = val.valueOf()
+        if (isNaN(val)) {
+            return -1
+        }
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Number) {
+                if (unboxedVal == tmp.unboxed()) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private indexOfFloat(val: Float, fi: int, len: int): int {
+        const unboxedVal: float = val.unboxed()
+        if (isNaN(val)) {
+            return -1
+        }
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Float) {
+                if (unboxedVal == tmp.unboxed()) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private indexOfLong(val: Long, fi: int, len: int): int {
+        const unboxedVal: long = val.unboxed()
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Long) {
+                if (tmp == unboxedVal) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private indexOfInt(val: Int, fi: int, len: int): int {
+        const unboxedVal: int = val.unboxed()
+        for (let i = fi; i < len; i++) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Int) {
+                if (tmp == unboxedVal) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private indexOfCommon(val: T, fi: int, len: int): int {
+        for (let i = fi; i < len; i++) {
+            if (val == this.$_get_unsafe(i)) {
+                return i
+            }
+        }
+        return -1
+    }
     /**
      * Default comparison function for sort algorithm.
      * Objects are compared as string. Both objects are convereted to string
@@ -1919,12 +2015,24 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      */
     public indexOf(val: T, fromIndex: int): int {
         fromIndex = normalizeIndex(fromIndex, this.actualLength)
-        for (let i = fromIndex; i < this.actualLength; i++) {
-            if (__runtimeEquals(val, this.$_get_unsafe(i))) {
-                return i
-            }
+        const len = this.actualLength;
+        if (val instanceof String) {
+            return this.indexOfString(val, fromIndex, len)
+        } else if (val instanceof Number) {
+            return this.indexOfNumber(val, fromIndex, len)
+        } else if (val instanceof Float) {
+            return this.indexOfFloat(val, fromIndex, len)
+        } else if (val instanceof Long) {
+            return this.indexOfLong(val, fromIndex, len)
+        } else if (val instanceof Int) {
+            return this.indexOfInt(val, fromIndex, len)
+        } else if (__runtimeIsSameReference(val, undefined)) {
+            return this.indexOfUndefined(fromIndex, len)
+        } else if (val == null) {
+            return this.indexOfNull(fromIndex, len)
+        } else {
+            return this.indexOfCommon(val, fromIndex, len)
         }
-        return -1
     }
 
     /**
