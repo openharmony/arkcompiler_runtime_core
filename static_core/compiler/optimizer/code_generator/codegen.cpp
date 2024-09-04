@@ -2182,7 +2182,22 @@ void Codegen::VisitCallIndirect(CallIndirectInst *inst)
 void Codegen::VisitCall(CallInst *inst)
 {
     ASSERT(GetGraph()->GetRelocationHandler() != nullptr);
-    ASSERT(!HasLiveCallerSavedRegs(inst));
+
+    auto mode = GetGraph()->GetMode();
+    ASSERT(mode.IsFastPath() || mode.IsInterpreter() || mode.IsNative());
+    ASSERT(mode.IsFastPath() || !HasLiveCallerSavedRegs(inst));
+
+    RegMask callerRegs;
+    RegMask callerFpRegs;
+    auto dstReg = ConvertRegister(inst->GetDstReg(), inst->GetType());
+
+    if (mode.IsFastPath()) {
+        // irtoc fastpath needs to save all caller registers in case of call native function
+        callerRegs = GetCallerRegsMask(GetArch(), false);
+        callerFpRegs = GetCallerRegsMask(GetArch(), true);
+        GetEncoder()->SetRegister(&callerRegs, &callerFpRegs, dstReg, false);
+        SaveCallerRegisters(callerRegs, callerFpRegs, false);
+    }
 
     RelocationInfo relocation;
     relocation.data = inst->GetCallMethodId();
@@ -2190,9 +2205,12 @@ void Codegen::VisitCall(CallInst *inst)
     GetGraph()->GetRelocationHandler()->AddRelocation(relocation);
 
     if (inst->HasUsers()) {
-        auto dstReg = ConvertRegister(inst->GetDstReg(), inst->GetType());
         ASSERT(dstReg.IsValid());
         GetEncoder()->EncodeMov(dstReg, GetTarget().GetReturnReg(dstReg.GetType()));
+    }
+
+    if (mode.IsFastPath()) {
+        LoadCallerRegisters(callerRegs, callerFpRegs, false);
     }
 }
 
