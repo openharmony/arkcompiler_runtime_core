@@ -27,31 +27,43 @@ cases:
           }
       to:
           - type: '(p: A) => C'
+            init_value: '(p: A) => new C()'
             call: '(new A()) === c'
           - type: '(p: B) => C'
+            init_value: '(p: B) => new C()'
             call: '(new B()) === c'
           - type: '(p: C) => C'
+            init_value: '(p: C) => new C()'
             call: '(new C()) === c'
 
           - type: '(p: A) => B'
+            init_value: '(p: A) => new B()'
             call: '(new A()) === c'
           - type: '(p: B) => B'
+            init_value: '(p: B) => new B()'
             call: '(new B()) === c'
           - type: '(p: C) => B'
+            init_value: '(p: C) => new B()'
             call: '(new C()) === c'
 
           - type: '(p: A) => A'
+            init_value: '(p: A) => new A()'
             call: '(new A()) === c'
           - type: '(p: B) => A'
+            init_value: '(p: B) => new A()'
             call: '(new B()) === c'
           - type: '(p: C) => A'
+            init_value: '(p: C) => new A()'
             call: '(new C()) === c'
 
           - type: '(p: A) => Object'
+            init_value: '(p: A) => new Object()'
             call: '(new A()) === c'
           - type: '(p: B) => Object'
+            init_value: '(p: B) => new Object()'
             call: '(new B()) === c'
           - type: '(p: C) => Object'
+            init_value: '(p: C) => new Object()'
             call: '(new C()) === c'
 
     - decl: |-
@@ -67,18 +79,24 @@ cases:
           }
       to:
           - type: '(p: B) => B'
+            init_value: '(p: B) => new B()'
             call: '(new B()) === b'
           - type: '(p: C) => B'
+            init_value: '(p: C) => new B()'
             call: '(new C()) === b'
 
           - type: '(p: B) => A'
+            init_value: '(p: B) => new A()'
             call: '(new B()) === b'
           - type: '(p: C) => A'
+            init_value: '(p: C) => new A()'
             call: '(new C()) === b'
 
           - type: '(p: B) => Object'
+            init_value: '(p: B) => new Object()'
             call: '(new B()) === b'
           - type: '(p: C) => Object'
+            init_value: '(p: C) => new Object()'
             call: '(new C()) === b'
 
     - decl: |-
@@ -94,8 +112,10 @@ cases:
           }
       to:
           - type: '(p: C) => A'
+            init_value: '(p: C) => new A()'
             call: '(new C()) === a'
           - type: '(p: C) => Object'
+            init_value: '(p: C) => new Object()'
             call: '(new C()) === a'
 
     # interfaces
@@ -110,24 +130,33 @@ cases:
           }
       to:
           - type: '(p: I) => J'
+            init_value: '(p: I) => new A()'
             call: '(new A()) === a'
           - type: '(p: I) => I'
+            init_value: '(p: I) => new A()'
             call: '(new A()) === a'
           - type: '(p: I) => Object'
+            init_value: '(p: I) => new Object()'
             call: '(new A()) === a'
 
           - type: '(p: J) => J'
+            init_value: '(p: J) => new A()'
             call: '(new A()) === a'
           - type: '(p: J) => I'
+            init_value: '(p: J) => new A()'
             call: '(new A()) === a'
           - type: '(p: J) => Object'
+            init_value: '(p: J) => new Object()'
             call: '(new A()) === a'
 
           - type: '(p: A) => J'
+            init_value: '(p: A) => new A()'
             call: '(new A()) === a'
           - type: '(p: A) => I'
+            init_value: '(p: A) => new A()'
             call: '(new A()) === a'
           - type: '(p: A) => Object'
+            init_value: '(p: A) => new Object()'
             call: '(new A()) === a'
 
     # arrays
@@ -142,18 +171,24 @@ cases:
           }
       to:
           - type: '(p: A[]) => B[]'
+            init_value: '(p: A[]) => []'
             call: '(new A[1]) === b'
           - type: '(p: B[]) => B[]'
+            init_value: '(p: B[]) => []'
             call: '(new B[1]) === b'
 
           - type: '(p: A[]) => A[]'
+            init_value: '(p: A[]) => []'
             call: '(new A[1]) === b'
           - type: '(p: B[]) => A[]'
+            init_value: '(p: B[]) => []'
             call: '(new B[1]) === b'
 
           - type: '(p: A[]) => Object[]'
+            init_value: '(p: A[]) => []'
             call: '(new A[1]) === b'
           - type: '(p: B[]) => Object[]'
+            init_value: '(p: B[]) => []'
             call: '(new B[1]) === b'
 
     - decl: |-
@@ -167,8 +202,10 @@ cases:
           }
       to:
           - type: '(p: B[]) => A[]'
+            init_value: '(p: B[]) => []'
             call: '(new B[1]) === a'
           - type: '(p: B[]) => Object[]'
+            init_value: '(p: B[]) => []'
             call: '(new B[1]) === a'
 
     # functions
@@ -214,36 +251,51 @@ cases:
           }
       to:
           - type: '(p: T2) => T1'
+            init_value: '(p: T2) => ""'
             call: '(t2) as string == t1 as string'
           - type: '(p: T1) => T1'
+            init_value: '(p: T1) => ""'
             call: '(t1) as string == t1 as string'
           - type: '(p: String) => T1'
+            init_value: '(p: String) => ""'
             call: '("") as string == t1 as string'
           - type: '(p: Number) => T1'
+            init_value: '(p: Number) => ""'
             call: '(42.0) as string == t1 as string'
           - type: '(p: Boolean) => T1'
+            init_value: '(p: Boolean) => ""'
             call: '(false) as string == t1 as string'
 
           - type: '(p: T2) => T2'
+            init_value: '(p: T2) => ""'
             call: '(t2) as string == t1 as string'
           - type: '(p: T1) => T2'
+            init_value: '(p: T1) => ""'
             call: '(t1) as string == t1 as string'
           - type: '(p: String) => T2'
+            init_value: '(p: String) => ""'
             call: '("") as string == t1 as string'
           - type: '(p: Number) => T2'
+            init_value: '(p: Number) => ""'
             call: '(42.0) as string == t1 as string'
           - type: '(p: Boolean) => T2'
+            init_value: '(p: Boolean) => ""'
             call: '(false) as string == t1 as string'
 
           - type: '(p: T2) => Object'
+            init_value: '(p: T2) => ""'
             call: '(t2) as string == t1 as string'
           - type: '(p: T1) => Object'
+            init_value: '(p: T1) => ""'
             call: '(t1) as string == t1 as string'
           - type: '(p: String) => Object'
+            init_value: '(p: String) => ""'
             call: '("") as string == t1 as string'
           - type: '(p: Number) => Object'
+            init_value: '(p: Number) => ""'
             call: '(42.0) as string == t1 as string'
           - type: '(p: Boolean) => Object'
+            init_value: '(p: Boolean) => ""'
             call: '(false) as string == t1 as string'
 
     - decl: |-
@@ -256,17 +308,23 @@ cases:
           }
       to:
           - type: '(p: T1) => T2'
+            init_value: '(p: T1) => 0.0'
             call: '(t1) as number == t2 as number'
           - type: '(p: String) => T2'
+            init_value: '(p: String) => 0.0'
             call: '("") as number == t2 as number'
           - type: '(p: Boolean) => T2'
+            init_value: '(p: Boolean) => 0.0'
             call: '(true) as number == t2 as number'
 
           - type: '(p: T1) => Object'
+            init_value: '(p: T1) => 0.0'
             call: '(t1) as number == t2 as number'
           - type: '(p: String) => Object'
+            init_value: '(p: String) => 0.0'
             call: '("") as number == t2 as number'
           - type: '(p: Boolean) => Object'
+            init_value: '(p: Boolean) => 0.0'
             call: '(true) as number == t2 as number'
 
     # nullish
@@ -279,18 +337,24 @@ cases:
           }
       to:
           - type: '(p: number|null) => number'
+            init_value: '(p: number|null) => 0.0'
             call: '(t2) == t1'
           - type: '(p: number) => number'
+            init_value: '(p: number) => 0.0'
             call: '(t1) == t1'
 
           - type: '(p: number|null) => number|null'
+            init_value: '(p: number|null) => 0.0'
             call: '(t2) == t1'
           - type: '(p: number) => number|null'
+            init_value: '(p: number) => 0.0'
             call: '(t1) == t1'
 
           - type: '(p: number|null) => number|undefined'
+            init_value: '(p: number|null) => 0.0'
             call: '(t2) == t1'
           - type: '(p: number) => number|undefined'
+            init_value: '(p: number) => 0.0'
             call: '(t1) == t1'
 
     - decl: |-
@@ -302,18 +366,24 @@ cases:
           }
       to:
           - type: '(p: number|undefined) => number'
+            init_value: '(p: number|undefined) => 0.0'
             call: '(t2) == t1'
           - type: '(p: number) => number'
+            init_value: '(p: number) => 0.0'
             call: '(t1) == t1'
 
           - type: '(p: number|undefined) => number|undefined'
+            init_value: '(p: number|undefined) => 0.0'
             call: '(t2) == t1'
           - type: '(p: number) => number|undefined'
+            init_value: '(p: number) => 0.0'
             call: '(t1) == t1'
 
           - type: '(p: number|undefined) => number|null'
+            init_value: '(p: number|undefined) => 0.0'
             call: '(t2) == t1'
           - type: '(p: number) => number|null'
+            init_value: '(p: number) => 0.0'
             call: '(t1) == t1'
 
     # primitive
@@ -323,31 +393,43 @@ cases:
           }
       to:
           - type: '(p: Numeric) => float'
+            init_value: '(p: Numeric) => 0.0f'
             call: '(1) == 1.5f'
           - type: '(p: Floating) => float'
+            init_value: '(p: Floating) => 0.0f'
             call: '(1.0) == 1.5f'
           - type: '(p: float) => float'
+            init_value: '(p: float) => 0.0f'
             call: '(1f) == 1.5f'
 
           - type: '(p: Numeric) => Floating'
+            init_value: '(p: Numeric) => 0.0f'
             call: '(1) as Float == 1.5f'
           - type: '(p: Floating) => Floating'
+            init_value: '(p: Floating) => 0.0f'
             call: '(1.0) as Float == 1.5f'
           - type: '(p: float) => Floating'
+            init_value: '(p: float) => 0.0f'
             call: '(1f) as Float == 1.5f'
 
           - type: '(p: Numeric) => Numeric'
+            init_value: '(p: Numeric) => 0.0f'
             call: '(1) as Float == 1.5f'
           - type: '(p: Floating) => Numeric'
+            init_value: '(p: Floating) => 0.0f'
             call: '(1.0) as Float == 1.5f'
           - type: '(p: float) => Numeric'
+            init_value: '(p: float) => 0.0f'
             call: '(1f) as Float == 1.5f'
 
           - type: '(p: Numeric) => Object'
+            init_value: '(p: Numeric) => 0.0f'
             call: '(1) as Float == 1.5f'
           - type: '(p: Floating) => Object'
+            init_value: '(p: Floating) => 0.0f'
             call: '(1.0) as Float == 1.5f'
           - type: '(p: float) => Object'
+            init_value: '(p: float) => 0.0f'
             call: '(1f) as Float == 1.5f'
 
     - decl: |-
@@ -357,31 +439,43 @@ cases:
           }
       to:
           - type: '(p: Numeric) => byte'
+            init_value: '(p: Numeric) => 0'
             call: '(t1) == 127'
           - type: '(p: Integral) => byte'
+            init_value: '(p: Integral) => 0'
             call: '(t1) == 127'
           - type: '(p: Byte) => byte'
+            init_value: '(p: Byte) => 0'
             call: '(t1) == 127'
 
           - type: '(p: Numeric) => Integral'
+            init_value: '(p: Numeric) => 0'
             call: '(t1) as Byte == 127'
           - type: '(p: Integral) => Integral'
+            init_value: '(p: Integral) => 0'
             call: '(t1) as Byte == 127'
           - type: '(p: Byte) => Integral'
+            init_value: '(p: Byte) => 0'
             call: '(t1) as Byte == 127'
 
           - type: '(p: Numeric) => Numeric'
+            init_value: '(p: Numeric) => 0'
             call: '(t1) as Byte == 127'
           - type: '(p: Integral) => Numeric'
+            init_value: '(p: Integral) => 0'
             call: '(t1) as Byte == 127'
           - type: '(p: Byte) => Numeric'
+            init_value: '(p: Byte) => 0'
             call: '(t1) as Byte == 127'
 
           - type: '(p: Numeric) => Object'
+            init_value: '(p: Numeric) => 0'
             call: '(t1) as Byte == 127'
           - type: '(p: Integral) => Object'
+            init_value: '(p: Integral) => 0'
             call: '(t1) as Byte == 127'
           - type: '(p: Byte) => Object'
+            init_value: '(p: Byte) => 0'
             call: '(t1) as Byte == 127'
 
     # enums
@@ -392,6 +486,7 @@ cases:
           }
       to:
           - type: '(p: Color) => Object'
+            init_value: '(p: Color) => Color.Red'
             call: '(Color.Red) as Color == Color.Green'
 
     - decl: |-
@@ -401,6 +496,7 @@ cases:
           }
       to:
           - type: '(p: Color) => Color'
+            init_value: '(p: Color) => Color.Red'
             call: '(Color.Red) == Color.Green'
 
     # tuples
@@ -414,8 +510,10 @@ cases:
           }
       to:
           - type: '(p: [B, B]) => [B, B]'
+            init_value: '(p: [B, B]) => [new B(), new B()]'
             call: '(bb) === bb'
           - type: '(p: [B, B]) => Object'
+            init_value: '(p: [B, B]) => [new B(), new B()]'
             call: '(bb) as [B, B] === bb'
 
     - decl: |-
@@ -428,4 +526,5 @@ cases:
           }
       to:
           - type: '(p: [B, B]) => [B, B]'
+            init_value: '(p: [B, B]) => [new B(), new B()]'
             call: '(bb) === bb'

@@ -19,7 +19,7 @@ tags: [compile-only]
 ---*/
 
 class MyClass {
-  property: MyClass;
+  property: MyClass = {};
 }
   
 function main(): void {

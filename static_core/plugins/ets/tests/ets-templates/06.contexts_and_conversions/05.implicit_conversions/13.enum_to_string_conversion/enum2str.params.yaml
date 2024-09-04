@@ -67,9 +67,9 @@ cases:
     - decl: |-
           let s: string = "Z"
           class A {
-              fld1: string
-              fld2: string
-              fld3: string
+              fld1: string = ""
+              fld2: string = ""
+              fld3: string = ""
           }
       use: |-
           // assignment-like context, field assignment
@@ -109,7 +109,7 @@ cases:
     - decl: |-
           let s: string = "Z"
           class A {
-              fld: string
+              fld: string = ""
               constructor(p: string) {
                   this.fld = p
               }
@@ -131,7 +131,7 @@ cases:
     - decl: |-
           let s: string = "Z"
           class A {
-              fld: string
+              fld: string = ""
           }
       use: |-
           // composite object

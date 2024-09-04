@@ -13,6 +13,7 @@
 
 add_subdirectory(bouncing_peas)
 add_subdirectory(bouncing_pandas)
+add_subdirectory(default_import)
 add_subdirectory(export)
 add_subdirectory(export_with_alias)
 add_subdirectory(import_static_member)
@@ -21,3 +22,4 @@ add_subdirectory(recursive_import)
 add_subdirectory(import_external_overload)
 add_subdirectory(selective_export_with_alias)
 add_subdirectory(single_export)
+add_subdirectory(selective_re-export)

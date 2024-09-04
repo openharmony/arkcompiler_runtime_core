@@ -22,7 +22,7 @@ package pkg_a
 
 {{c.decl}}
 
-export function foo({{c.sig2}}): int {
+export function foo{{loop.index0}}({{c.sig2}}): int {
     return 2
 }
 {%- endfor %}

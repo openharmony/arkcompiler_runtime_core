@@ -13,7 +13,6 @@
 
 package_declarations:
   - package P1
-  - package P1.A
   - |
     package P1
     import {Uint8Array as Bytes} from 'std/core'

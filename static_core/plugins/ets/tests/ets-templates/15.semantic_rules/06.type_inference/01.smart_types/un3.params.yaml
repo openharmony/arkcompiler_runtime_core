@@ -71,7 +71,7 @@ cases:
     # object literal
     - decl: |-
           class A {
-              f: X
+            f: X = new X()
           }
       code: |-
           let v: Error|X|Int|Number|undefined = new Int()

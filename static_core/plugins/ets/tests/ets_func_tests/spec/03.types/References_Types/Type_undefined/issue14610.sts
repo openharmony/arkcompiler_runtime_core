@@ -25,7 +25,7 @@ class TestNode<T> {
 }
 
 class Tree<T> {
-    private current: TestNode<T>;
+    private current: TestNode<T> = new TestNode<T>();
     up(): void {
         let parent = this.current.parent
         this.current = parent!

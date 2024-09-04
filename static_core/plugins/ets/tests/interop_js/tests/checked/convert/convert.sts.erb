@@ -40,7 +40,7 @@ function create_null_obj(): EtsClass | null {
 }
 
 //! CHECKER      Test utility js method deepEqual
-//! RUN          entry: "test_deep_equal", options: "--compiler-enable-jit=false"
+//! # RUN          entry: "test_deep_equal", options: "--compiler-enable-jit=false"
 
 function js_set_object_for_equal(index: int, value: EtsClass | null): int {
     return js_set(index, value) as int;

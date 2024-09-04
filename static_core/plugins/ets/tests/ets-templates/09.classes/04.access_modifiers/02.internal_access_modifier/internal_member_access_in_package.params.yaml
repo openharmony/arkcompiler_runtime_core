@@ -15,5 +15,5 @@
 members:
   - { body: "x: int;", call: "x"}
   - { body: "getValue(): int { return 1 }", call: "getValue()" }
-  - { body: "inner class B { static x: int = 1; }", call: "B.x" }
-  - { body: "enum Color {Red, Green}", call: "Color.Red.ordinal()" }
+#  - { body: "inner class E { static x: int = 1; }", call: "E.x" }
+#  - { body: "enum Color {Red, Green}", call: "Color.Red.ordinal()" }

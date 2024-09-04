@@ -22,14 +22,18 @@ desc: >-
 {{c.decl}}
 
 function main() {
+    try {
 {% for t in c['to'] %}
-    let w{{loop.index}}: {{t.type}} = foo
-    assert w{{loop.index}}{{t.call}}
+        let w{{loop.index}}: {{t.type}} = foo
+        assert w{{loop.index}}{{t.call}}
 {% endfor %}
 
 {% for t in c['to'] %}
-    let q{{loop.index}}: {{t.type}} throws = foo
-    assert q{{loop.index}}{{t.call}}
+        let q{{loop.index}}: {{t.type}} throws = foo
+        assert q{{loop.index}}{{t.call}}
 {% endfor %}
+    } catch(e) {
+        assert(false)
+    }
 }
 {%- endfor %}

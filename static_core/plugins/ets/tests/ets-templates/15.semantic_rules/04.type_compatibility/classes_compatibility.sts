@@ -28,7 +28,7 @@ class A {
 }
 
 class B {
-    b: string;
+    b: string = "";
     constructor(a: number, b: string) {}
 }
 

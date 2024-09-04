@@ -20,7 +20,7 @@ desc: Field setter declaration with reference type.
 class A {}
 
 class B {
-  private _obj: A;
+  private _obj: A = new A();
 
   set obj(value: A) {
     this._obj = value;

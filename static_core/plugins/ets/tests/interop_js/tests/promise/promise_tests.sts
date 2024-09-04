@@ -144,7 +144,7 @@ function testRejectedPromise(): int {
 }
 
 class ThenBeforeResolveFixture {
-    public fn: (value: Object) => void;
+    public fn: (value: Object) => void = (value: Object) => {};
     public state = 0;
 }
 

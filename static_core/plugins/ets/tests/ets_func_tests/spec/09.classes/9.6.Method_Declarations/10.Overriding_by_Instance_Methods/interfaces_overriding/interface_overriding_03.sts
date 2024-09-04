@@ -28,7 +28,7 @@ interface AA extends A {
 }
 
 class B implements AA {
-  private value: string;
+  private value: string = "";
 
   foo(): string {
     this.value = "foo(): string"

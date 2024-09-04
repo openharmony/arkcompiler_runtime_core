@@ -20,8 +20,8 @@ files: ['./pkg_a/pkg_{{loop.index0}}.sts', './pkg_b/pkg_{{loop.index0}}.sts']
 tags: [{{c.tags}}]
 ---*/
 
-import { foo as foo_a } from './pkg_a/pkg_{{loop.index0}}.sts'
-import { foo as foo_b } from './pkg_b/pkg_{{loop.index0}}.sts'
+import { foo{{loop.index0}} as foo_a } from './pkg_a/pkg_{{loop.index0}}.sts'
+import { foo{{loop.index0}} as foo_b } from './pkg_b/pkg_{{loop.index0}}.sts'
 
 {{c.decl}}
 

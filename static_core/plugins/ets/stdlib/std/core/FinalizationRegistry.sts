@@ -17,14 +17,14 @@ package std.core;
 
 export final class FinalizationRegistry<T> {
 
-    private callbackWithArg: (value: T) => void;
-    private callbackWithoutArg: () => void;
+    private callbackWithArg: (value: T) => void = (value: T) => { return };
+    private callbackWithoutArg: () => void = () => { return };
     private isCallbackWithArg: boolean = true;
     // Can be changed to local trimplet class when it will be implemented
-    private obj_token_refs: (Object | null)[];
-    private callback_arguments: (T | null)[];
+    private obj_token_refs: (Object | null)[] = [];
+    private callback_arguments: (T | null)[] = [];
     // Contains chains of used and free trimplet indexes, [0] serves as uselist head
-    private idxarr: int[];
+    private idxarr: int[] = [];
     private freeidx: int = -1;
 
     private static readonly FIRST_SIZE = 32;

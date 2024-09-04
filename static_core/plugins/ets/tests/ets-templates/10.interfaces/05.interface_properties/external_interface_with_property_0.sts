@@ -22,7 +22,7 @@ files: ["./external_interface_with_property_1.sts"]
 import {I, D} from "./external_interface_with_property_1.sts"
 
 class C implements I {
-    text: string;
+    text: string = "";
     constructor() {
         this.text = "hello"
     }

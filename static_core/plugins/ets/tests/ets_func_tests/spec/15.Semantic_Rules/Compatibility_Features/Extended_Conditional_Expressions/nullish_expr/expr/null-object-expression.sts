@@ -20,7 +20,7 @@ tags: []
 
 
 class C1 {
-  attr: String;
+  attr: String = "";
 }
 
 function main() : int {

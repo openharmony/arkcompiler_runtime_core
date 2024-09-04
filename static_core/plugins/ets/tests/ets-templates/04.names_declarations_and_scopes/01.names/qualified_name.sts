@@ -21,7 +21,7 @@ params: {{qname}}
 
 package test;
 
-class Clazz {
+class Clazz{{loop.index0}} {
     static staticField: int = 1;
     static staticMethod(): int { return 2; }
 
@@ -29,9 +29,13 @@ class Clazz {
     method(): int { return 4; }
 }
 
-let instance: Clazz = new Clazz();
+let instance{{loop.index0}}: Clazz{{loop.index0}} = new Clazz{{loop.index0}}();
 
+{% if loop.last %}
 function main(): void {
-	  assert {{qname}}
+    {% for qname1 in qualified_name %}
+	assert {{qname1}}
+    {% endfor %}
 }
+{% endif %}
 {% endfor %}

@@ -29,10 +29,14 @@ class Z {
 }
 
 function main() {
-    let z: Z = new Z()
+    try {
+        let z: Z = new Z()
 {% for t in c['to'] %}
-    assert z.w{{loop.index}}{{t.call}}
-    assert z.q{{loop.index}}{{t.call}}
+        assert z.w{{loop.index}}{{t.call}}
+        assert z.q{{loop.index}}{{t.call}}
 {% endfor %}
+    } catch(e) {
+        assert(false)
+    }
 }
 {%- endfor %}

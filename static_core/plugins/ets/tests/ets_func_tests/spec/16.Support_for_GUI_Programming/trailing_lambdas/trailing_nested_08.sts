@@ -24,7 +24,7 @@ let global = 0
 
 class A {
   _width: int
-  _color: string
+  _color: string = ""
   __initializeStruct(): A {
     global++
     return this

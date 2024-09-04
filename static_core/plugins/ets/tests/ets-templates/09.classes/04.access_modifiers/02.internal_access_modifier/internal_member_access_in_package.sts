@@ -22,14 +22,18 @@ params: "{{member.body}}"
 
 package Test;
 
-class A {
+class D{{loop.index0}} {
   internal {{member.body}}
 }
 
+{% if loop.last %}
 function main(): void {
-  let instance: A = new A();
-
-  instance.{{member.call}};
+    let instance_A: A = new A(2, 3);
+    let instanc_A: A = new A(2);
+{% for member1 in members %}
+    let instance{{loop.index0}}: D{{loop.index0}} = new D{{loop.index0}}();
+    instance{{loop.index0}}.{{member1.call}};
+{% endfor %}
 }
-
+{% endif %}
 {% endfor %}

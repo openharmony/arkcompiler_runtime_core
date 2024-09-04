@@ -24,7 +24,7 @@ export interface PromiseLike<T> {
 }
 
 class PromiseSettledResultBase {
-    status: string;
+    status: string = "";
 }
 
 export class PromiseFulfilledResult<T> extends PromiseSettledResultBase {

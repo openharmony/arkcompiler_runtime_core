@@ -22,14 +22,18 @@ desc: >-
 {{c.decl}}
 
 function main() {
+    try {
 {% for t in c['to'] %}
-    let w{{loop.index}}: ({{t.type}})[] = [foo, foo]
-    w{{loop.index}} = [foo]
-    assert w{{loop.index}}[0]{{t.call}}
+        let w{{loop.index}}: ({{t.type}})[] = [foo, foo]
+        w{{loop.index}} = [foo]
+        assert w{{loop.index}}[0]{{t.call}}
 
-    let q{{loop.index}}: ({{t.type}} throws)[] = []
-    q{{loop.index}} = [foo, foo, foo]
-    assert q{{loop.index}}[2]{{t.call}}
+        let q{{loop.index}}: ({{t.type}} throws)[] = []
+        q{{loop.index}} = [foo, foo, foo]
+        assert q{{loop.index}}[2]{{t.call}}
 {% endfor %}
+    } catch (e) {
+        assert(false)
+    }
 }
 {%- endfor %}

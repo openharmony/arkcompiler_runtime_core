@@ -18,8 +18,8 @@ desc: Checking that two variables with the same expressions of the compound clas
 ---*/
 
 class Person {
-  height: Int;
-  age: Int;
+  height: Int = 0;
+  age: Int = 0;
 }
 
 function main(): void {

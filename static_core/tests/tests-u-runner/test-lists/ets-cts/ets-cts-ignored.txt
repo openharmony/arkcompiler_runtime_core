@@ -196,8 +196,6 @@
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_interface_access_in_package.sts
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_2.sts
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_3.sts
-09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_in_package_2.sts
-09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_in_package_3.sts
 09.classes/04.access_modifiers/03.protected_access_modifier/protected_interface_access_in_class.sts
 09.classes/04.access_modifiers/03.protected_access_modifier/protected_interface_access_in_derived_class.sts
 09.classes/04.access_modifiers/03.protected_access_modifier/protected_member_access_in_class_2.sts
@@ -992,6 +990,10 @@
 13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_6.sts
 13.compilation_units_packages_and_modules/09.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 
+# 18493
+13.compilation_units_packages_and_modules/08.top-level_declarations/bad_top_level_declarations_2.sts
+# end
+
 # 15095
 09.classes/06.method_declarations/hiding_by_class_methods/hiding_instance_static_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/hiding_methods_with_different_access_modifiers_2.sts
@@ -1533,11 +1535,8 @@
 # 6.5.9 Constant String to Character Conversions not yet supported
 06.contexts_and_conversions/05.implicit_conversions/09.constant_string_to_char_conversion/str2char_7.sts
 
-# 16304 Byte to char widening conversion issues
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_func/call-func_6.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/call_meth/call-meth_6.sts
+# 18550 [ArkTS frontend] es2panda aborts on implicit number conversion
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_var/decl-var_6.sts
 
 # enum cannot be assigned to type Object - not yet implemented
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/assn_var/assn-var_20.sts
@@ -1872,6 +1871,9 @@
 15.semantic_rules/06.type_inference/01.smart_types/un1_15.sts
 15.semantic_rules/06.type_inference/01.smart_types/un1_17.sts
 
+10.interfaces/05.interface_properties/external_interface_with_property_0.sts
+10.interfaces/05.interface_properties/external_interface_with_property_1.sts
+
 # 14673,16369, 14338 Function, method, constructor overload signatures
 15.semantic_rules/04.type_compatibility/classes_compatibility_2.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_compatible_signature_6.sts
@@ -2072,8 +2074,13 @@
 # es2panda: #18598 import type with the same name as not imported module entity
 13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_class_same_name_2.sts
 
-# es2panda: #18603 export entity as default, imported from another module as non-default 
+# es2panda: #18603 export entity as default, imported from another module as non-default
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_2.sts
 
 # test runner: #18046 Update compilation process with modules for AOT mode
 17.experimental_features/14.enumeration_methods/enum_type_methods_pipeline.sts
+
+# es2panda: #15667 Invalid tests, This cases should be allowed
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.sts
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_hided_method.sts
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_overrided_method.sts

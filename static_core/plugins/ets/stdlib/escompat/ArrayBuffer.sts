@@ -210,7 +210,7 @@ export class ArrayBuffer extends Buffer
  * Internal non-movable memory of a SharedArrayBuffer
  */
 class SharedMemory {
-    private data: byte[]
+    private data: byte[] = []
     private waiterPtr: long
 
     private constructor() {}

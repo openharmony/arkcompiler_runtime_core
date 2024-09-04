@@ -23,7 +23,7 @@ tags: []
 
 
 class CallMeTrinity {
-    name: String;
+    name: String = "";
 
     static instantiate(factory: () => CallMeTrinity, newName: String): CallMeTrinity {
         let x = factory();

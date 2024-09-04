@@ -17,9 +17,9 @@ package std.core;
 
 // TODO(shumilov-petr): Add runtime mirror
 export final class UnionCase {
-    private name: string
-    private typ: TypeDesc
-    private val: Object
+    private name: string = ""
+    private typ: TypeDesc = new TypeDesc()
+    private val: Object = new Object()
 
     private constructor () {}
 

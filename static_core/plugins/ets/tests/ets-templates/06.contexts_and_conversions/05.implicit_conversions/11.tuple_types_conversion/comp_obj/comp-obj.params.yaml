@@ -43,10 +43,10 @@ cases:
           let a: A = new A()
           let b: B = new B()
       values:
-          - { type: A, expr: "a", eq: "===" }
-          - { type: B, expr: "b", eq: "===" }
-          - { type: Object, expr: "a", eq: "===" }
-          - { type: Object, expr: "b", eq: "===" }
+          - { type: A, init_value: "new A()", expr: "a", eq: "===" }
+          - { type: B, init_value: "new B()", expr: "b", eq: "===" }
+          - { type: Object, init_value: "new Object()", expr: "a", eq: "===" }
+          - { type: Object, init_value: "new Object()", expr: "b", eq: "===" }
 
     - decl: |-
           interface I {}
@@ -56,10 +56,10 @@ cases:
           let i: I = new A()
           let j: J = new B()
       values:
-          - { type: I, expr: "i", eq: "===" }
-          - { type: J, expr: "j", eq: "===" }
-          - { type: Object, expr: "i", eq: "===" }
-          - { type: Object, expr: "j", eq: "===" }
+          - { type: I, init_value: "new A()", expr: "i", eq: "===" }
+          - { type: J, init_value: "new B()", expr: "j", eq: "===" }
+          - { type: Object, init_value: "new Object()", expr: "i", eq: "===" }
+          - { type: Object, init_value: "new Object()", expr: "j", eq: "===" }
 
     - decl: |-
           let byte_arr: byte[] = [-128]

@@ -23,7 +23,7 @@ desc: >-
 
 {% for t in c['to'] %}
 class Z{{loop.index}} {
-    fld: {{t.type}}
+    fld: {{t.type}} {%- if t.init_value is defined %} = {{t.init_value}}{%- endif %}
 }
 {% endfor %}
 

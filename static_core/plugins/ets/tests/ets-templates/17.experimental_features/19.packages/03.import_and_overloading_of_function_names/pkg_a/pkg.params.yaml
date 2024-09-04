@@ -22,10 +22,10 @@ cases:
     - sig2: 'p1: Int[], p2: Object, p3: int[]'
 
     # 3
-    - sig2: 'p1: A[], p2: Object[]'
+    - sig2: 'p1: A3[], p2: Object[]'
       decl: |-
-          export class A {}
-          export class B {}
+          export class A3 {}
+          export class B3 {}
 
     # 4
     - sig2: 'p1: [string, int], p2: [string, int]'
@@ -43,22 +43,22 @@ cases:
           export enum Size { S, M, L, XL }
 
     # 8
-    - sig2: 'p1: A, p2?: Object'
+    - sig2: 'p1: A8, p2?: Object'
       decl: |-
-          export class A {}
-          export class B {}
+          export class A8 {}
+          export class B8 {}
 
     # 9
-    - sig2: 'p1: B, p2?: B'
+    - sig2: 'p1: B9, p2?: B9'
       decl: |-
-          export class A {}
-          export class B {}
+          export class A9 {}
+          export class B9 {}
 
     # 10
-    - sig2: 'p1: B, p2: B = new B()'
+    - sig2: 'p1: B10, p2: B10 = new B10()'
       decl: |-
-          export class A {}
-          export class B {}
+          export class A10 {}
+          export class B10 {}
 
     # 11
     - sig2: '...p2: Boolean[]'
@@ -88,10 +88,10 @@ cases:
     - sig2: 'p1: number, p2: number'
 
     # 20
-    - sig2: 'p1: A, p2: A'
+    - sig2: 'p1: A20, p2: A20'
       decl: |-
-          export class A {}
-          export class B extends A {}
+          export class A20 {}
+          export class B20 extends A20 {}
 
     # 21
     - sig2: 'p1: boolean|string, p2: number|boolean, p3: string[]|number, p4: boolean[]|string[], p5: number[]|boolean[], p6: undefined|null|number[]'
@@ -100,13 +100,13 @@ cases:
     - sig2: 'p1: Int|null'
 
     # 23
-    - sig2: 'p1: B'
+    - sig2: 'p1: B23'
       decl: |-
-          export class A {
+          export class A23 {
               f1: int
               f2: int
           }
-          export class B {
+          export class B23 {
               f1: long
               f2: long
           }

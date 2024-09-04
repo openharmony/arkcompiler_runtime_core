@@ -1088,7 +1088,7 @@ function arg_reserve42(): string
 
 class StringBuilderHolder
 {
-    sb : StringBuilder
+    sb : StringBuilder = new StringBuilder()
 }
 let sb_holder = new StringBuilderHolder
 function store_reserve43() : string

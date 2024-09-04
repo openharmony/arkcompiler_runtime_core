@@ -15,6 +15,7 @@
 cases:
     - from_type: byte
       to_type: Byte
+      init_value: 0
       values:
           - { expr: 0 as byte, val: 0 }
           - { expr: 0x7F as byte, val: 127 }
@@ -22,6 +23,7 @@ cases:
 
     - from_type: byte
       to_type: Short
+      init_value: 0
       values:
           - { expr: 0 as byte, val: 0 }
           - { expr: 0x7F as byte, val: 127 }
@@ -29,6 +31,7 @@ cases:
 
     - from_type: short
       to_type: Short
+      init_value: 0
       values:
           - { expr: 0 as short, val: 0 }
           - { expr: 0x007F as short, val: 127 }
@@ -38,6 +41,7 @@ cases:
 
     - from_type: byte
       to_type: Int
+      init_value: 0
       values:
           - { expr: 0 as byte, val: 0 }
           - { expr: 0x7F as byte, val: 127 }
@@ -45,6 +49,7 @@ cases:
 
     - from_type: short
       to_type: Int
+      init_value: 0
       values:
           - { expr: 0 as short, val: 0 }
           - { expr: 0x007F as short, val: 127 }
@@ -54,6 +59,7 @@ cases:
 
     - from_type: int
       to_type: Int
+      init_value: 0
       values:
           - { expr: 0 as int, val: 0 }
           - { expr: 0x0000007F as int, val: 127 }
@@ -65,6 +71,7 @@ cases:
 
     - from_type: char
       to_type: Int
+      init_value: 0
       values:
           - { expr: "c'\\u0000'", val: 0 }
           - { expr: "c'\\u007F'", val: 127 }
@@ -74,6 +81,7 @@ cases:
 
     - from_type: byte
       to_type: Long
+      init_value: 0
       values:
           - { expr: 0 as byte, val: 0 }
           - { expr: 0x7F as byte, val: 127 }
@@ -81,6 +89,7 @@ cases:
 
     - from_type: short
       to_type: Long
+      init_value: 0
       values:
           - { expr: 0 as short, val: 0 }
           - { expr: 0x007F as short, val: 127 }
@@ -90,6 +99,7 @@ cases:
 
     - from_type: int
       to_type: Long
+      init_value: 0
       values:
           - { expr: 0 as int, val: 0 }
           - { expr: 0x0000007F as int, val: 127 }
@@ -101,6 +111,7 @@ cases:
 
     - from_type: long
       to_type: Long
+      init_value: 0
       values:
           - { expr: 0 as long, val: 0 }
           - { expr: 0x000000000000007F as long, val: 127 }
@@ -114,6 +125,7 @@ cases:
 
     - from_type: char
       to_type: Long
+      init_value: 0
       values:
           - { expr: "c'\\u0000'", val: 0 }
           - { expr: "c'\\u007F'", val: 127 }
@@ -123,6 +135,7 @@ cases:
 
     - from_type: byte
       to_type: Float
+      init_value: 0.0f
       values:
           - { expr: 0 as byte, val: 0.0 as float }
           - { expr: 0x7F as byte, val: 127.0 as float }
@@ -130,6 +143,7 @@ cases:
 
     - from_type: short
       to_type: Float
+      init_value: 0.0f
       values:
           - { expr: 0 as short, val: 0.0 as float }
           - { expr: 0x007F as short, val: 127.0 as float }
@@ -139,6 +153,7 @@ cases:
 
     - from_type: int
       to_type: Float
+      init_value: 0.0f
       values:
           - { expr: 0 as int, val: 0 }
           - { expr: 0x0000007F as int, val: 127.0 as float }
@@ -150,6 +165,7 @@ cases:
 
     - from_type: long
       to_type: Float
+      init_value: 0.0f
       values:
           - { expr: 0 as long, val: 0 }
           - { expr: 0x000000000000007F as long, val: 127.0 as float }
@@ -163,6 +179,7 @@ cases:
 
     - from_type: float
       to_type: Float
+      init_value: 0.0f
       values:
           - { expr: +0.0 as float, val: +0.0 as float }
           - { expr: -0.0 as float, val: -0.0 as float }
@@ -173,6 +190,7 @@ cases:
 
     - from_type: char
       to_type: Float
+      init_value: 0.0f
       values:
           - { expr: "c'\\u0000'", val: 0.0 as float }
           - { expr: "c'\\u007F'", val: 127.0 as float }
@@ -182,6 +200,7 @@ cases:
 
     - from_type: byte
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: 0 as byte, val: 0.0 }
           - { expr: 0x7F as byte, val: 127.0 }
@@ -189,6 +208,7 @@ cases:
 
     - from_type: short
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: 0 as short, val: 0.0 as double }
           - { expr: 0x007F as short, val: 127.0 as double }
@@ -198,6 +218,7 @@ cases:
 
     - from_type: int
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: 0 as int, val: 0.0 as double }
           - { expr: 0x0000007F as int, val: 127.0 as double }
@@ -209,6 +230,7 @@ cases:
 
     - from_type: long
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: 0 as long, val: 0 }
           - { expr: 0x000000000000007F as long, val: 127.0 as double }
@@ -222,6 +244,7 @@ cases:
 
     - from_type: float
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: +0.0 as float, val: +0.0 as double }
           - { expr: -0.0 as float, val: -0.0 as double }
@@ -232,6 +255,7 @@ cases:
 
     - from_type: double
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: '+0.0', val: +0.0 as double }
           - { expr: '-0.0', val: -0.0 as double }
@@ -242,6 +266,7 @@ cases:
 
     - from_type: char
       to_type: Double
+      init_value: 0.0
       values:
           - { expr: "c'\\u0000'", val: 0.0 as double }
           - { expr: "c'\\u007F'", val: 127.0 as double }
@@ -251,6 +276,7 @@ cases:
 
     - from_type: number
       to_type: Number
+      init_value: 0.0
       values:
           - { expr: '+0.0', val: +0.0 as number }
           - { expr: '-0.0', val: -0.0 as number }
@@ -261,6 +287,7 @@ cases:
 
     - from_type: byte
       to_type: Char
+      init_value: "c'\\0'"
       values:
           - { expr: 0 as byte, val: "c'\\u0000'" }
           - { expr: 127 as byte, val: "c'\\u007F'" }
@@ -268,6 +295,7 @@ cases:
 
     - from_type: char
       to_type: Char
+      init_value: "c'\\0'"
       values:
           - { expr: "c'\\u0000'", val: "c'\\u0000'" }
           - { expr: "c'\\u007F'", val: "c'\\u007F'" }
@@ -276,6 +304,7 @@ cases:
 
     - from_type: boolean
       to_type: Boolean
+      init_value: 'false'
       values:
           - { expr: '!true', val: 'false' }
           - { expr: '!false', val: 'true' }

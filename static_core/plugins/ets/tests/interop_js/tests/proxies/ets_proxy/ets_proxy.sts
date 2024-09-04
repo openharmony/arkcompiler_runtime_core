@@ -110,6 +110,7 @@ class PrimitivesAccessStatic {
 
 class UClass1 { };
 class UClass2 { };
+function foo(resolve: (value: Object) => void): void { resolve(new Object()); }
 
 class ReferencesAccess {
     public getfUClass1(): UClass1 { return this.fUClass1; }
@@ -128,13 +129,13 @@ class ReferencesAccess {
     public setfAString(v: String[]): void { this.fAString = v; }
     public setfAUClass1(v: UClass1[]): void { this.fAUClass1 = v; }
 
-    public fUClass1: UClass1;
-    public fUClass2: UClass2;
-    public fString: String;
-    public fJSValue: JSValue;
-    public fPromise: Promise<Object>;
-    public fAString: String[];
-    public fAUClass1: UClass1[];
+    public fUClass1: UClass1 = new UClass1();
+    public fUClass2: UClass2 = new UClass2();
+    public fString: String = new String();
+    public fJSValue: JSValue = '0' as JSValue;
+    public fPromise: Promise<Object> = new Promise<Object>(foo);
+    public fAString: String[] = [];
+    public fAUClass1: UClass1[] = [];
 };
 
 class ReferencesAccessStatic {
@@ -150,11 +151,11 @@ class ReferencesAccessStatic {
     public static setfJSValue(v: JSValue): void { ReferencesAccessStatic.fJSValue = v; }
     public static setfPromise(v: Promise<Object>): void { ReferencesAccessStatic.fPromise = v; }
 
-    public static fUClass1: UClass1;
-    public static fUClass2: UClass2;
-    public static fString: String;
-    public static fJSValue: JSValue;
-    public static fPromise: Promise<Object>;
+    public static fUClass1: UClass1 = new UClass1();
+    public static fUClass2: UClass2 = new UClass2();
+    public static fString: String = new String();
+    public static fJSValue: JSValue = '0' as JSValue;;
+    public static fPromise: Promise<Object> = new Promise<Object>(foo);
 };
 
 class FooBase {

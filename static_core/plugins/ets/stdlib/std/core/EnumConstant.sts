@@ -17,10 +17,10 @@ package std.core;
 
 // TODO(shumilov-petr): Add runtime mirror
 export final class EnumConstant {
-    private name: string
-    private typ: TypeDesc
+    private name: string = ""
+    private typ: TypeDesc = new TypeDesc()
     private intVal: int
-    private strVal: string
+    private strVal: string = ""
 
     private constructor () {}
 
