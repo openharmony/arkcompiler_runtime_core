@@ -69,7 +69,10 @@ class UtilASTChecker:
     def create_test_case(self, name: Optional[str], pattern_type: UtilASTChecker._TestType,
                          pattern: str, line: int, col: int, error_file: str = '') -> UtilASTChecker._TestCase:
         if pattern_type == UtilASTChecker._TestType.NODE:
-            pattern_parsed = json.loads(pattern)
+            try:
+                pattern_parsed = json.loads(pattern)
+            except json.JSONDecodeError as ex:
+                Log.exception_and_raise(_LOGGER, f'TestCase: {name}.\nThrows JSON error: {ex}.\nJSON data: {pattern}')
         else:
             pattern_parsed = {'error': pattern}
         return UtilASTChecker._TestCase(name, pattern_type, pattern_parsed, line, col, error_file=error_file)
