@@ -24,7 +24,7 @@ class CodeDataAccessor {
 public:
     class TryBlock {
     public:
-        explicit TryBlock(Span<const uint8_t> data);
+        PANDA_PUBLIC_API explicit TryBlock(Span<const uint8_t> data);
 
         ~TryBlock() = default;
 
@@ -73,7 +73,7 @@ public:
 
     class CatchBlock {
     public:
-        explicit CatchBlock(Span<const uint8_t> data);
+        PANDA_PUBLIC_API explicit CatchBlock(Span<const uint8_t> data);
 
         ~CatchBlock() = default;
 
@@ -108,7 +108,7 @@ public:
         size_t size_;
     };
 
-    CodeDataAccessor(const File &pandaFile, File::EntityId codeId);
+    PANDA_PUBLIC_API CodeDataAccessor(const File &pandaFile, File::EntityId codeId);
 
     ~CodeDataAccessor() = default;
 

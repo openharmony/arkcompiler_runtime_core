@@ -94,9 +94,10 @@ ohos_shared_library("arktsdisassembler") {
 
   external_deps = [ sdk_libc_secshared_ext_dep ]
 
-  output_extension = "so"
-  if (is_mingw) {
+  if (is_mingw || is_win) {
     output_extension = "dll"
+  } else {
+    output_extension = "so"
   }
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"

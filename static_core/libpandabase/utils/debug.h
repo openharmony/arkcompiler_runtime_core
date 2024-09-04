@@ -16,10 +16,12 @@
 #ifndef PANDA_DEBUG_H
 #define PANDA_DEBUG_H
 
+#include "libpandabase/macros.h"
+
 namespace ark::debug {
 
-[[noreturn]] __attribute__((visibility("default"))) void AssertionFail(const char *expr, const char *file,
-                                                                       unsigned line, const char *function);
+[[noreturn]] PANDA_PUBLIC_API void AssertionFail(const char *expr, const char *file, unsigned line,
+                                                 const char *function);
 
 #if defined(PANDA_TARGET_MOBILE) || defined(PANDA_TARGET_WINDOWS) || defined(PANDA_TARGET_OHOS)
 inline void PrintStackTrace([[maybe_unused]] int skip = 1) {}

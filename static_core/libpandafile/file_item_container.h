@@ -35,7 +35,7 @@ class ItemDeduper;
 
 class ItemContainer {
 public:
-    ItemContainer();
+    PANDA_PUBLIC_API ItemContainer();
     ~ItemContainer() = default;
     NO_COPY_SEMANTIC(ItemContainer);
     NO_MOVE_SEMANTIC(ItemContainer);
@@ -45,21 +45,21 @@ public:
         return "L_GLOBAL;";
     }
 
-    StringItem *GetOrCreateStringItem(const std::string &str);
+    PANDA_PUBLIC_API StringItem *GetOrCreateStringItem(const std::string &str);
 
-    LiteralArrayItem *GetOrCreateLiteralArrayItem(const std::string &id);
+    PANDA_PUBLIC_API LiteralArrayItem *GetOrCreateLiteralArrayItem(const std::string &id);
 
-    ClassItem *GetOrCreateClassItem(const std::string &str);
+    PANDA_PUBLIC_API ClassItem *GetOrCreateClassItem(const std::string &str);
 
-    ForeignClassItem *GetOrCreateForeignClassItem(const std::string &str);
+    PANDA_PUBLIC_API ForeignClassItem *GetOrCreateForeignClassItem(const std::string &str);
 
-    ScalarValueItem *GetOrCreateIntegerValueItem(uint32_t v);
+    PANDA_PUBLIC_API ScalarValueItem *GetOrCreateIntegerValueItem(uint32_t v);
 
-    ScalarValueItem *GetOrCreateLongValueItem(uint64_t v);
+    PANDA_PUBLIC_API ScalarValueItem *GetOrCreateLongValueItem(uint64_t v);
 
-    ScalarValueItem *GetOrCreateFloatValueItem(float v);
+    PANDA_PUBLIC_API ScalarValueItem *GetOrCreateFloatValueItem(float v);
 
-    ScalarValueItem *GetOrCreateDoubleValueItem(double v);
+    PANDA_PUBLIC_API ScalarValueItem *GetOrCreateDoubleValueItem(double v);
 
     ScalarValueItem *GetOrCreateIdValueItem(BaseItem *v);
 
@@ -68,13 +68,13 @@ public:
         return GetOrCreateClassItem(std::string(GetGlobalClassName()));
     }
 
-    ProtoItem *GetOrCreateProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params);
+    PANDA_PUBLIC_API ProtoItem *GetOrCreateProtoItem(TypeItem *retType, const std::vector<MethodParamItem> &params);
 
     PrimitiveTypeItem *GetOrCreatePrimitiveTypeItem(Type type);
 
-    PrimitiveTypeItem *GetOrCreatePrimitiveTypeItem(Type::TypeId type);
+    PANDA_PUBLIC_API PrimitiveTypeItem *GetOrCreatePrimitiveTypeItem(Type::TypeId type);
 
-    LineNumberProgramItem *CreateLineNumberProgramItem();
+    PANDA_PUBLIC_API LineNumberProgramItem *CreateLineNumberProgramItem();
 
     void IncRefLineNumberProgramItem(LineNumberProgramItem *it);
 
@@ -114,11 +114,11 @@ public:
         return ret;
     }
 
-    uint32_t ComputeLayout();
+    PANDA_PUBLIC_API uint32_t ComputeLayout();
 
-    bool Write(Writer *writer, bool deduplicateItems = true, bool computeLayout = true);
+    PANDA_PUBLIC_API bool Write(Writer *writer, bool deduplicateItems = true, bool computeLayout = true);
 
-    std::map<std::string, size_t> GetStat();
+    PANDA_PUBLIC_API std::map<std::string, size_t> GetStat();
 
     void DumpItemsStat(std::ostream &os) const;
 
@@ -187,7 +187,7 @@ public:
         return end_;
     }
 
-    void ReorderItems(ark::panda_file::pgo::ProfileOptimizer *profileOpt);
+    PANDA_PUBLIC_API void ReorderItems(ark::panda_file::pgo::ProfileOptimizer *profileOpt);
 
     void DeduplicateItems(bool computeLayout = true);
 
@@ -218,7 +218,7 @@ private:
         return itemsEnd_;
     }
 
-    class IndexItem : public BaseItem {
+    class PANDA_PUBLIC_API IndexItem : public BaseItem {
     public:
         IndexItem(IndexType type, size_t maxIndex) : type_(type), maxIndex_(maxIndex)
         {
@@ -235,7 +235,7 @@ private:
             return sizeof(uint32_t);
         }
 
-        bool Write(Writer *writer) override;
+        PANDA_PUBLIC_API bool Write(Writer *writer) override;
 
         ItemTypes GetItemType() const override;
 
@@ -403,7 +403,7 @@ private:
         std::vector<IndexItem *> indexes_;
     };
 
-    class RegionSectionItem : public BaseItem {
+    class PANDA_PUBLIC_API RegionSectionItem : public BaseItem {
     public:
         size_t Alignment() override
         {

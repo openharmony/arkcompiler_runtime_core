@@ -84,13 +84,13 @@ public:
     }
 
     /// Bind the label with the current place in the final bytecode.
-    void Bind(const Label &label);
+    PANDA_PUBLIC_API void Bind(const Label &label);
 
     /**
      * Generate mov <reg> <reg> instruction.
      * The method chooses appropriate instruction encoding.
      */
-    ErrorCode Build(std::vector<uint8_t> *output);
+    PANDA_PUBLIC_API ErrorCode Build(std::vector<uint8_t> *output);
 
 #include <bytecode_emitter_def_gen.h>
 

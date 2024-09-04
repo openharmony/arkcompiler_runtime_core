@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#include "macros.h"
+#include "libpandabase/macros.h"
 
 static napi_value GetSampleString(napi_env env, napi_callback_info info)
 {

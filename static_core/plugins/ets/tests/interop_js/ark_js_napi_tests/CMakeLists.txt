@@ -55,7 +55,7 @@ panda_ets_interop_js_plugin(sample_function
     SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/sample_function.cpp
 )
 panda_target_include_directories(sample_function
-    PUBLIC ${PANDA_ROOT}/libpandabase
+    PUBLIC ${PANDA_ROOT}/
 )
 
 add_ark_js_napi_interop_test(call_function_test MODULE sample_function)

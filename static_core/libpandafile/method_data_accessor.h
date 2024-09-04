@@ -33,7 +33,7 @@ public:
         STRING_DATA_END = FUNCTION_NAME
     };
 
-    MethodDataAccessor(const File &pandaFile, File::EntityId methodId);
+    PANDA_PUBLIC_API MethodDataAccessor(const File &pandaFile, File::EntityId methodId);
 
     ~MethodDataAccessor() = default;
 

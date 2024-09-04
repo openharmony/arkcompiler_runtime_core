@@ -24,7 +24,7 @@ set(COMPILER_SOURCES
   ${PANDA_ETS_PLUGIN_SOURCE}/compiler/ir_build_intrinsics_ets.cpp
 )
 
-if (NOT PANDA_TARGET_WINDOWS AND NOT PANDA_TARGET_MACOS)
+if (NOT PANDA_TARGET_MACOS)
   list(APPEND COMPILER_SOURCES
       ${PANDA_ETS_PLUGIN_SOURCE}/compiler/codegen_intrinsics_ets.cpp
   )

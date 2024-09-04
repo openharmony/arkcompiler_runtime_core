@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <vector>
+#include "macros.h"
 #include "unzip.h"
 #include "zip.h"
 
@@ -69,7 +70,7 @@ public:
 /*
  * Judge whether magic is zip magic.
  */
-bool IsZipMagic(uint32_t magic);
+PANDA_PUBLIC_API bool IsZipMagic(uint32_t magic);
 
 /*
  * Open a Zip archive from filename path, and sets handle for the file.
@@ -92,14 +93,14 @@ int CloseArchive(ZipArchiveHandle &handle);
  *
  * Returns 0 on success, and 1 on failure.
  */
-int OpenArchiveFile(ZipArchiveHandle &handle, FILE *fp);
+PANDA_PUBLIC_API int OpenArchiveFile(ZipArchiveHandle &handle, FILE *fp);
 
 /*
  * Close archive opened with OpenArchiveFile, releasing internal resources associated with it.
  *
  * Returns 0 on success, and 1 on failure.
  */
-int CloseArchiveFile(ZipArchiveHandle &handle);
+PANDA_PUBLIC_API int CloseArchiveFile(ZipArchiveHandle &handle);
 
 /*
  * Write info about the ZipFile in the *gstat structure.
@@ -121,7 +122,7 @@ int GoToNextFile(ZipArchiveHandle &handle);
  *
  * Returns 0 on success, and 1 on failure.
  */
-int LocateFile(ZipArchiveHandle &handle, const char *filename);
+PANDA_PUBLIC_API int LocateFile(ZipArchiveHandle &handle, const char *filename);
 
 /*
  * Get Info about the current file within ZipFile and write info into the *entry structure.
@@ -129,7 +130,7 @@ int LocateFile(ZipArchiveHandle &handle, const char *filename);
  *
  * Returns 0 on success, and 1 on failure.
  */
-int GetCurrentFileInfo(ZipArchiveHandle &handle, EntryFileStat *entry);
+PANDA_PUBLIC_API int GetCurrentFileInfo(ZipArchiveHandle &handle, EntryFileStat *entry);
 
 /*
  * Open for reading data the current file in the zipfile.
@@ -137,19 +138,19 @@ int GetCurrentFileInfo(ZipArchiveHandle &handle, EntryFileStat *entry);
  *
  * Returns 0 on success, and 1 on failure.
  */
-int OpenCurrentFile(ZipArchiveHandle &handle);
+PANDA_PUBLIC_API int OpenCurrentFile(ZipArchiveHandle &handle);
 
 /*
  * Get the current file offset opened with OpenCurrentFile. The offset will be stored into entry->offset.
  */
-void GetCurrentFileOffset(ZipArchiveHandle &handle, EntryFileStat *entry);
+PANDA_PUBLIC_API void GetCurrentFileOffset(ZipArchiveHandle &handle, EntryFileStat *entry);
 
 /*
  * Close the file in zip opened with unzOpenCurrentFile
  *
  * Returns 0 on success, and 1 on failure.
  */
-int CloseCurrentFile(ZipArchiveHandle &handle);
+PANDA_PUBLIC_API int CloseCurrentFile(ZipArchiveHandle &handle);
 
 /*
  * Uncompress a given zip archive represented with handle to buf of size |buf_size|.
@@ -157,7 +158,7 @@ int CloseCurrentFile(ZipArchiveHandle &handle);
  *
  * Returns 0 on success and 1 on failure.
  */
-int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t bufSize);
+PANDA_PUBLIC_API int ExtractToMemory(ZipArchiveHandle &handle, void *buf, size_t bufSize);
 
 /*
  * Add a new file filename(resident in memory pbuf which has size of size |buf_size|) to the archive zipname,

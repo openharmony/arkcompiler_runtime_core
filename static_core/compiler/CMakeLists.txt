@@ -243,7 +243,7 @@ set(COMPILER_SOURCES
         ${INST_BUILDER_GEN}
         ${IRTOC_IR_INLINE_GEN}
 )
-if (NOT PANDA_TARGET_WINDOWS AND NOT PANDA_TARGET_MACOS)
+if (NOT PANDA_TARGET_MACOS)
     list(APPEND COMPILER_SOURCES
         compile_method.cpp
         optimizer/code_generator/disassembly.cpp

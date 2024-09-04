@@ -345,7 +345,7 @@ public:
 
     void EncodeDynamicCast(Inst *inst, Reg dst, bool dstSigned, Reg src);
 
-    Reg ConvertInstTmpReg(const Inst *inst, DataType::Type type) const;
+    PANDA_PUBLIC_API Reg ConvertInstTmpReg(const Inst *inst, DataType::Type type) const;
     Reg ConvertInstTmpReg(const Inst *inst) const;
 
     bool OffsetFitReferenceTypeSize(uint64_t offset) const;
