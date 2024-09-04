@@ -17,72 +17,86 @@
 #ifdef __arm__
 
 // defined in libgcc_s.so
-extern "C" uint64_t __aeabi_uldivmod(uint64_t numerator, uint64_t denominator);
-extern "C" int64_t __aeabi_ldivmod(int64_t numerator, int64_t denominator);
 
-extern "C" uint32_t __aeabi_uidivmod(uint32_t numerator, uint32_t denominator);
-extern "C" int32_t __aeabi_idivmod(int32_t numerator, int32_t denominator);
+#define AeabiUldivmod __aeabi_uldivmod
+#define AeabiLdivmod __aeabi_ldivmod
+#define AeabiUidivmod __aeabi_uidivmod
+#define AeabiIdivmod __aeabi_idivmod
+#define AeabiL2f __aeabi_l2f
+#define AeabiUl2f __aeabi_ul2f
+#define AeabiL2d __aeabi_l2d
+#define AeabiUl2d __aeabi_ul2d
+#define AeabiF2lz __aeabi_f2lz
+#define AeabiF2ulz __aeabi_f2ulz
+#define AeabiD2lz __aeabi_d2lz
+#define AeabiD2ulz __aeabi_d2ulz
 
-extern "C" float __aeabi_l2f(int64_t data);
-extern "C" float __aeabi_ul2f(uint64_t data);
-extern "C" double __aeabi_l2d(int64_t data);
-extern "C" double __aeabi_ul2d(uint64_t data);
+extern "C" uint64_t AeabiUldivmod(uint64_t numerator, uint64_t denominator);
+extern "C" int64_t AeabiLdivmod(int64_t numerator, int64_t denominator);
 
-extern "C" int64_t __aeabi_f2lz(float data);
-extern "C" uint64_t __aeabi_f2ulz(float data);
-extern "C" int64_t __aeabi_d2lz(double data);
-extern "C" uint64_t __aeabi_d2ulz(double data);
+extern "C" uint32_t AeabiUidivmod(uint32_t numerator, uint32_t denominator);
+extern "C" int32_t AeabiIdivmod(int32_t numerator, int32_t denominator);
 
-#define AEABIuldivmod __aeabi_uldivmod // __aeabi_uldivmod returns two consecutive uint64_t
-#define AEABIldivmod __aeabi_ldivmod   // __aeabi_uldivmod returns two consecutive int64_t
+extern "C" float AeabiL2f(int64_t data);
+extern "C" float AeabiUl2f(uint64_t data);
+extern "C" double AeabiL2d(int64_t data);
+extern "C" double AeabiUl2d(uint64_t data);
+
+extern "C" int64_t AeabiF2lz(float data);
+extern "C" uint64_t AeabiF2ulz(float data);
+extern "C" int64_t AeabiD2lz(double data);
+extern "C" uint64_t AeabiD2ulz(double data);
+
+#define AEABIuldivmod __aeabi_uldivmod  // __aeabi_uldivmod returns two consecutive uint64_t
+#define AEABIldivmod __aeabi_ldivmod    // __aeabi_uldivmod returns two consecutive int64_t
 
 auto AEABIuidivmod(uint32_t numerator, uint32_t denominator)
 {
-    return __aeabi_uidivmod(numerator, denominator);
+    return AeabiUidivmod(numerator, denominator);
 }
 auto AEABIidivmod(int32_t numerator, int32_t denominator)
 {
-    return __aeabi_idivmod(numerator, denominator);
+    return AeabiIdivmod(numerator, denominator);
 }
 
 float AEABIl2f(int64_t data)
 {
-    return __aeabi_l2f(data);
+    return AeabiL2f(data);
 }
 
 float AEABIul2f(uint64_t data)
 {
-    return __aeabi_ul2f(data);
+    return AeabiUl2f(data);
 }
 
 double AEABIl2d(int64_t data)
 {
-    return __aeabi_l2d(data);
+    return AeabiL2d(data);
 }
 
 double AEABIul2d(uint64_t data)
 {
-    return __aeabi_ul2d(data);
+    return AeabiUl2d(data);
 }
 
 int64_t AEABIf2lz(float data)
 {
-    return __aeabi_f2lz(data);
+    return AeabiF2lz(data);
 }
 
 uint64_t AEABIf2ulz(float data)
 {
-    return __aeabi_f2ulz(data);
+    return AeabiF2ulz(data);
 }
 
 int64_t AEABId2lz(double data)
 {
-    return __aeabi_d2lz(data);
+    return AeabiD2lz(data);
 }
 
 uint64_t AEABId2ulz(double data)
 {
-    return __aeabi_d2ulz(data);
+    return AeabiD2ulz(data);
 }
 
 #else
