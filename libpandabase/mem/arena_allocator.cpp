@@ -33,7 +33,7 @@ ArenaAllocatorT<use_oom_handler>::ArenaAllocatorT(SpaceType space_type, BaseMemS
     ASSERT(!use_oom_handler);
     if (!ON_STACK_ALLOCATION_ENABLED) {
         arenas_ = PoolManager::AllocArena(DEFAULT_ARENA_SIZE, space_type_, AllocatorType::ARENA_ALLOCATOR, this);
-        ASSERT(arenas_ != nullptr);
+        CHECK_NOT_NULL(arenas_);
         AllocArenaMemStats(DEFAULT_ARENA_SIZE);
     }
 }
