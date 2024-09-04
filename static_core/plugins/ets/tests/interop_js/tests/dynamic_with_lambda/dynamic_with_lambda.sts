@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { A } from "/plugins/ets/tests/interop_js/tests/dynamic_with_lambda/dynamic_with_lambda.js"
+import { A } from "."
 
 function TestArgs0(): int {
     let a = new A();

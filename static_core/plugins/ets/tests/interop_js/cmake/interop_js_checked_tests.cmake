@@ -11,10 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(INTEROP_TESTS_GENERATED_DIR "${PANDA_BINARY_ROOT}/plugins/ets/tests/ets_interop_js/generated")
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/tests/checked/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/tests/checked/arktsconfig.in.json ${ETS_CONFIG})
+
+
+
 add_custom_target(ets_interop_js_checked_tests COMMENT "Run ets_interop_js checked tests")
 add_dependencies(ets_tests ets_interop_js_checked_tests)
 add_dependencies(ets_interop_tests ets_interop_js_checked_tests)
-set(ETS_CONFIG "${PANDA_BINARY_ROOT}/tests/ets_interop_js/arktsconfig.json")
 
 function(panda_ets_interop_js_checked_test)
     cmake_parse_arguments(ARG "" "FILE" "" ${ARGN})

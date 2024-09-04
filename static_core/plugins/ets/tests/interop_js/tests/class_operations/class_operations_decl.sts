@@ -14,13 +14,13 @@
  */
 
 import {
-	evaluateNumber,
-	ExampleClass,
-	ClassWithEmptyConstructor,
-	evaluateObject,
-	MyNamespace,
-	evaluateArray,
-} from '/plugins/ets/tests/interop_js/tests/number_subtypes/module';
+    evaluateNumber,
+    ExampleClass,
+    ClassWithEmptyConstructor,
+    evaluateObject,
+    MyNamespace,
+    evaluateArray
+} from "module"
 
 function jscallEmpty(): int {
 	evaluateNumber();

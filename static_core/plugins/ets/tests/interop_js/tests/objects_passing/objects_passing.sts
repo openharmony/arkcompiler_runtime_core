@@ -15,7 +15,21 @@
 
 // Pass ArkTS object to JS (wrapping) (ArkTS calls TS)
 
-import {updateObjectId, getOuterObj, testOuterObject, testSecondObjCls, testObjCls, testObject, getName, getDetails, changeName, getEdu, getObjectId, getId, getObjectName} from "/plugins/ets/tests/interop_js/tests/objects_passing/objects_passing.js"
+import {
+  updateObjectId,
+  getOuterObj,
+  testOuterObject,
+  testSecondObjCls,
+  testObjCls,
+  testObject,
+  getName,
+  getDetails,
+  changeName,
+  getEdu,
+  getObjectId,
+  getId
+  getObjectName
+  } from "js_import"
 
 //Test 1 Get public property
  function getPublicProperty():string{

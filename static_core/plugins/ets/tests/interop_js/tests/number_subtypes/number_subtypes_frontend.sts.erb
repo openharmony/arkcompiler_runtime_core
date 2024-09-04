@@ -17,7 +17,7 @@ import {
     evaluateNumber,
     ExampleClass,
     ClassWithEmptyConstructor
-} from "/plugins/ets/tests/interop_js/tests/number_subtypes/module.js"
+} from "module"
 
 % (@integral_primitives + @float_primitives).each do |primitive|
 //! CHECKER      jscall<%= primitive.getName.capitalize %> JIT

@@ -14,6 +14,21 @@
 
 include(cmake/ets_package.cmake)
 
+macro(SUBDIRLIST result curdir)
+    FILE(GLOB children ${curdir}/*)
+    SET(dirlist "")
+    FOREACH(child ${children})
+        get_filename_component(child_name ${child} NAME)
+        IF(IS_DIRECTORY ${child})
+                IF(${child_name} IN_LIST "${ARGN}")
+                ELSE()
+                    LIST(APPEND dirlist ${child})
+                ENDIF()
+        ENDIF()
+    ENDFOREACH()
+    SET(${result} ${dirlist})
+endmacro()
+
 if(PANDA_ETS_INTEROP_JS)
     include(cmake/interop_js_plugin.cmake)
 endif()

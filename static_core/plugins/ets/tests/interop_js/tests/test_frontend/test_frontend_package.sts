@@ -17,7 +17,7 @@ package Test;
 
 import {
     Car, foo, A
-} from "/plugins/ets/tests/interop_js/tests/test_frontend/test_frontend_package.js";
+} from ".";
 
 
 function test_newcall(): boolean {

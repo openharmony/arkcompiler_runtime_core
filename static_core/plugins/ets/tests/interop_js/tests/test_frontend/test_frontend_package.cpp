@@ -23,7 +23,7 @@ public:
     void SetUp() override
     {
         EtsInteropTest::SetUp();
-        LoadModuleAs("test_frontend", "test_frontend/test_frontend_package.js");
+        LoadModuleAs("test_frontend", "index.js");
     }
 };
 

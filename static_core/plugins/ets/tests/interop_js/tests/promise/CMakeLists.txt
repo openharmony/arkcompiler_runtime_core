@@ -103,8 +103,8 @@ panda_ets_interop_js_test(ets_interop_js_test_promise12
 )
 
 panda_ets_interop_js_test(ets_interop_js_test_await_promise
-    ETS_SOURCES ${INTEROP_JS_TESTS_SOURCE_DIR}/promise/promise_tests.sts
-    JS_LAUNCHER ${INTEROP_JS_TESTS_SOURCE_DIR}/promise/run_promise_test.js
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_promise_test.js
     LAUNCHER_ARGS "testAwaitPromise"
 )
 

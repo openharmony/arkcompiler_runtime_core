@@ -11,6 +11,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set(ETS_CONFIG ${CMAKE_CURRENT_BINARY_DIR}/arktsconfig.json)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/arktsconfig.in.json ${ETS_CONFIG})
+
 panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/example/strings.sts)
 panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/js_call/js_call.sts)
 panda_ets_interop_js_checked_test(FILE ${CMAKE_CURRENT_LIST_DIR}/obj_call/obj_call.sts)

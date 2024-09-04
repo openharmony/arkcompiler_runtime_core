@@ -61,9 +61,6 @@ export const testObject:TestObjectType = {
     id: 555
 };
 
-
-
-
 export function getName(obj: TestUserClass): string {
     return obj.name;
 }
@@ -80,7 +77,6 @@ export function changeName(obj: TestUserClass, name: string): Object {
 export function getEdu(obj: TestUserClass): string {
     return obj.education;
 }
-
 
 export function getId(obj: TestSecondClass): number {
     return obj.getProtectedId();
@@ -99,7 +95,7 @@ export const testSecondObjCls = new TestSecondClass('TestNameTwo', 40, 789, 'tes
 
 const testInnerObject = {'id': 123};
 
-export const testOuterObject = {'id':456, testInnerObject:t estInnerObject};
+export const testOuterObject = {'id':456, testInnerObject};
 
 export function getOuterObj(obj): Object {
     return obj.testInnerObject.id;

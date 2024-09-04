@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { etsUndefinedProduce, etsUndefinedConsume, etsNullProduce, etsNullConsume } from "/plugins/ets/tests/interop_js/tests/test_undefined/test_undefined.js"
+import { etsUndefinedProduce, etsUndefinedConsume, etsNullProduce, etsNullConsume } from "."
 
 function TestPassUndefinedToEts(): boolean {
     let a: NullishType = etsUndefinedProduce()
