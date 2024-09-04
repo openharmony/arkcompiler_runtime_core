@@ -15,8 +15,13 @@
 # limitations under the License.
 #
 
+from pathlib import Path
+
 from vmb.tool import ToolBase
 from vmb.unit import BenchUnit
+
+NODE_RUNNER = Path(__file__).parent.parent.parent\
+    .joinpath('templates', 'InteropRunner.js')
 
 
 class Tool(ToolBase):
@@ -24,6 +29,7 @@ class Tool(ToolBase):
     def __init__(self, *args):
         super().__init__(*args)
         panda_build = self.ensure_dir_env('PANDA_BUILD')
+        self.runner_script = self.ensure_file(NODE_RUNNER)
         # assuming PANDA_BUILD is PANDA_ROOT/build
         modules = self.ensure_dir(panda_build, 'lib', 'module')
         self.node = self.ensure_file(
@@ -34,6 +40,8 @@ class Tool(ToolBase):
         self.cmd = f'MODULE_PATH={modules} ' \
                    f'ARK_ETS_STDLIB_PATH={etsstdlib} ' \
                    'ARK_ETS_INTEROP_JS_GTEST_ABC_PATH={test_zip} ' \
+                   'VMB_BENCH_UNIT_NAME={name} ' \
+                   'VMB_BENCH_UNIT_ITERATIONS=10000 ' \
                    f'{self.node} {self.custom} ' \
                    '{test_js}'
 
@@ -48,7 +56,13 @@ class Tool(ToolBase):
 
     def exec(self, bu: BenchUnit) -> None:
         js = bu.src('.js')
+        if not js.is_file():
+            js = self.runner_script
         test_zip = bu.src('.zip')
-        res = self.x_run(self.cmd.format(test_zip=test_zip, test_js=js),
+        formatted_cmd = self.cmd.format(test_zip=test_zip,
+                                        test_js=js,
+                                        name=bu.name
+                                        )
+        res = self.x_run(formatted_cmd,
                          measure_time=True)
         bu.parse_run_output(res)

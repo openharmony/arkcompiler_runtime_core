@@ -262,13 +262,10 @@ Default place is `/data/local/tmp/vmb/v_8`.
 
 
 ## Interoperability tests:
-#### Freestyle
-Allows to write custom tests, i.e. without benchmark generation phase.
 
-```shell
-export PANDA_BUILD=$HOME/ark-built-with-interop/runtime_core/static_core/build
-vmb run -p arkts_node_interop_host -v trace ./examples/benchmarks-interop-freestyle/
-```
+#### Freestyle
+Please refer to [this manual](./interop.readme.md) for freestyle benchmark development and running guide.
+
 #### Doclet
 Allows use corpus of existing VMB tests in interop mode.
 Benchmarks are generated from sts [doclets](#doclet-format).

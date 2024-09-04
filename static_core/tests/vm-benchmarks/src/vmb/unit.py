@@ -118,11 +118,13 @@ class BenchUnit:
         # pylint: disable-next=protected-access
         self.result._ext_time = self.parse_ext_time(res.err)
 
-    def src(self, *ext) -> Path:
+    def src(self, *ext, die_on_zero_matches=False) -> Path:
         files = [f for f in self.path.glob(f'{BENCH_PREFIX}{self.name}*')
                  if (not ext or f.suffix in ext)]
-        if files:
+        if len(files) > 0:
             return files[0]
+        if die_on_zero_matches:
+            raise FileNotFoundError()
         # fallback: return unexistent
         return self.path.joinpath(f'{BENCH_PREFIX}{self.name}')
 
