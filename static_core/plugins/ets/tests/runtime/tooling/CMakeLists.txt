@@ -35,13 +35,13 @@ panda_ets_add_gtest(
 
 add_custom_target(es2panda_ets_stdlib_debug_info
     COMMAND ${es2panda_bin} --opt-level=0 --debug-info --gen-stdlib=true
-            --extension=sts --output ${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc
+            --extension=ets --output ${CMAKE_CURRENT_BINARY_DIR}/etsstdlib.abc
     DEPENDS ${es2panda_target}
 )
 
 add_custom_target(es2panda_convert_ets_debug_info
-    COMMAND ${es2panda_bin} --opt-level=0 --debug-info --gen-stdlib=false --extension=sts
-            --output ${CMAKE_CURRENT_BINARY_DIR}/BitopsBitwiseAnd.abc ${CMAKE_CURRENT_SOURCE_DIR}/BitopsBitwiseAnd.sts
+    COMMAND ${es2panda_bin} --opt-level=0 --debug-info --gen-stdlib=false --extension=ets
+            --output ${CMAKE_CURRENT_BINARY_DIR}/BitopsBitwiseAnd.abc ${CMAKE_CURRENT_SOURCE_DIR}/BitopsBitwiseAnd.ets
     DEPENDS es2panda_ets_stdlib_debug_info
 )
 add_dependencies(debug_info_tests_ets_gtests es2panda_convert_ets_debug_info)

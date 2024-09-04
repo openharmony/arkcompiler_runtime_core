@@ -343,7 +343,6 @@ if (!ark_standalone_build) {
   group("runtime_core_unittest") {
     testonly = true
     deps = [
-      "$ark_root/arkplatform/tests:unittest",
       "$ark_root/libpandabase/tests:unittest",
       "$ark_root/libpandafile/tests:unittest",
       "$ark_root/libziparchive/tests:unittest",
@@ -354,7 +353,6 @@ if (!ark_standalone_build) {
     testonly = true
     deps = [
       "$ark_root/abc2program/tests:host_unittest",
-      "$ark_root/arkplatform/tests:host_unittest",
       "$ark_root/assembler/tests:host_unittest",
       "$ark_root/bytecode_optimizer/tests:host_unittest",
       "$ark_root/compiler/tests:host_unittest",
@@ -376,15 +374,5 @@ if (!ark_standalone_build) {
   group("compiler_host_unittest") {
     testonly = true
     deps = [ "$ark_root/compiler/tests:host_unittest" ]
-  }
-
-  group("arkplatform_host_unittest") {
-    testonly = true
-    deps = [ "$ark_root/arkplatform/tests:host_unittest" ]
-  }
-
-  group("arkplatform_unittest") {
-    testonly = true
-    deps = [ "$ark_root/arkplatform/tests:unittest" ]
   }
 }

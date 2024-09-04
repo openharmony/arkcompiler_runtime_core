@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_gtest(ets_interop_js__setter_ets_to_ts
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/setter_ets.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/setter_ets.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/setter_ets.ets
 )

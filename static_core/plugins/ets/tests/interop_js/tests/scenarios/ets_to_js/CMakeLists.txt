@@ -13,5 +13,5 @@
 
 panda_ets_interop_js_gtest(ets_interop_js_test__scenarios
     CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.cpp
-    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.sts
+    ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/scenarios.ets
 )

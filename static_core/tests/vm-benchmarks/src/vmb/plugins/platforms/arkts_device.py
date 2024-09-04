@@ -65,7 +65,7 @@ class Platform(PlatformBase):
 
     @property
     def langs(self) -> List[str]:
-        return ['sts']
+        return ['ets']
 
     @property
     def gc_parcer(self) -> Optional[Type]:

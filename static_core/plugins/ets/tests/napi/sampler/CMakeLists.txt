@@ -37,7 +37,7 @@ else()
     set(aspt_converter_bin  $<TARGET_FILE:${aspt_converter_target}>)
 endif()
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
@@ -60,7 +60,7 @@ set(testing_dir "${CMAKE_CURRENT_BINARY_DIR}")
 
 # Compile Ets tests
 add_custom_target(sampler_etsnapi_es2panda
-    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerNapiTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerNapiTest.sts
+    COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/SamplerNapiTest.abc ${CMAKE_CURRENT_SOURCE_DIR}/SamplerNapiTest.ets
     WORKING_DIRECTORY "${testing_dir}"
     DEPENDS ${es2panda_target}
 )

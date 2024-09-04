@@ -115,8 +115,26 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::
     UpdateDefinitionAcc(intrinsic);
 }
 
-IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic(size_t pc, DataType::Type type)
+void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type)
 {
+    auto pc = GetPc(bcInst->GetAddress());
+    // Create SaveState instruction
+    auto saveState = CreateSaveState(Opcode::SaveState, pc);
+
+    // Create NullCheck instruction
+    auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
+
+    auto runtime = GetRuntime();
+    auto fieldIndex = bcInst->GetId(0).AsIndex();
+    auto fieldId = runtime->ResolveFieldIndex(GetMethod(), fieldIndex);
+    if (type != DataType::REFERENCE) {
+        type = runtime->GetFieldTypeById(GetMethod(), fieldId);
+    }
+
+    // Get a value to store
+    Inst *storeVal = nullptr;
+    storeVal = GetDefinitionAcc();
+
     RuntimeInterface::IntrinsicId id;
     switch (type) {
         case DataType::REFERENCE:
@@ -152,37 +170,17 @@ IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic(size_t pc, DataType::Type
             UNREACHABLE();
             break;
     }
-    auto *intrinsic = GetGraph()->CreateInstIntrinsic(DataType::VOID, pc, id);
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::VOID, pc, id);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3_I);
-    intrinsic->AddInputType(DataType::REFERENCE);
-    intrinsic->AddInputType(type);
-    intrinsic->AddInputType(DataType::NO_TYPE);
-    return intrinsic;
-}
 
-void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type)
-{
-    auto pc = GetPc(bcInst->GetAddress());
-    // Create SaveState instruction
-    auto saveState = CreateSaveState(Opcode::SaveState, pc);
-    // Create NullCheck instruction
-    auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
-
-    auto runtime = GetRuntime();
-    auto fieldIndex = bcInst->GetId(0).AsIndex();
-    auto fieldId = runtime->ResolveFieldIndex(GetMethod(), fieldIndex);
-    if (type != DataType::REFERENCE) {
-        type = runtime->GetFieldTypeById(GetMethod(), fieldId);
-    }
-
-    // Get a value to store
-    Inst *storeVal = nullptr;
-    storeVal = GetDefinitionAcc();
-
-    auto *intrinsic = CreateStObjByNameIntrinsic(pc, type);
     intrinsic->AppendInput(nullCheck);
+    intrinsic->AddInputType(DataType::REFERENCE);
+
     intrinsic->AppendInput(storeVal);
+    intrinsic->AddInputType(type);
+
     intrinsic->AppendInput(saveState);
+    intrinsic->AddInputType(DataType::NO_TYPE);
     intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
     intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
 

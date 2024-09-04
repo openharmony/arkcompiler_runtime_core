@@ -50,7 +50,7 @@ protected:
         seed_ = std::time(NULL);
 #else
         // NOLINTNEXTLINE(readability-magic-numbers)
-        seed_ = 123456U;
+        seed_ = 123456;
 #endif
         RuntimeOptions options;
         // NOLINTNEXTLINE(readability-magic-numbers)

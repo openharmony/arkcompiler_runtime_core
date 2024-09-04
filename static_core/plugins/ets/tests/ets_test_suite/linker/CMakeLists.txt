@@ -33,7 +33,7 @@ add_custom_target(ets_test_suite_linker)
 foreach(test ${linker_tests})
     set(test_out_dir "${linker_tests_out_dir}/${test}")
 
-    set(test_in "${linker_tests_in_dir}/${test}.sts")
+    set(test_in "${linker_tests_in_dir}/${test}.ets")
     set(target ets_test_suite_linker_${test})
 
     run_int_jit_aot_ets_code(${test_in} ${test_out_dir} ${target})
@@ -44,3 +44,4 @@ foreach(test ${linker_tests})
         add_dependencies(ets_test_suite_linker ${target}-ets-aot)
     endif()
 endforeach()
+

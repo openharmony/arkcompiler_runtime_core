@@ -471,7 +471,7 @@
     return <%= this_call.('slice') %>start, Int.MAX_VALUE as int);
 }
 
-<% if access_public == "export function" %><% #generate code for BuiltinArray.sts %>
+<% if access_public == "export function" %><% #generate code for BuiltinArray.ets %>
 /**
  * Returns the last index at which a given element can be found in the array,
  * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
@@ -520,7 +520,7 @@
 <%= access_public %> <%= override %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex?: Number): number {
     return <%= this_call.('lastIndexOf') %>element, asIntOrDefault(fromIndex, <%= this_len_int %> - 1));
 }
-<% else %><% #generate code for Array.sts %>
+<% else %><% #generate code for Array.ets %>
 /**
  * Returns the last index at which a given element can be found in the array,
  * or -1 if it is not present. The array is searched backwards, starting at fromIndex.

@@ -24,7 +24,7 @@ export class StringUtil {
     }
 
     randomString(size: number): string {
-        let s = '';
+        let s = "";
         for (let i = 0; i < size; i++) {
             s += String.fromCharCode((this.x * Math.random()) + this.y);
         }

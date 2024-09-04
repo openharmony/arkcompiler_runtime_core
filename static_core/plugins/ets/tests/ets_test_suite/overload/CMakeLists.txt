@@ -21,9 +21,10 @@ set(overload_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 foreach(test ${overload_tests})
     set(test_out_dir "${overload_tests_out_dir}/${test}")
 
-    set(test_src "${overload_tests_in_dir}/${test}.sts")
+    set(test_src "${overload_tests_in_dir}/${test}.ets")
     set(target ets_test_suite_overload_${test})
 
     run_ets_code_verifier(${test_src} ${test_out_dir} ${target}-ets-verifier)
     run_int_jit_aot_ets_code(${test_src} ${test_out_dir} ${target})
 endforeach()
+

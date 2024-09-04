@@ -15,5 +15,5 @@ panda_ets_native_add_gtest(ets_native_promise_test
     CPP_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/promise_test.cpp
     ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/promise_test.sts
+        ${CMAKE_CURRENT_SOURCE_DIR}/promise_test.ets
 )

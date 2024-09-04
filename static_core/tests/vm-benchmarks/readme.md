@@ -97,7 +97,7 @@ Defaults are:
 
 | platform      | langs      | sources         |
 |---------------|------------|-----------------|
-| `arkts_*`     | `ets`      | `*.sts`, `*.ts` |
+| `arkts_*`     | `ets`      | `*.ets`, `*.ts` |
 | `ark_js_vm_*` | `ts`       | `*.ts`          |
 | `swift_*`     | `swift`    | `*.swift`       |
 | `v_8_*`       | `ts`, `js` | `*.ts`, `*.js`  |
@@ -165,7 +165,7 @@ Supported doclets are:
 * `@State` on a root class which contains benchmarks tests as its methods.
 * `@Setup` on an initialization method of a state.
 * `@Benchmark` on a method that is measured.
-   It should not accept any parameters and
+   It should not accept any parameters and 
    (preferably) it may return a value which is consumed.
 * `@Param  p1 [, p2...]` on a state field.
    Attribute define values to create several benchmarks using same code,

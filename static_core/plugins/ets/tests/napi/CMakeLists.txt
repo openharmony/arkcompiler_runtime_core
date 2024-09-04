@@ -60,7 +60,7 @@ panda_target_include_directories(etsnapi_lib PRIVATE ${PANDA_ETS_PLUGIN_SOURCE}/
 
 add_custom_target(etsnapi_test_suite COMMENT "Running etsnapi tests")
 
-set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --opt-level=0)
+set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
 
 set(RUNTIME_ARGUMENTS
     --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
@@ -74,7 +74,7 @@ foreach(t ${ets_tests_list})
 
     # Compile Ets tests
     add_custom_target(es2panda_${t}
-        COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/${t}.abc ${CMAKE_CURRENT_SOURCE_DIR}/ets/${t}.sts
+        COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${testing_dir}/${t}.abc ${CMAKE_CURRENT_SOURCE_DIR}/ets/${t}.ets
         WORKING_DIRECTORY "${testing_dir}"
         DEPENDS ${es2panda_target}
     )
@@ -83,7 +83,7 @@ foreach(t ${ets_tests_list})
     else()
       add_dependencies(es2panda_${t} etsnapi_lib)
     endif()
-
+    
     # Run tests
     add_custom_target(etsnapi_run_${t}
         COMMAND LD_LIBRARY_PATH=${GEN_ETSNAPI_LIB_DIR} ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} ${testing_dir}/${t}.abc ETSGLOBAL::main

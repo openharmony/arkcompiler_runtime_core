@@ -378,7 +378,7 @@ void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
                                     return false);
                     } else {
                         if (regInfo.GetLocation() != VRegInfo::Location::CONSTANT) {
-                            HOOK_ASSERT(reg.GetLong() == (regInfo.GetIndex() + 100000000000L), return false);
+                            HOOK_ASSERT(reg.GetLong() == (regInfo.GetIndex() + 100000000000), return false);
                         }
                         regIndex++;
                     }

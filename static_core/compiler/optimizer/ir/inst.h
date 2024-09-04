@@ -1600,12 +1600,12 @@ public:
         vn_ = vn;
     }
     void Dump(std::ostream *out, bool newLine = true) const;
-    virtual bool DumpInputs(std::ostream *out) const;
-    virtual void DumpOpcode(std::ostream *out) const;
-    void DumpBytecode(std::ostream *out) const;
+    virtual bool DumpInputs(std::ostream * /* out */) const;
+    virtual void DumpOpcode(std::ostream * /* out */) const;
+    void DumpBytecode(std::ostream * /* out */) const;
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    void DumpSourceLine(std::ostream *out) const;
+    void DumpSourceLine(std::ostream * /* out */) const;
 #endif  // PANDA_COMPILER_DEBUG_INFO
 
     virtual void SetDstReg([[maybe_unused]] unsigned index, Register reg)
@@ -2594,7 +2594,7 @@ public:
     }
 
     void SetVnObject(VnObject *vnObj) override;
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     bool IsSafeInst() const override
     {
@@ -2632,7 +2632,7 @@ public:
     }
 
     void SetVnObject(VnObject *vnObj) override;
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
     Inst *Clone(const Graph *targetGraph) const override;
 };
 
@@ -2654,7 +2654,7 @@ public:
     }
 
     void SetVnObject(VnObject *vnObj) override;
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
     Inst *Clone(const Graph *targetGraph) const override;
 };
 
@@ -2915,7 +2915,7 @@ public:
         return GetField<StringCtorTypeField>();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3053,7 +3053,7 @@ public:
         ASSERT(index < GetInputsCount());
         return GetOperandsType();
     }
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
 
     void SetVnObject(VnObject *vnObj) override;
 
@@ -3514,7 +3514,7 @@ public:
         return Inst::GetDstLocation();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override;
 
@@ -3622,7 +3622,7 @@ public:
         sfType_ = type;
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
 #ifndef NDEBUG
     Inst *Clone(const Graph *targetGraph) const override
@@ -3670,7 +3670,7 @@ public:
     {
         argRefNumber_ = argRefNumber;
     }
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override;
 
@@ -3739,7 +3739,7 @@ public:
     /// Get input instruction corresponding to the given basic block, can't be null.
     Inst *GetPhiInput(BasicBlock *bb);
     Inst *GetPhiDataflowInput(BasicBlock *bb);
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
     void DumpOpcode(std::ostream *out) const override;
 
     // Get index of the given block in phi inputs
@@ -4168,7 +4168,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4218,7 +4218,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4272,7 +4272,7 @@ public:
         }
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4327,7 +4327,7 @@ public:
         }
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4355,7 +4355,7 @@ public:
         SetIsArray(isArray);
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4436,7 +4436,7 @@ public:
     ReturnInstI(Opcode opcode, uint64_t imm) : FixedInputsInst(opcode), ImmediateMixin(imm) {}
     ReturnInstI(Inst::Initializer t, uint64_t imm) : FixedInputsInst(std::move(t)), ImmediateMixin(imm) {}
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4500,7 +4500,7 @@ public:
         return DataType::REFERENCE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
 
 protected:
     using Exit = LastField::NextFlag;
@@ -4686,7 +4686,7 @@ public:
 
     void SetVnObject(VnObject *vnObj) override;
 
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4748,7 +4748,7 @@ public:
 
     void SetVnObject(VnObject *vnObj) override;
 
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4846,7 +4846,7 @@ public:
     }
 
     void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* unused */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5106,7 +5106,7 @@ public:
     }
 
     void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* unused */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5972,7 +5972,7 @@ public:
 
     void SetVnObject(VnObject *vnObj) override;
 
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
 
 private:
     uint64_t obj_ {0};
@@ -6074,7 +6074,7 @@ public:
         return GetOperandsType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
     void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -6113,8 +6113,8 @@ public:
         return GetOperandsType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
+    bool DumpInputs(std::ostream * /* unused */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6151,7 +6151,7 @@ public:
         return GetOperandsType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
 
     void SetVnObject(VnObject *vnObj) override;
 
@@ -6204,8 +6204,8 @@ public:
         return GetOperandsType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    void DumpOpcode(std::ostream * /* unused */) const override;
+    bool DumpInputs(std::ostream * /* unused */) const override;
     void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -6251,7 +6251,7 @@ public:
         return GetImm();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6322,7 +6322,7 @@ public:
         return 0;
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 };
 
 /// Load a pair of consecutive values from object
@@ -6434,7 +6434,7 @@ public:
         return clone;
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 };
 
 /// Store a pair of consecutive values to object
@@ -6510,7 +6510,7 @@ public:
     {
         return Inst::IsBarrier() || GetNeedBarrier();
     }
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6590,7 +6590,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    bool DumpInputs(std::ostream * /* out */) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {

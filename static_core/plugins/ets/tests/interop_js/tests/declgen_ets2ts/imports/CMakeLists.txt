@@ -23,8 +23,8 @@ create_declgen_ets2ts_test(imports
     JS_SOURCES
         ${CMAKE_CURRENT_SOURCE_DIR}/lib3.js
     ETS_SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib1.sts
-        ${CMAKE_CURRENT_SOURCE_DIR}/lib2.sts
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib1.ets
+        ${CMAKE_CURRENT_SOURCE_DIR}/lib2.ets
     DECLS_EXPECTED
         ${CMAKE_CURRENT_SOURCE_DIR}/lib1.expected
         ${CMAKE_CURRENT_SOURCE_DIR}/lib2.expected

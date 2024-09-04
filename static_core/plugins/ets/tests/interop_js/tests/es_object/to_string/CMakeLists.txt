@@ -13,6 +13,6 @@
 
 panda_ets_interop_js_gtest(ets_interop_js_test_to_string
         CPP_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_to_string_method.cpp
-        ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_to_string_method.sts
+        ETS_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/test_to_string_method.ets
         ETS_CONFIG ${ETS_CONFIG}
 )

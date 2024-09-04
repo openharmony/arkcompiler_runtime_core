@@ -21,8 +21,9 @@ set(union_tests_out_dir "${CMAKE_CURRENT_BINARY_DIR}")
 foreach(test ${union_tests})
     set(test_out_dir "${union_tests_out_dir}/${test}")
 
-    set(test_src "${union_tests_in_dir}/${test}.sts")
+    set(test_src "${union_tests_in_dir}/${test}.ets")
     set(target ets_test_suite_union_${test})
 
     run_ets_code_verifier(${test_src} ${test_out_dir} ${target}-ets-verifier)
 endforeach()
+

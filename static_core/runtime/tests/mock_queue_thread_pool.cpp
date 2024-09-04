@@ -134,7 +134,7 @@ public:
         // This is required to distribute tasks between different workers rather than solve it instantly
         // on only one worker.
         // NOLINTNEXTLINE(readability-magic-numbers)
-        std::this_thread::sleep_for(std::chrono::milliseconds(10U));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
         task.SetStatus(MockTask::COMPLETED);
         LOG(DEBUG, RUNTIME) << "Task " << task.GetId() << " has been solved";
         solvedTasks_++;
@@ -310,7 +310,7 @@ void TestThreadPoolWithControllers(size_t numberOfThreadsInitial, size_t numberO
             break;
         }
         // NOLINTNEXTLINE(readability-magic-numbers)
-        std::this_thread::sleep_for(std::chrono::milliseconds(10U));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
     controllerThreadPutTask1.join();
     controllerThreadPutTask2.join();

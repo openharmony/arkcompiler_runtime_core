@@ -96,24 +96,24 @@ static_core/plugins/ets/runtime/regexp/                                       @i
 static_core/plugins/ets/runtime/types/*atomic*                                @dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*promise*                               @dmitriitr @konstanting
 static_core/plugins/ets/runtime/types/*typeapi*                               @shumilov-petr
-static_core/plugins/ets/stdlib/escompat/Atomics.sts                           @dmitriitr @konstanting
+static_core/plugins/ets/stdlib/escompat/Atomics.ets                           @dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     @ivan-tyulyandin
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin
-static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr
+static_core/plugins/ets/tools/declgen_ts2ets/                                 @semenovaleksandr
 static_core/tests/tests-u-runner/tools/generate-es-checked/      @ivan-tyulyandin
-static_core/plugins/ets/stdlib/std/core/Coroutine.sts            @dmitriitr @konstanting
-static_core/plugins/ets/stdlib/std/core/EnumConstant.sts         @shumilov-petr
-static_core/plugins/ets/stdlib/std/core/Field.sts                @shumilov-petr
-static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.sts @dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/GC.sts                   @dmitriitr @udav
-static_core/plugins/ets/stdlib/std/core/Method.sts               @shumilov-petr
-static_core/plugins/ets/stdlib/std/core/Object.sts               @shumilov-petr
-static_core/plugins/ets/stdlib/std/core/Promise.sts              @dmitriitr @udav
+static_core/plugins/ets/stdlib/std/core/Coroutine.ets            @dmitriitr @konstanting
+static_core/plugins/ets/stdlib/std/core/EnumConstant.ets         @shumilov-petr
+static_core/plugins/ets/stdlib/std/core/Field.ets                @shumilov-petr
+static_core/plugins/ets/stdlib/std/core/FinalizationRegistry.ets @dmitriitr @udav
+static_core/plugins/ets/stdlib/std/core/GC.ets                   @dmitriitr @udav
+static_core/plugins/ets/stdlib/std/core/Method.ets               @shumilov-petr
+static_core/plugins/ets/stdlib/std/core/Object.ets               @shumilov-petr
+static_core/plugins/ets/stdlib/std/core/Promise.ets              @dmitriitr @udav
 static_core/plugins/ets/stdlib/std/core/Type*                    @shumilov-petr
-static_core/plugins/ets/stdlib/std/core/UnionCase.sts            @shumilov-petr
-static_core/plugins/ets/stdlib/std/core/Value.sts                @shumilov-petr
+static_core/plugins/ets/stdlib/std/core/UnionCase.ets            @shumilov-petr
+static_core/plugins/ets/stdlib/std/core/Value.ets                @shumilov-petr
 static_core/plugins/ets/tests/ets_func_tests/escompat/           @ivan-tyulyandin
 static_core/plugins/ets/tests/ets_func_tests/std/                @ivan-tyulyandin
 static_core/plugins/ets/tests/ets_test_suite/atomics/            @konstanting

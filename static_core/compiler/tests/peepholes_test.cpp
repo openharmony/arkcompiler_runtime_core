@@ -5895,39 +5895,38 @@ TEST_F(PeepholesTest, ConditionalAssignmentWrongConstants)
     }
 }
 
-SRC_GRAPH(ConditionalAssignmentsTwoBranches, Graph *graph, bool inverse)
-{
-    GRAPH(graph)
-    {
-        PARAMETER(0U, 0U).b();
-        CONSTANT(2U, 0x0U).s64();
-        CONSTANT(4U, 0x1U).s32();
-        CONSTANT(5U, 0x0U).s32();
-
-        BASIC_BLOCK(2U, 4U, 5U)
-        {
-            INST(1U, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0U, 2U);
-            INST(3U, Opcode::IfImm).SrcType(compiler::DataType::BOOL).CC(inverse ? CC_NE : CC_EQ).Imm(0U).Inputs(1U);
-        }
-
-        BASIC_BLOCK(4U, 6U) {}
-        BASIC_BLOCK(6U, 3U) {}
-
-        BASIC_BLOCK(5U, 3U) {}
-
-        BASIC_BLOCK(3U, -1L)
-        {
-            INST(6U, Opcode::Phi).b().Inputs(4U, 5U);
-            INST(7U, Opcode::Return).b().Inputs(6U);
-        }
-    }
-}
-
 TEST_F(PeepholesTest, ConditionalAssignmentsTwoBranches)
 {
     for (auto inverse : {true, false}) {
         auto graph = CreateEmptyBytecodeGraph();
-        src_graph::ConditionalAssignmentsTwoBranches::CREATE(graph, inverse);
+        GRAPH(graph)
+        {
+            PARAMETER(0U, 0U).b();
+            CONSTANT(2U, 0x0U).s64();
+            CONSTANT(4U, 0x1U).s32();
+            CONSTANT(5U, 0x0U).s32();
+
+            BASIC_BLOCK(2U, 4U, 5U)
+            {
+                INST(1U, Opcode::Compare).b().SrcType(DataType::BOOL).CC(CC_NE).Inputs(0U, 2U);
+                INST(3U, Opcode::IfImm)
+                    .SrcType(compiler::DataType::BOOL)
+                    .CC(inverse ? CC_NE : CC_EQ)
+                    .Imm(0U)
+                    .Inputs(1U);
+            }
+
+            BASIC_BLOCK(4U, 6U) {}
+            BASIC_BLOCK(6U, 3U) {}
+
+            BASIC_BLOCK(5U, 3U) {}
+
+            BASIC_BLOCK(3U, -1L)
+            {
+                INST(6U, Opcode::Phi).b().Inputs(4U, 5U);
+                INST(7U, Opcode::Return).b().Inputs(6U);
+            }
+        }
 
 #ifndef NDEBUG
         graph->SetLowLevelInstructionsEnabled();

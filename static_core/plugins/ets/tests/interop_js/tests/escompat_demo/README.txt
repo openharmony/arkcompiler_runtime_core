@@ -1,6 +1,6 @@
 Sources:
 main.js - entrypoint
-foo.sts / foo.ts - implementation / declaration of ets module
+foo.ets / foo.ts - implementation / declaration of ets module
 demo.ts - test app
 
 Build arkruntime:
@@ -26,8 +26,8 @@ test: five
 Demo:
 
 * out/main.js - launcher that initialises ArkTS VM and imports `demo`
-* demo.ts - test that uses functions and classes from `foo.sts`. It does following:
+* demo.ts - test that uses functions and classes from `foo.ets`. It does following:
     - Creates dynamic `Array` and passes it to static function `FooFunction`
     - Calls static function `BarFunction` that returns static `Array`
-* foo.sts - has definitions of `FooFunction` and `BarFunction`
-* foo.ts - file with TS declarations that can be generated from `foo.sts`
+* foo.ets - has definitions of `FooFunction` and `BarFunction`
+* foo.ts - file with TS declarations that can be generated from `foo.ets`
