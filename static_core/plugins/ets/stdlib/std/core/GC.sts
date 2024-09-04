@@ -38,6 +38,9 @@ export final class GC {
     public static readonly MIXED_CAUSE = 2;
     public static readonly FULL_CAUSE = 3;
 
+    public static readonly NOT_IN_PLACE_MODE: boolean = false;
+    public static readonly IN_PLACE_MODE: boolean = true;
+
     // Use class as static
     private constructor() {}
 
@@ -63,6 +66,8 @@ export final class GC {
      *
      * @param callback callback is called in concurrent phase
      *
+     * @param inPlaceMode run GC in place mode
+     *
      * @throws IllegalArgumentException if cause of GC is invalid or
      *         current GC does not support requested cause
      *
@@ -71,14 +76,16 @@ export final class GC {
      * - 0 in case the GC is executed in-place. It means there is no need to wait such GC
      * - -1 in case the task is canceled
      */
-    public static startGC(cause: int, callback: () => void): long throws {
-        return GC.startGCImpl(cause, callback as Object);
+    public static startGC(cause: int, callback: () => void, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long throws {
+        return GC.startGCImpl(cause, callback as Object, inPlaceMode);
     }
 
     /**
      * The function triggers specific GC
      *
      * @param cause cause of requested GC
+     *
+     * @param inPlaceMode run GC in place mode
      *
      * @throws IllegalArgumentException if cause of GC is invalid or
      *         current GC does not support requested cause
@@ -91,11 +98,11 @@ export final class GC {
      * - 0 in case the GC is executed in-place. It means there is no need to wait such GC
      * - -1 in case the task is canceled.
      */
-    public static startGC(cause: int): long throws {
-        return GC.startGCImpl(cause, null);
+    public static startGC(cause: int, inPlaceMode: boolean = GC.NOT_IN_PLACE_MODE): long throws {
+        return GC.startGCImpl(cause, null, inPlaceMode);
     }
-
-    private static native startGCImpl(cause: int, callback: Object | null): long throws;
+    
+    private static native startGCImpl(cause: int, callback: Object | null, runInPlace: boolean): long throws;
 
     /**
     * The function returns when the specified GC gets finished
