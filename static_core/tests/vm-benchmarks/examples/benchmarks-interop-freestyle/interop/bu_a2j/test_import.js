@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-exports.testFunction = () =>  {
+exports.testFunction = () => {
 	return Math.random() * Number.MAX_SAFE_INTEGER;
-}
+};
 
 function overloadReturnTypeByValueBoolean(x, y) {
-	return y == null ? x == 0 : x - y.length == 0;
-}
+	return y === null ? x === 0 : x - y.length === 0;
+};
 
-exports.overloadReturnTypeByValueBoolean = overloadReturnTypeByValueBoolean
+exports.overloadReturnTypeByValueBoolean = overloadReturnTypeByValueBoolean;
