@@ -29,18 +29,12 @@ public:
     const std::string &GetOutputFilePath() const;
 
 private:
-    bool ProcessArgs(int argc, const char **argv);
     void ConstructErrorMsg();
     void PrintErrorMsg() const;
     panda::PandArgParser pa_parser_;
     std::string input_file_path_;
     std::string output_file_path_;
     std::string error_msg_;
-    panda::PandArg<bool> *help_arg_ = nullptr;
-    panda::PandArg<bool> *debug_arg_ = nullptr;
-    panda::PandArg<std::string> *debug_file_arg_ = nullptr;
-    panda::PandArg<std::string> *input_file_arg_ = nullptr;
-    panda::PandArg<std::string> *output_file_arg_ = nullptr;
 };  // class Abc2ProgramOptions
 
 }  // namespace panda::abc2program
