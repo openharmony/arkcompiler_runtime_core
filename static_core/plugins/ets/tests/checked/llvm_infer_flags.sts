@@ -43,7 +43,7 @@ function simple(): int {
 }
 
 //! CHECKER        Will throw
-//! RUN_LLVM       options: "--llvm-options=--print-after=infer-flags --compiler-regex='.*willThrow'"
+//! RUN_LLVM       options: "--llvm-options=--print-after=runtime-calls-lowering --compiler-regex='.*willThrow'"
 //! READ_FILE      "console.out"
 //! LLVM_METHOD    /.*willThrow.*/
 //! INST_NEXT      /.*ArithmeticException.*/

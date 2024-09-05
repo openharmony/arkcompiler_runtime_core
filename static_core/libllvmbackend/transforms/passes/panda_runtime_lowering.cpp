@@ -60,14 +60,17 @@ llvm::PreservedAnalyses PandaRuntimeLowering::run(llvm::Function &function, llvm
         }
         for (auto call : calls) {
             auto callee = call->getCalledFunction();
-            ASSERT(callee != nullptr && !callee->isIntrinsic());
+            ASSERT((callee != nullptr && !callee->isIntrinsic()) ||
+                   callee->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize);
 
             // LLVM is able to process pure recursive calls, but they may confuse StackWalker after deoptimization
             if (callee == &function && !hasDeopt) {
                 continue;
             }
 
-            if (callee->getSectionPrefix() && callee->getSectionPrefix()->equals(builtins::BUILTIN_SECTION)) {
+            if (callee->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize) {
+                LowerDeoptimizeIntrinsic(call);
+            } else if (callee->getSectionPrefix() && callee->getSectionPrefix()->equals(builtins::BUILTIN_SECTION)) {
                 LowerBuiltin(call);
             } else if (arkInterface_->IsRememberedCall(&function, callee)) {
                 LowerCallStatic(call);
@@ -150,12 +153,52 @@ void PandaRuntimeLowering::LowerBuiltin(llvm::CallInst *inst)
 bool PandaRuntimeLowering::NeedsToBeLowered(llvm::CallInst *call)
 {
     auto callee = call->getCalledFunction();
-    if (callee == nullptr || callee->isIntrinsic()) {
+    if (callee == nullptr ||
+        (callee->isIntrinsic() && callee->getIntrinsicID() != llvm::Intrinsic::experimental_deoptimize)) {
         return false;
     }
     ASSERT((callee->getSectionPrefix() && callee->getSectionPrefix()->equals(builtins::BUILTIN_SECTION)) ||
-           arkInterface_->IsRememberedCall(call->getCaller(), callee) || call->hasFnAttr("original-method-id"));
+           arkInterface_->IsRememberedCall(call->getCaller(), callee) || call->hasFnAttr("original-method-id") ||
+           call->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize);
     return true;
+}
+
+void PandaRuntimeLowering::LowerDeoptimizeIntrinsic(llvm::CallInst *deoptimize)
+{
+    ASSERT(deoptimize->getIntrinsicID() == llvm::Intrinsic::experimental_deoptimize);
+
+    llvm::IRBuilder<> builder {deoptimize};
+    ASSERT(deoptimize->arg_size() > 0);
+
+    // The last argument is the entrypoint id
+    llvm::Value *entrypointIdValue = deoptimize->getArgOperand(deoptimize->arg_size() - 1U);
+    uint64_t entrypointId = llvm::cast<llvm::ConstantInt>(entrypointIdValue)->getZExtValue();
+
+    // Drop last argument
+    llvm::SmallVector<llvm::Value *> args;
+    for (auto &arg : llvm::drop_end(deoptimize->args())) {
+        args.push_back(arg.get());
+    }
+
+    auto entrypointCall = llvmbackend::runtime_calls::CreateEntrypointCallCommon(
+        &builder, runtime_calls::GetThreadRegValue(&builder, arkInterface_), arkInterface_,
+        static_cast<llvmbackend::runtime_calls::EntrypointId>(entrypointId), args, utils::CopyDeoptBundle(deoptimize));
+    // Copy attributes
+    entrypointCall->setDebugLoc(deoptimize->getDebugLoc());
+
+    // Remove return after llvm.experimental.deoptimize call
+    auto basicBlock = entrypointCall->getParent();
+    auto terminator = basicBlock->getTerminator();
+    ASSERT(llvm::isa<llvm::ReturnInst>(terminator));
+    terminator->eraseFromParent();
+
+    // Erase the llvm.experimental.deoptimize call
+    ASSERT(deoptimize->getNumUses() == 0);
+    deoptimize->eraseFromParent();
+
+    // Create unreachable instead of removed return
+    builder.SetInsertPoint(basicBlock);
+    builder.CreateUnreachable();
 }
 
 }  // namespace ark::llvmbackend::passes

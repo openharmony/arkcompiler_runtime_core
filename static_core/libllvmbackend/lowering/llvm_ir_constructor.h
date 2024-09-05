@@ -158,6 +158,8 @@ private:
     void CreateLaunchCall([[maybe_unused]] CallInst *callInst);
     void CreateDeoptimizationBranch(Inst *inst, llvm::Value *deoptimize, RuntimeInterface::EntrypointId exception,
                                     llvm::ArrayRef<llvm::Value *> arguments = llvm::None);
+    llvm::CallInst *CreateDeoptimizeCall(Inst *inst, llvm::ArrayRef<llvm::Value *> arguments,
+                                         RuntimeInterface::EntrypointId exception);
     ArenaVector<llvm::OperandBundleDef> CreateSaveStateBundle(Inst *inst, bool noReturn = false);
     void EncodeSaveStateInputs(ArenaVector<llvm::Value *> *vals, SaveStateInst *ss);
     void EncodeInlineInfo(Inst *inst, llvm::Instruction *instruction);
@@ -166,6 +168,7 @@ private:
     llvm::Value *CreateMemoryFence(memory_order::Order order);
     llvm::Value *CreateCondition(ConditionCode cc, llvm::Value *x, llvm::Value *y);
     void CreateIf(Inst *inst, llvm::Value *cond, bool likely, bool unlikely);
+    llvm::Value *CreateReturn(llvm::Value *value);
     llvm::CallInst *CreateTailCallFastPath(Inst *inst);
     llvm::CallInst *CreateTailCallInterpreter(Inst *inst);
     template <uint32_t VECTOR_SIZE>

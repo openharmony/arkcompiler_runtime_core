@@ -23,11 +23,10 @@
 
 namespace ark::llvmbackend {
 
-constexpr llvm::StringRef RO_DATA_SECTION_PREFIX {".ro"};
+constexpr llvm::StringRef RO_DATA_SECTION_PREFIX {".rodata"};
 constexpr llvm::StringRef TEXT_SECTION_PREFIX {".text."};
 constexpr llvm::StringRef AOT_GOT_SECTION {".aot_got"};
 constexpr llvm::StringRef RELA_LLVM_STACKMAPS_SECTION {".rela.llvm_stackmaps"};
-constexpr llvm::StringRef LLVM_STACKMAPS_SECTION {".llvm_stackmaps"};
 
 class SectionReference {
 public:
@@ -67,8 +66,6 @@ private:
 
 class CreatedObjectFile {
 public:
-    using ObjectFilePostProcessor = std::function<void(llvm::object::ObjectFile *)>;
-
     struct StackMapSymbol {
         uint64_t idx;
         uint64_t sectionOffset;
