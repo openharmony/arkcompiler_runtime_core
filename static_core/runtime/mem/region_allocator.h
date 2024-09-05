@@ -288,10 +288,18 @@ public:
     template <RegionFlag REGIONS_TYPE_FROM, RegionFlag REGIONS_TYPE_TO, bool USE_MARKED_BITMAP = false>
     void CompactSpecificRegion(Region *regions, const GCObjectVisitor &deathChecker,
                                const ObjectVisitorEx &moveHandler);
-
-    template <bool USE_MARKED_BITMAP = false>
-    void PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker,
-                            const ObjectVisitor &aliveObjectsHandler);
+    /**
+     * Promote region and return a counter of moved alive objects during MixedGC if use_marked_bitmap == true, or 0 in
+     * any other case scenarios.
+     * @tparam use_marked_bitmap - if we need to use marked_bitmap from the regions or not.
+     * @tparam full_gc - check it's FullGC or MixedGC.
+     * @param region - region needed to proceed.
+     * @param death_checker - checker what will return objects status for iterated object.
+     * @param alive_objects_handler - called for every alive object.
+     */
+    template <bool USE_MARKED_BITMAP = false, bool FULL_GC = false>
+    size_t PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker,
+                              const ObjectVisitor &aliveObjectsHandler);
 
     /**
      * Reset all regions with type /param regions_type.

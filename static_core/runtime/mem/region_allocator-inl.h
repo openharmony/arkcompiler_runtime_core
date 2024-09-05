@@ -506,22 +506,28 @@ void RegionAllocator<AllocConfigT, LockConfigT>::ReleaseReservedRegion()
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-template <bool USE_MARKED_BITMAP>
-void RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *region, const GCObjectVisitor &deathChecker,
-                                                                    const ObjectVisitor &aliveObjectsHandler)
+template <bool USE_MARKED_BITMAP, bool FULL_GC>
+size_t RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *region,
+                                                                      const GCObjectVisitor &deathChecker,
+                                                                      const ObjectVisitor &aliveObjectsHandler)
 {
     ASSERT(region->HasFlag(RegionFlag::IS_EDEN));
+    size_t aliveMoveCount = 0;
     // We should create live bitmap here and copy alive object in marked bitmap to it
     region->CreateLiveBitmap();
     region->CloneMarkBitmapToLiveBitmap();
-    auto visitor = [&aliveObjectsHandler, &region](ObjectHeader *object) {
+    [[maybe_unused]] auto visitor = [&aliveObjectsHandler, &region](ObjectHeader *object) {
         aliveObjectsHandler(object);
         region->IncreaseAllocatedObjects();
     };
     // NOLINTNEXTLINE(readability-braces-around-statements)
     if constexpr (USE_MARKED_BITMAP) {
-        region->GetMarkBitmap()->IterateOverMarkedChunks(
-            [&visitor](void *objectAddr) { visitor(static_cast<ObjectHeader *>(objectAddr)); });
+        if constexpr (FULL_GC) {
+            region->GetMarkBitmap()->IterateOverMarkedChunks(
+                [&visitor](void *objectAddr) { visitor(static_cast<ObjectHeader *>(objectAddr)); });
+        } else {
+            aliveMoveCount = region->UpdateAllocatedObjects();
+        }
     } else {  // NOLINT(readability-misleading-indentation)
         auto liveCheckVisitor = [&visitor, &deathChecker](ObjectHeader *object) {
             if (deathChecker(object) == ObjectStatus::ALIVE_OBJECT) {
@@ -533,6 +539,7 @@ void RegionAllocator<AllocConfigT, LockConfigT>::PromoteYoungRegion(Region *regi
     // We set not actual value here but we will update it later
     region->SetLiveBytes(region->GetAllocatedBytes());
     this->GetSpace()->PromoteYoungRegion(region);
+    return aliveMoveCount;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
