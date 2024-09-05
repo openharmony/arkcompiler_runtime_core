@@ -18,33 +18,27 @@ import("$ark_root/tests/test_helper.gni")
 ##############################unittest##########################################
 
 test_js_path = "${ark_root}/libark_defect_scan_aux/tests/unittest"
-test_script_path = "${ark_root}/libark_defect_scan_aux/tests/unittest/scripts"
 
-defect_scan_aux_test_files = [
-  "module_info_test.js",
-  "define_info_test.js",
-  "callee_info_test.js",
-  "debug_info_test.js",
-  "graph_test.js",
-  "async_function_test.js",
-  "ecma2022_class_test.js",
-  "sendable_class_test.ts",
+defect_scan_aux_test_js_files = [
+  "module_info_test",
+  "define_info_test",
+  "callee_info_test",
+  "debug_info_test",
+  "graph_test",
+  "async_function_test",
 ]
 
-foreach(file, defect_scan_aux_test_files) {
-  file_base_name = get_path_info(file, "name")
-  file_extension = get_path_info(file, "extension")
+foreach(file, defect_scan_aux_test_js_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_js = "${test_js_path}/${file}.js"
+    test_abc = "${target_out_dir}/${file}.abc"
 
-  es2abc_gen_abc("gen_${file_base_name}_abc") {
-    test_file = "${test_js_path}/${file_base_name}.${file_extension}"
-    test_abc = "${target_out_dir}/${file_base_name}.abc"
-
-    src_js = rebase_path(test_file)
+    src_js = rebase_path(test_js)
     dst_file = rebase_path(test_abc)
 
     extra_args = [ "--module" ]
 
-    in_puts = [ test_file ]
+    in_puts = [ test_js ]
     out_puts = [ test_abc ]
   }
 }
@@ -63,9 +57,8 @@ host_unittest_action("LibArkDefectScanAuxTest") {
 
   defines = [ "DEFECT_SCAN_AUX_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
-  foreach(file, defect_scan_aux_test_files) {
-    file_base_name = get_path_info(file, "name")
-    deps += [ ":gen_${file_base_name}_abc" ]
+  foreach(file, defect_scan_aux_test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
   }
 }
 
@@ -86,53 +79,6 @@ foreach(project, defect_scan_aux_test_projects) {
 
     in_puts = [ test_js ]
     out_puts = [ test_abc ]
-  }
-}
-
-defect_scan_aux_fileinfo_projects = [ "sendable_class_merge_abc_test" ]
-
-foreach(project, defect_scan_aux_fileinfo_projects) {
-  action("run_handle_fileinfo_script_" + project) {
-    script = "${test_script_path}/handle_fileinfo.py"
-
-    inputs = [ "${test_js_path}/${project}/fileinfo.txt" ]
-    outputs = [ "${target_out_dir}/${project}/fileinfo.txt" ]
-    args = [
-      rebase_path("${test_js_path}/${project}/fileinfo.txt"),
-      rebase_path("${target_out_dir}/${project}/fileinfo.txt"),
-      rebase_path("${test_js_path}"),
-    ]
-  }
-}
-
-group("run_python_script_first") {
-  foreach(project, defect_scan_aux_fileinfo_projects) {
-    deps = [ ":run_handle_fileinfo_script_" + project ]
-  }
-}
-
-foreach(project, defect_scan_aux_fileinfo_projects) {
-  es2abc_gen_abc("gen_${project}_abc") {
-    test_fileinfo = "${target_out_dir}/${project}/fileinfo.txt"
-    test_abc = "${target_out_dir}/${project}.abc"
-
-    src_middle = rebase_path(test_fileinfo)
-    src_js = "@${src_middle}"
-    dst_file = rebase_path(test_abc)
-
-    extra_args = [
-      "--module",
-      "--merge-abc",
-    ]
-
-    out_puts = [ test_abc ]
-  }
-}
-
-group("gen_projects_through_fileinfo") {
-  deps = [ ":run_python_script_first" ]
-  foreach(project, defect_scan_aux_fileinfo_projects) {
-    deps += [ ":gen_${project}_abc" ]
   }
 }
 
@@ -157,8 +103,6 @@ host_unittest_action("LibArkDefectScanAuxMergeTest") {
   foreach(project, defect_scan_aux_test_projects) {
     deps += [ ":gen_${project}_abc" ]
   }
-
-  deps += [ ":gen_projects_through_fileinfo" ]
 }
 
 group("host_unittest") {
