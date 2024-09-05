@@ -24,16 +24,6 @@ cases:
           assert A.met() == "S"
 
     - decl: |-
-          interface I {
-              static met(): string {
-                  return "I"
-              }
-          }
-      use: |-
-          // interface name
-          assert I.met() == "I"
-
-    - decl: |-
           class A {
               static met(): string {
                   return "S"
@@ -44,13 +34,3 @@ cases:
           // class name alias
           assert TA.met() == "S"
 
-    - decl: |-
-          interface I {
-              static met(): string {
-                  return "I"
-              }
-          }
-          type TI = I
-      use: |-
-          // interface name alias
-          assert TI.met() == "I"

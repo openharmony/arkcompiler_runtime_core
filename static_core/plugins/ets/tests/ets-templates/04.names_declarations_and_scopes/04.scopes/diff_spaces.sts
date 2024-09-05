@@ -36,19 +36,12 @@ enum Enum { abc, def, ghk, xyz }
 
 let xyz: int = 4;
 
-interface I {
-    static xyz(): int {
-        return 5;
-    }
-}
-
 function main(): int {
     if (0 == foo() &&
         1 == new C().xyz &&
         2 == new D().xyz() &&
         3 == Enum.xyz.valueOf() &&
-        4 == xyz &&
-        5 == I.xyz()
+        4 == xyz
     ) {
         let xyz = 0;
         return xyz;

@@ -1879,7 +1879,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @returns String - string value decoded from JSON
      */
-    static createFromJSONValue(json: JSONValue): String {
+    public createFromJSONValue(json: JSONValue): String {
         if (json instanceof JSONString) {
             return (json as JSONString).value
         }

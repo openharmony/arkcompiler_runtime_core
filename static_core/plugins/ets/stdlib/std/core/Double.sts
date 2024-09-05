@@ -800,7 +800,7 @@ export final class Double extends Floating implements Comparable<Double>, JSONab
      * @returns Double - double value decoded from JSON
      * @tag arkts
      */
-    static createFromJSONValue(json: JSONValue): Double {
+    public createFromJSONValue(json: JSONValue): Double {
         if (json instanceof JSONNumber) {
             return Double.valueOf((json as JSONNumber).value)
         }

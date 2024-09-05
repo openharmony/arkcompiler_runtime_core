@@ -146,24 +146,6 @@ cases:
           assert createC().met() == "I"
 
     - decl: |-
-          interface I {
-              met(): string {
-                  return "I"
-              }
-              static smet(): string {
-                  return "SI"
-              }
-          }
-          class A implements I {}
-          function getI(): I {
-              return new A()
-          }
-      use: |-
-          // using interface type expression
-          assert getI().met() == "I"
-          assert I.smet() == "SI"
-
-    - decl: |-
           class X {
               met(): string {
                   return "X"
