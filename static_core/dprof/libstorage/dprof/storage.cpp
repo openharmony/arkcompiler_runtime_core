@@ -29,6 +29,7 @@ namespace ark::dprof {
 std::unique_ptr<AppData> AppData::CreateByParams(const std::string &name, uint64_t hash, uint32_t pid,
                                                  FeaturesMap &&featuresMap)
 {
+    // CC-OFFNXT(G.RES.09) private constructor
     std::unique_ptr<AppData> appData(new AppData);
 
     appData->commonInfo_.name = name;
@@ -42,6 +43,7 @@ std::unique_ptr<AppData> AppData::CreateByParams(const std::string &name, uint64
 /* static */
 std::unique_ptr<AppData> AppData::CreateByBuffer(const std::vector<uint8_t> &buffer)
 {
+    // CC-OFFNXT(G.RES.09) private constructor
     std::unique_ptr<AppData> appData(new AppData);
 
     const uint8_t *data = buffer.data();
@@ -97,6 +99,7 @@ std::unique_ptr<AppDataStorage> AppDataStorage::Create(const std::string &storag
     if (::stat(storageDir.c_str(), &statBuffer) == 0) {
         // NOLINTNEXTLINE(hicpp-signed-bitwise)
         if (S_ISDIR(statBuffer.st_mode)) {
+            // CC-OFFNXT(G.RES.09) private constructor
             return std::unique_ptr<AppDataStorage>(new AppDataStorage(storageDir));
         }
 
@@ -110,6 +113,7 @@ std::unique_ptr<AppDataStorage> AppDataStorage::Create(const std::string &storag
             PLOG(ERROR, DPROF) << "mkdir() failed";
             return nullptr;
         }
+        // CC-OFFNXT(G.RES.09) private constructor
         return std::unique_ptr<AppDataStorage>(new AppDataStorage(storageDir));
     }
 
