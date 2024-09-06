@@ -46,7 +46,7 @@ llvm::PreservedAnalyses InlinePrepare::run(llvm::Module &module, llvm::ModuleAna
 {
     auto &advisorResult = moduleAm.getResult<llvm::InlineAdvisorAnalysis>(module);
     if (!advisorResult.tryCreate(
-            inlineParams_, llvm::InliningAdvisorMode::Default, {},
+            inlineParams_, llvm::InliningAdvisorMode::Default, {},  // CC-OFF(G.FMT.06-CPP) project code style
             llvm::InlineContext {llvm::ThinOrFullLTOPhase::None, llvm::InlinePass::ModuleInliner})) {
         module.getContext().emitError("Could not setup Inlining Advisor for the requested mode and/or options");
     }

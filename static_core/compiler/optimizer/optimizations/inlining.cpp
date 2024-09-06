@@ -579,78 +579,13 @@ bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterf
             continue;
         }
         vregsCount_ += inlGraph.graph->GetVRegsCount();
-        if (callBb == nullptr) {
-            // Split block by call instruction
-            callBb = callInst->GetBasicBlock();
-            callContBb = callBb->SplitBlockAfterInstruction(callInst, false);
-            callBb->AppendInst(getClsInst);
-            if (callInst->GetType() != DataType::VOID) {
-                phiInst = GetGraph()->CreateInstPhi(callInst->GetType(), callInst->GetPc());
-                phiInst->ReserveInputs(receivers->size() << 1U);
-                callContBb->AppendPhi(phiInst);
-            }
-        } else {
-            auto newCallBb = GetGraph()->CreateEmptyBlock(callBb);
-            callBb->GetLoop()->AppendBlock(newCallBb);
-            callBb->AddSucc(newCallBb);
-            callBb = newCallBb;
-        }
+        auto blocks = MakeCallBbs({callInst, getClsInst}, {callBb, callContBb}, &phiInst, receivers->size());
+        callBb = blocks.first;
+        callContBb = blocks.second;
 
         CreateCompareClass(callInst, getClsInst, receiver, callBb);
-
-        // Create call_inlined_block
-        auto callInlinedBlock = GetGraph()->CreateEmptyBlock(callBb);
-        callBb->GetLoop()->AppendBlock(callInlinedBlock);
-        callBb->AddSucc(callInlinedBlock);
-
-        // Insert Call.inlined in call_inlined_block
-        newCallInst->AppendInput(callInst->GetObjectInst());
-        newCallInst->AppendInput(callInst->GetSaveState());
-        newCallInst->SetInlined(true);
-        newCallInst->SetFlag(inst_flags::NO_DST);
-        // Set NO_DCE flag, since some call instructions might not have one after inlining
-        newCallInst->SetFlag(inst_flags::NO_DCE);
-        callInlinedBlock->PrependInst(newCallInst);
-
-        // Create return_inlined_block and inster PHI for non void functions
-        auto returnInlinedBlock = GetGraph()->CreateEmptyBlock(callBb);
-        callBb->GetLoop()->AppendBlock(returnInlinedBlock);
-        PhiInst *localPhiInst = nullptr;
-        if (callInst->GetType() != DataType::VOID) {
-            localPhiInst = GetGraph()->CreateInstPhi(callInst->GetType(), callInst->GetPc());
-            localPhiInst->ReserveInputs(receivers->size() << 1U);
-            returnInlinedBlock->AppendPhi(localPhiInst);
-        }
-
-        // Inlined graph between call_inlined_block and return_inlined_block
-        GetGraph()->SetMaxMarkerIdx(inlGraph.graph->GetCurrentMarkerIdx());
-        UpdateParameterDataflow(inlGraph.graph, callInst);
-        UpdateDataflow(inlGraph.graph, callInst, localPhiInst, phiInst);
-        MoveConstants(inlGraph.graph);
-        UpdateControlflow(inlGraph.graph, callInlinedBlock, returnInlinedBlock);
-
-        if (!returnInlinedBlock->GetPredsBlocks().empty()) {
-            if (inlGraph.hasRuntimeCalls) {
-                auto inlinedReturn =
-                    GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, newCallInst->GetSaveState());
-                returnInlinedBlock->PrependInst(inlinedReturn);
-            }
-            if (callInst->GetType() != DataType::VOID) {
-                ASSERT(phiInst);
-                // clang-tidy think that phi_inst can be nullptr
-                phiInst->AppendInput(localPhiInst);  // NOLINT
-            }
-            returnInlinedBlock->AddSucc(callContBb);
-        } else {
-            // We need remove return_inlined_block if inlined graph doesn't have Return inst(only Throw or Deoptimize)
-            hasUnreachableBlocks = true;
-        }
-
-        if (inlGraph.hasRuntimeCalls) {
-            hasRuntimeCalls = true;
-        } else {
-            newCallInst->GetBasicBlock()->RemoveInst(newCallInst);
-        }
+        InlineReceiver({callInst, newCallInst, phiInst}, {callBb, callContBb},
+                       {&hasUnreachableBlocks, &hasRuntimeCalls}, receivers->size(), inlGraph);
 
         GetGraph()->GetPassManager()->GetStatistics()->AddInlinedMethods(1);
         EVENT_INLINE(runtime->GetMethodFullName(GetGraph()->GetMethod()), runtime->GetMethodFullName(ctx.method),
@@ -658,17 +593,118 @@ bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterf
         LOG_INLINING(DEBUG) << "Successfully inlined: " << GetMethodFullName(GetGraph(), ctx.method);
         methodsInlined_++;
     }
+
+    bool needToDeoptimize = (methodsInlined_ - inlinedMethods == receivers->size());
+    return FinalizeInlineReceiver({callInst, getClsInst, phiInst}, {callBb, callContBb},
+                                  {&hasUnreachableBlocks, &hasRuntimeCalls}, needToDeoptimize);
+}
+
+Inlining::BasicBlockPair Inlining::MakeCallBbs(InstPair insts, BasicBlockPair bbs, [[maybe_unused]] PhiInst **phiInst,
+                                               [[maybe_unused]] size_t receiversSize)
+{
+    [[maybe_unused]] auto *callInst = static_cast<CallInst *>(insts.first);
+    [[maybe_unused]] auto *getClsInst = insts.second;
+    auto [callBb, callContBb] = bbs;
+    if (callBb == nullptr) {
+        // Split block by call instruction
+        callBb = callInst->GetBasicBlock();
+        callContBb = callBb->SplitBlockAfterInstruction(callInst, false);
+        callBb->AppendInst(getClsInst);
+        if (callInst->GetType() != DataType::VOID) {
+            *phiInst = GetGraph()->CreateInstPhi(callInst->GetType(), callInst->GetPc());
+            (*phiInst)->ReserveInputs(receiversSize << 1U);
+            callContBb->AppendPhi(*phiInst);
+        }
+    } else {
+        auto newCallBb = GetGraph()->CreateEmptyBlock(callBb);
+        callBb->GetLoop()->AppendBlock(newCallBb);
+        callBb->AddSucc(newCallBb);
+        callBb = newCallBb;
+    }
+    return std::make_pair(callBb, callContBb);
+}
+
+void Inlining::InlineReceiver(InstTriple insts, BasicBlockPair bbs, FlagPair flags, size_t receiversSize,
+                              InlinedGraph inlGraph)
+{
+    auto *callInst = static_cast<CallInst *>(std::get<0>(insts));
+    auto *newCallInst = static_cast<CallInst *>(std::get<1>(insts));
+    auto *phiInst = static_cast<PhiInst *>(std::get<2>(insts));
+    auto [callBb, callContBb] = bbs;
+    auto [hasUnreachableBlocks, hasRuntimeCalls] = flags;
+    // Create call_inlined_block
+    auto callInlinedBlock = GetGraph()->CreateEmptyBlock(callBb);
+    callBb->GetLoop()->AppendBlock(callInlinedBlock);
+    callBb->AddSucc(callInlinedBlock);
+
+    // Insert Call.inlined in call_inlined_block
+    newCallInst->AppendInput(callInst->GetObjectInst());
+    newCallInst->AppendInput(callInst->GetSaveState());
+    newCallInst->SetInlined(true);
+    newCallInst->SetFlag(inst_flags::NO_DST);
+    // Set NO_DCE flag, since some call instructions might not have one after inlining
+    newCallInst->SetFlag(inst_flags::NO_DCE);
+    callInlinedBlock->PrependInst(newCallInst);
+
+    // Create return_inlined_block and inster PHI for non void functions
+    auto returnInlinedBlock = GetGraph()->CreateEmptyBlock(callBb);
+    callBb->GetLoop()->AppendBlock(returnInlinedBlock);
+    PhiInst *localPhiInst = nullptr;
+    if (callInst->GetType() != DataType::VOID) {
+        localPhiInst = GetGraph()->CreateInstPhi(callInst->GetType(), callInst->GetPc());
+        localPhiInst->ReserveInputs(receiversSize << 1U);
+        returnInlinedBlock->AppendPhi(localPhiInst);
+    }
+
+    // Inlined graph between call_inlined_block and return_inlined_block
+    GetGraph()->SetMaxMarkerIdx(inlGraph.graph->GetCurrentMarkerIdx());
+    UpdateParameterDataflow(inlGraph.graph, callInst);
+    UpdateDataflow(inlGraph.graph, callInst, localPhiInst, phiInst);
+    MoveConstants(inlGraph.graph);
+    UpdateControlflow(inlGraph.graph, callInlinedBlock, returnInlinedBlock);
+
+    if (!returnInlinedBlock->GetPredsBlocks().empty()) {
+        if (inlGraph.hasRuntimeCalls) {
+            auto inlinedReturn =
+                GetGraph()->CreateInstReturnInlined(DataType::VOID, INVALID_PC, newCallInst->GetSaveState());
+            returnInlinedBlock->PrependInst(inlinedReturn);
+        }
+        if (callInst->GetType() != DataType::VOID) {
+            ASSERT(phiInst);
+            // clang-tidy think that phi_inst can be nullptr
+            phiInst->AppendInput(localPhiInst);  // NOLINT
+        }
+        returnInlinedBlock->AddSucc(callContBb);
+    } else {
+        // We need remove return_inlined_block if inlined graph doesn't have Return inst(only Throw or Deoptimize)
+        *hasUnreachableBlocks = true;
+    }
+
+    if (inlGraph.hasRuntimeCalls) {
+        *hasRuntimeCalls = true;
+    } else {
+        newCallInst->GetBasicBlock()->RemoveInst(newCallInst);
+    }
+}
+
+bool Inlining::FinalizeInlineReceiver(InstTriple insts, BasicBlockPair bbs, FlagPair flags, bool needToDeoptimize)
+{
+    auto *callInst = static_cast<CallInst *>(std::get<0>(insts));
+    auto *getClsInst = std::get<1>(insts);
+    auto *phiInst = static_cast<PhiInst *>(std::get<2>(insts));
+    auto [callBb, callContBb] = bbs;
+    auto [hasUnreachableBlocks, hasRuntimeCalls] = flags;
     if (callBb == nullptr) {
         // Nothing was inlined
         return false;
     }
-    if (callContBb->GetPredsBlocks().empty() || hasUnreachableBlocks) {
+    if (callContBb->GetPredsBlocks().empty() || *hasUnreachableBlocks) {
         GetGraph()->RemoveUnreachableBlocks();
     }
 
     getClsInst->SetInput(0, callInst->GetObjectInst());
 
-    if (methodsInlined_ - inlinedMethods == receivers->size()) {
+    if (needToDeoptimize) {
         InsertDeoptimizeInst(callInst, callBb);
     } else {
         InsertCallInst(callInst, callBb, callContBb, phiInst);
@@ -677,12 +713,11 @@ bool Inlining::DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterf
         callInst->ReplaceUsers(phiInst);
     }
 
-    ProcessCallReturnInstructions(callInst, callContBb, hasRuntimeCalls);
+    ProcessCallReturnInstructions(callInst, callContBb, *hasRuntimeCalls);
 
-    if (hasRuntimeCalls) {
+    if (*hasRuntimeCalls) {
         callInst->GetBasicBlock()->RemoveInst(callInst);
     }
-
     return true;
 }
 

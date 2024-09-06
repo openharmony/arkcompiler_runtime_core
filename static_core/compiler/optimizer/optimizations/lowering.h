@@ -100,6 +100,7 @@ private:
         {
             ASSERT(i < MAX_OPERANDS);
 #pragma GCC diagnostic push
+// CC-OFFNXT(warning_suppression) GCC false positive
 #pragma GCC diagnostic ignored "-Warray-bounds"
             operands_[i] = inst;
 #pragma GCC diagnostic pop
@@ -400,6 +401,7 @@ private:
     static void InPlaceLowerIfImm(IfImmInst *inst, Inst *input, Inst *cst, ConditionCode cc, DataType::Type inputType);
     static void LowerIfImmToIf(IfImmInst *inst, Inst *input, ConditionCode cc, DataType::Type inputType);
     static void LowerToDeoptimizeCompare(Inst *inst);
+    static bool SatisfyReplaceDivMovConditions(Inst *inst);
     static bool TryReplaceDivPowerOfTwo(GraphVisitor *v, Inst *inst);
     static bool TryReplaceDivModNonPowerOfTwo(GraphVisitor *v, Inst *inst);
     static bool TryReplaceModPowerOfTwo(GraphVisitor *v, Inst *inst);

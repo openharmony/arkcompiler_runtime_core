@@ -298,13 +298,14 @@ TEST_F(RegAllocCommonTest, DynMethodNargsParamReserve)
         auto reg = Target(checkGraph->GetArch()).GetParamRegId(1U);
 
         for (auto inst : checkGraph->GetStartBlock()->Insts()) {
-            if (inst->IsSpillFill()) {
-                auto sfs = inst->CastToSpillFill()->GetSpillFills();
-                auto it = std::find_if(sfs.cbegin(), sfs.cend(), [reg](auto sf) {
-                    return sf.DstValue() == reg && sf.DstType() == LocationType::REGISTER;
-                });
-                ASSERT_EQ(it, sfs.cend());
+            if (!inst->IsSpillFill()) {
+                continue;
             }
+            auto sfs = inst->CastToSpillFill()->GetSpillFills();
+            auto it = std::find_if(sfs.cbegin(), sfs.cend(), [reg](auto sf) {
+                return sf.DstValue() == reg && sf.DstType() == LocationType::REGISTER;
+            });
+            ASSERT_EQ(it, sfs.cend());
         }
     });
 }

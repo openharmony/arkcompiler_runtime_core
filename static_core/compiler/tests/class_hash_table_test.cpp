@@ -304,13 +304,14 @@ TEST_F(ClassHashTableTest, LoadAbcFileCanLoadClassHashTable)
     ASSERT_TRUE(res);
 
     const panda_file::File *pfPtr = nullptr;
-    Runtime::GetCurrent()->GetClassLinker()->EnumeratePandaFiles([&pfPtr, filename](const panda_file::File &pf) {
+    auto checkFilename = [&pfPtr, filename](const panda_file::File &pf) {
         if (pf.GetFilename() == filename) {
             pfPtr = &pf;
             return false;
         }
         return true;
-    });
+    };
+    Runtime::GetCurrent()->GetClassLinker()->EnumeratePandaFiles(checkFilename);
 
     ASSERT(!pfPtr->GetClassHashTable().empty());
 }

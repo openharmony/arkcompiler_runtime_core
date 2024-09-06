@@ -62,17 +62,7 @@ void CodegenNative::GeneratePrologue()
     GetCallingConvention()->GenerateNativePrologue(*GetFrameInfo());
 
 #if defined(EVENT_METHOD_ENTER_ENABLED) && EVENT_METHOD_ENTER_ENABLED != 0
-    if (GetGraph()->IsAotMode()) {
-        SCOPED_DISASM_STR(this, "LoadMethod for trace");
-        ScopedTmpReg method_reg(GetEncoder());
-        LoadMethod(method_reg);
-        InsertTrace(Imm(static_cast<size_t>(TraceId::METHOD_ENTER)), method_reg,
-                    Imm(static_cast<size_t>(events::MethodEnterKind::COMPILED)));
-    } else {
-        InsertTrace(Imm(static_cast<size_t>(TraceId::METHOD_ENTER)),
-                    Imm(reinterpret_cast<size_t>(GetGraph()->GetMethod())),
-                    Imm(static_cast<size_t>(events::MethodEnterKind::COMPILED)));
-    }
+    MakeTrace();
 #endif
 }
 
@@ -82,18 +72,7 @@ void CodegenNative::GenerateEpilogue()
     SCOPED_DISASM_STR(this, "Method Epilogue");
 
 #if defined(EVENT_METHOD_EXIT_ENABLED) && EVENT_METHOD_EXIT_ENABLED != 0
-    GetCallingConvention()->GenerateNativeEpilogue(*GetFrameInfo(), [this]() {
-        if (GetGraph()->IsAotMode()) {
-            ScopedTmpReg method_reg(GetEncoder());
-            LoadMethod(method_reg);
-            InsertTrace(Imm(static_cast<size_t>(TraceId::METHOD_EXIT)), method_reg,
-                        Imm(static_cast<size_t>(events::MethodExitKind::COMPILED)));
-        } else {
-            InsertTrace(Imm(static_cast<size_t>(TraceId::METHOD_EXIT)),
-                        Imm(reinterpret_cast<size_t>(GetGraph()->GetMethod())),
-                        Imm(static_cast<size_t>(events::MethodExitKind::COMPILED)));
-        }
-    });
+    GetCallingConvention()->GenerateNativeEpilogue(*GetFrameInfo(), MakeTrace);
 #else
     GetCallingConvention()->GenerateNativeEpilogue(*GetFrameInfo(), []() {});
 #endif

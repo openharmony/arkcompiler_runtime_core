@@ -31,7 +31,7 @@ bool TestNeg(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -80,7 +80,7 @@ bool TestNot(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -122,7 +122,7 @@ bool TestMov(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -285,7 +285,7 @@ bool TestBitTestAndBranch(Encoder64Test *test, T value, int pos, uint32_t expect
     auto retVal = Target::Current().GetReturnReg();
     auto label = test->GetEncoder()->CreateLabel();
 
-    if (NOT_ZERO) {
+    if constexpr (NOT_ZERO) {
         test->GetEncoder()->EncodeBitTestAndBranch(label, param, pos, true);
     } else {
         test->GetEncoder()->EncodeBitTestAndBranch(label, param, pos, false);
@@ -471,9 +471,8 @@ bool TestJumpCC(Encoder64Test *test)
     // First type-dependency
     auto param = test->GetParameter(TypeInfo(T(0)));
     // Main test call
-    auto retVal = Target::Current().GetReturnReg();
-
     auto tsucc = test->GetEncoder()->CreateLabel();
+    auto retVal = Target::Current().GetReturnReg();
 
     test->GetEncoder()->EncodeJump(tsucc, param, CC);
     test->GetEncoder()->EncodeMov(param, Imm(0x0));
@@ -490,7 +489,7 @@ bool TestJumpCC(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -596,7 +595,7 @@ bool TestLdr(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -651,7 +650,7 @@ bool TestStr(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -768,7 +767,7 @@ bool TestStrz(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -873,7 +872,7 @@ bool TestAbs(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -925,7 +924,7 @@ bool TestSqrt(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -976,7 +975,7 @@ bool TestAdd(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -997,10 +996,10 @@ bool TestAdd(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
+        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
             return false;
         }
-        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
+        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
         if (!test->CallCode<T>(-std::numeric_limits<T>::infinity(), std::numeric_limits<T>::infinity(), nan)) {
@@ -1039,7 +1038,7 @@ bool TestAddImm(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1085,7 +1084,7 @@ bool TestSub(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1099,7 +1098,8 @@ bool TestSub(Encoder64Test *test)
         // Deduced conflicting types for parameter
         // Main check - compare parameter and
         // return value
-        if (!test->CallCode<T>(tmp1, tmp2, tmp1 - tmp2)) {
+        auto diff = tmp1 - tmp2;
+        if (!test->CallCode<T>(tmp1, tmp2, diff)) {
             return false;
         }
     }
@@ -1149,7 +1149,7 @@ bool TestSubImm(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1162,7 +1162,8 @@ bool TestSubImm(Encoder64Test *test)
         // Deduced conflicting types for parameter
         // Main check - compare parameter and
         // return value
-        if (!test->CallCode<T>(tmp1, tmp1 - param2)) {
+        auto diff = tmp1 - param2;
+        if (!test->CallCode<T>(tmp1, diff)) {
             return false;
         }
     }
@@ -1194,7 +1195,7 @@ bool TestMul(Encoder64Test *test)
     test->PostWork();
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1208,7 +1209,8 @@ bool TestMul(Encoder64Test *test)
         // Deduced conflicting types for parameter
         // Main check - compare parameter and
         // return value
-        if (!test->CallCode<T>(tmp1, tmp2, tmp1 * tmp2)) {
+        auto prod = tmp1 * tmp2;
+        if (!test->CallCode<T>(tmp1, tmp2, prod)) {
             return false;
         }
     }
@@ -1258,7 +1260,7 @@ bool TestMin(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1272,7 +1274,8 @@ bool TestMin(Encoder64Test *test)
         // Deduced conflicting types for parameter
 
         T result {0};
-        if (std::is_floating_point_v<T> && (std::isnan(tmp1) || std::isnan(tmp2))) {
+        bool areNan = (std::isnan(tmp1) || std::isnan(tmp2));
+        if (std::is_floating_point_v<T> && areNan) {
             result = std::numeric_limits<T>::quiet_NaN();
         } else {
             // We do that, because auto check -0.0 and +0.0 std::max give incorrect result
@@ -1337,7 +1340,7 @@ bool TestMax(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1350,7 +1353,8 @@ bool TestMax(Encoder64Test *test)
         T tmp2 = RandomGen<T>();
         // Deduced conflicting types for parameter
         T result {0};
-        if (std::is_floating_point_v<T> && (std::isnan(tmp1) || std::isnan(tmp2))) {
+        bool areNan = (std::isnan(tmp1) || std::isnan(tmp2));
+        if (std::is_floating_point_v<T> && areNan) {
             result = std::numeric_limits<T>::quiet_NaN();
         } else {
             // We do that, because auto check -0.0 and +0.0 std::max give incorrect result
@@ -1369,10 +1373,10 @@ bool TestMax(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
+        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
             return false;
         }
-        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
+        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
         // use static_cast to make sure correct float/double type is applied
@@ -1416,7 +1420,7 @@ bool TestShl(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1439,9 +1443,11 @@ bool TestShl(Encoder64Test *test)
         bool result {false};
 
         if constexpr (std::is_same_v<T, int8_t> || std::is_same_v<T, int16_t>) {
-            result = test->CallCode<T>(tmp1, tmp2, tmp1 << (tmp2 & (CHAR_BIT * sizeof(T) - 1)));
+            auto changed = tmp1 << (tmp2 & (CHAR_BIT * sizeof(T) - 1));
+            result = test->CallCode<T>(tmp1, tmp2, changed);
         } else {
-            result = test->CallCode<T>(tmp1, tmp2, tmp1 << tmp2);
+            auto changed = tmp1 << tmp2;
+            result = test->CallCode<T>(tmp1, tmp2, changed);
         }
 
         if (!result) {
@@ -1475,7 +1481,7 @@ bool TestShr(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1536,7 +1542,7 @@ bool TestAShr(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1595,7 +1601,7 @@ bool TestAnd(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1640,7 +1646,7 @@ bool TestOr(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1685,7 +1691,7 @@ bool TestXor(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1735,7 +1741,7 @@ bool TestShlImm(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1794,7 +1800,7 @@ bool TestShrImm(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1853,7 +1859,7 @@ bool TestCmp(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1899,7 +1905,7 @@ bool TestFcmp(Encoder64Test *test, bool isFcmpg)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1915,7 +1921,8 @@ bool TestFcmp(Encoder64Test *test, bool isFcmpg)
         auto compare = [](T a, T b) -> int32_t { return a < b ? -1 : a > b ? 1 : 0; };
 
         int32_t result {0};
-        if (std::isnan(tmp1) || std::isnan(tmp2)) {
+        auto isNan = (std::isnan(tmp1) || std::isnan(tmp2));
+        if (isNan) {
             result = isFcmpg ? 1 : -1;
         } else {
             result = compare(tmp1, tmp2);
@@ -1930,13 +1937,14 @@ bool TestFcmp(Encoder64Test *test, bool isFcmpg)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-        if (!test->CallCode<T, int32_t>(nan, 5.0F, isFcmpg ? 1 : -1)) {
+        auto sign = isFcmpg ? 1 : -1;
+        if (!test->CallCode<T, int32_t>(nan, 5.0F, sign)) {
             return false;
         }
-        if (!test->CallCode<T, int32_t>(5.0F, nan, isFcmpg ? 1 : -1)) {
+        if (!test->CallCode<T, int32_t>(5.0F, nan, sign)) {
             return false;
         }
-        if (!test->CallCode<T, int32_t>(nan, nan, isFcmpg ? 1 : -1)) {
+        if (!test->CallCode<T, int32_t>(nan, nan, sign)) {
             return false;
         }
     }

@@ -763,9 +763,9 @@ void ClassInst::DumpOpcode(std::ostream *out) const
     auto allocator = graph->GetLocalAllocator();
     const auto &adapter = allocator->Adapter();
 
+    ArenaString opc(GetOpcodeString(GetOpcode()), adapter);
     ArenaString space(" ", adapter);
     ArenaString qt("'", adapter);
-    ArenaString opc(GetOpcodeString(GetOpcode()), adapter);
     ArenaString className(GetClass() == nullptr ? ArenaString("", adapter)
                                                 : ArenaString(graph->GetRuntime()->GetClassName(GetClass()), adapter));
     (*out) << std::setw(INDENT_OPCODE) << opc + space + qt + className + qt << " ";
@@ -838,9 +838,8 @@ void ResolveStaticInst::DumpOpcode(std::ostream *out) const
     auto graph = GetBasicBlock()->GetGraph();
     auto allocator = graph->GetLocalAllocator();
     const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
-    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
     ArenaString methodId(ToArenaString(GetCallMethodId(), allocator));
+    ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
     if (GetCallMethod() != nullptr) {
         ArenaString method(graph->GetRuntime()->GetMethodFullName(GetCallMethod()), adapter);
         (*out) << std::setw(INDENT_OPCODE) << opcode + ' ' + methodId + ' ' + method << ' ';
@@ -854,7 +853,6 @@ void ResolveVirtualInst::DumpOpcode(std::ostream *out) const
     auto graph = GetBasicBlock()->GetGraph();
     auto allocator = graph->GetLocalAllocator();
     const auto &adapter = allocator->Adapter();
-    ArenaString space(" ", adapter);
     ArenaString opcode(GetOpcodeString(GetOpcode()), adapter);
     ArenaString methodId(ToArenaString(GetCallMethodId(), allocator));
     if (GetCallMethod() != nullptr) {
@@ -925,8 +923,8 @@ void DeoptimizeCompareInst::DumpOpcode(std::ostream *out) const
     const auto &adapter = allocator->Adapter();
     ArenaString opcode(ArenaString(GetOpcodeString(GetOpcode()), adapter).append(" "));
     ArenaString cc(ArenaString(GetCondCodeToString(GetCc(), allocator), adapter).append(" "));
-    ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
     ArenaString cmpType(ArenaString(DataType::ToString(GetOperandsType()), adapter).append(" "));
+    ArenaString type(ArenaString(DeoptimizeTypeToString(GetDeoptimizeType()), adapter).append(" "));
     (*out) << std::setw(INDENT_OPCODE) << opcode.append(cc).append(cmpType).append(type);
 }
 

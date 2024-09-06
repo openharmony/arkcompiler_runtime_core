@@ -207,11 +207,11 @@ public:
 #endif
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override;
+#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override; /* CC-OFF(G.PRE.09) code generation */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BINARY_OPERATION(opc)                               \
     void Encode##opc(Reg dst, Reg src0, Reg src1) override; \
-    void Encode##opc(Reg dst, Reg src0, Imm src1) override;
+    void Encode##opc(Reg dst, Reg src0, Imm src1) override; /* CC-OFF(G.PRE.09) code generation */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INST_DEF(OPCODE, MACRO) MACRO(OPCODE)
 
@@ -495,11 +495,15 @@ public:
     uint32_t GetCodeSize() override;
 
     Reg InitFlagsReg(bool hasFloatRegs);
+    size_t SaveFpLr(const FrameInfo &frameInfo, [[maybe_unused]] Encoder *encoder, [[maybe_unused]] Reg fp,
+                    [[maybe_unused]] Reg lr);
+    void EncodeDynCallMode([[maybe_unused]] const FrameInfo &frameInfo, Encoder *encoder);
 
     // Pushes regs and returns number of regs(from boths vectos)
     size_t PushRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool isCallee);
     // Pops regs and returns number of regs(from boths vectos)
     size_t PopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool isCallee);
+    void PrepareToPushPopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool isCallee);
 
     // Calculating information about parameters and save regs_offset registers for special needs
     ParameterInfo *GetParameterInfo(uint8_t regsOffset) override;
@@ -508,6 +512,8 @@ public:
 
 private:
     void SaveCalleeSavedRegs(const FrameInfo &frameInfo, const CFrameLayout &fl, size_t spToRegsSlots, bool isNative);
+    template <bool IS_NATIVE>
+    void GenerateEpilogueImpl(const FrameInfo &frameInfo, const std::function<void()> &postJob);
 };  // Aarch64CallingConvention
 }  // namespace ark::compiler::aarch64
 #endif  // COMPILER_OPTIMIZER_CODEGEN_TARGET_AARCH64_TARGET_H

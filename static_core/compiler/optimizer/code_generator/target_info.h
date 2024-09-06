@@ -45,6 +45,7 @@ constexpr size_t ConvertRegNumberX86(size_t regId)
     return regId;
 }
 
+// CC-OFFNXT(G.PRE.06) list generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_NUMERIC_REGISTERS(REG) \
     REG(0)                            \
@@ -86,6 +87,7 @@ constexpr size_t ConvertRegNumberX86(size_t regId)
 struct ArchCallingConventionX8664 {
     // Following registers are swapped (see comment above for ConvertRegNumberX86):
     // BX, SP, BP <==> R9, R10, R11
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define X86_64_REGISTER_LIST(REG) \
     REG(rax) /* 0 */              \
@@ -128,9 +130,9 @@ struct ArchCallingConventionX8664 {
 #undef DEF_REG_NAME
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF_FP_REG_NAME(r) "xmm" #r,
-    static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
-#undef DEF_FP_REG_NAME
+#define DEF_FP_REG_NAME_X86(r) "xmm" #r,
+    static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME_X86)};
+#undef DEF_FP_REG_NAME_X86
     static constexpr const char *GetRegName(size_t reg, bool isFp)
     {
         ASSERT(reg < REG_NAMES.size() || isFp);
@@ -153,14 +155,14 @@ struct ArchCallingConventionAarch64 {
     static constexpr uint32_t SP_ALIGNMENT = 16;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF_FP_REG_NAME(r) "r" #r,
-    static constexpr std::array<const char *, 32> REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
-#undef DEF_FP_REG_NAME
+#define DEF_FP_REG_NAME_AARCH_64(r) "r" #r,
+    static constexpr std::array<const char *, 32> REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME_AARCH_64)};
+#undef DEF_FP_REG_NAME_AARCH_64
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF_FP_REG_NAME(r) "d" #r,
-    static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
-#undef DEF_FP_REG_NAME
+#define DEF_FP_REG_NAME_AARCH_64(r) "d" #r,
+    static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME_AARCH_64)};
+#undef DEF_FP_REG_NAME_AARCH_64
 
     static constexpr const char *GetRegName(size_t reg, bool isFp)
     {
@@ -184,14 +186,14 @@ struct ArchCallingConventionAarch32 {
     static constexpr uint32_t SP_ALIGNMENT = 8;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF_FP_REG_NAME(r) "r" #r,
-    static constexpr std::array<const char *, 32> REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
-#undef DEF_FP_REG_NAME
+#define DEF_FP_REG_NAME_AARCH_32(r) "r" #r,
+    static constexpr std::array<const char *, 32> REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME_AARCH_32)};
+#undef DEF_FP_REG_NAME_AARCH_32
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF_FP_REG_NAME(r) "d" #r,
-    static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME)};
-#undef DEF_FP_REG_NAME
+#define DEF_FP_REG_NAME_AARCH_32(r) "d" #r,
+    static constexpr std::array<const char *, 32> FP_REG_NAMES = {DEFINE_NUMERIC_REGISTERS(DEF_FP_REG_NAME_AARCH_32)};
+#undef DEF_FP_REG_NAME_AARCH_32
 
     static constexpr const char *GetRegName(size_t reg, bool isFp)
     {
@@ -345,18 +347,23 @@ public:
     }
 
 #undef TARGET_DEFINE_GETTER
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define TARGET_DEFINE_GETTER(name)                                   \
     constexpr auto name() const                                      \
     {                                                                \
         switch (arch_) {                                             \
             case Arch::X86_64:                                       \
+                /* CC-OFFNXT(G.PRE.05) function gen */               \
                 return ArchCallingConvention<Arch::X86_64>::name();  \
             case Arch::X86:                                          \
+                /* CC-OFFNXT(G.PRE.05) function gen */               \
                 return ArchCallingConvention<Arch::X86>::name();     \
             case Arch::AARCH64:                                      \
+                /* CC-OFFNXT(G.PRE.05) function gen */               \
                 return ArchCallingConvention<Arch::AARCH64>::name(); \
             case Arch::AARCH32:                                      \
+                /* CC-OFFNXT(G.PRE.05) function gen */               \
                 return ArchCallingConvention<Arch::AARCH32>::name(); \
             default:                                                 \
                 UNREACHABLE();                                       \
@@ -382,23 +389,29 @@ public:
     TARGET_DEFINE_GETTER(GetSpAlignment);
 
 #undef TARGET_DEFINE_GETTER_1_ARG
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define TARGET_DEFINE_GETTER_1_ARG(name, arg_type)                      \
     constexpr auto name(arg_type arg) const                             \
     {                                                                   \
         switch (arch_) {                                                \
             case Arch::X86_64:                                          \
+                /* CC-OFFNXT(G.PRE.05) function gen */                  \
                 return ArchCallingConvention<Arch::X86_64>::name(arg);  \
             case Arch::X86:                                             \
+                /* CC-OFFNXT(G.PRE.05) function gen */                  \
                 return ArchCallingConvention<Arch::X86>::name(arg);     \
             case Arch::AARCH64:                                         \
+                /* CC-OFFNXT(G.PRE.05) function gen */                  \
                 return ArchCallingConvention<Arch::AARCH64>::name(arg); \
             case Arch::AARCH32:                                         \
+                /* CC-OFFNXT(G.PRE.05) function gen */                  \
                 return ArchCallingConvention<Arch::AARCH32>::name(arg); \
             default:                                                    \
                 UNREACHABLE();                                          \
         }                                                               \
     }
+
     TARGET_DEFINE_GETTER_1_ARG(GetReturnReg, TypeInfo);
     TARGET_DEFINE_GETTER_1_ARG(GetParamRegId, size_t);
 

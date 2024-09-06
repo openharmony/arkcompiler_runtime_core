@@ -34,10 +34,11 @@ public:
     NO_MOVE_SEMANTIC(FrameInfo);
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FRAME_INFO_GET_ATTR(name, var) \
-    auto Get##name() const             \
-    {                                  \
-        return var;                    \
+#define FRAME_INFO_GET_ATTR(name, var)         \
+    auto Get##name() const                     \
+    {                                          \
+        /* CC-OFFNXT(G.PRE.05) function gen */ \
+        return var;                            \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -55,17 +56,19 @@ public:
     FRAME_INFO_SET_ATTR(name, var)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FRAME_INFO_GET_FIELD(name, type) \
-    type Get##name() const               \
-    {                                    \
-        return name::Get(fields_);       \
+#define FRAME_INFO_GET_FIELD(name, type)                                   \
+    type Get##name() const                                                 \
+    {                                                                      \
+        /* CC-OFFNXT(G.PRE.02, G.PRE.05) function gen, namespace member */ \
+        return name::Get(fields_);                                         \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define FRAME_INFO_SET_FIELD(name, type) \
-    void Set##name(type val)             \
-    {                                    \
-        name::Set(val, &fields_);        \
+#define FRAME_INFO_SET_FIELD(name, type)           \
+    void Set##name(type val)                       \
+    {                                              \
+        /* CC-OFFNXT(G.PRE.02) namespace member */ \
+        name::Set(val, &fields_);                  \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

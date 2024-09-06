@@ -857,6 +857,18 @@ void CleanupGraphSaveStateOSR(Graph *graph)
 }
 
 template <typename T>
+bool FindInThisBlock(Inst *currInst, Inst *finish)
+{
+    while (currInst != finish) {
+        if (T()(currInst)) {
+            return true;
+        }
+        currInst = currInst->GetPrev();
+    }
+    return false;
+}
+
+template <typename T>
 bool FindInstBetween(Inst *domInst, BasicBlock *currentBb, Marker marker)
 {
     if (currentBb->SetMarker(marker)) {
@@ -865,11 +877,8 @@ bool FindInstBetween(Inst *domInst, BasicBlock *currentBb, Marker marker)
     bool isSameBlock = domInst->GetBasicBlock() == currentBb;
     auto currInst = currentBb->GetLastInst();
     Inst *finish = isSameBlock ? domInst : nullptr;
-    while (currInst != finish) {
-        if (T()(currInst)) {
-            return true;
-        }
-        currInst = currInst->GetPrev();
+    if (FindInThisBlock<T>(currInst, finish)) {
+        return true;
     }
     if (isSameBlock) {
         return false;
@@ -896,11 +905,8 @@ bool HasSaveStateBetween(Inst *domInst, Inst *inst)
     bool isSameBlock = domInst->GetBasicBlock() == bb;
     auto currInst = inst->GetPrev();
     Inst *finish = isSameBlock ? domInst : nullptr;
-    while (currInst != finish) {
-        if (T()(currInst)) {
-            return true;
-        }
-        currInst = currInst->GetPrev();
+    if (FindInThisBlock<T>(currInst, finish)) {
+        return true;
     }
     if (isSameBlock) {
         return false;

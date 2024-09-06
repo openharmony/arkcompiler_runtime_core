@@ -290,21 +290,21 @@ public:
     NO_COPY_SEMANTIC(SlowPathJsCastDoubleToInt32);
     NO_MOVE_SEMANTIC(SlowPathJsCastDoubleToInt32);
 
-    void SetDstReg(Reg dstReg)
-    {
-        dstReg_ = dstReg;
-    }
-
     void SetSrcReg(Reg srcReg)
     {
         srcReg_ = srcReg;
     }
 
+    void SetDstReg(Reg dstReg)
+    {
+        dstReg_ = dstReg;
+    }
+
     void GenerateImpl(Codegen *codegen) override;
 
 private:
-    Reg dstReg_ {INVALID_REGISTER};
     Reg srcReg_ {INVALID_REGISTER};
+    Reg dstReg_ {INVALID_REGISTER};
 };
 
 class SlowPathStringHashCode : public SlowPathEntrypoint {

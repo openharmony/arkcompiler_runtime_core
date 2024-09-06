@@ -25,16 +25,16 @@ Define arch-specific interfaces
 #include "compiler/optimizer/code_generator/callconv.h"
 #include "registers_description.h"
 
+#ifdef PANDA_COMPILER_TARGET_X86_64
+#include "amd64/target.h"
+#endif
+
 #ifdef PANDA_COMPILER_TARGET_AARCH32
 #include "aarch32/target.h"
 #endif
 
 #ifdef PANDA_COMPILER_TARGET_AARCH64
 #include "aarch64/target.h"
-#endif
-
-#ifdef PANDA_COMPILER_TARGET_X86_64
-#include "amd64/target.h"
 #endif
 
 #include "asm_printer.h"

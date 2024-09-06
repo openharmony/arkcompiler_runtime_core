@@ -75,6 +75,7 @@ EMITED_ONE_PARAM_INST_LIST(C_EXTERN_ONE_PARAM);
 
 EMITED_TWO_PARAM_INST_LIST(C_EXTERN_TWO_PARAM);
 
+// CC-OFFNXT(G.FUN.01, huge_method) test, solid logic
 TEST_F(AsmCaller, CallMath)
 {
     // NOLINTBEGIN(readability-magic-numbers)
@@ -102,9 +103,13 @@ TEST_F(AsmCaller, CallMath)
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CALL_ONE_PARAM_OUTPUT(opc, param)                                 \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                        \
     EXPECT_EQ(test_##opc##_8(ui8), static_cast<uint8_t>(param(ui8)));     \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                        \
     EXPECT_EQ(test_##opc##_16(ui16), static_cast<uint16_t>(param(ui16))); \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                        \
     EXPECT_EQ(test_##opc##_32(ui32), static_cast<uint32_t>(param(ui32))); \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                        \
     EXPECT_EQ(test_##opc##_64(ui64), static_cast<uint64_t>(param(ui64)))
 #endif
 
@@ -124,9 +129,13 @@ TEST_F(AsmCaller, CallMath)
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CALL_TWO_PARAM_OUTPUT(opc, param)                                             \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                                    \
     EXPECT_EQ(test_##opc##_8(ui8, ui82), static_cast<uint8_t>(ui8 param ui82));       \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                                    \
     EXPECT_EQ(test_##opc##_16(ui16, ui162), static_cast<uint16_t>(ui16 param ui162)); \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                                    \
     EXPECT_EQ(test_##opc##_32(ui32, ui322), static_cast<uint32_t>(ui32 param ui322)); \
+    /* CC-OFFNXT(G.PRE.10) local macro for test */                                    \
     EXPECT_EQ(test_##opc##_64(ui64, ui642), static_cast<uint64_t>(ui64 param ui642))
 #endif
     EMITED_TWO_PARAM_INST_LIST(CALL_TWO_PARAM_OUTPUT);  // NOLINT(hicpp-signed-bitwise)

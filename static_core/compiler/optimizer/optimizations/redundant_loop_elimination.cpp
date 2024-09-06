@@ -55,10 +55,11 @@ BasicBlock *RedundantLoopElimination::IsRedundant(Loop *loop)
                 inst->GetOpcode() != Opcode::SafePoint) {
                 return nullptr;
             }
-            for (auto &user : inst->GetUsers()) {
-                if (user.GetInst()->GetBasicBlock()->GetLoop() != loop) {
-                    return nullptr;
-                }
+            auto users = inst->GetUsers();
+            auto it = std::find_if(users.begin(), users.end(),
+                                   [loop](auto &user) { return user.GetInst()->GetBasicBlock()->GetLoop() != loop; });
+            if (it != users.end()) {
+                return nullptr;
             }
         }
     }

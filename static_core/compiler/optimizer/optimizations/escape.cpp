@@ -1348,15 +1348,14 @@ void EscapeAnalysis::VisitLoadObject(Inst *inst)
         aliases_.erase(inst);
     }
 
-    if (!DataType::IsReference(inst->GetType())) {
-        return;
+    if (DataType::IsReference(inst->GetType())) {
+        if (vstate == nullptr) {
+            GetState(inst->GetBasicBlock())->SetStateId(inst, MATERIALIZED_ID);
+            return;
+        }
+        auto fieldInstId = vstate->GetFieldOrDefault(field, ZERO_INST);
+        GetState(inst->GetBasicBlock())->SetStateId(inst, GetState(inst->GetBasicBlock())->GetStateId(fieldInstId));
     }
-    if (vstate == nullptr) {
-        GetState(inst->GetBasicBlock())->SetStateId(inst, MATERIALIZED_ID);
-        return;
-    }
-    auto fieldInstId = vstate->GetFieldOrDefault(field, ZERO_INST);
-    GetState(inst->GetBasicBlock())->SetStateId(inst, GetState(inst->GetBasicBlock())->GetStateId(fieldInstId));
 }
 
 void EscapeAnalysis::VisitLoadArray(Inst *inst)

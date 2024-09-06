@@ -724,6 +724,7 @@ TEST_F(LSETest, LoopBranches)
 }
 
 /// Nested loop elimination
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(NestedLoopElimination, Graph *graph)
 {
     GRAPH(graph)
@@ -784,6 +785,7 @@ SRC_GRAPH(NestedLoopElimination, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(NestedLoopElimination, Graph *graph)
 {
     GRAPH(graph)
@@ -2450,6 +2452,7 @@ TEST_F(LSETest, NotEliminableMonitoredLoadStore)
 }
 
 /// Inner loop overwrites outer loop reference. No elimination
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(InnerOverwrite, Graph *graph)
 {
     GRAPH(graph)
@@ -2518,6 +2521,7 @@ TEST_F(LSETest, InnerOverwrite)
 }
 
 /// Outer loop overwrites inner loop reference.
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(OuterOverwrite, Graph *graph)
 {
     GRAPH(graph)
@@ -2575,6 +2579,7 @@ SRC_GRAPH(OuterOverwrite, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(OuterOverwrite, Graph *graph)
 {
     GRAPH(graph)

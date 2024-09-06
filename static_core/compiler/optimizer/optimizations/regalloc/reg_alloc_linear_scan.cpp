@@ -393,11 +393,11 @@ std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const Lif
             LiveRange range;
             [[maybe_unused]] bool succ = interval->FindRangeCoveringPosition(intersection, &range);
             ASSERT(succ);
-            if (range.GetBegin() == intersection) {
+            if (intersection == range.GetBegin()) {
                 return;
             }
         }
-        ASSERT(regsUsePositions_.size() > interval->GetReg());
+        ASSERT(interval->GetReg() < regsUsePositions_.size());
         regsUsePositions_[interval->GetReg()] = intersection;
     };
     auto setInactiveUsage = [this](const auto &interval, LifeNumber intersection) {

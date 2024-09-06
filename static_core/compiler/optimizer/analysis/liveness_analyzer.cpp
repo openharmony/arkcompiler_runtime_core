@@ -160,20 +160,25 @@ void LivenessAnalyzer::LinearizeBlocks()
             if (succ->IsMarked(marker_) || !AllForwardEdgesVisited(succ)) {
                 continue;
             }
-
-            if constexpr (USE_PC_ORDER) {  // NOLINT(readability-braces-around-statements)
-                auto pcCompare = [succ](auto block) { return block->GetGuestPc() > succ->GetGuestPc(); };
-                auto insertBefore = std::find_if(pending.begin(), pending.end(), pcCompare);
-                pending.insert(insertBefore, succ);
-            } else {
-                // Insert successor right before the first block not from an inner loop.
-                // Such ordering guarantee that a loop and all it's inner loops will be processed
-                // before following edges leading to outer loop blocks.
-                auto isNotInnerLoop = [succ](auto block) { return !block->GetLoop()->IsInside(succ->GetLoop()); };
-                auto insertBefore = std::find_if(pending.begin(), pending.end(), isNotInnerLoop);
-                pending.insert(insertBefore, succ);
-            }
+            InsertSuccToPendingList<USE_PC_ORDER>(pending, succ);
         }
+    }
+}
+
+template <bool USE_PC_ORDER>
+void LivenessAnalyzer::InsertSuccToPendingList(ArenaList<BasicBlock *> &pending, BasicBlock *succ)
+{
+    if constexpr (USE_PC_ORDER) {  // NOLINT(readability-braces-around-statements)
+        auto pcCompare = [succ](auto block) { return block->GetGuestPc() > succ->GetGuestPc(); };
+        auto insertBefore = std::find_if(pending.begin(), pending.end(), pcCompare);
+        pending.insert(insertBefore, succ);
+    } else {
+        // Insert successor right before the first block not from an inner loop.
+        // Such ordering guarantee that a loop and all it's inner loops will be processed
+        // before following edges leading to outer loop blocks.
+        auto isNotInnerLoop = [succ](auto block) { return !block->GetLoop()->IsInside(succ->GetLoop()); };
+        auto insertBefore = std::find_if(pending.begin(), pending.end(), isNotInnerLoop);
+        pending.insert(insertBefore, succ);
     }
 }
 

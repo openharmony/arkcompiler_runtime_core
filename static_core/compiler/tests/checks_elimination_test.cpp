@@ -3020,6 +3020,7 @@ void ChecksEliminationTest::BuildGraphLoopSeveralIndexesBoundsChecks()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, LoopSeveralIndexesBoundsChecks)
 {
     BuildGraphLoopSeveralIndexesBoundsChecks();
@@ -4090,6 +4091,7 @@ TEST_F(ChecksEliminationTest, BugWithNullCheck)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void ChecksEliminationTest::BuildGraphNullAndBoundsChecksNestedLoop()
 {
     GRAPH(GetGraph())
@@ -4146,6 +4148,7 @@ void ChecksEliminationTest::BuildGraphNullAndBoundsChecksNestedLoop()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, NullAndBoundsChecksNestedLoop)
 {
     BuildGraphNullAndBoundsChecksNestedLoop();
@@ -4411,6 +4414,7 @@ void ChecksEliminationTest::BuildGraphLoopWithBigStepLE()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, LoopWithBigStepLE)
 {
     BuildGraphLoopWithBigStepLE();
@@ -4504,6 +4508,7 @@ void ChecksEliminationTest::BuildGraphLoopWithBigStepLT()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, LoopWithBigStepLT)
 {
     BuildGraphLoopWithBigStepLT();
@@ -4561,6 +4566,7 @@ TEST_F(ChecksEliminationTest, LoopWithBigStepLT)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph1));
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfGE()
 {
     GRAPH(GetGraph())
@@ -4619,6 +4625,7 @@ void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfGE()
 }
 
 // Lower bound is correct in each branch based on BoundsAnalysis, build deoptimize only for upper bound
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfGE)
 {
     BuildGraphLoopWithBoundsCheckUnderIfGE();
@@ -4738,6 +4745,7 @@ void ChecksEliminationTest::BuildGraphLoopWithBoundsCheckUnderIfLT()
 }
 
 // Upper bound is correct in each branch based on BoundsAnalysis, build deoptimize only for lower bound
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(ChecksEliminationTest, LoopWithBoundsCheckUnderIfLT)
 {
     BuildGraphLoopWithBoundsCheckUnderIfLT();

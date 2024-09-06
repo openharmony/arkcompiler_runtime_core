@@ -41,8 +41,10 @@ static inline Expected<const uint8_t *, std::string> LoadSymbol(const ark::os::l
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOAD_AOT_SYMBOL(name)                                             \
+    /* CC-OFFNXT(G.PRE.02) name part */                                   \
     auto name = LoadSymbol(handle, (#name));                              \
     if (!(name)) {                                                        \
+        /* CC-OFFNXT(G.PRE.05) code generation */                         \
         return Unexpected("Cannot load name section: " + (name).Error()); \
     }
 

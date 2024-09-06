@@ -332,7 +332,7 @@ void Lowering::ReplaceUnsignedDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, In
     LowerShift(shrInst);
 }
 
-bool Lowering::TryReplaceDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst)
+bool Lowering::SatisfyReplaceDivMovConditions(Inst *inst)
 {
     if (inst->GetBasicBlock()->GetGraph()->IsBytecodeOptimizer()) {
         return false;
@@ -341,11 +341,16 @@ bool Lowering::TryReplaceDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *i
         return false;
     }
     auto c = inst->GetInput(1).GetInst();
-    if (!c->IsConst()) {
+    return c->IsConst();
+}
+
+bool Lowering::TryReplaceDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst)
+{
+    if (!SatisfyReplaceDivMovConditions(inst)) {
         return false;
     }
 
-    uint64_t uValue = c->CastToConstant()->GetInt64Value();
+    uint64_t uValue = inst->GetInput(1).GetInst()->CastToConstant()->GetInt64Value();
     auto sValue = bit_cast<int64_t>(uValue);
 
     auto input0 = inst->GetInput(0).GetInst();
@@ -364,19 +369,12 @@ bool Lowering::TryReplaceDivPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *i
 
 bool Lowering::TryReplaceDivModNonPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
-    auto graph = inst->GetBasicBlock()->GetGraph();
-    if (graph->IsBytecodeOptimizer()) {
-        return false;
-    }
-    if (DataType::IsFloatType(inst->GetType())) {
-        return false;
-    }
-    auto c = inst->GetInput(1).GetInst();
-    if (!c->IsConst()) {
+    if (!SatisfyReplaceDivMovConditions(inst)) {
         return false;
     }
 
-    uint64_t uValue = c->CastToConstant()->GetInt64Value();
+    auto *graph = inst->GetBasicBlock()->GetGraph();
+    uint64_t uValue = inst->GetInput(1).GetInst()->CastToConstant()->GetInt64Value();
 
     auto input0 = inst->GetInput(0).GetInst();
     bool isSigned = DataType::IsTypeSigned(input0->GetType());
@@ -397,18 +395,11 @@ bool Lowering::TryReplaceDivModNonPowerOfTwo([[maybe_unused]] GraphVisitor *v, I
 
 bool Lowering::TryReplaceModPowerOfTwo([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
-    if (inst->GetBasicBlock()->GetGraph()->IsBytecodeOptimizer()) {
-        return false;
-    }
-    if (DataType::IsFloatType(inst->GetType())) {
-        return false;
-    }
-    auto c = inst->GetInput(1).GetInst();
-    if (!c->IsConst()) {
+    if (!SatisfyReplaceDivMovConditions(inst)) {
         return false;
     }
 
-    uint64_t uValue = c->CastToConstant()->GetInt64Value();
+    uint64_t uValue = inst->GetInput(1).GetInst()->CastToConstant()->GetInt64Value();
     auto sValue = bit_cast<int64_t>(uValue);
 
     auto input0 = inst->GetInput(0).GetInst();
@@ -1290,22 +1281,7 @@ void Lowering::JoinFcmpInst(IfImmInst *inst, CmpInst *input)
         cc = InverseSignednessConditionCode(cc);
     }
 
-    // New instruction
-    auto graph = input->GetBasicBlock()->GetGraph();
-    auto replace = graph->CreateInstIf(DataType::NO_TYPE, inst->GetPc(), input->GetInput(0).GetInst(),
-                                       input->GetInput(1).GetInst(), input->GetOperandsType(), cc, inst->GetMethod());
-#ifdef PANDA_COMPILER_DEBUG_INFO
-    replace->SetCurrentMethod(inst->GetCurrentMethod());
-#endif
-
-    // Replace IfImm instruction immediately because it's not removable by DCE
-    inst->RemoveInputs();
-    inst->GetBasicBlock()->ReplaceInst(inst, replace);
-    graph->GetEventWriter().EventLowering(GetOpcodeString(inst->GetOpcode()), inst->GetId(), inst->GetPc());
-    if (graph->IsBytecodeOptimizer()) {
-        OptimizeIfInput(replace);
-    }
-    COMPILER_LOG(DEBUG, LOWERING) << "Lowering is applied for " << GetOpcodeString(inst->GetOpcode());
+    LowerIfImmToIf(inst, input, cc, input->GetOperandsType());
 }
 
 void Lowering::LowerIf(IfImmInst *inst)

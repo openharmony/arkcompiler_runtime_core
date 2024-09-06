@@ -294,6 +294,7 @@ void Codegen::EmitAtomicByteOr(Reg addr, Reg value)
 }
 
 #ifdef INTRINSIC_SLOW_PATH_ENTRY_ENABLED
+// CC-OFFNXT(huge_method, G.FUN.01) big switch-case
 // NOLINTNEXTLINE(readability-function-size)
 void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
 {
@@ -417,6 +418,13 @@ void Codegen::GeneratePrologue()
     }
 
 #if defined(EVENT_METHOD_ENTER_ENABLED) && EVENT_METHOD_ENTER_ENABLED != 0
+    MakeTrace();
+#endif
+}
+
+#if defined(EVENT_METHOD_ENTER_ENABLED) && EVENT_METHOD_ENTER_ENABLED != 0
+void Codegen::MakeTrace()
+{
     if (GetGraph()->IsAotMode()) {
         SCOPED_DISASM_STR(this, "LoadMethod for trace");
         ScopedTmpReg method_reg(GetEncoder());
@@ -428,26 +436,15 @@ void Codegen::GeneratePrologue()
                     Imm(reinterpret_cast<size_t>(GetGraph()->GetMethod())),
                     Imm(static_cast<size_t>(events::MethodEnterKind::COMPILED)));
     }
-#endif
 }
+#endif
 
 void Codegen::GenerateEpilogue()
 {
     SCOPED_DISASM_STR(this, "Method Epilogue");
 
 #if defined(EVENT_METHOD_EXIT_ENABLED) && EVENT_METHOD_EXIT_ENABLED != 0
-    GetCallingConvention()->GenerateEpilogue(*frame_info_, [this]() {
-        if (GetGraph()->IsAotMode()) {
-            ScopedTmpReg method_reg(GetEncoder());
-            LoadMethod(method_reg);
-            InsertTrace(Imm(static_cast<size_t>(TraceId::METHOD_EXIT)), method_reg,
-                        Imm(static_cast<size_t>(events::MethodExitKind::COMPILED)));
-        } else {
-            InsertTrace(Imm(static_cast<size_t>(TraceId::METHOD_EXIT)),
-                        Imm(reinterpret_cast<size_t>(GetGraph()->GetMethod())),
-                        Imm(static_cast<size_t>(events::MethodExitKind::COMPILED)));
-        }
-    });
+    GetCallingConvention()->GenerateEpilogue(*frame_info_, MakeTrace);
 #else
     GetCallingConvention()->GenerateEpilogue(*frameInfo_, []() {});
 #endif

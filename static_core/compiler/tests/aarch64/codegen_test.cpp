@@ -323,8 +323,8 @@ public:
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         auto codeExit = codeEntry + GetGraph()->GetCode().Size();
         ASSERT(codeEntry != nullptr && codeExit != nullptr);
-        auto &decoder {GetDecoder()};
         LoadStoreInstCollector visitor;
+        auto &decoder {GetDecoder()};
         vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&visitor});
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         for (auto instr = codeEntry; instr < codeExit; instr += vixl::aarch64::kInstructionSize) {
@@ -492,8 +492,8 @@ public:
         size_t codeItems = (codeExit - codeEntry) / vixl::aarch64::kInstructionSize;
         ASSERT_TRUE(codeItems == expectedAsm.size());
 
-        auto& decoder {GetDecoder()};
         auto& disasm {GetDisasm()};
+        auto& decoder {GetDecoder()};
         vixl::aarch64::Decoder::ScopedAddVisitors sv(decoder, {&disasm});
         for (size_t item = 0; item < codeItems; ++item) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)

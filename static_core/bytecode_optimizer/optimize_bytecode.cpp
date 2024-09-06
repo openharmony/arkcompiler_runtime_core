@@ -271,8 +271,9 @@ bool OptimizeFunction(pandasm::Program *prog, const pandasm::AsmEmitter::PandaFi
     auto methodPtr = reinterpret_cast<compiler::RuntimeInterface::MethodPtr>(mda.GetMethodId().GetOffset());
 
     ark::BytecodeOptimizerRuntimeAdapter adapter(mda.GetPandaFile());
-    auto graph = allocator.New<compiler::Graph>(&allocator, &localAllocator, Arch::NONE, methodPtr, &adapter, false,
-                                                nullptr, isDynamic, true);
+    auto graph = allocator.New<compiler::Graph>(
+        compiler::Graph::GraphArgs {&allocator, &localAllocator, Arch::NONE, methodPtr, &adapter}, nullptr, false,
+        isDynamic, true);
     if (graph == nullptr) {
         return false;
     }

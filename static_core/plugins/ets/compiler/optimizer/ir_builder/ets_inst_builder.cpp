@@ -51,7 +51,8 @@ template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, true>(c
 template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, true, false>(const BytecodeInstruction *bcInst);
 template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, false>(const BytecodeInstruction *bcInst);
 
-void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::Type type)
+// CC-OFFNXT(huge_method) big switch-case
+void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type)
 {
     auto pc = GetPc(bcInst->GetAddress());
     // Create SaveState instruction
@@ -144,7 +145,7 @@ std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByTyp
     UNREACHABLE();
 }
 
-IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic(size_t pc, DataType::Type type)
+IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic(size_t pc, compiler::DataType::Type type)
 {
     auto [id, extractedType] = ExtractIntrinsicIdByType(type);
     type = extractedType;
@@ -156,7 +157,7 @@ IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic(size_t pc, DataType::Type
     return intrinsic;
 }
 
-void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type)
+void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type)
 {
     auto pc = GetPc(bcInst->GetAddress());
     // Create SaveState instruction

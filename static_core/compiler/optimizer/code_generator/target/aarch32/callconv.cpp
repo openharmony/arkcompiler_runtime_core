@@ -119,13 +119,13 @@ constexpr auto Aarch32CallingConvention::GetTarget()
 uint8_t Aarch32CallingConvention::PushRegs(RegMask regs, VRegMask vregs, bool isCallee)
 {
     auto regdescr = static_cast<Aarch32RegisterDescription *>(GetRegfile());
-    auto fp = GetTarget().GetFrameReg().GetId();
-    if (regs.test(fp)) {
-        regs.reset(fp);
-    }
     auto lr = GetTarget().GetLinkReg().GetId();
     if (regs.test(lr)) {
         regs.reset(lr);
+    }
+    auto fp = GetTarget().GetFrameReg().GetId();
+    if (regs.test(fp)) {
+        regs.reset(fp);
     }
 
     uint8_t realOffset = 0;

@@ -1493,6 +1493,7 @@ TEST_F(AliasAnalysisTest, LoadObjectStatic)
     ASSERT_EQ(alias.CheckInstAlias(&INS(5U), &INS(6U)), AliasType::NO_ALIAS);
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void AliasAnalysisTest::BuildGraphDynamicMethods(Graph *graph)
 {
     GRAPH(graph)

@@ -74,12 +74,7 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallHelper(const 
         Builder()->AddInstruction(resolver_);
     }
     // Add Call
-    Builder()->AddInstruction(call_);
-    if (call_->GetType() != DataType::VOID) {
-        Builder()->UpdateDefinitionAcc(call_);
-    } else {
-        Builder()->UpdateDefinitionAcc(nullptr);
-    }
+    AddCallInstruction();
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
@@ -260,12 +255,7 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultStati
     }
     /* if there are reference type args to be checked for NULL ('need_nullcheck' intrinsic property) */
     Builder()->template AddArgNullcheckIfNeeded<false>(intrinsicId, call_, saveState_, pc_);
-    Builder()->AddInstruction(call_);
-    if (call_->GetType() != DataType::VOID) {
-        Builder()->UpdateDefinitionAcc(call_);
-    } else {
-        Builder()->UpdateDefinitionAcc(nullptr);
-    }
+    AddCallInstruction();
     if (NeedSafePointAfterIntrinsic(intrinsicId)) {
         Builder()->AddInstruction(Builder()->CreateSafePoint(Builder()->GetCurrentBlock()));
     }
@@ -616,6 +606,18 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildStaticCallIn
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
 template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::AddCallInstruction()
+{
+    Builder()->AddInstruction(call_);
+    if (call_->GetType() != DataType::VOID) {
+        Builder()->UpdateDefinitionAcc(call_);
+    } else {
+        Builder()->UpdateDefinitionAcc(nullptr);
+    }
+}
+
+// NOLINTNEXTLINE(misc-definitions-in-headers)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
 void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultVirtualCallIntrinsic(
     RuntimeInterface::IntrinsicId intrinsicId)
 {
@@ -632,12 +634,7 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultVirtu
     /* if there are reference type args to be checked for NULL */
     Builder()->template AddArgNullcheckIfNeeded<true>(intrinsicId, call_, saveState_, pc_);
 
-    Builder()->AddInstruction(call_);
-    if (call_->GetType() != DataType::VOID) {
-        Builder()->UpdateDefinitionAcc(call_);
-    } else {
-        Builder()->UpdateDefinitionAcc(nullptr);
-    }
+    AddCallInstruction();
     if (NeedSafePointAfterIntrinsic(intrinsicId)) {
         Builder()->AddInstruction(Builder()->CreateSafePoint(Builder()->GetCurrentBlock()));
     }

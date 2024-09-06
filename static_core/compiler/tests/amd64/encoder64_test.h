@@ -32,6 +32,14 @@ public:
     NO_MOVE_SEMANTIC(Encoder64Test);
     ~Encoder64Test() override = default;
 
+    void PreWork()
+    {
+        // Curor need to encode multiply tests due one execution
+        currCursor_ = 0;
+        encoder_->SetCursorOffset(0);
+        callconv_->GeneratePrologue(FrameInfo::FullPrologue());
+    }
+
     // Warning! Do not use multiply times with different types!
     Reg GetParameter(TypeInfo type, int id = 0)
     {
@@ -40,14 +48,6 @@ public:
             return Reg(id, type);
         }
         return Target::Current().GetParamReg(id, type);
-    }
-
-    void PreWork()
-    {
-        // Curor need to encode multiply tests due one execution
-        currCursor_ = 0;
-        encoder_->SetCursorOffset(0);
-        callconv_->GeneratePrologue(FrameInfo::FullPrologue());
     }
 
     template <typename T>
@@ -69,8 +69,8 @@ public:
         // Using max size type: type result "U" or 32bit to check result,
         // because in our ISA min type is 32bit.
         // Only integers less thаn 32bit.
-        using UExp = typename std::conditional<(sizeof(U) * BYTE_SIZE) >= WORD_SIZE, U, uint32_t>::type;
         using TExp = typename std::conditional<(sizeof(T) * BYTE_SIZE) >= WORD_SIZE, T, uint32_t>::type;
+        using UExp = typename std::conditional<(sizeof(U) * BYTE_SIZE) >= WORD_SIZE, U, uint32_t>::type;
         using FunctPtr = UExp (*)(TExp data);
         auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
@@ -81,27 +81,27 @@ public:
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_floating_point_v<T> || std::is_floating_point_v<U>) {
-            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
-                  (std::isnan(currResult) && std::isnan(result));
+            bool areNan = (std::isnan(currResult) && std::isnan(result));
+            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) || areNan;
         } else {
             ret = (currResult - result == 0);
         }
         if (!ret) {
             std::cerr << std::hex << "Failed CallCode for param=" << param << " and result=" << result
-                      << " current_reslt=" << currResult << "\n";
+                      << " current_reslt=" << currResult << std::endl;
             if constexpr (std::is_floating_point_v<T> || std::is_floating_point_v<U>) {
                 std::cerr << "In binary :";
-                if constexpr (std::is_same<double, T>::value) {
-                    std::cerr << " param=" << bit_cast<uint64_t>(param);
-                } else if constexpr (std::is_same<float, T>::value) {
+                if constexpr (std::is_same<float, T>::value) {
                     std::cerr << " param=" << bit_cast<uint32_t>(param);
+                } else if constexpr (std::is_same<double, T>::value) {
+                    std::cerr << " param=" << bit_cast<uint64_t>(param);
                 }
-                if constexpr (std::is_same<double, U>::value) {
-                    std::cerr << " reslt=" << bit_cast<uint64_t>(result);
-                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(currResult);
-                } else if constexpr (std::is_same<float, U>::value) {
+                if constexpr (std::is_same<float, U>::value) {
                     std::cerr << " result=" << bit_cast<uint32_t>(result);
                     std::cerr << " current_reslt=" << bit_cast<uint32_t>(currResult);
+                } else if constexpr (std::is_same<double, U>::value) {
+                    std::cerr << " reslt=" << bit_cast<uint64_t>(result);
+                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -113,8 +113,8 @@ public:
     template <typename T, typename U>
     bool CallCode(const T &param1, const T &param2, const U &result)
     {
-        using UExp = typename std::conditional<(sizeof(U) * BYTE_SIZE) >= WORD_SIZE, U, uint32_t>::type;
         using TExp = typename std::conditional<(sizeof(T) * BYTE_SIZE) >= WORD_SIZE, T, uint32_t>::type;
+        using UExp = typename std::conditional<(sizeof(U) * BYTE_SIZE) >= WORD_SIZE, U, uint32_t>::type;
         using FunctPtr = UExp (*)(TExp param1, TExp param2);
         auto size = callconv_->GetCodeSize() - currCursor_;
         void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
@@ -124,27 +124,28 @@ public:
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_same<float, T>::value || std::is_same<double, T>::value) {
-            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
-                  (std::isnan(currResult) && std::isnan(result));
+            bool areNan = (std::isnan(currResult) && std::isnan(result));
+            bool eqSignBit = (std::signbit(currResult) == std::signbit(result));
+            ret = (currResult == result && eqSignBit) || areNan;
         } else {
             ret = (currResult - result == 0);
         }
         if (!ret) {
             std::cerr << "Failed CallCode for param1=" << param1 << " param2=" << param2 << " and result=" << result
-                      << " current_result=" << currResult << "\n";
+                      << " current_result=" << currResult << std::endl;
             if constexpr (std::is_floating_point_v<T> || std::is_floating_point_v<U>) {
                 std::cerr << "In binary :";
-                if constexpr (std::is_same<double, T>::value) {
-                    std::cerr << " param1=" << bit_cast<uint64_t>(param1) << " param2=" << bit_cast<uint64_t>(param2);
-                } else if constexpr (std::is_same<float, T>::value) {
+                if constexpr (std::is_same<float, T>::value) {
                     std::cerr << " param1=" << bit_cast<uint32_t>(param1) << " param2=" << bit_cast<uint32_t>(param2);
+                } else if constexpr (std::is_same<double, T>::value) {
+                    std::cerr << " param1=" << bit_cast<uint64_t>(param1) << " param2=" << bit_cast<uint64_t>(param2);
                 }
-                if constexpr (std::is_same<double, U>::value) {
-                    std::cerr << " reslt=" << bit_cast<uint64_t>(result);
-                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(currResult);
-                } else if constexpr (std::is_same<float, U>::value) {
+                if constexpr (std::is_same<float, U>::value) {
                     std::cerr << " result=" << bit_cast<uint32_t>(result);
                     std::cerr << " current_result=" << bit_cast<uint32_t>(currResult);
+                } else if constexpr (std::is_same<double, U>::value) {
+                    std::cerr << " reslt=" << bit_cast<uint64_t>(result);
+                    std::cerr << " current_reslt=" << bit_cast<uint64_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -166,8 +167,8 @@ public:
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_same<float, T>::value || std::is_same<double, T>::value) {
-            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
-                  (std::isnan(currResult) && std::isnan(result));
+            bool areNan = (std::isnan(currResult) && std::isnan(result));
+            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) || areNan;
         } else {
             ret = (currResult - result == 0);
         }
@@ -176,13 +177,13 @@ public:
                       << " current_result=" << currResult << "\n";
             if constexpr (std::is_floating_point_v<T>) {
                 std::cerr << "In binary :";
-                if constexpr (std::is_same<double, T>::value) {
+                if constexpr (std::is_same<float, T>::value) {
+                    std::cerr << " param=" << bit_cast<uint32_t>(param);
+                    std::cerr << " curr_reslt=" << bit_cast<uint32_t>(currResult);
+                } else if constexpr (std::is_same<double, T>::value) {
                     std::cerr << " param=" << bit_cast<uint64_t>(param);
                     std::cerr << " reslt=" << bit_cast<uint64_t>(result);
-                    std::cerr << " curr_reslt=" << bit_cast<uint64_t>(currResult);
-                } else if constexpr (std::is_same<float, T>::value) {
-                    std::cerr << " param=" << bit_cast<uint32_t>(param);
-                    std::cerr << " currResult=" << bit_cast<uint32_t>(currResult);
+                    std::cerr << " currResult=" << bit_cast<uint64_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -204,8 +205,8 @@ public:
         ResetCodeAllocator(ptr, size);
         bool ret = false;
         if constexpr (std::is_same<float, T>::value || std::is_same<double, T>::value) {
-            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) ||
-                  (std::isnan(currResult) && std::isnan(result));
+            bool areNan = (std::isnan(currResult) && std::isnan(result));
+            ret = (currResult == result && std::signbit(currResult) == std::signbit(result)) || areNan;
         } else {
             ret = (currResult - result == 0);
         }
@@ -214,14 +215,14 @@ public:
                       << " currResult=" << currResult << "\n";
             if constexpr (std::is_floating_point_v<T>) {
                 std::cerr << "In binary :";
-                if constexpr (std::is_same<double, T>::value) {
-                    std::cerr << " param1=" << bit_cast<uint64_t>(param1) << " param2=" << bit_cast<uint64_t>(param2);
-                    std::cerr << " reslt=" << bit_cast<uint64_t>(result)
-                              << " currResult=" << bit_cast<uint64_t>(currResult);
-                } else if constexpr (std::is_same<float, T>::value) {
+                if constexpr (std::is_same<float, T>::value) {
                     std::cerr << " param1=" << bit_cast<uint32_t>(param1) << " param2=" << bit_cast<uint32_t>(param2);
                     std::cerr << " result=" << bit_cast<uint32_t>(result)
                               << " currResult=" << bit_cast<uint32_t>(currResult);
+                } else if constexpr (std::is_same<double, T>::value) {
+                    std::cerr << " param1=" << bit_cast<uint64_t>(param1) << " param2=" << bit_cast<uint64_t>(param2);
+                    std::cerr << " reslt=" << bit_cast<uint64_t>(result)
+                              << " currResult=" << bit_cast<uint64_t>(currResult);
                 }
                 std::cerr << "\n";
             }
@@ -235,10 +236,10 @@ public:
     {
         using FunctPtr = T (*)(uint64_t param1, T param2);
         auto size = callconv_->GetCodeSize() - currCursor_;
-        void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
+        auto codeEntry = callconv_->GetCodeEntry();
+        void *offset = (static_cast<uint8_t *>(codeEntry));
         void *ptr = codeAlloc_->AllocateCode(size, offset);
-        auto func = reinterpret_cast<FunctPtr>(ptr);
-        const T currResult = func(address, param);
+        const T currResult = reinterpret_cast<FunctPtr>(ptr)(address, param);
         ResetCodeAllocator(ptr, size);
         return currResult;
     }
@@ -248,7 +249,8 @@ public:
     {
         using FunctPtr = U (*)(T param1, T param2);
         auto size = callconv_->GetCodeSize() - currCursor_;
-        void *offset = (static_cast<uint8_t *>(callconv_->GetCodeEntry()));
+        auto codeEntry = callconv_->GetCodeEntry();
+        void *offset = (static_cast<uint8_t *>(codeEntry));
         void *ptr = codeAlloc_->AllocateCode(size, offset);
         auto func = reinterpret_cast<FunctPtr>(ptr);
         const U currResult = func(param1, param2);

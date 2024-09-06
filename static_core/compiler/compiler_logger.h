@@ -25,7 +25,7 @@ namespace ark::compiler {
 
 enum CompilerLoggerComponents : uint8_t {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF(COMPONENT, ...) COMPONENT,
+#define DEF(COMPONENT, ...) COMPONENT,  // CC-OFF(G.PRE.02) list generation
     COMPILER_LOG_COMPONENTS(DEF)
 #undef DEF
         LOG_COMPONENTS_NUM
@@ -64,10 +64,10 @@ private:
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define COMPILER_LOG(level, comp) \
+#define COMPILER_LOG(level, comp) /* CC-OFFNXT(G.PRE.02) name part */ \
     CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::comp) && LOG(level, COMPILER) << "[" #comp "] "
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define COMPILER_LOG_IF(cond, level, comp)                                                              \
+#define COMPILER_LOG_IF(cond, level, comp) /* CC-OFFNXT(G.PRE.02) name part */                          \
     CompilerLogger::IsComponentEnabled(CompilerLoggerComponents::comp) && LOG_IF(cond, level, COMPILER) \
                                                                               << "[" #comp "] "
 }  // namespace ark::compiler

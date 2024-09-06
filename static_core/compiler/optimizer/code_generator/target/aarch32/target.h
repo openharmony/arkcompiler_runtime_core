@@ -274,11 +274,11 @@ public:
     void SetMaxAllocatedBytes(size_t size) override;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override;
+#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override; /* CC-OFF(G.PRE.09) code generation */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BINARY_OPERATION(opc)                               \
     void Encode##opc(Reg dst, Reg src0, Reg src1) override; \
-    void Encode##opc(Reg dst, Reg src0, Imm src1) override;
+    void Encode##opc(Reg dst, Reg src0, Imm src1) override; /* CC-OFF(G.PRE.09) code generation */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INST_DEF(OPCODE, MACRO) MACRO(OPCODE)
 
@@ -434,9 +434,13 @@ private:
     template <bool IS_STORE>
     void LoadStoreRegisters(RegMask registers, ssize_t slot, size_t startReg, bool isFp);
     template <bool IS_STORE>
-    void LoadStoreRegisters(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask);
+    void LoadStoreRegisters(RegMask registers, ssize_t slot, Reg base, RegMask mask, bool isFp);
     template <bool IS_STORE>
-    void LoadStoreRegistersMainLoop(RegMask registers, bool isFp, int32_t slot, Reg base, RegMask mask);
+    void LoadStoreRegistersMainLoop(RegMask registers, ssize_t slot, Reg base, RegMask mask, bool isFp);
+    template <bool IS_STORE>
+    void ConstructLdrStr(vixl::aarch32::MemOperand mem, size_t i, bool isFp);
+    void ConstructAddForBigOffset(vixl::aarch32::Register tmp, vixl::aarch32::Register *baseReg, ssize_t *slot,
+                                  ssize_t maxOffset, bool isFp);
 
 private:
     vixl::aarch32::MemOperand PrepareMemLdSForFloat(MemRef mem, vixl::aarch32::Register tmp);
@@ -446,6 +450,7 @@ private:
     void EncodeCastScalarToFloat(Reg dst, Reg src, bool srcSigned);
     void EncodeCastFloatToScalar(Reg dst, bool dstSigned, Reg src);
     void EncodeCastFloatToScalarWithSmallDst(Reg dst, bool dstSigned, Reg src);
+    void EncodeCastToDoubleWord(Reg dst, bool dstSigned, Reg src);
 
     void EncoderCastExtendFromInt32(Reg dst, bool dstSigned);
     void EncodeCastScalar(Reg dst, bool dstSigned, Reg src, bool srcSigned);
@@ -466,6 +471,7 @@ private:
     void TestImmHelper(Reg src, Imm imm, Condition cc);
     bool CompareNegImmHelper(Reg src, int64_t value, const Condition *cc);
     bool ComparePosImmHelper(Reg src, int64_t value, Condition *cc);
+    Condition TrySwapCc(Condition cc, bool *swap);
     void CompareZeroHelper(Reg src, Condition *cc);
     void EncodeCmpFracWithDelta(Reg src);
     static inline constexpr int32_t MEM_BIG_OFFSET = 4095;

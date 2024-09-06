@@ -37,11 +37,12 @@ const char *TypeName(T /*unused*/)
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CLASS_NAME(type)                    \
-    template <>                             \
-    inline const char *TypeName<type>(void) \
-    {                                       \
-        return #type;                       \
+#define CLASS_NAME(type)                       \
+    template <>                                \
+    inline const char *TypeName<type>(void)    \
+    {                                          \
+        /* CC-OFFNXT(G.PRE.05) function gen */ \
+        return #type;                          \
     }
 
 CLASS_NAME(int8_t)

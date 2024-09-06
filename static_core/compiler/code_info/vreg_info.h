@@ -35,7 +35,7 @@ public:
     V(LEX_ENV)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define VREG_ENV_TYPE(ENV_TYPE) ENV_TYPE,
+#define VREG_ENV_TYPE(ENV_TYPE) ENV_TYPE,  // CC-OFF(G.PRE.02) list generation
     enum VRegType : uint8_t { VREG, ACC, VREGS_ENV_TYPE_DEFS(VREG_ENV_TYPE) COUNT, ENV_BEGIN = THIS_FUNC };
 #undef VREG_ENV_TYPE
 

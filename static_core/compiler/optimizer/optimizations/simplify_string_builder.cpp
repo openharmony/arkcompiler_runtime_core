@@ -1547,6 +1547,7 @@ void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage 
     }
 }
 
+// CC-OFFNXT(huge_depth) false positive
 Inst *SimplifyStringBuilder::MatchHoistableInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match,
                                                         Marker appendInstructionVisited)
 {
@@ -1608,12 +1609,12 @@ const ArenaVector<SimplifyStringBuilder::ConcatenationLoopMatch> &SimplifyString
     Loop *loop)
 {
     // Search loop for string concatenation patterns like the following:
-    //      let str = initial_value: String
-    //      for (...) {
-    //          str += a0 + b0 + ...
-    //          str += a1 + b2 + ...
-    //          ...
-    //      }
+    //   >  let str = initial_value: String
+    //   >  for (...) {
+    //   >      str += a0 + b0 + ...
+    //   >      str += a1 + b2 + ...
+    //   >      ...
+    //   >  }
     // And fill ConcatenationLoopMatch structure with instructions from the pattern found
 
     matches_.clear();
@@ -1816,6 +1817,7 @@ bool HasPhiOfStringBuilders(BasicBlock *block)
     return false;
 }
 
+// CC-OFFNXT(huge_depth) false positive
 const SimplifyStringBuilder::StringBuilderCallsMap &SimplifyStringBuilder::CollectStringBuilderCalls(BasicBlock *block)
 {
     auto &calls = stringBuilderCalls_;

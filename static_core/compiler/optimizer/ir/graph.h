@@ -57,20 +57,22 @@ class GraphMode {
 public:
     explicit GraphMode(uint32_t value) : value_(value) {}
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_GRAPH_MODE_MODIFIERS(name) \
-    void Set##name(bool v)                 \
-    {                                      \
-        Flag##name ::Set(v, &value_);      \
-    }                                      \
-    bool Is##name() const                  \
-    {                                      \
-        return Flag##name ::Get(value_);   \
+#define DECLARE_GRAPH_MODE_MODIFIERS(name)     \
+    void Set##name(bool v)                     \
+    {                                          \
+        Flag##name ::Set(v, &value_);          \
+    }                                          \
+    bool Is##name() const                      \
+    {                                          \
+        /* CC-OFFNXT(G.PRE.05) function gen */ \
+        return Flag##name ::Get(value_);       \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DECLARE_GRAPH_MODE(name)                    \
     static GraphMode name(bool set = true)          \
     {                                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */      \
         return GraphMode(Flag##name ::Encode(set)); \
     }                                               \
     DECLARE_GRAPH_MODE_MODIFIERS(name)
@@ -128,51 +130,53 @@ using EncodeDataType = Span<uint8_t>;
 
 class Graph final : public MarkerMgr {
 public:
+    struct GraphArgs {
+        ArenaAllocator *allocator;
+        ArenaAllocator *localAllocator;
+        Arch arch;
+        RuntimeInterface::MethodPtr method;
+        RuntimeInterface *runtime;
+    };
+
     explicit Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch)
-        : Graph(allocator, localAllocator, arch, false)
+        : Graph({allocator, localAllocator, arch, nullptr, GetDefaultRuntime()}, false)
     {
     }
 
     Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, bool osrMode)
-        : Graph(allocator, localAllocator, arch, nullptr, GetDefaultRuntime(), osrMode)
+        : Graph({allocator, localAllocator, arch, nullptr, GetDefaultRuntime()}, osrMode)
     {
     }
 
     Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, bool dynamicMethod, bool bytecodeOpt)
-        : Graph(allocator, localAllocator, arch, nullptr, GetDefaultRuntime(), false, nullptr, dynamicMethod,
+        : Graph({allocator, localAllocator, arch, nullptr, GetDefaultRuntime()}, nullptr, false, dynamicMethod,
                 bytecodeOpt)
     {
     }
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, RuntimeInterface::MethodPtr method,
-          RuntimeInterface *runtime, bool osrMode)
-        : Graph(allocator, localAllocator, arch, method, runtime, osrMode, nullptr)
-    {
-    }
+    Graph(const GraphArgs &args, bool osrMode) : Graph(args, nullptr, osrMode) {}
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, RuntimeInterface::MethodPtr method,
-          RuntimeInterface *runtime, bool osrMode, Graph *parent, bool dynamicMethod = false, bool bytecodeOpt = false)
-        : Graph(allocator, localAllocator, arch, method, runtime, parent,
+    Graph(const GraphArgs &args, Graph *parent, bool osrMode, bool dynamicMethod = false, bool bytecodeOpt = false)
+        : Graph(args, parent,
                 GraphMode::Osr(osrMode) | GraphMode::BytecodeOpt(bytecodeOpt) | GraphMode::DynamicMethod(dynamicMethod))
     {
     }
 
-    Graph(ArenaAllocator *allocator, ArenaAllocator *localAllocator, Arch arch, RuntimeInterface::MethodPtr method,
-          RuntimeInterface *runtime, Graph *parent, GraphMode mode)
-        : allocator_(allocator),
-          localAllocator_(localAllocator),
-          arch_(arch),
-          vectorBb_(allocator->Adapter()),
-          throwableInsts_(allocator->Adapter()),
-          runtime_(runtime),
-          method_(method),
+    Graph(const GraphArgs &args, Graph *parent, GraphMode mode)
+        : allocator_(args.allocator),
+          localAllocator_(args.localAllocator),
+          arch_(args.arch),
+          vectorBb_(args.allocator->Adapter()),
+          throwableInsts_(args.allocator->Adapter()),
+          runtime_(args.runtime),
+          method_(args.method),
           passManager_(this, parent != nullptr ? parent->GetPassManager() : nullptr),
-          eventWriter_(runtime->GetClassNameFromMethod(method), runtime->GetMethodName(method)),
+          eventWriter_(args.runtime->GetClassNameFromMethod(args.method), args.runtime->GetMethodName(args.method)),
           mode_(mode),
-          singleImplementationList_(allocator->Adapter()),
-          tryBeginBlocks_(allocator->Adapter()),
-          throwBlocks_(allocator->Adapter()),
-          spilledConstants_(allocator->Adapter()),
+          singleImplementationList_(args.allocator->Adapter()),
+          tryBeginBlocks_(args.allocator->Adapter()),
+          throwBlocks_(args.allocator->Adapter()),
+          spilledConstants_(args.allocator->Adapter()),
           parentGraph_(parent)
     {
         SetNeedCleanup(true);
@@ -182,8 +186,8 @@ public:
 
     Graph *CreateChildGraph(RuntimeInterface::MethodPtr method)
     {
-        auto graph = GetAllocator()->New<Graph>(GetAllocator(), GetLocalAllocator(), GetArch(), method, GetRuntime(),
-                                                this, mode_);
+        auto graph = GetAllocator()->New<Graph>(
+            GraphArgs {GetAllocator(), GetLocalAllocator(), GetArch(), method, GetRuntime()}, this, mode_);
         graph->SetAotData(GetAotData());
         return graph;
     }

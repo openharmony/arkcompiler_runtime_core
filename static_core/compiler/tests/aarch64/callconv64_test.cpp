@@ -41,9 +41,9 @@ public:
     {
         Logger::Destroy();
         encoder_->~Encoder();
-        delete allocator_;
         delete codeAlloc_;
         delete memStats_;
+        delete allocator_;
         PoolManager::Finalize();
         ark::mem::MemConfig::Finalize();
     }
@@ -51,14 +51,14 @@ public:
     NO_COPY_SEMANTIC(Callconv64Test);
     NO_MOVE_SEMANTIC(Callconv64Test);
 
-    ArenaAllocator *GetAllocator()
-    {
-        return allocator_;
-    }
-
     Encoder *GetEncoder()
     {
         return encoder_;
+    }
+
+    ArenaAllocator *GetAllocator()
+    {
+        return allocator_;
     }
 
     RegistersDescription *GetRegfile()
@@ -72,8 +72,8 @@ public:
     }
 
 private:
-    ArenaAllocator *allocator_ {nullptr};
     Encoder *encoder_ {nullptr};
+    ArenaAllocator *allocator_ {nullptr};
     RegistersDescription *regfile_ {nullptr};
     CallingConvention *callconv_ {nullptr};
     CodeAllocator *codeAlloc_ {nullptr};
@@ -142,14 +142,14 @@ TEST_F(Callconv64Test, NativeFloatParams)
         auto paramInfo = GetCallconv()->GetParameterInfo(0);
         auto ret = paramInfo->GetNativeParam(FLOAT32_TYPE);
         EXPECT_TRUE(std::holds_alternative<Reg>(ret));
-        EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, FLOAT32_TYPE));
+        EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
 
         for (uint32_t i = 1; i <= 7U; ++i) {
             ret = paramInfo->GetNativeParam(FLOAT32_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
-            EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
             EXPECT_EQ(std::get<Reg>(ret), Reg(i, FLOAT32_TYPE));
+            EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
         }
     }
 
@@ -158,14 +158,14 @@ TEST_F(Callconv64Test, NativeFloatParams)
         auto paramInfo = GetCallconv()->GetParameterInfo(0);
         auto ret = paramInfo->GetNativeParam(FLOAT64_TYPE);
         EXPECT_TRUE(std::holds_alternative<Reg>(ret));
-        EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
         EXPECT_EQ(std::get<Reg>(ret), Reg(0, FLOAT64_TYPE));
+        EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
 
         for (uint32_t i = 1; i <= 7U; ++i) {
             ret = paramInfo->GetNativeParam(FLOAT64_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
-            EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
             EXPECT_EQ(std::get<Reg>(ret), Reg(i, FLOAT64_TYPE));
+            EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
         }
     }
 }

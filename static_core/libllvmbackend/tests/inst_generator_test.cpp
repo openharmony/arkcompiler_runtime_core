@@ -54,9 +54,14 @@ public:
             if (graph->GetAotData() == nullptr) {
                 uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
                 auto aotData = graph->GetAllocator()->New<compiler::AotData>(
-                    nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
-                    aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
-                    aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
+                    compiler::AotData::AotDataArgs {nullptr,
+                                                    graph,
+                                                    nullptr,
+                                                    codeAddress,
+                                                    aotBuilder.GetIntfInlineCacheIndex(),
+                                                    {aotBuilder.GetGotPlt(), aotBuilder.GetGotVirtIndexes(),
+                                                     aotBuilder.GetGotClass(), aotBuilder.GetGotString()},
+                                                    {aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon()}});
                 aotData->SetUseCha(true);
                 graph->SetAotData(aotData);
             }
@@ -96,9 +101,14 @@ public:
         if (graph->GetAotData() == nullptr) {
             uintptr_t codeAddress = aotBuilder.GetCurrentCodeAddress();
             auto aotData = graph->GetAllocator()->New<compiler::AotData>(
-                nullptr, graph, codeAddress, aotBuilder.GetIntfInlineCacheIndex(), aotBuilder.GetGotPlt(),
-                aotBuilder.GetGotVirtIndexes(), aotBuilder.GetGotClass(), aotBuilder.GetGotString(),
-                aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon(), nullptr);
+                compiler::AotData::AotDataArgs {nullptr,
+                                                graph,
+                                                nullptr,
+                                                codeAddress,
+                                                aotBuilder.GetIntfInlineCacheIndex(),
+                                                {aotBuilder.GetGotPlt(), aotBuilder.GetGotVirtIndexes(),
+                                                 aotBuilder.GetGotClass(), aotBuilder.GetGotString()},
+                                                {aotBuilder.GetGotIntfInlineCache(), aotBuilder.GetGotCommon()}});
             aotData->SetUseCha(true);
             graph->SetAotData(aotData);
         }

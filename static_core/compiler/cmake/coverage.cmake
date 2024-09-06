@@ -13,6 +13,7 @@
 
 # option(ENABLE_COMPILER_COVERAGE "Enable coverage-calculation for compiler" false)
 
+# CC-OFFNXT(bc-40028) false positive
 include(${PANDA_ROOT}/cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
 if(ENABLE_COMPILER_COVERAGE)

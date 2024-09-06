@@ -81,12 +81,12 @@ public:
     }
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
-    CfiInfo &GetCfiInfo()
+    const CfiInfo &GetCfiInfo() const
     {
         return cfiInfo_;
     }
 
-    const CfiInfo &GetCfiInfo() const
+    CfiInfo &GetCfiInfo()
     {
         return cfiInfo_;
     }

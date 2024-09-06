@@ -147,6 +147,8 @@ public:
 
     template <typename Allocator>
     using VRegList = SmallVector<VRegInfo, VREG_LIST_STATIC_SIZE, Allocator, true>;
+    using VRegNumberPair = std::pair<uint32_t *, uint32_t *>;
+    using RegionType = BitMemoryRegion<const uint8_t>;
 
     NO_COPY_SEMANTIC(CodeInfo);
     NO_MOVE_SEMANTIC(CodeInfo);
@@ -470,27 +472,38 @@ public:
             mapIndex += vregMask.Popcount(0, firstVreg);
             vregMask = vregMask.Subregion(firstVreg, vregMask.Size() - firstVreg);
 
-            uint32_t end = std::min<uint32_t>(vregMask.Size(), vregsCount);
-            for (size_t i = 0; i < end; i += BITS_PER_UINT32) {
-                uint32_t mask = vregMask.Read(i, std::min<uint32_t>(end - i, BITS_PER_UINT32));
-                while (mask != 0) {
-                    auto regIdx = static_cast<size_t>(Ctz(mask));
-                    if (!regSet[i + regIdx]) {
-                        auto vregIndex = vregsMap_.GetRow(mapIndex);
-                        if (vregIndex.GetIndex() != StackMap::NO_VALUE) {
-                            ASSERT(!vregList[i + regIdx].IsLive());
-                            vregList[i + regIdx] = vregsCatalogue_.GetRow(vregIndex.GetIndex()).GetVRegInfo();
-                            vregList[i + regIdx].SetIndex(i + regIdx);
-                        }
-                        remainingRegisters--;
-                        regSet[i + regIdx] = true;
-                    }
-                    mapIndex++;
-                    mask ^= 1U << regIdx;
-                }
-            }
+            FillVRegList<Allocator>(vregMask, vregList, regSet, {&vregsCount, &remainingRegisters}, &mapIndex);
         }
         return vregList;
+    }
+
+    template <typename Allocator>
+    void FillVRegList(RegionType &vregMask, VRegList<Allocator> &vregList, std::vector<bool> &regSet,
+                      VRegNumberPair vregPair, uint32_t *mapIndex) const
+    {
+        auto [vregsCount, remainingRegisters] = vregPair;
+        uint32_t end = std::min<uint32_t>(vregMask.Size(), *vregsCount);
+        for (size_t i = 0; i < end; i += BITS_PER_UINT32) {
+            uint32_t mask = vregMask.Read(i, std::min<uint32_t>(end - i, BITS_PER_UINT32));
+            while (mask != 0) {
+                auto regIdx = static_cast<size_t>(Ctz(mask));
+                if (regSet[i + regIdx]) {
+                    (*mapIndex)++;
+                    mask ^= 1U << regIdx;
+                    continue;
+                }
+                auto vregIndex = vregsMap_.GetRow(*mapIndex);
+                if (vregIndex.GetIndex() != StackMap::NO_VALUE) {
+                    ASSERT(!vregList[i + regIdx].IsLive());
+                    vregList[i + regIdx] = vregsCatalogue_.GetRow(vregIndex.GetIndex()).GetVRegInfo();
+                    vregList[i + regIdx].SetIndex(i + regIdx);
+                }
+                (*remainingRegisters)--;
+                regSet[i + regIdx] = true;
+                (*mapIndex)++;
+                mask ^= 1U << regIdx;
+            }
+        }
     }
 
     template <typename Allocator>

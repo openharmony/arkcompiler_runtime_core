@@ -63,6 +63,7 @@ SRC_GRAPH(LoopCopingSimpleLoop, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(LoopCopingSimpleLoop, Graph *graph)
 {
     GRAPH(graph)
@@ -173,6 +174,7 @@ SRC_GRAPH(LoopCopingLoopSum, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(LoopCopingLoopSum, Graph *graph)
 {
     GRAPH(graph)
@@ -373,6 +375,7 @@ SRC_GRAPH(LoopCopingWithoutIndexResolver, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(LoopCopingWithoutIndexResolver, Graph *graph)
 {
     GRAPH(graph)

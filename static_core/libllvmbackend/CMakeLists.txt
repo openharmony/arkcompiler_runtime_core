@@ -17,6 +17,7 @@ if (NOT PANDA_BUILD_LLVM_BACKEND)
     message(FATAL_ERROR "PANDA_BUILD_LLVM_BACKEND must be true")
 endif()
 
+# CC-OFFNXT(bc-40028) false positive
 include(${PANDA_ROOT}/compiler/cmake/target.cmake)
 
 if(ENABLE_COMPILER_COVERAGE)

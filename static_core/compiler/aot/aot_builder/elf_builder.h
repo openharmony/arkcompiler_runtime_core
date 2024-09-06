@@ -114,16 +114,17 @@ class ElfBuilder {  // NOLINT(cppcoreguidelines-special-member-functions)
 public:
     class Section {
     public:
+        using ElfShdrParams = std::array<ElfWord, 5U>;
+
         // NOLINTNEXTLINE(modernize-pass-by-value)
-        Section(ElfBuilder &builder, const std::string &name, ElfWord type, ElfWord flags, Section *link, ElfWord info,
-                ElfWord align, ElfWord entsize)
+        Section(ElfBuilder &builder, const std::string &name, Section *link, const ElfShdrParams &params)
             : builder_(builder), name_(name), link_(link)
         {
-            header_.sh_type = type;
-            header_.sh_flags = flags;
-            header_.sh_info = info;
-            header_.sh_addralign = align;
-            header_.sh_entsize = entsize;
+            header_.sh_type = params[0U];
+            header_.sh_flags = params[1U];
+            header_.sh_info = params[2U];
+            header_.sh_addralign = params[3U];
+            header_.sh_entsize = params[4U];
         }
         virtual ~Section() = default;
         NO_MOVE_SEMANTIC(Section);
@@ -221,11 +222,11 @@ public:
     class SymbolSection : public Section {
     public:
         using ThunkFunc = std::function<ElfAddr(void)>;
+        using typename Section::ElfShdrParams;
 
         using Section::Section;
-        SymbolSection(ElfBuilder &builder, const std::string &name, ElfWord type, ElfWord flags, Section *link,
-                      ElfWord info, ElfWord align, ElfWord entsize)
-            : Section(builder, name, type, flags, link, info, align, entsize)
+        SymbolSection(ElfBuilder &builder, const std::string &name, Section *link, const ElfShdrParams &params)
+            : Section(builder, name, link, params)
         {
             symbols_.emplace_back(ElfSym {});
             thunks_.emplace_back();
@@ -253,7 +254,7 @@ public:
     class StringSection : public DataSection {
     public:
         StringSection(ElfBuilder &builder, const std::string &name, ElfWord flags, ElfWord align)
-            : DataSection(builder, name, SHT_STRTAB, flags, nullptr, 0, align, 0)
+            : DataSection(builder, name, nullptr, {SHT_STRTAB, flags, 0, align, 0})
         {
             AddString("\0");  // NOLINT(bugprone-string-literal-with-embedded-nul)
         }
@@ -353,9 +354,10 @@ public:
     void AddRoDataSection(const std::string &name, size_t alignment)
     {
         ASSERT(!name.empty());
-        auto section =
-            new DataSection(*this, name, SHT_PROGBITS, SHF_ALLOC | SHF_MERGE, nullptr,  // NOLINT(hicpp-signed-bitwise)
-                            0, alignment, 0);
+        auto section = new DataSection(*this, name, nullptr,
+                                       // CC-OFFNXT(G.FMT.03) project code style
+                                       {SHT_PROGBITS, SHF_ALLOC | SHF_MERGE,  // NOLINT(hicpp-signed-bitwise)
+                                        0, static_cast<ElfWord>(alignment), 0});
         AddSection(section);
         roDataSections_.push_back(section);
     }
@@ -510,25 +512,26 @@ private:
 
     std::vector<DataSection *> roDataSections_;
     DataSection hashSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        DataSection(*this, ".hash", SHT_HASH, SHF_ALLOC, &dynsymSection_, 0, sizeof(ElfWord), sizeof(ElfWord));
+        DataSection(*this, ".hash", &dynsymSection_, {SHT_HASH, SHF_ALLOC, 0, sizeof(ElfWord), sizeof(ElfWord)});
     DataSection textSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        DataSection(*this, ".text", SHT_PROGBITS, SHF_ALLOC | SHF_EXECINSTR, nullptr, 0,
-                    IS_JIT_MODE ? JIT_TEXT_ALIGNMENT : PAGE_SIZE_VALUE, 0);
+        DataSection(
+            *this, ".text", nullptr,
+            {SHT_PROGBITS, SHF_ALLOC | SHF_EXECINSTR, 0, IS_JIT_MODE ? JIT_TEXT_ALIGNMENT : PAGE_SIZE_VALUE, 0});
     StringSection shstrtabSection_ = StringSection(*this, ".shstrtab", 0, 1);
     StringSection dynstrSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
         StringSection(*this, ".dynstr", SHF_ALLOC, IS_JIT_MODE ? JIT_DYNSTR_ALIGNMENT : DYNSTR_SECTION_ALIGN);
     SymbolSection dynsymSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        SymbolSection(*this, ".dynsym", SHT_DYNSYM, SHF_ALLOC, &dynstrSection_, 1, sizeof(ElfOff), sizeof(ElfSym));
+        SymbolSection(*this, ".dynsym", &dynstrSection_, {SHT_DYNSYM, SHF_ALLOC, 1, sizeof(ElfOff), sizeof(ElfSym)});
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    DataSection aotSection_ = DataSection(*this, ".aot", SHT_PROGBITS, SHF_ALLOC, nullptr, 0, sizeof(ElfWord), 0);
+    DataSection aotSection_ = DataSection(*this, ".aot", nullptr, {SHT_PROGBITS, SHF_ALLOC, 0, sizeof(ElfWord), 0});
     // NOLINTNEXTLINE(hicpp-signed-bitwise)
-    DataSection gotSection_ = DataSection(*this, ".aot_got", SHT_PROGBITS, SHF_ALLOC, nullptr, 0, PAGE_SIZE_VALUE, 0);
+    DataSection gotSection_ = DataSection(*this, ".aot_got", nullptr, {SHT_PROGBITS, SHF_ALLOC, 0, PAGE_SIZE_VALUE, 0});
     DataSection dynamicSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        DataSection(*this, ".dynamic", SHT_DYNAMIC, SHF_ALLOC, &dynstrSection_, 0, PAGE_SIZE_VALUE, sizeof(ElfDyn));
+        DataSection(*this, ".dynamic", &dynstrSection_, {SHT_DYNAMIC, SHF_ALLOC, 0, PAGE_SIZE_VALUE, sizeof(ElfDyn)});
 #ifdef PANDA_COMPILER_DEBUG_INFO
     DataSection frameSection_ =  // NOLINTNEXTLINE(hicpp-signed-bitwise)
-        DataSection(*this, ".eh_frame", SHT_PROGBITS, SHF_ALLOC, nullptr, 0,
-                    IS_JIT_MODE ? JIT_DATA_ALIGNMENT : PAGE_SIZE_VALUE, 0);
+        DataSection(*this, ".eh_frame", nullptr,
+                    {SHT_PROGBITS, SHF_ALLOC, 0, IS_JIT_MODE ? JIT_DATA_ALIGNMENT : PAGE_SIZE_VALUE, 0});
 
     std::vector<DwarfSectionData> *frameData_ {nullptr};
 #endif

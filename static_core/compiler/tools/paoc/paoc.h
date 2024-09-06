@@ -84,6 +84,7 @@ private:
     bool CompileJit(CompilingContext *ctx);
     bool CompileOsr(CompilingContext *ctx);
     bool CompileAot(CompilingContext *ctx);
+    void MakeAotData(CompilingContext *ctx, uintptr_t codeAddress);
     bool FinalizeCompileAot(CompilingContext *ctx, [[maybe_unused]] uintptr_t codeAddress);
     void PrintError(const std::string &error);
     void PrintUsage(const ark::PandArgParser &paParser);

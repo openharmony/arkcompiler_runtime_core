@@ -40,11 +40,7 @@ void RegisterMap::SetMask(const LocationMask &regMask, size_t priorityReg)
     availableRegsCount_ = codegenRegMap_.size();
 
     // Now map unavailable registers, since they can be assigned to the instructions
-    for (size_t reg = 0; reg < maskSize; ++reg) {
-        if (regMask.IsSet(reg)) {
-            codegenRegMap_.push_back(reg);
-        }
-    }
+    MapUnavailableRegisters(regMask, maskSize);
 }
 
 void RegisterMap::SetCallerFirstMask(const LocationMask &regMask, size_t firstCalleeReg, size_t lastCalleeReg)
@@ -76,6 +72,11 @@ void RegisterMap::SetCallerFirstMask(const LocationMask &regMask, size_t firstCa
     availableRegsCount_ = codegenRegMap_.size();
 
     // Now map unavailable registers, since they can be assigned to the instructions
+    MapUnavailableRegisters(regMask, maskSize);
+}
+
+void RegisterMap::MapUnavailableRegisters(const LocationMask &regMask, size_t maskSize)
+{
     for (size_t reg = 0; reg < maskSize; ++reg) {
         if (regMask.IsSet(reg)) {
             codegenRegMap_.push_back(reg);

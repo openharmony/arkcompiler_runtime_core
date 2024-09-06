@@ -238,8 +238,9 @@ public:
 
                 if (!mda.IsExternal() && !mda.IsAbstract() && !mda.IsNative() && isEqual) {
                     auto adapter = allocator_.New<BytecodeOptimizerRuntimeAdapter>(mda.GetPandaFile());
-                    tempGraph = allocator_.New<compiler::Graph>(&allocator_, &localAllocator_, Arch::NONE, methodPtr,
-                                                                adapter, false, nullptr, false, true);
+                    tempGraph = allocator_.New<compiler::Graph>(
+                        compiler::Graph::GraphArgs {&allocator_, &localAllocator_, Arch::NONE, methodPtr, adapter},
+                        nullptr, false, false, true);
                     ASSERT_NE(tempGraph, nullptr);
                     ASSERT_TRUE(tempGraph->RunPass<compiler::IrBuilder>());
                 }

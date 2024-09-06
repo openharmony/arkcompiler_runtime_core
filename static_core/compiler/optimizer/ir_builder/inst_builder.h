@@ -32,7 +32,7 @@ constexpr int64_t INVALID_OFFSET = std::numeric_limits<int64_t>::max();
 
 class InstBuilder {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ENV_IDX(ENV_TYPE) \
+#define ENV_IDX(ENV_TYPE) /* CC-OFFNXT(G.PRE.02, G.PRE.09) namespace member, code generation */ \
     static constexpr uint8_t ENV_TYPE##_IDX = VRegInfo::VRegType::ENV_TYPE - VRegInfo::VRegType::ENV_BEGIN;
     VREGS_ENV_TYPE_DEFS(ENV_IDX)
 #undef ENV_IDX
@@ -221,6 +221,7 @@ private:
         void BuildStaticCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);
         void BuildVirtualCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId);
 
+        void AddCallInstruction();
         void BuildCallInst(uint32_t classId);
         void BuildCallStaticInst(uint32_t classId);
         void BuildInitClassInstForCallStatic(uint32_t classId);

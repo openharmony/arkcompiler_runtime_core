@@ -101,33 +101,36 @@ public:
     ~CallConvMode() = default;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_CALLCONV_MODE_MODIFIERS(name) \
-    void Set##name(bool v)                    \
-    {                                         \
-        Flag##name ::Set(v, &value_);         \
-    }                                         \
-    bool Is##name() const                     \
-    {                                         \
-        return Flag##name ::Get(value_);      \
+#define DECLARE_CALLCONV_MODE_MODIFIERS(name)  \
+    void Set##name(bool v)                     \
+    {                                          \
+        Flag##name ::Set(v, &value_);          \
+    }                                          \
+    bool Is##name() const                      \
+    {                                          \
+        /* CC-OFFNXT(G.PRE.05) function gen */ \
+        return Flag##name ::Get(value_);       \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DECLARE_CALLCONV_MODE(name)                    \
     static CallConvMode name(bool set = true)          \
     {                                                  \
+        /* CC-OFFNXT(G.PRE.05) function gen */         \
         return CallConvMode(Flag##name ::Encode(set)); \
     }                                                  \
     DECLARE_CALLCONV_MODE_MODIFIERS(name)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DECLARE_CALLCONV_MODE_MODIFIERS(name) \
-    void Set##name(bool v)                    \
-    {                                         \
-        Flag##name ::Set(v, &value_);         \
-    }                                         \
-    bool Is##name() const                     \
-    {                                         \
-        return Flag##name ::Get(value_);      \
+#define DECLARE_CALLCONV_MODE_MODIFIERS(name)  \
+    void Set##name(bool v)                     \
+    {                                          \
+        Flag##name ::Set(v, &value_);          \
+    }                                          \
+    bool Is##name() const                      \
+    {                                          \
+        /* CC-OFFNXT(G.PRE.05) function gen */ \
+        return Flag##name ::Get(value_);       \
     }
 
     // Panda ABI convention (native - otherwise)

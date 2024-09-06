@@ -49,6 +49,7 @@ class Encoder;
 class CodeBuilder;
 class OsrEntryStub;
 
+// CC-OFFNXT(G.FUD.06) big switch-case
 inline VRegInfo::Type IrTypeToMetainfoType(DataType::Type type)
 {
     switch (type) {
@@ -242,6 +243,9 @@ public:
      */
     template <typename... Args>
     void InsertTrace(Args &&...params);
+#if defined(EVENT_METHOD_ENTER_ENABLED) && EVENT_METHOD_ENTER_ENABLED != 0
+    void MakeTrace();
+#endif
     void CallIntrinsic(Inst *inst, RuntimeInterface::IntrinsicId id);
 
     template <bool IS_FASTPATH, typename... Args>

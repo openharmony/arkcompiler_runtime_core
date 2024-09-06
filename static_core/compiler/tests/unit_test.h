@@ -460,7 +460,7 @@ struct TmpFile {
     ~TmpFile()
     {
         ASSERT(fileName_ != nullptr);
-        remove(fileName_);
+        std::remove(fileName_);
     }
 
     NO_MOVE_SEMANTIC(TmpFile);
@@ -475,7 +475,7 @@ private:
     const char *fileName_ {nullptr};
 };
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define TEST_GRAPH(ns, testName, ...)                                                 \
+#define TEST_GRAPH(ns, testName, ...) /* CC-OFF(G.PRE.06) solid logic */              \
     namespace ns {                                                                    \
     class testName {                                                                  \
     public:                                                                           \
@@ -495,6 +495,7 @@ private:
                                                                                       \
         auto GetBuilder()                                                             \
         {                                                                             \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                    \
             return builder_;                                                          \
         }                                                                             \
                                                                                       \

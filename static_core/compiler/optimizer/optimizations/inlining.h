@@ -42,6 +42,10 @@ struct InlinedGraph {
 class Inlining : public Optimization {
 public:
     static constexpr auto MAX_CALL_DEPTH = 20U;
+    using InstPair = std::pair<Inst *, Inst *>;
+    using InstTriple = std::tuple<Inst *, Inst *, Inst *>;
+    using BasicBlockPair = std::pair<BasicBlock *, BasicBlock *>;
+    using FlagPair = std::pair<bool *, bool *>;
 
     explicit Inlining(Graph *graph) : Inlining(graph, 0, 0, nullptr) {}
     Inlining(Graph *graph, bool resolveWoInline) : Inlining(graph)
@@ -93,6 +97,11 @@ protected:
     bool DoInlinePolymorphic(CallInst *callInst, ArenaVector<RuntimeInterface::ClassPtr> *receivers);
     void CreateCompareClass(CallInst *callInst, Inst *getClsInst, RuntimeInterface::ClassPtr receiver,
                             BasicBlock *callBb);
+    BasicBlockPair MakeCallBbs(InstPair insts, BasicBlockPair bbs, [[maybe_unused]] PhiInst **phiInst,
+                               [[maybe_unused]] size_t receiversSize);
+    void InlineReceiver(InstTriple insts, BasicBlockPair bbs, FlagPair flags, size_t receiversSize,
+                        InlinedGraph inlGraph);
+    bool FinalizeInlineReceiver(InstTriple insts, BasicBlockPair bbs, FlagPair flags, bool needToDeoptimize);
     void InsertDeoptimizeInst(CallInst *callInst, BasicBlock *callBb,
                               DeoptimizeType deoptType = DeoptimizeType::INLINE_IC);
     void InsertCallInst(CallInst *callInst, BasicBlock *callBb, BasicBlock *retBb, Inst *phiInst);

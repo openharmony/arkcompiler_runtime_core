@@ -1518,15 +1518,15 @@ public:
     }
 
     template <typename Accessor>
-    typename Accessor::ValueType GetField() const
-    {
-        return Accessor::Get(bitFields_);
-    }
-
-    template <typename Accessor>
     void SetField(typename Accessor::ValueType value)
     {
         Accessor::Set(value, &bitFields_);
+    }
+
+    template <typename Accessor>
+    typename Accessor::ValueType GetField() const
+    {
+        return Accessor::Get(bitFields_);
     }
 
     uint64_t GetAllFields() const
@@ -1705,7 +1705,7 @@ private:
                                         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
                                         (inputsCount + Input::GetPadding(RUNTIME_ARCH, inputsCount))) -
                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-               index - 1;
+               index - 1;  // CC-OFF(G.FMT.02) project code style
     }
 
     size_t OperandsStorageSize() const
@@ -2652,8 +2652,8 @@ public:
         return GetType();
     }
 
-    void SetVnObject(VnObject *vnObj) override;
     bool DumpInputs(std::ostream *out) const override;
+    void SetVnObject(VnObject *vnObj) override;
     Inst *Clone(const Graph *targetGraph) const override;
 };
 
@@ -3047,14 +3047,14 @@ public:
         SetCc(cc);
     }
 
+    void DumpOpcode(std::ostream *out) const override;
+    void SetVnObject(VnObject *vnObj) override;
+
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
         return GetOperandsType();
     }
-    void DumpOpcode(std::ostream *out) const override;
-
-    void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3967,13 +3967,13 @@ public:
         SetIsArray(isArray);
     }
 
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
     Inst *GetIndex()
     {
         return GetInput(1).GetInst();
+    }
+    Inst *GetArray()
+    {
+        return GetInput(0).GetInst();
     }
 
     bool IsBarrier() const override
@@ -3998,16 +3998,16 @@ public:
         }
     }
 
-    uint32_t Latency() const override
-    {
-        return g_options.GetCompilerSchedLatencyLong();
-    }
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = NeedBarrierMixin<FixedInputsInst2>::Clone(targetGraph);
         ASSERT(static_cast<LoadInst *>(clone)->IsArray() == IsArray());
         return clone;
+    }
+
+    uint32_t Latency() const override
+    {
+        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 
@@ -4058,6 +4058,11 @@ public:
 
     LoadCompressedStringCharInstI(Initializer t, uint64_t imm) : Base(std::move(t)), ImmediateMixin(imm) {}
 
+    uint32_t Latency() const override
+    {
+        return g_options.GetCompilerSchedLatencyLong();
+    }
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -4069,11 +4074,6 @@ public:
             default:
                 return DataType::NO_TYPE;
         }
-    }
-
-    uint32_t Latency() const override
-    {
-        return g_options.GetCompilerSchedLatencyLong();
     }
 };
 /// Store value into array element
@@ -4109,7 +4109,8 @@ public:
         ASSERT(index < GetInputsCount());
         switch (index) {
             case 0: {
-                auto inputType = GetInput(0).GetInst()->GetType();
+                auto input = GetInput(0).GetInst();
+                auto inputType = input->GetType();
                 ASSERT(inputType == DataType::ANY || inputType == DataType::REFERENCE);
                 return inputType;
             }
@@ -4247,13 +4248,13 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
     Inst *GetStoredValue()
     {
         return GetInput(1).GetInst();
+    }
+    Inst *GetArray()
+    {
+        return GetInput(0).GetInst();
     }
     DataType::Type GetInputType(size_t index) const override
     {
@@ -4271,8 +4272,6 @@ public:
         }
     }
 
-    bool DumpInputs(std::ostream *out) const override;
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = static_cast<StoreInstI *>(FixedInputsInst::Clone(targetGraph));
@@ -4280,6 +4279,8 @@ public:
         ASSERT(clone->GetVolatile() == GetVolatile());
         return clone;
     }
+
+    bool DumpInputs(std::ostream *out) const override;
 
     // StoreArrayI call barriers twice,so we need to save input register for second call
     bool IsPropagateLiveness() const override
@@ -4983,16 +4984,16 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
-    }
-
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
         ASSERT(GetInputsCount() == 2U);
         return index == 0 ? DataType::REFERENCE : GetType();
+    }
+
+    bool IsBarrier() const override
+    {
+        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
     Inst *Clone(const Graph *targetGraph) const override
@@ -5032,7 +5033,7 @@ public:
 
     bool IsBarrier() const override
     {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
+        return Inst::IsBarrier() || GetVolatile() || GetNeedBarrier();
     }
 
     DataType::Type GetInputType(size_t index) const override
@@ -5133,7 +5134,7 @@ public:
 
     bool IsBarrier() const override
     {
-        return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
+        return GetNeedBarrier() || GetVolatile() || Inst::IsBarrier();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5174,20 +5175,20 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
-    {
-        ASSERT(GetInputsCount() == 1U);
-        ASSERT(index == 0);
-        // This is SaveState input
-        return DataType::NO_TYPE;
-    }
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
         clone->CastToResolveObjectFieldStatic()->SetTypeId(GetTypeId());
         clone->CastToResolveObjectFieldStatic()->SetMethod(GetMethod());
         return clone;
+    }
+
+    DataType::Type GetInputType([[maybe_unused]] size_t index) const override
+    {
+        ASSERT(GetInputsCount() == 1U);
+        ASSERT(index == 0);
+        // This is SaveState input
+        return DataType::NO_TYPE;
     }
 
     uint32_t Latency() const override
@@ -5255,8 +5256,8 @@ public:
                     bool needBarrier = false)
         : Base(std::move(t)), TypeIdMixin(std::move(m)), FieldMixin(field)
     {
-        SetVolatile(isVolatile);
         SetNeedBarrier(needBarrier);
+        SetVolatile(isVolatile);
     }
 
     bool IsBarrier() const override
@@ -5424,11 +5425,6 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -5443,6 +5439,11 @@ public:
             default:
                 UNREACHABLE();
         }
+    }
+
+    bool IsBarrier() const override
+    {
+        return Inst::IsBarrier() || GetNeedBarrier();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5504,7 +5505,7 @@ public:
 
     bool IsBarrier() const override
     {
-        return Inst::IsBarrier() || GetNeedBarrier();
+        return GetNeedBarrier() || Inst::IsBarrier();
     }
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
@@ -5598,8 +5599,6 @@ public:
         return DataType::NO_TYPE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
@@ -5609,6 +5608,8 @@ public:
         ASSERT(clone->CastToIsInstance()->GetOmitNullCheck() == GetOmitNullCheck());
         return clone;
     }
+
+    void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Load data from constant pool.
@@ -5623,15 +5624,15 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    bool IsBarrier() const override
-    {
-        return Inst::IsBarrier() || GetNeedBarrier();
-    }
-
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
         return DataType::NO_TYPE;
+    }
+
+    bool IsBarrier() const override
+    {
+        return GetNeedBarrier() || Inst::IsBarrier();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5754,7 +5755,7 @@ public:
 
     bool IsBarrier() const override
     {
-        return Inst::IsBarrier() || GetNeedBarrier();
+        return GetNeedBarrier() || Inst::IsBarrier();
     }
 
     void DumpOpcode(std::ostream *out) const override;
@@ -5804,8 +5805,6 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph);
@@ -5813,6 +5812,8 @@ public:
         static_cast<GlobalVarInst *>(clone)->SetMethod(GetMethod());
         return clone;
     }
+
+    void DumpOpcode(std::ostream *out) const override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -6064,6 +6065,9 @@ public:
         }
     }
 
+    void DumpOpcode(std::ostream *out) const override;
+    void SetVnObject(VnObject *vnObj) override;
+
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -6072,9 +6076,6 @@ public:
         }
         return GetOperandsType();
     }
-
-    void DumpOpcode(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6197,15 +6198,15 @@ public:
         SetCc(cc);
     }
 
+    void DumpOpcode(std::ostream *out) const override;
+    bool DumpInputs(std::ostream *out) const override;
+    void SetVnObject(VnObject *vnObj) override;
+
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
         ASSERT(index < GetInputsCount());
         return GetOperandsType();
     }
-
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6387,13 +6388,13 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
     Inst *GetIndex()
     {
         return GetInput(1).GetInst();
+    }
+    Inst *GetArray()
+    {
+        return GetInput(0).GetInst();
     }
     Inst *GetStoredValue(uint64_t index)
     {
@@ -6511,6 +6512,15 @@ public:
     }
     bool DumpInputs(std::ostream *out) const override;
 
+    DataType::Type GetInputType(size_t index) const override
+    {
+        ASSERT(index < GetInputsCount());
+        if (index == 0) {
+            return DataType::REFERENCE;
+        }
+        return DataType::NO_TYPE;
+    }
+
     Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = FixedInputsInst::Clone(targetGraph)->CastToLoadArrayPairI();
@@ -6521,15 +6531,6 @@ public:
         }
 #endif
         return clone;
-    }
-
-    DataType::Type GetInputType(size_t index) const override
-    {
-        ASSERT(index < GetInputsCount());
-        if (index == 0) {
-            return DataType::REFERENCE;
-        }
-        return DataType::NO_TYPE;
     }
 
     uint32_t Latency() const override
@@ -6552,18 +6553,6 @@ public:
         SetNeedBarrier(needBarrier);
     }
 
-    Inst *GetArray()
-    {
-        return GetInput(0).GetInst();
-    }
-    Inst *GetFirstValue()
-    {
-        return GetInput(1).GetInst();
-    }
-    Inst *GetSecondValue()
-    {
-        return GetInput(2U).GetInst();
-    }
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -6576,6 +6565,18 @@ public:
             default:
                 return DataType::NO_TYPE;
         }
+    }
+    Inst *GetArray()
+    {
+        return GetInput(0).GetInst();
+    }
+    Inst *GetFirstValue()
+    {
+        return GetInput(1).GetInst();
+    }
+    Inst *GetSecondValue()
+    {
+        return GetInput(2U).GetInst();
     }
 
     // StoreArrayPairI call barriers twice,so we need to save input register for second call
@@ -6871,16 +6872,6 @@ public:
         SetCc(compare->GetCc());
     }
 
-    Inst *Clone(const Graph *targetGraph) const override
-    {
-        auto clone = FixedInputsInst2::Clone(targetGraph);
-        ASSERT(clone->CastToDeoptimizeCompareImm()->GetDeoptimizeType() == GetDeoptimizeType());
-        ASSERT(clone->CastToDeoptimizeCompareImm()->GetOperandsType() == GetOperandsType());
-        ASSERT(clone->CastToDeoptimizeCompareImm()->GetCc() == GetCc());
-        clone->CastToDeoptimizeCompareImm()->SetImm(GetImm());
-        return clone;
-    }
-
     DataType::Type GetInputType(size_t index) const override
     {
         ASSERT(index < GetInputsCount());
@@ -6892,6 +6883,16 @@ public:
             default:
                 UNREACHABLE();
         }
+    }
+
+    Inst *Clone(const Graph *targetGraph) const override
+    {
+        auto clone = FixedInputsInst2::Clone(targetGraph);
+        ASSERT(clone->CastToDeoptimizeCompareImm()->GetDeoptimizeType() == GetDeoptimizeType());
+        ASSERT(clone->CastToDeoptimizeCompareImm()->GetOperandsType() == GetOperandsType());
+        ASSERT(clone->CastToDeoptimizeCompareImm()->GetCc() == GetCc());
+        clone->CastToDeoptimizeCompareImm()->SetImm(GetImm());
+        return clone;
     }
 
     void DumpOpcode(std::ostream *out) const override;

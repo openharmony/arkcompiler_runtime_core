@@ -16,6 +16,7 @@
 #include "inst_generator.h"
 
 namespace ark::compiler {
+// CC-OFFNXT(huge_method, G.FUN.01) big switch-case
 Graph *GraphCreator::GenerateGraph(Inst *inst)
 {
     Graph *graph;
@@ -467,6 +468,7 @@ void GraphCreator::PopulateDefault(Graph *graph, Inst *inst, DataType::Type type
     }
 }
 
+// CC-OFFNXT(huge_cyclomatic_complexity, huge_cca_cyclomatic_complexity) solid logic
 void GraphCreator::PopulateGraph(Graph *graph, Inst *inst, int32_t n)
 {
     auto type = DataTypeByOpcode(inst);
@@ -1123,6 +1125,7 @@ std::vector<Inst *> &InstGenerator::GenerateOperations<MonitorInst>(Opcode opCod
 
 #include "generate_operations_intrinsic_inst.inl"
 
+// CC-OFFNXT(huge_method, huge_cyclomatic_complexity, G.FUN.01) big switch-case
 std::vector<Inst *> &InstGenerator::Generate(Opcode opCode)
 {
     insts_.clear();

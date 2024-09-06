@@ -186,6 +186,8 @@ using LoopIterationsInfo = std::pair<CountableLoopInfo, uint64_t>;
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
 class BoundsAnalysis : public Analysis, public GraphVisitor {
 public:
+    using InstPair = std::pair<Inst *, Inst *>;
+
     explicit BoundsAnalysis(Graph *graph);
     NO_MOVE_SEMANTIC(BoundsAnalysis);
     NO_COPY_SEMANTIC(BoundsAnalysis);
@@ -237,8 +239,8 @@ private:
 
     static BoundsRange UpdateLenArray(BoundsRange range, const Inst *lenArray, const Inst *upper);
     static void CalcNewBoundsRangeForIsInstanceInput(GraphVisitor *v, IsInstanceInst *isInstance, IfImmInst *ifImm);
-    static void CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *block, ConditionCode cc, Inst *left,
-                                             Inst *right, BasicBlock *tgtBlock);
+    static void CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *block, ConditionCode cc, InstPair args,
+                                             BasicBlock *tgtBlock);
     template <Opcode OPC>
     static void CalcNewBoundsRangeUnary(GraphVisitor *v, const Inst *inst);
     template <Opcode OPC>

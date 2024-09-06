@@ -34,6 +34,9 @@ using GroupedBoundsChecks = ArenaVector<std::tuple<Inst *, InstVector, int64_t, 
 // loop->len_array->GroupedBoundsChecks
 using LoopNotFullyRedundantBoundsCheck = ArenaVector<std::pair<Inst *, GroupedBoundsChecks>>;
 using NotFullyRedundantBoundsCheck = ArenaVector<std::pair<Loop *, LoopNotFullyRedundantBoundsCheck>>;
+using FlagPair = std::pair<bool, bool>;
+using InstPair = std::pair<Inst *, Inst *>;
+using InstTriple = std::tuple<Inst *, Inst *, Inst *>;
 
 // {CountableLoopInfo; savestate; lower value; upper value; cond code for Deoptimize; head is loop exit; has pre-header
 // compare}
@@ -128,7 +131,7 @@ private:
     static int64_t GetInc(Inst *inst);
     static Loop *GetLoopForBoundsCheck(BasicBlock *block, Inst *lenArray, Inst *index);
     void InitItemForNewIndex(GroupedBoundsChecks *place, Inst *index, Inst *inst, bool checkUpper, bool checkLower);
-    void PushNewBoundsCheck(Loop *loop, Inst *lenArray, Inst *index, Inst *inst, bool checkUpper, bool checkLower);
+    void PushNewBoundsCheck(Loop *loop, Inst *inst, InstPair helpers, bool checkUpper, bool checkLower);
     void PushNewBoundsCheckAtExistingIndexes(GroupedBoundsChecks *indexes, Inst *index, Inst *inst, bool checkUpper,
                                              bool checkLower);
     void TryRemoveDominatedNullChecks(Inst *inst, Inst *ref);
@@ -147,14 +150,16 @@ private:
     template <Opcode OPC>
     void TryOptimizeOverflowCheck(Inst *inst);
 
-    bool TryInsertDeoptimizationForLargeStep(ConditionCode cc, Inst *resultLenArray, Inst *lower, Inst *upper,
-                                             int64_t maxAdd, Inst *insertDeoptAfter, Inst *ss, uint64_t constStep);
+    bool TryInsertDeoptimizationForLargeStep(ConditionCode cc, InstPair bounds, InstTriple helpers, int64_t maxAdd,
+                                             uint64_t constStep);
     bool TryInsertDeoptimization(LoopInfo loopInfo, Inst *lenArray, int64_t maxAdd, int64_t minAdd,
                                  bool hasCheckInHeader);
+    bool TryInsertUpperDeoptimization(LoopInfo loopInfo, Inst *lenArray, BoundsRange lowerRange, int64_t maxAdd,
+                                      bool insertNewLenArray);
 
     Inst *InsertNewLenArray(Inst *lenArray, Inst *ss);
-    bool NeedUpperDeoptimization(BasicBlock *header, Inst *lenArray, BoundsRange lenArrayRange, Inst *upper,
-                                 BoundsRange upperRange, int64_t maxAdd, ConditionCode cc, bool *insertNewLenArray);
+    bool NeedUpperDeoptimization(BasicBlock *header, InstPair insts, FlagPair flags, int64_t maxAdd,
+                                 bool *insertNewLenArray);
     void InsertDeoptimizationForIndexOverflow(CountableLoopInfo *countableLoopInfo, BoundsRange indexUpperRange,
                                               Inst *ss);
     void ProcessingLoop(Loop *loop, LoopNotFullyRedundantBoundsCheck *lenarrIndexChecks);
@@ -169,10 +174,8 @@ private:
     void MoveCheckOutOfLoop();
 
     void InsertInstAfter(Inst *inst, Inst *after, BasicBlock *block);
-    void InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *left, int64_t val, Inst *right, Inst *ss,
-                                         Inst *insertAfter, Opcode newLeftOpcode = Opcode::Add);
-    Inst *InsertDeoptimization(ConditionCode cc, Inst *left, Inst *right, Inst *ss, Inst *insertAfter,
-                               DeoptimizeType deoptType);
+    void InsertBoundsCheckDeoptimization(ConditionCode cc, InstPair args, int64_t val, InstPair helpers,
+                                         Opcode newLeftOpcode = Opcode::Add);
 
     std::optional<LoopInfo> FindLoopInfo(Loop *loop);
     Inst *FindSaveState(Loop *loop);
