@@ -195,6 +195,103 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return new Array<T>(FROM_BUFFER, ret)
     }
 
+    private lastIndexOfUndefined(fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            if (this.$_get_unsafe(i) instanceof undefined) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfNull(fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            if (this.$_get_unsafe(i) instanceof null) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfString(val: String, fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof String) {
+                if (tmp == val) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+    
+    private lastIndexOfNumber(val: Number, fi: int): int {
+        const unboxedVal: number = val.valueOf()
+        if (isNaN(val)) {
+            return -1
+        }
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Number) {
+                if (unboxedVal == tmp.unboxed()) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfFloat(val: Float, fi: int): int {
+        const unboxedVal: float = val.unboxed()
+        if (isNaN(val)) {
+            return -1
+        }
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Float) {
+                if (unboxedVal == tmp.unboxed()) {
+                        return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfLong(val: Long, fi: int): int {
+        const unboxedVal: long = val.unboxed()
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Long) {
+                if (tmp == unboxedVal) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfInt(val: Int, fi: int): int {
+        const unboxedVal: int = val.unboxed()
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Int) {
+                if (tmp == unboxedVal) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfCommon(val: T, fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            if (val == this.$_get_unsafe(i)) {
+                return i
+            }
+        }
+        return -1
+    }
+
     private searchUndefined(fi: int, len: int): boolean {
         for (let i = fi; i < len; i++) {
             if (this.$_get_unsafe(i) instanceof undefined) {

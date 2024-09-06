@@ -212,6 +212,103 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return new Array<T>(FROM_BUFFER, ret)
     }
 
+    private lastIndexOfUndefined(fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            if (this.$_get_unsafe(i) instanceof undefined) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfNull(fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            if (this.$_get_unsafe(i) instanceof null) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfString(val: String, fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof String) {
+                if (tmp == val) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfNumber(val: Number, fi: int): int {
+        const unboxedVal: number = val.valueOf()
+        if (isNaN(val)) {
+            return -1
+        }
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Number) {
+                if (unboxedVal == tmp.unboxed()) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfFloat(val: Float, fi: int): int {
+        const unboxedVal: float = val.unboxed()
+        if (isNaN(val)) {
+            return -1
+        }
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Float) {
+                if (unboxedVal == tmp.unboxed()) {
+                        return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfLong(val: Long, fi: int): int {
+        const unboxedVal: long = val.unboxed()
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Long) {
+                if (tmp == unboxedVal) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfInt(val: Int, fi: int): int {
+        const unboxedVal: int = val.unboxed()
+        for (let i = fi; i >= 0; i--) {
+            const tmp = this.$_get_unsafe(i)
+            if (tmp instanceof Int) {
+                if (tmp == unboxedVal) {
+                    return i
+                }
+            }
+        }
+        return -1
+    }
+
+    private lastIndexOfCommon(val: T, fi: int): int {
+        for (let i = fi; i >= 0; i--) {
+            if (val == this.$_get_unsafe(i)) {
+                return i
+            }
+        }
+        return -1
+    }
+
     private searchUndefined(fi: int, len: int): boolean {
         for (let i = fi; i < len; i++) {
             if (this.$_get_unsafe(i) instanceof undefined) {
@@ -1674,13 +1771,23 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             k = this.actualLength + n;
         }
 
-        while (k >= 0) {
-            if (__runtimeEquals(this.$_get_unsafe(k), searchElement)) {
-                return k;
-            }
-            k--;
+        if (searchElement instanceof String) {
+            return this.lastIndexOfString(searchElement, k)
+        } else if (searchElement instanceof Number) {
+            return this.lastIndexOfNumber(searchElement, k)
+        } else if (searchElement instanceof Float) {
+            return this.lastIndexOfFloat(searchElement, k)
+        } else if (searchElement instanceof Long) {
+            return this.lastIndexOfLong(searchElement, k)
+        } else if (searchElement instanceof Int) {
+            return this.lastIndexOfInt(searchElement, k)
+        } else if (__runtimeIsSameReference(searchElement, undefined)) {
+            return this.lastIndexOfUndefined(k)
+        } else if (searchElement == null) {
+                return this.lastIndexOfNull(k)
+        } else {
+            return this.lastIndexOfCommon(searchElement, k)
         }
-        return -1;
     }
 
     /**
