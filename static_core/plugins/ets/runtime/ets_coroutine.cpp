@@ -26,8 +26,8 @@
 namespace ark::ets {
 
 EtsCoroutine::EtsCoroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm, PandaString name,
-                           CoroutineContext *context, CallbackQueue *queue, std::optional<EntrypointInfo> &&epInfo)
-    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, queue, std::move(epInfo))
+                           CoroutineContext *context, std::optional<EntrypointInfo> &&epInfo)
+    : Coroutine(id, allocator, vm, ark::panda_file::SourceLang::ETS, std::move(name), context, std::move(epInfo))
 {
     ASSERT(vm != nullptr);
 }
@@ -73,16 +73,18 @@ void EtsCoroutine::FreeInternalMemory()
 
 void EtsCoroutine::RequestCompletion(Value returnValue)
 {
-    EtsPromise *promise = nullptr;
+    mem::Reference *promiseRef = nullptr;
     {
         auto *coroEvent = GetCompletionEvent();
-        auto *storage = GetVM()->GetGlobalObjectStorage();
         os::memory::LockHolder lh(*coroEvent);
-        auto *promiseRef = coroEvent->ReleasePromise();
-        ASSERT(promiseRef != nullptr);
-        promise = reinterpret_cast<EtsPromise *>(storage->Get(promiseRef));
-        storage->Remove(promiseRef);
+        promiseRef = coroEvent->ReleasePromise();
     }
+    if (promiseRef == nullptr) {
+        Coroutine::RequestCompletion(returnValue);
+        return;
+    }
+    auto *promise = EtsPromise::FromCoreType(GetVM()->GetGlobalObjectStorage()->Get(promiseRef));
+    GetVM()->GetGlobalObjectStorage()->Remove(promiseRef);
     if (promise == nullptr) {
         LOG(DEBUG, COROUTINES)
             << "Coroutine " << GetName()
@@ -98,15 +100,13 @@ void EtsCoroutine::RequestCompletion(Value returnValue)
         panda_file::Type returnType = GetReturnType();
         retObject = GetReturnValueAsObject(returnType, returnValue);
         if (retObject != nullptr) {
-            if (returnType.IsVoid()) {
-                LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed";
-            } else if (returnType.IsPrimitive()) {
-                LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed with return value 0x" << std::hex
-                                       << returnValue.GetAs<uint64_t>();
-            } else {
-                LOG(DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed with return value = ObjectPtr<"
-                                       << returnValue.GetAs<ObjectHeader *>() << ">";
-            }
+            LOG_IF(returnType.IsVoid(), DEBUG, COROUTINES) << "Coroutine " << GetName() << " has completed";
+            LOG_IF(returnType.IsPrimitive(), DEBUG, COROUTINES)
+                << "Coroutine " << GetName() << " has completed with return value 0x" << std::hex
+                << returnValue.GetAs<uint64_t>();
+            LOG_IF(returnType.IsReference(), DEBUG, COROUTINES)
+                << "Coroutine " << GetName() << " has completed with return value = ObjectPtr<"
+                << returnValue.GetAs<ObjectHeader *>() << ">";
         }
     }
     if (HasPendingException()) {

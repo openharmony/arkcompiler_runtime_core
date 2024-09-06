@@ -23,7 +23,6 @@
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/job_queue.h"
-#include "plugins/ets/runtime/ets_callback.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/mem/panda_containers.h"
@@ -49,6 +48,30 @@ void SubscribePromiseOnResultObject(EtsPromise *outsidePromise, EtsPromise *inte
     } else {
         subscribeOnAnotherPromise();
     }
+}
+
+static void EnsureCapacity(EtsCoroutine *coro, EtsHandle<EtsPromise> &hpromise)
+{
+    int queueLength = hpromise->GetCallbackQueue(coro) == nullptr ? 0 : hpromise->GetCallbackQueue(coro)->GetLength();
+    if (hpromise->GetQueueSize() != queueLength) {
+        return;
+    }
+    auto newQueueLength = queueLength * 2U + 1U;
+    auto *objectClass = coro->GetPandaVM()->GetClassLinker()->GetObjectClass();
+    auto *newCallbackQueue = EtsObjectArray::Create(objectClass, newQueueLength);
+    if (hpromise->GetQueueSize() != 0) {
+        hpromise->GetCallbackQueue(coro)->CopyDataTo(newCallbackQueue);
+    }
+    hpromise->SetCallbackQueue(coro, newCallbackQueue);
+    auto *newLaunchModeQueue = EtsIntArray::Create(newQueueLength);
+    if (hpromise->GetQueueSize() != 0) {
+        auto *launchModeQueueData = hpromise->GetLaunchModeQueue(coro)->GetData<EtsCoroutine *>();
+        [[maybe_unused]] auto err =
+            memcpy_s(newLaunchModeQueue->GetData<CoroutineLaunchMode>(), newQueueLength * sizeof(EtsInt),
+                     launchModeQueueData, queueLength * sizeof(CoroutineLaunchMode));
+        ASSERT(err == EOK);
+    }
+    hpromise->SetLaunchModeQueue(coro, newLaunchModeQueue);
 }
 
 void EtsPromiseResolve(EtsPromise *promise, EtsObject *value)
@@ -100,25 +123,23 @@ void EtsPromiseReject(EtsPromise *promise, EtsObject *error)
 void EtsPromiseSubmitCallback(EtsPromise *promise, EtsObject *callback)
 {
     auto *coro = EtsCoroutine::GetCurrent();
-    promise->Lock();
-    if (promise->GetState() != EtsPromise::STATE_PENDING) {
-        ASSERT(promise->GetQueueSize() == 0);
-        ASSERT(promise->GetCallbackQueue(coro) == nullptr);
-        ASSERT(promise->GetCoroPtrQueue(coro) == nullptr);
-        promise->Unlock();
-        auto thenCallback = EtsCallback::Create(coro, callback);
-        coro->AddCallback(std::move(thenCallback));
-        return;
-    }
+    auto *coroManager = coro->GetCoroutineManager();
+    auto launchMode =
+        coro == coroManager->GetMainThread() ? CoroutineLaunchMode::MAIN_WORKER : CoroutineLaunchMode::DEFAULT;
     [[maybe_unused]] EtsHandleScope scope(coro);
     EtsHandle<EtsPromise> hpromise(coro, promise);
     EtsHandle<EtsObject> hcallback(coro, callback);
-    // NOTE(panferovi): fix issue with GC
-    // The problem is we can create new EtsArray inside method
-    // Promise::SubmitCallback and it may trigger GC.
-    // In case someone else tries to lock the promise, it will lead to a deadlock
-    hpromise->SubmitCallback(coro, hcallback);
-    coro->AnnounceCallbackAddition();
+    hpromise->Lock();
+    if (hpromise->GetState() == EtsPromise::STATE_PENDING) {
+        EnsureCapacity(coro, hpromise);
+        hpromise->SubmitCallback(coro, hcallback.GetPtr(), launchMode);
+        hpromise->Unlock();
+        return;
+    }
+    ASSERT(hpromise->GetQueueSize() == 0);
+    ASSERT(hpromise->GetCallbackQueue(coro) == nullptr);
+    ASSERT(hpromise->GetLaunchModeQueue(coro) == nullptr);
+    EtsPromise::LaunchCallback(coro, hcallback.GetPtr(), launchMode);
     hpromise->Unlock();
 }
 
@@ -184,8 +205,6 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
 
     /* CASE 2. This is a native STS promise */
     while (true) {
-        currentCoro->ProcessPresentCallbacks();
-
         promiseHandle->Lock();
         if (!promiseHandle->IsPending()) {
             // already settled!
@@ -218,15 +237,12 @@ EtsObject *EtsAwaitPromise(EtsPromise *promise)
         // because otherwise resolvee coro may destroy resources
         auto isGeneric = e->GetType() == CoroutineEvent::Type::GENERIC;
         // NOTE(konstanting, #I67QXC): try to make the Promise/Event locking sequence easier for understanding
-        auto noReadyCallbacks = currentCoro->TryEnterAwaitModeAndLockAwaitee(e);
+        e->Lock();
         promiseHandle->Unlock();
-        if (noReadyCallbacks) {
-            LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a pending promise...";
-            ASSERT(!e->Happened());
-            currentCoro->GetCoroutineManager()->Await(e);  // will unlock the event
-            currentCoro->LeaveAwaitMode();
-            LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
-        }
+        LOG(DEBUG, COROUTINES) << "Promise::await: starting await() for a pending promise...";
+        ASSERT(!e->Happened());
+        currentCoro->GetCoroutineManager()->Await(e);  // will unlock the event
+        LOG(DEBUG, COROUTINES) << "Promise::await: await() finished.";
         if (isGeneric) {
             promiseHandle->RetireEventPtr(e);
         }

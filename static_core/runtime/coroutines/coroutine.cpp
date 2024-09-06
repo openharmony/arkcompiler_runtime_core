@@ -18,7 +18,6 @@
 #include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/include/panda_vm.h"
-#include "runtime/coroutines/coro_callback_queue.h"
 
 namespace ark {
 
@@ -26,23 +25,20 @@ Coroutine *Coroutine::Create(Runtime *runtime, PandaVM *vm, PandaString name, Co
                              std::optional<EntrypointInfo> &&epInfo)
 {
     mem::InternalAllocatorPtr allocator = runtime->GetInternalAllocator();
-    auto *callbackQueue = allocator->New<CoroCallbackQueue>();
     auto *co = allocator->New<Coroutine>(os::thread::GetCurrentThreadId(), allocator, vm,
                                          ark::panda_file::SourceLang::PANDA_ASSEMBLY, std::move(name), context,
-                                         callbackQueue, std::move(epInfo));
+                                         std::move(epInfo));
     co->Initialize();
     return co;
 }
 
 Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *vm,
                      ark::panda_file::SourceLang threadLang, PandaString name, CoroutineContext *context,
-                     CallbackQueue *queue, std::optional<EntrypointInfo> &&epInfo)
+                     std::optional<EntrypointInfo> &&epInfo)
     : ManagedThread(id, allocator, vm, Thread::ThreadType::THREAD_TYPE_TASK, threadLang),
       name_(std::move(name)),
       context_(context),
-      startSuspended_(epInfo.has_value()),
-      callbackQueue_(queue),
-      callbacksEvent_(static_cast<CoroutineManager *>(vm->GetThreadManager()))
+      startSuspended_(epInfo.has_value())
 {
     ASSERT(vm != nullptr);
     ASSERT(context != nullptr);
@@ -52,7 +48,6 @@ Coroutine::Coroutine(ThreadId id, mem::InternalAllocatorPtr allocator, PandaVM *
 
 Coroutine::~Coroutine()
 {
-    callbackQueue_->Destroy();
     static_cast<CoroutineManager *>(GetVM()->GetThreadManager())->FreeCoroutineId(coroutineId_);
 }
 
@@ -153,63 +148,6 @@ void Coroutine::RequestCompletion([[maybe_unused]] Value returnValue)
 {
     auto *e = GetCompletionEvent();
     e->Happen();
-}
-
-void Coroutine::AcceptAnnouncedCallbacks(PandaList<PandaUniquePtr<Callback>> callbacks)
-{
-    os::memory::LockHolder lh(preparingCallbacksLock_);
-    ASSERT(preparingCallbacks_ >= callbacks.size());
-    auto readyCallbacks = callbacks.size();
-    ASSERT(callbackQueue_ != nullptr);
-    callbackQueue_->PostSequence(std::move(callbacks));
-    // Atomic with relaxed order reason: mutex synchronization
-    preparingCallbacks_.fetch_sub(readyCallbacks, std::memory_order_relaxed);
-    auto *event = awaiteeEvent_.exchange(nullptr);
-    event = (event == nullptr) ? &callbacksEvent_ : event;
-    event->Happen();
-}
-
-void Coroutine::WaitTillAnnouncedCallbacksAreDelivered()
-{
-    preparingCallbacksLock_.Lock();
-    // Atomic with relaxed order reason: mutex synchronization
-    if (preparingCallbacks_.load(std::memory_order_relaxed) == 0) {
-        preparingCallbacksLock_.Unlock();
-        return;
-    }
-    callbacksEvent_.SetNotHappened();
-    callbacksEvent_.Lock();
-    preparingCallbacksLock_.Unlock();
-    auto *coroManager = static_cast<CoroutineManager *>(GetVM()->GetThreadManager());
-    coroManager->Await(&callbacksEvent_);
-}
-
-void Coroutine::ProcessPresentAndAnnouncedCallbacks()
-{
-    ASSERT(callbackQueue_ != nullptr);
-    do {
-        ProcessPresentCallbacks();
-        WaitTillAnnouncedCallbacksAreDelivered();
-    } while (!callbackQueue_->IsEmpty());
-    ASSERT(preparingCallbacks_ == 0);
-}
-
-bool Coroutine::TryEnterAwaitModeAndLockAwaitee(CoroutineEvent *event)
-{
-    ASSERT(this == Coroutine::GetCurrent());
-    ASSERT(awaiteeEvent_ == nullptr);
-    ASSERT(event != nullptr);
-    os::memory::LockHolder lh(preparingCallbacksLock_);
-    if (!callbackQueue_->IsEmpty()) {
-        return false;
-    }
-
-    if (preparingCallbacks_ != 0) {
-        awaiteeEvent_ = event;
-    }
-    event->SetNotHappened();
-    event->Lock();
-    return true;
 }
 
 std::ostream &operator<<(std::ostream &os, Coroutine::Status status)

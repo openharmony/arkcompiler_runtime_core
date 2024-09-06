@@ -59,7 +59,7 @@ public:
     {
         return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsPromise, value_, "value"),
                                              MIRROR_FIELD_INFO(EtsPromise, callbackQueue_, "callbackQueue"),
-                                             MIRROR_FIELD_INFO(EtsPromise, coroPtrQueue_, "coroPtrQueue"),
+                                             MIRROR_FIELD_INFO(EtsPromise, launchModeQueue_, "launchModeQueue"),
                                              MIRROR_FIELD_INFO(EtsPromise, interopObject_, "interopObject"),
                                              MIRROR_FIELD_INFO(EtsPromise, linkedPromise_, "linkedPromise"),
                                              MIRROR_FIELD_INFO(EtsPromise, queueSize_, "queueSize"),

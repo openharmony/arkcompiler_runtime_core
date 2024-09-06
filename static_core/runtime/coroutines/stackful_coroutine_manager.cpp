@@ -440,12 +440,19 @@ stackful_coroutines::AffinityMask StackfulCoroutineManager::CalcAffinityMaskFrom
      * launch mode \ policy      DEFAULT                         NON_MAIN
      *   DEFAULT                ->least busy, allow migration   ->least busy, allow migration, disallow <main>
      *   SAME_WORKER            ->same, forbid migration        ->same, forbid migration
+     *   MAIN_WORKER            ->main, forbid migration        ->main, forbid migration
      *   EXCLUSIVE              ->least busy, forbid migration  ->least busy, forbid migration, disallow <main>
      */
 
     if (mode == CoroutineLaunchMode::SAME_WORKER) {
         std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> mask(stackful_coroutines::AFFINITY_MASK_NONE);
         mask.set(GetCurrentWorker()->GetId());
+        return mask.to_ullong();
+    }
+
+    if (mode == CoroutineLaunchMode::MAIN_WORKER) {
+        std::bitset<stackful_coroutines::MAX_WORKERS_COUNT> mask(stackful_coroutines::AFFINITY_MASK_NONE);
+        mask.set(stackful_coroutines::MAIN_WORKER_ID);
         return mask.to_ullong();
     }
 

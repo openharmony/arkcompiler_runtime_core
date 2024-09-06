@@ -283,11 +283,6 @@ bool PandaEtsVM::InitializeFinish()
 void PandaEtsVM::UninitializeThreads()
 {
     // Wait until all threads finish the work
-    {
-        auto *mainCoro = EtsCoroutine::GetCurrent();
-        ScopedManagedCodeThread s(mainCoro);
-        mainCoro->ProcessPresentAndAnnouncedCallbacks();
-    }
     coroutineManager_->WaitForDeregistration();
     coroutineManager_->DestroyMainCoroutine();
     coroutineManager_->Finalize();

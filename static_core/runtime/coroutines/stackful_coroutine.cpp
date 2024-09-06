@@ -118,7 +118,6 @@ void StackfulCoroutineContext::ThreadProcImpl()
         GetWorker()->GetPerfStats().FinishInterval(CoroutineTimeStats::SCH_ALL);
         Value result = co->GetManagedEntrypoint()->Invoke(co, args.data());
         co->RequestCompletion(result);
-        co->ProcessPresentAndAnnouncedCallbacks();
     } else if (co->HasNativeEntrypoint()) {
         // profiling: jump to the NATIVE EP, will end the SCH_ALL there
         co->GetNativeEntrypoint()(co->GetNativeEntrypointParam());

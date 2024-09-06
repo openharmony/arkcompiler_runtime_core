@@ -16,19 +16,18 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H_
 
-#include "runtime/include/mem/panda_smart_pointers.h"
-#include "runtime/include/callback_queue.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets {
-class JobQueue : public CallbackQueue {
+
+class JobQueue {
 public:
     JobQueue() = default;
 
-    ~JobQueue() override = default;
+    virtual ~JobQueue() = default;
 
     /// @brief Adds a callback (in a form of lambda function) to the JobQueue
-    void Post(PandaUniquePtr<Callback> callback) override = 0;
+    virtual void Post(EtsObject *callback) = 0;
     /**
      * @brief Creates a link between objects, so target's state changes synchronously to source's
      *
@@ -39,5 +38,6 @@ public:
     NO_COPY_SEMANTIC(JobQueue);
     NO_MOVE_SEMANTIC(JobQueue);
 };
+
 }  // namespace ark::ets
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_JOB_QUEUE_INTERFACE_H_

@@ -41,6 +41,8 @@ enum class CoroutineLaunchMode {
     DEFAULT,
     /// schedule to the parent's worker only
     SAME_WORKER,
+    /// schedule to the main worker only
+    MAIN_WORKER,
     /// schedule exclusively, moving other coros off the target worker
     EXCLUSIVE
 };

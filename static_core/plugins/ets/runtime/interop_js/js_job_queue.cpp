@@ -27,7 +27,6 @@
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
-#include "plugins/ets/runtime/ets_callback.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
 #include "runtime/coroutines/stackful_coroutine.h"
 #include "intrinsics.h"
@@ -38,13 +37,13 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
     EtsCoroutine *coro = EtsCoroutine::GetCurrent();
     INTEROP_CODE_SCOPE_JS(coro, env);
 
-    EtsCallback *callback = nullptr;
+    JsJobQueue::JsCallback *jsCallback = nullptr;
     [[maybe_unused]] napi_status status =
-        napi_get_cb_info(env, info, nullptr, nullptr, nullptr, reinterpret_cast<void **>(&callback));
+        napi_get_cb_info(env, info, nullptr, nullptr, nullptr, reinterpret_cast<void **>(&jsCallback));
     ASSERT(status == napi_ok);
 
-    callback->Run();
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(callback);
+    jsCallback->Run();
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(jsCallback);
 
     if (coro->HasPendingException()) {
         napi_throw_error(env, nullptr, "EtsVM internal error");
@@ -54,10 +53,9 @@ static napi_value ThenCallback(napi_env env, napi_callback_info info)
     return undefined;
 }
 
-void JsJobQueue::Post(PandaUniquePtr<Callback> callback)
+void JsJobQueue::Post(EtsObject *callback)
 {
-    auto *callbackPtr = callback.release();
-    auto postProc = [callbackPtr] {
+    auto postProc = [callback] {
         EtsCoroutine *coro = EtsCoroutine::GetCurrent();
         napi_env env = InteropCtx::Current(coro)->GetJSEnv();
         napi_deferred deferred;
@@ -74,8 +72,9 @@ void JsJobQueue::Post(PandaUniquePtr<Callback> callback)
         ASSERT(status == napi_ok);
         (void)status;
 
+        auto *jsCallback = JsCallback::Create(coro, callback);
         napi_value thenCallback;
-        status = napi_create_function(env, nullptr, 0, ThenCallback, callbackPtr, &thenCallback);
+        status = napi_create_function(env, nullptr, 0, ThenCallback, jsCallback, &thenCallback);
         if (status != napi_ok) {
             InteropCtx::Fatal("Cannot create a function");
         }
@@ -173,4 +172,29 @@ void JsJobQueue::CreateLink(EtsObject *source, EtsObject *target)
         addLinkProc();
     }
 }
+
+/* static */
+JsJobQueue::JsCallback *JsJobQueue::JsCallback::Create(EtsCoroutine *coro, const EtsObject *callback)
+{
+    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
+    auto *jsCallbackRef = refStorage->Add(callback->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
+    ASSERT(jsCallbackRef != nullptr);
+    auto *jsCallback = Runtime::GetCurrent()->GetInternalAllocator()->New<JsCallback>(jsCallbackRef);
+    return jsCallback;
+}
+
+void JsJobQueue::JsCallback::Run()
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    auto *refStorage = coro->GetPandaVM()->GetGlobalObjectStorage();
+    auto *callback = EtsObject::FromCoreType(refStorage->Get(jsCallbackRef_));
+    LambdaUtils::InvokeVoid(coro, callback);
+}
+
+JsJobQueue::JsCallback::~JsCallback()
+{
+    auto *refStorage = EtsCoroutine::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage();
+    refStorage->Remove(jsCallbackRef_);
+}
+
 }  // namespace ark::ets::interop::js

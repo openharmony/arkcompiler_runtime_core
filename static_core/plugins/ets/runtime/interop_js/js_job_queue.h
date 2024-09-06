@@ -19,16 +19,43 @@
 #include "plugins/ets/runtime/job_queue.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 
+namespace ark::mem {
+class Reference;
+}  // namespace ark::mem
+
 namespace ark::ets::interop::js {
 
-class JSValue;
 class JsJobQueue final : public JobQueue {
 public:
-    void Post(PandaUniquePtr<Callback> callback) override;
+    /**
+     *  This class represents a JS callback associated with the ETS function object: void()
+     *  It is used to post callback in the JS job queue and run it in JS env
+     */
+    class JsCallback {
+    public:
+        static JsCallback *Create(EtsCoroutine *coro, const EtsObject *callback);
+
+        void Run();
+
+        ~JsCallback();
+
+        NO_COPY_SEMANTIC(JsCallback);
+        NO_MOVE_SEMANTIC(JsCallback);
+
+    private:
+        explicit JsCallback(mem::Reference *jsCallbackRef) : jsCallbackRef_(jsCallbackRef) {}
+
+        mem::Reference *jsCallbackRef_;
+
+        friend class ark::mem::Allocator;
+    };
+
+    void Post(EtsObject *callback) override;
     void CreateLink(EtsObject *source, EtsObject *target) override;
 
 private:
     void CreatePromiseLink(EtsObject *jsObject, EtsPromise *etsPromise);
 };
+
 }  // namespace ark::ets::interop::js
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_JS_INTEROP_JOB_QUEUE_H_

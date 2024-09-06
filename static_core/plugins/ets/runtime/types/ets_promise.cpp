@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
+#include "runtime/coroutines/coroutine_manager.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_callback.h"
+#include "plugins/ets/runtime/types/ets_method.h"
 
 namespace ark::ets {
 
@@ -38,46 +39,35 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
         SetEventPtr(nullptr);
     }
 
-    PandaUnorderedMap<EtsCoroutine *, PandaList<PandaUniquePtr<Callback>>> readyCallbacks;
     auto *cbQueue = GetCallbackQueue(coro);
-    auto *coroPtrQueue = GetCoroPtrQueue(coro);
+    auto *launchModeQueue = GetLaunchModeQueue(coro);
     auto queueSize = GetQueueSize();
 
     for (int idx = 0; idx < queueSize; ++idx) {
-        auto *callbackCoro = reinterpret_cast<EtsCoroutine *>(coroPtrQueue->Get(idx));
         auto *thenCallback = cbQueue->Get(idx);
-        auto callback = EtsCallback::Create(coro, thenCallback);
-        readyCallbacks[callbackCoro].push_back(std::move(callback));
+        auto launchMode = static_cast<CoroutineLaunchMode>(launchModeQueue->Get(idx));
+        EtsPromise::LaunchCallback(coro, thenCallback, launchMode);
     }
-
     ClearQueues(coro);
-    for (auto &[callbackCoro, callbacks] : readyCallbacks) {
-        callbackCoro->AcceptAnnouncedCallbacks(std::move(callbacks));
-    }
 }
 
-void EtsPromise::EnsureCapacity(EtsCoroutine *coro)
+/* static */
+void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode)
 {
-    int queueLength = GetCallbackQueue(coro) == nullptr ? 0 : GetCallbackQueue(coro)->GetLength();
-    if (queueSize_ > queueLength) {
+    // Post callback to js env
+    auto *jobQueue = coro->GetPandaVM()->GetJobQueue();
+    if (launchMode == CoroutineLaunchMode::MAIN_WORKER && jobQueue != nullptr) {
+        jobQueue->Post(callback);
         return;
     }
-    auto newQueueLength = queueLength * 2U + 1U;
-    auto *objectClass = coro->GetPandaVM()->GetClassLinker()->GetObjectClass();
-    auto *tmpCbQueue = EtsObjectArray::Create(objectClass, newQueueLength);
-    if (queueSize_ != 0) {
-        GetCallbackQueue(coro)->CopyDataTo(tmpCbQueue);
-    }
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, callbackQueue_), tmpCbQueue->GetCoreType());
-    auto *newCoroPtrQueue = EtsLongArray::Create(newQueueLength);
-    if (queueSize_ != 0) {
-        auto *coroPtrQueueData = GetCoroPtrQueue(coro)->GetData<EtsCoroutine *>();
-        [[maybe_unused]] auto err =
-            memcpy_s(newCoroPtrQueue->GetData<EtsCoroutine *>(), newQueueLength * sizeof(EtsLong), coroPtrQueueData,
-                     queueLength * sizeof(EtsCoroutine *));
-        ASSERT(err == EOK);
-    }
-    ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, coroPtrQueue_), newCoroPtrQueue->GetCoreType());
+    // Launch callback in its own coroutine
+    auto *coroManager = coro->GetCoroutineManager();
+    auto *event = Runtime::GetCurrent()->GetInternalAllocator()->New<CompletionEvent>(nullptr, coroManager);
+    auto *method = EtsMethod::ToRuntimeMethod(callback->GetClass()->GetMethod("invoke"));
+    ASSERT(method != nullptr);
+    auto args = PandaVector<Value> {Value(callback->GetCoreType())};
+    [[maybe_unused]] auto *launchedCoro = coroManager->Launch(event, method, std::move(args), launchMode);
+    ASSERT(launchedCoro != nullptr);
 }
 
 void EtsPromise::PromotePromiseRef(EtsCoroutine *coro)
