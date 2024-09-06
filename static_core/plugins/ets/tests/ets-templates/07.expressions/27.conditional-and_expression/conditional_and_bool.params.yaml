@@ -1,0 +1,66 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+--- # Conditional AND for boolean
+cases:
+  - doc: Conditional AND for 2x boolean - true true
+    decl: |-
+      let a: boolean = true;
+      let b: boolean = true;
+      assert((a && b) == true);
+
+  - doc: Conditional AND for 2x boolean - true false
+    decl: |-
+      let a: boolean = true;
+      let b: boolean = false;
+      assert((a && b) == false);
+
+  - doc: Conditional AND for 2x boolean - false unknown
+    decl: |-
+      let a: boolean = false;
+      assert((a && fail()) == false);
+
+  - doc: Conditional AND for 4x boolean - true true true true
+    decl: |-
+      let a: boolean = true;
+      let b: boolean = true;
+      let c: boolean = true;
+      let d: boolean = true;
+      assert((a && b && c && d) == true)
+
+  - doc: Conditional AND for 4x boolean - true true true false
+    decl: |-
+      let a: boolean = true;
+      let b: boolean = true;
+      let c: boolean = true;
+      let d: boolean = false;
+      assert((a && b && c && d) == false)
+
+  - doc: Conditional AND for 4x boolean - true true false unknown
+    decl: |-
+      let a: boolean = true;
+      let b: boolean = true;
+      let c: boolean = false;
+      assert((a && b && c && fail()) == false)
+
+  - doc: Conditional AND for 4x boolean - true false unknown...
+    decl: |-
+      let a: boolean = true;
+      let b: boolean = false;
+      assert((a && b && fail() && fail()) == false)
+
+  - doc: Conditional AND for 4x boolean - false unknown...
+    decl: |-
+      let a: boolean = false;
+      assert((a && fail() && fail() && fail()) == false)
+

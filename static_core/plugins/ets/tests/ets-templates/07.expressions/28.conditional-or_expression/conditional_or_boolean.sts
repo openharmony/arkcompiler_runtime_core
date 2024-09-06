@@ -13,16 +13,19 @@
  * limitations under the License.
  */
 
+{% for c in cases %}
 /*---
-desc: Conditional and operator
+desc: {{c.doc}}
 ---*/
 
-function check(): Boolean {
+function fail(): boolean {
   assert(false);
   return true;
 }
 
+
 function main(): void {
-  let x: Boolean = true;
-  assert(!(x || check()));
+{{c.decl}}
 }
+
+{% endfor %}
