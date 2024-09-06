@@ -216,4 +216,29 @@ TEST_F(EtsInteropScenariosJsToEts, Test_static_methodCall_return_type_union)
     ASSERT_EQ(ret, true);
 }
 
+TEST_F(EtsInteropScenariosJsToEts, Test_function_rest_parameter)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_rest_parameter");
+    ASSERT_EQ(ret, true);
+}
+
+// NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_function_spread_parameter)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_spread_parameter");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_function_overload)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_overload");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_function_callable_return_value)
+{
+    auto ret = CallEtsMethod<bool>("Test_function_callable_return_value");
+    ASSERT_EQ(ret, true);
+}
+
 }  // namespace ark::ets::interop::js::testing

@@ -246,6 +246,34 @@ class ClassWithStaticMethod {
 		return functionReturnTypeUnion(arg);
 	}
 }
+function functionRestParameter(...arg) {
+  return arg[0]; // transpiled from Typescript code: function function_rest_parameter(...arg: number[])
+}
+
+function functionSpreadParameter(arg1, arg2) {
+  return arg1 + arg2; // transpiled from Typescript code: function function_spread_parameter(arg1: number, arg2: number)
+}
+
+function functionOverloaded() {
+}
+
+function functionOverloaded(arg) {
+}
+
+function functionOverload() {
+    let value = 1;
+    functionOverloaded();
+    functionOverloaded(value);
+    return value;
+}
+
+
+function functionCallableReturnValue() {
+    const value = () => (x) =>  Number(x) + 1;
+    console.log(value()(4))
+    return Function('', 'return 2')
+}
+
 
 exports.standaloneFunctionJs = standaloneFunctionJs;
 exports.ClassWithMethodJs = ClassWithMethodJs;
@@ -283,3 +311,7 @@ exports.functionArgTypeUnion = functionArgTypeUnion;
 exports.functionReturnTypeUnion = functionReturnTypeUnion;
 exports.UnionTestClassJs = UnionTestClassJs;
 exports.ClassWithStaticMethod = ClassWithStaticMethod;
+exports.functionRestParameter = functionRestParameter;
+exports.functionSpreadParameter = functionSpreadParameter;
+exports.functionOverload = functionOverload;
+exports.functionCallableReturnValue = functionCallableReturnValue;
