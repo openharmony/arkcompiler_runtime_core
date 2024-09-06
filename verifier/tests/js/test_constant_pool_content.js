@@ -45,3 +45,15 @@ for (let i = 0; i < 10; i++) {
     break;
   }
 }
+
+let myDoubles = [12.34, 56.78];
+
+function testTryCatch() {
+  try {
+      let a = 1;
+      let b = 0;
+      let c = a / b;
+  } catch (error) {
+      console.log('This is a simulated error ', error);
+  }
+}

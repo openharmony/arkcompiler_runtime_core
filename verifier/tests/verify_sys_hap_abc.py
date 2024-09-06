@@ -15,11 +15,13 @@
 # limitations under the License.
 
 import argparse
+import datetime
 import os
 import shutil
+import stat
 import subprocess
+import time
 import zipfile
-import shutil
 
 
 def parse_args():
@@ -28,6 +30,8 @@ def parse_args():
         "--hap-dir", required=True, help="Path to the HAP files directory.")
     parser.add_argument(
         "--verifier-dir", required=True, help="Path to the ark_verifier directory.")
+    parser.add_argument(
+        "--keep-files", action="store_true", help="Keep extracted files after verification.")
     return parser.parse_args()
 
 
@@ -47,35 +51,60 @@ def extract_zip(zip_path, extract_folder):
 
 
 def verify_file(file_path, ark_verifier_path):
-    verification_command = [ark_verifier_path, "--input_file", file_path]
+    verification_command = ["/usr/bin/time", "-v", ark_verifier_path, "--input_file", file_path]
     result = subprocess.run(verification_command, capture_output=True, text=True)
     status = 'pass' if result.returncode == 0 else 'fail'
-    print(f"Verifying: {file_path} {status}")
-    return result.returncode == 0
+    
+    memory_usage = None
+    user_time_ms = None
+    
+    for line in result.stderr.splitlines():
+        if "Maximum resident set size" in line:
+            memory_usage = line.split(":")[1].strip() + " KB"
+        if "User time (seconds)" in line:
+            user_time_seconds = float(line.split(":")[1].strip())
+            user_time_ms = f"{user_time_seconds * 1000:.2f} ms"
+    
+    file_size = os.path.getsize(file_path)
+    file_size_str = f"{file_size / 1024:.2f} KB" if file_size < 1024**2 else f"{file_size / 1024**2:.2f} MB"
+    report = {
+        "file": file_path,
+        "size": file_size_str,
+        "status": status,
+        "memory_usage": memory_usage,
+        "user_time": user_time_ms,
+    }
+    return report
 
 
 def process_directory(directory, ark_verifier_path):
     total_count = 0
     passed_count = 0
     failed_abc_list = []
+    report_list = []
 
     for root, dirs, files in os.walk(directory):
         for file in files:
             if not file.endswith(".abc"):
                 continue
             abc_path = os.path.join(root, file)
-            if verify_file(abc_path, ark_verifier_path):
+            print(f"Verifying file: {abc_path}")
+            report = verify_file(abc_path, ark_verifier_path)
+            report_list.append(report)
+            if report.get("status") == "pass":
                 passed_count += 1
             else:
-                failed_abc_list.append(os.path.relpath(abc_path, hap_folder))
+                failed_abc_list.append(os.path.relpath(abc_path, directory))
             total_count += 1
 
-    return total_count, passed_count, failed_abc_list
+    return total_count, passed_count, failed_abc_list, report_list
+
 
 def verify_hap(hap_folder, ark_verifier_path):
     failed_abc_list = []
     passed_count = 0
     total_count = 0
+    report_list = []
 
     for file in os.listdir(hap_folder):
         if not file.endswith(".zip"):
@@ -83,6 +112,7 @@ def verify_hap(hap_folder, ark_verifier_path):
 
         zip_path = os.path.join(hap_folder, file)
         extract_folder = os.path.join(hap_folder, file.replace(".zip", ""))
+        print(f"Extracting {zip_path} to {extract_folder}")
         extract_zip(zip_path, extract_folder)
 
         ets_path = os.path.join(extract_folder, "ets")
@@ -91,32 +121,68 @@ def verify_hap(hap_folder, ark_verifier_path):
 
         modules_abc_path = os.path.join(ets_path, "modules.abc")
         if os.path.isfile(modules_abc_path):
-            if verify_file(modules_abc_path, ark_verifier_path):
+            print(f"Verifying file: {modules_abc_path}")
+            report = verify_file(modules_abc_path, ark_verifier_path)
+            report_list.append(report)
+            if report.get("status") == "pass":
                 passed_count += 1
             else:
                 failed_abc_list.append(os.path.relpath(modules_abc_path, hap_folder))
             total_count += 1
         else:
-            total_inc, passed_inc, failed_abc_inc = process_directory(ets_path, ark_verifier_path)
+            total_inc, passed_inc, failed_abc_inc, reports = process_directory(ets_path, ark_verifier_path)
             total_count += total_inc
             passed_count += passed_inc
             failed_abc_list.extend(failed_abc_inc)
+            report_list.extend(reports)
 
-    return total_count, passed_count, len(failed_abc_list), failed_abc_list
+    return total_count, passed_count, len(failed_abc_list), failed_abc_list, report_list
+
+
+def save_report(report_list, report_file):
+    flags = os.O_RDWR | os.O_CREAT
+    mode = stat.S_IWUSR | stat.S_IRUSR
+    with os.fdopen(os.open(report_file, flags, mode), 'w') as f:
+        f.truncate()
+        f.write("<html><head><title>Verification Report</title>")
+        f.write("<style>")
+        f.write("body {font-family: Arial, sans-serif;}")
+        f.write("table {width: 100%; border-collapse: collapse;}")
+        f.write("th, td {border: 1px solid black; padding: 8px; text-align: left;}")
+        f.write("th {background-color: #f2f2f2;}")
+        f.write("tr:nth-child(even) {background-color: #f9f9f9;}")
+        f.write("tr:hover {background-color: #f1f1f1;}")
+        f.write("</style></head><body>\n")
+        f.write("<h1>Verification Report</h1>\n")
+        f.write(f"<p>Generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>\n")
+        f.write("<table>\n")
+        f.write("<tr><th>File</th><th>Size</th><th>Status</th><th>Memory Usage</th><th>User Time</th></tr>\n")
+        for report in report_list:
+            f.write("<tr>")
+            f.write(f"<td>{report['file']}</td>")
+            f.write(f"<td>{report['size']}</td>")
+            f.write(f"<td>{report['status']}</td>")
+            f.write(f"<td>{report['memory_usage']}</td>")
+            f.write(f"<td>{report['user_time']}</td>")
+            f.write("</tr>\n")
+        f.write("</table>\n")
+        f.write("</body></html>\n")
 
 
 def main():
+    start_time = time.time()
     args = parse_args()
 
     hap_folder_path = os.path.abspath(args.hap_dir)
     ark_verifier_path = os.path.abspath(os.path.join(args.verifier_dir, "ark_verifier"))
 
-    out_folder = os.path.join(os.path.dirname(__file__), "out")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    out_folder = os.path.join(script_dir, "out")
     os.makedirs(out_folder, exist_ok=True)
 
     copy_and_rename_hap_files(hap_folder_path, out_folder)
 
-    total_count, passed_count, failed_count, failed_abc_list = verify_hap(out_folder, ark_verifier_path)
+    total_count, passed_count, failed_count, failed_abc_list, report_list = verify_hap(out_folder, ark_verifier_path)
 
     print("Summary(abc verification):")
     print(f"Total: {total_count}")
@@ -128,7 +194,21 @@ def main():
         for failed_abc in failed_abc_list:
             print(f"  - {failed_abc}")
 
-    shutil.rmtree(out_folder)
+    report_file = os.path.join(script_dir, "verification_report.html")
+    save_report(report_list, report_file)
+    print(f"\nDetailed report saved to: {report_file}")
+
+    if not args.keep_files:
+        if os.path.isdir(out_folder):
+            shutil.rmtree(out_folder)
+            print(f"\n'{out_folder}' directory has been deleted.")
+
+    end_time = time.time()
+    duration = end_time - start_time
+    completion_time = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(end_time))
+
+    print(f"\nExecution time: {duration:.2f} seconds")
+    print(f"Completion time: {completion_time}")
 
 
 if __name__ == "__main__":

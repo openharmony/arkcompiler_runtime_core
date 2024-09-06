@@ -257,6 +257,9 @@ public:
     // Read imm and return it as int64_t/uint64_t
     auto GetImm64(size_t idx = 0) const;
 
+    // Read imm as actually signed / unsigned and cast it to int64 before return
+    auto GetImmData(size_t idx = 0) const;
+
     /**
      * Primary and Secondary Opcodes are used in interpreter/verifier instruction dispatch
      * while full Opcode is typically used for various instruction property query.
