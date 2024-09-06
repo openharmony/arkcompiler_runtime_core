@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
+ * Licensed under the Apache License, Version 2.0 (the 'License');
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
+ * distributed under the License is distributed on an 'AS IS' BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -31,7 +31,7 @@ const capitalize = (str = '') => {
         .map((substring, i) =>
             substring[0].toUpperCase() + substring.substring(1))
         .join('');
-}
+};
 
 class Benchmark {
     #ark = require(MODULE_PATH + '/ets_interop_js_napi.node');
@@ -39,21 +39,19 @@ class Benchmark {
     #benchmark;
     #passedTime = BigInt(0);
     #binaries = [];
-    constructor(
-        ...binaries
-    ){
+    constructor(...binaries) {
         this.#binaries = binaries;
         this.#__init();
     }
 
-    #__init(){
+    #__init() {
         const isOk = this.#ark.createRuntime({
             'boot-panda-files': [ARK_ETS_STDLIB_PATH, ...this.#binaries].join(':'),
             'panda-files': this.#binaries.join(':'),
             'gc-trigger-type': 'heap-trigger',
             'compiler-enable-jit': 'false',
             'run-gc-in-place': 'true',
-            "log-components": "ets_interop_js",
+            'log-components': 'ets_interop_js',
             'load-runtimes': 'ets'
         });
 
@@ -62,13 +60,13 @@ class Benchmark {
         }
     }
 
-    #prepare(){
+    #prepare() {
         const TestClass = this.#ark.getClass(`L${this.#benchName};`);
         this.#benchmark = new TestClass();
         this.#benchmark.setup();
     }
 
-    #loopFromJS(iterations = DEFAULT_ITERATIONS){
+    #loopFromJS(iterations = DEFAULT_ITERATIONS) {
         if (!Number.isFinite(iterations)) {
             throw new Error(`Iteration count should be a valid integer, ${iterations} given instead`);
         }
@@ -81,15 +79,15 @@ class Benchmark {
         return this.#passedTime;
     }
 
-    #loopFromArk(iterations = DEFAULT_ITERATIONS){
+    #loopFromArk(iterations = DEFAULT_ITERATIONS) {
         if (!Number.isFinite(iterations)) {
             throw new Error(`Iteration count should be a valid integer, ${iterations} given instead`);
         }
         this.#benchmark.runsLeft = iterations;
-        return Number(this.#benchmark.test())
+        return Number(this.#benchmark.test());
     }
 
-    run(iterations = DEFAULT_ITERATIONS){
+    run(iterations = DEFAULT_ITERATIONS) {
         this.#prepare();
         const isSelfTimed = this.#benchmark.totalTime !== undefined;
         const testRunner = isSelfTimed ? this.#loopFromArk.bind(this) : this.#loopFromJS.bind(this);
