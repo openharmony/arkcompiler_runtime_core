@@ -1,0 +1,65 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+const Empty: String = '';
+const Esc: String = '\t\n\v';
+const Hello: String = 'Hello';
+const Nature: String = '自然界';
+
+function main(): int {
+
+    assert Empty.startsWith('') == true;
+    assert Empty.startsWith('', -1) == true;
+    assert Empty.startsWith('', 0) == true;
+    assert Empty.startsWith('', 1) == true;
+    assert Empty.startsWith('*') == false
+    assert Empty.startsWith('*', -1) == false
+    assert Empty.startsWith('*', 0) == false
+    assert Empty.startsWith('*', 1) == false
+
+    assert Esc.startsWith('\t') == true
+    assert Esc.startsWith('\t', -1) == true
+    assert Esc.startsWith('\t', 0) == true
+    assert Esc.startsWith('\n', 1) == true
+    assert Esc.startsWith('\v', 2) == true
+
+    assert Hello.startsWith('') == true
+    assert Hello.startsWith('',-1) == true
+    assert Hello.startsWith('', 0) == true
+    assert Hello.startsWith('', 1) == true
+    assert Hello.startsWith('', 2) == true
+    assert Hello.startsWith('', 3) == true
+    assert Hello.startsWith('', 4) == true
+    assert Hello.startsWith('', 5) == true
+
+    assert Hello.startsWith('H') == true
+    assert Hello.startsWith("Hel") == true
+    assert Hello.startsWith("Hel", 0) == true
+    assert Hello.startsWith("Hel", -1) == true
+    assert Hello.startsWith("ello", 1) == true
+    assert Hello.startsWith("o", 4) == true
+
+    assert Nature.startsWith('自然界') == true
+    assert Nature.startsWith('自然') == true
+    assert Nature.startsWith("自") == true
+    assert Nature.startsWith("自", -1) == true
+    assert Nature.startsWith("然", 0) == false
+    assert Nature.startsWith("然界", 1) == true
+    assert Nature.startsWith("界", 2) == true
+    assert Nature.startsWith("界", 3) == false
+
+    console.println("PASS");
+    return 0;
+}

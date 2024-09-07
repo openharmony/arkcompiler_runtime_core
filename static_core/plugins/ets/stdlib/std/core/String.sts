@@ -398,43 +398,14 @@ export final class String extends Object implements Comparable<String>, JSONable
      * @param prefix prefix string
      * @param fromIndex index to start from
      *
-     * @throws NullPointerError if prefix param is null
-     *
      * @returns true if the substring begins with prefix
      */
+    public native startsWith(prefix: String, fromIndex: int): boolean;
     public startsWith(prefix: String, fromIndex?: Number): boolean {
         if (fromIndex == undefined) {
             return this.startsWith(prefix, 0)
         }
         return this.startsWith(prefix, fromIndex.intValue())
-    }
-
-    /**
-     * Checks that the substring of this string that starts from
-     * the specified index starts with the specified prefix.
-     *
-     * @param prefix prefix string
-     * @param fromIndex index to start from
-     *
-     * @throws NullPointerError if prefix param is null
-     * @throws StringIndexOutOfBoundsError if fromIndex param is negative or >= length
-     *
-     * @returns true if the substring begins with prefix
-     */
-    public startsWith(prefix: String, fromIndex: int): boolean {
-        let prefixLen = prefix.getLength()
-        if (fromIndex < 0) {
-            fromIndex = 0;
-        }
-        if (fromIndex > this.getLength() - prefixLen) {
-            return prefix.isEmpty();
-        }
-        for (let i: int = 0; i < prefixLen; i++) {
-            if (this.charAt(fromIndex + i) != prefix.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -445,28 +416,11 @@ export final class String extends Object implements Comparable<String>, JSONable
      *
      * @param endPosition at which suffix is expected to be found. Defaults to str.length.
      *
-     * @throws NullPointerError if suffix param is null
-     *
      * @returns true if this string ends with suffix
      */
+    public native endsWith(suffix: String, endPosition: int): boolean;
     public endsWith(suffix: String, endPosition?: Number): boolean {
-        let ep = asIntOrDefault(endPosition, this.getLength())
-        if (ep > this.getLength()) {
-            ep = this.getLength()
-        } else if (ep <= 0) {
-            return suffix == "";
-        }
-        let suffixLen = suffix.getLength()
-        let fromIndex: int = ep - suffixLen;
-        if (fromIndex < 0 && !suffix.isEmpty()) {
-            return false;
-        }
-        for (let i: int = 0; i < suffixLen; i++) {
-            if (this.charAt(fromIndex + i) != suffix.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
+        return this.endsWith(suffix, asIntOrDefault(endPosition, this.getLength()));
     }
 
     /**

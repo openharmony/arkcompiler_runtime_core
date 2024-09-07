@@ -37,3 +37,5 @@ bool EmitStringTrim(Inst *inst);
 bool EmitStringTrimLeft(Inst *inst);
 bool EmitStringTrimRight(Inst *inst);
 bool EmitCharIsWhiteSpace(Inst *inst);
+bool EmitStringStartsWith(Inst *inst);
+bool EmitStringEndsWith(Inst *inst);

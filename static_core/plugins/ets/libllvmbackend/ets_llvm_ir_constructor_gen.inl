@@ -342,3 +342,13 @@ bool LLVMIrConstructor::EmitCharIsWhiteSpace(Inst *inst)
 {
     return EmitFastPath(inst, RuntimeInterface::EntrypointId::CHAR_IS_WHITE_SPACE, 1U);
 }
+
+bool LLVMIrConstructor::EmitStringStartsWith(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_STARTS_WITH, 3U);
+}
+
+bool LLVMIrConstructor::EmitStringEndsWith(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_ENDS_WITH, 3U);
+}

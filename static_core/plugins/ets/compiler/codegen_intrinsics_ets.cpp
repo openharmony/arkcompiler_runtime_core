@@ -453,4 +453,21 @@ void Codegen::CreateStringTrim(IntrinsicInst *inst, Reg dst, SRCREGS src)
     CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_TRIM, dst, {}, str, unused, unused);
 }
 
+void Codegen::CreateStringStartsWith(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto str = src[FIRST_OPERAND];
+    auto pfx = src[SECOND_OPERAND];
+    auto idx = src[THIRD_OPERAND];
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_STARTS_WITH, dst, {}, str, pfx, idx);
+}
+
+void Codegen::CreateStringEndsWith(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto str = src[FIRST_OPERAND];
+    auto sfx = src[SECOND_OPERAND];
+    auto idx = src[THIRD_OPERAND];
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_ENDS_WITH, dst, {}, str, sfx, idx);
+}
 }  // namespace ark::compiler

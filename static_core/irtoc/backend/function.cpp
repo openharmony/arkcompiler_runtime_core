@@ -301,6 +301,9 @@ static bool RunIrtocOptimizations(Graph *graph)
         graph->RunPass<compiler::Peepholes>();
         graph->RunPass<compiler::ValNum>();
         graph->RunPass<compiler::Cse>();
+#ifndef NDEBUG
+        graph->SetLowLevelInstructionsEnabled();
+#endif  // NDEBUG
         graph->RunPass<compiler::Cleanup>();
         graph->RunPass<compiler::Lowering>();
         graph->RunPass<compiler::CodeSink>();
