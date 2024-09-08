@@ -35,6 +35,11 @@ if (enable_codegen) {
     ]
     deps = []
     defines = []
+
+    if (ark_standalone_build) {
+      deps += [ sdk_libc_secshared_dep ]
+    }
+
     external_deps = [ sdk_libc_secshared_dep ]
 
     if (target_cpu == "x86") {

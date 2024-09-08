@@ -242,7 +242,7 @@ if(PANDA_WITH_TOOLCHAIN)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/securec)
     set(OPENSSL_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/openssl)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/openssl)
-    set(TOOLCHAIN_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/arkcompiler_toolchain)
+    set(TOOLCHAIN_ROOT ${PANDA_THIRD_PARTY_SOURCES_DIR}/arkcompiler/toolchain)
     add_subdirectory(${PANDA_THIRD_PARTY_CONFIG_DIR}/toolchain_websocket)
     add_subdirectory(libpandabase)
 

@@ -126,6 +126,15 @@ $ cmake -DQEMU_PREFIX=/opt/qemu-6.2.0 ...
 
 ## Building with GN
 
+### Using bootstrap
+
+Build `arkts_bin`, `ark_aot`, `es2panda`, `verifier_bin` and `ets_interop_js_napi` targets.
+```
+./scripts/build-panda-with-gn
+```
+
+### Mannually
+
 1. Getting GN binary
 
 ```
@@ -145,7 +154,7 @@ $ ninja -C out arkts_bin
 When standard system, use
 ```
 $ cd /path/to/panda/repository
-$ /path/to/gn/repository/out/gn --args=-is_standard_system=true gen out
+$ /path/to/gn/repository/out/gn --args=is_standard_system=true gen out
 $ ninja -C out <target name>
 ```
 To use LLVM Backend add the following arguments:

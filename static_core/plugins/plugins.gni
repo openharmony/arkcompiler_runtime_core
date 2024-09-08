@@ -151,6 +151,11 @@ foreach(plugin, ark_enabled_plugins) {
       plugin_runtime_sources += [ "$_plugin_dir/$src" ]
     }
   }
+  if (defined(_plugin_vars.configs_runtime)) {
+    foreach(src, _plugin_vars.configs_runtime) {
+      plugin_runtime_configs += [ "$_plugin_dir/$src" ]
+    }
+  }
   if (defined(_plugin_vars.srcs_verification)) {
     foreach(src, _plugin_vars.srcs_verification) {
       plugin_verifier_sources += [ "$_plugin_dir/$src" ]

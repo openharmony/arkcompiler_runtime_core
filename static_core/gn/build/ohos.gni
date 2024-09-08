@@ -18,18 +18,8 @@ template("ohos_executable") {
              [
                "install_images",
                "part_name",
+               "external_deps",
              ])
-
-  if (defined(invoker.external_deps) && invoker.external_deps != []) {
-    if (!defined(invoker.deps)) {
-      invoker.deps = []
-    }
-    foreach(dep, invoker.external_deps) {
-      if (label_matches(dep, [ "//third_party/*" ])) {
-        invoker.deps += [ dep ]
-      }
-    }
-  }
 
   executable("${target_name}") {
     forward_variables_from(invoker,
@@ -64,18 +54,8 @@ template("ohos_shared_library") {
              [
                "install_images",
                "part_name",
+               "external_deps",
              ])
-
-  if (defined(invoker.external_deps) && invoker.external_deps != []) {
-    if (!defined(invoker.deps)) {
-      invoker.deps = []
-    }
-    foreach(dep, invoker.external_deps) {
-      if (label_matches(dep, [ "//third_party/*" ])) {
-        invoker.deps += [ dep ]
-      }
-    }
-  }
 
   shared_library("${target_name}") {
     forward_variables_from(invoker,
@@ -108,18 +88,11 @@ template("ohos_shared_library") {
 }
 
 template("ohos_static_library") {
-  not_needed(invoker, [ "part_name" ])
-
-  if (defined(invoker.external_deps) && invoker.external_deps != []) {
-    if (!defined(invoker.deps)) {
-      invoker.deps = []
-    }
-    foreach(dep, invoker.external_deps) {
-      if (label_matches(dep, [ "//third_party/*" ])) {
-        invoker.deps += [ dep ]
-      }
-    }
-  }
+  not_needed(invoker,
+             [
+               "part_name",
+               "external_deps",
+             ])
 
   static_library("${target_name}") {
     forward_variables_from(invoker,
@@ -169,18 +142,8 @@ template("ohos_source_set") {
                "public_external_deps",
                "part_name",
                "subsystem_name",
+               "external_deps",
              ])
-
-  if (defined(invoker.external_deps) && invoker.external_deps != []) {
-    if (!defined(invoker.deps)) {
-      invoker.deps = []
-    }
-    foreach(dep, invoker.external_deps) {
-      if (label_matches(dep, [ "//third_party/*" ])) {
-        invoker.deps += [ dep ]
-      }
-    }
-  }
 
   source_set(target_name) {
     forward_variables_from(invoker,

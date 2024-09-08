@@ -245,7 +245,12 @@ if [[ "$ARK_INSTALL_NODE" == "yes" ]] ; then
 fi
 
 if [[ "$ARK_THIRD_PARTY_FORCE_CLONE" == "yes" ]] ; then
-    rm -rf "$ARK_THIRD_PARTY_DIR"
+    if [[ -L "$ARK_THIRD_PARTY_DIR/arkcompiler/toolchain" ]] ; then
+        # remove all folders in third_party except arkcompiler if arkcompiler/toolchain is symlink
+        cd "$ARK_THIRD_PARTY_DIR" && rm -rf `ls | grep -v arkcompiler`
+    else
+        rm -rf "$ARK_THIRD_PARTY_DIR"
+    fi
 fi
 
 if [[ -d "$ARK_THIRD_PARTY_DIR" && ${#REPOS[@]} -eq 0 ]] ; then

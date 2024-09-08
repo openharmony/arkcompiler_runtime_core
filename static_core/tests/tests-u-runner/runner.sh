@@ -30,7 +30,8 @@ source "${ROOT_DIR}/scripts/python/venv-utils.sh"
 activate_venv
 set +e
 
-echo "${RUNNER_OPTIONS}"
+echo "RUNNER_OPTIONS=" "$RUNNER_OPTIONS"
+echo "ALL OPTIONS:" "$@"
 
 python3 -B "${RUNNER}" "$@"
 EXIT_CODE=$?
