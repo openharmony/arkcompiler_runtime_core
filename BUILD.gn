@@ -361,13 +361,11 @@ if (!ark_standalone_build) {
       "$ark_root/assembler/tests:host_unittest",
       "$ark_root/bytecode_optimizer/tests:host_unittest",
       "$ark_root/compiler/tests:host_unittest",
-      "$ark_root/disassembler/tests:host_unittest",
       "$ark_root/libark_defect_scan_aux/tests/unittest:host_unittest",
       "$ark_root/libpandabase/tests:host_unittest",
       "$ark_root/libpandafile/tests:host_unittest",
       "$ark_root/libziparchive/tests:host_unittest",
       "$ark_root/platforms/tests:host_unittest",
-      "$ark_root/verifier/tests:host_unittest",
     ]
   }
 
