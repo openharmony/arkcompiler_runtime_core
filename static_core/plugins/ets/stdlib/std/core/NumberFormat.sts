@@ -1,0 +1,61 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package std.core;
+
+export class NumberFormat {
+
+    /**
+     * The Intl.NumberFormat() constructor creates Intl.NumberFormat objects.
+     *
+     * @param locale locale from which to load formats and symbols for number formatting
+     */
+    public constructor(locale: string = "") {
+        if (locale == "") {
+            locale = "en-US";  // en-US as default locale
+        }
+        this.locale = locale;
+    }
+
+    /**
+     * Formats a number according to the locale and formatting options of this Intl.NumberFormat object.
+     *
+     * @param value a number to format.
+     *
+     * @returns string representing the given number formatted according to the locale and formatting options of this Intl.NumberFormat object.
+     */
+    public format(value: number): string {
+        return NumberFormat.formatDouble(this.locale, value);
+    }
+
+    /**
+     * Formats a number according to the locale and formatting options of this Intl.NumberFormat object.
+     *
+     * @param value A number or BigInt to format
+     *
+     * @returns A string representing the given number formatted according to the locale and formatting options of this Intl.NumberFormat object.
+     */
+    public format(value: number | bigint): string {
+        if (value instanceof BigInt) {
+            return NumberFormat.formatDecimal(this.locale, value.toString());
+        }
+        return this.format(value);
+    }
+
+    private static native formatDouble(locale: string, value: double): string;
+    private static native formatDecimal(locale: string, value: string): string;
+
+    private locale: String;
+}
