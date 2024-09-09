@@ -272,6 +272,14 @@ def create_file(path: Union[str, Path]):
         mode='w', encoding='utf-8')
 
 
+def load_file(path: Union[str, Path]) -> str:
+    """Read file to string."""
+    fd = os.fdopen(
+        os.open(path, os.O_RDONLY), mode="r", encoding='utf-8', buffering=1)
+    fd.seek(0)
+    return fd.read()
+
+
 def force_link(link: Path, dest: Path) -> None:
     if link.exists():
         link.unlink()

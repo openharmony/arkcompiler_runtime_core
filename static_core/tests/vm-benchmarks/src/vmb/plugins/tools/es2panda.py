@@ -15,21 +15,51 @@
 # limitations under the License.
 #
 
+import json
 import os
 import logging
 from pathlib import Path
-from shutil import copyfile
-from json import load, dump
 from glob import glob
 from tempfile import mkstemp
+from string import Template
+from typing import List, Union
 
 from vmb.tool import ToolBase, VmbToolExecError
 from vmb.unit import BenchUnit
 from vmb.shell import ShellResult
 from vmb.result import BuildResult, BUStatus
+from vmb.helpers import load_file, create_file
 
-log = logging.getLogger('es2p')
-JSON_PERMISSIONS = 0o664
+log = logging.getLogger('es2panda')
+
+
+def make_arktsconfig(configpath: Union[str, Path],
+                     ark_root: Union[str, Path],
+                     extra_paths: List[str]) -> None:
+    tpl_path = Path(__file__).parent.parent.parent.joinpath(
+        'templates', 'arktsconfig.json').resolve()
+    template = Template(
+        load_file(tpl_path)).substitute(ROOT=str(ark_root))
+    parsed_template = json.loads(template)
+    if len(extra_paths) > 0:
+        paths: dict = {}
+        dynamic_paths: dict = {}
+        for path in extra_paths:
+            lib_name = Path(path).stem
+            is_compilable = Path(path).suffix == '.sts' or Path(path).is_dir()
+            paths[lib_name] = [path]
+            if not is_compilable:
+                dynamic_paths[path] = {'language': 'js', 'hasDecl': False}
+                parsed_template['compilerOptions']['paths'] = {
+                    **parsed_template['compilerOptions']['paths'],
+                    **paths
+                    }
+                parsed_template['compilerOptions']['dynamicPaths'] = {
+                    **parsed_template['compilerOptions']['dynamicPaths'],
+                    **dynamic_paths
+                    }
+    with create_file(configpath) as f:
+        f.write(json.dumps(parsed_template))
 
 
 class Tool(ToolBase):
@@ -40,8 +70,8 @@ class Tool(ToolBase):
             os.environ.get('PANDA_BUILD', ''),
             err='Please set $PANDA_BUILD env var'
         )
-        self.default_arktsconfig = f'{self.panda_root}' \
-            f'/bin/arktsconfig.json'
+        self.default_arktsconfig = str(Path(self.panda_root).joinpath(
+            'tools', 'es2panda', 'generated', 'arktsconfig.json'))
         self.opts = '--gen-stdlib=false --extension=sts --opt-level=2 ' \
             f'{self.custom}'
         self.es2panda = self.ensure_file(self.panda_root, 'bin', 'es2panda')
@@ -50,55 +80,19 @@ class Tool(ToolBase):
     def name(self) -> str:
         return 'ES to Panda compiler (ArkTS mode)'
 
-    def make_arktsconfig(self, bu: BenchUnit) -> str:
+    def configure_paths(self, bu: BenchUnit) -> str:
         js_files = glob(f'{str(bu.src().parent)}/*.js')
         js_files_includable = [x for x in js_files if x.find('bench_') == -1]
-        [_, arktsconfig_path] = mkstemp('.json', 'arktsconfig_')
         sts_paths_includable = [str(x) for x in bu.libs()
                                 if str(x).find('.abc') == -1]
-        if len(js_files_includable) < 1:
-            copyfile(self.default_arktsconfig, arktsconfig_path)
-        else:
-            self.extend_arktsconfig(js_files_includable,
-                                    sts_paths_includable,
-                                    arktsconfig_path)
+        extra_paths = js_files_includable + sts_paths_includable
+        if len(extra_paths) < 1:
+            return self.default_arktsconfig
+        _, arktsconfig_path = mkstemp('.json', 'arktsconfig_')
+        make_arktsconfig(arktsconfig_path,
+                         self.panda_root,
+                         extra_paths)
         return arktsconfig_path
-
-    def extend_arktsconfig(self,
-                           extra_js_paths: list[str],
-                           extra_sts_paths: list[str],
-                           output_file: str
-                           ) -> None:
-        paths: dict = {}
-        dynamic_paths: dict = {}
-
-        for path in extra_js_paths:
-            lib_name = Path(path).stem
-            paths[lib_name] = [path]
-            dynamic_paths[path] = {'language': 'js', 'hasDecl': False}
-
-        for path in extra_sts_paths:
-            lib_name = Path(path).stem
-            paths[lib_name] = [path]
-        config_fd = os.open(self.default_arktsconfig,
-                            os.O_RDONLY | os.O_CREAT,
-                            JSON_PERMISSIONS)
-        output_fd = os.open(output_file,
-                            os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
-                            0o664)
-        raw_config = os.fdopen(config_fd, mode="r", encoding='utf-8')
-        output = os.fdopen(output_fd, mode="w", encoding='utf-8')
-        default_values = load(raw_config)
-        raw_config.close()
-        default_values['compilerOptions']['paths'] = {
-            **default_values['compilerOptions']['paths'],
-            **paths
-        }
-        default_values['compilerOptions']['dynamicPaths'] = {
-            **default_values['compilerOptions']['dynamicPaths'],
-            **dynamic_paths
-        }
-        dump(default_values, output)
 
     def exec(self, bu: BenchUnit) -> None:
         for lib in bu.libs('.ts', '.sts'):
@@ -120,7 +114,7 @@ class Tool(ToolBase):
                      abc: Path,
                      opts: str,
                      bu: BenchUnit) -> ShellResult:
-        arktsconfig = self.make_arktsconfig(bu)
+        arktsconfig = self.configure_paths(bu)
         res = self.sh.run(
             f'LD_LIBRARY_PATH={self.panda_root}/lib '
             f'{self.es2panda} {opts} '
