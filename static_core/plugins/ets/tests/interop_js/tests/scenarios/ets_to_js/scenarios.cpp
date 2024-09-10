@@ -402,4 +402,16 @@ TEST_F(EtsInteropScenariosEtsToJs, test_callable_return_value)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_callable_return_value.js"));
 }
 
+// NOTE(nikitayegorov) #18198 enable this after literal types are fixed
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_string_literal_type)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_string_literal_type.js"));
+}
+
+// NOTE(nikitayegorov) #18198 enable this after literal types are fixed
+TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_intersection_type)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_intersection_type.js"));
+}
+
 }  // namespace ark::ets::interop::js::testing

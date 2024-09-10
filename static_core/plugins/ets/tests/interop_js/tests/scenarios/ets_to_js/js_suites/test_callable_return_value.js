@@ -15,7 +15,7 @@
 const { getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
-const callableReturnValueFunctionEts = etsMod.getFunction('function_callable_return_value');
+const callableReturnValueFunctionEts = etsMod.getFunction('functionCallableReturnValue');
 
 {
   let ret = callableReturnValueFunctionEts()();

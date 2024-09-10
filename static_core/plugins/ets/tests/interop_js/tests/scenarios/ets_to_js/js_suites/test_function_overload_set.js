@@ -15,7 +15,7 @@
 const { getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
-const overloadFunctionEts = etsMod.getFunction('function_overload');
+const overloadFunctionEts = etsMod.getFunction('functionOverload');
 
 {
   let ret = overloadFunctionEts();

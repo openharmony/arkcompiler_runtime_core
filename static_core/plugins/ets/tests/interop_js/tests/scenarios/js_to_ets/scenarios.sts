@@ -20,14 +20,17 @@ import {
     functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
     functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
     functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
-    genericTypeReturnValue, functionRestParameter, functionSpreadParameter,
-    functionOverload, functionCallableReturnValue } from "pure_js"
+    functionRestParameter, functionSpreadParameter, functionOverload, functionCallableReturnValue,
+    genericTypeReturnValue, functionArgStringLiteralType, functionIntersectionTypePrimitive
+} from "pure_js"
 
 import {
     optionalCall,
     singleRequired,
 } from "decl_js"
 
+// NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
+const FIXED_17339 = false;
 
 function testOptionals() {
     let x = optionalCall(123, 321, 5)
@@ -261,20 +264,28 @@ function Test_function_rest_parameter(): boolean {
 }
 
 function Test_function_spread_parameter(): boolean {
-    // NOTE(nikitayegorov) #17339 enable after rest\spread is fixed
-    //const arr = [1, 1];
-    //return functionSpreadParameter(...arr) as int == 2;
+    if (FIXED_17339) {
+        const arr = [1, 1];
+        return functionSpreadParameter(...arr) as int == 2;
+    }
     return false;
 }
 
-function Test_function_overload(): boolean {
+function testFunctionOverload(): boolean {
     return functionOverload() as int == 1;
 }
 
-function Test_function_callable_return_value(): boolean {
+function testFunctionCallableReturnValue(): boolean {
     const fn = functionCallableReturnValue;
     return fn()(1) as int == 2;
 }
 
+function testFunctionArgStringLiteralType(): boolean {
+    let arg: JSValue = 1;
+    return functionArgStringLiteralType(arg) as int == 1;
+}
 
-
+function testFunctionIntersectionTypePrimitive(): boolean {
+    let arg: JSValue = 1;
+    return functionIntersectionTypePrimitive(arg) as int == 1;
+}

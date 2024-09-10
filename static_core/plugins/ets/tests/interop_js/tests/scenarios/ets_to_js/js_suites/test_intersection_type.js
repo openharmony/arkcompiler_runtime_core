@@ -15,13 +15,18 @@
 const { getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
-const restParameterFunctionEts = etsMod.getFunction('functionRestParameter');
+const functionIntersectionTypePrimitiveEts = etsMod.getFunction('functionIntersectionTypePrimitive');
+const functionIntersectionTypeObjectEts = etsMod.getFunction('functionIntersectionTypeObject');
 
 {
-  const VALUE = 1;
-  let ret = restParameterFunctionEts(VALUE, VALUE);
-  ASSERT_EQ(ret, VALUE);
+  const VALUE1 = "1";
 
-  ret = restParameterFunctionEts(VALUE, VALUE, VALUE);
-  ASSERT_EQ(ret, VALUE);
+  let ret = functionIntersectionTypePrimitiveEts(1);
+  ASSERT_EQ(ret, 1);
+
+  let res = functionIntersectionTypeObjectEts();
+  ASSERT_EQ(res.a, 1);
+  ASSERT_EQ(res.b, VALUE1);
+  ASSERT_TRUE(typeof res.a === 'number');
+  ASSERT_TRUE(typeof res.b === 'string');
 }

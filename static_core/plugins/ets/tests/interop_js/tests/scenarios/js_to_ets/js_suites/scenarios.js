@@ -247,11 +247,11 @@ class ClassWithStaticMethod {
 	}
 }
 function functionRestParameter(...arg) {
-  return arg[0]; // transpiled from Typescript code: function function_rest_parameter(...arg: number[])
+  return arg[0]; // transpiled from Typescript code: function functionRestParameter(...arg: number[])
 }
 
 function functionSpreadParameter(arg1, arg2) {
-  return arg1 + arg2; // transpiled from Typescript code: function function_spread_parameter(arg1: number, arg2: number)
+  return arg1 + arg2; // transpiled from Typescript code: function functionSpreadParameter(arg1: number, arg2: number)
 }
 
 function functionOverloaded() {
@@ -274,6 +274,17 @@ function functionCallableReturnValue() {
     return Function('', 'return 2')
 }
 
+
+function functionArgStringLiteralType(arg) {
+  return arg;
+  // transpiled from Typescript code: functionArgStringLiteralType(arg: TypeString): TypeString
+}
+
+function functionIntersectionTypePrimitive(arg) {
+    const ret = arg;
+    return ret;
+    // transpiled from Typescript code: functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB
+}
 
 exports.standaloneFunctionJs = standaloneFunctionJs;
 exports.ClassWithMethodJs = ClassWithMethodJs;
@@ -315,3 +326,5 @@ exports.functionRestParameter = functionRestParameter;
 exports.functionSpreadParameter = functionSpreadParameter;
 exports.functionOverload = functionOverload;
 exports.functionCallableReturnValue = functionCallableReturnValue;
+exports.functionArgStringLiteralType = functionArgStringLiteralType;
+exports.functionIntersectionTypePrimitive = functionIntersectionTypePrimitive;
