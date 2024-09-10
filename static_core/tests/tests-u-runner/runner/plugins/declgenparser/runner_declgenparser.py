@@ -25,6 +25,7 @@ from runner.runner_base import get_test_id
 from runner.logger import Log
 from runner.plugins.declgenparser.test_declgenparser import TestDeclgenParser
 from runner.runner_js import RunnerJS
+from runner.enum_types.test_directory import TestDirectory
 
 _LOGGER = logging.getLogger("runner.plugins.declgenparser.runner_declgenparser")
 
@@ -51,20 +52,21 @@ class RunnerDeclgenParser(RunnerJS):
         self.test_root = declgen_root / "test" if self.test_root is None else self.test_root
         Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
 
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
+
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()
 
-        self.add_directories()
+        self.add_directories(self.get_test_directories())
 
     @property
     def default_work_dir_root(self) -> Path:
         return Path("/tmp") / "declgenparser"
 
-    def add_directories(self) -> None:
+    def get_test_directories(self) -> List[TestDirectory]:
         flags = ["--extension=sts"]
-        for test_dir in self.TEST_DIRS:
-            dir_path = path.join(self.test_root, test_dir)
-            self.add_directory(dir_path, "sts", flags)
+        return [TestDirectory(path.join(self.test_root, test_dir), "sts", flags)
+                for test_dir in self.TEST_DIRS]
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestDeclgenParser:
         test = TestDeclgenParser(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))

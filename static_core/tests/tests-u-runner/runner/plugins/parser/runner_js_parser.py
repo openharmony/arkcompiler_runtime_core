@@ -25,6 +25,7 @@ from runner.options.config import Config
 from runner.plugins.parser.test_js_parser import TestJSParser
 from runner.runner_base import get_test_id
 from runner.runner_js import RunnerJS
+from runner.enum_types.test_directory import TestDirectory
 
 _LOGGER = logging.getLogger("runner.plugins.parser.runner_js_parser")
 
@@ -57,35 +58,34 @@ class RunnerJSParser(RunnerJS):
         allowed_list = self.collect_test_lists("allowed")
         self.allowed_tests = self.load_tests_from_lists(allowed_list)
 
-        if self.config.general.with_js:
-            self.add_directory("ark_tests/parser/js", "js", flags=["--parse-only"])
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
+
+        test_dirs: List[TestDirectory] = [
+            TestDirectory('compiler/ts', 'ts', flags=['--extension=ts']),
+            TestDirectory('compiler/ets', 'sts', flags=[
+                '--extension=sts',
+                '--output=/dev/null',
+                f'--arktsconfig={self.arktsconfig}'
+            ]),
+            TestDirectory('parser/ts', 'ts', flags=['--parse-only', '--extension=ts']),
+            TestDirectory('parser/as', 'ts', flags=['--parse-only', '--extension=as']),
+            TestDirectory('parser/ets', 'sts', flags=[
+                '--extension=sts',
+                '--output=/dev/null',
+                f'--arktsconfig={self.arktsconfig}'
+            ]),
+        ]
 
         if self.config.general.with_js:
-            self.add_directory("compiler/js", "js", flags=["--extension=js", "--output=/dev/null"])
-        self.add_directory("compiler/ts", "ts", flags=["--extension=ts", ])
-        self.add_directory("compiler/ets", "sts", flags=[
-            "--extension=sts",
-            "--output=/dev/null",
-            f"--arktsconfig={self.arktsconfig}"
-        ])
+            test_dirs.append(TestDirectory('compiler/js', 'js', flags=['--extension=js', '--output=/dev/null']))
+            test_dirs.append(TestDirectory('ark_tests/parser/js', 'js', flags=['--parse-only', '--extension=js']))
+            test_dirs.append(TestDirectory('parser/js', 'js', flags=['--parse-only', '--extension=js']))
 
-        if self.config.general.with_js:
-            self.add_directory("parser/js", "js", flags=["--parse-only"])
-        self.add_directory("parser/ts", "ts", flags=["--parse-only", '--extension=ts'])
-        self.add_directory("parser/as", "ts", flags=["--parse-only", "--extension=as"])
-        self.add_directory("parser/ets", "sts", flags=[
-            "--extension=sts",
-            "--output=/dev/null",
-            f"--arktsconfig={self.arktsconfig}"
-        ])
+        self.add_directories(test_dirs)
 
     @property
     def default_work_dir_root(self) -> Path:
         return Path("/tmp") / "parser"
-
-    def add_directory(self, directory: str, extension: str, flags: List[str]) -> None:
-        new_dir = path.normpath(path.join(self.test_root, directory))
-        super().add_directory(new_dir, extension, flags)
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSParser:
         if test_file not in self.allowed_tests:

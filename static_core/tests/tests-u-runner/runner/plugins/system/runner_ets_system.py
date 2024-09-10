@@ -26,6 +26,8 @@ from runner.options.config import Config
 from runner.plugins.system.test_ets_system import TestETSSystem
 from runner.runner_base import get_test_id
 from runner.runner_js import RunnerJS
+from runner.enum_types.test_directory import TestDirectory
+
 
 _LOGGER = logging.getLogger("runner.plugins.system.runner_ets_system")
 
@@ -65,6 +67,7 @@ class RunnerETSSystem(RunnerJS):
 
         self.test_root = es2panda_test if self.test_root is None else self.test_root
         Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
 
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()
@@ -85,23 +88,23 @@ class RunnerETSSystem(RunnerJS):
         werror_tests = ets_flags + SystemArkTSFlags.WERROR_TESTS.value
 
         if config.es2panda.system:
-            self.add_directory("all_warnings_tests", "sts", flags=all_warnings)
-            self.add_directory("boost_equal_statements_tests", "sts", flags=boost_equality_statements)
-            self.add_directory("implicit_boxing_unboxing_tests", "sts", flags=implicit_boxing_unboxing)
-            self.add_directory("prohibit_top_level_statements_tests", "sts", flags=prohibit_top_level)
-            self.add_directory("remove_async_tests", "sts", flags=remove_async)
-            self.add_directory("remove_lambda_tests", "sts", flags=remove_lambda)
-            self.add_directory("suggest_final_tests", "sts", flags=suggest_final)
-            self.add_directory("warnings_suppresion_tests", "sts", flags=suppression_tests)
-            self.add_directory("werror_tests", "sts", flags=werror_tests)
+            test_dirs = [
+                TestDirectory("all_warnings_tests", "sts", flags=all_warnings),
+                TestDirectory("boost_equal_statements_tests", "sts", flags=boost_equality_statements),
+                TestDirectory("implicit_boxing_unboxing_tests", "sts", flags=implicit_boxing_unboxing),
+                TestDirectory("prohibit_top_level_statements_tests", "sts", flags=prohibit_top_level),
+                TestDirectory("remove_async_tests", "sts", flags=remove_async),
+                TestDirectory("remove_lambda_tests", "sts", flags=remove_lambda),
+                TestDirectory("suggest_final_tests", "sts", flags=suggest_final),
+                TestDirectory("warnings_suppresion_tests", "sts", flags=suppression_tests),
+                TestDirectory("werror_tests", "sts", flags=werror_tests),
+            ]
+            self.add_directories(test_dirs)
 
     @property
     def default_work_dir_root(self) -> Path:
         return Path("/tmp") / "ets_warnings_tests"
 
-    def add_directory(self, directory: str, extension: str, flags: List[str]) -> None:
-        new_dir = path.normpath(path.join(self.test_root, directory))
-        super().add_directory(new_dir, extension, flags)
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestETSSystem:
         test = TestETSSystem(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))

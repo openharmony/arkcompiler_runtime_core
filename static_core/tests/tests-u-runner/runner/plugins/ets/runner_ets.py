@@ -28,8 +28,9 @@ from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_suite import EtsTestSuite
 from runner.plugins.ets.test_ets import TestETS
 from runner.plugins.ets.test_sts_ts_subset import TestTSSubset
-from runner.runner_base import get_test_id, correct_path
+from runner.runner_base import get_test_id
 from runner.runner_file_based import RunnerFileBased
+from runner.enum_types.test_directory import TestDirectory
 
 
 _LOGGER = logging.getLogger("runner.plugins.ets.runner_ets")
@@ -69,9 +70,7 @@ class RunnerETS(RunnerFileBased):
         test_suite.process(self.config.general.generate_only or self.config.ets.force_generate)
         self.test_root, self.list_root = test_suite.test_root, test_suite.list_root
 
-        self.explicit_list = correct_path(self.list_root, config.test_lists.explicit_list) \
-            if config.test_lists.explicit_list is not None and self.list_root is not None \
-            else None
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
 
         Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
@@ -80,7 +79,7 @@ class RunnerETS(RunnerFileBased):
         self.collect_excluded_test_lists(test_name=suite_name)
         self.collect_ignored_test_lists(test_name=suite_name)
 
-        self.add_directory(self.test_root, "sts", [])
+        self.add_directories([TestDirectory(self.test_root, "sts", [])])
 
     @property
     def default_work_dir_root(self) -> Path:
