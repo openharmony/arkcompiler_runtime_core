@@ -31,6 +31,11 @@ config("arkfile_public_config") {
   }
 }
 
+config("data_protect_configs") {
+  cflags_cc = [ "-march=armv8.4-a" ]
+  defines = [ "PANDA_ENABLE_DATA_PROTECT" ]
+}
+
 config("arkfile_fuzz_config") {
   configs = [ "$build_root/config/compiler:exceptions" ]
   defines = [ "SUPPORT_KNOWN_EXCEPTION" ]
@@ -98,6 +103,11 @@ ohos_static_library("libarkfile_static") {
   sources = libarkfile_sources
 
   public_configs = libarkfile_configs
+
+  if (enabled_pac_data_protect) {
+    configs = libarkfile_sources
+    configs += [ ":data_protect_configs" ]
+  }
 
   deps = [
     ":arkfile_header_deps",

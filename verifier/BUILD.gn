@@ -57,6 +57,9 @@ libarkverifier_sources = [
 ]
 
 ohos_shared_library("libarkverifier") {
+  if (!ark_standalone_build) {
+    branch_protector_ret = "pac_ret"
+  }
   sources = libarkverifier_sources
 
   deps = [ "$ark_root/libpandafile:libarkfile_static_verifier" ]
