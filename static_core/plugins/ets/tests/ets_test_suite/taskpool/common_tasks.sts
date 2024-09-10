@@ -13,7 +13,15 @@
  * limitations under the License.
  */
 
-function TaskpoolFuncTestSumInt() {
+function returnAbc(): string {
+    return (() => "a")() + (() => "b")() + (() => "c")();
+}
+
+function returnFailAbc(): string {
+    throw new Error("Concurrent function failed");
+}
+
+function TaskpoolCommonTaskTestLambda() {
     let Sum = (): int => {
         return 10 + 20;
     }
@@ -22,7 +30,135 @@ function TaskpoolFuncTestSumInt() {
     assert(result == 30);
 }
 
+function TaskpoolCommonTaskTestFunc() {
+    let task = new taskpoolTask(returnAbc);
+    let result = await taskpool.execute(task);
+    assert(result == "abc");
+}
+
+function TaskpoolCommonTaskTestRunCallbacksOnSucceededTask() {
+    let onEnqueuedStr = "";
+    let onStartExecutionStr = "";
+    let onExecutionSucceededStr = "";
+    let onExecutionFailedStr = "";
+    let task = new taskpoolTask(returnAbc);
+    task.onEnqueued(() => { onEnqueuedStr = "enqueue callback is done"; });
+    task.onStartExecution(() => { onStartExecutionStr = "start callback is done"; });
+    task.onExecutionSucceeded(() => { onExecutionSucceededStr = "success callback is done"; });
+    task.onExecutionFailed((e: Error) => { onExecutionFailedStr = e.message + ", fail callback is done"; });
+    let res = await taskpool.execute(task);
+    assert(res == "abc");
+    assert(onEnqueuedStr == "enqueue callback is done");
+    assert(onStartExecutionStr == "start callback is done");
+    assert(onExecutionSucceededStr == "success callback is done");
+    assert(onExecutionFailedStr == "");
+}
+
+function TaskpoolCommonTaskTestRunCallbacksOnFailedTask() {
+    let onEnqueuedStr = "";
+    let onStartExecutionStr = "";
+    let onExecutionSucceededStr = "";
+    let onExecutionFailedStr = "";
+    let task = new taskpoolTask(returnFailAbc);
+    task.onEnqueued(() => { onEnqueuedStr = "enqueue callback is done"; });
+    task.onStartExecution(() => { onStartExecutionStr = "start callback is done"; });
+    task.onExecutionSucceeded(() => { onExecutionSucceededStr = "success callback is done"; });
+    task.onExecutionFailed((e: Error) => { onExecutionFailedStr = e.message + ", fail callback is done"; });
+    let isErrorOccurred = false;
+    try {
+        await taskpool.execute(task);
+    } catch(e: Error) {
+        isErrorOccurred = true;
+        assert(e.message == "Concurrent function failed");
+    }
+    assert(isErrorOccurred);
+    assert(onEnqueuedStr == "enqueue callback is done");
+    assert(onStartExecutionStr == "start callback is done");
+    assert(onExecutionSucceededStr == "");
+    assert(onExecutionFailedStr == "Concurrent function failed, fail callback is done");
+}
+
+function expectErrorWithMessage(fn: () => void, expectedErrorMessage: string): void {
+    try {
+        fn();
+    } catch (e: Error) {
+        assert(e.message == expectedErrorMessage);
+        return;
+    }
+    assert(!"Callback passed, but Error is expected");
+}
+
+function TaskpoolCommonTaskTestAddCallbacksAfterExecution() {
+    let task = new taskpoolTask(returnAbc);
+    taskpool.execute(task);
+    let expectedErrorMessage = "taskpool:: The executed task does not support the registration of listeners.";
+    expectErrorWithMessage(() => { task.onEnqueued(() => {}); }, expectedErrorMessage);
+    expectErrorWithMessage(() => { task.onStartExecution(() => {}); }, expectedErrorMessage);
+    expectErrorWithMessage(() => { task.onExecutionSucceeded(() => {}); }, expectedErrorMessage);
+    expectErrorWithMessage(() => { task.onExecutionFailed((e: Error) => {}); }, expectedErrorMessage);
+}
+
+function TaskpoolCommonTaskTestIsCancel() {
+    assert(taskpoolTask.isCancel() == false);
+    let t = new taskpoolTask(returnAbc);
+    taskpool.execute(t);
+    assert(taskpoolTask.isCancel() == false);
+}
+
+function TaskpoolCommonTaskTestCancelNonStartedTask() {
+    let t = new taskpoolTask(returnAbc);
+    let isErrorOccurred = false;
+    try {
+        taskpool.cancel(t);
+        taskpool.execute(t);
+    } catch(e: Error) {
+        isErrorOccurred = true;
+        assert(e.message == "taskpool:: task is not executed or has been executed");
+    }
+    assert(isErrorOccurred);
+}
+
+function TaskpoolCommonTaskTestCancelExecutingTask() {
+    let t = new taskpoolTask(returnAbc);
+    let p = taskpool.execute(t);
+    try {
+        taskpool.cancel(t);
+    } catch(e: Error) {
+        assert(e.message == "taskpool:: task is not executed or has been executed");
+        return;
+    }
+    let isErrorOccurred = false;
+    try {
+        let res = await p;
+    } catch(e: Error) {
+        assert(e.message == "taskpool:: task has been canceled");
+        isErrorOccurred = true;
+    }
+    assert(isErrorOccurred);
+}
+
+function TaskpoolCommonTaskTestCancelExecutedTask() {
+    let t = new taskpoolTask(returnAbc);
+    let isErrorOccurred = false;
+    try {
+        await taskpool.execute(t);
+        taskpool.cancel(t);
+    } catch(e: Error) {
+        isErrorOccurred = true;
+        assert(e.message == "taskpool:: task is not executed or has been executed");
+    }
+    assert(isErrorOccurred);
+}
+
 function main(): int {
-    TaskpoolFuncTestSumInt();
+    TaskpoolCommonTaskTestLambda();
+    TaskpoolCommonTaskTestFunc();
+    TaskpoolCommonTaskTestRunCallbacksOnSucceededTask();
+    TaskpoolCommonTaskTestRunCallbacksOnFailedTask();
+    TaskpoolCommonTaskTestAddCallbacksAfterExecution();
+    TaskpoolCommonTaskTestIsCancel();
+    TaskpoolCommonTaskTestCancelNonStartedTask();
+    TaskpoolCommonTaskTestCancelExecutingTask();
+    TaskpoolCommonTaskTestCancelExecutedTask();
     return 0;
 }

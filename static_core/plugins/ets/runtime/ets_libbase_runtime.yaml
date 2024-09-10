@@ -1393,7 +1393,7 @@ intrinsics:
     static: true
     signature:
       ret: void
-      args: [i64]
+      args: [i64, i64]
     impl: ark::ets::intrinsics::TaskpoolCancelTask
 
   - name: TaskpoolCancelGroup
@@ -1425,6 +1425,16 @@ intrinsics:
       ret: i64
       args: []
     impl: ark::ets::intrinsics::GenerateGroupId
+
+  - name: TaskpoolGenerateSequenceRunnerId
+    space: ets
+    class_name: escompat.taskpoolSequenceRunner
+    method_name: generateSeqRunnerId
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::GenerateSeqRunnerId
 
 ###################
 # std.time.Chrono #

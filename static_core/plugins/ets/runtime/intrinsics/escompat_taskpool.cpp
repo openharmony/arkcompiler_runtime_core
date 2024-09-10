@@ -32,6 +32,13 @@ extern "C" EtsLong GenerateGroupId()
     return coroutine->GetPandaVM()->GetTaskpool()->GenerateTaskGroupId();
 }
 
+extern "C" EtsLong GenerateSeqRunnerId()
+{
+    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
+    ASSERT(coroutine != nullptr);
+    return coroutine->GetPandaVM()->GetTaskpool()->GenerateSeqRunnerId();
+}
+
 extern "C" void TaskpoolTaskSubmitted(EtsLong taskId)
 {
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
@@ -63,13 +70,15 @@ extern "C" EtsBoolean TaskpoolTaskFinished(EtsLong taskId, EtsLong groupId)
         coroutine->GetPandaVM()->GetTaskpool()->TaskFinished(coroutine->GetCoroutineId(), taskId, groupId));
 }
 
-extern "C" void TaskpoolCancelTask(EtsLong taskId)
+extern "C" void TaskpoolCancelTask(EtsLong taskId, EtsLong seqId)
 {
     EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
     if (!coroutine->GetPandaVM()->GetTaskpool()->CancelTask(taskId)) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ERROR,
-                          "taskpool:: task is not executed or has been executed");
+        // seqId = 0 means task was not added to a task sequence runner
+        const char *messageError = (seqId == 0) ? "taskpool:: task is not executed or has been executed"
+                                                : "taskpool:: sequenceRunner task has been executed";
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ERROR, messageError);
     }
 }
 

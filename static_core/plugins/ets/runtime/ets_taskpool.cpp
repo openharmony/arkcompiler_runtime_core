@@ -29,6 +29,11 @@ EtsLong Taskpool::GenerateTaskGroupId()
     return taskGroupId_++;
 }
 
+EtsLong Taskpool::GenerateSeqRunnerId()
+{
+    return seqRunnerId_++;
+}
+
 void Taskpool::TaskSubmitted(EtsLong taskId)
 {
     os::memory::LockHolder lh(taskpoolLock_);
