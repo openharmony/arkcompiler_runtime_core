@@ -372,6 +372,10 @@
   title: 'Boolean Relational Operators'
   status: 'Finished'
 
+'7.25.6':
+  title: 'Reference Equality Based on Actual Type'
+  status: 'Finished'
+
 '7.26.1':
   title: 'Integer Bitwise Operators'
   status: 'Finished'
@@ -436,15 +440,99 @@
   title: 'Semantic Rules'
   status: 'No testable assertions'
 
+'15.1':
+  title: 'Subtyping'
+  status: ''
+
+'15.2':
+  title: 'Supertyping'
+  status: ''
+
 '15.3':
+  title: 'Variance'
+  status: ''
+
+'15.3.1':
+  title: 'Invariance'
+  status: ''
+
+'15.3.2':
+  title: 'Covariance'
+  status: ''
+
+'15.3.3.':
+  title: 'Contravariance'
+  status: ''
+
+'15.3.4':
+  title: 'Examples'
+  status: ''
+
+'15.4':
   title: 'Type Compatibility'
   status: 'No testable assertions'  # Implicit Conversion is tested in 6.5
 
+'15.5':
+  title: 'Compatibility of Call Arguments'
+  status: ''
+
+'15.6':
+  title: 'Type Inference'
+  status: 'No testable assertions'
+
+'15.6.1':
+  title: 'Smart Types'
+  status: 'Finished'
+
 '15.7':
+  title: 'Overloading and Overriding'
+  status: ''
+
+'15.7.1':
+  title: 'Overload-Equivalent Signatures'
+  status: ''
+
+'15.7.2':
+  title: 'Override-Compatible Signatures'
+  status: ''
+
+'15.7.3':
+  title: 'Overloading for Functions'
+  status: ''
+
+'15.7.4':
+  title: 'Overloading and Overriding in Classes'
+  status: ''
+
+'15.7.5':
+  title: 'Overloading and Overriding in Interfaces'
+  status: ''
+
+'15.8':
+  title: 'Overload Resolution'
+  status: ''
+
+'15.8.1':
+  title: 'Selection of Applicable Candidates'
+  status: ''
+
+'15.8.2':
+  title: 'Selection of Best Candidate'
+  status: ''
+
+'15.9':
+  title: 'Overload Signatures'
+  status: ''
+
+'15.9.1':
+  title: 'Overload Signature Correctness Check'
+  status: ''
+
+'15.10':
   title: 'Compatibility Features'
   status: 'No testable assertions'
 
-'15.7.1':
+'15.10.1':
   title: 'Extended Conditional Expressions'
   status: 'Finished'
 
@@ -464,13 +552,73 @@
   title: 'Character Type and Literals'
   status: 'No testable assertions'
 
+'17.1.1':
+  title: 'Character Literals'
+  status: 'Finished'
+
+'17.1.2':
+  title: 'Character Type and Operations'
+  status: ''
+
+'17.2':
+  title: 'Array Creation Expressions'
+  status: 'Finished'
+
+'17.2.1':
+  title: 'Runtime Evaluation of Array Creation Expressions'
+  status: 'Finished'
+
+'17.3':
+  title: 'Indexable Types'
+  status: 'Finished'
+
+'17.4':
+  title: 'Iterable Types'
+  status: 'Finished'
+
+'17.5':
+  title: 'Callable Types'
+  status: 'Finished'
+
+'17.5.1':
+  title: 'Callable Types with Invoke Method'
+  status: 'Finished'
+
+'17.5.2':
+  title: 'Callable Types with Instantiate Method'
+  status: 'Finished'
+
 '17.6':
   title: 'Statements'
   status: 'No testable assertions'
 
+'17.6.1':
+  title: 'For-of Type Annotation'
+  status: 'Finished'
+
+'17.6.2':
+  title: 'Multiple Catch Clauses in Try Statements'
+  status: 'Finished'
+
 '17.7':
   title: 'Function and Method Overloading'
   status: 'No testable assertions'
+
+'17.7.1':
+  title: 'Function Overloading'
+  status: ''
+
+'17.7.2':
+  title: 'Class Method Overloading'
+  status: ''
+
+'17.7.3':
+  title: 'Constructor Overloading'
+  status: ''
+
+'17.7.4':
+  title: 'Declaration Distinguishable by Signatures'
+  status: ''
 
 '17.8':
   title: 'Native Functions and Methods'
@@ -489,8 +637,16 @@
   status: 'Finished'
 
 '17.10':
-  title: 'Default and Static Interface Methods'
+  title: 'Default Interface Method Declarations'
   status: 'No testable assertions'
+
+'17.11':
+  title: 'Extension Functions'
+  status: ''
+
+'17.12':
+  title: 'Trailing Lambda'
+  status: 'Finished'
 
 '17.15':
   title: 'Exceptions'

@@ -519,6 +519,18 @@
 03.types/08.reference_types/11.union_types/ut_9.sts
 # end of es2panda fails
 
+# 18883 Failure to distinguish between static and instance instantiate method
+17.experimental_features/05.callable_types/02.callable_types_with_instantiate_method/ct_inst_13.sts
+
+# 18884 Cannot propagate an exception from callable type with instantiate method
+17.experimental_features/05.callable_types/02.callable_types_with_instantiate_method/ct_inst_17.sts
+
+# 18853 Failure to distinguish between static and instance invoke methods
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_13.sts
+
+# 18856 Order of static methods makes a difference
+17.experimental_features/05.callable_types/01.callable_types_with_invoke_method/ct_invoke_17.sts
+
 # es2panda fails: panda#14391 Cannot cast enum to the same enum type or Object
 06.contexts_and_conversions/04.casting_contexts_and_conversions/identity.sts
 06.contexts_and_conversions/01.assignment-like_contexts/ref_widening_39.sts
