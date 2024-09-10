@@ -142,9 +142,4 @@ function main() {
     concurrentPushPopTestInt(); // Concurrent test for Int type
     concurrentPushPopTestObj(); // Concurrent test for Object type
     concurrentPushPopTestStr(); // Concurrent test for String type
-
-    // Free internal memory used by the queues
-    queueInt.cleanup();
-    queueObj.cleanup();
-    queueStr.cleanup();
 }

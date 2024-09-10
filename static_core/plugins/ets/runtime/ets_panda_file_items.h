@@ -36,6 +36,7 @@ static constexpr std::string_view PROMISE_REF                          = "Lstd/c
 static constexpr std::string_view WAITERS_LIST                         = "Lstd/core/WaitersList;";
 static constexpr std::string_view MUTEX                                = "Lstd/core/Mutex;";
 static constexpr std::string_view EVENT                                = "Lstd/core/Event;";
+static constexpr std::string_view COND_VAR                             = "Lstd/core/CondVar;";
 static constexpr std::string_view INTERNAL_UNDEFINED                   = "Lstd/core/__internal_undefined;";
 static constexpr std::string_view STRING                               = "Lstd/core/String;";
 static constexpr std::string_view WEAK_REF                             = "Lstd/core/WeakRef;";

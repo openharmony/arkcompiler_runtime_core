@@ -57,6 +57,7 @@ public:
     EtsClass *GetWaitersListClass();
     EtsClass *GetMutexClass();
     EtsClass *GetEventClass();
+    EtsClass *GetCondVarClass();
     EtsClass *GetArrayBufferClass();
     EtsClass *GetStringBuilderClass();
     EtsClass *GetSharedMemoryClass();

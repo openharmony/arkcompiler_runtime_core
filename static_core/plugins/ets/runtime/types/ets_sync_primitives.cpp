@@ -19,17 +19,6 @@
 
 namespace ark::ets {
 
-static inline void SuspendCoroutine(EtsWaitersList *waitersList, EtsWaitersList::Node *awaitee)
-{
-    auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
-    auto &event = awaitee->GetEvent();
-    // Need to lock event before PushBack
-    // to avoid use-after-free in CoroutineEvent::Happen method
-    event.Lock();
-    waitersList->PushBack(awaitee);
-    coroManager->Await(&event);
-}
-
 /*static*/
 EtsMutex *EtsMutex::Create(EtsCoroutine *coro)
 {
@@ -46,10 +35,9 @@ void EtsMutex::Lock()
     if (waiters_.fetch_add(1, std::memory_order_acq_rel) == 0) {
         return;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
     auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
     auto awaitee = EtsWaitersList::Node(coroManager);
-    SuspendCoroutine(GetWaitersList(coro), &awaitee);
+    SuspendCoroutine(&awaitee);
 }
 
 void EtsMutex::Unlock()
@@ -58,9 +46,7 @@ void EtsMutex::Unlock()
     if (waiters_.fetch_sub(1, std::memory_order_acq_rel) == 1) {
         return;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *awaitee = GetWaitersList(coro)->PopFront();
-    awaitee->GetEvent().Happen();
+    ResumeCoroutine();
 }
 
 bool EtsMutex::IsHeld()
@@ -87,21 +73,58 @@ void EtsEvent::Wait()
     if (IsFireState(state)) {
         return;
     }
-    auto *coro = EtsCoroutine::GetCurrent();
-    auto *coroManager = coro->GetCoroutineManager();
+    auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
     auto awaitee = EtsWaitersList::Node(coroManager);
-    SuspendCoroutine(GetWaitersList(coro), &awaitee);
+    SuspendCoroutine(&awaitee);
 }
 
 void EtsEvent::Fire()
 {
     // Atomic with acq_rel order reason: sync Wait/Fire in other threads
     auto waiters = GetNumberOfWaiters(state_.exchange(FIRE_STATE, std::memory_order_acq_rel));
-    auto *coro = EtsCoroutine::GetCurrent();
     while (waiters > 0) {
-        auto *awaitee = GetWaitersList(coro)->PopFront();
-        awaitee->GetEvent().Happen();
+        ResumeCoroutine();
         waiters--;
+    }
+}
+
+/* static */
+EtsCondVar *EtsCondVar::Create(EtsCoroutine *coro)
+{
+    auto *classLinker = coro->GetPandaVM()->GetClassLinker();
+    auto *klass = classLinker->GetCondVarClass();
+    auto hCondVar = EtsHandle<EtsCondVar>(coro, EtsCondVar::FromEtsObject(EtsObject::Create(klass)));
+    auto *waitersList = EtsWaitersList::Create(coro);
+    hCondVar->SetWaitersList(coro, waitersList);
+    return hCondVar.GetPtr();
+}
+
+void EtsCondVar::Wait(EtsHandle<EtsMutex> &mutex)
+{
+    ASSERT(mutex->IsHeld());
+    waiters_++;
+    mutex->Unlock();
+    auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
+    auto awaitee = EtsWaitersList::Node(coroManager);
+    SuspendCoroutine(&awaitee);
+    mutex->Lock();
+}
+
+void EtsCondVar::NotifyOne([[maybe_unused]] EtsMutex *mutex)
+{
+    ASSERT(mutex->IsHeld());
+    if (waiters_ != 0) {
+        ResumeCoroutine();
+        waiters_--;
+    }
+}
+
+void EtsCondVar::NotifyAll([[maybe_unused]] EtsMutex *mutex)
+{
+    ASSERT(mutex->IsHeld());
+    while (waiters_ != 0) {
+        ResumeCoroutine();
+        waiters_--;
     }
 }
 
