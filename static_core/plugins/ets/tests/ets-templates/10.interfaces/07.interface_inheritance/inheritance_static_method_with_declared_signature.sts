@@ -15,8 +15,12 @@ limitations under the License.
 
 /*---
 desc: Inheritance open method from superinterface with declared static method with same signature in interface.
-assert: If an interface I declares a private or static method m, and the signature of m is a subsignature of a public instance method m' in a superinterface of I, and m' would otherwise be accessible to code in I, then a compile-time error occurs.
-tags: [negative, compile-only]
+assert: >-
+    A compile-time error occurs if:
+        If an interface I declares a private method m, and
+        Signature of m is compatible with the public instance method 𝑚′ in a superinterface of I, and
+        𝑚′ is otherwise accessible to code in I.
+tags: [compile-only]
 ---*/
 
 interface A {
@@ -26,7 +30,7 @@ interface A {
 }
 
 interface B extends A {
-  statics foo(): int {
+  static foo(): int {
     return 2;
   }
 }

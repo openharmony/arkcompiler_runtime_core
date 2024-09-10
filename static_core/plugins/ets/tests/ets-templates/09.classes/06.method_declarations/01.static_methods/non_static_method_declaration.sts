@@ -14,7 +14,7 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Non-static method declaraion.
+desc: Non-static method declaration.
 assert: A method that is not declared static called an instance method, and sometimes called a non-static method.
 tags: [compile-only]
 ---*/

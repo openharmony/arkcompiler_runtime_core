@@ -1,5 +1,5 @@
 /*---
-Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+Copyright (c) 2024 Huawei Device Co., Ltd.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -14,15 +14,17 @@ limitations under the License.
 ---*/
 
 /*---
-desc: Static method declaration with parameter of type declared in body of method class.
-assert: It is a compile-time error to use the name of a parameter of any surrounding declaration in the header or body of a class. 
-tags: [compile-only, negative]
+desc: Inheritance static method from superinterface.
+assert: Private methods defined in superinterfaces are not accessible (see Accessible) in the interface body.
+tags: [negative, compile-only]
 ---*/
 
-class A {
-  inner class B {
+interface A {
+  static private foo(): int {
+    return 5;
+  };
+}
 
-  }
-
-  static foo(b: B): void;
+interface B extends A {
+  bar() { A.foo(); }
 }
