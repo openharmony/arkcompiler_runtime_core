@@ -44,6 +44,7 @@ inline CardTable::Card::Status CardTable::Card::GetStatus() const
     return value_.load(std::memory_order_relaxed) & STATUS_MASK;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void CardTable::FillRanges(PandaVector<MemRange> *ranges, const Card *startCard, const Card *endCard)
 {
     constexpr size_t MIN_RANGE = 32;

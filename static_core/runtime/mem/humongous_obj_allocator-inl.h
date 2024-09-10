@@ -372,6 +372,7 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::Insert(Me
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FMT.07) project code style
 typename HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolHeader *
 HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::FindSuitablePool(size_t size)
 {
@@ -416,6 +417,7 @@ void HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolList::IterateAn
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FMT.07) project code style
 typename HumongousObjAllocator<AllocConfigT, LockConfigT>::MemoryPoolHeader *
 HumongousObjAllocator<AllocConfigT, LockConfigT>::ReservedMemoryPools::TryToInsert(MemoryPoolHeader *pool)
 {
@@ -501,6 +503,7 @@ bool HumongousObjAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader
     ASSERT(ContainObject(obj));
     auto *memHeader = static_cast<MemoryPoolHeader *>(ToVoidPtr(ToUintPtr(obj) & PAGE_SIZE_MASK));
     ASSERT(PoolManager::GetMmapMemPool()->GetStartAddrPoolForAddr(
+               // CC-OFFNXT(G.FMT.06-CPP) project code style
                static_cast<void *>(const_cast<ObjectHeader *>(obj))) == static_cast<void *>(memHeader));
     return memHeader->GetMemory() == static_cast<void *>(const_cast<ObjectHeader *>(obj));
 }

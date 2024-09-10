@@ -60,6 +60,7 @@ inline FrameAllocator<ALIGNMENT, USE_MEMSET>::~FrameAllocator()
 }
 
 template <Alignment ALIGNMENT, bool USE_MEMSET>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool FrameAllocator<ALIGNMENT, USE_MEMSET>::TryAllocateNewArena(size_t size)
 {
     size_t arenaSize = GetNextArenaSize(size);
@@ -134,6 +135,7 @@ ALWAYS_INLINE inline void FrameAllocator<ALIGNMENT, USE_MEMSET>::Free(void *mem)
 }
 
 template <Alignment ALIGNMENT, bool USE_MEMSET>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void *FrameAllocator<ALIGNMENT, USE_MEMSET>::TryToAllocate(size_t size)
 {
     // Try to allocate memory in the current arena:
@@ -176,6 +178,7 @@ inline size_t FrameAllocator<ALIGNMENT, USE_MEMSET>::GetNextArenaSize(size_t siz
 }
 
 template <Alignment ALIGNMENT, bool USE_MEMSET>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void FrameAllocator<ALIGNMENT, USE_MEMSET>::FreeLastArena()
 {
     ASSERT(lastAllocArena_ != nullptr);
@@ -200,6 +203,8 @@ inline void FrameAllocator<ALIGNMENT, USE_MEMSET>::FreeLastArena()
 }
 
 template <Alignment ALIGNMENT, bool USE_MEMSET>
+// CC-OFFNXT(G.FMT.07) project code style
+// CC-OFFNXT(G.FUD.06) perf critical
 inline typename FrameAllocator<ALIGNMENT, USE_MEMSET>::FramesArena *
 FrameAllocator<ALIGNMENT, USE_MEMSET>::AllocateArenaImpl(size_t size)
 {

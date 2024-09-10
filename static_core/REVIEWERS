@@ -63,6 +63,7 @@ static_core/runtime/bridge/                   @Prof1983
 static_core/runtime/coroutines/               @dmitriitr @konstanting
 static_core/runtime/entrypoints/              @Prof1983
 static_core/runtime/entrypoints/entrypoints.* @mbolshov
+static_core/runtime/fibers/                   @konstanting
 static_core/runtime/jit/                      @Prof1983
 static_core/runtime/mem/                      @dmitriitr @udav
 static_core/runtime/tooling/                  @ragnvald

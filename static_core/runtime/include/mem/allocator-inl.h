@@ -31,6 +31,7 @@ inline void *ObjectAllocatorBase::AllocateSafe(size_t size, Alignment align, All
 }
 
 template <typename AllocT, bool NEED_LOCK>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void *ObjectAllocatorBase::AddPoolsAndAlloc(size_t size, Alignment align, AllocT *objectAllocator,
                                                    size_t poolSize, SpaceType spaceType, HeapSpace *heapSpace)
 {

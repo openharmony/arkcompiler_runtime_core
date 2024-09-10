@@ -91,6 +91,7 @@ static void DumpReferenceField(ObjectHeader *objectHeader, const Field &field,
     }
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) big switch-case
 static void DumpPrimitivesField(ObjectHeader *objectHeader, const Field &field,
                                 std::basic_ostream<char, std::char_traits<char>> *oStream)
 {

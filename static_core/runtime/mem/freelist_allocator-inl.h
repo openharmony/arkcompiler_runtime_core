@@ -44,7 +44,9 @@ FreeListAllocator<AllocConfigT, LockConfigT>::~FreeListAllocator()
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool NEED_LOCK>
-void *FreeListAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align)
+// CC-OFFNXT(G.FUN.01-CPP, G.FUD.06) Allocations perf critical, the change will create additional conditions and method
+// calls that will degrade performance
+inline void *FreeListAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align)
 {
     os::memory::WriteLockHolder<LockConfigT, NEED_LOCK> wlock(allocFreeLock_);
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Try to allocate object with size " << std::dec << size;
@@ -716,7 +718,9 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::SegregatedList::ReleaseFreeMe
 }
 
 template <typename AllocConfigT, typename LockConfigT>
-freelist::FreeListHeader *
+// CC-OFFNXT(G.FMT.07) project code style
+// CC-OFFNXT(G.FUD.06) perf critical
+inline freelist::FreeListHeader *
 FreeListAllocator<AllocConfigT, LockConfigT>::SegregatedList::FindTheMostSuitableBlockInOrderedList(size_t index,
                                                                                                     size_t size)
 {

@@ -218,13 +218,14 @@ public:
     void IterateOverObjectsInRange(const ObjectVisitor &visitor, void *begin, void *end)
     {
         this->GetSpace()->IterateRegions([&](Region *region) {
-            if (region->Intersect(ToUintPtr(begin), ToUintPtr(end))) {
-                region->IterateOverObjects([&visitor, begin, end](ObjectHeader *obj) {
-                    if (ToUintPtr(begin) <= ToUintPtr(obj) && ToUintPtr(obj) < ToUintPtr(end)) {
-                        visitor(obj);
-                    }
-                });
+            if (!region->Intersect(ToUintPtr(begin), ToUintPtr(end))) {
+                return;
             }
+            region->IterateOverObjects([&visitor, begin, end](ObjectHeader *obj) {
+                if (ToUintPtr(begin) <= ToUintPtr(obj) && ToUintPtr(obj) < ToUintPtr(end)) {
+                    visitor(obj);
+                }
+            });
         });
     }
 
@@ -628,13 +629,14 @@ public:
     void IterateOverObjectsInRange(const ObjectVisitor &visitor, void *begin, void *end)
     {
         this->GetSpace()->IterateRegions([&](Region *region) {
-            if (region->Intersect(ToUintPtr(begin), ToUintPtr(end))) {
-                region->IterateOverObjects([&visitor, begin, end](ObjectHeader *obj) {
-                    if (ToUintPtr(begin) <= ToUintPtr(obj) && ToUintPtr(obj) < ToUintPtr(end)) {
-                        visitor(obj);
-                    }
-                });
+            if (!region->Intersect(ToUintPtr(begin), ToUintPtr(end))) {
+                return;
             }
+            region->IterateOverObjects([&visitor, begin, end](ObjectHeader *obj) {
+                if (ToUintPtr(begin) <= ToUintPtr(obj) && ToUintPtr(obj) < ToUintPtr(end)) {
+                    visitor(obj);
+                }
+            });
         });
     }
 
