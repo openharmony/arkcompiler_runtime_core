@@ -242,22 +242,22 @@ HWTEST(DefectScanAuxTest, DebugInfoTest, testing::ext::TestSize.Level0)
     auto ci0_0 = f0->GetCalleeInfoByIndex(0);
     ASSERT_NE(ci0_0, nullptr);
     // callarg0
-    EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_0->GetCallInst()), 292);
+    EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_0->GetCallInst()), 305);
     auto ci0_1 = f0->GetCalleeInfoByIndex(1);
     ASSERT_NE(ci0_1, nullptr);
     // callspread
-    EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_1->GetCallInst()), 296);
+    EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_1->GetCallInst()), 309);
     auto ci0_2 = f0->GetCalleeInfoByIndex(2);
     ASSERT_NE(ci0_2, nullptr);
     // callirange
-    EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_2->GetCallInst()), 298);
+    EXPECT_EQ(abc_file->GetLineNumberByInst(f0, ci0_2->GetCallInst()), 311);
     // ctor of Data
     auto f1 = abc_file->GetFunctionByName("#*@2~@1=#Data");
     ASSERT_NE(f1, nullptr);
     EXPECT_EQ(f1->GetCalleeInfoCount(), 1U);
     auto ci1_0 = f1->GetCalleeInfoByIndex(0);
     // supercall
-    EXPECT_EQ(abc_file->GetLineNumberByInst(f1, ci1_0->GetCallInst()), 318);
+    EXPECT_EQ(abc_file->GetLineNumberByInst(f1, ci1_0->GetCallInst()), 331);
     // bar
     auto f2 = abc_file->GetFunctionByName("#*#bar");
     ASSERT_NE(f2, nullptr);
@@ -265,11 +265,11 @@ HWTEST(DefectScanAuxTest, DebugInfoTest, testing::ext::TestSize.Level0)
     auto ci2_0 = f2->GetCalleeInfoByIndex(0);
     ASSERT_NE(ci2_0, nullptr);
     // callithisrange
-    EXPECT_EQ(abc_file->GetLineNumberByInst(f2, ci2_0->GetCallInst()), 328);
+    EXPECT_EQ(abc_file->GetLineNumberByInst(f2, ci2_0->GetCallInst()), 341);
     auto ci2_1 = f2->GetCalleeInfoByIndex(1);
     ASSERT_NE(ci2_1, nullptr);
     // callithisrange
-    EXPECT_EQ(abc_file->GetLineNumberByInst(f2, ci2_1->GetCallInst()), 333);
+    EXPECT_EQ(abc_file->GetLineNumberByInst(f2, ci2_1->GetCallInst()), 346);
 }
 
 HWTEST(DefectScanAuxTest, CalleeInfoTest1, testing::ext::TestSize.Level0)
