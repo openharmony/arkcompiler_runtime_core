@@ -27,46 +27,6 @@
 #endif
 
 namespace panda::panda_file {
-    
-static inline uintptr_t DataProtectAut(const uintptr_t pointer, [[maybe_unused]]const uintptr_t address)
-{
-#if defined(PANDA_ENABLE_DATA_PROTECT)
-    uint64_t hwcaps = getauxval(AT_HWCAP);
-    if (!(hwcaps & HWCAP_PACA) || !(hwcaps & HWCAP_PACG)) {
-        return pointer;
-    }
-    void *t1 = reinterpret_cast<void*>(pointer);
-    void *t2 = reinterpret_cast<void*>(address);
-#ifdef PAC_DFI_PTR_BKEY
-    __asm__ __volatile__("autdb %0, %1":"+r"(t1):"r"(t2):);
-#else
-    __asm__ __volatile__("autda %0, %1":"+r"(t1):"r"(t2):);
-#endif
-    return reinterpret_cast<uintptr_t>(t1);
-#else
-    return pointer;
-#endif
-}
-
-static inline uintptr_t DataProtectPac(const uintptr_t pointer, [[maybe_unused]]const uintptr_t address)
-{
-#if defined(PANDA_ENABLE_DATA_PROTECT)
-    uint64_t hwcaps = getauxval(AT_HWCAP);
-    if (!(hwcaps & HWCAP_PACA) || !(hwcaps & HWCAP_PACG)) {
-        return pointer;
-    }
-    void *t1 = reinterpret_cast<void*>(pointer);
-    void *t2 = reinterpret_cast<void*>(address);
-#ifdef PAC_DFI_PTR_BKEY
-    __asm__ __volatile__("pacdb %0, %1":"+r"(t1):"r"(t2):);
-#else
-    __asm__ __volatile__("pacda %0, %1":"+r"(t1):"r"(t2):);
-#endif
-    return reinterpret_cast<uintptr_t>(t1);
-#else
-    return pointer;
-#endif
-}
 
 class DataProtect {
 public:
@@ -81,6 +41,46 @@ public:
     }
 
     ~DataProtect() = default;
+
+    static inline uintptr_t DataProtectAut(const uintptr_t pointer, [[maybe_unused]]const uintptr_t address)
+    {
+#if defined(PANDA_ENABLE_DATA_PROTECT)
+        uint64_t hwcaps = getauxval(AT_HWCAP);
+        if (!(hwcaps & HWCAP_PACA) || !(hwcaps & HWCAP_PACG)) {
+            return pointer;
+        }
+        void *t1 = reinterpret_cast<void*>(pointer);
+        void *t2 = reinterpret_cast<void*>(address);
+#ifdef PAC_DFI_PTR_BKEY
+        __asm__ __volatile__("autdb %0, %1":"+r"(t1):"r"(t2):);
+#else
+        __asm__ __volatile__("autda %0, %1":"+r"(t1):"r"(t2):);
+#endif
+        return reinterpret_cast<uintptr_t>(t1);
+#else
+        return pointer;
+#endif
+    }
+
+    static inline uintptr_t DataProtectPac(const uintptr_t pointer, [[maybe_unused]]const uintptr_t address)
+    {
+#if defined(PANDA_ENABLE_DATA_PROTECT)
+        uint64_t hwcaps = getauxval(AT_HWCAP);
+        if (!(hwcaps & HWCAP_PACA) || !(hwcaps & HWCAP_PACG)) {
+            return pointer;
+        }
+        void *t1 = reinterpret_cast<void*>(pointer);
+        void *t2 = reinterpret_cast<void*>(address);
+#ifdef PAC_DFI_PTR_BKEY
+        __asm__ __volatile__("pacdb %0, %1":"+r"(t1):"r"(t2):);
+#else
+        __asm__ __volatile__("pacda %0, %1":"+r"(t1):"r"(t2):);
+#endif
+        return reinterpret_cast<uintptr_t>(t1);
+#else
+        return pointer;
+#endif
+    }
 
     void Update(const uintptr_t pointer)
     {
@@ -122,12 +122,13 @@ public:
 
     void Update(const bool flag)
     {
-        protect_bool_ = DataProtectPac(flag ? PAC_TRUE : PAC_FALSE, reinterpret_cast<uintptr_t>(&protect_bool_));
+        protect_bool_ = DataProtect::DataProtectPac(flag ? PAC_TRUE : PAC_FALSE,
+            reinterpret_cast<uintptr_t>(&protect_bool_));
     }
 
     bool GetBool() const
     {
-        auto value = DataProtectAut(protect_bool_, reinterpret_cast<uintptr_t>(&protect_bool_));
+        auto value = DataProtect::DataProtectAut(protect_bool_, reinterpret_cast<uintptr_t>(&protect_bool_));
         return value == PAC_TRUE ? true : false;
     }
 
@@ -170,15 +171,15 @@ public:
         if (origin_length_ % step > 0) {
             // Filling back empty
             uint32_t empty_count = step - (origin_length_ % step);
-            auto last_data = DataProtectAut(data_.back(), reinterpret_cast<uintptr_t>(&data_));
+            auto last_data = DataProtect::DataProtectAut(data_.back(), reinterpret_cast<uintptr_t>(&data_));
             data_.pop_back();
             uint8_t shift = (SHIFT8 * (empty_count - 1));
-            last_data |= ch << shift;
-            data_.push_back(DataProtectPac(last_data, reinterpret_cast<uintptr_t>(&data_)));
+            last_data |= static_cast<uintptr_t>(ch) << shift;
+            data_.push_back(DataProtect::DataProtectPac(last_data, reinterpret_cast<uintptr_t>(&data_)));
         } else {
             uintptr_t temp_data = uintptr_t(ch);
             temp_data <<= SHIFT24;
-            data_.push_back(DataProtectPac(temp_data, reinterpret_cast<uintptr_t>(&data_)));
+            data_.push_back(DataProtect::DataProtectPac(temp_data, reinterpret_cast<uintptr_t>(&data_)));
         }
         origin_length_++;
     }
@@ -197,7 +198,7 @@ public:
             // Filling back empty
             uint32_t iter = 0;
             uint32_t empty_count = step - (origin_length_ % step);
-            auto last_data = DataProtectAut(data_.back(), reinterpret_cast<uintptr_t>(&data_));
+            auto last_data = DataProtect::DataProtectAut(data_.back(), reinterpret_cast<uintptr_t>(&data_));
             data_.pop_back();
             
             last_data >>= SHIFT8 * empty_count;
@@ -206,7 +207,7 @@ public:
                 last_data += (iter < len ? str[iter] : 0);
                 iter++;
             }
-            data_.push_back(DataProtectPac(last_data, reinterpret_cast<uintptr_t>(&data_)));
+            data_.push_back(DataProtect::DataProtectPac(last_data, reinterpret_cast<uintptr_t>(&data_)));
             origin_length_ += (empty_count < len ? empty_count : len);
             if (empty_count < len) {
                 AppendWithoutCheckBack(str_data.substr(empty_count));
@@ -226,7 +227,7 @@ public:
         std::string res = "";
         constexpr uintptr_t mask = 0xff000000;
         for (uint32_t iter = 0; iter < data_.size(); ++iter) {
-            uintptr_t temp_data = DataProtectAut(data_[iter], reinterpret_cast<uintptr_t>(&data_));
+            uintptr_t temp_data = DataProtect::DataProtectAut(data_[iter], reinterpret_cast<uintptr_t>(&data_));
             res.push_back(char((temp_data & mask) >> SHIFT24));
             temp_data <<= SHIFT8;
             res.push_back(char((temp_data & mask) >> SHIFT24));
@@ -264,7 +265,7 @@ public:
                 temp_data += (left < len ? str[left] : 0);
                 ++left;
             }
-            auto res = DataProtectPac(temp_data, reinterpret_cast<uintptr_t>(&data_));
+            auto res = DataProtect::DataProtectPac(temp_data, reinterpret_cast<uintptr_t>(&data_));
             if (res != *data_ptr) {
                 return false;
             }
@@ -314,7 +315,7 @@ private:
                 temp_data += (left < len ? str[left] : 0);
                 ++left;
             }
-            data_.push_back(DataProtectPac(temp_data, reinterpret_cast<uintptr_t>(&data_)));
+            data_.push_back(DataProtect::DataProtectPac(temp_data, reinterpret_cast<uintptr_t>(&data_)));
         }
         origin_length_ += str_data.length();
     }
