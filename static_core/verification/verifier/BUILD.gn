@@ -12,7 +12,11 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-import("//build/ohos.gni")
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 ohos_executable("verifier_bin") {
   sources = [ "verifier.cpp" ]
@@ -57,8 +61,6 @@ ark_gen_file("verifier_options_gen_h") {
 
 ohos_prebuilt_etc("verifier.config") {
   source = "verifier.config"
-
-  install_enable = true
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }

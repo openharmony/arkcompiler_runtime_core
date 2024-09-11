@@ -13,9 +13,14 @@
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
-import("//build/ohos.gni")
 import("$ark_root/irtoc/irtoc.gni")
 import("$ark_root/plugins/plugins.gni")
+
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 ohos_static_library("libarktscompiler_package") {
   deps = []
@@ -227,6 +232,7 @@ ohos_shared_library("libarktscompiler") {
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":libarkcompiler_opcodes_h_savestate_optimization_call_visitors_inl",
     ":pipeline_includes_h",
+    ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase",
@@ -319,6 +325,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":libarkcompiler_opcodes_h_savestate_optimization_call_visitors_inl",
     ":pipeline_includes_h",
+    ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
@@ -345,7 +352,6 @@ ohos_source_set("libarktscompiler_frontend_static") {
       ":irtoc_builder_cpp",
       ":irtoc_generate_ir_inline",
       ":irtoc_interface_extensions_inl_h",
-      ":plugin_create_pipeline_inl",
     ]
   }
   if (enable_codegen) {
@@ -581,6 +587,12 @@ ark_gen_file("intrinsics_extensions_inl_h") {
   output_file = "$target_gen_dir/generated/intrinsics_extensions.inl.h"
 }
 
+generated_file("plugin_create_pipeline_inl") {
+  outputs = [ "$target_gen_dir/generated/create_pipeline.inl" ]
+  contents = plugin_create_pipeline_paths
+  output_conversion = "list lines"
+}
+
 if (enable_irtoc) {
   ark_gen_file("irtoc_interface_extensions_inl_h") {
     extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
@@ -598,12 +610,6 @@ if (enable_irtoc) {
     api = [ "$ark_root/templates/plugin_options.rb" ]
     output_file =
         "$target_gen_dir/generated/irtoc_interface_extensions_includes.inl.h"
-  }
-
-  generated_file("plugin_create_pipeline_inl") {
-    outputs = [ "$target_gen_dir/generated/create_pipeline.inl" ]
-    contents = plugin_create_pipeline_paths
-    output_conversion = "list lines"
   }
 
   action("irtoc_builder_cpp") {

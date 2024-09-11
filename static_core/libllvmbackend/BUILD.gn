@@ -32,7 +32,7 @@ if (is_llvmbackend) {
   copy("llvm_lib") {
     sources = [ "$llvm_lib_file" ]
     basename = get_path_info("$llvm_lib_file", "file")
-    if (ark_standalone_build) {
+    if (ark_static_standalone_build) {
       outputs = [ "$root_out_dir/lib/$basename" ]
     } else {
       outputs = [ "$root_out_dir/$ark_subsystem_name/$ark_part_name/$basename" ]

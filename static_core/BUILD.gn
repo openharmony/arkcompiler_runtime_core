@@ -13,8 +13,13 @@
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
-import("//build/ohos.gni")
 import("$ark_root/plugins/plugins.gni")
+
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 group("ark_packages") {
   if (enable_static_vm) {
@@ -23,7 +28,6 @@ group("ark_packages") {
       deps += [
         "$ark_root/compiler:libarktscompiler",
         "$ark_root/compiler/aot:libarkaotmanager",
-        "$ark_root/compiler/tools/paoc:ark_aot",
         "$ark_root/libpandabase:libarktsbase",
         "$ark_root/libpandafile:libarktsfile",
         "$ark_root/libpandafile/external:libarkfileExt",
@@ -36,7 +40,10 @@ group("ark_packages") {
         "$ark_root/verification/verifier:verifier_bin",
       ]
       if (enable_codegen) {
-        deps += [ "$ark_root/compiler/optimizer/code_generator:libarkencoder" ]
+        deps += [
+          "$ark_root/compiler/optimizer/code_generator:libarkencoder",
+          "$ark_root/compiler/tools/paoc:ark_aot",
+        ]
       }
     }
   }
@@ -62,7 +69,7 @@ group("ark_host_linux_tools_packages") {
     }
 
     # TODO: don't exclude these targets from OHOS build
-    if (ark_standalone_build) {
+    if (ark_static_standalone_build) {
       deps += [
         "$ark_root/compiler/tools/aotdump:ark_aotdump(${host_toolchain})",
         "$ark_root/compiler/tools/paoc:ark_aot(${host_toolchain})",
@@ -75,7 +82,8 @@ group("ark_host_linux_tools_packages") {
 
 group("ark_host_windows_tools_packages") {
   deps = plugin_ark_host_windows_tools_packages
-  if (host_os != "mac" && current_cpu != "arm" && !ark_standalone_build) {
+  if (host_os != "mac" && current_cpu != "arm" &&
+      !ark_static_standalone_build && !ark_standalone_build) {
     deps += [
       "$ark_root/assembler:arkts_asm(//build/toolchain/mingw:mingw_x86_64)",
       "$ark_root/disassembler:arkts_disasm(//build/toolchain/mingw:mingw_x86_64)",
@@ -110,7 +118,7 @@ group("ark_host_tests") {
 
 # Common config for ark source
 config("ark_config") {
-  if (!ark_standalone_build) {
+  if (!ark_static_standalone_build) {
     visibility = [
       "$ark_es2panda_root:libes2panda",
       "$ark_es2panda_root:libes2panda_frontend_static",
@@ -248,7 +256,7 @@ config("ark_config") {
 
   cflags_c = []
 
-  if (ark_standalone_build) {
+  if (ark_static_standalone_build) {
     cflags_cc += [ "-Wno-bitwise-instead-of-logical" ]
   }
 
@@ -293,7 +301,7 @@ config("ark_config") {
 
   configs = plugin_ark_configs
 
-  if (ark_standalone_build) {
+  if (ark_static_standalone_build) {
     configs += [ sdk_libc_secshared_config ]
   }
 
