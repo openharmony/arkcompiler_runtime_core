@@ -229,11 +229,6 @@ config("ark_config") {
     configs += [ "$ark_root/plugins/$plugin:ark_config" ]
   }
 
-  if (enabled_pac_data_protect) {
-    cflags_cc += [ "-march=armv8.4-a" ]
-    defines += [ "PANDA_ENABLE_DATA_PROTECT" ]
-  }
-
   if (current_cpu == "arm") {
     cflags_cc += [
       "-march=armv7-a",
@@ -258,6 +253,10 @@ config("ark_config") {
       "PANDA_ENABLE_GLOBAL_REGISTER_VARIABLES",
       "PANDA_USE_32_BIT_POINTER",
     ]
+    if (enabled_pac_data_protect) {
+      cflags_cc += [ "-march=armv8.4-a" ]
+      defines += [ "PANDA_ENABLE_DATA_PROTECT" ]
+    }
   } else if (current_cpu == "x86") {
     defines += [ "PANDA_TARGET_X86" ]
   } else if (current_cpu == "amd64" || current_cpu == "x64" ||
