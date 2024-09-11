@@ -419,6 +419,13 @@ bool Runtime::Destroy()
 
     trace::ScopedTrace scopedTrace("Runtime shutdown");
 
+    if (GetOptions().ShouldLoadBootPandaFiles()) {
+        // Performing some actions before Runtime destroy.
+        // For example, traversing FinalizableWeakRefList
+        // in order to free internal data, which was not handled by GC
+        instance_->GetPandaVM()->BeforeShutdown();
+    }
+
     if (instance_->GetOptions().IsSamplingProfilerEnable()) {
         instance_->GetTools().StopSamplingProfiler();
     }

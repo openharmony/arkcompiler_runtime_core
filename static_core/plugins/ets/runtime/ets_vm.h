@@ -353,6 +353,8 @@ public:
 
     void CleanFinalizableReferenceList();
 
+    void BeforeShutdown() override;
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
