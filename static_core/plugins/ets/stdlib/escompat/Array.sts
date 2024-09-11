@@ -1731,14 +1731,14 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
      * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
      */
     public override join(sep?: String): string {
+        if (this.actualLength == 0) {
+            return ""
+        }
         const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-        let sb = new StringBuilder()
-        for (let i: int = 0; i < this.actualLength; i++) {
+        let sb = new StringBuilder(new String(this.$_get_unsafe(0)))
+        for (let i: int = 1; i < this.actualLength; i++) {
             const tmp = this.$_get_unsafe(i)
-            // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-            if (i != 0) {
-                sb.append(sepReal);
-            }
+            sb.append(sepReal);
             // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
             if (!__runtimeIsSameReference(tmp, undefined)) {
                 sb.append(new String(tmp))
