@@ -42,37 +42,3 @@ cases:
           }
       use: |-
           let r = launch new A('abc')  // call a constructor
-
-    - decl: |-
-          class A {
-              fld: string
-              constructor(p: string) {
-                  this.fld = p
-              }
-              meth(): string {
-                  return this.fld
-              }
-          }
-      use: |-
-          let a: A = new A('abc')
-          let r = launch a.meth()  // call a method
-
-    - decl: |-
-          class A {
-              static meth(p: string): string {
-                  return p + p
-              }
-          }
-      use: |-
-          let r = launch A.meth('abc')  // call static method
-
-    - decl: |-
-          interface I {
-              meth(p: string): string {
-                  return p + p
-              }
-          }
-          class A implements I {}
-      use: |-
-          let a: A = new A()
-          let r = launch a.meth('abc')  // call default interface method

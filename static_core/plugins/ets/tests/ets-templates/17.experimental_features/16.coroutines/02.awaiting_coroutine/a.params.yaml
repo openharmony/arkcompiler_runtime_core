@@ -22,7 +22,7 @@ cases:
               return p + 1
           }
       use: |-
-          assert foo(launch bar(1)) == 2
+          assert(foo(launch bar(1)) == 2)
 
     - decl: |-
           // Error in launch function propagates outside
@@ -38,11 +38,11 @@ cases:
       use: |-
           try {
               foo(launch bar(1))
-              assert false
+              assert(false)
           } catch (e: Error) {
-              assert e.message == 'ABC'  // expected
+              assert(e.message == 'ABC')  // expected
           } catch (e) {
-              assert false
+              assert(false)
           }
 
     - decl: |-
@@ -59,11 +59,11 @@ cases:
       use: |-
           try {
               foo(launch bar(1), 1)
-              assert false
+              assert(false)
           } catch (e: Error) {
-              assert e.message == 'ABC'  // expected
+              assert(e.message == 'ABC')  // expected
           } catch (e) {
-              assert false
+              assert(false)
           }
 
     - decl: |-
@@ -80,11 +80,11 @@ cases:
       use: |-
           try {
               foo(launch bar(1))
-              assert false
+              assert(false)
           } catch (e: Exception) {
-              assert e.message == 'ABC'  // expected
+              assert(e.message == 'ABC')  // expected
           } catch (e) {
-              assert false
+              assert(false)
           }
 
     - decl: |-
@@ -101,11 +101,11 @@ cases:
       use: |-
           try {
               foo(1, launch bar(1))
-              assert false
+              assert(false)
           } catch (e: Exception) {
-              assert e.message == 'ABC'  // expected
+              assert(e.message == 'ABC')  // expected
           } catch (e) {
-              assert false
+              assert(false)
           }
 
     - decl: |-
@@ -125,11 +125,11 @@ cases:
       use: |-
           try {
               baz(launch bar(1), foo)
-              assert false
+              assert(false)
           } catch (e: Exception) {
-              assert e.message == 'ABC'  // expected
+              assert(e.message == 'ABC')  // expected
           } catch (e) {
-              assert false
+              assert(false)
           }
 
     - decl: |-
@@ -154,7 +154,7 @@ cases:
           let res = ''
           arr = [launch foo(1), launch foo(2), launch foo(3)]
           for (let v of arr) res += bar(v)
-          assert res == '1X3'
+          assert(res == '1X3')
 
     - decl: |-
           // Exception in one promise should not affect other running promises
@@ -181,9 +181,9 @@ cases:
               let res = ''
               arr = [launch foo(1), launch foo(2), launch foo(3)]
               for (let v of arr) res += bar(v)
-              assert res == '1X3'
+              assert(res == '1X3')
           } catch (e) {
-              assert false
+              assert(false)
           }
 
     - decl: |-
@@ -208,42 +208,42 @@ cases:
       use: |-
           // array element
           let arr: Promise<string>[] = [launch foo('A')]
-          assert (await arr[0]) == 'AA'
+          assert((await arr[0]) == 'AA')
 
           // tuple element
           let tup: [boolean, Promise<string>] = [false, launch foo('A')]
-          assert (await tup[1]) == 'AA'
+          assert((await tup[1]) == 'AA')
 
           // union type
           let ut: boolean|number|Promise<string> = launch foo('A')
-          assert (await (ut as Promise<string>)) == 'AA'
+          assert((await (ut as Promise<string>)) == 'AA')
 
           // nullish type
           let nt: Promise<string>|null|undefined = p1()
-          assert (await nt!) == 'AA'
+          assert((await nt!) == 'AA')
 
           nt = p2()
           try {
               await nt!
-              assert false
+              assert(false)
           } catch (e) {
               // OK
           }
 
           // function call
           let f: (p: Promise<string>) => Promise<string> = (p: Promise<string>): Promise<string> => p
-          assert (await f(launch foo('A'))) == 'AA'
+          assert((await f(launch foo('A'))) == 'AA')
 
           // instance field
           let a: A = { fld: launch foo('A') }
-          assert (await a.fld) == 'AA'
+          assert((await a.fld) == 'AA')
 
           // method call
           let b: A = new A(launch foo('A'))
-          assert (await b.meth()) == 'AA'
+          assert((await b.meth()) == 'AA')
 
           // conditional expression
           let expr1 = launch foo('A')
           let expr2 = launch foo('B')
-          assert (await a instanceof A ? expr1 : expr2) == 'AA'
-          assert (await ! (a instanceof A) ? expr1 : expr2) == 'BB'
+          assert((await a instanceof A ? expr1 : expr2) == 'AA')
+          assert((await ! (a instanceof A) ? expr1 : expr2) == 'BB')

@@ -13,16 +13,6 @@
 # end of es2panda fails
 
 # 16343 Improve typeof result inference, move it to ETSAnalyzer
-07.expressions/17.typeof_expression/tof_const_1.sts
-07.expressions/17.typeof_expression/tof_vars_1.sts
-07.expressions/17.typeof_expression/tof_func_1.sts
-07.expressions/17.typeof_expression/tof_meth_1.sts
-07.expressions/17.typeof_expression/tof_obj_1.sts
-07.expressions/17.typeof_expression/tof_const_4.sts
-07.expressions/17.typeof_expression/tof_vars_4.sts
-07.expressions/17.typeof_expression/tof_func_4.sts
-07.expressions/17.typeof_expression/tof_meth_4.sts
-07.expressions/17.typeof_expression/tof_obj_4.sts
 07.expressions/17.typeof_expression/tof_const_6.sts
 07.expressions/17.typeof_expression/tof_vars_6.sts
 07.expressions/17.typeof_expression/tof_func_6.sts
@@ -73,14 +63,6 @@
 05.generics/01.type_parameters/generic_classes/generic_class_self_dependency_12.sts
 05.generics/01.type_parameters/generic_classes/generic_class_self_dependency_13.sts
 05.generics/01.type_parameters/generic_classes/generic_class_self_dependency_14.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_functions/function_type_parameter_default_0.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_functions/function_type_parameter_default_1.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_functions/function_type_parameter_default_4.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_methods/method_type_parameter_default_0.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_methods/method_type_parameter_default_1.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_methods/method_type_parameter_default_2.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_methods/method_type_parameter_default_3.sts
-05.generics/01.type_parameters/02.type_parameter_default/generic_methods/method_type_parameter_default_4.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_9.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_variance_0.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_variance_1.sts
@@ -153,8 +135,6 @@
 07.expressions/01.evaluation_of_expressions/eval_decl.sts
 07.expressions/03.qualified_name/qualified_name_0.sts
 07.expressions/03.qualified_name/qualified_name_1.sts
-07.expressions/03.qualified_name/qualified_name_4.sts
-07.expressions/03.qualified_name/qualified_name_5.sts
 07.expressions/08.this_expression/this_in_interface_method.sts
 07.expressions/08.this_expression/this_in_lambda.sts
 07.expressions/08.this_expression/this_in_lambda_negative.sts
@@ -474,7 +454,6 @@
 03.types/08.reference_types/07.function_types/function_type_6.sts
 03.types/08.reference_types/07.function_types/function_type_7.sts
 17.experimental_features/07.function_and_method_overloading/01.function_overloading/fn_overloading_30.sts
-04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_7.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_11.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_12.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.sts
@@ -588,30 +567,45 @@
 06.contexts_and_conversions/03.numeric_operator_contexts/conv_7.sts
 # end of es2panda fails
 
-# es2panda fails: panda#14767 undefined is not supported
-06.contexts_and_conversions/02.string_operator_contexts/conversion_9.sts
-# end of es2panda fails
+# 19583 es2panda segfault on launching a coroutine in trailing lambda
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_24.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_23.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_43.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_44.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_43.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_44.sts
 
 # 17053 Cannot create array of nullish tuples
 07.expressions/04.array_literal/array_literal_13.sts
 
 # 17051 Promise<void> should resolve as undefined
-17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_0.sts
-
-# 17050 SegFault on executing launch in a launched function
-17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_9.sts
-
-# 17022 No CTE on launching a method
-17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_n_6.sts
-17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_n_7.sts
-17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_n_8.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_0.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_0.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_lamb_0.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_0.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_0.sts
 
 # 17057 Cannot launch function returning enum
-17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_19.sts
-17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_20.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_19.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_20.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_18.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_19.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_lamb_17.sts
+17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_lamb_18.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_33.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_34.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_35.sts
+17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_36.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_33.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_34.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_35.sts
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_36.sts
 
-# 17142 Compilation fails on multiple then/catch in Promise chain
-17.experimental_features/16.coroutines/03.promise_class/p_4.sts
+# 19596 es2panda aborts on this reference from async method
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_38.sts
+
+# 19985 es2panda aborts on using async methods
+17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_17.sts
 
 # es2panda fails: panda#11752
 13.compilation_units_packages_and_modules/10.top-level_statements/block_declaration_10.sts
@@ -643,13 +637,9 @@
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_11.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_12.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_13.sts
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_16.sts
-#19909
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_14.sts
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_17.sts
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_3.sts
+07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_16.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_4.sts
-07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_5.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_6.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_7.sts
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_9.sts
@@ -662,18 +652,11 @@
 # es2panda fails: panda#12528
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_4.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_5.sts
-04.names_declarations_and_scopes/08.function_declarations/function_decl_9.sts
-# 19909
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_6.sts
 # es2panda fails: panda#12554
 04.names_declarations_and_scopes/01.names/qualified_name_0.sts
 04.names_declarations_and_scopes/01.names/qualified_name_1.sts
 04.names_declarations_and_scopes/01.names/qualified_name_2.sts
-04.names_declarations_and_scopes/01.names/qualified_name_3.sts
-04.names_declarations_and_scopes/01.names/qualified_name_6.sts
-04.names_declarations_and_scopes/01.names/qualified_name_7.sts
-04.names_declarations_and_scopes/01.names/qualified_name_10.sts
-04.names_declarations_and_scopes/01.names/qualified_name_11.sts
 # end of es2panda fails
 
 # es2panda fails: panda#12853 es2panda fails on private interface method
@@ -699,14 +682,10 @@
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_10.sts
 
 # 15477 Type conversions are not supported in for-of statement
-17.experimental_features/06.statements/01.for-of_type_annotation/for_of_13.sts
-17.experimental_features/06.statements/01.for-of_type_annotation/for_of_14.sts
-17.experimental_features/06.statements/01.for-of_type_annotation/for_of_24.sts
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_15.sts
 17.experimental_features/06.statements/01.for-of_type_annotation/for_of_25.sts
 
-# #19932 es2panda fails: 7.6.2 Object Literal of Interface Type is not implemented
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_0.sts
+# es2panda fails: 7.6.2 Object Literal of Interface Type is not implemented
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_1.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_10.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_2.sts
@@ -715,7 +694,6 @@
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_5.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_6.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_7.sts
-07.expressions/05.object_literal/02.object_literal_of_interface_type/in_8.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/in_9.sts
 07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex1.sts
 # end of es2panda fails
@@ -875,7 +853,6 @@
 
 # es2panda fails: equality not yet implemented
 07.expressions/25.equality_expressions/eq_12.sts
-07.expressions/25.equality_expressions/eq_13.sts
 07.expressions/25.equality_expressions/eq_16.sts
 07.expressions/25.equality_expressions/eq_17.sts
 07.expressions/25.equality_expressions/eq_19.sts
@@ -913,6 +890,10 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_16.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_17.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_18.sts
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_20.sts
+07.expressions/11.function_call_expression/step_1_selection_of_function/step1_21.sts
+07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_5.sts
+07.expressions/11.function_call_expression/step_2_semantic_correctness_check/step2_6.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_27.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_5.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_6.sts
@@ -921,7 +902,6 @@
 
 
 # es2panda fails: panda, 4.8.3 optional parameters not fully implemented
-07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_16.sts
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_17.sts
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_18.sts
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_19.sts
@@ -971,9 +951,6 @@
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen1.sts
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen2.sts
 
-# 18096 Cannot assign a function to Object variable
-06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/userdef_ref_3.sts
-
 # 15242 Ensure-Not-Nullish expression for nullish tuple not recognized
 03.types/08.reference_types/10.tuple_types/tt_17.sts
 
@@ -1006,11 +983,6 @@
 13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_2.sts
 13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_3.sts
 
-13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_1.sts
-13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_3.sts
-13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_4.sts
-13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_5.sts
-13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_6.sts
 13.compilation_units_packages_and_modules/09.export_directives/04.re-export_directive/re-export_all_by_old_names.sts
 
 # 18493
@@ -1023,14 +995,12 @@
 # end 15095
 
 # es2panda: panda#13442 Reworking the equality expression so it aligns with the specification changes
-03.types/08.reference_types/10.tuple_types/tt2_15.sts
 # end of es2panda fails
 
 # Throwing function types
-17.experimental_features/08.native_functions_and_methods/01.native_functions/nat8.sts
 17.experimental_features/15.exceptions/01.throwing_functions/lambda.sts
 
-# Leftovers from bit operations on floats
+# Leftovers from bit operations on floats, verifier failure with opt-level=0
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_61.sts
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_68.sts
 
@@ -1038,12 +1008,6 @@
 # not recommended, yet allowed
 03.types/08.reference_types/08.null_type/null12.sts
 03.types/08.reference_types/08.null_type/null13.sts
-
-# 17736 Incorrect relational operation result with negative bigint
-07.expressions/24.relational_expressions/03.bigint_relational_operators/ge_0.sts
-07.expressions/24.relational_expressions/03.bigint_relational_operators/gt_0.sts
-07.expressions/24.relational_expressions/03.bigint_relational_operators/le_0.sts
-07.expressions/24.relational_expressions/03.bigint_relational_operators/lt_0.sts
 
 # inferred type is null
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/null_initializer.sts
@@ -1223,9 +1187,7 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_14.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_15.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_17.sts
-17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_19.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_20.sts
-17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_21.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_22.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_23.sts
 
@@ -1412,7 +1374,6 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-intf_4.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-intf_5.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-intf_6.sts
-06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-intf_7.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/comp_obj/comp-intf_8.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_const/decl-const_0.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_const/decl-const_1.sts
@@ -1444,117 +1405,10 @@
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/decl_var/decl-var_8.sts
 
 # 13947 Object Literal of Interface Type is not implemented
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-nan.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_0.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_1.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_10.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_11.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_12.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_13.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_14.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_15.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_16.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_17.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_18.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_19.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_2.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_20.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_21.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_22.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_23.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_24.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_25.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_26.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_27.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_28.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_3.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_4.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_5.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_6.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_7.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_8.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf_9.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_0.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_1.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_2.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_3.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_4.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_5.sts
-06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/comp_obj/comp-intf-ident_6.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf-nan_0.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf-nan_1.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf-nan_2.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_0.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_1.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_10.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_11.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_12.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_13.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_14.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_15.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_16.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_17.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_18.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_19.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_2.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_20.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_21.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_22.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_23.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_24.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_25.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_26.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_27.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_28.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_3.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_4.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_5.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_6.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_7.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_8.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-intf_9.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf-nan_0.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf-nan_1.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf-nan_2.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_0.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_1.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_10.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_11.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_12.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_13.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_14.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_15.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_16.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_17.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_18.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_19.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_2.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_20.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_21.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_22.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_23.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_24.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_25.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_26.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_3.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_4.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_5.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_6.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_7.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_8.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/comp_obj/comp-intf_9.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_0.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_1.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_10.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_11.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_12.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_13.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_14.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_15.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_16.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_17.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_18.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_19.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_2.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_20.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_21.sts
@@ -1565,7 +1419,6 @@
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_6.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_7.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_8.sts
-06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_9.sts
 
 # 16325 unboxing in lambda parameter
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd-nan_1.sts
@@ -1588,9 +1441,6 @@
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_7.sts
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_8.sts
 06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_9.sts
-
-# 6.5.9 Constant String to Character Conversions not yet supported
-06.contexts_and_conversions/05.implicit_conversions/09.constant_string_to_char_conversion/str2char_7.sts
 
 # 18550 [ArkTS frontend] es2panda aborts on implicit number conversion
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.sts
@@ -1757,40 +1607,6 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_8.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.sts
 
-# 16523 tuple conversion should allow identical types only
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_n_3.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_n_4.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_n_5.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_n_6.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_n_7.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_n_8.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/assn_var/assn-var_n_9.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_arr/comp-arr_n_3.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_arr/comp-arr_n_4.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_arr/comp-arr_n_5.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_arr/comp-arr_n_6.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_arr/comp-arr_n_7.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_arr/comp-arr_n_8.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_arr/comp-arr_n_9.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_n_3.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_n_4.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_n_5.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_n_6.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_field/decl-field_n_3.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_field/decl-field_n_4.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_field/decl-field_n_5.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_field/decl-field_n_6.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_field/decl-field_n_7.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_field/decl-field_n_8.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_field/decl-field_n_9.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_3.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_4.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_5.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_6.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_7.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_8.sts
-06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/decl_var/decl-var_n_9.sts
-
 # 18763 es2panda aborts on for-of over a union type array
 08.statements/09.for_of_statements/for_of_28.sts
 17.experimental_features/04.iterable_types/it_11.sts
@@ -1853,6 +1669,10 @@
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_8.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/ne1_10.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/ne1_9.sts
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq1_7.sts
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq1_8.sts
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/ne1_10.sts
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/ne1_9.sts
 
 # 16840
 10.interfaces/04.interface_members/methods_overriding.sts
@@ -1908,9 +1728,6 @@
 # es2panda: #16410 Cannot declare function with optional parameters (ambient declarations)
 14.ambient_declarations/ambient_declarations_7.sts
 
-# es2panda: #16411 Cannot declare final class
-14.ambient_declarations/ambient_declarations_57.sts
-
 # es2panda: #16415 Cannot declare static field in generic ambient class
 14.ambient_declarations/ambient_declarations_24.sts
 
@@ -1963,8 +1780,6 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_39.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_40.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_41.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_48.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_50.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_7.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_1.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_29.sts
@@ -1973,8 +1788,6 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_13.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_15.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_17.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_46.sts
-15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_48.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_10.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_35.sts
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_36.sts
@@ -2105,22 +1918,7 @@
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_and_decl_1.sts
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_and_decl_2.sts
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_and_decl_4.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_0.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_1.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_10.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_11.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_12.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_13.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_14.sts
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_18.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_2.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_3.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_4.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_5.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_6.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_7.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_8.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_9.sts
 
 # 18550 es2panda aborts on implicit number conversion
 17.experimental_features/03.indexable_types/ind_interface_4.sts
