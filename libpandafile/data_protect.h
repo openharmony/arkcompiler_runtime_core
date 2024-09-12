@@ -250,8 +250,8 @@ public:
         if (str_data.length() != origin_length_) {
             return false;
         }
-        constexpr int32_t step = 4;
         int32_t len = static_cast<int32_t>(str_data.length());
+        constexpr int32_t step = 4;
         auto str = reinterpret_cast<const uint8_t *>(str_data.data());
         
         auto data_ptr = data_.begin();
