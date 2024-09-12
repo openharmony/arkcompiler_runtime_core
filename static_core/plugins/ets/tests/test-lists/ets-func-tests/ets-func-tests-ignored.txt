@@ -560,3 +560,10 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/t
 ### Issue 19529 end
 # Issue 20687
 spec/05.Generics/tuple_as_generic_args_0030.sts
+
+# Issue 20760
+std/core/IntlNumberFormatRangeInfTest.sts
+
+### Issue 20525 begin
+std/concurrency/AsyncLockTest.sts
+### Issue 20525 end

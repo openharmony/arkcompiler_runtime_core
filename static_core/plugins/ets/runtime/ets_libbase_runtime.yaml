@@ -4939,3 +4939,37 @@ intrinsics:
       ret: void
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
+
+######################################
+# std.concurrency.ConcurrencyHelpers #
+######################################
+
+  - name: stdConcurrencyConcurrencyHelpersMutexCreate
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: mutexCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsMutexCreate
+
+  - name: stdConcurrencyConcurrencyHelpersMutexLock
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: mutexLock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexLock
+
+  - name: stdConcurrencyConcurrencyHelpersMutexUnlock
+    space: ets
+    class_name: std.concurrency.ConcurrencyHelpers
+    method_name: mutexUnlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexUnlock
