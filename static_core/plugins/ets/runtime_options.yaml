@@ -206,3 +206,11 @@ options:
   type: bool
   default: false
   description: Collect coroutine stats and dump it at the end of the program
+
+- name: native-library-path
+  lang:
+    - ets
+  type: arg_list_t
+  default: []
+  description: Pathes to find native libraries
+  delimiter: ":"
