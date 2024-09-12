@@ -28,7 +28,7 @@ public:
     void Push(EtsCoroutine *coro, Node *weakRef)
     {
         ASSERT(weakRef != nullptr);
-        auto *head = GetHead(coro);
+        auto *head = GetHead();
         if (head == nullptr) {
             SetHead(coro, weakRef);
             return;
@@ -41,15 +41,15 @@ public:
     void Unlink(EtsCoroutine *coro, Node *weakRef)
     {
         ASSERT(weakRef != nullptr);
-        auto *prev = weakRef->GetPrev(coro);
-        auto *next = weakRef->GetNext(coro);
+        auto *prev = weakRef->GetPrev();
+        auto *next = weakRef->GetNext();
         if (prev != nullptr) {
             prev->SetNext(coro, next);
         }
         if (next != nullptr) {
             next->SetPrev(coro, prev);
         }
-        if (weakRef == GetHead(coro)) {
+        if (weakRef == GetHead()) {
             SetHead(coro, next);
         }
         weakRef->SetPrev(coro, nullptr);
@@ -58,7 +58,7 @@ public:
 
     void UnlinkClearedReferences(EtsCoroutine *coro)
     {
-        auto *weakRef = GetHead(coro);
+        auto *weakRef = GetHead();
         auto *undefinedObj = coro->GetUndefinedObject();
         while (weakRef != nullptr) {
             auto *referent = weakRef->GetReferent();
@@ -68,7 +68,7 @@ public:
                 ASSERT(weakRef->ReleaseFinalizer().IsEmpty());
                 Unlink(coro, weakRef);
             }
-            weakRef = weakRef->GetNext(coro);
+            weakRef = weakRef->GetNext();
         }
     }
 
@@ -102,29 +102,29 @@ public:
         return reinterpret_cast<List *>(intrusiveList);
     }
 
-    void TraverseAndFinalize(EtsCoroutine *coro)
+    void TraverseAndFinalize()
     {
-        auto *weakRef = GetHead(coro);
+        auto *weakRef = GetHead();
         while (weakRef != nullptr) {
             auto finalizer = weakRef->ReleaseFinalizer();
             if (!finalizer.IsEmpty()) {
                 finalizer.Run();
             }
-            weakRef = weakRef->GetNext(coro);
+            weakRef = weakRef->GetNext();
         }
     }
 
 private:
-    Node *GetHead(EtsCoroutine *coro) const
+    Node *GetHead() const
     {
-        ASSERT(GetPrev(coro) == nullptr);
+        ASSERT(GetPrev() == nullptr);
         ASSERT(GetReferent() == nullptr);
-        return GetNext(coro);
+        return GetNext();
     }
 
     void SetHead(EtsCoroutine *coro, Node *weakRef)
     {
-        ASSERT(GetPrev(coro) == nullptr);
+        ASSERT(GetPrev() == nullptr);
         ASSERT(GetReferent() == nullptr);
         return SetNext(coro, weakRef);
     }

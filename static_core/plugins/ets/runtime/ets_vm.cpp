@@ -765,6 +765,7 @@ void PandaEtsVM::RegisterFinalizationRegistryInstance(EtsObject *instance)
 void PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
                                             void (*finalizer)(void *), void *finalizerArg)
 {
+    ASSERT_MANAGED_CODE();
     auto *weakRef = EtsFinalizableWeakRef::Create(coro);
     weakRef->SetFinalizer(finalizer, finalizerArg);
     weakRef->SetReferent(object.GetPtr());
@@ -772,15 +773,6 @@ void PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<
     auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
     os::memory::LockHolder lh(finalizableWeakRefListLock_);
     weakRefList->Push(coro, weakRef);
-}
-
-void PandaEtsVM::UnlinkFinalizableReference(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef)
-{
-    auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
-    auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
-    ASSERT(ToUintPtr(weakRefList) != ToUintPtr(weakRef));
-    os::memory::LockHolder lh(finalizableWeakRefListLock_);
-    weakRefList->Unlink(coro, weakRef);
 }
 
 void PandaEtsVM::CleanFinalizableReferenceList()
@@ -793,10 +785,10 @@ void PandaEtsVM::CleanFinalizableReferenceList()
 
 void PandaEtsVM::BeforeShutdown()
 {
+    ScopedManagedCodeThread managedScope(EtsCoroutine::GetCurrent());
     auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
     auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
-    os::memory::LockHolder lh(finalizableWeakRefListLock_);
-    weakRefList->TraverseAndFinalize(EtsCoroutine::GetCurrent());
+    weakRefList->TraverseAndFinalize();
 }
 
 /* static */

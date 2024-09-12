@@ -80,9 +80,9 @@ public:
                          reinterpret_cast<FinalizerArg>(std::exchange(finalizerArgPtr_, 0)));
     }
 
-    EtsFinalizableWeakRef *GetPrev(EtsCoroutine *coro) const
+    EtsFinalizableWeakRef *GetPrev() const
     {
-        auto *prev = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsFinalizableWeakRef, prev_));
+        auto *prev = ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsFinalizableWeakRef, prev_));
         return FromCoreType(prev);
     }
 
@@ -91,9 +91,9 @@ public:
         return MEMBER_OFFSET(EtsFinalizableWeakRef, prev_);
     }
 
-    EtsFinalizableWeakRef *GetNext(EtsCoroutine *coro) const
+    EtsFinalizableWeakRef *GetNext() const
     {
-        auto *next = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsFinalizableWeakRef, next_));
+        auto *next = ObjectAccessor::GetObject(this, MEMBER_OFFSET(EtsFinalizableWeakRef, next_));
         return FromCoreType(next);
     }
 
