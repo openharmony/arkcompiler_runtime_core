@@ -62,6 +62,27 @@ class TestFileBased(Test):
     def verifier_args(self) -> List[str]:
         return self.test_env.verifier_args
 
+    @staticmethod
+    def get_processes(pid: int, gdb_timeout: int) -> str:
+        cmd = [
+            "sudo",
+            "gdb", "--batch", "-p", str(pid),
+            "-ex", 'info threads',
+            "-ex", 'thread apply all bt',
+        ]
+        try:
+            with subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    encoding='utf-8',
+                    errors='ignore',
+            ) as process:
+                output, error = process.communicate(timeout=gdb_timeout)
+                return f"output: '{output}'\nerror: '{error}'"
+        except subprocess.TimeoutExpired:
+            return "<no stacktrace information>"
+
     def detect_segfault(self, return_code: int, default_fail_kind: FailKind) -> FailKind:
         if return_code == self.SEGFAULT_RETURN_CODE:
             return FailKind.SEGFAULT_FAIL
@@ -102,7 +123,8 @@ class TestFileBased(Test):
                 passed = result_validator(output, error, return_code)
                 fail_kind = self.detect_segfault(return_code, params.fail_kind_fail) if not passed else None
             except subprocess.TimeoutExpired:
-                self.log_cmd(f"Failed by timeout after {params.timeout} sec")
+                timeout_info = self.get_processes(process.pid, params.gdb_timeout)
+                self.log_cmd(f"Failed by timeout after {params.timeout} sec\n{timeout_info}")
                 fail_kind = params.fail_kind_timeout
                 error = fail_kind.name
                 return_code = process.returncode
@@ -142,6 +164,7 @@ class TestFileBased(Test):
             flags=es2panda_flags,
             env=self.test_env.cmd_env,
             timeout=self.test_env.config.es2panda.timeout,
+            gdb_timeout=self.test_env.config.general.gdb_timeout,
             fail_kind_fail=FailKind.ES2PANDA_FAIL,
             fail_kind_timeout=FailKind.ES2PANDA_TIMEOUT,
             fail_kind_other=FailKind.ES2PANDA_OTHER,
@@ -176,6 +199,7 @@ class TestFileBased(Test):
 
         params = Params(
             timeout=self.ark_timeout,
+            gdb_timeout=self.test_env.config.general.gdb_timeout,
             executor=self.test_env.runtime,
             flags=ark_flags,
             env=self.test_env.cmd_env,
@@ -201,6 +225,7 @@ class TestFileBased(Test):
         if self.test_env.ark_aot is not None:
             params = Params(
                 timeout=self.test_env.config.ark_aot.timeout,
+                gdb_timeout=self.test_env.config.general.gdb_timeout,
                 executor=self.test_env.ark_aot,
                 flags=aot_flags,
                 env=self.test_env.cmd_env,
@@ -224,6 +249,7 @@ class TestFileBased(Test):
 
         params = Params(
             timeout=self.ark_timeout,
+            gdb_timeout=self.test_env.config.general.gdb_timeout,
             executor=self.test_env.ark_quick,
             flags=quick_flags,
             env=self.test_env.cmd_env,

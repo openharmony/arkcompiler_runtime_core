@@ -136,6 +136,7 @@ class TestTSSubset(TestETS):
     def _run_ts_node(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
         params = Params(
             timeout=self.test_env.config.es2panda.timeout,
+            gdb_timeout=self.test_env.config.general.gdb_timeout,
             executor=self.npx,
             flags=self._npx_options,
             env=self.test_env.cmd_env,
@@ -153,6 +154,7 @@ class TestTSSubset(TestETS):
     def _run_node(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
         params = Params(
             timeout=self.test_env.config.es2panda.timeout,
+            gdb_timeout=self.test_env.config.general.gdb_timeout,
             executor=self.node,
             flags=self._node_options,
             env=self.test_env.cmd_env,
