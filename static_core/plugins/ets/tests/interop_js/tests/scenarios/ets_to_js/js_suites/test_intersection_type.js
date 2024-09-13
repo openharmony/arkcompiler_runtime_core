@@ -19,7 +19,7 @@ const functionIntersectionTypePrimitiveEts = etsMod.getFunction('functionInterse
 const functionIntersectionTypeObjectEts = etsMod.getFunction('functionIntersectionTypeObject');
 
 {
-  const VALUE1 = "1";
+  const VALUE1 = '1';
 
   let ret = functionIntersectionTypePrimitiveEts(1);
   ASSERT_EQ(ret, 1);

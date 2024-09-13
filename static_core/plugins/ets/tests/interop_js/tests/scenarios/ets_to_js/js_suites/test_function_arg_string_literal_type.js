@@ -19,8 +19,8 @@ const functionArgStringLiteralTypeEts = etsMod.getFunction('functionArgStringLit
 const functionArgStringLiteralTypeUnionEts = etsMod.getFunction('functionArgStringLiteralTypeUnion');
 
 {
-  const VALUE1 = "1";
-  const VALUE2 = "2";
+  const VALUE1 = '1';
+  const VALUE2 = '2';
   let ret = functionArgStringLiteralTypeEts(VALUE1);
   ASSERT_EQ(ret, VALUE1);
 

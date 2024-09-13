@@ -87,12 +87,12 @@ class Tool(ToolBase):
                                 if str(x).find('.abc') == -1]
         extra_paths = js_files_includable + sts_paths_includable
         if len(extra_paths) < 1:
-            return self.default_arktsconfig
+            return str(self.default_arktsconfig)
         _, arktsconfig_path = mkstemp('.json', 'arktsconfig_')
         make_arktsconfig(arktsconfig_path,
                          self.panda_root,
                          extra_paths)
-        return arktsconfig_path
+        return str(arktsconfig_path)
 
     def exec(self, bu: BenchUnit) -> None:
         for lib in bu.libs('.ts', '.sts'):
