@@ -29,8 +29,8 @@ namespace ark::tooling {
 
 class InspectorExtension {
 public:
-    using PropertyHandler = std::function<void(const std::string &name, TypedValue value, bool isArrayElement,
-                                               bool isFinal, bool isAccessor)>;
+    using PropertyHandler =
+        std::function<void(const std::string &name, TypedValue value, bool isFinal, bool isAccessor)>;
 
     InspectorExtension() = default;
     virtual ~InspectorExtension() = default;

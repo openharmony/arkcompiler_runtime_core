@@ -165,7 +165,7 @@ TEST_F(ObjectRepositoryTest, S)
     auto frameObj = obj.CreateFrameObject(frame, locals, objThis);
     ASSERT_EQ(frameObj.GetObjectId().value(), RemoteObjectId(2UL));
 
-    auto properties = obj.GetProperties(frameObj.GetObjectId().value(), true);
+    auto properties = obj.GetProperties(frameObj.GetObjectId().value(), false);
     ASSERT_EQ(properties.size(), 2UL);
     ASSERT_EQ(properties[0].GetName(), "a");
 

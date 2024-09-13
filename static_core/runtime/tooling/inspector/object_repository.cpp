@@ -142,14 +142,27 @@ std::vector<PropertyDescriptor> ObjectRepository::GetProperties(RemoteObjectId i
                 continue;
             }
 
-            auto &value = property.GetValue();
-            if (auto valueId = value.GetObjectId()) {
-                value.GeneratePreview(GetProperties(*valueId));
+            RemoteObject &value = property.GetValue();
+            auto preview = CreateObjectPreview(value);
+            if (preview.has_value()) {
+                value.SetObjectPreview(std::move(*preview));
             }
         }
     }
 
     return properties;
+}
+
+std::optional<ObjectPreview> ObjectRepository::CreateObjectPreview(RemoteObject &remobj)
+{
+    auto valueId = remobj.GetObjectId();
+    if (!valueId.has_value()) {
+        return {};
+    }
+
+    ObjectPreview preview(remobj.GetType(), GetProperties(*valueId));
+
+    return preview;
 }
 
 RemoteObject ObjectRepository::CreateObject(coretypes::TaggedValue value)
@@ -221,10 +234,9 @@ std::vector<PropertyDescriptor> ObjectRepository::GetProperties(RemoteObjectId i
     }
 
     std::vector<PropertyDescriptor> properties;
-    auto propertyHandler = [this, &properties](auto &name, auto value, auto isArrayElement, auto isFinal,
-                                               auto isAccessor) {
+    auto propertyHandler = [this, &properties](auto &name, auto value, auto isFinal, auto isAccessor) {
         auto property = isAccessor ? PropertyDescriptor::Accessor(name, CreateObject(value))
-                                   : PropertyDescriptor(name, CreateObject(value), isArrayElement);
+                                   : PropertyDescriptor(name, CreateObject(value));
         if (!isAccessor && isFinal) {
             property.SetWritable(false);
         }

@@ -28,10 +28,7 @@
 namespace ark::tooling::inspector {
 class PropertyDescriptor {
 public:
-    PropertyDescriptor(std::string name, RemoteObject value, bool isEntry = false)
-        : name_(std::move(name)), value_(std::move(value)), isEntry_(isEntry)
-    {
-    }
+    PropertyDescriptor(std::string name, RemoteObject value) : name_(std::move(name)), value_(std::move(value)) {}
 
     static PropertyDescriptor Accessor(std::string name, RemoteObject getter)
     {
@@ -48,11 +45,6 @@ public:
     bool IsConfigurable() const
     {
         return configurable_;
-    }
-
-    bool IsEntry() const
-    {
-        return isEntry_;
     }
 
     bool IsEnumerable() const
@@ -83,6 +75,12 @@ public:
     }
 
     const RemoteObject &GetValue() const
+    {
+        ASSERT(!IsAccessor());
+        return value_;
+    }
+
+    RemoteObject &GetValue()
     {
         ASSERT(!IsAccessor());
         return value_;
@@ -135,7 +133,6 @@ private:
     std::optional<RemoteObject> symbol_;
     RemoteObject value_;
     bool isAccessor_ {false};
-    bool isEntry_ {false};
     bool configurable_ {false};
     bool enumerable_ {true};
     bool writable_ {true};

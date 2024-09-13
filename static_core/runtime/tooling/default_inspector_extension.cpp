@@ -128,8 +128,7 @@ std::optional<size_t> StaticDefaultInspectorExtension::GetLengthIfArray(const Ob
     return coretypes::Array::Cast(const_cast<ObjectHeader *>(object))->GetLength();
 }
 
-void StaticDefaultInspectorExtension::EnumerateProperties(
-    const ObjectHeader *object, const std::function<void(const std::string &, TypedValue, bool, bool, bool)> &handler)
+void StaticDefaultInspectorExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
     auto cls = object->ClassAddr<Class>();
     ASSERT(cls != nullptr);
@@ -138,18 +137,18 @@ void StaticDefaultInspectorExtension::EnumerateProperties(
         auto type = cls->GetComponentType()->GetType();
         for (auto index = 0U; index < array.GetLength(); ++index) {
             auto offset = index * cls->GetComponentSize();
-            handler(std::to_string(index), GetArrayElementValueStatic(array, offset, type), true, false, false);
+            handler(std::to_string(index), GetArrayElementValueStatic(array, offset, type), false, false);
         }
     } else if (cls->IsClassClass()) {
         auto runtimeCls = ark::Class::FromClassObject(object);
         for (auto &field : runtimeCls->GetStaticFields()) {
-            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(runtimeCls, field), false,
-                    field.IsFinal(), false);
+            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(runtimeCls, field), field.IsFinal(),
+                    false);
         }
     } else {
         for (const auto &field : cls->GetInstanceFields()) {
-            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(object, field), false,
-                    field.IsFinal(), false);
+            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(object, field), field.IsFinal(),
+                    false);
         }
     }
 }
@@ -160,7 +159,7 @@ void StaticDefaultInspectorExtension::EnumerateGlobals(const PropertyHandler &ha
     ASSERT(classLinkerExtension != nullptr);
     classLinkerExtension->EnumerateClasses([&handler](auto cls) {
         if (cls->IsInitialized() && cls->GetNumStaticFields() > 0) {
-            handler(cls->GetName(), TypedValue::Reference(cls->GetManagedObject()), false, false, false);
+            handler(cls->GetName(), TypedValue::Reference(cls->GetManagedObject()), false, false);
         }
         return true;
     });
@@ -188,8 +187,7 @@ std::optional<size_t> DynamicDefaultInspectorExtension::GetLengthIfArray(const O
     return length;
 }
 
-void DynamicDefaultInspectorExtension::EnumerateProperties(
-    const ObjectHeader *object, const std::function<void(const std::string &, TypedValue, bool, bool, bool)> &handler)
+void DynamicDefaultInspectorExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
     auto *cls = object->ClassAddr<HClass>();
     ASSERT(cls != nullptr);
@@ -202,7 +200,7 @@ void DynamicDefaultInspectorExtension::EnumerateProperties(
         ArraySizeT arrayLength = array.GetLength();
         for (coretypes::ArraySizeT i = 0; i < arrayLength; i++) {
             TaggedValue arrayElement(array.Get<TaggedType, false, true>(i));
-            handler(std::to_string(i), TypedValue::Tagged(arrayElement), true, false, false);
+            handler(std::to_string(i), TypedValue::Tagged(arrayElement), false, false);
         }
     } else if (cls->IsHClass()) {
         auto dataOffset = sizeof(ObjectHeader) + sizeof(HClass);
@@ -212,7 +210,7 @@ void DynamicDefaultInspectorExtension::EnumerateProperties(
         for (size_t i = 0; i < numOfFields; i++) {
             auto fieldOffset = dataOffset + i * TaggedValue::TaggedTypeSize();
             auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(object, fieldOffset);
-            handler(std::to_string(i), TypedValue::Tagged(taggedValue), false, false, false);
+            handler(std::to_string(i), TypedValue::Tagged(taggedValue), false, false);
         }
     } else {
         uint32_t objBodySize = cls->GetObjectSize() - ObjectHeader::ObjectHeaderSize();
@@ -225,7 +223,7 @@ void DynamicDefaultInspectorExtension::EnumerateProperties(
                 continue;
             }
             auto taggedValue = ObjectAccessor::GetDynValue<TaggedValue>(object, fieldOffset);
-            handler(std::to_string(i), TypedValue::Tagged(taggedValue), false, false, false);
+            handler(std::to_string(i), TypedValue::Tagged(taggedValue), false, false);
         }
     }
 }

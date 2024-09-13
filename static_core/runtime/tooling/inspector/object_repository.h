@@ -52,6 +52,8 @@ private:
     RemoteObject CreateObject(ObjectHeader *object);
     std::vector<PropertyDescriptor> GetProperties(RemoteObjectId id);
 
+    std::optional<ObjectPreview> CreateObjectPreview(RemoteObject &remobj);
+
     std::unique_ptr<InspectorExtension> extension_;
     HandleScope<ObjectHeader *> scope_;
     RemoteObjectId counter_ {GLOBAL_OBJECT_ID + 1};
