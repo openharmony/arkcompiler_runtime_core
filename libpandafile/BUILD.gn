@@ -105,7 +105,7 @@ ohos_static_library("libarkfile_static") {
   public_configs = libarkfile_configs
 
   if (enabled_pac_data_protect) {
-    configs = libarkfile_sources
+    configs = libarkfile_configs
     configs += [ ":data_protect_configs" ]
   }
 
