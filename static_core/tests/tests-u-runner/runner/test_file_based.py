@@ -34,6 +34,11 @@ ResultValidator = Callable[[str, str, int], bool]
 
 
 class TestFileBased(Test):
+    SEGFAULT_RETURN_CODE = 139
+    ABORT_RETURN_CODE = 134
+    IRTOC_ASSERT_RETURN_CODE = 133
+    CTE_RETURN_CODE = 1
+
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         Test.__init__(self, test_env, test_path, flags, test_id)
         # If test fails it contains reason (of FailKind enum) of first failed step
@@ -56,6 +61,15 @@ class TestFileBased(Test):
     @property
     def verifier_args(self) -> List[str]:
         return self.test_env.verifier_args
+
+    def detect_segfault(self, return_code: int, default_fail_kind: FailKind) -> FailKind:
+        if return_code == self.SEGFAULT_RETURN_CODE:
+            return FailKind.SEGFAULT_FAIL
+        if return_code == self.ABORT_RETURN_CODE:
+            return FailKind.ABORT_FAIL
+        if return_code == self.IRTOC_ASSERT_RETURN_CODE:
+            return FailKind.IRTOC_ASSERT_FAIL
+        return default_fail_kind
 
     # pylint: disable=too-many-locals
     def run_one_step(self, name: str, params: Params, result_validator: ResultValidator) \
@@ -86,7 +100,7 @@ class TestFileBased(Test):
                 output, error = process.communicate(timeout=params.timeout)
                 return_code = process.returncode
                 passed = result_validator(output, error, return_code)
-                fail_kind = params.fail_kind_fail if not passed else None
+                fail_kind = self.detect_segfault(return_code, params.fail_kind_fail) if not passed else None
             except subprocess.TimeoutExpired:
                 self.log_cmd(f"Failed by timeout after {params.timeout} sec")
                 fail_kind = params.fail_kind_timeout

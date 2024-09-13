@@ -579,3 +579,8 @@ spec/partial_type/partialType_main.sts
 ### Issue 19337
 escompat/ProcessTest.sts
 
+### ES2PANDA_FAIL - fails of negative, compile-only
+### Issue 19676
+spec/07.expressions/Object_Literal/issue14680.sts
+### Issue 19677
+spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_03.sts
