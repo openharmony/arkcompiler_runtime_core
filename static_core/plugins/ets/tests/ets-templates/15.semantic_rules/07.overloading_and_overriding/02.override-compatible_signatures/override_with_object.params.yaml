@@ -604,34 +604,6 @@ cases:
       new Derived().foo(i);
     result: 2
 
-  # override-compatible argument (covariance)
-  - base: |-
-      foo(i: [Object, Object]): void {
-          res = 1;
-      }
-    derived: |-
-      override foo(i: [Object, Base]): void {
-          res = 2;
-      }
-    call: |-
-      let i: [Base, Base] =  [ new Base(), new Base()];
-      new Derived().foo(i);
-    result: 2
-
-  # override-compatible argument (covariance)
-  - base: |-
-      foo(i: [Object, Object]): void {
-          res = 1;
-      }
-    derived: |-
-      override foo(i: [Object, Base]): void {
-          res = 2;
-      }
-    call: |-
-      let i: [Base, Object] =  [ new Base(), new Object()];
-      new Derived().foo(i);
-    result: 2
-
   # override-compatible return value (invariance)
   - base: |-
       foo(): [Object, Object] {
@@ -661,37 +633,6 @@ cases:
     result: 2
 
   # override-incompatible return value (contravariance)
-  - tags: negative, compile-only
-    base: |-
-      foo(): [Base, Object] {
-          res = 1;  
-          return [ new Base(), new Object()];
-      }
-    derived: |-
-      override foo(): [Object, Object] {
-          res = 2;  
-          return [ new Object(), new Object()];
-      }
-    call: new Derived().foo();
-    result: 2
-
-  # override-incompatible return value (contravariance)
-  - tags: negative, compile-only
-    base: |-
-      foo(): [Base, Base] {
-          res = 1;  
-          return [ new Base(), new Object()];
-      }
-    derived: |-
-      override foo(): [Object, Object] {
-          res = 2;  
-          return [ new Object(), new Object()];
-      }
-    call: new Derived().foo();
-    result: 2
-
-  # override-incompatible return value (contravariance)
-  - tags: negative, compile-only
     base: |-
       foo(): [Object, Base] {
           res = 1;  

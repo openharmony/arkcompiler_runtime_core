@@ -5,3 +5,4 @@ libpandafile/include
 panda_gen_options
 plugins/ets
 runtime/include
+tools/es2panda/generated/es2panda_lib

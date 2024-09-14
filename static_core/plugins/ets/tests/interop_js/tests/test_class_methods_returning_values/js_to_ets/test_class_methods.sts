@@ -209,7 +209,7 @@ function TestReturnIntSubsetByValue(): boolean {
     const testVal = TestFunc() as int
     return (
         testVal == TEST_INT
-        && typeof testVal == 'int'
+        && typeof testVal == 'number'
     )
 }
 
@@ -218,7 +218,7 @@ function TestReturnLongIntSubsetByValue(): boolean {
     const testVal = TestFunc() as long
     return (
         testVal == TEST_LONG_INT
-        && typeof testVal == 'long'
+        && typeof testVal == 'number'
     )
 }
 

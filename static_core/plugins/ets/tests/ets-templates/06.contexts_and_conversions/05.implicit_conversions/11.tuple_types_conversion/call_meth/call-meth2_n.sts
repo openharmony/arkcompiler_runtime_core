@@ -18,6 +18,7 @@
 desc: >-
     Tuple types conversion is the conversion of one tuple type to another.
     Call context, instance method, tuple type conversion, implicit
+tags: [compile-only, negative]    
 ---*/
 {{c.decl}}
 
