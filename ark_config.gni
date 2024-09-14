@@ -21,12 +21,13 @@ if (is_standard_system) {
 
 declare_args() {
   enabled_plugins = default_enabled_plugins
-  pandas_support_pac_oh_pac_data_protect = false
   enabled_pac_data_protect = false
 }
 
-if (defined(target_cpu) && target_cpu == "arm64" &&
-    pandas_support_pac_oh_pac_data_protect && !is_emulator) {
+if (!ark_standalone_build && !(defined(is_arkui_x) && is_arkui_x) && is_ohos &&
+    is_standard_system && target_cpu == "arm64" && !is_emulator &&
+    defined(global_parts_info) &&
+    defined(global_parts_info.security_code_signature)) {
   enabled_pac_data_protect = true
 }
 
