@@ -45,6 +45,7 @@ graph_test_js_files = [
   "styleTryCatch",
   "dominatorsTryCatch",
   "testTryCatch",
+  "graphTest",
 ]
 
 foreach(file, graph_test_js_files) {
@@ -92,11 +93,17 @@ host_unittest_action("GraphInterfaceTest") {
     "dominators_tree_new_test.cpp",
     "dump_test.cpp",
     "graph_checker_test.cpp",
+    "graph_cloner_new_test.cpp",
     "irBuilder_tests.cpp",
     "linear_order_new_test.cpp",
     "liveness_analyzer_new_test.cpp",
     "loop_analyzer_new_test.cpp",
+    "pass_manager_test.cpp",
+    "reg_alloc_graph_coloring_new_test.cpp",
     "reg_alloc_interference_graph_new_test.cpp",
+    "reg_alloc_resolver_test.cpp",
+    "spill_fills_resolver_test.cpp",
+    "split_resolver_new_test.cpp",
   ]
   configs = compiler_test_configs
   deps = compiler_test_deps
