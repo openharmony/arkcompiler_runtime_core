@@ -7,7 +7,8 @@
 			"decl_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios"],
 			"pure_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios.js"],
 			"pure_js_conflict": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/conflict_types.js"],
-			"indirect_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/indirect_call.js"]
+			"indirect_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/indirect_call.js"],
+      "symbol": ["${CMAKE_CURRENT_SOURCE_DIR}/symbol.js"]
 		},
 		"dynamicPaths": {
 			"${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios": {
@@ -23,6 +24,10 @@
 				"hasDecl": false
 			},
 			"${CMAKE_CURRENT_SOURCE_DIR}/js_suites/indirect_call.js": {
+				"language": "js",
+				"hasDecl": false
+			},
+			"${CMAKE_CURRENT_SOURCE_DIR}/symbol.js": {
 				"language": "js",
 				"hasDecl": false
 			}

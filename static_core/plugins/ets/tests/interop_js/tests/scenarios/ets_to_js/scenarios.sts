@@ -72,6 +72,7 @@ function genericFunctionEts<T>(arg: T): T {
 }
 
 class ClassToExtendEts {
+    public x: number;
     value(): int {
         return 1;
     }
@@ -421,10 +422,6 @@ async function asyncFunctionUserInterface(obj: InterfaceWithMethodEts): Promise<
     return obj.methodInInterface();
 }
 
-//function functionRestParameter(...arg: number[]): number {
-//    return arg[0];
-//}
-
 function functionSpreadParameter(arg1: number, arg2: number): number {
     return arg1 + arg2;
 }
@@ -447,38 +444,48 @@ function functionCallableReturnValue(): Function<int> {
 }
 
 // NOTE(nikitayegorov) #18198 enable this after literal types are fixed
-//type TypeString = "1";
-//type TypeStringU = "1" | "2";
-//type PrimitiveA = 0 | 1;
-//type PrimitiveB = 1 | 2;
-//type PrimitiveAB = PrimitiveA & PrimitiveB;
+type TypeString = string; // replace with '1' when #18198 is resolved
+type TypeStringU = string; // replace with "1" | "2" when #18198 is resolved
+type PrimitiveA = int; // replace with 0 | 1 when #18198 is resolved
+type PrimitiveB = int; // replace with 1 | 2 when #18198 is resolved
+type PrimitiveAB = PrimitiveA | PrimitiveB;
 
-//interface A {
-//  a: number;
-//}
-//interface B {
-//  b: string;
-//}
-//type AB = A & B;
+interface A {
+    a: number;
+}
+interface B {
+    b: string;
+}
+
+interface AB extends A, B { }
 
 
-//function functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB {
-//  const ret: PrimitiveAB = arg;
-//  return ret;
-//}
+function functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB {
+  const ret: PrimitiveAB = arg;
+  return ret;
+}
 
-//function functionIntersectionTypeObject(): AB {
-//  let ab: AB = {
-//    a: 1,
-//    b: "1"
-//  };
-//  return ab;
-//}
+function functionIntersectionTypeObject(): AB {
+    let ab: AB = {
+        a: 1,
+        b: "1"
+    };
+    return ab;
+}
 
-//function functionArgStringLiteralType(arg: TypeString): TypeString {
-//  return arg;
-//}
+function functionArgStringLiteralType(arg: TypeString): TypeString {
+    return arg as TypeString;
+}
 
-//function functionArgStringLiteralTypeUnion(arg: TypeStringU): TypeStringU {
-//  return arg;
-//}
+function functionArgStringLiteralTypeUnion(arg: TypeStringU): TypeStringU {
+    return arg as TypeStringU;
+}
+
+function fnWithArgOfTypeSymbol(arg: JSValue): JSValue {
+    return arg;
+}
+
+function fnWithArgOfClassWithSymbolProperty(arg: ClassToExtendEts): ClassToExtendEts {
+    arg.x = 1;
+    return arg;
+}
