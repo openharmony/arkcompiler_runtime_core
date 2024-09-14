@@ -189,8 +189,8 @@ Function types compatibility
 .. meta:
     frontend_status: Done
 
-|TS| allows more relaxed assignments into variables of function type. While
-|LANG| follows more strict rules stated in (:ref:`Function Types Conversions`).
+|TS| allows more relaxed assignments into variables of function type, while
+|LANG| follows stricter rules stated in :ref:`Function Types Conversions`.
 
 .. code-block:: typescript
    :linenos:
@@ -205,7 +205,7 @@ Function types compatibility
 .. _Compatibility for utility types:
 
 Compatibility for Utility Types
-===============================
+*******************************
 
 .. meta:
     frontend_status: Done
@@ -232,8 +232,8 @@ Difference in Overload Signatures
     frontend_status: Partly
 
 *Implementation signature* is considered as an accessible (see
-:ref:`Accessible`) entity. The following code is valid in |LANG| (while it
-causes a compile-time error in |TS|):
+:ref:`Accessible`) entity. The following code is valid in |LANG|, while it
+causes a compile-time error in |TS|:
 
 .. code-block-meta:
    not-subset
@@ -250,7 +250,7 @@ causes a compile-time error in |TS|):
     foo(undefined) // compile-time error in Typescript
 
 |LANG| supports calling function or method only with the number of arguments
-that corresponds to the number of the parameters. |TS|, in some cases, allows
+that corresponds to the number of the parameters. In some cases, |TS| allows
 providing more arguments than the actual function or method has.
 
 .. code-block-meta:
@@ -282,7 +282,7 @@ the invariant or covariant type, and potentially with a new initial value.
 different field with the same name.
 
 As a result, the number of fields in a derived object, and the semantics of
-*super* can be different. An attempt to access ``super.field_name`` in |TS|
+``super`` can be different. Trying to access ``super.field_name`` in |TS|
 returns *undefined*. However, the same code in |LANG| returns the shadowed
 field declared in or inherited from the direct superclass.
 
@@ -321,9 +321,8 @@ Overriding for Primitive Types
 ******************************
 
 |TS| allows overriding class type version of the primitive type into a pure
-primitive type. |LANG| does not allow such overriding.
-
-These situation is illustrated by the example below:
+primitive type. |LANG| allows no such overriding. These situation is
+illustrated by the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -347,7 +346,7 @@ Excessive Arguments
     frontend_status: None
 
 |TS| allows calling functions stored in function type variables with more
-arguments than they were declared with. |LANG| allows no such calls.
+arguments than were declared. |LANG| allows no such calls:
 
 
 .. code-block:: typescript
@@ -361,6 +360,71 @@ arguments than they were declared with. |LANG| allows no such calls.
     foo = (p?: number):void => {} 
         /* compile-time error in ArkTS as a call with two arguments is
            invalid while it is OK for the Typescript */
+
+|
+
+.. _Built-in Arrays Compatibility:
+
+Built-in Arrays Compatibility
+*****************************
+
+.. meta:
+    frontend_status: Done
+
+|TS| allows covariant array assignment as in |TS| all types are of the
+refrence kind. |LANG| has value types, and the array of elements of a value
+type cannot be assigned into an array of a reference type:
+
+.. code-block:: typescript
+   :linenos:
+
+    // Typescript
+    let a: Object[] = [1, 2, 3]
+    let b = [1, 2, 3] // type of 'b' is inferred as number[]
+    a = b // That works well for the Typescript
+
+
+    // ArkTS
+    let a: Object[] = [1, 2, 3]
+    let b = [1, 2, 3] // type of 'b' is inferred as double[]
+    a = b // That leads to the type error as double[] is not compatible with Object[]
+    // Array of primitive values is not compatible with array of references to objects
+
+    // ArkTS
+    let a: Object[] = [1, 2, 3]
+    let b: Number[] = [1, 2, 3] 
+    a = b // That works fine
+
+|
+
+.. _Extending Class Object:
+
+Extending Class Object
+**********************
+
+.. meta:
+    frontend_status: Done
+
+|TS| forbids using ``super`` and ``override`` if class ``Object`` is not
+explicitly listed in the ``extends`` clause of a class. |LANG| allows this as 
+``Object`` is a superclass for any class without an explicit ``extends`` clause:
+
+.. code-block:: typescript
+   :linenos:
+
+    // Typescript reports an error while ArkTS compiles with no issues 
+    class A {
+       override toString() {       // compile-time error
+           return super.toString() // compile-time error
+       }
+    }
+
+    class A extends Object { // That is the form supported by TypeScript
+       override toString() {
+           return super.toString()
+       }
+    }
+
 
 |
 

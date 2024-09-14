@@ -24,8 +24,8 @@ Type classification as accepted in |LANG| is discussed below---along
 with all aspects of using types in programs written in the language.
 
 Conventionally, the type of an entity is defined as the set of *values* the
-entity can take, and the set of *operators* applicable to the entity of
-a given type.
+entity (variable) can take, and the set of *operators* applicable to the entity
+of a given type.
 
 |LANG| is a statically typed language. It means that the type of every
 declared entity and every expression is known at compile time. The type of
@@ -154,8 +154,9 @@ User-Defined Types
 -  Array types (see :ref:`Array Types`);
 -  Function types (see :ref:`Function Types`);
 -  Tuple types (see :ref:`Tuple Types`);
--  Union types (see :ref:`Union Types`); and
--  Type parameters (see :ref:`Type Parameters`).
+-  Union types (see :ref:`Union Types`);
+-  Type parameters (see :ref:`Type Parameters`); and
+-  Literal types (see :ref:`Literal Types`).
 
 .. index::
    user-defined type
@@ -166,6 +167,7 @@ User-Defined Types
    function type
    union type
    type parameter
+   literal type
 
 |
 
@@ -188,13 +190,13 @@ All |LANG| types are summarized in the following table:
    *Value Types*             *Reference Types*         *Value Types*             *Reference Types*
    (Primitive Types)
    ========================= ========================= ========================= =========================
-   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types         class types,             
-   ``short``, ``int``,       ``Short``, ``Int``,                                 interface types,         
-   ``long``, ``float``,      ``Long``, ``Float``,                                array types,             
+   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types,        class types,            
+   ``short``, ``int``,       ``Short``, ``Int``,       literal types             interface types,
+   ``long``, ``float``,      ``Long``, ``Float``,                                array types,   
    ``double``, ``char``,     ``Double``, ``Char``,                               function types,          
    ``boolean``, ``string``,  ``Boolean``,                                        tuple types,             
    ``bigint``                ``String``, ``string``,                             union types,             
-                                                                                                          
+                                                                                 literal types,           
                              ``BigInt``, ``bigint``,                             type parameters          
                                                                                                           
                              ``Object``, ``object``,                                                      
@@ -202,6 +204,11 @@ All |LANG| types are summarized in the following table:
                              ``void``, ``null``,                                                          
                              ``never``                                                                    
    ========================= ========================= ========================= =========================
+
+
+**Note**: Type ``string`` (see :ref:`Type string`) and type ``bigint`` (see
+:ref:`BigInt Type`) have dual semantics. It affects some types in several
+categories in the table above.
 
 
 .. index::
@@ -214,6 +221,7 @@ All |LANG| types are summarized in the following table:
    union type
    tuple type
    type parameter
+   literal type
 
 |
 
@@ -252,6 +260,7 @@ A type can be referred to in source code by the following:
         | tupleType
         | functionType
         | unionType
+        | literalType
         | keyofType
         | '(' type ')'
         ;
@@ -263,6 +272,9 @@ A type can be referred to in source code by the following:
         | 'object' | 'string' | 'void' | 'never' |'undefined'
         ;
 
+    literalType
+        Literal
+        ;
 
 
 The use of types is presented by the example below:
@@ -274,6 +286,7 @@ The use of types is presented by the example below:
     let n: number   // using primitive value type name
     let o: Object   // using predefined class type name
     let a: number[] // using array type
+    let l: 1        // using literal type
 
 Parentheses in types (where a type is a combination of array, function, or
 union types) are used to specify the required type structure.
@@ -416,6 +429,23 @@ a valid type reference. A type reference is valid if its type arguments (see
       // MyType<number> is a type reference  - alias reference
       // A<number> is a type reference - class type reference
 
+
+If a type reference refers to the type by a type alias (see
+:ref:`Type Alias Declaration`), then the type alias is replaced (potentially
+recursively) for the non-aliased type in all cases when dealing with types
+in this document.
+
+.. code-block:: typescript
+   :linenos:
+
+   type T1 = Object
+   type T2 = number
+   function foo(t1: T1, t2: T2)  {
+       t1 = t2      // Type compatibilty test will use Object and number
+       t2 = t2 + t2 // Operator validity test will use type number not T2
+   } 
+ 
+
 |
 
 .. _Value Types:
@@ -429,9 +459,10 @@ Value Types
 Predefined integer types (see :ref:`Integer Types and Operations`),
 floating-point types (see :ref:`Floating-Point Types and Operations`), the
 boolean type (see :ref:`Boolean Types and Operations`), character types
-(see :ref:`Character Type and Operations`), and user-defined enumeration
-types (see :ref:`Enumerations`) are *value types*. The values of such types
-do *not* share state with other values.
+(see :ref:`Character Type and Operations`), user-defined enumeration
+types (see :ref:`Enumerations`), and literal types (see :ref:`Literal Types`)
+are *value types*. The values of such types do *not* share state with other
+values.
 
 .. index::
    value type
@@ -928,6 +959,99 @@ as the result of comparison *x != 0*.
 
 |
 
+.. _Literal Types:
+
+Literal Types
+=============
+
+.. meta:
+    frontend_status: None
+
+Literal types are aligned with |LANG| literals (see :ref:`Literals`), and
+their names are the same as the names of their values, i.e., the literals.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: 1 = 1
+    let b: true = true
+    let c: 3.14 = 3.14
+    let d: "string literal" = "string literal"
+    let e: c'C' = c'C'
+    let f: 123n = 123n
+    let g: null = null
+    let h: undefined = undefined
+
+    printThem (a, b, c, d, e, f, g, h)
+    function printThem (
+        p1: 1, p2: true, p3: 3.14, p4: "string literal",
+        p5: c"C", p6: 123n, p7: null, p8: undefined
+    ) {
+        console.log (p1, p2, p3, p4, p5, p6, p7, p8)
+    }
+
+In case of numeric forms of literal types, *0*'s with no meaning are truncated:
+
+.. code-block:: typescript
+   :linenos:
+
+    // a1 and a2 have the same type 1
+    let a1: 1 = 0001
+    let a2: 0001 = 1
+
+    // b1 and b2 have the same type 3.14
+    let b1: 3.14 = 3.140000
+    let b1: 3.1400000 = 3.140
+
+
+Operations on variables of literal types are identical to the operations
+of the literal type. The resulting operation type is the type specified
+for the type of the literal. Typically, it is the type of the literal but
+not the literal type itself:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: 1 = 1
+    let b: true = true
+    let c: 3.14 = 3.14
+    let d: "string literal" = "string literal"
+    let e: c"C" = c"C"
+    let f: 123n = 123n
+
+    let x: int = a + a       // + for int returns int
+    let y: boolean = b || b  // || for boolean returns boolean
+    let z: double = c * c    // * for double returns double
+    let s: string = d + d    // + for string returns string
+    let t: int = e + e       // + for char returns char
+    let u: bigint = f + f    // + for bigint returns bigint
+
+Every literal type is a subtype (see :ref:`Subtyping`) of the type of its
+literal:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        foo(p: 1): int { return 666 }
+    }
+    class Derived extends Base {
+        override foo(p: int): 1 { return 1 }
+    }
+    // Type 1 <: int
+
+    let base: Base = new Derived
+    let result: int = base.foo(1)
+    /* Argument 1 (value) is compatible to type 1 and to the type int in
+       the overridden method
+       Function result of type int accepts 1 (value) of literal type 1
+    */
+
+Literal types are practically used inside union types (see :ref:`Union Types`).
+
+
+|
+
 .. _Reference Types:
 
 Reference Types
@@ -1069,7 +1193,7 @@ can be seen in the reference of the other variable.
 All classes, interfaces, string types, arrays, unions, function types, and enum
 types are compatible (see :ref:`Type Compatibility`) with class ``Object``, and
 all inherit (see :ref:`Inheritance`) the methods of the class ``Object``. Full
-description of all methods of class *Object* is given in the standard library
+description of all methods of class ``Object`` is given in the standard library
 (see :ref:`Standard Library`) description.
 
 The method ``toString`` as used in the examples in this document returns a
@@ -1622,22 +1746,23 @@ Union Types
 .. code-block:: abnf
 
     unionType:
-        type|literal ('|' type|literal)*
+        type ('|' type)*
         ;
 
 A *union* type is a reference type created as a combination of other
-types or values. Valid values of all types and literals the union is created
-from are the values of a union type.
+types. Valid values of all types the union is created from are the values of a
+union type.
 
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
 
 If a *union* uses a primitive type (see *Primitive types* in
-:ref:`Types by Category`), then automatic boxing (see
-:ref:`Boxing Conversions`) occurs to keep the reference nature of the type.
+:ref:`Types by Category`) or a literal type (see :ref:`Literal Types`), then
+automatic boxing (see :ref:`Boxing Conversions`) occurs to keep the reference
+nature of the type.
 
-The reduced form of *union* types allows defining a type that has one value
-only:
+The reduced form of *union* types allows defining a type that has one literal
+type (see :ref:`Literal Types`) only:
 
 .. index::
    union type
@@ -1646,14 +1771,14 @@ only:
    union
    compile-time error
    primitive type
-   literal
+   literal type
    primitive type
    automatic boxing
 
 .. code-block:: typescript
    :linenos:
 
-   type T = 3
+   type T = 3    // Literal type aliased
    let t1: T = 3 // OK
    let t2: T = 2 // Compile-time error
 
@@ -1712,7 +1837,7 @@ The following example represents primitive types:
        let i: number = p as number // Explicit conversion from Primitive to number
     }
 
-The following example represents values:
+The following example represents literal types:
 
 .. code-block:: typescript
    :linenos:
@@ -1728,8 +1853,8 @@ The following example represents values:
     }
 
 **Note**: A :index:`compile-time error` occurs if an expression of a union type
-is compared to a literal value that does not belong to the values of the union
-type:
+is compared to a literal value or constant that does not belong to the values
+of the union type:
 
 .. code-block:: typescript
    :linenos:
@@ -1739,7 +1864,7 @@ type:
     if (car_code == 666){ ... }
     /*
        compile-time error as 666 does not belong to
-       values of type BMW_ModelCode
+       values of literal type BMW_ModelCode
     */
 
     function model_code_test (code: number) {
@@ -1757,14 +1882,14 @@ Union Types Normalization
    frontend_status: Partly
    todo: depends on literal types, maybe issues can occur for now
 
-Union types normalization allows minimizing the number of types and literals
-within a union type, while keeping the type's safety. Some types or literals
-can also be replaced for more general types.
+Union types normalization allows minimizing the number of types within a union
+type, while keeping the type's safety. Some types can also be replaced for more
+general types.
 
 Formally, union type ``T``:sub:`1` | ... | ``T``:sub:`N`, where ``N`` > 1, can be
 reduced to type ``U``:sub:`1` | ... | ``U``:sub:`M`, where ``M`` <= ``N``, or even to
-a non-union type or value *V*. In this latter case *V* can be a primitive value
-type, or a value that changes the reference nature of the union type.
+a non-union type *V*. In this latter case *V* can be a primitive value
+type, or a literal type that changes the reference nature of the union type.
 
 The normalization process presumes performing the following steps one after
 another:
@@ -1778,24 +1903,23 @@ another:
 #. All nested union types are linearized.
 #. All type aliases if any are recursively replaced for non-alias types.
 #. Identical types within the union type are replaced for a single type.
-#. Identical literals within the union type are replaced for a single literal.
 #. If at least one type in the union is ``Object``, then all other non-nullish
    types are removed.
 #. If there is type ``never`` among union types, then it is removed.
 #. If there is a non-empty group of numeric types in a union, then the largest
    numeric type (see :ref:`Numeric Types Hierarchy`) is to stay in the union,
-   while others are removed. Any numeric literal that fits into the largest
-   numeric type in a union is removed.
+   while others are removed. Any numeric literal type is removed if its value
+   fits into the largest numeric type in a union.
 #. If there is a non-empty group of boxed numeric types (see
    :ref:`Boxed Types`) in a union, then the largest boxed numeric type
    (Byte->Short->Int->Long->Float->Double) is to stay in the union, while
    others are removed.
 #. If after boxing (see :ref:`Boxing Conversions`) a primitive type equals
    another union type, then the initial type is removed.
-#. If a literal of a union type belongs to the values of a type that is part
-   of the union, then the literal is removed.
-#. If a numeric literal belongs to the unboxed type of one of union numeric
-   class type, then the literal is removed.
+#. If the value of the literal type in a union type belongs to the values of a
+   type that is part of the union, then the literal type is removed.
+#. If the numeric value of a literal type belongs to the unboxed type of one of
+   union numeric class type, then the literal type is removed.
 #. This step is performed recursively until no mutually compatible types remain
    (see :ref:`Type Compatibility`), or the union type is reduced to a single
    type:
@@ -1810,9 +1934,8 @@ another:
 .. index::
    union type
    linearization
-   literal non-union type
+   literal type
    normalization
-   literal
    Object type
    numeric union type
    compatible type
@@ -1826,9 +1949,8 @@ is presented in the examples below:
 
     ( T1 | T2) | (T3 | T4) => T1 | T2 | T3 | T4  // Linearization
 
-    1 | 1 | 1  =>  1                             // Identical values elimination
-
-    number | number => number                    // Identical types elimination
+    1 | 1 | 1  =>  1                             // Identical types elimination
+    number | number => number                    
 
     number | Number => Number                    // The same after boxing
     Int | float => Int | Float => Float          // Boxing for numeric value type + heaviest left
@@ -1843,7 +1965,7 @@ is presented in the examples below:
     Int | 3.14 | Float => Int | Float           // 3.14 belongs to unboxed Float
 
 
-    1 | string | number => string | number       // Union value elimination
+    1 | string | number => string | number       // Literal type value belongs to another type values
 
     1 | Object => Object                         // Object wins
     AnyNonNullishType | Object => Object         
@@ -1854,8 +1976,8 @@ is presented in the examples below:
     Base | Derived1 => Base                      // Base wins
     Derived1 | Derived2 => Derived1 | Derived2   // End of normalization
 
-The |LANG| compiler applies such normalization while processing union types
-and handling the type inference for array literals (see
+The |LANG| compiler applies such normalization while processing union types and
+handling the type inference for array literals (see
 :ref:`Array Type Inference from Types of Elements`).
 
 .. index::
@@ -2120,6 +2242,7 @@ initialization (see :ref:`Variable Declarations`), including the following:
 .. - All primitive types and *string* (see the table below).
 
 - Primitive types (see the table below);
+- Literal types;
 - All union types that have at least one nullish (see :ref:`Nullish Types`)
   value, and use an appropriate nullish value as default (see the table below).
 
@@ -2163,6 +2286,27 @@ Default values of primitive types are as follows:
 +--------------+--------------------+
 | ``boolean``  | ``false``          |
 +--------------+--------------------+
+
+Default values of literal types are literals of literal types:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: 1
+    let b: true
+    let c: 3.14
+    let d: "string literal"
+    let e: c'C'
+    let f: 123n
+    let g: null
+    let h: undefined
+
+    printThem (a, b, c, d, e, f, g, h)
+    function printThem (p1: 1, p2: true, p3: 3.14, p4: "string literal", p5: c"C", p6: 123n, p7: null, p8: undefined) {
+        console.log (p1, p2, p3, p4, p5, p6, p7, p8)
+        // Output: 1 true 3.14 undefined C 123 null undefined
+    }
+
 
 
 Default values of nullish union types are as follows:
@@ -2208,7 +2352,7 @@ Default values of nullish union types are as follows:
 
 .. [3]
    Wherever IEEE 754 is used in this Specification, the reference is to the
-   latest revision of "754-2019 - IEEE Standard for Floating-Point Arithmetic".
+   latest revision of "754-2019--IEEE Standard for Floating-Point Arithmetic".
 
 
 .. raw:: pdf

@@ -223,7 +223,9 @@ Assignment-like contexts allow using of one of the following:
 
 - :ref:`Enumeration to Int Conversions`;
 
-- :ref:`Enumeration to String Conversions`.
+- :ref:`Enumeration to String Conversions`;
+
+- :ref:`Literal Type to Type of Literal Conversions`.
 
 
 If there is no applicable conversion, then a :index:`compile-time error`
@@ -1017,7 +1019,7 @@ Constant String to Character Conversions
 *Constant string to character conversion* converts an expression of type
 ``string`` to type ``char``. The initial type ``string`` expression must be a
 constant expression (see :ref:`Constant Expressions`). The length of this
-espression equals 1.
+expression equals 1.
 
 The resultant ``char`` is the first and only character of the converted
 ``string``.
@@ -1171,7 +1173,7 @@ Enumeration to String Conversions
 =================================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 A value of ``enumeration`` type is converted to type ``string`` if enumeration
 constants of this type are of type ``string``.
@@ -1186,6 +1188,37 @@ This conversion never causes runtime errors.
     let a_string: string = string_enum // a_string will get the value of "a"
 
 |
+
+.. _Literal Type to Type of Literal Conversions:
+
+Literal Type to Type of Literal Conversions
+===========================================
+
+.. meta:
+    frontend_status: Partly
+
+A value of ``literal`` type can always be converted to the type of its literal
+as it is its supertype (see :ref:`Supertyping`). This conversion never causes
+a runtime error:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo (a: 1, b: true, c: 3.14, d: "string literal", e: c'C', f: 123n) {
+       let aa: int = a
+       let bb: boolean = b
+       let cc: double = c
+       let dd: string = d
+       let ee: char = e
+       let ff: bigint = f
+    }
+    foo (1, true, 3.14, "string literal", c'C', 123n)
+
+
+The reverse conversion is not possbile.
+
+|
+
 
 .. raw:: pdf
 

@@ -205,7 +205,10 @@ The examples are presented below:
       c'\x7F'
       c'\u0000'
 
-``Character Literals`` are of type ``char``.
+``Character Literals`` are of literal types corresponding to the literals. If
+an operator is applied to the literal, then the literal type is replaced for
+``char``.
+
 
 .. index::
    char literal
@@ -238,7 +241,7 @@ below.
 
 All character operators are identical to integer operators (see
 :ref:`Integer Types and Operations`) for they handle character values as
-integers of type *int* (see :ref:`Widening Primitive Conversions`).
+integers of type ``int`` (see :ref:`Widening Primitive Conversions`).
 
 The class ``Char`` provides constructors, methods, and constants that are
 parts of the |LANG| standard library (see :ref:`Standard Library`).
@@ -293,19 +296,19 @@ provide some initial values (see :ref:`Array Literal`).
 An *array creation expression* creates an object that is a new array with the
 elements of the type specified by ``arrayElelementType``.
 
-The type of each ``dimensionExpression`` must be convertible (see
+The type of each *dimensionExpression* must be convertible (see
 :ref:`Primitive Types Conversions`) to an integer type. Otherwise,
 a :index:`compile-time error` occurs.
 
 A numeric conversion (see :ref:`Primitive Types Conversions`) is performed
-on each ``dimensionExpression`` to ensure that the resultant type is ``int``.
+on each *dimensionExpression* to ensure that the resultant type is ``int``.
 Otherwise, a :index:`compile-time error` occurs.
 
-A :index:`compile-time error` occurs if any ``dimensionExpression`` is a
+A :index:`compile-time error` occurs if any *dimensionExpression* is a
 constant expression that is evaluated at compile time to a negative integer
 value.
 
-If the type of any ``dimensionExpression`` is number or other floating-point
+If the type of any *dimensionExpression* is ``number`` or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
 
@@ -339,7 +342,7 @@ Otherwise, a :index:`compile-time error` occurs.
 A :index:`compile-time error` occurs if ``arrayElelementType`` refers to a
 class that does not contain an accessible (see :ref:`Accessible`) parameterless
 constructor, or constructor with all parameters of the second form of optional
-parameters (see :ref:`Optional Parameters`), or if ``type`` has no a default
+parameters (see :ref:`Optional Parameters`), or if ``type`` has no default
 value:
 
 .. code-block-meta:
@@ -374,7 +377,7 @@ Creating an array with a known number of elements is presented below:
    :linenos:
 
       class A {}
-         // It has no default value or parametereless constructor defined
+         // It has no default value or parameterless constructor defined
 
       let array_size = 5
 
@@ -442,7 +445,7 @@ as follows:
    and the evaluation of the array creation expression completes abruptly.
 
 #. When a one-dimensional array is created, each element of that array
-   is initialized to its default value if the type default value is defined
+   is initialized to its default value if type default value is defined
    (:ref:`Default Values for Types`).
    If the default value for an element type is not defined, but the element
    type is a class type, then its *parameterless* constructor is used to
@@ -533,13 +536,11 @@ Type ``string`` can be used as a type of the index parameter:
 
 Functions ``$_get`` and ``$_set`` are ordinary functions with compiler-known
 signatures. The functions can be used like any other function.
-The functions can be abstract or defined in an interface and implemented later.
+The functions can be abstract, or defined in an interface and implemented later.
 The functions can be overridden and provide a dynamic dispatch for the indexing
-expression evaluation (see :ref:`Indexing Expressions`). They can be used in
-generic classes and interfaces for better flexibility.
-
-A :index:`compile-time error` occurs if these functions are marked as
-``async``.
+expression evaluation (see :ref:`Indexing Expressions`). The functions can be
+used in generic classes and interfaces for better flexibility. A
+:index:`compile-time error` occurs if these functions are marked as ``async``.
 
 .. code-block-meta:
    expect-cte:
@@ -590,14 +591,12 @@ Iterable Types
 A class or an interface can be made *iterable*, meaning that their instances
 can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
-A type *C* is *iterable* if it declares a parameterless function with name
+Some type ``C`` is *iterable* if it declares a parameterless function with name
 ``$_iterator`` with the return type which is compatible (see
 :ref:`Type Compatibility`) with type ``Iterator``, defined in the standard
-library (see :ref:`Standard Library`). That guarantees that an object returned
-is of the class type which implements ``Iterator`` and thus, allows traversing
-of an object of the class type *C*.
-
-The example below defines *iterable* class *C*:
+library (see :ref:`Standard Library`). It guarantees the object returned
+is of the class type which implements ``Iterator``, and thus allows traversing
+an object of class type ``C``. The example below defines *iterable* class ``C``:
 
 .. code-block:: typescript
    :linenos:
@@ -628,8 +627,8 @@ The example below defines *iterable* class *C*:
             console.log(x)
       }
 
-In the example above, class *C* function ``$_iterator`` returns
-``CIterator<string>``, which implements ``Iterator<string>``. If executed,
+In the example above, class ``C`` function ``$_iterator`` returns
+``CIterator<string>`` that implements ``Iterator<string>``. If executed,
 this code prints out the following:
 
 .. code-block:: typescript
@@ -641,9 +640,8 @@ this code prints out the following:
 
 The function ``$_iterator`` is an ordinary function with a compiler-known
 signature. The function can be used like any other function. It can be
-abstract or defined in an interface to be implemented later.
-
-A :index:`compile-time error` occurs if this function is marked as ``async``.
+abstract or defined in an interface to be implemented later. A
+:index:`compile-time error` occurs if this function is marked as ``async``.
 
 **Note**: To support the code compatible with |TS|, the name of the function
 ``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the class
@@ -791,11 +789,11 @@ contain corresponding arguments:
     }
     let x = C("Bob") // factory is passed implicitly
 
-A :index:`compile-time error` occurs in a *type call expression* with type *T*,
+A :index:`compile-time error` occurs in a *type call expression* with type ``T``,
 if:
 
-- *T* has neither method ``invoke`` nor  method ``instantiate``; or
-- *T* has the method ``instantiate`` but its first parameter is not
+- ``T`` has neither method ``invoke`` nor  method ``instantiate``; or
+- ``T`` has the method ``instantiate`` but its first parameter is not
   a ``factory``.
 
 .. code-block-meta:
@@ -1016,7 +1014,7 @@ a separate body for each overloaded header.
 
 Both approaches have their advantages and disadvantages. The latter approach
 supported by |LANG| can deliver better performance because no extra checks
-are performed during execution of a specific body at runtime.
+are performed during the execution of a specific body at runtime.
 
 .. index::
    function overloading
@@ -1162,7 +1160,7 @@ Declaration Distinguishable by Signatures
 .. meta:
     frontend_status: Done
 
-Declarations with the same name are distinguishable by signatures if such
+Same-name declarations are distinguishable by signatures if such
 declarations are one of the following:
 
 -  Functions with the same name and signatures that are not
@@ -1297,7 +1295,7 @@ A class can be declared ``final`` to prevent extension, i.e., a class declared
 ``final`` cannot have subclasses. No method of a ``final`` class can be
 overridden.
 
-If a class type *F* expression is declared *final*, then only a class *F*
+If a class type ``F`` expression is declared *final*, then only a class ``F``
 object can be its value.
 
 A :index:`compile-time error` occurs if the ``extends`` clause of a class
@@ -1393,11 +1391,10 @@ a new functionality.
 *Extensions* can be called in the usual way like methods of the original class.
 However, *extensions* do not actually modify the classes they extend. No new
 member is inserted into a class; only new *extension functions* are callable
-with the *dot-notation* on variables of the class.
-
-*Extension functions* are dispatched statically; what *extension function*
-is being called is already known at compile time based on the receiver type
-specified in the extension function declaration.
+with the *dot-notation* on variables of the class. *Extension functions* are
+dispatched statically; what *extension function* is being called is already
+known at compile time based on the receiver type specified in the extension
+function declaration.
 
 .. index::
    function
@@ -1425,7 +1422,7 @@ specified in the extension function declaration.
 The keyword ``this`` inside an extension function corresponds to the receiver
 object (i.e., ``typeReference`` before the dot).
 
-Class or interface referred by typeReference, and ``private`` or ``protected``
+Class or interface referred by *typeReference*, and ``private`` or ``protected``
 members are not accessible (see :ref:`Accessible`) within the bodies of their
 *extension functions*. Only ``public`` members can be accessed:
 
@@ -1453,7 +1450,7 @@ members are not accessible (see :ref:`Accessible`) within the bodies of their
       a.foo() // Ordinary class method is called
       a.bar() // Class extension function is called
 
-*Extension functions* can be generic as in the example below:
+*Extension functions* can be generic as in the following example:
 
 .. code-block:: typescript
    :linenos:
@@ -1468,7 +1465,7 @@ members are not accessible (see :ref:`Accessible`) within the bodies of their
           // Explicit instantiation
      }
 
-*Extension functions* are top-level functions that can call one other.
+*Extension functions* are top-level functions that can call one another.
 The form of such calls depends on whether ``static`` was or was not used while
 declaring. This affects the kind of receiver to be used for the call:
 
@@ -1521,7 +1518,7 @@ derived class is found:
       let d: Derived = new Derived()
       d.foo() // `Derived.foo is called` to be printed
 
-As illustrated by the examples below, an *extension function* can be:
+As illustrated by the following examples, an *extension function* can be:
 
 -  Put into a compilation unit other than class or interface; and
 -  Imported by using a name of the *extension function*.
@@ -1787,7 +1784,7 @@ Several static methods are available to handle each enumeration type as follows:
       //colors[0] is the same as Color.Red
       let red = Color.valueOf("Red")
 
-There is an additional method for instances of any enumeration type:
+There are additional methods for instances of any enumeration type:
 
 -  Method ``valueOf()`` returns an ``int`` or ``string`` value of an enumeration
    constant depending on the type of the enumeration constant.
@@ -2058,10 +2055,8 @@ A call is exception-free if:
 
 However, the call can raise an exception, and is handled as any other
 *throwing function* call if at least one of the actual function arguments
-is *throwing*.
-
-It implies that a call to ``foo`` within the body of a *non-throwing* function
-must be guaranteed with a ``try-catch`` statement:
+is *throwing*. It implies that a call to ``foo`` within the body of a
+*non-throwing* function must be guaranteed with a ``try-catch`` statement:
 
 .. index::
    function
@@ -2218,8 +2213,8 @@ Lambda is used in a launch expression as follows:
    lambda
    launch expression
 
-The result of the launch expression is of type ``Promise<T>``, where *T* is the
-return type of the function being called:
+The result of the launch expression is of type ``Promise<T>``, where ``T`` is
+the return type of the function being called:
 
 .. code-block:: typescript
    :linenos:
@@ -2296,7 +2291,7 @@ If the coroutine result must be ignored, then the expression statement
       await promise
 
 The ``await`` cannot return ``Promise<T>`` or union type that contains
-``Promise<T>``. If the actual type argument of *T* in ``Promise<T>`` contains
+``Promise<T>``. If the actual type argument of ``T`` in ``Promise<T>`` contains
 ``Promise``, then the compiler eliminates any such usage.
 
 Return types of ``await`` expressions are represented in the example below:
@@ -2355,7 +2350,7 @@ The methods are used as follows:
 
 .. code-block:: typescript
 
-        Promise<U> Promise<T>::then<U>(fullfillCallback :
+        Promise<U> Promise<T>::then<U>(fulfilCallback :
             function
         <T>(val: T) : Promise<U>, rejectCallback : (err: Object)
         : Promise<U>)
@@ -2433,8 +2428,8 @@ Async Functions and Methods
 functions. ``Async`` functions can be neither ``abstract`` nor ``native``.
 
 The return type of an ``async`` function must be ``Promise<T>`` (see
-:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and *T* from
-``async`` functions is allowed.
+:ref:`Promise<T> Class`). Returning values of types ``Promise<T>`` and ``T``
+from ``async`` functions is allowed.
 
 Using return statement without an expression is allowed if the return type
 is ``Promise<void>``.
@@ -2517,7 +2512,7 @@ object of type ``DynamicObject`` are handled by the compiler in a special manner
 - Field access;
 - Method call;
 - Indexing access;
-- New;
+- New; and
 - Cast.
 
 .. index::
@@ -2709,11 +2704,11 @@ The wrapper must raise an error if:
 
 The cast expression *D as T* (see :ref:`Cast Expressions`), where *D* is of
 type ``DynamicObject``, is handled as an attempt to cast the underlying object
-to a static type *T*.
+to a static type ``T``.
 
-A :index:`compile-time error` occurs if *T* is not a class or interface type.
+A :index:`compile-time error` occurs if ``T`` is not a class or interface type.
 
-The result of a cast expression is an instance of type *T*.
+The result of a cast expression is an instance of type ``T``.
 
 .. code-block:: typescript
    :linenos:
@@ -2980,9 +2975,9 @@ NonNullish Type Parameter
 .. meta:
     frontend_status: None
 
-When some generic class has a type parameter with nullish union type constraint
-then a special syntax for the type annotation can be used to get a non-nullish
-version of the type parameter variable. The example below illustrates the
+If some generic class has a type parameter with nullish union type constraint,
+then special syntax for type annotation can be used to get a non-nullish
+version of the type parameter variable. The example below illustrates this
 possibility:
 
 .. code-block:: typescript

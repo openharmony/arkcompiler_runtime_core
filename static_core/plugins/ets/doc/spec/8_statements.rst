@@ -285,8 +285,8 @@ below:
 
 A ``while`` statement and a ``do`` statement evaluate an expression and
 execute the statement repeatedly till the expression value is ``true``.
-The key difference is that ``whileStatement`` starts from evaluating and
-checking the expression value, and ``doStatement`` starts from executing
+The key difference is that *whileStatement* starts from evaluating and
+checking the expression value, and *doStatement* starts from executing
 the statement:
 
 .. index::
@@ -462,8 +462,8 @@ feature (see :ref:`For-of Type Annotation`).
     frontend_status: Done
     todo: break with label causes compile time assertion
 
-A ``break`` statement transfers control out of the enclosing ``loopStatement``
-or ``switchStatement``:
+A ``break`` statement transfers control out of the enclosing *loopStatement*
+or *switchStatement*:
 
 .. index::
    break statement
@@ -476,15 +476,14 @@ or ``switchStatement``:
         ;
 
 A ``break`` statement with the label *identifier* transfers control out of the
-enclosing statement with the same label *identifier*. A
-:index:`compile-time error` occurs if a ``break`` statement is not found within
-the body of the surrounding function or method.
+enclosing statement with the same label *identifier*. If there is no enclosing
+statement with the same label identifier, then a :index:`compile-time error`
+occurs .
 
 A statement without a label transfers control out of the innermost enclosing
-``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement.
-
-A :index:`compile-time error` occurs if ``breakStatement`` is not found
-within ``loopStatment`` or ``switchStatement``.
+``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement. If
+``breakStatement`` is placed outside *loopStatement* or *switchStatement*, then
+a :index:`compile-time error` occurs.
 
 .. index::
    break statement
@@ -528,7 +527,7 @@ of the enclosing loop statement with the same label *identifier*.
 A :index:`compile-time error` occurs if a ``continue`` statement is not found
 within the body of the surrounding function or method.
 
-A :index:`compile-time error` occurs if ``continueStatement`` is not found
+A :index:`compile-time error` occurs if *continueStatement* is not found
 within ``loopStatment``.
 
 .. index::
@@ -599,7 +598,7 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
    class initializer
    constructor declaration
 
-The execution of ``returnStatement`` leads to the termination of the
+The execution of *returnStatement* leads to the termination of the
 surrounding function or method. If an *expression* is provided,
 the resultant value is the evaluated *expression*.
 

@@ -18,8 +18,8 @@ Generics
 .. meta:
     frontend_status: Partly
 
-Class, interface, type alias, method, and function are program entities that
-can be parameterized in |LANG| by one or several types. An entity so
+Class, interface, type alias, method, function, and lambda are program entities
+that can be parameterized in |LANG| by one or several types. An entity so
 parameterized introduces a *generic declaration* (called *a generic* for
 brevity).
 
@@ -28,12 +28,12 @@ Types used as generic parameters in a generic are called *type parameters*
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
 is the action that converts a *generic* into a real program entity (non-generic
-class, interface, union, array, function, or method), or into another *generic
-instantiation*. Instantiation (see :ref:`Generic Instantiations`) can be
-performed either explicitly or implicitly.
+class, interface, union, array, mehtod, function, or lambda), or into another
+*generic instantiation*. Instantiation (see :ref:`Generic Instantiations`) can
+be performed either explicitly or implicitly.
 
-|LANG| has special types that look similar to generics  syntax-wise, and
-allow creating new types during compilation (see :ref:`Utility Types`).
+|LANG| has special types that look similar to generics syntax-wise, and allow
+creating new types during compilation (see :ref:`Utility Types`).
 
 
 .. index::
@@ -104,9 +104,9 @@ specify its *in-* or *out-* variance (see :ref:`Type Parameter Variance`).
         '=' typeReference ('[]')?
         ;
 
-A generic class, interface, type alias, method, or function defines a set of
-parameterized classes, interfaces, unions, arrays, methods, or functions
-respectively (see :ref:`Generic Instantiations`).
+A generic class, interface, type alias, method, function, or lambda defines a
+set of parameterized classes, interfaces, unions, arrays, methods, functions, or
+lambdas respectively (see :ref:`Generic Instantiations`).
 One type argument can define only one set for each possible parameterization of
 the type parameter section.
 
@@ -115,6 +115,7 @@ the type parameter section.
    generic class
    generic interface
    generic function
+   generic lambda
    generic instantiation
    class
    interface
@@ -461,16 +462,16 @@ Generic Instantiations
 .. meta:
     frontend_status: Done
 
-As mentioned before, a generic class, interface, type alias, function, or method
-declaration defines a set of corresponding non-generic entities. A generic
-entity must be *instantiated* in order to make it a non-generic entity. The
-result of instantiation is a *real*, non-parameterized program entity, e.g.,
-class, interface, union, array, method, or function that is handled in a
+As mentioned before, a generic class, interface, type alias, method, function,
+or lambda declaration defines a set of corresponding non-generic entities. A
+generic entity must be *instantiated* in order to make it a non-generic entity.
+The result of instantiation is a *real*, non-parameterized program entity, e.g.,
+class, interface, union, array, method, function, or lambda that is handled in a
 usual way. Instantiation can also lead to a new definition of a generic entity.
 
-Conceptually, a generic class, an interface, a type alias, a method, or a
-function defines a set of non-generics classes, interfaces, unions, arrays,
-methods, or functions respectively.
+Conceptually, a generic class, an interface, a type alias, a method, a
+function, or a lambda defines a set of non-generics classes, interfaces,
+unions, arrays, methods, functions, or lambdas  respectively.
 
 An explicit generic instantiation is a language construct, which provides a
 list of *type arguments* (see :ref:`Type Arguments`) that specify real types or
@@ -500,6 +501,9 @@ type parameters to substitute corresponding type parameters of a generic:
        f1: X<Object, T> // X instantiated with Object and T
        f2: X<T, string> // X instantiated with T and string
     }
+
+    let lambda = <T> (p: T) => { console.log (p) } // Generic lambda defined
+    lambda<string> ("string argument") // Generic lambda instantiated and called
 
 
 .. index::
@@ -576,7 +580,7 @@ Implicit Generic Instantiations
 ===============================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 In an *implicit* instantiation, type arguments are not specified explicitly.
 Such type arguments are inferred (see :ref:`Type Inference`) from the context
@@ -652,8 +656,8 @@ parameterized function.
 Utility Types
 *************
 
-|LANG| supports several embedded types, called *utility* types.
-They allow constructing new types, adjusting properties of the inital types.
+|LANG| supports several embedded types, called *utility* types. Utility types
+allow constructing new types by adjusting properties of the initial types.
 
 .. index::
    embedded type

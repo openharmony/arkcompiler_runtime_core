@@ -31,6 +31,7 @@ Grammar Summary
         | tupleType
         | functionType
         | unionType
+        | literalType
         | keyofType
         | '(' type ')'
         ;
@@ -40,6 +41,10 @@ Grammar Summary
         | 'bigint'
         | 'char' | 'boolean'
         | 'object' | 'string' | 'void' | 'never' |'undefined'
+        ;
+
+    literalType
+        Literal
         ;
 
     typeReference:
@@ -81,7 +86,7 @@ Grammar Summary
         ;
 
     unionType:
-        type|literal ('|' type|literal)*
+        type ('|' type)*
         ;
 
     keyofType:
@@ -148,7 +153,11 @@ Grammar Summary
         ;
 
     signature:
-        '(' parameterList? ')' returnType? throwMark?
+        parameters returnType? throwMark?
+        ;
+
+    parameters:
+        '(' parameterList? ')'
         ;
 
     returnType:
@@ -457,7 +466,7 @@ Grammar Summary
         ;
 
     lambdaExpression:
-        'async'? signature '=>' lambdaBody
+        ('async'|typeParameters)? signature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -692,9 +701,8 @@ Grammar Summary
 
     constructorDeclaration:
         constructorOverloadSignature*
-        'constructor' '(' parameterList? ')' throwMark? constructorBody
+        'constructor' parameters throwMark? constructorBody
         ;
-
 
     constructorOverloadSignature:
         accessModifier? 'constructor' signature
@@ -905,7 +913,7 @@ Grammar Summary
         ;
 
     ambientConstructorDeclaration:
-        'constructor' '(' parameterList? ')' throwMark?
+        'constructor' parameters throwMark?
         ;
 
     ambientMethodDeclaration:
@@ -1089,6 +1097,34 @@ Grammar Summary
      '\u200D'
     ;
 
+    UnicodeIDStart
+      : Letter
+      | ['$']
+      | '\\' UnicodeEscapeSequence;
+
+    UnicodeIDContinue
+      : UnicodeIDStart
+      | UnicodeDigit
+      | '\u200C'
+      | '\u200D';
+
+    UnicodeEscapeSequence:
+      'u' HexDigit HexDigit HexDigit HexDigit
+      | 'u' '{' HexDigit HexDigit+ '}'
+      ;
+
+    Letter
+      : UNICODE_CLASS_LU
+      | UNICODE_CLASS_LL
+      | UNICODE_CLASS_LT
+      | UNICODE_CLASS_LM
+      | UNICODE_CLASS_LO
+      ;
+
+    UnicodeDigit
+      : UNICODE_CLASS_ND
+      ;
+
     Literal:
       IntegerLiteral
       | FloatLiteral
@@ -1161,7 +1197,7 @@ Grammar Summary
 
     FractionalPart:
         DecimalDigit
-        | DecimalDigit (DecimalDigit | '|')* DecimalDigit
+        | DecimalDigit (DecimalDigit | '_')* DecimalDigit
         ;
 
     FloatTypeSuffix:

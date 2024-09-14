@@ -341,15 +341,15 @@ accessible (see :ref:`Accessible`) within subclasses:
     }
 
 The transitive closure of a *direct subclass* relationship is the *subclass*
-relationship. Class *A* can be a subclass of class *C* if:
+relationship. Class ``A`` can be a subclass of class ``C`` if:
 
--  Class *A* is the direct subclass of *C*; or
+-  Class ``A`` is the direct subclass of ``C``; or
 
--  Class *A* is a subclass of some class *B*,  which is in turn a subclass of
-   *C* (i.e., the definition applies recursively).
+-  Class ``A`` is a subclass of some class ``B``,  which is in turn a subclass
+   of ``C`` (i.e., the definition applies recursively).
 
 
-Class *C* is a *superclass* of class *A* if *A* is its subclass.
+Class ``C`` is a *superclass* of class ``A`` if ``A`` is its subclass.
 
 .. index::
    transitive closure
@@ -778,7 +778,7 @@ Access Modifiers
 ****************
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 Access modifiers define how a class member or a constructor can be accessed.
 Accessibility in |LANG| can be of the following kinds:
@@ -824,8 +824,8 @@ Private Access Modifier
 
 The modifier ``private`` indicates that a class member or a constructor is
 accessible (see :ref:`Accessible`) within its declaring class, i.e., a private
-member or constructor *m* declared in some class *C* can be accessed only within
-the class body of *C*:
+member or constructor *m* declared in some class ``C`` can be accessed only
+within the class body of ``C``:
 
 .. code-block:: typescript
    :linenos:
@@ -876,9 +876,9 @@ Protected Access Modifier
 
 The modifier ``protected`` indicates that a class member or a constructor is
 accessible (see :ref:`Accessible`) only within its declaring class and the
-classes derived from that declaring class. A protected member *M* declared in
-some class *C* can be accessed only within the class body of *C* or of a class
-derived from *C*:
+classes derived from that declaring class. A protected member ``M`` declared in
+some class ``C`` can be accessed only within the class body of ``C`` or of a
+class derived from ``C``:
 
 .. code-block:: typescript
    :linenos:
@@ -1132,7 +1132,7 @@ The following rules apply to an initializer in a static field declaration:
    a method (see :ref:`Method Call Expression`) or accessing a field (see
    :ref:`Field Access Expression`), then a :index:`compile-time error` occurs.
 -  The initializer is evaluated, and the assignment is performed only once
-   before the the field is accessed for the first time.
+   before the field is accessed for the first time.
 
 ``Readonly`` fields initialization never uses default values (see
 :ref:`Default Values for Types`).
@@ -1350,8 +1350,8 @@ A :index:`compile-time error` occurs if:
 -  The method declaration contains another modifier (``static``, ``final``,
    ``native``, or ``async``) along with the modifier ``abstract``.
 -  The declaration of an abstract method *m* does not appear directly within an
-   abstract class *A*.
--  Any non-abstract subclass of *A* (see :ref:`Abstract Classes`) does not
+   abstract class ``A``.
+-  Any non-abstract subclass of ``A`` (see :ref:`Abstract Classes`) does not
    provide an implementation for *m*.
 
 An abstract method declaration provided by an abstract subclass can override
@@ -1857,12 +1857,7 @@ a method declaration with no return type:
 
     constructorDeclaration:
         constructorOverloadSignature*
-        'constructor' '(' parameterList? ')' throwMark? constructorBody
-        ;
-
-    throwMark:
-        'throws'
-        | 'rethrows'
+        'constructor' parameters throwMark? constructorBody
         ;
 
 Constructors are called by the following:
@@ -2215,22 +2210,22 @@ performed as follows:
    superclass constructor call statement
 
 1. If instance *i* is created, then the following procedure is used to
-   determine *i*'s immediately enclosing instance with respect to *S*
+   determine *i*'s immediately enclosing instance with respect to ``S``
    (if available):
 
-   -  If the declaration of *S* occurs in a static context, then *i* has no
-      immediately enclosing instance with respect to *S*.
+   -  If the declaration of ``S`` occurs in a static context, then *i* has no
+      immediately enclosing instance with respect to ``S``.
 
-   -  If the superclass constructor call is unqualified, then *S* must be a
+   -  If the superclass constructor call is unqualified, then ``S`` must be a
       local class.
 
-      If *S* is a local class, then the immediately enclosing type declaration
-      of *S* is *O*.
+      If ``S`` is a local class, then the immediately enclosing type declaration
+      of ``S`` is *O*.
 
       If *n* is an integer (:math:`n\geq{}1`), and *O* is the *n*’th
-      lexically enclosing type declaration of *C*, then *i*'s immediately
-      enclosing instance with respect to *S* is the *n*’th lexically enclosing
-      instance of ``this``.
+      lexically enclosing type declaration of ``C``, then *i*'s immediately
+      enclosing instance with respect to ``S`` is the *n*’th lexically
+      enclosing instance of ``this``.
 
 .. index::
    instance
@@ -2247,15 +2242,15 @@ performed as follows:
    expression
    evaluation
 
-2. After *i*'s immediately enclosing instance with respect to *S* (if available)
-   is determined, the evaluation of the superclass constructor call statement
-   continues left-to-right. The arguments to the constructor are evaluated, and
-   then the constructor is called.
+2. After *i*'s immediately enclosing instance with respect to ``S`` (if
+   available) is determined, the evaluation of the superclass constructor call
+   statement continues left-to-right. The arguments to the constructor are
+   evaluated, and then the constructor is called.
 
 3. If the superclass constructor call statement completes normally after all,
-   then all non-static field initializers of *C* are executed. *I* is executed
-   before *J* if a non-static field initializer *I* textually precedes another
-   non-static field initializer *J*.
+   then all non-static field initializers of ``C`` are executed. ``I`` is
+   executed before ``J`` if a non-static field initializer *I* textually
+   precedes another non-static field initializer *J*.
 
 
    Non-static field initializers are executed if the superclass constructor
@@ -2319,7 +2314,7 @@ the superclass:
 
    // Class declarations with default constructors declared implicitly
    class Object {
-     constructor () {} // Empty body - as there is no supercalss
+     constructor () {} // Empty body - as there is no superclass
    }
    // Default constructors added
    class Base { constructor () { super () } }
@@ -2371,27 +2366,27 @@ Inheritance
 .. meta:
     frontend_status: Done
 
-Class *C* inherits all accessible members from its direct superclass and
+Class ``C`` inherits all accessible members from its direct superclass and
 direct superinterfaces (see :ref:`Accessible`), and optionally overrides or
 hides some of the inherited members.
 
 An accessible member is a public, protected, or internal member in the
-same package as *C*.
+same package as ``C``.
 
-If *C* is not abstract, then it must implement all inherited abstract methods.
+If ``C`` is not abstract, then it must implement all inherited abstract methods.
 The method of each inherited abstract method must be defined with
 *override-compatible* signatures (see :ref:`Override-Compatible Signatures`).
 
 Semantic checks for inherited method and accessors are described in
 :ref:`Overloading and Overriding in Classes`.
 
-Constructors from the direct superclass of *C*  are not subject of overloading
+Constructors from the direct superclass of ``C``  are not subject of overloading
 and overriding because such constructors are not accessible (see
-:ref:`Accessible`) in *C* directly, and can only be called from a constructor
-of *C* (see :ref:`Constructor Body`).
+:ref:`Accessible`) in ``C`` directly, and can only be called from a constructor
+of ``C`` (see :ref:`Constructor Body`).
 
-If *C* defines a static or instance field *F* with the same name as that of
-a field accessible from its direct superclass (see :ref:`Accessible`), then *F*
+If ``C`` defines a static or instance field ``F`` with the same name as that of
+a field accessible from its direct superclass (see :ref:`Accessible`), then ``F``
 hides the inherited field:
 
 .. code-block:: typescript
