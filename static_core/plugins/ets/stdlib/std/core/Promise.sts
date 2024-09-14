@@ -321,13 +321,13 @@ export final class Promise<out T> implements PromiseLike<T> {
     // 2. Primitive fields in mostly size decreasing order
     // filling alignment holes
     private value: T | null = null;
+    private mutex = new Mutex();
+    private event = new Event();
     private callbackQueue: Object[] | null = null;
     private launchModeQueue: int[] | null = null;
     private interopObject: Object|null = null;
     private linkedPromise: Object | null = null;
     private queueSize: int = 0;
-    private eventPtr: long;
-    private eventRefCounter: int = 0;
     private state: int = Promise.STATE_PENDING;
 }
 

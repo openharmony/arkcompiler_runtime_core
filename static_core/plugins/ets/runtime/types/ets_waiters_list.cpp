@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "plugins/ets/runtime/ets_vm.h"
+#include "plugins/ets/runtime/types/ets_waiters_list.h"
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_
-#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_
+namespace ark::ets {
 
-#include "plugins/ets/runtime/types/ets_array.h"
-#include "plugins/ets/runtime/types/ets_shared_memory.h"
-#include "plugins/ets/runtime/types/ets_atomic_flag.h"
-#include "plugins/ets/runtime/types/ets_sync_primitives.h"
-#include "plugins/ets/runtime/interop_js/intrinsics_declaration.h"
+/*static*/
+EtsWaitersList *EtsWaitersList::Create(EtsCoroutine *coro)
+{
+    EtsClass *klass = coro->GetPandaVM()->GetClassLinker()->GetWaitersListClass();
+    EtsObject *etsObject = EtsObject::Create(coro, klass);
+    return reinterpret_cast<EtsWaitersList *>(etsObject);
+}
 
-#endif  // !PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_DECLARATION_H_
+}  // namespace ark::ets

@@ -40,6 +40,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Double.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Float.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_SyncPrimitives.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_String.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StringBuilder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp
@@ -70,12 +71,14 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_promise.cpp
     ${ETS_EXT_SOURCES}/types/ets_promise_ref.cpp
     ${ETS_EXT_SOURCES}/types/ets_object.cpp
+    ${ETS_EXT_SOURCES}/types/ets_sync_primitives.cpp
     ${ETS_EXT_SOURCES}/types/ets_string_builder.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_create.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_field.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_method.cpp
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
     ${ETS_EXT_SOURCES}/types/ets_shared_memory.cpp
+    ${ETS_EXT_SOURCES}/types/ets_waiters_list.cpp
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
     ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp

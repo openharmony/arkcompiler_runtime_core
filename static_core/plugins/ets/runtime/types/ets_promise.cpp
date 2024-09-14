@@ -23,21 +23,22 @@
 namespace ark::ets {
 
 /*static*/
-EtsPromise *EtsPromise::Create(EtsCoroutine *etsCoroutine)
+EtsPromise *EtsPromise::Create(EtsCoroutine *coro)
 {
-    EtsClass *klass = etsCoroutine->GetPandaVM()->GetClassLinker()->GetPromiseClass();
-    EtsObject *etsObject = EtsObject::Create(etsCoroutine, klass);
-    return reinterpret_cast<EtsPromise *>(etsObject);
+    [[maybe_unused]] EtsHandleScope scope(coro);
+    auto *klass = coro->GetPandaVM()->GetClassLinker()->GetPromiseClass();
+    auto hPromise = EtsHandle<EtsPromise>(coro, EtsPromise::FromEtsObject(EtsObject::Create(coro, klass)));
+    auto *mutex = EtsMutex::Create(coro);
+    hPromise->SetMutex(coro, mutex);
+    auto *event = EtsEvent::Create(coro);
+    hPromise->SetEvent(coro, event);
+    return hPromise.GetPtr();
 }
 
 void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
 {
-    auto *event = GetEventPtr();
-    // event can be equal to nullptr in case of GENERIC CoroutineEvent
-    if (event != nullptr) {
-        event->Happen();
-        SetEventPtr(nullptr);
-    }
+    // Unblock awaitee coros
+    GetEvent(coro)->Fire();
 
     auto *cbQueue = GetCallbackQueue(coro);
     auto *launchModeQueue = GetLaunchModeQueue(coro);
@@ -68,58 +69,6 @@ void EtsPromise::LaunchCallback(EtsCoroutine *coro, EtsObject *callback, Corouti
     auto args = PandaVector<Value> {Value(callback->GetCoreType())};
     [[maybe_unused]] auto *launchedCoro = coroManager->Launch(event, method, std::move(args), launchMode);
     ASSERT(launchedCoro != nullptr);
-}
-
-void EtsPromise::PromotePromiseRef(EtsCoroutine *coro)
-{
-    auto *event = GetEventPtr();
-    // event can be equal to nullptr in case of GENERIC CoroutineEvent
-    if (event == nullptr || event->GetType() != CoroutineEvent::Type::COMPLETION) {
-        return;
-    }
-    auto *completionEvent = static_cast<CompletionEvent *>(event);
-    os::memory::LockHolder lh(*completionEvent);
-    auto *promiseRef = completionEvent->ReleasePromise();
-    // promiseRef can be equal to nullptr in case of concurrent Promise.resolve
-    if (promiseRef == nullptr || promiseRef->IsGlobal()) {
-        completionEvent->SetPromise(promiseRef);
-        return;
-    }
-    ASSERT(promiseRef->IsWeak());
-    auto *storage = coro->GetPandaVM()->GetGlobalObjectStorage();
-    auto *globalPromiseRef = storage->Add(this, mem::Reference::ObjectType::GLOBAL);
-    completionEvent->SetPromise(globalPromiseRef);
-    storage->Remove(promiseRef);
-}
-
-CoroutineEvent *EtsPromise::GetOrCreateEventPtr()
-{
-    ASSERT(IsLocked());
-    auto *event = GetEventPtr();
-    if (event != nullptr) {
-        if (event->GetType() == CoroutineEvent::Type::GENERIC) {
-            eventRefCounter_++;
-        }
-        return event;
-    }
-    ASSERT(eventRefCounter_ == 0);
-    auto *coroManager = EtsCoroutine::GetCurrent()->GetCoroutineManager();
-    event = Runtime::GetCurrent()->GetInternalAllocator()->New<GenericEvent>(coroManager);
-    eventRefCounter_++;
-    SetEventPtr(event);
-    return event;
-}
-
-void EtsPromise::RetireEventPtr(CoroutineEvent *event)
-{
-    ASSERT(event != nullptr);
-    os::memory::LockHolder lk(*this);
-    ASSERT(event->GetType() == CoroutineEvent::Type::GENERIC);
-    ASSERT(GetEventPtr() == event || GetEventPtr() == nullptr);
-    if (eventRefCounter_-- == 1) {
-        Runtime::GetCurrent()->GetInternalAllocator()->Delete(event);
-        SetEventPtr(nullptr);
-    }
 }
 
 }  // namespace ark::ets

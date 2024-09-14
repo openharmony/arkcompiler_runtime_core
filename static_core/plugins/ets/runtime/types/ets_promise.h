@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_panda_file_items.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_array.h"
+#include "plugins/ets/runtime/types/ets_sync_primitives.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
 #include "runtime/coroutines/coroutine_events.h"
 
@@ -99,16 +100,6 @@ public:
         return queueSize_;
     }
 
-    CoroutineEvent *GetEventPtr()
-    {
-        return reinterpret_cast<CoroutineEvent *>(event_);
-    }
-
-    void SetEventPtr(CoroutineEvent *e)
-    {
-        event_ = reinterpret_cast<EtsLong>(e);
-    }
-
     bool IsResolved() const
     {
         return (state_ == STATE_RESOLVED);
@@ -151,9 +142,30 @@ public:
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, linkedPromise_), p->GetCoreType());
     }
 
+    EtsMutex *GetMutex(EtsCoroutine *coro)
+    {
+        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_));
+        return EtsMutex::FromCoreType(obj);
+    }
+
+    void SetMutex(EtsCoroutine *coro, EtsMutex *mutex)
+    {
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, mutex_), mutex->GetCoreType());
+    }
+
+    EtsEvent *GetEvent(EtsCoroutine *coro)
+    {
+        auto *obj = ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsPromise, event_));
+        return EtsEvent::FromCoreType(obj);
+    }
+
+    void SetEvent(EtsCoroutine *coro, EtsEvent *event)
+    {
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, event_), event->GetCoreType());
+    }
+
     void Resolve(EtsCoroutine *coro, EtsObject *value)
     {
-        os::memory::LockHolder lk(*this);
         ASSERT(state_ == STATE_PENDING);
         auto coreValue = (value == nullptr) ? nullptr : value->GetCoreType();
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), coreValue);
@@ -163,7 +175,6 @@ public:
 
     void Reject(EtsCoroutine *coro, EtsObject *error)
     {
-        os::memory::LockHolder lk(*this);
         ASSERT(state_ == STATE_PENDING);
         ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsPromise, value_), error->GetCoreType());
         state_ = STATE_REJECTED;
@@ -174,8 +185,6 @@ public:
     {
         ASSERT(IsLocked());
         ASSERT(queueSize_ < static_cast<int>(GetCallbackQueue(coro)->GetLength()));
-        // We need to promote weak reference to promise to prevent GC from collecting promise
-        PromotePromiseRef(coro);
         auto *cbQueue = GetCallbackQueue(coro);
         auto *launchModeQueue = GetLaunchModeQueue(coro);
         launchModeQueue->Set(queueSize_, static_cast<int>(launchMode));
@@ -198,85 +207,42 @@ public:
         return MEMBER_OFFSET(EtsPromise, value_);
     }
 
+    /// Allows to get exclusive access to the promise state
     void Lock()
     {
-        auto tid = EtsCoroutine::GetCurrent()->GetCoroutineId();
-        ASSERT((tid & MarkWord::LIGHT_LOCK_THREADID_MASK) != 0);
-        auto mwExpected = AtomicGetMark();
-        switch (mwExpected.GetState()) {
-            case MarkWord::STATE_GC:
-                LOG(FATAL, COROUTINES) << "Cannot lock a GC-collected Promise object!";
-                break;
-            case MarkWord::STATE_LIGHT_LOCKED:
-            case MarkWord::STATE_HEAVY_LOCKED:
-                // should wait until unlock...
-                // NOTE(konstanting, #I67QXC): check tid and decide what to do in case when locked by current tid
-                mwExpected = mwExpected.DecodeFromUnlocked();
-                break;
-            case MarkWord::STATE_HASHED:
-                // NOTE(konstanting, #I67QXC): should save the hash
-                LOG(FATAL, COROUTINES)
-                    << "Cannot lock a hashed Promise object! This functionality is not implemented yet.";
-                break;
-            case MarkWord::STATE_UNLOCKED:
-            default:
-                break;
-        }
-        auto newMw = mwExpected.DecodeFromLightLock(tid, 0);
-#ifndef NDEBUG
-        size_t cycles = 0;
-#endif /* NDEBUG */
-        while (!AtomicSetMark<false>(mwExpected, newMw)) {
-            mwExpected = mwExpected.DecodeFromUnlocked();
-            newMw = mwExpected.DecodeFromLightLock(tid, 0);
-#ifndef NDEBUG
-            ++cycles;
-#endif /* NDEBUG */
-        }
-#ifndef NDEBUG
-        LOG(DEBUG, COROUTINES) << "Promise::Lock(): took " << cycles << " cycles";
-#endif /* NDEBUG */
+        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        ASSERT(mutex != nullptr);
+        mutex->Lock();
     }
 
     void Unlock()
     {
-        // precondition: is locked AND if the event pointer is set then the event is locked
-        // NOTE(konstanting, #I67QXC): find a way to add an ASSERT for (the event is locked)
-        // NOTE(konstanting, #I67QXC): should load the hash once we support the hashed state in Lock()
-        auto mw = AtomicGetMark();
-        ASSERT(mw.GetState() == MarkWord::STATE_LIGHT_LOCKED);
-        auto newMw = mw.DecodeFromUnlocked();
-        while (!AtomicSetMark<false>(mw, newMw)) {
-            ASSERT(mw.GetState() == MarkWord::STATE_LIGHT_LOCKED);
-            newMw = mw.DecodeFromUnlocked();
-        }
+        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        ASSERT(mutex != nullptr);
+        ASSERT(mutex->IsHeld());
+        mutex->Unlock();
     }
 
     bool IsLocked()
     {
-        auto mw = AtomicGetMark();
-        return mw.GetState() == MarkWord::STATE_LIGHT_LOCKED;
+        auto *mutex = GetMutex(EtsCoroutine::GetCurrent());
+        ASSERT(mutex != nullptr);
+        return mutex->IsHeld();
     }
 
-    /**
-     * Precondition: promise is locked.
-     * In case of COMPLETION event just return it.
-     * In case of GENERIC event create it or increment the reference counter and return.
-     */
-    CoroutineEvent *GetOrCreateEventPtr();
-
-    /**
-     * Precondition: event is GENERIC and linked to a promise (obtained using the GetOrCreateEventPtr method).
-     * Decrement the reference counter and in case it reaches zero delete the event.
-     */
-    void RetireEventPtr(CoroutineEvent *event);
+    /// Blocks current coroutine until promise is resolved/rejected
+    void Wait()
+    {
+        auto *event = GetEvent(EtsCoroutine::GetCurrent());
+        ASSERT(event != nullptr);
+        event->Wait();
+    }
 
     // launch promise then/catch callback: void()
     static void LaunchCallback(EtsCoroutine *coro, EtsObject *callback, CoroutineLaunchMode launchMode);
 
 private:
     void OnPromiseCompletion(EtsCoroutine *coro);
-    void PromotePromiseRef(EtsCoroutine *coro);
 
     void ClearQueues(EtsCoroutine *coro)
     {
@@ -286,14 +252,14 @@ private:
     }
 
     ObjectPointer<EtsObject> value_;  // the completion value of the Promise
+    ObjectPointer<EtsMutex> mutex_;
+    ObjectPointer<EtsEvent> event_;
     ObjectPointer<EtsObjectArray>
         callbackQueue_;  // the queue of 'then and catch' calbacks which will be called when the Promise gets fulfilled
     ObjectPointer<EtsIntArray> launchModeQueue_;  // the queue of callbacks' launch mode
     ObjectPointer<EtsObject> interopObject_;      // internal object used in js interop
     ObjectPointer<EtsObject> linkedPromise_;      // linked JS promise as JSValue (if exists)
     EtsInt queueSize_;
-    EtsLong event_;
-    EtsInt eventRefCounter_;
     uint32_t state_;  // the Promise's state
 
     friend class test::EtsPromiseTest;

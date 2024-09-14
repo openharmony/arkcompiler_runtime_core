@@ -544,6 +544,9 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
         ASSERT(subscribeOnAnotherPromiseMethod_ != nullptr);
     }
     promiseRefClass_ = CacheClass(PROMISE_REF);
+    waiterListClass_ = CacheClass(WAITERS_LIST);
+    mutexClass_ = CacheClass(MUTEX);
+    eventClass_ = CacheClass(EVENT);
     exceptionClass_ = CacheClass(EXCEPTION);
     errorClass_ = CacheClass(ERROR);
     arraybufClass_ = CacheClass(ARRAY_BUFFER);

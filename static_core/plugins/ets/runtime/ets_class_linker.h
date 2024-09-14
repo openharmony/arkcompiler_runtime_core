@@ -54,6 +54,9 @@ public:
     EtsClass *GetPromiseClass();
     EtsClass *GetPromiseRefClass();
     EtsClass *GetArrayClass();
+    EtsClass *GetWaitersListClass();
+    EtsClass *GetMutexClass();
+    EtsClass *GetEventClass();
     EtsClass *GetArrayBufferClass();
     EtsClass *GetStringBuilderClass();
     EtsClass *GetSharedMemoryClass();
