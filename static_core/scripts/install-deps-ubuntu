@@ -482,7 +482,11 @@ if [[ "$INSTALL_CROSS_LIBS" == "yes" ]]; then
 fi
 
 if [[ "x$INSTALL_DOC_DEV" == "xyes" ]]; then
-    install_dep "$SCRIPT_DIR/dep-lists/ubuntu-doc-dev"
+    if [[ -f "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-doc-dev" ]] ; then 
+        install_dep "$SCRIPT_DIR/dep-lists/$UBUNTU_NAME-doc-dev"
+    else
+        install_dep "$SCRIPT_DIR/dep-lists/ubuntu-doc-dev"
+    fi
     install_pip_dep "${SCRIPT_DIR}/dep-lists/requirements-doc-dev"
 fi
 
