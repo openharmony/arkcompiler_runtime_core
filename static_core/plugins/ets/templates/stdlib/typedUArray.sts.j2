@@ -1777,7 +1777,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns an {{element['name']}}Array with replaced value on index
      */
-    {{isNonCompat}} with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
+    public with(index: int, value: {{element['primitiveType']}}): {{element['name']}}Array {
         let res = new {{element['name']}}Array(this)
         res.setUnsafeClamp(index, value)
         return res
