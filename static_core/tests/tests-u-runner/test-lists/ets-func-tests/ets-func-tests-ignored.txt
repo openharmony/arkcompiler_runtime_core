@@ -10,8 +10,6 @@ std/core/std_core_string_String_localeCompare_string_005.sts
 ### Issue 10945, 11969 begin
 std/core/std_core_char_static_Char_isPartOfSurrogatePair.sts
 std/core/std_core_char_static_Char_isValidCodePoint.sts
-### Issue 10285
-std/core/std_core_double_instance_Double_toString.sts
 ### Issue 11484 11541 begin
 std/core/std_core_array_concat_char_array_char_array.sts
 ### Issue 11468 begin
