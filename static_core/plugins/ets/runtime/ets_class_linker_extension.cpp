@@ -85,7 +85,7 @@ void EtsClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, co
     ThrowEtsException(EtsCoroutine::GetCurrent(), GetClassLinkerErrorDescriptor(error), message);
 }
 
-void EtsClassLinkerExtension::InitializeClassRoot()
+void EtsClassLinkerExtension::InitializeClassRoots()
 {
     InitializeArrayClassRoot(ClassRoot::ARRAY_CLASS, ClassRoot::CLASS,
                              utf::Mutf8AsCString(langCtx_.GetClassArrayClassDescriptor()));
@@ -129,29 +129,22 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
     langCtx_ = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
     heapManager_ = coroutine->GetVM()->GetHeapManager();
 
-    // NB! By convention, class_class should be allocated first, so that all
-    // other class objects receive a pointer to it in their klass words.
-    // At the same time, std.core.Class is derived from std.core.Object, so we
-    // allocate object_class immediately after std.core.Class and manually adjust
-    // inheritance chain. After this, initialization order is not fixed.
-    auto classClass = CreateClassRoot(langCtx_.GetClassClassDescriptor(), ClassRoot::CLASS);
-
-    // EtsClass has reference fields, if they are not traversed in gc, then
-    // they can be either deallocated or moved
-    classClass->SetRefFieldsOffset(EtsClass::GCRefFieldsOffset(), false);
-    classClass->SetRefFieldsNum(EtsClass::GCRefFieldsNum(), false);
-    classClass->SetVolatileRefFieldsNum(0, false);
-
     auto *objectClass = GetClassLinker()->GetClass(langCtx_.GetObjectClassDescriptor(), false, GetBootContext());
     if (objectClass == nullptr) {
         LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << langCtx_.GetObjectClassDescriptor() << "'";
         return false;
     }
-
     SetClassRoot(ClassRoot::OBJECT, objectClass);
 
-    ASSERT(classClass->GetBase() == nullptr);
-    classClass->SetBase(objectClass);
+    auto *classClass = GetClassLinker()->GetClass(langCtx_.GetClassClassDescriptor(), false, GetBootContext());
+    if (classClass == nullptr) {
+        LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << langCtx_.GetClassClassDescriptor() << "'";
+        return false;
+    }
+    SetClassRoot(ClassRoot::CLASS, classClass);
+
+    EtsClass::FromRuntimeClass(classClass)->AsObject()->GetCoreType()->SetClass(classClass);
+    EtsClass::FromRuntimeClass(objectClass)->AsObject()->GetCoreType()->SetClass(classClass);
 
     coretypes::String::SetCompressedStringsEnabled(compressedStringEnabled);
 
@@ -160,11 +153,10 @@ bool EtsClassLinkerExtension::InitializeImpl(bool compressedStringEnabled)
         LOG(ERROR, CLASS_LINKER) << "Cannot create class '" << langCtx_.GetStringClassDescriptor() << "'";
         return false;
     }
-
     SetClassRoot(ClassRoot::STRING, stringClass);
     stringClass->SetStringClass();
 
-    InitializeClassRoot();
+    InitializeClassRoots();
 
     return true;
 }
@@ -404,15 +396,20 @@ Class *EtsClassLinkerExtension::CreateClass(const uint8_t *descriptor, size_t vt
 {
     ASSERT(IsInitialized());
 
-    auto classRoot = GetClassRoot(ClassRoot::CLASS);
-    ASSERT(classRoot != nullptr);
-
-    auto objectHeader = heapManager_->AllocateNonMovableObject<false>(classRoot, EtsClass::GetSize(size));
-    if (UNLIKELY(objectHeader == nullptr)) {
+    Class *classClassRoot = GetClassRoot(ClassRoot::CLASS);
+    ObjectHeader *classObject;
+    if (UNLIKELY(classClassRoot == nullptr)) {
+        ASSERT(utf::IsEqual(descriptor, langCtx_.GetObjectClassDescriptor()) ||
+               utf::IsEqual(descriptor, langCtx_.GetClassClassDescriptor()));
+        classObject = heapManager_->AllocateNonMovableObject<true>(classClassRoot, EtsClass::GetSize(size));
+    } else {
+        classObject = heapManager_->AllocateNonMovableObject<false>(classClassRoot, EtsClass::GetSize(size));
+    }
+    if (UNLIKELY(classObject == nullptr)) {
         return nullptr;
     }
 
-    return InitializeClass(objectHeader, descriptor, vtableSize, imtSize, size);
+    return InitializeClass(classObject, descriptor, vtableSize, imtSize, size);
 }
 
 Class *EtsClassLinkerExtension::CreateClassRoot(const uint8_t *descriptor, ClassRoot root)
@@ -521,22 +518,43 @@ Class *EtsClassLinkerExtension::CacheClass(std::string_view descriptor, F const 
     return cls;
 }
 
+void EtsClassLinkerExtension::InitializeBuiltinSpecialClasses()
+{
+    // CC-OFFNXT(WordsTool.95) false positive
+    // NOLINTNEXTLINE(google-build-using-namespace)
+    using namespace panda_file_items::class_descriptors;
+
+    CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
+    undefinedClass_ = CacheClass(INTERNAL_UNDEFINED, [](auto *c) {
+        c->SetUndefined();
+        c->SetValueTyped();
+    });
+    auto const setupBoxedFlags = [](EtsClass *c) {
+        c->SetBoxed();
+        c->SetValueTyped();
+    };
+    boxBooleanClass_ = CacheClass(BOX_BOOLEAN, setupBoxedFlags);
+    boxByteClass_ = CacheClass(BOX_BYTE, setupBoxedFlags);
+    boxCharClass_ = CacheClass(BOX_CHAR, setupBoxedFlags);
+    boxShortClass_ = CacheClass(BOX_SHORT, setupBoxedFlags);
+    boxIntClass_ = CacheClass(BOX_INT, setupBoxedFlags);
+    boxLongClass_ = CacheClass(BOX_LONG, setupBoxedFlags);
+    boxFloatClass_ = CacheClass(BOX_FLOAT, setupBoxedFlags);
+    boxDoubleClass_ = CacheClass(BOX_DOUBLE, setupBoxedFlags);
+    bigintClass_ = CacheClass(BIG_INT, [](auto *c) {
+        c->SetBigInt();
+        c->SetValueTyped();
+    });
+    functionClass_ = CacheClass(FUNCTION, [](auto *c) { c->SetFunction(); });
+}
+
 void EtsClassLinkerExtension::InitializeBuiltinClasses()
 {
     // NOLINTNEXTLINE(google-build-using-namespace)
     using namespace panda_file_items::class_descriptors;
 
-    CacheClass(STRING, [](auto *c) { c->SetValueTyped(); });
-    undefinedClass_ = CacheClass(INTERNAL_UNDEFINED, [](auto *c) { c->SetValueTyped(); });
-    boxBooleanClass_ = CacheClass(BOX_BOOLEAN, [](auto *c) { c->SetValueTyped(); });
-    boxByteClass_ = CacheClass(BOX_BYTE, [](auto *c) { c->SetValueTyped(); });
-    boxCharClass_ = CacheClass(BOX_CHAR, [](auto *c) { c->SetValueTyped(); });
-    boxShortClass_ = CacheClass(BOX_SHORT, [](auto *c) { c->SetValueTyped(); });
-    boxIntClass_ = CacheClass(BOX_INT, [](auto *c) { c->SetValueTyped(); });
-    boxLongClass_ = CacheClass(BOX_LONG, [](auto *c) { c->SetValueTyped(); });
-    boxFloatClass_ = CacheClass(BOX_FLOAT, [](auto *c) { c->SetValueTyped(); });
-    boxDoubleClass_ = CacheClass(BOX_DOUBLE, [](auto *c) { c->SetValueTyped(); });
-    bigintClass_ = CacheClass(BIG_INT, [](auto *c) { c->SetValueTyped(); });
+    InitializeBuiltinSpecialClasses();
+
     promiseClass_ = CacheClass(PROMISE);
     if (promiseClass_ != nullptr) {
         subscribeOnAnotherPromiseMethod_ = EtsMethod::ToRuntimeMethod(
@@ -557,7 +575,6 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     typeapiFieldClass_ = CacheClass(FIELD);
     typeapiMethodClass_ = CacheClass(METHOD);
     typeapiParameterClass_ = CacheClass(PARAMETER);
-    ifuncClass_ = CacheClass(IFUNCTION);
     sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
     jsvalueClass_ = CacheClass(JS_VALUE);
     finalizableWeakClass_ = CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {

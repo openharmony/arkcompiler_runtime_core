@@ -21,7 +21,7 @@ class jsvars {
 };
 
 class jscall {
-    static Init = JSRuntime.__initJSCallClass("Ljscall;");
+    static Init = JSRuntime.__initJSCallClass();
 
     native static void$(top: JSValue, qname: String): void;
     native static num$(top: JSValue, qname: String): double;
@@ -39,7 +39,8 @@ class jscall {
 }
 
 class jsnew {
-    static Init = JSRuntime.__initJSNewClass("Ljsnew;");
+    static Init = JSRuntime.__initJSNewClass();
+
     native static $(top: JSValue, qname: String, a0: double, a1: double) : JSValue;
     native static $(top: JSValue, qname: String, a0: boolean, a1: boolean) : JSValue;
     native static $(top: JSValue, qname: String) : JSValue;

@@ -25,7 +25,6 @@ export final class JSRuntime {
     // ==================
     public static newJSValueBoolean(value: boolean): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.newJSValueBoolean(value);
     }
 
     public static newJSValueByte(value: byte): JSValue {
@@ -54,17 +53,14 @@ export final class JSRuntime {
 
     public static newJSValueDouble(value: double): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.newJSValueDouble(value);
     }
 
     public static newJSValueString(value: String): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.newJSValueString(value);
     }
 
     public static newJSValueObject(value: Object): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.newJSValueObject(value);
     }
 
     // ================
@@ -72,23 +68,19 @@ export final class JSRuntime {
     // ================
     public static getValueBoolean(value: JSValue): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getValueBoolean(value);
     }
 
     public static getValueDouble(value: JSValue): double {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getValueDouble(value);
     }
 
     public static getValueString(value: JSValue): String {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getValueString(value);
     }
 
     // 2nd argument is ClassClass
-    public static getValueObject(value: JSValue, t: Object): Object {
+    public static getValueObject(value: JSValue, t: Class): Object {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getValueObject(value, t);
     }
 
     // ===================
@@ -96,7 +88,6 @@ export final class JSRuntime {
     // ===================
     public static getPropertyBoolean(object: JSValue, name: String): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getPropertyBoolean(object, name) as boolean;
     }
 
     public static getPropertyByte(object: JSValue, name: String): byte {
@@ -125,17 +116,14 @@ export final class JSRuntime {
 
     public static getPropertyDouble(object: JSValue, name: String): double {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getPropertyDouble(object, name);
     }
 
     public static getPropertyString(object: JSValue, name: String): String {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getPropertyString(object, name);
     }
 
     public static getPropertyJSValue(object: JSValue, name: String): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getPropertyJSValue(object, name);
     }
 
     // ===================
@@ -186,39 +174,30 @@ export final class JSRuntime {
     // ===================
     public static getUndefined(): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getUndefined();
     }
 
     public static getNull(): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getNull();
     }
 
     public static getGlobal(): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getGlobal();
     }
 
     public static createObject(): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.createObject();
     }
 
     public static instanceOfDynamic(object: JSValue, ctor: JSValue): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.instanceOfDynamic(object, ctor);
     }
 
-    // NOTE(v.cherkashin):
-    //  Replace 'cls: Object' by 'cls: Type' when issue #15273 was resolved
-    public static instanceOfStatic(object: JSValue, cls: Object): boolean {
+    public static instanceOfStatic(object: JSValue, cls: Class): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.instanceOfStatic(object, cls);
     }
 
     public static strictEqual(lhs: JSValue, rhs: JSValue): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.strictEqual(lhs, rhs);
     }
 
     // ===================
@@ -226,7 +205,6 @@ export final class JSRuntime {
     // ===================
     public static getElementBoolean(object: JSValue, index: int): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getElementBoolean(object, index);
     }
 
     public static getElementByte(object: JSValue, index: int): byte {
@@ -255,12 +233,10 @@ export final class JSRuntime {
 
     public static getElementDouble(object: JSValue, index: int): double {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getElementDouble(object, index);
     }
 
     public static getElementJSValue(object: JSValue, index: int): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.getElementJSValue(object, index);
     }
 
     // ===================
@@ -304,7 +280,6 @@ export final class JSRuntime {
 
     public static loadModule(m: String): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.loadModule(m);
     }
 
     // ===================
@@ -324,22 +299,19 @@ export final class JSRuntime {
         return JSRuntime.finQueue!;
     }
 
-    public static __initJSCallClass(name: String): boolean {
+    public static __initJSCallClass(): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.__initJSCallClass(name);
     }
 
-    public static __initJSNewClass(name: String): boolean {
+    public static __initJSNewClass(): boolean {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.__initJSNewClass(name);
     }
 
     public static __createLambdaProxy(lambda: Object): JSValue {
         JSRuntime.checkIntrinsicMethod();
-        return JSRuntime.__createLambdaProxy(lambda);
     }
 
-    private static checkIntrinsicMethod(): void {
+    private static checkIntrinsicMethod(): never {
         let msg = "This method must not be called";
         // TODO(dmitrys99): Call to console gives error here:
         // SyntaxError: Variable 'console' is accessed before it's initialization. [JSRuntime.sts:229:9]

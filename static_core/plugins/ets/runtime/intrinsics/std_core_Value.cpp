@@ -54,7 +54,7 @@ void SetFieldValue(EtsObject *obj, EtsLong i, T val)
 
     auto typeClass = objHandle.GetPtr()->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
-    if (fieldObject->GetType()->IsBoxedClass()) {
+    if (fieldObject->GetType()->IsBoxed()) {
         objHandle.GetPtr()->SetFieldObject(fieldObject, EtsBoxPrimitive<T>::Create(coroutine, val));
         return;
     }
@@ -124,7 +124,7 @@ void SetFieldByNameValue(EtsObject *obj, EtsString *name, T val)
 
     auto typeClass = objHandle.GetPtr()->GetClass();
     auto fieldObject = typeClass->GetFieldIDByName(nameHandle.GetPtr()->GetMutf8().c_str());
-    if (fieldObject->GetType()->IsBoxedClass()) {
+    if (fieldObject->GetType()->IsBoxed()) {
         objHandle.GetPtr()->SetFieldObject(fieldObject, EtsBoxPrimitive<T>::Create(coroutine, val));
         return;
     }
@@ -191,7 +191,7 @@ T GetFieldValue(EtsObject *obj, EtsLong i)
 
     auto typeClass = objHandle.GetPtr()->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
-    if (fieldObject->GetType()->IsBoxedClass()) {
+    if (fieldObject->GetType()->IsBoxed()) {
         return EtsBoxPrimitive<T>::FromCoreType(objHandle.GetPtr()->GetFieldObject(fieldObject))->GetValue();
     }
     return objHandle.GetPtr()->GetFieldPrimitive<T>(fieldObject);
@@ -257,7 +257,7 @@ T GetFieldByNameValue(EtsObject *obj, EtsString *name)
 
     auto typeClass = objHandle.GetPtr()->GetClass();
     auto fieldObject = typeClass->GetFieldIDByName(name->GetMutf8().c_str());
-    if (fieldObject->GetType()->IsBoxedClass()) {
+    if (fieldObject->GetType()->IsBoxed()) {
         return EtsBoxPrimitive<T>::FromCoreType(objHandle.GetPtr()->GetFieldObject(fieldObject))->GetValue();
     }
     return objHandle.GetPtr()->GetFieldPrimitive<T>(fieldObject);
@@ -327,7 +327,7 @@ void SetElement(EtsObject *obj, EtsLong i, T val)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     auto typeClass = obj->GetClass();
-    if (!typeClass->GetComponentType()->IsBoxedClass()) {
+    if (!typeClass->GetComponentType()->IsBoxed()) {
         VMHandle<P> arrHandle(coroutine, obj->GetCoreType());
         arrHandle.GetPtr()->Set(i, val);
     } else {
@@ -391,7 +391,7 @@ typename P::ValueType GetElement(EtsObject *obj, EtsLong i)
     auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(coroutine);
     auto typeClass = obj->GetClass();
-    if (!typeClass->GetComponentType()->IsBoxedClass()) {
+    if (!typeClass->GetComponentType()->IsBoxed()) {
         VMHandle<P> arrHandle(coroutine, obj->GetCoreType());
         return arrHandle.GetPtr()->Get(i);
     }

@@ -30,6 +30,7 @@ public:
 
     static constexpr EtsBoxPrimitive *FromCoreType(EtsObject *obj)
     {
+        ASSERT(obj->GetClass()->IsBoxed());
         return static_cast<EtsBoxPrimitive<T> *>(obj);
     }
 

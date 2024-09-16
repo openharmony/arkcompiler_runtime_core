@@ -29,6 +29,7 @@ class EtsBigInt : public EtsObject {
 public:
     static EtsBigInt *FromEtsObject(EtsObject *etsObj)
     {
+        ASSERT(etsObj->GetClass()->IsBigInt());
         return reinterpret_cast<EtsBigInt *>(etsObj);
     }
 

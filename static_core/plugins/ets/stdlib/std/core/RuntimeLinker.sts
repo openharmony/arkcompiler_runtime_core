@@ -1,0 +1,83 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package std.core;
+
+/**
+ * Unstable API, represents internal runtime type descriptor
+ */
+export final class Class {
+    private name: string | null
+    private superClass: Class | null
+    private flags: int
+
+    private constructor() { throw new Error("Class constructor called") }
+    private native getNameInternal(): string;
+
+    public getName(): string {
+        return this.name ?? this.getNameInternal()
+    }
+
+    public getSuper(): Class | null {
+        return this.superClass
+    }
+
+    public getLinker(): RuntimeLinker {
+        return new RuntimeLinker(this)
+    }
+
+    /**
+     * Invoke class initializer once if class is not initialized
+     */
+    public native initialize(): void
+
+    public static native of(obj: Object): Class
+
+    /**
+     * Get class of caller method
+     */
+    public static native ofCaller(): Class
+
+    public native createInstance(): Object
+
+    /**
+     * Get internal string descriptor
+     */
+    public native getDescriptor(): string
+}
+
+/**
+ * Unstable API, represents internal runtime type linking and loading APIs
+ */
+export final class RuntimeLinker {
+    private ctxClass: Class // A temporary internal solution to specify lookup scope
+
+    internal constructor(ctxClass: Class) { this.ctxClass = ctxClass }
+    private static native loadClassInternal(ctxClass: Class, clsName: string, init: boolean): Class
+
+    /**
+     * Load Class by name in the context of this RuntimeLinker
+     */
+    public loadClass(clsName: string, init: boolean = false): Class {
+        return RuntimeLinker.loadClassInternal(this.ctxClass, clsName, init)
+    }
+}
+
+/**
+ * Loads library from specified path.
+ *
+ * @param path to library to load
+ */
+export native function loadLibrary(path: String): void;

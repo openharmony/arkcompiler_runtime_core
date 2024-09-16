@@ -397,9 +397,14 @@ public:
         return (accessFlags_ & ACC_INTERFACE) != 0;
     }
 
+    bool IsClass() const
+    {
+        return !IsPrimitive() && !IsInterface();
+    }
+
     bool IsInstantiable() const
     {
-        return (!IsPrimitive() && !IsAbstract() && !IsInterface()) || IsArrayClass();
+        return (IsClass() && !IsAbstract()) || IsArrayClass();
     }
 
     bool IsObjectClass() const

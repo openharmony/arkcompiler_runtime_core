@@ -126,7 +126,7 @@ public:
         // Generate Array class name  "[L<object_class>;"
         EtsClassLinker *classLinker = PandaEtsVM::GetCurrent()->GetClassLinker();
         PandaString arrayClassName = PandaString("[") + objectClass->GetDescriptor();
-        EtsClass *arrayClass = classLinker->GetClass(arrayClassName.c_str(), true, objectClass->GetClassLoader());
+        EtsClass *arrayClass = classLinker->GetClass(arrayClassName.c_str(), true, objectClass->GetLoadContext());
         if (arrayClass == nullptr) {
             return nullptr;
         }

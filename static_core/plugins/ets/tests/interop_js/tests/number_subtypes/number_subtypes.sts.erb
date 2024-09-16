@@ -21,12 +21,12 @@ class jsvars {
 };
 
 class jscall {
-    static _init = JSRuntime.__initJSCallClass("Ljscall;")
+    static _init = JSRuntime.__initJSCallClass()
     native static num$(top: JSValue, qname: String, a0: double, a1: double) : double;
 };
 
 class jsnew {
-    static _init = JSRuntime.__initJSNewClass("Ljsnew;")
+    static _init = JSRuntime.__initJSNewClass()
     native static $(top: JSValue, qname: String, a0: double, a1: double) : JSValue
     native static $(top: JSValue, qname: String) : JSValue;
 };

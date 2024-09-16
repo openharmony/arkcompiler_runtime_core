@@ -15,7 +15,7 @@ coretypes:
 - managed_class: std.core.Object
   mirror_class: ark::ets::EtsObject
 
-- managed_class: std.core.Type
+- managed_class: std.core.Class
   mirror_class: ark::ets::EtsClass
 
 - managed_class: std.core.String
@@ -133,9 +133,7 @@ intrinsics:
     static: true
     signature:
       ret: std.core.Object
-      # NOTE(v.cherkashin):
-      #  Replace std.core.Object by std.core.Type when issue #15273 was resolved
-      args: [ std.interop.js.JSValue, std.core.Object ] # 2nd argument is ClassClass
+      args: [ std.interop.js.JSValue, std.core.Class ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeGetValueObjectIntrinsic
     clear_flags: [can_throw, heap_inv, no_cse]
 
@@ -311,9 +309,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      # NOTE(v.cherkashin):
-      #  Replace std.core.Object by std.core.Type when issue #15273 was resolved
-      args: [ std.interop.js.JSValue, std.core.Object ] # 2nd argument is ClassClass
+      args: [ std.interop.js.JSValue, std.core.Class ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInstanceOfStaticIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -324,7 +320,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.String ]
+      args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSCallClassIntrinsic
     clear_flags: [can_throw, heap_inv]
 
@@ -335,7 +331,7 @@ intrinsics:
     static: true
     signature:
       ret: u1
-      args: [ std.core.String ]
+      args: [ ]
     impl: ark::ets::interop::js::intrinsics::JSRuntimeInitJSNewClassIntrinsic
     clear_flags: [can_throw, heap_inv]
 

@@ -65,6 +65,7 @@ static constexpr std::string_view CLASS_ARRAY                          = "[Lstd/
 static constexpr std::string_view STRING_ARRAY                         = "[Lstd/core/String;";
 
 // Functional interfaces
+static constexpr std::string_view FUNCTION                             = "Lstd/core/Function;";
 static constexpr std::string_view FUNCTION0                            = "Lstd/core/Function0;";
 static constexpr std::string_view FUNCTION1                            = "Lstd/core/Function1;";
 static constexpr std::string_view FUNCTION2                            = "Lstd/core/Function2;";
@@ -83,7 +84,6 @@ static constexpr std::string_view FUNCTION14                           = "Lstd/c
 static constexpr std::string_view FUNCTION15                           = "Lstd/core/Function15;";
 static constexpr std::string_view FUNCTION16                           = "Lstd/core/Function16;";
 static constexpr std::string_view FUNCTIONN                            = "Lstd/core/FunctionN;";
-static constexpr std::string_view IFUNCTION                    = "Lstd/core/Function;";
 
 // Exception classes
 static constexpr std::string_view ARGUMENT_OUT_OF_RANGE_EXCEPTION      = "Lstd/core/ArgumentOutOfRangeException;";

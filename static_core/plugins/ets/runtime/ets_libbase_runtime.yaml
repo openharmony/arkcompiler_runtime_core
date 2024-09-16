@@ -12,11 +12,11 @@
 # limitations under the License.
 
 coretypes:
-- managed_class: panda.String
-  mirror_class: coretypes::String
-
 - managed_class: std.core.Object
   mirror_class: ark::ets::EtsObject
+
+- managed_class: std.core.Class
+  mirror_class: ark::ets::EtsClass
 
 - managed_class: std.core.String
   mirror_class: ark::ets::EtsString
@@ -3220,6 +3220,82 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeTypeof
     clear_flags: [ no_dce ]
     set_flags: [ no_nullptr ]
+
+####################
+# std.core.Class #
+####################
+  - name: StdCoreClassGetNameInternal
+    space: ets
+    class_name: std.core.Class
+    method_name: getNameInternal
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetNameInternal
+
+  - name: StdCoreClassOf
+    space: ets
+    class_name: std.core.Class
+    method_name: of
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::StdCoreClassOf
+
+  - name: StdCoreClassOfCaller
+    space: ets
+    class_name: std.core.Class
+    method_name: ofCaller
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassOfCaller
+
+  - name: StdCoreClassInitialize
+    space: ets
+    class_name: std.core.Class
+    method_name: initialize
+    static: false
+    signature:
+      ret: void
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassInitialize
+
+  - name: StdCoreClassCreateInstance
+    space: ets
+    class_name: std.core.Class
+    method_name: createInstance
+    static: false
+    signature:
+      ret: std.core.Object
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassCreateInstance
+
+  - name: StdCoreClassGetDescriptor
+    space: ets
+    class_name: std.core.Class
+    method_name: getDescriptor
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreClassGetDescriptor
+
+####################
+# std.core.RuntimeLinker #
+####################
+  - name: StdCoreRuntimeLinkerLoadClassInternal
+    space: ets
+    class_name: std.core.RuntimeLinker
+    method_name: loadClassInternal
+    static: true
+    signature:
+      ret: std.core.Class
+      args: [ std.core.Class, std.core.String, u1]
+    impl: ark::ets::intrinsics::StdCoreRuntimeLinkerLoadClassInternal
 
 ###################
 # std.core.RegExp #

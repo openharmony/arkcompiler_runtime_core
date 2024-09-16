@@ -42,6 +42,7 @@ EtsBoxPrimitive<T> *EtsBoxPrimitive<T>::Create(EtsCoroutine *coro, T value)
     } else if constexpr (std::is_same<T, EtsDouble>::value) {
         boxClass = ext->GetBoxDoubleClass();
     }
+    ASSERT(EtsClass::FromRuntimeClass(boxClass)->IsBoxed());
     auto *instance = reinterpret_cast<EtsBoxPrimitive<T> *>(ObjectHeader::Create(coro, boxClass));
     instance->SetValue(value);
     return instance;

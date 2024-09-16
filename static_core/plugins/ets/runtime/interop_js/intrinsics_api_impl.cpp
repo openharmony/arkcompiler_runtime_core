@@ -119,15 +119,11 @@ EtsString *JSRuntimeGetValueString(JSValue *etsJsValue)
     return res.value();
 }
 
-EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj)
+EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsClass *clsObj)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-
-    if (!clsObj->GetClass()->IsClassClass()) {
-        ctx->Fatal("GetValueObject parameter is not a ClassClass instance");
-    }
-    auto const cls = reinterpret_cast<EtsClass *>(clsObj);
+    auto cls = clsObj->GetRuntimeClass();
 
     if (etsJsValue == nullptr) {
         return nullptr;
@@ -143,7 +139,7 @@ EtsObject *JSRuntimeGetValueObject(JSValue *etsJsValue, EtsObject *clsObj)
     NapiScope jsHandleScope(env);
     napi_value jsVal = etsJsValue->GetNapiValue(env);
 
-    auto refconv = JSRefConvertResolve<true>(ctx, cls->GetRuntimeClass());
+    auto refconv = JSRefConvertResolve<true>(ctx, cls);
     if (UNLIKELY(refconv == nullptr)) {
         if (NapiIsExceptionPending(env)) {
             ctx->ForwardJSException(coro);
@@ -212,9 +208,9 @@ uint8_t JSRuntimeInstanceOfDynamic(JSValue *object, JSValue *ctor)
     return static_cast<uint8_t>(res);
 }
 
-uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass)
+uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls)
 {
-    ASSERT(etsClass != nullptr);
+    ASSERT(etsCls != nullptr);
 
     if (etsJsValue == nullptr) {
         return 0;
@@ -224,7 +220,7 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass)
     auto ctx = InteropCtx::Current(coro);
     auto env = ctx->GetJSEnv();
 
-    Class *cls = etsClass->GetRuntimeClass();
+    Class *cls = etsCls->GetRuntimeClass();
     if (!cls->IsInitialized() && !IsStdClass(cls)) {
         // 'js_value' haven't been created from the uninitialized class
         return 0;
@@ -239,7 +235,7 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsClass)
 
     if (sharedRef != nullptr) {
         EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
-        return static_cast<uint8_t>(etsClass->IsAssignableFrom(etsObject->GetClass()));
+        return static_cast<uint8_t>(etsCls->IsAssignableFrom(etsObject->GetClass()));
     }
 
     if (IsStdClass(cls)) {

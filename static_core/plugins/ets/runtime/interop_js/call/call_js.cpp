@@ -19,6 +19,7 @@
 #include "plugins/ets/runtime/interop_js/call/arg_convertors.h"
 #include "plugins/ets/runtime/interop_js/call/proto_reader.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/ets_stubs-inl.h"
 
 namespace ark::ets::interop::js {
 
@@ -484,12 +485,11 @@ static std::optional<uint32_t> GetQnameCount(Class *klass)
     return qnameCount;
 }
 
-static uint8_t InitCallJSClass(coretypes::String *descriptorStr, bool isNewCall)
+static uint8_t InitCallJSClass(bool isNewCall)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    auto *klass = ctx->GetClassLinker()->GetClass(descriptorStr->GetDataMUtf8(), true, ctx->LinkerCtx());
-    INTEROP_FATAL_IF(klass == nullptr);
+    auto *klass = GetMethodOwnerClassInFrames(coro, 0)->GetRuntimeClass();
     INTEROP_LOG(DEBUG) << "Bind bridge call methods for " << utf::Mutf8AsCString(klass->GetDescriptor());
 
     for (auto &method : klass->GetMethods()) {
@@ -518,14 +518,14 @@ static uint8_t InitCallJSClass(coretypes::String *descriptorStr, bool isNewCall)
     return 1;
 }
 
-uint8_t JSRuntimeInitJSCallClass(EtsString *clsStr)
+uint8_t JSRuntimeInitJSCallClass()
 {
-    return InitCallJSClass(clsStr->GetCoreType(), false);
+    return InitCallJSClass(false);
 }
 
-uint8_t JSRuntimeInitJSNewClass(EtsString *clsStr)
+uint8_t JSRuntimeInitJSNewClass()
 {
-    return InitCallJSClass(clsStr->GetCoreType(), true);
+    return InitCallJSClass(true);
 }
 
 }  // namespace ark::ets::interop::js

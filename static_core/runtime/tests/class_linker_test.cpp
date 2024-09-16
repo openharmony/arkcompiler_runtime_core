@@ -205,7 +205,24 @@ static void TestPrimitiveClassRoot(const ClassLinkerExtension &classLinkerExt, C
     EXPECT_FALSE(klass->IsStringClass()) << msg;
     EXPECT_TRUE(klass->IsPrimitive()) << msg;
     EXPECT_TRUE(klass->IsAbstract()) << msg;
+    EXPECT_FALSE(klass->IsClass()) << msg;
+    EXPECT_FALSE(klass->IsInterface()) << msg;
     EXPECT_FALSE(klass->IsInstantiable()) << msg;
+}
+
+static void TestPrimitiveClassRoots(const ClassLinkerExtension &ext)
+{
+    TestPrimitiveClassRoot(ext, ClassRoot::U1, panda_file::Type::TypeId::U1);
+    TestPrimitiveClassRoot(ext, ClassRoot::I8, panda_file::Type::TypeId::I8);
+    TestPrimitiveClassRoot(ext, ClassRoot::U8, panda_file::Type::TypeId::U8);
+    TestPrimitiveClassRoot(ext, ClassRoot::I16, panda_file::Type::TypeId::I16);
+    TestPrimitiveClassRoot(ext, ClassRoot::U16, panda_file::Type::TypeId::U16);
+    TestPrimitiveClassRoot(ext, ClassRoot::I32, panda_file::Type::TypeId::I32);
+    TestPrimitiveClassRoot(ext, ClassRoot::U32, panda_file::Type::TypeId::U32);
+    TestPrimitiveClassRoot(ext, ClassRoot::I64, panda_file::Type::TypeId::I64);
+    TestPrimitiveClassRoot(ext, ClassRoot::U64, panda_file::Type::TypeId::U64);
+    TestPrimitiveClassRoot(ext, ClassRoot::F32, panda_file::Type::TypeId::F32);
+    TestPrimitiveClassRoot(ext, ClassRoot::F64, panda_file::Type::TypeId::F64);
 }
 
 static size_t GetComponentSize(ClassRoot componentRoot)
@@ -250,7 +267,24 @@ static void TestArrayClassRoot(const ClassLinkerExtension &classLinkerExt, Class
     EXPECT_FALSE(klass->IsStringClass()) << msg;
     EXPECT_FALSE(klass->IsPrimitive()) << msg;
     EXPECT_TRUE(klass->IsAbstract()) << msg;
+    EXPECT_TRUE(klass->IsClass()) << msg;
+    EXPECT_FALSE(klass->IsInterface()) << msg;
     EXPECT_TRUE(klass->IsInstantiable()) << msg;
+}
+
+static void TestArrayClassRoots(const ClassLinkerExtension &ext)
+{
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_U1, ClassRoot::U1);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_I8, ClassRoot::I8);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_U8, ClassRoot::U8);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_I16, ClassRoot::I16);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_U16, ClassRoot::U16);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_I32, ClassRoot::I32);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_U32, ClassRoot::U32);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_I64, ClassRoot::I64);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_U64, ClassRoot::U64);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_F32, ClassRoot::F32);
+    TestArrayClassRoot(ext, ClassRoot::ARRAY_F64, ClassRoot::F64);
 }
 
 TEST_F(ClassLinkerTest, TestClassRoots)
@@ -261,16 +295,34 @@ TEST_F(ClassLinkerTest, TestClassRoots)
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::PANDA_ASSEMBLY);
     auto *ext = classLinker->GetExtension(ctx);
 
+    Class *classClass = ext->GetClassRoot(ClassRoot::CLASS);
+    ASSERT_NE(classClass, nullptr);
+    EXPECT_EQ(classClass->GetBase(), ext->GetClassRoot(ClassRoot::OBJECT));
+    EXPECT_EQ(classClass->GetComponentSize(), 0U);
+    EXPECT_EQ(classClass->GetFlags(), 0U);
+    EXPECT_EQ(classClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
+    EXPECT_TRUE(classClass->IsClassClass());
+    EXPECT_FALSE(classClass->IsObjectClass());
+    EXPECT_FALSE(classClass->IsArrayClass());
+    EXPECT_FALSE(classClass->IsObjectArrayClass());
+    EXPECT_FALSE(classClass->IsStringClass());
+    EXPECT_FALSE(classClass->IsPrimitive());
+    EXPECT_TRUE(classClass->IsClass());
+    EXPECT_FALSE(classClass->IsInterface());
+
     Class *objectClass = ext->GetClassRoot(ClassRoot::OBJECT);
     ASSERT_NE(objectClass, nullptr);
     EXPECT_EQ(objectClass->GetBase(), nullptr);
     EXPECT_EQ(objectClass->GetComponentSize(), 0U);
     EXPECT_EQ(objectClass->GetFlags(), 0U);
     EXPECT_EQ(objectClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
+    EXPECT_TRUE(objectClass->IsObjectClass());
     EXPECT_FALSE(objectClass->IsArrayClass());
     EXPECT_FALSE(objectClass->IsObjectArrayClass());
     EXPECT_FALSE(objectClass->IsStringClass());
     EXPECT_FALSE(objectClass->IsPrimitive());
+    EXPECT_TRUE(objectClass->IsClass());
+    EXPECT_FALSE(objectClass->IsInterface());
 
     Class *stringClass = ext->GetClassRoot(ClassRoot::STRING);
     ASSERT_NE(stringClass, nullptr);
@@ -278,34 +330,16 @@ TEST_F(ClassLinkerTest, TestClassRoots)
     EXPECT_EQ(stringClass->GetComponentSize(), 0U);
     EXPECT_EQ(stringClass->GetFlags(), Class::STRING_CLASS);
     EXPECT_EQ(stringClass->GetType().GetId(), panda_file::Type::TypeId::REFERENCE);
+    EXPECT_FALSE(stringClass->IsObjectClass());
     EXPECT_FALSE(stringClass->IsArrayClass());
     EXPECT_FALSE(stringClass->IsObjectArrayClass());
     EXPECT_TRUE(stringClass->IsStringClass());
     EXPECT_FALSE(stringClass->IsPrimitive());
+    EXPECT_TRUE(stringClass->IsClass());
+    EXPECT_FALSE(stringClass->IsInterface());
 
-    TestPrimitiveClassRoot(*ext, ClassRoot::U1, panda_file::Type::TypeId::U1);
-    TestPrimitiveClassRoot(*ext, ClassRoot::I8, panda_file::Type::TypeId::I8);
-    TestPrimitiveClassRoot(*ext, ClassRoot::U8, panda_file::Type::TypeId::U8);
-    TestPrimitiveClassRoot(*ext, ClassRoot::I16, panda_file::Type::TypeId::I16);
-    TestPrimitiveClassRoot(*ext, ClassRoot::U16, panda_file::Type::TypeId::U16);
-    TestPrimitiveClassRoot(*ext, ClassRoot::I32, panda_file::Type::TypeId::I32);
-    TestPrimitiveClassRoot(*ext, ClassRoot::U32, panda_file::Type::TypeId::U32);
-    TestPrimitiveClassRoot(*ext, ClassRoot::I64, panda_file::Type::TypeId::I64);
-    TestPrimitiveClassRoot(*ext, ClassRoot::U64, panda_file::Type::TypeId::U64);
-    TestPrimitiveClassRoot(*ext, ClassRoot::F32, panda_file::Type::TypeId::F32);
-    TestPrimitiveClassRoot(*ext, ClassRoot::F64, panda_file::Type::TypeId::F64);
-
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_U1, ClassRoot::U1);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_I8, ClassRoot::I8);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_U8, ClassRoot::U8);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_I16, ClassRoot::I16);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_U16, ClassRoot::U16);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_I32, ClassRoot::I32);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_U32, ClassRoot::U32);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_I64, ClassRoot::I64);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_U64, ClassRoot::U64);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_F32, ClassRoot::F32);
-    TestArrayClassRoot(*ext, ClassRoot::ARRAY_F64, ClassRoot::F64);
+    TestPrimitiveClassRoots(*ext);
+    TestArrayClassRoots(*ext);
 }
 
 struct FieldData {

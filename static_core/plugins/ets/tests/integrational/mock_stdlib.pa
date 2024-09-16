@@ -16,6 +16,7 @@
 .record std.core.String
 .record std.core.StringBuilder
 .record std.core.Object
+.record std.core.Class
 .record std.core.__internal_undefined
 .record std.core.StackOverflowError
 .record std.core.DoubleToStringCacheElement

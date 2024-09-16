@@ -177,10 +177,3 @@ export function __runtimeSameValue(o1: NullishType, o2: NullishType): boolean {
 export function __runtimeIsSameReference(o1: NullishType, o2: NullishType): boolean {
     return runtime.isSameReference(o1, o2)
 }
-
-/**
- * Loads library from specified path.
- *
- * @param path to library to load
- */
-export native function loadLibrary(path: String): void;

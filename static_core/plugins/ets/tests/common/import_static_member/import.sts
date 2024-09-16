@@ -16,6 +16,6 @@
 import * as A from "./class_module.sts"
 
 function main() : void {
-  A.Class.foo();
-  A.Class.a;
+  A.TestClass.foo();
+  A.TestClass.a;
 }
