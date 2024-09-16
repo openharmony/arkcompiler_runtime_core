@@ -98,16 +98,11 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Int8Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        // NOTE (ikorobkov): dealing with this overload is tricky
-        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.sts
-        let arr = Array.from<Number>(elements)
-        this.byteLength = arr.length * Int8Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = arr.length as int
-        this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.byteOffset = 0
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, arr.$_get(i).byteValue())
-        }
+        let x = Int8Array.from(elements)
+        this.byteLength = x.byteLength
+        this.lengthInt = x.lengthInt
+        this.buffer = x.buffer
+        this.byteOffset = x.byteOffset
     }
 
     /**
@@ -921,14 +916,17 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         let iter = arrayLike.$_iterator()
         // NOTE: This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
         const maybeLength = tryGetIteratorLength(arrayLike)
         if (maybeLength) {
             const result = new Int8Array(maybeLength)
             for (let i = 0; i < maybeLength; ++i) {
-                const x: number = iter.next().value!
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x, i as number)) as byte)
+                const x = iter.next()
+                if (x.done) {
+                    return new Int8Array(result.buffer, 0, i)
+                }
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)) as byte)
             }
             return result
         }
@@ -948,10 +946,10 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int8Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)) as byte)
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])) as byte)
             index[0]++
         })
-        return new Int8Array(temp.buffer, new Number(0), new Number(index[0]))
+        return new Int8Array(temp.buffer, 0, index[0])
     }
 
 
@@ -2684,16 +2682,11 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Int16Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        // NOTE (ikorobkov): dealing with this overload is tricky
-        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.sts
-        let arr = Array.from<Number>(elements)
-        this.byteLength = arr.length * Int16Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = arr.length as int
-        this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.byteOffset = 0
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, arr.$_get(i).shortValue())
-        }
+        let x = Int16Array.from(elements)
+        this.byteLength = x.byteLength
+        this.lengthInt = x.lengthInt
+        this.buffer = x.buffer
+        this.byteOffset = x.byteOffset
     }
 
     /**
@@ -3514,14 +3507,17 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         let iter = arrayLike.$_iterator()
         // NOTE: This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
         const maybeLength = tryGetIteratorLength(arrayLike)
         if (maybeLength) {
             const result = new Int16Array(maybeLength)
             for (let i = 0; i < maybeLength; ++i) {
-                const x: number = iter.next().value!
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x, i as number)) as short)
+                const x = iter.next()
+                if (x.done) {
+                    return new Int16Array(result.buffer, 0, i)
+                }
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)) as short)
             }
             return result
         }
@@ -3541,10 +3537,10 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int16Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)) as short)
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])) as short)
             index[0]++
         })
-        return new Int16Array(temp.buffer, new Number(0), new Number(index[0]))
+        return new Int16Array(temp.buffer, 0, index[0])
     }
 
 
@@ -5281,16 +5277,11 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Int32Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        // NOTE (ikorobkov): dealing with this overload is tricky
-        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.sts
-        let arr = Array.from<Number>(elements)
-        this.byteLength = arr.length * Int32Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = arr.length as int
-        this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.byteOffset = 0
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, arr.$_get(i).intValue())
-        }
+        let x = Int32Array.from(elements)
+        this.byteLength = x.byteLength
+        this.lengthInt = x.lengthInt
+        this.buffer = x.buffer
+        this.byteOffset = x.byteOffset
     }
 
     /**
@@ -6069,14 +6060,17 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         let iter = arrayLike.$_iterator()
         // NOTE: This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
         const maybeLength = tryGetIteratorLength(arrayLike)
         if (maybeLength) {
             const result = new Int32Array(maybeLength)
             for (let i = 0; i < maybeLength; ++i) {
-                const x: number = iter.next().value!
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x, i as number)) as int)
+                const x = iter.next()
+                if (x.done) {
+                    return new Int32Array(result.buffer, 0, i)
+                }
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)) as int)
             }
             return result
         }
@@ -6096,10 +6090,10 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Int32Array(tb)
             }
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)) as int)
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])) as int)
             index[0]++
         })
-        return new Int32Array(temp.buffer, new Number(0), new Number(index[0]))
+        return new Int32Array(temp.buffer, 0, index[0])
     }
 
 
@@ -7836,15 +7830,26 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * Creates an BigInt64Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<BigInt>) {
-        // NOTE (ikorobkov): dealing with this overload is tricky
-        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.sts
-        let arr = Array.from<BigInt>(elements)
-        this.byteLength = arr.length * BigInt64Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = arr.length as int
+        // NOTE (templin.konstantin): Please remove this code block after
+        //  BigInt.from implementation
+
+        let iterator = elements.$_iterator();
+        let result = new IteratorResult<BigInt>()
+        let length = 0
+        while ((result = iterator.next()).done != true) {
+            ++length
+        }
+        this.byteLength = length * BigInt64Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length as int
         this.buffer = new ArrayBuffer(this.byteLength as int)
         this.byteOffset = 0
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, arr.$_get(i).getLong())
+        iterator = elements.$_iterator();
+        let i = 0
+        while ((result = iterator.next()).done != true) {
+            if (__runtimeIsSameReference(result.value, undefined)) {
+                continue
+            }
+            this.setUnsafe(i++, (result.value as BigInt).getLong())
         }
     }
 
@@ -10367,16 +10372,11 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Float32Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        // NOTE (ikorobkov): dealing with this overload is tricky
-        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.sts
-        let arr = Array.from<Number>(elements)
-        this.byteLength = arr.length * Float32Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = arr.length as int
-        this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.byteOffset = 0
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, arr.$_get(i).floatValue())
-        }
+        let x = Float32Array.from(elements)
+        this.byteLength = x.byteLength
+        this.lengthInt = x.lengthInt
+        this.buffer = x.buffer
+        this.byteOffset = x.byteOffset
     }
 
     /**
@@ -11172,14 +11172,17 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         let iter = arrayLike.$_iterator()
         // NOTE: This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
         const maybeLength = tryGetIteratorLength(arrayLike)
         if (maybeLength) {
             const result = new Float32Array(maybeLength)
             for (let i = 0; i < maybeLength; ++i) {
-                const x: number = iter.next().value!
-                result.setUnsafe(i, (mapfn)!(x, i as number) as float)
+                const x = iter.next()
+                if (x.done) {
+                    return new Float32Array(result.buffer, 0, i)
+                }
+                result.setUnsafe(i, (mapfn)!(x.value!, i) as float)
             }
             return result
         }
@@ -11199,10 +11202,10 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Float32Array(tb)
             }
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0] as number) as float)
+            temp.setUnsafe(index[0], (mapfn)!(x, index[0]) as float)
             index[0]++
         })
-        return new Float32Array(temp.buffer, new Number(0), new Number(index[0]))
+        return new Float32Array(temp.buffer, 0, index[0])
     }
 
 
@@ -12945,16 +12948,11 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Float64Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        // NOTE (ikorobkov): dealing with this overload is tricky
-        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.sts
-        let arr = Array.from<Number>(elements)
-        this.byteLength = arr.length * Float64Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = arr.length as int
-        this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.byteOffset = 0
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, arr.$_get(i).doubleValue())
-        }
+        let x = Float64Array.from(elements)
+        this.byteLength = x.byteLength
+        this.lengthInt = x.lengthInt
+        this.buffer = x.buffer
+        this.byteOffset = x.byteOffset
     }
 
     /**
@@ -13640,14 +13638,17 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         let iter = arrayLike.$_iterator()
         // NOTE: This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
         const maybeLength = tryGetIteratorLength(arrayLike)
         if (maybeLength) {
             const result = new Float64Array(maybeLength)
             for (let i = 0; i < maybeLength; ++i) {
-                const x: number = iter.next().value!
-                result.setUnsafe(i, (mapfn)!(x, i as number) as double)
+                const x = iter.next()
+                if (x.done) {
+                    return new Float64Array(result.buffer, 0, i)
+                }
+                result.setUnsafe(i, (mapfn)!(x.value!, i) as double)
             }
             return result
         }
@@ -13667,10 +13668,10 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
                 }
                 temp = new Float64Array(tb)
             }
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0] as number) as double)
+            temp.setUnsafe(index[0], (mapfn)!(x, index[0]) as double)
             index[0]++
         })
-        return new Float64Array(temp.buffer, new Number(0), new Number(index[0]))
+        return new Float64Array(temp.buffer, 0, index[0])
     }
 
 

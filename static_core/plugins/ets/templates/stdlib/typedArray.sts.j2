@@ -116,16 +116,35 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * Creates an {{N}}Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<{{subsetTypeValues}}>) {
-        // NOTE (ikorobkov): dealing with this overload is tricky
-        // with banned `instanceof` generic, so it is delegated to array here. Initial idea from Set.sts
-        let arr = Array.from<{{subsetTypeValues}}>(elements)
-        this.byteLength = arr.length * {{N}}Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = arr.length as int
+        {%- if N != 'BigInt64' %}
+        let x = {{N}}Array.from(elements)
+        this.byteLength = x.byteLength
+        this.lengthInt = x.lengthInt
+        this.buffer = x.buffer
+        this.byteOffset = x.byteOffset
+        {%- else %}
+        // NOTE (templin.konstantin): Please remove this code block after
+        //  BigInt.from implementation
+
+        let iterator = elements.$_iterator();
+        let result = new IteratorResult<{{subsetTypeValues}}>()
+        let length = 0
+        while ((result = iterator.next()).done != true) {
+            ++length
+        }
+        this.byteLength = length * {{N}}Array.BYTES_PER_ELEMENT as int
+        this.lengthInt = length as int
         this.buffer = new ArrayBuffer(this.byteLength as int)
         this.byteOffset = 0
-        for (let i: int = 0; i < this.lengthInt; ++i) {
-            this.setUnsafe(i, arr.$_get(i){{numberBigIntToPrimitive}})
+        iterator = elements.$_iterator();
+        let i = 0
+        while ((result = iterator.next()).done != true) {
+            if (__runtimeIsSameReference(result.value, undefined)) {
+                continue
+            }
+            this.setUnsafe(i++, (result.value as {{subsetTypeValues}}){{numberBigIntToPrimitive}})
         }
+        {%- endif %}
     }
 
     /**
@@ -1042,17 +1061,20 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         let iter = arrayLike.$_iterator()
         // NOTE: This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
-        //  We are trying to use "reflection" to find the "__getLength" method and if it exists,
+        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
         const maybeLength = tryGetIteratorLength(arrayLike)
         if (maybeLength) {
             const result = new {{N}}Array(maybeLength)
             for (let i = 0; i < maybeLength; ++i) {
-                const x: number = iter.next().value!
+                const x = iter.next()
+                if (x.done) {
+                    return new {{N}}Array(result.buffer, 0, i)
+                }
                 {%- if (N != 'Float32') and (N != 'Float64') %}
-                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x, i as number)){{fromElementCompat}})
+                result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)){{fromElementCompat}})
                 {%- else %}
-                result.setUnsafe(i, (mapfn)!(x, i as number){{fromElementCompat}})
+                result.setUnsafe(i, (mapfn)!(x.value!, i){{fromElementCompat}})
                 {%- endif %}
             }
             return result
@@ -1074,13 +1096,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 temp = new {{N}}Array(tb)
             }
             {%- if (N != 'Float32') and (N != 'Float64') %}
-            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0] as number)){{fromElementCompat}})
+            temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])){{fromElementCompat}})
             {%- else %}
-            temp.setUnsafe(index[0], (mapfn)!(x, index[0] as number){{fromElementCompat}})
+            temp.setUnsafe(index[0], (mapfn)!(x, index[0]){{fromElementCompat}})
             {%- endif %}
             index[0]++
         })
-        return new {{N}}Array(temp.buffer, new Number(0), new Number(index[0]))
+        return new {{N}}Array(temp.buffer, 0, index[0])
     {%- else %}
         throw new Error("{{N}}Array.from: not implemented")
     {%- endif %}
