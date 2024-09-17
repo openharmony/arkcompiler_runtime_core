@@ -12,7 +12,12 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-import("//build/ohos.gni")
+
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 # NB! Standard library is built only if the front-end is available.
 with_stdlib = false
@@ -25,12 +30,9 @@ foreach(plugin, ark_enabled_plugins) {
 group("ark_packages") {
   deps = [ "runtime/napi/etsnative:etsnative" ]
 
-  if (ark_standalone_build) {
+  if (ark_static_standalone_build) {
     deps += [ "$ark_es2panda_root/aot:ets2panda" ]
-  } else {
-    external_deps = [ "ets_frontend:ets2panda" ]
   }
-
   if (with_stdlib) {
     deps += [ ":etsstdlib" ]
   }
@@ -105,7 +107,7 @@ ark_isa_gen("isa_gen_ets_bytecodeopt") {
 if (with_stdlib) {
   es2panda_gen("etsstdlib") {
     inputs = [ "stdlib" ]
-    if (ark_standalone_build) {
+    if (ark_static_standalone_build) {
       outputs = [ "$root_build_dir/plugins/ets/etsstdlib.abc" ]
     } else {
       outputs = [ "$target_gen_dir/etsstdlib.abc" ]
@@ -125,12 +127,11 @@ if (with_stdlib) {
       "  }",
       "}",
     ]
-
     default_arktsconfig =
         get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
                        "root_out_dir")
 
-    if (ark_standalone_build) {
+    if (ark_static_standalone_build) {
       default_arktsconfig += "/bin"
     } else {
       default_arktsconfig += "/arkcompiler/ets_frontend"
@@ -142,56 +143,7 @@ if (with_stdlib) {
     write_file("$default_arktsconfig/arktsconfig.json",
                json_array,
                "list lines")
-    sources = [
-      "stdlib/escompat/Array.sts",
-      "stdlib/escompat/ArrayBuffer.sts",
-      "stdlib/escompat/DataView.sts",
-      "stdlib/escompat/Date.sts",
-      "stdlib/escompat/Error.sts",
-      "stdlib/escompat/Errors.sts",
-      "stdlib/escompat/Map.sts",
-      "stdlib/escompat/Math.sts",
-      "stdlib/escompat/Number.sts",
-      "stdlib/escompat/RegExp.sts",
-      "stdlib/escompat/Set.sts",
-      "stdlib/escompat/TypedArrays.sts",
-      "stdlib/escompat/json.sts",
-      "stdlib/std/containers/AVLTree.sts",
-      "stdlib/std/containers/ArrayAsListInt.sts",
-      "stdlib/std/containers/ArrayAsListObject.sts",
-      "stdlib/std/containers/ListInt.sts",
-      "stdlib/std/containers/ListObject.sts",
-      "stdlib/std/core/Boolean.sts",
-      "stdlib/std/core/Byte.sts",
-      "stdlib/std/core/Char.sts",
-      "stdlib/std/core/Comparable.sts",
-      "stdlib/std/core/Console.sts",
-      "stdlib/std/core/Double.sts",
-      "stdlib/std/core/Exception.sts",
-      "stdlib/std/core/Exceptions.sts",
-      "stdlib/std/core/Field.sts",
-      "stdlib/std/core/FinalizationRegistry.sts",
-      "stdlib/std/core/Float.sts",
-      "stdlib/std/core/GC.sts",
-      "stdlib/std/core/Int.sts",
-      "stdlib/std/core/Long.sts",
-      "stdlib/std/core/Method.sts",
-      "stdlib/std/core/Numeric.sts",
-      "stdlib/std/core/Object.sts",
-      "stdlib/std/core/Parameter.sts",
-      "stdlib/std/core/Runtime.sts",
-      "stdlib/std/core/Short.sts",
-      "stdlib/std/core/StackTrace.sts",
-      "stdlib/std/core/String.sts",
-      "stdlib/std/core/StringBuilder.sts",
-      "stdlib/std/core/System.sts",
-      "stdlib/std/core/Type.sts",
-      "stdlib/std/core/UnionCase.sts",
-      "stdlib/std/core/Value.sts",
-      "stdlib/std/core/WeakRef.sts",
-      "stdlib/std/math/consts/consts.sts",
-      "stdlib/std/math/math.sts",
-    ]
+
     args = [
       "--extension=sts",
       "--opt-level=2",

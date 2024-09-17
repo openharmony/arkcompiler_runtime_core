@@ -12,9 +12,14 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-import("//build/ohos.gni")
 import("$ark_root/plugins/plugins.gni")
 import("$ark_root/verification/verification.gni")
+
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 runtime_yaml = [ "runtime.yaml" ]
 if (enable_irtoc) {
@@ -49,6 +54,9 @@ config("arkruntime_config") {
     "$ark_root/compiler",
     "$ark_root/dprof/libdprof",
   ]
+  if (ark_standalone_build) {
+    include_dirs += [ "//third_party/icu/icu4c/source" ]
+  }
 
   cflags_cc = [
     "-Wno-invalid-offsetof",
@@ -60,9 +68,9 @@ config("arkruntime_config") {
   }
 
   configs = [
-    "//build/config/compiler:optimize_speed",
-    "//build/config/compiler:no_exceptions",
-    "//build/config/compiler:no_rtti",
+    "$build_root/config/compiler:optimize_speed",
+    "$build_root/config/compiler:no_exceptions",
+    "$build_root/config/compiler:no_rtti",
   ]
 }
 
@@ -375,16 +383,19 @@ ohos_source_set("libarkruntime_set_static") {
     "$ark_root/runtime/asm_defines:asm_defines_generator",
   ]
 
-  if (ark_standalone_build) {
+  if (ark_static_standalone_build) {
     deps += [ icui18n_dep ]
   }
 
   external_deps = [
-    "napi:ace_napi",
     icui18n_dep,
     icuuc_dep,
     sdk_libc_secshared_dep,
   ]
+
+  if (!ark_standalone_build) {
+    external_deps += [ "napi:ace_napi" ]
+  }
 
   deps += plugin_runtime_deps
   deps += plugin_arkruntime_stdlib_plugin_deps

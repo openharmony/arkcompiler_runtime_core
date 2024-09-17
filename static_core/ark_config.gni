@@ -13,12 +13,17 @@
 
 import("//arkcompiler/runtime_core/static_core/ark_root.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
-import("//build/ohos.gni")
+
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 ark_subsystem_name = "arkcompiler"
 ark_part_name = "runtime_core"
 
-if (is_standard_system) {
+if (is_standard_system || ark_standalone_build) {
   import("$ark_root/platforms/ohos/ark_config.gni")
 } else {
   import("$ark_root/platforms/mobile/ark_config.gni")
@@ -78,7 +83,8 @@ ark_isa_yaml = "$isa_gen_dir/isa.yaml"
 
 enable_irtoc = true
 enable_codegen = true
-if (!ark_standalone_build && (target_cpu == "x64" || target_cpu == "x86_64")) {
+if (ark_standalone_build || (!ark_static_standalone_build &&
+                             (target_cpu == "x64" || target_cpu == "x86_64"))) {
   enable_irtoc = false
   enable_codegen = false
   is_llvmbackend = false
@@ -121,7 +127,7 @@ icui18n_dep = "icu:shared_icui18n"
 icuuc_dep = "icu:shared_icuuc"
 vixl_dep = "vixl:libvixl"
 
-if (ark_standalone_build) {
+if (ark_static_standalone_build) {
   sdk_libc_secshared_dep = "$ark_third_party_root/securec:libc_secshared"
   sdk_libc_secshared_ext_dep = "$ark_third_party_root/securec:libc_secshared"
   sdk_libc_secshared_config =
@@ -388,8 +394,7 @@ template("es2panda_gen") {
     es2panda_root_out =
         get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
                        "root_out_dir")
-
-    if (ark_standalone_build) {
+    if (ark_static_standalone_build || ark_standalone_build) {
       deps = [ "$ark_es2panda_root/aot:ets2panda" ]
       es2panda_bin = "/bin/es2panda"
     } else {
@@ -401,7 +406,6 @@ template("es2panda_gen") {
 
     inputs = invoker.inputs
     outputs = invoker.outputs
-    sources = invoker.sources
     args = invoker.args
   }
 }

@@ -11,25 +11,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+if (!defined(ark_static_standalone_build)) {
+  ark_static_standalone_build = false
+}
 if (!defined(ark_standalone_build)) {
   ark_standalone_build = false
 }
 
-if (ark_standalone_build) {
-  ark_root = "//"
-  build_root = "//gn/build"
-  import("$build_root/fastverify.gni")
-} else {
-  ark_root = "//arkcompiler/runtime_core/static_core"
-  build_root = "//build"
-  import("$build_root/config/components/toolchain/build_type.gni")
-}
+ark_root = "//arkcompiler/runtime_core/static_core"
 
 ark_third_party_root = "//third_party"
 
-# TODO(vpukhov): adjust es2panda path
 if (ark_standalone_build) {
+  ark_es2panda_root = "//arkcompiler/ets_frontend/ets2panda"
+  ark_third_party_root = "//arkcompiler/toolchain/build/third_party_gn"
+  import("$build_root/config/build_type.gni")
+} else if (ark_static_standalone_build) {
+  ark_root = "//"
   ark_es2panda_root = "$ark_root/tools/es2panda"
+  build_root = "//gn/build"
+  import("$build_root/fastverify.gni")
 } else {
   ark_es2panda_root = "//arkcompiler/ets_frontend/ets2panda"
+  import("//build/config/components/toolchain/build_type.gni")
 }

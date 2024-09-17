@@ -11,8 +11,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//build/config/sanitizers/sanitizers.gni")
-import("//build/ohos_var.gni")
+if (!defined(ark_static_standalone_build)) {
+  ark_static_standalone_build = false
+}
+if (!defined(ark_standalone_build)) {
+  ark_standalone_build = false
+}
+
+if (ark_standalone_build) {
+  import("//arkcompiler/toolchain/build/config/sanitizers/sanitizers.gni")
+  ark_root = "//arkcompiler/runtime_core/static_core"
+  import("$build_root/ark_var.gni")
+} else if (ark_static_standalone_build) {
+  import("//build/config/sanitizers/sanitizers.gni")
+  build_root = "$ark_root/gn/build"
+} else {
+  import("//build/config/sanitizers/sanitizers.gni")
+  build_root = "//build"
+  import("//build/ohos_var.gni")
+}
 
 enable_arkplatform = true
 enable_static_vm = true

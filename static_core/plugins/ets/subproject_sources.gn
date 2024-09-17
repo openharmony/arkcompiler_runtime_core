@@ -60,9 +60,7 @@ inst_templates_yaml_path =
 
 entrypoints_yaml_path = "runtime/ets_entrypoints.yaml"
 
-irtoc_scripts = [
-  "irtoc_scripts/to_string_cache.irt",
-]
+irtoc_scripts = [ "irtoc_scripts/to_string_cache.irt" ]
 
 irtoc_plugins = [
   "irtoc_scripts/interpreter_handlers.irt",
@@ -192,7 +190,8 @@ if (ark_ets_interop_js) {
   configs_runtime += [ "runtime/interop_js:interop_js_public_config" ]
 
   if (ark_standalone_build) {
-    arkruntime_deps += [ "$ark_root/plugins/ets/runtime/interop_js:install_nodejs" ]
+    arkruntime_deps +=
+        [ "$ark_root/plugins/ets/runtime/interop_js:install_nodejs" ]
   }
 }
 

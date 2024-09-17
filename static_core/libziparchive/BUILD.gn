@@ -12,13 +12,21 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-import("//build/ohos.gni")
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 config("arkziparchive_config") {
   include_dirs = [
     "$ark_root/libziparchive",
     "$ark_root/libpandabase",
   ]
+
+  if (ark_standalone_build) {
+    include_dirs += [ "//third_party/zlib/contrib/minizip" ]
+  }
 }
 
 ohos_source_set("libarktsziparchive_static") {
@@ -32,7 +40,7 @@ ohos_source_set("libarktsziparchive_static") {
 
   deps = [ "$ark_root/libpandabase:libarktsbase" ]
 
-  if (ark_standalone_build) {
+  if (ark_static_standalone_build) {
     public_configs += [ zlib_public_config ]
     deps += [ zlib_dep ]
   }
@@ -67,8 +75,11 @@ ohos_source_set("libarktsziparchive_frontend_set_static") {
 
   deps = [ "$ark_root/libpandabase:logger_enum_gen_h" ]
 
-  if (ark_standalone_build) {
+  if (ark_static_standalone_build || ark_standalone_build) {
     public_configs += [ zlib_public_config ]
+  }
+
+  if (ark_static_standalone_build) {
     deps += [
       sdk_libc_secshared_dep,
       zlib_dep,
