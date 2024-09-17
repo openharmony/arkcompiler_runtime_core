@@ -255,6 +255,7 @@ if(PANDA_WITH_TOOLCHAIN)
         add_subdirectory(libpandafile/external)
     endif()
 
+    add_subdirectory(abc2program)
     add_subdirectory(assembler)
     add_subdirectory(disassembler)
 

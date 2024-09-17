@@ -28,6 +28,8 @@ srcs_compiler = [
   "compiler/optimizer/ets_intrinsics_peephole.cpp",
 ]
 
+srcs_abc2program = [ "abc2program/abc2program_ets_plugin.cpp" ]
+
 srcs_disassembler = [ "disassembler/disasm_ets_plugin.cpp" ]
 
 srcs_isa = [ "isa/isa.yaml" ]

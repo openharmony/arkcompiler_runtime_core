@@ -51,6 +51,7 @@ components:
   - name: verifier
   - name: compilation_queue
   - name: disassembler
+  - name: abc2program
   - name: ziparchive
   - name: bytecode_optimizer
   - name: AOT
