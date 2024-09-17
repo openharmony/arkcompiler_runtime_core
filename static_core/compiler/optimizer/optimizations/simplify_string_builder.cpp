@@ -1157,35 +1157,36 @@ void SimplifyStringBuilder::CleanupSaveStateInstructionInputs(Loop *loop)
     RemoveFromInstructionInputs(inputDescriptors_);
 }
 
-bool SimplifyStringBuilder::NeedRemoveInputFromPhiInstruction(Inst *inputInst)
+Inst *SimplifyStringBuilder::FindHoistedToStringCallInput(Inst *phi)
 {
     for (auto &match : matches_) {
-        // If input is hoisted toString-call mark it for removal
-        if (inputInst == match.exit.toStringCall) {
-            return true;
+        auto toStringCall = match.exit.toStringCall;
+        if (HasInput(phi, [toStringCall](auto &input) { return input.GetInst() == toStringCall; })) {
+            return toStringCall;
         }
     }
 
-    return false;
+    return nullptr;
 }
 
 void SimplifyStringBuilder::CleanupPhiInstructionInputs(Inst *phi)
 {
     ASSERT(phi->IsPhi());
 
-    for (size_t i = 0; i < phi->GetInputsCount(); ++i) {
-        auto inputInst = phi->GetInput(i).GetInst();
-        if (NeedRemoveInputFromPhiInstruction(inputInst)) {
-            phi->SetInput(i, phi);
-        }
+    auto toStringCall = FindHoistedToStringCallInput(phi);
+    if (toStringCall != nullptr) {
+        RemoveFromSaveStateInputs(phi);
+        phi->ReplaceUsers(toStringCall);
+        phi->GetBasicBlock()->RemoveInst(phi);
     }
 }
 
 void SimplifyStringBuilder::CleanupPhiInstructionInputs(Loop *loop)
 {
-    // Remove toString()-call from accumulated value phi-instruction inputs
+    // Remove toString()-call from accumulated value phi-instruction inputs,
+    // replace accumulated value users with toString()-call, and remove accumulated value itself
     for (auto block : loop->GetBlocks()) {
-        for (auto phi : block->PhiInsts()) {
+        for (auto phi : block->PhiInstsSafe()) {
             CleanupPhiInstructionInputs(phi);
         }
     }
