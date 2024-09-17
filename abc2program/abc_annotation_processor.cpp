@@ -15,6 +15,8 @@
 
 #include "abc_annotation_processor.h"
 #include "abc2program_log.h"
+#include "abc_literal_array_processor.h"
+#include "file-inl.h"
 
 namespace panda::abc2program {
 
@@ -24,12 +26,14 @@ AbcAnnotationProcessor::AbcAnnotationProcessor(panda_file::File::EntityId entity
     : AbcFileEntityProcessor(entity_id, entity_container), function_(function)
 {
     annotation_data_accessor_ = std::make_unique<panda_file::AnnotationDataAccessor>(*file_, entity_id_);
-    auto type_descriptor_name = GetStringById(annotation_data_accessor_->GetClassId());
-    annotation_name_ = pandasm::Type::FromDescriptor(type_descriptor_name).GetName();
+    annotation_name_ = pandasm::Type::FromDescriptor(GetStringById(annotation_data_accessor_->GetClassId())).GetName();
 }
 
 void AbcAnnotationProcessor::FillProgramData()
 {
+    if (annotation_name_.empty()) {
+        return;
+    }
     FillAnnotation();
 }
 
@@ -43,19 +47,64 @@ void AbcAnnotationProcessor::FillAnnotation()
     function_.metadata->AddAnnotations(annotations);
 }
 
+void AbcAnnotationProcessor::FillLiteralArrayAnnotation(std::vector<pandasm::AnnotationElement> &elements,
+                                                        const std::string &annotation_elem_name, uint32_t value)
+{
+    panda_file::LiteralDataAccessor lit_data_accessor(*file_, file_->GetLiteralArraysId());
+    AbcLiteralArrayProcessor lit_array_proc(panda_file::File::EntityId{value}, entity_container_,
+                                            lit_data_accessor);
+    lit_array_proc.FillProgramData();
+    std::string name = entity_container_.GetLiteralArrayIdName(value);
+    pandasm::AnnotationElement annotation_element(
+        annotation_elem_name, std::make_unique<pandasm::ScalarValue>(
+        pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(name)));
+    elements.emplace_back(annotation_element);
+}
+
 void AbcAnnotationProcessor::FillAnnotationElements(std::vector<pandasm::AnnotationElement> &elements)
 {
     for (uint32_t i = 0; i < annotation_data_accessor_->GetCount(); ++i) {
         auto annotation_data_accessor_elem = annotation_data_accessor_->GetElement(i);
         auto annotation_elem_name = GetStringById(annotation_data_accessor_elem.GetNameId());
-        auto value = annotation_data_accessor_elem.GetScalarValue().GetValue();
         auto value_type = pandasm::Value::GetCharAsType(annotation_data_accessor_->GetTag(i).GetItem());
         switch (value_type) {
+            case pandasm::Value::Type::U1: {
+                auto value = annotation_data_accessor_elem.GetScalarValue().Get<bool>();
+                pandasm::AnnotationElement annotation_element(
+                    annotation_elem_name, std::make_unique<pandasm::ScalarValue>(
+                    pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(value)));
+                elements.emplace_back(annotation_element);
+                break;
+            }
             case pandasm::Value::Type::U32: {
+                auto value = annotation_data_accessor_elem.GetScalarValue().Get<uint32_t>();
                 pandasm::AnnotationElement annotation_element(
                     annotation_elem_name, std::make_unique<pandasm::ScalarValue>(
                     pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(value)));
                 elements.emplace_back(annotation_element);
+                break;
+            }
+            case pandasm::Value::Type::F64: {
+                auto value = annotation_data_accessor_elem.GetScalarValue().Get<double>();
+                pandasm::AnnotationElement annotation_element(
+                    annotation_elem_name, std::make_unique<pandasm::ScalarValue>(
+                    pandasm::ScalarValue::Create<pandasm::Value::Type::F64>(value)));
+                elements.emplace_back(annotation_element);
+                break;
+            }
+            case pandasm::Value::Type::STRING: {
+                auto value = annotation_data_accessor_elem.GetScalarValue().Get<uint32_t>();
+                std::string_view string_value {
+                    reinterpret_cast<const char *>(file_->GetStringData(panda_file::File::EntityId(value)).data)};
+                pandasm::AnnotationElement annotation_element(
+                    annotation_elem_name, std::make_unique<pandasm::ScalarValue>(
+                    pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(string_value)));
+                elements.emplace_back(annotation_element);
+                break;
+            }
+            case pandasm::Value::Type::LITERALARRAY: {
+                auto value = annotation_data_accessor_elem.GetScalarValue().Get<uint32_t>();
+                FillLiteralArrayAnnotation(elements, annotation_elem_name, value);
                 break;
             }
             default:

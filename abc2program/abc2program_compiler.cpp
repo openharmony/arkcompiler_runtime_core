@@ -69,9 +69,6 @@ pandasm::Program *Abc2ProgramCompiler::CompileAbcFile()
     std::string record_name = "";
     for (size_t i = 0; i < classes.size(); i++) {
         panda_file::File::EntityId record_id(classes[i]);
-        if (file_->IsExternal(record_id)) {
-            UNREACHABLE();
-        }
         CompileAbcClass(record_id, *prog_, record_name);
     }
     return prog_;
@@ -80,7 +77,6 @@ pandasm::Program *Abc2ProgramCompiler::CompileAbcFile()
 void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &record_id,
                                           pandasm::Program &program, std::string &record_name)
 {
-    ASSERT(!file_->IsExternal(record_id));
     Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset());
     record_name = entity_container.GetFullRecordNameById(record_id);
     panda::Timer::timerStart(EVENT_COMPILE_ABC_FILE_RECORD, record_name);

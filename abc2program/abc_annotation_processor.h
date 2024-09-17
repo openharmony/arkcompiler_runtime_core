@@ -32,6 +32,8 @@ private:
     void InitAnnotationName();
     void FillAnnotation();
     void FillAnnotationElements(std::vector<pandasm::AnnotationElement> &elements);
+    void FillLiteralArrayAnnotation(std::vector<pandasm::AnnotationElement> &elements,
+                                    const std::string &annotation_elem_name, uint32_t value);
     std::unique_ptr<panda_file::AnnotationDataAccessor> annotation_data_accessor_;
     pandasm::Function &function_;
     std::string annotation_name_;

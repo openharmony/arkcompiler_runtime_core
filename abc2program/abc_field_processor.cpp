@@ -15,6 +15,9 @@
 
 #include "abc_field_processor.h"
 #include "abc2program_log.h"
+#include "abc_literal_array_processor.h"
+#include "file-inl.h"
+#include "literal_data_accessor.h"
 
 namespace panda::abc2program {
 
@@ -69,38 +72,90 @@ void AbcFieldProcessor::FillFieldAttributes()
     }
 }
 
+void AbcFieldProcessor::FillU32MetaData()
+{
+    uint32_t val = field_data_accessor_->GetValue<uint32_t>().value();
+    if (record_.name == ES_MODULE_RECORD || field_.name == MODULE_RECORD_IDX) {
+        entity_container_.AddModuleLiteralArrayId(val);
+        auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
+        field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+            module_literal_array_id_name));
+    } else if (record_.name == ES_SCOPE_NAMES_RECORD || field_.name == SCOPE_NAMES) {
+        entity_container_.AddUnnestedLiteralArrayId(val);
+        auto literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
+        field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+            literal_array_id_name));
+    } else if (field_.name == MODULE_REQUEST_PAHSE_IDX) {
+        entity_container_.AddModuleRequestPhaseId(val);
+        auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
+        field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+            module_literal_array_id_name));
+    } else if (field_.name == JSON_FILE_CONTENT) {
+        auto json_string_id = panda_file::File::EntityId(val);
+        field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(
+            entity_container_.GetStringById(json_string_id)));
+    } else {
+        field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(val));
+    }
+}
+
+void AbcFieldProcessor::FillStringMetaData()
+{
+    std::optional<uint32_t> string_offset_val = field_data_accessor_->GetValue<uint32_t>();
+    if (string_offset_val.has_value()) {
+        std::string_view val {reinterpret_cast<const char *>(
+            file_->GetStringData(panda_file::File::EntityId(string_offset_val.value())).data)};
+        field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(val));
+    }
+}
+
+void AbcFieldProcessor::FillLiteralArrayMetaData()
+{
+    std::optional<uint32_t> litarray_offset_val = field_data_accessor_->GetValue<uint32_t>();
+    if (litarray_offset_val.has_value()) {
+        panda_file::LiteralDataAccessor literal_data_accessor(*file_, file_->GetLiteralArraysId());
+        AbcLiteralArrayProcessor abcLitarrayProcessor{panda_file::File::EntityId{litarray_offset_val.value()},
+                                                      entity_container_, literal_data_accessor};
+        abcLitarrayProcessor.FillProgramData();
+        std::string name = entity_container_.GetLiteralArrayIdName(litarray_offset_val.value());
+        field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+            std::string_view {name}));
+    }
+}
+
 void AbcFieldProcessor::FillMetaDataValue()
 {
     switch (field_.type.GetId()) {
         case panda_file::Type::TypeId::U32: {
-            uint32_t val = field_data_accessor_->GetValue<uint32_t>().value();
-            if (record_.name == ES_MODULE_RECORD || field_.name == MODULE_RECORD_IDX) {
-                entity_container_.AddModuleLiteralArrayId(val);
-                auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
-                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
-                    module_literal_array_id_name));
-            } else if (record_.name == ES_SCOPE_NAMES_RECORD || field_.name == SCOPE_NAMES) {
-                entity_container_.AddUnnestedLiteralArrayId(val);
-                auto literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
-                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
-                    literal_array_id_name));
-            } else if (field_.name == MODULE_REQUEST_PAHSE_IDX) {
-                entity_container_.AddModuleRequestPhaseId(val);
-                auto module_literal_array_id_name = entity_container_.GetLiteralArrayIdName(val);
-                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
-                    module_literal_array_id_name));
-            } else if (field_.name == JSON_FILE_CONTENT) {
-                auto json_string_id = panda_file::File::EntityId(val);
-                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(
-                    entity_container_.GetStringById(json_string_id)));
-            } else {
-                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(val));
-            }
+            FillU32MetaData();
             break;
         }
         case panda_file::Type::TypeId::U8: {
             const uint8_t val = field_data_accessor_->GetValue<uint8_t>().value();
             field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U8>(val));
+            break;
+        }
+        case panda_file::Type::TypeId::F64: {
+            std::optional<double> val = field_data_accessor_->GetValue<double>();
+            if (val.has_value()) {
+                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::F64>(val.value()));
+            }
+            break;
+        }
+        case panda_file::Type::TypeId::U1: {
+            std::optional<bool> val = field_data_accessor_->GetValue<bool>();
+            if (val.has_value()) {
+                field_.metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(val.value()));
+            }
+            break;
+        }
+        case panda_file::Type::TypeId::REFERENCE: {
+            if (field_.type.GetName() == "panda.String") {
+                FillStringMetaData();
+            }
+            if (field_.type.IsArray()) {
+                FillLiteralArrayMetaData();
+            }
             break;
         }
         default:

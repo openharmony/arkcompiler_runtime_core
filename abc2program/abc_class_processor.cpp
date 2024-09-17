@@ -25,7 +25,9 @@ namespace panda::abc2program {
 AbcClassProcessor::AbcClassProcessor(panda_file::File::EntityId entity_id, Abc2ProgramEntityContainer &entity_container)
     : AbcFileEntityProcessor(entity_id, entity_container), record_(pandasm::Record("", LANG_ECMA))
 {
-    class_data_accessor_ = std::make_unique<panda_file::ClassDataAccessor>(*file_, entity_id_);
+    if (!file_->IsExternal(entity_id_)) {
+        class_data_accessor_ = std::make_unique<panda_file::ClassDataAccessor>(*file_, entity_id_);
+    }
 }
 
 void AbcClassProcessor::FillProgramData()
@@ -39,7 +41,17 @@ void AbcClassProcessor::FillProgramData()
 void AbcClassProcessor::FillRecord()
 {
     FillRecordName();
-    record_.metadata->SetAccessFlags(class_data_accessor_->GetAccessFlags());
+    /*
+    * All array types like f64[] are records because of assembler implementation.
+    * AbcClassProcessor must only collect record name for future purposes
+    * and not to collect any other data about it
+    */
+    if (AbcFileUtils::IsArrayTypeName(record_.name)) {
+        return;
+    }
+    if (!file_->IsExternal(entity_id_)) {
+        record_.metadata->SetAccessFlags(class_data_accessor_->GetAccessFlags());
+    }
     ASSERT(program_->record_table.count(record_.name) == 0);
     FillRecordData();
     program_->record_table.emplace(record_.name, std::move(record_));
@@ -76,6 +88,9 @@ void AbcClassProcessor::FillRecordAnnotations()
 
 void AbcClassProcessor::FillRecordSourceFile()
 {
+    if (file_->IsExternal(entity_id_)) {
+        return;
+    }
     std::optional<panda_file::File::EntityId> source_file_id = class_data_accessor_->GetSourceFileId();
     if (source_file_id.has_value()) {
         record_.source_file = GetStringById(source_file_id.value());
