@@ -178,6 +178,7 @@ T CompilerEtsLdObjByName(ark::Method *method, int32_t id, uint32_t pc, ark::Obje
 }
 
 template <panda_file::Type::TypeId FIELD_TYPE, class T>
+/* CC-OFFNXT(G.FUN.01-CPP, huge_method) big switch-case */
 static void SetTypedFieldPrimitive(Field *field, const VMHandle<ObjectHeader> &handleObj, T storeValue)
 {
     switch (field->GetTypeId()) {

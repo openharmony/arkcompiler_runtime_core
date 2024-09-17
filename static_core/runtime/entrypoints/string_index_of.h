@@ -22,10 +22,12 @@
 
 namespace ark::intrinsics {
 
+/* CC-OFFNXT(G.FUN.01-CPP) false positive */
 #if !defined(PANDA_TARGET_ARM64) && !defined(PANDA_TARGET_ARM32) && !defined(PANDA_TARGET_AMD64) && \
     !defined(PANDA_TARGET_X86)
 #error \
-    "Unknown target architecture. IndexOf implementation assumes that target architecture is little-endian, check it and update the file."
+    "Unknown target architecture. IndexOf implementation assumes that target architecture is little-endian, \
+check it and update the file."
 #endif
 
 namespace impl {
@@ -183,6 +185,7 @@ inline ALWAYS_INLINE int32_t Utf16StringIndexOfChar(uint16_t *data, size_t offse
 
 }  // namespace impl
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline int32_t StringIndexOfU16(void *str, uint16_t character, int32_t offset)
 {
     auto string = reinterpret_cast<ark::coretypes::String *>(str);

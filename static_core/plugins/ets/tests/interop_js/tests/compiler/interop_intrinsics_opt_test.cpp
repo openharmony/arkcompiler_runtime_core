@@ -346,6 +346,7 @@ void InteropIntrnsicsOptTest::BuildGraphTriangleOfBlocks()
 }
 
 // Param specifies for which blocks there is a local scope
+// CC-OFFNXT(huge_depth) graph creation
 PARAM_TEST(InteropIntrnsicsOptTest, TriangleOfBlocks,
            ::testing::Values(BlockPos::PRED | BlockPos::LEFT | BlockPos::NEXT, BlockPos::PRED | BlockPos::LEFT,
                              BlockPos::PRED | BlockPos::NEXT, BlockPos::LEFT | BlockPos::NEXT),
@@ -401,6 +402,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, TriangleOfBlocks,
 }
 
 // Param specifies for which blocks there is a local scope
+// CC-OFFNXT(huge_depth, huge_method, G.FUN.01-CPP) graph creation
 PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
            ::testing::Values(BlockPos::PRED | BlockPos::RIGHT | BlockPos::NEXT, BlockPos::PRED | BlockPos::RIGHT,
                              BlockPos::PRED | BlockPos::NEXT, BlockPos::RIGHT | BlockPos::NEXT),
@@ -558,6 +560,8 @@ PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocks,
 // Replace a wrap in dominated block with a wrap in dominator
 // In some cases hoist the wrap to the dominator
 // Param specifies for which blocks there is a wrap of int value v0 to js value
+// CC-OFFNXT(huge_depth, huge_method, huge_cyclomatic_complexity, huge_cca_cyclomatic_complexity) graph creation
+// CC-OFFNXT(G.FUN.01-CPP) graph creation
 PARAM_TEST(InteropIntrnsicsOptTest, DiamondOfBlocksRepeatedWraps,
            ::testing::Values(BlockPos::PRED | BlockPos::LEFT | BlockPos::RIGHT | BlockPos::NEXT,
                              BlockPos::LEFT | BlockPos::RIGHT, BlockPos::LEFT | BlockPos::RIGHT | BlockPos::NEXT,

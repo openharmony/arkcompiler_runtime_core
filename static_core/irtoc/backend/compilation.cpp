@@ -287,6 +287,7 @@ static size_t GetElfArch(Arch arch)
     }
 }
 
+// CC-OFFNXT(huge_method[C++],G.FUN.01-CPP) solid logic
 // CODECHECK-NOLINTNEXTLINE(C_RULE_ID_FUNCTION_SIZE)
 Compilation::Result Compilation::MakeElf(std::string_view output)
 {

@@ -35,6 +35,7 @@ namespace ark::ets::intrinsics {
 #define SHARED_MEMORY_AT(type, postfix)                                          \
     extern "C" type SharedMemoryAt##postfix(EtsSharedMemory *mem, int32_t index) \
     {                                                                            \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                   \
         return mem->GetElement<type>(index);                                     \
     }
 
@@ -49,6 +50,7 @@ namespace ark::ets::intrinsics {
     {                                                                                         \
         auto add = [value](type oldValue) { return oldValue + value; };                       \
         auto result = mem->ReadModifyWrite<type>(index, add);                                 \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                \
         return result.first;                                                                  \
     }
 
@@ -56,9 +58,11 @@ namespace ark::ets::intrinsics {
     extern "C" type SharedMemoryAnd##postfix(EtsSharedMemory *mem, int32_t index, type value)     \
     {                                                                                             \
         auto bitwiseAnd = [value](type oldValue) {                                                \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                                \
             return static_cast<type>((bit_cast<u##type>(oldValue)) & (bit_cast<u##type>(value))); \
         };                                                                                        \
         auto result = mem->ReadModifyWrite<type>(index, bitwiseAnd);                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                    \
         return result.first;                                                                      \
     }
 
@@ -67,6 +71,7 @@ namespace ark::ets::intrinsics {
     {                                                                                                 \
         auto bitwiseAnd = [value](type oldValue) { return static_cast<type>((oldValue) & (value)); }; \
         auto result = mem->ReadModifyWrite<type>(index, bitwiseAnd);                                  \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                        \
         return result.first;                                                                          \
     }
 
@@ -75,9 +80,11 @@ namespace ark::ets::intrinsics {
                                                          type replacementValue)                                   \
     {                                                                                                             \
         auto compareExchange = [expectedValue, replacementValue](type oldValue) {                                 \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                                                \
             return oldValue == expectedValue ? replacementValue : oldValue;                                       \
         };                                                                                                        \
         auto result = mem->ReadModifyWrite<type>(index, compareExchange);                                         \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                                    \
         return result.first;                                                                                      \
     }
 
@@ -86,6 +93,7 @@ namespace ark::ets::intrinsics {
     {                                                                                              \
         auto exchange = [value]([[maybe_unused]] type oldValue) { return value; };                 \
         auto result = mem->ReadModifyWrite<type>(index, exchange);                                 \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                     \
         return result.first;                                                                       \
     }
 
@@ -94,16 +102,20 @@ namespace ark::ets::intrinsics {
     {                                                                              \
         auto load = [](type value) { return value; };                              \
         auto result = mem->ReadModifyWrite<type>(index, load);                     \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                     \
         return result.first;                                                       \
     }
 
+// CC-OFFNXT(G.PRE.05) function gen
 #define SHARED_MEMORY_OR_SIGNED(type, postfix)                                                    \
     extern "C" type SharedMemoryOr##postfix(EtsSharedMemory *mem, int32_t index, type value)      \
     {                                                                                             \
         auto orBitwise = [value](type oldValue) {                                                 \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                                \
             return static_cast<type>((bit_cast<u##type>(oldValue)) | (bit_cast<u##type>(value))); \
         };                                                                                        \
         auto result = mem->ReadModifyWrite<type>(index, orBitwise);                               \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                    \
         return result.first;                                                                      \
     }
 
@@ -112,6 +124,7 @@ namespace ark::ets::intrinsics {
     {                                                                                                \
         auto orBitwise = [value](type oldValue) { return static_cast<type>((oldValue) | (value)); }; \
         auto result = mem->ReadModifyWrite<type>(index, orBitwise);                                  \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                       \
         return result.first;                                                                         \
     }
 
@@ -120,6 +133,7 @@ namespace ark::ets::intrinsics {
     {                                                                                           \
         auto store = [value]([[maybe_unused]] type oldValue) { return value; };                 \
         auto result = mem->ReadModifyWrite<type>(index, store);                                 \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                  \
         return result.second;                                                                   \
     }
 
@@ -128,6 +142,7 @@ namespace ark::ets::intrinsics {
     {                                                                                         \
         auto add = [value](type oldValue) { return oldValue - value; };                       \
         auto result = mem->ReadModifyWrite<type>(index, add);                                 \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                \
         return result.first;                                                                  \
     }
 
@@ -135,9 +150,11 @@ namespace ark::ets::intrinsics {
     extern "C" type SharedMemoryXor##postfix(EtsSharedMemory *mem, int32_t index, type value)     \
     {                                                                                             \
         auto xorBitwise = [value](type oldValue) {                                                \
+            /* CC-OFFNXT(G.PRE.05) function gen */                                                \
             return static_cast<type>((bit_cast<u##type>(oldValue)) ^ (bit_cast<u##type>(value))); \
         };                                                                                        \
         auto result = mem->ReadModifyWrite<type>(index, xorBitwise);                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                    \
         return result.first;                                                                      \
     }
 
@@ -146,6 +163,7 @@ namespace ark::ets::intrinsics {
     {                                                                                                 \
         auto xorBitwise = [value](type oldValue) { return static_cast<type>((oldValue) ^ (value)); }; \
         auto result = mem->ReadModifyWrite<type>(index, xorBitwise);                                  \
+        /* CC-OFFNXT(G.PRE.05) function gen */                                                        \
         return result.first;                                                                          \
     }
 

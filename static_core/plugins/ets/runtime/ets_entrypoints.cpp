@@ -38,9 +38,11 @@ using TypeId = panda_file::Type::TypeId;
 
 #if defined(__clang__)
 #pragma clang diagnostic push
+// CC-OFFNXT(warning_suppression) gcc false positive
 #pragma clang diagnostic ignored "-Wgnu-label-as-value"
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
+// CC-OFFNXT(warning_suppression) gcc false positive
 #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 

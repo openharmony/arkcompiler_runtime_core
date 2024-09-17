@@ -25,6 +25,7 @@
 
 namespace ark {
 
+// CC-OFFNXT(C_RULE_ID_MACRODEFINE_ENDWITH_SEMICOLON) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFINE_VALUE(name, value) static_assert((name) == (value));
 #include "asm_defines/asm_defines.def"

@@ -299,6 +299,7 @@ EtsObject *TypeAPIGetStaticFieldValue(EtsString *ownerTd, EtsString *name)
 
     if (field->GetType()->IsPrimitive()) {
         return EtsPrimitiveTypeEnumToComptimeConstant(
+            // CC-OFFNXT(G.FMT.14-CPP) project code style
             ConvertPandaTypeToEtsType(field->GetCoreType()->GetType()), [&](auto type) -> EtsObject * {
                 using T = EtsTypeEnumToCppType<decltype(type)::value>;
                 auto val = ownerType->GetRuntimeClass()->GetFieldPrimitive<T>(*field->GetCoreType());

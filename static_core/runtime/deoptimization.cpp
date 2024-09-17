@@ -40,6 +40,7 @@ namespace ark {
  *                     FreeFrame inside this function
  * @param callee_regs  Pointer to a callee-saved registers buffer from StackWalker
  */
+// CC-OFFNXT(readability-function-size_parameters) asm bridge
 extern "C" [[noreturn]] void DeoptimizeAfterCFrame(ManagedThread *thread, const uint8_t *pc, Frame *frame,
                                                    void *cframeFp, Frame *lastFrame, void *calleeRegs);
 /**
@@ -53,6 +54,7 @@ extern "C" [[noreturn]] void DeoptimizeAfterCFrame(ManagedThread *thread, const 
  *                     FreeFrame inside this function
  * @param callee_regs  Pointer to a callee-saved registers buffer from StackWalker
  */
+// CC-OFFNXT(readability-function-size_parameters) asm bridge
 extern "C" [[noreturn]] void DeoptimizeAfterIFrame(ManagedThread *thread, const uint8_t *pc, Frame *frame,
                                                    void *cframeFp, Frame *lastFrame, void *calleeRegs);
 /**
@@ -72,6 +74,35 @@ static void UnpoisonAsanStack([[maybe_unused]] void *ptr)
 #endif  // PANDA_ASAN_ON
 }
 
+#ifdef PANDA_EVENTS_ENABLED
+static bool InvalidateCompiledMethod(ManagedThread *thread, Method *method, bool isCha,
+                                     size_t &inStackCount) NO_THREAD_SAFETY_ANALYSIS
+#else
+static bool InvalidateCompiledMethod(ManagedThread *thread, Method *method, bool isCha) NO_THREAD_SAFETY_ANALYSIS
+#endif
+{
+    ASSERT(thread != nullptr);
+    // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
+    for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
+        if (stack.IsCFrame() && stack.GetMethod() == method) {
+            auto &cframe = stack.GetCFrame();
+            cframe.SetShouldDeoptimize(true);
+            cframe.SetDeoptCodeEntry(stack.GetCompiledCodeEntry());
+            if (isCha) {
+                LOG(DEBUG, CLASS_LINKER) << "[CHA]   Set ShouldDeoptimize for method: "
+                                         << cframe.GetMethod()->GetFullName();
+            } else {
+                LOG(DEBUG, CLASS_LINKER) << "[IC]   Set ShouldDeoptimize for method: "
+                                         << cframe.GetMethod()->GetFullName();
+            }
+#ifdef PANDA_EVENTS_ENABLED
+            inStackCount++;
+#endif
+        }
+    }
+    return true;
+}
+
 // NO_THREAD_SAFETY_ANALYSIS because it doesn't know about mutator_lock status in this scope
 void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha) NO_THREAD_SAFETY_ANALYSIS
 {
@@ -82,29 +113,11 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha)
 #ifdef PANDA_EVENTS_ENABLED
         size_t inStackCount = 0;
         vm->GetThreadManager()->EnumerateThreads([method, &inStackCount, isCha](ManagedThread *thread) {
+            return InvalidateCompiledMethod(thread, method, isCha, inStackCount);
 #else
         vm->GetThreadManager()->EnumerateThreads([method, isCha](ManagedThread *thread) {
+            return InvalidateCompiledMethod(thread, method, isCha);
 #endif
-            ASSERT(thread != nullptr);
-            // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
-            for (auto stack = StackWalker::Create(thread); stack.HasFrame(); stack.NextFrame()) {
-                if (stack.IsCFrame() && stack.GetMethod() == method) {
-                    auto &cframe = stack.GetCFrame();
-                    cframe.SetShouldDeoptimize(true);
-                    cframe.SetDeoptCodeEntry(stack.GetCompiledCodeEntry());
-                    if (isCha) {
-                        LOG(DEBUG, CLASS_LINKER)
-                            << "[CHA]   Set ShouldDeoptimize for method: " << cframe.GetMethod()->GetFullName();
-                    } else {
-                        LOG(DEBUG, CLASS_LINKER)
-                            << "[IC]   Set ShouldDeoptimize for method: " << cframe.GetMethod()->GetFullName();
-                    }
-#ifdef PANDA_EVENTS_ENABLED
-                    inStackCount++;
-#endif
-                }
-            }
-            return true;
         });
         if (isCha) {
             EVENT_CHA_DEOPTIMIZE(std::string(method->GetFullName()), inStackCount);

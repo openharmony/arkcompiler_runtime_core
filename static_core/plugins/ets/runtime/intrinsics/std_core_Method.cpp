@@ -84,6 +84,7 @@ EtsObject *TypeAPIMethodInvokeImplementation(EtsCoroutine *coro, EtsMethod *meth
     }
 
     ASSERT(res.IsPrimitive());
+    // CC-OFFNXT(G.FMT.14-CPP) project code style
     return EtsPrimitiveTypeEnumToComptimeConstant(meth->GetReturnValueType(), [&](auto type) -> EtsObject * {
         using T = EtsTypeEnumToCppType<decltype(type)::value>;
         return EtsBoxPrimitive<T>::Create(coro, res.GetAs<T>());
