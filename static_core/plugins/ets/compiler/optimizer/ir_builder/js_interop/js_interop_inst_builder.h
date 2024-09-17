@@ -24,15 +24,16 @@ IntrinsicInst *BuildInteropIntrinsic(size_t pc, RuntimeInterface::IntrinsicId id
                                      const std::array<DataType::Type, N> &types,
                                      const std::array<Inst *, N + 1> &inputs);
 Inst *BuildInitJSCallClass(RuntimeInterface::MethodPtr method, size_t pc, SaveStateInst *saveState);
+// CC-OFFNXT(G.NAM.01) namespace identifier
 std::pair<Inst *, Inst *> BuildResolveInteropCallIntrinsic(RuntimeInterface::InteropCallKind callKind, size_t pc,
                                                            RuntimeInterface::MethodPtr method, Inst *arg0, Inst *arg1,
                                                            Inst *arg2, Inst *cpOffsetForClass,
                                                            SaveStateInst *saveState);
 IntrinsicInst *CreateInteropCallIntrinsic(size_t pc, RuntimeInterface::InteropCallKind callKind);
-void BuildReturnValueConvertInteropIntrinsic(RuntimeInterface::InteropCallKind callKind, size_t pc,
-                                             RuntimeInterface::MethodPtr method, Inst *jsCall,
+void BuildReturnValueConvertInteropIntrinsic(compiler::RuntimeInterface::InteropCallKind callKind, size_t pc,
+                                             compiler::RuntimeInterface::MethodPtr method, Inst *jsCall,
                                              SaveStateInst *saveState);
-void BuildInteropCall(const BytecodeInstruction *bcInst, RuntimeInterface::InteropCallKind callKind,
-                      RuntimeInterface::MethodPtr method, bool isRange, bool accRead);
+void BuildInteropCall(const BytecodeInstruction *bcInst, compiler::RuntimeInterface::InteropCallKind callKind,
+                      compiler::RuntimeInterface::MethodPtr method, bool isRange, bool accRead);
 bool TryBuildInteropCall(const BytecodeInstruction *bcInst, bool isRange, bool accRead);
 #endif  // PANDA_PLUGINS_ETS_COMPILER_OPTIMIZER_IR_BUILDER_JS_INTEROP_JS_INTEROP_INST_BUILDER_H

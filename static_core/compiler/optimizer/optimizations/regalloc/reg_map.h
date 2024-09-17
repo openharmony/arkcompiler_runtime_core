@@ -45,6 +45,7 @@ public:
 
     void SetMask(const LocationMask &regMask, size_t priorityReg);
     void SetCallerFirstMask(const LocationMask &regMask, size_t firstCalleeReg, size_t lastCalleeReg);
+    void MapUnavailableRegisters(const LocationMask &regMask, size_t maskSize);
     size_t Size() const;
     size_t GetAvailableRegsCount() const;
     bool IsRegAvailable(Register reg, Arch arch) const;

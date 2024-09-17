@@ -44,6 +44,7 @@ public:
 
     static const size_t DEFAULT_VECTOR_SIZE = 64;
     using IndexVector = SmallVector<unsigned, DEFAULT_VECTOR_SIZE>;
+    using IndexVectorPair = std::pair<IndexVector, IndexVector>;
 
 protected:
     bool Allocate() override;
@@ -55,6 +56,8 @@ private:
     IndexVector PrecolorIG(InterferenceGraph *ig);
     IndexVector PrecolorIG(InterferenceGraph *ig, const RegisterMap &map);
     void BuildBias(InterferenceGraph *ig, const IndexVector &affinityNodes);
+    void WalkNodes(IndexVectorPair &&vectors, NodeVector &nodes, ColorNode node, InterferenceGraph *ig,
+                   const IndexVector &affinityNodes);
     void AddAffinityEdgesToPhi(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinityNodes);
     void AddAffinityEdgesToSiblings(InterferenceGraph *ig, const ColorNode &node, IndexVector *affinityNodes);
     void AddAffinityEdgesToPhysicalNodes(InterferenceGraph *ig, IndexVector *affinityNodes);

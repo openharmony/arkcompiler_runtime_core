@@ -116,7 +116,7 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
 #define CAST(Opc) CastTo##Opc()
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage
-#define CHECK_OR_RETURN(Opc, Getter)                                                                     \
+#define CHECK_OR_RETURN(Opc, Getter) /* CC-OFFNXT(G.PRE.02) namespace member */                          \
     if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
         instCompareMap_.erase(inst1);                                                                    \
         return false;                                                                                    \

@@ -49,19 +49,24 @@ TEST_F(SpillFillEncoderTest, SpillFillDataSorting)
         {{LocationType::REGISTER, LocationType::STACK, 0U, 2U, DataType::Type::INT64},
          {LocationType::REGISTER, LocationType::STACK, 1U, 0U, DataType::Type::INT64},
          // skip move
+         // CC-OFFNXT(G.FMT.02) project code style
          {LocationType::REGISTER, LocationType::REGISTER, 0U, 1U, DataType::Type::INT64},
          {LocationType::REGISTER, LocationType::REGISTER, 1U, 2U, DataType::Type::INT64},
          // skip imm move
+         // CC-OFFNXT(G.FMT.02) project code style
          {LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 0U, DataType::Type::INT64},
          {LocationType::IMMEDIATE, LocationType::REGISTER, 0U, 1U, DataType::Type::INT64},
          // reorder fills
+         // CC-OFFNXT(G.FMT.02) project code style
          {LocationType::STACK, LocationType::REGISTER, 2U, 2U, DataType::Type::INT64},
          {LocationType::STACK, LocationType::REGISTER, 1U, 1U, DataType::Type::INT64},
          {LocationType::STACK, LocationType::REGISTER, 0U, 0U, DataType::Type::INT64},
          // skip move
+         // CC-OFFNXT(G.FMT.02) project code style
          {LocationType::REGISTER, LocationType::REGISTER, 2U, 4U, DataType::Type::INT64},
          {LocationType::STACK, LocationType::REGISTER, 3U, 2U, DataType::Type::INT64},
          // skip mem move
+         // CC-OFFNXT(G.FMT.02) project code style
          {LocationType::STACK, LocationType::STACK, 7U, 9U, DataType::Type::INT64},
          {LocationType::STACK, LocationType::STACK, 8U, 10U, DataType::Type::INT64}},
         GetAllocator()->Adapter()};

@@ -95,6 +95,7 @@ void LoopUnroll::TransformLoopImpl(Loop *loop, std::optional<uint64_t> optIterat
         // GCC gives false positive here
 #if !defined(__clang__)
 #pragma GCC diagnostic push
+// CC-OFFNXT(warning_suppression) GCC false positive
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
         auto iterations = *optIterations;

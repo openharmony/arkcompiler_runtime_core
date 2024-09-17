@@ -61,8 +61,8 @@ uint32_t Aarch64CallingConvention::GetCodeSize()
     return GetMasm()->GetSizeOfCodeGenerated();
 }
 
-size_t Aarch64CallingConvention::PushRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs,
-                                          bool isCallee)
+void Aarch64CallingConvention::PrepareToPushPopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs,
+                                                    bool isCallee)
 {
     if ((regs.GetCount() % IMM_2) == 1) {
         ASSERT((regs.GetList() & (UINT64_C(1) << vixl::aarch64::xzr.GetCode())) == 0);
@@ -74,6 +74,12 @@ size_t Aarch64CallingConvention::PushRegs(vixl::aarch64::CPURegList regs, vixl::
         ASSERT((vregs.GetList() & (UINT64_C(1) << allignmentVreg)) == 0);
         vregs.Combine(allignmentVreg);
     }
+}
+
+size_t Aarch64CallingConvention::PushRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs,
+                                          bool isCallee)
+{
+    PrepareToPushPopRegs(regs, vregs, isCallee);
     GetMasm()->PushCPURegList(vregs);
     GetMasm()->PushCPURegList(regs);
     return vregs.GetCount() + regs.GetCount();
@@ -81,16 +87,7 @@ size_t Aarch64CallingConvention::PushRegs(vixl::aarch64::CPURegList regs, vixl::
 
 size_t Aarch64CallingConvention::PopRegs(vixl::aarch64::CPURegList regs, vixl::aarch64::CPURegList vregs, bool isCallee)
 {
-    if ((regs.GetCount() % IMM_2) == 1) {
-        ASSERT((regs.GetList() & (UINT64_C(1) << vixl::aarch64::xzr.GetCode())) == 0);
-        regs.Combine(vixl::aarch64::xzr);
-    }
-    if ((vregs.GetCount() % IMM_2) == 1) {
-        auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
-        uint8_t allignmentVreg = regdescr->GetAlignmentVreg(isCallee);
-        ASSERT((vregs.GetList() & (UINT64_C(1) << allignmentVreg)) == 0);
-        vregs.Combine(allignmentVreg);
-    }
+    PrepareToPushPopRegs(regs, vregs, isCallee);
     GetMasm()->PopCPURegList(regs);
     GetMasm()->PopCPURegList(vregs);
     return vregs.GetCount() + regs.GetCount();
@@ -164,6 +161,39 @@ void Aarch64CallingConvention::SaveCalleeSavedRegs(const FrameInfo &frameInfo, c
     SET_CFI_OFFSET(pushCallees, GetEncoder()->GetCursorOffset());
 }
 
+size_t Aarch64CallingConvention::SaveFpLr(const FrameInfo &frameInfo, [[maybe_unused]] Encoder *encoder,
+                                          [[maybe_unused]] Reg fp, [[maybe_unused]] Reg lr)
+{
+    if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
+        static_assert(CFrameLayout::GetTopToRegsSlotsCount() > CFrameLayout::GetFpLrSlotsCount());
+        GetMasm()->PushCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
+        SET_CFI_OFFSET(pushFplr, encoder->GetCursorOffset());
+        return CFrameLayout::GetFpLrSlotsCount();
+    }
+    return 0;
+}
+
+void Aarch64CallingConvention::EncodeDynCallMode([[maybe_unused]] const FrameInfo &frameInfo, Encoder *encoder)
+{
+    static_assert(CallConvDynInfo::REG_NUM_ARGS == 1);
+    static_assert(CallConvDynInfo::REG_COUNT == CallConvDynInfo::REG_NUM_ARGS + 1);
+
+    ASSERT(frameInfo.GetSaveFrameAndLinkRegs());
+
+    constexpr auto NUM_ACTUAL_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
+    constexpr auto NUM_EXPECTED_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_COUNT);
+    auto numExpected = GetDynInfo().GetNumExpectedArgs();
+
+    auto expandDone = encoder->CreateLabel();
+    encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
+    encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
+
+    MemRef expandEntrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
+                            GetDynInfo().GetExpandEntrypointTlsOffset());
+    GetEncoder()->MakeCall(expandEntrypoint);
+    encoder->BindLabel(expandDone);
+}
+
 void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
 {
     static_assert((CFrameLayout::GetLocalsCount() & 1U) == 0);
@@ -175,12 +205,7 @@ void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
     auto spToRegsSlots = CFrameLayout::GetTopToRegsSlotsCount();
 
     // Save FP and LR
-    if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
-        static_assert(CFrameLayout::GetTopToRegsSlotsCount() > CFrameLayout::GetFpLrSlotsCount());
-        GetMasm()->PushCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
-        SET_CFI_OFFSET(pushFplr, encoder->GetCursorOffset());
-        spToRegsSlots -= CFrameLayout::GetFpLrSlotsCount();
-    }
+    spToRegsSlots -= SaveFpLr(frameInfo, encoder, fp, lr);
 
     // Setup FP
     if (frameInfo.GetSetupFrame() || ProvideCFI()) {
@@ -193,23 +218,7 @@ void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
     }
 
     if (IsDynCallMode() && GetDynInfo().IsCheckRequired()) {
-        static_assert(CallConvDynInfo::REG_NUM_ARGS == 1);
-        static_assert(CallConvDynInfo::REG_COUNT == CallConvDynInfo::REG_NUM_ARGS + 1);
-
-        ASSERT(frameInfo.GetSaveFrameAndLinkRegs());
-
-        constexpr auto NUM_ACTUAL_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
-        constexpr auto NUM_EXPECTED_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_COUNT);
-        auto numExpected = GetDynInfo().GetNumExpectedArgs();
-
-        auto expandDone = encoder->CreateLabel();
-        encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
-        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
-
-        MemRef expandEntrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
-                                GetDynInfo().GetExpandEntrypointTlsOffset());
-        GetEncoder()->MakeCall(expandEntrypoint);
-        encoder->BindLabel(expandDone);
+        EncodeDynCallMode(frameInfo, encoder);
     }
 
     // Reset flags and setup method
@@ -233,10 +242,10 @@ void Aarch64CallingConvention::GeneratePrologue(const FrameInfo &frameInfo)
     }
 }
 
-void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
+template <bool IS_NATIVE>
+void Aarch64CallingConvention::GenerateEpilogueImpl(const FrameInfo &frameInfo, const std::function<void()> &postJob)
 {
-    auto encoder = GetEncoder();
-    const CFrameLayout &fl = encoder->GetFrameLayout();
+    const CFrameLayout &fl = GetEncoder()->GetFrameLayout();
     auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
     auto sp = GetTarget().GetStackReg();
     auto fp = GetTarget().GetFrameReg();
@@ -249,7 +258,12 @@ void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std:
     // Restore callee-registers
     RegMask calleeRegsMask;
     VRegMask calleeVregsMask;
-    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs());
+    if constexpr (IS_NATIVE) {
+        regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs(),
+                                               GetMode().IsOptIrtoc());
+    } else {
+        regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs());
+    }
 
     auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
     auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
@@ -272,7 +286,7 @@ void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std:
         GetMasm()->LoadCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
         GetMasm()->LoadCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
     }
-    SET_CFI_OFFSET(popCallees, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popCallees, GetEncoder()->GetCursorOffset());
 
     // Adjust SP
     if (frameInfo.GetAdjustSpReg()) {
@@ -282,19 +296,24 @@ void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std:
             spToFrameTopSlots -= CFrameLayout::GetFpLrSlotsCount();
         }
         auto spToFrameTopOffset = spToFrameTopSlots * fl.GetSlotSize();
-        encoder->EncodeAdd(sp, sp, Imm(spToFrameTopOffset));
+        GetEncoder()->EncodeAdd(sp, sp, Imm(spToFrameTopOffset));
     }
 
     // Restore FP and LR
     if (IsOsrMode()) {
-        encoder->EncodeAdd(sp, sp, Imm(CFrameLayout::GetFpLrSlotsCount() * fl.GetSlotSize()));
-        encoder->EncodeLdp(fp, lr, false, MemRef(fp, -fl.GetOsrFpLrOffset()));
+        GetEncoder()->EncodeAdd(sp, sp, Imm(CFrameLayout::GetFpLrSlotsCount() * fl.GetSlotSize()));
+        GetEncoder()->EncodeLdp(fp, lr, false, MemRef(fp, -fl.GetOsrFpLrOffset()));
     } else if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
         GetMasm()->PopCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
     }
-    SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
+    SET_CFI_OFFSET(popFplr, GetEncoder()->GetCursorOffset());
 
     GetMasm()->Ret();
+}
+
+void Aarch64CallingConvention::GenerateEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
+{
+    GenerateEpilogueImpl<false>(frameInfo, postJob);
 }
 
 void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo)
@@ -308,12 +327,7 @@ void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo
     auto spToRegsSlots = CFrameLayout::GetTopToRegsSlotsCount();
 
     // Save FP and LR
-    if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
-        static_assert(CFrameLayout::GetTopToRegsSlotsCount() > CFrameLayout::GetFpLrSlotsCount());
-        GetMasm()->PushCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
-        SET_CFI_OFFSET(pushFplr, encoder->GetCursorOffset());
-        spToRegsSlots -= CFrameLayout::GetFpLrSlotsCount();
-    }
+    spToRegsSlots -= SaveFpLr(frameInfo, encoder, fp, lr);
 
     // 'Native' calling convention requires setting up FP for FastPath calls from IRtoC Interpreter entrypoint
     if (frameInfo.GetSetupFrame() || ProvideCFI()) {
@@ -322,23 +336,7 @@ void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo
     }
 
     if (IsDynCallMode() && GetDynInfo().IsCheckRequired()) {
-        static_assert(CallConvDynInfo::REG_NUM_ARGS == 1);
-        static_assert(CallConvDynInfo::REG_COUNT == CallConvDynInfo::REG_NUM_ARGS + 1);
-
-        ASSERT(frameInfo.GetSaveFrameAndLinkRegs());
-
-        constexpr auto NUM_ACTUAL_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_NUM_ARGS);
-        constexpr auto NUM_EXPECTED_REG = GetTarget().GetParamReg(CallConvDynInfo::REG_COUNT);
-        auto numExpected = GetDynInfo().GetNumExpectedArgs();
-
-        auto expandDone = encoder->CreateLabel();
-        encoder->EncodeJump(expandDone, NUM_ACTUAL_REG, Imm(numExpected), Condition::GE);
-        encoder->EncodeMov(NUM_EXPECTED_REG, Imm(numExpected));
-
-        MemRef expandEntrypoint(Reg(GetThreadReg(Arch::AARCH64), GetTarget().GetPtrRegType()),
-                                GetDynInfo().GetExpandEntrypointTlsOffset());
-        GetEncoder()->MakeCall(expandEntrypoint);
-        encoder->BindLabel(expandDone);
+        EncodeDynCallMode(frameInfo, encoder);
     }
 
     // Save callee-saved registers
@@ -353,66 +351,6 @@ void Aarch64CallingConvention::GenerateNativePrologue(const FrameInfo &frameInfo
 
 void Aarch64CallingConvention::GenerateNativeEpilogue(const FrameInfo &frameInfo, std::function<void()> postJob)
 {
-    auto encoder = GetEncoder();
-    const CFrameLayout &fl = encoder->GetFrameLayout();
-    auto regdescr = static_cast<Aarch64RegisterDescription *>(GetRegfile());
-    auto sp = GetTarget().GetStackReg();
-    auto fp = GetTarget().GetFrameReg();
-    auto lr = GetTarget().GetLinkReg();
-
-    if (postJob) {
-        postJob();
-    }
-
-    // Restore callee-registers
-    RegMask calleeRegsMask;
-    VRegMask calleeVregsMask;
-    regdescr->FillUsedCalleeSavedRegisters(&calleeRegsMask, &calleeVregsMask, frameInfo.GetSaveUnusedCalleeRegs(),
-                                           GetMode().IsOptIrtoc());
-
-    auto calleeRegs = CPURegList(CPURegister::kRegister, vixl::aarch64::kXRegSize, calleeRegsMask.GetValue());
-    auto calleeVregs = CPURegList(CPURegister::kVRegister, vixl::aarch64::kXRegSize, calleeVregsMask.GetValue());
-
-    if (frameInfo.GetAdjustSpReg()) {
-        // SP points to the frame's bottom
-        auto lastCalleeReg = fl.GetRegsSlotsCount() - calleeRegsMask.Count();
-        auto lastCalleeVreg = fl.GetRegsSlotsCount() - fl.GetCalleeRegistersCount(false) - calleeVregsMask.Count();
-        GetMasm()->LoadCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(lastCalleeReg * fl.GetSlotSize())));
-        GetMasm()->LoadCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(lastCalleeVreg * fl.GetSlotSize())));
-    } else {
-        // SP either points to the frame's top or frame's top + FPLR slot
-        auto spToRegsSlots = CFrameLayout::GetTopToRegsSlotsCount();
-        if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
-            // Adjust for FPLR slot
-            spToRegsSlots -= CFrameLayout::GetFpLrSlotsCount();
-        }
-        auto lastCalleeReg = spToRegsSlots + calleeRegsMask.Count();
-        auto lastCalleeVreg = spToRegsSlots + fl.GetCalleeRegistersCount(false) + calleeVregsMask.Count();
-        GetMasm()->LoadCPURegList(calleeRegs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeReg * fl.GetSlotSize())));
-        GetMasm()->LoadCPURegList(calleeVregs, MemOperand(VixlReg(sp), VixlImm(-lastCalleeVreg * fl.GetSlotSize())));
-    }
-    SET_CFI_OFFSET(popCallees, encoder->GetCursorOffset());
-
-    // Adjust SP
-    if (frameInfo.GetAdjustSpReg()) {
-        // SP points to the frame's bottom
-        auto spToFrameTopSlots = fl.GetRegsSlotsCount() + CFrameRegs::Start() - CFrameReturnAddr::Start();
-        if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
-            spToFrameTopSlots -= CFrameLayout::GetFpLrSlotsCount();
-        }
-        auto spToFrameTopOffset = spToFrameTopSlots * fl.GetSlotSize();
-        encoder->EncodeAdd(sp, sp, Imm(spToFrameTopOffset));
-    }
-
-    // Restore FP and LR
-    if (IsOsrMode()) {
-        encoder->EncodeAdd(sp, sp, Imm(CFrameLayout::GetFpLrSlotsCount() * fl.GetSlotSize()));
-        encoder->EncodeLdp(fp, lr, false, MemRef(fp, -fl.GetOsrFpLrOffset()));
-    } else if (frameInfo.GetSaveFrameAndLinkRegs() || ProvideCFI()) {
-        GetMasm()->PopCPURegList(vixl::aarch64::CPURegList(VixlReg(fp), VixlReg(lr)));
-    }
-    SET_CFI_OFFSET(popFplr, encoder->GetCursorOffset());
-
-    GetMasm()->Ret();
+    GenerateEpilogueImpl<true>(frameInfo, postJob);
 }
 }  // namespace ark::compiler::aarch64

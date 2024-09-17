@@ -228,6 +228,8 @@ protected:
     }
 
     void MakeLoopCloneInfo(LoopClonerData *unrollData);
+    LoopClonerData *PrepareLoopToClone(Loop *loop);
+    void ProcessMarkedInsts(LoopClonerData *data);
     BasicBlock *CreateNewOutsideSucc(BasicBlock *outsideSucc, BasicBlock *backEdge, BasicBlock *preHeader);
 
     /**
@@ -287,7 +289,7 @@ private:
     void BuildDataFlow();
     void CloneAnalyses(Graph *newGraph);
     // Loop cloning
-    LoopClonerData *PrepareLoopToClone(Loop *loop);
+    void SplitPreHeader(Loop *loop);
     GraphCloner::LoopClonerData *PopulateLoopClonerData(Loop *loop, BasicBlock *preHeader, BasicBlock *outsideSucc);
     void BuildLoopCloneControlFlow(LoopClonerData *unrollData);
     void BuildLoopCloneDataFlow(LoopClonerData *unrollData);
@@ -295,6 +297,7 @@ private:
     LoopUnrollData *PrepareLoopToUnroll(Loop *loop, bool cloneSideExits);
     BasicBlock *CreateResolverBlock(Loop *loop, BasicBlock *backEdge);
     BasicBlock *SplitBackEdge(LoopUnrollData *unrollData, Loop *loop, BasicBlock *backEdge);
+    Inst *GetCompareInst(Inst *ifimm);
     void UpdateUsersAfterNoSideExitsUnroll(const LoopUnrollData *unrollData);
     void UpdateOutloopUsers(Loop *loop, Inst *inst);
     void BuildLoopUnrollControlFlow(LoopUnrollData *unrollData);

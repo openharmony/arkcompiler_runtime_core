@@ -160,6 +160,8 @@ private:
     bool TrySimplifyCompareCaseInputInv(Inst *inst, Inst *input);
     bool TrySimplifyCompareWithBoolInput(Inst *inst, bool *isOsrBlocked);
     bool TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked);
+    bool TrySimplifyFloatCmpCompare(Inst **input0, Inst **input1, DataType::Type *cmpOpType, Inst *compareInput,
+                                    bool *swap);
     bool TrySimplifyTestEqualInputs(Inst *inst);
     void TryRemoveOverflowCheck(Inst *inst);
     static bool TrySimplifyCompareAndZero(Inst *inst, bool *isOsrBlocked);

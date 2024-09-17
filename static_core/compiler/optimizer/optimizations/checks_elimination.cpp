@@ -375,7 +375,7 @@ void ChecksElimination::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
 
     COMPILER_LOG(DEBUG, CHECKS_ELIM) << "BoundsCheck saved for further replacing on deoptimization";
     auto loop = GetLoopForBoundsCheck(block, lenArray, index);
-    visitor->PushNewBoundsCheck(loop, lenArray, index, inst, !correctUpper, !correctLower);
+    visitor->PushNewBoundsCheck(loop, inst, {lenArray, index}, !correctUpper, !correctLower);
 }
 
 void ChecksElimination::VisitCheckCast(GraphVisitor *v, Inst *inst)
@@ -526,9 +526,10 @@ void ChecksElimination::InitItemForNewIndex(GroupedBoundsChecks *place, Inst *in
     place->emplace_back(std::make_tuple(parentIndex, insts, maxVal, minVal));
 }
 
-void ChecksElimination::PushNewBoundsCheck(Loop *loop, Inst *lenArray, Inst *index, Inst *inst, bool checkUpper,
-                                           bool checkLower)
+void ChecksElimination::PushNewBoundsCheck(Loop *loop, Inst *inst, InstPair helpers, bool checkUpper, bool checkLower)
 {
+    auto *lenArray = helpers.first;
+    auto *index = helpers.second;
     ASSERT(loop != nullptr && lenArray != nullptr && index != nullptr && inst != nullptr);
     ASSERT(inst->GetOpcode() == Opcode::BoundsCheck);
     auto loopChecksIt =
@@ -540,7 +541,7 @@ void ChecksElimination::PushNewBoundsCheck(Loop *loop, Inst *lenArray, Inst *ind
     } else {
         auto *lenArrays = &loopChecksIt->second;
         auto lenArrayIt =
-            std::find_if(lenArrays->begin(), lenArrays->end(), [=](auto p) { return p.first == lenArray; });
+            std::find_if(lenArrays->begin(), lenArrays->end(), [lenArray](auto p) { return p.first == lenArray; });
         if (lenArrayIt == lenArrays->end()) {
             auto &lenArrayIndexes = lenArrays->emplace_back(lenArray, GetGraph()->GetLocalAllocator()->Adapter());
             InitItemForNewIndex(&lenArrayIndexes.second, index, inst, checkUpper, checkLower);
@@ -554,7 +555,7 @@ void ChecksElimination::PushNewBoundsCheck(Loop *loop, Inst *lenArray, Inst *ind
 void ChecksElimination::PushNewBoundsCheckAtExistingIndexes(GroupedBoundsChecks *indexes, Inst *index, Inst *inst,
                                                             bool checkUpper, bool checkLower)
 {
-    auto indexIt = std::find_if(indexes->begin(), indexes->end(), [=](auto p) { return std::get<0>(p) == index; });
+    auto indexIt = std::find_if(indexes->begin(), indexes->end(), [index](auto p) { return std::get<0>(p) == index; });
     if (indexIt == indexes->end()) {
         auto parentIndex = index;
         int64_t val {};
@@ -839,9 +840,11 @@ void ChecksElimination::InsertInstAfter(Inst *inst, Inst *after, BasicBlock *blo
     }
 }
 
-void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *left, int64_t val, Inst *right,
-                                                        Inst *ss, Inst *insertAfter, Opcode newLeftOpcode)
+void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, InstPair args, int64_t val, InstPair helpers,
+                                                        Opcode newLeftOpcode)
 {
+    auto [left, right] = args;
+    auto [ss, insertAfter] = helpers;
     auto block = insertAfter->GetBasicBlock();
     Inst *newLeft = nullptr;
     if (val == 0 && left != nullptr) {
@@ -865,17 +868,6 @@ void ChecksElimination::InsertBoundsCheckDeoptimization(ConditionCode cc, Inst *
     auto deopt = GetGraph()->CreateInstDeoptimizeIf(ss->GetPc(), deoptComp, ss, DeoptimizeType::BOUNDS_CHECK);
     InsertInstAfter(deoptComp, insertAfter, block);
     block->InsertAfter(deopt, deoptComp);
-}
-
-Inst *ChecksElimination::InsertDeoptimization(ConditionCode cc, Inst *left, Inst *right, Inst *ss, Inst *insertAfter,
-                                              DeoptimizeType deoptType)
-{
-    auto deoptComp = GetGraph()->CreateInstCompare(DataType::BOOL, INVALID_PC, left, right, left->GetType(), cc);
-    auto deopt = GetGraph()->CreateInstDeoptimizeIf(ss->GetPc(), deoptComp, ss, deoptType);
-    auto block = insertAfter->GetBasicBlock();
-    block->InsertAfter(deoptComp, insertAfter);
-    block->InsertAfter(deopt, deoptComp);
-    return deopt;
 }
 
 std::optional<LoopInfo> ChecksElimination::FindLoopInfo(Loop *loop)
@@ -952,21 +944,17 @@ void ChecksElimination::InsertDeoptimizationForIndexOverflow(CountableLoopInfo *
             Inst *insertAfter = loopUpper->IsDominate(ss) ? ss : loopUpper;
             COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Build deoptimize for loop index overflow";
             // Create deoptimize if loop index can become negative
-            InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, nullptr, maxUpper, loopUpper, ss, insertAfter);
+            InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {nullptr, loopUpper}, maxUpper, {ss, insertAfter});
         }
     }
 }
 
-bool ChecksElimination::NeedUpperDeoptimization(BasicBlock *header, Inst *lenArray, BoundsRange lenArrayRange,
-                                                Inst *upper, BoundsRange upperRange, int64_t maxAdd, ConditionCode cc,
+bool ChecksElimination::NeedUpperDeoptimization(BasicBlock *header, InstPair insts, FlagPair flags, int64_t maxAdd,
                                                 bool *insertNewLenArray)
 {
-    if (maxAdd == std::numeric_limits<int64_t>::min()) {
-        return false;
-    }
-    if (upperRange.Add(BoundsRange(maxAdd)).IsLess(lenArrayRange)) {
-        return false;
-    }
+    auto *lenArray = insts.first;
+    auto *upper = insts.second;
+    auto [ccIsLt, upperRangeIsMax] = flags;
     auto bri = GetGraph()->GetBoundsRangeInfo();
     auto newUpper = upper;
     auto newMaxAdd = maxAdd;
@@ -977,11 +965,11 @@ bool ChecksElimination::NeedUpperDeoptimization(BasicBlock *header, Inst *lenArr
         newUpper = upper->GetInput(0).GetInst();
     }
     if (lenArray == newUpper) {
-        if (newMaxAdd < 0 || (newMaxAdd == 0 && cc == CC_LT)) {
+        if (newMaxAdd < 0 || (newMaxAdd == 0 && ccIsLt)) {
             return false;
         }
     }
-    auto useUpperLen = upperAdd >= 0 || !upperRange.IsMaxRange(upper->GetType());
+    auto useUpperLen = upperAdd >= 0 || !upperRangeIsMax;
     if (useUpperLen && newMaxAdd <= 0) {
         auto newUpperRange = bri->FindBoundsRange(header, newUpper);
         if (newUpperRange.GetLenArray() == lenArray) {
@@ -992,10 +980,11 @@ bool ChecksElimination::NeedUpperDeoptimization(BasicBlock *header, Inst *lenArr
     return true;
 }
 
-bool ChecksElimination::TryInsertDeoptimizationForLargeStep(ConditionCode cc, Inst *resultLenArray, Inst *lower,
-                                                            Inst *upper, int64_t maxAdd, Inst *insertDeoptAfter,
-                                                            Inst *ss, uint64_t constStep)
+bool ChecksElimination::TryInsertDeoptimizationForLargeStep(ConditionCode cc, InstPair bounds, InstTriple helpers,
+                                                            int64_t maxAdd, uint64_t constStep)
 {
+    auto [lower, upper] = bounds;
+    auto [insertDeoptAfter, ss, resultLenArray] = helpers;
     auto block = insertDeoptAfter->GetBasicBlock();
     if (!lower->IsDominate(insertDeoptAfter)) {
         if (lower->GetBasicBlock() == block) {
@@ -1017,13 +1006,13 @@ bool ChecksElimination::TryInsertDeoptimizationForLargeStep(ConditionCode cc, In
     if (resultLenArray == upper) {
         auto maxAddConst = GetGraph()->FindOrCreateConstant(maxAdd);
         // (upper - lower [- 1]) % step </<= maxAdd
-        InsertBoundsCheckDeoptimization(cc, mod, 0, maxAddConst, ss, mod, Opcode::NOP);
+        InsertBoundsCheckDeoptimization(cc, {mod, maxAddConst}, 0, {ss, mod}, Opcode::NOP);
     } else {
         // result_len_array - maxAdd </<= upper - (upper - lower [- 1]) % step
         auto maxIndexValue = GetGraph()->CreateInstSub(DataType::INT32, INVALID_PC, upper, mod);
         block->InsertAfter(maxIndexValue, mod);
         auto opcode = maxAdd > 0 ? Opcode::Sub : Opcode::SubOverflowCheck;
-        InsertBoundsCheckDeoptimization(cc, resultLenArray, maxAdd, maxIndexValue, ss, maxIndexValue, opcode);
+        InsertBoundsCheckDeoptimization(cc, {resultLenArray, maxIndexValue}, maxAdd, {ss, maxIndexValue}, opcode);
     }
     return true;
 }
@@ -1031,19 +1020,19 @@ bool ChecksElimination::TryInsertDeoptimizationForLargeStep(ConditionCode cc, In
 bool ChecksElimination::TryInsertDeoptimization(LoopInfo loopInfo, Inst *lenArray, int64_t maxAdd, int64_t minAdd,
                                                 bool hasCheckInHeader)
 {
-    auto [countable_loop_info, ss, lower, upper, cc, is_head_loop_exit, has_pre_header_compare] = loopInfo;
+    auto [countableLoopInfo, ss, lower, upper, cc, isHeadLoopExit, hasPreHeaderCompare] = loopInfo;
     ASSERT(cc == CC_LT || cc == CC_LE);
     auto bri = GetGraph()->GetBoundsRangeInfo();
-    auto header = countable_loop_info.index->GetBasicBlock();
+    auto header = countableLoopInfo.index->GetBasicBlock();
     auto upperRange = bri->FindBoundsRange(header, upper);
     auto lowerRange = bri->FindBoundsRange(header, lower);
     auto lenArrayRange = bri->FindBoundsRange(header, lenArray);
-    auto hasCheckBeforeExit = hasCheckInHeader || !is_head_loop_exit;
-    if (!has_pre_header_compare && !lowerRange.IsLess(upperRange) && hasCheckBeforeExit) {
+    auto hasCheckBeforeExit = hasCheckInHeader || !isHeadLoopExit;
+    if (!hasPreHeaderCompare && !lowerRange.IsLess(upperRange) && hasCheckBeforeExit) {
         // if lower > upper, removing BoundsCheck may be wrong for the first iteration
         return false;
     }
-    uint64_t lowerInc = (countable_loop_info.normalizedCc == CC_GT ? 1 : 0);
+    uint64_t lowerInc = (countableLoopInfo.normalizedCc == CC_GT ? 1 : 0);
     bool needLowerDeopt = (minAdd != std::numeric_limits<int64_t>::max()) &&
                           !lowerRange.Add(BoundsRange(minAdd)).Add(BoundsRange(lowerInc)).IsNotNegative();
     bool insertLowerDeopt = lower->IsDominate(ss);
@@ -1052,50 +1041,65 @@ bool ChecksElimination::TryInsertDeoptimization(LoopInfo loopInfo, Inst *lenArra
         return false;
     }
 
-    bool insertNewLenArray;
-    if (NeedUpperDeoptimization(header, lenArray, lenArrayRange, upper, upperRange, maxAdd, cc, &insertNewLenArray)) {
-        auto resultLenArray = insertNewLenArray ? InsertNewLenArray(lenArray, ss) : lenArray;
-        if (resultLenArray == nullptr) {
-            COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value";
-            return false;
-        }
-        auto insertDeoptAfter = lenArray != resultLenArray ? resultLenArray : ss;
-        if (!upper->IsDominate(insertDeoptAfter)) {
-            insertDeoptAfter = upper;
-        }
-        ASSERT(insertDeoptAfter->GetBasicBlock()->IsDominate(header));
-        if (insertDeoptAfter->GetBasicBlock() == header) {
-            COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value";
-            return false;
-        }
-        auto constStep = countable_loop_info.constStep;
-        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Try to build deoptimize for upper value";
-        if (constStep == 1 ||
-            (countable_loop_info.normalizedCc == CC_GT || countable_loop_info.normalizedCc == CC_GE)) {
-            auto opcode = maxAdd > 0 ? Opcode::Sub : Opcode::SubOverflowCheck;
-            // Create deoptimize if result_len_array - maxAdd <=(<) upper
-            // result_len_array is >= 0, so if maxAdd > 0, overflow is not possible
-            // that's why we do not add maxAdd to upper instead
-            InsertBoundsCheckDeoptimization(cc, resultLenArray, maxAdd, upper, ss, insertDeoptAfter, opcode);
-        } else if (lowerRange.IsConst() && lowerRange.GetLeft() == 0 && countable_loop_info.normalizedCc == CC_LT &&
-                   resultLenArray == upper && maxAdd == static_cast<int64_t>(constStep) - 1) {
-            // For (int i = 0; i < len; i += x) process(a[i], ..., a[i + x - 1])
-            // deoptimize if len % x != 0
-            auto zeroConst = GetGraph()->FindOrCreateConstant(0);
-            InsertBoundsCheckDeoptimization(ConditionCode::CC_NE, resultLenArray, constStep, zeroConst, ss,
-                                            insertDeoptAfter, Opcode::Mod);
-        } else if (!TryInsertDeoptimizationForLargeStep(cc, resultLenArray, lower, upper, maxAdd, insertDeoptAfter, ss,
-                                                        constStep)) {
-            COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value with step > 1";
+    bool insertNewLenArray = false;
+    bool correctMax = (maxAdd != std::numeric_limits<int64_t>::min());
+    bool correctUpperRange = upperRange.Add(BoundsRange(maxAdd)).IsLess(lenArrayRange);
+    bool upperRangeIsMax = upperRange.IsMaxRange(upper->GetType());
+    if (correctMax && !correctUpperRange &&
+        NeedUpperDeoptimization(header, {lenArray, upper}, {cc == CC_LT, upperRangeIsMax}, maxAdd,
+                                &insertNewLenArray)) {
+        if (!TryInsertUpperDeoptimization(loopInfo, lenArray, lowerRange, maxAdd, insertNewLenArray)) {
             return false;
         }
     }
-    InsertDeoptimizationForIndexOverflow(&countable_loop_info, lenArrayRange.Sub(BoundsRange(maxAdd)), ss);
+    InsertDeoptimizationForIndexOverflow(&countableLoopInfo, lenArrayRange.Sub(BoundsRange(maxAdd)), ss);
     if (needLowerDeopt) {
         COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Build deoptimize for lower value";
         // Create deoptimize if lower < 0 (or -1 for loop with CC_GT)
         auto lowerConst = GetGraph()->FindOrCreateConstant(-lowerInc);
-        InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, lower, minAdd, lowerConst, ss, ss);
+        InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {lower, lowerConst}, minAdd, {ss, ss});
+    }
+    return true;
+}
+
+bool ChecksElimination::TryInsertUpperDeoptimization(LoopInfo loopInfo, Inst *lenArray, BoundsRange lowerRange,
+                                                     int64_t maxAdd, bool insertNewLenArray)
+{
+    [[maybe_unused]] auto [countableLoopInfo, ss, lower, upper, cc, isHeadLoopExit, hasPreHeaderCompare] = loopInfo;
+    auto header = countableLoopInfo.index->GetBasicBlock();
+    auto resultLenArray = insertNewLenArray ? InsertNewLenArray(lenArray, ss) : lenArray;
+    if (resultLenArray == nullptr) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value";
+        return false;
+    }
+    auto insertDeoptAfter = lenArray != resultLenArray ? resultLenArray : ss;
+    if (!upper->IsDominate(insertDeoptAfter)) {
+        insertDeoptAfter = upper;
+    }
+    ASSERT(insertDeoptAfter->GetBasicBlock()->IsDominate(header));
+    if (insertDeoptAfter->GetBasicBlock() == header) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value";
+        return false;
+    }
+    auto constStep = countableLoopInfo.constStep;
+    COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Try to build deoptimize for upper value";
+    if (constStep == 1 || (countableLoopInfo.normalizedCc == CC_GT || countableLoopInfo.normalizedCc == CC_GE)) {
+        auto opcode = maxAdd > 0 ? Opcode::Sub : Opcode::SubOverflowCheck;
+        // Create deoptimize if resultLenArray - maxAdd <=(<) upper
+        // resultLenArray is >= 0, so if maxAdd > 0, overflow is not possible
+        // that's why we do not add maxAdd to upper instead
+        InsertBoundsCheckDeoptimization(cc, {resultLenArray, upper}, maxAdd, {ss, insertDeoptAfter}, opcode);
+    } else if (lowerRange.IsConst() && lowerRange.GetLeft() == 0 && countableLoopInfo.normalizedCc == CC_LT &&
+               resultLenArray == upper && maxAdd == static_cast<int64_t>(constStep) - 1) {
+        // Example: for (int i = 0; i < len; i += x) process(a[i], ..., a[i + x - 1])
+        // deoptimize if len % x != 0
+        auto zeroConst = GetGraph()->FindOrCreateConstant(0);
+        InsertBoundsCheckDeoptimization(ConditionCode::CC_NE, {resultLenArray, zeroConst}, constStep,
+                                        {ss, insertDeoptAfter}, Opcode::Mod);
+    } else if (!TryInsertDeoptimizationForLargeStep(cc, {lower, upper}, {insertDeoptAfter, ss, resultLenArray}, maxAdd,
+                                                    constStep)) {
+        COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Unable to build deoptimize for upper value with step > 1";
+        return false;
     }
     return true;
 }
@@ -1244,12 +1248,13 @@ void ChecksElimination::ReplaceOneBoundsCheckToDeoptimizationInLoop(
             auto insertAfter = lenArray->IsDominate(saveState) ? saveState : lenArray;
             if (max != std::numeric_limits<int64_t>::min()) {
                 // Create deoptimize if max_index >= lenArray
-                InsertBoundsCheckDeoptimization(ConditionCode::CC_GE, index, max, lenArray, saveState, insertAfter);
+                InsertBoundsCheckDeoptimization(ConditionCode::CC_GE, {index, lenArray}, max, {saveState, insertAfter});
             }
             if (index != nullptr && min != std::numeric_limits<int64_t>::max()) {
                 // Create deoptimize if min_index < 0
                 auto zeroConst = GetGraph()->FindOrCreateConstant(0);
-                InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, index, min, zeroConst, saveState, insertAfter);
+                InsertBoundsCheckDeoptimization(ConditionCode::CC_LT, {index, zeroConst}, min,
+                                                {saveState, insertAfter});
             } else {
                 // No lower check needed based on BoundsAnalysis
                 // if index is null, group of bounds checks consists of constants

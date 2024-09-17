@@ -186,6 +186,7 @@ public:
     };
 
     template <class T>
+    // CC-OFFNXT(huge_method, huge_cyclomatic_complexity, huge_cca_cyclomatic_complexity, G.FUN.01-CPP) big switch-case
     void FixParams([[maybe_unused]] T *param1, [[maybe_unused]] T *param2, [[maybe_unused]] T *param3, Opcode opc)
     {
         switch (opc) {
@@ -549,6 +550,7 @@ public:
     // NOLINTBEGIN(hicpp-signed-bitwise)
     // Make logic with parameters (default - first parameter)
     template <class T>
+    // CC-OFFNXT(huge_method, huge_cyclomatic_complexity, huge_cca_cyclomatic_complexity, G.FUN.01-CPP) big switch-case
     T DoLogic(Opcode opc, T param1, [[maybe_unused]] T param2, [[maybe_unused]] T param3,
               [[maybe_unused]] ShiftType shiftType, [[maybe_unused]] uint8_t typeSize)
     {

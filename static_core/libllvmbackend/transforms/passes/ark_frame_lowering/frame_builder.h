@@ -37,6 +37,7 @@ struct FrameInfo {
     bool usesFloatRegs = false;
 };
 
+// CC-OFFNXT(G.NAM.01) false positive
 enum class FrameConstantDescriptor {
     FRAME_FLAGS,
     TLS_FRAME_OFFSET,

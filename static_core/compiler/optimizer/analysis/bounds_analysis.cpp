@@ -901,8 +901,8 @@ void BoundsAnalysis::VisitIfImm(GraphVisitor *v, Inst *inst)
     } else {
         UNREACHABLE();
     }
-    CalcNewBoundsRangeForCompare(v, block, cc, op0, op1, trueBlock);
-    CalcNewBoundsRangeForCompare(v, block, GetInverseConditionCode(cc), op0, op1, falseBlock);
+    CalcNewBoundsRangeForCompare(v, block, cc, {op0, op1}, trueBlock);
+    CalcNewBoundsRangeForCompare(v, block, GetInverseConditionCode(cc), {op0, op1}, falseBlock);
 }
 
 void BoundsAnalysis::VisitPhi(GraphVisitor *v, Inst *inst)
@@ -1302,10 +1302,11 @@ void BoundsAnalysis::CalcNewBoundsRangeForIsInstanceInput(GraphVisitor *v, IsIns
     }
 }
 
-void BoundsAnalysis::CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *block, ConditionCode cc, Inst *left,
-                                                  Inst *right, BasicBlock *tgtBlock)
+void BoundsAnalysis::CalcNewBoundsRangeForCompare(GraphVisitor *v, BasicBlock *block, ConditionCode cc, InstPair args,
+                                                  BasicBlock *tgtBlock)
 {
     auto bri = static_cast<BoundsAnalysis *>(v)->GetBoundsRangeInfo();
+    auto [left, right] = args;
     auto leftRange = bri->FindBoundsRange(block, left);
     auto rightRange = bri->FindBoundsRange(block, right);
     // try to skip triangle:

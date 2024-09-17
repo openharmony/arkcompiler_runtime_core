@@ -12,3 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_X86_ENCODE
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_X86_ENCODE
+/*
+Encoder (implementation of math and mem Low-level emitters)
+*/
+#endif

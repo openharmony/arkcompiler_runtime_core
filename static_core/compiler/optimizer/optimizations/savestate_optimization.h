@@ -54,14 +54,14 @@ public:
         return GetGraph()->GetBlocksRPO();
     }
 
-    void SetApplied()
-    {
-        isApplied_ = true;
-    }
-
     bool IsApplied() const
     {
         return isApplied_;
+    }
+
+    void SetApplied()
+    {
+        isApplied_ = true;
     }
 
     bool HaveCalls()

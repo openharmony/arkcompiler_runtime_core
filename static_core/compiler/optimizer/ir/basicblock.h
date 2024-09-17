@@ -719,13 +719,13 @@ public:
     {
         return InstSafeIterator(final_);
     }
-    bool operator!=(const InstSafeIterator &other) const
-    {
-        return this->GetCurrent() != other.GetCurrent();
-    }
     bool operator==(const InstSafeIterator &other) const
     {
         return this->GetCurrent() == other.GetCurrent();
+    }
+    bool operator!=(const InstSafeIterator &other) const
+    {
+        return this->GetCurrent() != other.GetCurrent();
     }
 
 private:

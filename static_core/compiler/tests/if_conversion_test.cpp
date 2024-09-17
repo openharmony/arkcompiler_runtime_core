@@ -32,6 +32,7 @@ public:
     Graph *CreateExpectedJointDiamondImm();
     Graph *CreateExpectedJointDiamond();
     Graph *CreateExpJointDiamondWithDroppedSelect();
+    void CreateNonLoopInvariantNotPreventConversion();
 };
 
 // NOLINTBEGIN(readability-magic-numbers)
@@ -876,6 +877,7 @@ TEST_F(IfConversionTest, TrianglePhiFloat)
     ASSERT_EQ(GetGraph()->RunPass<IfConversion>(), GetGraph()->GetEncoder()->CanEncodeFloatSelect());
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(IfConversionTest, LoopInvariantPreventTriangle)
 {
     GRAPH(GetGraph())
@@ -959,6 +961,7 @@ TEST_F(IfConversionTest, LoopInvariantPreventTriangle)
     ASSERT_FALSE(GetGraph()->RunPass<IfConversion>());
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(IfConversionTest, LoopInvariantPreventDiamond)
 {
     GRAPH(GetGraph())
@@ -1052,7 +1055,8 @@ TEST_F(IfConversionTest, LoopInvariantPreventDiamond)
     ASSERT_FALSE(GetGraph()->RunPass<IfConversion>());
 }
 
-TEST_F(IfConversionTest, NonLoopInvariantNotPreventConversion)
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation, solid logic
+void IfConversionTest::CreateNonLoopInvariantNotPreventConversion()
 {
     GRAPH(GetGraph())
     {
@@ -1128,6 +1132,12 @@ TEST_F(IfConversionTest, NonLoopInvariantNotPreventConversion)
             INST(58U, Opcode::Return).i32().Inputs(21U);
         }
     }
+}
+
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
+TEST_F(IfConversionTest, NonLoopInvariantNotPreventConversion)
+{
+    CreateNonLoopInvariantNotPreventConversion();
     ASSERT_TRUE(GetGraph()->RunPass<IfConversion>());
     auto graph = CreateEmptyGraph();
     GRAPH(graph)

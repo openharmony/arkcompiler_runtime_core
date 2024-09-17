@@ -247,11 +247,11 @@ public:
     static constexpr auto GetTarget();
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override;
+#define UNARY_OPERATION(opc) void Encode##opc(Reg dst, Reg src0) override; /* CC-OFF(G.PRE.09) code generation */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BINARY_OPERATION(opc)                               \
     void Encode##opc(Reg dst, Reg src0, Reg src1) override; \
-    void Encode##opc(Reg dst, Reg src0, Imm src1) override;
+    void Encode##opc(Reg dst, Reg src0, Imm src1) override; /* CC-OFF(G.PRE.09) code generation */
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define INST_DEF(OPCODE, MACRO) MACRO(OPCODE)
 

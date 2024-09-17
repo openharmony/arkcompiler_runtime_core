@@ -54,24 +54,28 @@ class AotData {
     using ClassPtr = RuntimeInterface::ClassPtr;
 
 public:
-    AotData(const File *pfile, Graph *graph, AddressType codeAddr, uint64_t *intfInlineCacheIndex,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *gotPlt,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *gotVirtIndexes,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *gotClass,
-            std::map<std::pair<const File *, uint32_t>, int32_t> *gotString,
-            std::map<std::pair<const File *, uint64_t>, int32_t> *gotIntfInlineCache,
-            std::map<std::pair<const File *, uint64_t>, int32_t> *gotCommon, SharedSlowPathData *slowPathData)
-        : pfile_(pfile),
-          graph_(graph),
-          slowPathData_(slowPathData),
-          codeAddress_(codeAddr),
-          intfInlineCacheIndex_(intfInlineCacheIndex),
-          gotPlt_(gotPlt),
-          gotVirtIndexes_(gotVirtIndexes),
-          gotClass_(gotClass),
-          gotString_(gotString),
-          gotIntfInlineCache_(gotIntfInlineCache),
-          gotCommon_(gotCommon)
+    struct AotDataArgs {
+        File *pfile;
+        Graph *graph;
+        SharedSlowPathData *slowPathData;
+        AddressType codeAddr;
+        uint64_t *intfInlineCacheIndex;
+        std::array<std::map<std::pair<const File *, uint32_t>, int32_t> *, 4U> mapArgs32;
+        std::array<std::map<std::pair<const File *, uint64_t>, int32_t> *, 2U> mapArgs64;
+    };
+
+    explicit AotData(const AotDataArgs &args)
+        : pfile_(args.pfile),
+          graph_(args.graph),
+          slowPathData_(args.slowPathData),
+          codeAddress_(args.codeAddr),
+          intfInlineCacheIndex_(args.intfInlineCacheIndex),
+          gotPlt_(args.mapArgs32[0U]),
+          gotVirtIndexes_(args.mapArgs32[1U]),
+          gotClass_(args.mapArgs32[2U]),
+          gotString_(args.mapArgs32[3U]),
+          gotIntfInlineCache_(args.mapArgs64[0U]),
+          gotCommon_(args.mapArgs64[1U])
     {
     }
 

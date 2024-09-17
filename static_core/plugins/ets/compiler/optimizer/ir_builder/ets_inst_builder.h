@@ -23,9 +23,9 @@ void BuildLaunch(const BytecodeInstruction *bcInst);
 #include "plugins/ets/compiler/optimizer/ir_builder/js_interop/js_interop_inst_builder.h"
 #endif
 
-void BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::Type type);
-IntrinsicInst *CreateStObjByNameIntrinsic(size_t pc, DataType::Type type);
-void BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type);
+void BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
+IntrinsicInst *CreateStObjByNameIntrinsic(size_t pc, compiler::DataType::Type type);
+void BuildStObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 
 void BuildEquals(const BytecodeInstruction *bcInst);
 

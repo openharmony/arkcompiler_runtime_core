@@ -64,9 +64,10 @@ private:
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LLVM_LOG(level, comp)                                                                      \
-    ark::llvmbackend::LLVMLogger::IsComponentEnabled(ark::llvmbackend::LLVMLoggerComponents::comp, \
-                                                     ark::Logger::Level::level) &&                 \
+#define LLVM_LOG(level, comp)                                                                 \
+    ark::llvmbackend::LLVMLogger::IsComponentEnabled(                                         \
+        ark::llvmbackend::LLVMLoggerComponents::comp, /* CC-OFF(G.PRE.02) namespace member */ \
+        ark::Logger::Level::level) &&                 /* CC-OFF(G.PRE.02) namespace member */ \
         LOG(level, LLVM) << "[" #comp "] "
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

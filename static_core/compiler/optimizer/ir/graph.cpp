@@ -844,10 +844,12 @@ void GraphMode::Dump(std::ostream &stm)
 {
     const char *sep = "";
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DUMP_MODE(name)      \
-    if (Is##name()) {        \
-        stm << sep << #name; \
-        sep = ", ";          \
+#define DUMP_MODE(name)                                \
+    if (Is##name()) {                                  \
+        /* CC-OFFNXT(G.PRE.10) function scope macro */ \
+        stm << sep << #name;                           \
+        /* CC-OFFNXT(G.PRE.10) function scope macro */ \
+        sep = ", ";                                    \
     }
 
     DUMP_MODE(Osr);
@@ -858,6 +860,8 @@ void GraphMode::Dump(std::ostream &stm)
     DUMP_MODE(Boundary);
     DUMP_MODE(Interpreter);
     DUMP_MODE(InterpreterEntry);
+
+#undef DUMP_MODE
 }
 
 size_t GetObjectOffset(const Graph *graph, ObjectType objType, RuntimeInterface::FieldPtr field, uint32_t typeId)

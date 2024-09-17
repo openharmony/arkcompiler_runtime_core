@@ -1610,6 +1610,7 @@ TEST_F(BranchEliminationTest, CreateInfiniteLoop)
  *            ...
  *        if_imm(compare1)
  */
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void BranchEliminationTest::BuildGraphCompareAndIfNotSameBlock(Graph *graph)
 {
     GRAPH(graph)

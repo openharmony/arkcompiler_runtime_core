@@ -33,12 +33,15 @@ namespace ark::compiler {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_DO_EXT(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPass();)
 
+// CC-OFFNXT(G.PRE.10) local scope macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_DO_EXT_VISITOR(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPassVisitor(v);)
 
+// CC-OFFNXT(G.FMT.16) project code style
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT(cond) ASSERT_DO_EXT(cond, )
 
+// CC-OFFNXT(G.FMT.16) project code style
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT_VISITOR(cond) ASSERT_DO_EXT_VISITOR(cond, )
 
@@ -48,6 +51,7 @@ namespace ark::compiler {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_EXT_PRINT_VISITOR(cond, message) \
+    /* CC-OFFNXT(G.PRE.10) local scope macro */ \
     ASSERT_DO((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPassVisitor(v);)
 // --------------------------------------------------------------
 
@@ -1261,10 +1265,10 @@ void GraphChecker::VisitModI([[maybe_unused]] GraphVisitor *v, Inst *inst)
     if (static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer()) {
         ASSERT_DO_EXT_VISITOR(DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) &&
                                   !DataType::IsReference(type),
-                              (std::cerr << "\nDivI must have Int32 type\n", inst->Dump(&std::cerr)));
+                              (std::cerr << "\nModI must have Int32 type\n", inst->Dump(&std::cerr)));
     } else {
         ASSERT_DO_EXT_VISITOR(!DataType::IsLessInt32(type) && !DataType::IsReference(type),
-                              (std::cerr << "\nDivI must have at least Int32 type\n", inst->Dump(&std::cerr)));
+                              (std::cerr << "\nModI must have at least Int32 type\n", inst->Dump(&std::cerr)));
     }
     CheckUnaryOperationTypes(inst);
 }
@@ -2671,19 +2675,24 @@ void GraphChecker::VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *in
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define VisitBinaryShiftedRegister(opc)                                                         \
+#define VISIT_BINARY_SHIFTED_REGISTER(opc)                                                      \
     void GraphChecker::Visit##opc(GraphVisitor *v, Inst *inst)                                  \
     {                                                                                           \
         CheckBinaryOperationWithShiftedOperandTypes(                                            \
             v, inst, inst->GetOpcode() != Opcode::AddSR && inst->GetOpcode() != Opcode::SubSR); \
     }
 
-VisitBinaryShiftedRegister(AddSR) VisitBinaryShiftedRegister(SubSR) VisitBinaryShiftedRegister(AndSR)
-    VisitBinaryShiftedRegister(OrSR) VisitBinaryShiftedRegister(XorSR) VisitBinaryShiftedRegister(AndNotSR)
-        VisitBinaryShiftedRegister(OrNotSR) VisitBinaryShiftedRegister(XorNotSR)
-#undef VisitBinaryShiftedRegister
+VISIT_BINARY_SHIFTED_REGISTER(AddSR)
+VISIT_BINARY_SHIFTED_REGISTER(SubSR)
+VISIT_BINARY_SHIFTED_REGISTER(AndSR)
+VISIT_BINARY_SHIFTED_REGISTER(OrSR)
+VISIT_BINARY_SHIFTED_REGISTER(XorSR)
+VISIT_BINARY_SHIFTED_REGISTER(AndNotSR)
+VISIT_BINARY_SHIFTED_REGISTER(OrNotSR)
+VISIT_BINARY_SHIFTED_REGISTER(XorNotSR)
+#undef VISIT_BINARY_SHIFTED_REGISTER
 
-            void GraphChecker::VisitNegSR([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+void GraphChecker::VisitNegSR([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     ASSERT_DO_EXT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                           (std::cerr << "NegSR must have integer type\n", inst->Dump(&std::cerr)));

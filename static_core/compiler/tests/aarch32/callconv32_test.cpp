@@ -267,14 +267,14 @@ public:
             auto paramInfo = GetCallconv()->GetParameterInfo(0);
             auto ret = paramInfo->GetNativeParam(INT32_TYPE);
             EXPECT_TRUE(std::holds_alternative<Reg>(ret));
-            EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
             EXPECT_EQ(std::get<Reg>(ret), Reg(0, INT32_TYPE));
+            EXPECT_EQ(std::get<Reg>(ret).GetId(), 0);
 
             for (uint32_t i = 1; i <= 3U; ++i) {
                 ret = paramInfo->GetNativeParam(INT32_TYPE);
                 EXPECT_TRUE(std::holds_alternative<Reg>(ret));
-                EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
                 EXPECT_EQ(std::get<Reg>(ret), Reg(i, INT32_TYPE));
+                EXPECT_EQ(std::get<Reg>(ret).GetId(), i);
             }
         }
 

@@ -55,7 +55,7 @@ static bool RunIrtocInterpreterOptimizations(Graph *graph);
 Function::Result Function::Compile(Arch arch, ArenaAllocator *allocator, ArenaAllocator *localAllocator)
 {
     IrtocRuntimeInterface runtime;
-    graph_ = allocator->New<Graph>(allocator, localAllocator, arch, this, &runtime, false);
+    graph_ = allocator->New<Graph>(Graph::GraphArgs {allocator, localAllocator, arch, this, &runtime}, false);
     builder_ = std::make_unique<compiler::IrConstructor>();
 
     MakeGraphImpl();

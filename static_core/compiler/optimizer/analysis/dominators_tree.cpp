@@ -82,10 +82,10 @@ void DominatorsTree::ComputeImmediateDominators(BasicBlock *block)
     while (!bucket.empty()) {
         auto v = *bucket.rbegin();
         auto eval = Eval(v);
-        if (GetSemi(eval) < GetSemi(v)) {
-            SetIdom(v, eval);
-        } else {
+        if (GetSemi(eval) >= GetSemi(v)) {
             SetIdom(v, parent);
+        } else {
+            SetIdom(v, eval);
         }
         bucket.pop_back();
     }

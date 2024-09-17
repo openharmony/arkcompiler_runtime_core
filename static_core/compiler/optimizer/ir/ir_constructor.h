@@ -483,6 +483,7 @@ public:
         return *this;
     }
 
+    // CC-OFFNXT(huge_method, G.FUN.01) big switch-case
     IrConstructor &Imm(uint64_t imm)
     {
         auto inst = CurrentInst();
@@ -750,6 +751,7 @@ public:
         return *this;
     }
 
+    // CC-OFFNXT(huge_method, huge_cyclomatic_complexity, G.FUN.01) big switch-case
     IrConstructor &TypeId(uint32_t typeId)
     {
         auto inst = CurrentInst();
@@ -1000,11 +1002,11 @@ public:
     {
         auto inst = CurrentInst();
         switch (inst->GetOpcode()) {
-            case Opcode::Cmp:
-                inst->CastToCmp()->SetOperandsType(type);
-                break;
             case Opcode::Compare:
                 inst->CastToCompare()->SetOperandsType(type);
+                break;
+            case Opcode::Cmp:
+                inst->CastToCmp()->SetOperandsType(type);
                 break;
             case Opcode::If:
                 inst->CastToIf()->SetOperandsType(type);
@@ -1015,14 +1017,14 @@ public:
             case Opcode::SubOverflow:
                 inst->CastToSubOverflow()->SetOperandsType(type);
                 break;
-            case Opcode::IfImm:
-                inst->CastToIfImm()->SetOperandsType(type);
-                break;
             case Opcode::Select:
                 inst->CastToSelect()->SetOperandsType(type);
                 break;
             case Opcode::SelectImm:
                 inst->CastToSelectImm()->SetOperandsType(type);
+                break;
+            case Opcode::IfImm:
+                inst->CastToIfImm()->SetOperandsType(type);
                 break;
             case Opcode::Cast:
                 inst->CastToCast()->SetOperandsType(type);

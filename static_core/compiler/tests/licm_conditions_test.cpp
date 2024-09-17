@@ -182,6 +182,7 @@ SRC_GRAPH(TestBrachWithoutPhi, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestBrachWithoutPhi, Graph *graph)
 {
     GRAPH(graph)
@@ -366,6 +367,7 @@ SRC_GRAPH(TestProcessLongestChain, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestProcessLongestChain, Graph *graph)
 {
     GRAPH(graph)
@@ -456,6 +458,7 @@ TEST_F(LicmConditionsTest, TestProcessLongestChain)
  * - Loop contains condition combination BB12, BB14 and BB15.
  * - Longest chain should be processed but it has Phi with different inputs in multiple predecessors successor
  */
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(TestProcessLongestChainNotSuitable, Graph *graph)
 {
     GRAPH(graph)
@@ -519,6 +522,7 @@ SRC_GRAPH(TestProcessLongestChainNotSuitable, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestProcessLongestChainNotSuitable, Graph *graph)
 {
     GRAPH(graph)
@@ -695,6 +699,7 @@ SRC_GRAPH(TestUpdatePhi, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestUpdatePhi, Graph *graph)
 {
     GRAPH(graph)
@@ -843,6 +848,7 @@ SRC_GRAPH(TestHoistPhi, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestHoistPhi, Graph *graph)
 {
     GRAPH(graph)
@@ -986,6 +992,7 @@ SRC_GRAPH(TestCannotHoistPhi, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestCannotHoistPhi, Graph *graph)
 {
     GRAPH(graph)
@@ -1122,6 +1129,7 @@ SRC_GRAPH(TestHoistPhiCorrectPredOrder, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestHoistPhiCorrectPredOrder, Graph *graph)
 {
     GRAPH(graph)
@@ -1200,6 +1208,7 @@ TEST_F(LicmConditionsTest, TestHoistPhiCorrectPredOrder)
  * Test graph:
  * - two chains with neighbour blocks
  */
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(TestProcessNeigbourChains, Graph *graph)
 {
     GRAPH(graph)
@@ -1264,6 +1273,7 @@ SRC_GRAPH(TestProcessNeigbourChains, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestProcessNeigbourChains, Graph *graph)
 {
     GRAPH(graph)
@@ -1373,6 +1383,7 @@ TEST_F(LicmConditionsTest, TestProcessNeigbourChains)
  * Test graph:
  * - two chains with common successors
  */
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(TestProcessChainsWithCommonSuccessors, Graph *graph)
 {
     GRAPH(graph)
@@ -1435,6 +1446,7 @@ SRC_GRAPH(TestProcessChainsWithCommonSuccessors, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestProcessChainsWithCommonSuccessors, Graph *graph)
 {
     GRAPH(graph)
@@ -1535,6 +1547,7 @@ TEST_F(LicmConditionsTest, TestProcessChainsWithCommonSuccessors)
  * Test graph:
  * - two chains can be merged
  */
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(TestMergeChains, Graph *graph)
 {
     GRAPH(graph)
@@ -1608,6 +1621,7 @@ SRC_GRAPH(TestMergeChains, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestMergeChains, Graph *graph)
 {
     GRAPH(graph)
@@ -1700,6 +1714,7 @@ TEST_F(LicmConditionsTest, TestMergeChains)
  * Test graph:
  * - two chains can be merged
  */
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(TestMergeChainsPhiHoisted, Graph *graph)
 {
     GRAPH(graph)
@@ -1774,6 +1789,7 @@ SRC_GRAPH(TestMergeChainsPhiHoisted, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestMergeChainsPhiHoisted, Graph *graph)
 {
     GRAPH(graph)
@@ -1883,6 +1899,7 @@ TEST_F(LicmConditionsTest, TestMergeChainsPhiHoisted)
  * Test graph:
  * - One of the chains is an extension of the other.
  */
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 SRC_GRAPH(TestNoMergeChains, Graph *graph)
 {
     GRAPH(graph)
@@ -1956,6 +1973,7 @@ SRC_GRAPH(TestNoMergeChains, Graph *graph)
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(TestNoMergeChains, Graph *graph)
 {
     GRAPH(graph)

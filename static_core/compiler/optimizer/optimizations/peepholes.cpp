@@ -805,26 +805,26 @@ void Peepholes::VisitOr([[maybe_unused]] GraphVisitor *v, Inst *inst)
     auto input0 = inst->GetInput(0).GetInst();
     auto input1 = inst->GetInput(1).GetInst();
     // NOLINTNEXTLINE(bugprone-branch-clone)
-    if (input1->IsConst() && static_cast<ConstantInst *>(input1)->GetIntValue() == static_cast<uint64_t>(0)) {
+    if (input0 == input1 && input0->GetType() == inst->GetType()) {
         // case 2:
-        // 0.i64 Const 0x000..00
-        // 1.i64 OR v5, v0
+        // 1.i64 OR v5, v5
         // 2.i64 INS which use v1
         // ===>
-        // 0.i64 Const 0x000..00
-        // 1.i64 OR v5, v0
+        // 1.i64 OR v5, v5
         // 2.i64 INS which use v5
         if (SkipThisPeepholeInOSR(inst, input0)) {
             return;
         }
         inst->ReplaceUsers(input0);
         PEEPHOLE_IS_APPLIED(static_cast<Peepholes *>(v), inst);
-    } else if (input0 == input1 && input0->GetType() == inst->GetType()) {
+    } else if (input1->IsConst() && static_cast<ConstantInst *>(input1)->GetIntValue() == static_cast<uint64_t>(0)) {
         // case 3:
-        // 1.i64 OR v5, v5
+        // 0.i64 Const 0x000..00
+        // 1.i64 OR v5, v0
         // 2.i64 INS which use v1
         // ===>
-        // 1.i64 OR v5, v5
+        // 0.i64 Const 0x000..00
+        // 1.i64 OR v5, v0
         // 2.i64 INS which use v5
         if (SkipThisPeepholeInOSR(inst, input0)) {
             return;
@@ -1860,10 +1860,10 @@ bool Peepholes::TrySimplifySubAddAdd(Inst *inst, Inst *input0, Inst *input1)
         return true;
     }
 
-    // (a + b) - (b + c) = a - c
-    if (input0->GetInput(1) == input1->GetInput(0)) {
+    // (a + b) - (c + b) = a - c
+    if (input0->GetInput(1) == input1->GetInput(1)) {
         auto newInput0 = input0->GetInput(0).GetInst();
-        auto newInput1 = input1->GetInput(1).GetInst();
+        auto newInput1 = input1->GetInput(0).GetInst();
         if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
@@ -1873,10 +1873,10 @@ bool Peepholes::TrySimplifySubAddAdd(Inst *inst, Inst *input0, Inst *input1)
         return true;
     }
 
-    // (a + b) - (c + b) = a - c
-    if (input0->GetInput(1) == input1->GetInput(1)) {
+    // (a + b) - (b + c) = a - c
+    if (input0->GetInput(1) == input1->GetInput(0)) {
         auto newInput0 = input0->GetInput(0).GetInst();
-        auto newInput1 = input1->GetInput(0).GetInst();
+        auto newInput1 = input1->GetInput(1).GetInst();
         if (SkipThisPeepholeInOSR(inst, newInput0) || SkipThisPeepholeInOSR(inst, newInput1)) {
             return true;
         }
@@ -2236,26 +2236,7 @@ bool Peepholes::TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked)
     auto cmpOpType = input->CastToCmp()->GetOperandsType();
     if (IsFloatType(cmpOpType)) {
         ASSERT(compare->GetOperandsType() == DataType::INT32);
-        if (CheckFcmpInputs(input0, input1)) {
-            input0 = input0->GetInput(0).GetInst();
-            input1 = input1->GetInput(0).GetInst();
-            cmpOpType = DataType::INT32;
-        } else if (CheckFcmpWithConstInput(input0, input1)) {
-            bool cmpSwap = false;
-            Inst *cmpCastInput = nullptr;
-            ConstantInst *cmpConstInput = nullptr;
-            if (!GetInputsOfCompareWithConst(input, &cmpCastInput, &cmpConstInput, &swap)) {
-                return false;
-            }
-            Inst *cmpConstInst = static_cast<Inst *>(cmpConstInput);
-            if (!TryReplaceFloatConstToIntConst(&cmpCastInput, &cmpConstInst)) {
-                return false;
-            }
-            input0 = cmpCastInput;
-            input1 = cmpConstInst;
-            cmpOpType = input0->GetType();
-            swap = swap ^ cmpSwap;
-        } else {
+        if (!TrySimplifyFloatCmpCompare(&input0, &input1, &cmpOpType, input, &swap)) {
             return false;
         }
     }
@@ -2269,6 +2250,34 @@ bool Peepholes::TrySimplifyCmpCompareWithZero(Inst *inst, bool *isOsrBlocked)
     compare->SetInput(1, input1);
     compare->SetOperandsType(cmpOpType);
     compare->SetCc(cc);
+    return true;
+}
+
+bool Peepholes::TrySimplifyFloatCmpCompare(Inst **input0, Inst **input1, DataType::Type *cmpOpType, Inst *compareInput,
+                                           bool *swap)
+{
+    if (CheckFcmpInputs(*input0, *input1)) {
+        *input0 = (*input0)->GetInput(0).GetInst();
+        *input1 = (*input1)->GetInput(0).GetInst();
+        *cmpOpType = DataType::INT32;
+    } else if (CheckFcmpWithConstInput(*input0, *input1)) {
+        bool cmpSwap = false;
+        Inst *cmpCastInput = nullptr;
+        ConstantInst *cmpConstInput = nullptr;
+        if (!GetInputsOfCompareWithConst(compareInput, &cmpCastInput, &cmpConstInput, swap)) {
+            return false;
+        }
+        Inst *cmpConstInst = static_cast<Inst *>(cmpConstInput);
+        if (!TryReplaceFloatConstToIntConst(&cmpCastInput, &cmpConstInst)) {
+            return false;
+        }
+        *input0 = cmpCastInput;
+        *input1 = cmpConstInst;
+        *cmpOpType = (*input0)->GetType();
+        *swap = (*swap) ^ cmpSwap;
+    } else {
+        return false;
+    }
     return true;
 }
 
@@ -2625,6 +2634,7 @@ void Peepholes::VisitInitClass(GraphVisitor *v, Inst *inst)
 void Peepholes::VisitIntrinsic([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     auto intrinsic = inst->CastToIntrinsic();
+    // CC-OFFNXT(C_RULE_SWITCH_BRANCH_CHECKER) autogenerated code
     switch (intrinsic->GetIntrinsicId()) {
 #include "intrinsics_peephole.inl"
         default: {

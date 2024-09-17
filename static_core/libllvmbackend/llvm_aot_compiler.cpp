@@ -776,8 +776,9 @@ llvm::Expected<compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAllocator &a
     auto sourceLang = method.GetClass()->GetSourceLang();
     bool isDynamic = panda_file::IsDynamicLanguage(sourceLang);
 
-    auto graph = allocator.New<compiler::Graph>(&allocator, &localAllocator, aotBuilder_->GetArch(), &method, runtime_,
-                                                false, nullptr, isDynamic);
+    auto graph = allocator.New<compiler::Graph>(
+        compiler::Graph::GraphArgs {&allocator, &localAllocator, aotBuilder_->GetArch(), &method, runtime_}, nullptr,
+        false, isDynamic);
     if (graph == nullptr) {
         return llvm::createStringError(llvm::inconvertibleErrorCode(), "Couldn't create graph");
     }
@@ -785,9 +786,14 @@ llvm::Expected<compiler::Graph *> LLVMAotCompiler::CreateGraph(ArenaAllocator &a
 
     uintptr_t codeAddress = aotBuilder_->GetCurrentCodeAddress();
     auto aotData = graph->GetAllocator()->New<compiler::AotData>(
-        method.GetPandaFile(), graph, codeAddress, aotBuilder_->GetIntfInlineCacheIndex(), aotBuilder_->GetGotPlt(),
-        aotBuilder_->GetGotVirtIndexes(), aotBuilder_->GetGotClass(), aotBuilder_->GetGotString(),
-        aotBuilder_->GetGotIntfInlineCache(), aotBuilder_->GetGotCommon(), nullptr);
+        compiler::AotData::AotDataArgs {method.GetPandaFile(),
+                                        graph,
+                                        nullptr,
+                                        codeAddress,
+                                        aotBuilder_->GetIntfInlineCacheIndex(),
+                                        {aotBuilder_->GetGotPlt(), aotBuilder_->GetGotVirtIndexes(),
+                                         aotBuilder_->GetGotClass(), aotBuilder_->GetGotString()},
+                                        {aotBuilder_->GetGotIntfInlineCache(), aotBuilder_->GetGotCommon()}});
 
     aotData->SetUseCha(true);
     graph->SetAotData(aotData);

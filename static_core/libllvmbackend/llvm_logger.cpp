@@ -32,10 +32,11 @@ void LLVMLogger::SetComponents(const std::vector<std::string>& args)
             break;
         }
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF(COMPONENT, NAME)                 \
-            if ((NAME) == arg) {               \
-                components_.set(COMPONENT);  \
-                continue;                    \
+#define DEF(COMPONENT, NAME)                           \
+            if ((NAME) == arg) {                       \
+                components_.set(COMPONENT);            \
+                /* CC-OFFNXT(G.PRE.05) function gen */ \
+                continue;                              \
             }
         LLVM_LOG_COMPONENTS(DEF)
 #undef DEF

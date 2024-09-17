@@ -33,6 +33,7 @@ public:
     void CreateInitialGraphDuplicatePhiInputs();
     Graph *CreateExpectedSplitPhiIntoTwo();
     Graph *CreateExpectedConstantPhiLoopBackEdge(bool inverse);
+    void CreateNestedIfGraph();
 };
 
 Graph *IfMergingTest::CreateExpectedSameIfs(bool inverse)
@@ -771,35 +772,8 @@ TEST_F(IfMergingTest, InstInPhiBlock)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), clone));
 }
 
-/*
- *        [0]
- *         |
- *         v
- *        [2]--->[4]----\
- *         |      |     |
- *         v      v     v
- *        [3]    [5]   [6]
- *         |      |     |
- *         |<-----+-----/
- *         v
- *        [7]--->[9]----\
- *         |      |     |
- *         v      v     v
- *        [8]    [10]  [11]
- *
- * Transform to:
- *        [0]
- *         |
- *         v
- *        [2]--->[4]----\
- *         |      |     |
- *         v      v     v
- *        [3]    [5]   [6]
- *         |      |     |
- *         v      v     v
- *        [8]    [10]  [11]
- */
-TEST_F(IfMergingTest, NestedIf)
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation, solid logic
+void IfMergingTest::CreateNestedIfGraph()
 {
     GRAPH(GetGraph())
     {
@@ -856,7 +830,39 @@ TEST_F(IfMergingTest, NestedIf)
             INST(21U, Opcode::Return).b().Inputs(3U);
         }
     }
+}
 
+/*
+ *        [0]
+ *         |
+ *         v
+ *        [2]--->[4]----\
+ *         |      |     |
+ *         v      v     v
+ *        [3]    [5]   [6]
+ *         |      |     |
+ *         |<-----+-----/
+ *         v
+ *        [7]--->[9]----\
+ *         |      |     |
+ *         v      v     v
+ *        [8]    [10]  [11]
+ *
+ * Transform to:
+ *        [0]
+ *         |
+ *         v
+ *        [2]--->[4]----\
+ *         |      |     |
+ *         v      v     v
+ *        [3]    [5]   [6]
+ *         |      |     |
+ *         v      v     v
+ *        [8]    [10]  [11]
+ */
+TEST_F(IfMergingTest, NestedIf)
+{
+    CreateNestedIfGraph();
     ASSERT_TRUE(GetGraph()->RunPass<IfMerging>());
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 

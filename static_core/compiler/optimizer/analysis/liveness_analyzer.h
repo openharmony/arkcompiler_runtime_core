@@ -600,6 +600,8 @@ private:
     void BuildBlocksLinearOrder();
     template <bool USE_PC_ORDER>
     void LinearizeBlocks();
+    template <bool USE_PC_ORDER>
+    void InsertSuccToPendingList(ArenaList<BasicBlock *> &pending, BasicBlock *succ);
     bool CheckLinearOrder();
 
     /*

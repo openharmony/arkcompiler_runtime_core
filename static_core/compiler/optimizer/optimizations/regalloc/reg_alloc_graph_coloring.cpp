@@ -83,18 +83,18 @@ void RegAllocGraphColoring::BuildIG(InterferenceGraph *ig, WorkingRanges *ranges
                 node->AddCallsite(rangeStart);
             }
         }
-
+        auto callback = [ig, node](Location location) {
+            ASSERT(location.IsFixedRegister());
+            auto physicalNode = ig->FindPhysicalNode(location);
+            if (physicalNode == nullptr) {
+                return;
+            }
+            ig->AddEdge(node->GetNumber(), physicalNode->GetNumber());
+        };
         if (!currentInterval->HasInst()) {
             // current_interval - is additional life interval for an instruction required temp, add edges to the fixed
             // inputs' nodes of that instruction
-            la.EnumerateFixedLocationsOverlappingTemp(currentInterval, [ig, node](Location location) {
-                ASSERT(location.IsFixedRegister());
-                auto physicalNode = ig->FindPhysicalNode(location);
-                if (physicalNode == nullptr) {
-                    return;
-                }
-                ig->AddEdge(node->GetNumber(), physicalNode->GetNumber());
-            });
+            la.EnumerateFixedLocationsOverlappingTemp(currentInterval, callback);
         }
 
         // Add node to active_nodes sorted by End time
@@ -167,35 +167,42 @@ void RegAllocGraphColoring::BuildBias(InterferenceGraph *ig, const IndexVector &
         walked.push_back(node.GetNumber());
         biased.clear();
         biased.push_back(node.GetNumber());
-        unsigned biasNum = ig->GetBiasCount();
-        node.SetBias(biasNum);
-        auto &bias = ig->AddBias();
-        ig->UpdateBiasData(&bias, node);
-        do {
-            // Pop back
-            unsigned curIndex = walked.back();
-            walked.resize(walked.size() - 1);
-
-            // Walk N affine nodes
-            for (auto tryIndex : affinityNodes) {
-                auto &tryNode = nodes[tryIndex];
-                if (tryNode.HasBias() || !ig->HasAffinityEdge(curIndex, tryIndex)) {
-                    continue;
-                }
-                // Check if the `try_node` intersects one of the already biased
-                auto it = std::find_if(biased.cbegin(), biased.cend(),
-                                       [ig, tryIndex](auto id) { return ig->HasEdge(id, tryIndex); });
-                if (it != biased.cend()) {
-                    continue;
-                }
-
-                tryNode.SetBias(biasNum);
-                ig->UpdateBiasData(&bias, tryNode);
-                walked.push_back(tryIndex);
-                biased.push_back(tryIndex);
-            }
-        } while (!walked.empty());
+        WalkNodes(std::make_pair(walked, biased), nodes, node, ig, affinityNodes);
     }
+}
+
+void RegAllocGraphColoring::WalkNodes(IndexVectorPair &&vectors, NodeVector &nodes, ColorNode node,
+                                      InterferenceGraph *ig, const IndexVector &affinityNodes)
+{
+    auto &[walked, biased] = vectors;
+    unsigned biasNum = ig->GetBiasCount();
+    node.SetBias(biasNum);
+    auto &bias = ig->AddBias();
+    ig->UpdateBiasData(&bias, node);
+    do {
+        // Pop back
+        unsigned curIndex = walked.back();
+        walked.resize(walked.size() - 1);
+
+        // Walk N affine nodes
+        for (auto tryIndex : affinityNodes) {
+            auto &tryNode = nodes[tryIndex];
+            if (tryNode.HasBias() || !ig->HasAffinityEdge(curIndex, tryIndex)) {
+                continue;
+            }
+            // Check if the `try_node` intersects one of the already biased
+            auto it = std::find_if(biased.cbegin(), biased.cend(),
+                                   [ig, tryIndex](auto id) { return ig->HasEdge(id, tryIndex); });
+            if (it != biased.cend()) {
+                continue;
+            }
+
+            tryNode.SetBias(biasNum);
+            ig->UpdateBiasData(&bias, tryNode);
+            walked.push_back(tryIndex);
+            biased.push_back(tryIndex);
+        }
+    } while (!walked.empty());
 }
 
 void RegAllocGraphColoring::AddAffinityEdgesToPhi(InterferenceGraph *ig, const ColorNode &node,

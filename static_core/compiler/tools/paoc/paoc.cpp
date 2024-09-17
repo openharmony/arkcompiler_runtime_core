@@ -736,8 +736,9 @@ bool Paoc::TryCreateGraph(CompilingContext *ctx)
     auto sourceLang = ctx->method->GetClass()->GetSourceLang();
     bool isDynamic = ark::panda_file::IsDynamicLanguage(sourceLang);
 
-    ctx->graph = ctx->allocator.New<Graph>(&ctx->allocator, &ctx->graphLocalAllocator, aotBuilder_->GetArch(),
-                                           ctx->method, runtime_, false, nullptr, isDynamic);
+    ctx->graph = ctx->allocator.New<Graph>(
+        Graph::GraphArgs {&ctx->allocator, &ctx->graphLocalAllocator, aotBuilder_->GetArch(), ctx->method, runtime_},
+        nullptr, false, isDynamic);
     if (ctx->graph == nullptr) {
         PrintError("Graph creation failed!");
         return false;
@@ -805,13 +806,7 @@ bool Paoc::CompileAot(CompilingContext *ctx)
     }
 
     uintptr_t codeAddress = aotBuilder_->GetCurrentCodeAddress();
-    auto aotData = ctx->graph->GetAllocator()->New<AotData>(
-        ctx->method->GetPandaFile(), ctx->graph, codeAddress, aotBuilder_->GetIntfInlineCacheIndex(),
-        aotBuilder_->GetGotPlt(), aotBuilder_->GetGotVirtIndexes(), aotBuilder_->GetGotClass(),
-        aotBuilder_->GetGotString(), aotBuilder_->GetGotIntfInlineCache(), aotBuilder_->GetGotCommon(), slowPathData_);
-
-    aotData->SetUseCha(paocOptions_->IsPaocUseCha());
-    ctx->graph->SetAotData(aotData);
+    MakeAotData(ctx, codeAddress);
 
     if (!ctx->graph->RunPass<IrBuilder>()) {
         PrintError("IrBuilder failed!");
@@ -844,6 +839,22 @@ bool Paoc::CompileAot(CompilingContext *ctx)
     }
 
     return FinalizeCompileAot(ctx, codeAddress);
+}
+
+void Paoc::MakeAotData(CompilingContext *ctx, uintptr_t codeAddress)
+{
+    auto *aotData = ctx->graph->GetAllocator()->New<AotData>(
+        AotData::AotDataArgs {ctx->method->GetPandaFile(),
+                              ctx->graph,
+                              slowPathData_,
+                              codeAddress,
+                              aotBuilder_->GetIntfInlineCacheIndex(),
+                              {aotBuilder_->GetGotPlt(), aotBuilder_->GetGotVirtIndexes(), aotBuilder_->GetGotClass(),
+                               aotBuilder_->GetGotString()},
+                              {aotBuilder_->GetGotIntfInlineCache(), aotBuilder_->GetGotCommon()}});
+
+    aotData->SetUseCha(paocOptions_->IsPaocUseCha());
+    ctx->graph->SetAotData(aotData);
 }
 
 void Paoc::PrintError(const std::string &error)

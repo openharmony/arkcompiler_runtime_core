@@ -97,10 +97,13 @@ public:
     };
 
     using BasicBlockHeap = ArenaMap<Inst *, struct HeapValue>;
+    using BasicBlockHeapIter = BasicBlockHeap::iterator;
     using Heap = ArenaMap<BasicBlock *, BasicBlockHeap>;
     using LoopPhiCands = ArenaMap<Inst *, InstVector>;
     using PhiCands = ArenaUnorderedMap<Loop *, LoopPhiCands>;
     using HeapEqClasses = ArenaVector<std::pair<Heap, PhiCands>>;
+    using PredBlocksIter = ArenaVector<BasicBlock *>::iterator;
+    using PredBlocksItersPair = std::pair<PredBlocksIter, PredBlocksIter>;
 
     explicit Lse(Graph *graph, bool hoistLoads = true)
         : Optimization(graph),
@@ -136,6 +139,11 @@ private:
     void InitializeHeap(BasicBlock *block, HeapEqClasses *heaps);
     void MergeHeapValuesForLoop(BasicBlock *block, HeapEqClasses *heaps);
     size_t MergeHeapValuesForBlock(BasicBlock *block, HeapEqClasses *heaps, Marker phiFixupMrk);
+    size_t ProcessHeapValuesForBlock(Heap *heap, BasicBlock *block, Marker phiFixupMrk);
+    BasicBlockHeapIter ProcessPredecessorHeap(BasicBlockHeap &predHeap, HeapValue &heapValue, BasicBlock *block,
+                                              Inst *curInst, size_t *aliasCalls);
+    bool ProcessHeapValues(HeapValue &heapValue, BasicBlock *block, BasicBlockHeapIter predInstIt,
+                           PredBlocksItersPair iters, Marker phiFixupMrk);
     void FixupPhisInBlock(BasicBlock *block, Marker phiFixupMrk);
     const char *GetEliminationCode(Inst *inst, Inst *origin);
     void ApplyHoistToCandidate(Loop *loop, Inst *alive);

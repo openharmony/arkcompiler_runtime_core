@@ -133,6 +133,7 @@ protected:
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BINARY_SHIFTED_REGISTER_OPERATION_DEF(opc, ignored) \
+    /* CC-OFFNXT(G.PRE.09) code generation */               \
     static void Visit##opc##SR(GraphVisitor *visitor, Inst *inst);
 
     ENCODE_INST_WITH_SHIFTED_OPERAND(BINARY_SHIFTED_REGISTER_OPERATION_DEF)
@@ -409,6 +410,8 @@ protected:
     static void FillIsInstanceCaseInterface(GraphVisitor *visitor, Inst *inst);
 
     static void FillIsInstance(GraphVisitor *visitor, Inst *inst, Reg tmpReg, LabelHolder::LabelId endLabel);
+    static void EncodeLoadAndInitClassInAot(EncodeVisitor *enc, Encoder *encoder, Inst *inst, uint32_t classId,
+                                            Reg dst);
 
 #include "optimizer/ir/visitor.inc"
 

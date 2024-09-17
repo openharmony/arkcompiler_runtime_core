@@ -1007,15 +1007,15 @@ static std::pair<Inst *, Inst *> GetHoistPosition(BasicBlock *block, Inst *bound
         if (inst == boundaryInst) {
             auto prev = inst->GetPrev();
             if (prev != nullptr && prev->GetOpcode() == Opcode::SaveState && !inst->IsMovableObject()) {
-                return {prev, inst};
+                return std::make_pair(prev, inst);
             }
-            return {nullptr, nullptr};
+            return std::make_pair(nullptr, nullptr);
         }
         if (inst->GetOpcode() == Opcode::SaveState) {
-            return {inst, inst};
+            return std::make_pair(inst, inst);
         }
     }
-    return {nullptr, nullptr};
+    return std::make_pair(nullptr, nullptr);
 }
 
 Inst *InteropIntrinsicOptimization::FindEliminationCandidate(BasicBlock *block)

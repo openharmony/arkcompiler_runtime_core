@@ -42,7 +42,7 @@ Loop *LoopUnswitcher::UnswitchLoop(Loop *loop, Inst *inst)
 
     auto markerHolder = MarkerHolder(GetGraph());
     cloneMarker_ = markerHolder.GetMarker();
-    auto unswitchData = PrepareLoopToUnswitch(loop);
+    auto unswitchData = PrepareLoopToClone(loop);
 
     conditions_.clear();
     for (auto bb : loop->GetBlocks()) {
@@ -68,48 +68,6 @@ Loop *LoopUnswitcher::UnswitchLoop(Loop *loop, Inst *inst)
     COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Loop " << loop->GetId() << " is copied";
     COMPILER_LOG(DEBUG, GRAPH_CLONER) << "Created new loop, id = " << cloneLoop->GetId();
     return cloneLoop;
-}
-
-GraphCloner::LoopClonerData *LoopUnswitcher::PrepareLoopToUnswitch(Loop *loop)
-{
-    auto preHeader = loop->GetPreHeader();
-    ASSERT(preHeader->GetSuccsBlocks().size() == MAX_SUCCS_NUM);
-    // If `outside_succ` has more than 2 predecessors, create a new one
-    // with loop header and back-edge predecessors only and insert it before `outside_succ`
-    auto outsideSucc = GetLoopOutsideSuccessor(loop);
-    constexpr auto PREDS_NUM = 2;
-    if (outsideSucc->GetPredsBlocks().size() > PREDS_NUM) {
-        auto backEdge = loop->GetBackEdges()[0];
-        outsideSucc = CreateNewOutsideSucc(outsideSucc, backEdge, preHeader);
-    }
-    // Split outside succ after last phi
-    // create empty block before outside succ if outside succ don't contain phi insts
-    if (outsideSucc->HasPhi() && outsideSucc->GetFirstInst() != nullptr) {
-        auto lastPhi = outsideSucc->GetFirstInst()->GetPrev();
-        auto block = outsideSucc->SplitBlockAfterInstruction(lastPhi, true);
-        // if `outside_succ` is pre-header replace it by `block`
-        for (auto inLoop : loop->GetOuterLoop()->GetInnerLoops()) {
-            if (inLoop->GetPreHeader() == outsideSucc) {
-                inLoop->SetPreHeader(block);
-            }
-        }
-    } else if (outsideSucc->GetFirstInst() != nullptr) {
-        auto block = outsideSucc->InsertEmptyBlockBefore();
-        outsideSucc->GetLoop()->AppendBlock(block);
-        outsideSucc = block;
-    }
-    // Populate `LoopClonerData`
-    auto allocator = GetGraph()->GetLocalAllocator();
-    auto unswitchData = allocator->New<LoopClonerData>();
-    unswitchData->blocks = allocator->New<ArenaVector<BasicBlock *>>(allocator->Adapter());
-    unswitchData->blocks->resize(loop->GetBlocks().size() + 1);
-    unswitchData->blocks->at(0) = preHeader;
-    std::copy(loop->GetBlocks().begin(), loop->GetBlocks().end(), unswitchData->blocks->begin() + 1);
-    unswitchData->blocks->push_back(outsideSucc);
-    unswitchData->outer = outsideSucc;
-    unswitchData->header = loop->GetHeader();
-    unswitchData->preHeader = loop->GetPreHeader();
-    return unswitchData;
 }
 
 void LoopUnswitcher::BuildLoopUnswitchControlFlow(LoopClonerData *unswitchData)
@@ -154,17 +112,7 @@ void LoopUnswitcher::BuildLoopUnswitchControlFlow(LoopClonerData *unswitchData)
 void LoopUnswitcher::BuildLoopUnswitchDataFlow(LoopClonerData *unswitchData, Inst *ifInst)
 {
     ASSERT(unswitchData != nullptr);
-    for (const auto &block : *unswitchData->blocks) {
-        for (const auto &inst : block->AllInsts()) {
-            if (inst->GetOpcode() == Opcode::NOP) {
-                continue;
-            }
-            if (inst->IsMarked(cloneMarker_)) {
-                SetCloneInputs<false>(inst);
-                UpdateCaller(inst);
-            }
-        }
-    }
+    ProcessMarkedInsts(unswitchData);
 
     auto commonOuter = unswitchData->outer->GetSuccessor(0);
     for (auto phi : unswitchData->outer->PhiInsts()) {

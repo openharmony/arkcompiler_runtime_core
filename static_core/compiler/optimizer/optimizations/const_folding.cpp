@@ -374,9 +374,9 @@ bool ConstFoldingSub(Inst *inst)
     auto input1 = inst->GetInput(1);
     auto graph = inst->GetBasicBlock()->GetGraph();
     if (input0.GetInst()->IsConst() && input1.GetInst()->IsConst()) {
+        ConstantInst *newCnst = nullptr;
         auto cnst0 = static_cast<ConstantInst *>(input0.GetInst());
         auto cnst1 = static_cast<ConstantInst *>(input1.GetInst());
-        ConstantInst *newCnst = nullptr;
         switch (DataType::GetCommonType(inst->GetType())) {
             case DataType::INT64:
                 newCnst = ConstFoldingCreateIntConst(

@@ -104,14 +104,14 @@ public:
         return localAllocator_;
     }
 
-    const std::string &GetMethodName() const
-    {
-        return methodName_;
-    }
-
     Graph *GetGraph() const
     {
         return graph_;
+    }
+
+    const std::string &GetMethodName() const
+    {
+        return methodName_;
     }
 
     Pipeline *GetPipeline() const
@@ -130,8 +130,8 @@ private:
     PandaVM *pandaVm_ {nullptr};
     ArenaAllocator *allocator_ {nullptr};
     ArenaAllocator *localAllocator_ {nullptr};
-    std::string methodName_;
     Graph *graph_ {nullptr};
+    std::string methodName_;
     Pipeline *pipeline_ {nullptr};
     // Used only in JIT Compilation
     bool compilationStatus_ {false};

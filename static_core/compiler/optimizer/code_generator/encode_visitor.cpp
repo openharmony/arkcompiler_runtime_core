@@ -104,28 +104,29 @@ BINARY_IMM_SIGN_OPS(BINARY_IMM_SIGN_OPERATION)
 #undef BINARY_IMM_SIGN_OPS
 #undef BINARY_IMM_SIGN_OPERATION
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define BINARY_SIGN_UNSIGN_OPERATION(opc)                                         \
-    void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)             \
-    {                                                                             \
-        auto type = inst->GetType();                                              \
-        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);               \
-        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);   \
-        auto arch = enc->GetCodegen()->GetArch();                                 \
-        if (!Codegen::InstEncodedWithLibCall(inst, arch)) {                       \
-            enc->GetEncoder()->Encode##opc(dst, IsTypeSigned(type), src0, src1);  \
-            return;                                                               \
-        }                                                                         \
-        ASSERT(arch == Arch::AARCH32);                                            \
-        if (enc->cg_->GetGraph()->IsAotMode()) {                                  \
-            enc->GetEncoder()->SetFalseResult();                                  \
-            return;                                                               \
-        }                                                                         \
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst); \
-        enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);      \
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);      \
-        enc->GetEncoder()->Encode##opc(dst, IsTypeSigned(type), src0, src1);      \
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);      \
+#define BINARY_SIGN_UNSIGN_OPERATION(opc)                                        \
+    void EncodeVisitor::Visit##opc(GraphVisitor *visitor, Inst *inst)            \
+    {                                                                            \
+        auto type = inst->GetType();                                             \
+        EncodeVisitor *enc = static_cast<EncodeVisitor *>(visitor);              \
+        auto [dst, src0, src1] = enc->GetCodegen()->ConvertRegisters<2U>(inst);  \
+        auto arch = enc->GetCodegen()->GetArch();                                \
+        if (!Codegen::InstEncodedWithLibCall(inst, arch)) {                      \
+            enc->GetEncoder()->Encode##opc(dst, IsTypeSigned(type), src0, src1); \
+            return; /* CC-OFF(G.PRE.05) function gen */                          \
+        }                                                                        \
+        ASSERT(arch == Arch::AARCH32);                                           \
+        if (enc->cg_->GetGraph()->IsAotMode()) {                                 \
+            enc->GetEncoder()->SetFalseResult();                                 \
+            return; /* CC-OFF(G.PRE.05) function gen */                          \
+        }                                                                        \
+        auto [liveRegs, liveFpRegs] = enc->GetCodegen()->GetLiveRegisters(inst); \
+        enc->GetEncoder()->SetRegister(&liveRegs, &liveFpRegs, dst, false);      \
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveFpRegs, true);      \
+        enc->GetEncoder()->Encode##opc(dst, IsTypeSigned(type), src0, src1);     \
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveFpRegs, true);      \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -153,8 +154,8 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
         RuntimeInterface::IntrinsicId entry =
             ((type == DataType::FLOAT32) ? RuntimeInterface::IntrinsicId::LIB_CALL_FMODF
                                          : RuntimeInterface::IntrinsicId::LIB_CALL_FMOD);
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+        auto [liveRegs, liveFpRegs] = enc->GetCodegen()->GetLiveRegisters(inst);
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveFpRegs, true);
 
         enc->GetCodegen()->FillCallParams(src0, src1);
         enc->GetCodegen()->CallIntrinsic(inst, entry);
@@ -170,8 +171,8 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
                                          Reg(retVal.GetId(), dst.GetSize() == WORD_SIZE ? INT32_TYPE : INT64_TYPE));
         }
 
-        enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+        enc->GetEncoder()->SetRegister(&liveRegs, &liveFpRegs, dst, false);
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveFpRegs, true);
         return;
     }
     ASSERT(arch == Arch::AARCH32);
@@ -180,11 +181,11 @@ void EncodeVisitor::VisitMod(GraphVisitor *visitor, Inst *inst)
         enc->GetEncoder()->SetFalseResult();
         return;
     }
-    auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-    enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
-    enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+    auto [liveRegs, liveFpRegs] = enc->GetCodegen()->GetLiveRegisters(inst);
+    enc->GetEncoder()->SetRegister(&liveRegs, &liveFpRegs, dst, false);
+    enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveFpRegs, true);
     enc->GetEncoder()->EncodeMod(dst, IsTypeSigned(type), src0, src1);
-    enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+    enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveFpRegs, true);
 }
 
 void EncodeVisitor::VisitShrI(GraphVisitor *visitor, Inst *inst)
@@ -274,11 +275,11 @@ void EncodeVisitor::VisitCast(GraphVisitor *visitor, Inst *inst)
         enc->GetEncoder()->SetFalseResult();
         return;
     }
-    auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-    enc->GetEncoder()->SetRegister(&live_regs, &live_vregs, dst, false);
-    enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+    auto [liveRegs, liveVregs] = enc->GetCodegen()->GetLiveRegisters(inst);
+    enc->GetEncoder()->SetRegister(&liveRegs, &liveVregs, dst, false);
+    enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveVregs, true);
     enc->GetEncoder()->EncodeCast(dst, dstSigned, src, srcSigned);
-    enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+    enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveVregs, true);
 }
 
 void EncodeVisitor::VisitBitcast(GraphVisitor *visitor, Inst *inst)
@@ -504,22 +505,22 @@ void EncodeVisitor::VisitFillConstArray(GraphVisitor *visitor, Inst *inst)
         encoder->EncodeAdd(methodReg, methodReg, Imm(arrOffset));
         // call memcpy
         RuntimeInterface::IntrinsicId entry = RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY;
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+        auto [liveRegs, liveFpRegs] = enc->GetCodegen()->GetLiveRegisters(inst);
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveFpRegs, true);
 
         enc->GetCodegen()->FillCallParams(arrayReg, methodReg, TypedImm(arraySize));
         enc->GetCodegen()->CallIntrinsic(inst, entry);
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveFpRegs, true);
     } else {
         auto data = runtime->GetPointerToConstArrayData(method, arrayType);
         // call memcpy
         RuntimeInterface::IntrinsicId entry = RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY;
-        auto [live_regs, live_vregs] = enc->GetCodegen()->GetLiveRegisters(inst);
-        enc->GetCodegen()->SaveCallerRegisters(live_regs, live_vregs, true);
+        auto [liveRegs, liveFpRegs] = enc->GetCodegen()->GetLiveRegisters(inst);
+        enc->GetCodegen()->SaveCallerRegisters(liveRegs, liveFpRegs, true);
 
         enc->GetCodegen()->FillCallParams(arrayReg, TypedImm(data), TypedImm(arraySize));
         enc->GetCodegen()->CallIntrinsic(inst, entry);
-        enc->GetCodegen()->LoadCallerRegisters(live_regs, live_vregs, true);
+        enc->GetCodegen()->LoadCallerRegisters(liveRegs, liveFpRegs, true);
     }
 }
 
@@ -1224,6 +1225,24 @@ void EncodeVisitor::VisitLoadRuntimeClass(GraphVisitor *visitor, Inst *inst)
     enc->GetEncoder()->EncodeLdr(dst, false, mem);
 }
 
+void EncodeVisitor::EncodeLoadAndInitClassInAot(EncodeVisitor *enc, Encoder *encoder, Inst *inst, uint32_t classId,
+                                                Reg dst)
+{
+    auto graph = enc->cg_->GetGraph();
+    ScopedTmpReg tmpReg(encoder);
+    auto aotData = graph->GetAotData();
+    intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
+    encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
+    auto label = encoder->CreateLabel();
+    encoder->EncodeJump(label, dst, Condition::NE);
+    // PLT Class Init Resolver has special calling convention:
+    // First encoder temporary (tmp_reg) works as parameter and return value
+    CHECK_EQ(tmpReg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
+    enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmpReg.GetReg(), EntrypointId::CLASS_INIT_RESOLVER);
+    encoder->EncodeMov(dst, tmpReg);
+    encoder->BindLabel(label);
+}
+
 void EncodeVisitor::VisitLoadAndInitClass(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<EncodeVisitor *>(visitor);
@@ -1242,18 +1261,7 @@ void EncodeVisitor::VisitLoadAndInitClass(GraphVisitor *visitor, Inst *inst)
             encoder->EncodeLdr(dst.As(Codegen::ConvertDataType(DataType::REFERENCE, graph->GetArch())), false, mem);
             return;
         }
-        ScopedTmpReg tmpReg(encoder);
-        auto aotData = graph->GetAotData();
-        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
-        encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
-        auto label = encoder->CreateLabel();
-        encoder->EncodeJump(label, dst, Condition::NE);
-        // PLT Class Init Resolver has special calling convention:
-        // First encoder temporary (tmp_reg) works as parameter and return value
-        CHECK_EQ(tmpReg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
-        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmpReg.GetReg(), EntrypointId::CLASS_INIT_RESOLVER);
-        encoder->EncodeMov(dst, tmpReg);
-        encoder->BindLabel(label);
+        EncodeLoadAndInitClassInAot(enc, encoder, inst, classId, dst);
     } else {  // JIT mode
         auto klass = reinterpret_cast<uintptr_t>(inst->CastToLoadAndInitClass()->GetClass());
         encoder->EncodeMov(dst, Imm(klass));
@@ -1283,18 +1291,7 @@ void EncodeVisitor::VisitUnresolvedLoadAndInitClass(GraphVisitor *visitor, Inst 
     auto dst = enc->GetCodegen()->ConvertRegister(inst->GetDstReg(), inst->GetType());  // load value
     ASSERT(inst->IsRuntimeCall());
     if (graph->IsAotMode()) {
-        ScopedTmpReg tmpReg(encoder);
-        auto aotData = graph->GetAotData();
-        intptr_t offset = aotData->GetClassSlotOffset(encoder->GetCursorOffset(), classId, true);
-        encoder->MakeLoadAotTableAddr(offset, tmpReg, dst);
-        auto label = encoder->CreateLabel();
-        encoder->EncodeJump(label, dst, Condition::NE);
-        // PLT Class Init Resolver has special calling convention:
-        // First encoder temporary (tmp_reg) works as parameter and return value
-        CHECK_EQ(tmpReg.GetReg().GetId(), encoder->GetTarget().GetTempRegsMask().GetMinRegister());
-        enc->GetCodegen()->CreateJumpToClassResolverPltShared(inst, tmpReg.GetReg(), EntrypointId::CLASS_INIT_RESOLVER);
-        encoder->EncodeMov(dst, tmpReg);
-        encoder->BindLabel(label);
+        EncodeLoadAndInitClassInAot(enc, encoder, inst, classId, dst);
     } else {  // JIT mode
         auto method = inst->CastToUnresolvedLoadAndInitClass()->GetMethod();
         auto utypes = graph->GetRuntime()->GetUnresolvedTypes();

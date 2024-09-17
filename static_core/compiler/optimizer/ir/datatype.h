@@ -93,6 +93,7 @@ inline std::ostream &operator<<(std::ostream &os, const DataType::Type &type)
     return os;
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 constexpr inline Type GetCommonType(Type type)
 {
     switch (type) {
@@ -114,6 +115,7 @@ constexpr inline Type GetCommonType(Type type)
     };
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline bool IsInt32Bit(Type type)
 {
     switch (type) {
@@ -130,6 +132,7 @@ inline bool IsInt32Bit(Type type)
     };
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline bool IsTypeNumeric(Type type)
 {
     switch (type) {
@@ -165,6 +168,7 @@ inline bool IsLessInt32(Type type)
     }
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline Type GetIntTypeForReference([[maybe_unused]] Arch arch)
 {
     // This is necessary for arm32 cross compilation
@@ -185,6 +189,7 @@ inline Type GetIntTypeForReference([[maybe_unused]] Arch arch)
     }
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 constexpr inline Type GetIntTypeBySize(size_t sizeInBytes, bool isSigned = false)
 {
     if (sizeInBytes <= sizeof(uint8_t)) {
@@ -203,6 +208,7 @@ constexpr inline Type GetIntTypeBySize(size_t sizeInBytes, bool isSigned = false
     return NO_TYPE;
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline bool Is32Bits(Type type, Arch arch)
 {
     switch (type) {
@@ -240,6 +246,7 @@ inline bool IsFloatType(Type type)
     }
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline bool IsTypeSigned(Type type)
 {
     switch (type) {
@@ -260,6 +267,7 @@ inline bool IsReference(Type type)
     return type == REFERENCE;
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline uint8_t ShiftByType(Type type, Arch arch)
 {
     switch (type) {

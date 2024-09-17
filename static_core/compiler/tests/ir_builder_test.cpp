@@ -4163,6 +4163,7 @@ return.void
 }
 
 // Checks the build of unfolded lda.const instruction
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 TEST_F(IrBuilderTest, LdaConstUnfold)
 {
     auto source = R"(
@@ -4365,6 +4366,7 @@ TEST_F(IrBuilderTest, DISABLED_MultiArray)
             INST(4U, Opcode::MultiArray)
                 .ref()
                 .Inputs(
+                    // CC-OFFNXT(G.FMT.06) project code style
                     {{DataType::REFERENCE, 3U}, {DataType::INT32, 1U}, {DataType::INT32, 0U}, {DataType::NO_TYPE, 2U}});
             INST(5U, Opcode::Return).ref().Inputs(4U);
         }
@@ -5624,6 +5626,7 @@ ok:
     ASSERT_TRUE(GraphComparator().Compare(graph, expectedGraph));
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 OUT_GRAPH(FallthroughBeforeTryBlockEnd, Graph *graph)
 {
     GRAPH(graph)

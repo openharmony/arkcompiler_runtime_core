@@ -34,7 +34,6 @@ public:
     Loop *UnswitchLoop(Loop *loop, Inst *inst);
 
 private:
-    LoopClonerData *PrepareLoopToUnswitch(Loop *loop);
     void BuildLoopUnswitchControlFlow(LoopClonerData *unswitchData);
     void BuildLoopUnswitchDataFlow(LoopClonerData *unswitchData, Inst *ifInst);
     void ReplaceWithConstantCondition(Inst *ifInst);

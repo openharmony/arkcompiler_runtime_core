@@ -83,9 +83,14 @@ bool LLVMArkInterface::DeoptsEnabled()
 
 AotData GetAotDataFromBuilder(const class ark::panda_file::File *file, AotBuilder *aotBuilder)
 {
-    return AotData(file, nullptr, 0, aotBuilder->GetIntfInlineCacheIndex(), aotBuilder->GetGotPlt(),
-                   aotBuilder->GetGotVirtIndexes(), aotBuilder->GetGotClass(), aotBuilder->GetGotString(),
-                   aotBuilder->GetGotIntfInlineCache(), aotBuilder->GetGotCommon(), nullptr);
+    return AotData(AotData::AotDataArgs {file,
+                                         nullptr,
+                                         nullptr,
+                                         0,
+                                         aotBuilder->GetIntfInlineCacheIndex(),
+                                         {aotBuilder->GetGotPlt(), aotBuilder->GetGotVirtIndexes(),
+                                          aotBuilder->GetGotClass(), aotBuilder->GetGotString()},
+                                         {aotBuilder->GetGotIntfInlineCache(), aotBuilder->GetGotCommon()}});
 }
 
 ark::llvmbackend::LLVMArkInterface::LLVMArkInterface(RuntimeInterface *runtime, llvm::Triple triple,
@@ -199,6 +204,7 @@ std::string GetValueAsString(llvm::Value *value)
 
 static bool MustLowerMemSet(const llvm::IntrinsicInst *inst, llvm::Triple::ArchType arch)
 {
+    // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
     ASSERT(inst->getIntrinsicID() == llvm::Intrinsic::memset ||
            inst->getIntrinsicID() == llvm::Intrinsic::memset_inline);
 
@@ -222,6 +228,7 @@ static bool MustLowerMemSet(const llvm::IntrinsicInst *inst, llvm::Triple::ArchT
 
 static bool MustLowerMemCpy(const llvm::IntrinsicInst *inst, llvm::Triple::ArchType arch)
 {
+    // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
     ASSERT(inst->getIntrinsicID() == llvm::Intrinsic::memcpy ||
            inst->getIntrinsicID() == llvm::Intrinsic::memcpy_inline);
 
@@ -246,6 +253,7 @@ static bool MustLowerMemCpy(const llvm::IntrinsicInst *inst, llvm::Triple::ArchT
 
 static bool MustLowerMemMove(const llvm::IntrinsicInst *inst, llvm::Triple::ArchType arch)
 {
+    // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
     ASSERT(inst->getIntrinsicID() == llvm::Intrinsic::memmove);
 
     auto sizeArg = inst->getArgOperand(2U);
@@ -292,9 +300,11 @@ llvm::Intrinsic::ID LLVMArkInterface::GetLLVMIntrinsicId(const llvm::Instruction
     }
 
     auto llvmId = intrinsicInst->getIntrinsicID();
+    // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
     if (llvmId == llvm::Intrinsic::memcpy && !MustLowerMemCpy(intrinsicInst, triple_.getArch())) {
         return llvm::Intrinsic::memcpy_inline;
     }
+    // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
     if (llvmId == llvm::Intrinsic::memset && !MustLowerMemSet(intrinsicInst, triple_.getArch())) {
         return llvm::Intrinsic::memset_inline;
     }
@@ -351,9 +361,12 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetIntrinsicId(const llvm::Instr
 LLVMArkInterface::IntrinsicId LLVMArkInterface::GetIntrinsicIdSwitch(const llvm::IntrinsicInst *inst) const
 {
     switch (inst->getIntrinsicID()) {
+        // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
         case llvm::Intrinsic::memcpy:
         case llvm::Intrinsic::memcpy_inline:
+        // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
         case llvm::Intrinsic::memmove:
+        // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
         case llvm::Intrinsic::memset:
         case llvm::Intrinsic::memset_inline:
             return GetIntrinsicIdMemory(inst);
@@ -386,15 +399,18 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetIntrinsicIdMemory(const llvm:
     auto arch = triple_.getArch();
     auto llvmId = inst->getIntrinsicID();
     switch (llvmId) {
+        // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
         case llvm::Intrinsic::memcpy:
         case llvm::Intrinsic::memcpy_inline:
             if (!ark::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemCpy(inst, arch)) {
+                // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
                 ASSERT(llvmId != llvm::Intrinsic::memcpy);
                 EVENT_PAOC("Skip lowering for @llvm.memcpy");
                 return NO_INTRINSIC_ID;
             }
             EVENT_PAOC("Lowering @llvm.memcpy");
             return static_cast<IntrinsicId>(RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY);
+        // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
         case llvm::Intrinsic::memmove:
             if (!ark::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemMove(inst, arch)) {
                 EVENT_PAOC("Skip lowering for @llvm.memmove, size is: " + GetValueAsString(inst->getArgOperand(2U)));
@@ -402,9 +418,11 @@ LLVMArkInterface::IntrinsicId LLVMArkInterface::GetIntrinsicIdMemory(const llvm:
             }
             EVENT_PAOC("Lowering @llvm.memmove, size is: " + GetValueAsString(inst->getArgOperand(2U)));
             return static_cast<IntrinsicId>(RuntimeInterface::IntrinsicId::LIB_CALL_MEM_MOVE);
+        // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
         case llvm::Intrinsic::memset:
         case llvm::Intrinsic::memset_inline:
             if (!ark::compiler::g_options.IsCompilerNonOptimizing() && !MustLowerMemSet(inst, arch)) {
+                // CC-OFFNXT(RiskyFunction, unsafe_function) false positive
                 ASSERT(llvmId != llvm::Intrinsic::memset);
                 EVENT_PAOC("Skip lowering for @llvm.memset");
                 return NO_INTRINSIC_ID;

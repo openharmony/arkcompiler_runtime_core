@@ -12,3 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef COMPILER_OPTIMIZER_CODEGEN_TARGET_X86_REGFILE
+#define COMPILER_OPTIMIZER_CODEGEN_TARGET_X86_REGFILE
+/*
+Register file implementation.
+Reserve registers.
+*/
+#endif

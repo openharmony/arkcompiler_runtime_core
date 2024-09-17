@@ -43,7 +43,7 @@ class Location {
 public:
     enum class Kind : uint8_t {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOCATION_DEF(name, short) name,
+#define LOCATION_DEF(name, short) name, /* CC-OFF(G.PRE.02) list generation */
         LOCATIONS(LOCATION_DEF)
 #undef LOCATION_DEF
             LAST = STACK_ARGUMENT,
@@ -60,7 +60,7 @@ public:
     {
         static constexpr std::array NAMES = {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOCATION_DEF(name, short_name) short_name,
+#define LOCATION_DEF(name, short_name) short_name, /* CC-OFF(G.PRE.02) list generation */
             LOCATIONS(LOCATION_DEF)
 #undef LOCATION_DEF
         };

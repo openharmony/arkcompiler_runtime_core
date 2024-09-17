@@ -91,6 +91,7 @@ void RegAllocResolverTest::ResolveFixedInputsRunLiveness()
 }
 
 // NOLINTBEGIN(readability-magic-numbers)
+// CC-OFFNXT(huge_depth) false positive
 TEST_F(RegAllocResolverTest, ResolveFixedInputs)
 {
     src_graph::RegAllocResolverTest::CREATE(GetGraph());
@@ -139,14 +140,15 @@ TEST_F(RegAllocResolverTest, ResolveFixedInputs)
                 break;
             }
         }
-        if (!found) {
-            std::stringstream f;
-            for (auto &esf : sfData) {
-                f << sf_data::ToString(esf, GetGraph()->GetArch()) << ", ";
-            }
-            ASSERT_TRUE(found) << "Spill fill " << sf_data::ToString(expSf, GetGraph()->GetArch())
-                               << "  not found among " << f.str();
+        if (found) {
+            continue;
         }
+        std::stringstream f;
+        for (auto &esf : sfData) {
+            f << sf_data::ToString(esf, GetGraph()->GetArch()) << ", ";
+        }
+        ASSERT_TRUE(found) << "Spill fill " << sf_data::ToString(expSf, GetGraph()->GetArch()) << "  not found among "
+                           << f.str();
     }
 }
 // NOLINTEND(readability-magic-numbers)

@@ -39,7 +39,7 @@ bool TestCmp64(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -91,7 +91,7 @@ bool TestCompare(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -142,7 +142,7 @@ bool TestCompare64(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -218,10 +218,10 @@ bool TestCast(Encoder64Test *test)
 
             if (src > floatMinInt) {
                 dst = src < floatMaxInt ? static_cast<Dst>(src) : maxInt;
-            } else if (std::isnan(src)) {
-                dst = 0;
-            } else {
+            } else if (!std::isnan(src)) {
                 dst = minInt;
+            } else {
+                dst = 0;
             }
         }
 
@@ -438,7 +438,7 @@ bool TestDiv(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -496,7 +496,8 @@ bool TestDivImm(Encoder64Test *test)
     bool isSigned = std::is_signed_v<T>;
     using ExtT = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
 
-    auto innerIters = static_cast<uint64_t>(std::ceil(std::sqrt(ITERATION)));
+    auto ceiled = std::ceil(std::sqrt(ITERATION));
+    auto innerIters = static_cast<uint64_t>(ceiled);
 
     for (uint64_t i = 0; i < ITERATION; ++i) {
         test->PreWork();
@@ -518,7 +519,7 @@ bool TestDivImm(Encoder64Test *test)
 
         // If encode unsupported - now print error
         if (!test->GetEncoder()->GetResult()) {
-            std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+            std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
             return false;
         }
         // Change this for enable print disasm
@@ -576,7 +577,7 @@ bool TestModImm(Encoder64Test *test)
 
         // If encode unsupported - now print error
         if (!test->GetEncoder()->GetResult()) {
-            std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+            std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
             return false;
         }
         // Change this for enable print disasm
@@ -619,15 +620,18 @@ bool TestModMainLoop(Encoder64Test *test)
         // Main check - compare parameter and
         // return value
         if constexpr (std::is_same<float, T>::value) {
-            if (!test->CallCode<T>(tmp1, tmp2, fmodf(tmp1, tmp2))) {
+            auto mod = fmodf(tmp1, tmp2);
+            if (!test->CallCode<T>(tmp1, tmp2, mod)) {
                 return false;
             }
         } else if constexpr (std::is_same<double, T>::value) {
-            if (!test->CallCode<T>(tmp1, tmp2, fmod(tmp1, tmp2))) {
+            auto mod = fmod(tmp1, tmp2);
+            if (!test->CallCode<T>(tmp1, tmp2, mod)) {
                 return false;
             }
         } else {
-            if (!test->CallCode<T>(tmp1, tmp2, static_cast<T>(tmp1 % tmp2))) {
+            auto mod = static_cast<T>(tmp1 % tmp2);
+            if (!test->CallCode<T>(tmp1, tmp2, mod)) {
                 return false;
             }
         }
@@ -635,10 +639,10 @@ bool TestModMainLoop(Encoder64Test *test)
 
     if constexpr (std::is_floating_point_v<T>) {
         T nan = std::numeric_limits<T>::quiet_NaN();
-        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
+        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
             return false;
         }
-        if (!test->CallCode<T>(RandomGen<T>(), nan, nan)) {
+        if (!test->CallCode<T>(nan, RandomGen<T>(), nan)) {
             return false;
         }
         if (!test->CallCode<T>(0.0, 0.0, nan)) {
@@ -681,7 +685,7 @@ bool TestMod(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -691,10 +695,10 @@ bool TestMod(Encoder64Test *test)
 
 TEST_F(Encoder64Test, ModTest)
 {
-    EXPECT_TRUE(TestMod<int32_t>(this));
-    EXPECT_TRUE(TestMod<int64_t>(this));
     EXPECT_TRUE(TestMod<uint32_t>(this));
     EXPECT_TRUE(TestMod<uint64_t>(this));
+    EXPECT_TRUE(TestMod<int32_t>(this));
+    EXPECT_TRUE(TestMod<int64_t>(this));
     EXPECT_TRUE(TestMod<float>(this));
     EXPECT_TRUE(TestMod<double>(this));
 }
@@ -836,7 +840,7 @@ bool TestSelect(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -930,7 +934,7 @@ bool TestSelectTest(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1000,7 +1004,7 @@ bool TestCompareTest(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1070,7 +1074,7 @@ bool TestJumpTest(Encoder64Test *test)
 
     // If encode unsupported - now print error
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1133,7 +1137,7 @@ bool TestLoadExclusive(Encoder64Test *test, uint64_t inputWord, T expectedResult
     test->PostWork();
 
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1156,7 +1160,7 @@ bool TestStoreExclusiveFailed(Encoder64Test *test)
     test->PostWork();
 
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1187,7 +1191,7 @@ bool TestStoreExclusive(Encoder64Test *test, T value, uint64_t expectedResult)
     test->PostWork();
 
     if (!test->GetEncoder()->GetResult()) {
-        std::cerr << "Unsupported for " << TypeName<T>() << "\n";
+        std::cerr << "Unsupported for " << TypeName<T>() << std::endl;
         return false;
     }
     // Change this for enable print disasm
@@ -1209,28 +1213,28 @@ TEST_F(Encoder64Test, LoadExclusiveTest)
     const uint64_t sourceWord = 0x1122334455667788ULL;
     // aarch64 is little-endian, so bytes are actually stored in following order:
     // 0x 88 77 66 55 44 33 22 11
-    EXPECT_TRUE((TestLoadExclusive<uint8_t, false>(this, sourceWord, 0x88U)));
-    EXPECT_TRUE((TestLoadExclusive<uint16_t, false>(this, sourceWord, 0x7788U)));
-    EXPECT_TRUE((TestLoadExclusive<uint32_t, false>(this, sourceWord, 0x55667788UL)));
-    EXPECT_TRUE((TestLoadExclusive<uint64_t, false>(this, sourceWord, sourceWord)));
-
     EXPECT_TRUE((TestLoadExclusive<uint8_t, true>(this, sourceWord, 0x88U)));
     EXPECT_TRUE((TestLoadExclusive<uint16_t, true>(this, sourceWord, 0x7788U)));
     EXPECT_TRUE((TestLoadExclusive<uint32_t, true>(this, sourceWord, 0x55667788UL)));
     EXPECT_TRUE((TestLoadExclusive<uint64_t, true>(this, sourceWord, sourceWord)));
+
+    EXPECT_TRUE((TestLoadExclusive<uint8_t, false>(this, sourceWord, 0x88U)));
+    EXPECT_TRUE((TestLoadExclusive<uint16_t, false>(this, sourceWord, 0x7788U)));
+    EXPECT_TRUE((TestLoadExclusive<uint32_t, false>(this, sourceWord, 0x55667788UL)));
+    EXPECT_TRUE((TestLoadExclusive<uint64_t, false>(this, sourceWord, sourceWord)));
 }
 
 TEST_F(Encoder64Test, StoreExclusiveTest)
 {
-    EXPECT_TRUE((TestStoreExclusiveFailed<uint8_t, false>(this)));
-    EXPECT_TRUE((TestStoreExclusiveFailed<uint16_t, false>(this)));
-    EXPECT_TRUE((TestStoreExclusiveFailed<uint32_t, false>(this)));
-    EXPECT_TRUE((TestStoreExclusiveFailed<uint64_t, false>(this)));
-
     EXPECT_TRUE((TestStoreExclusiveFailed<uint8_t, true>(this)));
     EXPECT_TRUE((TestStoreExclusiveFailed<uint16_t, true>(this)));
     EXPECT_TRUE((TestStoreExclusiveFailed<uint32_t, true>(this)));
     EXPECT_TRUE((TestStoreExclusiveFailed<uint64_t, true>(this)));
+
+    EXPECT_TRUE((TestStoreExclusiveFailed<uint8_t, false>(this)));
+    EXPECT_TRUE((TestStoreExclusiveFailed<uint16_t, false>(this)));
+    EXPECT_TRUE((TestStoreExclusiveFailed<uint32_t, false>(this)));
+    EXPECT_TRUE((TestStoreExclusiveFailed<uint64_t, false>(this)));
 
     EXPECT_TRUE((TestStoreExclusive<uint8_t, false>(this, 0x11U, 0xFFFFFFFFFFFFFF11ULL)));
     EXPECT_TRUE((TestStoreExclusive<uint16_t, false>(this, 0x1122U, 0xFFFFFFFFFFFF1122ULL)));
@@ -1363,8 +1367,8 @@ TEST_F(Encoder64Test, Registers)
     {
         {
             ScopedTmpReg tmp1(GetEncoder(), true);
-            ASSERT_EQ(tmp1.GetReg(), target.GetLinkReg());
             ScopedTmpReg tmp2(GetEncoder(), true);
+            ASSERT_EQ(tmp1.GetReg(), target.GetLinkReg());
             ASSERT_NE(tmp2.GetReg(), target.GetLinkReg());
         }
         ScopedTmpReg tmp3(GetEncoder(), true);

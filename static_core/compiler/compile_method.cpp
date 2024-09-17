@@ -70,10 +70,19 @@ void JITStats::DumpCsv(char sep)
     }
 }
 
-static void EndCompilation(const std::string &methodName, bool isOsr, size_t bcSize, [[maybe_unused]] uintptr_t address,
-                           size_t codeSize, [[maybe_unused]] size_t infoSize,
-                           [[maybe_unused]] events::CompilationStatus status, JITStats *jitStats)
+struct EventCompilationArgs {
+    const std::string methodName_;
+    bool isOsr;
+    size_t bcSize;
+    uintptr_t address;
+    size_t codeSize;
+    size_t infoSize;
+    events::CompilationStatus status;
+};
+
+static void EndCompilation(const EventCompilationArgs &args, JITStats *jitStats)
 {
+    [[maybe_unused]] auto [methodName, isOsr, bcSize, address, codeSize, infoSize, status] = args;
     EVENT_COMPILATION(methodName, isOsr, bcSize, address, codeSize, infoSize, status);
     if (jitStats != nullptr) {
         ASSERT((codeSize != 0) == (status == events::CompilationStatus::COMPILED));
@@ -139,10 +148,17 @@ static Span<uint8_t> EmitCode(const Graph *graph, CodeAllocator *allocator)
     return Span<uint8_t>(reinterpret_cast<uint8_t *>(memRange.GetData()), codeSize);
 }
 
-static uint8_t *GetEntryPoint(Graph *graph, [[maybe_unused]] Method *method, const std::string &methodName,
-                              [[maybe_unused]] bool isOsr, CodeAllocator *codeAllocator,
-                              [[maybe_unused]] ArenaAllocator *gdbDebugInfoAllocator, JITStats *jitStats)
+struct EmitCodeArgs {
+    Graph *graph;
+    CodeAllocator *codeAllocator;
+    ArenaAllocator *gdbDebugInfoAllocator;
+    const std::string methodName_;
+};
+
+static uint8_t *GetEntryPoint(EmitCodeArgs &&args, [[maybe_unused]] Method *method, [[maybe_unused]] bool isOsr,
+                              JITStats *jitStats)
 {
+    [[maybe_unused]] auto [graph, codeAllocator, gdbDebugInfoAllocator, methodName] = args;
 #ifdef PANDA_COMPILER_DEBUG_INFO
     auto generatedData = g_options.IsCompilerEmitDebugInfo()
                              ? EmitElf(graph, codeAllocator, gdbDebugInfoAllocator, methodName)
@@ -159,8 +175,10 @@ static uint8_t *GetEntryPoint(Graph *graph, [[maybe_unused]] Method *method, con
                         << bit_cast<void *>(codeInfo.GetCode()) << ", code size " << codeInfo.GetCodeSize();
 
     auto entryPoint = const_cast<uint8_t *>(codeInfo.GetCode());
-    EndCompilation(methodName, isOsr, method->GetCodeSize(), reinterpret_cast<uintptr_t>(entryPoint),
-                   codeInfo.GetCodeSize(), codeInfo.GetInfoSize(), events::CompilationStatus::COMPILED, jitStats);
+    EndCompilation(EventCompilationArgs {methodName, isOsr, method->GetCodeSize(),
+                                         reinterpret_cast<uintptr_t>(entryPoint), codeInfo.GetCodeSize(),
+                                         codeInfo.GetInfoSize(), events::CompilationStatus::COMPILED},
+                   jitStats);
     return entryPoint;
 }
 
@@ -178,19 +196,29 @@ static void RunOptimizations(CompilerTaskRunner<RUNNER_MODE> taskRunner, JITStat
             LOG(FATAL, COMPILER) << "RunOptimizations failed!";
         }
         LOG(WARNING, COMPILER) << "RunOptimizations failed!";
-        EndCompilation(compilerCtx.GetMethodName(), compilerCtx.IsOsr(), compilerCtx.GetMethod()->GetCodeSize(), 0, 0,
-                       0, events::CompilationStatus::FAILED, jitStats);
+        EndCompilation(EventCompilationArgs {compilerCtx.GetMethodName(), compilerCtx.IsOsr(),
+                                             compilerCtx.GetMethod()->GetCodeSize(), 0, 0, 0,
+                                             events::CompilationStatus::FAILED},
+                       jitStats);
     });
 
     // Run compiler optimizations over created graph
     RunOptimizations<RUNNER_MODE>(std::move(taskRunner));
 }
 
+struct CheckCompilationArgs {
+    RuntimeInterface *runtime;
+    CodeAllocator *codeAllocator;
+    ArenaAllocator *gdbDebugInfoAllocator;
+    JITStats *jitStats;
+    bool isDynamic;
+    Arch arch;
+};
+
 template <TaskRunnerMode RUNNER_MODE>
-static bool CheckCompilation(RuntimeInterface *runtime, CodeAllocator *codeAllocator,
-                             ArenaAllocator *gdbDebugInfoAllocator, JITStats *jitStats, bool isDynamic, Arch arch,
-                             CompilerContext<RUNNER_MODE> &compilerCtx)
+static bool CheckCompilation(CheckCompilationArgs &&args, CompilerContext<RUNNER_MODE> &compilerCtx)
 {
+    auto [runtime, codeAllocator, gdbDebugInfoAllocator, jitStats, isDynamic, arch] = args;
     auto *graph = compilerCtx.GetGraph();
 
     ASSERT(graph != nullptr && graph->GetCode().data() != nullptr);
@@ -200,18 +228,22 @@ static bool CheckCompilation(RuntimeInterface *runtime, CodeAllocator *codeAlloc
     auto *method = compilerCtx.GetMethod();
 
     if (!isDynamic && !CheckSingleImplementation(graph)) {
-        EndCompilation(name, isOsr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED_SINGLE_IMPL,
+        EndCompilation(EventCompilationArgs {name, isOsr, method->GetCodeSize(), 0, 0, 0,
+                                             events::CompilationStatus::FAILED_SINGLE_IMPL},
                        jitStats);
         return false;
     }
 
     // Drop non-native code in any case
     if (arch != RUNTIME_ARCH) {
-        EndCompilation(name, isOsr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::DROPPED, jitStats);
+        EndCompilation(
+            EventCompilationArgs {name, isOsr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::DROPPED},
+            jitStats);
         return false;
     }
 
-    auto entryPoint = GetEntryPoint(graph, method, name, isOsr, codeAllocator, gdbDebugInfoAllocator, jitStats);
+    auto entryPoint =
+        GetEntryPoint(EmitCodeArgs {graph, codeAllocator, gdbDebugInfoAllocator, name}, method, isOsr, jitStats);
     if (entryPoint == nullptr) {
         return false;
     }
@@ -265,8 +297,9 @@ void JITCompileMethod(RuntimeInterface *runtime, CodeAllocator *codeAllocator, A
 
     taskRunner.AddCallbackOnSuccess([runtime, codeAllocator, gdbDebugInfoAllocator, jitStats, isDynamic,
                                      arch](CompilerContext<RUNNER_MODE> &compilerCtx) {
-        bool compilationStatus = CheckCompilation<RUNNER_MODE>(runtime, codeAllocator, gdbDebugInfoAllocator, jitStats,
-                                                               isDynamic, arch, compilerCtx);
+        bool compilationStatus = CheckCompilation<RUNNER_MODE>(
+            CheckCompilationArgs {runtime, codeAllocator, gdbDebugInfoAllocator, jitStats, isDynamic, arch},
+            compilerCtx);
         compilerCtx.SetCompilationStatus(compilationStatus);
     });
     taskRunner.AddCallbackOnFail(
@@ -295,12 +328,14 @@ void CompileInGraph(RuntimeInterface *runtime, bool isDynamic, Arch arch, Compil
 
     auto *allocator = taskCtx.GetAllocator();
     auto *localAllocator = taskCtx.GetLocalAllocator();
-    auto *graph =
-        allocator->template New<Graph>(allocator, localAllocator, arch, method, runtime, isOsr, nullptr, isDynamic);
+    auto *graph = allocator->template New<Graph>(Graph::GraphArgs {allocator, localAllocator, arch, method, runtime},
+                                                 nullptr, isOsr, isDynamic);
     taskCtx.SetGraph(graph);
     if (graph == nullptr) {
         LOG(ERROR, COMPILER) << "Creating graph failed!";
-        EndCompilation(methodName, isOsr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED, jitStats);
+        EndCompilation(
+            EventCompilationArgs {methodName, isOsr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED},
+            jitStats);
         CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
         return;
     }
@@ -315,7 +350,9 @@ void CompileInGraph(RuntimeInterface *runtime, bool isDynamic, Arch arch, Compil
             LOG(FATAL, COMPILER) << "IrBuilder failed!";
         }
         LOG(WARNING, COMPILER) << "IrBuilder failed!";
-        EndCompilation(methodName, isOsr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED, jitStats);
+        EndCompilation(
+            EventCompilationArgs {methodName, isOsr, method->GetCodeSize(), 0, 0, 0, events::CompilationStatus::FAILED},
+            jitStats);
     };
     CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), success);
 }
@@ -330,10 +367,8 @@ template void CompileInGraph<INPLACE_MODE>(RuntimeInterface *, bool, Arch, Compi
                                            JITStats *);
 template void RunOptimizations<BACKGROUND_MODE>(CompilerTaskRunner<BACKGROUND_MODE>, JITStats *);
 template void RunOptimizations<INPLACE_MODE>(CompilerTaskRunner<INPLACE_MODE>, JITStats *);
-template bool CheckCompilation<BACKGROUND_MODE>(RuntimeInterface *, CodeAllocator *, ArenaAllocator *, JITStats *, bool,
-                                                Arch, CompilerContext<BACKGROUND_MODE> &);
-template bool CheckCompilation<INPLACE_MODE>(RuntimeInterface *, CodeAllocator *, ArenaAllocator *, JITStats *, bool,
-                                             Arch, CompilerContext<INPLACE_MODE> &);
+template bool CheckCompilation<BACKGROUND_MODE>(CheckCompilationArgs &&args, CompilerContext<BACKGROUND_MODE> &);
+template bool CheckCompilation<INPLACE_MODE>(CheckCompilationArgs &&args, CompilerContext<INPLACE_MODE> &);
 
 }  // namespace ark::compiler
 
@@ -355,7 +390,7 @@ void NO_INLINE __jit_debug_register_code(void)
 
 // Default version for descriptor (may be checked before register code)
 // NOLINTNEXTLINE(modernize-use-nullptr, readability-identifier-naming)
-jit_descriptor __jit_debug_descriptor = {1, JIT_NOACTION, NULL, NULL};
+jit_descriptor __jit_debug_descriptor = {1, JIT_NOACTION, NULL, NULL};  // CC-OFF(G.EXP.01-CPP) public API
 }  // extern "C"
 
 namespace ark::compiler {

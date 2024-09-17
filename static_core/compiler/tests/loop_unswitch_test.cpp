@@ -23,6 +23,7 @@ namespace ark::compiler {
 // NOLINTBEGIN(readability-magic-numbers,readability-function-size)
 class LoopUnswitchTest : public GraphTest {
 public:
+    // CC-OFFNXT(huge_method, G.FUN.01) graph creation
     void CreateIncLoopGraph(int count)
     {
         GRAPH(GetGraph())
@@ -90,6 +91,7 @@ public:
         }
     }
 
+    // CC-OFFNXT(huge_method, G.FUN.01) graph creation
     void CreateDecLoopGraph(int count)
     {
         GRAPH(GetGraph())
@@ -326,6 +328,7 @@ void LoopUnswitchTest::BuildGraphSameCondition()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 Graph *LoopUnswitchTest::BuildExpectedSameCondition()
 {
     auto graph = CreateEmptyGraph();
@@ -416,6 +419,7 @@ TEST_F(LoopUnswitchTest, TestSameCondition)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void LoopUnswitchTest::BuildGraphMultipleConditions()
 {
     GRAPH(GetGraph())
@@ -517,6 +521,7 @@ void LoopUnswitchTest::BuildGraphMultipleConditions()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 Graph *LoopUnswitchTest::BuildExpectedMultipleConditions()
 {
     auto graph = CreateEmptyGraph();
@@ -642,6 +647,7 @@ TEST_F(LoopUnswitchTest, TestMultipleConditions)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void LoopUnswitchTest::BuildGraphMultipleConditionsLimitLevel()
 {
     GRAPH(GetGraph())
@@ -743,6 +749,7 @@ void LoopUnswitchTest::BuildGraphMultipleConditionsLimitLevel()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 Graph *LoopUnswitchTest::BuildExpectedMultipleConditionsLimitLevel()
 {
     auto graph = CreateEmptyGraph();
@@ -862,6 +869,7 @@ TEST_F(LoopUnswitchTest, TestMultipleConditionsLimitLevel)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 void LoopUnswitchTest::BuildGraphMultipleConditionsLimitInstructions()
 {
     GRAPH(GetGraph())
@@ -963,6 +971,7 @@ void LoopUnswitchTest::BuildGraphMultipleConditionsLimitInstructions()
     }
 }
 
+// CC-OFFNXT(huge_method, G.FUN.01) graph creation
 Graph *LoopUnswitchTest::BuildExpectedMultipleConditionsLimitInstructions()
 {
     auto graph = CreateEmptyGraph();

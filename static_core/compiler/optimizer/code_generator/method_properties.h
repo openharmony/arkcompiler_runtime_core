@@ -39,17 +39,19 @@ public:
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define MPROP_GET_FIELD(name, type) \
-    type Get##name() const          \
-    {                               \
-        return name::Get(fields_);  \
+#define MPROP_GET_FIELD(name, type)                                        \
+    type Get##name() const                                                 \
+    {                                                                      \
+        /* CC-OFFNXT(G.PRE.05, G.PRE.02) function gen, namespace member */ \
+        return name::Get(fields_);                                         \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define MPROP_SET_FIELD(name, type) \
-    void Set##name(type val)        \
-    {                               \
-        name::Set(val, &fields_);   \
+#define MPROP_SET_FIELD(name, type)                \
+    void Set##name(type val)                       \
+    {                                              \
+        /* CC-OFFNXT(G.PRE.02) namespace member */ \
+        name::Set(val, &fields_);                  \
     }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
