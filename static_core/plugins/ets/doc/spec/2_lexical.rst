@@ -63,6 +63,13 @@ The language has the following types of lexical input elements:
 -  :ref:`Tokens`, and
 -  :ref:`Comments`.
 
+.. index::
+   white space
+   line separator
+   token
+   comment
+   lexical input
+
 |
 
 .. _White Spaces:
@@ -94,11 +101,17 @@ White spaces are ignored by the syntactic grammar (see :ref:`Grammar Summary`).
 White spaces never occur within a single token, but can occur within a comment.
 
 .. index::
-   lexical input element
+   lexical input
    source code
    white space
    syntactic grammar
    comment
+   token
+   space
+   horizontal tabulation
+   form feed
+   no-break space
+   zero-width no-break space
 
 |
 
@@ -124,6 +137,14 @@ Line separators include the following:
 
 Line separators improve source code readability. Any sequence of line
 separators is considered a single separator.
+
+.. index::
+   lexical input
+   newline character
+   carriage return character
+   line separator character
+   paragraph separator character
+
 
 |
 
@@ -199,7 +220,9 @@ characters:
    identifier
    Unicode code point
    Unicode character
-   
+   zero-width joiner
+   zero-width non-joiner
+
 .. code-block:: abnf
 
     Identifier:
@@ -360,7 +383,7 @@ the future use (or used in |TS|):
 
 .. index::
    identifier
-   keyword
+   soft keyword
 
 +-------------------------+-------------------------+-------------------------+
 |                         |                         |                         |
@@ -396,6 +419,11 @@ The following character sequences represent operators and punctuators:
    subtraction
    comparison
    punctuator
+   semicolon
+   parenthesis
+   comma
+   square bracket
+   keyword
 
 +-------+--------+--------+----------+--------+---------+---------+-------+-------+
 +-------+--------+--------+----------+--------+---------+---------+-------+-------+
@@ -440,10 +468,11 @@ Literals
 
 See :ref:`Character Literals` for the experimental ``char literal``.
 
-Each literal is of the literal type (see :ref:`Literal Types`). The type name
-is the same as that of the literal itlsef. If an operator is applied to the
-literal, then the literal type is replaced for its supertype, i.e., one of the
-predefined types (see :ref:`Predefined Types`) that correspond to the literal.
+Each literal is of its own literal type (see :ref:`Literal Types`). The name of
+this literal type is the literal itself. If an operator is applied to the
+literal, then the literal type is replaced for its supertype (see
+:ref:`Supertypes of Literal Types`), i.e., one of the predefined types (see
+:ref:`Predefined Types`) that corresponds to the literal.
 
 .. index::
    literal
@@ -461,7 +490,7 @@ Integer Literals
     frontend_status: Done
 
 Integer literals represent numbers that do not have a decimal point or
-an exponential part. Integer literals can be written with bases 16
+an exponential part. Integer literals can be written with radices 16
 (hexadecimal), 10 (decimal), 8 (octal), and 2 (binary) as follows:
 
 .. index::
@@ -471,8 +500,9 @@ an exponential part. Integer literals can be written with bases 16
    decimal
    octal
    binary
-   
-   
+   radix
+
+
 .. code-block:: abnf
 
     IntegerLiteral:
@@ -523,7 +553,7 @@ an exponential part. Integer literals can be written with bases 16
       [0-1]
       ;
 
-Integral literals with different bases are represented by the examples below:
+Integral literals with different radices are represented by the examples below:
 
 .. code-block:: typescript
    :linenos:
@@ -535,7 +565,7 @@ Integral literals with different bases are represented by the examples below:
     0o777 // octal literal
     0b101 // binary literal
 
-The underscore character '``_``' after the base prefix or between successive
+The underscore character '``_``' after the radix prefix or between successive
 digits can be used to denote an integer literal and improve readability.
 Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
@@ -557,12 +587,12 @@ types:
 
 
 In variable and constant declarations, an integer literal can be implicitly
-converted to another integer type or type ``char`` (see
+converted to another numeric type or type ``char`` (see
 :ref:`Type Compatibility with Initializer`). An explicit cast must be used
 elsewhere (see :ref:`Cast Expressions`).
 
-A :index:`compile-time error` occurs if a non-zero integer literal is
-too large for its type.
+A :index:`compile-time error` occurs if a value of an integer literal is too
+large for the values of type ``long``.
 
 .. index::
    integer literal
@@ -622,7 +652,7 @@ The concept is represented by the examples below:
     1e10
     1e10f
 
-The underscore character '``_``' after the base prefix or between successive
+The underscore character '``_``' after the radix prefix or between successive
 digits can be used to denote a floating-point literal and improve readability.
 Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
@@ -649,6 +679,9 @@ converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
    underscore character
    implicit conversion
    constant declaration
+   decimal number
+   radix
+   readability
 
 |
 
@@ -661,7 +694,7 @@ converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
     frontend_status: Done
 
 ``BigInt`` literals represent integer numbers with unlimited number of digits.
-``BigInt`` literals use decimal base only. 
+``BigInt`` literals use decimal radix only.
 
 ``BigInt`` literals are always of the literal type that corresponds to the
 literal itself. If an operator is applied to the literal, then the literal type
@@ -671,7 +704,7 @@ A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
 
 .. code-block:: abnf
 
-    BigIntLiteral: 
+    BigIntLiteral:
       '0n'
       | [1-9] ('_'? [0-9])* 'n'
       ;
@@ -707,6 +740,10 @@ Strings that represent numbers or any integer values can be converted to
    integer
    BigInt literal
    underscore character
+   readability
+   string
+   number
+   integer value
 
 Two other static methods allow taking *bitsCount* lower bits of a
 ``BigInt`` number and return them as a result. Signed and unsigned versions
@@ -719,6 +756,8 @@ are both possible as seen below:
 
 .. index::
    static method
+   decimal
+   radix
 
 
 .. _Boolean Literals:
@@ -745,6 +784,9 @@ for ``boolean``.
 .. index::
    keyword
    Boolean literal
+   literal value
+   literal
+   literal type
 
 |
 
@@ -768,6 +810,7 @@ for ``string`` (see :ref:`Type String`).
 
 .. index::
    string literal
+   multiline string
    predefined reference type
 
 
@@ -847,6 +890,18 @@ by one of the following characters:
 -  any single character except digits from '1' to '9', and characters '``x``',
    '``u``', '``CR``' and '``LF``'.
 
+.. index::
+   string literal
+   escape sequence
+   backslash
+   horizontal tab
+   form feed
+   backspace
+   vertical tab
+   hexadecimal
+   Unicode escape sequence
+
+
 The examples are provided below:
 
 .. code-block:: typescript
@@ -879,7 +934,9 @@ Multiline String Literal
    multiline string literal
    multiline string
    string interpolation
-   multi-line string
+   multiline string
+   backtick
+   escape character
 
 .. code-block:: abnf
 
@@ -901,19 +958,25 @@ Multiline String Literal
 The grammar of *embeddedExpression* is described in
 :ref:`String Interpolation Expressions`.
 
-An example of a multi-line string is provided below:
+An example of a multiline string is provided below:
 
 .. code-block:: typescript
    :linenos:
 
     let sentence = `This is an example of
-                    a multi-line string, 
+                    a multiline string, 
                     which should be enclosed in 
                     backticks`
 
 *MultilineString* literals are of the literal type that corresponds to the literal.
 If an operator is applied to the literal, then the literal type is replaced
 for ``string`` (see :ref:`Type String`).
+
+.. index::
+   multiline string
+   operator
+   literal
+   literal type
 
 |
 
@@ -993,7 +1056,7 @@ or sequence of characters between them is allowed but ignored.
     // This is a line comment
 
 
-*Multi-line comments* begin with the sequence of characters '``\*``' (as seen
+*Multiline comments* begin with the sequence of characters '``\*``' (as seen
 in the example below) and end with the first subsequent sequence of characters
 '``*/``'. Any character or sequence of characters between them is allowed but
 ignored.
@@ -1001,8 +1064,8 @@ ignored.
 .. code-block:: typescript
    :linenos:
 
-    /* 
-        This is a multi-line comment
+    /*
+        This is a multiline comment
     */
 
 Comments cannot be nested.
@@ -1010,7 +1073,7 @@ Comments cannot be nested.
 .. index::
    comment
    syntactic grammar
-   multi-line comment
+   multiline comment
 
 |
 
@@ -1031,6 +1094,7 @@ syntax productions written in one line, or to avoid ambiguity.
    statement
    line separator
    syntax production
+   semicolon
 
 .. code-block:: typescript
    :linenos:

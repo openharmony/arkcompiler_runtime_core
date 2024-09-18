@@ -57,10 +57,8 @@ contrary, a statement execution is considered to *complete abruptly* if it
 causes an exception or an error to be thrown.
 
 .. index::
-   statement execution
    statement
    execution
-   normal mode of execution
    statement execution
    normal completion
    abrupt completion
@@ -90,7 +88,7 @@ The execution of a statement leads to the execution of the expression. The
 result of such execution is discarded.
 
 .. index::
-   expression statement
+   statement
    expression
    execution
 
@@ -127,7 +125,8 @@ return statement at all. Such a block is equivalent to one that ends in a
 ``return`` statement, and is executed accordingly.
 
 .. index::
-   sequence of statements
+   statement
+   balanced brace
    block
    execution
    block statement
@@ -167,7 +166,6 @@ function or method, and by the block scope rules (see :ref:`Scopes`).
 
 .. index::
    local declaration
-   immutable variable
    let declaration
    const declaration
    mutable variable
@@ -215,14 +213,6 @@ type is not ``boolean``.
 
 Any ``else`` corresponds to the first ``if`` of an ``if`` statement:
 
-.. index::
-   if statement
-   execution
-   statement
-   expression
-   evaluation
-   compile-time error
-
 .. code-block:: typescript
    :linenos:
  
@@ -240,6 +230,13 @@ A list of statements in braces (see :ref:`Block`) is used to combine the
       if (Cond2) statement1
     }
     else statement2 // Executes if: !Cond1
+
+.. index::
+   if statement
+   statement
+   expression
+   evaluation
+   compile-time error
 
 |
 
@@ -262,6 +259,7 @@ below:
    loop label
    break statement
    continue statement
+   identifier
 
 .. code-block:: abnf
 
@@ -289,14 +287,6 @@ The key difference is that *whileStatement* starts from evaluating and
 checking the expression value, and *doStatement* starts from executing
 the statement:
 
-.. index::
-   while statement
-   do statement
-   expression
-   expression value
-   execution
-   statement
-
 .. code-block:: abnf
 
     whileStatement:
@@ -307,6 +297,14 @@ the statement:
         : 'do' statement 'while' '(' expression ')'
         ;
 
+.. index::
+   while statement
+   do statement
+   expression
+   expression value
+   execution
+   statement
+
 |
 
 .. _For Statements:
@@ -316,9 +314,6 @@ the statement:
 
 .. meta:
     frontend_status: Done
-
-.. index::
-   for statement
 
 .. code-block:: abnf
 
@@ -356,6 +351,9 @@ the statement:
       console.log(i)
     }
 
+.. index::
+   for statement
+
 |
 
 .. _For-Of Statements:
@@ -369,13 +367,6 @@ the statement:
 A ``for-of`` loop iterates elements of ``array`` or ``string``, or an instance
 of *iterable* class or interface (see :ref:`Iterable Types`):
 
-
-.. index::
-   for-of statement
-   loop
-   array
-   string
-
 .. code-block:: abnf
 
     forOfStatement:
@@ -385,7 +376,6 @@ of *iterable* class or interface (see :ref:`Iterable Types`):
     forVariable:
         identifier | ('let' | 'const') identifier (':' type)?
         ;
-
 
 A :index:`compile-time error` occurs if the type of an expression is not
 ``array``, ``string``, or iterable type.
@@ -397,6 +387,10 @@ loop iterations (execution of the ``statement``). On each iteration,
 result of class iterator advancing.
 
 .. index::
+   for-of statement
+   loop
+   array
+   string
    compile-time error
    expression
    type
@@ -406,8 +400,6 @@ result of class iterator advancing.
    evaluation
    loop iterations
    statement
-   array
-   string
 
 If ``forVariable`` has the modifiers ``let`` or ``const``, then a new variable
 is used inside the loop. Otherwise, the variable is as declared above.
@@ -421,9 +413,11 @@ feature (see :ref:`For-of Type Annotation`).
    modifier
    let modifier
    const modifier
+   variable
    assignment
+   modification
    for-of type annotation
-   type annotation
+   annotation
 
 
 .. code-block-meta:
@@ -468,6 +462,8 @@ or *switchStatement*:
 .. index::
    break statement
    control transfer
+   switch statement
+   loop statement
 
 .. code-block:: abnf
 
@@ -487,19 +483,20 @@ a :index:`compile-time error` occurs.
 
 .. index::
    break statement
+   label
    identifier
    control transfer
-   enclosing statement
-   surrounding function
-   surrounding method
-   innermost enclosing statement
+   statement
+   function
+   method
+   label
    switch statement
    while statement
    do statement
    for statement
    for-of statement
    compile-time error
-   loop
+   loop statement
 
 |
 
@@ -533,11 +530,14 @@ within ``loopStatment``.
 .. index::
    continue statement
    execution
+   label
+   exit condition
    loop statement
    surrounding function
    control transfer
    identifier
-   identifier
+   continue statement
+   function
 
 |
 
@@ -566,6 +566,7 @@ A *return expression* statement can only occur inside a function or a method bod
    return expression
    function
    method
+   method body
    constructor
 
 A ``return`` statement (with no expression) can occur in one of the following
@@ -595,7 +596,9 @@ A :index:`compile-time error` occurs if a ``return`` statement is found in:
    function
    method
    return type
-   class initializer
+   class
+   initializer
+   constructor
    constructor declaration
 
 The execution of *returnStatement* leads to the termination of the
@@ -621,6 +624,7 @@ body, class initializer, or top-level statement are not executed.
    method body
    class initializer
    top-level statement
+   return statement
 
 |
 
@@ -668,7 +672,6 @@ The ``switch`` expression type must be of type ``char``, ``byte``, ``short``,
 ``int``, ``long``, ``Char``, ``Byte``, ``Short``, ``Int``, ``Long``, ``string``,
 or ``enum``.
 
-
 .. index::
    expression type
    constant expression
@@ -686,26 +689,24 @@ or ``enum``.
 
 A :index:`compile-time error` occurs if not **all** of the following is true:
 
--  Every case expression type associated with a ``switch`` statement is
+-  Every case expression type is
    compatible (see :ref:`Type Compatibility`) with the type of the ``switch``
    statement expression.
 
 -  In a ``switch`` statement expression of type ``enum``, every case expression
    associated with the ``switch`` statement is of type ``enum``.
 
--  No two case expressions associated with the ``switch`` statement have
-   identical values.
+-  No two case constant expressions (see :ref:`Constant Expressions`)
+   have identical values.
 
--  No case expression associated with the ``switch`` statement is ``null``.
+-  No case expression is ``null``.
 
 .. index::
    expression
    switch statement
-   type compatibility
+   compatibility
    constant
-   null statement
-
-|
+   null expression
 
 .. code-block:: typescript
    :linenos:
@@ -747,7 +748,6 @@ determines the equality.
    Short
    Int
    unboxing conversion
-   Expression
    constant
    operator
    string
@@ -857,6 +857,7 @@ control is transferred to the ``catch`` clause.
 
 .. index::
    catch clause
+   multiple typed catch clause
    typed catch clause
    try statement
    try block
@@ -880,16 +881,18 @@ control is transferred to the ``catch`` clause.
 
 A ``catch`` clause consists of two parts:
 
--  A *catch identifier* that provides access to the object associated with
-   the error thrown; and
+-  A *catch identifier* that provides access to an object associated with
+   the *error* or *exception* thrown; and
 
 -  A block of code that handles the situation.
 
-The type of *catch identifier* is ``Object``.
+The type of *catch identifier* inside the block is ``Error | Exception``
+(see :ref:`Error Handling`).
 
 .. index::
    catch clause
    catch identifier
+   exception
    access
    error
    block
@@ -901,8 +904,6 @@ See :ref:`Multiple Catch Clauses in Try Statements` for the details of
 
 .. index::
    typed catch clause
-
-|
 
 .. code-block:: typescript
    :linenos:
@@ -975,9 +976,6 @@ can be performed while leaving the ``try-catch``:
    error
    return
    try-catch
-   exception
-   flush buffer
-   file descriptor
 
 .. code-block:: typescript
 
@@ -1041,11 +1039,10 @@ can be performed while leaving the ``try-catch``:
    catch clause
    exception
    runtime
-   compatible type
    catch clause
    exception parameter
    error
-   type compatibility
+   compatibility
    propagation
    surrounding scope
    function

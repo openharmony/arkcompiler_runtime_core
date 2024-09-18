@@ -19,7 +19,7 @@ Contexts and Conversions
     frontend_status: Done
 
 Every expression written in the |LANG| programming language has a type that
-is inferred (see :ref:`Type Inference`) at compile time. 
+is inferred (see :ref:`Type Inference`) at compile time.
 
 In most contexts, an expression must be *compatible* with a type expected in
 that context. This type is called the *target type*. 
@@ -72,6 +72,7 @@ expression* with its surrounding context:
    compile time
    inference
    target type
+   type
    surrounding context
    expression
    compatible type
@@ -94,6 +95,10 @@ into a form that is appropriate for the new type ``T``.
 
 .. index::
    runtime behavior
+   expression
+   target type
+   context
+   runtime
    conversion
 
 If the type of the expression is ``readonly``, then the target type must
@@ -126,6 +131,19 @@ Contexts can be of the following kinds:
 -  :ref:`Casting Contexts and Conversions`, i.e., the conversion of an
    expression value to a type explicitly specified by a cast expression (see
    :ref:`Cast Expressions`).
+
+.. index::
+   expression
+   readonly
+   target type
+   expression value
+   concatenation
+   operator
+   numeric operator
+   conversion
+   type
+   cast expression
+   string concatenation
 
 |
 
@@ -169,6 +187,24 @@ Assignment-like Contexts
    formal parameter
    array literal
    object literal
+   value
+   variable
+   constant
+   interface field
+   type annotation
+   assignment context
+   assignment-like context
+   declaration context
+   call context
+   composite literal context
+   function
+   method
+   constructor
+   lambda call
+   expression value
+   array element
+   assignment
+   argument value
 
 The examples are presented below:
 
@@ -225,8 +261,21 @@ Assignment-like contexts allow using of one of the following:
 
 - :ref:`Enumeration to String Conversions`;
 
-- :ref:`Literal Type to Type of Literal Conversions`.
+- :ref:`Literal Type to its Supertype Conversions`.
 
+.. index::
+   expression type
+   target type
+   conversion
+   assignment
+   widening
+   narrowing
+   constant
+   boxing conversion
+   constant
+   string
+   enumeration
+   literal type
 
 If there is no applicable conversion, then a :index:`compile-time error`
 occurs.
@@ -288,6 +337,20 @@ The target type in this context is always ``string``:
     let c = "X"
     console.log("char is " + c) // prints "char is X"
 
+.. index::
+   string context
+   string operator
+   string
+   conversion
+   enumeration type
+   char
+   boolean
+   decimal
+   string conversion
+   operand null
+   operator undefined
+   reference type
+
 |
 
 .. _Numeric Operator Contexts:
@@ -308,26 +371,15 @@ An operand of an enumeration type (see :ref:`Enumerations`) can be used in
 the numeric context if values of this enumeration are of type ``int``.
 The type of this operand is assumed to be ``int``.
 
-
 .. index::
-   string conversion
-   string context
-   operand
-   direct conversion
-   target type
-   reference type
-   enum type
-   string type
-   conversion
-   method call
-   primitive type
-   boxing
-   predefined numeric types conversion
-   numeric types conversion
-   target type
    numeric context
    arithmetic operator
-   expression
+   primitive type
+   argument expression
+   target type
+   string conversion
+   string context
+   type int
 
 The numeric contexts are actually the forms of the following expressions:
 
@@ -376,11 +428,6 @@ Casting Contexts and Conversions
 *Casting contexts* are applied to cast expressions (:ref:`Cast Expressions`),
 and rely on the application of *casting conversions*.
 
-.. index::
-   casting context
-   cast expression
-   casting conversion
-
 *Casting conversion* is the conversion of an operand in a cast expression to
 an explicitly specified *target type* by using one of the following:
 
@@ -392,6 +439,17 @@ an explicitly specified *target type* by using one of the following:
 
 If there is no applicable conversion, then a :index:`compile-time error`
 occurs.
+
+.. index::
+   casting context
+   cast expression
+   casting conversion
+   target type
+   conversion
+   expression type
+   implicit conversion
+
+|
 
 .. _Numeric Casting Conversions:
 
@@ -434,6 +492,21 @@ A numeric casting conversion of a floating-point type operand to types
 - The casting conversion to ``int`` is performed first;
 - Then, the ``int`` operand is casted to the target type.
 
+.. index::
+   casting conversion
+   target type
+   numeric
+   char
+   conversion
+   runtime error
+   operand
+   compliance
+   IEEE 754
+   NaN
+   floating-point type
+   floating-point infinity
+   rounding rules
+
 A numeric casting conversion of a floating-point type operand to
 target types ``long`` or ``int`` is performed by the following rules:
 
@@ -457,6 +530,14 @@ value can differ from that of the original value.
 
 .. index::
    IEEE 754
+   casting conversion
+   floating-point type
+   operand
+   NaN
+   positive infinity
+   target type
+   negative infinity
+   rounding
 
 |
 
@@ -473,6 +554,9 @@ supertype (superclass or superinterface) (see :ref:`Supertyping`) to a
 subclass or subinterface:
 
 .. index::
+   narrowing
+   reference
+   expression
    casting conversion
    conversion
    operand
@@ -510,6 +594,12 @@ type of a converted expression cannot be converted to the *target type*:
 
     let b: Base = new Derived1()
     let d = b as Derived2 // runtime error
+
+.. index::
+   runtime error
+   conversion
+   converted expression
+   target type
 
 |
 
@@ -554,6 +644,13 @@ A :index:`compile-time error` occurs if target type ``TT`` is not one of
           // Perform an action specific for the particular union type derivative
     }
 
+.. index::
+   casting conversion from union
+   conversion
+   expression
+   union type
+   type
+   target type
 
 These conversions can cause a runtime error (``ClassCastError``) if the runtime
 type of an expression is not the *target type*.
@@ -583,6 +680,13 @@ compatible with the target type, then the conversion causes a
 
     let x: Double | Base = ...
     let y: double = x // Compile-time error, as Base cannot be converted into double 
+
+.. index::
+   target type
+   conversion from union
+   expression
+   runtime error
+   union
 
 |
 
@@ -631,6 +735,14 @@ A *primitive type conversion* is one of the following:
 - :ref:`Boxing Conversions`;
 
 - :ref:`Unboxing Conversions`.
+
+.. index::
+   primitive type conversion
+   primitive type
+   narrowing
+   widening
+   boxing conversion
+   unboxing conversion
 
 |
 
@@ -682,6 +794,7 @@ is properly rounded to the integer value.
 
 .. index::
    widening conversion
+   conversion
    predefined numeric types conversion
    numeric type
    numeric value
@@ -691,6 +804,8 @@ is properly rounded to the integer value.
    round-to-nearest mode
    runtime error
    IEEE 754
+   enumeration constant
+   rounding
 
 |
 
@@ -726,6 +841,16 @@ types or of type ``char`` to a value of a smaller integer type provided that:
     foo (1000) // Version #2 is called as int is safely widened into double/number
 
 These conversions never cause runtime errors.
+
+.. index::
+   narrowing
+   constant
+   integer conversion
+   expression
+   conversion
+   type
+   value
+   runtime error
 
 |
 
@@ -768,6 +893,9 @@ not sufficient.
    widening conversion
    boxing conversion
    reference type
+   target type
+   expression
+   widening
 
 |
 
@@ -805,6 +933,9 @@ into type ``long``:
    unboxing conversion
    expression
    primitive type
+   target type
+   widening
+   primitive conversion
 
 |
 
@@ -839,6 +970,17 @@ is true after normalization (see :ref:`Union Types Normalization`):
   - For every value ``U``:sub:`i` there is a value ``V``:sub:`j`, when
     ``U``:sub:`i` == ``V``:sub:`j`.
 
+.. index::
+   widening
+   union conversion
+   conversion
+   union type
+   non-union type
+   runtime error
+   normalization
+   compatibility
+   value
+
 **Note**: If union type normalization issues a single type or value, then
 this type or value is used instead of the initial set of union types or values.
 
@@ -865,6 +1007,7 @@ This concept is illustrated by the example below:
        // are compatible with Base as Note states
     u5 = u4 // compile-time error as Base is not compatible with both
        // Derived1 and Derived2
+
 
 Non-union type ``T`` can be converted to union type ``U`` = ``U``:sub:`1` ``| ... | U``:sub:`n`
 if ``T`` is compatible with one of ``U``:sub:`i` types.
@@ -894,6 +1037,16 @@ converted to type ``T``.
     let e: number = d // ok
     let f: int = d // compile-time error, 3.14 cannot be converted to 'int'
 
+.. index::
+   normalization
+   type
+   value
+   union type
+   compatibility
+   conversion
+   literal
+   non-union type
+
 |
 
 .. _Widening Reference Conversions:
@@ -907,12 +1060,6 @@ Widening Reference Conversions
 A *widening reference conversion* handles any subtype (see :ref:`Subtyping`) as
 a supertype (see :ref:`Supertyping`). It requires no special action at runtime,
 and never causes an error.
-
-.. index::
-   widening reference conversion
-   subtype
-   supertype
-   runtime
 
 .. code-block:: typescript
    :linenos:
@@ -947,9 +1094,14 @@ The conversion of array types (see :ref:`Array Types`) also works in accordance
 with the widening style of the type of array elements as shown below:
 
 .. index::
+   widening
+   reference conversion
+   subtype
+   supertype
+   runtime error
    conversion
    array type
-   widening
+   type safety
 
 .. code-block:: typescript
    :linenos:
@@ -976,12 +1128,14 @@ runtime checks to ensure type-safety as show below:
          cause *ArrayStoreError* during program execution */
     }
 
-
 .. index::
    array assignment
    array type
    widening
-   type-safety
+   type safety
+   runtime system
+   runtime error
+   array
 
 |
 
@@ -1006,6 +1160,12 @@ Character to String Conversions
 This conversion can cause ``OutOfMemoryError`` thrown if the storage available
 for the creation of a new string is not sufficient.
 
+.. index::
+   character to string conversion
+   conversion
+   type
+   string
+
 |
 
 .. _Constant String to Character Conversions:
@@ -1025,6 +1185,13 @@ The resultant ``char`` is the first and only character of the converted
 ``string``.
 
 This conversion never causes runtime errors.
+
+.. index::
+   character to string conversion
+   expression
+   type
+   runtime error
+   conversion
 
 |
 
@@ -1049,6 +1216,7 @@ See :ref:`Type Compatibility` for details.
 .. index::
    function types conversion
    function type
+   parameter type
    conversion
    parameter type
    contravariance
@@ -1140,6 +1308,11 @@ if the following conditions are met:
 - Tuple types have the same number of elements, thus n == m.
 - Every *T*:sub:`i` is identical to *U*:sub:`i` for any *i* in ``1 .. n``.
 
+.. index::
+   tuple type
+   conversion
+
+
 |
 
 .. _Enumeration to Int Conversions:
@@ -1165,6 +1338,13 @@ This conversion never causes runtime errors.
        /* number_value will get the value of 0 as a result of conversion
           sequence: enumeration -> int - > number  */
 
+.. index::
+   enumeration
+   conversion
+   constant
+   runtime error
+   type
+
 |
 
 .. _Enumeration to String Conversions:
@@ -1187,19 +1367,26 @@ This conversion never causes runtime errors.
     let string_enum: StringEnum = StringEnum.a
     let a_string: string = string_enum // a_string will get the value of "a"
 
+.. index::
+   enumeration
+   string
+   conversion
+   constant
+   runtime error
+
 |
 
-.. _Literal Type to Type of Literal Conversions:
+.. _Literal Type to its Supertype Conversions:
 
-Literal Type to Type of Literal Conversions
-===========================================
+Literal Type to its Supertype Conversions
+=========================================
 
 .. meta:
     frontend_status: Partly
 
-A value of ``literal`` type can always be converted to the type of its literal
-as it is its supertype (see :ref:`Supertyping`). This conversion never causes
-a runtime error:
+A value of ``literal`` type (see :ref:`Literal Types`) can always be converted
+to its supertype (see :ref:`Supertypes of Literal Types`). This conversion
+never causes a runtime error:
 
 .. code-block:: typescript
    :linenos:
@@ -1214,10 +1401,15 @@ a runtime error:
     }
     foo (1, true, 3.14, "string literal", c'C', 123n)
 
+The reverse conversion is not possible.
 
-The reverse conversion is not possbile.
-
-|
+.. index::
+   literal type
+   supertype conversion
+   value
+   literal
+   conversion
+   runtime error
 
 
 .. raw:: pdf

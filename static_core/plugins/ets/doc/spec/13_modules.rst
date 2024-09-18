@@ -53,6 +53,7 @@ system or a database (see :ref:`Compilation Units in Host System`).
 
 .. index::
    compilation unit
+   compilation
    scope
    variable
    function
@@ -62,7 +63,8 @@ system or a database (see :ref:`Compilation Units in Host System`).
    access
    separate module
    package
-   
+   declaration module
+
 |
 
 .. _Separate Modules:
@@ -108,16 +110,12 @@ the standard library (see :ref:`Standard Library Usage`).
    import directive
    imported declaration
    module
+   entity
+   package
    top-level declaration
    top-level statement
    re-export directive
    import
-   predefined package
-   standard library
-   entity
-   access
-   simple name
-   console variable
 
 |
 
@@ -130,8 +128,8 @@ Separate Module Initializer
     frontend_status: Done
 
 If used for import, a *separate module* is initialized only once with the
-details listed in :ref:`Compilation Unit Initialization`. The initialization process
-is performed in the following steps:
+details listed in :ref:`Compilation Unit Initialization`. The initialization
+process is performed in the following steps:
 
 - If the separate module has variable or constant declarations (see
   :ref:`Variable and Constant Declarations`), then their initializers are
@@ -144,7 +142,9 @@ is performed in the following steps:
    separate module
    initialization
    variable declaration
+   compilation unit
    constant declaration
+   top-level statement
 
 |
 
@@ -227,7 +227,7 @@ run the initialization code.
 
     importDirective:
         'import' 
-        (allBinding|selectiveBindigns|defaultBinding|typeBinding 'from')?
+        (allBinding|selectiveBindings|defaultBinding|typeBinding 'from')?
         importPath
         ;
 
@@ -235,7 +235,7 @@ run the initialization code.
         '*' bindingAlias
         ;
 
-    selectiveBindigns:
+    selectiveBindings:
         '{' nameBinding (',' nameBinding)* '}'
         ;
 
@@ -244,7 +244,7 @@ run the initialization code.
         ;
 
     typeBinding:
-        'type' selectiveBindigns
+        'type' selectiveBindings
         ;
 
     nameBinding:
@@ -278,7 +278,9 @@ have no effect during program execution.
    module
    package
    declaration scope
+   import directive
 
+|
 
 .. _Bind All with Qualified Access:
 
@@ -311,18 +313,16 @@ the name of the imported compilation unit.
 
 .. index::
    import binding
-   qualified access
-   named entity
+   qualified name
+   entity
    declaration scope
    module
-   qualified name
    entity
    name
    access
    export
    compilation unit
    import path
-   source code
 
 |
 
@@ -362,8 +362,10 @@ this binding does not bind ``ident``. It is shown in the following module:
    overloaded function
    entity
    access
+   accessibility
    bound entity
    binding
+   module
 
 .. code-block:: typescript
    :linenos:
@@ -466,6 +468,8 @@ applied to a single name:
    import declaration
    import outcome
    declaration scope
+   entity
+   binding
 
 +-----------------------------+----------------------------+------------------------------+
 | **Case**                    | **Sample**                 | **Rule**                     |
@@ -555,10 +559,10 @@ import an entity initially exported as default.
 
 .. index::
    import binding
-   default import binding
+   entity
    import
    declaration
-   default export
+   export
    module
 
 |
@@ -596,6 +600,14 @@ and the latter imports only exported types.
     let c1 = new Class1() // OK
     let c2 = new Class2() // OK, the same
 
+.. index::
+   import binding
+   declaration
+   module
+   package
+   export type
+   import type
+   top-level declaration
 
 |
 
@@ -608,7 +620,7 @@ Import with No Binding
     frontend_status: None
 
 Import with No Binding allows initializing the imported module or package
-intialization code right before the code of the current module starts:
+initialization code right before the code of the current module starts:
 
 .. code-block:: typescript
    :linenos:
@@ -633,6 +645,12 @@ The output of Import with No Binding is as follows:
 - Package initialization code; or
 - MainProgram code.
 
+.. index::
+   import binding
+   initialization
+   import
+   module
+   package
 
 |
 
@@ -668,11 +686,13 @@ compilation units, and the exact placement of the source code:
    within the import path, or---if none is so provided---appended by the
    compiler.
 
-
 .. index::
    import binding
    import path
+   string
    string literal
+   slash character
+   alpha-numeric character
    compilation unit
    file system
    file path
@@ -713,11 +733,16 @@ Other import paths are *non-relative* as in the examples below:
     "/net/http"
     "std/components/treemap"
 
+.. index::
+   relative import path
+   relative import
+   non-relative import
+
 Resolving a *non-relative path* depends on the compilation environment. The
 definition of the compiler environment can be particularly provided in a
 configuration file or environment variables.
 
-The *base URL* setting is used to resolve a path that starts with '/'.
+The *base URL* setting is used to resolve a path that starts with '``/``'.
 *Path mapping* is used in all other cases. Resolution details depend on
 the implementation.
 
@@ -738,10 +763,12 @@ File name, placement, and format are implementation-specific.
 
 .. index::
    relative import path
+   non-relative import path
+   compilation environment
+   compiler environment
    imported file
    compilation unit
    relative location
-   non-relative import path
    configuration file
    environment variable
    resolving
@@ -782,8 +809,9 @@ in any compilation unit.
 
 .. index::
    compilation unit
-   import
-   exported entity
+   entity
+   export
+   accessibility
    package
    access
    simple name
@@ -815,6 +843,13 @@ elsewhere.
         )*
         ;
 
+.. index::
+   declaration module
+   compilation unit
+   import
+   ambient declaration
+   declaration module
+
 The following example shows how ambient functions can be declared and exported:
 
 .. code-block:: typescript
@@ -827,6 +862,12 @@ The following example shows how ambient functions can be declared and exported:
 Optional usage of the keyword ``export`` means that a particular declaration
 is used by other exported declarations. However, it is not exported on its own
 and cannot be used by modules that import this declaration module:
+
+.. index::
+   declaration
+   export
+   keyword export
+   declaration module
 
 .. code-block:: typescript
    :linenos:
@@ -854,9 +895,13 @@ and cannot be used by modules that import this declaration module:
    let a = new m.A // compile-time error as A is not exported
 
 
-
 The exact manner declaration modules are stored in the file system, and how
 they differ from separate modules, is determined by a particular implementation.
+
+.. index::
+   declaration
+   declaration module
+   implementation
 
 |
 
@@ -897,12 +942,21 @@ If there is a cyclic dependency between top-level variable declarations, then a
     let x = y // x uses y for its initialization
 
 .. index::
+   compilation unit
+   initialization
+   entity
+   function
+   variable
+   type
+   import directive
+   entry point
    binding
    declaration
    module
    package
    declaration scope
-   import construction
+   top-level declaration
+   variable
 
 
 |
@@ -916,8 +970,10 @@ Top-Level Declarations
     frontend_status: Done
 
 *Top-level declarations* declare top-level types (``class``, ``interface``,
-or ``enum``), top-level variables, constants, or functions. Top-level
-declarations can be exported.
+or ``enum`` see :ref:`Type Declarations`), top-level variables (see
+:ref:`Variable Declarations`), constants (see :ref:`Constant Declarations`),
+functions (see :ref:`Function Declarations`), or namespaces (see
+:ref:`Namespace Declarations`). Top-level declarations can be exported.
 
 .. code-block:: abnf
 
@@ -927,6 +983,7 @@ declarations can be exported.
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | namespaceDeclaration
         | extensionFunctionDeclaration
         )
         ;
@@ -937,8 +994,9 @@ declarations can be exported.
     export let x: number[], y: number
 
 .. index::
-   top-level type declaration
+   top-level declaration
    top-level type
+   top-level variable
    class
    interface
    enum
@@ -988,11 +1046,99 @@ occurs if more than one top-level declaration is marked as ``default``.
    exported declaration
    top-level declaration
    export modifier
+   accessibility
+   declaration
    export
    declared name
    compilation unit
    default export scheme
    import
+
+|
+
+.. _Namespace Declarations:
+
+Namespace Declarations
+**********************
+
+.. meta:
+    frontend_status: None
+
+A *namespace declaration* introduces the name (``identifer`` below)
+to be used as a qualifier for access to each exported entity of a namespace.
+Appropriate syntax is presented below:
+
+.. code-block:: abnf
+
+    namespaceDeclaration:
+        'namespace' identifier '{' topDeclaration* '}'
+        ;
+
+
+An example of usage is presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+    namespace NS1 {
+        export function foo() { ... }
+        export let variable = 1234
+        export const constant = 1234
+    }
+
+    if (NS1.variable == NS1.constant) {
+        NS1.variable = 4321
+    }
+
+.. index::
+   namespace declaration
+   qualifier
+   access
+   entity
+   export
+   namespace
+
+**Note**: A namespace must be exported to be used in another compilation unit.
+
+.. code-block:: typescript
+   :linenos:
+
+    // File1
+    namespace Space1 {
+        export function foo() { ... }
+        export let variable = 1234
+        export const constant = 1234
+    }
+    export namespace Space2 {
+        export function foo(p: number) { ... }
+        export let variable = "1234"
+    }
+
+
+    // File2
+    import {Space2 as Space1} from "File1"
+    if (Space1.variable == Space1.constant) { // compile-time error - there is no variable or constant called 'constant'
+        Space1.variable = 4321 // compile-time error - incorrect assignment as type 'number' is not compatible with type 'string'
+    }
+    Space1.foo()     // compile-time error - there is no function 'foo()'
+    Space1.foo(1234) // OK
+
+**Note**: Embedded namespaces are allowed.
+
+.. code-block:: typescript
+   :linenos:
+
+    namespace ExternalSpace {
+        export function foo() { ... }
+        export let variable = 1234
+        export namespace EmbeddedSpace {
+            export const constant = 1234
+        }
+    }
+
+    if (ExternalSpace.variable == ExternalSpace.EmbeddedSpace.constant) {
+        ExternalSpace.variable = 4321
+    }
 
 |
 
@@ -1024,7 +1170,8 @@ The *export directive* allows the following:
 
 .. index::
    export directive
-   exported declaration
+   export
+   declaration
    renaming
    re-export
    compilation unit
@@ -1047,7 +1194,7 @@ declarations exported with new names.
 .. code-block:: abnf
 
     selectiveExportDirective:
-        'export' selectiveBindigns
+        'export' selectiveBindings
         ;
 
 A selective export directive uses the same *selective bindings* as an import
@@ -1064,7 +1211,10 @@ module.
 
 .. index::
    selective export directive
-   exported declaration
+   top-level declaration
+   export
+   declaration
+   directive
    renaming
    import directive
    selective binding
@@ -1098,6 +1248,11 @@ in the example below exports variable 'v' by its name:
     export v
     let v = 1
 
+.. index::
+   export directive
+   declaration
+   export
+   compilation unit
 
 |
 
@@ -1120,7 +1275,7 @@ The appropriate syntax is presented below:
 .. code-block:: abnf
 
     exportTypeDirective:
-        'export' 'type' selectiveBindigns
+        'export' 'type' selectiveBindings
         ;
 
 If a class or an interface is exported in this manner, then its usage is
@@ -1141,6 +1296,16 @@ This situation is represented in the following example:
     export type MyA = A // name MyA is declared and exported
 
     export type {MyA} // compile-time error as MyA was already exported
+
+.. index::
+   export directive
+   export
+   declaration
+   export type
+   class
+   interface
+   name
+   import type
 
 |
 
@@ -1164,7 +1329,7 @@ is presented below:
 .. code-block:: abnf
 
     reExportDirective:
-        'export' ('*' | selectiveBindigns) 'from' importPath
+        'export' ('*' | selectiveBindings) 'from' importPath
         ;
 
 An ``importPath`` cannot refer to the file the current module is stored in.
@@ -1240,6 +1405,15 @@ The sequence above is equal to the following:
   nothing. If the separate module has the ``main`` function, then it is
   executed after the execution of the top-level statements. 
 
+.. index::
+   module
+   semantics
+   top-level statement
+   initialization
+   import
+   entry point
+   function
+
 .. code-block:: typescript
    :linenos:
 
@@ -1273,13 +1447,6 @@ return statement (:ref:`Expression Statements`).
 
 .. index::
    top-level statement
-   execution
-   function
-   access
-   top-level variable
-   separate module
-   statement
-   output
    return statement
 
 |
@@ -1310,6 +1477,20 @@ A top-level ``main`` function must have either no parameters, or one
 parameter of string type ``[]`` that provides access to the arguments of
 program command-line. Its return type is either ``void`` (see :ref:`Type void`)
 or ``int``. No overloading is allowed for an entry point function.
+
+.. index::
+   module
+   entry point
+   function
+   parameter
+   string type
+   access
+   argument
+   return type
+   type void
+   type int
+   overloading
+   top-level statement
 
 Different forms of valid and invalid entry points are represented in the example
 below:
@@ -1345,20 +1526,7 @@ below:
     // Option 4: top-level statement is the entry point
     console.log ("Hello, world!")
 
-
-.. index::
-   top-level function
-   top-level main function
-   program entry point
-   application entry point
-   parameter
-   string
-   return type
-   void
-   int
-   overloading
-   entry point function
-   entry point
+|
 
 .. _Program Exit:
 
@@ -1382,14 +1550,25 @@ A program exit takes place when:
 - An unhandled error or exception (see :ref:`Error Handling`, :ref:`Exceptions`)
   occurs during the program execution.
 
-In both cases, the control is passed to the |LANG| runtime system, which ensures
-that all coroutines (see :ref:`Coroutines`) created during the program execution
-are terminated.
+In both cases, the control is transferred to the |LANG| runtime system, which
+ensures that all coroutines (see :ref:`Coroutines`) created during the program
+execution are terminated.
 
 If an unhandled error or exception occur, then proper diagnostics is displayed.
-
 This is the end of the program exit process.
 
+.. index::
+   exit
+   top-level statement
+   top-level function
+   function body
+   normal completion
+   control
+   module
+   error
+   exception
+   runtime system
+   coroutine
 
 .. raw:: pdf
 

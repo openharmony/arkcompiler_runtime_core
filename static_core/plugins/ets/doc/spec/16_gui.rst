@@ -161,6 +161,11 @@ main builder, component’s custom builder, or stand-alone global custom builder
    implementation
    rendering
    argument
+   block
+   semantics
+   component field
+   component function
+   lambda
 
 |
 
@@ -204,6 +209,7 @@ following is not allowed:
     predefined builder
     builder call
     global custom builder
+    call
 
 |
 
@@ -246,6 +252,14 @@ The only result that is allowed to be returned from such a method is ``this``:
         }
     }
 
+.. index::
+    return type
+    instance method
+    struct
+    class
+    method signature
+    signature
+    subclass
 
 The return type of an overridden method in a subclass must also be ``this``:
 
@@ -267,8 +281,8 @@ Otherwise, a :index:`compile-time error` occurs.
 
 .. _Unary operator $$:
 
-Unary operator '$$'
-===================
+Unary operator '``$$``'
+=======================
 
 .. meta:
     frontend_status: None
@@ -278,9 +292,15 @@ It is added to |LANG| to support the legacy ArkUI code.
 As the use of this operator is deprecated, it is to be removed in the future
 versions of the language.
 
-The operator '$$' can be followed by an identifier. The code ``$$this.a`` is
+The operator '``$$``' can be followed by an identifier. The code ``$$this.a`` is
 considered to be the same as ``$$ this.a`` and ``$$(this.a)``.
 
+.. index::
+    unary operator
+    prefix
+    primitive type
+    reference
+    identifier
 
 |
 

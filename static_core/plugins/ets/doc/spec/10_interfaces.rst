@@ -61,7 +61,7 @@ support common behaviors without sharing a superclass.
    inheritance
    extension
    superinterface
-   implementation
+   direct implementation
    superclass
    object
    overriding
@@ -86,7 +86,10 @@ on the basis of reference types conversions (see
    method
    implementation
    assignment
-   reference types conversion
+   reference type
+   conversion
+   compatibility
+   assignment
    superclass
 
 |
@@ -162,6 +165,7 @@ the declared interface also implements all the interfaces that the interface
    direct superinterface
    implementation
    declared interface
+   interface
 
 A :index:`compile-time error` occurs if:
 
@@ -188,9 +192,13 @@ must name an accessible interface type (see :ref:`Accessible`). Otherwise, a
    parameterized type
    type-parameterized declaration
    primitive type
+   enumeration type
+   union type
+   function type
    enum type
    extends clause
    interface type
+   accessibility
 
 If an interface declaration (possibly generic) ``I`` <``F``:sub:`1` ``,...,
 F``:sub:`n`> (:math:`n\geq{}0`) contains an ``extends`` clause, then the
@@ -211,11 +219,13 @@ The *direct superinterfaces* of the parameterized interface type ``I``
 
 .. index::
    interface declaration
+   generic
    generic declaration
    extends clause
    direct superinterface
    compile-time error
    parameterized interface
+   substitution
 
 The transitive closure of the direct superinterface relationship results in
 the *superinterface* relationship.
@@ -276,6 +286,11 @@ Otherwise, a :index:`compile-time error` occurs.
 .. index::
    compile-time error
    interface
+   object
+   class
+   method
+   extension
+   implementation
 
 |
 
@@ -332,21 +347,13 @@ declared by the interface, and of the ``Object``'s ``public`` method are the
 same, but their signatures are different.
 
 .. index::
-   interface member
-   compile-time error
+   interface
    interface body
    inheritance
    direct superinterface
-   interface
-   abstract member method
-   public method
    Object
    public method
-   abstract method
    signature
-   interface method declaration
-   instance method
-   return type
 
 An interface inherits all members of the interfaces it extends
 (see :ref:`Interface Inheritance`).
@@ -362,7 +369,6 @@ methods of an interface type must not be the same (see
    method
    declaration scope
    interface type
-   interface declaration
 
 |
 
@@ -397,7 +403,10 @@ equivalent to ``type | undefined``.
 
 .. index::
    property
-   readonly property
+   interface
+   field
+   accessor
+   readonly
    getter
    setter
 
@@ -424,7 +433,6 @@ an accessor notation (see :ref:`Implementing Interface Properties`).
    field
    accessor notation
    property
-   accessor notation
 
 |
 
@@ -443,10 +451,13 @@ An interface method can have a body (see :ref:`Default Interface Method Declarat
 as an experimental feature.
 
 .. index::
-   interface method declaration
-   default method declaration
+   interface
+   method
+   declaration
    abstract signature
+   signature
    interface method
+   method body
 
 .. code-block:: abnf
 
@@ -461,12 +472,12 @@ A :index:`compile-time error` occurs if the body of an interface declares a
 method with a name that is already used for a property in this declaration.
 
 .. index::
-   compile-time error
    interface body
+   public method
    method
-   signature
-   inheritance
-   overriding
+   interface
+   property
+   declaration
 
 |
 
@@ -485,6 +496,14 @@ overload-equivalent (see :ref:`Overload-Equivalent Signatures`).
 
 A class that implements such interface can use :ref:`Class Method Overloading`
 or :ref:`Method Overload Signatures`. *Method overloading* is recommended.
+
+.. index::
+   interface
+   method
+   overloading
+   method overloading
+   signature
+   overload-equivalent method
 
 Overloading methods used in a class are represented in the example below:
 
@@ -533,6 +552,9 @@ Overload signatures are represented in the example below:
 Class ``C`` above defines only the *implementation* method that is called in
 all cases.
 
+.. index::
+   implementation
+
 |
 
 .. _Interface Inheritance:
@@ -556,6 +578,13 @@ Private methods defined in superinterfaces are not accessible (see
 
 .. index::
    inheritance
+   interface
+   direct superinterface
+   property
+   getter
+   setter
+   access
+   interface body
 
 A :index:`compile-time error` occurs if:
 
@@ -565,13 +594,15 @@ A :index:`compile-time error` occurs if:
 -  :math:`m'` is otherwise accessible (see :ref:`Accessible`) to code in *I*.
 
 .. index::
-   compile-time error
    interface
+   private method
+   compatibility
+   instance method
+   override-compatible signature
+   access
    superinterface
    private method
    signature
-
-|
 
 .. raw:: pdf
 

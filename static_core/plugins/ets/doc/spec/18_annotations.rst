@@ -15,10 +15,13 @@
 Annotations
 ###########
 
+.. meta:
+    frontend_status: Partly
+
 An *annotation* is a special language element that changes the semantics of
 the declaration it is applied to by adding metadata.
 
-The example below illustrates the declaration and use of an annotation:
+The example below illustrates how an annotation is declared and used:
 
 .. code-block:: typescript
    :linenos:
@@ -39,8 +42,19 @@ An annotation must be placed immediately before the declaration it is applied to
 An annotation can include arguments as in the example above.
 
 For an annotation to be used, the name of the annotation must be prefixed with
-the symbol ``@`` (e.g., ``@MyAnno``). Spaces and line separators between the
-symbol ``@`` and the name are not allowed:
+the character '``@``' (e.g., ``@MyAnno``). Spaces and line separators between
+the character '``@``' and the name are not allowed:
+
+.. index::
+   annotation
+   semantics
+   metadata
+   declaration
+   class declaration
+   prefix
+   space
+   line separator
+   argument
 
 .. code-block::
    :linenos:
@@ -61,6 +75,11 @@ Multiple annotations can be applied to a single declaration:
     @ClassAuthor({authorName: "John Smith"})
     class MyClass {/*body*/}
 
+.. index::
+   annotation
+   access
+   compilation unit
+
 |
 
 .. _Declaring Annotations:
@@ -68,8 +87,11 @@ Multiple annotations can be applied to a single declaration:
 Declaring Annotations
 *********************
 
+.. meta:
+    frontend_status: Partly
+
 The declaration of a *annotation* is similar to that of an interface where the
-keyword ``interface`` is prefixed with the symbol ``@``:
+keyword ``interface`` is prefixed with the character '``@``':
 
 .. code-block:: abnf
 
@@ -91,6 +113,18 @@ A *type* in the annotation field is restricted (see :ref:`Types of Annotation Fi
 The default value of an *annotation field* can be specified by using
 *initializer* as *constant expression*. A :index:`compile-time error`
 occurs if the value of this expression cannot be evaluated at compile time.
+
+.. index::
+   annotation
+   interface
+   keyword interface
+   prefix
+   annotation field
+   constant expression
+   compile time
+   initializer
+   keyword export
+   type
 
 The *annotation* must be defined at the top level. Otherwise, a
 :index:`compile-time error` occurs.
@@ -117,12 +151,21 @@ neither applied to the annotation, nor used as an interface:
 
     class A implements Position {} // compile-time error
 
+.. index::
+   annotation
+   type alias
+   interface
+   entity
+
 |
 
 .. _Types of Annotation Fields:
 
 Types of Annotation Fields
 ==========================
+
+.. meta:
+    frontend_status: Partly
 
 The choice of types for annotation fields is limited to the following:
 
@@ -135,12 +178,22 @@ The choice of types for annotation fields is limited to the following:
 A :index:`compile-time error` occurs if any other type is used as type of an
 *annotation field*.
 
+.. index::
+   annotation field
+   numeric type
+   string
+   enumeration type
+   array
+
 |
 
 .. _Using Annotations:
 
 Using Annotations
 *****************
+
+.. meta:
+    frontend_status: Partly
 
 The following syntax is used to apply an annotation to a declaration,
 and to define the values of annotation fields:
@@ -172,6 +225,12 @@ special case, annotation field values are set by using an expression (see
 All values in an *object literal* must be constant expressions. Otherwise,
 a :index:`compile-time error` occurs.
 
+.. index::
+   annotation
+   annotation field
+   object literal
+   expression
+
 The usage of annotation is presented in the example below:
 
 .. code-block:: typescript
@@ -191,6 +250,13 @@ The current version of |LANG| allows using annotations only with the following:
 - Non-abstract class declarations;
 - Method declarations in non-abstract classes; and
 - Function declaration.
+
+.. index::
+   annotation
+   non-abstract class
+   declaration
+   method
+   function
 
 Otherwise, a :index:`compile-time error` occurs:
 
@@ -229,6 +295,13 @@ Otherwise, a :index:`compile-time error` occurs:
     @ClassPreamble() // compile-time error, authorName is not defined
     class C1 {/*body*/}
 
+.. index::
+   annotation
+   array literal
+   array type
+   value
+   field
+
 If a field of an array type for an annotation is defined, then the array
 literal syntax is used to set its value:
 
@@ -256,10 +329,21 @@ properties is not required:
     @MyAnno
     class C4 {/*body*/}
 
+.. index::
+   field
+   array type
+   annotation
+   array literal
+
+|
+
 .. _Using Single Field Annotations:
 
 Using Single Field Annotations
 ==============================
+
+.. meta:
+    frontend_status: Partly
 
 If annotation declaration defines only one field, then it can be used with a
 short notation to specify just one expression instead of an object literal:
@@ -280,6 +364,12 @@ short notation to specify just one expression instead of an object literal:
 The behavior of a short notation is exactly the same as that of a notation
 with an object literal.
 
+.. index::
+   field annotation
+   notation
+   expression
+   object literal
+
 |
 
 .. _Exporting and Importing Annotations:
@@ -299,6 +389,7 @@ To export an annotation, its declaration must be marked with the keyword
     // a.sts
     export @interface MyAnno {}
 
+
 If an annotation is imported as part of an imported module, then the annotation
 is accessed by its qualified name:
 
@@ -310,6 +401,16 @@ is accessed by its qualified name:
 
     @ns.MyAnno
     class C {/*body*/}
+
+.. index::
+   export
+   import
+   annotation
+   import directive
+   imported module
+   qualified name
+   access
+   unqualified import
 
 Unqualified import is also allowed:
 
@@ -341,6 +442,13 @@ Annotations are forbidden in the following cases:
 
 - Rename in import.
 
+.. index::
+   export
+   import
+   annotation
+   type
+   notation
+
 .. code-block:: typescript
    :linenos:
 
@@ -368,6 +476,14 @@ used in the program.
 
 An ambient annotation and the annotation that implements it must be exactly
 identical, including field initialization:
+
+.. index::
+   ambient annotation
+   declaration
+   annotation
+   type
+   runtime error
+   field initialization
 
 .. code-block:: typescript
    :linenos:
@@ -407,9 +523,9 @@ as a regular annotation:
     class C {/*body*/}
 
 If an annotation is applied to an ambient declaration in the *.d.sts* file (see
-the example below), then the developer is to apply the annotation to the
-implementation declaration manually, because as the annotation is not
-automatically applied to the declaration that implements the ambient declaration:
+the example below), then the annotation is to be applied to the implementation
+declaration manually, because the annotation is not automatically applied to
+the declaration that implements the ambient declaration:
 
 .. code-block:: typescript
    :linenos:
@@ -419,6 +535,13 @@ automatically applied to the declaration that implements the ambient declaration
 
     @MyAnno
     declare class C {}
+
+.. index::
+   annotation declaration
+   import
+   annotation
+   ambient declaration
+   declaration
 
 |
 
@@ -432,6 +555,14 @@ or implicitly defined in the compiler (*built-in annotation*).
 A *standard annotation* is usually known to the compiler. A *standard annotation*
 modifies semantics of the declaration it is applied to.
 
+.. index::
+   standard annotation
+   annotation
+   compiler
+   built-in annotation
+   semantics
+   declaration
+
 |
 
 .. _Annotation namespace:
@@ -439,14 +570,13 @@ modifies semantics of the declaration it is applied to.
 Annotation ``namespace``
 ========================
 
-The ``namespace`` annotation specifies that a declaration marked with this
-annotation corresponds to the ambient declaration from an ambient namespace of
-some declaration module (see :ref:`Implementing Ambient Namespace Declaration`
-for details).
+The ``namespace`` annotation specifies that the marked namespace
+corresponds to ambient namespace of some declaration module (see
+:ref:`Implementing Ambient Namespace Declaration` for details).
 
-This annotation has a single field ``name: string`` that denotes the name of
-the namespace. It can be applied to functions and classes declared in the
-ambient context:
+This annotation has a single field ``address: string`` that denotes the
+ambient namespace in some way. The syntax of an address string is
+implementation-dependent.
 
 .. code-block:: typescript
    :linenos:
@@ -460,13 +590,27 @@ ambient context:
 
     //=== files.sts
 
-    @namespace("IO")
-    class File {/*body*/}
+    @namespace({address: "io.d.ts"})
+    namespace IO {
+      class File {/*body*/}
 
-    @namespace("IO")
-    function open(filename: string): File {/*body*/}
+      function open(filename: string): File {/*body*/}
+    }
 
-**Note**: As an annotation has only a one field, a short notation can be used (see :ref:`Using Single Field Annotations`).
+The annotation can be applied to namespaces only. A :index:`compile-time error`
+occurs otherwise.
+
+**Note**: As an annotation has only one field, a short notation can be used
+(see :ref:`Using Single Field Annotations`).
+
+.. index::
+   annotation
+   namespace
+   ambient namespace
+   string
+   declaration module
+   field
+   notation
 
 .. raw:: pdf
 

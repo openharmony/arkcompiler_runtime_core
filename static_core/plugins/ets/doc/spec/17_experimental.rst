@@ -75,14 +75,19 @@ with ``enums``.
    implementation
    function overloading
    method overloading
-   class final
+   final class
    method final
    OOP (object-oriented programming)
    inheritance
+   enum
+   class
+   interface
+   inheritance
+   derived class
 
 Section :ref:`Exceptions` discusses the powerful, commonly used mechanism for
 the processing of various kinds of unexpected events and situations that break
-the *ordinary* program logic. There are constructs to raise (``throw``)
+the *ordinary* program logic. There are constructs to raise (*throw*)
 exceptions, *catch* them along the dynamic sequence of function calls, and
 handle them. Some support for exceptions is also provided by the classes from
 the standard library (see :ref:`Standard Library`).
@@ -111,6 +116,9 @@ launched as a separate thread explicitly by using the launch expression.
    async modifier
    launch expression
    launch
+   lambda expression
+   concurrency
+   async modifier
 
 The ``await`` statement is introduced to synchronize functions launched as
 threads. The generic class ``Promise<T>`` from the standard library (see
@@ -161,6 +169,7 @@ makes a *package* even more independent from the environment.
    non-exported declaration
    access
    initialization
+   semantics
 
 |
 
@@ -168,6 +177,8 @@ makes a *package* even more independent from the environment.
 
 Character Type and Literals
 ***************************
+
+|
 
 .. _Character Literals:
 
@@ -212,7 +223,7 @@ an operator is applied to the literal, then the literal type is replaced for
 
 .. index::
    char literal
-   character
+   character literal
    escape sequence
    single quote
    type char
@@ -308,6 +319,16 @@ A :index:`compile-time error` occurs if any *dimensionExpression* is a
 constant expression that is evaluated at compile time to a negative integer
 value.
 
+.. index::
+   array creation expression
+   conversion
+   integer
+   type
+   value
+   numeric conversion
+   type int
+   constant expression
+
 If the type of any *dimensionExpression* is ``number`` or other floating-point
 type, and its fractional part is different from '0', then errors occur as
 follows:
@@ -323,6 +344,17 @@ as follows:
 - Lambda function with the return type equal to the type of array element
   denoted by ``arrayElelementType`` and the parameters of type ``int``, and the
   number of parameters equal to the number of array dimensions.
+
+.. index::
+   type
+   floating-point type
+   runtime error
+   compilation
+   expression
+   lambda function
+   array
+   parameter
+   array
 
 Otherwise, a :index:`compile-time error` occurs.
 
@@ -371,6 +403,11 @@ parameter:
          }
       }
 
+.. index::
+   accessibility
+   constructor
+   array
+
 Creating an array with a known number of elements is presented below:
 
 .. code-block:: typescript
@@ -404,19 +441,6 @@ Creating exotic arrays with different kinds of element types is presented below:
       let array_of_functor = new (() => void) [5] ( (): void => {})
       type aliasTypeName = number []
       let array_of_array = new aliasTypeName [5] ( [3.141592653589] )
-
-.. index::
-   array creation expression
-   object
-   instance
-   array
-   array literal
-   array instance
-   initial value
-   conversion
-   integer type
-   numeric conversion
-   type int
 
 |
 
@@ -458,7 +482,9 @@ as follows:
 .. index::
    array
    constructor
+   abrupt completion
    expression
+   runtime
    evaluation
    default value
    parameterless constructor
@@ -517,6 +543,15 @@ expressions (see :ref:`Indexing Expressions`) is available:
     setClass = setClass[0] // Error - no $_get function available
     setClass[0] = setClass
 
+
+.. index::
+   function
+   signature
+   indexing expression
+   variable
+   index expression
+   string
+
 Type ``string`` can be used as a type of the index parameter:
 
 .. code-block-meta:
@@ -541,6 +576,20 @@ The functions can be overridden and provide a dynamic dispatch for the indexing
 expression evaluation (see :ref:`Indexing Expressions`). The functions can be
 used in generic classes and interfaces for better flexibility. A
 :index:`compile-time error` occurs if these functions are marked as ``async``.
+
+.. index::
+   index parameter
+   function
+   compiler
+   signature
+   overriding
+   interface
+   implementation
+   indexing expression
+   evaluation
+   flexibility
+   async function
+   generic class
 
 .. code-block-meta:
    expect-cte:
@@ -598,6 +647,16 @@ library (see :ref:`Standard Library`). It guarantees the object returned
 is of the class type which implements ``Iterator``, and thus allows traversing
 an object of class type ``C``. The example below defines *iterable* class ``C``:
 
+.. index::
+   iterable type
+   class
+   interface
+   instance
+   for-of statement
+   parameterless function
+   compatibility
+   iterable class
+
 .. code-block:: typescript
    :linenos:
 
@@ -643,6 +702,15 @@ signature. The function can be used like any other function. It can be
 abstract or defined in an interface to be implemented later. A
 :index:`compile-time error` occurs if this function is marked as ``async``.
 
+.. index::
+   function
+   class
+   string
+   iterator
+   compiler
+   signature
+   async function
+
 **Note**: To support the code compatible with |TS|, the name of the function
 ``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the class
 ``iterable`` looks as follows:
@@ -661,6 +729,12 @@ abstract or defined in an interface to be implemented later. A
 
 The use of the name ``[Symbol.iterator]`` is considered deprecated.
 It can be removed in the future versions of the language.
+
+.. index::
+   compatibility
+   function
+   iterator
+   class
 
 |
 
@@ -693,6 +767,15 @@ In the above example, ``C()`` is a *type call expression*. It is the short
 form of the normal method call ``C.invoke()``. Using an explicit call is always
 valid for the methods ``invoke`` and ``instantiate``.
 
+.. index::
+   callable type
+   call expression
+   expression
+   type call expression
+   class type
+   method call
+   instantiation
+
 **Note**: Only a constructor---not the methods ``invoke`` or ``instantiate``---is
 called in a *new expression*:
 
@@ -712,6 +795,10 @@ discussed below.
 
 A :index:`compile-time error` occurs if a callable type contains both methods
 ``invoke`` and ``instantiate``.
+
+.. index::
+   method
+   instantiation
 
 |
 
@@ -738,6 +825,13 @@ parameters, then the call must contain corresponding arguments.
         }
     }
     console.log(Add(2, 2)) // prints: 4
+
+.. index::
+   callable type
+   signature
+   method
+   type call expression
+   argument
 
 |
 
@@ -773,6 +867,14 @@ parameter is passed implicitly:
     // Explicit call of 'instantiate' requires explicit 'factory':
     let y = C.instantiate(() => { return new C()})
 
+.. index::
+   method
+   signature
+   type call expression
+   factory
+   parameterless function type
+   struct type
+
 If the method ``instantiate`` has additional parameters, then the call must
 contain corresponding arguments:
 
@@ -795,6 +897,12 @@ if:
 - ``T`` has neither method ``invoke`` nor  method ``instantiate``; or
 - ``T`` has the method ``instantiate`` but its first parameter is not
   a ``factory``.
+
+.. index::
+   type call expression
+   instantiation
+   method
+   parameter
 
 .. code-block-meta:
     expect-cte
@@ -830,7 +938,7 @@ For-of Type Annotation
 .. meta:
     frontend_status: Done
 
-An explicit type annotation is allowed for a *for variable*:
+An explicit type annotation is allowed for a *for-variable*:
 
 .. code-block:: typescript
    :linenos:
@@ -842,7 +950,9 @@ An explicit type annotation is allowed for a *for variable*:
       }
 
 .. index::
-   explicit type annotation
+   type annotation
+   for-variable
+   for-of type annotation
 
 |
 
@@ -854,7 +964,8 @@ Multiple Catch Clauses in Try Statements
 .. meta:
     frontend_status: Done
 
-When an exception or an error is thrown in the ``try`` block, or in a
+When an exception or an error is thrown in the ``try`` block
+(see :ref:`try Statements`), or in a
 *throwing* or *rethrowing* function (see :ref:`Throwing Functions` and
 :ref:`Rethrowing Functions`) called from the ``try`` block, the control is
 transferred to the first ``catch`` clause if the statement has at least one
@@ -879,17 +990,18 @@ A ``catch`` clause has two parts:
    rethrowing function
    non-throwing function
    try block
-   control transfer
+   try statement
+   propagation
+   scope
    catch clause
    propagation
-   surrounding scope
    exception parameter
    access
 
 *Default catch clause* is a ``catch`` clause with the exception parameter type
 omitted. Such a ``catch`` clause handles any exception or error that is not
-handled by any previous clause. The type of that parameter is of the class
-``Object``.
+handled by any previous clause. The type of that parameter is union 
+``Exception`` | ``Error``.
 
 A :index:`compile-time error` occurs if:
 
@@ -900,6 +1012,15 @@ A :index:`compile-time error` occurs if:
    class ``Exception`` or ``Error``, nor a class derived from ``Exception`` or
    ``Error``.
 
+.. index::
+   catch clause
+   default catch clause
+   exception
+   parameter type
+   union
+   try statement
+   type reference
+   error
 
 .. code-block-meta:
 
@@ -922,20 +1043,11 @@ A :index:`compile-time error` occurs if:
         catch (d: ZeroDivisorException) {
           // Handle zero division situation
         }
-        catch (e) {
+        catch (e) { // type of 'e' is Error|Exception
           // Handle all other errors or exceptions
         }
       }
 
-.. index::
-   default catch clause
-   exception
-   exception parameter
-   error
-   Exception
-   Error
-   try statement
-   derived class
 
 All exceptions that the ``try`` block can throw are caught by the function
 *process*. Special handling is provided for the ``ZeroDivisor`` exception,
@@ -952,6 +1064,7 @@ is never propagated.
 .. index::
    exception
    try block
+   exception
    propagation
    try statement
    default catch clause
@@ -995,7 +1108,7 @@ are propagated to the surrounding scope if no ``catch`` clause is found.
    runtime
    error
    propagation
-   surrounding scope
+   scope
 
 |
 
@@ -1025,7 +1138,6 @@ are performed during the execution of a specific body at runtime.
    method
    signature
    overloaded header
-   execution
    runtime
 
 |
@@ -1059,13 +1171,13 @@ time to determine exactly which one is to be called (see
    declaration scope
    signature
    name
+   overload-equivalence
    overload-equivalent signature
    overloaded function name
    return type
    throws clause
    argument
-   actual argument
-   explicit type argument
+   type argument
    function call
    compile-time error
 
@@ -1087,6 +1199,17 @@ Method overloading declarations cause no :index:`compile-time error` on their
 own, except where a possible instantiation causes an *overload-equivalent* (see
 :ref:`Overload-Equivalent Signatures`) method in the instantiated class or
 interface:
+
+.. index::
+   class method overloading
+   class
+   signature
+   overload-equivalent signature
+   overload equivalence
+   overloading
+   method
+   instantiation
+   interface
 
 .. code-block:: typescript
    :linenos:
@@ -1118,17 +1241,15 @@ time to determine exactly which one is to be called (see
 :ref:`Method Call Expression`, and :ref:`Step 2 Selection of Method`).
 
 .. index::
-   class method overloading
    signature
    overload-equivalent signature
+   overload equivalence
    throws clause
    rethrows clause
-   explicit type argument
-   actual argument
+   type argument
+   argument type
    method call
    instance method
-   runtime
-   dynamic method lookup
 
 |
 
@@ -1148,7 +1269,9 @@ compile time.
 .. index::
    constructor overloading
    method overloading
-   class instance creation expression
+   class instance
+   creation expression
+   compile time
 
 |
 
@@ -1176,11 +1299,13 @@ declarations are one of the following:
    :ref:`Constructor Overloading`).
 
 .. index::
+   distinguishable declaration
    signature
-   function overloading
+   function
+   overloading
    overload-equivalent signature
-   class method overloading
-
+   overload-equivalence
+   constructor
 
 The example below represents the functions distinguishable by signatures:
 
@@ -1208,8 +1333,11 @@ that cause a :index:`compile-time error`:
       function foo(x: MyNumber) {}
 
 .. index::
+   distinguishable function
    function
    signature
+
+|
 
 |
 
@@ -1221,6 +1349,7 @@ Native Functions and Methods
 .. meta:
     frontend_status: Done
 
+|
 
 .. _Native Functions:
 
@@ -1230,15 +1359,20 @@ Native Functions
 .. meta:
     frontend_status: Done
 
+A native function is a function that marked with ``native`` keyword (see :ref:`Function Declarations`).
+
 A ``native`` function implemented in a platform-dependent code is typically
 written in another programming language (e.g., *C*). A :index:`compile-time error`
 occurs if a ``native`` function has a body.
 
 .. index::
+   keyword native
+   function
    native function
    implementation
    platform-dependent code
    compile-time error
+   function body
 
 |
 
@@ -1249,6 +1383,8 @@ Native Methods
 
 .. meta:
     frontend_status: Done
+
+A native method is a method that marked with ``native`` keyword (see :ref:`Method Declarations`).
 
 ``Native`` methods are the methods implemented in a platform-dependent code
 written in another programming language (e.g., *C*).
@@ -1270,6 +1406,33 @@ A :index:`compile-time error` occurs if:
    block
    method declaration
    keyword abstract
+   semicolon
+   empty body
+
+|
+
+.. _Native Constructors:
+
+Native Constructors
+===================
+
+.. meta:
+    frontend_status: None
+
+A native constructor is a constructor that marked with ``native`` keyword (see :ref:`Constructor Declaration`).
+
+``Native`` constructors are the constructors implemented in a platform-dependent code
+written in another programming language (e.g., *C*).
+
+A :index:`compile-time error` occurs if:
+
+-  The ``native`` constructor has a non-empty body (see :ref:`Constructor Body`).
+
+.. index::
+   native constructor
+   platform-dependent code
+   keyword native
+   non-empty body
 
 |
 
@@ -1407,6 +1570,7 @@ function declaration.
    extension function
    callable function
    dot-notation
+   notation
    receiver type
    extension function declaration
 
@@ -1430,6 +1594,10 @@ members are not accessible (see :ref:`Accessible`) within the bodies of their
    keyword this
    extension function
    receiver object
+   type reference
+   private
+   protected
+   access
 
 .. code-block:: typescript
    :linenos:
@@ -1473,6 +1641,15 @@ declaring. This affects the kind of receiver to be used for the call:
 -  *Non-static extension function* requires a variable (as in the examples
    below).
 
+.. index::
+   extension function
+   top-level function
+   function call
+   receiver
+   static extension function
+   name
+   non-static extension function
+   variable
 
 .. code-block:: typescript
    :linenos:
@@ -1523,6 +1700,12 @@ As illustrated by the following examples, an *extension function* can be:
 -  Put into a compilation unit other than class or interface; and
 -  Imported by using a name of the *extension function*.
 
+.. index::
+   extension function
+   class
+   interface
+   import
+
 .. code-block:: typescript
    :linenos:
 
@@ -1546,6 +1729,12 @@ As illustrated by the following examples, an *extension function* can be:
 If an *extension function* and a type method have the same name and signature,
 then calls to that name are routed to the method:
 
+.. index::
+   extension function
+   method
+   signature
+   call
+
 .. code-block:: typescript
    :linenos:
 
@@ -1566,6 +1755,11 @@ by the following formula:
 
 In other words, the priority of standard object-oriented semantics is higher
 than that of type extension functions:
+
+.. index::
+   extension function
+   instance method
+   semantics
 
 .. code-block:: typescript
    :linenos:
@@ -1601,6 +1795,14 @@ without a receiver as they have access to ``this``:
       a.foo() // Extension function is called, `Extension A.foo is called` to be printed out
       foo () // Top-level function is called, `Top-level foo is called` to be printed out
 
+.. index::
+   extension function
+   top-level function
+   signature
+   function
+   receiver
+   access
+
 |
 
 .. _Trailing Lambda:
@@ -1622,8 +1824,10 @@ Syntactically, the *trailing lambda* looks as follows:
    trailing lambda
    function call
    method call
-   function parameter
-   method parameter
+   parameter
+   function type
+   method
+   parameter
    lambda
    function type
 
@@ -1665,6 +1869,18 @@ If other semantics is needed, then the semicolon '``;``' separator can be used.
 It means that the function or the method is to be called without the last
 argument (see :ref:`Optional Parameters`).
 
+.. index::
+   trailing lambda
+   parameter
+   block
+   function
+   method
+   function type
+   lambda function
+   lambda
+   semicolon
+   call
+
 .. code-block:: typescript
    :linenos:
 
@@ -1687,16 +1903,6 @@ argument (see :ref:`Optional Parameters`).
       bar(); { console.log ("that is the block code") }
       // function 'bar' is called with 'p' parameter set to 'undefined'
 
-.. index::
-   trailing lambda
-   compile-time error
-   call
-   block
-   statement
-   function
-   method
-   lambda function
-   function type parameter
 
 .. code-block:: typescript
    :linenos:
@@ -1744,11 +1950,11 @@ be used to get an enumeration variable back by applying the ``as`` conversion:
 
 .. index::
    enum type
-   class type
-   Object
-   polymorphic assignment
-   type variable
+   enumeration type
    conversion
+   assignment
+   Object
+   variable
    compatibility
 
 |
@@ -1856,6 +2062,7 @@ An exception can  be  processed in two ways:
    base class
    Exception
    try statement
+   throw statement
    propagation
    function
    throwing function
@@ -2164,7 +2371,7 @@ to be awaited.
    function
    lambda
    coroutine
-   channel
+   communication channel
    launch
 
 |
@@ -2178,12 +2385,13 @@ Create and Launch a Coroutine
     frontend_status: Done
 
 The following expression is used to create and launch a coroutine based on
-a function or method call, or on a lambda expression:
+a function call, a lambda call (see :ref:`Function Call Expression`), or a
+method call (see :ref:`Method Call Expression`):
 
 .. code-block:: abnf
 
       launchExpression:
-        'launch' functionCallExpression|methodCallExpression|lambdaExpression;
+        'launch' functionCallExpression | methodCallExpression;
 
 
 .. code-block:: typescript
@@ -2198,12 +2406,12 @@ a function or method call, or on a lambda expression:
         return res
       }
 
-Lambda is used in a launch expression as follows:
+Lambda can be used in a launch expression as a part of a function call:
 
 .. code-block:: typescript
    :linenos:
 
-      let res = launch (n: int) => { /* lambda body */(7)
+      let res = launch ((n: int) => { /* lambda body */ })(7)
 
 .. index::
    expression
@@ -2236,7 +2444,7 @@ to from what scope to call the function ``async``:
    return type
    function call
    coroutine
-   function async
+   async function
    restriction
 
 .. code-block:: typescript
@@ -2314,7 +2522,9 @@ Return types of ``await`` expressions are represented in the example below:
 .. index::
    coroutine
    expression statement
-   await
+   union type
+   type argument
+   await expression
 
 |
 
@@ -2342,6 +2552,7 @@ The methods are used as follows:
    class
    value
    launch expression
+   import expression
    argument
    callback
    package
@@ -2416,6 +2627,8 @@ Async Functions and Methods
 .. meta:
     frontend_status: Done
 
+|
+
 .. _Async Functions:
 
 ``Async`` Functions
@@ -2447,6 +2660,10 @@ supported for the sake of backward |TS| compatibility only.
    function body
    backward compatibility
    annotation
+   no-argument return statement
+   async function
+   return statement
+   compatibility
 
 |
 
@@ -2479,8 +2696,11 @@ is supported for the sake of backward |TS| compatibility only.
    coroutine
    return type
    function body
-   backward compatibility
+   compatibility
+   no-argument return statement
    annotation
+   abstract method
+   native method
 
 |
 
@@ -2516,7 +2736,7 @@ object of type ``DynamicObject`` are handled by the compiler in a special manner
 - Cast.
 
 .. index::
-   DynamicObject
+   interface
    interoperability
    dynamic import
    interface
@@ -2531,6 +2751,7 @@ object of type ``DynamicObject`` are handled by the compiler in a special manner
    field access
    indexing access
    method call
+   cast
 
 |
 
@@ -2567,11 +2788,12 @@ The wrapper can raise an error if:
   (see :ref:`Type Compatibility`).
 
 .. index::
-   DynamicObject
    wrapper
    dynamic import
    underlying object
    field access
+   field access expression
+   compile time
    property
    instance
    assignment
@@ -2651,8 +2873,10 @@ The wrapper must raise an error if:
 - The type of the *index* expression is not supported by the underlying object.
 
 .. index::
-   DynamicObject
-   indexing access
+   indexing access expression
+   index expression
+   wrapper
+   access
    underlying object
 
 |
@@ -2687,8 +2911,13 @@ The wrapper must raise an error if:
   with the types of call arguments.
 
 .. index::
-   DynamicObject
+   expression
+   constructor call
+   constructor
    wrapper
+   returned value
+   compatibility
+   call argument
    property
    instance
 
@@ -2726,9 +2955,16 @@ The wrapper must raise an error if an underlying object cannot be converted
 to the target type specified by the cast operator.
 
 .. index::
-   DynamicObject
    wrapper
+   underlying object
    cast expression
+   interface type
+   cast expression
+   instance
+   type
+   conversion
+   target type
+   cast operator
 
 |
 
@@ -2761,6 +2997,7 @@ have the same *package header*:
    file system
    database
    package header
+   module
 
 .. code-block:: abnf
 
@@ -2797,6 +3034,7 @@ modules that constitute the package.
    package header
    package
    identifier
+   core package
    import
    exported entity
    access
@@ -2826,11 +3064,14 @@ module.
 
 .. index::
    modifier
-   internal access modifier
+   access modifier
+   accessibility
+   interface
    class member
    constructor
    access
    package module
+   module
 
 .. code-block:: typescript
    :linenos:
@@ -2871,7 +3112,9 @@ The appropriate syntax is presented below:
    package initializer
    package module
    initialization
+   compilation unit
    variable
+   package initializer
 
 .. code-block:: abnf
 
@@ -2907,12 +3150,15 @@ While importing functions, the following situations can occur:
 
 .. index::
    import
+   function
    overloading
    function name
    function
    imported function
    signature
    module
+   access
+   accessibility
 
 The two situations are illustrated by the examples below:
 
@@ -2966,6 +3212,7 @@ The two situations are illustrated by the examples below:
 Generics Experimental
 *********************
 
+|
 
 .. _NonNullish Type Parameter:
 
@@ -2979,6 +3226,16 @@ If some generic class has a type parameter with nullish union type constraint,
 then special syntax for type annotation can be used to get a non-nullish
 version of the type parameter variable. The example below illustrates this
 possibility:
+
+.. index::
+   generic class
+   type parameter
+   nullish union type
+   constraint
+   annotation
+   non-nullish type
+   variable
+   parameter
 
 .. code-block:: typescript
    :linenos:

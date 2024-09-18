@@ -33,6 +33,8 @@ user-defined type names, but are not otherwise restricted.
 
 .. index::
    reserved names of |TS| types
+   compatibility
+   user-defined type name
 
 1. Names of |TS| utility types that are not supported by |LANG|:
 
@@ -107,6 +109,11 @@ Undefined is Not a Universal Value
        //        violation or runtime error ArrayOutOfBounds
     console.log(x)
 
+.. index::
+   value
+   runtime value
+   runtime error
+
 |
 
 .. _Numeric semantics:
@@ -135,6 +142,11 @@ on the context and can produce different results:
     console.log(n / 2)
        // TypeScript: will print 0.5 - floating-point division is used
        // ArkTS: will print 0 - integer division is used
+
+.. index::
+   numeric type
+   context
+   semantics
 
 |
 
@@ -179,6 +191,15 @@ by compiler-generated compile-time errors:
     let base: Base = new Derived
     base.foo (new Base)
 
+.. index::
+   covariant overriding
+   runtime model
+   object
+   property
+   access
+   compile time
+   type safety
+
 |
 
 .. _Function types compatibility:
@@ -199,6 +220,12 @@ Function types compatibility
     let f1: FuncType = (p: string): number => { return 0 } // compile-time error in ArkTS
     let f1: FuncType = (p: string): string => { return "" } // compile-time error in ArkTS
 
+.. index::
+   function type
+   compatibility
+   assignment
+   variable
+   conversion
 
 |
 
@@ -220,6 +247,12 @@ with object literals only.
     function foo<T>(t: T, part_t: Partial<T>) {
         part_t = t // compile-time error in ArkTS
     }
+
+.. index::
+   compatibility
+   utility type
+   initialization
+   object literal
 
 |
 
@@ -264,6 +297,14 @@ providing more arguments than the actual function or method has.
        { console.log ("1st parameter := ", p)  }
 
     foo("1st argument", true) // compile-time error in ArkTS while OK for Typescript
+
+.. index::
+   implementation signature
+   access
+   call
+   argument
+   method
+   function
 
 |
 
@@ -313,6 +354,17 @@ These situations are illustrated by the examples below:
    // { field: 666, field: 555 }
    // 555 666
 
+.. index::
+   class field
+   inheritance
+   overriding
+   subclass
+   invariant
+   covariant
+   shadowing
+   semantics
+   superclass
+
 |
 
 .. _Overriding for Primitive Types:
@@ -334,6 +386,11 @@ illustrated by the example below:
    class Derived extends Base {
      foo(): number { return 5 } // Such overriding is prohibited
    }
+
+.. index::
+   overriding
+   primitive type
+   class type
 
 |
 
@@ -361,6 +418,11 @@ arguments than were declared. |LANG| allows no such calls:
         /* compile-time error in ArkTS as a call with two arguments is
            invalid while it is OK for the Typescript */
 
+.. index::
+   argument
+   function type
+   variable
+
 |
 
 .. _Built-in Arrays Compatibility:
@@ -372,7 +434,7 @@ Built-in Arrays Compatibility
     frontend_status: Done
 
 |TS| allows covariant array assignment as in |TS| all types are of the
-refrence kind. |LANG| has value types, and the array of elements of a value
+reference kind. |LANG| has value types, and the array of elements of a value
 type cannot be assigned into an array of a reference type:
 
 .. code-block:: typescript
@@ -394,6 +456,13 @@ type cannot be assigned into an array of a reference type:
     let a: Object[] = [1, 2, 3]
     let b: Number[] = [1, 2, 3] 
     a = b // That works fine
+
+.. index::
+   built-in array compatibility
+   covariant
+   array
+   assignment
+   reference type
 
 |
 
@@ -425,6 +494,9 @@ explicitly listed in the ``extends`` clause of a class. |LANG| allows this as
        }
     }
 
+.. index::
+   class object
+   extends clause
 
 |
 

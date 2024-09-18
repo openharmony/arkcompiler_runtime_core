@@ -37,7 +37,9 @@ associated set of named constants that define its possible values:
 
 .. index::
    enumeration
-   named constant
+   type enum
+   user-defined type
+   constant
 
 ``const enum`` is supported for source-level compatibility with |TS|,
 and ``const`` is skipped as it has no impact on ``enum`` semantics in
@@ -58,12 +60,14 @@ For example, if *Color* is exported, then all constants like ``Color.Red``
 are exported along with the mandatory qualification ``Color``.
 
 .. index::
+   source-level compatibility
+   semantics
    qualification
    access
    enumeration constant
    enumeration type
    enum constant
-   numeric constant expression
+   const enum
 
 The value of an enum constant can be set explicitly to a numeric constant
 expression (expression of type ``int``) or to a constant expression
@@ -92,13 +96,14 @@ a :index:`compile-time error` occurs.
 
 .. index::
    enum constant
+   string
+   constant
+   expression
+   numeric value
+   integer
    numeric constant expression
    constant expression
    enumeration constant
-   compile-time error
-   numeric value
-   enum constant
-   integer
 
 |
 
@@ -123,6 +128,7 @@ the value explicitly:
    enum constant
    enumeration constant
    integer type
+   expression
 
 .. code-block:: typescript
    :linenos:
@@ -142,10 +148,6 @@ the values of the constants are set by the following rules:
 -  A constant that is not the first and has no explicit value takes the value
    of the immediately preceding constant plus one.
 
-.. index::
-   constant
-   assignment
-
 In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
 ``Green``, 6:
 
@@ -154,6 +156,10 @@ In the example below, the value of ``Red`` is 0, of ``Blue``, 5, and of
 
     enum Color { Red, Blue = 5, Green }
 
+.. index::
+   constant
+   value
+   assignment
 
 |
 
@@ -173,8 +179,9 @@ A string value for enumeration constants must be set explicitly:
     enum Commands { Open = "fopen", Close = "fclose" }
 
 .. index::
-   string value
-   enumeration string value
+   string
+   value
+   enumeration
    enumeration constant
 
 |
@@ -193,6 +200,8 @@ using the method ``toString``:
 .. index::
    enumeration constant
    method
+   conversion
+   string
 
 .. code-block:: typescript
    :linenos:
