@@ -569,3 +569,5 @@ endif()
 if (PANDA_ETS_INTEROP_JS)
     add_subdirectory(interop_js)
 endif()
+
+add_subdirectory(debugger)
