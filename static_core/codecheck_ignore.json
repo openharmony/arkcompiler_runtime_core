@@ -279,7 +279,6 @@
   "tests/tests-u-runner": "*",
   "tests/verifier-tests": "*",
   "tests/vm-benchmarks": "*",
-  "tools": "*",
   "verification": "*",
   "compiler/optimizer/ir/visitor.inc": {"G.INC.02": "*", "G.INC.04-CPP": "*"},
   "*": ["G.CMT.03", "G.FMT.11", "G.NAM.03", "huge_headerfile", "huge_non_headerfile", "bc-30001"]
