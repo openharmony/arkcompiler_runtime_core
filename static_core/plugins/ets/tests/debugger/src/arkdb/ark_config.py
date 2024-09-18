@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -26,7 +27,7 @@ def get_config(config: Config, name: str):
     return config.getoption(name, config.getini(name), True)
 
 
-def str2bool(val: str | None) -> bool | None:
+def str2bool(val: str | None) -> None | bool:
     if val is None:
         return None
     val = val.lower()
@@ -36,8 +37,7 @@ def str2bool(val: str | None) -> bool | None:
         return True
     if val in ("n", "no", "f", "false", "off", "0"):
         return False
-    else:
-        raise ValueError("invalid truth value %r" % (val,))
+    raise ValueError("invalid truth value %r" % (val,))
 
 
 @fixture(scope="session")

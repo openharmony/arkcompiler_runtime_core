@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 # Copyright (c) 2024 Huawei Device Co., Ltd.
@@ -65,7 +66,7 @@ class BytecodeComparator:
                     BytecodeComparator.EXPECTED_FUNC_DECL_PATTERN,
                     [f"{ExpressionEvaluationNames.EVAL_PATCH_FUNCTION_NAME}.", f"{self.base_module_name}."],
                 )
-                if expected_func_body:
+                if not expected_func_body:
                     error_report = "Expected bytecode function was not found or empty."
                 else:
                     # Restore fully qualified function name after prefixes removal.
@@ -80,7 +81,7 @@ class BytecodeComparator:
                     self.patch_func_pattern,
                     [f"{self.base_module_name}."],
                 )
-                if patch_func_body is None:
+                if not patch_func_body:
                     error_report += "\tEvaluation patch bytecode function was not found"
 
                 if error_report == "" and len(expected_func_body) != len(patch_func_body):
@@ -99,7 +100,11 @@ class BytecodeComparator:
                     raise BytecodeComparisonError("Bytecode comparison failed:\n" + "\n".join(error_list))
 
 
-def _fetch_bytecode_function(bytecode: list[str], function_decl_pattern: str, prefixes: Iterable[str]):
+def _fetch_bytecode_function(
+    bytecode: list[str],
+    function_decl_pattern: str,
+    prefixes: Iterable[str],
+) -> list[str]:
     func_body: list[str] = []
     start_idx: int | None = None
 
@@ -114,7 +119,7 @@ def _fetch_bytecode_function(bytecode: list[str], function_decl_pattern: str, pr
             if line == "}\n":
                 return func_body
 
-    return None
+    return []
 
 
 def _remove_prefix(line: str, prefixes: Iterable[str]) -> str:
