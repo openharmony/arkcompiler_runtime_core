@@ -148,6 +148,9 @@ void InstBuilder::Prepare(bool isInlinedGraph)
     // Create Parameter instructions for all arguments
     for (size_t i = 0; i < numArgs; i++) {
         auto paramInst = GetGraph()->AddNewParameter(i);
+        if (GetGraph()->IsAbcKit()) {
+            paramInst->SetFlag(inst_flags::NO_DCE);
+        }
         auto type = GetCurrentMethodArgumentType(i);
         auto regNum = GetRuntime()->GetMethodRegistersCount(GetMethod()) + i;
         ASSERT(!GetGraph()->IsBytecodeOptimizer() || regNum != INVALID_REG);

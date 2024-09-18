@@ -105,6 +105,7 @@ panda_gen(DATA ${PANDA_BINARY_ROOT}/runtime/intrinsics.yaml
 panda_gen(DATA ${CMAKE_CURRENT_LIST_DIR}/optimizer/ir/instructions.yaml
         TEMPLATES
             opcodes.h.erb
+            inst_flags.inl.erb
             arch_info_gen.h.erb
             inst_checker_gen.h.erb
             IR-instructions.md.erb

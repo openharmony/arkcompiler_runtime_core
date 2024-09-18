@@ -157,6 +157,7 @@ private:
     uint32_t FindCatchBlockInPandaFile(Class *cls, uint32_t pc) const;
     void ConnectThrowBlock(BasicBlock *throwBlock, const TryCodeBlock &tryBlock);
     void ConnectThrowBlocks();
+    bool BuildIrImpl(size_t vregsCount);
     bool BuildIr(size_t vregsCount);
     RuntimeInterface::ClassPtr FindExceptionClass(BasicBlock *throwBlock, int32_t *throwPc);
     bool FindAppropriateCatchBlock(const TryCodeBlock &tryBlock, BasicBlock *throwBlock, uint32_t catchPc);

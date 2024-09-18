@@ -106,21 +106,42 @@ templates:
     AddInstruction(inst);
     UpdateDefinitionAcc(inst);
   if: |-
-    Inst *input0 = GetDefinitionAcc();
+    if (graph_->GetMode().IsAbcKit()) {
     % if inst.acc_and_operands.size > 2
-    Inst *input1 = GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>());
+        auto inst = graph_->CreateInstIf(compiler::DataType::NO_TYPE, GetPc(instruction->GetAddress()), GetDefinitionAcc(),
+                                        GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()), compiler::<%= get_type(inst.type(0)) %>, <%= get_cc(inst) %>);
     % else
     %   if inst.mnemonic.include? "obj"
-    Inst *input1 = graph_->GetOrCreateNullPtr();
+        auto inst = graph_->CreateInstIf(compiler::DataType::NO_TYPE, GetPc(instruction->GetAddress()), GetDefinitionAcc(),
+                                             graph_->GetOrCreateNullPtr(), compiler::<%= get_type(inst.type(0)) %>, <%= get_cc(inst) %>);
     %   else
-    Inst *input1 = FindOrCreateConstant(0);
+    %     if ['i64' 'f64' 'b64' 'u64'].include?(inst.type(0))
+        auto inst = graph_->CreateInstIf(compiler::DataType::NO_TYPE, GetPc(instruction->GetAddress()), GetDefinitionAcc(),
+                                             FindOrCreateConstant(0), compiler::<%= get_type(inst.type(0)) %>, <%= get_cc(inst) %>);
+    %     else
+        auto inst = graph_->CreateInstIf(compiler::DataType::NO_TYPE, GetPc(instruction->GetAddress()), GetDefinitionAcc(),
+                                             FindOrCreate32BitConstant(0), compiler::<%= get_type(inst.type(0)) %>, <%= get_cc(inst) %>);
+    %     end
     %   end
     % end
-    auto inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), input0, input1, <%= get_type(inst.type(0)) %>, <%= get_cc(inst) %>);
-    auto inst_jump = graph_->CreateInstIfImm(DataType::NO_TYPE, GetPc(instruction->GetAddress()), inst, 0, 
+        AddInstruction(inst);
+    } else {
+        Inst *input0 = GetDefinitionAcc();
+    % if inst.acc_and_operands.size > 2
+        Inst *input1 = GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>());
+    % else
+    %   if inst.mnemonic.include? "obj"
+        Inst *input1 = graph_->GetOrCreateNullPtr();
+    %   else
+        Inst *input1 = FindOrCreateConstant(0);
+    %   end
+    % end
+        auto inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), input0, input1, <%= get_type(inst.type(0)) %>, <%= get_cc(inst) %>);
+        auto inst_jump = graph_->CreateInstIfImm(DataType::NO_TYPE, GetPc(instruction->GetAddress()), inst, 0,
                                              DataType::BOOL, ConditionCode::CC_NE, graph_->GetMethod());
-    AddInstruction(inst);
-    AddInstruction(inst_jump);
+        AddInstruction(inst);
+        AddInstruction(inst_jump);
+    }
   jump: |-
   mov: |-
     % if inst.mnemonic.include? "null"
@@ -169,7 +190,14 @@ templates:
     %     if inst.opcode =~ /lda_const/
     BuildLoadConstArray(instruction);
     %     else
-    BuildLoadFromPool<Opcode::<%= inst.opcode =~ /lda_type/ ? 'LoadType' : 'LoadString' %>>(instruction);
+    if (!GetGraph()->IsAbcKit()) {
+      BuildLoadFromPool<Opcode::<%= inst.opcode =~ /lda_type/ ? 'LoadType' : 'LoadString' %>>(instruction);
+    }
+    #ifdef ENABLE_LIBABCKIT
+    else {
+      reinterpret_cast<AbcKitInstBuilder *>(this)->AbcKitBuildLoadFromPool<Opcode::<%= inst.opcode =~ /lda_type/ ? 'LoadType' : 'LoadString' %>>(instruction);
+    }
+    #endif
     %     end
     % else
     % raise "Unsupported instruction type" unless inst.acc_and_operands[1].reg?
@@ -215,7 +243,11 @@ templates:
     % is_virtual = inst.opcode.include? 'virt'
     % acc_read = inst.acc_read?
     if (!TryBuildInteropCall(instruction, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>)) {
-      BuildCallHelper<Opcode::<%= is_virtual ? 'CallVirtual' : 'CallStatic' %>, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>>(instruction, this);
+      if (graph_->IsAbcKit()) {
+        BuildCallHelper<Opcode::<%= is_virtual ? 'CallVirtual' : 'CallStatic' %>, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>, false>(instruction, this);
+      } else {
+        BuildCallHelper<Opcode::<%= is_virtual ? 'CallVirtual' : 'CallStatic' %>, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>, true>(instruction, this);
+      }
     }
   monitor: |-
     % is_enter = inst.mnemonic.end_with?('enter')
@@ -228,9 +260,23 @@ templates:
     % is_range = inst.opcode.include? 'range'
     BuildInitObject(instruction, <%= is_range ? 'true' : 'false' %>);
   ldobj: |-
-    BuildLoadObject< <%= inst.acc_write? %> >(instruction, <%= get_type(inst.dtype) %>);
+    if (!GetGraph()->IsAbcKit()) {
+      BuildLoadObject< <%= inst.acc_write? %> >(instruction, <%= get_type(inst.dtype) %>);
+    }
+    #ifdef ENABLE_LIBABCKIT
+    else {
+      reinterpret_cast<AbcKitInstBuilder *>(this)->AbcKitBuildLoadObject< <%= inst.acc_write? %> >(instruction, <%= get_type(inst.dtype) %>);
+    }
+    #endif
   stobj: |-
-    BuildStoreObject< <%= inst.acc_read? %> >(instruction, <%= get_type(inst.type(0)) %>);
+    if (!GetGraph()->IsAbcKit()) {
+      BuildStoreObject< <%= inst.acc_read? %> >(instruction, <%= get_type(inst.type(0)) %>);
+    }
+    #ifdef ENABLE_LIBABCKIT
+    else {
+      reinterpret_cast<AbcKitInstBuilder *>(this)->AbcKitBuildStoreObject< <%= inst.acc_read? %> >(instruction, <%= get_type(inst.type(0)) %>);
+    }
+    #endif
   ldstatic: |-
     BuildLoadStatic(instruction, <%= get_type(inst.dtype) %>);
   ststatic: |-

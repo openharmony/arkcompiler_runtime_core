@@ -72,6 +72,12 @@ void LinearOrder::HandlePrevInstruction(BasicBlock *block, BasicBlock *prevBlock
                 break;
 
             default:
+                if (GetGraph()->IsAbcKit()) {
+                    ABCKIT_MODE_CHECK(prevInst->GetOpcode() == Opcode::Intrinsic &&
+                                          prevInst->CastToIntrinsic()->GetIntrinsicId() ==
+                                              RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_THROW,
+                                      break);
+                }
                 ASSERT(prevBlock->GetSuccsBlocks().size() == 1 || prevBlock->IsTryBegin() || prevBlock->IsTryEnd());
                 if (block != prevBlock->GetSuccessor(0) && !prevBlock->GetLastInst()->IsControlFlow()) {
                     prevBlock->SetNeedsJump(true);

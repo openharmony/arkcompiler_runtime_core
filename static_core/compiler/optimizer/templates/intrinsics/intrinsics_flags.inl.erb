@@ -36,6 +36,9 @@ inline void AdjustFlags([[maybe_unused]] RuntimeInterface::IntrinsicId intrinsic
         break;
     }
 % end
+#if defined(ENABLE_LIBABCKIT)
+#include "dyn_intrinsics_flags.inc"
+#endif
     default:
         return;
     }

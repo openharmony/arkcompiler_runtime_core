@@ -56,6 +56,7 @@ private:
     void MarkInstruction(compiler::Inst *inst);
     void ClearAccForInstAndUsers(compiler::Inst *inst);
     void SetNeedLda(compiler::Inst *inst, bool need);
+    bool CanIntrinsicReadAcc(compiler::IntrinsicInst *inst) const;
 
     compiler::Marker accMarker_ {0};
 };

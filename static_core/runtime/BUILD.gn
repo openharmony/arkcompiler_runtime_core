@@ -677,7 +677,11 @@ ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
 }
 
 ark_gen("arkruntime_gen_intrinsics") {
-  data = [ "$target_gen_dir/intrinsics.yaml" ]
+  if (enable_libabckit && current_toolchain == host_toolchain) {
+    data = [ "$target_gen_dir/abckit_intrinsics.yaml" ]
+  } else {
+    data = [ "$target_gen_dir/intrinsics.yaml" ]
+  }
   template_files = [
     "intrinsics_gen.h.erb",
     "intrinsics.h.erb",
@@ -689,6 +693,10 @@ ark_gen("arkruntime_gen_intrinsics") {
   sources = "templates"
   destination = "$target_gen_dir"
   extra_dependencies = [ ":arkruntime_gen_intrinsics_yaml" ]
+  if (enable_libabckit && current_toolchain == host_toolchain) {
+    extra_dependencies +=
+        [ "$ark_root/../libabckit:concat_abckit_intrinsics_yaml" ]
+  }
 }
 
 ark_gen_file("libarkruntime_options_gen_h") {

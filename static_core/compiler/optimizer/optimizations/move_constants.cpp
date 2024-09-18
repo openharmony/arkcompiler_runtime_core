@@ -88,7 +88,19 @@ void MoveConstants::MoveFromStartBlock(Inst *inst)
 
     if (targetBb != graph->GetStartBlock()) {
         graph->GetStartBlock()->EraseInst(inst);
-        targetBb->PrependInst(inst);
+        auto firstInst = targetBb->GetFirstInst();
+        if (firstInst != nullptr && (firstInst->IsCatchPhi() || firstInst->IsPhi())) {
+            while (firstInst != nullptr && (firstInst->IsCatchPhi() || firstInst->IsPhi())) {
+                firstInst = firstInst->GetNext();
+            }
+            if (firstInst != nullptr) {
+                targetBb->InsertBefore(inst, firstInst);
+            } else {
+                targetBb->AppendInst(inst);
+            }
+        } else {
+            targetBb->PrependInst(inst);
+        }
         movedConstantsCounter_++;
     }
 }

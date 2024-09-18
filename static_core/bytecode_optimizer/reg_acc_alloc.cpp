@@ -46,6 +46,9 @@ static bool IsAccWriteInInst(compiler::Inst *inst)
     if (!inst->IsAccWrite()) {
         return false;
     }
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit()) {
+        return true;
+    }
     if (!inst->IsConst()) {
         return true;
     }
@@ -135,6 +138,11 @@ bool RegAccAlloc::IsAccWrite(compiler::Inst *inst) const
     return UNLIKELY(inst->IsPhi()) ? IsPhiOptimizable(inst) : inst->IsAccWrite();
 }
 
+bool RegAccAlloc::CanIntrinsicReadAcc(compiler::IntrinsicInst *inst) const
+{
+    ASSERT(GetGraph()->IsAbcKit());
+    return inst->IsAccRead();
+}
 /**
  * Decide if user can use accumulator as source.
  * Do modifications on the order of inputs if necessary.
@@ -182,6 +190,15 @@ bool RegAccAlloc::CanUserReadAcc(compiler::Inst *inst, compiler::Inst *user) con
 
     if (user->IsLaunchCall()) {
         return false;
+    }
+
+    if (GetGraph()->IsAbcKit()) {
+        if (user->IsIntrinsic()) {
+            return CanIntrinsicReadAcc(user->CastToIntrinsic()) && user->GetInput(AccReadIndex(user)).GetInst() == inst;
+        }
+        if (user->IsCall()) {
+            return user->GetInputsCount() <= (MAX_NUM_NON_RANGE_ARGS);
+        }
     }
 
     if (user->IsCallOrIntrinsic()) {
@@ -240,9 +257,10 @@ void RegAccAlloc::SetNeedLda(compiler::Inst *inst, bool need)
     if (!IsAccRead(inst)) {
         return;
     }
-    if (inst->IsCallOrIntrinsic()) {  // we never need lda for calls
+    if (IsCall(inst)) {
         return;
     }
+
     compiler::Register reg = need ? compiler::INVALID_REG : compiler::ACC_REG_ID;
     inst->SetSrcReg(AccReadIndex(inst), reg);
 }
@@ -250,6 +268,14 @@ void RegAccAlloc::SetNeedLda(compiler::Inst *inst, bool need)
 static inline bool MaybeRegDst(compiler::Inst *inst)
 {
     compiler::Opcode opcode = inst->GetOpcode();
+#ifdef ENABLE_LIBABCKIT
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && inst->IsIntrinsic()) {
+        auto id = inst->CastToIntrinsic()->GetIntrinsicId();
+        return id == ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT ||
+               id == ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_WIDE ||
+               id == ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_OBJECT_OBJECT;
+    }
+#endif
     return inst->IsConst() || inst->IsBinaryInst() || inst->IsBinaryImmInst() || opcode == compiler::Opcode::LoadObject;
 }
 
@@ -362,8 +388,7 @@ void RegAccAlloc::MarkInstructions()
             if (inst->GetInputsCount() == 0U) {
                 continue;
             }
-
-            if (inst->IsCallOrIntrinsic()) {
+            if (IsCall(inst)) {
                 continue;
             }
 
@@ -402,9 +427,9 @@ bool RegAccAlloc::RunImpl()
     MarkPhiInstructions();
     MarkInstructions();
 
-#ifndef NDEBUG
+#ifdef COMPILER_DEBUG_CHECKS
     GetGraph()->SetRegAccAllocApplied();
-#endif  // NDEBUG
+#endif  // COMPILER_DEBUG_CHECKS
 
     return true;
 }

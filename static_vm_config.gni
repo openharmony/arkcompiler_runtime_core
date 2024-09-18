@@ -33,6 +33,7 @@ if (ark_standalone_build) {
 
 enable_arkplatform = true
 enable_static_vm = true
+enable_libabckit = false
 if (is_asan && use_hwasan) {
   enable_arkplatform = false
   enable_static_vm = false
