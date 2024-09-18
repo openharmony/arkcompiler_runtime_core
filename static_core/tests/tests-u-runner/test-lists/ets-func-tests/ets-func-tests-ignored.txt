@@ -10,8 +10,8 @@ std/core/std_core_string_String_localeCompare_string_005.sts
 ### Issue 10945, 11969 begin
 std/core/std_core_char_static_Char_isPartOfSurrogatePair.sts
 std/core/std_core_char_static_Char_isValidCodePoint.sts
-### Issue 11484 11541 begin
-std/core/std_core_array_concat_char_array_char_array.sts
+### Issue 10285
+std/core/std_core_double_instance_Double_toString.sts
 ### Issue 11468 begin
 std/core/std_core_array_forEach_int_array_func_int.sts
 std/core/std_core_array_forEach_char_array_func_char_int_char_array.sts
@@ -28,10 +28,6 @@ std/core/std_core_typeduarrays__Uint8Array.sts
 std/core/std_core_typeduarrays__Uint16Array.sts
 std/core/std_core_typeduarrays__Uint32Array.sts
 ### Issue I8PRJS end
-# #17897
-std/core/std_core_typeduarrays_function1__Uint8ClampedArray.sts
-# #17894
-std/core/std_core_typeduarrays_function1__Uint16Array.sts
 # #14724
 std/core/std_core_typedarrays__BigInt64Array.sts
 # #16217
@@ -84,17 +80,9 @@ spec/03.types/References_Types/unions/union_generics_03.sts
 ### generics + unions not everything supported yet
 spec/03.types/References_Types/unions/union_generics_02.sts
 ### Negative tests
-spec/03.types/References_Types/unions/union_cast_n_01.sts
-spec/03.types/References_Types/unions/union_cast_n_02.sts
-spec/03.types/References_Types/unions/union_cast_n_03.sts
 spec/03.types/References_Types/unions/union_compare_n_10.sts
 spec/03.types/References_Types/unions/union_param_n_01.sts
 spec/03.types/References_Types/unions/union_param_n_02.sts
-### Issue 14165
-spec/03.types/References_Types/unions/union_compare_02_04.sts
-### Issue 15312
-### Issue 15965, 14165
-spec/03.types/References_Types/unions/union_compare_02_02.sts
 ### End of Unions
 ### Koala related issues
 koala-related-benchmarks/benchmark-lambda-no-lambda-original.sts
@@ -117,12 +105,10 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/n
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/numeric/expr/numeric-double-object-zero-expression.sts
 ### Trailing lambda issues
 ### Valid cases but not supported features
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_01.sts
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_03.sts
 spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_03_04.sts
 ### Issue 14384
 spec/trailing_lambdas/trailing_only_fn_04_01.sts
-spec/16.Support_for_GUI_Programming/trailing_lambdas/trailing_only_fn_04_01.sts
 ### End of Trailing lambda
 ### ArkUI struct
 ### Issue 14040 -> Annotations not yet implemented
@@ -174,7 +160,6 @@ spec/07.expressions/7.32.Lambda_Expressions/issue15579_2.sts
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_3.sts
 spec/07.expressions/7.32.Lambda_Expressions/issue15579_4.sts
 ### Issue 14054
-spec/07.expressions/7.32.Lambda_Expressions/callAsyncMethodFromAsyncLambda1.sts
 spec/07.expressions/7.32.Lambda_Expressions/callMethodFromAsyncLambda1.sts
 ### Issue 14131
 spec/07.expressions/7.32.Lambda_Expressions/callRegularLambdaWithAsyncOverload.sts
@@ -222,11 +207,6 @@ spec/16.Support_for_GUI_Programming/callable-classes/type-call-instantiate_7.sts
 ### issue 14539
 ### End of Feature: Callable classes
 
-### Start never issues
-### Issue 14472
-spec/03.types/References_Types/Type_never/useWithLambdaAndUnion.sts
-### Negative test
-### End never issues
 ### Feature: Null safety tests
 ### Issue 14510
 spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-function-result_2.sts
@@ -261,27 +241,20 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 spec/05.Generics/issue14751.sts
 ### Issue 14752
 spec/05.Generics/issue14752.sts
-### Issue 14498
-spec/05.Generics/generic_03.sts
 ### Issue 14510
 spec/05.Generics/generic_02.sts
 ### Issue 14542
 ### Negative tests
 spec/05.Generics/wrongUsingInT.sts
-### Issue 14656
-spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_05.sts
 ### Issue 14941
 spec/05.Generics/issue14700_ArrayBackedConstructorWithobject.sts
 ### Issue 15089
 spec/05.Generics/issue15089_05.sts
 spec/05.Generics/issue15089_06.sts
 spec/05.Generics/issue15089_08.sts
-### Issue 15623
-spec/05.Generics/issue15380_0.sts
 ### Issue 15380
 spec/05.Generics/issue15380_1.sts
 spec/05.Generics/issue15380_2.sts
-spec/05.Generics/issue15380_3.sts
 ### End of Generic
 ### Import-export issues
 ### cannot create runtime (compound tests not supported)
@@ -402,8 +375,6 @@ spec/17.Experimental_Features/Iterable_Types/for_of_11.sts
 spec/17.Experimental_Features/Iterable_Types/for-of-s01-array-08.sts
 ### end for of
 
-### Issue 15726
-spec/07.expressions/05.array_literal/01.type_inference_from_context/issue14062_8.sts
 ### Issue 14536: usage of === with primitive types
 spec/expressions/equality/equality_primitive_01_byte_equal_byte.sts
 spec/expressions/equality/equality_primitive_01_byte_equal_byte_016.sts
@@ -433,11 +404,9 @@ spec/expressions/equality/equality_primitive_01_short_equal_short_015.sts
 ### accessors
 ### Issue 15396
 spec/09.classes/Accessor_Declarations/issue-13330_7.sts
-spec/09.classes/Accessor_Declarations/issue-13330_8.sts
 ### Issue 15644
 spec/09.classes/Accessor_Declarations/issue-15142_5.sts
 ### Issue 15646
-spec/09.classes/Accessor_Declarations/issue-15142_9.sts
 spec/09.classes/Accessor_Declarations/issue-15142_10.sts
 ### Issue 15647
 spec/09.classes/Accessor_Declarations/issue-15142_7.sts
@@ -473,8 +442,6 @@ spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/overri
 
 ### Issue 15201
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.sts
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_07_01.sts
-spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_08_01.sts
 ### End of Overriding
 ### Issue 15281
 spec/types/number_to_string_1.sts
@@ -519,12 +486,6 @@ regression/12581_box_type_array_Byte_array.sts
 regression/12581_box_type_array_Int_array.sts
 regression/12581_box_type_array_Short_array.sts
 regression/12581_box_type_array_Long_array.sts
-# undefined|number assigned to number
-std/core/std_core_string_String_codePointAt_number.sts
-###
-
-### VariableHasEnclosingScopeForAll, VariableHasScopeForAll
-spec/05.Generics/callFromAsyncLambda.sts
 ###
 
 ### Class constructor inheritance
@@ -546,11 +507,6 @@ spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interface
 
 ### issue 15523
 spec/10.interfaces/overriding/15523_0000_iterable_override.sts
-spec/10.interfaces/overriding/15523_0001_iterable_override.sts
-spec/10.interfaces/overriding/15523_0002_iterable_override.sts
-spec/10.interfaces/overriding/15523_0003_iterable_override.sts
-spec/10.interfaces/overriding/15523_0004_iterable_override.sts
-spec/10.interfaces/overriding/15523_0005_iterable_override.sts
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.sts
 
@@ -573,16 +529,8 @@ spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_000
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0004.sts
 spec/10.Interfaces/10.4.Interface_Members/interface_with_optional_attributes_0005.sts
 ### Issue 16535 end
-### Issue 16434 begin
-spec/05.Generics/callFromAsyncLambda.sts
-spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_00.sts
-spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_01.sts
-spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_02.sts
-spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_03.sts
-### Issue 16434 end
 ### Issue 16696 begin
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_04.sts
-spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_05.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_00.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_01.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_02.sts
@@ -625,18 +573,6 @@ spec/05.Generics/function_as_type_generic_0020.sts
 spec/05.Generics/function_as_type_generic_0030.sts
 ### Issue 17725
 
-### Issue 18123
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0010.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0020.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0030.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0040.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0050.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0060.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0070.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0080.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0090.sts
-spec/03.types/References_Types/Array_Types/array_constructors_optional_params_0100.sts
-### Issue 18123 end
 ### Issue 18766 begin
 spec/partial_type/partialType_main.sts
 ### Issue 18766 end
