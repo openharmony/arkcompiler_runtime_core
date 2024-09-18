@@ -29,7 +29,7 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     name_.data = sp.data();
 
     size_t size = utf::Mutf8Size(name_.data) + 1;  // + 1 for null byte
-    THROW_IF(sp.Size() < size, File::INVALID_FILE_OFFSET);
+    panda_file_.ThrowIfWithCheck(sp.Size() < size, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
     sp = sp.SubSpan(size);
 
     super_class_off_ = helpers::Read<ID_SIZE>(&sp);
@@ -38,22 +38,22 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     num_fields_ = helpers::ReadULeb128(&sp);
     num_methods_ = helpers::ReadULeb128(&sp);
 
-    THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
+    panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
     auto tag = static_cast<ClassTag>(sp[0]);
 
     while (tag != ClassTag::NOTHING && tag < ClassTag::SOURCE_LANG) {
-        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
         sp = sp.SubSpan(1);
 
         if (tag == ClassTag::INTERFACES) {
             num_ifaces_ = helpers::ReadULeb128(&sp);
             ifaces_offsets_sp_ = sp;
             size_t scale = IDX_SIZE * num_ifaces_;
-            THROW_IF(sp.Size() < scale, File::INVALID_FILE_OFFSET);
+            panda_file_.ThrowIfWithCheck(sp.Size() < scale, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
             sp = sp.SubSpan(scale);
         }
 
-        THROW_IF(sp.Size() == 0U, File::INVALID_FILE_OFFSET);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
         tag = static_cast<ClassTag>(sp[0]);
     }
 
@@ -62,7 +62,7 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     if (tag == ClassTag::NOTHING) {
         annotations_sp_ = sp;
         source_file_sp_ = sp;
-        THROW_IF(sp.Size() < TAG_SIZE, File::INVALID_FILE_OFFSET);
+        panda_file_.ThrowIfWithCheck(sp.Size() < TAG_SIZE, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
         fields_sp_ = sp.SubSpan(TAG_SIZE);  // skip NOTHING tag
     }
 }

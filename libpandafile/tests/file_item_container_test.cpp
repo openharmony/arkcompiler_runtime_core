@@ -23,6 +23,7 @@
 #include "file_item_container.h"
 #include "file_writer.h"
 #include "helpers.h"
+#include "libpandabase/utils/logger.h"
 #include "method_data_accessor-inl.h"
 #include "method_handle_data_accessor.h"
 #include "modifiers.h"
@@ -1252,4 +1253,85 @@ HWTEST(ItemContainer, IndexedItemGlobalIndexTest, testing::ext::TestSize.Level0)
     EXPECT_EQ(container.GetIndexedItemCount(), scalarValueItem->GetIndexedItemCount() + 1);
 }
 
+void GenerateModifiedAbc(const std::vector<unsigned char> &buffer, const std::string &filename)
+{
+    std::ofstream abc_file(filename, std::ios::out | std::ios::binary);
+    abc_file.write(reinterpret_cast<const char *>(buffer.data()), buffer.size());
+    abc_file.close();
+}
+
+HWTEST(ItemContainer, ValidateChecksumTest, testing::ext::TestSize.Level0)
+{
+    using panda::os::file::Mode;
+    using panda::os::file::Open;
+
+    ItemContainer container;
+    container.GetOrCreateClassItem("A");
+
+    const std::string file_name = "test_validate_checksum.abc";
+    auto writer = FileWriter(file_name);
+
+    ASSERT_TRUE(container.Write(&writer));
+
+    auto file = File::Open(file_name);
+    EXPECT_TRUE(file->ValidateChecksum());
+
+    std::ifstream base_file(file_name, std::ios::binary);
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    std::vector<uint8_t> new_content = {0x01, 0x01};
+
+    // The checksum calculation starts with the 12th element
+    buffer[12] = new_content[0];
+    buffer[13] = new_content[1];
+
+    GenerateModifiedAbc(buffer, file_name);
+
+    EXPECT_FALSE(file->ValidateChecksum());
+}
+
+HWTEST(ItemContainer, ThrowIfWithCheckTest, testing::ext::TestSize.Level0)
+{
+    Logger::InitializeStdLogging(Logger::Level::FATAL, Logger::Component::PANDAFILE);
+    EXPECT_TRUE(Logger::IsLoggingOn(Logger::Level::FATAL, Logger::Component::PANDAFILE));
+
+    using panda::os::file::Mode;
+    using panda::os::file::Open;
+
+    ItemContainer container;
+    container.GetOrCreateClassItem("B");
+
+    const std::string file_name = "test_throw_if_with_check.abc";
+    auto writer = FileWriter(file_name);
+
+    ASSERT_TRUE(container.Write(&writer));
+
+    // Read panda file from disk
+    auto file = File::Open(file_name);
+    EXPECT_NE(file, nullptr);
+
+    file->ThrowIfWithCheck(0U > 1U, File::INVALID_FILE_OFFSET);
+    
+#ifdef HOST_UT
+    EXPECT_DEATH(file->ThrowIfWithCheck(1U > 0U, File::INVALID_FILE_OFFSET),
+                 "F/pandafile: Invalid file offset");
+#endif
+
+    std::ifstream base_file(file_name, std::ios::binary);
+    std::vector<unsigned char> buffer(std::istreambuf_iterator<char>(base_file), {});
+
+    std::vector<uint8_t> new_content = {0x01, 0x01};
+
+    // The checksum calculation starts with the 12th element
+    buffer[12] = new_content[0];
+    buffer[13] = new_content[1];
+
+    GenerateModifiedAbc(buffer, file_name);
+
+#ifdef HOST_UT
+    EXPECT_DEATH(file->ThrowIfWithCheck(1U > 0U, File::INVALID_FILE_OFFSET),
+                 "F/pandafile: Invalid file offset, checksum mismatch. The abc file has been corrupted.");
+#endif
+
+}
 }  // namespace panda::panda_file::test
