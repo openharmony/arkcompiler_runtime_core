@@ -39,12 +39,13 @@ from runner.logger import Log
 from runner.options.config import Config
 from runner.test_base import Test
 from runner.utils import get_group_number
+from runner.enum_types.test_directory import TestDirectory
 
 CONST_COMMENT = ["#"]
 TEST_COMMENT_EXPR = re.compile(r"^\s*(?P<test>[^# ]+)?(\s*#\s*(?P<comment>.+))?", re.MULTILINE)
 
 
-def load_list(test_root: str, test_list_path: str) -> List[str]:
+def load_list(test_root: str, test_list_path: str, directory: Optional[str] = None) -> List[str]:
     result: List[str] = []
     if not path.exists(test_list_path):
         return result
@@ -52,7 +53,10 @@ def load_list(test_root: str, test_list_path: str) -> List[str]:
     with open(test_list_path, 'r', encoding="utf-8") as file:
         for line in file:
             test, _ = get_test_and_comment_from_line(line.strip(" \n"))
-            if test is not None:
+            if test is None:
+                continue
+            extra_dir_check = (directory is None) or (directory is not None and test.startswith(str(directory)))
+            if extra_dir_check:
                 result.append(path.normpath(path.join(test_root, test)))
 
     return result
@@ -146,9 +150,7 @@ class Runner(ABC):
         self.results: List[Test] = []
         # name of file with a list of only tests what should be executed
         # if it's specified other tests are not executed
-        self.explicit_list = correct_path(self.list_root, config.test_lists.explicit_list) \
-            if config.test_lists.explicit_list is not None and self.list_root is not None \
-            else None
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
         # name of the single test file in form of a relative path from test_root what should be executed
         # if it's specified other tests are not executed even if test_list is set
         self.explicit_test = config.test_lists.explicit_file
@@ -200,6 +202,11 @@ class Runner(ABC):
         elif len(original) > 0:
             Log.summary(_LOGGER, f"No duplicates found in {kind} lists.")
 
+    def recalculate_explicit_list(self, explicit_list: str) -> Optional[str]:
+        return correct_path(self.list_root, explicit_list) \
+            if explicit_list is not None and self.list_root is not None \
+            else None
+
     @abstractmethod
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> Test:
         pass
@@ -223,13 +230,13 @@ class Runner(ABC):
             pool.close()
             pool.join()
 
-    def load_tests_from_lists(self, lists: List[str]) -> List[str]:
+    def load_tests_from_lists(self, lists: List[str], directory: Optional[str] = None) -> List[str]:
         tests = []
         for list_name in lists:
             list_path = correct_path(self.list_root, list_name)
             Log.summary(_LOGGER, f"Loading tests from the list {list_path}")
             TestCase().assertTrue(self.test_root, "TEST_ROOT not set to correct value")
-            tests.extend(load_list(self.test_root, list_path))
+            tests.extend(load_list(self.test_root, list_path, directory))
         return tests
 
     # Read excluded_lists and load list of excluded tests
@@ -245,15 +252,22 @@ class Runner(ABC):
         self.ignored_tests.update(ignored_tests)
         self._search_duplicates(ignored_tests, "ignored")
 
+    def add_directories(self, test_dirs: List[TestDirectory]) -> None:
+        for test_dir in test_dirs:
+            self.add_directory(test_dir)
+
     # Browse the directory, search for files with the specified extension
     # and add them as tests
-    def add_directory(self, directory: str, extension: str, flags: List[str]) -> None:
+    def add_directory(self, test_dir: TestDirectory) -> None:
+        directory, extension, flags = test_dir
         Log.summary(_LOGGER, f"Loading tests from the directory {directory}")
         test_files = []
         if self.explicit_test is not None:
-            test_files.extend([correct_path(self.test_root, self.explicit_test)])
+            if self.explicit_test.startswith(directory):
+                test_files.extend([correct_path(self.test_root, self.explicit_test)])
         elif self.explicit_list is not None:
-            test_files.extend(self.load_tests_from_lists([self.explicit_list]))
+            extra_dir = None if directory == self.test_root or directory.startswith(str(self.test_root)) else directory
+            test_files.extend(self.load_tests_from_lists([self.explicit_list], extra_dir))
         else:
             if not self.config.test_lists.skip_test_lists:
                 self.load_excluded_tests()

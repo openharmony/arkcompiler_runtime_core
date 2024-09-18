@@ -26,6 +26,7 @@ from runner.plugins.test262.test_js_test262 import TestJSTest262
 from runner.plugins.test262.util_test262 import UtilTest262
 from runner.runner_base import correct_path, get_test_id
 from runner.runner_js import RunnerJS
+from runner.enum_types.test_directory import TestDirectory
 
 _LOGGER = logging.getLogger("runner.plugins.test262.runner_js_test262")
 
@@ -47,13 +48,14 @@ class RunnerJSTest262(RunnerJS):
             harness_path=path.join(path.dirname(__file__), "test262harness.js"),
         )
         Log.summary(_LOGGER, f"TEST_ROOT reset to {self.test_root}")
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
         self.test_env.util = self.util
 
         if self.config.general.bco:
             self.bco_list = correct_path(self.list_root, f"{self.ignored_name_prefix}skiplist-bco.txt")
             self.bco_tests = self.load_tests_from_lists([self.bco_list])
 
-        self.add_directory(self.test_root, "js", [])
+        self.add_directories([TestDirectory(self.test_root, "js", [])])
 
     @property
     def default_work_dir_root(self) -> Path:

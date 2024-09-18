@@ -26,6 +26,7 @@ from runner.plugins.hermes.test_js_hermes import TestJSHermes
 from runner.plugins.hermes.util_hermes import UtilHermes
 from runner.runner_base import get_test_id
 from runner.runner_js import RunnerJS
+from runner.enum_types.test_directory import TestDirectory
 
 _LOGGER = logging.getLogger("runner.plugins.hermes.runner_js_hermes")
 
@@ -36,6 +37,7 @@ class RunnerJSHermes(RunnerJS):
 
         self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
         Log.all(_LOGGER, f"LIST_ROOT set to {self.list_root}")
+        self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()
 
@@ -43,7 +45,7 @@ class RunnerJSHermes(RunnerJS):
         self.test_env.util = self.util
         self.test_root = self.util.generate()
         Log.summary(_LOGGER, f"TEST_ROOT reset to {self.test_root}")
-        self.add_directory(self.test_root, "js", [])
+        self.add_directories([TestDirectory(self.test_root, "js", [])])
 
     @property
     def default_work_dir_root(self) -> Path:
