@@ -820,12 +820,33 @@
  */
 <%= access_public %> indexOf<%= this_generic %>(<%= this_arg %>val: <%= el_type %>, fromIndex: int): int {
     fromIndex = normalizeIndex(fromIndex, <%= this_len_int %>)
+% if el_type != 'T'
     for (let i = fromIndex; i < <%= this_len_int %>; i++) {
         if (__runtimeEquals(val, <%= get_unsafe.(this, 'i') %>)) {
             return i
         }
     }
     return -1
+% else
+    const len = <%= this_len_int %>;
+    if (val instanceof String) {
+        return this.indexOfString(val, fromIndex, len)
+    } else if (val instanceof Number) {
+        return this.indexOfNumber(val, fromIndex, len)
+    } else if (val instanceof Float) {
+        return this.indexOfFloat(val, fromIndex, len)
+    } else if (val instanceof Long) {
+        return this.indexOfLong(val, fromIndex, len)
+    } else if (val instanceof Int) {
+        return this.indexOfInt(val, fromIndex, len)
+    } else if (__runtimeIsSameReference(val, undefined)) {
+        return this.indexOfUndefined(fromIndex, len)
+    } else if (val == null) {
+        return this.indexOfNull(fromIndex, len)
+    } else {
+        return this.indexOfCommon(val, fromIndex, len) 
+    }
+% end
 }
 
 /**
