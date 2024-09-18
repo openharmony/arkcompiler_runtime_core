@@ -16,7 +16,7 @@
 #
 
 import warnings
-from typing import Any
+from typing import Any, OrderedDict
 
 import pytest
 
@@ -64,7 +64,7 @@ function main(): int {
     let n: int = 2
     let obj: A = new A()                // #BP{unknown}
     let x = obj.foo(n)
-    let func = (a: int): int => {
+    let func = (a: int): int => {       // #BP{lambda_decl}
         let z = a * x
         undefined                       // #BP{main_lambda}
         console.log("lambda", z, a, x)
@@ -83,7 +83,7 @@ async def test_this_in_lambda_and_class(
     expect: Expect,
 ):
 
-    def _check(label: str, this: Any):
+    def _check(label: str, this: Any, scope_vars: OrderedDict[str, Any]):
         match label:
             case "ctor" | "foo1" | "foo" | "lambda":
                 with expect.error():
@@ -97,6 +97,17 @@ async def test_this_in_lambda_and_class(
             case "main_lambda":
                 with expect.error():
                     assert this == mirror_undefined()
+            case "lambda_decl":
+                # NOTE(dslynko, #19869): check debug-info is correct for lambdas
+                assert all(
+                    scope_vars.get(x) is not None
+                    for x in (
+                        "n",
+                        "obj",
+                        "x",
+                    )
+                )
+                assert scope_vars.get("func") is None
             case _:
                 warnings.warn(f"Unknown breakpoint on line {paused.frame().data.location.line_number}")
 
@@ -109,4 +120,5 @@ async def test_this_in_lambda_and_class(
                 await walker.log_layout("%s %s", label, bp)
                 this_obj = paused.frame().this()
                 this = await this_obj.mirror_value() if this_obj is not None else None
-                _check(label, this)
+                scope_vars = await paused.frame().scope().mirror_variables()
+                _check(label, this, scope_vars)

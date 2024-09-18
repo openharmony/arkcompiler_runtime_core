@@ -153,7 +153,7 @@ Runner supports following kinds of test lists:
 -   **excluded** test lists - tests specified here are excluded from execution. "Don't try to run"
 -   **ignored** test lists - tests specified here run, but failures are ignored. Such lists are named "known failures list" or KFL as well.
 
-Test list name usually has the following format: `<test-suite-name>[-<additional info>]-<kind>[-<OS>][-<architecture>][-<configuration>][-<sanitizer>][-<opt-level>][-REPEATS][-<build-type>].txt`
+Test list name usually has the following format: `<test-suite-name>[-<additional info>]-<kind>[-<OS>][-<architecture>][-<configuration>][-<sanitizer>][-<opt-level>][-<debug-info>][-REPEATS][-<build-type>].txt`
 
 -   `kind` is one of `excluded` or `ignored`
 -   `OS` is one of `LIN`, `WIN`, `MAC`.   If an operating system is set explicitly, the test list is applied only to this OS. If none is set, the list is applied to any OS.
@@ -161,6 +161,7 @@ Test list name usually has the following format: `<test-suite-name>[-<additional
 -   `configuration` is one of `INT`, `AOT`, `AOT-FULL`, `IRTOC`, `LLVM`, `JIT` or other used value for `interpreter-type` option. If a configuration is set explicitly, the test list is applied only to this configuration. If none is set, the list is applied to any configuration.
 -   `sanitizer` is one of `ASAN` or `TSAN`. If a sanitizer is set explicitly, the test list is applied only to this build configuration. If none is set, the list is applied to any configuration.
 -   `opt-level` is `OLx`, where `x` is opt-level, usually 0 or 2.
+-   `debug-info` is `DI` when `--es2panda-debug-info` option is specified.
 -   `REPEATS` is set if the test list should apply to runs with the option `--jit-repeats` sets number of repeats more than 1.
 -   `build-type` is one of `DEBUG`, `RELEASE`, `FAST-VERIFY`.   If a build type is set explicitly, the test list is applied only to this build type. If none is set, the list is applied to any build type.
 

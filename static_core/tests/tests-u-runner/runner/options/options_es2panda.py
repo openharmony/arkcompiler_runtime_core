@@ -32,6 +32,7 @@ class Es2PandaOptions:
         return {
             "timeout": self.timeout,
             "opt-level": self.opt_level,
+            "debug-info": self.debug_info,
             "custom-path": self.custom_path,
             "arktsconfig": self.arktsconfig,
             "es2panda-args": self.es2panda_args,
@@ -47,6 +48,11 @@ class Es2PandaOptions:
     @value(yaml_path="es2panda.opt-level", cli_name="es2panda_opt_level", cast_to_type=_to_int)
     def opt_level(self) -> int:
         return Es2PandaOptions.__DEFAULT_OPT_LEVEL
+
+    @cached_property
+    @value(yaml_path="es2panda.debug-info", cli_name="es2panda_debug_info", cast_to_type=_to_bool)
+    def debug_info(self) -> bool:
+        return False
 
     @cached_property
     @value(yaml_path="es2panda.custom-path", cli_name="custom_es2panda_path", cast_to_type=_to_path)
@@ -74,5 +80,6 @@ class Es2PandaOptions:
             f'--es2panda-opt-level={self.opt_level}' if self.opt_level != Es2PandaOptions.__DEFAULT_OPT_LEVEL else '',
             f'--custom-es2panda="{self.custom_path}"' if self.custom_path is not None else '',
             f'--arktsconfig="{self.arktsconfig}"' if self.arktsconfig is not None else '',
+            '--es2panda-debug-info' if self.debug_info else '',
         ]
         return ' '.join(options)

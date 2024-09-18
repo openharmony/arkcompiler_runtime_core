@@ -24,7 +24,7 @@ from cdp import runtime
 from pytest import fixture
 
 from arkdb.compiler import StringCodeCompiler
-from arkdb.debug_client import DebugLocator
+from arkdb.debug_client import DebuggerClient, DebugLocator
 from arkdb.logs import RichLogger
 from arkdb.runnable_module import ScriptFile
 from arkdb.runtime import Runtime, RuntimeProcess
@@ -106,6 +106,23 @@ async def test_debug(
     check_exit_status(process, log)
 
 
+async def _pause_and_get_vars(client: DebuggerClient, log: RichLogger, script_file: ScriptFile, line_number: int):
+    paused = await client.continue_to_location(script_id=runtime.ScriptId("0"), line_number=line_number)
+    script_file.log(log, highlight_lines=[paused.call_frames[0].location.line_number + 1])
+    log.info("paused: %s", paused)
+    object_ids = [
+        scope.object_.object_id
+        for frame in paused.call_frames
+        for scope in frame.scope_chain
+        if scope.object_.object_id is not None
+    ]
+    props = [prop for props in [(await client.get_properties(obj_id))[0] for obj_id in object_ids] for prop in props]
+    variables = {prop.name: prop.value.value if prop.value is not None else None for prop in props}
+    log.info("Properties: \n%s", repr(props))
+    log.info("All variables: %r", variables)
+    return variables
+
+
 async def test_code_compiler(
     nursery: trio.Nursery,
     ark_runtime: Runtime,
@@ -127,24 +144,14 @@ async def test_code_compiler(
         async with debug_locator.connect(nursery) as client:
 
             await client.configure(nursery)
-            paused = await client.run_if_waiting_for_debugger()
+            await client.run_if_waiting_for_debugger()
 
-            paused = await client.continue_to_location(script_id=runtime.ScriptId("0"), line_number=3)
-            script_file.log(log, highlight_lines=[paused.call_frames[0].location.line_number + 1])
-            log.info("paused: %s", paused)
-            object_ids = [
-                scope.object_.object_id
-                for frame in paused.call_frames
-                for scope in frame.scope_chain
-                if scope.object_.object_id is not None
-            ]
-            props = [
-                prop for props in [(await client.get_properties(obj_id))[0] for obj_id in object_ids] for prop in props
-            ]
-            variables = {prop.name: prop.value.value if prop.value is not None else None for prop in props}
-            log.info("Properties: \n%s", repr(props))
-            log.info("All variables: %r", variables)
-            assert variables == {"a": 100, "b": 0}
+            variables = await _pause_and_get_vars(client, log, script_file, 3)
+            assert variables == {"a": 100}
+
+            variables = await _pause_and_get_vars(client, log, script_file, 4)
+            assert variables == {"a": 100, "b": 110}
+
             await client.resume()
     check_exit_status(process, log)
 
