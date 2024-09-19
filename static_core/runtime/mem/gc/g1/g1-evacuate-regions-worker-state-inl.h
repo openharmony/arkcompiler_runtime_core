@@ -122,7 +122,7 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::ProcessRef(Ref p)
 
     // Atomic with relaxed order reason: memory order is not required
     MarkWord markWord = obj->AtomicGetMark(std::memory_order_relaxed);
-    if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
+    if (markWord.IsForwarded()) {
         obj = reinterpret_cast<ObjectHeader *>(markWord.GetForwardingAddress());
     } else {
         obj = Evacuate(obj, markWord);
@@ -173,7 +173,7 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateNonHeapRoots()
             return;
         }
         MarkWord markWord = rootObject->AtomicGetMark(std::memory_order_relaxed);
-        if (markWord.GetState() == MarkWord::ObjectState::STATE_GC) {
+        if (markWord.IsForwarded()) {
             return;
         }
         LOG(DEBUG, GC) << "root " << GetDebugInfoAboutObject(rootObject);

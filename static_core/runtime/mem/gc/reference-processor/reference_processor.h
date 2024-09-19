@@ -55,12 +55,6 @@ public:
      */
     virtual bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                              const ReferenceCheckPredicateT &pred) const = 0;
-    /// True if current object is Reference and referent in collection set
-    virtual bool IsReference([[maybe_unused]] const BaseClass *baseCls, [[maybe_unused]] const ObjectHeader *ref) const
-    {
-        ASSERT_PRINT(false, "Should be implemented by subclasses");
-        return false;
-    }
 
     /**
      * Save reference for future processing and handle it with GC point of view (mark needed fields, if necessary)
@@ -86,8 +80,7 @@ public:
      * Process all references which we discovered by GC.
      * Predicate checks which references should be processed
      */
-    virtual void ProcessReferencesAfterCompaction([[maybe_unused]] bool clearSoftReferences,
-                                                  [[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred)
+    virtual void ProcessReferencesAfterCompaction([[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred)
     {
         ASSERT_PRINT(false, "Should be implemented by subclasses");
     }

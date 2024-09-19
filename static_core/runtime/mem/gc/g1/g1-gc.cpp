@@ -1047,6 +1047,15 @@ bool G1GC<LanguageConfig>::IsMarked(ark::ObjectHeader const *object) const
 }
 
 template <class LanguageConfig>
+bool G1GC<LanguageConfig>::IsMarkedEx(ark::ObjectHeader const *object) const
+{
+    if (singlePassCompactionEnabled_) {
+        return object->AtomicGetMark(std::memory_order_relaxed).IsForwarded();
+    }
+    return IsMarked(object);
+}
+
+template <class LanguageConfig>
 void G1GC<LanguageConfig>::MarkStackMixed(GCMarkingStackType *stack)
 {
     ASSERT(stack != nullptr);
@@ -1122,6 +1131,7 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     RemSet<> remset;
+    singlePassCompactionEnabled_ = true;
     MergeRemSet(&remset);
 
     for (auto *region : remset.GetDirtyRegions()) {
@@ -1163,6 +1173,7 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
     SweepRegularVmRefs();
 
     ResetRegionAfterMixedGC();
+    singlePassCompactionEnabled_ = false;
 }
 
 template <class LanguageConfig>
@@ -1216,13 +1227,23 @@ void G1GC<LanguageConfig>::MergeRemSet(RemSet<> *remset)
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::HandleReferences(const GCTask &task)
+void G1GC<LanguageConfig>::HandleReferences([[maybe_unused]] const GCTask &task)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     auto refClearPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-    this->ProcessReferences(task, refClearPred);
+    this->ProcessReferences(refClearPred);
     this->GetPandaVm()->GetGlobalObjectStorage()->ClearWeakRefs(refClearPred);
     ProcessDirtyCards();
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::EvacuateStartingWith(void *ref)
+{
+    GCEvacuateRegionsTaskStack<Ref> refStack(this);
+    G1EvacuateRegionsWorkerState<LanguageConfig> state(this, &refStack);
+    state.PushToQueue(reinterpret_cast<Ref>(ref));
+    state.EvacuateLiveObjects();
+    ASSERT(refStack.Empty());
 }
 
 template <class LanguageConfig>

@@ -96,7 +96,7 @@ template <typename LockConfigT>
 void RemSet<LockConfigT>::Merge(RemSet<> *other)
 {
     for (auto &[bitmap_begin_addr, bitmap] : other->bitmaps_) {
-        bitmaps_[bitmap_begin_addr].Merge(bitmap);
+        bitmaps_[bitmap_begin_addr].AddBits(bitmap);
     }
 }
 

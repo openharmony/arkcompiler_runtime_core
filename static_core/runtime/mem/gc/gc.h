@@ -319,7 +319,9 @@ public:
     void ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceClearPredicateT &pred);
 
     /// Process all references which were found during evacuation
-    void ProcessReferences(const GCTask &task, const ReferenceClearPredicateT &pred);
+    void ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred);
+
+    virtual void EvacuateStartingWith(void *ref);
 
     size_t GetNativeBytesRegistered()
     {
@@ -411,7 +413,6 @@ public:
 
     /// Return true of ref is an instance of reference or it's ancestor, false otherwise
     bool IsReference(const BaseClass *cls, const ObjectHeader *ref, const ReferenceCheckPredicateT &pred);
-    bool IsReference(const BaseClass *cls, const ObjectHeader *ref);
 
     void ProcessReference(GCMarkingStackType *objectsStack, const BaseClass *cls, const ObjectHeader *ref,
                           const ReferenceProcessPredicateT &pred);
@@ -436,6 +437,15 @@ public:
     virtual bool IsMarked(const ObjectHeader *object) const = 0;
 
     /**
+     * Check if the object is marked for GC(alive)
+     * It is similar to IsMarked method but can contain additional GC specific logic.
+     * If caller is not aware about GC mode it should use this method instead of IsMarked.
+     * @param object
+     * @return true if object marked for GC
+     */
+    virtual bool IsMarkedEx(const ObjectHeader *object) const;
+
+    /**
      * Mark object.
      * Note: for some GCs it is not necessary set GC bit to 1.
      * @param object_header
@@ -456,35 +466,17 @@ public:
      */
     void AddReference(ObjectHeader *fromObject, ObjectHeader *object);
 
-    inline void SetGCPhase(GCPhase gcPhase)
-    {
-        phase_ = gcPhase;
-    }
+    void SetGCPhase(GCPhase gcPhase);
 
-    size_t GetCounter() const
-    {
-        return gcCounter_;
-    }
+    size_t GetCounter() const;
 
-    virtual void PostponeGCStart()
-    {
-        ASSERT(IsPostponeGCSupported());
-        isPostponeEnabled_ = true;
-    }
+    virtual void PostponeGCStart();
 
-    virtual void PostponeGCEnd()
-    {
-        ASSERT(IsPostponeGCSupported());
-        ASSERT(IsPostponeEnabled());
-        isPostponeEnabled_ = false;
-    }
+    virtual void PostponeGCEnd();
 
     virtual bool IsPostponeGCSupported() const = 0;
 
-    bool IsPostponeEnabled()
-    {
-        return isPostponeEnabled_;
-    }
+    bool IsPostponeEnabled() const;
 
     virtual void ComputeNewSize()
     {
@@ -496,6 +488,8 @@ public:
     {
         return &gcSettings_;
     }
+
+    bool IsClearSoftReferencesEnabled() const;
 
 protected:
     /// @brief Runs all phases
@@ -802,6 +796,7 @@ private:
     PandaVM *vm_ {nullptr};
     std::atomic<bool> isFullGc_ {false};
     std::atomic<bool> isPostponeEnabled_ {false};
+    bool clearSoftReferencesEnabled_ {false};
 };
 
 /**
@@ -825,7 +820,6 @@ private:
     GC *gc_;
     bool started_ = false;
 };
-
 }  // namespace ark::mem
 
 #endif  // PANDA_RUNTIME_MEM_GC_GC_HMA

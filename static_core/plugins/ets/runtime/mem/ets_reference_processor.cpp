@@ -60,47 +60,14 @@ bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHe
         return false;
     }
 
-    ASSERT(IsMarking(gc_->GetGCPhase()));
-    bool referentIsMarked = false;
-    if (pred(referent->GetCoreType())) {
-        referentIsMarked = gc_->IsMarked(referent->GetCoreType());
-    } else {
+    if (!pred(referent->GetCoreType())) {
         LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref) << " as normal object, because referent "
                              << std::hex << GetDebugInfoAboutObject(referent->GetCoreType())
                              << " doesn't suit predicate";
-        referentIsMarked = true;
-    }
-    return !referentIsMarked;
-}
-
-bool EtsReferenceProcessor::IsReference(const BaseClass *baseCls, const ObjectHeader *ref) const
-{
-    ASSERT(baseCls != nullptr);
-    ASSERT(ref != nullptr);
-    ASSERT(baseCls->GetSourceLang() == panda_file::SourceLang::ETS);
-
-    const auto *objEtsClass = ark::ets::EtsClass::FromRuntimeClass(static_cast<const Class *>(baseCls));
-
-    if (!objEtsClass->IsReference()) {
-        return false;
-    }
-    ASSERT(objEtsClass->IsWeakReference() || objEtsClass->IsFinalizerReference());
-
-    const auto *etsRef = reinterpret_cast<const ark::ets::EtsWeakReference *>(ref);
-
-    auto *referent = etsRef->GetReferent();
-    if (referent == nullptr || referent == undefinedObject_) {
-        LOG(DEBUG, REF_PROC) << "Treat " << GetDebugInfoAboutObject(ref)
-                             << " as normal object, because referent is nullish";
         return false;
     }
 
-    auto *referentObj = referent->GetCoreType();
-    if (!gc_->InGCSweepRange(referentObj)) {
-        return false;
-    }
-
-    return referentObj->AtomicGetMark().GetState() != MarkWord::ObjectState::STATE_GC;
+    return !gc_->IsMarkedEx(referent->GetCoreType());
 }
 
 void EtsReferenceProcessor::HandleReference(GC *gc, GCMarkingStackType *objectsStack, const BaseClass *cls,
@@ -188,12 +155,11 @@ void EtsReferenceProcessor::ProcessReferences([[maybe_unused]] bool concurrent,
     });
 }
 
-void EtsReferenceProcessor::ProcessReferencesAfterCompaction([[maybe_unused]] bool clearSoftReferences,
-                                                             const mem::GC::ReferenceClearPredicateT &pred)
+void EtsReferenceProcessor::ProcessReferencesAfterCompaction(const mem::GC::ReferenceClearPredicateT &pred)
 {
     ProcessReferences(pred, [this](auto *weakRefObj, auto *referentObj) {
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
-        auto markword = referentObj->GetMark();
+        auto markword = referentObj->AtomicGetMark(std::memory_order_relaxed);
         auto forwarded = markword.GetState() == MarkWord::ObjectState::STATE_GC;
         if (forwarded) {
             LOG(DEBUG, REF_PROC) << "Update " << GetDebugInfoAboutObject(weakRefObj) << " referent "

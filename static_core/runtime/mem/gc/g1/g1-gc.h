@@ -147,6 +147,7 @@ public:
 
     void ComputeNewSize() override;
     bool Trigger(PandaUniquePtr<GCTask> task) override;
+    void EvacuateStartingWith(void *ref) override;
 
 protected:
     ALWAYS_INLINE ObjectAllocatorG1<LanguageConfig::MT_MODE> *GetG1ObjectAllocator() const
@@ -163,6 +164,8 @@ protected:
     // NOLINTEND(misc-non-private-member-variables-in-classes)
 
 private:
+    using Ref = typename ObjectReference<LanguageConfig::LANG_TYPE>::Type;
+
     void CreateUpdateRemsetWorker();
     void ProcessDirtyCards();
     bool HaveGarbageRegions();
@@ -232,8 +235,6 @@ private:
      * Return true if garbage can be collected in single pass (VM supports it, no pinned objects, GC is not postponed
      * etc) otherwise false
      */
-    using Ref = typename ObjectReference<LanguageConfig::LANG_TYPE>::Type;
-
     bool SinglePassCompactionAvailable();
     void CollectInSinglePass(const GCTask &task);
     void EvacuateCollectionSet(const RemSet<> &remset);
@@ -335,6 +336,7 @@ private:
     void Sweep();
 
     bool IsMarked(const ObjectHeader *object) const override;
+    bool IsMarkedEx(const ObjectHeader *object) const override;
 
     /// Start process of on pause marking
     void FullMarking(ark::GCTask &task);
@@ -536,6 +538,7 @@ private:
 
     size_t copiedBytesYoung_ {0};
     size_t copiedBytesOld_ {0};
+    bool singlePassCompactionEnabled_ {false};
 
     template <class>
     friend class RefCacheBuilder;

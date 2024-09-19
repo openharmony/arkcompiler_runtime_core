@@ -368,6 +368,7 @@ void GC::RunPhases(GCTask &task)
 
         FireGCStarted(task, bytesInHeapBeforeGc);
         PreRunPhasesImpl();
+        clearSoftReferencesEnabled_ = task.reason == GCTaskCause::OOM_CAUSE || IsExplicitFull(task);
         // NOLINTNEXTLINE(performance-unnecessary-value-param)
         RunPhasesImpl(task);
         // Clear Internal allocator unused pools (must do it on pause to avoid race conditions):
@@ -423,6 +424,11 @@ bool GC::CheckGCCause(GCTaskCause cause) const
     return cause != GCTaskCause::INVALID_CAUSE;
 }
 
+bool GC::IsMarkedEx(const ObjectHeader *object) const
+{
+    return IsMarked(object);
+}
+
 bool GC::MarkObjectIfNotMarked(ObjectHeader *objectHeader)
 {
     ASSERT(objectHeader != nullptr);
@@ -476,18 +482,56 @@ void GC::ProcessReferences(GCPhase gcPhase, const GCTask &task, const ReferenceC
     }
 }
 
-void GC::ProcessReferences(const GCTask &task, const ReferenceClearPredicateT &pred)
+void GC::ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred)
 {
+    ASSERT(!this->IsFullGC());
     trace::ScopedTrace scopedTrace(__FUNCTION__);
     LOG(DEBUG, REF_PROC) << "Start processing cleared references";
     ASSERT(referenceProcessor_ != nullptr);
-    bool clearSoftReferences = task.reason == GCTaskCause::OOM_CAUSE || IsExplicitFull(task);
-    referenceProcessor_->ProcessReferencesAfterCompaction(clearSoftReferences, pred);
+    referenceProcessor_->ProcessReferencesAfterCompaction(pred);
     Reference *processedRef = referenceProcessor_->CollectClearedReferences();
     if (processedRef != nullptr) {
         os::memory::LockHolder holder(*clearedReferencesLock_);
         clearedReferences_->push_back(processedRef);
     }
+}
+
+void GC::EvacuateStartingWith([[maybe_unused]] void *ref)
+{
+    ASSERT_PRINT(false, "Should be implemented by subclasses");
+}
+
+bool GC::IsClearSoftReferencesEnabled() const
+{
+    return clearSoftReferencesEnabled_;
+}
+
+void GC::SetGCPhase(GCPhase gcPhase)
+{
+    phase_ = gcPhase;
+}
+
+size_t GC::GetCounter() const
+{
+    return gcCounter_;
+}
+
+void GC::PostponeGCStart()
+{
+    ASSERT(IsPostponeGCSupported());
+    isPostponeEnabled_ = true;
+}
+
+void GC::PostponeGCEnd()
+{
+    ASSERT(IsPostponeGCSupported());
+    ASSERT(IsPostponeEnabled());
+    isPostponeEnabled_ = false;
+}
+
+bool GC::IsPostponeEnabled() const
+{
+    return isPostponeEnabled_;
 }
 
 void GC::DestroyWorker()
@@ -602,12 +646,6 @@ bool GC::IsReference(const BaseClass *cls, const ObjectHeader *ref, const Refere
 {
     ASSERT(referenceProcessor_ != nullptr);
     return referenceProcessor_->IsReference(cls, ref, pred);
-}
-
-bool GC::IsReference(const BaseClass *cls, const ObjectHeader *ref)
-{
-    ASSERT(referenceProcessor_ != nullptr);
-    return referenceProcessor_->IsReference(cls, ref);
 }
 
 void GC::EnqueueReferences()

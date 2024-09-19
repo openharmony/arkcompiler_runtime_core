@@ -91,7 +91,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, Obje
     auto *cls = obj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
 
-    if (gc->IsReference(cls, obj)) {
+    if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
         gc->ProcessReferenceForSinglePassCompaction(
             cls, obj, [handler](void *o) { handler->ProcessObjectPointer(reinterpret_cast<ObjectPointerType *>(o)); });
         return true;
@@ -107,7 +107,7 @@ bool ObjectIterator<LANG_TYPE_STATIC>::IterateAndDiscoverReferences(GC *gc, Obje
     auto *cls = obj->ClassAddr<Class>();
     ASSERT(cls != nullptr);
 
-    if (gc->IsReference(cls, obj)) {
+    if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
         gc->ProcessReferenceForSinglePassCompaction(
             cls, obj, [handler](void *o) { handler->ProcessObjectPointer(reinterpret_cast<ObjectPointerType *>(o)); });
         return true;
@@ -301,7 +301,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, Obj
     auto *cls = obj->ClassAddr<HClass>();
     ASSERT(cls != nullptr && cls->IsDynamicClass());
 
-    if (gc->IsReference(cls, obj)) {
+    if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
         gc->ProcessReferenceForSinglePassCompaction(
             cls, obj, [handler](void *o) { handler->ProcessObjectPointer(reinterpret_cast<TaggedType *>(o)); });
         return true;
@@ -317,7 +317,7 @@ bool ObjectIterator<LANG_TYPE_DYNAMIC>::IterateAndDiscoverReferences(GC *gc, Obj
     auto *cls = obj->ClassAddr<HClass>();
     ASSERT(cls != nullptr && cls->IsDynamicClass());
 
-    if (gc->IsReference(cls, obj)) {
+    if (gc->IsReference(cls, obj, [gc](auto *o) { return gc->InGCSweepRange(o); })) {
         gc->ProcessReferenceForSinglePassCompaction(
             cls, obj, [handler](void *o) { handler->ProcessObjectPointer(reinterpret_cast<TaggedType *>(o)); });
         return true;
