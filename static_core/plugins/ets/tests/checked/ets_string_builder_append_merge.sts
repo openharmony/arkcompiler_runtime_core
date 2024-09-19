@@ -1159,3 +1159,131 @@ function main() : int {
 
     return 0
 }
+
+//! CHECKER       BugFix: Wrong index at slowpath implementation of StringBuilder.append2 JIT (IARLQ5/19441)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-reserve-string-builder-buffer=false", entry: "ETSGLOBAL::bugfix_19441"
+//! EVENTS_COUNT  /SbBufferRealloc,\d+,0x[0-9a-fA-F]+,32.*/,4
+
+function bugfix_19441_append17() : string {
+    let sb = new StringBuilder();
+
+    // Fill StringBuilder internal buffer with 16 elements
+    sb.append("0");
+    sb.append("1");
+    sb.append("2");
+    sb.append("3");
+    sb.append("4");
+    sb.append("5");
+    sb.append("6");
+    sb.append("7");
+    sb.append("8");
+    sb.append("9");
+    sb.append("10");
+    sb.append("11");
+    sb.append("12");
+    sb.append("13");
+    sb.append("14");
+    sb.append("15");
+
+    // Call to StringBuilder.append via slowpath
+    sb.append("16");
+
+    return sb.toString();
+}
+
+function bugfix_19441_append18() : string {
+    let sb = new StringBuilder();
+
+    // Fill StringBuilder internal buffer with 16 elements
+    sb.append("0");
+    sb.append("1");
+    sb.append("2");
+    sb.append("3");
+    sb.append("4");
+    sb.append("5");
+    sb.append("6");
+    sb.append("7");
+    sb.append("8");
+    sb.append("9");
+    sb.append("10");
+    sb.append("11");
+    sb.append("12");
+    sb.append("13");
+    sb.append("14");
+    sb.append("15");
+
+    // Call to StringBuilder.append2 via slowpath
+    sb.append("16");
+    sb.append("17");
+
+    return sb.toString();
+}
+
+function bugfix_19441_append19() : string {
+    let sb = new StringBuilder();
+
+    // Fill StringBuilder internal buffer with 16 elements
+    sb.append("0");
+    sb.append("1");
+    sb.append("2");
+    sb.append("3");
+    sb.append("4");
+    sb.append("5");
+    sb.append("6");
+    sb.append("7");
+    sb.append("8");
+    sb.append("9");
+    sb.append("10");
+    sb.append("11");
+    sb.append("12");
+    sb.append("13");
+    sb.append("14");
+    sb.append("15");
+
+    // Call to StringBuilder.append3 via slowpath
+    sb.append("16");
+    sb.append("17");
+    sb.append("18");
+
+    return sb.toString();
+}
+
+function bugfix_19441_append20() : string {
+    let sb = new StringBuilder();
+
+    // Fill StringBuilder internal buffer with 16 elements
+    sb.append("0");
+    sb.append("1");
+    sb.append("2");
+    sb.append("3");
+    sb.append("4");
+    sb.append("5");
+    sb.append("6");
+    sb.append("7");
+    sb.append("8");
+    sb.append("9");
+    sb.append("10");
+    sb.append("11");
+    sb.append("12");
+    sb.append("13");
+    sb.append("14");
+    sb.append("15");
+
+    // Call to StringBuilder.append4 via slowpath
+    sb.append("16");
+    sb.append("17");
+    sb.append("18");
+    sb.append("19");
+
+    return sb.toString();
+}
+
+function bugfix_19441() : int {
+    assert bugfix_19441_append17() == "012345678910111213141516"      : 'Wrong result at bugfix_19441_append17()';
+    assert bugfix_19441_append18() == "01234567891011121314151617"    : 'Wrong result at bugfix_19441_append18()';
+    assert bugfix_19441_append19() == "0123456789101112131415161718"  : 'Wrong result at bugfix_19441_append19()';
+    assert bugfix_19441_append20() == "012345678910111213141516171819": 'Wrong result at bugfix_19441_append20()';
+
+    return 0;
+}

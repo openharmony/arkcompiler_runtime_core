@@ -324,7 +324,7 @@ VMHandle<EtsObject> &StringBuilderAppendStringsChecked(VMHandle<EtsObject> &sbHa
     // Append strings to the buf
     // NOLINTNEXTLINE(clang-analyzer-core.CallAndMessage)
     buf->Set(index + 0U, EtsObject::FromCoreType(str0->GetCoreType()));
-    buf->Set(index + 0U, EtsObject::FromCoreType(str1->GetCoreType()));
+    buf->Set(index + 1U, EtsObject::FromCoreType(str1->GetCoreType()));
     // Increment the index
     sb->SetFieldPrimitive<uint32_t>(SB_INDEX_OFFSET, index + 2U);
     // Increase the length
