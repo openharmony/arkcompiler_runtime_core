@@ -20,6 +20,7 @@
 #include "utils/const_value.h"
 
 #include <iomanip>
+#include <type_traits>
 
 #include "get_language_specific_metadata.inc"
 
@@ -123,7 +124,7 @@ void Disassembler::Serialize(std::ostream &os, bool add_separators, bool print_i
 
     if (add_separators) {
         os << "# ====================\n"
-        "# STRING\n\n";
+              "# STRING\n\n";
     }
 
     LOG(DEBUG, DISASSEMBLER) << "[serializing strings]";
@@ -543,70 +544,112 @@ void Disassembler::GetMethods(const panda_file::File::EntityId &record_id)
     });
 }
 
-void Disassembler::GetMethodAnnotations(pandasm::Function &method, const panda_file::File::EntityId &method_id)
+void Disassembler::GetAnnotationElements(pandasm::Function &method, const panda_file::AnnotationDataAccessor &ada,
+                                         const std::string &annotation_name)
 {
-    static const std::string MODULE_REQUEST_ANN_NAME = "L_ESConcurrentModuleRequestsAnnotation";
-    static const std::string SLOT_NUMBER_ANN_NAME = "L_ESSlotNumberAnnotation";
-
-    panda_file::MethodDataAccessor mda(*file_, method_id);
-    mda.EnumerateAnnotations([&](panda_file::File::EntityId annotation_id) {
-        panda_file::AnnotationDataAccessor ada(*file_, annotation_id);
-        auto *annotation_name = reinterpret_cast<const char *>(file_->GetStringData(ada.GetClassId()).data);
-        if (std::strcmp("L_ESConcurrentModuleRequestsAnnotation;", annotation_name) == 0) {
-            CreateAnnotationElement(ada, method, MODULE_REQUEST_ANN_NAME,
-                                    "ConcurrentModuleRequest", "concurrentModuleRequestIdx");
-        } else if (std::strcmp("L_ESSlotNumberAnnotation;", annotation_name) == 0) {
-            CreateAnnotationElement(ada, method, SLOT_NUMBER_ANN_NAME, "SlotNumber", "slotNumberIdx");
-        }
-    });
-}
-
-void Disassembler::CreateAnnotationElement(panda_file::AnnotationDataAccessor &ada, pandasm::Function &method,
-                                           const std::string &ann_name, const std::string &ann_elem_name,
-                                           const std::string &ann_elem_index)
-{
-    if (ann_elem_name.empty() || ann_elem_index.empty()) {
-        return;
-    }
-
     uint32_t elem_count = ada.GetCount();
     for (uint32_t i = 0; i < elem_count; i++) {
         panda_file::AnnotationDataAccessor::Elem adae = ada.GetElement(i);
-        auto *elem_name = reinterpret_cast<const char *>(file_->GetStringData(adae.GetNameId()).data);
-        if (ann_elem_name == elem_name) {
-            uint32_t ann_elem_value = adae.GetScalarValue().GetValue();
-            AddAnnotationElement(method, ann_name, ann_elem_index, ann_elem_value);
+        const auto &elem_name =
+            std::string {reinterpret_cast<const char *>(file_->GetStringData(adae.GetNameId()).data)};
+        panda_file::AnnotationDataAccessor::Tag tag = ada.GetTag(i);
+        auto value_type = pandasm::Value::GetCharAsType(tag.GetItem());
+        switch (value_type) {
+            case pandasm::Value::Type::U1: {
+                bool ann_elem_value = adae.GetScalarValue().Get<bool>();
+                AddAnnotationElement<bool>(method, annotation_name, elem_name, ann_elem_value);
+                break;
+            }
+            case pandasm::Value::Type::U32: {
+                uint32_t ann_elem_value = adae.GetScalarValue().Get<uint32_t>();
+                AddAnnotationElement<uint32_t>(method, annotation_name, elem_name, ann_elem_value);
+                break;
+            }
+            case pandasm::Value::Type::F64: {
+                double ann_elem_value = adae.GetScalarValue().Get<double>();
+                AddAnnotationElement<double>(method, annotation_name, elem_name, ann_elem_value);
+                break;
+            }
+            case pandasm::Value::Type::STRING: {
+                uint32_t string_id = adae.GetScalarValue().Get<uint32_t>();
+                std::string_view ann_elem_value {
+                    reinterpret_cast<const char *>(file_->GetStringData(panda_file::File::EntityId(string_id)).data)};
+                AddAnnotationElement<std::string_view>(method, annotation_name, elem_name, ann_elem_value);
+                break;
+            }
+            case pandasm::Value::Type::LITERALARRAY: {
+                uint32_t literalArray_offset = adae.GetScalarValue().Get<uint32_t>();
+                AddAnnotationElement<panda::pandasm::LiteralArray, std::string_view>(
+                    method, annotation_name, elem_name, std::string_view {std::to_string(literalArray_offset)});
+                break;
+            }
+            default:
+                UNREACHABLE();
         }
     }
 }
 
-void Disassembler::AddAnnotationElement(pandasm::Function &method, const std::string &annotation_name,
-                                        const std::string &key, const uint32_t &value)
+void Disassembler::GetMethodAnnotations(pandasm::Function &method, const panda_file::File::EntityId &method_id)
 {
-    if (annotation_name.empty() || key.empty()) {
-        return;
-    }
+    panda_file::MethodDataAccessor mda(*file_, method_id);
+    mda.EnumerateAnnotations([&](panda_file::File::EntityId annotation_id) {
+        panda_file::AnnotationDataAccessor ada(*file_, annotation_id);
+        auto annotation_name =
+            std::string {reinterpret_cast<const char *>(file_->GetStringData(ada.GetClassId()).data)};
+        annotation_name.pop_back(); // remove ; from annotation name
 
-    std::vector<pandasm::AnnotationData> method_annotation = method.metadata->GetAnnotations();
-    const auto ann_iter = std::find_if(method_annotation.begin(), method_annotation.end(),
-                                       [&](pandasm::AnnotationData &ann) -> bool {
-        return ann.GetName() == annotation_name;
-    });
+        if (annotation_name.empty()) {
+            return;
+        }
 
-    pandasm::AnnotationElement annotation_element(key,
-        std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(value)));
-    const bool is_annotation = ann_iter != method_annotation.end();
-    if (is_annotation) {
-        ann_iter->AddElement(std::move(annotation_element));
-        method.metadata->SetAnnotations(std::move(method_annotation));
-    } else {
+        std::vector<pandasm::AnnotationData> method_annotation = method.metadata->GetAnnotations();
         std::vector<pandasm::AnnotationElement> elements;
         pandasm::AnnotationData ann_data(annotation_name, elements);
-        ann_data.AddElement(std::move(annotation_element));
         std::vector<pandasm::AnnotationData> annotations;
         annotations.push_back(std::move(ann_data));
         method.metadata->AddAnnotations(annotations);
+
+        GetAnnotationElements(method, ada, annotation_name);
+    });
+}
+
+template <typename T, typename U = T>
+void Disassembler::AddAnnotationElement(pandasm::Function &method, const std::string &annotation_name,
+                                        const std::string &key, const U &value)
+{
+    if (key.empty()) {
+        return;
     }
+
+    std::unique_ptr<pandasm::Value> pandasmValue;
+    if constexpr (std::is_same<T, uint32_t>::value) {
+        pandasmValue = std::move(
+            std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(value)));
+    } else if constexpr (std::is_same<T, double>::value) {
+        pandasmValue = std::move(
+            std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::F64>(value)));
+    } else if constexpr (std::is_same<T, bool>::value) {
+        pandasmValue = std::move(
+            std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(value)));
+    } else if constexpr (std::is_same<T, std::string_view>::value) {
+        pandasmValue = std::move(
+            std::make_unique<pandasm::ScalarValue>(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(value)));
+    } else if constexpr (std::is_same<T, panda::pandasm::LiteralArray>::value) {
+        static_assert(std::is_same<U, std::string_view>::value);
+        pandasmValue = std::move(std::make_unique<pandasm::ScalarValue>(
+            pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(value)));
+    } else {
+        UNREACHABLE();
+    }
+
+    std::vector<pandasm::AnnotationData> method_annotation = method.metadata->GetAnnotations();
+    const auto ann_iter =
+        std::find_if(method_annotation.begin(), method_annotation.end(),
+                     [&](pandasm::AnnotationData &ann) -> bool { return ann.GetName() == annotation_name; });
+
+    pandasm::AnnotationElement annotation_element(key, std::move(pandasmValue));
+    ann_iter->AddElement(std::move(annotation_element));
+    method.metadata->SetAnnotations(std::move(method_annotation));
 }
 
 std::optional<std::vector<std::string>> Disassembler::GetAnnotationByMethodName(const std::string &method_name) const
@@ -629,6 +672,47 @@ std::optional<std::vector<std::string>> Disassembler::GetAnnotationByMethodName(
         ann.emplace_back(ann_data.GetName());
     }
     return ann;
+}
+
+std::optional<std::string> Disassembler::GetSerializedMethodAnnotation(const std::string &method_name,
+                                                                       const std::string &anno_name) const
+{
+    const auto method_synonyms_iter = prog_.function_synonyms.find(method_name);
+    if (method_synonyms_iter == prog_.function_synonyms.end()) {
+        return std::nullopt;
+    }
+
+    const auto method_iter = prog_.function_table.find(method_synonyms_iter->second.back());
+    if (method_iter == prog_.function_table.end()) {
+        return std::nullopt;
+    }
+
+    const auto annotations = method_iter->second.metadata->GetAnnotations();
+    if (annotations.empty()) {
+        return std::nullopt;
+    }
+
+    const auto annotation_iter =
+        std::find_if(annotations.begin(), annotations.end(),
+                     [&](const pandasm::AnnotationData &ann) -> bool { return ann.GetName() == anno_name; });
+    if (annotation_iter == annotations.end()) {
+        return std::nullopt;
+    }
+
+    std::ostringstream os;
+    SerializeMethodAnnotation(*annotation_iter, os);
+    return os.str();
+}
+
+std::optional<std::string> Disassembler::GetSerializedRecord(const std::string &record_name) const
+{
+    const auto record_iter = prog_.record_table.find(record_name);
+    if (record_iter == prog_.record_table.end()) {
+        return std::nullopt;
+    }
+    std::ostringstream os;
+    Serialize(record_iter->second, os, false);
+    return os.str();
 }
 
 std::vector<std::string> Disassembler::GetStrings() const
@@ -924,8 +1008,52 @@ void Disassembler::GetMetaData(pandasm::Record *record, const panda_file::File::
     }
 }
 
-void Disassembler::GetMetaData(pandasm::Field *field,
-                               const panda_file::File::EntityId &field_id,
+void Disassembler::GetMetadataFieldValue(panda_file::FieldDataAccessor &field_accessor, pandasm::Field *field,
+                                         bool isScopeNamesRecord)
+{
+    if (field->type.GetId() == panda_file::Type::TypeId::U32) {
+        const auto offset = field_accessor.GetValue<uint32_t>().value();
+        bool isScopeNameField = isScopeNamesRecord || field->name == ark::SCOPE_NAMES;
+        if (field->name == ark::MODULE_REQUEST_PAHSE_IDX) {
+            module_request_phase_literals_.insert(offset);
+        } else if (field->name != ark::TYPE_SUMMARY_FIELD_NAME && !isScopeNameField) {
+            LOG(DEBUG, DISASSEMBLER) << "Module literalarray " << field->name << " at offset 0x" << std::hex << offset
+                                     << " is excluded";
+            module_literals_.insert(offset);
+        }
+        field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(offset));
+    } else if (field->type.GetId() == panda_file::Type::TypeId::U8) {
+        const uint8_t val = field_accessor.GetValue<uint8_t>().value();
+        field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U8>(val));
+    } else if (field->type.GetId() == panda_file::Type::TypeId::F64) {
+        std::optional<double> val = field_accessor.GetValue<double>();
+        if (val.has_value()) {
+            field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::F64>(val.value()));
+        }
+    } else if (field->type.GetId() == panda_file::Type::TypeId::U1) {
+        std::optional<bool> val = field_accessor.GetValue<bool>();
+        if (val.has_value()) {
+            field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U1>(val.value()));
+        }
+    } else if (field->type.GetId() == panda_file::Type::TypeId::REFERENCE && field->type.GetName() == "panda.String") {
+        std::optional<uint32_t> string_offset_val = field_accessor.GetValue<uint32_t>();
+        if (string_offset_val.has_value()) {
+            std::string_view val {reinterpret_cast<const char *>(
+                file_->GetStringData(panda_file::File::EntityId(string_offset_val.value())).data)};
+            field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(val));
+        }
+    } else if (field->type.GetRank() > 0) {
+        std::optional<uint32_t> litarray_offset_val = field_accessor.GetValue<uint32_t>();
+        if (litarray_offset_val.has_value()) {
+            field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+                std::string_view {std::to_string(litarray_offset_val.value())}));
+        }
+    } else {
+        UNREACHABLE();
+    }
+}
+
+void Disassembler::GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &field_id,
                                bool is_scope_names_record)
 {
     LOG(DEBUG, DISASSEMBLER) << "[getting metadata]\nfield id: " << field_id << " (0x" << std::hex << field_id << ")";
@@ -946,22 +1074,7 @@ void Disassembler::GetMetaData(pandasm::Field *field,
         field->metadata->SetAttribute("static");
     }
 
-    if (field->type.GetId() == panda_file::Type::TypeId::U32) {
-        const auto offset = field_accessor.GetValue<uint32_t>().value();
-        bool is_scope_name_field = is_scope_names_record || field->name == ark::SCOPE_NAMES;
-        if (field->name == ark::MODULE_REQUEST_PAHSE_IDX) {
-            module_request_phase_literals_.insert(offset);
-        } else if (field->name != ark::TYPE_SUMMARY_FIELD_NAME && !is_scope_name_field) {
-            LOG(DEBUG, DISASSEMBLER) << "Module literalarray " << field->name << " at offset 0x" << std::hex << offset
-                                     << " is excluded";
-            module_literals_.insert(offset);
-        }
-        field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U32>(offset));
-    }
-    if (field->type.GetId() == panda_file::Type::TypeId::U8) {
-        const auto val = field_accessor.GetValue<uint8_t>().value();
-        field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::U8>(val));
-    }
+    GetMetadataFieldValue(field_accessor, field, is_scope_names_record);
 }
 
 std::string Disassembler::AnnotationTagToString(const char tag) const
@@ -1555,6 +1668,74 @@ void Disassembler::Serialize(const pandasm::Record &record, std::ostream &os, bo
     os << "}\n\n";
 }
 
+void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literal_array, std::stringstream &ss) const
+{
+    ss << "[";
+    bool firstItem = true;
+    for (const auto &item : literal_array.literals_) {
+        if (!firstItem) {
+            ss << ", ";
+        } else {
+            firstItem = false;
+        }
+
+        switch (item.tag_) {
+            case panda_file::LiteralTag::DOUBLE: {
+                ss << std::get<double>(item.value_);
+                break;
+            }
+            case panda_file::LiteralTag::BOOL: {
+                ss << std::get<bool>(item.value_);
+                break;
+            }
+            case panda_file::LiteralTag::STRING: {
+                ss << "\"" << std::get<std::string>(item.value_) << "\"";
+                break;
+            }
+            case panda_file::LiteralTag::LITERALARRAY: {
+                std::string offset_str = std::get<std::string>(item.value_);
+                uint32_t lit_array_fffset = std::stoi(offset_str, nullptr, 16);
+                pandasm::LiteralArray lit_array;
+                GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
+                DumpLiteralArray(lit_array, ss);
+                break;
+            }
+            case panda_file::LiteralTag::BUILTINTYPEINDEX: {
+                // By convention, BUILTINTYPEINDEX is used to store type of empty arrays,
+                // therefore it has no value
+                break;
+            }
+            default: {
+                UNREACHABLE();
+                break;
+            }
+        }
+    }
+    ss << "]";
+}
+
+void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstream &ss) const
+{
+    if (f.type.GetId() == panda_file::Type::TypeId::U32) {
+        ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
+    } else if (f.type.GetId() == panda_file::Type::TypeId::U8) {
+        ss << " = 0x" << std::hex << static_cast<uint32_t>(f.metadata->GetValue().value().GetValue<uint8_t>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::F64) {
+        ss << " = " << static_cast<double>(f.metadata->GetValue().value().GetValue<double>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::U1) {
+        ss << " = " << static_cast<bool>(f.metadata->GetValue().value().GetValue<bool>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::REFERENCE && f.type.GetName() == "panda.String") {
+        ss << " = \"" << static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()) << "\"";
+    } else if (f.type.GetRank() > 0) {
+        uint32_t lit_array_fffset =
+            std::stoi(static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()));
+        pandasm::LiteralArray lit_array;
+        GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
+        ss << " = ";
+        DumpLiteralArray(lit_array, ss);
+    }
+}
+
 void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &os, bool print_information) const
 {
     constexpr size_t INFO_OFFSET = 80;
@@ -1571,12 +1752,7 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
         std::string file = GetFileNameByPath(f.name);
         ss << "\t" << f.type.GetPandasmName() << " " << file;
         if (f.metadata->GetValue().has_value()) {
-            if (f.type.GetId() == panda_file::Type::TypeId::U32) {
-                ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
-            }
-            if (f.type.GetId() == panda_file::Type::TypeId::U8) {
-                ss << " = 0x" << std::hex << static_cast<uint32_t>(f.metadata->GetValue().value().GetValue<uint8_t>());
-            }
+            SerializeFieldValue(f, ss);
         }
         if (record_in_table) {
             const auto field_iter = record_iter->second.field_annotations.find(f.name);
@@ -1602,6 +1778,107 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
     }
 }
 
+std::string Disassembler::getLiteralArrayTypeFromValue(const pandasm::LiteralArray &literal_array) const
+{
+    [[maybe_unused]] auto size = literal_array.literals_.size();
+    ASSERT(size > 0);
+    switch (literal_array.literals_[0].tag_) {
+        case panda_file::LiteralTag::DOUBLE: {
+            return "f64[]";
+        }
+        case panda_file::LiteralTag::BOOL: {
+            return "u1[]";
+        }
+        case panda_file::LiteralTag::STRING: {
+            return "panda.String[]";
+        }
+        case panda_file::LiteralTag::LITERALARRAY: {
+            std::string offset_str = std::get<std::string>(literal_array.literals_[0].value_);
+            uint32_t lit_array_fffset = std::stoi(offset_str, nullptr, 16);
+            pandasm::LiteralArray lit_array;
+            GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
+            return getLiteralArrayTypeFromValue(lit_array) + "[]";
+        }
+        case panda_file::LiteralTag::BUILTINTYPEINDEX: {
+            uint8_t typeIndex = std::get<uint8_t>(literal_array.literals_[0].value_);
+            static constexpr uint8_t EMPTY_LITERAL_ARRAY_WITH_NUMBER_TYPE = 0;
+            static constexpr uint8_t EMPTY_LITERAL_ARRAY_WITH_BOOLEAN_TYPE = 1;
+            static constexpr uint8_t EMPTY_LITERAL_ARRAY_WITH_STRING_TYPE = 2;
+            switch (typeIndex) {
+                case EMPTY_LITERAL_ARRAY_WITH_NUMBER_TYPE:
+                    return "f64[]";
+                case EMPTY_LITERAL_ARRAY_WITH_BOOLEAN_TYPE:
+                    return "u1[]";
+                case EMPTY_LITERAL_ARRAY_WITH_STRING_TYPE:
+                    return "panda.String[]";
+                default:
+                    UNREACHABLE();
+                    break;
+            }
+        }
+        default: {
+            UNREACHABLE();
+            break;
+        }
+    }
+}
+
+void Disassembler::SerializeAnnotationElement(const std::vector<pandasm::AnnotationElement> &elements,
+                                              std::stringstream &ss, uint32_t idx) const
+{
+    for (const auto &elem : elements) {
+        auto type = elem.GetValue()->GetType();
+        if (type == pandasm::Value::Type::U32) {
+            ss << "\t"
+               << "u32"
+               << " " << elem.GetName() << " { ";
+            ss << "0x" << std::hex << elem.GetValue()->GetAsScalar()->GetValue<uint32_t>() << " }";
+        } else if (type == pandasm::Value::Type::F64) {
+            ss << "\t"
+               << "f64"
+               << " " << elem.GetName() << " { ";
+            ss << elem.GetValue()->GetAsScalar()->GetValue<double>() << " }";
+        } else if (type == pandasm::Value::Type::U1) {
+            ss << "\t"
+               << "u1"
+               << " " << elem.GetName() << " { ";
+            ss << elem.GetValue()->GetAsScalar()->GetValue<bool>() << " }";
+        } else if (type == pandasm::Value::Type::STRING) {
+            ss << "\t"
+               << "panda.String"
+               << " " << elem.GetName() << " { \"";
+            ss << elem.GetValue()->GetAsScalar()->GetValue<std::string>() << "\" }";
+        } else if (type == pandasm::Value::Type::LITERALARRAY) {
+            uint32_t lit_array_fffset = std::stoi(elem.GetValue()->GetAsScalar()->GetValue<std::string>());
+            pandasm::LiteralArray lit_array;
+            GetLiteralArrayByOffset(&lit_array, panda_file::File::EntityId(lit_array_fffset));
+            std::string typeName = getLiteralArrayTypeFromValue(lit_array);
+            ss << "\t" << typeName << " " << elem.GetName() << " { ";
+            DumpLiteralArray(lit_array, ss);
+            ss << " }";
+        } else {
+            UNREACHABLE();
+        }
+        if (idx > 0) {
+            ss << "\n";
+        }
+        --idx;
+    }
+}
+
+void Disassembler::SerializeMethodAnnotation(const pandasm::AnnotationData &ann, std::ostream &os) const
+{
+    os << ann.GetName() << ":\n";
+    std::stringstream ss;
+    std::vector<pandasm::AnnotationElement> elements = ann.GetElements();
+    if (elements.empty()) {
+        return;
+    }
+    uint32_t idx = elements.size() - 1;
+    SerializeAnnotationElement(elements, ss, idx);
+    os << ss.str() << "\n";
+}
+
 void Disassembler::SerializeMethodAnnotations(const pandasm::Function &method, std::ostream &os) const
 {
     const auto annotations = method.metadata->GetAnnotations();
@@ -1610,23 +1887,7 @@ void Disassembler::SerializeMethodAnnotations(const pandasm::Function &method, s
     }
 
     for (const auto &ann : annotations) {
-        os << ann.GetName() << ":\n";
-        std::stringstream ss;
-        std::vector<pandasm::AnnotationElement> elements = ann.GetElements();
-        if (elements.empty()) {
-            continue;
-        }
-        uint32_t idx = elements.size() - 1;
-        ss << "\t" << "u32" << " " << elements.back().GetName() << " { ";
-        for (const auto &elem : elements) {
-            ss << "0x" << std::hex << elem.GetValue()->GetAsScalar()->GetValue<uint32_t>();
-            if (idx > 0) {
-                ss << ", ";
-            }
-            --idx;
-        }
-        ss << " }";
-        os << ss.str() << "\n";
+        SerializeMethodAnnotation(ann, os);
     }
 }
 
@@ -1723,7 +1984,7 @@ void Disassembler::Serialize(const pandasm::Function &method, std::ostream &os, 
 void Disassembler::SerializeStrings(const panda_file::File::EntityId &offset, const std::string &name_value,
                                     std::ostream &os) const
 {
-    os << "[offset:0x" << std::hex <<offset<< ", name_value:" << name_value<< "]" <<std::endl;
+    os << "[offset:0x" << std::hex << offset << ", name_value:" << name_value << "]" << std::endl;
 }
 
 void Disassembler::Serialize(const pandasm::Function::CatchBlock &catch_block, std::ostream &os) const
@@ -1866,8 +2127,7 @@ pandasm::Opcode Disassembler::BytecodeOpcodeToPandasmOpcode(uint8_t o) const
     return BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode(o));
 }
 
-std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id,
-                                     size_t idx) const
+std::string Disassembler::IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const
 {
     std::stringstream name;
     const auto offset = file_->ResolveOffsetByIndex(method_id, bc_ins.GetId(idx).AsIndex());
@@ -1989,7 +2249,7 @@ IdList Disassembler::GetInstructions(pandasm::Function *method, panda_file::File
         // In some case, the end label can be after the last instruction
         // Creating an invalid instruction for the label to make sure it can be serialized
         if (pair.first == instruction_count) {
-            pandasm::Ins ins{};
+            pandasm::Ins ins {};
             ins.opcode = pandasm::Opcode::INVALID;
             method->AddInstruction(ins);
         }

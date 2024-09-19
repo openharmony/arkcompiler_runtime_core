@@ -24,7 +24,7 @@ namespace panda::disasm {
 static const std::string MODULE_REQUEST_FILE_NAME = GRAPH_TEST_ABC_DIR "module-requests-annotation-import.abc";
 static const std::string SLOT_NUMBER_FILE_NAME = GRAPH_TEST_ABC_DIR "slot-number-annotation.abc";
 
-class DisassemblerAnnotationTest : public testing::Test {
+class DisassemblerSystemAnnotationTest : public testing::Test {
 public:
     static void SetUpTestCase(void) {};
     static void TearDownTestCase(void) {};
@@ -44,12 +44,12 @@ public:
 };
 
 /**
-* @tc.name: disassembler_annotation_test_001
+* @tc.name: disassembler_system_annotation_test_001
 * @tc.desc: get module request annotation of abc file.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
-HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_001, TestSize.Level1)
+HWTEST_F(DisassemblerSystemAnnotationTest, disassembler_system_annotation_test_001, TestSize.Level1)
 {
     static const std::string METHOD_NAME = "module-requests-annotation-import.#*#funcD";
     static const std::string ANNOTATION_NAME = "L_ESConcurrentModuleRequestsAnnotation";
@@ -57,17 +57,17 @@ HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_001, TestSize.
     disasm.Disassemble(MODULE_REQUEST_FILE_NAME, false, false);
     std::optional<std::vector<std::string>> annotations = disasm.GetAnnotationByMethodName(METHOD_NAME);
     ASSERT_NE(annotations, std::nullopt);
-    bool has_annotation = ValidateAnnotation(annotations, ANNOTATION_NAME);
-    EXPECT_TRUE(has_annotation);
+    bool hasAnnotation = ValidateAnnotation(annotations, ANNOTATION_NAME);
+    EXPECT_TRUE(hasAnnotation);
 }
 
 /**
-* @tc.name: disassembler_annotation_test_002
+* @tc.name: disassembler_system_annotation_test_002
 * @tc.desc: get solt number annotation of abc file.
 * @tc.type: FUNC
 * @tc.require: file path and name
 */
-HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_002, TestSize.Level1)
+HWTEST_F(DisassemblerSystemAnnotationTest, disassembler_system_annotation_test_002, TestSize.Level1)
 {
     static const std::string METHOD_NAME = "#*#funcA";
     static const std::string ANNOTATION_NAME = "L_ESSlotNumberAnnotation";
@@ -75,7 +75,7 @@ HWTEST_F(DisassemblerAnnotationTest, disassembler_annotation_test_002, TestSize.
     disasm.Disassemble(SLOT_NUMBER_FILE_NAME, false, false);
     std::optional<std::vector<std::string>> annotations = disasm.GetAnnotationByMethodName(METHOD_NAME);
     ASSERT_NE(annotations, std::nullopt);
-    bool has_annotation = ValidateAnnotation(annotations, ANNOTATION_NAME);
-    EXPECT_TRUE(has_annotation);
+    bool hasAnnotation = ValidateAnnotation(annotations, ANNOTATION_NAME);
+    EXPECT_TRUE(hasAnnotation);
 }
 };
