@@ -162,6 +162,14 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
         compile_int_ets_export_files(${INTERPRETER_TYPE} ${WORK_DIR} ${TARGET} EXTRA_BOOT_PANDAFILES OPT_LEVEL ${ARG_OPT_LEVEL} EXPORT_FILES ${ARG_EXPORT_FILES})
     endif()
 
+    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
+    file(MAKE_DIRECTORY "${BUILD_DIR}")
+
+    set(BUILD_LOG   "${BUILD_DIR}/build.log")
+    set(BUILD_OUT   "${BUILD_DIR}/build.out")
+    set(BUILD_ERR   "${BUILD_DIR}/build.err")
+    set(CAT_PROGRAM 'cat')
+
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc${EXTRA_BOOT_PANDAFILES}
         --load-runtimes=ets
@@ -170,11 +178,12 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}
         ETSGLOBAL::main
+        --log-file ${BUILD_LOG}
     )
 
     add_custom_target(${TARGET}
         COMMENT "Running ark INT(${INTERPRETER_TYPE}) for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
+        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
         DEPENDS ark etsstdlib ${ABC_TARGET}
     )
 
@@ -182,8 +191,8 @@ function(run_int_ets_code_impl INTERPRETER_TYPE ETS_SRC WORK_DIR TARGET)
     if(NOT PANDA_LLVM_INTERPRETER AND ${GC_TYPE_SET} EQUAL -1)
         add_custom_target(${TARGET}-gc
             COMMENT "Running ark INT(${INTERPRETER_TYPE}) for ets file: ${OUTPUT_ABC}"
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc
-            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=gen-gc 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (false)
+            COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} --gc-type=stw 1>"${BUILD_OUT}" 2>>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
             DEPENDS ark etsstdlib ${ABC_TARGET}
         )
         add_dependencies(ets_tests ${TARGET}-gc)
@@ -229,6 +238,12 @@ function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
     set(ABC_TARGET ${TARGET}-ets-es2panda)
     compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
 
+    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
+    set(BUILD_LOG   "${BUILD_DIR}/build.log")
+    set(BUILD_OUT   "${BUILD_DIR}/build.out")
+    set(BUILD_ERR   "${BUILD_DIR}/build.err")
+    set(CAT_PROGRAM 'cat')
+
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
         --load-runtimes=ets
@@ -239,11 +254,12 @@ function(run_jit_ets_code ETS_SRC WORK_DIR TARGET)
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}
         ETSGLOBAL::main
+        --log-file ${BUILD_LOG}
     )
 
     add_custom_target(${TARGET}
         COMMENT "Running ark JIT for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
+        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
         DEPENDS ark etsstdlib ${ABC_TARGET}
     )
 
@@ -260,6 +276,12 @@ function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
     set(ABC_TARGET ${TARGET}-ets-es2panda)
     compile_ets_code(${ETS_SRC} ${OUTPUT_ABC} ${ABC_TARGET} OPT_LEVEL ${ARG_OPT_LEVEL})
 
+    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
+    set(BUILD_LOG   "${BUILD_DIR}/build.log")
+    set(BUILD_OUT   "${BUILD_DIR}/build.out")
+    set(BUILD_ERR   "${BUILD_DIR}/build.err")
+    set(CAT_PROGRAM 'cat')
+
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
         --load-runtimes=ets
@@ -270,11 +292,12 @@ function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}
         ETSGLOBAL::main
+        --log-file ${BUILD_LOG}
     )
 
     add_custom_target(${TARGET}
         COMMENT "Running ark JIT for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
+        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
         DEPENDS ark etsstdlib ${ABC_TARGET}
     )
 
@@ -320,6 +343,12 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     set(TARGET_AOT ${TARGET}-${PAOC_MODE}-files)
     compile_aot_ets_code(${PAOC_MODE} ${OUTPUT_ABC} ${OUTPUT_AN} ${TARGET_AOT} ${ABC_TARGET} RUNTIME_EXTRA_OPTIONS ${ARG_RUNTIME_EXTRA_OPTIONS})
 
+    set(BUILD_DIR   "${CMAKE_CURRENT_BINARY_DIR}/LOG_OUTPUTS_DIR")
+    set(BUILD_LOG   "${BUILD_DIR}/build.log")
+    set(BUILD_OUT   "${BUILD_DIR}/build.out")
+    set(BUILD_ERR   "${BUILD_DIR}/build.err")
+    set(CAT_PROGRAM 'cat')
+
     set(RUNTIME_ARGUMENTS
         --boot-panda-files=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc
         --load-runtimes=ets
@@ -327,11 +356,12 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}
         ETSGLOBAL::main
+        --log-file ${BUILD_LOG}
     )
 
     add_custom_target(${TARGET}
         COMMENT "Running ark AOT(${PAOC_MODE}) for ets file: ${OUTPUT_ABC}"
-        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS}
+        COMMAND ${PANDA_RUN_PREFIX} $<TARGET_FILE:ark> ${RUNTIME_ARGUMENTS} 1>"${BUILD_OUT}" 2>"${BUILD_ERR}" || (${CAT_PROGRAM} ${BUILD_ERR} && false)
         DEPENDS ark etsstdlib ${TARGET_AOT}
     )
 
