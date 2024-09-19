@@ -12,24 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-'use strict';
 
-class ClassToCheckSymbol {
-  constructor(p) {
-      this.x = p;
-  }
+import {
+    user,
+    InterfaceStatic,
+    userInterfaceFromTs
+} from "main_js"
+
+function checkUserInterfaceStatic(): boolean {
+   return InterfaceStatic.get(user).tsInt as int == user.tsInt as int;
 }
 
-function functionArgTypeClassToCheckSymbol(classInstanceArg) {
-  let testProperty = Symbol.for('id');
-  class ExtClassToCheckSymbol extends ClassToCheckSymbol {
-    constructor(parentClassInstance) {
-      super(parentClassInstance.x);
-      this[testProperty] = 1;
-    }
-  }
-  return new ExtClassToCheckSymbol(classInstanceArg);
+function checkUserInterfaceFromTs(): boolean {
+   return userInterfaceFromTs(user).tsInt as int == user.tsInt as int;
 }
-
-exports.ClassToCheckSymbol = ClassToCheckSymbol;
-exports.functionArgTypeClassToCheckSymbol = functionArgTypeClassToCheckSymbol;
