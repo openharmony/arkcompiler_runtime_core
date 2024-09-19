@@ -2595,668 +2595,735 @@ TEST(parsertests, parse_catch_directive_9)
     ASSERT_EQ(function.catchBlocks[0].catchEndLabel, "catch_end");
 }
 
-TEST(parsertests, parse_catchall_directive)
+TEST(parsertests, parse_catchall_directive1)
 {
-    {
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    v.push_back(l.TokenizeString(".catchall try_begin, try_end, catch_begin").first);
+
+    p.Parse(v);
+
+    Error e = p.ShowError();
+
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
+    ASSERT_EQ(e.lineNumber, 1);
+    ASSERT_EQ(e.message, ".catchall directive is located outside of a function body.");
+}
+
+TEST(parsertests, parse_catchall_directive2)
+{
+    std::vector<std::string> directives {".catchall",        ".catchall t1",      ".catchall t1,",
+                                         ".catchall t1, t2", ".catchall t1, t2,", ".catchall t1, t2, c,"};
+
+    for (const auto &s : directives) {
         std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
-        v.push_back(l.TokenizeString(".catchall try_begin, try_end, catch_begin").first);
+        v.push_back(l.TokenizeString(".function void main() {").first);
+        v.push_back(l.TokenizeString(s).first);
+        v.push_back(l.TokenizeString("}").first);
 
         p.Parse(v);
 
         Error e = p.ShowError();
 
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_INCORRECT_DIRECTIVE_LOCATION);
-        ASSERT_EQ(e.lineNumber, 1);
-        ASSERT_EQ(e.message, ".catchall directive is located outside of a function body.");
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION);
+        ASSERT_EQ(e.lineNumber, 2);
+        ASSERT_EQ(e.pos, 0);
+        ASSERT_EQ(e.message,
+                  "Incorrect catch block declaration. Must be in the format: .catchall <try_begin_label>, "
+                  "<try_end_label>, <catch_begin_label>[, <catch_end_label>]");
     }
+}
 
-    {
-        std::vector<std::string> directives {".catchall",        ".catchall t1",      ".catchall t1,",
-                                             ".catchall t1, t2", ".catchall t1, t2,", ".catchall t1, t2, c,"};
+TEST(parsertests, parse_catchall_directive3)
+{
+    std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
 
-        for (const auto &s : directives) {
-            std::vector<std::vector<ark::pandasm::Token>> v;
-            Lexer l;
-            Parser p;
+    for (size_t i = 1; i < labels.size(); i++) {
+        std::string directive = ".catchall ";
 
-            v.push_back(l.TokenizeString(".function void main() {").first);
-            v.push_back(l.TokenizeString(s).first);
-            v.push_back(l.TokenizeString("}").first);
-
-            p.Parse(v);
-
-            Error e = p.ShowError();
-
-            ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION);
-            ASSERT_EQ(e.lineNumber, 2);
-            ASSERT_EQ(e.pos, 0);
-            ASSERT_EQ(e.message,
-                      "Incorrect catch block declaration. Must be in the format: .catchall <try_begin_label>, "
-                      "<try_end_label>, <catch_begin_label>[, <catch_end_label>]");
+        for (size_t j = 0; j < labels.size(); j++) {
+            if (j != 0) {
+                directive += i == j ? " $ " : " , ";
+            }
+            directive += labels[j];
         }
-    }
 
-    {
-        std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
-        std::vector<std::string> labelNames {"try block begin", "try block end", "catch block begin"};
-
-        for (size_t i = 0; i < labels.size(); i++) {
-            std::string s = ".catchall ";
-
-            if (i != 0) {
-                std::string directive = s;
-                for (size_t j = 0; j < labels.size(); j++) {
-                    if (j != 0) {
-                        directive += i == j ? " $ " : " , ";
-                    }
-                    directive += labels[j];
-                }
-
-                std::vector<std::vector<ark::pandasm::Token>> v;
-                Lexer l;
-                Parser p;
-
-                v.push_back(l.TokenizeString(".function void main() {").first);
-                v.push_back(l.TokenizeString(directive).first);
-                v.push_back(l.TokenizeString("}").first);
-
-                p.Parse(v);
-
-                Error e = p.ShowError();
-
-                ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION) << "Test " << directive;
-                ASSERT_EQ(e.lineNumber, 2) << "Test " << directive;
-                ASSERT_EQ(e.pos, directive.find('$')) << "Test " << directive;
-                ASSERT_EQ(e.message, "Expected comma.") << "Test " << directive;
-            }
-
-            {
-                std::string directive = s;
-                for (size_t j = 0; j < labels.size(); j++) {
-                    if (j != 0) {
-                        directive += " , ";
-                    }
-                    directive += i == j ? "$Exception" : labels[j];
-                }
-
-                std::vector<std::vector<ark::pandasm::Token>> v;
-                Lexer l;
-                Parser p;
-
-                v.push_back(l.TokenizeString(".record $Exception {}").first);
-                v.push_back(l.TokenizeString(".function void main() {").first);
-                v.push_back(l.TokenizeString("$Exception:").first);
-                v.push_back(l.TokenizeString("try_begin:").first);
-                v.push_back(l.TokenizeString("try_end:").first);
-                v.push_back(l.TokenizeString("catch_begin:").first);
-                v.push_back(l.TokenizeString(directive).first);
-                v.push_back(l.TokenizeString("}").first);
-
-                p.Parse(v);
-
-                Error e = p.ShowError();
-                ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
-            }
-
-            {
-                std::string directive = s;
-                for (size_t j = 0; j < labels.size(); j++) {
-                    if (j != 0) {
-                        directive += " , ";
-                    }
-                    directive += i == j ? "1Exception" : labels[j];
-                }
-
-                std::vector<std::vector<ark::pandasm::Token>> v;
-                Lexer l;
-                Parser p;
-
-                v.push_back(l.TokenizeString(".function void main() {").first);
-                v.push_back(l.TokenizeString(directive).first);
-                v.push_back(l.TokenizeString("}").first);
-
-                p.Parse(v);
-
-                Error e = p.ShowError();
-                ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL) << "Test " << directive;
-                ASSERT_EQ(e.lineNumber, 2) << "Test " << directive;
-                ASSERT_EQ(e.pos, directive.find('1')) << "Test " << directive;
-                ASSERT_EQ(e.message, std::string("Invalid name of the ") + labelNames[i] + " label.")
-                    << "Test " << directive;
-            }
-
-            {
-                std::stringstream ss;
-                ss << "Test " << labels[i] << " does not exists";
-
-                std::vector<std::vector<ark::pandasm::Token>> v;
-                Lexer l;
-                Parser p;
-
-                std::string catchTable = ".catchall try_begin, try_end, catch_begin";
-
-                v.push_back(l.TokenizeString(".function void main() {").first);
-                for (size_t j = 0; j < labels.size(); j++) {
-                    if (i != j) {
-                        v.push_back(l.TokenizeString(labels[j] + ":").first);
-                    }
-                }
-                v.push_back(l.TokenizeString(catchTable).first);
-                v.push_back(l.TokenizeString("}").first);
-
-                p.Parse(v);
-
-                Error e = p.ShowError();
-
-                ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL_EXT) << ss.str();
-                ASSERT_EQ(e.pos, catchTable.find(labels[i])) << ss.str();
-                ASSERT_EQ(e.message, "This label does not exist.") << ss.str();
-            }
-        }
-    }
-
-    {
         std::vector<std::vector<ark::pandasm::Token>> v;
         Lexer l;
         Parser p;
 
-        std::string s = ".catchall try_begin, try_end, catch_begin";
-
         v.push_back(l.TokenizeString(".function void main() {").first);
+        v.push_back(l.TokenizeString(directive).first);
+        v.push_back(l.TokenizeString("}").first);
+
+        p.Parse(v);
+
+        Error e = p.ShowError();
+
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_DIRECTIVE_DECLARATION) << "Test " << directive;
+        ASSERT_EQ(e.lineNumber, 2) << "Test " << directive;
+        ASSERT_EQ(e.pos, directive.find('$')) << "Test " << directive;
+        ASSERT_EQ(e.message, "Expected comma.") << "Test " << directive;
+    }
+}
+
+TEST(parsertests, parse_catchall_directive4)
+{
+    std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
+
+    for (size_t i = 0; i < labels.size(); i++) {
+        std::string directive = ".catchall ";
+        for (size_t j = 0; j < labels.size(); j++) {
+            if (j != 0) {
+                directive += " , ";
+            }
+            directive += i == j ? "$Exception" : labels[j];
+        }
+
+        std::vector<std::vector<ark::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+
+        v.push_back(l.TokenizeString(".record $Exception {}").first);
+        v.push_back(l.TokenizeString(".function void main() {").first);
+        v.push_back(l.TokenizeString("$Exception:").first);
         v.push_back(l.TokenizeString("try_begin:").first);
         v.push_back(l.TokenizeString("try_end:").first);
         v.push_back(l.TokenizeString("catch_begin:").first);
-        v.push_back(l.TokenizeString(s).first);
+        v.push_back(l.TokenizeString(directive).first);
         v.push_back(l.TokenizeString("}").first);
 
-        auto res = p.Parse(v);
+        p.Parse(v);
 
         Error e = p.ShowError();
-
-        const auto sigMain = GetFunctionSignatureFromName("main", {});
-
         ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
-
-        auto &program = res.Value();
-        auto &function = program.functionTable.find(sigMain)->second;
-
-        ASSERT_EQ(function.catchBlocks.size(), 1);
-        ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "");
-        ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
-        ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
-        ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
     }
 }
 
-TEST(parsertests, parse_numbers)
+TEST(parsertests, parse_catchall_directive5)
 {
+    std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
+    std::vector<std::string> labelNames {"try block begin", "try block end", "catch block begin"};
+
+    for (size_t i = 0; i < labels.size(); i++) {
+        std::string directive = ".catchall ";
+        for (size_t j = 0; j < labels.size(); j++) {
+            if (j != 0) {
+                directive += " , ";
+            }
+            directive += i == j ? "1Exception" : labels[j];
+        }
+
+        std::vector<std::vector<ark::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+
+        v.push_back(l.TokenizeString(".function void main() {").first);
+        v.push_back(l.TokenizeString(directive).first);
+        v.push_back(l.TokenizeString("}").first);
+
+        p.Parse(v);
+
+        Error e = p.ShowError();
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL) << "Test " << directive;
+        ASSERT_EQ(e.lineNumber, 2) << "Test " << directive;
+        ASSERT_EQ(e.pos, directive.find('1')) << "Test " << directive;
+        ASSERT_EQ(e.message, std::string("Invalid name of the ") + labelNames[i] + " label.") << "Test " << directive;
+    }
+}
+
+TEST(parsertests, parse_catchall_directive6)
+{
+    std::vector<std::string> labels {"try_begin", "try_end", "catch_begin"};
+
+    for (size_t i = 0; i < labels.size(); i++) {
+        std::stringstream ss;
+        ss << "Test " << labels[i] << " does not exists";
+
+        std::vector<std::vector<ark::pandasm::Token>> v;
+        Lexer l;
+        Parser p;
+
+        std::string catchTable = ".catchall try_begin, try_end, catch_begin";
+
+        v.push_back(l.TokenizeString(".function void main() {").first);
+        for (size_t j = 0; j < labels.size(); j++) {
+            if (i != j) {
+                v.push_back(l.TokenizeString(labels[j] + ":").first);
+            }
+        }
+        v.push_back(l.TokenizeString(catchTable).first);
+        v.push_back(l.TokenizeString("}").first);
+
+        p.Parse(v);
+
+        Error e = p.ShowError();
+
+        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_LABEL_EXT) << ss.str();
+        ASSERT_EQ(e.pos, catchTable.find(labels[i])) << ss.str();
+        ASSERT_EQ(e.message, "This label does not exist.") << ss.str();
+    }
+}
+
+TEST(parsertests, parse_catchall_directive7)
+
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = ".catchall try_begin, try_end, catch_begin";
+
+    v.push_back(l.TokenizeString(".function void main() {").first);
+    v.push_back(l.TokenizeString("try_begin:").first);
+    v.push_back(l.TokenizeString("try_end:").first);
+    v.push_back(l.TokenizeString("catch_begin:").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    auto res = p.Parse(v);
+
+    Error e = p.ShowError();
+
     const auto sigMain = GetFunctionSignatureFromName("main", {});
 
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, 12345}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(12345)))
-            << "12345 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE);
 
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, 0xFEFfe}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(0xFEFfe)))
-            << "0xFEFfe expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
+    auto &program = res.Value();
+    auto &function = program.functionTable.find(sigMain)->second;
 
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, 01237}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(01237)))
-            << "01237 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, 0b10101}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(0b10101)))
-            << "0b10101 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, -12345}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-12345)))
-            << "-12345 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, -0xFEFfe}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-0xFEFfe)))
-            << "12345 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, -01237}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-01237)))
-            << "12345 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("movi v0, -0b10101}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-0b10101)))
-            << "-0b10101 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.0}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0)) << "1.0 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.)) << "1. expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, .1}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(.1)) << ".0 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1e10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e10)) << "1e10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1e+10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e+10)) << "1e+10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1e-10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e-10)) << "1e-10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e10)) << "1.0e10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e+10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e+10)) << "1.0e+10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e-10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e-10)) << "12345 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.e10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e10)) << "1.e10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.e+10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e+10)) << "1.e+10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, 1.e-10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e-10)) << "12345 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.0}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0)) << "-1.0 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.)) << "-1. expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -.1}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-.1)) << "-.0 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1e10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e10)) << "-1e10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1e+10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e+10)) << "-1e+10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1e-10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e-10)) << "-1e-10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e10)) << "-1.0e10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e+10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e+10)) << "-1.0e+10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e-10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e-10)) << "-1.0e-10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.e10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e10)) << "-1.e10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.e+10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e+10)) << "-1.e+10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
-
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
-        v.push_back(l.TokenizeString(".function u8 main(){").first);
-        v.push_back(l.TokenizeString("fmovi.64 v0, -1.e-10}").first);
-        auto item = p.Parse(v);
-        ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e-10)) << "-1.e-10 expected";
-        ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
-    }
+    ASSERT_EQ(function.catchBlocks.size(), 1);
+    ASSERT_EQ(function.catchBlocks[0].exceptionRecord, "");
+    ASSERT_EQ(function.catchBlocks[0].tryBeginLabel, "try_begin");
+    ASSERT_EQ(function.catchBlocks[0].tryEndLabel, "try_end");
+    ASSERT_EQ(function.catchBlocks[0].catchBeginLabel, "catch_begin");
 }
 
-TEST(parsertests, field_value)
+TEST(parsertests, parse_numbers0)
 {
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, 12345}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(12345))) << "12345 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        std::string s = "i32 f <value=A>";
+TEST(parsertests, parse_numbers1)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, 0xFEFfe}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(0xFEFfe)))
+        << "0xFEFfe expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        v.push_back(l.TokenizeString(".record A {").first);
-        v.push_back(l.TokenizeString(s).first);
-        v.push_back(l.TokenizeString("}").first);
+TEST(parsertests, parse_numbers2)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, 01237}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(01237))) << "01237 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        auto res = p.Parse(v);
+TEST(parsertests, parse_numbers3)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, 0b10101}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(0b10101)))
+        << "0b10101 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        Error e = p.ShowError();
+TEST(parsertests, parse_numbers4)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, -12345}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-12345))) << "-12345 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_METADATA_INVALID_VALUE);
-        ASSERT_EQ(e.lineNumber, 2);
-        ASSERT_EQ(e.pos, s.find('A'));
-        ASSERT_EQ(e.message, "Excepted integer literal");
-    }
+TEST(parsertests, parse_numbers5)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, -0xFEFfe}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-0xFEFfe))) << "12345 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
+TEST(parsertests, parse_numbers6)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, -01237}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-01237))) << "12345 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        std::string s = "i32 f <value=10>";
+TEST(parsertests, parse_numbers7)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("movi v0, -0b10101}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(int64_t(-0b10101)))
+        << "-0b10101 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        v.push_back(l.TokenizeString(".record A {").first);
-        v.push_back(l.TokenizeString(s).first);
-        v.push_back(l.TokenizeString("}").first);
+TEST(parsertests, parse_numbers8)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.0}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0)) << "1.0 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        auto res = p.Parse(v);
+TEST(parsertests, parse_numbers9)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.)) << "1. expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        Error e = p.ShowError();
+TEST(parsertests, parse_numbers10)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, .1}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(.1)) << ".0 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
+TEST(parsertests, parse_numbers11)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1e10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e10)) << "1e10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        auto &program = res.Value();
-        auto &record = program.recordTable.find("A")->second;
-        auto &field = record.fieldList[0];
+TEST(parsertests, parse_numbers12)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1e+10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e+10)) << "1e+10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        ASSERT_EQ(field.metadata->GetFieldType().GetName(), "i32");
-        ASSERT_TRUE(field.metadata->GetValue());
-        ASSERT_EQ(field.metadata->GetValue()->GetType(), Value::Type::I32);
-        ASSERT_EQ(field.metadata->GetValue()->GetValue<int32_t>(), 10);
-    }
+TEST(parsertests, parse_numbers13)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1e-10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1e-10)) << "1e-10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
+TEST(parsertests, parse_numbers14)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e10)) << "1.0e10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        std::string s = "panda.String f <value=\"10\">";
+TEST(parsertests, parse_numbers15)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e+10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e+10)) << "1.0e+10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        v.push_back(l.TokenizeString(".record A {").first);
-        v.push_back(l.TokenizeString(s).first);
-        v.push_back(l.TokenizeString("}").first);
+TEST(parsertests, parse_numbers16)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.0e-10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.0e-10)) << "12345 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        auto res = p.Parse(v);
+TEST(parsertests, parse_numbers17)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.e10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e10)) << "1.e10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        Error e = p.ShowError();
+TEST(parsertests, parse_numbers18)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.e+10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e+10)) << "1.e+10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
+TEST(parsertests, parse_numbers19)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, 1.e-10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(1.e-10)) << "12345 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        auto &program = res.Value();
-        auto &record = program.recordTable.find("A")->second;
-        auto &field = record.fieldList[0];
+TEST(parsertests, parse_numbers20)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.0}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0)) << "-1.0 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        ASSERT_EQ(field.metadata->GetFieldType().GetName(), "panda.String");
-        ASSERT_TRUE(field.metadata->GetValue());
-        ASSERT_EQ(field.metadata->GetValue()->GetType(), Value::Type::STRING);
-        ASSERT_EQ(field.metadata->GetValue()->GetValue<std::string>(), "10");
-    }
+TEST(parsertests, parse_numbers21)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.)) << "-1. expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-    {
-        std::vector<std::vector<ark::pandasm::Token>> v;
-        Lexer l;
-        Parser p;
+TEST(parsertests, parse_numbers22)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -.1}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-.1)) << "-.0 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        std::string s = "panda.String f";
+TEST(parsertests, parse_numbers23)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1e10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e10)) << "-1e10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        v.push_back(l.TokenizeString(".record A {").first);
-        v.push_back(l.TokenizeString(s).first);
-        v.push_back(l.TokenizeString("}").first);
+TEST(parsertests, parse_numbers24)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1e+10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e+10)) << "-1e+10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        auto res = p.Parse(v);
+TEST(parsertests, parse_numbers25)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1e-10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1e-10)) << "-1e-10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        Error e = p.ShowError();
+TEST(parsertests, parse_numbers26)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e10)) << "-1.0e10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
+TEST(parsertests, parse_numbers27)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e+10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e+10)) << "-1.0e+10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        auto &program = res.Value();
-        auto &record = program.recordTable.find("A")->second;
-        auto &field = record.fieldList[0];
+TEST(parsertests, parse_numbers28)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.0e-10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.0e-10)) << "-1.0e-10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
 
-        ASSERT_EQ(field.metadata->GetFieldType().GetName(), "panda.String");
-        ASSERT_FALSE(field.metadata->GetValue());
-    }
+TEST(parsertests, parse_numbers29)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.e10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e10)) << "-1.e10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
+
+TEST(parsertests, parse_numbers30)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.e+10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e+10)) << "-1.e+10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
+
+TEST(parsertests, parse_numbers31)
+{
+    const auto sigMain = GetFunctionSignatureFromName("main", {});
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+    v.push_back(l.TokenizeString(".function u8 main(){").first);
+    v.push_back(l.TokenizeString("fmovi.64 v0, -1.e-10}").first);
+    auto item = p.Parse(v);
+    ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].imms[0], Ins::IType(-1.e-10)) << "-1.e-10 expected";
+    ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE) << "ERR_NONE expected";
+}
+
+TEST(parsertests, field_value1)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = "i32 f <value=A>";
+
+    v.push_back(l.TokenizeString(".record A {").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    auto res = p.Parse(v);
+
+    Error e = p.ShowError();
+
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_BAD_METADATA_INVALID_VALUE);
+    ASSERT_EQ(e.lineNumber, 2);
+    ASSERT_EQ(e.pos, s.find('A'));
+    ASSERT_EQ(e.message, "Excepted integer literal");
+}
+
+TEST(parsertests, field_value2)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = "i32 f <value=10>";
+
+    v.push_back(l.TokenizeString(".record A {").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    auto res = p.Parse(v);
+
+    Error e = p.ShowError();
+
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
+
+    auto &program = res.Value();
+    auto &record = program.recordTable.find("A")->second;
+    auto &field = record.fieldList[0];
+
+    ASSERT_EQ(field.metadata->GetFieldType().GetName(), "i32");
+    ASSERT_TRUE(field.metadata->GetValue());
+    ASSERT_EQ(field.metadata->GetValue()->GetType(), Value::Type::I32);
+    ASSERT_EQ(field.metadata->GetValue()->GetValue<int32_t>(), 10);
+}
+
+TEST(parsertests, field_value3)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = "panda.String f <value=\"10\">";
+
+    v.push_back(l.TokenizeString(".record A {").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    auto res = p.Parse(v);
+
+    Error e = p.ShowError();
+
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
+
+    auto &program = res.Value();
+    auto &record = program.recordTable.find("A")->second;
+    auto &field = record.fieldList[0];
+
+    ASSERT_EQ(field.metadata->GetFieldType().GetName(), "panda.String");
+    ASSERT_TRUE(field.metadata->GetValue());
+    ASSERT_EQ(field.metadata->GetValue()->GetType(), Value::Type::STRING);
+    ASSERT_EQ(field.metadata->GetValue()->GetValue<std::string>(), "10");
+}
+TEST(parsertests, field_value4)
+{
+    std::vector<std::vector<ark::pandasm::Token>> v;
+    Lexer l;
+    Parser p;
+
+    std::string s = "panda.String f";
+
+    v.push_back(l.TokenizeString(".record A {").first);
+    v.push_back(l.TokenizeString(s).first);
+    v.push_back(l.TokenizeString("}").first);
+
+    auto res = p.Parse(v);
+
+    Error e = p.ShowError();
+
+    ASSERT_EQ(e.err, Error::ErrorType::ERR_NONE) << e.message;
+
+    auto &program = res.Value();
+    auto &record = program.recordTable.find("A")->second;
+    auto &field = record.fieldList[0];
+
+    ASSERT_EQ(field.metadata->GetFieldType().GetName(), "panda.String");
+    ASSERT_FALSE(field.metadata->GetValue());
 }
 
 TEST(parsertests, call_short_0args)
