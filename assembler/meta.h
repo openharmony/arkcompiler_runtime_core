@@ -208,6 +208,17 @@ public:
         annotations_.insert(annotations_.end(), annotations.begin(), annotations.end());
     }
 
+    void DeleteAnnotationElementByName(std::string_view annotation_name, std::string_view annotation_elem_name)
+    {
+        auto annotation_iter = std::find_if(annotations_.begin(), annotations_.end(),
+            [&](pandasm::AnnotationData &annotation) -> bool {
+            return annotation.GetName() == annotation_name;
+        });
+        if (annotation_iter != annotations_.end()) {
+            annotation_iter->DeleteAnnotationElementByName(annotation_elem_name);
+        }
+    }
+
     void DeleteAnnotationByName(const std::string_view &annotation_name)
     {
         auto annotation_iter = std::find_if(annotations_.begin(), annotations_.end(),
@@ -216,6 +227,17 @@ public:
         });
         if (annotation_iter != annotations_.end()) {
             (void)annotations_.erase(annotation_iter);
+        }
+    }
+
+    void AddAnnotationElementByName(const std::string_view &annotation_name, AnnotationElement &&element)
+    {
+        auto annotation_iter = std::find_if(annotations_.begin(), annotations_.end(),
+            [&](pandasm::AnnotationData &annotation) -> bool {
+            return annotation.GetName() == annotation_name;
+        });
+        if (annotation_iter != annotations_.end()) {
+            annotation_iter->AddElement(std::move(element));
         }
     }
 

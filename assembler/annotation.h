@@ -61,6 +61,8 @@ public:
         elements_.push_back(std::forward<AnnotationElement>(element));
     }
 
+    void DeleteAnnotationElementByName(const std::string_view &annotation_elem_name);
+
     void SetOrAddElementByIndex(size_t ele_idx, AnnotationElement &&element);
 
 private:
@@ -362,6 +364,9 @@ public:
                 break;
             case '@':
                 type = Type::METHOD_HANDLE;
+                break;
+            case '#':
+                type = Type::LITERALARRAY;
                 break;
             case '0':
             default:
