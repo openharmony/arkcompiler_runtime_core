@@ -5,34 +5,38 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_1625 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
+_ESModuleRecord_1698 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
 
-_ESScopeNamesRecord_1601 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
+_ESScopeNamesRecord_1674 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
 
-_GLOBAL_1705 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1778 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1722 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_1795 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_1731 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1804 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_1753 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
+_GLOBAL_1826 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
 
-_GLOBAL_1772 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1753, ]}
+_GLOBAL_1845 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1826, ]}
 
-_GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_value:2, i32:0, tag_value:5, string:"this", tag_value:2, i32:1, ]}
+_GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_value:2, i32:0, tag_value:5, string:"this", tag_value:2, i32:1, ]}
 
 
 
 # ====================
 # RECORDS
 
+.record _ESExpectedPropertyCountAnnotation {
+}
+.record.source_file 
+
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_3278
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1698
 }
 .record.source_file 
 
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_3254
+	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_1674
 }
 .record.source_file 
 
@@ -403,7 +407,7 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
 	fldai 1.230000e+00                       # line: 71           # column: 9
 	trystglobalbyname 0x0, varA              # line: 71           # column: 2
-	createobjectwithbuffer 0x1, _GLOBAL_1705 # line: 72           # column: 12
+	createobjectwithbuffer 0x1, _GLOBAL_1778 # line: 72           # column: 12
 	sta v5                                   # line: 72           # column: 12
 	lda v5                                   # line: 72           # column: 12
 	sta v3                                   # line: 72           # column: 6
@@ -464,6 +468,8 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 }
 
 .function_kind FunctionKind::FUNCTION
+ _ESExpectedPropertyCountAnnotation
+ ExpectedPropertyCount 1
  _ESSlotNumberAnnotation
  SlotNumber 2
 .function any .#~@0=#HelloWorld(any a0, any a1, any a2) {
@@ -547,6 +553,8 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 }
 
 .function_kind FunctionKind::NONE
+ _ESExpectedPropertyCountAnnotation
+ ExpectedPropertyCount 1
  _ESSlotNumberAnnotation
  SlotNumber 2
 .function any .#~@2=#NestedLiteralArray(any a0, any a1, any a2) {
@@ -589,7 +597,7 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
  _ESSlotNumberAnnotation
  SlotNumber 28
 .function any .func_main_0(any a0, any a1, any a2) {
-	newlexenvwithname 0x2, _GLOBAL_1799      # line: 18446744073709551615           # column: 4294967295
+	newlexenvwithname 0x2, _GLOBAL_1872      # line: 18446744073709551615           # column: 4294967295
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	lda a1                                   # line: 18446744073709551615           # column: 4294967295
 	stlexvar 0x0, 0x0                        # line: 18446744073709551615           # column: 4294967295
@@ -611,7 +619,7 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	stmodulevar 0x0                          # line: 17           # column: 11
 	ldhole                                   # line: 21           # column: 17
 	sta v17                                  # line: 21           # column: 17
-	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1722, 0x0, v17 # line: 21           # column: 17
+	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1795, 0x0, v17 # line: 21           # column: 17
 	sta v15                                  # line: 21           # column: 17
 	sta v16                                  # line: 21           # column: 6
 	lda v15                                  # line: 21           # column: 17
@@ -621,7 +629,7 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	sta v3                                   # line: 21           # column: 6
 	ldhole                                   # line: 25           # column: 10
 	sta v17                                  # line: 25           # column: 10
-	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1731, 0x0, v17 # line: 25           # column: 10
+	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1804, 0x0, v17 # line: 25           # column: 10
 	sta v15                                  # line: 25           # column: 10
 	sta v16                                  # line: 25           # column: 6
 	lda v15                                  # line: 25           # column: 10
@@ -631,7 +639,7 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	sta v4                                   # line: 25           # column: 6
 	ldhole                                   # line: 29           # column: 25
 	sta v17                                  # line: 29           # column: 25
-	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1772, 0x0, v17 # line: 29           # column: 25
+	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1845, 0x0, v17 # line: 29           # column: 25
 	sta v15                                  # line: 29           # column: 25
 	sta v16                                  # line: 29           # column: 6
 	sta v5                                   # line: 29           # column: 6
