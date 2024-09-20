@@ -212,7 +212,7 @@ private:
     bool NeedRemoveInputFromSaveStateInstruction(Inst *inputInst);
     void CollectSaveStateInputsForRemoval(Inst *inst);
     void CleanupSaveStateInstructionInputs(Loop *loop);
-    bool NeedRemoveInputFromPhiInstruction(Inst *inputInst);
+    Inst *FindHoistedToStringCallInput(Inst *phi);
     void CleanupPhiInstructionInputs(Inst *phi);
     void CleanupPhiInstructionInputs(Loop *loop);
     bool HasNotHoistedUser(PhiInst *phi);

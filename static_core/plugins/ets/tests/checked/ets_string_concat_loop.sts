@@ -1682,3 +1682,25 @@ function bugfix_concat_loop2() {
         assert bugfix_concat_loop2_test4() == expected;
     }
 }
+
+//! CHECKER       Invalid phi instruction AOT (IARN2S/19226)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*bugfix_concat_loop3' --compiler-loop-unroll=false --compiler-inlining=true"
+
+//! CHECKER       Invalid phi instruction JIT (IARN2S/19226)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-loop-unroll=false", entry: "ETSGLOBAL::bugfix_concat_loop3"
+
+function bugfix_concat_loop3() {
+    let str = "";
+    let a2 : string[] = ["ddd"]
+    let idx2 : string | boolean;
+    for (idx2 of a2) {
+        let c2 = idx2
+        if (c2 instanceof string) {
+            str += c2;
+        }
+    }
+
+    assert(str == "ddd");
+}
