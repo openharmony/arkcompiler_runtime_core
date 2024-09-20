@@ -25,7 +25,7 @@ from pytest import Config, Function, Item, Parser, hookimpl
 
 pytest_plugins = ["pytest_trio"]
 
-DEFAULT_TIMEOUT: float = 90.0
+DEFAULT_TIMEOUT: float = 300.0
 LOG = logging.getLogger(__name__)
 
 

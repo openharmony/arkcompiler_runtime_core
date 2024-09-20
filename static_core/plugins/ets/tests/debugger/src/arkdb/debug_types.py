@@ -18,11 +18,13 @@ import base64
 from collections import OrderedDict, UserList
 from dataclasses import dataclass, field
 from pathlib import Path
+from subprocess import CalledProcessError
 from typing import Any, Dict, Generic, List, Literal, TypeVar, Union
 
 import trio
 from cdp import debugger, runtime
 
+from arkdb.compiler import CompileError
 from arkdb.compiler_verification.expression_verifier import ExpressionVerifier
 from arkdb.debug_client import DebuggerClient
 from arkdb.logs import logger
@@ -223,20 +225,26 @@ class Paused(Wrap[debugger.Paused]):
         expression: str | Path,
         abc_files: list[Path],
         verifier: ExpressionVerifier | None = None,
+        allow_compiler_failure: bool = False,
     ):
         assert len(self.data.call_frames) > 0
         paused_file = Path(self.data.call_frames[0].url)
         # Must be 1-based.
         paused_code_line = self.data.call_frames[0].location.line_number + 1
 
-        compiled_expression = self.client.code_compiler.compile_expression(
-            expression,
-            eval_panda_files=abc_files,
-            eval_source=paused_file,
-            eval_line=paused_code_line,
-            ast_parser=verifier.ast_parser if verifier else None,
-            eval_log_level="debug",
-        )
+        try:
+            compiled_expression = self.client.code_compiler.compile_expression(
+                expression,
+                eval_panda_files=abc_files,
+                eval_source=paused_file,
+                eval_line=paused_code_line,
+                ast_parser=verifier.ast_parser if verifier else None,
+                eval_log_level="debug",
+            )
+        except CalledProcessError as e:
+            if allow_compiler_failure:
+                raise CompileError(e.output) from e
+
         if verifier is not None:
             verifier(compiled_expression)
 

@@ -14,10 +14,10 @@
 # limitations under the License.
 #
 
-from pytest import fixture, mark
+from pytest import fixture, mark, TempPathFactory
 from typing_extensions import LiteralString
 
-from arkdb.compiler import CompileError, StringCodeCompiler
+from arkdb.compiler import CompileError, Compiler, Options, StringCodeCompiler
 from arkdb.mirrors.base import arkts_str
 from arkdb.runnable_module import ScriptFile
 from arkdb.walker import BreakpointWalkerType
@@ -128,9 +128,23 @@ function main() {{
         assert walker.capture.stdout[-1] == arkts_str(f"{AFTER_EVAL_MESSAGE}{expected_string}")
 
 
-@fixture
+@fixture(scope="session")
+def session_code_compiler(
+    tmp_path_factory: TempPathFactory,
+    ark_compiler_default_options: Options,
+) -> StringCodeCompiler:
+    """
+    Return :class:`StringCodeCompiler` instance that can compile ``sts``-file.
+    """
+    return StringCodeCompiler(
+        tmp_path=tmp_path_factory.mktemp("./expressions", numbered=True),
+        ark_compiler=Compiler(ark_compiler_default_options),
+    )
+
+
+@fixture(scope="session")
 def expression_evaluation_base(
-    code_compiler: StringCodeCompiler,
+    session_code_compiler: StringCodeCompiler,
 ) -> ScriptFile:
     base_code = """\
 let globalInt: int = 2;
@@ -163,7 +177,7 @@ function main() {
 }
 """
     # Will compile once for all test cases.
-    return code_compiler.compile(base_code)
+    return session_code_compiler.compile(base_code, name="failed_expressions_base_file")
 
 
 @mark.parametrize(
@@ -201,4 +215,4 @@ async def test_compilation_error(
     """
     async with breakpoint_walker(expression_evaluation_base) as walker:
         eval_point = await anext(walker)
-        await eval_point.evaluate(expression, [walker.script_file.panda_file])
+        await eval_point.evaluate(expression, [walker.script_file.panda_file], allow_compiler_failure=True)
