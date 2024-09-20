@@ -151,6 +151,8 @@ class ESCheckedTestPreparationStep(TestPreparationStep):
         res = subprocess.run(
             [
                 generator_executable,
+                '--proc',
+                str(self.config.general.processes),
                 '--out',
                 self.test_gen_path,
                 '--tmp',
