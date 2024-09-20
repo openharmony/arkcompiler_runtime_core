@@ -364,7 +364,9 @@ void PandaEtsVM::HandleGCRoutineInMutator()
         for (auto *entry : registeredFinalizationRegistryInstances_) {
             VMHandle<ObjectHeader> handle(coroutine, entry->GetCoreType());
             Value arg(handle.GetPtr());
+            finalizationRegistryLock_.Unlock();
             cleanup->GetPandaMethod()->Invoke(coroutine, &arg);
+            finalizationRegistryLock_.Lock();
             ASSERT(!coroutine->HasPendingException());
         }
     }
