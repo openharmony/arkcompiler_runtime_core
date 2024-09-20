@@ -260,10 +260,11 @@ class Runner(ABC):
     # and add them as tests
     def add_directory(self, test_dir: TestDirectory) -> None:
         directory, extension, flags = test_dir
+        directory = str(directory)
         Log.summary(_LOGGER, f"Loading tests from the directory {directory}")
         test_files = []
         if self.explicit_test is not None:
-            if self.explicit_test.startswith(directory):
+            if self.explicit_test.startswith(directory) or path.isdir(directory):
                 test_files.extend([correct_path(self.test_root, self.explicit_test)])
         elif self.explicit_list is not None:
             extra_dir = None if directory == self.test_root or directory.startswith(str(self.test_root)) else directory
@@ -272,6 +273,8 @@ class Runner(ABC):
             if not self.config.test_lists.skip_test_lists:
                 self.load_excluded_tests()
                 self.load_ignored_tests()
+            if not path.exists(directory):
+                directory = str(path.join(self.test_root, directory))
             test_files.extend(self.__load_test_files(directory, extension))
 
         self._search_both_excluded_and_ignored_tests()
