@@ -117,7 +117,7 @@ sub:
       - method: join
         params:
            - |
-             paramOf("'---'", "''")
+             paramOf("'---'", "''", undefined)
         mandatory: 0
       - method: reverse
       - method: sort

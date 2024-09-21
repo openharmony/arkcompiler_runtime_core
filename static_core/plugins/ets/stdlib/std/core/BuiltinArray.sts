@@ -978,14 +978,14 @@ export function lastIndexOf(self: boolean[], element: boolean, fromIndex?: Numbe
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: boolean[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
@@ -2658,14 +2658,14 @@ export function lastIndexOf(self: byte[], element: byte, fromIndex?: Number): nu
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: byte[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
@@ -4338,14 +4338,14 @@ export function lastIndexOf(self: short[], element: short, fromIndex?: Number): 
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: short[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
@@ -6018,14 +6018,14 @@ export function lastIndexOf(self: int[], element: int, fromIndex?: Number): numb
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: int[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
@@ -7698,14 +7698,14 @@ export function lastIndexOf(self: long[], element: long, fromIndex?: Number): nu
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: long[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
@@ -9378,14 +9378,14 @@ export function lastIndexOf(self: float[], element: float, fromIndex?: Number): 
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: float[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
@@ -11066,14 +11066,14 @@ export function lastIndexOf(self: double[], element: double, fromIndex?: Number)
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: double[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
@@ -12754,14 +12754,14 @@ export function lastIndexOf(self: char[], element: char, fromIndex?: Number): nu
  * @returns A string with all array elements joined. If `length()` is 0, the empty string is returned.
  */
 export function join(self: char[], sep?: String): string {
+    if (self.length == 0) {
+        return ""
+    }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder()
-    for (let i: int = 0; i < self.length; i++) {
+    let sb = new StringBuilder(new String(self[0]))
+    for (let i: int = 1; i < self.length; i++) {
         const tmp = self[i]
-        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
-        if (i != 0) {
-            sb.append(sepReal);
-        }
+        sb.append(sepReal);
         sb.append(tmp)
     }
 
