@@ -38,7 +38,6 @@ public:
 
     bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref,
                      const ReferenceCheckPredicateT &pred) const final;
-    bool IsReference(const BaseClass *baseCls, const ObjectHeader *ref) const final;
 
     void HandleReference(GC *gc, GCMarkingStackType *objectsStack, const BaseClass *cls, const ObjectHeader *object,
                          const ReferenceProcessPredicateT &pred) final;
@@ -47,8 +46,7 @@ public:
 
     void ProcessReferences(bool concurrent, bool clearSoftReferences, GCPhase gcPhase,
                            const mem::GC::ReferenceClearPredicateT &pred) final;
-    void ProcessReferencesAfterCompaction(bool clearSoftReferences,
-                                          const mem::GC::ReferenceClearPredicateT &pred) final;
+    void ProcessReferencesAfterCompaction([[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred) final;
 
     ark::mem::Reference *CollectClearedReferences() final
     {

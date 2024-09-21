@@ -42,6 +42,8 @@ public:
     {
     }
 
+    void ProcessReferencesAfterCompaction([[maybe_unused]] const mem::GC::ReferenceClearPredicateT &pred) override {}
+
     ark::mem::Reference *CollectClearedReferences() override
     {
         return nullptr;

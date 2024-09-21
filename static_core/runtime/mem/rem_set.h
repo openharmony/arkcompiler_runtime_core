@@ -107,13 +107,6 @@ public:
             return GetBitmapSizeInBytes() * BITS_PER_BYTE;
         }
 
-        void Merge(Bitmap other)
-        {
-            for (size_t i = 0; i < SIZE; i++) {
-                bitmap_[i] |= other.bitmap_[i];
-            }
-        }
-
         void Set(size_t idx)
         {
             size_t elemIdx = idx / ELEM_BITS;

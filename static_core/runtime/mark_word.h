@@ -310,6 +310,11 @@ public:
         return GetForwardingAddressField() << FORWARDING_ADDRESS_SHIFT;
     }
 
+    bool IsForwarded() const
+    {
+        return GetState() == MarkWord::ObjectState::STATE_GC;
+    }
+
     Monitor::MonitorId GetMonitorId() const
     {
         LOG_IF(GetState() != STATE_HEAVY_LOCKED, DEBUG, RUNTIME) << "Wrong State";
