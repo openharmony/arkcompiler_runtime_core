@@ -258,4 +258,15 @@ void AnnotationData::SetOrAddElementByIndex(size_t ele_idx, AnnotationElement &&
     }
     elements_[ele_idx] = std::forward<AnnotationElement>(element);
 }
+
+void AnnotationData::DeleteAnnotationElementByName(const std::string_view &annotation_elem_name)
+{
+    auto annotation_elem_iter = std::find_if(elements_.begin(), elements_.end(),
+        [&](pandasm::AnnotationElement &annotation_element) -> bool {
+        return annotation_element.GetName() == annotation_elem_name;
+    });
+    if (annotation_elem_iter != elements_.end()) {
+        (void)elements_.erase(annotation_elem_iter);
+    }
+}
 }  // namespace panda::pandasm
