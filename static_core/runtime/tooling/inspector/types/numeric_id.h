@@ -16,15 +16,15 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_NUMERIC_ID_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_NUMERIC_ID_H
 
-#include "utils/expected.h"
-#include "utils/json_parser.h"
-#include "utils/string_helpers.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <string>
 #include <type_traits>
+
+#include "utils/expected.h"
+#include "utils/json_parser.h"
+#include "utils/string_helpers.h"
 
 namespace ark::tooling::inspector {
 using BreakpointId = size_t;

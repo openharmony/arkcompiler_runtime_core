@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#include "runtime/include/class.h"
-#include "runtime/include/coretypes/array-inl.h"
-#include "runtime/include/coretypes/string-inl.h"
-#include "runtime/include/object_header.h"
-#include "runtime/include/hclass.h"
+#include "runtime/tooling/pt_default_lang_extension.h"
+
+#include "include/class.h"
+#include "include/coretypes/array-inl.h"
+#include "include/coretypes/string-inl.h"
+#include "include/object_header.h"
+#include "include/hclass.h"
 #include "runtime/mem/object_helpers-inl.h"
-#include "runtime/tooling/default_inspector_extension.h"
 
 namespace ark::tooling {
 
@@ -100,12 +101,12 @@ static TypedValue GetFieldValueStatic(T object, const Field &field)
     UNREACHABLE();
 }
 
-std::string StaticDefaultInspectorExtension::GetClassName(const ObjectHeader *object)
+std::string PtStaticDefaultExtension::GetClassName(const ObjectHeader *object)
 {
     return ClassHelper::GetNameUndecorated(object->ClassAddr<Class>()->GetDescriptor());
 }
 
-std::optional<std::string> StaticDefaultInspectorExtension::GetAsString(const ObjectHeader *object)
+std::optional<std::string> PtStaticDefaultExtension::GetAsString(const ObjectHeader *object)
 {
     if (!object->ClassAddr<Class>()->IsStringClass()) {
         return {};
@@ -120,7 +121,7 @@ std::optional<std::string> StaticDefaultInspectorExtension::GetAsString(const Ob
     return value;
 }
 
-std::optional<size_t> StaticDefaultInspectorExtension::GetLengthIfArray(const ObjectHeader *object)
+std::optional<size_t> PtStaticDefaultExtension::GetLengthIfArray(const ObjectHeader *object)
 {
     if (!object->ClassAddr<Class>()->IsArrayClass()) {
         return {};
@@ -128,7 +129,7 @@ std::optional<size_t> StaticDefaultInspectorExtension::GetLengthIfArray(const Ob
     return coretypes::Array::Cast(const_cast<ObjectHeader *>(object))->GetLength();
 }
 
-void StaticDefaultInspectorExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
+void PtStaticDefaultExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
     auto cls = object->ClassAddr<Class>();
     ASSERT(cls != nullptr);
@@ -153,7 +154,7 @@ void StaticDefaultInspectorExtension::EnumerateProperties(const ObjectHeader *ob
     }
 }
 
-void StaticDefaultInspectorExtension::EnumerateGlobals(const PropertyHandler &handler)
+void PtStaticDefaultExtension::EnumerateGlobals(const PropertyHandler &handler)
 {
     auto classLinkerExtension = Runtime::GetCurrent()->GetClassLinker()->GetExtension(lang_);
     ASSERT(classLinkerExtension != nullptr);
@@ -165,7 +166,7 @@ void StaticDefaultInspectorExtension::EnumerateGlobals(const PropertyHandler &ha
     });
 }
 
-std::string DynamicDefaultInspectorExtension::GetClassName(const ObjectHeader *object)
+std::string PtDynamicDefaultExtension::GetClassName(const ObjectHeader *object)
 {
     if (object->ClassAddr<HClass>()->IsString()) {
         return "String object";
@@ -173,12 +174,12 @@ std::string DynamicDefaultInspectorExtension::GetClassName(const ObjectHeader *o
     return "Dynamic object";
 }
 
-std::optional<std::string> DynamicDefaultInspectorExtension::GetAsString([[maybe_unused]] const ObjectHeader *object)
+std::optional<std::string> PtDynamicDefaultExtension::GetAsString([[maybe_unused]] const ObjectHeader *object)
 {
     return {};
 }
 
-std::optional<size_t> DynamicDefaultInspectorExtension::GetLengthIfArray(const ObjectHeader *object)
+std::optional<size_t> PtDynamicDefaultExtension::GetLengthIfArray(const ObjectHeader *object)
 {
     if (!object->ClassAddr<HClass>()->IsArray()) {
         return {};
@@ -187,7 +188,7 @@ std::optional<size_t> DynamicDefaultInspectorExtension::GetLengthIfArray(const O
     return length;
 }
 
-void DynamicDefaultInspectorExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
+void PtDynamicDefaultExtension::EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler)
 {
     auto *cls = object->ClassAddr<HClass>();
     ASSERT(cls != nullptr);

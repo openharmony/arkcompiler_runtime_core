@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
-#include "endpoint_base.h"
-
-#include "utils/json_parser.h"
-#include "utils/logger.h"
+#include "connection/endpoint_base.h"
 
 #include <optional>
+
+#include "utils/json_builder.h"
+#include "utils/json_parser.h"
+#include "utils/logger.h"
 
 namespace ark::tooling::inspector {
 void EndpointBase::OnCall(const char *method, EndpointBase::MethodHandler &&handler)
@@ -45,16 +46,17 @@ void EndpointBase::HandleMessage(const std::string &message)
     if (method != nullptr && result == nullptr) {
         os::memory::LockHolder lock(methodHandlersMutex_);
 
+        auto optId = id != nullptr ? std::make_optional(*id) : std::nullopt;
         if (auto handler = methodHandlers_.find(*method); handler != methodHandlers_.end()) {
             auto *params = request.GetValue<JsonObject::JsonObjPointer>("params");
 
             JsonObject empty;
 
-            handler->second(sessionId != nullptr ? *sessionId : std::string(),
-                            id != nullptr ? std::make_optional(*id) : std::nullopt,
+            handler->second(sessionId != nullptr ? *sessionId : std::string(), optId,
                             params != nullptr ? **params : empty);
         } else {
             LOG(WARNING, DEBUGGER) << "Unsupported method: " << message;
+            HandleUnsupportedMethod(optId, *method);
         }
     } else if (result != nullptr && method == nullptr) {
         if (id == nullptr) {
@@ -84,6 +86,19 @@ void EndpointBase::Call(const std::string &sessionId, std::optional<Id> id, cons
         if (!sessionId.empty()) {
             call.AddProperty("sessionId", sessionId);
         }
+    });
+}
+
+void EndpointBase::HandleUnsupportedMethod(std::optional<double> optId, const std::string &method)
+{
+    Send([&optId, &method](JsonObjectBuilder &builder) {
+        if (optId) {
+            builder.AddProperty("id", *optId);
+        }
+        builder.AddProperty("error", [&method](JsonObjectBuilder &errorBuilder) {
+            errorBuilder.AddProperty("code", static_cast<int>(InspectorErrorCode::METHOD_NOT_FOUND));
+            errorBuilder.AddProperty("message", "Unsupported method: " + method);
+        });
     });
 }
 }  // namespace ark::tooling::inspector

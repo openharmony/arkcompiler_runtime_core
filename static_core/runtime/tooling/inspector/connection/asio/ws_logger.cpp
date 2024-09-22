@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#include "ws_logger.h"
+#include "connection/asio/ws_logger.h"
+
+#include "websocketpp/logger/levels.hpp"
 
 #include "macros.h"
 #include "utils/logger.h"
-
-#include "websocketpp/logger/levels.hpp"
 
 namespace ark::tooling::inspector {
 void WsLogger::set_channels(Level channels)

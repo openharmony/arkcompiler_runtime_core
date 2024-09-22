@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-#include "runtime/tooling/inspector/evaluation/base64.h"
-
 #include <string_view>
 #include <utility>
+
+#include "gtest/gtest.h"
+
+#include "evaluation/base64.h"
 
 // NOLINTBEGIN
 

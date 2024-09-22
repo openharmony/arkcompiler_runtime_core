@@ -16,16 +16,16 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TOOLING_ETS_INSPECTOR_EXTENSION_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TOOLING_ETS_INSPECTOR_EXTENSION_H
 
-#include "runtime/tooling/default_inspector_extension.h"
+#include "runtime/tooling/pt_default_lang_extension.h"
 
 namespace ark::ets {
-class EtsInspectorExtension : public tooling::StaticDefaultInspectorExtension {
+class PtEtsExtension : public tooling::PtStaticDefaultExtension {
 public:
-    explicit EtsInspectorExtension() : tooling::StaticDefaultInspectorExtension(panda_file::SourceLang::ETS) {}
-    ~EtsInspectorExtension() override = default;
+    explicit PtEtsExtension() : tooling::PtStaticDefaultExtension(panda_file::SourceLang::ETS) {}
+    ~PtEtsExtension() override = default;
 
-    NO_COPY_SEMANTIC(EtsInspectorExtension);
-    NO_MOVE_SEMANTIC(EtsInspectorExtension);
+    NO_COPY_SEMANTIC(PtEtsExtension);
+    NO_MOVE_SEMANTIC(PtEtsExtension);
 
     std::string_view GetThisParameterName() const override
     {

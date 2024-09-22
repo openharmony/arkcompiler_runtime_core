@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-#include "test_frame.h"
 #include "debug_info_cache.h"
-#include "runtime_options.h"
-#include "runtime.h"
-#include "types/numeric_id.h"
+
+#include "gtest/gtest.h"
+
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
+#include "runtime.h"
+#include "runtime_options.h"
+#include "types/numeric_id.h"
+
+#include "test_frame.h"
 
 // NOLINTBEGIN
 

@@ -13,20 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_INSPECTOR_EVALUATION_HELPERS_H
-#define PANDA_TOOLING_INSPECTOR_EVALUATION_HELPERS_H
-
-#include "runtime/class_linker_context.h"
-#include "runtime/tooling/inspector/types/exception_details.h"
+#ifndef PANDA_RUNTIME_TOOLING_EVALUATION_HELPERS_H
+#define PANDA_RUNTIME_TOOLING_EVALUATION_HELPERS_H
 
 #include <string>
 
-namespace ark::tooling::inspector {
+#include "runtime/class_linker_context.h"
+#include "runtime/include/tooling/debug_interface.h"
 
-using EvaluationResult = std::pair<std::optional<RemoteObject>, std::optional<ExceptionDetails>>;
+namespace ark::tooling {
 
-Method *LoadEvaluationPatch(ClassLinkerContext *ctx, const std::string &encodedBytecodeFragment);
+Expected<Method *, Error> LoadExpressionBytecode(ClassLinkerContext *ctx, const std::string &bytecode);
 
-}  // namespace ark::tooling::inspector
+}  // namespace ark::tooling
 
-#endif  // PANDA_TOOLING_INSPECTOR_EVALUATION_HELPERS_H
+#endif  // PANDA_RUNTIME_TOOLING_EVALUATION_HELPERS_H

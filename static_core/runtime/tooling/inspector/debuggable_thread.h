@@ -16,16 +16,21 @@
 #ifndef PANDA_TOOLING_INSPECTOR_DEBUGGABLE_THREAD_H
 #define PANDA_TOOLING_INSPECTOR_DEBUGGABLE_THREAD_H
 
-#include "runtime/tooling/debugger.h"
-#include "runtime/tooling/inspector/evaluation/helpers.h"
-#include "runtime/tooling/inspector/object_repository.h"
-#include "runtime/tooling/inspector/thread_state.h"
-#include "runtime/tooling/inspector/types/exception_details.h"
-#include "runtime/tooling/inspector/types/numeric_id.h"
-#include "runtime/tooling/inspector/types/pause_on_exceptions_state.h"
+#include "include/managed_thread.h"
+
+#include "evaluation/evaluation_engine.h"
+#include "object_repository.h"
+#include "thread_state.h"
+#include "types/exception_details.h"
+#include "types/numeric_id.h"
+#include "types/pause_on_exceptions_state.h"
 
 namespace ark::tooling::inspector {
-class DebuggableThread final {
+/**
+ * @brief Application thread abstraction.
+ * Note that private inheritance is used in order not to expose evaluation-related state details.
+ */
+class DebuggableThread final : private PtThreadEvaluationEngine {
 public:
     struct SuspensionCallbacks final {
         std::function<void(ObjectRepository &, const std::vector<BreakpointId> &, ObjectHeader *)> preSuspend;
@@ -37,8 +42,8 @@ public:
     };
 
 public:
-    DebuggableThread(ManagedThread *thread, SuspensionCallbacks &&callbacks);
-    ~DebuggableThread() = default;
+    DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks);
+    ~DebuggableThread() override = default;
 
     NO_COPY_SEMANTIC(DebuggableThread);
     NO_MOVE_SEMANTIC(DebuggableThread);
@@ -80,8 +85,14 @@ public:
     // Enables or disables stops on breakpoints
     void SetBreakpointsActive(bool active);
 
-    // Sets a breakpoint on the locations. Returns the breakpoint ID
-    BreakpointId SetBreakpoint(const std::vector<PtLocation> &locations);
+    /**
+     * @brief Set a breakpoint with optional condition.
+     * @param locations to set breakpoint at, all will have the same BreakpointId.
+     * @param condition pointer to string with panda bytecode, will not be saved.
+     * @returns BreakpointId of set breakpoint on success, empty otherwise.
+     * NOTE: current implementation supports setting a condition only for a single location.
+     */
+    std::optional<BreakpointId> SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition);
 
     // Removes the breakpoint by ID
     void RemoveBreakpoint(BreakpointId id);
@@ -91,15 +102,6 @@ public:
 
     // Executes a request to object repository on a paused thread (does nothing for running threads)
     bool RequestToObjectRepository(std::function<void(ObjectRepository &)> request);
-
-    /**
-     * @brief Loads provided bytecode file and executes evaluation method.
-     * File must contain public class with equally named static method taking no arguments.
-     * Name of both class and method must equal source code file name, path to which must be included into binary.
-     * @param bcFragment base64 encoded panda file.
-     * @returns pair of optional result and exception objects if it was raised by evaluated code.
-     */
-    std::pair<std::optional<RemoteObject>, std::optional<RemoteObject>> Evaluate(const std::string &bcFragment);
 
     /// The following methods should be called on an application thread
 
@@ -120,13 +122,17 @@ public:
     std::vector<RemoteObject> OnConsoleCall(const PandaVector<TypedValue> &arguments);
 
     /**
-     * @brief Executes method in evaluation mode.
-     * @param method static method taking no arguments.
-     * @returns pair of result (might be void) and pointer to exception (if appeared).
+     * @brief Evaluates the given bytecode expression.
+     * @param frameNumber frame depth to evaluate expression in.
+     * @param bytecode fragment with expression.
+     * @returns optional pair of result (might be void) and optional exception objects.
      */
-    std::pair<Value, ObjectHeader *> InvokeEvaluationMethod(Method *method);
+    std::optional<std::pair<RemoteObject, std::optional<RemoteObject>>> EvaluateExpression(
+        uint32_t frameNumber, const ExpressionWrapper &bytecode);
 
 private:
+    using PtThreadEvaluationEngine::EvaluateExpression;
+
     // Suspends a paused thread. Should be called on an application thread
     void Suspend(ObjectRepository &objectRepository, const std::vector<BreakpointId> &hitBreakpoints,
                  ObjectHeader *exception) REQUIRES(mutex_);
@@ -135,13 +141,11 @@ private:
     void Resume() REQUIRES(mutex_);
 
 private:
-    ManagedThread *thread_;
     SuspensionCallbacks callbacks_;
 
     os::memory::Mutex mutex_;
     ThreadState state_ GUARDED_BY(mutex_);
     bool suspended_ GUARDED_BY(mutex_) {false};
-    bool evaluationMode_ {false};
     std::optional<std::function<void(ObjectRepository &)>> request_ GUARDED_BY(mutex_);
     os::memory::ConditionVariable requestDone_ GUARDED_BY(mutex_);
 };

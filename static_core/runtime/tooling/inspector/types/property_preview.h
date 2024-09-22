@@ -16,10 +16,10 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_PREVIEW_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_PREVIEW_H
 
-#include "tooling/inspector/types/remote_object_type.h"
-
 #include <optional>
 #include <string>
+
+#include "types/remote_object_type.h"
 
 namespace ark::tooling::inspector {
 

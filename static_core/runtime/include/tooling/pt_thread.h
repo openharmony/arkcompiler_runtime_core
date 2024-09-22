@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_TOOLING_PT_THREAD_H
-#define PANDA_TOOLING_PT_THREAD_H
+#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H
+#define PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H
 
 #include <cstdint>
 #include "libpandabase/macros.h"
@@ -65,4 +65,4 @@ private:
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_TOOLING_PT_THREAD_H
+#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_PT_THREAD_H

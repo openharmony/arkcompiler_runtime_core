@@ -15,17 +15,25 @@
 # limitations under the License.
 #
 
+from typing import Final
+
 from pytest import fixture, mark, TempPathFactory
+import trio
 from typing_extensions import LiteralString
 
-from arkdb.compiler import CompileError, Compiler, Options, StringCodeCompiler
+from arkdb.compiler import CompileError, Compiler, EvaluateCompileExpressionArgs, Options, StringCodeCompiler
+from arkdb.debug_client import DebuggerClient, DebugLocator
+from arkdb.debug_types import compile_expression
 from arkdb.mirrors.base import arkts_str
 from arkdb.runnable_module import ScriptFile
-from arkdb.walker import BreakpointWalkerType
+from arkdb.runtime import Runtime
+from arkdb.source_meta import Breakpoint, parse_source_meta
+from arkdb.walker import BreakpointWalker, BreakpointWalkerType
 
 BEFORE_EVAL_MESSAGE: LiteralString = "Before eval : "
 EVAL_MESSAGE: LiteralString = "From eval : "
 AFTER_EVAL_MESSAGE: LiteralString = "After eval : "
+END_LABEL: LiteralString = "END"
 
 pytestmark = mark.evaluate
 
@@ -214,3 +222,81 @@ async def test_compilation_error(
     async with breakpoint_walker(expression_evaluation_base) as walker:
         eval_point = await anext(walker)
         await eval_point.evaluate(expression, [walker.script_file.panda_file], allow_compiler_failure=True)
+
+
+async def set_breakpoints(
+    client: DebuggerClient,
+    breakpoints: list[Breakpoint],
+    script_file: ScriptFile,
+):
+    await trio.lowlevel.checkpoint()
+    for bp in breakpoints:
+        # Debugger must handle empty conditions correctly
+        condition_bytecode = ""
+        if bp.label and bp.label != END_LABEL:
+            # Compiled requires 1-based evaluation line
+            eval_line = bp.line_number + 1
+            condition_bytecode = compile_expression(
+                client.code_compiler,
+                EvaluateCompileExpressionArgs(
+                    bp.label,
+                    eval_panda_files=[script_file.panda_file],
+                    eval_source=script_file.source_file,
+                    eval_line=eval_line,
+                ),
+            )
+        bp.breakpoint_id, bp.locations = await client.set_breakpoint_by_url(
+            url=str(script_file.source_file),
+            line_number=bp.line_number,
+            condition=condition_bytecode,
+        )
+
+
+async def test_conditional_breakpoint(
+    nursery: trio.Nursery,
+    ark_runtime: Runtime,
+    code_compiler: StringCodeCompiler,
+    debug_locator: DebugLocator,
+    sync_capture_timeout: float,
+):
+    upper_bound: Final[int] = 3
+    expected_result: Final[int] = 45
+    condition: LiteralString = f"i < {upper_bound}"
+    code = f"""
+function main() {{
+    let acc: int = 0;
+    for (let i: int = 0; i < 10; i++) {{
+        acc += i;   // #BP{{{condition}}}
+    }}
+    console.log(acc);
+    return 0;   // #BP{{{END_LABEL}}}
+}}
+"""
+    script_file = code_compiler.compile(code)
+    meta = parse_source_meta(code)  # noqa F841
+
+    async with ark_runtime.run(nursery, module=script_file) as process:
+        async with debug_locator.connect(nursery) as client:
+            await client.configure(nursery)
+            await client.run_if_waiting_for_debugger()
+            await set_breakpoints(client, meta.breakpoints, script_file)
+
+            breakpoints_counter = 0
+            acc = 0
+            walker = BreakpointWalker(client, meta, process, script_file, sync_capture_timeout)
+            for i in range(upper_bound):
+                paused = await anext(walker)
+                assert len(paused.hit_breakpoints()) == 1
+
+                scope_vars = await paused.frame().scope().mirror_variables()
+                assert scope_vars["acc"] == acc
+                acc += i
+                breakpoints_counter += 1
+
+            paused = await anext(walker)
+            assert len(paused.hit_breakpoints()) == 1 and paused.hit_breakpoints()[0].label == END_LABEL
+            scope_vars = await paused.frame().scope().mirror_variables()
+            assert scope_vars["acc"] == expected_result
+            assert breakpoints_counter == upper_bound
+
+            process.terminate()

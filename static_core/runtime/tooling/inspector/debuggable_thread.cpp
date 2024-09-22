@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include "runtime/tooling/inspector/debuggable_thread.h"
+#include "include/method.h"
+
+#include "debuggable_thread.h"
+#include "error.h"
 
 namespace ark::tooling::inspector {
-DebuggableThread::DebuggableThread(ManagedThread *thread, SuspensionCallbacks &&callbacks)
-    : thread_(thread), callbacks_(std::move(callbacks))
+DebuggableThread::DebuggableThread(ManagedThread *thread, DebugInterface *debugger, SuspensionCallbacks &&callbacks)
+    : PtThreadEvaluationEngine(debugger, thread), callbacks_(std::move(callbacks)), state_(*this)
 {
-    ASSERT(thread);
 }
 
 void DebuggableThread::Reset()
@@ -93,10 +95,19 @@ void DebuggableThread::SetBreakpointsActive(bool active)
     state_.SetBreakpointsActive(active);
 }
 
-BreakpointId DebuggableThread::SetBreakpoint(const std::vector<PtLocation> &locations)
+std::optional<BreakpointId> DebuggableThread::SetBreakpoint(const std::vector<PtLocation> &locations,
+                                                            const std::string *condition)
 {
     os::memory::LockHolder lock(mutex_);
-    return state_.SetBreakpoint(locations);
+    if (locations.empty()) {
+        LOG(WARNING, DEBUGGER) << "Will not set breakpoint for empty locations";
+        return {};
+    }
+    if (condition != nullptr && locations.size() != 1) {
+        LOG(WARNING, DEBUGGER) << "Conditional breakpoint must have only one location, but found " << locations.size();
+        return {};
+    }
+    return state_.SetBreakpoint(locations, condition);
 }
 
 void DebuggableThread::RemoveBreakpoint(BreakpointId id)
@@ -121,88 +132,62 @@ bool DebuggableThread::RequestToObjectRepository(std::function<void(ObjectReposi
         return false;
     }
 
-    ASSERT(thread_->IsSuspended());
+    ASSERT(GetManagedThread()->IsSuspended());
 
     request_ = std::move(request);
-    thread_->Resume();
+    GetManagedThread()->Resume();
 
     while (request_) {
         requestDone_.Wait(&mutex_);
     }
 
     ASSERT(suspended_);
-    ASSERT(thread_->IsSuspended());
+    ASSERT(GetManagedThread()->IsSuspended());
 
     return true;
 }
 
-std::pair<std::optional<RemoteObject>, std::optional<RemoteObject>> DebuggableThread::Evaluate(
-    const std::string &bcFragment)
+std::optional<std::pair<RemoteObject, std::optional<RemoteObject>>> DebuggableThread::EvaluateExpression(
+    uint32_t frameNumber, const ExpressionWrapper &bytecode)
 {
     std::optional<RemoteObject> optResult;
     std::optional<RemoteObject> optException;
-
-    RequestToObjectRepository([this, &bcFragment, &optResult, &optException](ObjectRepository &objectRepo) {
-        ASSERT(thread_->GetCurrentFrame());
-        auto *ctx = thread_->GetCurrentFrame()->GetMethod()->GetClass()->GetLoadContext();
-
-        auto *method = LoadEvaluationPatch(ctx, bcFragment);
-        if (method == nullptr) {
+    RequestToObjectRepository([this, frameNumber, &bytecode, &optResult, &optException](ObjectRepository &objectRepo) {
+        Method *method = nullptr;
+        auto res = EvaluateExpression(frameNumber, bytecode, &method);
+        if (!res) {
+            HandleError(res.Error());
             return;
         }
 
-        auto [result, exception] = InvokeEvaluationMethod(method);
-
-        if (exception != nullptr) {
-            optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exception)));
+        auto [result, exc] = res.Value();
+        optResult.emplace(objectRepo.CreateObject(result));
+        if (exc != nullptr) {
+            optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exc)));
         }
-
-        auto resultTypeId = method->GetReturnType().GetId();
-        optResult.emplace(objectRepo.CreateObject(result, resultTypeId));
     });
-
-    return std::make_pair(optResult, optException);
-}
-
-std::pair<Value, ObjectHeader *> DebuggableThread::InvokeEvaluationMethod(Method *method)
-{
-    ASSERT(method);
-    ASSERT(!thread_->HasPendingException());
-
-    // Some debugger functionality must be disabled in evaluation mode.
-    evaluationMode_ = true;
-    // Evaluation patch should not accept any arguments.
-    Value result = method->Invoke(thread_, nullptr);
-    evaluationMode_ = false;
-
-    ObjectHeader *newException = nullptr;
-    if (thread_->HasPendingException()) {
-        newException = thread_->GetException();
-        LOG(WARNING, DEBUGGER) << "Evaluation has completed with a exception "
-                               << newException->ClassAddr<Class>()->GetName();
-        // Restore the previous exception.
-        thread_->SetException(nullptr);
+    if (!optResult) {
+        return {};
     }
-
-    return std::make_pair(result, newException);
+    return std::make_pair(*optResult, optException);
 }
 
 void DebuggableThread::OnException(bool uncaught)
 {
-    if (evaluationMode_) {
+    if (IsEvaluating()) {
         return;
     }
     os::memory::LockHolder lock(mutex_);
     state_.OnException(uncaught);
     while (state_.IsPaused()) {
         ObjectRepository objectRepository;
-        Suspend(objectRepository, {}, thread_->GetException());
+        Suspend(objectRepository, {}, GetManagedThread()->GetException());
     }
 }
 
 void DebuggableThread::OnFramePop()
 {
-    if (evaluationMode_) {
+    if (IsEvaluating()) {
         return;
     }
     os::memory::LockHolder lock(mutex_);
@@ -211,7 +196,7 @@ void DebuggableThread::OnFramePop()
 
 bool DebuggableThread::OnMethodEntry()
 {
-    if (evaluationMode_) {
+    if (IsEvaluating()) {
         return false;
     }
     os::memory::LockHolder lock(mutex_);
@@ -220,7 +205,7 @@ bool DebuggableThread::OnMethodEntry()
 
 void DebuggableThread::OnSingleStep(const PtLocation &location)
 {
-    if (evaluationMode_) {
+    if (IsEvaluating()) {
         return;
     }
     os::memory::LockHolder lock(mutex_);
@@ -246,7 +231,7 @@ std::vector<RemoteObject> DebuggableThread::OnConsoleCall(const PandaVector<Type
 void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::vector<BreakpointId> &hitBreakpoints,
                                ObjectHeader *exception)
 {
-    ASSERT(ManagedThread::GetCurrent() == thread_);
+    ASSERT(ManagedThread::GetCurrent() == GetManagedThread());
 
     ASSERT(!suspended_);
     ASSERT(!request_.has_value());
@@ -254,7 +239,7 @@ void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::ve
     callbacks_.preSuspend(objectRepository, hitBreakpoints, exception);
 
     suspended_ = true;
-    thread_->Suspend();
+    GetManagedThread()->Suspend();
 
     callbacks_.postSuspend(objectRepository, hitBreakpoints, exception);
 
@@ -262,7 +247,7 @@ void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::ve
         mutex_.Unlock();
 
         callbacks_.preWaitSuspension();
-        thread_->WaitSuspension();
+        GetManagedThread()->WaitSuspension();
         callbacks_.postWaitSuspension();
 
         mutex_.Lock();
@@ -270,7 +255,7 @@ void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::ve
         // We have three levels of suspension:
         // - state_.IsPaused() - tells if the thread is paused on breakpoint or step;
         // - suspended_ - tells if the thread generally sleeps (but could execute object repository requests);
-        // - thread_->IsSuspended() - tells if the thread is actually sleeping
+        // - GetManagedThread()->IsSuspended() - tells if the thread is actually sleeping
         //
         // If we are here, then the latter is false (thread waked up). The following variants are possible:
         // - not paused and not suspended - e.g. continue / stepping action was performed;
@@ -285,7 +270,7 @@ void DebuggableThread::Suspend(ObjectRepository &objectRepository, const std::ve
             (*request_)(objectRepository);
 
             request_.reset();
-            thread_->Suspend();
+            GetManagedThread()->Suspend();
 
             requestDone_.Signal();
         }
@@ -300,12 +285,12 @@ void DebuggableThread::Resume()
         return;
     }
 
-    ASSERT(thread_->IsSuspended());
+    ASSERT(GetManagedThread()->IsSuspended());
 
     callbacks_.preResume();
 
     suspended_ = false;
-    thread_->Resume();
+    GetManagedThread()->Resume();
 
     callbacks_.postResume();
 }

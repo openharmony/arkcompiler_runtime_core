@@ -16,9 +16,9 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_HELPERS_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_HELPERS_H
 
-#include "utils/json_builder.h"
-
 #include <functional>
+
+#include "utils/json_builder.h"
 
 namespace ark::tooling::inspector {
 

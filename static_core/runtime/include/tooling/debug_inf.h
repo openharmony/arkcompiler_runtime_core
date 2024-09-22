@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_DEBUG_DEBUG_INF_H
-#define PANDA_RUNTIME_DEBUG_DEBUG_INF_H
+#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INF_H
+#define PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INF_H
 
 #include <atomic>
 #include "include/thread.h"
@@ -53,4 +53,4 @@ private:
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_RUNTIME_DEBUG_DEBUG_INF_H
+#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INF_H

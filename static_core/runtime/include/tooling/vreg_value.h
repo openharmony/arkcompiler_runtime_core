@@ -17,7 +17,10 @@
 #define PANDA_RUNTIME_INCLUDE_TOOLING_VREG_VALUE_H
 
 #include <cstdint>
+
 #include "libpandabase/macros.h"
+#include "include/coretypes/tagged_value.h"
+#include "include/typed_value.h"
 
 namespace ark::tooling {
 class VRegValue {
@@ -32,6 +35,43 @@ public:
     constexpr void SetValue(int64_t value)
     {
         value_ = value;
+    }
+
+    TypedValue ToTypedValue(panda_file::Type::TypeId typeId)
+    {
+        switch (typeId) {
+            case panda_file::Type::TypeId::INVALID:
+                return TypedValue::Invalid();
+            case panda_file::Type::TypeId::VOID:
+                return TypedValue::Void();
+            case panda_file::Type::TypeId::U1:
+                return TypedValue::U1(static_cast<bool>(GetValue()));
+            case panda_file::Type::TypeId::I8:
+                return TypedValue::I8(static_cast<int8_t>(GetValue()));
+            case panda_file::Type::TypeId::U8:
+                return TypedValue::U8(static_cast<uint8_t>(GetValue()));
+            case panda_file::Type::TypeId::I16:
+                return TypedValue::I16(static_cast<int16_t>(GetValue()));
+            case panda_file::Type::TypeId::U16:
+                return TypedValue::U16(static_cast<uint16_t>(GetValue()));
+            case panda_file::Type::TypeId::I32:
+                return TypedValue::I32(static_cast<int32_t>(GetValue()));
+            case panda_file::Type::TypeId::U32:
+                return TypedValue::U32(static_cast<uint32_t>(GetValue()));
+            case panda_file::Type::TypeId::F32:
+                return TypedValue::F32(bit_cast<float>(static_cast<uint32_t>(GetValue())));
+            case panda_file::Type::TypeId::F64:
+                return TypedValue::F64(bit_cast<double>(static_cast<uint64_t>(GetValue())));
+            case panda_file::Type::TypeId::I64:
+                return TypedValue::I64(static_cast<int64_t>(GetValue()));
+            case panda_file::Type::TypeId::U64:
+                return TypedValue::U64(static_cast<uint64_t>(GetValue()));
+            case panda_file::Type::TypeId::REFERENCE:
+                return TypedValue::Reference(reinterpret_cast<ObjectHeader *>(GetValue()));
+            case panda_file::Type::TypeId::TAGGED:
+                return TypedValue::Tagged(coretypes::TaggedValue(GetValue()));
+        }
+        UNREACHABLE();
     }
 
     ~VRegValue() = default;

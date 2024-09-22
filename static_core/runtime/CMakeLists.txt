@@ -29,7 +29,8 @@ set(SOURCES
     class_linker_extension.cpp
     class_initializer.cpp
     tooling/debugger.cpp
-    tooling/default_inspector_extension.cpp
+    tooling/evaluation/expression_loader.cpp
+    tooling/pt_default_lang_extension.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
     tooling/tools.cpp

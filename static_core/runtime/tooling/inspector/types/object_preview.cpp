@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "tooling/inspector/types/object_preview.h"
-#include "tooling/inspector/types/property_descriptor.h"
-#include "tooling/inspector/types/json_build_helpers.h"
+#include "types/object_preview.h"
 
 #include "utils/string_helpers.h"
+
+#include "types/property_descriptor.h"
+#include "types/json_build_helpers.h"
 
 namespace ark::tooling::inspector {
 

@@ -13,28 +13,113 @@
  * limitations under the License.
  */
 
-#include "asio_server.h"
-#include "asio_config.h"
-
-#include "utils/logger.h"
-#include "websocketpp/uri.hpp"
+#include "connection/asio/asio_server.h"
 
 #include <memory>
+#include <sstream>
 #include <system_error>
+
+#include "websocketpp/close.hpp"
+#include "websocketpp/http/constants.hpp"
+#include "websocketpp/uri.hpp"
+
+#include "utils/json_builder.h"
+#include "utils/logger.h"
+
+#include "connection/asio/asio_config.h"
 
 #define CONFIG AsioConfig  // NOLINT(cppcoreguidelines-macro-usage)
 #include "server_endpoint-inl.h"
 #undef CONFIG
 
 namespace ark::tooling::inspector {
+template <typename ConnectionPtr>
+static void HandleHttpRequest(ConnectionPtr conn)
+{
+    static constexpr std::string_view GET = "GET";
+    static constexpr std::string_view JSON_URI = "/json";
+    static constexpr std::string_view JSON_LIST_URI = "/json/list";
+    static constexpr std::string_view JSON_VERSION_URI = "/json/version";
+
+    const auto &req = conn->get_request();
+    const auto &uri = req.get_uri();
+    if (req.get_method() != GET) {
+        CloseConnection(conn);
+        return;
+    }
+
+    if (uri == JSON_URI || uri == JSON_LIST_URI) {
+        HandleJsonList(conn);
+    } else if (uri == JSON_VERSION_URI) {
+        HandleJsonVersion(conn);
+    } else {
+        CloseConnection(conn);
+        return;
+    }
+    conn->append_header("Content-Type", "application/json; charset=UTF-8");
+    conn->append_header("Cache-Control", "no-cache");
+    conn->set_status(websocketpp::http::status_code::value::ok);
+}
+
+template <typename ConnectionPtr>
+static void HandleJsonVersion(ConnectionPtr conn)
+{
+    JsonObjectBuilder builder;
+    builder.AddProperty("browser", "ArkTS");
+    builder.AddProperty("protocol-version", "1.1");
+    AddWebSocketDebuggerUrl(conn, builder);
+    conn->set_body(std::move(builder).Build());
+}
+
+template <typename ConnectionPtr>
+static void HandleJsonList(ConnectionPtr conn)
+{
+    auto buildJson = [conn](JsonObjectBuilder &builder) {
+        builder.AddProperty("description", "ArkTS");
+        // Empty "id" corresponds to constructed URLs
+        builder.AddProperty("id", "");
+        builder.AddProperty("type", "node");
+        // Do not add "url" fields as it dummy value might confuse some clients
+        AddWebSocketDebuggerUrl(conn, builder);
+        std::stringstream ss;
+        // CC-OFFNXT(WordsTool.74) fixed protocol url
+        ss << "devtools://devtools/bundled/devtools_app.html?ws=" << conn->get_host() << ':'
+           << static_cast<int>(conn->get_port());
+        builder.AddProperty("devToolsFrontendUrl", ss.str());
+    };
+    JsonArrayBuilder arrayBuilder;
+    arrayBuilder.Add(std::move(buildJson));
+    conn->set_body(std::move(arrayBuilder).Build());
+}
+
+template <typename ConnectionPtr>
+static void CloseConnection(ConnectionPtr conn)
+{
+    std::error_code ec;
+    conn->close(websocketpp::close::status::protocol_error, "", ec);
+    if (ec) {
+        LOG(WARNING, DEBUGGER) << "Failed to close invalid HTTP connection";
+    }
+}
+
+template <typename ConnectionPtr>
+static void AddWebSocketDebuggerUrl(ConnectionPtr conn, JsonObjectBuilder &builder)
+{
+    std::stringstream ss;
+    ss << "ws://" << conn->get_host() << ':' << conn->get_port();
+    builder.AddProperty("webSocketDebuggerUrl", ss.str());
+}
+
 bool AsioServer::Initialize()
 {
     if (initialized_) {
         return true;
     }
 
-    std::error_code ec;
+    // Do JSON handshake, as it is expected by some debugger clients
+    endpoint_.set_http_handler([this](auto hdl) { HandleHttpRequest(endpoint_.get_con_from_hdl(hdl)); });
 
+    std::error_code ec;
     endpoint_.init_asio(ec);
     if (ec) {
         LOG(ERROR, DEBUGGER) << "Failed to initialize endpoint";

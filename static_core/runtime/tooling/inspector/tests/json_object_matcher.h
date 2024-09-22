@@ -16,12 +16,6 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TEST_JSON_OBJECT_MATCHER_H
 #define PANDA_TOOLING_INSPECTOR_TEST_JSON_OBJECT_MATCHER_H
 
-#include "macros.h"
-#include "utils/json_parser.h"
-
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
@@ -29,6 +23,12 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+#include "macros.h"
+#include "utils/json_parser.h"
 
 // NOLINTBEGIN
 

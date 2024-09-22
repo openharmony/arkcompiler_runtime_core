@@ -16,9 +16,9 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_H
 
-#include "event_loop.h"
-
 #include <functional>
+
+#include "connection/event_loop.h"
 
 namespace ark {
 class JsonObject;

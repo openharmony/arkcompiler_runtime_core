@@ -16,13 +16,13 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_LOCATION_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_LOCATION_H
 
-#include "numeric_id.h"
-
-#include "utils/expected.h"
-
 #include <cstddef>
 #include <functional>
 #include <string>
+
+#include "utils/expected.h"
+
+#include "types/numeric_id.h"
 
 namespace ark {
 class JsonObject;
@@ -44,6 +44,11 @@ public:
     size_t GetLineNumber() const
     {
         return lineNumber_;
+    }
+
+    void SetLineNumber(size_t lineNumber)
+    {
+        lineNumber_ = lineNumber;
     }
 
     std::function<void(JsonObjectBuilder &)> ToJson() const;

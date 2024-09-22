@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "tooling/inspector/types/exception_details.h"
+#include "types/exception_details.h"
 
 #include "macros.h"
 #include "utils/json_builder.h"

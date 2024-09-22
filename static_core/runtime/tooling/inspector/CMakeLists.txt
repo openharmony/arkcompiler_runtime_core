@@ -19,10 +19,11 @@ set(ARKINSPECTOR_ROOTS
     connection/endpoint_base.cpp
     connection/event_loop.cpp
     connection/server_endpoint_base.cpp
-    evaluation/helpers.cpp
     debug_info_cache.cpp
     debuggable_thread.cpp
     error.cpp
+    evaluation/conditions_storage.cpp
+    evaluation/evaluation_engine.cpp
     init.cpp
     inspector.cpp
     inspector_server.cpp
@@ -87,6 +88,7 @@ add_dependencies(${PROJECT_NAME} arkruntime)
 
 panda_target_include_directories(${PROJECT_NAME}
     PUBLIC ${PANDA_ROOT}/runtime/include/
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 panda_target_include_directories(${PROJECT_NAME} SYSTEM
