@@ -25,9 +25,19 @@ config("arkfile_public_config") {
   if (is_ohos && !is_standard_system) {
     defines += [ "ENABLE_FULL_FILE_FIELDS" ]
   }
+}
 
-  if (use_libfuzzer || (!ark_standalone_build && use_clang_coverage)) {
-    defines += [ "FATAL_AS_ERROR" ]
+config("arkfile_runtime_public_config") {
+  include_dirs = [
+    "$ark_root/libpandafile",
+    "$ark_root/libziparchive",
+    "$target_gen_dir",
+    "$target_gen_dir/include",
+  ]
+
+  defines = [ "ERROR_AS_FATAL" ]
+  if (is_ohos && !is_standard_system) {
+    defines += [ "ENABLE_FULL_FILE_FIELDS" ]
   }
 }
 
@@ -84,6 +94,12 @@ libarkfile_configs = [
   ":arkfile_public_config",
 ]
 
+libarkfile_runtime_configs = [
+  "$ark_root:ark_config",
+  "$ark_root/libpandabase:arkbase_public_config",
+  ":arkfile_runtime_public_config",
+]
+
 ohos_static_library("arkfile_header_deps") {
   deps = [
     ":isa_gen_libarkfile_bytecode_emitter_def_gen_h",
@@ -107,6 +123,47 @@ ohos_static_library("libarkfile_static") {
 
   if (enabled_pac_data_protect) {
     configs = libarkfile_configs
+    configs += [ ":data_protect_configs" ]
+  }
+
+  deps = [
+    ":arkfile_header_deps",
+    "$ark_root/libpandabase:libarkbase_static",
+    "$ark_root/libziparchive:libarkziparchive_static",
+  ]
+
+  if (is_arkui_x) {
+    deps += [
+      "$ark_third_party_root/bounds_checking_function:libsec_static",
+      "$ark_third_party_root/zlib:libz",
+    ]
+  } else if (ark_standalone_build) {
+    external_deps = [
+      "zlib:shared_libz",
+      sdk_libc_secshared_dep,
+    ]
+  } else {
+    public_external_deps = [
+      "zlib:shared_libz",
+      sdk_libc_secshared_dep,
+    ]
+  }
+
+  if (enable_hilog) {
+    public_external_deps += [ "hilog:libhilog" ]
+  }
+
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
+ohos_static_library("libarkfile_runtime_static") {
+  sources = libarkfile_sources
+
+  public_configs = libarkfile_runtime_configs
+
+  if (enabled_pac_data_protect) {
+    configs = libarkfile_runtime_configs
     configs += [ ":data_protect_configs" ]
   }
 
