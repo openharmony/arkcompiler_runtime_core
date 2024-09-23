@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+set -e
+
 VENV=${VENV:-.venv}
 
 if [ ! -d "$VENV" ]; then
