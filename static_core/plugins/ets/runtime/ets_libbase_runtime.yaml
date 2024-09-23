@@ -3157,7 +3157,8 @@ intrinsics:
       ret: std.core.String
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdCoreRuntimeTypeof
-    clear_flags: [ ]
+    clear_flags: [ no_dce ]
+    set_flags: [ no_nullptr ]
 
 ###################
 # std.core.RegExp #

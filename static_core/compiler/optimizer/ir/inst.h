@@ -1094,6 +1094,11 @@ public:
         return GetFlag(inst_flags::RUNTIME_CALL);
     }
 
+    virtual bool NoNullPtr() const
+    {
+        return GetFlag(inst_flags::NO_NULLPTR);
+    }
+
     virtual bool IsPropagateLiveness() const;
 
     // Returns true if the instruction doesn't have side effects(call runtime, throw e.t.c.)

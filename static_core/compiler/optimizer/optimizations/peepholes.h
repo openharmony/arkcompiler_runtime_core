@@ -228,7 +228,6 @@ private:
     bool TrySimplifyCompareNegation(Inst *inst);
     bool IsNegationPattern(Inst *inst);
     bool TrySimplifyNegationPattern(Inst *inst);
-    bool IsCastWithNagationPattern(Inst *inst);
 
 private:
     // Each peephole application has own unique index, it will be used in peepholes dumps

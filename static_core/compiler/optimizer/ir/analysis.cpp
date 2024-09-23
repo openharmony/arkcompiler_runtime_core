@@ -445,7 +445,7 @@ bool IsSuitableForImplicitNullCheck(const Inst *inst)
 bool IsInstNotNull(const Inst *inst)
 {
     // Allocations cannot return null pointer
-    if (inst->IsAllocation() || inst->IsNullCheck()) {
+    if (inst->IsAllocation() || inst->IsNullCheck() || inst->NoNullPtr()) {
         return true;
     }
     if (inst->IsParameter() && inst->CastToParameter()->GetArgNumber() == 0) {

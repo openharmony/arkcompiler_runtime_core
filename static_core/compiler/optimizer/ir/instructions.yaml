@@ -1352,6 +1352,7 @@ flags:
   no_dce: Instruction that can't be deleted on DCE
   no_cse: Instruction has unique vn class and CSE can't be applied
   no_dst: Instruction has no destination operand
+  no_nullptr: Instruction doesn't produce nullptr
   pseudo_dst: Instruction has pseudo destination operand, i.e. it doesn't affect on dataflow
   implicit_runtime_call: Instruction may call runtime before loading source, which can be moved by GC during that call
   low_level: Low level instruction

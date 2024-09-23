@@ -2403,7 +2403,8 @@ void Codegen::CreateStringFromCharArrayTlab(Inst *inst, Reg dst, SRCREGS src)
             CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), offset, count, array, klassReg);
         }
     } else {
-        auto klassImm = TypedImm(reinterpret_cast<uintptr_t>(runtime->GetStringClass(GetGraph()->GetMethod())));
+        auto klassImm =
+            TypedImm(reinterpret_cast<uintptr_t>(runtime->GetStringClass(GetGraph()->GetMethod(), nullptr)));
         if (GetRegfile()->GetZeroReg().GetId() == offset.GetId()) {
             CallFastPath(inst, entryId, dst, RegMask::GetZeroMask(), count, array, klassImm);
         } else {

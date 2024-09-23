@@ -62,7 +62,7 @@ void ObjectTypePropagation::VisitLoadString(GraphVisitor *v, Inst *i)
 {
     auto self = static_cast<ObjectTypePropagation *>(v);
     auto inst = i->CastToLoadString();
-    auto klass = self->GetGraph()->GetRuntime()->GetStringClass(inst->GetMethod());
+    auto klass = self->GetGraph()->GetRuntime()->GetStringClass(inst->GetMethod(), nullptr);
     if (klass != nullptr) {
         inst->SetObjectTypeInfo({klass, true});
     }

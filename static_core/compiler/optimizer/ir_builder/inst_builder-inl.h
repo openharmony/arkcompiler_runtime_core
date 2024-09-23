@@ -1045,7 +1045,7 @@ void InstBuilder::BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, D
     }
 
     [[maybe_unused]] auto arrayClass = GetRuntime()->ResolveType(method, typeId);
-    ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetStringClass(method)));
+    ASSERT(GetRuntime()->CheckStoreArray(arrayClass, GetRuntime()->GetStringClass(method, nullptr)));
     // Special case for string array
     BuildUnfoldLoadConstStringArray<T>(bcInst, type, litArray, arrayInst);
 }

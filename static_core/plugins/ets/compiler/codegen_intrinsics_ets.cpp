@@ -401,7 +401,8 @@ void Codegen::CreateStringBuilderToString(IntrinsicInst *inst, Reg dst, SRCREGS 
         enc->EncodeLdr(klass, false, MemRef(ThreadReg(), GetRuntime()->GetStringClassPointerTlsOffset(GetArch())));
         CallFastPath(inst, entrypoint, dst, {}, sb, klass);
     } else {
-        auto klass = TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod())));
+        auto klass =
+            TypedImm(reinterpret_cast<uintptr_t>(GetRuntime()->GetStringClass(GetGraph()->GetMethod(), nullptr)));
         CallFastPath(inst, entrypoint, dst, {}, sb, klass);
     }
 }

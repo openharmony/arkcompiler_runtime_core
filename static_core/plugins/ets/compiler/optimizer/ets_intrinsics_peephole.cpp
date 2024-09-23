@@ -40,6 +40,56 @@ static void ReplaceWithCompareEQ(IntrinsicInst *intrinsic)
     intrinsic->ReplaceUsers(compare);
 }
 
+static bool ReplaceTypeofWithIsInstance(IntrinsicInst *intrinsic)
+{
+    if (intrinsic->GetBasicBlock()->GetGraph()->IsAotMode()) {
+        return false;
+    }
+    auto typeOf = intrinsic->GetDataFlowInput(0);
+    auto loadString = intrinsic->GetInput(1).GetInst();
+    if (loadString->GetOpcode() != Opcode::LoadString || !typeOf->IsIntrinsic()) {
+        return false;
+    }
+    auto intrinsicId = typeOf->CastToIntrinsic()->GetIntrinsicId();
+    if (intrinsicId != RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_RUNTIME_TYPEOF) {
+        return false;
+    }
+    auto typeId = loadString->CastToLoadString()->GetTypeId();
+    auto bb = intrinsic->GetBasicBlock();
+    auto graph = bb->GetGraph();
+    auto runtime = graph->GetRuntime();
+    auto method = graph->GetMethod();
+
+    auto stringValue = runtime->GetStringValue(method, typeId);
+    RuntimeInterface::ClassPtr klass;
+    uint32_t ktypeId = 0;
+    if (stringValue == "string") {
+        klass = runtime->GetStringClass(method, &ktypeId);
+    } else {
+        const std::unordered_map<std::string_view, const char *const> n2n = {
+            {"number", "Lstd/core/Double;"}, {"double", "Lstd/core/Double;"}, {"int", "Lstd/core/Int;"},
+            {"short", "Lstd/core/Short;"},   {"byte", "Lstd/core/Byte;"},     {"float", "Lstd/core/Float;"}};
+        auto found = n2n.find(stringValue);
+        if (found == n2n.end()) {
+            return false;
+        }
+        klass = runtime->GetNumberClass(method, found->second, &ktypeId);
+    }
+
+    auto pc = intrinsic->GetPc();
+    auto saveState = typeOf->GetInput(1U).GetInst();
+    ASSERT(saveState->GetOpcode() == Opcode::SaveState);
+    auto loadClass =
+        graph->CreateInstLoadClass(DataType::REFERENCE, pc, saveState, TypeIdMixin {ktypeId, method}, nullptr);
+    loadClass->SetClass(klass);
+    bb->InsertAfter(loadClass, saveState);
+    auto isInstance = graph->CreateInstIsInstance(DataType::BOOL, pc, typeOf->GetInput(0).GetInst(), loadClass,
+                                                  saveState, TypeIdMixin {typeId, method}, ClassType::FINAL_CLASS);
+    intrinsic->ReplaceUsers(isInstance);
+    bb->InsertAfter(isInstance, loadClass);
+    return true;
+}
+
 bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
 {
     // Replaces
@@ -54,7 +104,7 @@ bool Peepholes::PeepholeStringEquals([[maybe_unused]] GraphVisitor *v, Intrinsic
         return true;
     }
 
-    return false;
+    return ReplaceTypeofWithIsInstance(intrinsic);
 }
 
 Inst *GetStringFromLength(Inst *inst)
