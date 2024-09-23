@@ -17,7 +17,7 @@
 import os
 import yaml
 
-current_version = "13.0.0.0"
+CURRENT_VERSION = "13.0.0.0"
 
 script_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -38,4 +38,4 @@ def check_version(yaml_file, cur_version):
     except Exception as e:
         print(f"Error reading file: {e}")
 
-check_version(isa_file_path, current_version)
+check_version(isa_file_path, CURRENT_VERSION)

@@ -40,7 +40,7 @@ enum class ActionType {
     COLLECTINFOS,
 };
 
-struct VerifyMethodParams {
+struct MethodInfos {
     const BytecodeInstruction &bc_ins_init;
     BytecodeInstruction &bc_ins;
     const BytecodeInstruction &bc_ins_last;
@@ -92,13 +92,9 @@ private:
     bool VerifyMethodId(const uint32_t &method_id) const;
     bool VerifyLiteralId(const uint32_t &literal_id) const;
     bool VerifyStringId(const uint32_t &string_id) const;
-    bool IsRangeInstruction(const Opcode &ins_opcode);
     bool IsRangeInstAndHasInvalidRegIdx(const BytecodeInstruction &bc_ins,
                                         const size_t count, uint64_t valid_regs_num);
-    std::optional<uint64_t> GetRangeRegNum(const BytecodeInstruction &bc_ins, Opcode ins_opcode);
     bool IsRegIdxOutOfBounds(uint64_t reg_idx, uint64_t valid_regs_num);
-    std::optional<uint64_t> CalculateMaxRegIdx(const BytecodeInstruction &bc_ins,
-                                               Opcode ins_opcode, uint64_t range_reg_num);
     bool CheckVRegIdx(const BytecodeInstruction &bc_ins, const size_t count, uint64_t valid_regs_num);
     std::optional<int64_t> GetFirstImmFromInstruction(const BytecodeInstruction &bc_ins);
     std::optional<uint64_t> GetSlotNumberFromAnnotation(panda_file::MethodDataAccessor &method_accessor);
@@ -108,7 +104,6 @@ private:
     bool IsModuleLiteralId(const panda_file::File::EntityId &id) const;
     bool VerifySingleLiteralArray(const panda_file::File::EntityId &literal_id);
     bool VerifyLiteralArrays();
-    bool IsJumpInstruction(const Opcode &ins_opcode);
     bool VerifyJumpInstruction(const BytecodeInstruction &bc_ins, const BytecodeInstruction &bc_ins_last,
                                const BytecodeInstruction &bc_ins_init, const uint8_t *ins_arr,
                                panda_file::File::EntityId code_id);
@@ -123,12 +118,11 @@ private:
                            const BytecodeInstruction &bc_ins_last);
     bool VerifyTryBlocks(panda_file::CodeDataAccessor &code_accessor, const BytecodeInstruction &bc_ins,
                          const BytecodeInstruction &bc_ins_last);
-    bool IsReturnAndThrowInstruction(const Opcode &ins_opcode);
     bool PrecomputeInstructionIndices(const BytecodeInstruction &bc_ins_start, const BytecodeInstruction &bc_ins_last);
     bool IsMethodBytecodeInstruction(const BytecodeInstruction &bc_ins_cur);
     bool VerifyMethodRegisterIndex(panda_file::CodeDataAccessor &code_accessor,
                                    std::optional<uint64_t> &max_reg_idx);
-    bool VerifyMethodInstructions(const VerifyMethodParams &params);
+    bool VerifyMethodInstructions(const MethodInfos &infos);
 
     inline bool IsImpureNaN(double value)
     {
