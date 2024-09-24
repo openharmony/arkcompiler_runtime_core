@@ -58,6 +58,7 @@
         - plugins_main_loop: plugins/ets/irtoc_scripts/interpreter_main_loop.irt
         - plugins_string_builder: plugins/ets/irtoc_scripts/string_builder.irt
         - plugins_string: plugins/ets/irtoc_scripts/string.irt
+        - plugins_to_string_cache: plugins/ets/irtoc_scripts/to_string_cache.irt
 
       Metadatas:
         - RecordMetadata:
