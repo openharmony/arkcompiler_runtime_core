@@ -19,14 +19,13 @@ const functionArgStringLiteralTypeEts = etsMod.getFunction('functionArgStringLit
 const functionArgStringLiteralTypeUnionEts = etsMod.getFunction('functionArgStringLiteralTypeUnion');
 
 {
-  const VALUE1 = '1';
-  const VALUE2 = '2';
-  let ret = functionArgStringLiteralTypeEts(VALUE1);
-  ASSERT_EQ(ret, VALUE1);
+	const VALUE1 = '1';
+	const VALUE2 = '2';
+	let ret = functionArgStringLiteralTypeEts(VALUE1);
+	ASSERT_EQ(ret, VALUE1);
+	ret = functionArgStringLiteralTypeUnionEts(VALUE1);
+	ASSERT_EQ(ret, VALUE1);
 
-  ret = functionArgStringLiteralTypeUnionEts(VALUE1);
-  ASSERT_EQ(ret, VALUE1);
-
-  ret = functionArgStringLiteralTypeUnionEts(VALUE2);
-  ASSERT_EQ(ret, VALUE2);
+	ret = functionArgStringLiteralTypeUnionEts(VALUE2);
+	ASSERT_EQ(ret, VALUE2);
 }

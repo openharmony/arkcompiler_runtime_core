@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 function createProxy(target, handler) {
-    return new Proxy(target, handler);
+	return new Proxy(target, handler);
 }
 
 exports.createProxy = createProxy;

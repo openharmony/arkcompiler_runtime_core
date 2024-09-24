@@ -18,8 +18,8 @@ const etsMod = getTestModule('scenarios_test');
 const spreadParameterFunctionEts = etsMod.getFunction('functionSpreadParameter');
 
 {
-  const EXPECTED_RET = 2;
-  const args = [1, 1];
-  let ret = spreadParameterFunctionEts(...args);
-  ASSERT_EQ(ret, EXPECTED_RET);
+	const EXPECTED_RET = 2;
+	const args = [1, 1];
+	let ret = spreadParameterFunctionEts(...args);
+	ASSERT_EQ(ret, EXPECTED_RET);
 }

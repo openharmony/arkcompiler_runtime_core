@@ -20,35 +20,25 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const getValueObject = etsMod.getFunction('getObjectName');
 const getOuterObject = etsMod.getFunction('getOuterObject');
 
-
-
 const testObject = {
-    name: 'TestName';
-}
+	name: 'TestName',
+};
 
-const testInnerObject = {
-    id: 123;
-}
+const testInnerObject = { id: 123 };
 
 const testOuterObject = {
-    id: 456,
-    testInnerObject:testInnerObject
+	id: 456,
+	testInnerObject: testInnerObject,
+};
+
+{
+	let ret = getValueObject(testObject);
+	console.log(ret);
+	ASSERT_EQ(ret, 'TestName');
 }
 
 {
-    let ret = getValueObject(testObject);
-    console.log(ret);
-    ASSERT_EQ(ret, 'TestName');
-  }
-
-  {
-    let ret = getOuterObject(testOuterObject);
-    console.log(ret);
-    ASSERT_EQ(ret, 456);
-  }
-  
-
-
-
-
-
+	let ret = getOuterObject(testOuterObject);
+	console.log(ret);
+	ASSERT_EQ(ret, 456);
+}

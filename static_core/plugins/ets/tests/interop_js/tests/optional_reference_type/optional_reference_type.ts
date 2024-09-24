@@ -14,7 +14,7 @@
  */
 
 export function fnWithAnyParams(arr?: any[]): object {
-    return arr ? arr[0] : 'Argument not found';
+	return arr ? arr[0] : 'Argument not found';
 }
 
 type City = 'Moscow' | 'London' | 'Paris';

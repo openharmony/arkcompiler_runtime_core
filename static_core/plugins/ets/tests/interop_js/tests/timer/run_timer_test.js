@@ -14,32 +14,32 @@
  */
 
 function runTest(test) {
-    console.log('Running test ' + test);
-    let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-    if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-        console.log('Cannot create ETS runtime');
-        process.exit(1);
-    }
-    let res = etsVm.call(test);
-    let counter = 0;
-    const maxCounter = 5;
-    const checkDelay = 1000;
-    let checkCallback = () => {
-        ++counter;
-        if (counter === maxCounter) {
-            throw new Error('Test failed: timeout.');
-        }
-        let result = etsVm.call('check');
-        if (!result) {
-            setTimeout(checkCallback, checkDelay);
-        }
-    };
-    setTimeout(checkCallback, checkDelay);
+	console.log('Running test ' + test);
+	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
+		console.log('Cannot create ETS runtime');
+		process.exit(1);
+	}
+	let res = etsVm.call(test);
+	let counter = 0;
+	const maxCounter = 5;
+	const checkDelay = 1000;
+	let checkCallback = () => {
+		++counter;
+		if (counter === maxCounter) {
+			throw new Error('Test failed: timeout.');
+		}
+		let result = etsVm.call('check');
+		if (!result) {
+			setTimeout(checkCallback, checkDelay);
+		}
+	};
+	setTimeout(checkCallback, checkDelay);
 }
 
 let args = process.argv;
 if (args.length !== 3) {
-    console.log('Expected test name');
-    process.exit(1);
+	console.log('Expected test name');
+	process.exit(1);
 }
 runTest(args[2]);

@@ -18,6 +18,6 @@ const etsMod = getTestModule('scenarios_test');
 const callableReturnValueFunctionEts = etsMod.getFunction('functionCallableReturnValue');
 
 {
-  let ret = callableReturnValueFunctionEts()();
-  ASSERT_EQ(ret, 1);
+	let ret = callableReturnValueFunctionEts()();
+	ASSERT_EQ(ret, 1);
 }

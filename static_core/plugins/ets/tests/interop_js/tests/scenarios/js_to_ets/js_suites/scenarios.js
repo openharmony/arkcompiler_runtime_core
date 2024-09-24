@@ -247,43 +247,39 @@ class ClassWithStaticMethod {
 	}
 }
 function functionRestParameter(...arg) {
-  return arg[0]; // transpiled from Typescript code: function functionRestParameter(...arg: number[])
+	return arg[0]; // transpiled from Typescript code: function functionRestParameter(...arg: number[])
 }
 
 function functionSpreadParameter(arg1, arg2) {
-  return arg1 + arg2; // transpiled from Typescript code: function functionSpreadParameter(arg1: number, arg2: number)
+	return arg1 + arg2; // transpiled from Typescript code: function functionSpreadParameter(arg1: number, arg2: number)
 }
 
-function functionOverloaded() {
-}
+function functionOverloaded() {}
 
-function functionOverloaded(arg) {
-}
+function functionOverloaded(arg) {}
 
 function functionOverload() {
-    let value = 1;
-    functionOverloaded();
-    functionOverloaded(value);
-    return value;
+	let value = 1;
+	functionOverloaded();
+	functionOverloaded(value);
+	return value;
 }
-
 
 function functionCallableReturnValue() {
-    const value = () => (x) =>  Number(x) + 1;
-    console.log(value()(4))
-    return Function('', 'return 2')
+	const value = () => (x) => Number(x) + 1;
+	console.log(value()(4));
+	return Function('', 'return 2');
 }
 
-
 function functionArgStringLiteralType(arg) {
-  return arg;
-  // transpiled from Typescript code: functionArgStringLiteralType(arg: TypeString): TypeString
+	return arg;
+	// transpiled from Typescript code: functionArgStringLiteralType(arg: TypeString): TypeString
 }
 
 function functionIntersectionTypePrimitive(arg) {
-    const ret = arg;
-    return ret;
-    // transpiled from Typescript code: functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB
+	const ret = arg;
+	return ret;
+	// transpiled from Typescript code: functionIntersectionTypePrimitive(arg: PrimitiveAB): PrimitiveAB
 }
 
 exports.standaloneFunctionJs = standaloneFunctionJs;

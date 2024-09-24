@@ -80,7 +80,6 @@ function extractSquaredInt(obj) {
 	return x * x;
 }
 
-
 function MakeObjectWithPrototype() {
 	this.overriddenValue = 4;
 	this.overriddenFunction = function () {

@@ -12,36 +12,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export function getArray(arr:string[]): string[] {
-    return arr;
+export function getArray(arr: string[]): string[] {
+	return arr;
 }
 
 export class CustomArray<T> extends Array<T> {
-    constructor(...items: T[]) {
-        super(...items);
-    }
-
+	constructor(...items: T[]) {
+		super(...items);
+	}
 }
 
 export function returnCustomArray<T>(array: CustomArray<T>): CustomArray<T> {
-    return array;
+	return array;
 }
 
 export function createStringRecord(): Record<string, string> {
-    const data: Record<string, string> = {
-        'key1': 'A',
-        'key2': 'B',
-        'key3': 'C'
-    };
-    return data;
+	const data: Record<string, string> = {
+		key1: 'A',
+		key2: 'B',
+		key3: 'C',
+	};
+	return data;
 }
 
 export function createInt8Array(length: number): Int8Array {
-    const array = new Int8Array(length);
-    for (let i = 0; i < length; i++) {
-        array[i] = i;
-    }
-    return array;
+	const array = new Int8Array(length);
+	for (let i = 0; i < length; i++) {
+		array[i] = i;
+	}
+	return array;
 }
 
 type RecordObject = Record<string, string>;
@@ -49,19 +48,19 @@ type RecordObject = Record<string, string>;
 type AnyType = {};
 
 export const handler = {
-  get: function(target: RecordObject, property: string): Object {
-    if (property in target) {
-      return target[property];
-    } else {
-      return undefined;
-    }
-  },
-  set: function(target: RecordObject, property: string, value: AnyType): Object {
-    if (typeof value === 'string') {
-      target[property] = value;
-      return true;
-    } else {
-      throw new TypeError('The value must be a string');
-    }
-  }
+	get: function (target: RecordObject, property: string): Object {
+		if (property in target) {
+			return target[property];
+		} else {
+			return undefined;
+		}
+	},
+	set: function (target: RecordObject, property: string, value: AnyType): Object {
+		if (typeof value === 'string') {
+			target[property] = value;
+			return true;
+		} else {
+			throw new TypeError('The value must be a string');
+		}
+	},
 };

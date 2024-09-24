@@ -20,20 +20,19 @@ const etsMod = getTestModule('class_methods_test');
 const FIX_17878 = false;
 
 if (FIX_17878) {
-  const functionReturnInterfaceEts = etsMod.getFunction('functionReturnInterface');
-  {
-    const testInterfaceVal = functionReturnInterfaceEts();
+	const functionReturnInterfaceEts = etsMod.getFunction('functionReturnInterface');
+	{
+		const testInterfaceVal = functionReturnInterfaceEts();
 
-    ASSERT_EQ(testInterfaceVal.testNumber, 100);
-    ASSERT_EQ(testInterfaceVal.testString, 'Test');
-  }
+		ASSERT_EQ(testInterfaceVal.testNumber, 100);
+		ASSERT_EQ(testInterfaceVal.testString, 'Test');
+	}
 } else {
-  const newInterfaceWithMethodEts = etsMod.getFunction('newInterfaceWithMethodEts');
+	const newInterfaceWithMethodEts = etsMod.getFunction('newInterfaceWithMethodEts');
 
-  {
-    const testInterfaceVal = newInterfaceWithMethodEts();
+	{
+		const testInterfaceVal = newInterfaceWithMethodEts();
 
-    ASSERT_EQ(testInterfaceVal.methodInInterface(), 100);
-  }
-
+		ASSERT_EQ(testInterfaceVal.methodInInterface(), 100);
+	}
 }

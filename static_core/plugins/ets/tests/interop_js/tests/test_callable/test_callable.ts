@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-
 export function callNamedFunction(x: number, y: number): number {
-    return x + y;
+	return x + y;
 }
 
 export let callAnonymousFunction = function (x: number, y: number): number {
-    return x + y;
+	return x + y;
 };
 
 export let callArrowFunction = (x: number, y: number): Object => x + y;
@@ -29,24 +28,18 @@ export const callConstructedFunction = new Function('a', 'b', 'return a + b');
 export let callBoundFunction = callNamedFunction.bind(null);
 
 export class CallableTestClass {
-    public callNamedFunction = callNamedFunction.bind(this);
-    public callAnonymousFunction = callAnonymousFunction.bind(this);
-    public callArrowFunction = callArrowFunction.bind(this);
-    public callConstructedFunction = callConstructedFunction.bind(this);
-    public callBoundFunction = callBoundFunction.bind(this);
+	public callNamedFunction = callNamedFunction.bind(this);
+	public callAnonymousFunction = callAnonymousFunction.bind(this);
+	public callArrowFunction = callArrowFunction.bind(this);
+	public callConstructedFunction = callConstructedFunction.bind(this);
+	public callBoundFunction = callBoundFunction.bind(this);
 }
 
 export type TCallableTestClass = CallableTestClass;
 export const callableTestClassInstance = new CallableTestClass();
 
 const test = (): void => {
-    console.log([
-        callNamedFunction,
-        callAnonymousFunction,
-        callArrowFunction,
-        callConstructedFunction,
-        callBoundFunction
-    ].map(x => x(10, 5)));
+	console.log([callNamedFunction, callAnonymousFunction, callArrowFunction, callConstructedFunction, callBoundFunction].map((x) => x(10, 5)));
 };
 
 test();
