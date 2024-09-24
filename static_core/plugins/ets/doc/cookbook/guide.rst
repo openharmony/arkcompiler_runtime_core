@@ -57,11 +57,10 @@ Severity Levels
 Each recipe is marked with the severity level.
 The supported values are as follows:
 
-- |CB_ERROR|: The recipe must be followed, otherwise the program
-  fails to compile.
-- |CB_WARNING|: It is highly recommended to follow the recipe. A violation of
-  the recipe does not currently affect the compilation, but will cause the
-  compilation to fail in the future versions.
+- |CB_ERROR|: You are to follow the recipe, otherwise program compilation fails.
+- |CB_WARNING|: You are highly recommended to follow the recipe. Failing to
+  follow the recipe will not affect the compilation currently, but will cause
+  compilation failure in the future versions.
 
 .. _Status of Unsupported Features:
 

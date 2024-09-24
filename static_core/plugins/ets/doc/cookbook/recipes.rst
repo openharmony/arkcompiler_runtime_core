@@ -830,7 +830,7 @@ any other fields is prohibited, and causes compile-time errors.
 To access a field, use ``obj.field`` syntax. Indexed access (``obj["field"]``)
 is not supported, except all typed arrays found in the standard library (e.g.,
 ``Int32Array``) that support access to their elements through
-``container[index]`` syntax, tuples, Record objects, and enums.
+``container[index]`` syntax, tuples, ``Record`` objects, and enums.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1713,7 +1713,7 @@ be done explicitly.
 |CB_ERROR|
 
 |LANG| assumes that object layout is known at compile time, and cannot be
-changed at runtime. Thus, the operation of deleting a property makes no sense.
+changed at runtime. Thus, deleting a property makes no sense.
 
 |CB_BAD|
 ~~~~~~~~
@@ -4378,9 +4378,8 @@ These functions are thus excessive.
 
 **Note: This rule describes the restrictions of an ArkTS-specific feature**
 
-``Sendable`` classes can inherit only from other ``Sendable`` classes in |LANG|,
-and ``Non-Sendable`` classes are not allowed to inherit from ``Sendable``
-classes.
+``Sendable`` classes can inherit only from other ``Sendable`` classes in |LANG|.
+``Non-Sendable`` classes are not allowed to inherit from ``Sendable`` classes.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
