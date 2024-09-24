@@ -56,7 +56,8 @@ using MonitorContendedEnteredCallback = std::function<bool(PtThread, ObjectHeade
 
 using Scenario = std::function<bool()>;
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.06) Macro contains solid logic. Splitting this macro will degrade readability.
+// NOLINT(cppcoreguidelines-macro-usage)
 #define DEBUG_EVENTS_LIST(_)       \
     _(BREAKPOINT)                  \
     _(LOAD_MODULE)                 \
@@ -91,7 +92,7 @@ using Scenario = std::function<bool()>;
 
 enum class DebugEvent {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFINE_EVENT_DEF(NAME) NAME,
+#define DEFINE_EVENT_DEF(NAME) NAME,  // CC-OFF(G.PRE.02) list generation.
     DEBUG_EVENTS_LIST(DEFINE_EVENT_DEF)
 #undef DEFINE_EVENT_DEF
 };

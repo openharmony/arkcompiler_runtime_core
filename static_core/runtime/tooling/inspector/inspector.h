@@ -55,6 +55,7 @@ public:
 
     void ConsoleCall(PtThread thread, ConsoleCallType type, uint64_t timestamp,
                      const PandaVector<TypedValue> &arguments) override;
+    // CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
     void Exception(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *exception,
                    Method *catchMethod, const PtLocation &catchLocation) override;
     void FramePop(PtThread thread, Method *method, bool wasPoppedByException) override;

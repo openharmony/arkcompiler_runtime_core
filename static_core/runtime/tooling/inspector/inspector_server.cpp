@@ -315,7 +315,7 @@ void InspectorServer::OnCallDebuggerRestartFrame(std::function<void(PtThread, Fr
             auto frameId = ParseNumericId<FrameId>(params, "callFrameId");
             if (!frameId) {
                 LOG(INFO, DEBUGGER) << frameId.Error();
-               return;
+                return;
             }
 
             handler(thread, *frameId);
