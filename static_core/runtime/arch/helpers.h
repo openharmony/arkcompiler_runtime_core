@@ -24,15 +24,17 @@
 namespace ark::arch {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ARCH_COPY_METHOD_ARGS_DISPATCH      \
-    it.IncrementWithoutCheck();             \
-    encoding = (*it).GetEncoding();         \
-    ASSERT(!(encoding & ~SHORTY_ELEM_MAX)); \
+#define ARCH_COPY_METHOD_ARGS_DISPATCH                  \
+    it.IncrementWithoutCheck();                         \
+    encoding = (*it).GetEncoding();                     \
+    ASSERT(!(encoding & ~SHORTY_ELEM_MAX));             \
+    /* CC-OFFNXT(G.PRE.05, G.PRE.09) code generation */ \
     goto *dispatch_table[encoding];
 
 // We use macro instead of function because it's impossible to inline a dispatch table
 // We should inline the dispatch table for performance reasons.
 // LABEL_TYPEID_INVALID before LABEL_TYPEID_REFERENCE refers to tagged type (types.yaml) and does not handles here
+// CC-OFFNXT(C_RULE_ID_DEFINE_LENGTH_LIMIT) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ARCH_COPY_METHOD_ARGS(METHOD, ARG_READER, ARG_WRITER)                                                        \
     do {                                                                                                             \

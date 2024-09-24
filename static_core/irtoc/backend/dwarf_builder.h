@@ -68,6 +68,7 @@ public:
         return elfBuilder_;
     }
 
+    // CC-OFFNXT(G.FUN.01-CPP) depend on Dwarf_Callback_Func by DWARF Producer Interface. Should be suppress
     static int CreateSectionCallback([[maybe_unused]] char *name, [[maybe_unused]] int size,
                                      [[maybe_unused]] Dwarf_Unsigned type, [[maybe_unused]] Dwarf_Unsigned flags,
                                      [[maybe_unused]] Dwarf_Unsigned link, [[maybe_unused]] Dwarf_Unsigned info,

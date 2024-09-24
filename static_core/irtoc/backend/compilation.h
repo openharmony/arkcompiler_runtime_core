@@ -67,21 +67,26 @@ private:
 };
 }  // namespace ark::irtoc
 
+// CC-OFFNXT(G.PRE.06) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define COMPILE(name)                                     \
+    /* CC-OFFNXT(G.PRE.02) part name */                   \
     class name : public Function {                        \
     public:                                               \
         using Function::Function;                         \
         void MakeGraphImpl() override;                    \
         const char *GetName() const override              \
         {                                                 \
+            /* CC-OFFNXT(G.PRE.05) function gen */        \
             return #name;                                 \
         }                                                 \
                                                           \
     private:                                              \
         static int dummy;                                 \
     };                                                    \
+    /* CC-OFFNXT(G.PRE.02) part name */                   \
     int name ::dummy = Compilation::RegisterUnit<name>(); \
+    /* CC-OFFNXT(G.PRE.02) part name */                   \
     void name ::MakeGraphImpl()
 
 #endif  // PANDA_IRTOC_COMPILATION_H

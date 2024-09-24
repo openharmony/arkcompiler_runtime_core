@@ -489,7 +489,7 @@ TEST_F(DanglingPointersCheckerTest, test8)
 //    ------         --------     ------
 //   | bb_6 |       |  bb_7  |-->| bb_9 |--> end_bb
 //    ------         --------     ------
-
+// CC-OFFNXT(huge_method[C++],G.FUN.01-CPP) graph creation
 TEST_F(DanglingPointersCheckerTest, test9)
 {
     auto arch = ark::RUNTIME_ARCH;
@@ -590,7 +590,7 @@ TEST_F(DanglingPointersCheckerTest, test9)
 //    ------         --------     ------
 //   | bb_6 |       |  bb_7  |-->| bb_9 |--> end_bb
 //    ------         --------     ------
-
+// CC-OFFNXT(huge_method[C++],G.FUN.01-CPP) graph creation
 TEST_F(DanglingPointersCheckerTest, test10)
 {
     auto arch = ark::RUNTIME_ARCH;

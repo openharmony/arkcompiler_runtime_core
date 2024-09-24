@@ -56,6 +56,8 @@ extern "C" void DeleteEvent(EtsLong eventPtr)
 // due to mutexes' manipulations at the end of functions
 #if defined(__clang__)
 #pragma clang diagnostic push
+// CC-OFFNXT(warning_suppression[C++]) Disable thread-safety-analysis because it creates warnings due to mutexes'
+// manipulations at the end of functions. Should be suppressed.
 #pragma clang diagnostic ignored "-Wthread-safety-analysis"
 #endif
 

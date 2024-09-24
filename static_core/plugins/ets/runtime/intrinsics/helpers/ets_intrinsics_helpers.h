@@ -103,6 +103,7 @@ inline uint8_t ToDigit(uint8_t c)
     return '$';
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline double PowHelper(uint64_t number, int16_t exponent, uint8_t radix)
 {
     const double log2Radix {std::log2(radix)};
@@ -136,6 +137,7 @@ inline double PowHelper(uint64_t number, int16_t exponent, uint8_t radix)
     return u.fval;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool IsNonspace(uint16_t c)
 {
     int i;
@@ -151,6 +153,7 @@ inline bool IsNonspace(uint16_t c)
     return true;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool GotoNonspace(uint8_t **ptr, const uint8_t *end)
 {
     while (*ptr < end) {
@@ -181,6 +184,7 @@ inline bool IsEmptyString(const uint8_t *start, const uint8_t *end)
     return !GotoNonspace(&p, end);
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline double Strtod(const char *str, int exponent, uint8_t radix)
 {
     ASSERT(str != nullptr);

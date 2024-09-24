@@ -83,6 +83,8 @@ ParseResult<int32_t> ParseExponent(const uint8_t *start, const uint8_t *end, con
 
 }  // namespace parse_helpers
 
+// CC-OFFNXT(G.FUN.01-CPP,huge_cyclomatic_complexity[C++],huge_method[C++]) solid logic
+// CC-OFFNXT(huge_cca_cyclomatic_complexity[C++]) solid logic
 double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, uint32_t flags)
 {
     // 1. skip space and line terminal
@@ -259,6 +261,8 @@ double StringToDouble(const uint8_t *start, const uint8_t *end, uint8_t radix, u
     return Strtod(buffer.c_str(), exponent, radix);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP,huge_cyclomatic_complexity[C++],huge_method[C++]) solid logic
+// CC-OFFNXT(huge_cca_cyclomatic_complexity[C++]) solid logic
 double StringToDoubleWithRadix(const uint8_t *start, const uint8_t *end, int radix)
 {
     auto p = const_cast<uint8_t *>(start);
