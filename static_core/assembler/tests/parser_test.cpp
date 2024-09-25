@@ -318,6 +318,7 @@ TEST(parsertests, test22)
     ASSERT_EQ(item.Value().functionTable.at(sigMain).ins[0].regs[0], 12) << "12 expected";
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test23)
 {
     std::vector<std::vector<ark::pandasm::Token>> v;
@@ -541,6 +542,7 @@ TEST(parsertests, test27_record_and_function)
     ASSERT_EQ(item.Value().functionTable.at(sigNiam).ins[0].imms[0], Ins::IType(int64_t(-1))) << "-1 expected";
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test28_records_and_functions)
 {
     std::vector<std::vector<ark::pandasm::Token>> v;
@@ -805,6 +807,7 @@ TEST(parsertests, test34_vregs_number)
     ASSERT_EQ(item.Value().functionTable.at(sigNiam2).regsNum, 6U);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test35_functions_bracket)
 {
     std::vector<std::vector<ark::pandasm::Token>> v;
@@ -1119,6 +1122,7 @@ TEST(parsertests, test40_parse_operand_string_escape_seq)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test41_parse_operand_string_hex_escape_seq)
 {
     {
@@ -1247,6 +1251,7 @@ TEST(parsertests, test42_parse_operand_string_octal_escape_seq)
     ASSERT_EQ(item.Value().strings, strings);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test43_call_short)
 {
     {
@@ -1340,6 +1345,7 @@ TEST(parsertests, test43_call_short)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test44_call)
 {
     {
@@ -1682,6 +1688,7 @@ TEST(parsertests, Naming_call_function)
     ASSERT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, register_naming_incorr)
 {
     {
@@ -1799,6 +1806,7 @@ TEST(parsertests, register_naming_corr)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, array_type)
 {
     {
@@ -1946,6 +1954,7 @@ TEST(parsertests, undefined_type)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, parse_undefined_record_field)
 {
     {
@@ -2195,6 +2204,7 @@ TEST(parsertests, Vreg_width)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, Num_vregs)
 {
     {
@@ -3663,6 +3673,7 @@ TEST(parsertests, test_fields_same_name)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test_array_integer_def)
 {
     std::vector<std::vector<ark::pandasm::Token>> v;
@@ -3842,6 +3853,7 @@ TEST(parsertests, test_array_static_bool_def)
     ASSERT_EQ(std::get<bool>(item.Value().literalarrayTable.at("array").literals[4].value), true);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test_array_static_integer_def)
 {
     std::vector<std::vector<ark::pandasm::Token>> v;
@@ -4473,6 +4485,7 @@ TEST(parsertests, test_external_fields)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(parsertests, test_accessors)
 {
     {

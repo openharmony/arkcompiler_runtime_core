@@ -25,6 +25,7 @@ struct Label {
     std::string name;                          // NOLINT(misc-non-private-member-variables-in-classes)
     std::optional<FileLocation> fileLocation;  // NOLINT(misc-non-private-member-variables-in-classes)
 
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     Label(std::string s, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
         : name(std::move(s)), fileLocation({fC, bL, bR, lN, d})
     {

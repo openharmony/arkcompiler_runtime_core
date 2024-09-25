@@ -95,6 +95,7 @@ public:
         UNKNOWN
     };
 
+    // CC-OFFNXT(huge_cyclomatic_complexity[C], huge_method[C], G.FUN.01-CPP) big switch case
     static constexpr char GetTypeAsChar(Type t)
     {
         char type = '0';
@@ -166,6 +167,7 @@ public:
         return type;
     }
 
+    // CC-OFFNXT(huge_method[C], G.FUN.01-CPP) big switch case
     static constexpr char GetArrayTypeAsChar(Type t)
     {
         char type = '0';
@@ -228,6 +230,7 @@ public:
         return type;
     }
 
+    // CC-OFFNXT(huge_cyclomatic_complexity[C], huge_method[C], G.FUN.01-CPP) big switch case
     static constexpr Type GetCharAsType(char c)
     {
         Type type = Type::UNKNOWN;
@@ -299,6 +302,7 @@ public:
         return type;
     }
 
+    // CC-OFFNXT(huge_method[C], G.FUN.01-CPP) big switch case
     static constexpr Type GetCharAsArrayType(char c)
     {
         Type type = Type::UNKNOWN;

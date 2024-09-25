@@ -22,6 +22,7 @@ constexpr char PARSE_COMMENT_MARKER = '#';
 
 constexpr char PARSE_AREA_MARKER = '.';
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define PANDA_ASSEMBLER_TYPES(_) \
     _("void", VOID)              \

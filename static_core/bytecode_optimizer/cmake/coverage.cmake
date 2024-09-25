@@ -13,6 +13,7 @@
 
 option(ENABLE_BYTECODE_OPTIMIZER_COVERAGE "Enable coverage calculation for the bytecode optimizer" false)
 
+# CC-OFFNXT(bc-40028) false positive
 include(${PANDA_ROOT}/cmake/toolchain/coverage/unit_tests_lcov.cmake)
 
 add_custom_target(bytecode_optimizer_coverage DEPENDS bytecodeopt_unit_tests)

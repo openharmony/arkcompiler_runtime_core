@@ -17,6 +17,7 @@
 
 namespace ark::pandasm {
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) big switch case
 std::unique_ptr<ScalarValue> InitScalarValue(const ScalarValue &scVal)
 {
     std::unique_ptr<ScalarValue> copyVal;

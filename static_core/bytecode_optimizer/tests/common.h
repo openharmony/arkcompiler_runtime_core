@@ -306,19 +306,22 @@ public:
             block2->Dump(&std::cout);
             return false;
         }
+
+        auto comparator = [this](auto inst1, auto inst2) {
+            ASSERT(inst2 != nullptr);
+            bool t = Compare(inst1, inst2);
+            if (!t) {
+                std::cerr << "Different instructions:\n";
+                inst1->Dump(&std::cout);
+                inst2->Dump(&std::cout);
+            }
+            return t;
+        };
         return std::equal(block1->AllInsts().begin(), block1->AllInsts().end(), block2->AllInsts().begin(),
-                          block2->AllInsts().end(), [this](auto inst1, auto inst2) {
-                              ASSERT(inst2 != nullptr);
-                              bool t = Compare(inst1, inst2);
-                              if (!t) {
-                                  std::cerr << "Different instructions:\n";
-                                  inst1->Dump(&std::cout);
-                                  inst2->Dump(&std::cout);
-                              }
-                              return t;
-                          });
+                          block2->AllInsts().end(), comparator);
     }
 
+    // CC-OFFNXT(huge_method[C], G.FUN.01-CPP) solid logic
     bool Compare(Inst *inst1, Inst *inst2)
     {
         if (auto it = instCompareMap_.insert({inst1, inst2}); !it.second) {
@@ -368,9 +371,10 @@ public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECK(Opc, Getter)                                                                                   \
     do {                                                                                                     \
+        /* CC-OFFNXT(G.PRE.02) false positive */                                                             \
         if (inst1->GetOpcode() == Opcode::Opc && inst1->CAST(Opc)->Getter() != inst2->CAST(Opc)->Getter()) { \
             instCompareMap_.erase(inst1);                                                                    \
-            return false;                                                                                    \
+            return false; /* CC-OFF(G.PRE.05) function gen */                                                \
         }                                                                                                    \
     } while (0)
 
@@ -433,6 +437,7 @@ private:
     std::unordered_map<Inst *, Inst *> instCompareMap_;
 };
 
+// CC-OFFNXT(G.FUD.06) big switch case
 inline std::string JccMnemonic(compiler::ConditionCode cc)
 {
     switch (cc) {

@@ -192,6 +192,7 @@ std::string AsmEmitter::GetMethodSignatureFromProgram(const std::string &name, c
 }
 
 /* static */
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) big switch case
 panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
     ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods)
@@ -475,6 +476,7 @@ ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container,
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
     ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out, const Program &program,
     const std::unordered_map<std::string, BaseClassItem *> &classes,
@@ -496,6 +498,7 @@ ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, const Value *value,
                                                    std::vector<ScalarValueItem> *out, const Program &program,
                                                    const std::unordered_map<std::string, BaseClassItem *> &classes,
@@ -548,6 +551,7 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *value, const Program &program,
                                        const std::unordered_map<std::string, BaseClassItem *> &classes,
                                        const std::unordered_map<std::string, BaseFieldItem *> &fields,
@@ -668,6 +672,7 @@ MethodHandleItem *AsmEmitter::CreateMethodHandleItem(ItemContainer *container, c
 
 /* static */
 template <class T>
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const AnnotationMetadata &metadata,
                                 const Program &program, const std::unordered_map<std::string, BaseClassItem *> &classes,
                                 const std::unordered_map<std::string, BaseFieldItem *> &fields,
@@ -879,6 +884,7 @@ void AsmEmitter::MakeArrayTypeItems(ItemContainer *items, const Program &program
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::HandleRecordAsForeign(
     ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
     const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes, const std::string &name,
@@ -953,6 +959,7 @@ bool AsmEmitter::HandleInterfaces(ItemContainer *items, const Program &program, 
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
                               const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
                               const std::string &name, const Record &rec, ClassItem *record)
@@ -980,6 +987,7 @@ bool AsmEmitter::HandleFields(ItemContainer *items, const Program &program, AsmE
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::HandleRecord(ItemContainer *items, const Program &program, AsmEmitter::AsmEntityCollections &entities,
                               const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
                               const std::string &name, const Record &rec)
@@ -1045,6 +1053,7 @@ StringItem *AsmEmitter::GetMethodName(ItemContainer *items, const Function &func
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::HandleAreaForInner(ItemContainer *items, const Program &program, ClassItem **area,
                                     ForeignClassItem **foreignArea, const std::string &name,
                                     const std::string &recordOwnerName)
@@ -1072,6 +1081,7 @@ bool AsmEmitter::HandleAreaForInner(ItemContainer *items, const Program &program
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::HandleRecordOnwer(ItemContainer *items, const Program &program, ClassItem **area,
                                    ForeignClassItem **foreignArea, const std::string &name,
                                    const std::string &recordOwnerName)
@@ -1089,6 +1099,7 @@ bool AsmEmitter::HandleRecordOnwer(ItemContainer *items, const Program &program,
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::HandleFunctionParams(
     ItemContainer *items, const Program &program, size_t idx, const std::string &name, const Function &func,
     const std::unordered_map<panda_file::Type::TypeId, PrimitiveTypeItem *> &primitiveTypes,
@@ -1133,6 +1144,7 @@ bool AsmEmitter::HandleFunctionLocalVariables(ItemContainer *items, const Functi
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::CreateMethodItem(ItemContainer *items, AsmEmitter::AsmEntityCollections &entities,
                                   const Function &func, TypeItem *typeItem, ClassItem *area,
                                   ForeignClassItem *foreignArea, uint32_t accessFlags, StringItem *methodName,
@@ -1393,6 +1405,7 @@ void AsmEmitter::FillMap(PandaFileToPandaAsmMaps *maps, AsmEmitter::AsmEntityCol
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 void AsmEmitter::EmitDebugInfo(ItemContainer *items, const Program &program, const std::vector<uint8_t> *bytes,
                                const MethodItem *method, const Function &func, const std::string &name,
                                bool emitDebugInfo)
@@ -1516,6 +1529,7 @@ bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToP
     return EmitFunctions(items, program, entities, emitDebugInfo);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::string, size_t> *stat,
                       PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
@@ -1531,6 +1545,7 @@ bool AsmEmitter::Emit(Writer *writer, const Program &program, std::map<std::stri
     return items.Write(writer);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::Emit(const std::string &filename, const Program &program, std::map<std::string, size_t> *stat,
                       PandaFileToPandaAsmMaps *maps, bool debugInfo, ark::panda_file::pgo::ProfileOptimizer *profileOpt)
 {
@@ -1622,6 +1637,7 @@ TypeItem *AsmEmitter::GetTypeItem(
     return items->GetOrCreateClassItem(type.GetDescriptor());
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool Function::Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
                     const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
                     const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,

@@ -49,6 +49,7 @@ static const uint8_t *GetTypeDescriptor(const std::string &name, std::string *st
     return utf::CStringAsMutf8(storage->c_str());
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(emittertests, test)
 {
     Parser p;
@@ -58,7 +59,7 @@ TEST(emittertests, test)
             i32 sf <static>      # 3
             i8  if               # 4
         }                        # 5
-                                 # 6
+        #                        # 6
         .function void main() {  # 7
             return.void          # 8
         }                        # 9
@@ -352,6 +353,7 @@ TEST(emittertests, exceptions)
     });
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(emittertests, errors)
 {
     {
@@ -529,6 +531,7 @@ static auto g_fieldValue = R"(
         }
     )";
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(emittertests, field_value)
 {
     Parser p;
@@ -830,6 +833,7 @@ static auto g_testAccessModifiers = R"(
         .function void C.f() <access.function=public> {}
 )";
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(emittertests, access_modifiers)
 {
     Parser p;

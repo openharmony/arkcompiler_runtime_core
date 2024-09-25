@@ -80,6 +80,7 @@ TEST_F(IrBuilderTest, Lowering)
     }
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(LoweringTest, AddSub)
 {
     auto init = CreateEmptyGraph();
@@ -141,6 +142,7 @@ TEST_F(LoweringTest, AddSub)
     EXPECT_TRUE(GraphComparator().Compare(init, expected));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(LoweringTest, MulDivMod)
 {
     auto init = CreateEmptyGraph();
@@ -225,6 +227,7 @@ TEST_F(LoweringTest, MulDivMod)
     EXPECT_TRUE(GraphComparator().Compare(init, expected));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(LoweringTest, Logic)
 {
     auto init = CreateEmptyGraph();
@@ -301,6 +304,7 @@ TEST_F(LoweringTest, Logic)
     EXPECT_TRUE(GraphComparator().Compare(init, expected));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(LoweringTest, Shift)
 {
     auto init = CreateEmptyGraph();

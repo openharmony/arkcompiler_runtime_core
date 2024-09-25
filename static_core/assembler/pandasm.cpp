@@ -62,6 +62,7 @@ void PrintHelp(const ark::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool PrepareArgs(ark::PandArgParser &paParser, const ark::PandArg<std::string> &inputFile,
                  const ark::PandArg<std::string> &outputFile, const ark::PandArg<std::string> &logFile,
                  const ark::PandArg<bool> &help, const ark::PandArg<bool> &verbose, const ark::PandArg<bool> &version,
@@ -201,6 +202,7 @@ bool EmitProgramInBinary(ark::pandasm::Program &program, ark::PandArgParser &paP
     return true;
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool BuildFiles(ark::pandasm::Program &program, ark::PandArgParser &paParser,
                 const ark::PandArg<std::string> &outputFile, ark::PandArg<bool> &optimize, ark::PandArg<bool> &sizeStat,
                 ark::PandArg<std::string> &scopesFile)

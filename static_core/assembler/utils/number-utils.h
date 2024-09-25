@@ -16,6 +16,8 @@
 #ifndef PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H
 #define PANDA_ASSEMBLER_UTILS_NUMBERS_UTILS_H
 
+#include "libpandabase/utils/bit_utils.h"
+
 namespace ark::pandasm {
 
 constexpr size_t HEX_BASE = 16;
@@ -69,115 +71,11 @@ inline bool ValidateZeroToTenToken(std::string_view token)
     return true;
 }
 
-inline bool ValidateInteger(std::string_view p)
-{
-    constexpr size_t GENERAL_SHIFT = 2;
+bool ValidateInteger(std::string_view p);
 
-    std::string_view token = p;
+int64_t IntegerNumber(std::string_view p);
 
-    if (token.back() == '-' || token.back() == '+' || token.back() == 'x' || token == ".") {
-        return false;
-    }
-
-    if (token[0] == '-' || token[0] == '+') {
-        token.remove_prefix(1);
-    }
-
-    if (token[0] == '0' && token.size() > 1 && token.find('.') == std::string::npos) {
-        if (token[1] == 'x') {
-            return ValidateXToken(token, GENERAL_SHIFT);
-        }
-
-        if (token[1] == 'b') {
-            return ValidateBToken(token, GENERAL_SHIFT);
-        }
-
-        if (token[1] >= '0' && token[1] <= '9' && token.find('e') == std::string::npos) {
-            return ValidateZeroToTenToken(token);
-        }
-    }
-
-    for (auto i : token) {
-        if (!(i >= '0' && i <= '9')) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-inline int64_t IntegerNumber(std::string_view p)
-{
-    constexpr size_t GENERAL_SHIFT = 2;
-
-    // expects a valid number
-    if (p.size() == 1) {
-        return p[0] - '0';
-    }
-
-    size_t minusShift = 0;
-    if (p[0] == '-') {
-        minusShift++;
-    }
-
-    if (p.size() == GENERAL_SHIFT && minusShift != 0) {
-        return -1 * (p[1] - '0');
-    }
-
-    if (p[minusShift + 1] == 'b') {
-        p.remove_prefix(GENERAL_SHIFT + minusShift);
-        return std::strtoull(p.data(), nullptr, BIN_BASE) * (minusShift == 0 ? 1 : -1);
-    }
-
-    if (p[minusShift + 1] == 'x') {
-        return std::strtoull(p.data(), nullptr, HEX_BASE);
-    }
-
-    if (p[minusShift] == '0') {
-        return std::strtoull(p.data(), nullptr, OCT_BASE);
-    }
-
-    return std::strtoull(p.data(), nullptr, DEC_BASE);
-}
-
-inline bool ValidateFloat(std::string_view p)
-{
-    std::string_view token = p;
-
-    if (ValidateInteger(token)) {
-        return true;
-    }
-
-    if (token[0] == '-' || token[0] == '+') {
-        token.remove_prefix(1);
-    }
-
-    bool dot = false;
-    bool exp = false;
-    bool nowexp = false;
-
-    for (auto i : token) {
-        if (nowexp && (i == '-' || i == '+')) {
-            nowexp = false;
-            continue;
-        }
-
-        if (nowexp) {
-            nowexp = false;
-        }
-
-        if (i == '.' && !exp && !dot) {
-            dot = true;
-        } else if (!exp && i == 'e') {
-            nowexp = true;
-            exp = true;
-        } else if (!(i >= '0' && i <= '9')) {
-            return false;
-        }
-    }
-
-    return !nowexp;
-}
+bool ValidateFloat(std::string_view p);
 
 inline double FloatNumber(std::string_view p, bool is64bit)
 {
@@ -188,6 +86,7 @@ inline double FloatNumber(std::string_view p, bool is64bit)
         if (is64bit) {
             return bit_cast<double>(strtoull(p.data(), &end, 0));
         }
+        // CC-OFFNXT(G.FUU.01) false positive
         return bit_cast<float>(static_cast<uint32_t>(strtoull(p.data(), &end, 0)));
     }
     return std::strtold(std::string(p.data(), p.length()).c_str(), nullptr);

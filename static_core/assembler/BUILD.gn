@@ -53,6 +53,7 @@ libarkassembler_sources = [
   "extensions/extensions.cpp",
   "lexer.cpp",
   "meta.cpp",
+  "utils/number-utils.cpp",
 ]
 libarkassembler_sources += plugin_libarkassembler_sources
 

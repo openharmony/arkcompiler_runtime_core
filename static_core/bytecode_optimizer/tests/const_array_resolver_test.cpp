@@ -250,6 +250,7 @@ TEST_F(CommonTest, ConstArrayResolverByteAccess)
     EXPECT_TRUE(GraphComparator().Compare(graph, expected));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(CommonTest, ConstArrayResolverStringAccess)
 {
     auto graph = CreateEmptyGraph();
