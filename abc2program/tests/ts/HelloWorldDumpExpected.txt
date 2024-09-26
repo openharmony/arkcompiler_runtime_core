@@ -5,19 +5,19 @@
 # ====================
 # LITERALS
 
-_ESModuleRecord_1466 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
+_ESModuleRecord_1437 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
 
-_ESScopeNamesRecord_1442 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
+_ESScopeNamesRecord_1413 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
 
-_GLOBAL_1546 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1517 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1563 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_1534 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_1572 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1543 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_1594 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
+_GLOBAL_1565 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
 
-_GLOBAL_1613 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1594, ]}
+_GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1565, ]}
 
 
 
@@ -336,7 +336,7 @@ _GLOBAL_1613 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function any .#*#hoo(any a0, any a1, any a2) {
 	fldai 1.230000e+00                       # line: 71           # column: 0
 	trystglobalbyname 0x0, varA              # line: 71           # column: 0
-	createobjectwithbuffer 0x1, _GLOBAL_1546 # line: 72           # column: 0
+	createobjectwithbuffer 0x1, _GLOBAL_1517 # line: 72           # column: 0
 	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 73           # column: 0
 }
@@ -457,12 +457,12 @@ _GLOBAL_1613 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	stlexvar 0x0, 0x0                        # line: 18446744073709551615           # column: 0
 	lda a2                                   # line: 18446744073709551615           # column: 0
 	stlexvar 0x0, 0x1                        # line: 18446744073709551615           # column: 0
-	definefunc 0x0, .#*#foo, 0x0             # line: 18446744073709551615           # column: 0
+	definefunc 0x0, .#*#asyncGenerateFunc, 0x0 # line: 18446744073709551615           # column: 0
+	definefunc 0x1, .#*#foo, 0x0             # line: 18446744073709551615           # column: 0
 	sta v0                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x1, .#*#asyncGenerateFunc, 0x0 # line: 18446744073709551615           # column: 0
-	definefunc 0x2, .#*#goo, 0x0             # line: 18446744073709551615           # column: 0
+	definefunc 0x2, .#*#generateFunc, 0x0    # line: 18446744073709551615           # column: 0
+	definefunc 0x3, .#*#goo, 0x0             # line: 18446744073709551615           # column: 0
 	sta v1                                   # line: 18446744073709551615           # column: 0
-	definefunc 0x3, .#*#generateFunc, 0x0    # line: 18446744073709551615           # column: 0
 	definefunc 0x4, .#*#hoo, 0x0             # line: 18446744073709551615           # column: 0
 	sta v2                                   # line: 18446744073709551615           # column: 0
 	getmodulenamespace 0x1                   # line: 18446744073709551615           # column: 0
@@ -470,15 +470,15 @@ _GLOBAL_1613 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	stmodulevar 0x0                          # line: 17           # column: 0
 	ldhole                                   # line: 21           # column: 0
 	sta v3                                   # line: 21           # column: 0
-	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1563, 0x0, v3 # line: 21           # column: 0
+	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1534, 0x0, v3 # line: 21           # column: 0
 	ldobjbyname 0x6, prototype               # line: 21           # column: 0
 	ldhole                                   # line: 25           # column: 0
 	sta v3                                   # line: 25           # column: 0
-	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1572, 0x0, v3 # line: 25           # column: 0
+	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1543, 0x0, v3 # line: 25           # column: 0
 	ldobjbyname 0x9, prototype               # line: 25           # column: 0
 	ldhole                                   # line: 29           # column: 0
 	sta v3                                   # line: 29           # column: 0
-	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1613, 0x0, v3 # line: 29           # column: 0
+	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1584, 0x0, v3 # line: 29           # column: 0
 	lda.str                                  # line: 37           # column: 0
 	trystglobalbyname 0xc, string            # line: 37           # column: 0
 	definefunc 0xd, .#*#add, 0x2             # line: 75           # column: 0

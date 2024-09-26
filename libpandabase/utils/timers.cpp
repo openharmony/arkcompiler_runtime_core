@@ -25,8 +25,8 @@
 #include <sstream>
 
 namespace panda {
-TimeStartFunc Timer::timerStart;
-TimeEndFunc Timer::timerEnd;
+TimeStartFunc Timer::timerStart = Timer::TimerStartDoNothing;
+TimeEndFunc Timer::timerEnd = Timer::TimerEndDoNothing;
 std::unordered_map<std::string_view, TimeRecord> Timer::timers_;
 std::vector<std::string_view> Timer::events_;
 std::mutex Timer::mutex_;
@@ -38,9 +38,6 @@ void Timer::InitializeTimer(std::string &perfFile)
         Timer::timerStart = Timer::TimerStartImpl;
         Timer::timerEnd = Timer::TimerEndImpl;
         perfFile_ = perfFile;
-    } else {
-        Timer::timerStart = Timer::TimerStartDoNothing;
-        Timer::timerEnd = Timer::TimerEndDoNothing;
     }
 }
 
