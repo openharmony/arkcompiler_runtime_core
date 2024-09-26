@@ -142,7 +142,7 @@ async def test_code_compiler(
                 prop for props in [(await client.get_properties(obj_id))[0] for obj_id in object_ids] for prop in props
             ]
             variables = {prop.name: prop.value.value if prop.value is not None else None for prop in props}
-            log.info("Properties: \n%s", "\n".join(repr(props)))
+            log.info("Properties: \n%s", repr(props))
             log.info("All variables: %r", variables)
             assert variables == {"a": 100, "b": 0}
             await client.resume()
