@@ -83,6 +83,11 @@ public:
         return id_;
     }
 
+    bool IsMainWorker() const
+    {
+        return id_ == stackful_coroutines::MAIN_WORKER_ID;
+    }
+
     /**
      * @brief Adds a coroutine to the runnables queue
      * @param new_coro coroutine to add
@@ -93,9 +98,8 @@ public:
     /**
      * @brief Block current coroutine till an event happens and switch context to the next ready one
      * @param awaitee the event to wait
-     * @return false if the event is apready happened, true after the waiting is completed
      */
-    bool WaitForEvent(CoroutineEvent *awaitee) RELEASE(awaitee);
+    void WaitForEvent(CoroutineEvent *awaitee) RELEASE(awaitee);
 
     /**
      * @brief Signal that an event has happened and unblock all the coroutines in the current worker that are waiting

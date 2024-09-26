@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CODE_SCOPES_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_CODE_SCOPES_H
 
+#include "plugins/ets/runtime/interop_js/ets_session.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 
 namespace ark::ets::interop::js {
@@ -83,7 +84,7 @@ private:
 class InteropCodeScopeJS {
 public:
     InteropCodeScopeJS(EtsCoroutine *coro, napi_env env, char const *descr = nullptr)
-        : codeScope_(coro, descr), jsEnvScope_(InteropCtx::Current(coro), env)
+        : codeScope_(coro, descr), jsEnvScope_(InteropCtx::Current(coro), env), etsSessionScope_(coro)
     {
     }
 
@@ -95,6 +96,7 @@ private:
 
     InteropCodeScope<false> codeScope_;
     JSNapiEnvScope jsEnvScope_;
+    ScopedETSSession etsSessionScope_;
 };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

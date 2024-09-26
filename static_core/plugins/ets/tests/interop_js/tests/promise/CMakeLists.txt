@@ -278,3 +278,8 @@ panda_ets_interop_js_test(ets_interop_js_test_resolve_js_promise_from_non_main_c
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/resolve_js_promise_from_non_main_coro_test.js
     LAUNCHER_ARGS "testPromiseResolve"
 )
+
+panda_ets_interop_js_test(ets_interop_js_test_schedule_main_coro
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/schedule_main_coro.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/schedule_main_coro.js
+)
