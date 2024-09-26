@@ -412,7 +412,7 @@ groups:
         acc: inout:top
         opcode_idx: [0xd7]
         format: [op_imm_8]
-        properties: [ic_slot, eight_bit_ic]
+        properties: [ic_slot, two_slot, eight_bit_ic]
       - sig: ldprivateproperty imm1:u8, imm2:u16, imm3:u16
         acc: inout:top
         opcode_idx: [0xd8]
@@ -891,13 +891,13 @@ groups:
         opcode_idx: [0x13]
         format: [pref_op_imm_8]
         prefix: callruntime
-        properties: [ic_slot, eight_bit_ic]
+        properties: [ic_slot, one_slot, eight_bit_ic]
       - sig: callruntime.isfalse imm:u8
         acc: inout:top
         opcode_idx: [0x14]
         format: [pref_op_imm_8]
         prefix: callruntime
-        properties: [ic_slot, eight_bit_ic]
+        properties: [ic_slot, one_slot, eight_bit_ic]
       - sig: callruntime.ldlazymodulevar imm:u8
         acc: out:top
         opcode_idx: [0x15]
