@@ -19,12 +19,36 @@ function_decls:
         foo();
 
     - decl: |-
+        function foo() { // CTE, the execution path of the function or method body has no return statement
+            if(1) return true
+        }
+      call: |-
+        return
+
+    - decl: |-
+        class A {
+            foo() { // CTE, the execution path of the function or method body has no return statement
+                if(0) return true
+            }
+        }
+      call: |-
+        return
+
+    - decl: |-
         let i = 1
         function foo() {  // infer void
             i += 1
         }
       call: |-
         let x: number = foo();  // CTE, cannot assign void to number
+
+    - decl: |-
+        let i = 1
+        function foo() {  // infer void
+            i += 1
+        }
+      call: |-
+        let x = foo();  // CTE, Cannot use type 'void' as value
 
     - decl: |-
         let i = 1
