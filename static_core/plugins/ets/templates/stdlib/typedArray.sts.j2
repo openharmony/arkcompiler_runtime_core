@@ -116,11 +116,27 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * Creates an {{N}}Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<{{subsetTypeValues}}>) {
-        let x = {{N}}Array.from(elements)
-        this.byteLength = x.byteLength
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffset = x.byteOffset
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<{{subsetTypeValues}}>(items as ArrayLike<{{subsetTypeValues}}>)
+            this.byteLength = arr.length as int * {{N}}Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                {%- if N == 'BigInt64' %}
+                this.setUnsafe(i, this.zeroIfInfinity(arr.$_get(i)).getLong())
+                {%- else %}
+                this.setUnsafe(i, arr.$_get(i).{{T}}Value())
+                {%- endif %}
+            }
+        } else {
+          let x = {{N}}Array.from(elements)
+          this.byteLength = x.byteLength
+          this.lengthInt = x.lengthInt
+          this.buffer = x.buffer
+          this.byteOffset = x.byteOffset
+        }
     }
 
     /**

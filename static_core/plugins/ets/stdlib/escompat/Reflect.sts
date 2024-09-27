@@ -17,6 +17,9 @@ package escompat
 
 export class Reflect {
 
+    private static readonly GETTER_PREFIX = "<get>"
+    private static readonly SETTER_PREFIX = "<set>"
+
     private constructor () {}
 
     /**
@@ -28,7 +31,7 @@ export class Reflect {
     *
     * @returns the value of the field
     */
-    public static get(target: Object, key: string): Object | undefined {
+    public static get<T extends Object>(target: T, key: PropertyKey): NullishType {
         if (target instanceof Char ||
             target instanceof Boolean ||
             target instanceof Byte ||
@@ -45,7 +48,17 @@ export class Reflect {
         }
         const t = Type.of(target)
         if (t instanceof ClassType) {
-            return (Value.of(target) as ClassValue).getFieldByName(key).getData()!
+            if (t.hasField(key)) {
+                const classVal = Value.of(target) as ClassValue
+                return classVal.getFieldByName(key).getData()
+            } else {
+                const getter = Reflect.findMethod(t, Reflect.GETTER_PREFIX + key)
+                if (getter !== undefined) {
+                    return getter.invoke(target, [])
+                } else {
+                    return undefined
+                }
+            }
         } else if (t instanceof ArrayType) {
             if (key == ARRAY_LENGTH_MEMBER_NAME) {
                 return new Number((Value.of(target) as ArrayValue).getLength())
@@ -121,7 +134,7 @@ export class Reflect {
     *
     * @returns a Boolean indicating whether or not setting the field was successful
     */
-    public static set(target: Object, key: string, value: Object): Boolean {
+    public static set<T extends Object>(target: T, key: PropertyKey, value: NullishType): boolean {
         if (!Reflect.has(target, key)) {
             return false
         }
@@ -129,14 +142,35 @@ export class Reflect {
         let vt = v.getType()
         if (vt instanceof ClassType) {
             let cv = v as ClassValue
-            try {
-                cv.setFieldByName(key, Value.of(value))
-            } catch (e: Error) {
-                return false
+            if (vt.hasField(key)) {
+                try {
+                    cv.setFieldByName(key, Value.of(value))
+                    return true
+                } catch (e: Error) {
+                    return false
+                }
+            } else {
+                const setter = Reflect.findMethod(vt, Reflect.SETTER_PREFIX + key)
+                if (setter !== undefined) {
+                    setter.invoke(target, [value])
+                    return true
+                } else {
+                    return false
+                }
             }
-            return true
         }
         return false
+    }
+
+    private static findMethod(type: ClassType, name: string): Method | undefined {
+        for (let methodIdx = 0; methodIdx < type.getMethodsNum(); methodIdx++) {
+            const method = type.getMethod(methodIdx)
+            if (method.getName() == name) {
+                return method
+            }
+        }
+
+        return undefined
     }
 
     /**
@@ -199,7 +233,13 @@ export class Reflect {
                     if (m.isStatic()) {
                         continue
                     }
-                    if (m.getName() == key) {
+
+                    const methodName = m.getName()
+                    if (methodName == key) {
+                        return true
+                    } else if (methodName == Reflect.GETTER_PREFIX + key) {
+                        return true
+                    } else if (methodName == Reflect.SETTER_PREFIX + key) {
                         return true
                     }
                 }

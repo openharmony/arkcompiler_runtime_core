@@ -114,18 +114,17 @@ PandasmMethodCreator CreateCopiedMethod(TypeCreatorCtx *ctx, const std::string &
     return fn;
 }
 
-void SetAccessFlags(pandasm::ItemMetadata *meta, EtsTypeAPIAccessModifier mod)
+void SetAccessFlags(pandasm::ItemMetadata *meta, const std::string_view &attr, EtsTypeAPIAccessModifier mod)
 {
     switch (mod) {
         case EtsTypeAPIAccessModifier::PUBLIC:
-            meta->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS, typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
+            meta->SetAttributeValue(attr, typeapi_create_consts::ATTR_ACCESS_VAL_PUBLIC);
             break;
         case EtsTypeAPIAccessModifier::PRIVATE:
-            meta->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS, typeapi_create_consts::ATTR_ACCESS_VAL_PRIVATE);
+            meta->SetAttributeValue(attr, typeapi_create_consts::ATTR_ACCESS_VAL_PRIVATE);
             break;
         case EtsTypeAPIAccessModifier::PROTECTED:
-            meta->SetAttributeValue(typeapi_create_consts::ATTR_ACCESS,
-                                    typeapi_create_consts::ATTR_ACCESS_VAL_PROTECTED);
+            meta->SetAttributeValue(attr, typeapi_create_consts::ATTR_ACCESS_VAL_PROTECTED);
             break;
         default:
             UNREACHABLE();
@@ -316,7 +315,8 @@ EtsLong TypeAPITypeCreatorCtxMethodCreate(EtsLong containingTypePtr, EtsString *
 EtsString *TypeAPITypeCreatorCtxMethodAddAccessMod(EtsLong methodPtr, EtsInt access)
 {
     auto m = PtrFromLong<PandasmMethodCreator>(methodPtr);
-    SetAccessFlags(m->GetFn().metadata.get(), static_cast<EtsTypeAPIAccessModifier>(access));
+    auto accessMod = static_cast<EtsTypeAPIAccessModifier>(access);
+    SetAccessFlags(m->GetFn().metadata.get(), typeapi_create_consts::ATTR_ACCESS_FUNCTION, accessMod);
     return ErrorFromCtx(m->Ctx());
 }
 
@@ -579,7 +579,8 @@ EtsString *TypeAPITypeCreatorCtxClassAddField(EtsLong classPtr, EtsString *name,
     }
     fld.name = name->GetMutf8();
     fld.type = pandasm::Type(type, 0);
-    SetAccessFlags(fld.metadata.get(), static_cast<EtsTypeAPIAccessModifier>(access));
+    auto accessMod = static_cast<EtsTypeAPIAccessModifier>(access);
+    SetAccessFlags(fld.metadata.get(), typeapi_create_consts::ATTR_ACCESS_FIELD, accessMod);
     klass->GetRec()->fieldList.emplace_back(std::move(fld));
     return ErrorFromCtx(klass->GetCtx());
 }

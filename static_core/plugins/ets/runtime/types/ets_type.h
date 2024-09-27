@@ -30,6 +30,7 @@ static constexpr const char *NULL_TYPE_DESC = "Null";
 static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *LAMBDA_METHOD_NAME = "invoke";
+static constexpr const char *FN_INVOKE_METHOD_NAME = "invoke0";
 static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
 static constexpr const char *GETTER_BEGIN = "<get>";

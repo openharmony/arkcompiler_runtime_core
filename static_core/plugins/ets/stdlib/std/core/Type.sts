@@ -129,6 +129,7 @@ export class ValueTypeDesc {
     public static readonly LONG: TypeDesc      = "J"
     public static readonly FLOAT: TypeDesc     = "F"
     public static readonly DOUBLE: TypeDesc    = "D"
+    public static readonly VOID: TypeDesc      = "V"
 }
 
 const ObjectTD = "Lstd/core/Object;" // NOTE(shumilov-petr): get td from runtime
@@ -182,7 +183,7 @@ export abstract class Type extends Object {
             case TypeKind.NONE:
                 return null
             case TypeKind.VOID:
-                return VoidType.REF
+                return td == ValueTypeDesc.VOID ? VoidType.VAL : VoidType.REF
             case TypeKind.CHAR:
                 return TypeAPIIsValueType(td) ? CharType.VAL : CharType.REF
             case TypeKind.BOOLEAN:
@@ -585,6 +586,45 @@ export abstract class Type extends Object {
     }
 
     abstract equals(other: Type): boolean
+
+    public static toRefType(primitiveType: Type): Type {
+        if (!primitiveType.isPrimitive()) {
+            throw new Error(`type ${primitiveType.getName()} is not primitive type`)
+        }
+
+        if (primitiveType.isReference()) {
+            // StringType is primitive and reference at the same time
+            return primitiveType
+        }
+
+        if (primitiveType instanceof BooleanType) {
+            return BooleanType.REF
+        } else if (primitiveType instanceof ByteType) {
+            return ByteType.REF
+        } else if (primitiveType instanceof CharType) {
+            return CharType.REF
+        } else if (primitiveType instanceof ShortType) {
+            return ShortType.REF
+        } else if (primitiveType instanceof IntType) {
+            return IntType.REF
+        } else if (primitiveType instanceof LongType) {
+            return LongType.REF
+        } else if (primitiveType instanceof FloatType) {
+            return FloatType.REF
+        } else if (primitiveType instanceof DoubleType) {
+            return DoubleType.REF
+        } else {
+            throw new Error(`failed to convert primitive type ${primitiveType.getName()} to relevant reference type`)
+        }
+    }
+}
+
+export final class Types {
+    private constructor() {}
+
+    public static identity_cast<T>(array: ArrayLike<T>): ArrayLike<T> {
+        return array
+    }
 }
 
 /**
@@ -735,10 +775,14 @@ export final class UndefinedType extends Type {
  * Represents void type
  */
 export final class VoidType extends Type {
-    public static readonly REF: VoidType = new VoidType()
+    public static readonly VAL: VoidType = new VoidType(ValueTypeDesc.VOID, true) 
+    public static readonly REF: VoidType = new VoidType(TypeAPIGetTypeDescriptor(Void.void_instance), false)
 
-    private constructor() {
-        this.td = TypeAPIGetTypeDescriptor(Void.void_instance)
+    private readonly value: boolean
+
+    private constructor(td: TypeDesc, value: boolean) {
+        this.td = td
+        this.value = value
     }
 
     /**
@@ -756,7 +800,7 @@ export final class VoidType extends Type {
      * @returns true if type is reference and false otherwise
      */
     public override isReference(): boolean {
-        return true
+        return !this.value
     }
 
     /**
@@ -1888,11 +1932,15 @@ export final class ClassType extends Type {
         // `this` implements `other` interface?
         if (other instanceof InterfaceType) {
             let iface = other as InterfaceType
-            let ifaceNum = this.getInterfacesNum()
-            for (let i = 0; i < ifaceNum; i++) {
-                if (this.getInterface(i).hasSuperInterface(iface)) {
-                    return true
+            let bt = this
+            while (!bt.equals(bt.getBaseType())) {
+                let ifaceNum = bt.getInterfacesNum()
+                for (let i = 0; i < ifaceNum; i++) {
+                    if (bt.getInterface(i).hasSuperInterface(iface)) {
+                        return true
+                    }
                 }
+                bt = bt.getBaseType()
             }
         }
         return false
@@ -2466,16 +2514,35 @@ export final class LambdaType extends FunctionType {
         if (l.getParametersNum() != r.getParametersNum()) {
             return false
         }
+        
         // Parameter types are using contravariance
         for (let i = 0; i < l.getParametersNum(); i++) {
             let lt = l.getParameter(i).getType()
             let rt = r.getParameter(i).getType()
+
             if (!lt.subTypeOf(rt)) {
-                return false
+                if (rt.isPrimitive()) {
+                    const rrt = Type.toRefType(rt)
+                    if (!lt.subTypeOf(rrt)) {
+                        return false
+                    }
+                } else {
+                    return false
+                }
             }
         }
+
         // Return types are using covariance
-        return r.getResultType().subTypeOf(l.getResultType())
+        if (r.getResultType().subTypeOf(l.getResultType())) {
+            return true
+        }
+
+        const rvalResType = r.getResultType()
+        if (rvalResType.isPrimitive()) {
+            return Type.toRefType(rvalResType).subTypeOf(l.getResultType())
+        } else {
+            return false
+        }
     }
 
     internal override convertObject(obj: NullishType): NullishType {
@@ -2483,11 +2550,10 @@ export final class LambdaType extends FunctionType {
         if (this.equals(objType)) {
             return obj
         }
-        if (!this.assignableFrom(objType)) {
-            throw new Error("invalid conversion")
+        if (this.assignableFrom(objType)) {
+            return obj
         }
-        // NOTE(shumilov-petr): Need to use Create API
-        throw new Error("todo(kprokopenko): unequal labmda type conversion")
+        throw new Error("invalid conversion")
     }
 }
 

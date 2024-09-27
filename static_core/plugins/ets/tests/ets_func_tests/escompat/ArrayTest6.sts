@@ -33,192 +33,212 @@ function main(): int {
 const d: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 const dd: Number[] = [1, 0, 3, 4, 0, 6];
 
+function newProxy<T>(a: Array<T>): Array<T> {
+    class Handler<T> extends DefaultArrayProxyHandler<T> {}
+
+    return Proxy.create<T>(a, new Handler<T>())
+}
+
+function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {
+    let failures = 0
+
+    failures += testFn(newArrayFn())
+    failures += testFn(newProxy(newArrayFn()))
+
+    return failures
+}
+
 function findIndexFuncArg1(): int {
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    const fnPositive = (elem: number): boolean => { return elem == 12; };
-    const fnNegative = (elem: number): boolean => { return elem < 0; };
-    const fnUndefined = (elem: Number): boolean => { return elem == undefined; };
-    const fnNull = (elem: Number): boolean => { return elem == null; };
-    if (arr.findIndex(fnPositive) != 9) { return fail; }
-    if (arr.findIndex(fnNegative) != 1) { return fail; }
-    if (arr.findIndex(fnUndefined) != -1) { return fail; }
-    if (arr.findIndex(fnNull) != -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        const fnPositive = (elem: number): boolean => { return elem == 12; };
+        const fnNegative = (elem: number): boolean => { return elem < 0; };
+        const fnUndefined = (elem: Number): boolean => { return elem == undefined; };
+        const fnNull = (elem: Number): boolean => { return elem == null; };
+        if (arr.findIndex(fnPositive) != 9) { return fail; }
+        if (arr.findIndex(fnNegative) != 1) { return fail; }
+        if (arr.findIndex(fnUndefined) != -1) { return fail; }
+        if (arr.findIndex(fnNull) != -1) { return fail; }
+        return success;
+    })
 }
 
 function findIndexFuncArg2(): int {
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-       arr.push(d[i]);
-    }
-    const fnPositive = (elem: number, index: number): boolean => {
-        return elem == 12 && index > 0;
-    };
-    const fnNegative = (elem: number, index: number): boolean => {
-        return elem < 0 && index > 0;
-    };
-    const fnUndefined = (elem: Number, index: number): boolean => {
-        return elem == undefined && index < 0;
-    };
-    const fnNull = (elem: Number, index: number): boolean => {
-        return elem == null && index > 0;
-    };
-    if (arr.findIndex(fnPositive) != 9) { return fail; }
-    if (arr.findIndex(fnNegative) != 1) { return fail; }
-    if (arr.findIndex(fnUndefined) != -1) { return fail; }
-    if (arr.findIndex(fnNull) != -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        for (let i: int = 0; i < d.length; ++i) {
+           arr.push(d[i]);
+        }
+        const fnPositive = (elem: number, index: number): boolean => {
+            return elem == 12 && index > 0;
+        };
+        const fnNegative = (elem: number, index: number): boolean => {
+            return elem < 0 && index > 0;
+        };
+        const fnUndefined = (elem: Number, index: number): boolean => {
+            return elem == undefined && index < 0;
+        };
+        const fnNull = (elem: Number, index: number): boolean => {
+            return elem == null && index > 0;
+        };
+        if (arr.findIndex(fnPositive) != 9) { return fail; }
+        if (arr.findIndex(fnNegative) != 1) { return fail; }
+        if (arr.findIndex(fnUndefined) != -1) { return fail; }
+        if (arr.findIndex(fnNull) != -1) { return fail; }
+        return success;
+    })
 }
 
 function findIndexFuncArg3ArrayNumber(): int {
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    const fnPositive = (elem: number, index: number, obj: Array<Number>): boolean => {
-        return obj.at(index)! == elem && elem == 12 && index > 0;
-    };
-    const fnNegative = (elem: number, index: number, obj: Array<Number>): boolean => {
-        return obj.at(index)! == elem && elem < 0 && index > 0;
-    };
-    const fnUndefined = (elem: Number, index: number, obj: Array<Number>): boolean => {
-        return obj.at(index)! == elem && elem == undefined && index < 0;
-    };
-    const fnNull = (elem: Number, index: number, obj: Array<Number>): boolean => {
-        return obj.at(index)! == elem && elem == null && index > 0;
-    };
-    if (arr.findIndex(fnPositive) != 9) { return fail; }
-    if (arr.findIndex(fnNegative) != 1) { return fail; }
-    if (arr.findIndex(fnUndefined) != -1) { return fail; }
-    if (arr.findIndex(fnNull) != -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        const fnPositive = (elem: number, index: number, obj: Array<Number>): boolean => {
+            return obj.at(index)! == elem && elem == 12 && index > 0;
+        };
+        const fnNegative = (elem: number, index: number, obj: Array<Number>): boolean => {
+            return obj.at(index)! == elem && elem < 0 && index > 0;
+        };
+        const fnUndefined = (elem: Number, index: number, obj: Array<Number>): boolean => {
+            return obj.at(index)! == elem && elem == undefined && index < 0;
+        };
+        const fnNull = (elem: Number, index: number, obj: Array<Number>): boolean => {
+            return obj.at(index)! == elem && elem == null && index > 0;
+        };
+        if (arr.findIndex(fnPositive) != 9) { return fail; }
+        if (arr.findIndex(fnNegative) != 1) { return fail; }
+        if (arr.findIndex(fnUndefined) != -1) { return fail; }
+        if (arr.findIndex(fnNull) != -1) { return fail; }
+        return success;
+    })
 }
 
 function findLastIndexFuncArg1(): int {
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    const fnPositive = (elem: number): boolean => { return elem == 12; };
-    const fnNegative = (elem: number): boolean => { return elem < 0; };
-    const fnUndefined = (elem: Number): boolean => { return elem == undefined; };
-    const fnNull = (elem: Number): boolean => { return elem == null; };
-    if (arr.findLastIndex(fnPositive) != 9) { return fail; }
-    if (arr.findLastIndex(fnNegative) != 3) { return fail; }
-    if (arr.findLastIndex(fnUndefined) != -1) { return fail; }
-    if (arr.findLastIndex(fnNull) != -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        const fnPositive = (elem: number): boolean => { return elem == 12; };
+        const fnNegative = (elem: number): boolean => { return elem < 0; };
+        const fnUndefined = (elem: Number): boolean => { return elem == undefined; };
+        const fnNull = (elem: Number): boolean => { return elem == null; };
+        if (arr.findLastIndex(fnPositive) != 9) { return fail; }
+        if (arr.findLastIndex(fnNegative) != 3) { return fail; }
+        if (arr.findLastIndex(fnUndefined) != -1) { return fail; }
+        if (arr.findLastIndex(fnNull) != -1) { return fail; }
+        return success;
+    })
 }
 
 function findLastFuncArg1(): int {
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    const fnPositive = (elem: number): boolean => { return elem == 12; };
-    const fnNegative = (elem: number): boolean => { return elem < 0; };
-    const fnUndefined = (elem: Number): boolean => { return elem == undefined; };
-    const fnNull = (elem: Number): boolean => { return elem == null; };
-    if (arr.findLast(fnPositive) != 12) { return fail; }
-    if (arr.findLast(fnNegative) != -5) { return fail; }
-    if (arr.findLast(fnUndefined) != undefined) { return fail; }
-    if (arr.findLast(fnNull) != undefined) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        const fnPositive = (elem: number): boolean => { return elem == 12; };
+        const fnNegative = (elem: number): boolean => { return elem < 0; };
+        const fnUndefined = (elem: Number): boolean => { return elem == undefined; };
+        const fnNull = (elem: Number): boolean => { return elem == null; };
+        if (arr.findLast(fnPositive) != 12) { return fail; }
+        if (arr.findLast(fnNegative) != -5) { return fail; }
+        if (arr.findLast(fnUndefined) != undefined) { return fail; }
+        if (arr.findLast(fnNull) != undefined) { return fail; }
+        return success;
+    })
 }
 
 function mapFuncArg1(): int {
-    let fn = (elem: number): number => {
-        return elem * elem;
-    };
-    let arrEmpty = new Array<Number>;
-    let res0 = arrEmpty.map<Number>(fn);
-    if (res0.length != arrEmpty.length) { return fail; }
-    if (res0.length != 0) { return fail; }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let fn = (elem: number): number => {
+            return elem * elem;
+        };
+        let res0 = arr.map<Number>(fn);
+        if (res0.length != arr.length) { return fail; }
+        if (res0.length != 0) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.map<Number>(fn);
-    if (res.length != arr.length) { return fail; }
-    for (let i: int = 0; i < res.length; ++i) {
-        if (res.at(i) == undefined) { return fail; }
-        if (res.at(i)! != arr.at(i)! * arr.at(i)!) {
-            return fail;
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
         }
-    }
-    return success;
+        let res = arr.map<Number>(fn);
+        if (res.length != arr.length) { return fail; }
+        for (let i: int = 0; i < res.length; ++i) {
+            if (res.at(i) == undefined) { return fail; }
+            if (res.at(i)! != arr.at(i)! * arr.at(i)!) {
+                return fail;
+            }
+        }
+        return success;
+    })
 }
 
 function mapFuncArg2(): int {
-    let fn = (elem: number, index: number): number => {
-        if (index < 4) {
-            return elem * elem;
-        } else {
-            return 0;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let fn = (elem: number, index: number): number => {
+            if (index < 4) {
+                return elem * elem;
+            } else {
+                return 0;
+            }
         }
-    }
-    let arrEmpty = new Array<Number>;
-    let res0 = arrEmpty.map<Number>(fn);
-    if (res0.length != arrEmpty.length) { return fail; }
-    if (res0.length != 0) { return fail; }
+        let res0 = arr.map<Number>(fn);
+        if (res0.length != arr.length) { return fail; }
+        if (res0.length != 0) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.map<Number>(fn);
-    if (res.length != arr.length) { return fail; }
-    let tmp: Number;
-    for (let i: int = 0; i < res.length; ++i) {
-        if (res.at(i) == undefined) { return fail; }
-        if (i < 4) {
-            tmp = new Number(arr.at(i)! * arr.at(i)!);
-        } else {
-            tmp = 0;
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
         }
-        if (res.at(i)! != tmp) {
-            return fail;
+        let res = arr.map<Number>(fn);
+        if (res.length != arr.length) { return fail; }
+        let tmp: Number;
+        for (let i: int = 0; i < res.length; ++i) {
+            if (res.at(i) == undefined) { return fail; }
+            if (i < 4) {
+                tmp = new Number(arr.at(i)! * arr.at(i)!);
+            } else {
+                tmp = 0;
+            }
+            if (res.at(i)! != tmp) {
+                return fail;
+            }
         }
-    }
-    return success;
+        return success;
+    })
 }
 
 function mapFuncArg3ArrayNumber(): int {
-    let fn = (elem: number, index: number, arr: Array<Number>): number => {
-        if ((index < 4) && (index < arr.length)) {
-            return arr.at(index)! * arr.at(index)!;
-        } else {
-            return 0;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let fn = (elem: number, index: number, arr: Array<Number>): number => {
+            if ((index < 4) && (index < arr.length)) {
+                return arr.at(index)! * arr.at(index)!;
+            } else {
+                return 0;
+            }
         }
-    }
-    let arrEmpty = new Array<Number>;
-    let res0 = arrEmpty.map<Number>(fn);
-    if (res0.length != arrEmpty.length) { return fail; }
-    if (res0.length != 0) { return fail; }
+        let res0 = arr.map<Number>(fn);
+        if (res0.length != arr.length) { return fail; }
+        if (res0.length != 0) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.map<Number>(fn);
-    if (res.length != arr.length) { return fail; }
-    let tmp: Number;
-    for (let i: int = 0; i < res.length; ++i) {
-        if (res.at(i) == undefined) { return fail; }
-        if (i < 4) {
-            tmp = new Number(arr.at(i)! * arr.at(i)!);
-        } else {
-            tmp = 0;
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
         }
-        if (res.at(i)! != tmp) {
-            return fail;
+        let res = arr.map<Number>(fn);
+        if (res.length != arr.length) { return fail; }
+        let tmp: Number;
+        for (let i: int = 0; i < res.length; ++i) {
+            if (res.at(i) == undefined) { return fail; }
+            if (i < 4) {
+                tmp = new Number(arr.at(i)! * arr.at(i)!);
+            } else {
+                tmp = 0;
+            }
+            if (res.at(i)! != tmp) {
+                return fail;
+            }
         }
-    }
-    return success;
+        return success;
+    })
 }
 
 function check(result: int, message: String): int {

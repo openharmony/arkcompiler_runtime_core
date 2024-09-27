@@ -168,9 +168,10 @@ PandaVector<EtsMethod *> EtsClass::GetMethods()
     auto addDirectMethods = [&](const EtsClass *c) {
         auto directMethods = c->GetRuntimeClass()->GetMethods();
         for (auto &method : directMethods) {
-            auto name = PandaString(utf::Mutf8AsCString((method.GetName().data)));
-            if (uniqueMethods.find(name) == uniqueMethods.end()) {
-                uniqueMethods[name] = EtsMethod::FromRuntimeMethod(&method);
+            PandaString methodFullName = utf::Mutf8AsCString(method.GetName().data);
+            methodFullName += method.GetProto().GetSignature();
+            if (uniqueMethods.find(methodFullName) == uniqueMethods.end()) {
+                uniqueMethods[methodFullName] = EtsMethod::FromRuntimeMethod(&method);
             }
         }
     };
@@ -179,12 +180,16 @@ PandaVector<EtsMethod *> EtsClass::GetMethods()
         auto directMethods = c->GetRuntimeClass()->GetMethods();
         auto fnum = directMethods.Size();
         for (uint32_t i = 0; i < fnum; i++) {
+            Method *method = &directMethods[i];
             // Skip constructors
-            if (directMethods[i].IsConstructor()) {
+            if (method->IsConstructor()) {
                 continue;
             }
-            auto name = PandaString(utf::Mutf8AsCString((directMethods[i].GetName().data)));
-            uniqueMethods[name] = EtsMethod::FromRuntimeMethod(&directMethods[i]);
+
+            PandaString methodFullName = utf::Mutf8AsCString((method->GetName().data));
+            methodFullName += method->GetProto().GetSignature();
+
+            uniqueMethods[methodFullName] = EtsMethod::FromRuntimeMethod(method);
         }
     };
 
