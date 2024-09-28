@@ -73,6 +73,12 @@ public:
                                              MIRROR_FIELD_INFO(EtsEvent, state_, "state")};
     }
 
+    static std::vector<MirrorFieldInfo> GetCondVarMembers()
+    {
+        return std::vector<MirrorFieldInfo> {MIRROR_FIELD_INFO(EtsCondVar, waitersList_, "waitersList"),
+                                             MIRROR_FIELD_INFO(EtsCondVar, waiters_, "waiters")};
+    }
+
 protected:
     PandaEtsVM *vm_ = nullptr;  // NOLINT(misc-non-private-member-variables-in-classes)
 };
@@ -99,6 +105,14 @@ TEST_F(EtsSyncPrimitivesTest, EventMemoryLayout)
 {
     auto *eventClass = vm_->GetClassLinker()->GetEventClass();
     MirrorFieldInfo::CompareMemberOffsets(eventClass, GetEventMembers());
+}
+
+// Check both EtsCondVar and ark::Class<CondVar> has the same number of fields
+// and at the same offsets
+TEST_F(EtsSyncPrimitivesTest, CondVarMemoryLayout)
+{
+    auto *condVarClass = vm_->GetClassLinker()->GetCondVarClass();
+    MirrorFieldInfo::CompareMemberOffsets(condVarClass, GetCondVarMembers());
 }
 
 }  // namespace ark::ets::test

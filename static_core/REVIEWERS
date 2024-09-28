@@ -95,7 +95,6 @@ static_core/plugins/ets/runtime/intrinsics/compiler_intrinsics.cpp            @P
 static_core/plugins/ets/runtime/intrinsics/escompat_*                         @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/runtime/intrinsics/escompat_taskpool.cpp              @dmitriitr @konstanting @ipetrov
 static_core/plugins/ets/runtime/intrinsics/std_*                              @ivan-tyulyandin @anton-sysoev
-static_core/plugins/ets/runtime/intrinsics/std_containers_BlockingQueue.cpp   @konstanting
 static_core/plugins/ets/runtime/intrinsics/std_core_Method.cpp                @smirnovandrei @anton-sysoev
 static_core/plugins/ets/runtime/intrinsics/std_core_Type*                     @smirnovandrei @anton-sysoev
 static_core/plugins/ets/runtime/intrinsics/std_core_Value.cpp                 @smirnovandrei @anton-sysoev

@@ -547,6 +547,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     waiterListClass_ = CacheClass(WAITERS_LIST);
     mutexClass_ = CacheClass(MUTEX);
     eventClass_ = CacheClass(EVENT);
+    condVarClass_ = CacheClass(COND_VAR);
     exceptionClass_ = CacheClass(EXCEPTION);
     errorClass_ = CacheClass(ERROR);
     arraybufClass_ = CacheClass(ARRAY_BUFFER);

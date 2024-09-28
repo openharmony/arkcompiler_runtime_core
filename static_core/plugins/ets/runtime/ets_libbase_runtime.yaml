@@ -54,6 +54,9 @@ coretypes:
 - managed_class: std.core.Event
   mirror_class: ark::ets::EtsEvent
 
+- managed_class: std.core.CondVar
+  mirror_class: ark::ets::EtsCondVar
+
 intrinsics_namespace: ark::ets::intrinsics
 
 intrinsics:
@@ -2220,20 +2223,20 @@ intrinsics:
     space: ets
     class_name: std.core.Mutex
     method_name: lock
-    static: false
+    static: true
     signature:
       ret: void
-      args: []
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsMutexLock
 
   - name: StdMutexUnlock
     space: ets
     class_name: std.core.Mutex
     method_name: unlock
-    static: false
+    static: true
     signature:
       ret: void
-      args: []
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsMutexUnlock
 
 ######################
@@ -2243,21 +2246,54 @@ intrinsics:
     space: ets
     class_name: std.core.Event
     method_name: wait
-    static: false
+    static: true
     signature:
       ret: void
-      args: []
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEventWait
 
   - name: StdEventFire
     space: ets
     class_name: std.core.Event
     method_name: fire
-    static: false
+    static: true
     signature:
       ret: void
-      args: []
+      args: [ std.core.Object ]
     impl: ark::ets::intrinsics::EtsEventFire
+
+######################
+# std.core.CondVar #
+######################
+  - name: StdCondVarWait
+    space: ets
+    class_name: std.core.CondVar
+    method_name: wait
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarWait
+
+  - name: StdCondVarNotfiyOne
+    space: ets
+    class_name: std.core.CondVar
+    method_name: notifyOne
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyOne
+
+  - name: StdCondVarNotifyAll
+    space: ets
+    class_name: std.core.CondVar
+    method_name: notifyAll
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyAll
 
 ############################
 #   escompat.SharedMemory  #
@@ -4415,85 +4451,105 @@ intrinsics:
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAdd
 
 ################################
-# std.containers.BlockingQueue #
+# std.containers.ConcurrencyHelpers #
 ################################
 
-  - name: BlockingQueueInitMutex
+  - name: ConcurrencyHelpersMutexCreate
     space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: initMutex
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: mutexCreate
     static: true
     signature:
-      ret: i64
+      ret: std.core.Object
       args: []
-    impl: ark::ets::intrinsics::InitializeMutex
+    impl: ark::ets::intrinsics::EtsMutexCreate
 
-  - name: BlockingQueueInitEvent
+  - name: ConcurrencyHelpersMutexLock
     space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: initEvent
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: mutexLock
     static: true
     signature:
-      ret: i64
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexLock
+
+  - name: ConcurrencyHelpersMutexUnlock
+    space: ets
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: mutexUnlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexUnlock
+
+  - name: ConcurrencyHelpersEventCreate
+    space: ets
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: eventCreate
+    static: true
+    signature:
+      ret: std.core.Object
       args: []
-    impl: ark::ets::intrinsics::InitializeEvent
+    impl: ark::ets::intrinsics::EtsEventCreate
 
-  - name: BlockingQueueDeleteMutex
+  - name: ConcurrencyHelpersEventWait
     space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: deleteMutex
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: eventWait
     static: true
     signature:
       ret: void
-      args: [ i64 ]
-    impl: ark::ets::intrinsics::DeleteMutex
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventWait
 
-  - name: BlockingQueueDeleteEvent
+  - name: ConcurrencyHelpersEventFire
     space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: deleteEvent
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: eventFire
     static: true
     signature:
       ret: void
-      args: [ i64 ]
-    impl: ark::ets::intrinsics::DeleteEvent
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventFire
 
-  - name: BlockingQueueMutexLock
+  - name: ConcurrencyHelpersCondVarCreate
     space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: lock
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: condVarCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsCondVarCreate
+
+  - name: ConcurrencyHelpersCondVarWait
+    space: ets
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: condVarWait
     static: true
     signature:
       ret: void
-      args: [ i64 ]
-    impl: ark::ets::intrinsics::MutexLock
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarWait
 
-  - name: BlockingQueueMutexUnlock
+  - name: ConcurrencyHelpersCondVarNotifyOne
     space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: unlock
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: condVarNotifyOne
     static: true
     signature:
       ret: void
-      args: [ i64 ]
-    impl: ark::ets::intrinsics::MutexUnlock
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyOne
 
-  - name: BlockingQueueAwait
+  - name: ConcurrencyHelpersCondVarNotifyAll
     space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: await_
+    class_name: std.containers.ConcurrencyHelpers
+    method_name: condVarNotifyAll
     static: true
     signature:
       ret: void
-      args: [ i64, i64 ]
-    impl: ark::ets::intrinsics::Await
-
-  - name: BlockingQueueUnblockWaiters
-    space: ets
-    class_name: std.containers.BlockingQueue
-    method_name: unblockWaiters
-    static: true
-    signature:
-      ret: void
-      args: [ i64, i64 ]
-    impl: ark::ets::intrinsics::UnblockWaiters
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyAll

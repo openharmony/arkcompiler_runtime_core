@@ -117,6 +117,11 @@ EtsClass *EtsClassLinker::GetEventClass()
     return EtsClass::FromRuntimeClass(ext_->GetEventClass());
 }
 
+EtsClass *EtsClassLinker::GetCondVarClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetCondVarClass());
+}
+
 EtsClass *EtsClassLinker::GetArrayClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetArrayClass());

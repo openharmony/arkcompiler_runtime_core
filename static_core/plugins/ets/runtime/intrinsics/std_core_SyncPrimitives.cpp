@@ -18,24 +18,67 @@
 
 namespace ark::ets::intrinsics {
 
-void EtsMutexLock(EtsMutex *mutex)
+EtsObject *EtsMutexCreate()
 {
-    mutex->Lock();
+    return EtsMutex::Create(EtsCoroutine::GetCurrent());
 }
 
-void EtsMutexUnlock(EtsMutex *mutex)
+void EtsMutexLock(EtsObject *mutex)
 {
-    mutex->Unlock();
+    ASSERT(mutex->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetMutexClass());
+    EtsMutex::FromEtsObject(mutex)->Lock();
 }
 
-void EtsEventWait(EtsEvent *event)
+void EtsMutexUnlock(EtsObject *mutex)
 {
-    event->Wait();
+    ASSERT(mutex->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetMutexClass());
+    EtsMutex::FromEtsObject(mutex)->Unlock();
 }
 
-void EtsEventFire(EtsEvent *event)
+EtsObject *EtsEventCreate()
 {
-    event->Fire();
+    return EtsEvent::Create(EtsCoroutine::GetCurrent());
+}
+
+void EtsEventWait(EtsObject *event)
+{
+    ASSERT(event->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetEventClass());
+    EtsEvent::FromEtsObject(event)->Wait();
+}
+
+void EtsEventFire(EtsObject *event)
+{
+    ASSERT(event->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetEventClass());
+    EtsEvent::FromEtsObject(event)->Fire();
+}
+
+EtsObject *EtsCondVarCreate()
+{
+    return EtsCondVar::Create(EtsCoroutine::GetCurrent());
+}
+
+void EtsCondVarWait(EtsObject *condVar, EtsObject *mutex)
+{
+    auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(condVar->GetClass() == coro->GetPandaVM()->GetClassLinker()->GetCondVarClass());
+    ASSERT(mutex->GetClass() == coro->GetPandaVM()->GetClassLinker()->GetMutexClass());
+    EtsHandleScope scope(coro);
+    EtsHandle<EtsMutex> hMutex(coro, EtsMutex::FromEtsObject(mutex));
+    EtsCondVar::FromEtsObject(condVar)->Wait(hMutex);
+}
+
+void EtsCondVarNotifyOne(EtsObject *condVar, EtsObject *mutex)
+{
+    ASSERT(condVar->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetCondVarClass());
+    ASSERT(mutex->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetMutexClass());
+    EtsCondVar::FromEtsObject(condVar)->NotifyOne(EtsMutex::FromEtsObject(mutex));
+}
+
+void EtsCondVarNotifyAll(EtsObject *condVar, EtsObject *mutex)
+{
+    ASSERT(condVar->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetCondVarClass());
+    ASSERT(mutex->GetClass() == EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetMutexClass());
+    EtsCondVar::FromEtsObject(condVar)->NotifyAll(EtsMutex::FromEtsObject(mutex));
 }
 
 }  // namespace ark::ets::intrinsics

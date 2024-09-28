@@ -31,8 +31,78 @@ namespace test {
 class EtsSyncPrimitivesTest;
 }  // namespace test
 
+/// @brief The base class for sync primitives. Should not be used directly.
+template <typename T>
+class EtsSyncPrimitive : public EtsObject {
+public:
+    static T *FromCoreType(ObjectHeader *syncPrimitive)
+    {
+        return reinterpret_cast<T *>(syncPrimitive);
+    }
+
+    static T *FromEtsObject(EtsObject *syncPrimitive)
+    {
+        return reinterpret_cast<T *>(syncPrimitive);
+    }
+
+    EtsObject *AsObject()
+    {
+        return this;
+    }
+
+    const EtsObject *AsObject() const
+    {
+        return this;
+    }
+
+    EtsWaitersList *GetWaitersList(EtsCoroutine *coro)
+    {
+        return EtsWaitersList::FromCoreType(
+            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsSyncPrimitive, waitersList_)));
+    }
+
+    void SetWaitersList(EtsCoroutine *coro, EtsWaitersList *waitersList)
+    {
+        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsSyncPrimitive, waitersList_),
+                                  waitersList->GetCoreType());
+    }
+
+    /**
+     * Blocks current coroutine. It can be used concurrently with other Suspend and Resume
+     * @param awaitee - EtsWaitersList node that contains GenericEvent and probably other useful data
+     * NOTE: `this` and all other raw ObjectHeaders may become invalid after this call due to GC
+     */
+    ALWAYS_INLINE void SuspendCoroutine(EtsWaitersList::Node *awaitee)
+    {
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto *coroManager = coro->GetCoroutineManager();
+        auto &event = awaitee->GetEvent();
+        // Need to lock event before PushBack
+        // to avoid use-after-free in CoroutineEvent::Happen method
+        event.Lock();
+        GetWaitersList(coro)->PushBack(awaitee);
+        coroManager->Await(&event);
+    }
+
+    /**
+     * Unblocks suspended coroutine. It can be used concurrently with Suspend,
+     * BUT not with other Resume (PopFront is not thread-safety)
+     */
+    ALWAYS_INLINE void ResumeCoroutine()
+    {
+        auto *coro = EtsCoroutine::GetCurrent();
+        auto *awaitee = GetWaitersList(coro)->PopFront();
+        awaitee->GetEvent().Happen();
+    }
+
+private:
+    ObjectPointer<EtsWaitersList> waitersList_;
+
+    friend class test::EtsSyncPrimitivesTest;
+};
+
 /// @brief Coroutine mutex. This allows to get exclusive access to the critical section.
-class EtsMutex : public EtsObject {
+class EtsMutex : public EtsSyncPrimitive<EtsMutex> {
 public:
     template <typename T>
     class LockHolder {
@@ -71,46 +141,14 @@ public:
 
     static EtsMutex *Create(EtsCoroutine *coro);
 
-    static EtsMutex *FromCoreType(ObjectHeader *mutex)
-    {
-        return reinterpret_cast<EtsMutex *>(mutex);
-    }
-
-    static EtsMutex *FromEtsObject(EtsObject *mutex)
-    {
-        return reinterpret_cast<EtsMutex *>(mutex);
-    }
-
-    EtsObject *AsObject()
-    {
-        return this;
-    }
-
-    const EtsObject *AsObject() const
-    {
-        return this;
-    }
-
-    EtsWaitersList *GetWaitersList(EtsCoroutine *coro)
-    {
-        return EtsWaitersList::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsMutex, waitersList_)));
-    }
-
-    void SetWaitersList(EtsCoroutine *coro, EtsWaitersList *waitersList)
-    {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsMutex, waitersList_), waitersList->GetCoreType());
-    }
-
 private:
-    ObjectPointer<EtsWaitersList> waitersList_;
     std::atomic<uint32_t> waiters_;
 
     friend class test::EtsSyncPrimitivesTest;
 };
 
 /// @brief Coroutine one-shot event. This allows to block current coroutine until event is fired
-class EtsEvent : public EtsObject {
+class EtsEvent : public EtsSyncPrimitive<EtsEvent> {
 public:
     /**
      * Blocks current coroutine until another coroutine will fire the same event.
@@ -127,37 +165,6 @@ public:
 
     static EtsEvent *Create(EtsCoroutine *coro);
 
-    static EtsEvent *FromCoreType(ObjectHeader *event)
-    {
-        return reinterpret_cast<EtsEvent *>(event);
-    }
-
-    static EtsEvent *FromEtsObject(EtsObject *event)
-    {
-        return reinterpret_cast<EtsEvent *>(event);
-    }
-
-    EtsObject *AsObject()
-    {
-        return this;
-    }
-
-    const EtsObject *AsObject() const
-    {
-        return this;
-    }
-
-    EtsWaitersList *GetWaitersList(EtsCoroutine *coro)
-    {
-        return EtsWaitersList::FromCoreType(
-            ObjectAccessor::GetObject(coro, this, MEMBER_OFFSET(EtsEvent, waitersList_)));
-    }
-
-    void SetWaitersList(EtsCoroutine *coro, EtsWaitersList *waitersList)
-    {
-        ObjectAccessor::SetObject(coro, this, MEMBER_OFFSET(EtsEvent, waitersList_), waitersList->GetCoreType());
-    }
-
 private:
     static constexpr uint32_t STATE_BIT = 1U;
     static constexpr uint32_t FIRE_STATE = 1U;
@@ -173,8 +180,41 @@ private:
         return state >> STATE_BIT;
     }
 
-    ObjectPointer<EtsWaitersList> waitersList_;
     std::atomic<uint32_t> state_;
+
+    friend class test::EtsSyncPrimitivesTest;
+};
+
+/// Coroutine conditional variable
+class EtsCondVar : public EtsSyncPrimitive<EtsCondVar> {
+public:
+    /**
+     * precondition: mutex is locked
+     * 1. Unlocks mutex
+     * 2. Blocks current coroutine
+     * 3. Locks mutex
+     * This method is thread-safe in relation to other methods of the CondVar
+     */
+    void Wait(EtsHandle<EtsMutex> &mutex);
+
+    /**
+     * precondition: mutex is locked
+     * Unblocks ONE suspended coroutine associated with this CondVar, if it exists.
+     * This method is thread-safe in relation to other methods of the CondVar
+     */
+    void NotifyOne([[maybe_unused]] EtsMutex *mutex);
+
+    /**
+     * precondition: mutex is locked
+     * Unblocks ALL suspended coroutine associated with this CondVar.
+     * This method is thread-safe in relation to other methods of the CondVar
+     */
+    void NotifyAll([[maybe_unused]] EtsMutex *mutex);
+
+    static EtsCondVar *Create(EtsCoroutine *coro);
+
+private:
+    EtsInt waiters_;
 
     friend class test::EtsSyncPrimitivesTest;
 };

@@ -119,6 +119,11 @@ public:
         return eventClass_;
     }
 
+    Class *GetCondVarClass()
+    {
+        return condVarClass_;
+    }
+
     Class *GetBigIntClass()
     {
         return bigintClass_;
@@ -290,6 +295,7 @@ private:
     Class *waiterListClass_ = nullptr;
     Class *mutexClass_ = nullptr;
     Class *eventClass_ = nullptr;
+    Class *condVarClass_ = nullptr;
     Class *arrayClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;

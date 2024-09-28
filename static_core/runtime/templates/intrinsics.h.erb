@@ -23,7 +23,7 @@
 #include "include/coretypes/tagged_value.h"
 #include "intrinsics.inl.h"
 
-% Runtime::intrinsics.select { |i| i.has_impl? && i.need_decl && !i.is_stub}.group_by { |i| i.impl.rpartition('::').first }.each_pair do |ns, group|
+% Runtime::intrinsics.uniq {|i| i.has_impl? && i.impl }.select { |i| i.has_impl? && i.need_decl && !i.is_stub}.group_by { |i| i.impl.rpartition('::').first }.each_pair do |ns, group|
 namespace <%= ns %> {
 
 %   group.each do |i|
