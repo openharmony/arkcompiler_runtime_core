@@ -261,12 +261,14 @@ class TestETS(TestFileBased):
 
     def _validate_compiler(self, return_code: int, output_path: str) -> bool:
         if self.is_negative_compile:
-            return return_code != 0
+            return return_code == self.CTE_RETURN_CODE
         return return_code == 0 and path.exists(output_path) and path.getsize(output_path) > 0
 
     def _run_verifier(self, test_abc: str) -> Tuple[bool, TestReport, Optional[FailKind]]:
-        TestCase().assertTrue(path.exists(self.test_env.verifier), \
-                              f"Verifier binary '{self.test_env.verifier}' is absent or not set")
+        TestCase().assertTrue(
+            path.exists(self.test_env.verifier),
+            f"Verifier binary '{self.test_env.verifier}' is absent or not set"
+        )
         config_path = self.test_env.config.verifier.config
         if config_path is None:
             config_path = path.join(path.dirname(__file__), 'ets-verifier.config')

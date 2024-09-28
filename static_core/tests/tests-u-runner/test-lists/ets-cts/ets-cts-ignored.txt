@@ -2151,3 +2151,110 @@
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_hided_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_overrided_method.sts
+
+### ES2PANDA_FAIL - fails of negative, compile-only
+### Issue 19678
+03.types/08.reference_types/11.union_types/ut_n_17.sts
+03.types/08.reference_types/11.union_types/ut_n_22.sts
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_5.sts
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_6.sts
+03.types/08.reference_types/12.nullish_types/nullable_types_operations_7.sts
+06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var_n_6.sts
+### end of Issue 19678
+### Issue 19679
+08.statements/15.try_statements/02.finally_clause/finally_n_2.sts
+17.experimental_features/06.statements/02.multiple_catch_clauses_in_try_statements/finally_n_2.sts
+### end of Issue 19679
+### Issue 19684
+15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_15.sts
+15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_16.sts
+15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_17.sts
+15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_19.sts
+### end of Issue 19684
+### Issue 19685
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/different_return_types_in_hiding.sts
+09.classes/06.method_declarations/requirements_in_overriding_and_hiding/different_return_types_in_overriding.sts
+15.semantic_rules/03.variance/03.contravariance/contravariance_class_negative.sts
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_23.sts
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_variance_5.sts
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_21.sts
+15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_4.sts
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_8.sts
+### end of Issue 19685
+### Issue 19686
+08.statements/04.local_declarations/negative_local_class.sts
+08.statements/11.continue_statements/continue_do1_neg.sts
+08.statements/11.continue_statements/continue_for1_neg.sts
+08.statements/11.continue_statements/continue_for_of1_neg.sts
+08.statements/11.continue_statements/continue_while1_neg.sts
+### end of Issue 19686
+### Issue 19680
+03.types/01.predefined_types/01.primitive_types/pt_constructor_9.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_11.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_12.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_14.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_18.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_19.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_20.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_21.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_8.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_9.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_11.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_21.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_13.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_0.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_1.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_2.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_3.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_4.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_5.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_0.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_1.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_10.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_11.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_12.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_13.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_14.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_15.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_16.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_17.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_18.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_19.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_2.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_20.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_21.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_22.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_23.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_24.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_25.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_3.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_4.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_5.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_6.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_7.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_8.sts
+06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_9.sts
+07.expressions/04.array_literal/arr_n_0.sts
+07.expressions/04.array_literal/arr_n_1.sts
+07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3a_n_4.sts
+07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3a_n_5.sts
+09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_12.sts
+09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_13.sts
+09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.sts
+09.classes/11.local_classes_and_interfaces/local_interface_with_already_declared_name.sts
+10.interfaces/05.interface_properties/readonly_simple_form_1.sts
+13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/negative_selective_exports_0.sts
+13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/negative_selective_exports_1.sts
+15.semantic_rules/06.type_inference/01.smart_types/un1_16.sts
+15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_25.sts
+17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_n_1.sts
+17.experimental_features/03.indexable_types/cte_10.sts
+17.experimental_features/03.indexable_types/cte_12.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_0_19.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_0_21.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_19.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_21.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/shadow_function_alias.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/shadow_function_explicit_name.sts
+### end of Issue 19680
+### end of ES2PANDA_FAIL - fails of negative, compile-only

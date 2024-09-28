@@ -49,3 +49,7 @@ class FailKind(Enum):
     NODE_FAIL = 26
     NODE_TIMEOUT = 27
     NODE_OTHER = 28
+
+    SEGFAULT_FAIL = 29
+    ABORT_FAIL = 29
+    IRTOC_ASSERT_FAIL = 29
