@@ -43,6 +43,9 @@
       Disasm:
         language_interface_path: plugins/ets/disassembler/disasm_ets_plugin.inc
 
+      Abc2Prog:
+        language_interface_path: plugins/ets/abc2program/abc2program_ets_plugin.h
+
       logger:
         components:
           - name: ets

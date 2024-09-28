@@ -37,6 +37,7 @@ plugin_libarkbytecodeopt_sources = []
 plugin_libarkcompiler_sources = []
 plugin_runtime_sources = []
 plugin_verifier_sources = []
+plugin_abc2program_sources = []
 
 plugin_entrypoints_yamls = []
 plugin_inst_templates_yamls = []
@@ -126,6 +127,11 @@ foreach(plugin, ark_enabled_plugins) {
     }
   }
 
+  if (defined(_plugin_vars.srcs_abc2program)) {
+    foreach(src, _plugin_vars.srcs_abc2program) {
+      plugin_abc2program_sources += [ "$_plugin_dir/$src" ]
+    }
+  }
   if (defined(_plugin_vars.srcs_disassembler)) {
     foreach(src, _plugin_vars.srcs_disassembler) {
       plugin_arkdisassembler_sources += [ "$_plugin_dir/$src" ]

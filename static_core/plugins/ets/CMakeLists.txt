@@ -102,6 +102,7 @@ endif()
 
 if(PANDA_WITH_TOOLCHAIN)
     add_subdirectory(assembler)
+    add_subdirectory(abc2program)
     add_subdirectory(disassembler)
     add_subdirectory(isa)
 endif()
