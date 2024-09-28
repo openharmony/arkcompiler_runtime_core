@@ -31,12 +31,13 @@ namespace ark::compiler {
 constexpr int64_t INVALID_OFFSET = std::numeric_limits<int64_t>::max();
 
 class InstBuilder {
+public:
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ENV_IDX(ENV_TYPE) /* CC-OFFNXT(G.PRE.02, G.PRE.09) namespace member, code generation */ \
     static constexpr uint8_t ENV_TYPE##_IDX = VRegInfo::VRegType::ENV_TYPE - VRegInfo::VRegType::ENV_BEGIN;
     VREGS_ENV_TYPE_DEFS(ENV_IDX)
 #undef ENV_IDX
-public:
+
     InstBuilder(Graph *graph, RuntimeInterface::MethodPtr method, CallInst *callerInst, uint32_t inliningDepth);
 
     NO_COPY_SEMANTIC(InstBuilder);
@@ -139,17 +140,7 @@ public:
     }
 #endif
 
-private:
-    void SyncWithGraph();
-
-    void UpdateDefsForCatch();
-    void UpdateDefsForLoopHead();
-
-    size_t GetVRegsCount() const
-    {
-        return vregsAndArgsCount_ + 1 + GetGraph()->GetEnvCount();
-    }
-
+protected:
     template <typename T>
     void AddInstruction(T inst)
     {
@@ -176,6 +167,47 @@ private:
     Inst *GetDefinition(size_t vreg);
     Inst *GetDefinitionAcc();
     Inst *GetEnvDefinition(uint8_t envIdx);
+
+    void BuildCastToAnyString(const BytecodeInstruction *bcInst);
+
+    Graph *GetGraph()
+    {
+        return graph_;
+    }
+
+    const Graph *GetGraph() const
+    {
+        return graph_;
+    }
+
+    const RuntimeInterface *GetRuntime() const
+    {
+        return runtime_;
+    }
+
+    RuntimeInterface *GetRuntime()
+    {
+        return runtime_;
+    }
+
+    RuntimeInterface::MethodPtr GetMethod() const
+    {
+        return method_;
+    }
+
+    /// Get count of arguments for the method specified by id
+    size_t GetMethodArgumentsCount(uintptr_t id) const;
+
+private:
+    void SyncWithGraph();
+
+    void UpdateDefsForCatch();
+    void UpdateDefsForLoopHead();
+
+    size_t GetVRegsCount() const
+    {
+        return vregsAndArgsCount_ + 1 + GetGraph()->GetEnvCount();
+    }
 
     ConstantInst *FindOrCreate32BitConstant(uint32_t value);
     ConstantInst *FindOrCreateConstant(uint64_t value);
@@ -207,7 +239,7 @@ private:
         return newObj;
     }
 
-    template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
+    template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE = true>
     class BuildCallHelper {
     public:
         BuildCallHelper(const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput = nullptr);
@@ -228,6 +260,7 @@ private:
 
         void BuildCallVirtualInst();
         void SetCallArgs(Inst *additionalInput = nullptr);
+        uint32_t GetClassId();
         auto GetGraph()
         {
             return builder_->GetGraph();
@@ -279,11 +312,11 @@ private:
     void BuildCharIsLowerCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
     void BuildCharToLowerCaseIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
     void BuildMonitorIntrinsic(const BytecodeInstruction *bcInst, bool isEnter, bool accRead);
-    void BuildThrow(const BytecodeInstruction *bcInst);
+    virtual void BuildThrow(const BytecodeInstruction *bcInst);
     void BuildLenArray(const BytecodeInstruction *bcInst);
-    void BuildNewArray(const BytecodeInstruction *bcInst);
-    void BuildNewObject(const BytecodeInstruction *bcInst);
-    void BuildLoadConstArray(const BytecodeInstruction *bcInst);
+    virtual void BuildNewArray(const BytecodeInstruction *bcInst);
+    virtual void BuildNewObject(const BytecodeInstruction *bcInst);
+    virtual void BuildLoadConstArray(const BytecodeInstruction *bcInst);
     void BuildLoadConstStringArray(const BytecodeInstruction *bcInst);
     template <typename T>
     void BuildUnfoldLoadConstArray(const BytecodeInstruction *bcInst, DataType::Type type,
@@ -295,7 +328,7 @@ private:
     void BuildUnfoldLoadConstStringArray(const BytecodeInstruction *bcInst, DataType::Type type,
                                          const pandasm::LiteralArray &litArray, NewArrayInst *arrayInst);
     void BuildInitString(const BytecodeInstruction *bcInst);
-    void BuildInitObject(const BytecodeInstruction *bcInst, bool isRange);
+    virtual void BuildInitObject(const BytecodeInstruction *bcInst, bool isRange);
     CallInst *BuildCallStaticForInitObject(const BytecodeInstruction *bcInst, uint32_t methodId, Inst **resolver);
     void BuildMultiDimensionalArrayObject(const BytecodeInstruction *bcInst, bool isRange);
     void BuildInitObjectMultiDimensionalArray(const BytecodeInstruction *bcInst, bool isRange);
@@ -305,16 +338,16 @@ private:
     void BuildStoreObject(const BytecodeInstruction *bcInst, DataType::Type type);
     Inst *BuildStoreObjectInst(const BytecodeInstruction *bcInst, DataType::Type type, RuntimeInterface::FieldPtr field,
                                uint32_t fieldId, Inst **resolveInst);
-    void BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type);
+    virtual void BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type);
     Inst *BuildLoadStaticInst(size_t pc, DataType::Type type, uint32_t typeId, Inst *saveState);
-    void BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::Type type);
+    virtual void BuildStoreStatic(const BytecodeInstruction *bcInst, DataType::Type type);
     Inst *BuildStoreStaticInst(const BytecodeInstruction *bcInst, DataType::Type type, uint32_t typeId,
                                Inst *storeInput, Inst *saveState);
-    void BuildCheckCast(const BytecodeInstruction *bcInst);
-    void BuildIsInstance(const BytecodeInstruction *bcInst);
+    virtual void BuildCheckCast(const BytecodeInstruction *bcInst);
+    virtual void BuildIsInstance(const BytecodeInstruction *bcInst);
     Inst *BuildLoadClass(RuntimeInterface::IdType typeId, size_t pc, Inst *saveState);
-    void BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Type type);
-    void BuildStoreArray(const BytecodeInstruction *bcInst, DataType::Type type);
+    virtual void BuildLoadArray(const BytecodeInstruction *bcInst, DataType::Type type);
+    virtual void BuildStoreArray(const BytecodeInstruction *bcInst, DataType::Type type);
     template <bool CREATE_REF_CHECK>
     void BuildStoreArrayInst(const BytecodeInstruction *bcInst, DataType::Type type, Inst *arrayRef, Inst *index,
                              Inst *value);
@@ -322,7 +355,6 @@ private:
         size_t pc, Inst *arrayRef, bool withNullcheck = true);
     template <Opcode OPCODE>
     void BuildLoadFromPool(const BytecodeInstruction *bcInst);
-    void BuildCastToAnyString(const BytecodeInstruction *bcInst);
     void BuildCastToAnyNumber(const BytecodeInstruction *bcInst);
     AnyTypeCheckInst *BuildAnyTypeCheckInst(size_t bcAddr, Inst *input, Inst *saveState,
                                             AnyBaseType type = AnyBaseType::UNDEFINED_TYPE);
@@ -335,31 +367,6 @@ private:
 
     bool TryBuildStringCharAtIntrinsic(const BytecodeInstruction *bcInst, bool accRead);
 #include "inst_builder_extensions.inl.h"
-
-    Graph *GetGraph()
-    {
-        return graph_;
-    }
-
-    const Graph *GetGraph() const
-    {
-        return graph_;
-    }
-
-    const RuntimeInterface *GetRuntime() const
-    {
-        return runtime_;
-    }
-
-    RuntimeInterface *GetRuntime()
-    {
-        return runtime_;
-    }
-
-    RuntimeInterface::MethodPtr GetMethod() const
-    {
-        return method_;
-    }
 
     auto GetClassId() const
     {
@@ -394,8 +401,6 @@ private:
     DataType::Type GetMethodReturnType(uintptr_t id) const;
     /// Get type of argument of the method specified by id
     DataType::Type GetMethodArgumentType(uintptr_t id, size_t index) const;
-    /// Get count of arguments for the method specified by id
-    size_t GetMethodArgumentsCount(uintptr_t id) const;
     /// Get return type of currently compiling method
     DataType::Type GetCurrentMethodReturnType() const;
     /// Get type of argument of currently compiling method

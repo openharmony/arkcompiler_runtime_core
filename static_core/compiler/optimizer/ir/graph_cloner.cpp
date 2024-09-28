@@ -46,7 +46,7 @@ Graph *GraphCloner::CloneGraph()
     newGraph->SetBitFields(GetGraph()->GetBitFields());
     newGraph->InitUsedRegs<DataType::INT64>(GetGraph()->GetUsedRegs<DataType::INT64>());
     newGraph->InitUsedRegs<DataType::FLOAT64>(GetGraph()->GetUsedRegs<DataType::FLOAT64>());
-#ifndef NDEBUG
+#ifdef COMPILER_DEBUG_CHECKS
     CloneAnalyses(newGraph);
 #endif
     return newGraph;

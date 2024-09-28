@@ -35,6 +35,9 @@ inline std::string GetIntrinsicName(RuntimeInterface::IntrinsicId intrinsic) {
         return "LIB_CALL_MEMSET_F32";
     case RuntimeInterface::IntrinsicId::LIB_CALL_MEMSET_F64:
         return "LIB_CALL_MEMSET_F64";
+#ifdef ENABLE_LIBABCKIT
+#include "get_dyn_intrinsics_names.inc"
+#endif
     default:
         return "";
     }

@@ -23,7 +23,7 @@ uint8_t AccReadIndex(const compiler::Inst *inst)
 {
     // For calls we cannot tell static index for acc position, thus
     // ensure that we don't invoke this for calls
-    ASSERT(!inst->IsCallOrIntrinsic());
+    ASSERT(!inst->IsCallOrIntrinsic() || (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && !inst->IsCall()));
 
     switch (inst->GetOpcode()) {
         case compiler::Opcode::LoadArray:
@@ -35,6 +35,10 @@ uint8_t AccReadIndex(const compiler::Inst *inst)
             return 2U;
         default: {
             if (inst->IsIntrinsic() && inst->IsAccRead()) {
+                if (inst->GetBasicBlock()->GetGraph()->IsAbcKit()) {
+                    ASSERT(inst->GetInputsCount() >= 1U);
+                    return 0U;
+                }
                 ASSERT(inst->GetBasicBlock()->GetGraph()->IsDynamicMethod());
                 ASSERT(inst->GetInputsCount() >= 2U);
                 return inst->GetInputsCount() - 2L;
@@ -43,6 +47,19 @@ uint8_t AccReadIndex(const compiler::Inst *inst)
         }
     }
 }
+
+#ifdef ENABLE_LIBABCKIT
+#include "generated/abckit_intrinsics.inl"
+#else
+bool IsAbcKitIntrinsicRange([[maybe_unused]] compiler::RuntimeInterface::IntrinsicId intrinsicId)
+{
+    UNREACHABLE();
+}
+bool IsAbcKitIntrinsic([[maybe_unused]] compiler::RuntimeInterface::IntrinsicId intrinsicId)
+{
+    UNREACHABLE();
+}
+#endif
 
 // This method is used by bytecode optimizer's codegen.
 bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
@@ -90,6 +107,20 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
 
     // IncI works only with 4 bits immediates.
     return imm >= min && imm <= max;
+}
+
+bool IsCall(compiler::Inst *inst)
+{
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit()) {
+        if (inst->IsCall()) {
+            return true;
+        }
+    } else {
+        if (inst->IsCallOrIntrinsic()) {
+            return true;
+        }
+    }
+    return false;
 }
 
 }  // namespace ark::bytecodeopt

@@ -860,6 +860,7 @@ void GraphMode::Dump(std::ostream &stm)
     DUMP_MODE(Boundary);
     DUMP_MODE(Interpreter);
     DUMP_MODE(InterpreterEntry);
+    DUMP_MODE(AbcKit);
 
 #undef DUMP_MODE
 }

@@ -21,6 +21,9 @@
 % end
 
 enum class IntrinsicId {
+#ifdef ENABLE_LIBABCKIT
+#include "dyn_intrinsics_enum.inc"
+#endif
 % Compiler::intrinsics.select{ |x| !x.is_irtoc? }.each do |intrinsic|
     <%= intrinsic.entrypoint_name %>,
 % end

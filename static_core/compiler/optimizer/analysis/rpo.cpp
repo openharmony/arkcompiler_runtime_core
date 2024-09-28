@@ -59,7 +59,7 @@ bool Rpo::RunImpl()
         }
         UNREACHABLE();
     }
-#endif  // NDEBUG
+#endif  // !NDEBUG
     GetGraph()->EraseMarker(marker_);
     return true;
 }

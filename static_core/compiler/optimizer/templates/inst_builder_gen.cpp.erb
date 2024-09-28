@@ -159,6 +159,9 @@ end
 #ifdef PANDA_WITH_IRTOC
 #include "irtoc_builder.cpp"
 #endif
+#ifdef ENABLE_LIBABCKIT
+#include "abckit_inst_builder-inl.h"
+#endif
 
 namespace ark::compiler {
 // NOLINTBEGIN(readability-identifier-naming)

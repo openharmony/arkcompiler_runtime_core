@@ -27,6 +27,17 @@
 #include "optimizer/analysis/hotness_propagation.h"
 #include "method_data_accessor-inl.h"
 
+#ifdef ENABLE_LIBABCKIT
+#include "abckit_inst_builder.h"
+#define ABCKIT_INST_BUILDER(graph, method, callerInst, inliningDepth) \
+    AbcKitInstBuilder(graph, method, callerInst, inliningDepth)
+#else
+// CC-OFFNXT(G.PRE.02) should be with define
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define ABCKIT_INST_BUILDER(graph, method, callerInst, inliningDepth) \
+    InstBuilder(graph, method, callerInst, inliningDepth)
+#endif
+
 namespace ark::compiler {
 
 bool IrBuilder::RunImpl()
@@ -65,16 +76,17 @@ bool IrBuilder::RunImpl()
     COMPILER_LOG(INFO, IR_BUILDER) << "IR successfully built: " << GetGraph()->GetVectorBlocks().size()
                                    << " basic blocks, " << GetGraph()->GetCurrentInstructionId() << " instructions";
 
-    HotnessPropagation(GetGraph()).Run();
+    if (!GetGraph()->IsAbcKit()) {
+        HotnessPropagation(GetGraph()).Run();
+    }
 
     return true;
 }
 
-bool IrBuilder::BuildIr(size_t vregsCount)
+bool IrBuilder::BuildIrImpl(size_t vregsCount)
 {
     auto instructionsBuf = GetGraph()->GetRuntime()->GetMethodCode(GetMethod());
-    InstBuilder instBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
-    SetInstBuilder(&instBuilder);
+
     instDefs_.resize(vregsCount + GetGraph()->GetEnvCount());
     COMPILER_LOG(INFO, IR_BUILDER) << "Start instructions building...";
     for (auto bb : GetGraph()->GetBlocksRPO()) {
@@ -91,11 +103,25 @@ bool IrBuilder::BuildIr(size_t vregsCount)
     GetGraph()->RunPass<DominatorsTree>();
     GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
     GetGraph()->RunPass<LoopAnalyzer>();
-    instBuilder.FixInstructions();
+    GetInstBuilder()->FixInstructions();
     if (GetGraph()->GetRuntime()->IsMemoryBarrierRequired(GetMethod())) {
         SetMemoryBarrierFlag();
     }
     return true;
+}
+
+bool IrBuilder::BuildIr(size_t vregsCount)
+{
+    if (GetGraph()->IsAbcKit()) {
+        auto instBuilder = ABCKIT_INST_BUILDER(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
+        SetInstBuilder(&instBuilder);
+        return BuildIrImpl(vregsCount);
+    }
+
+    auto instBuilder = InstBuilder(GetGraph(), GetMethod(), callerInst_, inliningDepth_);
+    SetInstBuilder(&instBuilder);
+
+    return BuildIrImpl(vregsCount);
 }
 
 void IrBuilder::SetMemoryBarrierFlag()

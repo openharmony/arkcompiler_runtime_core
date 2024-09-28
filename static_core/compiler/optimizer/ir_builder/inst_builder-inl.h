@@ -20,10 +20,23 @@
 #include "optimizer/code_generator/encode.h"
 
 namespace ark::compiler {
+
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+uint32_t InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::GetClassId()
+{
+    if (method_ == nullptr) {
+        return 0;
+    }
+    if (GetGraph()->IsAotMode()) {
+        return GetRuntime()->GetClassIdWithinFile(GetMethod(), GetRuntime()->GetClass(method_));
+    }
+    return GetRuntime()->GetClassIdForMethod(GetMethod(), methodId_);
+}
+
 // NOLINTNEXTLINE(misc-definitions-in-headers,readability-function-size)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallHelper(const BytecodeInstruction *bcInst,
-                                                                          InstBuilder *builder, Inst *additionalInput)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput)
     : builder_(builder), bcInst_(bcInst)
 {
     methodId_ = GetRuntime()->ResolveMethodIndex(Builder()->GetMethod(), bcInst->GetId(0).AsIndex());
@@ -35,51 +48,55 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallHelper(const 
         BuildIntrinsic();
         return;
     }
-    saveState_ = Builder()->CreateSaveState(Opcode::SaveState, pc_);
-
+    saveState_ = nullptr;
     uint32_t classId = 0;
-    if (hasImplicitArg_) {
-        nullCheck_ = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, pc_,
-                                                     Builder()->GetArgDefinition(bcInst, 0, ACC_READ), saveState_);
-    } else if (method_ != nullptr) {
-        if (GetGraph()->IsAotMode()) {
-            classId = GetRuntime()->GetClassIdWithinFile(GetMethod(), GetRuntime()->GetClass(method_));
+    if constexpr (HAS_SAVE_STATE) {
+        saveState_ = Builder()->CreateSaveState(Opcode::SaveState, pc_);
+        if (hasImplicitArg_) {
+            nullCheck_ = GetGraph()->CreateInstNullCheck(DataType::REFERENCE, pc_,
+                                                         Builder()->GetArgDefinition(bcInst, 0, ACC_READ), saveState_);
         } else {
-            classId = GetRuntime()->GetClassIdForMethod(GetMethod(), methodId_);
+            classId = GetClassId();
         }
+    } else {
+        classId = GetClassId();
     }
 
     // NOLINTNEXTLINE(readability-magic-numbers)
     BuildCallInst(classId);
     SetCallArgs(additionalInput);
 
-    // Add SaveState
-    Builder()->AddInstruction(saveState_);
-    // Add NullCheck
-    if (hasImplicitArg_) {
-        ASSERT(nullCheck_ != nullptr);
-        Builder()->AddInstruction(nullCheck_);
-    } else if (!call_->IsUnresolved() && static_cast<CallInst *>(call_)->GetCallMethod() != nullptr) {
-        // Initialize class as call is resolved
-        BuildInitClassInstForCallStatic(classId);
-    }
-    // Add resolver
-    if (resolver_ != nullptr) {
-        if (call_->IsStaticCall()) {
-            resolver_->SetInput(0, saveState_);
-        } else {
-            resolver_->SetInput(0, nullCheck_);
-            resolver_->SetInput(1, saveState_);
+    if constexpr (HAS_SAVE_STATE) {
+        // Add SaveState
+        if (saveState_ != nullptr) {
+            Builder()->AddInstruction(saveState_);
         }
-        Builder()->AddInstruction(resolver_);
+        // Add NullCheck
+        if (hasImplicitArg_) {
+            ASSERT(nullCheck_ != nullptr);
+            Builder()->AddInstruction(nullCheck_);
+        } else if (!call_->IsUnresolved() && static_cast<CallInst *>(call_)->GetCallMethod() != nullptr) {
+            // Initialize class as call is resolved
+            BuildInitClassInstForCallStatic(classId);
+        }
+        // Add resolver
+        if (resolver_ != nullptr) {
+            if (call_->IsStaticCall()) {
+                resolver_->SetInput(0, saveState_);
+            } else {
+                resolver_->SetInput(0, nullCheck_);
+                resolver_->SetInput(1, saveState_);
+            }
+            Builder()->AddInstruction(resolver_);
+        }
     }
     // Add Call
     AddCallInstruction();
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::SetCallArgs(Inst *additionalInput)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::SetCallArgs(Inst *additionalInput)
 {
     size_t hiddenArgsCount = hasImplicitArg_ ? 1 : 0;                 // +1 for non-static call
     size_t additionalArgsCount = additionalInput == nullptr ? 0 : 1;  // +1 for launch call
@@ -98,9 +115,15 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::SetCallArgs(Inst 
         call_->AddInputType(DataType::REFERENCE);
         saveState_->AppendBridge(additionalInput);
     }
-    if (hasImplicitArg_) {
+    if (hasImplicitArg_ && nullCheck_ != nullptr) {
         call_->AppendInput(nullCheck_);
         call_->AddInputType(DataType::REFERENCE);
+    }
+    if constexpr (!HAS_SAVE_STATE) {
+        if (hasImplicitArg_) {
+            call_->AppendInput(Builder()->GetArgDefinition(bcInst_, 0, ACC_READ));
+            call_->AddInputType(DataType::REFERENCE);
+        }
     }
     if constexpr (IS_RANGE) {
         auto startReg = bcInst_->GetVReg(0);
@@ -125,8 +148,9 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::SetCallArgs(Inst 
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildInitClassInstForCallStatic(uint32_t classId)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildInitClassInstForCallStatic(
+    uint32_t classId)
 {
     if (Builder()->GetClassId() != classId) {
         auto initClass = GetGraph()->CreateInstInitClass(DataType::NO_TYPE, pc_, saveState_,
@@ -137,8 +161,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildInitClassIns
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallStaticInst(uint32_t classId)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildCallStaticInst(uint32_t classId)
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::METHOD;
     if (method_ == nullptr || (GetRuntime()->IsMethodStatic(GetMethod(), methodId_) && classId == 0) ||
@@ -163,8 +187,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallStaticIn
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallVirtualInst()
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildCallVirtualInst()
 {
     constexpr auto SLOT_KIND = UnresolvedTypesInterface::SlotKind::VIRTUAL_METHOD;
     ASSERT(!GetRuntime()->IsMethodStatic(Builder()->GetMethod(), methodId_));
@@ -199,8 +223,10 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallVirtualI
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildCallInst([[maybe_unused]] uint32_t classId)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildCallInst(
+    // CC-OFFNXT(G.FMT.06) false positive
+    [[maybe_unused]] uint32_t classId)
 {
     // NOLINTNEXTLINE(readability-magic-numbers,readability-braces-around-statements,bugprone-suspicious-semicolon)
     if constexpr (OPCODE == Opcode::CallStatic || OPCODE == Opcode::CallLaunchStatic) {
@@ -240,8 +266,8 @@ void InstBuilder::BuildMonitor(const BytecodeInstruction *bcInst, Inst *def, boo
 #include <intrinsics_ir_build.inl>
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultStaticIntrinsic(
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildDefaultStaticIntrinsic(
     RuntimeInterface::IntrinsicId intrinsicId)
 {
     ASSERT(intrinsicId != RuntimeInterface::IntrinsicId::COUNT);
@@ -516,8 +542,8 @@ Inst *InstBuilder::GetArgDefinitionRange(const BytecodeInstruction *bcInst, size
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildMonitorIntrinsic(bool isEnter)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildMonitorIntrinsic(bool isEnter)
 {
     ASSERT(Builder()->GetMethodReturnType(methodId_) == DataType::VOID);
     ASSERT(Builder()->GetMethodArgumentsCount(methodId_) == 1);
@@ -525,8 +551,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildMonitorIntri
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildIntrinsic()
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildIntrinsic()
 {
     auto intrinsicId = GetRuntime()->GetIntrinsicId(method_);
     auto isVirtual = IsVirtual(intrinsicId);
@@ -541,8 +567,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildIntrinsic()
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultIntrinsic(
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildDefaultIntrinsic(
     RuntimeInterface::IntrinsicId intrinsicId, bool isVirtual)
 {
     if (intrinsicId == RuntimeInterface::IntrinsicId::INTRINSIC_OBJECT_MONITOR_ENTER ||
@@ -561,8 +587,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultIntri
 
 // do not specify reason for tidy suppression because comment does not fit single line
 // NOLINTNEXTLINE
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildStaticCallIntrinsic(
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildStaticCallIntrinsic(
     RuntimeInterface::IntrinsicId intrinsicId)
 {
     switch (intrinsicId) {
@@ -605,8 +631,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildStaticCallIn
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::AddCallInstruction()
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::AddCallInstruction()
 {
     Builder()->AddInstruction(call_);
     if (call_->GetType() != DataType::VOID) {
@@ -617,8 +643,8 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::AddCallInstructio
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultVirtualCallIntrinsic(
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildDefaultVirtualCallIntrinsic(
     RuntimeInterface::IntrinsicId intrinsicId)
 {
     saveState_ = Builder()->CreateSaveState(Opcode::SaveState, pc_);
@@ -642,17 +668,31 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildDefaultVirtu
 
 template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallResolvedStatic, false, false, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, false, true, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchStatic, true, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, false, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, false, true, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false>::BuildCallHelper(
+    const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
+template InstBuilder::BuildCallHelper<Opcode::CallLaunchVirtual, true, false, false>::BuildCallHelper(
     const BytecodeInstruction *bcInst, InstBuilder *builder, Inst *additionalInput);
 
 // NOLINTNEXTLINE(readability-function-size,misc-definitions-in-headers)

@@ -148,9 +148,9 @@ bool RegAllocBase::Finish()
 {
     // Update loop info after inserting resolving blocks
     GetGraph()->RunPass<LoopAnalyzer>();
-#ifndef NDEBUG
+#ifdef COMPILER_DEBUG_CHECKS
     GetGraph()->SetRegAllocApplied();
-#endif  // NDEBUG
+#endif  // COMPILER_DEBUG_CHECKS
     COMPILER_LOG(DEBUG, REGALLOC) << "Regalloc " << GetPassName() << " complete";
     return true;
 }

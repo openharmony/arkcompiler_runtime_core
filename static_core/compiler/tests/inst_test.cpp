@@ -15,7 +15,6 @@
 
 #include "unit_test.h"
 #include "libpandabase/utils/utils.h"
-#include "optimizer/ir_builder/inst_builder-inl.h"
 
 namespace ark::compiler {
 

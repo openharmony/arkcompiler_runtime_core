@@ -16,6 +16,19 @@
 #include "reg_encoder.h"
 #include "common.h"
 #include "compiler/optimizer/ir/basicblock.h"
+#if defined(ENABLE_LIBABCKIT)
+#include "generated/abckit_intrinsics_vreg_width.h"
+#else
+bool IsDstRegNeedRenumbering([[maybe_unused]] ark::compiler::Inst *inst)
+{
+    UNREACHABLE();
+}
+void CheckWidthAbcKitIntrinsic([[maybe_unused]] ark::bytecodeopt::RegEncoder *re,
+                               [[maybe_unused]] ark::compiler::Inst *inst)
+{
+    UNREACHABLE();
+}
+#endif
 
 namespace ark::bytecodeopt {
 
@@ -23,6 +36,9 @@ static bool IsIntrinsicRange(Inst *inst)
 {
     if (inst->GetOpcode() != compiler::Opcode::Intrinsic) {
         return false;
+    }
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit()) {
+        return IsAbcKitIntrinsicRange(inst->CastToIntrinsic()->GetIntrinsicId());
     }
 #if defined(ENABLE_BYTECODE_OPT) && defined(PANDA_WITH_ECMASCRIPT)
     switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
@@ -362,7 +378,19 @@ static void AddMoveBefore(Inst *inst, const T &spContainer)
 static bool IsAccReadPosition(compiler::Inst *inst, size_t pos)
 {
     // Calls can have accumulator at any position, return false for them
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && inst->IsIntrinsic()) {
+        return inst->IsAccRead() && pos == AccReadIndex(inst);
+    }
     return !inst->IsCallOrIntrinsic() && inst->IsAccRead() && pos == AccReadIndex(inst);
+}
+
+static void AddMoveAfter(Inst *inst, compiler::Register src, RegContent dst)
+{
+    auto *sfInst = inst->GetBasicBlock()->GetGraph()->CreateInstSpillFill();
+    sfInst->AddMove(src, dst.reg, dst.type);
+    LOG(DEBUG, BYTECODE_OPTIMIZER) << "RegEncoder: Move v" << static_cast<int>(dst.reg) << " <- v"
+                                   << static_cast<int>(src) << " was added";
+    inst->GetBasicBlock()->InsertAfter(sfInst, inst);
 }
 
 void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
@@ -405,12 +433,24 @@ void RegEncoder::InsertSpillsForDynInputsInst(compiler::Inst *inst)
             }
         } else {
             spillVec.emplace_back(srcReg, RegContent(temp, type));
+            if (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && temp >= compiler::VIRTUAL_FRAME_SIZE) {
+                success_ = false;
+                return;
+            }
             inst->SetSrcReg(i, temp++);
         }
     }
 
     AddMoveBefore(inst, spillMap);
     AddMoveBefore(inst, spillVec);
+
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && IsDstRegNeedRenumbering(inst)) {
+        auto reg = inst->GetDstReg();
+        if (RegNeedsRenumbering(reg) && reg >= NUM_COMPACTLY_ENCODED_REGS) {
+            inst->SetDstReg(temp);
+            AddMoveAfter(inst, temp, RegContent(reg, GetRegType(inst->GetType())));
+        }
+    }
 }
 
 size_t RegEncoder::GetStartInputIndex(compiler::Inst *inst)
@@ -420,15 +460,6 @@ size_t RegEncoder::GetStartInputIndex(compiler::Inst *inst)
             inst->GetOpcode() == compiler::Opcode::CallLaunchVirtual)
                ? 1U
                : 0U;  // exclude LoadAndInitClass and NewObject
-}
-
-static void AddMoveAfter(Inst *inst, compiler::Register src, RegContent dst)
-{
-    auto sfInst = inst->GetBasicBlock()->GetGraph()->CreateInstSpillFill();
-    sfInst->AddMove(src, dst.reg, dst.type);
-    LOG(DEBUG, BYTECODE_OPTIMIZER) << "RegEncoder: Move v" << static_cast<int>(dst.reg) << " <- v"
-                                   << static_cast<int>(src) << " was added";
-    inst->GetBasicBlock()->InsertAfter(sfInst, inst);
 }
 
 static bool IsBoundDstSrc(const compiler::Inst *inst)
@@ -608,17 +639,29 @@ void RegEncoder::VisitInitObject(GraphVisitor *visitor, Inst *inst)
 
 void RegEncoder::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
 {
+    if (inst->GetBasicBlock()->GetGraph()->IsAbcKit() && inst->IsIntrinsic()) {
+        auto re = static_cast<RegEncoder *>(visitor);
+        if (IsIntrinsicRange(inst)) {
+            re->Check4Width(inst);
+            return;
+        }
+        if (IsAbcKitIntrinsic(inst->CastToIntrinsic()->GetIntrinsicId())) {
+            CheckWidthAbcKitIntrinsic(re, inst);
+        }
+        CallHelper(visitor, inst);
+        return;
+    }
     if (inst->IsCallOrIntrinsic()) {
         CallHelper(visitor, inst);
         return;
     }
     auto re = static_cast<RegEncoder *>(visitor);
     if (IsIntrinsicRange(inst)) {
-        re->Check4Width(inst->CastToIntrinsic());
+        re->Check4Width(inst);
         return;
     }
 
-    re->Check8Width(inst->CastToIntrinsic());
+    re->Check8Width(inst);
 }
 
 void RegEncoder::VisitLoadObject(GraphVisitor *v, Inst *instBase)

@@ -191,6 +191,10 @@ module IR
     @data['flags']
   end
 
+  def abckit_flags
+    @data['abckit_flags']
+  end
+
   def modes
     @data['modes']
   end

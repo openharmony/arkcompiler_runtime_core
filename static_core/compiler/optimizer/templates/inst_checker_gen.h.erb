@@ -15,6 +15,10 @@
 
 #include "compiler/optimizer/ir/graph_visitor.h"
 #include "compiler/optimizer/ir/graph.h"
+#include "compiler/optimizer/ir/graph_checker_macros.h"
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHECKER_DO_IF_NOT_VISITOR(cond, func) CHECKER_DO_IF_NOT_VISITOR_INTERNAL(InstChecker *, cond, func)
 
 namespace ark::compiler {
 
@@ -37,30 +41,47 @@ public:
         return inst->GetInput(input).GetInst()->GetType();
     }
 
-    static void Run(const Graph *graph)
+    static bool Run(const Graph *graph)
     {
-        InstChecker(graph).VisitGraph();
+        auto checker = InstChecker(graph);
+        checker.VisitGraph();
+        return checker.GetStatus();
+    }
+
+    bool GetStatus() const
+    {
+        return success_;
+    }
+
+    void SetStatus(bool status)
+    {
+        success_ = status;
+    }
+
+    const Graph *GetGraph() const
+    {
+        return graph_;
     }
 
 % IR::instructions.each do |inst|
     static void Visit<%= inst.opcode %>([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
     {
 %   if !inst.has_dst?
-        ASSERT(!inst->HasUsers());
+        CHECKER_ASSERT(!inst->HasUsers());
 %   elsif !inst.dst.pseudo?
-        ASSERT_DO(CheckType(inst->GetType(), <%= inst.dst.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
+        CHECKER_DO_IF_NOT_VISITOR(CheckType(inst->GetType(), <%= inst.dst.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
             std::cerr << "Wrong dst type '" << DataType::ToString(inst->GetType()) << "' for inst:\n" << *inst << std::endl);
 %   end
 %   if inst.inputs.any? { |x| x.is_dyn? }
     }
 %     next
 %   end
-        CHECK_EQ(inst->GetInputsCount(), <%= inst.inputs.size %>U);
+        CHECKER_EQ(inst->GetInputsCount(), <%= inst.inputs.size %>U);
 %   inst.inputs.each_with_index do |operand, i|
 %     if operand.has('save_state')
-        ASSERT(inst->GetInput(<%= i %>).GetInst()->IsSaveState());
+        CHECKER_ASSERT(inst->GetInput(<%= i %>).GetInst()->IsSaveState());
 %     else
-        ASSERT_DO(CheckType(GetInputType(inst, <%= i %>), <%= operand.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
+        CHECKER_DO_IF_NOT_VISITOR(CheckType(GetInputType(inst, <%= i %>), <%= operand.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
             std::cerr << "Wrong input <%= i %> type '" << DataType::ToString(GetInputType(inst, <%= i %>)) << "' for inst:\n" << *inst << std::endl);
 %     end
 %   end
@@ -71,6 +92,9 @@ public:
 
 private:
     const Graph *graph_{nullptr};
+    bool success_ {true};
 };
+
+#undef CHECKER_DO_IF_NOT_VISITOR
 
 }  // namespace ark::compiler

@@ -204,21 +204,36 @@ bool PassManager::RunPass(Pass *pass, size_t localMemSizeBeforePass)
         DumpVisualizerGraph(pass->GetPassName());
     }
 
-#ifndef NDEBUG
-    RunPassChecker(pass, result, isCodegen);
-#endif
+    result &= RunPassChecker(pass, result, isCodegen);
+
     return result;
 }
 
-void PassManager::RunPassChecker(Pass *pass, bool result, bool isCodegen)
+bool PassManager::RunPassChecker(Pass *pass, bool result, bool isCodegen)
+{
+    if (graph_->IsAbcKit()) {
+        return RunPassChecker<true>(pass, result, isCodegen);
+    }
+#ifndef NDEBUG
+    RunPassChecker<false>(pass, result, isCodegen);
+#endif
+    return true;
+}
+
+template <bool FORCE_RUN>
+bool PassManager::RunPassChecker(Pass *pass, bool result, bool isCodegen)
 {
     bool checkerEnabled = g_options.IsCompilerCheckGraph();
     if (g_options.IsCompilerCheckFinal()) {
         checkerEnabled = isCodegen;
     }
-    if (result && !pass->IsAnalysis() && checkerEnabled) {
-        GraphChecker(graph_, pass->GetPassName()).Check();
+    if constexpr (FORCE_RUN) {
+        checkerEnabled = true;
     }
+    if (result && !pass->IsAnalysis() && checkerEnabled) {
+        result &= GraphChecker(graph_, pass->GetPassName()).Check();
+    }
+    return result;
 }
 
 ArenaAllocator *PassManager::GetAllocator()

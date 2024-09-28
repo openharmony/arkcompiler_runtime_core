@@ -34,6 +34,11 @@ constexpr ark::compiler::Register NUM_COMPACTLY_ENCODED_REGS = 16;
 // Get the position where accumulator read happens.
 uint8_t AccReadIndex(const compiler::Inst *inst);
 
+bool IsAbcKitIntrinsic(compiler::RuntimeInterface::IntrinsicId intrinsicId);
+bool IsAbcKitIntrinsicRange(compiler::RuntimeInterface::IntrinsicId intrinsicId);
+
+bool IsCall(compiler::Inst *inst);
+
 bool CanConvertToIncI(const compiler::BinaryImmOperation *binop);
 }  // namespace ark::bytecodeopt
 

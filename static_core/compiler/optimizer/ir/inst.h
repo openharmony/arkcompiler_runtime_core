@@ -1206,6 +1206,11 @@ public:
         return GetField<FieldFlags>();
     }
 
+    void SetFlagsMask(inst_flags::Flags flag)
+    {
+        SetField<FieldFlags>(flag);
+    }
+
     bool GetFlag(inst_flags::Flags flag) const
     {
         return (GetFlagsMask() & flag) != 0;
@@ -4512,6 +4517,7 @@ protected:
     using LastField = Exit;
 };
 
+#include "inst_flags.inl"
 #include "intrinsics_flags.inl"
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)

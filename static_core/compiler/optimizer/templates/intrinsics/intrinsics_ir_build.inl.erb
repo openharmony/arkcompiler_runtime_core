@@ -74,8 +74,8 @@ inline bool IsVirtual([[maybe_unused]] RuntimeInterface::IntrinsicId intrinsic)
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
-template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ>
-void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>::BuildVirtualCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId)
+template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
+void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildVirtualCallIntrinsic(RuntimeInterface::IntrinsicId intrinsicId)
 {
 % if Compiler::ext_intrinsic_spaces.any?
     // NOLINTNEXTLINE(hicpp-multiway-paths-covered)

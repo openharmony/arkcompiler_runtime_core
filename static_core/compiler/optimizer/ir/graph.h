@@ -27,6 +27,21 @@
 #include <algorithm>
 #include <optional>
 
+// defines required for AbcKit
+#if !defined(NDEBUG) || defined(ENABLE_LIBABCKIT)
+#define COMPILER_DEBUG_CHECKS
+#endif
+#ifdef ENABLE_LIBABCKIT
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ABCKIT_MODE_CHECK(cond, action) \
+    if (cond) {                         \
+        action;                         \
+    }
+#else
+// CC-OFFNXT(G.PRE.02) should be with define
+#define ABCKIT_MODE_CHECK(cond, action)
+#endif
+
 namespace ark {
 class Method;
 class CodeAllocator;
@@ -94,6 +109,8 @@ public:
     DECLARE_GRAPH_MODE(Interpreter);
     // Graph will be compiled for interpreter main loop
     DECLARE_GRAPH_MODE(InterpreterEntry);
+    // Graph will be compiled for abckit
+    DECLARE_GRAPH_MODE(AbcKit);
 
 #undef DECLARE_GRAPH_MODE
 #undef DECLARE_GRAPH_MODE_MODIFIERS
@@ -115,6 +132,7 @@ private:
     using FlagBoundary = FlagFastPath::NextFlag;
     using FlagInterpreter = FlagBoundary::NextFlag;
     using FlagInterpreterEntry = FlagInterpreter::NextFlag;
+    using FlagAbcKit = FlagInterpreterEntry::NextFlag;
 
     uint32_t value_ {0};
 
@@ -368,7 +386,7 @@ public:
     {
         FlagUnrollComplete::Set(true, &bitFields_);
     }
-#ifndef NDEBUG
+#ifdef COMPILER_DEBUG_CHECKS
     bool IsRegAllocApplied() const
     {
         return FlagRegallocApplied::Get(bitFields_);
@@ -414,7 +432,7 @@ public:
     {
         return false;
     }
-#endif  // NDEBUG
+#endif  // COMPILER_DEBUG_CHECKS
 
     bool IsThrowApplied() const
     {
@@ -1024,14 +1042,18 @@ public:
     // clang-format off
 
     /// Create instruction by opcode
+    // NOLINTNEXTLINE(readability-function-size)
     [[nodiscard]] Inst* CreateInst(Opcode opc) const
     {
         switch (opc) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define RETURN_INST(OPCODE, BASE, ...)                                      \
+#define RETURN_INST(OPCODE, BASE, ...)                                   \
             case Opcode::OPCODE: {                                       \
                 auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE); \
-                inst->SetId(instrCurrentId_++);                        \
+                inst->SetId(instrCurrentId_++);                          \
+                if (IsAbcKit()) {                                        \
+                    SetAbcKitFlags(inst);                                \
+                }                                                        \
                 return inst;                                             \
             }
             OPCODE_LIST(RETURN_INST)
@@ -1043,12 +1065,15 @@ public:
     }
     /// Define creation methods for all opcodes
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define RETURN_INST(OPCODE, BASE, ...)                                                                     \
-    template <typename... Args>                                                                         \
-    [[nodiscard]] BASE* CreateInst##OPCODE(Args&&... args) const {     \
+#define RETURN_INST(OPCODE, BASE, ...)                                                         \
+    template <typename... Args>                                                                \
+    [[nodiscard]] BASE* CreateInst##OPCODE(Args&&... args) const {                             \
         auto inst = Inst::New<BASE>(allocator_, Opcode::OPCODE, std::forward<Args>(args)...);  \
-        inst->SetId(instrCurrentId_++);                                                             \
-        return inst;                                                    \
+        inst->SetId(instrCurrentId_++);                                                        \
+        if (IsAbcKit()) {                                                                      \
+            SetAbcKitFlags(inst);                                                              \
+        }                                                                                      \
+        return inst;                                                                           \
     }
     OPCODE_LIST(RETURN_INST)
 
@@ -1126,6 +1151,15 @@ public:
         return mode_.IsDynamicMethod();
     }
 
+    bool IsAbcKit() const
+    {
+#ifdef ENABLE_LIBABCKIT
+        return mode_.IsAbcKit();
+#else
+        return false;
+#endif
+    }
+
     bool SupportManagedCode() const
     {
         return mode_.SupportManagedCode();
@@ -1162,6 +1196,11 @@ public:
     void SetDynamicMethod()
     {
         mode_.SetDynamicMethod(true);
+    }
+
+    void SetAbcKit()
+    {
+        mode_.SetAbcKit(true);
     }
 
     void SetDynamicStub()
@@ -1321,7 +1360,7 @@ private:
     using FlagIrtocPrologEpilogOptimized = FlagDefaultLocationsInit::NextFlag;
     using FlagThrowApplied = FlagIrtocPrologEpilogOptimized::NextFlag;
     using FlagUnrollComplete = FlagThrowApplied::NextFlag;
-#ifdef NDEBUG
+#if defined(NDEBUG) && !defined(ENABLE_LIBABCKIT)
     using LastField = FlagUnrollComplete;
 #else
     using FlagRegallocApplied = FlagUnrollComplete::NextFlag;
