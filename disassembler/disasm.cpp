@@ -68,19 +68,18 @@ bool ProcessArgs(panda::PandArgParser &pa_parser, const panda::PandArg<std::stri
         return false;
     }
 
+    panda::Logger::ComponentMask log_mask = panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER)
+                                                                          .set(panda::Logger::Component::PANDAFILE);
     if (debug.GetValue()) {
         if (debug_file.GetValue().empty()) {
             panda::Logger::InitializeStdLogging(
-                panda::Logger::Level::DEBUG,
-                panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
+                panda::Logger::Level::DEBUG, log_mask);
         } else {
             panda::Logger::InitializeFileLogging(
-                debug_file.GetValue(), panda::Logger::Level::DEBUG,
-                panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
+                debug_file.GetValue(), panda::Logger::Level::DEBUG, log_mask);
         }
     } else {
-        panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR,
-                                            panda::Logger::ComponentMask().set(panda::Logger::Component::DISASSEMBLER));
+        panda::Logger::InitializeStdLogging(panda::Logger::Level::ERROR, log_mask);
     }
 
     return true;

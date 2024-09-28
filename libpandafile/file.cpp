@@ -660,10 +660,10 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
 
 void CheckFileVersion(const std::array<uint8_t, File::VERSION_SIZE> &file_version, const std::string_view &filename)
 {
-#ifdef FATAL_AS_ERROR
-#define LOG_LEVEL ERROR
-#else
+#ifdef ERROR_AS_FATAL
 #define LOG_LEVEL FATAL
+#else
+#define LOG_LEVEL ERROR
 #endif
     if (file_version == version) {
         return;
