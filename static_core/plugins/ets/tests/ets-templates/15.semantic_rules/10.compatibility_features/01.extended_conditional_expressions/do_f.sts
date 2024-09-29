@@ -21,9 +21,11 @@ desc: >-
 
 {{c.decl}}
 
+let res: int
+
 function main(): int {
     let v: {{c.type}} = {{c.val}}  // falsy
-    let res: int = 0
+    res = 0
 
     do {
         if (++res > 1) {

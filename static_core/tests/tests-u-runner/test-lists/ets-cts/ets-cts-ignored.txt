@@ -41,6 +41,18 @@
 17.experimental_features/02.array_creation_expressions/expr_n_11.sts
 # end of es2panda fails
 
+# Recursive Type Alias Declaration (4.6.1) is not implemented
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_19.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_20.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_22.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_23.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_24.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_25.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_26.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/spec3.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/spec4.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/spec5.sts
+
 # not implemented
 03.types/01.predefined_types/class_types_declaration_2.sts
 03.types/04.using_types/array_value_types_declaration_18.sts
@@ -434,6 +446,11 @@
 09.classes/04.access_modifiers/access_modifiers_9.sts
 # end of es2panda fails
 
+# 19135 Cannot infer array type from context
+07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_10.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_9.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_18.sts
+
 #FailKind.ES2PANDA_FAIL not implemented yet
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_0.sts
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_1.sts
@@ -470,7 +487,7 @@
 09.classes/07.accessor_declarations/setter_inheritance.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_1.sts
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_2.sts
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_10.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_11.sts
 # end of es2panda fails not implemented yet
 
 #FailKind.RUNTIME_TIMEOUT - can't reproduce locally, but fail consistently on the CI
@@ -612,10 +629,6 @@
 13.compilation_units_packages_and_modules/04.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_3.sts
 13.compilation_units_packages_and_modules/04.import_directives/03.several_bindings_for_one_import_path/explicitly_and_implicitly_import_5.sts
 # end of runtime fails
-
-# es2panda fails: panda#14062
-07.expressions/04.array_literal/01.type_inference_from_context/arr_inf_8.sts
-# end of es2panda fails
 
 # es2panda fails: panda#14067
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_10.sts
@@ -926,11 +939,7 @@
 07.expressions/11.function_call_expression/step_1_selection_of_function/step1_5.sts
 # end of es2panda fails
 
-# es2panda fails: panda:#14588 Enum type alias is not honored
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_14.sts
-# end of es2panda fails
-
-# es2panda fails: panda:#13438 Support type alias with type parameter
+# es2panda fails: panda:#18918 No CTE on using primitive types as alias names
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_4.sts
 # end of es2panda fails
 
@@ -2109,7 +2118,7 @@
 17.experimental_features/03.indexable_types/cte_15.sts
 
 # es2panda: #17635: Smart cast problem
-04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_4.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_gen_1.sts
 
 # es2panda: #17766 Order of initialization of global const and let
 07.expressions/17.typeof_expression/tof_const_11.sts
