@@ -1311,7 +1311,7 @@ HWTEST(ItemContainer, ThrowIfWithCheckTest, testing::ext::TestSize.Level0)
     EXPECT_NE(file, nullptr);
 
     file->ThrowIfWithCheck(0U > 1U, File::INVALID_FILE_OFFSET);
-    
+
 #ifdef HOST_UT
     EXPECT_DEATH(file->ThrowIfWithCheck(1U > 0U, File::INVALID_FILE_OFFSET),
                  "F/pandafile: Invalid file offset");

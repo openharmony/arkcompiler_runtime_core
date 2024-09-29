@@ -540,7 +540,8 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode open_
 
     size_t size = res.Value();
     if (size < sizeof(File::Header)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "' - has not header";
+        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "' - missing or incomplete header" <<
+                                 ". Abc file is corrupted";
         return nullptr;
     }
 
@@ -568,7 +569,7 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
     }
 
     if (size < sizeof(File::Header)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file size '" << filename << "'";
+        LOG(ERROR, PANDAFILE) << "Invalid panda file size '" << filename << "'" << ". Abc file is corrupted";
         return nullptr;
     }
     LOG(DEBUG, PANDAFILE) << " size=" << size << " offset=" << offset << " " << filename;
@@ -599,51 +600,53 @@ bool CheckHeaderElementOffset(size_t offset, size_t number, size_t file_size)
 bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filename)
 {
     if (ptr.Get() == nullptr || ptr.GetSize() < sizeof(File::Header)) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'";
+        LOG(ERROR, PANDAFILE) << "Invalid panda file '" << filename << "'" << ". Abc file is corrupted";
         return false;
     }
     auto header = reinterpret_cast<const File::Header *>(reinterpret_cast<uintptr_t>(ptr.Get()));
     if (header->magic != File::MAGIC) {
-        LOG(ERROR, PANDAFILE) << "Invalid magic number '";
+        LOG(ERROR, PANDAFILE) << "Invalid magic number" << ". Abc file is corrupted";
         return false;
     }
 
     CheckFileVersion(header->version, filename);
 
     if (header->file_size < sizeof(File::Header) || header->file_size > ptr.GetSize()) {
-        LOG(ERROR, PANDAFILE) << "Invalid panda file size " << header->file_size;
+        LOG(ERROR, PANDAFILE) << "Invalid panda file size " << header->file_size << ". Abc file is corrupted";
         return false;
     }
 
     if (!CheckHeaderElementOffset<uint8_t>(header->foreign_off, header->foreign_size, header->file_size)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file foreign_off " << header->foreign_off <<
-            " or foreign_size " << header->foreign_size;
+            " or foreign_size " << header->foreign_size << ". Abc file is corrupted";
         return false;
     }
 
     if (!CheckHeaderElementOffset(header->class_idx_off, header->num_classes, header->file_size)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file class_idx_off " << header->class_idx_off <<
-            " or num_classes " << header->num_classes;
+            " or num_classes " << header->num_classes << ". Abc file is corrupted";
         return false;
     }
 
     if (!CheckHeaderElementOffset(header->lnp_idx_off, header->num_lnps, header->file_size)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file lnp_idx_off " << header->lnp_idx_off <<
-            " or num_lnps " << header->num_lnps;
+            " or num_lnps " << header->num_lnps << ". Abc file is corrupted";
         return false;
     }
 
     if (ContainsLiteralArrayInHeader(header->version)) {
         if (!CheckHeaderElementOffset(header->literalarray_idx_off, header->num_literalarrays, header->file_size)) {
             LOG(ERROR, PANDAFILE) << "Invalid panda file literalarray_idx_off " << header->literalarray_idx_off <<
-                                     " or num_literalarrays " << header->num_literalarrays;
+                                     " or num_literalarrays " << header->num_literalarrays <<
+                                     ". Abc file is corrupted";
             return false;
         }
     } else {
         if (header->literalarray_idx_off != INVALID_INDEX || header->num_literalarrays != INVALID_OFFSET) {
             LOG(ERROR, PANDAFILE) << "Invalid panda file literalarray_idx_off " << header->literalarray_idx_off <<
                                      " or num_literalarrays " << header->num_literalarrays <<
-                                     ", The literalarray_idx_off and num_literalarrays should be reserved.";
+                                     ", The literalarray_idx_off and num_literalarrays should be reserved." <<
+                                     " Abc file is corrupted";
             return false;
         }
     }
@@ -651,7 +654,7 @@ bool CheckHeader(const os::mem::ConstBytePtr &ptr, const std::string_view &filen
     if (!CheckHeaderElementOffset<File::IndexHeader>(header->index_section_off, header->num_indexes,
         header->file_size)) {
         LOG(ERROR, PANDAFILE) << "Invalid panda file index_section_off " << header->index_section_off <<
-            " or num_indexes " << header->num_indexes;
+            " or num_indexes " << header->num_indexes << ". Abc file is corrupted";
         return false;
     }
 
@@ -779,7 +782,7 @@ bool ContainsLiteralArrayInHeader(const std::array<uint8_t, File::VERSION_SIZE> 
     return panda::panda_file::IsVersionLessOrEqual(version, LAST_CONTAINS_LITERAL_IN_HEADER_VERSION);
 }
 
-bool File::ValidateChecksum() const
+bool File::ValidateChecksum(uint32_t *cal_checksum_out) const
 {
     constexpr uint32_t MAGIC_SIZE = 8U;
     constexpr uint32_t CHECKSUM_SIZE = 4U;
@@ -787,15 +790,23 @@ bool File::ValidateChecksum() const
     constexpr uint32_t FILE_CONTENT_OFFSET = MAGIC_SIZE + CHECKSUM_SIZE;
     uint32_t file_size = GetHeader()->file_size;
     uint32_t cal_checksum = adler32(1, GetBase() + FILE_CONTENT_OFFSET, file_size - FILE_CONTENT_OFFSET);
+
+    if (cal_checksum_out != nullptr) {
+        *cal_checksum_out = cal_checksum;
+    }
+
     return GetHeader()->checksum == cal_checksum;
 }
 
 void File::ThrowIfWithCheck(bool cond, const std::string& msg, const std::string& tag) const
 {
     if (UNLIKELY(cond)) {
-        bool is_checksum_match = ValidateChecksum();
+        uint32_t cal_checksum = 0;
+        bool is_checksum_match = ValidateChecksum(&cal_checksum);
         if (!is_checksum_match) {
-            LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted.";
+            LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted. "
+                                         << "Expected checksum: 0x" << std::hex << GetHeader()->checksum
+                                         << ", Actual checksum: 0x" << std::hex << cal_checksum;
         }
 
         if (!tag.empty()) {
