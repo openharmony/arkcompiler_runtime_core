@@ -1,8 +1,4 @@
-# panda#15887
-06.contexts_and_conversions/01.kinds_of_contexts/02.string_operator_contexts/conversion_8.sts
-# panda#17450
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-un_6.sts
-# panda#17445
+ # panda#17445
 06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-wd_6.ets
 
 # 17669 JIT-optimized code gives wrong result
