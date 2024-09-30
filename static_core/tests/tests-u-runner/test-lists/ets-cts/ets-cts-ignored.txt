@@ -2056,15 +2056,6 @@
 # end es2panda
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
-### Issue 19678
-03.types/08.reference_types/11.union_types/ut_n_17.sts
-03.types/08.reference_types/12.nullish_types/nullable_types_operations_5.sts
-03.types/08.reference_types/12.nullish_types/nullable_types_operations_6.sts
-03.types/08.reference_types/12.nullish_types/nullable_types_operations_7.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var_n_6.sts
-### end of Issue 19678
-### 19950
-03.types/08.reference_types/11.union_types/ut_n_22.sts
 ### Issue 19679
 08.statements/15.try_statements/02.finally_clause/finally_n_2.sts
 17.experimental_features/06.statements/02.multiple_catch_clauses_in_try_statements/finally_n_2.sts
