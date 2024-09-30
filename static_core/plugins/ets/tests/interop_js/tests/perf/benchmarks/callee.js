@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,15 +14,18 @@
  */
 'use strict';
 
-const o = { a: 1, b: '2', c: {} };
+let o = { a: 1, b: '2', c: {} };
 
-exports.GetObject = function () {
+module.exports.GetObject = function GetObject() {
     return o;
 };
-exports.GetNumber = function () {
+module.exports.GetNumber = function GetNumber() {
     return 24;
 };
-exports.GetString = function () {
+module.exports.GetString = function GetString() {
     return 'abc';
 };
-exports.Nop = function () {};
+module.exports.GetArray = function GetArray() {
+    return [1, 2, 5];
+};
+module.exports.Pass = function Pass() {};

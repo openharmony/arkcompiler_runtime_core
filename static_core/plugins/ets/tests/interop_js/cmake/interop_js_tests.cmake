@@ -90,7 +90,7 @@ function(panda_ets_interop_js_test TARGET)
         ARG
         ""
         "JS_LAUNCHER;ETS_CONFIG"
-        "ABC_FILE;CPP_SOURCES;ETS_SOURCES;LAUNCHER_ARGS;ETS_VERIFICATOR_ERRORS"
+        "NODE_OPTIONS;ABC_FILE;CPP_SOURCES;ETS_SOURCES;LAUNCHER_ARGS;ETS_VERIFICATOR_ERRORS"
         ${ARGN}
     )
 
@@ -106,7 +106,7 @@ function(panda_ets_interop_js_test TARGET)
 
     add_custom_target(${TARGET}
         COMMAND "/usr/bin/env" "MODULE_PATH=${CMAKE_BINARY_DIR}/lib/module" "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc/${TARGET_TEST_PACKAGE}.zip"
-            "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" ${NODE_BINARY} ${ARG_JS_LAUNCHER} ${ARG_LAUNCHER_ARGS} > ${OUTPUT_FILE} 2>&1
+            "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc" ${NODE_BINARY} ${ARG_NODE_OPTIONS} ${ARG_JS_LAUNCHER} ${ARG_LAUNCHER_ARGS} > ${OUTPUT_FILE} 2>&1
             || (cat ${OUTPUT_FILE} && false)
             DEPENDS ${ARG_JS_LAUNCHER} ${TARGET_TEST_PACKAGE} ets_interop_js_napi
     )

@@ -102,6 +102,7 @@
   "plugins/ets/tests/interop_js/tests/proxies/mem/proxy_reference_storage_2/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/timer/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/perf/CMakeLists.txt": {"bc-40001": "*"},
+  "plugins/ets/tests/interop_js/tests/perf/benchmarks/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/classes/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/enums/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/declgen_ets2ts/fields/CMakeLists.txt": {"bc-40001": "*"},
