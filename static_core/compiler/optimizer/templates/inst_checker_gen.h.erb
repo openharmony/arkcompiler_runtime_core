@@ -18,7 +18,7 @@
 #include "compiler/optimizer/ir/graph_checker_macros.h"
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECKER_DO_IF_NOT_VISITOR(cond, func) CHECKER_DO_IF_NOT_VISITOR_INTERNAL(InstChecker *, cond, func)
+#define CHECKER_DO_IF_NOT_VISITOR(visitor, cond, func) CHECKER_DO_IF_NOT_VISITOR_INTERNAL(visitor, InstChecker *, cond, func)
 
 namespace ark::compiler {
 
@@ -69,7 +69,7 @@ public:
 %   if !inst.has_dst?
         CHECKER_ASSERT(!inst->HasUsers());
 %   elsif !inst.dst.pseudo?
-        CHECKER_DO_IF_NOT_VISITOR(CheckType(inst->GetType(), <%= inst.dst.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
+        CHECKER_DO_IF_NOT_VISITOR(v, CheckType(inst->GetType(), <%= inst.dst.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
             std::cerr << "Wrong dst type '" << DataType::ToString(inst->GetType()) << "' for inst:\n" << *inst << std::endl);
 %   end
 %   if inst.inputs.any? { |x| x.is_dyn? }
@@ -81,7 +81,7 @@ public:
 %     if operand.has('save_state')
         CHECKER_ASSERT(inst->GetInput(<%= i %>).GetInst()->IsSaveState());
 %     else
-        CHECKER_DO_IF_NOT_VISITOR(CheckType(GetInputType(inst, <%= i %>), <%= operand.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
+        CHECKER_DO_IF_NOT_VISITOR(v, CheckType(GetInputType(inst, <%= i %>), <%= operand.types.map { |x| Operand::cpp_type(x) }.join(', ') %>),
             std::cerr << "Wrong input <%= i %> type '" << DataType::ToString(GetInputType(inst, <%= i %>)) << "' for inst:\n" << *inst << std::endl);
 %     end
 %   end

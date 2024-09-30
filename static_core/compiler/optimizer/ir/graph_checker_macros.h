@@ -29,20 +29,19 @@
 #define CHECKER_DO_IF_NOT(cond, func) ASSERT_DO((cond), func)
 // CC-OFFNXT(G.PRE.02) should be with define
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECKER_DO_IF_NOT_VISITOR_INTERNAL(klass, cond, func) ASSERT_DO((cond), func)
+#define CHECKER_DO_IF_NOT_VISITOR_INTERNAL(visitor, klass, cond, func) ASSERT_DO((cond), func)
 // CC-OFFNXT(G.PRE.02) should be with define
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECKER_DO_IF_NOT_AND_PRINT(cond, func) ASSERT_DO((cond), func; PrintFailedMethodAndPass();)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(cond, func) \
-    /* CC-OFFNXT(G.PRE.10) local scope macro */         \
-    ASSERT_DO((cond), func; PrintFailedMethodAndPassVisitor(v);)
+#define CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(visitor, cond, func) \
+    ASSERT_DO((cond), func; PrintFailedMethodAndPassVisitor(visitor);)
 // CC-OFFNXT(G.FMT.16) project code style
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHECKER_IF_NOT_PRINT(cond) CHECKER_DO_IF_NOT_AND_PRINT(cond, )
 // CC-OFFNXT(G.FMT.16) project code style
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECKER_IF_NOT_PRINT_VISITOR(cond) CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(cond, )
+#define CHECKER_IF_NOT_PRINT_VISITOR(visitor, cond) CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(visitor, cond, )
 // CC-OFFNXT(G.PRE.02) should be with define
 #define CHECK_STATUS()
 #else
@@ -74,11 +73,10 @@
         CHECK_EQ(lhs, rhs);                                           \
     }
 // CC-OFFNXT(G.PRE.02) should be with define
-#define ABCKIT_DO_IF_NOT_VISITOR(cond, func)                   \
-    if (UNLIKELY(!(cond))) {                                   \
-        func;                                                  \
-        /* CC-OFFNXT(G.PRE.10) local scope macro */            \
-        reinterpret_cast<GraphChecker *>(v)->SetStatus(false); \
+#define ABCKIT_DO_IF_NOT_VISITOR(visitor, cond, func)                \
+    if (UNLIKELY(!(cond))) {                                         \
+        func;                                                        \
+        reinterpret_cast<GraphChecker *>(visitor)->SetStatus(false); \
     }
 // CC-OFFNXT(G.PRE.02) should be with define
 #define ABCKIT_DO_IF_NOT(cond, func) \
@@ -94,24 +92,24 @@
         ASSERT_DO(cond, func);          \
     }
 // CC-OFFNXT(G.PRE.02) should be with define
-#define CHECKER_DO_IF_NOT_VISITOR_INTERNAL(klass, cond, func) \
-    if (reinterpret_cast<klass>(v)->GetGraph()->IsAbcKit()) { \
-        ABCKIT_DO_IF_NOT_VISITOR((cond), func);               \
-    } else {                                                  \
-        ASSERT_DO(cond, func);                                \
+#define CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(visitor, klass, cond, func) \
+    if (reinterpret_cast<klass>(visitor)->GetGraph()->IsAbcKit()) {     \
+        ABCKIT_DO_IF_NOT_VISITOR(visitor, (cond), func);                \
+    } else {                                                            \
+        ASSERT_DO(cond, func);                                          \
     }
 
 // CC-OFFNXT(G.PRE.02) should be with define
 #define CHECKER_DO_IF_NOT_AND_PRINT(cond, func) CHECKER_DO_IF_NOT((cond), func; PrintFailedMethodAndPass();)
 // CC-OFFNXT(G.PRE.02) should be with define
-#define CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(cond, func) \
-    CHECKER_DO_IF_NOT_VISITOR_INTERNAL(GraphChecker *, (cond), func; PrintFailedMethodAndPassVisitor(v);)
+#define CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(visitor, cond, func) \
+    CHECKER_DO_IF_NOT_VISITOR_INTERNAL(visitor, GraphChecker *, (cond), func; PrintFailedMethodAndPassVisitor(visitor);)
 // CC-OFFNXT(G.PRE.02) should be with define
 // CC-OFFNXT(G.FMT.16) project code style
 #define CHECKER_IF_NOT_PRINT(cond) CHECKER_DO_IF_NOT_AND_PRINT(cond, )
 // CC-OFFNXT(G.PRE.02) should be with define
 // CC-OFFNXT(G.FMT.16) project code style
-#define CHECKER_IF_NOT_PRINT_VISITOR(cond) CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(cond, )
+#define CHECKER_IF_NOT_PRINT_VISITOR(visitor, cond) CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(visitor, cond, )
 // CC-OFFNXT(G.PRE.02) should be with define
 #define CHECK_STATUS()                                        \
     if (!GetStatus() && GetGraph()->IsAbcKit()) {             \
@@ -127,8 +125,8 @@
     CHECKER_DO_IF_NOT((cond), std::cerr << (message) << std::endl; PrintFailedMethodAndPass();)
 // CC-OFFNXT(G.PRE.02) should be with define
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(cond, message)                                     \
-    CHECKER_DO_IF_NOT_VISITOR_INTERNAL(GraphChecker *, (cond), std::cerr << (message) << std::endl; \
-                                       PrintFailedMethodAndPassVisitor(v);)
+#define CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(visitor, cond, message)                                     \
+    CHECKER_DO_IF_NOT_VISITOR_INTERNAL(visitor, GraphChecker *, (cond), std::cerr << (message) << std::endl; \
+                                       PrintFailedMethodAndPassVisitor(visitor);)
 
 #endif  // COMPILER_OPTIMIZER_IR_GRAPH_CHECKER_MACROS_H
