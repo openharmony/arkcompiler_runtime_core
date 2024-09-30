@@ -29,6 +29,7 @@
 #include "tooling/pt_thread.h"
 
 #include <array>
+#include <atomic>
 #include <cstddef>
 #include <functional>
 #include <memory>
@@ -63,6 +64,7 @@ public:
     void SingleStep(PtThread thread, Method *method, const PtLocation &location) override;
     void ThreadStart(PtThread thread) override;
     void ThreadEnd(PtThread thread) override;
+    void VmDeath() override;
 
 private:
     void RuntimeEnable(PtThread thread);
@@ -97,6 +99,23 @@ private:
 
     void NotifyExecutionEnded();
 
+    EvaluationResult Evaluate(PtThread thread, const std::string &bcFragment);
+
+    ALWAYS_INLINE bool CheckVmDead() REQUIRES_SHARED(vmDeathLock_)
+    {
+        if (UNLIKELY(isVmDead_)) {
+            LOG(WARNING, DEBUGGER) << "Killing inspector server after VM death";
+            inspectorServer_.Kill();
+            return true;
+        }
+        return false;
+    }
+
+    /// @brief Get verbose information about the raised exception.
+    std::optional<ExceptionDetails> CreateExceptionDetails(PtThread thread, RemoteObject &&exception);
+
+    size_t GetNewExceptionId();
+
 private:
     bool breakOnStart_;
 
@@ -107,6 +126,11 @@ private:
     DebugInterface &debugger_;
     DebugInfoCache debugInfoCache_;
     std::map<PtThread, DebuggableThread> threads_;
+
+    std::atomic_size_t currentExceptionId_ {0};
+
+    os::memory::RWLock vmDeathLock_;
+    bool isVmDead_ GUARDED_BY(vmDeathLock_) {false};
 
     std::thread serverThread_;
 };

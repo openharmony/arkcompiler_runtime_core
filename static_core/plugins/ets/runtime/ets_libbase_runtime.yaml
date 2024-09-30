@@ -4553,3 +4553,214 @@ intrinsics:
       ret: void
       args: [ std.core.Object, std.core.Object ]
     impl: ark::ets::intrinsics::EtsCondVarNotifyAll
+
+###############################
+# std.core.Debugger #
+###############################
+
+  - name: DebuggerAPIGetLocalBoolean
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalBoolean
+    static: true
+    signature:
+      ret: u1
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalBoolean
+
+  - name: DebuggerAPIGetLocalByte
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalByte
+    static: true
+    signature:
+      ret: i8
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalByte
+
+  - name: DebuggerAPIGetLocalShort
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalShort
+    static: true
+    signature:
+      ret: i16
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalShort
+
+  - name: DebuggerAPIGetLocalChar
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalChar
+    static: true
+    signature:
+      ret: u16
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalChar
+
+  - name: DebuggerAPIGetLocalInt
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalInt
+    static: true
+    signature:
+      ret: i32
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalInt
+
+  - name: DebuggerAPIGetLocalFloat
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalFloat
+    static: true
+    signature:
+      ret: f32
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalFloat
+
+  - name: DebuggerAPIGetLocalDouble
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalDouble
+    static: true
+    signature:
+      ret: f64
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalDouble
+
+  - name: DebuggerAPIGetLocalLong
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalLong
+    static: true
+    signature:
+      ret: i64
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalLong
+
+  - name: DebuggerAPIGetLocalObject
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: getLocalObject
+    static: true
+    signature:
+      ret: std.core.Object
+      args:
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPIGetLocalObject
+
+  - name: DebuggerAPISetLocalBoolean
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalBoolean
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - u1
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalBoolean
+
+  - name: DebuggerAPISetLocalByte
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalByte
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - i8
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalByte
+
+  - name: DebuggerAPISetLocalShort
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalShort
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - i16
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalShort
+
+  - name: DebuggerAPISetLocalChar
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalChar
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - u16
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalChar
+
+  - name: DebuggerAPISetLocalInt
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalInt
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - i32
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalInt
+
+  - name: DebuggerAPISetLocalFloat
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalFloat
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - f32
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalFloat
+
+  - name: DebuggerAPISetLocalDouble
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalDouble
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - f64
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalDouble
+
+  - name: DebuggerAPISetLocalLong
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalLong
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - i64
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalLong
+
+  - name: DebuggerAPISetLocalObject
+    space: ets
+    class_name: std.debug.DebuggerAPI
+    method_name: setLocalObject
+    static: true
+    signature:
+      ret: void
+      args:
+        - i64
+        - std.core.Object
+    impl: ark::ets::intrinsics::DebuggerAPISetLocalObject

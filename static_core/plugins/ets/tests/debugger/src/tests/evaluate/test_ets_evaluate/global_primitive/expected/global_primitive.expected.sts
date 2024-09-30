@@ -15,11 +15,12 @@
 
 package evalPatchFunction;
 
-import { globalFunction } from "./global_overloaded_function.base";
+import { globalVariable } from "../global_primitive.base";
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        console.log("From patch: " + globalFunction(5));
-        globalFunction();
+        console.log("Current value: " + globalVariable);
+        const evalGeneratedResult = (globalVariable += 1);
+        return evalGeneratedResult;
     }
 }

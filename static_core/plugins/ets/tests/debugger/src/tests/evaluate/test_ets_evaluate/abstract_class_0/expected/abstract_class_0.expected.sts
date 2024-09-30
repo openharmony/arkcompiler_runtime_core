@@ -15,14 +15,19 @@
 
 package evalPatchFunction;
 
-import {D} from "./abstract_class_1.base"
+import {A, C} from "../abstract_class_0.base"
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        let variable = new D();
+        let variable: A = DebuggerAPI.getLocalObject(0) as A;
 
-        let x = variable.return_x();
-        let y = variable.return_y();
-        let z = variable.return_z();
+        let state = variable.return_state();
+
+        variable = new C(2, 1);
+        let state2 = variable.return_state();
+
+        const evalGeneratedResult = (2 * state == state2);
+        DebuggerAPI.setLocalObject(0, variable);
+        return evalGeneratedResult;
     }
 }

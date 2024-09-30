@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,29 +13,20 @@
  * limitations under the License.
  */
 
-package evalPatchFunction;
+#ifndef PANDA_TOOLING_INSPECTOR_EVALUATION_HELPERS_H
+#define PANDA_TOOLING_INSPECTOR_EVALUATION_HELPERS_H
 
-import {A, B, C} from "./inheritance_0.base"
+#include "runtime/class_linker_context.h"
+#include "runtime/tooling/inspector/types/exception_details.h"
 
-class evalPatchFunction {
-    private static evalPatchFunction() {
-        let var_a = new A()   
-        var_a.a_foo();
-        var_a.a_x = 10;
+#include <string>
 
-        let var_c = new C()   
-        var_c.a_foo();
-        var_c.a_x = 20;
-        var_c.b_foo();
-        var_c.b_x = 30;
-        var_c.c_foo();
-        var_c.c_x = 40;
+namespace ark::tooling::inspector {
 
-        let var_b = new B()   
-        var_b.a_foo();
-        var_b.a_x = 50;
-        var_b.b_foo();
-        const evalGeneratedResult = (var_b.b_x = 60);
-        return evalGeneratedResult;
-    }
-}
+using EvaluationResult = std::pair<std::optional<RemoteObject>, std::optional<ExceptionDetails>>;
+
+Method *LoadEvaluationPatch(ClassLinkerContext *ctx, const std::string &encodedBytecodeFragment);
+
+}  // namespace ark::tooling::inspector
+
+#endif  // PANDA_TOOLING_INSPECTOR_EVALUATION_HELPERS_H

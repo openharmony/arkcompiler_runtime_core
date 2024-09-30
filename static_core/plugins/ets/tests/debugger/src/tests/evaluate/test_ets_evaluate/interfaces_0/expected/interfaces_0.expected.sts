@@ -15,11 +15,11 @@
 
 package evalPatchFunction;
 
-import { globalFunction } from "./global_function.base";
+import { B } from "../interfaces_0.base"
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        console.log("From patch: " + globalFunction(5));
-        console.log("From patch: " + globalFunction(5));
+        let b = new B();
+        assert(b.foo(123.321) == 123.321);
     }
 }

@@ -448,6 +448,7 @@ bool Runtime::Destroy()
         compiler->JoinWorker();
     }
 
+    // Stop debugger first to correctly remove it as listener.
     instance_->UnloadDebugger();
 
     // Note JIT thread (compiler) may access to thread data,

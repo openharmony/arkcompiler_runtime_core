@@ -15,12 +15,11 @@
 
 package evalPatchFunction;
 
-import { A } from "./static_function.base";
+import { globalFunction } from "../global_function.base";
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        A.foo(6) == A.goo(3);
-        const evalGeneratedResult = (A.foo(5) == 800);
-        return evalGeneratedResult;
+        console.log("From patch: " + globalFunction(5));
+        console.log("From patch: " + globalFunction(5));
     }
 }

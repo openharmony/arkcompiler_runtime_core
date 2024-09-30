@@ -15,12 +15,12 @@
 
 package evalPatchFunction;
 
-import { globalVariable } from "./global_user_class.base";
+import { C } from "../interfaces_1.base"
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        console.log("Current value: " + globalVariable.getNested());
-        // Result won't be returned due to non-primitive type.
-        globalVariable.s.str += ", world!";
+        let c = new C();
+        assert(c.foo(123.321) == 123.321);
+        assert(c.goo(123456) == 123456);
     }
 }

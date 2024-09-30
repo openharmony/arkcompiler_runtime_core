@@ -18,7 +18,7 @@
 import difflib
 import json
 from copy import deepcopy
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable, Final, TypeVar
 
 from arkdb.compiler_verification import ExpressionEvaluationNames
 from arkdb.runnable_module import ScriptFile
@@ -28,6 +28,9 @@ Transformer = Callable[[T], T]
 
 AstNode = dict[str, Any]
 AstNodeOrList = AstNode | list[AstNode]
+
+# NOTE(dslynko): remove this utility when es2panda-generated cctor calls are removed
+CCTOR_PREFIX: Final[str] = "_$trigger_cctor$_for_$"
 
 
 class AstComparisonError(AssertionError):
@@ -69,7 +72,32 @@ class AstComparator:
             statements_filter = _get_import_statements_sources_filter({base_test_file_name: ""})
             statements_list = list(map(statements_filter, statements_list))
 
-        return _split_statements(statements_list)
+        def _find_prefix_recursively(ast_node: Any, prefix: str):
+            if isinstance(ast_node, dict):
+                if (name := ast_node.get("name")) and isinstance(name, str) and name.startswith(prefix):
+                    return True
+                return any(_find_prefix_recursively(x, prefix) for x in ast_node.values())
+            if isinstance(ast_node, list):
+                return any(_find_prefix_recursively(x, prefix) for x in ast_node)
+            return False
+
+        def _imports_trigger_cctor(x: dict) -> bool:
+            return x.get("type") == "ImportSpecifier" and _find_prefix_recursively(x.get("local"), CCTOR_PREFIX)
+
+        def _remove_cctor_call(ast_node: Any) -> Any:
+            if isinstance(ast_node, dict):
+                if (stmts := ast_node.get("statements")) and isinstance(stmts, list):
+                    ast_node["statements"] = [x for x in stmts if not _find_prefix_recursively(x, CCTOR_PREFIX)]
+                    return ast_node
+                for key, value in ast_node.items():
+                    ast_node[key] = _remove_cctor_call(value)
+            elif isinstance(ast_node, list):
+                return [
+                    _remove_cctor_call(x) for x in ast_node if not (isinstance(x, dict) and _imports_trigger_cctor(x))
+                ]
+            return ast_node
+
+        return _split_statements(statements_list, additional_filters=[_remove_cctor_call])
 
     def _prepare_expression_statements(self):
         statements_list = self.expression.ast.get("statements")

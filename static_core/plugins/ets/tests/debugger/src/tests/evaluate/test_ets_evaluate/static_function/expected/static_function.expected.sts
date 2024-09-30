@@ -15,12 +15,12 @@
 
 package evalPatchFunction;
 
-import { globalVariable } from "./global_std_class.base";
+import { A } from "../static_function.base";
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        console.log("Current value: " + globalVariable);
-        // Result won't be returned due to non-primitive type.
-        globalVariable += ", world!";
+        A.foo(6) == A.goo(3);
+        const evalGeneratedResult = (A.foo(5) == 800);
+        return evalGeneratedResult;
     }
 }

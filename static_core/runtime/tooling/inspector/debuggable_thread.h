@@ -17,8 +17,10 @@
 #define PANDA_TOOLING_INSPECTOR_DEBUGGABLE_THREAD_H
 
 #include "runtime/tooling/debugger.h"
+#include "runtime/tooling/inspector/evaluation/helpers.h"
 #include "runtime/tooling/inspector/object_repository.h"
 #include "runtime/tooling/inspector/thread_state.h"
+#include "runtime/tooling/inspector/types/exception_details.h"
 #include "runtime/tooling/inspector/types/numeric_id.h"
 #include "runtime/tooling/inspector/types/pause_on_exceptions_state.h"
 
@@ -64,6 +66,10 @@ public:
     // Tells a paused thread to perform a step out
     void StepOut();
 
+    // Checks if application thread is currently paused.
+    // Used by server thread for validation before executing stepping requests.
+    bool IsPaused();
+
     // Makes a paused thread to resume and suspend back (does nothing for running threads).
     // Used to notify about thread's state when processing `runIfWaitingForDebugger`
     void Touch();
@@ -86,6 +92,15 @@ public:
     // Executes a request to object repository on a paused thread (does nothing for running threads)
     bool RequestToObjectRepository(std::function<void(ObjectRepository &)> request);
 
+    /**
+     * @brief Loads provided bytecode file and executes evaluation method.
+     * File must contain public class with equally named static method taking no arguments.
+     * Name of both class and method must equal source code file name, path to which must be included into binary.
+     * @param bcFragment base64 encoded panda file.
+     * @returns pair of optional result and exception objects if it was raised by evaluated code.
+     */
+    std::pair<std::optional<RemoteObject>, std::optional<RemoteObject>> Evaluate(const std::string &bcFragment);
+
     /// The following methods should be called on an application thread
 
     // Notification that an exception was thrown. Pauses the thread if necessary
@@ -104,6 +119,13 @@ public:
     // Notification that a call to console was performed. Returns its arguments presented as remote objects
     std::vector<RemoteObject> OnConsoleCall(const PandaVector<TypedValue> &arguments);
 
+    /**
+     * @brief Executes method in evaluation mode.
+     * @param method static method taking no arguments.
+     * @returns pair of result (might be void) and pointer to exception (if appeared).
+     */
+    std::pair<Value, ObjectHeader *> InvokeEvaluationMethod(Method *method);
+
 private:
     // Suspends a paused thread. Should be called on an application thread
     void Suspend(ObjectRepository &objectRepository, const std::vector<BreakpointId> &hitBreakpoints,
@@ -112,12 +134,14 @@ private:
     // Marks a paused thread as not suspended. Should be called on the server thread
     void Resume() REQUIRES(mutex_);
 
+private:
     ManagedThread *thread_;
     SuspensionCallbacks callbacks_;
 
     os::memory::Mutex mutex_;
     ThreadState state_ GUARDED_BY(mutex_);
     bool suspended_ GUARDED_BY(mutex_) {false};
+    bool evaluationMode_ {false};
     std::optional<std::function<void(ObjectRepository &)>> request_ GUARDED_BY(mutex_);
     os::memory::ConditionVariable requestDone_ GUARDED_BY(mutex_);
 };

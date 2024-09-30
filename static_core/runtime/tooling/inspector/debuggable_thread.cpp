@@ -69,6 +69,12 @@ void DebuggableThread::StepOut()
     Resume();
 }
 
+bool DebuggableThread::IsPaused()
+{
+    os::memory::LockHolder lock(mutex_);
+    return suspended_;
+}
+
 void DebuggableThread::Touch()
 {
     os::memory::LockHolder lock(mutex_);
@@ -130,8 +136,62 @@ bool DebuggableThread::RequestToObjectRepository(std::function<void(ObjectReposi
     return true;
 }
 
+std::pair<std::optional<RemoteObject>, std::optional<RemoteObject>> DebuggableThread::Evaluate(
+    const std::string &bcFragment)
+{
+    std::optional<RemoteObject> optResult;
+    std::optional<RemoteObject> optException;
+
+    RequestToObjectRepository([this, &bcFragment, &optResult, &optException](ObjectRepository &objectRepo) {
+        ASSERT(thread_->GetCurrentFrame());
+        auto *ctx = thread_->GetCurrentFrame()->GetMethod()->GetClass()->GetLoadContext();
+
+        auto *method = LoadEvaluationPatch(ctx, bcFragment);
+        if (method == nullptr) {
+            return;
+        }
+
+        auto [result, exception] = InvokeEvaluationMethod(method);
+
+        if (exception != nullptr) {
+            optException.emplace(objectRepo.CreateObject(TypedValue::Reference(exception)));
+        }
+
+        auto resultTypeId = method->GetReturnType().GetId();
+        optResult.emplace(objectRepo.CreateObject(result, resultTypeId));
+    });
+
+    return std::make_pair(optResult, optException);
+}
+
+std::pair<Value, ObjectHeader *> DebuggableThread::InvokeEvaluationMethod(Method *method)
+{
+    ASSERT(method);
+    ASSERT(!thread_->HasPendingException());
+
+    // Some debugger functionality must be disabled in evaluation mode.
+    evaluationMode_ = true;
+    // Evaluation patch should not accept any arguments.
+    Value result = method->Invoke(thread_, nullptr);
+    evaluationMode_ = false;
+
+    ObjectHeader *newException = nullptr;
+    if (thread_->HasPendingException()) {
+        newException = thread_->GetException();
+        LOG(WARNING, DEBUGGER) << "Evaluation has completed with a exception "
+                               << newException->ClassAddr<Class>()->GetName();
+        // Restore the previous exception.
+        thread_->SetException(nullptr);
+    }
+
+    return std::make_pair(result, newException);
+}
+
 void DebuggableThread::OnException(bool uncaught)
 {
+    if (evaluationMode_) {
+        return;
+    }
     os::memory::LockHolder lock(mutex_);
     state_.OnException(uncaught);
     while (state_.IsPaused()) {
@@ -142,18 +202,27 @@ void DebuggableThread::OnException(bool uncaught)
 
 void DebuggableThread::OnFramePop()
 {
+    if (evaluationMode_) {
+        return;
+    }
     os::memory::LockHolder lock(mutex_);
     state_.OnFramePop();
 }
 
 bool DebuggableThread::OnMethodEntry()
 {
+    if (evaluationMode_) {
+        return false;
+    }
     os::memory::LockHolder lock(mutex_);
     return state_.OnMethodEntry();
 }
 
 void DebuggableThread::OnSingleStep(const PtLocation &location)
 {
+    if (evaluationMode_) {
+        return;
+    }
     os::memory::LockHolder lock(mutex_);
     state_.OnSingleStep(location);
     while (state_.IsPaused()) {

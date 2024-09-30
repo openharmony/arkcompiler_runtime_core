@@ -21,6 +21,7 @@
 #include "types/numeric_id.h"
 
 #include "console_call_type.h"
+#include "tooling/inspector/evaluation/helpers.h"
 #include "tooling/inspector/types/pause_on_exceptions_state.h"
 #include "tooling/inspector/types/property_descriptor.h"
 #include "tooling/inspector/types/remote_object.h"
@@ -93,6 +94,7 @@ public:
     void OnCallRuntimeGetProperties(
         std::function<std::vector<PropertyDescriptor>(PtThread, RemoteObjectId, bool)> &&handler);
     void OnCallRuntimeRunIfWaitingForDebugger(std::function<void(PtThread)> &&handler);
+    void OnCallRuntimeEvaluate(std::function<EvaluationResult(PtThread, const std::string &)> &&handler);
 
 private:
     struct CallFrameInfo {

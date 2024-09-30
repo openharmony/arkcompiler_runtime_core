@@ -15,11 +15,16 @@
 
 package evalPatchFunction;
 
-import { B } from "./interfaces_0.base"
+import { S } from "../local_variable_user_class.base";
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        let b = new B();
-        assert(b.foo(123.321) == 123.321);
+        let a: S = DebuggerAPI.getLocalObject(0) as S;
+
+        const localVar = new S();
+        // Result won't be returned due to non-primitive type.
+        a.s.str = a.s.str + localVar.s.str + '2';
+
+        DebuggerAPI.setLocalObject(0, a);
     }
 }

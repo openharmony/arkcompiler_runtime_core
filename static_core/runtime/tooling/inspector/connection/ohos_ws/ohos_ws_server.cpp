@@ -54,7 +54,7 @@ bool OhosWsServer::Start([[maybe_unused]] uint32_t port)
     succeeded = endpoint_.InitUnixWebSocket(name);
 #endif
     if (succeeded) {
-        LOG(ERROR, DEBUGGER) << "Inspector server listening on " << name;
+        LOG(INFO, DEBUGGER) << "Inspector server listening on " << name;
         return true;
     }
     LOG(ERROR, DEBUGGER) << "Failed to bind Inspector server on " << name;

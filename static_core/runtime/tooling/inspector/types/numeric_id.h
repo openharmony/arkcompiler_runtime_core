@@ -28,6 +28,7 @@
 
 namespace ark::tooling::inspector {
 using BreakpointId = size_t;
+using ExecutionContextId = uint32_t;
 using FrameId = uint32_t;
 using RemoteObjectId = size_t;
 using ScriptId = size_t;

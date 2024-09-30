@@ -15,12 +15,27 @@
 
 package evalPatchFunction;
 
-import { globalVariable } from "./global_primitive.base";
+import {A, B, C} from "../inheritance_0.base"
 
 class evalPatchFunction {
     private static evalPatchFunction() {
-        console.log("Current value: " + globalVariable);
-        const evalGeneratedResult = (globalVariable += 1);
+        let var_a = new A()   
+        var_a.a_foo();
+        var_a.a_x = 10;
+
+        let var_c = new C()   
+        var_c.a_foo();
+        var_c.a_x = 20;
+        var_c.b_foo();
+        var_c.b_x = 30;
+        var_c.c_foo();
+        var_c.c_x = 40;
+
+        let var_b = new B()   
+        var_b.a_foo();
+        var_b.a_x = 50;
+        var_b.b_foo();
+        const evalGeneratedResult = (var_b.b_x = 60);
         return evalGeneratedResult;
     }
 }
