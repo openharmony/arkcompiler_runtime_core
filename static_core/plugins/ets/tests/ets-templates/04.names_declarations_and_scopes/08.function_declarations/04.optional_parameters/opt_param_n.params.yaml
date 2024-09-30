@@ -34,7 +34,7 @@ cases:
 
     - decl: |-
           function foo(e: string = 'abc') {}
-      call: 'foo(null)  // CTE, cannot set null for string type'
+      call: foo(null)  // CTE, cannot set null for string type'
 
     - decl: |-
           function foo(e?: string = 'abc') {} // CTE, ambiguity

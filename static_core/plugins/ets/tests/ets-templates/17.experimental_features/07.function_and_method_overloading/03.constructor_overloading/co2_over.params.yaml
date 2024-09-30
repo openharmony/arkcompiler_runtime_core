@@ -24,6 +24,26 @@ cases:
       tags: negative, compile-only
 
     - decl: |-
+          // override-equivalent signatures, different throws clause
+          class Ex extends Exception {}
+          class A {
+              constructor(p: Number) throws { if (p < 0) throw new Ex() }
+              constructor(v: Double) {}
+          }
+      use: return
+      tags: negative, compile-only
+
+    - decl: |-
+          // override-equivalent signatures, different throws clause
+          class Ex extends Exception {}
+          class A {
+              constructor(p: string) throws { if (p < 0) throw new Ex() }
+              constructor(v: String) {}
+          }
+      use: return
+      tags: negative, compile-only
+
+    - decl: |-
           type B = A
           // override-equivalent signatures
           class Ex extends Exception {}
@@ -74,24 +94,24 @@ cases:
           }
       use: |-
           try {
-              assert new A(new Byte(-1 as byte)).getType() == "Byte"
-              assert new A(new Short(-1 as short)).getType() == "Short"
-              assert new A(new Int(-1 as int)).getType() == "Int"
-              assert new A(new Long(-1 as long)).getType() == "Long"
-              assert new A(new Char(c'A')).getType() == "Char"
-              assert new A(new Boolean(false)).getType() == "Boolean"
-              assert new A(new Float(3.14 as float)).getType() == "Float"
-              assert new A(new Double(3.14)).getType() == "Double"
-              assert new A(-1 as long).getType() == "long"
-              assert new A(-1).getType() == "int"
-              assert new A(-1 as short).getType() == "short"
-              assert new A(-1 as byte).getType() == "byte"
-              assert new A(c'A').getType() == "char"
-              assert new A(false).getType() == "boolean"
-              assert new A(3.14).getType() == "double"
-              assert new A(3.14 as float).getType() == "float"
+              assert(new A(new Byte(-1 as byte)).getType() == "Byte")
+              assert(new A(new Short(-1 as short)).getType() == "Short")
+              assert(new A(new Int(-1 as int)).getType() == "Int")
+              assert(new A(new Long(-1 as long)).getType() == "Long")
+              assert(new A(new Char(c'A')).getType() == "Char")
+              assert(new A(new Boolean(false)).getType() == "Boolean")
+              assert(new A(new Float(3.14 as float)).getType() == "Float")
+              assert(new A(new Double(3.14)).getType() == "Double")
+              assert(new A(-1 as long).getType() == "long")
+              assert(new A(-1).getType() == "int")
+              assert(new A(-1 as short).getType() == "short")
+              assert(new A(-1 as byte).getType() == "byte")
+              assert(new A(c'A').getType() == "char")
+              assert(new A(false).getType() == "boolean")
+              assert(new A(3.14).getType() == "double")
+              assert(new A(3.14 as float).getType() == "float")
           } catch (e) {
-              assert false: "Unexpected exception"
+              assert(false)
           }
 
     - decl: |-
@@ -113,11 +133,11 @@ cases:
           }
       use: |-
           try {
-              assert new A(Color.Red).getType() == "Color"
-              assert new A(Size.L).getType() == "Size"
-              assert new A(Status.go).getType() == "Status"
+              assert(new A(Color.Red).getType() == "Color")
+              assert(new A(Size.L).getType() == "Size")
+              assert(new A(Status.go).getType() == "Status")
           } catch (e) {
-              assert false: "Unexpected exception"
+              assert(false)
           }
 
     - decl: |-
@@ -152,26 +172,26 @@ cases:
           }
       use: |-
           try {
-              assert new A([-1 as byte]).getType() == "byte"
-              assert new A([-1 as short]).getType() == "short"
-              assert new A([-1 as int]).getType() == "int"
-              assert new A([-1 as long]).getType() == "long"
-              assert new A([c'A']).getType() == "char"
-              assert new A([false]).getType() == "boolean"
-              assert new A([3.14 as float]).getType() == "float"
-              assert new A([3.14]).getType() == "double"
-              assert new A([new Byte(-1 as byte)]).getType() == "Byte"
-              assert new A([new Short(-1 as short)]).getType() == "Short"
-              assert new A([new Int(-1)]).getType() == "Int"
-              assert new A([new Long(-1 as long)]).getType() == "Long"
-              assert new A([new Char(c'A')]).getType() == "Char"
-              assert new A([new Boolean(false)]).getType() == "Boolean"
-              assert new A([new Float(3.14 as float)]).getType() == "Float"
-              assert new A([new Double(3.14)]).getType() == "Double"
-              assert new A([new Object()]).getType() == "Object"
-              assert new A(new A[1]).getType() == "A"
+              assert(new A([-1 as byte]).getType() == "byte")
+              assert(new A([-1 as short]).getType() == "short")
+              assert(new A([-1 as int]).getType() == "int")
+              assert(new A([-1 as long]).getType() == "long")
+              assert(new A([c'A']).getType() == "char")
+              assert(new A([false]).getType() == "boolean")
+              assert(new A([3.14 as float]).getType() == "float")
+              assert(new A([3.14]).getType() == "double")
+              assert(new A([new Byte(-1 as byte)]).getType() == "Byte")
+              assert(new A([new Short(-1 as short)]).getType() == "Short")
+              assert(new A([new Int(-1)]).getType() == "Int")
+              assert(new A([new Long(-1 as long)]).getType() == "Long")
+              assert(new A([new Char(c'A')]).getType() == "Char")
+              assert(new A([new Boolean(false)]).getType() == "Boolean")
+              assert(new A([new Float(3.14 as float)]).getType() == "Float")
+              assert(new A([new Double(3.14)]).getType() == "Double")
+              assert(new A([new Object()]).getType() == "Object")
+              assert(new A(new A[1]).getType() == "A")
           } catch (e) {
-              assert false: "Unexpected exception"
+              assert(false)
           }
 
     - decl: |-
@@ -193,13 +213,13 @@ cases:
       use: |-
           try {
               let t: T = [3.14, ""]
-              assert new A(t).getType() == "T"
+              assert(new A(t).getType() == "T")
               let r: R = [3.14, false]
-              assert new A(r).getType() == "R"
+              assert(new A(r).getType() == "R")
               t = [42.0, "xyz"]
-              assert new A(t).getType() == "T"
+              assert(new A(t).getType() == "T")
           } catch (e) {
-              assert false: "Unexpected exception"
+              assert(false)
           }
 
     - decl: |-
@@ -221,15 +241,15 @@ cases:
       use: |-
           try {
               let usn: USN = "abc"
-              assert new A(usn).getType() == "USN"
+              assert(new A(usn).getType() == "USN")
               usn = 42.0
-              assert new A(usn).getType() == "USN"
+              assert(new A(usn).getType() == "USN")
               let usb: USB = new Boolean(true)
-              assert new A(usb).getType() == "USB"
+              assert(new A(usb).getType() == "USB")
               usb = "xyz"
-              assert new A(usb).getType() == "USB"
+              assert(new A(usb).getType() == "USB")
           } catch (e) {
-              assert false: "Unexpected exception"
+              assert(false)
           }
 
     - decl: |-
@@ -257,10 +277,10 @@ cases:
       use: |-
           try {
               let f: FF = fff
-              assert new A(f).getType() == "FF"
-              assert new A(eee).getType() == "EE"
+              assert(new A(f).getType() == "FF")
+              assert(new A(eee).getType() == "EE")
           } catch (e) {
-              assert false: "Unexpected exception"
+              assert(false)
           }
 
     - decl: |-
@@ -286,19 +306,19 @@ cases:
       use: |-
           try {
               let s: S = "ABC"
-              assert new A(s).getType() == "S"
+              assert(new A(s).getType() == "S")
               let sn: SN = "ABC"
-              assert new A(sn).getType() == "SN"
+              assert(new A(sn).getType() == "SN")
               let su: SU = "ABC"
-              assert new A(su).getType() == "SU"
+              assert(new A(su).getType() == "SU")
               let snu: SNU = "ABC"
-              assert new A(snu).getType() == "SNU"
+              assert(new A(snu).getType() == "SNU")
               sn = null
-              assert new A(sn).getType() == "SN"
+              assert(new A(sn).getType() == "SN")
               su = undefined
-              assert new A(su).getType() == "SU"
+              assert(new A(su).getType() == "SU")
               snu = undefined
-              assert new A(snu).getType() == "SNU"
+              assert(new A(snu).getType() == "SNU")
           } catch (e) {
-              assert false: "Unexpected exception"
+              assert(false)
           }
