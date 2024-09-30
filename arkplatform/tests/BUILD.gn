@@ -14,7 +14,6 @@
 import("//arkcompiler/runtime_core/ark_config.gni")
 import("//arkcompiler/runtime_core/arkplatform/arkplatform_config.gni")
 import("//arkcompiler/runtime_core/arkplatform/tests/test_helper.gni")
-import("//arkcompiler/runtime_core/static_vm_config.gni")
 
 host_unittest_action("ArkplatformTest") {
   module_out_path = module_output_path

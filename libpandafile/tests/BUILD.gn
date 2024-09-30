@@ -43,8 +43,13 @@ host_unittest_action("LibPandaFileTest") {
   deps = [
     "$ark_root/assembler:libarkassembler_static",
     "$ark_root/libpandafile:libarkfile_static",
-    "//third_party/googletest:gmock_main",
   ]
+
+  if (ark_standalone_build) {
+    deps += [ "$build_root/third_party_gn/googletest:gmock_main" ]
+  } else {
+    deps += [ "//third_party/googletest:gmock_main" ]
+  }
 
   external_deps = [
     "zlib:libz",

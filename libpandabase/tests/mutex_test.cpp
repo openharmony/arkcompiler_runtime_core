@@ -99,7 +99,7 @@ static void *TestThread5(void *input)
 
 HWTEST_F(MutexTest, RWLockTest, testing::ext::TestSize.Level0)
 {
-    size_t res;
+    size_t res = 0;
     auto *rwlock = new os::memory::RWLock();
     ThreadRWLockArgs arg = {rwlock, &res};
 
