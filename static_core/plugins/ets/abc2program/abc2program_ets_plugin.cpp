@@ -20,6 +20,7 @@
 #include "class_data_accessor.h"
 
 namespace ark::abc2program {
+// CC-OFFNXT(G.FUD.01) project codestyle
 void AbcFileProcessor::GeteTSMetadata()
 {
     LOG(DEBUG, ABC2PROGRAM) << "\n[getting ETS-specific metadata]\n";

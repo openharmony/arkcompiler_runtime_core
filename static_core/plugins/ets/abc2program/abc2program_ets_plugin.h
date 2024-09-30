@@ -16,6 +16,7 @@
 #ifndef ABC2PROGRAM_ETS_PLUGIN_INCLUDED
 #define ABC2PROGRAM_ETS_PLUGIN_INCLUDED
 
+// CC-OFFNXT(G.FUD.01) project codestyle
 void GeteTSMetadata();
 void GetETSMetadata(pandasm::Record *record, const panda_file::File::EntityId &recordId);
 void SetETSAttributes(pandasm::Record *record, const panda_file::File::EntityId &recordId) const;
