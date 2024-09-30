@@ -257,6 +257,8 @@ class TestETS(TestFileBased):
             params=params,
             result_validator=lambda _, _2, rc: self._validate_compiler(rc, test_abc)
         )
+        if fail_kind == FailKind.ES2PANDA_FAIL and report and report.return_code == 0:
+            fail_kind = FailKind.ES2PANDA_NEG_FAIL
         return passed, report, fail_kind
 
     def _validate_compiler(self, return_code: int, output_path: str) -> bool:

@@ -45,6 +45,18 @@ CONST_COMMENT = ["#"]
 TEST_COMMENT_EXPR = re.compile(r"^\s*(?P<test>[^# ]+)?(\s*#\s*(?P<comment>.+))?", re.MULTILINE)
 
 
+def load_test_from_list(test_root: str, line: str, directory: Optional[str] = None) -> Optional[str]:
+    test, _ = get_test_and_comment_from_line(line.strip(" \n"))
+    if test is None:
+        return None
+    extra_dir_check = (directory is None) or (directory is not None and test.startswith(str(directory)))
+    if extra_dir_check:
+        test_file = path.normpath(path.join(test_root, test))
+        if path.exists(test_file):
+            return test_file
+    return None
+
+
 def load_list(test_root: str, test_list_path: str, directory: Optional[str] = None) -> List[str]:
     result: List[str] = []
     if not path.exists(test_list_path):
@@ -52,12 +64,9 @@ def load_list(test_root: str, test_list_path: str, directory: Optional[str] = No
 
     with open(test_list_path, 'r', encoding="utf-8") as file:
         for line in file:
-            test, _ = get_test_and_comment_from_line(line.strip(" \n"))
-            if test is None:
-                continue
-            extra_dir_check = (directory is None) or (directory is not None and test.startswith(str(directory)))
-            if extra_dir_check:
-                result.append(path.normpath(path.join(test_root, test)))
+            test_file = load_test_from_list(test_root, line, directory)
+            if test_file:
+                result.append(test_file)
 
     return result
 
