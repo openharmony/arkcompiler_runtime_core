@@ -191,6 +191,8 @@ public:
     /// @return true if coroutine switch for the current worker is disabled
     virtual bool IsCoroutineSwitchDisabled() = 0;
 
+    virtual bool IsMainWorker(Coroutine *coro) const = 0;
+
 protected:
     /// Create native coroutine context instance (implementation dependent)
     virtual CoroutineContext *CreateCoroutineContext(bool coroHasEntrypoint) = 0;

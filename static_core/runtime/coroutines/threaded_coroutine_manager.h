@@ -67,6 +67,8 @@ public:
         return false;
     };
 
+    bool IsMainWorker(Coroutine *co) const override;
+
 protected:
     bool EnumerateThreadsImpl(const ThreadManager::Callback &cb, unsigned int incMask,
                               unsigned int xorMask) const override;
