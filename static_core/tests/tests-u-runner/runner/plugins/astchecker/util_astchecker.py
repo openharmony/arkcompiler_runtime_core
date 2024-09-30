@@ -36,9 +36,9 @@ class UtilASTChecker:
         WARNING = 'Warning'
 
     class _TestCase:
-        '''
+        """
         Class for storing test case parsed from test file
-        '''
+        """
         def __init__(self, name: Optional[str], test_type: UtilASTChecker._TestType,
                      checks: dict, line: int, col: int, error_file: str = '') -> None:
             self.name = name
@@ -52,9 +52,9 @@ class UtilASTChecker:
             return f'TestCase({self.name}, {self.line}:{self.col}, {self.test_type}, {self.checks}, {self.error_file})'
 
     class _TestCasesList:
-        '''
+        """
         Class for storing test cases parsed from one test file
-        '''
+        """
         def __init__(self, tests_list: List[UtilASTChecker._TestCase]):
             self.tests_list = tests_list
             has_error_tests = False
@@ -66,23 +66,54 @@ class UtilASTChecker:
     def __init__(self) -> None:
         self.regex = re.compile(r'/\*\s*@@\s*(?P<pattern>.*?)\s*\*/', re.DOTALL)
 
-    def create_test_case(self, name: Optional[str], pattern_type: UtilASTChecker._TestType,
+    @staticmethod
+    def create_test_case(name: Optional[str], pattern_type: UtilASTChecker._TestType,
                          pattern: str, line: int, col: int, error_file: str = '') -> UtilASTChecker._TestCase:
+        pattern_parsed = {'error': pattern}
         if pattern_type == UtilASTChecker._TestType.NODE:
             try:
                 pattern_parsed = json.loads(pattern)
             except json.JSONDecodeError as ex:
                 Log.exception_and_raise(_LOGGER, f'TestCase: {name}.\nThrows JSON error: {ex}.\nJSON data: {pattern}')
-        else:
-            pattern_parsed = {'error': pattern}
         return UtilASTChecker._TestCase(name, pattern_type, pattern_parsed, line, col, error_file=error_file)
+
+    @staticmethod
+    def get_match_location(match: re.Match, start: bool = False) -> Tuple[int, int]:
+        """
+        Returns match location in file: line and column (counting from 1)
+        """
+        match_idx = match.start() if start else match.end()
+        line_start_index = match.string[:match_idx].rfind('\n') + 1
+        col = match_idx - line_start_index + 1
+        line = match.string[:match_idx].count('\n') + 1
+        return line, col
+
+    @staticmethod
+    def check_properties(node: dict, properties: dict) -> bool:
+        """
+        Checks if `node` contains all key:value pairs specified in `properties` dict argument
+        """
+        for key, value in properties.items():
+            if node.get(key) != value:
+                return False
+        return True
+
+    @staticmethod
+    def run_error_test(test_file: str, test: _TestCase, actual_error: str) -> bool:
+        file_name = os.path.basename(test_file) if test.error_file == '' else test.error_file
+        actual_errors = []
+        for error_str in actual_error.split('\n'):
+            error_text, error_loc = error_str.rsplit(' ', 1)
+            actual_errors.append((error_text.strip(), error_loc))
+        expected_error = f'{test.checks["error"]}', f'[{file_name}:{test.line}:{test.col}]'
+        return expected_error in actual_errors
 
     def parse_define_statement(self, match: re.Match[str],
                               link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]],
                               link_sources_map: Dict[str, re.Match[str]]) -> Optional[UtilASTChecker._TestCase]:
-        '''
+        """
         Parses `@<id> <pattern-type> <pattern>`
-        '''
+        """
         match_str = re.sub(r'\s+', ' ', match.group('pattern'))[1:].strip()
         sep1 = match_str.find(' ')
         sep2 = match_str.find(' ', sep1 + 1)
@@ -109,9 +140,9 @@ class UtilASTChecker:
     def parse_match_statement(self, match: re.Match[str],
                               link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]],
                               link_sources_map: Dict[str, re.Match[str]]) -> Optional[UtilASTChecker._TestCase]:
-        '''
+        """
         Parses `<pattern-type> <pattern>` and `<id>`
-        '''
+        """
         str_match = match.group('pattern')
         sep = str_match.find(' ')
         if sep == -1:
@@ -140,10 +171,10 @@ class UtilASTChecker:
         return self.create_test_case(None, pattern_type, pattern, line, col)
 
     def parse_match_at_loc_statement(self, match: re.Match[str]) -> UtilASTChecker._TestCase:
-        '''
+        """
         Parses `? <line>:<col> <pattern-type> <pattern>`
         and  `? <file-name>:<line>:<col> <pattern-type> <pattern>`
-        '''
+        """
         match_str = re.sub(r'\s+', ' ', match.group('pattern'))[1:].strip()
         sep1 = match_str.find(' ')
         sep2 = match_str.find(' ', sep1 + 1)
@@ -173,9 +204,9 @@ class UtilASTChecker:
         return self.create_test_case(None, pattern_type, pattern, line, col, error_file=error_file)
 
     def parse_tests(self, file: TextIO) -> UtilASTChecker._TestCasesList:
-        '''
+        """
         Takes .ets file with tests and parses them into a list of TestCases.
-        '''
+        """
         test_text = file.read()
         link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]] = {}
         link_sources_map: Dict[str, re.Match[str]] = {}
@@ -197,20 +228,10 @@ class UtilASTChecker:
 
         return UtilASTChecker._TestCasesList(test_cases)
 
-    def get_match_location(self, match: re.Match, start: bool = False) -> Tuple[int, int]:
-        '''
-        Returns match location in file: line and column (counting from 1)
-        '''
-        match_idx = match.start() if start else match.end()
-        line_start_index = match.string[:match_idx].rfind('\n') + 1
-        col = match_idx - line_start_index + 1
-        line = match.string[:match_idx].count('\n') + 1
-        return line, col
-
     def find_nodes_by_start_location(self, root: dict, line: int, col: int) -> List[dict]:
-        '''
+        """
         Finds all descendants of `root` with location starting at `loc`
-        '''
+        """
 
         nodes = []
         if 'loc' in root and root['loc']['start']['line'] == line and \
@@ -226,15 +247,6 @@ class UtilASTChecker:
 
         return nodes
 
-    def check_properties(self, node: dict, properties: dict) -> bool:
-        '''
-        Checks if `node` contains all key:value pairs specified in `properties` dict argument
-        '''
-        for key, value in properties.items():
-            if node.get(key) != value:
-                return False
-        return True
-
     def run_node_test(self, test: _TestCase, ast: dict) -> bool:
         nodes_by_loc = self.find_nodes_by_start_location(ast, test.line, test.col)
         test_passed = False
@@ -244,25 +256,18 @@ class UtilASTChecker:
                 break
         return test_passed
 
-    def run_error_test(self, test_file: str, test: _TestCase, actual_error: str) -> bool:
-        file_name = os.path.basename(test_file) if test.error_file == '' else test.error_file
-        actual_errors = []
-        for error_str in actual_error.split('\n'):
-            error_text, error_loc = error_str.rsplit(' ', 1)
-            actual_errors.append((error_text.strip(), error_loc))
-        expected_error = f'{test.checks["error"]}', f'[{file_name}:{test.line}:{test.col}]'
-        return expected_error in actual_errors
-
     def run_tests(self, test_file: str, tests: List[_TestCase], ast: dict, error: str = '') -> bool:
-        '''
+        """
         Takes AST and runs tests on it, returns True if all tests passed
-        '''
+        """
         Log.all(_LOGGER, f'Running {len(tests)} tests...')
         failed_tests = 0
+        expected_errors = 0
         for i, test in enumerate(tests):
             if test.test_type == UtilASTChecker._TestType.NODE:
                 test_passed = self.run_node_test(test, ast)
             else:
+                expected_errors += 1
                 test_passed = self.run_error_test(test_file, test, error)
 
             test_name = f'Test {i + 1}' + ('' if test.name is None else f': {test.name}')
@@ -271,6 +276,12 @@ class UtilASTChecker:
             else:
                 Log.all(_LOGGER, f'FAIL: {test_name} in {test_file}')
                 failed_tests += 1
+
+        actual_errors = len(error.split("\n")) if error else 0
+        if expected_errors != actual_errors:
+            failed_tests += 1
+            Log.all(_LOGGER, f'FAIL: {test_file}: number of expected errors {expected_errors} '
+                             f'does not match to number of actual errors {actual_errors}')
 
         if failed_tests == 0:
             Log.all(_LOGGER, 'All tests passed')
