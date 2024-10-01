@@ -23,6 +23,8 @@
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref.h"
 
+#include "plugins/ets/runtime/mem/mpsc_set.h"
+
 namespace ark::mem::ets {
 
 class EtsReferenceProcessor final : public ReferenceProcessor {
@@ -78,11 +80,9 @@ private:
 
     /// Handle fields of references
     template <bool USE_OBJECT_REF>
-    void HandleOtherFields(const BaseClass *cls, const ObjectHeader *object, const ReferenceProcessorT &processor)
-        REQUIRES(weakRefLock_);
+    void HandleOtherFields(const BaseClass *cls, const ObjectHeader *object, const ReferenceProcessorT &processor);
 
-    mutable os::memory::Mutex weakRefLock_;
-    PandaUnorderedSet<ObjectHeader *> weakReferences_ GUARDED_BY(weakRefLock_);
+    mem::MPSCSet<PandaUnorderedSet<ObjectHeader *>> weakReferences_;
     GC *gc_ {nullptr};
     ark::ets::EtsObject *undefinedObject_ {nullptr};
     PandaDeque<RefFinalizer> finalizerQueue_;
@@ -91,9 +91,9 @@ private:
 template <typename Handler>
 void EtsReferenceProcessor::ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler)
 {
-    os::memory::LockHolder lock(weakRefLock_);
-    while (!weakReferences_.empty()) {
-        auto *weakRefObj = weakReferences_.extract(weakReferences_.begin()).value();
+    weakReferences_.FlushSets();
+    while (!weakReferences_.IsEmpty()) {
+        auto *weakRefObj = weakReferences_.Extract();
         ASSERT(ark::ets::EtsClass::FromRuntimeClass(weakRefObj->ClassAddr<Class>())->IsWeakReference());
         auto *weakRef = static_cast<ark::ets::EtsWeakReference *>(ark::ets::EtsObject::FromCoreType(weakRefObj));
         auto *referent = weakRef->GetReferent();

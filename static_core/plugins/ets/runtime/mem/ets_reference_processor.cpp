@@ -73,9 +73,8 @@ void EtsReferenceProcessor::HandleReference(GC *gc, GCMarkingStackType *objectsS
                                             const ObjectHeader *object,
                                             [[maybe_unused]] const ReferenceProcessPredicateT &pred)
 {
-    os::memory::LockHolder lock(weakRefLock_);
     LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
-    weakReferences_.insert(const_cast<ObjectHeader *>(object));
+    weakReferences_.Insert(const_cast<ObjectHeader *>(object));
     HandleOtherFields<false>(cls, object, [gc, objectsStack, object](void *reference) {
         auto *refObject = reinterpret_cast<ObjectHeader *>(reference);
         if (gc->MarkObjectIfNotMarked(refObject)) {
@@ -87,9 +86,8 @@ void EtsReferenceProcessor::HandleReference(GC *gc, GCMarkingStackType *objectsS
 void EtsReferenceProcessor::HandleReference([[maybe_unused]] GC *gc, const BaseClass *cls, const ObjectHeader *object,
                                             const ReferenceProcessorT &processor)
 {
-    os::memory::LockHolder lock(weakRefLock_);
     LOG(DEBUG, REF_PROC) << GetDebugInfoAboutObject(object) << " is added to weak references set for processing";
-    weakReferences_.insert(const_cast<ObjectHeader *>(object));
+    weakReferences_.Insert(const_cast<ObjectHeader *>(object));
     HandleOtherFields<true>(cls, object, processor);
 }
 
@@ -166,8 +164,7 @@ void EtsReferenceProcessor::ProcessReferencesAfterCompaction(const mem::GC::Refe
 
 size_t EtsReferenceProcessor::GetReferenceQueueSize() const
 {
-    os::memory::LockHolder lock(weakRefLock_);
-    return weakReferences_.size();
+    return weakReferences_.Size();
 }
 
 void EtsReferenceProcessor::ProcessFinalizers()
