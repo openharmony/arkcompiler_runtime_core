@@ -270,6 +270,7 @@ static Opcode GetOpcode(size_t instSize)
  * label2:
  * return.void
  */
+// CC-OFFNXT(huge_method[C++], huge_depth[C++]) solid logic
 static std::vector<uint8_t> EmitJmpFwdBwd(size_t n1, size_t n2)
 {
     std::array<std::tuple<size_t, int32_t, int32_t>, 3U> jmps {
@@ -317,6 +318,7 @@ static std::vector<uint8_t> EmitJmpFwdBwd(size_t n1, size_t n2)
 }
 
 /*
+// CC-OFFNXT(G.CMT.04-CPP) false positive
  * Test following control flow:
  *
  * label1:

@@ -128,6 +128,7 @@ public:
     NO_COPY_SEMANTIC(LineNumberProgramProcessor);
     NO_MOVE_SEMANTIC(LineNumberProgramProcessor);
 
+    // CC-OFFNXT(G.FUN.01-CPP, huge_method[C]) big switch case
     void Process()
     {
         handler_->ProcessBegin();

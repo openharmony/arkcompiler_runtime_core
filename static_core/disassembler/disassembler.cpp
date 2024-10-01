@@ -735,6 +735,7 @@ static size_t GetBytecodeInstructionNumber(BytecodeInstruction bcInsFirst, Bytec
     return count;
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 bool Disassembler::LocateTryBlock(const BytecodeInstruction &bcIns, const BytecodeInstruction &bcInsLast,
                                   const panda_file::CodeDataAccessor::TryBlock &tryBlock,
                                   pandasm::Function::CatchBlock *catchBlockPa, LabelTable *labelTable,
@@ -1100,17 +1101,17 @@ std::string Disassembler::ArrayValueToString(const panda_file::ArrayValue &value
         auto res = value.Get<uint8_t>(idx);
         ss << static_cast<unsigned int>(res);
     } else if (type == "i16") {
-        ss << value.Get<int16_t>(idx);
+        ss << (value.Get<int16_t>(idx));
     } else if (type == "u16") {
-        ss << value.Get<uint16_t>(idx);
+        ss << (value.Get<uint16_t>(idx));
     } else if (type == "i32") {
-        ss << value.Get<int32_t>(idx);
+        ss << (value.Get<int32_t>(idx));
     } else if (type == "u32") {
-        ss << value.Get<uint32_t>(idx);
+        ss << (value.Get<uint32_t>(idx));
     } else if (type == "i64") {
-        ss << value.Get<int64_t>(idx);
+        ss << (value.Get<int64_t>(idx));
     } else if (type == "u64") {
-        ss << value.Get<uint64_t>(idx);
+        ss << (value.Get<uint64_t>(idx));
     } else if (type == "f32") {
         ss << value.Get<float>(idx);
     } else if (type == "f64") {
@@ -1734,6 +1735,7 @@ ark::panda_file::SourceLang Disassembler::GetRecordLanguage(panda_file::File::En
     return cda.GetSourceLang().value_or(panda_file::SourceLang::PANDA_ASSEMBLY);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static void TranslateImmToLabel(pandasm::Ins *paIns, LabelTable *labelTable, const uint8_t *insArr,
                                 BytecodeInstruction bcIns, BytecodeInstruction bcInsLast,
                                 panda_file::File::EntityId codeId)

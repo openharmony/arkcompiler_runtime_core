@@ -48,4 +48,23 @@ CodeDataAccessor::CodeDataAccessor(const File &pandaFile, File::EntityId codeId)
     tryBlocksSp_ = sp;
 }
 
+// static
+const uint8_t *CodeDataAccessor::GetInstructions(const File &pf, File::EntityId codeId)
+{
+    auto sp = pf.GetSpanFromId(codeId);
+    uint32_t dataPrefix;
+    // with reading *reinterpret_cast<const uint32_t *>(sp.Data()) unaligned read occurs
+    // according to decompiler memcpy is optimized to a single load
+    std::copy_n(sp.Data(), 4U, reinterpret_cast<uint8_t *>(&dataPrefix));
+    if (UNLIKELY(dataPrefix & 0x80808080)) {
+        helpers::SkipULeb128(&sp);  // num_vregs
+        helpers::SkipULeb128(&sp);  // num_args
+        helpers::SkipULeb128(&sp);  // code_size
+        helpers::SkipULeb128(&sp);  // tries_size
+        return sp.data();
+    }
+
+    return sp.SubSpan(4U).data();
+}
+
 }  // namespace ark::panda_file

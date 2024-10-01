@@ -109,9 +109,11 @@ private:
                            panda_file::File::EntityId codeId);
     LabelTable GetExceptions(pandasm::Function *method, panda_file::File::EntityId methodId,
                              panda_file::File::EntityId codeId) const;
+    // CC-OFFNXT(G.FUN.01) solid logic
     bool LocateTryBlock(const BytecodeInstruction &bcIns, const BytecodeInstruction &bcInsLast,
                         const panda_file::CodeDataAccessor::TryBlock &tryBlock,
                         pandasm::Function::CatchBlock *catchBlockPa, LabelTable *labelTable, size_t tryIdx) const;
+    // CC-OFFNXT(G.FUN.01) solid logic
     bool LocateCatchBlock(const BytecodeInstruction &bcIns, const BytecodeInstruction &bcInsLast,
                           const panda_file::CodeDataAccessor::CatchBlock &catchBlock,
                           pandasm::Function::CatchBlock *catchBlockPa, LabelTable *labelTable, size_t tryIdx,

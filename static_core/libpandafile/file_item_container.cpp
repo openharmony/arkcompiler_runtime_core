@@ -157,6 +157,7 @@ private:
 
 // NOTE(nsizov): make method for items deletion
 template <class T, class C, class I, class P, class E, class... Args>
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 static T *GetOrInsert(C &map, I &items, const P &pos, const E &key, bool isForeign, Args &&...args)
 {
     auto it = map.find(key);

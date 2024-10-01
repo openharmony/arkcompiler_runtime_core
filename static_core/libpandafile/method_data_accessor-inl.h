@@ -256,8 +256,7 @@ inline std::optional<size_t> MethodDataAccessor::GetProfileSize()
     if (isExternal_) {
         // NB! This is a workaround for https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
         // which fails Release builds for GCC 8 and 9.
-        std::optional<size_t> novalue;
-        return novalue;
+        return std::nullopt;
     }
 
     if (profileInfoSp_.data() == nullptr) {

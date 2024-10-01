@@ -18,6 +18,10 @@
 
 #include "file.h"
 #include "file_items.h"
+#include "proto_data_accessor-inl.h"
+#include "method_data_accessor.h"
+#include "class_data_accessor.h"
+#include "debug_data_accessor.h"
 
 #include <string>
 #include <vector>
@@ -87,6 +91,8 @@ public:
 
 private:
     void Extract(const File *pf);
+    std::vector<ParamInfo> EnumerateParameters(const File *pf, ProtoDataAccessor &pda, DebugInfoDataAccessor &dda,
+                                               MethodDataAccessor &mda, ClassDataAccessor &cda);
 
     struct MethodDebugInfo {
         std::string sourceFile;

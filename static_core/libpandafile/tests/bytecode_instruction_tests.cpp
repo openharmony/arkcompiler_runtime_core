@@ -26,6 +26,7 @@ namespace ark::test {
 
 // NOLINTBEGIN(modernize-avoid-c-arrays)
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(BytecodeInstruction, Parse)
 {
     // V4_IMM4
@@ -256,6 +257,7 @@ TEST(BytecodeInstruction, JumpTo)
     EXPECT_EQ(static_cast<uint8_t>(next.GetOpcode()), bytecode[2]);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(BytecodeInstructionSafe, Parse)
 {
     // Positive tests

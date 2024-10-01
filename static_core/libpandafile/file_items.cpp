@@ -76,6 +76,7 @@ static bool WriteIdTaggedValue(Writer *writer, Tag tag, BaseItem *item)
     return WriteTaggedValue(writer, tag, item->GetOffset());
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, huge_cyclomatic_complexity[C++], huge_method[C++]) big switch case
 std::string ItemTypeToString(ItemTypes type)
 {
     switch (type) {

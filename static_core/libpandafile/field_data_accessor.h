@@ -176,6 +176,15 @@ private:
 
     void SkipTypeAnnotations();
 
+    template <class T>
+    inline T GetValueImpl(FieldValue &fieldValue);
+
+    template <class T>
+    inline T GetValueIntegral(FieldValue &fieldValue);
+
+    template <class T>
+    inline T GetValueNonIntegral(FieldValue &fieldValue);
+
     const File &pandaFile_;
     File::EntityId fieldId_;
 

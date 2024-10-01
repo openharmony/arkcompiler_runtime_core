@@ -93,6 +93,7 @@ inline uint32_t ReadULeb128(Span<const uint8_t> *sp)
     return result;
 }
 
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void SkipULeb128(Span<const uint8_t> *sp)
 {
     if ((*sp)[0U] <= leb128::PAYLOAD_MASK) {

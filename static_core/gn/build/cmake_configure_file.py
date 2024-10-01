@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,6 +17,7 @@ import re
 import sys
 import os
 import argparse
+import stat
 
 
 def main():
@@ -78,7 +79,9 @@ def main():
             return file.read()
 
     if not os.path.exists(args.output) or read(args.output) != output:
-        with open(args.output, 'w') as file:
+        flags = os.O_RDWR | os.O_CREAT
+        mode = stat.S_IWUSR | stat.S_IRUSR
+        with os.fdopen(os.open(args.output, flags, mode), 'w') as file:
             file.write(output)
         os.chmod(args.output, os.stat(args.input).st_mode & 0o777)
 
