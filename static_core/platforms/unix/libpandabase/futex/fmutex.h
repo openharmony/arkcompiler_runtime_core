@@ -49,10 +49,15 @@ namespace ark::os::unix::memory::futex {
 #define GET_CURRENT_THREAD ark::os::thread::GetCurrentThreadId()           // NOLINT(cppcoreguidelines-macro-usage)
 #define ATOMIC(type) std::atomic<type>                                     // NOLINT(cppcoreguidelines-macro-usage)
 #define ATOMIC_INT ATOMIC(int)                                             // NOLINT(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02) namespace member
 #define ATOMIC_STORE(addr, val, mem) (addr)->store(val, std::mem)          // NOLINT(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02) namespace member
 #define ATOMIC_LOAD(addr, mem) (addr)->load(std::mem)                      // NOLINT(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02) namespace member
 #define ATOMIC_FETCH_ADD(addr, val, mem) (addr)->fetch_add(val, std::mem)  // NOLINT(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02) namespace member
 #define ATOMIC_FETCH_SUB(addr, val, mem) (addr)->fetch_sub(val, std::mem)  // NOLINT(cppcoreguidelines-macro-usage)
+// CC-OFFNXT(G.PRE.02) namespace member
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ATOMIC_CAS_WEAK(addr, old_val, new_val, mem1, mem2) \
     (addr)->compare_exchange_weak(old_val, new_val, std::mem1, std::mem2)

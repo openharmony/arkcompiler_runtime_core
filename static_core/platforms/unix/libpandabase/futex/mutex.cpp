@@ -179,6 +179,16 @@ void RWLock::WriteLock()
     exclusiveOwner_.store(current_tid, std::memory_order_relaxed);
 }
 
+inline void RWLock::WaitForFutex(int32_t curState)
+{
+    // NOLINTNEXTLINE(hicpp-signed-bitwise)
+    if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0) {
+        if ((errno != EAGAIN) && (errno != EINTR)) {
+            LOG(FATAL, COMMON) << "Futex wait failed!";
+        }
+    }
+}
+
 void RWLock::HandleReadLockWait(int32_t curState)
 {
     // Wait until RWLock WriteLock is unlocked
@@ -187,12 +197,7 @@ void RWLock::HandleReadLockWait(int32_t curState)
         IncrementWaiters();
         // Retry wait until WriteLock not held.
         while (curState == WRITE_LOCKED) {
-            // NOLINTNEXTLINE(hicpp-signed-bitwise)
-            if (futex(GetStateAddr(), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0) {
-                if ((errno != EAGAIN) && (errno != EINTR)) {
-                    LOG(FATAL, COMMON) << "Futex wait failed!";
-                }
-            }
+            WaitForFutex(curState);
             // Atomic with relaxed order reason: mutex synchronization
             curState = state_.load(std::memory_order_relaxed);
         }
@@ -269,12 +274,7 @@ void RWLock::WriteUnlock()
             // curState should be updated with fetched value on fail
             done = state_.compare_exchange_weak(curState, UNLOCKED, std::memory_order_seq_cst);
             if (LIKELY(done)) {
-                // We are doing write unlock, all waiters could be ReadLocks so we need to wake all.
-                // Atomic with seq_cst order reason: mutex synchronization
-                if (waiters_.load(std::memory_order_seq_cst) > 0) {
-                    // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                    futex(GetStateAddr(), FUTEX_WAKE_PRIVATE, WAKE_ALL, nullptr, nullptr, 0);
-                }
+                WakeAllWaiters();
             }
         } else {
             LOG(FATAL, COMMON) << "RWLock WriteUnlock got unexpected state, RWLock is not writelocked?";

@@ -99,6 +99,7 @@ static DWORD mem_select_upper_bound(off_t off)
                : static_cast<DWORD>((static_cast<uoff_t>(off) >> OFFSET_DWORD) & 0xFFFFFFFFL);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 void *mmap([[maybe_unused]] void *addr, size_t len, uint32_t prot, int flags, int fildes, off_t off)
 {
     errno = 0;
@@ -158,6 +159,7 @@ void MmapDeleter(std::byte *ptr, size_t size) noexcept
     }
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t fileOffset, void *hint)
 {
     size_t mapOffset = RoundDown(fileOffset, GetPageSize());

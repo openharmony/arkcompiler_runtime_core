@@ -35,6 +35,7 @@ private:
      * Installed it using "_CrtSetAllocHook", then it will be called every time memory is
      * allocated, reallocated, or freed.
      */
+    // CC-OFFNXT(G.FUN.01) solid logic
     static int PandaAllocHook(int alloctype, void *data, std::size_t size, int blocktype, long request,
                               const unsigned char *filename, int linenumber);
 

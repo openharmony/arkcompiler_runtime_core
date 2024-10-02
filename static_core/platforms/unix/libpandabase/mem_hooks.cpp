@@ -85,13 +85,13 @@ void *PandaHooks::MallocHook(size_t size, const void *caller)
 #ifndef TRACK_INTERNAL_ALLOCATIONS
     if (allocViaStandard_ > MAX_ALLOC_VIA_STANDARD) {
         std::cerr << "Too many usage of standard allocations" << std::endl;
-        abort();
+        abort();  // CC-OFF(G.STD.16) fatal error
     }
 #endif                                 // TRACK_INTERNAL_ALLOCATIONS
     void *result = realMalloc_(size);  // NOLINT(cppcoreguidelines-no-malloc)
     if (UNLIKELY(result == nullptr)) {
         std::cerr << "Malloc error" << std::endl;
-        abort();
+        abort();  // CC-OFF(G.STD.16) fatal error
     }
     return result;
 }
@@ -106,13 +106,13 @@ void *PandaHooks::MemalignHook(size_t alignment, size_t size, const void *caller
 #ifndef TRACK_INTERNAL_ALLOCATIONS
     if (allocViaStandard_ > MAX_ALLOC_VIA_STANDARD) {
         std::cerr << "Too many usage of standard allocations" << std::endl;
-        abort();
+        abort();  // CC-OFF(G.STD.16) fatal error
     }
 #endif  // TRACK_INTERNAL_ALLOCATIONS
     void *result = realMemalign_(alignment, size);
     if (UNLIKELY(result == nullptr)) {
         std::cerr << "Align error" << std::endl;
-        abort();
+        abort();  // CC-OFF(G.STD.16) fatal error
     }
     return result;
 }

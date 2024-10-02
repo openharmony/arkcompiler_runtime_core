@@ -123,7 +123,7 @@ public:
 #if defined(PANDA_TARGET_MOBILE)
         return std::string("/data/local/tmp");
 #else
-        const char *temp = getenv("XDG_RUNTIME_DIR");
+        const char *temp = getenv("XDG_RUNTIME_DIR");  // CC-OFF(G.FUU.01) false positive
         temp = temp != nullptr ? temp : getenv("TMPDIR");
         temp = temp != nullptr ? temp : getenv("TMP");
         temp = temp != nullptr ? temp : getenv("TEMP");

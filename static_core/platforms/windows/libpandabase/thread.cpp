@@ -123,11 +123,6 @@ void ThreadDetach(NativeHandleType pthreadHandle)
     pthread_detach(reinterpret_cast<pthread_t>(pthreadHandle));
 }
 
-void ThreadExit(void *ret)
-{
-    pthread_exit(ret);
-}
-
 void ThreadJoin(NativeHandleType pthreadHandle, void **ret)
 {
     pthread_join(reinterpret_cast<pthread_t>(pthreadHandle), ret);
