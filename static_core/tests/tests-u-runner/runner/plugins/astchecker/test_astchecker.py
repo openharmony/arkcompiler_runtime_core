@@ -15,11 +15,11 @@
 # limitations under the License.
 #
 
+from json import JSONDecoder
 import json
 import logging
-from typing import List, Any
-import re
-
+from typing import List, Any, Tuple
+from runner.logger import Log
 from runner.descriptor import Descriptor
 from runner.test_file_based import TestFileBased
 from runner.enum_types.params import TestEnv
@@ -55,20 +55,47 @@ class TestASTChecker(TestFileBased):
             result_validator=self.es2panda_result_validator
         )
 
-        self.passed = (self.test_cases.has_error_tests and self.fail_kind == FailKind.ES2PANDA_OTHER) ^ passed
+        self.passed = ((self.test_cases.has_error_tests or self.test_cases.has_warning_tests)
+                       and self.fail_kind == FailKind.ES2PANDA_OTHER) ^ passed
         return self
 
+    def handle_error_dump(self, input_string: str) -> Tuple[str, dict]:
+        actual_output = str()
+        errors_list = []
+        not_handled_errors = []
+        lines = input_string.splitlines()
+        for line in lines:
+            if line.startswith("Warning") or line.startswith("SyntaxError") or line.startswith("TypeError"):
+                errors_list.append(line)  # Add the line to the errors list
+            if line.startswith("Error:"):
+                not_handled_errors.append(line)
+
+        errors = "\n".join(errors_list)
+        errors_list.extend(not_handled_errors)
+
+        filtered_lines = [line for line in lines if line not in errors_list]
+        dump = "\n".join(filtered_lines)
+
+        if any(char != '\b' for char in dump):
+            decoder = JSONDecoder()
+            pos = 0
+            result = []
+            obj, pos = decoder.raw_decode(dump, pos)
+            result.append(obj)
+            pos += 1
+            actual_output = " ".join(map(str, result[:pos]))
+
+        return errors, json.loads(json.dumps(actual_output))
+
     def es2panda_result_validator(self, actual_output: str, _: Any, return_code: int) -> bool:
-        ast_end = actual_output.rfind('}')
-        ast = {}
-        if ast_end != -1:
-            ast_str = re.sub(r'\bundefined\b', 'null', actual_output[:ast_end + 1])
-            ast = json.loads(ast_str)
-        error = actual_output[actual_output.rfind('}') + 1:].strip()
+        error = str()
+        try:
+            error, dump = self.handle_error_dump(actual_output)
+        except ValueError as err:
+            Log.exception_and_raise(_LOGGER, f'Output from file: {self.path}.\nThrows JSON error: {err}.')
 
-        passed = self.util.run_tests(self.path, self.test_cases.tests_list, ast, error=error)
+        passed = self.util.run_tests(self.path, self.test_cases, dump, error=error)
 
-        if self.test_cases.has_error_tests:
+        if (self.test_cases.has_error_tests and not self.test_cases.skip_errors):
             return passed and return_code == 1
-
         return passed and return_code == 0
