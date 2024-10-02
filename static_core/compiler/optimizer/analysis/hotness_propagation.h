@@ -245,6 +245,8 @@ private:
         // it:
         if constexpr (!IS_END_BLOCK) {
             ASSERT(pred->GetSuccsBlocks().size() == 1 || pred->IsTryBegin() || pred->IsTryEnd() ||
+                   pred->GetLastInst()->GetOpcode() == Opcode::AddOverflow ||
+                   pred->GetLastInst()->GetOpcode() == Opcode::SubOverflow ||
                    (pred->GetGraph()->IsThrowApplied() && pred->IsEndWithThrow()));
         }
         size_t sumPreds = 0;
