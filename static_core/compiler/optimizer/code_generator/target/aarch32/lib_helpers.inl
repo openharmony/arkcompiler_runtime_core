@@ -18,6 +18,7 @@
 
 // defined in libgcc_s.so
 
+// NOLINTBEGIN(readability-identifier-naming)
 #define AeabiUldivmod __aeabi_uldivmod
 #define AeabiLdivmod __aeabi_ldivmod
 #define AeabiUidivmod __aeabi_uidivmod
@@ -30,6 +31,7 @@
 #define AeabiF2ulz __aeabi_f2ulz
 #define AeabiD2lz __aeabi_d2lz
 #define AeabiD2ulz __aeabi_d2ulz
+// NOLINTEND(readability-identifier-naming)
 
 extern "C" uint64_t AeabiUldivmod(uint64_t numerator, uint64_t denominator);
 extern "C" int64_t AeabiLdivmod(int64_t numerator, int64_t denominator);
