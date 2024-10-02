@@ -19,7 +19,7 @@ function SumInt(value1: int, value2: int): int {
 
 function TaskpoolFuncTestSumInt() {
     let result = await taskpool.execute(SumInt, 10, 20);
-    assert(result == 30);
+    assertEQ(result, 30);
 }
 
 function TaskpoolFuncTestAnd() {
@@ -30,7 +30,7 @@ function TaskpoolFuncTestAnd() {
         return false;
     }
     let result = await taskpool.execute(And, true, true);
-    assert(result == true);
+    assertEQ(result, true);
 }
 
 function TaskpoolFuncTestStrCat() {
@@ -38,7 +38,7 @@ function TaskpoolFuncTestStrCat() {
         return value1 + value2;
     }
     let result = await taskpool.execute(StrCat, "abc", "def");
-    assert(result == "abcdef");
+    assertEQ(result, "abcdef");
 }
 
 function TaskpoolFuncTestStrCat2() {
@@ -47,7 +47,7 @@ function TaskpoolFuncTestStrCat2() {
     }
     let result = await taskpool.execute(StrCat, "abc", "def");
     result = await taskpool.execute(StrCat, "abc", "def");
-    assert(result == "abcdef");
+    assertEQ(result, "abcdef");
 }
 
 function TaskpoolFuncTestStrCat3() {
@@ -58,7 +58,7 @@ function TaskpoolFuncTestStrCat3() {
         return value1 + StrCat(value2, "hello");
     }
     let result = await taskpool.execute(Sum, "abc", "def");
-    assert(result == "abcdefhello");
+    assertEQ(result, "abcdefhello");
 }
 
 function TaskpoolFuncTestArraySum() {
@@ -69,8 +69,8 @@ function TaskpoolFuncTestArraySum() {
         return result;
     }
     let result = (await taskpool.execute(Sum, [1, 2], [3, 4])) as int[];
-    assert(result[0] == 4);
-    assert(result[1] == 6);
+    assertEQ(result[0], 4);
+    assertEQ(result[1], 6);
 }
 
 class A {
@@ -88,22 +88,22 @@ function TaskpoolFuncTestClassFieldsSum() {
         return result;
     }
     let result = (await taskpool.execute(Sum, new A(1, 2), new A(3, 4))) as A;
-    assert(result.a == 4);
-    assert(result.b == 6);
+    assertEQ(result.a, 4);
+    assertEQ(result.b, 6);
 }
 
 function TaskpoolFuncTestSumInt2() {
     let result1 = await taskpool.execute(SumInt, 10, 20);
     let result2 = await taskpool.execute(SumInt, 30, 40);
-    assert(result1 == 30);
-    assert(result2 == 70);
+    assertEQ(result1, 30);
+    assertEQ(result2, 70);
 }
 
 function TaskpoolFuncTestSumInt2SameArguments() {
     let result1 = await taskpool.execute(SumInt, 10, 20);
     let result2 = await taskpool.execute(SumInt, 10, 20);
-    assert(result1 == 30);
-    assert(result2 == 30);
+    assertEQ(result1, 30);
+    assertEQ(result2, 30);
 }
 
 function TaskpoolFuncTestSumAndMulti() {
@@ -114,10 +114,10 @@ function TaskpoolFuncTestSumAndMulti() {
     let result2 = await taskpool.execute(MultiInt, 10, 20);
     let result3 = await taskpool.execute(SumInt, 10, 30);
     let result4 = await taskpool.execute(MultiInt, 20, 20);
-    assert(result1 == 30);
-    assert(result2 == 200);
-    assert(result3 == 40);
-    assert(result4 == 400);
+    assertEQ(result1, 30);
+    assertEQ(result2, 200);
+    assertEQ(result3, 40);
+    assertEQ(result4, 400);
 }
 
 function main(): int {

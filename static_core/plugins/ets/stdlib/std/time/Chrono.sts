@@ -15,8 +15,15 @@
 
 package std.time;
 
-
 export final class Chrono {
+    /// Count of nanoseconds in 1 millisecond
+    public static readonly NS_PER_MS: long = 1000000;
+
     // now() in nanoseconds
     public static native nanoNow(): long;
+
+    /**
+     * @returns cpu time in nanoseconds
+     */
+    public static native getCpuTime(): long;
 }

@@ -18,10 +18,7 @@ package std.core;
 /**
  * @class Represents an error that occurs when assertion fails.
  */
-
 export class AssertionError extends Error {
-    readonly tmp_console = new Console();
-
     //NOTE(kirill-mitkin): Used by frontend
     constructor(message: String) {
         this(message, undefined)
@@ -29,7 +26,7 @@ export class AssertionError extends Error {
 
     constructor(message?: String, options?: ErrorOptions) {
         super("AssertionError", message, options)
-        this.tmp_console.log(message!);
+        console.log(message!);
     }
 }
 

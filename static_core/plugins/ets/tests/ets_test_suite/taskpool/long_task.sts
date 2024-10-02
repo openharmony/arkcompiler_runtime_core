@@ -13,33 +13,24 @@
  * limitations under the License.
  */
 
-function TaskpoolLongTaskTest() {
-    let Sum = (): int => {
-        return 10 + 20;
-    }
-    let task = new taskpoolLongTask(Sum);
-    let result = await taskpool.execute(task);
-    assert(result == 30);
-}
-
-function TaskpoolLongTaskTestDoubleExecution() {
-    let Sum = (): int => {
-        return 10 + 20;
-    }
-    let task = new taskpoolLongTask(Sum);
-    taskpool.execute(task);
-    let isErrorOccurred = false;
-    try {
-        taskpool.execute(task);
-    } catch (e: Error) {
-        assert(e.message == "taskpool:: The long task can only be executed once");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
+function sumFunc(): int {
+    return (() => 10)() + (() => 20)();
 }
 
 function main(): int {
-    TaskpoolLongTaskTest();
-    TaskpoolLongTaskTestDoubleExecution();
-    return 0;
+    let longTaskTestsuite = new ArkTestsuite("taskpool.LongTask");
+    longTaskTestsuite.addTest("ExecuteTest", () =>
+    {
+        let task = new taskpoolLongTask(sumFunc);
+        let result = await taskpool.execute(task);
+        assertEQ(result, 30);
+    });
+    longTaskTestsuite.addTest("DoubleExecutionTest", (): void throws =>
+    {
+        let task = new taskpoolLongTask(sumFunc);
+        taskpool.execute(task);
+        expectError(() => { taskpool.execute(task) },
+                    new Error("taskpool:: The long task can only be executed once"));
+    });
+    return longTaskTestsuite.run();
 }

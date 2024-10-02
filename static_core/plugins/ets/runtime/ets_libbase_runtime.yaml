@@ -1394,77 +1394,7 @@ intrinsics:
     signature:
       ret: i64
       args: []
-    impl: ark::ets::intrinsics::GenerateTaskId
-
-  - name: TaskpoolTaskSubmitted
-    space: ets
-    class_name: escompat.taskpool
-    method_name: taskSubmitted
-    static: true
-    signature:
-      ret: void
-      args: [i64]
-    impl: ark::ets::intrinsics::TaskpoolTaskSubmitted
-
-  - name: TaskpoolGroupSubmitted
-    space: ets
-    class_name: escompat.taskpool
-    method_name: taskGroupSubmitted
-    static: true
-    signature:
-      ret: void
-      args: [i64, i64]
-    impl: ark::ets::intrinsics::TaskpoolGroupSubmitted
-
-  - name: TaskpoolTaskStarted
-    space: ets
-    class_name: escompat.taskpool
-    method_name: taskStarted
-    static: true
-    signature:
-      ret: u1
-      args: [i64, i64]
-    impl: ark::ets::intrinsics::TaskpoolTaskStarted
-
-  - name: TaskpoolTaskFinished
-    space: ets
-    class_name: escompat.taskpool
-    method_name: taskFinished
-    static: true
-    signature:
-      ret: u1
-      args: [i64, i64]
-    impl: ark::ets::intrinsics::TaskpoolTaskFinished
-
-  - name: TaskpoolCancelTask
-    space: ets
-    class_name: escompat.taskpool
-    method_name: cancelImpl
-    static: true
-    signature:
-      ret: void
-      args: [i64, i64]
-    impl: ark::ets::intrinsics::TaskpoolCancelTask
-
-  - name: TaskpoolCancelGroup
-    space: ets
-    class_name: escompat.taskpool
-    method_name: cancelGroupImpl
-    static: true
-    signature:
-      ret: void
-      args: [i64]
-    impl: ark::ets::intrinsics::TaskpoolCancelGroup
-
-  - name: TaskpoolIsTaskCancel
-    space: ets
-    class_name: escompat.taskpoolTask
-    method_name: isCancel
-    static: true
-    signature:
-      ret: u1
-      args: []
-    impl: ark::ets::intrinsics::TaskpoolIsTaskCanceled
+    impl: ark::ets::intrinsics::taskpool::GenerateTaskId
 
   - name: TaskpoolGenerateGroupId
     space: ets
@@ -1474,7 +1404,7 @@ intrinsics:
     signature:
       ret: i64
       args: []
-    impl: ark::ets::intrinsics::GenerateGroupId
+    impl: ark::ets::intrinsics::taskpool::GenerateGroupId
 
   - name: TaskpoolGenerateSequenceRunnerId
     space: ets
@@ -1484,7 +1414,7 @@ intrinsics:
     signature:
       ret: i64
       args: []
-    impl: ark::ets::intrinsics::GenerateSeqRunnerId
+    impl: ark::ets::intrinsics::taskpool::GenerateSeqRunnerId
 
 ###################
 # std.time.Chrono #
@@ -1499,6 +1429,17 @@ intrinsics:
       ret: i64
       args: []
     impl: ark::intrinsics::NanoTime
+    clear_flags: [ require_state, runtime_call, can_throw ]
+  
+  - name: StdTimeChronoGetCpuTime
+    space: ets
+    class_name: std.time.Chrono
+    method_name: getCpuTime
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::ChronoGetCpuTime
     clear_flags: [ require_state, runtime_call, can_throw ]
 
 ##################
@@ -4877,3 +4818,107 @@ intrinsics:
         - i64
         - std.core.Object
     impl: ark::ets::intrinsics::DebuggerAPISetLocalObject
+
+###############################
+# escompat.ConcurrencyHelpers #
+###############################
+
+  - name: escompatConcurrencyHelpersMutexCreate
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: mutexCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsMutexCreate
+
+  - name: escompatConcurrencyHelpersMutexLock
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: mutexLock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexLock
+
+  - name: escompatConcurrencyHelpersMutexUnlock
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: mutexUnlock
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsMutexUnlock
+
+  - name: escompatConcurrencyHelpersEventCreate
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: eventCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsEventCreate
+
+  - name: escompatConcurrencyHelpersEventWait
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: eventWait
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventWait
+
+  - name: escompatConcurrencyHelpersEventFire
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: eventFire
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::EtsEventFire
+
+  - name: escompatConcurrencyHelpersCondVarCreate
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: condVarCreate
+    static: true
+    signature:
+      ret: std.core.Object
+      args: []
+    impl: ark::ets::intrinsics::EtsCondVarCreate
+
+  - name: escompatConcurrencyHelpersCondVarWait
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: condVarWait
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarWait
+
+  - name: escompatConcurrencyHelpersCondVarNotifyOne
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: condVarNotifyOne
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyOne
+
+  - name: escompatConcurrencyHelpersCondVarNotifyAll
+    space: ets
+    class_name: escompat.ConcurrencyHelpers
+    method_name: condVarNotifyAll
+    static: true
+    signature:
+      ret: void
+      args: [ std.core.Object, std.core.Object ]
+    impl: ark::ets::intrinsics::EtsCondVarNotifyAll

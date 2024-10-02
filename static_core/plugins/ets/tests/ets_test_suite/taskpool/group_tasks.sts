@@ -21,190 +21,152 @@ function returnDef(): string {
     return (() => "de")() + (() => "f")();
 }
 
-function TaskpoolTaskGroupTest() {
-    let g = new taskpoolTaskGroup("g1");
-    assert(g.name == "g1");
-    let t1 = new taskpoolTask(returnAbc);
-    let t2 = new taskpoolTask(returnDef);
-    g.addTask(t1);
-    g.addTask(t2);
-    let res = await taskpool.execute(g);
-    assert(res[0] == "abc");
-    assert(res[1] == "def");
-    assert(g.name == "g1");
-}
-
-function TaskpoolTaskGroupTestExecuteSeveral() {
-    let g1 = new taskpoolTaskGroup();
-    let g2 = new taskpoolTaskGroup();
-    let g3 = new taskpoolTaskGroup();
-    // Group 1
-    let t1 = new taskpoolTask(returnAbc);
-    let t2 = new taskpoolTask(returnDef);
-    g1.addTask(t1);
-    g1.addTask(t2);
-    g1.addTask(returnAbc);
-    // Group 2
-    g2.addTask(returnDef);
-    g2.addTask(returnAbc);
-    // Execute group 1
-    let p1 = taskpool.execute(g1);
-    // Group 3
-    g3.addTask(returnAbc);
-    g3.addTask(new taskpoolTask(returnDef));
-    // Execute group 3 and group 2
-    let p3 = taskpool.execute(g3);
-    let p2 = taskpool.execute(g2);
-    // await result for all groups
-    let res1 = await p1;
-    let res2 = await p2;
-    let res3 = await p3;
-    // Asserts for group 1
-    assert(res1[0] == "abc");
-    assert(res1[1] == "def");
-    assert(res1[2] == "abc");
-    // Asserts for group 2
-    assert(res2[0] == "def");
-    assert(res2[1] == "abc");
-    // Asserts for group 3
-    assert(res3[0] == "abc");
-    assert(res3[1] == "def");
-}
-
-function TaskpoolTaskGroupTestCancelNonStartedGroup() {
-    let g = new taskpoolTaskGroup();
-    g.addTask(returnAbc);
-    g.addTask(returnDef);
-    let isErrorOccurred = false;
-    try {
-        taskpool.cancel(g);
-        taskpool.execute(g);
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: taskGroup is not executed or has been executed");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolTaskGroupTestCancelExecutingGroup() {
-    let g = new taskpoolTaskGroup();
-    g.addTask(returnAbc);
-    g.addTask(returnDef);
-    let p = taskpool.execute(g);
-    try {
-        taskpool.cancel(g);
-    } catch(e: Error) {
-        assert(e.toString() == "Error: taskpool:: taskGroup is not executed or has been executed");
-        return;
-    }
-    let isErrorOccurred = false;
-    try {
-        await p;
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: taskGroup has been canceled");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolTaskGroupTestCancelExecutedGroup() {
-    let g = new taskpoolTaskGroup();
-    g.addTask(returnAbc);
-    g.addTask(returnDef);
-    let isErrorOccurred = false;
-    try {
-        await taskpool.execute(g);
-        taskpool.cancel(g);
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: taskGroup is not executed or has been executed");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolTaskGroupTestAddExecutedTask() {
-    let g = new taskpoolTaskGroup();
-    let t = new taskpoolTask(returnAbc);
-    taskpool.execute(t);
-    let isErrorOccurred = false;
-    try {
-        g.addTask(t);
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolTaskGroupTestAddLongTask() {
-    let g = new taskpoolTaskGroup();
-    let t = new taskpoolLongTask(returnAbc);
-    let isErrorOccurred = false;
-    try {
-        g.addTask(t);
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: The interface does not support the long task");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolTaskGroupTestAddTaskFromAnotherGroup() {
-    let g1 = new taskpoolTaskGroup();
-    let t1 = new taskpoolTask(returnAbc);
-    g1.addTask(t1);
-    let g2 = new taskpoolTaskGroup();
-    let t2 = new taskpoolTask(returnDef);
-    g2.addTask(t2);
-    let isErrorOccurred = false;
-    try {
-        g1.addTask(t2);
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: taskGroup cannot add groupTask");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolTaskGroupTestAddTaskTwiceToOneGroup() {
-    let g1 = new taskpoolTaskGroup();
-    let t1 = new taskpoolTask(returnAbc);
-    g1.addTask(t1);
-    let isErrorOccurred = false;
-    try {
-        g1.addTask(t1);
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: taskGroup cannot add groupTask");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolTaskGroupTestAddTaskFromSeqRunner() {
-    let group = new taskpoolTaskGroup();
-    let task = new taskpoolTask(returnAbc);
-    let runner = new taskpoolSequenceRunner(); 
-    runner.execute(task);
-    let isErrorOccurred = false;
-    try {
-        group.addTask(task);
-    } catch(e: Error) {
-        isErrorOccurred = true;
-        assert(e.message == "taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
-    }
-    assert(isErrorOccurred);
-}
-
 function main(): int {
-    TaskpoolTaskGroupTest();
-    TaskpoolTaskGroupTestExecuteSeveral();
-    TaskpoolTaskGroupTestCancelNonStartedGroup();
-    TaskpoolTaskGroupTestCancelExecutingGroup();
-    TaskpoolTaskGroupTestCancelExecutedGroup();
-    TaskpoolTaskGroupTestAddExecutedTask();
-    TaskpoolTaskGroupTestAddLongTask();
-    TaskpoolTaskGroupTestAddTaskFromAnotherGroup();
-    TaskpoolTaskGroupTestAddTaskTwiceToOneGroup();
-    TaskpoolTaskGroupTestAddTaskFromSeqRunner();
-    return 0;
+    let taskGroupTestsuite = new ArkTestsuite("taskpool.TaskGroup");
+    taskGroupTestsuite.addTest("RunOneGroupTest", () =>
+    {
+        let g2 = new taskpoolTaskGroup("g2");
+        assertEQ(g2.name, "g2");
+        let t1 = new taskpoolTask(returnAbc);
+        let t2 = new taskpoolTask(returnDef);
+        g2.addTask(t1);
+        g2.addTask(t2);
+        let res2 = await taskpool.execute(g2);
+        assertEQ(res2[0], "abc");
+        assertEQ(res2[1], "def");
+        assertEQ(g2.name, "g2");
+        // Run group without tasks
+        let g0 = new taskpoolTaskGroup("g0");
+        let res0 = await taskpool.execute(g0);
+        assertEQ(res0.length, 0);
+        assertEQ(g0.name, "g0");
+    });
+    taskGroupTestsuite.addTest("RunSeveralGroupsTest", () =>
+    {
+        let g1 = new taskpoolTaskGroup();
+        let g2 = new taskpoolTaskGroup();
+        let g3 = new taskpoolTaskGroup();
+        // Group 1
+        let t1 = new taskpoolTask(returnAbc);
+        let t2 = new taskpoolTask(returnDef);
+        g1.addTask(t1);
+        g1.addTask(t2);
+        g1.addTask(returnAbc);
+        // Group 2
+        g2.addTask(returnDef);
+        g2.addTask(returnAbc);
+        // Execute group 1
+        let p1 = taskpool.execute(g1);
+        // Group 3
+        g3.addTask(returnAbc);
+        g3.addTask(new taskpoolTask(returnDef));
+        // Execute group 3 and group 2
+        let p3 = taskpool.execute(g3);
+        let p2 = taskpool.execute(g2);
+        // await result for all groups
+        let res1 = await p1;
+        let res3 = await p3;
+        let res2 = await p2;
+        // Asserts for group 1
+        assertEQ(res1[0], "abc");
+        assertEQ(res1[1], "def");
+        assertEQ(res1[2], "abc");
+        assertEQ(t1.isDone(), true);
+        assertEQ(t2.isDone(), true);
+        // Asserts for group 2
+        assertEQ(res2[0], "def");
+        assertEQ(res2[1], "abc");
+        // Asserts for group 3
+        assertEQ(res3[0], "abc");
+        assertEQ(res3[1], "def");
+    });
+    taskGroupTestsuite.addTest("CancelNonStartedGroupTest", (): void throws =>
+    {
+        let g = new taskpoolTaskGroup();
+        g.addTask(returnAbc);
+        g.addTask(returnDef);
+        expectError(() => {
+            taskpool.cancel(g);
+            taskpool.execute(g);
+        }, new Error("taskpool:: taskGroup is not executed or has been executed"));
+    });
+    taskGroupTestsuite.addTest("CancelExecutingGroupTest", (): void throws =>
+    {
+        let g = new taskpoolTaskGroup();
+        g.addTask(returnAbc);
+        g.addTask(returnDef);
+        let p = taskpool.execute(g);
+        try {
+            taskpool.cancel(g);
+        } catch(e: Error) {
+            assertEQ(e.message, "taskpool:: taskGroup is not executed or has been executed");
+            return;
+        }
+        expectError(() => { await p },
+                    new Error("taskpool:: taskGroup has been canceled"));
+    });
+    taskGroupTestsuite.addTest("CancelExecutedGroupTest", (): void throws =>
+    {
+        let g = new taskpoolTaskGroup();
+        g.addTask(returnAbc);
+        g.addTask(returnDef);
+        expectError(() => {
+            await taskpool.execute(g);
+            // Group tasks finished, so 'cancel' should produce the Error
+            taskpool.cancel(g);
+        }, new Error("taskpool:: taskGroup is not executed or has been executed"));
+    });
+    taskGroupTestsuite.addTest("AddExecutedTaskTest", (): void throws =>
+    {
+        let g = new taskpoolTaskGroup();
+        let expectedError = new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
+        // Executed task
+        let task = new taskpoolTask(returnAbc);
+        taskpool.execute(task);
+        expectError(() => { g.addTask(task) }, expectedError);
+        // Executed task via SequenceRunner
+        let runnerTask = new taskpoolTask(returnAbc);
+        let runner = new taskpoolSequenceRunner(); 
+        runner.execute(runnerTask);
+        expectError(() => { g.addTask(runnerTask) }, expectedError);
+    });
+    taskGroupTestsuite.addTest("AddLongTaskTest", (): void throws =>
+    {
+        let g = new taskpoolTaskGroup();
+        let t = new taskpoolLongTask(returnAbc);
+        expectError(() => { g.addTask(t) },
+                    new Error("taskpool:: The interface does not support the long task"));
+    });
+    taskGroupTestsuite.addTest("AddTaskFromGroupTest", (): void throws =>
+    {
+        let g1 = new taskpoolTaskGroup();
+        let t1 = new taskpoolTask(returnAbc);
+        g1.addTask(t1);
+        let g2 = new taskpoolTaskGroup();
+        let t2 = new taskpoolTask(returnDef);
+        g2.addTask(t2);
+        let expectedError = new Error("taskpool:: taskGroup cannot add groupTask");
+        // Add the same task
+        expectError(() => { g1.addTask(t1) }, expectedError);
+        // Add task from another group
+        expectError(() => { g1.addTask(t2) }, expectedError);
+    });
+    taskGroupTestsuite.addTest("AddDependentTaskTest", (): void throws =>
+    {
+        let task1 = new taskpoolTask(returnAbc);
+        let task2 = new taskpoolTask(returnAbc);
+        task1.addDependency(task2);
+        let taskGroup = new taskpoolTaskGroup();
+        expectError(() => { taskGroup.addTask(task1) }, new Error("taskpool:: dependent task not allowed."));
+    });
+    taskGroupTestsuite.addTest("AddDependencyForGroupTaskTest", (): void throws =>
+    {
+        let task1 = new taskpoolTask(returnAbc);
+        let taskGroup = new taskpoolTaskGroup();
+        taskGroup.addTask(task1);
+        let task2 = new taskpoolTask(returnAbc);
+        expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: groupTask cannot addDependency"));
+        expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: groupTask cannot be relied on"));
+    });
+    return taskGroupTestsuite.run();
 }
