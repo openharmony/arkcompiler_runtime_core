@@ -26,11 +26,22 @@ from pathlib import Path
 from types import TracebackType
 from typing import Any, Final, Generator, Generic, Type, TypeVar
 
+# CC-OFFNXT(warning_suppression) Pylint warning suppression.
 from _pytest import nodes  # pylint:disable=protected-access
+
+# CC-OFFNXT(warning_suppression) Pylint warning suppression.
 from _pytest.capture import CaptureManager  # pylint:disable=protected-access
+
+# CC-OFFNXT(warning_suppression) Pylint warning suppression.
 from _pytest.config import Config, UsageError, hookimpl  # pylint:disable=protected-access
+
+# CC-OFFNXT(warning_suppression) Pylint warning suppression.
 from _pytest.config.argparsing import Parser  # pylint:disable=protected-access
+
+# CC-OFFNXT(warning_suppression) Pylint warning suppression.
 from _pytest.main import Session  # pylint:disable=protected-access
+
+# CC-OFFNXT(warning_suppression) Pylint warning suppression.
 from _pytest.stash import StashKey  # pylint:disable=protected-access
 from pytest import OptionGroup
 from rich import get_console, reconfigure
@@ -92,11 +103,17 @@ def _clean_option_init(group: OptionGroup):
     if not parser:
         return
     remove = [o.dest for o in group.options]
+
+    # CC-OFFNXT(warning_suppression) Pylint warning suppression.
+    ininames = parser._ininames  # pylint:disable=protected-access
+    # CC-OFFNXT(warning_suppression) Pylint warning suppression.
+    inidict = parser._inidict  # pylint:disable=protected-access
+
     for dest in remove:
-        if dest in parser._ininames:  # pylint:disable=protected-access
-            parser._ininames.remove(dest)  # pylint:disable=protected-access
-        if dest in parser._inidict:  # pylint:disable=protected-access
-            del parser._inidict[dest]  # pylint:disable=protected-access
+        if dest in ininames:
+            ininames.remove(dest)
+        if dest in inidict:
+            del inidict[dest]
         for o in group.options:
             if dest == o.dest:
                 group.options.remove(o)
@@ -222,6 +239,7 @@ class LogCaptureHandler(ExtRichHandler):
         self.records = []
         self.console.file = StringIO()
 
+    # CC-OFFNXT(G.NAM.01) This is override method of base class logging.Handler.handleError.
     def handleError(self, _: logging.LogRecord) -> None:
         if logging.raiseExceptions:
             e: BaseException | None = sys.exc_info()[1]
@@ -509,7 +527,7 @@ class _RichLoggingStreamHandler(ExtRichHandler):
                 self._section_name_was_shown = True
             super().emit(log_record)
 
-    # override the logging.Handler.handleError method
+    # CC-OFFNXT(G.NAM.01) This is override method of base class logging.Handler.handleError.
     def handleError(self, _: logging.LogRecord) -> None:
         pass
 
@@ -521,6 +539,6 @@ class _RichLoggingNullHandler(ExtRichHandler):
     def reset(self):
         pass
 
-    # override the logging.Handler.handleError method
+    # CC-OFFNXT(G.NAM.01) This is override method of base class logging.Handler.handleError.
     def handleError(self, _: logging.LogRecord):
         pass

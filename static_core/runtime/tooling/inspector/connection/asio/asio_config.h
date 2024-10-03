@@ -18,13 +18,9 @@
 
 #include "ws_logger.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 #include "websocketpp/config/asio_no_tls.hpp"
 #include "websocketpp/logger/levels.hpp"
 #include "websocketpp/transport/asio/endpoint.hpp"
-#pragma GCC diagnostic pop
 
 namespace ark::tooling::inspector {
 // NOLINTBEGIN(readability-identifier-naming)
