@@ -91,7 +91,6 @@ public:
         loadedHooks->Paused(reason);
     }
 
-    // CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
     void Exception(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *exceptionObject,
                    Method *catchMethod, const PtLocation &catchLocation) override
     {
@@ -131,7 +130,6 @@ public:
         loadedHooks->PropertyAccess(thread, method, location, object, property);
     }
 
-    // CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
     void PropertyModification(PtThread thread, Method *method, const PtLocation &location, ObjectHeader *object,
                               PtProperty property, VRegValue newValue) override
     {
