@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 import argparse
-import logging
 
 parser = argparse.ArgumentParser(description="Sampler trace test")
 parser.add_argument("--file", type=str)
@@ -36,6 +35,6 @@ with open(file_name, 'r') as my_file:
         if not string in content:
             ALL_TRACES_FOUND = False
     if not ALL_TRACES_FOUND:
-        logging.error("Actual stack trace")
-        logging.error(content)
+        print("Actual stack trace")
+        print(content)
         raise Exception("Not all native traces found")

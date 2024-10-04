@@ -21,21 +21,14 @@ from typing import List, Optional, Union
 
 from cdp import debugger, runtime
 
-
-def create_pattern():
-    """
-    Examples:
-        function main(): int {
-            let a: int = 100;    //#BP{}
-            let b: int = a + 10; //  #BP{label}
-            console.log(a + 1)   //  # BP
-            return a;            // #BP {}
-        }
-    """
-    return re.compile(r"//\s+#\s*(?P<br>BP\s*(\{(?P<br_label>.*?)\})?)\s*$")
-
-
-BREAKPOINT_PATTERN = create_pattern()
+BREAKPOINT_PATTERN = re.compile(r"//\s+#\s*(?P<br>BP\s*(\{(?P<br_label>.*?)\})?)\s*$")
+# Examples:
+# >>>  function main(): int {
+# >>>    let a: int = 100;    //#BP{}
+# >>>    let b: int = a + 10; //  #BP{label}
+# >>>    console.log(a + 1)   //  # BP
+# >>>    return a;            // #BP {}
+# >>>  }
 
 
 @dataclass
