@@ -23,3 +23,19 @@ panda_ets_add_gtest(
             "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
     DEPS_TARGETS etsstdlib
 )
+
+if (PANDA_TARGET_ARM32)
+    return()
+endif()
+
+panda_ets_add_gtest(
+    NO_CORES
+    NAME etsnative_library_path_test
+    SOURCES etsnative_library_path_test.cpp
+    LIBRARIES etsnative
+    SANITIZERS ${PANDA_SANITIZERS_LIST}
+    CUSTOM_PRERUN_ENVIRONMENT
+            "ARK_ETS_STDLIB_PATH=${PANDA_BINARY_ROOT}/plugins/ets/etsstdlib.abc"
+            "ARK_ETS_LIBRARY_PATH=${PANDA_BINARY_ROOT}/plugins/ets/tests/napi/lib"
+    DEPS_TARGETS etsstdlib etsnapi_lib
+)

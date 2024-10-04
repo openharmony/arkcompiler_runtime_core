@@ -452,7 +452,8 @@ typedef enum {
     ETS_GC_TRIGGER_TYPE,
     ETS_GC_TYPE,
     ETS_RUN_GC_IN_PLACE,
-    ETS_INTERPRETER_TYPE
+    ETS_INTERPRETER_TYPE,
+    ETS_NATIVE_LIBRARY_PATH
 } EtsOptionType;
 
 typedef struct EtsVMOption {

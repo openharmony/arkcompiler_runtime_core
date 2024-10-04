@@ -15,9 +15,34 @@
 
 #include "plugins/ets/runtime/ets_native_library_provider.h"
 
+#include "ets_native_library.h"
+#include "include/mem/panda_containers.h"
+#include "include/mem/panda_string.h"
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 
 namespace ark::ets {
+
+namespace {
+
+Expected<EtsNativeLibrary, os::Error> LoadFromPath(const PandaVector<PandaString> &pathes, const PandaString &name)
+{
+    if (name.find('/') == std::string::npos) {
+        for (const auto &path : pathes) {
+            if (path.empty()) {
+                continue;
+            }
+            PandaStringStream s;
+            s << path << '/' << name;
+            if (auto loadRes = EtsNativeLibrary::Load(s.str())) {
+                return loadRes;
+            }
+        }
+    }
+    return EtsNativeLibrary::Load(name);
+}
+
+}  // namespace
+
 std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const PandaString &name)
 {
     {
@@ -30,7 +55,7 @@ std::optional<std::string> NativeLibraryProvider::LoadLibrary(EtsEnv *env, const
         }
     }
 
-    auto loadRes = EtsNativeLibrary::Load(name);
+    auto loadRes = LoadFromPath(GetLibraryPath(), name);
     if (!loadRes) {
         return loadRes.Error().ToString();
     }
@@ -72,4 +97,23 @@ void *NativeLibraryProvider::ResolveSymbol(const PandaString &name) const
 
     return nullptr;
 }
+
+PandaVector<PandaString> NativeLibraryProvider::GetLibraryPath() const
+{
+    os::memory::ReadLockHolder lock(lock_);
+    return libraryPath_;
+}
+
+void NativeLibraryProvider::SetLibraryPath(const PandaVector<PandaString> &pathes)
+{
+    os::memory::WriteLockHolder lock(lock_);
+    libraryPath_ = pathes;
+}
+
+void NativeLibraryProvider::AddLibraryPath(const PandaString &path)
+{
+    os::memory::WriteLockHolder lock(lock_);
+    libraryPath_.emplace_back(path);
+}
+
 }  // namespace ark::ets

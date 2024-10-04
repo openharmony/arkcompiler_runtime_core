@@ -16,6 +16,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_ETS_NATIVE_LIBRARY_PROVIDER_H_
 
+#include <string>
 #include "libpandabase/os/mutex.h"
 #include "plugins/ets/runtime/ets_native_library.h"
 #include "plugins/ets/runtime/napi/ets_napi.h"
@@ -33,9 +34,14 @@ public:
     std::optional<std::string> LoadLibrary(EtsEnv *env, const PandaString &name);
     void *ResolveSymbol(const PandaString &name) const;
 
+    PandaVector<PandaString> GetLibraryPath() const;
+    void SetLibraryPath(const PandaVector<PandaString> &pathes);
+    void AddLibraryPath(const PandaString &path);
+
 private:
     mutable os::memory::RWLock lock_;
     PandaSet<EtsNativeLibrary> libraries_ GUARDED_BY(lock_);
+    PandaVector<PandaString> libraryPath_ GUARDED_BY(lock_);
 };
 }  // namespace ark::ets
 

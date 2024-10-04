@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+#include "napi/ets_napi.h"
 #include "plugins/ets/runtime/napi/ets_napi_internal.h"
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 
+#include <sstream>
 #include <vector>
 
 #include "generated/base_options.h"
@@ -164,6 +166,17 @@ struct ParsedOptions final {
     explicit ParsedOptions(const std::string &exePath) : baseOptions(exePath) {}
 };
 
+static arg_list_t SplitString(const std::string &from, char delim)
+{
+    arg_list_t pathes;
+    std::istringstream iss {from};
+    std::string path;
+    while (std::getline(iss, path, delim)) {
+        pathes.emplace_back(path);
+    }
+    return pathes;
+}
+
 static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &parsedOptions,
                                Span<const EtsVMOption> &options)
 {
@@ -210,6 +223,9 @@ static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &pa
                 break;
             case EtsOptionType::ETS_INTERPRETER_TYPE:
                 runtimeOptions.SetInterpreterType(extraStr);
+                break;
+            case EtsOptionType::ETS_NATIVE_LIBRARY_PATH:
+                runtimeOptions.SetNativeLibraryPath(SplitString(extraStr, ':'));
                 break;
             default:
                 LOG(ERROR, RUNTIME) << "No such option";

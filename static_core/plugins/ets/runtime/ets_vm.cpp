@@ -17,6 +17,7 @@
 #include <atomic>
 
 #include "compiler/optimizer/ir/runtime_interface.h"
+#include "include/mem/panda_string.h"
 #include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
@@ -262,6 +263,11 @@ bool PandaEtsVM::Initialize()
         // library
         EtsEnv *env = EtsCoroutine::GetCurrent()->GetEtsNapiEnv();
         ark::ets::stdlib::InitNativeMethods(env);
+    }
+
+    const auto lang = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
+    for (const auto &path : Runtime::GetOptions().GetNativeLibraryPath(lang)) {
+        nativeLibraryProvider_.AddLibraryPath(ConvertToString(path));
     }
 
     return true;
