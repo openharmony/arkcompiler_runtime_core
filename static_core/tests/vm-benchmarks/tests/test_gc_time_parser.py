@@ -26,26 +26,31 @@ class FwTimeParserTests(unittest.TestCase):
         fw_start_time = 1624469473444
         fw_end_time = 1624469503456
         vm_start_time = 116359999212857
-        text = """
+        format1 = f'''
 1624469503548 INFO [Host] - VM 1/1 output
-{} INFO - Startup execution started: {}
+{fw_start_time} INFO - Startup execution started: {vm_start_time}
 1624469476451 INFO - Warmup 1: 8387 ops, 357863.083105 ns/op
 1624469479452 INFO - Warmup 2: 9280 ops, 323313.791272 ns/op
-1624469482453 INFO - Warmup 3: 9239 ops, 324789.918714 ns/op
-1624469485453 INFO - Warmup 4: 9281 ops, 323282.864131 ns/op
 1624469488454 INFO - Iter 1: 8982 ops, 333967.421176 ns/op
 1624469491454 INFO - Iter 2: 9100 ops, 329618.112747 ns/op
 1624469494454 INFO - Iter 3: 9112 ops, 329214.669008 ns/op
-1624469497454 INFO - Iter 4: 9286 ops, 322999.009584 ns/op
-1624469500455 INFO - Iter 5: 9334 ops, 321456.791408 ns/op
-1624469503456 INFO - Iter 6: 9223 ops, 325344.669413 ns/op
-{} INFO - Benchmark result: FragmentedHeap_allocateYoungAndSave 327044.073024
-        """.format(fw_start_time, vm_start_time, fw_end_time)
+{fw_end_time} INFO - Benchmark result: TestBench1 327044.073024'''
+        format2 = f'''
+1624469503548 [Host] - VM 1/1 output
+{fw_start_time} Startup execution started: {vm_start_time}
+1624469476451 Warmup 1: 8387 ops, 357863.083105 ns/op
+1624469488454 Iter 1: 8982 ops, 333967.421176 ns/op
+{fw_end_time} Benchmark result: TestBench2 327044.073024'''
 
-        result = FwTimeParser().parse_text(text)
-        self.assertEqual(fw_start_time * 1000.0 * 1000.0, result.get('fw_start_time'))
-        self.assertEqual(fw_end_time * 1000.0 * 1000.0, result.get('fw_end_time'))
-        self.assertEqual(vm_start_time, result.get('vm_start_time'))
+        for text in (format1, format2):
+            result = FwTimeParser().parse_text(text)
+            self.assertIsNotNone(result, 'Parsing fw time failed')
+            self.assertEqual(fw_start_time * 1000.0 * 1000.0,
+                             result.get('fw_start_time'))
+            self.assertEqual(fw_end_time * 1000.0 * 1000.0,
+                             result.get('fw_end_time'))
+            self.assertEqual(vm_start_time,
+                             result.get('vm_start_time'))
 
 
 if __name__ == '__main__':

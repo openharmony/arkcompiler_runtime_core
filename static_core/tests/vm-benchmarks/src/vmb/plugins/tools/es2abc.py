@@ -31,7 +31,7 @@ class Tool(ToolBase):
     def __init__(self, *args):
         super().__init__(*args)
         self.sdk = self.ensure_dir_env('OHOS_SDK')
-        self.opts = f'--module --merge-abc --extension=ts {self.custom}'
+        self.opts = f'--module --merge-abc {self.custom}'
         if not os.path.isdir(self.sdk):
             raise RuntimeError('OHOS_SDK not found.')
         self.es2abc = os.path.join(
@@ -44,16 +44,20 @@ class Tool(ToolBase):
         return 'ES to ABC compiler'
 
     def exec(self, bu: BenchUnit) -> None:
-        ts_files = [bu.src('.ts')] + list(bu.libs('.ts'))
-        for ts in ts_files:
-            if not ts.is_file():
+        self.exec_lang(bu)
+
+    def exec_lang(self, bu: BenchUnit, lang: str = 'ts') -> None:
+        ext = '.mjs' if lang == 'js' else '.ts'
+        src_files = [bu.src(ext)] + list(bu.libs(ext))
+        for src in src_files:
+            if not src.is_file():
                 continue
-            abc = ts.with_suffix('.abc')
+            abc = src.with_suffix('.abc')
             abc.unlink(missing_ok=True)
-            res = self.run_es2abc(ts, abc)
+            res = self.run_es2abc(src, abc, lang)
             if res.ret != 0 or not abc.is_file():
                 bu.status = BUStatus.COMPILATION_FAILED
-                raise VmbToolExecError(f'{self.name} failed: {ts}', res)
+                raise VmbToolExecError(f'{self.name} failed: {src}', res)
             abc_size = self.sh.get_filesize(abc)
             bu.result.build.append(
                 BuildResult('es2abc', abc_size, res.tm, res.rss))
@@ -61,8 +65,9 @@ class Tool(ToolBase):
 
     def run_es2abc(self,
                    src: Union[str, Path],
-                   out: Union[str, Path]) -> ShellResult:
+                   out: Union[str, Path],
+                   lang: str = 'ts') -> ShellResult:
         return self.sh.run(
-            f'{self.es2abc} {self.opts} '
+            f'{self.es2abc} --extension={lang} {self.opts} '
             f'--output={out} {src}',
             measure_time=True)
