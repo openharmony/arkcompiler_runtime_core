@@ -422,6 +422,10 @@ async function asyncFunctionUserInterface(obj: InterfaceWithMethodEts): Promise<
     return obj.methodInInterface();
 }
 
+function functionRestParameter(...arg: number[]): number {
+    return arg[0];
+}
+
 function functionSpreadParameter(arg1: number, arg2: number): number {
     return arg1 + arg2;
 }
@@ -488,4 +492,19 @@ function fnWithArgOfTypeSymbol(arg: JSValue): JSValue {
 function fnWithArgOfClassWithSymbolProperty(arg: ClassToExtendEts): ClassToExtendEts {
     arg.x = 1;
     return arg;
+}
+
+class RefType1 {
+    type: number = 1
+    value: string = 'valueone'
+}
+
+class RefType2 {
+    type: number = 2
+    value: string = 'valuetwo'
+}
+
+function functionReturnsCompositeType(arg: JSValue): RefType1 | RefType2 {
+    const seed = arg as number;
+    return seed > 1 ? new RefType2() : new RefType1();
 }

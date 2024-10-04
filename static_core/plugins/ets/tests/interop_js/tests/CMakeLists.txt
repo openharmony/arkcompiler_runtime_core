@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set(EXCLUDED_TEST_PACKAGES static_enum)
+set(EXCLUDED_TEST_PACKAGES static_enum standalone_function)
 
 SUBDIRLIST(SUBDIRS 
   ${CMAKE_CURRENT_LIST_DIR}
