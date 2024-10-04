@@ -19,7 +19,6 @@
 import os
 import sys
 import argparse
-import logging
 import numpy as np
 
 
@@ -88,11 +87,11 @@ class ModulesDumpTest:
                 expected_checksum: np.uint32 | None = self._checksum_name_map.get(pathname, None)
 
                 if (expected_checksum is None):
-                    logging.error("sampler_module_file_check: can not find expected checksum for ", pathname)
+                    print("sampler_module_file_check: can not find expected checksum for ", pathname)
                     return False
 
                 if (checksum != expected_checksum):
-                    logging.error("sampler_module_file_check: for file",
+                    print("sampler_module_file_check: for file",
                           pathname,
                           "checksum is not equal",
                           expected_checksum,
@@ -105,7 +104,7 @@ class ModulesDumpTest:
                 "sampler_module_file_check: wrong number of modules in module file: "
                 f"expected {len(modules_list)}, in file {len(modules_from_file)}"
             )
-            logging.error(error_message)
+            print(error_message)
             return False
 
         return True
@@ -116,7 +115,7 @@ def main():
     test = ModulesDumpTest(args)
 
     if not test.module_file_check():
-        logging.error("sampler_module_file_check: test failed")
+        print("sampler_module_file_check: test failed")
         return 1
 
     return 0
