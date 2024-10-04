@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H__
-#define _PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H__
+#ifndef PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H_
+#define PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H_
 
 #include "macros.h"
 
@@ -83,4 +83,4 @@ private:
 
 }  // namespace ark::verifier
 
-#endif  // !_PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H__
+#endif  // !PANDA_VERIFIER_CACHE_FILE_ENTITY_CACHE_H_

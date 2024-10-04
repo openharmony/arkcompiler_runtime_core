@@ -83,172 +83,208 @@ void Worker(PandaDeque<Method *> *queue, os::memory::Mutex *lock, size_t threadN
     LOG(DEBUG, VERIFIER) << "Verifier thread " << threadNum << " finishing";
 }
 
+static void EnqueueMethod(Method *method, PandaDeque<Method *> &queue, PandaUnorderedSet<Method *> &methodsSet)
+{
+    if (methodsSet.count(method) == 0) {
+        queue.push_back(method);
+        methodsSet.insert(method);
+    }
+}
+
+static void EnqueueClass(const Class &klass, bool verifyLibraries, PandaDeque<Method *> &queue,
+                         PandaUnorderedSet<Method *> &methodsSet)
+{
+    if (!verifyLibraries && IsSystemClass(&klass)) {
+        LOG(INFO, VERIFIER) << klass.GetName() << " is a system class, skipping";
+        return;
+    }
+    LOG(INFO, VERIFIER) << "Begin verification of class " << klass.GetName();
+    for (auto &method : klass.GetMethods()) {
+        EnqueueMethod(&method, queue, methodsSet);
+    }
+}
+
+static auto GetFileHandler(std::atomic<bool> &result, ClassLinker &classLinker, bool verifyLibraries,
+                           PandaDeque<Method *> &queue, PandaUnorderedSet<Method *> &methodsSet)
+{
+    auto handleClass = [&result, &classLinker, verifyLibraries, &queue,
+                        &methodsSet](const panda_file::File &file, const panda_file::File::EntityId &entityId) {
+        if (!file.IsExternal(entityId)) {
+            auto optLang = panda_file::ClassDataAccessor {file, entityId}.GetSourceLang();
+            if (optLang.has_value() && !IsValidSourceLang(optLang.value())) {
+                LOG(ERROR, VERIFIER) << "Unknown SourceLang";
+                result = false;
+                return false;
+            }
+            ClassLinkerExtension *ext =
+                classLinker.GetExtension(optLang.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
+            if (ext == nullptr) {
+                LOG(ERROR, VERIFIER) << "Error: Class Linker Extension failed to initialize";
+                result = false;
+                return false;
+            }
+            const Class *klass = ext->GetClass(file, entityId);
+
+            if (klass != nullptr) {
+                EnqueueClass(*klass, verifyLibraries, queue, methodsSet);
+            }
+        }
+
+        return true;
+    };
+
+    return [handleClass](const panda_file::File &file) {
+        LOG(INFO, VERIFIER) << "Processing file" << file.GetFilename();
+        for (auto id : file.GetClasses()) {
+            panda_file::File::EntityId entityId {id};
+            if (!handleClass(file, entityId)) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+}
+
+static void VerifyAllNames(std::atomic<bool> &result, bool verifyLibraries, Runtime &runtime,
+                           PandaDeque<Method *> &queue, PandaUnorderedSet<Method *> &methodsSet)
+{
+    auto &classLinker = *runtime.GetClassLinker();
+    PandaVector<const panda_file::File *> pfiles;
+    classLinker.EnumeratePandaFiles([&pfiles](const panda_file::File &file) {
+        pfiles.push_back(&file);
+        return true;
+    });
+
+    auto handleFile = GetFileHandler(result, classLinker, verifyLibraries, queue, methodsSet);
+
+    for (auto pf : pfiles) {
+        if (!handleFile(*pf)) {
+            break;
+        }
+    }
+
+    if (verifyLibraries) {
+        classLinker.EnumerateBootPandaFiles(handleFile);
+    } else if (runtime.GetPandaFiles().empty()) {
+        // in this case the last boot-panda-file and only it is actually not a system file and should be
+        // verified
+        OptionalConstRef<panda_file::File> file;
+        classLinker.EnumerateBootPandaFiles([&file](const panda_file::File &pf) {
+            file = std::cref(pf);
+            return true;
+        });
+        if (file.HasRef()) {
+            handleFile(*file);
+        } else {
+            LOG(ERROR, VERIFIER) << "No files given to verify";
+        }
+    }
+}
+
+static Class *GetClassByName(std::atomic<bool> &result, PandaUnorderedMap<std::string, Class *> &classesByName,
+                             Runtime &runtime, const std::string &className)
+{
+    auto it = classesByName.find(className);
+    if (it != classesByName.end()) {
+        return it->second;
+    }
+
+    PandaString descriptor;
+    auto &classLinker = *runtime.GetClassLinker();
+    auto *ctx = classLinker.GetExtension(runtime.GetLanguageContext(runtime.GetRuntimeType()))->GetBootContext();
+    const uint8_t *classNameBytes = ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
+
+    Class *klass = classLinker.GetClass(classNameBytes, true, ctx);
+    if (klass == nullptr) {
+        LOG(ERROR, VERIFIER) << "Error: Cannot resolve class with name " << className;
+        result = false;
+    }
+
+    classesByName.emplace(className, klass);
+    return klass;
+}
+
+static bool VeifyMethod(Class *klass, const std::string &fqMethodName, const std::string_view &unqualifiedMethodName,
+                        PandaDeque<Method *> &queue, PandaUnorderedSet<Method *> &methodsSet)
+{
+    bool methodFound = false;
+    for (auto &method : klass->GetMethods()) {
+        const char *nameData = utf::Mutf8AsCString(method.GetName().data);
+        if (std::string_view(nameData) == unqualifiedMethodName) {
+            methodFound = true;
+            LOG(INFO, VERIFIER) << "Verification of method '" << fqMethodName << "'";
+            EnqueueMethod(&method, queue, methodsSet);
+        }
+    }
+    return methodFound;
+}
+
+static void RunVerifierImpl(std::atomic<bool> &result, Runtime &runtime, const std::vector<std::string> &classNames,
+                            const std::vector<std::string> &methodNames, PandaDeque<Method *> &queue)
+{
+    bool verifyLibraries = runtime.GetOptions().IsVerifyRuntimeLibraries();
+    PandaUnorderedSet<Method *> methodsSet;
+
+    // we need ScopedManagedCodeThread for the verifier since it can allocate objects
+    ScopedManagedCodeThread managedObjThread(ManagedThread::GetCurrent());
+    if (classNames.empty() && methodNames.empty()) {
+        VerifyAllNames(result, verifyLibraries, runtime, queue, methodsSet);
+    } else {
+        PandaUnorderedMap<std::string, Class *> classesByName;
+
+        for (const auto &className : classNames) {
+            Class *klass = GetClassByName(result, classesByName, runtime, className);
+            // the bad case is already handled in get_class_by_name
+            if (klass != nullptr) {
+                EnqueueClass(*klass, verifyLibraries, queue, methodsSet);
+            }
+        }
+
+        for (const std::string &fqMethodName : methodNames) {
+            size_t pos = fqMethodName.find_last_of("::");
+            if (pos == std::string::npos) {
+                LOG(ERROR, VERIFIER) << "Error: Fully qualified method name must contain '::', was " << fqMethodName;
+                result = false;
+                break;
+            }
+            std::string className = fqMethodName.substr(0, pos - 1);
+            std::string_view unqualifiedMethodName = std::string_view(fqMethodName).substr(pos + 1);
+            if (std::find(classNames.begin(), classNames.end(), className) != classNames.end()) {
+                // this method was already verified while enumerating class_names
+                continue;
+            }
+            Class *klass = GetClassByName(result, classesByName, runtime, className);
+            if (klass == nullptr) {
+                continue;
+            }
+            bool methodFound = VeifyMethod(klass, fqMethodName, unqualifiedMethodName, queue, methodsSet);
+            if (!methodFound) {
+                LOG(ERROR, VERIFIER) << "Error: Cannot resolve method with name " << unqualifiedMethodName
+                                     << " in class " << className;
+                result = false;
+            }
+        }
+    }
+}
+
 bool RunVerifier(const Options &cliOptions)
 {
     auto isPerfMeasure = cliOptions.IsPerfMeasure();
     std::chrono::steady_clock::time_point begin;
     std::chrono::steady_clock::time_point end;
 
-    PandaDeque<Method *> queue;
     os::memory::Mutex lock;
 
     auto &runtime = *Runtime::GetCurrent();
-    auto &classLinker = *runtime.GetClassLinker();
+
+    PandaDeque<Method *> queue;
 
     const std::vector<std::string> &classNames = cliOptions.GetClasses();
     const std::vector<std::string> &methodNames = cliOptions.GetMethods();
 
     std::atomic<bool> result = true;
-
-    PandaUnorderedSet<Method *> methodsSet;
-
-    auto enqueueMethod = [&methodsSet, &queue](Method *method) {
-        if (methodsSet.count(method) == 0) {
-            queue.push_back(method);
-            methodsSet.insert(method);
-        }
-    };
-
-    bool verifyLibraries = runtime.GetOptions().IsVerifyRuntimeLibraries();
-
-    auto enqueueClass = [&verifyLibraries, &enqueueMethod](const Class &klass) {
-        if (!verifyLibraries && IsSystemClass(&klass)) {
-            LOG(INFO, VERIFIER) << klass.GetName() << " is a system class, skipping";
-            return;
-        }
-        LOG(INFO, VERIFIER) << "Begin verification of class " << klass.GetName();
-        for (auto &method : klass.GetMethods()) {
-            enqueueMethod(&method);
-        }
-    };
-
-    // we need ScopedManagedCodeThread for the verifier since it can allocate objects
-    {
-        ScopedManagedCodeThread managedObjThread(ManagedThread::GetCurrent());
-        if (classNames.empty() && methodNames.empty()) {
-            PandaVector<const panda_file::File *> pfiles;
-            classLinker.EnumeratePandaFiles([&pfiles](const panda_file::File &file) {
-                pfiles.push_back(&file);
-                return true;
-            });
-
-            auto handleFile = [&result, &classLinker, &enqueueClass](const panda_file::File &file) {
-                LOG(INFO, VERIFIER) << "Processing file" << file.GetFilename();
-                for (auto id : file.GetClasses()) {
-                    panda_file::File::EntityId entityId {id};
-                    if (!file.IsExternal(entityId)) {
-                        auto optLang = panda_file::ClassDataAccessor {file, entityId}.GetSourceLang();
-                        if (optLang.has_value() && !IsValidSourceLang(optLang.value())) {
-                            LOG(ERROR, VERIFIER) << "Unknown SourceLang";
-                            result = false;
-                            return false;
-                        }
-                        ClassLinkerExtension *ext =
-                            classLinker.GetExtension(optLang.value_or(panda_file::SourceLang::PANDA_ASSEMBLY));
-                        if (ext == nullptr) {
-                            LOG(ERROR, VERIFIER) << "Error: Class Linker Extension failed to initialize";
-                            result = false;
-                            return false;
-                        }
-                        const Class *klass = ext->GetClass(file, entityId);
-
-                        if (klass != nullptr) {
-                            enqueueClass(*klass);
-                        }
-                    }
-                }
-                return true;
-            };
-
-            for (auto pf : pfiles) {
-                if (!handleFile(*pf)) {
-                    break;
-                }
-            }
-
-            if (verifyLibraries) {
-                classLinker.EnumerateBootPandaFiles(handleFile);
-            } else if (runtime.GetPandaFiles().empty()) {
-                // in this case the last boot-panda-file and only it is actually not a system file and should be
-                // verified
-                OptionalConstRef<panda_file::File> file;
-                classLinker.EnumerateBootPandaFiles([&file](const panda_file::File &pf) {
-                    file = std::cref(pf);
-                    return true;
-                });
-                if (file.HasRef()) {
-                    handleFile(*file);
-                } else {
-                    LOG(ERROR, VERIFIER) << "No files given to verify";
-                }
-            }
-        } else {
-            PandaUnorderedMap<std::string, Class *> classesByName;
-            ClassLinkerContext *ctx =
-                classLinker.GetExtension(runtime.GetLanguageContext(runtime.GetRuntimeType()))->GetBootContext();
-
-            auto getClassByName = [&classesByName, &classLinker, &ctx,
-                                   &result](const std::string &className) -> Class * {
-                auto it = classesByName.find(className);
-                if (it != classesByName.end()) {
-                    return it->second;
-                }
-
-                PandaString descriptor;
-                const uint8_t *classNameBytes =
-                    ClassHelper::GetDescriptor(utf::CStringAsMutf8(className.c_str()), &descriptor);
-                Class *klass = classLinker.GetClass(classNameBytes, true, ctx);
-                if (klass == nullptr) {
-                    LOG(ERROR, VERIFIER) << "Error: Cannot resolve class with name " << className;
-                    result = false;
-                }
-
-                classesByName.emplace(className, klass);
-                return klass;
-            };
-
-            for (const auto &className : classNames) {
-                Class *klass = getClassByName(className);
-                // the bad case is already handled in get_class_by_name
-                if (klass != nullptr) {
-                    enqueueClass(*klass);
-                }
-            }
-
-            for (const std::string &fqMethodName : methodNames) {
-                size_t pos = fqMethodName.find_last_of("::");
-                if (pos == std::string::npos) {
-                    LOG(ERROR, VERIFIER) << "Error: Fully qualified method name must contain '::', was "
-                                         << fqMethodName;
-                    result = false;
-                    break;
-                }
-                std::string className = fqMethodName.substr(0, pos - 1);
-                std::string_view unqualifiedMethodName = std::string_view(fqMethodName).substr(pos + 1);
-                if (std::find(classNames.begin(), classNames.end(), className) != classNames.end()) {
-                    // this method was already verified while enumerating class_names
-                    continue;
-                }
-                Class *klass = getClassByName(className);
-                if (klass != nullptr) {
-                    bool methodFound = false;
-                    for (auto &method : klass->GetMethods()) {
-                        const char *nameData = utf::Mutf8AsCString(method.GetName().data);
-                        if (std::string_view(nameData) == unqualifiedMethodName) {
-                            methodFound = true;
-                            LOG(INFO, VERIFIER) << "Verification of method '" << fqMethodName << "'";
-                            enqueueMethod(&method);
-                        }
-                    }
-                    if (!methodFound) {
-                        LOG(ERROR, VERIFIER) << "Error: Cannot resolve method with name " << unqualifiedMethodName
-                                             << " in class " << className;
-                        result = false;
-                    }
-                }
-            }
-        }
-    }
+    RunVerifierImpl(result, runtime, classNames, methodNames, queue);
 
     if (isPerfMeasure) {
         begin = std::chrono::steady_clock::now();

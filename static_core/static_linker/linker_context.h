@@ -229,6 +229,16 @@ private:
 
     void ProcessCodeData(CodePatcher &p, CodeData *data);
 
+    void MakeChangeWithId(CodePatcher &p, CodeData *data);
+
+    void AddItemToKnown(panda_file::BaseItem *item, const std::map<std::string, panda_file::BaseClassItem *> &cm,
+                        const panda_file::FileReader &reader);
+
+    void MergeItem(panda_file::BaseItem *item, const panda_file::FileReader &reader);
+
+    void HandleCandidates(const panda_file::FileReader *reader, const std::vector<panda_file::FieldItem *> &candidates,
+                          panda_file::ForeignFieldItem *ff);
+
     class ErrorDetail {
     public:
         using InfoType = std::variant<const panda_file::BaseItem *, std::string>;

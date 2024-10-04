@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_SATURATED_ENUM_H__
-#define PANDA_VERIFIER_UTIL_SATURATED_ENUM_H__
+#ifndef PANDA_VERIFIER_UTIL_SATURATED_ENUM_H_
+#define PANDA_VERIFIER_UTIL_SATURATED_ENUM_H_
 
 #include "macros.h"
 
@@ -166,4 +166,4 @@ protected:
 
 }  // namespace ark::verifier
 
-#endif  // PANDA_VERIFIER_UTIL_SATURATED_ENUM_H__
+#endif  // PANDA_VERIFIER_UTIL_SATURATED_ENUM_H_

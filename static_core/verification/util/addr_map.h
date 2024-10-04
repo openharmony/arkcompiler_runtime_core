@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_ADDR_MAP_HPP_
-#define _PANDA_VERIFIER_ADDR_MAP_HPP_
+#ifndef PANDA_VERIFIER_ADDR_MAP_HPP_
+#define PANDA_VERIFIER_ADDR_MAP_HPP_
 
 #include "macros.h"
 #include "range.h"
@@ -217,4 +217,4 @@ private:
 };
 }  // namespace ark::verifier
 
-#endif  // !_PANDA_VERIFIER_ADDR_MAP_HPP_
+#endif  // !PANDA_VERIFIER_ADDR_MAP_HPP_

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFICATION_CFLOW_CFLOW_COMMON_H__
-#define _PANDA_VERIFICATION_CFLOW_CFLOW_COMMON_H__
+#ifndef PANDA_VERIFICATION_CFLOW_CFLOW_COMMON_H_
+#define PANDA_VERIFICATION_CFLOW_CFLOW_COMMON_H_
 
 #include "runtime/include/mem/panda_string.h"
 
@@ -24,4 +24,4 @@ PandaString OffsetAsHexStr(const void *base, const void *ptr);
 
 }  // namespace ark::verifier
 
-#endif  // ! _PANDA_VERIFICATION_CFLOW_CFLOW_COMMON_H__
+#endif  // ! PANDA_VERIFICATION_CFLOW_CFLOW_COMMON_H_

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_VALUE_ORIGIN_H__
-#define PANDA_VERIFIER_VALUE_ORIGIN_H__
+#ifndef PANDA_VERIFIER_VALUE_ORIGIN_H_
+#define PANDA_VERIFIER_VALUE_ORIGIN_H_
 
 #include "verification/util/enum_tag.h"
 #include "verification/util/tagged_index.h"
@@ -67,4 +67,4 @@ public:
 };
 }  // namespace ark::verifier
 
-#endif  // PANDA_VERIFIER_VALUE_ORIGIN_H__
+#endif  // PANDA_VERIFIER_VALUE_ORIGIN_H_

@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_SET_OPERATIONS__
-#define PANDA_VERIFIER_UTIL_SET_OPERATIONS__
+#ifndef PANDA_VERIFIER_UTIL_SET_OPERATIONS_
+#define PANDA_VERIFIER_UTIL_SET_OPERATIONS_
 
 #include <cstddef>
 #include "function_traits.h"
@@ -116,4 +116,4 @@ S ToSet(const C &c)
 }
 }  // namespace ark::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_SET_OPERATIONS__
+#endif  // !PANDA_VERIFIER_UTIL_SET_OPERATIONS_

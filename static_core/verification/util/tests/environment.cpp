@@ -21,6 +21,7 @@
 
 namespace ark::verifier::test {
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
 EnvOptions::EnvOptions(const char *envVarName)
 {
     using ark::parser::Action;

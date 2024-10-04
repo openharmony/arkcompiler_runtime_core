@@ -509,17 +509,10 @@ public:
         return [this, sz, to, pos, val, idx]() mutable -> Index<size_t> {
             while (true) {
                 if (idx > to) {
-                    return {};
+                    return Index<size_t>();
                 }
                 if (val) {
-                    auto i = static_cast<size_t>(ark::Ctz(val));
-                    idx += i;
-                    if (idx > to) {
-                        return {};
-                    }
-                    val >>= i;
-                    val >>= 1;
-                    return idx++;
+                    return ValLazyIndicesOf(idx, to, val);
                 }
                 while (val == 0 && pos < sz) {
                     val = VAL ? data_[pos] : ~data_[pos];
@@ -527,7 +520,7 @@ public:
                 }
                 idx = (pos - 1) << POS_SHIFT;
                 if (pos >= sz && val == 0) {
-                    return {};
+                    return Index<size_t>();
                 }
             }
         };
@@ -666,14 +659,7 @@ public:
                     return {};
                 }
                 if (val) {
-                    auto i = static_cast<size_t>(ark::Ctz(val));
-                    idx += i;
-                    if (idx >= size) {
-                        return {};
-                    }
-                    val >>= i;
-                    val >>= 1;
-                    return idx++;
+                    return ValLazyOpIndicesOf(idx, size, val);
                 }
                 while (val == 0 && pos < sz) {
                     val = getProcessedWord(pos++);
@@ -739,6 +725,30 @@ private:
         // don't rhs.Deallocate() as we stole its data_!
         other.size_ = 0;
         other.data_ = nullptr;
+    }
+
+    static Index<size_t> ValLazyIndicesOf(size_t &idx, size_t &to, Word &val)
+    {
+        auto i = static_cast<size_t>(ark::Ctz(val));
+        idx += i;
+        if (idx > to) {
+            return {};
+        }
+        val >>= i;
+        val >>= 1U;
+        return idx++;
+    }
+
+    static Index<size_t> ValLazyOpIndicesOf(size_t &idx, size_t &size, Word &val)
+    {
+        auto i = static_cast<size_t>(ark::Ctz(val));
+        idx += i;
+        if (idx >= size) {
+            return {};
+        }
+        val >>= i;
+        val >>= 1U;
+        return idx++;
     }
 };
 

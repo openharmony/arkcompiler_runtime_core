@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_DEBUG_BREAKPOINT_H__
-#define PANDA_VERIFIER_DEBUG_BREAKPOINT_H__
+#ifndef PANDA_VERIFIER_DEBUG_BREAKPOINT_H_
+#define PANDA_VERIFIER_DEBUG_BREAKPOINT_H_
 
 #include "runtime/include/method.h"
 #include "runtime/include/mem/panda_string.h"
@@ -56,4 +56,4 @@ inline bool ManagedBreakpointPresent([[maybe_unused]] DebugContext const *ctx, [
 #endif
 }  // namespace ark::verifier::debug
 
-#endif  // PANDA_VERIFIER_DEBUG_BREAKPOINT_H__
+#endif  // PANDA_VERIFIER_DEBUG_BREAKPOINT_H_

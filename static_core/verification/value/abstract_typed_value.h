@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP
-#define _PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP
+#ifndef PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP
+#define PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP
 
 #include "verification/type/type_type.h"
 #include "verification/value/abstract_value.h"
@@ -121,4 +121,4 @@ inline AbstractTypedValue AtvJoin(AbstractTypedValue const *lhs, AbstractTypedVa
 
 }  // namespace ark::verifier
 
-#endif  // !_PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP
+#endif  // !PANDA_VERIFIER_ABSTRACT_TYPED_VALUE_HPP

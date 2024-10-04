@@ -98,6 +98,103 @@ void ReprMethod(std::ostream &o, panda_file::StringItem *name, panda_file::BaseC
     o << ")";
 }
 
+void ReprValueItem(std::ostream &o, const panda_file::BaseItem *i)
+{
+    auto j = static_cast<const panda_file::ValueItem *>(i);
+    switch (j->GetType()) {
+        case panda_file::ValueItem::Type::ARRAY: {
+            auto *arr = static_cast<const panda_file::ArrayValueItem *>(j);
+            const auto &its = arr->GetItems();
+            o << "[";
+            for (size_t k = 0; k < its.size(); k++) {
+                if (k != 0) {
+                    o << ", ";
+                }
+                ReprItem(o, &its[k]);
+            }
+            o << "]";
+            break;
+        }
+        case panda_file::ValueItem::Type::INTEGER: {
+            auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
+            o << scalar->GetValue<uint32_t>() << " as int";
+            break;
+        }
+        case panda_file::ValueItem::Type::LONG: {
+            auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
+            o << scalar->GetValue<uint64_t>() << " as long";
+            break;
+        }
+        case panda_file::ValueItem::Type::FLOAT: {
+            auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
+            o << scalar->GetValue<float>() << " as float";
+            break;
+        }
+        case panda_file::ValueItem::Type::DOUBLE: {
+            auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
+            o << scalar->GetValue<double>() << " as double";
+            break;
+        }
+        case panda_file::ValueItem::Type::ID: {
+            auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
+            ReprItem(o, scalar->GetIdItem());
+            break;
+        }
+        default:
+            UNREACHABLE();
+    }
+}
+
+void ReprAnnotationItem(std::ostream &o, const panda_file::BaseItem *i)
+{
+    auto j = static_cast<const panda_file::AnnotationItem *>(i);
+    ReprItem(o, j->GetClassItem());
+    o << "<";
+    bool first = true;
+    for (auto &a : *j->GetElements()) {
+        if (first) {
+            first = false;
+        } else {
+            o << ", ";
+        }
+        o << a.GetName()->GetData() << "=";
+        ReprItem(o, a.GetValue());
+    }
+    o << ">";
+}
+
+void ReprStringItem(std::ostream &o, const panda_file::BaseItem *i)
+{
+    auto str = static_cast<const panda_file::StringItem *>(i);
+    auto view = std::string_view(str->GetData());
+    o << '"';
+    while (!view.empty()) {
+        auto pos = view.find_first_of("\"\\\n");
+        o << view.substr(0, pos);
+        if (pos != std::string::npos) {
+            if (view[pos] == '\n') {
+                o << "\\n";
+            } else {
+                o << '\\' << view[pos];
+            }
+            view = view.substr(pos + 1);
+        } else {
+            view = "";
+        }
+    }
+    o << '"';
+}
+
+template <typename T>
+void ReprFieldItem(std::ostream &o, const T *j)
+{
+    ReprItem(o, j->GetTypeItem());
+    o << " ";
+    ReprItem(o, j->GetClassItem());
+    o << "." << j->GetNameItem()->GetData();
+}
+
+// CC-OFFNXT(G.FUN.01, huge_method) big switch case
 void ReprItem(std::ostream &o, const panda_file::BaseItem *i)
 {
     if (i == nullptr) {
@@ -117,18 +214,12 @@ void ReprItem(std::ostream &o, const panda_file::BaseItem *i)
         }
         case panda_file::ItemTypes::FOREIGN_FIELD_ITEM: {
             auto j = static_cast<const panda_file::ForeignFieldItem *>(i);
-            ReprItem(o, j->GetTypeItem());
-            o << " ";
-            ReprItem(o, j->GetClassItem());
-            o << "." << j->GetNameItem()->GetData();
+            ReprFieldItem(o, j);
             break;
         }
         case panda_file::ItemTypes::FIELD_ITEM: {
             auto j = static_cast<const panda_file::FieldItem *>(i);
-            ReprItem(o, j->GetTypeItem());
-            o << " ";
-            ReprItem(o, j->GetClassItem());
-            o << "." << j->GetNameItem()->GetData();
+            ReprFieldItem(o, j);
             break;
         }
         case panda_file::ItemTypes::PRIMITIVE_TYPE_ITEM: {
@@ -147,87 +238,15 @@ void ReprItem(std::ostream &o, const panda_file::BaseItem *i)
             break;
         }
         case panda_file::ItemTypes::ANNOTATION_ITEM: {
-            auto j = static_cast<const panda_file::AnnotationItem *>(i);
-            ReprItem(o, j->GetClassItem());
-            o << "<";
-            bool first = true;
-            for (auto &a : *j->GetElements()) {
-                if (first) {
-                    first = false;
-                } else {
-                    o << ", ";
-                }
-                o << a.GetName()->GetData() << "=";
-                ReprItem(o, a.GetValue());
-            }
-            o << ">";
+            ReprAnnotationItem(o, i);
             break;
         }
         case panda_file::ItemTypes::VALUE_ITEM: {
-            auto j = static_cast<const panda_file::ValueItem *>(i);
-            switch (j->GetType()) {
-                case panda_file::ValueItem::Type::ARRAY: {
-                    auto *arr = static_cast<const panda_file::ArrayValueItem *>(j);
-                    const auto &its = arr->GetItems();
-                    o << "[";
-                    for (size_t k = 0; k < its.size(); k++) {
-                        if (k != 0) {
-                            o << ", ";
-                        }
-                        ReprItem(o, &its[k]);
-                    }
-                    o << "]";
-                    break;
-                }
-                case panda_file::ValueItem::Type::INTEGER: {
-                    auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
-                    o << scalar->GetValue<uint32_t>() << " as int";
-                    break;
-                }
-                case panda_file::ValueItem::Type::LONG: {
-                    auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
-                    o << scalar->GetValue<uint64_t>() << " as long";
-                    break;
-                }
-                case panda_file::ValueItem::Type::FLOAT: {
-                    auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
-                    o << scalar->GetValue<float>() << " as float";
-                    break;
-                }
-                case panda_file::ValueItem::Type::DOUBLE: {
-                    auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
-                    o << scalar->GetValue<double>() << " as double";
-                    break;
-                }
-                case panda_file::ValueItem::Type::ID: {
-                    auto *scalar = static_cast<const panda_file::ScalarValueItem *>(j);
-                    ReprItem(o, scalar->GetIdItem());
-                    break;
-                }
-                default:
-                    UNREACHABLE();
-            }
+            ReprValueItem(o, i);
             break;
         }
         case panda_file::ItemTypes::STRING_ITEM: {
-            auto str = static_cast<const panda_file::StringItem *>(i);
-            auto view = std::string_view(str->GetData());
-            o << '"';
-            while (!view.empty()) {
-                auto pos = view.find_first_of("\"\\\n");
-                o << view.substr(0, pos);
-                if (pos != std::string::npos) {
-                    if (view[pos] == '\n') {
-                        o << "\\n";
-                    } else {
-                        o << '\\' << view[pos];
-                    }
-                    view = view.substr(pos + 1);
-                } else {
-                    view = "";
-                }
-            }
-            o << '"';
+            ReprStringItem(o, i);
             break;
         }
         default:

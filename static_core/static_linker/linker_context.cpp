@@ -39,6 +39,33 @@ auto DerefPtrRef(T &&v) -> std::conditional_t<std::is_pointer_v<T>, std::remove_
 
 namespace ark::static_linker {
 
+void Context::AddItemToKnown(panda_file::BaseItem *item, const std::map<std::string, panda_file::BaseClassItem *> &cm,
+                             const panda_file::FileReader &reader)
+{
+    auto *fc = static_cast<panda_file::ForeignClassItem *>(item);
+    auto name = GetStr(fc->GetNameItem());
+    if (auto iter = cm.find(name); iter != cm.end()) {
+        knownItems_[fc] = iter->second;
+    } else {
+        auto clz = cont_.GetOrCreateForeignClassItem(name);
+        cameFrom_.emplace(clz, &reader);
+        knownItems_[fc] = clz;
+    }
+}
+
+void Context::MergeItem(panda_file::BaseItem *item, const panda_file::FileReader &reader)
+{
+    switch (item->GetItemType()) {
+        case panda_file::ItemTypes::FOREIGN_METHOD_ITEM:
+            MergeForeignMethod(&reader, static_cast<panda_file::ForeignMethodItem *>(item));
+            break;
+        case panda_file::ItemTypes::FOREIGN_FIELD_ITEM:
+            MergeForeignField(&reader, static_cast<panda_file::ForeignFieldItem *>(item));
+            break;
+        default:;
+    }
+}
+
 void Context::Merge()
 {
     // types can reference types only
@@ -68,17 +95,8 @@ void Context::Merge()
         auto *items = reader.GetItems();
         for (auto &itPair : *items) {
             auto *item = itPair.second;
-
             if (item->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
-                auto *fc = static_cast<panda_file::ForeignClassItem *>(item);
-                auto name = GetStr(fc->GetNameItem());
-                if (auto iter = cm.find(name); iter != cm.end()) {
-                    knownItems_[fc] = iter->second;
-                } else {
-                    auto clz = cont_.GetOrCreateForeignClassItem(name);
-                    cameFrom_.emplace(clz, &reader);
-                    knownItems_[fc] = clz;
-                }
+                AddItemToKnown(item, cm, reader);
             }
         }
     }
@@ -90,16 +108,7 @@ void Context::Merge()
         auto *items = reader.GetItems();
         for (auto [offset, item] : *items) {
             item->SetOffset(offset.GetOffset());
-
-            switch (item->GetItemType()) {
-                case panda_file::ItemTypes::FOREIGN_METHOD_ITEM:
-                    MergeForeignMethod(&reader, static_cast<panda_file::ForeignMethodItem *>(item));
-                    break;
-                case panda_file::ItemTypes::FOREIGN_FIELD_ITEM:
-                    MergeForeignField(&reader, static_cast<panda_file::ForeignFieldItem *>(item));
-                    break;
-                default:;
-            }
+            MergeItem(item, reader);
         }
     }
 
@@ -465,46 +474,53 @@ std::variant<std::monostate, panda_file::FieldItem *, panda_file::ForeignClassIt
     return TryFindField(kls->GetSuperClass(), name, expectedType, badCandidates);
 }
 
+void Context::HandleCandidates(const panda_file::FileReader *reader,
+                               const std::vector<panda_file::FieldItem *> &candidates, panda_file::ForeignFieldItem *ff)
+{
+    auto details = std::vector<ErrorDetail> {{"field", ff}};
+    for (const auto &c : candidates) {
+        details.emplace_back("candidate", c);
+    }
+    Error("Unresolved field", details, reader);
+}
+
 void Context::MergeForeignField(const panda_file::FileReader *reader, panda_file::ForeignFieldItem *ff)
 {
     ASSERT(knownItems_.find(ff) == knownItems_.end());
     ASSERT(knownItems_.find(ff->GetClassItem()) != knownItems_.end());
-    auto clz = static_cast<panda_file::BaseClassItem *>(knownItems_[ff->GetClassItem()]);
-    if (clz->GetItemType() != panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
-        ASSERT(clz->GetItemType() == panda_file::ItemTypes::CLASS_ITEM);
-        auto rclz = static_cast<panda_file::ClassItem *>(clz);
-        std::vector<panda_file::FieldItem *> candidates;
-        auto res = TryFindField(rclz, ff->GetNameItem()->GetData(), TypeFromOld(ff->GetTypeItem()), &candidates);
 
-        std::visit(
-            [&](auto el) {
-                using T = decltype(el);
-                if constexpr (std::is_same_v<T, std::monostate>) {
-                    if (conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
-                        MergeForeignFieldCreate(reader, clz, ff);
-                    } else {
-                        auto details = std::vector<ErrorDetail> {{"field", ff}};
-                        for (const auto &c : candidates) {
-                            details.emplace_back("candidate", c);
-                        }
-                        Error("Unresolved field", details, reader);
-                    }
-                } else if constexpr (std::is_same_v<T, panda_file::FieldItem *>) {
-                    knownItems_[ff] = el;
-                } else {
-                    ASSERT((std::is_same_v<T, panda_file::ForeignClassItem *>));
-                    // el or klass? propagate field to base or not?
-                    auto fieldKlass = el;
-                    LOG(DEBUG, STATIC_LINKER) << "Propagating foreign field to base\n"
-                                              << ErrorToString({"field", ff}, 1) << '\n'
-                                              << ErrorToString({"new base", fieldKlass}, 1);
-                    MergeForeignFieldCreate(reader, fieldKlass, ff);
-                }
-            },
-            res);
-    } else {
+    auto clz = static_cast<panda_file::BaseClassItem *>(knownItems_[ff->GetClassItem()]);
+    if (clz->GetItemType() == panda_file::ItemTypes::FOREIGN_CLASS_ITEM) {
         MergeForeignFieldCreate(reader, clz, ff);
+        return;
     }
+
+    ASSERT(clz->GetItemType() == panda_file::ItemTypes::CLASS_ITEM);
+    auto rclz = static_cast<panda_file::ClassItem *>(clz);
+    std::vector<panda_file::FieldItem *> candidates;
+    auto res = TryFindField(rclz, ff->GetNameItem()->GetData(), TypeFromOld(ff->GetTypeItem()), &candidates);
+
+    auto visitor = [&reader, &clz, &ff, &candidates, this](auto el) {
+        using T = decltype(el);
+        if constexpr (std::is_same_v<T, std::monostate>) {
+            if (conf_.remainsPartial.count(GetStr(clz->GetNameItem())) != 0) {
+                MergeForeignFieldCreate(reader, clz, ff);
+            } else {
+                HandleCandidates(reader, candidates, ff);
+            }
+        } else if constexpr (std::is_same_v<T, panda_file::FieldItem *>) {
+            knownItems_[ff] = el;
+        } else {
+            ASSERT((std::is_same_v<T, panda_file::ForeignClassItem *>));
+            // el or klass? propagate field to base or not?
+            auto fieldKlass = el;
+            LOG(DEBUG, STATIC_LINKER) << "Propagating foreign field to base\n"
+                                      << ErrorToString({"field", ff}, 1) << '\n'
+                                      << ErrorToString({"new base", fieldKlass}, 1);
+            MergeForeignFieldCreate(reader, fieldKlass, ff);
+        }
+    };
+    std::visit(visitor, res);
 }
 
 void Context::MergeForeignFieldCreate(const panda_file::FileReader *reader, panda_file::BaseClassItem *clz,
