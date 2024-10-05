@@ -2242,9 +2242,9 @@ void G1GC<LanguageConfig>::ClearSatb()
     // Data race is happens in thread.pre_buf_. The terminating thread may
     // release own pre_buf_ while GC thread iterates over threads and gets theirs
     // pre_buf_.
-    os::memory::LockHolder lock(satbAndNewobjBufLock_);
     // Process satb buffers of the active threads
-    auto threadCallback = [](ManagedThread *thread) {
+    auto threadCallback = [this](ManagedThread *thread) {
+        os::memory::LockHolder lock(satbAndNewobjBufLock_);
         auto preBuff = thread->GetPreBuff();
         if (preBuff != nullptr) {
             preBuff->clear();
@@ -2253,6 +2253,7 @@ void G1GC<LanguageConfig>::ClearSatb()
     };
     this->GetPandaVm()->GetThreadManager()->EnumerateThreads(threadCallback);
 
+    os::memory::LockHolder lock(satbAndNewobjBufLock_);
     // Process satb buffers of the terminated threads
     for (auto objVector : satbBuffList_) {
         this->GetInternalAllocator()->Delete(objVector);
