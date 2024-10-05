@@ -1890,7 +1890,9 @@ void G1GC<LanguageConfig>::SweepNonRegularVmRefs()
             region->HasFlag(RegionFlag::IS_NONMOVABLE) || region->HasFlag(RegionFlag::IS_LARGE_OBJECT);
         if (!nonRegularObject) {
             ASSERT(region->GetLiveBytes() != 0U || !this->IsMarked(object));
-            return region->GetLiveBytes() == 0U ? ObjectStatus::DEAD_OBJECT : ObjectStatus::ALIVE_OBJECT;
+            if (region->GetLiveBytes() == 0U) {
+                return ObjectStatus::DEAD_OBJECT;
+            }
         }
         return this->IsMarked(object) ? ObjectStatus::ALIVE_OBJECT : ObjectStatus::DEAD_OBJECT;
     });
