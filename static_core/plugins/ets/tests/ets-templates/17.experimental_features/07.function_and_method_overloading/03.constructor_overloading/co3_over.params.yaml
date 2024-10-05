@@ -30,21 +30,21 @@ cases:
           }
       use: |-
           let a: A = new A()
-          assert a.i == 0 && a.d == 0.0 && a.s == ""
+          assert(a.i == 0 && a.d == 0.0 && a.s == "")
           a = new A(12345)
-          assert a.i == 12345 && a.d == 0.0 && a.s == ""
+          assert(a.i == 12345 && a.d == 0.0 && a.s == "")
           a = new A(11, 22)
-          assert a.i == 33 && a.d == 0.0 && a.s == ""
+          assert(a.i == 33 && a.d == 0.0 && a.s == "")
           a = new A(1, 2, 3)
-          assert a.i == 3 && a.d == 0.0 && a.s == ""
+          assert(a.i == 3 && a.d == 0.0 && a.s == "")
           a = new A(90, 90.0)
-          assert a.i == 0 && a.d == 180.0 && a.s == ""
+          assert(a.i == 0 && a.d == 180.0 && a.s == "")
           a = new A(0, 0, 0.0)
-          assert a.i == 0 && a.d == 123.0 && a.s == ""
+          assert(a.i == 0 && a.d == 123.0 && a.s == "")
           a = new A(1.0, -1.0, 42)
-          assert a.i == 0 && a.d == 42.0 && a.s == ""
+          assert(a.i == 0 && a.d == 42.0 && a.s == "")
           a = new A("", 0.00014)
-          assert a.i == 0 && a.d == 0.0 && a.s == "0.00014"
+          assert(a.i == 0 && a.d == 0.0 && a.s == "0.00014")
 
     - decl: |-
           // constructor overloaded with optional parameters
@@ -57,15 +57,15 @@ cases:
           }
       use: |-
           let a: A = new A(new Error())
-          assert a.fld == 1
+          assert(a.fld == 1)
           a = new A(1)
-          assert a.fld == 4
+          assert(a.fld == 4)
           a = new A(1, a)
-          assert a.fld == 2
+          assert(a.fld == 2)
           a = new A(1, a, a)
-          assert a.fld == 3
+          assert(a.fld == 3)
           a = new A(1, a, a, a)
-          assert a.fld == 4
+          assert(a.fld == 4)
 
     - decl: |-
           // constructor overloaded with boxing/unboxing parameters
@@ -79,15 +79,15 @@ cases:
           }
       use: |-
           let a = new A(true)
-          assert a.fld == 1.0
+          assert(a.fld == 1.0)
           a = new A(new Boolean())
-          assert a.fld == 2.0
+          assert(a.fld == 2.0)
           a = new A(true, 1.0)
-          assert a.fld == 3.0
+          assert(a.fld == 3.0)
           a = new A(false, new Double())
-          assert a.fld == 4.0
+          assert(a.fld == 4.0)
           a = new A(new Boolean(), new Double())
-          assert a.fld == 5.0
+          assert(a.fld == 5.0)
 
     - decl: |-
           // constructor overloaded with rest parameters
@@ -100,13 +100,13 @@ cases:
           }
       use: |-
           let a: A = new A(new Error(), new Object[1])
-          assert a.fld == 1
+          assert(a.fld == 1)
           a = new A(new Error(), new Long(), new Error())
-          assert a.fld == 2
+          assert(a.fld == 2)
           a = new A(new Error(), new Error())
-          assert a.fld == 3
+          assert(a.fld == 3)
           a = new A(new Error(), new Object(), new Object(), new Object())
-          assert a.fld == 4
+          assert(a.fld == 4)
 
     - decl: |-
           // constructor overloaded with type variables
@@ -120,11 +120,11 @@ cases:
           }
       use: |-
           let a: A<X, Y> = new A<X, Y>(new X())
-          assert a.fld == 1
+          assert(a.fld == 1)
           a = new A<X, Y>(new X(), new Y())
-          assert a.fld == 2
+          assert(a.fld == 2)
           a = new A<X, Y>(new Y(), new X(), new Y())
-          assert a.fld == 3
+          assert(a.fld == 3)
 
     - decl: |-
           // constructor overloaded with multiple parameters with dependent types
@@ -142,16 +142,16 @@ cases:
           let y: Y = new Y()
           let z: Z = new Z()
           let a: A = new A(x)
-          assert a.fld == 3
+          assert(a.fld == 3)
           a = new A(y)
-          assert a.fld == 3
+          assert(a.fld == 3)
           a = new A(z)
-          assert a.fld == 3
+          assert(a.fld == 3)
           a = new A(x, y)
-          assert a.fld == 2
+          assert(a.fld == 2)
           a = new A(z, z)
-          assert a.fld == 2
+          assert(a.fld == 2)
           a = new A(x, y, z)
-          assert a.fld == 1
+          assert(a.fld == 1)
           a = new A(z, z, z)
-          assert a.fld == 1
+          assert(a.fld == 1)

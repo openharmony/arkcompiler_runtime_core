@@ -23,6 +23,22 @@ cases:
       tags: negative, compile-only
 
     - decl: |-
+          class A {
+              constructor(p: Number) {}
+              constructor(v: Double) {}
+          }
+      use: return
+      tags: negative, compile-only
+
+    - decl: |-
+          class A {
+              constructor(p: String) {}
+              constructor(v: string) {}
+          }
+      use: return
+      tags: negative, compile-only
+
+    - decl: |-
           type B = A
           // override-equivalent signatures
           class A {
@@ -68,22 +84,22 @@ cases:
               constructor(p: Double) { this.t = "Double" }
           }
       use: |-
-          assert new A(new Byte(-1 as byte)).getType() == "Byte"
-          assert new A(new Short(-1 as short)).getType() == "Short"
-          assert new A(new Int(-1 as int)).getType() == "Int"
-          assert new A(new Long(-1 as long)).getType() == "Long"
-          assert new A(new Char(c'A')).getType() == "Char"
-          assert new A(new Boolean(false)).getType() == "Boolean"
-          assert new A(new Float(3.14 as float)).getType() == "Float"
-          assert new A(new Double(3.14)).getType() == "Double"
-          assert new A(-1 as long).getType() == "long"
-          assert new A(-1).getType() == "int"
-          assert new A(-1 as short).getType() == "short"
-          assert new A(-1 as byte).getType() == "byte"
-          assert new A(c'A').getType() == "char"
-          assert new A(false).getType() == "boolean"
-          assert new A(3.14).getType() == "double"
-          assert new A(3.14 as float).getType() == "float"
+          assert(new A(new Byte(-1 as byte)).getType() == "Byte")
+          assert(new A(new Short(-1 as short)).getType() == "Short")
+          assert(new A(new Int(-1 as int)).getType() == "Int")
+          assert(new A(new Long(-1 as long)).getType() == "Long")
+          assert(new A(new Char(c'A')).getType() == "Char")
+          assert(new A(new Boolean(false)).getType() == "Boolean")
+          assert(new A(new Float(3.14 as float)).getType() == "Float")
+          assert(new A(new Double(3.14)).getType() == "Double")
+          assert(new A(-1 as long).getType() == "long")
+          assert(new A(-1).getType() == "int")
+          assert(new A(-1 as short).getType() == "short")
+          assert(new A(-1 as byte).getType() == "byte")
+          assert(new A(c'A').getType() == "char")
+          assert(new A(false).getType() == "boolean")
+          assert(new A(3.14).getType() == "double")
+          assert(new A(3.14 as float).getType() == "float")
 
     - decl: |-
           // primitives and boxed with sub/superclass
@@ -130,22 +146,22 @@ cases:
               constructor(p: Double) { super(p) }
           }
       use: |-
-          assert new A(new Byte(-1 as byte)).getType() == "Byte"
-          assert new A(new Short(-1 as short)).getType() == "Short"
-          assert new A(new Int(-1 as int)).getType() == "Int"
-          assert new A(new Long(-1 as long)).getType() == "Long"
-          assert new A(new Char(c'A')).getType() == "Char"
-          assert new A(new Boolean(false)).getType() == "Boolean"
-          assert new A(new Float(3.14 as float)).getType() == "Float"
-          assert new A(new Double(3.14)).getType() == "Double"
-          assert new A(-1 as long).getType() == "long"
-          assert new A(-1).getType() == "int"
-          assert new A(-1 as short).getType() == "short"
-          assert new A(-1 as byte).getType() == "byte"
-          assert new A(c'A').getType() == "char"
-          assert new A(false).getType() == "boolean"
-          assert new A(3.14).getType() == "double"
-          assert new A(3.14 as float).getType() == "float"
+          assert(new A(new Byte(-1 as byte)).getType() == "Byte")
+          assert(new A(new Short(-1 as short)).getType() == "Short")
+          assert(new A(new Int(-1 as int)).getType() == "Int")
+          assert(new A(new Long(-1 as long)).getType() == "Long")
+          assert(new A(new Char(c'A')).getType() == "Char")
+          assert(new A(new Boolean(false)).getType() == "Boolean")
+          assert(new A(new Float(3.14 as float)).getType() == "Float")
+          assert(new A(new Double(3.14)).getType() == "Double")
+          assert(new A(-1 as long).getType() == "long")
+          assert(new A(-1).getType() == "int")
+          assert(new A(-1 as short).getType() == "short")
+          assert(new A(-1 as byte).getType() == "byte")
+          assert(new A(c'A').getType() == "char")
+          assert(new A(false).getType() == "boolean")
+          assert(new A(3.14).getType() == "double")
+          assert(new A(3.14 as float).getType() == "float")
 
     - decl: |-
           // enums
@@ -164,12 +180,12 @@ cases:
               constructor(p: short) { this.t = "short" }
           }
       use: |-
-          assert new A(-1).getType() == "int"
-          assert new A(-2 as short).getType() == "short"
-          assert new A(-3 as byte).getType() == "int"
-          assert new A(Color.Red).getType() == "Color"
-          assert new A("abc").getType() == "string"
-          assert new A(Size.L).getType() == "Size"
+          assert(new A(-1).getType() == "int")
+          assert(new A(-2 as short).getType() == "short")
+          assert(new A(-3 as byte).getType() == "int")
+          assert(new A(Color.Red).getType() == "Color")
+          assert(new A("abc").getType() == "string")
+          assert(new A(Size.L).getType() == "Size")
 
     - decl: |-
           // arrays
@@ -204,26 +220,26 @@ cases:
               constructor(p: Size[]) { this.t = "Size" }
           }
       use: |-
-          assert new A([-1 as byte]).getType() == "byte"
-          assert new A([-1 as short]).getType() == "short"
-          assert new A([-1 as int]).getType() == "int"
-          assert new A([-1 as long]).getType() == "long"
-          assert new A([c'A']).getType() == "char"
-          assert new A([false]).getType() == "boolean"
-          assert new A([3.14 as float]).getType() == "float"
-          assert new A([3.14]).getType() == "double"
-          assert new A([new Byte(-1 as byte)]).getType() == "Byte"
-          assert new A([new Short(-1 as short)]).getType() == "Short"
-          assert new A([new Int(-1)]).getType() == "Int"
-          assert new A([new Long(-1 as long)]).getType() == "Long"
-          assert new A([new Char(c'A')]).getType() == "Char"
-          assert new A([new Boolean(false)]).getType() == "Boolean"
-          assert new A([new Float(3.14 as float)]).getType() == "Float"
-          assert new A([new Double(3.14)]).getType() == "Double"
-          assert new A([new Object()]).getType() == "Object"
-          assert new A([Color.Red]).getType() == "Color"
-          assert new A([Size.M]).getType() == "Size"
-          assert new A(new A[1]).getType() == "A"
+          assert(new A([-1 as byte]).getType() == "byte")
+          assert(new A([-1 as short]).getType() == "short")
+          assert(new A([-1 as int]).getType() == "int")
+          assert(new A([-1 as long]).getType() == "long")
+          assert(new A([c'A']).getType() == "char")
+          assert(new A([false]).getType() == "boolean")
+          assert(new A([3.14 as float]).getType() == "float")
+          assert(new A([3.14]).getType() == "double")
+          assert(new A([new Byte(-1 as byte)]).getType() == "Byte")
+          assert(new A([new Short(-1 as short)]).getType() == "Short")
+          assert(new A([new Int(-1)]).getType() == "Int")
+          assert(new A([new Long(-1 as long)]).getType() == "Long")
+          assert(new A([new Char(c'A')]).getType() == "Char")
+          assert(new A([new Boolean(false)]).getType() == "Boolean")
+          assert(new A([new Float(3.14 as float)]).getType() == "Float")
+          assert(new A([new Double(3.14)]).getType() == "Double")
+          assert(new A([new Object()]).getType() == "Object")
+          assert(new A([Color.Red]).getType() == "Color")
+          assert(new A([Size.M]).getType() == "Size")
+          assert(new A(new A[1]).getType() == "A")
 
     - decl: |-
           // tuples
@@ -252,14 +268,14 @@ cases:
               constructor(p: Boolean) { super(p) }
           }
       use: |-
-          assert new A(new Boolean(true)).getType() == "Boolean"
-          assert new A([3.14, 0.0]).getType() == "number[]"
+          assert(new A(new Boolean(true)).getType() == "Boolean")
+          assert(new A([3.14, 0.0]).getType() == "number[]")
           let t: T = [3.14, ""]
-          assert new A(t).getType() == "T"
+          assert(new A(t).getType() == "T")
           let r: R = [3.14, false]
-          assert new A(r).getType() == "R"
-          assert new A(["3.14", "xyz"]).getType() == "string[]"
-          assert new A().getType() == "none"
+          assert(new A(r).getType() == "R")
+          assert(new A(["3.14", "xyz"]).getType() == "string[]")
+          assert(new A().getType() == "none")
 
     - decl: |-
           // unions
@@ -279,17 +295,17 @@ cases:
               constructor(p: Boolean) { this.t = "Boolean" }
           }
       use: |-
-          assert new A(new Boolean(false)).getType() == "Boolean"
-          assert new A("").getType() == "string"
-          assert new A(1.0).getType() == "number"
+          assert(new A(new Boolean(false)).getType() == "Boolean")
+          assert(new A("").getType() == "string")
+          assert(new A(1.0).getType() == "number")
           let usn: USN = "abc"
-          assert new A(usn).getType() == "USN"
+          assert(new A(usn).getType() == "USN")
           usn = 42.0
-          assert new A(usn).getType() == "USN"
+          assert(new A(usn).getType() == "USN")
           let usb: USB = new Boolean(true)
-          assert new A(usb).getType() == "USB"
+          assert(new A(usb).getType() == "USB")
           usb = "xyz"
-          assert new A(usb).getType() == "USB"
+          assert(new A(usb).getType() == "USB")
 
     - decl: |-
           // function types
@@ -303,7 +319,6 @@ cases:
               constructor() {}
               constructor(p: Object) { this.t = "should never be called" }
               constructor(p: () => void) { this.t = "void-void" }
-              constructor(p: (p: number) => void) { this.t = "number-void" }
               constructor(p: FF) { this.t = "FF" }
               constructor(p: EE) { this.t = "EE" }
           }
@@ -314,14 +329,23 @@ cases:
               return v == "" ? 0.0 : 1.0
           }
           function foo() {
-              assert false
+              assert(false)
           }
       use: |-
-          assert new A(foo).getType() == "void-void"
+          assert(new A(foo).getType() == "void-void")
           let f: FF = fff
-          assert new A(f).getType() == "FF"
-          assert new A(eee).getType() == "EE"
-          assert new A((p: number): void => { assert p == 0.0 }).getType() == "number-void"
+          assert(new A(f).getType() == "FF")
+          assert(new A(eee).getType() == "EE")
+
+    - decl: |-
+          // Parameter names and return types do not influence overload-equivalence
+          type FF=(p: number) => string
+          class A {
+              constructor(i: (i: number) => void) { return 1 }
+              constructor(p: FF) { return 2 }
+          }
+      use: return
+      tags: compile-only, negative
 
     - decl: |-
           // nullish types
@@ -343,16 +367,16 @@ cases:
           }
       use: |-
           let s: S = "ABC"
-          assert new A(s).getType() == "S"
+          assert(new A(s).getType() == "S")
           let sn: SN = "ABC"
-          assert new A(sn).getType() == "SN"
+          assert(new A(sn).getType() == "SN")
           let su: SU = "ABC"
-          assert new A(su).getType() == "SU"
+          assert(new A(su).getType() == "SU")
           let snu: SNU = "ABC"
-          assert new A(snu).getType() == "SNU"
+          assert(new A(snu).getType() == "SNU")
           sn = null
-          assert new A(sn).getType() == "SN"
+          assert(new A(sn).getType() == "SN")
           su = undefined
-          assert new A(su).getType() == "SU"
+          assert(new A(su).getType() == "SU")
           snu = undefined
-          assert new A(snu).getType() == "SNU"
+          assert(new A(snu).getType() == "SNU")

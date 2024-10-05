@@ -994,10 +994,10 @@
 17.experimental_features/12.trailing_lambda/trlambda_func_15.sts
 # end of es2panda fails
 
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_0.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_1.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_2.sts
-13.compilation_units_packages_and_modules/04.import_directives/06.import_path/dir/import_path_dir_3.sts
+13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_0.sts
+13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_1.sts
+13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_2.sts
+13.compilation_units_packages_and_modules/04.import_directives/07.import_path/dir/import_path_dir_3.sts
 
 13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_1.sts
 13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/selective_exports_3.sts
@@ -1131,7 +1131,7 @@
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_8.sts
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over2_10.sts
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over2_12.sts
-17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_7.sts
+17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_11.sts
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_9.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_0_13.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_13.sts
@@ -1157,11 +1157,10 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_7.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_8.sts
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_10.sts
-17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_5.sts
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_6.sts
 17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_9.sts
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over2_8.sts
-17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_4.sts
+17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_10.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_0_5.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_5.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_5.sts
@@ -1171,6 +1170,23 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_0_7.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_7.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab_7.sts
+
+# 14673 Method Overload is not supported
+# enum
+04.names_declarations_and_scopes/05.accesible/type_name_const_enum.sts
+04.names_declarations_and_scopes/05.accesible/type_name_variable_enum.sts
+# union
+04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_23.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_5.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_6.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_7.sts
+# types, lambda
+17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_11.sts
+17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_10.sts
+# nullish types
+17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_13.sts
+17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co2_over_11.sts
+# end
 
 # 17816 cannot overload a function from a package
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_0.sts
@@ -1832,11 +1848,9 @@
 10.interfaces/06.interface_method_declarations/overriding_by_instance_methods/overriding_public_method.sts
 10.interfaces/07.interface_inheritance/inheritance_method_with_declared_signature.sts
 17.experimental_features/07.function_and_method_overloading/02.class_method_overloading/cm_over1_4.sts
-17.experimental_features/07.function_and_method_overloading/03.constructor_overloading/co1_over_4.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_3.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_4.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_5.sts
-
 # es2panda fails: 14691 Abstract classes and interfaces cannot be instantied with array creation expression
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_3.sts
 04.names_declarations_and_scopes/08.function_declarations/function_decl_5.sts
@@ -2125,6 +2139,27 @@
 
 # 17488: Separate module initializer not implemented yet
 13.compilation_units_packages_and_modules/02.separate_module_initializer/import_statements.sts
+
+# es2panda: #18344 Invalid test, ArkTS doesn't have intersection type
+06.contexts_and_conversions/01.assignment-like_contexts/identity2_11.sts
+
+# es2panda: #18598 import type with the same name as not imported module entity
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_class_same_name_2.sts
+
+# es2panda: #18603 export entity as default, imported from another module as non-default
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_2.sts
+
+# test runner: #18046 Update compilation process with modules for AOT mode
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_class_alias.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_class.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_interface.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_var_default.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_var_primitive.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_var_boxed.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_class_same_name.sts
+13.compilation_units_packages_and_modules/04.import_directives/05.type_binding/type_binding_abstract_class.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export.sts
+13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_export.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_abstract_class.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_const_var.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_enum.sts
@@ -2136,30 +2171,65 @@
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_union.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_default_export.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_3.sts
-13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_export.sts
-13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export.sts
-13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_abstract_class.sts
-13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_class_same_name.sts
-13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_var_boxed.sts
-13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_var_default.sts
-13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_var_primitive.sts
-
-# es2panda: #18344 Invalid test, ArkTS doesn't have intersection type
-06.contexts_and_conversions/01.assignment-like_contexts/identity2_11.sts
-
-# es2panda: #18598 import type with the same name as not imported module entity
-13.compilation_units_packages_and_modules/04.import_directives/05.type_import_binding/type_binding_class_same_name_2.sts
-
-# es2panda: #18603 export entity as default, imported from another module as non-default
-13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_2.sts
-
-# test runner: #18046 Update compilation process with modules for AOT mode
-17.experimental_features/14.enumeration_methods/enum_type_methods_pipeline.sts
 
 # es2panda: #15667 Invalid tests, This cases should be allowed
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_hided_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_overrided_method.sts
+
+# es2panda: 14468 Implement readonly parameters
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_0.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_1.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_10.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_11.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_12.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_13.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_14.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_15.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_16.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_17.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_18.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_19.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_2.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_3.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_4.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_5.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_6.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_7.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_8.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_9.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_0.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_10.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_2.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_4.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_6.sts
+04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_context_and_conversion_8.sts
+# end es2panda
+
+# es2panda: 19602
+04.names_declarations_and_scopes/05.accesible/type_name_neg_1.sts
+04.names_declarations_and_scopes/05.accesible/type_name_neg_2.sts
+# end es2panda
+
+# es2panda 19635: compilation segfault, enum
+04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_20.sts
+# end es2panda
+
+# es2panda 19640: compilation segfault, custom type
+04.names_declarations_and_scopes/05.accesible/type_name_interface_prop_22.sts
+# end es2panda
+
+# es2panda 19655: missing CTE for overloaded constructors with different access modifiers
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_1.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_2.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_3.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_4.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_5.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_6.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_7.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_8.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/different_access_modifiers_9.sts
+# end es2panda
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
 ### Issue 19678

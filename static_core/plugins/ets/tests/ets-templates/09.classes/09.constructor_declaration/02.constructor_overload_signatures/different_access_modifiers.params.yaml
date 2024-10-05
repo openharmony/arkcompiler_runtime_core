@@ -1,0 +1,128 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+cases:
+    - tags: |-
+        negative, compile-only
+      decl: |-
+        class A {
+            constructor() { }
+            private constructor() { }
+        }
+
+    - tags: |-
+        negative, compile-only
+      decl: |-
+        class A {
+            constructor(i: Int) { }
+            private constructor(i: int) { }
+        }
+
+    - tags: |-
+        negative, compile-only
+      decl: |-
+        class A {
+            protected constructor(i: int) { }
+            private constructor(j: float) { }
+        }
+
+    - tags: |-
+        negative, compile-only
+      decl: |-
+        class A {
+            constructor() { }
+            protected constructor(j: int) { }
+        }
+
+    - tags: |-
+        negative, compile-only
+      decl: |-
+        class A {
+            constructor(i: int) { }
+            protected constructor() { }
+        }
+
+    - tags: |-
+        negative, compile-only
+      decl: |-
+        class A {
+            constructor(j: int) { }
+            protected constructor(j: float) { }
+            protected constructor(j: string) { }
+        }
+
+    - tags: |-
+        negative, compile-only
+      decl: |-
+        class A {
+            constructor(j: int) { }
+            protected constructor(j: float) { }
+            private constructor(j: string) { }
+        }
+
+    - decl: |-
+        let i: int = 0;
+        class A {
+            static a = new A(1 as int)
+            static b = new A(1 as float)
+            constructor() { i += 1; }
+            private constructor(i: int)
+            private constructor(i: float) {
+                i += 1;
+            }
+        }
+        class B extends A { }
+        function main() {
+            i = 0;
+            new B();
+            assert(i == 3);
+        }
+
+    - decl: |-
+        let i: int = 0;
+        class A {
+            protected constructor()
+            protected constructor(j: int) {
+                i += 1;
+            }
+        }
+        class B extends A { }
+        function main() {
+            i = 0;
+            new B();
+            assert(i == 1);
+            new B(2);
+            assert(i == 2);
+        }
+
+    - decl: |-
+        let i: int = 0;
+        class A {
+            protected constructor()
+            protected constructor(j: int) { i += 1; }
+        }
+        class B extends A {
+            constructor() {
+                super();
+            }
+            constructor(j: int) {
+                super(j);
+            }
+        }
+        function main() {
+            i = 0;
+            new B();
+            assert(i == 1);
+            new B(3);
+            assert(i == 2);
+        }
