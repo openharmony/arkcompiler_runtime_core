@@ -115,6 +115,7 @@ struct Error {
 
     inline Error() : Error("No messages", 0, ErrorType::ERR_NONE, "", 0, 0, "") {}
 
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     inline Error(std::string s, size_t line, ErrorType errorType, std::string overinfo, size_t p, size_t e,
                  std::string buff, ErrorClass classType = ErrorClass::ERROR)
         : type(classType),

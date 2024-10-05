@@ -102,6 +102,7 @@ struct Function {
         ins.emplace_back(instruction);
     }
 
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     Function(std::string s, ark::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
         : name(std::move(s)),
           language(lang),
@@ -130,6 +131,7 @@ struct Function {
         return (metadata->GetAccessFlags() & ACC_STATIC) != 0;
     }
 
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,

@@ -54,6 +54,7 @@ protected:
     ark::MTManagedThread *thread_;
 };
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(BytecodeOptPeepholes, TryBlock)
 {
     pandasm::Parser p;

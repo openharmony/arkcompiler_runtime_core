@@ -80,6 +80,7 @@ Token::Type Findkeyword(std::string_view s)
     return KEYWORDS.at(s);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) big switch case
 std::string_view TokenTypeWhat(Token::Type t)
 {
     if (t >= Token::Type::OPERATION && t < Token::Type::KEYWORD) {

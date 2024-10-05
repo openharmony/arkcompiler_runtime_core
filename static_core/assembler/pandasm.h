@@ -24,6 +24,7 @@ void PrintError(const ark::pandasm::Error &e, const std::string &msg);
 
 void PrintErrors(const ark::pandasm::ErrorList &warnings, const std::string &msg);
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool PrepareArgs(ark::PandArgParser &paParser, const ark::PandArg<std::string> &inputFile,
                  const ark::PandArg<std::string> &outputFile, const ark::PandArg<std::string> &logFile,
                  const ark::PandArg<bool> &help, const ark::PandArg<bool> &verbose, std::ifstream &inputfile, int argc,
@@ -42,6 +43,7 @@ bool EmitProgramInBinary(ark::pandasm::Program &program, ark::PandArgParser &paP
                          const ark::PandArg<std::string> &outputFile, ark::PandArg<bool> &optimize,
                          ark::PandArg<bool> &sizeStat);
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool BuildFiles(ark::pandasm::Program &program, ark::PandArgParser &paParser,
                 const ark::PandArg<std::string> &outputFile, ark::PandArg<bool> &optimize, ark::PandArg<bool> &sizeStat,
                 ark::PandArg<std::string> &scopesFile);

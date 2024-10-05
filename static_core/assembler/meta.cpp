@@ -146,6 +146,7 @@ static Expected<ScalarValue, Metadata::Error> CreatePrimitiveValue(std::string_v
     return ScalarValue::Create<TYPE>(converted);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, huge_method[C++]) big switch case
 static Expected<ScalarValue, Metadata::Error> CreateValue(
     Value::Type type, std::string_view value,
     const std::unordered_map<std::string, std::unique_ptr<AnnotationData>> &annotationIdMap = {})

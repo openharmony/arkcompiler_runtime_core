@@ -44,6 +44,7 @@ set(SOURCES
     meta.cpp
     ins_to_string.cpp
     extensions/extensions.cpp
+    utils/number-utils.cpp
 )
 
 set(META_GEN_H ${CMAKE_CURRENT_BINARY_DIR}/meta_gen.h)

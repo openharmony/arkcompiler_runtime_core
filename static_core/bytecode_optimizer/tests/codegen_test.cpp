@@ -111,6 +111,7 @@ TEST_F(CommonTest, CodeGenBinaryImms)
     EXPECT_TRUE(graph->RunPass<BytecodeGen>(&function, nullptr));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(CommonTest, CodeGenIfImm)
 {
     auto graph = CreateEmptyGraph();

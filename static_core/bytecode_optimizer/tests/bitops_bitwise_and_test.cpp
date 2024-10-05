@@ -20,6 +20,7 @@
 
 namespace ark::bytecodeopt::test {
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(AsmTest, BitopsBitwiseAnd)
 {
     // naive translation of bitops-bitwise-and benchmark

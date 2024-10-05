@@ -19,6 +19,7 @@ import json
 import subprocess
 import tempfile
 import sys
+import logging
 
 SRC_PATH = os.path.realpath(os.path.dirname(__file__))
 testdir = os.path.join(SRC_PATH, "suite")
@@ -47,13 +48,13 @@ args = parser.parse_args()
 
 def log(msg):
     if args.verbose:
-        print(msg)
+        logging.info(msg)
 
 
 def parse_c2p_output(name, stdout, stderr, returncode, d):
     d[name] = {}  # {'name': name: {'code_item section': 11}, {'total': 123}, ..}
     result = {}  # { 'name': name }
-    # TODO: Handle segmentation fault correctly
+    # NOTE(@Csaba Osztrogonac, #19838): Handle segmentation fault correctly
     if returncode != 0:
         d[name] = {"error": stderr.decode('ascii')}
     else:
@@ -69,7 +70,7 @@ def parse_c2p_output(name, stdout, stderr, returncode, d):
 
 def print_sizes_dict(sizes):
     for d in sorted(sizes):
-        print("%28s: %d" % (d, sizes[d]))
+        logging.info("%28s: %d", d, sizes[d])
 
 
 def calc_statistics(sizes):
@@ -94,11 +95,11 @@ def calc_statistics(sizes):
     for d in avgs:
         avgs[d] = round(avgs[d] / total, 1)
 
-    print("\nAverage sizes (in bytes):")
+    logging.info("\nAverage sizes (in bytes):")
     print_sizes_dict(avgs)
-    print("\nMinimum sizes (in bytes):")
+    logging.info("\nMinimum sizes (in bytes):")
     print_sizes_dict(mins)
-    print("\nMaximum sizes (in bytes):")
+    logging.info("\nMaximum sizes (in bytes):")
     print_sizes_dict(maxs)
 
     return {"Average sizes (in bytes)": avgs,
@@ -114,24 +115,27 @@ def run_c2p(test_dir, bin_dir, c2p_opts):
 
     c2p = os.path.join(bin_dir, "c2p")
     if not os.path.exists(c2p):
-        print("c2p executable does not exists (%s)." % os.path.relpath(c2p))
+        logging.error("c2p executable does not exists (%s).", os.path.relpath(c2p))
         exit(2)
     fp = tempfile.NamedTemporaryFile()
-    for dirpath, dirnames, filenames in os.walk(test_dir):
-        for name in filenames:
-            if name.endswith(".class"):
-                test_path = os.path.join(dirpath, name)
-                proc = subprocess.Popen([c2p, "--size-stat"] + c2p_opts + [
-                                        test_path, fp.name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate(timeout=3600)
-                sizes.append(parse_c2p_output(test_path, stdout,
-                             stderr, proc.returncode, result))
-                if proc.returncode == 0:
-                    tests_passed += 1
-                else:
-                    tests_failed += 1
-                    log("Could not process the class file (%s)." % test_path)
-                    pass
+    class_files = (
+        os.path.join(dirpath, name)
+        for dirpath, _, filenames in os.walk(test_dir)
+        for name in filenames
+        if name.endswith(".class")
+    )
+    for test_path in class_files:
+        proc = subprocess.Popen([c2p, "--size-stat"] + c2p_opts + [
+                                test_path, fp.name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate(timeout=3600)
+        sizes.append(parse_c2p_output(test_path, stdout,
+                        stderr, proc.returncode, result))
+        if proc.returncode == 0:
+            tests_passed += 1
+        else:
+            tests_failed += 1
+            log("Could not process the class file (%s)." % test_path)
+
     fp.close()
     return sizes, tests_passed, tests_failed, result
 
@@ -140,7 +144,7 @@ def run_c2p(test_dir, bin_dir, c2p_opts):
 
 if __name__ == '__main__':
     if not os.path.exists(args.testdir):
-        print("Test directory (%s) does not exists." % args.testdir)
+        logging.info("Test directory (%s) does not exists.", args.testdir)
         exit(1)
 
     num_of_tests = 0
@@ -163,13 +167,15 @@ if __name__ == '__main__':
         num_of_tests = passed_tests + failed_tests
         stats = calc_statistics(c2p_sizes)
         if args.json:
-            with open(args.json, 'w') as json_file:
+            flags = os.O_RDWR | os.O_CREAT
+            mode = stat.S_IWUSR | stat.S_IRUSR
+            with os.fdopen(os.open(args.json, flags, mode), 'w') as json_file:
                 json.dump(c2p_res, json_file, indent=4, sort_keys=True)
                 json_file.write("\n")
 
     else:
-        print("Non class input types have not been implemented.")
+        logging.error("Non class input types have not been implemented.")
         exit(2)
 
-    print("Summary:\n========\n  Tests : %d\n  Passed: %d\n  Failed: %d\n"
-          % (num_of_tests, passed_tests, failed_tests))
+    logging.info("Summary:\n========\n  Tests : %d\n  Passed: %d\n  Failed: %d\n",
+        num_of_tests, passed_tests, failed_tests)

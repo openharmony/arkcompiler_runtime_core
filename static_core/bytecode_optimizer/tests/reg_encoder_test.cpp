@@ -25,6 +25,7 @@ namespace ark::bytecodeopt::test {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(CommonTest, RegEncoderF32)
 {
     auto graph = CreateEmptyGraph();
@@ -97,6 +98,7 @@ TEST_F(CommonTest, RegEncoderF32)
     EXPECT_TRUE(GraphComparator().Compare(graph, expected));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
 {
     RuntimeInterfaceMock interface(2U);
@@ -229,6 +231,7 @@ TEST_F(CommonTest, RegEncoderHoldingSpillFillInst)
     EXPECT_TRUE(GraphComparator().Compare(graph, expected));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(CommonTest, RegEncoderStoreObject)
 {
     // This test covers function CheckWidthVisitor::VisitStoreObject

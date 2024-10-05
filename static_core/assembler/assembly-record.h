@@ -40,6 +40,7 @@ struct Record {
     std::string sourceFile; /* The file in which the record is defined or empty */
     std::optional<FileLocation> fileLocation;
 
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     Record(std::string s, ark::panda_file::SourceLang lang, size_t bL, size_t bR, std::string fC, bool d, size_t lN)
         : name(std::move(s)),
           language(lang),

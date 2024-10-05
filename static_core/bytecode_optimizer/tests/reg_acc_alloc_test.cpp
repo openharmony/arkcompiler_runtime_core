@@ -552,6 +552,7 @@ TEST_F(RegAccAllocTest, PhiWithSubsequentCompareInstruction)
  * A switch-case example. There are different arithmetic instructions
  * in the case blocks. These instructions are the inputs of a Phi.
  */
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(RegAccAllocTest, SwitchCase)
 {
     auto graph = CreateEmptyGraph();
@@ -716,6 +717,7 @@ TEST_F(RegAccAllocTest, StoreStaticInstruction)
  * Test if Phi uses Phi as input.
  * This case is not supported right now.
  */
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST_F(RegAccAllocTest, PhiUsesPhiAsInput)
 {
     auto graph = CreateEmptyGraph();

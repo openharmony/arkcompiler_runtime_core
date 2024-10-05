@@ -32,6 +32,7 @@
 namespace ark::pandasm {
 
 enum class Opcode {
+// CC-OFFNXT(G.PRE.02) opcode is class member
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) opcode,
     PANDA_INSTRUCTION_LIST(OPLIST)
@@ -85,16 +86,16 @@ constexpr std::array<int, static_cast<size_t>(Opcode::NUM_OPCODES)> DEF_IDX_TABL
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) (use_idxs),
-// clang-format off
-constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>, static_cast<size_t>(Opcode::NUM_OPCODES)> USE_IDXS_TABLE = {
-    PANDA_INSTRUCTION_LIST(OPLIST)};
-// clang-format on
+constexpr std::array<std::array<int, MAX_NUMBER_OF_SRC_REGS>, static_cast<size_t>(Opcode::NUM_OPCODES)> USE_IDXS_TABLE =
+    {PANDA_INSTRUCTION_LIST(OPLIST)};  // CC-OFF(G.FMT.03) any style changes will worsen readability
 #undef OPLIST
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define OPLIST(opcode, name, optype, width, flags, def_idx, use_idxs, prof_size) (prof_size),
-constexpr std::array<unsigned, static_cast<size_t>(Opcode::NUM_OPCODES) + 1> INST_PROFILE_SIZES = {
-    PANDA_INSTRUCTION_LIST(OPLIST) 0};
+// clang-format off
+constexpr std::array<unsigned, static_cast<size_t>(Opcode::NUM_OPCODES) + 1> INST_PROFILE_SIZES =
+    {PANDA_INSTRUCTION_LIST(OPLIST) 0};  // CC-OFF(G.FMT.03) any style changes will worsen readability
+// clang-format on
 #undef OPLIST
 
 // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
@@ -119,6 +120,7 @@ struct Ins {
     PANDA_PUBLIC_API std::string ToString(const std::string &endline = "", bool printArgs = false,
                                           size_t firstArgIdx = 0) const;
 
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     bool Emit(BytecodeEmitter &emitter, panda_file::MethodItem *method,
               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods,
               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,

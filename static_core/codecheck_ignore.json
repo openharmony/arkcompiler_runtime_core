@@ -1,6 +1,4 @@
 {
-  "assembler": "*",
-  "bytecode_optimizer": "*",
   "cmake": "*",
   "CMakeLists.txt": {"bc-40015": "*"},
   "cross_values": "*",

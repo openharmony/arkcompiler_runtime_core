@@ -17,6 +17,7 @@ import argparse
 import os
 import json
 import subprocess
+import logging
 
 SRC_PATH = os.path.realpath(os.path.dirname(__file__))
 
@@ -39,11 +40,11 @@ args = parser.parse_args()
 
 if __name__ == '__main__':
     if not os.path.exists(args.old):
-        print("Input file (%s) does not exists." % args.old)
+        logging.error("Input file (%s) does not exists.", args.old)
         exit(1)
 
     if not os.path.exists(args.new):
-        print("Input file (%s) does not exists." % args.new)
+        logging.error("Input file (%s) does not exists.", args.new)
         exit(1)
 
     with open(args.old, 'r') as old_fp, open(args.new, 'r') as new_fp:
@@ -75,8 +76,10 @@ if __name__ == '__main__':
                     sum_old += old_size
                     sum_new += new_size
                     diff = old_size - new_size
-                    result[filename] = {"old_size": old_size,
-                                        "new_size": new_size, "diff": diff}
+                    result[filename] = {
+                        "old_size": old_size,
+                        "new_size": new_size, "diff": diff
+                    }
                     if diff > 0:
                         optimized_files += 1
                         sum_optimized_old += old_size
@@ -94,43 +97,47 @@ if __name__ == '__main__':
             failed_old += 1
             failed_log_old[filename] = old_res[filename]
 
-    print("Classes that have been optimized:\n  Code_item section size:\n|Old: |New: |Diff:|Per:  |File:")
+    logging.info("Classes that have been optimized:\n  Code_item section size:\n|Old: |New: |Diff:|Per:  |File:")
     for r in result:
         if result[r]["diff"] > 0:
-            print("|{:5d}|{:5d}|{:5d}|{:5.2f}%| {:s}".format(
+            logging.info("|%5d|%5d|%5d|%5.2f%| %s",
                 result[r]["old_size"],
                 result[r]["new_size"],
                 result[r]["diff"],
-                100 * (1 - float(result[r]["new_size"]) / result[r]["old_size"]), r))
+                100 * (1 - float(result[r]["new_size"]) / result[r]["old_size"]), r)
 
-    print("""\nSummary:\n=============\
-    \n Total code_item section size of baseline files: {:d} bytes\
-    \n Total code_item section size of compared files: {:d} bytes\
-    \n Difference: {:d} bytes [{:3.2f}%]\
-    \n Number of optimized files: {:d}\
-    \n Number of not optimized files : {:d}\
-    \n Files with no code item section: {:d}\
-    \n Files that are bigger than baseline: {:d}\
-    \n Failed tests on baseline: {:d}\
-    \n Failed tests compared to baseline: {:d}\
-    \n============="""
-          .format(sum_old, sum_new, sum_old - sum_new,
-                  100 * (1 - float(sum_new) / sum_old) if sum_old != 0 else 0,
-                  optimized_files, not_optimized_files, empty_files, de_optimized_files, failed_old, failed_new))
+    logging.info("""\nSummary:\n=============\
+    \n Total code_item section size of baseline files: %d bytes\
+    \n Total code_item section size of compared files: %d bytes\
+    \n Difference: %d bytes [%3.2f%]\
+    \n Number of optimized files: %d\
+    \n Number of not optimized files : %d\
+    \n Files with no code item section: %d\
+    \n Files that are bigger than baseline: %d\
+    \n Failed tests on baseline: %d\
+    \n Failed tests compared to baseline: %d\
+    \n=============""",
+        sum_old, sum_new, sum_old - sum_new,
+        100 * (1 - float(sum_new) / sum_old) if sum_old != 0 else 0,
+        optimized_files, not_optimized_files, empty_files, de_optimized_files, failed_old, failed_new)
 
-    print("""\nStatistics on optimized files:\n============= \
-    \n Total code_item section size of baseline files: {:d} bytes\
-    \n Total code_item section size of compared files: {:d} bytes\
-    \n Difference: {:d} bytes [{:3.2f}%]\
-    \n============="""
-          .format(sum_optimized_old, sum_optimized_new,
-                  sum_optimized_old - sum_optimized_new,
-                  100 * (1 - float(sum_optimized_new) / sum_optimized_old) if sum_optimized_old != 0 else 0))
+    logging.info("""\nStatistics on optimized files:\n============= \
+    \n Total code_item section size of baseline files: %d bytes\
+    \n Total code_item section size of compared files: %d bytes\
+    \n Difference: %d bytes [%3.2f%]\
+    \n=============""",
+        sum_optimized_old, sum_optimized_new,
+        sum_optimized_old - sum_optimized_new,
+        100 * (1 - float(sum_optimized_new) / sum_optimized_old) if sum_optimized_old != 0 else 0)
 
     if args.failed:
-        with open(args.failed, 'w') as fp:
-            flog = {"Errors on baseline tests": failed_log_old,
-                    "Errors on compared tests": failed_log_new}
+        flags = os.O_RDWR | os.O_CREAT
+        mode = stat.S_IWUSR | stat.S_IRUSR
+        with os.fdopen(os.open(args.failed, flags, mode), 'w') as fp:
+            flog = {
+                "Errors on baseline tests": failed_log_old,
+                "Errors on compared tests": failed_log_new
+            }
 
             json.dump(flog, fp, indent=4)
             fp.write("\n")
