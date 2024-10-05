@@ -47,6 +47,8 @@ class jscall {
     native static str$nsn(top: JSValue, qname: String, a0: double, a1: String, a2: double): String;
     native static str$s(top: JSValue, qname: String, a0: String): String;
 
+    native static bigint$a(top: JSValue, qname: String, v0: JSValue): BigInt;
+
     native static any$a(top: JSValue, qname: String, v0: JSValue): JSValue;
     native static any$a$obj(top: JSValue, qname: String, v0: JSValue): NullishType;
     native static any$b(top: JSValue, qname: String, v0: boolean): JSValue;
@@ -60,6 +62,7 @@ class jscall {
     native static any$As(top: JSValue, qname: String, v0: String[]): JSValue;
     native static any$Ao(top: JSValue, qname: String, v0: Object[]): JSValue;
     native static any$aaaa(top: JSValue, qname: String, v0: JSValue, v1: JSValue, v2: JSValue, v3: JSValue): JSValue;
+    native static any$bi(top: JSValue, qname: String, v0: BigInt): JSValue;
     // Remove after JSValue cast fix
     native static any$(top: JSValue, qname: String, v0: JSValue): JSValue;
 
@@ -148,6 +151,44 @@ function testObject(): boolean {
     let v = JSRuntime.createObject();
     let r = "object:[object Object]";
     return r == vstringify(jscall.any$a(jsvars.m, ".identity", v));
+}
+
+function testBigint(): boolean {
+    let v1: bigint = -1234567890123456789012345678901234567890n;
+    let r1 = "bigint:-1234567890123456789012345678901234567890";
+    v1 = jscall.bigint$a(jsvars.m, ".identity", jscall.any$bi(jsvars.m, ".identity", v1));
+
+    let v2: bigint = 1234567890123456789012345678901234567890n;
+    let r2 = "bigint:1234567890123456789012345678901234567890";
+    v2 = jscall.bigint$a(jsvars.m, ".identity", jscall.any$bi(jsvars.m, ".identity", v2));
+
+    let v3: bigint = 0n;
+    let r3 = "bigint:0";
+    v3 = jscall.bigint$a(jsvars.m, ".identity", jscall.any$bi(jsvars.m, ".identity", v3));
+
+    let v4: bigint = -0n;
+    let r4 = "bigint:0";
+    v4 = jscall.bigint$a(jsvars.m, ".identity", jscall.any$bi(jsvars.m, ".identity", v4));
+
+    let v5: bigint = -18446744073709551614n; // FF FF FF FF FF FF FF FE
+    let r5 = "bigint:-18446744073709551614";
+    v5 = jscall.bigint$a(jsvars.m, ".identity", jscall.any$bi(jsvars.m, ".identity", v5));
+
+    let v6: bigint = -4703919738795935662080n; // FF 00 00 00 00 00 00 00 00
+    let r6 = "bigint:-4703919738795935662080";
+    v6 = jscall.bigint$a(jsvars.m, ".identity", jscall.any$bi(jsvars.m, ".identity", v6));
+
+    let v7: bigint = 2147483648n; // 2^31
+    let r7 = "bigint:2147483648";
+    v7 = jscall.bigint$a(jsvars.m, ".identity", jscall.any$bi(jsvars.m, ".identity", v7));
+
+    return r1 == vstringify(jscall.any$bi(jsvars.m, ".identity", v1)) &&
+           r2 == vstringify(jscall.any$bi(jsvars.m, ".identity", v2)) &&
+           r3 == vstringify(jscall.any$bi(jsvars.m, ".identity", v3)) &&
+           r4 == vstringify(jscall.any$bi(jsvars.m, ".identity", v4)) &&
+           r5 == vstringify(jscall.any$bi(jsvars.m, ".identity", v5)) &&
+           r6 == vstringify(jscall.any$bi(jsvars.m, ".identity", v6)) &&
+           r7 == vstringify(jscall.any$bi(jsvars.m, ".identity", v7));
 }
 
 function testStringOps(): boolean {

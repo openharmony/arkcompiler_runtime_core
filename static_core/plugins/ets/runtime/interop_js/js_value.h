@@ -21,6 +21,7 @@
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "runtime/include/coretypes/class.h"
+#include "utils/small_vector.h"
 #include <node_api.h>
 
 namespace ark::ets::interop::js {
@@ -135,6 +136,12 @@ public:
         return GetData<double>();
     }
 
+    std::pair<SmallVector<uint64_t, 4U>, int> *GetBigInt() const
+    {
+        ASSERT(GetType() == napi_bigint);
+        return GetData<std::pair<SmallVector<uint64_t, 4U>, int> *>();
+    }
+
     JSValueStringStorage::CachedEntry GetString() const
     {
         ASSERT(GetType() == napi_string);
@@ -158,6 +165,9 @@ public:
     JSValue() = delete;
 
 private:
+    static JSValue *CreateByType(InteropCtx *ctx, napi_env env, napi_value nvalue, napi_valuetype jsType,
+                                 JSValue *jsvalue);
+
     static constexpr bool IsRefType(napi_valuetype type)
     {
         return type == napi_object || type == napi_function || type == napi_symbol;
@@ -165,7 +175,7 @@ private:
 
     static constexpr bool IsFinalizableType(napi_valuetype type)
     {
-        return type == napi_string || IsRefType(type);
+        return type == napi_string || type == napi_bigint || IsRefType(type);
     }
 
     void SetType(napi_valuetype type)
@@ -246,6 +256,13 @@ private:
     {
         SetType(napi_string);
         SetData(value);
+    }
+
+    void SetBigInt(std::pair<SmallVector<uint64_t, 4U>, int> &&value)
+    {
+        SetType(napi_bigint);
+        SetData(new std::pair<SmallVector<uint64_t, 4U>, int>(std::move(value)));
+        // NOLINTNEXTLINE(clang-analyzer-cplusplus.NewDeleteLeaks)
     }
 
     void SetRefValue(napi_env env, napi_value jsValue, napi_valuetype type)

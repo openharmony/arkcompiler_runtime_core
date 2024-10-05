@@ -109,6 +109,11 @@
     FN_MACRO(napi_open_handle_scope, napi_env, env, napi_handle_scope *, result)                                       \
     FN_MACRO(napi_create_uint32, napi_env, env, uint32_t, value, napi_value *, result)                                 \
     FN_MACRO(napi_create_double, napi_env, env, double, value, napi_value *, result)                                   \
+    FN_MACRO(napi_create_bigint_words, napi_env, env, int, sign_bit, size_t, word_count, const uint64_t *, words,      \
+             napi_value *, result)                                                                                     \
+    FN_MACRO(napi_get_value_bigint_uint64, napi_env, env, napi_value, value, uint64_t *, result, bool *, lossless)     \
+    FN_MACRO(napi_get_value_bigint_words, napi_env, env, napi_value, value, int *, sign_bit, size_t *, word_count,     \
+             uint64_t *, words)                                                                                        \
     FN_MACRO(napi_get_arraybuffer_info, napi_env, env, napi_value, arraybuffer, void **, data, size_t *, byte_length)  \
     FN_MACRO(napi_define_class, napi_env, env, const char *, utf8name, size_t, length, napi_callback, constructor,     \
              void *, data, size_t, property_count, const napi_property_descriptor *, properties, napi_value *, result) \

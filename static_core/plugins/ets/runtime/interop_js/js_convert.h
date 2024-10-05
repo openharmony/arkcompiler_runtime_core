@@ -294,6 +294,62 @@ JSCONVERT_UNWRAP(String)
     std::string value = GetString(env, jsVal);
     return EtsString::CreateFromUtf8(value.data(), value.length());
 }
+JSCONVERT_DEFINE_TYPE(BigInt, EtsBigInt *);
+JSCONVERT_WRAP(BigInt)
+{
+    auto size = etsVal->GetBytes()->GetActualLength();  // size includes extra sign element
+    auto data = etsVal->GetBytes()->GetData();
+
+    std::vector<uint32_t> etsArray;
+    etsArray.reserve(size);
+    for (size_t i = 0; i < size; ++i) {
+        etsArray.emplace_back(static_cast<uint32_t>(data->Get(i)->GetValue()));
+    }
+
+    SmallVector<uint64_t, 4U> jsArray;
+    int sign = 0;
+    if (size > 1) {
+        sign = GeBigIntSign(etsArray);
+        if (sign == 1) {
+            ConvertFromTwosComplement(etsArray);
+        }
+
+        jsArray = ConvertBigIntArrayFromEtsToJs(etsArray);
+    } else {
+        jsArray = {0};
+    }
+    napi_value jsVal;
+    NAPI_CHECK_FATAL(napi_create_bigint_words(env, sign, jsArray.size(), jsArray.data(), &jsVal));
+
+    return jsVal;
+}
+JSCONVERT_UNWRAP(BigInt)
+{
+    if (UNLIKELY(GetValueType(env, jsVal) != napi_bigint)) {
+        TypeCheckFailed();
+        return {};
+    }
+
+    auto [words, signBit] = GetBigInt(env, jsVal);
+    std::vector<EtsInt> array = ConvertBigIntArrayFromJsToEts(words, signBit);
+
+    auto arrayKlass = EtsClass::FromRuntimeClass(ctx->GetArrayClass());
+    auto etsIntArray = EtsTypedObjectArray<EtsBoxPrimitive<EtsInt>>::Create(arrayKlass, array.size());
+
+    for (size_t i = 0; i < array.size(); ++i) {
+        etsIntArray->Set(i, EtsBoxPrimitive<EtsInt>::Create(EtsCoroutine::GetCurrent(), array[i]));
+    }
+
+    auto bigIntArrayField = EtsBoxedIntArray::FromEtsObject(EtsObject::Create(arrayKlass));
+    bigIntArrayField->SetFieldPrimitive<EtsInt>(EtsBoxedIntArray::GetActualLengthOffset(), false, array.size());
+    bigIntArrayField->SetFieldObject(EtsBoxedIntArray::GetBufferOffset(), reinterpret_cast<EtsObject *>(etsIntArray));
+
+    auto bigintKlass = EtsClass::FromRuntimeClass(ctx->GetBigIntClass());
+    auto bigInt = EtsBigInt::FromEtsObject(EtsObject::Create(bigintKlass));
+    bigInt->SetFieldObject(EtsBigInt::GetBytesOffset(), bigIntArrayField);
+
+    return bigInt;
+}
 
 JSCONVERT_DEFINE_TYPE(JSValue, JSValue *);
 JSCONVERT_WRAP(JSValue)
