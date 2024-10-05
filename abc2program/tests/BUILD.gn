@@ -33,7 +33,10 @@ abc2prog_test_deps = [
 test_ts_dir = "//arkcompiler/runtime_core/abc2program/tests/ts/"
 test_json_dir = "//arkcompiler/runtime_core/abc2program/tests/json/"
 
-abc2prog_test_ts_files = [ "HelloWorld" ]
+abc2prog_test_ts_files = [
+  "HelloWorld",
+  "Annotations",
+]
 
 foreach(file, abc2prog_test_ts_files) {
   es2abc_gen_abc("gen_${file}_abc") {
@@ -43,6 +46,9 @@ foreach(file, abc2prog_test_ts_files) {
     src_js = rebase_path(test_ts)
     dst_file = rebase_path(test_abc)
     extra_args = [ "--module" ]
+    if (file == "Annotations") {
+      extra_args += [ "--enable-annotations" ]
+    }
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
   }

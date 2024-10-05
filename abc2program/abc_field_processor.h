@@ -29,6 +29,9 @@ public:
     void FillProgramData() override;
 
 private:
+    void FillLiteralArrayMetaData();
+    void FillStringMetaData();
+    void FillU32MetaData();
     void FillFieldData();
     void FillFieldName();
     void FillFieldType();

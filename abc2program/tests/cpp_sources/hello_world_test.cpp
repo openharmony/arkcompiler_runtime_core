@@ -41,9 +41,16 @@ struct FuncName {
     std::string async_generate = ".#*#asyncGenerateFunc";
     std::string async_arrow = ".#*#asyncArrowFunc";
     std::string nested_literal_array = ".#~@2>#NestedLiteralArray";
+    std::string class_with_default_annotation = ".#~A=#A";
+    std::string class_with_spec_annotation = ".#~B=#B";
+};
+
+struct RecordName {
+    std::string annotation = "Anno";
 };
 
 const FuncName FUNC_NAME;
+const RecordName RECORD_NAME;
 const std::string HELLO_WORLD_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorld.abc";
 const std::string HELLO_WORLD_DEBUG_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorldDebug.abc";
 const std::string JSON_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "JsonTest.abc";
@@ -66,12 +73,21 @@ constexpr uint8_t NUM_OF_NAMESPACE_IMPORTS = 1;
 constexpr uint8_t NUM_OF_LOCAL_EXPORTS = 1;
 constexpr uint8_t NUM_OF_INDIRECT_EXPORTS = 1;
 constexpr uint8_t NUM_OF_STAR_EXPORTS = 1;
+const std::string ANNOTATIONS_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "Annotations.abc";
+
 
 static const pandasm::Function *GetFunction(const std::string &name,
                                             const pandasm::Program &program)
 {
     ASSERT(program.function_table.find(name) != program.function_table.end());
     return &(program.function_table.find(name)->second);
+}
+
+static const pandasm::Record *GetRecord(const std::string &name,
+                                        const pandasm::Program &program)
+{
+    ASSERT(program.record_table.find(name) != program.record_table.end());
+    return &(program.record_table.find(name)->second);
 }
 
 class Abc2ProgramHelloWorldTest : public testing::Test {
@@ -146,6 +162,28 @@ public:
 
     Abc2ProgramDriver driver_;
     const pandasm::Program *prog_ = nullptr;
+};
+
+class Abc2ProgramAnnotationTest : public testing::Test {
+public:
+    static void SetUpTestCase(void) {}
+    static void TearDownTestCase(void) {}
+    void SetUp()
+    {
+        (void)driver_.Compile(ANNOTATIONS_ABC_TEST_FILE_NAME);
+        prog_ = &(driver_.GetProgram());
+        a_function_ = GetFunction(FUNC_NAME.class_with_default_annotation, *prog_);
+        b_function_ = GetFunction(FUNC_NAME.class_with_spec_annotation, *prog_);
+        anno_record_ = GetRecord(RECORD_NAME.annotation, *prog_);
+    }
+
+    void TearDown() {}
+
+    Abc2ProgramDriver driver_;
+    const pandasm::Program *prog_ = nullptr;
+    const pandasm::Function *a_function_ = nullptr;
+    const pandasm::Function *b_function_ = nullptr;
+    const pandasm::Record *anno_record_ = nullptr;
 };
 
 /*------------------------------------- Cases of release mode below -------------------------------------*/
@@ -883,6 +921,110 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_Label, Tes
     std::string result_null = test.GetMappedLabel(label2, label_map);
     EXPECT_EQ(result_found, "second_mapped_label");
     EXPECT_EQ(result_null, "");
+}
+
+/**
+ * @tc.name: abc2program_annotations_test_Record
+ * @tc.desc: record fields compare
+ * @tc.type: FUNC
+ * @tc.require: IARNAU
+ */
+HWTEST_F(Abc2ProgramAnnotationTest, abc2program_annotations_test_Record, TestSize.Level1)
+{
+    const auto &fields = anno_record_->field_list;
+    for (auto& field : fields) {
+        EXPECT_TRUE(field.name == "a" || field.name == "b" || field.name == "c" || field.name == "d" ||
+                    field.name == "e" || field.name == "f");
+        if (field.name == "a") {
+            EXPECT_EQ(field.type.GetName(), "f64");
+            EXPECT_EQ(field.metadata->GetValue()->GetValue<double>(), 7);
+        }
+        if (field.name == "b") {
+            EXPECT_EQ(field.type.GetName(), "f64[]");
+            auto &litarr = prog_->literalarray_table.at(field.metadata->GetValue()->GetValue<std::string>());
+            EXPECT_EQ(litarr.literals_.size(), 4);
+        }
+        if (field.name == "c") {
+            EXPECT_EQ(field.type.GetName(), "panda.String");
+            EXPECT_EQ(field.metadata->GetValue()->GetValue<std::string>(), "abc");
+        }
+        if (field.name == "d") {
+            EXPECT_EQ(field.type.GetName(), "u1");
+            EXPECT_EQ(field.metadata->GetValue()->GetValue<bool>(), false);
+        }
+        if (field.name == "e") {
+            EXPECT_EQ(field.type.GetName(), "f64[]");
+            auto &litarr = prog_->literalarray_table.at(field.metadata->GetValue()->GetValue<std::string>());
+            EXPECT_EQ(litarr.literals_.size(), 6);
+        }
+        if (field.name == "f") {
+            EXPECT_EQ(field.type.GetName(), "f64");
+            EXPECT_EQ(field.metadata->GetValue()->GetValue<double>(), 2);
+        }
+    }
+}
+
+/**
+ * @tc.name: abc2program_annotations_test_function_annotation
+ * @tc.desc: check if annotated function has annotation
+ * @tc.type: FUNC
+ * @tc.require: IARNAU
+ */
+HWTEST_F(Abc2ProgramAnnotationTest, abc2program_annotations_test_function_annotation, TestSize.Level1)
+{
+    auto &annotations = a_function_->metadata->GetAnnotations();
+    auto iter = std::find_if(annotations.begin(), annotations.end(), [](const pandasm::AnnotationData &anno) {
+        return anno.GetName() == "Anno";
+    });
+    EXPECT_NE(iter, annotations.end());
+    EXPECT_EQ(iter->GetName(), "Anno");
+}
+
+/**
+ * @tc.name: abc2program_annotations_test_function_annotation_fields
+ * @tc.desc: annotation of function fields comparison
+ * @tc.type: FUNC
+ * @tc.require: IARNAU
+ */
+HWTEST_F(Abc2ProgramAnnotationTest, abc2program_annotations_test_function_annotation_fields, TestSize.Level1)
+{
+    auto &annotations = b_function_->metadata->GetAnnotations();
+    auto anno = std::find_if(annotations.begin(), annotations.end(), [](const pandasm::AnnotationData &anno) {
+        return anno.GetName() == "Anno";
+    });
+    EXPECT_NE(anno, annotations.end());
+    EXPECT_EQ(anno->GetName(), "Anno");
+    const auto &elements = anno->GetElements();
+    for (auto& elem : elements) {
+        EXPECT_TRUE(elem.GetName() == "a" || elem.GetName() == "b" || elem.GetName() == "c" || elem.GetName() == "d" ||
+                    elem.GetName() == "e" || elem.GetName() == "f");
+        if (elem.GetName() == "a") {
+            EXPECT_EQ(elem.GetValue()->GetType(), pandasm::Value::Type::F64);
+            EXPECT_EQ(elem.GetValue()->GetAsScalar()->GetValue<double>(), 5);
+        }
+        if (elem.GetName() == "b") {
+            EXPECT_EQ(elem.GetValue()->GetType(), pandasm::Value::Type::LITERALARRAY);
+            auto &litarr = prog_->literalarray_table.at(elem.GetValue()->GetAsScalar()->GetValue<std::string>());
+            EXPECT_EQ(litarr.literals_.size(), 6);
+        }
+        if (elem.GetName() == "c") {
+            EXPECT_EQ(elem.GetValue()->GetType(), pandasm::Value::Type::STRING);
+            EXPECT_EQ(elem.GetValue()->GetAsScalar()->GetValue<std::string>(), "def");
+        }
+        if (elem.GetName() == "d") {
+            EXPECT_EQ(elem.GetValue()->GetType(), pandasm::Value::Type::U1);
+            EXPECT_EQ(elem.GetValue()->GetAsScalar()->GetValue<bool>(), true);
+        }
+        if (elem.GetName() == "e") {
+            EXPECT_EQ(elem.GetValue()->GetType(), pandasm::Value::Type::LITERALARRAY);
+            auto &litarr = prog_->literalarray_table.at(elem.GetValue()->GetAsScalar()->GetValue<std::string>());
+            EXPECT_EQ(litarr.literals_.size(), 4);
+        }
+        if (elem.GetName() == "f") {
+            EXPECT_EQ(elem.GetValue()->GetType(), pandasm::Value::Type::F64);
+            EXPECT_EQ(elem.GetValue()->GetAsScalar()->GetValue<double>(), 3);
+        }
+    }
 }
 
 };  // panda::abc2program
