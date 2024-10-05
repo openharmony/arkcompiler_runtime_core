@@ -50,7 +50,8 @@ struct LocalVariableInfo {
 
     bool IsAccessibleAt(uint32_t offset) const
     {
-        return startOffset <= offset && offset <= endOffset;
+        // Variable is accessible strictly after its definition
+        return startOffset < offset && offset <= endOffset;
     }
 };
 

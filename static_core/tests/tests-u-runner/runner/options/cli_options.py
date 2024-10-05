@@ -346,6 +346,9 @@ def add_es2panda_args(parser: argparse.ArgumentParser) -> None:
         default=None, type=lambda arg: check_int(arg, "es2panda-opt-level", is_zero_allowed=True),
         dest='es2panda_opt_level', help='es2panda opt-level. By default 2')
     parser.add_argument(
+        '--es2panda-debug-info', action='store_true',
+        dest='es2panda_debug_info', help='Compile with debug-info, false by default')
+    parser.add_argument(
         '--arktsconfig', action='store', dest='arktsconfig',
         type=is_file, default=None,
         help='path to arktsconfig file')
