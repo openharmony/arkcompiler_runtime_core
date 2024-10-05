@@ -62,3 +62,9 @@ options:
   default: false
   description: In this mode aspt_converter retrieves information from .aspt file about necessary modules paths on device 
                and then dump this paths to outfile, that specified in --output
+
+- name: dump-system-frames
+  type: bool
+  default: false
+  description: With this flag aspt converter will print info about bridge frames but only if they are the top on the
+               stack.

@@ -79,6 +79,8 @@ private:
     DumpType dumpType_ {DumpType::THREAD_SEPARATION_BY_TID};
     bool buildColdGraph_ {false};
 
+    bool buildSystemFrames_ {false};
+
     std::optional<SubstituteModules> substituteDirectories_;
 };
 
