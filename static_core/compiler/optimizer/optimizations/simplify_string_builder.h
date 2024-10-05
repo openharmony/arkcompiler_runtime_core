@@ -30,6 +30,7 @@ namespace ark::compiler {
  * 2. Replaces String Builder usage with string concatenation whenever optimal
  * 3. Optimizes String Builder concatenation loops
  * 4. Merges consecutive String Builder append string calls into one appendN call
+ * 5. Merges consecutive String Builders into one String Builder if possible
  *
  * See compiler/docs/simplify_sb_doc.md for complete documentation
  */
@@ -254,6 +255,19 @@ private:
     void ReplaceWithAppendIntrinsic(Inst *instance, const InstVector &calls, size_t from, size_t to);
     void OptimizeStringBuilderAppendChain(BasicBlock *block);
 
+    // 5. Merges consecutive String Builders into one String Builder if possible
+    using InstPair = std::pair<Inst *, Inst *>;
+    using StringBuilderFirstLastCallsMap = ArenaMap<Inst *, InstPair>;
+    void CollectStringBuilderFirstCalls(BasicBlock *block);
+    void CollectStringBuilderLastCalls(BasicBlock *block);
+    void CollectStringBuilderFirstLastCalls();
+    void CollectStringBuilderChainCalls(Inst *instance, Inst *inputInstance);
+    StringBuilderCallsMap &CollectStringBuilderChainCalls();
+    bool CanMergeStringBuilders(Inst *instance, const InstPair &instanceCalls, Inst *inputInstance);
+    void Cleanup(Inst *instance, Inst *instanceFirstAppendCall, Inst *inputInstanceToStringCall);
+    void FixBrokenSaveStatesForStringBuilderCalls(Inst *instance);
+    void OptimizeStringBuilderChain();
+
 private:
     bool isApplied_ {false};
     SaveStateBridgesBuilder ssb_ {};
@@ -263,6 +277,7 @@ private:
     ArenaVector<StringBuilderUsage> usages_;
     ArenaVector<ConcatenationLoopMatch> matches_;
     StringBuilderCallsMap stringBuilderCalls_;
+    StringBuilderFirstLastCallsMap stringBuilderFirstLastCalls_;
 };
 
 }  // namespace ark::compiler

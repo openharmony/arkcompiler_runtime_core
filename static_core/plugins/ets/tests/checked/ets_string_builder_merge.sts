@@ -1,0 +1,912 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+//! CHECKER       AOT IR Builder, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           entry: "ETSGLOBAL::main"
+//! RUN_PAOC      options: "--compiler-regex='.*chain_concat[0-9]*' --compiler-inlining=false"
+//!
+//! METHOD        "ETSGLOBAL::chain_concat0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",10
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::chain_concat1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",7
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",7
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::chain_concat2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",9
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",18
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",9
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",8
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::chain_concat3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",14
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",28
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",14
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",12
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
+//!
+//! METHOD        "ETSGLOBAL::uber_chain_concat4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",64
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",128
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",64
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
+//!
+//! METHOD        "ETSGLOBAL::supported_chain_concat5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendChar",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendChar",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::supported_chain_concat6"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",37
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendBool",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendChar",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendShort",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendLong",2
+//! INST_COUNT    "std.core.StringBuilder::append",8
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",22
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",2
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::unsupported_append_chain_concat7"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_constructor_chain_concat8"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_usage_chain_concat9"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat10"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat11"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat12"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat13"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//!
+//! METHOD        "ETSGLOBAL::partially_supported_chain_concat14"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::supported_chain_concat15"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::partially_supported_chain_concat16"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+
+//! CHECKER       JIT IR Builder, check String Builders merging
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-regex='.*chain_concat[0-9]+.*' --compiler-inlining=false", entry: "ETSGLOBAL::main"
+//!
+//! METHOD        "ETSGLOBAL::chain_concat0"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",10
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::chain_concat1"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",7
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",14
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",7
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",6
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::chain_concat2"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",9
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",18
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",9
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",8
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::chain_concat3"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",14
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",28
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",14
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",12
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
+//!
+//! METHOD        "ETSGLOBAL::uber_chain_concat4"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",64
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",128
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",64
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
+//!
+//! METHOD        "ETSGLOBAL::supported_chain_concat5"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendChar",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendChar",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::supported_chain_concat6"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",37
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendBool",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendChar",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendByte",4
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendShort",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendInt",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendLong",2
+//! INST_COUNT    "std.core.StringBuilder::append",8
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",22
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",0
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString3",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString4",2
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::unsupported_append_chain_concat7"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_constructor_chain_concat8"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_usage_chain_concat9"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat10"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat11"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat12"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//!
+//! METHOD        "ETSGLOBAL::unsupported_chain_concat13"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//!
+//! METHOD        "ETSGLOBAL::partially_supported_chain_concat14"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::supported_chain_concat15"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::partially_supported_chain_concat16"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",3
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString",6
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",3
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",1
+//! INST_COUNT    "Intrinsic.StdCoreStringConcat2",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
+//! PASS_AFTER    "Codegen"
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+
+//! CHECKER       JIT IR Builder, check String Builders merging (uber only, w/o optimizations)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN           force_jit: true, options: "--compiler-inlining=false --compiler-simplify-string-builder=false", entry: "ETSGLOBAL::main_uber_only"
+
+// Each '+=' operation on strings in tests below is translated into StringBuilder + 2 append calls by frontend
+
+function chain_concat0(a: String, n: int, b: String, m: int): String {
+    let str: String = "";
+    str += "_";
+    for (let i = 0; i < n; ++i)
+        str += a;
+    str += "_";
+    for (let i = 0; i < m; ++i)
+        str += b;
+    str += "_";
+    return str;                                 // applied, 5 SBs merged into 1
+}
+
+function chain_concat1(a: String, n: int, b: String, m: int, c: String, l: int): String {
+    let str: String = "";
+    str += "_";
+    for (let i = 0; i < n; ++i)
+        str += a;
+    str += "_";
+    for (let i = 0; i < m; ++i)
+        str += b;
+    str += "_";
+    for (let i = 0; i < l; ++i)
+        str += c;
+    str += "_";
+    return str;                                 // applied, 7 SBs merged into 1
+}
+
+function chain_concat2(a: String, n: int, b: String, m: int, c: String, l: int, d: String, k: int): String {
+    let str: String = "";
+    str += "_";
+    for (let i = 0; i < n; ++i)
+        str += a;
+    str += "_";
+    for (let i = 0; i < m; ++i)
+        str += b;
+    str += "_";
+    for (let i = 0; i < l; ++i)
+        str += c;
+    str += "_";
+    for (let i = 0; i < k; ++i)
+        str += d;
+    str += "_";
+    return str;                                 // applied, 9 SBs merged into 1
+}
+
+function chain_concat3(a: String, n: int, b: String, m: int, c: String, l: int, d: String, k: int): String {
+    let str0: String = "";                      // two SBs chains '0' and '1'
+    let str1: String = "";                      // for each string accumulator variable
+    str0 += "_";                                //  0
+    str1 += "_";                                //  |     1
+    for (let i = 0; i < n; ++i) {               //  |     |
+        str0 += a;                              //  0     |
+        str1 += a;                              //  |     1
+    }                                           //  |     |
+    str0 += "_";                                //  0     |
+    str1 += "_";                                //  |     1
+    for (let i = 0; i < m; ++i) {               //  |    /
+        str0 += b;                              //  0   /
+        str1 += b;                              //  |  1
+    }                                           //  | /
+                                                //  |/
+    str0 += str1;                               //  0 <- 'chain 1' connects to 'chain 0' here
+    str0 += "_";                                //  0
+                                                //  |
+    for (let i = 0; i < l; ++i)                 //  |
+        str0 += c;                              //  0
+    str0 += "_";                                //  0
+    for (let i = 0; i < k; ++i)                 //  |
+        str0 += d;                              //  0
+    str0 += "_";                                //  0
+    return str0;    // applied, 14 SBs (10 from 'chain 0', and 4 from 'chain 1') merged into 2 SBs
+}
+
+function uber_chain_concat4(a: String, n: int, b: String, m: int, c: String, l: int, d: String, k: int,
+                            cond0: boolean, cond1: boolean, do_throw0: boolean, do_throw1: boolean): String {
+    /*
+        This test has the following data flow (very-very briefly):
+            0     3'
+           / \   /
+          0   1 3'
+          |   |/
+          0   1
+           \ / \
+            0   2
+            |   |
+            0   2
+             \ / \
+              0   3
+              |   |
+              0   3
+               \ /
+                0
+        It contans 5 individial chains of SBs (0, 1, 2, 3 and 3').
+        Each of them can be collapsed into a single SB.
+    */
+    let str0: String = "";
+    let str1: String = "";
+    let str2: String = "";
+    let str3: String = "";
+    str0 += "_";
+    for (let i = 0; i < n; ++i) {
+        str0 += a;
+    }
+    str0 += "_";
+    str1 += str0;
+    str3 += "_";
+    if (cond0) {
+        for (let i = 0; i < m; ++i) {
+            try {
+                if (do_throw0)
+                    throw new Exception();
+                str0 += b;
+                str1 += c;
+                str3 += d;
+                if (do_throw1)
+                    throw new Exception();
+            }
+            catch(ex) {
+                str0 += a;
+                str1 += b;
+                str3 += c;
+            }
+            finally {
+                str0 += d;
+                str1 += a;
+                str3 += b;
+            }
+        }
+    }
+    else {
+        for (let i = 0; i < m; ++i) {
+            try {
+                if (do_throw0)
+                    throw new Exception();
+                str0 += c;
+                str1 += d;
+                str3 += a;
+                if (do_throw1)
+                    throw new Exception();
+            }
+            catch(ex) {
+                str0 += b;
+                str1 += c;
+                str3 += d;
+            }
+            finally {
+                str0 += a;
+                str1 += b;
+                str3 += c;
+            }
+        }
+    }
+    str0 += str1;
+    str0 += "_";
+    str1 += str3;
+    str1 += "_";
+    str2 += str1;
+    for (let i = 0; i < l; ++i) {
+        if (cond1) {
+            str0 += d;
+            str2 += a;
+        }
+        else {
+            str0 += b;
+            str2 += c;
+        }
+    }
+    str0 += str2;
+    str0 += "_";
+    str3 += str2;
+    str3 += "_";
+    if (cond0) {
+        for (let i = 0; i < k; ++i) {
+            if (cond1) {
+                str0 += d;
+                str3 += a;
+            }
+            else {
+                str0 += b;
+                str3 += c;
+            }
+        }
+    }
+    else {
+        for (let i = 0; i < k; ++i) {
+            if (cond1) {
+                try {
+                    if (do_throw0)
+                        throw new Exception();
+                    str0 += d;
+                    str3 += a;
+                    if (do_throw1)
+                        throw new Exception();
+                }
+                catch(ex) {
+                    str0 += b;
+                    str3 += c;
+                }
+                finally {
+                    str0 += d;
+                    str3 += a;
+                }
+            }
+            else {
+                try {
+                    if (do_throw0)
+                        throw new Exception();
+                    str0 += b;
+                    str3 += c;
+                    if (do_throw1)
+                        throw new Exception();
+                }
+                catch(ex) {
+                    str0 += d;
+                    str3 += a;
+                }
+                finally {
+                    str0 += b;
+                    str3 += c;
+                }
+            }
+        }
+    }
+    str0 += str3;
+    str0 += "_";
+    return str0;    // applied, 64 SBs + 128 append calls merged into 5 SBs + 5 append2 calls + 5 append calls
+}
+
+// Set of SB based tests
+
+const empty = "";
+const space = " ";
+
+function supported_chain_concat5(): String {
+    let sb0 = new StringBuilder();
+    sb0.append(0)
+       .append("1")
+       .append(c'2');
+
+    let sb1 = new StringBuilder();
+    sb1.append(sb0.toString())
+       .append(space)
+       .append(0)
+       .append("1")
+       .append(c'2');
+
+    return sb1.toString();                  // applied
+}
+
+function supported_chain_concat6(): String {
+    let sb0 = new StringBuilder();
+    sb0.append(space)
+       .append("abcΣΨΩ0123456789")
+       .append(space)
+       .append(true)
+       .append(space)
+       .append(false)
+       .append(space)
+       .append(c'A' as char)
+       .append(space)
+       .append(57 as byte)
+       .append(space)
+       .append(127 as byte)
+       .append(space)
+       .append(32767 as short)
+       .append(space)
+       .append(128934675 as int)
+       .append(space)
+       .append(701234987654321 as long)
+       .append(space)
+       .append(empty)
+       .append("string")
+       .append(space)
+       .append(new Object())
+       .append(space)
+       .append(1.0 as Float)
+       .append(space)
+       .append(1.0 as Double)
+       .append(space)
+       .append(1.0 as Number)
+       .append(space);
+
+    let sb1 = new StringBuilder();
+    sb1.append(sb0.toString())
+       .append(space)
+       .append("abcΣΨΩ0123456789")
+       .append(space)
+       .append(true)
+       .append(space)
+       .append(false)
+       .append(space)
+       .append(c'A' as char)
+       .append(space)
+       .append(57 as byte)
+       .append(space)
+       .append(127 as byte)
+       .append(space)
+       .append(32767 as short)
+       .append(space)
+       .append(128934675 as int)
+       .append(space)
+       .append(701234987654321 as long)
+       .append(space)
+       .append(empty)
+       .append("string")
+       .append(space)
+       .append(new Object())
+       .append(space)
+       .append(1.0 as Float)
+       .append(space)
+       .append(1.0 as Double)
+       .append(space)
+       .append(1.0 as Number)
+       .append(space);
+
+    return sb1.toString();                  // applied
+}
+
+function unsupported_append_chain_concat7(): String {
+    let sb0 = new StringBuilder();
+    sb0.append(0);
+
+    let sb1 = new StringBuilder();
+    sb1.append(0)
+       .append(space)
+       .append(sb0.toString());
+
+    return sb1.toString();                  // not applied, sb0.toString() must be appended first
+}
+
+function unsupported_constructor_chain_concat8(): String {
+    let sb0 = new StringBuilder();
+    sb0.append(0);
+
+    let sb1 = new StringBuilder("0");
+    sb1.append(sb0.toString());
+
+    return sb1.toString();                  // not applied, sb1 must be constructed via default constructor
+}
+
+function unsupported_usage_chain_concat9(): String {
+    let sb0 = new StringBuilder();
+    sb0.append(0);
+
+    let sb1 = new StringBuilder();
+    sb1.append(sb0.toString());
+
+    sb0.append(space);
+
+    return sb1.toString();                  // not applied, sb0 must not be used after sb0.toString() appended
+}
+
+function unsupported_chain_concat10(cond: boolean): String {
+    let sb0 = new StringBuilder();
+    sb0.append(0)
+       .append("1")
+       .append(c'2');
+
+    let sb1 = new StringBuilder();
+    if (cond)
+        sb1.append(sb0.toString());
+    else
+        sb1.append("210");
+
+    sb1.append(space)
+       .append(0)
+       .append("1")
+       .append(c'2');
+
+    return sb1.toString();                  // not applied, sb1 constructor and sb1.append(sb0.toString()) are not in the same BB
+}
+
+function unsupported_chain_concat11(cond: boolean): String {
+    let sb0 = new StringBuilder("0");
+    let sb1 = new StringBuilder("1");
+
+    let sb = cond ? sb1 : sb0;
+
+    let sb2 = new StringBuilder();
+    sb2.append(sb.toString())
+       .append(space)
+       .append(2);
+
+    return sb2.toString();                  // not applied, sb is Phi instruction
+}
+
+function __noinline__consume(obj: Object): void {}
+
+function unsupported_chain_concat12(cond: boolean): String {
+    let sb0 = new StringBuilder("0");
+    let sb1 = new StringBuilder();
+    let sb = cond ? sb1 : sb0;
+
+    sb1.append(sb0.toString())
+       .append(space)
+       .append(1);
+
+    __noinline__consume(sb);
+
+    return sb1.toString();                  // not applied, sb0 must not be used after sb0.toString() appended
+}
+
+let sb0_global = new StringBuilder("0");
+function unsupported_chain_concat13(): String {
+    let sb1 = new StringBuilder();
+    sb1.append(sb0_global.toString())
+       .append(space)
+       .append(1);
+
+    return sb1.toString();                  // not applied, sb0 must be local instance
+}
+
+function partially_supported_chain_concat14(a: String, b: String, c: String, d: String): String {
+    let ab = a + b;
+    let cd = c + d;                                 // not applied, due to 'cd' appended to result is not the first append
+    return ab + cd;                                 // applied, 3 SBs merged into 1 SB + concat2
+}
+
+function supported_chain_concat15(a: String, b: String, c: String, d: String): String {
+    let str = a + b;
+    str += c;
+    str += d;                                       // applied, 3 SBs merged into 1 SB
+    return str;
+}
+
+function partially_supported_chain_concat16(a: String, b: String, c: String, d: String): String {
+    let abcd = a + b;
+    abcd += c + d;                                  // not applied, due to 'c+d' appended to result is not the first append
+    return abcd;                                    // applied, 3 SBs merged into 1 SB + concat2
+}
+
+
+//! CHECKER       AOT IR Builder, check String Builders merging (chain_concat19 only, with --compiler-inlining=true)
+//! SKIP_IF       @architecture == "arm32"
+//! RUN_PAOC      options: "--compiler-regex='.*chain_concat19' --compiler-inlining=true"
+
+function chain_concat19(): void {
+    const _ = "_";
+    const a = "a";
+    const b = "b";
+    const c = "c";
+
+    let sb_a = new StringBuilder();
+    sb_a.append(_)
+    sb_a.append(a)
+    let _a = sb_a.toString()
+
+    let sb_ab = new StringBuilder();
+    sb_ab.append(_a)
+    sb_ab.append(b)
+    let _ab = sb_ab.toString()
+
+    let sb_abc = new StringBuilder();
+    sb_abc.append(_ab)
+    sb_abc.append(c)
+    let _abc = sb_abc.toString()
+
+    assert _a == "_a";
+    assert _ab == "_ab";
+    assert _abc == "_abc";
+}
+
+function main() {
+    assert chain_concat0("a", 4, "b", 3) == "_aaaa_bbb_": "Wrong result at chain_concat0"
+    assert chain_concat1("a", 4, "b", 3, "c", 5) == "_aaaa_bbb_ccccc_": "Wrong result at chain_concat1"
+    assert chain_concat2("a", 4, "b", 3, "c", 5, "d", 2) == "_aaaa_bbb_ccccc_dd_": "Wrong result at chain_concat2"
+    assert chain_concat3("a", 4, "b", 3, "c", 5, "d", 2) == "_aaaa_bbb_aaaa_bbb_ccccc_dd_": "Wrong result at chain_concat3"
+
+    assert supported_chain_concat5() == "012 012": "Wrong result at supported_chain_concat5"
+    assert supported_chain_concat6() == " abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1  abcΣΨΩ0123456789 true false A 57 127 32767 128934675 701234987654321 string [object Object] 1 1 1 ": "Wrong result at supported_chain_concat6"
+
+    assert unsupported_append_chain_concat7() == "0 0": "Wrong result at unsupported_append_chain_concat7"
+    assert unsupported_constructor_chain_concat8() == "00": "Wrong result at unsupported_constructor_chain_concat8"
+    assert unsupported_usage_chain_concat9() == "0": "Wrong result at unsupported_usage_chain_concat9"
+
+    assert unsupported_chain_concat10(false) == "210 012": "Wrong result at unsupported_chain_concat10(false)"
+    assert unsupported_chain_concat10(true) == "012 012": "Wrong result at unsupported_chain_concat10(true)"
+
+    assert unsupported_chain_concat11(false) == "0 2": "Wrong result at unsupported_chain_concat11(false)"
+    assert unsupported_chain_concat11(true) == "1 2": "Wrong result at unsupported_chain_concat11(true)"
+
+    assert unsupported_chain_concat12(false) == "0 1": "Wrong result at unsupported_chain_concat12(false)"
+    assert unsupported_chain_concat12(true) == "0 1": "Wrong result at unsupported_chain_concat12(true)"
+
+    assert unsupported_chain_concat13() == "0 1": "Wrong result at unsupported_chain_concat13()"
+
+    assert partially_supported_chain_concat14("ab", "c", "d", "e") == "abcde": "Wrong result at partially_supported_chain_concat14";
+    assert supported_chain_concat15("ab", "c", "d", "e") == "abcde": "Wrong result at supported_chain_concat15";
+    assert partially_supported_chain_concat16("ab", "c", "d", "e") == "abcde": "Wrong result at partially_supported_chain_concat16";
+
+    chain_concat19();
+
+    main_uber_only();
+}
+
+const uber_golden_FFFF = "_aaaa_cacaca_aaaa_dbdbdb_bbbbb_aaaa_dbdbdb_acacac_ccccc_bbbb_acacac_aaaa_dbdbdb_acacac_ccccc_cccc_";
+const uber_golden_FFFT = "_aaaa_cbacbacba_aaaa_dcbdcbdcb_bbbbb_aaaa_dcbdcbdcb_adcadcadc_ccccc_bdbbdb_adcadcadc_aaaa_dcbdcbdcb_adcadcadc_ccccc_caccac_";
+const uber_golden_FFTF = "_aaaa_bababa_aaaa_cbcbcb_bbbbb_aaaa_cbcbcb_dcdcdc_ccccc_dbdb_dcdcdc_aaaa_cbcbcb_dcdcdc_ccccc_acac_";
+const uber_golden_FFTT = "_aaaa_bababa_aaaa_cbcbcb_bbbbb_aaaa_cbcbcb_dcdcdc_ccccc_dbdb_dcdcdc_aaaa_cbcbcb_dcdcdc_ccccc_acac_";
+const uber_golden_FTFF = "_aaaa_cacaca_aaaa_dbdbdb_ddddd_aaaa_dbdbdb_acacac_aaaaa_dddd_acacac_aaaa_dbdbdb_acacac_aaaaa_aaaa_";
+const uber_golden_FTFT = "_aaaa_cbacbacba_aaaa_dcbdcbdcb_ddddd_aaaa_dcbdcbdcb_adcadcadc_aaaaa_dbddbd_adcadcadc_aaaa_dcbdcbdcb_adcadcadc_aaaaa_acaaca_";
+const uber_golden_FTTF = "_aaaa_bababa_aaaa_cbcbcb_ddddd_aaaa_cbcbcb_dcdcdc_aaaaa_bdbd_dcdcdc_aaaa_cbcbcb_dcdcdc_aaaaa_caca_";
+const uber_golden_FTTT = "_aaaa_bababa_aaaa_cbcbcb_ddddd_aaaa_cbcbcb_dcdcdc_aaaaa_bdbd_dcdcdc_aaaa_cbcbcb_dcdcdc_aaaaa_caca_";
+const uber_golden_TFFF = "_aaaa_bdbdbd_aaaa_cacaca_bbbbb_aaaa_cacaca_dbdbdb_ccccc_bb_dbdbdb_aaaa_cacaca_dbdbdb_ccccc_cc_";
+const uber_golden_TFFT = "_aaaa_badbadbad_aaaa_cbacbacba_bbbbb_aaaa_cbacbacba_dcbdcbdcb_ccccc_bb_dcbdcbdcb_aaaa_cbacbacba_dcbdcbdcb_ccccc_cc_";
+const uber_golden_TFTF = "_aaaa_adadad_aaaa_bababa_bbbbb_aaaa_bababa_cbcbcb_ccccc_bb_cbcbcb_aaaa_bababa_cbcbcb_ccccc_cc_";
+const uber_golden_TFTT = "_aaaa_adadad_aaaa_bababa_bbbbb_aaaa_bababa_cbcbcb_ccccc_bb_cbcbcb_aaaa_bababa_cbcbcb_ccccc_cc_";
+const uber_golden_TTFF = "_aaaa_bdbdbd_aaaa_cacaca_ddddd_aaaa_cacaca_dbdbdb_aaaaa_dd_dbdbdb_aaaa_cacaca_dbdbdb_aaaaa_aa_";
+const uber_golden_TTFT = "_aaaa_badbadbad_aaaa_cbacbacba_ddddd_aaaa_cbacbacba_dcbdcbdcb_aaaaa_dd_dcbdcbdcb_aaaa_cbacbacba_dcbdcbdcb_aaaaa_aa_";
+const uber_golden_TTTF = "_aaaa_adadad_aaaa_bababa_ddddd_aaaa_bababa_cbcbcb_aaaaa_dd_cbcbcb_aaaa_bababa_cbcbcb_aaaaa_aa_";
+const uber_golden_TTTT = "_aaaa_adadad_aaaa_bababa_ddddd_aaaa_bababa_cbcbcb_aaaaa_dd_cbcbcb_aaaa_bababa_cbcbcb_aaaaa_aa_";
+
+function main_uber_only() {
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, false, false) == uber_golden_FFFF: "Wrong result at uber_golden_FFFF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, false, true)  == uber_golden_FFFT: "Wrong result at uber_golden_FFFT"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, true, false)  == uber_golden_FFTF: "Wrong result at uber_golden_FFTF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, true, true)   == uber_golden_FFTT: "Wrong result at uber_golden_FFTT"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, false, false)  == uber_golden_FTFF: "Wrong result at uber_golden_FTFF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, false, true)   == uber_golden_FTFT: "Wrong result at uber_golden_FTFT"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, true, false)   == uber_golden_FTTF: "Wrong result at uber_golden_FTTF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, true, true)    == uber_golden_FTTT: "Wrong result at uber_golden_FTTT"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, false, false)  == uber_golden_TFFF: "Wrong result at uber_golden_TFFF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, false, true)   == uber_golden_TFFT: "Wrong result at uber_golden_TFFT"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, true, false)   == uber_golden_TFTF: "Wrong result at uber_golden_TFTF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, true, true)    == uber_golden_TFTT: "Wrong result at uber_golden_TFTT"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, false, false)   == uber_golden_TTFF: "Wrong result at uber_golden_TTFF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, false, true)    == uber_golden_TTFT: "Wrong result at uber_golden_TTFT"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, true, false)    == uber_golden_TTTF: "Wrong result at uber_golden_TTTF"
+    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, true, true)     == uber_golden_TTTT: "Wrong result at uber_golden_TTTT"
+}
