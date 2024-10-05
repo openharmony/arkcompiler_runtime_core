@@ -79,7 +79,8 @@ tokens), *N* can name the following:
 -  A class or interface type (see :ref:`Classes`, :ref:`Interfaces`) with ``x``
    to name its static member;
 
--  A variable of a class or interface type with ``x`` to name its member.
+-  A class or interface type variable with ``x`` to name its instance member.
+
 
 .. index::
    name
@@ -664,9 +665,8 @@ The initial value can be identified as follows:
 
 - Otherwise, the following situations are possible:
 
-   + Each static variable of class or interface is initialized by the
-     execution of the class or interface initializer (see
-     :ref:`Class Initializer`).
+   + Each static variable of class is initialized by the execution of the class
+     initializer (see :ref:`Class Initializer`).
    + Each class variable is initialized either with a *default value* (see
      :ref:`Default Values for Types`), or by the execution of a class
      constructor (see :ref:`Constructor Declaration`).
@@ -996,8 +996,8 @@ Parameter List
 
 A signature may contain a *parameter list* that specifies an identifier of
 each parameter name, and the type of each parameter. The type of each
-parameter must be defined explicitly. If *parameter list* is omitted, then the
-function or method has no parameters. 
+parameter must be defined explicitly. If the *parameter list* is omitted, then
+the function or the method has no parameters.
 
 .. code-block:: abnf
 
@@ -1019,14 +1019,14 @@ function or method has no parameters.
 If a parameter type is prefixed with ``readonly``, then there are additional
 restrictions on the parameter as described in :ref:`Readonly Parameters`.
 
-The last parameter of a function can be a *rest parameter*
+The last parameter of a function or a method can be a *rest parameter*
 (see :ref:`Rest Parameter`), or a sequence of *optional parameters*
 (see :ref:`Optional Parameters`). This construction allows omitting
-the corresponding argument when calling a function. If a parameter is not
-*optional*, then each function call must contain an argument corresponding
-to that parameter. Non-optional parameters are called the *required parameters*.
+the corresponding argument when calling the function or the method.
 
-The function below has *required parameters*:
+If a parameter is not *optional*, then each function or method call must contain
+an argument corresponding to that parameter. Non-optional parameters are called
+the *required parameters*. The function below has *required parameters*:
 
 .. code-block:: typescript
    :linenos:
@@ -1045,6 +1045,7 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
    identifier
    parameter type
    function
+   method
    rest parameter
    optional parameter
    argument
@@ -1112,7 +1113,7 @@ Optional Parameters
 The first form contains an expression that specifies a *default value*. It is
 called a *parameter with default value*. The value of the parameter is set
 to the *default value* if the argument corresponding to that parameter is
-omitted in a function call:
+omitted in a function or method call:
 
 .. index::
    optional parameter
@@ -1185,28 +1186,34 @@ Rest Parameter
 .. meta:
     frontend_status: Done
 
-*Rest parameters* allow functions or methods to take arbitrary numbers of
-arguments. *Rest parameters* have the ``spread`` operator '``...``' as prefix
-before the parameter name:
+*Rest parameters* allow functions, methods, constructors, or lambdas to take
+arbitrary numbers of arguments. *Rest parameters* have the ``spread`` operator
+'``...``' as prefix before the parameter name:
 
 .. code-block:: typescript
    :linenos:
 
-    function sum(...numbers: number[]): number {
+    function sum(...numbers: number[]): number { // function
       let res = 0
       for (let n of numbers)
         res += n
       return res
     }
+    const lambda = (...numbers: number[]): number => 0 // lambda
+    class A {
+        constructor (...numbers: number[]) {} // constructor
+        foo (...p: [undefined, null, Object]) {} // method
+    }
+
 
 A :index:`compile-time error` occurs if a rest parameter:
 
 -  Is not the last parameter in a parameter list;
--  Has a type that is not an array type.
+-  Has a type that is neither an array type nor a tuple type.
 
-A function with a rest parameter of type ``T[]`` can accept any number of
-arguments of types that are compatible (see :ref:`Type Compatibility`) with
-``T``:
+A function, method, constructor, or lambda with a rest parameter of type ``T[]``
+can accept any number of arguments of types that are compatible (see
+:ref:`Type Compatibility`) with ``T``:
 
 .. index::
    rest parameter
@@ -1233,10 +1240,10 @@ arguments of types that are compatible (see :ref:`Type Compatibility`) with
     sum(1, 2, 3) // returns 6
 
 
-If an argument of array type ``T[]`` is to be passed to a function with the
-rest parameter, then the spread expression (see :ref:`Spread Expression`) must
-be used with the ``spread`` operator '``...``' as prefix before the array
-argument:
+If an argument of array type ``T[]`` is to be passed to a function or a method
+with the rest parameter, then the spread expression (see
+:ref:`Spread Expression`) must be used with the ``spread`` operator '``...``'
+as prefix before the array argument:
 
 
 .. code-block-meta:
@@ -1253,6 +1260,56 @@ argument:
 
     let x: number[] = [1, 2, 3]
     sum(...x) // spread an array 'x'
+       // returns 6
+
+.. index::
+   argument
+   prefix
+   spread operator
+
+A function, method, constructor, or lambda with a rest parameter of type
+``[T1, T2, ... Tn]`` can accept only ``n`` arguments of types that are
+compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
+
+.. index::
+   rest parameter
+   function
+   method
+   parameter name
+   tuple type
+   parameter list
+   type
+   argument
+
+.. code-block:: typescript
+   :linenos:
+
+    function sum(...numbers: [number, number, number]): number {
+      return numbers[0] + numbers[1] + numbers[2]
+    }
+
+    sum()        // compile time error: incorrect number of arguments, 0 instead of 3
+    sum(1)       // compile time error: incorrect number of arguments, 1 instead of 3
+    sum(1, 2, 3) // returns 6
+
+
+If an argument of tuple type ``[T1, T2, ... Tn]`` is to be passed to a function
+or a method with the rest parameter, then a spread expression (see
+:ref:`Spread Expression`) must have the ``spread`` operator '``...``' as a
+prefix before the tuple argument:
+
+
+.. code-block-meta:
+
+.. code-block:: typescript
+   :linenos:
+
+    function sum(...numbers: [number, number, number]): number {
+      return numbers[0] + numbers[1] + numbers[2]
+    }
+
+    let x: [number, number, number] = [1, 2, 3]
+    sum(...x) // spread tuple 'x'
        // returns 6
 
 .. index::

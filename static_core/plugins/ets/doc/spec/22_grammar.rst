@@ -43,7 +43,7 @@ Grammar Summary
         | 'object' | 'string' | 'void' | 'never' |'undefined'
         ;
 
-    literalType
+    literalType:
         Literal
         ;
 
@@ -249,7 +249,7 @@ Grammar Summary
 
     primaryExpression:
         literal
-        | qualifiedName
+        | namedReference
         | arrayLiteral
         | objectLiteral
         | thisExpression
@@ -291,6 +291,10 @@ Grammar Summary
     restArgument:
         '...'? expression
         ;
+
+    namedReference:
+      qualifiedName typeArguments?
+      ;
 
     arrayLiteral:
         '[' expressionSequence? ']'
@@ -466,11 +470,43 @@ Grammar Summary
         ;
 
     lambdaExpression:
-        ('async'|typeParameters)? signature '=>' lambdaBody
+        ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
         expression | block
+        ;
+
+    lambdaSignature:
+        lambdaParameters returnType? throwMark?
+        ;
+
+    lambdaParameters:
+        '(' lambdaParameterList? ')'
+        | identifier
+        ;
+
+    lambdaParameterList:
+        lambdaParameter (',' lambdaParameter)*
+               (',' lambdaOptionalParameters|lambdaRestParameter)? 
+        | lambdaRestParameter
+        | optionalParameters
+        ;
+
+    lambdaParameter:
+        identifier (':' 'readonly'? type)?
+        ;
+
+    lambdaRestParameter:
+        '...' lambdaParameter
+        ;
+
+    lambdaOptionalParameters:
+        lambdaOptionalParameter (',' lambdaOptionalParameter)
+        ;
+    
+    lambdaOptionalParameter:
+        identifier '?' (':' 'readonly'? type)?
         ;
 
     dynamicImportExpression:
@@ -770,8 +806,9 @@ Grammar Summary
         ;
 
     importDirective:
-        'import' allBinding|selectiveBindigns|defaultBinding|typeBinding
-        'from' importPath
+        'import'
+        (allBinding|selectiveBindigns|defaultBinding|typeBinding 'from')?
+        importPath
         ;
 
     allBinding:
@@ -1131,7 +1168,7 @@ Grammar Summary
       | BigIntLiteral
       | BooleanLiteral
       | StringLiteral
-      | TemplateLiteral
+      | MultilineStringLiteral
       | NullLiteral
       | UndefinedLiteral
       | CharLiteral
@@ -1236,11 +1273,18 @@ Grammar Summary
         | ~[1-9xu\r\n]
         ;
 
+    MultilineStringLiteral:
+        '`' (BacktickCharacter)* '`'
+        ;
 
     BacktickCharacter:
         ~['\\\r\n]
         | '\\' EscapeSequence
         | LineContinuation
+        ;
+
+     LineContinuation:
+        '\\' [\r\n\u2028\u2029]+
         ;
 
     NullLiteral:
@@ -1251,26 +1295,9 @@ Grammar Summary
         'undefined'
         ;
 
-    TemplateLiteral:
-        '`' (BacktickCharacter | embeddedExpression)* '`'
-        ;
-
     CharLiteral:
         'c\'' SingleQuoteCharacter '\''
         ;
-
-    UnicodeIDStart: [\p{L}] | ['$'] | '\\' UnicodeEscapeSequence;
-
-    UnicodeIDContinue: UnicodeIDStart | [\p{Mn}] | [\p{Nd}] | [\p{Pc}] | '\u200C' | '\u200D';
-
-    UnicodeEscapeSequence:
-        'u' HexDigit HexDigit HexDigit HexDigit
-        | 'u' '{' HexDigit HexDigit+ '}'
-        ;
-
-    LineContinuation: '\\' [\r\n\u2028\u2029]+;
-
-
 
 |
 

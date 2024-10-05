@@ -675,8 +675,8 @@ Partial Utility Type
     frontend_status: Done
 
 Type ``Partial<T>`` constructs a type with all properties of ``T`` set to
-optional. ``T`` must be a class or an interface type. No method of ``T`` is
-part of the ``Partial<T>`` type.
+optional. ``T`` must be a class or an interface type. No method (including any
+getter or setter) of ``T`` is part of the ``Partial<T>`` type.
 
 .. code-block:: typescript
    :linenos:
@@ -742,8 +742,8 @@ Required Utility Type
 
 Type ``Required<T>`` is opposite to ``Partial<T>``, and constructs a type with
 all properties of ``T`` set to required (i.e., not optional). ``T`` must be a
-class or an interface type. No method of ``T`` is part of the ``Required<T>``
-type.
+class or an interface type. No method (including any getter or setter) of ``T``
+is part of the ``Required<T>`` type.
 
 .. code-block:: typescript
    :linenos:
@@ -787,8 +787,8 @@ Readonly Utility Type
 
 Type ``Readonly<T>`` constructs a type with all properties of ``T`` set to
 readonly. It means that the properties of the constructed value cannot be
-reassigned. ``T`` must be a class or an interface type. No method of ``T`` is
-part of the ``Readonly<T>`` type.
+reassigned. ``T`` must be a class or an interface type. No method (including
+any getter or setter) of ``T`` is part of the ``Readonly<T>`` type.
 
 
 .. code-block:: typescript

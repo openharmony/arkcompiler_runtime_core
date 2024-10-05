@@ -478,7 +478,7 @@ or *switchStatement*:
 A ``break`` statement with the label *identifier* transfers control out of the
 enclosing statement with the same label *identifier*. If there is no enclosing
 statement with the same label identifier, then a :index:`compile-time error`
-occurs .
+occurs.
 
 A statement without a label transfers control out of the innermost enclosing
 ``switch``, ``while``, ``do``, ``for``, or ``for-of`` statement. If
@@ -844,7 +844,7 @@ to handle different exceptions and errors (see :ref:`Error Handling`).
           ;
 
 The |LANG| programming language supports *multiple typed catch clauses* as
-an experimental feature (see :ref:`Try Statements`).
+an experimental feature (see :ref:`Multiple Catch Clauses in Try Statements`).
 
 A ``try`` statement must contain either a ``finally`` clause, or at least one
 ``catch`` clause. Otherwise, a :index:`compile-time error` occurs.

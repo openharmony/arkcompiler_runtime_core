@@ -309,12 +309,13 @@ technique called *type inference* allows keeping program code readability,
 typing less, and focusing on the business logic while keeping type-safety.
 Type inference can be applied by the compiler in several contexts as follows:
 
-- Variable and constant declarations (see :ref:`Type Inference from Initializer`)
-- Implicit generic instantiations (see :ref:`Implicit Generic Instantiations`)
-- Function or method return type (see :ref:`Return Type Inference`)
+- Variable and constant declarations (see :ref:`Type Inference from Initializer`);
+- Implicit generic instantiations (see :ref:`Implicit Generic Instantiations`);
+- Function or method return type (see :ref:`Return Type Inference`);
+- Lambda expression parameter type (see :ref:`Lambda Signature`);
 - Array literal type inference (see :ref:`Array Type Inference from Context`,
-  :ref:`Array Type Inference from Types of Elements`)
-- Smart types (see :ref:`Smart Types`)
+  and :ref:`Array Type Inference from Types of Elements`);
+- Smart types (see :ref:`Smart Types`).
 
 |
 
@@ -1269,17 +1270,28 @@ Extended Conditional Expressions
 .. meta:
     frontend_status: Done
 
-|LANG| provides extended semantics for conditional-and and conditional-or
-expressions to ensure better |TS| alignment. It affects the semantics of
-conditional expressions (see :ref:`Conditional Expressions`), ``while`` and
-``do`` statements (see :ref:`While Statements and Do Statements`), ``for``
-statements (see :ref:`For Statements`), ``if`` statements (see
-:ref:`if Statements`), and assignment (see :ref:`Simple Assignment Operator`).
+|LANG| provides extended semantics for conditional expressions
+to ensure better |TS| alignment.
+It affects the semantics of
+
+-  Conditional expressions (see :ref:`Conditional Expressions`,
+   :ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`, and
+   :ref:`Logical Complement`);
+
+-  ``while`` and ``do`` statements (see :ref:`While Statements and Do Statements`);
+
+-  ``for`` statements (see :ref:`For Statements`);
+
+-  ``if`` statements (see :ref:`if Statements`);
+
+-  assignment (see :ref:`Simple Assignment Operator`).
+
+**Note:** The extended semantics is to be deprecated in one of the future
+versions of the language.
 
 This approach is based on the concept of *truthiness* that extends the Boolean
-logic to operands of non-Boolean types, while the result of an operation (see
-:ref:`Conditional-And Expression`, :ref:`Conditional-Or Expression`, and
-:ref:`Logical Complement`) is kept boolean.
+logic to operands of non-Boolean types.
+
 Depending on the kind of the value type, the value of any valid expression can
 be handled as ``true`` or ``false`` as described in the table below:
 
@@ -1329,6 +1341,17 @@ be handled as ``true`` or ``false`` as described in the table below:
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
 | any other nonNullish type            | ``never``                              | ``always``                        | ``new SomeType != null``        |
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
+
+Extended semantics of :ref:`Conditional-And Expression` and
+:ref:`Conditional-Or Expression` affects the resultant type of expressions
+as follows:
+
+-  A *conditional-and* expression ``A && B`` is of type ``B`` if the result of
+   ``A`` is handled as ``true``. Otherwise, it is of type ``A``.
+
+-  A *conditional-or* expression ``A || B`` is of type ``B`` if the result of
+   ``A`` is handled as ``false``. Otherwise, it is of type ``A``.
+
 
 The example below illustrates the way this approach works in practice. Any
 ``nonzero`` number is handled as ``true``. The loop continues until it becomes

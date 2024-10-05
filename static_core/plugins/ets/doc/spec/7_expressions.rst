@@ -51,7 +51,7 @@ evaluation of  expressions, except for the expressions related to coroutines
         ;
     primaryExpression:
         literal
-        | qualifiedName
+        | namedReference
         | arrayLiteral
         | objectLiteral
         | thisExpression
@@ -87,18 +87,20 @@ expression rules:
 
 There are three options the ``objectReference`` refers to:
 
-- A class or an interface that are to handle static members;
+- A class that is to handle static members;
 - ``Super`` that is to access shadowed fields or constructors declared in the
   superclass, or the overridden method version of the superclass;
-- *primaryExpression* that is to refer to an instance variable of a class
-  or interface type after evaluation, unless the manner of the evaluation
-  is altered by the chaining operator '?.' (see :ref:`Chaining Operator`).
+- *primaryExpression* that is to refer to an instance variable of a class,
+  interface, or function type after evaluation, unless the manner of the
+  evaluation is altered by the chaining operator '?.' (see
+  :ref:`Chaining Operator`).
 
 If the form of *primaryExpression* is *thisExpression*, then the pattern
 "this?." is handled as a :index:`compile-time error`.
 
 If the form of *primaryExpression* is *super*, then the pattern "super?."
 is handled as a :index:`compile-time error`.
+
 
 .. code-block:: abnf
 
@@ -528,13 +530,22 @@ literals are determined as follows:
 
 |
 
-.. _Qualified Name:
+.. _Named Reference:
 
-Qualified Name
-**************
+Named Reference
+***************
 
 .. meta:
-    frontend_status: Done
+    frontend_status: Partly
+
+An expression can have the form of a *named reference* as described by the
+syntax rule as follows:
+
+.. code-block:: abnf
+
+    namedReference:
+      qualifiedName typeArguments?
+      ;
 
 A *qualifiedName* (see :ref:`Names`) is an expression that consists of
 dot-separated names. A *qualifiedName* that consists of a single identifier
@@ -546,12 +557,18 @@ A *simple name* refers to the following:
 -  A local variable or parameter of the surrounding function or method.
 
 A *qualifiedName* that is not a *simple name* refers to the following:
-
+   
 -  An entity imported from a compilation unit, or
 -  A member of some class or interface.
 
-A :index:`compile-time error` occurs if *qualifiedName* refers to a name that
-is undefined or inaccessible, or if ambiguity occurs while resolving the name.
+If *typeArguments* are provided, then *qualifiedName* is a valid instantiation
+of the generic method or function. Otherwise, a :index:`compile-time error`
+occurs.
+
+A :index:`compile-time error` occurs if:
+
+-  The name referred by *qualifiedName* is undefined or inaccessible; or
+-  Ambiguity occurs while resolving the name.
 
 
 .. index::
@@ -590,6 +607,9 @@ is undefined or inaccessible, or if ambiguity occurs while resolving the name.
 
     function bar (p: string) {}
     function bar (p: number) {}
+
+    function generic_function<T> () {}
+    let instantiation = generic_function<string>
 
 |
 
@@ -1267,18 +1287,18 @@ Spread Expression
 
 A *spread expression* can be used only within the array literal (see
 :ref:`Array Literal`) or argument passing. The *expression* must be of
-array type (see :ref:`Array Types`). Otherwise, a :index:`compile-time error`
-occurs.
+array type (see :ref:`Array Types`) or tuple type (see :ref:`Tuple Types`).
+Otherwise, a :index:`compile-time error` occurs.
 
-A *spread expression* for arrays can be evaluated as follows:
+A *spread expression* for arrays or tuples can be evaluated as follows:
 
 -  By the compiler at compile time if *expression* is constant (see
    :ref:`Constant Expressions`);
 -  At runtime otherwise.
 
-An array referred by the *expression* is broken by the evaluation into a
-sequence of values. This sequence is used where a spread expression is used.
-It can be an assignment, a call of a function, or a method.
+An array or tuple referred by the *expression* is broken by the evaluation into
+a sequence of values. This sequence is used where a spread expression is used.
+It can be an assignment, a call of a function, method, or constructor.
 
 .. code-block:: typescript
    :linenos:
@@ -1294,16 +1314,35 @@ It can be an assignment, a call of a function, or a method.
       console.log (array)
     }
 
-    run_time_spread_application (array1, array2) // prints [1, 2, 3, 666, 4, 5]
-    function run_time_spread_application (a1: number[], a2: number[]) {
+    run_time_spread_application1 (array1, array2) // prints [1, 2, 3, 666, 4, 5]
+    function run_time_spread_application1 (a1: number[], a2: number[]) {
       console.log ([...a1, 666, ...a2])
         // array literal will be built at runtime
     }
 
+    let tuple1: [number, string, boolean] = [1, "2", true]
+    let tuple2: [number, string] = [4, "5"]
+    let tuple3: [number, string, boolean, number, string] = [...tuple1, ...tuple2] // spread tuple1 and tuple2 elements
+       // while building new tuple object during compile-time
+    console.log(tuple3) // prints [1, "2", true, 4, "5"]
 
-**Note**: If an array is spread while calling a function, an appropriate
-parameter must be of spread array kind. A :index:`compile-time error` occurs if
-an array is spread into a sequence of ordinary parameters:
+    bar (...tuple2)  // spread tuple2 elements into arguments of the foo() call
+    function bar (...tuple: [number, string]) {
+      console.log (tuple)
+    }
+
+    run_time_spread_application2 (tuple1, tuple2) // prints [1, "2", true, 666, 4, "5"]
+    function run_time_spread_application2 (a1: [number, string, boolean], a2: [number, string]) {
+      console.log ([...a1, 666, ...a2])
+        // such array literal will be built at runtime
+    }
+
+
+
+
+**Note**: If an array is spread while calling a function, then an appropriate
+parameter must be of the spread array kind. If an array is spread into a
+sequence of ordinary parameters, then a :index:`compile-time error` occurs:
 
 .. code-block:: typescript
    :linenos:
@@ -1311,6 +1350,17 @@ an array is spread into a sequence of ordinary parameters:
     let an_array = [1, 2]
     bar (...an_array) // compile-time error
     function bar (n1: number, n2: number) { ... }
+
+**Note**: If a tuple is spread while calling a function, an appropriate
+parameter must be of spread tuple kind. A :index:`compile-time error` occurs if
+a tuple is spread into a sequence of ordinary parameters:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a_tuple: [number, string] = [1, "2"]
+    bar (...a_tuple) // compile-time error
+    function bar (n1: number, n2: string) { ... }
 
 |
 
@@ -1472,7 +1522,7 @@ below.
 a. *Static* field access (*objectReference* is evaluated in the form *typeReference*)
 
 The evaluation of *typeReference* is performed. The result of the *field access
-expression* of a static field in a class or interface is as follows:
+expression* of a static field in a class is as follows:
 
 -  ``variable`` if the field is not ``readonly``. The resultant value can
    then be changed.
@@ -1711,9 +1761,9 @@ Step 3: Checking Method Modifiers
 In this step, the single method to call is known, and the following set of
 semantic checks must be performed:
 
--  If the method call has the form ``typeReference.identifier``, then the
-   method must be declared ``static``. Otherwise, a :index:`compile-time error`
-   occurs.
+-  If the method call has the form ``typeReference.identifier``, then
+   ``typeReference`` refers to a class, and the method must be declared
+   ``static``. Otherwise, a :index:`compile-time error` occurs.
 
 -  If the method call has the form ``expression.identifier``, then the method
    must not be declared ``static``. Otherwise, a :index:`compile-time error`
@@ -1812,6 +1862,33 @@ and require different semantic checks:
    overload resolution
    function to call
    potentially applicable candidate
+
+
+
+The example below represents different forms of function calls:
+
+.. code-block:: typescript
+   :linenos:
+
+    function foo() { console.log ("Function foo() is called") }
+    foo() // function call uses function name to call it
+
+    call (foo)            // top-level function passed
+    call ((): void => { console.log ("Lambda is called") }) // lambda is passed
+    call (A.method)       // static method
+    call ((new A).method) // instance method is passed
+
+    class A {
+       static method() { console.log ("Static method() is called") }
+       method() { console.log ("Instance method() is called") }
+    }
+
+    function call (callee: () => void) {
+       callee() // function call uses parameter name to call any functional object passed as an argument
+    }
+
+	((): void => { console.log ("Lambda is called") }) () // function call uses lambda expression to call it
+
 
 |
 
@@ -2393,8 +2470,7 @@ system, and the result of the ``instanceof`` expression cannot be determined.
         ;
 
 Any ``typeof`` expression is of type ``string``. The ``typeof`` expression
-values of the below types are known at compile time, and require no evaluation
-at runtime:
+values of the below types are known at compile time:
 
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
@@ -2418,12 +2494,6 @@ at runtime:
 |                                 |                         |  let B: Boolean             |
 |                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
-
-(table cont'd)
-
-+---------------------------------+-------------------------+-----------------------------+
-|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
-+=================================+=========================+=============================+
 | ``bigint``/``BigInt``           | "bigint"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  let b: bigint              |
@@ -2446,18 +2516,25 @@ at runtime:
 |                                 |                         |                             |
 |                                 |                         |  typeof undefined           |
 +---------------------------------+-------------------------+-----------------------------+
+
+(table cont'd)
+
++---------------------------------+-------------------------+-----------------------------+
+|     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
++=================================+=========================+=============================+
 | ``null``                        | "object"                | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  typeof null                |
 +---------------------------------+-------------------------+-----------------------------+
 | ``T|null``, when ``T`` is a     | "object"                | .. code-block:: typescript  |
-| class, interface or array       |                         |                             |
-|                                 |                         |  let x: Object | null       |
+| class (but not Object -         |                         |                             |
+| see next table),                |                         |  class C {}                 |
+| interface or array              |                         |  let x: C | null            |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
-| ``enum``                        | "number"                | .. code-block:: typescript  |
-|                                 |                         |                             |
-|                                 |                         |  enum C {R, G, B}           |
+| ``enum``                        | "number" or "string",   | .. code-block:: typescript  |
+|                                 | depending of constant   |                             |
+|                                 | type                    |  enum C {R, G, B}           |
 |                                 |                         |  let c: C                   |
 |                                 |                         |  typeof c                   |
 +---------------------------------+-------------------------+-----------------------------+
@@ -2477,6 +2554,12 @@ program execution. The result of the evaluation is the ``typeof`` value.
 +------------------------+-----------------------------+
 | **Type of Expression** | **Code Example**            |
 +========================+=============================+
+| Object                 | .. code-block:: typescript  |
+|                        |                             |
+|                        |  function f(o: Object) {    |
+|                        |    typeof p                 |
+|                        |  }                          |
++------------------------+-----------------------------+
 | union type             | .. code-block:: typescript  |
 |                        |                             |
 |                        |  function f(p:A|B) {        |
@@ -3075,6 +3158,7 @@ A *logical complement expression* is an expression preceded by the operator
 
 The type of the operand *expression* with the unary '``!``' operator must be
 ``boolean`` or ``Boolean``. Otherwise, a :index:`compile-time error` occurs.
+See :ref:`Extended Conditional Expressions` for extended semantics.
 
 The unary logical complement expression’s type is ``boolean``.
 
@@ -4760,6 +4844,8 @@ A *conditional-and* expression is always of type ``boolean``.
 
 Each operand of the *conditional-and* operator must be of type ``boolean``, or
 ``Boolean``. Otherwise, a :index:`compile-time error` occurs.
+See :ref:`Extended Conditional Expressions` for extended semantics, operands
+and result type.
 
 The left-hand operand expression is first evaluated at runtime. If the result
 is of type ``Boolean``, then the unboxing conversion (see
@@ -4826,6 +4912,8 @@ A *conditional-or* expression is always of type ``boolean``.
 
 Each operand of the *conditional-or* operator must be of type ``boolean`` or
 ``Boolean``. Otherwise, a :index:`compile-time error` occurs.
+See :ref:`Extended Conditional Expressions` for extended semantics, operands
+and result type.
 
 The left-hand operand expression is first evaluated at runtime. If the result
 is of type ``Boolean``, then the *unboxing conversion ()* is performed as
@@ -5390,8 +5478,8 @@ String Interpolation Expressions
 .. meta:
     frontend_status: Done
 
-A '*string interpolation expression*' is a template literal (a string literal
-delimited with backticks, see :ref:`Template Literals` for details) that
+A '*string interpolation expression*' is a multiline string literal (a string literal
+delimited with backticks, see :ref:`Multiline String Literal` for details) that
 contains at least one *embedded expression*:
 
 .. code-block:: abnf
@@ -5416,7 +5504,6 @@ operator (see :ref:`String Concatenation`):
 
 .. index::
    string interpolation expression
-   template literal
    string literal
    embedded expression
    string concatenation operator
@@ -5441,12 +5528,12 @@ as follows:
     let b = 2
     console.log("The result of " + a + " * " + b + " is " + a * b)
 
-An embedded expression can contain nested template strings.
+An embedded expression can contain nested multiline strings.
 
 .. index::
    string concatenation operator
-   nested template string
-   template string
+   nested multiline string
+   multiline string
    embedded expression
 
 |
@@ -5461,28 +5548,86 @@ Lambda Expressions
 
 *Lambda expression* fully defines an instance of a function type (see
 :ref:`Function Types`) by providing optional ``async`` mark, type parameters
-(see :ref:`Type Parameters`), mandatory signature, and lambda body. The
-definition of *lambda expression* is generally similar to that a function
-declaration (see :ref:`Function Declarations`) but has no function name
-specified:
-
+(see :ref:`Type Parameters`), mandatory lambda signature, and its body. The
+definition of *lambda expression* is generally similar to that of a function
+declaration (see :ref:`Function Declarations`), except that a lambda expression
+has no function name specified, and can have types of parameters omitted:
 
 .. code-block:: abnf
 
     lambdaExpression:
-        ('async'|typeParameters)? signature '=>' lambdaBody
+        ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
         expression | block
         ;
 
+    lambdaSignature:
+        lambdaParameters returnType? throwMark?
+        ;
+
+    lambdaParameters:
+        '(' lambdaParameterList? ')'
+        | identifier
+        ;
+
+    lambdaParameterList:
+        lambdaParameter (',' lambdaParameter)*
+               (',' lambdaOptionalParameters|lambdaRestParameter)? 
+        | lambdaRestParameter
+        | optionalParameters
+        ;
+
+    lambdaParameter:
+        identifier (':' 'readonly'? type)?
+        ;
+
+    lambdaRestParameter:
+        '...' lambdaParameter
+        ;
+
+    lambdaOptionalParameters:
+        lambdaOptionalParameter (',' lambdaOptionalParameter)
+        ;
+    
+    lambdaOptionalParameter:
+        identifier '?' (':' 'readonly'? type)?
+        ;
+
+
+The examples of usage are presented below:
+
 .. code-block:: typescript
    :linenos:
 
-    (x: number): number => { return Math.sin(x) }
-    (x: number) => Math.sin(x) // expression as lambda body
-    <T> (x: T, y: T) => { let local = x } // generic lambda
+    (x: number): number => { return Math.sin(x) } // block as lambda body
+    (x: number) => Math.sin(x)                    // expression as lambda body
+    <T> (x: T, y: T) => { let local = x }         // generic lambda
+    e => e                                        // shortest form of lambda
+    p1, p2 => p1 + p2
+
+    function foo<T> (a: (p1: T, ...p2: T[]) => T) {}
+    // All calls to foo pass valid lambda expressions in different forms 
+    foo (e => e)
+    foo ((e1, e2) => e1)
+    foo ((e1, e2: Object) => e1)
+    foo ((e1: Object, e2) => e1)
+    foo ((e1: Object, e2, e3) => e1)
+    foo ((e1: Object, ...e2) => e1)
+
+    foo (<Object>(e1: Object, e2: Object) => e1)
+
+    function bar<T> (a: (...p: T[]) => T) {}
+    // Type can be omitted for the rest parameter
+    bar ((...e) => e)
+
+
+    function goo<T> (a: (p?: T) => T) {}
+    // Type can be omitted for the optional parameter
+    goo ((e?) => e)
+
+
 
 A *lambda expression* evaluation creates an instance of a function type (see
 :ref:`Function Types`) as described in detail in
@@ -5509,19 +5654,20 @@ Lambda Signature
     frontend_status: Done
 
 Similarly to function declarations (see :ref:`Function Declarations`),
-*lambda signatures* are composed of formal parameters, return types, and
-``throw``/``rethrow`` marks as defined in a lambda expression.
+*lambda signatures* are composed of formal parameters with optional types,
+optional return types, and ``throw``/``rethrow`` marks as defined in a lambda
+expression.
 
 See :ref:`Scopes` for the specification of the scope, and
 :ref:`Shadowing by Parameter` for the shadowing details of formal parameter
 declarations.
 
-A :index:`compile-time error` occurs if a lambda expression declares two formal
-parameters with the same name.
+A :index:`compile-time error` occurs if:
 
-As a lambda expression is evaluated, the values of actual argument expressions
-initialize the newly created parameter variables of the declared type before
-the execution of the lambda body.
+- A lambda expression declares two formal parameters with the same name.
+- A formal parameter contains no type provided, and the type cannot be derived
+  by type inference.
+
 
 See :ref:`Throwing Functions` for the details of ``throws``, and
 :ref:`Rethrowing Functions` for the details of ``rethrows`` marks.
@@ -5560,21 +5706,17 @@ Lambda Body
 
 *Lambda body* can be a single expression or a block (see :ref:`Block`).
 Similarly to the body of a method or a function, a lambda body describes the
-code to be executed when a lambda call occurs (see
-:ref:`Runtime Evaluation of Lambda Expressions`).
+code to be executed when a lambda expression call occurs (see
+:ref:`Function Call Expression`). 
 
 The meanings of names, and of the keywords ``this`` and ``super`` (along with
 the accessibility of the referred declarations) are the same as in the
 surrounding context. However, lambda parameters introduce new names.
 
-If a single expression, a *lambda body* is equivalent to the block
+If a *lambda body* is a single expression, then it is equivalent to the block
 with one return statement that returns that single expression
 *{ return singleExpression }*.
-
-If completing normally, a lambda body block is *value-compatible*.
-A *lambda body completing normally* means that the statement of the form
-*return expression* is executed.
-
+ 
 If any local variable or formal parameter of the surrounding context is
 used but not declared in a lambda body, then the local variable or formal
 parameter is *captured* by the lambda.

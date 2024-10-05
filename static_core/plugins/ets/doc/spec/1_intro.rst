@@ -571,10 +571,9 @@ as used in other languages, application areas, or industries.
      member declarations).
 
    static member
-     -- a class or interface member that is not related to a particular class 
+     -- a class member that is not related to a particular class 
      instance. A static member can be used across an entire program by using
-     a qualified name notation (qualification is the name of a class or
-     an interface).
+     a qualified name notation (qualification is the name of a class).
 
    linearization
      -- de-nesting of all nested types in a union type to present them in
