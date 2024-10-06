@@ -1,2 +1,0 @@
-# aot timeout
-built-ins/Array/prototype/sort/stability-2048-elements.js

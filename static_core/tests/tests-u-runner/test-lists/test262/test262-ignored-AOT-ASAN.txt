@@ -48,8 +48,6 @@ intl402/Collator/usage-de.js
 built-ins/String/prototype/toLocaleUpperCase/special_casing.js
 # Timeout #9967
 built-ins/String/prototype/toLocaleLowerCase/special_casing.js
-# #9717
-built-ins/String/prototype/repeat/repeat-string-n-times.js
 # Timeout #9960
 intl402/Number/prototype/toLocaleString/returns-same-results-as-NumberFormat.js
 # Timeout #9959
