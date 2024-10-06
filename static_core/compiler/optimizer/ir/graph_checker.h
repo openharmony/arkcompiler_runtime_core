@@ -30,7 +30,8 @@
 
 // CC-OFFNXT(G.PRE.02) should be with define
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define CHECKER_DO_IF_NOT_VISITOR(cond, func) CHECKER_DO_IF_NOT_VISITOR_INTERNAL(GraphChecker *, cond, func)
+#define CHECKER_DO_IF_NOT_VISITOR(visitor, cond, func) \
+    CHECKER_DO_IF_NOT_VISITOR_INTERNAL(visitor, GraphChecker *, cond, func)
 
 namespace ark::compiler {
 inline std::ostream &operator<<(std::ostream &os, const std::initializer_list<Opcode> &opcs)
@@ -231,6 +232,7 @@ private:
     static void VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
+    static void VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst);
     static void VisitIf([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitIfImm([[maybe_unused]] GraphVisitor *v, Inst *inst);
     static void VisitTry([[maybe_unused]] GraphVisitor *v, Inst *inst);
@@ -290,24 +292,24 @@ private:
 
         if (isInt) {
             CHECKER_DO_IF_NOT_VISITOR(
-                DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+                v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                 (std::cerr << "Binary instruction type is not a integer", inst->Dump(&std::cerr)));
         }
 
         CHECKER_DO_IF_NOT_VISITOR(
-            DataType::IsTypeNumeric(op1->GetType()),
+            v, DataType::IsTypeNumeric(op1->GetType()),
             (std::cerr << "Binary instruction 1st operand type is not a numeric", inst->Dump(&std::cerr)));
         CHECKER_DO_IF_NOT_VISITOR(
-            DataType::IsTypeNumeric(op2->GetType()),
+            v, DataType::IsTypeNumeric(op2->GetType()),
             (std::cerr << "Binary instruction 2nd operand type is not a numeric", inst->Dump(&std::cerr)));
-        CHECKER_DO_IF_NOT_VISITOR(DataType::IsTypeNumeric(inst->GetType()),
+        CHECKER_DO_IF_NOT_VISITOR(v, DataType::IsTypeNumeric(inst->GetType()),
                                   (std::cerr << "Binary instruction type is not a numeric", inst->Dump(&std::cerr)));
 
-        CHECKER_DO_IF_NOT_VISITOR(CheckCommonTypes(op1, op2),
+        CHECKER_DO_IF_NOT_VISITOR(v, CheckCommonTypes(op1, op2),
                                   (std::cerr << "Types of binary instruction operands are not compatible\n",
                                    op1->Dump(&std::cerr), op2->Dump(&std::cerr), inst->Dump(&std::cerr)));
         CHECKER_DO_IF_NOT_VISITOR(
-            CheckCommonTypes(inst, op1),
+            v, CheckCommonTypes(inst, op1),
             (std::cerr << "Types of binary instruction result and its operands are not compatible\n",
              inst->Dump(&std::cerr)));
     }
@@ -318,10 +320,10 @@ private:
         // But ASSERT wasn't added because the instructions checks in codegen_test.cpp with default method
         // NOTE(pishin) add an ASSERT after add assembly tests tests and remove the test from codegen_test.cpp
         [[maybe_unused]] auto cc = inst->GetCc();
-        CHECKER_DO_IF_NOT_VISITOR((cc == CC_EQ || cc == CC_NE),
+        CHECKER_DO_IF_NOT_VISITOR(v, (cc == CC_EQ || cc == CC_NE),
                                   (std::cerr << "overflow instruction are used only CC_EQ or CC_NE"));
         CheckBinaryOperationTypes(v, inst, true);
-        CHECKER_DO_IF_NOT_VISITOR(!DataType::IsLessInt32(inst->GetType()),
+        CHECKER_DO_IF_NOT_VISITOR(v, !DataType::IsLessInt32(inst->GetType()),
                                   (std::cerr << "overflow instruction have INT32 or INT64 types"));
     }
 
@@ -330,7 +332,8 @@ private:
     {
         CheckBinaryOperationTypes(v, inst, true);
         [[maybe_unused]] auto instWShift = static_cast<BinaryShiftedRegisterOperation *>(inst);
-        CHECKER_DO_IF_NOT_VISITOR(instWShift->GetShiftType() != ShiftType::INVALID_SHIFT &&
+        CHECKER_DO_IF_NOT_VISITOR(v,
+                                  instWShift->GetShiftType() != ShiftType::INVALID_SHIFT &&
                                       (rorSupported || instWShift->GetShiftType() != ShiftType::ROR),
                                   (std::cerr << "Operation has invalid shift type\n", inst->Dump(&std::cerr)));
     }
@@ -339,7 +342,7 @@ private:
     {
         [[maybe_unused]] auto op = inst->GetInput(0).GetInst();
         CHECKER_DO_IF_NOT_VISITOR(
-            CheckCommonTypes(inst, op),
+            v, CheckCommonTypes(inst, op),
             (std::cerr << "Types of unary instruction result and its operand are not compatible\n",
              inst->Dump(&std::cerr), op->Dump(&std::cerr)));
     }
@@ -352,28 +355,28 @@ private:
 
         if (isInt) {
             CHECKER_DO_IF_NOT_VISITOR(
-                DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+                v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                 (std::cerr << "Ternary instruction type is not a integer", inst->Dump(&std::cerr)));
         }
 
         CHECKER_DO_IF_NOT_VISITOR(
-            DataType::IsTypeNumeric(op1->GetType()),
+            v, DataType::IsTypeNumeric(op1->GetType()),
             (std::cerr << "Ternary instruction 1st operand type is not a numeric", inst->Dump(&std::cerr)));
         CHECKER_DO_IF_NOT_VISITOR(
-            DataType::IsTypeNumeric(op2->GetType()),
+            v, DataType::IsTypeNumeric(op2->GetType()),
             (std::cerr << "Ternary instruction 2nd operand type is not a numeric", inst->Dump(&std::cerr)));
         CHECKER_DO_IF_NOT_VISITOR(
-            DataType::IsTypeNumeric(op3->GetType()),
+            v, DataType::IsTypeNumeric(op3->GetType()),
             (std::cerr << "Ternary instruction 2nd operand type is not a numeric", inst->Dump(&std::cerr)));
-        CHECKER_DO_IF_NOT_VISITOR(DataType::IsTypeNumeric(inst->GetType()),
+        CHECKER_DO_IF_NOT_VISITOR(v, DataType::IsTypeNumeric(inst->GetType()),
                                   (std::cerr << "Ternary instruction type is not a numeric", inst->Dump(&std::cerr)));
 
-        CHECKER_DO_IF_NOT_VISITOR(CheckCommonTypes(op1, op2) && CheckCommonTypes(op2, op3),
+        CHECKER_DO_IF_NOT_VISITOR(v, CheckCommonTypes(op1, op2) && CheckCommonTypes(op2, op3),
                                   (std::cerr << "Types of ternary instruction operands are not compatible\n",
                                    op1->Dump(&std::cerr), op2->Dump(&std::cerr), op3->Dump(&std::cerr),
                                    inst->Dump(&std::cerr)));
         CHECKER_DO_IF_NOT_VISITOR(
-            CheckCommonTypes(inst, op1),
+            v, CheckCommonTypes(inst, op1),
             (std::cerr << "Types of ternary instruction result and its operands are not compatible\n",
              inst->Dump(&std::cerr)));
     }
@@ -381,11 +384,12 @@ private:
     static void CheckMemoryInstruction([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst,
                                        [[maybe_unused]] bool needBarrier = false)
     {
-        CHECKER_DO_IF_NOT_VISITOR(DataType::IsTypeNumeric(inst->GetType()) || inst->GetType() == DataType::REFERENCE ||
+        CHECKER_DO_IF_NOT_VISITOR(v,
+                                  DataType::IsTypeNumeric(inst->GetType()) || inst->GetType() == DataType::REFERENCE ||
                                       inst->GetType() == DataType::ANY,
                                   (std::cerr << "Memory instruction has wrong type\n", inst->Dump(&std::cerr)));
         if (inst->IsStore() && (inst->GetInputType(0) != DataType::POINTER) && (inst->GetType() == DataType::ANY)) {
-            CHECKER_DO_IF_NOT_VISITOR(needBarrier,
+            CHECKER_DO_IF_NOT_VISITOR(v, needBarrier,
                                       (std::cerr << "This store should have barrier:\n", inst->Dump(&std::cerr)));
         }
     }
@@ -397,41 +401,42 @@ private:
         // We can inline intrinsics with the instruction under the  option --compiler-inline-full-intrinsics=true
         if (!g_options.IsCompilerInlineFullIntrinsics()) {
             CHECKER_DO_IF_NOT_VISITOR(
-                type != ObjectType::MEM_OBJECT && type != ObjectType::MEM_STATIC,
+                v, type != ObjectType::MEM_OBJECT && type != ObjectType::MEM_STATIC,
                 (std::cerr << "The object type isn't supported for dynamic\n", inst->Dump(&std::cerr)));
         }
         if (type == ObjectType::MEM_DYN_CLASS) {
             CHECKER_DO_IF_NOT_VISITOR(
-                typeId == TypeIdMixin::MEM_DYN_CLASS_ID,
+                v, typeId == TypeIdMixin::MEM_DYN_CLASS_ID,
                 (std::cerr << "The object type_id for MEM_DYN_CLASS is incorrect\n", inst->Dump(&std::cerr)));
         } else if (type == ObjectType::MEM_DYN_PROPS) {
             CHECKER_DO_IF_NOT_VISITOR(
-                typeId == TypeIdMixin::MEM_DYN_PROPS_ID,
+                v, typeId == TypeIdMixin::MEM_DYN_PROPS_ID,
                 (std::cerr << "The object type_id for MEM_DYN_PROPS is incorrect\n", inst->Dump(&std::cerr)));
         } else if (type == ObjectType::MEM_DYN_PROTO_HOLDER) {
             CHECKER_DO_IF_NOT_VISITOR(
-                typeId == TypeIdMixin::MEM_DYN_PROTO_HOLDER_ID,
+                v, typeId == TypeIdMixin::MEM_DYN_PROTO_HOLDER_ID,
                 (std::cerr << "The object type_id for MEM_DYN_PROTO_HOLDER is incorrect\n", inst->Dump(&std::cerr)));
         } else if (type == ObjectType::MEM_DYN_PROTO_CELL) {
             [[maybe_unused]] Inst *objInst = inst->GetInput(0).GetInst();
             CHECKER_DO_IF_NOT_VISITOR(
-                typeId == TypeIdMixin::MEM_DYN_PROTO_CELL_ID,
+                v, typeId == TypeIdMixin::MEM_DYN_PROTO_CELL_ID,
                 (std::cerr << "The object type_id for MEM_DYN_PROTO_CELL is incorrect\n", inst->Dump(&std::cerr)));
         } else if (type == ObjectType::MEM_DYN_CHANGE_FIELD) {
             [[maybe_unused]] Inst *objInst = inst->GetInput(0).GetInst();
             CHECKER_DO_IF_NOT_VISITOR(
-                typeId == TypeIdMixin::MEM_DYN_CHANGE_FIELD_ID,
+                v, typeId == TypeIdMixin::MEM_DYN_CHANGE_FIELD_ID,
                 (std::cerr << "The object type_id for MEM_DYN_CHANGE_FIELD is incorrect\n", inst->Dump(&std::cerr)));
         } else if (type == ObjectType::MEM_DYN_GLOBAL) {
             CHECKER_DO_IF_NOT_VISITOR(
-                typeId == TypeIdMixin::MEM_DYN_GLOBAL_ID,
+                v, typeId == TypeIdMixin::MEM_DYN_GLOBAL_ID,
                 (std::cerr << "The object type_id for MEM_DYN_GLOBAL is incorrect\n", inst->Dump(&std::cerr)));
         } else if (type == ObjectType::MEM_DYN_HCLASS) {
             CHECKER_DO_IF_NOT_VISITOR(
-                typeId == TypeIdMixin::MEM_DYN_HCLASS_ID,
+                v, typeId == TypeIdMixin::MEM_DYN_HCLASS_ID,
                 (std::cerr << "The object type_id for MEM_DYN_HCLASS is incorrect\n", inst->Dump(&std::cerr)));
         } else {
             CHECKER_DO_IF_NOT_VISITOR(
+                v,
                 typeId != TypeIdMixin::MEM_DYN_GLOBAL_ID && typeId != TypeIdMixin::MEM_DYN_CLASS_ID &&
                     typeId != TypeIdMixin::MEM_DYN_PROPS_ID,
                 (std::cerr << "The object type_id for MEM_DYN_GLOBAL is incorrect\n", inst->Dump(&std::cerr)));
@@ -449,7 +454,7 @@ private:
             CheckObjectTypeDynamic(v, inst, type, typeId);
         } else {
             CHECKER_DO_IF_NOT_VISITOR(
-                type == ObjectType::MEM_OBJECT || type == ObjectType::MEM_STATIC,
+                v, type == ObjectType::MEM_OBJECT || type == ObjectType::MEM_STATIC,
                 (std::cerr << "The object type isn't supported for static\n", inst->Dump(&std::cerr)));
         }
     }
@@ -459,10 +464,10 @@ private:
         auto block = inst->GetBasicBlock();
         [[maybe_unused]] auto lastInst = *block->AllInstsSafeReverse().begin();
         CHECKER_DO_IF_NOT_VISITOR(
-            (lastInst == inst),
+            v, (lastInst == inst),
             (std::cerr << "Control flow instruction must be last instruction in block\n CF instruction:\n",
              inst->Dump(&std::cerr), std::cerr << "\n last instruction:\n", lastInst->Dump(&std::cerr)));
-        CHECKER_DO_IF_NOT_VISITOR(inst->GetUsers().Empty(),
+        CHECKER_DO_IF_NOT_VISITOR(v, inst->GetUsers().Empty(),
                                   (std::cerr << "Control flow instruction has users\n", inst->Dump(&std::cerr)));
     }
 
@@ -484,10 +489,10 @@ private:
         }
 
         CHECKER_DO_IF_NOT_VISITOR(
-            !inst->HasUsers() || hasOpc,
+            v, !inst->HasUsers() || hasOpc,
             (inst->Dump(&std::cerr),
              std::cerr << "Throw inst doesn't have any users from the list:" << opcs << std::endl));
-        CHECKER_DO_IF_NOT_VISITOR(hasSaveState,
+        CHECKER_DO_IF_NOT_VISITOR(v, hasSaveState,
                                   (inst->Dump(&std::cerr), std::cerr << "Throw inst without SaveState" << std::endl));
 #endif
     }
@@ -495,6 +500,7 @@ private:
     static void CheckSaveStateInput([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
     {
         CHECKER_DO_IF_NOT_VISITOR(
+            v,
             inst->GetInputsCount() != 0 &&
                 inst->GetInput(inst->GetInputsCount() - 1).GetInst()->GetOpcode() == Opcode::SaveState,
             (std::cerr << "Instruction must have SaveState as last input:\n", inst->Dump(&std::cerr)));

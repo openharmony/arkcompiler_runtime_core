@@ -1216,7 +1216,7 @@ void GraphChecker::VisitAbs(GraphVisitor *v, Inst *inst)
 }
 void GraphChecker::VisitSqrt(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::IsFloatType(inst->GetType()),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsFloatType(inst->GetType()),
                                         (std::cerr << "\nSqrt must have float type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
 }
@@ -1225,11 +1225,11 @@ void GraphChecker::VisitAddI(GraphVisitor *v, Inst *inst)
 {
     if (inst->GetType() == DataType::POINTER) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            inst->GetInputType(0) == DataType::POINTER || inst->GetInputType(0) == DataType::REFERENCE,
+            v, inst->GetInputType(0) == DataType::POINTER || inst->GetInputType(0) == DataType::REFERENCE,
             (std::cerr << "\nptr AddI must have ptr or ref input type\n", inst->Dump(&std::cerr)));
         return;
     }
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nAddI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
 }
@@ -1237,11 +1237,11 @@ void GraphChecker::VisitSubI(GraphVisitor *v, Inst *inst)
 {
     if (inst->GetType() == DataType::POINTER) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            inst->GetInputType(0) == DataType::POINTER || inst->GetInputType(0) == DataType::REFERENCE,
+            v, inst->GetInputType(0) == DataType::POINTER || inst->GetInputType(0) == DataType::REFERENCE,
             (std::cerr << "\nptr SubI must have ptr or ref input type\n", inst->Dump(&std::cerr)));
         return;
     }
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nSubI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
 }
@@ -1249,6 +1249,7 @@ void GraphChecker::VisitMulI(GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto type = inst->GetType();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) && !DataType::IsReference(type),
         (std::cerr << "\nMulI must have Int32 type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
@@ -1258,12 +1259,13 @@ void GraphChecker::VisitDivI(GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto type = inst->GetType();
     if (static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) &&
                 !DataType::IsReference(type),
             (std::cerr << "\nDivI must have Int32 type\n", inst->Dump(&std::cerr)));
     } else {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            !DataType::IsLessInt32(type) && !DataType::IsReference(type),
+            v, !DataType::IsLessInt32(type) && !DataType::IsReference(type),
             (std::cerr << "\nDivI must have at least Int32 type\n", inst->Dump(&std::cerr)));
     }
     CheckUnaryOperationTypes(v, inst);
@@ -1273,67 +1275,68 @@ void GraphChecker::VisitModI(GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto type = inst->GetType();
     if (static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             DataType::Is32Bits(type, static_cast<GraphChecker *>(v)->GetGraph()->GetArch()) &&
                 !DataType::IsReference(type),
             (std::cerr << "\nModI must have Int32 type\n", inst->Dump(&std::cerr)));
     } else {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            !DataType::IsLessInt32(type) && !DataType::IsReference(type),
+            v, !DataType::IsLessInt32(type) && !DataType::IsReference(type),
             (std::cerr << "\nModI must have at least Int32 type\n", inst->Dump(&std::cerr)));
     }
     CheckUnaryOperationTypes(v, inst);
 }
 void GraphChecker::VisitAndI(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nAndI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
 }
 void GraphChecker::VisitOrI(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nOrI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
 }
 void GraphChecker::VisitXorI(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nXorI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
 }
 void GraphChecker::VisitShlI(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nShlI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
     [[maybe_unused]] auto imm = static_cast<BinaryImmOperation *>(inst)->GetImm();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        imm <= DataType::GetTypeSize(inst->GetType(), static_cast<GraphChecker *>(v)->GetGraph()->GetArch()),
+        v, imm <= DataType::GetTypeSize(inst->GetType(), static_cast<GraphChecker *>(v)->GetGraph()->GetArch()),
         (std::cerr << "\nShlI have shift more then size of type\n", inst->Dump(&std::cerr)));
 }
 void GraphChecker::VisitShrI(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nShrI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
     [[maybe_unused]] auto imm = static_cast<BinaryImmOperation *>(inst)->GetImm();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        imm <= DataType::GetTypeSize(inst->GetType(), static_cast<GraphChecker *>(v)->GetGraph()->GetArch()),
+        v, imm <= DataType::GetTypeSize(inst->GetType(), static_cast<GraphChecker *>(v)->GetGraph()->GetArch()),
         (std::cerr << "\nShrI have shift more then size of type\n", inst->Dump(&std::cerr)));
 }
 void GraphChecker::VisitAShlI(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nAShrI must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
     [[maybe_unused]] auto imm = static_cast<BinaryImmOperation *>(inst)->GetImm();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        imm <= DataType::GetTypeSize(inst->GetType(), static_cast<GraphChecker *>(v)->GetGraph()->GetArch()),
+        v, imm <= DataType::GetTypeSize(inst->GetType(), static_cast<GraphChecker *>(v)->GetGraph()->GetArch()),
         (std::cerr << "\nAShlI have shift more then size of type\n", inst->Dump(&std::cerr)));
 }
 void GraphChecker::VisitNot(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "\nNot must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
 }
@@ -1358,8 +1361,9 @@ void GraphChecker::VisitAdd(GraphVisitor *v, Inst *inst)
         [[maybe_unused]] auto type1 = inst->GetInput(0).GetInst()->GetType();
         [[maybe_unused]] auto type2 = inst->GetInput(1).GetInst()->GetType();
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            type1 != type2, (std::cerr << "\nptr Add must have ptr and int input types\n", inst->Dump(&std::cerr)));
+            v, type1 != type2, (std::cerr << "\nptr Add must have ptr and int input types\n", inst->Dump(&std::cerr)));
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             (type1 == DataType::POINTER && IsIntWithPointerSize(type2, graph)) ||
                 (type2 == DataType::POINTER && IsIntWithPointerSize(type1, graph)),
             (std::cerr << "\nptr Add must have ptr and int input types\n", inst->Dump(&std::cerr)));
@@ -1375,14 +1379,16 @@ void GraphChecker::VisitSub(GraphVisitor *v, Inst *inst)
         [[maybe_unused]] auto type2 = inst->GetInput(1).GetInst()->GetType();
         if (inst->GetType() == DataType::POINTER) {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                type1 != type2, (std::cerr << "\nptr Sub must have ptr and int input types\n", inst->Dump(&std::cerr)));
+                v, type1 != type2,
+                (std::cerr << "\nptr Sub must have ptr and int input types\n", inst->Dump(&std::cerr)));
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                (type1 == DataType::POINTER && IsIntWithPointerSize(type2, graph)),
+                v, (type1 == DataType::POINTER && IsIntWithPointerSize(type2, graph)),
                 (std::cerr << "\nptr Sub must have ptr and int input types\n", inst->Dump(&std::cerr)));
             return;
         }
         if (type1 == DataType::POINTER && type2 == DataType::POINTER) {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+                v,
                 DataType::GetCommonType(inst->GetType()) == DataType::INT64 &&
                     IsIntWithPointerSize(inst->GetType(), graph),
                 (std::cerr << "\n Sub with 2 ptr inputs must have int type\n", inst->Dump(&std::cerr)));
@@ -1454,16 +1460,16 @@ void GraphChecker::VisitLoadArrayI(GraphVisitor *v, Inst *inst)
 }
 void GraphChecker::VisitLoadArrayPair(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) ||
-                                            DataType::IsReference(inst->GetType()),
-                                        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
+        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst);
 }
 void GraphChecker::VisitLoadObjectPair(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) ||
-                                            DataType::IsReference(inst->GetType()),
-                                        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
+        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst);
     auto loadObj = inst->CastToLoadObjectPair();
     ASSERT(loadObj->GetObjectType() == MEM_OBJECT || loadObj->GetObjectType() == MEM_STATIC);
@@ -1478,33 +1484,33 @@ void GraphChecker::VisitLoadObjectPair(GraphVisitor *v, Inst *inst)
 }
 void GraphChecker::VisitLoadArrayPairI(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) ||
-                                            DataType::IsReference(inst->GetType()),
-                                        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
+        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst);
 }
 
 void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) ||
-                                            DataType::IsReference(inst->GetType()),
-                                        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
+        (std::cerr << "Unallowed type of coalesced load\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst);
     [[maybe_unused]] auto op1 = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto idx = inst->CastToLoadPairPart()->GetImm();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(op1->WithGluedInsts(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op1->WithGluedInsts(),
                                         (std::cerr << "Input instruction is not a Pair\n", inst->Dump(&std::cerr)));
     if (op1->GetOpcode() == Opcode::LoadArrayPairI) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(idx < op1->CastToLoadArrayPairI()->GetDstCount(),
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, idx < op1->CastToLoadArrayPairI()->GetDstCount(),
                                             (std::cerr << "Pair index is out of bounds\n", inst->Dump(&std::cerr)));
     } else if (op1->GetOpcode() == Opcode::LoadArrayPair) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(idx < op1->CastToLoadArrayPair()->GetDstCount(),
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, idx < op1->CastToLoadArrayPair()->GetDstCount(),
                                             (std::cerr << "Pair index is out of bounds\n", inst->Dump(&std::cerr)));
     } else {
         ASSERT(op1->GetOpcode() == Opcode::LoadObjectPair);
     }
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[0].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[0].GetInst()),
         (std::cerr << "Types of load vector element and vector input are not compatible\n", inst->Dump(&std::cerr)));
 
     // Strict order here
@@ -1517,7 +1523,7 @@ void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
         }
     }
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        prev != nullptr && prev == op1,
+        v, prev != nullptr && prev == op1,
         (std::cerr << "LoadPairPart(s) instructions must follow immediately after appropriate "
                       "LoadArrayPair(I) or LoadObjectPair\n",
          inst->Dump(&std::cerr), prev->Dump(&std::cerr), inst->GetBasicBlock()->GetGraph()->Dump(&std::cerr)));
@@ -1525,19 +1531,19 @@ void GraphChecker::VisitLoadPairPart(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitStoreArrayPair(GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) ||
-                                            DataType::IsReference(inst->GetType()),
-                                        (std::cerr << "Unallowed type of coalesced store\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
+        (std::cerr << "Unallowed type of coalesced store\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
         (std::cerr << "Types of store and the first stored value are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[3U].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[3U].GetInst()),
         (std::cerr << "Types of store and the second stored value are not compatible\n", inst->Dump(&std::cerr)));
     [[maybe_unused]] bool needBarrier = inst->CastToStoreArrayPair()->GetNeedBarrier();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
         (std::cerr << "StoreArrayPair has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
 }
 
@@ -1547,13 +1553,13 @@ void GraphChecker::VisitStoreObjectPair(GraphVisitor *v, Inst *inst)
     bool needBarrier = storeObj->GetNeedBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and the first store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[2].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[2].GetInst()),
         (std::cerr << "Types of store and the second store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
         (std::cerr << "StoreObjectPair has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
 
     ASSERT(storeObj->GetObjectType() == MEM_OBJECT || storeObj->GetObjectType() == MEM_STATIC);
@@ -1570,18 +1576,18 @@ void GraphChecker::VisitStoreObjectPair(GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitStoreArrayPairI(GraphVisitor *v, Inst *inst)
 {
     bool needBarrier = inst->CastToStoreArrayPairI()->GetNeedBarrier();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(MemoryCoalescing::AcceptedType(inst->GetType()) ||
-                                            DataType::IsReference(inst->GetType()),
-                                        (std::cerr << "Unallowed type of coalesced store\n", inst->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, MemoryCoalescing::AcceptedType(inst->GetType()) || DataType::IsReference(inst->GetType()),
+        (std::cerr << "Unallowed type of coalesced store\n", inst->Dump(&std::cerr)));
     CheckMemoryInstruction(v, inst, needBarrier);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and the first stored value are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
         (std::cerr << "Types of store and the second stored value are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
         (std::cerr << "StoreArrayPairI has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
 }
 
@@ -1602,10 +1608,10 @@ void GraphChecker::VisitStoreArray(GraphVisitor *v, Inst *inst)
     bool needBarrier = inst->CastToStoreArray()->GetNeedBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[2U].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
         (std::cerr << "StoreArray has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
 }
 
@@ -1614,10 +1620,10 @@ void GraphChecker::VisitStoreArrayI(GraphVisitor *v, Inst *inst)
     bool needBarrier = inst->CastToStoreArrayI()->GetNeedBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
         (std::cerr << "StoreArrayI has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
 }
 
@@ -1627,10 +1633,10 @@ void GraphChecker::VisitStoreStatic(GraphVisitor *v, Inst *inst)
     CheckMemoryInstruction(v, inst, needBarrier);
     auto graph = static_cast<GraphChecker *>(v)->GetGraph();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE),
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE),
         (std::cerr << "StoreStatic has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
     [[maybe_unused]] auto initInst = inst->GetInputs()[0].GetInst();
     if (initInst->IsPhi()) {
@@ -1638,7 +1644,7 @@ void GraphChecker::VisitStoreStatic(GraphVisitor *v, Inst *inst)
     }
     [[maybe_unused]] auto opcode = initInst->GetOpcode();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        (opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadImmediate),
+        v, (opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadImmediate),
         (std::cerr << "The first input for the StoreStatic should be LoadAndInitClass or LoadImmediate",
          inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
     [[maybe_unused]] auto storeStatic = inst->CastToStoreStatic();
@@ -1646,7 +1652,7 @@ void GraphChecker::VisitStoreStatic(GraphVisitor *v, Inst *inst)
         graph->GetRuntime()->GetClassIdForField(storeStatic->GetMethod(), storeStatic->GetTypeId());
     // See comment in VisitNewObject about this if statement
     if (opcode == Opcode::LoadAndInitClass && initInst->CastToLoadAndInitClass()->GetClass() == nullptr) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(initInst->CastToLoadAndInitClass()->GetTypeId() == classId,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, initInst->CastToLoadAndInitClass()->GetTypeId() == classId,
                                             (std::cerr << "StoreStatic and LoadAndInitClass must have equal class",
                                              inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
     }
@@ -1657,14 +1663,14 @@ void GraphChecker::VisitUnresolvedStoreStatic(GraphVisitor *v, Inst *inst)
     bool needBarrier = inst->CastToUnresolvedStoreStatic()->GetNeedBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[0].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[0].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE),
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE),
         (std::cerr << "UnresolvedStoreStatic has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
     [[maybe_unused]] auto ss = inst->GetInputs()[1].GetInst();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        ss->GetOpcode() == Opcode::SaveState,
+        v, ss->GetOpcode() == Opcode::SaveState,
         (std::cerr << "UnresolvedStoreStatic instruction second operand is not a SaveState", inst->Dump(&std::cerr),
          ss->Dump(&std::cerr)));
 }
@@ -1674,10 +1680,10 @@ void GraphChecker::VisitStoreObject(GraphVisitor *v, Inst *inst)
     bool needBarrier = inst->CastToStoreObject()->GetNeedBarrier();
     CheckMemoryInstruction(v, inst, needBarrier);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
+        v, CheckCommonTypes(inst, inst->GetInputs()[1].GetInst()),
         (std::cerr << "Types of store and store input are not compatible\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
+        v, needBarrier == (inst->GetType() == DataType::REFERENCE) || inst->GetType() == DataType::ANY,
         (std::cerr << "StoreObject has incorrect value NeedBarrier", inst->Dump(&std::cerr)));
     CheckObjectType(v, inst, inst->CastToStoreObject()->GetObjectType(), inst->CastToStoreObject()->GetTypeId());
 }
@@ -1716,7 +1722,7 @@ void GraphChecker::VisitLoadStatic(GraphVisitor *v, Inst *inst)
     }
     [[maybe_unused]] auto opcode = initInst->GetOpcode();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadImmediate,
+        v, opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadImmediate,
         (std::cerr << "The first input for the LoadStatic should be LoadAndInitClass or LoadImmediate",
          inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
     [[maybe_unused]] auto loadStatic = inst->CastToLoadStatic();
@@ -1724,7 +1730,7 @@ void GraphChecker::VisitLoadStatic(GraphVisitor *v, Inst *inst)
         graph->GetRuntime()->GetClassIdForField(loadStatic->GetMethod(), loadStatic->GetTypeId());
     // See comment in VisitNewObject about this if statement
     if (opcode == Opcode::LoadAndInitClass && initInst->CastToLoadAndInitClass()->GetClass() == nullptr) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(initInst->CastToLoadAndInitClass()->GetTypeId() == classId,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, initInst->CastToLoadAndInitClass()->GetTypeId() == classId,
                                             (std::cerr << "LoadStatic and LoadAndInitClass must have equal class",
                                              inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
     }
@@ -1732,11 +1738,12 @@ void GraphChecker::VisitLoadStatic(GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::REFERENCE,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::REFERENCE,
                                         (std::cerr << "LoadClass must have Reference type", inst->Dump(&std::cerr)));
     for (auto &user : inst->GetUsers()) {
         [[maybe_unused]] auto userInst = user.GetInst();
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             userInst->GetOpcode() == Opcode::CheckCast || userInst->GetOpcode() == Opcode::IsInstance ||
                 userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::Intrinsic,
             (std::cerr << "Incorrect user of the LoadClass", inst->Dump(&std::cerr), userInst->Dump(&std::cerr)));
@@ -1746,11 +1753,12 @@ void GraphChecker::VisitLoadClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetType() == DataType::REFERENCE,
+        v, inst->GetType() == DataType::REFERENCE,
         (std::cerr << "LoadAndInitClass must have Reference type", inst->Dump(&std::cerr)));
     for (auto &user : inst->GetUsers()) {
         [[maybe_unused]] auto userInst = user.GetInst();
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             userInst->GetOpcode() == Opcode::LoadStatic ||
                 (userInst->GetOpcode() == Opcode::LoadObject &&
                  userInst->CastToLoadObject()->GetObjectType() == ObjectType::MEM_STATIC) ||
@@ -1770,19 +1778,20 @@ void GraphChecker::VisitLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst 
 void GraphChecker::VisitUnresolvedLoadAndInitClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetType() == DataType::REFERENCE,
+        v, inst->GetType() == DataType::REFERENCE,
         (std::cerr << "UnresolvedLoadAndInitClass must have Reference type", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->CastToUnresolvedLoadAndInitClass()->GetClass() == nullptr,
+        v, inst->CastToUnresolvedLoadAndInitClass()->GetClass() == nullptr,
         (std::cerr << "UnresolvedLoadAndInitClass must have a null ClassPtr", inst->Dump(&std::cerr)));
     [[maybe_unused]] auto ss = inst->GetInputs()[0].GetInst();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        ss->GetOpcode() == Opcode::SaveState,
+        v, ss->GetOpcode() == Opcode::SaveState,
         (std::cerr << "UnresolvedLoadAndInitClass instruction first operand is not a SaveState", inst->Dump(&std::cerr),
          ss->Dump(&std::cerr)));
     for (auto &user : inst->GetUsers()) {
         [[maybe_unused]] auto userInst = user.GetInst();
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             userInst->GetOpcode() == Opcode::LoadStatic || userInst->GetOpcode() == Opcode::StoreStatic ||
                 userInst->GetOpcode() == Opcode::NewObject || userInst->GetOpcode() == Opcode::NewArray ||
                 userInst->GetOpcode() == Opcode::Phi || userInst->GetOpcode() == Opcode::MultiArray ||
@@ -1795,11 +1804,11 @@ void GraphChecker::VisitUnresolvedLoadAndInitClass([[maybe_unused]] GraphVisitor
 void GraphChecker::VisitGetInstanceClass([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetType() == DataType::REFERENCE,
+        v, inst->GetType() == DataType::REFERENCE,
         (std::cerr << "GetInstanceClass must have Reference type", inst->Dump(&std::cerr)));
     for (auto &user : inst->GetUsers()) {
         [[maybe_unused]] auto userInst = user.GetInst();
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(!userInst->IsSaveState(),
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !userInst->IsSaveState(),
                                             (std::cerr << "Incorrect user of the GetInstanceClass",
                                              inst->Dump(&std::cerr), userInst->Dump(&std::cerr)));
     }
@@ -1811,21 +1820,22 @@ void GraphChecker::VisitGetInstanceClass([[maybe_unused]] GraphVisitor *v, Inst 
 
 void GraphChecker::VisitNewObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::REFERENCE,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::REFERENCE,
                                         (std::cerr << "NewObject must be have Reference type", inst->Dump(&std::cerr)));
     [[maybe_unused]] auto initInst = inst->GetInputs()[0].GetInst();
     if (initInst->IsPhi()) {
         return;
     }
     [[maybe_unused]] auto opcode = initInst->GetOpcode();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadRuntimeClass ||
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v,
+                                        opcode == Opcode::LoadAndInitClass || opcode == Opcode::LoadRuntimeClass ||
                                             opcode == Opcode::UnresolvedLoadAndInitClass ||
                                             opcode == Opcode::LoadImmediate,
                                         (std::cerr << "The first input for the NewObject should be LoadAndInitClass or "
                                                       "UnresolvedLoadAndInitClass or LoadRuntimeClass or LoadImmediate",
                                          inst->Dump(&std::cerr), initInst->Dump(&std::cerr)));
     [[maybe_unused]] auto ssInst = inst->GetInputs()[1].GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(ssInst->GetOpcode() == Opcode::SaveState,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, ssInst->GetOpcode() == Opcode::SaveState,
                                         (std::cerr << "The second input for the NewObject should be SaveState",
                                          inst->Dump(&std::cerr), ssInst->Dump(&std::cerr)));
     // If InitClass contains an already resolved class, then IDs may be different. Because VN can remove the
@@ -1833,14 +1843,14 @@ void GraphChecker::VisitNewObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
     // accordingly.
     if (initInst->GetOpcode() == Opcode::LoadAndInitClass &&
         initInst->CastToLoadAndInitClass()->GetClass() == nullptr) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(initInst->CastToLoadAndInitClass()->GetTypeId() ==
-                                                inst->CastToNewObject()->GetTypeId(),
-                                            std::cerr << "NewObject and LoadAndInitClass must have equal class:\n"
-                                                      << *inst << '\n'
-                                                      << *initInst << std::endl);
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, initInst->CastToLoadAndInitClass()->GetTypeId() == inst->CastToNewObject()->GetTypeId(),
+            std::cerr << "NewObject and LoadAndInitClass must have equal class:\n"
+                      << *inst << '\n'
+                      << *initInst << std::endl);
     } else if (initInst->GetOpcode() == Opcode::UnresolvedLoadAndInitClass) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            initInst->CastToUnresolvedLoadAndInitClass()->GetTypeId() == inst->CastToNewObject()->GetTypeId(),
+            v, initInst->CastToUnresolvedLoadAndInitClass()->GetTypeId() == inst->CastToNewObject()->GetTypeId(),
             std::cerr << "NewObject and UnresolvedLoadAndInitClass must have equal class:\n"
                       << *inst << '\n'
                       << *initInst << std::endl);
@@ -1850,20 +1860,20 @@ void GraphChecker::VisitNewObject([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitLoadRuntimeClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->CastToLoadRuntimeClass()->GetTypeId() == TypeIdMixin::MEM_PROMISE_CLASS_ID,
+        v, inst->CastToLoadRuntimeClass()->GetTypeId() == TypeIdMixin::MEM_PROMISE_CLASS_ID,
         (std::cerr << "LoadRuntimeClass should have TypeId MEM_PROMISE_CLASS_ID", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitInitObject([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        g_options.IsCompilerSupportInitObjectInst(),
+        v, g_options.IsCompilerSupportInitObjectInst(),
         (std::cerr << "Instruction InitObject isn't supported", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitInitClass([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::NO_TYPE,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::NO_TYPE,
                                         (std::cerr << "InitClass doesn't have type", inst->Dump(&std::cerr)));
 }
 
@@ -1889,12 +1899,14 @@ void GraphChecker::VisitConstant([[maybe_unused]] GraphVisitor *v, [[maybe_unuse
     [[maybe_unused]] auto isDynamic = static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod();
     if (static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             type == DataType::FLOAT32 || type == DataType::FLOAT64 || type == DataType::INT64 ||
                 type == DataType::INT32 || (type == DataType::ANY && isDynamic),
             (std::cerr << "Constant inst can be only FLOAT32, FLOAT64, INT32 or INT64\n", inst->Dump(&std::cerr)));
 
     } else {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             type == DataType::FLOAT32 || type == DataType::FLOAT64 || type == DataType::INT64 ||
                 (type == DataType::ANY && isDynamic),
             (std::cerr << "Constant instruction can be only FLOAT32, FLOAT64 or INT64\n", inst->Dump(&std::cerr)));
@@ -1904,11 +1916,11 @@ void GraphChecker::VisitConstant([[maybe_unused]] GraphVisitor *v, [[maybe_unuse
 void GraphChecker::VisitNullPtr([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetType() == DataType::REFERENCE,
+        v, inst->GetType() == DataType::REFERENCE,
         (std::cerr << "NullPtr instruction should have REFERENCE type only\n", inst->Dump(&std::cerr)));
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->IncrementNullPtrInstCounterAndGet() == 1,
+        v, static_cast<GraphChecker *>(v)->IncrementNullPtrInstCounterAndGet() == 1,
         (std::cerr << "There should be not more than one NullPtr instruction in graph\n",
          inst->GetBasicBlock()->Dump(&std::cerr)));
 }
@@ -1916,11 +1928,11 @@ void GraphChecker::VisitNullPtr([[maybe_unused]] GraphVisitor *v, [[maybe_unused
 void GraphChecker::VisitLoadUndefined([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetType() == DataType::REFERENCE,
+        v, inst->GetType() == DataType::REFERENCE,
         (std::cerr << "LoadUndefined instruction should have REFERENCE type only\n", inst->Dump(&std::cerr)));
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->IncrementLoadUndefinedInstCounterAndGet() == 1,
+        v, static_cast<GraphChecker *>(v)->IncrementLoadUndefinedInstCounterAndGet() == 1,
         (std::cerr << "There should be not more than one LoadUndefined instruction in graph\n",
          inst->GetBasicBlock()->Dump(&std::cerr)));
 }
@@ -1929,6 +1941,7 @@ void GraphChecker::VisitPhi([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     for ([[maybe_unused]] auto input : inst->GetInputs()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             CheckCommonTypes(inst, input.GetInst()) ||
                 (static_cast<GraphChecker *>(v)->GetGraph()->IsThrowApplied() &&
                  (input.GetInst()->GetBasicBlock()->IsEndWithThrow() ||
@@ -1941,7 +1954,7 @@ void GraphChecker::VisitPhi([[maybe_unused]] GraphVisitor *v, Inst *inst)
 
 void GraphChecker::VisitParameter([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() != DataType::NO_TYPE,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() != DataType::NO_TYPE,
                                         (std::cerr << "The parametr doesn't have type:\n", inst->Dump(&std::cerr)));
 }
 
@@ -1950,39 +1963,40 @@ void GraphChecker::VisitCompare([[maybe_unused]] GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto op1 = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto op2 = inst->GetInputs()[1].GetInst();
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(i) != DataType::NO_TYPE,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(i) != DataType::NO_TYPE,
                                             std::cerr << "Source operand type is not set: " << *inst << std::endl);
     }
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(0) == inst->GetInputType(1),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(0) == inst->GetInputType(1),
                                         std::cerr << "Conditional instruction has different inputs type: " << *inst
                                                   << std::endl);
     if (inst->GetInputType(0) == DataType::REFERENCE) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             inst->CastToCompare()->GetCc() == ConditionCode::CC_NE ||
                 inst->CastToCompare()->GetCc() == ConditionCode::CC_EQ,
             (std::cerr << "Reference compare must have CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
         if (op1->IsConst()) {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op1),
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op1),
                                                 (std::cerr << "Constant reference input must be integer 0: \n",
                                                  inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
         } else {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                op1->GetType() == DataType::REFERENCE,
+                v, op1->GetType() == DataType::REFERENCE,
                 (std::cerr << "Condition instruction 1st operand type is not a reference\n", inst->Dump(&std::cerr),
                  op1->Dump(&std::cerr)));
         }
         if (op2->IsConst()) {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op2),
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op2),
                                                 (std::cerr << "Constant reference input must be integer 0: \n",
                                                  inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
         } else {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                op2->GetType() == DataType::REFERENCE,
+                v, op2->GetType() == DataType::REFERENCE,
                 (std::cerr << "Condition instruction 2nd operand type is not a reference\n", inst->Dump(&std::cerr),
                  op2->Dump(&std::cerr)));
         }
     }
-    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::BOOL,
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::BOOL,
                                              "Condition instruction type is not a bool");
 }
 
@@ -1993,19 +2007,19 @@ void GraphChecker::VisitCast([[maybe_unused]] GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto inputType = inst->GetInput(0).GetInst()->GetType();
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::IsTypeNumeric(dstType),
+        v, DataType::IsTypeNumeric(dstType),
         (std::cerr << "Cast instruction dst type is not a numeric type\n", inst->Dump(&std::cerr)));
     if (static_cast<GraphChecker *>(v)->GetGraph()->GetMode().SupportManagedCode()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            DataType::IsTypeNumeric(srcType),
+            v, DataType::IsTypeNumeric(srcType),
             (std::cerr << "Cast instruction src type is not a numeric type\n", inst->Dump(&std::cerr)));
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            DataType::IsTypeNumeric(inputType),
+            v, DataType::IsTypeNumeric(inputType),
             (std::cerr << "Cast instruction operand type is not a numeric type\n", inst->Dump(&std::cerr)));
     }
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(srcType) == DataType::GetCommonType(inputType),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(srcType) == DataType::GetCommonType(inputType),
                                         (std::cerr << "Incorrect src_type and input type\n", inst->Dump(&std::cerr)));
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(!(DataType::IsFloatType(srcType) && DataType::IsLessInt32(dstType)),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !(DataType::IsFloatType(srcType) && DataType::IsLessInt32(dstType)),
                                         (std::cerr << "Cast instruction from "
                                                    << DataType::internal::TYPE_NAMES.at(srcType) << " to "
                                                    << DataType::internal::TYPE_NAMES.at(dstType) << " don't support\n",
@@ -2016,22 +2030,22 @@ void GraphChecker::VisitCmp([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto op1 = inst->GetInput(0).GetInst();
     [[maybe_unused]] auto op2 = inst->GetInput(1).GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::IsTypeNumeric(op1->GetType()),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsTypeNumeric(op1->GetType()),
                                         (std::cerr << "Cmp instruction 1st operand type is not a numeric type\n",
                                          inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::IsTypeNumeric(op2->GetType()),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsTypeNumeric(op2->GetType()),
                                         (std::cerr << "Cmp instruction 2st operand type is not a numeric type\n",
                                          inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::GetCommonType(op1->GetType()) == DataType::GetCommonType(inst->GetInputType(0)),
+        v, DataType::GetCommonType(op1->GetType()) == DataType::GetCommonType(inst->GetInputType(0)),
         (std::cerr << "Input type and Cmp Input Type are not equal\n", inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::GetCommonType(op2->GetType()) == DataType::GetCommonType(inst->GetInputType(1)),
+        v, DataType::GetCommonType(op2->GetType()) == DataType::GetCommonType(inst->GetInputType(1)),
         (std::cerr << "Input type and Cmp Input Type are not equal\n", inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::INT32,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::INT32,
                                         (std::cerr << "Cmp instruction type is not a int32\n", inst->Dump(&std::cerr)));
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(i) != DataType::NO_TYPE,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(i) != DataType::NO_TYPE,
                                             std::cerr << "Source operand type is not set: " << *inst << std::endl);
     }
 }
@@ -2039,13 +2053,13 @@ void GraphChecker::VisitCmp([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitMonitor([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto op = inst->GetInputs()[0].GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::VOID,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::VOID,
                                         (std::cerr << "Monitor type is not a void", inst->Dump(&std::cerr)));
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::IsReference(op->GetType()),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsReference(op->GetType()),
                                         (std::cerr << "Monitor instruction 1st operand type is not a reference",
                                          inst->Dump(&std::cerr), op->Dump(&std::cerr)));
     [[maybe_unused]] auto op1 = inst->GetInputs()[1].GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(op1->GetOpcode() == Opcode::SaveState,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op1->GetOpcode() == Opcode::SaveState,
                                         (std::cerr << "Monitor instruction second operand is not a SaveState",
                                          inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
 }
@@ -2053,14 +2067,14 @@ void GraphChecker::VisitMonitor([[maybe_unused]] GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitReturn(GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto op = inst->GetInputs()[0].GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(CheckCommonTypes(inst, op),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, CheckCommonTypes(inst, op),
                                         (std::cerr << "Types of return and its input are not compatible\n return:\n",
                                          inst->Dump(&std::cerr), std::cerr << "\n input:\n", op->Dump(&std::cerr)));
     CheckContrlFlowInst(v, inst);
     [[maybe_unused]] auto numSuccs = inst->GetBasicBlock()->GetSuccsBlocks().size();
-    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(numSuccs == 1, "Basic block with Return must have 1 successor");
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(v, numSuccs == 1, "Basic block with Return must have 1 successor");
     [[maybe_unused]] auto succ = inst->GetBasicBlock()->GetSuccsBlocks()[0];
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(succ->IsEndBlock() || succ->IsTryEnd(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, succ->IsEndBlock() || succ->IsTryEnd(),
                                         std::cerr
                                             << "Basic block with Return must have end or try end block as successor:\n"
                                             << *inst << std::endl);
@@ -2070,24 +2084,24 @@ void GraphChecker::VisitReturnVoid(GraphVisitor *v, Inst *inst)
 {
     CheckContrlFlowInst(v, inst);
     [[maybe_unused]] auto numSuccs = inst->GetBasicBlock()->GetSuccsBlocks().size();
-    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(numSuccs == 1, "Basic block with ReturnVoid must have 1 successor");
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(v, numSuccs == 1, "Basic block with ReturnVoid must have 1 successor");
     [[maybe_unused]] auto succ = inst->GetBasicBlock()->GetSuccsBlocks()[0];
     CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(
-        succ->IsEndBlock() || succ->IsTryEnd(),
+        v, succ->IsEndBlock() || succ->IsTryEnd(),
         "Basic block with ReturnVoid must have end or try_end block as successor.");
 }
 
 void GraphChecker::VisitNullCheck([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] Inst *array = inst->GetInput(0).GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::IsReference(array->GetType()) || array->GetType() == DataType::ANY,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsReference(array->GetType()) || array->GetType() == DataType::ANY,
                                         (std::cerr << "\n Types of input NullCheck must be REFERENCE or ANY: \n",
                                          inst->Dump(&std::cerr), array->Dump(&std::cerr)));
     [[maybe_unused]] auto ss = inst->GetInput(1).GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(ss->GetOpcode() == Opcode::SaveState ||
-                                            ss->GetOpcode() == Opcode::SaveStateDeoptimize,
-                                        (std::cerr << "\n Second input of NullCheck must be SaveState: \n",
-                                         inst->Dump(&std::cerr), ss->Dump(&std::cerr)));
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v, ss->GetOpcode() == Opcode::SaveState || ss->GetOpcode() == Opcode::SaveStateDeoptimize,
+        (std::cerr << "\n Second input of NullCheck must be SaveState: \n", inst->Dump(&std::cerr),
+         ss->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitBoundsCheck([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -2098,6 +2112,7 @@ void GraphChecker::VisitBoundsCheck([[maybe_unused]] GraphVisitor *v, Inst *inst
         // NOTE(pishin): actually type should be INT32, but predecessor may be Call instruction with type u16, u8
         // e.t.c
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v,
             (op->IsConst() && opType == DataType::INT64) ||
                 (DataType::GetCommonType(opType) == DataType::INT64 &&
                  Is32Bits(opType, static_cast<GraphChecker *>(v)->GetGraph()->GetArch())),
@@ -2107,18 +2122,18 @@ void GraphChecker::VisitBoundsCheck([[maybe_unused]] GraphVisitor *v, Inst *inst
 
 void GraphChecker::VisitBoundsCheckI([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_IF_NOT_PRINT_VISITOR(!inst->HasUsers());
+    CHECKER_IF_NOT_PRINT_VISITOR(v, !inst->HasUsers());
 }
 
 void GraphChecker::VisitRefTypeCheck(GraphVisitor *v, Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        (inst->GetType() == DataType::REFERENCE),
+        v, (inst->GetType() == DataType::REFERENCE),
         (std::cerr << "Types of RefTypeCheck must be REFERENCE\n", inst->Dump(&std::cerr)));
     for (unsigned i = 0; i < 2U; i++) {
         [[maybe_unused]] auto op = inst->GetInputs()[i].GetInst();
         [[maybe_unused]] auto opType = op->GetType();
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR((opType == DataType::REFERENCE),
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (opType == DataType::REFERENCE),
                                             (std::cerr << "Types of " << i << " input RefTypeCheck must be REFERENCE\n",
                                              inst->Dump(&std::cerr), op->Dump(&std::cerr)));
     }
@@ -2132,7 +2147,7 @@ void GraphChecker::VisitNegativeCheck(GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto op = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto opType = op->GetType();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::GetCommonType(opType) == DataType::INT64,
+        v, DataType::GetCommonType(opType) == DataType::INT64,
         (std::cerr << "Type of NegativeCheck must be integer\n", inst->Dump(&std::cerr)));
     if (inst->GetBasicBlock()->GetGraph()->IsDynamicMethod()) {
         // In dynamic methods for negative values we creates f64 Mod, so we insert NegativeCheck before Mod
@@ -2150,7 +2165,7 @@ void GraphChecker::VisitNotPositiveCheck(GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto op = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto opType = op->GetType();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::GetCommonType(opType) == DataType::INT64,
+        v, DataType::GetCommonType(opType) == DataType::INT64,
         (std::cerr << "Type of NotPositiveCheck must be integer\n", inst->Dump(&std::cerr)));
     ASSERT(inst->GetBasicBlock()->GetGraph()->IsDynamicMethod());
     CheckThrows(v, inst, {Opcode::Phi, Opcode::Mod, Opcode::ModI});
@@ -2161,7 +2176,7 @@ void GraphChecker::VisitZeroCheck(GraphVisitor *v, Inst *inst)
     [[maybe_unused]] auto op = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto opType = op->GetType();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::GetCommonType(opType) == DataType::INT64,
+        v, DataType::GetCommonType(opType) == DataType::INT64,
         (std::cerr << "Type of ZeroCheck input must be integer\n", inst->Dump(&std::cerr)));
     CheckThrows(v, inst, {Opcode::Div, Opcode::DivI, Opcode::Mod, Opcode::ModI, Opcode::Phi});
 }
@@ -2170,24 +2185,24 @@ void GraphChecker::VisitDeoptimizeIf([[maybe_unused]] GraphVisitor *v, Inst *ins
 {
     [[maybe_unused]] auto op = inst->GetInput(0).GetInst();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        op->GetType() == DataType::BOOL || op->IsBoolConst(),
+        v, op->GetType() == DataType::BOOL || op->IsBoolConst(),
         (std::cerr << "Type of first input DeoptimizeIf must be BOOL:\n", inst->Dump(&std::cerr)));
     [[maybe_unused]] auto ss = inst->GetInput(1).GetInst();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        ss->GetOpcode() == Opcode::SaveStateDeoptimize || ss->GetOpcode() == Opcode::SaveState,
+        v, ss->GetOpcode() == Opcode::SaveStateDeoptimize || ss->GetOpcode() == Opcode::SaveState,
         (std::cerr << "Second input DeoptimizeIf must be SaveStateDeoptimize or SaveState:\n", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitLenArray([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::INT32,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::INT32,
                                         (std::cerr << "Type of LenArray must be INT32:\n", inst->Dump(&std::cerr)));
     [[maybe_unused]] auto op = inst->GetInputs()[0].GetInst();
     if (op->GetOpcode() == Opcode::NullCheck) {
         op = op->GetInput(0).GetInst();
     }
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::IsReference(op->GetType()),
+        v, DataType::IsReference(op->GetType()),
         (std::cerr << "Types of input LenArray must be REFERENCE:\n", inst->Dump(&std::cerr), op->Dump(&std::cerr)));
 }
 
@@ -2195,13 +2210,13 @@ void GraphChecker::VisitCallVirtual([[maybe_unused]] GraphVisitor *v, Inst *inst
 {
     auto graph = inst->GetBasicBlock()->GetGraph();
     // In AbcKit mode there are no SaveStates
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputs().Size() > 0 || graph->IsAbcKit(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputs().Size() > 0 || graph->IsAbcKit(),
                                         (std::cerr << "Virtual function must have inputs:\n", inst->Dump(&std::cerr)));
     if (graph->IsAbcKit()) {
         return;
     }
     [[maybe_unused]] auto op = inst->GetInputs()[0].GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::IsReference(op->GetType()),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsReference(op->GetType()),
                                         (std::cerr << "Types of first input CallVirtual must be REFERENCE(this):\n",
                                          inst->Dump(&std::cerr), op->Dump(&std::cerr)));
 }
@@ -2209,13 +2224,13 @@ void GraphChecker::VisitCallVirtual([[maybe_unused]] GraphVisitor *v, Inst *inst
 void GraphChecker::VisitCallDynamic([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
+        v, static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
         (std::cerr << "CallDynamic is supported only for dynamic languages:\n", inst->Dump(&std::cerr)));
 }
 
 void GraphChecker::VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR((static_cast<SaveStateInst *>(inst))->Verify(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->Verify(),
                                         std::cerr << "Inconsistent SaveState instruction:\n"
                                                   << *inst << std::endl);
 #ifndef NDEBUG
@@ -2223,7 +2238,7 @@ void GraphChecker::VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unus
     if (ss->GetInputsWereDeleted()) {
         for (auto &user : inst->GetUsers()) {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                !user.GetInst()->RequireRegMap(),
+                v, !user.GetInst()->RequireRegMap(),
                 std::cerr << "Some inputs from save_state were deleted, but the user requireRegMap:\n"
                           << *inst << std::endl
                           << *(user.GetInst()) << std::endl);
@@ -2239,7 +2254,7 @@ void GraphChecker::VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unus
                 auto vreg = ss->GetVirtualRegister(i);
                 founded |= vreg.GetVRegType() == envType;
             }
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(founded,
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, founded,
                                                 std::cerr << VRegInfo::VRegTypeToString(envType) << " not found");
         }
 #undef VREG_ENV_TYPES
@@ -2250,44 +2265,46 @@ void GraphChecker::VisitSaveState([[maybe_unused]] GraphVisitor *v, [[maybe_unus
 
 void GraphChecker::VisitSafePoint([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(!inst->HasUsers(), std::cerr << "SafePoint must not have users:\n"
-                                                                     << *inst << std::endl);
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR((static_cast<SaveStateInst *>(inst))->Verify(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !inst->HasUsers(),
+                                        std::cerr << "SafePoint must not have users:\n"
+                                                  << *inst << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->Verify(),
                                         std::cerr << "Inconsistent SafePoint instruction:\n"
                                                   << *inst << std::endl);
 }
 
 void GraphChecker::VisitSaveStateOsr([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(!inst->HasUsers(), std::cerr << "SafeStateOsr must not have users:\n"
-                                                                     << *inst << std::endl);
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR((static_cast<SaveStateInst *>(inst))->Verify(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, !inst->HasUsers(),
+                                        std::cerr << "SafeStateOsr must not have users:\n"
+                                                  << *inst << std::endl);
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (static_cast<SaveStateInst *>(inst))->Verify(),
                                         std::cerr << "Inconsistent SafeStateOsr instruction:\n"
                                                   << *inst << std::endl);
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(static_cast<GraphChecker *>(v)->GetGraph()->IsOsrMode(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, static_cast<GraphChecker *>(v)->GetGraph()->IsOsrMode(),
                                         std::cerr << "SafeStateOsr must be created in the OSR mode only\n");
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetBasicBlock()->IsOsrEntry(),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetBasicBlock()->IsOsrEntry(),
                                         std::cerr << "SafeStateOsr's basic block must be osr-entry\n");
     auto firstInst = inst->GetBasicBlock()->GetFirstInst();
     while (firstInst != nullptr && (firstInst->IsCatchPhi() || firstInst->GetOpcode() == Opcode::Try)) {
         firstInst = firstInst->GetNext();
     }
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(firstInst == inst,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, firstInst == inst,
                                         std::cerr << "SafeStateOsr must be the first instruction in the basic block\n");
 }
 
 void GraphChecker::VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::IsReference(inst->GetInput(0).GetInst()->GetType()),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::IsReference(inst->GetInput(0).GetInst()->GetType()),
                                         std::cerr << "Throw instruction must have input with reference type: " << *inst
                                                   << std::endl);
     [[maybe_unused]] auto bb = inst->GetBasicBlock();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst == bb->GetLastInst(),
+        v, inst == bb->GetLastInst(),
         std::cerr << "Throw instruction must be last instruction in the basic block: " << *inst << std::endl);
     for ([[maybe_unused]] auto succ : bb->GetSuccsBlocks()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            succ->IsEndBlock() || succ->IsTryEnd() || succ->IsCatchBegin(),
+            v, succ->IsEndBlock() || succ->IsTryEnd() || succ->IsCatchBegin(),
             std::cerr << "Throw block must have end block or try-end or catch-begin block as successor\n");
     }
 }
@@ -2295,25 +2312,25 @@ void GraphChecker::VisitThrow([[maybe_unused]] GraphVisitor *v, [[maybe_unused]]
 void GraphChecker::VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::IsReference(inst->GetInput(0).GetInst()->GetType()),
+        v, DataType::IsReference(inst->GetInput(0).GetInst()->GetType()),
         std::cerr << "CheckCast instruction must have input 0 with reference type: " << *inst << std::endl);
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::IsReference(inst->GetInput(1).GetInst()->GetType()),
+        v, DataType::IsReference(inst->GetInput(1).GetInst()->GetType()),
         std::cerr << "CheckCast instruction must have input 1 with reference type: " << *inst << std::endl);
 
     [[maybe_unused]] auto saveState = inst->GetInput(2).GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(saveState != nullptr,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, saveState != nullptr,
                                         std::cerr << "CheckCast instruction must have SaveState as input 2: " << *inst
                                                   << std::endl);
     if (inst->CanDeoptimize()) {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            (saveState->GetOpcode() == Opcode::SaveState || saveState->GetOpcode() == Opcode::SaveStateDeoptimize),
+            v, (saveState->GetOpcode() == Opcode::SaveState || saveState->GetOpcode() == Opcode::SaveStateDeoptimize),
             std::cerr << "CheckCast D instruction must have SaveState or SaveStateDeoptimize as input 2: " << *inst
                       << std::endl);
     } else {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            saveState->GetOpcode() == Opcode::SaveState,
+            v, saveState->GetOpcode() == Opcode::SaveState,
             std::cerr << "CheckCast instruction must have SaveState as input 2: " << *inst << std::endl);
     }
 }
@@ -2321,18 +2338,18 @@ void GraphChecker::VisitCheckCast([[maybe_unused]] GraphVisitor *v, [[maybe_unus
 void GraphChecker::VisitIsInstance([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::IsReference(inst->GetInput(0).GetInst()->GetType()),
+        v, DataType::IsReference(inst->GetInput(0).GetInst()->GetType()),
         std::cerr << "IsInstance instruction must have input 0 with reference type: " << *inst << std::endl);
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        DataType::IsReference(inst->GetInput(1).GetInst()->GetType()),
+        v, DataType::IsReference(inst->GetInput(1).GetInst()->GetType()),
         std::cerr << "IsInstance instruction must have input 1 with reference type: " << *inst << std::endl);
 
     [[maybe_unused]] auto saveState = inst->GetInput(2).GetInst();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR((saveState != nullptr && saveState->GetOpcode() == Opcode::SaveState),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, (saveState != nullptr && saveState->GetOpcode() == Opcode::SaveState),
                                         std::cerr << "IsInstance instruction must have SaveState as input 2: " << *inst
                                                   << std::endl);
 
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetType() == DataType::BOOL,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetType() == DataType::BOOL,
                                         (std::cerr << "Types of IsInstance must be BOOL:\n", inst->Dump(&std::cerr)));
 }
 
@@ -2344,23 +2361,23 @@ void GraphChecker::VisitSelectWithReference([[maybe_unused]] GraphVisitor *v, [[
     [[maybe_unused]] auto cc = inst->CastToSelect()->GetCc();
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
+        v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
         (std::cerr << "Select reference comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
     if (op2->IsConst()) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op2),
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op2),
                                             (std::cerr << "Constant reference input must be integer 0: \n",
                                              inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
     } else {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(op2->GetType() == DataType::REFERENCE,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op2->GetType() == DataType::REFERENCE,
                                             (std::cerr << "Select instruction 3rd operand type is not a reference\n",
                                              inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
     }
     if (op3->IsConst()) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op3),
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op3),
                                             (std::cerr << "Constant reference input must be integer 0: \n",
                                              inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
     } else {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(op3->GetType() == DataType::REFERENCE,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op3->GetType() == DataType::REFERENCE,
                                             (std::cerr << "Select instruction 4th operand type is not a reference\n",
                                              inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
     }
@@ -2374,22 +2391,25 @@ void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
     [[maybe_unused]] auto op3 = inst->GetInput(3U).GetInst();
 
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(i) != DataType::NO_TYPE,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(i) != DataType::NO_TYPE,
                                             std::cerr << "Source operand type is not set: " << *inst << std::endl);
     }
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::GetCommonType(inst->GetType()) == DataType::INT64 ||
             IsFloatType(DataType::GetCommonType(inst->GetType())) || inst->GetType() == DataType::REFERENCE ||
             inst->GetType() == DataType::ANY,
         (std::cerr << "Select instruction type is not integer or reference or any", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::GetCommonType(op0->GetType()) == DataType::INT64 ||
             IsFloatType(DataType::GetCommonType(op0->GetType())) || op0->GetType() == DataType::REFERENCE ||
             op0->GetType() == DataType::ANY,
         (std::cerr << "Select instruction 1st operand type is not integer or reference or any",
          inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::GetCommonType(op1->GetType()) == DataType::INT64 ||
             IsFloatType(DataType::GetCommonType(op1->GetType())) || op1->GetType() == DataType::REFERENCE ||
             op1->GetType() == DataType::ANY,
@@ -2397,13 +2417,14 @@ void GraphChecker::VisitSelect([[maybe_unused]] GraphVisitor *v, [[maybe_unused]
          inst->Dump(&std::cerr)));
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(op0, op1), (std::cerr << "Types of two first select instruction operands are not compatible\n",
-                                     op0->Dump(&std::cerr), op1->Dump(&std::cerr), inst->Dump(&std::cerr)));
+        v, CheckCommonTypes(op0, op1),
+        (std::cerr << "Types of two first select instruction operands are not compatible\n", op0->Dump(&std::cerr),
+         op1->Dump(&std::cerr), inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, op0),
+        v, CheckCommonTypes(inst, op0),
         (std::cerr << "Types of instruction result and its operands are not compatible\n", inst->Dump(&std::cerr)));
 
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(2U) == inst->GetInputType(3U),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(2U) == inst->GetInputType(3U),
                                         std::cerr << "Select comparison arguments has different inputs type: " << *inst
                                                   << std::endl);
     if (inst->GetInputType(2U) == DataType::REFERENCE) {
@@ -2419,46 +2440,66 @@ void GraphChecker::VisitSelectImmWithReference([[maybe_unused]] GraphVisitor *v,
     [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
+        v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
         (std::cerr << "SelectImm reference comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
     if (op2->IsConst()) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op2),
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op2),
                                             (std::cerr << "Constant reference input must be integer 0: \n",
                                              inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
     } else {
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            op2->GetType() == DataType::REFERENCE,
+            v, op2->GetType() == DataType::REFERENCE,
             (std::cerr << "Condition with immediate jump 1st operand type is not a reference\n", inst->Dump(&std::cerr),
              op1->Dump(&std::cerr)));
     }
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        op3 == 0, (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
+        v, op3 == 0, (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
+}
+
+void GraphChecker::VisitSelectImmNotReference([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
+{
+    [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
+    [[maybe_unused]] bool isDynamic = static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod();
+
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(
+        v,
+        DataType::GetCommonType(op2->GetType()) == DataType::INT64 ||
+            (isDynamic && DataType::GetCommonType(op2->GetType()) == DataType::ANY),
+        "SelectImm 3rd operand type is not an integer or any");
+
+    if (DataType::GetCommonType(op2->GetType()) == DataType::ANY) {
+        [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+            v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
+            (std::cerr << "SelectImm any comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
+    }
 }
 
 void GraphChecker::VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     [[maybe_unused]] auto op0 = inst->GetInput(0).GetInst();
     [[maybe_unused]] auto op1 = inst->GetInput(1).GetInst();
-    [[maybe_unused]] auto op2 = inst->GetInput(2U).GetInst();
-    [[maybe_unused]] auto op3 = inst->CastToSelectImm()->GetImm();
     [[maybe_unused]] bool isDynamic = static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod();
 
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(i) != DataType::NO_TYPE,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(i) != DataType::NO_TYPE,
                                             std::cerr << "Source operand type is not set: " << *inst << std::endl);
     }
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::GetCommonType(inst->GetType()) == DataType::INT64 || inst->GetType() == DataType::REFERENCE ||
             IsFloatType(DataType::GetCommonType(inst->GetType())) || (isDynamic && inst->GetType() == DataType::ANY),
         (std::cerr << "SelectImm instruction type is not integer or reference or any", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::GetCommonType(op0->GetType()) == DataType::INT64 ||
             IsFloatType(DataType::GetCommonType(op0->GetType())) || op0->GetType() == DataType::REFERENCE ||
             (isDynamic && op0->GetType() == DataType::ANY),
         (std::cerr << "SelectImm instruction 1st operand type is not integer or reference or any",
          inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::GetCommonType(op1->GetType()) == DataType::INT64 ||
             IsFloatType(DataType::GetCommonType(op1->GetType())) || op1->GetType() == DataType::REFERENCE ||
             (isDynamic && op1->GetType() == DataType::ANY),
@@ -2466,27 +2507,17 @@ void GraphChecker::VisitSelectImm([[maybe_unused]] GraphVisitor *v, [[maybe_unus
          inst->Dump(&std::cerr)));
 
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(op0, op1),
+        v, CheckCommonTypes(op0, op1),
         (std::cerr << "Types of two first SelectImm instruction operands are not compatible\n", op0->Dump(&std::cerr),
          op1->Dump(&std::cerr), inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        CheckCommonTypes(inst, op0),
+        v, CheckCommonTypes(inst, op0),
         (std::cerr << "Types of instruction result and its operands are not compatible\n", inst->Dump(&std::cerr)));
 
     if (inst->GetInputType(2U) == DataType::REFERENCE) {
         VisitSelectImmWithReference(v, inst);
     } else {
-        CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(
-            DataType::GetCommonType(op2->GetType()) == DataType::INT64 ||
-                (isDynamic && DataType::GetCommonType(op2->GetType()) == DataType::ANY),
-            "SelectImm 3rd operand type is not an integer or any");
-
-        if (DataType::GetCommonType(op2->GetType()) == DataType::ANY) {
-            [[maybe_unused]] auto cc = inst->CastToSelectImm()->GetCc();
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
-                (std::cerr << "SelectImm any comparison must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
-        }
+        VisitSelectImmNotReference(v, inst);
     }
 }
 
@@ -2494,36 +2525,37 @@ void GraphChecker::VisitIf(GraphVisitor *v, Inst *inst)
 {
     CheckContrlFlowInst(v, inst);
     [[maybe_unused]] auto numSuccs = inst->GetBasicBlock()->GetSuccsBlocks().size();
-    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(numSuccs == MAX_SUCCS_NUM, "Basic block with If must have 2 successesors");
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(v, numSuccs == MAX_SUCCS_NUM,
+                                             "Basic block with If must have 2 successesors");
 
     [[maybe_unused]] auto op1 = inst->GetInputs()[0].GetInst();
     [[maybe_unused]] auto op2 = inst->GetInputs()[1].GetInst();
     for (size_t i = 0; i < inst->GetInputsCount(); i++) {
-        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(i) != DataType::NO_TYPE,
+        CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(i) != DataType::NO_TYPE,
                                             std::cerr << "Source operand type is not set: " << *inst << std::endl);
     }
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(0) == inst->GetInputType(1),
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(0) == inst->GetInputType(1),
                                         std::cerr << "If has different inputs type: " << *inst << std::endl);
     if (inst->GetInputType(0) == DataType::REFERENCE) {
         [[maybe_unused]] auto cc = inst->CastToIf()->GetCc();
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
+            v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
             (std::cerr << "Reference comparison in If must be CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
         if (op1->IsConst()) {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op1),
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op1),
                                                 (std::cerr << "Constant reference input must be integer 0: \n",
                                                  inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
         } else {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(op1->GetType() == DataType::REFERENCE,
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op1->GetType() == DataType::REFERENCE,
                                                 (std::cerr << "If 1st operand type is not a reference\n",
                                                  inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
         }
         if (op2->IsConst()) {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op2),
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op2),
                                                 (std::cerr << "Constant reference input must be integer 0: \n",
                                                  inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
         } else {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(op2->GetType() == DataType::REFERENCE,
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op2->GetType() == DataType::REFERENCE,
                                                 (std::cerr << "If 2nd operand type is not a reference\n",
                                                  inst->Dump(&std::cerr), op2->Dump(&std::cerr)));
         }
@@ -2534,31 +2566,32 @@ void GraphChecker::VisitIfImm(GraphVisitor *v, Inst *inst)
 {
     CheckContrlFlowInst(v, inst);
     [[maybe_unused]] auto numSuccs = inst->GetBasicBlock()->GetSuccsBlocks().size();
-    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(numSuccs == MAX_SUCCS_NUM,
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(v, numSuccs == MAX_SUCCS_NUM,
                                              "Basic block with IfImm must have 2 successesors");
 
     [[maybe_unused]] auto op1 = inst->GetInput(0).GetInst();
     [[maybe_unused]] auto op2 = inst->CastToIfImm()->GetImm();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(inst->GetInputType(0) != DataType::NO_TYPE,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, inst->GetInputType(0) != DataType::NO_TYPE,
                                         std::cerr << "Source operand type is not set: " << *inst << std::endl);
     if (inst->GetInputType(0) == DataType::REFERENCE) {
         [[maybe_unused]] auto cc = inst->CastToIfImm()->GetCc();
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
+            v, cc == ConditionCode::CC_NE || cc == ConditionCode::CC_EQ,
             (std::cerr << "Reference comparison in IfImm must have CC_NE or CC_EQ: \n", inst->Dump(&std::cerr)));
         if (op1->IsConst()) {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(IsZeroConstant(op1),
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, IsZeroConstant(op1),
                                                 (std::cerr << "Constant reference input must be integer 0: \n",
                                                  inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
         } else {
-            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(op1->GetType() == DataType::REFERENCE,
+            CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, op1->GetType() == DataType::REFERENCE,
                                                 (std::cerr << "IfImm operand type should be here a reference: \n",
                                                  inst->Dump(&std::cerr), op1->Dump(&std::cerr)));
         }
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            op2 == 0, (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
+            v, op2 == 0, (std::cerr << "Reference can be compared only with 0 immediate: \n", inst->Dump(&std::cerr)));
     } else {
         CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(
+            v,
             DataType::GetCommonType(op1->GetType()) == DataType::INT64 ||
                 (static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod() && op1->GetType() == DataType::ANY),
             "IfImm operand type should be here an integer");
@@ -2568,12 +2601,13 @@ void GraphChecker::VisitIfImm(GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitTry([[maybe_unused]] GraphVisitor *v, Inst *inst)
 {
     [[maybe_unused]] auto bb = inst->GetBasicBlock();
-    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(bb->IsTryBegin(), "TryInst should be placed in the try-begin basic block");
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(v, bb->IsTryBegin(),
+                                             "TryInst should be placed in the try-begin basic block");
 }
 
 void GraphChecker::VisitNOP([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(inst->GetUsers().Empty(), "NOP can not have users\n");
+    CHECKER_MESSAGE_IF_NOT_AND_PRINT_VISITOR(v, inst->GetUsers().Empty(), "NOP can not have users\n");
 }
 
 void GraphChecker::VisitAndNot([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -2604,10 +2638,10 @@ void GraphChecker::VisitMSub(GraphVisitor *v, Inst *inst)
 void GraphChecker::VisitCompareAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
+        v, static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
         (std::cerr << "CompareAnyType is supported only for dynamic languages:\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->CastToCompareAnyType()->GetAllowedInputType() == profiling::AnyInputType::DEFAULT,
+        v, inst->CastToCompareAnyType()->GetAllowedInputType() == profiling::AnyInputType::DEFAULT,
         (std::cerr << "CompareAnyType doesn't support special values or treating int as double\n",
          inst->Dump(&std::cerr)));
 }
@@ -2615,18 +2649,18 @@ void GraphChecker::VisitCompareAnyType([[maybe_unused]] GraphVisitor *v, [[maybe
 void GraphChecker::VisitCastAnyTypeValue([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
+        v, static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
         (std::cerr << "CastAnyTypeValue is supported only for dynamic languages:\n", inst->Dump(&std::cerr)));
     if ((inst->CastToCastAnyTypeValue()->GetAllowedInputType() & profiling::AnyInputType::INTEGER) != 0) {
         [[maybe_unused]] auto type = AnyBaseTypeToDataType(inst->CastToCastAnyTypeValue()->GetAnyType());
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            type == DataType::FLOAT64,
+            v, type == DataType::FLOAT64,
             (std::cerr << "Target type of CastAnyTypeValue with Integer allowed must be FLOAT64\n",
              inst->Dump(&std::cerr)));
     } else if (inst->CastToCastAnyTypeValue()->GetAllowedInputType() != profiling::AnyInputType::DEFAULT) {
         [[maybe_unused]] auto type = AnyBaseTypeToDataType(inst->CastToCastAnyTypeValue()->GetAnyType());
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            type == DataType::FLOAT64 || type == DataType::INT32,
+            v, type == DataType::FLOAT64 || type == DataType::INT32,
             (std::cerr << "Target type of CastAnyTypeValue with special value allowed must be FLOAT64 or INT32\n",
              inst->Dump(&std::cerr)));
     }
@@ -2635,7 +2669,7 @@ void GraphChecker::VisitCastAnyTypeValue([[maybe_unused]] GraphVisitor *v, [[may
 void GraphChecker::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
+        v, static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
         (std::cerr << "CastValueToAnyType is supported only for dynamic languages:\n", inst->Dump(&std::cerr)));
 
     const auto *inputInst = inst->GetInput(0).GetInst();
@@ -2648,7 +2682,7 @@ void GraphChecker::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[m
     if (inputInst->IsConst() && (inputType == DataType::Type::INT64 || inputType == DataType::Type::INT32)) {
         if (outputType == DataType::Type::BOOL) {
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                inputInst->IsBoolConst(),
+                v, inputInst->IsBoolConst(),
                 (std::cerr << "Integral constant input not coercible to BOOL:\n", inst->Dump(&std::cerr)));
             return;
         }
@@ -2656,7 +2690,7 @@ void GraphChecker::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[m
         if (outputType == DataType::INT32 && inputType == DataType::INT64) {
             [[maybe_unused]] auto value = static_cast<int64_t>(inputInst->CastToConstant()->GetInt64Value());
             CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-                value == static_cast<int32_t>(value),
+                v, value == static_cast<int32_t>(value),
                 (std::cerr << "Integral constant input not coercible to INT32:\n", inst->Dump(&std::cerr)));
             return;
         }
@@ -2676,24 +2710,24 @@ void GraphChecker::VisitCastValueToAnyType([[maybe_unused]] GraphVisitor *v, [[m
 void GraphChecker::VisitAnyTypeCheck([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
+        v, static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
         (std::cerr << "AnyTypeCheck is supported only for dynamic languages:\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetInput(0).GetInst()->GetType() == DataType::Type::ANY,
+        v, inst->GetInput(0).GetInst()->GetType() == DataType::Type::ANY,
         (std::cerr << "First input in AnyTypeCheck must be Any type:\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetInput(1).GetInst()->IsSaveState(),
+        v, inst->GetInput(1).GetInst()->IsSaveState(),
         (std::cerr << "Second input in AnyTypeCheck must be SaveState:\n", inst->Dump(&std::cerr)));
     if ((inst->CastToAnyTypeCheck()->GetAllowedInputType() & profiling::AnyInputType::INTEGER) != 0) {
         [[maybe_unused]] auto type = AnyBaseTypeToDataType(inst->CastToAnyTypeCheck()->GetAnyType());
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            type == DataType::FLOAT64,
+            v, type == DataType::FLOAT64,
             (std::cerr << "Target type of AnyTypeCheck with Integer allowed must be FLOAT64\n",
              inst->Dump(&std::cerr)));
     } else if (inst->CastToAnyTypeCheck()->GetAllowedInputType() != profiling::AnyInputType::DEFAULT) {
         [[maybe_unused]] auto type = AnyBaseTypeToDataType(inst->CastToAnyTypeCheck()->GetAnyType());
         CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-            type == DataType::FLOAT64 || type == DataType::INT32,
+            v, type == DataType::FLOAT64 || type == DataType::INT32,
             (std::cerr << "Target type of AnyTypeCheck with special value allowed must be FLOAT64 or INT32\n",
              inst->Dump(&std::cerr)));
     }
@@ -2702,21 +2736,22 @@ void GraphChecker::VisitAnyTypeCheck([[maybe_unused]] GraphVisitor *v, [[maybe_u
 void GraphChecker::VisitHclassCheck([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
+        v, static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod(),
         (std::cerr << "HclassCheck is supported only for dynamic languages:\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetInput(0).GetInst()->GetType() == DataType::Type::REFERENCE,
+        v, inst->GetInput(0).GetInst()->GetType() == DataType::Type::REFERENCE,
         (std::cerr << "First input in HclassCheck must be Ref type:\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         (inst->GetInput(0).GetInst()->GetOpcode() == Opcode::LoadObject &&
          inst->GetInput(0).GetInst()->CastToLoadObject()->GetObjectType() == ObjectType::MEM_DYN_HCLASS),
         (std::cerr << "First input in HclassCheck must be LoadObject Hclass:\n", inst->Dump(&std::cerr)));
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        inst->GetInput(1).GetInst()->IsSaveState(),
+        v, inst->GetInput(1).GetInst()->IsSaveState(),
         (std::cerr << "Second input in HclassCheck must be SaveState:\n", inst->Dump(&std::cerr)));
     [[maybe_unused]] auto hclassCheck = inst->CastToHclassCheck();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
-        hclassCheck->GetCheckIsFunction() || hclassCheck->GetCheckFunctionIsNotClassConstructor(),
+        v, hclassCheck->GetCheckIsFunction() || hclassCheck->GetCheckFunctionIsNotClassConstructor(),
         (std::cerr << "HclassCheck must have at least one check: IsFunction or FunctionIsNotClassConstructor\n",
          inst->Dump(&std::cerr)));
 }
@@ -2725,6 +2760,7 @@ void GraphChecker::VisitBitcast([[maybe_unused]] GraphVisitor *v, [[maybe_unused
 {
     [[maybe_unused]] auto arch = static_cast<GraphChecker *>(v)->GetGraph()->GetArch();
     CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(
+        v,
         DataType::GetTypeSize(inst->GetInput(0).GetInst()->GetType(), arch) ==
             DataType::GetTypeSize(inst->GetType(), arch),
         (std::cerr << "Size of input and output types must be equal\n", inst->Dump(&std::cerr)));
@@ -2732,23 +2768,23 @@ void GraphChecker::VisitBitcast([[maybe_unused]] GraphVisitor *v, [[maybe_unused
 
 void GraphChecker::VisitLoadString([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_IF_NOT_PRINT_VISITOR(!static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod() ||
-                                 static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer());
+    CHECKER_IF_NOT_PRINT_VISITOR(v, !static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod() ||
+                                        static_cast<GraphChecker *>(v)->GetGraph()->IsBytecodeOptimizer());
 }
 
 void GraphChecker::VisitLoadType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_IF_NOT_PRINT_VISITOR(!static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod());
+    CHECKER_IF_NOT_PRINT_VISITOR(v, !static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod());
 }
 
 void GraphChecker::VisitLoadUnresolvedType([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_IF_NOT_PRINT_VISITOR(!static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod());
+    CHECKER_IF_NOT_PRINT_VISITOR(v, !static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod());
 }
 
 void GraphChecker::VisitLoadFromConstantPool([[maybe_unused]] GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_IF_NOT_PRINT_VISITOR(static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod());
+    CHECKER_IF_NOT_PRINT_VISITOR(v, static_cast<GraphChecker *>(v)->GetGraph()->IsDynamicMethod());
 }
 
 void GraphChecker::VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *inst)
@@ -2756,17 +2792,17 @@ void GraphChecker::VisitLoadImmediate([[maybe_unused]] GraphVisitor *v, Inst *in
     auto loadImm = inst->CastToLoadImmediate();
     [[maybe_unused]] auto type = inst->GetType();
     [[maybe_unused]] auto objType = loadImm->GetObjectType();
-    CHECKER_IF_NOT_PRINT_VISITOR(objType != LoadImmediateInst::ObjectType::UNKNOWN);
+    CHECKER_IF_NOT_PRINT_VISITOR(v, objType != LoadImmediateInst::ObjectType::UNKNOWN);
     CHECKER_IF_NOT_PRINT_VISITOR(
-        (type == DataType::REFERENCE &&
-         (objType == LoadImmediateInst::ObjectType::CLASS || objType == LoadImmediateInst::ObjectType::OBJECT)) ||
-        (type == DataType::POINTER &&
-         (objType == LoadImmediateInst::ObjectType::METHOD || objType == LoadImmediateInst::ObjectType::STRING ||
-          objType == LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET || loadImm->IsTlsOffset())) ||
-        (type == DataType::ANY && objType == LoadImmediateInst::ObjectType::CONSTANT_POOL));
-    CHECKER_IF_NOT_PRINT_VISITOR(objType != LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET ||
-                                 static_cast<GraphChecker *>(v)->GetGraph()->IsAotMode());
-    CHECKER_IF_NOT_PRINT_VISITOR(loadImm->GetObject() != nullptr);
+        v, (type == DataType::REFERENCE &&
+            (objType == LoadImmediateInst::ObjectType::CLASS || objType == LoadImmediateInst::ObjectType::OBJECT)) ||
+               (type == DataType::POINTER &&
+                (objType == LoadImmediateInst::ObjectType::METHOD || objType == LoadImmediateInst::ObjectType::STRING ||
+                 objType == LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET || loadImm->IsTlsOffset())) ||
+               (type == DataType::ANY && objType == LoadImmediateInst::ObjectType::CONSTANT_POOL));
+    CHECKER_IF_NOT_PRINT_VISITOR(v, objType != LoadImmediateInst::ObjectType::PANDA_FILE_OFFSET ||
+                                        static_cast<GraphChecker *>(v)->GetGraph()->IsAotMode());
+    CHECKER_IF_NOT_PRINT_VISITOR(v, loadImm->GetObject() != nullptr);
 }
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -2789,11 +2825,11 @@ VISIT_BINARY_SHIFTED_REGISTER(XorNotSR)
 
 void GraphChecker::VisitNegSR(GraphVisitor *v, [[maybe_unused]] Inst *inst)
 {
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(DataType::GetCommonType(inst->GetType()) == DataType::INT64,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, DataType::GetCommonType(inst->GetType()) == DataType::INT64,
                                         (std::cerr << "NegSR must have integer type\n", inst->Dump(&std::cerr)));
     CheckUnaryOperationTypes(v, inst);
     [[maybe_unused]] auto shiftType = static_cast<UnaryShiftedRegisterOperation *>(inst)->GetShiftType();
-    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(shiftType != ShiftType::INVALID_SHIFT && shiftType != ShiftType::ROR,
+    CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(v, shiftType != ShiftType::INVALID_SHIFT && shiftType != ShiftType::ROR,
                                         (std::cerr << "Operation has invalid shift type\n", inst->Dump(&std::cerr)));
 }
 
