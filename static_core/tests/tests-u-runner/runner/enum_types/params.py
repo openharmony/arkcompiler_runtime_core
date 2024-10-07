@@ -67,6 +67,7 @@ class TestEnv:
 @dataclass(frozen=True)
 class Params:
     timeout: int
+    gdb_timeout: int
     executor: str
     fail_kind_fail: FailKind
     fail_kind_timeout: FailKind

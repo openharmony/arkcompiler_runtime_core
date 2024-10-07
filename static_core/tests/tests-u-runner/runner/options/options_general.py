@@ -16,7 +16,7 @@
 
 from functools import cached_property
 from os import path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union, Any
 
 from runner.enum_types.qemu import QemuKind
 from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
@@ -35,6 +35,7 @@ class GeneralOptions:
     __DEFAULT_VERBOSE = VerboseKind.NONE
     __DEFAULT_VERBOSE_FILTER = VerboseFilter.NEW_FAILURES
     __DEFAULT_QEMU = QemuKind.NONE
+    __DEFAULT_GDB_TIMEOUT = 10
 
     def __str__(self) -> str:
         return _to_str(self, 1)
@@ -47,6 +48,19 @@ class GeneralOptions:
         elif self.qemu == QemuKind.ARM32:
             qemu = '--arm32-qemu'
         return qemu
+
+    @staticmethod
+    def __to_cli_with_default(
+            option_name: str,
+            option_value: Optional[Any],
+            default_value: Optional[Any] = None) -> str:
+        return f"{option_name}={option_value}" if option_value != default_value else ""
+
+    @staticmethod
+    def __to_cli(
+            option_name: str,
+            option_value: Optional[Union[str, bool]]) -> str:
+        return f"{option_name}={option_value}" if option_value else ""
 
     @cached_property
     def chunksize(self) -> int:
@@ -162,35 +176,41 @@ class GeneralOptions:
     def generate_only(self) -> bool:
         return False
 
+    @cached_property
+    @value(yaml_path="general.gdb-timeout", cli_name="gdb_timeout", cast_to_type=_to_int)
+    def gdb_timeout(self) -> int:
+        return self.__DEFAULT_GDB_TIMEOUT
+
     coverage = CoverageOptions()
 
     def get_command_line(self) -> str:
         options = [
-            f'--generate-config="{self.generate_config}"' if self.generate_config else '',
-            f'--processes={self.processes}' if self.processes != GeneralOptions.__DEFAULT_PROCESSES else '',
-            f'--chunksize={self.chunksize}' if self.chunksize != GeneralOptions.__DEFAULT_CHUNKSIZE else '',
             f'--build-dir="{self.build}"',
-            f'--test-root="{self.test_root}"' if self.test_root else '',
-            f'--list-root="{self.list_root}"' if self.list_root else '',
-            f'--work-dir="{self.work_dir}"' if self.work_dir else '',
-            f'--ets-stdlib-root="{self.ets_stdlib_root}"' if self.ets_stdlib_root else '',
-            '--show-progress' if self.show_progress else '',
-            f'--gc-type="{self.gc_type}"' if self.gc_type != GeneralOptions.__DEFAULT_GC_TYPE else '',
-            f'--full-gc-bombing-frequency={self.full_gc_bombing_frequency}'
-            if self.full_gc_bombing_frequency != GeneralOptions.__DEFAULT_GC_BOMBING_FREQUENCY else '',
-            '--no-run-gc-in-place' if self.run_gc_in_place else '',
-            f'--heap-verifier="{self.heap_verifier}"'
-            if self.heap_verifier != GeneralOptions.__DEFAULT_HEAP_VERIFIER else '',
-            f'--verbose={self.verbose.value}'
-            if self.verbose != GeneralOptions.__DEFAULT_VERBOSE else '',
-            f'--verbose-filter={self.verbose_filter.value}'
-            if self.verbose_filter != GeneralOptions.__DEFAULT_VERBOSE_FILTER else '',
-            self.coverage.get_command_line(),
-            '--force-download' if self.force_download else '',
-            '--no-bco' if not self.bco else '',
-            '--no-js' if not self.with_js else '',
-            '--generate-only' if self.generate_only else '',
+            self.__to_cli('--generate-config', self.generate_config),
+            self.__to_cli_with_default('--processes', self.processes, GeneralOptions.__DEFAULT_PROCESSES),
+            self.__to_cli_with_default('--chunksize', self.chunksize, GeneralOptions.__DEFAULT_CHUNKSIZE),
+            self.__to_cli('--test-root', self.test_root),
+            self.__to_cli('--list-root', self.list_root),
+            self.__to_cli('--work-dir', self.work_dir),
+            self.__to_cli('--ets-stdlib-root', self.ets_stdlib_root),
+            self.__to_cli('--show-progress', self.show_progress),
+            self.__to_cli_with_default('--gc-type', self.gc_type, GeneralOptions.__DEFAULT_GC_TYPE),
+            self.__to_cli_with_default('--full-gc-bombing-frequency', self.full_gc_bombing_frequency,
+                                       GeneralOptions.__DEFAULT_GC_BOMBING_FREQUENCY),
+            self.__to_cli('--no-run-gc-in-place', self.run_gc_in_place),
+            self.__to_cli_with_default('--heap-verifier', self.heap_verifier,
+                                       GeneralOptions.__DEFAULT_HEAP_VERIFIER),
+            self.__to_cli_with_default('--verbose', self.verbose, GeneralOptions.__DEFAULT_VERBOSE),
+            self.__to_cli_with_default('--verbose-filter', self.verbose_filter,
+                                       GeneralOptions.__DEFAULT_VERBOSE_FILTER),
+            self.__to_cli('--force-download', self.force_download),
+            self.__to_cli('--no-bco', not self.bco),
+            self.__to_cli('--no-js', not self.with_js),
+            self.__to_cli('--generate-only', self.generate_only),
             self.qemu_cmd_line,
+            self.__to_cli_with_default('--gdb-timeout', self.gdb_timeout,
+                                       GeneralOptions.__DEFAULT_GDB_TIMEOUT),
+            self.coverage.get_command_line(),
         ]
         return ' '.join(options)
 
@@ -215,4 +235,5 @@ class GeneralOptions:
             "qemu": self.qemu.value.upper(),
             "with-js": self.with_js,
             "generate_only": self.generate_only,
+            "gdb-timeout": self.gdb_timeout
         }

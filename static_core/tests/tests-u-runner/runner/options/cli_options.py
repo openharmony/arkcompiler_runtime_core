@@ -329,6 +329,9 @@ def add_general_other_args(parser: argparse.ArgumentParser) -> None:
         '--no-js', action='store_false', dest='with_js',
         default=None,
         help='disable JS-related tests')
+    parser.add_argument(
+        '--gdb-timeout', type=check_timeout, default=None,
+        dest='gdb_timeout', help='Additional timeout for collecting stack information by gdb. By default 10 sec')
 
 
 def add_es2panda_args(parser: argparse.ArgumentParser) -> None:
