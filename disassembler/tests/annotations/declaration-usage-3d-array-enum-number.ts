@@ -15,14 +15,14 @@
 
 const enum E {
     A = 1,
-    B = 2
+    B = -2
 }
 
 @interface Anno {
     a: E[][][] = [[new Array<E>(0)]];
 }
 
-@#Anno({a: [[[1, 2, 1]]]})
+@#Anno({a: [[[1, -2, 1]]]})
 class A {
     @#Anno({a: [[new Array<E>(1)]]})
     foo() {}

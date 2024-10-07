@@ -19,6 +19,6 @@
 
 @#Anno({a : 42})
 class A {
-    @#Anno({a : 314})
+    @#Anno({a : -314})
     foo() {}
 }

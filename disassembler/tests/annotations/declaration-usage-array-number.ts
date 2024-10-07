@@ -17,7 +17,7 @@
     a: number[];
 }
 
-@#Anno({a: [1, 2, 3]})
+@#Anno({a: [1, -2, 3]})
 class A {
     @#Anno({a: new Array<number>()})
     foo() {}

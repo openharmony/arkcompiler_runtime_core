@@ -20,3 +20,7 @@
 @interface Anno2 {
     a: number = 42;
 }
+
+@interface Anno3 {
+    a: number = -314;
+}

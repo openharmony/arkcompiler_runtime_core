@@ -15,7 +15,7 @@
 
 const enum E {
     A = 1,
-    B = 2,
+    B = -2,
     C = 3
 }
 
@@ -26,10 +26,10 @@ const enum E1 {
 
 @interface Anno {
     a: number
-    b: number[] = [13, 10]
+    b: number[] = [13, -10]
     c: string
     d: boolean
-    e: E[] = [1, 2, 3]
+    e: E[] = [1, -2, 3]
     f: number[]
     h: E = new Number(10) as number // no initializer
     i: E[][][] = [[new Array<E>(0)]] // no initializer
