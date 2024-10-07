@@ -66,8 +66,6 @@ ohos_shared_library("abc2program") {
     ":isa_gen_abc2program_abc_opcode_convert_cpp",
     ":isa_gen_abc2program_program_dump_utils_cpp",
     "$ark_root/assembler:libarkassembler",
-    "$ark_root/libpandabase:libarkbase",
-    "$ark_root/libpandafile:libarkfile",
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
