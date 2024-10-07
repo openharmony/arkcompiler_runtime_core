@@ -70,15 +70,18 @@ void LaunchCoroutine(Method *method, ObjectHeader *obj, uint64_t *args, ObjectHe
     ASSERT(promise != nullptr);
 
     PandaVector<Value> values;
+    arch::ArgReaderStack<RUNTIME_ARCH> argReader(reinterpret_cast<uint8_t *>(args));
+    arch::ValueWriter writer(&values);
     if (thisObj != nullptr) {
         ASSERT(!method->IsStatic());
         // Add this for virtual call
         values.push_back(Value(thisObj));
     } else {
-        ASSERT(method->IsStatic());
+        if (!method->IsStatic()) {
+            auto pThisObj = const_cast<ObjectHeader **>((argReader).template ReadPtr<ObjectHeader *>());
+            values.push_back(Value(*pThisObj));
+        }
     }
-    arch::ArgReaderStack<RUNTIME_ARCH> argReader(reinterpret_cast<uint8_t *>(args));
-    arch::ValueWriter writer(&values);
     ARCH_COPY_METHOD_ARGS(method, argReader, writer);
 
     auto *currentCoro = EtsCoroutine::GetCurrent();
