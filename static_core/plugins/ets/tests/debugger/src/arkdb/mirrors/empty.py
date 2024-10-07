@@ -31,9 +31,12 @@ class EmptyBase(metaclass=PrimitiveMeta):
     def __eq__(self, other: Any) -> bool:
         return type(self) is type(other) or type(self).__name__ == type(other).__name__
 
+    # CC-OFFNXT(G.NAM.05) Standard function from rich package
+    # CC-OFFNXT(G.CLS.07) followed required interface
     def __rich_repr__(self):
         return []
 
+    # CC-OFFNXT(G.NAM.05) internal function name
     def __arkts_str__(self, *, depth: Optional[int] = None) -> str:
         return type(self).__name__
 

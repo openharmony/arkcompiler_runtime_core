@@ -94,17 +94,17 @@ class DebugConnection(trio_cdp.CdpConnection):
         await super().aclose()
         self._close_channels()
 
+    async def reader_task(self):
+        try:
+            await super()._reader_task()
+        finally:
+            self._close_channels()
+
     def _close_channels(self):
         channels: set[trio.MemorySendChannel] = set([c for s in self.channels.values() for c in s])
         self.channels.clear()
         for ch in channels:
             ch.close()
-
-    async def _reader_task(self):
-        try:
-            await super()._reader_task()
-        finally:
-            self._close_channels()
 
 
 async def connect_cdp(nursery: trio.Nursery, url, max_retries: int) -> DebugConnection:
@@ -118,7 +118,7 @@ async def connect_cdp(nursery: trio.Nursery, url, max_retries: int) -> DebugConn
                     max_message_size=trio_cdp.MAX_WS_MESSAGE_SIZE,
                 )
             )
-            nursery.start_soon(conn._reader_task)  # pylint:disable=protected-access
+            nursery.start_soon(conn.reader_task)
             return conn
         except OSError:
             counter -= 1

@@ -25,7 +25,7 @@ from typing import Any, Dict, Generic, List, Literal, TypeVar, Union
 import trio
 from cdp import debugger, runtime
 
-from arkdb.compiler import CompileError
+from arkdb.compiler import CompileError, EvaluateCompileExpressionArgs
 from arkdb.compiler_verification.expression_verifier import ExpressionVerifier
 from arkdb.debug_client import DebuggerClient
 from arkdb.logs import logger
@@ -235,12 +235,14 @@ class Paused(Wrap[debugger.Paused]):
 
         try:
             compiled_expression = self.client.code_compiler.compile_expression(
-                expression,
-                eval_panda_files=abc_files,
-                eval_source=paused_file,
-                eval_line=paused_code_line,
-                ast_parser=verifier.ast_parser if verifier else None,
-                eval_log_level="debug",
+                EvaluateCompileExpressionArgs(
+                    ets_expression=expression,
+                    eval_panda_files=abc_files,
+                    eval_source=paused_file,
+                    eval_line=paused_code_line,
+                    eval_log_level="debug",
+                    ast_parser=verifier.ast_parser if verifier else None,
+                )
             )
         except CalledProcessError as e:
             if allow_compiler_failure:

@@ -40,9 +40,11 @@ class ObjectMeta(MirrorMeta):
         cls = super().__new__(mcls, name, bases, namespace, **kwargs)
         return rich.repr.auto(cls)
 
+    # CC-OFFNXT(G.NAM.05) Standard function from rich package
     def __rich_repr__(self) -> Iterable[Tuple[str, Any]]:
         return [(name, attr) for name, attr in vars(self).items() if not callable(attr)]
 
+    # CC-OFFNXT(G.NAM.05) internal function name
     def __arkts_repr__(self) -> Iterable[Tuple[str, Any]]:
         return [
             (name, attr)
@@ -60,6 +62,7 @@ class ObjectMeta(MirrorMeta):
                 return False
         return True
 
+    # CC-OFFNXT(G.NAM.05) internal function name
     def __arkts_str__(self, *, depth: Optional[int] = None) -> str:
         if depth == 0:
             return f"{self.__class__.__name__} {{...}}"

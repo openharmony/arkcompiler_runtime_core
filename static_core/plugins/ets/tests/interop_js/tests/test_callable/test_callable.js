@@ -32,6 +32,7 @@ let callAnonymousFunction = function (x, y) {
 exports.callAnonymousFunction = callAnonymousFunction;
 let callArrowFunction = (x, y) => x + y;
 exports.callArrowFunction = callArrowFunction;
+// CC-OFFNXT(G.MET.08) test specific
 exports.callConstructedFunction = new Function('a', 'b', 'return a + b');
 exports.callBoundFunction = callNamedFunction.bind(null);
 class CallableTestClass {

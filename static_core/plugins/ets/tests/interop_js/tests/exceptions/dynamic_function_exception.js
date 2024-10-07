@@ -16,12 +16,14 @@
 
 //Dynamic function throws builtin exception E
 
+// CC-OFFNXT(G.MET.08) test specific
 const dynamicFunctionWithBuiltinException = new Function(`
     throw new TypeError('This is a TypeError');
 `);
 
 
 // Dynamic function throws object that isn't extend Error
+// CC-OFFNXT(G.MET.08) test specific
 const dynamicFunctionWithCustomObject = new Function(`
     throw { message: 'This is a custom object error', code: 123 };
 `);

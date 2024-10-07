@@ -23,7 +23,7 @@ from arkdb.mirrors import mirror_array as arr
 from arkdb.mirrors import mirror_object as cls
 from arkdb.mirrors import mirror_primitive as value
 
-from ..mirrors import Object, arkts_str
+from arkdb.mirrors import Object, arkts_str
 
 
 def param(a, b, op: str):

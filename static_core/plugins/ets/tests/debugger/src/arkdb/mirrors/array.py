@@ -45,10 +45,12 @@ class Array(Generic[T], metaclass=PrimitiveMeta):
             return False
         return self._items == other._items
 
+    # CC-OFFNXT(G.NAM.05) Standard function from rich package
     def __rich_repr__(self):
         yield self._cls_name
         yield self._items
 
+    # CC-OFFNXT(G.NAM.05) internal function name
     def __arkts_str__(self, *, depth: Optional[int] = None) -> str:
         if depth == 0:
             return "[...]"

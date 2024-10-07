@@ -16,25 +16,28 @@
 # limitations under the License.
 #
 import argparse
+import logging
 
 parser = argparse.ArgumentParser(description="Sampler trace test")
 parser.add_argument("--file", type=str)
 args = parser.parse_args()
 file_name = args.file
 
-trace_list = ["LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunction;",
-              "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy1;",
-              "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy2;",
-              "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy3;"]
+trace_list = [
+    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunction;",
+    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy1;",
+    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy2;",
+    "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy3;"
+]
 
 ALL_TRACES_FOUND = True
 
 with open(file_name, 'r') as my_file:
     content = my_file.read()
     for string in trace_list:
-        if not string in content:
+        if string not in content:
             ALL_TRACES_FOUND = False
     if not ALL_TRACES_FOUND:
-        print("Actual stack trace")
-        print(content)
+        logging.error("Actual stack trace")
+        logging.error(content)
         raise Exception("Not all native traces found")
