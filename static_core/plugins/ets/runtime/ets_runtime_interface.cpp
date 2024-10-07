@@ -147,7 +147,7 @@ uint64_t EtsRuntimeInterface::GetFuncPropNameOffset(MethodPtr methodPtr, uint32_
 
 bool EtsRuntimeInterface::IsMethodStringConcat(MethodPtr method) const
 {
-    return GetClassNameFromMethod(method) == "std.core.String" &&
+    return GetMethodFullName(method, false) == "std.core.String::concat" &&
            MethodCast(method)->GetProto().GetSignature() == "([Lstd/core/String;)Lstd/core/String;";
 }
 
