@@ -65,12 +65,12 @@ koala-related-benchmarks/arkts-phase1.sts
 ### End of Koala
 ### Feature: Rest Params
 ### Issue 19926
-spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/BadTypeError.sts
+spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/BadTypeError.sts
 ### Issue 19926 end
 ### Issue 19952
-spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/RestParamsTest_PassInterfaceArgs.sts
-spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_0.sts
-spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_1.sts
+spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassInterfaceArgs.sts
+spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_0.sts
+spec/04.Names_Declarations_and_Scopes/4.8.Function_Declarations/4.8.5.Rest_Parameter/RestParamsTest_PassLambdas_1.sts
 ### Issue 19952
 ### End Of Feature: Rest Params
 ### undefined functionality is not implemented
