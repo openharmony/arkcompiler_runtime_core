@@ -34,9 +34,9 @@ ResultValidator = Callable[[str, str, int], bool]
 
 
 class TestFileBased(Test):
-    SEGFAULT_RETURN_CODE = 139
-    ABORT_RETURN_CODE = 134
-    IRTOC_ASSERT_RETURN_CODE = 133
+    SEGFAULT_RETURN_CODE = [139, -11]
+    ABORT_RETURN_CODE = [134, -6]
+    IRTOC_ASSERT_RETURN_CODE = [133, -5]
     CTE_RETURN_CODE = 1
 
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
@@ -63,11 +63,11 @@ class TestFileBased(Test):
         return self.test_env.verifier_args
 
     def detect_segfault(self, return_code: int, default_fail_kind: FailKind) -> FailKind:
-        if return_code == self.SEGFAULT_RETURN_CODE:
+        if return_code in self.SEGFAULT_RETURN_CODE:
             return FailKind.SEGFAULT_FAIL
-        if return_code == self.ABORT_RETURN_CODE:
+        if return_code in self.ABORT_RETURN_CODE:
             return FailKind.ABORT_FAIL
-        if return_code == self.IRTOC_ASSERT_RETURN_CODE:
+        if return_code in self.IRTOC_ASSERT_RETURN_CODE:
             return FailKind.IRTOC_ASSERT_FAIL
         return default_fail_kind
 
