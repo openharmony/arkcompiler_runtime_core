@@ -507,6 +507,24 @@ export class Math {
         return max;
     }
 
+    public static max(): number {
+        return -Infinity;
+    }
+
+    public static max(val: number): number {
+        return val;
+    }
+
+    public static max(val1: number, val2: number): number {
+        if (isNaN(val1) || isNaN(val2)) {
+            return NaN
+        }
+        if (val1 > val2) {
+            return val1
+        }
+        return val2;
+    }
+
     /**
      * Smallest value of `u` and `v`
      *
@@ -527,6 +545,24 @@ export class Math {
             }
         }
         return min;
+    }
+
+    public static min(): number {
+        return Infinity;
+    }
+
+    public static min(val: number): number {
+        return val;
+    }
+
+    public static min(val1: number, val2: number): number {
+        if (isNaN(val1) || isNaN(val2)) {
+            return NaN
+        }
+        if (val1 < val2) {
+            return val1
+        }
+        return val2;
     }
 
     /**

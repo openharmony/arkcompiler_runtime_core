@@ -1286,6 +1286,31 @@ intrinsics:
     codegen_arch: [arm64, amd64]
 
 #################
+# escompat.Math #
+#################
+  - name: EscompatMathMax
+    space: ets
+    class_name: escompat.Math
+    method_name: max
+    static: true
+    signature:
+      ret: f64
+      args: [f64, f64]
+    impl: ark::intrinsics::MaxF64
+    safe_intrinsic: true
+
+  - name: EscompatMathMin
+    space: ets
+    class_name: escompat.Math
+    method_name: min
+    static: true
+    signature:
+      ret: f64
+      args: [f64, f64]
+    impl: ark::intrinsics::MinF64
+    safe_intrinsic: true
+
+#################
 # escompat.Date #
 #################
   - name: EscompatDateNow
