@@ -18,7 +18,7 @@
 from dataclasses import replace
 from typing import Any, List, Tuple
 
-from pytest import fixture, mark
+from pytest import fixture
 
 from arkdb import runtime
 from arkdb.expect import Expect
@@ -28,14 +28,7 @@ from arkdb.runnable_module import syntax
 from arkdb.walker import BreakpointWalker, BreakpointWalkerType, PausedStep
 
 
-@mark.xfail(
-    raises=AssertionError,
-    reason="The representation of classes is broken: "
-    "parent class variables are not output, variables are sorted by name.",
-)
-async def test_class_ark_str(
-    breakpoint_walker: BreakpointWalkerType,
-):
+async def test_class_ark_str(breakpoint_walker: BreakpointWalkerType, expect: Expect):
 
     code = """\
 class A {
@@ -70,7 +63,8 @@ function main(): int {
             a = arkts_str(vars["a"])
             await walker.log_layout("%s", a)
 
-            assert a == cap.stdout[-1]
+            with expect.warning():
+                assert a == cap.stdout[-1]
             walker.stop()
 
 

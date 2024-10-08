@@ -146,10 +146,13 @@ void StaticDefaultInspectorExtension::EnumerateProperties(const ObjectHeader *ob
                     false);
         }
     } else {
-        for (const auto &field : cls->GetInstanceFields()) {
-            handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(object, field), field.IsFinal(),
-                    false);
-        }
+        do {
+            for (const auto &field : cls->GetInstanceFields()) {
+                handler(utf::Mutf8AsCString(field.GetName().data), GetFieldValueStatic(object, field), field.IsFinal(),
+                        false);
+            }
+            cls = cls->GetBase();
+        } while (cls != nullptr);
     }
 }
 
