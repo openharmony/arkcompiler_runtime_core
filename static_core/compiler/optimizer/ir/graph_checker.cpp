@@ -688,8 +688,13 @@ void GraphChecker::CheckLoops()
         CHECKER_IF_NOT_PRINT(block->IsMarked(mrk));
         if (!block->IsLoopHeader()) {
             CHECKER_IF_NOT_PRINT(!block->IsOsrEntry());
+            if (block->IsLoopPreHeader()) {
+                CHECKER_IF_NOT_PRINT(block->GetNextLoop()->GetPreHeader() == block);
+            }
             continue;
         }
+        CHECKER_IF_NOT_PRINT(loop->IsTryCatchLoop() || loop->IsIrreducible() ||
+                             loop->GetPreHeader()->GetNextLoop() == loop);
         if (block->IsOsrEntry()) {
             CHECKER_IF_NOT_PRINT(GetGraph()->IsOsrMode());
             auto ssOsr = block->GetFirstInst();

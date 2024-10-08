@@ -76,7 +76,6 @@ public:
     Graph *CloneGraph();
     BasicBlock *CloneLoopHeader(BasicBlock *block, BasicBlock *outer, BasicBlock *replaceablePred);
     Loop *CloneLoop(Loop *loop);
-    bool IsLoopClonable(Loop *loop, size_t instLimit);
 
     /**
      * Make equal to the `factor` number of clones of loop body and insert them into the graph
@@ -281,6 +280,17 @@ protected:
         return cloneInstructions_[inst->GetCloneNumber()];
     }
 
+    // Cloned blocks and instructions getters
+    bool HasClone(const BasicBlock *block)
+    {
+        return (block->GetId() < cloneBlocks_.size()) && (cloneBlocks_[block->GetId()] != nullptr);
+    }
+
+    bool HasClone(Inst *inst)
+    {
+        return inst->IsMarked(cloneMarker_) && (inst->GetCloneNumber() < cloneInstructions_.size());
+    }
+
 private:
     // Whole graph cloning
     void CopyLoop(Loop *loop, Loop *clonedLoop);
@@ -307,16 +317,6 @@ private:
     // Loop header cloning
     void BuildClonedLoopHeaderDataFlow(const BasicBlock &block, BasicBlock *resolver, BasicBlock *clone);
     void UpdateUsersForClonedLoopHeader(Inst *inst, BasicBlock *outerBlock);
-    // Cloned blocks and instructions getters
-    bool HasClone(const BasicBlock *block)
-    {
-        return (block->GetId() < cloneBlocks_.size()) && (cloneBlocks_[block->GetId()] != nullptr);
-    }
-
-    bool HasClone(Inst *inst)
-    {
-        return inst->IsMarked(cloneMarker_) && (inst->GetCloneNumber() < cloneInstructions_.size());
-    }
 
     /// Clone block's instructions and append to the block's clone
     template <InstCloneType TYPE, bool SKIP_SAFEPOINTS>

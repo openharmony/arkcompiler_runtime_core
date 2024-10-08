@@ -288,7 +288,7 @@ void BasicBlock::SetNextLoop(Loop *loop)
     nextLoop_ = loop;
 }
 
-Loop *BasicBlock::GetNextLoop()
+Loop *BasicBlock::GetNextLoop() const
 {
     return nextLoop_;
 }
@@ -694,6 +694,10 @@ void BasicBlock::JoinSuccessorBlock()
 
     ASSERT(succ->GetPredsBlocks().size() == 1);
     ASSERT(succ->GetPredBlockByIndex(0) == this);
+    ASSERT(!IsLoopPreHeader());
+    if (succ->IsLoopPreHeader()) {
+        succ->GetNextLoop()->SetPreHeader(this);
+    }
 
     // moving instructions from successor
     ASSERT(!succ->HasPhi());

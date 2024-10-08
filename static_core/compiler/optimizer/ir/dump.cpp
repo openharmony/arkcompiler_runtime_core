@@ -1225,7 +1225,7 @@ static void CheckLoop(const BasicBlock *block, std::ostream *out, bool *printPro
 {
     if (block->IsLoopPreHeader()) {
         CheckPrintPropsFlag(out, printPropsFlag);
-        (*out) << "prehead";
+        (*out) << "prehead (loop " << block->GetNextLoop()->GetId() << ")";
     }
     if (block->IsLoopValid() && !block->GetLoop()->IsRoot()) {
         if (block->IsLoopHeader()) {
