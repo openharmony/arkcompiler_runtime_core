@@ -70,18 +70,19 @@ class TestFileBased(Test):
             "-ex", 'info threads',
             "-ex", 'thread apply all bt',
         ]
-        try:
-            with subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    encoding='utf-8',
-                    errors='ignore',
-            ) as process:
+        with subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                encoding='utf-8',
+                errors='ignore',
+        ) as process:
+            try:
                 output, error = process.communicate(timeout=gdb_timeout)
                 return f"output: '{output}'\nerror: '{error}'"
-        except subprocess.TimeoutExpired:
-            return "<no stacktrace information>"
+            except subprocess.TimeoutExpired:
+                process.kill()
+                return "<no stacktrace information>"
 
     def detect_segfault(self, return_code: int, default_fail_kind: FailKind) -> FailKind:
         if return_code in self.SEGFAULT_RETURN_CODE:
