@@ -327,13 +327,12 @@ bool IsValidModifiedUTF8(const uint8_t *elems)
 
             case 0xf0:  // NOLINT(readability-magic-numbers)
                 // pattern 1111 0xxx starts four byte section
-                if ((*elems & 0x08) == 0) {  // NOLINT(hicpp-signed-bitwise)
-                    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-                    ++elems;
-                    if ((*elems & 0xc0) != 0x80) {  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
-                        return false;
-                    }
-                } else {
+                if ((*elems & 0x08) != 0) {  // NOLINT(hicpp-signed-bitwise)
+                    return false;
+                }
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                ++elems;
+                if ((*elems & 0xc0) != 0x80) {  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
                     return false;
                 }
                 // no need break
@@ -502,6 +501,7 @@ size_t Utf16ToMUtf8Size(const uint16_t *mutf16, uint32_t length)
     return Utf16ToUtf8Size(mutf16, length, true);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 size_t ConvertRegionUtf16ToUtf8(const uint16_t *utf16In, uint8_t *utf8Out, size_t utf16Len, size_t utf8Len,
                                 size_t start, bool modify)
 {

@@ -135,7 +135,7 @@ Logger::Message::~Message()
         std::cerr << "FATAL ERROR" << std::endl;
         std::cerr << "Backtrace [tid=" << os::thread::GetCurrentThreadId() << "]:\n";
         PrintStack(std::cerr);
-        std::abort();
+        std::abort();  // CC-OFF(G.STD.16) fatal error
     }
 }
 

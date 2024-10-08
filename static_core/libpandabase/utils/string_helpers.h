@@ -30,6 +30,7 @@
 
 namespace ark::helpers::string {
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline std::string Vformat(const char *fmt, va_list args)
 {
     static constexpr size_t SIZE = 1024;

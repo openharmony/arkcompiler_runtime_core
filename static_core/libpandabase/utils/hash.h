@@ -96,11 +96,12 @@ uint32_t PseudoFnvHashItem(Item item, uint32_t seed = FNV_INITIAL_SEED)
 }
 
 /// Works like FNV hash but operates over 4-byte words at a time instead of single bytes
+// CC-OFFNXT(G.FUD.06) perf critical
 inline uint32_t PseudoFnvHashString(const uint8_t *str, uint32_t hash = FNV_INITIAL_SEED)
 {
     while (true) {
         // NOLINTNEXTLINE(readability-implicit-bool-conversion, cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        if (!str[0] || !str[1] || !str[2] || !str[3]) {
+        if (!str[0U] || !str[1U] || !str[2U] || !str[3U]) {
             break;
         }
         constexpr uint32_t BYTE = 8U;

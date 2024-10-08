@@ -22,7 +22,7 @@
 // The attributes can be safely erased when compiling with other compilers.
 #if defined(__clang__) && (!defined(SWIG))
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))
+#define THREAD_ANNOTATION_ATTRIBUTE__(x) __attribute__((x))  // CC-OFF(G.NAM.01) public API
 #else
 #define THREAD_ANNOTATION_ATTRIBUTE__(x)  // no-op
 #endif

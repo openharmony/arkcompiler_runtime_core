@@ -31,6 +31,7 @@ struct StructToTupleImpl;
         auto operator()(Struct &&str) const                 \
         {                                                   \
             auto [__VA_ARGS__] = std::forward<Struct>(str); \
+            /* CC-OFFNXT(G.PRE.05) function gen */          \
             return std::make_tuple(__VA_ARGS__);            \
         }                                                   \
     }

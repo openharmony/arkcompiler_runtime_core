@@ -33,7 +33,7 @@ namespace ark::helpers::math {
 constexpr uint32_t GetIntLog2(const uint32_t x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<uint32_t>(panda_bit_utils_ctz(x));
+    return static_cast<uint32_t>(PANDA_BIT_UTILS_CTZ(x));
 }
 
 /**
@@ -44,7 +44,7 @@ constexpr uint32_t GetIntLog2(const uint32_t x)
 constexpr uint64_t GetIntLog2(const uint64_t x)
 {
     ASSERT((x > 0) && !(x & (x - 1U)));
-    return static_cast<uint64_t>(panda_bit_utils_ctzll(x));
+    return static_cast<uint64_t>(PANDA_BIT_UTILS_CTZLL(x));
 }
 
 template <typename T>

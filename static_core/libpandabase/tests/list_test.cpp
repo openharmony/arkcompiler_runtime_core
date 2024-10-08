@@ -29,7 +29,7 @@ constexpr const int DEFAULT_LIST_CAPACITY = 1000;
 struct TestNode : public ListNode {
     TestNode() = default;
     // NOLINTNEXTLINE(google-explicit-constructor)
-    TestNode(int v) : value(v) {}
+    TestNode(int v) : value(v) {}  // CC-OFF(G.CLS.03) class for testing
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     int value {0U};
 };

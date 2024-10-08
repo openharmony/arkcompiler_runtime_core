@@ -93,6 +93,7 @@ public:
         bool Parse();
 
         bool GetJsonObject(JsonObject *emptyObj);
+        void SaveSourceString(std::streampos posStart);
         bool GetValue();
         bool GetNull();
         bool GetString(char delim);

@@ -30,9 +30,11 @@
 #if defined(PANDA_ASAN_ON)
 extern "C" {
 // Marks memory region [addr, addr+size) as unaddressable.
+// CC-OFFNXT(G.DCL.01) public API
 // NOLINTNEXTLINE(readability-identifier-naming, readability-redundant-declaration)
 void __asan_poison_memory_region(void const volatile *addr, size_t size) __attribute__((visibility("default")));
 // Marks memory region [addr, addr+size) as addressable.
+// CC-OFFNXT(G.DCL.01) public API
 // NOLINTNEXTLINE(readability-identifier-naming, readability-redundant-declaration)
 void __asan_unpoison_memory_region(void const volatile *addr, size_t size) __attribute__((visibility("default")));
 }

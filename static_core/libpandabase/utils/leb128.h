@@ -30,6 +30,7 @@ constexpr size_t EXTENSION_BIT = 0x80;
 constexpr size_t SIGN_BIT = 0x40;
 
 template <class T>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline std::tuple<T, size_t, bool> DecodeUnsigned(const uint8_t *data)
 {
     static_assert(std::is_unsigned_v<T>, "T must be unsigned");
@@ -56,6 +57,7 @@ inline std::tuple<T, size_t, bool> DecodeUnsigned(const uint8_t *data)
 }
 
 template <>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t *data)
 {
     constexpr size_t LEB128_BYTE2_SHIFT = 7U;
@@ -97,6 +99,7 @@ inline std::tuple<uint32_t, size_t, bool> DecodeUnsigned<uint32_t>(const uint8_t
 }
 
 template <class T>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline std::tuple<T, size_t, bool> DecodeSigned(const uint8_t *data)
 {
     static_assert(std::is_signed_v<T>, "T must be signed");
@@ -153,6 +156,7 @@ inline size_t EncodeUnsigned(T data, uint8_t *out)
 }
 
 template <class T>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline size_t EncodeSigned(T data, uint8_t *out)
 {
     static_assert(std::is_signed_v<T>, "T must be signed");

@@ -21,9 +21,11 @@ namespace ark::os::dfx_option {
 bool DfxOptionHandler::IsInOptionList(const std::string &s)
 {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str)  \
-    if (s == (str)) { \
-        return true;  \
+#define D(e, v, str)                               \
+    /* CC-OFFNXT(G.PRE.10) function scope macro */ \
+    if (s == (str)) {                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */     \
+        return true;                               \
     }
     DFX_OPTION_LIST(D)
 #undef D
@@ -34,9 +36,11 @@ bool DfxOptionHandler::IsInOptionList(const std::string &s)
 DfxOptionHandler::DfxOption DfxOptionHandler::DfxOptionFromString(const std::string &s)
 {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define D(e, v, str)                           \
-    if (s == (str)) {                          \
-        return DfxOptionHandler::DfxOption::e; \
+#define D(e, v, str)                               \
+    /* CC-OFFNXT(G.PRE.10) function scope macro */ \
+    if (s == (str)) {                              \
+        /* CC-OFFNXT(G.PRE.05) function gen */     \
+        return DfxOptionHandler::DfxOption::e;     \
     }
     DFX_OPTION_LIST(D)
 #undef D
@@ -48,7 +52,9 @@ std::string DfxOptionHandler::StringFromDfxOption(DfxOptionHandler::DfxOption df
 {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define D(e, v, str)                                   \
+    /* CC-OFFNXT(G.PRE.10) function scope macro */     \
     if (dfxOption == DfxOptionHandler::DfxOption::e) { \
+        /* CC-OFFNXT(G.PRE.05) function gen */         \
         return (str);                                  \
     }
     DFX_OPTION_LIST(D)

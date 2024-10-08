@@ -44,6 +44,7 @@ constexpr double operator""_D(long double v)
 
 // Returns the value (0 .. 15) of a hexadecimal character c.
 // If c is not a legal hexadecimal character, returns a value < 0.
+// CC-OFFNXT(G.FUD.06) solid logic
 inline uint32_t HexValue(uint32_t c)
 {
     constexpr uint32_t BASE16 = 16;
