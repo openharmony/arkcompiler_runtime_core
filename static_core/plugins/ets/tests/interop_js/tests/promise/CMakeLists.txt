@@ -272,3 +272,9 @@ panda_ets_interop_js_test(ets_interop_js_test_to_ets_and_back
     ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/promise_tests.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_to_ets_and_back_test.js
 )
+
+panda_ets_interop_js_test(ets_interop_js_test_resolve_js_promise_from_non_main_coro
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/resolve_js_promise_from_non_main_coro_test.sts
+    JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/resolve_js_promise_from_non_main_coro_test.js
+    LAUNCHER_ARGS "testPromiseResolve"
+)

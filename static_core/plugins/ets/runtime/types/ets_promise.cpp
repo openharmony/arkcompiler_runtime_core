@@ -50,6 +50,20 @@ void EtsPromise::OnPromiseCompletion(EtsCoroutine *coro)
         EtsPromise::LaunchCallback(coro, thenCallback, launchMode);
     }
     ClearQueues(coro);
+
+    auto resolver = GetPromiseResolver();
+    InvalidatePromiseResolver();
+    if (resolver == nullptr) {
+        return;
+    }
+    auto remotePromiseResolverAction =
+        IsResolved() ? RemotePromiseResolver::Action::RESOLVE : RemotePromiseResolver::Action::REJECT;
+    if (coro == coro->GetCoroutineManager()->GetMainThread()) {
+        resolver->ResolveInPlace(GetValue(coro), remotePromiseResolverAction);
+    } else {
+        resolver->ResolveViaCallback(GetValue(coro), remotePromiseResolverAction);
+    }
+    Runtime::GetCurrent()->GetInternalAllocator()->Delete(resolver);
 }
 
 /* static */

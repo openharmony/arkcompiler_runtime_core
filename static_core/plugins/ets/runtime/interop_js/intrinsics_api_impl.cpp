@@ -645,6 +645,8 @@ void SettleJsPromise(EtsObject *value, napi_deferred deferred, EtsInt state)
     auto *ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
     napi_value completionValue;
+
+    NapiScope napiScope(env);
     if (value == nullptr) {
         napi_get_null(env, &completionValue);
     } else {

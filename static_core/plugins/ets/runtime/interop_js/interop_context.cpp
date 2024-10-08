@@ -119,6 +119,7 @@ InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env)
 {
     JSNapiEnvScope envscope(this, env);
 
+    jsEnvForEventLoopCallbacks_ = env;
     PandaEtsVM *vm = coro->GetPandaVM();
     EtsClassLinker *etsClassLinker = vm->GetClassLinker();
     refstor_ = vm->GetGlobalObjectStorage();

@@ -148,6 +148,12 @@ public:
         jsEnv_ = env;
     }
 
+    napi_env GetJsEnvForEventLoopCallbacks() const
+    {
+        ASSERT(EtsCoroutine::GetCurrent() == EtsCoroutine::GetCurrent()->GetCoroutineManager()->GetMainThread());
+        return jsEnvForEventLoopCallbacks_;
+    }
+
     mem::GlobalObjectStorage *Refstor() const
     {
         return refstor_;
@@ -449,6 +455,8 @@ private:
     void CacheClasses(EtsClassLinker *etsClassLinker);
 
     napi_env jsEnv_ {};
+
+    napi_env jsEnvForEventLoopCallbacks_ {};
 
     mem::GlobalObjectStorage *refstor_ {};
     ClassLinker *classLinker_ {};

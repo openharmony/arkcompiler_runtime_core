@@ -57,6 +57,7 @@
 #include "plugins/ets/runtime/napi/ets_napi.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/job_queue.h"
+#include "plugins/ets/runtime/ets_external_callback_poster.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_taskpool.h"
@@ -355,6 +356,30 @@ public:
 
     void BeforeShutdown() override;
 
+    /**
+     * @brief Method creates CallbackPosterFactory with your implementation. Here we use template to avoid
+     * usage of InternalAllocator outside the virtual machine.
+     */
+    template <class FactoryImpl, class... Args>
+    void CreateCallbackPosterFactory(Args... args)
+    {
+        static_assert(std::is_base_of_v<CallbackPosterFactoryIface, FactoryImpl>);
+        static_assert(std::is_constructible_v<FactoryImpl, Args...>);
+        ASSERT(callbackPosterFactory_ == nullptr);
+        callbackPosterFactory_ = MakePandaUnique<FactoryImpl>(args...);
+    }
+
+    /// @brief Uses CallbackPosterFactory to create a CallbackPoster
+    PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
+    {
+        auto *coro = EtsCoroutine::GetCurrent();
+        if (coro != coro->GetPandaVM()->GetCoroutineManager()->GetMainThread()) {
+            return nullptr;
+        }
+        ASSERT(callbackPosterFactory_ != nullptr);
+        return callbackPosterFactory_->CreatePoster();
+    }
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
@@ -399,6 +424,7 @@ private:
     PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
     PandaUniquePtr<JobQueue> jobQueue_;
     Taskpool *taskpool_ {nullptr};
+    PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     std::function<void(Frame *)> clearInteropHandleScopes_;

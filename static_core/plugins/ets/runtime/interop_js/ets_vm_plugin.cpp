@@ -18,6 +18,7 @@
 #include "plugins/ets/runtime/ets_vm_api.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_proxy.h"
+#include "plugins/ets/runtime/interop_js/event_loop_module.h"
 #include "plugins/ets/runtime/interop_js/call/call.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/ts2ets_copy.h"
@@ -191,6 +192,13 @@ static std::vector<napi_value> GetArgs(napi_env env, napi_callback_info info)
     return argv;
 }
 
+static void RegisterEventLoopModule()
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
+    coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
+}
+
 static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
 {
     napi_value napiFalse;
@@ -235,6 +243,7 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
 
     bool res = ark::ets::CreateRuntime(stdlibPath, indexPath, useJit, useAot);
     res &= RegisterTimerModule(env);
+    RegisterEventLoopModule();
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);
@@ -351,6 +360,7 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
 
     bool res = ets::CreateRuntime(addOpts);
     res &= RegisterTimerModule(env);
+    RegisterEventLoopModule();
     if (res) {
         auto coro = EtsCoroutine::GetCurrent();
         ScopedManagedCodeThread scoped(coro);

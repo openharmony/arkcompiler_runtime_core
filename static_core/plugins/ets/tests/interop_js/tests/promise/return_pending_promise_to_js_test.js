@@ -61,18 +61,11 @@ function queueTasks(etsVm) {
 			console.log("Call of 'resolvePendingPromise' return false");
 			return null;
 		}
-		queueMicrotask(() => {
-			if (testSuccess) {
-				console.log('Promise must not be resolved');
-				process.exit(1);
-			}
-			queueMicrotask(() => {
-				queueTasksHelper(testSuccess);
-				return null;
-			});
-			return null;
-		});
-		return null;
+        queueMicrotask(() => {
+            queueTasksHelper(testSuccess);
+            return null;
+        });
+        return null;
 	});
 }
 
