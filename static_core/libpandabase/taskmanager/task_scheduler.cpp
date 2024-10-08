@@ -264,22 +264,27 @@ size_t TaskScheduler::StealAndExecuteOneTaskFromWorkers(TaskProperties propertie
     ASSERT(!workers_.empty());
     std::queue<Task> taskQueue;
     auto addTaskToQueue = [&taskQueue](Task &&task) { taskQueue.push(std::move(task)); };
-    auto chosenWorker = *std::max_element(
-        workers_.begin(), workers_.end(), [&properties](const WorkerThread *lv, const WorkerThread *rv) {
-            return lv->CountOfTasksWithProperties(properties) < rv->CountOfTasksWithProperties(properties);
-        });
-    if (chosenWorker->CountOfTasksWithProperties(properties) == 0) {
-        return 0;
-    }
+    while (true) {
+        auto chosenWorker = *std::max_element(
+            workers_.begin(), workers_.end(), [&properties](const WorkerThread *lv, const WorkerThread *rv) {
+                return lv->CountOfTasksWithProperties(properties) < rv->CountOfTasksWithProperties(properties);
+            });
+        if UNLIKELY (chosenWorker->CountOfTasksWithProperties(properties) == 0) {
+            return 0;
+        }
 
-    auto stolen = chosenWorker->GiveTasksToAnotherWorker(addTaskToQueue, 1UL,
-                                                         chosenWorker->GetLocalWorkerQueueSchedulerPopId(), properties);
-
-    while (!taskQueue.empty()) {
-        taskQueue.front().RunTask();
-        taskQueue.pop();
+        auto stolen = chosenWorker->GiveTasksToAnotherWorker(
+            addTaskToQueue, 1UL, chosenWorker->GetLocalWorkerQueueSchedulerPopId(), properties);
+        if (stolen == 0) {  // check if stealing was successful
+            // if we did not stole we should retry
+            continue;
+        }
+        while (!taskQueue.empty()) {
+            taskQueue.front().RunTask();
+            taskQueue.pop();
+        }
+        return stolen;
     }
-    return stolen;
 }
 
 void TaskScheduler::WaitForFinishAllTasksWithProperties(TaskProperties properties)
