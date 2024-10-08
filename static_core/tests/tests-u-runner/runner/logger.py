@@ -59,8 +59,7 @@ class Log:
 
         logger.addHandler(file_handler)
         logger.addHandler(console_handler)
-
-        Log._is_init = True
+        logger.addHandler(logging.NullHandler())
 
         return logger
 
@@ -69,40 +68,28 @@ class Log:
         """
         Logs on the level verbose=ALL
         """
-        if Log._is_init:
-            logger.debug(message)
-        else:
-            print(message)
+        logger.debug(message)
 
     @staticmethod
     def short(logger: logging.Logger, message: str) -> None:
         """
         Logs on the level verbose=SHORT
         """
-        if Log._is_init:
-            logger.info(message)
-        else:
-            print(message)
+        logger.info(message)
 
     @staticmethod
     def summary(logger: logging.Logger, message: str) -> None:
         """
         Logs on the level verbose=SUMMARY (sum)
         """
-        if Log._is_init:
-            logger.log(SUMMARY_LOG_LEVEL, message)
-        else:
-            print(message)
+        logger.log(SUMMARY_LOG_LEVEL, message)
 
     @staticmethod
     def default(logger: logging.Logger, message: str) -> None:
         """
         Logs on the level verbose=None
         """
-        if Log._is_init:
-            logger.log(NONE_LOG_LEVEL, message)
-        else:
-            print(message)
+        logger.log(NONE_LOG_LEVEL, message)
 
     @staticmethod
     def exception_and_raise(logger: logging.Logger, message: str,
@@ -110,8 +97,7 @@ class Log:
         """
         Logs and throw the exception
         """
-        if Log._is_init:
-            logger.critical(message)
+        logger.critical(message)
         if exception_cls is None:
             raise Exception(message)
         raise exception_cls(message)

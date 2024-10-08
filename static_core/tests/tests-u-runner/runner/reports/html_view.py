@@ -20,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Tuple
 
+import pytz
 from runner.reports.report_format import ReportFormat
 from runner.enum_types.fail_kind import FailKind
 from runner.options.config import Config
@@ -52,7 +53,7 @@ class HtmlView:
         with open(report_file, "r", encoding="utf-8") as file_pointer:
             report = file_pointer.read()
 
-        report = report.replace(INDEX_TITLE, f"Summary for {self.__summary.name} {datetime.now()}")
+        report = report.replace(INDEX_TITLE, f"Summary for {self.__summary.name} {datetime.now(pytz.UTC)}")
         report = report.replace(INDEX_OPTIONS, str(self.__config))
         report = report.replace(INDEX_TOTAL, str(self.__summary.total))
         report = report.replace(INDEX_PASSED, str(self.__summary.passed))

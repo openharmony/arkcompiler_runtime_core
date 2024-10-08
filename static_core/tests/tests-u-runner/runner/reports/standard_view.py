@@ -20,6 +20,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Dict
 
+import pytz
 from runner.logger import Log
 from runner.options.options_time_report import TimeReportOptions
 from runner.reports.report_format import ReportFormat
@@ -126,7 +127,7 @@ class StandardView:
         for tests_for_time in tests_by_time[-1]:
             time_report += f"{tests_for_time}\n"
 
-        timestamp = int(datetime.timestamp(datetime.now()))
+        timestamp = int(datetime.timestamp(datetime.now(pytz.UTC)))
         time_report_path = self.__report_root / f"{self.__summary.name}-time_report-{timestamp}.txt"
 
         write_2_file(time_report_path, time_report)

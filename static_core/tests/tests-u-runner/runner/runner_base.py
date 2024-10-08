@@ -29,6 +29,7 @@ from os import path
 from pathlib import Path
 from typing import List, Set, Tuple, Optional
 
+import pytz
 from tqdm import tqdm
 
 from runner.chapters import Chapters
@@ -53,7 +54,7 @@ def load_test_from_list(test_root: str, line: str, directory: Optional[str] = No
     if extra_dir_check:
         test_file = path.normpath(path.join(test_root, test))
         if path.exists(test_file):
-            return test_file
+            return str(test_file)
     return None
 
 
@@ -132,7 +133,7 @@ class Runner(ABC):
             Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 
         # runner init time
-        self.start_time = datetime.now()
+        self.start_time = datetime.now(pytz.UTC)
         # root directory containing bin folder with binary files
         self.build_dir = config.general.build
         self.arktsconfig = config.es2panda.arktsconfig \

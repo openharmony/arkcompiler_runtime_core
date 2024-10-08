@@ -94,28 +94,3 @@ def walk_test_subdirs(path: Path, parent: Optional[TestDirectory] = None) -> Ite
         # walk recursively
         for subsubdir in walk_test_subdirs(subdir.path, subdir):
             yield subsubdir
-
-
-def build_directory_tree(test_dir: TestDirectory) -> None:
-    subdirs = []
-    for name in os.listdir(str(test_dir.path)):
-        if (test_dir.path / name).is_dir():
-            subdirs.append(TestDirectory(
-                parent=test_dir, path=(test_dir.path / name)))
-    subdirs = sorted(subdirs, key=lambda dir: dir.test_id)
-
-    for sub_dir in subdirs:
-        test_dir.add_subdir(sub_dir)
-        build_directory_tree(sub_dir)
-
-
-def print_tree(test_dir: TestDirectory) -> None:
-    for sub_dir in test_dir.subdirs:
-        left_space = " " * 2 * len(sub_dir.full_index())
-        section_index = str(sub_dir.test_id)
-        section_name = sub_dir.name.replace("_", " ").title()
-        right_space = 90 - len(left_space) - \
-            len(section_index) - len(section_name)
-
-        print(left_space, section_index, section_name, "." * right_space, "\n")
-        print_tree(sub_dir)

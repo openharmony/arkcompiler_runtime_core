@@ -20,6 +20,7 @@ import sys
 from datetime import datetime
 from typing import List
 
+import pytz
 from dotenv import load_dotenv
 
 from runner.logger import Log
@@ -37,6 +38,7 @@ def main() -> None:
     args = get_args()
     config = Config(args)
     logger = Log.setup(config.general.verbose, config.general.work_dir)
+    config.log_warnings()
     Log.summary(logger, f"Loaded configuration: {config}")
     config.generate_config()
 
@@ -48,7 +50,7 @@ def main() -> None:
         Log.default(logger, "Attention: tests are going to take only 1 process. The execution can be slow. "
                             "You can set the option `--processes` to wished processes quantity "
                             "or use special value `all` to use all available cores.")
-    start = datetime.now()
+    start = datetime.now(pytz.UTC)
     for test_suite in config.test_suites:
         plugin = "ets" if test_suite.startswith("ets") or test_suite.startswith("sts") else test_suite
         runner_class = registry.get_runner(plugin)
@@ -69,7 +71,7 @@ def main() -> None:
             if config.general.coverage.use_llvm_cov:
                 runner.create_coverage_html()
 
-    finish = datetime.now()
+    finish = datetime.now(pytz.UTC)
     Log.default(logger, f"Runner has been working for {round((finish-start).total_seconds())} sec")
 
     registry.cleanup()

@@ -112,11 +112,14 @@ class UtilHermes:
                 process.communicate(timeout=10)
                 return_code = process.returncode
             except subprocess.TimeoutExpired as ex:
-                _LOGGER.error(f"{' '.join(cmd)} failed with {ex}")
+                error_message = f"Timeout: {' '.join(cmd)} failed with {ex}"
+                _LOGGER.error(error_message)
                 process.kill()
                 return_code = -1
             except Exception as ex:  # pylint: disable=broad-except
-                _LOGGER.error(f"{' '.join(cmd)} failed with {ex}")
+                error_message = f"Exception{' '.join(cmd)} failed with {ex}"
+                _LOGGER.error(error_message)
+                process.kill()
                 return_code = -1
 
         return return_code == 0

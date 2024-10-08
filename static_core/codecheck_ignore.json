@@ -392,7 +392,6 @@
   "tests/cts-generator": "*",
   "tests/irtoc-interpreter-tests": "*",
   "tests/panda": "*",
-  "tests/tests-u-runner": "*",
   "tests/verifier-tests": "*",
   "tests/vm-benchmarks": "*",
   "tools": "*",
