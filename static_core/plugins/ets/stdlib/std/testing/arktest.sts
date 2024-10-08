@@ -27,6 +27,26 @@ function assertCommon(condition: boolean, message: string, description?: string)
 }
 
 /**
+ * Assert that the supplied condition is true
+ * @param condition supplied condition
+ * @param comment optional comment that will be printed in case of failed assertion
+ * @throws AssertionFailed if condition is false
+ */
+export function assertTrue(condition: boolean, comment?: string): void {
+    assertCommon(condition, "expected true but was false", comment)
+}
+
+/**
+ * Assert that the supplied condition is false
+ * @param condition supplied condition
+ * @param comment optional comment that will be printed in case of failed assertion
+ * @throws AssertionFailed if condition is true
+ */
+export function assertFalse(condition: boolean, comment?: string): void {
+    assertCommon(!condition, "expected false but was true", comment)
+}
+
+/**
  * Check two values for == and produce throw error if check failed
  * @param value1 first value for equality
  * @param value2 second value for equality
@@ -268,11 +288,26 @@ export function expectNoThrow(fn: () => void throws): void {
     }
 }
 
+class TermColor {
+    static readonly BLACK = new TermColor(0)
+    static readonly RED = new TermColor(1)
+    static readonly GREEN = new TermColor(2)
+
+    readonly code: int
+
+    private constructor(code: int) {
+        this.code = code
+    }
+
+    toString(): string {
+        return "" + this.code
+    }
+}
+
 /**
  * @class ArkTest provides interface for running a test
  */
 export class ArkTest {
-
     /**
      * Create a test instance
      * @param name test name
@@ -293,7 +328,8 @@ export class ArkTest {
         try {
             this.callback();
         } catch (e) {
-            let msgFail = "[ FAILED ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)";
+            const failedMsg = this.addTermColor(TermColor.RED, "FAILED")
+            const msgFail = "[ " + failedMsg + " ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)";
             if (!(e instanceof AssertionError)) {
                 console.log("Unexpected exception: " + e);
             } else {
@@ -311,8 +347,13 @@ export class ArkTest {
             console.log(msgFail);
             return false;
         }
-        console.log("[ PASSED ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)");
+        const passedMsg = this.addTermColor(TermColor.GREEN, "PASSED")
+        console.log("[ " + passedMsg + " ] " + testcaseName + " (" + (Date.now() - startMs) + " ms)");
         return true;
+    }
+
+    private addTermColor(color: TermColor, str: string): string {
+        return "\x1b[38;5;" + color + "m" + str + "\x1b[0m"
     }
 
     /**
