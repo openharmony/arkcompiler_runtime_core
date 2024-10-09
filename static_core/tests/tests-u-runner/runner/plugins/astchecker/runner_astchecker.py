@@ -85,7 +85,6 @@ class RunnerASTChecker(RunnerJS):
     def default_work_dir_root(self) -> Path:
         return Path('/tmp') / 'astchecker'
 
-
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestASTChecker:
         with open(test_file, 'r', encoding='utf-8') as file:
             test_cases = self.util.parse_tests(file)
