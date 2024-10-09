@@ -1,1 +1,4 @@
-test.sts
+### Issue 19842 begin
+std/core/PromiseResolveBySelf.sts
+std/core/PromiseAnyPoisonedThen.sts
+### Issue 19842 end

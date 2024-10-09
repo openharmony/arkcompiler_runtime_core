@@ -1,0 +1,19 @@
+### Issue 17754 begin
+std/core/PromiseAllSettledRejectAll.sts
+std/core/PromiseAllSettledMixed.sts
+std/core/PromiseAllSettledResolve.sts
+std/core/PromiseAllSettledReject.sts
+std/core/PromiseAllSettledRejectDeferred.sts
+std/core/PromiseAllSettledRejectIgnored.sts
+std/core/PromiseAllSettledRejectIgnoredDeferred.sts
+std/core/PromiseAllSettledPoisonedThen.sts
+### Issue 17754 end
+
+### Issue 19835 begin
+std/core/PromiseResolve2.sts
+std/core/PromiseReject.sts
+### Issue 19835 end
+
+### Issue 19841 begin
+std/core/PromiseSequence7.sts
+### Issue 19841 end

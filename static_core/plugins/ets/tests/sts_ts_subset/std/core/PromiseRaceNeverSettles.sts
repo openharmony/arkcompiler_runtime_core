@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,20 +13,9 @@
  * limitations under the License.
  */
 
-function main() {
-  let p = new Promise<number>(
-    (resolve: (v: number)=>void, _: (error: Object)=>void)=>{resolve(7);}
-  );
-  p.then<void, void>((value:number):void => {
-    if(value != 7) {
-      console.log("Test failed.");
-      return;
-    }
-    console.log("Test passed.");
-  }, (err: Object): void => {
-    console.log("Test failed.");
-  });
-  return 0;
-}
-
-main();
+let array: Object[] = [];
+Promise.race<Object>(array).then<void, void>((value: Object): void => {
+    console.log("Test failed. The promise should not be resolved.");
+}, (err: Error): void => {
+    console.log("Test failed. The promise should not be rejected.");
+});
