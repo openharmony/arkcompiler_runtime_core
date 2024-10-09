@@ -612,7 +612,7 @@ bool Paoc::Compile(Class *klass, const panda_file::File &pfileRef)
         // Method (or the whole class?) may already have a definition in another file,
         // in this case it should not be added into AOT file.
         Method &method = methodDataAccessor.IsStatic() ? methods[smethodIdx++] : methods[vmethodIdx++];
-        auto methodName = runtime_->GetMethodFullName(&method, false);
+        auto methodName = runtime_->GetMethodFullName(&method, g_options.WasSetCompilerRegexWithSignature());
         if (method.GetPandaFile()->GetFilename() == pfileRef.GetFilename() && !Skip(&method) &&
             IsMethodInList(methodName) && g_options.MatchesRegex(methodName) && !Compile(&method, methodIndex)) {
             errorOccurred = true;

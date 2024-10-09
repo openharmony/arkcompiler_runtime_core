@@ -175,6 +175,9 @@ void Compilation::CheckUsedRegisters()
 
 Compilation::Result Compilation::Run()
 {
+    if (compiler::g_options.WasSetCompilerRegexWithSignature()) {
+        LOG(FATAL, IRTOC) << "Regex with signatures is not supported, please use '--compiler-regex'.";
+    }
     if (compiler::g_options.WasSetCompilerRegex()) {
         methodsRegex_ = compiler::g_options.GetCompilerRegex();
     }
