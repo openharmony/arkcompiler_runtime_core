@@ -22,7 +22,6 @@
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
 #include "plugins/ets/runtime/types/ets_finalizable_weak_ref.h"
 #include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
 
 namespace ark::mem::ets {
 
@@ -104,36 +103,27 @@ void EtsReferenceProcessor::HandleOtherFields(const BaseClass *cls, const Object
     }
     // Currently, only finalizer references' other fields are handled
     ASSERT(etsClass->IsWeakReference());
-    auto *coro = ark::ets::EtsCoroutine::GetCurrent();
     auto *finalizableWeakRef = ark::ets::EtsFinalizableWeakRef::FromCoreType(object);
     if constexpr (USE_OBJECT_REF) {
-        auto refHandler = [this, coro, processor, finalizableWeakRef](auto *ref, size_t offset) {
+        auto refHandler = [processor, finalizableWeakRef](auto *ref, size_t offset) {
             if (ref == nullptr) {
                 return;
             }
             ASSERT(ref->GetReferent() != nullptr);
-            if (ref->GetReferent() == undefinedObject_) {
-                coro->GetPandaVM()->UnlinkFinalizableReference(coro, ref);
-                return;
-            }
             processor(ToVoidPtr(ToUintPtr(finalizableWeakRef) + offset));
         };
-        refHandler(finalizableWeakRef->GetPrev(coro), ark::ets::EtsFinalizableWeakRef::GetPrevOffset());
-        refHandler(finalizableWeakRef->GetNext(coro), ark::ets::EtsFinalizableWeakRef::GetNextOffset());
+        refHandler(finalizableWeakRef->GetPrev(), ark::ets::EtsFinalizableWeakRef::GetPrevOffset());
+        refHandler(finalizableWeakRef->GetNext(), ark::ets::EtsFinalizableWeakRef::GetNextOffset());
     } else {
-        auto refHandler = [this, coro, processor](auto *ref) {
+        auto refHandler = [processor](auto *ref) {
             if (ref == nullptr) {
                 return;
             }
             ASSERT(ref->GetReferent() != nullptr);
-            if (ref->GetReferent() == undefinedObject_) {
-                coro->GetPandaVM()->UnlinkFinalizableReference(coro, ref);
-                return;
-            }
             processor(ref->GetCoreType());
         };
-        refHandler(finalizableWeakRef->GetPrev(coro));
-        refHandler(finalizableWeakRef->GetNext(coro));
+        refHandler(finalizableWeakRef->GetPrev());
+        refHandler(finalizableWeakRef->GetNext());
     }
 }
 

@@ -350,8 +350,6 @@ public:
     void RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object, void (*finalizer)(void *),
                                     void *finalizerArg);
 
-    void UnlinkFinalizableReference(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef);
-
     void CleanFinalizableReferenceList();
 
     void BeforeShutdown() override;
