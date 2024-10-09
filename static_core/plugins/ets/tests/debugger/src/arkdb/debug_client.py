@@ -92,6 +92,12 @@ class DebuggerClient:
         await trio.lowlevel.checkpoint()
         return proxy.value
 
+    async def send_and_wait_for_paused(self, send_arg) -> debugger.Paused:
+        async with self.wait_for(debugger.Paused) as proxy:
+            await self.connection.send(send_arg)
+        await trio.lowlevel.checkpoint()
+        return proxy.value
+
     async def continue_to_location(
         self,
         script_id: runtime.ScriptId,
@@ -191,6 +197,9 @@ class DebuggerClient:
 
     async def evaluate(self, expression: str) -> tuple[runtime.RemoteObject, runtime.ExceptionDetails | None]:
         return await self.connection.send(runtime.evaluate(expression))
+
+    async def restart_frame(self, frame_number: int) -> debugger.Paused:
+        return await self.send_and_wait_for_paused(debugger.restart_frame(debugger.CallFrameId(str(frame_number))))
 
     def _on_script_parsed(self, event: debugger.ScriptParsed):
         pass
