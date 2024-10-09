@@ -15,10 +15,9 @@
 # limitations under the License.
 #
 
-from . import cdp_runtime_objectpreview_from_json, pytest_trio_choose_run, wsproto_handshake
+from . import pytest_trio_choose_run, wsproto_handshake
 
 
 def overwrite_all() -> None:
     pytest_trio_choose_run.overwrite()
     wsproto_handshake.overwrite()
-    cdp_runtime_objectpreview_from_json.overwrite()

@@ -48,9 +48,7 @@ public:
     std::string GetClassName(const ObjectHeader *object) override;
     std::optional<std::string> GetAsString(const ObjectHeader *object) override;
     std::optional<size_t> GetLengthIfArray(const ObjectHeader *object) override;
-    void EnumerateProperties(
-        const ObjectHeader *object,
-        const std::function<void(const std::string &, TypedValue, bool, bool, bool)> &handler) override;
+    void EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler) override;
     void EnumerateGlobals([[maybe_unused]] const PropertyHandler &handler) override {}
 };
 }  // namespace ark::tooling

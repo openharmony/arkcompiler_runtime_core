@@ -33,6 +33,7 @@ set(ARKINSPECTOR_ROOTS
     types/exception_details.cpp
     types/location.cpp
     types/remote_object.cpp
+    types/object_preview.cpp
     types/scope.cpp
 )
 set(ARKINSPECTOR_LINKED_LIBRARIES
