@@ -15,8 +15,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(arkinspector)
 
-add_compile_options(-fexceptions -Wno-invalid-offsetof)
-
 set(ARKINSPECTOR_ROOTS
     connection/endpoint_base.cpp
     connection/event_loop.cpp
@@ -77,33 +75,28 @@ else()
     )
 endif()
 
-add_definitions(${ARKINSPECTOR_DEFINITIONS})
 
-panda_add_library(arkinspector SHARED
-    ${ARKINSPECTOR_ROOTS}
+panda_add_library(${PROJECT_NAME} SHARED ${ARKINSPECTOR_ROOTS})
+
+panda_target_compile_definitions(${PROJECT_NAME} PUBLIC ${ARKINSPECTOR_DEFINITIONS})
+
+panda_target_compile_options(${PROJECT_NAME} PUBLIC -fexceptions -Wno-invalid-offsetof)
+
+add_dependencies(${PROJECT_NAME} arkruntime)
+
+panda_target_include_directories(${PROJECT_NAME}
+    PUBLIC ${PANDA_ROOT}/runtime/include/
 )
 
-add_dependencies(arkinspector arkruntime)
-
-include_directories(
-    ${PANDA_ROOT}/runtime/include/
+panda_target_include_directories(${PROJECT_NAME} SYSTEM
+    PUBLIC ${ARKINSPECTOR_INCLUDES}
 )
 
-include_directories(SYSTEM
-    ${ARKINSPECTOR_INCLUDES}
-)
-
-panda_target_link_libraries(arkinspector
+panda_target_link_libraries(${PROJECT_NAME}
     ${ARKINSPECTOR_LINKED_LIBRARIES}
 )
 
-panda_add_sanitizers(TARGET arkinspector SANITIZERS ${PANDA_SANITIZERS_LIST})
-
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 13.0.0)
-    panda_target_compile_options(arkinspector PUBLIC "-Wno-null-pointer-subtraction")
-endif()
-
-panda_target_compile_options(arkinspector PUBLIC "-Wno-deprecated-declarations")
+panda_add_sanitizers(TARGET ${PROJECT_NAME} SANITIZERS ${PANDA_SANITIZERS_LIST})
 
 panda_add_gtest(
     NAME arkinspector_tests
@@ -121,7 +114,7 @@ panda_add_gtest(
         ${PANDA_ROOT}/runtime/tooling/inspector 
     LIBRARIES
         arkassembler
-        arkinspector
+        ${PROJECT_NAME}
         arkruntime
         gmock
     SANITIZERS

@@ -118,6 +118,7 @@ build-sdk/sdk/ohos_arm64/lib/libarkassembler.so
 build-sdk/sdk/ohos_arm64/lib/libarkbase.so
 build-sdk/sdk/ohos_arm64/lib/libarkbytecodeopt.so
 build-sdk/sdk/ohos_arm64/lib/libarkcompiler.so
+build-sdk/sdk/ohos_arm64/lib/libarkdisassembler.so
 build-sdk/sdk/ohos_arm64/lib/libarkfile.so
 build-sdk/sdk/ohos_arm64/lib/libarkruntime.so
 build-sdk/sdk/ohos_arm64/lib/libarkruntime_static.a
