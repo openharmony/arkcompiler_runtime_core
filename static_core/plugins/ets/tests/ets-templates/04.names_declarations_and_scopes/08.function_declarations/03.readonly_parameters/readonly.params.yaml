@@ -209,3 +209,16 @@ cases:
         a[0] = 3;
         a[1] = 4.5;
         assert(foo([3], a, "str") == "6strstr34.5");
+
+  # readonly decl as function parameter
+    - decl: |-
+        interface I {
+            foo(array: readonly int[]) {}
+        }
+        class A {
+            static foo(array: readonly int[]) {}
+        }
+        class B {
+            static foo(array: readonly int[]) {}
+        }
+      check: |-

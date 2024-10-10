@@ -61,21 +61,6 @@ cases:
         type TPL = [string, int];
         function foo(array?: readonly TPL = ["str", 1], i: int) { }
 
-    - decl: |-
-        interface I {
-            foo(array: readonly int[]) {}
-        }
-
-    - decl: |-
-        class A {
-            static foo(array: readonly int[]) {}
-        }
-
-    - decl: |-
-        class A {
-            static foo(array: readonly int[]) {}
-        }
-
   # edit readonly parameter configured with the default value
     - decl: |-
         function foo(array?: readonly number[] = [1.1, 2.2]) {
