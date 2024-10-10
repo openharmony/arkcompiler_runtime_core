@@ -149,6 +149,7 @@ def get_expression_verifier(
         def __init__(self, parser: AstParser):
             self._ast_parser = parser
 
+        # CC-OFFNXT(G.CLS.07) followed required interface
         def __call__(self, expression: ScriptFile):
             verifier(base, expression, expected)
 

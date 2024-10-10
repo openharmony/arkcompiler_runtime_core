@@ -18,12 +18,9 @@
 
 #include "tooling/inspector/connection/server_endpoint_base.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wshadow"
 #include "websocketpp/common/connection_hdl.hpp"
 #include "websocketpp/frame.hpp"
 #include "websocketpp/server.hpp"
-#pragma GCC diagnostic pop
 
 namespace ark::tooling::inspector {
 // Server endpoint based on websocketpp implementation.

@@ -116,7 +116,14 @@ async def _pause_and_get_vars(client: DebuggerClient, log: RichLogger, script_fi
         for scope in frame.scope_chain
         if scope.object_.object_id is not None
     ]
-    props = [prop for props in [(await client.get_properties(obj_id))[0] for obj_id in object_ids] for prop in props]
+    # fmt: off
+    props = [
+        prop
+        for props in [(await client.get_properties(obj_id))[0]
+                      for obj_id in object_ids]
+        for prop in props
+    ]
+    # fmt: on
     variables = {prop.name: prop.value.value if prop.value is not None else None for prop in props}
     log.info("Properties: \n%s", repr(props))
     log.info("All variables: %r", variables)

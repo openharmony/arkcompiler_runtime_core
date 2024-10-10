@@ -158,25 +158,8 @@ class DebuggerClient:
             ),
         )
 
-    async def set_breakpoint_by_url(
-        self,
-        line_number: int,
-        url: Optional[str] = None,
-        url_regex: Optional[str] = None,
-        script_hash: Optional[str] = None,
-        column_number: Optional[int] = None,
-        condition: Optional[str] = None,
-    ) -> Tuple[debugger.BreakpointId, List[debugger.Location]]:
-        return await self.connection.send(
-            debugger.set_breakpoint_by_url(
-                line_number=line_number,
-                url=url,
-                url_regex=url_regex,
-                script_hash=script_hash,
-                column_number=column_number,
-                condition=condition,
-            ),
-        )
+    async def set_breakpoint_by_url(self, *args, **kwargs) -> Tuple[debugger.BreakpointId, List[debugger.Location]]:
+        return await self.connection.send(debugger.set_breakpoint_by_url(*args, **kwargs))
 
     async def get_possible_breakpoints(
         self,

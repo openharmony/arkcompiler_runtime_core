@@ -114,6 +114,7 @@ void Inspector::ConsoleCall(PtThread thread, ConsoleCallType type, uint64_t time
     inspectorServer_.CallRuntimeConsoleApiCalled(thread, type, timestamp, it->second.OnConsoleCall(arguments));
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) Decreasing the number of arguments will decrease the clarity of the code.
 void Inspector::Exception(PtThread thread, Method * /* method */, const PtLocation & /* location */,
                           ObjectHeader * /* exception */, Method * /* catch_method */, const PtLocation &catchLocation)
 {

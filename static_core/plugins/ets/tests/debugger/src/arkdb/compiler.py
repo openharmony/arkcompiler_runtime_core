@@ -80,6 +80,18 @@ class CompilerArguments:
         return result
 
 
+@dataclass
+class EvaluateCompileExpressionArgs:
+    ets_expression: str | Path
+    eval_panda_files: list[Path] | None = None
+    eval_source: Path | None = None
+    eval_line: int | None = None
+    eval_log_level: CompileLogLevel | None = None
+    ast_parser: AstParser | None = None
+    name: str = "evaluated_expression"
+    extension: CompilerExtensions | None = None
+
+
 class CompileError(Exception):
     def __init__(self, stdout: str) -> None:
         super().__init__([stdout])
@@ -218,32 +230,25 @@ class StringCodeCompiler:
 
     def compile_expression(
         self,
-        ets_expression: str | Path,
-        eval_panda_files: list[Path] | None = None,
-        eval_source: Path | None = None,
-        eval_line: int | None = None,
-        eval_log_level: CompileLogLevel | None = None,
-        ast_parser: AstParser | None = None,
-        name: str = "evaluated_expression",
-        extension: CompilerExtensions | None = None,
+        eval_args: EvaluateCompileExpressionArgs,
     ) -> ScriptFile:
         args = CompilerArguments(
             ets_module=True,
             dump_dynamic_ast=ast_parser is not None,
             debugger_eval_mode=True,
-            debugger_eval_panda_files=eval_panda_files,
-            debugger_eval_source=eval_source,
-            debugger_eval_line=eval_line,
-            log_level=eval_log_level if eval_log_level is not None else "error",
+            debugger_eval_panda_files=eval_args.eval_panda_files,
+            debugger_eval_source=eval_args.eval_source,
+            debugger_eval_line=eval_args.eval_line,
+            log_level=eval_args.eval_log_level if eval_args.eval_log_level is not None else "error",
         )
-        if extension is not None:
-            args.extension = extension
+        if eval_args.extension is not None:
+            args.extension = eval_args.extension
 
         ets_file: Path
-        if isinstance(ets_expression, str):
-            ets_file = self._write_into_file(ets_expression, name, args.extension)
+        if isinstance(eval_args.ets_expression, str):
+            ets_file = self._write_into_file(eval_args.ets_expression, eval_args.name, args.extension)
         else:
-            ets_file = ets_expression
+            ets_file = eval_args.ets_expression
         if not ets_file.exists():
             raise FileNotFoundError(ets_file)
 
@@ -252,7 +257,7 @@ class StringCodeCompiler:
             self._tmp_path,
             self._ark_compiler,
             arguments=args,
-            ast_parser=ast_parser,
+            ast_parser=eval_args.ast_parser,
         )
 
     def _write_into_file(self, source_code: str, filename: str, extension: str) -> Path:

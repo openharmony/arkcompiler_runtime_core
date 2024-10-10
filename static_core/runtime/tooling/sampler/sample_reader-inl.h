@@ -43,6 +43,8 @@ namespace ark::tooling::sampler {
  * Module row |__________|__________|__________|___________|_____________------___________|
  *              64 bits    64 bits    32 bits    64 bits       (8 * <name size>) bits
  */
+
+// CC-OFFNXT(G.FUD.06) Splitting this function will degrade readability. Keyword "inline" needs to satisfy ODR rule.
 inline SampleReader::SampleReader(const char *filename)
 {
     {
@@ -103,6 +105,7 @@ inline SampleReader::SampleReader(const char *filename)
 }
 
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+// CC-OFFNXT(G.FUD.06) Splitting this function will degrade readability. Keyword "inline" needs to satisfy ODR rule.
 inline bool SampleReader::GetNextSample(SampleInfo *sampleOut)
 {
     if (sampleRowPtrs_.size() <= sampleRowCounter_) {
@@ -123,6 +126,7 @@ inline bool SampleReader::GetNextSample(SampleInfo *sampleOut)
     return true;
 }
 
+// CC-OFFNXT(G.FUD.06) Splitting this function will degrade readability. Keyword "inline" needs to satisfy ODR rule.
 inline bool SampleReader::GetNextModule(FileInfo *moduleOut)
 {
     if (moduleRowPtrs_.size() <= moduleRowCounter_) {

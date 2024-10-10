@@ -52,9 +52,11 @@ class Primitive(Generic[T], metaclass=PrimitiveMeta):
             return self.value == other
         return False
 
+    # CC-OFFNXT(G.NAM.05) Standard function from rich package
     def __rich_repr__(self):
         return [self.value]
 
+    # CC-OFFNXT(G.NAM.05) internal function name
     def __arkts_str__(self, *, depth: Optional[int] = None) -> str:
         return arkts_str(self.value)
 

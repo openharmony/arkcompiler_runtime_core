@@ -22,6 +22,7 @@ from .type_cache import clear_cache, log_stats
 
 @hookimpl(hookwrapper=True)
 def pytest_runtest_call(item: Item):
+    # CC-OFFNXT(G.NAM.05) is used for PyTest complexity reduction
     __tracebackhide__ = True
     try:
         yield

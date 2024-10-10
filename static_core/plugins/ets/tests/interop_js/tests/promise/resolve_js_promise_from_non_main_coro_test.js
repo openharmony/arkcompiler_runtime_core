@@ -14,7 +14,7 @@
  */
 
 async function runTest(test) {
-    let etsVm = require(process.env.MODULE_PATH + "/ets_interop_js_napi.node");
+    let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
 
 	let runtimeCreated = etsVm.createRuntime({
 		'boot-panda-files': process.env.ARK_ETS_STDLIB_PATH + ':' + process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
@@ -28,31 +28,31 @@ async function runTest(test) {
 
 	});
     if (!runtimeCreated) {
-        console.log("Cannot create ETS runtime");
+        console.log('Cannot create ETS runtime');
         process.exit(1);
     }
     let valueToResolveWith = 42;
-    let promise = etsVm.call(test, valueToResolveWith)
-    if(promise == null) {
-        console.log("Function returned null");
+    let promise = etsVm.call(test, valueToResolveWith);
+    if (promise == null) {
+        console.log('Function returned null');
         process.exit(-1);
     }
-    etsVm.call("signalPromiseInJs")
+    etsVm.call('signalPromiseInJs');
     try {
         let result = await promise;
-        if (result != valueToResolveWith) {
-            console.log("Promise was not resolved correctly: result: ", result, " expected: ", valueToResolveWith);
+        if (result !== valueToResolveWith) {
+            console.log('Promise was not resolved correctly: result: ', result, ' expected: ', valueToResolveWith);
             process.exit(-1);
         }
-    } catch(error) {
-        console.log("Promise was rejected with error:", error);
+    } catch (error) {
+        console.log('Promise was rejected with error:', error);
         process.exit(-1);
     }
 }
 
 let args = process.argv;
-if (args.length != 3) {
-    console.log("Expected test name");
+if (args.length !== 3) {
+    console.log('Expected test name');
     process.exit(1);
 }
 runTest(args[2]);

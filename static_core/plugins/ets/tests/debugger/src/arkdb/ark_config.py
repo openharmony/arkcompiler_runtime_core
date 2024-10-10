@@ -27,6 +27,8 @@ def get_config(config: Config, name: str):
     return config.getoption(name, config.getini(name), True)
 
 
+# CC-OFFNXT(G.CTL.01) This is exactly the signature of the function that required.
+# Any changes will complicate the code and its processing.
 def str2bool(val: str | None) -> None | bool:
     if val is None:
         return None

@@ -16,6 +16,7 @@
 #
 
 from pathlib import Path
+from dataclasses import dataclass
 
 from pytest import fixture, mark, param
 
@@ -47,22 +48,25 @@ def get_expected_path(ets_file_path: Path, lang_extension: str):
     return ets_file_path.parent / "expected" / replace_suffixes(ets_file_path, f".expected.{lang_extension}").name
 
 
-def get_verifier(
-    base: ScriptFile,
-    tmp_path: Path,
-    ark_compiler: Compiler,
-    expression_file_comparator: ExpressionFileComparator,
-    ast_parser: AstParser,
-    lang_extension: str,
-):
+@dataclass
+class GetVerifierArgs:
+    base: ScriptFile
+    tmp_path: Path
+    ark_compiler: Compiler
+    expression_file_comparator: ExpressionFileComparator
+    ast_parser: AstParser
+    lang_extension: str
+
+
+def get_verifier(args: GetVerifierArgs):
     expected: ScriptFile = ark_compile(
-        get_expected_path(base.source_file, lang_extension),
-        tmp_path,
-        ark_compiler,
+        get_expected_path(args.base.source_file, args.lang_extension),
+        args.tmp_path,
+        args.ark_compiler,
         arguments=CompilerArguments(ets_module=True, dump_dynamic_ast=True),
-        ast_parser=ast_parser,
+        ast_parser=args.ast_parser,
     )
-    return get_expression_verifier(expression_file_comparator, base, expected, ast_parser)
+    return get_expression_verifier(args.expression_file_comparator, args.base, expected, args.ast_parser)
 
 
 @mark.parametrize(
@@ -75,6 +79,7 @@ def get_verifier(
         if file.is_file() and file.name.endswith(".base.sts")
     ],
 )
+# CC-OFFNXT(G.FNM.03) temporary: reduce parameters list
 async def test_evaluate_from_file(
     breakpoint_walker: BreakpointWalkerType,
     tmp_path: Path,
@@ -94,7 +99,9 @@ async def test_evaluate_from_file(
         stop_point = await anext(walker)
 
         verifier = get_verifier(
-            base_file, tmp_path, ark_compiler, expression_file_comparator, ast_parser, arkts_file_extension
+            GetVerifierArgs(
+                base_file, tmp_path, ark_compiler, expression_file_comparator, ast_parser, arkts_file_extension
+            )
         )
         result = await stop_point.evaluate(
             get_expression_path(base_file.source_file, arkts_file_extension),
