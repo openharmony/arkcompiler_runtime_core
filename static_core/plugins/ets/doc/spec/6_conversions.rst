@@ -63,8 +63,8 @@ expression* with its surrounding context:
 
 #. If the inferred expression type is different from the target type, then
    performing an implicit *conversion* can ensure type compatibility.
-   The conversion from type *S* to type *T* causes a type *S* expression to
-   be handled as a type *T* expression at compile time.
+   The conversion from type ``S`` to type ``T`` causes a type ``S`` expression to
+   be handled as a type ``T`` expression at compile time.
 
 .. index::
    context
@@ -90,11 +90,29 @@ in some cases, its runtime behavior.
 
 Some cases of conversion require action at runtime to check the
 validity of conversion, or to translate the runtime expression value
-into a form that is appropriate for the new type *T*.
+into a form that is appropriate for the new type ``T``.
 
 .. index::
    runtime behavior
    conversion
+
+If the type of the expression is ``readonly``, then the target type must
+also be ``readonly``. Otherwise, a :index:`compile-time error` occurs:
+
+.. code-block:: typescript
+   :linenos:
+
+      let readonly_array: readonly number[] = [1, 2, 3]
+
+      foo1(readonly_array) // OK
+      foo2(readonly_array) // compile-time error
+
+      function foo1 (p: readonly number[]) {}
+      function foo2 (p: number[]) {}
+
+      let writable_array: number [] = [1, 2, 3]
+      foo1 (writable_array) // OK, as always safe
+
 
 Contexts can be of the following kinds:
 
@@ -167,6 +185,10 @@ The examples are presented below:
       // assignment contexts:
       x = str.length
       new C().f = "bb"
+      function foo<T1, T2> (p1: T1, p2: T2) {
+        let t1: T1 = p1
+        let t2: T2 = p2
+      }
 
       // call contexts:
       function foo(s: string) {}
@@ -174,7 +196,6 @@ The examples are presented below:
 
       // composite literal contexts:
       let a: number[] = [str.length, 11]
-
 
 In all these cases, the expression type either must be equal to the *target
 type* or can be converted to the *target type* by using one of the conversions
@@ -202,9 +223,8 @@ Assignment-like contexts allow using of one of the following:
 
 - :ref:`Enumeration to Int Conversions`;
 
-- :ref:`Enumeration to String Conversions`;
+- :ref:`Enumeration to String Conversions`.
 
-- :ref:`Type Parameter Conversions`.
 
 If there is no applicable conversion, then a :index:`compile-time error`
 occurs.
@@ -224,7 +244,7 @@ String Operator Contexts
 
 *String conversion* for a non-``string`` operand is evaluated as follows:
 
--  The operand of nullish type that has a nullish value is converted as
+-  The operand of a nullish type that has a nullish value is converted as
    described below:
 
      - The operand ``null`` is converted to string ``null``.
@@ -279,8 +299,8 @@ Numeric Operator Contexts
 Numeric contexts apply to the operands of an arithmetic operator.
 Numeric contexts use combinations of predefined numeric types conversions
 (see :ref:`Primitive Types Conversions`), and ensure that each argument
-expression can be converted to target type *T* while the arithmetic
-operation for the values of type *T* is being defined.
+expression can be converted to target type ``T`` while the arithmetic
+operation for the values of type ``T`` is being defined.
 
 An operand of an enumeration type (see :ref:`Enumerations`) can be used in
 the numeric context if values of this enumeration are of type ``int``.
@@ -427,8 +447,8 @@ target types ``long`` or ``int`` is performed by the following rules:
 
 
 A numeric casting conversion from an integer type (or char) to a smaller integer
-type (or char) *I* discards all bits except the *N* lowest ones, where *N* is
-the number of bits used to represent type *I*. This conversion can lose the
+type (or char) ``I`` discards all bits except the *N* lowest ones, where *N* is
+the number of bits used to represent type ``I``. This conversion can lose the
 information on the magnitude of the numeric value. The sign of the resulting
 value can differ from that of the original value.
 
@@ -906,7 +926,7 @@ and never causes an error.
        bi = di // DerivedInterface is compatible with BaseInterface 
     }
 
-The only exception is the cast to type *never* that is forbidden. This cast is
+The only exception is the cast to type ``never`` that is forbidden. This cast is
 a :index:`compile-time error` as it can cause type-safety violations:
 
 .. code-block:: typescript
@@ -1136,8 +1156,11 @@ This conversion never causes runtime errors.
    :linenos:
 
     enum IntegerEnum {a, b, c}
-    let ie: IntegerEnum = IntegerEnum.a
-    let n: number = ie // n will get the value of 0
+    let int_enum: IntegerEnum = IntegerEnum.a
+    let int_value: int = int_enum // int_value will get the value of 0
+    let number_value: number = int_enum
+       /* number_value will get the value of 0 as a result of conversion
+          sequence: enumeration -> int - > number  */
 
 |
 
@@ -1158,41 +1181,8 @@ This conversion never causes runtime errors.
    :linenos:
 
     enum StringEnum {a = "a", b = "b", c = "c"}
-    let se: StringEnum = StringEnum.a
-    let s: string = se // n will get the value of "a"
-
-|
-
-.. _Type Parameter Conversions:
-
-Type Parameter Conversions
-==========================
-
-.. meta:
-    frontend_status: Done
-
-A value of the ``type parameter`` type can be converted only to the same
-``type parameter`` type. This conversion never causes runtime errors.
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {}
-    class Derived extends Base {}
-
-    class A <T1 extends Base, T2 extends Derived, T3 extends Base> {
-        foo (p1: T1, p2: T2, p3: T3) {
-            let t1: T1 = p1
-            let t2: T2 = p2
-            let t3: T3 = p3
-
-            t1 = t2 // compile-time error
-            t2 = t1 // compile-time error
-            t1 = t3 // compile-time error
-            t3 = t1 // compile-time error
-        }
-    }
-
+    let string_enum: StringEnum = StringEnum.a
+    let a_string: string = string_enum // a_string will get the value of "a"
 
 |
 

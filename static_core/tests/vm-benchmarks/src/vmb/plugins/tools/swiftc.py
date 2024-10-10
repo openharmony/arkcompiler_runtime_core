@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-import os
 import logging
 from vmb.tool import ToolBase, VmbToolExecError
 from vmb.unit import BenchUnit
@@ -31,19 +30,18 @@ class Tool(ToolBase):
         super().__init__(*args)
         self.swiftc = ToolBase.get_cmd_path('swiftc', 'SWIFTC')
         if Target.HOST != self.target:
-            dev_kit = self.ensure_dir(os.environ.get(f'{"N"}DK_PATH', ''))
-            swift_build = self.ensure_dir(
-                os.environ.get('SWIFT_BUILD', ''))
+            dev_kit = self.ensure_dir_env(f'{"N"}DK_PATH')
+            swift_build = self.ensure_dir_env('SWIFT_BUILD')
             self.command = f'{self.swiftc} ' \
                            '-O -gnone -wmo ' \
                            f'-tools-directory {dev_kit}/bin/ ' \
                            '-target aarch64-unknown-linux-and' \
                            f'roid21 -sdk {dev_kit}/sysroot ' \
-                           f'-resource-dir {swift_build} ' \
+                           f'-resource-dir {swift_build} {self.custom} ' \
                            '-o {exe} {src}'
         else:
-            self.command = f'{self.swiftc} ' \
-                           '-O -gnone -wmo -v -o {exe} {src}'
+            self.command = f'{self.swiftc} -O -gnone -wmo -v {self.custom} ' \
+                           '-o {exe} {src}'
 
     @property
     def name(self) -> str:
@@ -62,10 +60,11 @@ class Tool(ToolBase):
         res = self.sh.run(cmd, measure_time=True, timeout=300)
         if res is None or res.ret != 0 or not exe.is_file():
             bu.status = BUStatus.COMPILATION_FAILED
-            raise VmbToolExecError(f'{self.name} failed')
+            raise VmbToolExecError(f'{self.name} failed', res)
         exe_size = self.sh.get_filesize(exe)
         bu.result.build.append(
             BuildResult('swiftc', exe_size, res.tm, res.rss))
+        bu.binaries.append(exe)
 
     def kill(self) -> None:
         self.sh.run('pkill swift-driver')

@@ -16,6 +16,7 @@
 #ifndef LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
 #define LIBPANDAFILE_METHOD_DATA_ACCESSOR_INL_H_
 
+#include <cstdint>
 #include "helpers.h"
 #include "method_data_accessor.h"
 #include "class_data_accessor-inl.h"
@@ -351,25 +352,32 @@ inline Type MethodDataAccessor::GetReturnType() const
     return pda.GetReturnType();
 }
 
+template <std::size_t SIZE>
+void MethodDataAccessor::NumAnnonationProcess(uint32_t &result, File::EntityId &annotationId,
+                                              std::array<const char *, SIZE> elemNameTable, uint32_t fieldId)
+{
+    AnnotationDataAccessor ada(pandaFile_, annotationId);
+    auto *annotationName = reinterpret_cast<const char *>(pandaFile_.GetStringData(ada.GetClassId()).data);
+    if (::strcmp("L_ESAnnotation;", annotationName) != 0) {
+        return;
+    }
+    uint32_t elemCount = ada.GetCount();
+    for (uint32_t i = 0; i < elemCount; i++) {
+        AnnotationDataAccessor::Elem adae = ada.GetElement(i);
+        auto *elemName = reinterpret_cast<const char *>(pandaFile_.GetStringData(adae.GetNameId()).data);
+        if (::strcmp(elemNameTable[fieldId], elemName) == 0) {
+            result = adae.GetScalarValue().GetValue();
+        }
+    }
+}
+
 inline uint32_t MethodDataAccessor::GetNumericalAnnotation(uint32_t fieldId)
 {
     static constexpr uint32_t NUM_ELEMENT = 3;
     static std::array<const char *, NUM_ELEMENT> elemNameTable = {"icSize", "parameterLength", "funcName"};
     uint32_t result = 0;
-    EnumerateAnnotations([&](File::EntityId annotationId) {
-        AnnotationDataAccessor ada(pandaFile_, annotationId);
-        auto *annotationName = reinterpret_cast<const char *>(pandaFile_.GetStringData(ada.GetClassId()).data);
-        if (::strcmp("L_ESAnnotation;", annotationName) == 0) {
-            uint32_t elemCount = ada.GetCount();
-            for (uint32_t i = 0; i < elemCount; i++) {
-                AnnotationDataAccessor::Elem adae = ada.GetElement(i);
-                auto *elemName = reinterpret_cast<const char *>(pandaFile_.GetStringData(adae.GetNameId()).data);
-                if (::strcmp(elemNameTable[fieldId], elemName) == 0) {
-                    result = adae.GetScalarValue().GetValue();
-                }
-            }
-        }
-    });
+    EnumerateAnnotations(
+        [&](File::EntityId annotationId) { NumAnnonationProcess(result, annotationId, elemNameTable, fieldId); });
     return result;
 }
 inline std::string MethodDataAccessor::GetClassName() const

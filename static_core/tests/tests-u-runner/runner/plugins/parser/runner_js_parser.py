@@ -54,14 +54,17 @@ class RunnerJSParser(RunnerJS):
         self.collect_excluded_test_lists()
         self.collect_ignored_test_lists()
 
+        allowed_list = self.collect_test_lists("allowed")
+        self.allowed_tests = self.load_tests_from_lists(allowed_list)
+
         if self.config.general.with_js:
             self.add_directory("ark_tests/parser/js", "js", flags=["--parse-only"])
 
         if self.config.general.with_js:
             self.add_directory("compiler/js", "js", flags=["--extension=js", "--output=/dev/null"])
         self.add_directory("compiler/ts", "ts", flags=["--extension=ts", ])
-        self.add_directory("compiler/ets", "ets", flags=[
-            "--extension=ets",
+        self.add_directory("compiler/ets", "sts", flags=[
+            "--extension=sts",
             "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
         ])
@@ -70,8 +73,8 @@ class RunnerJSParser(RunnerJS):
             self.add_directory("parser/js", "js", flags=["--parse-only"])
         self.add_directory("parser/ts", "ts", flags=["--parse-only", '--extension=ts'])
         self.add_directory("parser/as", "ts", flags=["--parse-only", "--extension=as"])
-        self.add_directory("parser/ets", "ets", flags=[
-            "--extension=ets",
+        self.add_directory("parser/ets", "sts", flags=[
+            "--extension=sts",
             "--output=/dev/null",
             f"--arktsconfig={self.arktsconfig}"
         ])
@@ -85,6 +88,9 @@ class RunnerJSParser(RunnerJS):
         super().add_directory(new_dir, extension, flags)
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSParser:
+        if test_file not in self.allowed_tests:
+            raise Exception(f'JSParser is deprecated, creating new tests ({test_file}) is not allowed. '
+                             'Use ASTChecker instead')
         test = TestJSParser(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test

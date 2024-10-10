@@ -24,7 +24,6 @@ class Tool(ToolBase):
     def __init__(self, *args):
         super().__init__(*args)
         self.node = ToolBase.get_cmd_path('node', 'NODE')
-        self.options = ''
 
     @property
     def name(self) -> str:
@@ -38,6 +37,6 @@ class Tool(ToolBase):
     def exec(self, bu: BenchUnit) -> None:
         mjs = bu.src('.mjs')
         res = self.x_run(
-            f'{self.node} {self.options} {mjs}',
+            f'{self.node} {self.custom} {mjs}',
             measure_time=True)
         bu.parse_run_output(res)

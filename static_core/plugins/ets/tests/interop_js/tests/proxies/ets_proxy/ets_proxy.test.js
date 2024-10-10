@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-const etsVm = require("lib/module/ets_interop_js_napi");
+const etsVm = require('lib/module/ets_interop_js_napi');
 
-function getTestClass(name) { return etsVm.getClass("Lclass_proxy/test/" + name + ";") }
-function getTestFunction(name) { return etsVm.getFunction("Lclass_proxy/test/ETSGLOBAL;", name) }
+function getTestClass(name) {
+	return etsVm.getClass('Lclass_proxy/test/' + name + ';');
+}
+function getTestFunction(name) {
+	return etsVm.getFunction('Lclass_proxy/test/ETSGLOBAL;', name);
+}
 
 module.exports = {
-    etsVm,
-    getTestClass,
-    getTestFunction,
-}
+	etsVm,
+	getTestClass,
+	getTestFunction,
+};

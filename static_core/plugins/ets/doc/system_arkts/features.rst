@@ -17,8 +17,8 @@ This section provides examples for each feature. Pieces of code cause
 ETS-Warnings as the compilation proceeds. The warning messages are included
 as comments to the examples.
 
-If the code performs poorly, a rewritten version of |LANG| code appears
-with specific notes to each line of code that was fixed.
+If the performance is to improve, then a rewritten version of |LANG| code
+appears with specific notes to each line of code that was fixed.
 
 
 Feature #1: Show Implicit Boxing and Unboxing Conversions
@@ -30,148 +30,113 @@ Feature #1: Show Implicit Boxing and Unboxing Conversions
 Rationale
 ~~~~~~~~~
 
-|LANG| supports Boxing and Unboxing conversions. However, they perform badly.
-Use other constructions or types to avoid extra Boxing/Unboxing conversions,
-and boost the performance from 44.0% to 97.5%.
+|LANG| supports Boxing and Unboxing conversions, though they have performance
+limitations. If the design of the application allows avoiding frequent
+Boxed/Unboxed type conversions, then the developer is to use the appropriate
+type. The performance gain can be as much as double in some applications.
 
-|LANG|
-~~~~~~
 
-.. code-block:: typescript
-
-    let k: Int = 5;
-
-|LANG| Efficient
-~~~~~~~~~~~~~~~~
+|LANG| Performance Challenges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
-    let k: int = 5;
+    // Application contains many arithmetic operations wrapped in a Reference Type.
+    // Using Value type is preferable here.
+    function complexArithmeticExpression(a: int, b: float, c: long): double {
+        if (b == 0 || c == 0) {
+            console.log('Division by zero is not allowed');
+        }
 
+        const addition = a + b;
+        const subtraction = a - c;
+        const multiplication = b * c;
+        const division = a / (b + c);
 
+        const result = (addition * subtraction) / (multiplication + division) + (Math.pow(a, 2) - Math.sqrt(b)) * Math.sin(c);
 
-Feature #2: Boost Equality Statements
--------------------------------------
+        return result;
+    }
 
-|CB_RULE| ``ets-boost-equality-statement``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    function main() {
+        let num1: Int = 15; // ETS Warning: Implicit Boxing to Char in Variable Declaration.
+        let num2: Float = 5.0; // ETS Warning: Implicit Boxing to Float in Variable Declaration.
+        let num3: Long = 5; // ETS Warning: Implicit Boxing to Long in Variable Declaration.
+        let result: double = complexArithmeticExpression(num1, num2, num3); // ETS Warning: Implicit Unboxing to float in Call Method/Function.
+        console.log(result);
+    }
+
+|LANG| is More Efficient
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: typescript
+
+    function complexArithmeticExpression(a: int, b: float, c: long): double {
+        if (b == 0 || c == 0) {
+            console.log('Division by zero is not allowed');
+        }
+
+        const addition = a + b;
+        const subtraction = a - c;
+        const multiplication = b * c;
+        const division = a / (b + c);
+
+        const result = (addition * subtraction) / (multiplication + division) + (Math.pow(a, 2) - Math.sqrt(b)) * Math.sin(c);
+
+        return result;
+    }
+
+    function main() {
+        let num1: int = 15;
+        let num2: float = 5.0;
+        let num3: long = 5;
+        let result: double = complexArithmeticExpression(num1, num2, num3);
+        console.log(result);
+    }
+
+Feature #2: Boost Equality Expressions
+---------------------------------------
+
+|CB_RULE| ``ets-boost-equality-expression``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Rationale
 ~~~~~~~~~
 
-|LANG| supports reference binary operators. If the left part of a statement
+|LANG| supports reference binary operators. If the left part of an expression
 is a nullable type, and the right part is a reference type, then swapping the
-sides of the expression causes it work faster by about 12 %, while the result
-of the expression in both cases is the same.
+sides of the expression causes it work faster, while the result
+of the expression in both cases is the same. The change can result in an
+approximately 10 % performance improvement.
 
-|LANG| Performs Badly
-~~~~~~~~~~~~~~~~~~~~~
+|LANG| Performance Challenges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
     let x: Int = new Int(5);
 
-    if (x == null) { // ETS Warning: Boost Equality Statement. Change sides of binary expression.
-        console.println("slow way");
+    if (x == null) { // ETS Warning: Boost Equality Expression. Change sides of binary expression.
+        console.println("Hello!");
     }
 
-    let k: boolean = x == null; // ETS Warning: Boost Equality Statement. Change sides of binary expression.
+    let k: boolean = x == null; // ETS Warning: Boost Equality Expression. Change sides of binary expression.
 
-|LANG| is More Efficient
-~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Improvement Implemented
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
     let x: Int = new Int(5);
 
     if (null == x) { // Fixed ETS-Warning
-        console.println("performance way");
+        console.println("Hello!");
     }
 
     let k: boolean = null == x; // Fixed version - sides of binary expression changed.
 
 
-or
-
-|LANG| Performs Badly
-~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: typescript
-
-    function main() {
-        let i: Char = 15 as char; // ETS Warning: Implicit Boxing to Char in Variable Declaration.
-        let i1: Float = 5.0; // ETS Warning: Implicit Boxing to Float in Variable Declaration.
-        let i4: Long = 5 as long; // ETS Warning: Implicit Boxing to Long in Variable Declaration.
-    }
-
-|LANG| is More Efficient Option 1
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: typescript
-
-    function main() {
-        let i: char = 15 as char; // Fixed version
-        let i1: float = 5.0; // Fixed version
-        let i4: long = 5 as long; // Fixed version
-    }
-
-or
-
-|LANG| is More Efficient Option 2
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: typescript
-
-    function main() {
-        let i: Char = 15 as Char; // Fixed version: explicit Boxing
-        let i1: Float = 5.0 as Float; // Fixed version: explicit Boxing
-        let i4: Long = 5 as Long; // Fixed version: explicit Boxing
-    }
-
-
-Feature #3: Prohibit Top-Level Statements
-----------------------------------------------------
-
-|CB_RULE| ``ets-phohibit-top-level-statements``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Rationale
-~~~~~~~~~
-
-|LANG| supports Top-Level statements. However, they can lead to slower
-startup times for application because of executing before the application's entry point.
-Encapsulate code within methods or classes.
-
-|LANG| Bad Startup
-~~~~~~~~~~~~~~~~~~
-
-.. code-block:: typescript
-
-    console.println("Hello, World"); // ETS Warning: Prohibit top-level statements - call expression
-
-    let x: int = 5; // ETS Warning: Prohibit top-level statements - assignment expression.
-
-    if (x == 6) { // ETS Warning: Prohibit top-level statements.
-        console.println("Oh no, 5 is equal to 6!");
-    }
-
-|LANG| Better Startup
-~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: typescript
-
-    // Fixing example: wrap call, assignment expressions and ``if`` statement in new function
-    function greeting(): void {
-        console.println("Hello, World");
-
-        let x: int = 5;
-
-        if (x == 6) {
-            console.println("Oh no, 5 is equal to 6!");
-        }
-    }
-
-Feature #4: Use Coroutines Instead of Async-functions
+Feature #3: Using Coroutines Instead of Async-functions
 -----------------------------------------------------------
 
 |CB_RULE| ``ets-remove-async``
@@ -181,53 +146,37 @@ Rationale
 ~~~~~~~~~
 
 |LANG| supports Async-functions and Coroutines. Async-function type is only
-supported for the backward |TS| compatibility.
-"System |LANG|" suggests using Coroutines instead of Async-functions.
+supported for the backward |TS| compatibility, and "System |LANG|" suggests
+using Coroutines instead.
 
-|LANG| Bad Way
-~~~~~~~~~~~~~~
+|LANG| Async Way
+~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
-
-    let num_of_cycles = 30000
 
     async function foo(): Promise <int> {
         return 1;
     }
 
-    function bench_body(): void {
-        for (let i = 0; i < num_of_cycles; i++) {
-            let promise = foo(); // ETS Warning: Replace asynchronous function with coroutine.
-        }
-    }
-
     function main(): void {
-        bench_body();
+        let promise = foo(); // ETS Warning: Replace asynchronous function with coroutine.
     }
 
-|LANG| Better Way
-~~~~~~~~~~~~~~~~~
+|LANG| Coroutines Way
+~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
-
-    let num_of_cycles = 30000
 
     async function foo(): Promise <int> {
         return 1;
     }
 
-    function bench_body(): void {
-        for (let i = 0; i < num_of_cycles; i++) {
-            let promise = launch foo(); // Changed to coroutine way - begin
-            let i = await promise; // Changed to coroutine way - end
-        }
-    }
-
     function main(): void {
-        bench_body();
+        let promise = launch foo(); // Changed to coroutine way - begin
+        let i = await promise; // Changed to coroutine way - end
     }
 
-Feature #5: Suggest Final Modifier for Classes and Methods
+Feature #4: Suggest Final Modifier for Classes and Methods
 ----------------------------------------------------------
 
 |CB_RULE| ``ets-suggest-final``
@@ -236,13 +185,14 @@ Feature #5: Suggest Final Modifier for Classes and Methods
 Rationale
 ~~~~~~~~~
 
-By default, all classes in |LANG| can be extended, and all method can be
+By default, all classes in |LANG| can be extended, and all methods can be
 overriden. As a consequence, calling a method requires runtime resolution.
-Making class or method ``final`` allows more efficient calls, improving the
-performance by up to 67%.
+If a class or a method is not intended to be used further for inheritance,
+the providing the modifier ``final`` is recommended. The usage of ``final``
+allows making calls more efficient, and improves the performance significantly.
 
-|LANG| Performs Badly
-~~~~~~~~~~~~~~~~~~~~~
+|LANG| Performance Challenges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -252,15 +202,15 @@ performance by up to 67%.
         };
     }
 
-    class K extends A { // ETS Warning: Suggest 'final' modifier for class
-        foo_to_suggest(): void {}; // ETS Warning: Suggest 'final' modifier for method.
-        override foo(): String { // ETS Warning: Suggest 'final' modifier for method.
+    class K extends A { // ETS Warning: Suggest 'final' modifier for class 'K'
+        foo_to_suggest(): void {}; // ETS Warning: Suggest 'final' modifier for method 'foo_to_suggest'.
+        override foo(): String { // ETS Warning: Suggest 'final' modifier for method 'foo'.
             return "overridden_foo";
         }
     }
 
-|LANG| is More Efficient
-~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Improvement Implemented
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
@@ -277,7 +227,7 @@ performance by up to 67%.
         }
     }
 
-Feature #6: Using Function Call Instead of Lambda
+Feature #5: Using Function Call Instead of Lambda
 -------------------------------------------------
 
 |CB_RULE| ``ets-remove-lambda``
@@ -286,23 +236,23 @@ Feature #6: Using Function Call Instead of Lambda
 Rationale
 ~~~~~~~~~
 
-|LANG| supports lambda calls. However, using a function call is four times
-as fast as lambda. "System |LANG|" suggests using function calls.
+|LANG| supports lambda calls. However, some applications with function calls
+are four times as fast as those with lambda. "System |LANG|" suggests using
+function calls.
 
-|LANG| Performs Badly
-~~~~~~~~~~~~~~~~~~~~~
+|LANG| Performance Challenges
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
     let foo: (i: int) => int
     foo = (i: int): int => {return i + 1} // ETS Warning: Replace the lambda function with a regular function.
 
-|LANG| is More Efficient
-~~~~~~~~~~~~~~~~~~~~~~~~
+|LANG| Improvement Implemented
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
-    // Fixed version: function call
     function foo(i: int) : int {
         return i + 1
     }

@@ -22,38 +22,35 @@ const FIVE = 5;
 const FIFTEEN = 15;
 const PRECISION = 3;
 
+// NOTE(ivagin): enable when supported by runtime #12808
+const FIX_12808: boolean = false;
+
 import { Methods } from './lib';
 
-function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
+	}
 }
 
-export function main() {
-  testMethods();
+export function main(): void {
+	testMethods();
 }
 
-function testMethods() {
-  AssertEq(Methods.StaticSumDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
+function testMethods(): void {
+	assertEq(Methods.StaticSumDouble(THREE, TWENTY_TWO_HUNDREDTH).toFixed(PRECISION), (THREE + TWENTY_TWO_HUNDREDTH).toFixed(PRECISION));
 
-  const o = new Methods();
-  AssertEq(o.IsTrue(false), false);
+	const o = new Methods();
+	assertEq(o.IsTrue(false), false);
 
-  AssertEq(o.SumString('Hello from ', 'Panda!!!!'), 'Hello from Panda!!!!');
-  AssertEq(o.SumIntArray([ONE, TWO, THREE, FOUR, FIVE]), FIFTEEN);
-  AssertEq(o.OptionalString('Optional string'), 'Optional string');
+	assertEq(o.SumString('Hello from ', 'Panda!!!!'), 'Hello from Panda!!!!');
+	assertEq(o.SumIntArray([ONE, TWO, THREE, FOUR, FIVE]), FIFTEEN);
+	assertEq(o.OptionalString('Optional string'), 'Optional string');
 
-  // NOTE(ivagin): enable when supported by runtime #12808
-  // NOTE(vpukhov): optional methods produce overload sets
-  if (false) {
-    // AssertEq(o.OptionalString(undefined), undefined);
-    // AssertEq(o.OptionalString(), undefined);
-  }
-
-  // NOTE(ivagin): enable when supported by interop #12808
-  if (false) {
-    AssertEq(o.SumIntVariadic(ONE, TWO, THREE, FOUR, FIVE).toFixed(PRECISION), (FIFTEEN).toFixed(PRECISION));
-  }
+	if (FIX_12808) {
+		assertEq(o.OptionalString(undefined), undefined);
+		// NOTE(ivagin): add one more check like this: "assertEq(o.OptionalString(), undefined);"
+		assertEq(o.SumIntVariadic(ONE, TWO, THREE, FOUR, FIVE).toFixed(PRECISION), FIFTEEN.toFixed(PRECISION));
+	}
 }

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 here=$(realpath $(dirname "$BASH_SOURCE"))
 echo
 echo "!!! Invoking VMB as a script"
@@ -21,4 +23,3 @@ echo "!!! See steps in $here/readme.md"
 echo
 cd "$here"/src || exit
 PYTHONPATH=vmb python3 -m vmb $@
-

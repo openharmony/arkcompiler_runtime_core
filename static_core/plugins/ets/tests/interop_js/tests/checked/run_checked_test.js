@@ -13,31 +13,35 @@
  * limitations under the License.
  */
 
-function runTest(test, panda_options) {
-    console.log("Running test " + test);
-    let penv = process.env;
-    let etsVm = require(penv.MODULE_PATH + "/ets_interop_js_napi.node");
-    globalThis.require = require;
-    let options = [
-        "--boot-panda-files", penv.ARK_ETS_STDLIB_PATH + ":" + penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
-        "--panda-files", penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
-    ].concat(panda_options);
-    const etsVmRes = etsVm.createRuntime(options);
-    if (!etsVmRes) {
-        console.error(`Failed to create ETS runtime`);
-        return 1;
-    }
-    let res = etsVm.call(test);
-    if (res !== 0) {
-        throw "test failed: " + res;
-    }
+function runTest(test, pandaptions) {
+	console.log('Running test ' + test);
+	let penv = process.env;
+	let etsVm = require(penv.MODULE_PATH + '/ets_interop_js_napi.node');
+	globalThis.require = require;
+	let options = [
+		'--boot-panda-files',
+		penv.ARK_ETS_STDLIB_PATH + ':' + penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
+		'--panda-files',
+		penv.ARK_ETS_INTEROP_JS_TEST_ABC_PATH,
+	].concat(pandaptions);
+	const etsVmRes = etsVm.createRuntime(options);
+	if (!etsVmRes) {
+		console.error('Failed to create ETS runtime');
+		return 1;
+	}
+
+	let res = etsVm.call(test);
+	if (res !== 0) {
+		throw 'test failed: ' + res;
+	}
+	return 0;
 }
 
 let args = process.argv;
 
 if (args.length < 4) {
-    console.log("Expected ark options, test package and test function name");
-    process.exit(1);
+	console.log('Expected ark options, test package and test function name');
+	process.exit(1);
 }
 // checker.rb passes file and entry point as two last arguments
 let test = args[args.length - 1];

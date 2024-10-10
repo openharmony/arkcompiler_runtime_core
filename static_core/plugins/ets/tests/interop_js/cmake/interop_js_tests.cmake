@@ -31,8 +31,8 @@ add_dependencies(ets_interop_tests ets_interop_js_tests)
 #       tests/unit1_test.cpp
 #       tests/unit2_test.cpp
 #     ETS_SOURCES
-#       tests/unit1_test.ets
-#       tests/unit2_test.ets
+#       tests/unit1_test.sts
+#       tests/unit2_test.sts
 #     LIBRARIES
 #       lib_target1
 #       lib_target2
@@ -74,6 +74,7 @@ function(panda_ets_interop_js_gtest TARGET)
             "ARK_ETS_INTEROP_JS_GTEST_ABC_PATH=${PANDA_BINARY_ROOT}/abc-gtests/${TARGET_GTEST_PACKAGE}.zip"
             "ARK_ETS_INTEROP_JS_GTEST_SOURCES=${CMAKE_CURRENT_SOURCE_DIR}"
             "ARR_ETS_INTEROP_JS_GTEST_DIR=${INTEROP_TESTS_DIR}"
+            "FIXED_ISSUES=${FIXED_ISSUES}"
         LAUNCHER ${NODE_BINARY} gtest_launcher.js ${TARGET}
         DEPS_TARGETS ${TARGET} ets_interop_js_gtest_launcher
         TEST_RUN_DIR ${INTEROP_TESTS_DIR}

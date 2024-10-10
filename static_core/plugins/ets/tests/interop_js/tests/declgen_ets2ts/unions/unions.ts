@@ -17,19 +17,19 @@ const TWO = 2;
 
 import { NumberOrStringEquality } from './lib';
 
-function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
+	}
 }
 
-export function main() {
-  testUnions();
+export function main(): void {
+	testUnions();
 }
 
-function testUnions() {
-  AssertEq(NumberOrStringEquality(TWO, TWO), true);
-  AssertEq(NumberOrStringEquality(TWO, '2'), false);
-  AssertEq(NumberOrStringEquality('2', '2'), true);
+function testUnions(): void {
+	assertEq(NumberOrStringEquality(TWO, TWO), true);
+	assertEq(NumberOrStringEquality(TWO, '2'), false);
+	assertEq(NumberOrStringEquality('2', '2'), true);
 }

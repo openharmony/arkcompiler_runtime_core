@@ -164,10 +164,8 @@ public:
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             ((flags_ & RegExpParser::FLAG_MULTILINE) != 0 && PeekPrevChar(currentPtr_, input_) == '\n')) {
             Advance(opCode);
-        } else {
-            if (MatchFailed()) {
-                return false;
-            }
+        } else if (MatchFailed()) {
+            return false;
         }
         return true;
     }

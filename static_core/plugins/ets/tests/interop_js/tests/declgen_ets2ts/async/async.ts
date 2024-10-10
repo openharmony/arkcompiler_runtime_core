@@ -17,22 +17,22 @@ const TEN = 10;
 
 import { PromiseWrapper, AsyncIdentity } from './lib';
 
-function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
+	}
 }
 
-export function main() {
-  testAsync();
+export function main(): void {
+	testAsync();
 }
 
-function testAsync() {
-  // NOTE(ivagin): enable when supported by interop #12808
-  if (false) {
-    const promiseWrapper = new PromiseWrapper();
-    promiseWrapper.promise_.then((v: string) => AssertEq(v, 'Panda string'));
-  }
-  AsyncIdentity(TEN).then((v) => AssertEq(v, TEN));
+function testAsync(): void {
+	// NOTE(ivagin): enable when supported by interop #12808
+	if (false) {
+		const promiseWrapper = new PromiseWrapper();
+		promiseWrapper.promise_.then((v: string) => assertEq(v, 'Panda string'));
+	}
+	AsyncIdentity(TEN).then((v) => assertEq(v, TEN));
 }

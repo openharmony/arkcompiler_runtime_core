@@ -18,8 +18,9 @@
 import os
 import logging
 import shutil
+import json
 from pathlib import Path
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Tuple
 from abc import ABC, abstractmethod
 from enum import Flag, auto
 from subprocess import TimeoutExpired
@@ -35,8 +36,11 @@ log = logging.getLogger('vmb')
 class VmbToolExecError(Exception):
     """VMB Error. Tool execution failed."""
 
-    def __init__(self, message: str) -> None:
+    def __init__(self, message: str,
+                 res: Optional[ShellResult] = None) -> None:
         super().__init__(message)
+        self.out = f'{message}\n\nout:\n{res.out}\n\nerr:\n{res.err}\n' \
+                   if res is not None else message
 
 
 class ToolMode(StringEnum):
@@ -50,8 +54,10 @@ class OptFlags(Flag):
     NONE = auto()
     GC_STATS = auto()
     JIT_STATS = auto()
+    AOT_STATS = auto()
     AOT_SKIP_LIBS = auto()
     DRY_RUN = auto()
+    DISABLE_INLINING = auto()
     # these 3 flags are mutually exclusive (this is guarantied by ToolMode)
     AOT = auto()
     INT = auto()
@@ -136,6 +142,11 @@ class ToolBase(CrossShell, ABC):
             raise RuntimeError(f'Dir "{d}" not found! {err}')
         return str(d)
 
+    @staticmethod
+    def ensure_dir_env(var_name: str) -> str:
+        return ToolBase.ensure_dir(os.environ.get(var_name, ''),
+                                   err=f'Please set {var_name} env var.')
+
     @abstractmethod
     def exec(self, bu: BenchUnit) -> None:
         pass
@@ -156,7 +167,7 @@ class ToolBase(CrossShell, ABC):
             self.kill()
             raise e
         if not res or res.ret != 0:
-            raise VmbToolExecError(f'{self.name} failed')
+            raise VmbToolExecError(f'{self.name} failed', res)
         return res
 
     def x_src(self, bu: BenchUnit, *ext) -> Path:
@@ -168,3 +179,15 @@ class ToolBase(CrossShell, ABC):
         if self.target == Target.HOST:
             return bu.libs(*ext)
         return bu.libs_device(*ext)
+
+    def get_bu_opts(self, bu: BenchUnit) -> Tuple[OptFlags, str]:
+        conf = bu.path.joinpath('config.json')
+        flags: OptFlags = self.flags
+        aot_opts: str = ''
+        if conf.exists():
+            with open(conf, 'r', encoding='utf-8') as f:
+                conf_data = json.load(f)
+                if conf_data.get('disable_inlining', False):
+                    flags |= OptFlags.DISABLE_INLINING
+                aot_opts = conf_data.get('aot_opts', '')
+        return flags, aot_opts

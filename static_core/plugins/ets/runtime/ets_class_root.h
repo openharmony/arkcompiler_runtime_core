@@ -54,64 +54,7 @@ inline ClassRoot ToCoreClassRoot(EtsClassRoot etsClassRoot)
     return static_cast<ClassRoot>(etsClassRoot);
 }
 
-inline EtsClassRoot ToEtsClassRoot(ClassRoot classRoot)
-{
-    switch (classRoot) {
-        // Primitives types
-        case ClassRoot::V:
-            return EtsClassRoot::VOID;
-        case ClassRoot::U1:
-            return EtsClassRoot::BOOLEAN;
-        case ClassRoot::I8:
-            return EtsClassRoot::BYTE;
-        case ClassRoot::U16:
-            return EtsClassRoot::CHAR;
-        case ClassRoot::I16:
-            return EtsClassRoot::SHORT;
-        case ClassRoot::I32:
-            return EtsClassRoot::INT;
-        case ClassRoot::I64:
-            return EtsClassRoot::LONG;
-        case ClassRoot::F32:
-            return EtsClassRoot::FLOAT;
-        case ClassRoot::F64:
-            return EtsClassRoot::DOUBLE;
-
-        // Primitive arrays types
-        case ClassRoot::ARRAY_U1:
-            return EtsClassRoot::BOOLEAN_ARRAY;
-        case ClassRoot::ARRAY_U8:
-            return EtsClassRoot::BYTE_ARRAY;
-        case ClassRoot::ARRAY_U16:
-            return EtsClassRoot::CHAR_ARRAY;
-        case ClassRoot::ARRAY_I16:
-            return EtsClassRoot::SHORT_ARRAY;
-        case ClassRoot::ARRAY_I32:
-            return EtsClassRoot::INT_ARRAY;
-        case ClassRoot::ARRAY_I64:
-            return EtsClassRoot::LONG_ARRAY;
-        case ClassRoot::ARRAY_F32:
-            return EtsClassRoot::FLOAT_ARRAY;
-        case ClassRoot::ARRAY_F64:
-            return EtsClassRoot::DOUBLE_ARRAY;
-
-        // Object types
-        case ClassRoot::CLASS:
-            return EtsClassRoot::CLASS;
-        case ClassRoot::OBJECT:
-            return EtsClassRoot::OBJECT;
-
-        // Other types
-        case ClassRoot::STRING:
-            return EtsClassRoot::STRING;
-        case ClassRoot::ARRAY_CLASS:
-            return EtsClassRoot::STRING_ARRAY;
-        default:
-            LOG(FATAL, ETS) << "Unsupporeted class_root: " << helpers::ToUnderlying(classRoot);
-    }
-
-    UNREACHABLE();
-}
+EtsClassRoot ToEtsClassRoot(ClassRoot classRoot);
 
 }  // namespace ark::ets
 

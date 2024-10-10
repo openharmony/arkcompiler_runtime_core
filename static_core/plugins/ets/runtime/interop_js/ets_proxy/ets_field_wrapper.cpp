@@ -261,13 +261,15 @@ static napi_property_descriptor DoMakeNapiProperty(EtsFieldWrapper *wrapper)
 napi_property_descriptor EtsFieldWrapper::MakeInstanceProperty(EtsClassWrapper *owner, Field *field)
 {
     new (this) EtsFieldWrapper(owner, field);
-    return DoMakeNapiProperty</*IS_STATIC=*/false>(this);
+    /*IS_STATIC=false*/
+    return DoMakeNapiProperty<false>(this);
 }
 
 napi_property_descriptor EtsFieldWrapper::MakeStaticProperty(EtsClassWrapper *owner, Field *field)
 {
     new (this) EtsFieldWrapper(owner, field);
-    return DoMakeNapiProperty</*IS_STATIC=*/true>(this);
+    /*IS_STATIC=true*/
+    return DoMakeNapiProperty<true>(this);
 }
 
 }  // namespace ark::ets::interop::js::ets_proxy

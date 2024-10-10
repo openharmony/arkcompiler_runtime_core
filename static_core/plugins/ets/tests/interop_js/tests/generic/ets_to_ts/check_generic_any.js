@@ -13,13 +13,10 @@
  * limitations under the License.
  */
 
-const {
-    generic_function,
-    num,
-} = require("generic.test.js");
+const { genericFunction, num } = require('generic.test.js');
 
-function check_generic_any_type() {
-    ASSERT_EQ(typeof num, typeof generic_function(num));
+function checkGenericAnyType() {
+	ASSERT_EQ(typeof num, typeof genericFunction(num));
 }
 
-check_generic_any_type();
+checkGenericAnyType();

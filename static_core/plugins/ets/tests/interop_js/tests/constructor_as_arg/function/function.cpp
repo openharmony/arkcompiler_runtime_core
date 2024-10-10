@@ -22,52 +22,52 @@ class EtsFunctionTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_main)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_function_main"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionMain"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_parent)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_function_parent"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionParent"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_child)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_function_child"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionChild"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_anonymous)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_function_anonymous"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionAnonymous"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_function_IIFE)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_function_IIFE"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassFunctionIIFE"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_main)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_arrow_function_main"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionMain"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_parent)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_arrow_function_parent"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionParent"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_child)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_arrow_function_child"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionChild"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_anonymous)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_arrow_function_anonymous"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionAnonymous"));
 }
 
 TEST_F(EtsFunctionTsToEtsTest, check_create_class_arrow_function_IIFE)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_create_class_arrow_function_IIFE"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkCreateClassArrowFunctionIIFE"));
 }
 
 }  // namespace ark::ets::interop::js::testing

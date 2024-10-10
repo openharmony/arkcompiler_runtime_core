@@ -2019,6 +2019,16 @@ void ScalarReplacement::FillLiveInsts(BasicBlock *block, ArenaSet<Inst *> &liveI
     }
 }
 
+bool ScalarReplacement::HasUsageOutsideBlock(Inst *inst, BasicBlock *initialBlock)
+{
+    for (auto &user : inst->GetUsers()) {
+        if (user.GetInst()->GetBasicBlock() != initialBlock) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Compute live ref-valued insturctions at each save state and insert any missing live instruction into a save state.
 void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<ArenaSet<Inst *>> &liveness)
 {
@@ -2029,9 +2039,10 @@ void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<Ar
     bool loopIsHeader = !loop->IsRoot() && loop->GetHeader() == block;
     if (loopIsHeader) {
         for (auto inst : block->InstsReverse()) {
-            if (IsEnqueuedForRemoval(inst)) {
+            if (IsEnqueuedForRemoval(inst) || !HasUsageOutsideBlock(inst, block)) {
                 continue;
             }
+            // That part is neccessary only when some instructions is used outside block with definition ref
             AddLiveInputs(inst, liveIns);
         }
     }
@@ -2045,9 +2056,7 @@ void ScalarReplacement::PatchSaveStatesInBlock(BasicBlock *block, ArenaVector<Ar
         if (IsEnqueuedForRemoval(inst)) {
             continue;
         }
-        if (!loopIsHeader) {
-            AddLiveInputs(inst, liveIns);
-        }
+        AddLiveInputs(inst, liveIns);
     }
 
     if (!loop->IsRoot() && loop->GetHeader() == block) {

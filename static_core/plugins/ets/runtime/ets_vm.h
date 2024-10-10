@@ -66,6 +66,7 @@ namespace ark::ets {
 class DoubleToStringCache;
 class FloatToStringCache;
 class LongToStringCache;
+class EtsFinalizableWeakRef;
 
 class PandaEtsVM final : public PandaVM, public EtsVM {  // NOLINT(fuchsia-multiple-inheritance)
 public:
@@ -346,6 +347,13 @@ public:
         return MEMBER_OFFSET(PandaEtsVM, doubleToStringCache_);
     }
 
+    void RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object, void (*finalizer)(void *),
+                                    void *finalizerArg);
+
+    void UnlinkFinalizableReference(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef);
+
+    void CleanFinalizableReferenceList();
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
@@ -383,6 +391,8 @@ private:
     mem::Reference *oomObjRef_ {nullptr};
     compiler::RuntimeInterface *runtimeIface_ {nullptr};
     mem::Reference *undefinedObjRef_ {nullptr};
+    mem::Reference *finalizableWeakRefList_ {nullptr};
+    os::memory::Mutex finalizableWeakRefListLock_;
     NativeLibraryProvider nativeLibraryProvider_;
     os::memory::Mutex finalizationRegistryLock_;
     PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);

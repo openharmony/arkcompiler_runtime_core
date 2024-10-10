@@ -20,7 +20,7 @@ from typing import List
 from vmb.unit import BenchUnit
 from vmb.platform import PlatformBase
 from vmb.target import Target
-from vmb.cli import Args, OptFlags
+from vmb.cli import Args
 
 log = logging.getLogger('vmb')
 
@@ -56,7 +56,7 @@ class Platform(PlatformBase):
     def run_unit(self, bu: BenchUnit) -> None:
         if self.tsc:
             self.tsc(bu)
-        if OptFlags.DRY_RUN in self.flags:
+        if self.dry_run_stop(bu):
             return
         self.push_unit(bu)
         self.v_8(bu)

@@ -28,7 +28,18 @@
 namespace ark::ets::intrinsics::helpers {
 class DtoaHelper {
 public:
-    static void Dtoa(double value, char *buffer, int *point, int *length);
+    explicit DtoaHelper(char *buffer) : buffer_(buffer) {}
+    void Dtoa(double value);
+
+    int GetPoint()
+    {
+        return point_;
+    }
+
+    int GetDigits()
+    {
+        return length_;
+    }
 
 private:
     static constexpr int CACHED_POWERS_OFFSET = 348;
@@ -165,25 +176,19 @@ private:
         friend class DtoaHelper;
     };
 
-    static DiyFp GetCachedPower(int e, int *kOut)
-    {
-        // dk must be positive, so can do ceiling in positive
-        double dk = (Q - e) * D_1_LOG2_10 + CACHED_POWERS_OFFSET - 1;
-        int k = static_cast<int>(dk);
-        if (dk - k > 0.0) {
-            k++;
-        }
-        auto index = (static_cast<uint32_t>(k) >> 3U) + 1;                // 3: parameter
-        *kOut = -(MIN_DECIMAL_EXPONENT + static_cast<int>(index << 3U));  // 3: parameter
-        return GetCachedPowerByIndex(index);
-    }
-
+    DiyFp GetCachedPower(int e);
     static DiyFp GetCachedPowerByIndex(std::size_t index);
-    static void GrisuRound(char *buffer, int len, uint64_t delta, uint64_t rest, uint64_t tenKappa, uint64_t distance);
+    void GrisuRound(uint64_t delta, uint64_t rest, uint64_t tenKappa, uint64_t distance);
     static int CountDecimalDigit32(uint32_t n);
     static uint32_t PopDigit(int kappa, uint32_t &p1);
-    static void DigitGen(const DiyFp &w, const DiyFp &mp, uint64_t delta, char *buffer, int *len, int *k);
-    static void Grisu(double value, char *buffer, int *length, int *k);
+    void DigitGen(const DiyFp &w, const DiyFp &mp, uint64_t delta);
+    void Grisu(double value);
+
+private:
+    char *buffer_;
+    int length_ {};
+    int point_ {};
+    int k_ {};
 };
 }  // namespace ark::ets::intrinsics::helpers
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_DTOA_HELPER

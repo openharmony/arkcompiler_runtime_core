@@ -33,7 +33,7 @@ static HeapManager *CreateHeapManager(InternalAllocatorPtr internalAllocator, co
         return nullptr;
     }
 
-    if (!heapManager->Initialize(gcType, options.isSingleThread, options.isUseTlabForAllocations, memStats,
+    if (!heapManager->Initialize(gcType, options.multithreadingMode, options.isUseTlabForAllocations, memStats,
                                  internalAllocator, options.isStartAsZygote)) {
         LOG(ERROR, RUNTIME) << "Failed to initialize HeapManager";
         return nullptr;

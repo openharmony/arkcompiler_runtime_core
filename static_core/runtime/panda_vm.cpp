@@ -165,4 +165,9 @@ PandaString PandaVM::GetClassesFootprint() const
     return statistic.str();
 }
 
+void PandaVM::ProcessReferenceFinalizers()
+{
+    GetReferenceProcessor()->ProcessFinalizers();
+}
+
 }  // namespace ark

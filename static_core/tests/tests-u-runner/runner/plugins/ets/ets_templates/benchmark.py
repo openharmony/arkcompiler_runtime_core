@@ -26,8 +26,8 @@ from runner.plugins.ets.ets_templates.params import Params
 from runner.plugins.ets.ets_templates.template import Template
 
 
-TEMPLATE_EXTENSION = ".ets"
-OUT_EXTENSION = ".ets"
+TEMPLATE_EXTENSION = ".sts"
+OUT_EXTENSION = ".sts"
 
 _LOGGER = logging.getLogger("runner.plugins.ets.ets_templates.benchmark")
 

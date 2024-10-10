@@ -116,7 +116,7 @@ config("ark_config") {
       "$ark_es2panda_root:libes2panda_frontend_static",
       "$ark_es2panda_root:libes2panda_public",
       "$ark_es2panda_root:libes2panda_public_frontend_static",
-      "$ark_es2panda_root/aot:es2panda",
+      "$ark_es2panda_root/aot:ets2panda",
       "$ark_third_party_root/asmjit:*",
       "$ark_third_party_root/vixl:*",
       "./*",
@@ -134,13 +134,18 @@ config("ark_config") {
   if (is_emulator) {
     defines += [ "PANDA_TARGET_EMULATOR" ]
   }
-  if (is_llvmbackend) {
-    defines += [
-      "PANDA_LLVM_IRTOC",
-      "PANDA_LLVM_INTERPRETER",
-      "PANDA_LLVM_FASTPATH",
-      "PANDA_LLVM_AOT",
-    ]
+
+  if (is_llvm_interpreter || is_llvm_fastpath) {
+    defines += [ "PANDA_LLVM_IRTOC" ]
+    if (is_llvm_interpreter) {
+      defines += [ "PANDA_LLVM_INTERPRETER" ]
+    }
+    if (is_llvm_fastpath) {
+      defines += [ "PANDA_LLVM_FASTPATH" ]
+    }
+  }
+  if (is_llvm_aot) {
+    defines += [ "PANDA_LLVM_AOT" ]
   }
 
   if (is_ohos && is_standard_system) {

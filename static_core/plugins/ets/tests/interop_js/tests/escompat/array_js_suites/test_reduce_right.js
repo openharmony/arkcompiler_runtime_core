@@ -21,20 +21,26 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSReduceRight = etsMod.getFunction('Array_TestJSReduceRight');
 
-{ // Test JS Array<FooClass>
-  TestJSReduceRight(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSReduceRight(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
 
-  function fnReduce(a, b) { return a; }
-  let reduced = arr.reduceRight(fnReduce);
-  ASSERT_EQ(reduced, arr.at(0));
+	function fnReduce(a, b) {
+		return a;
+	}
+	let reduced = arr.reduceRight(fnReduce);
+	ASSERT_EQ(reduced, arr.at(0));
 
-  function fnReduce2(a, b) { return b; }
-  let reduced2 = arr.reduceRight(fnReduce2, 'initVal');
-  ASSERT_EQ(reduced, arr.at(1));
+	function fnReduce2(a, b) {
+		return b;
+	}
+	let reduced2 = arr.reduceRight(fnReduce2, 'initVal');
+	ASSERT_EQ(reduced, arr.at(1));
 }
 
 GCJSRuntimeCleanup();

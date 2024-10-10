@@ -19,12 +19,12 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const ClassWithGetterSetterEts = etsMod.getClass('ClassWithGetterSetterEts');
 
 {
-  let obj = new ClassWithGetterSetterEts();
-  // NOTE enable this test after getter gets bound to actual property because currently
-  //   running below fails with TypeError: Cannot add property value, object is not extensible
-  const EXPECTED_VALUE = 2;
-  obj.value = EXPECTED_VALUE;
-  ASSERT_EQ(obj.value, EXPECTED_VALUE);
+	let obj = new ClassWithGetterSetterEts();
+	// NOTE enable this test after getter gets bound to actual property because currently
+	//   running below fails with TypeError: Cannot add property value, object is not extensible
+	const EXPECTED_VALUE = 2;
+	obj.value = EXPECTED_VALUE;
+	ASSERT_EQ(obj.value, EXPECTED_VALUE);
 }
 
 GCJSRuntimeCleanup();

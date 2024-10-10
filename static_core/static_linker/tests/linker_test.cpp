@@ -265,7 +265,6 @@ void TestMultiple(const std::string &path, std::vector<std::string> perms, bool 
         }
     } while (std::next_permutation(perms.begin(), perms.end()));
 }
-}  // namespace
 
 TEST(linkertests, HelloWorld)
 {
@@ -423,3 +422,4 @@ TEST(linkertests, ForeignBase)
     ASSERT_TRUE(res.errors.empty()) << res.errors.front();
 #endif
 }
+}  // namespace

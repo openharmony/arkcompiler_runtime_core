@@ -20,6 +20,7 @@
 #include <mem/mem.h>
 #include <runtime/mem/gc/gc_types.h>
 #include <runtime/mem/heap_manager.h>
+#include "runtime/mem/lock_config_helper.h"
 
 namespace ark {
 class RuntimeOptions;
@@ -67,7 +68,7 @@ public:
         HeapManager::RegisterFinalizeReferenceFunc registerFinalizeReferenceFunc;
         uint32_t maxGlobalRefSize;
         bool isGlobalReferenceSizeCheckEnabled;
-        bool isSingleThread;
+        MTModeT multithreadingMode;
         bool isUseTlabForAllocations;
         bool isStartAsZygote;
     };

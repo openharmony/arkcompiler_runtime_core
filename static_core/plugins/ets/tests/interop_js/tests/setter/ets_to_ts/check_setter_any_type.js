@@ -13,25 +13,21 @@
  * limitations under the License.
  */
 
-const {
-    SetterAnyType,
-    string,
-    create_setter_any_type_class,
-} = require("setter.test.js");
+const { SetterAnyType, string, createSetterAnyTypeClass } = require('setter.test.js');
 
-function check_setter_any_type() {
-    const setterAnyType = new SetterAnyType();
-    setterAnyType.value = string;
+function checkSetterAnyType() {
+	const setterAnyType = new SetterAnyType();
+	setterAnyType.value = string;
 
-    ASSERT_EQ(typeof string, typeof setterAnyType.value);
+	ASSERT_EQ(typeof string, typeof setterAnyType.value);
 }
 
-function check_setter_any_type_class_from_ets() {
-    const setterAnyType = create_setter_any_type_class();
-    setterAnyType.value = string;
+function checkSetterAnyTypeClassFromEts() {
+	const setterAnyType = createSetterAnyTypeClass();
+	setterAnyType.value = string;
 
-    ASSERT_EQ(typeof string, typeof setterAnyType.value);
+	ASSERT_EQ(typeof string, typeof setterAnyType.value);
 }
 
-check_setter_any_type();
-check_setter_any_type_class_from_ets();
+checkSetterAnyType();
+checkSetterAnyTypeClassFromEts();

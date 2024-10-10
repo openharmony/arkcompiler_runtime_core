@@ -12,12 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 class A {
-    constructor(v0) {
-        this.v0 = v0;
-    }
-};
+	constructor(v0) {
+		this.v0 = v0;
+	}
+}
 
 exports.A = A;

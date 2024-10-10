@@ -30,14 +30,21 @@ RemoteObject ObjectRepository::CreateGlobalObject()
     return RemoteObject::Object("[Global]", GLOBAL_OBJECT_ID, "Global object");
 }
 
-RemoteObject ObjectRepository::CreateFrameObject(const PtFrame &frame, const std::map<std::string, TypedValue> &locals)
+RemoteObject ObjectRepository::CreateFrameObject(const PtFrame &frame, const std::map<std::string, TypedValue> &locals,
+                                                 std::optional<RemoteObject> &objThis)
 {
     ASSERT(ManagedThread::GetCurrent()->GetMutatorLock()->HasLock());
 
     std::vector<PropertyDescriptor> properties;
     properties.reserve(locals.size());
-    for (auto &local : locals) {
-        properties.emplace_back(local.first, CreateObject(local.second));
+    auto thisParamName = extension_->GetThisParameterName();
+    for (const auto &[paramName, value] : locals) {
+        auto obj = CreateObject(value);
+        if (paramName == thisParamName) {
+            objThis.emplace(std::move(obj));
+        } else {
+            properties.emplace_back(paramName, std::move(obj));
+        }
     }
 
     auto id = counter_++;

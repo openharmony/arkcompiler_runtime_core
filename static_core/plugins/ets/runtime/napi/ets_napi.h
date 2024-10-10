@@ -179,14 +179,14 @@ struct ETS_NativeInterface {
     ets_class (*DefineClass)(EtsEnv *env, const char *name, ets_object loader, const ets_byte *buf, ets_size bufLen);
 #endif
     ets_class (*FindClass)(EtsEnv *env, const char *name);
-#ifdef ETS_NAPI_DESIGN_FINISHED    
+#ifdef ETS_NAPI_DESIGN_FINISHED
     ets_method (*FromReflectedMethod)(EtsEnv *env, ets_object method);
     ets_field (*FromReflectedField)(EtsEnv *env, ets_object field);
     ets_object (*ToReflectedMethod)(EtsEnv *env, ets_class cls, ets_method p_method, ets_boolean isStatic);
-#endif    
+#endif
     ets_class (*GetSuperclass)(EtsEnv *env, ets_class cls);
     ets_boolean (*IsAssignableFrom)(EtsEnv *env, ets_class cls1, ets_class cls2);
-#ifdef ETS_NAPI_DESIGN_FINISHED    
+#ifdef ETS_NAPI_DESIGN_FINISHED
     ets_object (*ToReflectedField)(EtsEnv *env, ets_class cls, ets_field p_field, ets_boolean isStatic);
 #endif
     ets_int (*ThrowError)(EtsEnv *env, ets_error obj);
@@ -422,11 +422,11 @@ struct ETS_NativeInterface {
     ets_weak (*NewWeakGlobalRef)(EtsEnv *env, ets_object obj);
     void (*DeleteWeakGlobalRef)(EtsEnv *env, ets_weak obj);
     ets_boolean (*ErrorCheck)(EtsEnv *env);
-#ifdef ETS_NAPI_DESIGN_FINISHED    
+#ifdef ETS_NAPI_DESIGN_FINISHED
     ets_object (*NewDirectByteBuffer)(EtsEnv *env, void *address, ets_long capacity);
     void *(*GetDirectBufferAddress)(EtsEnv *env, ets_object buf);
     ets_long (*GetDirectBufferCapacity)(EtsEnv *env, ets_object buf);
-#endif    
+#endif
     ets_objectRefType (*GetObjectRefType)(EtsEnv *env, ets_object obj);
 
     /* 227 methods */

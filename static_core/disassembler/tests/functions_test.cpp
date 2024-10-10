@@ -31,6 +31,8 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
 
+namespace ark::disasm::test {
+
 TEST(FunctionsTest, EmptyFunction)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -63,9 +65,9 @@ TEST(FunctionsTest, OverloadingTest)
         .function void f() {}
 
         .function void f(u1 a0) {}
-        
+
         .function void f(u1 a0, i8 a1) {}
-        
+
         .function void main() {
             call f:()
             call f:(u1), v1
@@ -186,3 +188,5 @@ TEST(FunctionsTest, SerializeLineTable)
 }
 
 #undef DISASM_BIN_DIR
+
+}  // namespace ark::disasm::test

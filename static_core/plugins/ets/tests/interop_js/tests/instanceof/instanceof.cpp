@@ -27,27 +27,27 @@ class EtsInteropInstanceOf : public EtsInteropTest {};
  */
 TEST_F(EtsInteropInstanceOf, Test_object_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_object_instanceof_object"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestObjectInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_etstype_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_etstype_instanceof_object"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestEtstypeInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_jsvalue_instanceof_object"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestJsvalueInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_dynvalue_instanceof_object"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestDynvalueInstanceofObject"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_object)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_dyndecl_instanceof_object"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestDyndeclInstanceofObject"));
 }
 
 /*
@@ -57,27 +57,27 @@ TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_object)
  */
 TEST_F(EtsInteropInstanceOf, Test_object_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_object_instanceof_etstype"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestObjectInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_etstype_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_etstype_instanceof_etstype"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestEtstypeInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_jsvalue_instanceof_etstype"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestJsvalueInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_dynvalue_instanceof_etstype"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestDynvalueInstanceofEtstype"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_etstype)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_dyndecl_instanceof_etstype"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestDyndeclInstanceofEtstype"));
 }
 
 /*
@@ -87,27 +87,27 @@ TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_etstype)
  */
 TEST_F(EtsInteropInstanceOf, Test_object_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_object_instanceof_dyndecl"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestObjectInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_etstype_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_etstype_instanceof_dyndecl"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestEtstypeInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_jsvalue_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_jsvalue_instanceof_dyndecl"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestJsvalueInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dynvalue_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_dynvalue_instanceof_dyndecl"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestDynvalueInstanceofDyndecl"));
 }
 
 TEST_F(EtsInteropInstanceOf, Test_dyndecl_instanceof_dyndecl)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("Test_dyndecl_instanceof_dyndecl"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("TestDyndeclInstanceofDyndecl"));
 }
 
 }  // namespace ark::ets::interop::js::testing

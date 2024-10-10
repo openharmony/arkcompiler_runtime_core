@@ -19,12 +19,12 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const ImplInterfaceWithUnionEts = etsMod.getClass('ImplInterfaceWithUnionEts');
 
 {
-  let obj = new ImplInterfaceWithUnionEts();
-  ASSERT_EQ(obj.methodWithUnion(42), 42);
-  ASSERT_EQ(obj.methodWithUnion("abc"), "abc");
+	let obj = new ImplInterfaceWithUnionEts();
+	ASSERT_EQ(obj.methodWithUnion(42), 42);
+	ASSERT_EQ(obj.methodWithUnion('abc'), 'abc');
 
-  let arr = [10, 20, 30];
-  ASSERT_EQ(obj.methodWithUnion(arr), arr);
+	let arr = [10, 20, 30];
+	ASSERT_EQ(obj.methodWithUnion(arr), arr);
 }
 
 GCJSRuntimeCleanup();

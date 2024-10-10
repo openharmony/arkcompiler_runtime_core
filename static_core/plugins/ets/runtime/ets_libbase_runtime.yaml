@@ -971,6 +971,46 @@ intrinsics:
     need_param_locations: true
     safe_intrinsic: true
 
+  - name: StdCoreStringTrimLeft
+    space: ets
+    class_name: std.core.String
+    method_name: trimLeft
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreStringTrimLeft
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateStringTrimLeft
+    llvm_codegen_func: EmitStringTrimLeft
+
+  - name: StdCoreStringTrimRight
+    space: ets
+    class_name: std.core.String
+    method_name: trimRight
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreStringTrimRight
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateStringTrimRight
+    llvm_codegen_func: EmitStringTrimRight
+
+  - name: StdCoreStringTrim
+    space: ets
+    class_name: std.core.String
+    method_name: trim
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ ]
+    impl: ark::ets::intrinsics::StdCoreStringTrim
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateStringTrim
+    llvm_codegen_func: EmitStringTrim
+
+
 ##########################
 # std.core.StringBuilder #
 ##########################
@@ -1149,6 +1189,7 @@ intrinsics:
     class_name: std.core.StringBuilder
     method_name: append
     static: false
+    set_flags: [require_tmp]
     signature:
       ret: std.core.StringBuilder
       args: [std.core.String]
@@ -2964,20 +3005,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdCoreRuntimeTypeof
     clear_flags: [ ]
 
-##########################
-# std.serialization.JSON #
-##########################
-
-  - name: escompatJSONStringifyObj
-    space: ets
-    class_name: escompat.JSON
-    method_name: stringifyObj
-    static: true
-    signature:
-      ret: std.core.String
-      args: [std.core.Object]
-    impl: ark::ets::intrinsics::EscompatJSONStringifyObj
-
 ###################
 # std.core.RegExp #
 ###################
@@ -3356,6 +3383,21 @@ intrinsics:
       args: [ u16 ]
     impl: ark::ets::intrinsics::StdCoreCharToLowerCase
     safe_intrinsic: true
+
+  - name: StdCoreCharIsWhiteSpace
+    space: ets
+    class_name: std.core.Char
+    method_name: isWhiteSpace
+    static: true
+    signature:
+      ret: u1
+      args: [ u16 ]
+    impl: ark::ets::intrinsics::StdCoreCharIsWhiteSpace
+    safe_intrinsic: true
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateCharIsWhiteSpace
+    llvm_codegen_func: EmitCharIsWhiteSpace
+
 
 ###################
 # std.core.Value  #
@@ -4216,3 +4258,87 @@ intrinsics:
       args:
         - i64
     impl: ark::ets::intrinsics::TypeAPITypeCreatorCtxLambdaTypeAdd
+
+################################
+# std.containers.BlockingQueue #
+################################
+
+  - name: BlockingQueueInitMutex
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: initMutex
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::InitializeMutex
+
+  - name: BlockingQueueInitEvent
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: initEvent
+    static: true
+    signature:
+      ret: i64
+      args: []
+    impl: ark::ets::intrinsics::InitializeEvent
+
+  - name: BlockingQueueDeleteMutex
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: deleteMutex
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::DeleteMutex
+
+  - name: BlockingQueueDeleteEvent
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: deleteEvent
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::DeleteEvent
+
+  - name: BlockingQueueMutexLock
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: lock
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::MutexLock
+
+  - name: BlockingQueueMutexUnlock
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: unlock
+    static: true
+    signature:
+      ret: void
+      args: [ i64 ]
+    impl: ark::ets::intrinsics::MutexUnlock
+
+  - name: BlockingQueueAwait
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: await_
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64 ]
+    impl: ark::ets::intrinsics::Await
+
+  - name: BlockingQueueUnblockWaiters
+    space: ets
+    class_name: std.containers.BlockingQueue
+    method_name: unblockWaiters
+    static: true
+    signature:
+      ret: void
+      args: [ i64, i64 ]
+    impl: ark::ets::intrinsics::UnblockWaiters

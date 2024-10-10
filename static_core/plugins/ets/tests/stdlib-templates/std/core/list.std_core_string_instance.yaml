@@ -423,9 +423,9 @@
     param_nature: {"param1": primitive},
     param_list: {"param1": "[0, 1, 10]"},
 
-    method_return_type: int,
-    expected_data_item_type: int,
-    expected_data_type: "int[]",
+    method_return_type: number,
+    expected_data_item_type: number,
+    expected_data_type: "number[]",
 
     expected_test_data:  "[0x61, 0x62, 0x6a]",
     verify_test_result_function: comparePrimitiveValue,

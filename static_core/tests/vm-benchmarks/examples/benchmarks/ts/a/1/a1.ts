@@ -14,7 +14,7 @@
  */
 
 /**
- * @Import { StringUtil } from "../../shared/libStringUtil.ts"
+ * @Import { StringUtil } from '../../shared/libStringUtil.ts'
  */
 
 /**
@@ -31,8 +31,8 @@ class A1 {
    * @Param 100
    */
     loopCount: number;
-    startString: string = "";
-    concatString: string = "Ab";
+    startString: string = '';
+    concatString: string = 'Ab';
 
   /**
    * @Setup
@@ -51,7 +51,7 @@ class A1 {
         for (let i = 0; i < this.loopCount; i++) {
             result = result.concat(this.concatString);
         }
-        return result.substring(this.loopCount/2, this.loopCount);
+        return result.substring(this.loopCount / 2, this.loopCount);
     }
 
 }

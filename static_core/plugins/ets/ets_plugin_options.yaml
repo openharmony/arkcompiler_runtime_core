@@ -22,7 +22,7 @@
       additional_interpter_inl: plugins/ets/runtime/interpreter/interpreter-inl.h
       language_config:
         lang_type: static
-        mt_mode: multi
+        mt_mode: task
         has_value_object_types: false
       ctor_name: <ctor>
       cctor_name: <cctor>
@@ -57,6 +57,7 @@
         - plugins_interpreter_handlers: plugins/ets/irtoc_scripts/interpreter_handlers.irt
         - plugins_main_loop: plugins/ets/irtoc_scripts/interpreter_main_loop.irt
         - plugins_string_builder: plugins/ets/irtoc_scripts/string_builder.irt
+        - plugins_string: plugins/ets/irtoc_scripts/string.irt
 
       Metadatas:
         - RecordMetadata:

@@ -18,9 +18,9 @@ const etsMod = getTestModule('scenarios_test');
 const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
 {
-  const INT_VALUE = 222;
+	const INT_VALUE = 222;
 
-  // Interface requires to have 3 fields: 'foo', 'numVal' and 'stringVal',
-  // but only 2 fields are given
-  ASSERT_THROWS(TypeError, () => functionArgIsInterface({numVal: INT_VALUE, stringVal: 'hehehe'}));
+	// Interface requires to have 3 fields: 'foo', 'numVal' and 'stringVal',
+	// but only 2 fields are given
+	ASSERT_THROWS(TypeError, () => functionArgIsInterface({ numVal: INT_VALUE, stringVal: 'hehehe' }));
 }

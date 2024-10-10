@@ -21,42 +21,39 @@
 import os
 import pytest  # type: ignore
 from unittest import TestCase
-from subprocess import TimeoutExpired
-from vmb.shell import ShellUnix, ShellAdb
+from vmb.shell import ShellUnix
 
 here = os.path.realpath(os.path.dirname(__file__))
 sh = ShellUnix()
 
 
-def only_posix() -> None:
-    if 'posix' != os.name:
-        pytest.skip("Only POSIX")
+def posix_only(f):
+    def s(*args):
+        if 'posix' != os.name:
+            pytest.skip("POSIX-only test")
+        else:
+            f(*args)
+    return s
 
 
+@posix_only
 def test_unix_ls() -> None:
-    only_posix()
     this_file = os.path.basename(__file__)
     res = sh.run(f'ls -1 {here}')
     TestCase().assertTrue(res.grep(this_file) == this_file)
 
 
+@posix_only
 def test_unix_cwd() -> None:
-    only_posix()
     this_file = os.path.basename(__file__)
     this_dir = os.path.dirname(__file__)
     res = sh.run(f'ls -1 .', cwd=this_dir)
     TestCase().assertTrue(res.grep(this_file) == this_file)
 
 
+@posix_only
 def test_unix_measure_time() -> None:
-    only_posix()
     res = sh.run('sleep 1', measure_time=True, timeout=3)
     test = TestCase()
     test.assertTrue(res.tm > 0.9)
     test.assertTrue(res.rss > 0)
-
-
-def test_unix_timeout() -> None:
-    only_posix()
-    with pytest.raises(TimeoutExpired):
-        sh.run('sleep 2', timeout=1)

@@ -47,6 +47,14 @@ public:
 
     void SingleBlockBuildInitialGraph();
     Graph *SingleBlockBuildExpectedGraph();
+
+    void BuildCall(size_t callId, size_t ssId)
+    {
+        INST(ssId, Opcode::SaveState).NoVregs();
+        INST(callId, Opcode::CallStatic).v0id().InputsAutoType(ssId);
+    }
+    void BuildGraphChainOfBlocks();
+    void BuildGraphTriangleOfBlocks();
 };
 
 std::string GetTestName(const testing::TestParamInfo<InteropIntrnsicsOptTest::ParamType> &info)
@@ -182,8 +190,7 @@ TEST_F(InteropIntrnsicsOptTest, SingleBlockNotApplied)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), initial));
 }
 
-PARAM_TEST(InteropIntrnsicsOptTest, ChainOfBlocks,
-           ::testing::Values(BlockPos::PRED, BlockPos::LEFT, BlockPos::NEXT, BlockPos::NONE), GetTestName)
+void InteropIntrnsicsOptTest::BuildGraphChainOfBlocks()
 {
     GRAPH(GetGraph())
     {
@@ -207,8 +214,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, ChainOfBlocks,
             INTRINSIC(10U, COMPILER_DESTROY_LOCAL_SCOPE).v0id().InputsAutoType(9U);
 
             if (BlockEnabled(BlockPos::PRED)) {
-                INST(23U, Opcode::SaveState).NoVregs();
-                INST(24U, Opcode::CallStatic).v0id().InputsAutoType(23U);
+                BuildCall(24U, 23U);
             }
             INST(19U, Opcode::Add).s32().Inputs(18U, 0U);
         }
@@ -238,6 +244,12 @@ PARAM_TEST(InteropIntrnsicsOptTest, ChainOfBlocks,
             INST(22U, Opcode::ReturnVoid).v0id();
         }
     }
+}
+
+PARAM_TEST(InteropIntrnsicsOptTest, ChainOfBlocks,
+           ::testing::Values(BlockPos::PRED, BlockPos::LEFT, BlockPos::NEXT, BlockPos::NONE), GetTestName)
+{
+    BuildGraphChainOfBlocks();
     GraphChecker(GetGraph()).Check();
     if (GetParam() == BlockPos::NONE) {
         Graph *graph = CreateEmptyGraph();
@@ -283,11 +295,7 @@ PARAM_TEST(InteropIntrnsicsOptTest, ChainOfBlocks,
     }
 }
 
-// Param specifies for which blocks there is a local scope
-PARAM_TEST(InteropIntrnsicsOptTest, TriangleOfBlocks,
-           ::testing::Values(BlockPos::PRED | BlockPos::LEFT | BlockPos::NEXT, BlockPos::PRED | BlockPos::LEFT,
-                             BlockPos::PRED | BlockPos::NEXT, BlockPos::LEFT | BlockPos::NEXT),
-           GetTestName)
+void InteropIntrnsicsOptTest::BuildGraphTriangleOfBlocks()
 {
     GRAPH(GetGraph())
     {
@@ -335,6 +343,15 @@ PARAM_TEST(InteropIntrnsicsOptTest, TriangleOfBlocks,
             INST(22U, Opcode::Return).s64().Inputs(30U);
         }
     }
+}
+
+// Param specifies for which blocks there is a local scope
+PARAM_TEST(InteropIntrnsicsOptTest, TriangleOfBlocks,
+           ::testing::Values(BlockPos::PRED | BlockPos::LEFT | BlockPos::NEXT, BlockPos::PRED | BlockPos::LEFT,
+                             BlockPos::PRED | BlockPos::NEXT, BlockPos::LEFT | BlockPos::NEXT),
+           GetTestName)
+{
+    BuildGraphTriangleOfBlocks();
     GraphChecker(GetGraph()).Check();
     if (BlockEnabled(BlockPos::PRED) && BlockEnabled(BlockPos::NEXT)) {
         Graph *graph = CreateEmptyGraph();

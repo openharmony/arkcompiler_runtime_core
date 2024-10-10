@@ -13,48 +13,45 @@
  * limitations under the License.
  */
 
-const {
-    EtsGenericErrorHandle,
-    check_generic_value,
-    ets_get_generic_error_identity,
-} = require("generic_types.test.js");
+const { EtsGenericErrorHandle, checkGenericValue, etsGetGenericErrorIdentity } = require('generic_types.test.js');
 
+// NOTE enable when error typing is enabled
+const FIXES_IMPLEMENTED = false;
 
-function check_error_message(err, err_msg) {
-    check_generic_value(err);
+function checkErrorMessage(err, errMsg) {
+	checkGenericValue(err);
 
-    let ets_error_handle = new EtsGenericErrorHandle(err);
-    let msg = ets_error_handle.get_error_message();
+	let etsErrorHandle = new EtsGenericErrorHandle(err);
+	let msg = etsErrorHandle.getErrorMessage();
 
-    ASSERT_EQ(msg, err_msg);
+	ASSERT_EQ(msg, errMsg);
 
-    let gen_error = ets_get_generic_error_identity(err);
-    ASSERT_EQ(err, gen_error);
+	let genError = etsGetGenericErrorIdentity(err);
+	ASSERT_EQ(err, genError);
 }
 
-function check_incorrect_js_object() {
-    let err_msg = "incorrect js object"
-    let obj = {message: err_msg};
+function checkIncorrectJsObject() {
+	let errMsg = 'incorrect js object';
+	let obj = { message: errMsg };
 
-    ASSERT_THROWS(TypeError, () => (check_error_message(obj, err_msg)));
-    ASSERT_THROWS(TypeError, () => (ets_get_generic_error_identity(obj)));
+	ASSERT_THROWS(TypeError, () => checkErrorMessage(obj, errMsg));
+	ASSERT_THROWS(TypeError, () => etsGetGenericErrorIdentity(obj));
 }
 
-function check_incorrect_ets_object() {
-    let err_msg = "incorrect ets object"
-    let obj = new ets.Object();
+function checkIncorrectEtsObject() {
+	let errMsg = 'incorrect ets object';
+	let obj = new ets.Object();
 
-    ASSERT_THROWS(TypeError, () => (check_error_message(obj, err_msg)));
-    ASSERT_THROWS(TypeError, () => (ets_get_generic_error_identity(obj)));
+	ASSERT_THROWS(TypeError, () => checkErrorMessage(obj, errMsg));
+	ASSERT_THROWS(TypeError, () => etsGetGenericErrorIdentity(obj));
 }
-
 
 // TODO(v.cherkashin): Enable when implemented
 // Check js/ets errors
-check_error_message(new ets.Error("ets Error message", undefined), "ets Error message");
-// check_error_message(new Error("js Error message"), "js Error message");
-// check_error_message(new ets.TypeError("ets TypeError message"), "ets TypeError message");
-// check_error_message(new TypeError("js TypeError message"), "js TypeError message");
+checkErrorMessage(new ets.Error('ets Error message', undefined), 'ets Error message');
+FIXES_IMPLEMENTED && checkErrorMessage(new Error('js Error message'), 'js Error message');
+FIXES_IMPLEMENTED && checkErrorMessage(new ets.TypeError('ets TypeError message'), 'ets TypeError message');
+FIXES_IMPLEMENTED && checkErrorMessage(new TypeError('js TypeError message'), 'js TypeError message');
 
-check_incorrect_ets_object()
-check_incorrect_js_object()
+checkIncorrectEtsObject();
+checkIncorrectJsObject();

@@ -30,8 +30,8 @@ class Tool(ToolBase):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.sdk = os.environ.get('OHOS_SDK', '')
-        self.opts = '--module --merge-abc --extension=ts'
+        self.sdk = self.ensure_dir_env('OHOS_SDK')
+        self.opts = f'--module --merge-abc --extension=ts {self.custom}'
         if not os.path.isdir(self.sdk):
             raise RuntimeError('OHOS_SDK not found.')
         self.es2abc = os.path.join(
@@ -53,10 +53,11 @@ class Tool(ToolBase):
             res = self.run_es2abc(ts, abc)
             if res.ret != 0 or not abc.is_file():
                 bu.status = BUStatus.COMPILATION_FAILED
-                raise VmbToolExecError(f'{self.name} failed: {ts}')
+                raise VmbToolExecError(f'{self.name} failed: {ts}', res)
             abc_size = self.sh.get_filesize(abc)
             bu.result.build.append(
                 BuildResult('es2abc', abc_size, res.tm, res.rss))
+            bu.binaries.append(abc)
 
     def run_es2abc(self,
                    src: Union[str, Path],

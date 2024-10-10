@@ -13,31 +13,33 @@
  * limitations under the License.
  */
 
-const { check_generic_value } = require("generic_types.test.js");
+const { checkGenericValue } = require('generic_types.test.js');
+
+// NOTE (v.cherkashin): Enable when bigInt is implemented
+const FIX_BIGINT = false;
 
 // Null
-check_generic_value(null);
+checkGenericValue(null);
 
 // Undefined
-check_generic_value(undefined);
+checkGenericValue(undefined);
 
 // Boolean
-check_generic_value(false);
-check_generic_value(true);
-check_generic_value(new Boolean(false));
-check_generic_value(new Boolean(true));
+checkGenericValue(false);
+checkGenericValue(true);
+checkGenericValue(new Boolean(false));
+checkGenericValue(new Boolean(true));
 
 // Number
-check_generic_value(234);
-check_generic_value(4.234);
-check_generic_value(new Number(34));
-check_generic_value(new Number(-643.23566));
+checkGenericValue(234);
+checkGenericValue(4.234);
+checkGenericValue(new Number(34));
+checkGenericValue(new Number(-643.23566));
 
 // BigInt
-// TODO(v.cherkashin): Enable when implemented
-// check_generic_value(9007199254740991n);
-// check_generic_value(new BigInt("0b11010101"));
+FIX_BIGINT && checkGenericValue(9007199254740991n);
+FIX_BIGINT && checkGenericValue(new BigInt('0b11010101'));
 
 // String
-check_generic_value("abcdefg");
-check_generic_value(new String("ABCDEFG"));
+checkGenericValue('abcdefg');
+checkGenericValue(new String('ABCDEFG'));

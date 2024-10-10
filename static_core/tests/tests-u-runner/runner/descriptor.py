@@ -25,7 +25,8 @@ class Descriptor:
         self.header = re.compile(
             r"/\*---(?P<header>.+)---\*/", re.DOTALL)
         self.includes = re.compile(r"includes:\s+\[(?P<includes>.+)]")
-        self.includes2 = re.compile(r"includes:(?P<includes>(\s+-[^-].+)+)")
+        spaces_pattern = r"(\s+-[^-].+)+"
+        self.includes2 = re.compile(f"includes:(?P<includes>{spaces_pattern})")
         self.flags = re.compile(r"flags:\s+\[(?P<flags>.+)]")
         self.negative = re.compile(
             r"negative:.*phase:\s+(?P<phase>\w+).*type:\s+(?P<type>\w+)",

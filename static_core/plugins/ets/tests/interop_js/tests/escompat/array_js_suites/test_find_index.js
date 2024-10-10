@@ -21,24 +21,30 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSFindIndex = etsMod.getFunction('Array_TestJSFindIndex');
 
-{ // Test JS Array<FooClass>
-  TestJSFindIndex(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSFindIndex(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  function fnTrue(v) { return true; }
-  function fnFalse(v) { return false; }
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	function fnTrue(v) {
+		return true;
+	}
+	function fnFalse(v) {
+		return false;
+	}
 
-  let found = arr.findIndex(fnTrue);
-  ASSERT_EQ(found, 0);
-  let foundStatic = Array.findIndex(fnTrue, arr);
-  ASSERT_EQ(foundStatic, 'foo');
+	let found = arr.findIndex(fnTrue);
+	ASSERT_EQ(found, 0);
+	let foundStatic = Array.findIndex(fnTrue, arr);
+	ASSERT_EQ(foundStatic, 'foo');
 
-  let foundNot = arr.findIndex(fnFalse);
-  ASSERT_TRUE(foundNot === -1);
-  let foundNotStatic = Array.findIndex(fnFalse, arr);
-  ASSERT_TRUE(foundNotStatic === -1);
+	let foundNot = arr.findIndex(fnFalse);
+	ASSERT_TRUE(foundNot === -1);
+	let foundNotStatic = Array.findIndex(fnFalse, arr);
+	ASSERT_TRUE(foundNotStatic === -1);
 }
 
 GCJSRuntimeCleanup();

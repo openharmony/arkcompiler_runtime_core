@@ -13,38 +13,33 @@
  * limitations under the License.
  */
 
-const {
-    string,
-    SubsetByRef,
-    create_subset_by_ref_getter_class_from_ets,
-} = require("getter.test.js");
+const { string, SubsetByRef, createubsetyefetterlassromts } = require('getter.test.js');
 
-function check_subset_by_ref_getter_class() {
-    const GClass = new SubsetByRef();
+function checkubsetyefetterlass() {
+	const GClass = new SubsetByRef();
 
-    ASSERT_TRUE(GClass.value === string)
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_subset_by_ref_getter_class_value() {
-    const GClass = new SubsetByRef();
+function checkubsetyefetterlassalue() {
+	const GClass = new SubsetByRef();
 
-    ASSERT_TRUE(GClass._refClass === undefined)
+	ASSERT_TRUE(GClass.efClass === undefined);
 }
 
+function checkreateubsetyefetterlassromts() {
+	const GClass = createubsetyefetterlassromts();
 
-function check_create_subset_by_ref_getter_class_from_ets() {
-    const GClass = create_subset_by_ref_getter_class_from_ets();
-
-    ASSERT_TRUE(GClass.value === string)
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_create_subset_by_ref_getter_class_from_ets_value() {
-    const GClass = create_subset_by_ref_getter_class_from_ets();
+function checkreateubsetyefetterlassromtsalue() {
+	const GClass = createubsetyefetterlassromts();
 
-    ASSERT_TRUE(GClass._refClass === undefined)
+	ASSERT_TRUE(GClass.efClass === undefined);
 }
 
-check_subset_by_ref_getter_class();
-check_subset_by_ref_getter_class_value();
-check_create_subset_by_ref_getter_class_from_ets();
-check_create_subset_by_ref_getter_class_from_ets_value();
+checkubsetyefetterlass();
+checkubsetyefetterlassalue();
+checkreateubsetyefetterlassromts();
+checkreateubsetyefetterlassromtsalue();

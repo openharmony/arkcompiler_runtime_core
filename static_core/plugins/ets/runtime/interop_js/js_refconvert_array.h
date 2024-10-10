@@ -16,12 +16,14 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_ARRAY_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REFCONVERT_ARRAY_H_
 
+#include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/interop_js/interop_context.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/js_refconvert.h"
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "runtime/mem/local_object_handle.h"
+#include "plugins/ets/runtime/types/ets_object.h"
 
 namespace ark::ets::interop::js {
 
@@ -171,6 +173,21 @@ public:
         return jsArr;
     }
 
+    EtsObject *UnwrapNonUndefined(InteropCtx *ctx, napi_value jsElem)
+    {
+        if (UNLIKELY(baseElemConv_ == nullptr)) {
+            baseElemConv_ = JSRefConvertResolve(ctx, klass_->GetComponentType());
+            if (UNLIKELY(baseElemConv_ == nullptr)) {
+                return nullptr;
+            }
+        }
+        EtsObject *etsElem = baseElemConv_->Unwrap(ctx, jsElem);
+        if (UNLIKELY(etsElem == nullptr)) {
+            return nullptr;
+        }
+        return etsElem;
+    }
+
     EtsObject *UnwrapImpl(InteropCtx *ctx, napi_value jsArr)
     {
         auto coro = EtsCoroutine::GetCurrent();
@@ -200,13 +217,7 @@ public:
                 return nullptr;
             }
             if (LIKELY(!IsNullOrUndefined(env, jsElem))) {
-                if (UNLIKELY(baseElemConv_ == nullptr)) {
-                    baseElemConv_ = JSRefConvertResolve(ctx, klass_->GetComponentType());
-                    if (UNLIKELY(baseElemConv_ == nullptr)) {
-                        return nullptr;
-                    }
-                }
-                EtsObject *etsElem = baseElemConv_->Unwrap(ctx, jsElem);
+                auto *etsElem = UnwrapNonUndefined(ctx, jsElem);
                 if (UNLIKELY(etsElem == nullptr)) {
                     return nullptr;
                 }

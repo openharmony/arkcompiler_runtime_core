@@ -22,27 +22,27 @@ class EtsMethodConstructorTsToEtsTest : public EtsInteropTest {};
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_constructor_main_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_method_constructor_main_class"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodConstructorMainClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_parent_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_method_class_parent_class"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassParentClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_child_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_method_class_child_class"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassChildClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_anonymous_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_method_class_anonymous_class"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassAnonymousClass"));
 }
 
 TEST_F(EtsMethodConstructorTsToEtsTest, check_method_class_IIFE_class)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("check_method_class_IIFE_class"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("checkMethodClassIIFEClass"));
 }
 
 }  // namespace ark::ets::interop::js::testing

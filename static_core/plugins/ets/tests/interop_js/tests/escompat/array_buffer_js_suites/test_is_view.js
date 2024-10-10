@@ -20,15 +20,17 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const CreateEtsSample = etsMod.getFunction('ArrayBuffer_CreateEtsSample');
 const TestJSIsView = etsMod.getFunction('ArrayBuffer_TestJSIsView');
 
-{ // Test JS ArrayBuffer
-  const LENGTH = 32;
-  TestJSIsView(new ArrayBuffer(LENGTH));
+{
+	// Test JS ArrayBuffer
+	const LENGTH = 32;
+	TestJSIsView(new ArrayBuffer(LENGTH));
 }
 
-{ // Test ETS ArrayBuffer
-  let arr = CreateEtsSample();
-  ASSERT_TRUE(!ArrayBuffer.isView(arr));
-  ASSERT_TRUE(ArrayBuffer.isView(new Int8Array(arr)));
+{
+	// Test ETS ArrayBuffer
+	let arr = CreateEtsSample();
+	ASSERT_TRUE(!ArrayBuffer.isView(arr));
+	ASSERT_TRUE(ArrayBuffer.isView(new Int8Array(arr)));
 }
 
 GCJSRuntimeCleanup();

@@ -25,7 +25,8 @@ from typing import Optional, Any, List
 import yaml
 
 METADATA_PATTERN = re.compile(r"(?<=\/\*---)(.*?)(?=---\*\/)", flags=re.DOTALL)
-PACKAGE_PATTERN = re.compile(r"\n\s*package[\t\f\v  ]+(?P<package_name>\w+(\.\w+)*)\b")
+DOTS_WHITESPACES_PATTERN = r"(\.\w+)*"
+PACKAGE_PATTERN = re.compile(f"\\n\\s*package[\\t\\f\\v  ]+(?P<package_name>\\w+{DOTS_WHITESPACES_PATTERN})\\b")
 SPEC_CHAPTER_PATTERN = re.compile(r"^\d{1,2}\.{0,1}\d{0,3}\.{0,1}\d{0,3}\.{0,1}\d{0,3}\.{0,1}\d{0,3}$")
 _LOGGER = logging.getLogger("runner.plugins.ets.ets_templates.test_metadata")
 

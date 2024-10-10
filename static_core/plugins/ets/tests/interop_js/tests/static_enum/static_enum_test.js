@@ -14,53 +14,53 @@
  */
 
 function assertEq(a, b) {
-    // console.log(`assertEq: '${a}' === '${b}'`)
-    if (a !== b) {
-        console.log(`assertEq failed: '${a}' === '${b}'`);
-        process.exit(1);
-    }
+	// console.log(`assertEq: '${a}' === '${b}'`)
+	if (a !== b) {
+		console.log(`assertEq failed: '${a}' === '${b}'`);
+		process.exit(1);
+	}
 }
 
 function runTest() {
-    let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
-    const etsOpts = {
-        'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
-        'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
-        'gc-trigger-type': 'heap-trigger',
-        'load-runtimes': 'ets',
-        'compiler-enable-jit': 'false',
-        'enable-an': 'false',
-        'run-gc-in-place': 'true',
-    };
-    const createRes = etsVm.createRuntime(etsOpts);
-    if (!createRes) {
-        console.log('Cannot create ETS runtime');
-        process.exit(1);
-    }
+	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+	const etsOpts = {
+		'panda-files': process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH,
+		'boot-panda-files': `${process.env.ARK_ETS_STDLIB_PATH}:${process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH}`,
+		'gc-trigger-type': 'heap-trigger',
+		'load-runtimes': 'ets',
+		'compiler-enable-jit': 'false',
+		'enable-an': 'false',
+		'run-gc-in-place': 'true',
+	};
+	const createRes = etsVm.createRuntime(etsOpts);
+	if (!createRes) {
+		console.log('Cannot create ETS runtime');
+		process.exit(1);
+	}
 
-    testFunction(etsVm);
-    testValues(etsVm);
+	testFunction(etsVm);
+	testValues(etsVm);
 }
 
 function testFunction(etsVm) {
-    const sumDouble = etsVm.getFunction('Lstatic_enum_test/ETSGLOBAL;', 'test1');
-    assertEq(test1(), 0);
-    const sumString = etsVm.getFunction('Lstatic_enum_test/ETSGLOBAL;', 'test2');
-    assertEq(test2(), true);
+	const sumDouble = etsVm.getFunction('Lstatic_enum_test/ETSGLOBAL;', 'test1');
+	assertEq(test1(), 0);
+	const sumString = etsVm.getFunction('Lstatic_enum_test/ETSGLOBAL;', 'test2');
+	assertEq(test2(), true);
 }
 
 function testValues(etsVm) {
-    const Color = etsVm.getClass('Lstatic_enum_test/Color;');
-    assertEq(Color.RED, 1);
-    assertEq(Color.GREEN, 2);
-    assertEq(Color.YELLOW, 3);
-    assertEq(Color.BLACK, 4);
-    assertEq(Color.BLUE, 5);
+	const Color = etsVm.getClass('Lstatic_enum_test/Color;');
+	assertEq(Color.RED, 1);
+	assertEq(Color.GREEN, 2);
+	assertEq(Color.YELLOW, 3);
+	assertEq(Color.BLACK, 4);
+	assertEq(Color.BLUE, 5);
 
-    const Direction = etsVm.getClass('Lstatic_enum_test/Direction;');
+	const Direction = etsVm.getClass('Lstatic_enum_test/Direction;');
 
-    assertEq(Direction.Up, 1);
-    assertEq(Direction.Down, -1);
+	assertEq(Direction.Up, 1);
+	assertEq(Direction.Down, -1);
 }
 
 runTest();

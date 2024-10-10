@@ -81,7 +81,7 @@ int PandaAllocHook(int alloctype, [[maybe_unused]] void *data, std::size_t size,
 
     std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << alloctypeName;
     std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << blocktypeName;
-    std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << (int)size;
+    std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << static_cast<int>(size);
     std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << filename;
     std::cout << std::left << std::setfill(' ') << std::setw(ALIGN_SIZE) << linenumber << std::endl;
 

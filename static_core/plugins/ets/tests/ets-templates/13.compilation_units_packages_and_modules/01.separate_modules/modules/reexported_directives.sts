@@ -1,0 +1,60 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/*---
+desc: >-
+      Module imports top-level declaration - types, classes, interfaces, enums, variables (including const) and functions
+      to reexport them.
+tags: [compile-only, not-a-test]
+files:
+- ./declarations.sts
+---*/
+
+// classes, interfaces, enum
+import {A as RA} from "./declarations.sts"
+import {B as RB} from "./declarations.sts"
+import {AC as RAC} from "./declarations.sts"
+import {C as RC} from "./declarations.sts"
+import {I as RI} from "./declarations.sts"
+import {II as RII} from "./declarations.sts"
+import {D as RD} from "./declarations.sts"
+import {ENUM as RENUM} from "./declarations.sts"
+
+// variables
+import {a as ra} from "./declarations.sts"
+import {i as ri} from "./declarations.sts"
+import {n as rn} from "./declarations.sts"
+import {s as rs} from "./declarations.sts"
+import {c as rc} from "./declarations.sts"
+import {u as ru} from "./declarations.sts"
+import {arr as rarr} from "./declarations.sts"
+
+// constants
+import { ca as rca } from "./declarations.sts"
+import { cs as rcs } from "./declarations.sts"
+import { ci as rci } from "./declarations.sts"
+
+// functions
+import { NoArg as RNoArg } from "./declarations.sts"
+import { OneArg as ROneArg } from "./declarations.sts"
+import { TwoArgs as RTwoArgs } from "./declarations.sts"
+import { Gen as RGen } from "./declarations.sts"
+import { ArgFun as RArgFun } from "./declarations.sts"
+import { ArgFun2 as RArgFun2 } from "./declarations.sts"
+
+// types
+import { CLASS_A as RCLASS_A } from "./declarations.sts"
+import { VAR_i as RVAR_i } from "./declarations.sts"
+import { TPL as RTPL } from "./declarations.sts"

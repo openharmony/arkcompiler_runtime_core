@@ -31,6 +31,8 @@ static inline std::string ExtractArrayBody(const std::string &text, const std::s
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
 
+namespace ark::disasm::test {
+
 TEST(LiteralsTest, LiteralsTestNames)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -183,3 +185,5 @@ TEST(LiteralsTest, LiteralsTestEscapeValue)
 }
 
 #undef DISASM_BIN_DIR
+
+}  // namespace ark::disasm::test

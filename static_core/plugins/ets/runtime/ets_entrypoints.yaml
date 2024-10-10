@@ -156,17 +156,15 @@
     - ark::ObjectHeader*  # string builder (result)
     - ark::ObjectHeader*  # string builder
     - int64_t             # long value
-    - ark::Class*         # array class pointer
 
-- name: StringBuilderAppendLongOddSaved
+- name: StringBuilderAppendLong3Arg
   entrypoint: StringBuilderAppendLongEntrypoint
-  bridge: odd_saved
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::ObjectHeader*  # string builder (result)
     - ark::ObjectHeader*  # string builder
     - int64_t             # long value
-    - ark::Class*         # array class pointer
 
 - name: StringBuilderAppendChar
   entrypoint: StringBuilderAppendChar
@@ -196,17 +194,15 @@
     - ark::ObjectHeader*  # string builder (result)
     - ark::ObjectHeader*  # string builder
     - uint16_t            # char
-    - ark::Class*         # array class pointer
 
-- name: StringBuilderAppendCharOddSaved
+- name: StringBuilderAppendChar3Arg
   entrypoint: StringBuilderAppendCharEntrypoint
-  bridge: odd_saved
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::ObjectHeader*  # string builder (result)
     - ark::ObjectHeader*  # string builder
     - uint16_t            # char
-    - ark::Class*         # array class pointer
 
 - name: StringBuilderAppendBool
   entrypoint: StringBuilderAppendBool
@@ -226,17 +222,15 @@
     - ark::ObjectHeader*  # string builder (result)
     - ark::ObjectHeader*  # string builder
     - uint8_t             # boolean
-    - ark::Class*         # array class pointer
 
-- name: StringBuilderAppendBoolOddSaved
+- name: StringBuilderAppendBool3Arg
   entrypoint: StringBuilderAppendBoolEntrypoint
-  bridge: odd_saved
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::ObjectHeader*  # string builder (result)
     - ark::ObjectHeader*  # string builder
     - uint8_t             # boolean
-    - ark::Class*         # array class pointer
 
 - name: StringBuilderAppendString
   entrypoint: StringBuilderAppendStringEntrypoint
@@ -271,16 +265,14 @@
   signature:
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # string builder
-    - ark::Class*         # string class pointer
 
-- name: StringBuilderToStringUsual
+- name: StringBuilderToString2Arg
   entrypoint: StringBuilderToStringEntrypoint
-  bridge: entrypoint
+  bridge: odd_saved2
   properties: []
   signature:
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # string builder
-    - ark::Class*         # string class pointer
 
 - name: DoubleToStringDecimal
   entrypoint: DoubleToStringDecimal
@@ -300,17 +292,15 @@
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # cache
     - uint64_t            # number
-    - uint64_t            # unused
 
-- name: DoubleToStringDecimalOddSaved
+- name: DoubleToStringDecimal3Arg
   entrypoint: DoubleToStringDecimalEntrypoint
-  bridge: odd_saved
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::ObjectHeader*  # string (result)
     - ark::ObjectHeader*  # cache
     - uint64_t            # number
-    - uint64_t            # unused
 
 - name: DoubleToStringDecimalStoreSlowPath
   entrypoint: DoubleToStringDecimalStoreEntrypoint
@@ -339,15 +329,87 @@
   signature:
     - ark::ObjectHeader*  # string (result)
     - uint64_t            # number
-    - uint64_t            # unused
-    - uint64_t            # unused
 
-- name: DoubleToStringDecimalNoCacheOddSaved
+- name: DoubleToStringDecimalNoCache3Arg
   entrypoint: DoubleToStringDecimalNoCacheEntrypoint
-  bridge: odd_saved
+  bridge: odd_saved3
   properties: []
   signature:
     - ark::ObjectHeader*  # string (result)
     - uint64_t            # number
-    - uint64_t            # unused
-    - uint64_t            # unused
+
+- name: StringEmpty
+  entrypoint: StringEmpty
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string (to obtain klass)
+
+- name: StringTrimLeft
+  entrypoint: StringTrimLeft
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimLeftBase
+  entrypoint: StringTrimLeftBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRight
+  entrypoint: StringTrimRight
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimRightBase
+  entrypoint: StringTrimRightBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrim
+  entrypoint: StringTrim
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: StringTrimBase
+  entrypoint: StringTrimBase
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # string to trim
+    - int32_t             # unused
+    - int32_t             # unused
+
+- name: CharIsWhiteSpace
+  entrypoint: CharIsWhiteSpace
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - uint8_t   # result (true/false)
+    - uint16_t  # char to test

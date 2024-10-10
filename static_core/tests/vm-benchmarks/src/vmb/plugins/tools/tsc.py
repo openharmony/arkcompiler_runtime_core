@@ -51,10 +51,11 @@ class Tool(ToolBase):
                 f'{self.tsc} '
                 '--target es6 '
                 '--module es6 '
+                f'{self.custom} '
                 f'--outDir {bu.path} {ts}', measure_time=True)
             js = ts.with_suffix('.js')
             if res.ret != 0 or not js.is_file():
                 bu.status = BUStatus.COMPILATION_FAILED
-                raise VmbToolExecError(f'{self.name} failed')
+                raise VmbToolExecError(f'{self.name} failed', res)
             ToolBase.rename_suffix(js, '.mjs')
             bu.result.build.append(BuildResult('tsc', 0, res.tm, res.rss))

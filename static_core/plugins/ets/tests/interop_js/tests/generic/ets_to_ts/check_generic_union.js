@@ -13,23 +13,18 @@
  * limitations under the License.
  */
 
-const {
-    UnionClass,
-    create_union_object_from_ets,
-    num,
-    str,
-} = require("generic.test.js");
+const { UnionClass, createUnionObjectFromEts, num, str } = require('generic.test.js');
 
-function check_union_class() {
-    const unionClass = new UnionClass(num);
-    ASSERT_EQ(typeof num, typeof unionClass.get());
+function checkUnionClass() {
+	const unionClass = new UnionClass(num);
+	ASSERT_EQ(typeof num, typeof unionClass.get());
 }
 
-function check_create_union_object_from_ets() {
-    const unionClass = create_union_object_from_ets();
+function checkCreateUnionObjectFromEts() {
+	const unionClass = createUnionObjectFromEts();
 
-    ASSERT_EQ(typeof str, typeof unionClass.get());
+	ASSERT_EQ(typeof str, typeof unionClass.get());
 }
 
-check_union_class();
-check_create_union_object_from_ets();
+checkUnionClass();
+checkCreateUnionObjectFromEts();

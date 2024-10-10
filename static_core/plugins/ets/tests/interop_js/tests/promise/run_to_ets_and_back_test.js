@@ -14,20 +14,19 @@
  */
 
 function runTest() {
-    let test = "toEtsAndBack";
-    console.log("Running test " + test);
-    let etsVm = require(process.env.MODULE_PATH + "/ets_interop_js_napi.node");
-    if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-        console.log("Cannot create ETS runtime");
-        process.exit(1);
-    }
-    let jsPromise = Promise.resolve();
-    let etsPromise = etsVm.call("getTheSamePromise", jsPromise);
-    if (jsPromise !== etsPromise) {
-        console.log("Test " + test + " failed: expected jsPromise and etsPromise are the same but actually they differs");
-        process.exit(1);
-    }
+	let test = 'toEtsAndBack';
+	console.log('Running test ' + test);
+	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
+		console.log('Cannot create ETS runtime');
+		process.exit(1);
+	}
+	let jsPromise = Promise.resolve();
+	let etsPromise = etsVm.call('getTheSamePromise', jsPromise);
+	if (jsPromise !== etsPromise) {
+		console.log('Test ' + test + ' failed: expected jsPromise and etsPromise are the same but actually they differs');
+		process.exit(1);
+	}
 }
 
 runTest();
-

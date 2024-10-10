@@ -21,24 +21,30 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSFindLast = etsMod.getFunction('Array_TestJSFindLast');
 
-{ // Test JS Array<FooClass>
-  TestJSFindLast(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSFindLast(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  function fnTrue(v) { return true; }
-  function fnFalse(v) { return false; }
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	function fnTrue(v) {
+		return true;
+	}
+	function fnFalse(v) {
+		return false;
+	}
 
-  let last = arr.findLast(fnTrue);
-  ASSERT_EQ(last, 'foo');
-  let lastStatic = Array.findLast(fnTrue, arr);
-  ASSERT_EQ(lastStatic, 'foo');
+	let last = arr.findLast(fnTrue);
+	ASSERT_EQ(last, 'foo');
+	let lastStatic = Array.findLast(fnTrue, arr);
+	ASSERT_EQ(lastStatic, 'foo');
 
-  let lastNull = arr.findLast(fnFalse);
-  ASSERT_TRUE(lastNull === null);
-  let lastNullStatic = Array.findLast(fnFalse, arr);
-  ASSERT_TRUE(lastNullStatic === null);
+	let lastNull = arr.findLast(fnFalse);
+	ASSERT_TRUE(lastNull === null);
+	let lastNullStatic = Array.findLast(fnFalse, arr);
+	ASSERT_TRUE(lastNullStatic === null);
 }
 
 GCJSRuntimeCleanup();

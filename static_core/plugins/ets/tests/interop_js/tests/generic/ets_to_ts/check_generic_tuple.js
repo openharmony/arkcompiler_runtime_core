@@ -13,15 +13,11 @@
  * limitations under the License.
  */
 
-const {
-    tuple_declared_type,
-    num,
-    bool,
-} = require("generic.test.js");
+const { tupleDeclaredType, num, bool } = require('generic.test.js');
 
-function check_tuple_type () {
-    const result = tuple_declared_type([num, bool]);
-    ASSERT_TRUE(typeof num === typeof result[0] && typeof bool === typeof result[1]);
+function checkTupleType() {
+	const result = tupleDeclaredType([num, bool]);
+	ASSERT_TRUE(typeof num === typeof result[0] && typeof bool === typeof result[1]);
 }
 
-check_tuple_type();
+checkTupleType();

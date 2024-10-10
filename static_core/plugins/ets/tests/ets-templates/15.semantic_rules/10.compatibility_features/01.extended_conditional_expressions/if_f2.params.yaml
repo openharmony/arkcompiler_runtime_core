@@ -57,7 +57,7 @@ cases:
     - decl: |-
         enum Color { Red, Green, Blue }
       type: int
-      val: Color.Red.getValue()
+      val: Color.Red.valueOf()
 
     - { val: 'new Byte()', type: 'Byte' }
     - { val: 'new Short()', type: 'Short' }

@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 /**
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,121 +13,137 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.withOptionalMethodInstanceClass = exports.withoutOptionalMethodInstanceClass = exports.tupleInstanceClass = exports.subsetByValueInstanceClass = exports.unionTypeMethodInstanceClass = exports.create_interface_class_tuple_type_method_from_ts = exports.TupleTypeMethodClass = exports.optional_arg_array = exports.optional_arg = exports.create_class_without_optional_method = exports.create_class_with_optional_method = exports.WithoutOptionalMethodClass = exports.WithOptionalMethodClass = exports.create_subset_by_value_class_from_ts = exports.SubsetByValueClass = exports.subset_by_ref_interface = exports.create_interface_class_union_type_method = exports.UnionTypeMethodClass = exports.create_interface_class_any_type_method = exports.AnyTypeMethodClass = exports.ts_string = exports.ts_number = void 0;
-exports.ts_number = 1;
-exports.ts_string = 'string';
-var AnyTypeMethodClass = /** @class */ (function () {
-    function AnyTypeMethodClass() {
-    }
-    AnyTypeMethodClass.prototype.get = function (a) {
-        return a;
-    };
-    return AnyTypeMethodClass;
-}());
+Object.defineProperty(exports, '__esModule', { value: true });
+exports.withOptionalMethodInstanceClass =
+	exports.withoutOptionalMethodInstanceClass =
+	exports.tupleInstanceClass =
+	exports.subsetByValueInstanceClass =
+	exports.unionTypeMethodInstanceClass =
+	exports.createInterfaceClassTupleTypeMethodFromTs =
+	exports.TupleTypeMethodClass =
+	exports.optionalArgArray =
+	exports.optionalArg =
+	exports.createClassWithoutOptionalMethod =
+	exports.createClassWithOptionalMethod =
+	exports.WithoutOptionalMethodClass =
+	exports.WithOptionalMethodClass =
+	exports.createSubsetByValueClassFromTs =
+	exports.SubsetByValueClass =
+	exports.subsetByRefInterface =
+	exports.createInterfaceClassUnionTypeMethod =
+	exports.UnionTypeMethodClass =
+	exports.createInterfaceClassAnyTypeMethod =
+	exports.AnyTypeMethodClass =
+	exports.tsString =
+	exports.tsNumber =
+		void 0;
+exports.tsNumber = 1;
+exports.tsString = 'string';
+const AnyTypeMethodClass = /** @class */ (function () {
+	function anyTypeMethodClass() {}
+	anyTypeMethodClass.prototype.get = function (a) {
+		return a;
+	};
+	return anyTypeMethodClass;
+})();
 exports.AnyTypeMethodClass = AnyTypeMethodClass;
-function create_interface_class_any_type_method() {
-    return new AnyTypeMethodClass();
+function createInterfaceClassAnyTypeMethod() {
+	return new AnyTypeMethodClass();
 }
-exports.create_interface_class_any_type_method = create_interface_class_any_type_method;
-var UnionTypeMethodClass = /** @class */ (function () {
-    function UnionTypeMethodClass() {
-    }
-    UnionTypeMethodClass.prototype.get = function (a) {
-        return a;
-    };
-    return UnionTypeMethodClass;
-}());
+exports.createInterfaceClassAnyTypeMethod = createInterfaceClassAnyTypeMethod;
+const UnionTypeMethodClass = /** @class */ (function () {
+	function unionTypeMethodClass() {}
+	unionTypeMethodClass.prototype.get = function (a) {
+		return a;
+	};
+	return unionTypeMethodClass;
+})();
 exports.UnionTypeMethodClass = UnionTypeMethodClass;
-function create_interface_class_union_type_method() {
-    return new AnyTypeMethodClass();
+function createInterfaceClassUnionTypeMethod() {
+	return new AnyTypeMethodClass();
 }
-exports.create_interface_class_union_type_method = create_interface_class_union_type_method;
-function subset_by_ref_interface(obj) {
-    return obj.get();
+exports.createInterfaceClassUnionTypeMethod = createInterfaceClassUnionTypeMethod;
+function subsetByRefInterface(obj) {
+	return obj.get();
 }
-exports.subset_by_ref_interface = subset_by_ref_interface;
-var UserClass = /** @class */ (function () {
-    function UserClass() {
-        this.value = 1;
-    }
-    return UserClass;
-}());
-var SubsetByValueClass = /** @class */ (function () {
-    function SubsetByValueClass() {
-    }
-    SubsetByValueClass.prototype.get = function () {
-        return new UserClass();
-    };
-    return SubsetByValueClass;
-}());
+exports.subsetByRefInterface = subsetByRefInterface;
+const UserClass = /** @class */ (function () {
+	function userClass() {
+		this.value = 1;
+	}
+	return userClass;
+})();
+const SubsetByValueClass = /** @class */ (function () {
+	function subsetByValueClass() {}
+	subsetByValueClass.prototype.get = function () {
+		return new UserClass();
+	};
+	return subsetByValueClass;
+})();
 exports.SubsetByValueClass = SubsetByValueClass;
-function create_subset_by_value_class_from_ts() {
-    return new SubsetByValueClass();
+function createSubsetByValueClassFromTs() {
+	return new SubsetByValueClass();
 }
-exports.create_subset_by_value_class_from_ts = create_subset_by_value_class_from_ts;
-var WithOptionalMethodClass = /** @class */ (function () {
-    function WithOptionalMethodClass() {
-    }
-    WithOptionalMethodClass.prototype.getNum = function () {
-        return exports.ts_number;
-    };
-    WithOptionalMethodClass.prototype.getStr = function () {
-        return exports.ts_string;
-    };
-    return WithOptionalMethodClass;
-}());
+exports.createSubsetByValueClassFromTs = createSubsetByValueClassFromTs;
+const WithOptionalMethodClass = /** @class */ (function () {
+	function withOptionalMethodClass() {}
+	withOptionalMethodClass.prototype.getNum = function () {
+		return exports.tsNumber;
+	};
+	withOptionalMethodClass.prototype.getStr = function () {
+		return exports.tsString;
+	};
+	return withOptionalMethodClass;
+})();
 exports.WithOptionalMethodClass = WithOptionalMethodClass;
-var WithoutOptionalMethodClass = /** @class */ (function () {
-    function WithoutOptionalMethodClass() {
-    }
-    WithoutOptionalMethodClass.prototype.getStr = function () {
-        return exports.ts_string;
-    };
-    return WithoutOptionalMethodClass;
-}());
+const WithoutOptionalMethodClass = /** @class */ (function () {
+	function withoutOptionalMethodClass() {}
+	withoutOptionalMethodClass.prototype.getStr = function () {
+		return exports.tsString;
+	};
+	return withoutOptionalMethodClass;
+})();
 exports.WithoutOptionalMethodClass = WithoutOptionalMethodClass;
-function create_class_with_optional_method() {
-    return new WithOptionalMethodClass();
+function createClassWithOptionalMethod() {
+	return new WithOptionalMethodClass();
 }
-exports.create_class_with_optional_method = create_class_with_optional_method;
-function create_class_without_optional_method() {
-    return new WithoutOptionalMethodClass();
+exports.createClassWithOptionalMethod = createClassWithOptionalMethod;
+function createClassWithoutOptionalMethod() {
+	return new WithoutOptionalMethodClass();
 }
-exports.create_class_without_optional_method = create_class_without_optional_method;
-function optional_arg(arg, optional) {
-    if (optional) {
-        return { with: arg, without: optional };
-    }
-    return { with: arg };
+exports.createClassWithoutOptionalMethod = createClassWithoutOptionalMethod;
+function optionalArg(arg, optional) {
+	if (optional) {
+		return { with: arg, without: optional };
+	}
+	return { with: arg };
 }
-exports.optional_arg = optional_arg;
-function optional_arg_array() {
-    var arg = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        arg[_i] = arguments[_i];
-    }
-    var withOptional = arg[0];
-    var withoutOptional = arg[1];
-    if (withoutOptional) {
-        return { with: withOptional, without: withoutOptional };
-    }
-    return { with: withOptional };
+exports.optionalArg = optionalArg;
+function optionalArgArray(...args) {
+	const arg = [];
+	for (let I = 0; I < args.length; I++) {
+		arg[I] = args[I];
+	}
+	const withOptional = arg[0];
+	const withoutOptional = arg[1];
+	if (withoutOptional) {
+		return { with: withOptional, without: withoutOptional };
+	}
+	return { with: withOptional };
 }
-exports.optional_arg_array = optional_arg_array;
-var TupleTypeMethodClass = /** @class */ (function () {
-    function TupleTypeMethodClass() {
-    }
-    TupleTypeMethodClass.prototype.get = function (arg) {
-        return arg;
-    };
-    return TupleTypeMethodClass;
-}());
+exports.optionalArgArray = optionalArgArray;
+const TupleTypeMethodClass = /** @class */ (function () {
+	function tupleTypeMethodClass() {}
+	tupleTypeMethodClass.prototype.get = function (arg) {
+		return arg;
+	};
+	return tupleTypeMethodClass;
+})();
 exports.TupleTypeMethodClass = TupleTypeMethodClass;
-function create_interface_class_tuple_type_method_from_ts() {
-    return new TupleTypeMethodClass();
+function createInterfaceClassTupleTypeMethodFromTs() {
+	return new TupleTypeMethodClass();
 }
-exports.create_interface_class_tuple_type_method_from_ts = create_interface_class_tuple_type_method_from_ts;
+exports.createInterfaceClassTupleTypeMethodFromTs = createInterfaceClassTupleTypeMethodFromTs;
 exports.unionTypeMethodInstanceClass = new UnionTypeMethodClass();
 exports.subsetByValueInstanceClass = new SubsetByValueClass();
 exports.tupleInstanceClass = new TupleTypeMethodClass();

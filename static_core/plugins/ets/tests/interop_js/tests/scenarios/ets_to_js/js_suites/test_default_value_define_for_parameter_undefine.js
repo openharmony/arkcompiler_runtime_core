@@ -16,20 +16,19 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const defaultUndefinedFunctionEts = etsMod.getFunction('default_undefined_parameter_function');
-
+const defaultUndefinedFunctionEts = etsMod.getFunction('defaultUndefinedParameterFunction');
 
 {
-  const INT_VALUE = 1;
+	const INT_VALUE = 1;
 
-  let ret = defaultUndefinedFunctionEts();
-  ASSERT_EQ(ret, undefined);
+	let ret = defaultUndefinedFunctionEts();
+	ASSERT_EQ(ret, undefined);
 
-  ret = defaultUndefinedFunctionEts(undefined);
-  ASSERT_EQ(ret, undefined);
+	ret = defaultUndefinedFunctionEts(undefined);
+	ASSERT_EQ(ret, undefined);
 
-  ret = defaultUndefinedFunctionEts(INT_VALUE);
-  ASSERT_EQ(ret, INT_VALUE);
+	ret = defaultUndefinedFunctionEts(INT_VALUE);
+	ASSERT_EQ(ret, INT_VALUE);
 }
 
 GCJSRuntimeCleanup();

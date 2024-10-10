@@ -18,11 +18,11 @@ const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const ClassToExtendEts = etsMod.getClass('ClassToExtendEts');
 
-class ChildClass extends ClassToExtendEts { }
+class ChildClass extends ClassToExtendEts {}
 
 {
-  let obj = new ChildClass();
-  ASSERT_EQ(obj.value(), 1);
+	let obj = new ChildClass();
+	ASSERT_EQ(obj.value(), 1);
 }
 
 GCJSRuntimeCleanup();

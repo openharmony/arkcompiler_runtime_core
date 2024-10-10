@@ -25,18 +25,16 @@ void OpenPandaFileFuzzTest(const uint8_t *data, size_t size)
     const char *filename2 = "classes1.abc";
 
     const char *zip_filename1 = "__OpenPandaFileFuzzTest.zip";
-    int ret1 =
-        ark::CreateOrAddFileIntoZip(zip_filename1, filename1, data, size, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
-    int ret2 =
-        ark::CreateOrAddFileIntoZip(zip_filename1, filename2, data, size, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
+    std::vector<uint8_t> buf(data, data + size);
+    int ret1 = ark::CreateOrAddFileIntoZip(zip_filename1, filename1, &buf, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+    int ret2 = ark::CreateOrAddFileIntoZip(zip_filename1, filename2, &buf, APPEND_STATUS_ADDINZIP, Z_BEST_COMPRESSION);
     if (ret1 != 0 || ret2 != 0) {
         (void)remove(zip_filename1);
         return;
     }
 
     const char *zip_filename2 = "__OpenPandaFileFromZipNameAnonMem.zip";
-    int ret3 =
-        ark::CreateOrAddFileIntoZip(zip_filename2, filename1, data, size, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
+    int ret3 = ark::CreateOrAddFileIntoZip(zip_filename2, filename1, buf, APPEND_STATUS_CREATE, Z_BEST_COMPRESSION);
     if (ret3 != 0) {
         (void)remove(zip_filename2);
         return;

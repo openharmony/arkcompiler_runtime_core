@@ -102,6 +102,11 @@ EtsClass *EtsClassLinker::GetPromiseRefClass()
     return EtsClass::FromRuntimeClass(ext_->GetPromiseRefClass());
 }
 
+EtsClass *EtsClassLinker::GetArrayClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetArrayClass());
+}
+
 EtsClass *EtsClassLinker::GetArrayBufferClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetArrayBufferClass());
@@ -135,6 +140,11 @@ EtsClass *EtsClassLinker::GetTypeAPIParameterClass()
 EtsClass *EtsClassLinker::GetIFunctionClass()
 {
     return EtsClass::FromRuntimeClass(ext_->GetIFunctionClass());
+}
+
+EtsClass *EtsClassLinker::GetFinalizableWeakRefClass()
+{
+    return EtsClass::FromRuntimeClass(ext_->GetFinalizableWeakRefClass());
 }
 
 Method *EtsClassLinker::GetSubscribeOnAnotherPromiseMethod()

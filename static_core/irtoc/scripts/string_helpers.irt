@@ -713,14 +713,13 @@ def GenerateCreateStringFromCharArrayTlab(string_compression_enabled)
       copy_u16_chars(arr_data, str_data, Cast(char_count).u64)
       StoreI(new_str, char_count).Imm(Constants::STRING_LENGTH_OFFSET).u32
     end
-    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
     # String is supposed to be a constant object, so all its data should be visible by all threads
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_CHAR_ARRAY_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, char_offset, char_count, char_array, string_klass).AddImm(entrypoint).MethodAsImm("CreateStringFromCharArrayUsualBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, char_offset, char_count, char_array).AddImm(entrypoint).MethodAsImm("CreateStringFromCharArray4ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromCharArrayTlab
@@ -774,14 +773,13 @@ def GenerateCreateStringFromZeroBasedCharArrayTlab(string_compression_enabled)
       copy_u16_chars(arr_data, str_data, Cast(char_count).u64)
       StoreI(new_str, char_count).Imm(Constants::STRING_LENGTH_OFFSET).u32
     end
-    StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
     # String is supposed to be a constant object, so all its data should be visible by all threads
     Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
     Return(new_str).ptr
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("CREATE_STRING_FROM_ZERO_BASED_CHAR_ARRAY_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, char_count, char_array, string_klass).AddImm(entrypoint).MethodAsImm("CreateStringFromZeroBasedCharArrayOddSavedBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, char_count, char_array).AddImm(entrypoint).MethodAsImm("CreateStringFromZeroBasedCharArray3ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateCreateStringFromZeroBasedCharArrayTlab
@@ -876,7 +874,6 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
           copy_u16_chars(src_str_data, new_str_data, Cast(char_count).u64)
           StoreI(new_str, OrI(ShlI(char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
         }
-        StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
         # String is supposed to be a constant object, so all its data should be visible by all threads
         Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
         Return(new_str).ptr
@@ -886,7 +883,6 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
         new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
         copy_u8_chars(src_str_data, new_str_data, Cast(char_count).u64)
         StoreI(new_str, ShlI(char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
-        StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
         # String is supposed to be a constant object, so all its data should be visible by all threads
         Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
         Return(new_str).ptr
@@ -897,7 +893,6 @@ def GenerateSubstringFromStringTlab(string_compression_enabled)
       new_str_data := Add(new_str, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
       copy_u16_chars(src_str_data, new_str_data, Cast(char_count).u64)
       StoreI(new_str, char_count).Imm(Constants::STRING_LENGTH_OFFSET).u32
-      StoreI(new_str, Cast(0).u32).Imm(Constants::STRING_HASHCODE_OFFSET).u32
       # String is supposed to be a constant object, so all its data should be visible by all threads
       Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
       Return(new_str).ptr
@@ -968,7 +963,7 @@ def GenerateStringGetCharsTlab(string_compression_enabled)
 
   Label(:SlowPathEntrypoint)
     entrypoint = get_entrypoint_offset("STRING_GET_CHARS_SLOW_PATH")
-    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index, array_klass).AddImm(entrypoint).MethodAsImm("StringGetCharsUsualBridge").Terminator.ptr
+    Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetChars4ArgBridge").Terminator.ptr
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
   }
 end  # def GenerateStringGetCharsTlab

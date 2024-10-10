@@ -13,11 +13,10 @@
 
 import_stmts:
   - import * as all from "./module_a"
-  - import * as all from "./module_a.ets"
+  - import * as all from "./module_a.sts"
   - import * as all from "./nesteddir/module_a"
-  - import * as all from "./nesteddir/module_a.ets"
+  - import * as all from "./nesteddir/module_a.sts"
   - import * as all from "./nesteddir/../module_a"
-  - import * as all from "./nesteddir/../module_a.ets"
+  - import * as all from "./nesteddir/../module_a.sts"
   - import * as all from "../module_a"
-  - import * as all from "../module_a.ets"
-  
+  - import * as all from "../module_a.sts"

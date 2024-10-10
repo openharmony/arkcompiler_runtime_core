@@ -13,19 +13,21 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const CreateEtsSample = ets_mod.getFunction("Boolean_CreateEtsSample");
-const TestJSSample = ets_mod.getFunction("Boolean_TestJSSample");
+const etsMod = getTestModule('escompat_test');
+const CreateEtsSample = etsMod.getFunction('Boolean_CreateEtsSample');
+const TestJSSample = etsMod.getFunction('Boolean_TestJSSample');
 
-{   // Test JS Boolean
-    TestJSSample(new Boolean(false));
+{
+	// Test JS Boolean
+	TestJSSample(new Boolean(false));
 }
 
-{   // Test ETS Boolean
-    let v = CreateEtsSample();
-    ASSERT_TRUE(v instanceof Boolean);
+{
+	// Test ETS Boolean
+	let v = CreateEtsSample();
+	ASSERT_TRUE(v instanceof Boolean);
 
-    ASSERT_EQ(v.toString(), "true");
+	ASSERT_EQ(v.toString(), 'true');
 }

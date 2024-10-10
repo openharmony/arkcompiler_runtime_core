@@ -18,25 +18,25 @@ const etsMod = getTestModule('scenarios_test');
 const unpackValue = etsMod.getFunction('unpack_value');
 
 class Boxx {
-  constructor(value) {
-    this.value_ = value;
-  }
+	constructor(value) {
+		this.value_ = value;
+	}
 
-  getValue() {
-    return this.value_;
-  }
+	getValue() {
+		return this.value_;
+	}
 }
 
 {
-  const INT_VALUE = 222;
-  const STRING_VALUE = 'hehehe';
+	const INT_VALUE = 222;
+	const STRING_VALUE = 'hehehe';
 
-  const intBox = new Boxx(INT_VALUE);
-  const stringBox = new Boxx(STRING_VALUE);
+	const intBox = new Boxx(INT_VALUE);
+	const stringBox = new Boxx(STRING_VALUE);
 
-  let intRet = unpackValue(intBox);
-  ASSERT_EQ(intRet, INT_VALUE);
+	let intRet = unpackValue(intBox);
+	ASSERT_EQ(intRet, INT_VALUE);
 
-  let stringRet = unpackValue(stringBox);
-  ASSERT_EQ(stringRet, STRING_VALUE);
+	let stringRet = unpackValue(stringBox);
+	ASSERT_EQ(stringRet, STRING_VALUE);
 }

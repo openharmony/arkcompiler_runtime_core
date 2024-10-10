@@ -21,20 +21,30 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSEvery = etsMod.getFunction('Array_TestJSEvery');
 
-{ // Test JS Array<FooClass>
-  TestJSEvery(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSEvery(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  function fnTrue(v) { return true; }
-  function fn1True(v, k) { return true; }
-  ASSERT_TRUE(arr.every(fnTrue));
-  ASSERT_TRUE(arr.every(fn1True));
-  function fnFalse(v) { return false; }
-  function fn1False(v, k) { return k < 0; }
-  ASSERT_FALSE(arr.every(fnFalse));
-  ASSERT_FALSE(arr.every(fn1False));
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	function fnTrue(v) {
+		return true;
+	}
+	function fn1True(v, k) {
+		return true;
+	}
+	ASSERT_TRUE(arr.every(fnTrue));
+	ASSERT_TRUE(arr.every(fn1True));
+	function fnFalse(v) {
+		return false;
+	}
+	function fn1False(v, k) {
+		return k < 0;
+	}
+	ASSERT_FALSE(arr.every(fnFalse));
+	ASSERT_FALSE(arr.every(fn1False));
 }
 
 GCJSRuntimeCleanup();

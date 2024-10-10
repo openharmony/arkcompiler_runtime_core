@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionReturnTypePrimitiveEts = etsMod.getFunction('function_return_type_primitive');
+const functionReturnTypePrimitiveEts = etsMod.getFunction('functionReturnTypePrimitive');
 
 {
-  let ret = functionReturnTypePrimitiveEts();
-  ASSERT_EQ(typeof ret, 'number');
+	let ret = functionReturnTypePrimitiveEts();
+	ASSERT_EQ(typeof ret, 'number');
 }
 
 GCJSRuntimeCleanup();

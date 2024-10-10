@@ -1,26 +1,31 @@
 {
-  "compilerOptions": {
-    "baseUrl": "${CMAKE_CURRENT_SOURCE_DIR}",
-    "paths": {
-      "escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"],
-      "std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"],
-      "decl_js": [ "${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios" ],
-      "pure_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios.js"],
-      "pure_js_conflict": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/conflict_types.js"]
-    },
-    "dynamicPaths": {
-      "${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios": {
-        "language": "js",
-        "hasDecl": true
-      },
-      "${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios.js": {
-        "language": "js",
-        "hasDecl": false
-      },
-      "${CMAKE_CURRENT_SOURCE_DIR}/js_suites/conflict_types.js": {
-        "language": "js",
-        "hasDecl": false
-      }
-    }
-  }
+	"compilerOptions": {
+		"baseUrl": "${CMAKE_CURRENT_SOURCE_DIR}",
+		"paths": {
+			"escompat": ["${PANDA_ROOT}/plugins/ets/stdlib/escompat"],
+			"std": ["${PANDA_ROOT}/plugins/ets/stdlib/std"],
+			"decl_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios"],
+			"pure_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios.js"],
+			"pure_js_conflict": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/conflict_types.js"],
+			"indirect_js": ["${CMAKE_CURRENT_SOURCE_DIR}/js_suites/indirect_call.js"]
+		},
+		"dynamicPaths": {
+			"${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios": {
+				"language": "js",
+				"hasDecl": true
+			},
+			"${CMAKE_CURRENT_SOURCE_DIR}/js_suites/scenarios.js": {
+				"language": "js",
+				"hasDecl": false
+			},
+			"${CMAKE_CURRENT_SOURCE_DIR}/js_suites/conflict_types.js": {
+				"language": "js",
+				"hasDecl": false
+			},
+			"${CMAKE_CURRENT_SOURCE_DIR}/js_suites/indirect_call.js": {
+				"language": "js",
+				"hasDecl": false
+			}
+		}
+	}
 }

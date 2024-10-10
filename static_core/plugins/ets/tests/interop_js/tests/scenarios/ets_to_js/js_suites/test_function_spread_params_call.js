@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const function_spread_params = etsMod.getFunction('function_spread_params');
+const functionSpreadParams = etsMod.getFunction('functionSpreadParams');
 
 {
-  const arr = [10, 20, 30];
-  ASSERT_EQ(function_spread_params(arr), '10,20,30');
+	const arr = [10, 20, 30];
+	ASSERT_EQ(functionSpreadParams(arr), '10,20,30');
 }
 
 GCJSRuntimeCleanup();

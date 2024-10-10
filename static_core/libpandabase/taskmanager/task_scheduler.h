@@ -17,9 +17,9 @@
 #define PANDA_LIBPANDABASE_TASKMANAGER_TASK_MANAGER_H
 
 #include "libpandabase/taskmanager/task_queue.h"
-#include "libpandabase/taskmanager/task_statistics/task_statistics.h"
 #include "libpandabase/taskmanager/utils/wait_list.h"
 #include "libpandabase/taskmanager/worker_thread.h"
+#include "libpandabase/taskmanager/utils/task_time_stats.h"
 #include <vector>
 #include <map>
 #include <queue>
@@ -32,6 +32,8 @@ namespace ark::taskmanager {
  *  - JIT queue
  */
 class TaskScheduler {
+    using TaskPropertiesCounterMap = std::unordered_map<TaskProperties, size_t, TaskProperties::Hash>;
+
 public:
     NO_COPY_SEMANTIC(TaskScheduler);
     NO_MOVE_SEMANTIC(TaskScheduler);
@@ -43,10 +45,10 @@ public:
     /**
      * @brief Creates an instance of TaskScheduler.
      * @param threadsCount - number of worker that will be created be Task Manager
-     * @param taskStatisticsType - type of TaskStatistics that will be used in TaskScheduler
+     * @param taskStatsType - type of TaskStatistics that will be used in TaskScheduler
      */
-    PANDA_PUBLIC_API static TaskScheduler *Create(
-        size_t threadsCount, TaskStatisticsImplType taskStatisticsType = TaskStatisticsImplType::NO_STAT);
+    PANDA_PUBLIC_API static TaskScheduler *Create(size_t threadsCount,
+                                                  TaskTimeStatsType taskStatsType = TaskTimeStatsType::NO_STATISTICS);
 
     /**
      * @brief Returns the pointer to TaskScheduler. If you use it before the Create or after Destroy methods, it
@@ -56,6 +58,12 @@ public:
 
     /// @brief Deletes the existed TaskScheduler. You should not use it if you didn't use Create before.
     PANDA_PUBLIC_API static void Destroy();
+
+    /// @brief Returns true if TaskScheduler outputs log info
+    PANDA_PUBLIC_API bool IsTaskLifetimeStatisticsUsed() const;
+
+    TaskTimeStatsBase *GetTaskTimeStats() const;
+    TaskTimeStatsType GetTaskTimeStatsType() const;
 
     /**
      * @brief Creates and starts workers with registered queues. After this method, you can not register new
@@ -87,7 +95,6 @@ public:
         }
         return queue;
     }
-
     /**
      * @brief Method Destroy and Unregister TaskQueue
      * @param queue - TaskQueueInterface* of TaskQueue.
@@ -178,7 +185,7 @@ public:
     PANDA_PUBLIC_API ~TaskScheduler();
 
 private:
-    explicit TaskScheduler(size_t workersCount, TaskStatisticsImplType taskStatisticsType);
+    explicit TaskScheduler(size_t workersCount, TaskTimeStatsType taskTimeStatsType);
 
     /**
      * @brief Method get and execute tasks with specified properties. If there are no tasks with that properties method
@@ -320,7 +327,9 @@ private:
      */
     std::unordered_map<TaskProperties, std::atomic_size_t, TaskProperties::Hash> countOfTasksInSystem_;
 
-    TaskStatistics *taskStatistics_ = nullptr;
+    TaskTimeStatsBase *taskTimeStats_ = nullptr;
+    TaskTimeStatsType taskTimeStatsType_;
+
     internal::TaskSelector selector_;
 
     WaitList<Task> waitList_ GUARDED_BY(taskSchedulerStateLock_);

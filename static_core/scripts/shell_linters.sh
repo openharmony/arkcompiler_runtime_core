@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [[ -z $1 ]]; then
+set -e
+
+if [[ -z "$1" ]]; then
     echo "Usage: $0 <sources>"
     echo "    <sources> path where the sources to be checked are located"
     echo
@@ -67,7 +69,7 @@ SC2164,SC2166,SC2172,SC2173,SC2222,SC2253"}
 BASHATE_RULES=${BASHATE_IGNORE_RULES:-"E006,E042"}
 
 function save_exit_code() {
-    EXIT_CODE=$(($1 + $2))
+    return $(($1 + $2))
 }
 
 set +e
@@ -84,8 +86,10 @@ fi
 while read file_to_check; do
     bashate-mod-ds -i "${BASHATE_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
+    EXIT_CODE=$?
     shellcheck -i "${SHELLCHECK_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
+    EXIT_CODE=$?
 done <<<$(find "${root_dir}" -name "*.sh" -type f | grep -v "${skip_options}")
 
 num_checked=$(find "${root_dir}" -name "*.sh" -type f | grep -c -v "${skip_options}")

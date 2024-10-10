@@ -13,8 +13,8 @@
 
 cases:
   - import: |-
-        import {A} from "./modules/declarations.ets"  // Base class
-        import {RA} from "./modules/reexported_directives.ets"  // Base class
+        import {A} from "./modules/declarations.sts"  // Base class
+        import {RA} from "./modules/reexported_directives.sts"  // Base class
     call: |-
         let a: A = new A();
         let b: RA = new RA();
@@ -22,10 +22,10 @@ cases:
         assert(b instanceof A);
 
   - import: |-
-        import {A} from "./modules/declarations.ets"  // Base class
-        import {B} from "./modules/declarations.ets"  // Derived class
-        import {RA} from "./modules/reexported_directives.ets"  // Base class
-        import {RB} from "./modules/reexported_directives.ets"  // Derived class
+        import {A} from "./modules/declarations.sts"  // Base class
+        import {B} from "./modules/declarations.sts"  // Derived class
+        import {RA} from "./modules/reexported_directives.sts"  // Base class
+        import {RB} from "./modules/reexported_directives.sts"  // Derived class
     call: |-
         let a: B = new B();
         let b: RB = new RB();
@@ -33,10 +33,10 @@ cases:
         assert(b instanceof RA);
 
   - import: |-
-        import {AC} from "./modules/declarations.ets"  // Abstract class
-        import {C} from "./modules/declarations.ets"  // Derived class
-        import {RAC} from "./modules/reexported_directives.ets"  // Abstract class
-        import {RC} from "./modules/reexported_directives.ets"  // Derived class
+        import {AC} from "./modules/declarations.sts"  // Abstract class
+        import {C} from "./modules/declarations.sts"  // Derived class
+        import {RAC} from "./modules/reexported_directives.sts"  // Abstract class
+        import {RC} from "./modules/reexported_directives.sts"  // Derived class
     call: |-
         let a: AC = new C();
         let b: RAC = new RC();
@@ -44,10 +44,10 @@ cases:
         assert(b instanceof AC);
 
   - import: |-
-        import {I} from "./modules/declarations.ets"  // Base interface
-        import {II} from "./modules/declarations.ets"  // Derived interface
-        import {RI} from "./modules/reexported_directives.ets"  // Base interface
-        import {RII} from "./modules/reexported_directives.ets"  // Derived interface
+        import {I} from "./modules/declarations.sts"  // Base interface
+        import {II} from "./modules/declarations.sts"  // Derived interface
+        import {RI} from "./modules/reexported_directives.sts"  // Base interface
+        import {RII} from "./modules/reexported_directives.sts"  // Derived interface
     decl: |-
         class A implements I {};
         class B implements II {};
@@ -67,12 +67,12 @@ cases:
         assert(d instanceof I);
 
   - import: |-
-        import {I} from "./modules/declarations.ets"  // Base interface
-        import {II} from "./modules/declarations.ets"  // Derived interface
-        import {D} from "./modules/declarations.ets"  // Derived class
-        import {RI} from "./modules/reexported_directives.ets"  // Base interface
-        import {RII} from "./modules/reexported_directives.ets"  // Derived interface
-        import {RD} from "./modules/reexported_directives.ets"  // Derived class
+        import {I} from "./modules/declarations.sts"  // Base interface
+        import {II} from "./modules/declarations.sts"  // Derived interface
+        import {D} from "./modules/declarations.sts"  // Derived class
+        import {RI} from "./modules/reexported_directives.sts"  // Base interface
+        import {RII} from "./modules/reexported_directives.sts"  // Derived interface
+        import {RD} from "./modules/reexported_directives.sts"  // Derived class
     call: |-
         let a: I = new D();
         let b: RI = new RD();
@@ -84,17 +84,17 @@ cases:
         assert(b instanceof II);
 
   - import: |-
-        import {ENUM} from "./modules/declarations.ets"  // Enum
-        import {RENUM} from "./modules/reexported_directives.ets"  // Enum
+        import {ENUM} from "./modules/declarations.sts"  // Enum
+        import {RENUM} from "./modules/reexported_directives.sts"  // Enum
     call: |-
-        assert(ENUM.Red.getValue() == RENUM.Red.getValue());
-        assert(ENUM.Blue.getValue() == RENUM.Blue.getValue());
+        assert(ENUM.Red.valueOf() == RENUM.Red.valueOf());
+        assert(ENUM.Blue.valueOf() == RENUM.Blue.valueOf());
 
   - import: |-
-        import {A} from "./modules/declarations.ets"  // Base class
-        import {CLASS_A} from "./modules/declarations.ets"  // Type, class
-        import {RA} from "./modules/reexported_directives.ets"  // Base class
-        import {RCLASS_A} from "./modules/reexported_directives.ets"  // Type, class
+        import {A} from "./modules/declarations.sts"  // Base class
+        import {CLASS_A} from "./modules/declarations.sts"  // Type, class
+        import {RA} from "./modules/reexported_directives.sts"  // Base class
+        import {RCLASS_A} from "./modules/reexported_directives.sts"  // Type, class
     call: |-
         let a: CLASS_A = new CLASS_A();
         let b: RCLASS_A = new RCLASS_A();
@@ -102,16 +102,16 @@ cases:
         assert(b instanceof A);
 
   - import: |-
-        import {VAR_i} from "./modules/declarations.ets"  // variable of primitive type (int)
-        import {RVAR_i} from "./modules/reexported_directives.ets"  // variable of primitive type (int)
+        import {VAR_i} from "./modules/declarations.sts"  // variable of primitive type (int)
+        import {RVAR_i} from "./modules/reexported_directives.sts"  // variable of primitive type (int)
     call: |-
         let a: VAR_i = 3;
         let b: RVAR_i = 3;
         assert(a == b);
 
   - import: |-
-        import {TPL} from "./modules/declarations.ets"  // Tuple type
-        import {RTPL} from "./modules/reexported_directives.ets"  // Tuple type
+        import {TPL} from "./modules/declarations.sts"  // Tuple type
+        import {RTPL} from "./modules/reexported_directives.sts"  // Tuple type
     call: |-
         let a: TPL = [new Number(), new String()];
         let b: RTPL = [new Number(), new String()];
@@ -119,9 +119,9 @@ cases:
         assert(b instanceof TPL);
 
   - import: |-
-        import {NoArg} from "./modules/declarations.ets"  // Function without arguments
-        import {res} from "./modules/declarations.ets"
-        import {RNoArg} from "./modules/reexported_directives.ets"  // Function without arguments
+        import {NoArg} from "./modules/declarations.sts"  // Function without arguments
+        import {res} from "./modules/declarations.sts"
+        import {RNoArg} from "./modules/reexported_directives.sts"  // Function without arguments
     call: |-
         NoArg();
         assert(res == 1);
@@ -130,42 +130,42 @@ cases:
         assert(res == 1);
 
   - import: |-
-        import {OneArg} from "./modules/declarations.ets"  // Function, argument of Number type
-        import {ROneArg} from "./modules/reexported_directives.ets"  // Function, argument of Number type
+        import {OneArg} from "./modules/declarations.sts"  // Function, argument of Number type
+        import {ROneArg} from "./modules/reexported_directives.sts"  // Function, argument of Number type
     call: |-
         assert(OneArg(new Number()) == ROneArg(new Number()));
 
   - import: |-
-        import {TwoArgs} from "./modules/declarations.ets"  // Function, arguments of char and byte types
-        import {RTwoArgs} from "./modules/reexported_directives.ets"  // Function, arguments of char and byte types
+        import {TwoArgs} from "./modules/declarations.sts"  // Function, arguments of char and byte types
+        import {RTwoArgs} from "./modules/reexported_directives.sts"  // Function, arguments of char and byte types
     call: |-
         assert(TwoArgs(c'A', 1 as byte) == RTwoArgs(c'B', 2 as byte));
 
   - import: |-
-        import {Gen} from "./modules/declarations.ets"  // Function, generic argument
-        import {RGen} from "./modules/reexported_directives.ets"  // Function, generic argument
+        import {Gen} from "./modules/declarations.sts"  // Function, generic argument
+        import {RGen} from "./modules/reexported_directives.sts"  // Function, generic argument
     call: |-
         let s = "knock-knock";
         assert(Gen(s) == RGen(s));
         assert(Gen(new Number(1.45)) == RGen(new Number(1.45)));
 
   - import: |-
-        import {ArgFun} from "./modules/declarations.ets"  // Function, argument is of function type
-        import {RArgFun} from "./modules/reexported_directives.ets"  // Function, argument is of function type
+        import {ArgFun} from "./modules/declarations.sts"  // Function, argument is of function type
+        import {RArgFun} from "./modules/reexported_directives.sts"  // Function, argument is of function type
     call: |-
         assert(ArgFun( () => { return 3; } ) == RArgFun( () => { return 3; } ));
         assert(RArgFun( () => { return 4; } ) == 4 );
 
   - import: |-
-        import {ArgFun2} from "./modules/declarations.ets"  // Function, arguments - function type + primitive
-        import {RArgFun2} from "./modules/reexported_directives.ets"  // Function, arguments - function type + primitive
+        import {ArgFun2} from "./modules/declarations.sts"  // Function, arguments - function type + primitive
+        import {RArgFun2} from "./modules/reexported_directives.sts"  // Function, arguments - function type + primitive
     call: |-
         assert(ArgFun2( (i) => { return i; }, 4) == RArgFun2( (i) => { return i; }, 4));
         assert(RArgFun2( (i) => { return i; }, 5) == 5);
 
   - import: |-
-        import {a} from "./modules/declarations.ets"  // Variable, primitive, implicit type
-        import {ra} from "./modules/reexported_directives.ets"  // Variable, primitive, implicit type
+        import {a} from "./modules/declarations.sts"  // Variable, primitive, implicit type
+        import {ra} from "./modules/reexported_directives.sts"  // Variable, primitive, implicit type
     call: |-
         assert(ra == 1);
         ra += 3;
@@ -174,8 +174,8 @@ cases:
         a = 1;
 
   - import: |-
-        import {i} from "./modules/declarations.ets"  // Variable, int
-        import {ri} from "./modules/reexported_directives.ets"  // Variable, int
+        import {i} from "./modules/declarations.sts"  // Variable, int
+        import {ri} from "./modules/reexported_directives.sts"  // Variable, int
     call: |-
         assert(ri == 2);
         i += 3;
@@ -184,8 +184,8 @@ cases:
         i = 2;
 
   - import: |-
-        import {n} from "./modules/declarations.ets"  // Variable, number
-        import {rn} from "./modules/reexported_directives.ets"  // Variable, number
+        import {n} from "./modules/declarations.sts"  // Variable, number
+        import {rn} from "./modules/reexported_directives.sts"  // Variable, number
     call: |-
         assert(rn == 3);
         rn += 0.2;
@@ -194,8 +194,8 @@ cases:
         n = 3;
 
   - import: |-
-        import {s} from "./modules/declarations.ets"  // Variable, String
-        import {rs} from "./modules/reexported_directives.ets"  // Variable, String
+        import {s} from "./modules/declarations.sts"  // Variable, String
+        import {rs} from "./modules/reexported_directives.sts"  // Variable, String
     call: |-
         assert(rs == "knock-knock");
         s += " who`s there";
@@ -204,8 +204,8 @@ cases:
         s = "knock-knock";
 
   - import: |-
-        import {c} from "./modules/declarations.ets"  // Variable, char
-        import {rc} from "./modules/reexported_directives.ets"  // Variable, char
+        import {c} from "./modules/declarations.sts"  // Variable, char
+        import {rc} from "./modules/reexported_directives.sts"  // Variable, char
     call: |-
         assert(rc == c'A');
         rc = c'b';
@@ -214,8 +214,8 @@ cases:
         c = c'A';
 
   - import: |-
-        import {u} from "./modules/declarations.ets"  // Variable, union
-        import {ru} from "./modules/reexported_directives.ets"  // Variable, union
+        import {u} from "./modules/declarations.sts"  // Variable, union
+        import {ru} from "./modules/reexported_directives.sts"  // Variable, union
     call: |-
         assert(ru == undefined);
         u = new Number(1.2);
@@ -227,8 +227,8 @@ cases:
         u = undefined;
 
   - import: |-
-        import {arr} from "./modules/declarations.ets"  // Variable, bytes[3]
-        import {rarr} from "./modules/reexported_directives.ets"  // Variable, bytes[3]
+        import {arr} from "./modules/declarations.sts"  // Variable, bytes[3]
+        import {rarr} from "./modules/reexported_directives.sts"  // Variable, bytes[3]
     call: |-
         assert(rarr.length == 3);
         arr = new byte[2];
@@ -237,42 +237,42 @@ cases:
         arr = new byte[3];
 
   - import: |-
-        import {ca} from "./modules/declarations.ets"  // Const implicit int
-        import {rca} from "./modules/reexported_directives.ets"  // Const implicit int
+        import {ca} from "./modules/declarations.sts"  // Const implicit int
+        import {rca} from "./modules/reexported_directives.sts"  // Const implicit int
     call: |-
         assert(rca == ca);
 
   - import: |-
-        import {ca} from "./modules/declarations.ets"  // Const implicit int
-        import {rca} from "./modules/reexported_directives.ets"  // Const implicit int
+        import {ca} from "./modules/declarations.sts"  // Const implicit int
+        import {rca} from "./modules/reexported_directives.sts"  // Const implicit int
     call: |-
         rca = 21;
     tags: |-
         negative, compile-only
 
   - import: |-
-        import {ci} from "./modules/declarations.ets"  // Const int
-        import {rci} from "./modules/reexported_directives.ets"  // Const int
+        import {ci} from "./modules/declarations.sts"  // Const int
+        import {rci} from "./modules/reexported_directives.sts"  // Const int
     call: |-
         assert(rci == ci);
 
   - import: |-
-        import {ci} from "./modules/declarations.ets"  // Const int
-        import {rci} from "./modules/reexported_directives.ets"  // Const int
+        import {ci} from "./modules/declarations.sts"  // Const int
+        import {rci} from "./modules/reexported_directives.sts"  // Const int
     call: |-
         rci = 22;
     tags: |-
         negative, compile-only
 
   - import: |-
-        import {cs} from "./modules/declarations.ets"  // Const str
-        import {rcs} from "./modules/reexported_directives.ets"  // Const str
+        import {cs} from "./modules/declarations.sts"  // Const str
+        import {rcs} from "./modules/reexported_directives.sts"  // Const str
     call: |-
         assert(rcs == cs);
 
   - import: |-
-        import {cs} from "./modules/declarations.ets"  // Const str
-        import {rcs} from "./modules/reexported_directives.ets"  // Const str
+        import {cs} from "./modules/declarations.sts"  // Const str
+        import {rcs} from "./modules/reexported_directives.sts"  // Const str
     call: |-
         rcs = "updated";
     tags: |-

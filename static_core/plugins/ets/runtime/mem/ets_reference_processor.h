@@ -21,10 +21,13 @@
 
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_weak_reference.h"
+#include "plugins/ets/runtime/types/ets_finalizable_weak_ref.h"
 
 namespace ark::mem::ets {
 
 class EtsReferenceProcessor final : public ReferenceProcessor {
+    using RefFinalizer = ark::ets::EtsFinalizableWeakRef::Finalizer;
+
 public:
     explicit EtsReferenceProcessor(GC *gc);
     NO_COPY_SEMANTIC(EtsReferenceProcessor);
@@ -65,13 +68,25 @@ public:
     /// @return size of the queue of weak references
     size_t GetReferenceQueueSize() const final;
 
+    /// Process native finalizers of FinalizableWeakRef
+    void ProcessFinalizers() final;
+
 private:
     template <typename Handler>
     void ProcessReferences(const mem::GC::ReferenceClearPredicateT &pred, const Handler &handler);
+
+    /// Add finalizer of dead referent of FinalizableWeakRef to the queue
+    void EnqueueFinalizer(ark::ets::EtsWeakReference *weakRef);
+
+    /// Handle fields of references
+    void HandleOtherFields(const BaseClass *cls, const ObjectHeader *object, const ReferenceProcessorT &processor)
+        REQUIRES(weakRefLock_);
+
     mutable os::memory::Mutex weakRefLock_;
     PandaUnorderedSet<ObjectHeader *> weakReferences_ GUARDED_BY(weakRefLock_);
     GC *gc_ {nullptr};
     ark::ets::EtsObject *undefinedObject_ {nullptr};
+    PandaDeque<RefFinalizer> finalizerQueue_;
 };
 
 template <typename Handler>

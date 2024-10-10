@@ -21,25 +21,25 @@ gen_file(TARGET test_number_subtypes_gen_cpp
 )
 
 gen_file(TARGET test_number_subtypes_gen_ets
-    TEMPLATE ${INTEROP_JS_TESTS_SOURCE_DIR}/number_subtypes/number_subtypes.ets.erb
-    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.ets
+    TEMPLATE ${INTEROP_JS_TESTS_SOURCE_DIR}/number_subtypes/number_subtypes.sts.erb
+    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.sts
     REQUIRES ${INTEROP_JS_TESTS_SOURCE_DIR}/number_subtypes/number_subtypes.rb
 )
 
 gen_file(TARGET frontend_test_number_subtypes_gen_ets
-    TEMPLATE ${INTEROP_JS_TESTS_SOURCE_DIR}/number_subtypes/number_subtypes_frontend.ets.erb
-    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets
+    TEMPLATE ${INTEROP_JS_TESTS_SOURCE_DIR}/number_subtypes/number_subtypes_frontend.sts.erb
+    OUTPUT ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.sts
     REQUIRES ${INTEROP_JS_TESTS_SOURCE_DIR}/number_subtypes/number_subtypes.rb
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_test_number_subtypes
     CPP_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.cpp
-    ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.ets
+    ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.sts
 )
 
 panda_ets_interop_js_gtest(ets_interop_js_frontend_test_number_subtypes
     CPP_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes.cpp
-    ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.ets
+    ETS_SOURCES ${INTEROP_TESTS_GENERATED_DIR}/number_subtypes_frontend.sts
     ETS_CONFIG ${ETS_CONFIG}
 )
 

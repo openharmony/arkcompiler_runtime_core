@@ -19,16 +19,16 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const DerivedClassWithDefaultParameterMethods = etsMod.getClass('DerivedClassWithDefaultParameterMethods');
 
 {
-  const INT_VALUE = 777;
-  const DEFAULT_VALUE = 1;
+	const INT_VALUE = 777;
+	const DEFAULT_VALUE = 1;
 
-  let obj = new DerivedClassWithDefaultParameterMethods();
+	let obj = new DerivedClassWithDefaultParameterMethods();
 
-  let ret = obj.int_parameter_method();
-  ASSERT_EQ(ret, -DEFAULT_VALUE);
+	let ret = obj.intParameterMethod();
+	ASSERT_EQ(ret, -DEFAULT_VALUE);
 
-  ret = obj.int_parameter_method(INT_VALUE);
-  ASSERT_EQ(ret, -INT_VALUE);
+	ret = obj.intParameterMethod(INT_VALUE);
+	ASSERT_EQ(ret, -INT_VALUE);
 }
 
 GCJSRuntimeCleanup();

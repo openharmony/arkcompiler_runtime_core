@@ -12,6 +12,6 @@
 # limitations under the License.
 
 panda_ets_interop_js_test(ets_interop_js__test_proxy_reference_storage_2
-    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_proxy_reference_storage_2.ets
+    ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_proxy_reference_storage_2.sts
     JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/test_proxy_reference_storage_2.js
 )

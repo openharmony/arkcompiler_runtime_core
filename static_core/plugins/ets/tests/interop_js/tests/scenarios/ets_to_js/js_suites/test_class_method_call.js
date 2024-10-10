@@ -19,8 +19,8 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const ClassWithMethodEts = etsMod.getClass('ClassWithMethodEts');
 
 {
-  let obj = new ClassWithMethodEts();
-  ASSERT_EQ(obj.methodInClass(), 1);
+	let obj = new ClassWithMethodEts();
+	ASSERT_EQ(obj.methodInClass(), 1);
 }
 
 GCJSRuntimeCleanup();

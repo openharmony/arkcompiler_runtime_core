@@ -13,8 +13,13 @@
  * limitations under the License.
  */
 
+#include <cstddef>
 #include <cstdint>
 
+#include "annotation_data_accessor.h"
+#include "bytecode_instruction.h"
+#include "code_data_accessor.h"
+#include "field_data_accessor.h"
 #include "file.h"
 #include "debug_info_updater-inl.h"
 #include "file_items.h"
@@ -30,6 +35,7 @@
 #include "libpandafile/method_data_accessor-inl.h"
 
 #include "libpandabase/utils/utf.h"
+#include "proto_data_accessor.h"
 
 namespace ark::panda_file {
 
@@ -80,6 +86,123 @@ bool FileReader::ReadContainer(bool shouldRebuildIndices)
     return true;
 }
 
+template <typename T>
+static void EmplaceLiteralArray(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                std::vector<panda_file::LiteralItem> &literalArray, std::unique_ptr<const File> &file)
+{
+    File::EntityId id(std::get<uint32_t>(value));
+    auto sp = file->GetSpanFromId(id);
+    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+    literalArray.emplace_back(len);
+    for (size_t i = 0; i < len; i++) {
+        auto v = helpers::Read<sizeof(T)>(&sp);
+        literalArray.emplace_back(v);
+    }
+}
+
+static void EmplaceLiteralString(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                 std::vector<panda_file::LiteralItem> &literalArray, std::unique_ptr<const File> &file,
+                                 ItemContainer &container)
+{
+    File::EntityId id(std::get<uint32_t>(value));
+    auto data = file->GetStringData(id);
+    std::string itemStr(utf::Mutf8AsCString(data.data));
+    auto *stringItem = container.GetOrCreateStringItem(itemStr);
+    literalArray.emplace_back(stringItem);
+}
+
+static void EmplaceLiteralArrayString(const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                      std::vector<panda_file::LiteralItem> &literalArray,
+                                      std::unique_ptr<const File> &file, ItemContainer &container)
+{
+    File::EntityId id(std::get<uint32_t>(value));
+    auto sp = file->GetSpanFromId(id);
+    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
+    literalArray.emplace_back(len);
+    for (size_t i = 0; i < len; i++) {
+        File::EntityId strId(helpers::Read<sizeof(uint32_t)>(&sp));
+        auto data = file->GetStringData(strId);
+        std::string itemStr(utf::Mutf8AsCString(data.data));
+        auto *stringItem = container.GetOrCreateStringItem(itemStr);
+        literalArray.emplace_back(stringItem);
+    }
+}
+
+void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &literalArray,
+                                    const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                    const panda_file::LiteralTag &tag)
+{
+    literalArray.emplace_back(static_cast<uint8_t>(tag));
+    switch (tag) {
+        case panda_file::LiteralTag::BOOL: {
+            literalArray.emplace_back(static_cast<uint8_t>(std::get<bool>(value)));
+            break;
+        }
+        case panda_file::LiteralTag::TAGVALUE:
+        case panda_file::LiteralTag::ACCESSOR:
+        case panda_file::LiteralTag::NULLVALUE: {
+            literalArray.emplace_back(std::get<uint8_t>(value));
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_U1:
+        case panda_file::LiteralTag::ARRAY_I8:
+        case panda_file::LiteralTag::ARRAY_U8: {
+            EmplaceLiteralArray<uint8_t>(value, literalArray, file_);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I16:
+        case panda_file::LiteralTag::ARRAY_U16: {
+            EmplaceLiteralArray<uint16_t>(value, literalArray, file_);
+            break;
+        }
+        case panda_file::LiteralTag::INTEGER: {
+            literalArray.emplace_back(std::get<uint32_t>(value));
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I32:
+        case panda_file::LiteralTag::ARRAY_U32:
+        case panda_file::LiteralTag::ARRAY_F32: {
+            EmplaceLiteralArray<uint32_t>(value, literalArray, file_);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_I64:
+        case panda_file::LiteralTag::ARRAY_U64:
+        case panda_file::LiteralTag::ARRAY_F64: {
+            EmplaceLiteralArray<uint64_t>(value, literalArray, file_);
+            break;
+        }
+        case panda_file::LiteralTag::FLOAT: {
+            literalArray.emplace_back(bit_cast<uint32_t>(std::get<float>(value)));
+            break;
+        }
+        case panda_file::LiteralTag::DOUBLE: {
+            literalArray.emplace_back(bit_cast<uint64_t>(std::get<double>(value)));
+            break;
+        }
+        case panda_file::LiteralTag::STRING: {
+            EmplaceLiteralString(value, literalArray, file_, container_);
+            break;
+        }
+        case panda_file::LiteralTag::ARRAY_STRING: {
+            EmplaceLiteralArrayString(value, literalArray, file_, container_);
+            break;
+        }
+        case panda_file::LiteralTag::METHOD:
+        case panda_file::LiteralTag::GENERATORMETHOD:
+        case panda_file::LiteralTag::ASYNCMETHOD:
+        case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
+            File::EntityId methodId(std::get<uint32_t>(value));
+            MethodDataAccessor methodAcc(*file_, methodId);
+            File::EntityId classId(methodAcc.GetClassId());
+            auto *classItem = CreateClassItem(classId);
+            literalArray.emplace_back(CreateMethodItem(classItem, methodId));
+            break;
+        }
+        default:
+            UNREACHABLE();
+    }
+}
+
 /* static */
 bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, File::EntityId arrayId, uint32_t index)
 {
@@ -96,119 +219,7 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, F
     litArrayAccessor->EnumerateLiteralVals(
         arrayId, [&literalArray, this](const panda_file::LiteralDataAccessor::LiteralValue &value,
                                        const panda_file::LiteralTag &tag) {
-            literalArray.emplace_back(static_cast<uint8_t>(tag));
-            switch (tag) {
-                case panda_file::LiteralTag::BOOL: {
-                    literalArray.emplace_back(static_cast<uint8_t>(std::get<bool>(value)));
-                    break;
-                }
-                case panda_file::LiteralTag::TAGVALUE:
-                case panda_file::LiteralTag::ACCESSOR:
-                case panda_file::LiteralTag::NULLVALUE: {
-                    literalArray.emplace_back(std::get<uint8_t>(value));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_U1:
-                case panda_file::LiteralTag::ARRAY_I8:
-                case panda_file::LiteralTag::ARRAY_U8: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint8_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I16:
-                case panda_file::LiteralTag::ARRAY_U16: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint16_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::INTEGER: {
-                    literalArray.emplace_back(std::get<uint32_t>(value));
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I32:
-                case panda_file::LiteralTag::ARRAY_U32:
-                case panda_file::LiteralTag::ARRAY_F32: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint32_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_I64:
-                case panda_file::LiteralTag::ARRAY_U64:
-                case panda_file::LiteralTag::ARRAY_F64: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        auto v = helpers::Read<sizeof(uint64_t)>(&sp);
-                        literalArray.emplace_back(v);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::FLOAT: {
-                    literalArray.emplace_back(bit_cast<uint32_t>(std::get<float>(value)));
-                    break;
-                }
-                case panda_file::LiteralTag::DOUBLE: {
-                    literalArray.emplace_back(bit_cast<uint64_t>(std::get<double>(value)));
-                    break;
-                }
-                case panda_file::LiteralTag::STRING: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto data = file_->GetStringData(id);
-                    std::string itemStr(utf::Mutf8AsCString(data.data));
-                    auto *stringItem = container_.GetOrCreateStringItem(itemStr);
-                    literalArray.emplace_back(stringItem);
-                    break;
-                }
-                case panda_file::LiteralTag::ARRAY_STRING: {
-                    File::EntityId id(std::get<uint32_t>(value));
-                    auto sp = file_->GetSpanFromId(id);
-                    auto len = helpers::Read<sizeof(uint32_t)>(&sp);
-                    literalArray.emplace_back(len);
-                    for (size_t i = 0; i < len; i++) {
-                        File::EntityId strId(helpers::Read<sizeof(uint32_t)>(&sp));
-                        auto data = file_->GetStringData(strId);
-                        std::string itemStr(utf::Mutf8AsCString(data.data));
-                        auto *stringItem = container_.GetOrCreateStringItem(itemStr);
-                        literalArray.emplace_back(stringItem);
-                    }
-                    break;
-                }
-                case panda_file::LiteralTag::METHOD:
-                case panda_file::LiteralTag::GENERATORMETHOD:
-                case panda_file::LiteralTag::ASYNCMETHOD:
-                case panda_file::LiteralTag::ASYNCGENERATORMETHOD: {
-                    File::EntityId methodId(std::get<uint32_t>(value));
-                    MethodDataAccessor methodAcc(*file_, methodId);
-                    auto name = methodAcc.GetName();
-                    (void)name;
-                    File::EntityId classId(methodAcc.GetClassId());
-                    auto *classItem = CreateClassItem(classId);
-                    literalArray.emplace_back(CreateMethodItem(classItem, methodId));
-                    break;
-                }
-                default:
-                    UNREACHABLE();
-            }
+            this->EmplaceLiteralVals(literalArray, value, tag);
         });
 
     item->AddItems(literalArray);
@@ -216,7 +227,220 @@ bool FileReader::CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, F
     return true;
 }
 
+template <typename T>
+static ValueItem *GeneratePrimitiveItemLesserInt32(AnnotationDataAccessor::Elem &annElem, ItemContainer &container,
+                                                   ark::panda_file::Type::TypeId typeId)
+{
+    auto array = annElem.GetArrayValue();
+    std::vector<ScalarValueItem> items;
+    for (size_t j = 0; j < array.GetCount(); j++) {
+        ScalarValueItem scalar(static_cast<uint32_t>(array.Get<T>(j)));
+        items.emplace_back(std::move(scalar));
+    }
+    return static_cast<ValueItem *>(container.CreateItem<ArrayValueItem>(Type(typeId), std::move(items)));
+}
+
+template <typename T>
+static ValueItem *GeneratePrimitiveItem(AnnotationDataAccessor::Elem &annElem, ItemContainer &container,
+                                        ark::panda_file::Type::TypeId typeId)
+{
+    auto array = annElem.GetArrayValue();
+    std::vector<ScalarValueItem> items;
+    for (size_t j = 0; j < array.GetCount(); j++) {
+        ScalarValueItem scalar(array.Get<T>(j));
+        items.emplace_back(std::move(scalar));
+    }
+    return static_cast<ValueItem *>(container.CreateItem<ArrayValueItem>(Type(typeId), std::move(items)));
+}
+
 // NOLINTNEXTLINE(readability-function-size)
+ValueItem *FileReader::SetElemValueItem(AnnotationDataAccessor::Tag &annTag, AnnotationDataAccessor::Elem &annElem)
+{
+    switch (annTag.GetItem()) {
+        case '1':
+        case '2':
+        case '3': {
+            auto scalar = annElem.GetScalarValue();
+            return container_.GetOrCreateIntegerValueItem(scalar.Get<uint8_t>());
+        }
+        case '4':
+        case '5': {
+            auto scalar = annElem.GetScalarValue();
+            return container_.GetOrCreateIntegerValueItem(scalar.Get<uint16_t>());
+        }
+        case '6':
+        case '7': {
+            auto scalar = annElem.GetScalarValue();
+            return container_.GetOrCreateIntegerValueItem(scalar.Get<uint32_t>());
+        }
+        case '8':
+        case '9': {
+            auto scalar = annElem.GetScalarValue();
+            return container_.GetOrCreateLongValueItem(scalar.Get<uint64_t>());
+        }
+        case 'A': {
+            auto scalar = annElem.GetScalarValue();
+            return container_.GetOrCreateFloatValueItem(scalar.Get<float>());
+        }
+        case 'B': {
+            auto scalar = annElem.GetScalarValue();
+            return container_.GetOrCreateDoubleValueItem(scalar.Get<double>());
+        }
+        case 'C': {
+            auto scalar = annElem.GetScalarValue();
+            const File::EntityId strId(scalar.Get<uint32_t>());
+            auto data = file_->GetStringData(strId);
+            std::string itemStr(utf::Mutf8AsCString(data.data));
+            auto *strItem = container_.GetOrCreateStringItem(itemStr);
+            return container_.GetOrCreateIdValueItem(strItem);
+        }
+        case 'D': {
+            auto scalar = annElem.GetScalarValue();
+            const File::EntityId classId {scalar.Get<uint32_t>()};
+            return container_.GetOrCreateIdValueItem(CreateGenericClassItem(classId));
+        }
+        case 'E': {
+            auto scalar = annElem.GetScalarValue();
+            const File::EntityId methodId {scalar.Get<uint32_t>()};
+            MethodDataAccessor methodAcc(*file_, methodId);
+            auto *clsItem = CreateGenericClassItem(methodAcc.GetClassId());
+            return container_.GetOrCreateIdValueItem(CreateGenericMethodItem(clsItem, methodId));
+        }
+        case 'F': {
+            auto scalar = annElem.GetScalarValue();
+            const File::EntityId fieldId {scalar.Get<uint32_t>()};
+            FieldDataAccessor fieldAcc(*file_, fieldId);
+            auto *clsItem = CreateGenericClassItem(fieldAcc.GetClassId());
+            return container_.GetOrCreateIdValueItem(CreateGenericFieldItem(clsItem, fieldId));
+        }
+        case 'G': {
+            auto scalar = annElem.GetScalarValue();
+            const File::EntityId annItemId {scalar.Get<uint32_t>()};
+            return container_.GetOrCreateIdValueItem(CreateAnnotationItem(annItemId));
+        }
+        case 'J': {
+            LOG(FATAL, PANDAFILE) << "MethodHandle is not supported so far";
+            break;
+        }
+        case '*': {
+            return container_.GetOrCreateIntegerValueItem(0);
+        }
+        case 'K': {
+            return GeneratePrimitiveItemLesserInt32<uint8_t>(annElem, container_, Type::TypeId::U1);
+        }
+        case 'L': {
+            return GeneratePrimitiveItemLesserInt32<uint8_t>(annElem, container_, Type::TypeId::I8);
+        }
+        case 'M': {
+            return GeneratePrimitiveItemLesserInt32<uint8_t>(annElem, container_, Type::TypeId::U8);
+        }
+        case 'N': {
+            return GeneratePrimitiveItemLesserInt32<uint16_t>(annElem, container_, Type::TypeId::I16);
+        }
+        case 'O': {
+            return GeneratePrimitiveItemLesserInt32<uint16_t>(annElem, container_, Type::TypeId::U16);
+        }
+        case 'P': {
+            return GeneratePrimitiveItem<uint32_t>(annElem, container_, Type::TypeId::I32);
+        }
+        case 'Q': {
+            return GeneratePrimitiveItem<uint32_t>(annElem, container_, Type::TypeId::U32);
+        }
+        case 'R': {
+            return GeneratePrimitiveItem<uint64_t>(annElem, container_, Type::TypeId::I64);
+        }
+        case 'S': {
+            return GeneratePrimitiveItem<uint64_t>(annElem, container_, Type::TypeId::U64);
+        }
+        case 'T': {
+            return GeneratePrimitiveItem<float>(annElem, container_, Type::TypeId::F32);
+        }
+        case 'U': {
+            return GeneratePrimitiveItem<double>(annElem, container_, Type::TypeId::F64);
+        }
+        case 'V': {
+            auto array = annElem.GetArrayValue();
+            std::vector<ScalarValueItem> items;
+            for (size_t j = 0; j < array.GetCount(); j++) {
+                const File::EntityId strId(array.Get<uint32_t>(j));
+                auto data = file_->GetStringData(strId);
+                std::string itemStr(utf::Mutf8AsCString(data.data));
+                items.emplace_back(ScalarValueItem(container_.GetOrCreateStringItem(itemStr)));
+            }
+            return static_cast<ValueItem *>(
+                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
+        }
+        case 'W': {
+            auto array = annElem.GetArrayValue();
+            std::vector<ScalarValueItem> items;
+            for (size_t j = 0; j < array.GetCount(); j++) {
+                const File::EntityId classId {array.Get<uint32_t>(j)};
+                BaseClassItem *clsItem = nullptr;
+                if (file_->IsExternal(classId)) {
+                    clsItem = CreateForeignClassItem(classId);
+                } else {
+                    clsItem = CreateClassItem(classId);
+                }
+                ASSERT(clsItem != nullptr);
+                items.emplace_back(ScalarValueItem(clsItem));
+            }
+            return static_cast<ValueItem *>(
+                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
+        }
+        case 'X': {
+            auto array = annElem.GetArrayValue();
+            std::vector<ScalarValueItem> items;
+            for (size_t j = 0; j < array.GetCount(); j++) {
+                const File::EntityId methodId {array.Get<uint32_t>(j)};
+                MethodDataAccessor methodAcc(*file_, methodId);
+                auto *clsItem = CreateGenericClassItem(methodAcc.GetClassId());
+                items.emplace_back(ScalarValueItem(CreateGenericMethodItem(clsItem, methodId)));
+            }
+            return static_cast<ValueItem *>(
+                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
+        }
+        case 'Y': {
+            auto array = annElem.GetArrayValue();
+            std::vector<ScalarValueItem> items;
+            for (size_t j = 0; j < array.GetCount(); j++) {
+                const File::EntityId fieldId {array.Get<uint32_t>(j)};
+                FieldDataAccessor fieldAcc(*file_, fieldId);
+                auto *clsItem = CreateGenericClassItem(fieldAcc.GetClassId());
+                items.emplace_back(ScalarValueItem(CreateGenericFieldItem(clsItem, fieldId)));
+            }
+            return static_cast<ValueItem *>(
+                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
+        }
+        case 'H': {
+            // ARRAY can appear for empty arrays only
+            ASSERT(annElem.GetArrayValue().GetCount() == 0);
+            return static_cast<ValueItem *>(
+                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::VOID), std::vector<ScalarValueItem>()));
+        }
+        case 'Z': {
+            auto array = annElem.GetArrayValue();
+            std::vector<ScalarValueItem> items;
+            for (size_t j = 0; j < array.GetCount(); j++) {
+                const File::EntityId annItemId {array.Get<uint32_t>(j)};
+                items.emplace_back(CreateAnnotationItem(annItemId));
+            }
+            return static_cast<ValueItem *>(
+                container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
+        }
+        case '@': {
+            // NOTE(nsizov): support it
+            LOG(FATAL, PANDAFILE) << "MethodHandle is not supported so far";
+            break;
+        }
+            // array
+        case 'I':
+            // VOID(I) and ARRAY(H) value should not appear
+        default:
+            UNREACHABLE();
+    }
+    return nullptr;
+}
+
 AnnotationItem *FileReader::CreateAnnotationItem(File::EntityId annId)
 {
     auto it = itemsDone_.find(annId);
@@ -248,295 +472,7 @@ AnnotationItem *FileReader::CreateAnnotationItem(File::EntityId annId)
     for (size_t i = 0; i < annAcc.GetCount(); i++) {
         AnnotationDataAccessor::Tag annTag = annAcc.GetTag(i);
         AnnotationDataAccessor::Elem annElem = annAcc.GetElement(i);
-        ValueItem *elemValueItem = nullptr;
-        switch (annTag.GetItem()) {
-            case '1':
-            case '2':
-            case '3': {
-                auto scalar = annElem.GetScalarValue();
-                elemValueItem = container_.GetOrCreateIntegerValueItem(scalar.Get<uint8_t>());
-                break;
-            }
-            case '4':
-            case '5': {
-                auto scalar = annElem.GetScalarValue();
-                elemValueItem = container_.GetOrCreateIntegerValueItem(scalar.Get<uint16_t>());
-                break;
-            }
-            case '6':
-            case '7': {
-                auto scalar = annElem.GetScalarValue();
-                elemValueItem = container_.GetOrCreateIntegerValueItem(scalar.Get<uint32_t>());
-                break;
-            }
-            case '8':
-            case '9': {
-                auto scalar = annElem.GetScalarValue();
-                elemValueItem = container_.GetOrCreateLongValueItem(scalar.Get<uint64_t>());
-                break;
-            }
-            case 'A': {
-                auto scalar = annElem.GetScalarValue();
-                elemValueItem = container_.GetOrCreateFloatValueItem(scalar.Get<float>());
-                break;
-            }
-            case 'B': {
-                auto scalar = annElem.GetScalarValue();
-                elemValueItem = container_.GetOrCreateDoubleValueItem(scalar.Get<double>());
-                break;
-            }
-            case 'C': {
-                auto scalar = annElem.GetScalarValue();
-                const File::EntityId strId(scalar.Get<uint32_t>());
-                auto data = file_->GetStringData(strId);
-                std::string itemStr(utf::Mutf8AsCString(data.data));
-                auto *strItem = container_.GetOrCreateStringItem(itemStr);
-                elemValueItem = container_.GetOrCreateIdValueItem(strItem);
-                break;
-            }
-            case 'D': {
-                auto scalar = annElem.GetScalarValue();
-                const File::EntityId classId {scalar.Get<uint32_t>()};
-                elemValueItem = container_.GetOrCreateIdValueItem(CreateGenericClassItem(classId));
-                break;
-            }
-            case 'E': {
-                auto scalar = annElem.GetScalarValue();
-                const File::EntityId methodId {scalar.Get<uint32_t>()};
-                MethodDataAccessor methodAcc(*file_, methodId);
-                auto *clsItem = CreateGenericClassItem(methodAcc.GetClassId());
-                elemValueItem = container_.GetOrCreateIdValueItem(CreateGenericMethodItem(clsItem, methodId));
-                break;
-            }
-            case 'F': {
-                auto scalar = annElem.GetScalarValue();
-                const File::EntityId fieldId {scalar.Get<uint32_t>()};
-                FieldDataAccessor fieldAcc(*file_, fieldId);
-                auto *clsItem = CreateGenericClassItem(fieldAcc.GetClassId());
-                elemValueItem = container_.GetOrCreateIdValueItem(CreateGenericFieldItem(clsItem, fieldId));
-                break;
-            }
-            case 'G': {
-                auto scalar = annElem.GetScalarValue();
-                const File::EntityId annItemId {scalar.Get<uint32_t>()};
-                elemValueItem = container_.GetOrCreateIdValueItem(CreateAnnotationItem(annItemId));
-                break;
-            }
-            case 'J': {
-                LOG(FATAL, PANDAFILE) << "MethodHandle is not supported so far";
-                break;
-            }
-            case '*': {
-                elemValueItem = container_.GetOrCreateIntegerValueItem(0);
-                break;
-            }
-            case 'K': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U1), std::move(items)));
-                break;
-            }
-            case 'L': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I8), std::move(items)));
-                break;
-            }
-            case 'M': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint8_t>(j)));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U8), std::move(items)));
-                break;
-            }
-            case 'N': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint16_t>(j)));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I16), std::move(items)));
-                break;
-            }
-            case 'O': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(static_cast<uint32_t>(array.Get<uint16_t>(j)));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U16), std::move(items)));
-                break;
-            }
-            case 'P': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(array.Get<uint32_t>(j));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I32), std::move(items)));
-                break;
-            }
-            case 'Q': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(array.Get<uint32_t>(j));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U32), std::move(items)));
-                break;
-            }
-            case 'R': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(array.Get<uint64_t>(j));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::I64), std::move(items)));
-                break;
-            }
-            case 'S': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(array.Get<uint64_t>(j));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::U64), std::move(items)));
-                break;
-            }
-            case 'T': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(array.Get<float>(j));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::F32), std::move(items)));
-                break;
-            }
-            case 'U': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    ScalarValueItem scalar(array.Get<double>(j));
-                    items.emplace_back(std::move(scalar));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::F64), std::move(items)));
-                break;
-            }
-            case 'V': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId strId(array.Get<uint32_t>(j));
-                    auto data = file_->GetStringData(strId);
-                    std::string itemStr(utf::Mutf8AsCString(data.data));
-                    items.emplace_back(ScalarValueItem(container_.GetOrCreateStringItem(itemStr)));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
-                break;
-            }
-            case 'W': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId classId {array.Get<uint32_t>(j)};
-                    BaseClassItem *clsItem = nullptr;
-                    if (file_->IsExternal(classId)) {
-                        clsItem = CreateForeignClassItem(classId);
-                    } else {
-                        clsItem = CreateClassItem(classId);
-                    }
-                    ASSERT(clsItem != nullptr);
-                    items.emplace_back(ScalarValueItem(clsItem));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
-                break;
-            }
-            case 'X': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId methodId {array.Get<uint32_t>(j)};
-                    MethodDataAccessor methodAcc(*file_, methodId);
-                    auto *clsItem = CreateGenericClassItem(methodAcc.GetClassId());
-                    items.emplace_back(ScalarValueItem(CreateGenericMethodItem(clsItem, methodId)));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
-                break;
-            }
-            case 'Y': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId fieldId {array.Get<uint32_t>(j)};
-                    FieldDataAccessor fieldAcc(*file_, fieldId);
-                    auto *clsItem = CreateGenericClassItem(fieldAcc.GetClassId());
-                    items.emplace_back(ScalarValueItem(CreateGenericFieldItem(clsItem, fieldId)));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
-                break;
-            }
-            case 'H': {
-                // ARRAY can appear for empty arrays only
-                ASSERT(annElem.GetArrayValue().GetCount() == 0);
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::VOID), std::vector<ScalarValueItem>()));
-                break;
-            }
-            case 'Z': {
-                auto array = annElem.GetArrayValue();
-                std::vector<ScalarValueItem> items;
-                for (size_t j = 0; j < array.GetCount(); j++) {
-                    const File::EntityId annItemId {array.Get<uint32_t>(j)};
-                    items.emplace_back(CreateAnnotationItem(annItemId));
-                }
-                elemValueItem = static_cast<ValueItem *>(
-                    container_.CreateItem<ArrayValueItem>(Type(Type::TypeId::REFERENCE), std::move(items)));
-                break;
-            }
-            case '@': {
-                // NOTE(nsizov): support it
-                LOG(FATAL, PANDAFILE) << "MethodHandle is not supported so far";
-                break;
-            }
-                // array
-            case 'I':
-                // VOID(I) and ARRAY(H) value should not appear
-            default:
-                UNREACHABLE();
-        }
+        ValueItem *elemValueItem = SetElemValueItem(annTag, annElem);
 
         ASSERT(elemValueItem != nullptr);
 
@@ -649,6 +585,68 @@ DebugInfoItem *FileReader::CreateDebugInfoItem(File::EntityId debugInfoId)
     return debugInfoItem;
 }
 
+BaseClassItem *FileReader::GetCatchTypeItem(CodeDataAccessor::CatchBlock &catchBlock, File::EntityId methodId,
+                                            MethodItem *methodItem)
+{
+    BaseClassItem *catchTypeItem = nullptr;
+    auto typeIdx = catchBlock.GetTypeIdx();
+    if (typeIdx != panda_file::INVALID_INDEX) {
+        File::EntityId catchClsId = file_->ResolveClassIndex(methodId, catchBlock.GetTypeIdx());
+        if (file_->IsExternal(catchClsId)) {
+            catchTypeItem = CreateForeignClassItem(catchClsId);
+        } else {
+            catchTypeItem = CreateClassItem(catchClsId);
+        }
+        methodItem->AddIndexDependency(catchTypeItem);
+    }
+    return catchTypeItem;
+}
+
+void FileReader::SetMethodCodeIfPresent(std::optional<File::EntityId> &codeId, MethodItem *methodItem,
+                                        File::EntityId &methodId)
+{
+    CodeDataAccessor codeAcc(*file_, codeId.value());
+    std::vector<uint8_t> instructions(codeAcc.GetCodeSize());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    instructions.assign(codeAcc.GetInstructions(), codeAcc.GetInstructions() + codeAcc.GetCodeSize());
+    auto *codeItem =
+        container_.CreateItem<CodeItem>(codeAcc.GetNumVregs(), codeAcc.GetNumArgs(), std::move(instructions));
+
+    codeAcc.EnumerateTryBlocks([this, &methodItem, &methodId, &codeItem](CodeDataAccessor::TryBlock &tryBlock) {
+        std::vector<CodeItem::CatchBlock> catchBlocks;
+        tryBlock.EnumerateCatchBlocks(
+            [this, &methodItem, &methodId, &catchBlocks](CodeDataAccessor::CatchBlock &catchBlock) {
+                BaseClassItem *catchTypeItem = this->GetCatchTypeItem(catchBlock, methodId, methodItem);
+                catchBlocks.emplace_back(CodeItem::CatchBlock(methodItem, catchTypeItem, catchBlock.GetHandlerPc(),
+                                                              catchBlock.GetCodeSize()));
+                return true;
+            });
+        codeItem->AddTryBlock(CodeItem::TryBlock(tryBlock.GetStartPc(), tryBlock.GetLength(), std::move(catchBlocks)));
+        return true;
+    });
+
+    methodItem->SetCode(codeItem);
+}
+
+TypeItem *FileReader::SetRetType(ProtoDataAccessor &protoAcc, size_t &referenceNum)
+
+{
+    Type retType = protoAcc.GetReturnType();
+    TypeItem *retTypeItem = nullptr;
+    if (retType.IsPrimitive()) {
+        retTypeItem = container_.GetOrCreatePrimitiveTypeItem(retType);
+    } else {
+        const File::EntityId typeClsId = protoAcc.GetReferenceType(referenceNum);
+        if (file_->IsExternal(typeClsId)) {
+            retTypeItem = CreateForeignClassItem(typeClsId);
+        } else {
+            retTypeItem = CreateClassItem(typeClsId);
+        }
+        referenceNum++;
+    }
+    return retTypeItem;
+}
+
 MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId)
 {
     auto it = itemsDone_.find(methodId);
@@ -662,20 +660,8 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId
     auto *methodStrItem = container_.GetOrCreateStringItem(methodName);
 
     ProtoDataAccessor protoAcc(*file_, methodAcc.GetProtoId());
-    Type retType = protoAcc.GetReturnType();
     size_t referenceNum = 0;
-    TypeItem *retTypeItem = nullptr;
-    if (retType.IsPrimitive()) {
-        retTypeItem = container_.GetOrCreatePrimitiveTypeItem(retType);
-    } else {
-        const File::EntityId typeClsId = protoAcc.GetReferenceType(referenceNum);
-        if (file_->IsExternal(typeClsId)) {
-            retTypeItem = CreateForeignClassItem(typeClsId);
-        } else {
-            retTypeItem = CreateClassItem(typeClsId);
-        }
-        referenceNum++;
-    }
+    TypeItem *retTypeItem = SetRetType(protoAcc, referenceNum);
     ASSERT(retTypeItem != nullptr);
     auto paramItems = CreateMethodParamItems(&protoAcc, &methodAcc, referenceNum);
     // Double check if we done this method while computing params
@@ -712,38 +698,7 @@ MethodItem *FileReader::CreateMethodItem(ClassItem *cls, File::EntityId methodId
 
     auto codeId = methodAcc.GetCodeId();
     if (codeId) {
-        CodeDataAccessor codeAcc(*file_, codeId.value());
-        std::vector<uint8_t> instructions(codeAcc.GetCodeSize());
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        instructions.assign(codeAcc.GetInstructions(), codeAcc.GetInstructions() + codeAcc.GetCodeSize());
-        auto *codeItem =
-            container_.CreateItem<CodeItem>(codeAcc.GetNumVregs(), codeAcc.GetNumArgs(), std::move(instructions));
-
-        codeAcc.EnumerateTryBlocks([this, &methodItem, &methodId, &codeItem](CodeDataAccessor::TryBlock &tryBlock) {
-            std::vector<CodeItem::CatchBlock> catchBlocks;
-            tryBlock.EnumerateCatchBlocks(
-                [this, &methodItem, &methodId, &catchBlocks](CodeDataAccessor::CatchBlock &catchBlock) {
-                    BaseClassItem *catchTypeItem = nullptr;
-                    auto typeIdx = catchBlock.GetTypeIdx();
-                    if (typeIdx != panda_file::INVALID_INDEX) {
-                        File::EntityId catchClsId = file_->ResolveClassIndex(methodId, catchBlock.GetTypeIdx());
-                        if (file_->IsExternal(catchClsId)) {
-                            catchTypeItem = CreateForeignClassItem(catchClsId);
-                        } else {
-                            catchTypeItem = CreateClassItem(catchClsId);
-                        }
-                        methodItem->AddIndexDependency(catchTypeItem);
-                    }
-                    catchBlocks.emplace_back(CodeItem::CatchBlock(methodItem, catchTypeItem, catchBlock.GetHandlerPc(),
-                                                                  catchBlock.GetCodeSize()));
-                    return true;
-                });
-            codeItem->AddTryBlock(
-                CodeItem::TryBlock(tryBlock.GetStartPc(), tryBlock.GetLength(), std::move(catchBlocks)));
-            return true;
-        });
-
-        methodItem->SetCode(codeItem);
+        SetMethodCodeIfPresent(codeId, methodItem, methodId);
     }
 
     auto debugInfoId = methodAcc.GetDebugInfoId();
@@ -764,6 +719,42 @@ MethodHandleItem *FileReader::CreateMethodHandleItem(File::EntityId mhId)
     (void)mhId;
     ASSERT(false);
     return nullptr;  // STUB
+}
+
+void FileReader::SetFieldValue(FieldItem *fieldItem, Type fieldType, FieldDataAccessor &fieldAcc)
+{
+    switch (fieldType.GetId()) {
+        case Type::TypeId::U1:
+        case Type::TypeId::I8:
+        case Type::TypeId::U8:
+            SetIntegerFieldValue<uint8_t>(&fieldAcc, fieldItem);
+            break;
+        case Type::TypeId::I16:
+        case Type::TypeId::U16:
+            SetIntegerFieldValue<uint16_t>(&fieldAcc, fieldItem);
+            break;
+        case Type::TypeId::I32:
+        case Type::TypeId::U32:
+            SetIntegerFieldValue<uint32_t>(&fieldAcc, fieldItem);
+            break;
+        case Type::TypeId::I64:
+        case Type::TypeId::U64:
+            SetIntegerFieldValue<uint64_t>(&fieldAcc, fieldItem);
+            break;
+        case Type::TypeId::F32:
+            SetFloatFieldValue<float>(&fieldAcc, fieldItem);
+            break;
+        case Type::TypeId::F64:
+            SetFloatFieldValue<double>(&fieldAcc, fieldItem);
+            break;
+        case Type::TypeId::REFERENCE:
+            SetStringFieldValue(&fieldAcc, fieldItem);
+            break;
+        case Type::TypeId::TAGGED:
+        default:
+            UNREACHABLE();
+            break;
+    }
 }
 
 FieldItem *FileReader::CreateFieldItem(ClassItem *cls, File::EntityId fieldId)
@@ -802,38 +793,7 @@ FieldItem *FileReader::CreateFieldItem(ClassItem *cls, File::EntityId fieldId)
     FieldItem *fieldItem = cls->AddField(fieldName, fieldTypeItem, fieldAcc.GetAccessFlags());
     itemsDone_.insert({fieldId, static_cast<BaseItem *>(fieldItem)});
 
-    switch (fieldType.GetId()) {
-        case Type::TypeId::U1:
-        case Type::TypeId::I8:
-        case Type::TypeId::U8:
-            SetIntegerFieldValue<uint8_t>(&fieldAcc, fieldItem);
-            break;
-        case Type::TypeId::I16:
-        case Type::TypeId::U16:
-            SetIntegerFieldValue<uint16_t>(&fieldAcc, fieldItem);
-            break;
-        case Type::TypeId::I32:
-        case Type::TypeId::U32:
-            SetIntegerFieldValue<uint32_t>(&fieldAcc, fieldItem);
-            break;
-        case Type::TypeId::I64:
-        case Type::TypeId::U64:
-            SetIntegerFieldValue<uint64_t>(&fieldAcc, fieldItem);
-            break;
-        case Type::TypeId::F32:
-            SetFloatFieldValue<float>(&fieldAcc, fieldItem);
-            break;
-        case Type::TypeId::F64:
-            SetFloatFieldValue<double>(&fieldAcc, fieldItem);
-            break;
-        case Type::TypeId::REFERENCE:
-            SetStringFieldValue(&fieldAcc, fieldItem);
-            break;
-        case Type::TypeId::TAGGED:
-        default:
-            UNREACHABLE();
-            break;
-    }
+    SetFieldValue(fieldItem, fieldType, fieldAcc);
 
     fieldAcc.EnumerateAnnotations(
         [this, &fieldItem](File::EntityId annId) { fieldItem->AddAnnotation(CreateAnnotationItem(annId)); });
@@ -1108,10 +1068,46 @@ void FileReader::UpdateDebugInfo(DebugInfoItem *debugInfoItem, File::EntityId de
     updater.Emit(debugInfoItem->GetLineNumberProgram(), debugInfoItem->GetConstantPool(), debugInfoId);
 }
 
-void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverseDone)
+void FileReader::InstCheckByFlags(BytecodeInstruction &inst, MethodItem *methodItem,
+                                  const std::map<BaseItem *, File::EntityId> &reverseDone)
 {
     using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
 
+    if (inst.HasFlag(Flags::TYPE_ID)) {
+        BytecodeId bId = inst.GetId();
+        File::Index idx = bId.AsIndex();
+        File::EntityId methodId = reverseDone.find(methodItem)->second;
+        File::EntityId oldId = file_->ResolveClassIndex(methodId, idx);
+        ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+        auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+        methodItem->AddIndexDependency(idxItem);
+    } else if (inst.HasFlag(Flags::METHOD_ID)) {
+        BytecodeId bId = inst.GetId();
+        File::Index idx = bId.AsIndex();
+        File::EntityId methodId = reverseDone.find(methodItem)->second;
+        File::EntityId oldId = file_->ResolveMethodIndex(methodId, idx);
+        ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+        auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+        methodItem->AddIndexDependency(idxItem);
+    } else if (inst.HasFlag(Flags::FIELD_ID)) {
+        BytecodeId bId = inst.GetId();
+        File::Index idx = bId.AsIndex();
+        File::EntityId methodId = reverseDone.find(methodItem)->second;
+        File::EntityId oldId = file_->ResolveFieldIndex(methodId, idx);
+        ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+        auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+        methodItem->AddIndexDependency(idxItem);
+    } else if (inst.HasFlag(Flags::STRING_ID)) {
+        BytecodeId bId = inst.GetId();
+        File::EntityId oldId = bId.AsFileId();
+        auto data = file_->GetStringData(oldId);
+        std::string itemStr(utf::Mutf8AsCString(data.data));
+        container_.GetOrCreateStringItem(itemStr);
+    }
+}
+
+void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverseDone)
+{
     auto *classMap = container_.GetClassMap();
 
     // First pass, add dependencies bytecode -> new items
@@ -1136,37 +1132,7 @@ void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, F
             size_t offset = 0;
             BytecodeInstruction inst(codeItem->GetInstructions()->data());
             while (offset < codeItem->GetCodeSize()) {
-                if (inst.HasFlag(Flags::TYPE_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::Index idx = bId.AsIndex();
-                    File::EntityId methodId = reverseDone.find(methodItem)->second;
-                    File::EntityId oldId = file_->ResolveClassIndex(methodId, idx);
-                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
-                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
-                    methodItem->AddIndexDependency(idxItem);
-                } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::Index idx = bId.AsIndex();
-                    File::EntityId methodId = reverseDone.find(methodItem)->second;
-                    File::EntityId oldId = file_->ResolveMethodIndex(methodId, idx);
-                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
-                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
-                    methodItem->AddIndexDependency(idxItem);
-                } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::Index idx = bId.AsIndex();
-                    File::EntityId methodId = reverseDone.find(methodItem)->second;
-                    File::EntityId oldId = file_->ResolveFieldIndex(methodId, idx);
-                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
-                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
-                    methodItem->AddIndexDependency(idxItem);
-                } else if (inst.HasFlag(Flags::STRING_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::EntityId oldId = bId.AsFileId();
-                    auto data = file_->GetStringData(oldId);
-                    std::string itemStr(utf::Mutf8AsCString(data.data));
-                    container_.GetOrCreateStringItem(itemStr);
-                }
+                InstCheckByFlags(inst, methodItem, reverseDone);
 
                 offset += inst.GetSize();
                 inst = inst.GetNext();

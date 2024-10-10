@@ -21,20 +21,26 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSFlatMap = etsMod.getFunction('Array_TestJSFlatMap');
 
-{ // Test JS Array<FooClass>
-  TestJSFlatMap(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSFlatMap(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  function fnMap(v, k) { return v.toString(); }
-  function fnMap1(v) { return v.toString(); }
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	function fnMap(v, k) {
+		return v.toString();
+	}
+	function fnMap1(v) {
+		return v.toString();
+	}
 
-  let mapped = arr.flatMap(fnMap);
-  ASSERT_EQ(mapped.at(0), '123');
+	let mapped = arr.flatMap(fnMap);
+	ASSERT_EQ(mapped.at(0), '123');
 
-  let mapped1 = arr.flatMap(fnMap1);
-  ASSERT_EQ(mapped1.at(0), '123');
+	let mapped1 = arr.flatMap(fnMap1);
+	ASSERT_EQ(mapped1.at(0), '123');
 }
 
 GCJSRuntimeCleanup();

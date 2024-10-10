@@ -20,6 +20,8 @@
 extern "C" {
 #endif
 
+// This function have 8 arguments in order to check the case
+// when some arguments are put not into registers but on stack.
 extern "C" int SumEightElements(int, int, int, int, int, int, int, int);
 
 // NOLINTBEGIN(readability-magic-numbers, readability-named-parameter, cppcoreguidelines-pro-type-vararg,

@@ -13,27 +13,23 @@
  * limitations under the License.
  */
 
-const {
-    TupleSet,
-    num,
-    string,
-} = require("setter.test.js");
+const { TupleSet, num, string, createTupleSetClass } = require('setter.test.js');
 
-function check_setter_tuple() {
-    const tupleSet = new TupleSet();
-    const arr = [num, string];
-    tupleSet.value = arr;
+function checkSetterTuple() {
+	const tupleSet = new TupleSet();
+	const arr = [num, string];
+	tupleSet.value = arr;
 
-    ASSERT_EQ(arr, tupleSet.value);
+	ASSERT_EQ(arr, tupleSet.value);
 }
 
-function check_setter_tuple_class_from_ets() {
-    const tupleSet = create_tuple_set_class();
-    const arr = [num, string];
-    tupleSet.value = arr;
+function checkSetterTupleClassFromEts() {
+	const tupleSet = createTupleSetClass();
+	const arr = [num, string];
+	tupleSet.value = arr;
 
-    ASSERT_EQ(arr, tupleSet.value);
+	ASSERT_EQ(arr, tupleSet.value);
 }
 
-check_setter_tuple();
-check_setter_tuple_class_from_ets();
+checkSetterTuple();
+checkSetterTupleClassFromEts();

@@ -21,24 +21,34 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSFilter = etsMod.getFunction('Array_TestJSFilter');
 
-{ // Test JS Array<FooClass>
-  TestJSFilter(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSFilter(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  function fnTrue(v) { return true; }
-  function fn1True(v, k) { return true; }
-  let filter = arr.filter(fnTrue);
-  let filter1 = arr.filter(fn1True);
-  ASSERT_EQ(filter.at(0), arr.at(0));
-  ASSERT_EQ(filter1.at(0), arr.at(0));
-  function fnFalse(v) { return false; }
-  function fn1False(v, k) { return k < 0; }
-  let filterFalse = arr.filter(fnFalse);
-  let filter1False = arr.filter(fn1False);
-  ASSERT_NE(filterFalse.at(0), arr.at(0));
-  ASSERT_NE(filter1False.at(0), arr.at(0));
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	function fnTrue(v) {
+		return true;
+	}
+	function fn1True(v, k) {
+		return true;
+	}
+	let filter = arr.filter(fnTrue);
+	let filter1 = arr.filter(fn1True);
+	ASSERT_EQ(filter.at(0), arr.at(0));
+	ASSERT_EQ(filter1.at(0), arr.at(0));
+	function fnFalse(v) {
+		return false;
+	}
+	function fn1False(v, k) {
+		return k < 0;
+	}
+	let filterFalse = arr.filter(fnFalse);
+	let filter1False = arr.filter(fn1False);
+	ASSERT_NE(filterFalse.at(0), arr.at(0));
+	ASSERT_NE(filter1False.at(0), arr.at(0));
 }
 
 GCJSRuntimeCleanup();

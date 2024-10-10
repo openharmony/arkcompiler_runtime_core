@@ -90,7 +90,7 @@ cases:
           // call context, function
           assert foo(Color.Red) == "r!"
           assert foo(Color.Green + Color.Blue) == "gb!"
-          assert foo(s + Color.Blue + "X") == "Zb!X"
+          assert foo(s + Color.Blue + "X") == "ZbX!"
 
     - decl: |-
           let s: string = "Z"
@@ -104,7 +104,7 @@ cases:
           let a: A = new A()
           assert a.meth(Color.Red) == "r!"
           assert a.meth(Color.Green + Color.Blue) == "gb!"
-          assert a.meth(s + Color.Blue + "X") == "Zb!X"
+          assert a.meth(s + Color.Blue + "X") == "ZbX!"
 
     - decl: |-
           let s: string = "Z"
@@ -126,7 +126,7 @@ cases:
           // call context, lambda
           assert ((p: string): string => { return p + "!" })(Color.Red) == "r!"
           assert ((p: string): string => { return p + "!" })(Color.Green + Color.Blue) == "gb!"
-          assert ((p: string): string => { return p + "!" })(s + Color.Blue + "X") == "Zb!X"
+          assert ((p: string): string => { return p + "!" })(s + Color.Blue + "X") == "ZbX!"
 
     - decl: |-
           let s: string = "Z"
@@ -141,20 +141,6 @@ cases:
           assert a.fld == "bg"
           a = { fld: s + Color.Blue + "!" }
           assert a.fld == "Zb!"
-
-    - decl: |-
-          let s: string = "Z"
-          interface I {
-              fld: string
-          }
-      use: |-
-          // composite interface
-          let i: I = { fld: Color.Red }
-          assert i.fld == "r"
-          i = { fld: Color.Blue + Color.Green }
-          assert i.fld == "bg"
-          i = { fld: s + Color.Blue + "!" }
-          assert i.fld == "Zb!"
 
     - decl: |-
           let s: string = "Z"

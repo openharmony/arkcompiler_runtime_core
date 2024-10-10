@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-const {
-    // explicitly_declared_type,
-} = require("generic.test.js");
+const { explicitlyDeclaredType } = require('generic.test.js');
 
-function check_explicitly_declared_type() {
-    // explicitly_declared_type();
+function checkExplicitlyDeclaredType() {
+	explicitlyDeclaredType();
 }
 
-check_explicitly_declared_type();
+checkExplicitlyDeclaredType();

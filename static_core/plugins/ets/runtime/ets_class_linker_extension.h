@@ -124,6 +124,11 @@ public:
         return arrayAsListIntClass_;
     }
 
+    Class *GetArrayClass()
+    {
+        return arrayClass_;
+    }
+
     Class *GetArrayBufferClass()
     {
         return arraybufClass_;
@@ -199,6 +204,11 @@ public:
         return boxDoubleClass_;
     }
 
+    Class *GetFinalizableWeakRefClass()
+    {
+        return finalizableWeakClass_;
+    }
+
     Method *GetSubscribeOnAnotherPromiseMethod()
     {
         return subscribeOnAnotherPromiseMethod_;
@@ -262,10 +272,12 @@ private:
     Class *promiseClass_ = nullptr;
     Method *subscribeOnAnotherPromiseMethod_ = nullptr;
     Class *promiseRefClass_ = nullptr;
+    Class *arrayClass_ = nullptr;
     Class *arraybufClass_ = nullptr;
     Class *stringBuilderClass_ = nullptr;
     Class *arrayAsListIntClass_ = nullptr;
     Class *jsvalueClass_ = nullptr;
+    Class *finalizableWeakClass_ = nullptr;
     // Cached type API classes
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;

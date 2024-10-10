@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-const { check_generic_value } = require("generic_types.test.js");
+const { checkGenericValue } = require('generic_types.test.js');
 
 // Object
-check_generic_value({});
-check_generic_value({"a": 1, "b": 2});
+checkGenericValue({});
+checkGenericValue({ a: 1, b: 2 });
 
 // Function
-check_generic_value(() => {});
+checkGenericValue(() => {});

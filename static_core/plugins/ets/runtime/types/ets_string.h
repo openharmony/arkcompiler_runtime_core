@@ -168,6 +168,62 @@ public:
         return reinterpret_cast<EtsString *>(string3);
     }
 
+    EtsString *TrimLeft()
+    {
+        if (IsEmpty() || !utf::IsWhiteSpaceChar(At(0))) {
+            return this;
+        }
+        const auto numChars = GetLength();
+        auto notWhiteSpaceIndex = numChars;
+        for (int i = 1; i < numChars; ++i) {
+            if (!utf::IsWhiteSpaceChar(At(i))) {
+                notWhiteSpaceIndex = i;
+                break;
+            }
+        }
+        auto len = numChars - notWhiteSpaceIndex;
+        return FastSubString(this, static_cast<uint32_t>(notWhiteSpaceIndex), static_cast<uint32_t>(len));
+    }
+
+    EtsString *TrimRight()
+    {
+        if (IsEmpty()) {
+            return this;
+        }
+        auto last = GetLength() - 1;
+        if (!utf::IsWhiteSpaceChar(At(last))) {
+            return this;
+        }
+        int notWhiteSpaceIndex = -1;
+        for (int i = last - 1; i >= 0; --i) {
+            if (!utf::IsWhiteSpaceChar(At(i))) {
+                notWhiteSpaceIndex = i;
+                break;
+            }
+        }
+        auto len = notWhiteSpaceIndex + 1;
+        return EtsString::FastSubString(this, 0, static_cast<uint32_t>(len));
+    }
+
+    EtsString *Trim()
+    {
+        if (IsEmpty()) {
+            return this;
+        }
+        int left = 0;
+        int right = GetLength() - 1;
+        while (utf::IsWhiteSpaceChar(At(right))) {
+            if (right == left) {
+                return EtsString::CreateNewEmptyString();
+            }
+            --right;
+        }
+        while (left < right && utf::IsWhiteSpaceChar(At(left))) {
+            ++left;
+        }
+        return EtsString::FastSubString(this, left, static_cast<uint32_t>(right - left + 1));
+    }
+
     int32_t Compare(EtsString *rhs)
     {
         return GetCoreType()->Compare(rhs->GetCoreType());

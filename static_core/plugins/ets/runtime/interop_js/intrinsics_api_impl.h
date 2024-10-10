@@ -172,20 +172,26 @@ std::conditional_t<USE_RET, void *, void> CompilerJSCallFunction(void *obj, void
     }
 }
 
+inline void HandleExceptions(napi_env env, InteropCtx *ctx)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+
+    if (NapiIsExceptionPending(env)) {
+        ctx->ForwardJSException(coro);
+    }
+    ASSERT(ctx->SanityETSExceptionPending());
+}
+
 template <typename CONVERTOR>
-inline typename CONVERTOR::cpptype ConvertFromLocal(void *value)
+typename CONVERTOR::cpptype ConvertFromLocal(void *value)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     INTEROP_CODE_SCOPE_ETS(coro);
     napi_env env = ctx->GetJSEnv();
-    auto jsVal = ToLocal(value);
-    auto res = CONVERTOR::Unwrap(ctx, env, jsVal);
+    auto res = CONVERTOR::Unwrap(ctx, env, ToLocal(value));
     if (UNLIKELY(!res.has_value())) {
-        if (NapiIsExceptionPending(env)) {
-            ctx->ForwardJSException(coro);
-        }
-        ASSERT(ctx->SanityETSExceptionPending());
+        HandleExceptions(env, ctx);
         if constexpr (!std::is_pointer_v<typename CONVERTOR::cpptype>) {
             return 0;
         } else {
@@ -198,25 +204,19 @@ inline typename CONVERTOR::cpptype ConvertFromLocal(void *value)
 template <>
 inline JSValue *ConvertFromLocal<JSConvertJSValue>(void *value)
 {
-    auto jsVal = ToLocal(value);
+    INTEROP_CODE_SCOPE_ETS(EtsCoroutine::GetCurrent());
 
-    auto coro = EtsCoroutine::GetCurrent();
-    auto ctx = InteropCtx::Current(coro);
-    INTEROP_CODE_SCOPE_ETS(coro);
-    napi_env env = ctx->GetJSEnv();
-    if (UNLIKELY(IsNull(env, jsVal))) {
-        return nullptr;
-    }
-
-    auto res = JSConvertJSValue::Unwrap(ctx, env, jsVal);
-    if (UNLIKELY(!res.has_value())) {
-        if (NapiIsExceptionPending(env)) {
-            ctx->ForwardJSException(coro);
+    auto ctx = InteropCtx::Current(EtsCoroutine::GetCurrent());
+    if (!IsNull(ctx->GetJSEnv(), ToLocal(value))) {
+        auto res = JSConvertJSValue::Unwrap(ctx, ctx->GetJSEnv(), ToLocal(value));
+        if (res.has_value()) {
+            return res.value();
         }
-        ASSERT(ctx->SanityETSExceptionPending());
-        return nullptr;
+
+        HandleExceptions(ctx->GetJSEnv(), ctx);
     }
-    return res.value();
+
+    return nullptr;
 }
 
 }  // namespace ark::ets::interop::js

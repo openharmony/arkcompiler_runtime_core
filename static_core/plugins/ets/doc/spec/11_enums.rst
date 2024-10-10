@@ -18,13 +18,13 @@ Enumerations
 .. meta:
     frontend_status: Done
 
-An enumeration type ``enum`` specifies a distinct type with an associated set
-of named constants that define its possible values:
+An enumeration type ``enum`` specifies a distinct user-defined type with an
+associated set of named constants that define its possible values:
 
 .. code-block:: abnf
 
     enumDeclaration:
-        'enum' identifier '{' enumConstantList '}'
+        'const'? 'enum' identifier '{' enumConstantList '}'
         ;
 
     enumConstantList:
@@ -38,6 +38,10 @@ of named constants that define its possible values:
 .. index::
    enumeration
    named constant
+
+``const enum`` is supported for source-level compatibility with |TS|,
+and ``const`` is skipped as it has no impact on ``enum`` semantics in
+|LANG|.
 
 Qualification by type is mandatory to access the enumeration constant:
 

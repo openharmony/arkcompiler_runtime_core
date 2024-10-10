@@ -381,7 +381,7 @@ An interface property can be defined in the form of a field or an accessor
 .. code-block:: abnf
 
     interfaceProperty:
-        readonly? identifier '?'? ':' type
+        'readonly'? identifier '?'? ':' type
         | 'get' identifier '(' ')' returnType
         | 'set' identifier '(' parameter ')'
         ;

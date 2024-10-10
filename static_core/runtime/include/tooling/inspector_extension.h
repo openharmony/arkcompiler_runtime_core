@@ -43,6 +43,10 @@ public:
     virtual std::optional<size_t> GetLengthIfArray(const ObjectHeader *object) = 0;
     virtual void EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler) = 0;
     virtual void EnumerateGlobals(const PropertyHandler &handler) = 0;
+    virtual std::string_view GetThisParameterName() const
+    {
+        return "this";
+    }
 };
 }  // namespace ark::tooling
 

@@ -145,7 +145,7 @@ void GcRefLiveness::ReplaceValue(Value *from, Value *to)
 void GcRefLiveness::PopulateLiveInByUsers(BasicBlock &block)
 {
     for (auto &inst : block) {
-        if (!IsGcRefType(inst.getType()) || IsDerived(&inst)) {
+        if (!IsGcRefType(inst.getType()) || IsDerived(&inst) || gc_utils::IsNonMovable(&inst)) {
             continue;
         }
         for (auto user : inst.users()) {
@@ -191,8 +191,10 @@ bool GcRefLiveness::PropagateLiveInsLiveOuts(BasicBlock *block)
     for (auto out : blockOuts) {
         auto inst = llvm::dyn_cast<Instruction>(out);
         // If defined in block, it is not a live-in
-        if (inst != nullptr && inst->getParent() == block) {
-            continue;
+        if (inst != nullptr) {
+            if (inst->getParent() == block || gc_utils::IsNonMovable(inst)) {
+                continue;
+            }
         }
         updated |= blockIns.insert(out);
     }
@@ -288,7 +290,7 @@ void GcIntrusion::RewriteWithGcInBlock(BasicBlock *block, GcRefLiveness *livenes
         alive->remove(inst);
         for (auto &ops : inst->operands()) {
             if (IsGcRefType(ops->getType()) && (llvm::isa<Argument>(ops) || llvm::isa<Instruction>(ops)) &&
-                !IsDerived(ops)) {
+                !IsDerived(ops) && !gc_utils::IsNonMovable(ops)) {
                 alive->insert(ops);
             }
         }
@@ -355,12 +357,8 @@ void GcIntrusion::CopySinglePredRelocs(GcRefLiveness *liveness, BasicBlock *bloc
 
 void GcIntrusion::ReplaceWithPhi(Value *var, BasicBlock *block, GcIntrusionContext *gcContext)
 {
+    ASSERT(var != nullptr);
     auto &varBlocks = gcContext->relocs.FindAndConstruct(var).second;
-
-    // tidy workaround...
-    if (var == nullptr) {
-        llvm_unreachable("Clang was right!\n");
-    }
 
     PHINode *phi = PHINode::Create(var->getType(), pred_size(block), "", &(*block->begin()));
     if (var->hasName()) {

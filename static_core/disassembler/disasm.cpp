@@ -57,7 +57,7 @@ struct Options {
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
-void PrintHelp(ark::PandArgParser &paParser)
+static void PrintHelp(ark::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "ark_disasm [options] input_file output_file" << std::endl << std::endl;

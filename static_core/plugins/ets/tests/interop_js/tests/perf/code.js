@@ -12,11 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
-var o = { a: 1, b: "2", c: {} };
+const o = { a: 1, b: '2', c: {} };
 
-exports.GetObject = function () { return o; }
-exports.GetNumber = function () { return 24; }
-exports.GetString = function () { return "abc"; }
-exports.Nop = function () { }
+exports.GetObject = function () {
+	return o;
+};
+exports.GetNumber = function () {
+	return 24;
+};
+exports.GetString = function () {
+	return 'abc';
+};
+exports.Nop = function () {};

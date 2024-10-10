@@ -13,66 +13,61 @@
  * limitations under the License.
  */
 
-const {
-    num,
-    string,
-    UnionTypeMethodClass,
-    create_interface_class_union_type_method,
-} = require('interface_method.test.js');
+const { num, string, UnionTypeMethodClass, createInterfaceClassUnionTypeMethod } = require('interface_method.test.js');
 
-function check_union_type_method_class_interface_int() {
-    const IClass = new UnionTypeMethodClass();
+function checkUnionTypeMethodClassInterfaceInt() {
+	const IClass = new UnionTypeMethodClass();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_union_type_method_class_interface_string() {
-    const IClass = new UnionTypeMethodClass();
+function checkUnionTypeMethodClassInterfaceString() {
+	const IClass = new UnionTypeMethodClass();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_union_interface_object_from_ets_int() {
-    const IClass = new create_interface_class_union_type_method();
+function checkUnionInterfaceObjectFromEtsInt() {
+	const IClass = new createInterfaceClassUnionTypeMethod();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_union_interface_object_from_ets_string() {
-    const IClass = new create_interface_class_union_type_method();
+function checkUnionInterfaceObjectFromEtsString() {
+	const IClass = new createInterfaceClassUnionTypeMethod();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_union_value_type_method_class_interface_int() {
-    const IClass = new UnionTypeMethodClass();
+function checkUnionValueTypeMethodClassInterfaceInt() {
+	const IClass = new UnionTypeMethodClass();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_union_value_type_method_class_interface_string() {
-    const IClass = new UnionTypeMethodClass();
+function checkUnionValueTypeMethodClassInterfaceString() {
+	const IClass = new UnionTypeMethodClass();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_union_value_interface_object_from_ets_int() {
-    const IClass = new create_interface_class_union_type_method();
+function checkUnionValueInterfaceObjectFromEtsInt() {
+	const IClass = new createInterfaceClassUnionTypeMethod();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_union_value_interface_object_from_ets_string() {
-    const IClass = new create_interface_class_union_type_method();
+function checkUnionValueInterfaceObjectFromEtsString() {
+	const IClass = new createInterfaceClassUnionTypeMethod();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-check_union_type_method_class_interface_int();
-check_union_type_method_class_interface_string();
-check_union_interface_object_from_ets_int();
-check_union_interface_object_from_ets_string();
-check_union_value_type_method_class_interface_int();
-check_union_value_type_method_class_interface_string();
-check_union_value_interface_object_from_ets_int();
-check_union_value_interface_object_from_ets_string();
+checkUnionTypeMethodClassInterfaceInt();
+checkUnionTypeMethodClassInterfaceString();
+checkUnionInterfaceObjectFromEtsInt();
+checkUnionInterfaceObjectFromEtsString();
+checkUnionValueTypeMethodClassInterfaceInt();
+checkUnionValueTypeMethodClassInterfaceString();
+checkUnionValueInterfaceObjectFromEtsInt();
+checkUnionValueInterfaceObjectFromEtsString();

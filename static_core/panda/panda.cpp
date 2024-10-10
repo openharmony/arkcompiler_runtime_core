@@ -68,17 +68,8 @@ void PrintHelp(const ark::PandArgParser &paParser)
 
 bool PrepareArguments(ark::PandArgParser *paParser, const RuntimeOptions &runtimeOptions,
                       const ark::PandArg<std::string> &file, const ark::PandArg<std::string> &entrypoint,
-                      const ark::PandArg<bool> &help, int argc, const char **argv)
+                      const ark::PandArg<bool> &help)
 {
-    auto startTime =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
-            .count();
-
-    if (!paParser->Parse(argc, argv)) {
-        PrintHelp(*paParser);
-        return false;
-    }
-
     if (runtimeOptions.IsVersion()) {
         PrintPandaVersion();
         return false;
@@ -87,11 +78,6 @@ bool PrepareArguments(ark::PandArgParser *paParser, const RuntimeOptions &runtim
     if (file.GetValue().empty() || entrypoint.GetValue().empty() || help.GetValue()) {
         PrintHelp(*paParser);
         return false;
-    }
-
-    if (runtimeOptions.IsStartupTime()) {
-        std::cout << "\n"
-                  << "Startup start time: " << startTime << std::endl;
     }
 
     auto runtimeOptionsErr = runtimeOptions.Validate();
@@ -133,7 +119,21 @@ int Main(int argc, const char **argv)
     paParser.EnableTail();
     paParser.EnableRemainder();
 
-    if (!ark::PrepareArguments(&paParser, runtimeOptions, file, entrypoint, help, argc, argv)) {
+    auto startTime =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch())
+            .count();
+
+    if (!paParser.Parse(argc, argv)) {
+        PrintHelp(paParser);
+        return 1;
+    }
+
+    if (runtimeOptions.IsStartupTime()) {
+        std::cout << "\n"
+                  << "Startup start time: " << startTime << std::endl;
+    }
+
+    if (!ark::PrepareArguments(&paParser, runtimeOptions, file, entrypoint, help)) {
         return 1;
     }
 

@@ -21,18 +21,24 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSFromAsync = etsMod.getFunction('Array_TestJSFromAsync');
 
-{ // Test JS Array<FooClass>
-  TestJSFromAsync(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSFromAsync(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  function fnMap(v, k) { return 'String'; }
-  function fnMap1(v) { return 'String1'; }
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	function fnMap(v, k) {
+		return 'String';
+	}
+	function fnMap1(v) {
+		return 'String1';
+	}
 
-  Array.fromAsync(arr).then((array) => ASSERT_EQ(array.at(0), arr.at(0)));
-  Array.fromAsync(arr, fnMap).then((array) => ASSERT_EQ(array.at(0), 'String'));
-  Array.fromAsync(arr, fnMap1).then((array) => ASSERT_EQ(array.at(0), 'String1'));
+	Array.fromAsync(arr).then((array) => ASSERT_EQ(array.at(0), arr.at(0)));
+	Array.fromAsync(arr, fnMap).then((array) => ASSERT_EQ(array.at(0), 'String'));
+	Array.fromAsync(arr, fnMap1).then((array) => ASSERT_EQ(array.at(0), 'String1'));
 }
 
 GCJSRuntimeCleanup();

@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypeTupleEts = etsMod.getFunction('function_arg_type_tuple_ets');
+const functionArgTypeTupleEts = etsMod.getFunction('functionArgTypeTupleEts');
 
 {
-  let ret = functionArgTypeTupleEts([1, 'one']);
-  ASSERT_EQ(ret, 1);
+	let ret = functionArgTypeTupleEts([1, 'one']);
+	ASSERT_EQ(ret, 1);
 }
 
 GCJSRuntimeCleanup();

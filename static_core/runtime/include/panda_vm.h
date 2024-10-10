@@ -94,6 +94,7 @@ public:
     virtual void HandleGCRoutineInMutator() {}
     virtual void HandleLdaStr(Frame *frame, BytecodeId stringId);
     virtual void HandleReturnFrame() {}
+    virtual void ProcessReferenceFinalizers();
 
     virtual mem::GCStats *GetGCStats() const = 0;
     virtual mem::HeapManager *GetHeapManager() const = 0;

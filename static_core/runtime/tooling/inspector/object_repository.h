@@ -38,7 +38,8 @@ public:
     NO_MOVE_SEMANTIC(ObjectRepository);
 
     RemoteObject CreateGlobalObject();
-    RemoteObject CreateFrameObject(const PtFrame &frame, const std::map<std::string, TypedValue> &locals);
+    RemoteObject CreateFrameObject(const PtFrame &frame, const std::map<std::string, TypedValue> &locals,
+                                   std::optional<RemoteObject> &objThis);
     RemoteObject CreateObject(TypedValue value);
 
     std::vector<PropertyDescriptor> GetProperties(RemoteObjectId id, bool generatePreview);

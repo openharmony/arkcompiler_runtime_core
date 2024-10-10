@@ -46,6 +46,9 @@ void WrappedModule::AddMethod(ark::compiler::RuntimeInterface::MethodPtr method)
 void WrappedModule::SetCompiled(std::unique_ptr<ark::llvmbackend::CreatedObjectFile> objectFile)
 {
     objectFile_ = std::move(objectFile);
+#ifndef NDEBUG
+    arkInterface_->MarkAsCompiled();
+#endif
     module_ = nullptr;
     debugData_ = nullptr;
     llvmContext_ = nullptr;

@@ -17,6 +17,7 @@
 #include "libpandabase/utils/utils.h"
 #include "compiler_logger.h"
 #include "optimizer/ir/datatype.h"
+#include "optimizer/ir/runtime_interface.h"
 #include "optimizer/ir_builder/inst_builder.h"
 #include "optimizer/ir_builder/ir_builder.h"
 #include "optimizer/ir/inst.h"
@@ -115,12 +116,51 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, DataType::
     UpdateDefinitionAcc(intrinsic);
 }
 
+std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByType(DataType::Type type)
+{
+    switch (type) {
+        case DataType::REFERENCE:
+            return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ, type};
+        case DataType::FLOAT64:
+            return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F64, type};
+        case DataType::FLOAT32:
+            return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F32, type};
+        case DataType::UINT64:
+        case DataType::INT64:
+            return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I64, DataType::INT64};
+        case DataType::UINT8:
+        case DataType::INT8:
+            return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I8, DataType::INT8};
+        case DataType::UINT16:
+        case DataType::INT16:
+            return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I16, DataType::INT16};
+        case DataType::UINT32:
+        case DataType::INT32:
+            return {RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32, DataType::INT32};
+        default:
+            UNREACHABLE();
+            break;
+    }
+    UNREACHABLE();
+}
+
+IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic(size_t pc, DataType::Type type)
+{
+    auto [id, extractedType] = ExtractIntrinsicIdByType(type);
+    type = extractedType;
+    auto *intrinsic = GetGraph()->CreateInstIntrinsic(DataType::VOID, pc, id);
+    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3_I);
+    intrinsic->AddInputType(DataType::REFERENCE);
+    intrinsic->AddInputType(type);
+    intrinsic->AddInputType(DataType::NO_TYPE);
+    return intrinsic;
+}
+
 void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::Type type)
 {
     auto pc = GetPc(bcInst->GetAddress());
     // Create SaveState instruction
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
-
     // Create NullCheck instruction
     auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
 
@@ -135,52 +175,10 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, DataType::
     Inst *storeVal = nullptr;
     storeVal = GetDefinitionAcc();
 
-    RuntimeInterface::IntrinsicId id;
-    switch (type) {
-        case DataType::REFERENCE:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_OBJ;
-            break;
-        case DataType::FLOAT64:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F64;
-            break;
-        case DataType::FLOAT32:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_F32;
-            break;
-        case DataType::UINT64:
-        case DataType::INT64:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I64;
-            type = DataType::INT64;
-            break;
-        case DataType::UINT8:
-        case DataType::INT8:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I8;
-            type = DataType::INT8;
-            break;
-        case DataType::UINT16:
-        case DataType::INT16:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I16;
-            type = DataType::INT16;
-            break;
-        case DataType::UINT32:
-        case DataType::INT32:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_ST_OBJ_BY_NAME_I32;
-            type = DataType::INT32;
-            break;
-        default:
-            UNREACHABLE();
-            break;
-    }
-    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::VOID, pc, id);
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3_I);
-
+    auto *intrinsic = CreateStObjByNameIntrinsic(pc, type);
     intrinsic->AppendInput(nullCheck);
-    intrinsic->AddInputType(DataType::REFERENCE);
-
     intrinsic->AppendInput(storeVal);
-    intrinsic->AddInputType(type);
-
     intrinsic->AppendInput(saveState);
-    intrinsic->AddInputType(DataType::NO_TYPE);
     intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
     intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
 

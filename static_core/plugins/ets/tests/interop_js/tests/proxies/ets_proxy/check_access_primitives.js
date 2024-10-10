@@ -13,62 +13,61 @@
  * limitations under the License.
  */
 
-const { getTestClass } = require("ets_proxy.test.js");
-const PrimitivesAccess = getTestClass("PrimitivesAccess");
-const PrimitivesAccessStatic = getTestClass("PrimitivesAccessStatic");
+const { getTestClass } = require('ets_proxy.test.js');
+const PrimitivesAccess = getTestClass('PrimitivesAccess');
+const PrimitivesAccessStatic = getTestClass('PrimitivesAccessStatic');
 
 let pa = new PrimitivesAccess();
 let pas = PrimitivesAccessStatic;
 
-let typelist = [
-    "byte", "short", "int", "long",
-    "float", "double",
-    "char", "boolean"
-];
+let typelist = ['byte', 'short', 'int', 'long', 'float', 'double', 'char', 'boolean'];
+const cap = (str = '') => str[0].toUpperCase() + str.substring(1);
 
-{   // Test property accessors
-    function TestAccessors(tname, ...values) {
-        function TestAccessorsOf(o, tname, ...values) {
-            for (let v of values) {
-                o["f_" + tname] = v;
-                ASSERT_EQ(o["getf_" + tname](), v);
-                o["setf_" + tname](v);
-                ASSERT_EQ(o["f_" + tname], v)
-            }
-        }
-        TestAccessorsOf(pa, tname, ...values);
-        TestAccessorsOf(pas, tname, ...values);
-    }
+{
+	// Test property accessors
+	function testAccessors(tname, ...values) {
+		function testAccessorsOf(o, tname, ...values) {
+			for (let v of values) {
+				o['f' + cap(tname)] = v;
+				ASSERT_EQ(o['getf' + cap(tname)](), v);
+				o['setf' + cap(tname)](v);
+				ASSERT_EQ(o['f' + cap(tname)], v);
+			}
+		}
+		testAccessorsOf(pa, tname, ...values);
+		testAccessorsOf(pas, tname, ...values);
+	}
 
-    function IntBit(exp) {
-        ASSERT_TRUE(exp < 53, "IntBit overflow");
-        return (1 << (exp % 30)) * (1 << (exp - exp % 30));
-    }
-    function TestSInt(tname, bits) {
-        let msb = bits - 1;
-        TestAccessors(tname, 0, 1, -1, IntBit(msb) - 1, -IntBit(msb));
-    }
-    function TestUInt(tname, bits) {
-        let msb = bits - 1;
-        TestAccessors(tname, 0, 1, IntBit(msb), IntBit(msb + 1) - 1);
-    }
+	function intBit(exp) {
+		ASSERT_TRUE(exp < 53, 'intBit overflow');
+		return (1 << exp % 30) * (1 << (exp - (exp % 30)));
+	}
+	function testSInt(tname, bits) {
+		let msb = bits - 1;
+		testAccessors(tname, 0, 1, -1, intBit(msb) - 1, -intBit(msb));
+	}
+	function testUInt(tname, bits) {
+		let msb = bits - 1;
+		testAccessors(tname, 0, 1, intBit(msb), intBit(msb + 1) - 1);
+	}
 
-    TestSInt("byte", 8);
-    TestSInt("short", 16);
-    TestSInt("int", 32);
-    TestSInt("long", 53);
-    TestAccessors("float", 0, 1, 1.25, 0x1234 / 256, Infinity, NaN);
-    TestAccessors("double", 0, 1, 1.33333, 0x123456789a / 256, Infinity, NaN);
-    TestUInt("char", 16);
-    TestAccessors("boolean", false, true);
+	testSInt('byte', 8);
+	testSInt('short', 16);
+	testSInt('int', 32);
+	testSInt('long', 53);
+	testAccessors('float', 0, 1, 1.25, 0x1234 / 256, Infinity, NaN);
+	testAccessors('double', 0, 1, 1.33333, 0x123456789a / 256, Infinity, NaN);
+	testUInt('char', 16);
+	testAccessors('boolean', false, true);
 }
 
-{   // Test typechecks
-    typelist.forEach(function (tname) {
-        function check(o) {
-            ASSERT_THROWS(TypeError, () => (o["f_" + tname] = undefined));
-        }
-        check(pa);
-        check(pas);
-    })
+{
+	// Test typechecks
+	typelist.forEach(function (tname) {
+		function check(o) {
+			ASSERT_THROWS(TypeError, () => (o['f' + cap(tname)] = undefined));
+		}
+		check(pa);
+		check(pas);
+	});
 }

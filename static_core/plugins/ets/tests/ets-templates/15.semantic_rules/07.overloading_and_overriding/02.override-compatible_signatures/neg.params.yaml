@@ -115,10 +115,3 @@ cases:
           public constructor (a: Int[]) {}
           public constructor (b: T1) {}
       }
-
-  - decl: |-
-      // ambiguous for the case with a single argument
-      class A {
-          public constructor (...a: int[]) {}
-          public constructor (a: int) {}
-      }

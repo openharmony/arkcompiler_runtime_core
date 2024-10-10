@@ -13,25 +13,21 @@
  * limitations under the License.
  */
 
-const {
-    BaseClass,
-    create_base_class,
-    string,
-} = require("setter.test.js");
+const { BaseClass, createBaseClass, string } = require('setter.test.js');
 
-function ckack_setter_user_class() {
-    const userClass = new BaseClass();
-    userClass.value = string;
+function checkSetterUserClass() {
+	const userClass = new BaseClass();
+	userClass.value = string;
 
-    ASSERT_EQ(typeof string, typeof userClass.value);
+	ASSERT_EQ(typeof string, typeof userClass.value);
 }
 
-function ckack_setter_user_class_from_ets() {
-    const userClass = create_base_class();
-    userClass.value = string;
+function checkSetterUserClassFromEts() {
+	const userClass = createBaseClass();
+	userClass.value = string;
 
-    ASSERT_EQ(typeof string, typeof userClass.value);
+	ASSERT_EQ(typeof string, typeof userClass.value);
 }
 
-ckack_setter_user_class();
-ckack_setter_user_class_from_ets();
+checkSetterUserClass();
+checkSetterUserClassFromEts();

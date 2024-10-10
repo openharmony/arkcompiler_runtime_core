@@ -13,17 +13,14 @@
  * limitations under the License.
  */
 
-const {
-    generic_subset_ref,
-    data,
-} = require("generic.test.js");
+const { genericSubsetRef, data } = require('generic.test.js');
 
-function check_subset_ref_generic_type() {
-    const obj = {
-        test: 'test',
-        ...data
-    }
-    ASSERT_EQ(obj, generic_subset_ref(obj));
+function checkSubsetRefGenericType() {
+	const obj = {
+		test: 'test',
+		...data,
+	};
+	ASSERT_EQ(obj, genericSubsetRef(obj));
 }
 
-check_subset_ref_generic_type();
+checkSubsetRefGenericType();

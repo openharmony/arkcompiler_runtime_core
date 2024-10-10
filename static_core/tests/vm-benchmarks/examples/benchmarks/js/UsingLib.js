@@ -14,13 +14,13 @@
  */
 
 /**
- * @Import { randomNumber } from "./libOne.mjs"
+ * @Import { randomNumber } from './libOne.mjs'
  */
 
 /**
  * @State
  */
-function UsingLib() {
+function usingLib() {
 
   /**
    * @Param 128

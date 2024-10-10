@@ -13,22 +13,17 @@
  * limitations under the License.
  */
 
-const {
-    GClass,
-    create_generic_object_from_ets,
-    num,
-    str,
-} = require("generic.test.js");
+const { GClass, createGenericObjectFromEts, num, str } = require('generic.test.js');
 
-function check_generic_class_type() {
-    const gClass = new GClass(num);
-    ASSERT_EQ(typeof num, typeof gClass.get());
+function checkGenericClassType() {
+	const gClass = new GClass(num);
+	ASSERT_EQ(typeof num, typeof gClass.get());
 }
 
-function check_create_generic_object_from_ets() {
-    const gClass = new create_generic_object_from_ets();
-    ASSERT_EQ(typeof str, typeof gClass.get());
+function checkCreateGenericObjectFromEts() {
+	const gClass = new createGenericObjectFromEts();
+	ASSERT_EQ(typeof str, typeof gClass.get());
 }
 
-check_create_generic_object_from_ets();
-check_generic_class_type();
+checkCreateGenericObjectFromEts();
+checkGenericClassType();

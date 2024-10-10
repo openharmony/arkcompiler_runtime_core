@@ -30,7 +30,8 @@ void OpenUncompressedArchiveFuzzTest(const uint8_t *data, size_t size)
     // Create zip file
     const char *zip_filename = "__OpenUncompressedArchiveFuzzTest.zip";
     const char *filename = ark::panda_file::ARCHIVE_FILENAME;
-    int ret = ark::CreateOrAddFileIntoZip(zip_filename, filename, data, size, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
+    std::vector<uint8_t> buf(data, data + size);
+    int ret = ark::CreateOrAddFileIntoZip(zip_filename, filename, &buf, APPEND_STATUS_CREATE, Z_NO_COMPRESSION);
     if (ret != 0) {
         (void)remove(zip_filename);
         return;

@@ -16,6 +16,7 @@
 #
 
 from __future__ import annotations
+import sys
 import logging
 from pathlib import Path
 from vmb.helpers import ColorFormatter, \
@@ -29,13 +30,24 @@ from vmb.platform import PlatformBase
 
 __all__ = ['main', 'VERSION']
 
-VERSION = '0.0.1'
+VERSION = '0.0.3'
 log = logging.getLogger("vmb")
 # Inject new log level above info
 logging.addLevelName(PASS_LOG_LEVEL, "PASS")
 logging.addLevelName(TRACE_LOG_LEVEL, "TRAC")
 logging.Logger.passed = log_pass  # type: ignore
 logging.Logger.trace = log_trace  # type: ignore
+
+
+def print_list(args: Args) -> None:
+    vmb_root = Path(__file__).parent.resolve()
+    for p in ('hooks', 'tools', 'langs', 'platforms'):
+        print(f'\n=== {p} ===')
+        for f in sorted(vmb_root.joinpath('plugins', p).glob('*.py')):
+            print(f"    {f.with_suffix('').name}")
+        if args.extra_plugins:
+            for f in sorted(args.extra_plugins.joinpath(p).glob('*.py')):
+                print(f"    {f.with_suffix('').name} (extra)")
 
 
 def main() -> None:
@@ -65,11 +77,7 @@ def main() -> None:
         return
 
     if args.command == Command.LIST:
-        vmb_root = Path(__file__).parent.resolve()
-        for p in ('hooks', 'langs', 'platforms', 'tools'):
-            print(f'\n=== {p} ===')
-            for f in sorted(vmb_root.joinpath('plugins', p).glob('*.py')):
-                print(f" - {f.with_suffix('').name}")
+        print_list(args)
         return
 
     if args.command == Command.REPORT:
@@ -85,14 +93,18 @@ def main() -> None:
         # if there is no override, use all langs, exposed by platform
         if not args.langs:
             args.langs = runner.platform.langs
-        bench_units = generate_main(args)
+        bench_units = generate_main(args, settings=runner.platform.template)
     else:
         bench_units = PlatformBase.search_units(args.paths)
 
     bus, ext_info, timer = runner.run(bench_units)
 
     if bus:
-        report_main(args, bus=bus, ext_info=ext_info, timer=timer)
+        if not args.dry_run:
+            report_main(args, bus=bus, ext_info=ext_info, timer=timer)
+    else:
+        log.error('No tests run!')
+        sys.exit(1)
 
 
 if __name__ == '__main__':
