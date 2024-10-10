@@ -2269,11 +2269,6 @@
 08.statements/15.try_statements/02.finally_clause/finally_n_2.sts
 17.experimental_features/06.statements/02.multiple_catch_clauses_in_try_statements/finally_n_2.sts
 ### end of Issue 19679
-### Issue 19684
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_15.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_16.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_17.sts
-### end of Issue 19684
 ### Issue 19951
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_19.sts
 ### Issue 19685
