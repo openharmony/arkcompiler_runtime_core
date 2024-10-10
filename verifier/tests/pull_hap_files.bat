@@ -1,15 +1,15 @@
-:: Copyright (c) 2024 Huawei Device Co., Ltd.
-:: Licensed under the Apache License, Version 2.0 (the "License");
-:: you may not use this file except in compliance with the License.
-:: You may obtain a copy of the License at
-::
-::  http://www.apache.org/licenses/LICENSE-2.0
-::
-:: Unless required by applicable law or agreed to in writing, software
-:: distributed under the License is distributed on an "AS IS" BASIS,
-:: WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-:: See the License for the specific language governing permissions and
-:: limitations under the License.
+@rem Copyright (c) 2024 Huawei Device Co., Ltd.
+@rem Licensed under the Apache License, Version 2.0 (the "License");
+@rem you may not use this file except in compliance with the License.
+@rem You may obtain a copy of the License at
+@rem
+@rem  http://www.apache.org/licenses/LICENSE-2.0
+@rem
+@rem Unless required by applicable law or agreed to in writing, software
+@rem distributed under the License is distributed on an "AS IS" BASIS,
+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+@rem See the License for the specific language governing permissions and
+@rem limitations under the License.
 
 @echo off
 setlocal enabledelayedexpansion
@@ -22,14 +22,14 @@ setlocal enabledelayedexpansion
 
 @rem Initialize variables
 set "device="
-set "deviceCount=0"
+set "device_count=0"
 
 @rem Check if a device is connected
 echo Checking for connected devices...
 for /f "delims=" %%i in ('hdc list targets') do (
     if not "%%i"=="" (
         set "device=%%i"
-        set /a deviceCount+=1
+        set /a device_count+=1
     )
 )
 
@@ -37,19 +37,19 @@ for /f "delims=" %%i in ('hdc list targets') do (
 if "%device%"=="[Empty]" (
     echo No devices connected. Please connect a device first.
     pause
-    goto :EOF
+    exit /b
 )
 
 @rem Debugging output
-echo Device count: %deviceCount%
+echo Device count: %device_count%
 
 echo Device connected: %device%
 
 @rem Create target directory if it does not exist
-set targetDir=D:\system_haps
-if not exist "%targetDir%" (
-    mkdir "%targetDir%"
-    echo Created directory %targetDir%
+set target_dir=D:\system_haps
+if not exist "%target_dir%" (
+    mkdir "%target_dir%"
+    echo Created directory %target_dir%
 )
 
 @rem Retrieve list of .hap files from the device
@@ -61,7 +61,7 @@ for /f "delims=" %%f in (hap_files.txt) do (
     if not "%%f"=="" (
         set "hapFile=%%f"
         echo Pulling file: !hapFile!
-        hdc file recv "!hapFile!" "%targetDir%"
+        hdc file recv "!hapFile!" "%target_dir%"
     )
 )
 

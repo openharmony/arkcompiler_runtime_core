@@ -54,17 +54,17 @@ def verify_file(file_path, ark_verifier_path):
     verification_command = ["/usr/bin/time", "-v", ark_verifier_path, "--input_file", file_path]
     result = subprocess.run(verification_command, capture_output=True, text=True)
     status = 'pass' if result.returncode == 0 else 'fail'
-    
+
     memory_usage = None
     user_time_ms = None
-    
+
     for line in result.stderr.splitlines():
         if "Maximum resident set size" in line:
-            memory_usage = line.split(":")[1].strip() + " KB"
+            memory_usage = f"{line.split(':')[1].strip()} KB"
         if "User time (seconds)" in line:
             user_time_seconds = float(line.split(":")[1].strip())
             user_time_ms = f"{user_time_seconds * 1000:.2f} ms"
-    
+
     file_size = os.path.getsize(file_path)
     file_size_str = f"{file_size / 1024:.2f} KB" if file_size < 1024**2 else f"{file_size / 1024**2:.2f} MB"
     report = {
