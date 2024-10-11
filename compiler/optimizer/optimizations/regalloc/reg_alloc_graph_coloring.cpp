@@ -14,13 +14,6 @@
  */
 
 #include "reg_alloc_graph_coloring.h"
-#include <cmath>
-#include "compiler_logger.h"
-#include "interference_graph.h"
-#include "optimizer/analysis/dominators_tree.h"
-#include "optimizer/ir/basicblock.h"
-#include "optimizer/ir/datatype.h"
-#include "optimizer/ir/graph.h"
 #include "reg_type.h"
 
 namespace panda::compiler {

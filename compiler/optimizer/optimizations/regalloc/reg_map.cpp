@@ -14,7 +14,6 @@
  */
 
 #include "reg_map.h"
-#include <algorithm>
 
 namespace panda::compiler {
 

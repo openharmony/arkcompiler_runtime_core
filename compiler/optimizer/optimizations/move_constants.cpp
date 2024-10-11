@@ -14,7 +14,6 @@
  */
 
 #include "move_constants.h"
-#include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
 #include "optimizer/analysis/loop_analyzer.h"
 

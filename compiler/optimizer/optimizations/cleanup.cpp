@@ -16,7 +16,6 @@
 #include "cleanup.h"
 
 #include "compiler_logger.h"
-#include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/ir/basicblock.h"

@@ -17,7 +17,6 @@
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/linear_order.h"
-#include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_cloner.h"
 
 namespace panda::compiler {

@@ -14,11 +14,8 @@
  */
 
 #include "interference_graph.h"
-#include <array>
-#include <iterator>
 #include <numeric>
 #include "optimizer/analysis/liveness_analyzer.h"
-#include "utils/small_vector.h"
 
 namespace panda::compiler {
 bool GraphMatrix::AddEdge(unsigned a, unsigned b)

@@ -13,14 +13,9 @@
  * limitations under the License.
  */
 
-#include <iomanip>
-#include "compiler_logger.h"
 #include "trace/trace.h"
 #include "pass_manager.h"
-
-#include "optimizer/ir/graph.h"
 #include "optimizer/ir/graph_checker.h"
-
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/linear_order.h"
 #include "optimizer/analysis/liveness_analyzer.h"
@@ -30,13 +25,6 @@
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ENABLE_IR_DUMP
-
-#ifdef ENABLE_IR_DUMP
-
-#include <fstream>
-#include <ctime>
-#include "os/filesystem.h"
-#endif  // ENABLE_IR_DUMP
 
 namespace panda::compiler {
 PassManager::PassManager(Graph *graph, PassManager *parent_pm)
