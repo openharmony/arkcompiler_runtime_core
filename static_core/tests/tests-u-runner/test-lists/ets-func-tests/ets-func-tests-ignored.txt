@@ -47,7 +47,6 @@ regression/12581_custom_class_Engine_array.sts
 
 ### Union issues
 ### literal types not supported yet #19926
-spec/03.types/References_Types/unions/union_literal_02.sts
 spec/03.types/References_Types/unions/union_assignment_12_01.sts
 spec/03.types/References_Types/unions/union_assignment_12_02.sts
 spec/03.types/References_Types/unions/union_assignment_12_03.sts
@@ -65,7 +64,7 @@ koala-related-benchmarks/benchmark-lambda-no-lambda-original.sts
 koala-related-benchmarks/arkts-phase1.sts
 ### End of Koala
 ### Feature: Rest Params
-### Issue 19926 
+### Issue 19926
 spec/04.Names_Declarations_and_Scopes/4.8.5.Rest_Parameter/BadTypeError.sts
 ### Issue 19926 end
 ### Issue 19952
@@ -274,7 +273,7 @@ spec/import_export/07.export_directives/03.re-export_directives/to_export.sts
 spec/import_export/07.export_directives/03.re-export_directives/to_export_2.sts
 spec/import_export/07.export_directives/02.export_type_directives/to_export_for_import_type_alias_with_qualified_access.sts
 ### End of Import-export
-### issue 19719 
+### issue 19719
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0030.sts
 spec/17.Experimental_Features/17.3.Indexable_Types/idx-s01-0080.sts
 ### issue 19717
@@ -435,7 +434,7 @@ regression/12581_box_type_array_Long_array.sts
 ###
 
 ### Class constructor inheritance
-### Issue 19809 
+### Issue 19809
 spec/09.classes/constructor-inheritance/issue14720_2.sts
 ### Issue 19811
 spec/09.classes/constructor-inheritance/issue14720_6.sts

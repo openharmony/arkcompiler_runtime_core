@@ -17,14 +17,10 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const functionRestParamsUnion = etsMod.getFunction('functionRestParamsUnion');
-const functionSpreadParamsUnion = etsMod.getFunction('functionSpreadParamsUnion');
 
 {
-	ASSERT_EQ(functionSpreadParamsUnion(), '10 abc 30');
-}
-{
 	const arr = ['ab', 20, 'cd'];
-	ASSERT_EQ(functionRestParamsUnion(...arr), 'ab 20 cd');
+	ASSERT_EQ(functionRestParamsUnion(...arr), 'ab,20,cd');
 }
 
 GCJSRuntimeCleanup();

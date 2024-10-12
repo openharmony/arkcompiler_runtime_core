@@ -460,7 +460,7 @@
 # 19950
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_18.sts
 
-#FailKind.ES2PANDA_FAIL #19926 not implemented yet 
+#FailKind.ES2PANDA_FAIL #19926 not implemented yet
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_0.sts
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_1.sts
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_2.sts
@@ -532,13 +532,10 @@
 03.types/08.reference_types/11.union_types/ut_29.sts
 03.types/08.reference_types/11.union_types/ut_3.sts
 03.types/08.reference_types/11.union_types/ut_30.sts
-03.types/08.reference_types/11.union_types/ut_31.sts
 03.types/08.reference_types/11.union_types/ut_32.sts
 03.types/08.reference_types/11.union_types/ut_33.sts
-03.types/08.reference_types/11.union_types/ut_4.sts
 03.types/08.reference_types/11.union_types/ut_5.sts
 03.types/08.reference_types/11.union_types/ut_6.sts
-03.types/08.reference_types/11.union_types/ut_7.sts
 03.types/08.reference_types/11.union_types/ut_8.sts
 03.types/08.reference_types/11.union_types/ut_9.sts
 # end of es2panda fails
@@ -662,7 +659,7 @@
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.sts
 
 
-# es2panda fails: panda#12528 
+# es2panda fails: panda#12528
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_4.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_5.sts
 04.names_declarations_and_scopes/08.function_declarations/function_decl_9.sts
@@ -819,7 +816,7 @@
 17.experimental_features/02.array_creation_expressions/expr_9.sts
 # end of es2panda fails
 
-# es2panda fails: panda#19809 
+# es2panda fails: panda#19809
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_0.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_1.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_10.sts
@@ -1327,7 +1324,7 @@
 08.statements/08.for_statements/for_loop_parameters_6.sts
 # end of es2panda fails
 
-# 19809 
+# 19809
 07.expressions/25.equality_expressions/08.equality_with_null_or_undefined/null_and_undefined_equality_12.sts
 
 
@@ -1851,7 +1848,7 @@
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/ne3_16.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/ne3_17.sts
 
-# 19809 
+# 19809
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_7.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/eq1_8.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/object_type_equality_operators/ne1_10.sts
@@ -1866,7 +1863,7 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_4.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/im_over_5.sts
 # es2panda fails: 14691 Abstract classes and interfaces cannot be instantied with array creation expression
-# es2panda fails: #19908 
+# es2panda fails: #19908
 04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_3.sts
 04.names_declarations_and_scopes/08.function_declarations/function_decl_5.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_14.sts
@@ -2201,6 +2198,11 @@
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_hided_method.sts
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_overrided_method.sts
 
+# es2panda: #18843 type compatability
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_0.sts
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_0.sts
+07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/ne_3.sts
+
 # es2panda: 14468 Implement readonly parameters
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_0.sts
 04.names_declarations_and_scopes/08.function_declarations/03.readonly_parameters/readonly_1.sts
@@ -2294,7 +2296,18 @@
 08.statements/11.continue_statements/continue_while1_neg.sts
 ### end of Issue 19686
 ### Issue 19680
+02.lexical_elements/09.literals/01.integer_literals/incorrect_int_literals_10.sts
+02.lexical_elements/09.literals/01.integer_literals/incorrect_int_literals_17.sts
+02.lexical_elements/09.literals/04.boolean_literals/bool_literals_n1.sts
+02.lexical_elements/09.literals/04.boolean_literals/bool_literals_n2.sts
+02.lexical_elements/09.literals/04.boolean_literals/bool_literals_n3.sts
+02.lexical_elements/09.literals/04.boolean_literals/bool_literals_n4.sts
 03.types/01.predefined_types/01.primitive_types/pt_constructor_9.sts
+03.types/08.reference_types/09.undefined_type/undefined_incorrect_usage_7.sts
+03.types/08.reference_types/09.undefined_type/undefined_incorrect_usage_9.sts
+04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_17.sts
+04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_neg_7.sts
+04.names_declarations_and_scopes/08.function_declarations/02.parameter_list/param_list_neg_8.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_11.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_12.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/class_args_neg_14.sts
@@ -2307,6 +2320,48 @@
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_11.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/interface_args_neg_21.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_13.sts
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_48.sts
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_49.sts
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_50.sts
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_51.sts
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_52.sts
+05.generics/01.type_parameters/01.type_parameter_constraint/generic_classes/generic_class_wrong_constraint_53.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_0.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_1.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_10.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_11.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_12.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_13.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_14.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_15.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_16.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_2.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_3.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_4.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_5.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_6.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_7.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_8.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args1_neg_9.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_0.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_1.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_10.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_11.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_12.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_2.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_3.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_4.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_5.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_6.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_7.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_8.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args2_neg_9.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args3_neg_0.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args3_neg_1.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args3_neg_2.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/constr_args3_neg_3.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/func_args1_neg_8.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_8.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_0.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_1.sts
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n1_2.sts
@@ -2341,12 +2396,24 @@
 06.contexts_and_conversions/05.implicit_conversions/10.function_types_conversions/comp_arr/comp-arr-n2_9.sts
 07.expressions/04.array_literal/arr_n_0.sts
 07.expressions/04.array_literal/arr_n_1.sts
+07.expressions/08.this_expression/this_with_t_in_non_generic.sts
+07.expressions/09.field_access_expressions/02.accessing_superclass_fields/access_to_super_through_this.sts
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3a_n_4.sts
 07.expressions/10.method_call_expression/03.step_3_checking_method_modifiers/step3a_n_5.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_0.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_2.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_5.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_6.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_7.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_8.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_9.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_10.sts
+09.classes/09.constructor_declaration/02.constructor_overload_signatures/constructor_implementation_11.sts
 09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_12.sts
 09.classes/09.constructor_declaration/04.explicit_constructor_call/call_to_this_super_must_be_first_stmt_13.sts
 09.classes/11.local_classes_and_interfaces/local_class_out_of_visibility_area_7.sts
 09.classes/11.local_classes_and_interfaces/local_interface_with_already_declared_name.sts
+10.interfaces/02.superinterfaces_and_subinterfaces/circulary_interface_declaration.sts
 10.interfaces/05.interface_properties/readonly_simple_form_1.sts
 13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/negative_selective_exports_0.sts
 13.compilation_units_packages_and_modules/09.export_directives/01.selective_export_directive/negative_selective_exports_1.sts

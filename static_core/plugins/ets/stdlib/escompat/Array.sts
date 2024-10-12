@@ -708,11 +708,17 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         return obj
     }
 
-    // NOTE(kprokopenko): remove when #14756 is fixed and rename below fucntion to push
-    public push(val: T): number {
-        this.ensureUnusedCapacity(1)
-        this.buffer[this.actualLength] = val
-        this.actualLength += 1
+    /**
+     * Adds the specified elements to the end of an array and returns the new length of the array.
+     *
+     * @returns new length
+     */
+    public push(...val: T[]): number {
+        this.ensureUnusedCapacity(val.length)
+        for (let i = 0; i < val.length; i++) {
+            this.buffer[this.actualLength + i] = val[i]
+        }
+        this.actualLength += val.length
         return this.actualLength
     }
 

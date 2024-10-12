@@ -21,9 +21,6 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSFind = etsMod.getFunction('Array_TestJSFind');
 
-// NOTE(oignatenko) enable below after interop will work properly instead of returning undefined from arr.find
-const FIX_RETURN_UNDEFINED: boolean = false;
-
 {
 	// Test JS Array<FooClass>
 	TestJSFind(new Array(new FooClass('zero'), new FooClass('one')));
@@ -45,10 +42,7 @@ const FIX_RETURN_UNDEFINED: boolean = false;
 
 	// actual test code:
 	let found = arr.find(fnTrue);
-	// NOTE(oignatenko) uncomment below after interop will work like reference above instead of returning undefined
-	if (FIX_RETURN_UNDEFINED) {
-		ASSERT_EQ(found, 123);
-	}
+	ASSERT_EQ(found, 123);
 
 	let foundNull = arr.find(fnFalse);
 	console.log(foundNull);

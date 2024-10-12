@@ -38,3 +38,8 @@ cases:
     use: |-
       let w = foo<SomeType>()
       w.accept(new SomeType(), [new SomeType()])
+  - decl: |-
+      function foo<T = "string">(): Consumer<T> { return new Consumer<T>() }
+    use: |-
+      let w = foo()
+      w.accept("string")

@@ -597,30 +597,30 @@ class EtsClass {
 //! INST_NEXT  "Intrinsic.JSRuntimeGetValueDouble"
 
 //! CHECKER      Use ets object from js, AOT (slow)
-//! # RUN_AOT      options: "--compiler-regex=ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
-//! # METHOD       "jscallEtsObject"
-//! # PASS_AFTER   "IrBuilder"
-//! # INST         /CallStatic.*jscall::invoke/
-//! # INST         "Intrinsic.JSRuntimeGetValueDouble"
-//! # RUN          entry: "jscallEtsObject"
+//! RUN_AOT      options: "--compiler-regex=ETSGLOBAL::jscallEtsObject --compiler-enable-fast-interop=false"
+//! METHOD       "jscallEtsObject"
+//! PASS_AFTER   "IrBuilder"
+//! INST         /CallStatic.*jscall::invoke/
+//! INST         "Intrinsic.JSRuntimeGetValueDouble"
+//! RUN          entry: "jscallEtsObject"
 
 //! CHECKER     Use ets object from js, AOT (fast)
-//! # RUN_PAOC    options: "--compiler-regex=ETSGLOBAL::jscallEtsObject"
-//! # METHOD     "jscallEtsObject"
-//! # PASS_AFTER "IrBuilder"
-//! # INST_NOT   /CallStatic.*jscall::invoke/
-//! # INST       "Intrinsic.CompilerCreateLocalScope"
-//! # INST_NEXT  "Intrinsic.CompilerConvertJSValueToLocal"
-//! # INST_NEXT  "Intrinsic.CompilerResolveQualifiedJSCall"
-//! # INST_NOT   /LoadImmediate.*PandaFileOffset/
-//! # INST_NEXT  "Intrinsic.CompilerLoadResolvedJSFunction"
-//! # INST_NEXT  "Intrinsic.CompilerJSCallCheck"
-//! # INST_NEXT  "Intrinsic.CompilerConvertRefTypeToLocal"
-//! # INST_NEXT  "Intrinsic.CompilerJSCallFunction"
-//! # INST_NEXT  "Intrinsic.CompilerConvertLocalToJSValue"
-//! # INST_NEXT  "Intrinsic.CompilerDestroyLocalScope"
-//! # INST_NEXT  "Intrinsic.JSRuntimeGetValueDouble"
-//! # RUN        entry: "jscallEtsObject"
+//! RUN_PAOC    options: "--compiler-regex=ETSGLOBAL::jscallEtsObject"
+//! METHOD     "jscallEtsObject"
+//! PASS_AFTER "IrBuilder"
+//! INST_NOT   /CallStatic.*jscall::invoke/
+//! INST       "Intrinsic.CompilerCreateLocalScope"
+//! INST_NEXT  "Intrinsic.CompilerConvertJSValueToLocal"
+//! INST_NEXT  "Intrinsic.CompilerResolveQualifiedJSCall"
+//! INST_NOT   /LoadImmediate.*PandaFileOffset/
+//! INST_NEXT  "Intrinsic.CompilerLoadResolvedJSFunction"
+//! INST_NEXT  "Intrinsic.CompilerJSCallCheck"
+//! INST_NEXT  "Intrinsic.CompilerConvertRefTypeToLocal"
+//! INST_NEXT  "Intrinsic.CompilerJSCallFunction"
+//! INST_NEXT  "Intrinsic.CompilerConvertLocalToJSValue"
+//! INST_NEXT  "Intrinsic.CompilerDestroyLocalScope"
+//! INST_NEXT  "Intrinsic.JSRuntimeGetValueDouble"
+//! RUN        entry: "jscallEtsObject"
 
 function jscallEtsObject(): int {
     for (let i = 1; i <= 5; i++) {
@@ -633,7 +633,7 @@ function jscallEtsObject(): int {
     return 0;
 }
 
-//! CHECKER      Load value from js prototype, JIT 
+//! CHECKER      Load value from js prototype, JIT
 //! RUN          force_jit: true, entry: "jsLoadFromPrototype", options: "--compiler-regex=ETSGLOBAL::jsLoadFromPrototype"
 //! METHOD       "jsLoadFromPrototype"
 //! PASS_AFTER   "IrBuilder"
