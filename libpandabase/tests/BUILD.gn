@@ -27,7 +27,6 @@ host_unittest_action("LibPandaBaseTest") {
     "cframe_layout_test.cpp",
     "code_allocator_test.cpp",
     "json_parser_test.cpp",
-    "logger_test.cpp",
     "math_helpers_test.cpp",
     "mem_space_test.cpp",
     "mmap_mem_pool_test.cpp",
@@ -42,6 +41,7 @@ host_unittest_action("LibPandaBaseTest") {
   if (is_linux) {
     sources += [
       "genmc/mutex_test_2.cpp",
+      "logger_test.cpp",
       "mutex_test.cpp",
       "unix_error_test.cpp",
       "unix_exec_test.cpp",

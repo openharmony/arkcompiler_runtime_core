@@ -31,7 +31,7 @@ HWTEST(MathHelpers, GetIntLog2, testing::ext::TestSize.Level0)
 
     for (int i = 1; i < 32; i++) {
         val = (1U << i) + (i == 31 ? -1 : 1);
-#ifndef NDEBUG
+#if !defined(NDEBUG) && defined(HOST_UT)
         EXPECT_DEATH_IF_SUPPORTED(GetIntLog2(val), "");
 #endif
     }

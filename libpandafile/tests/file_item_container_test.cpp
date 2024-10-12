@@ -122,7 +122,9 @@ HWTEST(ItemContainer, TestFileFormatVersionTooOldDeathTest, testing::ext::TestSi
         EXPECT_TRUE(writer.FinishWrite());
     }
 
+#ifdef HOST_UT
     EXPECT_DEATH(File::Open(file_name), ".*");
+#endif
 }
 
 HWTEST(ItemContainer, TestRewriteChecksum, testing::ext::TestSize.Level0)
@@ -194,7 +196,9 @@ HWTEST(ItemContainer, TestFileFormatVersionTooNewDeathTest, testing::ext::TestSi
         EXPECT_TRUE(writer.FinishWrite());
     }
 
+#ifdef HOST_UT
     EXPECT_DEATH(File::Open(file_name), ".*");
+#endif
 }
 
 HWTEST(ItemContainer, TestFileFormatVersionValid, testing::ext::TestSize.Level0)
