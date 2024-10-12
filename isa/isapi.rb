@@ -264,6 +264,26 @@ class Instruction < SimpleDelegator
     dig(:namespace) || 'core'
   end
 
+  def is_range_0?
+    properties.include?('range_0')
+  end
+
+  def is_range_1?
+    properties.include?('range_1')
+  end
+
+  def is_range_instruction?
+    is_range_0? || is_range_1?
+  end
+
+  def is_return_instruction?
+    properties.include?('return')
+  end
+
+  def is_unconditional_throw_instruction?
+    dig(:prefix) == 'throw' && !properties.include?('conditional_throw')
+  end
+
   include FreezeMixin
   freeze_defined_methods
 end

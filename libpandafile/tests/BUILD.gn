@@ -20,6 +20,8 @@ host_unittest_action("LibPandaFileTest") {
   sources = [
     "bytecode_emitter_tests.cpp",
     "bytecode_imm_fetch_tests.cpp",
+    "bytecode_jump_range_tests.cpp",
+    "bytecode_rerturn_throw_tests.cpp",
     "data_protect_test.cpp",
     "debug_info_extractor_test.cpp",
     "file_format_version_test.cpp",

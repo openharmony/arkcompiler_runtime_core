@@ -260,6 +260,8 @@ public:
     // Read imm as actually signed / unsigned and cast it to int64 before return
     auto GetImmData(size_t idx = 0) const;
 
+    auto GetImmCount() const;
+
     /**
      * Primary and Secondary Opcodes are used in interpreter/verifier instruction dispatch
      * while full Opcode is typically used for various instruction property query.
@@ -405,7 +407,25 @@ public:
         return Size(GetFormat(opcode));
     }
 
+    static std::optional<uint64_t> SafeAdd(uint64_t a, uint64_t b)
+    {
+        if (a > std::numeric_limits<uint64_t>::max() - b) {
+            return std::nullopt;
+        }
+        return a + b;
+    }
+
     size_t GetLiteralIndex() const;
+
+    bool IsJumpInstruction() const;
+
+    bool IsReturnOrThrowInstruction() const;
+
+    bool IsRangeInstruction() const;
+
+    std::optional<uint64_t> GetRangeInsLastRegIdx() const;
+
+    std::optional<uint64_t> GetLastVReg() const;
 };
 
 template <const BytecodeInstMode Mode>

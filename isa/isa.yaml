@@ -165,6 +165,16 @@ properties:
     description: The instruction occupies ic slots of 16 bit width.
   - tag: eight_sixteen_bit_ic
     description: The instruction occupies ic slots of both 8 and 16 bit width.
+  - tag: conditional_throw
+    description: The throw instruction can throw an excepton only if certain conditions are met.
+  - tag: range_0
+    description: Indicates that the instruction takes some consective registers as inputs.
+                 The start register of these consective inputs is the last register of the instruction.
+                 The number of consective inputs is the last immediate of the instruction.
+  - tag: range_1
+    description: Indicates that the instruction takes some consective registers as inputs.
+                 The start register of these consective inputs is the last register of the instruction.
+                 The number of consective inputs is the last immediate of the instruction plus 1.
 
 exceptions:
   - tag: x_none
@@ -475,11 +485,13 @@ groups:
         acc: out:top
         opcode_idx: [0xb3]
         format: [op_imm_8_v1_8_v2_8]
+        properties: [range_1]
       - sig: wide.createobjectwithexcludedkeys imm:u16, v1:in:top, v2:in:top
         acc: out:top
         opcode_idx: [0x00]
         format: [pref_op_imm_16_v1_8_v2_8]
         prefix: wide
+        properties: [range_1]
       - sig: createarraywithbuffer imm:u16, literalarray_id
         acc: out:top
         opcode_idx: [0x06, 0x81]
@@ -514,12 +526,13 @@ groups:
         acc: out:top
         opcode_idx: [0x08, 0x83]
         format: [op_imm1_8_imm2_8_v_8, op_imm1_16_imm2_8_v_8]
-        properties: [ic_slot, two_slot, eight_sixteen_bit_ic]
+        properties: [ic_slot, two_slot, eight_sixteen_bit_ic, range_0]
       - sig: wide.newobjrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x01]
         format: [pref_op_imm_16_v_8]
         prefix: wide
+        properties: [range_0]
       - sig: newlexenv imm:u8
         acc: out:top
         opcode_idx: [0x09]
@@ -971,22 +984,25 @@ groups:
         opcode_idx: [0x05]
         format: [pref_op_v_8]
         prefix: throw
+        properties: [conditional_throw]
       - sig: throw.undefinedifhole v1:in:top, v2:in:top
         acc: none
         opcode_idx: [0x06]
         format: [pref_op_v1_8_v2_8]
         prefix: throw
+        properties: [conditional_throw]
       - sig: throw.ifsupernotcorrectcall imm:u16
         acc: in:top
         opcode_idx: [0x07, 0x08]
         format: [pref_op_imm_8, pref_op_imm_16]
         prefix: throw
+        properties: [conditional_throw]
       - sig: throw.undefinedifholewithname string_id
         acc: in:top
         opcode_idx: [0x09]
         format: [pref_op_id_16]
         prefix: throw
-        properties: [string_id]
+        properties: [string_id, conditional_throw]
 
   - title: call instructions
     description: call
@@ -1047,17 +1063,19 @@ groups:
         acc: inout:top
         opcode_idx: [0x73]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot, eight_bit_ic]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic, range_0]
       - sig: wide.callrange imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x04]
         format: [pref_op_imm_16_v_8]
         prefix: wide
+        properties: [range_0]
       - sig: deprecated.callrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x0f]
         format: [pref_op_imm_16_v_8]
         prefix: deprecated
+        properties: [range_0]
       - sig: supercallspread imm:u8, v:in:top
         acc: inout:top
         opcode_idx: [0xb9]
@@ -1097,37 +1115,41 @@ groups:
         acc: inout:top
         opcode_idx: [0x31]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot, eight_bit_ic]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic, range_0]
       - sig: wide.callthisrange imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x05]
         format: [pref_op_imm_16_v_8]
         prefix: wide
+        properties: [range_1]
       - sig: deprecated.callthisrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x11]
         format: [pref_op_imm_16_v_8]
         prefix: deprecated
+        properties: [range_1]
       - sig: supercallthisrange imm1:u8, imm2:u8, v:in:top
         acc: out:top
         opcode_idx: [0x32]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot, eight_bit_ic]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic, range_0]
       - sig: wide.supercallthisrange imm:u16, v:in:top
         acc: out:top
         opcode_idx: [0x06]
         format: [pref_op_imm_16_v_8]
         prefix: wide
+        properties: [range_0]
       - sig: supercallarrowrange imm1:u8, imm2:u8, v:in:top
         acc: inout:top
         opcode_idx: [0xbb]
         format: [op_imm1_8_imm2_8_v_8]
-        properties: [jit_ic_slot, two_slot, eight_bit_ic]
+        properties: [jit_ic_slot, two_slot, eight_bit_ic, range_0]
       - sig: wide.supercallarrowrange imm:u16, v:in:top
         acc: inout:top
         opcode_idx: [0x07]
         format: [pref_op_imm_16_v_8]
         prefix: wide
+        properties: [range_0]
 
   - title: definition instuctions
     description: instructions which define object
