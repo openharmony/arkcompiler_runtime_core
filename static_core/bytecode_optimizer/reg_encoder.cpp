@@ -19,12 +19,12 @@
 #if defined(ENABLE_LIBABCKIT)
 #include "generated/abckit_intrinsics_vreg_width.h"
 #else
-bool IsDstRegNeedRenumbering([[maybe_unused]] ark::compiler::Inst *inst)
+static bool IsDstRegNeedRenumbering([[maybe_unused]] ark::compiler::Inst *inst)
 {
     UNREACHABLE();
 }
-void CheckWidthAbcKitIntrinsic([[maybe_unused]] ark::bytecodeopt::RegEncoder *re,
-                               [[maybe_unused]] ark::compiler::Inst *inst)
+static void CheckWidthAbcKitIntrinsic([[maybe_unused]] ark::bytecodeopt::RegEncoder *re,
+                                      [[maybe_unused]] ark::compiler::Inst *inst)
 {
     UNREACHABLE();
 }
