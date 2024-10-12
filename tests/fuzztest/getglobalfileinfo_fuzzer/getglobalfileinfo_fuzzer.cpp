@@ -23,8 +23,10 @@ namespace OHOS {
         {
             // handle is nullptr
             panda::ZipArchiveHandle handle = nullptr;
-            panda::GlobalStat* gstat = nullptr;
-            panda::GetGlobalFileInfo(handle, gstat);
+            panda::GlobalStat gi = panda::GlobalStat();
+            if (panda::GetGlobalFileInfo(handle, &gi) != 0) {
+                return;
+            }
         }
 
         {
