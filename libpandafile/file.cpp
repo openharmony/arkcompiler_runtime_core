@@ -790,7 +790,7 @@ bool File::ValidateChecksum() const
     return GetHeader()->checksum == cal_checksum;
 }
 
-void File::ThrowIfWithCheck(bool cond, const std::string& msg, const std::string& tag) const
+void File::ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::string_view& tag) const
 {
     if (UNLIKELY(cond)) {
         bool is_checksum_match = ValidateChecksum();
