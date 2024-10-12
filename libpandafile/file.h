@@ -430,7 +430,7 @@ public:
         class_hash_table_ = class_hash_table;
     }
 
-    bool ValidateChecksum() const;
+    bool ValidateChecksum(uint32_t *cal_checksum_out = nullptr) const;
 
     void ThrowIfWithCheck(bool cond, const std::string& msg, const std::string& tag = "") const;
 
