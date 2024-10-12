@@ -91,6 +91,10 @@ function(panda_add_checked_test)
             "${boot_stdlibs}"
             "--load-runtimes=${boot_spaces}")
 
+    if (NOT PANDA_CI_TESTING_MODE STREQUAL "Nightly")
+        set (OPTIONS ${OPTIONS} "--compiler-check-final=true")
+    endif()
+
     if ("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
         set(RELEASE_OPT "--release")
     endif()
