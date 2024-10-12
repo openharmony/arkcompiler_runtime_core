@@ -51,7 +51,8 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_SIGNBIT: {
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_I32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_I64:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_F32:
-case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_F64: {
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_F64:
+case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_MATH_MAX: {
     Builder()->template BuildBinaryOperationIntrinsic<Opcode::Max>(bcInst_, ACC_READ);
     break;
 }
@@ -59,7 +60,8 @@ case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MAX_F64: {
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_I32:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_I64:
 case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_F32:
-case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_F64: {
+case RuntimeInterface::IntrinsicId::INTRINSIC_STD_MATH_MIN_F64:
+case RuntimeInterface::IntrinsicId::INTRINSIC_ESCOMPAT_MATH_MIN: {
     Builder()->template BuildBinaryOperationIntrinsic<Opcode::Min>(bcInst_, ACC_READ);
     break;
 }
