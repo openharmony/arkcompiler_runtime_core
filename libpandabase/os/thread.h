@@ -133,7 +133,14 @@ native_handle_type ThreadStart(Func *func, Args... args)
         ptr->this_ptr = shared_ptr;
         // Leave scope to make sure that local shared_ptr was destroyed before thread creation
     }
-    pthread_create(&tid, nullptr,
+    pthread_attr_t attr;
+    pthread_attr_init(&attr);
+#ifdef PANDA_TARGET_MACOS
+    // In MacOS, the stack size of child thread is 512KB by default. Adjust it to 8MB to be consistent with Linux.
+    size_t stack_size = 8 * 1024 * 1024;
+    pthread_attr_setstacksize(&attr, stack_size);
+#endif
+    pthread_create(&tid, &attr,
                    &internal::ProxyFunc<Func, decltype(args_tuple), std::tuple_size<decltype(args_tuple)>::value>,
                    static_cast<void *>(ptr));
 #ifdef PANDA_TARGET_UNIX
