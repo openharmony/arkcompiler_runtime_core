@@ -385,4 +385,9 @@ void ThreadedCoroutineManager::MainCoroutineCompleted()
 
 void ThreadedCoroutineManager::Finalize() {}
 
+bool ThreadedCoroutineManager::IsMainWorker(Coroutine *co) const
+{
+    return co == GetMainThread();
+}
+
 }  // namespace ark

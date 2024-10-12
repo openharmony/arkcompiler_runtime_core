@@ -81,10 +81,12 @@ void EtsEvent::Wait()
 void EtsEvent::Fire()
 {
     // Atomic with acq_rel order reason: sync Wait/Fire in other threads
-    auto waiters = GetNumberOfWaiters(state_.exchange(FIRE_STATE, std::memory_order_acq_rel));
-    while (waiters > 0) {
+    auto state = state_.exchange(FIRE_STATE, std::memory_order_acq_rel);
+    if (IsFireState(state)) {
+        return;
+    }
+    for (auto waiters = GetNumberOfWaiters(state); waiters > 0; --waiters) {
         ResumeCoroutine();
-        waiters--;
     }
 }
 

@@ -603,6 +603,12 @@ StackfulCoroutineWorker *StackfulCoroutineManager::GetCurrentWorker()
     return GetCurrentContext()->GetWorker();
 }
 
+bool StackfulCoroutineManager::IsMainWorker(Coroutine *co) const
+{
+    auto *worker = co->GetContext<StackfulCoroutineContext>()->GetWorker();
+    return worker->GetId() == stackful_coroutines::MAIN_WORKER_ID;
+}
+
 bool StackfulCoroutineManager::IsJsMode()
 {
     return jsMode_;
