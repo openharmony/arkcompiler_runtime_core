@@ -784,10 +784,9 @@ bool ContainsLiteralArrayInHeader(const std::array<uint8_t, File::VERSION_SIZE> 
 
 bool File::ValidateChecksum(uint32_t *cal_checksum_out) const
 {
-    constexpr uint32_t MAGIC_SIZE = 8U;
     constexpr uint32_t CHECKSUM_SIZE = 4U;
     // The checksum calculation does not include magic or checksum, so the offset needs to be added
-    constexpr uint32_t FILE_CONTENT_OFFSET = MAGIC_SIZE + CHECKSUM_SIZE;
+    constexpr uint32_t FILE_CONTENT_OFFSET = File::MAGIC_SIZE + CHECKSUM_SIZE;
     uint32_t file_size = GetHeader()->file_size;
     uint32_t cal_checksum = adler32(1, GetBase() + FILE_CONTENT_OFFSET, file_size - FILE_CONTENT_OFFSET);
 
