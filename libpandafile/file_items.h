@@ -84,31 +84,6 @@ enum class FunctionKind : uint8_t {
     SENDABLE_FUNCTION = 1 << 3
 };
 
-bool IsDynamicLanguage(panda::panda_file::SourceLang lang);
-std::optional<panda::panda_file::SourceLang> LanguageFromString(const std::string_view &lang);
-const char *LanguageToString(panda::panda_file::SourceLang lang);
-const char *GetCtorName(panda::panda_file::SourceLang lang);
-const char *GetCctorName(panda::panda_file::SourceLang lang);
-const char *GetStringClassDescriptor(panda::panda_file::SourceLang lang);
-
-static constexpr size_t ID_SIZE = File::EntityId::GetSize();
-static constexpr size_t IDX_SIZE = sizeof(uint16_t);
-static constexpr size_t TAG_SIZE = 1;
-static constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max();
-static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
-static constexpr uint32_t MAX_INDEX_32 = std::numeric_limits<uint32_t>::max();
-static constexpr uint32_t FLAG_WIDTH = 8;
-static constexpr uint32_t FUNTION_KIND_WIDTH = 8;
-static constexpr uint32_t FUNCTION_KIND_MASK = 0xFF00;
-static constexpr uint32_t FLAG_MASK = 0xFF;
-
-constexpr uint16_t INVALID_INDEX_16 = std::numeric_limits<uint16_t>::max();
-constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max() - 1;
-
-constexpr uint32_t PGO_STRING_DEFAULT_COUNT = 5;
-constexpr uint32_t PGO_CLASS_DEFAULT_COUNT = 3;
-constexpr uint32_t PGO_CODE_DEFAULT_COUNT = 1;
-
 enum class ItemTypes {
     ANNOTATION_ITEM,
     CATCH_BLOCK_ITEM,
@@ -139,6 +114,32 @@ enum class ItemTypes {
     TRY_BLOCK_ITEM,
     VALUE_ITEM
 };
+
+bool IsDynamicLanguage(panda::panda_file::SourceLang lang);
+std::optional<panda::panda_file::SourceLang> LanguageFromString(const std::string_view &lang);
+const char *LanguageToString(panda::panda_file::SourceLang lang);
+const char *GetCtorName(panda::panda_file::SourceLang lang);
+const char *GetCctorName(panda::panda_file::SourceLang lang);
+const char *GetStringClassDescriptor(panda::panda_file::SourceLang lang);
+std::string ItemTypeToString(ItemTypes type);
+
+static constexpr size_t ID_SIZE = File::EntityId::GetSize();
+static constexpr size_t IDX_SIZE = sizeof(uint16_t);
+static constexpr size_t TAG_SIZE = 1;
+static constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max();
+static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
+static constexpr uint32_t MAX_INDEX_32 = std::numeric_limits<uint32_t>::max();
+static constexpr uint32_t FLAG_WIDTH = 8;
+static constexpr uint32_t FUNTION_KIND_WIDTH = 8;
+static constexpr uint32_t FUNCTION_KIND_MASK = 0xFF00;
+static constexpr uint32_t FLAG_MASK = 0xFF;
+
+constexpr uint16_t INVALID_INDEX_16 = std::numeric_limits<uint16_t>::max();
+constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max() - 1;
+
+constexpr uint32_t PGO_STRING_DEFAULT_COUNT = 5;
+constexpr uint32_t PGO_CLASS_DEFAULT_COUNT = 3;
+constexpr uint32_t PGO_CODE_DEFAULT_COUNT = 1;
 
 constexpr std::string_view STRING_ITEM = "string_item";
 constexpr std::string_view CLASS_ITEM = "class_item";
