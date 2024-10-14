@@ -54,3 +54,6 @@ class FailKind(Enum):
     ABORT_FAIL = 30
     IRTOC_ASSERT_FAIL = 31
     ES2PANDA_NEG_FAIL = 32
+
+    SRC_DUMPER_FAIL = 33
+    INVALID_JSON = 34
