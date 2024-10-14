@@ -25,12 +25,15 @@ HWTEST(DataProtect, PacString, testing::ext::TestSize.Level0)
     StringPacProtect pstr("Hello World!");
     ASSERT_STREQ(pstr.GetOriginString().c_str(), "Hello World!");
     pstr.Append('a');
-    ASSERT_STREQ(pstr.GetOriginString().c_str(), "Hello World!a");
+    pstr.Append('a');
+    pstr.Append('a');
+    pstr.Append('a');
+    ASSERT_STREQ(pstr.GetOriginString().c_str(), "Hello World!aaaa");
     pstr.Append(" QWERT");
-    ASSERT_STREQ(pstr.GetOriginString().c_str(), "Hello World!a QWERT");
+    ASSERT_STREQ(pstr.GetOriginString().c_str(), "Hello World!aaaa QWERT");
     pstr.Append('1');
-    ASSERT_STREQ(pstr.GetOriginString().c_str(), "Hello World!a QWERT1");
-    ASSERT_TRUE(pstr.CompareStringWithPacedString("Hello World!a QWERT1"));
+    ASSERT_STREQ(pstr.GetOriginString().c_str(), "Hello World!aaaa QWERT1");
+    ASSERT_TRUE(pstr.CompareStringWithPacedString("Hello World!aaaa QWERT1"));
 }
 
 HWTEST(DataProtect, PacBool, testing::ext::TestSize.Level0)
