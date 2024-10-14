@@ -41,6 +41,42 @@ inline File::EntityId FieldDataAccessor::GetNameId(const File &pandaFile, File::
 }
 
 template <class T>
+inline T FieldDataAccessor::GetValueIntegral(FieldValue &fieldValue)
+{
+    // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
+    if constexpr (sizeof(T) <= sizeof(uint32_t)) {
+        return static_cast<T>(std::get<uint32_t>(fieldValue));
+        // NOLINTNEXTLINE(readability-misleading-indentation)
+    } else {
+        return static_cast<T>(std::get<uint64_t>(fieldValue));
+    }
+}
+
+template <class T>
+inline T FieldDataAccessor::GetValueNonIntegral(FieldValue &fieldValue)
+{
+    // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
+    if constexpr (sizeof(T) <= sizeof(uint32_t)) {
+        return bit_cast<T, uint32_t>(std::get<uint32_t>(fieldValue));
+        // NOLINTNEXTLINE(readability-misleading-indentation)
+    } else {
+        return bit_cast<T, uint64_t>(std::get<uint64_t>(fieldValue));
+    }
+}
+
+template <class T>
+inline T FieldDataAccessor::GetValueImpl(FieldValue &fieldValue)
+{
+    // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
+    // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
+    if constexpr (std::is_integral_v<T>) {
+        return GetValueIntegral<T>(fieldValue);
+    } else {
+        return GetValueNonIntegral<T>(fieldValue);
+    }
+}
+
+template <class T>
 inline std::optional<T> FieldDataAccessor::GetValue()
 {
     if (isExternal_) {
@@ -58,28 +94,7 @@ inline std::optional<T> FieldDataAccessor::GetValue()
         return novalue;
     }
 
-    FieldValue fieldValue = *v;
-
-    // Disable checks due to clang-tidy bug https://bugs.llvm.org/show_bug.cgi?id=32203
-    // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
-    if constexpr (std::is_integral_v<T>) {
-        // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
-        if constexpr (sizeof(T) <= sizeof(uint32_t)) {
-            return static_cast<T>(std::get<uint32_t>(fieldValue));
-            // NOLINTNEXTLINE(readability-misleading-indentation)
-        } else {
-            return static_cast<T>(std::get<uint64_t>(fieldValue));
-        }
-        // NOLINTNEXTLINE(readability-misleading-indentation)
-    } else {
-        // NOLINTNEXTLINE(readability-braces-around-statements, hicpp-braces-around-statements)
-        if constexpr (sizeof(T) <= sizeof(uint32_t)) {
-            return bit_cast<T, uint32_t>(std::get<uint32_t>(fieldValue));
-            // NOLINTNEXTLINE(readability-misleading-indentation)
-        } else {
-            return bit_cast<T, uint64_t>(std::get<uint64_t>(fieldValue));
-        }
-    }
+    return GetValueImpl<T>(*v);
 }
 
 template <>

@@ -38,6 +38,7 @@ inline void LiteralDataAccessor::EnumerateLiteralVals(size_t index, const Callba
 }
 
 template <class Callback>
+// CC-OFFNXT(G.FUD.06, G.FUN.01-CPP, huge_method[C]) big switch case
 inline void LiteralDataAccessor::EnumerateLiteralVals(File::EntityId id, const Callback &cb)
 {
     auto sp = pandaFile_.GetSpanFromId(id);

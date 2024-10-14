@@ -40,6 +40,7 @@ namespace ark::panda_file::test {
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 static const char SOURCE_FILE[] = "asm.pa";
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 void PreparePandaFile(ItemContainer *container)
 {
     ClassItem *classItem = container->GetOrCreateClassItem("A");

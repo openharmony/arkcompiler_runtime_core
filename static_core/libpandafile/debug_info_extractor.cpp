@@ -18,7 +18,6 @@
 #include "line_number_program.h"
 #include "class_data_accessor-inl.h"
 #include "debug_data_accessor-inl.h"
-#include "proto_data_accessor-inl.h"
 #include "utils/utf.h"
 
 namespace ark::panda_file {
@@ -181,6 +180,38 @@ private:
     ColumnNumberTable cnt_;
 };
 
+std::vector<DebugInfoExtractor::ParamInfo> DebugInfoExtractor::EnumerateParameters(
+    const File *pf, ProtoDataAccessor &pda, DebugInfoDataAccessor &dda, MethodDataAccessor &mda, ClassDataAccessor &cda)
+{
+    std::vector<ParamInfo> paramInfo;
+
+    size_t idx = 0;
+    size_t idxRef = pda.GetReturnType().IsReference() ? 1 : 0;
+    bool firstParam = true;
+    dda.EnumerateParameters([&](File::EntityId &paramId) {
+        ParamInfo info;
+        if (!paramId.IsValid()) {
+            return;
+        }
+        info.name = utf::Mutf8AsCString(pf->GetStringData(paramId).data);
+        if (firstParam && !mda.IsStatic()) {
+            info.signature = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
+        } else {
+            Type paramType = pda.GetArgType(idx++);
+            if (paramType.IsPrimitive()) {
+                info.signature = Type::GetSignatureByTypeId(paramType);
+            } else {
+                auto refType = pda.GetReferenceType(idxRef++);
+                info.signature = utf::Mutf8AsCString(pf->GetStringData(refType).data);
+            }
+        }
+        firstParam = false;
+        paramInfo.emplace_back(info);
+    });
+
+    return paramInfo;
+}
+
 void DebugInfoExtractor::Extract(const File *pf)
 {
     auto classes = pf->GetClasses();
@@ -203,31 +234,7 @@ void DebugInfoExtractor::Extract(const File *pf)
             DebugInfoDataAccessor dda(*pf, debugInfoId.value());
             ProtoDataAccessor pda(*pf, mda.GetProtoId());
 
-            std::vector<ParamInfo> paramInfo;
-
-            size_t idx = 0;
-            size_t idxRef = pda.GetReturnType().IsReference() ? 1 : 0;
-            bool firstParam = true;
-            dda.EnumerateParameters([&](File::EntityId &paramId) {
-                ParamInfo info;
-                if (!paramId.IsValid()) {
-                    return;
-                }
-                info.name = utf::Mutf8AsCString(pf->GetStringData(paramId).data);
-                if (firstParam && !mda.IsStatic()) {
-                    info.signature = utf::Mutf8AsCString(pf->GetStringData(cda.GetClassId()).data);
-                } else {
-                    Type paramType = pda.GetArgType(idx++);
-                    if (paramType.IsPrimitive()) {
-                        info.signature = Type::GetSignatureByTypeId(paramType);
-                    } else {
-                        auto refType = pda.GetReferenceType(idxRef++);
-                        info.signature = utf::Mutf8AsCString(pf->GetStringData(refType).data);
-                    }
-                }
-                firstParam = false;
-                paramInfo.emplace_back(info);
-            });
+            auto paramInfo = EnumerateParameters(pf, pda, dda, mda, cda);
 
             LineProgramState state(*pf, sourceFileId.value_or(File::EntityId(0)), dda.GetLineStart(),
                                    dda.GetConstantPool());

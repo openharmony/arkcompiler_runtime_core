@@ -170,6 +170,7 @@ static std::unique_ptr<const File> GetPandaFile(std::vector<uint8_t> &data)
     return File::OpenFromMemory(std::move(ptr));
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(ItemContainer, TestClasses)
 {
     // Write panda file to memory
@@ -417,6 +418,7 @@ TEST(ItemContainer, TestMethods)
     });
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 void TestProtos(size_t n)
 {
     constexpr size_t ELEM_WIDTH = 4;
@@ -516,6 +518,7 @@ TEST(ItemContainer, TestProtos)
     TestProtos(7);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(ItemContainer, TestDebugInfo)
 {
     // Write panda file to memory
@@ -742,6 +745,7 @@ TEST(ItemContainer, ContainerChecksum)
     EXPECT_EQ(file->GetHeader()->checksum, checksum);
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(ItemContainer, TestProfileGuidedRelayout)
 {
     ItemContainer container;
@@ -936,6 +940,7 @@ TEST(ItemContainer, TestProfileGuidedRelayout)
     EXPECT_EQ(item, items.end());
 }
 
+// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) solid logic
 TEST(ItemContainer, GettersTest)
 {
     ItemContainer container;

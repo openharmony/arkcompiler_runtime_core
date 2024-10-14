@@ -34,6 +34,7 @@ inline void ProtoDataAccessor::SkipShorty()
 }
 
 template <class Callback>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void ProtoDataAccessor::EnumerateTypes(const Callback &c)
 {
     auto sp = pandaFile_.GetSpanFromId(protoId_);
@@ -69,6 +70,7 @@ inline void ProtoDataAccessor::EnumerateTypes(const Callback &c)
     refTypesSp_ = sp;
 }
 
+// CC-OFFNXT(G.FUD.06) solid logic
 inline bool ProtoDataAccessor::IsEqual(ProtoDataAccessor *other)
 {
     size_t refNum = 0;

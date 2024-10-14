@@ -143,19 +143,8 @@ public:
             if (pandaFile_->IsExternal(ark::panda_file::File::EntityId(id))) {
                 continue;
             }
-            ark::panda_file::ClassDataAccessor cda {*pandaFile_, ark::panda_file::File::EntityId(id)};
-            cda.EnumerateMethods([&](ark::panda_file::MethodDataAccessor &mda) -> void {
-                if (mda.GetCodeId().has_value()) {
-                    ark::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
-                    std::stringstream ss;
-                    std::string_view cname(ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetClassId()).data));
-                    if (!cname.empty()) {
-                        ss << cname.substr(0, cname.size() - 1);
-                    }
-                    ss << "." << ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data);
-                    res.push_back({mda.GetCodeId().value(), ca.GetCodeSize(), ss.str()});
-                }
-            });
+
+            EnumerateMethods(id, res);
         }
 
         std::vector<struct MethodSymInfoExt> methodInfo;
@@ -171,6 +160,29 @@ public:
     }
 
 private:
+    inline void EnumerateMethods(uint32_t id, std::vector<ark::panda_file::ext::MethodSymEntry> &res)
+    {
+        ark::panda_file::ClassDataAccessor cda {*pandaFile_, ark::panda_file::File::EntityId(id)};
+        cda.EnumerateMethods([&](ark::panda_file::MethodDataAccessor &mda) -> void {
+            if (mda.GetCodeId().has_value()) {
+                ark::panda_file::CodeDataAccessor ca {*pandaFile_, mda.GetCodeId().value()};
+                res.push_back({mda.GetCodeId().value(), ca.GetCodeSize(), GetMethodSymName(mda)});
+            }
+        });
+    }
+
+    inline std::string GetMethodSymName(ark::panda_file::MethodDataAccessor &mda)
+    {
+        std::stringstream ss;
+        std::string_view cname(ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetClassId()).data));
+        if (!cname.empty()) {
+            ss << cname.substr(0, cname.size() - 1);
+        }
+        ss << "." << ark::utf::Mutf8AsCString(pandaFile_->GetStringData(mda.GetNameId()).data);
+
+        return ss.str();
+    }
+
     std::map<uint64_t, ark::panda_file::ext::MethodSymEntry> methodSymbols_;
     std::unique_ptr<const ark::panda_file::File> pandaFile_;
 };

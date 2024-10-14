@@ -52,9 +52,10 @@ void LoadPandFileExt()
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOAD_FUNC(CLASS, FUNC)                                                 \
     do {                                                                       \
+        /* CC-OFFNXT(G.PRE.10) function scope macro */                         \
         CLASS::p##FUNC = reinterpret_cast<decltype(FUNC) *>(dlsym(hd, #FUNC)); \
         if (CLASS::p##FUNC == nullptr) {                                       \
-            return;                                                            \
+            return; /* CC-OFF(G.PRE.05) function gen */                        \
         }                                                                      \
     } while (0)
 

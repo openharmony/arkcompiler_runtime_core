@@ -169,6 +169,7 @@ std::unique_ptr<const panda_file::File> OpenPandaFileFromZipFile(ZipArchiveHandl
     return panda_file::File::OpenFromMemory(std::move(constPtr), location);
 }
 
+// CC-OFFNXT(G.FUN.01-CPP) solid logic
 // NOLINTNEXTLINE(google-runtime-references)
 std::unique_ptr<const panda_file::File> HandleArchive(ZipArchiveHandle &handle, FILE *fp, std::string_view location,
                                                       EntryFileStat &entry, std::string_view archiveFilename,
@@ -492,6 +493,7 @@ std::unique_ptr<const File> File::Open(std::string_view filename, OpenMode openM
         return nullptr;
     }
 
+    // CC-OFFNXT(G.RES.09-CPP) ctor of class is private
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
@@ -521,6 +523,7 @@ std::unique_ptr<const File> File::OpenUncompressedArchive(int fd, const std::str
         return nullptr;
     }
 
+    // CC-OFFNXT(G.RES.09-CPP) ctor of class is private
     return std::unique_ptr<File>(new File(filename.data(), std::move(ptr)));
 }
 
@@ -559,6 +562,7 @@ std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr)
         return nullptr;
     }
 
+    // CC-OFFNXT(G.RES.09-CPP) ctor of class is private
     return std::unique_ptr<File>(new File("", std::forward<os::mem::ConstBytePtr>(ptr)));
 }
 
@@ -571,6 +575,7 @@ std::unique_ptr<const File> File::OpenFromMemory(os::mem::ConstBytePtr &&ptr, st
         return nullptr;
     }
 
+    // CC-OFFNXT(G.RES.09-CPP) ctor of class is private
     return std::unique_ptr<File>(new File(filename.data(), std::forward<os::mem::ConstBytePtr>(ptr)));
 }
 

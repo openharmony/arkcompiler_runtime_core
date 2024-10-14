@@ -80,13 +80,13 @@ const char *GetCtorName(ark::panda_file::SourceLang lang);
 const char *GetCctorName(ark::panda_file::SourceLang lang);
 const char *GetStringClassDescriptor(ark::panda_file::SourceLang lang);
 
-static constexpr size_t ID_SIZE = File::EntityId::GetSize();
-static constexpr size_t IDX_SIZE = sizeof(uint16_t);
-static constexpr size_t TAG_SIZE = 1;
-static constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max();
-static constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
-static constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max();
-static constexpr uint32_t MAX_INDEX_32 = std::numeric_limits<uint32_t>::max();
+constexpr size_t ID_SIZE = File::EntityId::GetSize();
+constexpr size_t IDX_SIZE = sizeof(uint16_t);
+constexpr size_t TAG_SIZE = 1;
+constexpr uint32_t INVALID_OFFSET = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t INVALID_INDEX = std::numeric_limits<uint32_t>::max();
+constexpr uint32_t MAX_INDEX_16 = std::numeric_limits<uint16_t>::max();
+constexpr uint32_t MAX_INDEX_32 = std::numeric_limits<uint32_t>::max();
 
 constexpr uint32_t PGO_STRING_DEFAULT_COUNT = 5;
 constexpr uint32_t PGO_CLASS_DEFAULT_COUNT = 3;
@@ -142,7 +142,7 @@ enum class IndexType {
     NONE
 };
 
-static constexpr size_t INDEX_COUNT_16 = static_cast<size_t>(IndexType::LAST_16) + 1;
+constexpr size_t INDEX_COUNT_16 = static_cast<size_t>(IndexType::LAST_16) + 1;
 
 class IndexedItem;
 

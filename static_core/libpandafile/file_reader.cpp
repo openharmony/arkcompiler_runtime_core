@@ -128,6 +128,7 @@ static void EmplaceLiteralArrayString(const panda_file::LiteralDataAccessor::Lit
     }
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, huge_method[C++]) big switch case
 void FileReader::EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &literalArray,
                                     const panda_file::LiteralDataAccessor::LiteralValue &value,
                                     const panda_file::LiteralTag &tag)
@@ -253,6 +254,7 @@ static ValueItem *GeneratePrimitiveItem(AnnotationDataAccessor::Elem &annElem, I
     return static_cast<ValueItem *>(container.CreateItem<ArrayValueItem>(Type(typeId), std::move(items)));
 }
 
+// CC-OFFNXT(G.FUN.01-CPP, huge_cyclomatic_complexity[C++], huge_method[C++]) big switch case
 // NOLINTNEXTLINE(readability-function-size)
 ValueItem *FileReader::SetElemValueItem(AnnotationDataAccessor::Tag &annTag, AnnotationDataAccessor::Elem &annElem)
 {
@@ -990,50 +992,68 @@ bool FileReader::ReadLiteralArrayItems()
     return true;
 }
 
+bool FileReader::TryCreateMethodItem(File::EntityId methodId)
+{
+    MethodDataAccessor methodAcc(*file_, methodId);
+    File::EntityId classId(methodAcc.GetClassId());
+    if (file_->IsExternal(classId)) {
+        auto *fclassItem = CreateForeignClassItem(classId);
+        ASSERT(file_->IsExternal(methodId));
+        if (CreateForeignMethodItem(fclassItem, methodId) == nullptr) {
+            return false;
+        }
+    } else {
+        auto *classItem = CreateClassItem(classId);
+        if (file_->IsExternal(methodId)) {
+            if (CreateForeignMethodItem(classItem, methodId) == nullptr) {
+                return false;
+            }
+        } else if (CreateMethodItem(classItem, methodId) == nullptr) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool FileReader::TryCreateFieldItem(File::EntityId fieldId)
+{
+    FieldDataAccessor fieldAcc(*file_, fieldId);
+    File::EntityId classId(fieldAcc.GetClassId());
+    if (file_->IsExternal(classId)) {
+        ASSERT(file_->IsExternal(fieldId));
+        auto *fclassItem = CreateForeignClassItem(fieldAcc.GetClassId());
+        if (CreateForeignFieldItem(fclassItem, fieldId) == nullptr) {
+            return false;
+        }
+    } else {
+        auto *classItem = CreateClassItem(fieldAcc.GetClassId());
+        if (file_->IsExternal(fieldId)) {
+            if (CreateForeignFieldItem(classItem, fieldId) == nullptr) {
+                return false;
+            }
+        } else if (CreateFieldItem(classItem, fieldId) == nullptr) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 bool FileReader::ReadRegionHeaders()
 {
     auto indexHeaders = file_->GetRegionHeaders();
     for (const auto &header : indexHeaders) {
         auto methodIndex = file_->GetMethodIndex(&header);
         for (auto methodId : methodIndex) {
-            MethodDataAccessor methodAcc(*file_, methodId);
-            File::EntityId classId(methodAcc.GetClassId());
-            if (file_->IsExternal(classId)) {
-                auto *fclassItem = CreateForeignClassItem(classId);
-                ASSERT(file_->IsExternal(methodId));
-                if (CreateForeignMethodItem(fclassItem, methodId) == nullptr) {
-                    return false;
-                }
-            } else {
-                auto *classItem = CreateClassItem(classId);
-                if (file_->IsExternal(methodId)) {
-                    if (CreateForeignMethodItem(classItem, methodId) == nullptr) {
-                        return false;
-                    }
-                } else if (CreateMethodItem(classItem, methodId) == nullptr) {
-                    return false;
-                }
+            if (!TryCreateMethodItem(methodId)) {
+                return false;
             }
         }
         auto fieldIndex = file_->GetFieldIndex(&header);
         for (auto fieldId : fieldIndex) {
-            FieldDataAccessor fieldAcc(*file_, fieldId);
-            File::EntityId classId(fieldAcc.GetClassId());
-            if (file_->IsExternal(classId)) {
-                ASSERT(file_->IsExternal(fieldId));
-                auto *fclassItem = CreateForeignClassItem(fieldAcc.GetClassId());
-                if (CreateForeignFieldItem(fclassItem, fieldId) == nullptr) {
-                    return false;
-                }
-            } else {
-                auto *classItem = CreateClassItem(fieldAcc.GetClassId());
-                if (file_->IsExternal(fieldId)) {
-                    if (CreateForeignFieldItem(classItem, fieldId) == nullptr) {
-                        return false;
-                    }
-                } else if (CreateFieldItem(classItem, fieldId) == nullptr) {
-                    return false;
-                }
+            if (!TryCreateFieldItem(fieldId)) {
+                return false;
             }
         }
     }
@@ -1142,10 +1162,64 @@ void FileReader::UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, F
     }
 }
 
-void FileReader::ComputeLayoutAndUpdateIndices()
+void FileReader::InstUpdateId(CodeItem *codeItem, MethodItem *methodItem,
+                              std::map<BaseItem *, File::EntityId> &reverseDone)
 {
     using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
 
+    size_t offset = 0;
+    BytecodeInstruction inst(codeItem->GetInstructions()->data());
+    while (offset < codeItem->GetCodeSize()) {
+        if (inst.HasFlag(Flags::TYPE_ID)) {
+            BytecodeId bId = inst.GetId();
+            File::Index idx = bId.AsIndex();
+
+            File::EntityId methodId = reverseDone.find(methodItem)->second;
+            File::EntityId oldId = file_->ResolveClassIndex(methodId, idx);
+            ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+
+            auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+            uint32_t index = idxItem->GetIndex(methodItem);
+            inst.UpdateId(BytecodeId(index));
+        } else if (inst.HasFlag(Flags::METHOD_ID)) {
+            BytecodeId bId = inst.GetId();
+            File::Index idx = bId.AsIndex();
+
+            File::EntityId methodId = reverseDone.find(methodItem)->second;
+            File::EntityId oldId = file_->ResolveMethodIndex(methodId, idx);
+            ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+
+            auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+            uint32_t index = idxItem->GetIndex(methodItem);
+            inst.UpdateId(BytecodeId(index));
+        } else if (inst.HasFlag(Flags::FIELD_ID)) {
+            BytecodeId bId = inst.GetId();
+            File::Index idx = bId.AsIndex();
+
+            File::EntityId methodId = reverseDone.find(methodItem)->second;
+            File::EntityId oldId = file_->ResolveFieldIndex(methodId, idx);
+            ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
+
+            auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
+            uint32_t index = idxItem->GetIndex(methodItem);
+            inst.UpdateId(BytecodeId(index));
+        } else if (inst.HasFlag(Flags::STRING_ID)) {
+            BytecodeId bId = inst.GetId();
+            File::EntityId oldId = bId.AsFileId();
+            auto data = file_->GetStringData(oldId);
+
+            std::string itemStr(utf::Mutf8AsCString(data.data));
+            auto *stringItem = container_.GetOrCreateStringItem(itemStr);
+            inst.UpdateId(BytecodeId(stringItem->GetFileId().GetOffset()));
+        }
+
+        offset += inst.GetSize();
+        inst = inst.GetNext();
+    }
+}
+
+void FileReader::ComputeLayoutAndUpdateIndices()
+{
     std::map<BaseItem *, File::EntityId> reverseDone;
     for (const auto &it : itemsDone_) {
         reverseDone.insert({it.second, it.first});
@@ -1201,48 +1275,7 @@ void FileReader::ComputeLayoutAndUpdateIndices()
                 return true;
             }
 
-            size_t offset = 0;
-            BytecodeInstruction inst(codeItem->GetInstructions()->data());
-            while (offset < codeItem->GetCodeSize()) {
-                if (inst.HasFlag(Flags::TYPE_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::Index idx = bId.AsIndex();
-                    File::EntityId methodId = reverseDone.find(methodItem)->second;
-                    File::EntityId oldId = file_->ResolveClassIndex(methodId, idx);
-                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
-                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
-                    uint32_t index = idxItem->GetIndex(methodItem);
-                    inst.UpdateId(BytecodeId(index));
-                } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::Index idx = bId.AsIndex();
-                    File::EntityId methodId = reverseDone.find(methodItem)->second;
-                    File::EntityId oldId = file_->ResolveMethodIndex(methodId, idx);
-                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
-                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
-                    uint32_t index = idxItem->GetIndex(methodItem);
-                    inst.UpdateId(BytecodeId(index));
-                } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::Index idx = bId.AsIndex();
-                    File::EntityId methodId = reverseDone.find(methodItem)->second;
-                    File::EntityId oldId = file_->ResolveFieldIndex(methodId, idx);
-                    ASSERT(itemsDone_.find(oldId) != itemsDone_.end());
-                    auto *idxItem = static_cast<IndexedItem *>(itemsDone_.find(oldId)->second);
-                    uint32_t index = idxItem->GetIndex(methodItem);
-                    inst.UpdateId(BytecodeId(index));
-                } else if (inst.HasFlag(Flags::STRING_ID)) {
-                    BytecodeId bId = inst.GetId();
-                    File::EntityId oldId = bId.AsFileId();
-                    auto data = file_->GetStringData(oldId);
-                    std::string itemStr(utf::Mutf8AsCString(data.data));
-                    auto *stringItem = container_.GetOrCreateStringItem(itemStr);
-                    inst.UpdateId(BytecodeId(stringItem->GetFileId().GetOffset()));
-                }
-
-                offset += inst.GetSize();
-                inst = inst.GetNext();
-            }
+            InstUpdateId(codeItem, methodItem, reverseDone);
 
             codeItemsDone.insert(codeItem);
 

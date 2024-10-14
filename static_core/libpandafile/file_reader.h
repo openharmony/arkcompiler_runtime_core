@@ -105,6 +105,11 @@ private:
     void UpdateDebugInfoDependecies(File::EntityId debugInfoId);
     void UpdateDebugInfo(DebugInfoItem *debugInfoItem, File::EntityId debugInfoId);
 
+    void InstUpdateId(CodeItem *codeItem, MethodItem *methodItem, std::map<BaseItem *, File::EntityId> &reverseDone);
+
+    bool TryCreateMethodItem(File::EntityId methodId);
+    bool TryCreateFieldItem(File::EntityId fieldId);
+
     template <typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
     void SetIntegerFieldValue(FieldDataAccessor *fieldAcc, FieldItem *fieldItem)
     {
