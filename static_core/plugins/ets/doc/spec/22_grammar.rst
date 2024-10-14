@@ -25,26 +25,14 @@ Grammar Summary
     indexType: 'number';
 
     type:
-        predefinedType
-        | typeReference
+        typeReference
         | arrayType
         | tupleType
         | functionType
         | unionType
-        | literalType
+        | StringLiteral
         | keyofType
         | '(' type ')'
-        ;
-
-    predefinedType:
-        'number' | 'byte' | 'short' | 'int' | 'long' | 'float' | 'double'
-        | 'bigint'
-        | 'char' | 'boolean'
-        | 'object' | 'string' | 'void' | 'never' |'undefined'
-        ;
-
-    literalType:
-        Literal
         ;
 
     typeReference:

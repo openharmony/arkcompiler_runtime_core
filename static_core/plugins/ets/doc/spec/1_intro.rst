@@ -16,7 +16,7 @@ Introduction
 ############
 
 This document presents complete information on the new common-purpose,
-multi-paradigm programming language called |LANG|.
+multiparadigm programming language called |LANG|.
 
 |
 
@@ -112,7 +112,7 @@ The following major aspects characterize the |LANG| language as a whole:
    generics
    template
 
--  Multi-targeting
+-  Multitargeting
 
    |LANG| provides an efficient application development solution for a wide
    range of devices. The language ecosystem is a developer-friendly and uniform
@@ -122,7 +122,7 @@ The following major aspects characterize the |LANG| language as a whole:
    realizing the full potential of any specific target hardware.
 
 .. index::
-   multi-targeting
+   multitargeting
 
 |LANG| is designed as a part of the modern language manifold. To provide an
 efficient and safely executable code, the language takes flexibility and

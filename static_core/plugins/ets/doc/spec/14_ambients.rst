@@ -501,11 +501,9 @@ top-level declaration of a compilation unit. If a namespace is embedded into
 another namespace, then all namespace names must be same as in ambient context.
 
 A compilation unit that implements a namespace is the unit for which the
-declaration module is built (see :ref:`Declaration Modules`). Otherwise,
-:ref:`Annotation namespace` must be applied to the implementation namespace.
+declaration module is built (see :ref:`Declaration Modules`).
 
 .. index::
-   annotation namespace
    ambient namespace declaration
    entity
 

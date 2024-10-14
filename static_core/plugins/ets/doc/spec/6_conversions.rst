@@ -608,6 +608,9 @@ type of a converted expression cannot be converted to the *target type*:
 Casting Conversions from Union
 ==============================
 
+.. meta:
+    frontend_status: Done
+
 A *casting conversion from union* converts an expression of union type to one
 of the types of the union, or to a type that is derived from such one type.
 
@@ -945,8 +948,7 @@ Widening Union Conversions
 ==========================
 
 .. meta:
-    frontend_status: Partly
-    todo: adapt it after literal types are implemented
+    frontend_status: Done
 
 There are three options of *widening union conversion* as follows:
 
@@ -994,8 +996,8 @@ This concept is illustrated by the example below:
     u1 = u2 // OK 
     u2 = u1 // compile-time error as type of u1 is not compatible with type of u2
 
-    let u3: 1 | 2 | boolean = 3 
-       // compile-time error as there is no value 3 among values of u3 type
+    let u3: "1" | "2" | boolean = "3" 
+       // compile-time error as there is no value "3" among values of u3 type
 
     class Base {}
     class Derived1 extends Base {}
@@ -1023,19 +1025,12 @@ Union type ``U`` (``U``:sub:`1` ``| ... | U``:sub:`n`) can be converted into
 non-union type ``T`` if each ``U``:sub:`i` is a literal that can be implicitly
 converted to type ``T``.
 
-.. code-block-meta:
-   expect-cte:
-
 .. code-block:: typescript
    :linenos:
 
-    let a: 1 | 2 = 1
-    let b: int = a // ok, literals fit type 'int'
-    let c: number = a // ok, literals fit type 'number'
+    let a: "1" | "2" = "1"
+    let b: string = a // ok, literals fit type 'string'
     
-    let d: 3 | 3.14 = 3
-    let e: number = d // ok
-    let f: int = d // compile-time error, 3.14 cannot be converted to 'int'
 
 .. index::
    normalization
@@ -1382,7 +1377,7 @@ Literal Type to its Supertype Conversions
 =========================================
 
 .. meta:
-    frontend_status: Partly
+    frontend_status: Done
 
 A value of ``literal`` type (see :ref:`Literal Types`) can always be converted
 to its supertype (see :ref:`Supertypes of Literal Types`). This conversion

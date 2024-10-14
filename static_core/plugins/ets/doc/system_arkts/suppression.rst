@@ -22,9 +22,12 @@ single feature or a group of features.
 Developers can also disable checks for certain strings or parts of code by
 using ``ETSNOLINT``. Possible warning-suppressions are as follows:
 
-* ``ETSNOLINT``:                               Applies to the current line;
-* ``ETSNOLINT-NEXTLINE``:                      Applies to the next line; and
-* ``ETSNOLINT-BEGIN`` with ``ETSNOLINT-END``:  Applies to all lines (including the line with the directive) until closed by the corresponding ``ETSNOLINT-END``.
+* ``ETSNOLINT``:
+    Applies to the current line;
+* ``ETSNOLINT-NEXTLINE``:
+    Applies to the next line; and
+* ``ETSNOLINT-BEGIN`` with ``ETSNOLINT-END``:
+    Applies to all lines (including the line with the directive) until closed by the corresponding ``ETSNOLINT-END``.
 
 
 **Note**: ``ETSNOLINT-END`` reset the impact of ``ETSNOLINT-BEGIN`` in
@@ -38,12 +41,15 @@ Arguments must be separated with commas without whitespaces.
 Only the specified warning types are suppressed.
 If there is no argument, then all warnings will be suppressed.
 
-* ``ETSNOLINT(ets-suggest-final)``: Disable ``ets-suggest-final``. Applies to the current line.
-* ``ETSNOLINT-NEXTLINE(ets-implicit-boxing-unboxing)``: Disable ``ets-implicit-boxing-unboxing``. Applies to the next line.
-* ``ETSNOLINT-BEGIN(ets-implicit-boxing-unboxing,ets-suggest-final)``: Disable ``ets-implicit-boxing-unboxing`` and ``ets-suggest-final`` checks. Applied to all lines (including the line with the directive) until closed by the corresponding ``ETSNOLINT-END``.
+* ``ETSNOLINT(ets-suggest-final)``:
+    Disable ``ets-suggest-final``. Applies to the current line.
+* ``ETSNOLINT-NEXTLINE(ets-implicit-boxing-unboxing)``:
+    Disable ``ets-implicit-boxing-unboxing``. Applies to the next line.
+* ``ETSNOLINT-BEGIN(ets-implicit-boxing-unboxing,ets-suggest-final)``:
+    Disable ``ets-implicit-boxing-unboxing`` and ``ets-suggest-final`` checks. Applied to all lines (including the line with the directive) until closed by the corresponding ``ETSNOLINT-END``.
 
 Other combinations are also valid. The list of possible arguments is the same as the list of ETS-warnings. Add any type of suppression to single-line
-or multi-line comments.
+or multiline comments.
 
 Appropriate examples with |LANG| code are provided below:
 

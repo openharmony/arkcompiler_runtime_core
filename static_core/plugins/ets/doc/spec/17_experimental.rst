@@ -32,7 +32,7 @@ enables users to dynamically create objects of array type by using runtime
 expressions that provide the array size. This is a useful addition to other
 array-related features of the language, such as array literals.
 
-The construct can also be used to create multi-dimensional arrays.
+The construct can also be used to create multidimensional arrays.
 
 The feature *function and method overloading* is supported in many
 (if not all) modern programming languages. Overloading functions/methods
@@ -475,7 +475,7 @@ as follows:
    type is a class type, then its *parameterless* constructor is used to
    create the value of each element.
 
-#. When a multi-dimensional array is created, the array creation effectively
+#. When a multidimensional array is created, the array creation effectively
    executes a set of nested loops of depth *n-1*, and creates an implied
    array of arrays.
 
