@@ -398,7 +398,6 @@
   "tests/tests-u-runner": "*",
   "tests/verifier-tests": "*",
   "tests/vm-benchmarks": "*",
-  "tools": "*",
   "verification": "*",
   "compiler/optimizer/ir/visitor.inc": {"G.INC.02": "*", "G.INC.04-CPP": "*"},
   "plugins/ets/tests/runtime/tooling/sampler/CMakeLists.txt": {"bc-40001": "*"},
