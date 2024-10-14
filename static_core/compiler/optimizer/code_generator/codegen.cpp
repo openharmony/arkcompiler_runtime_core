@@ -147,7 +147,7 @@ Codegen::Codegen(Graph *graph)
       codeBuilder_(allocator_->New<CodeInfoBuilder>(graph->GetArch(), allocator_)),
       slowPaths_(graph->GetLocalAllocator()->Adapter()),
       slowPathsMap_(graph->GetLocalAllocator()->Adapter()),
-      frameLayout_(CFrameLayout(graph->GetArch(), graph->GetStackSlotsCount())),
+      frameLayout_(CFrameLayout(graph->GetArch(), graph->GetStackSlotsCount(), !graph->GetMode().IsFastPath())),
       osrEntries_(graph->GetLocalAllocator()->Adapter()),
       vregIndices_(GetAllocator()->Adapter()),
       runtime_(graph->GetRuntime()),
