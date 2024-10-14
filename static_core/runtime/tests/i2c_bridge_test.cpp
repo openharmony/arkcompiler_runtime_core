@@ -845,6 +845,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke2Long)
     FreeFrame(frame);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static void Void4IntDouble(Method *method, int32_t a0, int32_t a1, int32_t a2, int32_t a3, double a4)
 {
     g_gCallResult = PrintFunc("void", __FUNCTION__, method, a0, a1, a2, a3, a4);
@@ -877,6 +878,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke4IntDouble)
 }
 
 // aarch64 max number of register parameters
+// CC-OFFNXT(G.FUN.01) solid logic
 static void Void7Int(Method *method, int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6)
 {
     g_gCallResult = PrintFunc("void", __FUNCTION__, method, a0, a1, a2, a3, a4, a5, a6);
@@ -911,6 +913,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7Int)
     FreeFrame(frame);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static void Void7Int8Double(Method *method, int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5,
                             int32_t a6, double d0, double d1, double d2, double d3, double d4, double d5, double d6,
                             double d7)
@@ -972,6 +975,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7Int8Double)
     FreeFrame(frame);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static void Void8Int(Method *method, int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5, int32_t a6,
                      int32_t a7)
 {
@@ -1008,6 +1012,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int)
     FreeFrame(frame);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static void Void6IntVReg(Method *method, int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5,
                          int64_t value)
 {
@@ -1043,6 +1048,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke6IntVReg)
     FreeFrame(frame);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static void Void7IntVReg(Method *method, int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5,
                          int32_t a6, int64_t value)
 {
@@ -1079,6 +1085,7 @@ TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke7IntVReg)
     FreeFrame(frame);
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static void Void8Int9Double(Method *method, int32_t a0, int32_t a1, int32_t a2, int32_t a3, int32_t a4, int32_t a5,
                             int32_t a6, int32_t a7, double d0, double d1, double d2, double d3, double d4, double d5,
                             double d6, double d7, double d8)
@@ -1087,6 +1094,7 @@ static void Void8Int9Double(Method *method, int32_t a0, int32_t a1, int32_t a2, 
         PrintFunc("void", __FUNCTION__, method, a0, a1, a2, a3, a4, a5, a6, a7, d0, d1, d2, d3, d4, d5, d6, d7, d8);
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
 TEST_F(InterpreterToCompiledCodeBridgeTest, Invoke8Int9Double)
 {
     uint16_t *shorty = MakeShorty({TypeId::VOID, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32, TypeId::I32,

@@ -87,7 +87,7 @@ public:
     uint32_t ParseClassAtom(RangeSet *atom);
     int ParseClassEscape(RangeSet *atom);
     void ParseError(const char *errorMessage);
-    void ParseUnicodePropertyValueCharacters(bool *isValue);
+    void ParseUnicodePropertyValueCharactersImpl(bool *isValue);
     int FindGroupName(const PandaString &name);
     uint32_t ParseOctalLiteral();
     bool ParseHexEscape(int length, uint32_t *value);
@@ -222,6 +222,32 @@ private:
 
     bool ParseQuantifierPrefix(int &min, int &max, bool &isGreedy);
     void PrintF(const char *fmt, ...);
+    void ParseUnicodePropertyValueCharacters(int &result);
+    void PrintControlEscapeAndAdvance();
+    void ParseControlLetter(uint32_t &result);
+    void ParseCharacterEscapeDefault(uint32_t &result);
+    void InsertRangeBase(RangeSet *atom, RangeSet &rangeSet, bool invert);
+    void InsertRangeOpCode(DynChunk &buffer, RangeSet &rangeSet, PrevOpCode &prevOp, bool isBackward);
+    void InsertRange32OpCode(DynChunk &buffer, RangeSet &rangeSet, PrevOpCode &prevOp, bool isBackward);
+    void ParseLookBehind(DynChunk &buffer, PrevOpCode &prevOp, bool isBackward);
+    int ParseGroupName();
+
+    template <typename OpCodeT>
+    void InsertMatchAheadOpCode(bool isBackward);
+
+    bool ParseAssertion(bool isBackward, bool &isAtom, bool &parseCapture);
+    bool HandleGroupName();
+    bool ParseClassRangesImpl(RangeSet *result);
+    bool CalculateCaptureIndex(const uint8_t *p, int &captureIndex, const char *groupName, PandaString &name);
+    bool ParseCaptureCountImpl(const uint8_t *p, int &captureIndex, const char *groupName, PandaString &name);
+
+    void ParseAlternativeEscape(bool isBackward, bool &isAtom);
+    void ParseAlternativeEscapeDefault(int atomValue);
+    void ParsePatternCharacter(bool isBackward);
+    void ParseAlternativeAny(bool isBackward);
+    void ParseAlternativeRange(bool isBackward);
+    void ParseAlternativeImpl(bool isBackward, bool &isAtom, int &captureIndex);
+
     uint8_t *base_ {nullptr};
     uint8_t *pc_ {nullptr};
     uint8_t *end_ {nullptr};

@@ -38,6 +38,7 @@ inline void GlobalHandleStorage<T>::FreeHandles()
 }
 
 template <typename T>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline uintptr_t GlobalHandleStorage<T>::NewGlobalHandle(T value)
 {
     if (count_ == GLOBAL_BLOCK_SIZE && freeList_ == nullptr) {
@@ -97,6 +98,7 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::DealUpdateObject(std::ar
 }
 
 template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void GlobalHandleStorage<coretypes::TaggedType>::UpdateHeapObject()
 {
     if (globalNodes_->empty()) {
@@ -127,6 +129,7 @@ inline void GlobalHandleStorage<coretypes::TaggedType>::DealVisitGCRoots(std::ar
 }
 
 template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void GlobalHandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
 {
     if (globalNodes_->empty()) {

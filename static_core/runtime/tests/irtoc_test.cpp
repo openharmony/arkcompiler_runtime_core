@@ -133,6 +133,7 @@ extern "C" double IncrementFloat(double n)
     return n + 1;
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 extern "C" size_t IrtocTestRelocations2(size_t a0, size_t a1, double f0, size_t a2, size_t a3, size_t a4, double f1,
                                         double f2, size_t a5, size_t a6, double f3, size_t a7, size_t a8, size_t a9,
                                         double f4);

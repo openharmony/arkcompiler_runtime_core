@@ -164,6 +164,7 @@ ValueT Method::GetReturnValueFromAcc(interpreter::AccVRegister &aacVreg)
     }
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline Value Method::InvokeCompiledCode(ManagedThread *thread, uint32_t numArgs, Value *args)
 {
     Frame *currentFrame = thread->GetCurrentFrame();
@@ -286,6 +287,7 @@ inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const
 }
 
 template <class InvokeHelper>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline coretypes::TaggedValue Method::InvokeContext(ManagedThread *thread, const uint8_t *pc,
                                                     coretypes::TaggedValue *acc, uint32_t nregs,
                                                     coretypes::TaggedValue *regs)
@@ -452,7 +454,8 @@ inline void Method::SetAcc(AccVRegisterPtrT acc)
  * @return true if OSR has been occurred
  */
 template <bool IS_CALL, class AccVRegisterPtrT>
-inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bytecodeOffset,
+// CC-OFFNXT(G.FUD.06) perf critical
+inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcOffset,
                                             [[maybe_unused]] AccVRegisterPtrT acc, bool osr, TaggedValue func)
 {
     // The compilation process will start performing
@@ -476,7 +479,6 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
         ASSERT(!osr);
     }
 
-    auto runtime = Runtime::GetCurrent();
     auto &options = Runtime::GetOptions();
     uint32_t threshold = options.GetCompilerHotnessThreshold();
     uint32_t profThreshold = options.GetCompilerProfilingThreshold();
@@ -495,17 +497,13 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
             SetAcc<AccVRegisterPtrT>(thread, acc);
 
             if (func.IsHeapObject()) {
-                [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
-                VMHandle<ObjectHeader> handleFunc(thread, func.GetHeapObject());
-                return TryVerify<IS_CALL>() ? runtime->GetPandaVM()->GetCompiler()->CompileMethod(
-                                                  this, bytecodeOffset, osr, TaggedValue(handleFunc.GetPtr()))
-                                            : false;
+                return DecrementHotnessCounterForTaggedFunction<IS_CALL>(thread, bcOffset, osr, func);
             }
             if (!TryVerify<IS_CALL>()) {
                 return false;
             }
-            return runtime->GetPandaVM()->GetCompiler()->CompileMethod(
-                this, bytecodeOffset, osr, func);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
+            auto compiler = Runtime::GetCurrent()->GetPandaVM()->GetCompiler();
+            return compiler->CompileMethod(this, bcOffset, osr, func);  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
         }
         if (status == WAITING) {
             DecrementHotnessCounter();
@@ -515,6 +513,21 @@ inline bool Method::DecrementHotnessCounter(ManagedThread *thread, uintptr_t byt
 }
 
 template <bool IS_CALL>
+inline bool Method::DecrementHotnessCounterForTaggedFunction(ManagedThread *thread, uintptr_t bcOffset, bool osr,
+                                                             TaggedValue func)
+{
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<ObjectHeader> handleFunc(thread, func.GetHeapObject());
+    if (TryVerify<IS_CALL>()) {
+        auto compiler = Runtime::GetCurrent()->GetPandaVM()->GetCompiler();
+        return compiler->CompileMethod(this, bcOffset, osr, TaggedValue(handleFunc.GetPtr()));
+    }
+
+    return false;
+}
+
+template <bool IS_CALL>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool Method::TryVerify()
 {
     if constexpr (!IS_CALL) {

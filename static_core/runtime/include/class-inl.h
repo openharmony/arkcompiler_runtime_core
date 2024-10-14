@@ -82,6 +82,7 @@ ALWAYS_INLINE inline Item *BinSearch(Span<Item> items, Key key, const Pred &...p
     return nullptr;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline uint32_t Class::GetTypeSize(panda_file::Type type)
 {
     switch (type.GetId()) {
@@ -138,6 +139,7 @@ inline bool Class::IsSubClassOf(const Class *klass) const
     return false;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool Class::IsAssignableFrom(const Class *klass) const
 {
     if (klass == this) {
@@ -203,6 +205,7 @@ ALWAYS_INLINE inline Field *BinarySearchField(Span<Field> fields, panda_file::Fi
 }
 
 template <Class::FindFilter FILTER>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline Field *Class::FindDeclaredField(panda_file::File::EntityId id) const
 {
     if (FILTER == FindFilter::ALL) {
@@ -228,6 +231,24 @@ inline Field *Class::FindDeclaredField(panda_file::File::EntityId id) const
 }
 
 template <Class::FindFilter FILTER, class Pred>
+inline Field *Class::FindFieldInInterfaces(const Class *kls, Pred pred) const
+{
+    while (kls != nullptr) {
+        for (auto *iface : kls->GetInterfaces()) {
+            auto *field = iface->FindField<FILTER>(pred);
+            if (field != nullptr) {
+                return field;
+            }
+        }
+
+        kls = kls->GetBase();
+    }
+
+    return nullptr;
+}
+
+template <Class::FindFilter FILTER, class Pred>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline Field *Class::FindField(Pred pred) const
 {
     auto *cls = this;
@@ -241,23 +262,14 @@ inline Field *Class::FindField(Pred pred) const
     }
 
     if (FILTER == FindFilter::STATIC || FILTER == FindFilter::ALL) {
-        auto *kls = this;
-        while (kls != nullptr) {
-            for (auto *iface : kls->GetInterfaces()) {
-                auto *field = iface->FindField<FILTER>(pred);
-                if (field != nullptr) {
-                    return field;
-                }
-            }
-
-            kls = kls->GetBase();
-        }
+        return FindFieldInInterfaces<FILTER>(this, pred);
     }
 
     return nullptr;
 }
 
 template <Class::FindFilter FILTER>
+// CC-OFFNXT(G.FUD.06) big swtich case
 inline Span<Method> Class::GetMethods() const
 {
     switch (FILTER) {
@@ -275,6 +287,7 @@ inline Span<Method> Class::GetMethods() const
 }
 
 template <Class::FindFilter FILTER, typename KeyComp, typename Key, typename... Pred>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline Method *Class::FindDirectMethod(Key key, const Pred &...preds) const
 {
     // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
@@ -311,6 +324,7 @@ inline Method *Class::FindDirectMethod(Key key, const Pred &...preds) const
 }
 
 template <Class::FindFilter FILTER, typename KeyComp, typename Key, typename... Pred>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline Method *Class::FindClassMethod(Key key, const Pred &...preds) const
 {
     auto *cls = this;
@@ -330,6 +344,7 @@ inline Method *Class::FindClassMethod(Key key, const Pred &...preds) const
 }
 
 template <Class::FindFilter FILTER, typename KeyComp, typename Key, typename... Pred>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline Method *Class::FindInterfaceMethod(Key key, const Pred &...preds) const
 {
     static_assert(FILTER != FindFilter::COPIED, "interfaces don't have copied methods");
@@ -515,6 +530,7 @@ inline Method *Class::GetInterfaceMethod(const uint8_t *mutf8Name) const
     return FindInterfaceMethod<FindFilter::ALL, MethodNameComp>(sd);
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline Method *Class::ResolveVirtualMethod(const Method *method) const
 {
     Method *resolved = nullptr;

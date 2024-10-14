@@ -78,7 +78,6 @@ public:
 
 /**
  * call stack:
- *
  * native #0
  *   managed #1
  *      native #2

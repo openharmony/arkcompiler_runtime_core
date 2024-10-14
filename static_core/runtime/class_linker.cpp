@@ -585,6 +585,7 @@ constexpr size_t SIZE_32 = sizeof(uint32_t);
 constexpr size_t SIZE_16 = sizeof(uint16_t);
 constexpr size_t SIZE_8 = sizeof(uint8_t);
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static size_t LayoutFieldsInBaseClassPadding(Class *klass, PandaVector<Field *> *taggedFields,
                                              PandaVector<Field *> *fields64, PandaVector<Field *> *fields32,
                                              PandaVector<Field *> *fields16, PandaVector<Field *> *fields8,
@@ -619,6 +620,7 @@ static size_t LayoutFieldsInBaseClassPadding(Class *klass, PandaVector<Field *> 
     return alignOffset;
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static size_t LayoutFields(Class *klass, PandaVector<Field *> *taggedFields, PandaVector<Field *> *fields64,
                            PandaVector<Field *> *fields32, PandaVector<Field *> *fields16,
                            PandaVector<Field *> *fields8, PandaVector<Field *> *refFields, bool isStatic)
@@ -686,6 +688,7 @@ static inline bool PushBackFieldIfNonPrimitiveType(Field &field, PandaVector<Fie
 }
 
 /* static */
+// CC-OFFNXT(huge_method) solid logic
 bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool isStatic,
                                [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
 {
@@ -971,6 +974,7 @@ static void HandleNoExtensionError(LanguageContext &ctx, const uint8_t *descript
     OnError(errorHandler, ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
 Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
                               ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler,
                               bool addToRuntime /* = true */)

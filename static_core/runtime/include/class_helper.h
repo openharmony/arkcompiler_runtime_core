@@ -85,6 +85,13 @@ public:
         }
         return dim;
     }
+
+private:
+    template <typename Str = std::string>
+    static void AppendType(const uint8_t *descriptor, int rank, Str &result);
+
+    template <typename Str = std::string>
+    static void AppendNonPrimitiveType(const uint8_t *descriptor, int rank, Str &result);
 };
 
 // Str is std::string or PandaString
@@ -151,6 +158,21 @@ Str ClassHelper::GetNameUndecorated(const uint8_t *descriptor)
         rank++;
     }
 
+    AppendType(descriptor, rank, result);
+
+    while (rank > 0) {
+        result.append("[]");
+        rank--;
+    }
+
+    return result;
+}
+
+// Str is std::string or PandaString
+/* static */
+template <typename Str>
+void ClassHelper::AppendType(const uint8_t *descriptor, int rank, Str &result)
+{
     switch (descriptor[rank]) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         case 'V':
             result.append("void");
@@ -192,24 +214,24 @@ Str ClassHelper::GetNameUndecorated(const uint8_t *descriptor)
             result.append("any");
             break;
         case 'L':
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            result.append(utf::Mutf8AsCString(descriptor + rank + 1));  // cut 'L' at the beginning
-            ASSERT(result.size() > 0);
-            result.pop_back();  // cut ';' at the end
-
-            std::replace(result.begin(), result.end(), '/', '.');
-
+            AppendNonPrimitiveType(descriptor, rank, result);
             break;
         default:
             break;
     }
+}
 
-    while (rank > 0) {
-        result.append("[]");
-        rank--;
-    }
+// Str is std::string or PandaString
+/* static */
+template <typename Str>
+void ClassHelper::AppendNonPrimitiveType(const uint8_t *descriptor, int rank, Str &result)
+{
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    result.append(utf::Mutf8AsCString(descriptor + rank + 1));  // cut 'L' at the beginning
+    ASSERT(result.size() > 0);
+    result.pop_back();  // cut ';' at the end
 
-    return result;
+    std::replace(result.begin(), result.end(), '/', '.');
 }
 
 }  // namespace ark

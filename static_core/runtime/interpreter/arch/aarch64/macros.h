@@ -23,14 +23,17 @@
 #define RESTORE_GLOBAL_REGS()
 #endif
 
+// clang-format off
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DISPATCH(DISPATCH_TABLE, OPCODE)                                             \
     do {                                                                             \
         void const *_label;                                                          \
         asm("ldr %[label], [%[dispatch_table], %w[opcode], uxtw #3]"                 \
             : [label] "=r"(_label)                                                   \
+            /* CC-OFFNXT(G.PRE.02) code generation */                                \
             : [dispatch_table] "r"(DISPATCH_TABLE), [opcode] "r"((uint32_t)OPCODE)); \
-        goto *_label;                                                                \
+        goto *_label; /* CC-OFF(G.PRE.05) code generation */                         \
     } while (0)
+// clang-format on
 
 #endif  // PANDA_INTERPRETER_ARCH_AARCH64_MACROS_H_
