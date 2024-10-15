@@ -611,6 +611,9 @@ public:
     /// Clears the pre/post barrier buffers (and other resources) without deallocation.
     void CleanupInternalResources();
 
+    /// Collect TLAB metrics for memstats
+    void CollectTLABMetrics();
+
     void InitForStackOverflowCheck(size_t nativeStackReservedSize, size_t nativeStackProtectedSize);
     virtual void DisableStackOverflowCheck();
     virtual void EnableStackOverflowCheck();

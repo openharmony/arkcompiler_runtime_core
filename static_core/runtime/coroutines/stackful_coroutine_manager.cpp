@@ -196,6 +196,14 @@ bool StackfulCoroutineManager::TerminateCoroutine(Coroutine *co)
     {
         os::memory::LockHolder lList(coroListLock_);
         RemoveFromRegistry(co);
+        // We need collect TLAB metrics and clear TLAB before calling the manage thread destructor
+        // because of the possibility heap use after free. This happening when GC starts execute ResetYoungAllocator
+        // method which start iterate set of threads, collect TLAB metrics and clear TLAB. If thread was deleted from
+        // set but we haven't destroyed the thread yet, GC won't collect metrics and can complete TLAB
+        // deletion faster. And when we try to get the TLAB metrics in the destructor of managed thread, we will get
+        // heap use after free
+        co->CollectTLABMetrics();
+        co->ClearTLAB();
         // DestroyInternalResources()/CleanupInternalResources() must be called in one critical section with
         // RemoveFromRegistry (under core_list_lock_). This functions transfer cards from coro's post_barrier buffer to
         // UpdateRemsetThread internally. Situation when cards still remain and UpdateRemsetThread cannot visit the

@@ -402,11 +402,8 @@ void ObjectAllocatorG1<MT_MODE>::FreeObjectsMovedToPygoteSpace()
 template <MTModeT MT_MODE>
 void ObjectAllocatorG1<MT_MODE>::ResetYoungAllocator()
 {
-    MemStatsType *memStats = memStats_;
-    auto callback = [&memStats](ManagedThread *thread) {
-        if (!PANDA_TRACK_TLAB_ALLOCATIONS && (thread->GetTLAB()->GetOccupiedSize() != 0)) {
-            memStats->RecordAllocateObject(thread->GetTLAB()->GetOccupiedSize(), SpaceType::SPACE_TYPE_OBJECT);
-        }
+    auto callback = [](ManagedThread *thread) {
+        thread->CollectTLABMetrics();
         if (Runtime::GetOptions().IsAdaptiveTlabSize()) {
             thread->GetWeightedTlabAverage()->ComputeNewSumAndResetSamples();
         }
