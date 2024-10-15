@@ -369,17 +369,20 @@ void G1GC<LanguageConfig>::CollectNonRegularObjects()
     this->memStats_.template RecordSizeFreedTenured<ATOMIC>(deleteSize);
 }
 
-PandaVector<Region *> GetEmptyTenuredRegularRegionsFromQueue(
-    PandaPriorityQueue<std::pair<uint32_t, Region *>> garbageRegions)
+static PandaVector<Region *> GetEmptyTenuredRegularRegions(PandaVector<std::pair<uint32_t, Region *>> &garbageRegions)
 {
-    PandaVector<Region *> emptyTenuredRegions;
-    while (!garbageRegions.empty()) {
-        auto *topRegion = garbageRegions.top().second;
-        if (topRegion->GetLiveBytes() == 0U) {
-            emptyTenuredRegions.push_back(topRegion);
-        }
-        garbageRegions.pop();
+    auto firstEmptyRegionIter =
+        std::find_if_not(garbageRegions.rbegin(), garbageRegions.rend(),
+                         [](const std::pair<uint32_t, Region *> &entry) { return entry.first == DEFAULT_REGION_SIZE; });
+    if (firstEmptyRegionIter == garbageRegions.rend()) {
+        return {};
     }
+    PandaVector<Region *> emptyTenuredRegions;
+    emptyTenuredRegions.reserve(garbageRegions.end() - firstEmptyRegionIter.base());
+    for (auto iter = firstEmptyRegionIter.base(); iter != garbageRegions.end(); ++iter) {
+        emptyTenuredRegions.emplace_back(iter->second);
+    }
+    garbageRegions.erase(firstEmptyRegionIter.base(), garbageRegions.end());
     return emptyTenuredRegions;
 }
 
@@ -721,11 +724,6 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
         }
         collectionSet_.clear();
 
-        if (task.reason == GCTaskCause::MIXED) {
-            // There was forced a mixed GC. This GC type sets specific settings.
-            // So we need to restore them.
-            regionGarbageRateThreshold_ = this->GetSettings()->G1RegionGarbageRateThreshold();
-        }
         if (ScheduleMixedGCAndConcurrentMark(task)) {
             RunConcurrentMark(task);
         }
@@ -762,6 +760,7 @@ void G1GC<LanguageConfig>::RunFullGC(ark::GCTask &task)
     CollectAndMoveYoungRegions(collectionSet);
     ReleasePagesInFreePools();
     this->SetFullGC(false);
+    topGarbageRegions_.clear();
 }
 
 template <class LanguageConfig>
@@ -769,7 +768,6 @@ void G1GC<LanguageConfig>::TryRunMixedGC(ark::GCTask &task)
 {
     bool isMixed = false;
     if (task.reason == GCTaskCause::MIXED && !interruptConcurrentFlag_) {
-        regionGarbageRateThreshold_ = 0;
         isMixed = true;
     } else {
         // Atomic with acquire order reason: to see changes made by GC thread (which do concurrent
@@ -941,37 +939,16 @@ void G1GC<LanguageConfig>::RunConcurrentMark(ark::GCTask &task)
 template <class LanguageConfig>
 bool G1GC<LanguageConfig>::HaveGarbageRegions()
 {
-    // Use GetTopGarbageRegions because it doesn't return current regions
-    auto regions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-    return HaveGarbageRegions(regions);
+    return std::find_if(topGarbageRegions_.begin(), topGarbageRegions_.end(), [](const auto &entry) {
+               return entry.first != DEFAULT_REGION_SIZE && !entry.second->HasPinnedObjects();
+           }) != topGarbageRegions_.end();
 }
 
 template <class LanguageConfig>
 size_t G1GC<LanguageConfig>::GetOldCollectionSetCandidatesNumber()
 {
-    auto regions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-    size_t count = 0;
-    while (!regions.empty()) {
-        auto *region = regions.top().second;
-        double garbageRate = static_cast<double>(region->GetGarbageBytes()) / region->Size();
-        if (garbageRate < regionGarbageRateThreshold_) {
-            break;
-        }
-        regions.pop();
-        count++;
-    }
-    return count;
-}
-
-template <class LanguageConfig>
-bool G1GC<LanguageConfig>::HaveGarbageRegions(const PandaPriorityQueue<std::pair<uint32_t, Region *>> &regions)
-{
-    if (regions.empty()) {
-        return false;
-    }
-    auto *topRegion = regions.top().second;
-    double garbageRate = static_cast<double>(topRegion->GetGarbageBytes()) / topRegion->Size();
-    return garbageRate >= regionGarbageRateThreshold_;
+    return std::count_if(topGarbageRegions_.begin(), topGarbageRegions_.end(),
+                         [](const std::pair<uint32_t, Region *> &entry) { return !entry.second->HasPinnedObjects(); });
 }
 
 template <class LanguageConfig>
@@ -1712,8 +1689,11 @@ void G1GC<LanguageConfig>::FullMarking(ark::GCTask &task)
     }
     // Force card updater here, after swapping bitmap, to skip dead objects
     ProcessDirtyCards();
+    // We don't save to topGarbageRegions_ here, because
+    // making topGarbageRegions_ value reusable for FullGC,
+    // GetTopGarbageRegions<true>() should be called, which is not allowed here
     auto garbageRegions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-    auto emptyTenuredRegions = GetEmptyTenuredRegularRegionsFromQueue(std::move(garbageRegions));
+    auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(garbageRegions);
     CollectEmptyRegions<false, false>(task, &emptyTenuredRegions);
 }
 
@@ -1744,8 +1724,8 @@ void G1GC<LanguageConfig>::ConcurrentMarking(ark::GCTask &task)
     if (!interruptConcurrentFlag_) {
         Remark(task);
         // Enable mixed GC
-        auto garbageRegions = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-        if (HaveGarbageRegions(garbageRegions)) {
+        topGarbageRegions_ = GetG1ObjectAllocator()->template GetTopGarbageRegions<false>(regionGarbageRateThreshold_);
+        if (HaveGarbageRegions()) {
             // Atomic with release order reason: to see changes made by GC thread (which do concurrent marking
             // and than set isMixedGcRequired_) in mutator thread which waits for the end of concurrent
             // marking.
@@ -1755,7 +1735,7 @@ void G1GC<LanguageConfig>::ConcurrentMarking(ark::GCTask &task)
         {
             ScopedTiming t("Concurrent Sweep", *this->GetTiming());
             ConcurrentScope concurrentScope(this);
-            auto emptyTenuredRegions = GetEmptyTenuredRegularRegionsFromQueue(std::move(garbageRegions));
+            auto emptyTenuredRegions = GetEmptyTenuredRegularRegions(topGarbageRegions_);
             if (this->IsConcurrencyAllowed()) {
                 CollectEmptyRegions<true, true>(task, &emptyTenuredRegions);
             } else {
@@ -1946,39 +1926,57 @@ CollectionSet G1GC<LanguageConfig>::GetCollectibleRegions(ark::GCTask const &tas
 }
 
 template <class LanguageConfig>
-void G1GC<LanguageConfig>::AddOldRegionsMaxAllowed(CollectionSet &collectionSet)
+template <typename UnaryPred>
+void G1GC<LanguageConfig>::DrainOldRegions(CollectionSet &collectionSet, UnaryPred pred)
 {
-    auto regions = this->GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
-    for (size_t i = 0; i < numberOfMixedTenuredRegions_ && !regions.empty(); i++) {
-        auto *garbageRegion = regions.top().second;
-        regions.pop();
+    for (auto regionsIter = topGarbageRegions_.rbegin(); regionsIter != topGarbageRegions_.rend();) {
+        auto *garbageRegion = regionsIter->second;
+        if (garbageRegion->HasPinnedObjects()) {
+            // Pinned objects may occur between collection phases
+            ++regionsIter;
+            continue;
+        }
         ASSERT(!garbageRegion->HasFlag(IS_EDEN));
-        ASSERT(!garbageRegion->HasPinnedObjects());
         ASSERT(!garbageRegion->HasFlag(IS_RESERVED));
         ASSERT(garbageRegion->GetAllocatedBytes() != 0U);
-        double garbageRate = static_cast<double>(garbageRegion->GetGarbageBytes()) / garbageRegion->GetAllocatedBytes();
-        if (garbageRate >= regionGarbageRateThreshold_) {
-            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec
-                         << garbageRate << " %, add to collection set";
-            collectionSet.AddRegion(garbageRegion);
-        } else {
-            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec
-                         << garbageRate << " %, don't add to collection set";
+        if (!pred(garbageRegion)) {
             break;
         }
+        [[maybe_unused]] double garbageRate =
+            static_cast<double>(garbageRegion->GetGarbageBytes()) / garbageRegion->GetAllocatedBytes();
+        LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec << garbageRate
+                     << " %, add to collection set";
+        collectionSet.AddRegion(garbageRegion);
+        auto eraseIter = (regionsIter + 1).base();
+        regionsIter = std::make_reverse_iterator(topGarbageRegions_.erase(eraseIter));
     }
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::AddOldRegionsMaxAllowed(CollectionSet &collectionSet)
+{
+    auto pred = [numberOfAddedRegions = 0U,
+                 maxNumOfRegions = numberOfMixedTenuredRegions_]([[maybe_unused]] Region *garbageRegion) mutable {
+        return numberOfAddedRegions++ < maxNumOfRegions;
+    };
+    DrainOldRegions(collectionSet, pred);
 }
 
 template <class LanguageConfig>
 void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet)
 {
+    auto topRegionIter =
+        std::find_if_not(topGarbageRegions_.rbegin(), topGarbageRegions_.rend(),
+                         [](const std::pair<uint32_t, Region *> &entry) { return entry.second->HasPinnedObjects(); });
+    if (topRegionIter == topGarbageRegions_.rend()) {
+        return;
+    }
     auto gcPauseTimeBudget = this->GetSettings()->GetG1MaxGcPauseInMillis() * ark::os::time::MILLIS_TO_MICRO;
-    auto candidates = this->GetG1ObjectAllocator()->template GetTopGarbageRegions<false>();
     // add at least one old region to guarantee a progress in mixed collection
-    auto *topRegion = candidates.top().second;
-    collectionSet.AddRegion(topRegion);
+    collectionSet.AddRegion(topRegionIter->second);
     auto expectedYoungCollectionTime = analytics_.PredictYoungCollectionTimeInMicros(collectionSet);
-    auto expectedTopRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(topRegion);
+    auto expectedTopRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(topRegionIter->second);
+    topGarbageRegions_.erase((topRegionIter + 1).base());
     auto totalPredictedPause = expectedYoungCollectionTime + expectedTopRegionCollectionTime;
     if (gcPauseTimeBudget < expectedTopRegionCollectionTime) {
         LOG_DEBUG_GC << "Not enough budget to add more than one old region";
@@ -2001,47 +1999,27 @@ void G1GC<LanguageConfig>::AddOldRegionsAccordingPauseTimeGoal(CollectionSet &co
     gcPauseTimeBudget -= expectedScanDirtyCardsTime;
     totalPredictedPause += expectedScanDirtyCardsTime;
 
-    candidates.pop();
-    totalPredictedPause += AddMoreOldRegionsAccordingPauseTimeGoal(collectionSet, candidates, gcPauseTimeBudget);
+    totalPredictedPause += AddMoreOldRegionsAccordingPauseTimeGoal(collectionSet, gcPauseTimeBudget);
     analytics_.ReportPredictedMixedPause(totalPredictedPause);
 }
 
 template <class LanguageConfig>
-uint64_t G1GC<LanguageConfig>::AddMoreOldRegionsAccordingPauseTimeGoal(
-    CollectionSet &collectionSet, PandaPriorityQueue<std::pair<uint32_t, Region *>> candidates,
-    uint64_t gcPauseTimeBudget)
+uint64_t G1GC<LanguageConfig>::AddMoreOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet,
+                                                                       uint64_t gcPauseTimeBudget)
 {
     uint64_t time = 0;
-    while (!candidates.empty()) {
-        auto &scoreAndRegion = candidates.top();
-        auto *garbageRegion = scoreAndRegion.second;
-        ASSERT(!garbageRegion->HasFlag(IS_EDEN));
-        ASSERT(!garbageRegion->HasPinnedObjects());
-        ASSERT(!garbageRegion->HasFlag(IS_RESERVED));
-        ASSERT(garbageRegion->GetAllocatedBytes() != 0U);
-
-        candidates.pop();
-
-        auto garbageRate = static_cast<double>(garbageRegion->GetGarbageBytes()) / garbageRegion->GetAllocatedBytes();
-        if (garbageRate < regionGarbageRateThreshold_) {
-            LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec
-                         << garbageRate << " %, don't add to collection set";
-            break;
-        }
-
+    auto pred = [this, &time, &gcPauseTimeBudget](Region *garbageRegion) {
         auto expectedRegionCollectionTime = analytics_.PredictOldCollectionTimeInMicros(garbageRegion);
         if (gcPauseTimeBudget < expectedRegionCollectionTime) {
             LOG_DEBUG_GC << "Not enough budget to add old regions anymore";
-            break;
+            return false;
         }
 
         gcPauseTimeBudget -= expectedRegionCollectionTime;
         time += expectedRegionCollectionTime;
-
-        LOG_DEBUG_GC << "Garbage percentage in " << std::hex << garbageRegion << " region = " << std::dec << garbageRate
-                     << " %, add to collection set";
-        collectionSet.AddRegion(garbageRegion);
-    }
+        return true;
+    };
+    DrainOldRegions(collectionSet, pred);
     return time;
 }
 
@@ -2056,9 +2034,8 @@ CollectionSet G1GC<LanguageConfig>::GetFullCollectionSet()
     CollectionSet collectionSet(g1Allocator->GetYoungRegions());
     auto movableGarbageRegions = g1Allocator->template GetTopGarbageRegions<true>();
     LOG_DEBUG_GC << "Regions for FullGC:";
-    while (!movableGarbageRegions.empty()) {
-        auto *region = movableGarbageRegions.top().second;
-        movableGarbageRegions.pop();
+    for (auto iter = movableGarbageRegions.begin(); iter != movableGarbageRegions.end(); ++iter) {
+        auto *region = iter->second;
         if (region->HasFlag(IS_EDEN) || region->HasPinnedObjects()) {
             LOG_DEBUG_GC << (region->HasFlags(IS_EDEN) ? "Young regions" : "Region with pinned objects") << " ("
                          << *region << ") is not added to collection set";
