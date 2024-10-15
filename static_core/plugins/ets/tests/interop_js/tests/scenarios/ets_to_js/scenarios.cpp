@@ -385,6 +385,16 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_object)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_object.js"));
 }
 
+TEST_F(EtsInteropScenariosEtsToJs, test_return_value_is_this)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_return_value_is_this.js"));
+}
+
+TEST_F(EtsInteropScenariosEtsToJs, test_return_value_is_omitted)
+{
+    ASSERT_EQ(true, RunJsTestSuite("js_suites/test_return_value_is_omitted.js"));
+}
+
 TEST_F(EtsInteropScenariosEtsToJs, test_rest_parameter)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_rest_parameter.js"));
