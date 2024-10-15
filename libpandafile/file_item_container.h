@@ -104,6 +104,7 @@ public:
         return ret;
     }
 
+    void ReLayout();
     uint32_t ComputeLayout();
     bool Write(Writer *writer, bool deduplicateItems = true);
 

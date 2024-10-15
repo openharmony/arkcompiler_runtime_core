@@ -84,6 +84,12 @@ enum class FunctionKind : uint8_t {
     SENDABLE_FUNCTION = 1 << 3
 };
 
+enum class ItemRank : uint8_t {
+    DEFAULT_RANK = 0x0,
+    STRING_ITEM_RANK = 0x1,
+    CLASS_ITEM_RANK = 0x2
+};
+
 enum class ItemTypes {
     ANNOTATION_ITEM,
     CATCH_BLOCK_ITEM,
@@ -274,6 +280,16 @@ public:
         return original_rank_;
     }
 
+    void SetReLayoutRank(ItemRank rank)
+    {
+        re_layout_rank_ = rank;
+    }
+
+    ItemRank GetReLayoutRank() const
+    {
+        return re_layout_rank_;
+    }
+
 private:
     bool needs_emit_ {true};
     uint32_t offset_ {0};
@@ -281,6 +297,7 @@ private:
     std::list<IndexedItem *> index_deps_;
     uint32_t pgo_rank_ {0};
     uint32_t original_rank_ {0};
+    ItemRank re_layout_rank_ {ItemRank::DEFAULT_RANK};
 };
 
 class IndexedItem : public BaseItem {
