@@ -177,6 +177,14 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayU16Class(Met
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U16);
 }
 
+compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayU8Class(MethodPtr method) const
+{
+    ScopedMutatorLock lock;
+    auto *caller = MethodCast(method);
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
+    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U8);
+}
+
 compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klassPtr) const
 {
     if (klassPtr == nullptr) {

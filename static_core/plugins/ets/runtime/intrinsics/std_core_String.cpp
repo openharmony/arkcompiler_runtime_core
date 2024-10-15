@@ -42,7 +42,7 @@ constexpr const uint32_t CHAR0X1FFC00 = 0x1ffc00;
 constexpr const uint16_t CHAR0XD800 = 0xd800;
 constexpr const uint16_t CHAR0XDC00 = 0xdc00;
 
-EtsCharArray *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
+static ObjectHeader *StdCoreStringGetDataAsArray(EtsString *s, ets_int begin, ets_int end, bool isUtf16)
 {
     ASSERT(s != nullptr);
     ets_int length = s->GetLength();
@@ -63,13 +63,49 @@ EtsCharArray *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
     [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
     VMHandle<coretypes::String> sHandle(thread, s->GetCoreType());
     ets_int n = end - begin;
-    EtsCharArray *charArray = EtsCharArray::Create(n);
-    if (charArray == nullptr || n == 0) {
-        return charArray;
+    void *array = nullptr;
+    if (isUtf16) {
+        array = EtsCharArray::Create(n);
+    } else {
+        array = EtsByteArray::Create(n);
     }
-    Span<ets_char> out(charArray->GetData<ets_char>(), charArray->GetLength());
-    sHandle.GetPtr()->CopyDataRegionUtf16(&out[0], begin, charArray->GetLength(), sHandle.GetPtr()->GetLength());
-    return charArray;
+    if (array == nullptr || n == 0) {
+        return reinterpret_cast<ObjectHeader *>(array);
+    }
+    if (isUtf16) {
+        auto charArray = reinterpret_cast<EtsCharArray *>(array);
+        Span<ets_char> out(charArray->GetData<ets_char>(), charArray->GetLength());
+        sHandle.GetPtr()->CopyDataRegionUtf16(&out[0], begin, charArray->GetLength(), sHandle.GetPtr()->GetLength());
+    } else {
+        auto byteArray = reinterpret_cast<EtsByteArray *>(array);
+        Span<uint8_t> out(byteArray->GetData<uint8_t>(), byteArray->GetLength());
+
+        /* as we need only one LSB no sophisticated conversion is needed */
+        if (sHandle.GetPtr()->IsUtf16()) {
+            auto in = sHandle.GetPtr()->GetDataUtf16();
+            for (int i = 0; i < n; ++i) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                out[i] = in[i + begin];
+            }
+        } else {
+            auto in = sHandle.GetPtr()->GetDataMUtf8();
+            for (int i = 0; i < n; ++i) {
+                // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+                out[i] = in[i + begin];
+            }
+        }
+    }
+    return reinterpret_cast<ObjectHeader *>(array);
+}
+
+ObjectHeader *StdCoreStringGetChars(EtsString *s, ets_int begin, ets_int end)
+{
+    return StdCoreStringGetDataAsArray(s, begin, end, true);
+}
+
+ObjectHeader *StdCoreStringGetBytes(EtsString *s, ets_int begin, ets_int end)
+{
+    return StdCoreStringGetDataAsArray(s, begin, end, false);
 }
 
 EtsString *StdCoreStringSubstring(EtsString *str, ets_int begin, ets_int end)

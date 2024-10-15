@@ -160,6 +160,5 @@ function main(): int {
       return 6;
     }
 
-    console.println("PASS");
     return 0;
 }

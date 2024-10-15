@@ -374,6 +374,7 @@ protected:
     void *postWrbTwoObjects_ {nullptr};
     void *stringClassPtr_ {nullptr};    // ClassRoot::STRING
     void *arrayU16ClassPtr_ {nullptr};  // ClassRoot::ARRAY_U16
+    void *arrayU8ClassPtr_ {nullptr};   // ClassRoot::ARRAY_U8
     PandaVector<ObjectHeader *> *preBuff_ {nullptr};
     void *languageExtensionData_ {nullptr};
 #ifndef NDEBUG

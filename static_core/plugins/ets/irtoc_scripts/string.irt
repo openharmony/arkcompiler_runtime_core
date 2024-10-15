@@ -770,3 +770,55 @@ function(:StringEndsWith,
   entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase").Terminator.b
 }
+function(:StringGetBytesTlab,
+        params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
+        regmap: $full_regmap,
+        regalloc_set: $panda_mask,
+        mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  If(begin_index, end_index).GT.Unlikely.b {
+    Goto(:SlowPathEntrypoint)  # Out of range
+  }
+
+  If(begin_index, Cast(0).i32).LT.Unlikely.b {
+    Goto(:SlowPathEntrypoint)  # Out of range
+  }
+
+  # Note, 'str' is checked against nullptr in the InstBuilder (see AddArgNullcheckIfNeeded)
+  length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
+  uncompressed := AndI(length).Imm(1).u32;
+  length := ShrI(length).Imm(1).u32;
+
+  If(Cast(end_index).u32, length).A.Unlikely.b {
+    Goto(:SlowPathEntrypoint)  # Out of range
+  }
+  offset := Shl(begin_index, uncompressed).u32
+
+  src_str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+  src_str_data := Add(src_str_data, Cast(offset).u64).ptr
+
+# Allocate a new array of u8 (bytes)
+  count := Sub(Cast(end_index).u32, Cast(begin_index).u32).u64
+  new_arr := allocate_array_of_bytes_tlab(array_klass, Cast(count).word)
+  new_arr_data := Add(new_arr, Cast(Constants::ARRAY_DATA_OFFSET).u64).ptr
+  If(uncompressed, Cast(0).u32).EQ.Likely.b {
+    copy_u8_chars(src_str_data, new_arr_data, count)
+    Goto(:End)
+  }
+  compress_u16_to_u8_chars(src_str_data, new_arr_data, count)
+
+  Label(:End)
+  Return(new_arr).ptr
+
+  Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_GET_BYTES_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, begin_index, end_index).AddImm(entrypoint).MethodAsImm("StringGetBytes4ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+

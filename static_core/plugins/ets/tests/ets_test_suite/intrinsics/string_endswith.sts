@@ -97,6 +97,5 @@ function main(): int {
     assert Nature.endsWith('自然界', 2) == false;
     assert Nature.endsWith('自然界', 100) == true;
 
-    console.println("PASS");
     return 0;
 }

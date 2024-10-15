@@ -39,3 +39,4 @@ bool EmitStringTrimRight(Inst *inst);
 bool EmitCharIsWhiteSpace(Inst *inst);
 bool EmitStringStartsWith(Inst *inst);
 bool EmitStringEndsWith(Inst *inst);
+bool EmitStringGetBytesTlab(Inst *inst);

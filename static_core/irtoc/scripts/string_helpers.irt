@@ -190,7 +190,6 @@ def GenerateStringEquals(lang, dynamic, compression)
     }
 end
 
-
 # Try to allocate String in TLAB.
 # The result is either a pointer to a new string or null if there is no enough space in TLAB.
 macro(:allocate_string_tlab) do |string_klass, data_size|
@@ -223,6 +222,44 @@ macro(:allocate_string_tlab) do |string_klass, data_size|
   StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
   # Return a pointer to the newly allocated string
   _allocated_string := _start
+end
+
+# Try to allocate Array of i8 chars in TLAB.
+# The result is either a pointer to a new array or null if there is no enough space in TLAB.
+macro(:allocate_array_of_bytes_tlab) do |array_klass, char_count|
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  elements_num := And(char_count, "0x00000000ffffffff").word
+  # Account for u16 char size
+  _size := Cast(elements_num).word
+  # Add sizeof(Array) and do align
+  _size := AndI(AddI(_size).Imm(Constants::ARRAY_CLASS_SIZE_WITH_ALIGNMENT).word).Imm(Constants::ALIGNMENT_MASK).word
+  # Load pointer to the TLAB from TLS
+  _tlab := LoadI(%tr).Imm(Constants::TLAB_OFFSET).ptr
+  # Load pointer to the start address of free memory in the TLAB
+  _start := LoadI(_tlab).Imm(Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr
+  # Load pointer to the end address of free memory in the TLAB
+  _end := LoadI(_tlab).Imm(Constants::TLAB_MEMORY_END_ADDR_OFFSET).ptr
+  # Check if there is enough space
+  If(Sub(_end, _start).word, _size).B.Unlikely.b {
+    Goto(:SlowPathEntrypoint)
+  }
+  Intrinsic(:WRITE_TLAB_STATS_SAFE, _start, _size, Cast(-1).u64).void if defines.DEBUG
+  if defines.__SANITIZE_ADDRESS__ || defines.__SANITIZE_THREAD__
+    call_runtime_save_all(Constants::ANNOTATE_SANITIZERS_NO_BRIDGE, _start, _size).void
+  end
+  # Store class of the object
+  StoreI(_start, array_klass).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  # Store array length
+  StoreI(_start, elements_num).Imm(Constants::ARRAY_LENGTH_OFFSET).word
+  # Update the TLAB state
+  StoreI(Add(_tlab, Constants::TLAB_CUR_FREE_POSITION_OFFSET).ptr, Add(_start, _size).ptr).Imm(0).Volatile.ptr
+  # Return a pointer to the newly allocated array
+  _allocated_array := _start
 end
 
 # Try to allocate Array of u16 chars in TLAB.
@@ -432,6 +469,7 @@ else  # if Options.arch == :arm64
 Label(:CopyLoop_8b)
     i := Phi(i1, i2).u64
     chunk := Load(src_data, ShlI(i).Imm(3).u64).u64
+    chunk := AndI(chunk).Imm(0x00ff00ff00ff00ff).u64 # zero high part of each two-byte
     chunk := AndI(Or(chunk, ShrI(chunk).Imm(8).u64).u64).Imm(0x0000ffff0000ffff).u64
     chunk := Or(chunk, ShrI(chunk).Imm(16).u64).u64
     Store(dst_data, ShlI(i).Imm(2).u64, Cast(chunk).u32).u32

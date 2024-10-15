@@ -380,7 +380,6 @@ intrinsics:
     impl: ark::ets::intrinsics::StdMathTan
     safe_intrinsic: true
 
-
   - name: StdMathTanh
     space: ets
     class_name: std.math.ETSGLOBAL
@@ -658,7 +657,7 @@ intrinsics:
     method_name: getChars
     static: false
     signature:
-      ret: u16\\[
+      ret: u16[]
       args:
         - i32
         - i32
@@ -666,6 +665,24 @@ intrinsics:
     codegen_func: CreateStringGetCharsTlab
     codegen_arch: [arm64, amd64]
     llvm_codegen_func: EmitStringGetCharsTlab
+    need_param_locations: true
+    clear_flags: [ ]
+    set_flags: [ ]
+
+  - name: StdCoreStringGetBytes
+    space: ets
+    class_name: std.core.String
+    method_name: getBytes
+    static: false
+    signature:
+      ret: i8[]
+      args:
+        - i32
+        - i32
+    impl: ark::ets::intrinsics::StdCoreStringGetBytes
+    codegen_func: CreateStringGetBytesTlab
+    codegen_arch: [arm64, amd64]
+    llvm_codegen_func: EmitStringGetBytesTlab
     need_param_locations: true
     clear_flags: [ ]
     set_flags: [ ]
@@ -1926,7 +1943,6 @@ intrinsics:
       args: []
     impl: ark::ets::intrinsics::StdCoreStackTraceProvisionStackTrace
     clear_flags: [ no_dce ]
-
 
   - name: StdCoreExit
     space: ets
@@ -3614,7 +3630,6 @@ intrinsics:
     codegen_func: CreateCharIsWhiteSpace
     llvm_codegen_func: EmitCharIsWhiteSpace
 
-
 ###################
 # std.core.Value  #
 ###################
@@ -3979,8 +3994,6 @@ intrinsics:
       args: [ std.core.Object, std.core.String, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetFieldByNameDouble
 
-
-
   - name: ValueAPIGetArrayLength
     space: ets
     class_name: std.core.ETSGLOBAL
@@ -4080,7 +4093,6 @@ intrinsics:
       ret: void
       args: [ std.core.Object, i64, f64 ]
     impl: ark::ets::intrinsics::ValueAPISetElementDouble
-
 
   - name: ValueAPIGetElementObject
     space: ets

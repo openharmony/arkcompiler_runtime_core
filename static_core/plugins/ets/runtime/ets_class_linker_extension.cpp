@@ -572,6 +572,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     // initialization in MT ManagedThread ctor and EtsCoroutine::Initialize
     coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));
     coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
+    coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
 }
 
 }  // namespace ark::ets

@@ -873,6 +873,7 @@ void Runtime::SetThreadClassPointers()
     if (ext != nullptr) {
         thread->SetStringClassPtr(ext->GetClassRoot(ClassRoot::STRING));
         thread->SetArrayU16ClassPtr(ext->GetClassRoot(ClassRoot::ARRAY_U16));
+        thread->SetArrayU8ClassPtr(ext->GetClassRoot(ClassRoot::ARRAY_U8));
     }
 }
 
