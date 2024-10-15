@@ -18,7 +18,7 @@
 import os
 import re
 import logging
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict, Any
 from abc import ABC, abstractmethod
 
 log = logging.getLogger('vmb')
@@ -34,7 +34,7 @@ class LangBase(ABC):
         r'([\'"])?(?P<lib>[./\w]+)([\'"])?\s*(;\s*)?$')
 
     def __init__(self):
-        self.src = ''
+        self.src = set()
         self.ext = ''
 
     @property
@@ -60,13 +60,19 @@ class LangBase(ABC):
     def get_import_line(self, lib: str, what: str) -> str:
         libfile = os.path.split(lib)[1]
         libname = os.path.splitext(libfile)[0]
-        # libs are copied into each bench, maybe they should be symlinked
         return f'import {what} from "./{libname}";\n'
 
     def get_method_call(self, name: str, typ: str) -> str:
         if typ and typ != 'void':
             return f'Consumer.consume(bench.{name}());'
         return f'bench.{name}();'
+
+    def get_custom_fields(
+            # pylint: disable-next=unused-argument
+            self, values: Dict[str, Any], custom_values: Dict[str, Any]
+    ) -> Dict[str, str]:
+        """Help in adding custom fields in extra-plugins."""
+        return {}
 
     def parse_state(self, line: str) -> str:
         m = re.search(self.re_state, line)

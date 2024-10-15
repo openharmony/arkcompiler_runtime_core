@@ -189,6 +189,7 @@ public:
     // Remove all instructions from bb
 
     bool IsEndWithThrowOrDeoptimize() const;
+    bool IsEndWithThrow() const;
     Inst *GetFirstInst() const;
     Inst *GetLastInst() const;
     Inst *GetFirstPhi() const;
@@ -199,6 +200,7 @@ public:
 
     void SetDominator(BasicBlock *dominator);
     void ClearDominator();
+
     BasicBlock *CreateImmediateDominator();
 
     void AddDominatedBlock(BasicBlock *block);
@@ -255,9 +257,6 @@ public:
 
     void SetCatchBegin(bool v);
     bool IsCatchBegin() const;
-
-    void SetCatchEnd(bool v);
-    bool IsCatchEnd() const;
 
     void SetTry(bool v);
     bool IsTry() const;
@@ -330,8 +329,7 @@ private:
     using MonitorExitBlock = MonitorEntryBlock::NextFlag;  //  block with MonitorExit
     using MonitorBlock = MonitorExitBlock::NextFlag;       //  block between MonitorEntryBlock and MonitorExitBlock.
     using CatchBeginBlock = MonitorBlock::NextFlag;
-    using CatchEndBlock = CatchBeginBlock::NextFlag;
-    using CatchBlock = CatchEndBlock::NextFlag;
+    using CatchBlock = CatchBeginBlock::NextFlag;
     using TryBeginBlock = CatchBlock::NextFlag;
     using TryEndBlock = TryBeginBlock::NextFlag;
     using TryBlock = TryEndBlock::NextFlag;

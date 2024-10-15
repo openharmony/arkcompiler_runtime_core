@@ -87,27 +87,6 @@ std::vector<std::string> LLVMIrtocCompiler::GetFeaturesForArch(Arch arch)
     return {};
 }
 
-static llvm::CallingConv::ID GetFastPathCallingConv(uint32_t numArgs)
-{
-    ASSERT(numArgs <= 5U);
-    switch (numArgs) {
-        case 1U:
-            return llvm::CallingConv::ArkFast1;
-        case 2U:
-            return llvm::CallingConv::ArkFast2;
-        case 3U:
-            return llvm::CallingConv::ArkFast3;
-        case 4U:
-            return llvm::CallingConv::ArkFast4;
-        case 5U:
-            return llvm::CallingConv::ArkFast5;
-        case 6U:
-            return llvm::CallingConv::ArkFast6;
-        default:
-            UNREACHABLE();
-    }
-}
-
 Expected<bool, std::string> LLVMIrtocCompiler::TryAddGraph(compiler::Graph *graph)
 {
     ASSERT(graph != nullptr);
@@ -125,21 +104,7 @@ Expected<bool, std::string> LLVMIrtocCompiler::TryAddGraph(compiler::Graph *grap
 
     LLVMIrConstructor ctor(graph, module_.get(), GetLLVMContext(), &arkInterface_, debugData_);
     auto llvmFunction = ctor.GetFunc();
-    if (graph->GetMode().IsInterpreter()) {
-        llvmFunction->setCallingConv(llvm::CallingConv::ArkInt);
-    } else if (graph->GetMode().IsFastPath()) {
-        // Excluding fake thread and frame arguments
-        uint32_t constexpr FAKE_ARGS_NUM = 2U;
-        ASSERT(llvmFunction->arg_size() >= FAKE_ARGS_NUM);
-        if (llvmFunction->arg_size() - FAKE_ARGS_NUM == 0) {
-            if (llvmFunction->getReturnType()->isVoidTy()) {
-                llvmFunction->setCallingConv(llvm::CallingConv::ArkFast0);
-            } else {
-                llvmFunction->setCallingConv(llvm::CallingConv::ArkFast1);
-            }
-        } else {
-            llvmFunction->setCallingConv(GetFastPathCallingConv(llvmFunction->arg_size() - FAKE_ARGS_NUM));
-        }
+    if (graph->GetMode().IsFastPath()) {
         llvmFunction->addFnAttr("target-features", GetFastPathFeatures());
     }
 

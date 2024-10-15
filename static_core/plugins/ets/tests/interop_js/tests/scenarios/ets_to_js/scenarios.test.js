@@ -16,19 +16,25 @@
 const etsVm = require('lib/module/ets_interop_js_napi');
 
 class TestModule {
-  constructor(name) {
-    this.descriptorPrefix = 'L' + name.replaceAll('.', '/') + '/';
-  }
+	constructor(name) {
+		this.descriptorPrefix = 'L' + name.replaceAll('.', '/') + '/';
+	}
 
-  getClass(name) { return etsVm.getClass(this.descriptorPrefix + name + ';'); }
-  getFunction(name) { return etsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name); }
+	getClass(name) {
+		return etsVm.getClass(this.descriptorPrefix + name + ';');
+	}
+	getFunction(name) {
+		return etsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name);
+	}
 
-  static descriptorPrefix;
-};
+	static descriptorPrefix;
+}
 
-function getTestModule(name) { return new TestModule(name); }
+function getTestModule(name) {
+	return new TestModule(name);
+}
 
 module.exports = {
-  etsVm,
-  getTestModule,
+	etsVm,
+	getTestModule,
 };

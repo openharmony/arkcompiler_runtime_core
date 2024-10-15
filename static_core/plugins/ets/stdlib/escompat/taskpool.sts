@@ -1,0 +1,173 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package escompat;
+
+// NOTE(ipetrov, #16281): Make taskpool.Task when namespaces will be supported
+export class taskpoolTask {
+    // NOTE(ipetrov, #17246, #17339): support arguments after es2apnda support spread expressions and common function super-type
+    constructor(name: string, func: Function0<NullishType>) {
+        this.name = name;
+        this.func = func;
+        this.args = [];
+        // NOTE(ipetrov, #15499): support information about durations
+        this.totalDuration = 0.0;
+        this.ioDuration = 0.0;
+        this.cpuDuration = 0.0;
+        // Each task has unique identifier
+        this.id = taskpoolTask.generateId();
+    }
+
+    constructor(func: Function0<NullishType>) {
+        this("", func);
+    }
+
+    /**
+     * Check current running task is canceled or not
+     *
+     * @returns true if current running task is canceled, false - otherwise
+     */
+    static native isCancel(): boolean;
+
+    internal execute(): NullishType {
+        if (!taskpool.taskStarted(this.id)) {
+            throw new Error("taskpool:: task has been canceled");
+        }
+        let result: NullishType = null;
+        try {
+            result = this.func();
+        } finally {
+            if (!taskpool.taskFinished(this.id)) {
+                throw new Error("taskpool:: task has been canceled");
+            }
+        }
+        return result;
+    }
+
+    private static native generateId(): long;
+
+    internal readonly id: long;
+    totalDuration: number;
+    ioDuration: number;
+    cpuDuration: number;
+    func: Function0<NullishType>;
+    args: NullishType[];
+    name: string;
+}
+
+// NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
+export class taskpool {
+    static execute(func: Function0<NullishType>): Promise<NullishType> {
+        return launch func();
+    }
+    static execute<A1>(func: Function1<A1, NullishType>, a1: A1): Promise<NullishType> {
+        return launch func(a1);
+    }
+    static execute<A1, A2>(func: Function2<A1, A2, NullishType>, a1: A1, a2: A2): Promise<NullishType> {
+        return launch func(a1, a2);
+    }
+    static execute<A1, A2, A3>(func: Function3<A1, A2, A3, NullishType>, a1: A1, a2: A2, a3: A3): Promise<NullishType> {
+        return launch func(a1, a2, a3);
+    }
+    static execute<A1, A2, A3, A4>(func: Function4<A1, A2, A3, A4, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4);
+    }
+    static execute<A1, A2, A3, A4, A5>(func: Function5<A1, A2, A3, A4, A5, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5);
+    }
+    static execute<A1, A2, A3, A4, A5, A6>(func: Function6<A1, A2, A3, A4, A5, A6, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7>(func: Function7<A1, A2, A3, A4, A5, A6, A7, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8>(func: Function8<A1, A2, A3, A4, A5, A6, A7, A8, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9>(func: Function9<A1, A2, A3, A4, A5, A6, A7, A8, A9, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>(func: Function10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>(func: Function11<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>(func: Function12<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>(func: Function13<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>(func: Function14<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>(func: Function15<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15);
+    }
+    static execute<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16>(func: Function16<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, NullishType>, a1: A1, a2: A2, a3: A3, a4: A4, a5: A5, a6: A6, a7: A7, a8: A8, a9: A9, a10: A10, a11: A11, a12: A12, a13: A13, a14: A14, a15: A15, a16: A16): Promise<NullishType> {
+        return launch func(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16);
+    }
+
+    /**
+     * Execute a concurrent task
+     *
+     * @param task The task for executing
+     * @returns Promise for result of executed task
+     */
+    static execute(task: taskpoolTask): Promise<NullishType> {
+        taskpool.taskSubmitted(task.id);
+        return launch task.execute();
+    }
+
+    /**
+     * Cancel a concurrent task
+     *
+     * @param task The task for canceling
+     * @throws Error if the task does not exist when it is canceled
+     * @see Task.isCancel
+     */
+    static cancel(task: taskpoolTask): void {
+        taskpool.cancelImpl(task.id);
+    }
+
+    private static native cancelImpl(taskId: long): void;
+    /**
+     * @brief Submit task to the taskpool on the execute method
+     * @see taskpool.execute
+     * @param taskId identifier of the submitted task
+     */
+    private static native taskSubmitted(taskId: long): void;
+
+    /**
+     * @brief Notify the taskpool that the task is started on a coroutine
+     * @param taskId identifier of the started task
+     * @returns true if task is not cancled by cancel method, false - otherwise
+     *
+     * @see taskpool.Task.execute
+     * @see taskpool.cancel
+     */
+    internal static native taskStarted(taskId: long): boolean;
+
+    /**
+     * @brief Notify the taskpool that the task is finished on a coroutine
+     * @param taskId identifier of the finished task
+     * @returns true if task is not cancled by cancel method, false - otherwise
+     *
+     * @see taskpool.Task.execute
+     * @see taskpool.cancel
+     */
+    internal static native taskFinished(taskId: long): boolean;
+}

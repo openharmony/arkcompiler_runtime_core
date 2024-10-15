@@ -209,7 +209,7 @@ void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
 
         using Resolver = EntityId (panda_file::File::*)(EntityId id, panda_file::File::Index idx) const;
 
-        auto makeWithId = [&](Resolver resolve) {
+        auto makeWithId = [&p, &inst, &filePtr, &items, &myId, &data, this](Resolver resolve) {
             auto idx = inst.GetId().AsIndex();
             auto oldId = (filePtr->*resolve)(myId, idx);
             auto iter = items->find(oldId);

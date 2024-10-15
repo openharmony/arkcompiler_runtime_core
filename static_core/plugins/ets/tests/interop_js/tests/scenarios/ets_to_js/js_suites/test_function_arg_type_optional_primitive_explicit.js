@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const functionArgTypeOptionalPrimitiveEts = etsMod.getFunction('function_arg_type_optional_primitive');
+const functionArgTypeOptionalPrimitiveEts = etsMod.getFunction('functionArgTypeOptionalPrimitive');
 
 {
-  let ret = functionArgTypeOptionalPrimitiveEts(1);
-  ASSERT_EQ(ret, 1);
+	let ret = functionArgTypeOptionalPrimitiveEts(1);
+	ASSERT_EQ(ret, 1);
 }
 
 GCJSRuntimeCleanup();

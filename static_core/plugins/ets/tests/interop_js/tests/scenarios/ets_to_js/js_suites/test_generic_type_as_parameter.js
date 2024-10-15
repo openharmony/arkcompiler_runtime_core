@@ -16,21 +16,21 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const genericTypeParameterEts = etsMod.getFunction('generic_type_parameter_ets');
+const genericTypeParameterEts = etsMod.getFunction('genericTypeParameterEts');
 
 {
-  const STRING_VALUE = '1';
-  const INT_VALUE = 1;
-  const STRING_TRUE_VALUE = 'true';
-  const TRUE_VALUE = true;
+	const STRING_VALUE = '1';
+	const INT_VALUE = 1;
+	const STRING_TRUE_VALUE = 'true';
+	const TRUE_VALUE = true;
 
-  let ret = genericTypeParameterEts(INT_VALUE);
-  ASSERT_EQ(typeof ret, 'string');
-  ASSERT_EQ(ret, STRING_VALUE);
+	let ret = genericTypeParameterEts(INT_VALUE);
+	ASSERT_EQ(typeof ret, 'string');
+	ASSERT_EQ(ret, STRING_VALUE);
 
-  ret = genericTypeParameterEts(TRUE_VALUE);
-  ASSERT_EQ(typeof ret, 'string');
-  ASSERT_EQ(ret, STRING_TRUE_VALUE);
+	ret = genericTypeParameterEts(TRUE_VALUE);
+	ASSERT_EQ(typeof ret, 'string');
+	ASSERT_EQ(ret, STRING_TRUE_VALUE);
 }
 
 GCJSRuntimeCleanup();

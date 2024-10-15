@@ -1,0 +1,576 @@
+# plugin ets_string
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+include_relative 'string_helpers.irt'
+
+# It is assumed that _begin_index and _end_index are safe and does not check/normalize them.
+# The range is [_begin_index, _end_index).
+# Note, a caller of this macro must provide a corresponding 'SlowPathEntrypoint'
+# for the case when 'allocate_string_tlab' fails (see StringTrim as an example)
+# Now TLAB implementation initializes memory with zero, so the hashcode field
+# is not initialized with zero explicitly.
+macro(:fast_substring) do |_str, _str_len, _begin_index, _end_index, _not_compressed|
+  _char_count := Sub(_end_index, _begin_index).u32
+  If(_char_count, Cast(_str_len).u32).EQ.Unlikely.b {
+    # Return the string itself
+    _same_str := Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr
+    Goto(:_Fast_Substring_Result_No_Barrier)
+  }
+  _klass := LoadI(_str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  If(_char_count, 0).EQ.Unlikely.b {
+    # Allocate and return an empty string
+    _empty_str := allocate_string_tlab(_klass, 0)
+    Goto(:_Fast_Substring_Result)
+  }
+  # Allocate a new normal string
+  _offset := Shl(_begin_index, _not_compressed).u32
+  _src_str_data := Add(Cast(_str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+  _src_str_data := Add(_src_str_data, Cast(_offset).u64).ptr
+  If(_not_compressed, 1).EQ.Unlikely.b {
+    _compressable := is_array_of_compressable_chars(_src_str_data, Cast(_char_count).u64)
+    If(_compressable, 1).EQ.Likely.b {
+      _data_size1 := Cast(_char_count).word
+      Goto(:_L1)
+    }
+    _data_size2 := Cast(ShlI(_char_count).Imm(1).u32).word
+Label(:_L1)
+    _data_size := Phi(_data_size1, _data_size2).word
+    _new_str1 := allocate_string_tlab(_klass, _data_size)
+    _new_str_data := Add(_new_str1, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+    If(_compressable, 1).EQ.Likely.b {
+      compress_u16_to_u8_chars(_src_str_data, _new_str_data, Cast(_char_count).u64)
+      StoreI(_new_str1, ShlI(_char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+      Goto(:_Fast_Substring_Result)
+    }
+    copy_u16_chars(_src_str_data, _new_str_data, Cast(_char_count).u64)
+    StoreI(_new_str1, OrI(ShlI(_char_count).Imm(1).u32).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+    Goto(:_Fast_Substring_Result)
+  }
+  # Source string is already compressed
+  _new_str2 := allocate_string_tlab(_klass, Cast(_char_count).word)
+  _new_str_data2 := Add(_new_str2, Cast(Constants::STRING_DATA_OFFSET).u64).ptr
+  copy_u8_chars(_src_str_data, _new_str_data2, Cast(_char_count).u64)
+  StoreI(_new_str2, ShlI(_char_count).Imm(1).u32).Imm(Constants::STRING_LENGTH_OFFSET).u32
+Label(:_Fast_Substring_Result)
+  # String is supposed to be a constant object, so all its data should be visible by all threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  _substring := Phi(_empty_str, _new_str1, _new_str1, _new_str2).ptr
+Label(:_Fast_Substring_Result_No_Barrier)
+  _result := Phi(_same_str, _substring).ptr
+end
+
+
+#
+# Test if u16 char is a white space
+#
+scoped_macro(:is_white_space_u16) do |ch|
+  IfImm(Compare(ch, 0x0020).EQ.b).Imm(0).NE.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x000E..0x009F -- common non-whitespace chars
+  IfImm(Compare(ch, 0x000E).AE.b).Imm(0).NE.b {
+    IfImm(Compare(ch, 0x00A0).B.b).Imm(0).NE.b {
+      Goto(:LabelNotWhiteSpaceChar)
+    }
+  }
+  # 0x0009 -- horizontal tab
+  # 0x000A -- line feed or new line
+  # 0x000B -- vertical tab
+  # 0x000C -- formfeed
+  # 0x000D -- carriage return
+  IfImm(Compare(ch, 0x0009).B.b).Imm(0).NE.b {
+    Goto(:LabelNotWhiteSpaceChar)
+  }
+  IfImm(Compare(ch, 0x000D).BE.b).Imm(0).NE.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x00A0 -- non-breaking space
+  IfImm(Compare(ch, 0x00A0).EQ.b).Imm(0).NE.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x1680 -- Ogham space mark
+  If(ch, 0x1680).EQ.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x2000 -- en quad
+  # 0x2001 -- em quad
+  # 0x2002 -- en space
+  # 0x2003 -- em space
+  # 0x2004 -- three-per-em space
+  # 0x2005 -- four-per-em space
+  # 0x2006 -- six-per-em space
+  # 0x2007 -- figure space
+  # 0x2008 -- punctuation space
+  # 0x2009 -- thin space
+  # 0x200A -- hair space
+  If(ch, 0x2000).B.Unlikely.b {
+    Goto(:LabelNotWhiteSpaceChar)
+  }
+  If(ch, 0x200A).BE.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x2028 -- line separator
+  If(ch, 0x2028).EQ.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x2029 -- paragraph separator
+  If(ch, 0x2029).EQ.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x202F -- narrow no-break space
+  If(ch, 0x202F).EQ.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x205F -- medium mathematical space
+  If(ch, 0x205F).EQ.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0xFEFF -- byte order mark
+  If(ch, 0xFEFF).EQ.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x3000 -- ideographic space
+  If(ch, 0x3000).EQ.Unlikely.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+Label(:LabelNotWhiteSpaceChar)
+  whiteSpace0 := 0
+  Goto(:LabelReturn)
+Label(:LabelWhiteSpaceChar)
+  whiteSpace1 := 1
+Label(:LabelReturn)
+  result := Phi(whiteSpace0, whiteSpace1).b
+end
+
+#
+# Test if u8 char is a white space
+#
+scoped_macro(:is_white_space_u8) do |ch|
+  IfImm(Compare(ch, 0x20).EQ.b).Imm(0).NE.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0x0E..0x9F -- common non-whitespace chars
+  IfImm(Compare(ch, 0x0E).AE.b).Imm(0).NE.b {
+    IfImm(Compare(ch, 0xA0).B.b).Imm(0).NE.b {
+      Goto(:LabelNotWhiteSpaceChar)
+    }
+  }
+  # 0x09 -- horizontal tab
+  # 0x0A -- line feed or new line
+  # 0x0B -- vertical tab
+  # 0x0C -- formfeed
+  # 0x0D -- carriage return
+  IfImm(Compare(ch, 0x09).B.b).Imm(0).NE.b {
+    Goto(:LabelNotWhiteSpaceChar)
+  }
+  IfImm(Compare(ch, 0x0D).BE.b).Imm(0).NE.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+  # 0xA0 -- non-breaking space
+  IfImm(Compare(ch, 0xA0).EQ.b).Imm(0).NE.b {
+    Goto(:LabelWhiteSpaceChar)
+  }
+Label(:LabelNotWhiteSpaceChar)
+  whiteSpace0 := 0
+  Goto(:LabelReturn)
+Label(:LabelWhiteSpaceChar)
+  whiteSpace1 := 1
+Label(:LabelReturn)
+  result := Phi(whiteSpace0, whiteSpace1).b
+end
+
+
+function(:CharIsWhiteSpace,
+          params: {ch: 'u16'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+  Return(is_white_space_u16(ch)).b
+}
+
+
+function(:StringEmpty,
+          params: {str: 'ref'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  empty_str := allocate_string_tlab(klass, 0)
+  # String is supposed to be a constant object, so all its data should be visible by all threads
+  Intrinsic(:DATA_MEMORY_BARRIER_FULL).void
+  Return(empty_str).ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("CREATE_EMPTY_STRING_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY).AddImm(entrypoint).MethodAsImm("CreateEmptyString1ArgBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+
+if Options.arch == :arm64
+  trim_left_regs = $temps_mask + :callee0 + :callee1
+  trim_right_regs = $temps_mask + :callee0 + :callee1
+else
+  trim_left_regs = $temps_mask + :callee0 + :caller0 + :caller1
+  trim_right_regs = $temps_mask + :callee0 + :caller0 + :caller1
+end
+
+
+function(:StringTrimLeftBase,
+          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  not_compressed := AndI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(1).i32
+  start_index := Cast(1).i32
+  If(not_compressed, 0).EQ.Likely.b {
+    # String contains 8-bit chars
+Label(:Loop1)
+    i := Phi(start_index, i1).i32
+    ws1 := is_white_space_u8(Load(str_data, i).u8)
+    If(ws1, 0).NE.Likely.b {
+      i1 := AddI(i).Imm(1).i32
+      If(i1, length).LT.Likely.b {
+        Goto(:Loop1)
+      }
+    }
+    index1 := Phi(i, i1).i32
+    Goto(:TrimLeft)
+  }
+  # String contains 16-bit chars
+Label(:Loop2)
+  j := Phi(start_index, j1).i32
+  ws2 := is_white_space_u16(Load(str_data, ShlI(j).Imm(1).i32).u16)
+  If(ws2, 0).NE.Likely.b {
+    j1 := AddI(j).Imm(1).i32
+    If(j1, length).LT.Likely.b {
+      Goto(:Loop2)
+    }
+  }
+  index2 := Phi(j, j1).i32
+Label(:TrimLeft)
+  index := Phi(index1, index2).i32
+  trimmed := fast_substring(str, length, index, length, not_compressed)
+  Return(trimmed).ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, index, length).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+
+function(:StringTrimLeft,
+          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $trim_left_regs,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  If(length_packed, 1).LE.Unlikely.b {
+    Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+  }
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  not_compressed := AndI(length_packed).Imm(1).i32
+  If(not_compressed, 0).EQ.Likely.b {
+    ws1 := is_white_space_u8(Load(str_data, 0).u8)
+    Goto(:L1)
+  }
+  ws2 := is_white_space_u16(Load(str_data, 0).u16)
+Label(:L1)
+  ws := Phi(ws1, ws2).b
+  If(ws, 0).EQ.Likely.b {
+    Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+  }
+  If(ShrI(length_packed).Imm(1).i32, 1).EQ.Unlikely.b {
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
+  }
+  LiveOut(str).DstReg(regmap[:arg0]).ref
+  LiveOut(unused1).DstReg(regmap[:arg1]).i32
+  LiveOut(unused2).DstReg(regmap[:arg2]).i32
+  entrypoint2 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+}
+
+
+function(:StringTrimRightBase,
+          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  length := ShrI(length_packed).Imm(1).i32
+  start_index := SubI(length).Imm(2).i32
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  not_compressed := AndI(length_packed).Imm(1).i32
+  If(not_compressed, 0).EQ.Likely.b {
+    # String contains 8-bit chars
+Label(:Loop1)
+    i := Phi(start_index, i1).i32
+    ws1 := is_white_space_u8(Load(str_data, i).u8)
+    If(ws1, 0).NE.Likely.b {
+      i1 := SubI(i).Imm(1).i32
+      If(i1, 0).GE.Likely.b {
+        Goto(:Loop1)
+      }
+    }
+    index1 := Phi(i, i1).i32
+    Goto(:TrimRight)
+  }
+  # String contains 16-bit chars
+Label(:Loop2)
+  j := Phi(start_index, j1).i32
+  ws2 := is_white_space_u16(Load(str_data, ShlI(j).Imm(1).i32).u16)
+  If(ws2, 0).NE.Likely.b {
+    j1 := SubI(j).Imm(1).i32
+    If(j1, 0).GE.Likely.b {
+      Goto(:Loop2)
+    }
+  }
+  index2 := Phi(j, j1).i32
+Label(:TrimRight)
+  index := Phi(index1, index2).i32
+  index := AddI(index).Imm(1).i32
+  trimmed := fast_substring(str, length, 0, index, not_compressed)
+  Return(trimmed).ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, Cast(0).i32, index).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+
+function(:StringTrimRight,
+          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $trim_right_regs,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  If(length_packed, 1).LE.Unlikely.b {
+    Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+  }
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  not_compressed := AndI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(1).i32
+  last_char_index :=  SubI(length).Imm(1).i32
+  If(not_compressed, 0).EQ.Likely.b {
+    ws1 := is_white_space_u8(Load(str_data, last_char_index).u8)
+    Goto(:L1)
+  }
+  ws2 := is_white_space_u16(Load(str_data, ShlI(last_char_index).Imm(1).i32).u16)
+Label(:L1)
+  ws := Phi(ws1, ws2).b
+  If(ws, 0).EQ.Likely.b {
+    Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+  }
+  If(length, 1).EQ.Unlikely.b {
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
+  }
+  LiveOut(str).DstReg(regmap[:arg0]).ref
+  LiveOut(unused1).DstReg(regmap[:arg1]).i32
+  LiveOut(unused2).DstReg(regmap[:arg2]).i32
+  entrypoint2 = get_entrypoint_offset("STRING_TRIM_RIGHT_BASE")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimRightBase").Terminator.ptr
+}
+
+
+function(:StringTrimBase,
+          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  length := ShrI(length_packed).Imm(1).i32
+  left := 0
+  right := SubI(length).Imm(2).i32
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  not_compressed := AndI(length_packed).Imm(1).i32
+  If(not_compressed, 0).EQ.Likely.b {
+    # String contains 8-bit chars
+Label(:Loop1)  # while (utf::IsWhiteSpaceChar(str->At(right)))
+    right1 := Phi(right, right2).i32
+    If(is_white_space_u8(Load(str_data, right1).u8), 0).NE.Likely.b {
+      If(right1, 0).EQ.Unlikely.b {
+        Goto(:Trim)
+      }
+      right2 := SubI(right1).Imm(1).i32
+      Goto(:Loop1)
+    }
+Label(:Loop2)  # while (left < right && utf::IsWhiteSpaceChar(str->At(left)))
+    left1 := Phi(left, left2).i32
+    If(left1, right1).LT.Unlikely.b {
+      If(is_white_space_u8(Load(str_data, left1).u8), 0).NE.Likely.b {
+        left2 := AddI(left1).Imm(1).i32
+        Goto(:Loop2)
+      }
+    }
+    right3 := AddI(right1).Imm(1).i32
+    Goto(:Trim)
+  }
+  # String contains 16-bit chars
+Label(:Loop3)  # while (utf::IsWhiteSpaceChar(str->At(right)))
+  right11 := Phi(right, right22).i32
+  If(is_white_space_u16(Load(str_data, ShlI(right11).Imm(1).i32).u16), 0).NE.Likely.b {
+    If(right11, 0).EQ.Unlikely.b {
+      Goto(:Trim)
+    }
+    right22 := SubI(right11).Imm(1).i32
+    Goto(:Loop3)
+  }
+Label(:Loop4)  # while (left < right && utf::IsWhiteSpaceChar(str->At(left)))
+  left11 := Phi(left, left22).i32
+  If(left11, right11).LT.Unlikely.b {
+    If(is_white_space_u16(Load(str_data, ShlI(left11).Imm(1).i32).u16), 0).NE.Likely.b {
+      left22 := AddI(left11).Imm(1).i32
+      Goto(:Loop4)
+    }
+  }
+  right33 := AddI(right11).Imm(1).i32
+Label(:Trim)
+  l := Phi(left, left1, left, left11).i32
+  r := Phi(right1, right3, right11, right33).i32
+  trimmed := fast_substring(str, length, l, r, not_compressed)
+  Return(trimmed).ptr
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("SUB_STRING_FROM_STRING_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, l, r).AddImm(entrypoint).MethodAsImm("SubStringFromStringOddSavedBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}
+
+
+function(:StringTrim,
+          params: {str: 'ref', unused1: 'i32', unused2: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  length_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # length == 0
+  If(length_packed, 1).LE.Unlikely.b {
+    Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+  }
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+  not_compressed := AndI(length_packed).Imm(1).i32
+  length := ShrI(length_packed).Imm(1).i32
+  # length == 1
+  If(length, 1).EQ.b {
+    If(not_compressed, 0).EQ.Likely.b {
+      ws1 := is_white_space_u8(Load(str_data, 0).u8)
+      Goto(:L1)
+    }
+    ws2 := is_white_space_u16(Load(str_data, 0).u16)
+Label(:L1)
+    ws3 := Phi(ws1, ws2).b
+    If(ws3, 0).EQ.Likely.b {
+      Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+    }
+    LiveOut(str).DstReg(regmap[:arg0]).ref
+    entrypoint1 = get_entrypoint_offset("STRING_EMPTY")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint1).MethodAsImm("StringEmpty").Terminator.ptr
+  }
+  # length > 1
+  last_char_index := SubI(length).Imm(1).i32
+  If(not_compressed, 0).EQ.Likely.b {
+    ws4 := is_white_space_u8(Load(str_data, last_char_index).u8)
+    Goto(:L2)
+  }
+  ws5 := is_white_space_u16(Load(str_data, ShlI(last_char_index).Imm(1).i32).u16)
+Label(:L2)
+  ws6 := Phi(ws4, ws5).b
+  If(ws6, 0).EQ.Likely.b {
+    # last char is not whitespace, so check the first char
+    If(not_compressed, 0).EQ.Likely.b {
+      ws7 := is_white_space_u8(Load(str_data, 0).u8)
+      Goto(:L3)
+    }
+    ws8 := is_white_space_u16(Load(str_data, 0).u16)
+Label(:L3)
+    ws9 := Phi(ws7, ws8).b
+    If(ws9, 0).EQ.Likely.b {
+      # first char is not white space, so return 'str'
+      Return(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr).ptr
+    }
+    Goto(:FirstCharWhitespace)
+  }
+  # last char is whitespace, so call StringTrimBase
+  LiveOut(str).DstReg(regmap[:arg0]).ref
+  LiveOut(unused1).DstReg(regmap[:arg1]).i32
+  LiveOut(unused2).DstReg(regmap[:arg2]).i32
+  entrypoint2 = get_entrypoint_offset("STRING_TRIM_BASE")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint2).MethodAsImm("StringTrimBase").Terminator.ptr
+Label(:FirstCharWhitespace)
+  LiveOut(str).DstReg(regmap[:arg0]).ref
+  LiveOut(unused1).DstReg(regmap[:arg1]).i32
+  LiveOut(unused2).DstReg(regmap[:arg2]).i32
+  entrypoint3 = get_entrypoint_offset("STRING_TRIM_LEFT_BASE")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint3).MethodAsImm("StringTrimLeftBase").Terminator.ptr
+}

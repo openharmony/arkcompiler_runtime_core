@@ -18,17 +18,16 @@ const etsMod = getTestModule('scenarios_test');
 const Boxx = etsMod.getClass('Boxx');
 const unpackValue = etsMod.getFunction('unpack_value');
 
-
 {
-  const INT_VALUE = 222;
-  const STRING_VALUE = 'hehehe';
+	const INT_VALUE = 222;
+	const STRING_VALUE = 'hehehe';
 
-  const intBox = new Boxx(INT_VALUE);
-  const stringBox = new Boxx(STRING_VALUE);
+	const intBox = new Boxx(INT_VALUE);
+	const stringBox = new Boxx(STRING_VALUE);
 
-  let intRet = unpackValue(intBox);
-  ASSERT_EQ(intRet, INT_VALUE);
+	let intRet = unpackValue(intBox);
+	ASSERT_EQ(intRet, INT_VALUE);
 
-  let stringRet = unpackValue(stringBox);
-  ASSERT_EQ(stringRet, STRING_VALUE);
+	let stringRet = unpackValue(stringBox);
+	ASSERT_EQ(stringRet, STRING_VALUE);
 }

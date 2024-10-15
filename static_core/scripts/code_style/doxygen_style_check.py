@@ -81,9 +81,9 @@ def check_keywords(src_path: str, splitted_lines: list, line_num: int) -> bool:
 
 
 def check_javadoc(src_path: str, strings: list) -> bool:
-    f = open(src_path, 'r')
-    text = f.read()
-    f.close()
+    text = []
+    with open(src_path, 'r') as f:
+        text = f.read()
     found_wrong_comment = False
     found_wrong_keyword_sign = False
     for string in strings:
@@ -109,9 +109,9 @@ def check_javadoc(src_path: str, strings: list) -> bool:
 
 
 def check_additional_slashes(src_path: str, strings: list) -> bool:
-    f = open(src_path, 'r')
-    text = f.read()
-    f.close()
+    text = []
+    with open(src_path, 'r') as f:
+        text = f.read()
     lines = text.splitlines()
     found_wrong_comment = False
     found_wrong_keyword_sign = False
@@ -148,9 +148,9 @@ def check_additional_slashes(src_path: str, strings: list) -> bool:
 
 
 def check_less_than_slashes(src_path: str, strings: list) -> bool:
-    f = open(src_path, 'r')
-    text = f.read()
-    f.close()
+    text = []
+    with open(src_path, 'r') as f:
+        text = f.read()
     lines = text.splitlines()
     found_wrong_comment = False
     found_wrong_keyword_sign = False
@@ -196,16 +196,16 @@ def run_doxygen_check(src_path: str, msg: str) -> bool:
     wrong_patterns_found = []
     # Looking for comments with wrong style
     for regexp in regexps_for_wrong_styles:
-        f = open(src_path, 'r')
-        strings = regexp.findall(f.read())
-        f.close()
+        strings = []
+        with open(src_path, 'r') as f:
+            strings = regexp.findall(f.read())
         for s in strings:
             if is_doxygen_comment(s):
                 wrong_patterns_found.append(s)
+    lines = []
+    with open(src_path, 'r') as f:
+        lines = f.readlines()
     line_num = 1
-    f = open(src_path, 'r')
-    lines = f.readlines()
-    f.close()
     for line in lines:
         for pattern in wrong_patterns_found:
             if pattern in line:
@@ -218,9 +218,9 @@ def run_doxygen_check(src_path: str, msg: str) -> bool:
     # Getting comments with possibly allowed styles
     ind = 0
     for regexp in regexps_for_fine_styles:
-        f = open(src_path, 'r')
-        strings = regexp.findall(f.read())
-        f.close()
+        strings = []
+        with open(src_path, 'r') as f:
+            strings = regexp.findall(f.read())
         for s in strings:
             if is_doxygen_comment(s):
                 fine_patterns_found[ind].append(s)

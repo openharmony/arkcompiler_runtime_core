@@ -79,10 +79,20 @@ private:
     bool ReadRegionHeaders();
     bool ReadClasses();
 
+    void EmplaceLiteralVals(std::vector<panda_file::LiteralItem> &literalArray,
+                            const panda_file::LiteralDataAccessor::LiteralValue &value,
+                            const panda_file::LiteralTag &tag);
     bool CreateLiteralArrayItem(LiteralDataAccessor *litArrayAccessor, File::EntityId arrayId, uint32_t index);
+    ValueItem *SetElemValueItem(AnnotationDataAccessor::Tag &annTag, AnnotationDataAccessor::Elem &annElem);
     AnnotationItem *CreateAnnotationItem(File::EntityId annId);
+    BaseClassItem *GetCatchTypeItem(CodeDataAccessor::CatchBlock &catchBlock, File::EntityId methodId,
+                                    MethodItem *methodItem);
+    void SetMethodCodeIfPresent(std::optional<File::EntityId> &codeId, MethodItem *methodItem,
+                                File::EntityId &methodId);
+    TypeItem *SetRetType(ProtoDataAccessor &protoAcc, size_t &referenceNum);
     MethodItem *CreateMethodItem(ClassItem *cls, File::EntityId methodId);
     ForeignMethodItem *CreateForeignMethodItem(BaseClassItem *fcls, File::EntityId methodId);
+    void SetFieldValue(FieldItem *fieldItem, Type fieldType, FieldDataAccessor &fieldAcc);
     FieldItem *CreateFieldItem(ClassItem *cls, File::EntityId fieldId);
     ForeignFieldItem *CreateForeignFieldItem(BaseClassItem *fcls, File::EntityId fieldId);
     ClassItem *CreateClassItem(File::EntityId classId);
@@ -173,6 +183,8 @@ private:
         return CreateClassItem(classId);
     }
 
+    void InstCheckByFlags(BytecodeInstruction &inst, MethodItem *methodItem,
+                          const std::map<BaseItem *, File::EntityId> &reverseDone);
     void UpdateCodeAndDebugInfoDependencies(const std::map<BaseItem *, File::EntityId> &reverseDone);
 
     std::unique_ptr<const File> file_;

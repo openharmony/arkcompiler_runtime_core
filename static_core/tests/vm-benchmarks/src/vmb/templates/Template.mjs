@@ -134,8 +134,8 @@ function tune() {
     }
     loopCount1 = loopCount * iterMs / loopMs >> 0;
     if (loopCount1 == 0) loopCount1++;
-    log("Tuning: " +  loopCount + " ops, " + loopMs*MS2NS/loopCount + " ns/op => "
-        + loopCount1 + " reps");
+    log('Tuning: ' +  loopCount + ' ops, ' + loopMs*MS2NS/loopCount + ' ns/op => '
+        + loopCount1 + ' reps');
 }
 
 function runIters(phase, count, time) {
@@ -156,11 +156,11 @@ function runIters(phase, count, time) {
         }
         totalOps += ops;
         totalMs += elapsedMs;
-        log(phase + " " + iter + ":" + ops + " ops, " + elapsedMs*MS2NS/ops + " ns/op");
+        log(phase + ' ' + iter + ':' + ops + ' ops, ' + elapsedMs*MS2NS/ops + ' ns/op');
     }
 }
 
-log("Startup execution started: " + Date.now() * MS2NS);
+log('Startup execution started: ' + Date.now() * MS2NS);
 if (FI > 0) {
     let start = Date.now();
     for (let i = 0; i < FI; i++) {
@@ -170,7 +170,7 @@ if (FI > 0) {
     if (elapsed <= 0) {
         elapsed = 1;  // 0 is invalid result
     }
-    log("Benchmark result: $bench_name " + elapsed*MS2NS / FI);
+    log('Benchmark result: $bench_name ' + elapsed*MS2NS / FI);
 } else {
     tune();
     if (WI > 0) {
@@ -178,13 +178,13 @@ if (FI > 0) {
         // Re-entering runIters in warmup loop to allow profiler complete the method.
         // Possible deoptimizations and recompilations is done in warmup instead of measure phase.
         for (let wi = 0; wi < WI; ++wi) {
-            runIters("Warmup", 1, WT);
+            runIters('Warmup', 1, WT);
         }
     }
     iter = 1;
     var measure_iters = MI >> 0; // make sure it has int type
-    runIters("Iter", measure_iters, IT);
-    log("Benchmark result: $bench_name " + totalMs*MS2NS/totalOps);
+    runIters('Iter', measure_iters, IT);
+    log('Benchmark result: $bench_name ' + totalMs*MS2NS/totalOps);
 }
 
 Consumer.consumeObj(bench);

@@ -23,6 +23,14 @@ ENTRYPOINT ThrowNativeExceptionBridge, ThrowNativeExceptionEntrypoint, 0, VOID
 ENTRYPOINT_SLOW_PATH <%= entrypoint.bridge_name %>, <%= entrypoint.entrypoint %>, <%= entrypoint.signature.length - 1 %>, <%= entrypoint.general_return_type %>
 %   elsif entrypoint.bridge == 'odd_saved'
 ENTRYPOINT_ODD_SAVED <%= entrypoint.bridge_name %>, <%= entrypoint.entrypoint %>, <%= entrypoint.signature.length - 1 %>, <%= entrypoint.general_return_type %>
+%   elsif entrypoint.bridge == 'odd_saved1'
+ENTRYPOINT_ODD_SAVED <%= entrypoint.bridge_name %>, <%= entrypoint.entrypoint %>, 1, <%= entrypoint.general_return_type %>
+%   elsif entrypoint.bridge == 'odd_saved2'
+ENTRYPOINT_ODD_SAVED <%= entrypoint.bridge_name %>, <%= entrypoint.entrypoint %>, 2, <%= entrypoint.general_return_type %>
+%   elsif entrypoint.bridge == 'odd_saved3'
+ENTRYPOINT_ODD_SAVED <%= entrypoint.bridge_name %>, <%= entrypoint.entrypoint %>, 3, <%= entrypoint.general_return_type %>
+%   elsif entrypoint.bridge == 'odd_saved4'
+ENTRYPOINT_ODD_SAVED <%= entrypoint.bridge_name %>, <%= entrypoint.entrypoint %>, 4, <%= entrypoint.general_return_type %>
 %   elsif entrypoint.bridge == 'entrypoint'
 ENTRYPOINT           <%= entrypoint.bridge_name %>, <%= entrypoint.entrypoint %>, <%= entrypoint.signature.length - 1 %>, <%= entrypoint.general_return_type %>
 %   else

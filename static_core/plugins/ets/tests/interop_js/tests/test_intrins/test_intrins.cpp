@@ -33,7 +33,7 @@ TEST_F(EtsInteropJsIntrinsTest, basic1)
     constexpr double ARG1 = 314;
     constexpr double RES = ARG0 + ARG1;
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<double>("js_sum_wrapper_num_num", ARG0, ARG1);
+    auto ret = CallEtsMethod<double>("jsSumWrapperNumNum", ARG0, ARG1);
     ASSERT_EQ(ret, RES);
 }
 
@@ -43,95 +43,95 @@ TEST_F(EtsInteropJsIntrinsTest, basic2)
     constexpr std::string_view ARG1 = "foo";
     constexpr std::string_view RES = "12.34foo";
     // NOLINTNEXTLINE(modernize-use-auto)
-    auto ret = CallEtsMethod<std::string>("js_sum_wrapper_num_str", ARG0, ARG1);
+    auto ret = CallEtsMethod<std::string>("jsSumWrapperNumStr", ARG0, ARG1);
     ASSERT_EQ(ret, RES);
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_convertors)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_undefined"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_null"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_boolean"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_number"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_string"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_object"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testUndefined"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testNull"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBoolean"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testNumber"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testString"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testObject"));
     // NOTE(vpukhov): symbol, function, external, bigint
 
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_string_ops"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testStringOps"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_builtin_array_convertors)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_any"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_boolean"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_int"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_number"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_string"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_object"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_multidim"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_builtin_array_instanceof"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_init_array_component"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayAny"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayBoolean"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayInt"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayNumber"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayString"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayObject"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayMultidim"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testBuiltinArrayInstanceof"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testInitArrayComponent"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_named_access)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_named_access"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testNamedAccess"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_newcall)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_newcall"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testNewcall"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_value_call)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_value_call"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testValueCall"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_call_stress)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_call_stress"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testCallStress"));
 }
 
 // Remove after JSValue cast fix
 TEST_F(EtsInteropJsIntrinsTest, DISABLED_test_undefined_cast_bug)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_undefined_cast_bug"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testUndefinedCastBug"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_lambda_proxy)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_lambda_proxy"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_lambda_proxy_recursive"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testLambdaProxy"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testLambdaProxyRecursive"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_exception_forwarding)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_fromjs"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_fromets"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_exception_forwarding_recursive"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_core_error_forwarding"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingFromjs"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingFromets"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testExceptionForwardingRecursive"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testCoreErrorForwarding"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_typechecks)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_typecheck_getprop"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_typecheck_jscall"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_typecheck_callets"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testTypecheckGetProp"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testTypecheckJscall"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testTypecheckCallets"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_accessor_throws)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_get_throws"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_set_throws"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_jscall_resolution_throws1"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_jscall_resolution_throws2"));
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_jscall_resolution_throws3"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testGetThrows"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testSetThrows"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testJscallResolutionThrows1"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testJscallResolutionThrows2"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testJscallResolutionThrows3"));
 }
 
 TEST_F(EtsInteropJsIntrinsTest, test_finalizers)
 {
-    ASSERT_EQ(true, CallEtsMethod<bool>("test_finalizers"));
+    ASSERT_EQ(true, CallEtsMethod<bool>("testFinalizers"));
 }
 
 }  // namespace ark::ets::interop::js::testing

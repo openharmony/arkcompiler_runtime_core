@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-import os
 from vmb.tool import ToolBase, VmbToolExecError
 from vmb.target import Target
 from vmb.unit import BenchUnit
@@ -28,7 +27,7 @@ class Tool(ToolBase):
         super().__init__(*args)
         if Target.HOST == self.target:
             out = 'out/x64.release/arkcompiler'
-            self.sdk = self.ensure_dir(os.environ.get('OHOS_SDK', ''))
+            self.sdk = self.ensure_dir_env('OHOS_SDK')
             self.aot_compiler = self.ensure_file(
                 self.sdk,
                 f'{out}/ets_runtime/ark_aot_compiler')
@@ -37,7 +36,7 @@ class Tool(ToolBase):
                 f'{out}/../test/test',
                 f'{out}/../thirdparty/icu',
                 f'{out}/../thirdparty/zlib')])
-            # builtins shoud be compiled outside aot tool,
+            # builtins should be compiled outside aot tool,
             # but not to the moment of this init
             self.libark_abc = \
                 ToolBase.libs.joinpath('lib_ark_builtins.d.abc')
@@ -66,7 +65,7 @@ class Tool(ToolBase):
             '--compiler-opt-track-field=true '
             '--compiler-max-inline-bytecodes=45 '
             '--compiler-opt-level=2 '
-            f'--builtins-dts={self.libark_abc} '
+            f'{self.custom} '
             f'--compiler-pgo-profiler-path={name}.ap '
             f'{opts}'
             f'--aot-file={name} {name}.abc'
@@ -74,8 +73,13 @@ class Tool(ToolBase):
         res = self.x_run(aot_cmd, cwd=str(cwd))
         if not res or 0 != res.ret:
             bu.status = BUStatus.COMPILATION_FAILED
-            raise VmbToolExecError(f'{self.name} failed: {name}')
+            raise VmbToolExecError(f'{self.name} failed: {name}', res)
         an = self.x_src(bu, '.abc').with_suffix('.an')
         an_size = self.x_sh.get_filesize(an)
         bu.result.build.append(
             BuildResult('ark_aot_compiler', an_size, res.tm, res.rss))
+        if an not in bu.binaries:
+            bu.binaries.append(an)
+        ai = an.with_suffix('.ai')
+        if ai not in bu.binaries:
+            bu.binaries.append(ai)

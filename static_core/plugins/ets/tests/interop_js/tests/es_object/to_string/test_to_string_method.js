@@ -13,13 +13,45 @@
  * limitations under the License.
  */
 
-exports.Identity = function (x) { return x; };
-exports.Curry = function (x) { return { toString() { return x; } }; };
-exports.Throwing = function () { return { toString() { throw 123; } }; };
-exports.CurryToString = function (x) { return { toString() { return x.toString(); } }; };
-exports.IntValue = function () { return 42; }
-exports.NullVal = function () { return null; }
-exports.NanVal = function () { return NaN; }
-exports.UndefinedVal = function () { return undefined; }
-exports.Optional = function (x) { return x ? null : "optional_val" }
-exports.StringifyValue = function (v) { return typeof v + ":" + v }
+exports.Identity = function (x) {
+	return x;
+};
+exports.Curry = function (x) {
+	return {
+		toString() {
+			return x;
+		},
+	};
+};
+exports.Throwing = function () {
+	return {
+		toString() {
+			throw 123;
+		},
+	};
+};
+exports.CurryToString = function (x) {
+	return {
+		toString() {
+			return x.toString();
+		},
+	};
+};
+exports.IntValue = function () {
+	return 42;
+};
+exports.NullVal = function () {
+	return null;
+};
+exports.NanVal = function () {
+	return NaN;
+};
+exports.UndefinedVal = function () {
+	return undefined;
+};
+exports.Optional = function (x) {
+	return x ? null : 'optionalVal';
+};
+exports.StringifyValue = function (v) {
+	return typeof v + ':' + v;
+};

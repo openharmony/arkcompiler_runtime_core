@@ -17,6 +17,7 @@
 #define COMPILER_OPTIMIZER_IR_GRAPH_H
 
 #include "aot_data.h"
+#include "basicblock.h"
 #include "compiler_events_gen.h"
 #include "inst.h"
 #include "marker.h"
@@ -170,6 +171,7 @@ public:
           mode_(mode),
           singleImplementationList_(allocator->Adapter()),
           tryBeginBlocks_(allocator->Adapter()),
+          throwBlocks_(allocator->Adapter()),
           spilledConstants_(allocator->Adapter()),
           parentGraph_(parent)
     {
@@ -409,6 +411,19 @@ public:
         return false;
     }
 #endif  // NDEBUG
+
+    bool IsThrowApplied() const
+    {
+        return FlagThrowApplied::Get(bitFields_);
+    }
+    void SetThrowApplied()
+    {
+        FlagThrowApplied::Set(true, &bitFields_);
+    }
+    void UnsetThrowApplied()
+    {
+        FlagThrowApplied::Set(false, &bitFields_);
+    }
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
     bool IsLineDebugInfoEnabled() const
@@ -790,6 +805,43 @@ public:
     const auto &GetTryBeginBlocks() const
     {
         return tryBeginBlocks_;
+    }
+
+    void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rmPred);
+
+    bool FindThrowBlock(BasicBlock *block)
+    {
+        auto it = std::find(throwBlocks_.begin(), throwBlocks_.end(), block);
+        return (it != throwBlocks_.end());
+    }
+
+    bool AppendThrowBlock(BasicBlock *block)
+    {
+        if (!FindThrowBlock(block)) {
+            throwBlocks_.insert(block);
+            return true;
+        }
+        return false;
+    }
+
+    bool EraseThrowBlock(BasicBlock *block)
+    {
+        auto it = std::find(throwBlocks_.begin(), throwBlocks_.end(), block);
+        if (it == throwBlocks_.end()) {
+            return false;
+        }
+        throwBlocks_.erase(it);
+        return true;
+    }
+
+    const auto &GetThrowBlocks() const
+    {
+        return throwBlocks_;
+    }
+
+    void ClearThrowBlocks()
+    {
+        throwBlocks_.clear();
     }
 
     void AppendThrowableInst(const Inst *inst, BasicBlock *catchHandler)
@@ -1263,7 +1315,8 @@ private:
     using FlagFloatRegs = FlagInfiniteLoop::NextFlag;
     using FlagDefaultLocationsInit = FlagFloatRegs::NextFlag;
     using FlagIrtocPrologEpilogOptimized = FlagDefaultLocationsInit::NextFlag;
-    using FlagUnrollComplete = FlagIrtocPrologEpilogOptimized::NextFlag;
+    using FlagThrowApplied = FlagIrtocPrologEpilogOptimized::NextFlag;
+    using FlagUnrollComplete = FlagThrowApplied::NextFlag;
 #ifdef NDEBUG
     using LastField = FlagUnrollComplete;
 #else
@@ -1319,6 +1372,7 @@ private:
 
     ArenaVector<RuntimeInterface::MethodPtr> singleImplementationList_;
     ArenaVector<const BasicBlock *> tryBeginBlocks_;
+    ArenaSet<BasicBlock *> throwBlocks_;
     ArenaVector<ConstantInst *> spilledConstants_;
     // Graph that inlines this graph
     Graph *parentGraph_ {nullptr};
@@ -1387,7 +1441,6 @@ ConstantInst *Graph::FindOrCreateConstant(T value)
 
 void InvalidateBlocksOrderAnalyzes(Graph *graph);
 void MarkLoopExits(const Graph *graph, Marker marker);
-void RemovePredecessorUpdateDF(BasicBlock *block, BasicBlock *rmPred);
 std::string GetMethodFullName(const Graph *graph, RuntimeInterface::MethodPtr method);
 size_t GetObjectOffset(const Graph *graph, ObjectType objType, RuntimeInterface::FieldPtr field, uint32_t typeId);
 }  // namespace ark::compiler

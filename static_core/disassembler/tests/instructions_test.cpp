@@ -135,6 +135,8 @@ static inline std::string ExtractFuncBody(const std::string &text, const std::st
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
 
+namespace ark::disasm::test {
+
 TEST(InstructionsTest, TestLanguagePandaAssembly)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -153,7 +155,7 @@ TEST(InstructionsTest, TestLanguagePandaAssembly)
     EXPECT_TRUE(ss.str().find(".language PandaAssembly") != std::string::npos);
 }
 
-void CheckTestCalls(std::stringstream &g, std::string &line)
+static void CheckTestCalls(std::stringstream &g, std::string &line)
 {
     std::getline(g, line);
     EXPECT_EQ("\tcall.virt.range B.Bhandler_range:(B,i8,i16,i32,i8,i16,i32), v4", line);
@@ -316,3 +318,5 @@ TEST(InstructionsTest, TestCorrectReg)
 }
 
 #undef DISASM_BIN_DIR
+
+}  // namespace ark::disasm::test

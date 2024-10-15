@@ -18,14 +18,19 @@ const etsMod = getTestModule('scenarios_test');
 const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
 function foo(x) {
-  let result = this.stringVal + ' ' + this.numVal + ' ' + x;
-  return result;
+	let result = this.stringVal + ' ' + this.numVal + ' ' + x;
+	return result;
 }
 
 {
-  const INT_VALUE = 222;
+	const INT_VALUE = 222;
 
-  // 'stringVal' field must have string type, but integer value given
-  ASSERT_THROWS(TypeError, () => functionArgIsInterface({foo: foo, numVal: INT_VALUE, stringVal: INT_VALUE}));
-
+	// 'stringVal' field must have string type, but integer value given
+	ASSERT_THROWS(TypeError, () =>
+		functionArgIsInterface({
+			foo: foo,
+			numVal: INT_VALUE,
+			stringVal: INT_VALUE,
+		})
+	);
 }

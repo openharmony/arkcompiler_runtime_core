@@ -15,12 +15,17 @@
 # limitations under the License.
 #
 
+from __future__ import annotations
 import logging
 import statistics
 import inspect
-from collections import namedtuple
+import csv
+import math
+from collections import namedtuple, defaultdict
 from dataclasses import dataclass, field
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
+from operator import add
+from pathlib import Path
 
 from vmb.helpers import Jsonable, StringEnum
 
@@ -92,6 +97,54 @@ class AOTStats(Jsonable):
                 kwargs[k] = {n: Stat(*i) for n, i in v.items()}
         return cls(**kwargs)
 
+    @classmethod
+    def from_csv(cls, csv_file: Union[str, Path]):
+        data: Dict[Any, Any] = {}
+        with open(csv_file, mode='r', encoding='utf-8', newline='\n') as f:
+            for method, pass_name, *stat, pbc_inst_num in csv.reader(
+                    f, delimiter=','):
+                if data.get(method) is None:
+                    data[method] = {
+                        "passes": defaultdict(list),
+                        "pbc_inst_num": pbc_inst_num
+                    }
+                data[method]["passes"][pass_name].append(
+                    [int(s) for s in stat])
+        # number of runs, ir mem, local mem, time
+        aot_stats = AOTStats(number_of_methods=len(data),
+                             passes=defaultdict(lambda: Stat(0, 0, 0, 0)))
+        for info in data.values():
+            for pass_name, stats in info["passes"].items():
+                sums = [0, 0, 0]
+                for values in stats:  # [[1,2,3],[1,2,3]] -> [2,4,6]
+                    sums = [sum(i) for i in zip(values, sums)]
+                stats_sum = [len(stats)] + sums
+                vals = map(add, stats_sum, list(aot_stats.passes[pass_name]))
+                aot_stats.passes[pass_name] = Stat(*vals)
+        return aot_stats
+
+
+@dataclass
+class JITStat(Jsonable):
+    method: str
+    is_osr: bool
+    bc_size: int
+    code_size: int
+    time: int
+
+    @staticmethod
+    def from_csv(csv_file: Union[str, Path]) -> List[JITStat]:
+        data: List[JITStat] = []
+        with open(csv_file, mode='r', encoding='utf-8', newline='\n') as f:
+            for method, is_osr, bc_size, code_size, time in csv.reader(
+                    f, delimiter=','):
+                data.append(JITStat(method,
+                                    bool(int(is_osr)),
+                                    int(bc_size),
+                                    int(code_size),
+                                    int(time)))
+        return data
+
 
 @dataclass
 class AOTStatsLib(Jsonable):
@@ -107,7 +160,7 @@ class AOTStatsLib(Jsonable):
         }
         for k, v in kwargs.items():
             if 'aot_stats' == k:
-                kwargs[k] = AOTStats.from_obj(**v)
+                kwargs[k] = AOTStats.from_obj(**v) if v else AOTStats()
         return cls(**kwargs)
 
 
@@ -125,7 +178,7 @@ class RunResult(Jsonable):
     INFO - Benchmark result: DemoBench_Demo 95.58749625083489
     """
 
-    avg_time: float = 0.0
+    avg_time: Optional[float] = 0.0
     iterations: List[float] = field(default_factory=list)
     warmup: List[float] = field(default_factory=list)
     unit: str = 'ns/op'
@@ -135,18 +188,19 @@ class RunResult(Jsonable):
 class TestResult(Jsonable):
     # meta info:
     name: str
-    component: str = ''
+    component: str = 'Doclet'
     tags: List[str] = field(default_factory=list)
     bugs: List[str] = field(default_factory=list)
     # build stats:
     compile_status: int = 0
     build: List[BuildResult] = field(default_factory=list)
     # exec stats:
-    execution_status: int = -13
+    execution_status: Optional[int] = None
     execution_forks: List[RunResult] = field(default_factory=list)
-    mem_bytes: int = 0
+    mem_bytes: int = -1
     gc_stats: Optional[GCStats] = None
-    # this field seem unused: aot_stats
+    aot_stats: Optional[AOTStats] = None
+    jit_stats: Optional[List[JITStat]] = None
     # no-exportable:
     _status: BUStatus = BUStatus.NOT_RUN
     _ext_time: float = 0.0
@@ -172,25 +226,42 @@ class TestResult(Jsonable):
 
     @property
     def iterations_count(self) -> int:
+        if not self.execution_forks:
+            return 0
         return sum(len(f.iterations) for f in self.execution_forks)
 
     @property
-    def mean_time(self) -> float:
+    def mean_time(self) -> Optional[float]:
         if not self.execution_forks:
-            return 0.0
+            return None
         if not self.execution_forks[0].iterations:
-            return 0.0
+            return None
         return statistics.mean(self.execution_forks[0].iterations)
 
     @property
-    def stdev_time(self) -> float:
+    def stdev_time(self) -> Optional[float]:
         if not self.execution_forks:
-            return 0
+            return None
         if not self.execution_forks[0].iterations:
-            return 0
+            return None
         if len(self.execution_forks[0].iterations) < 2:
-            return 0
-        return statistics.stdev(self.execution_forks[0].iterations)
+            return None
+        stdev = statistics.stdev(self.execution_forks[0].iterations)
+        return stdev if stdev > 0 else 0.000001
+
+    @property
+    def mean_time_error_99(self) -> Optional[float]:
+        count = self.iterations_count
+        if count <= 2:
+            return None
+        stddev = self.stdev_time
+        if stddev == 0 or stddev is None:
+            return None
+        t_dist = [  # pre-calculated T-distribution coeff
+            0.0, 0.0, 63.66, 9.92, 5.84, 4.60, 4.03, 3.71, 3.50, 3.36,
+            3.25, 3.17, 3.11, 3.05, 3.01, 2.98, 2.95, 2.92, 2.90, 2.88, 2.86]
+        c = t_dist[count] if count <= len(t_dist) else 2.7
+        return c * stddev / math.sqrt(count)
 
     @classmethod
     def from_obj(cls, **kwargs):
@@ -205,13 +276,18 @@ class TestResult(Jsonable):
                 kwargs[k] = [RunResult(**i) for i in v]
             if 'gc_stats' == k:
                 kwargs[k] = GCStats(**v) if v else None
+            if 'aot_stats' == k:
+                kwargs[k] = AOTStats(**v) if v else None
+            if 'jit_stats' == k:
+                kwargs[k] = [JITStat(**i) for i in v if i] if v else None
         return cls(**kwargs)
 
     def get_avg_time(self) -> float:
         """Get mean of avg_time by executions."""
         if not self.execution_forks:
             return 0.0
-        return statistics.mean(f.avg_time for f in self.execution_forks)
+        return statistics.mean(f.avg_time for f in self.execution_forks
+                               if f.avg_time is not None)
 
 
 @dataclass

@@ -65,7 +65,7 @@ bool IsDirExists(const std::string &dirpath)
         return true;
     }
     struct stat info {};
-    return (stat(dirpath.c_str(), &info) == 0) && ((info.st_mode & (unsigned int)S_IFDIR) != 0U);
+    return (stat(dirpath.c_str(), &info) == 0) && ((info.st_mode & static_cast<unsigned int>(S_IFDIR)) != 0U);
 }
 
 std::string RemoveExtension(const std::string &filepath)

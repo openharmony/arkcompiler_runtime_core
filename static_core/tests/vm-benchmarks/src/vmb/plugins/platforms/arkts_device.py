@@ -47,8 +47,10 @@ class Platform(PlatformBase):
             if not self.ext_info.get('etsstdlib', {}):
                 self.ext_info['etsstdlib'] = {}
             self.ext_info['etsstdlib']['etsstdlib.an'] = \
-                AOTStatsLib(time=res.tm * 1e9,
-                            size=self.x_sh.get_filesize(an))
+                AOTStatsLib(time=res.tm,
+                            size=self.x_sh.get_filesize(an),
+                            aot_stats=self.paoc.get_aot_stats(
+                                an, self.paoc.libs))
         self.push_libs()
 
     @property
@@ -65,7 +67,7 @@ class Platform(PlatformBase):
 
     @property
     def langs(self) -> List[str]:
-        return ['ets']
+        return ['sts']
 
     @property
     def gc_parcer(self) -> Optional[Type]:
@@ -73,9 +75,9 @@ class Platform(PlatformBase):
 
     def run_unit(self, bu: BenchUnit) -> None:
         self.es2panda(bu)
-        if OptFlags.DRY_RUN in self.flags:
+        if self.dry_run_stop(bu):
             return
-        self.push_unit(bu, '.abc', '.an')
+        self.push_unit(bu, '.abc')
         if OptFlags.AOT in self.flags:
             self.paoc(bu)
         self.ark(bu)

@@ -60,6 +60,8 @@ private:
     llvm::MachineBasicBlock::iterator insertionPoint_;
 };
 
+namespace {
+
 void RemoveInstsIf(llvm::MachineBasicBlock &mblock, const std::function<bool(llvm::MachineInstr &)> &predicate)
 {
     std::vector<llvm::MachineInstr *> markedAsRemoved;
@@ -73,6 +75,8 @@ void RemoveInstsIf(llvm::MachineBasicBlock &mblock, const std::function<bool(llv
         inst->removeFromParent();
     }
 }
+
+}  // namespace
 
 // AMD64 Frame builder implementation
 

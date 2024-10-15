@@ -45,7 +45,7 @@ namespace inspector {
 // NOLINTNEXTLINE(fuchsia-virtual-inheritance)
 class Server;
 
-class Inspector : public PtHooks {
+class Inspector final : public PtHooks {
 public:
     Inspector(Server &server, DebugInterface &debugger, bool breakOnStart);
     ~Inspector() override;
@@ -94,6 +94,8 @@ private:
 
     void DebuggableThreadPostSuspend(PtThread thread, ObjectRepository &objectRepository,
                                      const std::vector<BreakpointId> &hitBreakpoints, ObjectHeader *exception);
+
+    void NotifyExecutionEnded();
 
 private:
     bool breakOnStart_;

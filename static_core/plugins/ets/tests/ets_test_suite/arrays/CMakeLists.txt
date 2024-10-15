@@ -12,6 +12,6 @@
 # limitations under the License.
 
 run_int_jit_aot_ets_code(
-    "${CMAKE_CURRENT_SOURCE_DIR}/class_composite.ets"
+    "${CMAKE_CURRENT_SOURCE_DIR}/class_composite.sts"
     "${CMAKE_CURRENT_BINARY_DIR}"
     ets_test_suite_arrays_class_composite)

@@ -36,6 +36,7 @@ static constexpr std::string_view PROMISE_REF                          = "Lstd/c
 static constexpr std::string_view INTERNAL_UNDEFINED                   = "Lstd/core/__internal_undefined;";
 static constexpr std::string_view STRING                               = "Lstd/core/String;";
 static constexpr std::string_view WEAK_REF                             = "Lstd/core/WeakRef;";
+static constexpr std::string_view FINALIZABLE_WEAK_REF                 = "Lstd/core/FinalizableWeakRef;";
 static constexpr std::string_view TYPE                                 = "Lstd/core/Type;";
 static constexpr std::string_view FIELD                                = "Lstd/core/Field;";
 static constexpr std::string_view METHOD                               = "Lstd/core/Method;";

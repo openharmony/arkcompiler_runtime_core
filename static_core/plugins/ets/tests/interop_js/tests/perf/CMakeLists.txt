@@ -21,28 +21,28 @@ if (HEAVY_RUN)
 endif()
 
 list(APPEND PERF_TESTS
-    "void_call"
-    "void_call_10str"
-    "void_call_10dbl"
-    "str_call"
-    "anystr_call"
-    "dbl_call"
-    "anydbl_call"
-    "anyobj_call"
+    "voidCall"
+    "voidCall10str"
+    "voidCall10dbl"
+    "strCall"
+    "anystrCall"
+    "dblCall"
+    "anydblCall"
+    "anyobjCall"
 )
 
 add_custom_target(ets_interop_js_perf_tests COMMENT "Running all js interop perf tests")
 
 foreach(TEST ${PERF_TESTS})
     panda_ets_interop_js_test(ets_interop_js_perf_test_${TEST}
-        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test.ets
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test.sts
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_test.js
         LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
     )
     add_dependencies(ets_interop_js_perf_tests ets_interop_js_perf_test_${TEST})
 
     panda_ets_interop_js_test(ets_interop_js_perf_test_frontend_${TEST}
-        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.ets
+        ETS_SOURCES ${CMAKE_CURRENT_LIST_DIR}/test_frontend.sts
         JS_LAUNCHER ${CMAKE_CURRENT_LIST_DIR}/run_test.js
         LAUNCHER_ARGS ${TEST} ${WARMUP} ${ITERS}
         ETS_CONFIG "${PANDA_BINARY_ROOT}/tests/ets_interop_js/arktsconfig.json"

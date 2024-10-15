@@ -414,12 +414,12 @@ def check_headers_in_es2panda_sources(panda_dir):
             _, extension = os.path.splitext(file_path)
             if extension != ".h" and extension != ".cpp":
                 continue
-            source_file = open(file_path, "r")
-            for line in source_file.readlines():
-                line = line.replace(" ", "")
-                if (line.startswith("#include\"tools/es2panda")):
-                    result.append("Error: use of header starting with tools/es2panda in " + file_path)
-                    continue
+            with open(file_path, "r") as source_file:
+                for line in source_file.readlines():
+                    line = line.replace(" ", "")
+                    if (line.startswith("#include\"tools/es2panda")):
+                        result.append(f"Error: use of header starting with tools/es2panda in {file_path}")
+                        continue
     if len(result) > 0:
         for file in result:
             print(file)

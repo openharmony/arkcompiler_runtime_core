@@ -183,7 +183,6 @@ A ``char literal`` represents the following:
 -  A single escape sequence preceded by the characters *single quote* (U+0027)
    and '*c*' (U+0063), and followed by a *single quote* U+0027).
 
-|
 
 .. code-block:: abnf
 
@@ -267,11 +266,15 @@ An *array creation expression* creates new objects that are instances of arrays.
 The *array literal* expression is used to create an array instance, and to
 provide some initial values (see :ref:`Array Literal`).
 
-.. code-block:: typescript
-   :linenos:
+.. code-block:: abnf
 
       newArrayInstance:
-          'new' typeReference dimensionExpression+ (arrayElement)?
+          'new' arrayElementType dimensionExpression+ (arrayElement)?
+          ;
+
+      arrayElementType:
+          typeReference
+          | '(' type ')'
           ;
 
       dimensionExpression:
@@ -280,7 +283,7 @@ provide some initial values (see :ref:`Array Literal`).
 
       arrayElement:
           '(' expression ')'
-
+          ;
 
 .. code-block:: typescript
    :linenos:
@@ -288,7 +291,7 @@ provide some initial values (see :ref:`Array Literal`).
       let x = new number[2][2] // create 2x2 matrix
 
 An *array creation expression* creates an object that is a new array with the
-elements of the type specified by ``typeReference``.
+elements of the type specified by ``arrayElelementType``.
 
 The type of each ``dimensionExpression`` must be convertible (see
 :ref:`Primitive Types Conversions`) to an integer type. Otherwise,
@@ -313,9 +316,9 @@ follows:
 If ``arrayElement`` is provided, then the type of the ``expression`` can be
 as follows:
 
-- Type of array element denoted by ``typeReference``, or
+- Type of array element denoted by ``arrayElelementType``, or
 - Lambda function with the return type equal to the type of array element
-  denoted by ``typeReference`` and the parameters of type ``int``, and the
+  denoted by ``arrayElelementType`` and the parameters of type ``int``, and the
   number of parameters equal to the number of array dimensions.
 
 Otherwise, a :index:`compile-time error` occurs.
@@ -333,11 +336,11 @@ Otherwise, a :index:`compile-time error` occurs.
       }
 
 
-A :index:`compile-time error` occurs if ``typeReference`` refers to a class
-that does not contain an accessible (see :ref:`Accessible`) parameterless
+A :index:`compile-time error` occurs if ``arrayElelementType`` refers to a
+class that does not contain an accessible (see :ref:`Accessible`) parameterless
 constructor, or constructor with all parameters of the second form of optional
-parameters (see :ref:`Optional Parameters`), or if ``typeReference`` has no a
-default value:
+parameters (see :ref:`Optional Parameters`), or if ``type`` has no a default
+value:
 
 .. code-block-meta:
    expect-cte:
@@ -353,7 +356,8 @@ default value:
       let y = new A[2] // OK, as all 3 elements of array will be filled with
       // new A() objects
 
-A :index:`compile-time error` occurs if ``typeReference`` is a type parameter:
+A :index:`compile-time error` occurs if ``arrayElelementType`` is a type
+parameter:
 
 .. code-block:: typescript
    :linenos:
@@ -364,29 +368,39 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter:
          }
       }
 
-Creating array with known number of elements:
+Creating an array with a known number of elements is presented below:
 
 .. code-block:: typescript
    :linenos:
 
-      class A {} 
+      class A {}
          // It has no default value or parametereless constructor defined
 
       let array_size = 5
 
-      let array1 = new A[array_size] (new A) 
+      let array1 = new A[array_size] (new A)
          /* Create array of 'array_size' elements and all of them will have
             initial value equal to an object created by new A expression */
 
-      let array2 = new A[array_size] ((index): A => { return new A }) 
+      let array2 = new A[array_size] ((index): A => { return new A })
          /* Create array of `array_size` elements and all of them will have
             initial value equal to the result of lambda function execution with
             different indices */
-     
-      let array2 = new A[2][3] ((index1, index2): A => { return new A }) 
+
+      let array2 = new A[2][3] ((index1, index2): A => { return new A })
          /* Create two-dimensional array of 6 elements total and all of them will
             have initial value equal to the result of lambda function execution with
             different indices */
+
+Creating exotic arrays with different kinds of element types is presented below:
+
+.. code-block:: typescript
+   :linenos:
+
+      let array_of_union = new (Object|null) [5] // filled with null
+      let array_of_functor = new (() => void) [5] ( (): void => {})
+      type aliasTypeName = number []
+      let array_of_array = new aliasTypeName [5] ( [3.141592653589] )
 
 .. index::
    array creation expression
@@ -468,7 +482,7 @@ value: Type2)* respectively, then an indexing expression (see
 
 .. code-block:: typescript
    :linenos:
-   
+
     class SomeClass {
        $_get (index: number): SomeClass { return this }
        $_set (index: number, value: SomeClass) { }
@@ -498,7 +512,7 @@ expressions (see :ref:`Indexing Expressions`) is available:
     }
     let setClass = new ClassWithSet
     setClass = setClass[0] // Error - no $_get function available
-    setClass[0] = setClass 
+    setClass[0] = setClass
 
 Type ``string`` can be used as a type of the index parameter:
 
@@ -512,9 +526,9 @@ Type ``string`` can be used as a type of the index parameter:
        $_set (index: string, value: SomeClass) { }
     }
     let x = new SomeClass
-    x = x["index string"] 
+    x = x["index string"]
        // This notation implies a call: x = x.$_get ("index string")
-    x["index string"] = x 
+    x["index string"] = x
        // This notation implies a call: x.$_set ("index string", x)
 
 Functions ``$_get`` and ``$_set`` are ordinary functions with compiler-known
@@ -532,7 +546,7 @@ A :index:`compile-time error` occurs if these functions are marked as
 
 .. code-block:: typescript
    :linenos:
-   
+
     interface ReadonlyIndexable<K, V> {
        $_get (index: K): V
     }
@@ -576,10 +590,12 @@ Iterable Types
 A class or an interface can be made *iterable*, meaning that their instances
 can be used in ``for-of`` statements (see :ref:`For-Of Statements`).
 
-A type is *iterable* if it declares a parameterless function with name
-``$_iterator`` and signature ``(): ITER``, where ``ITER`` is a class that
-implements ``Iterator`` interface defined in the standard library (see
-:ref:`Standard Library`), or interface that extends this interface.
+A type *C* is *iterable* if it declares a parameterless function with name
+``$_iterator`` with the return type which is compatible (see
+:ref:`Type Compatibility`) with type ``Iterator``, defined in the standard
+library (see :ref:`Standard Library`). That guarantees that an object returned
+is of the class type which implements ``Iterator`` and thus, allows traversing
+of an object of the class type *C*.
 
 The example below defines *iterable* class *C*:
 
@@ -588,7 +604,7 @@ The example below defines *iterable* class *C*:
 
       class C {
         data: string[] = ['a', 'b', 'c']
-        $_iterator() {
+        $_iterator() { // Function type is inferred from its body
           return new CIterator(this)
         }
       }
@@ -608,8 +624,8 @@ The example below defines *iterable* class *C*:
       }
 
       let c = new C()
-      for (let x of c) { 
-            console.log(x) 
+      for (let x of c) {
+            console.log(x)
       }
 
 In the example above, class *C* function ``$_iterator`` returns
@@ -639,7 +655,7 @@ A :index:`compile-time error` occurs if this function is marked as ``async``.
    :linenos:
 
       class C {
-        data: string[] = ['a', 'b', 'c']; 
+        data: string[] = ['a', 'b', 'c'];
         [Symbol.iterator]() {
           return new CIterator(this)
         }
@@ -674,7 +690,7 @@ defined or inherited:
     }
     C() // prints: invoked
     C.invoke() // also prints: invoked
-    
+
 In the above example, ``C()`` is a *type call expression*. It is the short
 form of the normal method call ``C.invoke()``. Using an explicit call is always
 valid for the methods ``invoke`` and ``instantiate``.
@@ -719,12 +735,12 @@ parameters, then the call must contain corresponding arguments.
    :linenos:
 
     class Add {
-        static invoke(a: number, b: number): number { 
+        static invoke(a: number, b: number): number {
             return a + b
         }
     }
     console.log(Add(2, 2)) // prints: 4
-    
+
 |
 
 .. _Callable Types with Instantiate Method:
@@ -750,12 +766,12 @@ parameter is passed implicitly:
    :linenos:
 
     class C {
-        static instantiate(factory: () => C): C { 
+        static instantiate(factory: () => C): C {
             return factory()
         }
     }
     let x = C() // factory is passed implicitly
-    
+
     // Explicit call of 'instantiate' requires explicit 'factory':
     let y = C.instantiate(() => { return new C()})
 
@@ -767,7 +783,7 @@ contain corresponding arguments:
 
     class C {
         name = ""
-        static instantiate(factory: () => C, name: string): C { 
+        static instantiate(factory: () => C, name: string): C {
             let x = factory()
             x.name = name
             return x
@@ -789,7 +805,7 @@ if:
    :linenos:
 
     class C {
-        static instantiate(factory: string): C { 
+        static instantiate(factory: string): C {
             return factory()
         }
     }
@@ -1032,7 +1048,8 @@ own.
 
 No specific relationship is required between the return types, or between the
 ``throws`` clauses of the two functions with the same name but different
-signatures that are not *overload-equivalent*.
+signatures that are not *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`).
 
 When calling an overloaded function, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
@@ -1065,11 +1082,13 @@ Class Method Overloading
     frontend_status: Done
 
 If two or more methods within a class have the same name, and their signatures
-are not *overload-equivalent*, then such methods are considered *overloaded*.
+are not *overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then
+such methods are considered *overloaded*.
 
 Method overloading declarations cause no :index:`compile-time error` on their
-own, except where a possible instantiation causes an *overload-equivalent*
-method in the instantiated class or interface:
+own, except where a possible instantiation causes an *overload-equivalent* (see
+:ref:`Overload-Equivalent Signatures`) method in the instantiated class or
+interface:
 
 .. code-block:: typescript
    :linenos:
@@ -1078,7 +1097,7 @@ method in the instantiated class or interface:
         foo (p: number) { ... }
         foo (p: T) { ... }
      }
-     let instantiation: Template<number> 
+     let instantiation: Template<number>
        // Leads to two *overload-equivalent* methods
 
      interface ITemplate<T> {
@@ -1091,9 +1110,9 @@ method in the instantiated class or interface:
 
 
 If the signatures of two or more methods with the same name are not
-*overload-equivalent*, then the return types of those methods, or the
-``throws`` or ``rethrows`` clauses of those methods can have any kind of
-relationship.
+*overload-equivalent* (see :ref:`Overload-Equivalent Signatures`), then the
+return types of those methods, or the ``throws`` or ``rethrows`` clauses of
+those methods can have any kind of relationship.
 
 When calling an overloaded method, the number of actual arguments (and any
 explicit type arguments) and compile-time argument types are used at compile
@@ -1147,7 +1166,7 @@ Declarations with the same name are distinguishable by signatures if such
 declarations are one of the following:
 
 -  Functions with the same name and signatures that are not
-   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and 
+   *overload-equivalent* (see :ref:`Overload-Equivalent Signatures` and
    :ref:`Function Overloading`).
 
 -  Methods with the same name and signatures that are not
@@ -1204,7 +1223,6 @@ Native Functions and Methods
 .. meta:
     frontend_status: Done
 
-|
 
 .. _Native Functions:
 
@@ -1275,8 +1293,8 @@ Final Classes
 .. meta:
     frontend_status: Done
 
-A class may be declared ``final`` to prevent its extension. A class declared
-``final`` cannot have subclasses, and no method of a ``final`` class can be
+A class can be declared ``final`` to prevent extension, i.e., a class declared
+``final`` cannot have subclasses. No method of a ``final`` class can be
 overridden.
 
 If a class type *F* expression is declared *final*, then only a class *F*
@@ -1425,7 +1443,7 @@ members are not accessible (see :ref:`Accessible`) within the bodies of their
           protected member_1 ...
           private member_2 ...
       }
-      function A.bar () { ... 
+      function A.bar () { ...
          this.foo() // Method foo() is accessible as it is public
          this.member_1 // Compile-time error as member_1 is not accessible
          this.member_2 // Compile-time error as member_2 is not accessible
@@ -1474,7 +1492,7 @@ declaring. This affects the kind of receiver to be used for the call:
          A.goo() // Other static extension function is called with class name receiver
          ...
       }
-      static function A.goo () { ... 
+      static function A.goo () { ...
          this.foo() // Compile-time error as instance members are not accessible
          this.bar() // Compile-time error as instance extension functions are not accessible
          ...
@@ -1511,8 +1529,8 @@ As illustrated by the examples below, an *extension function* can be:
 .. code-block:: typescript
    :linenos:
 
-      // file a.ets
-      import {bar} from "a.ets" // import name 'bar'
+      // file a.sts
+      import {bar} from "a.sts" // import name 'bar'
       class A {
           foo () { ...
              this.bar() // Non-static extension function is called with this.
@@ -1521,8 +1539,8 @@ As illustrated by the examples below, an *extension function* can be:
           }
       }
 
-      // file ext.ets
-      import {A} from "a.ets" // import name 'A'
+      // file ext.sts
+      import {A} from "a.sts" // import name 'A'
       function A.bar () { ...
          this.foo() // Method foo() is called
          ...
@@ -1535,7 +1553,7 @@ then calls to that name are routed to the method:
    :linenos:
 
       class A {
-          foo () { console.log ("Method A.foo is called") } 
+          foo () { console.log ("Method A.foo is called") }
       }
       function A.foo () { console.log ("Extension A.foo is called") }
       let a = new A()
@@ -1628,7 +1646,7 @@ The formal syntax of the *trailing lambda* is presented below:
 .. code-block:: abnf
 
     trailingLambdaCall:
-        ( objectReference '.' identifier typeArguments? 
+        ( objectReference '.' identifier typeArguments?
         | expression ('?.' | typeArguments)?
         )
         arguments block
@@ -1694,7 +1712,7 @@ argument (see :ref:`Optional Parameters`).
 
      bar(5) { console.log ("after call of 'bar' this block is executed") }
 
-     foo(() => { console.log ("function lambda argument is activated") }) 
+     foo(() => { console.log ("function lambda argument is activated") })
      { console.log ("after call of 'foo' this block is executed") }
      /* here, function foo receives lambda as an argument and a block after
       the call is just a block, not a trailing lambda. */
@@ -2029,7 +2047,7 @@ argument cannot throw an exception:
       }
 
       // calling rethrowing function:
-        foo(canThrow) // exception can be thrown 
+        foo(canThrow) // exception can be thrown
         foo(cannotThrow) // exception-free
 
 A call is exception-free if:
@@ -2167,8 +2185,7 @@ Create and Launch a Coroutine
 The following expression is used to create and launch a coroutine based on
 a function or method call, or on a lambda expression:
 
-.. code-block:: typescript
-   :linenos:
+.. code-block:: abnf
 
       launchExpression:
         'launch' functionCallExpression|methodCallExpression|lambdaExpression;
@@ -2245,8 +2262,8 @@ Awaiting a Coroutine
 .. meta:
     frontend_status: Done
 
-The expressions ``await`` and ``wait`` are used while a previously launched
-coroutine finishes and returns a value:
+The ``await`` expressions are used while a previously launched coroutine
+finishes and returns a value:
 
 .. code-block:: abnf
 
@@ -2258,7 +2275,6 @@ A :index:`compile-time error` occurs if the expression type is not ``Promise<T>`
 
 .. index::
    expression await
-   expression wait
    launch
    coroutine
    expression type
@@ -2288,10 +2304,10 @@ Return types of ``await`` expressions are represented in the example below:
 .. code-block:: typescript
    :linenos:
 
-       // if p has type Promise<Promise<string>>, 
+       // if p has type Promise<Promise<string>>,
        // await p returns string
        let x : string = await p;
-       
+
        // if p2 has type Promise<Promise<string> | number>,
        // await p2 returns string | number
        let y : string | number = await p2;
@@ -2315,12 +2331,13 @@ Return types of ``await`` expressions are represented in the example below:
 .. meta:
     frontend_status: Done
 
-The class ``Promise<T>`` represents the values returned by launch expressions.
-It belongs to the core packages of the standard library (see
-:ref:`Standard Library`), and thus it is imported by default and may be used
-without any qualification.
+The class ``Promise<T>`` represents the values returned by launch expressions
+(see :ref:`Create and Launch a Coroutine`) and dynamic import expressions (see
+:ref:`Dynamic Import Expression`). It belongs to the core packages of the
+standard library (see :ref:`Standard Library`), and can be used without
+any qualification.
 
-The following methods are used as follows:
+The methods are used as follows:
 
 -  ``then`` takes two arguments (the first argument is the callback used if the
    promise is fulfilled, and the second if it is rejected), and returns
@@ -2630,7 +2647,7 @@ The indexing access expression *D[index]*, where *D* is of type
    :linenos:
 
    function foo(d: DynamicObject) {
-      let x = d[0] 
+      let x = d[0]
    }
 
 The wrapper must raise an error if:
@@ -2665,7 +2682,7 @@ as the actual type of the returned value is not known at compile time.
    :linenos:
 
    function foo(d: DynamicObject) {
-      let x = new d() 
+      let x = new d()
    }
 
 The wrapper must raise an error if:
@@ -2689,7 +2706,7 @@ The wrapper must raise an error if:
 
 .. meta:
     frontend_status: None
-    
+
 The cast expression *D as T* (see :ref:`Cast Expressions`), where *D* is of
 type ``DynamicObject``, is handled as an attempt to cast the underlying object
 to a static type *T*.
@@ -2774,10 +2791,8 @@ A :index:`compile-time error` occurs if:
 -  Package headers of two package modules in the same package have
    different identifiers.
 
-A *package module* implicitly imports (see :ref:`Implicit Import`) all exported
-entities from the core packages of the standard library (see
-:ref:`Standard Library`). All entities from these packages are accessible (see
-:ref:`Accessible`) as simple names.
+Every *package module* can directly use all exported entities from the core
+packages of the standard library (see :ref:`Standard Library Usage`).
 
 A *package module* can directly access all top-level entities declared in all
 modules that constitute the package.
@@ -2890,9 +2905,10 @@ While importing functions, the following situations can occur:
    *overloading*. All such functions are accessible (see :ref:`Accessible`).
 
 -  A function (functions) of the current module and an imported function
-   (functions) have the same name and overload-equivalent signature. This
-   situation is a :index:`compile-time error` as declarations are duplicated.
-   Qualified import or alias in import can be used to access the imported entity.
+   (functions) have the same name and overload-equivalent signature (see
+   :ref:`Overload-Equivalent Signatures`). This situation is a
+   :index:`compile-time error` as declarations are duplicated. Qualified import
+   or alias in import can be used to access the imported entity.
 
 .. index::
    import
@@ -3008,5 +3024,3 @@ possibility:
 .. raw:: pdf
 
    PageBreak
-
-

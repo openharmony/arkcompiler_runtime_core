@@ -44,8 +44,8 @@ class Platform(PlatformBase):
     def required_tools(self) -> List[str]:
         return ['dummy']
 
-    @staticmethod
-    def langs() -> List[str]:
+    @property
+    def langs(self) -> List[str]:
         return []
 
     def run_unit(self, bu: BenchUnit) -> None:

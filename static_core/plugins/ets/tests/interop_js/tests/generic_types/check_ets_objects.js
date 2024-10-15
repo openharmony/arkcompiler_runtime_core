@@ -13,11 +13,7 @@
  * limitations under the License.
  */
 
-const {
-    check_generic_value,
-    EtsGenericValueHandle,
-} = require("generic_types.test.js");
+const { checkGenericValue, EtsGenericValueHandle } = require('generic_types.test.js');
 
-
-check_generic_value(new EtsGenericValueHandle(0));
-check_generic_value(new ets.Object());
+checkGenericValue(new EtsGenericValueHandle(0));
+checkGenericValue(new ets.Object());

@@ -22,20 +22,22 @@ const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSSlice = etsMod.getFunction('Array_TestJSSlice');
 
 // NOTE(kprokopenko): change to `x.length` when interop support properties
-const etsArrLen = x => x['<get>length'].call(x);
+const etsArrLen = (x) => x['<get>length'].call(x);
 
-{ // Test JS Array<FooClass>
-  TestJSSlice(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSSlice(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  let sliced = arr.slice(1, undefined);
-  ASSERT_EQ(sliced.at(0), 'foo');
-  ASSERT_EQ(etsArrLen(sliced), etsArrLen(arr) - 1);
-  const IDX_2 = 2;
-  let sliced1 = arr.slice(1, IDX_2);
-  ASSERT_EQ(sliced1.at(0), 'foo');
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	let sliced = arr.slice(1, undefined);
+	ASSERT_EQ(sliced.at(0), 'foo');
+	ASSERT_EQ(etsArrLen(sliced), etsArrLen(arr) - 1);
+	const IDX_2 = 2;
+	let sliced1 = arr.slice(1, IDX_2);
+	ASSERT_EQ(sliced1.at(0), 'foo');
 }
 
 GCJSRuntimeCleanup();

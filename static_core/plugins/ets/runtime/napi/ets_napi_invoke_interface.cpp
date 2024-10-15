@@ -153,29 +153,39 @@ static void EtsMobileLogPrint(int id, int level, const char *component, const ch
     logPrintCallback(id, etsLevel, component, fmt, msg);
 }
 
-static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, std::vector<std::string> &bootPandaFiles,
-                               std::vector<std::string> &aotFiles, std::vector<std::string> &arkFiles,
-                               base_options::Options &baseOptions, Span<const EtsVMOption> &options)
+struct ParsedOptions final {
+    // NOLINTBEGIN(misc-non-private-member-variables-in-classes)
+    std::vector<std::string> bootPandaFiles;
+    std::vector<std::string> aotFiles;
+    std::vector<std::string> arkFiles;
+    base_options::Options baseOptions;
+    // NOLINTEND(misc-non-private-member-variables-in-classes)
+
+    explicit ParsedOptions(const std::string &exePath) : baseOptions(exePath) {}
+};
+
+static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, ParsedOptions &parsedOptions,
+                               Span<const EtsVMOption> &options)
 {
     for (auto &o : options) {
         auto extraStr = reinterpret_cast<const char *>(o.extraInfo);
 
         switch (o.option) {
             case EtsOptionType::ETS_LOG_LEVEL:
-                baseOptions.SetLogLevel(extraStr);
+                parsedOptions.baseOptions.SetLogLevel(extraStr);
                 break;
             case EtsOptionType::ETS_MOBILE_LOG:
                 g_logPrintFunction = const_cast<void *>(o.extraInfo);
                 runtimeOptions.SetMobileLog(reinterpret_cast<void *>(EtsMobileLogPrint));
                 break;
             case EtsOptionType::ETS_BOOT_FILE:
-                bootPandaFiles.emplace_back(extraStr);
+                parsedOptions.bootPandaFiles.emplace_back(extraStr);
                 break;
             case EtsOptionType::ETS_AOT_FILE:
-                aotFiles.emplace_back(extraStr);
+                parsedOptions.aotFiles.emplace_back(extraStr);
                 break;
             case EtsOptionType::ETS_ARK_FILE:
-                arkFiles.emplace_back(extraStr);
+                parsedOptions.arkFiles.emplace_back(extraStr);
                 break;
             case EtsOptionType::ETS_JIT:
                 runtimeOptions.SetCompilerEnableJit(true);
@@ -209,21 +219,18 @@ static void ParseOptionsHelper(RuntimeOptions &runtimeOptions, std::vector<std::
 
 static bool ParseOptions(const EtsVMInitArgs *args, RuntimeOptions &runtimeOptions)
 {
-    std::vector<std::string> bootPandaFiles;
-    std::vector<std::string> aotFiles;
-    std::vector<std::string> arkFiles;
-    base_options::Options baseOptions("");
+    ParsedOptions parsedOptions("");
 
     runtimeOptions.SetLoadRuntimes({"ets"});
 
     Span<const EtsVMOption> options(args->options, args->nOptions);
-    ParseOptionsHelper(runtimeOptions, bootPandaFiles, aotFiles, arkFiles, baseOptions, options);
+    ParseOptionsHelper(runtimeOptions, parsedOptions, options);
 
-    Logger::Initialize(baseOptions);
+    Logger::Initialize(parsedOptions.baseOptions);
 
-    runtimeOptions.SetBootPandaFiles(bootPandaFiles);
-    runtimeOptions.SetAotFiles(aotFiles);
-    runtimeOptions.SetPandaFiles(arkFiles);
+    runtimeOptions.SetBootPandaFiles(parsedOptions.bootPandaFiles);
+    runtimeOptions.SetAotFiles(parsedOptions.aotFiles);
+    runtimeOptions.SetPandaFiles(parsedOptions.arkFiles);
 
     return true;
 }

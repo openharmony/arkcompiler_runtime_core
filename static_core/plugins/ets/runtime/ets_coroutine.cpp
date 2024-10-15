@@ -126,10 +126,7 @@ void EtsCoroutine::RequestCompletion(Value returnValue)
 
 EtsObject *EtsCoroutine::GetValueFromPromiseSync(EtsPromise *promise)
 {
-    if (promise->IsPending()) {
-        return intrinsics::EtsAwaitPromise(promise);
-    }
-    return promise->GetValue(this);
+    return intrinsics::EtsAwaitPromise(promise);
 }
 
 panda_file::Type EtsCoroutine::GetReturnType()

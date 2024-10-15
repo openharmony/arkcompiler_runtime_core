@@ -15,8 +15,12 @@
 
 #include "runtime/deoptimization.h"
 
+#include "include/cframe.h"
+#include "include/managed_thread.h"
+#include "include/stack_walker.h"
 #include "libpandabase/events/events.h"
 #include "libpandafile/file_items.h"
+#include "macros.h"
 #include "runtime/include/locks.h"
 #include "runtime/include/runtime.h"
 #include "runtime/include/panda_vm.h"
@@ -115,68 +119,9 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha)
     }
 }
 
-[[noreturn]] NO_ADDRESS_SANITIZE void Deoptimize(StackWalker *stack, const uint8_t *pc, bool hasException,
-                                                 Method *destroyMethod)
+void PrevFrameDeopt(FrameKind prevFrameKind, ManagedThread *thread, StackWalker *stack, const uint8_t *pc,
+                    Frame *lastIframe, Frame *iframe, CFrame &cframe)
 {
-    ASSERT(stack != nullptr);
-    auto *thread = ManagedThread::GetCurrent();
-    ASSERT(thread != nullptr);
-    ASSERT(stack->IsCFrame());
-    auto &cframe = stack->GetCFrame();
-    UnpoisonAsanStack(cframe.GetFrameOrigin());
-    auto method = stack->GetMethod();
-    if (pc == nullptr) {
-        ASSERT(method != nullptr);
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        pc = method->GetInstructions() + stack->GetBytecodePc();
-    }
-
-    LOG(INFO, INTEROP) << "Deoptimize frame: " << method->GetFullName() << ", pc=" << std::hex
-                       << pc - method->GetInstructions() << std::dec;
-
-    thread->GetVM()->ClearInteropHandleScopes(thread->GetCurrentFrame());
-
-    auto context = thread->GetVM()->GetLanguageContext();
-    // We must run InvalidateCompiledEntryPoint before we convert the frame, because GC is already may be in the
-    // collecting phase and it can move some object in the deoptimized frame.
-    if (destroyMethod != nullptr) {
-        LOG(DEBUG, INTEROP) << "Destroy compiled method: " << destroyMethod->GetFullName();
-        destroyMethod->SetDestroyed();
-        PandaSet<Method *> destroyMethods;
-        destroyMethods.insert(destroyMethod);
-        InvalidateCompiledEntryPoint(destroyMethods, false);
-    }
-
-    FrameKind prevFrameKind;
-    // We need to execute(find catch block) in all inlined methods. For this we calculate the number of inlined method
-    // Else we can execute previus interpreter frames and we will FreeFrames in incorrect order
-    uint32_t numInlinedMethods = 0;
-    Frame *iframe = stack->ConvertToIFrame(&prevFrameKind, &numInlinedMethods);
-    ASSERT(iframe != nullptr);
-
-    Frame *lastIframe = iframe;
-    while (numInlinedMethods-- != 0) {
-        EVENT_METHOD_EXIT(last_iframe->GetMethod()->GetFullName() + "(deopt)", events::MethodExitKind::INLINED,
-                          thread->RecordMethodExit());
-        lastIframe = lastIframe->GetPrevFrame();
-        ASSERT(!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(lastIframe));
-    }
-
-    EVENT_METHOD_EXIT(last_iframe->GetMethod()->GetFullName() + "(deopt)", events::MethodExitKind::COMPILED,
-                      thread->RecordMethodExit());
-
-    if (thread->HasPendingException()) {
-        LOG(DEBUG, INTEROP) << "Deoptimization has pending exception: "
-                            << thread->GetException()->ClassAddr<Class>()->GetName();
-        context.SetExceptionToVReg(iframe->GetAcc(), thread->GetException());
-    }
-
-    if (!hasException) {
-        thread->ClearException();
-    } else {
-        ASSERT(thread->HasPendingException());
-    }
-
     switch (prevFrameKind) {
         case FrameKind::COMPILER:
             LOG(DEBUG, INTEROP) << "Deoptimize after cframe";
@@ -209,6 +154,76 @@ void InvalidateCompiledEntryPoint(const PandaSet<Method *> &methods, bool isCha)
             DeoptimizeAfterIFrame(thread, pc, iframe, cframe.GetFrameOrigin(), lastIframe,
                                   stack->GetCalleeRegsForDeoptimize().end());
     }
+}
+
+NO_ADDRESS_SANITIZE void DestroyMethodWithInvalidatingEP(Method *destroyMethod)
+{
+    LOG(DEBUG, INTEROP) << "Destroy compiled method: " << destroyMethod->GetFullName();
+    destroyMethod->SetDestroyed();
+    PandaSet<Method *> destroyMethods;
+    destroyMethods.insert(destroyMethod);
+    InvalidateCompiledEntryPoint(destroyMethods, false);
+}
+
+[[noreturn]] NO_ADDRESS_SANITIZE void Deoptimize(StackWalker *stack, const uint8_t *pc, bool hasException,
+                                                 Method *destroyMethod)
+{
+    ASSERT(stack != nullptr);
+    auto *thread = ManagedThread::GetCurrent();
+    ASSERT(thread != nullptr);
+    ASSERT(stack->IsCFrame());
+    auto &cframe = stack->GetCFrame();
+    UnpoisonAsanStack(cframe.GetFrameOrigin());
+    auto method = stack->GetMethod();
+    if (pc == nullptr) {
+        ASSERT(method != nullptr);
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        pc = method->GetInstructions() + stack->GetBytecodePc();
+    }
+
+    LOG(INFO, INTEROP) << "Deoptimize frame: " << method->GetFullName() << ", pc=" << std::hex
+                       << pc - method->GetInstructions() << std::dec;
+
+    thread->GetVM()->ClearInteropHandleScopes(thread->GetCurrentFrame());
+
+    auto context = thread->GetVM()->GetLanguageContext();
+    // We must run InvalidateCompiledEntryPoint before we convert the frame, because GC is already may be in the
+    // collecting phase and it can move some object in the deoptimized frame.
+    if (destroyMethod != nullptr) {
+        DestroyMethodWithInvalidatingEP(destroyMethod);
+    }
+
+    FrameKind prevFrameKind;
+    // We need to execute(find catch block) in all inlined methods. For this we calculate the number of inlined method
+    // Else we can execute previus interpreter frames and we will FreeFrames in incorrect order
+    uint32_t numInlinedMethods = 0;
+    Frame *iframe = stack->ConvertToIFrame(&prevFrameKind, &numInlinedMethods);
+    ASSERT(iframe != nullptr);
+
+    Frame *lastIframe = iframe;
+    while (numInlinedMethods-- != 0) {
+        EVENT_METHOD_EXIT(last_iframe->GetMethod()->GetFullName() + "(deopt)", events::MethodExitKind::INLINED,
+                          thread->RecordMethodExit());
+        lastIframe = lastIframe->GetPrevFrame();
+        ASSERT(!StackWalker::IsBoundaryFrame<FrameKind::INTERPRETER>(lastIframe));
+    }
+
+    EVENT_METHOD_EXIT(last_iframe->GetMethod()->GetFullName() + "(deopt)", events::MethodExitKind::COMPILED,
+                      thread->RecordMethodExit());
+
+    if (thread->HasPendingException()) {
+        LOG(DEBUG, INTEROP) << "Deoptimization has pending exception: "
+                            << thread->GetException()->ClassAddr<Class>()->GetName();
+        context.SetExceptionToVReg(iframe->GetAcc(), thread->GetException());
+    }
+
+    if (!hasException) {
+        thread->ClearException();
+    } else {
+        ASSERT(thread->HasPendingException());
+    }
+
+    PrevFrameDeopt(prevFrameKind, thread, stack, pc, lastIframe, iframe, cframe);
     UNREACHABLE();
 }
 

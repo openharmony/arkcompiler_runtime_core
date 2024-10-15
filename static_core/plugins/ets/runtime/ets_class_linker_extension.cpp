@@ -549,12 +549,17 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     arraybufClass_ = CacheClass(ARRAY_BUFFER);
     stringBuilderClass_ = CacheClass(STRING_BUILDER);
     arrayAsListIntClass_ = CacheClass(ARRAY_AS_LIST_INT);
+    arrayClass_ = CacheClass(ARRAY);
     typeapiFieldClass_ = CacheClass(FIELD);
     typeapiMethodClass_ = CacheClass(METHOD);
     typeapiParameterClass_ = CacheClass(PARAMETER);
     ifuncClass_ = CacheClass(IFUNCTION);
     sharedMemoryClass_ = CacheClass(SHARED_MEMORY);
     jsvalueClass_ = CacheClass(JS_VALUE);
+    finalizableWeakClass_ = CacheClass(FINALIZABLE_WEAK_REF, [](auto *c) {
+        c->SetFinalizeReference();
+        c->SetWeakReference();
+    });
     CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
 
     auto coro = EtsCoroutine::GetCurrent();

@@ -69,7 +69,6 @@ catch_block2_begin:
     auto graph = GetGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     graph->RunPass<TryCatchResolving>();
-    graph->RunPass<Cleanup>();
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
     GRAPH(expectedGraph)
@@ -141,7 +140,6 @@ TEST_F(TryCatchResolvingTest, RemoveAllCatchHandlers)
     auto graph = GetGraph();
     ASSERT_TRUE(ParseToGraph<true>(source, "main", graph));
     graph->RunPass<TryCatchResolving>();
-    graph->RunPass<Cleanup>();
 
     auto expectedGraph = CreateGraphWithDefaultRuntime();
     src_graph::RemoveAllCatchHandlers::CREATE(expectedGraph);
@@ -208,7 +206,6 @@ TEST_F(TryCatchResolvingTest, EmptyTryCatches)
     INS(1U).CastToTry()->SetTryEndBlock(&BB(3U));
     BB(9U).SetCatchBegin(true);
     BB(9U).SetCatch(true);
-    BB(6U).SetCatchEnd(true);
     BB(6U).SetCatch(true);
     GraphChecker(graph).Check();
 

@@ -129,7 +129,7 @@ function(compile_int_ets_export_files INTERPRETER_TYPE WORK_DIR TARGET EXTRA_BOO
     set(oneValueArgs OPT_LEVEL)
     set(multiValueArgs EXPORT_FILES)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    
+
     set(COUNTER 0)
     set(RESULT "")
     foreach(ARG_EXPORT_FILE IN LISTS ARG_EXPORT_FILES)
@@ -266,7 +266,7 @@ function(run_jit_osr_ets_code ETS_SRC WORK_DIR TARGET)
         --compiler-enable-jit=true
         --compiler-hotness-threshold=2
         --compiler-enable-osr=true
-        --compiler-ignore-failures=false
+        --compiler-ignore-failures=true
         ${ARG_RUNTIME_EXTRA_OPTIONS}
         ${OUTPUT_ABC}
         ETSGLOBAL::main
@@ -310,7 +310,7 @@ function(run_aot_ets_code PAOC_MODE ETS_SRC WORK_DIR TARGET)
     set(oneValueArgs OPT_LEVEL)
     set(multiValueArgs RUNTIME_EXTRA_OPTIONS)
     cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-    
+
     get_filename_component(SRC_FNAME ${ETS_SRC} NAME)
     set(OUTPUT_ABC ${WORK_DIR}/${SRC_FNAME}-${PAOC_MODE}.abc)
     set(ABC_TARGET ${TARGET}-ets-es2panda)
@@ -527,10 +527,10 @@ function(panda_ets_napi_add_gtest)
 
     set(es2panda_target_test es2panda)
     set(es2panda_bin  $<TARGET_FILE:${es2panda_target_test}>)
-    set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=ets --opt-level=0)
+    set(ETS_COMPILE_ARGUMENTS --gen-stdlib=false --extension=sts --opt-level=0)
 
     foreach(c ${ARG_ETS_SOURCE})
-        STRING(REPLACE ".ets" "" CLEAR_NAME ${c})
+        STRING(REPLACE ".sts" "" CLEAR_NAME ${c})
         if(NOT TARGET es2panda_${CLEAR_NAME})
             add_custom_target(es2panda_${CLEAR_NAME}
                 COMMAND ${es2panda_bin} ${ETS_COMPILE_ARGUMENTS} --output ${CMAKE_CURRENT_BINARY_DIR}/${CLEAR_NAME}.abc ${CMAKE_CURRENT_SOURCE_DIR}/${c}

@@ -13,21 +13,20 @@
  * limitations under the License.
  */
 
-#include "heap_manager.h"
-#include "mem/pool_manager.h"
-#include "mem/mmap_mem_pool-inl.h"
-#include "mem/internal_allocator-inl.h"
-#include "include/runtime.h"
-#include "include/locks.h"
+#include "runtime/mem/heap_manager.h"
+#include "runtime/mem/lock_config_helper.h"
+#include "runtime/mem/internal_allocator-inl.h"
 
 #include <string>
 
 #include "libpandabase/mem/mmap_mem_pool-inl.h"
 #include "libpandabase/mem/pool_manager.h"
+#include "runtime/handle_base-inl.h"
+#include "runtime/include/locks.h"
 #include "runtime/include/runtime_notification.h"
 #include "runtime/include/thread_scopes.h"
-#include "runtime/handle_base-inl.h"
 #include "runtime/include/panda_vm.h"
+#include "runtime/include/runtime.h"
 #include "runtime/mem/gc/epsilon/epsilon.h"
 #include "runtime/mem/gc/epsilon-g1/epsilon-g1.h"
 #include "runtime/mem/gc/gen-gc/gen-gc.h"
@@ -36,7 +35,7 @@
 
 namespace ark::mem {
 
-bool HeapManager::Initialize(GCType gcType, bool singleThreaded, bool useTlab, MemStatsType *memStats,
+bool HeapManager::Initialize(GCType gcType, MTModeT multithreadingMode, bool useTlab, MemStatsType *memStats,
                              InternalAllocatorPtr internalAllocator, bool createPygoteSpace)
 {
     trace::ScopedTrace scopedTrace("HeapManager::Initialize");
@@ -45,23 +44,23 @@ bool HeapManager::Initialize(GCType gcType, bool singleThreaded, bool useTlab, M
     internalAllocator_ = internalAllocator;
     switch (gcType) {
         case GCType::EPSILON_GC: {
-            ret = Initialize<GCType::EPSILON_GC>(memStats, singleThreaded, createPygoteSpace);
+            ret = Initialize<GCType::EPSILON_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         case GCType::EPSILON_G1_GC: {
-            ret = Initialize<GCType::EPSILON_G1_GC>(memStats, singleThreaded, createPygoteSpace);
+            ret = Initialize<GCType::EPSILON_G1_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         case GCType::STW_GC: {
-            ret = Initialize<GCType::STW_GC>(memStats, singleThreaded, createPygoteSpace);
+            ret = Initialize<GCType::STW_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         case GCType::GEN_GC: {
-            ret = Initialize<GCType::GEN_GC>(memStats, singleThreaded, createPygoteSpace);
+            ret = Initialize<GCType::GEN_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         case GCType::G1_GC: {
-            ret = Initialize<GCType::G1_GC>(memStats, singleThreaded, createPygoteSpace);
+            ret = Initialize<GCType::G1_GC>(memStats, multithreadingMode, createPygoteSpace);
             break;
         }
         default:

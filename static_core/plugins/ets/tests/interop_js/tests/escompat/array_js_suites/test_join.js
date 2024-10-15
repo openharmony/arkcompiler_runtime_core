@@ -21,15 +21,17 @@ const FooClass = etsMod.getClass('FooClass');
 const CreateEtsSample = etsMod.getFunction('Array_CreateEtsSample');
 const TestJSJoin = etsMod.getFunction('Array_TestJSJoin');
 
-{ // Test JS Array<FooClass>
-  TestJSJoin(new Array(new FooClass('zero'), new FooClass('one')));
+{
+	// Test JS Array<FooClass>
+	TestJSJoin(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{ // Test ETS Array<Object>
-  let arr = CreateEtsSample();
-  ASSERT_EQ(arr.join(''), '123,foo');
-  ASSERT_EQ(arr.join('='), '123=foo');
-  ASSERT_EQ(arr.toString(), '123,foo');
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	ASSERT_EQ(arr.join(''), '123,foo');
+	ASSERT_EQ(arr.join('='), '123=foo');
+	ASSERT_EQ(arr.toString(), '123,foo');
 }
 
 GCJSRuntimeCleanup();

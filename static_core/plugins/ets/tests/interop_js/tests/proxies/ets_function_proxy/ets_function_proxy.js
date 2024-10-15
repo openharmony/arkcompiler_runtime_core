@@ -13,30 +13,30 @@
  * limitations under the License.
  */
 
-const {
-    getTestFunction
-} = require("ets_function_proxy.test.js")
+const { getTestFunction } = require('ets_function_proxy.test.js');
 
-{   // test simple function-proxy capabilities
-    const sum_double = getTestFunction("sum_double");
+{
+	// test simple function-proxy capabilities
+	const sumDouble = getTestFunction('sum_double');
 
-    ASSERT_TRUE(Object.isSealed(sum_double));
-    ASSERT_EQ(sum_double(3, 4), 3 + 4);
+	ASSERT_TRUE(Object.isSealed(sumDouble));
+	ASSERT_EQ(sumDouble(3, 4), 3 + 4);
 
-    ASSERT_THROWS(TypeError, () => (sum_double(1)));
-    ASSERT_THROWS(TypeError, () => (sum_double(1, 2, 3, 4)));
-    ASSERT_THROWS(TypeError, () => (sum_double(1, true)));
+	ASSERT_THROWS(TypeError, () => sumDouble(1));
+	ASSERT_THROWS(TypeError, () => sumDouble(1, 2, 3, 4));
+	ASSERT_THROWS(TypeError, () => sumDouble(1, true));
 }
 
-{   // test object-proxy
-    const point_create = getTestFunction("point_create");
-    const point_get_x = getTestFunction("point_get_x");
-    const point_get_y = getTestFunction("point_get_y");
+{
+	// test object-proxy
+	const pointCreate = getTestFunction('point_create');
+	const pointGetX = getTestFunction('point_get_x');
+	const pointGetY = getTestFunction('point_get_y');
 
-    let p = point_create(2, 6);
-    let x = point_get_x(p);
-    let y = point_get_y(p);
+	let p = pointCreate(2, 6);
+	let x = pointGetX(p);
+	let y = pointGetY(p);
 
-    ASSERT_EQ(x, 2);
-    ASSERT_EQ(y, 6);
+	ASSERT_EQ(x, 2);
+	ASSERT_EQ(y, 6);
 }

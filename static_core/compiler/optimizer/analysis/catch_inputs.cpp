@@ -22,7 +22,7 @@ namespace ark::compiler {
 namespace {
 bool IsCatch(BasicBlock *bb)
 {
-    return bb->IsCatch() || bb->IsCatchBegin() || bb->IsCatchEnd();
+    return bb->IsCatch() || bb->IsCatchBegin();
 }
 
 void ProcessInst(Inst *inst, Marker visited)

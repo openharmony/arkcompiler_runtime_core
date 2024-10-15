@@ -17,12 +17,12 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const ClassWithMethodEts = etsMod.getClass('ClassWithMethodEts');
-const async_function_user_class = etsMod.getFunction('async_function_user_class');
+const asyncFunctionUserClass = etsMod.getFunction('asyncFunctionUserClass');
 
 async function test() {
-  let obj = new ClassWithMethodEts();
-  let ret = await async_function_user_class(obj);
-  ASSERT_EQ(ret, obj);
+	let obj = new ClassWithMethodEts();
+	let ret = await asyncFunctionUserClass(obj);
+	ASSERT_EQ(ret, obj);
 }
 
 test();

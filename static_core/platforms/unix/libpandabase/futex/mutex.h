@@ -165,6 +165,7 @@ public:
         }
     }
 
+    void FutexWait(int32_t curState) ACQUIRE();
     PANDA_PUBLIC_API void WriteLock() ACQUIRE();
 
     PANDA_PUBLIC_API bool TryReadLock() TRY_ACQUIRE_SHARED(true);

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ ROOT_DIR=${STATIC_ROOT_DIR:-"${SCRIPT_DIR}/../.."}
 
 
 function save_exit_code() {
-    EXIT_CODE=$(($1 + $2))
+    return $(($1 + $2))
 }
 
 source "${ROOT_DIR}/scripts/python/venv-utils.sh"
@@ -34,12 +34,15 @@ cd "${RUNNER_DIR}"
 
 pylint --rcfile .pylintrc runner main.py runner_test.py
 save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 mypy main.py
 save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 mypy -p runner
 save_exit_code ${EXIT_CODE} $?
+EXIT_CODE=$?
 
 set -e
 

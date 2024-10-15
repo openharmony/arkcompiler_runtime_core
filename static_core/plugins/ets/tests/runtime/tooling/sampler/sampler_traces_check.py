@@ -27,8 +27,6 @@ trace_list = ["LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBA
               "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy2;",
               "LETSGLOBAL::execute_test; LETSGLOBAL::CallSlowFunction; LETSGLOBAL::SlowETSFunctionCopy3;"]
 
-trace_list_ignored = []
-
 ALL_TRACES_FOUND = True
 
 with open(file_name, 'r') as my_file:

@@ -66,7 +66,10 @@ extern "C" int StopDebugger()
         return 1;
     }
 
+    if (!g_server.Stop()) {
+        return 1;
+    }
     g_inspector.reset();
     g_debugSession.reset();
-    return static_cast<int>(!g_server.Stop());
+    return 0;
 }

@@ -52,7 +52,7 @@ const auto &WhitelistMethodParser()
 
     static const auto METHOD_NAME = P1::OfCharset(!Charset {" \t,"}) |= METHOD_NAME_HANDLER;  // NOLINT
 
-    static const auto WHITELIST_METHOD = ~WS >> METHOD_NAME >> ~WS >> P::End() | ~WS >> P::End();
+    static const auto WHITELIST_METHOD = (~WS >> METHOD_NAME >> ~WS >> P::End()) | (~WS >> P::End());
 
     return WHITELIST_METHOD;
 }

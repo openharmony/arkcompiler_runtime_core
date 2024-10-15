@@ -63,6 +63,11 @@ static llvm::cl::opt<bool> g_checkDerived("gcic-no-derived", llvm::cl::Hidden, l
 static llvm::cl::opt<bool> g_checkUnreachableRelocates("gcic-no-unreachable-relocate", llvm::cl::Hidden,
                                                        llvm::cl::init(false));
 
+/// Non-movable object is not relocated
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+static llvm::cl::opt<bool> g_checkNonMovableRelocates("gcic-movable-relocates-only", llvm::cl::Hidden,
+                                                      llvm::cl::init(true));
+
 namespace ark::llvmbackend::passes {
 
 void GcIntrusionCheck::CheckStatepoint(const Function &function, const GCStatepointInst &statepoint)
@@ -105,6 +110,19 @@ void GcIntrusionCheck::CheckRelocate(const Function &function, const GCRelocateI
         llvm::errs() << "relocate instruction " << relocate << " is followed by unreachable instruction\n";
         llvm::report_fatal_error("Post GC Intrusion check failed for relocate");
     }
+    if (g_checkNonMovableRelocates) {
+        if (baseCst != nullptr && gc_utils::IsNonMovable(baseCst)) {
+            llvm::errs() << "Post GC Intrusion check failed in function " << function.getName() << "\n";
+            llvm::errs() << "relocate instruction " << relocate << " relocates non-movable value " << *baseCst << "\n";
+            llvm::report_fatal_error("Post GC Intrusion check failed for relocate");
+        }
+        if (derivedCst != nullptr && gc_utils::IsNonMovable(derivedCst)) {
+            llvm::errs() << "Post GC Intrusion check failed in function " << function.getName() << "\n";
+            llvm::errs() << "relocate instruction " << relocate << " relocates non-movable value " << *derivedCst
+                         << "\n";
+            llvm::report_fatal_error("Post GC Intrusion check failed for relocate");
+        }
+    }
 }
 
 void GcIntrusionCheck::CheckInstruction(const Function &function, const Instruction &inst)
@@ -117,7 +135,7 @@ void GcIntrusionCheck::CheckInstruction(const Function &function, const Instruct
         }
 
         // Track only GC refs
-        if (!HasBeenGcRef(val, g_checkAnyEscaped) && !IsHiddenGcRef(val)) {
+        if ((!HasBeenGcRef(val, g_checkAnyEscaped) && !IsHiddenGcRef(val)) || gc_utils::IsNonMovable(val)) {
             continue;
         }
 

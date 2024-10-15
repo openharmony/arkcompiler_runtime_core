@@ -194,14 +194,14 @@ ETS_MEASURE_OVERRIDES = '''
     }
     '''
 
-ets_mod = get_plugin('langs', 'ets')
+sts_mod = get_plugin('langs', 'sts')
 
 
-def test_valid_ets():
-    ets = ets_mod.Lang()
+def test_valid_sts():
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_VALID, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(ETS_VALID, sts).parse()
     test.assertTrue(parser.state is not None)
     test.assertTrue('ArraySort' == parser.state.name)
     test.assertTrue(2 == len(parser.state.params))
@@ -209,25 +209,25 @@ def test_valid_ets():
 
 
 def test_duplicate_doclets():
-    ets = ets_mod.Lang()
-    TestCase().assertTrue(ets is not None)
+    sts = sts_mod.Lang()
+    TestCase().assertTrue(sts is not None)
     with pytest.raises(ValueError):
-        DocletParser.create(ETS_DUP, ets).parse()
+        DocletParser.create(ETS_DUP, sts).parse()
 
 
 def test_no_state():
-    ets = ets_mod.Lang()
-    TestCase().assertTrue(ets is not None)
+    sts = sts_mod.Lang()
+    TestCase().assertTrue(sts is not None)
     for src in (ETS_NOSTATE_BENCH, ETS_NOSTATE_SETUP, ETS_NOSTATE_PARAM):
         with pytest.raises(ValueError):
-            DocletParser.create(src, ets).parse()
+            DocletParser.create(src, sts).parse()
 
 
 def test_bench_list():
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_BENCH_LIST, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(ETS_BENCH_LIST, sts).parse()
     test.assertTrue(parser.state is not None)
     test.assertTrue('X' == parser.state.name)
     b = parser.state.benches
@@ -244,10 +244,10 @@ def test_bench_list():
 
 
 def test_bugs():
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_VALID, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(ETS_VALID, sts).parse()
     test.assertTrue(parser.state is not None)
     test.assertTrue('ArraySort' == parser.state.name)
     b = parser.state.benches
@@ -259,10 +259,10 @@ def test_bugs():
 
 
 def test_state_tags():
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_STATE_TAGS, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(ETS_STATE_TAGS, sts).parse()
     test.assertTrue(parser.state is not None)
     tags = parser.state.tags
     test.assertTrue(2 == len(tags))
@@ -282,10 +282,10 @@ def test_tags_before_state():
      */
     class MathFunctions {
     '''
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(src, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(src, sts).parse()
     test.assertTrue(parser.state is not None)
     tags = parser.state.tags
     test.assertTrue(3 == len(tags))
@@ -294,27 +294,27 @@ def test_tags_before_state():
 
 
 def test_state_comment():
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_STATE_COMMENT, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(ETS_STATE_COMMENT, sts).parse()
     test.assertTrue(parser.state is not None)
     test.assertTrue('XXX' in parser.state.name)
 
 
 def test_param_init():
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_PARAM_INIT, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(ETS_PARAM_INIT, sts).parse()
     test.assertTrue(parser.state is not None)
 
 
 def test_measure_overrides():
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(ETS_MEASURE_OVERRIDES, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(ETS_MEASURE_OVERRIDES, sts).parse()
     test.assertTrue(parser.state is not None)
     test.assertTrue('X' == parser.state.name)
     b = parser.state.benches
@@ -340,7 +340,7 @@ def test_measure_overrides():
     # Should be default
     test.assertTrue(args['sys_gc_pause'] is None)
     # Test cmdline overrides
-    with patch.object(sys, 'argv', 'vmb gen --lang ets -fi 123 blah'.split()):
+    with patch.object(sys, 'argv', 'vmb gen --lang sts -fi 123 blah'.split()):
         args = Args()
         tpl_vars = list(TemplateVars.params_from_parsed('', parser.state, args))
         test.assertTrue(2 == len(tpl_vars))
@@ -391,10 +391,10 @@ def test_tags():
     public two(): bool {
     }
     '''
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(src, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(src, sts).parse()
     test.assertTrue(parser.state is not None)
     test.assertTrue('X' == parser.state.name)
     test.assertTrue(set(parser.state.tags) == {'Cool', 'Fast'})
@@ -403,7 +403,7 @@ def test_tags():
     test.assertTrue(set(b[0].tags) == {'Fast', 'One'})
     test.assertTrue(set(b[1].tags) == set())
     # w/o --tags
-    with patch.object(sys, 'argv', 'vmb gen --lang ets blah'.split()):
+    with patch.object(sys, 'argv', 'vmb gen --lang sts blah'.split()):
         args = Args()
         tpl_vars = list(TemplateVars.params_from_parsed(
             '', parser.state, args))
@@ -413,7 +413,7 @@ def test_tags():
         test.assertTrue(tpl_vars[1].tags == {'Cool', 'Fast'})
     # with --tags filter
     with patch.object(sys, 'argv',
-                      'vmb gen --lang ets --tags=One blah'.split()):
+                      'vmb gen --lang sts --tags=One blah'.split()):
         args = Args()
         tpl_vars = list(TemplateVars.params_from_parsed(
             '', parser.state, args))
@@ -423,7 +423,7 @@ def test_tags():
     # filter all
     with patch.object(
             sys,
-            'argv', 'vmb gen --lang ets --tags=Unexistent blah'.split()):
+            'argv', 'vmb gen --lang sts --tags=Unexistent blah'.split()):
         args = Args()
         tpl_vars = list(TemplateVars.params_from_parsed(
             '', parser.state, args))
@@ -450,12 +450,60 @@ def test_import():
      public x(): int {
      }
     '''
-    ets = ets_mod.Lang()
+    sts = sts_mod.Lang()
     test = TestCase()
-    test.assertTrue(ets is not None)
-    parser = DocletParser.create(src, ets).parse()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(src, sts).parse()
     test.assertTrue(parser.state is not None)
     imports = parser.state.imports
     test.assertTrue(4 == len(imports))
     for i in ('hello from world', 'x from y', 'a from b', 'm from n'):
         test.assertTrue(i in imports)
+
+
+def test_generic_type():
+    src = '''
+    /**
+     * @State
+     */
+    class X {
+      /**
+       * @Benchmark
+       */
+      public testme(): Set<int> {
+      }
+    }
+    '''
+    test = TestCase()
+    sts = sts_mod.Lang()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(src, sts).parse()
+    test.assertTrue(parser.state is not None)
+    test.assertTrue('X' == parser.state.name)
+    b = parser.state.benches
+    test.assertTrue(1 == len(b))
+    test.assertTrue(b[0].name == 'testme')
+    test.assertTrue(b[0].return_type == 'Set<int>')
+
+
+def test_generator():
+    src = '''
+    /**
+     * @State
+     * @Generator gen_classes.py
+     * @Rank 10
+     */
+    export class X {
+        /**
+         * @Teardown
+         */
+         teardown() {
+         }
+    }'''
+    test = TestCase()
+    sts = sts_mod.Lang()
+    test.assertTrue(sts is not None)
+    parser = DocletParser.create(src, sts).parse()
+    test.assertTrue(parser.state is not None)
+    test.assertTrue('X' == parser.state.name)
+    test.assertTrue(parser.state.generator == 'gen_classes.py')

@@ -20,18 +20,20 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const CreateEtsSample = etsMod.getFunction('ArrayBuffer_CreateEtsSample');
 const TestJSSlice = etsMod.getFunction('ArrayBuffer_TestJSSlice');
 
-{ // Test JS ArrayBuffer
-  const LENGTH = 32;
-  TestJSSlice(new ArrayBuffer(LENGTH));
+{
+	// Test JS ArrayBuffer
+	const LENGTH = 32;
+	TestJSSlice(new ArrayBuffer(LENGTH));
 }
 
-{ // Test ETS ArrayBuffer
-  let arr = CreateEtsSample();
-  const BEGIN = 8;
-  const END = 24;
-  let sliced = arr.slice(BEGIN, END);
-  const EXPECTED_BYTE_LENGTH = 16;
-  ASSERT_EQ(sliced.byteLength, EXPECTED_BYTE_LENGTH);
+{
+	// Test ETS ArrayBuffer
+	let arr = CreateEtsSample();
+	const BEGIN = 8;
+	const END = 24;
+	let sliced = arr.slice(BEGIN, END);
+	const EXPECTED_BYTE_LENGTH = 16;
+	ASSERT_EQ(sliced.byteLength, EXPECTED_BYTE_LENGTH);
 }
 
 GCJSRuntimeCleanup();

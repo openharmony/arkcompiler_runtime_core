@@ -1,4 +1,4 @@
-#!/bin/env ruby
+#!/usr/bin/env ruby
 
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -50,7 +50,7 @@ end
 $optparse = OptionParser.new do |opts|
     opts.banner = 'Usage: test-generator [options] --out=DIR --tmp=DIR confs...'
     opts.on '--run-ets=PANDA', 'used to instantly run es2panda&ark on generated file, PANDA is a path to panda build directory'
-    opts.on '--out=DIR', String, 'path to .ets files output directory'
+    opts.on '--out=DIR', String, 'path to .sts files output directory'
     opts.on '--tmp=DIR', String, 'path to temporary directory (where to output .ts and .json files)'
     opts.on '--chunk-size=NUM', Integer, 'amout of tests in a single file'
     opts.on '--proc=PROC', Integer, 'number of ruby threads to use, defaults to max available' do |v|
@@ -87,7 +87,7 @@ eval("require '#{__dir__}/src/script_module'", $user_binding)
 ScriptClass = Class.new.extend(eval('ScriptModule', $user_binding))
 
 $template_ts = ERB.new File.read("#{__dir__}/templates/template.ts.erb"), nil, '%'
-$template_ets = ERB.new File.read("#{__dir__}/templates/template.ets.erb"), nil, '%'
+$template_ets = ERB.new File.read("#{__dir__}/templates/template.sts.erb"), nil, '%'
 
 def deep_copy(a)
     Marshal.load(Marshal.dump(a))
@@ -338,14 +338,14 @@ class Generator
             # ets part
             expected = JSON.load(stdout_str)
             buf = $template_ets.result(binding)
-            ets_path = File.join $options[:out], "#{k}#{chunk_id}.ets"
+            ets_path = File.join $options[:out], "#{k}#{chunk_id}.sts"
             File.write ets_path, buf
 
             # verify ets
             if $options[:"run-ets"]
                 panda_build = $options[:"run-ets"]
                 abc_path = File.join $options[:tmp], "#{k}#{chunk_id}.abc"
-                get_command_output("#{panda_build}/bin/es2panda", "--extension=ets", "--opt-level=2", "--output", abc_path, ets_path)
+                get_command_output("#{panda_build}/bin/es2panda", "--extension=sts", "--opt-level=2", "--output", abc_path, ets_path)
                 res = get_command_output("#{panda_build}/bin/ark", "--no-async-jit=true", "--gc-trigger-type=debug", "--boot-panda-files", "#{panda_build}/plugins/ets/etsstdlib.abc", "--load-runtimes=ets", abc_path, "ETSGLOBAL::main")
                 res.strip!
                 puts "✔ executed ets #{k} #{chunk_id}"
@@ -390,7 +390,7 @@ class Generator
         res.map! { |r|
             p = OpenStruct.new
             r.map! { |e| e.kind_of?(String) ? e.strip : e }
-            p.ts = p.ets = r
+            p.ts = p.sts = p.ets = r
             p
         }
         return res

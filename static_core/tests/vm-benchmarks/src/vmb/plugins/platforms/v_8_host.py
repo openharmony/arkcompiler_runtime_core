@@ -19,7 +19,6 @@ import logging
 from vmb.plugins.platforms.v_8_device import Platform as V_8_device
 from vmb.unit import BenchUnit
 from vmb.target import Target
-from vmb.cli import OptFlags
 
 log = logging.getLogger('vmb')
 
@@ -37,6 +36,6 @@ class Platform(V_8_device):
     def run_unit(self, bu: BenchUnit) -> None:
         if self.tsc:
             self.tsc(bu)
-        if OptFlags.DRY_RUN in self.flags:
+        if self.dry_run_stop(bu):
             return
         self.v_8(bu)

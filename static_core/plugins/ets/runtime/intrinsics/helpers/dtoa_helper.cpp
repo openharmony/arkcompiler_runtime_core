@@ -27,6 +27,19 @@ static constexpr uint64_t ConstructLong(uint32_t high32, uint32_t low32)
 #define UINT64_C2 ConstructLong
 #endif
 
+DtoaHelper::DiyFp DtoaHelper::GetCachedPower(int e)
+{
+    // dk must be positive, so can do ceiling in positive
+    double dk = (Q - e) * D_1_LOG2_10 + CACHED_POWERS_OFFSET - 1;
+    int k = static_cast<int>(dk);
+    if (dk - k > 0.0) {
+        k++;
+    }
+    auto index = (static_cast<uint32_t>(k) >> 3U) + 1;             // 3: parameter
+    k_ = -(MIN_DECIMAL_EXPONENT + static_cast<int>(index << 3U));  // 3: parameter
+    return GetCachedPowerByIndex(index);
+}
+
 DtoaHelper::DiyFp DtoaHelper::GetCachedPowerByIndex(std::size_t index)
 {
     // 10^-348, 10^-340, ..., 10^340
@@ -70,12 +83,12 @@ DtoaHelper::DiyFp DtoaHelper::GetCachedPowerByIndex(std::size_t index)
     return DtoaHelper::DiyFp(CACHED_POWERS_F[index], static_cast<int16_t>(CACHED_POWERS_E[index]));
 }
 
-void DtoaHelper::GrisuRound(char *buffer, int len, uint64_t delta, uint64_t rest, uint64_t tenKappa, uint64_t distance)
+void DtoaHelper::GrisuRound(uint64_t delta, uint64_t rest, uint64_t tenKappa, uint64_t distance)
 {
     while (rest < distance && delta - rest >= tenKappa &&
            (rest + tenKappa < distance || distance - rest > rest + tenKappa - distance)) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        buffer[len - 1]--;
+        buffer_[length_ - 1]--;
         rest += tenKappa;
     }
 }
@@ -138,7 +151,7 @@ uint32_t DtoaHelper::PopDigit(int kappa, uint32_t &p1)
     return d;
 }
 
-void DtoaHelper::DigitGen(const DiyFp &w, const DiyFp &mp, uint64_t delta, char *buffer, int *len, int *k)
+void DtoaHelper::DigitGen(const DiyFp &w, const DiyFp &mp, uint64_t delta)
 {
     ASSERT(mp.e_ <= 0);
     const DiyFp one(uint64_t(1) << static_cast<uint32_t>(-mp.e_), mp.e_);
@@ -147,18 +160,18 @@ void DtoaHelper::DigitGen(const DiyFp &w, const DiyFp &mp, uint64_t delta, char 
     auto p1 = static_cast<uint32_t>(mp.f_ >> static_cast<uint32_t>(-one.e_));
     uint64_t p2 = mp.f_ & (one.f_ - 1);
     int kappa = CountDecimalDigit32(p1);  // kappa in [0, 9]
-    *len = 0;
+    length_ = 0;
     while (kappa > 0) {
         uint32_t d = PopDigit(kappa, p1);
-        if (d != 0 || *len != 0) {
+        if (d != 0 || length_ != 0) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            buffer[(*len)++] = static_cast<char>('0' + static_cast<char>(d));
+            buffer_[length_++] = static_cast<char>('0' + static_cast<char>(d));
         }
         kappa--;
         uint64_t tmp = (static_cast<uint64_t>(p1) << static_cast<uint32_t>(-one.e_)) + p2;
         if (tmp <= delta) {
-            *k += kappa;
-            GrisuRound(buffer, *len, delta, tmp, POW10[kappa] << static_cast<uint32_t>(-one.e_), distance.f_);
+            k_ += kappa;
+            GrisuRound(delta, tmp, POW10[kappa] << static_cast<uint32_t>(-one.e_), distance.f_);
             return;
         }
     }
@@ -168,42 +181,41 @@ void DtoaHelper::DigitGen(const DiyFp &w, const DiyFp &mp, uint64_t delta, char 
         p2 *= TEN;
         delta *= TEN;
         char d = static_cast<char>(p2 >> static_cast<uint32_t>(-one.e_));
-        if (d != 0 || *len != 0) {
+        if (d != 0 || length_ != 0) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-            buffer[(*len)++] = static_cast<char>('0' + d);
+            buffer_[length_++] = static_cast<char>('0' + d);
         }
         p2 &= one.f_ - 1;
         kappa--;
     } while (p2 >= delta);
-    *k += kappa;
+    k_ += kappa;
     int index = -kappa;
-    GrisuRound(buffer, *len, delta, p2, one.f_, distance.f_ * (index < INDEX ? POW10[index] : 0));
+    GrisuRound(delta, p2, one.f_, distance.f_ * (index < INDEX ? POW10[index] : 0));
 }
 
 // Grisu2  algorithm use the extra capacity of the used integer type to shorten the produced output
-void DtoaHelper::Grisu(double value, char *buffer, int *length, int *k)
+void DtoaHelper::Grisu(double value)
 {
     const DiyFp v(value);
     DiyFp mMinus;
     DiyFp mPlus;
     v.NormalizedBoundaries(&mMinus, &mPlus);
 
-    const DiyFp cached = GetCachedPower(mPlus.e_, k);
+    const DiyFp cached = GetCachedPower(mPlus.e_);
     const DiyFp w = v.Normalize() * cached;
     DiyFp wPlus = mPlus * cached;
     DiyFp wMinus = mMinus * cached;
     wMinus.f_++;
     wPlus.f_--;
-    DigitGen(w, wPlus, wPlus.f_ - wMinus.f_, buffer, length, k);
+    DigitGen(w, wPlus, wPlus.f_ - wMinus.f_);
 }
 
-void DtoaHelper::Dtoa(double value, char *buffer, int *point, int *length)
+void DtoaHelper::Dtoa(double value)
 {
     // Exceptional case such as NAN, 0.0, negative... are processed in DoubleToEcmaString
     // So use Dtoa should avoid Exceptional case.
     ASSERT(value > 0);
-    int k;
-    Grisu(value, buffer, length, &k);
-    *point = *length + k;
+    Grisu(value);
+    point_ = length_ + k_;
 }
 }  // namespace ark::ets::intrinsics::helpers

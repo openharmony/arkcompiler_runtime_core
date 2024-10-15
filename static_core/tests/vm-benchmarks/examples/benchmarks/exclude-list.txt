@@ -1,2 +1,2 @@
-# Compile error
-Bad_bad
+# Doclet error
+BadDoclet_test

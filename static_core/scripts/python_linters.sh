@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [[ -z $1 ]]; then
+set -e
+
+if [[ -z "$1" ]]; then
     echo "Usage: $0 <sources>"
     echo "    <sources> path where the sources to be checked are located"
     exit 1
@@ -61,7 +63,7 @@ W0123,W0150,W0201,W0212,W0221,W0231,W0601,W0706,W0640,W1201,W3101"}
 FLAKE8_RULES=${FLAKE8_RULES:-"C101,EXE002,S506,S602"}
 
 function save_exit_code() {
-    EXIT_CODE=$(($1 + $2))
+    return $(($1 + $2))
 }
 
 source "${root_dir}/scripts/python/venv-utils.sh"
@@ -82,8 +84,10 @@ fi
 while read file_to_check; do
     pylint -s false --timeout-methods subprocess.Popen.communicate --disable=all -e "${PYLINT_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
+    EXIT_CODE=$?
     flake8 --select "${FLAKE8_RULES}" "${file_to_check}"
     save_exit_code ${EXIT_CODE} $?
+    EXIT_CODE=$?
 done <<<$(find "${root_dir}" -name "*.py" -type f | grep -v "${skip_options}")
 
 num_checked=$(find "${root_dir}" -name "*.py" -type f | grep -c -v "${skip_options}")

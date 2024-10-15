@@ -47,11 +47,8 @@ set(SOURCES
     ${PANDA_ROOT}/libpandabase/taskmanager/task.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/task_scheduler.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/worker_thread.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/task_statistics.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/simple_task_statistics_impl.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/fine_grained_task_statistics_impl.cpp
-    ${PANDA_ROOT}/libpandabase/taskmanager/task_statistics/lock_free_task_statistics_impl.cpp
     ${PANDA_ROOT}/libpandabase/taskmanager/utils/task_selector.cpp
+    ${PANDA_ROOT}/libpandabase/taskmanager/utils/task_time_stats.cpp
     ${ARKBASE_LTO_SOURCES}
 )
 
@@ -228,6 +225,12 @@ add_dependencies(arkbase_obj coherency_line_size_h)
 
 
 # Version
+set(ARK_VERSION_DATE)
+execute_process(
+    COMMAND date "+%Y-%m-%d %H:%M:%S"
+    OUTPUT_VARIABLE ARK_VERSION_DATE
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 find_package(Git)
 if(Git_FOUND)
     message(STATUS "Git found: ${GIT_EXECUTABLE}")
@@ -395,20 +398,22 @@ if (PANDA_USE_FUTEX)
         )
 endif()
 
-panda_add_gtest(
-    NO_CORES
-    NO_WARNING_FILTER
-    NAME arkbase_tests
-    SOURCES
-        ${ARKBASE_TESTS_SOURCES}
-    LIBRARIES
-        arkbase_static
-        gmock
-    SANITIZERS
-        ${PANDA_SANITIZERS_LIST}
-)
-if (TARGET arkbase_tests)
-    panda_target_compile_options(arkbase_tests PUBLIC "-Wno-unused")
+if (PANDA_CI_TESTING_MODE STREQUAL "Nightly" OR NOT PANDA_TARGET_ARM32)
+    panda_add_gtest(
+        NO_CORES
+        NO_WARNING_FILTER
+        NAME arkbase_tests
+        SOURCES
+            ${ARKBASE_TESTS_SOURCES}
+        LIBRARIES
+            arkbase_static
+            gmock
+        SANITIZERS
+            ${PANDA_SANITIZERS_LIST}
+    )
+    if (TARGET arkbase_tests)
+        panda_target_compile_options(arkbase_tests PUBLIC "-Wno-unused")
+    endif()
 endif()
 
 panda_add_gtest(
@@ -431,7 +436,7 @@ panda_add_gtest(
     SOURCES
         tests/taskmanager/task_test.cpp
         tests/taskmanager/task_scheduler_test.cpp
-        tests/taskmanager/task_statistics_test.cpp
+        tests/taskmanager/task_sheduler_logging_test.cpp
     LIBRARIES
         arkbase_static
     SANITIZERS

@@ -191,7 +191,6 @@ T GetFieldValue(EtsObject *obj, EtsLong i)
 
     auto typeClass = objHandle.GetPtr()->GetClass();
     auto fieldObject = typeClass->GetFieldByIndex(i);
-
     if (fieldObject->GetType()->IsBoxedClass()) {
         return EtsBoxPrimitive<T>::FromCoreType(objHandle.GetPtr()->GetFieldObject(fieldObject))->GetValue();
     }

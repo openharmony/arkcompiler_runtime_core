@@ -471,7 +471,7 @@
     return <%= this_call.('slice') %>start, Int.MAX_VALUE as int);
 }
 
-<% if access_public == "export function" %><% #generate code for BuiltinArray.ets %>
+<% if access_public == "export function" %><% #generate code for BuiltinArray.sts %>
 /**
  * Returns the last index at which a given element can be found in the array,
  * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
@@ -520,7 +520,7 @@
 <%= access_public %> <%= override %> lastIndexOf<%= this_generic %>(<%= this_arg %>element: <%= el_type %>, fromIndex?: Number): number {
     return <%= this_call.('lastIndexOf') %>element, asIntOrDefault(fromIndex, <%= this_len_int %> - 1));
 }
-<% else %><% #generate code for Array.ets %>
+<% else %><% #generate code for Array.sts %>
 /**
  * Returns the last index at which a given element can be found in the array,
  * or -1 if it is not present. The array is searched backwards, starting at fromIndex.
@@ -607,12 +607,19 @@
  */
 <%= access_public %> <%= override %> join<%= this_generic %>(<%= this_arg %>sep?: String): string {
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder();
+    let sb = new StringBuilder()
     for (let i: int = 0; i < <%= this_len_int %>; i++) {
+        const tmp = <%= get_unsafe.(this, 'i') %>
+        // NOTE(aleksander-sotov) We can't move if from loop due to 18709
         if (i != 0) {
             sb.append(sepReal);
         }
-        sb.append(new String(<%= get_unsafe.(this, 'i') %>));
+        <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
+        if (!__runtimeIsSameReference(tmp, undefined)) {
+            sb.append(new String(tmp))
+        } else {
+            sb.append("undefined")
+        }<% else %>sb.append(tmp)<% end %>
     }
 
     return sb.toString();

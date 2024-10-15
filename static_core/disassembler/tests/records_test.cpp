@@ -31,6 +31,8 @@ static inline std::string ExtractRecordBody(const std::string &text, const std::
     return text.substr(beg + header.length(), end - (beg + header.length()));
 }
 
+namespace ark::disasm::test {
+
 TEST(RecordTest, EmptyRecord)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -155,3 +157,5 @@ TEST(RecordTest, RecordWithRecord)
 }
 
 #undef DISASM_BIN_DIR
+
+}  // namespace ark::disasm::test

@@ -1,0 +1,351 @@
+/*
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package std.interop.js;
+
+// Subtype of Shareable enables reference tracking for ETS objects
+// TODO(ivagin): This is a workaround and should be removed if the future
+class Shareable { private internal_ : long; };
+
+export final class JSRuntime {
+    // ==================
+    // newJSValue<TYPE>()
+    // ==================
+    public static newJSValueBoolean(value: boolean): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.newJSValueBoolean(value);
+    }
+
+    public static newJSValueByte(value: byte): JSValue {
+        return JSRuntime.newJSValueInt(value);
+    }
+
+    public static newJSValueChar(value: char): JSValue {
+        return JSRuntime.newJSValueInt(value);
+    }
+
+    public static newJSValueShort(value: short): JSValue {
+        return JSRuntime.newJSValueInt(value);
+    }
+
+    public static newJSValueInt(value: int): JSValue {
+        return JSRuntime.newJSValueDouble(value as double);
+    }
+
+    public static newJSValueLong(value: long): JSValue {
+        return JSRuntime.newJSValueDouble(value as double);
+    }
+
+    public static newJSValueFloat(value: float): JSValue {
+        return JSRuntime.newJSValueDouble(value);
+    }
+
+    public static newJSValueDouble(value: double): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.newJSValueDouble(value);
+    }
+
+    public static newJSValueString(value: String): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.newJSValueString(value);
+    }
+
+    public static newJSValueObject(value: Object): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.newJSValueObject(value);
+    }
+
+    // ================
+    // getValue<TYPE>()
+    // ================
+    public static getValueBoolean(value: JSValue): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getValueBoolean(value);
+    }
+
+    public static getValueDouble(value: JSValue): double {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getValueDouble(value);
+    }
+
+    public static getValueString(value: JSValue): String {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getValueString(value);
+    }
+
+    // 2nd argument is ClassClass
+    public static getValueObject(value: JSValue, t: Object): Object {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getValueObject(value, t);
+    }
+
+    // ===================
+    // getProperty<TYPE>()
+    // ===================
+    public static getPropertyBoolean(object: JSValue, name: String): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getPropertyBoolean(object, name) as boolean;
+    }
+
+    public static getPropertyByte(object: JSValue, name: String): byte {
+        return JSRuntime.getPropertyInt(object, name) as byte;
+    }
+
+    public static getPropertyChar(object: JSValue, name: String): char {
+        return JSRuntime.getPropertyInt(object, name) as char;
+    }
+
+    public static getPropertyShort(object: JSValue, name: String): short {
+        return JSRuntime.getPropertyInt(object, name) as short;
+    }
+
+    public static getPropertyInt(object: JSValue, name: String): int {
+        return JSRuntime.getPropertyDouble(object, name) as int;
+    }
+
+    public static getPropertyLong(object: JSValue, name: String): long {
+        return JSRuntime.getPropertyDouble(object, name) as long;
+    }
+
+    public static getPropertyFloat(object: JSValue, name: String): float {
+        return JSRuntime.getPropertyDouble(object, name) as float;
+    }
+
+    public static getPropertyDouble(object: JSValue, name: String): double {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getPropertyDouble(object, name);
+    }
+
+    public static getPropertyString(object: JSValue, name: String): String {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getPropertyString(object, name);
+    }
+
+    public static getPropertyJSValue(object: JSValue, name: String): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getPropertyJSValue(object, name);
+    }
+
+    // ===================
+    // setProperty<TYPE>()
+    // ===================
+    public static setPropertyBoolean(object: JSValue, name: String, value: boolean): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static setPropertyByte(object: JSValue, name: String, value: byte): void {
+        JSRuntime.setPropertyInt(object, name, value);
+    }
+
+    public static setPropertyChar(object: JSValue, name: String, value: char): void {
+        JSRuntime.setPropertyInt(object, name, value);
+    }
+
+    public static setPropertyShort(object: JSValue, name: String, value: short): void {
+        JSRuntime.setPropertyInt(object, name, value);
+    }
+
+    public static setPropertyInt(object: JSValue, name: String, value: int): void {
+        JSRuntime.setPropertyDouble(object, name, value as double);
+    }
+
+    public static setPropertyLong(object: JSValue, name: String, value: long): void {
+        JSRuntime.setPropertyDouble(object, name, value as double);
+    }
+
+    public static setPropertyFloat(object: JSValue, name: String, value: float): void {
+        JSRuntime.setPropertyDouble(object, name, value);
+    }
+
+    public static setPropertyDouble(object: JSValue, name: String, value: double): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static setPropertyString(object: JSValue, name: String, value: String): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static setPropertyJSValue(object: JSValue, name: String, value: JSValue): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    // ===================
+    //
+    // ===================
+    public static getUndefined(): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getUndefined();
+    }
+
+    public static getNull(): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getNull();
+    }
+
+    public static getGlobal(): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getGlobal();
+    }
+
+    public static createObject(): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.createObject();
+    }
+
+    public static instanceOfDynamic(object: JSValue, ctor: JSValue): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.instanceOfDynamic(object, ctor);
+    }
+
+    // NOTE(v.cherkashin):
+    //  Replace 'cls: Object' by 'cls: Type' when issue #15273 was resolved
+    public static instanceOfStatic(object: JSValue, cls: Object): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.instanceOfStatic(object, cls);
+    }
+
+    public static strictEqual(lhs: JSValue, rhs: JSValue): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.strictEqual(lhs, rhs);
+    }
+
+    // ===================
+    // getElement<TYPE>()
+    // ===================
+    public static getElementBoolean(object: JSValue, index: int): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getElementBoolean(object, index);
+    }
+
+    public static getElementByte(object: JSValue, index: int): byte {
+        return JSRuntime.getElementInt(object, index) as byte;
+    }
+
+    public static getElementChar(object: JSValue, index: int): char {
+        return JSRuntime.getElementInt(object, index) as char;
+    }
+
+    public static getElementShort(object: JSValue, index: int): short {
+        return JSRuntime.getElementInt(object, index) as short;
+    }
+
+    public static getElementInt(object: JSValue, index: int): int {
+        return JSRuntime.getElementDouble(object, index) as int;
+    }
+
+    public static getElementLong(object: JSValue, index: int): long {
+        return JSRuntime.getElementDouble(object, index) as long;
+    }
+
+    public static getElementFloat(object: JSValue, index: int): float {
+        return JSRuntime.getElementDouble(object, index) as float;
+    }
+
+    public static getElementDouble(object: JSValue, index: int): double {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getElementDouble(object, index);
+    }
+
+    public static getElementJSValue(object: JSValue, index: int): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.getElementJSValue(object, index);
+    }
+
+    // ===================
+    // setElement<TYPE>()
+    // ===================
+    public static setElementBoolean(object: JSValue, index: int, value: boolean): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static setElementByte(object: JSValue, index: int, value: byte): void {
+        JSRuntime.setElementInt(object, index, value);
+    }
+
+    public static setElementChar(object: JSValue, index: int, value: char): void {
+        JSRuntime.setElementInt(object, index, value);
+    }
+
+    public static setElementShort(object: JSValue, index: int, value: short): void {
+        JSRuntime.setElementInt(object, index, value);
+    }
+
+    public static setElementInt(object: JSValue, index: int, value: int): void {
+        JSRuntime.setElementDouble(object, index, value as double);
+    }
+
+    public static setElementLong(object: JSValue, index: int, value: long): void {
+        JSRuntime.setElementDouble(object, index, value as double);
+    }
+
+    public static setElementFloat(object: JSValue, index: int, value: float): void {
+        JSRuntime.setElementDouble(object, index, value);
+    }
+
+    public static setElementDouble(object: JSValue, index: int, value: double): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static setElementJSValue(object: JSValue, index: int, value: JSValue): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    public static loadModule(m: String): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.loadModule(m);
+    }
+
+    // ===================
+    // Internal api
+    // ===================
+    public static getNumSharedJSValues(): int {
+        return JSRuntime.finQueue!.getSize();
+    }
+
+    private static finalizationRegistryCallback(obj: Object): void {
+        JSRuntime.checkIntrinsicMethod();
+    }
+
+    private static createFinalizationRegistry(): FinalizationRegistry<Object> {
+        assert JSRuntime.finQueue == null;
+        JSRuntime.finQueue = new FinalizationRegistry<Object>((obj: Object): void => { JSRuntime.finalizationRegistryCallback(obj); });
+        return JSRuntime.finQueue!;
+    }
+
+    public static __initJSCallClass(name: String): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.__initJSCallClass(name);
+    }
+
+    public static __initJSNewClass(name: String): boolean {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.__initJSNewClass(name);
+    }
+
+    public static __createLambdaProxy(lambda: Object): JSValue {
+        JSRuntime.checkIntrinsicMethod();
+        return JSRuntime.__createLambdaProxy(lambda);
+    }
+
+    private static checkIntrinsicMethod(): void {
+        let msg = "This method must not be called";
+        // TODO(dmitrys99): Call to console gives error here:
+        // SyntaxError: Variable 'console' is accessed before it's initialization. [JSRuntime.sts:229:9]
+        //console.print("ERROR: " + msg + "\n");
+        throw new Error(msg);
+    }
+
+    private static finQueue: FinalizationRegistry<Object> | null = null;
+}

@@ -22,9 +22,9 @@ import signal
 from typing import Union, Optional
 from pathlib import Path
 from subprocess import Popen, PIPE
+from threading import Thread, Timer
 from dataclasses import dataclass
 from tempfile import mktemp
-from threading import Timer
 from vmb.helpers import Singleton
 
 log = logging.getLogger('vmb')
@@ -103,6 +103,7 @@ class ShellBase(metaclass=Singleton):
 
     def __init__(self, timeout: Optional[float] = None) -> None:
         self._timeout = timeout
+        self.taskset = ''
 
     @staticmethod
     def timed_cmd(cmd: str) -> str:
@@ -113,6 +114,9 @@ class ShellBase(metaclass=Singleton):
             measure_time: bool = False,
             timeout: Optional[float] = None,
             cwd: str = '') -> ShellResult:
+        raise NotImplementedError
+
+    def run_async(self, cmd: str) -> None:
         raise NotImplementedError
 
     def push(self,
@@ -133,6 +137,13 @@ class ShellBase(metaclass=Singleton):
     def grep_output(self, cmd: str, regex: str) -> str:
         r = self.run(cmd=cmd)
         return r.grep(regex)
+
+    def set_affinity(self, arg: str) -> None:
+        """Set affinity mask for processes.
+
+        Effective only on devices, so hardcoding path
+        """
+        self.taskset = f'/system/bin/taskset -a {arg}'
 
 
 class ShellUnix(ShellBase):
@@ -157,6 +168,16 @@ class ShellUnix(ShellBase):
              src: Union[str, Path],
              dst: Union[str, Path]) -> ShellResult:
         raise NotImplementedError
+
+    def run_async(self, cmd: str) -> None:
+        def run_shell():
+            # pylint: disable-next=all
+            return Popen(cmd, shell=True, stdout=PIPE, stderr=PIPE)  # NOQA
+
+        log.debug('Async cmd: %s', cmd)
+        async_trhead = Thread(target=run_shell)
+        async_trhead.daemon = True
+        async_trhead.start()
 
     def __run(self,
               cmd: str,
@@ -217,7 +238,7 @@ class ShellDevice(ShellBase):
             cwd: str = '') -> ShellResult:
         redir = ''
         if measure_time:
-            cmd = self.timed_cmd(cmd)
+            cmd = f"\\time -v {self.taskset} env {cmd}"
             redir = f' 2>{self.stderr_out}'
         cwd = f'cd {cwd}; ' if cwd else ''
         res = self._sh.run(
@@ -229,6 +250,9 @@ class ShellDevice(ShellBase):
             stderr_host = mktemp(prefix='vmb-')
             self.pull(self.stderr_out, stderr_host)
             self._sh.run(f"{self._devsh} shell 'rm -f {self.stderr_out}'")
+            if not Path(stderr_host).exists():
+                res.err = 'Pull from device failed'
+                return res
             with open(stderr_host, 'r', encoding="utf-8") as f:
                 res.err = f.read()
             self._sh.run(f'rm -f {stderr_host}')
@@ -236,6 +260,9 @@ class ShellDevice(ShellBase):
         else:
             res.err = ''
         return res
+
+    def run_async(self, cmd: str) -> None:
+        self._sh.run_async(f"{self._devsh} shell '{cmd}'")
 
     def get_filesize(self, filepath: Union[str, Path]) -> int:
         res = self.run(f"stat -c '%s' {filepath}")

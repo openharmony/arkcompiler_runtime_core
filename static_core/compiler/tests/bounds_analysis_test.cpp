@@ -752,6 +752,40 @@ TEST_F(BoundsAnalysisTest, LoopWithBranch)
     ASSERT_EQ(bri->FindBoundsRange(&BB(6U), &INS(8U)), BoundsRange(10U, 20U));
 }
 
+TEST_F(BoundsAnalysisTest, NegativePhi)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(2U, 100U);
+        CONSTANT(3U, 5U);
+        CONSTANT(4U, 0U);
+        CONSTANT(5U, 4U);
+        CONSTANT(16U, 1U);
+        BASIC_BLOCK(3U, 4U, 2U)
+        {
+            INST(21U, Opcode::Compare).CC(CC_GE).b().Inputs(4U, 3U).SrcType(DataType::INT32);
+            INST(22U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(21U);
+        }
+        BASIC_BLOCK(2U, 4U, 2U)
+        {
+            INST(9U, Opcode::Phi).Inputs(4U, 15U).i32();
+            INST(10U, Opcode::Phi).Inputs(5U, 14U).i32();
+            INST(14U, Opcode::Sub).Inputs(2U, 10U).i32();
+            INST(15U, Opcode::Add).Inputs(9U, 16U).i32();
+            INST(12U, Opcode::Compare).CC(CC_GE).b().Inputs(15U, 3U);
+            INST(13U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(12U);
+        }
+        BASIC_BLOCK(4U, -1L)
+        {
+            INST(20U, Opcode::Return).Inputs(16U).i32();
+        }
+    }
+    auto bri = GetGraph()->GetBoundsRangeInfo();
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(9U)), BoundsRange(0U, 4U));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(10U)), BoundsRange(INT32_MIN, INT32_MAX));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(14U)), BoundsRange(INT32_MIN, INT32_MAX));
+    ASSERT_EQ(bri->FindBoundsRange(&BB(2U), &INS(15U)), BoundsRange(1U, 5U));
+}
 // NOLINTEND(readability-magic-numbers)
 
 }  // namespace ark::compiler

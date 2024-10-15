@@ -14,8 +14,8 @@
  */
 
 export function randomString(size) {
-    let s = "";
-    for (var i = 0; i < size; i++) {
+    let s = '';
+    for (let i = 0; i < size; i++) {
         s += String.fromCharCode((25 * Math.random()) + 97);
     }
     return s;

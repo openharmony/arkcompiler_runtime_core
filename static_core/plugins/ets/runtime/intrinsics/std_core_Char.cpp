@@ -14,6 +14,7 @@
  */
 
 #include "intrinsics.h"
+#include "helpers/ets_intrinsics_helpers.h"
 
 namespace ark::ets::intrinsics {
 
@@ -34,6 +35,10 @@ extern "C" EtsBoolean StdCoreCharIsLowerCase(EtsChar value)
 extern "C" EtsChar StdCoreCharToLowerCase(EtsChar value)
 {
     return (value >= 'A' && value <= 'Z') ? value + LOWER_TO_UPPER_OFFSET : value;
+}
+extern "C" EtsBoolean StdCoreCharIsWhiteSpace(EtsChar value)
+{
+    return ToEtsBoolean(utf::IsWhiteSpaceChar(value));
 }
 
 }  // namespace ark::ets::intrinsics

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 set -e
 
-if [[ -z $1 ]]; then
+if [[ -z "$1" ]]; then
     echo "Usage: generate.sh <generator options>"
     echo "    <generator options> options to main.py. To see full list use --help"
 

@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const async_newInterfaceWithMethodEts = etsMod.getFunction('async_newInterfaceWithMethodEts');
+const asyncNewInterfaceWithMethodEts = etsMod.getFunction('asyncNewInterfaceWithMethodEts');
 
 async function test() {
-  let obj = await async_newInterfaceWithMethodEts();
-  ASSERT_EQ(obj.methodInInterface(), 1);
+	let obj = await asyncNewInterfaceWithMethodEts();
+	ASSERT_EQ(obj.methodInInterface(), 1);
 }
 
 test();

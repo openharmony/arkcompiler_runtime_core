@@ -20,6 +20,8 @@
 #include "define.h"
 #include "lexer.h"
 
+namespace ark::test {
+
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark::pandasm;
 
@@ -225,3 +227,5 @@ TEST(lexertests, record_type)
     ASSERT_EQ(tok.first.size(), 1U);
     ASSERT_EQ(tok.first[0].type, Token::Type::ID);
 }
+
+}  // namespace ark::test

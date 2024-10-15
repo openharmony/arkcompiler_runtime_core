@@ -22,62 +22,62 @@ class ToStringTest : public EtsInteropTest {};
 
 TEST_F(ToStringTest, implicit_to_string)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("implicit_to_string"), "optional_valA");
+    ASSERT_EQ(CallEtsMethod<std::string>("implicitToString"), "optionalValA");
 }
 
 TEST_F(ToStringTest, test_functional1)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("test_functional1"), "Str1A");
+    ASSERT_EQ(CallEtsMethod<std::string>("testFunctional1"), "Str1A");
 }
 
 TEST_F(ToStringTest, test_functional2)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("test_functional2"), "123A");
+    ASSERT_EQ(CallEtsMethod<std::string>("testFunctional2"), "123A");
 }
 
 TEST_F(ToStringTest, test_nan_call)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("test_nan_call"), "NaNA");
+    ASSERT_EQ(CallEtsMethod<std::string>("testNanCall"), "NaNA");
 }
 
 TEST_F(ToStringTest, test_throwing)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("test_throwing"), "123A");
+    ASSERT_EQ(CallEtsMethod<std::string>("testThrowing"), "123A");
 }
 
 TEST_F(ToStringTest, ets_jsvalue_to_str)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("ets_jsvalue_to_str"), "123AA");
+    ASSERT_EQ(CallEtsMethod<std::string>("etsJsvalueToStr"), "123AA");
 }
 
 TEST_F(ToStringTest, ets_object_to_str)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("ets_object_to_str"), "123AA");
+    ASSERT_EQ(CallEtsMethod<std::string>("etsObjectToStr"), "123AA");
 }
 
 TEST_F(ToStringTest, jsval_object_to_str)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("jsval_object_to_str"), "123A");
+    ASSERT_EQ(CallEtsMethod<std::string>("jsvalObjectToStr"), "123A");
 }
 
 TEST_F(ToStringTest, concat_null_to_string)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("concat_null_to_string"), "nullA");
+    ASSERT_EQ(CallEtsMethod<std::string>("concatNullToString"), "nullA");
 }
 
 TEST_F(ToStringTest, concat_undefined_to_string)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("concat_undefined_to_string"), "undefinedA");
+    ASSERT_EQ(CallEtsMethod<std::string>("concatUndefinedToString"), "undefinedA");
 }
 
 TEST_F(ToStringTest, concat_nan_to_string)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("concat_nan_to_string"), "NaNA");
+    ASSERT_EQ(CallEtsMethod<std::string>("concatNanToString"), "NaNA");
 }
 
 TEST_F(ToStringTest, explicit_optional_to_string)
 {
-    ASSERT_EQ(CallEtsMethod<std::string>("explicit_optional_to_string"), "NPE");
+    ASSERT_EQ(CallEtsMethod<std::string>("explicitOptionalToString"), "NPE");
 }
 
 }  // namespace ark::ets::interop::js::testing

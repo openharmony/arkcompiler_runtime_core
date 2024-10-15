@@ -25,22 +25,22 @@ TEST_F(EtsInteropScenariosEtsToJs, test_standalone_function_call)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_standalone_function_call.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_class_method_call)
+TEST_F(EtsInteropScenariosEtsToJs, test_class_methodCall)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_method_call.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_class_method_call_union)
+TEST_F(EtsInteropScenariosEtsToJs, test_class_methodCall_union)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_class_method_call_union.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_interface_method_call)
+TEST_F(EtsInteropScenariosEtsToJs, test_interface_methodCall)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_interface_method_call.js"));
 }
 
-TEST_F(EtsInteropScenariosEtsToJs, test_interface_method_call_union)
+TEST_F(EtsInteropScenariosEtsToJs, test_interface_methodCall_union)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_interface_method_call_union.js"));
 }

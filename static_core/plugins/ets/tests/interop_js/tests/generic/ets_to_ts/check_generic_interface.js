@@ -13,23 +13,18 @@
  * limitations under the License.
  */
 
-const {
-    GIClass,
-    create_interface_object_from_ets,
-    num,
-    str,
-} = require("generic.test.js");
+const { GIClass, createInterfaceObjectFromEts, num, str } = require('generic.test.js');
 
-function check_interface_class() {
-    const interfaceClass = new GIClass(num);
-    ASSERT_EQ(typeof num, typeof interfaceClass.get());
+function checkInterfaceClass() {
+	const interfaceClass = new GIClass(num);
+	ASSERT_EQ(typeof num, typeof interfaceClass.get());
 }
 
-function check_create_interface_object_from_ets() {
-    const interfaceClass = create_interface_object_from_ets();
+function checkCreateInterfaceObjectFromEts() {
+	const interfaceClass = createInterfaceObjectFromEts();
 
-    ASSERT_EQ(typeof str, typeof interfaceClass.get());
+	ASSERT_EQ(typeof str, typeof interfaceClass.get());
 }
 
-check_interface_class();
-check_create_interface_object_from_ets();
+checkInterfaceClass();
+checkCreateInterfaceObjectFromEts();

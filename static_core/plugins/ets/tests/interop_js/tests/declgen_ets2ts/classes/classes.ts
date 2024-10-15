@@ -18,19 +18,19 @@ const THREE = 3;
 
 import { Derived } from './lib';
 
-function AssertEq<T>(a: T, b: T) {
-  console.log(`AssertEq: '${a}' === '${b}'`);
-  if (a !== b) {
-    throw new Error(`AssertEq failed: '${a}' === '${b}'`);
-  }
+function assertEq<T>(a: T, b: T): void {
+	console.log(`assertEq: '${a}' === '${b}'`);
+	if (a !== b) {
+		throw new Error(`assertEq failed: '${a}' === '${b}'`);
+	}
 }
 
-export function main() {
-  testClasses();
+export function main(): void {
+	testClasses();
 }
 
-function testClasses() {
-  const d = new Derived(TWO, THREE);
-  AssertEq(d.a, TWO);
-  AssertEq(d.b, THREE);
+function testClasses(): void {
+	const d = new Derived(TWO, THREE);
+	assertEq(d.a, TWO);
+	assertEq(d.b, THREE);
 }

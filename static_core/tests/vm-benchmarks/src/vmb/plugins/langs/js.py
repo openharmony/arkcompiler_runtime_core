@@ -29,7 +29,7 @@ class Lang(LangBase):
     # type is fake
     __re_func = re.compile(
         r'^\s*this\.(?P<func>\w+)\s*=\s*'
-        r'(?P<type>)function\s*\(\s*\)\s*({)?\s*$')
+        r'(?P<type>)function\s*\(\s*\)\s*({)?\s*([}\s;]*)?$')
     # fake type
     __re_param = re.compile(
         r'^\s*(?P<type>this)\.(?P<param>\w+)\s*;\s*$')

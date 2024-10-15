@@ -14,26 +14,26 @@
  */
 
 function runTest(test) {
-    console.log("Running test " + test);
-    let etsVm = require(process.env.MODULE_PATH + "/ets_interop_js_napi.node");
-    if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
-        console.log("Cannot create ETS runtime");
-        process.exit(1);
-    }
-    let res = etsVm.call(test);
-    let checkFn = () => {
-        if (!etsVm.call("ready")) {
-            queueMicrotask(checkFn);
-            return;
-        }
-        etsVm.call("check");
-    }
-    queueMicrotask(checkFn);
+	console.log('Running test ' + test);
+	let etsVm = require(process.env.MODULE_PATH + '/ets_interop_js_napi.node');
+	if (!etsVm.createEtsRuntime(process.env.ARK_ETS_STDLIB_PATH, process.env.ARK_ETS_INTEROP_JS_GTEST_ABC_PATH, false, false)) {
+		console.log('Cannot create ETS runtime');
+		process.exit(1);
+	}
+	let res = etsVm.call(test);
+	let checkFn = () => {
+		if (!etsVm.call('ready')) {
+			queueMicrotask(checkFn);
+			return;
+		}
+		etsVm.call('check');
+	};
+	queueMicrotask(checkFn);
 }
 
 let args = process.argv;
-if (args.length != 3) {
-    console.log("Expected test name");
-    process.exit(1);
+if (args.length !== 3) {
+	console.log('Expected test name');
+	process.exit(1);
 }
 runTest(args[2]);

@@ -68,7 +68,7 @@ TEST_F(EtsInteropJsJSValue, get_property_from_jsvalue)
     ASSERT_EQ(napi_ok, napi_set_named_property(env, jsObj, "prop", jsValue));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("get_property_from_jsvalue", jsObj);
+    auto ret = CallEtsMethod<double>("getPropertyFromJsvalue", jsObj);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -95,7 +95,7 @@ TEST_F(EtsInteropJsJSValue, get_property_from_jsvalue2)
     ASSERT_EQ(napi_ok, napi_set_named_property(env, jsProp1, "prop_2", jsProp2));
 
     // Call ets method
-    auto ret = CallEtsMethod<double>("get_property_from_jsvalue2", jsObj);
+    auto ret = CallEtsMethod<double>("getPropertyFromJsvalue2", jsObj);
 
     // Check result
     ASSERT_EQ(ret, TEST_VALUE);
@@ -113,7 +113,7 @@ TEST_F(EtsInteropJsJSValue, set_property_to_jsvalue)
     ASSERT_EQ(napi_ok, napi_create_object(env, &jsObj));
 
     // Call ets method
-    auto ret = CallEtsMethod<napi_value>("set_property_to_jsvalue", jsObj, TEST_VALUE);
+    auto ret = CallEtsMethod<napi_value>("setPropertyToJsvalue", jsObj, TEST_VALUE);
     ASSERT_TRUE(ret.has_value());
 
     // Return js object:

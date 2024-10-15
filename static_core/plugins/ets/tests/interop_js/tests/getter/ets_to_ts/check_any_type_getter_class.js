@@ -14,211 +14,211 @@
  */
 
 const {
-    check_array,
-    check_obj,
-    string,
-    number,
-    bool,
-    arr,
-    obj,
-    tuple,
-    AnyTypeClass,
-    create_any_type_getter_class_from_ets_string,
-    create_any_type_getter_class_from_ets_int,
-    create_any_type_getter_class_from_ets_bool,
-    create_any_type_getter_class_from_ets_arr,
-    create_any_type_getter_class_from_ets_obj,
-    create_any_type_getter_class_from_ets_tuple,
-    create_any_type_getter_class_from_ets_union,
-} = require("getter.test.js");
+	checkrray,
+	checkbj,
+	string,
+	number,
+	bool,
+	arr,
+	obj,
+	tuple,
+	AnyTypeClass,
+	createnyypeetterlassromtstring,
+	createnyypeetterlassromtsnt,
+	createnyypeetterlassromtsool,
+	createnyypeetterlassromtsrr,
+	createnyypeetterlassromtsbj,
+	createnyypeetterlassromtsuple,
+	createnyypeetterlassromtsnion,
+} = require('getter.test.js');
 
-function check_class_getter_class_value_int() {
-    const GClass = new AnyTypeClass(number);
+function checklassetterlassaluent() {
+	const GClass = new AnyTypeClass(number);
 
-    ASSERT_TRUE(GClass._value === number);
+	ASSERT_TRUE(GClass.alue === number);
 }
 
-function check_class_getter_class_value_string() {
-    const GClass = new AnyTypeClass(string);
+function checklassetterlassaluetring() {
+	const GClass = new AnyTypeClass(string);
 
-    ASSERT_TRUE(GClass._value === string);
+	ASSERT_TRUE(GClass.alue === string);
 }
 
-function check_class_getter_class_value_bool() {
-    const GClass = new AnyTypeClass(bool);
+function checklassetterlassalueool() {
+	const GClass = new AnyTypeClass(bool);
 
-    ASSERT_TRUE(GClass._value === bool);
+	ASSERT_TRUE(GClass.alue === bool);
 }
 
-function check_class_getter_class_value_arr() {
-    const GClass = new AnyTypeClass(arr);
+function checklassetterlassaluerr() {
+	const GClass = new AnyTypeClass(arr);
 
-    ASSERT_TRUE(check_array(GClass._value) && GClass._value[0] === arr[0]);
+	ASSERT_TRUE(checkrray(GClass.alue) && GClass.alue[0] === arr[0]);
 }
 
-function check_class_getter_class_value_obj() {
-    const GClass = new AnyTypeClass(obj);
+function checklassetterlassaluebj() {
+	const GClass = new AnyTypeClass(obj);
 
-    ASSERT_TRUE(check_obj(GClass._value));
+	ASSERT_TRUE(checkbj(GClass.alue));
 }
 
-function check_class_getter_class_value_tuple() {
-    const GClass = new AnyTypeClass(tuple);
+function checklassetterlassalueuple() {
+	const GClass = new AnyTypeClass(tuple);
 
-    const res = GClass._value;
+	const res = GClass.alue;
 
-    ASSERT_TRUE(check_array(res) && res[0] === tuple[0] && res[1] === tuple[1]);
+	ASSERT_TRUE(checkrray(res) && res[0] === tuple[0] && res[1] === tuple[1]);
 }
 
-function check_create_any_type_getter_class_value_from_ets_string() {
-    const GClass = create_any_type_getter_class_from_ets_string(string);
+function checkreatenyypeetterlassalueromtstring() {
+	const GClass = createnyypeetterlassromtstring(string);
 
-    ASSERT_TRUE(GClass._value === string);
+	ASSERT_TRUE(GClass.alue === string);
 }
 
-function check_create_any_type_getter_class_value_from_ets_int() {
-    const GClass = create_any_type_getter_class_from_ets_int(number);
+function checkreatenyypeetterlassalueromtsnt() {
+	const GClass = createnyypeetterlassromtsnt(number);
 
-    ASSERT_TRUE(GClass._value === number);
+	ASSERT_TRUE(GClass.alue === number);
 }
 
-function check_create_any_type_getter_class_value_from_ets_bool() {
-    const GClass = create_any_type_getter_class_from_ets_bool(bool);
+function checkreatenyypeetterlassalueromtsool() {
+	const GClass = createnyypeetterlassromtsool(bool);
 
-    ASSERT_TRUE(GClass._value === bool);
+	ASSERT_TRUE(GClass.alue === bool);
 }
 
-function check_create_any_type_getter_class_value_from_ets_arr() {
-    const GClass = create_any_type_getter_class_from_ets_arr(arr);
+function checkreatenyypeetterlassalueromtsrr() {
+	const GClass = createnyypeetterlassromtsrr(arr);
 
-    ASSERT_TRUE(check_array(GClass._value) && GClass._value[0] === arr[0]);
+	ASSERT_TRUE(checkrray(GClass.alue) && GClass.alue[0] === arr[0]);
 }
 
-function check_create_any_type_getter_class_value_from_ets_obj() {
-    const GClass = create_any_type_getter_class_from_ets_obj(obj);
+function checkreatenyypeetterlassalueromtsbj() {
+	const GClass = createnyypeetterlassromtsbj(obj);
 
-    ASSERT_TRUE(check_obj(GClass._value));
+	ASSERT_TRUE(checkbj(GClass.alue));
 }
 
-function check_create_any_type_getter_class_value_from_ets_tuple() {
-    const GClass = create_any_type_getter_class_from_ets_tuple(tuple);
+function checkreatenyypeetterlassalueromtsuple() {
+	const GClass = createnyypeetterlassromtsuple(tuple);
 
-    const res = GClass._value;
+	const res = GClass.alue;
 
-    ASSERT_TRUE(check_array(res) && res[0] === tuple[0] && res[1] === tuple[1]);
+	ASSERT_TRUE(checkrray(res) && res[0] === tuple[0] && res[1] === tuple[1]);
 }
 
-function check_create_any_type_getter_class_value_from_ets_union() {
-    const GClass = create_any_type_getter_class_from_ets_union(number);
+function checkreatenyypeetterlassalueromtsnion() {
+	const GClass = createnyypeetterlassromtsnion(number);
 
-    ASSERT_TRUE(GClass._value === number);
+	ASSERT_TRUE(GClass.alue === number);
 }
 
-function check_class_getter_class_int() {
-    const GClass = new AnyTypeClass(number);
+function checklassetterlassnt() {
+	const GClass = new AnyTypeClass(number);
 
-    ASSERT_TRUE(GClass.value === number);
+	ASSERT_TRUE(GClass.value === number);
 }
 
-function check_class_getter_class_string() {
-    const GClass = new AnyTypeClass(string);
+function checklassetterlasstring() {
+	const GClass = new AnyTypeClass(string);
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_class_getter_class_bool() {
-    const GClass = new AnyTypeClass(bool);
+function checklassetterlassool() {
+	const GClass = new AnyTypeClass(bool);
 
-    ASSERT_TRUE(GClass.value === bool);
+	ASSERT_TRUE(GClass.value === bool);
 }
 
-function check_class_getter_class_arr() {
-    const GClass = new AnyTypeClass(arr);
+function checklassetterlassrr() {
+	const GClass = new AnyTypeClass(arr);
 
-    ASSERT_TRUE(check_array(GClass.value) && GClass.value[0] === arr[0]);
+	ASSERT_TRUE(checkrray(GClass.value) && GClass.value[0] === arr[0]);
 }
 
-function check_class_getter_class_obj() {
-    const GClass = new AnyTypeClass(obj);
+function checklassetterlassbj() {
+	const GClass = new AnyTypeClass(obj);
 
-    ASSERT_TRUE(check_obj(GClass.value));
+	ASSERT_TRUE(checkbj(GClass.value));
 }
 
-function check_class_getter_class_tuple() {
-    const GClass = new AnyTypeClass(tuple);
+function checklassetterlassuple() {
+	const GClass = new AnyTypeClass(tuple);
 
-    const res = GClass.value;
+	const res = GClass.value;
 
-    ASSERT_TRUE(check_array(res) && res[0] === tuple[0] && res[1] === tuple[1]);
+	ASSERT_TRUE(checkrray(res) && res[0] === tuple[0] && res[1] === tuple[1]);
 }
 
-function check_create_any_type_getter_class_from_ets_string() {
-    const GClass = create_any_type_getter_class_from_ets_string(string);
+function checkreatenyypeetterlassromtstring() {
+	const GClass = createnyypeetterlassromtstring(string);
 
-    ASSERT_TRUE(GClass.value === string);
+	ASSERT_TRUE(GClass.value === string);
 }
 
-function check_create_any_type_getter_class_from_ets_int() {
-    const GClass = create_any_type_getter_class_from_ets_int(number);
+function checkreatenyypeetterlassromtsnt() {
+	const GClass = createnyypeetterlassromtsnt(number);
 
-    ASSERT_TRUE(GClass.value === number);
+	ASSERT_TRUE(GClass.value === number);
 }
 
-function check_create_any_type_getter_class_from_ets_bool() {
-    const GClass = create_any_type_getter_class_from_ets_bool(bool);
+function checkreatenyypeetterlassromtsool() {
+	const GClass = createnyypeetterlassromtsool(bool);
 
-    ASSERT_TRUE(GClass.value === bool);
+	ASSERT_TRUE(GClass.value === bool);
 }
 
-function check_create_any_type_getter_class_from_ets_arr() {
-    const GClass = create_any_type_getter_class_from_ets_arr(arr);
+function checkreatenyypeetterlassromtsrr() {
+	const GClass = createnyypeetterlassromtsrr(arr);
 
-    ASSERT_TRUE(check_array(GClass.value) && GClass.value[0] === arr[0]);
+	ASSERT_TRUE(checkrray(GClass.value) && GClass.value[0] === arr[0]);
 }
 
-function check_create_any_type_getter_class_from_ets_obj() {
-    const GClass = create_any_type_getter_class_from_ets_obj(obj);
+function checkreatenyypeetterlassromtsbj() {
+	const GClass = createnyypeetterlassromtsbj(obj);
 
-    ASSERT_TRUE(check_obj(GClass.value));
+	ASSERT_TRUE(checkbj(GClass.value));
 }
 
-function check_create_any_type_getter_class_from_ets_tuple() {
-    const GClass = create_any_type_getter_class_from_ets_tuple(tuple);
+function checkreatenyypeetterlassromtsuple() {
+	const GClass = createnyypeetterlassromtsuple(tuple);
 
-    const res = GClass.value;
+	const res = GClass.value;
 
-    ASSERT_TRUE(check_array(res) && res[0] === tuple[0] && res[1] === tuple[1]);
+	ASSERT_TRUE(checkrray(res) && res[0] === tuple[0] && res[1] === tuple[1]);
 }
 
-function check_create_any_type_getter_class_from_ets_union() {
-    const GClass = create_any_type_getter_class_from_ets_union(number);
+function checkreatenyypeetterlassromtsnion() {
+	const GClass = createnyypeetterlassromtsnion(number);
 
-    ASSERT_TRUE(GClass.value === number);
+	ASSERT_TRUE(GClass.value === number);
 }
 
-check_class_getter_class_value_int();
-check_class_getter_class_value_string();
-check_class_getter_class_value_bool();
-check_class_getter_class_value_arr();
-check_class_getter_class_value_obj();
-check_class_getter_class_value_tuple();
-check_create_any_type_getter_class_value_from_ets_string();
-check_create_any_type_getter_class_value_from_ets_int();
-check_create_any_type_getter_class_value_from_ets_bool();
-check_create_any_type_getter_class_value_from_ets_arr();
-check_create_any_type_getter_class_value_from_ets_obj();
-check_create_any_type_getter_class_value_from_ets_tuple();
-check_create_any_type_getter_class_value_from_ets_union();
-check_class_getter_class_int();
-check_class_getter_class_string();
-check_class_getter_class_bool();
-check_class_getter_class_arr();
-check_class_getter_class_obj();
-check_class_getter_class_tuple();
-check_create_any_type_getter_class_from_ets_string();
-check_create_any_type_getter_class_from_ets_int();
-check_create_any_type_getter_class_from_ets_bool();
-check_create_any_type_getter_class_from_ets_arr();
-check_create_any_type_getter_class_from_ets_obj();
-check_create_any_type_getter_class_from_ets_tuple();
-check_create_any_type_getter_class_from_ets_union();
+checklassetterlassaluent();
+checklassetterlassaluetring();
+checklassetterlassalueool();
+checklassetterlassaluerr();
+checklassetterlassaluebj();
+checklassetterlassalueuple();
+checkreatenyypeetterlassalueromtstring();
+checkreatenyypeetterlassalueromtsnt();
+checkreatenyypeetterlassalueromtsool();
+checkreatenyypeetterlassalueromtsrr();
+checkreatenyypeetterlassalueromtsbj();
+checkreatenyypeetterlassalueromtsuple();
+checkreatenyypeetterlassalueromtsnion();
+checklassetterlassnt();
+checklassetterlasstring();
+checklassetterlassool();
+checklassetterlassrr();
+checklassetterlassbj();
+checklassetterlassuple();
+checkreatenyypeetterlassromtstring();
+checkreatenyypeetterlassromtsnt();
+checkreatenyypeetterlassromtsool();
+checkreatenyypeetterlassromtsrr();
+checkreatenyypeetterlassromtsbj();
+checkreatenyypeetterlassromtsuple();
+checkreatenyypeetterlassromtsnion();

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ function run_tests() {
 
 function clear_dir() {
     TARGET_DIR=$1
-    if [[ -d $TARGET_DIR ]]; then
+    if [[ -d "$TARGET_DIR" ]]; then
         if [[ "$CLEAR_BUILD_DIRS" = true ]]; then
             rm -rf "$TARGET_DIR"
         else

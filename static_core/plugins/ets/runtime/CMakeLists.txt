@@ -34,6 +34,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/escompat_RegExp.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_taskpool.cpp
     ${ETS_EXT_SOURCES}/intrinsics/compiler_intrinsics.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_containers_BlockingQueue.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Runtime.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Char.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Console.cpp
@@ -52,7 +53,6 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Arrays.cpp
     ${ETS_EXT_SOURCES}/intrinsics/escompat_Atomics.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_math.cpp
-    ${ETS_EXT_SOURCES}/intrinsics/escompat_JSON.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/dtoa_helper.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_intrinsics_helpers.cpp
     ${ETS_EXT_SOURCES}/intrinsics/helpers/ets_to_string_cache.cpp
@@ -77,6 +77,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/types/ets_typeapi_parameter.cpp
     ${ETS_EXT_SOURCES}/types/ets_shared_memory.cpp
     ${ETS_EXT_SOURCES}/types/ets_weak_reference.cpp
+    ${ETS_EXT_SOURCES}/types/ets_finalizable_weak_ref.cpp
     ${ETS_EXT_SOURCES}/ets_vm_api.cpp
     ${ETS_EXT_SOURCES}/ets_utils.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp

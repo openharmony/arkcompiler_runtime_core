@@ -17,10 +17,9 @@
 #include <atomic>
 
 #include "compiler/optimizer/ir/runtime_interface.h"
-#include "plugins/ets/runtime/ets_coroutine.h"
-#include "include/runtime.h"
-#include "macros.h"
+#include "libpandabase/macros.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
+#include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_handle.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
@@ -30,14 +29,17 @@
 #include "plugins/ets/runtime/napi/ets_mangle.h"
 #include "plugins/ets/runtime/napi/ets_napi_invoke_interface.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_promise.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "runtime/compiler.h"
+#include "runtime/include/runtime.h"
 #include "runtime/include/thread_scopes.h"
 #include "runtime/init_icu.h"
 #include "runtime/coroutines/stackful_coroutine_manager.h"
 #include "runtime/coroutines/threaded_coroutine_manager.h"
-#include "plugins/ets/runtime/types/ets_promise.h"
+#include "runtime/mem/lock_config_helper.h"
 #include "plugins/ets/stdlib/native/init_native_methods.h"
+#include "plugins/ets/runtime/types/ets_finalizable_weak_ref_list.h"
 
 #include "plugins/ets/runtime/intrinsics/helpers/ets_to_string_cache.h"
 
@@ -50,11 +52,9 @@ static mem::MemoryManager *CreateMM(Runtime *runtime, const RuntimeOptions &opti
         nullptr,                                      // register_finalize_reference_func
         options.GetMaxGlobalRefSize(),                // max_global_ref_size
         options.IsGlobalReferenceSizeCheckEnabled(),  // is_global_reference_size_check_enabled
-        // NOTE(konstanting, #I67QXC): implement MT_MODE_TASK in allocators and HeapOptions as is_single_thread is
-        // not enough
-        false,                              // is_single_thread
-        options.IsUseTlabForAllocations(),  // is_use_tlab_for_allocations
-        options.IsStartAsZygote(),          // is_start_as_zygote
+        MT_MODE_TASK,                                 // multithreading mode
+        options.IsUseTlabForAllocations(),            // is_use_tlab_for_allocations
+        options.IsStartAsZygote(),                    // is_start_as_zygote
     };
 
     auto ctx = runtime->GetLanguageContext(panda_file::SourceLang::ETS);
@@ -74,8 +74,7 @@ bool PandaEtsVM::CreateTaskManagerIfNeeded(const RuntimeOptions &options)
 {
     if (options.GetWorkersType() == "taskmanager" && Runtime::GetTaskScheduler() == nullptr) {
         auto *taskScheduler = taskmanager::TaskScheduler::Create(
-            options.GetTaskmanagerWorkersCount(),
-            taskmanager::TaskStatisticsImplTypeFromString(options.GetTaskStatisticsImplType()));
+            options.GetTaskmanagerWorkersCount(), taskmanager::StringToTaskTimeStats(options.GetTaskStatsType()));
         if (taskScheduler == nullptr) {
             return false;
         }
@@ -125,7 +124,9 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
         // emulate_js
         Runtime::GetOptions().IsCoroutineJsMode(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
         // workers_count
-        Runtime::GetOptions().GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
+        Runtime::GetOptions().GetCoroutineWorkersCount(plugins::LangToRuntimeType(panda_file::SourceLang::ETS)),
+        // enable perf stats
+        Runtime::GetOptions().IsCoroutineDumpStats(plugins::LangToRuntimeType(panda_file::SourceLang::ETS))};
     vm->coroutineManager_->Initialize(cfg, runtime, vm);
 
     return vm;
@@ -236,6 +237,7 @@ bool PandaEtsVM::Initialize()
 
         PreallocSpecialReference(this, oomObjRef_, OUT_OF_MEMORY_ERROR.data());
         PreallocSpecialReference(this, undefinedObjRef_, INTERNAL_UNDEFINED.data(), true);
+        PreallocSpecialReference(this, finalizableWeakRefList_, FINALIZABLE_WEAK_REF.data());
 
         if (Thread::GetCurrent() != nullptr) {
             ASSERT(GetThreadManager()->GetMainThread() == Thread::GetCurrent());
@@ -358,7 +360,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
     // Handle references only in coroutine
     ASSERT(Coroutine::GetCurrent() != nullptr);
     ASSERT(GetMutatorLock()->HasLock());
-    auto coroutine = Coroutine::GetCurrent();
+    auto coroutine = EtsCoroutine::GetCurrent();
     [[maybe_unused]] HandleScope<ObjectHeader *> handleScope(coroutine);
     os::memory::LockHolder lock(finalizationRegistryLock_);
     if (!registeredFinalizationRegistryInstances_.empty()) {
@@ -371,6 +373,7 @@ void PandaEtsVM::HandleGCRoutineInMutator()
             ASSERT(!coroutine->HasPendingException());
         }
     }
+    coroutine->GetPandaVM()->CleanFinalizableReferenceList();
 }
 
 void PandaEtsVM::HandleGCFinished() {}
@@ -754,6 +757,35 @@ void PandaEtsVM::RegisterFinalizationRegistryInstance(EtsObject *instance)
 {
     os::memory::LockHolder lock(finalizationRegistryLock_);
     registeredFinalizationRegistryInstances_.push_back(instance);
+}
+
+void PandaEtsVM::RegisterFinalizerForObject(EtsCoroutine *coro, const EtsHandle<EtsObject> &object,
+                                            void (*finalizer)(void *), void *finalizerArg)
+{
+    auto *weakRef = EtsFinalizableWeakRef::Create(coro);
+    weakRef->SetFinalizer(finalizer, finalizerArg);
+    weakRef->SetReferent(object.GetPtr());
+    auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
+    auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
+    os::memory::LockHolder lh(finalizableWeakRefListLock_);
+    weakRefList->Push(coro, weakRef);
+}
+
+void PandaEtsVM::UnlinkFinalizableReference(EtsCoroutine *coro, EtsFinalizableWeakRef *weakRef)
+{
+    auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
+    auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
+    ASSERT(ToUintPtr(weakRefList) != ToUintPtr(weakRef));
+    os::memory::LockHolder lh(finalizableWeakRefListLock_);
+    weakRefList->Unlink(coro, weakRef);
+}
+
+void PandaEtsVM::CleanFinalizableReferenceList()
+{
+    auto *coreList = GetGlobalObjectStorage()->Get(finalizableWeakRefList_);
+    auto *weakRefList = EtsFinalizableWeakRefList::FromCoreType(coreList);
+    os::memory::LockHolder lh(finalizableWeakRefListLock_);
+    weakRefList->UnlinkClearedReferences(EtsCoroutine::GetCurrent());
 }
 
 /* static */

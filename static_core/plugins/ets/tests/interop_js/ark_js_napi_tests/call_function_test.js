@@ -14,12 +14,12 @@
  */
 
 function main() {
-    globalThis.test = requireNapiPreview("sample_function", true)
-    if ("Test" === globalThis.test.getSampleString()) {
-        print("Native function was successfully called")
-    } else {
-        throw new Error("Failed to call native function")
-    }
+	globalThis.test = requireNapiPreview('sample_function', true);
+	if ('Test' === globalThis.test.getSampleString()) {
+		print('Native function was successfully called');
+	} else {
+		throw new Error('Failed to call native function');
+	}
 }
 
-main()
+main();

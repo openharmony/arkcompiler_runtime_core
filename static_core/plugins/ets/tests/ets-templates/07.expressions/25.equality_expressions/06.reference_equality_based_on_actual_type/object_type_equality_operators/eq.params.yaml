@@ -1,0 +1,106 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # numerical equality
+    - case:
+          - '-128 as byte'
+          - '-128 as short'
+          - '-128'
+          - '-128 as long'
+          - '-128f'
+          - '-128.0'
+          - new Byte(-128 as byte)
+          - new Short(-128 as short)
+          - new Int(-128)
+          - new Long(-128 as long)
+          - new Float(-128f)
+          - new Double(-128.0)
+
+    - case:
+          - '127 as byte'
+          - '127 as short'
+          - '127'
+          - '127 as long'
+          - '127f'
+          - '127.0'
+          - "c'\\u007f'"
+          - new Byte(127 as byte)
+          - new Short(127 as short)
+          - new Int(127)
+          - new Long(127 as long)
+          - new Float(127f)
+          - new Double(127.0)
+          - "new Char(c'\\u007f')"
+
+    - case:
+          - '0 as byte'
+          - '0 as short'
+          - '0'
+          - '0 as long'
+          - '0f'
+          - '0.0'
+          - "c'\\u0000'"
+          - new Byte(0 as byte)
+          - new Short(0 as short)
+          - new Int(0)
+          - new Long(0 as long)
+          - new Float(0f)
+          - new Double(0.0)
+          - "new Char(c'\\u0000')"
+
+    # string equality
+    - case:
+          - "'abc def'"
+          - '`abc def`'
+          - new String('abc def')
+
+    - case:
+          - "''"
+          - '``'
+          - new String('')
+
+    # boolean equality
+    - case:
+          - 'true'
+          - new Boolean(true)
+
+    - case:
+          - 'false'
+          - new Boolean(false)
+
+    # enumeration  equality
+    - decl: |-
+          enum Color { Red, Green, Blue }
+      case:
+          - Color.Red
+          - Color.values()[0]
+
+    - decl: |-
+          enum Size { Small = "S", Medium = "M", Large = "L" }
+      case:
+          - Size.values()[1]
+          - Size.Medium
+
+    # bigint equality
+    - case:
+        - 12345n
+        - new BigInt(12345)
+        - new BigInt('12345')
+
+    - case:
+        - '0n'
+        - '-0n'
+        - new BigInt()
+        - new BigInt(0.0)

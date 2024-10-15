@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const function_rest_params = etsMod.getFunction('function_rest_params');
+const functionRestParams = etsMod.getFunction('functionRestParams');
 
 {
-  let ret = function_rest_params(1, 2, 3)
-  ASSERT_EQ(ret, '1,2,3');
+	let ret = functionRestParams(1, 2, 3);
+	ASSERT_EQ(ret, '1,2,3');
 }
 
 GCJSRuntimeCleanup();

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,14 +90,12 @@ function check_ubuntu_version()
     . /etc/os-release
 
     if [[ "${NAME}" != "Ubuntu" ]]; then
-        echo "FATAL: OS name is ${NAME}, but only Ubuntu is supported at the moment"
-        exit 1
+        echo "WARNING: OS name is ${NAME}, but only Ubuntu is supported at the moment"
     fi
 
     local major_version=$(echo "${VERSION_ID}" | cut -d. -f1)
     if [[ "${major_version}" -lt 20 ]]; then
-        echo "FATAL: OS version is ${VERSION_ID}, but Ubuntu 20+ is required to run this script"
-        exit 1
+        echo "WARNING: OS version is ${VERSION_ID}, but Ubuntu 20+ is required to run this script"
     fi
 }
 
@@ -137,7 +135,7 @@ fi
 
 BUILD_SOMETHING=no
 for i in "$@"; do
-    case $i in
+    case "$i" in
     -h|--help)
         print_help
         exit 0

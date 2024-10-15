@@ -50,7 +50,7 @@ class RunnerETS(RunnerFileBased):
         self.test_env.es2panda_args.extend([
             f"--arktsconfig={self.arktsconfig}",
             "--gen-stdlib=false",
-            "--extension=ets",
+            "--extension=sts",
             f"--opt-level={self.config.es2panda.opt_level}"
         ])
         self.test_env.es2panda_args.extend(self.config.es2panda.es2panda_args)
@@ -78,7 +78,7 @@ class RunnerETS(RunnerFileBased):
         self.collect_excluded_test_lists(test_name=suite_name)
         self.collect_ignored_test_lists(test_name=suite_name)
 
-        self.add_directory(self.test_root, "ets", [])
+        self.add_directory(self.test_root, "sts", [])
 
     @property
     def default_work_dir_root(self) -> Path:

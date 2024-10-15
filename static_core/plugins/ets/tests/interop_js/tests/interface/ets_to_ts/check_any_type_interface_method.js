@@ -13,84 +13,75 @@
  * limitations under the License.
  */
 
-const {
-    num,
-    string,
-    bool,
-    arr,
-    obj,
-    isObject,
-    AnyTypeMethodClass,
-    create_interface_class_any_type_method,
-} = require('interface_method.test.js');
+const { num, string, bool, arr, obj, isObject, AnyTypeMethodClass, createInterfaceClassAnyTypeMethod } = require('interface_method.test.js');
 
-function check_any_type_method_class_interface_int() {
-    const IClass = new AnyTypeMethodClass();
+function checkAnyTypeMethodClassInterfaceInt() {
+	const IClass = new AnyTypeMethodClass();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_any_type_method_class_interface_string() {
-    const IClass = new AnyTypeMethodClass();
+function checkAnyTypeMethodClassInterfaceString() {
+	const IClass = new AnyTypeMethodClass();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_any_type_method_class_interface_bool() {
-    const IClass = new AnyTypeMethodClass();
+function checkAnyTypeMethodClassInterfaceBool() {
+	const IClass = new AnyTypeMethodClass();
 
-    ASSERT_TRUE(IClass.get(bool) === bool);
+	ASSERT_TRUE(IClass.get(bool) === bool);
 }
 
-function check_any_type_method_class_interface_arr() {
-    const IClass = new AnyTypeMethodClass();
+function checkAnyTypeMethodClassInterfaceArr() {
+	const IClass = new AnyTypeMethodClass();
 
-    ASSERT_TRUE(Array.isArray(IClass.get(arr)));
+	ASSERT_TRUE(Array.isArray(IClass.get(arr)));
 }
 
-function check_any_type_method_class_interface_object() {
-    const IClass = new AnyTypeMethodClass();
+function checkAnyTypeMethodClassInterfaceObject() {
+	const IClass = new AnyTypeMethodClass();
 
-    ASSERT_TRUE(isObject(IClass.get(obj)));
+	ASSERT_TRUE(isObject(IClass.get(obj)));
 }
 
-function check_interface_object_from_ets_int() {
-    const IClass = new create_interface_class_any_type_method();
+function checkInterfaceObjectFromEtsInt() {
+	const IClass = new createInterfaceClassAnyTypeMethod();
 
-    ASSERT_TRUE(IClass.get(num) === num);
+	ASSERT_TRUE(IClass.get(num) === num);
 }
 
-function check_interface_object_from_ets_string() {
-    const IClass = new create_interface_class_any_type_method();
+function checkInterfaceObjectFromEtsString() {
+	const IClass = new createInterfaceClassAnyTypeMethod();
 
-    ASSERT_TRUE(IClass.get(string) === string);
+	ASSERT_TRUE(IClass.get(string) === string);
 }
 
-function check_interface_object_from_ets_bool() {
-    const IClass = new create_interface_class_any_type_method();
+function checkInterfaceObjectFromEtsBool() {
+	const IClass = new createInterfaceClassAnyTypeMethod();
 
-    ASSERT_TRUE(IClass.get(bool) === bool);
+	ASSERT_TRUE(IClass.get(bool) === bool);
 }
 
-function check_interface_object_from_ets_arr() {
-    const IClass = new create_interface_class_any_type_method();
+function checkInterfaceObjectFromEtsArr() {
+	const IClass = new createInterfaceClassAnyTypeMethod();
 
-    ASSERT_TRUE(Array.isArray(IClass.get(arr)));
+	ASSERT_TRUE(Array.isArray(IClass.get(arr)));
 }
 
-function check_interface_object_from_ets_object() {
-    const IClass = new create_interface_class_any_type_method();
+function checkInterfaceObjectFromEtsObject() {
+	const IClass = new createInterfaceClassAnyTypeMethod();
 
-    ASSERT_TRUE(isObject(IClass.get(obj)));
+	ASSERT_TRUE(isObject(IClass.get(obj)));
 }
 
-check_any_type_method_class_interface_int();
-check_any_type_method_class_interface_string();
-check_any_type_method_class_interface_bool();
-check_any_type_method_class_interface_arr();
-check_any_type_method_class_interface_object();
-check_interface_object_from_ets_int();
-check_interface_object_from_ets_string();
-check_interface_object_from_ets_bool();
-check_interface_object_from_ets_arr();
-check_interface_object_from_ets_object();
+checkAnyTypeMethodClassInterfaceInt();
+checkAnyTypeMethodClassInterfaceString();
+checkAnyTypeMethodClassInterfaceBool();
+checkAnyTypeMethodClassInterfaceArr();
+checkAnyTypeMethodClassInterfaceObject();
+checkInterfaceObjectFromEtsInt();
+checkInterfaceObjectFromEtsString();
+checkInterfaceObjectFromEtsBool();
+checkInterfaceObjectFromEtsArr();
+checkInterfaceObjectFromEtsObject();

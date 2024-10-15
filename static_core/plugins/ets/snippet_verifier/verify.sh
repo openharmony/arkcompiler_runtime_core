@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 args=$(getopt -a -o s:b:r --long spec:,build:,rst: -- "$@")
 
 if [ $? -ne 0 ]; then
@@ -21,19 +23,19 @@ fi
 eval set -- "${args}"
 
 while :; do
-    case $1 in
+    case "$1" in
     -b | --build)
-        export build=$2
+        export BUILD=$2
         shift 2
         ;;
 
     -s | --spec)
-        export spec=$2
+        export SPEC=$2
         shift 2
         ;;
 
     -r | --rst)
-        export rst_file=$2
+        export RST_FILE=$2
         shift 2
         ;;
 
@@ -57,7 +59,7 @@ WARNING_COLOR=11
 
 function echo_color_text() {
     COLOR_CODE=$1
-    if [[ $3 ]]; then
+    if [[ "$3" ]]; then
         tabs="\t";
     else
         tabs="\n"; fi
@@ -68,13 +70,13 @@ function echo_color_text() {
     printf "${C}${TEXT}${NC}${tabs}"
 }
 
-es2panda=$build/bin/es2panda
+es2panda=$BUILD/bin/es2panda
 # echo $es2panda
-if ! test -f "$build"; then
+if ! test -f "$BUILD"; then
     echo_color_text $WARNING_COLOR "please check your path to es2panda: \n $es2panda"
     exit; fi
 
-if [ "$spec" ] && [ "$rst_file" ]; then
+if [ "$SPEC" ] && [ "$RST_FILE" ]; then
     echo_color_text $WARNING_COLOR "please specify correctly"
     exit
 fi
@@ -84,10 +86,10 @@ mkdir snippets; mkdir snippets/abc; mkdir results
 touch snippets/_output; touch results/main_results
 chmod a+rwx -R snippets
 
-if [[ $spec ]]; then
-    python3 verify.py --spec="$spec" 2> ./.verifier_error; fi
-if [[ $rst_file ]]; then
-    python3 verify.py --rst="$rst_file" 2> ./.verifier_error; fi
+if [[ "$SPEC" ]]; then
+    python3 verify.py --spec="$SPEC" 2> ./.verifier_error; fi
+if [[ "$RST_FILE" ]]; then
+    python3 verify.py --rst="$RST_FILE" 2> ./.verifier_error; fi
 
 if [[ $(cat ./.verifier_error) ]]; then
     echo_color_text $WARNING_COLOR "please fix the snippets meta or check error in .verifier_error"
@@ -109,7 +111,7 @@ function write_md_results() {
     check_results_md_file "$theme"
 
     echo "<td> <details><summary>$2</summary><pre><code class=typescript>">> results/"$1".md
-    cat snippets/"$2".ets >> results/"$1".md
+    cat snippets/"$2".sts >> results/"$1".md
     echo "</td></code></pre></details>" >> results/"$1".md
     echo "<td> $3 </td><td> $4 </td><td> $5 </td><td> $6 </td><td> $7 </th></tr>" >> results/"$1".md
 }
@@ -146,31 +148,31 @@ function write_results() {
 }
 
 function check() {
-    ets_count=$(ls "$snippets"/*.ets 2> /dev/null | wc -l)
+    ets_count=$(ls "$snippets"/*.sts 2> /dev/null | wc -l)
     if [ "$ets_count" = 0 ]; then
-        echo_color_text $OK_COLOR "There is no snippets in $rst_file $spec :)"
+        echo_color_text $OK_COLOR "There is no snippets in $RST_FILE $SPEC :)"
         exit
     fi
     chmod a+x "$snippets"
-    for snippet in $snippets/*.ets; do
-        snippet_name=$(echo "${snippet##*/}" | cut -d "." -f 1) # "/../../../test.ets" -> "test"
+    for snippet in $snippets/*.sts; do
+        snippet_name=$(echo "${snippet##*/}" | cut -d "." -f 1) # "/../../../test.sts" -> "test"
 
         # echo "$snippet_name"
-        snippet_ets=$snippets/$snippet_name.ets
+        snippet_ets=$snippets/$snippet_name.sts
         snippet_ts=$snippets/$snippet_name.ts
 
         expect_cte=$(sed -n '1p' "$snippet_ets")
         frontend_status_comment=$(sed -n '2p' "$snippet_ets")
         expect_subset=$(sed -n '3p' "$snippet_ets")
 
-        frontend_status=${frontend_status_comment##* }
+        frontend_status_formated=${frontend_status_comment##* }
         expect_status=1
         expect_subset_status=1
 
-        if [[ $expect_cte = "// cte" ]]; then
+        if [[ "$expect_cte" = "// cte" ]]; then
             expect_status=0
         fi
-        if [[ $expect_subset = "// ns" ]]; then
+        if [[ "$expect_subset" = "// ns" ]]; then
             expect_subset_status=0
         fi
 
@@ -184,15 +186,15 @@ function check() {
         fi
 
         ets_compile_status=1; ts_compile_status=1
-        if [[ $ets_compile_return != '' ]]; then
+        if [[ "$ets_compile_return" != '' ]]; then
             ets_compile_status=0; fi
-        if [[ $ts_compile_return != '' ]]; then
+        if [[ "$ts_compile_return" != '' ]]; then
             ts_compile_status=0; fi
 
         ts_subset=$((! $ets_compile_status ^ $ts_compile_status))
         # ets_compile=$((! $ets_compile_status))
 
-        write_results "$snippet_name" $expect_subset_status $ts_subset $expect_status $ets_compile_status "$frontend_status"
+        write_results "$snippet_name" $expect_subset_status $ts_subset $expect_status $ets_compile_status "$frontend_status_formated"
 
     done
     for md_result in results/*.md; do

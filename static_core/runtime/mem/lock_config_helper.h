@@ -34,6 +34,12 @@ public:
 };
 
 template <class LockConfigT>
+class LockConfigHelper<LockConfigT, MT_MODE_TASK> {
+public:
+    using Value = typename LockConfigT::CommonLock;
+};
+
+template <class LockConfigT>
 class LockConfigHelper<LockConfigT, MT_MODE_SINGLE> {
 public:
     using Value = typename LockConfigT::DummyLock;

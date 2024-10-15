@@ -19,11 +19,13 @@ const etsMod = getTestModule('escompat_test');
 const CreateEtsSample = etsMod.getFunction('Error_CreateEtsSample');
 const TestJSToString = etsMod.getFunction('Error_TestJSToString');
 
-{ // Test JS Error
-  TestJSToString(new Error('message'));
+{
+	// Test JS Error
+	TestJSToString(new Error('message'));
 }
 
-{ // Test ETS Error
-  let v = CreateEtsSample();
-  ASSERT_TRUE(v.toString().includes(v.message.toString()));
+{
+	// Test ETS Error
+	let v = CreateEtsSample();
+	ASSERT_TRUE(v.toString().includes(v.message.toString()));
 }

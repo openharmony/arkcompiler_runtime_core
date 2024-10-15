@@ -27,14 +27,13 @@ Types used as generic parameters in a generic are called *type parameters*
 (see :ref:`Type Parameters`).
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
-is the action that converts a *generic* into a real program entity: non-generic
-class, interface, union, array, function, or method.
-Instantiation (see :ref:`Generic Instantiations`) can be performed either
-explicitly or implicitly.
+is the action that converts a *generic* into a real program entity (non-generic
+class, interface, union, array, function, or method), or into another *generic
+instantiation*. Instantiation (see :ref:`Generic Instantiations`) can be
+performed either explicitly or implicitly.
 
-There are special types in the |LANG| which syntactically look like generics
-and they allow to create new types durign compilation (see
-:ref:`Utility Types`).
+|LANG| has special types that look similar to generics  syntax-wise, and
+allow creating new types during compilation (see :ref:`Utility Types`).
 
 
 .. index::
@@ -65,9 +64,8 @@ an ordinary type inside a *generic*.
 Syntactically, a type parameter is an unqualified identifier with a proper
 scope (see :ref:`Scopes` for the scope of type parameters). Each type parameter
 can have a *constraint* (see :ref:`Type Parameter Constraint`). A type
-parameter can have a default type (see :ref:`Type Parameter Default`). Also
-type parameter may specify its variance (see :ref:`Type Parameter Variance`) in
-'in' or 'out' form.
+parameter can have a default type (see :ref:`Type Parameter Default`), and can
+specify its *in-* or *out-* variance (see :ref:`Type Parameter Variance`).
 
 .. index::
    generic parameter
@@ -168,7 +166,7 @@ If no constraint is declared, then the type parameter is not compatible with
 ``Object``, and has no methods or fields available for use. Lack of constraint
 effectively means ``extends Object|null|undefined``. 
 If type parameter *T* has type constraint *S*, then the actual type of the
-generic instantiation must be compatible  with *S* (see :ref:`Type Compatibility`).
+generic instantiation must be compatible with *S* (see :ref:`Type Compatibility`).
 If the constraint *S* is a non-nullish type (see :ref:`Nullish Types`), then
 *T* is non-nullish too. If the type parameter is constrained with the
 ``keyof T``, then valid instantiations of this parameter can be the values of
@@ -240,13 +238,13 @@ section depends on itself.
    :linenos:
 
     class Base {}
-    class Derived { }
+    class Derived extends Base { }
     class SomeType { }
   
     class G<T, S extends T> {}
     
     let x: G<Base, Derived>  // correct: the second argument directly
-                            // depends on the first one
+                             // depends on the first one
     let y: G<Base, SomeType> // error: SomeType does not depend on Base
 
     class A0<T> {
@@ -342,12 +340,12 @@ Type Parameter Variance
     frontend_status: Partly
     todo: Implement semantic checks, now in/out modifiers are only parsed ang ignored.
 
-Normally, two different argument types that specialize a generic class are
-handled as different and unrelated types (*invariance*). |LANG| supports type
-parameter variance which allows such specializations become base classes and
-derived classes (*covariance* :ref:`Covariance`), or vice versa
-(*contravariance* :ref:`Contravariance`), depending on the relationship of
-inheritance between argument types.
+Normally, two different argument types used to instantiate a generic class or
+interface are handled as different and unrelated types (*invariance*). |LANG|
+supports type parameter variance that allows such instantiations become base
+classes and derived classes (:ref:`Covariance`), or vice versa
+(:ref:`Contravariance`), depending on the relationship of inheritance between
+argument types.
 
 .. index::
    generic class
@@ -362,7 +360,7 @@ inheritance between argument types.
 
 Special markers are used to specify the *declaration-site variance*. The
 markers are to be added to generic parameter declarations. These markers are
-expressed as keywords ``in`` or ``out`` (a *variance modifier*, which specifies
+expressed as keywords ``in`` or ``out`` (a *variance modifier* that specifies
 the variance of the type parameter).
 
 Type parameters with the keyword ``out`` are *covariant* (see
@@ -380,12 +378,40 @@ Type parameters with the keyword ``in`` are *contravariant* (see
 
 Otherwise a :index:`compile-time error` occurs.
 
-
-.. TBD function types! Variance interleaving T, (T)=>..., (((T)=>...)=>...)
-
-
 Type parameters with no variance modifier are implicitly *invariant*, and can
 occur in any position.
+
+.. code-block:: typescript
+   :linenos:
+
+    class X<in T1, out T2, T3> {
+       // T1 can be used in in-position only
+       foo (p: T1) {...}
+
+       // T2 can be used in out-position only
+       bar(): T2 {...}
+       readonly fld1: T2
+
+       // T3 can be used in any position (in-out, write-read)
+       fld2: T3
+       method (p: T3): T3 {...}
+    }
+
+
+In case of function types (see :ref:`Function Types`) variance interleaving
+occurs.
+
+.. code-block:: typescript
+   :linenos:
+
+    class X<in T1, out T2> {
+       foo (p: T1): T2 {...}                           // in - out
+       foo (p: (p: T2)=> T1) {...}                     // out - in
+       foo (p: (p: (p: T1)=>T2)=> T1) {...}            // in - out - in
+       foo (p: (p: (p: (p: T2)=> T1)=>T2)=> T1) {...}  // out - in - out - in
+       // and further more
+    }
+
 
 .. index::
    generic
@@ -402,11 +428,12 @@ type parameters have a variance modifier specified.
 
 *Variance* is used to describe the subtyping (see :ref:`Subtyping`) operation
 on parameterized types (see :ref:`Generics`). The variance of the corresponding
-type parameter *F* defines the subtyping between *T<A>* and *T<B>* (in the case
-of declaration-site variance with two different types *A* <: *B*) as follows:
+type parameter *F* defines the subtyping between ``T<A>`` and ``T<B>`` (in the
+case of declaration-site variance with two different types ``A`` <: ``B``) as
+follows:
 
--  Covariant :ref:`Covariance` (*out F*): *T<A>* <: *T<B>*;
--  Contravariant :ref:`Contravariance` (*in F*): *T<A>* :> *T<B>*;
+-  Covariant :ref:`Covariance` (*out F*): ``T<A>`` <: ``T<B>``;
+-  Contravariant :ref:`Contravariance` (*in F*): ``T<A>`` :> ``T<B>``;
 -  Invariant (default) (*F*).
 
 .. index::
@@ -439,15 +466,15 @@ declaration defines a set of corresponding non-generic entities. A generic
 entity must be *instantiated* in order to make it a non-generic entity. The
 result of instantiation is a *real*, non-parameterized program entity, e.g.,
 class, interface, union, array, method, or function that is handled in a
-usual way.
+usual way. Instantiation can also lead to a new definition of a generic entity.
 
 Conceptually, a generic class, an interface, a type alias, a method, or a
 function defines a set of non-generics classes, interfaces, unions, arrays,
 methods, or functions respectively.
 
-An explicit generic instantiation is the language construct that provides a
-list of *type arguments* (see :ref:`Type Arguments`) that specify real types to
-substitute corresponding type parameters of a generic:
+An explicit generic instantiation is a language construct, which provides a
+list of *type arguments* (see :ref:`Type Arguments`) that specify real types or
+type parameters to substitute corresponding type parameters of a generic:
 
 .. code-block:: typescript
    :linenos:
@@ -467,6 +494,13 @@ substitute corresponding type parameters of a generic:
     type MyArray<T> = T[] // Generic type declaration
     let array: MyArray<boolean> = [true, false] // Explicit array instantiation, type argument provided
 
+    class X <T1, T2> {}
+    // Different forms of explicit instantiations of class X producing new generic entities
+    class Y<T> extends X<number, T> { // class Y extends X instantiated with number and T
+       f1: X<Object, T> // X instantiated with Object and T
+       f2: X<T, string> // X instantiated with T and string
+    }
+
 
 .. index::
    instantiation
@@ -485,7 +519,7 @@ the list of its type arguments.
    lines 312, 314, 336 - initially the type was *T*:sub:`1`, ``...``, *T*:sub:`n`
    lines 321, 322 - initially *C*:sub:`1`, ``...``, *C*:sub:`n` and *T*:sub:`1`, ``...``, *T*:sub:`n` 
 
-If type parameters ``T``:sub:`1`, ``...``, ``T``:sub:`n` of a generic
+If type parameters *T*:sub:`1`, ``...``, *T*:sub:`n` of a generic
 declaration are constrained by the corresponding ``C``:sub:`1`, ``...``,
 ``C``:sub:`n`, then *T*:sub:`i` is compatible with each constraint type
 *C*:sub:`i` (see :ref:`Type Compatibility`). All subtypes of the type listed
@@ -636,7 +670,7 @@ Partial Utility Type
 .. meta:
     frontend_status: Done
 
-Type ``Partial<T>`` constructs a type with all properties of *T* set to
+Type ``Partial<T>`` constructs a type with all properties of ``T`` set to
 optional. ``T`` must be a class or an interface type. No method of ``T`` is
 part of the ``Partial<T>`` type.
 
@@ -673,7 +707,7 @@ literals.
 
 |
 
-.. Required Utility Type:
+.. _Required Utility Type:
 
 Required Utility Type
 =====================
@@ -772,10 +806,10 @@ Record Utility Type
     frontend_status: Partly
     todo: support literals in Record types - #13645
 
-Type ``Record<K, V>`` constructs a container that maps keys (of type *K*)
-to values (of type *V*).
+Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
+to values (of type ``V``).
 
-The type *K* is restricted to ``number`` types, type ``string``, union types
+Type ``K`` is restricted to ``number`` types, type ``string``, union types
 constructed from these types, and literals of these types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
@@ -800,15 +834,15 @@ type is used in place of this type:
     type R4 = Record<"salary" | "bonus", number> // ok
     type R4 = Record<1 | true, number> // compile-time error
 
-There are no restrictions on type *V*. 
+There are no restrictions on type ``V``.
 
 A special form of object literals is supported for instances of type ``Record``
 (see :ref:`Object Literal of Record Type`).
 
 Access to ``Record<K, V>`` values is performed by an *indexing expression*
 like *r[index]*, where *r* is an instance of type ``Record``, and *index*
-is the expression of type *K*. The result of an indexing expression is of type
-*V* if *K* is a union that contains literal types only. Otherwise, it is of
+is the expression of type ``K``. The result of an indexing expression is of type
+``V`` if ``K`` is a union that contains literal types only. Otherwise, it is of
 type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
 
 .. index::
@@ -833,8 +867,8 @@ type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
     x['key2'] = 8
     console.log(x['key2']) // prints 8
 
-In the example above, *K* is a union of literal types. The result of an
-indexing expression is of type *V*. In this case it is ``number``.
+In the example above, ``K`` is a union of literal types. The result of an
+indexing expression is of type ``V``. In this case it is ``number``.
 
 |
 

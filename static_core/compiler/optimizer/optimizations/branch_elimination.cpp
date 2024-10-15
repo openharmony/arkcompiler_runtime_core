@@ -216,7 +216,7 @@ void BranchElimination::EliminateBranch(BasicBlock *ifBlock, BasicBlock *elimina
     });
     bool dominatesAllPreds = (it == preds.cend());
     if (preds.size() > 1 && !dominatesAllPreds) {
-        RemovePredecessorUpdateDF(eliminatedBlock, ifBlock);
+        GetGraph()->RemovePredecessorUpdateDF(eliminatedBlock, ifBlock);
         ifBlock->RemoveSucc(eliminatedBlock);
         ifBlock->RemoveInst(ifBlock->GetLastInst());
         GetGraph()->GetAnalysis<Rpo>().SetValid(true);

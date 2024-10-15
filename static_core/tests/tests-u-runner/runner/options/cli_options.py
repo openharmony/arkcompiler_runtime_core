@@ -86,6 +86,10 @@ def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
         default=None,
         help='run Hermes tests')
     parser.add_argument(
+        '--astchecker', action='store_true', dest='astchecker',
+        default=None,
+        help='run ast checker tests')
+    parser.add_argument(
         '--ets-system-tests', action='store_true', dest='system',
         default=None,
         help='run ets-system-tests')

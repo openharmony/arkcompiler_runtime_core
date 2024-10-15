@@ -25,10 +25,11 @@ protected:
     // without it.
     InterferenceGraph BuildSubgraph(InterferenceGraph &origGr, unsigned count, ArenaVector<unsigned> &peo,
                                     unsigned peoCount);
+    InterferenceGraph AssignColorsCreateIG();
 };
 
 namespace {
-constexpr unsigned DEFAULT_CAPACITY1 = 10;
+constexpr unsigned DEFAULT_CAPACITY1 = 10U;
 unsigned g_testEdgeS1[2U][2U] = {{0U, 1U}, {7U, 4U}};  // NOLINT(modernize-avoid-c-arrays)
 auto g_isInSet = [](unsigned a, unsigned b) {
     for (size_t i = 0; i < 2U; i++) {  // NOLINT(modernize-loop-convert)
@@ -219,11 +220,10 @@ TEST_F(RegAllocInterferenceTest, AssignColorsSimple)
     EXPECT_NE(nd4->GetColor(), nd3->GetColor());
 }
 
-TEST_F(RegAllocInterferenceTest, AssignColors)
+InterferenceGraph RegAllocInterferenceTest::AssignColorsCreateIG()
 {
-    const unsigned defaultCapacity = 11;
-    const unsigned defaultEdges = 12;
-    const unsigned defaultAedges = 4;
+    const unsigned defaultEdges = 12U;
+    const unsigned defaultAedges = 4U;
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ::std::pair<unsigned, unsigned> testEdges[defaultEdges] = {{0U, 1U}, {1U, 2U}, {2U, 0U},  {0U, 3U},
                                                                {2U, 3U}, {3U, 4U}, {6U, 5U},  {5U, 7U},
@@ -231,9 +231,28 @@ TEST_F(RegAllocInterferenceTest, AssignColors)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     ::std::pair<unsigned, unsigned> testAedges[defaultAedges] = {{3U, 6U}, {6U, 9U}, {2U, 5U}, {7U, 8U}};
 
+    const unsigned defaultCapacity = 11U;
+
     InterferenceGraph gr(GetLocalAllocator());
     gr.Reserve(defaultCapacity);
 
+    for (auto &testEdge : testEdges) {
+        auto x = testEdge.first;
+        auto y = testEdge.second;
+        gr.AddEdge(x, y);
+    }
+    for (auto &testEdge : testAedges) {
+        auto x = testEdge.first;
+        auto y = testEdge.second;
+        gr.AddAffinityEdge(x, y);
+    }
+
+    return gr;
+}
+
+TEST_F(RegAllocInterferenceTest, AssignColors)
+{
+    auto gr = AssignColorsCreateIG();
     auto *nd0 = gr.AllocNode();
     auto *nd1 = gr.AllocNode();
     auto *nd2 = gr.AllocNode();
@@ -246,16 +265,6 @@ TEST_F(RegAllocInterferenceTest, AssignColors)
     auto *nd9 = gr.AllocNode();
     auto *nd10 = gr.AllocNode();
 
-    for (auto &testEdge : testEdges) {
-        auto x = testEdge.first;
-        auto y = testEdge.second;
-        gr.AddEdge(x, y);
-    }
-    for (auto &testEdge : testAedges) {
-        auto x = testEdge.first;
-        auto y = testEdge.second;
-        gr.AddAffinityEdge(x, y);
-    }
     auto &bias0 = gr.AddBias();
     auto &bias1 = gr.AddBias();
     auto &bias2 = gr.AddBias();

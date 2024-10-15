@@ -370,8 +370,6 @@ private:
                                       Span<Class *> interfaces, bool isInterface,
                                       ClassLinkerErrorHandler *errorHandler);
 
-    void OnError(ClassLinkerErrorHandler *errorHandler, Error error, const PandaString &msg);
-
     static bool LayoutFields(Class *klass, Span<Field> fields, bool isStatic, ClassLinkerErrorHandler *errorHandler);
 
     mem::InternalAllocatorPtr allocator_;

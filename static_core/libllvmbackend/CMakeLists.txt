@@ -25,20 +25,30 @@ if(ENABLE_COMPILER_COVERAGE)
 endif()
 
 set(SOURCES
+        llvm_ark_interface.cpp
+        llvm_compiler.cpp
+        llvm_irtoc_compiler.cpp
+        llvm_logger.cpp
+        llvm_options.cpp
         lowering/debug_data_builder.cpp
         lowering/gc_barriers.cpp
         lowering/irtoc_function_utils.cpp
         lowering/llvm_ir_constructor.cpp
         lowering/wrapped_module.cpp
+        mir_compiler.cpp
         object_code/ark_aot_linker.cpp
         object_code/code_info_producer.cpp
         object_code/created_object_file.cpp
         object_code/dump.cpp
+        target_machine_builder.cpp
+        transforms/builtins.cpp
+        transforms/gc_utils.cpp
+        transforms/llvm_optimizer.cpp
         transforms/passes/aarch64_fixup_sdiv.cpp
+        transforms/passes/ark_frame_lowering/frame_builder.cpp
+        transforms/passes/ark_frame_lowering/frame_lowering.cpp
         transforms/passes/ark_gvn.cpp
         transforms/passes/ark_inlining.cpp
-        transforms/passes/ark_frame_lowering/frame_lowering.cpp
-        transforms/passes/ark_frame_lowering/frame_builder.cpp
         transforms/passes/check_external.cpp
         transforms/passes/check_tail_calls.cpp
         transforms/passes/devirt.cpp
@@ -47,6 +57,7 @@ set(SOURCES
         transforms/passes/gc_intrusion.cpp
         transforms/passes/gc_intrusion_check.cpp
         transforms/passes/gep_propagation.cpp
+        transforms/passes/infer_flags.cpp
         transforms/passes/inline_devirt.cpp
         transforms/passes/inline_ir/cleanup_inline_module.cpp
         transforms/passes/inline_ir/discard_inline_module.cpp
@@ -57,20 +68,12 @@ set(SOURCES
         transforms/passes/inline_ir/remove_unused_functions.cpp
         transforms/passes/insert_safepoints.cpp
         transforms/passes/intrinsics_lowering.cpp
+        transforms/passes/loop_peeling.cpp
         transforms/passes/mem_barriers.cpp
         transforms/passes/panda_runtime_lowering.cpp
+        transforms/passes/propagate_lenarray.cpp
         transforms/passes/prune_deopt.cpp
-        transforms/llvm_optimizer.cpp
         transforms/runtime_calls.cpp
-        transforms/gc_utils.cpp
-        transforms/builtins.cpp
-        llvm_ark_interface.cpp
-        llvm_compiler.cpp
-        llvm_irtoc_compiler.cpp
-        llvm_logger.cpp
-        llvm_options.cpp
-        mir_compiler.cpp
-        target_machine_builder.cpp
         utils.cpp
 )
 

@@ -50,7 +50,7 @@ Label(:Loop)
     i1 := Add(i_phi, 1).word
     Goto(:Loop)
 Label(:SlowPath)
-    ep_offset = get_entrypoint_offset("CHECK_CAST")
+    ep_offset = get_entrypoint_offset("CHECK_CAST_SLOW_PATH")
     Intrinsic(:SLOW_PATH_ENTRY, obj, interface).AddImm(ep_offset).MethodAsImm("CheckCastBridge").Terminator.void
     Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }

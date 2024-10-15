@@ -197,6 +197,14 @@ bool BasicBlock::IsEndWithThrowOrDeoptimize() const
     return lastInst_->IsControlFlow() && lastInst_->CanThrow() && lastInst_->IsTerminator();
 }
 
+bool BasicBlock::IsEndWithThrow() const
+{
+    if (lastInst_ == nullptr) {
+        return false;
+    }
+    return lastInst_->GetOpcode() == Opcode::Throw;
+}
+
 Inst *BasicBlock::GetFirstInst() const
 {
     return firstInst_;
@@ -350,16 +358,6 @@ bool BasicBlock::IsCatchBegin() const
     return GetField<CatchBeginBlock>();
 }
 
-void BasicBlock::SetCatchEnd(bool v)
-{
-    SetField<CatchEndBlock>(v);
-}
-
-bool BasicBlock::IsCatchEnd() const
-{
-    return GetField<CatchEndBlock>();
-}
-
 void BasicBlock::SetTry(bool v)
 {
     SetField<TryBlock>(v);
@@ -473,7 +471,7 @@ bool BasicBlock::IsLoopPostExit() const
 
 bool BasicBlock::IsTryCatch() const
 {
-    return IsTry() || IsTryBegin() || IsTryEnd() || IsCatch() || IsCatchBegin() || IsCatchEnd();
+    return IsTry() || IsTryBegin() || IsTryEnd() || IsCatch() || IsCatchBegin();
 }
 
 BasicBlock *BasicBlock::SplitBlockAfterInstruction(Inst *inst, bool makeEdge)
@@ -715,7 +713,7 @@ void BasicBlock::JoinSuccessorBlock()
         auto loop = succ->GetLoop();
         ASSERT(loop != nullptr);
         // Irreducible loop can not be fixed on the fly
-        if (loop->IsIrreducible()) {
+        if (loop->IsIrreducible() || GetGraph()->IsThrowApplied()) {
             GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
         } else {
             // edge can have 2 successors, so it can be back-edge in 2 loops: own loop and outer loop

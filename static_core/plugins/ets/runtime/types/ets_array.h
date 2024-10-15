@@ -20,6 +20,7 @@
 #include "runtime/include/coretypes/array.h"
 #include "plugins/ets/runtime/types/ets_class.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
+#include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_class_root.h"
 #include "plugins/ets/runtime/ets_vm.h"
@@ -263,6 +264,61 @@ using EtsLongArray = EtsPrimitiveArray<EtsLong, EtsClassRoot::LONG_ARRAY>;
 using EtsFloatArray = EtsPrimitiveArray<EtsFloat, EtsClassRoot::FLOAT_ARRAY>;
 using EtsDoubleArray = EtsPrimitiveArray<EtsDouble, EtsClassRoot::DOUBLE_ARRAY>;
 
+namespace test {
+template <class ElementType>
+class EtsArrayObjectMembers;
+}  // namespace test
+
+// Mirror class for Array<T> from ETS stdlib
+template <class ElementType>
+class EtsArrayObject : public EtsObject {
+public:
+    EtsArrayObject() = delete;
+    ~EtsArrayObject() = delete;
+
+    NO_COPY_SEMANTIC(EtsArrayObject);
+    NO_MOVE_SEMANTIC(EtsArrayObject);
+
+    static EtsArrayObject *FromEtsObject(EtsObject *etsObj)
+    {
+        return reinterpret_cast<EtsArrayObject *>(etsObj);
+    }
+
+    EtsTypedObjectArray<ElementType> *GetData()
+    {
+        return reinterpret_cast<EtsTypedObjectArray<ElementType> *>(GetFieldObject(GetBufferOffset()));
+    }
+
+    uint32_t GetActualLength()
+    {
+        return helpers::ToUnsigned(GetFieldPrimitive<EtsInt>(GetActualLengthOffset()));
+    }
+
+    static constexpr size_t GetBufferOffset()
+    {
+        return MEMBER_OFFSET(EtsArrayObject, buffer_);
+    }
+
+    static constexpr size_t GetActualLengthOffset()
+    {
+        return MEMBER_OFFSET(EtsArrayObject, actualLength_);
+    }
+
+private:
+    ObjectPointer<EtsTypedObjectArray<ElementType>> buffer_;
+    EtsInt actualLength_;
+
+    friend class test::EtsArrayObjectMembers<ElementType>;
+};
+
+using EtsBoxedBooleanArray = EtsArrayObject<EtsBoxPrimitive<EtsBoolean>>;
+using EtsBoxedByteArray = EtsArrayObject<EtsBoxPrimitive<EtsByte>>;
+using EtsBoxedCharArray = EtsArrayObject<EtsBoxPrimitive<EtsChar>>;
+using EtsBoxedShortArray = EtsArrayObject<EtsBoxPrimitive<EtsShort>>;
+using EtsBoxedIntArray = EtsArrayObject<EtsBoxPrimitive<EtsInt>>;
+using EtsBoxedLongArray = EtsArrayObject<EtsBoxPrimitive<EtsLong>>;
+using EtsBoxedFloatArray = EtsArrayObject<EtsBoxPrimitive<EtsFloat>>;
+using EtsBoxedDoubleArray = EtsArrayObject<EtsBoxPrimitive<EtsDouble>>;
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_FFI_CLASSES_ETS_ARRAY_H_

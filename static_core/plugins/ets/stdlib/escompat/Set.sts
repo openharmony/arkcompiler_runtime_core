@@ -1,0 +1,234 @@
+/*
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package escompat;
+
+export interface ReadonlySet<T> extends Iterable<T> {
+    /**
+     * Checks if a value is in the Set
+     *
+     * @param v the value to find in the Set
+     *
+     * @returns true if the value is in the Set
+     */
+
+    has(value: T): boolean;
+
+    /**
+     * Returns number of unique elements in the Set
+     *
+     * @returns number of unique elements in the Set
+     */
+    get size(): number;
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    forEach(callbackfn: () => void): void;
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    forEach(callbackfn: (value: T) => void): void;
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply; value2 is always same as value1
+     */
+    forEach(callbackfn: (value: T, value2: T) => void): void;
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply; value2 is always same as value1
+     */
+    forEach(callbackfn: (value: T, value2: T, set: ReadonlySet<T>) => void): void;
+
+    /**
+     * Despite name, returns elements from the Set
+     * @returns an iterable of the values in the set
+     */
+    keys(): IterableIterator<T>;
+
+    /**
+     * Returns elements from the Set
+     *
+     * @returns an iterable of the values in the set
+     */
+    values(): IterableIterator<T>;
+
+    /**
+     * @returns an iterable of [v,v] pairs for every value `v` in the set.
+     */
+    entries(): IterableIterator<[T, T]>;
+}
+
+/**
+ * Set implementation
+ */
+export final class Set<K> implements ReadonlySet<K> {
+    private readonly elements: Map<K, K> = new Map<K, K>()
+
+    /**
+     * Constructs a Set from collection
+     * @param elements initial collection
+     */
+    constructor(elements?: ArrayLike<K> | Iterable<K> | null) {
+        if (elements != null) {
+            const elementsIter = elements.$_iterator()
+
+            iteratorForEach<K>(elements.$_iterator(), (elem: K) => {
+                this.elements.set(elem, elem)
+            })
+        }
+    }
+
+    private toStringVals(): String {
+        const strBuf = new StringBuilder()
+
+        const valsIter = this.values()
+        let valsIterRes = valsIter.next()
+        while (!valsIterRes.done) {
+            strBuf.append(`${valsIterRes.value}`)
+
+            valsIterRes = valsIter.next()
+            if (!valsIterRes.done) {
+                strBuf.append(",")
+            }
+        }
+
+        return strBuf.toString()
+    }
+
+    override toString(): String {
+        return "Set[" + this.toStringVals() + "]"
+    }
+
+    /**
+     * Puts a value into the Set
+     *
+     * @param val the value to put into the Set
+     * @returns this
+     */
+    add(val: K): this {
+        this.elements.set(val, val)
+        return this
+    }
+
+    /**
+     * Checks if a value is in the Set
+     *
+     * @param val the value to find in the Set
+     *
+     * @returns true if the value is in the Set
+     */
+    override has(val: K): boolean {
+        return this.elements.has(val)
+    }
+
+    /**
+     * Returns number of unique elements in the Set
+     *
+     * @returns number of unique elements in the Set
+     */
+    override get size(): number {
+        return this.elements.size;
+    }
+
+    /**
+     * Removes a value from the Set
+     *
+     * @param val the value to remove
+     */
+    delete(val: K): boolean {
+        return this.elements.delete(val)
+    }
+
+    /**
+     * Deletes all elements from the Set
+     */
+    clear(): void {
+        this.elements.clear()
+    }
+
+    /**
+     * Despite name, returns elements from the Set
+     * @returns an iterable of the values in the set
+     */
+    override keys(): IterableIterator<K> {
+        return this.elements.keys()
+    }
+
+    /**
+     * Returns elements from the Set
+     *
+     * @returns an iterable of the values in the set
+     */
+    override values(): IterableIterator<K> {
+        return this.elements.keys()
+    }
+
+    override $_iterator(): IterableIterator<K> {
+        return this.values();
+    }
+
+    /**
+     * @returns an iterable of [v,v] pairs for every value `v` in the set.
+     */
+    override entries(): IterableIterator<[K, K]> {
+        return this.elements.entries()
+    }
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    override forEach(callbackfn: () => void): void {
+        iteratorForEach<K>(this.keys(), (elem: K) => callbackfn())
+    }
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    override forEach(callbackfn: (k: K) => void): void {
+        iteratorForEach<K>(this.keys(), callbackfn)
+    }
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    override forEach(callbackfn: (k: K, v: K) => void): void {
+        iteratorForEach<K>(this.keys(), (x: K): void => callbackfn(x, x))
+    }
+
+    /**
+     * Executes a provided function once per each value in the Set object, in insertion order
+     *
+     * @param callbackfn to apply
+     */
+    override forEach(callbackfn: (k: K, v: K, set: Set<K>) => void): void {
+        iteratorForEach<K>(this.keys(), (x: K): void => callbackfn(x, x, this))
+    }
+}

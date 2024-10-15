@@ -97,6 +97,8 @@ static std::string GetTest2Source()
 )";
 }
 
+namespace ark::disasm::test {
+
 TEST(LabelTest, test1)
 {
     auto program = ark::pandasm::Parser().Parse(R"(
@@ -130,7 +132,7 @@ TEST(LabelTest, test1)
     EXPECT_EQ(bodyGg, "\tjmp jump_label_0\njump_label_0:\n\treturn\n");
 }
 
-void CheckTest2(std::stringstream &g, std::string &line)
+static void CheckTest2(std::stringstream &g, std::string &line)
 {
     std::getline(g, line);
     EXPECT_EQ("jump_label_0:", line);
@@ -255,3 +257,5 @@ TEST(LabelTest, TestExceptions)
 }
 
 #undef DISASM_BIN_DIR
+
+}  // namespace ark::disasm::test

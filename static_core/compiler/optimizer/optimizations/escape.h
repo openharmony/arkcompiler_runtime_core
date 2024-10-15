@@ -450,6 +450,7 @@ private:
     void AddLiveInputs(Inst *inst, ArenaSet<Inst *> &liveIns);
     CallInst *FindCallerInst(BasicBlock *target, Inst *start = nullptr);
     void FixPhiInputTypes();
+    bool HasUsageOutsideBlock(Inst *inst, BasicBlock *initialBlock);
 };
 }  // namespace ark::compiler
 

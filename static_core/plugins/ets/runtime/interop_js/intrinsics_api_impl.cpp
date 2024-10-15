@@ -549,7 +549,6 @@ EtsString *CompilerConvertLocalToString(void *value)
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
     napi_env env = ctx->GetJSEnv();
-
     // NOTE(kprokopenko): can't assign undefined to EtsString *, see #14765
     if (UNLIKELY(IsNullOrUndefined(env, jsVal))) {
         return nullptr;

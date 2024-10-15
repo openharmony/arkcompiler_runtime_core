@@ -13,28 +13,30 @@
  * limitations under the License.
  */
 
-const { etsVm, getTestModule } = require("escompat.test.js")
+const { etsVm, getTestModule } = require('escompat.test.js');
 
-const ets_mod = getTestModule("escompat_test");
-const GCJSRuntimeCleanup = ets_mod.getFunction("GCJSRuntimeCleanup");
-const FooClass = ets_mod.getClass("FooClass");
-const CreateEtsSample = ets_mod.getFunction("Array_CreateEtsSample");
-const TestJSSample = ets_mod.getFunction("Array_TestJSSample");
+const etsod = getTestModule('escompat_test');
+const GCJSRuntimeCleanup = etsod.getFunction('GCJSRuntimeCleanup');
+const FooClass = etsod.getClass('FooClass');
+const CreateEtsSample = etsod.getFunction('Array_CreateEtsSample');
+const TestJSSample = etsod.getFunction('Array_TestJSSample');
 
-{   // Test JS Array<FooClass>
-    TestJSSample(new Array(new FooClass("zero"), new FooClass("one")));
+{
+	// Test JS Array<FooClass>
+	TestJSSample(new Array(new FooClass('zero'), new FooClass('one')));
 }
 
-{   // Test ETS Array<Object>
-    let arr = CreateEtsSample();
-    ASSERT_TRUE(arr instanceof Array);
+{
+	// Test ETS Array<Object>
+	let arr = CreateEtsSample();
+	ASSERT_TRUE(arr instanceof Array);
 
-    ASSERT_EQ(arr.at(0), 123);
-    ASSERT_EQ(arr.at(1), "foo");
+	ASSERT_EQ(arr.at(0), 123);
+	ASSERT_EQ(arr.at(1), 'foo');
 
-    let something = {};
-    arr.push(something);
-    ASSERT_EQ(arr.at(2), something);
+	let something = {};
+	arr.push(something);
+	ASSERT_EQ(arr.at(2), something);
 }
 
 GCJSRuntimeCleanup();

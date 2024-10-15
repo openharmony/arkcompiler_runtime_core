@@ -18,30 +18,30 @@ const etsMod = getTestModule('scenarios_test');
 const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
 class ClassImplementingInterfaceWithPropsAndMethod {
-  numVal = 0;
-  stringVal = 'hehehe';
+	numVal = 0;
+	stringVal = 'hehehe';
 
-  foo(x) {
-    let result = this.stringVal + ' ' + this.numVal + ' ' + x;
-    return result;
-  }
+	foo(x) {
+		let result = this.stringVal + ' ' + this.numVal + ' ' + x;
+		return result;
+	}
 }
 
 {
-  const INT_VALUE = 222;
+	const INT_VALUE = 222;
 
-  // Method 'foo' invocation from function will change field value
-  const CHANGED_INT_VALUE = INT_VALUE * 2;
+	// Method 'foo' invocation from function will change field value
+	const CHANGED_INT_VALUE = INT_VALUE * 2;
 
-  // Concatenation of various class field values and '123'
-  const RESULT_VALUE = 'hehehe ' + CHANGED_INT_VALUE + ' 123';
+	// Concatenation of various class field values and '123'
+	const RESULT_VALUE = 'hehehe ' + CHANGED_INT_VALUE + ' 123';
 
-  const obj = new ClassImplementingInterfaceWithPropsAndMethod()
-  obj.numVal = INT_VALUE;
+	const obj = new ClassImplementingInterfaceWithPropsAndMethod();
+	obj.numVal = INT_VALUE;
 
-  let ret = functionArgIsInterface(obj);
-  ASSERT_EQ(ret, RESULT_VALUE);
+	let ret = functionArgIsInterface(obj);
+	ASSERT_EQ(ret, RESULT_VALUE);
 
-  let changedNumValue = obj.numVal;
-  ASSERT_EQ(changedNumValue, CHANGED_INT_VALUE);
+	let changedNumValue = obj.numVal;
+	ASSERT_EQ(changedNumValue, CHANGED_INT_VALUE);
 }

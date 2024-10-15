@@ -16,11 +16,11 @@ const { etsVm, getTestModule } = require('scenarios.test.js');
 
 const etsMod = getTestModule('scenarios_test');
 const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
-const async_function_any = etsMod.getFunction('async_function_any');
+const asyncFunctionAny = etsMod.getFunction('asyncFunctionAny');
 
 async function test() {
-  let ret = await async_function_any(1);
-  ASSERT_EQ(ret, 1);
+	let ret = await asyncFunctionAny(1);
+	ASSERT_EQ(ret, 1);
 }
 
 test();

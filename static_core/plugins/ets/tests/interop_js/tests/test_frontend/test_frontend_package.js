@@ -12,23 +12,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 class C {
-    foo(param) {
-        return param + 5;
-    }
+	foo(param) {
+		return param + 5;
+	}
 }
 
 class B {
-    prop_var = new C();
+	propVar = new C();
 }
 class A {
-    getB() {
-        return new B(); 
-    }
+	getB() {
+		return new B();
+	}
 }
 
 exports.A = A;
-exports.Car = function (v) { this.color = v }
-exports.foo = function (input) { return input + 42; }
+exports.Car = function (v) {
+	this.color = v;
+};
+exports.foo = function (input) {
+	return input + 42;
+};

@@ -111,3 +111,10 @@ cases:
           constructor (b: U, a: T) {}
       }
     tags: [compile-only]
+
+  - decl: |-
+      class A {
+          public constructor (...a: int[]) {}
+          public constructor (a: int) {}
+      }
+    tags: [compile-only]

@@ -216,7 +216,7 @@ Label(:CallCppIntrinsic)
 }
 end
 
-include_plugin 'string_builder'
+include_plugin 'ets_string_builder'
 
 GenerateStringBuilderString(true)
 GenerateStringBuilderString(false)

@@ -18,19 +18,23 @@ const etsMod = getTestModule('scenarios_test');
 const functionArgIsInterface = etsMod.getFunction('function_arg_is_interface');
 
 function foo(x) {
-  let result = this.stringVal + ' ' + this.numVal + ' ' + x;
-  return result;
+	let result = this.stringVal + ' ' + this.numVal + ' ' + x;
+	return result;
 }
 
 {
-  const INT_VALUE = 222;
+	const INT_VALUE = 222;
 
-  // Method 'foo' invocation from function will change field value
-  const CHANGED_INT_VALUE = INT_VALUE * 2;
+	// Method 'foo' invocation from function will change field value
+	const CHANGED_INT_VALUE = INT_VALUE * 2;
 
-  // Concatenation of various class field values and '123'
-  const RESULT_VALUE = 'hehehe ' + CHANGED_INT_VALUE + ' 123';
+	// Concatenation of various class field values and '123'
+	const RESULT_VALUE = 'hehehe ' + CHANGED_INT_VALUE + ' 123';
 
-  let ret = functionArgIsInterface({foo: foo, numVal: INT_VALUE, stringVal: 'hehehe'});
-  ASSERT_EQ(ret, RESULT_VALUE);
+	let ret = functionArgIsInterface({
+		foo: foo,
+		numVal: INT_VALUE,
+		stringVal: 'hehehe',
+	});
+	ASSERT_EQ(ret, RESULT_VALUE);
 }

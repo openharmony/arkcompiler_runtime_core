@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-"use strict";
+'use strict';
 
-function add_string(s) {
-    return s + " " + s;
+function addString(s) {
+	return s + ' ' + s;
 }
 
-exports.add_string = add_string;
+exports.addString = addString;

@@ -97,8 +97,10 @@ inline T InvokeEntryPoint(Method *method)
     return GetInvokeHelper<T>()(gprData.data(), fprData.data(), stack.data(), 0, thread);
 }
 
+void CountMethodTypes(panda_file::ShortyIterator &it, arch::ArgCounter<RUNTIME_ARCH> counter);
+
 template <typename T, typename... Args>
-inline T InvokeEntryPoint(Method *method, Args... args)
+T InvokeEntryPoint(Method *method, Args... args)
 {
     arch::ArgCounter<RUNTIME_ARCH> counter;
     counter.Count<Method *>();
@@ -108,35 +110,7 @@ inline T InvokeEntryPoint(Method *method, Args... args)
     panda_file::ShortyIterator it(method->GetShorty());
     ++it;  // skip return type
     while (it != panda_file::ShortyIterator()) {
-        switch ((*it).GetId()) {
-            case panda_file::Type::TypeId::U1:
-            case panda_file::Type::TypeId::U8:
-            case panda_file::Type::TypeId::I8:
-            case panda_file::Type::TypeId::I16:
-            case panda_file::Type::TypeId::U16:
-            case panda_file::Type::TypeId::I32:
-            case panda_file::Type::TypeId::U32:
-                counter.Count<int32_t>();
-                break;
-            case panda_file::Type::TypeId::F32:
-                counter.Count<float>();
-                break;
-            case panda_file::Type::TypeId::F64:
-                counter.Count<double>();
-                break;
-            case panda_file::Type::TypeId::I64:
-            case panda_file::Type::TypeId::U64:
-                counter.Count<int64_t>();
-                break;
-            case panda_file::Type::TypeId::REFERENCE:
-                counter.Count<ObjectHeader *>();
-                break;
-            case panda_file::Type::TypeId::TAGGED:
-                counter.Count<coretypes::TaggedValue>();
-                break;
-            default:
-                UNREACHABLE();
-        }
+        CountMethodTypes(it, counter);
         ++it;
     }
 

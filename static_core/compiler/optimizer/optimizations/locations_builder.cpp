@@ -242,10 +242,6 @@ LOCATIONS_BUILDER(void)::VisitIntrinsic(GraphVisitor *visitor, Inst *inst)
     auto graph = static_cast<LocationsBuilder *>(visitor)->GetGraph();
     auto intrinsic = inst->CastToIntrinsic();
     auto id = intrinsic->GetIntrinsicId();
-    if (graph->GetRuntime()->IsIntrinsicStringBuilderAppendString(id)) {
-        // Needs an additional temp register to pass a buffer's slot address to CreatePreWRB
-        inst->SetFlag(inst_flags::REQUIRE_TMP);
-    }
     if (intrinsic->IsNativeCall() || IntrinsicNeedsParamLocations(id)) {
         auto pinfo = static_cast<LocationsBuilder *>(visitor)->GetResetParameterInfo();
         if (intrinsic->IsMethodFirstInput()) {

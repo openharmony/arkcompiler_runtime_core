@@ -20,6 +20,9 @@
 
 namespace ark::test {
 
+constexpr int TEN = 10;
+constexpr int PERCENT = 100;
+
 class MockThreadPoolTest : public testing::Test {
 public:
     static const size_t TASK_NUMBER = 32;
@@ -133,8 +136,7 @@ public:
         task.SetStatus(MockTask::PROCESSING);
         // This is required to distribute tasks between different workers rather than solve it instantly
         // on only one worker.
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(TEN));
         task.SetStatus(MockTask::COMPLETED);
         LOG(DEBUG, RUNTIME) << "Task " << task.GetId() << " has been solved";
         solvedTasks_++;
@@ -302,15 +304,13 @@ void TestThreadPoolWithControllers(size_t numberOfThreadsInitial, size_t numberO
     // Wait for tasks completion.
     for (;;) {
         auto solvedTasks = controller->GetSolvedTasks();
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        auto rate = static_cast<size_t>((static_cast<float>(solvedTasks) / MockThreadPoolTest::TASK_NUMBER) * 100);
+        auto rate = static_cast<size_t>((static_cast<float>(solvedTasks) / MockThreadPoolTest::TASK_NUMBER) * PERCENT);
         (void)rate;
         LOG(DEBUG, RUNTIME) << "Number of solved tasks is " << solvedTasks << " (" << rate << "%)";
         if (solvedTasks == MockThreadPoolTest::TASK_NUMBER || !threadPool->IsActive()) {
             break;
         }
-        // NOLINTNEXTLINE(readability-magic-numbers)
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(TEN));
     }
     controllerThreadPutTask1.join();
     controllerThreadPutTask2.join();

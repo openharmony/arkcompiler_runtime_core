@@ -19,6 +19,7 @@
 #include "runtime/coroutines/coroutine.h"
 #include "runtime/coroutines/coroutine_events.h"
 #include "runtime/coroutines/stackful_common.h"
+#include "runtime/coroutines/coroutine_stats.h"
 
 namespace ark {
 
@@ -126,6 +127,12 @@ public:
     void PrintRunnables(const PandaString &requester);
 #endif
 
+    /* profiling tools */
+    CoroutineWorkerStats &GetPerfStats()
+    {
+        return stats_;
+    }
+
 private:
     /* schedule loop management */
     /// the EP for threaded schedule loops
@@ -200,6 +207,9 @@ private:
      * The value 0 means that coroutine switch is ENABLED.
      */
     uint32_t disableCoroSwitchCounter_ = 0;
+
+    // stats
+    CoroutineWorkerStats stats_;
 
     PandaString name_;
     stackful_coroutines::WorkerId id_ = stackful_coroutines::INVALID_WORKER_ID;

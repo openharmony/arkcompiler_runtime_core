@@ -19,19 +19,19 @@ cases:
           let c: int = 2147483647 - 2   // not a constant expression
           enum Enum { first = a, second = b, third = c }
       use: |-
-          assert Enum.first.getValue() == a
-          assert Enum.second.getValue() == b
-          assert Enum.third.getValue() == c
+          assert Enum.first.valueOf() == a
+          assert Enum.second.valueOf() == b
+          assert Enum.third.valueOf() == c
 
     - decl: |-
           enum Enum { first = 1.0, second, third }  // wrong init type
       use: |-
-          assert Enum.first.getValue() == 1.0
+          assert Enum.first.valueOf() == 1.0
 
     - decl: |-
           enum Enum { first = 10e1, second, third }  // wrong init type
       use: |-
-          assert Enum.first.getValue() == 100
+          assert Enum.first.valueOf() == 100
 
     - decl: |-
           enum Enum { first = true, second = false }  // wrong init type
@@ -40,10 +40,10 @@ cases:
 
     - decl: |-
           enum Enum1 { first = 42, second }
-          enum Enum2 { first = Enum1.first.getValue(), second }  // not a constant expression
+          enum Enum2 { first = Enum1.first.valueOf(), second }  // not a constant expression
       use: |-
-          assert Enum2.first.getValue() == 42
-          assert Enum2.second.getValue() == 43
+          assert Enum2.first.valueOf() == 42
+          assert Enum2.second.valueOf() == 43
 
     - decl: |-
           enum Enum1 { first = 42, second }

@@ -42,7 +42,7 @@ class ModulesFetcher {
   
     program.parse(process.argv);
     
-    const args: any = program.opts();
+    const args = program.opts();
     this.moduleFile_ = args.module_file;
     this.outputDir_ = args.output_dir;
     this.appName_ = args.app_name;
@@ -68,11 +68,11 @@ class ModulesFetcher {
   
   // file line format: <checksum path>
   private parseModuleFile(): boolean {
-    const fileContent: any = fs.readFileSync(this.moduleFile_, 'utf-8');
+    const fileContent = fs.readFileSync(this.moduleFile_, 'utf-8');
     fileContent.split(/\r?\n/).forEach((line) => {
       if (line) {
-        let splitParts: any = line.split(' ');
-        let checksum: number = splitParts[0];
+        let splitParts: Array<string> = line.split(' ');
+        let checksum: number = Number(splitParts[0]);
         let path: string = this.mapSandboxDirToPhysicalDir(splitParts[1]);
 
         if (!this.pathChecksumMap_.has(path)) {
@@ -81,7 +81,7 @@ class ModulesFetcher {
       }
     });
   
-    return !(this.pathChecksumMap_.size == 0);
+    return !(this.pathChecksumMap_.size === 0);
   }
   
   // According to OHOS docs we need to do mapping in this way:

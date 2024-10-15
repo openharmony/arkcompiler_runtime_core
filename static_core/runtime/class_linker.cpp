@@ -580,16 +580,16 @@ static uint32_t LayoutReferenceFields(size_t size, size_t *offset, const PandaVe
     return volatileFieldsNum;
 }
 
+constexpr size_t SIZE_64 = sizeof(uint64_t);
+constexpr size_t SIZE_32 = sizeof(uint32_t);
+constexpr size_t SIZE_16 = sizeof(uint16_t);
+constexpr size_t SIZE_8 = sizeof(uint8_t);
+
 static size_t LayoutFieldsInBaseClassPadding(Class *klass, PandaVector<Field *> *taggedFields,
                                              PandaVector<Field *> *fields64, PandaVector<Field *> *fields32,
                                              PandaVector<Field *> *fields16, PandaVector<Field *> *fields8,
                                              PandaVector<Field *> *refFields, bool isStatic)
 {
-    constexpr size_t SIZE_64 = sizeof(uint64_t);
-    constexpr size_t SIZE_32 = sizeof(uint32_t);
-    constexpr size_t SIZE_16 = sizeof(uint16_t);
-    constexpr size_t SIZE_8 = sizeof(uint8_t);
-
     size_t offset;
 
     if (isStatic) {
@@ -623,11 +623,6 @@ static size_t LayoutFields(Class *klass, PandaVector<Field *> *taggedFields, Pan
                            PandaVector<Field *> *fields32, PandaVector<Field *> *fields16,
                            PandaVector<Field *> *fields8, PandaVector<Field *> *refFields, bool isStatic)
 {
-    constexpr size_t SIZE_64 = sizeof(uint64_t);
-    constexpr size_t SIZE_32 = sizeof(uint32_t);
-    constexpr size_t SIZE_16 = sizeof(uint16_t);
-    constexpr size_t SIZE_8 = sizeof(uint8_t);
-
     size_t offset =
         LayoutFieldsInBaseClassPadding(klass, taggedFields, fields64, fields32, fields16, fields8, refFields, isStatic);
     if (!refFields->empty()) {
@@ -679,6 +674,17 @@ static size_t LayoutFields(Class *klass, PandaVector<Field *> *taggedFields, Pan
     return offset;
 }
 
+static inline bool PushBackFieldIfNonPrimitiveType(Field &field, PandaVector<Field *> &refFields)
+{
+    auto type = field.GetType();
+    if (!type.IsPrimitive()) {
+        refFields.push_back(&field);
+        return true;
+    }
+
+    return false;
+}
+
 /* static */
 bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool isStatic,
                                [[maybe_unused]] ClassLinkerErrorHandler *errorHandler)
@@ -698,13 +704,11 @@ bool ClassLinker::LayoutFields(Class *klass, Span<Field> fields, bool isStatic,
     refFields.reserve(fields.size());
 
     for (auto &field : fields) {
-        auto type = field.GetType();
-        if (!type.IsPrimitive()) {
-            refFields.push_back(&field);
+        if (PushBackFieldIfNonPrimitiveType(field, refFields)) {
             continue;
         }
 
-        switch (type.GetId()) {
+        switch (field.GetType().GetId()) {
             case Type::TypeId::U1:
             case Type::TypeId::I8:
             case Type::TypeId::U8:
@@ -919,6 +923,54 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, const uint8_t *descrip
     return LoadClass(pf, classId, descriptor, context, nullptr);
 }
 
+static void OnError(ClassLinkerErrorHandler *errorHandler, ClassLinker::Error error, const PandaString &msg)
+{
+    if (errorHandler != nullptr) {
+        errorHandler->OnError(error, msg);
+    }
+}
+
+static bool TryInsertClassLoading(panda_file::File::EntityId &classId, const panda_file::File *pf,
+                                  panda_file::ClassDataAccessor &classDataAccessor, ClassLoadingSet *threadLocalSet,
+                                  ClassLinkerErrorHandler *errorHandler)
+{
+    uint32_t classIdInt = classId.GetOffset();
+    uint32_t pandaFileHash = pf->GetFilenameHash();
+    if (!threadLocalSet->insert(GetClassUniqueHash(pandaFileHash, classIdInt)).second) {
+        const PandaString &className = utf::Mutf8AsCString(pf->GetStringData(classDataAccessor.GetClassId()).data);
+        PandaString msg = "Class or interface \"" + className + "\" is its own superclass or superinterface";
+        OnError(errorHandler, ClassLinker::Error::CLASS_CIRCULARITY, msg);
+        return false;
+    }
+
+    return true;
+}
+
+static bool IsContextCanBeLoaded(ClassLinkerContext *context, panda_file::ClassDataAccessor &classDataAccessor,
+                                 const uint8_t *descriptor, ClassLinkerErrorHandler *errorHandler)
+{
+    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
+    if (ctx.GetLanguage() != context->GetSourceLang()) {
+        LanguageContext currentCtx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
+        PandaStringStream ss;
+        ss << "Cannot load " << ctx << " class " << descriptor << " into " << currentCtx << " context";
+        LOG(ERROR, CLASS_LINKER) << ss.str();
+        OnError(errorHandler, ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
+        return false;
+    }
+
+    return true;
+}
+
+static void HandleNoExtensionError(LanguageContext &ctx, const uint8_t *descriptor,
+                                   ClassLinkerErrorHandler *errorHandler)
+{
+    PandaStringStream ss;
+    ss << "Cannot load class '" << descriptor << "' as class linker hasn't " << ctx << " language extension";
+    LOG(ERROR, CLASS_LINKER) << ss.str();
+    OnError(errorHandler, ClassLinker::Error::CLASS_NOT_FOUND, ss.str());
+}
+
 Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::EntityId classId, const uint8_t *descriptor,
                               ClassLinkerContext *context, ClassLinkerErrorHandler *errorHandler,
                               bool addToRuntime /* = true */)
@@ -927,20 +979,12 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     ASSERT(context != nullptr);
     panda_file::ClassDataAccessor classDataAccessor(*pf, classId);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(&classDataAccessor);
-    if (ctx.GetLanguage() != context->GetSourceLang()) {
-        LanguageContext currentCtx = Runtime::GetCurrent()->GetLanguageContext(context->GetSourceLang());
-        PandaStringStream ss;
-        ss << "Cannot load " << ctx << " class " << descriptor << " into " << currentCtx << " context";
-        LOG(ERROR, CLASS_LINKER) << ss.str();
-        OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
+    if (!IsContextCanBeLoaded(context, classDataAccessor, descriptor, errorHandler)) {
         return nullptr;
     }
 
     if (!HasExtension(ctx)) {
-        PandaStringStream ss;
-        ss << "Cannot load class '" << descriptor << "' as class linker hasn't " << ctx << " language extension";
-        LOG(ERROR, CLASS_LINKER) << ss.str();
-        OnError(errorHandler, Error::CLASS_NOT_FOUND, ss.str());
+        HandleNoExtensionError(ctx, descriptor, errorHandler);
         return nullptr;
     }
 
@@ -958,12 +1002,7 @@ Class *ClassLinker::LoadClass(const panda_file::File *pf, panda_file::File::Enti
     Class *baseClass = nullptr;
     bool needLoadBase = IsInitialized() || !utf::IsEqual(ctx.GetObjectClassDescriptor(), descriptor);
     if (needLoadBase) {
-        uint32_t classIdInt = classId.GetOffset();
-        uint32_t pandaFileHash = pf->GetFilenameHash();
-        if (!threadLocalSet->insert(GetClassUniqueHash(pandaFileHash, classIdInt)).second) {
-            const PandaString &className = utf::Mutf8AsCString(pf->GetStringData(classDataAccessor.GetClassId()).data);
-            PandaString msg = "Class or interface \"" + className + "\" is its own superclass or superinterface";
-            OnError(errorHandler, Error::CLASS_CIRCULARITY, msg);
+        if (!TryInsertClassLoading(classId, pf, classDataAccessor, threadLocalSet, errorHandler)) {
             return nullptr;
         }
 
@@ -1543,13 +1582,6 @@ void ClassLinker::VisitLoadedClasses(size_t flag)
             continue;
         }
         ext->VisitLoadedClasses(flag);
-    }
-}
-
-void ClassLinker::OnError(ClassLinkerErrorHandler *errorHandler, ClassLinker::Error error, const PandaString &msg)
-{
-    if (errorHandler != nullptr) {
-        errorHandler->OnError(error, msg);
     }
 }
 

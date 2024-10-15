@@ -316,6 +316,44 @@ static auto g_testModifyManyVregsSource = R"(
     }
 )";
 
+template <typename VRegRef>
+static bool FirstRunModifyVregs(int *regIndex, StackWalker *walker, ObjectHeader *obj, const VRegInfo *regInfo,
+                                const VRegRef &reg)
+{
+    if (!regInfo->IsAccumulator()) {
+        if (reg.HasObject()) {
+            HOOK_ASSERT(reg.GetReference() != nullptr, return false);
+            walker->SetVRegValue(*regInfo, obj);
+        } else if (regInfo->GetLocation() != VRegInfo::Location::CONSTANT) {
+            // frame_size is more than nregs_ now for inst `V4_V4_ID16` and `V4_V4_V4_V4_ID16`
+            auto regIdx = regInfo->GetIndex();
+            if (regIdx < walker->GetMethod()->GetNumVregs()) {
+                HOOK_ASSERT(regIdx == reg.GetLong(), return false);
+            }
+            // NOLINTNEXTLINE(readability-magic-numbers)
+            walker->SetVRegValue(*regInfo, regIdx + 100000000000L);
+        }
+        (*regIndex)++;
+    }
+    return true;
+}
+
+template <typename VRegRef>
+static bool CheckVregs(int *regIndex, ObjectHeader *obj, const VRegInfo &regInfo, const VRegRef &reg)
+{
+    if (!regInfo.IsAccumulator()) {
+        if (reg.HasObject()) {
+            HOOK_ASSERT((reg.GetReference() == reinterpret_cast<ObjectHeader *>(Low32Bits(obj))), return false);
+        } else {
+            if (regInfo.GetLocation() != VRegInfo::Location::CONSTANT) {
+                HOOK_ASSERT(reg.GetLong() == (regInfo.GetIndex() + 100000000000L), return false);
+            }
+            (*regIndex)++;
+        }
+    }
+    return true;
+}
+
 void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
 {
     auto source = g_testModifyManyVregsSource;
@@ -350,40 +388,14 @@ void StackWalkerTest::TestModifyManyVregs(bool isCompiled)
         auto obj = Runtime::GetCurrent()->GetPandaVM()->GetGlobalObjectStorage()->Get(StackWalkerTest::globalObj_);
         if (firstRun) {
             success = walker.IterateVRegsWithInfo([&regIndex, &walker, &obj](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    if (reg.HasObject()) {
-                        HOOK_ASSERT(reg.GetReference() != nullptr, return false);
-                        walker.SetVRegValue(regInfo, obj);
-                    } else if (regInfo.GetLocation() != VRegInfo::Location::CONSTANT) {
-                        // frame_size is more than nregs_ now for inst `V4_V4_ID16` and `V4_V4_V4_V4_ID16`
-                        auto regIdx = regInfo.GetIndex();
-                        if (regIdx < walker.GetMethod()->GetNumVregs()) {
-                            HOOK_ASSERT(regIdx == reg.GetLong(), return false);
-                        }
-                        // NOLINTNEXTLINE(readability-magic-numbers)
-                        walker.SetVRegValue(regInfo, regIdx + 100000000000L);
-                    }
-                    regIndex++;
-                }
-                return true;
+                return FirstRunModifyVregs(&regIndex, &walker, obj, &regInfo, reg);
             });
             HOOK_ASSERT(success, return 1);
             HOOK_ASSERT(regIndex >= 32_I, return 1);
             firstRun = false;
         } else {
             success = walker.IterateVRegsWithInfo([&regIndex, &obj](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    if (reg.HasObject()) {
-                        HOOK_ASSERT((reg.GetReference() == reinterpret_cast<ObjectHeader *>(Low32Bits(obj))),
-                                    return false);
-                    } else {
-                        if (regInfo.GetLocation() != VRegInfo::Location::CONSTANT) {
-                            HOOK_ASSERT(reg.GetLong() == (regInfo.GetIndex() + 100000000000), return false);
-                        }
-                        regIndex++;
-                    }
-                }
-                return true;
+                return CheckVregs(&regIndex, obj, regInfo, reg);
             });
             HOOK_ASSERT(success, return 1);
             HOOK_ASSERT(regIndex >= 32_I, return 1);

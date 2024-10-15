@@ -762,6 +762,8 @@ BoundsAnalysis::BoundsAnalysis(Graph *graph)
 
 bool BoundsAnalysis::RunImpl()
 {
+    MarkerHolder holder {GetGraph()};
+    visited_ = holder.GetMarker();
     ASSERT(!GetGraph()->IsBytecodeOptimizer());
     boundsRangeInfo_.Clear();
     loopsInfoTable_.clear();
@@ -927,7 +929,16 @@ bool BoundsAnalysis::MergePhiPredecessors(PhiInst *phi, BoundsRangeInfo *bri)
     for (auto *block : phiBlock->GetPredsBlocks()) {
         auto *inst = phi->GetPhiInput(block);
         if constexpr (CHECK_TYPE) {
-            if (!(inst->IsAddSub() && (inst->GetInput(0).GetInst()->IsPhi() || inst->GetInput(1).GetInst()->IsPhi())) &&
+            if (inst->GetInputs().size() <= 1) {
+                return false;
+            }
+            auto loop = phi->GetBasicBlock()->GetLoop();
+            auto input0 = inst->GetInput(0).GetInst();
+            auto loop0 = input0->GetBasicBlock()->GetLoop();
+            auto input1 = inst->GetInput(1).GetInst();
+            auto loop1 = input1->GetBasicBlock()->GetLoop();
+            if (!(inst->IsAddSub() && (input0->IsPhi() || input1->IsPhi()) &&
+                  (!loop0->IsInside(loop) || !loop1->IsInside(loop))) &&
                 !inst->IsPhi()) {
                 // NOTE: support Mul-Div and maybe more cases
                 return false;
@@ -967,7 +978,7 @@ std::optional<uint64_t> BoundsAnalysis::GetNestedLoopIterations(Loop *loop, Coun
     if (outerIters == std::numeric_limits<uint64_t>::max()) {
         return outerIters;
     }
-    return iterationsValue * outerIters;
+    return BoundsRange::MulWithOverflowCheck(iterationsValue, outerIters);
 }
 
 std::optional<LoopIterationsInfo> BoundsAnalysis::GetSimpleLoopIterationsInfo(Loop *loop)
@@ -1132,8 +1143,7 @@ bool BoundsAnalysis::ProcessInitPhi(PhiInst *initPhi, BoundsRangeInfo *bri)
 
     // Else init phi range is the union range
     // (which is [min(init.left, update.left), max(init.right, update.right)])
-    auto updateRange = bri->FindBoundsRange(updateInst->GetBasicBlock(), updateInst);
-    if (updateRange.IsMaxRange(initPhi->GetType())) {
+    if (!updateInst->IsMarked(visited_)) {
         // If corresponding update phi was not processed yet
         return true;
     }
@@ -1150,18 +1160,6 @@ bool BoundsAnalysis::ProcessUpdatePhi(PhiInst *updatePhi, BoundsRangeInfo *bri, 
     auto *updatePhiBlock = updatePhi->GetBasicBlock();
     auto *loop = updatePhiBlock->GetLoop();
     auto *header = loop->GetHeader();
-    bool invalidateInit = false;
-
-    // Unite inputs' bounds range info
-    if (!MergePhiPredecessors<true>(updatePhi, bri)) {
-        // Cannot count update phi range => need to invalidate init phi range
-        invalidateInit = true;
-    }
-
-    // While revisiting, we just merge predecessors, because they can be changed
-    if (loopsRevisiting_) {
-        return true;
-    }
 
     // Find corresponding init phi
     auto *initPhi = TryFindCorrespondingInitPhi(updatePhi, header);
@@ -1172,11 +1170,18 @@ bool BoundsAnalysis::ProcessUpdatePhi(PhiInst *updatePhi, BoundsRangeInfo *bri, 
         return true;
     }
 
-    if (invalidateInit) {
+    // Unite inputs' bounds range info
+    if (!MergePhiPredecessors<true>(updatePhi, bri)) {
+        // Cannot count update phi range => need to invalidate init phi range
         // Set maximal possible range and revisit loop to invalidate dependent ranges
         bri->SetBoundsRange(header, initPhi, BoundsRange(initPhi->GetType()));
         VisitLoop(header, updatePhiBlock);
         return false;
+    }
+
+    // While revisiting, we just merge predecessors, because they can be changed
+    if (loopsRevisiting_) {
+        return true;
     }
 
     auto initRange = bri->FindBoundsRange(header, initPhi);
@@ -1187,6 +1192,7 @@ bool BoundsAnalysis::ProcessUpdatePhi(PhiInst *updatePhi, BoundsRangeInfo *bri, 
     auto diffRange = updateRange.Diff(initRange);
     auto updateNewRange = initRange.Add(diffRange.Mul(iterRange));
     bri->SetBoundsRange(updatePhiBlock, updatePhi, updateNewRange.FitInType(updatePhi->GetType()));
+    updatePhi->SetMarker(visited_);
 
     // Propagate init phi bounds info to a loop
     VisitLoop(header, updatePhiBlock);

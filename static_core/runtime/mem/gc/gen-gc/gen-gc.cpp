@@ -607,7 +607,7 @@ NO_THREAD_SAFETY_ANALYSIS void GenGC<LanguageConfig>::Sweep()
         }
 
         // NOLINTNEXTLINE(readability-braces-around-statements, bugprone-suspicious-semicolon)
-        if constexpr (CONCURRENT && LanguageConfig::MT_MODE == MT_MODE_MULTI) {
+        if constexpr (CONCURRENT && LanguageConfig::MT_MODE != MT_MODE_SINGLE) {
             // Run monitor deflation again, to avoid object was reclaimed before monitor deflate.
             auto youngMr = this->GetObjectAllocator()->GetYoungSpaceMemRanges().at(0);
             this->GetPandaVm()->GetMonitorPool()->DeflateMonitorsWithCallBack([&youngMr, this](Monitor *monitor) {

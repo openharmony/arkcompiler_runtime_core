@@ -19,8 +19,8 @@ const GCJSRuntimeCleanup = etsMod.getFunction('GCJSRuntimeCleanup');
 const newInterfaceWithUnionEts = etsMod.getFunction('newInterfaceWithUnionEts');
 
 {
-  ASSERT_EQ(newInterfaceWithUnionEts().methodWithUnion(42), 42);
-  ASSERT_EQ(newInterfaceWithUnionEts().methodWithUnion("abc"), "abc");
+	ASSERT_EQ(newInterfaceWithUnionEts().methodWithUnion(42), 42);
+	ASSERT_EQ(newInterfaceWithUnionEts().methodWithUnion('abc'), 'abc');
 }
 
 GCJSRuntimeCleanup();
