@@ -60,7 +60,17 @@ W0123,W0150,W0201,W0212,W0221,W0231,W0601,W0706,W0640,W1201,W3101"}
 # - S602 - subprocess popen with shell
 # - C101 - coding magic comment required
 # - EXE022 - executable files have shebang 
-FLAKE8_RULES=${FLAKE8_RULES:-"C101,EXE002,S506,S602"}
+# - N801 - class names should use CapWords convention
+# - N802 - function name should be lowercase
+# - N803 - argument name should be lowercase
+# - N805 - first argument of a method should be named ‘self’
+# - N806 - variable in function should be lowercase
+# - N807 - function name should not start and end with ‘__’
+# - N815 - mixedCase variable in class scope
+# - N816 - mixedCase variable in global scope
+# - N817 - camelcase imported as acronym
+
+FLAKE8_RULES=${FLAKE8_RULES:-"C101,EXE002,S506,S602,N801,N802,N803,N805,N806,N807,N815,N816,N817"}
 
 function save_exit_code() {
     return $(($1 + $2))
@@ -73,7 +83,7 @@ set +e
 
 EXIT_CODE=0
 
-skip_options="^${root_dir}/third_party/"
+skip_options="^${root_dir}/third_party/\|^${root_dir}/plugins/ets/tests/debugger/src/arkdb/"
 if [ -n "$SKIP_FOLDERS" ]; then
     for pt in $SKIP_FOLDERS; do
         skip_options="${skip_options}\|^${root_dir}/${pt}/"

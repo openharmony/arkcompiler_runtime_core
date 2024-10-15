@@ -702,7 +702,7 @@ if __name__ == '__main__':
         argument_parser = ArgsParser()
         instrumentator = Instrumentator(argument_parser)
         instrumentator.run()
-    except yaml.YAMLError as yamlErr:
+    except yaml.YAMLError as yaml_err:
         exit_code = 1
         print(err_msg_suffix)
         traceback.print_exc(file=sys.stdout, limit=0)
