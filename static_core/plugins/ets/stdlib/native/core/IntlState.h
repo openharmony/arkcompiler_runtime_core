@@ -13,18 +13,22 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/etsstdlib.h"
-#include "plugins/ets/stdlib/native/core/Intl.h"
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLSTATE_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLSTATE_H
+
+#include "plugins/ets/stdlib/native/core/IntlFormattersCache.h"
+#include <memory>
 
 namespace ark::ets::stdlib {
 
-// EtsNapiOnLoad needs to implement issue #18135
-ets_int EtsNapiOnLoad(EtsEnv *env)
-{
-    // Initializing components
-    ets_int hasError = ETS_OK;
-    hasError += InitCoreIntl(env);
-    return hasError == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
-}
+struct IntlState {
+    IntlFormattersCache fmtsCache;
+};
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+extern std::unique_ptr<IntlState> g_intlState;
+
+void CreateIntlState();
 
 }  // namespace ark::ets::stdlib
+
+#endif  //  PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLSTATE_H

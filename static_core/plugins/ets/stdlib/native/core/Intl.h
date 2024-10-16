@@ -13,18 +13,15 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/etsstdlib.h"
-#include "plugins/ets/stdlib/native/core/Intl.h"
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTL_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTL_H
+
+#include "plugins/ets/runtime/napi/ets_napi.h"
 
 namespace ark::ets::stdlib {
 
-// EtsNapiOnLoad needs to implement issue #18135
-ets_int EtsNapiOnLoad(EtsEnv *env)
-{
-    // Initializing components
-    ets_int hasError = ETS_OK;
-    hasError += InitCoreIntl(env);
-    return hasError == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
-}
+ets_int InitCoreIntl(EtsEnv *env);
 
 }  // namespace ark::ets::stdlib
+
+#endif  //  PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTL_H
