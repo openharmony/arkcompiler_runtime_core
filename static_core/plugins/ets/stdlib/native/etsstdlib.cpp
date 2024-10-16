@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/init_native_methods.h"
-#include "plugins/ets/stdlib/native/escompat/Process.h"
 #include "plugins/ets/stdlib/native/etsstdlib.h"
+#include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
 
 namespace ark::ets::stdlib {
-void InitNativeMethods(EtsEnv *env)
+
+// EtsNapiOnLoad needs to implement issue #18135
+ets_int EtsNapiOnLoad(EtsEnv *env)
 {
-    RegisterProcessNativeMethods(env);
-    // NOTE (ikorobkov): EtsNapiOnLoad needs to implement issue #18135
-    EtsNapiOnLoad(env);
+    // Initializing components
+    ets_int hasError = ETS_OK;
+    hasError += InitCoreIntlNumberFormat(env);
+    return hasError == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
 }
 
 }  // namespace ark::ets::stdlib

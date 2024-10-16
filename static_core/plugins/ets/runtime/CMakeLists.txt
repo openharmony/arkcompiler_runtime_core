@@ -86,6 +86,8 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/ets_utils.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/init_native_methods.cpp
     ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/escompat/Process.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/etsstdlib.cpp
+    ${PANDA_ETS_PLUGIN_SOURCE}/stdlib/native/core/IntlNumberFormat.cpp
 )
 
 get_directory_property(CURRENT_DEFS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} COMPILE_DEFINITIONS)
