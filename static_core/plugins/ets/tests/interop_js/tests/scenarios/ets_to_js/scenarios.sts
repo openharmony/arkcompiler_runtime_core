@@ -422,6 +422,19 @@ async function asyncFunctionUserInterface(obj: InterfaceWithMethodEts): Promise<
     return obj.methodInInterface();
 }
 
+class ClassReturnThis {
+  returnThis(): this {
+    return this;
+  }
+  returnThisAsJSValue(): JSValue {
+    return this;
+  }
+}
+
+function functionReturnOmittedValue(): void {
+    return;
+}
+
 function functionRestParameter(...arg: number[]): number {
     return arg[0];
 }

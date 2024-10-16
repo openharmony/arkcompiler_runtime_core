@@ -20,7 +20,7 @@ import {
     functionArgTypeTuple, functionReturnTypeAny, functionReturnTypeUnknown, functionReturnTypeUndefined,
     functionArgTypeCallable, functionDefaultParameterFunction, functionDefaultIntParameterFunction,
     functionDefaultStringParameterFunction, functionDefaultFloatParameterFunction, genericTypeParameter,
-    functionRestParameter, functionSpreadParameter, functionOverload, genericTypeReturnValue,
+    functionRestParameter, functionSpreadParameter, functionOverload, genericTypeReturnValue, ClassReturnThis, functionReturnOmittedValue,
     functionArgStringLiteralType, functionIntersectionTypePrimitive, functionCallableReturnValue,
     ClassWithInFieldDeclaration, functionReturnsCompositeType
 } from "pure_js"
@@ -257,6 +257,15 @@ function TestStaticMethodCallReturnTypeUnion(): boolean {
         return false;
     }
     return true;
+}
+
+function testReturnIsThis(): boolean {
+    let obj = new ClassReturnThis();
+    return obj.returnThis() as ClassReturnThis == obj;
+}
+
+function testReturnIsOmitted(): boolean {
+    return functionReturnOmittedValue() as Object | undefined == undefined;
 }
 
 function testFunctionRestParameter(): boolean {

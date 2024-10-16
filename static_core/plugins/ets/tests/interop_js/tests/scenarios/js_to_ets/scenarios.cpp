@@ -216,6 +216,19 @@ TEST_F(EtsInteropScenariosJsToEts, Test_static_methodCall_return_type_union)
     ASSERT_EQ(ret, true);
 }
 
+// NOTE(nikitayegorov) #18381 disable after 'this' is fixed to return a reference instead of a value copy.
+TEST_F(EtsInteropScenariosJsToEts, DISABLED_Test_return_value_is_this)
+{
+    auto ret = CallEtsMethod<bool>("testReturnIsThis");
+    ASSERT_EQ(ret, true);
+}
+
+TEST_F(EtsInteropScenariosJsToEts, Test_return_value_is_omitted)
+{
+    auto ret = CallEtsMethod<bool>("testReturnIsOmitted");
+    ASSERT_EQ(ret, true);
+}
+
 TEST_F(EtsInteropScenariosJsToEts, Test_function_rest_parameter)
 {
     auto ret = CallEtsMethod<bool>("testFunctionRestParameter");

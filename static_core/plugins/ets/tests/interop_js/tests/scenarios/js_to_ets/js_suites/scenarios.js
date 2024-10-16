@@ -247,6 +247,15 @@ class ClassWithStaticMethod {
 		return functionReturnTypeUnion(arg);
 	}
 }
+
+class ClassReturnThis {
+  returnThis() {
+    return this;
+  }
+}
+
+function functionReturnOmittedValue() {}
+
 function functionRestParameter(...arg) {
 	return arg[0]; // transpiled from Typescript code: function functionRestParameter(...arg: number[])
 }
@@ -338,6 +347,8 @@ exports.functionArgTypeUnion = functionArgTypeUnion;
 exports.functionReturnTypeUnion = functionReturnTypeUnion;
 exports.UnionTestClassJs = UnionTestClassJs;
 exports.ClassWithStaticMethod = ClassWithStaticMethod;
+exports.ClassReturnThis = ClassReturnThis;
+exports.functionReturnOmittedValue = functionReturnOmittedValue;
 exports.functionRestParameter = functionRestParameter;
 exports.functionSpreadParameter = functionSpreadParameter;
 exports.functionOverload = functionOverload;
