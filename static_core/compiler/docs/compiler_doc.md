@@ -151,7 +151,9 @@ arm64:
 
 - `--compiler-regex` - a regular expression that specifies methods to compile. The grammar used is ECMA-262 RegExp grammar
 
-The option is used for compile one(or several) method(s), instead of all methods(or not compile some methods).
+The option is used for compile one(or several) method(s), instead of all methods(or not compile some methods). Should be used in one of the manners:
+1. `--compiler-regex` - selects methods with fully-matched qualified name (i.e. 'Class::Method').
+2. `--compiler-regex-with-signature` - selects methods with fully-matched qualified name with signature (i.e. 'void Class::Method(f64)'). Useful for overloaded method.
 
 ## compiler-check-final
 

@@ -348,6 +348,16 @@ static void PaocSpecifyMethodsEmit(const TmpFile &pandaFname)
             return
         }
 
+        .function i32 B.f_overloaded() {
+            ldai 20
+            return
+        }
+
+        .function i32 B.f_overloaded(i32 a0) {
+            lda a0
+            return
+        }
+
         .function i32 main() {
             ldai 0
             return
@@ -384,11 +394,33 @@ TEST_F(AotTest, PaocSpecifyMethods)
 
         std::ifstream infile(paocOutputName.GetFileName());
         std::regex rgx("Compilation,B::f1.*,COMPILED");
+        size_t found = 0;
         for (std::string line; std::getline(infile, line);) {
             if (line.rfind("Compilation", 0U) == 0U) {
                 ASSERT_TRUE(std::regex_match(line, rgx));
+                found++;
             }
         }
+        ASSERT_EQ(found, 1U);
+    }
+    {
+        // Test `--compiler-regex-with-signature`:
+        auto res = os::exec::Exec(GetPaocFile(), "--paoc-panda-files", pandaFname.GetFileName(),
+                                  "--compiler-regex-with-signature", ".*B::f_overloaded\\(\\)", "--paoc-mode=jit",
+                                  "--events-output=csv", "--events-file", paocOutputName.GetFileName());
+        ASSERT_TRUE(res) << "paoc failed with error: " << res.Error().ToString();
+        ASSERT_EQ(res.Value(), 0U);
+
+        std::ifstream infile(paocOutputName.GetFileName());
+        std::regex rgx("Compilation,B::f_overloaded.*,COMPILED");
+        size_t found = 0;
+        for (std::string line; std::getline(infile, line);) {
+            if (line.rfind("Compilation", 0U) == 0U) {
+                ASSERT_TRUE(std::regex_match(line, rgx));
+                found++;
+            }
+        }
+        ASSERT_EQ(found, 1U);
     }
 }
 

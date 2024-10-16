@@ -270,8 +270,13 @@ void JITCompileMethod(RuntimeInterface *runtime, CodeAllocator *codeAllocator, A
 
     SCOPED_TRACE_STREAM << "JIT compiling " << methodName;
 
-    if (!g_options.MatchesRegex(methodName)) {
-        LOG(DEBUG, COMPILER) << "Skip the method due to regexp mismatch: " << methodName;
+    bool regex = g_options.WasSetCompilerRegex();
+    bool regexWithSign = g_options.WasSetCompilerRegexWithSignature();
+    ASSERT_PRINT(!(regex && regexWithSign),
+                 "'--compiler-regex' and '--compiler-regex-with-signature' cannot be used together.");
+    if ((regex || regexWithSign) && !g_options.MatchesRegex(runtime->GetMethodFullName(taskMethod, regexWithSign))) {
+        LOG(DEBUG, COMPILER) << "Skip the method due to regexp mismatch: "
+                             << runtime->GetMethodFullName(taskMethod, true);
         taskCtx.SetCompilationStatus(false);
         CompilerTaskRunner<RUNNER_MODE>::EndTask(std::move(taskRunner), false);
         return;

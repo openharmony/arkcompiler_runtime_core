@@ -16,6 +16,7 @@
 #ifndef COMPILER_COMPILER_OPTIONS_H
 #define COMPILER_COMPILER_OPTIONS_H
 
+#include "utils/logger.h"
 #include "utils/pandargs.h"
 #include "libpandabase/utils/arch.h"
 #include "cpu_features.h"
@@ -57,19 +58,30 @@ public:
      * Static local variable doesn't suit as soon as `Options::SetCompilerRegex()` is used (e.g. in
      * tests).
      */
+    void SetCompilerRegexWithSignature([[maybe_unused]] const std::string &newRegexPattern)
+    {
+        LOG(FATAL, COMPILER) << "'SetCompilerRegexWithSignature()' is not supported.";
+    }
+
     void SetCompilerRegex(const std::string &newRegexPattern)
     {
+        ASSERT(!WasSetCompilerRegexWithSignature());
         Options::SetCompilerRegex(newRegexPattern);
         regex_ = newRegexPattern;
     }
+
     template <typename T>
     bool MatchesRegex(const T &methodName)
     {
-        if (!WasSetCompilerRegex()) {
+        if (!WasSetCompilerRegex() && !WasSetCompilerRegexWithSignature()) {
             return true;
         }
         if (!regexInitialized_) {
-            regex_ = GetCompilerRegex();
+            if (WasSetCompilerRegexWithSignature() && WasSetCompilerRegex()) {
+                LOG(FATAL, COMPILER)
+                    << "'--compiler-regex' and '--compiler-regex-with-signature' cannot be used together.";
+            }
+            regex_ = WasSetCompilerRegex() ? GetCompilerRegex() : GetCompilerRegexWithSignature();
             regexInitialized_ = true;
         }
         return std::regex_match(methodName, regex_);

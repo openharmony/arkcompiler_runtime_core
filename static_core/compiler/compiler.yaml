@@ -23,10 +23,20 @@ options:
   tags: [perf]
 
 - name: compiler-regex
+  description: >
+     A regular expression that specifies methods to compile (ECMA-262 grammar).
+     A method matches if its qualified name (e.g. 'Foo::bar') is fully matched.
   type: std::string
-  default: ".*"
-  description: A regular expression that specifies methods to compile. The grammar used is ECMA-262 RegExp grammar.
   tags: [perf]
+  default: ".*"
+
+- name: compiler-regex-with-signature
+  description: >
+     A regular expression that specifies methods to compile (ECMA-262 grammar).
+     A method matches if its full signature (e.g. 'void Foo::bar(i32)') is fully matched.
+  type: std::string
+  tags: [perf]
+  default: ".*"
 
 - name: compiler-visualizer-dump
   type: bool
