@@ -168,20 +168,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_boolean, Test
 {
     InitDisasm(FILE_DECLARATION_3D_ARRAY_BOOLEAN);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-3d-array-boolean.Anno1", R"(
+        .record declaration-3d-array-boolean.Anno1 {
             u1[][][] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-3d-array-boolean.Anno2", R"(
+        .record declaration-3d-array-boolean.Anno2 {
             u1[][][] a = [[[]]]
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-3d-array-boolean.Anno3", R"(
+        .record declaration-3d-array-boolean.Anno3 {
             u1[][][] a = [[[1, 0], [1, 0]]]
         }
     )");
@@ -197,20 +197,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_enum_number, 
 {
     InitDisasm(FILE_DECLARATION_3D_ARRAY_ENUM_NUMBER);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-3d-array-enum-number.Anno1", R"(
+        .record declaration-3d-array-enum-number.Anno1 {
             f64[][][] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-3d-array-enum-number.Anno2", R"(
+        .record declaration-3d-array-enum-number.Anno2 {
             f64[][][] a = [[[]]]
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-3d-array-enum-number.Anno3", R"(
+        .record declaration-3d-array-enum-number.Anno3 {
             f64[][][] a = [[[42, 314, 42]]]
         }
     )");
@@ -226,20 +226,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_enum_string, 
 {
     InitDisasm(FILE_DECLARATION_3D_ARRAY_ENUM_STRING);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-3d-array-enum-string.Anno1", R"(
+        .record declaration-3d-array-enum-string.Anno1 {
             panda.String[][][] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-3d-array-enum-string.Anno2", R"(
+        .record declaration-3d-array-enum-string.Anno2 {
             panda.String[][][] a = [[[]]]
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-3d-array-enum-string.Anno3", R"(
+        .record declaration-3d-array-enum-string.Anno3 {
             panda.String[][][] a = [[["Hello", "world!", "Hello"]]]
         }
     )");
@@ -259,20 +259,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_number, TestS
 {
     InitDisasm(FILE_DECLARATION_3D_ARRAY_NUMBER);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-3d-array-number.Anno1", R"(
+        .record declaration-3d-array-number.Anno1 {
             f64[][][] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-3d-array-number.Anno2", R"(
+        .record declaration-3d-array-number.Anno2 {
             f64[][][] a = [[[]]]
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-3d-array-number.Anno3", R"(
+        .record declaration-3d-array-number.Anno3 {
             f64[][][] a = [[[1, 2, 3], [4, 5, 6]]]
         }
     )");
@@ -288,20 +288,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_string, TestS
 {
     InitDisasm(FILE_DECLARATION_3D_ARRAY_STRING);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-3d-array-string.Anno1", R"(
+        .record declaration-3d-array-string.Anno1 {
             panda.String[][][] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-3d-array-string.Anno2", R"(
+        .record declaration-3d-array-string.Anno2 {
             panda.String[][][] a = [[[]]]
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-3d-array-string.Anno3", R"(
+        .record declaration-3d-array-string.Anno3 {
             panda.String[][][] a = [[["hello", "world"], ["hello", "world"]]]
         }
     )");
@@ -321,20 +321,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_boolean, TestSiz
 {
     InitDisasm(FILE_DECLARATION_ARRAY_BOOLEAN);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-array-boolean.Anno1", R"(
+        .record declaration-array-boolean.Anno1 {
             u1[] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-array-boolean.Anno2", R"(
+        .record declaration-array-boolean.Anno2 {
             u1[] a = []
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-array-boolean.Anno3", R"(
+        .record declaration-array-boolean.Anno3 {
             u1[] a = [1, 0, 1]
         }
     )");
@@ -350,20 +350,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_enum_number, Tes
 {
     InitDisasm(FILE_DECLARATION_ARRAY_ENUM_NUMBER);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-array-enum-number.Anno1", R"(
+        .record declaration-array-enum-number.Anno1 {
             f64[] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-array-enum-number.Anno2", R"(
+        .record declaration-array-enum-number.Anno2 {
             f64[] a = []
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-array-enum-number.Anno3", R"(
+        .record declaration-array-enum-number.Anno3 {
             f64[] a = [42, 314, 42]
         }
     )");
@@ -379,20 +379,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_enum_string, Tes
 {
     InitDisasm(FILE_DECLARATION_ARRAY_ENUM_STRING);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-array-enum-string.Anno1", R"(
+        .record declaration-array-enum-string.Anno1 {
             panda.String[] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-array-enum-string.Anno2", R"(
+        .record declaration-array-enum-string.Anno2 {
             panda.String[] a = []
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-array-enum-string.Anno3", R"(
+        .record declaration-array-enum-string.Anno3 {
             panda.String[] a = ["Hello", "world!", "Hello"]
         }
     )");
@@ -412,20 +412,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_number, TestSize
 {
     InitDisasm(FILE_DECLARATION_ARRAY_NUMBER);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-array-number.Anno1", R"(
+        .record declaration-array-number.Anno1 {
             f64[] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-array-number.Anno2", R"(
+        .record declaration-array-number.Anno2 {
             f64[] a = []
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-array-number.Anno3", R"(
+        .record declaration-array-number.Anno3 {
             f64[] a = [1, 2, 3]
         }
     )");
@@ -441,20 +441,20 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_string, TestSize
 {
     InitDisasm(FILE_DECLARATION_ARRAY_STRING);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-array-string.Anno1", R"(
+        .record declaration-array-string.Anno1 {
             panda.String[] a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-array-string.Anno2", R"(
+        .record declaration-array-string.Anno2 {
             panda.String[] a = []
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("declaration-array-string.Anno3", R"(
+        .record declaration-array-string.Anno3 {
             panda.String[] a = ["Hello", "world", "!"]
         }
     )");
@@ -474,14 +474,14 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_boolean, TestSize.Leve
 {
     InitDisasm(FILE_DECLARATION_BOOLEAN);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-boolean.Anno1", R"(
+        .record declaration-boolean.Anno1 {
             u1 a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-boolean.Anno2", R"(
+        .record declaration-boolean.Anno2 {
             u1 a = 1
         }
     )");
@@ -497,8 +497,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_combination, TestSize.
 {
     InitDisasm(FILE_DECLARATION_COMBINATION);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-combination.Anno", R"(
+        .record declaration-combination.Anno {
             f64 a
             f64[] b = [13, 10]
             panda.String c
@@ -527,8 +527,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_empty, TestSize.Level1
 {
     InitDisasm(FILE_DECLARATION_EMPTY);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-empty.Anno", R"(
+        .record declaration-empty.Anno {
         }
     )");
 }
@@ -543,14 +543,14 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_enum_number, TestSize.
 {
     InitDisasm(FILE_DECLARATION_ENUM_NUMBER);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-enum-number.Anno1", R"(
+        .record declaration-enum-number.Anno1 {
             f64 a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-enum-number.Anno2", R"(
+        .record declaration-enum-number.Anno2 {
             f64 a = 42
         }
     )");
@@ -566,14 +566,14 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_enum_string, TestSize.
 {
     InitDisasm(FILE_DECLARATION_ENUM_STRING);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-enum-string.Anno1", R"(
+        .record declaration-enum-string.Anno1 {
             panda.String a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-enum-string.Anno2", R"(
+        .record declaration-enum-string.Anno2 {
             panda.String a = "Hello"
         }
     )");
@@ -593,14 +593,14 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_number, TestSize.Level
 {
     InitDisasm(FILE_DECLARATION_NUMBER);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-number.Anno1", R"(
+        .record declaration-number.Anno1 {
             f64 a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-number.Anno2", R"(
+        .record declaration-number.Anno2 {
             f64 a = 42
         }
     )");
@@ -616,14 +616,14 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_string, TestSize.Level
 {
     InitDisasm(FILE_DECLARATION_STRING);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("declaration-string.Anno1", R"(
+        .record declaration-string.Anno1 {
             panda.String a
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("declaration-string.Anno2", R"(
+        .record declaration-string.Anno2 {
             panda.String a = "Hello world!"
         }
     )");
@@ -643,19 +643,21 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_boolean
 {
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_BOOLEAN);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-3d-array-boolean.Anno", R"(
+        .record declaration-usage-3d-array-boolean.Anno {
             u1[][][] a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-boolean.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-boolean.#~A=#A", "Ldeclaration-usage-3d-array-boolean.Anno",
+                             R"(
+        Ldeclaration-usage-3d-array-boolean.Anno:
             u1[][][] a { [[[1, 0, 1]]] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-boolean.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-boolean.#~A>#foo",
+                             "Ldeclaration-usage-3d-array-boolean.Anno", R"(
+        Ldeclaration-usage-3d-array-boolean.Anno:
             u1[][][] a { [[[]]] }
     )");
 }
@@ -670,19 +672,21 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_enum_nu
 {
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_ENUM_NUMBER);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-3d-array-enum-number.Anno", R"(
+        .record declaration-usage-3d-array-enum-number.Anno {
             f64[][][] a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-enum-number.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-enum-number.#~A=#A",
+                             "Ldeclaration-usage-3d-array-enum-number.Anno", R"(
+        Ldeclaration-usage-3d-array-enum-number.Anno:
             f64[][][] a { [[[1, 2, 1]]] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-enum-number.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-enum-number.#~A>#foo",
+                             "Ldeclaration-usage-3d-array-enum-number.Anno", R"(
+        Ldeclaration-usage-3d-array-enum-number.Anno:
             f64[][][] a { [[[]]] }
     )");
 }
@@ -697,8 +701,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_enum_st
 {
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_ENUM_STRING);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-3d-array-enum-string.Anno", R"(
+        .record declaration-usage-3d-array-enum-string.Anno {
             panda.String[][][] a
         }
     )");
@@ -707,13 +711,15 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_enum_st
         .record panda.String <external>
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-enum-string.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-enum-string.#~A=#A",
+                             "Ldeclaration-usage-3d-array-enum-string.Anno", R"(
+        Ldeclaration-usage-3d-array-enum-string.Anno:
             panda.String[][][] a { [[["Hello", "world", "Hello"]]] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-enum-string.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-enum-string.#~A>#foo",
+                             "Ldeclaration-usage-3d-array-enum-string.Anno", R"(
+        Ldeclaration-usage-3d-array-enum-string.Anno:
             panda.String[][][] a { [[[]]] }
     )");
 }
@@ -728,19 +734,21 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_number,
 {
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_NUMBER);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-3d-array-number.Anno", R"(
+        .record declaration-usage-3d-array-number.Anno {
             f64[][][] a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-number.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-number.#~A=#A",
+                             "Ldeclaration-usage-3d-array-number.Anno", R"(
+        Ldeclaration-usage-3d-array-number.Anno:
             f64[][][] a { [[[1, 2, 3]]] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-number.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-number.#~A>#foo",
+                             "Ldeclaration-usage-3d-array-number.Anno", R"(
+        Ldeclaration-usage-3d-array-number.Anno:
             f64[][][] a { [[[]]] }
     )");
 }
@@ -755,8 +763,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_string,
 {
     InitDisasm(FILE_DECLARATION_USAGE_3D_ARRAY_STRING);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-3d-array-string.Anno", R"(
+        .record declaration-usage-3d-array-string.Anno {
             panda.String[][][] a
         }
     )");
@@ -765,13 +773,15 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_string,
         .record panda.String <external>
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-string.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-string.#~A=#A",
+                             "Ldeclaration-usage-3d-array-string.Anno", R"(
+        Ldeclaration-usage-3d-array-string.Anno:
             panda.String[][][] a { [[["Hello", "world", "!"]]] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-3d-array-string.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-3d-array-string.#~A>#foo",
+                             "Ldeclaration-usage-3d-array-string.Anno", R"(
+        Ldeclaration-usage-3d-array-string.Anno:
             panda.String[][][] a { [[[]]] }
     )");
 }
@@ -786,19 +796,21 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_boolean, T
 {
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_BOOLEAN);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-array-boolean.Anno", R"(
+        .record declaration-usage-array-boolean.Anno {
             u1[] a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-boolean.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-boolean.#~A=#A",
+                             "Ldeclaration-usage-array-boolean.Anno", R"(
+        Ldeclaration-usage-array-boolean.Anno:
             u1[] a { [1, 0, 1] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-boolean.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-boolean.#~A>#foo",
+                             "Ldeclaration-usage-array-boolean.Anno", R"(
+        Ldeclaration-usage-array-boolean.Anno:
             u1[] a { [] }
     )");
 }
@@ -813,19 +825,21 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_enum_numbe
 {
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_ENUM_NUMBER);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-array-enum-number.Anno", R"(
+        .record declaration-usage-array-enum-number.Anno {
             f64[] a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-enum-number.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-enum-number.#~A=#A",
+                             "Ldeclaration-usage-array-enum-number.Anno", R"(
+        Ldeclaration-usage-array-enum-number.Anno:
             f64[] a { [1, 2, 1] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-enum-number.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-enum-number.#~A>#foo",
+                             "Ldeclaration-usage-array-enum-number.Anno", R"(
+        Ldeclaration-usage-array-enum-number.Anno:
             f64[] a { [] }
     )");
 }
@@ -840,8 +854,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_enum_strin
 {
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_ENUM_STRING);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-array-enum-string.Anno", R"(
+        .record declaration-usage-array-enum-string.Anno {
             panda.String[] a
         }
     )");
@@ -850,13 +864,15 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_enum_strin
         .record panda.String <external>
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-enum-string.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-enum-string.#~A=#A",
+                             "Ldeclaration-usage-array-enum-string.Anno", R"(
+        Ldeclaration-usage-array-enum-string.Anno:
             panda.String[] a { ["Hello", "world", "Hello"] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-enum-string.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-enum-string.#~A>#foo",
+                             "Ldeclaration-usage-array-enum-string.Anno", R"(
+        Ldeclaration-usage-array-enum-string.Anno:
             panda.String[] a { [] }
     )");
 }
@@ -871,19 +887,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_number, Te
 {
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_NUMBER);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-array-number.Anno", R"(
+        .record declaration-usage-array-number.Anno {
             f64[] a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-number.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-number.#~A=#A", "Ldeclaration-usage-array-number.Anno", R"(
+        Ldeclaration-usage-array-number.Anno:
             f64[] a { [1, 2, 3] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-number.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-number.#~A>#foo", "Ldeclaration-usage-array-number.Anno", R"(
+        Ldeclaration-usage-array-number.Anno:
             f64[] a { [] }
     )");
 }
@@ -898,8 +914,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_string, Te
 {
     InitDisasm(FILE_DECLARATION_USAGE_ARRAY_STRING);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-array-string.Anno", R"(
+        .record declaration-usage-array-string.Anno {
             panda.String[] a
         }
     )");
@@ -908,13 +924,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_string, Te
         .record panda.String <external>
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-string.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-string.#~A=#A", "Ldeclaration-usage-array-string.Anno", R"(
+        Ldeclaration-usage-array-string.Anno:
             panda.String[] a { ["hello", "world", "!"] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-array-string.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-array-string.#~A>#foo", "Ldeclaration-usage-array-string.Anno", R"(
+        Ldeclaration-usage-array-string.Anno:
             panda.String[] a { [] }
     )");
 }
@@ -929,19 +945,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_boolean, TestSiz
 {
     InitDisasm(FILE_DECLARATION_USAGE_BOOLEAN);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-boolean.Anno", R"(
+        .record declaration-usage-boolean.Anno {
             u1 a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-boolean.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-boolean.#~A=#A", "Ldeclaration-usage-boolean.Anno", R"(
+        Ldeclaration-usage-boolean.Anno:
             u1 a { 1 }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-boolean.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-boolean.#~A>#foo", "Ldeclaration-usage-boolean.Anno", R"(
+        Ldeclaration-usage-boolean.Anno:
             u1 a { 0 }
     )");
 }
@@ -956,8 +972,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_combination, Tes
 {
     InitDisasm(FILE_DECLARATION_USAGE_COMBINATION);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-combination.Anno", R"(
+        .record declaration-usage-combination.Anno {
             f64 a
             f64[] b = [13, 10]
             panda.String c
@@ -971,8 +987,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_combination, Tes
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-combination.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-combination.#~A=#A", "Ldeclaration-usage-combination.Anno", R"(
+        Ldeclaration-usage-combination.Anno:
             f64 a { 20 }
             f64[] b { [13, 10] }
             panda.String c { "ab" }
@@ -986,8 +1002,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_combination, Tes
             panda.String[][][] k { [[[]]] }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-combination.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-combination.#~A>#foo", "Ldeclaration-usage-combination.Anno", R"(
+        Ldeclaration-usage-combination.Anno:
             f64 a { 10 }
             f64[] b { [1, 2, 3] }
             panda.String c { "cde" }
@@ -1012,21 +1028,21 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_empty, TestSize.
 {
     InitDisasm(FILE_DECLARATION_USAGE_EMPTY);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-empty.Anno", R"(
+        .record declaration-usage-empty.Anno {
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-empty.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-empty.#~A=#A", "Ldeclaration-usage-empty.Anno", R"(
+        Ldeclaration-usage-empty.Anno:
     )");
 
-    ValidateMethodAnnotation("declaration-usage-empty.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-empty.#~A>#foo", "Ldeclaration-usage-empty.Anno", R"(
+        Ldeclaration-usage-empty.Anno:
     )");
 
-    ValidateMethodAnnotation("declaration-usage-empty.#~A>#bar", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-empty.#~A>#bar", "Ldeclaration-usage-empty.Anno", R"(
+        Ldeclaration-usage-empty.Anno:
     )");
 }
 
@@ -1040,19 +1056,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_enum_number, Tes
 {
     InitDisasm(FILE_DECLARATION_USAGE_ENUM_NUMBER);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-enum-number.Anno", R"(
+        .record declaration-usage-enum-number.Anno {
             f64 a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-enum-number.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-enum-number.#~A=#A", "Ldeclaration-usage-enum-number.Anno", R"(
+        Ldeclaration-usage-enum-number.Anno:
             f64 a { 1 }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-enum-number.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-enum-number.#~A>#foo", "Ldeclaration-usage-enum-number.Anno", R"(
+        Ldeclaration-usage-enum-number.Anno:
             f64 a { 2 }
     )");
 }
@@ -1067,8 +1083,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_enum_string, Tes
 {
     InitDisasm(FILE_DECLARATION_USAGE_ENUM_STRING);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-enum-string.Anno", R"(
+        .record declaration-usage-enum-string.Anno {
             panda.String a
         }
     )");
@@ -1077,13 +1093,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_enum_string, Tes
         .record panda.String <external>
     )");
 
-    ValidateMethodAnnotation("declaration-usage-enum-string.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-enum-string.#~A=#A", "Ldeclaration-usage-enum-string.Anno", R"(
+        Ldeclaration-usage-enum-string.Anno:
             panda.String a { "Hello" }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-enum-string.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-enum-string.#~A>#foo", "Ldeclaration-usage-enum-string.Anno", R"(
+        Ldeclaration-usage-enum-string.Anno:
             panda.String a { "world" }
     )");
 }
@@ -1098,19 +1114,19 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_number, TestSize
 {
     InitDisasm(FILE_DECLARATION_USAGE_NUMBER);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-number.Anno", R"(
+        .record declaration-usage-number.Anno {
             f64 a
         }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-number.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-number.#~A=#A", "Ldeclaration-usage-number.Anno", R"(
+        Ldeclaration-usage-number.Anno:
             f64 a { 42 }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-number.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-number.#~A>#foo", "Ldeclaration-usage-number.Anno", R"(
+        Ldeclaration-usage-number.Anno:
             f64 a { 314 }
     )");
 }
@@ -1125,8 +1141,8 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_string, TestSize
 {
     InitDisasm(FILE_DECLARATION_USAGE_STRING);
 
-    ValidateRecord("Anno", R"(
-        .record Anno {
+    ValidateRecord("declaration-usage-string.Anno", R"(
+        .record declaration-usage-string.Anno {
             panda.String a
         }
     )");
@@ -1135,13 +1151,13 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_string, TestSize
         .record panda.String <external>
     )");
 
-    ValidateMethodAnnotation("declaration-usage-string.#~A=#A", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-string.#~A=#A", "Ldeclaration-usage-string.Anno", R"(
+        Ldeclaration-usage-string.Anno:
             panda.String a { "Hello" }
     )");
 
-    ValidateMethodAnnotation("declaration-usage-string.#~A>#foo", "LAnno", R"(
-        LAnno:
+    ValidateMethodAnnotation("declaration-usage-string.#~A>#foo", "Ldeclaration-usage-string.Anno", R"(
+        Ldeclaration-usage-string.Anno:
             panda.String a { "world" }
     )");
 }
@@ -1156,23 +1172,23 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_export, TestSize.Level1)
 {
     InitDisasm(FILE_EXPORT);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("export.Anno1", R"(
+        .record export.Anno1 {
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("export.Anno2", R"(
+        .record export.Anno2 {
             f64 a = 0
         }
     )");
 
-    ValidateMethodAnnotation("export.#~A=#A", "LAnno1", R"(
-        LAnno1:
+    ValidateMethodAnnotation("export.#~A=#A", "Lexport.Anno1", R"(
+        Lexport.Anno1:
     )");
 
-    ValidateMethodAnnotation("export.#~B=#B", "LAnno1", R"(
-        LAnno1:
+    ValidateMethodAnnotation("export.#~B=#B", "Lexport.Anno1", R"(
+        Lexport.Anno1:
     )");
 }
 
@@ -1186,42 +1202,44 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_import_qualified, TestSize.Level1)
 {
     InitDisasm(FILE_IMPORT_QUALIFIED);
 
-    ValidateRecord("Namespace1.Anno", R"(
-        .record Namespace1.Anno <external>
+    ValidateRecord("import-qualified.Namespace1.Anno", R"(
+        .record import-qualified.Namespace1.Anno <external>
     )");
 
-    ValidateRecord("Namespace1.Anno1", R"(
-        .record Namespace1.Anno1 <external>
+    ValidateRecord("import-qualified.Namespace1.Anno1", R"(
+        .record import-qualified.Namespace1.Anno1 <external>
     )");
 
-    ValidateRecord("Namespace1.Namespace2.Namespace3.Anno2", R"(
-        .record Namespace1.Namespace2.Namespace3.Anno2 <external>
+    ValidateRecord("import-qualified.Namespace1.Namespace2.Namespace3.Anno2", R"(
+        .record import-qualified.Namespace1.Namespace2.Namespace3.Anno2 <external>
     )");
 
-    ValidateRecord("Namespace1.Namespace2.Namespace3.Anno3", R"(
-        .record Namespace1.Namespace2.Namespace3.Anno3 <external>
+    ValidateRecord("import-qualified.Namespace1.Namespace2.Namespace3.Anno3", R"(
+        .record import-qualified.Namespace1.Namespace2.Namespace3.Anno3 <external>
     )");
 
-    ValidateMethodAnnotation("import-qualified.#~A=#A", "LNamespace1.Anno", R"(
-        LNamespace1.Anno:
+    ValidateMethodAnnotation("import-qualified.#~A=#A", "Limport-qualified.Namespace1.Anno", R"(
+        Limport-qualified.Namespace1.Anno:
     )");
 
-    ValidateMethodAnnotation("import-qualified.#~B=#B", "LNamespace1.Anno", R"(
-        LNamespace1.Anno:
+    ValidateMethodAnnotation("import-qualified.#~B=#B", "Limport-qualified.Namespace1.Anno", R"(
+        Limport-qualified.Namespace1.Anno:
     )");
 
-    ValidateMethodAnnotation("import-qualified.#~C=#C", "LNamespace1.Anno1", R"(
-        LNamespace1.Anno1:
+    ValidateMethodAnnotation("import-qualified.#~C=#C", "Limport-qualified.Namespace1.Anno1", R"(
+        Limport-qualified.Namespace1.Anno1:
             f64 a { 1 }
             panda.String b { "string" }
     )");
 
-    ValidateMethodAnnotation("import-qualified.#~D=#D", "LNamespace1.Namespace2.Namespace3.Anno2", R"(
-        LNamespace1.Namespace2.Namespace3.Anno2:
+    ValidateMethodAnnotation("import-qualified.#~D=#D", "Limport-qualified.Namespace1.Namespace2.Namespace3.Anno2",
+                             R"(
+        Limport-qualified.Namespace1.Namespace2.Namespace3.Anno2:
     )");
 
-    ValidateMethodAnnotation("import-qualified.#~E=#E", "LNamespace1.Namespace2.Namespace3.Anno2", R"(
-        LNamespace1.Namespace2.Namespace3.Anno2:
+    ValidateMethodAnnotation("import-qualified.#~E=#E", "Limport-qualified.Namespace1.Namespace2.Namespace3.Anno2",
+                             R"(
+        Limport-qualified.Namespace1.Namespace2.Namespace3.Anno2:
     )");
 }
 
@@ -1235,28 +1253,28 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_import_unqualified, TestSize.Level
 {
     InitDisasm(FILE_IMPORT_UNQUALIFIED);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 <external>
+    ValidateRecord("import-unqualified.Anno1", R"(
+        .record import-unqualified.Anno1 <external>
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 <external>
+    ValidateRecord("import-unqualified.Anno2", R"(
+        .record import-unqualified.Anno2 <external>
     )");
 
-    ValidateMethodAnnotation("import-unqualified.#~A=#A", "LAnno1", R"(
-        LAnno1:
+    ValidateMethodAnnotation("import-unqualified.#~A=#A", "Limport-unqualified.Anno1", R"(
+        Limport-unqualified.Anno1:
     )");
 
-    ValidateMethodAnnotation("import-unqualified.#~B=#B", "LAnno1", R"(
-        LAnno1:
+    ValidateMethodAnnotation("import-unqualified.#~B=#B", "Limport-unqualified.Anno1", R"(
+        Limport-unqualified.Anno1:
     )");
 
-    ValidateMethodAnnotation("import-unqualified.#~C=#C", "LAnno1", R"(
-        LAnno1:
+    ValidateMethodAnnotation("import-unqualified.#~C=#C", "Limport-unqualified.Anno1", R"(
+        Limport-unqualified.Anno1:
     )");
 
-    ValidateMethodAnnotation("import-unqualified.#~D=#D", "LAnno2", R"(
-        LAnno2:
+    ValidateMethodAnnotation("import-unqualified.#~D=#D", "Limport-unqualified.Anno2", R"(
+        Limport-unqualified.Anno2:
             f64 a { 1 }
             panda.String b { "string" }
     )");
@@ -1272,51 +1290,51 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_multiple_annotations, TestSize.Lev
 {
     InitDisasm(FILE_MULTIPLE_ANNOTATIONS);
 
-    ValidateRecord("Anno1", R"(
-        .record Anno1 {
+    ValidateRecord("multiple-annotations.Anno1", R"(
+        .record multiple-annotations.Anno1 {
             f64 a = 1
         }
     )");
 
-    ValidateRecord("Anno2", R"(
-        .record Anno2 {
+    ValidateRecord("multiple-annotations.Anno2", R"(
+        .record multiple-annotations.Anno2 {
             panda.String b = "string"
         }
     )");
 
-    ValidateRecord("Anno3", R"(
-        .record Anno3 {
+    ValidateRecord("multiple-annotations.Anno3", R"(
+        .record multiple-annotations.Anno3 {
             u1[] c = [1, 0]
         }
     )");
 
-    ValidateMethodAnnotation("multiple-annotations.#~A=#A", "LAnno1", R"(
-        LAnno1:
+    ValidateMethodAnnotation("multiple-annotations.#~A=#A", "Lmultiple-annotations.Anno1", R"(
+        Lmultiple-annotations.Anno1:
             f64 a { 42 }
     )");
 
-    ValidateMethodAnnotation("multiple-annotations.#~A=#A", "LAnno2", R"(
-        LAnno2:
+    ValidateMethodAnnotation("multiple-annotations.#~A=#A", "Lmultiple-annotations.Anno2", R"(
+        Lmultiple-annotations.Anno2:
             panda.String b { "abc" }
     )");
 
-    ValidateMethodAnnotation("multiple-annotations.#~A=#A", "LAnno3", R"(
-        LAnno3:
+    ValidateMethodAnnotation("multiple-annotations.#~A=#A", "Lmultiple-annotations.Anno3", R"(
+        Lmultiple-annotations.Anno3:
             u1[] c { [0, 1] }
     )");
 
-    ValidateMethodAnnotation("multiple-annotations.#~A>#foo", "LAnno1", R"(
-        LAnno1:
+    ValidateMethodAnnotation("multiple-annotations.#~A>#foo", "Lmultiple-annotations.Anno1", R"(
+        Lmultiple-annotations.Anno1:
             f64 a { 42 }
     )");
 
-    ValidateMethodAnnotation("multiple-annotations.#~A>#foo", "LAnno2", R"(
-        LAnno2:
+    ValidateMethodAnnotation("multiple-annotations.#~A>#foo", "Lmultiple-annotations.Anno2", R"(
+        Lmultiple-annotations.Anno2:
             panda.String b { "abc" }
     )");
 
-    ValidateMethodAnnotation("multiple-annotations.#~A>#foo", "LAnno3", R"(
-        LAnno3:
+    ValidateMethodAnnotation("multiple-annotations.#~A>#foo", "Lmultiple-annotations.Anno3", R"(
+        Lmultiple-annotations.Anno3:
             u1[] c { [0, 1] }
     )");
 }
