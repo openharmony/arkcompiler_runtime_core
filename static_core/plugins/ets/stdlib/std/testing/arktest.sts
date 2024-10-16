@@ -27,6 +27,16 @@ function assertCommon(condition: boolean, message: string, description?: string)
 }
 
 /**
+ * Produce AssertionError unconditionally
+ * @param message Error message
+ * @param description optional Error description
+ * @throws AssertionError unconditionally
+ */
+function failingAssertion(message: string, description?: string): never {
+    throw new AssertionError((description ? description + "\n" : "") + message)
+}
+
+/**
  * Assert that the supplied condition is true
  * @param condition supplied condition
  * @param comment optional comment that will be printed in case of failed assertion
@@ -216,63 +226,83 @@ export function assertLE(value1: double, value2: double, comment?: string): void
 }
 
 /**
+ * Assert callback throws and test the thrown value
+ * @param cb callback to be executed
+ * @param test for a thrown value, acts as predicate or returns an error message
+ * @throws AssertionError if no value thrown or value doesn't match the test predicate
+ */
+export function expectThrow(
+    cb: () => void throws,
+    test?: (v: Error | Exception) => boolean | string) {
+    try {
+        cb()
+    } catch (e) {
+        e = (e instanceof Error) ? e as Error
+            : (e instanceof Exception) ? e as Exception
+                : failingAssertion("An arbitrary object instance was caught!") 
+        let res = test?.(e)
+        if (res != undefined && res != true) {
+            failingAssertion((typeof res == "string") ? res as string : ("Unexpected value thrown: " + e))
+        }
+        return
+    }
+    failingAssertion("Callback expected to throw");
+}
+
+/**
  * Execute callback and check that Exception was occurred and it is the same as expected if it passed
  * @param fn executing callback
- * @param expectedException optional instance of expected exception (will check type and message with occured exception)
+ * @param message optional string message or Exception to be tested upon the thrown value
  * @throws AssertionError if an exception was not occured or occured exception is not same as expected exception
  */
-export function expectException(fn: () => void throws, expectedException?: Exception): void {
-    try {
-        fn();
-    } catch (e) {
+export function expectException(fn: () => void throws, expect?: string | Exception): void {
+    expectThrow(fn, (e) => {
         if (!(e instanceof Exception)) {
-            throw e as Error;
+            return "Expected an instance of Exception, got " + Type.of(e).getName()
         }
-        let occuredException = e as Exception;
-        if (expectedException) {
-            let occuredExceptionType = Type.of(occuredException);
-            let eException = expectedException!;
-            let expectedExceptionType = Type.of(eException);
-            assertEQ(occuredExceptionType.getId(), expectedExceptionType.getId(),
-                     "Occured Error type (" + occuredExceptionType.getName() + ") is not expected: " + expectedExceptionType.getName());
-            assertEQ(eException.message, e.message,
-                     "unexpected message in expected Error: " + occuredException.message + ", expected: " + eException.message);
+        if (expect == undefined) {
+            return true
+        } else if (typeof expect == "string") {
+            return e.message == expect
+        } else {
+            expect = expect as Exception // broken smartcast
+            if (Type.of(e).getId() != Type.of(expect).getId()) {
+                return "Expected " + Type.of(expect).getName() + ", got " + Type.of(e).getName()
+            }
+            if (e.message != (expect as Exception).message) { // broken smartcast
+                return "Expected " + (expect as Exception).message + ", got " + e.message // broken smartcast
+            }
+            return true
         }
-        return;
-    }
-    if (expectedException) {
-        assertCommon(false, "The Exception was not occured, but expected: " + expectedException);
-    } else {
-        assertCommon(false, "An Exception is expected, but was not occured");
-    }
+    })
 }
 
 /**
  * Execute callback and check that Error was occurred and it is the same as expected if it passed
  * @param fn executing callback
- * @param expectedException optional instance of expected error (will check type and message with occured error)
+ * @param message optional string message or Error to be tested upon the thrown value
  * @throws AssertionError if an error was not occured or occured error is not same as expected error
  */
-export function expectError(fn: () => void throws, expectedError?: Error): void throws {
-    try {
-        fn();
-    } catch (e: Error) {
-        if (expectedError) {
-            let occuredErrorType = Type.of(e);
-            let eError = expectedError!;
-            let expectedErrorType = Type.of(eError);
-            assertEQ(occuredErrorType.getId(), expectedErrorType.getId(),
-                     "Occured Error type (" + occuredErrorType.getName() + ") is not expected: " + expectedErrorType.getName());
-            assertEQ(eError.message, e.message,
-                     "unexpected message in expected Error: " + e.message + "\nexpected: " + eError.message);
+export function expectError(fn: () => void throws, expect?: string | Error): void {
+    expectThrow(fn, (e) => {
+        if (!(e instanceof Error)) {
+            return "Expected an instance of Error, got " + Type.of(e).getName()
         }
-        return;
-    }
-    if (expectedError) {
-        assertCommon(false, "The Error was not occured, but expected: " + expectedError);
-    } else {
-        assertCommon(false, "An Error is expected, but was not occured");
-    }
+        if (expect == undefined) {
+            return true
+        } else if (typeof expect == "string") {
+            return e.message == expect
+        } else {
+            expect = expect as Error // broken smartcast
+            if (Type.of(e).getId() != Type.of(expect).getId()) {
+                return "Expected " + Type.of(expect).getName() + ", got " + Type.of(e).getName()
+            }
+            if (e.message != (expect as Error).message) { // broken smartcast
+                return "Expected " + (expect as Error).message + ", got " + e.message // broken smartcast
+            }
+            return true
+        }
+    })
 }
 
 /**

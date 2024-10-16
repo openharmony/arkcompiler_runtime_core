@@ -22,7 +22,7 @@ class jsvars {
 };
 
 class $jscall {
-    static Init = JSRuntime.__initJSCallClass("L$jscall;");
+    static Init = JSRuntime.__initJSCallClass();
 
     native static void$(callee: JSValue, self: JSValue): void;
     native static void$10s(callee: JSValue, self: JSValue, u0: String, u1: String, u2: String, u3: String, u4: String, u5: String, u6: String, u7: String, u8: String, u9: String): void;
@@ -36,7 +36,7 @@ class $jscall {
 };
 
 class $jsnew {
-    static Init = JSRuntime.__initJSNewClass("L$jsnew;");
+    static Init = JSRuntime.__initJSNewClass();
 };
 
 export function initBenchmarks(isInterop : boolean): Object

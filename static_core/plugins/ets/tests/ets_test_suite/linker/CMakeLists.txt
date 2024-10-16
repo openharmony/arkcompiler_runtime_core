@@ -23,6 +23,7 @@ set(linker_tests
     override_abstract
     override_basic
     variance
+    runtime_linker
 )
 
 set(linker_tests_in_dir "${CMAKE_CURRENT_SOURCE_DIR}")

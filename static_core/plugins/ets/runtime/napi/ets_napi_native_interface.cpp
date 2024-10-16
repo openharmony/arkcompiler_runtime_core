@@ -312,7 +312,7 @@ ClassLinkerContext *GetClassLinkerContext(ScopedManagedCodeFix *soa)
     auto *method = EtsMethod::FromRuntimeMethod(stack.GetMethod());
 
     if (method != nullptr) {
-        return method->GetClass()->GetClassLoader();
+        return method->GetClass()->GetLoadContext();
     }
 
     return nullptr;

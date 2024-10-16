@@ -72,6 +72,7 @@ static void AssertCompoundClassRoot(EtsClassLinker *classLinker, EtsClassRoot ro
     ASSERT_TRUE(coreClass->IsInstantiable());
     ASSERT_FALSE(klass->IsArrayClass());
     ASSERT_FALSE(klass->IsPrimitive());
+    ASSERT_TRUE(klass->IsClass());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_FALSE(klass->IsAbstract());
     ASSERT_FALSE(coreClass->IsProxy());
@@ -97,6 +98,7 @@ static void AssertCompoundContainerClassRoot(EtsClassLinker *classLinker, EtsCla
     ASSERT_TRUE(coreClass->IsInstantiable());
     ASSERT_TRUE(klass->IsArrayClass());
     ASSERT_FALSE(klass->IsPrimitive());
+    ASSERT_TRUE(klass->IsClass());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_TRUE(klass->IsAbstract());
     ASSERT_FALSE(coreClass->IsProxy());
@@ -118,6 +120,7 @@ static void AssertPrimitiveClassRoot(EtsClassLinker *classLinker, EtsClassRoot r
     ASSERT_TRUE(klass->IsPrimitive());
     ASSERT_TRUE(klass->IsPublic());
     ASSERT_TRUE(klass->IsFinal());
+    ASSERT_FALSE(klass->IsClass());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_TRUE(klass->IsAbstract());
     ASSERT_FALSE(coreClass->IsProxy());
@@ -137,6 +140,7 @@ static void AssertPrimitiveContainerClassRoot(EtsClassLinker *classLinker, EtsCl
     ASSERT_FALSE(klass->IsPrimitive());
     ASSERT_TRUE(klass->IsPublic());
     ASSERT_TRUE(klass->IsFinal());
+    ASSERT_TRUE(klass->IsClass());
     ASSERT_FALSE(klass->IsInterface());
     ASSERT_TRUE(klass->IsAbstract());
     ASSERT_FALSE(coreClass->IsProxy());

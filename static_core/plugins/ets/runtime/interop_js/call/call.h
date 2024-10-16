@@ -43,8 +43,8 @@ PANDA_PUBLIC_API napi_value CallETSInstance(EtsCoroutine *coro, InteropCtx *ctx,
 PANDA_PUBLIC_API napi_value CallETSStatic(EtsCoroutine *coro, InteropCtx *ctx, Method *method, Span<napi_value> jsargv);
 
 PANDA_PUBLIC_API Expected<Method *, char const *> ResolveEntryPoint(InteropCtx *ctx, std::string_view entryPoint);
-uint8_t JSRuntimeInitJSCallClass(EtsString *clsStr);
-uint8_t JSRuntimeInitJSNewClass(EtsString *clsStr);
+uint8_t JSRuntimeInitJSCallClass();
+uint8_t JSRuntimeInitJSNewClass();
 
 template <char DELIM = '.', typename F>
 static bool WalkQualifiedName(std::string_view name, F const &f)

@@ -28,6 +28,9 @@ bool IsEtsGlobalClassName(const std::string &descriptor)
     constexpr size_t ETSGLOBAL_SEMICOLON_LENGTH = sizeof(ETSGLOBAL_CLASS_NAME);
 
     const auto etsGlobalSubstringPos = descriptor.rfind(ETSGLOBAL_CLASS_NAME);
+    if (etsGlobalSubstringPos == std::string::npos) {
+        return false;
+    }
     const bool etsGlobalClass = (1 == etsGlobalSubstringPos) && descriptor.length() == 1 + ETSGLOBAL_SEMICOLON_LENGTH;
     const bool endsWithETSGLOBAL = descriptor.length() - ETSGLOBAL_SEMICOLON_LENGTH == etsGlobalSubstringPos;
     const bool etsGlobalClassInPackage = endsWithETSGLOBAL && '/' == descriptor[etsGlobalSubstringPos - 1];

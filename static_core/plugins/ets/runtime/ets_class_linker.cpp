@@ -157,9 +157,9 @@ EtsClass *EtsClassLinker::GetTypeAPIParameterClass()
     return EtsClass::FromRuntimeClass(ext_->GetTypeAPIParameterClass());
 }
 
-EtsClass *EtsClassLinker::GetIFunctionClass()
+EtsClass *EtsClassLinker::GetFunctionClass()
 {
-    return EtsClass::FromRuntimeClass(ext_->GetIFunctionClass());
+    return EtsClass::FromRuntimeClass(ext_->GetFunctionClass());
 }
 
 EtsClass *EtsClassLinker::GetFinalizableWeakRefClass()

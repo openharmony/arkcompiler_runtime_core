@@ -23,7 +23,7 @@ class EtsClass {
     }
 }
 class $jscall {
-    static Init = JSRuntime.__initJSCallClass("L$jscall;");
+    static Init = JSRuntime.__initJSCallClass();
 
     native static getRetObj(top: JSValue, qname: JSValue, obj:EtsClass): EtsClass;
 };

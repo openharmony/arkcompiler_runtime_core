@@ -106,6 +106,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core.cpp",
   "runtime/intrinsics/std_core_Char.cpp",
   "runtime/intrinsics/std_core_Arrays.cpp",
+  "runtime/intrinsics/std_core_Class.cpp",
   "runtime/intrinsics/std_core_Console.cpp",
   "runtime/intrinsics/std_core_Double.cpp",
   "runtime/intrinsics/std_core_Float.cpp",

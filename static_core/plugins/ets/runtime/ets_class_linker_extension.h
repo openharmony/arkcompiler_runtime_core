@@ -63,7 +63,7 @@ public:
 
     void FreeClass(Class *klass) override;
 
-    void InitializeClassRoot();
+    void InitializeClassRoots();
 
     bool InitializeClass(Class *klass) override;
 
@@ -83,6 +83,7 @@ public:
     size_t GetClassObjectSizeFromClassSize(uint32_t size) override;
 
     void InitializeBuiltinClasses();
+    void InitializeBuiltinSpecialClasses();
 
     Class *GetObjectClass()
     {
@@ -179,9 +180,9 @@ public:
         return typeapiParameterClass_;
     }
 
-    Class *GetIFunctionClass()
+    Class *GetFunctionClass()
     {
-        return ifuncClass_;
+        return functionClass_;
     }
 
     Class *GetBoxBooleanClass()
@@ -285,8 +286,10 @@ private:
     Class *boxLongClass_ = nullptr;
     Class *boxFloatClass_ = nullptr;
     Class *boxDoubleClass_ = nullptr;
-    // std.core
+    // std.core special types
     Class *bigintClass_ = nullptr;
+    Class *functionClass_ = nullptr;
+    // std.core
     Class *exceptionClass_ = nullptr;
     Class *errorClass_ = nullptr;
     Class *promiseClass_ = nullptr;
@@ -306,7 +309,6 @@ private:
     Class *typeapiFieldClass_ = nullptr;
     Class *typeapiMethodClass_ = nullptr;
     Class *typeapiParameterClass_ = nullptr;
-    Class *ifuncClass_ = nullptr;
     // escompat
     Class *sharedMemoryClass_ = nullptr;
 };

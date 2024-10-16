@@ -222,16 +222,6 @@ EtsMethod *EtsClass::ResolveVirtualMethod(const EtsMethod *method) const
     return reinterpret_cast<EtsMethod *>(GetRuntimeClass()->ResolveVirtualMethod(method->GetPandaMethod()));
 }
 
-PandaVector<EtsClass *> EtsClass::GetInterfaces() const
-{
-    auto runtimeInterfaces = GetRuntimeClass()->GetInterfaces();
-    auto interfaces = PandaVector<EtsClass *>(runtimeInterfaces.Size());
-    for (size_t i = 0; i < interfaces.size(); i++) {
-        interfaces[i] = EtsClass::FromRuntimeClass(runtimeInterfaces[i]);
-    }
-    return interfaces;
-}
-
 /* static */
 EtsClass *EtsClass::GetPrimitiveClass(EtsString *name)
 {
@@ -403,20 +393,40 @@ void EtsClass::SetValueTyped()
     flags_ = flags_ | IS_VALUE_TYPED;
     ASSERT(IsValueTyped());
 }
-
-bool EtsClass::IsWeakReference() const
+void EtsClass::SetUndefined()
 {
-    return (flags_ & IS_WEAK_REFERENCE) != 0;
+    flags_ = flags_ | IS_UNDEFINED;
+    ASSERT(IsUndefined());
+}
+void EtsClass::SetBoxed()
+{
+    flags_ = flags_ | IS_BOXED;
+    ASSERT(IsBoxed());
+}
+void EtsClass::SetFunction()
+{
+    flags_ = flags_ | IS_FUNCTION;
+    ASSERT(IsFunction());
+}
+void EtsClass::SetBigInt()
+{
+    flags_ = flags_ | IS_BIGINT;
+    ASSERT(IsBigInt());
 }
 
-bool EtsClass::IsFinalizerReference() const
+static bool HasFunctionTypeInSuperClasses(EtsClass *cls)
 {
-    return (flags_ & IS_FINALIZE_REFERENCE) != 0;
-}
-
-bool EtsClass::IsReference() const
-{
-    return (flags_ & IS_REFERENCE) != 0;
+    if (EtsClass *base = cls->GetBase(); base != nullptr) {
+        if (UNLIKELY(base->IsFunction())) {
+            return true;
+        }
+    }
+    for (Class *iface : cls->GetRuntimeClass()->GetInterfaces()) {
+        if (UNLIKELY(EtsClass::FromRuntimeClass(iface)->IsFunction())) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPrimitiveType)
@@ -434,6 +444,10 @@ void EtsClass::Initialize(EtsClass *superClass, uint16_t accessFlags, bool isPri
     if (superClass != nullptr) {
         static constexpr uint32_t COPIED_MASK = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
         flags |= superClass->GetFlags() & COPIED_MASK;
+        ASSERT(!superClass->IsValueTyped());
+    }
+    if (UNLIKELY(HasFunctionTypeInSuperClasses(this))) {
+        flags |= IS_FUNCTION;
     }
     SetFlags(flags);
 }
@@ -539,72 +553,6 @@ EtsClass *EtsClass::GetBase()
         return nullptr;
     }
     return FromRuntimeClass(base);
-}
-
-bool EtsClass::IsAnnotation() const
-{
-    return GetRuntimeClass()->IsAnnotation();
-}
-
-bool EtsClass::IsEnum() const
-{
-    return GetRuntimeClass()->IsEnum();
-}
-
-bool EtsClass::IsStringClass() const
-{
-    return GetRuntimeClass()->IsStringClass();
-}
-
-bool EtsClass::IsFunctionalClass() const
-{
-    auto *ifuncClass = EtsCoroutine::GetCurrent()->GetPandaVM()->GetClassLinker()->GetIFunctionClass();
-    return ifuncClass->GetRuntimeClass()->IsAssignableFrom(GetRuntimeClass());
-}
-
-bool EtsClass::IsUnionClass() const
-{
-    // NOTE(petr-shumilov): Not implemented
-    return false;
-}
-
-bool EtsClass::IsUndefined() const
-{
-    return GetDescriptor() == panda_file_items::class_descriptors::INTERNAL_UNDEFINED;
-}
-
-bool EtsClass::IsClassClass() const
-{
-    return GetRuntimeClass()->IsClassClass();
-}
-
-bool EtsClass::IsInterface() const
-{
-    return GetRuntimeClass()->IsInterface();
-}
-
-bool EtsClass::IsArrayClass() const
-{
-    return GetRuntimeClass()->IsArrayClass();
-}
-
-bool EtsClass::IsTupleClass() const
-{
-    // NOTE(petr-shumilov): Not implemented
-    return false;
-}
-
-bool EtsClass::IsBoxedClass() const
-{
-    auto typeDesc = GetDescriptor();
-    return (typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BOOLEAN ||
-            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_BYTE ||
-            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_CHAR ||
-            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_SHORT ||
-            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_INT ||
-            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_LONG ||
-            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_FLOAT ||
-            typeDesc == ark::ets::panda_file_items::class_descriptors::BOX_DOUBLE);
 }
 
 void EtsClass::GetInterfaces(PandaUnorderedSet<EtsClass *> &ifaces, EtsClass *iface)

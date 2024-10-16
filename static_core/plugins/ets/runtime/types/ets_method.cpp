@@ -115,7 +115,7 @@ EtsClass *EtsMethod::ResolveArgType(uint32_t idx)
             }
         }
         ASSERT(refIdx <= proto.GetRefTypes().size());
-        return classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetClassLoader());
+        return classLinker->GetClass(proto.GetRefTypes()[refIdx].data(), false, GetClass()->GetLoadContext());
     }
 
     // get primitive type

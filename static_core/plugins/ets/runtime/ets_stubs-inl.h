@@ -48,6 +48,23 @@ ALWAYS_INLINE inline bool EtsReferenceEquals(EtsCoroutine *coro, EtsObject *ref1
     return EtsValueTypedEquals(coro, ref1, ref2);
 }
 
+// CC-OFFNXT(C_RULE_ID_INLINE_FUNCTION_SIZE) Perf critical common runtime code stub
+inline EtsClass *GetMethodOwnerClassInFrames(EtsCoroutine *coro, uint32_t depth)
+{
+    auto stack = StackWalker::Create(coro);
+    for (uint32_t i = 0; i < depth && stack.HasFrame(); ++i) {
+        stack.NextFrame();
+    }
+    if (UNLIKELY(!stack.HasFrame())) {
+        return nullptr;
+    }
+    auto method = stack.GetMethod();
+    if (UNLIKELY(method == nullptr)) {
+        return nullptr;
+    }
+    return EtsClass::FromRuntimeClass(method->GetClass());
+}
+
 }  // namespace ark::ets
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_STUBS_INL_H

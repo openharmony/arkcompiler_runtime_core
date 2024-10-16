@@ -144,7 +144,7 @@ public:
         const char *descriptor = proto.GetReturnTypeDescriptor().data();
         Runtime::GetCurrent()->GetClassLinker();
         return EtsClass::FromRuntimeClass(Runtime::GetCurrent()->GetClassLinker()->GetClass(
-            utf::CStringAsMutf8(descriptor), false, GetClass()->GetClassLoader()));
+            utf::CStringAsMutf8(descriptor), false, GetClass()->GetLoadContext()));
     }
 
     size_t GetVTableID() const

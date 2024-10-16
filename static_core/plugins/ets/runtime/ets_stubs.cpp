@@ -18,6 +18,7 @@
 #include "plugins/ets/runtime/ets_stubs-inl.h"
 #include "plugins/ets/runtime/types/ets_box_primitive.h"
 #include "plugins/ets/runtime/types/ets_bigint.h"
+#include "plugins/ets/runtime/types/ets_string.h"
 
 namespace ark::ets {
 
@@ -109,9 +110,8 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     if (cls1 == ext->GetBoxCharClass()) {
         return cls2 == ext->GetBoxCharClass() && CompareBoxedPrimitive<EtsChar>(obj1, obj2);
     }
-    if (UNLIKELY(cls1 == ext->GetBigIntClass())) {
-        return cls2 == ext->GetBigIntClass() &&
-               EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
+    if (UNLIKELY(ecls1->IsBigInt())) {
+        return ecls2->IsBigInt() && EtsBigIntEquality(EtsBigInt::FromEtsObject(obj1), EtsBigInt::FromEtsObject(obj2));
     }
     if (cls1 == ext->GetBoxLongClass() && cls2 == ext->GetBoxLongClass()) {
         return CompareBoxedPrimitive<EtsLong>(obj1, obj2);
@@ -119,6 +119,64 @@ bool EtsValueTypedEquals(EtsCoroutine *coro, EtsObject *obj1, EtsObject *obj2)
     if (auto num1 = GetBoxedNumericValue<EtsDouble>(ext, obj1); num1.has_value()) {
         auto num2 = GetBoxedNumericValue<EtsDouble>(ext, obj2);
         return num2.has_value() && num2.value() == num1.value();
+    }
+    UNREACHABLE();
+}
+
+EtsString *EtsGetTypeof(EtsCoroutine *coro, EtsObject *obj)
+{
+    // NOTE(vpukhov): #19799 use string constants
+    auto ext = coro->GetPandaVM()->GetClassLinker()->GetEtsClassLinkerExtension();
+    if (obj == nullptr) {
+        return EtsString::CreateFromMUtf8("object");
+    }
+    EtsClass *cls = obj->GetClass();
+
+    // NOTE(vpukhov): re-encode subtyping flags if necessary
+    if (!cls->IsValueTyped()) {
+        if (cls->IsFunction()) {
+            return EtsString::CreateFromMUtf8("function");
+        }
+        return EtsString::CreateFromMUtf8("object");
+    }
+
+    if (cls->IsUndefined()) {
+        return EtsString::CreateFromMUtf8("undefined");
+    }
+    if (obj->IsStringClass()) {
+        return EtsString::CreateFromMUtf8("string");
+    }
+    if (cls->IsBigInt()) {
+        return EtsString::CreateFromMUtf8("bigint");
+    }
+
+    ASSERT(cls->IsBoxed());
+
+    auto rcls = cls->GetRuntimeClass();
+    if (rcls == ext->GetBoxBooleanClass()) {
+        return EtsString::CreateFromMUtf8("boolean");
+    }
+    // NOTE(vpukhov): #19653 numerics must map to "number"
+    if (rcls == ext->GetBoxByteClass()) {
+        return EtsString::CreateFromMUtf8("byte");
+    }
+    if (rcls == ext->GetBoxCharClass()) {
+        return EtsString::CreateFromMUtf8("char");
+    }
+    if (rcls == ext->GetBoxShortClass()) {
+        return EtsString::CreateFromMUtf8("short");
+    }
+    if (rcls == ext->GetBoxIntClass()) {
+        return EtsString::CreateFromMUtf8("int");
+    }
+    if (rcls == ext->GetBoxLongClass()) {
+        return EtsString::CreateFromMUtf8("long");
+    }
+    if (rcls == ext->GetBoxFloatClass()) {
+        return EtsString::CreateFromMUtf8("float");
+    }
+    if (rcls == ext->GetBoxDoubleClass()) {
+        return EtsString::CreateFromMUtf8("number");
     }
     UNREACHABLE();
 }

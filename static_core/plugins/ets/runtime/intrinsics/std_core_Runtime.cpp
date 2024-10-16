@@ -22,6 +22,7 @@
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/ets_stubs.h"
 
 namespace ark::ets::intrinsics {
 
@@ -70,46 +71,7 @@ ObjectHeader *StdCoreRuntimeFailedTypeCastException(EtsObject *source, EtsString
 
 EtsString *StdCoreRuntimeTypeof(EtsObject *obj)
 {
-    if (obj != nullptr) {
-        if (obj->GetClass()->IsUndefined()) {
-            return EtsString::CreateFromMUtf8("undefined");
-        }
-        if (obj->IsStringClass()) {
-            return EtsString::CreateFromMUtf8("string");
-        }
-        if (obj->GetClass()->IsFunctionalClass()) {
-            return EtsString::CreateFromMUtf8("function");
-        }
-        auto ext = static_cast<PandaEtsVM *>(Runtime::GetCurrent()->GetPandaVM())
-                       ->GetClassLinker()
-                       ->GetEtsClassLinkerExtension();
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxBooleanClass()) {
-            return EtsString::CreateFromMUtf8("boolean");
-        }
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxByteClass()) {
-            return EtsString::CreateFromMUtf8("byte");
-        }
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxCharClass()) {
-            return EtsString::CreateFromMUtf8("char");
-        }
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxShortClass()) {
-            return EtsString::CreateFromMUtf8("short");
-        }
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxIntClass()) {
-            return EtsString::CreateFromMUtf8("int");
-        }
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxLongClass()) {
-            return EtsString::CreateFromMUtf8("long");
-        }
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxFloatClass()) {
-            return EtsString::CreateFromMUtf8("float");
-        }
-        if (obj->GetClass()->GetRuntimeClass() == ext->GetBoxDoubleClass()) {
-            return EtsString::CreateFromMUtf8("number");
-        }
-    }
-
-    return EtsString::CreateFromMUtf8("object");
+    return EtsGetTypeof(EtsCoroutine::GetCurrent(), obj);
 }
 
 }  // namespace ark::ets::intrinsics

@@ -1,0 +1,137 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+function cname(name: string) { return name }
+
+class Other {
+    static getCallerOfItself() {
+        return Class.ofCaller();
+    }
+}
+
+class A { }
+class B extends A { }
+interface I { }
+
+let LoadTarget_init = false;
+class LoadTarget {
+    private static s = (() => { LoadTarget_init = true; return 1; })();
+}
+
+let InitializeTarget_init = false;
+class InitializeTarget {
+    private static s = (() => { InitializeTarget_init = true; return 1; })();
+}
+
+let CreateInstanceTarget_init = false;
+class CreateInstanceTarget {
+    static s = (() => { CreateInstanceTarget_init = true; return 1; })();
+}
+
+let HasNoDefaultConstructor_init = false;
+class HasNoDefaultConstructor {
+    private static s = (() => { HasNoDefaultConstructor_init = true; return 1; })();
+    constructor(x: int) { this.x = x }
+    x: int
+}
+
+class Test {
+    static testRoots() {
+        let obj = new Object();
+        let objCls = Class.of(obj);
+        let clsCls = Class.of(objCls);
+        assert(Class.of(clsCls) == clsCls);
+        assert(objCls.getDescriptor() == "Lstd/core/Object;");
+        assert(clsCls.getDescriptor() == "Lstd/core/Class;");
+        assert(objCls.getSuper() == null);
+        assert(clsCls.getSuper() == objCls);
+    }
+
+    static testClassProps() {
+        const objcls = Class.of(new Object());
+        const acls = Class.of(new A());
+        const bcls = Class.of(new B());
+        assert(objcls.getName() == "std.core.Object");
+        assert(objcls.getSuper() == null);
+        assert(acls.getName() == cname("A"));
+        assert(acls.getSuper() == objcls);
+        assert(bcls.getName() == cname("B"));
+        assert(bcls.getSuper() == acls);
+    }
+
+    static testCaller() {
+        let caller = Class.ofCaller();
+        assert(caller.getName() == cname("Test"));
+        assert(Other.getCallerOfItself() != caller);
+    }
+
+    static testLoadClass() {
+        let linker = Class.ofCaller().getLinker();
+        let clsName = cname("LoadTarget");
+
+        assert(LoadTarget_init == false);
+        let cls = linker.loadClass(clsName, false);
+        assert(cls.getName() == clsName);
+        assert(LoadTarget_init == false);
+
+        let cls2 = linker.loadClass(clsName, true);
+        assert(LoadTarget_init == true);
+        assert(cls2 == cls);
+    }
+
+    static testInitialize() {
+        let linker = Class.ofCaller().getLinker();
+        let clsName = cname("InitializeTarget");
+
+        assert(InitializeTarget_init == false);
+        let cls = linker.loadClass(clsName, false);
+        assert(InitializeTarget_init == false);
+        cls.initialize();
+        assert(InitializeTarget_init == true);
+    }
+
+    static testCreateInstance() {
+        let linker = Class.ofCaller().getLinker();
+
+        let acls = Class.of(new A());
+        assert(Class.of(acls.createInstance()) == acls);
+
+        assert(!CreateInstanceTarget_init);
+        linker.loadClass(cname("CreateInstanceTarget"), false).createInstance();
+        assert(CreateInstanceTarget_init);
+
+        expectThrow(() => { linker.loadClass(cname("I"), false).createInstance() },
+            (e) => e instanceof Error
+        );
+        assert(!HasNoDefaultConstructor_init);
+        expectThrow(() => { linker.loadClass(cname("HasNoDefaultConstructor"), false).createInstance() },
+            (e) => e instanceof Error
+        );
+        assert(!HasNoDefaultConstructor_init);
+    }
+
+    static test() {
+        Test.testClassProps();
+        Test.testRoots();
+        Test.testCaller();
+        Test.testLoadClass();
+        Test.testInitialize();
+        Test.testCreateInstance();
+    }
+}
+
+function main() {
+    Test.test();
+}

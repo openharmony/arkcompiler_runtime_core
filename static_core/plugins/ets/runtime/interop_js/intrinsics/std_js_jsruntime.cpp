@@ -60,7 +60,7 @@ EtsString *JSRuntimeGetValueStringIntrinsic(JSValue *etsJsValue)
     return JSRuntimeGetValueString(etsJsValue);
 }
 
-EtsObject *JSRuntimeGetValueObjectIntrinsic(JSValue *etsJsValue, EtsObject *cls)
+EtsObject *JSRuntimeGetValueObjectIntrinsic(JSValue *etsJsValue, EtsClass *cls)
 {
     return JSRuntimeGetValueObject(etsJsValue, cls);
 }
@@ -140,22 +140,19 @@ uint8_t JSRuntimeInstanceOfDynamicIntrinsic(JSValue *object, JSValue *ctor)
     return JSRuntimeInstanceOfDynamic(object, ctor);
 }
 
-uint8_t JSRuntimeInstanceOfStaticIntrinsic(JSValue *object, EtsObject *cls)
+uint8_t JSRuntimeInstanceOfStaticIntrinsic(JSValue *object, EtsClass *clsObj)
 {
-    // NOTE(v.cherkashin):
-    //  Delete cast and use 'EtsClass *cls' instead of 'EtsObject *cls' when issue #15273 was resolved
-    ASSERT(cls->GetClass()->IsClassClass());
-    return JSRuntimeInstanceOfStatic(object, reinterpret_cast<EtsClass *>(cls));
+    return JSRuntimeInstanceOfStatic(object, clsObj);
 }
 
-uint8_t JSRuntimeInitJSCallClassIntrinsic(EtsString *clsName)
+uint8_t JSRuntimeInitJSCallClassIntrinsic()
 {
-    return JSRuntimeInitJSCallClass(clsName);
+    return JSRuntimeInitJSCallClass();
 }
 
-uint8_t JSRuntimeInitJSNewClassIntrinsic(EtsString *clsName)
+uint8_t JSRuntimeInitJSNewClassIntrinsic()
 {
-    return JSRuntimeInitJSNewClass(clsName);
+    return JSRuntimeInitJSNewClass();
 }
 
 JSValue *JSRuntimeLoadModuleIntrinsic(EtsString *module)

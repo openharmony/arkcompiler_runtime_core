@@ -45,6 +45,10 @@ class EtsTypeAPIParameter;
 
 enum class EtsType;
 
+namespace test {
+class EtsClassTest;
+}  // namespace test
+
 class EtsClass {
 public:
     // We shouldn't init header_ here - because it has been memset(0) in object allocation,
@@ -56,7 +60,7 @@ public:
 
     const char *GetDescriptor() const
     {
-        return reinterpret_cast<const char *>(GetRuntimeClass()->GetDescriptor());
+        return utf::Mutf8AsCString(GetRuntimeClass()->GetDescriptor());
     }
 
     PANDA_PUBLIC_API EtsClass *GetBase();
@@ -178,24 +182,44 @@ public:
         return GetRuntimeClass()->IsFinal();
     }
 
-    bool IsAnnotation() const;
-    bool IsEnum() const;
-    bool IsStringClass() const;
-    bool IsFunctionalClass() const;
-    bool IsUnionClass() const;
-    bool IsUndefined() const;
-    bool IsClassClass() const;
-    bool IsInterface() const;
-    bool IsArrayClass() const;
-    bool IsTupleClass() const;
-    bool IsBoxedClass() const;
-    bool IsJSValueClass() const;
+    bool IsAnnotation() const
+    {
+        return GetRuntimeClass()->IsAnnotation();
+    }
+
+    bool IsEnum() const
+    {
+        return GetRuntimeClass()->IsEnum();
+    }
+
+    bool IsStringClass() const
+    {
+        return GetRuntimeClass()->IsStringClass();
+    }
+
+    bool IsClassClass() const
+    {
+        return GetRuntimeClass()->IsClassClass();
+    }
+
+    bool IsArrayClass() const
+    {
+        return GetRuntimeClass()->IsArrayClass();
+    }
+
+    bool IsInterface() const
+    {
+        return GetRuntimeClass()->IsInterface();
+    }
+
+    bool IsClass() const
+    {
+        return GetRuntimeClass()->IsClass();
+    }
 
     static bool IsInSamePackage(std::string_view className1, std::string_view className2);
 
     bool IsInSamePackage(EtsClass *that);
-
-    PandaVector<EtsClass *> GetInterfaces() const;
 
     uint32_t GetComponentSize() const
     {
@@ -284,7 +308,7 @@ public:
         }
     }
 
-    ClassLinkerContext *GetClassLoader() const
+    ClassLinkerContext *GetLoadContext() const
     {
         return GetRuntimeClass()->GetLoadContext();
     }
@@ -340,7 +364,12 @@ public:
     static EtsClass *FromClassObject(ObjectHeader *obj)
     {
         ASSERT(obj->ClassAddr<Class>()->IsClassClass());
-        return reinterpret_cast<EtsClass *>(ToUintPtr(obj) - GetHeaderOffset());
+        return reinterpret_cast<EtsClass *>(obj);
+    }
+
+    static EtsClass *FromEtsClassObject(EtsObject *obj)
+    {
+        return FromClassObject(reinterpret_cast<ObjectHeader *>(obj));
     }
 
     static EtsClass *GetPrimitiveClass(EtsString *primitiveName);
@@ -360,7 +389,7 @@ public:
 
     void SetSuperClass(EtsClass *superClass)
     {
-        ObjectHeader *obj = superClass != nullptr ? reinterpret_cast<ObjectHeader *>(superClass->AsObject()) : nullptr;
+        auto obj = reinterpret_cast<ObjectHeader *>(superClass);
         GetObjectHeader()->SetFieldObject(GetSuperClassOffset(), obj);
     }
 
@@ -382,17 +411,51 @@ public:
     void SetWeakReference();
     void SetFinalizeReference();
     void SetValueTyped();
+    void SetUndefined();
+    void SetBoxed();
+    void SetFunction();
+    void SetBigInt();
 
-    [[nodiscard]] bool IsWeakReference() const;
-    [[nodiscard]] bool IsFinalizerReference() const;
+    [[nodiscard]] bool IsWeakReference() const
+    {
+        return (flags_ & IS_WEAK_REFERENCE) != 0;
+    }
+
+    [[nodiscard]] bool IsFinalizerReference() const
+    {
+        return (flags_ & IS_FINALIZE_REFERENCE) != 0;
+    }
+
+    /// True if class inherited from Reference, false otherwise
+    [[nodiscard]] bool IsReference() const
+    {
+        return (flags_ & IS_REFERENCE) != 0;
+    }
 
     [[nodiscard]] bool IsValueTyped() const
     {
         return (GetFlags() & IS_VALUE_TYPED) != 0;
     }
 
-    /// True if class inherited from Reference, false otherwise
-    [[nodiscard]] bool IsReference() const;
+    [[nodiscard]] bool IsUndefined() const
+    {
+        return (GetFlags() & IS_UNDEFINED) != 0;
+    }
+
+    [[nodiscard]] bool IsBoxed() const
+    {
+        return (GetFlags() & IS_BOXED) != 0;
+    }
+
+    [[nodiscard]] bool IsFunction() const
+    {
+        return (GetFlags() & IS_FUNCTION) != 0;
+    }
+
+    [[nodiscard]] bool IsBigInt() const
+    {
+        return (GetFlags() & IS_BIGINT) != 0;
+    }
 
     EtsClass() = delete;
     ~EtsClass() = delete;
@@ -442,19 +505,28 @@ private:
     constexpr static uint32_t IS_FINALIZE_REFERENCE = 1U << 18U;
     constexpr static uint32_t IS_REFERENCE = IS_WEAK_REFERENCE | IS_FINALIZE_REFERENCE;
 
+    // Class is a value-semantic type
     constexpr static uint32_t IS_VALUE_TYPED = 1U << 19U;
+    // Class is an internal "undefined" class
+    constexpr static uint32_t IS_UNDEFINED = 1U << 20U;
+    // Class is a boxed type
+    constexpr static uint32_t IS_BOXED = 1U << 21U;
+    // Class is Function
+    constexpr static uint32_t IS_FUNCTION = 1U << 22U;
+    // Class is BigInt
+    constexpr static uint32_t IS_BIGINT = 1U << 23U;
 
     ark::ObjectHeader header_;  // EtsObject
 
     // ets.Class fields BEGIN
-    // Reference fields START
     FIELD_UNUSED ObjectPointer<EtsString> name_;       // String
     FIELD_UNUSED ObjectPointer<EtsClass> superClass_;  // Class<? super T>
-    // Reference fields END
     FIELD_UNUSED uint32_t flags_;
     // ets.Class fields END
 
     ark::Class klass_;
+
+    friend class test::EtsClassTest;
 };
 
 // Object header field must be first
