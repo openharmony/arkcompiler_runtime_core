@@ -16,19 +16,47 @@ cases:
     - decl: |-
           enum Enum { first, second, third = 0 }
       use: |-
-          assert Enum.first != Enum.second && Enum.second != Enum.third
+          assert(Enum.first != Enum.second && Enum.second != Enum.third && Enum.first == Enum.third)
 
     - decl: |-
           enum Enum { first = 11, second = 11, third = 11 }
       use: |-
-          assert Enum.first == Enum.second && Enum.second == Enum.third
+          assert(Enum.first == Enum.second && Enum.second == Enum.third && Enum.first == Enum.third)
 
     - decl: |-
           enum Enum { first = "A", second = "B", third = "A" }
       use: |-
-          assert Enum.first != Enum.second && Enum.second != Enum.third
+          assert(Enum.first != Enum.second && Enum.second != Enum.third && Enum.first == Enum.third)
 
     - decl: |-
           enum Enum { first = "ABC", second = "ABC", third = "ABC" }
       use: |-
-          assert Enum.first == Enum.second && Enum.second == Enum.third
+          assert(Enum.first == Enum.second && Enum.second == Enum.third && Enum.first == Enum.third)
+
+    - decl: |-
+          enum Enum { first, second, third = 0 }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          assert(foo(0) != foo(1) && foo(1) != arr[2] && foo(0) == Enum.third)
+
+    - decl: |-
+          enum Enum { first = 11, second = 11, third = 11 }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          assert(foo(0) == foo(1) && foo(1) == arr[2] && foo(0) == Enum.third)
+
+    - decl: |-
+          enum Enum { first = "A", second = "B", third = "A" }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          assert(foo(0) != foo(1) && foo(1) != arr[2] && foo(0) == Enum.third)
+
+    - decl: |-
+          enum Enum { first = "ABC", second = "ABC", third = "ABC" }
+          let arr: Enum[] = [Enum.first, Enum.second, Enum.third]
+          let foo: (i: int) => Enum = (i: int): Enum => arr[i]
+      use: |-
+          assert(foo(0) == foo(1) && foo(1) == arr[2] && foo(0) == Enum.third)

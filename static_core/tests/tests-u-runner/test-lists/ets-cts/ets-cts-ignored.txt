@@ -507,6 +507,64 @@
 07.expressions/09.field_access_expressions/01.accessing_current_object_fields/access_static_field_5.sts
 # end of 16269
 
+# 20131 es2panda aborts on a enumeration relational operation
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_var_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_var_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_var_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_var_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_var_9.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_arr_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_arr_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_arr_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_arr_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_arr_9.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fld_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fld_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fld_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fld_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fld_9.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fun_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fun_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fun_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fun_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_fun_9.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_lmb_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_lmb_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_lmb_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_lmb_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_lmb_9.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_union_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_union_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_union_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_union_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_union_9.sts
+
+# 20051 Wrong type inferred from a conditional expression with enums
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_0.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_1.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_2.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_3.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_4.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_5.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_cond_9.sts
+
+# es2panda fails: panda#15188 es2panda aborts on enum in tuple type
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_0.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_1.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_10.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_2.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_3.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_4.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_5.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_6.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_7.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_8.sts
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_9.sts
+
 # es2panda fails: Union Types not implemented, #15233, #19926, 19950
 03.types/08.reference_types/11.union_types/spec_ex1.sts
 03.types/08.reference_types/11.union_types/spec_ex3.sts
