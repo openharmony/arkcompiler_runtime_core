@@ -181,7 +181,7 @@ void CodegenFastPath::CreateFrameInfo()
         FrameInfo::CallersRelativeFp::Encode(true) | FrameInfo::CalleesRelativeFp::Encode(false) |
         FrameInfo::PushCallers::Encode(true));
     frame->SetSpillsCount(GetGraph()->GetStackSlotsCount());
-    CFrameLayout fl(GetGraph()->GetArch(), GetGraph()->GetStackSlotsCount());
+    CFrameLayout fl(GetGraph()->GetArch(), GetGraph()->GetStackSlotsCount(), false);
 
     frame->SetCallersOffset(fl.GetOffset<CFrameLayout::OffsetOrigin::SP, CFrameLayout::OffsetUnit::SLOTS>(
         fl.GetStackStartSlot() + fl.GetCallerLastSlot(false)));

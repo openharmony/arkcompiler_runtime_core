@@ -63,8 +63,8 @@ private:
 
 class CFrameLayout {
 public:
-    constexpr CFrameLayout(Arch arch, size_t spillsCount)
-        : arch_(arch), spillsCount_(AlignSpillCount(arch, spillsCount))
+    constexpr CFrameLayout(Arch arch, size_t spillsCount, bool alignSpills = true)
+        : arch_(arch), spillsCount_(alignSpills ? AlignSpillCount(arch, spillsCount) : spillsCount)
     {
     }
     ~CFrameLayout() = default;
