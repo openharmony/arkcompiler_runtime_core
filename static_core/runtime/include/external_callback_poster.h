@@ -21,7 +21,7 @@
 #include "libpandabase/macros.h"
 #include "runtime/include/mem/panda_smart_pointers.h"
 
-namespace ark::ets {
+namespace ark {
 
 /// @brief Interface of class that should post a callback to remote side
 class CallbackPoster {
@@ -57,6 +57,6 @@ public:
     virtual PandaUniquePtr<CallbackPoster> CreatePoster() = 0;
 };
 
-}  // namespace ark::ets
+}  // namespace ark
 
 #endif  // PANDA_PLUGINS_ETS_RUNTIME_ETS_EXTERNAL_CALLBACK_POSTER_H

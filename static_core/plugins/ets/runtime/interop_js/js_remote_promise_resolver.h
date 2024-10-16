@@ -16,8 +16,8 @@
 #ifndef PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REMOTE_PROMISE_RESOLVER_H
 #define PLUGINS_ETS_RUNTIME_INTEROP_JS_JS_REMOTE_PROMISE_RESOLVER_H
 
+#include "runtime/include/external_callback_poster.h"
 #include "plugins/ets/runtime/ets_remote_promise_resolver.h"
-#include "plugins/ets/runtime/ets_external_callback_poster.h"
 #include "plugins/ets/runtime/ets_vm.h"
 #include "plugins/ets/runtime/types/ets_promise.h"
 #include <node_api.h>
@@ -27,7 +27,7 @@ namespace ark::ets::interop::js {
 /// @brief Class should be used to resolve/reject JS promises from any
 class JsRemotePromiseResolver : public RemotePromiseResolver {
 public:
-    JsRemotePromiseResolver(napi_deferred deferred, PandaUniquePtr<CallbackPoster> &&poster);
+    explicit JsRemotePromiseResolver(napi_deferred deferred);
     NO_COPY_SEMANTIC(JsRemotePromiseResolver);
     NO_MOVE_SEMANTIC(JsRemotePromiseResolver);
     ~JsRemotePromiseResolver() override = default;
@@ -39,7 +39,7 @@ private:
     static void ResolveRemotePromise(napi_deferred deferred, EtsObject *resolveValue, Action action);
 
     napi_deferred deferred_ = nullptr;
-    PandaUniquePtr<CallbackPoster> poster_ {nullptr};
+    PandaUniquePtr<CallbackPoster> poster_;
 };
 
 }  // namespace ark::ets::interop::js

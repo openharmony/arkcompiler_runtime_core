@@ -18,11 +18,31 @@
 
 #include <uv.h>
 #include <node_api.h>
-#include "plugins/ets/runtime/ets_external_callback_poster.h"
+#include <queue>
+
+#include "runtime/include/external_callback_poster.h"
+#include "libpandabase/os/mutex.h"
 
 namespace ark::ets::interop::js {
 
 class EventLoopCallbackPoster : public CallbackPoster {
+    class ThreadSafeCallbackQueue {
+        using CallbackQueue = std::queue<WrappedCallback>;
+
+    public:
+        ThreadSafeCallbackQueue() = default;
+        NO_COPY_SEMANTIC(ThreadSafeCallbackQueue);
+        NO_MOVE_SEMANTIC(ThreadSafeCallbackQueue);
+        ~ThreadSafeCallbackQueue() = default;
+
+        void PushCallback(WrappedCallback &&callback, uv_async_t *async);
+        void ExecuteAllCallbacks();
+
+    private:
+        os::memory::RecursiveMutex lock_;
+        CallbackQueue callbackQueue_ GUARDED_BY(lock_);
+    };
+
 public:
     static_assert(PANDA_ETS_INTEROP_JS);
     EventLoopCallbackPoster();
@@ -37,9 +57,10 @@ private:
 
     void PostToEventLoop(WrappedCallback &&callback);
 
-    static void AsyncCallbackBody(uv_async_t *async);
+    static void AsyncEventToExecuteCallbacks(uv_async_t *async);
 
     uv_async_t *async_ = nullptr;
+    ThreadSafeCallbackQueue *callbackQueue_;
 };
 
 class EventLoopCallbackPosterFactoryImpl : public CallbackPosterFactoryIface {
