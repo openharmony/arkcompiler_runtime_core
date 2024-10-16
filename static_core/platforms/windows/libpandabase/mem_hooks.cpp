@@ -51,6 +51,7 @@ static const char *GetBlockTypeName(int bt)
     }
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 int PandaAllocHook(int alloctype, [[maybe_unused]] void *data, std::size_t size, int blocktype,
                    [[maybe_unused]] long request, const unsigned char *filename, int linenumber)
 {

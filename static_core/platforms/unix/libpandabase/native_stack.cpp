@@ -163,33 +163,10 @@ bool WriterOsFile(const void *buffer, size_t count, int fd)
     return myfile.WriteAll(buffer, count);
 }
 
-std::string ChangeJaveStackFormat(const char *descriptor)
+std::string GetPrimitiveName(char descriptor)
 {
-    if (descriptor == nullptr || strlen(descriptor) < 1) {
-        LOG(ERROR, RUNTIME) << "Invalid descriptor";
-        return "";
-    }
-
-    if (descriptor[0] == 'L') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        std::string str(descriptor);
-        size_t end = str.find_last_of(';');
-        if (end == std::string::npos) {
-            LOG(ERROR, RUNTIME) << "Invalid descriptor: no scln at end";
-            return "";
-        }
-        std::string javaName = str.substr(1, end - 1);  // Remove 'L' and ';'
-        std::replace(javaName.begin(), javaName.end(), '/', '.');
-        return javaName;
-    }
-
-    if (descriptor[0] == '[') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        std::string javaName(descriptor);
-        std::replace(javaName.begin(), javaName.end(), '/', '.');
-        return javaName;
-    }
-
     const char *primitiveName = "";
-    switch (descriptor[0]) {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    switch (descriptor) {
         case 'Z':
             primitiveName = "boolean";
             break;
@@ -222,6 +199,34 @@ std::string ChangeJaveStackFormat(const char *descriptor)
     }
 
     return primitiveName;
+}
+
+std::string ChangeJaveStackFormat(const char *descriptor)
+{
+    if (descriptor == nullptr || strlen(descriptor) < 1) {
+        LOG(ERROR, RUNTIME) << "Invalid descriptor";
+        return "";
+    }
+
+    if (descriptor[0] == 'L') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::string str(descriptor);
+        size_t end = str.find_last_of(';');
+        if (end == std::string::npos) {
+            LOG(ERROR, RUNTIME) << "Invalid descriptor: no scln at end";
+            return "";
+        }
+        std::string javaName = str.substr(1, end - 1);  // Remove 'L' and ';'
+        std::replace(javaName.begin(), javaName.end(), '/', '.');
+        return javaName;
+    }
+
+    if (descriptor[0] == '[') {  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        std::string javaName(descriptor);
+        std::replace(javaName.begin(), javaName.end(), '/', '.');
+        return javaName;
+    }
+
+    return GetPrimitiveName(descriptor[0]);  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 }
 
 }  // namespace ark::os::unix::native_stack

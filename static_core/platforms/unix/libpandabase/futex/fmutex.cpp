@@ -20,7 +20,7 @@
 #define FAIL_WITH_MESSAGE(m) ASSERT(0)
 #define LOG_MESSAGE(l, m)
 #define HELPERS_TO_UNSIGNED(m) m
-extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
+extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));  // CC-OFF(G.EXP.01) public API
 #else
 #include "utils/logger.h"
 #include "utils/type_helpers.h"
@@ -169,6 +169,26 @@ void MutexDestroy(struct fmutex *const m)
 #endif  // PANDA_TARGET_MOBILE
 }
 
+static void WaitForUnlock(struct fmutex *const m, int curState)
+{
+    // Retry wait until lock not held. In heavy contention situations curState check can fail
+    // immediately due to repeatedly decrementing and incrementing waiters.
+    // NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
+    while ((HELPERS_TO_UNSIGNED(curState) & HELPERS_TO_UNSIGNED(HELD_MASK)) != 0) {
+#ifdef MC_ON
+        FutexWait(&m->stateAndWaiters, curState);
+#else
+        // NOLINTNEXTLINE(hicpp-signed-bitwise), NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
+        if (futex(GetStateAddr(m), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0 && (errno != EAGAIN) &&
+            (errno != EINTR)) {
+            LOG(FATAL, COMMON) << "Futex wait failed!";
+        }
+#endif
+        // Atomic with relaxed order reason: mutex synchronization
+        curState = ATOMIC_LOAD(&m->stateAndWaiters, memory_order_relaxed);
+    }
+}
+
 bool MutexLock(struct fmutex *const m, bool trylock)
 {
     current_tid = current_tid == 0 ? GET_CURRENT_THREAD : current_tid;
@@ -205,22 +225,7 @@ bool MutexLock(struct fmutex *const m, bool trylock)
                 IncrementWaiters(m);
                 // Update curState to be equal to current expected stateAndWaiters.
                 curState += WAITER_INCREMENT;
-                // Retry wait until lock not held. In heavy contention situations curState check can fail
-                // immediately due to repeatedly decrementing and incrementing waiters.
-                // NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
-                while ((HELPERS_TO_UNSIGNED(curState) & HELPERS_TO_UNSIGNED(HELD_MASK)) != 0) {
-#ifdef MC_ON
-                    FutexWait(&m->stateAndWaiters, curState);
-#else
-                    // NOLINTNEXTLINE(hicpp-signed-bitwise), NOLINTNEXTLINE(C_RULE_ID_FUNCTION_NESTING_LEVEL)
-                    if (futex(GetStateAddr(m), FUTEX_WAIT_PRIVATE, curState, nullptr, nullptr, 0) != 0 &&
-                        (errno != EAGAIN) && (errno != EINTR)) {
-                        LOG(FATAL, COMMON) << "Futex wait failed!";
-                    }
-#endif
-                    // Atomic with relaxed order reason: mutex synchronization
-                    curState = ATOMIC_LOAD(&m->stateAndWaiters, memory_order_relaxed);
-                }
+                WaitForUnlock(m, curState);
                 DecrementWaiters(m);
             }
         }

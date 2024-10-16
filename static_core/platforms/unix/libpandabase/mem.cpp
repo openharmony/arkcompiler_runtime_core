@@ -38,6 +38,7 @@ void MmapDeleter(std::byte *ptr, size_t size) noexcept
     }
 }
 
+// CC-OFFNXT(G.FUN.01) solid logic
 BytePtr MapFile(file::File file, uint32_t prot, uint32_t flags, size_t size, size_t fileOffset, void *hint)
 {
     size_t mapOffset = RoundDown(fileOffset, GetPageSize());

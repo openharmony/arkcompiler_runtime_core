@@ -52,7 +52,6 @@ PANDA_PUBLIC_API void Yield();
 PANDA_PUBLIC_API void NativeSleep(unsigned int ms);
 PANDA_PUBLIC_API void NativeSleepUS(std::chrono::microseconds us);
 PANDA_PUBLIC_API void ThreadDetach(NativeHandleType pthreadHandle);
-PANDA_PUBLIC_API void ThreadExit(void *ret);
 PANDA_PUBLIC_API void ThreadJoin(NativeHandleType pthreadHandle, void **ret);
 PANDA_PUBLIC_API void ThreadSendSignal(NativeHandleType pthreadHandle, int sig);
 

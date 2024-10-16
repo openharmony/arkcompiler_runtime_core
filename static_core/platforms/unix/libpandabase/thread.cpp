@@ -150,11 +150,6 @@ void ThreadDetach(NativeHandleType pthreadHandle)
     pthread_detach(pthreadHandle);
 }
 
-void ThreadExit(void *ret)
-{
-    pthread_exit(ret);
-}
-
 void ThreadJoin(NativeHandleType pthreadHandle, void **ret)
 {
     pthread_join(pthreadHandle, ret);

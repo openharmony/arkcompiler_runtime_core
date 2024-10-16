@@ -23,7 +23,7 @@
 namespace ark {
 
 #if PANDA_TARGET_MACOS && !defined _NSIG
-#define _NSIG NSIG
+#define _NSIG NSIG  // CC-OFF(G.DCL.01) public API
 #endif
 
 static constexpr uint64_t SIGHOOK_ALLOW_NORETURN = 0x1UL;

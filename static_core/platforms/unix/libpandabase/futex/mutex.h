@@ -188,17 +188,12 @@ private:
                 // Atomic with seq_cst order reason: mutex synchronization
                 done = state_.compare_exchange_weak(curState, newState, std::memory_order_seq_cst);
                 if (done && newState == UNLOCKED) {
-                    // Atomic with seq_cst order reason: mutex synchronization
-                    if (waiters_.load(std::memory_order_seq_cst) > 0) {
-                        // Wake one exclusive waiter as there are now no readers.
-                        // NOLINTNEXTLINE(hicpp-signed-bitwise)
-                        futex(GetStateAddr(), FUTEX_WAKE_PRIVATE, WAKE_ALL, nullptr, nullptr, 0);
-                    }
+                    WakeAllWaiters();
                 }
             } else {
                 // Cannot use logger in header
                 std::cout << "RWLock ReadUnlock got unexpected state, RWLock is unlocked?" << std::endl;
-                std::abort();
+                std::abort();  // CC-OFF(G.FUU.08) fatal error
             }
         }
     }
@@ -247,6 +242,18 @@ private:
         // Atomic with relaxed order reason: mutex synchronization
         waiters_.fetch_sub(1, std::memory_order_relaxed);
     }
+
+    inline void WakeAllWaiters()
+    {
+        // We are doing write unlock, all waiters could be ReadLocks so we need to wake all.
+        // Atomic with seq_cst order reason: mutex synchronization
+        if (waiters_.load(std::memory_order_seq_cst) > 0) {
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
+            futex(GetStateAddr(), FUTEX_WAKE_PRIVATE, WAKE_ALL, nullptr, nullptr, 0);
+        }
+    }
+
+    inline void WaitForFutex(int32_t curState);
 
     // Extra padding to make RWLock 16 bytes long
     static constexpr size_t PADDING_SIZE = 1;

@@ -101,7 +101,7 @@ Expected<size_t, Error> WaitForEvent(const UniqueFd *handles, size_t size, Event
 
         for (size_t i = 0; i < size; i++) {
             if ((static_cast<size_t>(pollfds[i].revents) & pollEvents) == pollEvents) {
-                return {i};
+                return Expected<size_t, Error>(i);
             }
         }
     }
