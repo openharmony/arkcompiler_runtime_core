@@ -1,0 +1,2 @@
+bin/es2panda
+lib/libe2p_test_plugin.so

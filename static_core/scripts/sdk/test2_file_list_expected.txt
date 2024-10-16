@@ -6,6 +6,11 @@ build-sdk/sdk/ets/stdlib/README.md
 build-sdk/sdk/ets/stdlib/escompat
 build-sdk/sdk/ets/stdlib/native
 build-sdk/sdk/ets/stdlib/std
+build-sdk/sdk/linux_arm64_host_tools
+build-sdk/sdk/linux_arm64_host_tools/bin
+build-sdk/sdk/linux_arm64_host_tools/bin/es2panda
+build-sdk/sdk/linux_arm64_host_tools/lib
+build-sdk/sdk/linux_arm64_host_tools/lib/libe2p_test_plugin.so
 build-sdk/sdk/linux_host_tools
 build-sdk/sdk/linux_host_tools/bin
 build-sdk/sdk/linux_host_tools/bin/ark
