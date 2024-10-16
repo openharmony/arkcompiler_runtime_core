@@ -22,6 +22,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Dict, Optional, List
 
+import pytz
 from runner.enum_types.params import TestEnv, TestReport
 from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
 from runner.logger import Log
@@ -75,12 +76,12 @@ class Test:
         self.reproduce.append(cmd)
 
     def run(self) -> Test:
-        start = datetime.now()
+        start = datetime.now(pytz.UTC)
         Log.all(_LOGGER, f"Start to execute: {self.test_id}")
 
         result = self.do_run()
 
-        finish = datetime.now()
+        finish = datetime.now(pytz.UTC)
         self.time = (finish - start).total_seconds()
 
         if result.passed is None:

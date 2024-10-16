@@ -44,11 +44,14 @@ class Config:
     def __init__(self, args: argparse.Namespace):
         CliArgsWrapper.setup(args)
         ConfigKeeper.get().load_configs(args.configs)
-        for warning in ConfigKeeper.get().warnings():
-            Log.summary(_LOGGER, warning)
 
     def __str__(self) -> str:
         return _to_str(self, 0)
+
+    @staticmethod
+    def log_warnings() -> None:
+        for warning in ConfigKeeper.get().warnings():
+            Log.summary(_LOGGER, warning)
 
     @cached_property
     @value(

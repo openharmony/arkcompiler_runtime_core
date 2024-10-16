@@ -26,6 +26,7 @@ from os import path, environ
 from pathlib import Path
 from typing import List, Dict, Optional, Type, Tuple
 
+import pytz
 from runner.utils import get_platform_binary_name
 from runner.enum_types.configuration_kind import ConfigurationKind, SanitizerKind
 from runner.enum_types.fail_kind import FailKind
@@ -142,7 +143,7 @@ class RunnerFileBased(Runner):
             aot_args=self.aot_args,
             ark_quick=self.binaries.ark_quick,
             quick_args=self.quick_args,
-            timestamp=int(datetime.timestamp(datetime.now())),
+            timestamp=int(datetime.timestamp(datetime.now(pytz.UTC))),
             report_formats={self.config.report.report_format},
             work_dir=self.work_dir,
             verifier=self.binaries.verifier,
@@ -254,7 +255,7 @@ class RunnerFileBased(Runner):
 
         if results:
             xml_view = XmlView(self.work_dir.report, summary)
-            execution_time = round((datetime.now() - self.start_time).total_seconds(), 3)
+            execution_time = round((datetime.now(pytz.UTC) - self.start_time).total_seconds(), 3)
             xml_view.create_xml_report(results, execution_time)
             xml_view.create_ignore_list(set(results))
             self.__generate_detailed_report(results)

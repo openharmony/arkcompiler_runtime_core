@@ -83,8 +83,8 @@ class TestMetadata:
             return
         self.spec = str(self.spec)
         if not re.match(SPEC_CHAPTER_PATTERN, self.spec):
-            _LOGGER.error(f"Incorrect format of specification chapter number : {self.spec}")
-
+            error_message = f"Incorrect format of specification chapter number : {self.spec}"
+            _LOGGER.error(error_message)
 
 
 def get_metadata(path: Path) -> TestMetadata:
