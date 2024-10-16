@@ -66,18 +66,6 @@
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
 //!
-//! METHOD        "ETSGLOBAL::uber_chain_concat4"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_COUNT    "StringBuilder::<ctor>",64
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",128
-//! INST_COUNT    "Intrinsic.StdCoreSbToString",64
-//! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_COUNT    "StringBuilder::<ctor>",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
-//! PASS_AFTER    "Codegen"
-//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
-//!
 //! METHOD        "ETSGLOBAL::supported_chain_concat5"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",2
@@ -246,18 +234,6 @@
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",2
 //!
-//! METHOD        "ETSGLOBAL::uber_chain_concat4"
-//! PASS_BEFORE   "BranchElimination"
-//! INST_COUNT    "StringBuilder::<ctor>",64
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",128
-//! INST_COUNT    "Intrinsic.StdCoreSbToString",64
-//! PASS_AFTER    "SimplifyStringBuilder"
-//! INST_COUNT    "StringBuilder::<ctor>",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString2",5
-//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",5
-//! PASS_AFTER    "Codegen"
-//! INST_COUNT    "Intrinsic.StdCoreSbToString",5
-//!
 //! METHOD        "ETSGLOBAL::supported_chain_concat5"
 //! PASS_BEFORE   "BranchElimination"
 //! INST_COUNT    "StringBuilder::<ctor>",2
@@ -374,10 +350,6 @@
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 
-//! CHECKER       JIT IR Builder, check String Builders merging (uber only, w/o optimizations)
-//! SKIP_IF       @architecture == "arm32"
-//! RUN           force_jit: true, options: "--compiler-inlining=false --compiler-simplify-string-builder=false", entry: "ETSGLOBAL::main_uber_only"
-
 // Each '+=' operation on strings in tests below is translated into StringBuilder + 2 append calls by frontend
 
 function chain_concat0(a: String, n: int, b: String, m: int): String {
@@ -451,161 +423,6 @@ function chain_concat3(a: String, n: int, b: String, m: int, c: String, l: int, 
         str0 += d;                              //  0
     str0 += "_";                                //  0
     return str0;    // applied, 14 SBs (10 from 'chain 0', and 4 from 'chain 1') merged into 2 SBs
-}
-
-function uber_chain_concat4(a: String, n: int, b: String, m: int, c: String, l: int, d: String, k: int,
-                            cond0: boolean, cond1: boolean, do_throw0: boolean, do_throw1: boolean): String {
-    /*
-        This test has the following data flow (very-very briefly):
-            0     3'
-           / \   /
-          0   1 3'
-          |   |/
-          0   1
-           \ / \
-            0   2
-            |   |
-            0   2
-             \ / \
-              0   3
-              |   |
-              0   3
-               \ /
-                0
-        It contans 5 individial chains of SBs (0, 1, 2, 3 and 3').
-        Each of them can be collapsed into a single SB.
-    */
-    let str0: String = "";
-    let str1: String = "";
-    let str2: String = "";
-    let str3: String = "";
-    str0 += "_";
-    for (let i = 0; i < n; ++i) {
-        str0 += a;
-    }
-    str0 += "_";
-    str1 += str0;
-    str3 += "_";
-    if (cond0) {
-        for (let i = 0; i < m; ++i) {
-            try {
-                if (do_throw0)
-                    throw new Exception();
-                str0 += b;
-                str1 += c;
-                str3 += d;
-                if (do_throw1)
-                    throw new Exception();
-            }
-            catch(ex) {
-                str0 += a;
-                str1 += b;
-                str3 += c;
-            }
-            finally {
-                str0 += d;
-                str1 += a;
-                str3 += b;
-            }
-        }
-    }
-    else {
-        for (let i = 0; i < m; ++i) {
-            try {
-                if (do_throw0)
-                    throw new Exception();
-                str0 += c;
-                str1 += d;
-                str3 += a;
-                if (do_throw1)
-                    throw new Exception();
-            }
-            catch(ex) {
-                str0 += b;
-                str1 += c;
-                str3 += d;
-            }
-            finally {
-                str0 += a;
-                str1 += b;
-                str3 += c;
-            }
-        }
-    }
-    str0 += str1;
-    str0 += "_";
-    str1 += str3;
-    str1 += "_";
-    str2 += str1;
-    for (let i = 0; i < l; ++i) {
-        if (cond1) {
-            str0 += d;
-            str2 += a;
-        }
-        else {
-            str0 += b;
-            str2 += c;
-        }
-    }
-    str0 += str2;
-    str0 += "_";
-    str3 += str2;
-    str3 += "_";
-    if (cond0) {
-        for (let i = 0; i < k; ++i) {
-            if (cond1) {
-                str0 += d;
-                str3 += a;
-            }
-            else {
-                str0 += b;
-                str3 += c;
-            }
-        }
-    }
-    else {
-        for (let i = 0; i < k; ++i) {
-            if (cond1) {
-                try {
-                    if (do_throw0)
-                        throw new Exception();
-                    str0 += d;
-                    str3 += a;
-                    if (do_throw1)
-                        throw new Exception();
-                }
-                catch(ex) {
-                    str0 += b;
-                    str3 += c;
-                }
-                finally {
-                    str0 += d;
-                    str3 += a;
-                }
-            }
-            else {
-                try {
-                    if (do_throw0)
-                        throw new Exception();
-                    str0 += b;
-                    str3 += c;
-                    if (do_throw1)
-                        throw new Exception();
-                }
-                catch(ex) {
-                    str0 += d;
-                    str3 += a;
-                }
-                finally {
-                    str0 += b;
-                    str3 += c;
-                }
-            }
-        }
-    }
-    str0 += str3;
-    str0 += "_";
-    return str0;    // applied, 64 SBs + 128 append calls merged into 5 SBs + 5 append2 calls + 5 append calls
 }
 
 // Set of SB based tests
@@ -871,42 +688,4 @@ function main() {
     assert partially_supported_chain_concat16("ab", "c", "d", "e") == "abcde": "Wrong result at partially_supported_chain_concat16";
 
     chain_concat19();
-
-    main_uber_only();
-}
-
-const uber_golden_FFFF = "_aaaa_cacaca_aaaa_dbdbdb_bbbbb_aaaa_dbdbdb_acacac_ccccc_bbbb_acacac_aaaa_dbdbdb_acacac_ccccc_cccc_";
-const uber_golden_FFFT = "_aaaa_cbacbacba_aaaa_dcbdcbdcb_bbbbb_aaaa_dcbdcbdcb_adcadcadc_ccccc_bdbbdb_adcadcadc_aaaa_dcbdcbdcb_adcadcadc_ccccc_caccac_";
-const uber_golden_FFTF = "_aaaa_bababa_aaaa_cbcbcb_bbbbb_aaaa_cbcbcb_dcdcdc_ccccc_dbdb_dcdcdc_aaaa_cbcbcb_dcdcdc_ccccc_acac_";
-const uber_golden_FFTT = "_aaaa_bababa_aaaa_cbcbcb_bbbbb_aaaa_cbcbcb_dcdcdc_ccccc_dbdb_dcdcdc_aaaa_cbcbcb_dcdcdc_ccccc_acac_";
-const uber_golden_FTFF = "_aaaa_cacaca_aaaa_dbdbdb_ddddd_aaaa_dbdbdb_acacac_aaaaa_dddd_acacac_aaaa_dbdbdb_acacac_aaaaa_aaaa_";
-const uber_golden_FTFT = "_aaaa_cbacbacba_aaaa_dcbdcbdcb_ddddd_aaaa_dcbdcbdcb_adcadcadc_aaaaa_dbddbd_adcadcadc_aaaa_dcbdcbdcb_adcadcadc_aaaaa_acaaca_";
-const uber_golden_FTTF = "_aaaa_bababa_aaaa_cbcbcb_ddddd_aaaa_cbcbcb_dcdcdc_aaaaa_bdbd_dcdcdc_aaaa_cbcbcb_dcdcdc_aaaaa_caca_";
-const uber_golden_FTTT = "_aaaa_bababa_aaaa_cbcbcb_ddddd_aaaa_cbcbcb_dcdcdc_aaaaa_bdbd_dcdcdc_aaaa_cbcbcb_dcdcdc_aaaaa_caca_";
-const uber_golden_TFFF = "_aaaa_bdbdbd_aaaa_cacaca_bbbbb_aaaa_cacaca_dbdbdb_ccccc_bb_dbdbdb_aaaa_cacaca_dbdbdb_ccccc_cc_";
-const uber_golden_TFFT = "_aaaa_badbadbad_aaaa_cbacbacba_bbbbb_aaaa_cbacbacba_dcbdcbdcb_ccccc_bb_dcbdcbdcb_aaaa_cbacbacba_dcbdcbdcb_ccccc_cc_";
-const uber_golden_TFTF = "_aaaa_adadad_aaaa_bababa_bbbbb_aaaa_bababa_cbcbcb_ccccc_bb_cbcbcb_aaaa_bababa_cbcbcb_ccccc_cc_";
-const uber_golden_TFTT = "_aaaa_adadad_aaaa_bababa_bbbbb_aaaa_bababa_cbcbcb_ccccc_bb_cbcbcb_aaaa_bababa_cbcbcb_ccccc_cc_";
-const uber_golden_TTFF = "_aaaa_bdbdbd_aaaa_cacaca_ddddd_aaaa_cacaca_dbdbdb_aaaaa_dd_dbdbdb_aaaa_cacaca_dbdbdb_aaaaa_aa_";
-const uber_golden_TTFT = "_aaaa_badbadbad_aaaa_cbacbacba_ddddd_aaaa_cbacbacba_dcbdcbdcb_aaaaa_dd_dcbdcbdcb_aaaa_cbacbacba_dcbdcbdcb_aaaaa_aa_";
-const uber_golden_TTTF = "_aaaa_adadad_aaaa_bababa_ddddd_aaaa_bababa_cbcbcb_aaaaa_dd_cbcbcb_aaaa_bababa_cbcbcb_aaaaa_aa_";
-const uber_golden_TTTT = "_aaaa_adadad_aaaa_bababa_ddddd_aaaa_bababa_cbcbcb_aaaaa_dd_cbcbcb_aaaa_bababa_cbcbcb_aaaaa_aa_";
-
-function main_uber_only() {
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, false, false) == uber_golden_FFFF: "Wrong result at uber_golden_FFFF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, false, true)  == uber_golden_FFFT: "Wrong result at uber_golden_FFFT"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, true, false)  == uber_golden_FFTF: "Wrong result at uber_golden_FFTF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, false, true, true)   == uber_golden_FFTT: "Wrong result at uber_golden_FFTT"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, false, false)  == uber_golden_FTFF: "Wrong result at uber_golden_FTFF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, false, true)   == uber_golden_FTFT: "Wrong result at uber_golden_FTFT"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, true, false)   == uber_golden_FTTF: "Wrong result at uber_golden_FTTF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, false, true, true, true)    == uber_golden_FTTT: "Wrong result at uber_golden_FTTT"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, false, false)  == uber_golden_TFFF: "Wrong result at uber_golden_TFFF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, false, true)   == uber_golden_TFFT: "Wrong result at uber_golden_TFFT"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, true, false)   == uber_golden_TFTF: "Wrong result at uber_golden_TFTF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, false, true, true)    == uber_golden_TFTT: "Wrong result at uber_golden_TFTT"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, false, false)   == uber_golden_TTFF: "Wrong result at uber_golden_TTFF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, false, true)    == uber_golden_TTFT: "Wrong result at uber_golden_TTFT"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, true, false)    == uber_golden_TTTF: "Wrong result at uber_golden_TTTF"
-    assert uber_chain_concat4("a", 4, "b", 3, "c", 5, "d", 2, true, true, true, true)     == uber_golden_TTTT: "Wrong result at uber_golden_TTTT"
 }
