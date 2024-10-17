@@ -23,6 +23,7 @@
 #include "optimizer/code_generator/codegen.h"
 #include "optimizer/code_generator/codegen_native.h"
 #include "optimizer/code_generator/method_properties.h"
+#include "utils-vixl.h"
 #include "aarch64/decoder-aarch64.h"
 #include "aarch64/disasm-aarch64.h"
 #include "aarch64/operands-aarch64.h"
@@ -30,6 +31,9 @@
 #include <regex>
 
 namespace ark::compiler {
+
+// NOLINTNEXTLINE(misc-unused-using-decls)
+using vixl::operator""_h;
 
 class VixlDisasmTest : public GraphTest {
 public:
@@ -65,7 +69,9 @@ public:
 
     void Visit(vixl::aarch64::Metadata *metadata, const vixl::aarch64::Instruction *instr) final
     {
-        auto visitorIt {FORM_TO_VISITOR.find((*metadata)["form"])};
+        const auto &form = (*metadata)["form"];
+        auto hash = vixl::Hash(form.c_str());
+        auto visitorIt {FORM_TO_VISITOR.find(hash)};
         ASSERT(visitorIt != std::end(FORM_TO_VISITOR));
 
         const auto &visitor {visitorIt->second};
