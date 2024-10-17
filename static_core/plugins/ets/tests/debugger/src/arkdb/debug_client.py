@@ -184,6 +184,15 @@ class DebuggerClient:
     async def restart_frame(self, frame_number: int) -> debugger.Paused:
         return await self.send_and_wait_for_paused(debugger.restart_frame(debugger.CallFrameId(str(frame_number))))
 
+    async def step_into(self) -> debugger.Paused:
+        return await self.send_and_wait_for_paused(debugger.step_into())
+
+    async def step_out(self) -> debugger.Paused:
+        return await self.send_and_wait_for_paused(debugger.step_out())
+
+    async def step_over(self) -> debugger.Paused:
+        return await self.send_and_wait_for_paused(debugger.step_over())
+
     def _on_script_parsed(self, event: debugger.ScriptParsed):
         pass
 
