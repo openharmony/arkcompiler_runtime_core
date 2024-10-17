@@ -89,9 +89,11 @@ class YamlDocument:
             current_value = current_data[key]
             parent_value = parent_data[key]
             new_parent_key = f"{parent_key}.{key}" if parent_key else key
+            # CC-OFFNXT(G.CTL.03) temporary suppress
             if current_value and isinstance(current_value, dict) and parent_value and isinstance(parent_value, dict):
                 self.__merge_level(config_path, new_parent_key, current_value, parent_value)
                 continue
+            # CC-OFFNXT(G.CTL.03) temporary suppress
             if current_value and isinstance(current_value, list) and parent_value and isinstance(parent_value, list):
                 self._warnings.append(f"Attention: config file '{config_path}' merges value "
                                       f"`{new_parent_key}:{current_value}` with `{parent_value}` ")
