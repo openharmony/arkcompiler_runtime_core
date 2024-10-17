@@ -34,9 +34,15 @@ struct BytecodeIterator {
     {
         return inst_;
     }
+
     bool operator!=(const BytecodeIterator &rhs)
     {
         return inst_.GetAddress() != rhs.inst_.GetAddress();
+    }
+
+    bool operator==(const BytecodeIterator &rhs)
+    {
+        return inst_.GetAddress() == rhs.inst_.GetAddress();
     }
 
 private:
@@ -61,6 +67,7 @@ struct BytecodeInstructions {
     {
         return INST.GetAddress() - data_;
     }
+
     size_t GetSize() const
     {
         return size_;
