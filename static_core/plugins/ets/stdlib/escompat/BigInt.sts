@@ -21,6 +21,21 @@ package escompat;
 export type bigint = BigInt;
 
 type Vec = Array<Int>;
+type ToStringHandlerMap = Record<int, (instance: BigInt) => string>;
+
+const MAX_REGULAR_INTEGER = new BigInt(Number.MAX_SAFE_INTEGER)
+// NOTE(@aendrewpolyakov, #19830): Rewrite using object literal of record type
+const FAST_TO_STRING_HANDLER_MAP: ToStringHandlerMap = () => {
+        let result = new ToStringHandlerMap
+        result[2] = (instance: BigInt):string => { return instance.toStringAsBinary() }
+        result[4] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(4) }
+        result[8] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(8) }
+        result[10] = (instance: BigInt):string => { return instance.toStringAsDecimal() }
+        result[16] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(16) }
+        result[32] = (instance: BigInt):string => { return instance.toStringAsPowerOfTwoRadix(32) }
+        return result
+}()
+
 
 /**
  * BigInt class stub
@@ -34,6 +49,7 @@ export final class BigInt {
     private static readonly shiftSys: long = 30 as long;
     private static readonly baseSys: long = 1 << BigInt.shiftSys;
     private static readonly maskSys: long = BigInt.baseSys - (1 as long);
+    private static readonly INVALID_RADIX_MESSAGE: string = "toString() radix argument must be between 2 and 36";
 
     internal static resetBytes(b: Vec):void {
         for (let i = 0; i<b.length; i++) {
@@ -57,7 +73,6 @@ export final class BigInt {
         BigInt.stripDigits(digits);
         return digits
     }
-
     constructor() {
         this.bytes = new Vec(1);
         this.bytes[0] = 0;
@@ -198,51 +213,92 @@ export final class BigInt {
     }
 
     public override toString(): string {
-
-        let digits = this.bytesToDigits(this.asBytes(), this.negative());
-
-        if (digits.length == 1) {
-            if (digits[0] == 0) {
-                return "0";
-            }
-        }
-
-        let s: string = "";
-        if (this.negative()) {
-            s += "-";
-        }
-
-        for (let i = 0; i < digits.length; i++) {
-            s += digits[i].toString();
-        }
-
-        return s;
+        return this.toString(10)
     }
 
     public toString(radix: double): string {
+        if (radix == -Infinity || radix == +Infinity || radix == NaN) {
+            throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
+        }
+        return this.toString(radix as int)
+    }
+
+    public toString(radix: int): string {
+        if (radix < 2 || radix > 36) {
+            throw new RangeError(BigInt.INVALID_RADIX_MESSAGE)
+        }
         if (this.isZero()) {
             return "0"
         }
-        const radixInt = radix as int
-        if (radixInt == 10) {
-            return this.toString()
-        }
+        let fastToStringHandler = FAST_TO_STRING_HANDLER_MAP[radix]
+        // NOTE(@aendrewpolyakov, #19643): Rewrite concat() with '+' operator once it got fixed for string operands
+        return (this.negative() ? "-" : "").concat((fastToStringHandler != undefined) ? fastToStringHandler!(this) : this.toStringAsGenericRadix(radix))
+    }
 
-        const q = radixInt as number
-        const qBigInt = new BigInt(q)
-        let buff = ""
-
-        let absolute = this.abs()
-        while (absolute > 0n) {
-            // temporary solution, need to optimize divide-mod operations
-            let tempDiv = new BigInt((new Number(absolute) / q) as int)
-            const mod = absolute - tempDiv * qBigInt
-            const digit = new Number(mod.doubleValue())
-            buff = digit.toString(radixInt).concat(buff)
-            absolute = tempDiv
+    internal toStringAsBinary(): string {
+        let reversedInts = BigInt.reverse(this.abs().bytes)
+        // remove sign
+        reversedInts.shift()
+        let intToBinaryString = (value: Int) => { return ((value & BigInt.maskSys) as Int).toString(2) }
+        let result = new StringBuilder(intToBinaryString(reversedInts.shift()!))
+        for (let i = 0; i < reversedInts.length; ++i) {
+            result = result.append(intToBinaryString(reversedInts[i]).padStart(BigInt.shiftSys, '0'))
         }
-        buff = (this.negative() ? "-" : "") + buff
-        return buff
+        return result.toString()
+    }
+
+    internal toStringAsDecimal(): string {
+        let digits = this.bytesToDigits(this.asBytes(), this.negative());
+        let result = new StringBuilder
+        for (let i = 0; i < digits.length; i++) {
+            result = result.append(digits[i].toString())
+        }
+        return result.toString()
+    }
+
+    internal toStringAsGenericRadix(radix: int): string {
+        const radixBigInt = new BigInt(radix)
+        let result: string = ""
+        let dividend = this.abs()
+        while (dividend > 0n) {
+            if (dividend < MAX_REGULAR_INTEGER) {
+                result = StringBuilder.concatStrings((dividend.longValue() as Number).toString(radix), result)
+                break
+            }
+            // NOTE(@aendrewpolyakov, #18313): Rewrite once destructuring assignment got support
+            let divisionResult = dividend.operatorDivideInternal(radixBigInt)
+            let quotent = divisionResult[0], remainder = divisionResult[1]
+            result = StringBuilder.concatStrings((remainder.longValue() as Number).toString(radix), result)
+            dividend = quotent
+        }
+        return result.toString()
+    }
+
+    internal toStringAsPowerOfTwoRadix(radix: int): string {
+        let chunkSize: Number = Math.log2(radix)
+        if (!chunkSize.isInteger() || radix < 2) {
+            throw new Error("BigInt::toStringAsPowerOfTwoRadix(): invalid radix: " + radix)
+        }
+        let result = new StringBuilder
+        let bitChunks = this.sliceToBinaryChunks(chunkSize)
+        for (let bitChunk of bitChunks) {
+            result = result.append((parseInt(bitChunk!, 2) as Number).toString(radix))
+        }
+        return result.toString()
+    }
+
+    private sliceToBinaryChunks(chunkSize: Number): string[] {
+        let binaryRepresentation: string = this.toStringAsBinary()
+        if (binaryRepresentation.length % chunkSize != 0) {
+            let requiredLength: Number = binaryRepresentation.length + (chunkSize - binaryRepresentation.length % chunkSize);
+            binaryRepresentation = binaryRepresentation.padStart(requiredLength, '0')
+        }
+        let chunksCount: int = (binaryRepresentation.length / chunkSize) as int
+        let result = new string[chunksCount]
+        for (let index: int = 0, offset: int = 0; index < chunksCount; ++index, offset += chunkSize) {
+	        result[index] = binaryRepresentation.substring(offset, offset + chunkSize)
+        }
+        return result
     }
 
     public valueOf(): BigInt {
@@ -421,6 +477,13 @@ export final class BigInt {
         if (sub.negative()) {
             // i.e. divisor is greater than divident, so the latter is a remainder
             return [0, divident];
+        }
+
+        if (divident < MAX_REGULAR_INTEGER) {
+            let dividentLong: long = divident.longValue(), divisorLong: long = divisor.longValue()
+            let quotent: int = (dividentLong / divisorLong) as int
+            let remainder: long = dividentLong % divisorLong
+            return [quotent, new BigInt(remainder)]
         }
 
         let from: long = 1
@@ -985,8 +1048,8 @@ export final class BigInt {
 
     private static reverse(input: Vec): Vec {
         let result = new Vec();
-        for (let i = 0; i < input.length; i++) {
-            result.unshift(input[i]);
+        for (let i = input.length - 1; i >= 0; --i) {
+            result.push(input[i]);
         }
 
         return result;
