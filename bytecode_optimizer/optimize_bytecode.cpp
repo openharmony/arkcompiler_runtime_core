@@ -110,11 +110,19 @@ void BuildMapFromPcToIns(pandasm::Function &function, BytecodeOptIrInterface &ir
     pc_ins_map->reserve(function.ins.size());
     auto instructions_buf = graph->GetRuntime()->GetMethodCode(method_ptr);
     compiler::BytecodeInstructions instructions(instructions_buf, graph->GetRuntime()->GetMethodCodeSize(method_ptr));
-    size_t idx = 0;
-    for (auto insn : instructions) {
-        pandasm::Ins &ins = function.ins[idx++];
-        pc_ins_map->emplace(instructions.GetPc(insn), &ins);
-        if (idx >= function.ins.size()) {
+    compiler::BytecodeIterator insn_iter = instructions.begin();
+    for (pandasm::Ins &ins : function.ins) {
+        /**
+         * pc_ins_map is built with instructions data from the emitted abc file and the original function assembly.
+         * Instructions of invalid opcode will be removed during emitter, but kept within function assembly structure,
+         * therefore these instructions need to be skipped here
+         **/
+        if (ins.opcode == pandasm::Opcode::INVALID) {
+            continue;
+        }
+        pc_ins_map->emplace(instructions.GetPc(*insn_iter), &ins);
+        ++insn_iter;
+        if (insn_iter == instructions.end()) {
             break;
         }
     }

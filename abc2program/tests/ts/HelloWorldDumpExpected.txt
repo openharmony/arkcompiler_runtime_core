@@ -62,9 +62,9 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	nop                                      # line: 18446744073709551615           # column: 0
 	asyncfunctionenter                       # line: 18446744073709551615           # column: 0
 	sta v0                                   # line: 18446744073709551615           # column: 0
-	label@3: ldundefined                     # line: 86           # column: 0
+	label@3: ldundefined                     # line: 18446744073709551615           # column: 0
 	asyncfunctionresolve v0                  # line: 18446744073709551615           # column: 0
-	return                                   # line: 18446744073709551615           # column: 0
+	return                                   # line: 86           # column: 0
 	label@6: sta v1                          # line: 86           # column: 0
 	lda v1                                   # line: 86           # column: 0
 	asyncfunctionreject v0                   # line: 86           # column: 0
@@ -85,13 +85,13 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	sta v0                                   # line: 18446744073709551615           # column: 0
 	label@3: ldai 0x1                        # line: 18446744073709551615           # column: 0
 	sta v2                                   # line: 18446744073709551615           # column: 0
-	ldundefined                              # line: 83           # column: 0
+	ldundefined                              # line: 18446744073709551615           # column: 0
 	suspendgenerator v0                      # line: 18446744073709551615           # column: 0
 	lda v0                                   # line: 18446744073709551615           # column: 0
 	resumegenerator                          # line: 18446744073709551615           # column: 0
 	lda v0                                   # line: 18446744073709551615           # column: 0
 	getresumemode                            # line: 18446744073709551615           # column: 0
-	lda.str hello                            # line: 18446744073709551615           # column: 0
+	lda.str hello                            # line: 83           # column: 0
 	asyncfunctionawaituncaught v0            # line: 83           # column: 0
 	suspendgenerator v0                      # line: 83           # column: 0
 	lda v0                                   # line: 83           # column: 0
@@ -138,26 +138,26 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	lda v0                                   # line: 83           # column: 0
 	setgeneratorstate 0x4                    # line: 83           # column: 0
 	asyncgeneratorresolve v0, v3, v2         # line: 83           # column: 0
-	return                                   # line: 83           # column: 0
+	return                                   # line: 84           # column: 0
 	label@59: lda v2                         # line: 83           # column: 0
 	eq 0x3, v4                               # line: 83           # column: 0
-	jeqz label@64                            # line: 84           # column: 0
+	jeqz label@64                            # line: 83           # column: 0
 	lda v3                                   # line: 83           # column: 0
 	throw                                    # line: 83           # column: 0
-	label@64: ldundefined                    # line: 83           # column: 0
-	sta v2                                   # line: 83           # column: 0
-	ldtrue                                   # line: 83           # column: 0
-	sta v3                                   # line: 83           # column: 0
+	label@64: ldundefined                    # line: 18446744073709551615           # column: 0
+	sta v2                                   # line: 18446744073709551615           # column: 0
+	ldtrue                                   # line: 18446744073709551615           # column: 0
+	sta v3                                   # line: 18446744073709551615           # column: 0
 	lda v0                                   # line: 18446744073709551615           # column: 0
 	setgeneratorstate 0x4                    # line: 18446744073709551615           # column: 0
 	asyncgeneratorresolve v0, v2, v3         # line: 18446744073709551615           # column: 0
-	return                                   # line: 18446744073709551615           # column: 0
-	label@72: sta v1                         # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	setgeneratorstate 0x4                    # line: 18446744073709551615           # column: 0
-	lda v1                                   # line: 84           # column: 0
-	asyncgeneratorreject v0                  # line: 84           # column: 0
-	return                                   # line: 83           # column: 0
+	return                                   # line: 84           # column: 0
+	label@72: sta v1                         # line: 82           # column: 0
+	lda v0                                   # line: 82           # column: 0
+	setgeneratorstate 0x4                    # line: 82           # column: 0
+	lda v1                                   # line: 82           # column: 0
+	asyncgeneratorreject v0                  # line: 82           # column: 0
+	return                                   # line: 84           # column: 0
 .catchall :
 	try_begin_label : label@3
 	try_end_label : label@72
@@ -175,73 +175,73 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	label@3: ldai 0xb                        # line: 40           # column: 0
 	mov v3, v0                               # line: 40           # column: 0
 	mov v1, v0                               # line: 40           # column: 0
-	trystglobalbyname 0x0, varA              # line: 40           # column: 0
-	ldai 0x16                                # line: 40           # column: 0
-	trystglobalbyname 0x1, x                 # line: 41           # column: 0
-	label@9: ldai 0x1                        # line: 41           # column: 0
-	trystglobalbyname 0x2, varA              # line: 42           # column: 0
-	label@11: jmp label@20                   # line: 42           # column: 0
-	label@12: lda.str inner catch            # line: 44           # column: 0
-	trystglobalbyname 0x3, msg               # line: 42           # column: 0
-	tryldglobalbyname 0x4, print             # line: 43           # column: 0
-	sta v4                                   # line: 43           # column: 0
-	tryldglobalbyname 0x5, msg               # line: 45           # column: 0
-	sta v5                                   # line: 45           # column: 0
+	trystglobalbyname 0x0, varA              # line: 41           # column: 0
+	ldai 0x16                                # line: 41           # column: 0
+	trystglobalbyname 0x1, x                 # line: 42           # column: 0
+	label@9: ldai 0x1                        # line: 42           # column: 0
+	trystglobalbyname 0x2, varA              # line: 44           # column: 0
+	label@11: jmp label@20                   # line: 44           # column: 0
+	label@12: lda.str inner catch            # line: 46           # column: 0
+	trystglobalbyname 0x3, msg               # line: 46           # column: 0
+	tryldglobalbyname 0x4, print             # line: 47           # column: 0
+	sta v4                                   # line: 47           # column: 0
+	tryldglobalbyname 0x5, msg               # line: 47           # column: 0
+	sta v5                                   # line: 47           # column: 0
 	lda v4                                   # line: 47           # column: 0
 	callarg1 0x6, v5                         # line: 47           # column: 0
 	label@20: mov v3, v0                     # line: 47           # column: 0
 	mov v1, v0                               # line: 47           # column: 0
-	tryldglobalbyname 0x8, varA              # line: 47           # column: 0
-	sta v0                                   # line: 47           # column: 0
-	lda.str                                  # line: 47           # column: 0
-	stricteq 0x9, v0                         # line: 47           # column: 0
-	jeqz label@29                            # line: 47           # column: 0
-	lda.str null                             # line: 42           # column: 0
-	throw                                    # line: 49           # column: 0
-	label@29: tryldglobalbyname 0xa, x       # line: 49           # column: 0
+	tryldglobalbyname 0x8, varA              # line: 49           # column: 0
 	sta v0                                   # line: 49           # column: 0
-	ldai 0x64                                # line: 49           # column: 0
-	greater 0xb, v0                          # line: 49           # column: 0
-	jeqz label@36                            # line: 50           # column: 0
-	lda.str max                              # line: 50           # column: 0
-	throw                                    # line: 42           # column: 0
-	label@36: lda.str min                    # line: 52           # column: 0
-	throw                                    # line: 52           # column: 0
-	label@38: mov v1, v3                     # line: 52           # column: 0
-	lda.str outter catch                     # line: 53           # column: 0
-	trystglobalbyname 0xc, masg              # line: 53           # column: 0
-	tryldglobalbyname 0xd, print             # line: 53           # column: 0
-	sta v0                                   # line: 53           # column: 0
-	tryldglobalbyname 0xe, msg               # line: 55           # column: 0
-	sta v4                                   # line: 55           # column: 0
-	lda v0                                   # line: 40           # column: 0
-	callarg1 0xf, v4                         # line: 40           # column: 0
+	lda.str                                  # line: 49           # column: 0
+	stricteq 0x9, v0                         # line: 49           # column: 0
+	jeqz label@29                            # line: 49           # column: 0
+	lda.str null                             # line: 50           # column: 0
+	throw                                    # line: 50           # column: 0
+	label@29: tryldglobalbyname 0xa, x       # line: 52           # column: 0
+	sta v0                                   # line: 52           # column: 0
+	ldai 0x64                                # line: 52           # column: 0
+	greater 0xb, v0                          # line: 52           # column: 0
+	jeqz label@36                            # line: 52           # column: 0
+	lda.str max                              # line: 53           # column: 0
+	throw                                    # line: 53           # column: 0
+	label@36: lda.str min                    # line: 55           # column: 0
+	throw                                    # line: 55           # column: 0
+	label@38: mov v1, v3                     # line: 55           # column: 0
+	lda.str outter catch                     # line: 59           # column: 0
+	trystglobalbyname 0xc, masg              # line: 59           # column: 0
+	tryldglobalbyname 0xd, print             # line: 60           # column: 0
+	sta v0                                   # line: 60           # column: 0
+	tryldglobalbyname 0xe, msg               # line: 60           # column: 0
+	sta v4                                   # line: 60           # column: 0
+	lda v0                                   # line: 60           # column: 0
+	callarg1 0xf, v4                         # line: 60           # column: 0
 	label@47: ldhole                         # line: 40           # column: 0
 	sta v0                                   # line: 40           # column: 0
 	mov v1, v3                               # line: 40           # column: 0
 	mov v2, v0                               # line: 40           # column: 0
 	jmp label@53                             # line: 40           # column: 0
-	label@52: sta v2                         # line: 59           # column: 0
-	label@53: ldundefined                    # line: 60           # column: 0
-	eq 0x11, v1                              # line: 60           # column: 0
-	jeqz label@64                            # line: 60           # column: 0
-	lda.str error                            # line: 60           # column: 0
-	trystglobalbyname 0x12, msg              # line: 40           # column: 0
-	tryldglobalbyname 0x13, print            # line: 40           # column: 0
-	sta v0                                   # line: 40           # column: 0
-	tryldglobalbyname 0x14, msg              # line: 40           # column: 0
-	sta v1                                   # line: 40           # column: 0
-	lda v0                                   # line: 40           # column: 0
-	callarg1 0x15, v1                        # line: 40           # column: 0
+	label@52: sta v2                         # line: 40           # column: 0
+	label@53: ldundefined                    # line: 40           # column: 0
+	eq 0x11, v1                              # line: 40           # column: 0
+	jeqz label@64                            # line: 40           # column: 0
+	lda.str error                            # line: 63           # column: 0
+	trystglobalbyname 0x12, msg              # line: 63           # column: 0
+	tryldglobalbyname 0x13, print            # line: 64           # column: 0
+	sta v0                                   # line: 64           # column: 0
+	tryldglobalbyname 0x14, msg              # line: 64           # column: 0
+	sta v1                                   # line: 64           # column: 0
+	lda v0                                   # line: 64           # column: 0
+	callarg1 0x15, v1                        # line: 64           # column: 0
 	label@64: ldhole                         # line: 40           # column: 0
 	sta v0                                   # line: 40           # column: 0
 	lda v2                                   # line: 40           # column: 0
 	noteq 0x17, v0                           # line: 40           # column: 0
 	jeqz label@71                            # line: 40           # column: 0
-	lda v2                                   # line: 63           # column: 0
-	throw                                    # line: 63           # column: 0
-	label@71: ldundefined                    # line: 64           # column: 0
-	returnundefined                          # line: 64           # column: 0
+	lda v2                                   # line: 40           # column: 0
+	throw                                    # line: 40           # column: 0
+	label@71: ldundefined                    # line: 18446744073709551615           # column: 0
+	returnundefined                          # line: 66           # column: 0
 .catchall :
 	try_begin_label : label@9
 	try_end_label : label@11
@@ -288,8 +288,8 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	jeqz label@25                            # line: 18446744073709551615           # column: 0
 	lda v3                                   # line: 18446744073709551615           # column: 0
 	throw                                    # line: 18446744073709551615           # column: 0
-	label@25: lda.str hello                  # line: 18446744073709551615           # column: 0
-	sta v3                                   # line: 18446744073709551615           # column: 0
+	label@25: lda.str hello                  # line: 79           # column: 0
+	sta v3                                   # line: 79           # column: 0
 	ldfalse                                  # line: 79           # column: 0
 	sta v4                                   # line: 79           # column: 0
 	createiterresultobj v3, v4               # line: 79           # column: 0
@@ -303,18 +303,18 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	lda v1                                   # line: 79           # column: 0
 	eq 0x2, v2                               # line: 79           # column: 0
 	jeqz label@42                            # line: 79           # column: 0
-	lda v3                                   # line: 79           # column: 0
-	return                                   # line: 79           # column: 0
-	label@42: lda v5                         # line: 80           # column: 0
-	eq 0x3, v2                               # line: 80           # column: 0
+	lda v3                                   # line: 80           # column: 0
+	return                                   # line: 80           # column: 0
+	label@42: lda v5                         # line: 79           # column: 0
+	eq 0x3, v2                               # line: 79           # column: 0
 	jeqz label@47                            # line: 79           # column: 0
 	lda v3                                   # line: 79           # column: 0
 	throw                                    # line: 79           # column: 0
-	label@47: ldundefined                    # line: 79           # column: 0
-	return                                   # line: 79           # column: 0
-	label@49: sta v0                         # line: 79           # column: 0
-	lda v0                                   # line: 79           # column: 0
-	throw                                    # line: 79           # column: 0
+	label@47: ldundefined                    # line: 18446744073709551615           # column: 0
+	return                                   # line: 80           # column: 0
+	label@49: sta v0                         # line: 78           # column: 0
+	lda v0                                   # line: 78           # column: 0
+	throw                                    # line: 78           # column: 0
 .catchall :
 	try_begin_label : label@1
 	try_end_label : label@49
@@ -336,7 +336,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function any .#*#hoo(any a0, any a1, any a2) {
 	fldai 1.230000e+00                       # line: 71           # column: 0
 	trystglobalbyname 0x0, varA              # line: 71           # column: 0
-	createobjectwithbuffer 0x1, _GLOBAL_1517 # line: 72           # column: 0
+	createobjectwithbuffer 0x1, _GLOBAL_1518 # line: 72           # column: 0
 	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 73           # column: 0
 }
@@ -348,7 +348,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	nop                                      # line: 18446744073709551615           # column: 0
 	createasyncgeneratorobj a0               # line: 18446744073709551615           # column: 0
 	sta v0                                   # line: 18446744073709551615           # column: 0
-	label@3: ldundefined                     # line: 72           # column: 0
+	label@3: ldundefined                     # line: 18446744073709551615           # column: 0
 	suspendgenerator v0                      # line: 18446744073709551615           # column: 0
 	lda v0                                   # line: 18446744073709551615           # column: 0
 	resumegenerator                          # line: 18446744073709551615           # column: 0
@@ -361,7 +361,7 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	lda v0                                   # line: 18446744073709551615           # column: 0
 	setgeneratorstate 0x4                    # line: 18446744073709551615           # column: 0
 	asyncgeneratorresolve v0, v2, v3         # line: 18446744073709551615           # column: 0
-	return                                   # line: 18446744073709551615           # column: 0
+	return                                   # line: 72           # column: 0
 	label@17: sta v1                         # line: 72           # column: 0
 	lda v0                                   # line: 72           # column: 0
 	setgeneratorstate 0x4                    # line: 72           # column: 0
@@ -419,10 +419,10 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	lda v2                                   # line: 18446744073709551615           # column: 0
 	throw                                    # line: 18446744073709551615           # column: 0
 	label@21: ldundefined                    # line: 18446744073709551615           # column: 0
-	return                                   # line: 18446744073709551615           # column: 0
-	label@23: sta v0                         # line: 18446744073709551615           # column: 0
-	lda v0                                   # line: 18446744073709551615           # column: 0
-	throw                                    # line: 18446744073709551615           # column: 0
+	return                                   # line: 26           # column: 0
+	label@23: sta v0                         # line: 26           # column: 0
+	lda v0                                   # line: 26           # column: 0
+	throw                                    # line: 26           # column: 0
 .catchall :
 	try_begin_label : label@1
 	try_end_label : label@23
@@ -470,15 +470,15 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	stmodulevar 0x0                          # line: 17           # column: 0
 	ldhole                                   # line: 21           # column: 0
 	sta v3                                   # line: 21           # column: 0
-	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1534, 0x0, v3 # line: 21           # column: 0
+	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1535, 0x0, v3 # line: 21           # column: 0
 	ldobjbyname 0x6, prototype               # line: 21           # column: 0
 	ldhole                                   # line: 25           # column: 0
 	sta v3                                   # line: 25           # column: 0
-	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1543, 0x0, v3 # line: 25           # column: 0
+	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1544, 0x0, v3 # line: 25           # column: 0
 	ldobjbyname 0x9, prototype               # line: 25           # column: 0
 	ldhole                                   # line: 29           # column: 0
 	sta v3                                   # line: 29           # column: 0
-	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1584, 0x0, v3 # line: 29           # column: 0
+	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1585, 0x0, v3 # line: 29           # column: 0
 	lda.str                                  # line: 37           # column: 0
 	trystglobalbyname 0xc, string            # line: 37           # column: 0
 	definefunc 0xd, .#*#add, 0x2             # line: 75           # column: 0
