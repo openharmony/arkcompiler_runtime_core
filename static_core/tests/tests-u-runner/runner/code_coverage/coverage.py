@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the 'License');
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -113,8 +113,8 @@ class LlvmCov:
 
     def make_profdata_list_file(self) -> None:
         results = self.do_find(self.coverage_dir.profdata_dir, '*.profdata')
-        with os.fdopen(os.open(self.coverage_dir.profdata_files_list_file, os.O_WRONLY | os.O_CREAT, 0o755),
-                       "a", encoding="utf-8") as the_file:
+        with os.fdopen(os.open(self.coverage_dir.profdata_files_list_file, os.O_RDWR | os.O_APPEND | os.O_CREAT, 0o755),
+                "a", encoding="utf-8") as the_file:
             for i in results:
                 the_file.write(str(i) + '\n')
 
@@ -146,11 +146,18 @@ class LlvmCov:
             ignore_filename_regex = f"--ignore-filename-regex=\"{IGNORE_REGEX}\""
             args.append(ignore_filename_regex)
 
-        command = self.llvm_cov_commands.llvm_cov_export_command(args)
+        command_info = self.llvm_cov_commands.llvm_cov_export_command(args)
+        args = list(map(lambda x: x.replace('-format=lcov', '-format=text'), args))
+        args.append("-summary-only")
+        command_json = self.llvm_cov_commands.llvm_cov_export_command(args)
 
         with os.fdopen(os.open(self.coverage_dir.info_file, os.O_WRONLY | os.O_CREAT, 0o755),
                        "w", encoding="utf-8") as file_dot_info:
-            self.linux_commands.run_command(command, stdout=file_dot_info)
+            self.linux_commands.run_command(command_info, stdout=file_dot_info)
+
+        with os.fdopen(os.open(self.coverage_dir.json_file, os.O_WRONLY | os.O_CREAT, 0o755), \
+            "w", encoding="utf-8") as file_dot_json:
+            self.linux_commands.run_command(command_json, stdout=file_dot_json)
 
     def genhtml(self) -> None:
         output_directory = f"--output-directory={self.coverage_dir.html_report_dir}"
