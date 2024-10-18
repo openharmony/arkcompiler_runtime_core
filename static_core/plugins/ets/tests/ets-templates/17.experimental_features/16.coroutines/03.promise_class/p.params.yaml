@@ -27,7 +27,7 @@ cases:
                   }
               }
           )
-          assert (await r) == 'XYZ'
+          assert((await r) == 'XYZ')
 
     - decl: |-
           type ON = Object|null
@@ -47,10 +47,10 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assert e.message == 'ABC'
+              assert(e.message == 'ABC')
               return
           }
-          assert false
+          assert(false)
 
     - decl: |-
           type ON = Object|null
@@ -70,17 +70,17 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assert e.message == 'XYZ'
+              assert(e.message == 'XYZ')
               return
           }
-          assert false
+          assert(false)
 
     - decl: |-
           type ON = Object|null
           let initVal: number = 1.0
       use: |-
           // test then chain, resolved
-          let r: Promise<number> = new Promise<number>(
+          let r = new Promise<number>(
               (resolve: (p: number) => void, reject: (p: ON) => void): void => {
                   if (initVal > 0) {
                       resolve(initVal)
@@ -97,14 +97,14 @@ cases:
                   return p + 100.0
               }
           )
-          assert (await r) == 111.0
+          assert((await r) == 111.0)
 
     - decl: |-
           type ON = Object|null
           let initVal: number = 1.0
       use: |-
           // test catch chain
-          let r: Promise<string> = new Promise<number>(
+          let r: Promise<string|number> = new Promise<number>(
               (resolve: (p: number) => void, reject: (p: ON) => void): void => {
                   if (initVal < 0) {
                       resolve(initVal)
@@ -133,10 +133,10 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assert e.message == 'ABC'
+              assert(e.message == 'ABC')
               return
           }
-          assert false
+          assert(false)
 
     - decl: |-
           type ON = Object|null
@@ -196,7 +196,7 @@ cases:
           try {
               await r
           } catch (e: Error) {
-              assert e.message == 'AEFJ'
+              assert(e.message == 'AEFJ')
               return
           }
-          assert false
+          assert(false)
