@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_TESTS_ENV_HPP
-#define _PANDA_VERIFIER_TESTS_ENV_HPP
+#ifndef PANDA_VERIFIER_TESTS_ENV_HPP
+#define PANDA_VERIFIER_TESTS_ENV_HPP
 
 #include <unordered_map>
 #include <string>
@@ -52,4 +52,4 @@ private:
 };
 }  // namespace ark::verifier::test
 
-#endif  // !_PANDA_VERIFIER_TESTS_ENV_HPP
+#endif  // !PANDA_VERIFIER_TESTS_ENV_HPP

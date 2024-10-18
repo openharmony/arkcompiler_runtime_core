@@ -37,7 +37,7 @@ template <typename T>
 using MPandaUniquePtr = std::unique_ptr<T>;
 
 // much simpler than trying to reproduce the full API
-#define MMakePandaUnique std::make_unique
+#define M_MAKE_PANDA_UNIQUE std::make_unique
 #else
 template <typename T>
 using MPandaAllocator = ark::mem::AllocatorAdapter<T>;
@@ -48,7 +48,7 @@ using MPandaVector = PandaVector<T>;
 template <typename T>
 using MPandaUniquePtr = PandaUniquePtr<T>;
 
-#define MMakePandaUnique MakePandaUnique
+#define M_MAKE_PANDA_UNIQUE MakePandaUnique
 #endif
 
 }  // namespace ark::verifier

@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-#include <cstddef>
-#include <cstdint>
-
 #ifndef PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H
 #define PANDA_VERIFICATION_UTIL_STRUCT_FIELD_H
+
+#include <cstddef>
+#include <cstdint>
 
 namespace ark::verifier {
 template <typename S, typename T>

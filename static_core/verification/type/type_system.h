@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_TYPE_SYSTEM_HPP
-#define _PANDA_TYPE_SYSTEM_HPP
+#ifndef PANDA_TYPE_SYSTEM_HPP
+#define PANDA_TYPE_SYSTEM_HPP
 
 #include "macros.h"
 #include "runtime/include/class.h"
@@ -150,4 +150,4 @@ private:
 
 }  // namespace ark::verifier
 
-#endif  // !_PANDA_TYPE_SYSTEM_HPP
+#endif  // !PANDA_TYPE_SYSTEM_HPP

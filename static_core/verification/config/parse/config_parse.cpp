@@ -39,6 +39,47 @@ struct Context {
 
 using P = ark::parser::Parser<Context, const char, const char *>;
 
+static bool IsComment(const PandaString &s)
+{
+    for (char const c : s) {
+        if (c == '#') {
+            return true;
+        }
+        if (isspace(c) != 0) {
+            return false;
+        }
+    }
+    return false;
+}
+
+static bool HandleLine(Action a, Context &c, PandaString &&s)
+{
+    if (a == Action::PARSED) {
+        if (!IsComment(s)) {
+            c.current.items.push_back(std::move(s));
+        }
+    }
+    return true;
+}
+
+static bool HandleSection(Action a, Context &c)
+{
+    if (a == Action::START) {
+        c.sections.push_back(c.current);
+        c.current.sections.clear();
+    }
+    if (a == Action::CANCEL) {
+        c.current = c.sections.back();
+        c.sections.pop_back();
+    }
+    if (a == Action::PARSED) {
+        c.sections.back().sections.push_back(c.current);
+        c.current = c.sections.back();
+        c.sections.pop_back();
+    }
+    return true;
+}
+
 bool ParseConfig(const char *str, Section &cfg)
 {
     using ark::parser::Charset;
@@ -64,26 +105,8 @@ bool ParseConfig(const char *str, Section &cfg)
     static const auto LCURL = P4::OfString("{");
     static const auto RCURL = P5::OfString("}");
 
-    static const auto IS_COMMENT = [](auto s) {
-        for (char const c : s) {
-            if (c == '#') {
-                return true;
-            }
-            if (!isspace(c)) {
-                return false;
-            }
-        }
-        return false;
-    };
-
     static const auto LINE_HANDLER = [](auto a, Context &c, auto from, auto to) {
-        if (a == Action::PARSED) {
-            auto item = PandaString {from, to};
-            if (!IS_COMMENT(item)) {
-                c.current.items.push_back(PandaString {from, to});
-            }
-        }
-        return true;
+        return HandleLine(a, c, PandaString {from, to});
     };
 
     static const auto LINE = P6::OfCharset(!Charset {"\r\n"}) |= LINE_HANDLER;
@@ -92,22 +115,8 @@ bool ParseConfig(const char *str, Section &cfg)
     static const auto SECTION_START = ~SP >> NAME >> ~SP >> LCURL >> ~SP >> NL;
     static const auto ITEM = (!SECTION_END) & (~SP >> LINE >> NL);
 
-    static const auto SECTION_HANDLER = [](auto a, Context &c) {
-        if (a == Action::START) {
-            c.sections.push_back(c.current);
-            c.current.sections.clear();
-        }
-        if (a == Action::CANCEL) {
-            c.current = c.sections.back();
-            c.sections.pop_back();
-        }
-        if (a == Action::PARSED) {
-            c.sections.back().sections.push_back(c.current);
-            c.current = c.sections.back();
-            c.sections.pop_back();
-        }
-        return true;
-    };
+    // CC-OFFNXT(G.NAM.03) false positive
+    static const auto SECTION_HANDLER = [](auto a, Context &c) { return HandleSection(a, c); };
 
     static P::P sectionRec;
 

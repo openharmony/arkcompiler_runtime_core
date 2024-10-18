@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_SHIFTED_VECTOR_H__
-#define PANDA_VERIFIER_UTIL_SHIFTED_VECTOR_H__
+#ifndef PANDA_VERIFIER_UTIL_SHIFTED_VECTOR_H_
+#define PANDA_VERIFIER_UTIL_SHIFTED_VECTOR_H_
 
 #include "runtime/include/mem/panda_containers.h"
 
@@ -70,4 +70,4 @@ public:
 
 }  // namespace ark::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_SHIFTED_VECTOR_H__
+#endif  // !PANDA_VERIFIER_UTIL_SHIFTED_VECTOR_H_

@@ -192,65 +192,68 @@ void CodePatcher::Patch(const std::pair<size_t, size_t> range)
     }
 }
 
-void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
+void Context::MakeChangeWithId(CodePatcher &p, CodeData *data)
 {
     using Flags = ark::BytecodeInst<ark::BytecodeInstMode::FAST>::Flags;
     using EntityId = panda_file::File::EntityId;
 
     const auto myId = EntityId(data->omi->GetOffset());
     auto *items = data->fileReader->GetItems();
+    auto inst = BytecodeInstruction(data->code->data());
+    size_t offset = 0;
+    const auto limit = data->code->size();
 
-    if (data->code != nullptr) {
-        auto inst = BytecodeInstruction(data->code->data());
-        size_t offset = 0;
-        const auto limit = data->code->size();
+    auto filePtr = data->fileReader->GetFilePtr();
 
-        auto filePtr = data->fileReader->GetFilePtr();
+    using Resolver = EntityId (panda_file::File::*)(EntityId id, panda_file::File::Index idx) const;
 
-        using Resolver = EntityId (panda_file::File::*)(EntityId id, panda_file::File::Index idx) const;
+    auto makeWithId = [&p, &inst, &filePtr, &items, &myId, &data, this](Resolver resolve) {
+        auto idx = inst.GetId().AsIndex();
+        auto oldId = (filePtr->*resolve)(myId, idx);
+        auto iter = items->find(oldId);
+        ASSERT(iter != items->end());
+        auto asIndexed = static_cast<panda_file::IndexedItem *>(iter->second);
+        auto found = knownItems_.find(asIndexed);
+        ASSERT(found != knownItems_.end());
+        p.Add(CodePatcher::IndexedChange {inst, data->nmi, static_cast<panda_file::IndexedItem *>(found->second)});
+    };
 
-        auto makeWithId = [&p, &inst, &filePtr, &items, &myId, &data, this](Resolver resolve) {
-            auto idx = inst.GetId().AsIndex();
-            auto oldId = (filePtr->*resolve)(myId, idx);
-            auto iter = items->find(oldId);
+    while (offset < limit) {
+        if (inst.HasFlag(Flags::TYPE_ID)) {
+            makeWithId(&panda_file::File::ResolveClassIndex);
+            // inst.UpdateId()
+        } else if (inst.HasFlag(Flags::METHOD_ID)) {
+            makeWithId(&panda_file::File::ResolveMethodIndex);
+        } else if (inst.HasFlag(Flags::FIELD_ID)) {
+            makeWithId(&panda_file::File::ResolveFieldIndex);
+        } else if (inst.HasFlag(Flags::STRING_ID)) {
+            BytecodeId bId = inst.GetId();
+            auto oldId = bId.AsFileId();
+
+            auto sData = filePtr->GetStringData(oldId);
+            auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
+            p.Add(CodePatcher::StringChange {inst, std::move(itemStr)});
+        } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
+            BytecodeId bId = inst.GetId();
+            auto oldIdx = bId.AsRawValue();
+            auto arrs = filePtr->GetLiteralArrays();
+            ASSERT(oldIdx < arrs.size());
+            auto off = arrs[oldIdx];
+            auto iter = items->find(EntityId(off));
             ASSERT(iter != items->end());
-            auto asIndexed = static_cast<panda_file::IndexedItem *>(iter->second);
-            auto found = knownItems_.find(asIndexed);
-            ASSERT(found != knownItems_.end());
-            p.Add(CodePatcher::IndexedChange {inst, data->nmi, static_cast<panda_file::IndexedItem *>(found->second)});
-        };
-
-        while (offset < limit) {
-            if (inst.HasFlag(Flags::TYPE_ID)) {
-                makeWithId(&panda_file::File::ResolveClassIndex);
-                // inst.UpdateId()
-            } else if (inst.HasFlag(Flags::METHOD_ID)) {
-                makeWithId(&panda_file::File::ResolveMethodIndex);
-            } else if (inst.HasFlag(Flags::FIELD_ID)) {
-                makeWithId(&panda_file::File::ResolveFieldIndex);
-            } else if (inst.HasFlag(Flags::STRING_ID)) {
-                BytecodeId bId = inst.GetId();
-                auto oldId = bId.AsFileId();
-
-                auto sData = filePtr->GetStringData(oldId);
-                auto itemStr = std::string(utf::Mutf8AsCString(sData.data));
-                p.Add(CodePatcher::StringChange {inst, std::move(itemStr)});
-            } else if (inst.HasFlag(Flags::LITERALARRAY_ID)) {
-                BytecodeId bId = inst.GetId();
-                auto oldIdx = bId.AsRawValue();
-                auto arrs = filePtr->GetLiteralArrays();
-                ASSERT(oldIdx < arrs.size());
-                auto off = arrs[oldIdx];
-                auto iter = items->find(EntityId(off));
-                ASSERT(iter != items->end());
-                ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::LITERAL_ARRAY_ITEM);
-                p.Add(
-                    CodePatcher::LiteralArrayChange {inst, static_cast<panda_file::LiteralArrayItem *>(iter->second)});
-            }
-
-            offset += inst.GetSize();
-            inst = inst.GetNext();
+            ASSERT(iter->second->GetItemType() == panda_file::ItemTypes::LITERAL_ARRAY_ITEM);
+            p.Add(CodePatcher::LiteralArrayChange {inst, static_cast<panda_file::LiteralArrayItem *>(iter->second)});
         }
+
+        offset += inst.GetSize();
+        inst = inst.GetNext();
+    }
+}
+
+void Context::ProcessCodeData(CodePatcher &p, CodeData *data)
+{
+    if (data->code != nullptr) {
+        MakeChangeWithId(p, data);
     }
 
     auto *dbg = data->omi->GetDebugInfo();

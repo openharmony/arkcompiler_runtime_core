@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_ABSTRACT_VALUE_HPP
-#define _PANDA_VERIFIER_ABSTRACT_VALUE_HPP
+#ifndef PANDA_VERIFIER_ABSTRACT_VALUE_HPP
+#define PANDA_VERIFIER_ABSTRACT_VALUE_HPP
 
 #include "verification/value/variables.h"
 
@@ -74,4 +74,4 @@ private:
 };
 }  // namespace ark::verifier
 
-#endif  // !_PANDA_VERIFIER_ABSTRACT_VALUE_HPP
+#endif  // !PANDA_VERIFIER_ABSTRACT_VALUE_HPP

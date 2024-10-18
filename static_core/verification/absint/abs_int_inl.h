@@ -34,22 +34,23 @@
 #include "verification_status.h"
 #include "verifier_messages.h"
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG_INST()                                             \
-    do {                                                       \
-        if (!GetInst().IsValid()) {                            \
-            SHOW_MSG(InvalidInstruction)                       \
-            LOG_VERIFIER_INVALID_INSTRUCTION();                \
-            END_SHOW_MSG();                                    \
-            SET_STATUS_FOR_MSG(InvalidInstruction, WARNING);   \
-            return false;                                      \
-        }                                                      \
-        if (job_->Options().ShowContext()) {                   \
-            DumpRegs(ExecCtx().CurrentRegContext());           \
-        }                                                      \
-        SHOW_MSG(DebugAbsIntLogInstruction)                    \
-        LOG_VERIFIER_DEBUG_ABS_INT_LOG_INSTRUCTION(GetInst()); \
-        END_SHOW_MSG();                                        \
+#define LOG_INST()                                               \
+    do {                                                         \
+        if (!GetInst().IsValid()) {                              \
+            SHOW_MSG(InvalidInstruction)                         \
+            LOG_VERIFIER_INVALID_INSTRUCTION();                  \
+            END_SHOW_MSG();                                      \
+            SET_STATUS_FOR_MSG(InvalidInstruction, WARNING);     \
+            return false; /* CC-OFF(G.PRE.05) code generation */ \
+        }                                                        \
+        if (job_->Options().ShowContext()) {                     \
+            DumpRegs(ExecCtx().CurrentRegContext());             \
+        }                                                        \
+        SHOW_MSG(DebugAbsIntLogInstruction)                      \
+        LOG_VERIFIER_DEBUG_ABS_INT_LOG_INSTRUCTION(GetInst());   \
+        END_SHOW_MSG();                                          \
     } while (0)
 
 #ifndef NDEBUG
@@ -63,6 +64,7 @@
 #define DBGBRK()
 #endif
 
+// CC-OFFNXT(G.PRE.02) namespace member
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SHOW_MSG(Message) if (!job_->Options().IsHidden(VerifierMessage::Message)) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -71,7 +73,8 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SET_STATUS_FOR_MSG(Message, AtLeast)                                                       \
     do {                                                                                           \
-        SetStatusAtLeast(VerificationStatus::AtLeast);                                             \
+        SetStatusAtLeast(VerificationStatus::AtLeast); /* CC-OFF(G.PRE.02) namespace member */     \
+        /* CC-OFFNXT(G.PRE.02) namespace member */                                                 \
         SetStatusAtLeast(MsgClassToStatus(job_->Options().MsgClassFor(VerifierMessage::Message))); \
     } while (0)
 
@@ -3792,9 +3795,9 @@ private:
         auto arrEltType = regType.GetArrayElementType(GetTypeSystem());
 
         auto find = [&expectedEltTypes](auto type) {
+            // CC-OFFNXT(G.FMT.12) false positive
             return std::find(expectedEltTypes.begin(), expectedEltTypes.end(), type) != expectedEltTypes.end();
         };
-
         if (!find(arrEltType)) {
             // array elt type is not expected one
             PandaVector<Type> expectedTypesVec;

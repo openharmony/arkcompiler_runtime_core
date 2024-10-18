@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_VERIFIER_UTIL_TAG_FOR_INT__
-#define PANDA_VERIFIER_UTIL_TAG_FOR_INT__
+#ifndef PANDA_VERIFIER_UTIL_TAG_FOR_INT_
+#define PANDA_VERIFIER_UTIL_TAG_FOR_INT_
 
 #include <cstddef>
 
@@ -48,4 +48,4 @@ public:
 
 }  // namespace ark::verifier
 
-#endif  // !PANDA_VERIFIER_UTIL_TAG_FOR_INT__
+#endif  // !PANDA_VERIFIER_UTIL_TAG_FOR_INT_

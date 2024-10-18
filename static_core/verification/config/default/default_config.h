@@ -18,6 +18,7 @@
 
 namespace ark::verifier::config {
 
+// CC-OFFNXT(G.ARR.07) antipattern of programming
 // NOLINTNEXTLINE(modernize-avoid-c-arrays)
 extern const char VERIFIER_DEBUG_DEFAULT_CONFIG[];
 

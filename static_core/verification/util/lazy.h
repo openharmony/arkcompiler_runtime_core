@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_LAZY_HPP
-#define _PANDA_LAZY_HPP
+#ifndef PANDA_LAZY_HPP
+#define PANDA_LAZY_HPP
 
 #include "callable.h"
 
@@ -372,4 +372,4 @@ auto JoinStreams(LHS lhs, MHS mhs, RHS rhs)
 }
 }  // namespace ark::verifier
 
-#endif  // !_PANDA_LAZY_HPP
+#endif  // !PANDA_LAZY_HPP

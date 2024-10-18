@@ -459,6 +459,7 @@ static bool IsClassSubtypeOfType(Class const *lhsClass, Type rhs, TypeSystem *ts
     return tsys->SupertypesOfClass(lhsClass)->count(rhs) > 0;
 }
 
+// CC-OFFNXT(G.FUN.01, huge_cyclomatic_complexity, huge_method) solid logic
 bool IsSubtypeImpl(Type lhs, Type rhs, TypeSystem *tsys)
 {
     ASSERT(InvariantHolds(lhs, tsys));

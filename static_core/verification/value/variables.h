@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _PANDA_VERIFIER_VARIABLES_HPP
-#define _PANDA_VERIFIER_VARIABLES_HPP
+#ifndef PANDA_VERIFIER_VARIABLES_HPP
+#define PANDA_VERIFIER_VARIABLES_HPP
 
 #include "verification/util/lazy.h"
 
@@ -103,4 +103,4 @@ private:
 
 }  // namespace ark::verifier
 
-#endif  // !_PANDA_VERIFIER_VARIABLES_HPP
+#endif  // !PANDA_VERIFIER_VARIABLES_HPP
