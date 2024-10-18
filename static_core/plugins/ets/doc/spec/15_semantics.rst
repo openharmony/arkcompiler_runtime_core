@@ -19,10 +19,8 @@ Semantic Rules
     frontend_status: Done
 
 This Chapter contains semantic rules to be used throughout the Specification
-document.
-
-Note that the description of the rules is more or less informal.
-Some details are omitted to simplify the understanding.
+document. The description of the rules is more or less informal. Some details
+are omitted to simplify the understanding.
 
 |
 
@@ -49,6 +47,9 @@ relation.
 .. index::
    subtyping
    subtype
+   closure
+   reflexive closure
+   transitive closure
    object
    type
    direct supertype
@@ -72,6 +73,9 @@ are **all** of the following:
 
 
 .. index::
+   subclass
+   subinterface
+   superclass
    direct supertype
    direct superclass
    reflexive closure
@@ -112,6 +116,8 @@ constraint of that type parameter.
    bound
    Object
 
+|
+
 .. _Supertyping:
 
 Supertyping
@@ -124,6 +130,13 @@ The *supertype* relationship between the two types ``T`` and ``S``, where ``T``
 is a supertype of ``T`` (recorded as ``T>:S``) is opposite to subtyping (see
 :ref:`Subtyping`). *Supertyping* means that any object of type ``S`` can be
 safely used in any context to replace an object of type ``T``.
+
+.. index::
+   supertype
+   supertyping
+   context
+   type
+   object
 
 |
 
@@ -143,6 +156,19 @@ of three kinds:
 -  Covariance, and
 -  Contravariance.
 
+.. index::
+   variance
+   subtyping
+   type
+   class member signature
+   parameter
+   return type
+   invariance
+   covariance
+   contravariance
+
+|
+
 .. _Invariance:
 
 Invariance
@@ -154,6 +180,11 @@ Invariance
 *Invariance* refers to the ability to use the originally-specified type as a
 derived one.
 
+.. index::
+   invariance
+   type
+
+|
 
 .. _Covariance:
 
@@ -166,6 +197,12 @@ Covariance
 *Covariance* is the ability to use a type that is more specific than originally
 specified.
 
+.. index::
+   covariance
+   type
+
+|
+
 .. _Contravariance:
 
 Contravariance
@@ -176,6 +213,10 @@ Contravariance
 
 *Contravariance* is the ability to use a type that is more general than
 originally specified.
+
+.. index::
+   contravariance
+   type
 
 Examples
 ========
@@ -207,6 +248,9 @@ If class ``Base`` is defined as follows:
       // contravariance for parameter types: Base is a super type for Derived
       override method_three(p: Base): Derived {}
    }
+
+.. index::
+   variance
 
 On the contrary, the following code causes compile-time errors:
 
@@ -251,6 +295,8 @@ compatible with type ``T``:sub:`1`.
 .. index::
    type compatibility
    conversion
+   implicit conversion
+   asymmetric relationship
 
 |
 
@@ -279,18 +325,18 @@ constructor call:
   operator must refer to an array of a type compatible with the type of the
   rest parameter.
 
-
 .. index::
-   function
-   method
-   constructor
+   call argument
+   function call
+   method call
+   constructor call
    semantic check
    argument
    rest parameter
    spread operator
    compatible type
-   type compatibility
-   parameter
+   type
+   compatibility
 
 |
 
@@ -306,7 +352,7 @@ In spite of the fact that |LANG| supports strong typing, it allows not to
 burden the programmer to specify type annotations everywhere. Smart compiler
 can infer the type of some entities from the surrounding context. This
 technique called *type inference* allows keeping program code readability,
-typing less, and focusing on the business logic while keeping type-safety.
+typing less, and focusing on the business logic while keeping type safety.
 Type inference can be applied by the compiler in several contexts as follows:
 
 - Variable and constant declarations (see :ref:`Type Inference from Initializer`);
@@ -316,6 +362,26 @@ Type inference can be applied by the compiler in several contexts as follows:
 - Array literal type inference (see :ref:`Array Type Inference from Context`,
   and :ref:`Array Type Inference from Types of Elements`);
 - Smart types (see :ref:`Smart Types`).
+
+.. index::
+   strong typing
+   annotation
+   type inference
+   entity
+   code readability
+   type safety
+   context
+   variable
+   constant
+   declaration
+   generic instantiation
+   function
+   method
+   return type
+   lambda expression
+   parameter type
+   array literal
+   smart type
 
 |
 
@@ -341,6 +407,18 @@ entities can be accessed if the entity acts as a receiver of the operation):
 
     let a = new Object
     a.toString() // entity 'a' has method toString()
+
+.. index::
+   entity
+   variable
+   class variable
+   local variable
+   function
+   method
+   static type
+   receiver
+   access
+   declaration
 
 There can be cases when the type of an entity (mostly local variables) is a
 class or interface type (see :ref:`Classes` and :ref:`Interfaces`), or union
@@ -379,6 +457,21 @@ Other examples are explicit calls to ``instanceof``
         }
     }
 
+.. index::
+   type
+   entity
+   local variable
+   interface type
+   class type
+   union type
+   context
+   compiler
+   narrowing
+   smart cast
+   smart type
+   if statement
+   conditional expression
+
 In cases like this, the smart compiler can deduce the smart type of an entity
 without requiring unnecessary ``as`` conversions (see :ref:`Cast Expressions`).
 
@@ -399,6 +492,17 @@ static type of an argument:
 
 Particular cases supported by the compiler are determined by the compiler
 implementation.
+
+.. index::
+   compiler
+   smart type
+   entity
+   as conversion
+   conversion
+   function
+   method
+   static type
+   implementation
 
 |
 
@@ -435,6 +539,24 @@ See :ref:`Overloading for Functions`,
 :ref:`Overloading and Overriding in Classes`, and
 :ref:`Overloading and Overriding in Interfaces` for details.
 
+.. index::
+   overloading
+   overriding
+   context
+   entity
+   function
+   constructor
+   method
+   signature
+   compile-time polymorphism
+   runtime polymorphism
+   inheritance
+   parent class
+   object type
+   runtime
+   overload-equivalence
+   override-compatibility
+
 |
 
 .. _Overload-Equivalent Signatures:
@@ -459,8 +581,21 @@ parameters are *overload-equivalent* if:
 -  All other parameter types in *S*:sub:`1` are equal to parameter types
    in the same positions in *S*:sub:`2`.
 
-Parameter names and return types do not influence *overload-equivalence*.
+Parameter names and return types do not influence *overload equivalence*.
 Signatures in the following series are *overload-equivalent*:
+
+.. index::
+   overload-equivalent signature
+   signature
+   parameter
+   type parameter
+   reference type
+   generic type
+   type argument
+   overriding
+   parameter name
+   return type
+   overload equivalence
 
 .. code-block-meta:
 
@@ -567,6 +702,18 @@ if **all** of the following conditions are met:
    (see :ref:`Contravariance`) to the appropriate constraints of ``V``:sub:`1`,
    ... ``V``:sub:`k`.
 
+.. index::
+   override-compatible signature
+   override compatibility
+   class
+   signature
+   method
+   parameter
+   type
+   contravariant
+   constraint
+   type parameter
+
 There are two cases of type override-compatibility, as types are used as either
 parameter types, or return types. There are five kinds of types for each case:
 
@@ -590,6 +737,18 @@ The following rule applies in case of generics:
      constraint in the base type;
    - Otherwise, a :index:`compile-time error` occurs.
 
+.. index::
+   override compatibility
+   parameter type
+   class type
+   interface type
+   function type
+   primitive type
+   array type
+   tuple type
+   type parameter
+   subtype
+   object
 
 .. code-block:: typescript
    :linenos:
@@ -603,7 +762,6 @@ The following rule applies in case of generics:
    class A2 <ContravariantTypeParameter extends Derived> {}
    class B2 <ContravariantTypeParameter extends Base> extends A2<ContravariantTypeParameter> {}
        // Compile-time error, derived class cannot have non-compatible constraints of type parameters
-
 
 
 Variances to be used for types that can be override-compatible in different
@@ -627,6 +785,14 @@ positions are represented in the following table:
 |6| Type parameter        | Contravariance >:   | Contravariance >: |
 | | constraint            |                     |                   |
 +-+-----------------------+---------------------+-------------------+
+
+
+.. index::
+   variance
+   covariance
+   contravariance
+   invariance
+   semantics
 
 The semantics is illustrated by the example below:
 
@@ -736,6 +902,16 @@ The semantic check for these functions is as follows:
 
 -  Otherwise, *overloading* is valid.
 
+.. index::
+   overloading
+   function
+   inheritance
+   access
+   scope
+   import
+   compilation unit
+   overload-equivalent signature
+
 |
 
 .. _Overloading and Overriding in Classes:
@@ -754,6 +930,15 @@ has a method with the same name. Accessors are considered methods here.
 An overriding member can keep or extend the access modifier (see
 :ref:`Access Modifiers`) of the inherited or implemented member. Otherwise, a
 :index:`compile-time error` occurs:
+
+.. index::
+   overloading
+   inheritance
+   overriding
+   private
+   method
+   superclass
+   access modifier
 
 .. code-block:: typescript
    :linenos:
@@ -791,6 +976,16 @@ table:
 | name, or two *constructors* are     | then a :index:`compile-time error`           |
 | defined in the same class.          | occurs. Otherwise, *overloading* is used.    |
 +-------------------------------------+----------------------------------------------+
+
+.. index::
+   semantic check
+   instance method
+   method
+   static method
+   constructor
+   overload equivalence
+   overloading
+   overload-equivalent signature
 
 .. code-block:: typescript
    :linenos:
@@ -844,6 +1039,17 @@ table:
 |                                     | Otherwise, *overloading* is used.           |
 +-------------------------------------+---------------------------------------------+
 
+.. index::
+   instance method
+   static method
+   subclass
+   superclass
+   override-compatible signature
+   override-compatibility
+   overloading
+   hiding
+   overriding
+
 .. code-block:: typescript
    :linenos:
 
@@ -875,6 +1081,11 @@ table:
            super(5)
       }
    }
+
+.. index::
+   constructor
+   subclass
+   class constructor
 
 |
 
@@ -913,6 +1124,14 @@ Overloading and Overriding in Interfaces
 | interface.                          |                                          |
 +-------------------------------------+------------------------------------------+
 
+.. index::
+   method
+   subinterface
+   superinterface
+   semantic check
+   override compatibility
+   override-compatible signature
+
 .. code-block:: typescript
    :linenos:
 
@@ -947,6 +1166,12 @@ The overload resolution is performed in two steps as follows:
 **Note**: The first step is performed in all cases, even if there is
 only one *applicable candidate* to check *call signature compatibility*.
 
+.. index::
+   overload resolution
+   entity
+   applicable candidate
+   call signature compatibility
+
 |
 
 .. _Selection of Applicable Candidates:
@@ -976,6 +1201,14 @@ After processing all entities, one of the following results is achieved:
 
 - More than one entity is left in the set. The next step of the
   *overload resolution* is to be performed.
+
+.. index::
+   applicable candidate
+   compatibility
+   call argument
+   parameter type
+   overload resolution
+   overloaded function
 
 Two overloaded functions are considered in the following example:
 
@@ -1030,6 +1263,16 @@ Possible argument transformations are listed below:
 
 - Folding several arguments to the array for a rest parameter.
 
+.. index::
+   applicable candidate
+   best candidate
+   parameter
+   compiler
+   import site
+   argument transformation
+   value
+   rest parameter
+
 The examples of transformations are presented below:
 
 .. code-block:: typescript
@@ -1071,6 +1314,10 @@ transformation:
    let x: string|undefined = "abc"
    goo(x) // #2 - is the best candidate, no transformations
 
+.. index::
+   best candidate
+   transformation
+   argument
 
 If there is no such candidate, then each argument transformation of each
 candidate is compared (taking optional and rest parameters into the account)
@@ -1090,6 +1337,15 @@ candidate has a rest parameter for the same arguments, then the first one
 is *better*.
 
 **Case 5**. All other variants are considered *not comparable*.
+
+.. index::
+   best candidate
+   argument transformation
+   numeric type
+   char
+   boxing
+   conversion
+   parameter
 
 .. code-block:: typescript
    :linenos:
@@ -1154,6 +1410,10 @@ occurs. Examples of error cases are presented below:
              // #1 is better for 1st argument,
              // #2 is better for 2nd argument.
 
+.. index::
+   best candidate
+   argument
+
 |
 
 .. _Overload Signatures:
@@ -1169,6 +1429,18 @@ functions (:ref:`Function Overload Signatures`), static and instance methods
 All signatures except the last *implementation signature* are considered
 *syntactic sugar*. The compiler uses the *implementation signature* only
 as it considers overloading, overriding, shadowing, or calls.
+
+.. index::
+   overload signature
+   alignment
+   constructor
+   implementation signature
+   syntactic sugar
+   signature
+   overloading
+   overriding
+   shadowing
+   call
 
 |
 
@@ -1201,6 +1473,16 @@ Signature *S*:sub:`i` with *n* parameters *fits* into implementation signature
   ``void`` (see :ref:`Type void`) or compatible with the return type of *IS*
   (see :ref:`Type Compatibility`).
 
+.. index::
+   overload signature
+   correctness check
+   parameter
+   implementation signature
+   function
+   method
+   constructor
+   compatibility
+   return type
 
 The examples below represent valid overload signatures:
 
@@ -1307,8 +1589,6 @@ be handled as ``true`` or ``false`` as described in the table below:
    if statement
    truthiness
    Boolean
-   truthy
-   falsy
    value type
 
 +--------------------------------------+----------------------------------------+-----------------------------------+---------------------------------+
@@ -1379,8 +1659,6 @@ The example below illustrates the way this approach works in practice. Any
      */
 
 .. index::
-   truthy
-   falsy
    NaN
    nullish expression
    numeric expression

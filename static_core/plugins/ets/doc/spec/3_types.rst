@@ -88,6 +88,14 @@ Predefined types include the following:
 
 -  Class types: ``Object``, ``String``, ``Array<T>``, and ``BigInt``.
 
+.. index::
+   predefined type
+   numeric value
+   numeric type
+   character type
+   Boolean type
+   reference type
+   class type
 
 |
 
@@ -107,6 +115,11 @@ used for user-defined type names.
 Type ``double`` is an alias to ``number``. Type ``Double`` is an alias to
 ``Number``.
 
+.. index::
+   predefined value
+   primitive type
+   user-defined type
+
 |
 
 .. _Boxed Types:
@@ -125,16 +138,9 @@ Each predefined value type has a corresponding predefined class type (called
 
 .. index::
    predefined type
-   basic numeric type
-   numeric type
-   user-defined type
-   type definition
-   alias
-   value type
-   class type
-   primitive type
-   type alias
-   wrapping
+   predefined class
+   predefined value
+   wrap
 
 |
 
@@ -212,16 +218,9 @@ categories in the table above.
 
 
 .. index::
-   class type
-   primitive type
-   reference type
-   value type
-   interface type
-   array type
-   union type
-   tuple type
-   type parameter
-   literal type
+   type string
+   BigInt type
+   semantics
 
 |
 
@@ -250,6 +249,7 @@ A type can be referred to in source code by the following:
    array type
    function type
    union type
+   tuple type
 
 .. code-block:: abnf
 
@@ -301,6 +301,7 @@ has the lowest precedence as presented in the following example:
    symbol
    construct
    precedence
+   parenthesis
 
 .. code-block:: typescript
    :linenos:
@@ -356,18 +357,17 @@ substituted for the type parameters of the named type.
 
 .. index::
    named type
-   class
-   interface
-   enumeration
-   union
    class declaration
    interface declaration
    enumeration declaration
-   union declaration
+   type alias declaration
+   type parameter declaration
+   type reference
    generic type
-   generics
+   non-generic type
    type argument
    type parameter
+   named type
 
 |
 
@@ -394,12 +394,15 @@ a valid type reference. A type reference is valid if its type arguments (see
 .. index::
    type reference
    type name
+   type parameter
    simple type name
    qualified type name
    identifier
    type alias
    type argument
    interface type
+   generic class
+   instantiation
 
 .. code-block:: abnf
 
@@ -441,10 +444,15 @@ in this document.
    type T1 = Object
    type T2 = number
    function foo(t1: T1, t2: T2)  {
-       t1 = t2      // Type compatibilty test will use Object and number
+       t1 = t2      // Type compatibility test will use Object and number
        t2 = t2 + t2 // Operator validity test will use type number not T2
-   } 
- 
+   }
+
+.. index::
+   type reference
+   type alias
+   non-aliased type
+
 
 |
 
@@ -472,6 +480,10 @@ values.
    boolean type
    character type
    enumeration
+   user-defined type
+   enumeration type
+   literal type
+   value type
 
 |
 
@@ -536,6 +548,7 @@ below.
 .. index::
    byte
    short
+   boolean
    int
    long
    bigint
@@ -738,6 +751,7 @@ discussed below.
    operand
    numeric type
    string
+   decimal form
 
 The classes ``Float`` and ``Double`` predefine constructors, methods, and
 constants that are parts of the |LANG| standard library (see
@@ -771,6 +785,7 @@ Any floating-point type value can be cast to or from any numeric type.
    constructor
    method
    constant
+   standard library
    operation
    floating-point operation
    predefined numeric types conversion
@@ -805,6 +820,7 @@ significant bit zero out of any two equally near representable values.
    cast
    floating-point type
    floating-point number
+   boolean type
    numeric type
    numeric types conversion
    widening
@@ -865,7 +881,7 @@ sufficient to perform it.
    floating-point operator
    floating-point value
    throw
-   
+
 |
 
 .. _Numeric Types Hierarchy:
@@ -891,6 +907,8 @@ conversion from a numeric type to ``bigint``. Standard library (see
 ``bigint`` values from numeric types.
 
 .. index::
+   integer type
+   floating-point type
    numeric type
    exception
    floating-point type
@@ -956,6 +974,7 @@ as the result of comparison *x != 0*.
    floating-point expression
    comparison
    conversion
+   nonzero value
 
 |
 
@@ -1003,31 +1022,34 @@ In case of numeric forms of literal types, *0*'s with no meaning are truncated:
     let b1: 3.14 = 3.140000
     let b1: 3.1400000 = 3.140
 
+.. index::
+   literal type
+   truncation
 
-Operations on variables of literal types are identical to the operations
-of the literal type. The resulting operation type is the type specified
-for the type of the literal. Typically, it is the type of the literal but
-not the literal type itself:
+|
 
-.. code-block:: typescript
-   :linenos:
+.. _Supertypes of Literal Types:
 
-    let a: 1 = 1
-    let b: true = true
-    let c: 3.14 = 3.14
-    let d: "string literal" = "string literal"
-    let e: c"C" = c"C"
-    let f: 123n = 123n
+Supertypes of Literal Types
+---------------------------
 
-    let x: int = a + a       // + for int returns int
-    let y: boolean = b || b  // || for boolean returns boolean
-    let z: double = c * c    // * for double returns double
-    let s: string = d + d    // + for string returns string
-    let t: int = e + e       // + for char returns char
-    let u: bigint = f + f    // + for bigint returns bigint
+- For integer literals (see :ref:`Integer Literals`) their supertype is ``int``
+  or ``long`` depending on the value of the literal. 
+- For floating-point literals (see :ref:`Floating-Point Literals`) their
+  supertype is ``float`` (if *float type suffix* is present) or
+  ``double``.
+- For bigint literals (see :ref:`BigInt Literals`) their supertype is
+  ``bigint``.
+- For boolean literals (see :ref:`Boolean Literals`) their supertype is
+  ``boolean``.
+- For string literals (see :ref:`String Literals`) their supertype is
+  ``string``.
+- For character literals (see :ref:`Character Literals`) their supertype is
+  ``char``.
+- For other literals their supertype is ``Object`` (see
+  :ref:`Object Class Type`).
 
-Every literal type is a subtype (see :ref:`Subtyping`) of the type of its
-literal:
+This affects the overriding as shown in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1047,8 +1069,52 @@ literal:
        Function result of type int accepts 1 (value) of literal type 1
     */
 
-Literal types are practically used inside union types (see :ref:`Union Types`).
+.. index::
+   literal type
+   supertype
+   floating-point literal
+   float
+   integer literal
+   float type suffix
+   string literal
+   bigint literal
+   boolean literal
+   character literal
+   override
 
+|
+
+.. _Operations on Literal Types:
+
+Operations on Literal Types
+---------------------------
+
+Operations on variables of literal types are identical to the operations
+of their supertypes. The resulting operation type is the type specified
+for the operation in the supertype. In most cases, it is the supertype
+itself:
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: 1 = 1
+    let b: true = true
+    let c: 3.14 = 3.14
+    let d: "string literal" = "string literal"
+    let e: c"C" = c"C"
+    let f: 123n = 123n
+
+    let x: int = a + a       // + for int returns int
+    let y: boolean = b || b  // || for boolean returns boolean
+    let z: double = c * c    // * for double returns double
+    let s: string = d + d    // + for string returns string
+    let t: int = e + e       // + for char returns char
+    let u: bigint = f + f    // + for bigint returns bigint
+
+.. index::
+   literal type
+   variable
+   supertype
 
 |
 
@@ -1074,12 +1140,13 @@ Reference Types
 -  Type parameters (see :ref:`Type Parameters`).
 
 .. index::
+   reference type
    class type
    interface type
    array type
    function type
    union type
-   type string
+   string type
    type never
    type null
    type undefined
@@ -1121,10 +1188,15 @@ Other expressions can implicitly create a class instance (see
    reference value
    function instance
    class instance
+   pointer
+   class instance
+   creation expression
    reference
    lambda expression
    qualified name
    name
+   string literal
+   initialization
    declared function
    array creation
    expression
@@ -1204,21 +1276,16 @@ refers to type ``Object``).
 
 .. index::
    class type
-   function call expression
-   field access expression
-   cast expression
-   concatenation operator
-   operand
-   reference
+   string type
+   string representation
+   array
+   union
+   function type
+   enum type
    method
-   object
-   object class type
-   call expression
-   instanceof operator
    interface
    array
    inheritance
-   hash code
 
 |
 
@@ -1257,13 +1324,21 @@ also refers to type ``string``).
 .. index::
    type string
    Unicode code unit
-   compiler
+   string type
+   string literal
+   string object
+   relational operator
+   equality operator
+   string concatenation
+   semantics
+   reference type
    predefined type
    extended semantics
    literal
    constant expression
    concatenation operator
    alias
+   value type
 
 |
 
@@ -1300,22 +1375,19 @@ Type ``never`` has no instance. It is used as one of the following:
 
     bar (foo())
 
-
-
-
 .. index::
-   class
+   type never
    instance
-   error
-   exception
-   function
    return type
-   string literal
-   string object
-   constant expression
-   concatenation operator
-   alias
-   instance
+   method
+   error
+   throw
+   exception
+   variable
+   assignment
+   parameter
+   function
+   return
    value
 
 |
@@ -1349,7 +1421,6 @@ A :index:`compile-time error` occurs if:
 -  Type ``void`` is used as type annotation;
 -  An expression of type ``void`` is used as a value.
 
-
 .. code-block-meta:
    expect-cte:
 
@@ -1361,6 +1432,14 @@ A :index:`compile-time error` occurs if:
     function foo (): void
     let y = foo()  // compile-time error - void used as a value
 
+.. index::
+   type void
+   instance
+   value
+   return type
+   function
+   method
+   type annotation
 
 Type ``void`` can be used as type argument that instantiates a generic type
 if a specific value of type argument is irrelevant. In this case, it is a
@@ -1383,11 +1462,11 @@ synonym for type ``undefined`` (see :ref:`Type undefined`):
    foo<void>(void) // compile-time error: void is used as value
 
 .. index::
-   return type
+   type void
    type argument
    instantiation
    generic type
-   type parameter argument
+   type undefined
 
 |
 
@@ -1401,7 +1480,7 @@ Array Types
 
 *Array type* is the built-in type characterized by the following:
 
--  Any object of array type contains elements indexed by integer position 
+-  Any object of array type contains elements indexed by integer position
    starting from *0*;
 -  Access to any array element is performed within the same time;
 -  If passed to non-|LANG| environment, an array is represented as a contiguous
@@ -1411,7 +1490,11 @@ Array Types
 
 .. index::
    array type
+   integer
    array element
+   upper-bounded type
+   element type
+   array declaration
    access
    array
 
@@ -1422,14 +1505,19 @@ The number of elements in an array can be obtained by accessing the field
 ``length``. Setting a new value of this field allows shrinking the array by
 reducing the number of its elements. Attempting to increase the length of the
 array causes a :index:`compile-time error` (if the compiler has the information
-sufficient to determine this), or to a run-time error.
+sufficient to determine this), or to a runtime error.
 
 An example of syntax for the built-in array type is presented below:
 
 .. index::
    array element
+   array
    index expression
    operator
+   field
+   array length
+   compiler
+   runtime error
 
 .. code-block:: abnf
 
@@ -1452,6 +1540,8 @@ but only if those do not change the array length.
    variable
    operator
    reference type
+   method
+   array length
    value type
    derived type
    standard library
@@ -1523,8 +1613,12 @@ A function type consists of the following:
    array type
    type Object
    keyword throws
+   function
    function type
    signature
+   return type
+   parameter
+   throws keyword
 
 .. code-block:: abnf
 
@@ -1551,9 +1645,6 @@ A function type consists of the following:
 
 The ``rest`` parameter is described in :ref:`Rest Parameter`.
 
-.. index::
-   rest parameter
-
 .. code-block:: typescript
    :linenos:
 
@@ -1564,6 +1655,7 @@ A type alias can set a name for a *function type* (see
 :ref:`Type Alias Declaration`).
 
 .. index::
+   rest parameter
    type alias
    function type
 
@@ -1613,13 +1705,21 @@ parameter has no default value.
     }
 
 
-Function types assignability is described in :ref:`Assignment-like Contexts`,
-and conversions in :ref:`Function Types Conversions`.
+All function types are subtypes of special type ``Function`` (see
+:ref:`Type Function`), which in turn is a subtype of ``Object`` (see
+:ref:`Object Class Type`). More details on function types assignability are
+provided in :ref:`Assignment-like Contexts`, and conversions in
+:ref:`Function Types Conversions`.
 
 .. index::
    function type
-   return type
-   type void
+   throwing function type
+   parameter name
+   parameter type
+   type undefined
+   assignability
+   context
+   conversion
    throwing function
    throwing function type
    throws mark
@@ -1677,11 +1777,12 @@ type if the specific value of the type argument is irrelevant.
 
    foo<undefined>(undefined) // ok
 
-
 .. index::
    type undefined
    keyword undefined
+   undefined literal
    literal
+   type argument
    annotation
    nullish type
 
@@ -1709,7 +1810,7 @@ its own type.
 The operator '``[]``' (square brackets) is used to access the elements of
 a tuple in a manner similar to that used to access elements of an array.
 
-An index expression belongs to an integer type. The index of the 1st tuple
+An index expression belongs to an integer type. The index of the first tuple
 element is *0*. Only constant expressions can be used as the index to get
 the access to tuple elements.
 
@@ -1730,6 +1831,18 @@ An empty tuple is a corner case. It is only added to support |TS| compatibility:
    :linenos:
 
    let empty: [] = [] // empty tuple with no elements in it
+
+.. index::
+   tuple type
+   type compatibility
+   object
+   class
+   reference type
+   value
+   type declaration
+   array element
+   index expression
+   constant expression
 
 |
 
@@ -1757,12 +1870,14 @@ A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
 
 If a *union* uses a primitive type (see *Primitive types* in
-:ref:`Types by Category`) or a literal type (see :ref:`Literal Types`), then
-automatic boxing (see :ref:`Boxing Conversions`) occurs to keep the reference
-nature of the type.
+:ref:`Types by Category`) then automatic boxing (see :ref:`Boxing Conversions`)
+occurs to keep the reference nature of the type.
 
-A :index:`compile-time error` occurs if a *union* type contains more than one
-numeric type.
+A :index:`compile-time error` occurs if a *union* type contains:
+
+-  More than one numeric type; or
+-  More than one literal numeric type, and the values (see
+   :ref:`Numerical Equality Operators`) of such types are equal to each other.
 
 The reduced form of *union* types allows defining a type that has one literal
 type (see :ref:`Literal Types`) only:
@@ -1770,6 +1885,8 @@ type (see :ref:`Literal Types`) only:
 .. index::
    union type
    reference type
+   union type
+   type declaration
    circular reference
    union
    compile-time error
@@ -1789,7 +1906,12 @@ type (see :ref:`Literal Types`) only:
    type BadUnion2 = Int | Double // Compile-time error
    type BadUnion3 = int | Double // Compile-time error
    let x = cond? new Int (): new Double /* Compile-time error as conditional
-        expression contains an invalid union type */
+        expression contains an invalid union type Int | Double */
+
+   type GoodUnion1 = 1 | 2      // OK
+   type GoodUnion2 = 1 | 2.0    // OK
+   type GoodUnion3 = 1 | "2"    // OK
+   type BadUnion4  = 1 | 1.0    // Compile-time error, values match each other
 
 
 A typical example of the *union* type usage is represented below:
@@ -1862,6 +1984,11 @@ The following example represents literal types:
        // pension :-)
     }
 
+.. index::
+   union type
+   primitive type
+   literal type
+
 **Note**: A :index:`compile-time error` occurs if an expression of a union type
 is compared to a literal value or constant that does not belong to the values
 of the union type:
@@ -1883,6 +2010,12 @@ of the union type:
     }
 
 
+.. index::
+   union type
+   literal value
+
+|
+
 .. _Union Types Normalization:
 
 Union Types Normalization
@@ -1893,7 +2026,7 @@ Union Types Normalization
    todo: depends on literal types, maybe issues can occur for now
 
 Union types normalization allows minimizing the number of types within a union
-type, while keeping the type's safety. Some types can also be replaced for more
+type, while keeping the type safety. Some types can also be replaced for more
 general types.
 
 Formally, union type ``T``:sub:`1` | ... | ``T``:sub:`N`, where ``N`` > 1, can be
@@ -1906,6 +2039,8 @@ another:
 
 .. index::
    union type
+   type safety
+   value type
    non-union type
    normalization
    literal
@@ -1937,6 +2072,17 @@ another:
 
 .. index::
    union type
+   nested union type
+   non-nullish type
+   type never
+   numeric type
+   numeric literal type
+   unboxed type
+   type never
+   primitive type
+   boxing
+   alias
+   non-alias
    linearization
    literal type
    normalization
@@ -1991,6 +2137,7 @@ handling the type inference for array literals (see
    type inference
    array literal
 
+|
 
 .. _Access to Common Union Members:
 
@@ -2014,7 +2161,6 @@ conditions are fulfilled:
     - Field with the same type.
 
 A :index:`compile-time error` occurs otherwise:
-
 
 .. code-block:: typescript
    :linenos:
@@ -2040,6 +2186,15 @@ A :index:`compile-time error` occurs otherwise:
     console.log(u.s) // compile-time error, field types are not equal
     u.goo() // compile-time error, signatures are not equal
 
+.. index::
+   union type
+   interface type
+   class type
+   method
+   accessor
+   signature
+
+|
 
 .. _Keyof Types:
 
@@ -2059,6 +2214,13 @@ names of all members of the class or interface type.
     keyofType:
         'keyof' typeReference
         ;
+
+.. index::
+   keyof type
+   union type
+   keyof keyword
+   interface type
+   semantics
 
 A :index:`compile-time error` occurs if ``typeReference`` is not a class or
 interface type. The semantics of type ``keyof`` is presented in the example
@@ -2091,6 +2253,11 @@ to type ``never``:
     class A {} // Empty class 
     type KeysOfA = keyof A // never
 
+.. index::
+   class
+   interface type
+   type never
+   type keyof
 
 |
 
@@ -2140,6 +2307,8 @@ that can potentially violate null safety (e.g., access to a property):
 
 .. index::
    union type
+   user-defined type
+   type declaration
    type inference
    array literal
    nullish type
@@ -2182,12 +2351,15 @@ that can potentially violate null safety (e.g., access to a property):
    field access expression
    indexing expression
    function call
-   converting
    cast expression
    ensure-not-nullish expression
    nullish-coalescing expression
    nullish value
    cast expression
+   safe method call
+   safe field access
+   safe indexing expression
+   conversion
 
 |
 
@@ -2228,6 +2400,14 @@ create new objects and calls to static methods of class ``BigInt``
    let b1: bigint = new BigInt (5)
    let b2: bigint = 123n
 
+.. index::
+   type bigint
+   integer
+   type long
+   bigint literal
+   value type
+   type annotation
+
 |
 
 .. _Default Values for Types:
@@ -2264,10 +2444,13 @@ Default values of primitive types are as follows:
    default value
    variable
    explicit initialization
+   literal type
    nullable reference type
    primitive type
+   type parameter
    reference type
    enumeration type
+   initialization
 
 +--------------+--------------------+
 |   Data Type  |   Default Value    |
@@ -2350,7 +2533,10 @@ Default values of nullish union types are as follows:
    double
    char
    boolean
-
+   type
+   null
+   undefined
+   data type
 
 -------------
 

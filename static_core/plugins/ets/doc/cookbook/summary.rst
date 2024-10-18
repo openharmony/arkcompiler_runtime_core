@@ -28,8 +28,8 @@ Static Typing is Enforced
 
 |LANG| was designed with the following goals in mind:
 
-- |LANG| programs must be easy for developers to read and understand because
-  the code is read more often than written;
+- |LANG| programs must be easy for a developer to read and understand because
+  code is read more often than written;
 - |LANG| must execute fast and consume as little power as possible because
   it is particularly critical on mobile devices which |LANG| targets.
 
@@ -39,9 +39,9 @@ is static typing. A statically typed program has all types known at compile
 time. As a result, understanding what data structures are used in the code
 is much easier.
 
-That all types are known before the program actually runs results in the
-compiler to verify code correctness, eliminates many runtime type checks,
-and improves performance. To achieve this, the usage of the type ``any`` is
+That all types are known before a program actually runs results in the
+compiler verifying code correctness, eliminating many runtime type checks,
+and improving performance. To achieve this, the usage of type ``any`` is
 prohibited in |LANG|.
 
 |
@@ -101,7 +101,7 @@ the following:
 - Assign values of arbitrary types to object properties.
 
 
-It is noteworthy that many such operations are already prohibited by the |TS|
+Note that many such operations are already prohibited by the |TS|
 compiler. However, |TS| compiler still can be "tricked", e.g., by ``as any``
 casts. |LANG| does not support such prohibited casts completely as shown in
 the detailed example below.
@@ -263,7 +263,7 @@ Can we pass a value of ``T`` to a function that accepts a parameter of ``U``?
     let t : T = new T()
     greeter(t) // Is this allowed?
 
-In other words, which approach are we to take:
+In other words, we are to take one of the following approaches:
 
 - ``T`` and ``U`` are not related by inheritance or any common interface, but
   are "somewhat equivalent" since they have the same public API, and thus the
@@ -273,15 +273,15 @@ In other words, which approach are we to take:
   to both questions above is "no".
 
 The languages that take the first approach are said to support structural
-typing, while the languages that take the second approach do not support it.
-Currently, |TS| supports structural typing, and |LANG| does not.
+typing. The languages that take the second approach do not support structural
+typing. Currently, |TS| supports structural typing, and |LANG| does not.
 
 It is debatable whether or not structural typing helps to produce a clearer
 and more understandable code as both *pro* and *contra* arguments can be found.
-Why not just support it then? The answer is, because structural typing support
-is a major feature that needs much consideration and care for the implementation
-in the language specification, compiler, and runtime. More importantly in case
-of |LANG| that enforces static typing (see above), runtime support for
+Why not just support it then? The reason is that structural typing support is
+a major feature that needs much consideration and care for the implementation
+in the language specification, compiler, and runtime. More importantly, in the
+case of |LANG| that enforces static typing (see above), runtime support for
 structural typing implies performance overhead.
 
 Since functionally correct and performant implementation requires taking so

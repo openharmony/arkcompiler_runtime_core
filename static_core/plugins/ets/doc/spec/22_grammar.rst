@@ -217,17 +217,9 @@ Grammar Summary
         ;
 
     typeArguments:
-        '<' typeArgumentList '>'
+        '<' type (',' type)* '>'
         ;
 
-    typeArgumentList:
-        typeArgument (',' typeArgument)*
-        ;
-
-    typeArgument:
-        typeReference
-        | arrayType
-        ;
 
     expression:
         primaryExpression
@@ -807,7 +799,7 @@ Grammar Summary
 
     importDirective:
         'import'
-        (allBinding|selectiveBindigns|defaultBinding|typeBinding 'from')?
+        (allBinding|selectiveBindings|defaultBinding|typeBinding 'from')?
         importPath
         ;
 
@@ -815,7 +807,7 @@ Grammar Summary
         '*' bindingAlias
         ;
 
-    selectiveBindigns:
+    selectiveBindings:
         '{' nameBinding (',' nameBinding)* '}'
         ;
 
@@ -824,7 +816,7 @@ Grammar Summary
         ;
 
     typeBinding:
-        'type' selectiveBindigns
+        'type' selectiveBindings
         ;
 
     nameBinding:
@@ -865,7 +857,7 @@ Grammar Summary
         ;
 
     selectiveExportDirective:
-        'export' selectiveBindigns
+        'export' selectiveBindings
         ;
 
     singleExportDirective:
@@ -873,11 +865,11 @@ Grammar Summary
         ;
 
     exportTypeDirective:
-        'export' 'type' selectiveBindigns
+        'export' 'type' selectiveBindings
         ;
 
     reExportDirective:
-        'export' ('*' | selectiveBindigns) 'from' importPath
+        'export' ('*' | selectiveBindings) 'from' importPath
         ;
 
     topLevelStatements:
@@ -1298,8 +1290,6 @@ Grammar Summary
     CharLiteral:
         'c\'' SingleQuoteCharacter '\''
         ;
-
-|
 
 
 .. raw:: pdf

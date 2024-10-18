@@ -40,10 +40,13 @@ or simple (unqualified) name.
    function
    method
    scope
+   accessibility
    declaration
    entity
    simple name
    unqualified name
+
+|
 
 .. _Names:
 
@@ -97,6 +100,7 @@ tokens), *N* can name the following:
    token
    separator
    static member
+   instance member
 
 |
 
@@ -216,12 +220,14 @@ Entities within the scope are accessible (see :ref:`Accessible`).
 .. index::
    scope
    entity
-   name qualification
+   qualified name
+   simple name
    access
    simple name
    variable
    constant
    function call
+   accessibility
 
 The scope of an entity depends on the context the entity is declared in:
 
@@ -238,6 +244,8 @@ The scope of an entity depends on the context the entity is declared in:
    module level scope
    access
    module
+   package
+   module
 
 .. _module-access:
 
@@ -252,6 +260,7 @@ The scope of an entity depends on the context the entity is declared in:
    access
    name
    declaration
+   compilation unit
 
 .. _class-access:
   
@@ -274,6 +283,12 @@ The scope of an entity depends on the context the entity is declared in:
 
 .. index::
    class level scope
+   accessibility
+   access modifier
+   keyword super
+   keyword this
+   expression
+   value
    method
    name
    access
@@ -294,7 +309,6 @@ The scope of an entity depends on the context the entity is declared in:
    interface level scope
    interface
    access
-   default public
 
 .. _class-or-interface-type-parameter-access:
 
@@ -397,6 +411,18 @@ follows:
   Qualified Access (see :ref:`Bind All with Qualified Access`) is used to deal
   with exported entities.
 
+.. index::
+   accessibility
+   scope
+   function name
+   method name
+   value
+   compilation unit
+   qualified access
+   import
+   bind all
+   entity
+   export
 
 |
 
@@ -426,8 +452,10 @@ An interface declaration (see :ref:`Interfaces`), a class declaration (see
    interface declaration
    class declaration
    enum declaration
+   alias
    type alias declaration
 
+|
 
 .. _Type Alias Declaration:
 
@@ -458,6 +486,8 @@ context.
    function
    union type
    scope
+   context
+   alias
    package level scope
    module level scope
    name
@@ -506,6 +536,11 @@ meaning nor introduces a new type.
         console.log(max(x)) // ok
     }
 
+.. index::
+   alias
+   type alias
+   name
+
 Type aliases can be recursively referenced inside the right-hand side of a type
 alias declaration.
 
@@ -535,6 +570,15 @@ does not have enough information about the defined alias:
     type E = E // compile-time error
     type F = string | E // compile-time error
 
+
+.. index::
+   alias
+   recursive reference
+   type alias declaration
+   array element
+   type argument
+   generic type
+   compiler
 
 The same rules apply to a generic type alias defined as
 ``type A<T> = something``:
@@ -570,6 +614,13 @@ is valid:
    :linenos:
 
     type NodeValue<T> = T | Array<T> | Array<NodeValue<T>>; 
+
+.. index::
+   alias
+   generic type
+   type argument
+   type alias
+   type parameter
 
 |
 
@@ -627,13 +678,18 @@ variable is determined as follows:
 
 .. index::
    variable declaration
-   named variable
-   initial value
+   name
    variable
    type annotation
    initializer expression
    compatibility
    inference
+   annotation
+   inference
+   variable declaration
+   value
+   declaration
+   initialization
 
 .. code-block:: typescript
    :linenos:
@@ -682,6 +738,25 @@ the content of the expression as described in
 must not lead to cyclic dependencies caused by the use of non-initialized
 variables. Otherwise, a :index:`compile-time error` occurs.
 
+.. index::
+   value
+   method parameter
+   function parameter
+   method
+   function
+   constructor parameter
+   initialization
+   argument value
+   class instance
+   creation expression
+   exception parameter
+   thrown object
+   variable
+   constructor
+   array element
+   initializer expression
+   non-initialized variable
+
 .. code-block-meta:
    expect-cte:
 
@@ -712,13 +787,18 @@ non-array type, then a :index:`compile-time error` occurs:
 
     function foo (p: number[]) {
        let x: readonly number [] = p
-       x[0] = 666 // Compile-time error as array itself is readonly
+       x[0] = 666 // compile-time error as array itself is readonly
        console.log (x[0]) // read operation is OK
     }
 
 
 .. index::
+   variable declaration
+   prefix readonly
+   array
    initial value
+   context
+   conversion
    initializer
    method parameter
    function parameter
@@ -825,6 +905,10 @@ initializer expression *E*, then the type of *E* must be compatible with ``T``
 .. index::
    initializer expression
    assignment-like contexts
+   annotation
+   constant declaration
+   type
+   compatibility
 
 |
 
@@ -841,9 +925,10 @@ from the initializer expression as follows:
 
 -  In a variable declaration (not in a constant declaration, though), if the
    initializer expression is of a literal type, then the literal type is
-   replaced for its supertype.
+   replaced for its supertype (see :ref:`Supertypes of Literal Types`).
    If the initializer expression is of a union type that contains literal types,
-   then each literal type is replaced for its supertype, and then normalized (see
+   then each literal type is replaced for its supertype (see
+   :ref:`Supertypes of Literal Types`), and then normalized (see
    :ref:`Union Types Normalization`).
 
 -  Otherwise, the type of a declaration is inferred from the initializer
@@ -854,10 +939,17 @@ If the type of the initializer expression cannot be inferred, then a
 
 .. index::
    type
+   declaration
+   annotation
    type inference
    initializer
    type annotation
    initializer expression
+   variable declaration
+   literal type
+   supertype
+   union type
+   literal type
 
 .. code-block:: typescript
    :linenos:
@@ -923,6 +1015,8 @@ Functions must be declared on the top level (see :ref:`Top-Level Statements`).
    name
    signature
    named function
+   function body
+   block
    body
    function overload signature
    function call
@@ -1015,7 +1109,6 @@ the function or the method has no parameters.
         '...' parameter
         ;
 
-
 If a parameter type is prefixed with ``readonly``, then there are additional
 restrictions on the parameter as described in :ref:`Readonly Parameters`.
 
@@ -1043,7 +1136,8 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
    signature
    parameter list
    identifier
-   parameter type
+   parameter name
+   type
    function
    method
    rest parameter
@@ -1051,6 +1145,8 @@ A :index:`compile-time error` occurs if an *optional parameter* precedes a
    argument
    non-optional parameter
    required parameter
+   prefix readonly
+   readonly parameter
 
 |
 
@@ -1060,7 +1156,7 @@ Readonly Parameters
 ===================
 
 .. meta:
-    frontend_status: None
+    frontend_status: Done
 
 If the parameter type is prefixed with ``readonly``, then the type must be of
 array type ``T[]`` (see :ref:`Array Types`) or tuple type ``[T1, T2, ..., Tn]``
@@ -1075,16 +1171,29 @@ modifies an array or tuple content that has the *readonly* parameter:
 
     function foo(array: readonly number[], tuple: readonly [number, string]) {
         let element = array[0] // OK, one can get array element
-        array[0] = element // Compile-time error, array is readonly
+        array[0] = element // compile-time error, array is readonly
 
         element = tuple[0] // OK, one can get tuple element
-        tuple[0] = element // Compile-time error, tuple is readonly
+        tuple[0] = element // compile-time error, tuple is readonly
     }
 
 This rule applies to variables as discussed in :ref:`Variable Declarations`.
 
 Any assignment of readonly parameters and variables must follow the limitations
 stated in :ref:`Contexts and Conversions`.
+
+.. index::
+   readonly parameter
+   parameter type
+   prefix readonly
+   array type
+   tuple type
+   function
+   method body
+   array
+   readonly parameter
+   variable
+   assignment
 
 |
 
@@ -1123,6 +1232,7 @@ omitted in a function or method call:
    argument
    function call
    default value
+   method call
 
 .. code-block:: typescript
    :linenos:
@@ -1146,6 +1256,7 @@ follows:
 .. index::
    notation
    parameter
+   boxing
    union type
    undefined
    default value
@@ -1224,6 +1335,12 @@ can accept any number of arguments of types that are compatible (see
    parameter list
    type
    argument
+   lambda
+   constructor
+   number
+   argument
+   compatibility
+   prefix
 
 .. code-block:: typescript
    :linenos:
@@ -1266,6 +1383,9 @@ as prefix before the array argument:
    argument
    prefix
    spread operator
+   function
+   method
+   array argument
 
 A function, method, constructor, or lambda with a rest parameter of type
 ``[T1, T2, ... Tn]`` can accept only ``n`` arguments of types that are
@@ -1274,6 +1394,8 @@ compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
 .. index::
    rest parameter
    function
+   lambda
+   compatibility
    method
    parameter name
    tuple type
@@ -1288,8 +1410,8 @@ compatible (see :ref:`Type Compatibility`) with the corresponding ``Ti``:
       return numbers[0] + numbers[1] + numbers[2]
     }
 
-    sum()        // compile time error: incorrect number of arguments, 0 instead of 3
-    sum(1)       // compile time error: incorrect number of arguments, 1 instead of 3
+    sum()        // compile-time error: incorrect number of arguments, 0 instead of 3
+    sum(1)       // compile-time error: incorrect number of arguments, 1 instead of 3
     sum(1, 2, 3) // returns 6
 
 
@@ -1315,6 +1437,10 @@ prefix before the tuple argument:
 .. index::
    argument
    prefix
+   spread expression
+   function
+   rest parameter
+   tuple argument
    spread operator
 
 |
@@ -1352,11 +1478,14 @@ top-level variable within the body of that function or method:
 .. index::
    shadowing
    parameter
+   accessibility
    top-level variable
    access
    function body
    method body
    name
+   function
+   method
 
 |
 
@@ -1381,6 +1510,15 @@ the execution path of the function or method body has no return statement (see
 If function or method return type is not specified, then it is inferred from
 its body (see :ref:`Return Type Inference`). If there is no body, then the
 function or method return type is ``void`` (see :ref:`Type void`).
+
+.. index::
+   return type
+   function
+   method
+   type compatibility
+   return statement
+   method body
+   type void
 
 |
 
@@ -1412,7 +1550,6 @@ the following conditions:
    above, and the type ``T`` is not of type ``Promise``, then the return type is
    ``Promise<T>``.
 
-
 Future compiler implementations are to infer the return type in more cases.
 The example below represents type inference:
 
@@ -1424,9 +1561,13 @@ The example below represents type inference:
    method body
    native function
    return statement
+   normalization
+   type expression
+   normalization
    expression
    function
    implementation
+   union type
 
 .. code-block:: typescript
 
@@ -1486,7 +1627,8 @@ The example below has overload signatures defined (one overload signature is
 parameterless, and other two have one parameter each):
 
 .. index::
-   function overload signature
+   function
+   overload signature
    function
    overload signature
    function header
@@ -1494,6 +1636,7 @@ parameterless, and other two have one parameter each):
    implementation function
    implementation
    method overload signature
+   parameter
 
 .. code-block:: typescript
    :linenos:
@@ -1523,13 +1666,15 @@ If not all overload signatures are either exported or non-exported, then a
 .. index::
    call
    implementation function
-   null argument
+   argument null
+   argument undefined
    execution
    signature
    function
    implementation
    overload signature
    compatibility
+
 
 .. raw:: pdf
 

@@ -30,13 +30,16 @@ Ambient functions, methods, and constructors have no bodies.
 
 .. index::
    ambient declaration
+   declaration
+   module
    entity
-   execution
+   executable code
    initializer
    initialization
    ambient function
    method
    constructor
+   function
 
 
 .. code-block:: abnf
@@ -68,7 +71,10 @@ context that is already ambient:
 .. index::
    compile-time error
    context
-   modifier
+   modifier declare
+   prefix
+   keyword const
+   compatibility
    ambient
 
 |
@@ -99,8 +105,12 @@ The initializer expression for an ambient constant
 must be a numeric or string literal.
 
 .. index::
-   ambient constant declaration
+   ambient constant
+   declaration
    type annotation
+   initializer expression
+   string literal
+   numeric literal
 
 |
 
@@ -136,7 +146,6 @@ A :index:`compile-time error` occurs if:
    compile-time error
    type annotation
    return type
-   ambient function
    overload signature
    top-level ambient overload signature
 
@@ -161,11 +170,9 @@ Ambient function declarations cannot specify function bodies.
 **Note**: The modifier ``async`` cannot be used in an ambient context.
 
 .. index::
-   ambient function
    ambient function declaration
-   ambient function parameter
-   default value
-   optional parameter
+   value
+   parameter
    modifier async
    function body
    ambient context
@@ -249,6 +256,11 @@ Ambient constructor, method, and accessor declarations have no bodies:
         )
         ;       
 
+.. index::
+   constructor
+   method
+   accessor
+
 |
 
 .. _Ambient Indexer:
@@ -270,6 +282,14 @@ in an ambient context. This feature is provided for |TS| compatibility:
 
 **Restriction**: *indexType* must be ``number``.
 
+.. index::
+   ambient indexer declaration
+   indexing
+   class
+   instance
+   ambient context
+   compatibility
+
 .. code-block:: typescript
    :linenos:
 
@@ -281,6 +301,14 @@ in an ambient context. This feature is provided for |TS| compatibility:
 **Note**: *Ambient indexer declaration* is supported in ambient contexts only.
 If ambient class implementation is written in |LANG|, then it must conform to
 :ref:`Indexable Types`.
+
+.. index::
+   ambient indexer declaration
+   ambient context
+   ambient class
+   implementation
+
+|
 
 .. _Ambient Call Signature:
 
@@ -309,6 +337,15 @@ in an ambient context. This feature is provided for |TS| compatibility:
 **Note**: *Ambient class signature declaration* is supported in ambient contexts
 only. If ambient class implementation is written in |LANG|, then it must conform
 to :ref:`Callable Types with Invoke Method`.
+
+.. index::
+   ambient call signature declaration
+   ambient call signature
+   callable type
+   ambient context
+   compatibility
+
+|
 
 .. _Ambient Iterable:
 
@@ -344,6 +381,14 @@ implements ``Iterator`` interface defined in the standard library (see
 If ambient class implementation is written in |LANG|, then it must conform to
 :ref:`Iterable Types`.
 
+.. index::
+   ambient iterable declaration
+   class instance
+   compatibility
+   return type
+   implementation
+   interface
+
 |
 
 .. _Ambient Interface Declarations:
@@ -373,6 +418,10 @@ Ambient Interface Declarations
 An ambient interface can contain additional members in the same manner as
 an ambient class (see :ref:`Ambient Indexer`, :ref:`Ambient Call Signature`,
 and :ref:`Ambient Iterable`).
+
+.. index::
+   ambient interface declaration
+   ambient class
 
 |
 
@@ -429,14 +478,36 @@ Namespace nesting is allowed:
 A namespace is not an object but just a scope for entities that can only be
 accessed by using qualified names.
 
+.. index::
+   namespace
+   entity
+   compatibility
+   platform API
+   third-party library API
+   ambient iterable declaration
+   qualified name
+   access
+
+|
+
 .. _Implementing Ambient Namespace Declaration:
 
 Implementing Ambient Namespace Declaration
 ==========================================
 
-:ref:`Annotation namespace` must be applied to classes and functions that
-implement the corresponding entities as declared in the ambient namespace.
+In case an *ambient namespace* is implemented in |LANG|, a namespace with the
+same name must be declared (see :ref:`Namespace Declarations`) as the 
+top-level declaration of a compilation unit. If a namespace is embedded into
+another namespace, then all namespace names must be same as in ambient context.
 
+A compilation unit that implements a namespace is the unit for which the
+declaration module is built (see :ref:`Declaration Modules`). Otherwise,
+:ref:`Annotation namespace` must be applied to the implementation namespace.
+
+.. index::
+   annotation namespace
+   ambient namespace declaration
+   entity
 
 .. raw:: pdf
 

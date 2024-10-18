@@ -41,6 +41,47 @@ If an import path ``<some path>/name`` is resolved to a path in the folder
 -   Otherwise, the compiler imports the package constituted by files
     ``name/*.sts``.
 
+.. index::
+   implementation
+   import path
+   compiler
+   lookup sequence
+   module
+   package
+
+|
+
+.. _Type Function:
+
+Type Function
+*************
+
+.. meta:
+    frontend_status: None
+
+The |LANG| supports the type called ``Function`` which is a supertype for all
+function types (see :ref:`Function Types`), and thus allows third party code
+interaction.
+
+.. code-block:: typescript
+   :linenos:
+
+    declare function processAnyFunction (a_function: Function)
+      // This is an external function which may handle any ArkTS function
+
+    function foo() {}
+    function bar(p1: number, p2: string, p3: boolean): Object {}
+
+    processAnyFunction (foo)         // pass 'foo' as an argument
+    processAnyFunction (bar)         // pass 'bar' as an argument
+    processAnyFunction (()=>void {}) // pass lambda expression as an argument
+
+.. index::
+   type function
+   supertype
+   function type
+
+|
 
 .. _How to get type via reflection:
 
@@ -71,6 +112,15 @@ be any valid type.
     interface SomeInterface {}
     let type_of_interface: Type = Type.for<SomeInterface>()
 
+.. index::
+   pseudo generic static method
+   static method
+   compiler
+   variable
+   runtime
+
+|
+
 .. _Methods for T[] Types:
 
 Methods for ``T[]`` Types
@@ -87,7 +137,17 @@ The list of supported methods is defined by the compiler implementation.
     let built_in_array: number[] = [1,2,3]
     built_in_array.at (0) // That will be a valid call
 
+.. index::
+   method
+   type
+   array
+   class type
+   compiler
+   method call
+   variable
+   implementation
 
+|
 
 .. _Generic and Function Types Peculiarities:
 
@@ -100,6 +160,16 @@ in the future. The compiler applies boxing (see :ref:`Boxing Conversions`) to
 any parameter and return type of primitive types when dealing with variables
 of function types. A particular example can be found under the last bullet of
 the compile-time errors list in :ref:`InstanceOf Expression`.
+
+.. index::
+   generic
+   function type
+   compiler
+   runtime implementation
+   boxing
+   conversion
+   variable
+   primitive type
 
 .. raw:: pdf
 

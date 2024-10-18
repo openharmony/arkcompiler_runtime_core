@@ -92,15 +92,30 @@ There are three options the ``objectReference`` refers to:
   superclass, or the overridden method version of the superclass;
 - *primaryExpression* that is to refer to an instance variable of a class,
   interface, or function type after evaluation, unless the manner of the
-  evaluation is altered by the chaining operator '?.' (see
+  evaluation is altered by the chaining operator '``?.``' (see
   :ref:`Chaining Operator`).
 
 If the form of *primaryExpression* is *thisExpression*, then the pattern
-"this?." is handled as a :index:`compile-time error`.
+"``this?.``" is handled as a :index:`compile-time error`.
 
-If the form of *primaryExpression* is *super*, then the pattern "super?."
+If the form of *primaryExpression* is *super*, then the pattern "``super?.``"
 is handled as a :index:`compile-time error`.
 
+.. index::
+   field
+   constructor
+   superclass
+   overriding
+   method
+   variable
+   expression
+   instance variable
+   class
+   interface
+   function type
+   evaluation
+   chaining operator
+   pattern
 
 .. code-block:: abnf
 
@@ -123,15 +138,9 @@ the last argument can have the form of a spread expression (see
 
 
 .. index::
-   interface
-   class
-   static member
-   instance variable
    argument
-   expression
-   evaluation
-   prefix
    spread operator
+   spread expression
 
 |
 
@@ -168,17 +177,21 @@ Expressions can contain assignments, increment operators, decrement operators,
 method calls, and function calls. The evaluation of an expression can produce
 side effects as a result.
 
+*Constant expressions* (see :ref:`Constant Expressions`) are the expressions
+with values that can be determined at compile time.
+
 .. index::
    variable
    value
    evaluation
    expression
-
-*Constant expressions* (see :ref:`Constant Expressions`) are the expressions
-with values that can be determined at compile time.
-
-.. index::
-   expression
+   type
+   assignment
+   increment operator
+   decrement operator
+   method call
+   function call
+   side effect
    constant expression
    compile time
 
@@ -244,7 +257,7 @@ follows:
    value
    array access expression
    error
-   array index expression
+   array indexing expression
    array
    runtime
    cast expression
@@ -261,31 +274,18 @@ follows:
    increment operator
    decrement operator
    array element type
+   cast
+   assignment
 
 Possible hard-to-predict and hard-to-handle linkage and virtual machine errors
 can cause errors in the course of an expression evaluation.
 
 An abrupt completion of a subexpression evaluation results in the following:
 
-.. index::
-   linkage
-   virtual machine error
-   error
-   expression
-   evaluation
-   abrupt completion
-   subexpression
-
 -  Immediate abrupt completion of the expression that contains such a
    subexpression (if the evaluation of the entire expression requires
    the evaluation of the contained subexpression); and
 -  Cancellation of all subsequent steps of the normal mode of evaluation.
-
-.. index::
-   abrupt completion
-   expression
-   subexpression
-   evaluation
 
 The terms *complete normally* and *complete abruptly* can also denote
 normal and abrupt completion of the execution of statements (see
@@ -300,6 +300,11 @@ being thrown.
    statement
    error
    exception
+   virtual machine
+   expression
+   subexpression
+   evaluation
+   linkage
 
 |
 
@@ -346,7 +351,6 @@ the following rules:
    they are unlikely to be computationally associative (even though they appear
    to be mathematically associative).
 
-
 .. index::
    operand
    order of evaluation
@@ -368,7 +372,9 @@ the following rules:
    floating-point calculation
    integer addition
    integer multiplication
+   integer division
    associativity
+   parenthesis
 
 |
 
@@ -428,6 +434,20 @@ also contains detailed information.
 | assignment                      | ``= += -= %= *= /= &= ^= |= <<= >>= >>>=`` | right to left  |
 +---------------------------------+--------------------------------------------+----------------+
 
+.. index::
+   precedence
+   bitwise operator
+   null-coalescing operator
+   assignment
+   shift operator
+   cast operator
+   equality operator
+   postfix operator
+   increment operator
+   decrement operator
+   prefix operator
+   logical operator
+   relational operator
 
 |
 
@@ -506,27 +526,13 @@ Literal
 .. meta:
     frontend_status: Done
 
-Literals (see :ref:`Literals`) denote fixed and unchanging value. Types of
-literals are determined as follows:
+Literals (see :ref:`Literals`) denote fixed and unchanging value. Every literal
+has its own type (see :ref:`Literal Types`).
 
-+-------------------------------+-----------------------------------------+
-| **Literal**                   | **Type of Literal Expression**          |
-+===============================+=========================================+
-| Integer                       | ``int`` if the value can be represented |
-|                               | by the 32-bit type, otherwise ``long``  |
-+-------------------------------+-----------------------------------------+
-| Floating-point                | ``double``, ``float``                   |
-+-------------------------------+-----------------------------------------+
-| Boolean (``true``, ``false``) | ``boolean``                             |
-+-------------------------------+-----------------------------------------+
-| ``Char``                      | ``char``                                |
-+-------------------------------+-----------------------------------------+
-| ``String``                    | ``string``                              |
-+-------------------------------+-----------------------------------------+
-| ``Null`` (``null``)           | ``null``                                |
-+-------------------------------+-----------------------------------------+
-| ``Undefined`` (``undefined``) | ``undefined``                           |
-+-------------------------------+-----------------------------------------+
+.. index::
+   literal
+   value
+   literal type
 
 |
 
@@ -570,19 +576,26 @@ A :index:`compile-time error` occurs if:
 -  The name referred by *qualifiedName* is undefined or inaccessible; or
 -  Ambiguity occurs while resolving the name.
 
-
 .. index::
-   qualified name
+   named reference
    expression
+   simple name
+   qualified name
    dot-separated name
    imported variable
    qualification
+   qualified name
+   compilation unit
    package
    field
    class property
    local variable
    surrounding function
    method parameter
+   method
+   instantiation
+   generic method
+   ambiguity
 
 .. code-block:: typescript
    :linenos:
@@ -602,7 +615,7 @@ A :index:`compile-time error` occurs if:
           module */
 
       goo() // goo is a undefined name - compile-time error
-      let bar_ref = bar // bar is an ambiguious reference - compile-time error
+      let bar_ref = bar // bar is an ambiguous reference - compile-time error
     }
 
     function bar (p: string) {}
@@ -647,6 +660,7 @@ expression in an array literal is ignored:
    value
    comma-separated list
    initializer expression
+   trailing comma
 
 
 .. code-block:: typescript
@@ -733,6 +747,7 @@ of an assignment, call parameter type, or type of a cast expression:
 .. index::
    type inference
    context
+   array type
    array literal
    type
    type annotation
@@ -820,6 +835,15 @@ union type. Otherwise, it is a :index:`compile-time error`:
     let incorrect_union_of_arrays: number[] | string[] = [1, 2, "string"]
      // compile-time error: number|string[] is not compatible with number[] | string[]
 
+.. index::
+   tuple type
+   context
+   literal
+   expression
+   type
+   array literal
+   union type
+   inference
 
 |
 
@@ -857,8 +881,8 @@ used to infer it from the initialization expressions:
 .. index::
    type inference
    array element
-   type
    array literal
+   type
    context
    initialization expression
    expression
@@ -895,8 +919,8 @@ expression (see :ref:`New Expressions`):
    object literal
    expression
    instance
-   class
-   class instance creation expression
+   class instance
+   creation expression
 
 .. code-block:: abnf
 
@@ -921,6 +945,8 @@ expression:
    object literal
    comma-separated list
    name-value pair
+   curly brace
+   trailing comma
    identifier
    expression
 
@@ -947,6 +973,8 @@ A :index:`compile-time error` occurs if:
 .. index::
    object literal
    inference
+   named class
+   anonymous class
    context
    class type
    anonymous class
@@ -1046,10 +1074,11 @@ These situations are presented in the examples below:
    expression
    type
    name-value pair
-   compatible type
-   type compatibility
+   compatibility
    field type
-   accessible constructor
+   accessibility
+   constructor
+   context
    parameterless constructor
    class composite context
    object literal
@@ -1142,8 +1171,8 @@ type:
 
 .. index::
    object literal
-   generic record type
-   record utility type
+   generic type
+   record type
    type property
    type value
    type key
@@ -1169,8 +1198,7 @@ the second expression denotes a value, and must be of type ``Value``:
 
 .. index::
    expression
-   type Key
-   type Value
+   key
    value
 
 .. code-block:: typescript
@@ -1252,6 +1280,8 @@ is to be performed by the following steps:
    value
    expression
    assignment
+   literal type
+   readonly field
 
 The execution of the object literal completes abruptly if so does
 the execution of a name-value pair.
@@ -1300,6 +1330,22 @@ An array or tuple referred by the *expression* is broken by the evaluation into
 a sequence of values. This sequence is used where a spread expression is used.
 It can be an assignment, a call of a function, method, or constructor.
 
+.. index::
+   spread expression
+   array literal
+   argument
+   expression
+   array type
+   tuple type
+   runtime
+   compiler
+   evaluation
+   call
+   function
+   method
+   constructor
+   assignment
+
 .. code-block:: typescript
    :linenos:
 
@@ -1338,8 +1384,6 @@ It can be an assignment, a call of a function, method, or constructor.
     }
 
 
-
-
 **Note**: If an array is spread while calling a function, then an appropriate
 parameter must be of the spread array kind. If an array is spread into a
 sequence of ordinary parameters, then a :index:`compile-time error` occurs:
@@ -1361,6 +1405,15 @@ a tuple is spread into a sequence of ordinary parameters:
     let a_tuple: [number, string] = [1, "2"]
     bar (...a_tuple) // compile-time error
     function bar (n1: number, n2: string) { ... }
+
+.. index::
+   spread
+   function call
+   parameter
+   tuple
+   spread array
+   array
+   parameter
 
 |
 
@@ -1426,6 +1479,8 @@ A :index:`compile-time error` occurs if the keyword ``this`` appears elsewhere.
    lambda expression
    direct call expression
    explicit constructor call statement
+   constructor
+   constructor call statement
 
 The keyword ``this`` used as a primary expression denotes a value that is a
 reference to the following:
@@ -1450,6 +1505,7 @@ with ``T``.
    object
    lambda body
    surrounding context
+   compatibility
    class
    runtime
    class type
@@ -1473,6 +1529,9 @@ described in detail in :ref:`Accessing Current Object Fields` and
 
 .. index::
    field access expression
+   access
+   field
+   superclass
    object reference
 
 .. code-block:: abnf
@@ -1497,8 +1556,11 @@ occurs otherwise.
 
 .. index::
    access
-   object field
-   field access
+   field
+   field access expression
+   safe field access
+   nullish object reference
+   abrupt completion
    non-nullish type
    reference type
    compile-time error
@@ -1532,6 +1594,8 @@ expression* of a static field in a class is as follows:
 
 
 .. index::
+   access
+   runtime
    field access expression
    object reference expression
    evaluation
@@ -1541,11 +1605,13 @@ expression* of a static field in a class is as follows:
    type
    const field
    field
+   field access
    variable
+   readonly
    class
    static initializer
+   class initializer
    variable initializer
-
 
 b. *Instance* field access (*objectReference* is evaluated in the form *primaryExpression*)
 
@@ -1562,7 +1628,12 @@ Only the *primaryExpression* type (not the class type of an actual object
 referred at runtime) is used to determine the field to be accessed.
 
 .. index::
-   instance field
+   instance field access
+   field access
+   field access expression
+   interface
+   variable
+   readonly
    object reference expression
    evaluation
    access
@@ -1617,7 +1688,9 @@ class is not ``T``).
    superclass field
    class type
    identifier
-   instance
+   instance method
+   instance initializer
+   accessibility
    superclass
    constructor
    instance variable
@@ -1673,12 +1746,14 @@ compile time (see :ref:`Step 1 Selection of Type to Use`,
 
 .. index::
    compile-time error
+   trailing lambda call
    type argument
    method call
    chaining operator
    safe method call
    nullish value
    method resolution
+   method modifier
    compile time
    field resolution
    method overloading
@@ -1745,8 +1820,10 @@ method is available (no method to call, or ambiguity).
 
 .. index::
    overload resolution
-   method to call
+   method call
    potentially applicable candidate
+   accessible method
+   access
 
 |
 
@@ -1775,6 +1852,7 @@ semantic checks must be performed:
 
 .. index::
    method call
+   semantic check
    static method call
    abstract method call
    type argument
@@ -1811,6 +1889,8 @@ A :index:`compile-time error` occurs if:
 .. index::
    function call expression
    function call
+   function type
+   trailing lambda call
    lambda expression
    compile-time error
    type argument
@@ -1860,9 +1940,13 @@ and require different semantic checks:
 
 .. index::
    overload resolution
-   function to call
+   expression
+   semantic check
+   function call
    potentially applicable candidate
-
+   accessibility
+   qualified name
+   function
 
 
 The example below represents different forms of function calls:
@@ -1887,7 +1971,7 @@ The example below represents different forms of function calls:
        callee() // function call uses parameter name to call any functional object passed as an argument
     }
 
-	((): void => { console.log ("Lambda is called") }) () // function call uses lambda expression to call it
+    ((): void => { console.log ("Lambda is called") }) () // function call uses lambda expression to call it
 
 
 |
@@ -1918,6 +2002,7 @@ Any indexing expression has two subexpressions:
 
 .. index::
    indexing expression
+   indexable type
    access
    array element
    array type
@@ -1930,12 +2015,12 @@ Any indexing expression has two subexpressions:
 If the operator '``?.``' (see :ref:`Chaining Operator`) is present in an
 indexing expression, then:
 
--  Type of the object reference expression must be a nullish type based
-   on array type or ``Record`` type. Otherwise, a :index:`compile-time error`
-   occurs.
--  Object reference expression must be checked to evaluate to nullish
-   value. If it does, then the entire *indexingExpression* equals ``undefined``.
-
+-  If an object reference expression is not of a nullish type, then the
+   chaining operator has no effect.
+-  Otherwise, object reference expression must be checked to nullish
+   value. If the value is ``undefined`` or ``null``,
+   then the evaluation of the entire surrounding *primary expression* stops.
+   The result of the entire primary expression is then ``undefined``.
 
 If no '``?.``' is present in an indexing expression, then object reference
 expression must be an array type or the ``Record`` type. Otherwise, a
@@ -1943,8 +2028,11 @@ expression must be an array type or the ``Record`` type. Otherwise, a
 
 .. index::
    chaining operator
-   indexing expressions
+   indexing expression
    object reference expression
+   expression
+   primary expression
+   array type
    nullish type
    record type
    compile-time error
@@ -1990,21 +2078,22 @@ It is essential that, if type ``T`` is a reference type, then the fields of
 array elements can be modified by changing the resultant variable fields:
 
 .. index::
-   array indexing expression
-   array element
-   indexing expression
    array indexing
+   index expression
+   numeric type
+   array element
+   floating-point type
+   runtime error
    object reference expression
    chaining operator
    array type
-   index expression
-   numeric type
-   numeric types conversion
-   predefined numeric types conversion
+   conversion
+   predefined numeric type
    compile-time error
-   variable
-   const
+   variable field
    reference expression
+   reference type
+   array
 
 .. code-block:: typescript
    :linenos:
@@ -2051,16 +2140,16 @@ An array indexing expression evaluated at runtime behaves as follows:
     }
 
 .. index::
-   array indexing
+   array
    indexing expression
    index expression
-   array indexing expression
+   evaluation
    object reference expression
    abrupt completion
    normal completion
    reference expression
-   array
    error
+   variable
 
 |
 
@@ -2099,6 +2188,14 @@ The result of an indexing expression is of type ``Value``.
     }
     let y = x['key2'] // y value is 2
 
+.. index::
+   index expression
+   key
+   union
+   literal type
+   literal
+   value
+   type
 
 A :index:`compile-time error` occurs if an index expression is not a valid
 literal:
@@ -2140,6 +2237,14 @@ The result of an indexing expression is of type ``Value | undefined``.
 
     let y = x[3]
 
+.. index::
+   index expression
+   literal
+   key
+   compiler
+   value
+   indexing expression
+
 In the code above, the type of *y* is ``string | undefined``, and the value of
 *y* is ``undefined``.
 
@@ -2157,14 +2262,10 @@ An indexing expression evaluated at runtime behaves as follows:
 -  Otherwise, the result is the literal ``undefined``.
 
 .. index::
-   record index expression
-   evaluation
-   runtime
-   undefined
    type
    value
    reference type
-   type Key
+   key
    indexing expression
    index expression
    object reference expression
@@ -2172,9 +2273,6 @@ An indexing expression evaluated at runtime behaves as follows:
    normal completion
    literal
    record instance
-   key
-
-
 
 |
 
@@ -2232,8 +2330,14 @@ an assignment (see :ref:`Assignment`) or expression
    evaluation
    nullish value
    nullish type
-   surrounding expression
-   expression evaluation
+   function call
+   method call
+   primary expression
+   evaluation
+   chaining operator
+   access
+   value
+   field access expression
 
 |
 
@@ -2302,7 +2406,6 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
    instantiation
    argument
    constructor
-   error
    instance creation expression
    instance
    error
@@ -2314,6 +2417,7 @@ A :index:`compile-time error` occurs if ``typeReference`` is a type parameter.
    constructor
    method validity
    semantic correctness check
+   type parameter
 
 |
 
@@ -2352,12 +2456,13 @@ or ``typeReference``.
 
 .. index::
    cast operator
+   cast expression
    expression
    conversion
    value
    runtime
    casting context
-   cast expression
+   type
 
 A cast expression type is always the target type.
 
@@ -2440,18 +2545,22 @@ system, and the result of the ``instanceof`` expression cannot be determined.
    expression
    operand
    reference type
+   compatibility
    compile-time error
    execution
    evaluation
-   type compatibility
    compatible type
    catch section
    runtime
    control transfer
    execution control
-   boolean
+   boolean type
    exception
    error
+   primitive type
+   generic type
+   catch
+   runtime
 
 |
 
@@ -2469,52 +2578,68 @@ system, and the result of the ``instanceof`` expression cannot be determined.
         'typeof' expression
         ;
 
-Any ``typeof`` expression is of type ``string``. The ``typeof`` expression
-values of the below types are known at compile time:
+Any ``typeof`` expression is of type ``string``.  Its evaluation starts with
+``expression`` evaluation. If such evaluation causes exception or error, then
+the result of the ``typeof`` expression cannot be determined in that case
+otherwise the ``typeof`` expression value is defined like this
+
+- for the below types it is known at compile time:
+
+
+.. index::
+   typeof expression
+   string
+   evaluation
+   exception
+   error
+   compile time
 
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
 +=================================+=========================+=============================+
 | ``number``/``Number``           | "number"                | .. code-block:: typescript  |
 |                                 |                         |                             |
-|                                 |                         |  let n: number              |
+|                                 |                         |  let n: number = ...        |
 |                                 |                         |  typeof n                   |
-|                                 |                         |  let N: Number              |
+|                                 |                         |  let N: Number = ...        |
 |                                 |                         |  typeof N                   |
 +---------------------------------+-------------------------+-----------------------------+
 | ``string``/``String``           | "string"                | .. code-block:: typescript  |
 |                                 |                         |                             |
-|                                 |                         |  let s: string              |
+|                                 |                         |  let s: string = ...        |
 |                                 |                         |  typeof s                   |
 +---------------------------------+-------------------------+-----------------------------+
 | ``boolean``/``Boolean``         | "boolean"               | .. code-block:: typescript  |
 |                                 |                         |                             |
-|                                 |                         |  let b: boolean             |
+|                                 |                         |  let b: boolean = ...       |
 |                                 |                         |  typeof b                   |
-|                                 |                         |  let B: Boolean             |
+|                                 |                         |  let B: Boolean = ...       |
 |                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
 | ``bigint``/``BigInt``           | "bigint"                | .. code-block:: typescript  |
 |                                 |                         |                             |
-|                                 |                         |  let b: bigint              |
+|                                 |                         |  let b: bigint = ...        |
 |                                 |                         |  typeof b                   |
-|                                 |                         |  let B: BigInt              |
+|                                 |                         |  let B: BigInt = ...        |
 |                                 |                         |  typeof B                   |
 +---------------------------------+-------------------------+-----------------------------+
 | any class or interface          | "object"                | .. code-block:: typescript  |
 |                                 |                         |                             |
-|                                 |                         |  let a: Object[]            |
+|                                 |                         |  let a: Object = ...        |
 |                                 |                         |  typeof a                   |
 +---------------------------------+-------------------------+-----------------------------+
 | any function type               | "function"              | .. code-block:: typescript  |
 |                                 |                         |                             |
-|                                 |                         |  let f: () => void =        |
-|                                 |                         |    () => {}                 |
+|                                 |                         |  let f: () => void = ...    |
 |                                 |                         |  typeof f                   |
 +---------------------------------+-------------------------+-----------------------------+
 | ``undefined``                   | "undefined"             | .. code-block:: typescript  |
 |                                 |                         |                             |
 |                                 |                         |  typeof undefined           |
++---------------------------------+-------------------------+-----------------------------+
+| ``null``                        | "object"                | .. code-block:: typescript  |
+|                                 |                         |                             |
+|                                 |                         |  typeof null                |
 +---------------------------------+-------------------------+-----------------------------+
 
 (table cont'd)
@@ -2522,25 +2647,21 @@ values of the below types are known at compile time:
 +---------------------------------+-------------------------+-----------------------------+
 |     **Type of Expression**      |   **Resulting String**  | **Code Example**            |
 +=================================+=========================+=============================+
-| ``null``                        | "object"                | .. code-block:: typescript  |
-|                                 |                         |                             |
-|                                 |                         |  typeof null                |
-+---------------------------------+-------------------------+-----------------------------+
 | ``T|null``, when ``T`` is a     | "object"                | .. code-block:: typescript  |
 | class (but not Object -         |                         |                             |
 | see next table),                |                         |  class C {}                 |
-| interface or array              |                         |  let x: C | null            |
+| interface or array              |                         |  let x: C | null = ...      |
 |                                 |                         |  typeof x                   |
 +---------------------------------+-------------------------+-----------------------------+
 | ``enum``                        | "number" or "string",   | .. code-block:: typescript  |
 |                                 | depending of constant   |                             |
 |                                 | type                    |  enum C {R, G, B}           |
-|                                 |                         |  let c: C                   |
+|                                 |                         |  let c: C = ...             |
 |                                 |                         |  typeof c                   |
 +---------------------------------+-------------------------+-----------------------------+
 | All high-performance numeric    | "number"                | .. code-block:: typescript  |
 | value types and their boxed     |                         |                             |
-| versions:                       |                         |  let x: byte                |
+| versions:                       |                         |  let x: byte = ...          |
 | ``byte``, ``short``, ``int``,   |                         |  typeof x                   |
 | ``long``, ``float``, ``double``,|                         |  ...                        |
 | ``Byte``, ``Short``, ``Int``,   |                         |                             |
@@ -2548,8 +2669,7 @@ values of the below types are known at compile time:
 | ``Double``, ``char``, ``Char``  |                         |                             |
 +---------------------------------+-------------------------+-----------------------------+
 
-The ``typeof`` expression value of all other types is to be evaluated during
-program execution. The result of the evaluation is the ``typeof`` value.
+- for all other types is evaluated during program execution:
 
 +------------------------+-----------------------------+
 | **Type of Expression** | **Code Example**            |
@@ -2557,7 +2677,7 @@ program execution. The result of the evaluation is the ``typeof`` value.
 | Object                 | .. code-block:: typescript  |
 |                        |                             |
 |                        |  function f(o: Object) {    |
-|                        |    typeof p                 |
+|                        |    typeof o                 |
 |                        |  }                          |
 +------------------------+-----------------------------+
 | union type             | .. code-block:: typescript  |
@@ -2578,14 +2698,6 @@ program execution. The result of the evaluation is the ``typeof`` value.
 |                        |     }                       |
 |                        |  }                          |
 +------------------------+-----------------------------+
-
-If the expression evaluation causes exception or error, then the control of
-the execution is transferred to a proper ``catch`` section of the runtime
-system. The result of the ``typeof`` expression cannot be determined in that
-case.
-
-.. index::
-   typeof expression
 
 |
 
@@ -2622,12 +2734,13 @@ type of *e*.
 
 .. index::
    ensure-not-nullish expression
-   postfix
-   prefix
+   postfix expression
+   prefix expression
    expression
    operator
    nullish type
    evaluation
+   non-nullish variant
    nullish value
    null
    undefined
@@ -2703,6 +2816,7 @@ mixed with conditional-and or conditional-or operators without parentheses.
    nullish-coalescing operator
    conditional-and operator
    conditional-or operator
+   union type
 
 |
 
@@ -2767,9 +2881,9 @@ If the evaluation of the operand expression completes normally at runtime, then:
 -  The sum is stored back into the variable.
 
 .. index::
-   postfix
+   postfix expression
+   increment expression
    increment operator
-   postfix increment expression
    expression
    conversion
    variable
@@ -2791,8 +2905,9 @@ The  value of the postfix increment expression is the value of the variable
    variable
    conversion
    predefined numeric types conversion
-   postfix
-   increment
+   postfix expression
+   increment expression
+   abrupt completion
    expression
    variable
    postfix increment expression
@@ -2822,10 +2937,10 @@ result of a postfix decrement expression is a value, not a variable.
 If evaluation of the operand expression completes at runtime, then:
 
 .. index::
-   postfix
-   decrement
-   operator
-   postfix decrement expression
+   postfix expression
+   decrement expression
+   decrement operator
+   postfix expression
    compile-time error
    variable
    expression
@@ -2850,12 +2965,13 @@ The value of the postfix decrement expression is the value of the variable
    value
    variable
    conversion
+   abrupt completion
    predefined numeric types conversion
    abrupt completion
    decrementation
-   postfix decrement expression
-   postfix
+   postfix expression
    decrement expression
+   postfix
    variable
    value
 
@@ -2882,13 +2998,13 @@ result of a prefix increment expression is a value, not a variable.
 If evaluation of the operand expression completes normally at runtime, then:
 
 .. index::
-   prefix increment operator
-   prefix increment expression
-   expression
-   prefix
+   prefix operator
    increment operator
-   evaluation
+   prefix expression
    increment expression
+   expression
+   prefix expression
+   evaluation
    variable
    runtime
    expression
@@ -2909,11 +3025,12 @@ The  value of the  prefix increment expression is the value of the variable
    value
    variable
    conversion
-   predefined numeric types conversion
+   predefined type
+   numeric type
+   conversion
    numeric type
    abrupt completion
-   prefix increment expression
-   prefix
+   prefix expression
    increment expression
 
 |
@@ -2937,10 +3054,11 @@ The type of a prefix decrement expression is the type of the variable. The
 result of a prefix decrement expression is a value, not a variable.
 
 .. index::
-   prefix decrement operator
-   prefix decrement expression
+   prefix operator
+   decrement operator
+   prefix expression
+   decrement expression
    expression
-   prefix
    decrement operator
    operator
    variable
@@ -2959,7 +3077,9 @@ the value of the variable *before* a new value is stored.
 
 .. index::
    evaluation
+   runtime
    expression
+   conversion
    operand
    normal completion
    predefined numeric types conversion
@@ -2967,7 +3087,7 @@ the value of the variable *before* a new value is stored.
    decrement
    abrupt completion
    variable
-   prefix
+   prefix expression
    decrement
    expression
    prefix decrement expression
@@ -3045,7 +3165,8 @@ from the same value set as the promoted operand value.
    unary operator
    conversion
    numeric type
-   predefined numeric types conversion
+   predefined numeric type
+   numeric types conversion
    expression
    operand
    normal completion
@@ -3081,6 +3202,7 @@ cases to consider are as follows:
 
 .. index::
    value set conversion
+   conversion
    unary minus expression
    runtime
    negation
@@ -3130,7 +3252,9 @@ complement of the promoted value of the operand. In all cases, *~x* equals
 *(-x)-1*.
 
 .. index::
-   bitwise complement operator
+   bitwise complement expression
+   numeric type
+   operator
    complement operator
    expression
    operand
@@ -3173,9 +3297,10 @@ converted) operand value is ``false``, and ``false`` if the operand value
    logical complement operator
    expression
    operand
+   operator
    unary operator
-   boolean
-   Boolean
+   boolean type
+   Boolean type
    compile-time error
    unary logical complement expression
    unboxing conversion
@@ -3220,6 +3345,7 @@ variable (even if the operand expression is a variable).
 
 .. index::
    multiplicative expression
+   conversion
    convertibility
    context
    conversion
@@ -3320,6 +3446,7 @@ despite possible overflow, underflow, or loss of information.
    multiplication
    signed infinity
    round-to-nearest
+   rounding
    underflow
    floating-point type
    floating-point operation
@@ -3329,6 +3456,7 @@ despite possible overflow, underflow, or loss of information.
    error
    loss of information
    IEEE 754
+   rounding
 
 |
 
@@ -3452,6 +3580,7 @@ information.
    overflow
    floating-point division
    round-to-nearest
+   rounding
    underflow
    floating-point types
    floating-point operation
@@ -3527,15 +3656,20 @@ can compute the IEEE 754 remainder operation.
 
 .. index::
    dividend
+   equality
+   magnitude
    negative integer
    divisor
+   remainder operator
    remainder operation
+   truncation
    integer remainder
    value
    floating-point remainder operation
    floating-point operation
+   division
    truncating division
-   rounding division
+   rounding
    IEEE 754
 
 The result of a floating-point remainder operation is determined in compliance
@@ -3590,6 +3724,11 @@ loss of precision cannot occur.
    dividend
    loss of precision
    operand
+   magnitude
+   underflow
+   error
+   overflow
+   loss of precision
 
 |
 
@@ -3626,7 +3765,7 @@ Otherwise, a :index:`compile-time error` occurs.
    additive expression
    additive operator
    operand
-   type string
+   string
    string concatenation
    operator
    conversion
@@ -3657,8 +3796,8 @@ then a new ``string`` object is created (see :ref:`New Expressions`).
 
 .. index::
    string concatenation operator
+   string
    operand
-   type string
    string conversion
    operator context
    runtime
@@ -3666,6 +3805,7 @@ then a new ``string`` object is created (see :ref:`New Expressions`).
    precedence
    expression
    constant expression
+   object
 
 |
 
@@ -3699,8 +3839,12 @@ is performed.
 
 .. index::
    additive operator
+   primitive type
+   conversion
    numeric type
    binary operator
+   integer arithmetic
+   integer
    type operand
    addition
    subtraction
@@ -3741,6 +3885,7 @@ IEEE 754 arithmetic as follows:
    operand value
    overflow
    floating-point addition
+   compliance
    associativity
    IEEE 754
 
@@ -3769,6 +3914,7 @@ overflows, and the result is an appropriately signed infinity.
    NaN
    infinity
    signed infinity
+   magnitude
    operand
    infinite operand
    infinite value
@@ -3780,7 +3926,7 @@ overflows, and the result is an appropriately signed infinity.
    operation overflow
 
 Otherwise, the sum is rounded to the nearest value within the chosen value set
-by using the IEEE 754 *round-to-nearest mode*. The |LANG| programming language
+by using the IEEE 754 *round-to-nearest* mode. The |LANG| programming language
 requires gradual underflow support as defined by IEEE 754 (see
 :ref:`Floating-Point Types and Operations`).
 
@@ -3800,6 +3946,7 @@ possible overflow, underflow, or loss of information.
 
 .. index::
    round-to-nearest mode
+   rounding
    value set
    underflow
    floating-point type
@@ -3812,6 +3959,7 @@ possible overflow, underflow, or loss of information.
    loss of information
    numeric type operand
    binary operator
+   subtraction
    negation
    overflow
    additive operator
@@ -3858,7 +4006,11 @@ A :index:`compile-time error` occurs if either operand in a shift operator
 type.
 
 .. index::
+   shift
    shift expression
+   left shift
+   right shift
+   shift distance
    shift operator
    signed right shift
    unsigned right shift
@@ -3871,6 +4023,8 @@ type.
    truncation
    truncated operand
    primitive type
+   integer type
+   bigint
 
 The shift expression type is the promoted type of the left-hand operand.
 
@@ -3904,6 +4058,7 @@ overflow.
    multiplication
    overflow
    two’s-complement integer representation
+   left shift
    runtime
 
 The value of *n* ``>>`` *s* is *n* right-shifted by *s* bit positions with
@@ -3922,6 +4077,8 @@ zero-extension, where:
 
 .. index::
    sign-extension
+   right shift
+   truncation
    truncating integer division
    integer division operator
    zero-extension
@@ -3965,7 +4122,10 @@ types described below.
    numerical relational operator
    relational operator
    relational expression
-   boolean
+   boolean type
+   expression
+   operand
+   type
 
 |
 
@@ -4051,6 +4211,8 @@ or floating-point operands other than ``NaN``:
    NaN
    operator
 
+|
+
 .. _String Relational Operators:
 
 String Relational Operators
@@ -4079,6 +4241,8 @@ Results of all string comparisons are defined as follows:
    string comparison
    string value
 
+|
+
 .. _Bigint Relational Operators:
 
 Bigint Relational Operators
@@ -4094,6 +4258,11 @@ All bigint relational operators compare bigint values.
 
 .. index::
    bigint comparison
+   relational operator
+   bigint
+   operand
+
+|
 
 .. _Boolean Relational Operators:
 
@@ -4114,6 +4283,12 @@ Results of all boolean comparisons are defined as follows:
 -  Operator '``>=``' delivers ``true`` if the left-hand operand is ``true``
    and the right-hand operand is ``false`` or ``true``, or ``false`` otherwise.
 
+.. index::
+   boolean operator
+   relational operator
+   boolean comparison
+
+|
 
 .. _Enumeration Relational Operators:
 
@@ -4129,6 +4304,12 @@ are used depending on the kind of enumeration constant value
 ( :ref:`Enumeration Integer Values` or :ref:`Enumeration String Values`).
 
 Otherwise, a :index:`compile-time error` occurs.
+
+.. index::
+   enumeration operator
+   relational operator
+   boolean comparison
+   constant value
 
 |
 
@@ -4161,6 +4342,12 @@ Equality operators are similar to relational operators, except for their
 lower precedence (:math:`a < b==c < d` is ``true`` if both :math:`a < b`
 and :math:`c < d` have the same ``truth`` value).
 
+.. index::
+   equality operator
+   equality expression
+   boolean type
+   relational operator
+
 In all cases, ``a != b`` produces the same result as ``!(a == b)``, and
 ``a !== b`` produces the same result as ``!(a === b)``.
 
@@ -4181,6 +4368,16 @@ operands used as follows:
 -  *Reference equality* is applied to entities of all other reference types
    (see :ref:`Reference Types`).
 
+.. index::
+   operator
+   value
+   value equality
+   primitive type
+   enumeration type
+   bigint
+   reference equality
+   object
+   type parameter
 
 Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
 
@@ -4221,6 +4418,15 @@ Operators '``===``' and '``==``', or '``!==``' and '``!=``' are used for:
    value equality
    comparison
    operand
+   numeric type
+   string
+   equality operator
+   boolean type
+   type parameter
+   object
+   reference type
+
+|
 
 .. _Numerical Equality Operators:
 
@@ -4230,13 +4436,13 @@ Numerical Equality Operators
 .. meta:
     frontend_status: Done
 
-*Value equality* is used for operands of numeric types (i.e., ``number``,
-``byte``, ``short``, ``int``, ``long``, ``float``, ``double``) and ``char``
-type, and for their corresponding boxed types.
-
 The type of each operand in a numerical equality operator must be convertible
 (see :ref:`Implicit Conversions`) to a numeric type. Otherwise, a
-:index:`compile-time error` occurs.
+:index:`compile-time error` occurs. 
+
+A widening conversion can occur (see :ref:`Widening Primitive Conversions`)
+if type of one operand is smaller than type of the other operand (see
+:ref:`Numeric Types Hierarchy`).
 
 If the converted type of the operands is ``int`` or ``long``, then an
 integer equality test is performed.
@@ -4258,6 +4464,8 @@ following IEEE 754 standard rules:
    conversion
    integer equality test
    IEEE 754
+   widening
+   primitive conversion
 
 -  The result of '``==``' is ``false`` but the result of '``!=``' is
    ``true`` if either operand is ``NaN``.
@@ -4305,8 +4513,11 @@ The following example illustrates *numerical equality*:
    value equality
    floating-point value
    floating-point operand
+   numerical equality
    positive infinity
    negative infinity
+   positive zero
+   negative zero
 
 |
 
@@ -4318,7 +4529,9 @@ String Equality Operators
 .. meta:
     frontend_status: Done
 
-*Value equality* is used for operands of ``string`` type.
+The type of one operand must be of type ``string``, other operand must
+be convertible (see :ref:`Implicit Conversions`) to ``string`` type.
+
 Two strings are equal if they represent the same sequence of characters:
 
 .. code-block:: typescript
@@ -4334,6 +4547,8 @@ Two strings are equal if they represent the same sequence of characters:
 
 .. index::
    value equality
+   string
+   conversion
 
 |
 
@@ -4345,7 +4560,9 @@ Bigint Equality Operators
 .. meta:
     frontend_status: Done
 
-*Value equality* is used for operands of ``bigint`` type.
+*Boolean equality* is used for operands of types ``bigint`` or
+``BigInt``.
+
 Two ``bigints`` are equal if they have the same value:
 
 .. code-block:: typescript
@@ -4356,6 +4573,9 @@ Two ``bigints`` are equal if they have the same value:
 
 .. index::
    value equality
+   bigint
+   equality operator
+   boolean equality
 
 |
 
@@ -4367,7 +4587,7 @@ Boolean Equality Operators
 .. meta:
     frontend_status: Done
 
-*Value equality* is used for operands of types ``boolean`` or
+*Boolean equality* is used for operands of types ``boolean`` or
 ``Boolean``.
 
 If an operand is of type ``Boolean``, then the unboxing conversion must be
@@ -4382,9 +4602,10 @@ If both operands are either ``true`` or ``false``, then the result of
 
 .. index::
    value equality
-   type boolean
-   type Boolean
+   boolean type
+   Boolean type
    boolean equality
+   equality operator
    value equality operator
    operand
    unboxing conversion
@@ -4406,6 +4627,11 @@ are used depending on the kind of enumeration constant value
 
 Otherwise, a :index:`compile-time error` occurs.
 
+.. index::
+   value equality
+   enumeration type
+   constant value
+
 |
 
 .. _Reference Equality Based on Actual Type:
@@ -4417,15 +4643,22 @@ Reference Equality Based on Actual Type
     frontend_status: Done
 
 If an operand of an equality operator is of type ``Object``, or a union type,
-or is a type parameter, then the evaluation of the operator is based on the
-actual type of this operand.
-
-If the other operand is of another type, then the static type of the first
-operand is used for evaluation.
+or is a type parameter, then the operator is evaluated at runtime, and is based
+on the actual type of this operand. If the other operand is of a type other
+than that above, then the static type of this operand is used for evaluation.
 
 If actual types of objects are compatible, then the corresponding evaluation of
 equality operator is used. Otherwise, the result of the operators '``==``' and
 '``===``' is ``false``.
+
+.. index::
+   reference equality
+   union type
+   equality operator
+   object
+   type parameter
+   evaluation
+   operator
 
 |
 
@@ -4462,7 +4695,6 @@ The following example illustrates an equality with a value of type ``Object``:
     equ("aa", "aa") // true, string equality
     equ(1, "aa") // false, not compatible types
 
-
 **Note**: The actual type of an ``Object`` value can be none of the following:
 
 - Union type, as only the current value of a union type variable can be assigned
@@ -4482,6 +4714,16 @@ The following example illustrates an equality with a value of type ``Object``:
             check(y) // ok, B is assignable to Object (as it is, at least, Number)
         }
     }
+
+.. index::
+   equality operator
+   object
+   reference type
+   value
+   union type
+   assignment
+   constraint
+   type parameter
 
 |
 
@@ -4511,7 +4753,6 @@ The following example illustrates an equality with values of two union types:
         return x == y // ok, types have overlap - value "abc"
     }
 
-
 If actual types of values are compatible, then the corresponding evaluation of
 an equality operator is used. Otherwise, the result of the operators '``==``'
 and '``===``' is ``false``:
@@ -4526,6 +4767,18 @@ and '``===``' is ``false``:
     console.log(equ("aa", "aa")) // string equality: prints true
     console.log(equ("ab", "aa")) // string equality: prints false
     console.log(equ(1, "aa")) // different types: prints false
+
+.. index::
+   equality operator
+   union
+   operand
+   union type
+   overlap
+   value
+   object
+   compatibility
+   evaluation
+   operator
 
 |
 
@@ -4553,6 +4806,15 @@ equality operator is used. Otherwise, the result of the operators '``==``' and
 
     console.log(equ<string>("aa", "aa")) // string equality: prints true
     console.log(equ<number>(1, 2)) // numerical equality: prints false
+
+.. index::
+   equality operator
+   type parameter
+   operand
+   reference type
+   object
+   compatibility
+   evaluation
 
 |
 
@@ -4588,13 +4850,21 @@ the result is ``false``. This semantics is illustrated by the example below:
 
 .. index::
    reference equality
-   reference type operand
+   reference type
+   operand
    entity
+   bigint
+   string
+   object
    class
    function
    compile-time error
    reference type
-
+   type parameter
+   conversion
+   operator
+   operand value
+   semantics
 
 .. code-block:: typescript
    :linenos:
@@ -4637,14 +4907,6 @@ Similarly, a comparison to ``undefined`` returns ``false`` if the variable
 being compared is neither type ``undefined`` nor a union type with ``undefined``
 as one of its types.
 
-.. index::
-   entity
-   comparison
-   null
-   nullable type
-   execution
-   compilation
-
 The following comparisons evaluate to ``false`` at compile time:
 
 .. code-block-meta:
@@ -4672,6 +4934,21 @@ The following comparison is evaluated at runtime:
     let undefinedable: Object|undefined = undefined
 
     foo (nullable, undefinedable) // Output: false false true true
+
+.. index::
+   semantics
+   alignment
+   equality
+   comparison
+   operator
+   undefined
+   null
+   nullable type
+   execution
+   compilation
+   compile time
+   evaluation
+   runtime
 
 |
 
@@ -4724,6 +5001,9 @@ type, or two operands of the ``boolean`` type. Otherwise, a
    side effect
    numeric type
    associativity
+   operator
+   boolean type
+
 
 |
 
@@ -4755,8 +5035,11 @@ The resultant value of '``|``' is the bitwise inclusive OR of the operand values
 
 
 .. index::
-   integer bitwise operator
+   integer operator
+   bitwise operator
    numeric types conversion
+   numeric type
+   conversion
    predefined numeric types conversion
    bitwise exclusive OR operand
    bitwise inclusive OR operand
@@ -4764,6 +5047,7 @@ The resultant value of '``|``' is the bitwise inclusive OR of the operand values
    primitive type
    integer type
    conversion
+   truncation
 
 |
 
@@ -4790,7 +5074,9 @@ If both operand values are ``false``, then the resultant value of ‘``|``’ is
 ``false``. Otherwise, the result is ``true``.
 
 .. index::
-   boolean logical operator
+   boolean operator
+   Boolean operator
+   logical operator
    bitwise operator expression
    unboxing conversion
    conversion
@@ -4865,6 +5151,8 @@ is of type ``Boolean``, then the unboxing conversion (see
    conditional-and expression
    conditional-and operator
    compile-time error
+   boolean type
+   Boolean type
    unboxing conversion
    predefined numeric types conversion
    numeric types conversion
@@ -4909,6 +5197,7 @@ A *conditional-or* expression is always of type ``boolean``.
    expression
    side effect
    evaluation
+   boolean type
 
 Each operand of the *conditional-or* operator must be of type ``boolean`` or
 ``Boolean``. Otherwise, a :index:`compile-time error` occurs.
@@ -4937,6 +5226,7 @@ the same, but the right-hand operand in '``||``' cannot be evaluated.
    conditional-or operator
    compile-time error
    runtime
+   boolean type
    Boolean type
    unboxing conversion
    expression
@@ -4944,6 +5234,7 @@ the same, but the right-hand operand in '``||``' cannot be evaluated.
    predefined numeric types conversion
    numeric types conversion
    numeric type
+   semantics
    conditional evaluation
 
 |
@@ -4980,7 +5271,6 @@ the value of *b* to *a*).
     rhsExpression:
         expression
         ;
-
 
 The result of the first operand in an assignment operator (represented by
 *lhsExpression*) must be one of the following:
@@ -5023,6 +5313,7 @@ but the value of a variable after the assignment.
    chaining operator
    variable
    assignment
+   assignment expression
    expression
    runtime
 
@@ -5054,9 +5345,11 @@ one of the following ways:
 
 .. index::
    simple assignment operator
+   operator
    compile-time error
    compatible type
-   type compatibility
+   compatibility
+   access
    field access
    field access expression
    runtime
@@ -5118,9 +5411,9 @@ one of the following ways:
         the selected array element.
 
 .. index::
-   array access expression
-   array indexing expression
-   array reference subexpression
+   array
+   access expression
+   indexing expression
    evaluation
    abrupt completion
    normal completion
@@ -5169,7 +5462,9 @@ one of the following ways:
 .. index::
    operand
    record access expression
+   access expression
    record indexing expression
+   indexing expression
    object reference subexpression
    index subexpression
    assignment expression
@@ -5180,6 +5475,7 @@ one of the following ways:
    normal completion
    abrupt completion
    key
+   record instance
 
 If none of the above is true, then the following three steps are required:
 
@@ -5203,15 +5499,18 @@ If none of the above is true, then the following three steps are required:
    - ``readonly`` tuple (see :ref:`Readonly Parameters`), while the
      converted type of the right-hand operand is a non-``readonly`` tuple.
 
-
 .. index::
    evaluation
    assignment expression
+   assignment
    abrupt completion
    normal completion
    conversion
    variable
    expression
+   readonly array
+   readonly tuple
+   converted type
 
 |
 
@@ -5253,6 +5552,7 @@ of the following ways:
 
 .. index::
    compound assignment operator
+   assignment operator
    evaluation
    expression
    runtime
@@ -5334,13 +5634,19 @@ of the following ways:
    operand
    access expression
    array indexing expression
+   indexing expression
    array reference subexpression
+   reference subexpression
    evaluation
    abrupt completion
    normal completion
    index subexpression
    assignment expression
    array
+   array length
+   string
+   primitive type
+   reference subexpression
    error
    assignment
    index subexpression
@@ -5395,10 +5701,12 @@ of the following ways:
    normal completion
    assignment
    object reference subexpression
+   reference subexpression
    index subexpression
    key
    key-value pair
    record indexing expression
+   indexing expression
    record instance
    value
    compound assignment operator
@@ -5434,6 +5742,15 @@ with the separators '``?``' between the first and the second, and
 A :index:`compile-time error` occurs if the first expression is not of type
 ``boolean`` or ``Boolean``.
 
+.. index::
+   conditional expression
+   boolean value
+   expression
+   conditional operator
+   operand
+   boolean type
+   Boolean type
+
 Type of the conditional expression is determined as the union of types of the
 second and the third expressions further normalized in accordance with the
 process discussed in :ref:`Union Types Normalization`. If the second and the
@@ -5467,6 +5784,15 @@ The examples below represent different scenarios with standalone expressions:
 
     condition ? "5" : 6           // "5" | 6
 
+.. index::
+   conditional expression
+   normalization
+   union type
+   evaluation
+   operand expression
+   unboxing conversion
+   conversion
+   standalone expression
 
 |
 
@@ -5478,9 +5804,9 @@ String Interpolation Expressions
 .. meta:
     frontend_status: Done
 
-A '*string interpolation expression*' is a multiline string literal (a string literal
-delimited with backticks, see :ref:`Multiline String Literal` for details) that
-contains at least one *embedded expression*:
+A '*string interpolation expression*' is a multiline string literal (a string
+literal delimited with backticks, see :ref:`Multiline String Literal` for
+details) that contains at least one *embedded expression*:
 
 .. code-block:: abnf
 
@@ -5504,9 +5830,13 @@ operator (see :ref:`String Concatenation`):
 
 .. index::
    string interpolation expression
+   multiline string
    string literal
+   backtick
+   curly brace
+   concatenation
    embedded expression
-   string concatenation operator
+   concatenation operator
    implicit conversion
    embedded expression
 
@@ -5595,6 +5925,14 @@ has no function name specified, and can have types of parameters omitted:
         identifier '?' (':' 'readonly'? type)?
         ;
 
+.. index::
+   lambda expression
+   instance
+   function type
+   async mark
+   type parameter
+   lambda signature
+   function declaration
 
 The examples of usage are presented below:
 
@@ -5628,19 +5966,13 @@ The examples of usage are presented below:
     goo ((e?) => e)
 
 
-
 A *lambda expression* evaluation creates an instance of a function type (see
 :ref:`Function Types`) as described in detail in
 :ref:`Runtime Evaluation of Lambda Expressions`.
 
 .. index::
    lambda expression
-   block of code
-   parameter
-   instance
    function type
-   execution
-   expression body
    instance
 
 |
@@ -5845,6 +6177,7 @@ variable is implied to change:
 
 .. index::
    captured by lambda
+   lambda
    variable
    captured variable
    original variable
@@ -5892,6 +6225,7 @@ the implementation can require the addition of a local variable as follows:
    boxing
    proxying
    local variable
+   variable
 
 +-----------------------------------+-----------------------------------+
 | **Source Code**                   | **Pseudo Code**                   |
@@ -5930,6 +6264,15 @@ module to be loaded. The result of this expression is ``Promise<DynamicObject>``
 (see :ref:`Promise<T> Class` and :ref:`DynamicObject Type`). Methods of class
 ``Promise`` can be used to access the loaded module, or to handle an error
 that can occur while attempting to load the module.
+
+.. index::
+   dynamic import expression
+   compilation unit
+   string
+   expression
+   path
+   method
+   class
 
 |
 
@@ -5992,7 +6335,7 @@ of the following:
 .. index::
    constant expression
    primitive type
-   type string
+   string
    normal completion
    literal
    cast expression
@@ -6015,9 +6358,11 @@ of the following:
    simple name
    constant variable
    qualified name
+   initializer
+
+
 
 .. raw:: pdf
 
    PageBreak
-
 

@@ -42,6 +42,8 @@ execution:
    normal execution
    normal completion
    completion failure
+   path
+   read permission
 
 This specification uses the terms as follows:
 
@@ -63,7 +65,8 @@ As a result, exceptions can be handled in a much more effective
 manner than errors.
 
 .. index::
-   error
+   runtime error
+   failure
    exception
    runtime
 
@@ -101,6 +104,7 @@ provided below:
 
 .. index::
    error
+   class
    error handling
    derived class
 
@@ -147,6 +151,7 @@ errors in a manner similar to the handling of exceptions.
 
 .. index::
    compile-time error
+   runtime system
    generic class
    subclass
    error

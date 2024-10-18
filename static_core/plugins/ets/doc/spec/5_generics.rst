@@ -28,7 +28,7 @@ Types used as generic parameters in a generic are called *type parameters*
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
 is the action that converts a *generic* into a real program entity (non-generic
-class, interface, union, array, mehtod, function, or lambda), or into another
+class, interface, union, array, method, function, or lambda), or into another
 *generic instantiation*. Instantiation (see :ref:`Generic Instantiations`) can
 be performed either explicitly or implicitly.
 
@@ -37,16 +37,25 @@ creating new types during compilation (see :ref:`Utility Types`).
 
 
 .. index::
+   class
+   array
+   interface
+   type alias
+   method
+   function
+   lambda
    entity
    parameterization
-   generic declaration
    generic
+   generic declaration
+   generic instantiation
    explicit instantiation
    instantiation
    program entity
    generic parameter
    type parameter
    generic instantiation
+   utility type
 
 |
 
@@ -81,6 +90,8 @@ specify its *in-* or *out-* variance (see :ref:`Type Parameter Variance`).
    default type
    type parameter
    variance
+   out-variance
+   in-variance
 
 .. code-block:: abnf
 
@@ -128,6 +139,12 @@ the type parameter section.
    parameterized function
    type-parameterized declaration
    parameterization
+   lambda
+   array
+   type alias
+   method
+   type parameter
+
 
 No type parameter has a default value, and initialization is mandatory for
 variables and fields of a type parameter (see :ref:`Field Initialization`):
@@ -144,8 +161,10 @@ variables and fields of a type parameter (see :ref:`Field Initialization`):
 
 
 .. index::
-    default value
-    field initialization
+   default value
+   type parameter
+   value
+   field initialization
 
 |
 
@@ -174,12 +193,20 @@ If the constraint *S* is a non-nullish type (see :ref:`Nullish Types`), then
 the union type created from string names of *T* or the union type itself:
 
 .. index::
-   type parameter constraint
+   constraint
+   instantiation
+   type parameter
    keyword extends
+   type reference
+   object
+   nullish-type
+   non-nullish-type
    type argument
    generic instantiation
    instantiation
    constraint
+   string name
+   union type
 
 .. code-block:: typescript
    :linenos:
@@ -228,6 +255,7 @@ section depends on itself.
 
 .. index::
    type parameter
+   generic
    generic declaration
    type parameter
    unqualified identifier
@@ -349,15 +377,17 @@ classes and derived classes (:ref:`Covariance`), or vice versa
 argument types.
 
 .. index::
+   type parameter
+   variance
    generic class
    argument type
    invariance
    contravariance
    covariance
+   instantiation
    inheritance
    derived class
    base class
-
 
 Special markers are used to specify the *declaration-site variance*. The
 markers are to be added to generic parameter declarations. These markers are
@@ -396,8 +426,7 @@ occur in any position.
        // T3 can be used in any position (in-out, write-read)
        fld2: T3 
        method (p: T3): T3 {...}
-    } 
-
+    }
 
 In case of function types (see :ref:`Function Types`) variance interleaving
 occurs. 
@@ -413,13 +442,21 @@ occurs.
        // and further more
     } 
 
-
 .. index::
-   generic
+   function type
    declaration-site variance
-   type parameter
+   generic parameter
+   declaration
    keyword in
    keyword out
+   variance modifier
+   covariance
+   contravariance
+   variance
+   invariant
+   interleaving
+   generic
+   type parameter
    variance modifier
    in-position
    out-position
@@ -441,11 +478,16 @@ follows:
    type parameter
    variance modifier
    function
+   subtyping
+   supertyping
    method
    constructor
    variance
    covariance
    contravariance
+   covariant
+   contravariant
+   invariant
    invariance
    type-parameterized declaration
    parameterized type
@@ -471,7 +513,90 @@ usual way. Instantiation can also lead to a new definition of a generic entity.
 
 Conceptually, a generic class, an interface, a type alias, a method, a
 function, or a lambda defines a set of non-generics classes, interfaces,
-unions, arrays, methods, functions, or lambdas  respectively.
+unions, arrays, methods, functions, or lambdas respectively.
+
+If a value type (see :ref:`Value Types`) is specified as type argument in a
+generic instantiation, then the compiler actually replaces it as follows:
+
+- Primitive type (see :ref:`Primitive Types`) for its boxed type (see
+  :ref:`Boxed Types`);
+- Enumeration type (see :ref:`Enumerations`) for a union of literal types
+  that correspond to the values of the enumeration type.
+
+.. code-block:: typescript
+   :linenos:
+
+    Array<number>  // replaced with Array<Number>
+    Array<boolean> // replaced with Array<Boolean>
+    enum Color {Red, Green, Blue}
+    Array<Color>   // replaced with Array<0|1|2>
+    enum Reply {Yes="yes", No="no"}
+    Array<Reply>   // replaced with Array<"yes"|"no">
+
+**Note**: Built-in arrays are not generics, thus ``number[]`` contains elements
+of type ``number`` but not ``Number``.
+
+.. index::
+   value type
+   generic class
+   generic instantiation
+   interface
+   alias
+   method
+   function
+   lambda declaration
+   instantiation
+   non-generic entity
+   class
+   primitive type
+   boxed type
+   enumeration type
+   built-in array
+
+|
+
+.. _Type Arguments:
+
+Type Arguments
+==============
+
+.. meta:
+    frontend_status: Done
+
+Type arguments is a non-empty list of types being used for instantiation.
+
+.. code-block:: abnf
+
+    typeArguments:
+        '<' type (',' type)* '>'
+        ;
+
+
+Below is the example of instantiations with different forms of type arguments:
+
+.. code-block:: typescript
+   :linenos:
+
+    Array<number>                     // instantiated with type number
+    Array<0|1>                        // instantiated with union type
+    Array<number[]>                   // instantiated with array type
+    Array<[number, string, boolean]>  // instantiated with tuple type
+    Array<()=>void>                   // instantiated with function type
+
+.. index::
+   type argument
+   instantiation
+
+|
+
+.. _Explicit Generic Instantiations:
+
+Explicit Generic Instantiations
+===============================
+
+.. meta:
+    frontend_status: Done
+
 
 An explicit generic instantiation is a language construct, which provides a
 list of *type arguments* (see :ref:`Type Arguments`) that specify real types or
@@ -505,7 +630,6 @@ type parameters to substitute corresponding type parameters of a generic:
     let lambda = <T> (p: T) => { console.log (p) } // Generic lambda defined
     lambda<string> ("string argument") // Generic lambda instantiated and called
 
-
 .. index::
    instantiation
    generic entity
@@ -514,6 +638,9 @@ type parameters to substitute corresponding type parameters of a generic:
    type argument
    type parameter
    generic
+
+A :index:`compile-time error` occurs if type arguments are provided for
+non-generic class, interface, type alias, method, function, or lambda.
 
 In the explicit generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`>,
 *G* is the generic declaration, and  <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
@@ -530,12 +657,6 @@ declaration are constrained by the corresponding ``C``:sub:`1`, ``...``,
 in the corresponding constraint have each type argument *T*:sub:`i` of the
 parameterized declaration ranging over them.
 
-.. index::
-   type argument
-   type parameter
-   generic declaration
-   parameterized declaration
-   constraint
 
 A generic instantiation *G* <``T``:sub:`1`, ``...``, ``T``:sub:`n`> is
 *well-formed* if **all** of the following is true:
@@ -558,10 +679,11 @@ Any two generic instantiations are considered *provably distinct* if:
 .. index::
    instantiation
    generic instantiation
-   well-formed declaration
-   generic declaration
    type argument
+   generic declaration
    type parameter
+   constraint
+   compatibility
    type parameter constraint
    compile-time error
    class type
@@ -589,11 +711,16 @@ the generic is referred in as in the example below:
 .. code-block:: typescript
    :linenos:
 
-    function foo <G> (x: G, y: G) {} // Generic declaration
-    foo (new Object, new Object)     // Implicit generic instantiation
+    function foo <G> (x: G, y: G) {} // Generic function declaration
+    foo (new Object, new Object)     // Implicit generic function instantiation
       // based on argument types the type argument is inferred
 
-Implicit instantiation is only possible for functions and methods.
+    let lambda = <T>(p: T): void => {console.log (p)}  // Generic lambda declaration
+    lambda(6) // Implicit generic lambda instantiation
+
+
+Implicit instantiation is only possible for generic functions, methods, and
+lambdas.
 
 .. index::
    implicit instantiation
@@ -606,48 +733,6 @@ Implicit instantiation is only possible for functions and methods.
    interface
    constructor
    function
-
-|
-
-.. _Type Arguments:
-
-Type Arguments
-==============
-
-.. meta:
-    frontend_status: Done
-
-Type arguments can be reference types or array types.
-
-If a value type is specified as a type argument in the generic instantiation,
-then the boxing conversion applies to the type (see :ref:`Boxing Conversions`).
-
-.. code-block:: abnf
-
-    typeArguments:
-        '<' typeArgumentList '>'
-        ;
-
-A :index:`compile-time error` occurs if type arguments are omitted in a
-parameterized function.
-
-.. index::
-   type argument
-   reference type
-   boxing conversion
-   parameterized function
-   compile-time error
-
-.. code-block:: abnf
-
-    typeArgumentList:
-        typeArgument (',' typeArgument)*
-        ;
-
-    typeArgument:
-        typeReference
-        | arrayType
-        ;
 
 |
 
@@ -705,6 +790,15 @@ analogous type:
         description?: string
     }
 
+.. index::
+   type
+   property
+   class type
+   interface type
+   method
+   getter
+   setter
+
 Type ``T`` is not compatible with ``Partial<T>`` (see :ref:`Type Compatibility`),
 and variables of ``Partial<T>`` are to be initialized with valid object
 literals.
@@ -729,6 +823,17 @@ Object literal has its own built-in getters and setters to modify its variables:
     }
     foo ({property: new SomeType}) // No getter or setter from class A is called
     // 666 is printed as object literal has its own setter and getter
+
+.. index::
+   type
+   variable
+   initialization
+   class
+   user-defined getter
+   object
+   literal
+   getter
+   setter
 
 |
 
@@ -757,8 +862,6 @@ is part of the ``Required<T>`` type.
         title: "aa"
     }
 
-
-
 In the example above, type ``Required<Issue>`` is transformed to a distinct
 but analogous type:
 
@@ -774,6 +877,16 @@ Type ``T`` is not compatible (see :ref:`Type Compatibility`) with
 ``Required<T>``, and variables of ``Required<T>`` are to be initialized with
 valid object literals.
 
+.. index::
+   utility type
+   property
+   method
+   getter
+   setter
+   class
+   interface type
+   type
+   literal
 
 |
 
@@ -803,6 +916,14 @@ any getter or setter) of ``T`` is part of the ``Readonly<T>`` type.
     };
 
     myIssue.title = "Two" // compile-time error: readonly property
+
+.. index::
+   utility type
+   type readonly
+   property
+   interface type
+   getter
+   setter
 
 Type ``T`` is compatible (see :ref:`Type Compatibility`) with ``Readonly<T>``,
 and allows assignments as a consequence:
@@ -842,6 +963,7 @@ type is used in place of this type:
 
 .. index::
    record utility type
+   utility type
    value
    container
    union type
@@ -849,6 +971,9 @@ type is used in place of this type:
    string type
    literal
    compile-time error
+   type
+   key
+   type string
 
 .. code-block:: typescript
    :linenos:
@@ -870,14 +995,6 @@ is the expression of type ``K``. The result of an indexing expression is of type
 ``V`` if ``K`` is a union that contains literal types only. Otherwise, it is of
 type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
 
-.. index::
-   object literal
-   instance
-   Record type
-   access
-   indexing expression
-   index expression
-
 .. code-block:: typescript
    :linenos:
    
@@ -894,6 +1011,17 @@ type ``V | undefined``. See :ref:`Record Indexing Expression` for details.
 
 In the example above, ``K`` is a union of literal types. The result of an
 indexing expression is of type ``V``. In this case it is ``number``.
+
+.. index::
+   object literal
+   object
+   literal
+   instance
+   Record type
+   access
+   indexing expression
+   index expression
+   number
 
 |
 
@@ -929,6 +1057,12 @@ accessed in any form.
    bar ({public_field: 777, private_field: ""}) // compile-time error, incorrect field name
 
    bar (new A) // OK, object of type Readonly<A> has field `private_field`
+
+.. index::
+   utility type
+   private field
+   type
+   access
 
 .. raw:: pdf
 
