@@ -53,6 +53,7 @@ EXPECTED="/tmp/panda_sdk_test_expected.txt"
 # Test 1
 find build-sdk -maxdepth 1 | sort --version-sort >"$ACTUAL"
 echo "build-sdk
+build-sdk/linux_arm64_host_tools
 build-sdk/linux_host_tools
 build-sdk/ohos_arm64
 build-sdk/panda-sdk-$SDK_VERSION.tgz

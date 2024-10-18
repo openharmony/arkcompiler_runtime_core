@@ -100,6 +100,15 @@ function copy_into_sdk() {
     done
 }
 
+function linux_arm64_tools() {
+    echo "> Building linux arm64 tools..."
+    local linux_arm64_build_dir="$SDK_BUILD_ROOT/linux_arm64_host_tools"
+    local linux_arm64_cmake_args="-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-qemu-aarch64.cmake"
+    local linux_arm64_build_targets="es2panda e2p_test_plugin"
+    build_panda "$linux_arm64_build_dir" "$linux_arm64_cmake_args" "$linux_arm64_build_targets"
+    copy_into_sdk "$linux_arm64_build_dir" "$PANDA_SDK_PATH/linux_arm64_host_tools" "$SCRIPT_DIR"/linux_arm64_host_tools.txt
+}
+
 function linux_tools() {
     echo "> Building linux tools..."
     local linux_build_dir="$SDK_BUILD_ROOT/linux_host_tools"
@@ -175,6 +184,7 @@ function ets_std_lib() {
 
 rm -r -f "$PANDA_SDK_PATH"
 ohos
+linux_arm64_tools
 linux_tools
 windows_tools
 ts_linter
