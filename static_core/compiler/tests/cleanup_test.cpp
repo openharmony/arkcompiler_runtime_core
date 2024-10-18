@@ -1494,7 +1494,7 @@ TEST_F(CleanupTest, TwoBlocksLoop)
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 }
 
-SRC_GRAPH(TwoLoopsPreHeader, Graph *graph)
+SRC_GRAPH(TwoLoopsPreHeaders, Graph *graph)
 {
     GRAPH(graph)
     {
@@ -1519,7 +1519,9 @@ SRC_GRAPH(TwoLoopsPreHeader, Graph *graph)
             INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(5U, 5U, -1L)
+        BASIC_BLOCK(5U, 6U) {}
+
+        BASIC_BLOCK(6U, 6U, -1L)
         {
             INST(10U, Opcode::Compare).b().CC(CC_GT).SrcType(DataType::Type::UINT64).Inputs(4U, 2U);
             INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
@@ -1527,7 +1529,7 @@ SRC_GRAPH(TwoLoopsPreHeader, Graph *graph)
     }
 }
 
-OUT_GRAPH(TwoLoopsPreHeader, Graph *graph)
+OUT_GRAPH(TwoLoopsPreHeaders, Graph *graph)
 {
     GRAPH(graph)
     {
@@ -1548,7 +1550,9 @@ OUT_GRAPH(TwoLoopsPreHeader, Graph *graph)
             INST(7U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(6U);
         }
 
-        BASIC_BLOCK(5U, 5U, -1L)
+        BASIC_BLOCK(5U, 6U) {}
+
+        BASIC_BLOCK(6U, 6U, -1L)
         {
             INST(10U, Opcode::Compare).b().CC(CC_GT).SrcType(DataType::Type::UINT64).Inputs(4U, 2U);
             INST(11U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0U).Inputs(10U);
@@ -1556,29 +1560,29 @@ OUT_GRAPH(TwoLoopsPreHeader, Graph *graph)
     }
 }
 
-TEST_F(CleanupTest, TwoLoopsPreHeader)
+TEST_F(CleanupTest, TwoLoopsPreHeaders)
 {
-    src_graph::TwoLoopsPreHeader::CREATE(GetGraph());
+    src_graph::TwoLoopsPreHeaders::CREATE(GetGraph());
 
     ASSERT_EQ(&BB(3U), BB(4U).GetLoop()->GetPreHeader());
-    ASSERT_EQ(&BB(3U), BB(5U).GetLoop()->GetPreHeader());
+    ASSERT_EQ(&BB(5U), BB(6U).GetLoop()->GetPreHeader());
     ASSERT_EQ(1U, BB(4U).GetLoop()->GetBlocks().size());
-    ASSERT_EQ(1U, BB(5U).GetLoop()->GetBlocks().size());
-    ASSERT_EQ(4U, BB(4U).GetLoop()->GetOuterLoop()->GetBlocks().size());
-    ASSERT_EQ(4U, BB(5U).GetLoop()->GetOuterLoop()->GetBlocks().size());
+    ASSERT_EQ(1U, BB(6U).GetLoop()->GetBlocks().size());
+    ASSERT_EQ(5U, BB(4U).GetLoop()->GetOuterLoop()->GetBlocks().size());
+    ASSERT_EQ(5U, BB(6U).GetLoop()->GetOuterLoop()->GetBlocks().size());
 
     ASSERT_TRUE(GetGraph()->RunPass<Cleanup>());
 
     auto graph = CreateEmptyGraph();
-    out_graph::TwoLoopsPreHeader::CREATE(graph);
+    out_graph::TwoLoopsPreHeaders::CREATE(graph);
     ASSERT_TRUE(GraphComparator().Compare(GetGraph(), graph));
 
     EXPECT_EQ(&BB(2U), BB(4U).GetLoop()->GetPreHeader());
-    EXPECT_EQ(&BB(2U), BB(5U).GetLoop()->GetPreHeader());
+    EXPECT_EQ(&BB(5U), BB(6U).GetLoop()->GetPreHeader());
     EXPECT_EQ(1U, BB(4U).GetLoop()->GetBlocks().size());
-    EXPECT_EQ(1U, BB(5U).GetLoop()->GetBlocks().size());
-    EXPECT_EQ(3U, BB(4U).GetLoop()->GetOuterLoop()->GetBlocks().size());
-    EXPECT_EQ(3U, BB(5U).GetLoop()->GetOuterLoop()->GetBlocks().size());
+    EXPECT_EQ(1U, BB(6U).GetLoop()->GetBlocks().size());
+    EXPECT_EQ(4U, BB(4U).GetLoop()->GetOuterLoop()->GetBlocks().size());
+    EXPECT_EQ(4U, BB(6U).GetLoop()->GetOuterLoop()->GetBlocks().size());
 }
 
 TEST_F(CleanupTest, LoopBackEdge)

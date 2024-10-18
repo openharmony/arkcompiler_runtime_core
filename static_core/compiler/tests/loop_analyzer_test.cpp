@@ -423,6 +423,79 @@ TEST_F(LoopAnalyzerTest, PreheaderInsert2)
     CheckVectorEqualBlocksIdSet(loop2->GetPreHeader()->GetSuccsBlocks(), {4U});
 }
 
+/*
+ * Initial Graph:
+ *                                 [0]
+ *                                  |
+ *                                  v
+ *                                 [2]---------------\
+ *                                  |                |
+ *                                 [3]<------\      [5]<------\
+ *                                  |        |       |        |
+ *                                  v        |       v        |
+ *                                 [4]-------/      [6]-------/
+ *                                  |                |
+ *                                  |----------------/
+ *                                  |
+ *                                  V
+ *                                 [7]----->[1]
+ *
+ * After loop pre-headers insertion:
+ *                                 [0]
+ *                                  |
+ *                                  v
+ *                                 [2]---------------\
+ *                                  |                |
+ *                                 [3]<------\      [8]
+ *                                  |        |       |
+ *                                  v        |      [5]<------\
+ *                                 [4]-------/       |        |
+ *                                  |                v        |
+ *                                  |               [6]-------/
+ *                                  |----------------/
+ *                                  |
+ *                                  V
+ *                                 [7]----->[1]
+ *
+ */
+TEST_F(LoopAnalyzerTest, PreheaderInsert3)
+{
+    GRAPH(GetGraph())
+    {
+        CONSTANT(0, 0);
+        CONSTANT(1, 1);
+        BASIC_BLOCK(2U, 3U, 5U)
+        {
+            INST(3U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
+            INST(4U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(3U);
+        }
+        BASIC_BLOCK(3U, 4U) {}
+        BASIC_BLOCK(4U, 7U, 3U)
+        {
+            INST(5U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
+            INST(6U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(5U);
+        }
+
+        BASIC_BLOCK(5U, 6U) {}
+        BASIC_BLOCK(6U, 7U, 5U)
+        {
+            INST(7U, Opcode::Compare).b().SrcType(DataType::Type::INT64).Inputs(0, 1);
+            INST(8U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_NE).Imm(0).Inputs(7U);
+        }
+
+        BASIC_BLOCK(7U, -1)
+        {
+            INST(9U, Opcode::ReturnVoid);
+        }
+    }
+
+    auto loop1 = BB(3U).GetLoop();
+    auto loop2 = BB(5U).GetLoop();
+    ASSERT_EQ(loop1->GetPreHeader()->GetNextLoop(), loop1);
+    ASSERT_EQ(loop2->GetPreHeader()->GetNextLoop(), loop2);
+    ASSERT_NE(loop1->GetPreHeader(), loop2->GetPreHeader());
+}
+
 TEST_F(LoopAnalyzerTest, CountableLoopTest)
 {
     // Loop isn't countable because const_step is negative and condition is CC_LT

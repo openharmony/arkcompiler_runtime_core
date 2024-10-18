@@ -225,7 +225,7 @@ public:
     bool IsTryCatch() const;
 
     void SetNextLoop(Loop *loop);
-    Loop *GetNextLoop();
+    Loop *GetNextLoop() const;
     bool IsLoopPreHeader() const;
     void InsertBlockBefore(BasicBlock *block);
 

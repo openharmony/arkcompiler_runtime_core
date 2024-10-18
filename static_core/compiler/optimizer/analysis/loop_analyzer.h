@@ -49,15 +49,10 @@ public:
     {
         return header_;
     }
-    void SetPreHeader(BasicBlock *preHeader)
-    {
-        preHeader_ = preHeader;
-    }
+    void SetPreHeader(BasicBlock *preHeader);
+    void SetPreHeader(std::nullptr_t preHeader);
+    BasicBlock *GetPreHeader() const;
 
-    BasicBlock *GetPreHeader() const
-    {
-        return preHeader_;
-    }
     void AppendBackEdge(BasicBlock *block)
     {
         ASSERT(std::find(backEdges_.begin(), backEdges_.end(), block) == backEdges_.end());

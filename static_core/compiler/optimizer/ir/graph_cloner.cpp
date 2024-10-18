@@ -635,6 +635,7 @@ BasicBlock *GraphCloner::CloneLoopHeader(BasicBlock *block, BasicBlock *outer, B
     auto cloneBlock = replaceablePred->InsertNewBlockToSuccEdge(block);
     ASSERT(block->GetLoop()->GetPreHeader() == replaceablePred);
     block->GetLoop()->SetPreHeader(cloneBlock);
+    ASSERT(replaceablePred->GetNextLoop() == nullptr);
     replaceablePred->GetLoop()->AppendBlock(cloneBlock);
     cloneBlock->AddSucc(resolver);
     // Check the order of true-false successors
@@ -1026,37 +1027,5 @@ void GraphCloner::UpdateCaller(Inst *inst)
             static_cast<SaveStateInst *>(ssClone)->SetCallerInst(static_cast<CallInst *>(callerClone));
         }
     }
-}
-
-bool GraphCloner::IsLoopClonable(Loop *loop, size_t instLimit)
-{
-    // NOTE(schernykh) : implement case when we have inner loops
-    if (!loop->GetOuterLoop()->IsRoot() || !loop->GetInnerLoops().empty() || !IsLoopSingleBackEdgeExitPoint(loop)) {
-        return false;
-    }
-
-    auto preHeader = loop->GetPreHeader();
-    auto ifimm = preHeader->GetLastInst();
-    ASSERT(ifimm->GetOpcode() == Opcode::IfImm);
-    auto compare = ifimm->GetInput(0).GetInst();
-    ASSERT(compare->GetOpcode() == Opcode::Compare);
-    // NOTE(schernykh) : Implement case when compare is not before of ifimm
-    if (ifimm->GetPrev() != compare) {
-        return false;
-    }
-
-    // Count instructions for copy
-    // in pre header copied compare + ifimm inst
-    uint32_t instCount = 1;
-    for (const auto &block : loop->GetBlocks()) {
-        instCount += std::distance(block->AllInsts().begin(), block->AllInsts().end());
-        if (instCount > instLimit) {
-            return false;
-        }
-    }
-    for ([[maybe_unused]] auto phi : GetLoopOutsideSuccessor(loop)->PhiInsts()) {
-        instCount++;
-    }
-    return (instCount <= instLimit);
 }
 }  // namespace ark::compiler

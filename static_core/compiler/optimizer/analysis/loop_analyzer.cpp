@@ -39,6 +39,7 @@ void LoopAnalyzer::ResetLoopInfo()
     for (auto block : GetGraph()->GetVectorBlocks()) {
         if (block != nullptr) {
             block->SetLoop(nullptr);
+            block->SetNextLoop(nullptr);
         }
     }
     GetGraph()->SetRootLoop(nullptr);
@@ -193,7 +194,7 @@ bool LoopAnalyzer::PreHeaderExists(Loop *loop)
     auto header = loop->GetHeader();
     return header->GetPredsBlocks().size() - loop->GetBackEdges().size() == 1 &&
            header->GetDominator()->GetLoop() == loop->GetOuterLoop() &&
-           header->GetDominator() != GetGraph()->GetStartBlock();
+           header->GetDominator() != GetGraph()->GetStartBlock() && header->GetDominator()->GetNextLoop() == nullptr;
 }
 
 /*
@@ -215,13 +216,35 @@ void LoopAnalyzer::FindAndInsertPreHeaders(Loop *loop)
             preHeader->CopyTryCatchProps(header);
             loop->GetOuterLoop()->AppendBlock(preHeader);
         }
+        ASSERT(preHeader->GetNextLoop() == nullptr);  // a preheader shouldn't relate to several loops.
         loop->SetPreHeader(preHeader);
-        preHeader->SetNextLoop(loop);
     }
 
     for (auto innerLoop : loop->GetInnerLoops()) {
         FindAndInsertPreHeaders(innerLoop);
     }
+}
+
+BasicBlock *Loop::GetPreHeader() const
+{
+    ASSERT(!preHeader_ || preHeader_->GetNextLoop() == this);
+    return preHeader_;
+}
+
+void Loop::SetPreHeader(BasicBlock *preHeader)
+{
+    if (preHeader_ != nullptr && preHeader_->GetNextLoop() == this) {
+        preHeader_->SetNextLoop(nullptr);
+    }
+    preHeader_ = preHeader;
+    preHeader_->SetNextLoop(this);
+}
+void Loop::SetPreHeader(std::nullptr_t preHeader)
+{
+    if (preHeader_ != nullptr && preHeader_->GetNextLoop() == this) {
+        preHeader_->SetNextLoop(nullptr);
+    }
+    preHeader_ = preHeader;
 }
 
 void LoopAnalyzer::PopulateIrreducibleLoop(Loop *loop)

@@ -1760,7 +1760,7 @@ private:
     uint32_t pc_ {INVALID_PC};
 
     /// Number used in cloning
-    uint32_t cloneNumber_ {0};
+    uint32_t cloneNumber_ {INVALID_ID};
 
     /// Instruction number getting while visiting graph
     LinearNumber linearNumber_ {INVALID_LINEAR_NUM};
