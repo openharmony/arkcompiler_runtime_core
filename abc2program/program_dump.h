@@ -80,38 +80,9 @@ private:
     void ReplaceLiteralId4Ins(pandasm::Ins &pa_ins) const;
     void DumpStrings(std::ostream &os) const;
     std::string SerializeLiteralArray(const pandasm::LiteralArray &lit_array, uint32_t id) const;
-    template <typename T>
-    void SerializeValues(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayU1(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayU8(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayI8(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayU16(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayI16(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayU32(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayI32(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayU64(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayI64(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayF32(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayF64(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeValues4ArrayString(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeLiterals(const pandasm::LiteralArray &lit_array, T &os) const;
-    template <typename T>
-    void SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, T &os, size_t i) const;
-    template <typename T>
-    void SerializeNestedLiteralArrayById(T &os, const std::string &literal_array_id_name) const;
+    void SerializeLiterals(const pandasm::LiteralArray &lit_array, std::stringstream &os) const;
+    void SerializeLiteralsAtIndex(const pandasm::LiteralArray &lit_array, std::stringstream &os, size_t i) const;
+    void SerializeNestedLiteralArrayById(std::stringstream &os, const std::string &literal_array_id_name) const;
     PandasmDumperSource dumper_source_ = PandasmDumperSource::PANDA_ASSEMBLY;
     std::string abc_file_path_;
     std::vector<pandasm::Ins> original_dump_ins_;

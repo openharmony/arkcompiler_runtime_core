@@ -87,27 +87,6 @@ size_t PandasmDumperUtils::GetLiteralIdIndex4Ins(const pandasm::Ins &pa_ins)
     return it->second;
 }
 
-bool PandasmDumperUtils::IsLiteralTagArray(const panda_file::LiteralTag &tag)
-{
-    switch (tag) {
-        case panda_file::LiteralTag::ARRAY_U1:
-        case panda_file::LiteralTag::ARRAY_U8:
-        case panda_file::LiteralTag::ARRAY_I8:
-        case panda_file::LiteralTag::ARRAY_U16:
-        case panda_file::LiteralTag::ARRAY_I16:
-        case panda_file::LiteralTag::ARRAY_U32:
-        case panda_file::LiteralTag::ARRAY_I32:
-        case panda_file::LiteralTag::ARRAY_U64:
-        case panda_file::LiteralTag::ARRAY_I64:
-        case panda_file::LiteralTag::ARRAY_F32:
-        case panda_file::LiteralTag::ARRAY_F64:
-        case panda_file::LiteralTag::ARRAY_STRING:
-            return true;
-        default:
-            return false;
-    }
-}
-
 std::string PandasmDumperUtils::GetMappedLabel(const std::string &label, const LabelMap &label_map)
 {
     auto it = label_map.find(label);
@@ -159,7 +138,7 @@ uint32_t PandasmDumperUtils::GetLiteralArrayIdFromName(const std::string &litera
     std::stringstream id_str(literal_array_id_name.substr(pos + 1));
     uint32_t id = 0;
     id_str >> id;
-    ASSERT(id_str.good());
+    ASSERT(!id_str.fail());
     return id;
 }
 

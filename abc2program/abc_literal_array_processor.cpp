@@ -52,65 +52,8 @@ void AbcLiteralArrayProcessor::GetLiteralArrayById(pandasm::LiteralArray *lit_ar
         lit_array_id, [this, lit_array](
                     const panda_file::LiteralDataAccessor::LiteralValue &value,
                     const panda_file::LiteralTag &tag) {
-            switch (tag) {
-                case panda_file::LiteralTag::ARRAY_U1:
-                    FillLiteralArrayData<bool>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I8:
-                case panda_file::LiteralTag::ARRAY_U8:
-                    FillLiteralArrayData<uint8_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I16:
-                case panda_file::LiteralTag::ARRAY_U16:
-                    FillLiteralArrayData<uint16_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I32:
-                case panda_file::LiteralTag::ARRAY_U32:
-                    FillLiteralArrayData<uint32_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_I64:
-                case panda_file::LiteralTag::ARRAY_U64:
-                    FillLiteralArrayData<uint64_t>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_F32:
-                    FillLiteralArrayData<float>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_F64:
-                    FillLiteralArrayData<double>(lit_array, tag, value);
-                    break;
-                case panda_file::LiteralTag::ARRAY_STRING:
-                    FillLiteralArrayData<uint32_t>(lit_array, tag, value);
-                    break;
-                default:
-                    FillLiteralData(lit_array, value, tag);
-                    break;
-            }
+            FillLiteralData(lit_array, value, tag);
         });
-}
-
-template <typename T>
-void AbcLiteralArrayProcessor::FillLiteralArrayData(pandasm::LiteralArray *lit_array, const panda_file::LiteralTag &tag,
-                                                    const panda_file::LiteralDataAccessor::LiteralValue &value) const
-{
-    panda_file::File::EntityId id(std::get<uint32_t>(value));
-    auto sp = file_->GetSpanFromId(id);
-    auto len = panda_file::helpers::Read<sizeof(uint32_t)>(&sp);
-    if (tag != panda_file::LiteralTag::ARRAY_STRING) {
-        for (size_t i = 0; i < len; i++) {
-            pandasm::LiteralArray::Literal lit;
-            lit.tag_ = tag;
-            lit.value_ = bit_cast<T>(panda_file::helpers::Read<sizeof(T)>(&sp));
-            lit_array->literals_.emplace_back(lit);
-        }
-        return;
-    }
-    for (size_t i = 0; i < len; i++) {
-        auto str_id = panda_file::helpers::Read<sizeof(T)>(&sp);
-        pandasm::LiteralArray::Literal lit;
-        lit.tag_ = tag;
-        lit.value_ = GetStringById(panda_file::File::EntityId{str_id});
-        lit_array->literals_.emplace_back(lit);
-    }
 }
 
 void AbcLiteralArrayProcessor::FillLiteralData(pandasm::LiteralArray *lit_array,

@@ -82,7 +82,6 @@ class PandasmDumperUtils {
 public:
     static std::string GetFunctionKindString(panda_file::FunctionKind function_kind);
     static std::string LiteralTagToString(const panda_file::LiteralTag &tag);
-    static bool IsLiteralTagArray(const panda_file::LiteralTag &tag);
     static bool IsMatchLiteralId(const pandasm::Ins &pa_ins);
     static size_t GetLiteralIdIndex4Ins(const pandasm::Ins &pa_ins);
     static std::string GetMappedLabel(const std::string &label, const LabelMap &label_map);

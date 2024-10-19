@@ -15,8 +15,8 @@
 
 #include <cstdlib>
 #include <gtest/gtest.h>
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
 #include "abc2program_driver.h"
 #include "abc2program_test_utils.h"
@@ -45,6 +45,11 @@ struct FuncName {
 const FuncName FUNC_NAME;
 const std::string HELLO_WORLD_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorld.abc";
 const std::string HELLO_WORLD_DEBUG_ABC_TEST_FILE_NAME = GRAPH_TEST_ABC_DIR "HelloWorldDebug.abc";
+const bool REMOVE_DUMP_RESULT_FILES = true;
+const std::string HELLO_WORLD_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDumpResult.txt";
+const std::string HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpResult.txt";
+const std::string HELLO_WORLD_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDumpExpected.txt";
+const std::string HELLO_WORLD_DEBUG_DUMP_EXPECTED_FILE_NAME = GRAPH_TEST_ABC_DUMP_DIR "HelloWorldDebugDumpExpected.txt";
 constexpr uint32_t NUM_OF_CODE_TEST_UT_FOO_METHOD_INS = 73;
 constexpr uint8_t INS_SIZE_OF_FUNCTION_HOO = 5;
 constexpr uint8_t IMMS_SIZE_OF_OPCODE_FLDAI = 1;
@@ -125,6 +130,22 @@ public:
 };
 
 /*------------------------------------- Cases of release mode below -------------------------------------*/
+
+/**
+ * @tc.name: abc2program_hello_world_test_dump
+ * @tc.desc: check dump result in release mode.
+ * @tc.type: FUNC
+ * @tc.require: IADG92
+ */
+HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_dump, TestSize.Level1)
+{
+    driver_.Dump(HELLO_WORLD_DUMP_RESULT_FILE_NAME);
+    EXPECT_TRUE(Abc2ProgramTestUtils::ValidateDumpResult(HELLO_WORLD_DUMP_RESULT_FILE_NAME,
+                                                         HELLO_WORLD_DUMP_EXPECTED_FILE_NAME));
+    if (REMOVE_DUMP_RESULT_FILES) {
+        Abc2ProgramTestUtils::RemoveDumpResultFile(HELLO_WORLD_DUMP_RESULT_FILE_NAME);
+    }
+}
 
 /**
  * @tc.name: abc2program_hello_world_test_func_annotation
@@ -632,8 +653,6 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_nested_literal_
      */
     panda::pandasm::LiteralArray nested_literal_array;
     for (auto &item : literal_array_table) {
-        std::cout << item.first << std::endl;
-        std::cout << item.second.literals_.size() << std::endl;
         for (auto &literal : item.second.literals_) {
             if (literal.tag_ == panda_file::LiteralTag::LITERALARRAY) {
                 nested_literal_array = item.second;
@@ -671,6 +690,22 @@ HWTEST_F(Abc2ProgramHelloWorldTest, abc2program_hello_world_test_nested_literal_
 
 /*------------------------------------- Cases of release mode above -------------------------------------*/
 /*-------------------------------------- Cases of debug mode below --------------------------------------*/
+
+/**
+ * @tc.name: abc2program_hello_world_debug_test_dump
+ * @tc.desc: check dump result in debug mode.
+ * @tc.type: FUNC
+ * @tc.require: IADG92
+ */
+HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_debug_test_dump, TestSize.Level1)
+{
+    driver_.Dump(HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME);
+    EXPECT_TRUE(Abc2ProgramTestUtils::ValidateDumpResult(HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME,
+                                                         HELLO_WORLD_DEBUG_DUMP_EXPECTED_FILE_NAME));
+    if (REMOVE_DUMP_RESULT_FILES) {
+        Abc2ProgramTestUtils::RemoveDumpResultFile(HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME);
+    }
+}
 
 /**
  * @tc.name: abc2program_hello_world_test_source_file

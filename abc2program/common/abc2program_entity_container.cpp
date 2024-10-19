@@ -84,16 +84,6 @@ std::string Abc2ProgramEntityContainer::ConcatFullMethodNameById(const panda_fil
     return ss.str();
 }
 
-// ark_disasm can use this method to get all literal array ids except module literal ids
-std::unordered_set<uint32_t> Abc2ProgramEntityContainer::GetLiteralArrayIdSet()
-{
-    std::unordered_set<uint32_t> literal_array_id_set;
-    set_union(module_literal_array_id_set_.begin(), module_literal_array_id_set_.end(),
-              processed_nested_literal_array_id_set_.begin(), processed_nested_literal_array_id_set_.end(),
-              inserter(literal_array_id_set, literal_array_id_set.begin()));
-    return literal_array_id_set;
-}
-
 const std::unordered_set<uint32_t> &Abc2ProgramEntityContainer::GetMouleLiteralArrayIdSet() const
 {
     return module_literal_array_id_set_;
@@ -157,11 +147,6 @@ std::string Abc2ProgramEntityContainer::GetLiteralArrayIdName(uint32_t literal_a
 void Abc2ProgramEntityContainer::AddProgramString(const std::string &str) const
 {
     program_.strings.insert(str);
-}
-
-std::string Abc2ProgramEntityContainer::GetAbcFileAbsolutePath() const
-{
-    return os::file::File::GetAbsolutePath(file_.GetFilename()).Value();
 }
 
 }  // namespace panda::abc2program
