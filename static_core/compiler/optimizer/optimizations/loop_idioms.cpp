@@ -112,10 +112,10 @@ bool IsLoopContainsArrayInitIdiom(StoreInst *store, Loop *loop, CountableLoopInf
 
 bool LoopIdioms::TryTransformArrayInitIdiom(Loop *loop)
 {
-    ASSERT(loop->GetInnerLoops().empty());
     if (loop->GetBlocks().size() != 1) {
         return false;
     }
+    ASSERT(loop->GetInnerLoops().empty());
 
     auto store = FindStoreForArrayInit(loop->GetHeader());
     if (store == nullptr) {

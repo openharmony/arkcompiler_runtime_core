@@ -343,6 +343,65 @@ void ChecksElimination::VisitHclassCheck(GraphVisitor *v, Inst *inst)
     visitor->PushNewCheckForMoveOutOfLoop(inst);
 }
 
+template <typename RangeChecker, typename... RangeCheckers>
+bool NeedSetFlagNoHoist(Inst *check, Inst *input, RangeChecker rangeChecker, RangeCheckers... rangeCheckers)
+{
+    return NeedSetFlagNoHoist(check, input, rangeChecker) || (NeedSetFlagNoHoist(check, input, rangeCheckers) || ...);
+}
+
+template <typename RangeChecker>
+bool NeedSetFlagNoHoist(Inst *check, Inst *input, RangeChecker rangeChecker)
+{
+    auto checkBlock = check->GetBasicBlock();
+    auto inputBlock = input->GetBasicBlock();
+
+    // 1. The `check` is in the root loop, further analysis is not needed.
+    if (checkBlock->GetLoop()->IsRoot()) {
+        return false;
+    }
+
+    // 2. If `input` isn't in the root loop and it is hoistable, conservatively enforce `NO_HOIST` flag on `check`'s
+    //    users since `input` itself may be hoisted, allowing the users to be hoisted as well (with the danger of
+    //    breaking bounds). See 'HoistableInput' checked test.
+    if (((!inputBlock->GetLoop()->IsRoot()) && (!input->IsNotHoistable())) || input->IsPhi()) {
+        return true;
+    }
+
+    // 3. `input` is not hoistable due to `2.` so users can be hoisted only into preheader of some inner loops, which
+    //     are dominated by `checkBlock`. No need to set `NO_HOIST` flag explicitly.
+    if ((inputBlock->GetLoop() == checkBlock->GetLoop()) || (inputBlock->GetLoop()->IsInside(checkBlock->GetLoop()))) {
+        return false;
+    }
+
+    // Find outermost loop of `check` that is lying in the innermost loop, containing both `check` and `input`.
+    auto cl = checkBlock->GetLoop();
+    auto il = inputBlock->GetLoop();
+    while (cl->GetOuterLoop() != il) {
+        cl = cl->GetOuterLoop();
+        if (cl == nullptr) {
+            // Restart algorithm with an outer `input` loop.
+            cl = checkBlock->GetLoop();
+            il = il->GetOuterLoop();
+        }
+    }
+    auto outermostPrehead = cl->GetPreHeader();
+
+    // It is hoistable if bounds range are valid at the outermost prehead:
+    auto bri = outermostPrehead->GetGraph()->GetBoundsRangeInfo();
+    auto range = bri->FindBoundsRange(outermostPrehead, input);
+    return !rangeChecker(range);
+}
+
+template <typename... RangeCheckers>
+void CheckAndSetFlagNoHoist(Inst *inst, Inst *input, RangeCheckers... rangeCheckers)
+{
+    if (NeedSetFlagNoHoist(inst, input, rangeCheckers...)) {
+        for (auto &user : inst->GetUsers()) {
+            user.GetInst()->SetFlag(inst_flags::NO_HOIST);
+        }
+    }
+}
+
 void ChecksElimination::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
 {
     COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Start visit BoundsCheck with id = " << inst->GetId();
@@ -357,11 +416,16 @@ void ChecksElimination::VisitBoundsCheck(GraphVisitor *v, Inst *inst)
 
     auto bri = block->GetGraph()->GetBoundsRangeInfo();
     auto lenArrayRange = bri->FindBoundsRange(block, lenArray);
+    auto upperChecker = [&lenArrayRange, &lenArray](const BoundsRange &idxRange) {
+        return idxRange.IsLess(lenArrayRange) || idxRange.IsLess(lenArray);
+    };
+    auto lowerChecker = [](const BoundsRange &idxRange) { return idxRange.IsNotNegative(); };
     auto indexRange = bri->FindBoundsRange(block, index);
-    auto correctUpper = indexRange.IsLess(lenArrayRange) || indexRange.IsLess(lenArray);
-    auto correctLower = indexRange.IsNotNegative();
+    auto correctUpper = upperChecker(indexRange);
+    auto correctLower = lowerChecker(indexRange);
     if (correctUpper && correctLower) {
         COMPILER_LOG(DEBUG, CHECKS_ELIM) << "Index of BoundsCheck have correct bounds";
+        CheckAndSetFlagNoHoist(inst, index, upperChecker, lowerChecker);
         visitor->ReplaceUsersAndRemoveCheck(inst, index);
         return;
     }
@@ -676,21 +740,27 @@ bool ChecksElimination::TryRemoveCheckByBounds(Inst *inst, Inst *input)
     ASSERT(inst->GetOpcode() == OPC);
     auto block = inst->GetBasicBlock();
     auto bri = block->GetGraph()->GetBoundsRangeInfo();
+
     auto range = bri->FindBoundsRange(block, input);
-    bool result = false;
-    // NOLINTNEXTLINE(readability-magic-numbers, readability-braces-around-statements, bugprone-branch-clone)
-    if constexpr (OPC == Opcode::ZeroCheck) {
-        result = range.IsLess(BoundsRange(0)) || range.IsMore(BoundsRange(0));
-    } else if constexpr (OPC == Opcode::NullCheck) {  // NOLINT
-        result = range.IsMore(BoundsRange(0));
-    } else if constexpr (OPC == Opcode::NegativeCheck) {  // NOLINT
-        result = range.IsNotNegative();
-    } else if constexpr (OPC == Opcode::NotPositiveCheck) {  // NOLINT
-        result = range.IsPositive();
-    }
+    auto rangeChecker = [](const BoundsRange &r) {
+        // NOLINTNEXTLINE(readability-magic-numbers, readability-braces-around-statements, bugprone-branch-clone)
+        if constexpr (OPC == Opcode::ZeroCheck) {
+            return r.IsLess(BoundsRange(0)) || r.IsMore(BoundsRange(0));
+        } else if constexpr (OPC == Opcode::NullCheck) {  // NOLINT
+            return r.IsMore(BoundsRange(0));
+        } else if constexpr (OPC == Opcode::NegativeCheck) {  // NOLINT
+            return r.IsNotNegative();
+        } else if constexpr (OPC == Opcode::NotPositiveCheck) {  // NOLINT
+            return r.IsPositive();
+        }
+    };
+    bool result = rangeChecker(range);
     if (result) {
         // NOLINTNEXTLINE(readability-magic-numbers)
         COMPILER_LOG(DEBUG, CHECKS_ELIM) << GetOpcodeString(OPC) << " have correct bounds";
+
+        // As bounds analysis was used to prove the check's excessiveness, users should be moved with care:
+        CheckAndSetFlagNoHoist(inst, input, rangeChecker);
         ReplaceUsersAndRemoveCheck(inst, input);
     } else {
         // NOLINTNEXTLINE(readability-magic-numbers, readability-braces-around-statements)

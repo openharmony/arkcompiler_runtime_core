@@ -39,6 +39,9 @@ templates:
     % end
     inst_check->SetInput(1, inst_save_state);
     auto inst = graph_->CreateInst<%= opc %>(<%= get_type(inst.dtype) %>, GetPc(instruction->GetAddress()));
+    if (graph_->IsBytecodeOptimizer()) {
+        inst->SetFlag(inst_flags::NO_HOIST);
+    }
     inst->SetInput(1, inst_check);
     % if (!inst.acc_and_operands[0].acc? && !inst.acc_and_operands[1].acc? && !inst.acc_and_operands.last.imm?)
     inst->SetInput(0, GetDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>()));

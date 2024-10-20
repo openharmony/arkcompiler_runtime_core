@@ -63,6 +63,9 @@ std::optional<CountableLoopInfo> CountableLoopParser::Parse()
 bool CountableLoopParser::ParseLoopExit()
 {
     auto loopExit = FindLoopExitBlock();
+    if (loopExit == nullptr) {
+        return false;
+    }
     if (loopExit->IsEmpty() || (loopExit != loop_.GetHeader() && loopExit != loop_.GetBackEdges()[0])) {
         return false;
     }
@@ -209,16 +212,20 @@ bool CountableLoopParser::IsInstIncOrDec(Inst *inst)
 BasicBlock *CountableLoopParser::FindLoopExitBlock()
 {
     auto outerLoop = loop_.GetOuterLoop();
+    BasicBlock *loopExit = nullptr;
     for (auto block : loop_.GetBlocks()) {
         const auto &succs = block->GetSuccsBlocks();
         auto it = std::find_if(succs.begin(), succs.end(),
                                [&outerLoop](const BasicBlock *bb) { return bb->GetLoop() == outerLoop; });
         if (it != succs.end()) {
-            return block;
+            // Countable loop must have a single exit:
+            if (loopExit != nullptr) {
+                return nullptr;
+            }
+            loopExit = block;
         }
     }
-    UNREACHABLE();
-    return nullptr;
+    return loopExit;
 }
 
 bool CountableLoopParser::SetUpdateAndTestInputs()

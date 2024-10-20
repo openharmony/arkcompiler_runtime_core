@@ -39,6 +39,11 @@ void LoopUnswitch::InvalidateAnalyses()
 
 bool LoopUnswitch::TransformLoop(Loop *loop)
 {
+    if (!loop->GetInnerLoops().empty()) {
+        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+            << "Loop wasn't unswitched since it contains loops. Loop id = " << loop->GetId();
+        return false;
+    }
     loops_.push(loop);
 
     int64_t budget = maxInsns_;

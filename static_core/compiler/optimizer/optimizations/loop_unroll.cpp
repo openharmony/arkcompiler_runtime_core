@@ -134,6 +134,11 @@ void LoopUnroll::TransformLoopImpl(Loop *loop, std::optional<uint64_t> optIterat
 
 bool LoopUnroll::TransformLoop(Loop *loop)
 {
+    if (!loop->GetInnerLoops().empty()) {
+        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+            << "Loop isn't unrolled since it contains loops. Loop id = " << loop->GetId();
+        return false;
+    }
     auto unrollParams = GetUnrollParams(loop);
     if (!g_options.IsCompilerUnrollLoopWithCalls() && unrollParams.hasCall) {
         COMPILER_LOG(DEBUG, LOOP_TRANSFORM)

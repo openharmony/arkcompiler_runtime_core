@@ -108,6 +108,11 @@ bool LoopPeeling::TransformLoop(Loop *loop)
     ASSERT(loop->GetBackEdges().size() == 1);
     ASSERT(loop->GetHeader()->GetLastInst()->GetOpcode() == Opcode::IfImm ||
            loop->GetHeader()->GetLastInst()->GetOpcode() == Opcode::If);
+    if (!loop->GetInnerLoops().empty()) {
+        COMPILER_LOG(DEBUG, LOOP_TRANSFORM)
+            << "Loop wasn't peeled since it contains loops. Loop id = " << loop->GetId();
+        return false;
+    }
     auto header = loop->GetHeader();
     // If header contains inlined call this call will be cloned and stay unpaired without `Return.inlined` instruction
     if (HeaderHasInlinedCalls(header)) {
