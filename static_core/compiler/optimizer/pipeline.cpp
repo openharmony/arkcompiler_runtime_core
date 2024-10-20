@@ -225,11 +225,11 @@ bool Pipeline::RunOptimizations()
     if (graph->IsAotMode()) {
         graph->RunPass<Cse>();
     }
-    graph->RunPass<LoopIdioms>();
     graph->RunPass<ChecksElimination>();
     if (graph->RunPass<DeoptimizeElimination>()) {
         graph->RunPass<Peepholes>();
     }
+    graph->RunPass<LoopIdioms>();
     graph->RunPass<LoopUnroll>(g_options.GetCompilerLoopUnrollInstLimit(), g_options.GetCompilerLoopUnrollFactor());
     OptimizationsAfterUnroll(graph);
     graph->RunPass<Peepholes>();

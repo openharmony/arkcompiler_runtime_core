@@ -485,6 +485,22 @@ bool LLVMIrConstructor::EmitIsInf(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitMemmoveUnchecked(Inst *inst)
+{
+    switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_1_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_1_BYTE, 5U);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_2_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_2_BYTE, 5U);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_4_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_4_BYTE, 5U);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_8_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_8_BYTE, 5U);
+        default:
+            UNREACHABLE();
+    }
+}
+
 bool LLVMIrConstructor::EmitUnreachable([[maybe_unused]] Inst *inst)
 {
     auto bb = GetCurrentBasicBlock();

@@ -60,10 +60,10 @@ private:
     bool CheckParsingLoopCorrectness();
     bool TryProcessBackEdge();
 
-private:
-    const Loop &loop_;
-    CountableLoopInfo loopInfo_ {};
-    bool isHeadLoopExit_ = false;
+protected:
+    const Loop &loop_;               // NOLINT(misc-non-private-member-variables-in-classes)
+    CountableLoopInfo loopInfo_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    bool isHeadLoopExit_ = false;    // NOLINT(misc-non-private-member-variables-in-classes)
 };
 }  // namespace ark::compiler
 

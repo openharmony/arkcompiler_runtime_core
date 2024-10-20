@@ -55,6 +55,8 @@ private:
     Inst *CreateArrayInitIntrinsic(StoreInst *store, CountableLoopInfo *info);
     bool ReplaceArrayInitLoop(Loop *loop, CountableLoopInfo *loopInfo, StoreInst *store, bool alwaysJump);
 
+    bool TryTransformArrayMoveIdiom(Loop *loop);
+
     bool isApplied_ {false};
 };
 

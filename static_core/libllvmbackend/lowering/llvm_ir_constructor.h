@@ -44,6 +44,7 @@ private:
     bool EmitStringConcat4(Inst *inst);
     bool EmitStringCompareTo(Inst *inst);
     bool EmitIsInf(Inst *inst);
+    bool EmitMemmoveUnchecked(Inst *inst);
     bool EmitUnreachable(Inst *inst);
     bool EmitNothing(Inst *inst);
     bool EmitSlowPathEntry(Inst *inst);

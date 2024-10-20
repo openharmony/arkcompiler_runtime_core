@@ -409,6 +409,74 @@ intrinsics:
   impl: ark::intrinsics::PrintU64
   clear_flags: [require_state, runtime_call, can_throw, heap_inv]
 
+- name: CompilerMemmoveUnchecked_1Byte
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args:
+       - u8\[
+       - u8\[
+       - i32
+       - i32
+       - i32
+  codegen_arch: [arm64, amd64]
+  codegen_func: CreateMemmoveUnchecked
+  llvm_codegen_func: EmitMemmoveUnchecked
+  need_param_locations: true
+
+- name: CompilerMemmoveUnchecked_2Byte
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args:
+       - u16\[
+       - u16\[
+       - i32
+       - i32
+       - i32
+  codegen_arch: [arm64, amd64]
+  codegen_func: CreateMemmoveUnchecked
+  llvm_codegen_func: EmitMemmoveUnchecked
+  need_param_locations: true
+
+- name: CompilerMemmoveUnchecked_4Byte
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args:
+       - u32\[
+       - u32\[
+       - i32
+       - i32
+       - i32
+  codegen_arch: [arm64, amd64]
+  codegen_func: CreateMemmoveUnchecked
+  llvm_codegen_func: EmitMemmoveUnchecked
+  need_param_locations: true
+
+- name: CompilerMemmoveUnchecked_8Byte
+  space: core
+  compiler_only: true
+  static: true
+  signature:
+    ret: void
+    args:
+       - u64\[
+       - u64\[
+       - i32
+       - i32
+       - i32
+  codegen_arch: [arm64, amd64]
+  codegen_func: CreateMemmoveUnchecked
+  llvm_codegen_func: EmitMemmoveUnchecked
+  need_param_locations: true
+
 - name: SystemCompileMethod
   space: core
   class_name: System
