@@ -157,7 +157,7 @@ class UtilTest262:
 
             passed = (len(std_err) == 0)
             if 'async' in desc['flags']:
-                passed = passed and bool(self.async_ok.match(out))
+                passed = passed and bool(self.async_ok.search(out))
             return passed  # positive test passed?
 
         if return_code == 1:  # failed

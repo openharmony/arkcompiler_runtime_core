@@ -2297,15 +2297,3 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/shadow_function_explicit_name.sts
 ### end of Issue 19680
 ### end of ES2PANDA_FAIL - fails of negative, compile-only
-
-# panda#19881
-08.statements/05.if_statements/if_neg_2.sts
-08.statements/05.if_statements/if_neg_4.sts
-08.statements/07.while_statements_and_do_statements/neg_3.sts
-08.statements/07.while_statements_and_do_statements/neg_5.sts
-08.statements/07.while_statements_and_do_statements/neg_6.sts
-08.statements/07.while_statements_and_do_statements/neg_7.sts
-08.statements/09.for_of_statements/for_of_neg_7.sts
-08.statements/09.for_of_statements/for_of_neg_9.sts
-17.experimental_features/06.statements/01.for-of_type_annotation/for_of_n_6.sts
-# end of panda#19881
