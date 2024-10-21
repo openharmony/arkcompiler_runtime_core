@@ -15,7 +15,7 @@
 
 const enum E {
     A = 42,
-    B = 314
+    B = -314
 } 
 
 @interface Anno1 {
@@ -29,5 +29,5 @@ const enum E {
 }
 
 @interface Anno3 {
-    a: E[][][] = [[[42, 314, 42]]];
+    a: E[][][] = [[[42, -314, 42]]];
 }

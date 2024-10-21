@@ -211,7 +211,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_enum_number, 
 
     ValidateRecord("declaration-3d-array-enum-number.Anno3", R"(
         .record declaration-3d-array-enum-number.Anno3 {
-            f64[][][] a = [[[42, 314, 42]]]
+            f64[][][] a = [[[42, -314, 42]]]
         }
     )");
 }
@@ -273,7 +273,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_3d_array_number, TestS
 
     ValidateRecord("declaration-3d-array-number.Anno3", R"(
         .record declaration-3d-array-number.Anno3 {
-            f64[][][] a = [[[1, 2, 3], [4, 5, 6]]]
+            f64[][][] a = [[[1, -2, 3], [4, -5, 6]]]
         }
     )");
 }
@@ -364,7 +364,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_enum_number, Tes
 
     ValidateRecord("declaration-array-enum-number.Anno3", R"(
         .record declaration-array-enum-number.Anno3 {
-            f64[] a = [42, 314, 42]
+            f64[] a = [42, -314, 42]
         }
     )");
 }
@@ -426,7 +426,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_array_number, TestSize
 
     ValidateRecord("declaration-array-number.Anno3", R"(
         .record declaration-array-number.Anno3 {
-            f64[] a = [1, 2, 3]
+            f64[] a = [1, -2, 3]
         }
     )");
 }
@@ -500,10 +500,10 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_combination, TestSize.
     ValidateRecord("declaration-combination.Anno", R"(
         .record declaration-combination.Anno {
             f64 a
-            f64[] b = [13, 10]
+            f64[] b = [13, -10]
             panda.String c
             u1 d
-            f64[] e = [1, 2, 3]
+            f64[] e = [1, -2, 3]
             f64[] f
             f64 h
             f64[][][] i
@@ -604,6 +604,12 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_number, TestSize.Level
             f64 a = 42
         }
     )");
+
+    ValidateRecord("declaration-number.Anno3", R"(
+        .record declaration-number.Anno3 {
+            f64 a = -314
+        }
+    )");
 }
 
 /**
@@ -681,7 +687,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_enum_nu
     ValidateMethodAnnotation("declaration-usage-3d-array-enum-number.#~A=#A",
                              "Ldeclaration-usage-3d-array-enum-number.Anno", R"(
         Ldeclaration-usage-3d-array-enum-number.Anno:
-            f64[][][] a { [[[1, 2, 1]]] }
+            f64[][][] a { [[[1, -2, 1]]] }
     )");
 
     ValidateMethodAnnotation("declaration-usage-3d-array-enum-number.#~A>#foo",
@@ -743,7 +749,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_3d_array_number,
     ValidateMethodAnnotation("declaration-usage-3d-array-number.#~A=#A",
                              "Ldeclaration-usage-3d-array-number.Anno", R"(
         Ldeclaration-usage-3d-array-number.Anno:
-            f64[][][] a { [[[1, 2, 3]]] }
+            f64[][][] a { [[[1, -2, 3]]] }
     )");
 
     ValidateMethodAnnotation("declaration-usage-3d-array-number.#~A>#foo",
@@ -834,7 +840,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_enum_numbe
     ValidateMethodAnnotation("declaration-usage-array-enum-number.#~A=#A",
                              "Ldeclaration-usage-array-enum-number.Anno", R"(
         Ldeclaration-usage-array-enum-number.Anno:
-            f64[] a { [1, 2, 1] }
+            f64[] a { [1, -2, 1] }
     )");
 
     ValidateMethodAnnotation("declaration-usage-array-enum-number.#~A>#foo",
@@ -895,7 +901,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_array_number, Te
 
     ValidateMethodAnnotation("declaration-usage-array-number.#~A=#A", "Ldeclaration-usage-array-number.Anno", R"(
         Ldeclaration-usage-array-number.Anno:
-            f64[] a { [1, 2, 3] }
+            f64[] a { [1, -2, 3] }
     )");
 
     ValidateMethodAnnotation("declaration-usage-array-number.#~A>#foo", "Ldeclaration-usage-array-number.Anno", R"(
@@ -975,10 +981,10 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_combination, Tes
     ValidateRecord("declaration-usage-combination.Anno", R"(
         .record declaration-usage-combination.Anno {
             f64 a
-            f64[] b = [13, 10]
+            f64[] b = [13, -10]
             panda.String c
             u1 d
-            f64[] e = [1, 2, 3]
+            f64[] e = [1, -2, 3]
             f64[] f
             f64 h
             f64[][][] i
@@ -990,10 +996,10 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_combination, Tes
     ValidateMethodAnnotation("declaration-usage-combination.#~A=#A", "Ldeclaration-usage-combination.Anno", R"(
         Ldeclaration-usage-combination.Anno:
             f64 a { 20 }
-            f64[] b { [13, 10] }
+            f64[] b { [-13, 10] }
             panda.String c { "ab" }
             u1 d { 1 }
-            f64[] e { [1, 2, 3] }
+            f64[] e { [-1, 2, 3] }
             f64[] f { [] }
             f64[][][] g { [[[0]]] }
             f64 h { 10 }
@@ -1004,14 +1010,14 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_combination, Tes
 
     ValidateMethodAnnotation("declaration-usage-combination.#~A>#foo", "Ldeclaration-usage-combination.Anno", R"(
         Ldeclaration-usage-combination.Anno:
-            f64 a { 10 }
-            f64[] b { [1, 2, 3] }
+            f64 a { -10 }
+            f64[] b { [1, 2, -3] }
             panda.String c { "cde" }
             u1 d { 1 }
-            f64[] e { [1, 2, 3] }
+            f64[] e { [1, -2, 3] }
             f64[] f { [1] }
             f64[][][] g { [[[0], [1]]] }
-            f64 h { 10 }
+            f64 h { -10 }
             f64[][][] i { [[[10], [20]]] }
             panda.String j { "B" }
             panda.String[][][] k { [[["A"], ["B"]]] }
@@ -1069,7 +1075,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_enum_number, Tes
 
     ValidateMethodAnnotation("declaration-usage-enum-number.#~A>#foo", "Ldeclaration-usage-enum-number.Anno", R"(
         Ldeclaration-usage-enum-number.Anno:
-            f64 a { 2 }
+            f64 a { -2 }
     )");
 }
 
@@ -1127,7 +1133,7 @@ HWTEST_F(DisassemblerUserAnnotationTest, test_declaration_usage_number, TestSize
 
     ValidateMethodAnnotation("declaration-usage-number.#~A>#foo", "Ldeclaration-usage-number.Anno", R"(
         Ldeclaration-usage-number.Anno:
-            f64 a { 314 }
+            f64 a { -314 }
     )");
 }
 

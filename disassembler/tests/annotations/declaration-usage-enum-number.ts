@@ -15,7 +15,7 @@
 
 const enum E {
     A = 1,
-    B = 2
+    B = -2
 }
 
 @interface Anno {
@@ -24,6 +24,6 @@ const enum E {
 
 @#Anno({a : 1})
 class A {
-    @#Anno({a : 2})
+    @#Anno({a : -2})
     foo() {}
 }

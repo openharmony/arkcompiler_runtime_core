@@ -22,5 +22,5 @@
 }
 
 @interface Anno3 {
-    a: number[] = [1, 2, 3];
+    a: number[] = [1, -2, 3];
 }
