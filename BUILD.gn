@@ -326,10 +326,10 @@ concat_yamls("concat_inst_templates_yamls") {
 group("ark_host_defectscanaux_tools") {
   deps = []
   if (host_os == "linux") {
-    deps += [
-      ":ark_host_linux_defectscanaux_unittest",
-      ":ark_host_win_defectscanaux_unittest",
-    ]
+    deps += [ ":ark_host_linux_defectscanaux_unittest" ]
+    if (host_cpu != "arm64") {
+      deps += [ ":ark_host_win_defectscanaux_unittest" ]
+    }
   } else if (host_os == "mac") {
     deps += [ ":ark_host_mac_defectscanaux_unittest" ]
   }
