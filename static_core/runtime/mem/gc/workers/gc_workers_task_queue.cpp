@@ -34,7 +34,10 @@ bool GCWorkersTaskQueue::TryAddTask(GCWorkersTask &&task)
 
 void GCWorkersTaskQueue::RunInCurrentThread()
 {
-    taskmanager::TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(GC_TASK_PROPERTIES);
+    size_t executed = 0;
+    do {
+        executed = taskmanager::TaskScheduler::GetTaskScheduler()->HelpWorkersWithTasks(GC_TASK_PROPERTIES);
+    } while (executed != 0);
 }
 
 }  // namespace ark::mem
