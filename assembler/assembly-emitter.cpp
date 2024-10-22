@@ -1756,6 +1756,10 @@ void Function::BuildLineNumberProgram(panda_file::DebugInfoItem *debug_item, con
     do {
         size_t end = emit_debug_info && iter != local_variable_info.end() ? iter->insn_order : num_ins;
         for (size_t i = start; i < end; i++) {
+            /**
+             * If you change the continue condition of this loop, you need to synchronously modify the same condition
+             * of the BuildMapFromPcToIns method in the optimizer-bytecode.cpp.
+             **/
             if (ins[i].opcode == Opcode::INVALID) {
                 continue;
             }

@@ -42,6 +42,8 @@ disasm_column_test_js_files = [
   "line-number5",
 ]
 
+disasm_line_release_test_ts_files = [ "line_number_release" ]
+
 disasm_test_js_files = [
   "slot-number-annotation",
   "script-string1",
@@ -61,6 +63,20 @@ foreach(file, disasm_column_test_js_files) {
       "--module",
     ]
     in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+test_ts_path = "//arkcompiler/runtime_core/disassembler/tests/ts/"
+
+foreach(file, disasm_line_release_test_ts_files) {
+  es2abc_gen_abc("gen_${file}_abc") {
+    test_ts = "${test_ts_path}${file}.ts"
+    test_abc = "$target_out_dir/${file}.abc"
+    src_js = rebase_path(test_ts)
+    dst_file = rebase_path(test_abc)
+    extra_args = [ "--module" ]
+    in_puts = [ test_ts ]
     out_puts = [ test_abc ]
   }
 }
@@ -214,6 +230,20 @@ host_unittest_action("DisasmDebugTest") {
   }
 }
 
+host_unittest_action("DisasmReleaseTest") {
+  module_out_path = module_output_path
+  sources = script_sources
+  include_dirs = disasm_include_dirs
+  configs = disasm_test_configs
+  deps = disasm_test_deps
+  test_abc_dir = rebase_path(target_out_dir)
+  defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
+
+  foreach(file, disasm_line_release_test_ts_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+}
+
 annotations_sources = [ "disassembler_user_annotations_test.cpp" ]
 
 host_unittest_action("DisasmUserAnnotationsTest") {
@@ -258,6 +288,7 @@ group("host_unittest") {
     ":DisasmDebugTestAction",
     ":DisasmImmTestAction",
     ":DisasmModuleTestAction",
+    ":DisasmReleaseTestAction",
     ":DisasmScriptTestAction",
     ":DisasmUserAnnotationsTest",
   ]
