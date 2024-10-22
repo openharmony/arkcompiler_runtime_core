@@ -393,6 +393,8 @@ private:
     template <bool REF_CAN_BE_NULL>
     static void UpdateMovedVmRef(Value &ref);
 
+    static void UpdateManagedEntrypointArgRefs(EtsCoroutine *coroutine);
+
     void InitializeRandomEngine()
     {
         ASSERT(!randomEngine_);

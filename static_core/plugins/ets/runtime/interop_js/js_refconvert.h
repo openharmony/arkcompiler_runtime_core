@@ -156,6 +156,7 @@ inline JSRefConvert *JSRefConvertResolve(InteropCtx *ctx, Class *klass)
 }
 
 template <bool ALLOW_INIT = false>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool CheckClassInitialized(Class *klass)
 {
     if constexpr (ALLOW_INIT) {

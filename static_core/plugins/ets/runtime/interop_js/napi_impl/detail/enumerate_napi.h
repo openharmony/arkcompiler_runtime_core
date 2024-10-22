@@ -18,6 +18,7 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
+// CC-OFFNXT(G.PRE.02) code generation
 #define EVERY_SECOND2(first, second) , second
 #define EVERY_SECOND3(first, second, ...) , second EVERY_SECOND2(__VA_ARGS__)
 #define EVERY_SECOND4(first, second, ...) , second EVERY_SECOND3(__VA_ARGS__)
@@ -44,6 +45,7 @@
 #define PARAMS_PAIR(first, second, ...) \
     first second COUNT_PARAMS_PAIR(__VA_ARGS__, 8, 8, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1)(__VA_ARGS__)
 
+// CC-OFFNXT(G.PRE.06) list generation
 #define ENUMERATE_NAPI(FN_MACRO)                                                                                       \
     FN_MACRO(napi_resolve_deferred, napi_env, env, napi_deferred, deferred, napi_value, resolution)                    \
     FN_MACRO(napi_open_escapable_handle_scope, napi_env, env, napi_escapable_handle_scope *, result)                   \
