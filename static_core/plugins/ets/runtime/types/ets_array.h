@@ -178,7 +178,7 @@ public:
             // PreBarrier isn't needed as links inside the source object arn't changed.
             auto *barrierSet = ManagedThread::GetCurrent()->GetBarrierSet();
             if (!mem::IsEmptyBarrier(barrierSet->GetPostType())) {
-                barrierSet->PostBarrier(dst, 0, dst->ObjectSize());
+                barrierSet->PostBarrier(dst, GetDataOffset(), count);
             }
         }
     }
@@ -211,7 +211,7 @@ private:
             reinterpret_cast<AtomicWord *>(&dst[i])->store(reinterpret_cast<AtomicWord *>(&src[i])->load(ORDER), ORDER);
         }
         // 2. copy by references if any
-        stop = ((src.Size() - i) / OBJECT_POINTER_SIZE) * OBJECT_POINTER_SIZE;
+        stop = src.Size();
         for (; i < stop; i += OBJECT_POINTER_SIZE) {
             // Atomic with parameterized order reason: memory order defined as constexpr
             reinterpret_cast<AtomicRef *>(&dst[i])->store(reinterpret_cast<AtomicRef *>(&src[i])->load(ORDER), ORDER);
