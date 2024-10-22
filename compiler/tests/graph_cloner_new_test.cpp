@@ -170,10 +170,9 @@ HWTEST_F(GraphClonerTest, graph_cloner_test_002, TestSize.Level1)
 
         EXPECT_TRUE(graph->RunPass<LoopAnalyzer>());
 
-        GraphCloner cloner(graph, graph->GetAllocator(), graph->GetLocalAllocator());
-
-        ForEachNonRootLoop(graph, [&graph](Loop *loop) {
-            auto graph_clone = CloneGraph(graph);
+        auto graph_clone = CloneGraph(graph);
+        EXPECT_TRUE(GraphComparator().Compare(graph, graph_clone));
+        ForEachNonRootLoop(graph_clone, [&graph_clone](Loop *loop) {
             auto blocks = graph_clone->GetVectorBlocks();
             auto header = blocks[loop->GetHeader()->GetId()];
             auto preheader = blocks[loop->GetPreHeader()->GetId()];
