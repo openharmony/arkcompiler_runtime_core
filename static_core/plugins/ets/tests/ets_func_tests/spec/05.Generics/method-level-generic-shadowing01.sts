@@ -16,8 +16,7 @@
 /*---
 desc: 05.Generics
 name: issue14751.sts
-tags:
-- compile-only
+tags: [compile-only, negative]
 ---*/
 
 interface I<T> {
@@ -25,7 +24,7 @@ interface I<T> {
 }
 
 class B<T> implements I<T> {
-    private b: B<T>
+    private b: B<T> = new B<T>
 
     override get<T>(): I<T> { return this.b as I<T> }
 

@@ -207,9 +207,6 @@ spec/03.types/References_Types/3.8.12.Nullish_Types/nullable-lambda-default-para
 ### End Of Feature: Null safety tests
 
 ### Generic issues
-### Issue 19670
-spec/05.Generics/issue14751.sts
-spec/05.Generics/issue14752.sts
 ### Issue 19693
 spec/05.Generics/generic_02.sts
 ### Negative tests
@@ -476,7 +473,6 @@ spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_00.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_01.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_02.sts
 spec/05.Generics/issue14751.sts
-spec/05.Generics/issue14752.sts
 spec/05.Generics/issue15089_05.sts
 spec/05.Generics/issue15089_06.sts
 spec/05.Generics/issue15089_08.sts
