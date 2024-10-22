@@ -67,20 +67,26 @@ libarkassembler_configs = [
 ]
 libarkassembler_configs += plugin_libarkassembler_configs
 
+group("arktsassembler_header_deps") {
+  deps = [
+    ":ark_asm_meta_gen_h",
+    ":ark_asm_register_extensions_h",
+    ":isa_gen_libarkassembler_ins_create_api_h",
+    ":isa_gen_libarkassembler_ins_emit_h",
+    ":isa_gen_libarkassembler_isa_h",
+    ":isa_gen_libarkassembler_opcode_parsing_h",
+    ":isa_gen_libarkassembler_operand_types_print_h",
+  ]
+}
+
 ohos_source_set("libarktsassembler_static") {
   sources = libarkassembler_sources
 
   public_configs = libarkassembler_configs
 
   deps = [
-    ":ark_asm_meta_gen_h",
-    ":ark_asm_register_extensions_h",
-    ":isa_gen_libarkassembler_ins_create_api_h",
-    ":isa_gen_libarkassembler_ins_emit_h",
+    ":arktsassembler_header_deps",
     ":isa_gen_libarkassembler_ins_to_string_cpp",
-    ":isa_gen_libarkassembler_isa_h",
-    ":isa_gen_libarkassembler_opcode_parsing_h",
-    ":isa_gen_libarkassembler_operand_types_print_h",
     "$ark_root/compiler:libarktscompiler",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:libarktsfile",
@@ -113,14 +119,8 @@ ohos_source_set("libarktsassembler_frontend_set_static") {
   public_configs = libarkassembler_configs
 
   deps = [
-    ":ark_asm_meta_gen_h",
-    ":ark_asm_register_extensions_h",
-    ":isa_gen_libarkassembler_ins_create_api_h",
-    ":isa_gen_libarkassembler_ins_emit_h",
+    ":arktsassembler_header_deps",
     ":isa_gen_libarkassembler_ins_to_string_cpp",
-    ":isa_gen_libarkassembler_isa_h",
-    ":isa_gen_libarkassembler_opcode_parsing_h",
-    ":isa_gen_libarkassembler_operand_types_print_h",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
     "$ark_root/runtime:profiling_gen_profiling_gen_h",
   ]

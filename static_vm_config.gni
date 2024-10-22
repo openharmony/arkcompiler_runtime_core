@@ -18,7 +18,7 @@ if (!defined(ark_standalone_build)) {
   ark_standalone_build = false
 }
 
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
 if (ark_standalone_build) {
   import("//arkcompiler/toolchain/build/config/sanitizers/sanitizers.gni")

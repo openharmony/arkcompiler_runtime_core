@@ -12,9 +12,9 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
-ark_isa_gen("isa_gen_libabckit") {
+ark_isa_gen("abckit_isa_gen") {
   template_files = [
     "opc_to_string.h.erb",
     "ins_create_wrapper_api.inc.erb",
@@ -22,16 +22,23 @@ ark_isa_gen("isa_gen_libabckit") {
   sources = "templates"
   destination = "$target_gen_dir/generated"
   requires = [
-    "$ark_root/assembler/asm_isapi.rb",
-    "$ark_root/libpandafile/pandafile_isapi.rb",
+    "$ark_root_dynamic/assembler/asm_isapi.rb",
+    "$ark_root_dynamic/libpandafile/pandafile_isapi.rb",
   ]
 }
 
-ohos_source_set("libabckit_pandasm_wrapper_source_set") {
+group("abckit_pandasm_wrapper_source_set_header_deps") {
+  deps = [
+    ":abckit_isa_gen_ins_create_wrapper_api_inc",
+    ":abckit_isa_gen_opc_to_string_h",
+  ]
+}
+
+ohos_source_set("abckit_pandasm_wrapper_source_set") {
   sources = [ "pandasm_wrapper.cpp" ]
 
   include_dirs = [
-    "$ark_root",
+    "$ark_root_dynamic",
     "$target_gen_dir",
   ]
 
@@ -39,34 +46,31 @@ ohos_source_set("libabckit_pandasm_wrapper_source_set") {
   subsystem_name = "arkcompiler"
 
   configs = [
-    "$ark_root/:ark_config",
-    "$ark_root/assembler:arkassembler_public_config",
-    "$ark_root/libpandafile:arkfile_public_config",
-    "$ark_root/libpandabase:arkbase_public_config",
-    "$abckit_root:libabckit_coverage",
-    "$abckit_root:libabckit_config",
+    "$ark_root_dynamic/:ark_config",
+    "$ark_root_dynamic/assembler:arkassembler_public_config",
+    "$ark_root_dynamic/libpandafile:arkfile_public_config",
+    "$ark_root_dynamic/libpandabase:arkbase_public_config",
+    "$abckit_root:abckit_config",
   ]
 
   deps = [
-    ":isa_gen_libabckit_ins_create_wrapper_api_inc",
-    ":isa_gen_libabckit_opc_to_string_h",
-    "$ark_root/assembler:libarkassembler",
+    ":abckit_pandasm_wrapper_source_set_header_deps",
+    "$ark_root_dynamic/assembler:libarkassembler",
   ]
 }
 
-ohos_source_set("libabckit_abcfile_wrapper_source_set") {
+ohos_source_set("abckit_abcfile_wrapper_source_set") {
   sources = [ "abcfile_wrapper.cpp" ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 
   configs = [
-    "$ark_root:ark_config",
-    "$ark_root/libpandafile:arkfile_public_config",
-    "$ark_root/libpandabase:arkbase_public_config",
-    "$abckit_root:libabckit_coverage",
-    "$abckit_root:libabckit_config",
+    "$ark_root_dynamic:ark_config",
+    "$ark_root_dynamic/libpandafile:arkfile_public_config",
+    "$ark_root_dynamic/libpandabase:arkbase_public_config",
+    "$abckit_root:abckit_config",
   ]
 
-  deps = [ "$ark_root/assembler:libarkassembler" ]
+  deps = [ "$ark_root_dynamic/assembler:libarkassembler" ]
 }

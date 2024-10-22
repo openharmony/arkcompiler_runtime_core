@@ -50,7 +50,7 @@ declare_args() {
   }
 
   if (ark_static_standalone_build) {
-    enable_libabckit = false
+    abckit_enable = false
   }
 }
 

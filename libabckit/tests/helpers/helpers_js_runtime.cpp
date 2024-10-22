@@ -14,7 +14,7 @@
  */
 
 #include "helpers_runtime.h"
-#include "libabckit/src/logger.h"
+#include "logger.h"
 #include "ecmascript/napi/include/jsnapi.h"
 
 #include <iostream>

@@ -50,7 +50,7 @@ config("arkcompiler_public_config") {
 
   include_dirs += platform_include_dirs
 
-  if (enable_libabckit) {
+  if (abckit_enable) {
     intrinsics_gen_dir =
         get_label_info(":libarkcompiler_intrinsics_gen_inl(${host_toolchain})",
                        "target_gen_dir")
@@ -61,7 +61,7 @@ config("arkcompiler_public_config") {
   if (enable_bytecode_optimizer && plugin_enable_bytecode_optimizer) {
     defines += [ "ENABLE_BYTECODE_OPT" ]
   }
-  if (enable_libabckit) {
+  if (abckit_enable) {
     defines += [ "ENABLE_LIBABCKIT" ]
   }
 
@@ -187,9 +187,9 @@ if (!is_mac) {
 
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
-if (enable_libabckit && current_toolchain == host_toolchain) {
+if (abckit_enable && current_toolchain == host_toolchain) {
   libabckit_path = "$ark_root/../libabckit"
-  libabckit_deps = [ "$libabckit_path/src/templates/abckit_intrinsics:ark_gen_libabckit_inst_builder_abckit_intrinsics_inc" ]
+  libabckit_deps = [ "$libabckit_path/src/templates/abckit_intrinsics:abckit_ark_gen_inst_builder_abckit_intrinsics_inc" ]
   libabckit_includes = [
     "$libabckit_path",
     "$libabckit_path/src/adapter_static",
@@ -206,11 +206,7 @@ libarkcompiler_configs = [
   "$ark_root/runtime:arkruntime_public_config",
 ]
 
-ohos_shared_library("libarktscompiler") {
-  sources = libarkcompiler_sources
-
-  configs = libarkcompiler_configs
-
+group("arktscompiler_header_deps") {
   deps = [
     ":codegen_language_extensions_h",
     ":compiler_events_gen_h",
@@ -231,7 +227,6 @@ ohos_shared_library("libarktscompiler") {
     ":intrinsics_lse_heap_inv_args_inl",
     ":intrinsics_peephole_inl_h",
     ":ir_dyn_base_types_h",
-    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
     ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
@@ -257,11 +252,9 @@ ohos_shared_library("libarktscompiler") {
     ":plugin_create_pipeline_inl",
     ":source_languages_h",
     "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
-    "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
     "$ark_root/libpandafile:libarkfile_type_gen_h",
-    "$ark_root/libpandafile:libarktsfile",
     "$ark_root/runtime:arkruntime_gen_entrypoints_compiler_checksum_entrypoints_compiler_checksum_inl",
     "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
     "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_S",
@@ -272,6 +265,19 @@ ohos_shared_library("libarktscompiler") {
     "$ark_root/runtime:arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
     "$ark_root/runtime:plugins_entrypoints_gen_h",
     "$ark_root/runtime/asm_defines:asm_defines_generator",
+  ]
+}
+
+ohos_shared_library("libarktscompiler") {
+  sources = libarkcompiler_sources
+
+  configs = libarkcompiler_configs
+
+  deps = [
+    ":arktscompiler_header_deps",
+    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+    "$ark_root/libpandabase:libarktsbase",
+    "$ark_root/libpandafile:libarktsfile",
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
@@ -295,7 +301,7 @@ ohos_shared_library("libarktscompiler") {
     "$ark_root/compiler/optimizer/code_generator",
   ]
 
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     include_dirs += libabckit_includes
     deps += libabckit_deps
   }
@@ -315,66 +321,10 @@ ohos_source_set("libarktscompiler_frontend_static") {
   configs = libarkcompiler_configs
 
   deps = [
-    ":codegen_language_extensions_h",
-    ":compiler_events_gen_h",
-    ":compiler_interface_extensions_inl_h",
-    ":compiler_logger_components_inc",
-    ":compiler_options_gen_h",
-    ":cpu_features_gen_inc",
-    ":inst_builder_extensions_inl_h",
-    ":intrinsics_can_encode_inl",
-    ":intrinsics_codegen_ext_inl_h",
-    ":intrinsics_extensions_inl_h",
-    ":intrinsics_graph_checker_inl",
-    ":intrinsics_inline_inl_h",
-    ":intrinsics_inline_native_method_inl",
-    ":intrinsics_ir_build_inl_h",
-    ":intrinsics_ir_build_static_call_inl",
-    ":intrinsics_ir_build_virtual_call_inl",
-    ":intrinsics_lse_heap_inv_args_inl",
-    ":intrinsics_peephole_inl_h",
-    ":ir_dyn_base_types_h",
+    ":arktscompiler_header_deps",
     ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-    ":libarkcompiler_intrinsics_gen_inl_can_encode_builtin_inl",
-    ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
-    ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
-    ":libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
-    ":libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsic_flags_test_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsics_codegen_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsics_codegen_inl_h",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsics_flags_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsics_inline_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
-    ":libarkcompiler_intrinsics_gen_inl_intrinsics_peephole_inl",
-    ":libarkcompiler_opcodes_h_IR-instructions_md",
-    ":libarkcompiler_opcodes_h_arch_info_gen_h",
-    ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
-    ":libarkcompiler_opcodes_h_inst_checker_gen_h",
-    ":libarkcompiler_opcodes_h_inst_flags_inl",
-    ":libarkcompiler_opcodes_h_opcodes_h",
-    ":libarkcompiler_opcodes_h_savestate_optimization_call_visitors_inl",
-    ":pipeline_includes_h",
-    ":plugin_create_pipeline_inl",
-    ":source_languages_h",
-    "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
     "$ark_root/libpandabase:libarktsbase_frontend_static",
-    "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
-    "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
-    "$ark_root/libpandafile:libarkfile_type_gen_h",
     "$ark_root/libpandafile:libarktsfile_frontend_static",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_compiler_checksum_entrypoints_compiler_checksum_inl",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_S",
-    "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_gen_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_enum_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_gen_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_intrinsics_h",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_unimplemented_intrinsics-inl_cpp",
-    "$ark_root/runtime:plugins_entrypoints_gen_h",
-    "$ark_root/runtime/asm_defines:asm_defines_generator",
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
@@ -396,7 +346,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
     "$ark_root/compiler/optimizer/code_generator",
   ]
 
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     include_dirs += libabckit_includes
     deps += libabckit_deps
   }
@@ -422,7 +372,7 @@ ark_isa_gen("isa_gen_libarkcompiler") {
 
 ark_gen("libarkcompiler_intrinsics_gen_inl") {
   gen_runtime_path = "$target_gen_dir/../runtime"
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     data = [ "$gen_runtime_path/abckit_intrinsics.yaml" ]
   } else {
     data = [ "$gen_runtime_path/intrinsics.yaml" ]
@@ -451,12 +401,12 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
   ]
   requires = [ "$ark_root/libpandabase/utils.rb" ]
   extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     extra_dependencies += [
-      "$libabckit_path/src/templates/dyn_intrinsics:isa_gen_libabckit_dyn_intrinsics_enum_inc",
-      "$libabckit_path/src/templates/dyn_intrinsics:isa_gen_libabckit_get_dyn_intrinsics_names_inc",
-      "$libabckit_path/src/templates/dyn_intrinsics:isa_gen_libabckit_dyn_intrinsics_flags_inc",
-      "$libabckit_path:concat_abckit_intrinsics_yaml",
+      "$libabckit_path/src/templates/dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_enum_inc",
+      "$libabckit_path/src/templates/dyn_intrinsics:abckit_isa_gen_get_dyn_intrinsics_names_inc",
+      "$libabckit_path/src/templates/dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_flags_inc",
+      "$libabckit_path/src:abckit_concat_intrinsics_yaml",
     ]
   }
 }

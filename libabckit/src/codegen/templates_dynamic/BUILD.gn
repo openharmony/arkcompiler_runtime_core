@@ -12,8 +12,9 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
-ark_isa_gen("isa_gen_libabckit") {
+ark_isa_gen("abckit_isa_gen") {
   template_files = [
     "insn_selection_dynamic.h.erb",
     "insn_selection_dynamic.cpp.erb",
@@ -24,31 +25,31 @@ ark_isa_gen("isa_gen_libabckit") {
   destination = "$target_gen_dir/../generated"
   requires = [
     "codegen_dynamic_isapi.rb",
-    "$ark_root/assembler/asm_isapi.rb",
+    "$ark_root_dynamic/assembler/asm_isapi.rb",
   ]
 }
 
-ark_isa_gen("isa_gen_libabckit") {
+ark_isa_gen("abckit_isa_gen") {
   template_files = [ "ic_info.h.erb" ]
   sources = "."
   destination = "$target_gen_dir/../generated"
   requires = [
     "codegen_dynamic_isapi.rb",
-    "$ark_root/assembler/asm_isapi.rb",
+    "$ark_root_dynamic/assembler/asm_isapi.rb",
   ]
 }
 
-ark_isa_gen("isa_gen_libabckit") {
+ark_isa_gen("abckit_isa_gen") {
   template_files = [ "generate_ecma.inl.erb" ]
   sources = "."
-  requires = [ "$ark_root/assembler/asm_isapi.rb" ]
+  requires = [ "$ark_root_dynamic/assembler/asm_isapi.rb" ]
   destination = "$target_gen_dir/../generated"
 }
 
 ark_gen_file("codegen_visitors_dyn_inc") {
-  extra_dependencies = [ "$ark_root:concat_plugins_yamls" ]
+  extra_dependencies = [ "$ark_root_dynamic:concat_plugins_yamls" ]
   template_file = "codegen_visitors_dyn.inc.erb"
-  data_file = "$ark_root/templates/plugin_options.yaml"
-  requires = [ "$ark_root/templates/plugin_options.rb" ]
+  data_file = "$ark_root_dynamic/templates/plugin_options.yaml"
+  requires = [ "$ark_root_dynamic/templates/plugin_options.rb" ]
   output_file = "$target_gen_dir/../generated/codegen_visitors_dyn.inc"
 }

@@ -13,7 +13,7 @@
 def collect_implemented_api_map(excluded_funcs)
     implemented_api_raw = nil
     Dir.chdir(File.dirname(__FILE__)) do
-        implemented_api_raw = `python get_abckit_status.py --print-implemented`.split(/\n/)
+        implemented_api_raw = `python abckit_status.py --print-implemented`.split(/\n/)
     end
 
     implemented_api_map = {}

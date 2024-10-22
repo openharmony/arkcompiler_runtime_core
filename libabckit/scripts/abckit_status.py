@@ -37,7 +37,7 @@ args = get_args()
 API_PATTERN = "^[\w,\d,_, ,*]+\(\*([\w,\d,_]+)\)\(.*"
 domain_patterns = ["struct Abckit\S*Api\s\{", "struct Abckit\S*ApiStatic\s\{", "struct Abckit\S*ApiDynamic\s\{"]
 libabckit_dir = os.path.join(script_dir, "..")
-libabckit_tests = os.path.join(libabckit_dir, "tests")
+abckit_tests = os.path.join(libabckit_dir, "tests")
 
 sources = {
     "include/c/ir_core.h",
@@ -265,7 +265,7 @@ def get_tests_statistics(api, tests):
 
 def main(api) :
     tests = []
-    for dirpath, _, filenames in os.walk(libabckit_tests):
+    for dirpath, _, filenames in os.walk(abckit_tests):
         for name in filenames:
             if name.endswith(".cpp"):
                 tests += collect_tests(os.path.join(dirpath, name), api)

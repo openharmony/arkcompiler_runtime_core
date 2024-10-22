@@ -24,7 +24,7 @@ if (ark_standalone_build) {
 ohos_static_library("libarktsbytecodeopt_package") {
   deps = []
   if (enable_static_vm) {
-    if (enable_libabckit) {
+    if (abckit_enable) {
       deps += [ ":libarktsbytecodeopt" ]
     } else {
       deps += [ ":libarktsbytecodeopt_frontend_static" ]
@@ -71,11 +71,11 @@ libarkbytecodeopt_configs = [
 
 libarkbytecodeopt_configs += plugin_bytecodeopt_configs
 
-if (enable_libabckit && current_toolchain == host_toolchain) {
+if (abckit_enable && current_toolchain == host_toolchain) {
   libabckit_path = "$ark_root/../libabckit"
   libabckit_deps = [
-    "$libabckit_path/src/templates/abckit_intrinsics:ark_gen_libabckit_abckit_intrinsics_inl",
-    "$libabckit_path/src/templates/abckit_intrinsics:ark_gen_libabckit_abckit_intrinsics_vreg_width_h",
+    "$libabckit_path/src/templates/abckit_intrinsics:abckit_ark_gen_abckit_intrinsics_inl",
+    "$libabckit_path/src/templates/abckit_intrinsics:abckit_ark_gen_abckit_intrinsics_vreg_width_h",
   ]
 }
 
@@ -102,7 +102,7 @@ ohos_shared_library("libarktsbytecodeopt") {
   ]
 
   deps += plugin_bytecodeopt_deps
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     deps += libabckit_deps
   }
 
@@ -141,7 +141,7 @@ ohos_static_library("libarktsbytecodeopt_frontend_static") {
 
   deps += plugin_bytecodeopt_deps
 
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     deps += libabckit_deps
   }
 

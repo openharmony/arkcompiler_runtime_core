@@ -11,11 +11,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
 
-ohos_source_set("libabckit_ir_builder_dynamic_source_set") {
+group("abckit_ir_builder_dynamic_source_set_header_deps") {
+  deps = [
+    "../templates/abckit_intrinsics:abckit_ark_gen_inst_builder_abckit_intrinsics_inc",
+    "templates:abckit_isa_gen_bytecode_inst-inl_gen_h",
+    "templates:abckit_isa_gen_bytecode_inst_enum_gen_h",
+  ]
+}
+
+ohos_source_set("abckit_ir_builder_dynamic_source_set") {
   sources = [
     "$target_gen_dir/generated/inst_builder_dyn_gen.cpp",
     "inst_builder_dyn.cpp",
@@ -23,47 +31,47 @@ ohos_source_set("libabckit_ir_builder_dynamic_source_set") {
   ]
 
   cross_values_gen_dir = get_label_info(
-          "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+          "$ark_root_static/cross_values:cross_values_getters_generate(${default_toolchain})",
           "target_gen_dir")
   entrypoints_compiler_gen_dir = get_label_info(
-          "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
+          "$ark_root_static/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
           "target_gen_dir")
   intrinsics_gen_dir = get_label_info(
-          "$ark_root/../libabckit/src/templates/dyn_intrinsics:isa_gen_libabckit_dyn_intrinsics_enum_inl",
+          "$abckit_root/src/templates/dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_enum_inl",
           "target_gen_dir")
   intrinsics_compiler_gen_dir = get_label_info(
-          "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
+          "$ark_root_static/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
           "target_gen_dir")
   include_dirs = [
     "$target_gen_dir",
     "$entrypoints_compiler_gen_dir/generated",
     "$intrinsics_gen_dir/../generated",
     "$cross_values_gen_dir",
-    "$ark_root/runtime",
+    "$ark_root_static/runtime",
     "$intrinsics_compiler_gen_dir",
-    "$ark_root",  # this target should not include headers from dynamic runtime,
-                  # so static_core must be listed first
-    "$ark_root/..",
+    "$ark_root_static",  # this target should not include headers from dynamic
+
+    # runtime,
+
+    # so static_core must be listed first
+    "$ark_root_static/..",
   ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 
   configs = [
-    "$ark_root/:ark_config",
-    "$ark_root/compiler:arkcompiler_public_config",
-    "$ark_root/libpandabase:arkbase_public_config",
-    "$ark_root/libpandafile:arkfile_public_config",
-    "$ark_root/runtime:profiling_gen_public_config",
-    "$abckit_root:libabckit_coverage",
-    "$abckit_root:libabckit_config",
+    "$ark_root_static/:ark_config",
+    "$ark_root_static/compiler:arkcompiler_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
+    "$ark_root_static/libpandafile:arkfile_public_config",
+    "$ark_root_static/runtime:profiling_gen_public_config",
+    "$abckit_root:abckit_config",
   ]
 
   deps = [
-    "$ark_root/compiler:libarktscompiler",
-    "../templates/abckit_intrinsics:ark_gen_libabckit_inst_builder_abckit_intrinsics_inc",
-    "templates:isa_gen_libabckit_bytecode_inst-inl_gen_h",
-    "templates:isa_gen_libabckit_bytecode_inst_enum_gen_h",
-    "templates:isa_gen_libabckit_inst_builder_dyn_gen_cpp",
+    ":abckit_ir_builder_dynamic_source_set_header_deps",
+    "$ark_root_static/compiler:libarktscompiler",
+    "templates:abckit_isa_gen_inst_builder_dyn_gen_cpp",
   ]
 }

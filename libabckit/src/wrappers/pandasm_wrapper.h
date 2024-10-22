@@ -162,7 +162,7 @@ struct InsWrapper {
     {
     }
 // NOLINTNEXTLINE(readability-duplicate-include)
-#include <generated/ins_create_wrapper_api.inc>
+#include "arkcompiler/runtime_core/libabckit/src/wrappers/generated/ins_create_wrapper_api.inc"
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 
@@ -188,7 +188,7 @@ public:
         return function;
     }
 // NOLINTNEXTLINE(readability-duplicate-include)
-#include <generated/ins_create_wrapper_api.inc>
+#include "arkcompiler/runtime_core/libabckit/src/wrappers/generated/ins_create_wrapper_api.inc"
 };
 
 // std::string DeMangleName(const std::string &name);

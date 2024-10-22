@@ -65,7 +65,7 @@ build_standalone() {
     set -e
     rm -rf out/$TARGET
 
-    ./ark.py $TARGET libabckit_packages --gn-args="is_standard_system=true libabckit_with_sanitizers=$SANITIZERS enable_notice_collection=false enable_libabckit_coverage=$COVERAGE ohos_components_checktype=3 enable_libabckit=true"
+    ./ark.py $TARGET abckit_packages --gn-args="is_standard_system=true abckit_with_sanitizers=$SANITIZERS enable_notice_collection=false abckit_with_coverage=$COVERAGE ohos_components_checktype=3 abckit_enable=true"
 
     set +e
 }
@@ -90,7 +90,7 @@ run_check_documentation() {
 
 build_and_run_tests() {
     set -e
-    ninja AbcKitTest
+    ninja abckit_gtests
 
     LSAN_OPTIONS=""
     if [ "$SANITIZERS" = "true" ]; then
@@ -109,10 +109,10 @@ build_and_run_tests() {
     LD_LIBRARY_PATH=./arkcompiler/runtime_core/:./arkcompiler/ets_runtime/:./thirdparty/icu/:./thirdparty/zlib/ \
         LSAN_OPTIONS="$LSAN_OPTIONS" \
         ASAN_OPTIONS=verify_asan_link_order=0 \
-        ./tests/unittest/arkcompiler/runtime_core/libabckit/AbcKitTest
+        ./tests/unittest/arkcompiler/runtime_core/libabckit/abckit_gtests
 
     if [ "$SANITIZERS" = "false" ]; then
-        ninja abckit_stress_test_package
+        ninja abckit_stress_tests_package
 
         if [ "$TARGET" = "x64.debug" ]; then
             ../../arkcompiler/runtime_core/libabckit/tests/stress/stress.py --build-dir $(realpath .)

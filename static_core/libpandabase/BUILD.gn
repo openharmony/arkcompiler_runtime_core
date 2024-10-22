@@ -193,16 +193,18 @@ libarkbase_configs = [
   "$ark_root:ark_config",
 ]
 
-libarkbase_deps = [
-  ":base_options_h",
-  ":coherency_line_size_h",
-  ":events_gen",
-  ":generate_version_file",
-  ":logger_enum_gen_h",
-  ":logger_impl_gen_h",
-  ":plugins_regmasks_gen",
-  ":source_language_gen",
-]
+group("arktsbase_header_deps") {
+  deps = [
+    ":base_options_h",
+    ":coherency_line_size_h",
+    ":events_gen",
+    ":generate_version_file",
+    ":logger_enum_gen_h",
+    ":logger_impl_gen_h",
+    ":plugins_regmasks_gen",
+    ":source_language_gen",
+  ]
+}
 
 ohos_source_set("libarktsbase_static") {
   sources = libarkbase_sources
@@ -214,7 +216,7 @@ ohos_source_set("libarktsbase_static") {
 
   public_configs = libarkbase_configs
 
-  deps = libarkbase_deps
+  deps = [ ":arktsbase_header_deps" ]
 
   if (ark_static_standalone_build) {
     deps += [ sdk_libc_secshared_dep ]
@@ -242,7 +244,7 @@ ohos_source_set("libarktsbase_frontend_set_static") {
 
   public_configs = libarkbase_configs
 
-  deps = libarkbase_deps
+  deps = [ ":arktsbase_header_deps" ]
 
   external_deps = [ sdk_libc_secshared_dep ]
 

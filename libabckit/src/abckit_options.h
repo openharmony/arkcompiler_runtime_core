@@ -16,7 +16,7 @@
 #ifndef LIBABCKIT_SRC_ABCKIT_OPTIONS_H
 #define LIBABCKIT_SRC_ABCKIT_OPTIONS_H
 
-#include "arkcompiler/runtime_core/libabckit/generated/abckit_options_gen.h"
+#include "arkcompiler/runtime_core/libabckit/src/generated/abckit_options_gen.h"
 
 namespace libabckit {
 extern libabckit::Options g_abckitOptions;
