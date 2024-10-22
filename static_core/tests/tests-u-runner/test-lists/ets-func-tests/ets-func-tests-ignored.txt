@@ -524,3 +524,11 @@ spec/partial_type/partialType_main.sts
 spec/07.expressions/Object_Literal/issue14680.sts
 ### Issue 19677
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_03.sts
+
+### Issue 15808
+regression/15588_wrong_readonly_field_return.sts
+### Issue 15808 end
+
+### Issue 20260
+regression/16169_false_unreachable_statement_after_class.sts
+### Issue 20260 end
