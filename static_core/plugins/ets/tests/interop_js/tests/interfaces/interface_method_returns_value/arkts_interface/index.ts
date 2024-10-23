@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 const etsVm = require('lib/module/ets_interop_js_napi');
 class TestModule {
     descriptorPrefix: string;
@@ -19,41 +20,41 @@ class TestModule {
       this.descriptorPrefix = 'L' + name.replaceAll('.', '/') + '/';
     }
 
-    getClass(name) { return etsVm.getClass(this.descriptorPrefix + name + ';'); }
-    getFunction(name) { return etsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name); }
+    getClass(name): Object { return etsVm.getClass(this.descriptorPrefix + name + ';'); }
+    getFunction(name): Object { return etsVm.getFunction(this.descriptorPrefix + 'ETSGLOBAL;', name); }
 
     static descriptorPrefix;
   };
 
-function getTestModule(name) { return new TestModule(name); }
+function getTestModule(name): Object { return new TestModule(name); }
 
-const testModule = getTestModule('interface_method_return_value')
+const testModule = getTestModule('interface_method_return_value');
 
-export function test(){
+export function test(): Object {
     const ahcGetter = testModule.getFunction('getThroughInterface');
     const lol = ahcGetter();
     const directClass = testModule.getClass('InstanceClass');
     const dir = new directClass();
-    return true
+    return true;
 }
 
-export function getLiteralTypeReturn(){
+export function getLiteralTypeReturn(): Object {
     const getterFn = testModule.getFunction('getBoolValue');
     const classInstance = getterFn();
     const expectedFalse = classInstance.getBoolean();
     return typeof expectedFalse === 'boolean' && !expectedFalse;
 }
 
-export function getNativeArrayReturn(){
+export function getNativeArrayReturn(): Object {
     const getterFn = testModule.getFunction('getArrayValue');
     const classInstance = getterFn();
     const result = classInstance.getArray();
-    const [ destructuredFirst ] = result;
-    const canDestructureCorrectly = destructuredFirst === result[0]
+    const [destructuredFirst] = result;
+    const canDestructureCorrectly = destructuredFirst === result[0];
     return Array.isArray(result) && canDestructureCorrectly;
 }
 
-export function getRecordTypeReturn(){
+export function getRecordTypeReturn(): Object {
     const getterFn = testModule.getFunction('getRefValue');
     const classInstance = getterFn();
     const returnedRecord = classInstance.getRecord();
@@ -62,29 +63,31 @@ export function getRecordTypeReturn(){
     return shouldBeValidFirst && isMissingOptionUndefined;
 }
 
-export function getRefTypeReturn(){
+export function getRefTypeReturn(): Object {
     const getterFn = testModule.getFunction('getRefValue');
     const classInstance = getterFn();
-    const canGetInterfaceMethod = Boolean(classInstance.getLiteral) && typeof classInstance.getLiteral === 'function'
-    const canGetNotDescribedMethod = Boolean(classInstance.methodNotDeclaredInInterface)
+    const canGetInterfaceMethod = Boolean(classInstance.getLiteral) && typeof classInstance.getLiteral === 'function';
+    const canGetNotDescribedMethod = Boolean(classInstance.methodNotDeclaredInInterface);
     let failsOnInexistentMethod: boolean = false;
 
     try {
-        classInstance.methodYouDontHave()
+        classInstance.methodYouDontHave();
     } catch {
         failsOnInexistentMethod = true;
     }
     return canGetInterfaceMethod && canGetNotDescribedMethod && failsOnInexistentMethod;
 }
 
-export function getUnion(){
+export function getUnion(): Object {
     const getterFn = testModule.getFunction('getUnion');
     // @ts-ignore
     const instance = getterFn();
-    const foundResults: (number | boolean | string)[] = []
+    const foundResults: (number | boolean | string)[] = [];
     while (!foundResults.includes(1234) && !foundResults.includes(false) && !foundResults.includes('stringValue')) {
         const runResult = instance.getUnion();
-        if (!foundResults.includes(runResult)) foundResults.push(runResult)
+        if (!foundResults.includes(runResult)) {
+            foundResults.push(runResult);
+        }
     }
     return true;
 }

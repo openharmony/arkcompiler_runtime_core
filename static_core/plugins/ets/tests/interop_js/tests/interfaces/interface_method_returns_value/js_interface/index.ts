@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 export const STRING_VALUE = 'Panda';
 export const INT_VALUE = Number.MAX_SAFE_INTEGER;
 
@@ -26,102 +25,105 @@ export enum ENUM_VALUE {
     OPTION_ONE,
     OPTION_TWO,
     OPTION_THREE
-}
+};
 
-type TEST_TUPLE = [ string, number ]
-const TUPLE_VALUE: TEST_TUPLE = ['abc', 123 ]
+type AnyType = {};
+
+type TEST_TUPLE = [string, number];
+const TUPLE_VALUE: TEST_TUPLE = ['abc', 123];
 
 export interface AbstractInterface {
-    value: string
-}
+    value: string;
+};
 
 export interface ExtensionInterface {
-    extendingProperty: number
-}
+    extendingProperty: number;
+};
 
-export type TFunctionReturnsType<T> = () => T
-export type TFunctionReturnsAny = TFunctionReturnsType<any>
-export type TFunctionReturnsString = TFunctionReturnsType<string>
-export type TFunctionReturnsNumber = TFunctionReturnsType<number>
-export type TFunctionReturnsBigInt = TFunctionReturnsType<bigint>
-export type TFunctionReturnsBoolean = TFunctionReturnsType<boolean>
-export type TFunctionReturnsStringLiteral = TFunctionReturnsType<"Panda">
+export type TFunctionReturnsType<T> = () => T;
+export type TFunctionReturnsAny = TFunctionReturnsType<AnyType>;
+export type TFunctionReturnsString = TFunctionReturnsType<string>;
+export type TFunctionReturnsNumber = TFunctionReturnsType<number>;
+export type TFunctionReturnsBigInt = TFunctionReturnsType<bigint>;
+export type TFunctionReturnsBoolean = TFunctionReturnsType<boolean>;
+export type TFunctionReturnsStringLiteral = TFunctionReturnsType<'Panda'>;
 export type TFunctionReturnsNumberLiteral = TFunctionReturnsType<1234>
-export type TFunctionReturnsEnum = TFunctionReturnsType<typeof ENUM_VALUE>
-export type TFunctionReturnsNull = TFunctionReturnsType<null>
-export type TFunctionReturnsUndefined = TFunctionReturnsType<undefined>
-export type TFunctionReturnsFunctionOfType<T> = (arg?: T) => TFunctionReturnsType<T>
+export type TFunctionReturnsEnum = TFunctionReturnsType<typeof ENUM_VALUE>;
+export type TFunctionReturnsNull = TFunctionReturnsType<null>;
+export type TFunctionReturnsUndefined = TFunctionReturnsType<undefined>;
+export type TFunctionReturnsFunctionOfType<T> = (arg?: T) => TFunctionReturnsType<T>;
 
 export class GenericInterface {
-    getAny(): any {
-        const randomValues = [ STRING_VALUE, INT_VALUE, FLOAT_VALUE, BOOLEAN_VALUE, NULL_VALUE, UNDEFINED, new Array(2).fill(' '), <Record<string, any>>{}]
+    getAny(): AnyType {
+        const randomValues = [STRING_VALUE, INT_VALUE, FLOAT_VALUE, BOOLEAN_VALUE, NULL_VALUE,
+            UNDEFINED, new Array(2).fill(' '), <Record<string, AnyType>>{}];
         const index = Math.round(Math.random() * randomValues.length);
         return randomValues[index];
     }
 
-    public getInt: TFunctionReturnsNumber = function(){
+    public getInt: TFunctionReturnsNumber = function(): Object {
         return Number(INT_VALUE);
     }
 
-    public getNegativeInt: TFunctionReturnsNumber = function(){
-        return Number(INT_VALUE)*-1;
+    public getNegativeInt: TFunctionReturnsNumber = function(): Object {
+        return Number(INT_VALUE) * -1;
     }
 
-    public getInfinity: TFunctionReturnsNumber = function(){
+    public getInfinity: TFunctionReturnsNumber = function(): Object {
         return Number.POSITIVE_INFINITY;
     }
 
-    public getNegativeInfinity: TFunctionReturnsNumber = function(){
+    public getNegativeInfinity: TFunctionReturnsNumber = function(): Object {
         return Number.NEGATIVE_INFINITY;
     }
 
-    public getNanAsNumber: TFunctionReturnsNumber = function(){
+    public getNanAsNumber: TFunctionReturnsNumber = function(): Object {
         return Number.NaN;
     }
 
-    public getBigInt: TFunctionReturnsBigInt = function (){
+    public getBigInt: TFunctionReturnsBigInt = function (): Object {
         return BigInt(INT_VALUE);
     }
 
-    public getFloat: TFunctionReturnsNumber = function (){
+    public getFloat: TFunctionReturnsNumber = function (): Object {
         return FLOAT_VALUE;
     }
 
-    public getString: TFunctionReturnsString = function (){
+    public getString: TFunctionReturnsString = function (): Object {
         return STRING_VALUE;
     }
 
-    public getBoolean: TFunctionReturnsBoolean = function(){
+    public getBoolean: TFunctionReturnsBoolean = function(): Object {
         return BOOLEAN_VALUE;
     }
 
-    public getTuple(): TEST_TUPLE{
-        return [ 'tuple_item_0', 1 ]
+    public getTuple(): TEST_TUPLE {
+        return ['tuple_item_0', 1];
     }
 
     public getGeneric<T extends {}>(arg: T): T & ExtensionInterface {
-        return { ...arg, extendingProperty: 0 }
+        return { ...arg, extendingProperty: 0 };
     }
 
     public getFunctionReturningType<T>(arg?: T): () => T {
         return (arg?: T) => 0 as T;
     }
 
-    public getEnum: TFunctionReturnsEnum = function() {
-        return ENUM_VALUE
+    public getEnum: TFunctionReturnsEnum = function(): Object {
+        return ENUM_VALUE;
     }
 
-    public getNull: TFunctionReturnsNull = function(){
+    public getNull: TFunctionReturnsNull = function(): Object {
         return NULL_VALUE;
     }
 
-    public getUndefined: TFunctionReturnsUndefined = function(){
+    public getUndefined: TFunctionReturnsUndefined = function(): Object {
         return UNDEFINED;
     }
 }
 
 export const genericInterfaceImplementation: GenericInterface = {
-    getAny(){
+    getAny() {
         const randomValues = [
             STRING_VALUE,
             INT_VALUE,
@@ -130,7 +132,7 @@ export const genericInterfaceImplementation: GenericInterface = {
             NULL_VALUE,
             UNDEFINED,
             new Array(2).fill(' '),
-            <Record<string, any>>{}
+            <Record<string, AnyType>>{}
         ];
         const index = Math.round(Math.random() * randomValues.length);
         return randomValues[index];
@@ -180,7 +182,7 @@ export const genericInterfaceImplementation: GenericInterface = {
         return { ...arg, extendingProperty: Object.keys(arg ?? {}).length * -1 }
     },
 
-    getFunctionReturningType<T>(arg?: T){
+    getFunctionReturningType<T>(arg?: T) {
         return () => {
             console.log('reached')
             switch (typeof arg) {
@@ -196,19 +198,19 @@ export const genericInterfaceImplementation: GenericInterface = {
         }
     },
 
-    getEnum(){
-        return ENUM_VALUE
+    getEnum() {
+        return ENUM_VALUE;
     },
 
-    getNull(){
+    getNull() {
         return NULL_VALUE;
     },
 
-    getUndefined(){
+    getUndefined() {
         return UNDEFINED;
     }
 };
 
 export const testObject = {
-    a: 1
-}
+    a: 1;
+};
