@@ -26,12 +26,6 @@ export {AsyncIdentity};
 exports.AsyncIdentity = AsyncIdentity;
 
 
-function _$trigger_cctor$_(): void { return {} as any; };
-(_$trigger_cctor$_ as any) = ETSGLOBAL._$trigger_cctor$_;
-export {_$trigger_cctor$_};
-exports._$trigger_cctor$_ = _$trigger_cctor$_;
-
-
 function AsyncIdentity$asyncimpl(param: number): any { return {} as any; };
 (AsyncIdentity$asyncimpl as any) = ETSGLOBAL.AsyncIdentity$asyncimpl;
 export {AsyncIdentity$asyncimpl};

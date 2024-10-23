@@ -32,12 +32,6 @@ export {ForEach};
 exports.ForEach = ForEach;
 
 
-function _$trigger_cctor$_(): void { return {} as any; };
-(_$trigger_cctor$_ as any) = ETSGLOBAL._$trigger_cctor$_;
-export {_$trigger_cctor$_};
-exports._$trigger_cctor$_ = _$trigger_cctor$_;
-
-
 class GenericClass<T extends Object> {
     public identity(x: T): T { return {} as any; };
     constructor() {};

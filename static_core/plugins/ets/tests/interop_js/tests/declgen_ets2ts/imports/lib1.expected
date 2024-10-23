@@ -16,17 +16,11 @@
 declare const exports: any;
 let ETSGLOBAL: any = (globalThis as any).Panda.getClass('LETSGLOBAL;');
 
-import { Lib2Class, Lib2Class2, IntAlias,  } from "./lib2";
+import { Lib2Class, Lib2Class2, IntAlias } from "./lib2";
 
 function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
 _$init$_();
-
-function _$trigger_cctor$_(): void { return {} as any; };
-(_$trigger_cctor$_ as any) = ETSGLOBAL._$trigger_cctor$_;
-export {_$trigger_cctor$_};
-exports._$trigger_cctor$_ = _$trigger_cctor$_;
-
 
 class C {
     public constructor() {};

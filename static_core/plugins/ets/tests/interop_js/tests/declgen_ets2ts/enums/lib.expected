@@ -20,12 +20,6 @@ function _$init$_(): void { return {} as any; };
 (_$init$_ as any) = ETSGLOBAL._$init$_;
 _$init$_();
 
-function _$trigger_cctor$_(): void { return {} as any; };
-(_$trigger_cctor$_ as any) = ETSGLOBAL._$trigger_cctor$_;
-export {_$trigger_cctor$_};
-exports._$trigger_cctor$_ = _$trigger_cctor$_;
-
-
 enum Letter {
     A = 0,
     B = 1,

@@ -44,12 +44,6 @@ export {ReplaceFirst};
 exports.ReplaceFirst = ReplaceFirst;
 
 
-function _$trigger_cctor$_(): void { return {} as any; };
-(_$trigger_cctor$_ as any) = ETSGLOBAL._$trigger_cctor$_;
-export {_$trigger_cctor$_};
-exports._$trigger_cctor$_ = _$trigger_cctor$_;
-
-
 class Simple {
     public constructor(x: number) {};
     public val: number = {} as any;

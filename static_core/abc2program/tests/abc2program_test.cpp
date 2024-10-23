@@ -91,7 +91,6 @@ TEST_F(Abc2ProgramHelloWorldTest, RecordTable)
 TEST_F(Abc2ProgramHelloWorldTest, Functions)
 {
     std::set<std::string> expectedFunctions = {"ETSGLOBAL._$init$_:void;",
-                                               "ETSGLOBAL._$trigger_cctor$_:void;",
                                                "ETSGLOBAL._cctor_:void;",
                                                "ETSGLOBAL.main:void;",
                                                "HelloWorld._ctor_:HelloWorld;void;",
@@ -147,7 +146,6 @@ TEST_F(Abc2ProgramFunctionsTest, Functions)
 {
     std::set<std::string> expectedFunctions = {
         "ETSGLOBAL._$init$_:void;",
-        "ETSGLOBAL._$trigger_cctor$_:void;",
         "ETSGLOBAL._cctor_:void;",
         "ETSGLOBAL.bar:f64;std.core.String;",
         "ETSGLOBAL.foo:std.core.String;std.core.String;",
