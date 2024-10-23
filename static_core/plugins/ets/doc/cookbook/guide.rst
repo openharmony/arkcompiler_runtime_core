@@ -16,12 +16,10 @@ How to Use the Cookbook
 =======================
 
 The main goal of this cookbook is to provide recipes for all partially
-supported features and explicitly list all unsupported features.
-
-The document is built on the feature-by-feature basis, and if you do not
-find some feature, then you can safely consider it **supported**. Otherwise,
-a recipe will give you a suggestion on how to rewrite your code and work
-around an unsupported case.
+supported features, and explicitly list all unsupported features. The document
+is built on the feature-by-feature basis. If you do not find a feature, then
+you can safely consider it **supported**. Otherwise, a recipe will give you
+a suggestion on how to rewrite your code and work around an unsupported case.
 
 |
 
@@ -49,18 +47,21 @@ The original |TS| code containing the keyword ``var``:
         return x + ten
     }
 
+|
+
 .. _Severity Levels:
 
 Severity Levels
 ---------------
 
-Each recipe is marked with the severity level.
-The supported values are as follows:
+Each recipe has a severity level mark. The supported values are as follows:
 
 - |CB_ERROR|: You are to follow the recipe, otherwise program compilation fails.
 - |CB_WARNING|: You are highly recommended to follow the recipe. Failing to
   follow the recipe will not affect the compilation currently, but will cause
   compilation failure in the future versions.
+
+|
 
 .. _Status of Unsupported Features:
 
@@ -73,8 +74,8 @@ Currently unsupported are mainly the features that degrade the following:
 - Project build time, by requiring extra support during compilation.
 
 However, the |LANG| team reserves the right to reconsider and **shrink** the
-list in the future releases based on the feedback from the developers,
-and on more real-world data experiments.
+list in future releases based on the developer feedback and more real-world
+data experiments.
 
 |
 

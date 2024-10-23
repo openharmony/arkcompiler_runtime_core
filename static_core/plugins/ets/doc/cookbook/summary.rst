@@ -44,8 +44,6 @@ compiler verifying code correctness, eliminating many runtime type checks,
 and improving performance. To achieve this, the usage of type ``any`` is
 prohibited in |LANG|.
 
-|
-
 Example
 ~~~~~~~
 
@@ -93,7 +91,7 @@ Changing Object Layout in Runtime Is Prohibited
 -----------------------------------------------
 
 To achieve maximum performance benefits, |LANG| requires the layout of objects
-to not change during program execution. In other words, it is prohibited to do
+not to change during program execution. In other words, it is prohibited to do
 the following:
 
 - Add new properties or methods to objects;
@@ -207,9 +205,9 @@ Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~
 
 Loading language operators with extra semantics overcomplicates the language
-specification, makes the developers remember all possible corner cases with
-appropriate handling rules, and in some cases causes some undesired runtime
-overhead.
+specification, makes developers remember all possible corner cases with
+appropriate handling rules, and causes some undesired runtime overhead in
+certain cases.
 
 According to our observations and experiments, this feature is not popular
 already in |TS|. It is used in less than 1% of real-world codebases, and such
