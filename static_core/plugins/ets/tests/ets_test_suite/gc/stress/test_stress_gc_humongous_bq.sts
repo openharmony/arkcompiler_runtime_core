@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,27 +18,8 @@
 
 const NUMBER_OF_FREE_REGIONS = 2;
 
-function cor(numObjToCreate: int, humongousSize: int): Object|null {
-    let localGarbage = new ArrayAsListObject();
-    try {
-        for (let i = 0; i < numObjToCreate; i++) {
-            localGarbage.pushBack(new byte[humongousSize] as Object);
-        }
-    }
-    catch(e: OutOfMemoryError) {
-        // NOTE: return null and localGarbage will be collected by GC
-        // but as alternative it is possible to return localGarbage with
-        // already allocated objects before OOM occurs
-        return null;
-    }
-    catch(e) {
-        assert false : "Some other error: " + e.toString();
-    }
-    return localGarbage as Object;
-};
-
 class TestHumongousStress {
-    private static GARBAGE = new ArrayAsListObject();
+    private static GARBAGE = new BlockingQueue<Object>();
 
     regionSize: int;
     humongousSize: int;
@@ -54,18 +35,42 @@ class TestHumongousStress {
         let maxNumberOfObjects = 0;
         try {
             while(true) {
-                TestHumongousStress.GARBAGE.pushBack(new byte[this.humongousSize] as Object);
+                TestHumongousStress.GARBAGE.push(new byte[this.humongousSize] as Object);
                 maxNumberOfObjects++;
             }
         }
         catch(e: OutOfMemoryError) {
-            TestHumongousStress.GARBAGE = new ArrayAsListObject();
+            TestHumongousStress.GARBAGE = new BlockingQueue<Object>();
+            try {
+                GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+            }
+            catch (e) {
+                assert false : "Unexpected exception during GC";
+            }
         }
         catch(e) {
             assert false : "Some other error: " + e.toString();
         }
         return maxNumberOfObjects;
     }
+
+    private cor(numObjToCreate: int, humongousSize: int): Object|null {
+        try {
+            for (let i = 0; i < numObjToCreate; i++) {
+                TestHumongousStress.GARBAGE.push(new byte[humongousSize] as Object);
+            }
+        }
+        catch(e: OutOfMemoryError) {
+            // NOTE: return null and localGarbage will be collected by GC
+            // but as alternative it is possible to return localGarbage with
+            // already allocated objects before OOM occurs
+            return null;
+        }
+        catch(e) {
+            assert false : "Some other error: " + e.toString();
+        }
+        return new Object();
+    };
 
     public run(): void {
         let maxObjects = this.getHeapSizeInObjects() - NUMBER_OF_FREE_REGIONS;
@@ -75,9 +80,9 @@ class TestHumongousStress {
 
         let corArrayTmp = new Array<Promise<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
-            corArrayTmp.push(launch cor(objPerCoroutine, this.humongousSize));
+            corArrayTmp.push(launch this.cor(objPerCoroutine, this.humongousSize));
         }
-        let corArrayLast = launch cor(lastCoroutuneNumObjects, this.humongousSize);
+        let corArrayLast = launch this.cor(lastCoroutuneNumObjects, this.humongousSize);
 
         Coroutine.Schedule();
 
@@ -87,40 +92,22 @@ class TestHumongousStress {
                 // Null is returned. Not enough memory. Finish current test.
                 continue;
             }
-            let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
-            for(let j = 0; j < numOfReturnedObjects; j++) {
-                try {
-                    TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
-                }
-                catch(e: OutOfMemoryError) {
-                    continue;
-                }
-                catch(e) {
-                    assert false : "Some other error: " + e.toString();
-                }
-            }
         }
         let tmp = await corArrayLast;
         if(tmp == null) {
                 // Null is returned. Not enough memory. Finish current test.
                 return;
             }
-        let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
-        for(let j = 0; j < numOfReturnedObjects; j++) {
-            try {
-                TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
-            }
-            catch(e: OutOfMemoryError) {
-                continue;
-            }
-            catch(e) {
-                assert false : "Some other error: " + e.toString();
-            }
-        }
     }
 
     public clear(): void {
-        TestHumongousStress.GARBAGE = new ArrayAsListObject();
+        TestHumongousStress.GARBAGE = new BlockingQueue<Object>();
+        try {
+            GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+        }
+        catch (e) {
+            assert false : "Unexpected exception during GC";
+        }
     }
 }
 

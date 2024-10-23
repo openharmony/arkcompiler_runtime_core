@@ -1,4 +1,5 @@
-# panda#13946: Verifier error: instruction is not implemented. method std.core.void TestHumongousStress::run(TestHumongousStress) failed to verify
+# #20150
 test_stress_gc_humongous.sts
-# #17528
-test_gc_old.sts
+test_stress_gc_humongous_bq.sts
+# #20621
+test_gc_old_longrun.sts
