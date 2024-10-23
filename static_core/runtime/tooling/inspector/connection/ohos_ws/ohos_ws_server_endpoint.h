@@ -36,8 +36,12 @@ protected:
 private:
     void SendMessage(const std::string &message) override
     {
+        auto wasSent = false;
         if (endpoint_.IsConnected()) {
-            endpoint_.SendReply(message);
+            wasSent = endpoint_.SendReply(message);
+        }
+        if (!wasSent) {
+            LOG(INFO, DEBUGGER) << "Did not send message: " << message;
         }
     }
 };

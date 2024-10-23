@@ -18,6 +18,7 @@
 import dataclasses
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from inspect import getfullargspec
 from typing import Any, AsyncIterator, Callable, Dict, List, Literal, Optional, Tuple, Type, TypeAlias
 
 import trio
@@ -55,7 +56,7 @@ class DebuggerClient:
         self.code_compiler = code_compiler
 
     async def configure(self, nursery: trio.Nursery):
-        self._listen(nursery, self._on_script_parsed)
+        self._listen(nursery, self._create_on_execution_contexts_cleared(nursery))
         await self.set_pause_on_exceptions()
 
     async def run_if_waiting_for_debugger(self) -> debugger.Paused:
@@ -193,8 +194,14 @@ class DebuggerClient:
     async def step_over(self) -> debugger.Paused:
         return await self.send_and_wait_for_paused(debugger.step_over())
 
-    def _on_script_parsed(self, event: debugger.ScriptParsed):
-        pass
+    def _create_on_execution_contexts_cleared(self, nursery: trio.Nursery):
+        def _on_execution_contexts_cleared(_: runtime.ExecutionContextsCleared):
+            # A deadlock can occur when client awaits a response after server's disconnect.
+            # ArkTS debugger implementation notifies about execution end via `runtime.ExecutionContextsCleared` event,
+            # which is used here to force client disconnect.
+            nursery.cancel_scope.cancel()
+
+        return _on_execution_contexts_cleared
 
     def _listen(
         self,
@@ -202,7 +209,10 @@ class DebuggerClient:
         handler: Callable[[T], None],
     ):
         async def _t():
-            async for event in self.connection.listen(T):
+            args_annotations = getfullargspec(handler).annotations
+            event_type = list(args_annotations.values())[0]
+            # Passing `T` as event type will not work
+            async for event in self.connection.listen(event_type):
                 handler(event)
 
         nursery.start_soon(_t)

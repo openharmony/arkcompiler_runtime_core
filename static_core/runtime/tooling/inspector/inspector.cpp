@@ -97,7 +97,8 @@ Inspector::Inspector(Server &server, DebugInterface &debugger, bool breakOnStart
 
 Inspector::~Inspector()
 {
-    NotifyExecutionEnded();
+    // Current implementation destroys `Inspector` after server connection is closed,
+    // hence no need to notify client
     inspectorServer_.Kill();
     serverThread_.join();
     HandleError(debugger_.UnregisterHooks());
@@ -213,6 +214,8 @@ void Inspector::VmDeath()
 
     ASSERT(!isVmDead_);
     isVmDead_ = true;
+
+    NotifyExecutionEnded();
 }
 
 void Inspector::RuntimeEnable(PtThread thread)

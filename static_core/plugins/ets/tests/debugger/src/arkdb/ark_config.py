@@ -112,7 +112,7 @@ def ark_runtime_default_options(
     """
     return runtime.Options(
         app_path=ark_build_path / "bin" / "ark",
-        log_debug=[],
+        log_debug=["debugger"],  # Always log debugger for CI launches
         interpreter_type="cpp",
         boot_panda_files=[ark_build_path / "plugins" / "ets" / "etsstdlib.abc"],
         debugger_library_path=ark_build_path / "lib" / "libarkinspector.so",
