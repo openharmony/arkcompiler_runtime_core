@@ -1189,9 +1189,11 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
     auto &param_items = method->GetParams();
     for (size_t proto_idx = 0; proto_idx < param_items.size(); proto_idx++) {
         size_t param_idx = method->IsStatic() ? proto_idx : proto_idx + 1;
-        auto &param = func.params[param_idx];
         auto &param_item = param_items[proto_idx];
-        if (!AddAnnotations(&param_item, items, *param.metadata, program, entities)) {
+        // The ArkTs language does not collect this metadata data information.
+        // Thereore, this parameter is set to the default value to ensure code consistency and compatibility.
+        auto metadata = extensions::MetadataExtension::CreateParamMetadata(pandasm::extensions::Language::ECMASCRIPT);
+        if (!AddAnnotations(&param_item, items, *metadata, program, entities)) {
             SetLastError("Cannot emit annotations for parameter a" + std::to_string(param_idx) + "of function " +
                          func.name + ": " + GetLastError());
             return false;
@@ -1358,7 +1360,7 @@ bool AsmEmitter::MakeItemsForSingleProgram(ItemContainer *items, const Program &
 }
 
 //  temp plan for ic slot number, should be deleted after method refactoring
-static void MakeSlotNumberRecord(Program *prog)
+void MakeSlotNumberRecord(Program *prog)
 {
     static const std::string SLOT_NUMBER = "_ESSlotNumberAnnotation";
     pandasm::Record record(SLOT_NUMBER, pandasm::extensions::Language::ECMASCRIPT);
@@ -1367,7 +1369,7 @@ static void MakeSlotNumberRecord(Program *prog)
 }
 
 //  temp plan for ic slot number, should be deleted after method refactoring
-static void MakeSlotNumberAnnotation(Program *prog)
+void MakeSlotNumberAnnotation(Program *prog)
 {
     static const std::string SLOT_NUMBER = "_ESSlotNumberAnnotation";
     static const std::string ELEMENT_NAME = "SlotNumber";
@@ -1387,7 +1389,7 @@ static void MakeSlotNumberAnnotation(Program *prog)
     }
 }
 
-static void MakeConcurrentModuleRequestsRecord(Program *prog)
+void MakeConcurrentModuleRequestsRecord(Program *prog)
 {
     static const std::string CONCURRENT_MODULE_REQUESTS = "_ESConcurrentModuleRequestsAnnotation";
     pandasm::Record record(CONCURRENT_MODULE_REQUESTS, pandasm::extensions::Language::ECMASCRIPT);
@@ -1395,7 +1397,7 @@ static void MakeConcurrentModuleRequestsRecord(Program *prog)
     prog->record_table.emplace(CONCURRENT_MODULE_REQUESTS, std::move(record));
 }
 
-static void MakeConcurrentModuleRequestsAnnotation(Program *prog)
+void MakeConcurrentModuleRequestsAnnotation(Program *prog)
 {
     static const std::string CONCURRENT_MODULE_REQUESTS = "_ESConcurrentModuleRequestsAnnotation";
     static const std::string ELEMENT_NAME = "ConcurrentModuleRequest";
@@ -1423,16 +1425,11 @@ static void MakeConcurrentModuleRequestsAnnotation(Program *prog)
     }
 }
 
+// The function releases the data in progs in advance for the sake of the peak memory at compiler time.
 bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Program *> &progs, bool emit_debug_info,
                               uint8_t api, std::string subApi)
 {
     ASSERT(!progs.empty());
-    for (auto *prog : progs) {
-        MakeSlotNumberRecord(prog);
-        MakeSlotNumberAnnotation(prog);
-        MakeConcurrentModuleRequestsRecord(prog);
-        MakeConcurrentModuleRequestsAnnotation(prog);
-    }
 
     ItemContainer::SetApi(api);
     ItemContainer::SetSubApi(subApi);
@@ -1441,25 +1438,31 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
     auto entities = AsmEmitter::AsmEntityCollections {};
     SetLastError("");
 
-    for (const auto *prog : progs) {
+    for (auto *prog : progs) {
         if (!MakeItemsForSingleProgram(&items, *prog, emit_debug_info, entities, primitive_types)) {
             return false;
         }
+        prog->strings.clear();
+        prog->literalarray_table.clear();
+        prog->array_types.clear();
     }
 
-    for (const auto *prog : progs) {
+    for (auto *prog : progs) {
         if (!MakeFunctionDebugInfoAndAnnotations(&items, *prog, entities, emit_debug_info)) {
             return false;
         }
+        prog->function_synonyms.clear();
     }
 
     items.ReLayout();
     items.ComputeLayout();
 
-    for (const auto *prog : progs) {
+    for (auto *prog : progs) {
         if (!EmitFunctions(&items, *prog, entities, emit_debug_info)) {
             return false;
         }
+        prog->function_table.clear();
+        prog->record_table.clear();
     }
 
     auto writer = FileWriter(filename);
@@ -1475,8 +1478,6 @@ bool AsmEmitter::EmitPrograms(const std::string &filename, const std::vector<Pro
 bool AsmEmitter::Emit(ItemContainer *items, const Program &program, PandaFileToPandaAsmMaps *maps, bool emit_debug_info,
                       panda::panda_file::pgo::ProfileOptimizer *profile_opt)
 {
-    MakeSlotNumberRecord(const_cast<Program *>(&program));
-    MakeSlotNumberAnnotation(const_cast<Program *>(&program));
     auto primitive_types = CreatePrimitiveTypes(items);
 
     auto entities = AsmEmitter::AsmEntityCollections {};
