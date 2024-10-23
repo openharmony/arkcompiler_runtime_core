@@ -11,4 +11,4 @@ _Please add detailed description_
 ```
 ninja all tests
 ```
-**All required pre-merge tests pased. Result are avaliable in the internal CI.**
+**All required pre-merge tests passed. Results are available in the internal CI.**

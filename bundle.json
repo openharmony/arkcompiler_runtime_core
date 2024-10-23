@@ -23,16 +23,14 @@
         "deps": {
             "components": [
                 "bounds_checking_function",
-                "ets_runtime",
                 "hilog",
                 "napi",
-                "toolchain",
-                "zlib",
-                "icu",
-                "vixl"
+                "zlib"
             ],
             "third_party": [
-                "musl"
+                "icu",
+                "musl",
+                "vixl"
             ]
         },
         "build": {

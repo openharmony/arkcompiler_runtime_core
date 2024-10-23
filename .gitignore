@@ -15,12 +15,7 @@ tags
 .cache
 *.swp
 static_core/build
-static_core/plugins/accord
-static_core/plugins/java
-static_core/plugins/cangjie
 static_core/plugins/ecmascript
-static_core/plugins/hz_ecmascript
-static_core/plugins/tests_java_ecmascript
 static_core/plugins/ets/tools/declgen_ts2ets/build
 static_core/plugins/ets/tools/declgen_ts2ets/node_modules
 static_core/plugins/ets/tools/declgen_ts2ets/out
@@ -34,4 +29,3 @@ static_core/tools/sampler/scripts/fetch_modules_from_device.js
 static_core/tools/es2panda
 static_core/third_party
 static_core/**/__pycache__
-static_core/build

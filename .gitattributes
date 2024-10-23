@@ -7,3 +7,5 @@
 
 static_core/plugins/ets/tests/ets-templates/02.lexical_elements/04.line_separators/line_separators.ets binary
 static_core/plugins/ets/tests/ets-templates/02.lexical_elements/03.white_spaces/whitespaces.ets binary
+static_core/plugins/ets/tests/ets-templates/02.lexical_elements/04.line_separators/line_separators.sts binary
+static_core/plugins/ets/tests/ets-templates/02.lexical_elements/03.white_spaces/whitespaces.sts binary
