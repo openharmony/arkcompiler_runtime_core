@@ -203,12 +203,18 @@ public:
         ASSERT(detail::EtsToStringCacheElement<T>::STRING_OFFSET ==
                MEMBER_OFFSET(detail::EtsToStringCacheElement<T>, data_));
 
+        // We can call "classLinker->GetClass" only with MutatorLock or with disabled GC.
+        // So just for testing is necessary add "MutatorLock"
+        // NOTE: In the main place of use (in initialization VM), during execution method
+        // "EtsToStringCacheElement<T>::GetClass" GC is not started
+        PandaVM::GetCurrent()->GetMutatorLock()->WriteLock();
         auto *klass = detail::EtsToStringCacheElement<T>::GetClass(EtsCoroutine::GetCurrent());
         std::vector<MirrorFieldInfo> members {
             MirrorFieldInfo("string", detail::EtsToStringCacheElement<T>::STRING_OFFSET),
             MirrorFieldInfo("lock", detail::EtsToStringCacheElement<T>::FLAG_OFFSET),
             MIRROR_FIELD_INFO(detail::EtsToStringCacheElement<T>, number_, "number")};
         MirrorFieldInfo::CompareMemberOffsets(klass, members);
+        PandaVM::GetCurrent()->GetMutatorLock()->Unlock();
     }
 
 protected:

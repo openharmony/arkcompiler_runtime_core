@@ -23,18 +23,13 @@ namespace ark::ets {
 compiler::RuntimeInterface::ClassPtr EtsRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
     if (id == RuntimeInterface::MEM_PROMISE_CLASS_ID) {
-        ScopedMutatorLock lock;
-        auto *caller = MethodCast(method);
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
-        return static_cast<EtsClassLinkerExtension *>(Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx))
-            ->GetPromiseClass();
+        return PandaEtsVM::GetCurrent()->GetClassLinker()->GetEtsClassLinkerExtension()->GetPromiseClass();
     }
     return PandaRuntimeInterface::GetClass(method, id);
 }
 
 compiler::RuntimeInterface::FieldPtr EtsRuntimeInterface::ResolveLookUpField(FieldPtr rawField, ClassPtr klass)
 {
-    ScopedMutatorLock lock;
     ASSERT(rawField != nullptr);
     ASSERT(klass != nullptr);
     return ClassCast(klass)->LookupFieldByName(FieldCast(rawField)->GetName());
@@ -53,7 +48,6 @@ compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::GetLookUpCall(FieldPt
 compiler::RuntimeInterface::MethodPtr EtsRuntimeInterface::ResolveLookUpCall(FieldPtr rawField, ClassPtr klass,
                                                                              bool isSetter)
 {
-    ScopedMutatorLock lock;
     ASSERT(rawField != nullptr);
     ASSERT(klass != nullptr);
     switch (FieldCast(rawField)->GetTypeId()) {
@@ -107,16 +101,14 @@ compiler::RuntimeInterface::InteropCallKind EtsRuntimeInterface::GetInteropCallK
 
     auto method = MethodCast(methodPtr);
 
-    ScopedMutatorLock lock;
-
     ASSERT(method->GetArgType(0).IsReference());  // arg0 is always a reference
     if (method->GetArgType(1).IsReference()) {
         auto pf = method->GetPandaFile();
         panda_file::ProtoDataAccessor pda(*pf, panda_file::MethodDataAccessor::GetProtoId(*pf, method->GetFileId()));
         ClassLinker *classLinker = Runtime::GetCurrent()->GetClassLinker();
-        LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*method);
-        auto linkerCtx = static_cast<EtsClassLinkerExtension *>(classLinker->GetExtension(ctx))->GetBootContext();
+        auto linkerCtx = method->GetClass()->GetLoadContext();
         uint32_t const argReftypeShift = method->GetReturnType().IsReference() ? 1 : 0;
+        ScopedMutatorLock lock;
         auto cls = classLinker->GetClass(*pf, pda.GetReferenceType(1 + argReftypeShift), linkerCtx);
         if (!cls->IsStringClass()) {
             return InteropCallKind::CALL_BY_VALUE;
@@ -199,9 +191,7 @@ uint32_t EtsRuntimeInterface::GetClassOffsetObject(MethodPtr method) const
 
 EtsRuntimeInterface::ClassPtr EtsRuntimeInterface::GetStringBuilderClass() const
 {
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(SourceLanguage::ETS);
-    return static_cast<EtsClassLinkerExtension *>(Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx))
-        ->GetStringBuilderClass();
+    return PandaEtsVM::GetCurrent()->GetClassLinker()->GetEtsClassLinkerExtension()->GetStringBuilderClass();
 }
 
 EtsRuntimeInterface::MethodPtr EtsRuntimeInterface::GetStringBuilderDefaultConstructor() const

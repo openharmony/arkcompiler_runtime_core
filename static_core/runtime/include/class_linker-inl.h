@@ -59,7 +59,6 @@ inline Class *ClassLinker::GetLoadedClass(const panda_file::File &pf, panda_file
                                           ClassLinkerContext *context)
 {
     ASSERT(context != nullptr);
-    ASSERT(!MTManagedThread::ThreadIsMTManagedThread(Thread::GetCurrent()));
 
     Class *cls = pf.GetPandaCache()->GetClassFromCache(id);
     if (LIKELY(cls != nullptr)) {

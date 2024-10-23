@@ -81,10 +81,7 @@ compiler::RuntimeInterface::IdType PandaRuntimeInterface::ResolveTypeIndex(Metho
 
 compiler::RuntimeInterface::MethodPtr PandaRuntimeInterface::GetMethodById(MethodPtr parentMethod, MethodId id) const
 {
-    ScopedMutatorLock lock;
-    ErrorHandler errorHandler;
-    return Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(parentMethod), panda_file::File::EntityId(id),
-                                                              &errorHandler);
+    return GetMethod(parentMethod, id);
 }
 
 compiler::RuntimeInterface::MethodId PandaRuntimeInterface::GetMethodId(MethodPtr method) const
@@ -104,7 +101,6 @@ uint64_t PandaRuntimeInterface::GetUniqMethodId(MethodPtr method) const
 
 compiler::RuntimeInterface::MethodPtr PandaRuntimeInterface::ResolveVirtualMethod(ClassPtr cls, MethodPtr method) const
 {
-    ScopedMutatorLock lock;
     ASSERT(method != nullptr);
     return ClassCast(cls)->ResolveVirtualMethod(MethodCast(method));
 }
@@ -112,7 +108,6 @@ compiler::RuntimeInterface::MethodPtr PandaRuntimeInterface::ResolveVirtualMetho
 compiler::RuntimeInterface::MethodPtr PandaRuntimeInterface::ResolveInterfaceMethod(ClassPtr cls,
                                                                                     MethodPtr method) const
 {
-    ScopedMutatorLock lock;
     ASSERT(method != nullptr);
     return ClassCast(cls)->ResolveVirtualMethod(MethodCast(method));
 }
@@ -136,17 +131,20 @@ compiler::RuntimeInterface::IdType PandaRuntimeInterface::GetMethodArgReferenceT
 
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetClass(MethodPtr method, IdType id) const
 {
-    ScopedMutatorLock lock;
     auto *caller = MethodCast(method);
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
+    Class *loadedClass = Runtime::GetCurrent()->GetClassLinker()->GetLoadedClass(
+        *caller->GetPandaFile(), panda_file::File::EntityId(id), caller->GetClass()->GetLoadContext());
+    if (LIKELY(loadedClass != nullptr)) {
+        return loadedClass;
+    }
     ErrorHandler handler;
-    return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClass(
-        *caller->GetPandaFile(), panda_file::File::EntityId(id), caller->GetClass()->GetLoadContext(), &handler);
+    ScopedMutatorLock lock;
+    return Runtime::GetCurrent()->GetClassLinker()->GetClass(*caller->GetPandaFile(), panda_file::File::EntityId(id),
+                                                             caller->GetClass()->GetLoadContext(), &handler);
 }
 
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetStringClass(MethodPtr method, uint32_t *typeId) const
 {
-    ScopedMutatorLock lock;
     auto *caller = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
     auto classPtr = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
@@ -171,7 +169,6 @@ compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetNumberClass(Metho
 
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayU16Class(MethodPtr method) const
 {
-    ScopedMutatorLock lock;
     auto *caller = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::ARRAY_U16);
@@ -191,9 +188,6 @@ compiler::ClassType PandaRuntimeInterface::GetClassType(ClassPtr klassPtr) const
         return compiler::ClassType::UNRESOLVED_CLASS;
     }
     auto klass = ClassCast(klassPtr);
-    if (klass == nullptr) {
-        return compiler::ClassType::UNRESOLVED_CLASS;
-    }
     if (klass->IsObjectClass()) {
         return compiler::ClassType::OBJECT_CLASS;
     }
@@ -222,36 +216,7 @@ compiler::ClassType PandaRuntimeInterface::GetClassType(MethodPtr method, IdType
     if (method == nullptr) {
         return compiler::ClassType::UNRESOLVED_CLASS;
     }
-    ScopedMutatorLock lock;
-    auto *caller = MethodCast(method);
-    LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*caller);
-    ErrorHandler handler;
-    auto klass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClass(
-        *caller->GetPandaFile(), panda_file::File::EntityId(id), caller->GetClass()->GetLoadContext(), &handler);
-    if (klass == nullptr) {
-        return compiler::ClassType::UNRESOLVED_CLASS;
-    }
-    if (klass->IsObjectClass()) {
-        return compiler::ClassType::OBJECT_CLASS;
-    }
-    if (klass->IsInterface()) {
-        return compiler::ClassType::INTERFACE_CLASS;
-    }
-    if (klass->IsArrayClass()) {
-        auto componentClass = klass->GetComponentType();
-        ASSERT(componentClass != nullptr);
-        if (componentClass->IsObjectClass()) {
-            return compiler::ClassType::ARRAY_OBJECT_CLASS;
-        }
-        if (componentClass->IsPrimitive()) {
-            return compiler::ClassType::FINAL_CLASS;
-        }
-        return compiler::ClassType::ARRAY_CLASS;
-    }
-    if (klass->IsFinal()) {
-        return compiler::ClassType::FINAL_CLASS;
-    }
-    return compiler::ClassType::OTHER_CLASS;
+    return GetClassType(GetClass(method, id));
 }
 
 bool PandaRuntimeInterface::IsArrayClass(MethodPtr method, IdType id) const
@@ -272,7 +237,6 @@ bool PandaRuntimeInterface::IsStringClass(MethodPtr method, IdType id) const
 
 compiler::RuntimeInterface::ClassPtr PandaRuntimeInterface::GetArrayElementClass(ClassPtr cls) const
 {
-    ScopedMutatorLock lock;
     ASSERT(ClassCast(cls)->IsArrayClass());
     return ClassCast(cls)->GetComponentType();
 }
@@ -297,16 +261,13 @@ bool PandaRuntimeInterface::IsAssignableFrom(ClassPtr cls1, ClassPtr cls2) const
 
 bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr parentMethod, MethodId id) const
 {
-    ScopedMutatorLock lock;
     ErrorHandler handler;
-    auto method = Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(parentMethod),
-                                                                     panda_file::File::EntityId(id), &handler);
+    auto *method = GetMethod(parentMethod, id);
     return (method->GetClass()->IsInterface() && !method->IsDefaultInterfaceMethod());
 }
 
 bool PandaRuntimeInterface::CanThrowException(MethodPtr method) const
 {
-    ScopedMutatorLock lock;
     auto *pandaMethod = MethodCast(method);
     LanguageContext ctx = Runtime::GetCurrent()->GetLanguageContext(*pandaMethod);
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->CanThrowException(pandaMethod);
@@ -320,7 +281,6 @@ uint32_t PandaRuntimeInterface::FindCatchBlock(MethodPtr m, ClassPtr cls, uint32
 
 bool PandaRuntimeInterface::IsInterfaceMethod(MethodPtr method) const
 {
-    ScopedMutatorLock lock;
     return (MethodCast(method)->GetClass()->IsInterface() && !MethodCast(method)->IsDefaultInterfaceMethod());
 }
 
@@ -443,11 +403,9 @@ std::string PandaRuntimeInterface::GetBytecodeString(MethodPtr method, uintptr_t
 PandaRuntimeInterface::FieldPtr PandaRuntimeInterface::ResolveField(PandaRuntimeInterface::MethodPtr m, size_t id,
                                                                     bool allowExternal, uint32_t *pclassId)
 {
-    ScopedMutatorLock lock;
-    ErrorHandler handler;
     auto method = MethodCast(m);
     auto pfile = method->GetPandaFile();
-    auto field = Runtime::GetCurrent()->GetClassLinker()->GetField(*method, panda_file::File::EntityId(id), &handler);
+    auto *field = GetField(method, id);
     if (field == nullptr) {
         return nullptr;
     }
@@ -575,7 +533,6 @@ RuntimeInterface::IdType PandaRuntimeInterface::GetClassIdWithinFile(MethodPtr m
 RuntimeInterface::IdType PandaRuntimeInterface::GetLiteralArrayClassIdWithinFile(
     PandaRuntimeInterface::MethodPtr method, panda_file::LiteralTag tag) const
 {
-    ScopedMutatorLock lock;
     ErrorHandler handler;
     auto ctx = Runtime::GetCurrent()->GetLanguageContext(*MethodCast(method));
     auto cls = Runtime::GetCurrent()->GetClassRootForLiteralTag(
@@ -611,14 +568,36 @@ bool PandaRuntimeInterface::CanScalarReplaceObject(ClassPtr klass) const
     return Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->CanScalarReplaceObject(cls);
 }
 
+Method *PandaRuntimeInterface::GetMethod(MethodPtr caller, RuntimeInterface::IdType id) const
+{
+    auto *methodFromCache =
+        MethodCast(caller)->GetPandaFile()->GetPandaCache()->GetMethodFromCache(panda_file::File::EntityId(id));
+    if (LIKELY(methodFromCache != nullptr)) {
+        return methodFromCache;
+    }
+    ErrorHandler errorHandler;
+    ScopedMutatorLock lock;
+    return Runtime::GetCurrent()->GetClassLinker()->GetMethod(*MethodCast(caller), panda_file::File::EntityId(id),
+                                                              &errorHandler);
+}
+
+Field *PandaRuntimeInterface::GetField(MethodPtr method, RuntimeInterface::IdType id) const
+{
+    auto *field =
+        MethodCast(method)->GetPandaFile()->GetPandaCache()->GetFieldFromCache(panda_file::File::EntityId(id));
+    if (LIKELY(field != nullptr)) {
+        return field;
+    }
+    ErrorHandler errorHandler;
+    ScopedMutatorLock lock;
+    return Runtime::GetCurrent()->GetClassLinker()->GetField(*MethodCast(method), panda_file::File::EntityId(id),
+                                                             &errorHandler);
+}
+
 PandaRuntimeInterface::ClassPtr PandaRuntimeInterface::ResolveType(PandaRuntimeInterface::MethodPtr method,
                                                                    size_t id) const
 {
-    ScopedMutatorLock lock;
-    ErrorHandler handler;
-    auto klass = Runtime::GetCurrent()->GetClassLinker()->GetClass(*MethodCast(method), panda_file::File::EntityId(id),
-                                                                   &handler);
-    return klass;
+    return GetClass(method, id);
 }
 
 bool PandaRuntimeInterface::IsClassInitialized(uintptr_t klass) const
@@ -672,7 +651,6 @@ uint32_t PandaRuntimeInterface::GetArrayElementSize(MethodPtr method, IdType id)
 
 uint32_t PandaRuntimeInterface::GetMaxArrayLength(ClassPtr klass) const
 {
-    ScopedMutatorLock lock;
     if (ClassCast(klass)->IsArrayClass()) {
         return INT32_MAX / ClassCast(klass)->GetComponentSize();
     }

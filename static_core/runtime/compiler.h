@@ -373,6 +373,7 @@ public:
     bool CanThrowException(MethodPtr method) const override;
 
     uint32_t FindCatchBlock(MethodPtr method, ClassPtr cls, uint32_t pc) const override;
+    Method *GetMethod(MethodPtr caller, RuntimeInterface::IdType id) const;
 
     /**********************************************************************************/
     /// Thread information
@@ -525,6 +526,7 @@ public:
     }
 
     FieldId GetFieldId(FieldPtr field) const override;
+    Field *GetField(MethodPtr method, RuntimeInterface::IdType id) const;
 
     /**********************************************************************************/
     /// Type information
