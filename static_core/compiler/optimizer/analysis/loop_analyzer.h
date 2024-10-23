@@ -51,7 +51,7 @@ public:
     }
     void SetPreHeader(BasicBlock *preHeader);
     void SetPreHeader(std::nullptr_t preHeader);
-    BasicBlock *GetPreHeader() const;
+    PANDA_PUBLIC_API BasicBlock *GetPreHeader() const;
 
     void AppendBackEdge(BasicBlock *block)
     {

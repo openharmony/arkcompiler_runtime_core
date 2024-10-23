@@ -27,7 +27,7 @@
 #include "utils/logger.h"
 
 namespace ark::compiler {
-class Cse : public Optimization {
+class PANDA_PUBLIC_API Cse : public Optimization {
     using PairInsts = std::pair<Inst *, Inst *>;
     using PairVectorsInsts = std::pair<InstVector, InstVector>;
 

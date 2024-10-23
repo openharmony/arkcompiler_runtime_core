@@ -22,7 +22,7 @@
 
 namespace ark::compiler {
 
-class MoveConstants : public Optimization {
+class PANDA_PUBLIC_API MoveConstants : public Optimization {
 public:
     explicit MoveConstants(Graph *graph);
 

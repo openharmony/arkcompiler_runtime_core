@@ -146,7 +146,7 @@ inline GraphMode operator|(GraphMode a, GraphMode b)
 
 using EncodeDataType = Span<uint8_t>;
 
-class Graph final : public MarkerMgr {
+class PANDA_PUBLIC_API Graph final : public MarkerMgr {
 public:
     struct GraphArgs {
         ArenaAllocator *allocator;
@@ -306,9 +306,9 @@ public:
 
     const BoundsRangeInfo *GetBoundsRangeInfo() const;
 
-    const ArenaVector<BasicBlock *> &GetBlocksRPO() const;
+    PANDA_PUBLIC_API const ArenaVector<BasicBlock *> &GetBlocksRPO() const;
 
-    const ArenaVector<BasicBlock *> &GetBlocksLinearOrder() const;
+    PANDA_PUBLIC_API const ArenaVector<BasicBlock *> &GetBlocksLinearOrder() const;
 
     template <class Callback>
     void VisitAllInstructions(Callback callback);
@@ -801,7 +801,7 @@ public:
     }
 
     bool HasLoop() const;
-    bool HasIrreducibleLoop() const;
+    PANDA_PUBLIC_API bool HasIrreducibleLoop() const;
     bool HasInfiniteLoop() const;
     bool HasFloatRegs() const;
 
@@ -878,7 +878,7 @@ public:
     }
 
     void RemoveThrowableInst(const Inst *inst);
-    void ReplaceThrowableInst(Inst *oldInst, Inst *newInst);
+    PANDA_PUBLIC_API void ReplaceThrowableInst(Inst *oldInst, Inst *newInst);
 
     const auto &GetThrowableInstHandlers(const Inst *inst) const
     {
@@ -1290,7 +1290,7 @@ public:
         explicit ParameterList(const Graph *graph) : graph_(graph) {}
 
         // NOLINTNEXTLINE(readability-identifier-naming)
-        Iterator begin();
+        PANDA_PUBLIC_API Iterator begin();
         // NOLINTNEXTLINE(readability-identifier-naming)
         static Iterator end()
         {

@@ -26,7 +26,7 @@ namespace ark::panda_file {
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
 class ClassDataAccessor {
 public:
-    ClassDataAccessor(const File &pandaFile, File::EntityId classId);
+    PANDA_PUBLIC_API ClassDataAccessor(const File &pandaFile, File::EntityId classId);
 
     ~ClassDataAccessor() = default;
 

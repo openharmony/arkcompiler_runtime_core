@@ -98,7 +98,7 @@ using ark::compiler::Inst;
 using ark::compiler::Opcode;
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class RegEncoder : public compiler::Optimization, public compiler::GraphVisitor {
+class PANDA_PUBLIC_API RegEncoder : public compiler::Optimization, public compiler::GraphVisitor {
 public:
     explicit RegEncoder(compiler::Graph *graph) : compiler::Optimization(graph) {}
 

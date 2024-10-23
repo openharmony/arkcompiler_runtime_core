@@ -37,7 +37,7 @@ struct BlocksConnectorInfo {
 };
 
 /// Build IR from panda bytecode
-class IrBuilder : public Optimization {
+class PANDA_PUBLIC_API IrBuilder : public Optimization {
     struct Boundaries {
         uint32_t beginPc;
         uint32_t endPc;

@@ -19,7 +19,7 @@
 #include "compiler/optimizer/ir/graph.h"
 
 namespace ark::compiler {
-bool RegAlloc(Graph *graph);
+PANDA_PUBLIC_API bool RegAlloc(Graph *graph);
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_REG_ALLOC_H

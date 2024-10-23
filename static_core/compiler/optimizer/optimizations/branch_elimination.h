@@ -21,7 +21,7 @@
 #include "utils/arena_containers.h"
 
 namespace ark::compiler {
-class BranchElimination : public Optimization {
+class PANDA_PUBLIC_API BranchElimination : public Optimization {
     struct ConditionOps {
         Inst *lhs;
         Inst *rhs;

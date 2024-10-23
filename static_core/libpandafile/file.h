@@ -366,7 +366,7 @@ public:
 
     static uint32_t CalcFilenameHash(const std::string &filename);
 
-    static std::unique_ptr<const File> Open(std::string_view filename, OpenMode openMode = READ_ONLY);
+    PANDA_PUBLIC_API static std::unique_ptr<const File> Open(std::string_view filename, OpenMode openMode = READ_ONLY);
 
     PANDA_PUBLIC_API static std::unique_ptr<const File> OpenFromMemory(os::mem::ConstBytePtr &&ptr);
 
@@ -380,7 +380,7 @@ public:
         classHashTable_ = classHashTable;
     }
 
-    ~File();
+    PANDA_PUBLIC_API ~File();
 
     NO_COPY_SEMANTIC(File);
     NO_MOVE_SEMANTIC(File);
@@ -436,8 +436,9 @@ std::unique_ptr<const File> OpenPandaFileFromMemory(const void *buffer, size_t s
 /*
  * OpenPandaFile from location which specicify the name.
  */
-std::unique_ptr<const File> OpenPandaFile(std::string_view location, std::string_view archiveFilename = "",
-                                          panda_file::File::OpenMode openMode = panda_file::File::READ_ONLY);
+PANDA_PUBLIC_API std::unique_ptr<const File> OpenPandaFile(
+    std::string_view location, std::string_view archiveFilename = "",
+    panda_file::File::OpenMode openMode = panda_file::File::READ_ONLY);
 
 /*
  * Check ptr point valid panda file: magic

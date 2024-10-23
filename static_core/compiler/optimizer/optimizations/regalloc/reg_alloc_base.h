@@ -26,7 +26,7 @@ namespace ark::compiler {
 void ConnectIntervals(SpillFillInst *spillFill, const LifeIntervals *src, const LifeIntervals *dst);
 bool TryToSpillConstant(LifeIntervals *interval, Graph *graph);
 
-class RegAllocBase : public Optimization {
+class PANDA_PUBLIC_API RegAllocBase : public Optimization {
 public:
     explicit RegAllocBase(Graph *graph);
     RegAllocBase(Graph *graph, size_t regsCount);

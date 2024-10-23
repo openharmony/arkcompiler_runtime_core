@@ -24,7 +24,7 @@
 
 namespace ark::compiler {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class Lowering : public Optimization, public GraphVisitor {
+class PANDA_PUBLIC_API Lowering : public Optimization, public GraphVisitor {
     using Optimization::Optimization;
 
 public:
