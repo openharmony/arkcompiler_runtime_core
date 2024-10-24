@@ -284,7 +284,8 @@ spec/17.Experimental_Features/17.3.Indexable_Types/idx-s03-0000.sts
 
 ### object-literals
 ### Issue 19932
-spec/07.expressions/Object_Literal/issue14687.sts
+spec/07.expressions/7.5.Object_Literal/issue14687.sts
+
 ### end Issue 19932
 ### End of object-literals
 
@@ -459,10 +460,10 @@ std/containers/BuiltinArrayMapTest.sts
 spec/13.Compilation_Units_Packages_and_Modules/06.Export_Directives/13.6.3.Re-Export_Directives/issue15371/issue15371_04.sts
 
 ### Issue 19733
-spec/07.expressions/nullish-coalescing_expressions/issue14609_02.sts
+spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_02.sts
 
 ### Issue 1654
-spec/07.expressions/nullish-coalescing_expressions/issue14609_01.sts
+spec/07.expressions/7.19.Nullish-Coalescing_Expressions/issue14609_01.sts
 ### Issue 1654 end
 
 ### Issue 16535
@@ -521,6 +522,6 @@ spec/partial_type/partialType_main.sts
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
 ### Issue 19676
-spec/07.expressions/Object_Literal/issue14680.sts
+spec/07.expressions/7.5.Object_Literal/issue14680.sts
 ### Issue 19677
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_03.sts
