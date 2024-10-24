@@ -42,12 +42,16 @@ InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildC
     methodId_ = GetRuntime()->ResolveMethodIndex(Builder()->GetMethod(), bcInst->GetId(0).AsIndex());
     pc_ = Builder()->GetPc(bcInst->GetAddress());
     hasImplicitArg_ = !GetRuntime()->IsMethodStatic(Builder()->GetMethod(), methodId_);
-    method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
 
     if (GetRuntime()->IsMethodIntrinsic(Builder()->GetMethod(), methodId_)) {
+        // Do not move "GetMethodId" ouside this if! Success of "IsMethodIntrinsic" guarantees that class and method are
+        // loaded. Thus value of "method_" is not nullptr and can be used in BuildIntrinsic.
+        method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
         BuildIntrinsic();
         return;
     }
+    // Here "GetMethodById" can be used without additional checks, result may be nullptr and it is normal situation
+    method_ = GetRuntime()->GetMethodById(Builder()->GetMethod(), methodId_);
     saveState_ = nullptr;
     uint32_t classId = 0;
     if constexpr (HAS_SAVE_STATE) {
@@ -554,6 +558,7 @@ void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::B
 template <Opcode OPCODE, bool IS_RANGE, bool ACC_READ, bool HAS_SAVE_STATE>
 void InstBuilder::BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, HAS_SAVE_STATE>::BuildIntrinsic()
 {
+    ASSERT(method_ != nullptr);
     auto intrinsicId = GetRuntime()->GetIntrinsicId(method_);
     auto isVirtual = IsVirtual(intrinsicId);
     if (GetGraph()->IsBytecodeOptimizer() || !g_options.IsCompilerEncodeIntrinsics()) {
