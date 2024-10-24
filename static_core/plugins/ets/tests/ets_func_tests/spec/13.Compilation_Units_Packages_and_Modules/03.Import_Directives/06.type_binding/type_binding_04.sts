@@ -19,7 +19,7 @@
  tags: [negative]
  ---*/
 
-import {StandardExportedClass as GIT1, ClassForExport as GIT2} from "./to_export.sts"}
+import {StandardExportedClass as GIT1, ClassForExport as GIT2} from "./to_export.sts"
 
 function main () {
   let c4 = new GIT2 // compile-time error: cannot create objects of type GIT2
