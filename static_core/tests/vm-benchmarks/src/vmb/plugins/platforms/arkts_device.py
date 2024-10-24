@@ -42,9 +42,11 @@ class Platform(PlatformBase):
             log.info('Skipping aot compilation of libs')
         else:
             an = Path(self.ark.etsstdlib).with_suffix('.an')
-            log.info('AOT-Compiling %s. This may took a long time...',
+            aot_lib_opts = ' '.join(args.aot_lib_compiler_options)
+            log.info('AOT-Compiling %s. This may take a long time...',
                      self.ark.etsstdlib)
-            res = self.paoc.run_paoc(self.ark.etsstdlib, an, timeout=1800)
+            res = self.paoc.run_paoc(self.ark.etsstdlib, an,
+                                     opts=aot_lib_opts, timeout=1800)
             if not self.ext_info.get('etsstdlib', {}):
                 self.ext_info['etsstdlib'] = {}
             self.ext_info['etsstdlib']['etsstdlib.an'] = \
