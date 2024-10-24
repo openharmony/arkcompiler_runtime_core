@@ -36,6 +36,12 @@ def get_args():
     parser.add_argument(
         '--full', action="store_true", help='Check all files with all compile keys.')
     parser.add_argument(
+        '--check-libabckit', action="store_true", help='Check runtime_core/libabckit folder')
+    parser.add_argument(
+        '--header-filter', type=str, action='store', dest='header_filter',
+        required=False, default=".*",
+        help='Ignore header filter from .clang-tidy file.')
+    parser.add_argument(
         '--proc-count', type=int, action='store', dest='proc_count',
         required=False, default="-1",
         help='Paralell process count of clang-tidy')
@@ -207,7 +213,7 @@ default_disabled_checks = [
 ]
 
 
-def run_clang_tidy(src_path: str, panda_dir: str, build_dir: str, compile_args: str) -> bool:
+def run_clang_tidy(src_path: str, config_file_path: str, build_dir: str, header_filter: str, compile_args: str) -> bool:
     # Used by ctcache to provide a wrapper for real clang-tidy that will check the cache
     # before launching clang-tidy and save the result to ctcache server
     cmd_path = os.getenv('CLANG_TIDY_PATH')
@@ -215,8 +221,8 @@ def run_clang_tidy(src_path: str, panda_dir: str, build_dir: str, compile_args: 
         cmd_path = 'clang-tidy-14'
     cmd = [cmd_path]
     cmd += ['-checks=*,' + ','.join(default_disabled_checks)]
-    cmd += ['--header-filter=.*']
-    cmd += ['--config-file=' + os.path.join(panda_dir, '.clang-tidy')]
+    cmd += ['--header-filter=' + header_filter]
+    cmd += ['--config-file=' + os.path.join(config_file_path, '.clang-tidy')]
     cmd += [src_path]
     cmd += ['--']
     cmd += compile_args.split()
@@ -251,7 +257,7 @@ def get_full_path(relative_path: str, location_base: str, panda_dir: str, build_
     return full_path
 
 
-def check_file_list(file_list: list, panda_dir: str, build_dir: str, proc_count: int) -> bool:
+def check_file_list(file_list: list, panda_dir: str, build_dir: str, header_filter: str, proc_count: int) -> bool:
     pool = multiprocessing.Pool(proc_count)
     jobs = []
     for src, args in file_list:
@@ -259,7 +265,7 @@ def check_file_list(file_list: list, panda_dir: str, build_dir: str, proc_count:
         msg = "Done clang-tidy: %s" % (src)
 
         proc = pool.apply_async(func=run_clang_tidy, args=(
-            src, panda_dir, build_dir, args))
+            src, panda_dir, build_dir, header_filter, args))
         jobs.append((proc, msg))
 
     # Wait for jobs to complete before exiting
@@ -459,6 +465,11 @@ if __name__ == "__main__":
     if not os.path.exists(os.path.join(arguments.build_dir, 'compile_commands.json')):
         sys.exit("Error: Missing file `compile_commands.json` in build directory")
 
+    # A lot of false positive checks on GTESTS in libabckit
+    if arguments.check_libabckit:
+        default_disabled_checks.append("-fuchsia-statically-constructed-objects")
+        default_disabled_checks.append("-cert-err58-cpp")
+
     err_msg = verify_args(arguments.panda_dir, arguments.build_dir)
     if err_msg:
         sys.exit(err_msg)
@@ -471,15 +482,16 @@ if __name__ == "__main__":
                  "Please check availble in build `dir compile_commands.json`"
                  "and correcting of parameter `--filename-filter` if you use it.")
 
-    check_headers_in_es2panda_sources(arguments.panda_dir)
-    print('Checked for system headers: Starting')
-    system_headers = check_file_list_for_system_headers_includes(files_list)
-    if system_headers:
-        err_msg = "Error: third_party includes should be marked as system\n"
-        for e_path, e_system_header in system_headers:
-            err_msg += e_path + " error: " + e_system_header + "\n"
-        sys.exit(err_msg)
-    print('Checked for system headers: Done')
+    if not arguments.check_libabckit:
+        check_headers_in_es2panda_sources(arguments.panda_dir)
+        print('Checked for system headers: Starting')
+        system_headers = check_file_list_for_system_headers_includes(files_list)
+        if system_headers:
+            err_msg = "Error: third_party includes should be marked as system\n"
+            for e_path, e_system_header in system_headers:
+                err_msg += e_path + " error: " + e_system_header + "\n"
+            sys.exit(err_msg)
+        print('Checked for system headers: Done')
 
     if not arguments.full:
         files_list = filter_file_list(files_list)
@@ -489,7 +501,10 @@ if __name__ == "__main__":
 
     process_count = get_proc_count(arguments.proc_count)
     print('clang-tidy proc_count: ' + str(process_count))
-    if not check_file_list(files_list, arguments.panda_dir, arguments.build_dir, process_count):
+    conf_file_path = arguments.panda_dir
+    if arguments.check_libabckit:
+        conf_file_path += "/libabckit/"
+    if not check_file_list(files_list, conf_file_path, arguments.build_dir, arguments.header_filter, process_count):
         sys.exit("Failed: Clang-tidy get errors")
 
     print("Clang-tidy was passed successfully!")

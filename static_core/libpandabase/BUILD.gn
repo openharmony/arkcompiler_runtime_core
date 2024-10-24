@@ -23,7 +23,7 @@ if (ark_standalone_build) {
 ohos_static_library("libarktsbase_package") {
   deps = []
   if (enable_static_vm) {
-    deps += [ ":libarktsbase_frontend_static" ]
+    deps += [ ":libarktsbase" ]
   }
 
   part_name = ark_part_name
@@ -45,6 +45,8 @@ config("arkbase_public_config") {
   if (ark_static_standalone_build) {
     ldflags = [ "-ldl" ]
   }
+
+  configs = [ sdk_libc_secshared_config ]
 }
 
 ark_gen_file("events_gen") {
@@ -254,7 +256,7 @@ ohos_shared_library("libarktsbase") {
   if (!is_mingw && !is_mac) {
     output_extension = "so"
   }
-  part_name = ark_part_name
+  part_name = "$ark_part_name"
   subsystem_name = "$ark_subsystem_name"
 }
 

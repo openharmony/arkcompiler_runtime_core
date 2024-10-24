@@ -41,13 +41,14 @@ runtime_yamls = [
   "runtime/ets_compiler_intrinsics.yaml",
 ]
 
+arkcompiler_deps = []
 if (ark_ets_interop_js) {
   srcs_compiler += [
     "compiler/optimizer/ir_builder/js_interop/js_interop_inst_builder.cpp",
     "compiler/optimizer/optimizations/interop_js/interop_intrinsic_optimization.cpp",
   ]
 
-  arkcompiler_deps =
+  arkcompiler_deps +=
       [ "$ark_root/plugins/ets/runtime/interop_js:interop_intrinsic_kinds_h" ]
 
   runtime_yamls += [ "runtime/interop_js/intrinsics/std_js_jsruntime.yaml" ]
@@ -78,6 +79,8 @@ arkruntime_deps = [
   "$ark_root/assembler:libarktsassembler_frontend_static",
   "$ark_root/libpandafile:libarktsfile_frontend_static",
 ]
+
+arkcompiler_deps += [ "$_plugin_dir/runtime/interop_js:interop_intrinsic_kinds_h(${default_toolchain})" ]
 
 srcs_runtime = [
   "runtime/ets_annotation.cpp",

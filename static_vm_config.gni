@@ -18,6 +18,8 @@ if (!defined(ark_standalone_build)) {
   ark_standalone_build = false
 }
 
+import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+
 if (ark_standalone_build) {
   import("//arkcompiler/toolchain/build/config/sanitizers/sanitizers.gni")
   ark_root = "//arkcompiler/runtime_core/static_core"
@@ -33,7 +35,6 @@ if (ark_standalone_build) {
 
 enable_arkplatform = true
 enable_static_vm = true
-enable_libabckit = false
 if (is_asan && use_hwasan) {
   enable_arkplatform = false
   enable_static_vm = false

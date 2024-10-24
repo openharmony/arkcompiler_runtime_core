@@ -345,6 +345,10 @@ class Operand
     @name == :v
   end
 
+  def is_64bit_imm?
+    %i[i64 f64 b64 u64].include?(@type.to_sym)
+  end
+
   def acc?
     @name == :acc
   end

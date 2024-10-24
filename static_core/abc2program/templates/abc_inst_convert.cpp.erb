@@ -36,12 +36,19 @@ pandasm::Ins AbcCodeConverter::BytecodeInstructionToPandasmInstruction(BytecodeI
     case BytecodeInstruction::Format::<%=i.format.pretty.upcase%>:
 %
 %   i.operands.each do |operand|
-%      if (operand.name == :imm)
-%         if (operand.type != "i64")
+%     if (operand.name == :imm)
+        if(bcIns.HasFlag(BytecodeInstruction::Flags::FLOAT)) {
+%       if (operand.is_64bit_imm?)
+            ins.imms.emplace_back(bit_cast<double, int64_t>(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
+%       else
+            ins.imms.emplace_back(bit_cast<float, int32_t>(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
+%       end
+        }
+%       if (!operand.is_64bit_imm?)
         ins.imms.emplace_back(static_cast<int64_t>(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>()));
-%         else
+%       else
         ins.imms.emplace_back(bcIns.GetImm<BytecodeInstruction::Format::<%=i.format.pretty.upcase%>, <%=imm_count%>>());
-%         end
+%       end
 %         imm_count += 1
 %
 %      elsif (operand.name == :v)
