@@ -32,9 +32,6 @@
 # 16032 Timeouts
 escompat/ArrayTest.sts
 
-# 18708 Timeouts
-escompat/escompat_BigInt_instance_BigInt_toString_001.sts
-
 # 17744 Tests creating BigInt from Double.MAX_VALUE don't fit in 300 sec timeout
 03.types/08.reference_types/13.type_bigint/bint_8.sts
 03.types/08.reference_types/13.type_bigint/bint_args_8.sts
