@@ -27,6 +27,8 @@ function main(): int {
     failures += check((): int => { return isArrayNullUndefined()}, "isArrayNullUndefined");
     failures += check((): int => { return push()}, "push");
     failures += check((): int => { return pushECMA()}, "pushECMA");
+    failures += check((): int => { return setNull()}, "setNull");
+    failures += check((): int => { return setCustomClass()}, "setCustomClass");
     failures += check((): int => { return toSplicedArg2()}, "toSplicedArg2");
     failures += check((): int => { return toSplicedArg1()}, "toSplicedArg1");
     return check(failures, "All tests run");
@@ -111,6 +113,23 @@ function pushECMA(): int {
         }
     }
     return success;
+}
+
+function setNull(): int {
+    let arr = new Array<string | null>(3);
+    arr[1] = "abc"
+    arr[2] = null;
+    if (!(arr[2] instanceof null)) {
+        return fail;
+    }
+    return success;
+}
+
+function setCustomClass() : int {
+    class A {}
+    let arr = new Array<A>(1)
+    arr[0] = new A()
+    return success
 }
 
 function toSplicedArg1(): int {

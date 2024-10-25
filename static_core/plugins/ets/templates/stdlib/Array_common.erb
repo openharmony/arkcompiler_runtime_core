@@ -620,7 +620,13 @@
         return ""
     }
     const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-    let sb = new StringBuilder(new String(<%= get_unsafe.(this, '0') %>))
+    <% if el_type == "T" %>// NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
+    const first_el = <%= get_unsafe.(this, '0') %>
+    let first_str = "undefined"
+    if (!__runtimeIsSameReference(first_el, undefined)) {
+        first_str = new String(first_el)
+    } 
+    let sb = new StringBuilder(first_str)<% else %>let sb = new StringBuilder(new String(<%= get_unsafe.(this, '0') %>))<% end %>
     for (let i: int = 1; i < <%= this_len_int %>; i++) {
         const tmp = <%= get_unsafe.(this, 'i') %>
         sb.append(sepReal);

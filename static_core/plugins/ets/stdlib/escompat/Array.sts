@@ -102,7 +102,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (idx >= this.actualLength) {
             throw new RangeError("Out of bounds")
         }
-        this.buffer[idx] = val as Object
+        this.buffer[idx] = val
     }
 
     private $_set_unsafe(idx: int, val: T): void {
@@ -1944,7 +1944,13 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
             return ""
         }
         const sepReal = __runtimeIsSameReference(sep, undefined) ? "," : sep!
-        let sb = new StringBuilder(new String(this.$_get_unsafe(0)))
+        // NOTE(aleksander-sotov) We can't call String constructor here due to internal issue 18583
+        const first_el = this.$_get_unsafe(0)
+        let first_str = "undefined"
+        if (!__runtimeIsSameReference(first_el, undefined)) {
+            first_str = new String(first_el)
+        }
+        let sb = new StringBuilder(first_str)
         for (let i: int = 1; i < this.actualLength; i++) {
             const tmp = this.$_get_unsafe(i)
             sb.append(sepReal);
