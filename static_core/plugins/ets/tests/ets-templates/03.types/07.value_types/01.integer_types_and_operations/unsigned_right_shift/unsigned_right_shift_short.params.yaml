@@ -20,11 +20,11 @@ values:
 - { left: -1, right: 1, result: Int.MAX_VALUE }
 - { left: -1, right: 14, result: '0x3ffff' }
 - { left: -1, right: 15, result: '0x1ffff' }
-- { left: "Short.MIN_VALUE as short", right: 1, result: '0x4000' }
-- { left: "Short.MIN_VALUE as short", right: 14, result: '0x3fffe' }
-- { left: "Short.MAX_VALUE as short", right: 1, result: '0x3fff' }
-- { left: "Short.MAX_VALUE as short", right: 14, result: 1 }
-- { left: "Short.MAX_VALUE as short", right: 15, result: 0 }
+- { left: "Short.MIN_VALUE", right: 1, result: '0x4000' }
+- { left: "Short.MIN_VALUE", right: 14, result: '0x3fffe' }
+- { left: "Short.MAX_VALUE", right: 1, result: '0x3fff' }
+- { left: "Short.MAX_VALUE", right: 14, result: 1 }
+- { left: "Short.MAX_VALUE", right: 15, result: 0 }
 - { left: '0x3fff', right: 2, result: '0x0fff' }
 - { left: 1, right: 0, result: 1 }
 - { left: -1, right: 0, result: -1 }
@@ -32,4 +32,4 @@ values:
 - { left: 1, right: -1, result: 0 }
 - { left: 0, right: -1, result: 0 }
 - { left: -1, right: -2, result: 3 }
-- { left: -1, right: -15, result: "Short.MAX_VALUE as short" }
+- { left: -1, right: -15, result: "Short.MAX_VALUE" }

@@ -61,8 +61,8 @@ cases:
           - { expr: new Short(), val: 0 }
           - { expr: new Short(Byte.MIN_VALUE as short), val: -128 }
           - { expr: new Short(Byte.MAX_VALUE as short), val: 127 }
-          - { expr: new Short(Short.MIN_VALUE as short), val: -32768 }
-          - { expr: new Short(Short.MAX_VALUE as short), val: 32767 }
+          - { expr: new Short(Short.MIN_VALUE), val: -32768 }
+          - { expr: new Short(Short.MAX_VALUE), val: 32767 }
 
     - from_type: Short
       to_type: int
@@ -70,8 +70,8 @@ cases:
           - { expr: new Short(), val: 0 }
           - { expr: new Short(Byte.MIN_VALUE as short), val: -128 }
           - { expr: new Short(Byte.MAX_VALUE as short), val: 127 }
-          - { expr: new Short(Short.MIN_VALUE as short), val: -32768 }
-          - { expr: new Short(Short.MAX_VALUE as short), val: 32767 }
+          - { expr: new Short(Short.MIN_VALUE), val: -32768 }
+          - { expr: new Short(Short.MAX_VALUE), val: 32767 }
 
     - from_type: Short
       to_type: long
@@ -79,8 +79,8 @@ cases:
           - { expr: new Short(), val: 0 }
           - { expr: new Short(Byte.MIN_VALUE as short), val: -128 }
           - { expr: new Short(Byte.MAX_VALUE as short), val: 127 }
-          - { expr: new Short(Short.MIN_VALUE as short), val: -32768 }
-          - { expr: new Short(Short.MAX_VALUE as short), val: 32767 }
+          - { expr: new Short(Short.MIN_VALUE), val: -32768 }
+          - { expr: new Short(Short.MAX_VALUE), val: 32767 }
 
     - from_type: Short
       to_type: float
@@ -88,8 +88,8 @@ cases:
           - { expr: new Short(), val: 0.0 }
           - { expr: new Short(Byte.MIN_VALUE as short), val: -128.0 as float }
           - { expr: new Short(Byte.MAX_VALUE as short), val: 127.0 as float }
-          - { expr: new Short(Short.MIN_VALUE as short), val: -32768.0 as float }
-          - { expr: new Short(Short.MAX_VALUE as short), val: 32767.0 as float }
+          - { expr: new Short(Short.MIN_VALUE), val: -32768.0 as float }
+          - { expr: new Short(Short.MAX_VALUE), val: 32767.0 as float }
 
     - from_type: Short
       to_type: double
@@ -97,8 +97,8 @@ cases:
           - { expr: new Short(), val: 0.0 }
           - { expr: new Short(Byte.MIN_VALUE as short), val: -128 }
           - { expr: new Short(Byte.MAX_VALUE as short), val: 127 }
-          - { expr: new Short(Short.MIN_VALUE as short), val: -32768 }
-          - { expr: new Short(Short.MAX_VALUE as short), val: 32767 }
+          - { expr: new Short(Short.MIN_VALUE), val: -32768 }
+          - { expr: new Short(Short.MAX_VALUE), val: 32767 }
 
     - from_type: Int
       to_type: int
@@ -108,8 +108,8 @@ cases:
           - { expr: new Int(Byte.MAX_VALUE as int), val: 127 }
           - { expr: new Int(Short.MIN_VALUE as int), val: -32768 }
           - { expr: new Int(Short.MAX_VALUE as int), val: 32767 }
-          - { expr: new Int(Int.MIN_VALUE as int), val: -2147483648 }
-          - { expr: new Int(Int.MAX_VALUE as int), val: 2147483647 }
+          - { expr: new Int(Int.MIN_VALUE), val: -2147483648 }
+          - { expr: new Int(Int.MAX_VALUE), val: 2147483647 }
 
     - from_type: Int
       to_type: long
@@ -119,8 +119,8 @@ cases:
           - { expr: new Int(Byte.MAX_VALUE as int), val: 127 }
           - { expr: new Int(Short.MIN_VALUE as int), val: -32768 }
           - { expr: new Int(Short.MAX_VALUE as int), val: 32767 }
-          - { expr: new Int(Int.MIN_VALUE as int), val: -2147483648 }
-          - { expr: new Int(Int.MAX_VALUE as int), val: 2147483647 }
+          - { expr: new Int(Int.MIN_VALUE), val: -2147483648 }
+          - { expr: new Int(Int.MAX_VALUE), val: 2147483647 }
 
     - from_type: Int
       to_type: float
@@ -130,8 +130,8 @@ cases:
           - { expr: new Int(Byte.MAX_VALUE as int), val: 127.0 as float }
           - { expr: new Int(Short.MIN_VALUE as int), val: -32768.0 as float }
           - { expr: new Int(Short.MAX_VALUE as int), val: 32767.0 as float }
-          - { expr: new Int(Int.MIN_VALUE as int), val: -2147483600.0 as float } # loss of precision
-          - { expr: new Int(Int.MAX_VALUE as int), val: 2147483600.0 as float }  # loss of precision
+          - { expr: new Int(Int.MIN_VALUE), val: -2147483600.0 as float } # loss of precision
+          - { expr: new Int(Int.MAX_VALUE), val: 2147483600.0 as float }  # loss of precision
 
     - from_type: Int
       to_type: double
@@ -141,8 +141,8 @@ cases:
           - { expr: new Int(Byte.MAX_VALUE as int), val: 127.0 }
           - { expr: new Int(Short.MIN_VALUE as int), val: -32768.0 }
           - { expr: new Int(Short.MAX_VALUE as int), val: 32767.0 }
-          - { expr: new Int(Int.MIN_VALUE as int), val: -2147483648.0 }
-          - { expr: new Int(Int.MAX_VALUE as int), val: 2147483647.0 }
+          - { expr: new Int(Int.MIN_VALUE), val: -2147483648.0 }
+          - { expr: new Int(Int.MAX_VALUE), val: 2147483647.0 }
 
     - from_type: Long
       to_type: long
@@ -154,8 +154,8 @@ cases:
           - { expr: new Long(Short.MAX_VALUE as long), val: 32767 }
           - { expr: new Long(Int.MIN_VALUE as long), val: -2147483648 }
           - { expr: new Long(Int.MAX_VALUE as long), val: 2147483647 }
-          - { expr: new Long(Long.MIN_VALUE as long), val: -9223372036854775808 }
-          - { expr: new Long(Long.MAX_VALUE as long), val: 9223372036854775807 }
+          - { expr: new Long(Long.MIN_VALUE), val: -9223372036854775808 }
+          - { expr: new Long(Long.MAX_VALUE), val: 9223372036854775807 }
 
     - from_type: Long
       to_type: float
@@ -167,8 +167,8 @@ cases:
           - { expr: new Long(Short.MAX_VALUE as long), val: 32767.0 as float }
           - { expr: new Long(Int.MIN_VALUE as long), val: -2147483600.0 as float } # loss of precision
           - { expr: new Long(Int.MAX_VALUE as long), val: 2147483600.0 as float }  # loss of precision
-          - { expr: new Long(Long.MIN_VALUE as long), val: -9223372000000000000.0 as float } # loss of precision
-          - { expr: new Long(Long.MAX_VALUE as long), val: 9223372000000000000.0 as float } # loss of precision
+          - { expr: new Long(Long.MIN_VALUE), val: -9223372000000000000.0 as float } # loss of precision
+          - { expr: new Long(Long.MAX_VALUE), val: 9223372000000000000.0 as float } # loss of precision
 
     - from_type: Long
       to_type: double
@@ -180,8 +180,8 @@ cases:
           - { expr: new Long(Short.MAX_VALUE as long), val: 32767.0 }
           - { expr: new Long(Int.MIN_VALUE as long), val: -2147483648.0 }
           - { expr: new Long(Int.MAX_VALUE as long), val: 2147483647.0 }
-          - { expr: new Long(Long.MIN_VALUE as long), val: -9223372036854775808.0 }
-          - { expr: new Long(Long.MAX_VALUE as long), val: 9223372036854775807.0 }
+          - { expr: new Long(Long.MIN_VALUE), val: -9223372036854775808.0 }
+          - { expr: new Long(Long.MAX_VALUE), val: 9223372036854775807.0 }
 
     - from_type: Float
       to_type: float
@@ -196,8 +196,8 @@ cases:
           - { expr: new Float(Int.MAX_VALUE as float), val: 2.14748365E9 as float }  # loss of precision
           - { expr: new Float(Long.MIN_VALUE as float), val: -9.223372E18 as float } # loss of precision
           - { expr: new Float(Long.MAX_VALUE as float), val: 9.223372E18 as float } # loss of precision
-          - { expr: new Float(Float.MIN_VALUE as float), val: 1.4E-45 as float }
-          - { expr: new Float(Float.MAX_VALUE as float), val: 3.4028235E38 as float }
+          - { expr: new Float(Float.MIN_VALUE), val: 1.4E-45 as float }
+          - { expr: new Float(Float.MAX_VALUE), val: 3.4028235E38 as float }
           - { expr: new Float(Float.NEGATIVE_INFINITY as float), val: Float.NEGATIVE_INFINITY }
           - { expr: new Float(Float.POSITIVE_INFINITY as float), val: Float.POSITIVE_INFINITY }
 
@@ -214,8 +214,8 @@ cases:
           - { expr: new Float(Int.MAX_VALUE as float), val: 2.147483648E9 }  # loss of precision
           - { expr: new Float(Long.MIN_VALUE as float), val: -9.223372036854776E18 } # loss of precision
           - { expr: new Float(Long.MAX_VALUE as float), val: 9.223372036854776E18 } # loss of precision
-          - { expr: new Float(Float.MIN_VALUE as float), val: 1.401298464324817E-45 }
-          - { expr: new Float(Float.MAX_VALUE as float), val: 3.4028234663852886E38 }
+          - { expr: new Float(Float.MIN_VALUE), val: 1.401298464324817E-45 }
+          - { expr: new Float(Float.MAX_VALUE), val: 3.4028234663852886E38 }
           - { expr: new Float(Float.NEGATIVE_INFINITY as float), val: Float.NEGATIVE_INFINITY as double }
           - { expr: new Float(Float.POSITIVE_INFINITY as float), val: Float.POSITIVE_INFINITY as double }
 
@@ -236,8 +236,8 @@ cases:
           - { expr: new Double(Float.MAX_VALUE as double), val: Float.MAX_VALUE as double }
           - { expr: new Double(Float.NEGATIVE_INFINITY as double), val: Float.NEGATIVE_INFINITY as double }
           - { expr: new Double(Float.POSITIVE_INFINITY as double), val: Float.POSITIVE_INFINITY as double }
-          - { expr: new Double(Double.MIN_VALUE as double), val: Double.MIN_VALUE as double }
-          - { expr: new Double(Double.MAX_VALUE as double), val: Double.MAX_VALUE as double }
+          - { expr: new Double(Double.MIN_VALUE), val: Double.MIN_VALUE }
+          - { expr: new Double(Double.MAX_VALUE), val: Double.MAX_VALUE }
           - { expr: new Double(Double.NEGATIVE_INFINITY as double), val: Double.NEGATIVE_INFINITY as double }
           - { expr: new Double(Double.POSITIVE_INFINITY as double), val: Double.POSITIVE_INFINITY as double }
 

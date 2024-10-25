@@ -33,7 +33,7 @@ class A {
   public foo({% for v in c['values'] %}p{{loop.index}}: {{c.type}}{{ ", " if not loop.last }}{% endfor %}): int {
     if (
       {%- for v in c['values'] %}
-      this.fld_{{loop.index}} === null {{ " ||" if not loop.last }}
+      this.fld_{{loop.index}} == null {{ " ||" if not loop.last }}
       {%- endfor %}
     ) {
       return 1;

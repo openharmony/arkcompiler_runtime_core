@@ -28,15 +28,15 @@ cases:
 
   - src_type: short
     dst_type: Short
-    values: [Short.MIN_VALUE as short, 255 as short]
+    values: [Short.MIN_VALUE, 255 as short]
 
   - src_type: int
     dst_type: Int
-    values: [127, 32767, Int.MAX_VALUE as int]
+    values: [127, 32767, Int.MAX_VALUE]
 
   - src_type: long
     dst_type: Long
-    values: [Long.MIN_VALUE as long, 9223372036854775807 as long]
+    values: [Long.MIN_VALUE, 9223372036854775807 as long]
 
   - src_type: float
     dst_type: Float

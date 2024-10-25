@@ -77,21 +77,21 @@ cases:
           class Ex extends Exception {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: byte): byte throws { if (p == 0) throw ex; else return Byte.MIN_VALUE as byte }
+              meth(p: byte): byte throws { if (p == 0) throw ex; else return Byte.MIN_VALUE }
               meth(p: Byte): Byte { return Byte.MAX_VALUE as Byte }
-              meth(p: short): short { return Short.MIN_VALUE as short }
+              meth(p: short): short { return Short.MIN_VALUE }
               meth(p: Short): Short throws { if (p == 0) throw ex; else return Short.MAX_VALUE as Short }
-              meth(p: int): int throws { if (p == 0) throw ex; else return Int.MIN_VALUE as int }
+              meth(p: int): int throws { if (p == 0) throw ex; else return Int.MIN_VALUE }
               meth(p: Int): Int { return Int.MAX_VALUE as Int }
-              meth(p: long): long { return Long.MIN_VALUE as long }
+              meth(p: long): long { return Long.MIN_VALUE }
               meth(p: Long): Long throws { if (p == 0) throw ex; else return Long.MAX_VALUE as Long }
               meth(p: char): char throws { if (p == 0) throw ex; else return Char.MIN_VALUE as char }
               meth(p: Char): Char { return Char.MAX_VALUE as Char }
               meth(p: boolean): boolean { return false as boolean }
               meth(p: Boolean): Boolean throws { return true as Boolean }
-              meth(p: float): float throws { if (p == 0) throw ex; else return Float.MIN_VALUE as float }
+              meth(p: float): float throws { if (p == 0) throw ex; else return Float.MIN_VALUE }
               meth(p: Float): Float { return Float.MAX_VALUE as Float }
-              meth(p: double): double { return Double.MIN_VALUE as double }
+              meth(p: double): double { return Double.MIN_VALUE }
               meth(p: Double): Double throws { if (p == 0) throw ex; else return Double.MAX_VALUE as Double }
           }
       use: |-
@@ -122,21 +122,21 @@ cases:
           class Ex extends Exception {}
           let ex: Ex = new Ex()
           class A {
-              meth(p: byte[]): byte throws { if (p.length == 0) throw ex; else return Byte.MIN_VALUE as byte }
+              meth(p: byte[]): byte throws { if (p.length == 0) throw ex; else return Byte.MIN_VALUE }
               meth(p: Byte[]): Byte { return Byte.MAX_VALUE as Byte }
-              meth(p: short[]): short { return Short.MIN_VALUE as short }
+              meth(p: short[]): short { return Short.MIN_VALUE }
               meth(p: Short[]): Short throws { if (p.length == 0) throw ex; else return Short.MAX_VALUE as Short }
-              meth(p: int[]): int throws { if (p.length == 0) throw ex; else return Int.MIN_VALUE as int }
+              meth(p: int[]): int throws { if (p.length == 0) throw ex; else return Int.MIN_VALUE }
               meth(p: Int[]): Int { return Int.MAX_VALUE as Int }
-              meth(p: long[]): long { return Long.MIN_VALUE as long }
+              meth(p: long[]): long { return Long.MIN_VALUE }
               meth(p: Long[]): Long throws { if (p.length == 0) throw ex; else return Long.MAX_VALUE as Long }
               meth(p: char[]): char throws { if (p.length == 0) throw ex; else return Char.MIN_VALUE as char }
               meth(p: Char[]): Char { return Char.MAX_VALUE as Char }
               meth(p: boolean[]): boolean { return false }
               meth(p: Boolean[]): Boolean throws { return true as Boolean }
-              meth(p: float[]): float throws { if (p.length == 0) throw ex; else return Float.MIN_VALUE as float }
+              meth(p: float[]): float throws { if (p.length == 0) throw ex; else return Float.MIN_VALUE }
               meth(p: Float[]): Float { return Float.MAX_VALUE as Float }
-              meth(p: double[]): double { return Double.MIN_VALUE as double }
+              meth(p: double[]): double { return Double.MIN_VALUE }
               meth(p: Double[]): Double throws { if (p.length == 0) throw ex; else return Double.MAX_VALUE as Double }
           }
       use: |-

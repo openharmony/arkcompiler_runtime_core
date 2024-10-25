@@ -20,11 +20,11 @@ values:
 - { left: -1, right: 1, result: Int.MAX_VALUE }
 - { left: -1, right: 31, result: 1 }
 - { left: -1, right: 30, result: 3 }
-- { left: "Byte.MIN_VALUE as byte", right: 1, result: "0x40" }
-- { left: "Byte.MIN_VALUE as byte", right: 31, result: 1 }
-- { left: "Byte.MAX_VALUE as byte", right: 1, result: 63 }
-- { left: "Byte.MAX_VALUE as byte", right: 6, result: 1 }
-- { left: "Byte.MAX_VALUE as byte", right: 7, result: 0 }
+- { left: "Byte.MIN_VALUE", right: 1, result: "0x40" }
+- { left: "Byte.MIN_VALUE", right: 31, result: 1 }
+- { left: "Byte.MAX_VALUE", right: 1, result: 63 }
+- { left: "Byte.MAX_VALUE", right: 6, result: 1 }
+- { left: "Byte.MAX_VALUE", right: 7, result: 0 }
 - { left: 63, right: 2, result: 15 }
 - { left: 1, right: 0, result: 1 }
 - { left: -1, right: 0, result: -1 }
@@ -32,4 +32,4 @@ values:
 - { left: 1, right: -1, result: 0 }
 - { left: 0, right: -1, result: 0 }
 - { left: -1, right: -2, result: 3 }
-- { left: -1, right: -7, result: "Byte.MAX_VALUE as byte" }
+- { left: -1, right: -7, result: "Byte.MAX_VALUE" }

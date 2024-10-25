@@ -15,37 +15,37 @@
 cases:
     - res: 'number'
       vals:
-          - { type: number, expr: Number.MIN_VALUE as number }
-          - { type: number, expr: Number.MAX_VALUE as number }
-          - { type: Number, init_value: 0, expr: new Number(Number.MIN_VALUE as number) }
-          - { type: Number, init_value: 0, expr: new Number(Number.MAX_VALUE as number) }
+          - { type: number, expr: Number.MIN_VALUE }
+          - { type: number, expr: Number.MAX_VALUE }
+          - { type: Number, init_value: 0, expr: new Number(Number.MIN_VALUE) }
+          - { type: Number, init_value: 0, expr: new Number(Number.MAX_VALUE) }
 
     - res: 'number'
       vals:
-          - { type: byte, expr: Byte.MIN_VALUE as byte }
-          - { type: byte, expr: Byte.MAX_VALUE as byte }
-          - { type: Byte, init_value: 0, expr: new Byte(Byte.MIN_VALUE as byte) }
-          - { type: Byte, init_value: 0, expr: new Byte(Byte.MAX_VALUE as byte) }
-          - { type: short, expr: Short.MIN_VALUE as short }
-          - { type: short, expr: Short.MAX_VALUE as short }
-          - { type: Short, init_value: 0, expr: new Short(Short.MIN_VALUE as short) }
-          - { type: Short, init_value: 0, expr: new Short(Short.MAX_VALUE as short) }
-          - { type: int, expr: Int.MIN_VALUE as int }
-          - { type: int, expr: Int.MAX_VALUE as int }
-          - { type: Int, init_value: 0, expr: new Int(Int.MIN_VALUE as int) }
-          - { type: Int, init_value: 0, expr: new Int(Int.MAX_VALUE as int) }
-          - { type: long, expr: Long.MIN_VALUE as long }
-          - { type: long, expr: Long.MAX_VALUE as long }
-          - { type: Long, init_value: 0, expr: new Long(Long.MIN_VALUE as long) }
-          - { type: Long, init_value: 0, expr: new Long(Long.MAX_VALUE as long) }
-          - { type: float, expr: Float.MIN_VALUE as float }
-          - { type: float, expr: Float.MAX_VALUE as float }
-          - { type: Float, init_value: 0.0f, expr: new Float(Float.MIN_VALUE as float) }
-          - { type: Float, init_value: 0.0f, expr: new Float(Float.MAX_VALUE as float) }
-          - { type: double, expr: Double.MIN_VALUE as double }
-          - { type: double, expr: Double.MAX_VALUE as double }
-          - { type: Double, init_value: 0.0, expr: new Double(Double.MIN_VALUE as double) }
-          - { type: Double, init_value: 0.0, expr: new Double(Double.MAX_VALUE as double) }
+          - { type: byte, expr: Byte.MIN_VALUE }
+          - { type: byte, expr: Byte.MAX_VALUE }
+          - { type: Byte, init_value: 0, expr: new Byte(Byte.MIN_VALUE) }
+          - { type: Byte, init_value: 0, expr: new Byte(Byte.MAX_VALUE) }
+          - { type: short, expr: Short.MIN_VALUE }
+          - { type: short, expr: Short.MAX_VALUE }
+          - { type: Short, init_value: 0, expr: new Short(Short.MIN_VALUE) }
+          - { type: Short, init_value: 0, expr: new Short(Short.MAX_VALUE) }
+          - { type: int, expr: Int.MIN_VALUE }
+          - { type: int, expr: Int.MAX_VALUE }
+          - { type: Int, init_value: 0, expr: new Int(Int.MIN_VALUE) }
+          - { type: Int, init_value: 0, expr: new Int(Int.MAX_VALUE) }
+          - { type: long, expr: Long.MIN_VALUE }
+          - { type: long, expr: Long.MAX_VALUE }
+          - { type: Long, init_value: 0, expr: new Long(Long.MIN_VALUE) }
+          - { type: Long, init_value: 0, expr: new Long(Long.MAX_VALUE) }
+          - { type: float, expr: Float.MIN_VALUE }
+          - { type: float, expr: Float.MAX_VALUE }
+          - { type: Float, init_value: 0.0f, expr: new Float(Float.MIN_VALUE) }
+          - { type: Float, init_value: 0.0f, expr: new Float(Float.MAX_VALUE) }
+          - { type: double, expr: Double.MIN_VALUE }
+          - { type: double, expr: Double.MAX_VALUE }
+          - { type: Double, init_value: 0.0, expr: new Double(Double.MIN_VALUE) }
+          - { type: Double, init_value: 0.0, expr: new Double(Double.MAX_VALUE) }
           - { type: char, expr: Char.MIN_VALUE as char }
           - { type: char, expr: Char.MAX_VALUE as char }
           - { type: Char, init_value: "c'\\0'", expr: new Char(Char.MIN_VALUE as char) }
@@ -94,25 +94,25 @@ cases:
 
     - res: 'object'
       vals:
-          - { type: 'number[]', init_value: '[]', expr: '[Number.MIN_VALUE as number]' }
-          - { type: 'number[]', init_value: '[]', expr: '[Number.MAX_VALUE as number]' }
-          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MIN_VALUE as number)]' }
-          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MAX_VALUE as number)]' }
+          - { type: 'number[]', init_value: '[]', expr: '[Number.MIN_VALUE]' }
+          - { type: 'number[]', init_value: '[]', expr: '[Number.MAX_VALUE]' }
+          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MIN_VALUE)]' }
+          - { type: 'Number[]', init_value: '[]', expr: '[new Number(Number.MAX_VALUE)]' }
 
     - res: 'object'
       vals:
-          - { type: 'byte[]', init_value: '[]', expr: '[Byte.MIN_VALUE as byte]' }
-          - { type: 'Byte[]', init_value: '[]', expr: '[new Byte(Byte.MIN_VALUE as byte)]' }
-          - { type: 'short[]', init_value: '[]', expr: '[Short.MIN_VALUE as short]' }
-          - { type: 'Short[]', init_value: '[]', expr: '[new Short(Short.MIN_VALUE as short)]' }
-          - { type: 'int[]', init_value: '[]', expr: '[Int.MAX_VALUE as int]' }
-          - { type: 'Int[]', init_value: '[]', expr: '[new Int(Int.MIN_VALUE as int)]' }
-          - { type: 'long[]', init_value: '[]', expr: '[Long.MIN_VALUE as long]' }
-          - { type: 'Long[]', init_value: '[]', expr: '[new Long(Long.MIN_VALUE as long)]' }
-          - { type: 'float[]', init_value: '[]', expr: '[Float.MIN_VALUE as float]' }
-          - { type: 'Float[]', init_value: '[]', expr: '[new Float(Float.MIN_VALUE as float)]' }
-          - { type: 'double[]', init_value: '[]', expr: '[Double.MIN_VALUE as double]' }
-          - { type: 'Double[]', init_value: '[]', expr: '[new Double(Double.MIN_VALUE as double)]' }
+          - { type: 'byte[]', init_value: '[]', expr: '[Byte.MIN_VALUE]' }
+          - { type: 'Byte[]', init_value: '[]', expr: '[new Byte(Byte.MIN_VALUE)]' }
+          - { type: 'short[]', init_value: '[]', expr: '[Short.MIN_VALUE]' }
+          - { type: 'Short[]', init_value: '[]', expr: '[new Short(Short.MIN_VALUE)]' }
+          - { type: 'int[]', init_value: '[]', expr: '[Int.MAX_VALUE]' }
+          - { type: 'Int[]', init_value: '[]', expr: '[new Int(Int.MIN_VALUE)]' }
+          - { type: 'long[]', init_value: '[]', expr: '[Long.MIN_VALUE]' }
+          - { type: 'Long[]', init_value: '[]', expr: '[new Long(Long.MIN_VALUE)]' }
+          - { type: 'float[]', init_value: '[]', expr: '[Float.MIN_VALUE]' }
+          - { type: 'Float[]', init_value: '[]', expr: '[new Float(Float.MIN_VALUE)]' }
+          - { type: 'double[]', init_value: '[]', expr: '[Double.MIN_VALUE]' }
+          - { type: 'Double[]', init_value: '[]', expr: '[new Double(Double.MIN_VALUE)]' }
           - { type: 'char[]', init_value: '[]', expr: '[Char.MIN_VALUE as char]' }
           - { type: 'Char[]', init_value: '[]', expr: '[new Char(Char.MAX_VALUE as char)]' }
 

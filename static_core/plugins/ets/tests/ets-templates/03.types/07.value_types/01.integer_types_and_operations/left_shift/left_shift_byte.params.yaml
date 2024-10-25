@@ -18,10 +18,10 @@ values:
 - { left: 1, right: 1, result: 2 }
 - { left: 1, right: 30, result: '0x40000000' }
 - { left: 1, right: 31, result: Int.MIN_VALUE }
-- { left: "Byte.MIN_VALUE as byte", right: 1, result: -256 }
-- { left: "Byte.MIN_VALUE as byte", right: 31, result: 0 }
-- { left: "Byte.MAX_VALUE as byte", right: 1, result: 254 }
-- { left: "Byte.MAX_VALUE as byte", right: 31, result: Int.MIN_VALUE }
+- { left: "Byte.MIN_VALUE", right: 1, result: -256 }
+- { left: "Byte.MIN_VALUE", right: 31, result: 0 }
+- { left: "Byte.MAX_VALUE", right: 1, result: 254 }
+- { left: "Byte.MAX_VALUE", right: 31, result: Int.MIN_VALUE }
 - { left: 0, right: 0, result: 0 }
 - { left: 1, right: 0, result: 1 }
 - { left: -1, right: 0, result: -1 }

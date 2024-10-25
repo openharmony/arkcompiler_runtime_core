@@ -17,10 +17,9 @@ values:
 - { left: 0, right: 1, result: 1 }
 - { left: 1, right: 1, result: 0 }
 - { left: -1, right: -1, result: 0 }
-- { left: "Byte.MIN_VALUE as byte", right: "Byte.MIN_VALUE as byte", result: 0 }
-- { left: "Byte.MAX_VALUE as byte", right: "Byte.MAX_VALUE as byte", result: 0 }
-- { left: "Byte.MIN_VALUE as byte", right: "Byte.MAX_VALUE as byte", result: -1 }
+- { left: "Byte.MIN_VALUE", right: "Byte.MIN_VALUE", result: 0 }
+- { left: "Byte.MAX_VALUE", right: "Byte.MAX_VALUE", result: 0 }
+- { left: "Byte.MIN_VALUE", right: "Byte.MAX_VALUE", result: -1 }
 - { left: 42, right: 42, result: 0 }
 - { left: 42, right: -42, result: -4 }
 - { left: 85, right: -86, result: -1 }
-  

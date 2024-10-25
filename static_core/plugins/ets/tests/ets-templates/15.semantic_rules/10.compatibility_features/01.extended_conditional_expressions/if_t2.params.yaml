@@ -21,11 +21,11 @@ cases:
     - { val: '0.0000000001', type: 'double' }
     - { val: '0.000001', type: 'float' }
 
-    - { val: 'Byte.MIN_VALUE as byte', type: 'byte' }
-    - { val: 'Byte.MAX_VALUE as byte', type: 'byte' }
+    - { val: 'Byte.MIN_VALUE', type: 'byte' }
+    - { val: 'Byte.MAX_VALUE', type: 'byte' }
 
-    - { val: 'Short.MIN_VALUE as short', type: 'short' }
-    - { val: 'Short.MAX_VALUE as short', type: 'short' }
+    - { val: 'Short.MIN_VALUE', type: 'short' }
+    - { val: 'Short.MAX_VALUE', type: 'short' }
 
     - { val: 'Int.MIN_VALUE', type: 'int' }
     - { val: 'Int.MAX_VALUE', type: 'int' }
@@ -45,14 +45,14 @@ cases:
     - { val: 'Float.MIN_VALUE', type: 'float' }
     - { val: 'Float.MAX_VALUE', type: 'float' }
 
-    - { val: 'new Byte(Byte.MIN_VALUE as byte)', type: 'Byte' }
-    - { val: 'new Byte(Byte.MAX_VALUE as byte)', type: 'Byte' }
+    - { val: 'new Byte(Byte.MIN_VALUE)', type: 'Byte' }
+    - { val: 'new Byte(Byte.MAX_VALUE)', type: 'Byte' }
 
-    - { val: 'new Short(Short.MIN_VALUE as short)', type: 'Short' }
-    - { val: 'new Short(Short.MAX_VALUE as short)', type: 'Short' }
+    - { val: 'new Short(Short.MIN_VALUE)', type: 'Short' }
+    - { val: 'new Short(Short.MAX_VALUE)', type: 'Short' }
 
-    - { val: 'new Int(Int.MIN_VALUE as int)', type: 'Int' }
-    - { val: 'new Int(Int.MAX_VALUE as int)', type: 'Int' }
+    - { val: 'new Int(Int.MIN_VALUE)', type: 'Int' }
+    - { val: 'new Int(Int.MAX_VALUE)', type: 'Int' }
 
     - { val: 'new Long(Long.MIN_VALUE)', type: 'Long' }
     - { val: 'new Long(Long.MAX_VALUE)', type: 'Long' }

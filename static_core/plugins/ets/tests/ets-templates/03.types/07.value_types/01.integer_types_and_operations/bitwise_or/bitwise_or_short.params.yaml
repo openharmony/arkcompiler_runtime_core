@@ -17,9 +17,9 @@ values:
 - { left: 0, right: 1, result: 1 }
 - { left: 1, right: 1, result: 1 }
 - { left: -1, right: -1, result: -1 }
-- { left: "Short.MIN_VALUE as short", right: "Short.MIN_VALUE as short", result: "Short.MIN_VALUE as short" }
-- { left: "Short.MAX_VALUE as short", right: "Short.MAX_VALUE as short", result: "Short.MAX_VALUE as short" }
-- { left: "Short.MIN_VALUE as short", right: "Short.MAX_VALUE as short", result: -1 }
+- { left: "Short.MIN_VALUE", right: "Short.MIN_VALUE", result: "Short.MIN_VALUE" }
+- { left: "Short.MAX_VALUE", right: "Short.MAX_VALUE", result: "Short.MAX_VALUE" }
+- { left: "Short.MIN_VALUE", right: "Short.MAX_VALUE", result: -1 }
 - { left: 42, right: 42, result: 42 }
 - { left: 42, right: -42, result: -2 }
 - { left: 40, right: -40, result: -8 }

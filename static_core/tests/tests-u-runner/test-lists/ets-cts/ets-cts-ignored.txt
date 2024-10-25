@@ -585,7 +585,7 @@
 17.experimental_features/17.async_functions_and_methods/01.async_functions/afunc_0.sts
 17.experimental_features/17.async_functions_and_methods/02.async_methods/ameth_0.sts
 
-# 17057 Cannot launch function returning enum
+# 17057, 17360 Cannot launch function returning enum
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_19.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_func_20.sts
 17.experimental_features/16.coroutines/01.create_and_launch_coroutine/c_meth_18.sts
@@ -647,7 +647,6 @@
 
 #19096
 07.expressions/04.array_literal/02.type_inference_from-types_of_elements/arr_inf2_8.sts
-
 
 # es2panda fails: panda#12528
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer_4.sts
@@ -794,7 +793,23 @@
 17.experimental_features/02.array_creation_expressions/expr_9.sts
 # end of es2panda fails
 
-# es2panda fails: panda#19809
+# 20289 es2panda aborts on extended conditional expression
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_1.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_10.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_11.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_16.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_17.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_19.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_20.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_22.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_25.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_27.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_28.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_29.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_30.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_34.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_36.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_4.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_0.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_1.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_10.sts
@@ -820,9 +835,6 @@
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_29.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_3.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_30.sts
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_31.sts
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_32.sts
-15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_33.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_34.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_35.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_36.sts
@@ -832,7 +844,35 @@
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_7.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_8.sts
 15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_9.sts
-# end of es2panda fails
+
+# 20294 es2panda reports errors on equality with extended conditional expressions
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_0.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_12.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_13.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_14.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_15.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_18.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_2.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_21.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_23.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_24.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_26.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_3.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_31.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_32.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_33.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_35.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_5.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_6.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_7.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_8.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops2_9.sts
+
+# 20296 es2panda doesn't permit nullish types in extended conditional expressions
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_31.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_32.sts
+15.semantic_rules/10.compatibility_features/01.extended_conditional_expressions/ops_33.sts
+
 
 # es2panda fails: panda#14338 es2panda fails to compile overloaded functions
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/pos_1.sts
@@ -1022,33 +1062,6 @@
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_2.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args1_neg_3.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/method_args2_neg_3.sts
-# non-compatible operands, null and non-nullable
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_0.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_1.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_2.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_3.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_4.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_5.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_6.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_7.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_0.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_1.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_10.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_11.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_12.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_13.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_2.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_3.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_4.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_5.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_6.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_7.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_8.sts
-06.contexts_and_conversions/01.assignment-like_contexts/boxing2_call_9.sts
-# no reason to fail
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_n_0.sts
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_n_2.sts
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_cond_n_3.sts
 # non-compatible operands
 # assign nullable to non-nullable
 07.expressions/11.function_call_expression/optional_chaining_value_result.sts
@@ -1419,28 +1432,6 @@
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_6.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_7.sts
 06.contexts_and_conversions/05.implicit_conversions/07.widening_reference_conversion/comp_obj/comp-intf_8.sts
-
-# 16325 unboxing in lambda parameter
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd-nan_1.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_1.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_10.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_12.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_13.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_14.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_16.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_17.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_19.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_2.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_22.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_23.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_24.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_25.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_3.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_4.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_5.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_7.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_8.sts
-06.contexts_and_conversions/05.implicit_conversions/05.unboxing_conversion/call_lmbd/call-lmbd_9.sts
 
 # 18550 [ArkTS frontend] es2panda aborts on implicit number conversion
 06.contexts_and_conversions/05.implicit_conversions/02.widening_primitive_conversions/decl_const/decl-const_6.sts

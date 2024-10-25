@@ -14,8 +14,8 @@
 ---
 cases:
   - types:
-    - { stype: byte, src: Byte.MIN_VALUE as byte, dtype: char, dst: "c'\\uff80'" }
-    - { stype: byte, src: Byte.MAX_VALUE as byte, dtype: char, dst: "c'\\u007f'" }
+    - { stype: byte, src: Byte.MIN_VALUE, dtype: char, dst: "c'\\uff80'" }
+    - { stype: byte, src: Byte.MAX_VALUE, dtype: char, dst: "c'\\u007f'" }
     - { stype: byte, src: 0 as byte, dtype: char, dst: "c'\\u0000'" }
     - { stype: byte, src: 1 as byte, dtype: char, dst: "c'\\u0001'" }
     - { stype: byte, src: (-1) as byte, dtype: char, dst: "c'\\uffff'" }
