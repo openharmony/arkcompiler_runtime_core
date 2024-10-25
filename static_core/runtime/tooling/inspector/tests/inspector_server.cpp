@@ -238,8 +238,8 @@ static JsonObject CreatePossibleBreakpointsRequest(ScriptId startScriptId, size_
                                                    size_t end, bool restrictToFunction)
 {
     JsonObjectBuilder params;
-    params.AddProperty("start", Location(startScriptId, start).ToJson());
-    params.AddProperty("end", Location(endScriptId, end).ToJson());
+    params.AddProperty("start", Location(startScriptId, start));
+    params.AddProperty("end", Location(endScriptId, end));
     params.AddProperty("restrictToFunction", restrictToFunction);
     return JsonObject(std::move(params).Build());
 }
@@ -413,7 +413,7 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpoint)
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObjectBuilder params;
-        params.AddProperty("location", Location(scriptId, start).ToJson());
+        params.AddProperty("location", Location(scriptId, start));
         handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()),
                     JsonProperties(JsonProperty<JsonObject::StringT> {"breakpointId", std::to_string(start)},
@@ -438,7 +438,7 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpoint)
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObjectBuilder params;
-        params.AddProperty("location", Location(scriptId, start).ToJson());
+        params.AddProperty("location", Location(scriptId, start));
         handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
     });

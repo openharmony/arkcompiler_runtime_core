@@ -15,30 +15,29 @@
 
 #include "types/exception_details.h"
 
-#include "macros.h"
 #include "utils/json_builder.h"
 
 namespace ark::tooling::inspector {
-std::function<void(JsonObjectBuilder &)> ExceptionDetails::ToJson() const
-{
-    return [this](JsonObjectBuilder &builder) {
-        builder.AddProperty("exceptionId", exceptionId_);
-        builder.AddProperty("text", text_);
-        builder.AddProperty("lineNumber", lineNumber_);
-        builder.AddProperty("columnNumber", columnNumber_);
 
-        if (scriptId_) {
-            builder.AddProperty("scriptId", *scriptId_);
-        }
-        if (url_) {
-            builder.AddProperty("url", *url_);
-        }
-        if (exception_) {
-            builder.AddProperty("exception", exception_->ToJson());
-        }
-        if (executionContextId_) {
-            builder.AddProperty("executionContextId", *executionContextId_);
-        }
-    };
+void ExceptionDetails::Serialize(JsonObjectBuilder &builder) const
+{
+    builder.AddProperty("exceptionId", exceptionId_);
+    builder.AddProperty("text", text_);
+    builder.AddProperty("lineNumber", lineNumber_);
+    builder.AddProperty("columnNumber", columnNumber_);
+
+    if (scriptId_) {
+        builder.AddProperty("scriptId", *scriptId_);
+    }
+    if (url_) {
+        builder.AddProperty("url", *url_);
+    }
+    if (exception_) {
+        builder.AddProperty("exception", *exception_);
+    }
+    if (executionContextId_) {
+        builder.AddProperty("executionContextId", *executionContextId_);
+    }
 }
+
 }  // namespace ark::tooling::inspector

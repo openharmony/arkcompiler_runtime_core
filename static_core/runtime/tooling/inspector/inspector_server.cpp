@@ -99,7 +99,7 @@ void InspectorServer::CallDebuggerPaused(PtThread thread, const std::vector<Brea
         });
 
         if (exception) {
-            params.AddProperty("data", exception->ToJson());
+            params.AddProperty("data", *exception);
         }
 
         params.AddProperty("reason", exception.has_value() ? "exception" : "other");
@@ -157,7 +157,7 @@ void InspectorServer::CallRuntimeConsoleApiCalled(PtThread thread, ConsoleCallTy
 
         params.AddProperty("args", [&](JsonArrayBuilder &argsBuilder) {
             for (const auto &argument : arguments) {
-                argsBuilder.Add(argument.ToJson());
+                argsBuilder.Add(argument);
             }
         });
     });
@@ -265,7 +265,7 @@ void InspectorServer::OnCallDebuggerGetPossibleBreakpoints(
 
             result.AddProperty("locations", [scriptId, &lineNumbers](JsonArrayBuilder &array) {
                 for (auto lineNumber : lineNumbers) {
-                    array.Add(Location(scriptId, lineNumber).ToJson());
+                    array.Add(Location(scriptId, lineNumber));
                 }
             });
         });
@@ -359,7 +359,7 @@ void InspectorServer::OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHan
             }
 
             result.AddProperty("breakpointId", std::to_string(*id));
-            result.AddProperty("actualLocation", location->ToJson());
+            result.AddProperty("actualLocation", *location);
         });
     // clang-format on
 }
@@ -513,7 +513,7 @@ void InspectorServer::OnCallRuntimeGetProperties(
 
             result.AddProperty("result", [&](JsonArrayBuilder &array) {
                 for (auto &descriptor : handler(thread, *objectId, generatePreview)) {
-                    array.Add(descriptor.ToJson());
+                    array.Add(descriptor);
                 }
             });
         });
@@ -546,14 +546,14 @@ void InspectorServer::OnCallRuntimeEvaluate(std::function<EvaluationResult(PtThr
             if (!optResult) {
                 // NOTE(dslynko): might return error instead of `undefined`.
                 LOG(DEBUG, DEBUGGER) << "Evaluation failed";
-                result.AddProperty("result", RemoteObject::Undefined().ToJson());
+                result.AddProperty("result", RemoteObject::Undefined());
                 return;
             }
 
             auto [evalResult, exceptionDetails] = *optResult;
-            result.AddProperty("result", evalResult.ToJson());
+            result.AddProperty("result", evalResult);
             if (exceptionDetails) {
-                result.AddProperty("exceptionDetails", exceptionDetails->ToJson());
+                result.AddProperty("exceptionDetails", *exceptionDetails);
             }
         });
     // clang-format on
@@ -598,16 +598,16 @@ void InspectorServer::AddCallFrameInfo(JsonArrayBuilder &callFrames, const CallF
 
         callFrame.AddProperty("callFrameId", std::to_string(callFrameInfo.frameId));
         callFrame.AddProperty("functionName", callFrameInfo.methodName.data());
-        callFrame.AddProperty("location", Location(scriptId, callFrameInfo.lineNumber).ToJson());
+        callFrame.AddProperty("location", Location(scriptId, callFrameInfo.lineNumber));
         callFrame.AddProperty("url", callFrameInfo.sourceFile.data());
 
         callFrame.AddProperty("scopeChain", [&](JsonArrayBuilder &scopeChainBuilder) {
             for (auto &scope : scopeChain) {
-                scopeChainBuilder.Add(scope.ToJson());
+                scopeChainBuilder.Add(scope);
             }
         });
 
-        callFrame.AddProperty("this", objThis.value_or(RemoteObject::Undefined()).ToJson());
+        callFrame.AddProperty("this", objThis.value_or(RemoteObject::Undefined()));
         callFrame.AddProperty("canBeRestarted", true);
     });
 }
@@ -617,15 +617,13 @@ void InspectorServer::AddBreakpointByUrlLocations(JsonArrayBuilder &locations,
                                                   PtThread thread)
 {
     for (auto sourceFile : sourceFiles) {
-        locations.Add([this, lineNumber, thread, sourceFile](JsonObjectBuilder &location) {
-            auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, sourceFile);
+        auto [scriptId, isNew] = sourceManager_.GetScriptId(thread, sourceFile);
 
-            if (isNew) {
-                CallDebuggerScriptParsed(thread, scriptId, sourceFile);
-            }
+        if (isNew) {
+            CallDebuggerScriptParsed(thread, scriptId, sourceFile);
+        }
 
-            Location(scriptId, lineNumber).ToJson()(location);
-        });
+        locations.Add(Location {scriptId, lineNumber});
     }
 }
 

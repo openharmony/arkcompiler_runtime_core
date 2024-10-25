@@ -173,10 +173,12 @@ TEST_F(ObjectRepositoryTest, S)
     ASSERT_EQ(properties[0].GetName(), "a");
 
     ASSERT_THAT(ToJson(frameObj), GetObjectProperties("", "Frame #0", "2"));
+
     ASSERT_THAT(
-        ToObject(properties[0].ToJson()),
+        ToJson(properties[0]),
         GetFrameObjectProperties("a", testing::Pointee(GetPrimitiveProperties<JsonObject::NumT>("number", 56U))));
-    ASSERT_THAT(ToObject(properties[1].ToJson()),
+
+    ASSERT_THAT(ToJson(properties[1]),
                 GetFrameObjectProperties("ref", testing::Pointee(GetObjectProperties(testing::_, testing::_, "1"))));
 
     // Call to "CreateFrameObject" must find and fill "this" parameter.

@@ -34,7 +34,7 @@ class JsonObjectBuilder;
 
 namespace ark::tooling::inspector {
 
-class RemoteObject {
+class RemoteObject final : public JsonSerializable {
 public:
     static RemoteObject Undefined()
     {
@@ -114,7 +114,7 @@ public:
 
     std::optional<RemoteObjectId> GetObjectId() const;
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const;
+    void Serialize(JsonObjectBuilder &builder) const override;
 
     RemoteObjectType GetType() const;
 

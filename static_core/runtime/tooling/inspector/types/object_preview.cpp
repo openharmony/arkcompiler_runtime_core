@@ -13,12 +13,10 @@
  * limitations under the License.
  */
 
-#include "types/object_preview.h"
+#include "tooling/inspector/types/object_preview.h"
+#include "tooling/inspector/types/property_descriptor.h"
 
 #include "utils/string_helpers.h"
-
-#include "types/property_descriptor.h"
-#include "types/json_build_helpers.h"
 
 namespace ark::tooling::inspector {
 
@@ -61,7 +59,8 @@ std::optional<std::string> GetPropertyPreviewValue(const RemoteObjectType::TypeV
 }
 }  // namespace
 
-ObjectPreview::ObjectPreview(RemoteObjectType type, const std::vector<PropertyDescriptor> &properties) : type_(type)
+ObjectPreview::ObjectPreview(RemoteObjectType type, const std::vector<PropertyDescriptor> &properties)
+    : type_(std::move(type))
 {
     overflow_ = (properties.size() > PROPERTIES_NMB_LIMIT);
 
@@ -84,20 +83,16 @@ ObjectPreview::ObjectPreview(RemoteObjectType type, const std::vector<PropertyDe
     }
 }
 
-std::function<void(JsonObjectBuilder &)> ObjectPreview::ToJson() const
+void ObjectPreview::Serialize(JsonObjectBuilder &builder) const
 {
-    auto result = type_.ToJson();
+    type_.Serialize(builder);
+    builder.AddProperty("overflow", overflow_);
 
-    AddProperty(result, "overflow", overflow_);
-
-    std::function<void(JsonArrayBuilder &)> properties = [](auto &) {};
-    for (auto &propertyPreview : properties_) {
-        AddElement(properties, propertyPreview.ToJson());
-    }
-
-    AddProperty(result, "properties", std::move(properties));
-
-    return result;
+    builder.AddProperty("properties", [&](JsonArrayBuilder &propertiesBuilder) {
+        for (auto &propertyPreview : properties_) {
+            propertiesBuilder.Add(propertyPreview);
+        }
+    });
 }
 
 }  // namespace ark::tooling::inspector

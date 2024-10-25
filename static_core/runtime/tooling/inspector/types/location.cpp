@@ -53,11 +53,10 @@ Expected<Location, std::string> Location::FromJsonProperty(const JsonObject &obj
     return Location(*scriptId, lineNumberTrunc + 1);
 }
 
-std::function<void(JsonObjectBuilder &)> Location::ToJson() const
+void Location::Serialize(JsonObjectBuilder &builder) const
 {
-    return [this](JsonObjectBuilder &jsonBuilder) {
-        jsonBuilder.AddProperty("scriptId", std::to_string(scriptId_));
-        jsonBuilder.AddProperty("lineNumber", lineNumber_ - 1);
-    };
+    builder.AddProperty("scriptId", std::to_string(scriptId_));
+    builder.AddProperty("lineNumber", lineNumber_ - 1);
 }
+
 }  // namespace ark::tooling::inspector
