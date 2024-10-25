@@ -61,23 +61,11 @@ std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsV
     return {words, signBit};
 }
 
-static inline size_t GetBigIntJSArraySize(size_t etsArraySize, uint64_t lastElem)
-{
-    size_t bitsNum = (etsArraySize - 1) * BIGINT_BITS_NUM;
-    size_t tailBits = 0;
-
-    while (lastElem > 0) {
-        lastElem >>= 1U;
-        ++tailBits;
-    }
-    bitsNum += tailBits;
-    return (bitsNum + BIT_64 - 1) / BIT_64;
-}
-
 SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32_t> &etsArray)
 {
-    // BigInt in ArkTS is stored in EtsInt array but only 30 bits have meaning. Put these bits into int64_t array
-    size_t jsArraySize = GetBigIntJSArraySize(etsArray.size(), etsArray.back());
+    ASSERT(BIT_64 % BIGINT_BITS_NUM == 0);
+    // BigInt in ArkTS is stored in EtsInt array. Put these bits into int64_t array
+    size_t jsArraySize = etsArray.size() / 2 + etsArray.size() % 2;
     SmallVector<uint64_t, 4U> jsArray;
     jsArray.resize(jsArraySize, 0);
 
@@ -85,14 +73,10 @@ SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32
     size_t curBitPos = 0;
     for (auto etsElem : etsArray) {
         jsArray[curJSArrayElemPos] |= static_cast<uint64_t>(etsElem) << curBitPos;
-        if (curBitPos + BIGINT_BITS_NUM <= BIT_64) {
-            curBitPos = curBitPos + BIGINT_BITS_NUM;
-        } else {
-            if (++curJSArrayElemPos != jsArray.size()) {
-                size_t leftoverBitNums = BIT_64 - curBitPos;
-                jsArray[curJSArrayElemPos] |= static_cast<uint32_t>(etsElem) >> leftoverBitNums;
-                curBitPos = BIGINT_BITS_NUM - leftoverBitNums;
-            }
+        curBitPos = curBitPos + BIGINT_BITS_NUM;
+        if (curBitPos == BIT_64) {
+            curBitPos = 0;
+            ++curJSArrayElemPos;
         }
     }
 
@@ -101,55 +85,35 @@ SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32
 
 static inline size_t GetBigIntEtsArraySize(size_t jsArraySize, uint64_t lastElem)
 {
-    size_t bitsNum = (jsArraySize - 1) * BIT_64;
-    size_t tailBits = 0;
-
-    while (lastElem > 0) {
-        lastElem >>= 1U;
-        ++tailBits;
+    if (jsArraySize == 1 && lastElem == 0) {
+        return 0;
     }
-    bitsNum += tailBits;
-    return (bitsNum + BIGINT_BITS_NUM - 1) / BIGINT_BITS_NUM;
+
+    size_t etsSize = jsArraySize * 2 - 1;
+
+    if ((lastElem >> BIGINT_BITS_NUM) > 0) {
+        ++etsSize;
+    }
+
+    return etsSize;
 }
 
-static inline void ConvertToTwosComplement(std::vector<EtsInt> &array)
-{
-    uint8_t extraBit = 1;
-    for (auto &elem : array) {
-        elem = (~static_cast<uint32_t>(elem) + extraBit) & BIGINT_BITMASK_30;
-        if (elem != 0) {
-            extraBit = 0;
-        }
-    }
-}
-
-std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray, int signBit)
+std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray)
 {
     size_t etsArraySize = GetBigIntEtsArraySize(jsArray.size(), jsArray.back());
-    std::vector<EtsInt> etsArray(etsArraySize + 1, 0);
+    std::vector<EtsInt> etsArray(etsArraySize, 0);
 
     size_t curJSArrayElemPos = 0;
     size_t curBitPos = 0;
     for (size_t i = 0; i < etsArraySize; ++i) {
-        auto etsElem = static_cast<uint32_t>(jsArray[curJSArrayElemPos] >> curBitPos);
+        etsArray[i] = static_cast<uint32_t>(jsArray[curJSArrayElemPos] >> curBitPos);
 
-        if (curBitPos + BIGINT_BITS_NUM <= BIT_64) {
-            curBitPos = curBitPos + BIGINT_BITS_NUM;
-        } else {
-            if (++curJSArrayElemPos != jsArray.size()) {
-                size_t leftoverBitNums = BIT_64 - curBitPos;
-                etsElem |= static_cast<uint32_t>(jsArray[curJSArrayElemPos]) << leftoverBitNums;
-                curBitPos = BIGINT_BITS_NUM - leftoverBitNums;
-            }
+        curBitPos = curBitPos + BIGINT_BITS_NUM;
+        if (curBitPos == BIT_64) {
+            curBitPos = 0;
+            ++curJSArrayElemPos;
         }
-
-        etsArray[i] = etsElem & BIGINT_BITMASK_30;
     }
-
-    if (signBit == 1) {
-        ConvertToTwosComplement(etsArray);
-    }
-    etsArray.back() = (signBit == 1) ? BIGINT_BITMASK_30 : 0;
 
     return etsArray;
 }

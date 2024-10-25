@@ -26,8 +26,7 @@
 
 namespace ark::ets::interop::js {
 
-constexpr uint32_t BIGINT_BITMASK_30 = 0x3FFFFFFF;
-constexpr size_t BIGINT_BITS_NUM = 30;
+constexpr size_t BIGINT_BITS_NUM = 32;
 constexpr size_t BIT_64 = 64;
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
@@ -38,7 +37,7 @@ constexpr size_t BIT_64 = 64;
 
 std::pair<SmallVector<uint64_t, 4U>, int> GetBigInt(napi_env env, napi_value jsVal);
 SmallVector<uint64_t, 4U> ConvertBigIntArrayFromEtsToJs(const std::vector<uint32_t> &etsArray);
-std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray, int signBit);
+std::vector<EtsInt> ConvertBigIntArrayFromJsToEts(SmallVector<uint64_t, 4U> &jsArray);
 
 // Alternative for ASSERT(!expr) with interop stacktraces, enabled in NDEBUG
 #define INTEROP_FATAL_IF(expr)                     \
@@ -191,38 +190,6 @@ inline std::string GetString(napi_env env, napi_value jsVal)
     // +1 for NULL terminated string!!!
     NAPI_CHECK_FATAL(napi_get_value_string_utf8(env, jsVal, value.data(), value.size() + 1, &length));
     return value;
-}
-
-inline int GeBigIntSign(std::vector<uint32_t> &array)
-{
-    int sign = 1;
-    if (array.back() == 0) {
-        sign = 0;
-    }
-    array.pop_back();
-
-    return sign;
-}
-
-inline void DecrementBigInt(std::vector<uint32_t> &array)
-{
-    for (auto &elem : array) {
-        if (elem != 0) {
-            --elem;
-            break;
-        }
-
-        elem = ~elem & BIGINT_BITMASK_30;
-    }
-}
-
-inline void ConvertFromTwosComplement(std::vector<uint32_t> &array)
-{
-    DecrementBigInt(array);
-
-    for (auto &elem : array) {
-        elem = ~elem & BIGINT_BITMASK_30;
-    }
 }
 
 inline bool NapiIsExceptionPending(napi_env env)
