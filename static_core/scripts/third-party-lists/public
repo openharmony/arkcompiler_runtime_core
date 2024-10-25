@@ -35,7 +35,7 @@ zlib,https://gitee.com/openharmony/third_party_zlib,branch,OpenHarmony-3.2-Beta1
 # ARK compiler:
 asmjit,https://github.com/asmjit/asmjit,commit,8474400e82c3ea65bd828761539e5d9b25f6bd83,with_patches,no_submodules
 elfio,https://gitee.com/openharmony/third_party_elfio,commit,be53e38fa7c93ce968288c3943831beef3c1d53e,no_patches,no_submodules
-vixl,https://gitee.com/openharmony/third_party_vixl.git,commit,e232cfd17b4edf070275c4ecbb798f6563021bb7,no_patches,no_submodules
+vixl,https://gitee.com/openharmony/third_party_vixl.git,commit,b80214947e501f7b6c11196765a980517205ee7c,no_patches,no_submodules
 zydis,https://github.com/zyantific/zydis,tag,v3.2.1,with_patches,no_submodules
 
 # ARK bytecode verifier:
