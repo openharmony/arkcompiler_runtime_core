@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <vector>
 #include <iostream>
+#include "libpandabase/macros.h"
 
 namespace ark {
 
@@ -31,15 +32,14 @@ class StackPrinterImpl;
  * Since PandaVector uses internal allocator it leads to
  * infinite recursion.
  */
-__attribute__((visibility("default"))) std::vector<uintptr_t> GetStacktrace();
+PANDA_PUBLIC_API std::vector<uintptr_t> GetStacktrace();
 
 /*
  * Print stack trace provided into 'Print' function.
  * The class caches information. So it is aimed to be used
  * to print multiple stack traces.
  */
-__attribute__((visibility("default"))) std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace,
-                                                                std::ostream &out);
+PANDA_PUBLIC_API std::ostream &PrintStack(const std::vector<uintptr_t> &stacktrace, std::ostream &out);
 
 /*
  * Print stack trace

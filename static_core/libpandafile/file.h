@@ -142,7 +142,7 @@ public:
     StringData GetStringData(EntityId id) const;
     EntityId GetLiteralArraysId() const;
 
-    EntityId GetClassId(const uint8_t *mutf8Name) const;
+    PANDA_PUBLIC_API EntityId GetClassId(const uint8_t *mutf8Name) const;
 
     EntityId GetClassIdFromClassHashTable(const uint8_t *mutf8Name) const;
 
@@ -368,7 +368,7 @@ public:
 
     static std::unique_ptr<const File> Open(std::string_view filename, OpenMode openMode = READ_ONLY);
 
-    static std::unique_ptr<const File> OpenFromMemory(os::mem::ConstBytePtr &&ptr);
+    PANDA_PUBLIC_API static std::unique_ptr<const File> OpenFromMemory(os::mem::ConstBytePtr &&ptr);
 
     static std::unique_ptr<const File> OpenFromMemory(os::mem::ConstBytePtr &&ptr, std::string_view filename);
 

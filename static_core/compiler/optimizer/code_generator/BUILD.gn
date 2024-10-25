@@ -123,7 +123,11 @@ if (enable_codegen) {
       "$ark_root/libpandabase:libarktsbase",
     ]
 
-    output_extension = "so"
+    if (is_mingw || is_win) {
+      output_extension = "dll"
+    } else {
+      output_extension = "so"
+    }
     part_name = ark_part_name
     subsystem_name = "$ark_subsystem_name"
   }

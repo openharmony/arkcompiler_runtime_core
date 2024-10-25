@@ -64,7 +64,11 @@ ohos_shared_library("libarkaotmanager") {
 
   external_deps = [ sdk_libc_secshared_dep ]
 
-  output_extension = "so"
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
   part_name = ark_part_name
   subsystem_name = "$ark_subsystem_name"
 }

@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "operands.h"
-#include "codegen.h"
+#include "compiler/optimizer/code_generator/operands.h"
+#include "compiler/optimizer/code_generator/codegen.h"
 #include "compiler/optimizer/ir/analysis.h"
 #include "runtime/include/coretypes/string.h"
 #include "runtime/include/coretypes/array.h"

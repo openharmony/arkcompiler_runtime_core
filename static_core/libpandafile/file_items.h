@@ -73,12 +73,12 @@ enum class FieldTag : uint8_t {
     TYPE_ANNOTATION = 0x06
 };
 
-bool IsDynamicLanguage(ark::panda_file::SourceLang lang);
-std::optional<ark::panda_file::SourceLang> LanguageFromString(std::string_view lang);
+PANDA_PUBLIC_API bool IsDynamicLanguage(ark::panda_file::SourceLang lang);
+PANDA_PUBLIC_API std::optional<ark::panda_file::SourceLang> LanguageFromString(std::string_view lang);
 const char *LanguageToString(ark::panda_file::SourceLang lang);
-const char *GetCtorName(ark::panda_file::SourceLang lang);
-const char *GetCctorName(ark::panda_file::SourceLang lang);
-const char *GetStringClassDescriptor(ark::panda_file::SourceLang lang);
+PANDA_PUBLIC_API const char *GetCtorName(ark::panda_file::SourceLang lang);
+PANDA_PUBLIC_API const char *GetCctorName(ark::panda_file::SourceLang lang);
+PANDA_PUBLIC_API const char *GetStringClassDescriptor(ark::panda_file::SourceLang lang);
 
 constexpr size_t ID_SIZE = File::EntityId::GetSize();
 constexpr size_t IDX_SIZE = sizeof(uint16_t);
@@ -495,11 +495,11 @@ public:
     DEFAULT_COPY_SEMANTIC(BaseFieldItem);
 
 protected:
-    BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type);
+    PANDA_PUBLIC_API BaseFieldItem(BaseClassItem *cls, StringItem *name, TypeItem *type);
 
-    size_t CalculateSize() const override;
+    PANDA_PUBLIC_API size_t CalculateSize() const override;
 
-    bool Write(Writer *writer) override;
+    PANDA_PUBLIC_API bool Write(Writer *writer) override;
 
 private:
     BaseClassItem *class_;
@@ -509,11 +509,11 @@ private:
 
 class FieldItem : public BaseFieldItem {
 public:
-    FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags);
+    PANDA_PUBLIC_API FieldItem(ClassItem *cls, StringItem *name, TypeItem *type, uint32_t accessFlags);
 
     ~FieldItem() override = default;
 
-    void SetValue(ValueItem *value);
+    PANDA_PUBLIC_API void SetValue(ValueItem *value);
 
     ValueItem *GetValue() const
     {
@@ -623,32 +623,33 @@ public:
     static constexpr int32_t LINE_RANGE = 15;
     static constexpr int32_t LINE_BASE = -4;
 
-    void EmitEnd();
+    PANDA_PUBLIC_API void EmitEnd();
 
-    void EmitAdvancePc(std::vector<uint8_t> *constantPool, uint32_t value);
+    PANDA_PUBLIC_API void EmitAdvancePc(std::vector<uint8_t> *constantPool, uint32_t value);
 
-    void EmitAdvanceLine(std::vector<uint8_t> *constantPool, int32_t value);
+    PANDA_PUBLIC_API void EmitAdvanceLine(std::vector<uint8_t> *constantPool, int32_t value);
 
-    void EmitColumn(std::vector<uint8_t> *constantPool, uint32_t pcInc, uint32_t column);
+    PANDA_PUBLIC_API void EmitColumn(std::vector<uint8_t> *constantPool, uint32_t pcInc, uint32_t column);
 
-    void EmitStartLocal(std::vector<uint8_t> *constantPool, int32_t registerNumber, StringItem *name, StringItem *type);
+    PANDA_PUBLIC_API void EmitStartLocal(std::vector<uint8_t> *constantPool, int32_t registerNumber, StringItem *name,
+                                         StringItem *type);
 
-    void EmitStartLocalExtended(std::vector<uint8_t> *constantPool, int32_t registerNumber, StringItem *name,
-                                StringItem *type, StringItem *typeSignature);
+    PANDA_PUBLIC_API void EmitStartLocalExtended(std::vector<uint8_t> *constantPool, int32_t registerNumber,
+                                                 StringItem *name, StringItem *type, StringItem *typeSignature);
 
-    void EmitEndLocal(int32_t registerNumber);
+    PANDA_PUBLIC_API void EmitEndLocal(int32_t registerNumber);
 
     void EmitRestartLocal(int32_t registerNumber);
 
-    bool EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc);
+    PANDA_PUBLIC_API bool EmitSpecialOpcode(uint32_t pcInc, int32_t lineInc);
 
     void EmitPrologueEnd();
 
     void EmitEpilogueBegin();
 
-    void EmitSetFile(std::vector<uint8_t> *constantPool, StringItem *sourceFile);
+    PANDA_PUBLIC_API void EmitSetFile(std::vector<uint8_t> *constantPool, StringItem *sourceFile);
 
-    void EmitSetSourceCode(std::vector<uint8_t> *constantPool, StringItem *sourceCode);
+    PANDA_PUBLIC_API void EmitSetSourceCode(std::vector<uint8_t> *constantPool, StringItem *sourceCode);
 
     void EmitOpcode(Opcode opcode);
 
@@ -702,7 +703,7 @@ private:
     std::vector<uint8_t> data_;
 };
 
-class DebugInfoItem : public BaseItem {
+class PANDA_PUBLIC_API DebugInfoItem : public BaseItem {
 public:
     explicit DebugInfoItem(LineNumberProgramItem *item) : program_(item) {}
 
@@ -803,11 +804,11 @@ public:
     DEFAULT_COPY_SEMANTIC(BaseMethodItem);
 
 protected:
-    BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags);
+    PANDA_PUBLIC_API BaseMethodItem(BaseClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags);
 
-    size_t CalculateSize() const override;
+    PANDA_PUBLIC_API size_t CalculateSize() const override;
 
-    bool Write(Writer *writer) override;
+    PANDA_PUBLIC_API bool Write(Writer *writer) override;
 
 private:
     BaseClassItem *class_;
@@ -893,8 +894,8 @@ class BaseClassItem;
 
 class MethodItem : public BaseMethodItem {
 public:
-    MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags,
-               std::vector<MethodParamItem> params);
+    PANDA_PUBLIC_API MethodItem(ClassItem *cls, StringItem *name, ProtoItem *proto, uint32_t accessFlags,
+                                std::vector<MethodParamItem> params);
 
     ~MethodItem() override = default;
 
@@ -1345,7 +1346,7 @@ class ProtoItem;
 
 class ParamAnnotationsItem : public BaseItem {
 public:
-    ParamAnnotationsItem(MethodItem *method, bool isRuntimeAnnotations);
+    PANDA_PUBLIC_API ParamAnnotationsItem(MethodItem *method, bool isRuntimeAnnotations);
 
     ~ParamAnnotationsItem() override = default;
 
@@ -1417,9 +1418,9 @@ private:
     std::vector<TypeItem *> referenceTypes_;
 };
 
-class CodeItem : public BaseItem {
+class PANDA_PUBLIC_API CodeItem : public BaseItem {
 public:
-    class CatchBlock : public BaseItem {
+    class PANDA_PUBLIC_API CatchBlock : public BaseItem {
     public:
         CatchBlock(MethodItem *method, BaseClassItem *type, size_t handlerPc, size_t codeSize = 0)
             : method_(method), type_(type), handlerPc_(handlerPc), codeSize_(codeSize)
@@ -1467,7 +1468,7 @@ public:
         size_t codeSize_;
     };
 
-    class TryBlock : public BaseItem {
+    class PANDA_PUBLIC_API TryBlock : public BaseItem {
     public:
         TryBlock(size_t startPc, size_t length, std::vector<CatchBlock> catchBlocks)
             : startPc_(startPc), length_(length), catchBlocks_(std::move(catchBlocks))
@@ -1664,7 +1665,7 @@ private:
     Type type_;
 };
 
-class ScalarValueItem : public ValueItem {
+class PANDA_PUBLIC_API ScalarValueItem : public ValueItem {
 public:
     explicit ScalarValueItem(uint32_t v) : ValueItem(Type::INTEGER), value_(v) {}
 
@@ -1719,7 +1720,7 @@ private:
     std::variant<uint32_t, uint64_t, float, double, BaseItem *> value_;
 };
 
-class ArrayValueItem : public ValueItem {
+class PANDA_PUBLIC_API ArrayValueItem : public ValueItem {
 public:
     ArrayValueItem(panda_file::Type componentType, std::vector<ScalarValueItem> items)
         : ValueItem(Type::ARRAY), componentType_(componentType), items_(std::move(items))
@@ -1757,7 +1758,7 @@ private:
 class LiteralItem;
 class LiteralArrayItem;
 
-class LiteralItem : public BaseItem {
+class PANDA_PUBLIC_API LiteralItem : public BaseItem {
 public:
     enum class Type { B1, B2, B4, B8, STRING, METHOD };
 
@@ -1824,7 +1825,7 @@ public:
     DEFAULT_MOVE_SEMANTIC(LiteralArrayItem);
     DEFAULT_COPY_SEMANTIC(LiteralArrayItem);
 
-    void AddItems(const std::vector<LiteralItem> &item);
+    PANDA_PUBLIC_API void AddItems(const std::vector<LiteralItem> &item);
 
     const std::vector<LiteralItem> &GetItems() const
     {
@@ -1857,7 +1858,7 @@ private:
     uint32_t index_ {0};
 };
 
-class AnnotationItem : public BaseItem {
+class PANDA_PUBLIC_API AnnotationItem : public BaseItem {
 public:
     class Elem {
     public:
@@ -1977,7 +1978,7 @@ enum class MethodHandleType : uint8_t {
     INVOKE_INTERFACE = 0x08
 };
 
-class MethodHandleItem : public BaseItem {
+class PANDA_PUBLIC_API MethodHandleItem : public BaseItem {
 public:
     MethodHandleItem(MethodHandleType type, BaseItem *entity) : type_(type), entity_(entity) {}
 

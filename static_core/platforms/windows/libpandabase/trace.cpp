@@ -19,7 +19,7 @@
 
 namespace ark::trace::internal {
 
-int g_traceMarkerFd = -1;
+PANDA_PUBLIC_API int g_traceMarkerFd = -1;
 
 bool DoInit()
 {
@@ -27,12 +27,12 @@ bool DoInit()
     return false;
 }
 
-void DoBeginTracePoint([[maybe_unused]] const char *str)
+PANDA_PUBLIC_API void DoBeginTracePoint([[maybe_unused]] const char *str)
 {
     UNREACHABLE();
 }
 
-void DoEndTracePoint()
+PANDA_PUBLIC_API void DoEndTracePoint()
 {
     UNREACHABLE();
 }

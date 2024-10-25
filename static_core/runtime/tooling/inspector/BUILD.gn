@@ -82,7 +82,9 @@ ohos_shared_library("libarkinspector") {
                    "target_gen_dir"),
   ]
 
-  if (!is_mingw && !is_mac) {
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
     output_extension = "so"
   }
   part_name = ark_part_name

@@ -19,5 +19,5 @@
 %   # formats = group.map(&:format)
 %   signature = emitter_signature(group, group.first.jump?)
 %   signature_str = signature.map { |o| "#{o.type} #{o.name}#{o.name == 'prof' ? ' = 0' : ''}" }.join(', ')
-void <%= group.first.emitter_name %>(<%= signature_str %>);
+PANDA_PUBLIC_API void <%= group.first.emitter_name %>(<%= signature_str %>);
 %end

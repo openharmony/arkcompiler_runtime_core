@@ -22,13 +22,16 @@ srcs_assembler = [ "assembler/extension/ets_meta.cpp" ]
 
 srcs_compiler = [
   "compiler/ir_build_intrinsics_ets.cpp",
-  "compiler/codegen_intrinsics_ets.cpp",
   "compiler/optimizer/ir_builder/ets_inst_builder.cpp",
   "compiler/optimizer/ets_codegen_extensions.cpp",
   "compiler/optimizer/ets_intrinsics_peephole.cpp",
 ]
 
 srcs_abc2program = [ "abc2program/abc2program_ets_plugin.cpp" ]
+
+if (!is_mac) {
+  srcs_compiler += [ "compiler/codegen_intrinsics_ets.cpp" ]
+}
 
 srcs_disassembler = [ "disassembler/disasm_ets_plugin.cpp" ]
 

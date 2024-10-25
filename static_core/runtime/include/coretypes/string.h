@@ -23,7 +23,6 @@
 #include "libpandabase/utils/utf.h"
 #include "runtime/include/language_context.h"
 #include "runtime/include/object_header.h"
-#include "runtime/mem/vm_handle.h"
 
 namespace ark::coretypes {
 

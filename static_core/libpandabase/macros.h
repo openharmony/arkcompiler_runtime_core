@@ -18,8 +18,6 @@
 
 #include <cassert>
 #include <iostream>
-#include "os/stacktrace.h"
-#include "utils/debug.h"
 
 // Inline (disabled for DEBUG)
 #ifndef NDEBUG
@@ -332,5 +330,8 @@ extern "C" void AnnotateIgnoreWritesEnd(const char *file, int line);
 #else
 #define CONSTEXPR_IN_RELEASE constexpr
 #endif
+
+#include "os/stacktrace.h"
+#include "utils/debug.h"
 
 #endif  // PANDA_LIBPANDABASE_PBASE_MACROS_H

@@ -36,7 +36,6 @@ config("arkbase_public_config") {
     "$ark_root/libpandabase",
     "$target_gen_dir/generated",
     "$target_gen_dir/include",
-    "$target_gen_dir/generated",
     "$target_gen_dir",
   ]
 
@@ -72,33 +71,37 @@ action("generate_version_file") {
   ]
 }
 
+libarkbase_sources = [
+  "$ark_root/libpandabase/mem/arena_allocator.cpp",
+  "$ark_root/libpandabase/mem/base_mem_stats.cpp",
+  "$ark_root/libpandabase/mem/code_allocator.cpp",
+  "$ark_root/libpandabase/mem/mem_config.cpp",
+  "$ark_root/libpandabase/mem/pool_manager.cpp",
+  "$ark_root/libpandabase/mem/pool_map.cpp",
+  "$ark_root/libpandabase/os/dfx_option.cpp",
+  "$ark_root/libpandabase/os/filesystem.cpp",
+  "$ark_root/libpandabase/os/native_stack.cpp",
+  "$ark_root/libpandabase/os/stacktrace_stub.cpp",
+  "$ark_root/libpandabase/os/time.cpp",
+  "$ark_root/libpandabase/taskmanager/task.cpp",
+  "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
+  "$ark_root/libpandabase/taskmanager/utils/task_selector.cpp",
+  "$ark_root/libpandabase/taskmanager/utils/task_time_stats.cpp",
+  "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
+  "$ark_root/libpandabase/utils/dfx.cpp",
+  "$ark_root/libpandabase/utils/json_builder.cpp",
+  "$ark_root/libpandabase/utils/json_parser.cpp",
+  "$ark_root/libpandabase/utils/logger.cpp",
+  "$ark_root/libpandabase/utils/time.cpp",
+  "$ark_root/libpandabase/utils/type_converter.cpp",
+  "$ark_root/libpandabase/utils/utf.cpp",
+  "$ark_root/libpandabase/utils/utils.cpp",
+]
+
 if (is_mingw) {
-  libarkbase_sources = [
-    "$ark_root/libpandabase/mem/arena_allocator.cpp",
-    "$ark_root/libpandabase/mem/base_mem_stats.cpp",
-    "$ark_root/libpandabase/mem/code_allocator.cpp",
-    "$ark_root/libpandabase/mem/mem_config.cpp",
-    "$ark_root/libpandabase/mem/pool_manager.cpp",
-    "$ark_root/libpandabase/mem/pool_map.cpp",
-    "$ark_root/libpandabase/os/dfx_option.cpp",
-    "$ark_root/libpandabase/os/filesystem.cpp",
+  libarkbase_sources += [
     "$ark_root/libpandabase/os/mutex.cpp",
-    "$ark_root/libpandabase/os/native_stack.cpp",
-    "$ark_root/libpandabase/os/stacktrace_stub.cpp",
-    "$ark_root/libpandabase/os/time.cpp",
-    "$ark_root/libpandabase/taskmanager/task.cpp",
-    "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
-    "$ark_root/libpandabase/taskmanager/utils/task_selector.cpp",
-    "$ark_root/libpandabase/taskmanager/utils/task_time_stats.cpp",
-    "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
-    "$ark_root/libpandabase/utils/dfx.cpp",
-    "$ark_root/libpandabase/utils/json_builder.cpp",
-    "$ark_root/libpandabase/utils/json_parser.cpp",
-    "$ark_root/libpandabase/utils/logger.cpp",
-    "$ark_root/libpandabase/utils/time.cpp",
-    "$ark_root/libpandabase/utils/type_converter.cpp",
-    "$ark_root/libpandabase/utils/utf.cpp",
-    "$ark_root/libpandabase/utils/utils.cpp",
+    "$ark_root/platforms/windows/libpandabase/cpu_affinity.cpp",
     "$ark_root/platforms/windows/libpandabase/error.cpp",
     "$ark_root/platforms/windows/libpandabase/file.cpp",
     "$ark_root/platforms/windows/libpandabase/filesystem.cpp",
@@ -109,39 +112,11 @@ if (is_mingw) {
     "$ark_root/platforms/windows/libpandabase/system_environment.cpp",
     "$ark_root/platforms/windows/libpandabase/thread.cpp",
     "$ark_root/platforms/windows/libpandabase/trace.cpp",
-    "$ark_root/platforms/windowslibpandabase/cpu_affinity.cpp",
   ]
 } else {
-  libarkbase_sources = [
-    "$ark_root/libpandabase/mem/arena_allocator.cpp",
-    "$ark_root/libpandabase/mem/base_mem_stats.cpp",
-    "$ark_root/libpandabase/mem/code_allocator.cpp",
-    "$ark_root/libpandabase/mem/mem_config.cpp",
-    "$ark_root/libpandabase/mem/pool_manager.cpp",
-    "$ark_root/libpandabase/mem/pool_map.cpp",
-    "$ark_root/libpandabase/os/dfx_option.cpp",
-    "$ark_root/libpandabase/os/filesystem.cpp",
-    "$ark_root/libpandabase/os/native_stack.cpp",
-    "$ark_root/libpandabase/os/property.cpp",
-    "$ark_root/libpandabase/taskmanager/task.cpp",
-    "$ark_root/libpandabase/taskmanager/task_scheduler.cpp",
-    "$ark_root/libpandabase/taskmanager/utils/task_selector.cpp",
-    "$ark_root/libpandabase/taskmanager/utils/task_time_stats.cpp",
-    "$ark_root/libpandabase/taskmanager/worker_thread.cpp",
-
-    # product build
-    "$ark_root/libpandabase/os/stacktrace_stub.cpp",
-    "$ark_root/libpandabase/os/time.cpp",
+  libarkbase_sources += [
     "$ark_root/libpandabase/trace/trace.cpp",
-    "$ark_root/libpandabase/utils/dfx.cpp",
-    "$ark_root/libpandabase/utils/json_builder.cpp",
-    "$ark_root/libpandabase/utils/json_parser.cpp",
-    "$ark_root/libpandabase/utils/logger.cpp",
     "$ark_root/libpandabase/utils/terminate.cpp",
-    "$ark_root/libpandabase/utils/time.cpp",
-    "$ark_root/libpandabase/utils/type_converter.cpp",
-    "$ark_root/libpandabase/utils/utf.cpp",
-    "$ark_root/libpandabase/utils/utils.cpp",
     "$ark_root/platforms/unix/libpandabase/cpu_affinity.cpp",
     "$ark_root/platforms/unix/libpandabase/error.cpp",
     "$ark_root/platforms/unix/libpandabase/file.cpp",
@@ -183,10 +158,10 @@ if (is_mingw) {
   } else {
     libarkbase_sources += [ "$ark_root/libpandabase/os/mutex.cpp" ]
   }
+}
 
-  if (is_debug) {
-    libarkbase_sources += [ "$ark_root/libpandabase/utils/debug.cpp" ]
-  }
+if (is_debug) {
+  libarkbase_sources += [ "$ark_root/libpandabase/utils/debug.cpp" ]
 }
 
 if (current_cpu == "arm64") {
@@ -251,7 +226,9 @@ ohos_source_set("libarktsbase_static") {
 
 ohos_shared_library("libarktsbase") {
   deps = [ ":libarktsbase_static" ]
-  if (!is_mingw && !is_mac) {
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
     output_extension = "so"
   }
   part_name = ark_part_name

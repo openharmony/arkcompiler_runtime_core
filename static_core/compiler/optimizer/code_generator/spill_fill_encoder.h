@@ -28,12 +28,12 @@ class Encoder;
 // Helper class for SpillFill encoding
 class SpillFillEncoder {
 public:
-    SpillFillEncoder(Codegen *codegen, Inst *inst);
+    PANDA_PUBLIC_API SpillFillEncoder(Codegen *codegen, Inst *inst);
     ~SpillFillEncoder() = default;
     NO_COPY_SEMANTIC(SpillFillEncoder);
     NO_MOVE_SEMANTIC(SpillFillEncoder);
 
-    void EncodeSpillFill();
+    PANDA_PUBLIC_API void EncodeSpillFill();
     static bool CanCombineSpillFills(SpillFillData pred, SpillFillData succ, const Graph *graph);
     static void SortSpillFillData(ArenaVector<SpillFillData> *spillFills);
 

@@ -169,9 +169,9 @@ private:
 
 class FileWriter : public Writer {
 public:
-    explicit FileWriter(const std::string &fileName);
+    PANDA_PUBLIC_API explicit FileWriter(const std::string &fileName);
 
-    ~FileWriter() override;
+    PANDA_PUBLIC_API ~FileWriter() override;
 
     NO_COPY_SEMANTIC(FileWriter);
     NO_MOVE_SEMANTIC(FileWriter);
