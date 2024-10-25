@@ -213,8 +213,6 @@
   "plugins/ets/tests/ets_test_suite/unions": "*",
   "plugins/ets/tests/ets_warnings_tests": "*",
   "plugins/ets/tests/integrational": "*",
-  // NOTE(oignatenko, #19857): test_items_pool.cpp needs to be addressed in some other way
-  "plugins/ets/tests/interop_js/tests/proxies/mem/items_pool/test_items_pool.cpp": {"G.FUN.01-CPP": "*", "G.FMT.05-CPP": "*"},
   "plugins/ets/tests/interop_js/tests/proxies/mem/proxy_reference_storage_2/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/timer/CMakeLists.txt": {"bc-40001": "*"},
   "plugins/ets/tests/interop_js/tests/perf/CMakeLists.txt": {"bc-40001": "*"},
