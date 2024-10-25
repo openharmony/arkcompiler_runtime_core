@@ -266,6 +266,8 @@ private:
     /// Caches refs from remset and marks objects in collection set (young-generation + maybe some tenured regions).
     void MixedMarkAndCacheRefs(const GCTask &task, const CollectionSet &collectibleRegions);
 
+    GCRootVisitor CreateGCRootVisitorForMixedMark(GCMarkingStackType &objectsStack);
+
     /**
      * Mark roots and add them to the stack
      * @param objects_stack

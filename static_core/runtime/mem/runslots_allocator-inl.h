@@ -43,6 +43,10 @@ inline RunSlotsAllocator<AllocConfigT, LockConfigT>::~RunSlotsAllocator()
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool NEED_LOCK, bool DISABLE_USE_FREE_RUNSLOTS>
+// CC-OFFNXT(G.FUN.01-CPP) Allocations perf critical, the change will create additional conditions and method calls that
+// will degrade performance
+// CC-OFFNXT(G.FUD.06) Allocations perf critical, the change will create additional conditions and method calls that
+// will degrade performance
 inline void *RunSlotsAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Alignment align)
 {
     using ListLock = typename LockConfigT::ListLock;
@@ -129,6 +133,7 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::Free(void *mem)
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::ReleaseEmptyRunSlotsPagesUnsafe()
 {
     // Iterate over free_runslots list:
@@ -148,6 +153,7 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::ReleaseEmptyRunSlotsPa
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafeInternal(RunSlotsType *runslots, void *mem)
 {
     bool needToAddToFreeList = false;
@@ -189,6 +195,7 @@ inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafeInternal(Run
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool LOCK_RUN_SLOTS>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
 {
     if (UNLIKELY(mem == nullptr)) {
@@ -266,6 +273,7 @@ bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AllocatedByRunSlotsAllocatorU
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool NEED_LOCK>
+// CC-OFFNXT(G.FMT.07) project code style
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
 RunSlotsAllocator<AllocConfigT, LockConfigT>::CreateNewRunSlotsFromMemory(size_t slotsSize)
 {
@@ -280,6 +288,7 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::CreateNewRunSlotsFromMemory(size_t
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::AddMemoryPool(void *mem, size_t size)
 {
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Get new memory pool with size " << size << " bytes, at addr " << std::hex << mem;
@@ -412,6 +421,7 @@ void RunSlotsAllocator<AllocConfigT, LockConfigT>::TrimUnsafe()
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PushToTail(RunSlotsType *runslots)
 {
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "Push to tail RunSlots at addr " << std::hex << static_cast<void *>(runslots);
@@ -430,6 +440,8 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PushToTa
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
+// CC-OFFNXT(G.FMT.07) project code style
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
 RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromHead()
 {
@@ -453,6 +465,8 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromHead()
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
+// CC-OFFNXT(G.FMT.07) project code style
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
 RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromTail()
 {
@@ -476,6 +490,7 @@ RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromTail()
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsList::PopFromList(RunSlotsType *runslots)
 {
     LOG_RUNSLOTS_ALLOCATOR(DEBUG) << "PopFromList RunSlots with addr " << std::hex << runslots;
@@ -515,6 +530,8 @@ inline RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::MemPoolMana
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool NEED_LOCK>
+// CC-OFFNXT(G.FUD.06) perf critical
+// CC-OFFNXT(G.FMT.07) project code style
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
 RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::GetNewRunSlots(size_t slotsSize)
 {
@@ -571,6 +588,7 @@ inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::AddNew
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::ReturnAndReleaseRunSlotsMemory(
     RunSlotsType *runslots)
 {
@@ -754,6 +772,7 @@ uintptr_t RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolList
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::Initialize(
     void *poolMem, uintptr_t unoccupiedMem, size_t size, PoolListElement *prev)
 {
@@ -775,6 +794,8 @@ inline void RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolLi
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
+// CC-OFFNXT(G.FMT.07) project code style
 inline typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
 RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::GetMemoryForRunSlots(size_t slotsSize)
 {
@@ -876,6 +897,7 @@ bool RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListEleme
 }
 
 template <typename AllocConfigT, typename LockConfigT>
+// CC-OFFNXT(G.FMT.07) project code style
 typename RunSlotsAllocator<AllocConfigT, LockConfigT>::RunSlotsType *
 RunSlotsAllocator<AllocConfigT, LockConfigT>::MemPoolManager::PoolListElement::GetFreedRunSlots(size_t slotsSize)
 {

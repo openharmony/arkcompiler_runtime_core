@@ -45,6 +45,7 @@ static HeapManager *CreateHeapManager(InternalAllocatorPtr internalAllocator, co
 }
 
 /* static */
+// CC-OFFNXT(G.FUN.01-CPP) solid logic, the fix will degrade the readability and maintenance of the code
 MemoryManager *MemoryManager::Create(const LanguageContext &ctx, InternalAllocatorPtr internalAllocator, GCType gcType,
                                      const GCSettings &gcSettings, const GCTriggerConfig &gcTriggerConfig,
                                      const HeapOptions &heapOptions)

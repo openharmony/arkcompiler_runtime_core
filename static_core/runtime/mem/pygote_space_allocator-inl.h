@@ -52,6 +52,7 @@ PygoteSpaceAllocator<AllocConfigT>::~PygoteSpaceAllocator()
 }
 
 template <typename AllocConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void PygoteSpaceAllocator<AllocConfigT>::SetState(PygoteSpaceState newState)
 {
     // must move to next state
@@ -85,6 +86,7 @@ inline void PygoteSpaceAllocator<AllocConfigT>::SetState(PygoteSpaceState newSta
 }
 
 template <typename AllocConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void *PygoteSpaceAllocator<AllocConfigT>::Alloc(size_t size, Alignment align)
 {
     ASSERT(state_ == STATE_PYGOTE_INIT || state_ == STATE_PYGOTE_FORKING);
@@ -138,14 +140,13 @@ inline void *PygoteSpaceAllocator<AllocConfigT>::Alloc(size_t size, Alignment al
 }
 
 template <typename AllocConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void PygoteSpaceAllocator<AllocConfigT>::Free(void *mem)
 {
-    if (!liveBitmaps_.empty()) {
-        for (auto bitmap : liveBitmaps_) {
-            if (bitmap->IsAddrInRange(mem)) {
-                bitmap->Clear(mem);
-                return;
-            }
+    for (auto bitmap : liveBitmaps_) {
+        if (bitmap->IsAddrInRange(mem)) {
+            bitmap->Clear(mem);
+            return;
         }
     }
 
@@ -167,12 +168,10 @@ inline bool PygoteSpaceAllocator<AllocConfigT>::ContainObject(const ObjectHeader
     }
 
     // see if in arena list
-    auto cur = arena_;
-    while (cur != nullptr) {
+    for (auto cur = arena_; cur != nullptr; cur = cur->GetNextArena()) {
         if (cur->InArena(const_cast<ObjectHeader *>(object))) {
             return true;
         }
-        cur = cur->GetNextArena();
     }
     return false;
 }
@@ -180,11 +179,9 @@ inline bool PygoteSpaceAllocator<AllocConfigT>::ContainObject(const ObjectHeader
 template <typename AllocConfigT>
 inline bool PygoteSpaceAllocator<AllocConfigT>::IsLive(const ObjectHeader *object)
 {
-    if (!liveBitmaps_.empty()) {
-        for (auto bitmap : liveBitmaps_) {
-            if (bitmap->IsAddrInRange(object)) {
-                return bitmap->Test(object);
-            }
+    for (auto bitmap : liveBitmaps_) {
+        if (bitmap->IsAddrInRange(object)) {
+            return bitmap->Test(object);
         }
     }
 
@@ -218,6 +215,7 @@ inline void PygoteSpaceAllocator<AllocConfigT>::ClearLiveBitmaps()
 
 template <typename AllocConfigT>
 template <typename Visitor>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjectsInRange(const Visitor &visitor, void *start,
                                                                           void *end)
 {
@@ -239,6 +237,7 @@ inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjectsInRange(const 
 }
 
 template <typename AllocConfigT>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void PygoteSpaceAllocator<AllocConfigT>::IterateOverObjects(const ObjectVisitor &objectVisitor)
 {
     if (!liveBitmaps_.empty()) {

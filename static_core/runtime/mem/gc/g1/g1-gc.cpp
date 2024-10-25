@@ -352,8 +352,10 @@ void G1GC<LanguageConfig>::CollectNonRegularObjects()
     auto deathChecker =
         g1TrackFreedObjects_
             ? GCObjectVisitor(
+                  // CC-OFFNXT(G.FMT.06-CPP) project code style
                   NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, false>(&deleteSize, &deleteCount))
             : GCObjectVisitor(
+                  // CC-OFFNXT(G.FMT.06-CPP) project code style
                   NonRegularObjectsDeathChecker<LanguageConfig, CONCURRENTLY, true>(&deleteSize, &deleteCount));
     auto regionVisitor = [this](PandaVector<Region *> &regions) {
         if constexpr (CONCURRENTLY) {
@@ -413,6 +415,7 @@ void G1GC<LanguageConfig>::ClearEmptyTenuredMovableRegions(PandaVector<Region *>
             this->GetG1ObjectAllocator()
                 ->template ResetRegions<RegionFlag::IS_OLD, RegionSpace::ReleaseRegionsPolicy::NoRelease,
                                         OSPagesPolicy::IMMEDIATE_RETURN, true, PandaVector<Region *>>(
+                    // CC-OFFNXT(G.FMT.06-CPP) project code style
                     *emptyTenuredRegions);
         } else {
             this->GetG1ObjectAllocator()
@@ -443,6 +446,7 @@ bool G1GC<LanguageConfig>::NeedToPromote(const Region *region) const
 
 template <class LanguageConfig>
 template <bool ATOMIC, RegionFlag REGION_TYPE, bool FULL_GC>
+// CC-OFFNXT(G.FUN.01-CPP) solid logic, the fix will degrade the readability and maintenance of the code
 void G1GC<LanguageConfig>::RegionCompactingImpl(Region *region, const ObjectVisitor &movedObjectSaver)
 {
     auto objectAllocator = this->GetG1ObjectAllocator();
@@ -1353,30 +1357,7 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
     analytics_.ReportMarkingStart(ark::time::GetCurrentTimeInNanos());
     CacheRefsFromRemsets(refsChecker);
 
-    auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
-    GCRootVisitor gcMarkCollectionSet = [&objectsStack, this, &refPred](const GCRoot &gcRoot) {
-        ObjectHeader *rootObject = gcRoot.GetObjectHeader();
-        ObjectHeader *fromObject = gcRoot.GetFromObjectHeader();
-        LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(rootObject) << " from: " << gcRoot.GetType();
-        if (UNLIKELY(fromObject != nullptr) &&
-            this->IsReference(fromObject->NotAtomicClassAddr<BaseClass>(), fromObject, refPred)) {
-            LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(fromObject) << " to stack";
-            mixedMarker_.Mark(fromObject);
-            this->ProcessReference(&objectsStack, fromObject->NotAtomicClassAddr<BaseClass>(), fromObject,
-                                   GC::EmptyReferenceProcessPredicate);
-        } else {
-            // Skip non-collection-set roots
-            auto rootObjectPtr = gcRoot.GetObjectHeader();
-            ASSERT(rootObjectPtr != nullptr);
-            if (mixedMarker_.MarkIfNotMarked(rootObjectPtr)) {
-                ASSERT(this->InGCSweepRange(rootObjectPtr));
-                LOG_DEBUG_GC << "root " << GetDebugInfoAboutObject(rootObjectPtr);
-                objectsStack.PushToStack(gcRoot.GetType(), rootObjectPtr);
-            } else {
-                LOG_DEBUG_GC << "Skip root for young mark: " << std::hex << rootObjectPtr;
-            }
-        }
-    };
+    GCRootVisitor gcMarkCollectionSet = CreateGCRootVisitorForMixedMark(objectsStack);
 
     {
         GCScope<TRACE_TIMING> markingCollectionSetRootsTrace("Marking roots collection-set", this);
@@ -1400,6 +1381,37 @@ void G1GC<LanguageConfig>::MixedMarkAndCacheRefs(const GCTask &task, const Colle
 
     // HandleReferences could write a new barriers - so we need to handle them before moving
     ProcessDirtyCards();
+}
+
+template <class LanguageConfig>
+GCRootVisitor G1GC<LanguageConfig>::CreateGCRootVisitorForMixedMark(GCMarkingStackType &objectsStack)
+{
+    GCRootVisitor gcMarkCollectionSet = [&objectsStack, this](const GCRoot &gcRoot) {
+        auto refPred = [this](const ObjectHeader *obj) { return this->InGCSweepRange(obj); };
+        ObjectHeader *rootObject = gcRoot.GetObjectHeader();
+        ObjectHeader *fromObject = gcRoot.GetFromObjectHeader();
+        LOG_DEBUG_GC << "Handle root " << GetDebugInfoAboutObject(rootObject) << " from: " << gcRoot.GetType();
+        if (UNLIKELY(fromObject != nullptr) &&
+            this->IsReference(fromObject->NotAtomicClassAddr<BaseClass>(), fromObject, refPred)) {
+            LOG_DEBUG_GC << "Add reference: " << GetDebugInfoAboutObject(fromObject) << " to stack";
+            mixedMarker_.Mark(fromObject);
+            this->ProcessReference(&objectsStack, fromObject->NotAtomicClassAddr<BaseClass>(), fromObject,
+                                   GC::EmptyReferenceProcessPredicate);
+        } else {
+            // Skip non-collection-set roots
+            auto rootObjectPtr = gcRoot.GetObjectHeader();
+            ASSERT(rootObjectPtr != nullptr);
+            if (mixedMarker_.MarkIfNotMarked(rootObjectPtr)) {
+                ASSERT(this->InGCSweepRange(rootObjectPtr));
+                LOG_DEBUG_GC << "root " << GetDebugInfoAboutObject(rootObjectPtr);
+                objectsStack.PushToStack(gcRoot.GetType(), rootObjectPtr);
+            } else {
+                LOG_DEBUG_GC << "Skip root for young mark: " << std::hex << rootObjectPtr;
+            }
+        }
+    };
+
+    return gcMarkCollectionSet;
 }
 
 template <class LanguageConfig>
@@ -1552,6 +1564,7 @@ bool G1GC<LanguageConfig>::CollectAndMove(const CollectionSet &collectionSet)
 
 template <class LanguageConfig>
 template <bool FULL_GC, bool NEED_LOCK>
+// CC-OFFNXT(G.FMT.10-CPP) project code style
 std::conditional_t<FULL_GC, UpdateRemsetRefUpdater<LanguageConfig, NEED_LOCK>, EnqueueRemsetRefUpdater<LanguageConfig>>
 G1GC<LanguageConfig>::CreateRefUpdater([[maybe_unused]] GCG1BarrierSet::ThreadLocalCardQueues *updatedRefQueue) const
 {

@@ -104,6 +104,7 @@ private:
      * @see IncreaseSolvedTasks
      */
     os::memory::ConditionVariable allSolvedTasksCondVar_ GUARDED_BY(allSolvedTasksCondVarLock_);
+    // CC-OFFNXT(G.FMT.03) project code style
     size_t solvedTasksSnapshot_ GUARDED_BY(allSolvedTasksCondVarLock_) {0U};
     std::atomic_size_t solvedTasks_ {0U};
     std::atomic_size_t sendedTasks_ {0U};

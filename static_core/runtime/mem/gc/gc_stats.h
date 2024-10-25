@@ -267,12 +267,15 @@ private:
     size_t largeObjectsFreed_ {0};
     size_t largeObjectsFreedBytes_ {0};
     uint64_t startTime_ {0};
+    // CC-OFFNXT(G.FMT.03) project code style
     size_t countMutator_ GUARDED_BY(mutatorStatsLock_) {0};
+    // CC-OFFNXT(G.FMT.03) project code style
     uint64_t mutatorStartTime_ GUARDED_BY(mutatorStatsLock_) {0};
 
     uint64_t lastDuration_ {0};
     uint64_t totalDuration_ {0};
     uint64_t totalPause_ {0};
+    // CC-OFFNXT(G.FMT.03) project code style
     uint64_t totalMutatorPause_ GUARDED_BY(mutatorStatsLock_) {0};
 
     uint64_t lastStartDuration_ {0};

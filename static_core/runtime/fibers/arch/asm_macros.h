@@ -41,6 +41,8 @@
     .hidden name;                  \
     FUNCTION_HEADER(name)
 
+// CC-OFFNXT(G.PRE.09) code generation
+// CC-OFFNXT(G.PRE.02) list generation
 #define FUNCTION_END(name) .size name, .- name;
 
 #endif /* PANDA_RUNTIME_FIBERS_ARCH_ASM_MACROS_H */

@@ -73,6 +73,7 @@ public:
         bool isStartAsZygote;
     };
 
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic, the fix will degrade the readability and maintenance of the code
     static MemoryManager *Create(const LanguageContext &ctx, InternalAllocatorPtr internalAllocator, GCType gcType,
                                  const GCSettings &gcSettings, const GCTriggerConfig &gcTriggerConfig,
                                  const HeapOptions &heapOptions);
@@ -127,6 +128,7 @@ public:
     }
 
 private:
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic, the fix will degrade the readability and maintenance of the code
     explicit MemoryManager(InternalAllocatorPtr internalAllocator, HeapManager *heapManager, GC *gc,
                            GCTrigger *gcTrigger, GCStats *gcStats, MemStatsType *memStats,
                            GlobalObjectStorage *globalObjectStorage)
