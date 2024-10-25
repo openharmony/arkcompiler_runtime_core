@@ -414,13 +414,6 @@ protected:
     ScopedTmpReg CalculatePreviousTLABAllocSize(Reg reg, LabelHolder::LabelId label);
     friend class IntrinsicCodegenTest;
 
-    virtual void IntrinsicSlowPathEntry(IntrinsicInst *inst);
-    virtual void IntrinsicCallRuntimeSaveAll(IntrinsicInst *inst);
-    virtual void IntrinsicSaveRegisters(IntrinsicInst *inst);
-    virtual void IntrinsicRestoreRegisters(IntrinsicInst *inst);
-    virtual void IntrinsicTailCall(IntrinsicInst *inst);
-    virtual void IntrinsicSaveTlabStatsSafe(IntrinsicInst *inst, Reg src1, Reg src2, Reg tmp);
-
     void CreateStringFromCharArrayTlab(Inst *inst, Reg dst, SRCREGS src);
 #include "codegen_language_extensions.h"
 #include "intrinsics_codegen.inl.h"

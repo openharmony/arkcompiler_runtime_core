@@ -978,6 +978,190 @@ void Aarch64Encoder::EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr,
     GetMasm()->St1(vixlVreg1, dst);
 }
 
+void Aarch64Encoder::EncodeMemCharU8X32UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp)
+{
+    ScopedTmpReg vTmp0(this, FLOAT64_TYPE);
+    ScopedTmpReg vTmp1(this, FLOAT64_TYPE);
+    auto vReg0 = vixl::aarch64::VRegister(vTmp0.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto vReg1 = vixl::aarch64::VRegister(vTmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto vReg2 = vixl::aarch64::VRegister(tmp.GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto xReg0 = vixl::aarch64::Register(dst.GetId(), vixl::aarch64::kXRegSize);
+    auto labelReturn = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelFound = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelSecond16B = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV0D1 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV1D1 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Ld1(vReg0, vReg1, vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    GetMasm()->Dup(vReg2, VixlReg(ch));
+    GetMasm()->Cmeq(vReg0, vReg0, vReg2);
+    GetMasm()->Cmeq(vReg1, vReg1, vReg2);
+    // Give up if char is not there
+    GetMasm()->Addp(vReg2, vReg0, vReg1);
+    GetMasm()->Addp(vReg2.V2D(), vReg2.V2D(), vReg2.V2D());
+    GetMasm()->Mov(xReg0, vReg2.D(), 0);
+    GetMasm()->Cbz(xReg0, labelReturn);
+    // Inspect the first 16-byte block
+    GetMasm()->Mov(xReg0, vReg0.D(), 0);
+    GetMasm()->Cbz(xReg0, labelCheckV0D1);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV0D1);
+    GetMasm()->Mov(xReg0, vReg0.D(), 1U);
+    GetMasm()->Cbz(xReg0, labelSecond16B);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(BITS_PER_UINT64));
+    GetMasm()->B(labelFound);
+    // Inspect the second 16-byte block
+    GetMasm()->Bind(labelSecond16B);
+    GetMasm()->Mov(xReg0, vReg1.D(), 0);
+    GetMasm()->Cbz(xReg0, labelCheckV1D1);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(2U * BITS_PER_UINT64));
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV1D1);
+    GetMasm()->Mov(xReg0, vReg1.D(), 1U);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(3U * BITS_PER_UINT64));
+
+    GetMasm()->Bind(labelFound);
+    GetMasm()->Lsr(xReg0, xReg0, 3U);
+    GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
+    GetMasm()->Bind(labelReturn);
+}
+
+void Aarch64Encoder::EncodeMemCharU16X16UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp)
+{
+    ScopedTmpReg vTmp0(this, FLOAT64_TYPE);
+    ScopedTmpReg vTmp1(this, FLOAT64_TYPE);
+    auto vReg0 = vixl::aarch64::VRegister(vTmp0.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8H);
+    auto vReg1 = vixl::aarch64::VRegister(vTmp1.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8H);
+    auto vReg2 = vixl::aarch64::VRegister(tmp.GetId(), vixl::aarch64::VectorFormat::kFormat8H);
+    auto xReg0 = vixl::aarch64::Register(dst.GetId(), vixl::aarch64::kXRegSize);
+    auto labelReturn = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelFound = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelSecond16B = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV0D1 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV1D1 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Ld1(vReg0, vReg1, vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    GetMasm()->Dup(vReg2, VixlReg(ch));
+    GetMasm()->Cmeq(vReg0, vReg0, vReg2);
+    GetMasm()->Cmeq(vReg1, vReg1, vReg2);
+    // Give up if char is not there
+    GetMasm()->Addp(vReg2, vReg0, vReg1);
+    GetMasm()->Addp(vReg2.V2D(), vReg2.V2D(), vReg2.V2D());
+    GetMasm()->Mov(xReg0, vReg2.D(), 0);
+    GetMasm()->Cbz(xReg0, labelReturn);
+    // Inspect the first 16-byte block
+    GetMasm()->Mov(xReg0, vReg0.D(), 0);
+    GetMasm()->Cbz(xReg0, labelCheckV0D1);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV0D1);
+    GetMasm()->Mov(xReg0, vReg0.D(), 1U);
+    GetMasm()->Cbz(xReg0, labelSecond16B);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(BITS_PER_UINT64));
+    GetMasm()->B(labelFound);
+    // Inspect the second 16-byte block
+    GetMasm()->Bind(labelSecond16B);
+    GetMasm()->Mov(xReg0, vReg1.D(), 0);
+    GetMasm()->Cbz(xReg0, labelCheckV1D1);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(2U * BITS_PER_UINT64));
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV1D1);
+    GetMasm()->Mov(xReg0, vReg1.D(), 1U);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(3U * BITS_PER_UINT64));
+
+    GetMasm()->Bind(labelFound);
+    GetMasm()->Lsr(xReg0, xReg0, 4U);
+    GetMasm()->Lsl(xReg0, xReg0, 1U);
+    GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
+    GetMasm()->Bind(labelReturn);
+}
+
+void Aarch64Encoder::EncodeMemCharU8X16UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp)
+{
+    ScopedTmpReg vTmp0(this, FLOAT64_TYPE);
+    ScopedTmpReg vTmp1(this, FLOAT64_TYPE);
+    auto vReg0 = vixl::aarch64::VRegister(vTmp0.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto vReg1 = vixl::aarch64::VRegister(tmp.GetId(), vixl::aarch64::VectorFormat::kFormat16B);
+    auto xReg0 = vixl::aarch64::Register(dst.GetId(), vixl::aarch64::kXRegSize);
+    auto labelReturn = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelFound = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV0D1 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Ld1(vReg0, vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    GetMasm()->Dup(vReg1, VixlReg(ch));
+    GetMasm()->Cmeq(vReg0, vReg0, vReg1);
+    // Give up if char is not there
+    GetMasm()->Addp(vReg1.V2D(), vReg0.V2D(), vReg0.V2D());
+    GetMasm()->Mov(xReg0, vReg1.D(), 0);
+    GetMasm()->Cbz(xReg0, labelReturn);
+    // Compute a pointer to the char
+    GetMasm()->Mov(xReg0, vReg0.D(), 0);
+    GetMasm()->Cbz(xReg0, labelCheckV0D1);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV0D1);
+    GetMasm()->Mov(xReg0, vReg0.D(), 1U);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(BITS_PER_UINT64));
+    GetMasm()->Bind(labelFound);
+    GetMasm()->Lsr(xReg0, xReg0, 3U);  // number of 8-bit chars
+    GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
+    GetMasm()->Bind(labelReturn);
+}
+
+void Aarch64Encoder::EncodeMemCharU16X8UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp)
+{
+    ScopedTmpReg vTmp0(this, FLOAT64_TYPE);
+    ScopedTmpReg vTmp1(this, FLOAT64_TYPE);
+    auto vReg0 = vixl::aarch64::VRegister(vTmp0.GetReg().GetId(), vixl::aarch64::VectorFormat::kFormat8H);
+    auto vReg1 = vixl::aarch64::VRegister(tmp.GetId(), vixl::aarch64::VectorFormat::kFormat8H);
+    auto xReg0 = vixl::aarch64::Register(dst.GetId(), vixl::aarch64::kXRegSize);
+    auto labelReturn = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelFound = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+    auto labelCheckV0D1 = static_cast<Aarch64LabelHolder *>(GetLabels())->GetLabel(CreateLabel());
+
+    GetMasm()->Ld1(vReg0, vixl::aarch64::MemOperand(VixlReg(srcAddr)));
+    GetMasm()->Dup(vReg1, VixlReg(ch));
+    GetMasm()->Cmeq(vReg0, vReg0, vReg1);
+    // Give up if char is not there
+    GetMasm()->Addp(vReg1.V2D(), vReg0.V2D(), vReg0.V2D());
+    GetMasm()->Mov(xReg0, vReg1.D(), 0);
+    GetMasm()->Cbz(xReg0, labelReturn);
+    // Compute a pointer to the char
+    GetMasm()->Mov(xReg0, vReg0.D(), 0);
+    GetMasm()->Cbz(xReg0, labelCheckV0D1);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->B(labelFound);
+    GetMasm()->Bind(labelCheckV0D1);
+    GetMasm()->Mov(xReg0, vReg0.D(), 1U);
+    GetMasm()->Rev(xReg0, xReg0);
+    GetMasm()->Clz(xReg0, xReg0);
+    GetMasm()->Add(xReg0, xReg0, VixlImm(BITS_PER_UINT64));
+    GetMasm()->Bind(labelFound);
+    GetMasm()->Lsr(xReg0, xReg0, 4U);  // number of 16-bit chars
+    GetMasm()->Lsl(xReg0, xReg0, 1U);  // number of bytes
+    GetMasm()->Add(xReg0, xReg0, VixlReg(srcAddr));
+    GetMasm()->Bind(labelReturn);
+}
+
 void Aarch64Encoder::EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src)
 {
     GetMasm()->Uxtl(VixlVReg(dst).V8H(), VixlVReg(src).V8B());

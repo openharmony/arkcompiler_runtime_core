@@ -61,6 +61,7 @@
 % end
 %   if intrinsic.respond_to?(:codegen_func)
   codegen_func: <%= intrinsic.codegen_func %>
+  codegen_virt: <%= intrinsic.respond_to?(:codegen_virt) ? intrinsic.codegen_virt : false %>
   codegen_arch: <%= intrinsic.respond_to?(:codegen_arch) ? intrinsic.codegen_arch : ['amd64', 'arm32', 'arm64'] %>
 % if intrinsic.respond_to?(:can_encode_func)
   can_encode_func: <%= intrinsic.can_encode_func %>

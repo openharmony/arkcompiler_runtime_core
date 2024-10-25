@@ -649,3 +649,93 @@
     - ark::ObjectHeader*       # src string
     - int32_t                  # begin index
     - int32_t                  # end index
+
+- name: StringIndexOf
+  entrypoint: StringIndexOf
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # unused (always zero)
+
+- name: StringIndexOfAfter
+  entrypoint: StringIndexOfAfter
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - ark::ObjectHeader*  # string
+    - uint16_t            # char to look up
+    - int32_t             # index of char to start from
+
+- name: StringIndexOfCompressedSmall
+  entrypoint: StringIndexOfCompressedSmall
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfCompressedMedium
+  entrypoint: StringIndexOfCompressedMedium
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfCompressedLarge
+  entrypoint: StringIndexOfCompressedLarge
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfCompressed
+  entrypoint: StringIndexOfCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u8 string data ptr
+    - uint32_t            # string data size
+    - uint8_t             # char to look up
+
+- name: StringIndexOfUncompressedSmall
+  entrypoint: StringIndexOfUncompressedSmall
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # string data size
+    - uint16_t            # char to look up
+
+- name: StringIndexOfUncompressedMedium
+  entrypoint: StringIndexOfUncompressedMedium
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # string data size
+    - uint16_t            # char to look up
+
+- name: StringIndexOfUncompressed
+  entrypoint: StringIndexOfUncompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - int32_t             # index of char in the string if any (result)
+    - void*               # u16 string data ptr
+    - uint32_t            # string data size
+    - uint16_t            # char to look up

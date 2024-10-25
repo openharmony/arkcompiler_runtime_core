@@ -340,6 +340,10 @@ public:
     void EncodeCrc32Update(Reg dst, Reg crcReg, Reg valReg) override;
     void EncodeCompressEightUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr) override;
     void EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(Reg srcAddr, Reg dstAddr) override;
+    void EncodeMemCharU8X32UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp) override;
+    void EncodeMemCharU16X16UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp) override;
+    void EncodeMemCharU8X16UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp) override;
+    void EncodeMemCharU16X8UsingSimd(Reg dst, Reg ch, Reg srcAddr, Reg tmp) override;
     void EncodeUnsignedExtendBytesToShorts(Reg dst, Reg src) override;
 
     bool CanEncodeBitCount() override;

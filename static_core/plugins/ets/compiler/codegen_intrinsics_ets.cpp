@@ -418,6 +418,16 @@ void Codegen::CreateDoubleToStringDecimal(IntrinsicInst *inst, Reg dst, SRCREGS 
     CallFastPath(inst, entrypoint, dst, {}, cache, numAsInt, unused);
 }
 
+void Codegen::CreateFloatIsInteger([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    GetEncoder()->EncodeIsInteger(dst, src[0]);
+}
+
+void Codegen::CreateFloatIsSafeInteger([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    GetEncoder()->EncodeIsSafeInteger(dst, src[0]);
+}
+
 /* See utf::IsWhiteSpaceChar() for the details */
 void Codegen::CreateCharIsWhiteSpace([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
@@ -488,6 +498,40 @@ void Codegen::CreateStringGetBytesTlab([[maybe_unused]] IntrinsicInst *inst, Reg
         CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND],
                      klassImm);
     }
+}
+
+void Codegen::CreateStringIndexOf(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto str = src[FIRST_OPERAND];
+    auto ch = src[SECOND_OPERAND];
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_INDEX_OF, dst, {}, str, ch, GetRegfile()->GetZeroReg());
+}
+
+void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    ASSERT(IntrinsicNeedsParamLocations(inst->GetIntrinsicId()));
+    auto *enc = GetEncoder();
+    ScopedTmpReg tmpReg(enc);
+    auto str = src[FIRST_OPERAND];
+    auto ch = src[SECOND_OPERAND];
+    auto startIndex = src[THIRD_OPERAND];
+    auto tmp = tmpReg.GetReg().As(startIndex.GetType());
+    auto zreg = GetRegfile()->GetZeroReg();
+    // If 'startIndex' is negative then make it zero.
+    // We must not overwrite 'startIndex' register so use a temp register instead.
+    enc->EncodeSelect({tmp, startIndex, zreg, startIndex, Imm(0), Condition::GE});
+    RegMask preserved(MakeMask(startIndex.GetId()));
+    CallFastPath(inst, RuntimeInterface::EntrypointId::STRING_INDEX_OF_AFTER, dst, {preserved}, str, ch, tmp);
+    // Irtoc implementation of INDEX_OF_AFTER calls the corresponding INDEX_OF_ variant.
+    // That is done for the optimization purpose.
+    // So here we must add 'startIndex' to the 'dst' (if it's not equal to '-1')
+    auto charNotFoundLabel = enc->CreateLabel();
+    enc->EncodeJump(charNotFoundLabel, dst, Imm(-1), Condition::EQ);
+    enc->EncodeSelect({tmp, startIndex, zreg, startIndex, Imm(0), Condition::GE});
+    enc->EncodeAdd(dst, dst, tmp);
+    enc->BindLabel(charNotFoundLabel);
 }
 
 }  // namespace ark::compiler

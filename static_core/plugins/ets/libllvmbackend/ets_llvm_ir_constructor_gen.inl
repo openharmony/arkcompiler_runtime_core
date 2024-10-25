@@ -367,3 +367,50 @@ bool LLVMIrConstructor::EmitStringGetBytesTlab(Inst *inst)
     ValueMapAdd(inst, result);
     return true;
 }
+
+bool LLVMIrConstructor::EmitStringIndexOf(Inst *inst)
+{
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return false;
+    }
+    auto entrypointId = RuntimeInterface::EntrypointId::STRING_INDEX_OF;
+    auto str = GetInputValue(inst, 0);
+    auto ch = GetInputValue(inst, 1);
+    auto zero = builder_.getInt32(0);
+    auto result = CreateFastPathCall(inst, entrypointId, {str, ch, zero});
+    ValueMapAdd(inst, result);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
+{
+    if (GetGraph()->GetArch() != Arch::AARCH64) {
+        return false;
+    }
+    auto entrypointId = RuntimeInterface::EntrypointId::STRING_INDEX_OF_AFTER;
+    auto str = GetInputValue(inst, 0);
+    auto ch = GetInputValue(inst, 1);
+    auto pos = GetInputValue(inst, 2);
+    auto zero = builder_.getInt32(0);
+    auto firstBb = GetCurrentBasicBlock();
+    auto charFoundBb = llvm::BasicBlock::Create(func_->getContext(),
+                                                CreateBasicBlockName(inst, "emit_string_index_of_after_found"), func_);
+    auto returnBb = llvm::BasicBlock::Create(func_->getContext(),
+                                             CreateBasicBlockName(inst, "emit_string_index_of_after_ret"), func_);
+    auto isNegative = builder_.CreateICmpSLT(pos, zero);
+    auto startIndex = builder_.CreateSelect(isNegative, zero, pos);
+    auto charIndex1 = CreateFastPathCall(inst, entrypointId, {str, ch, startIndex});
+    // Irtoc implementation of INDEX_OF_AFTER calls the corresponding INDEX_OF_ variant.
+    // That is done for the optimization purpose.
+    // So here we must add 'startIndex' to the returned 'charIndex' (if it's not equal to '-1')
+    builder_.CreateCondBr(builder_.CreateICmpEQ(charIndex1, builder_.getInt32(-1)), returnBb, charFoundBb);
+    SetCurrentBasicBlock(charFoundBb);
+    auto charIndex2 = builder_.CreateAdd(charIndex1, startIndex);
+    builder_.CreateBr(returnBb);
+    SetCurrentBasicBlock(returnBb);
+    auto charIndex = builder_.CreatePHI(builder_.getInt32Ty(), 2U);
+    charIndex->addIncoming(charIndex1, firstBb);
+    charIndex->addIncoming(charIndex2, charFoundBb);
+    ValueMapAdd(inst, charIndex);
+    return true;
+}

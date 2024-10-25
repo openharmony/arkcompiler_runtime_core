@@ -14,6 +14,20 @@
 
 include_relative 'string_helpers.irt'
 
+module Constants
+  MEM_BLOCK_8_BYTES = "8"
+  MEM_BLOCK_16_BYTES = "16"
+  MEM_BLOCK_32_BYTES = "32"
+  MEM_BLOCK_32_ALIGN_MASK = "~31ULL"
+  LOG2_BITS_PER_U8 = "3"
+  LOG2_BITS_PER_U16 = "4"
+  XOR_SUB_U8_MASK = "0x0101010101010101ULL"
+  XOR_AND_U8_MASK = "0x8080808080808080ULL"
+  MAX_U8_VALUE = "255"
+  U8_SIZE = "1"
+  U16_SIZE = "2"
+end
+
 # It is assumed that _begin_index and _end_index are safe and does not check/normalize them.
 # The range is [_begin_index, _end_index).
 # Note, a caller of this macro must provide a corresponding 'SlowPathEntrypoint'
@@ -770,6 +784,7 @@ function(:StringEndsWith,
   entrypoint = get_entrypoint_offset("STRING_ENDS_WITH_BASE")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringEndsWithBase").Terminator.b
 }
+
 function(:StringGetBytesTlab,
         params: {str: 'ref', begin_index: 'i32', end_index: 'i32', array_klass: 'ref'},
         regmap: $full_regmap,
@@ -822,3 +837,459 @@ function(:StringGetBytesTlab,
   Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
 }
 
+
+# String contains 8-bit chars
+# 0 < str_data_size < 8
+function(:StringIndexOfCompressedSmall,
+          params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+  i1 := 0
+Label(:Loop)
+  i := Phi(i1, i2).u32
+  If(Load(str_data, i).u8, ch).EQ.Unlikely.b {
+    Return(Cast(i).i32).i32
+  }
+  i2 := AddI(i).Imm(Constants::U8_SIZE).u32
+  If(i2, str_data_size).LT.Likely.b {
+    Goto(:Loop)
+  }
+  Return(-1).i32
+}
+
+
+# String contains 8-bit chars
+# 8 <= str_data_size < 16
+function(:StringIndexOfCompressedMedium,
+          params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  pattern := Cast(ch).u64
+  pattern := Or(ShlI(pattern).Imm("ark::BITS_PER_BYTE").u64, pattern).u64
+  pattern := Or(ShlI(pattern).Imm("ark::BITS_PER_UINT16").u64, pattern).u64
+  pattern := Or(ShlI(pattern).Imm("ark::BITS_PER_UINT32").u64, pattern).u64
+  value := LoadI(str_data).Imm(0).u64
+  x := Xor(value, pattern).u64
+  found := AndI(And(SubI(x).Imm(Constants::XOR_SUB_U8_MASK).u64, Not(x).u64).u64).Imm(Constants::XOR_AND_U8_MASK).u64
+  If(found, 0).NE.Likely.b {
+    rev := Intrinsic(:REVERSE_BYTES_U64, found).u64
+    pos := Cast(ShrI(Intrinsic(:COUNT_LEADING_ZERO_BITS_U64, rev).u64).Imm(Constants::LOG2_BITS_PER_U8).u64).i32
+    Return(pos).i32
+  }
+  i1 := Constants::MEM_BLOCK_8_BYTES
+Label(:Loop)
+  i := Phi(i1, i2).u32
+  If(i, str_data_size).LT.Likely.b {
+    If(Load(str_data, i).u8, ch).EQ.Unlikely.b {
+      Return(Cast(i).i32).i32
+    }
+    i2 := AddI(i).Imm(Constants::U8_SIZE).u32
+    Goto(:Loop)
+  }
+  Return(-1).i32
+}
+
+
+# 16 <= str_data_size < 32
+function(:StringIndexOfCompressedLarge,
+          params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # String contains 8-bit chars
+  p := Intrinsic(:MEM_CHAR_U8_X16_USING_SIMD, ch, str_data).ptr
+  If(p, 0).NE.Likely.b {
+    Return(Cast(Sub(p, str_data).word).i32).i32
+  }
+  i1 := Constants::MEM_BLOCK_16_BYTES
+Label(:Loop)
+  i := Phi(i1, i2).u32
+  If(i, str_data_size).LT.Likely.b {
+    If(Load(str_data, i).u8, ch).EQ.Unlikely.b {
+      Return(Cast(i).i32).i32
+    }
+    i2 := AddI(i).Imm(Constants::U8_SIZE).u32
+    Goto(:Loop)
+  }
+  Return(-1).i32
+}
+
+
+# 32 <= data size
+function(:StringIndexOfCompressed,
+          params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u8'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # String contains 8-bit chars
+  end_ptr := Add(str_data, Cast(str_data_size).word).ptr
+
+  IfImm(Compare(str_data_size, Constants::MEM_BLOCK_32_BYTES).GE.b).Imm(0).NE.Likely.b {
+    end_ptr_aligned := Bitcast(AndI(Bitcast(end_ptr).word).Imm(Constants::MEM_BLOCK_32_ALIGN_MASK).word).ptr
+Label(:LoopSimd)
+    curr_ptr := Phi(str_data, curr_ptr1).ptr;
+    p := Intrinsic(:MEM_CHAR_U8_X32_USING_SIMD, ch, curr_ptr).ptr
+    If(p, 0).NE.Likely.b {
+      Return(Cast(Sub(p, str_data).word).i32).i32
+    }
+    curr_ptr1 := Add(curr_ptr, Constants::MEM_BLOCK_32_BYTES).ptr
+    If(curr_ptr1, end_ptr_aligned).LT.Likely.b {
+      Goto(:LoopSimd)
+    }
+    If(end_ptr_aligned, end_ptr).EQ.Unlikely.b {
+      Return(-1).i32
+    }
+  }
+  curr_ptr2 := Phi(str_data, curr_ptr1).ptr
+
+  IfImm(Compare(Sub(end_ptr, curr_ptr2).word, Constants::MEM_BLOCK_16_BYTES).GE.b).Imm(0).NE.Likely.b {
+    p := Intrinsic(:MEM_CHAR_U8_X16_USING_SIMD, ch, curr_ptr2).ptr
+    If(p, 0).NE.Likely.b {
+      Return(Cast(Sub(p, str_data).word).i32).i32
+    }
+    curr_ptr3 := AddI(curr_ptr2).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+  }
+  curr_ptr4 := Phi(curr_ptr2, curr_ptr3).ptr
+
+Label(:Loop)
+  curr_ptr5 := Phi(curr_ptr4, curr_ptr6).ptr
+  If(curr_ptr5, end_ptr).LT.Likely.b {
+    c := LoadI(curr_ptr5).Imm(0).u8
+    If(c, ch).EQ.Unlikely.b {
+      Return(Cast(Sub(curr_ptr5, str_data).word).i32).i32
+    }
+    curr_ptr6 := AddI(curr_ptr5).Imm(Constants::U8_SIZE).ptr
+    Goto(:Loop)
+  }
+  Return(-1).i32
+}
+
+# 0 < str_data_size < 16
+function(:StringIndexOfUncompressedSmall,
+          params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # String contains 16-bit chars
+  i1 := 0
+Label(:Loop)
+  i := Phi(i1, i2).u32
+  If(Load(str_data, i).u16, ch).EQ.Unlikely.b {
+    Return(Cast(ShrI(i).Imm(1).u32).i32).i32
+  }
+  i2 := AddI(i).Imm(Constants::U16_SIZE).u32
+  If(i2, str_data_size).LT.Likely.b {
+    Goto(:Loop)
+  }
+  Return(-1).i32
+}
+
+
+# 16 <= str_data_size < 32
+function(:StringIndexOfUncompressedMedium,
+          params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # String contains 16-bit chars
+  p := Intrinsic(:MEM_CHAR_U16_X8_USING_SIMD, ch, str_data).ptr
+  If(p, 0).NE.Likely.b {
+    Return(Cast(ShrI(Sub(p, str_data).word).Imm(1).word).i32).i32
+  }
+  i1 := Constants::MEM_BLOCK_16_BYTES  # u16x8
+Label(:Loop)
+  i := Phi(i1, i2).u32
+  If(i, str_data_size).LT.Likely.b {
+    If(Load(str_data, i).u16, ch).EQ.Unlikely.b {
+      Return(Cast(ShrI(i).Imm(1).u32).i32).i32
+    }
+    i2 := AddI(i).Imm(Constants::U16_SIZE).u32
+    Goto(:Loop)
+  }
+  Return(-1).i32
+}
+
+
+# 32 <= data size
+function(:StringIndexOfUncompressed,
+          params: {str_data: 'ptr', str_data_size: 'u32', ch: 'u16'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  # String contains 16-bit chars
+  end_ptr := Add(str_data, Cast(str_data_size).word).ptr
+
+  IfImm(Compare(str_data_size, Constants::MEM_BLOCK_32_BYTES).GE.b).Imm(0).NE.Likely.b {
+    end_ptr_aligned := Bitcast(AndI(Bitcast(end_ptr).word).Imm(Constants::MEM_BLOCK_32_ALIGN_MASK).word).ptr
+Label(:LoopSimd)
+    curr_ptr := Phi(str_data, curr_ptr1).ptr;
+    p := Intrinsic(:MEM_CHAR_U16_X16_USING_SIMD, ch, curr_ptr).ptr
+    If(p, 0).NE.Likely.b {
+      Return(Cast(ShrI(Sub(p, str_data).word).Imm(1).word).i32).i32
+    }
+    curr_ptr1 := Add(curr_ptr, Constants::MEM_BLOCK_32_BYTES).ptr
+    If(curr_ptr1, end_ptr_aligned).LT.Likely.b {
+      Goto(:LoopSimd)
+    }
+    If(end_ptr_aligned, end_ptr).EQ.Unlikely.b {
+       Return(-1).i32
+    }
+  }
+  curr_ptr2 := Phi(str_data, curr_ptr1).ptr
+  IfImm(Compare(Sub(end_ptr, curr_ptr2).word, Constants::MEM_BLOCK_16_BYTES).GE.b).Imm(0).NE.Likely.b {
+    p := Intrinsic(:MEM_CHAR_U16_X8_USING_SIMD, ch, curr_ptr2).ptr
+    If(p, 0).NE.Likely.b {
+      Return(Cast(ShrI(Sub(p, str_data).word).Imm(1).word).i32).i32
+    }
+    curr_ptr3 := AddI(curr_ptr2).Imm(Constants::MEM_BLOCK_16_BYTES).ptr
+  }
+  curr_ptr4 := Phi(curr_ptr2, curr_ptr3).ptr
+
+Label(:Loop)
+  curr_ptr5 := Phi(curr_ptr4, curr_ptr6).ptr
+  If(curr_ptr5, end_ptr).LT.Likely.b {
+    If(LoadI(curr_ptr5).Imm(0).u16, ch).EQ.Unlikely.b {
+      Return(Cast(ShrI(Sub(curr_ptr5, str_data).word).Imm(1).word).i32).i32
+    }
+    curr_ptr6 := AddI(curr_ptr5).Imm(Constants::U16_SIZE).ptr
+    Goto(:Loop)
+  }
+  Return(-1).i32
+}
+
+
+function(:StringIndexOf,
+          params: {str: 'ref', ch: 'u16', fake: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_regs,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+
+  # Return '-1' if 'str' is empty.
+  IfImm(Compare(str_len_packed, 1).LE.b).Imm(0).NE.Unlikely.b {
+    Return(-1).i32
+  }
+
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+
+  IfImm(Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b).Imm(0).NE.Unlikely.b {
+    str_data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFE).u32
+    # 0 < data size < 16
+    If(str_data_size_u16, 16).LT.Unlikely.b {
+        LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+        LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
+        LiveOut(ch).DstReg(regmap[:arg2]).u16
+        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.b
+    }
+    # 16 <= data size < 32
+    If(str_data_size_u16, 32).LT.Unlikely.b {
+        LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+        LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
+        LiveOut(ch).DstReg(regmap[:arg2]).u16
+        entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.b
+    }
+    # 32 <= data size
+    LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+    LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u16
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.b
+  }
+
+  IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
+    Return(-1).i32
+  }
+
+  str_data_size_u8 := ShrI(str_len_packed).Imm(1).u32
+  # 0 < data size < 8
+  If(str_data_size_u8, 8).LT.Unlikely.b {
+    LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+    LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u8
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.b
+  }
+  # 8 <= data size < 16
+  If(str_data_size_u8, 16).LT.Unlikely.b {
+    LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+    LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u8
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.b
+  }
+  # 16 <= data size < 32
+  If(str_data_size_u8, 32).LT.Unlikely.b {
+    LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+    LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u8
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.b
+  }
+  # 32 <= data size
+  LiveOut(str_data).DstReg(regmap[:arg0]).ptr
+  LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
+  LiveOut(ch).DstReg(regmap[:arg2]).u8
+  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.b
+}
+
+
+# 'IndexOfAfter' calls the corresponding functions from the 'IndexOf' family
+# for the purpose of code efficiency and to avoid code duplication.
+# The problem is that we have to add 'start_index' to the result, but execution flow
+# never returns to 'StringIndexOfAfter' because of TAIL_CALL. So the codegen and libllvm
+# take care of it and emit instructions adding 'start_index' to the result returned
+# by 'StringIndexOfAfter'.
+function(:StringIndexOfAfter,
+          params: {str: 'ref', ch: 'u16', start_index: 'i32'},
+          regmap: $full_regmap,
+          regalloc_set: $panda_mask,
+          mode: [:FastPath]) {
+
+  if Options.arch == :arm32 || Options.arch == :x86_64
+    Intrinsic(:UNREACHABLE).Terminator.void
+    ReturnVoid().void
+    next
+  end
+
+  str_len_packed := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  # Return '-1' if 'str' is empty.
+  IfImm(Compare(str_len_packed, 1).LE.b).Imm(0).NE.Unlikely.b {
+    Return(-1).i32
+  }
+
+  str_len := ShrI(str_len_packed).Imm(1).i32
+
+  # Return '-1' if 'start_index' is out of range
+  If(start_index, str_len).GE.Unlikely.b {
+    Return(-1).i32
+  }
+
+  str_data := Add(Cast(str).SrcType(Constants::COMPILER_REFERENCE).ptr, Cast(Constants::STRING_DATA_OFFSET).word).ptr
+
+  IfImm(Compare(AndI(str_len_packed).Imm(1).i32, 1).EQ.b).Imm(0).NE.Unlikely.b {
+    offs := Cast(ShlI(start_index).Imm(1).i32).u32
+    data_size_u16 := AndI(str_len_packed).Imm(0xFFFFFFFE).u32
+    data_size_u16 := Sub(data_size_u16, offs).u32
+    data_ptr_u16 := Add(str_data, Cast(offs).word).ptr
+    # 0 < data size < 16
+    If(data_size_u16, 16).LT.Unlikely.b {
+      LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
+      LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
+      LiveOut(ch).DstReg(regmap[:arg2]).u16
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.b
+    }
+    # 16 <= data size < 32
+    If(data_size_u16, 32).LT.Unlikely.b {
+      LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
+      LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
+      LiveOut(ch).DstReg(regmap[:arg2]).u16
+      entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.b
+    }
+    # 32 <= data size
+    LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
+    LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u16
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.b
+  }
+
+  IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
+    # Return '-1' as 'str' is compressed and 'ch' does not fit in 8 bits.
+    Return(-1).i32
+  }
+
+  data_size_u8 := Sub(str_len, Cast(start_index).u32).u32
+  data_ptr_u8 := Add(str_data, Cast(start_index).word).ptr
+  # 0 < data size < 8
+  If(data_size_u8, 8).LT.Unlikely.b {
+    LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
+    LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u8
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.b
+  }
+  # 8 <= data size < 16
+  If(data_size_u8, 16).LT.Unlikely.b {
+    LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
+    LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u8
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.b
+  }
+  # 16 <= data size < 32
+  If(data_size_u8, 32).LT.Unlikely.b {
+    LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
+    LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
+    LiveOut(ch).DstReg(regmap[:arg2]).u8
+    entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.b
+  }
+  # 32 <= data size
+  LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
+  LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
+  LiveOut(ch).DstReg(regmap[:arg2]).u8
+  entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.b
+}

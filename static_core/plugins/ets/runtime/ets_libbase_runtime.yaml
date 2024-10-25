@@ -852,6 +852,9 @@ intrinsics:
       ret: i32
       args: [u16]
     impl: ark::ets::intrinsics::StdCoreStringIndexOf
+    codegen_arch: [arm64]
+    codegen_func: CreateStringIndexOf
+    llvm_codegen_func: EmitStringIndexOf
     safe_intrinsic: true
 
   - name: StdCoreStringIndexOfAfter
@@ -863,6 +866,10 @@ intrinsics:
       ret: i32
       args: [u16, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfAfter
+    codegen_arch: [arm64]
+    codegen_func: CreateStringIndexOfAfter
+    llvm_codegen_func: EmitStringIndexOfAfter
+    need_param_locations: true
     safe_intrinsic: true
 
   - name: StdCoreStringIndexOfString
