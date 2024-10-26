@@ -39,7 +39,11 @@ void InstBuilder::BuildLaunch(const BytecodeInstruction *bcInst)
     auto saveState = CreateSaveState(Opcode::SaveState, pc);
     auto newObj = CreateNewObjectInst(pc, TypeIdMixin::MEM_PROMISE_CLASS_ID, saveState, inst);
     AddInstruction(saveState, inst, newObj);
-    BuildCallHelper<OPCODE, IS_RANGE, ACC_READ>(bcInst, this, newObj);
+    if (GetGraph()->IsAbcKit()) {
+        BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, false>(bcInst, this, newObj);
+    } else {
+        BuildCallHelper<OPCODE, IS_RANGE, ACC_READ, true>(bcInst, this, newObj);
+    }
     UpdateDefinitionAcc(newObj);
 }
 
@@ -51,15 +55,34 @@ template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, true>(c
 template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, true, false>(const BytecodeInstruction *bcInst);
 template void InstBuilder::BuildLaunch<Opcode::CallLaunchVirtual, false, false>(const BytecodeInstruction *bcInst);
 
-// CC-OFFNXT(huge_method) big switch-case
+static RuntimeInterface::IntrinsicId GetIntrinsicId(DataType::Type type)
+{
+    switch (type) {
+        case DataType::REFERENCE:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_OBJ;
+        case DataType::FLOAT64:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F64;
+        case DataType::FLOAT32:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F32;
+        case DataType::UINT64:
+        case DataType::INT64:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I64;
+        case DataType::UINT8:
+        case DataType::INT8:
+        case DataType::UINT16:
+        case DataType::INT16:
+        case DataType::UINT32:
+        case DataType::INT32:
+            return RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I32;
+        default:
+            UNREACHABLE();
+    }
+}
+
+template <bool IS_ABC_KIT>
 void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type)
 {
     auto pc = GetPc(bcInst->GetAddress());
-    // Create SaveState instruction
-    auto saveState = CreateSaveState(Opcode::SaveState, pc);
-
-    // Create NullCheck instruction
-    auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
 
     auto runtime = GetRuntime();
     auto fieldIndex = bcInst->GetId(0).AsIndex();
@@ -68,41 +91,25 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::
         type = runtime->GetFieldTypeById(GetMethod(), fieldId);
     }
 
-    RuntimeInterface::IntrinsicId id;
-    switch (type) {
-        case DataType::REFERENCE:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_OBJ;
-            break;
-        case DataType::FLOAT64:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F64;
-            break;
-        case DataType::FLOAT32:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_F32;
-            break;
-        case DataType::UINT64:
-        case DataType::INT64:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I64;
-            break;
-        case DataType::UINT8:
-        case DataType::INT8:
-        case DataType::UINT16:
-        case DataType::INT16:
-        case DataType::UINT32:
-        case DataType::INT32:
-            id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_LD_OBJ_BY_NAME_I32;
-            break;
-        default:
-            UNREACHABLE();
-            break;
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, GetIntrinsicId(type));
+    if constexpr (!IS_ABC_KIT) {
+        intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
+
+        // Create SaveState instruction
+        auto saveState = CreateSaveState(Opcode::SaveState, pc);
+
+        // Create NullCheck instruction
+        auto nullCheck =
+            graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
+
+        intrinsic->AppendInput(nullCheck);
+        intrinsic->AddInputType(DataType::REFERENCE);
+        intrinsic->AppendInput(saveState);
+        intrinsic->AddInputType(DataType::NO_TYPE);
+
+        AddInstruction(saveState);
+        AddInstruction(nullCheck);
     }
-    auto intrinsic = GetGraph()->CreateInstIntrinsic(type, pc, id);
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
-
-    intrinsic->AppendInput(nullCheck);
-    intrinsic->AddInputType(DataType::REFERENCE);
-
-    intrinsic->AppendInput(saveState);
-    intrinsic->AddInputType(DataType::NO_TYPE);
 
     intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
     intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
@@ -110,12 +117,13 @@ void InstBuilder::BuildLdObjByName(const BytecodeInstruction *bcInst, compiler::
     intrinsic->SetMethodFirstInput();
     intrinsic->SetMethod(GetMethod());
 
-    AddInstruction(saveState);
-    AddInstruction(nullCheck);
     AddInstruction(intrinsic);
 
     UpdateDefinitionAcc(intrinsic);
 }
+
+template void InstBuilder::BuildLdObjByName<true>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
+template void InstBuilder::BuildLdObjByName<false>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
 
 std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByType(DataType::Type type)
 {
@@ -145,25 +153,32 @@ std::pair<RuntimeInterface::IntrinsicId, DataType::Type> ExtractIntrinsicIdByTyp
     UNREACHABLE();
 }
 
+template <bool IS_ABC_KIT>
 IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic(size_t pc, compiler::DataType::Type type)
 {
     auto [id, extractedType] = ExtractIntrinsicIdByType(type);
     type = extractedType;
     auto *intrinsic = GetGraph()->CreateInstIntrinsic(DataType::VOID, pc, id);
-    intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3_I);
-    intrinsic->AddInputType(DataType::REFERENCE);
-    intrinsic->AddInputType(type);
-    intrinsic->AddInputType(DataType::NO_TYPE);
+
+    if (intrinsic->RequireState()) {
+        intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 3_I);
+        intrinsic->AddInputType(DataType::REFERENCE);
+        intrinsic->AddInputType(type);
+        intrinsic->AddInputType(DataType::NO_TYPE);
+    } else {
+        intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 1_I);
+        intrinsic->AddInputType(type);
+    }
     return intrinsic;
 }
 
+template IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic<true>(size_t pc, compiler::DataType::Type type);
+template IntrinsicInst *InstBuilder::CreateStObjByNameIntrinsic<false>(size_t pc, compiler::DataType::Type type);
+
+template <bool IS_ABC_KIT>
 void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, compiler::DataType::Type type)
 {
     auto pc = GetPc(bcInst->GetAddress());
-    // Create SaveState instruction
-    auto saveState = CreateSaveState(Opcode::SaveState, pc);
-    // Create NullCheck instruction
-    auto nullCheck = graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
 
     auto runtime = GetRuntime();
     auto fieldIndex = bcInst->GetId(0).AsIndex();
@@ -176,19 +191,43 @@ void InstBuilder::BuildStObjByName(const BytecodeInstruction *bcInst, compiler::
     Inst *storeVal = nullptr;
     storeVal = GetDefinitionAcc();
 
-    auto *intrinsic = CreateStObjByNameIntrinsic(pc, type);
-    intrinsic->AppendInput(nullCheck);
-    intrinsic->AppendInput(storeVal);
-    intrinsic->AppendInput(saveState);
+    auto *intrinsic = CreateStObjByNameIntrinsic<IS_ABC_KIT>(pc, type);
+
+    if constexpr (!IS_ABC_KIT) {
+        // Create SaveState instruction
+        auto saveState = CreateSaveState(Opcode::SaveState, pc);
+        // Create NullCheck instruction
+        auto nullCheck =
+            graph_->CreateInstNullCheck(DataType::REFERENCE, pc, GetDefinition(bcInst->GetVReg(0)), saveState);
+
+        intrinsic->AppendInput(nullCheck);
+        intrinsic->AppendInput(storeVal);
+        intrinsic->AppendInput(saveState);
+        AddInstruction(saveState);
+        AddInstruction(nullCheck);
+    } else {
+        intrinsic->AppendInput(storeVal);
+    }
+
     intrinsic->AddImm(GetGraph()->GetAllocator(), fieldId);
     intrinsic->AddImm(GetGraph()->GetAllocator(), pc);
 
     intrinsic->SetMethodFirstInput();
     intrinsic->SetMethod(GetMethod());
 
-    AddInstruction(saveState);
-    AddInstruction(nullCheck);
     AddInstruction(intrinsic);
+}
+
+template void InstBuilder::BuildStObjByName<true>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
+template void InstBuilder::BuildStObjByName<false>(const BytecodeInstruction *bcInst, compiler::DataType::Type type);
+
+void InstBuilder::BuildIsUndefined(const BytecodeInstruction *bcInst)
+{
+    auto undefInst = graph_->GetOrCreateUndefinedInst();
+    auto cmpInst = graph_->CreateInstCompare(DataType::BOOL, GetPc(bcInst->GetAddress()), GetDefinitionAcc(), undefInst,
+                                             DataType::REFERENCE, ConditionCode::CC_EQ);
+    AddInstruction(cmpInst);
+    UpdateDefinitionAcc(cmpInst);
 }
 
 void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
@@ -198,8 +237,13 @@ void InstBuilder::BuildEquals(const BytecodeInstruction *bcInst)
     Inst *obj1 = GetDefinition(bcInst->GetVReg(0));
     Inst *obj2 = GetDefinition(bcInst->GetVReg(1));
 
-    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc,
-                                                     RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_EQUALS);
+    RuntimeInterface::IntrinsicId intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_EQUALS;
+#if defined(ENABLE_LIBABCKIT)
+    if (GetGraph()->IsAbcKit()) {
+        intrinsicId = RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_EQUALS;
+    }
+#endif
+    auto intrinsic = GetGraph()->CreateInstIntrinsic(DataType::BOOL, pc, intrinsicId);
     intrinsic->AllocateInputTypes(GetGraph()->GetAllocator(), 2_I);
 
     intrinsic->AppendInput(obj1);

@@ -1,0 +1,690 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
+import("//arkcompiler/ets_frontend/ets2panda/ets2abc_config.gni")
+import("//arkcompiler/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/tests/test_helper.gni")
+
+template("create_merge_file") {
+  assert(defined(invoker.input_file), "input_file is required!")
+  assert(defined(invoker.output_file), "output_file is required!")
+
+  extra_dependencies = []
+  if (defined(invoker.extra_dependencies)) {
+    extra_dependencies += invoker.extra_dependencies
+  }
+
+  action("$target_name") {
+    script = "./../scripts/create_merge_file.sh"
+
+    args = [
+      rebase_path(invoker.input_file),
+      rebase_path(invoker.output_file),
+    ]
+
+    deps = extra_dependencies
+
+    outputs = [ invoker.output_file ]
+  }
+}
+
+test_js_path = "//arkcompiler/runtime_core/libabckit/tests/"
+
+test_js_files = [
+  "cpp/tests/cpp_test_dynamic_js",
+
+  "ut/metadata_core/inspect_api/classes/classes_dynamic",
+  "ut/metadata_core/inspect_api/classes/classes_empty_dynamic",
+  "ut/metadata_core/inspect_api/literals/literals_dynamic",
+  "ut/metadata_core/inspect_api/values/values_dynamic",
+  "ut/metadata_core/inspect_api/modules/modules_dynamic",
+  "ut/metadata_core/inspect_api/modules/targets/JS_target",
+  "ut/metadata_core/inspect_api/modules/modules_dynamic_external",
+  "ut/metadata_core/inspect_api/types/types_dynamic",
+  "ut/metadata_core/modify_api/strings/strings_dynamic",
+  "ut/metadata_core/modify_api/literals/literals_dynamic",
+  "ut/metadata_core/modify_api/values/values_dynamic",
+  "ut/metadata_core/modify_api/types/types_dynamic",
+  "ut/metadata_core/inspect_api/files/file_dynamic",
+  "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify",
+  "ut/extensions/arkts/inspect_api/modules/modules_dynamic",
+  "ut/extensions/js/inspect_api/api_casts/JSapi_casts",
+  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic",
+  "ut/extensions/js/inspect_api/modules/JSmodules_dynamic_external",
+  "ut/extensions/js/inspect_api/enumerators/JSenumerators0_dynamic",
+  "ut/extensions/js/modify_api/modules/JSmodules_dynamic_modify",
+  "ut/extensions/js/modify_api/super_this/store_super",
+  "ut/extensions/js/modify_api/super_this/load_super",
+  "ut/extensions/js/modify_api/super_this/store_this",
+  "ut/extensions/js/modify_api/super_this/load_this",
+  "ut/extensions/js/modify_api/patch/patch_test",
+  "ut/extensions/js/modify_api/obj/newobj",
+  "ut/extensions/js/modify_api/obj/delobjprop",
+  "ut/extensions/js/modify_api/obj/privateprop",
+  "ut/extensions/js/modify_api/obj/callruntime_private",
+  "ut/extensions/js/modify_api/obj/proto",
+  "ut/extensions/js/modify_api/bigint/load_bigint",
+  "ut/isa/isa_dynamic/load_string/load_string_dynamic",
+  "ut/extensions/js/modify_api/arrays/starrayspread",
+  "ut/extensions/js/modify_api/copy/copyrestargs_test",
+  "ut/extensions/js/modify_api/copy/copy_properties_test",
+  "ut/isa/isa_dynamic/modules/isa_dynamic_modules",
+  "ut/isa/isa_dynamic/objects/objects_dynamic",
+  "ut/isa/isa_dynamic/return/return_dynamic",
+  "ut/isa/isa_dynamic/arithmetic/bininst_dynamic",
+  "ut/isa/isa_dynamic/arithmetic/bininst_logical_dynamic",
+  "ut/isa/isa_dynamic/arithmetic/bininst_shifts_dynamic",
+  "ut/isa/isa_dynamic/arithmetic/unaryinst_dynamic",
+  "ut/isa/isa_dynamic/get_insts/getnextpropname_dynamic",
+  "ut/isa/isa_dynamic/get_insts/getresumemode_dynamic",
+  "ut/isa/isa_dynamic/get_insts/gettemplateobject_dynamic",
+  "ut/isa/isa_dynamic/get_insts/getunmappedargs_dynamic",
+  "ut/isa/isa_dynamic/import/dynamicimport_dynamic",
+  "ut/isa/isa_dynamic/loadstore/emptyobj",
+  "ut/isa/isa_dynamic/loadstore/ld_dynamic",
+  "ut/isa/isa_dynamic/loadstore/stownbyindex",
+  "ut/isa/isa_dynamic/loadstore/stobjbyindex",
+  "ut/isa/isa_dynamic/loadstore/ldobjbyvalue",
+  "ut/isa/isa_dynamic/loadstore/ldobjbyname",
+  "ut/isa/isa_dynamic/loadstore/ldobjbyindex",
+  "ut/isa/isa_dynamic/loadstore/ldglobalvar",
+  "ut/isa/isa_dynamic/loadstore/stglobalvar",
+  "ut/isa/isa_dynamic/loadstore/tryldglobalbyname",
+  "ut/isa/isa_dynamic/loadstore/trystglobalbyname",
+  "ut/isa/isa_dynamic/create_if/create_if_dynamic",
+  "ut/isa/isa_dynamic/create/createobjectwithbuffer_dynamic",
+  "ut/isa/isa_dynamic/create/createdebugger_dynamic",
+  "ut/isa/isa_dynamic/create/createobjectwithexcludedkeys_dynamic",
+  "ut/isa/isa_dynamic/define/defineclasswithbuffer_dynamic",
+  "ut/isa/isa_dynamic/define/definefieldbyname_dynamic",
+  "ut/isa/isa_dynamic/define/definefieldruntime_dynamic",
+  "ut/isa/isa_dynamic/define/definefunc_dynamic",
+  "ut/isa/isa_dynamic/define/definemethod_dynamic",
+  "ut/isa/isa_dynamic/define/definegettersetterbyvalue_dynamic",
+  "ut/isa/isa_dynamic/dyn_call/call_dynamic",
+  "ut/isa/isa_dynamic/dyn_call_this/call_this_dynamic",
+  "ut/isa/isa_dynamic/call_runtime/topropertykey_dynamic",
+  "ut/isa/isa_dynamic/call_runtime/callinit_dynamic",
+  "ut/isa/isa_dynamic/throw/throw_dynamic",
+  "ut/isa/isa_dynamic/instanceof/instanceof_dynamic",
+  "ut/isa/isa_dynamic/isin/isin_dynamic",
+  "ut/isa/isa_dynamic/sendable/ldsendableclass_dynamic",
+  "ut/isa/isa_dynamic/sendable/makesendableclass_dynamic",
+  "ut/isa/isa_dynamic/supercall/supercall_dynamic",
+  "ut/isa/isa_dynamic/supercall/supercallarrow_dynamic",
+  "ut/isa/isa_dynamic/supercall/supercallspread_dynamic",
+  "ut/isa/isa_dynamic/testin/testin_dynamic",
+  "ut/isa/isa_dynamic/generators/creategeneratorobj_dynamic",
+  "ut/isa/isa_dynamic/iterators/createiterresultobj_dynamic",
+  "ut/isa/isa_dynamic/iterators/getiterator_dynamic",
+  "ut/isa/isa_dynamic/iterators/getpropiterator_dynamic",
+  "ut/isa/isa_dynamic/lexenv/lexenv_dynamic",
+  "ut/isa/isa_dynamic/lexenv/poplexenv_dynamic",
+  "ut/isa/isa_dynamic/arrays/create_array_dynamic",
+  "ut/isa/isa_dynamic/async/enter_resolve_reject_dynamic",
+  "ut/isa/isa_dynamic/async/awaituncaught_dynamic",
+  "ut/isa/isa_dynamic/async/asyncgenerator_dynamic",
+  "ut/isa/isa_dynamic/async/asyncgeneratorobj_dynamic",
+  "ut/isa/isa_dynamic/async/asyncuseconcurrent_dynamic",
+  "ut/isa/isa_dynamic/async/asynciterator_dynamic",
+  "ut/isa/isa_dynamic/apply/apply_dynamic",
+  "ut/isa/isa_dynamic/apply/newobjapply_dynamic",
+
+  "ut/ir_core/graph/graph_dynamic",
+  "ut/ir_core/inst_manipulation/inst_manipulation_dynamic",
+  "ut/ir_core/graph_basic_block/graph_basic_block_dynamic",
+  "ut/ir_core/graph_basic_block/graph_basic_block_simple",
+  "ut/ir_core/basic_blocks/basic_blocks_dynamic",
+  "ut/ir_core/basic_blocks/js_src/create_empty_dynamic",
+  "ut/ir_core/basic_blocks/js_src/visit_succ_dynamic",
+  "ut/ir_core/basic_blocks/js_src/try_catch_blocks_dynamic",
+  "ut/ir_core/get_constant_value/get_constant_value_dynamic",
+  "ut/ir_core/create_constant/create_constant_dynamic",
+  "ut/ir_core/inst_inputs/inst_inputs_dynamic",
+  "ut/ir_core/string/string_dynamic",
+  "ut/ir_core/method/method_dynamic",
+  "ut/ir_core/loops/loop_dynamic",
+  "ut/ir_core/types_api/get_type_dynamic",
+  "ut/ir_core/insert_try_catch/insert_try_catch_dynamic",
+  "ut/ir_core/insert_try_catch/insert_try_catch_dynamic_wrapper",
+
+  "scenarios/add_try_catch/dynamic/add_try_catch",
+  "scenarios/add_log/add_log_dynamic",
+  "scenarios/api_scanner/dynamic/api_scanner",
+  "scenarios/branch_eliminator/dynamic/branch_eliminator",
+  "scenarios/scan_subclasses/dynamic/scan_subclasses",
+  "scenarios/parameter_check/dynamic/parameter_check",
+  "scenarios_c_api_clean/add_log_js/add_log_dynamic",
+
+  "internal/ICSlotAllocator/ICSlotAllocator",
+  "internal/implementation_api/abc_dynamic",
+  "internal/mem_manager/abc_dynamic_1",
+  "internal/mem_manager/abc_dynamic_2",
+
+  "wrong_mode_tests/mode_test_dynamic",
+]
+
+test_ts_files = [
+  "cpp/tests/cpp_test_dynamic",
+
+  "scenarios/router_table/dynamic/router_table",
+  "scenarios/replace_call_site/dynamic/replace_call_site",
+
+  "ut/isa/isa_dynamic/catchphi/catchphi_dynamic",
+
+  "ut/ir_core/phi/phi_dynamic",
+
+  "ut/metadata_core/inspect_api/enumerators/enumerators0_dynamic",
+  "ut/metadata_core/inspect_api/modules/targets/TS_target",
+  "ut/metadata_core/inspect_api/methods/methods_dynamic",
+  "ut/metadata_core/inspect_api/annotations/annotations_inspect_dynamic",
+  "ut/metadata_core/inspect_api/namespaces/namespaces_dynamic",
+
+  "ut/extensions/arkts/inspect_api/api_casts/api_casts",
+  "ut/extensions/arkts/inspect_api/namespace/namespace_arkts_dynamic",
+  "ut/extensions/arkts/modify_api/annotations/annotations_dynamic",
+]
+
+test_ets_files = [
+  "ut/metadata_core/inspect_api/modules/targets/ArkTS2_target",
+  "ut/metadata_core/inspect_api/classes/classes_static",
+  "ut/metadata_core/inspect_api/classes/classes_empty_static",
+  "ut/metadata_core/inspect_api/methods/methods_static",
+  "ut/metadata_core/inspect_api/methods/native_method",
+  "ut/metadata_core/inspect_api/enumerators/enumerators_static",
+  "ut/metadata_core/inspect_api/files/file_static",
+  "ut/metadata_core/inspect_api/literals/literals_static",
+  "ut/metadata_core/inspect_api/values/values_static",
+  "ut/metadata_core/inspect_api/types/types_static",
+  "ut/metadata_core/modify_api/strings/strings_static",
+  "ut/metadata_core/modify_api/types/types_static",
+  "ut/metadata_core/modify_api/literals/literals_static",
+  "ut/metadata_core/modify_api/values/values_static",
+
+  "ut/isa/isa_static/arithmetic/bininst_imm_static",
+  "ut/isa/isa_static/arithmetic/bininst_logical_static",
+  "ut/isa/isa_static/arithmetic/bininst_logical_imm_static",
+  "ut/isa/isa_static/arithmetic/bininst_shifts_imm_static",
+  "ut/isa/isa_static/arithmetic/bininst_shifts_static",
+  "ut/isa/isa_static/arithmetic/bininst_static",
+  "ut/isa/isa_static/arithmetic/unaryinst_static",
+  "ut/isa/isa_static/arrays/load_array",
+  "ut/isa/isa_static/arrays/load_const_array",
+  "ut/isa/isa_static/arrays/new_array",
+  "ut/isa/isa_static/arrays/store_array",
+  "ut/isa/isa_static/arrays/store_array_wide",
+  "ut/isa/isa_static/arrays/len_array",
+  "ut/isa/isa_static/cast/cast_static",
+  "ut/isa/isa_static/cast/checkcast_static",
+  "ut/isa/isa_static/cast/target_type_static",
+  "ut/isa/isa_static/call/call_static_static",
+  "ut/isa/isa_static/call/call_virtual_static",
+  "ut/isa/isa_static/catchphi/catchphi_static",
+  "ut/isa/isa_static/cmp/create_cmp_static",
+  "ut/isa/isa_static/load_string/load_string_static",
+  "ut/isa/isa_static/load_undefined/load_undefined_static",
+  "ut/isa/isa_static/equals/equals_static",
+  "ut/isa/isa_static/get_opcode/get_opcode_static",
+  "ut/isa/isa_static/is_instance/is_instance_static",
+  "ut/isa/isa_static/is_undefined/is_undefined_static",
+  "ut/isa/isa_static/create_if/create_if_static",
+  "ut/isa/isa_static/objects/objects",
+  "ut/isa/isa_static/throw/throw_static",
+  "ut/isa/isa_static/classes/classes_api",
+  "ut/isa/isa_static/return/return_static",
+  "ut/isa/isa_static/create_nullptr/create_nullptr_static",
+
+  "ut/ir_core/graph/graph_static",
+  "ut/ir_core/inst_manipulation/inst_manipulation_static",
+  "ut/ir_core/basic_blocks/basic_blocks_static",
+  "ut/ir_core/graph_basic_block/graph_basic_block",
+  "ut/ir_core/create_constant/create_constant_static",
+  "ut/ir_core/string/string_static",
+  "ut/ir_core/method/method_static",
+  "ut/ir_core/inst_inputs/inst_inputs_static",
+  "ut/ir_core/types_api/get_type_static",
+  "ut/ir_core/get_constant_value/get_constant_value_static",
+  "ut/ir_core/phi/phi_static",
+  "ut/ir_core/loops/loop_static",
+  "ut/ir_core/insert_try_catch/insert_try_catch_static",
+  "ut/ir_core/graph_verifier/graph_verifier",
+
+  "internal/implementation_api/abc_static",
+  "internal/mem_manager/abc_static_1",
+  "internal/mem_manager/abc_static_2",
+
+  "wrong_mode_tests/mode_test_static",
+
+  "scenarios/add_log/add_log_static",
+  "scenarios/parameter_check/parameter_check_static",
+  "scenarios/replace_callsite/replace_callsite_static",
+  "scenarios/api_scanner/static/api_scanner_static",
+  "scenarios/static_branch_elimination/static_branch_elimination",
+  "scenarios_c_api_clean/add_log_arkts2/add_log_static",
+  "ut/extensions/arkts/modify_api/modules/modules_static_modify",
+]
+
+module_output_path = "arkcompiler/runtime_core/libabckit"
+
+foreach(file, test_js_files) {
+  test_js = "${test_js_path}${file}.js"
+  test_merge_file = "$target_out_dir/${file}_merge.txt"
+  test_abc = "$target_out_dir/${file}.abc"
+
+  create_merge_file("${file}_merge") {
+    input_file = "$test_js"
+    output_file = "$test_merge_file"
+  }
+  es2abc_gen_abc("gen_${file}_abc") {
+    # Only targets in this file can depend on this.
+    extra_visibility = [ ":*" ]
+    extra_dependencies = [ ":${file}_merge" ]
+    src_js = "@" + rebase_path(test_merge_file)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--module",
+      "--merge-abc",
+    ]
+
+    in_puts = [ test_js ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, test_ts_files) {
+  test_ts = "${test_js_path}${file}.ts"
+  test_merge_file = "$target_out_dir/${file}_merge.txt"
+  test_abc = "$target_out_dir/${file}.abc"
+
+  create_merge_file("${file}_merge") {
+    input_file = "$test_ts"
+    output_file = "$test_merge_file"
+  }
+  es2abc_gen_abc("gen_${file}_abc") {
+    # Only targets in this file can depend on this.
+    extra_visibility = [ ":*" ]
+    extra_dependencies = [ ":${file}_merge" ]
+    src_js = "@" + rebase_path(test_merge_file)
+    dst_file = rebase_path(test_abc)
+    extra_args = [
+      "--module",
+      "--merge-abc",
+      "--enable-annotations",
+    ]
+
+    extension = "ts"
+    in_puts = [ test_ts ]
+    out_puts = [ test_abc ]
+  }
+}
+
+foreach(file, test_ets_files) {
+  ets2abc_gen_abc("gen_${file}_abc") {
+    test_ets = "${test_js_path}${file}.sts"
+    test_abc = "$target_out_dir/${file}.abc"
+
+    # Only targets in this file can depend on this.
+    extra_visibility = [ ":*" ]
+    src_ets = rebase_path(test_ets)
+    dst_file = rebase_path(test_abc)
+
+    in_puts = [ test_ets ]
+    out_puts = [ test_abc ]
+  }
+}
+
+template("libabckit_host_unittest_action") {
+  _target_name_ = "${target_name}"
+
+  # unittest for phone running
+  ohos_unittest(_target_name_) {
+    forward_variables_from(invoker, "*")
+  }
+
+  _module_out_path_ = invoker.module_out_path
+
+  # unittest for host running
+  action("${_target_name_}Action") {
+    testonly = true
+
+    defines = [ "HOST_UT" ]
+
+    _host_test_target_ = ":${_target_name_}(${host_toolchain})"
+    _root_out_dir_ = get_label_info(_host_test_target_, "root_out_dir")
+
+    deps = [ _host_test_target_ ]
+
+    script = "$ark_root/libabckit/scripts/run_script.sh"
+
+    args = [
+      "--script=" + rebase_path(_root_out_dir_) +
+          "/tests/unittest/${_module_out_path_}/${_target_name_}",
+      "--ret-code=0",
+      "--env=LD_LIBRARY_PATH=" + rebase_path(_root_out_dir_) +
+          "/arkcompiler/runtime_core:" + rebase_path(_root_out_dir_) +
+          "/arkcompiler/ets_runtime:" + rebase_path(_root_out_dir_) +
+          "/thirdparty/icu:" + rebase_path(_root_out_dir_) +
+          "/thirdparty/zlib:",
+    ]
+
+    if (libabckit_with_sanitizers) {
+      args += [ "--env=ASAN_OPTIONS=verify_asan_link_order=0" ]
+      args += [ "--env=LSAN_OPTIONS=suppressions=" + rebase_path("$ark_root") +
+                "/libabckit/tests/sanitizers/ignored_leaks.supp" ]
+    }
+
+    print(script, string_join(" ", args))
+
+    inputs = [
+      "$_root_out_dir_/tests/unittest/${_module_out_path_}/${_target_name_}",
+    ]
+    outputs = [ "$target_out_dir/${_target_name_}/" ]
+  }
+}
+
+libabckit_host_unittest_action("AbcKitTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "cpp/tests/cpp_test.cpp",
+    "helpers/helpers.cpp",
+    "helpers/helpers_mode.cpp",
+    "helpers/helpers_nullptr.cpp",
+    "helpers/helpers_wrong_ctx.cpp",
+    "helpers/visit_helper/visit_helper.cpp",
+    "internal/ICSlotAllocator/ICSlotAllocator.cpp",
+    "internal/implementation_api/abc_stuff.cpp",
+    "internal/implementation_api/graph_stuff.cpp",
+    "internal/mem_manager/several_abc.cpp",
+    "null_args_tests/null_args_tests_ApiImpl_0.cpp",
+    "null_args_tests/null_args_tests_ArktsInspectApiImpl_0.cpp",
+    "null_args_tests/null_args_tests_ArktsModifyApiImpl_0.cpp",
+    "null_args_tests/null_args_tests_GraphApiImpl_0.cpp",
+    "null_args_tests/null_args_tests_InspectApiImpl_0.cpp",
+    "null_args_tests/null_args_tests_IsaApiDynamicImpl_0.cpp",
+    "null_args_tests/null_args_tests_IsaApiDynamicImpl_1.cpp",
+    "null_args_tests/null_args_tests_IsaApiStaticImpl_0.cpp",
+    "null_args_tests/null_args_tests_JsInspectApiImpl_0.cpp",
+    "null_args_tests/null_args_tests_JsModifyApiImpl_0.cpp",
+    "null_args_tests/null_args_tests_ModifyApiImpl_0.cpp",
+    "scenarios/add_log/add_log_dynamic_test.cpp",
+    "scenarios/add_log/add_log_static_test.cpp",
+    "scenarios/add_try_catch/dynamic/add_try_catch_test.cpp",
+    "scenarios/api_scanner/dynamic/api_scanner.cpp",
+    "scenarios/api_scanner/dynamic/api_scanner_test.cpp",
+    "scenarios/api_scanner/static/api_scanner_static.cpp",
+    "scenarios/branch_eliminator/dynamic/branch_eliminator.cpp",
+    "scenarios/branch_eliminator/dynamic/branch_eliminator_test.cpp",
+    "scenarios/parameter_check/dynamic/api_modifier.cpp",
+    "scenarios/parameter_check/dynamic/parameter_check_test.cpp",
+    "scenarios/parameter_check/parameter_check_static.cpp",
+    "scenarios/replace_call_site/dynamic/replace_call_site_test.cpp",
+    "scenarios/replace_callsite/replace_callsite_static.cpp",
+    "scenarios/router_table/dynamic/router_table_test.cpp",
+    "scenarios/scan_subclasses/dynamic/scan_subclasses_test.cpp",
+    "scenarios/scan_subclasses/dynamic/subclasses_scanner.cpp",
+    "scenarios/static_branch_elimination/static_branch_elimination.cpp",
+    "scenarios_c_api_clean/add_log_arkts2/add_log_static_test.cpp",
+    "scenarios_c_api_clean/add_log_js/add_log_dynamic_test.cpp",
+    "ut/extensions/arkts/inspect_api/api_casts/api_casts.cpp",
+    "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
+    "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",
+    "ut/extensions/arkts/modify_api/annotations/annotations_test.cpp",
+    "ut/extensions/arkts/modify_api/modules/modules_dynamic_modify_test.cpp",
+    "ut/extensions/js/inspect_api/api_casts/api_casts.cpp",
+    "ut/extensions/js/inspect_api/enumerators/modules_test.cpp",
+    "ut/extensions/js/inspect_api/modules/modules_dynamic_test.cpp",
+    "ut/extensions/js/modify_api/arrays/array_modify_test.cpp",
+    "ut/extensions/js/modify_api/bigint/load_bigint_test.cpp",
+    "ut/extensions/js/modify_api/copy/copy_modify_test.cpp",
+    "ut/extensions/js/modify_api/modules/modules_dynamic_modify_test.cpp",
+    "ut/extensions/js/modify_api/obj/obj_modify.cpp",
+    "ut/extensions/js/modify_api/patch/patch_modify.cpp",
+    "ut/extensions/js/modify_api/super_this/super_this_modify.cpp",
+    "ut/ir_core/basic_blocks/basic_blocks_dynamic.cpp",
+    "ut/ir_core/basic_blocks/basic_blocks_static.cpp",
+    "ut/ir_core/create_constant/create_constant_dynamic.cpp",
+    "ut/ir_core/create_constant/create_constant_static.cpp",
+    "ut/ir_core/get_constant_value/get_constant_value.cpp",
+    "ut/ir_core/graph/graph.cpp",
+    "ut/ir_core/graph_basic_block/graph_basic_block_dynamic.cpp",
+    "ut/ir_core/graph_basic_block/graph_basic_block_static.cpp",
+    "ut/ir_core/graph_verifier/graph_verifier.cpp",
+    "ut/ir_core/insert_try_catch/insert_try_catch_dynamic.cpp",
+    "ut/ir_core/insert_try_catch/insert_try_catch_static.cpp",
+    "ut/ir_core/inst_inputs/inst_inputs_test.cpp",
+    "ut/ir_core/inst_manipulation/inst_manipulation.cpp",
+    "ut/ir_core/loops/loops.cpp",
+    "ut/ir_core/method/method_dynamic.cpp",
+    "ut/ir_core/method/method_static.cpp",
+    "ut/ir_core/phi/phi.cpp",
+    "ut/ir_core/string/string_dynamic.cpp",
+    "ut/ir_core/string/string_static.cpp",
+    "ut/ir_core/types_api/get_type_dynamic.cpp",
+    "ut/ir_core/types_api/get_type_static.cpp",
+    "ut/isa/isa_dynamic/apply/apply_dynamic.cpp",
+    "ut/isa/isa_dynamic/arithmetic/bininst_dynamic.cpp",
+    "ut/isa/isa_dynamic/arithmetic/bininst_logical_dynamic.cpp",
+    "ut/isa/isa_dynamic/arithmetic/bininst_shifts_dynamic.cpp",
+    "ut/isa/isa_dynamic/arithmetic/helpers_arithmetic.cpp",
+    "ut/isa/isa_dynamic/arithmetic/unaryinst_dynamic.cpp",
+    "ut/isa/isa_dynamic/arrays/create_array_dynamic.cpp",
+    "ut/isa/isa_dynamic/async/async_dynamic.cpp",
+    "ut/isa/isa_dynamic/call_runtime/call_runtime_dynamic.cpp",
+    "ut/isa/isa_dynamic/catchphi/catchphi_dynamic.cpp",
+    "ut/isa/isa_dynamic/create/createdebugger.cpp",
+    "ut/isa/isa_dynamic/create/createobjectwithbuffer_dynamic.cpp",
+    "ut/isa/isa_dynamic/create/createobjectwithexcludedkeys_dynamic.cpp",
+    "ut/isa/isa_dynamic/create_if/create_if_dynamic.cpp",
+    "ut/isa/isa_dynamic/define/defineclasswithbuffer_dynamic.cpp",
+    "ut/isa/isa_dynamic/define/definefieldbyname_dynamic.cpp",
+    "ut/isa/isa_dynamic/define/definefieldruntime_dynamic.cpp",
+    "ut/isa/isa_dynamic/define/definefunc_dynamic.cpp",
+    "ut/isa/isa_dynamic/define/definegettersetterbyvalue_dynamic.cpp",
+    "ut/isa/isa_dynamic/define/definemethod_dynamic.cpp",
+    "ut/isa/isa_dynamic/dyn_call/call_dynamic.cpp",
+    "ut/isa/isa_dynamic/dyn_call_this/call_this_dynamic.cpp",
+    "ut/isa/isa_dynamic/generators/creategeneratorobj_dynamic.cpp",
+    "ut/isa/isa_dynamic/get_insts/getnextpropname_dynamic.cpp",
+    "ut/isa/isa_dynamic/get_insts/getresumemode_dynamic.cpp",
+    "ut/isa/isa_dynamic/get_insts/gettemplateobject_dynamic.cpp",
+    "ut/isa/isa_dynamic/get_insts/getunmappedargs_dynamic.cpp",
+    "ut/isa/isa_dynamic/import/dynamicimport_dynamic.cpp",
+    "ut/isa/isa_dynamic/instanceof/instanceof_dynamic.cpp",
+    "ut/isa/isa_dynamic/isin/isin_dynamic.cpp",
+    "ut/isa/isa_dynamic/iterators/createiterresultobj_dynamic.cpp",
+    "ut/isa/isa_dynamic/iterators/getiterator_dynamic.cpp",
+    "ut/isa/isa_dynamic/iterators/getpropiterator_dynamic.cpp",
+    "ut/isa/isa_dynamic/lexenv/lexenv_dynamic.cpp",
+    "ut/isa/isa_dynamic/load_string/load_string_dynamic.cpp",
+    "ut/isa/isa_dynamic/loadstore/ld_dynamic.cpp",
+    "ut/isa/isa_dynamic/loadstore/loadstore.cpp",
+    "ut/isa/isa_dynamic/modules/isa_dynamic_modules.cpp",
+    "ut/isa/isa_dynamic/objects/objects_dynamic.cpp",
+    "ut/isa/isa_dynamic/return/return_dynamic.cpp",
+    "ut/isa/isa_dynamic/sendable/sendable_dynamic.cpp",
+    "ut/isa/isa_dynamic/supercall/supercall_dynamic.cpp",
+    "ut/isa/isa_dynamic/testin/testin_dynamic.cpp",
+    "ut/isa/isa_dynamic/throw/throw_dynamic.cpp",
+    "ut/isa/isa_static/arithmetic/bininst_imm_static.cpp",
+    "ut/isa/isa_static/arithmetic/bininst_logical_imm_static.cpp",
+    "ut/isa/isa_static/arithmetic/bininst_logical_static.cpp",
+    "ut/isa/isa_static/arithmetic/bininst_shifts_imm_static.cpp",
+    "ut/isa/isa_static/arithmetic/bininst_shifts_static.cpp",
+    "ut/isa/isa_static/arithmetic/bininst_static.cpp",
+    "ut/isa/isa_static/arithmetic/unaryinst_static.cpp",
+    "ut/isa/isa_static/arrays/arrays_static.cpp",
+    "ut/isa/isa_static/call/call_static_static.cpp",
+    "ut/isa/isa_static/call/call_virtual_static.cpp",
+    "ut/isa/isa_static/cast/cast_static.cpp",
+    "ut/isa/isa_static/catchphi/catchphi_static.cpp",
+    "ut/isa/isa_static/classes/classes_api.cpp",
+    "ut/isa/isa_static/cmp/create_cmp_static.cpp",
+    "ut/isa/isa_static/create_if/create_if_static.cpp",
+    "ut/isa/isa_static/create_nullptr/create_nullptr_static.cpp",
+    "ut/isa/isa_static/equals/equals_static.cpp",
+    "ut/isa/isa_static/get_opcode/get_opcode_static.cpp",
+    "ut/isa/isa_static/is_instance/is_instance.cpp",
+    "ut/isa/isa_static/is_undefined/is_undefined.cpp",
+    "ut/isa/isa_static/load_string/load_string_static.cpp",
+    "ut/isa/isa_static/load_undefined/load_undefined_static.cpp",
+    "ut/isa/isa_static/objects/objects.cpp",
+    "ut/isa/isa_static/return/return_static.cpp",
+    "ut/isa/isa_static/throw/throw_static.cpp",
+    "ut/metadata_core/inspect_api/annotations/annotations_test.cpp",
+    "ut/metadata_core/inspect_api/classes/classes_test.cpp",
+    "ut/metadata_core/inspect_api/enumerators/modules_test.cpp",
+    "ut/metadata_core/inspect_api/files/files_test.cpp",
+    "ut/metadata_core/inspect_api/literals/literals_test.cpp",
+    "ut/metadata_core/inspect_api/methods/methods_test.cpp",
+    "ut/metadata_core/inspect_api/modules/modules_dynamic_test.cpp",
+    "ut/metadata_core/inspect_api/namespaces/namespaces_test.cpp",
+    "ut/metadata_core/inspect_api/strings/strings_test.cpp",
+    "ut/metadata_core/inspect_api/types/types_test.cpp",
+    "ut/metadata_core/inspect_api/values/values_test.cpp",
+    "ut/metadata_core/modify_api/literals/literals_test.cpp",
+    "ut/metadata_core/modify_api/strings/strings_test.cpp",
+    "ut/metadata_core/modify_api/types/types_test.cpp",
+    "ut/metadata_core/modify_api/values/values_test.cpp",
+
+    # "wrong_ctx_tests/wrong_ctx_tests_ApiImpl_0.cpp",
+    # "wrong_ctx_tests/wrong_ctx_tests_ArktsInspectApiImpl_0.cpp",
+    # "wrong_ctx_tests/wrong_ctx_tests_ArktsModifyApiImpl_0.cpp",
+    "wrong_ctx_tests/wrong_ctx_tests_GraphApiImpl_0.cpp",
+
+    # "wrong_ctx_tests/wrong_ctx_tests_InspectApiImpl_0.cpp",
+    "wrong_ctx_tests/wrong_ctx_tests_IsaApiDynamicImpl_0.cpp",
+    "wrong_ctx_tests/wrong_ctx_tests_IsaApiDynamicImpl_1.cpp",
+    "wrong_ctx_tests/wrong_ctx_tests_IsaApiStaticImpl_0.cpp",
+    "wrong_ctx_tests/wrong_ctx_tests_ModifyApiImpl_0.cpp",
+    "wrong_mode_tests/wrong_mode_tests_IsaApiDynamicImpl_0.cpp",
+    "wrong_mode_tests/wrong_mode_tests_IsaApiDynamicImpl_1.cpp",
+    "wrong_mode_tests/wrong_mode_tests_IsaApiStaticImpl_0.cpp",
+  ]
+
+  include_dirs = [
+    "$ark_root",
+    "$ark_root/libabckit",
+    "$ark_root/libabckit/include",
+    "$ark_root/libabckit/src",
+    "$ark_root/libabckit/tests",
+  ]
+
+  configs = [ "$ark_root/libabckit:libabckit_config" ]
+
+  deps = [
+    ":abckit_ets_vm_helpers",
+    ":abckit_js_vm_helpers",
+    "$ark_root/libabckit:libabckit",
+  ]
+
+  foreach(file, test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, test_ts_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, test_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  if (is_ohos && is_standard_system) {
+    test_abc_dir = "/data/test"
+  } else {
+    test_abc_dir = rebase_path(target_out_dir)
+  }
+
+  test_js_dir = rebase_path(test_js_path)
+
+  defines = [
+    "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
+    "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+  ]
+}
+
+group("abckit_stress_test_package") {
+  deps = [
+    "$ark_root/libabckit/abckit:abckit(${host_toolchain})",
+    "$ark_root/libabckit/abckit/stress_plugin:abckit_stress_plugin(${host_toolchain})",
+    "$ark_root/static_core/verification/verifier:verifier_bin(${host_toolchain})",
+  ]
+}
+
+action("abckit_stress_test") {
+  deps = [ ":abckit_stress_test_package" ]
+
+  outputs = [ "$target_gen_dir/abckit_stress_test.txt" ]
+
+  script = "stress/stress.py"
+}
+
+group("unittest") {
+  testonly = true
+  if (enable_libabckit) {
+    deps = [
+      ":AbcKitTest",
+      ":abckit_stress_test",
+    ]
+  }
+}
+
+group("host_unittest") {
+  testonly = true
+  if (enable_libabckit) {
+    deps = [
+      ":AbcKitTestAction",
+      ":abckit_stress_test",
+    ]
+  }
+}
+
+ohos_source_set("abckit_js_vm_helpers") {
+  sources = [ "helpers/helpers_js_runtime.cpp" ]
+
+  deps = [ "$ark_root/assembler:libarkassembler" ]
+
+  if (ark_standalone_build) {
+    deps += [ "$js_root:libark_jsruntime_test_set" ]
+  }
+
+  output_extension = "so"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}
+
+ohos_source_set("abckit_ets_vm_helpers") {
+  sources = [ "helpers/helpers_ets_runtime.cpp" ]
+
+  include_dirs = [
+    "$ark_root",
+    "$ark_root/libabckit/src",
+  ]
+
+  etsstdlib =
+      rebase_path(get_label_info("$ark_root/static_core/plugins/ets:etsstdlib",
+                                 "target_gen_dir")) + "/etsstdlib.abc"
+  defines = [ "ABCKIT_ETS_STD_LIB=\"${etsstdlib}\"" ]
+
+  deps = [
+    "$ark_root/static_core/plugins/ets:etsstdlib",
+    "$ark_root/static_core/runtime:libarkruntime",
+  ]
+
+  output_extension = "so"
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
+}

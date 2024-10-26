@@ -20,19 +20,23 @@
     %   acc_read = inst.acc_read?
     BuildLaunch<Opcode::<%= is_virtual ? 'CallLaunchVirtual' : 'CallLaunchStatic' %>, <%= is_range ? 'true' : 'false' %>, <%= acc_read %>>(instruction);
     % when "LDOBJ"
-    BuildLdObjByName(instruction, <%= get_type(inst.dtype) %>);
+    if (graph_->IsAbcKit()) {
+      BuildLdObjByName<true>(instruction, <%= get_type(inst.dtype) %>);
+    } else {
+      BuildLdObjByName<false>(instruction, <%= get_type(inst.dtype) %>);
+    }
     % when "STOBJ"
-    BuildStObjByName(instruction, <%= get_type(inst.type(0)) %>);
+    if (graph_->IsAbcKit()) {
+      BuildStObjByName<true>(instruction, <%= get_type(inst.type(0)) %>);
+    } else {
+      BuildStObjByName<false>(instruction, <%= get_type(inst.type(0)) %>);
+    }
     % when "LDUNDEFINED"
     UpdateDefinitionAcc(graph_->GetOrCreateUndefinedInst());
     % when "MOVUNDEFINED"
     UpdateDefinition(instruction->GetVReg<<%=inst.get_format%>, 0>(), graph_->GetOrCreateUndefinedInst());
     % when "ISUNDEFINED"
-    auto undef_inst = graph_->GetOrCreateUndefinedInst();
-    auto cmp_inst = graph_->CreateInstCompare(DataType::BOOL, GetPc(instruction->GetAddress()), GetDefinitionAcc(),
-                                              undef_inst, DataType::REFERENCE, ConditionCode::CC_EQ);
-    AddInstruction(cmp_inst);
-    UpdateDefinitionAcc(cmp_inst);
+    BuildIsUndefined(instruction);
     % when "EQUALS"
     BuildEquals(instruction);
     % else

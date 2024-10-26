@@ -14,6 +14,8 @@ tags
 .byebug_history
 .cache
 *.swp
+libabckit/node_modules
+libabckit/package-lock.json
 static_core/build
 static_core/plugins/ecmascript
 static_core/plugins/ets/tools/declgen_ts2ets/build

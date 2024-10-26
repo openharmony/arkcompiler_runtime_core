@@ -149,6 +149,7 @@ static_core/plugins/ets/tests/sts_ts_subset/std/core/Promise*                 @i
 /disassembler/ @ctw-ian
 /isa/ @ctw-ian
 /ldscripts/ @gitee-dakeQI
+/libabckit/ @ivagin @nazarovkonstantin
 /libark_defect_scan_aux/ @gitee-dakeQI
 /libpandabase/ @gitee-dakeQI
 /libpandafile/ @gitee-dakeQI

@@ -92,11 +92,11 @@
         ASSERT_DO(cond, func);          \
     }
 // CC-OFFNXT(G.PRE.02) should be with define
-#define CHECKER_DO_IF_NOT_AND_PRINT_VISITOR(visitor, klass, cond, func) \
-    if (reinterpret_cast<klass>(visitor)->GetGraph()->IsAbcKit()) {     \
-        ABCKIT_DO_IF_NOT_VISITOR(visitor, (cond), func);                \
-    } else {                                                            \
-        ASSERT_DO(cond, func);                                          \
+#define CHECKER_DO_IF_NOT_VISITOR_INTERNAL(visitor, klass, cond, func) \
+    if (reinterpret_cast<klass>(visitor)->GetGraph()->IsAbcKit()) {    \
+        ABCKIT_DO_IF_NOT_VISITOR(visitor, (cond), func);               \
+    } else {                                                           \
+        ASSERT_DO(cond, func);                                         \
     }
 
 // CC-OFFNXT(G.PRE.02) should be with define

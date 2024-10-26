@@ -252,6 +252,7 @@ public:
         auto *header = GetHeader();
         Span file(GetBase(), header->file_size);
         ASSERT(index_header != nullptr);
+        // NOLINTNEXTLINE(clang-analyzer-core.NullDereference)
         auto method_idx_size = index_header->method_idx_size * EntityId::GetSize();
         ThrowIfWithCheck(index_header->method_idx_off > header->file_size || method_idx_size > header->file_size ||
             index_header->method_idx_off > header->file_size - method_idx_size, File::INVALID_INDEX_HEADER,

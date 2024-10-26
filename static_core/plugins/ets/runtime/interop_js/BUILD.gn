@@ -12,7 +12,12 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
-import("//build/ohos.gni")
+
+if (ark_standalone_build) {
+  import("$build_root/ark.gni")
+} else {
+  import("//build/ohos.gni")
+}
 
 if (is_ohos && is_standard_system) {
   ohos_prebuilt_etc("etsstdlib_install") {

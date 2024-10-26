@@ -187,7 +187,7 @@ if (!is_mac) {
 
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
-if (enable_libabckit) {
+if (enable_libabckit && current_toolchain == host_toolchain) {
   libabckit_path = "$ark_root/../libabckit"
   libabckit_deps = [ "$libabckit_path/src/templates/abckit_intrinsics:ark_gen_libabckit_inst_builder_abckit_intrinsics_inc" ]
   libabckit_includes = [

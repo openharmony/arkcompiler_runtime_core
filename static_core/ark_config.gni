@@ -48,6 +48,10 @@ declare_args() {
   } else {
     ark_ets_interop_js = false
   }
+
+  if (ark_static_standalone_build) {
+    enable_libabckit = false
+  }
 }
 
 declare_args() {
@@ -83,7 +87,6 @@ ark_isa_yaml = "$isa_gen_dir/isa.yaml"
 
 enable_irtoc = true
 enable_codegen = true
-enable_libabckit = false
 if (ark_standalone_build || (!ark_static_standalone_build &&
                              (target_cpu == "x64" || target_cpu == "x86_64"))) {
   enable_irtoc = false
@@ -146,6 +149,8 @@ if (ark_static_standalone_build) {
   # For OpenHarmony build, always link with the static lib:
   sdk_libc_secshared_dep = "bounds_checking_function:libsec_static"
   sdk_libc_secshared_ext_dep = "bounds_checking_function:libsec_static"
+  sdk_libc_secshared_config =
+      "$ark_third_party_root/bounds_checking_function:libsec_public_config"
 }
 
 is_mob = !is_ohos && !is_linux && !is_mingw && !is_mac &&
@@ -395,18 +400,41 @@ template("es2panda_gen") {
     es2panda_root_out =
         get_label_info("$ark_es2panda_root/aot:ets2panda(${host_toolchain})",
                        "root_out_dir")
-    if (ark_static_standalone_build || ark_standalone_build) {
-      deps = [ "$ark_es2panda_root/aot:ets2panda" ]
-      es2panda_bin = "/bin/es2panda"
-    } else {
-      external_deps = [ "ets_frontend:ets2panda(${host_toolchain})" ]
-      es2panda_bin = "/arkcompiler/ets_frontend/es2panda"
-    }
-
-    script = es2panda_root_out + es2panda_bin
 
     inputs = invoker.inputs
     outputs = invoker.outputs
-    args = invoker.args
+
+    if (ark_static_standalone_build) {
+      deps = [ "$ark_es2panda_root/aot:ets2panda" ]
+      es2panda_bin = "/bin/es2panda"
+      script = es2panda_root_out + es2panda_bin
+      args = invoker.args
+    } else {
+      if (ark_standalone_build) {
+        deps = [ "$ark_es2panda_root/aot:ets2panda" ]
+      } else {
+        external_deps = [ "ets_frontend:ets2panda(${host_toolchain})" ]
+      }
+      es2panda_bin =
+          rebase_path("${es2panda_root_out}/arkcompiler/ets_frontend/es2panda")
+      script = "//arkcompiler/ets_runtime/script/run_ark_executable.py"
+      if (defined(invoker.sources)) {
+        sources = invoker.sources
+      }
+      args = [
+        "--script-file",
+        es2panda_bin,
+        "--script-args",
+        string_join(" ", invoker.args),
+        "--env-path",
+        rebase_path("${es2panda_root_out}/arkcompiler/runtime_core/") + ":" +
+            rebase_path("${es2panda_root_out}/arkcompiler/ets_frontend/") +
+            ":" + rebase_path("${es2panda_root_out}/arkcompiler/ets_runtime/") +
+            ":" + rebase_path("${es2panda_root_out}/thirdparty/zlib/") + ":" +
+            rebase_path("${es2panda_root_out}/thirdparty/icu/"),
+        "--expect-output",
+        "0",
+      ]
+    }
   }
 }

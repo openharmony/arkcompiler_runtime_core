@@ -120,6 +120,7 @@ group("ark_host_tests") {
 config("ark_config") {
   if (!ark_static_standalone_build) {
     visibility = [
+      "$abckit_root/*",
       "$ark_es2panda_root:libes2panda",
       "$ark_es2panda_root:libes2panda_frontend_static",
       "$ark_es2panda_root:libes2panda_public",
