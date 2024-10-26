@@ -800,6 +800,7 @@ bool File::ValidateChecksum(uint32_t *cal_checksum_out) const
 void File::ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::string_view& tag) const
 {
     if (UNLIKELY(cond)) {
+#ifndef SUPPORT_KNOWN_EXCEPTION
         uint32_t cal_checksum = 0;
         bool is_checksum_match = ValidateChecksum(&cal_checksum);
         if (!is_checksum_match) {
@@ -813,7 +814,9 @@ void File::ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::s
         } else {
             LOG(FATAL, PANDAFILE) << msg;
         }
+#else
+        throw helpers::FileAccessException(msg);
+#endif
     }
 }
-
 }  // namespace panda::panda_file
