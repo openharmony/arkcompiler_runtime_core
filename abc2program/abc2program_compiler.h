@@ -38,11 +38,18 @@ public:
         std::string &record_name);
     bool CheckClassId(uint32_t class_id, size_t offset) const;
 
+    void SetBundleName(std::string bundle_name)
+    {
+        bundle_name_ = bundle_name;
+    }
+
 private:
     std::unique_ptr<const panda_file::File> file_;
     std::unique_ptr<panda_file::DebugInfoExtractor> debug_info_extractor_;
     // the single whole program compiled from the abc file, only used in non-parallel mode
     pandasm::Program *prog_ = nullptr;
+    // It should modify record name when the bundle_name_ is not empty
+    std::string bundle_name_ {};
 }; // class Abc2ProgramCompiler
 
 } // namespace panda::abc2program

@@ -53,8 +53,31 @@ std::string Abc2ProgramEntityContainer::GetFullRecordNameById(const panda_file::
     std::string name = GetStringById(class_id);
     pandasm::Type type = pandasm::Type::FromDescriptor(name);
     std::string record_full_name = type.GetName();
+    ModifyRecordName(record_full_name);
     record_full_name_map_.emplace(class_id_offset, record_full_name);
     return record_full_name;
+}
+
+/**
+ * Support the inter-app hsp dependents bytecode har.
+ * The record name format: <bundleName>&<normalizedImportPath>&<version>
+ * The ohmurl specs that must have bundleName in inter-app package. The records need compile into the inter-app
+ * hsp package. So the recordNames need to add bundleName in front when the abc-file as input for the
+ * inter-app hsp package.
+ */
+void Abc2ProgramEntityContainer::ModifyRecordName(std::string &record_name)
+{
+    if (bundle_name_.empty()) {
+        return;
+    }
+    if (IsSourceFileRecord(record_name)) {
+        record_name = bundle_name_ + record_name;
+    }
+}
+
+bool Abc2ProgramEntityContainer::IsSourceFileRecord(const std::string& record_name)
+{
+    return record_name.find(NORMALIZED_OHMURL_SEPARATOR) == 0;
 }
 
 std::string Abc2ProgramEntityContainer::GetFullMethodNameById(const panda_file::File::EntityId &method_id)
