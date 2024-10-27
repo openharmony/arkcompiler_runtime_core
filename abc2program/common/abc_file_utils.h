@@ -39,6 +39,7 @@ constexpr std::string_view CONCURRENT_MODULE_REQUEST_RECORD_NAME = "_ESConcurren
 constexpr std::string_view SLOT_NUMBER_ANN_RECORD_TYPE_DESCRIPTOR = "L_ESSlotNumberAnnotation;";
 constexpr std::string_view SLOT_NUMBER_RECORD_NAME = "_ESSlotNumberAnnotation";
 constexpr std::string_view DOT = ".";
+constexpr char NORMALIZED_OHMURL_SEPARATOR = '&';
 
 // attribute constant
 constexpr std::string_view ABC_ATTR_EXTERNAL = "external";
