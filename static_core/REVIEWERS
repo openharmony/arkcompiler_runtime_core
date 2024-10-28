@@ -54,25 +54,30 @@ static_core/tests/                    @Prof1983
 static_core/tests/cts-*               @igelhaus
 static_core/tests/irtoc-interpreter-* @igelhaus
 static_core/verification/             @igelhaus
-static_core/docs/coroutines/                  @dmitriitr
-static_core/docs/diagrams/                    @dmitriitr
-static_core/libpandabase/os/*mem*             @dmitriitr @udav
-static_core/platforms/**/*mem*                @dmitriitr @udav
-static_core/runtime/arch/                     @Prof1983
-static_core/runtime/bridge/                   @Prof1983
-static_core/runtime/coroutines/               @dmitriitr @konstanting
-static_core/runtime/entrypoints/              @Prof1983
-static_core/runtime/entrypoints/entrypoints.* @mbolshov
-static_core/runtime/fibers/                   @konstanting
-static_core/runtime/jit/                      @Prof1983
-static_core/runtime/mem/                      @dmitriitr @udav
-static_core/runtime/tooling/                  @ragnvald
-static_core/scripts/clang-tidy/               @igelhaus @semenovaleksandr
-static_core/scripts/code_style/               @igelhaus @semenovaleksandr
-static_core/tests/benchmarks/                 @igelhaus
-static_core/tests/checked/                    @Prof1983
-static_core/tests/panda/                      @igelhaus
-static_core/tests/verifier-tests/             @igelhaus
+static_core/docs/coroutines/                             @dmitriitr
+static_core/docs/diagrams/                               @dmitriitr
+static_core/libpandabase/mem/                            @dmitriitr @udav
+static_core/libpandabase/os/*mem*                        @dmitriitr @udav
+static_core/libpandabase/tests/*mem*                     @udav
+static_core/platforms/**/*mem*                           @dmitriitr @udav
+static_core/runtime/arch/                                @Prof1983
+static_core/runtime/bridge/                              @Prof1983
+static_core/runtime/coroutines/                          @dmitriitr @konstanting
+static_core/runtime/entrypoints/                         @Prof1983
+static_core/runtime/entrypoints/entrypoints.*            @mbolshov
+static_core/runtime/fibers/                              @konstanting
+static_core/runtime/jit/                                 @Prof1983
+static_core/runtime/mem/                                 @dmitriitr @udav
+static_core/runtime/tooling/                             @ragnvald
+static_core/scripts/clang-tidy/                          @igelhaus @semenovaleksandr
+static_core/scripts/code_style/                          @igelhaus @semenovaleksandr
+static_core/tests/benchmarks/                            @igelhaus
+static_core/tests/checked/                               @Prof1983
+static_core/tests/panda/                                 @igelhaus
+static_core/tests/verifier-tests/                        @igelhaus
+static_core/libpandabase/tests/genmc/                    @udav
+static_core/libpandabase/tests/ringbuf/                  @udav
+static_core/libpandabase/tests/taskmanager/              @udav @molotkovmikhail
 static_core/plugins/ets/bytecode_optimizer/              @mbolshov
 static_core/plugins/ets/compiler/                        @Prof1983
 static_core/plugins/ets/irtoc_scripts/                   @Prof1983 @mbolshov

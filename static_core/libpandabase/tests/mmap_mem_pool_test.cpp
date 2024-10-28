@@ -37,6 +37,7 @@ public:
     NO_COPY_SEMANTIC(MMapMemPoolTest);
 
 protected:
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     MmapMemPool *CreateMMapMemPool(size_t objectPoolSize = 0, size_t internalSize = 0, size_t compilerSize = 0,
                                    size_t codeSize = 0U, size_t framesSize = 0U, size_t stacksSize = 0U)
     {
@@ -105,6 +106,7 @@ protected:
     }
 
 private:
+    // CC-OFFNXT(G.FUN.01-CPP) solid logic
     void SetupMemConfig(size_t objectPoolSize, size_t internalSize, size_t compilerSize, size_t codeSize,
                         size_t framesSize, size_t stacksSize)
     {

@@ -35,6 +35,7 @@ namespace ark {
 #define LOG_MMAP_MEM_POOL(level) LOG(level, MEMORYPOOL) << "MmapMemPool: "
 
 template <OSPagesAllocPolicy OS_ALLOC_POLICY>
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline Pool MmapPoolMap::PopFreePool(size_t size)
 {
     auto element = freePools_.lower_bound(size);
@@ -74,6 +75,7 @@ inline Pool MmapPoolMap::PopFreePool(size_t size)
 }
 
 template <OSPagesPolicy OS_PAGES_POLICY>
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline std::pair<size_t, OSPagesPolicy> MmapPoolMap::PushFreePool(Pool pool)
 {
     bool returnedToOs = OS_PAGES_POLICY == OSPagesPolicy::IMMEDIATE_RETURN;
@@ -145,6 +147,7 @@ inline size_t MmapPoolMap::GetAllSize() const
     return bytes;
 }
 
+// CC-OFFNXT(G.FUD.06) solid logic, ODR
 inline bool MmapPoolMap::HaveEnoughFreePools(size_t poolsNum, size_t poolSize) const
 {
     ASSERT(poolSize != 0);
@@ -160,6 +163,7 @@ inline bool MmapPoolMap::HaveEnoughFreePools(size_t poolsNum, size_t poolSize) c
     return false;
 }
 
+// CC-OFFNXT(G.FUD.06) solid logic, ODR
 inline MmapMemPool::MmapMemPool() : MemPool("MmapMemPool"), nonObjectSpacesCurrentSize_ {0}, nonObjectSpacesMaxSize_ {0}
 {
     ASSERT(static_cast<uint64_t>(mem::MemConfig::GetHeapSizeLimit()) <= PANDA_MAX_HEAP_SIZE);
@@ -271,6 +275,7 @@ inline MmapMemPool::~MmapMemPool()
 }
 
 template <class ArenaT, OSPagesAllocPolicy OS_ALLOC_POLICY>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline ArenaT *MmapMemPool::AllocArenaImpl(size_t size, SpaceType spaceType, AllocatorType allocatorType,
                                            const void *allocatorAddr)
 {
@@ -295,6 +300,7 @@ inline ArenaT *MmapMemPool::AllocArenaImpl(size_t size, SpaceType spaceType, All
 }
 
 template <class ArenaT, OSPagesPolicy OS_PAGES_POLICY>
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline void MmapMemPool::FreeArenaImpl(ArenaT *arena)
 {
     os::memory::LockHolder lk(lock_);
@@ -306,6 +312,7 @@ inline void MmapMemPool::FreeArenaImpl(ArenaT *arena)
     LOG_MMAP_MEM_POOL(DEBUG) << "Free arena call finished";
 }
 
+// CC-OFFNXT(G.FUD.06) solid logic, ODR
 inline void *MmapMemPool::AllocRawMemNonObjectImpl(size_t size, SpaceType spaceType)
 {
     ASSERT(!IsHeapSpace(spaceType));
@@ -333,6 +340,7 @@ inline void *MmapMemPool::AllocRawMemObjectImpl(size_t size, SpaceType type)
 }
 
 template <OSPagesAllocPolicy OS_ALLOC_POLICY>
+// CC-OFFNXT(G.FUD.06) perf critical, solid logic, ODR
 inline void *MmapMemPool::AllocRawMemImpl(size_t size, SpaceType type)
 {
     os::memory::LockHolder lk(lock_);
@@ -381,6 +389,7 @@ inline void MmapMemPool::FreeRawMemImpl(void *mem, size_t size)
 }
 
 template <OSPagesAllocPolicy OS_ALLOC_POLICY>
+// CC-OFFNXT(G.FUD.06, G.FUN.01-CPP) perf critical, solid logic
 inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType spaceType, AllocatorType allocatorType,
                                          const void *allocatorAddr)
 {
@@ -443,6 +452,7 @@ inline Pool MmapMemPool::AllocPoolUnsafe(size_t size, SpaceType spaceType, Alloc
 }
 
 template <OSPagesPolicy OS_PAGES_POLICY>
+// CC-OFFNXT(G.FUD.06) perf critical, solid logic, ODR
 inline void MmapMemPool::FreePoolUnsafe(void *mem, size_t size)
 {
     ASSERT(size == AlignUp(size, ark::os::mem::GetPageSize()));
@@ -518,6 +528,7 @@ inline void MmapMemPool::RemoveFromNonObjectPoolsMap(void *poolAddr)
     nonObjectMmapedPools_.erase(element);
 }
 
+// CC-OFFNXT(G.FUD.06) Splitting this function will degrade readability, solid logic, ODR
 inline std::tuple<Pool, AllocatorInfo, SpaceType> MmapMemPool::FindAddrInNonObjectPoolsMap(const void *addr) const
 {
     auto element = nonObjectMmapedPools_.lower_bound(addr);
@@ -630,6 +641,7 @@ inline bool MmapMemPool::ReleaseFreePagesToOSWithInterruption(const InterruptFla
     return wasInterrupted;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline bool MmapMemPool::ReleasePagesInUnreturnedPoolWithInterruption(const InterruptFlag &interruptFlag)
 {
     while (true) {
@@ -651,6 +663,7 @@ inline bool MmapMemPool::ReleasePagesInUnreturnedPoolWithInterruption(const Inte
     }
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline bool MmapMemPool::ReleasePagesInFreePoolsWithInterruption(const InterruptFlag &interruptFlag)
 {
     while (true) {
@@ -668,6 +681,7 @@ inline bool MmapMemPool::ReleasePagesInFreePoolsWithInterruption(const Interrupt
     }
 }
 
+// CC-OFFNXT(G.FUD.06) solid logic, ODR
 inline bool MmapMemPool::ReleasePagesInMainPoolWithInterruption(const InterruptFlag &interruptFlag)
 {
     while (true) {
