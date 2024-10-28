@@ -12,3 +12,19 @@
 # limitations under the License.
 
 js_root = "//arkcompiler/ets_runtime"
+
+if (!defined(ark_standalone_build)) {
+  ark_standalone_build = false
+}
+
+if (ark_standalone_build) {
+  import("//arkcompiler/toolchain/build/config/sanitizers/sanitizers.gni")
+  enable_arkplatform = false
+} else {
+  import("//build/config/sanitizers/sanitizers.gni")
+  enable_arkplatform = true
+}
+
+if (is_asan && use_hwasan) {
+  enable_arkplatform = false
+}

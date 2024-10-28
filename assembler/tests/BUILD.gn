@@ -82,8 +82,13 @@ host_unittest_action("AssemblerTest") {
     "$ark_root/libpandabase:libarkbase",
     "$ark_root/libpandafile:libarkfile",
     "$ark_root/libziparchive:libarkziparchive",
-    "//third_party/googletest:gtest_main",
   ]
+
+  if (ark_standalone_build) {
+    deps += [ "$build_root/third_party_gn/googletest:gtest_main" ]
+  } else {
+    deps += [ "//third_party/googletest:gtest_main" ]
+  }
 
   external_deps = [ sdk_libc_secshared_dep ]
   test_abc_dir = rebase_path(target_out_dir)
