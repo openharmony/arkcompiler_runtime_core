@@ -34,7 +34,7 @@ void Location::Dump(std::ostream &stm, Arch arch)
         case Kind::FP_REGISTER:
             if (IsUnallocatedRegister()) {
                 stm << GetName() << '?';
-            } else if (GetValue() == ACC_REG_ID) {
+            } else if (GetValue() == GetAccReg()) {
                 stm << "acc";
             } else {
                 stm << target.GetRegName(GetValue(), IsFpRegister());

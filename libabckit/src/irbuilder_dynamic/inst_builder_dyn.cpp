@@ -33,7 +33,7 @@ void InstBuilder::Prepare()
         auto paramInst = GetGraph()->AddNewParameter(i);
         auto type = compiler::DataType::Type::ANY;
         auto regNum = GetRuntime()->GetMethodRegistersCount(GetMethod()) + i;
-        ASSERT(!GetGraph()->IsBytecodeOptimizer() || regNum != ark::compiler::INVALID_REG);
+        ASSERT(!GetGraph()->IsBytecodeOptimizer() || regNum != ark::compiler::GetInvalidReg());
 
         paramInst->SetType(type);
         SetParamSpillFill(GetGraph(), paramInst, numArgs, i, type);
@@ -150,7 +150,7 @@ void InstBuilder::SetParamSpillFill(compiler::Graph *graph, compiler::ParameterI
                                     size_t i, compiler::DataType::Type type)
 {
     if (graph->IsBytecodeOptimizer()) {
-        auto regSrc = static_cast<compiler::Register>(compiler::VIRTUAL_FRAME_SIZE - numArgs + i);
+        auto regSrc = static_cast<compiler::Register>(compiler::GetFrameSize() - numArgs + i);
         compiler::DataType::Type regType;
         if (compiler::DataType::IsReference(type)) {
             regType = compiler::DataType::REFERENCE;

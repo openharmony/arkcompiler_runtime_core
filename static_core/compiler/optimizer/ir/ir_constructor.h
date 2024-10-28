@@ -125,7 +125,7 @@ public:
         auto inst = graph_->CreateInst(std::forward<Args>(args)...);
         inst->SetId(id);
         for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-            inst->SetSrcReg(i, INVALID_REG);
+            inst->SetSrcReg(i, GetInvalidReg());
         }
         currentInst_ = {id, inst};
         instMap_[id] = inst;
@@ -1470,7 +1470,7 @@ private:
     {
         for (auto bb : graph_->GetBlocksRPO()) {
             for (auto inst : bb->AllInsts()) {
-                if (inst->GetDstReg() == INVALID_REG || inst->IsOperandsDynamic()) {
+                if (inst->GetDstReg() == GetInvalidReg() || inst->IsOperandsDynamic()) {
                     continue;
                 }
                 for (size_t i = 0; i < inst->GetInputsCount(); i++) {

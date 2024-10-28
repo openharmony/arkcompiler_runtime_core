@@ -40,11 +40,11 @@ Register UseTable::GetNextUseOnFixedLocation(const Inst *inst, LifeNumber ln) co
 {
     auto it = table_.find(inst);
     if (it == table_.end()) {
-        return INVALID_REG;
+        return GetInvalidReg();
     }
     const auto &uses = it->second;
     auto usesIt = uses.lower_bound(ln);
-    return usesIt == uses.end() ? INVALID_REG : usesIt->second;
+    return usesIt == uses.end() ? GetInvalidReg() : usesIt->second;
 }
 
 void UseTable::Dump(std::ostream &out, Arch arch) const

@@ -19,42 +19,42 @@ namespace ark::bytecodeopt {
 
 void DoLdaObj(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_LDA_OBJ(reg));
     }
 }
 
 void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_LDA(reg));
     }
 }
 
 void DoLda64(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_LDA_64(reg));
     }
 }
 
 void DoStaObj(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_STA_OBJ(reg));
     }
 }
 
 void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_STA(reg));
     }
 }
 
 void DoSta64(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_STA_64(reg));
     }
 }
@@ -70,14 +70,14 @@ void DoSta(compiler::DataType::Type type, compiler::Register reg, std::vector<pa
 
 void DoLdaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_LDA_DYN(reg));
     }
 }
 
 void DoStaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_STA_DYN(reg));
     }
 }
@@ -208,7 +208,7 @@ void BytecodeGen::EncodeSpillFillData(const compiler::SpillFillData &sf)
         return;
     }
     ASSERT(sf.GetType() != compiler::DataType::NO_TYPE);
-    ASSERT(sf.SrcValue() != compiler::INVALID_REG && sf.DstValue() != compiler::INVALID_REG);
+    ASSERT(sf.SrcValue() != compiler::GetInvalidReg() && sf.DstValue() != compiler::GetInvalidReg());
 
     if (sf.SrcValue() == sf.DstValue()) {
         return;
@@ -276,7 +276,7 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt32Value()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dstReg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value());
                     res.emplace_back(ldai);
                 } else {
@@ -290,7 +290,7 @@ static void VisitConstant32(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetFloatValue()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dstReg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue());
                     res.emplace_back(ldai);
                 } else {
@@ -320,7 +320,7 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_LDAI_DYN(inst->CastToConstant()->GetInt64Value()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dstReg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value());
                     res.emplace_back(ldai);
                 } else {
@@ -334,7 +334,7 @@ static void VisitConstant64(BytecodeGen *enc, compiler::Inst *inst, std::vector<
                 res.emplace_back(pandasm::Create_FLDAI_DYN(inst->CastToConstant()->GetDoubleValue()));
                 DoStaDyn(inst->GetDstReg(), res);
             } else {
-                if (dstReg == compiler::ACC_REG_ID) {
+                if (dstReg == compiler::GetAccReg()) {
                     pandasm::Ins ldai = pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue());
                     res.emplace_back(ldai);
                 } else {
@@ -523,8 +523,8 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string met
     } else {
         for (size_t i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
-            ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::ACC_REG_ID);
-            if (reg == compiler::ACC_REG_ID) {
+            ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::GetAccReg());
+            if (reg == compiler::GetAccReg()) {
                 ASSERT(inst->IsCallOrIntrinsic());
                 ins.imms.emplace_back(static_cast<int64_t>(i));
                 ins.opcode = ChooseCallAccOpcode(ins.opcode);
@@ -535,7 +535,7 @@ void BytecodeGen::CallHandler(GraphVisitor *visitor, Inst *inst, std::string met
     }
     ins.ids.emplace_back(std::move(methodId));
     enc->result_.emplace_back(ins);
-    if (inst->GetDstReg() != compiler::INVALID_REG && inst->GetDstReg() != compiler::ACC_REG_ID) {
+    if (inst->GetDstReg() != compiler::GetInvalidReg() && inst->GetDstReg() != compiler::GetAccReg()) {
         enc->EncodeSta(inst->GetDstReg(), inst->GetType());
     }
 }
@@ -1394,7 +1394,7 @@ void BytecodeGen::VisitLoadString(GraphVisitor *v, Inst *instBase)
     }
 
     enc->result_.emplace_back(pandasm::Create_LDA_STR(enc->irInterface_->GetStringIdByOffset(inst->GetTypeId())));
-    if (inst->GetDstReg() != compiler::ACC_REG_ID) {
+    if (inst->GetDstReg() != compiler::GetAccReg()) {
         if (enc->GetGraph()->IsDynamicMethod()) {
             enc->result_.emplace_back(pandasm::Create_STA_DYN(inst->GetDstReg()));
         } else {
@@ -1542,7 +1542,7 @@ void BytecodeGen::VisitStoreObject(GraphVisitor *v, Inst *instBase)
     compiler::Register vs = inst->GetSrcReg(1U);
     std::string id = enc->irInterface_->GetFieldIdByOffset(inst->GetTypeId());
 
-    bool isAccType = (vs == compiler::ACC_REG_ID);
+    bool isAccType = (vs == compiler::GetAccReg());
 
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:
@@ -1625,7 +1625,7 @@ void BytecodeGen::VisitStoreStatic(GraphVisitor *v, Inst *instBase)
 
 static bool IsAccLoadObject(const compiler::LoadObjectInst *inst)
 {
-    return inst->GetDstReg() == compiler::ACC_REG_ID;
+    return inst->GetDstReg() == compiler::GetAccReg();
 }
 
 void BytecodeGen::VisitLoadObject(GraphVisitor *v, Inst *instBase)

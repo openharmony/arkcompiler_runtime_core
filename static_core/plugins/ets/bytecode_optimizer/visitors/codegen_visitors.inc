@@ -92,7 +92,7 @@ static void CallLaunchHandler(ark::compiler::GraphVisitor *visitor, ark::compile
     }
     ins.ids.emplace_back(enc->irInterface_->GetMethodIdByOffset(callInst->GetCallMethodId()));
     enc->result_.emplace_back(ins);
-    if (newobjInst->GetDstReg() != compiler::ACC_REG_ID) {
+    if (newobjInst->GetDstReg() != compiler::GetAccReg()) {
         enc->result_.emplace_back(pandasm::Create_STA_OBJ(newobjInst->GetDstReg()));
     }
 }
@@ -160,7 +160,7 @@ static void VisitEtsStObjByName(BytecodeGen *enc, compiler::IntrinsicInst *inst)
 static void VisitLoadUndefined(GraphVisitor *visitor, Inst *inst)
 {
     auto *enc = static_cast<BytecodeGen *>(visitor);
-    if (inst->GetDstReg() == compiler::ACC_REG_ID) {
+    if (inst->GetDstReg() == compiler::GetAccReg()) {
         enc->result_.emplace_back(pandasm::Create_ETS_LDUNDEFINED());
     } else {
         enc->result_.emplace_back(pandasm::Create_ETS_MOVUNDEFINED(inst->GetDstReg()));

@@ -269,11 +269,11 @@ end
 
 # we could use switch on 'bool' type for if-else purposes, but that hurts clang_tidy
 def is_acc?(reg)
-  "#{reg} == compiler::ACC_REG_ID"
+  "#{reg} == compiler::GetAccReg()"
 end
 
 def is_not_acc?(reg)
-  "#{reg} != compiler::ACC_REG_ID"
+  "#{reg} != compiler::GetAccReg()"
 end
 
 def is_compact?(reg)
@@ -354,7 +354,7 @@ def do_lda(instruction)
             else
               0
             end
-  "if (inst->GetSrcReg(#{reg_num}) != compiler::ACC_REG_ID) {
+  "if (inst->GetSrcReg(#{reg_num}) != compiler::GetAccReg()) {
     enc->result_.emplace_back(pandasm::Create_#{lda.asm_token}(inst->GetSrcReg(#{reg_num})));
   }"
 end
@@ -368,7 +368,7 @@ def do_sta(instruction)
         when 'ref'
           instruction_hash['sta.obj']
         end
-  "if (inst->GetDstReg() != compiler::ACC_REG_ID) {
+  "if (inst->GetDstReg() != compiler::GetAccReg()) {
     enc->result_.emplace_back(pandasm::Create_#{sta.asm_token}(inst->GetDstReg()));
   }"
 end

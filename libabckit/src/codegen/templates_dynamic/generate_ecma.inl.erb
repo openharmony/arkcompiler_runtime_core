@@ -64,7 +64,7 @@ void libabckit::CodeGenDynamic::VisitEcma(ark::compiler::GraphVisitor *visitor, 
 %     acc_read = inst.acc.include?("in")
 %     if acc_read
             auto accSrc = inst->GetSrcReg(0);
-            if (accSrc != ark::compiler::ACC_REG_ID) {
+            if (accSrc != ark::compiler::GetAccReg()) {
                 DoLda(accSrc, enc->result_);
             }
 %     end
@@ -120,7 +120,7 @@ void libabckit::CodeGenDynamic::VisitEcma(ark::compiler::GraphVisitor *visitor, 
             enc->result_.emplace_back(PandasmWrapper::Create_<%= inst.asm_token %>_Wrapper(<%= params_str %>));
 %     if inst.acc.include?("out")
             auto accDst = inst->GetDstReg();
-            if (accDst != ark::compiler::ACC_REG_ID) {
+            if (accDst != ark::compiler::GetAccReg()) {
                 DoSta(inst->GetDstReg(), enc->result_);
             }
 %     end

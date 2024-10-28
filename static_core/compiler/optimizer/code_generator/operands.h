@@ -48,6 +48,17 @@ enum RegMapping : uint32_t {
 
 constexpr uint8_t INVALID_REG_ID = std::numeric_limits<uint8_t>::max();
 constexpr uint8_t ACC_REG_ID = INVALID_REG_ID - 1U;
+#ifdef ENABLE_LIBABCKIT
+inline Register GetAccReg()
+{
+    return IsFrameSizeLarge() ? INVALID_REG_LARGE - 1U : ACC_REG_ID;
+}
+#else
+inline Register GetAccReg()
+{
+    return ACC_REG_ID;
+}
+#endif
 
 class Reg final {
 public:

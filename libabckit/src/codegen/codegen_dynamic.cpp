@@ -26,15 +26,27 @@ namespace libabckit {
 
 void DoLda(compiler::Register reg, std::vector<InsWrapper> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(PandasmWrapper::Create_LDA_Wrapper(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(PandasmWrapper::Create_MOV_Wrapper(CodeGenDynamic::RESERVED_REG, reg));
+            result.emplace_back(PandasmWrapper::Create_LDA_Wrapper(CodeGenDynamic::RESERVED_REG));
+        } else {
+            result.emplace_back(PandasmWrapper::Create_LDA_Wrapper(reg));
+        }
     }
 }
 
 void DoSta(compiler::Register reg, std::vector<InsWrapper> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(PandasmWrapper::Create_STA_Wrapper(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(PandasmWrapper::Create_STA_Wrapper(CodeGenDynamic::RESERVED_REG));
+            result.emplace_back(PandasmWrapper::Create_MOV_Wrapper(reg, CodeGenDynamic::RESERVED_REG));
+        } else {
+            result.emplace_back(PandasmWrapper::Create_STA_Wrapper(reg));
+        }
     }
 }
 
@@ -148,7 +160,7 @@ void CodeGenDynamic::EncodeSpillFillData(const compiler::SpillFillData &sf)
         return;
     }
     ASSERT(sf.GetType() != compiler::DataType::NO_TYPE);
-    ASSERT(sf.SrcValue() != compiler::INVALID_REG && sf.DstValue() != compiler::INVALID_REG);
+    ASSERT(sf.SrcValue() != compiler::GetInvalidReg() && sf.DstValue() != compiler::GetInvalidReg());
 
     if (sf.SrcValue() == sf.DstValue()) {
         return;
@@ -291,9 +303,7 @@ void CodeGenDynamic::VisitLoadStringIntrinsic(GraphVisitor *v, Inst *instBase)
     auto inst = instBase->CastToIntrinsic();
     enc->result_.emplace_back(
         PandasmWrapper::Create_LDA_STR_Wrapper(enc->irInterface_->GetStringIdByOffset(inst->GetImm(0))));
-    if (inst->GetDstReg() != compiler::ACC_REG_ID) {
-        enc->result_.emplace_back(PandasmWrapper::Create_STA_Wrapper(inst->GetDstReg()));
-    }
+    DoSta(inst->GetDstReg(), enc->result_);
 }
 
 void CodeGenDynamic::VisitReturn(GraphVisitor *v, Inst *instBase)

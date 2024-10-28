@@ -43,6 +43,8 @@ public:
         : ark::compiler::Optimization(graph), function_(function), irInterface_(irInterface)
     {
     }
+
+    constexpr static ark::compiler::Register RESERVED_REG = 0U;
     bool RunImpl() override;
     const char *GetPassName() const override
     {

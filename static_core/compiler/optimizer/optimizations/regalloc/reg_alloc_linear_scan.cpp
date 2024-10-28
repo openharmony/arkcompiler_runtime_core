@@ -62,7 +62,7 @@ RegAllocLinearScan::RegAllocLinearScan(Graph *graph)
 
 /// Use dynamic general registers mask (without vector regs) and zero stack slots
 RegAllocLinearScan::RegAllocLinearScan(Graph *graph, [[maybe_unused]] EmptyRegMask mask)
-    : RegAllocBase(graph, VIRTUAL_FRAME_SIZE),
+    : RegAllocBase(graph, GetFrameSize()),
       workingIntervals_(graph->GetLocalAllocator()),
       regsUsePositions_(graph->GetLocalAllocator()->Adapter()),
       generalIntervals_(graph->GetLocalAllocator()),
@@ -104,12 +104,12 @@ void RegAllocLinearScan::PrepareInterval(LifeIntervals *interval)
         return;
     }
 
-    if (interval->NoDest() || interval->GetInst()->GetDstCount() > 1U || interval->GetReg() == ACC_REG_ID) {
+    if (interval->NoDest() || interval->GetInst()->GetDstCount() > 1U || interval->GetReg() == GetAccReg()) {
         return;
     }
 
     if (interval->IsPreassigned() && interval->GetReg() == GetGraph()->GetZeroReg()) {
-        ASSERT(interval->GetReg() != INVALID_REG);
+        ASSERT(interval->GetReg() != GetInvalidReg());
         return;
     }
 
@@ -148,7 +148,7 @@ template <bool IS_FP>
 void RegAllocLinearScan::PreprocessPreassignedIntervals()
 {
     for (auto &interval : GetIntervals<IS_FP>().regular) {
-        if (!interval->IsPreassigned() || interval->IsSplitSibling() || interval->GetReg() == ACC_REG_ID) {
+        if (!interval->IsPreassigned() || interval->IsSplitSibling() || interval->GetReg() == GetAccReg()) {
             continue;
         }
         interval->SetPreassignedReg(regMap_.CodegenToRegallocReg(interval->GetReg()));
@@ -236,7 +236,7 @@ template <bool IS_FP>
 bool RegAllocLinearScan::TryToAssignRegister(LifeIntervals *currentInterval)
 {
     auto reg = GetSuitableRegister(currentInterval);
-    if (reg != INVALID_REG) {
+    if (reg != GetInvalidReg()) {
         currentInterval->SetReg(reg);
         return true;
     }
@@ -245,14 +245,14 @@ bool RegAllocLinearScan::TryToAssignRegister(LifeIntervals *currentInterval)
     auto [blocked_reg, next_blocked_use] = GetBlockedRegister(currentInterval);
     auto nextUse = currentInterval->GetNextUsage(currentInterval->GetBegin());
     // Spill current interval if its first use later than use of blocked register
-    if (blocked_reg != INVALID_REG && next_blocked_use < nextUse && !IsNonSpillableConstInterval(currentInterval)) {
+    if (blocked_reg != GetInvalidReg() && next_blocked_use < nextUse && !IsNonSpillableConstInterval(currentInterval)) {
         SplitBeforeUse<IS_FP>(currentInterval, nextUse);
         AssignStackSlot(currentInterval);
         return true;
     }
 
     // Blocked register that will be used in the next position mustn't be reassigned
-    if (blocked_reg == INVALID_REG || next_blocked_use < currentInterval->GetBegin() + LIFE_NUMBER_GAP) {
+    if (blocked_reg == GetInvalidReg() || next_blocked_use < currentInterval->GetBegin() + LIFE_NUMBER_GAP) {
         return false;
     }
 
@@ -321,7 +321,7 @@ Register RegAllocLinearScan::GetSuitableRegister(const LifeIntervals *currentInt
     // First of all, try to assign register using hint
     auto &useTable = GetGraph()->GetAnalysis<LivenessAnalyzer>().GetUseTable();
     auto hintReg = useTable.GetNextUseOnFixedLocation(currentInterval->GetInst(), currentInterval->GetBegin());
-    if (hintReg != INVALID_REG) {
+    if (hintReg != GetInvalidReg()) {
         auto reg = regMap_.CodegenToRegallocReg(hintReg);
         if (regMap_.IsRegAvailable(reg, GetGraph()->GetArch()) && IsIntervalRegFree(currentInterval, reg)) {
             COMPILER_LOG(DEBUG, REGALLOC) << "Hint-register is available";
@@ -371,7 +371,7 @@ Register RegAllocLinearScan::GetFreeRegister(const LifeIntervals *currentInterva
     // Select register with max position
     auto it = std::max_element(regsUsePositions_.cbegin(), regsUsePositions_.cend());
     // Register is free if it's available for the whole interval
-    return (*it >= currentInterval->GetEnd()) ? std::distance(regsUsePositions_.cbegin(), it) : INVALID_REG;
+    return (*it >= currentInterval->GetEnd()) ? std::distance(regsUsePositions_.cbegin(), it) : GetInvalidReg();
 }
 
 // Return blocked register and its next use position
@@ -379,7 +379,7 @@ std::pair<Register, LifeNumber> RegAllocLinearScan::GetBlockedRegister(const Lif
 {
     // Using blocked registers is impossible in the `BytecodeOptimizer` mode
     if (GetGraph()->IsBytecodeOptimizer()) {
-        return {INVALID_REG, INVALID_LIFE_NUMBER};
+        return {GetInvalidReg(), INVALID_LIFE_NUMBER};
     }
 
     std::fill(regsUsePositions_.begin(), regsUsePositions_.end(), MAX_LIFE_NUMBER);
@@ -455,7 +455,7 @@ void RegAllocLinearScan::AssignStackSlot(LifeIntervals *interval)
     ASSERT(interval->HasInst());
     if (rematConstants_ && interval->GetInst()->IsConst()) {
         auto immSlot = GetGraph()->AddSpilledConstant(interval->GetInst()->CastToConstant());
-        if (immSlot != INVALID_IMM_TABLE_SLOT) {
+        if (immSlot != GetInvalidImmTableSlot()) {
             interval->SetLocation(Location::MakeConstant(immSlot));
             COMPILER_LOG(DEBUG, REGALLOC) << interval->GetLocation().ToString(GetGraph()->GetArch())
                                           << " was assigned to the interval " << interval->template ToString<true>();
@@ -464,7 +464,7 @@ void RegAllocLinearScan::AssignStackSlot(LifeIntervals *interval)
     }
 
     auto slot = GetNextStackSlot(interval);
-    if (slot != INVALID_STACK_SLOT) {
+    if (slot != GetInvalidStackSlot()) {
         interval->SetLocation(Location::MakeStackSlot(slot));
         COMPILER_LOG(DEBUG, REGALLOC) << interval->GetLocation().ToString(GetGraph()->GetArch())
                                       << " was assigned to the interval " << interval->template ToString<true>();
@@ -626,7 +626,7 @@ bool RegAllocLinearScan::IsNonSpillableConstInterval(LifeIntervals *interval)
     }
     auto inst = interval->GetInst();
     return inst != nullptr && inst->IsConst() && rematConstants_ &&
-           inst->CastToConstant()->GetImmTableSlot() == INVALID_IMM_TABLE_SLOT &&
+           inst->CastToConstant()->GetImmTableSlot() == GetInvalidImmTableSlot() &&
            !GetGraph()->HasAvailableConstantSpillSlots();
 }
 

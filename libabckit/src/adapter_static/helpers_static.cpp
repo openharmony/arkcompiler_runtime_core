@@ -23,8 +23,11 @@
 
 #include "static_core/assembler/assembly-program.h"
 #include "static_core/assembler/mangling.h"
+#include "static_core/bytecode_optimizer/reg_acc_alloc.h"
 #include "static_core/compiler/optimizer/ir/graph.h"
 #include "static_core/compiler/optimizer/ir/basicblock.h"
+#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
+#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_resolver.h"
 
 #include "abckit_intrinsics_opcodes.inc"
 
@@ -954,6 +957,42 @@ AbckitLiteral *GetOrCreateLiteralStringStatic(AbckitFile *file, const std::strin
 AbckitLiteral *GetOrCreateLiteralMethodStatic(AbckitFile *file, const std::string &value)
 {
     return GetOrCreateLit(file, file->literals.methodLits, value, panda_file::LiteralTag::METHOD);
+}
+
+void FixPreassignedRegisters(compiler::Inst *inst, compiler::Register reg, compiler::Register regLarge)
+{
+    for (size_t idx = 0; idx < inst->GetInputsCount(); idx++) {
+        if (inst->GetSrcReg(idx) == reg) {
+            inst->SetSrcReg(idx, regLarge);
+        }
+    }
+    if (inst->GetDstReg() == reg) {
+        inst->SetDstReg(regLarge);
+    }
+}
+
+void FixPreassignedRegisters(compiler::Graph *graph)
+{
+    for (auto bb : graph->GetBlocksRPO()) {
+        for (auto inst : bb->AllInsts()) {
+            FixPreassignedRegisters(inst, compiler::INVALID_REG, compiler::INVALID_REG_LARGE);
+            FixPreassignedRegisters(inst, compiler::INVALID_REG - 1U, compiler::INVALID_REG_LARGE - 1U);  // ACC_REG
+        }
+    }
+}
+
+bool AllocateRegisters(compiler::Graph *graph, uint8_t reservedReg)
+{
+    graph->RunPass<bytecodeopt::RegAccAlloc>();
+    compiler::RegAllocResolver(graph).ResolveCatchPhis();
+    if (!compiler::IsFrameSizeLarge()) {
+        return graph->RunPass<compiler::RegAllocGraphColoring>(compiler::GetFrameSize());
+    }
+    compiler::LocationMask regMask(graph->GetLocalAllocator());
+    regMask.Resize(compiler::GetFrameSize());
+    regMask.Set(reservedReg);
+    FixPreassignedRegisters(graph);
+    return graph->RunPass<compiler::RegAllocGraphColoring>(regMask);
 }
 
 }  // namespace libabckit

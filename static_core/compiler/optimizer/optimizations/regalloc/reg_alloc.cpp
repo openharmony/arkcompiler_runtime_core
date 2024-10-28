@@ -102,7 +102,7 @@ bool RegAlloc(Graph *graph)
 
     if (graph->IsBytecodeOptimizer()) {
         RegAllocResolver(graph).ResolveCatchPhis();
-        raPassed = graph->RunPass<RegAllocGraphColoring>(VIRTUAL_FRAME_SIZE);
+        raPassed = graph->RunPass<RegAllocGraphColoring>(GetFrameSize());
     } else {
         if (IsGraphColoringEnable(graph)) {
             raPassed = graph->RunPass<RegAllocGraphColoring>();

@@ -74,7 +74,7 @@ void SplitResolver::ProcessBlock(BasicBlock *block)
         // so that the logic is equivalent to the logic of connecting split intervals
         if (interval->GetBegin() == succBegin) {
             auto phi = interval->GetInst();
-            if (!phi->IsPhi() || phi->GetDstReg() == ACC_REG_ID) {
+            if (!phi->IsPhi() || phi->GetDstReg() == GetAccReg()) {
                 continue;
             }
             ASSERT(phi->IsPhi());

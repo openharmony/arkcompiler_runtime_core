@@ -147,8 +147,8 @@ void InitStates(ArenaUnorderedMap<uint32_t, BlockStates> *blocks, const Graph *g
         if (bb == nullptr) {
             continue;
         }
-        [[maybe_unused]] auto res = blocks->try_emplace(bb->GetId(), usedRegs, usedVregs, MAX_NUM_STACK_SLOTS,
-                                                        MAX_NUM_STACK_SLOTS, graph->GetLocalAllocator());
+        [[maybe_unused]] auto res = blocks->try_emplace(bb->GetId(), usedRegs, usedVregs, GetMaxNumStackSlots(),
+                                                        GetMaxNumStackSlots(), graph->GetLocalAllocator());
         ASSERT(res.second);
     }
 }
@@ -329,7 +329,7 @@ void RegAllocVerifier::HandleDest(Inst *inst)
         return;
     }
     auto type = inst->GetType();
-    if (GetGraph()->GetZeroReg() != INVALID_REG && inst->GetDstReg() == GetGraph()->GetZeroReg()) {
+    if (GetGraph()->GetZeroReg() != GetInvalidReg() && inst->GetDstReg() == GetGraph()->GetZeroReg()) {
         UpdateLocation(Location::MakeRegister(inst->GetDstReg()), type, LocationState::ZERO_INST);
         return;
     }
@@ -445,7 +445,7 @@ void RegAllocVerifier::ProcessCurrentBlock()
         }
 
         if (inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) {
-            ASSERT(inst->GetDstReg() == INVALID_REG);
+            ASSERT(inst->GetDstReg() == GetInvalidReg());
             continue;
         }
 
@@ -504,7 +504,7 @@ void RegAllocVerifier::HandleSpillFill(SpillFillInst *inst)
 // Set instn's id to corresponding location.
 void RegAllocVerifier::HandleConst(ConstantInst *inst)
 {
-    if (inst->GetDstReg() != INVALID_REG) {
+    if (inst->GetDstReg() != GetInvalidReg()) {
         HandleDest(inst);
         return;
     }
@@ -512,12 +512,12 @@ void RegAllocVerifier::HandleConst(ConstantInst *inst)
     // if const inst does not have valid register then it was spilled to imm table.
     auto immSlot = GetGraph()->FindSpilledConstantSlot(inst->CastToConstant());
     // zero const is a special case - we're using zero reg to encode it.
-    if (immSlot == INVALID_IMM_TABLE_SLOT && IsZeroConstantOrNullPtr(inst)) {
+    if (immSlot == GetInvalidImmTableSlot() && IsZeroConstantOrNullPtr(inst)) {
         return;
     }
 
     // if there is no place in the imm table, constant will be spilled to the stack.
-    ASSERT(immSlot != INVALID_IMM_TABLE_SLOT || !GetGraph()->HasAvailableConstantSpillSlots());
+    ASSERT(immSlot != GetInvalidImmTableSlot() || !GetGraph()->HasAvailableConstantSpillSlots());
 }
 
 // Verify instn's inputs and set instn's id to destination location.

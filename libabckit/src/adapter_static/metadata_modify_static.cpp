@@ -28,12 +28,9 @@
 
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
 #include "static_core/compiler/optimizer/analysis/loop_analyzer.h"
-#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
-#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_resolver.h"
 #include "static_core/compiler/optimizer/optimizations/lowering.h"
-#include "static_core/bytecode_optimizer/reg_acc_alloc.h"
 #include "static_core/bytecode_optimizer/reg_encoder.h"
 
 #include <cstdint>
@@ -102,10 +99,8 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
     graphImpl->RunPass<compiler::Cleanup>(false);
 
     graphImpl->RunPass<compiler::MoveConstants>();
-    graphImpl->RunPass<bytecodeopt::RegAccAlloc>();
-    compiler::RegAllocResolver(graphImpl).ResolveCatchPhis();
 
-    if (!graphImpl->RunPass<compiler::RegAllocGraphColoring>(compiler::VIRTUAL_FRAME_SIZE)) {
+    if (!AllocateRegisters(graphImpl, CodeGenStatic::RESERVED_REG)) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": RegAllocGraphColoring failed!\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
         return;

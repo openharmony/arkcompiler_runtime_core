@@ -535,7 +535,7 @@ public:
 
     void SetRegUsage(Register reg, DataType::Type type)
     {
-        ASSERT(reg != INVALID_REG);
+        ASSERT(reg != GetInvalidReg());
         if (DataType::IsFloatType(type)) {
             SetUsedReg<DataType::FLOAT64>(reg);
         } else {
@@ -719,14 +719,14 @@ public:
     {
         // Constant already in the table
         auto currentSlot = constInst->GetImmTableSlot();
-        if (currentSlot != INVALID_IMM_TABLE_SLOT) {
+        if (currentSlot != GetInvalidImmTableSlot()) {
             ASSERT(spilledConstants_[currentSlot] == constInst);
             return currentSlot;
         }
 
         auto count = spilledConstants_.size();
-        if (count >= MAX_NUM_IMM_SLOTS) {
-            return INVALID_IMM_TABLE_SLOT;
+        if (count >= GetMaxNumImmSlots()) {
+            return GetInvalidImmTableSlot();
         }
         spilledConstants_.push_back(constInst);
         constInst->SetImmTableSlot(count);
@@ -737,7 +737,7 @@ public:
     {
         auto slot = std::find(spilledConstants_.begin(), spilledConstants_.end(), constInst);
         if (slot == spilledConstants_.end()) {
-            return INVALID_IMM_TABLE_SLOT;
+            return GetInvalidImmTableSlot();
         }
         return std::distance(spilledConstants_.begin(), slot);
     }
@@ -749,7 +749,7 @@ public:
 
     bool HasAvailableConstantSpillSlots() const
     {
-        return GetSpilledConstantsCount() < MAX_NUM_IMM_SLOTS;
+        return GetSpilledConstantsCount() < GetMaxNumImmSlots();
     }
 
     auto begin()  // NOLINT(readability-identifier-naming)

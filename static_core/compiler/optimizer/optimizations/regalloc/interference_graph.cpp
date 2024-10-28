@@ -206,11 +206,11 @@ void InterferenceGraph::Dump(const std::string &name, bool skipPhysical, std::os
 
     // Map to colors
     std::array<Register, std::numeric_limits<Register>::max()> colors {};
-    colors.fill(INVALID_REG);
+    colors.fill(GetInvalidReg());
     Register curColor = 0;
 
     for (auto &node : GetNodes()) {
-        if (!(skipPhysical && node.IsPhysical()) && colors[node.GetColor()] == INVALID_REG) {
+        if (!(skipPhysical && node.IsPhysical()) && colors[node.GetColor()] == GetInvalidReg()) {
             colors[node.GetColor()] = curColor;
             curColor++;
         }
@@ -233,7 +233,8 @@ void InterferenceGraph::Dump(const std::string &name, bool skipPhysical, std::os
             if (!check) {
                 continue;
             }
-            if (GetNode(nodeNum).GetColor() == GetNode(j).GetColor() && GetNode(nodeNum).GetColor() != INVALID_REG) {
+            if (GetNode(nodeNum).GetColor() == GetNode(j).GetColor() &&
+                GetNode(nodeNum).GetColor() != GetInvalidReg()) {
                 out << "Error: Same color\n";
             }
             out << nodeNum << "--" << j << "\n";
