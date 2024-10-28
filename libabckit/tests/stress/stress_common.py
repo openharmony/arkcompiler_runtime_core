@@ -58,19 +58,30 @@ class ExecRes:
         self.stderr = stderr
 
 
-def stress_exec(cmd, cwd=os.getcwd(), allow_error=False, timeout=600, print_output=False, print_command=True, env=None,
-         repeats: int = 1):
-    if print_command:
-        logging.debug('$ {0}> %s', cwd, " ".join(cmd))
+def stress_exec(cmd, **kwargs):
+    default_kwargs = {
+        'cwd': os.getcwd(),
+        'allow_error': False,
+        'timeout': 600,
+        'print_output': False,
+        'print_command': True,
+        'env': None,
+        'repeats': 1,
+    }
+    kwargs = {**default_kwargs, **kwargs}
 
-    ct = timeout
-    for loop in range(repeats):
-        return_code, stdout, stderr = __exec_impl(cmd, cwd=cwd, timeout=ct, print_output=print_output, env=env)
+    if kwargs['print_command']:
+        logging.debug('$ {0}> %s', kwargs['cwd'], " ".join(cmd))
+
+    ct = kwargs['timeout']
+    for _ in range(kwargs['repeats']):
+        return_code, stdout, stderr = __exec_impl(cmd, cwd=kwargs['cwd'], timeout=ct,
+                                                  print_output=kwargs['print_output'], env=kwargs['env'])
         if return_code != -1:
             break
         ct = ct + 60
 
-    if return_code != 0 and not allow_error:
+    if return_code != 0 and not kwargs['allow_error']:
         raise Exception(f"Error: Non-zero return code\nstdout: {stdout}\nstderr: {stderr}")
     return ExecRes(return_code, stdout, stderr)
 
