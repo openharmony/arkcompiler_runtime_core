@@ -164,6 +164,11 @@ struct LiteralArray {
             }
         }
 
+        bool IsLiteralArrayValue() const
+        {
+            return tag == panda_file::LiteralTag::LITERALARRAY;
+        }
+
         bool operator==(const LiteralArray::Literal &literal)
         {
             return tag == literal.tag && value == literal.value;

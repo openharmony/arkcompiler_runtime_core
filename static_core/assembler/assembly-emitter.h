@@ -171,9 +171,9 @@ private:
     static bool CheckValue(const Value *value, const Type &type, const Program &program);
     static std::string GetMethodSignatureFromProgram(const std::string &name, const Program &program);
 
-    static panda_file::LiteralItem *CreateLiteralItem(
-        panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
-        const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+    static panda_file::LiteralItem *CreateLiteralItem(panda_file::ItemContainer *container, const Value *value,
+                                                      std::vector<panda_file::LiteralItem> *out,
+                                                      const AsmEmitter::AsmEntityCollections &entities);
 
     template <class PrimType>
     static panda_file::ScalarValueItem *CreateScalarPrimValueItem(panda_file::ItemContainer *container,
@@ -210,36 +210,32 @@ private:
     static panda_file::ScalarValueItem *CreateScalarMethodValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const Program &program, const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+    static panda_file::ScalarValueItem *CreateScalarLiteralArrayItem(
+        panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
+        const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays);
     static panda_file::ScalarValueItem *CreateScalarEnumValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
         const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields);
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static panda_file::ScalarValueItem *CreateScalarAnnotationValueItem(
         panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
-        const Program &program, const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-        const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
-        const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+        const Program &program, const AsmEmitter::AsmEntityCollections &entities);
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
-    static panda_file::ScalarValueItem *CreateScalarValueItem(
-        panda_file::ItemContainer *container, const Value *value, std::vector<panda_file::ScalarValueItem> *out,
-        const Program &program, const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-        const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
-        const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+    static panda_file::ScalarValueItem *CreateScalarValueItem(panda_file::ItemContainer *container, const Value *value,
+                                                              std::vector<panda_file::ScalarValueItem> *out,
+                                                              const Program &program,
+                                                              const AsmEmitter::AsmEntityCollections &entities);
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
-    static panda_file::ValueItem *CreateValueItem(
-        panda_file::ItemContainer *container, const Value *value, const Program &program,
-        const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-        const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
-        const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+    static panda_file::ValueItem *CreateValueItem(panda_file::ItemContainer *container, const Value *value,
+                                                  const Program &program,
+                                                  const AsmEmitter::AsmEntityCollections &entities);
 
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
-    static panda_file::AnnotationItem *CreateAnnotationItem(
-        panda_file::ItemContainer *container, const AnnotationData &annotation, const Program &program,
-        const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-        const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
-        const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+    static panda_file::AnnotationItem *CreateAnnotationItem(panda_file::ItemContainer *container,
+                                                            const AnnotationData &annotation, const Program &program,
+                                                            const AsmEmitter::AsmEntityCollections &entities);
 
     static panda_file::MethodHandleItem *CreateMethodHandleItem(
         panda_file::ItemContainer *container, const MethodHandle &mh,
@@ -249,10 +245,7 @@ private:
     template <class T>
     // CC-OFFNXT(G.FUN.01-CPP) solid logic
     static bool AddAnnotations(T *item, panda_file::ItemContainer *container, const AnnotationMetadata &metadata,
-                               const Program &program,
-                               const std::unordered_map<std::string, panda_file::BaseClassItem *> &classes,
-                               const std::unordered_map<std::string, panda_file::BaseFieldItem *> &fields,
-                               const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods);
+                               const Program &program, const AsmEmitter::AsmEntityCollections &entities);
 
     // NOTE(mgonopolsky): Refactor to introduce a single error-processing mechanism for parser and emitter
     // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)

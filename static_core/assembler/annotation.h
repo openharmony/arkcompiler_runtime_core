@@ -24,6 +24,7 @@
 #include <variant>
 #include <vector>
 
+#include "assembly-literals.h"
 #include "assembly-type.h"
 
 #include "macros.h"
@@ -92,7 +93,8 @@ public:
         ARRAY,
         VOID,
         METHOD_HANDLE,
-        UNKNOWN
+        LITERALARRAY,
+        UNKNOWN,
     };
 
     // CC-OFFNXT(huge_cyclomatic_complexity[C], huge_method[C], G.FUN.01-CPP) big switch case
@@ -159,6 +161,9 @@ public:
                 break;
             case Type::STRING_NULLPTR:
                 type = '*';
+                break;
+            case Type::LITERALARRAY:
+                type = '#';
                 break;
             case Type::UNKNOWN:
             default:
@@ -295,6 +300,9 @@ public:
             case '*':
                 type = Type::STRING_NULLPTR;
                 break;
+            case '#':
+                type = Type::LITERALARRAY;
+                break;
             case '0':
             default:
                 type = Type::UNKNOWN;
@@ -302,7 +310,7 @@ public:
         return type;
     }
 
-    // CC-OFFNXT(huge_method[C], G.FUN.01-CPP) big switch case
+    // CC-OFFNXT(huge_cyclomatic_complexity[C], huge_method[C], G.FUN.01-CPP) big switch case
     static constexpr Type GetCharAsArrayType(char c)
     {
         Type type = Type::UNKNOWN;
@@ -357,6 +365,9 @@ public:
                 break;
             case '@':
                 type = Type::METHOD_HANDLE;
+                break;
+            case '#':
+                type = Type::LITERALARRAY;
                 break;
             case '0':
             default:
@@ -434,7 +445,9 @@ struct ValueTypeHelper {
                 std::conditional_t<VALUE_TYPE == Value::Type::ENUM, std::string_view,
                 // NOLINTNEXTLINE(readability-magic-numbers)
                 std::conditional_t<VALUE_TYPE == Value::Type::ANNOTATION, AnnotationData,
-                void>>>>>>>>>>>>>>>>>;
+                // NOLINTNEXTLINE(readability-magic-numbers)
+                std::conditional_t<VALUE_TYPE == Value::Type::LITERALARRAY, std::string_view,
+                void>>>>>>>>>>>>>>>>>>;
 };
 
 // clang-format on
@@ -478,6 +491,11 @@ public:
         if constexpr (!std::is_integral_v<T>) {  // NOLINT(bugprone-suspicious-semicolon)
             return std::get<T>(value_);
         }
+    }
+
+    std::variant<uint64_t, float, double, std::string, pandasm::Type, AnnotationData> GetValue()
+    {
+        return value_;
     }
 
     DEFAULT_MOVE_SEMANTIC(ScalarValue);

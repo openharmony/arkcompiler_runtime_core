@@ -17,6 +17,7 @@
 
 #include "file_items.h"
 #include "file_writer.h"
+#include "literal_data_accessor.h"
 #include "mangling.h"
 #include "os/file.h"
 #include "runtime/include/profiling_gen.h"
@@ -191,11 +192,86 @@ std::string AsmEmitter::GetMethodSignatureFromProgram(const std::string &name, c
     return std::string("");
 }
 
-/* static */
-// CC-OFFNXT(huge_method[C++], G.FUN.01-CPP) big switch case
-panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
-    ItemContainer *container, const Value *value, std::vector<panda_file::LiteralItem> *out,
-    const std::unordered_map<std::string, panda_file::BaseMethodItem *> &methods)
+static panda_file::LiteralItem *CreateLiteralItemFromUint8(const Value *value,
+                                                           std::vector<panda_file::LiteralItem> *out)
+{
+    auto v = value->GetAsScalar()->GetValue<uint8_t>();
+    out->emplace_back(v);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromUint16(const Value *value,
+                                                            std::vector<panda_file::LiteralItem> *out)
+{
+    auto v = value->GetAsScalar()->GetValue<uint16_t>();
+    out->emplace_back(v);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromUint32(const Value *value,
+                                                            std::vector<panda_file::LiteralItem> *out)
+{
+    auto v = value->GetAsScalar()->GetValue<uint32_t>();
+    out->emplace_back(v);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromUint64(const Value *value,
+                                                            std::vector<panda_file::LiteralItem> *out)
+{
+    auto v = value->GetAsScalar()->GetValue<uint64_t>();
+    out->emplace_back(v);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromFloat(const Value *value,
+                                                           std::vector<panda_file::LiteralItem> *out)
+{
+    auto v = bit_cast<uint32_t>(value->GetAsScalar()->GetValue<float>());
+    out->emplace_back(v);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromDouble(const Value *value,
+                                                            std::vector<panda_file::LiteralItem> *out)
+{
+    auto v = bit_cast<uint64_t>(value->GetAsScalar()->GetValue<double>());
+    out->emplace_back(v);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromString(ItemContainer *container, const Value *value,
+                                                            std::vector<panda_file::LiteralItem> *out)
+{
+    auto *stringItem = container->GetOrCreateStringItem(value->GetAsScalar()->GetValue<std::string>());
+    out->emplace_back(stringItem);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromMethod(const Value *value,
+                                                            std::vector<panda_file::LiteralItem> *out,
+                                                            const AsmEmitter::AsmEntityCollections &entities)
+{
+    auto name = value->GetAsScalar()->GetValue<std::string>();
+    auto methodItem = static_cast<ark::panda_file::MethodItem *>(Find(entities.methodItems, name));
+    out->emplace_back(methodItem);
+    return &out->back();
+}
+
+static panda_file::LiteralItem *CreateLiteralItemFromLiteralArray(const Value *value,
+                                                                  std::vector<panda_file::LiteralItem> *out,
+                                                                  const AsmEmitter::AsmEntityCollections &entities)
+{
+    auto key = value->GetAsScalar()->GetValue<std::string>();
+    auto litItem = Find(entities.literalarrayItems, key);
+    out->emplace_back(litItem);
+    return &out->back();
+}
+
+// 重构后的 CreateLiteralItem 方法
+panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(ItemContainer *container, const Value *value,
+                                                       std::vector<panda_file::LiteralItem> *out,
+                                                       const AsmEmitter::AsmEntityCollections &entities)
 {
     ASSERT(out != nullptr);
 
@@ -204,51 +280,28 @@ panda_file::LiteralItem *AsmEmitter::CreateLiteralItem(
     switch (valueType) {
         case Value::Type::U1:
         case Value::Type::I8:
-        case Value::Type::U8: {
-            auto v = value->GetAsScalar()->GetValue<uint8_t>();
-            out->emplace_back(v);
-            return &out->back();
-        }
+        case Value::Type::U8:
+            return CreateLiteralItemFromUint8(value, out);
         case Value::Type::I16:
-        case Value::Type::U16: {
-            auto v = value->GetAsScalar()->GetValue<uint16_t>();
-            out->emplace_back(v);
-            return &out->back();
-        }
+        case Value::Type::U16:
+            return CreateLiteralItemFromUint16(value, out);
         case Value::Type::I32:
         case Value::Type::U32:
-        case Value::Type::STRING_NULLPTR: {
-            auto v = value->GetAsScalar()->GetValue<uint32_t>();
-            out->emplace_back(v);
-            return &out->back();
-        }
+        case Value::Type::STRING_NULLPTR:
+            return CreateLiteralItemFromUint32(value, out);
         case Value::Type::I64:
-        case Value::Type::U64: {
-            auto v = value->GetAsScalar()->GetValue<uint64_t>();
-            out->emplace_back(v);
-            return &out->back();
-        }
-        case Value::Type::F32: {
-            auto v = bit_cast<uint32_t>(value->GetAsScalar()->GetValue<float>());
-            out->emplace_back(v);
-            return &out->back();
-        }
-        case Value::Type::F64: {
-            auto v = bit_cast<uint64_t>(value->GetAsScalar()->GetValue<double>());
-            out->emplace_back(v);
-            return &out->back();
-        }
-        case Value::Type::STRING: {
-            auto *stringItem = container->GetOrCreateStringItem(value->GetAsScalar()->GetValue<std::string>());
-            out->emplace_back(stringItem);
-            return &out->back();
-        }
-        case Value::Type::METHOD: {
-            auto name = value->GetAsScalar()->GetValue<std::string>();
-            auto methodItem = static_cast<ark::panda_file::MethodItem *>(Find(methods, name));
-            out->emplace_back(methodItem);
-            return &out->back();
-        }
+        case Value::Type::U64:
+            return CreateLiteralItemFromUint64(value, out);
+        case Value::Type::F32:
+            return CreateLiteralItemFromFloat(value, out);
+        case Value::Type::F64:
+            return CreateLiteralItemFromDouble(value, out);
+        case Value::Type::STRING:
+            return CreateLiteralItemFromString(container, value, out);
+        case Value::Type::METHOD:
+            return CreateLiteralItemFromMethod(value, out, entities);
+        case Value::Type::LITERALARRAY:
+            return CreateLiteralItemFromLiteralArray(value, out, entities);
         default:
             return nullptr;
     }
@@ -456,6 +509,23 @@ ScalarValueItem *AsmEmitter::CreateScalarMethodValueItem(
 }
 
 /* static */
+ScalarValueItem *AsmEmitter::CreateScalarLiteralArrayItem(
+    ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out,
+    const std::unordered_map<std::string, panda_file::LiteralArrayItem *> &literalarrays)
+{
+    auto name = value->GetAsScalar()->GetValue<std::string>();
+    auto it = literalarrays.find(name);
+    ASSERT(it != literalarrays.end());
+    auto *literalarrayItem = it->second;
+    if (out != nullptr) {
+        out->emplace_back(literalarrayItem);
+        return &out->back();
+    }
+
+    return container->CreateItem<ScalarValueItem>(literalarrayItem);
+}
+
+/* static */
 ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container, const Value *value,
                                                        std::vector<ScalarValueItem> *out,
                                                        const std::unordered_map<std::string, BaseFieldItem *> &fields)
@@ -477,14 +547,12 @@ ScalarValueItem *AsmEmitter::CreateScalarEnumValueItem(ItemContainer *container,
 
 /* static */
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
-ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
-    ItemContainer *container, const Value *value, std::vector<ScalarValueItem> *out, const Program &program,
-    const std::unordered_map<std::string, BaseClassItem *> &classes,
-    const std::unordered_map<std::string, BaseFieldItem *> &fields,
-    const std::unordered_map<std::string, BaseMethodItem *> &methods)
+ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(ItemContainer *container, const Value *value,
+                                                             std::vector<ScalarValueItem> *out, const Program &program,
+                                                             const AsmEmitter::AsmEntityCollections &entities)
 {
     auto annotation = value->GetAsScalar()->GetValue<AnnotationData>();
-    auto *annotationItem = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
+    auto *annotationItem = CreateAnnotationItem(container, annotation, program, entities);
     if (annotationItem == nullptr) {
         return nullptr;
     }
@@ -501,9 +569,7 @@ ScalarValueItem *AsmEmitter::CreateScalarAnnotationValueItem(
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
 ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, const Value *value,
                                                    std::vector<ScalarValueItem> *out, const Program &program,
-                                                   const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                                   const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                                   const std::unordered_map<std::string, BaseMethodItem *> &methods)
+                                                   const AsmEmitter::AsmEntityCollections &entities)
 {
     auto valueType = value->GetType();
 
@@ -532,16 +598,19 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
             return CreateScalarStringValueItem(container, value, out);
         }
         case Value::Type::RECORD: {
-            return CreateScalarRecordValueItem(container, value, out, classes);
+            return CreateScalarRecordValueItem(container, value, out, entities.classItems);
         }
         case Value::Type::METHOD: {
-            return CreateScalarMethodValueItem(container, value, out, program, methods);
+            return CreateScalarMethodValueItem(container, value, out, program, entities.methodItems);
         }
         case Value::Type::ENUM: {
-            return CreateScalarEnumValueItem(container, value, out, fields);
+            return CreateScalarEnumValueItem(container, value, out, entities.fieldItems);
         }
         case Value::Type::ANNOTATION: {
-            return CreateScalarAnnotationValueItem(container, value, out, program, classes, fields, methods);
+            return CreateScalarAnnotationValueItem(container, value, out, program, entities);
+        }
+        case Value::Type::LITERALARRAY: {
+            return CreateScalarLiteralArrayItem(container, value, out, entities.literalarrayItems);
         }
         default: {
             UNREACHABLE();
@@ -553,15 +622,13 @@ ScalarValueItem *AsmEmitter::CreateScalarValueItem(ItemContainer *container, con
 /* static */
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
 ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *value, const Program &program,
-                                       const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                       const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                       const std::unordered_map<std::string, BaseMethodItem *> &methods)
+                                       const AsmEmitter::AsmEntityCollections &entities)
 {
     switch (value->GetType()) {
         case Value::Type::ARRAY: {
             std::vector<ScalarValueItem> elements;
             for (const auto &elemValue : value->GetAsArray()->GetValues()) {
-                auto *item = CreateScalarValueItem(container, &elemValue, &elements, program, classes, fields, methods);
+                auto *item = CreateScalarValueItem(container, &elemValue, &elements, program, entities);
                 if (item == nullptr) {
                     return nullptr;
                 }
@@ -572,7 +639,7 @@ ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *va
                                                          std::move(elements));
         }
         default: {
-            return CreateScalarValueItem(container, value, nullptr, program, classes, fields, methods);
+            return CreateScalarValueItem(container, value, nullptr, program, entities);
         }
     }
 }
@@ -580,9 +647,7 @@ ValueItem *AsmEmitter::CreateValueItem(ItemContainer *container, const Value *va
 /* static */
 AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const AnnotationData &annotation,
                                                  const Program &program,
-                                                 const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                                 const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                                 const std::unordered_map<std::string, BaseMethodItem *> &methods)
+                                                 const AsmEmitter::AsmEntityCollections &entities)
 {
     auto recordName = annotation.GetName();
     auto it = program.recordTable.find(recordName);
@@ -628,7 +693,7 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
             return nullptr;
         }
 
-        auto *item = CreateValueItem(container, value, program, classes, fields, methods);
+        auto *item = CreateValueItem(container, value, program, entities);
         if (item == nullptr) {
             SetLastError("Cannot create value item for annotation element " + functionName + ": " + GetLastError());
             return nullptr;
@@ -638,7 +703,7 @@ AnnotationItem *AsmEmitter::CreateAnnotationItem(ItemContainer *container, const
         tagElements.emplace_back(tagType);
     }
 
-    auto *cls = classes.find(recordName)->second;
+    auto *cls = entities.classItems.find(recordName)->second;
     return container->CreateItem<AnnotationItem>(cls, std::move(itemElements), std::move(tagElements));
 }
 
@@ -674,12 +739,10 @@ MethodHandleItem *AsmEmitter::CreateMethodHandleItem(ItemContainer *container, c
 template <class T>
 // CC-OFFNXT(G.FUN.01-CPP) solid logic
 bool AsmEmitter::AddAnnotations(T *item, ItemContainer *container, const AnnotationMetadata &metadata,
-                                const Program &program, const std::unordered_map<std::string, BaseClassItem *> &classes,
-                                const std::unordered_map<std::string, BaseFieldItem *> &fields,
-                                const std::unordered_map<std::string, BaseMethodItem *> &methods)
+                                const Program &program, const AsmEmitter::AsmEntityCollections &entities)
 {
     for (const auto &annotation : metadata.GetAnnotations()) {
-        auto *annotationItem = CreateAnnotationItem(container, annotation, program, classes, fields, methods);
+        auto *annotationItem = CreateAnnotationItem(container, annotation, program, entities);
         if (annotationItem == nullptr) {
             return false;
         }
@@ -849,23 +912,55 @@ static ScalarValue MakeLiteralItemValue(const LiteralArray::Literal &literal, co
         case panda_file::LiteralTag::ASYNCGENERATORMETHOD:
         case panda_file::LiteralTag::ASYNCMETHOD:
             return CreateValue<Value::Type::METHOD, std::string>(literal);
+        case panda_file::LiteralTag::LITERALARRAY:
+            return CreateValue<Value::Type::LITERALARRAY, std::string>(literal);
         default:
             UNREACHABLE();
     }
+}
+
+static std::vector<std::pair<std::string, ark::pandasm::LiteralArray>> SortByLastWord(
+    const std::map<std::string, ark::pandasm::LiteralArray> &literalarrayTable)
+{
+    std::vector<std::pair<std::string, ark::pandasm::LiteralArray>> items(literalarrayTable.begin(),
+                                                                          literalarrayTable.end());
+
+    std::sort(items.begin(), items.end(), [](const auto &a, const auto &b) {
+        size_t posA = a.first.rfind('$');
+        size_t posB = b.first.rfind('$');
+
+        std::string lastNumberA = (posA != std::string::npos) ? a.first.substr(posA + 1) : "";
+        std::string lastNumberB = (posB != std::string::npos) ? b.first.substr(posB + 1) : "";
+
+        auto stringToInt = [](const std::string &str) {
+            int num = 0;
+            std::stringstream ss(str);
+            ss >> num;
+            return num;
+        };
+
+        return stringToInt(lastNumberA) < stringToInt(lastNumberB);
+    });
+
+    return items;
 }
 
 /* static */
 void AsmEmitter::MakeLiteralItems(ItemContainer *items, const Program &program,
                                   AsmEmitter::AsmEntityCollections &entities)
 {
-    for (const auto &[id, l] : program.literalarrayTable) {
+    // The insertion order of the literal arrays has been disrupted by the map, but this order is crucial
+    // (as the root array stores the offsets of the sub-arrays). Therefore, we utilize a sorted vector
+    // to restore the insertion order for iteration.
+    auto sortedTable = SortByLastWord(program.literalarrayTable);
+    for (const auto &[id, l] : sortedTable) {
         auto literalArrayItem = items->GetOrCreateLiteralArrayItem(id);
         std::vector<panda_file::LiteralItem> literalArray;
 
         for (auto &literal : l.literals) {
             auto value = MakeLiteralItemValue(literal, program);
             // the return pointer of vector element should not be rewrited
-            CreateLiteralItem(items, &value, &literalArray, entities.methodItems);
+            CreateLiteralItem(items, &value, &literalArray, entities);
         }
 
         literalArrayItem->AddItems(literalArray);
@@ -1241,8 +1336,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
         }
 
         auto *classItem = static_cast<ClassItem *>(Find(entities.classItems, name));
-        if (!AddAnnotations(classItem, items, *record.metadata, program, entities.classItems, entities.fieldItems,
-                            entities.methodItems)) {
+        if (!AddAnnotations(classItem, items, *record.metadata, program, entities)) {
             SetLastError("Cannot emit annotations for record " + record.name + ": " + GetLastError());
             return false;
         }
@@ -1253,8 +1347,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
                 fieldName.insert(0, record.name + ".");
             }
             auto *fieldItem = static_cast<FieldItem *>(Find(entities.fieldItems, fieldName));
-            if (!AddAnnotations(fieldItem, items, *field.metadata, program, entities.classItems, entities.fieldItems,
-                                entities.methodItems)) {
+            if (!AddAnnotations(fieldItem, items, *field.metadata, program, entities)) {
                 SetLastError("Cannot emit annotations for field " + fieldName + ": " + GetLastError());
                 return false;
             }
@@ -1262,8 +1355,7 @@ bool AsmEmitter::MakeRecordAnnotations(ItemContainer *items, const Program &prog
             auto res = field.metadata->GetValue();
             if (res) {
                 auto value = res.value();
-                auto *item = CreateValueItem(items, &value, program, entities.classItems, entities.fieldItems,
-                                             entities.methodItems);
+                auto *item = CreateValueItem(items, &value, program, entities);
                 fieldItem->SetValue(item);
             }
         }
@@ -1321,8 +1413,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
                                                const AsmEmitter::AsmEntityCollections &entities, MethodItem *method,
                                                const Function &func)
 {
-    if (!AddAnnotations(method, items, *func.metadata, program, entities.classItems, entities.fieldItems,
-                        entities.methodItems)) {
+    if (!AddAnnotations(method, items, *func.metadata, program, entities)) {
         SetLastError("Cannot emit annotations for function " + func.name + ": " + GetLastError());
         return false;
     }
@@ -1332,8 +1423,7 @@ bool AsmEmitter::AddMethodAndParamsAnnotations(ItemContainer *items, const Progr
         size_t paramIdx = method->IsStatic() ? protoIdx : protoIdx + 1;
         auto &param = func.params[paramIdx];
         auto &paramItem = paramItems[protoIdx];
-        if (!AddAnnotations(&paramItem, items, *param.metadata, program, entities.classItems, entities.fieldItems,
-                            entities.methodItems)) {
+        if (!AddAnnotations(&paramItem, items, *param.metadata, program, entities)) {
             SetLastError("Cannot emit annotations for parameter a" + std::to_string(paramIdx) + " of function " +
                          func.name + ": " + GetLastError());
             return false;

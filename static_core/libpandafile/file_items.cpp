@@ -1085,7 +1085,8 @@ size_t LiteralItem::CalculateSize() const
         }
 
         case Type::STRING:
-        case Type::METHOD: {
+        case Type::METHOD:
+        case Type::LITERALARRAY: {
             size = ID_SIZE;
             break;
         }
@@ -1102,6 +1103,11 @@ size_t LiteralItem::CalculateSize() const
 size_t LiteralItem::Alignment()
 {
     return GetSize();
+}
+
+File::EntityId LiteralItem::GetLiteralArrayFileId() const
+{
+    return File::EntityId(GetValue<LiteralArrayItem *>()->GetOffset());
 }
 
 bool LiteralItem::Write(Writer *writer)
@@ -1128,6 +1134,10 @@ bool LiteralItem::Write(Writer *writer)
         case Type::METHOD: {
             ASSERT(GetMethodId().IsValid());
             return writer->Write(GetMethodId().GetOffset());
+        }
+        case Type::LITERALARRAY: {
+            ASSERT(GetLiteralArrayFileId().IsValid());
+            return writer->Write(GetLiteralArrayFileId().GetOffset());
         }
         default: {
             UNREACHABLE();
