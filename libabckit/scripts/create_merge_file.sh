@@ -14,17 +14,18 @@
 
 set -e
 
-base="$(basename $1)"
-tmp="$(echo $base | sed 's/\..*//')"
-tmp_file="/tmp/merge_$tmp.txt"
-echo "$base;$tmp;esm;$base;entry" > $tmp_file
-dir="$(dirname $1)"
-modules_dir="$dir/modules"
-if [ -d "$modules_dir" ]; then
-    for file in "$modules_dir"/*; do
-        name=$(basename "$file")
-        tmp_module="$(echo $name | sed 's/\..*//')"
-        echo "modules/$name;modules/$tmp_module;esm;modules/$name;entry" >> $tmp_file
+OUT_DIR="$1"
+BASE="$(basename $2)"
+TMP="$(echo $BASE | sed 's/\..*//')"
+TMP_FILE="$OUT_DIR/$(echo $2 | sed 's|[/\\ ]|_|g').txt"
+echo "$BASE;$TMP;esm;$BASE;entry" > $TMP_FILE
+DIR="$(dirname $2)"
+MODULES_DIR="$DIR/modules"
+if [ -d "$MODULES_DIR" ]; then
+    for file in "$MODULES_DIR"/*; do
+        NAME=$(basename "$file")
+        TMP_MODULE="$(echo $NAME | sed 's/\..*//')"
+        echo "modules/$NAME;modules/$TMP_MODULE;esm;modules/$NAME;entry" >> $TMP_FILE
     done
 fi
-/usr/bin/python3 "$(dirname $0)/../../../ets_runtime/test/quickfix/generate_merge_file.py" --input "$tmp_file" --output "$2" --prefix "$dir/"
+/usr/bin/python3 "$(dirname $0)/../../../ets_runtime/test/quickfix/generate_merge_file.py" --input "$TMP_FILE" --output "$3" --prefix "$DIR/"

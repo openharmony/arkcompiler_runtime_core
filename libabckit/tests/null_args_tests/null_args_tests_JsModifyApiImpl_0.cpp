@@ -41,6 +41,13 @@ TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, fileAddExternalModule)
     helpers_nullptr::TestNullptr(g_jsModifyApiImp->fileAddExternalModule);
 }
 
+// Test: test-kind=api, api=JsModifyApiImpl::moduleAddExportFromJsToJs,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleAddExportFromJsToJs)
+{
+    helpers_nullptr::TestNullptr(g_jsModifyApiImp->moduleAddExportFromJsToJs);
+}
+
 // Test: test-kind=api, api=JsModifyApiImpl::moduleAddImportFromJsToJs,
 // abc-kind=NoABC, category=negative-nullptr
 TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleAddImportFromJsToJs)
@@ -60,13 +67,6 @@ TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleRemoveExport)
 TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleRemoveImport)
 {
     helpers_nullptr::TestNullptr(g_jsModifyApiImp->moduleRemoveImport);
-}
-
-// Test: test-kind=api, api=JsModifyApiImpl::moduleAddExportFromJsToJs,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsJsModifyApiImpl0, moduleAddExportFromJsToJs)
-{
-    helpers_nullptr::TestNullptr(g_jsModifyApiImp->moduleAddExportFromJsToJs);
 }
 
 }  // namespace libabckit::test

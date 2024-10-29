@@ -328,9 +328,9 @@ std::function<void(AbckitCoreClass *)> cbClass = [&](AbckitCoreClass *c) {
     });
 };
 
-std::function<void(AbckitCoreNamespace *)> cbNamespce;
-cbNamespce = [&](AbckitCoreNamespace *n) {
-    implI->namespaceEnumerateNamespaces(n, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+std::function<void(AbckitCoreNamespace *)> cbNamespace;
+cbNamespace = [&](AbckitCoreNamespace *n) {
+    implI->namespaceEnumerateNamespaces(n, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
         (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
         return true;
     });
@@ -345,7 +345,7 @@ cbNamespce = [&](AbckitCoreNamespace *n) {
 };
 
 std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
-    implI->moduleEnumerateNamespaces(m, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+    implI->moduleEnumerateNamespaces(m, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
         (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
         return true;
     });

@@ -28,6 +28,7 @@
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/wrappers/pandasm_wrapper.h"
 
+#include "static_core/assembler/assembly-program.h"
 #include "static_core/assembler/mangling.h"
 
 #include "static_core/compiler/optimizer/ir/graph.h"
@@ -214,6 +215,18 @@ AbckitBasicBlock *GgetBasicBlockStatic(AbckitGraph *graph, uint32_t id)
     return graph->implToBB.at(bbImpl);
 }
 
+uint32_t GgetNumberOfParametersStatic(AbckitGraph *graph)
+{
+    auto list = graph->impl->GetParameters();
+    auto ins = list.begin();
+    uint32_t size = 0;
+    while (ins != list.end()) {
+        ++ins;
+        ++size;
+    }
+    return size;
+}
+
 AbckitInst *GgetParameterStatic(AbckitGraph *graph, uint32_t index)
 {
     LIBABCKIT_LOG_FUNC;
@@ -221,19 +234,22 @@ AbckitInst *GgetParameterStatic(AbckitGraph *graph, uint32_t index)
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
+
+    if (index >= GgetNumberOfParametersStatic(graph)) {
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
+
     auto list = graph->impl->GetParameters();
     auto ins = list.begin();
     for (uint32_t i = 0; i < index; i++) {
         if (ins != list.end()) {
             ++ins;
-        } else {
-            SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
-            return nullptr;
         }
     }
-
     return graph->implToInst.at(*ins);
 }
+
 void SetTryBlocks(AbckitGraph *graph, AbckitBasicBlock *tryLastBB, AbckitBasicBlock *tryBeginBB,
                   AbckitBasicBlock *tryEndBB)
 {
@@ -340,7 +356,7 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
     AbckitGraph *graph = tryFirstBB->graph;
 
     // NOTE(nsizov): implement for static mode as well
-    if (!IsDynamic(graph->function->m->target)) {
+    if (!IsDynamic(graph->function->owningModule->target)) {
         libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
         return;
     }
@@ -604,7 +620,7 @@ void BBeraseSuccBlockStatic(AbckitBasicBlock *bb, size_t index)
     bb->impl->RemoveSucc(succ);
 }
 
-void BBclearStatic(AbckitBasicBlock *basicBlock)
+void BBremoveAllInstsStatic(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
@@ -877,12 +893,12 @@ AbckitInst *BBcreatePhiStatic(AbckitBasicBlock *bb, size_t argCount, std::va_lis
     }
 
     compiler::DataType::Type type = inputs[0]->impl->GetType();
-    if (IsDynamic(bb->graph->function->m->target)) {
+    if (IsDynamic(bb->graph->function->owningModule->target)) {
         type = compiler::DataType::ANY;
     }
 
     for (auto *inst : inputs) {
-        if (IsDynamic(bb->graph->function->m->target)) {
+        if (IsDynamic(bb->graph->function->owningModule->target)) {
             if (inst->impl->GetType() != compiler::DataType::INT64 &&
                 inst->impl->GetType() != compiler::DataType::ANY) {
                 LIBABCKIT_LOG(DEBUG) << "inconsistent input types\n";
@@ -905,6 +921,53 @@ AbckitInst *BBcreatePhiStatic(AbckitBasicBlock *bb, size_t argCount, std::va_lis
         phiImpl->AppendInput(inst->impl);
     }
     return phi;
+}
+
+AbckitInst *BBcreateCatchPhiStatic(AbckitBasicBlock *catchBegin, size_t argCount, std::va_list args)
+{
+    auto *instImpl = catchBegin->graph->impl->CreateInstCatchPhi();
+    auto *catchPhi = CreateInstFromImpl(catchBegin->graph, instImpl);
+
+    BBaddInstFrontStatic(catchBegin, catchPhi);
+
+    if (argCount == 0) {
+        auto type = IsDynamic(catchBegin->graph->function->owningModule->target) ? compiler::DataType::ANY
+                                                                                 : compiler::DataType::REFERENCE;
+        instImpl->SetIsAcc();
+        instImpl->SetType(type);
+        return catchPhi;
+    }
+
+    std::vector<compiler::DataType::Type> types;
+
+    for (size_t index = 0; index < argCount; ++index) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+        AbckitInst *inputOrThrowable = va_arg(args, AbckitInst *);
+        if (index % 2U == 0) {
+            types.push_back(inputOrThrowable->impl->GetType());
+            catchPhi->impl->AppendInput(inputOrThrowable->impl);
+        } else {
+            catchPhi->impl->CastToCatchPhi()->AppendThrowableInst(inputOrThrowable->impl);
+        }
+    }
+
+    ASSERT(!types.empty());
+
+    if (IsDynamic(catchBegin->graph->function->owningModule->target)) {
+        catchPhi->impl->SetType(compiler::DataType::ANY);
+    } else {
+        for (int i = 1, j = types.size(); i < j; ++i) {
+            if (types[0] != types[i]) {
+                LIBABCKIT_LOG(DEBUG) << "All inputs of a catchPhi should be of the same type " << '\n';
+                SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+                catchBegin->impl->EraseInst(instImpl, true);
+                return nullptr;
+            }
+        }
+        catchPhi->impl->SetType(types[0]);
+    }
+
+    return catchPhi;
 }
 
 // ========================================
@@ -933,7 +996,7 @@ AbckitLiteralArray *IgetLiteralArrayStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
     size_t idx = 0;
-    if (IsDynamic(inst->graph->function->m->target)) {
+    if (IsDynamic(inst->graph->function->owningModule->target)) {
         auto instOpcode = GetDynamicOpcode(inst->impl);
         if (!HasLiteralArrayIdOperandDynamic(instOpcode)) {
             statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -951,24 +1014,35 @@ AbckitLiteralArray *IgetLiteralArrayStatic(AbckitInst *inst)
     auto &imms = inst->impl->CastToIntrinsic()->GetImms();
     ASSERT(!imms.empty());
     auto arrName = inst->graph->irInterface->literalarrays.at(imms[idx]);
-
-    auto litarr = std::make_unique<AbckitLiteralArray>();
-    litarr->file = inst->graph->file;
-    if (IsDynamic(inst->graph->function->m->target)) {
-        litarr->impl = reinterpret_cast<panda::pandasm::LiteralArray *>(
+    std::variant<ark::pandasm::LiteralArray *, panda::pandasm::LiteralArray *> arrImpl {
+        (panda::pandasm::LiteralArray *)nullptr};
+    if (IsDynamic(inst->graph->function->owningModule->target)) {
+        arrImpl = reinterpret_cast<panda::pandasm::LiteralArray *>(
             PandasmWrapper::GetUnwrappedLiteralArrayTable(inst->graph->file->GetDynamicProgram()).at(arrName));
     } else {
-        litarr->impl = reinterpret_cast<ark::pandasm::LiteralArray *>(
-            PandasmWrapper::GetUnwrappedLiteralArrayTable(inst->graph->file->GetStaticProgram()).at(arrName));
+        arrImpl = &inst->graph->file->GetStaticProgram()->literalarrayTable.at(arrName);
     }
-    return inst->graph->file->litarrs.emplace_back(std::move(litarr)).get();
+
+    // Search through already created litarrs
+    auto &abckitLitArrs = inst->graph->file->litarrs;
+    for (auto &item : abckitLitArrs) {
+        if (item->impl == arrImpl) {
+            return item.get();
+        }
+    }
+
+    // Create new litarr
+    auto litarr = std::make_unique<AbckitLiteralArray>();
+    litarr->file = inst->graph->file;
+    litarr->impl = arrImpl;
+    return abckitLitArrs.emplace_back(std::move(litarr)).get();
 }
 
 void IsetLiteralArrayStatic(AbckitInst *inst, AbckitLiteralArray *la)
 {
     LIBABCKIT_LOG_FUNC;
     size_t idx = 0;
-    if (IsDynamic(inst->graph->function->m->target)) {
+    if (IsDynamic(inst->graph->function->owningModule->target)) {
         auto instOpcode = GetDynamicOpcode(inst->impl);
         if (!HasLiteralArrayIdOperandDynamic(instOpcode)) {
             statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -993,7 +1067,7 @@ AbckitString *IgetStringStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
     size_t idx = 0;
-    if (IsDynamic(inst->graph->function->m->target)) {
+    if (IsDynamic(inst->graph->function->owningModule->target)) {
         auto instOpcode = GetDynamicOpcode(inst->impl);
         if (!HasStringIdOperandDynamic(instOpcode)) {
             statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1019,7 +1093,7 @@ void IsetStringStatic(AbckitInst *inst, AbckitString *str)
 {
     LIBABCKIT_LOG_FUNC;
     size_t idx = 0;
-    if (IsDynamic(inst->graph->function->m->target)) {
+    if (IsDynamic(inst->graph->function->owningModule->target)) {
         auto instOpcode = GetDynamicOpcode(inst->impl);
         if (!HasStringIdOperandDynamic(instOpcode)) {
             statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1260,11 +1334,7 @@ void IappendInputStatic(AbckitInst *inst, AbckitInst *input)
 
 static AbckitType *CreateGeneralType(AbckitFile *file, AbckitTypeId typeId, AbckitCoreClass *klass)
 {
-    auto type = std::make_unique<AbckitType>();
-    type->id = typeId;
-    type->klass = klass;
-    file->types.emplace_back(std::move(type));
-    return file->types.back().get();
+    return GetOrCreateType(file, typeId, 0, klass);
 }
 
 AbckitType *IgetTypeStatic(AbckitInst *inst)
@@ -1332,7 +1402,7 @@ AbckitCoreFunction *IgetFunctionStatic(AbckitInst *inst)
         methodPtr = callInst->GetCallMethod();
     } else if (inst->impl->IsIntrinsic()) {
         size_t idx = 0;
-        if (IsDynamic(inst->graph->function->m->target)) {
+        if (IsDynamic(inst->graph->function->owningModule->target)) {
             auto instOpcode = GetDynamicOpcode(inst->impl);
             if (!HasMethodIdOperandDynamic(instOpcode)) {
                 statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1382,7 +1452,7 @@ void IsetFunctionStatic(AbckitInst *inst, AbckitCoreFunction *function)
         callInst->SetCallMethodId(methodOffset);
     } else if (inst->impl->IsIntrinsic()) {
         size_t idx = 0;
-        if (IsDynamic(inst->graph->function->m->target)) {
+        if (IsDynamic(inst->graph->function->owningModule->target)) {
             auto instOpcode = GetDynamicOpcode(inst->impl);
             if (!HasMethodIdOperandDynamic(instOpcode)) {
                 statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1578,19 +1648,19 @@ AbckitCoreModule *IgetModuleStatic(AbckitInst *inst)
         return nullptr;
     }
 
-    return inst->graph->function->m->md[intrInst->GetImm(0)];
+    return inst->graph->function->owningModule->md[intrInst->GetImm(0)];
 }
 
 uint64_t GetModuleIndex(AbckitGraph *graph, AbckitCoreModule *md)
 {
     uint64_t imm = 0;
-    for (auto m : graph->function->m->md) {
+    for (auto m : graph->function->owningModule->md) {
         if (m == md) {
             break;
         }
         imm++;
     }
-    if (imm == graph->function->m->md.size()) {
+    if (imm == graph->function->owningModule->md.size()) {
         LIBABCKIT_LOG(DEBUG) << "Can not find module descriptor for module with name '" << md->moduleName->impl
                              << "'\n";
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1627,7 +1697,7 @@ void IsetModuleStatic(AbckitInst *inst, AbckitCoreModule *md)
 
 AbckitCoreImportDescriptor *GetImportDescriptorDynamic(AbckitInst *inst, uint64_t idx)
 {
-    auto *module = inst->graph->function->m;
+    auto *module = inst->graph->function->owningModule;
     for (auto &id : module->id) {
         auto idPayload = GetDynImportDescriptorPayload(id.get());
         if (!idPayload->isRegularImport) {
@@ -1643,7 +1713,7 @@ AbckitCoreImportDescriptor *GetImportDescriptorDynamic(AbckitInst *inst, uint64_
 AbckitCoreImportDescriptor *IgetImportDescriptorStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
-    ASSERT(IsDynamic(inst->graph->function->m->target));
+    ASSERT(IsDynamic(inst->graph->function->owningModule->target));
 
     if (!inst->impl->IsIntrinsic()) {
         LIBABCKIT_LOG(DEBUG) << "Instruction doesn't have import descriptor\n";
@@ -1665,7 +1735,7 @@ AbckitCoreImportDescriptor *IgetImportDescriptorStatic(AbckitInst *inst)
 
 uint32_t GetImportDescriptorIdxDynamic(AbckitGraph *graph, AbckitCoreImportDescriptor *id)
 {
-    AbckitCoreModule *m = graph->function->m;
+    AbckitCoreModule *m = graph->function->owningModule;
     auto found = std::find_if(m->id.begin(), m->id.end(),
                               [&](std::unique_ptr<AbckitCoreImportDescriptor> const &d) { return d.get() == id; });
     if (found == m->id.end()) {
@@ -1679,7 +1749,7 @@ uint32_t GetImportDescriptorIdxDynamic(AbckitGraph *graph, AbckitCoreImportDescr
 void IsetImportDescriptorStatic(AbckitInst *inst, AbckitCoreImportDescriptor *id)
 {
     LIBABCKIT_LOG_FUNC;
-    ASSERT(IsDynamic(inst->graph->function->m->target));
+    ASSERT(IsDynamic(inst->graph->function->owningModule->target));
 
     if (!inst->impl->IsIntrinsic()) {
         LIBABCKIT_LOG(DEBUG) << "Instruction doesn't have import descriptor\n";
@@ -1705,7 +1775,7 @@ void IsetImportDescriptorStatic(AbckitInst *inst, AbckitCoreImportDescriptor *id
 
 AbckitCoreExportDescriptor *GetExportDescriptorDynamic(AbckitInst *inst, uint64_t idx)
 {
-    auto *module = inst->graph->function->m;
+    auto *module = inst->graph->function->owningModule;
     for (auto &ed : module->ed) {
         auto edPayload = GetDynExportDescriptorPayload(ed.get());
         if (edPayload->kind != AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT) {
@@ -1721,7 +1791,7 @@ AbckitCoreExportDescriptor *GetExportDescriptorDynamic(AbckitInst *inst, uint64_
 AbckitCoreExportDescriptor *IgetExportDescriptorStatic(AbckitInst *inst)
 {
     LIBABCKIT_LOG_FUNC;
-    ASSERT(IsDynamic(inst->graph->function->m->target));
+    ASSERT(IsDynamic(inst->graph->function->owningModule->target));
 
     if (!inst->impl->IsIntrinsic()) {
         LIBABCKIT_LOG(DEBUG) << "Instruction doesn't have export descriptor\n";
@@ -1745,7 +1815,7 @@ AbckitCoreExportDescriptor *IgetExportDescriptorStatic(AbckitInst *inst)
 
 uint32_t GetExportDescriptorIdxDynamic(AbckitGraph *graph, AbckitCoreExportDescriptor *ed)
 {
-    AbckitCoreModule *m = graph->function->m;
+    AbckitCoreModule *m = graph->function->owningModule;
     auto found = std::find_if(m->ed.begin(), m->ed.end(),
                               [&](std::unique_ptr<AbckitCoreExportDescriptor> const &d) { return d.get() == ed; });
     if (found == m->ed.end()) {
@@ -1759,7 +1829,7 @@ uint32_t GetExportDescriptorIdxDynamic(AbckitGraph *graph, AbckitCoreExportDescr
 void IsetExportDescriptorStatic(AbckitInst *inst, AbckitCoreExportDescriptor *ed)
 {
     LIBABCKIT_LOG_FUNC;
-    ASSERT(IsDynamic(inst->graph->function->m->target));
+    ASSERT(IsDynamic(inst->graph->function->owningModule->target));
 
     if (!inst->impl->IsIntrinsic()) {
         LIBABCKIT_LOG(DEBUG) << "Instruction doesn't have export descriptor\n";

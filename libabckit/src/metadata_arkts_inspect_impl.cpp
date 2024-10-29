@@ -80,7 +80,7 @@ extern "C" AbckitArktsNamespace *CoreNamespaceToArktsNamespace(AbckitCoreNamespa
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(n, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(n->m);
+    LIBABCKIT_CHECK_ARKTS_TARGET(n->owningModule);
     return n->GetArkTSImpl();
 }
 
@@ -89,7 +89,7 @@ extern "C" AbckitArktsFunction *ArktsV1NamespaceGetConstructor(AbckitArktsNamesp
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(n, nullptr);
-    if (n->core->m->target != ABCKIT_TARGET_ARK_TS_V1) {
+    if (n->core->owningModule->target != ABCKIT_TARGET_ARK_TS_V1) {
         libabckit::statuses::SetLastError(ABCKIT_STATUS_WRONG_TARGET);
         return nullptr;
     }
@@ -155,7 +155,7 @@ extern "C" AbckitArktsClass *CoreClassToArktsClass(AbckitCoreClass *c)
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(c, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(c->m);
+    LIBABCKIT_CHECK_ARKTS_TARGET(c->owningModule);
     return c->GetArkTSImpl();
 }
 
@@ -176,7 +176,7 @@ extern "C" AbckitArktsFunction *CoreFunctionToArktsFunction(AbckitCoreFunction *
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(m->m);
+    LIBABCKIT_CHECK_ARKTS_TARGET(m->owningModule);
     return m->GetArkTSImpl();
 }
 
@@ -186,7 +186,7 @@ extern "C" bool FunctionIsNative(AbckitArktsFunction *function)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(function, false);
 
-    switch (function->core->m->target) {
+    switch (function->core->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
             return FunctionIsNativeDynamic(function->core);
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -213,7 +213,7 @@ extern "C" AbckitArktsAnnotation *CoreAnnotationToArktsAnnotation(AbckitCoreAnno
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->m);
+    LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->owningModule);
     return a->GetArkTSImpl();
 }
 
@@ -234,7 +234,7 @@ extern "C" AbckitArktsAnnotationElement *CoreAnnotationElementToArktsAnnotationE
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(a->ann->ai->m);
+    LIBABCKIT_CHECK_ARKTS_TARGET(a->ann->ai->owningModule);
     return a->GetArkTSImpl();
 }
 
@@ -257,7 +257,7 @@ extern "C" AbckitArktsAnnotationInterface *CoreAnnotationInterfaceToArktsAnnotat
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(a->m);
+    LIBABCKIT_CHECK_ARKTS_TARGET(a->owningModule);
     return a->GetArkTSImpl();
 }
 
@@ -280,7 +280,7 @@ extern "C" AbckitArktsAnnotationInterfaceField *CoreAnnotationInterfaceFieldToAr
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(a, nullptr);
-    LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->m);
+    LIBABCKIT_CHECK_ARKTS_TARGET(a->ai->owningModule);
     return a->GetArkTSImpl();
 }
 
@@ -515,11 +515,17 @@ void ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
 // Function
 // ========================================
 
-void ArkTSFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
-                                           bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
+void ArkTSFunctionEnumerateNestedFunctions([[maybe_unused]] AbckitCoreFunction *function, [[maybe_unused]] void *data,
+                                           [[maybe_unused]] bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
 {
-    for (auto &f : function->nestedFunction) {
-        if (!cb(f.get(), data)) {
+    // There is no nested functions in ArkTS
+}
+
+void ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+                                         bool (*cb)(AbckitCoreClass *nestedClass, void *data))
+{
+    for (auto &c : function->nestedClasses) {
+        if (!cb(c.get(), data)) {
             break;
         }
     }
@@ -550,7 +556,7 @@ void ArkTSAnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
 
     LIBABCKIT_BAD_ARGUMENT_VOID(anno->ai)
 
-    AbckitCoreModule *m = anno->ai->m;
+    AbckitCoreModule *m = anno->ai->owningModule;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(m)
     LIBABCKIT_BAD_ARGUMENT_VOID(m->file)

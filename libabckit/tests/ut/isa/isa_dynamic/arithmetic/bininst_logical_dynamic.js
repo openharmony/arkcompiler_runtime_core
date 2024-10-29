@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
 
 class A {
     foo(a, b) {
@@ -23,27 +22,3 @@ class A {
 let a = new A();
 let res = a.foo(10, 2);
 print(res);
-
-// After AOP 1:
-
-// class A {
-//    foo(a: long, b: long) : long {
-//       return a | b;
-//    }
-// }
-
-// After AOP 2:
-
-// class A {
-//    foo(a: long, b: long) : long {
-//       return a & b;
-//    }
-// }
-
-// After AOP 3:
-
-// class A {
-//    foo(a: long, b: long) : long {
-//       return a ^ b;
-//    }
-// }

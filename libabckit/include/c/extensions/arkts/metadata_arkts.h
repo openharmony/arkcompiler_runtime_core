@@ -445,7 +445,7 @@ struct AbckitArktsDynamicModuleExportCreateParams {
 /**
  * @brief Struct that is used to create new external modules.
  */
-struct AbckitArktsExternalModuleCreateParams {
+struct AbckitArktsV1ExternalModuleCreateParams {
     /**
      * @brief Name of the created external module
      */
@@ -461,16 +461,16 @@ struct AbckitArktsModifyApi {
      * ======================================== */
 
     /**
-     * @brief Creates an external Arkts module and adds it to the file `file`.
-     * @return AbckitArktsModule *.
+     * @brief Creates an external Arkts module with target `ABCKIT_TARGET_ARK_TS_V1` and adds it to the file `file`.
+     * @return Pointer to the newly created module.
      * @param [ in ] file - Binary file to .
      * @param [ in ] params - Data that is used to create the external module.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      * @note Allocates
      */
-    AbckitArktsModule *(*fileAddExternalModule)(AbckitFile *file,
-                                                const struct AbckitArktsExternalModuleCreateParams *params);
+    AbckitArktsModule *(*fileAddExternalModuleArktsV1)(AbckitFile *file,
+                                                       const struct AbckitArktsV1ExternalModuleCreateParams *params);
 
     /* ========================================
      * Module

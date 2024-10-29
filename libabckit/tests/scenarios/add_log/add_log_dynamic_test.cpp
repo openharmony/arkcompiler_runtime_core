@@ -26,7 +26,7 @@
 
 namespace libabckit::test {
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
@@ -213,7 +213,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> GetCorrectBBSch
 }
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestDynamicAddLog)
+TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicAddLog)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_dynamic.abc", "add_log_dynamic");
     EXPECT_TRUE(helpers::Match(output, "abckit\n"));

@@ -36,7 +36,7 @@
 #include <cstdint>
 #include <string>
 
-// CC-OFFNXT(WordsTool.95 google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark;
 
@@ -248,8 +248,7 @@ AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **v
     // NOLINTNEXTLINE(cert-msc51-cpp)
     uint32_t arrayOffset = 0;
     while (prog->literalarrayTable.find(std::to_string(arrayOffset)) != prog->literalarrayTable.end()) {
-        LIBABCKIT_LOG(DEBUG) << "generating new arrayOffset\n";
-        arrayOffset = std::stoi(prog->literalarrayTable.rbegin()->first) + 1;
+        arrayOffset++;
     }
     auto arrayName = std::to_string(arrayOffset);
 

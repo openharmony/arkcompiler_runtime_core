@@ -31,6 +31,8 @@ void ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data,
 
 bool IsDynamic(AbckitTarget target);
 
+AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass);
+
 }  // namespace libabckit
 
 #endif  // LIBABCKIT_SRC_HELPERS_COMMON_H

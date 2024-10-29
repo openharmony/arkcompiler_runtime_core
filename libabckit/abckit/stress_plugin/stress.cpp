@@ -43,14 +43,40 @@ static void TransformMethod(AbckitCoreFunction *method)
     g_implM->functionSetGraph(method, graph);
 }
 
-// CC-OFFNXT(超大函数[C++] Oversized function) huge_function
+static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<bool(AbckitCoreNamespace *)> &cbNamespace,
+                                        std::function<bool(AbckitCoreClass *)> &cbClass,
+                                        std::function<bool(AbckitCoreFunction *)> &cbFunc, bool &hasError)
+{
+    std::function<bool(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
+        g_implI->moduleEnumerateNamespaces(m, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
+            return (*reinterpret_cast<std::function<bool(AbckitCoreNamespace *)> *>(cb))(n);
+        });
+        g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
+            return (*reinterpret_cast<std::function<bool(AbckitCoreClass *)> *>(cb))(c);
+        });
+        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+            return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(f);
+        });
+        return !hasError;
+    };
+
+    g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
+        return (*reinterpret_cast<std::function<bool(AbckitCoreModule *)> *>(cb))(m);
+    });
+}
+
 extern "C" int Entry(AbckitFile *file)
 {
     bool hasError = false;
 
+    std::function<bool(AbckitCoreClass *)> cbClass;
+
     std::function<bool(AbckitCoreFunction *)> cbFunc = [&](AbckitCoreFunction *f) {
         g_implI->functionEnumerateNestedFunctions(f, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(f);
+        });
+        g_implI->functionEnumerateNestedClasses(f, &cbClass, [](AbckitCoreClass *c, void *cb) {
+            return (*reinterpret_cast<std::function<bool(AbckitCoreClass *)> *>(cb))(c);
         });
 
         TransformMethod(f);
@@ -61,15 +87,15 @@ extern "C" int Entry(AbckitFile *file)
         return !hasError;
     };
 
-    std::function<bool(AbckitCoreClass *)> cbClass = [&](AbckitCoreClass *c) {
+    cbClass = [&](AbckitCoreClass *c) {
         g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(m);
         });
         return !hasError;
     };
 
-    std::function<void(AbckitCoreNamespace *)> cbNamespce = [&](AbckitCoreNamespace *n) {
-        g_implI->namespaceEnumerateNamespaces(n, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+    std::function<bool(AbckitCoreNamespace *)> cbNamespace = [&](AbckitCoreNamespace *n) {
+        g_implI->namespaceEnumerateNamespaces(n, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreNamespace *)> *>(cb))(n);
         });
         g_implI->namespaceEnumerateClasses(n, &cbClass, [](AbckitCoreClass *c, void *cb) {
@@ -81,22 +107,7 @@ extern "C" int Entry(AbckitFile *file)
         return !hasError;
     };
 
-    std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
-        g_implI->moduleEnumerateNamespaces(m, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
-            return (*reinterpret_cast<std::function<bool(AbckitCoreNamespace *)> *>(cb))(n);
-        });
-        g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
-            return (*reinterpret_cast<std::function<bool(AbckitCoreClass *)> *>(cb))(c);
-        });
-        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
-            return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(m);
-        });
-        return !hasError;
-    };
-
-    g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
-        return (*reinterpret_cast<std::function<bool(AbckitCoreModule *)> *>(cb))(m);
-    });
+    EnumerateAllMethodsInModule(file, cbNamespace, cbClass, cbFunc, hasError);
 
     return hasError ? 1 : 0;
 }

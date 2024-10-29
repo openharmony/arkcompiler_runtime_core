@@ -32,25 +32,11 @@ static auto g_graphApiImp = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitWrongCtxTestsGraphApiImpl0 : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::bbCheckDominance,
+// Test: test-kind=api, api=GraphApiImpl::iSetFunction,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, bbCheckDominance)
+TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iSetFunction)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->bbCheckDominance);
-}
-
-// Test: test-kind=api, api=GraphApiImpl::iCheckDominance,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iCheckDominance)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iCheckDominance);
-}
-
-// Test: test-kind=api, api=GraphApiImpl::iInsertAfter,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iInsertAfter)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iInsertAfter);
+    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iSetFunction);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbAddInstBack,
@@ -60,32 +46,11 @@ TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, bbAddInstBack)
     helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->bbAddInstBack);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetFunction,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iSetFunction)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iSetFunction);
-}
-
-// Test: test-kind=api, api=GraphApiImpl::bbAppendSuccBlock,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, bbAppendSuccBlock)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->bbAppendSuccBlock);
-}
-
 // Test: test-kind=api, api=GraphApiImpl::iInsertBefore,
 // abc-kind=NoABC, category=negative-file
 TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iInsertBefore)
 {
     helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iInsertBefore);
-}
-
-// Test: test-kind=api, api=GraphApiImpl::iAppendInput,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iAppendInput)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iAppendInput);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::bbAddInstFront,
@@ -100,6 +65,41 @@ TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, bbAddInstFront)
 TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, bbInsertSuccBlock)
 {
     helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->bbInsertSuccBlock);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::bbCheckDominance,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, bbCheckDominance)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->bbCheckDominance);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iCheckDominance,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iCheckDominance)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iCheckDominance);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iAppendInput,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iAppendInput)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iAppendInput);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::iInsertAfter,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, iInsertAfter)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->iInsertAfter);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::bbAppendSuccBlock,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsGraphApiImpl0, bbAppendSuccBlock)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_graphApiImp->bbAppendSuccBlock);
 }
 
 }  // namespace libabckit::test

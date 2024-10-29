@@ -67,10 +67,10 @@ void TransformIR(ReplaceContext *rctx)
     VisitAllBBs(rctx, start, visitedBlocks);
 }
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestReplaceCallSite)
+TEST_F(AbckitScenarioTest, LibAbcKitTestReplaceCallSite)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static.abc",
                                             "replace_callsite_static/ETSGLOBAL", "main");

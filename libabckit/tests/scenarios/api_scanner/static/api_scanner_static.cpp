@@ -95,10 +95,10 @@ bool CheckRessult(std::unordered_map<std::string, int> &methodsMap)
     return true;
 }
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestApiScannerStatic)
+TEST_F(AbckitScenarioTest, LibAbcKitTestApiScannerStatic)
 {
     AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios/api_scanner/static/api_scanner_static.abc");
 

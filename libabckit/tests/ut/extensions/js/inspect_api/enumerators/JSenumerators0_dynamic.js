@@ -19,6 +19,11 @@ function m0F0() {
     (() => {
         console.log(2);
     })();
+    function m0F0F0() {}
+    let m0F0F1 = ()=>{};
+    class M0F0C0 {
+        M0F0C0F0() {}
+    }
 }
 
 function* m0F1() {}

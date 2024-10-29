@@ -798,6 +798,14 @@ struct AbckitInspectApi {
     AbckitString *(*classGetName)(AbckitCoreClass *klass);
 
     /**
+     * @brief Returns parent function for class `klass`.
+     * @return Pointer to the `AbckitCoreFunction`.
+     * @param [ in ] klass - Class to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
+     */
+    AbckitCoreFunction *(*classGetParentFunction)(AbckitCoreClass *klass);
+
+    /**
      * @brief Returns parent namespace for class `klass`.
      * @return Pointer to the `AbckitCoreNamespace`.
      * @param [ in ] klass - Class to be inspected.
@@ -861,6 +869,14 @@ struct AbckitInspectApi {
     AbckitString *(*functionGetName)(AbckitCoreFunction *function);
 
     /**
+     * @brief Returns parent function for function `function`.
+     * @return Pointer to the `AbckitCoreClass`.
+     * @param [ in ] function - Function to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `function` is NULL.
+     */
+    AbckitCoreFunction *(*functionGetParentFunction)(AbckitCoreFunction *function);
+
+    /**
      * @brief Returns parent class for function `function`.
      * @return Pointer to the `AbckitCoreClass`.
      * @param [ in ] function - Function to be inspected.
@@ -888,6 +904,19 @@ struct AbckitInspectApi {
      */
     void (*functionEnumerateNestedFunctions)(AbckitCoreFunction *func, void *data,
                                              bool (*cb)(AbckitCoreFunction *nestedFunc, void *data));
+
+    /**
+     * @brief Enumerates nested classes of function `func`, invoking callback `cb` for each nested class.
+     * @return None.
+     * @param [ in ] func - Function to be inspected.
+     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
+     * it is invoked.
+     * @param [ in ] cb - Callback that will be invoked.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
+     */
+    void (*functionEnumerateNestedClasses)(AbckitCoreFunction *func, void *data,
+                                           bool (*cb)(AbckitCoreClass *nestedClass, void *data));
 
     /**
      * @brief Enumerates annotations of function `func`, invoking callback `cb` for each annotation.

@@ -119,7 +119,7 @@ extern "C" void DestroyGraph(AbckitGraph *graph)
 
     LIBABCKIT_BAD_ARGUMENT_VOID(graph);
 
-    if (IsDynamic(graph->function->m->target)) {
+    if (IsDynamic(graph->function->owningModule->target)) {
         return DestroyGraphDynamic(graph);
     }
     DestroyGraphStatic(graph);

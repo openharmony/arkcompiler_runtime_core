@@ -13,13 +13,22 @@
  * limitations under the License.
  */
 
+function throwableAPI() {
+    print('THROW');
+    throw new Error('DUMMY_ERROR');
+}
 
-function main() {
-    try {
-        throw new Error('abckit_error')
-    } catch (e) {
-        print('CATCH')
+class Handler {
+    run() {
+        let tmp;
+        tmp = throwableAPI();
+        return tmp;
     }
 }
 
-main()
+function main() {
+    let c = new Handler();
+    print(c.run());
+}
+
+main();

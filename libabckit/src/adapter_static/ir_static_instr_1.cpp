@@ -50,14 +50,14 @@ using namespace ark;
 AbckitInst *IcreateDynCallthis0Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS0_IMM8_V8);
 }
 
 AbckitInst *IcreateDynCallthis1Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS1_IMM8_V8_V8);
 }
 
@@ -70,7 +70,7 @@ AbckitInst *IcreateDynCallarg0Static(AbckitGraph *graph, AbckitInst *acc)
 AbckitInst *IcreateDynCallarg1Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLARG1_IMM8_V8);
 }
 
@@ -91,7 +91,7 @@ AbckitInst *IcreateDynLdobjbynameStatic(AbckitGraph *graph, AbckitInst *acc, Abc
 AbckitInst *IcreateDynNewobjrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args, compiler::IntrinsicInst::IntrinsicId::DYN_NEWOBJRANGE_IMM16_IMM8_V8);
 }
 
@@ -111,63 +111,63 @@ AbckitInst *IcreateDynNegStatic(AbckitGraph *graph, AbckitInst *acc)
 AbckitInst *IcreateDynAdd2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_ADD2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynSub2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_SUB2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynMul2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_MUL2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynDiv2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_DIV2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynMod2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_MOD2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynExpStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_EXP_IMM8_V8);
 }
 
 AbckitInst *IcreateDynShl2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_SHL2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynShr2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_SHR2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynAshr2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_ASHR2_IMM8_V8);
 }
 
@@ -180,21 +180,21 @@ AbckitInst *IcreateDynNotStatic(AbckitGraph *graph, AbckitInst *acc)
 AbckitInst *IcreateDynOr2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_OR2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynXor2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_XOR2_IMM8_V8);
 }
 
 AbckitInst *IcreateDynAnd2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_AND2_IMM8_V8);
 }
 
@@ -213,56 +213,56 @@ AbckitInst *IcreateDynDecStatic(AbckitGraph *graph, AbckitInst *acc)
 AbckitInst *IcreateDynEqStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_EQ_IMM8_V8);
 }
 
 AbckitInst *IcreateDynNoteqStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_NOTEQ_IMM8_V8);
 }
 
 AbckitInst *IcreateDynLessStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_LESS_IMM8_V8);
 }
 
 AbckitInst *IcreateDynLesseqStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_LESSEQ_IMM8_V8);
 }
 
 AbckitInst *IcreateDynGreaterStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_GREATER_IMM8_V8);
 }
 
 AbckitInst *IcreateDynGreatereqStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_GREATEREQ_IMM8_V8);
 }
 
 AbckitInst *IcreateDynStrictnoteqStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_STRICTNOTEQ_IMM8_V8);
 }
 
 AbckitInst *IcreateDynStricteqStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_STRICTEQ_IMM8_V8);
 }
 
@@ -317,21 +317,21 @@ AbckitInst *IcreateDynThrowDeletesuperpropertyStatic(AbckitGraph *graph)
 AbckitInst *IcreateDynThrowConstassignmentStatic(AbckitGraph *graph, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, compiler::IntrinsicInst::IntrinsicId::DYN_THROW_CONSTASSIGNMENT_PREF_V8);
 }
 
 AbckitInst *IcreateDynThrowIfnotobjectStatic(AbckitGraph *graph, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, compiler::IntrinsicInst::IntrinsicId::DYN_THROW_IFNOTOBJECT_PREF_V8);
 }
 
 AbckitInst *IcreateDynThrowUndefinedifholeStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, input1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_THROW_UNDEFINEDIFHOLE_PREF_V8_V8);
 }
@@ -363,7 +363,7 @@ AbckitInst *IcreateDynDefineclasswithbufferStatic(AbckitGraph *graph, AbckitCore
                                                   AbckitLiteralArray *literalArray, uint64_t imm0, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, GetMethodOffset(graph, function), GetLiteralArrayOffset(graph, literalArray), imm0,
                          input0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8);
@@ -374,7 +374,7 @@ AbckitInst *IcreateDynCallruntimeDefinesendableclassStatic(AbckitGraph *graph, A
                                                            AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(
         graph, GetMethodOffset(graph, function), GetLiteralArrayOffset(graph, literalArray), imm0, input0,
         compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_DEFINESENDABLECLASS_PREF_IMM16_ID16_ID16_IMM16_V8);
@@ -461,14 +461,14 @@ AbckitInst *IcreateDynTypeofStatic(AbckitGraph *graph, AbckitInst *acc)
 AbckitInst *IcreateDynIsinStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_ISIN_IMM8_V8);
 }
 
 AbckitInst *IcreateDynInstanceofStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_INSTANCEOF_IMM8_V8);
 }
 
@@ -487,7 +487,7 @@ AbckitInst *IcreateDynReturnundefinedStatic(AbckitGraph *graph)
 AbckitInst *IcreateDynStownbynameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, GetStringOffset(graph, string),
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYNAME_IMM16_ID16_V8);
 }
@@ -495,14 +495,14 @@ AbckitInst *IcreateDynStownbynameStatic(AbckitGraph *graph, AbckitInst *acc, Abc
 AbckitInst *IcreateDynStownbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYVALUE_IMM8_V8_V8);
 }
 
 AbckitInst *IcreateDynStownbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYINDEX_IMM16_V8_IMM16);
 }
@@ -510,7 +510,7 @@ AbckitInst *IcreateDynStownbyindexStatic(AbckitGraph *graph, AbckitInst *acc, Ab
 AbckitInst *IcreateDynWideStownbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_STOWNBYINDEX_PREF_V8_IMM32, false);
 }
@@ -519,7 +519,7 @@ AbckitInst *IcreateDynStownbyvaluewithnamesetStatic(AbckitGraph *graph, AbckitIn
                                                     AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYVALUEWITHNAMESET_IMM16_V8_V8);
 }
@@ -528,7 +528,7 @@ AbckitInst *IcreateDynStownbynamewithnamesetStatic(AbckitGraph *graph, AbckitIns
                                                    AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, GetStringOffset(graph, string),
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYNAMEWITHNAMESET_IMM8_ID16_V8);
 }
@@ -542,7 +542,7 @@ AbckitInst *IcreateDynCreateemptyobjectStatic(AbckitGraph *graph)
 AbckitInst *IcreateDynStobjbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOBJBYVALUE_IMM16_V8_V8);
 }
@@ -550,7 +550,7 @@ AbckitInst *IcreateDynStobjbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, Ab
 AbckitInst *IcreateDynStobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOBJBYINDEX_IMM8_V8_IMM16);
 }
@@ -558,7 +558,7 @@ AbckitInst *IcreateDynStobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc, Ab
 AbckitInst *IcreateDynWideStobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_STOBJBYINDEX_PREF_V8_IMM32, false);
 }
@@ -566,7 +566,7 @@ AbckitInst *IcreateDynWideStobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc
 AbckitInst *IcreateDynStobjbynameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, GetStringOffset(graph, string),
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOBJBYNAME_IMM16_ID16_V8);
 }
@@ -622,14 +622,14 @@ AbckitInst *IcreateDynGetasynciteratorStatic(AbckitGraph *graph, AbckitInst *acc
 AbckitInst *IcreateDynCreategeneratorobjStatic(AbckitGraph *graph, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, compiler::IntrinsicInst::IntrinsicId::DYN_CREATEGENERATOROBJ_V8);
 }
 
 AbckitInst *IcreateDynCreateasyncgeneratorobjStatic(AbckitGraph *graph, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, compiler::IntrinsicInst::IntrinsicId::DYN_CREATEASYNCGENERATOROBJ_V8);
 }
 
@@ -667,7 +667,7 @@ AbckitInst *IcreateDynGettemplateobjectStatic(AbckitGraph *graph, AbckitInst *ac
 AbckitInst *IcreateDynGetnextpropnameStatic(AbckitGraph *graph, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, compiler::IntrinsicInst::IntrinsicId::DYN_GETNEXTPROPNAME_V8, false);
 }
 
@@ -688,21 +688,21 @@ AbckitInst *IcreateDynDynamicimportStatic(AbckitGraph *graph, AbckitInst *acc)
 AbckitInst *IcreateDynCreateiterresultobjStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, input1, compiler::IntrinsicInst::IntrinsicId::DYN_CREATEITERRESULTOBJ_V8_V8);
 }
 
 AbckitInst *IcreateDynNewobjapplyStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_NEWOBJAPPLY_IMM16_V8);
 }
 
 AbckitInst *IcreateDynCallruntimeCallinitStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_CALLINIT_PREF_IMM8_V8);
 }
@@ -710,84 +710,84 @@ AbckitInst *IcreateDynCallruntimeCallinitStatic(AbckitGraph *graph, AbckitInst *
 AbckitInst *IcreateDynSupercallspreadStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_SUPERCALLSPREAD_IMM8_V8);
 }
 
 AbckitInst *IcreateDynDelobjpropStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_DELOBJPROP_V8);
 }
 
 AbckitInst *IcreateDynSuspendgeneratorStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_SUSPENDGENERATOR_V8);
 }
 
 AbckitInst *IcreateDynAsyncfunctionawaituncaughtStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_ASYNCFUNCTIONAWAITUNCAUGHT_V8);
 }
 
 AbckitInst *IcreateDynCopydatapropertiesStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_COPYDATAPROPERTIES_V8);
 }
 
 AbckitInst *IcreateDynSetobjectwithprotoStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_SETOBJECTWITHPROTO_IMM16_V8);
 }
 
 AbckitInst *IcreateDynLdobjbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_LDOBJBYVALUE_IMM16_V8);
 }
 
 AbckitInst *IcreateDynLdsuperbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_LDSUPERBYVALUE_IMM16_V8);
 }
 
 AbckitInst *IcreateDynAsyncfunctionresolveStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_ASYNCFUNCTIONRESOLVE_V8);
 }
 
 AbckitInst *IcreateDynAsyncfunctionrejectStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_ASYNCFUNCTIONREJECT_V8);
 }
 
 AbckitInst *IcreateDynStthisbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_STTHISBYVALUE_IMM8_V8);
 }
 
 AbckitInst *IcreateDynAsyncgeneratorrejectStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_ASYNCGENERATORREJECT_V8);
 }
 
@@ -796,28 +796,28 @@ AbckitInst *IcreateDynAsyncgeneratorrejectStatic(AbckitGraph *graph, AbckitInst 
 AbckitInst *IcreateDynCallargs2Static(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, compiler::IntrinsicInst::IntrinsicId::DYN_CALLARGS2_IMM8_V8_V8);
 }
 
 AbckitInst *IcreateDynApplyStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, compiler::IntrinsicInst::IntrinsicId::DYN_APPLY_IMM8_V8_V8);
 }
 
 AbckitInst *IcreateDynStarrayspreadStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, compiler::IntrinsicInst::IntrinsicId::DYN_STARRAYSPREAD_V8_V8);
 }
 
 AbckitInst *IcreateDynStsuperbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STSUPERBYVALUE_IMM16_V8_V8);
 }
@@ -826,7 +826,7 @@ AbckitInst *IcreateDynAsyncgeneratorresolveStatic(AbckitGraph *graph, AbckitInst
                                                   AbckitInst *input2)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, input1, input2,
                          compiler::IntrinsicInst::IntrinsicId::DYN_ASYNCGENERATORRESOLVE_V8_V8_V8);
 }
@@ -835,7 +835,7 @@ AbckitInst *IcreateDynCallruntimeDefinefieldbyvalueStatic(AbckitGraph *graph, Ab
                                                           AbckitInst *input1)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_DEFINEFIELDBYVALUE_PREF_IMM8_V8_V8);
 }
@@ -844,7 +844,7 @@ AbckitInst *IcreateDynDefinefieldbynameStatic(AbckitGraph *graph, AbckitInst *ac
                                               AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, GetStringOffset(graph, string),
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINEFIELDBYNAME_IMM8_ID16_V8);
 }
@@ -853,7 +853,7 @@ AbckitInst *IcreateDynDefinepropertybynameStatic(AbckitGraph *graph, AbckitInst 
                                                  AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, GetStringOffset(graph, string),
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINEPROPERTYBYNAME_IMM8_ID16_V8);
 }
@@ -861,7 +861,7 @@ AbckitInst *IcreateDynDefinepropertybynameStatic(AbckitGraph *graph, AbckitInst 
 AbckitInst *IcreateDynStsuperbynameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, GetStringOffset(graph, string),
                          compiler::IntrinsicInst::IntrinsicId::DYN_STSUPERBYNAME_IMM16_ID16_V8);
 }
@@ -870,7 +870,7 @@ AbckitInst *IcreateDynCreateobjectwithexcludedkeysStatic(AbckitGraph *graph, Abc
                                                          uint64_t imm0, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, input1, imm0, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CREATEOBJECTWITHEXCLUDEDKEYS_IMM8_V8_V8, false);
 }
@@ -879,7 +879,7 @@ AbckitInst *IcreateDynWideCreateobjectwithexcludedkeysStatic(AbckitGraph *graph,
                                                              uint64_t imm0, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, input1, imm0, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8,
                          false);
@@ -889,7 +889,7 @@ AbckitInst *IcreateDynCallruntimeDefinefieldbyindexStatic(AbckitGraph *graph, Ab
                                                           AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_DEFINEFIELDBYINDEX_PREF_IMM8_IMM32_V8);
 }
@@ -897,7 +897,7 @@ AbckitInst *IcreateDynCallruntimeDefinefieldbyindexStatic(AbckitGraph *graph, Ab
 AbckitInst *IcreateDynCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     auto intrImpl = graph->impl->CreateInstIntrinsic(
         compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHISRANGE_IMM8_IMM8_V8);
     size_t argsCount {argCount + 2};
@@ -917,7 +917,7 @@ AbckitInst *IcreateDynCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, s
 AbckitInst *IcreateDynWideCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     auto intrImpl = graph->impl->CreateInstIntrinsic(
         compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_CALLTHISRANGE_PREF_IMM16_V8);
     size_t argsCount {argCount + 2};
@@ -936,7 +936,7 @@ AbckitInst *IcreateDynWideCallthisrangeStatic(AbckitGraph *graph, AbckitInst *ac
 AbckitInst *IcreateDynSupercallarrowrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_SUPERCALLARROWRANGE_IMM8_IMM8_V8);
 }
@@ -944,14 +944,14 @@ AbckitInst *IcreateDynSupercallarrowrangeStatic(AbckitGraph *graph, AbckitInst *
 AbckitInst *IcreateDynCallrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args, compiler::IntrinsicInst::IntrinsicId::DYN_CALLRANGE_IMM8_IMM8_V8);
 }
 
 AbckitInst *IcreateDynWideCallrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_CALLRANGE_PREF_IMM16_V8, false);
 }
@@ -960,7 +960,7 @@ AbckitInst *IcreateDynWideSupercallarrowrangeStatic(AbckitGraph *graph, AbckitIn
                                                     std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8, false);
 }
@@ -969,7 +969,7 @@ AbckitInst *IcreateDynStprivatepropertyStatic(AbckitGraph *graph, AbckitInst *ac
                                               AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0, imm1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STPRIVATEPROPERTY_IMM8_IMM16_IMM16_V8);
 }
@@ -977,7 +977,7 @@ AbckitInst *IcreateDynCallruntimeDefineprivatepropertyStatic(AbckitGraph *graph,
                                                              uint64_t imm1, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(
         graph, acc, input0, imm0, imm1,
         compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_DEFINEPRIVATEPROPERTY_PREF_IMM8_IMM16_IMM16_V8);
@@ -1001,7 +1001,7 @@ AbckitInst *IcreateDynCallargs3Static(AbckitGraph *graph, AbckitInst *acc, Abcki
                                       AbckitInst *input2)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, input2,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLARGS3_IMM8_V8_V8_V8);
 }
@@ -1010,7 +1010,7 @@ AbckitInst *IcreateDynCallthis2Static(AbckitGraph *graph, AbckitInst *acc, Abcki
                                       AbckitInst *input2)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, input2,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS2_IMM8_V8_V8_V8);
 }
@@ -1020,7 +1020,7 @@ AbckitInst *IcreateDynCallthis3Static(AbckitGraph *graph, AbckitInst *acc, Abcki
                                       AbckitInst *input2, AbckitInst *input3)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, input2, input3,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHIS3_IMM8_V8_V8_V8_V8);
 }
@@ -1030,7 +1030,7 @@ AbckitInst *IcreateDynDefinegettersetterbyvalueStatic(AbckitGraph *graph, Abckit
                                                       AbckitInst *input1, AbckitInst *input2, AbckitInst *input3)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, input1, input2, input3,
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINEGETTERSETTERBYVALUE_V8_V8_V8_V8);
 }
@@ -1129,7 +1129,7 @@ AbckitInst *IcreateDynWideLdobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc
 AbckitInst *IcreateDynSupercallthisrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_SUPERCALLTHISRANGE_IMM8_IMM8_V8);
 }
@@ -1137,7 +1137,7 @@ AbckitInst *IcreateDynSupercallthisrangeStatic(AbckitGraph *graph, size_t argCou
 AbckitInst *IcreateDynWideSupercallthisrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_SUPERCALLTHISRANGE_PREF_IMM16_V8, false);
 }
@@ -1145,7 +1145,7 @@ AbckitInst *IcreateDynWideSupercallthisrangeStatic(AbckitGraph *graph, size_t ar
 AbckitInst *IcreateDynWideNewobjrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+    // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_NEWOBJRANGE_PREF_IMM16_V8, false);
 }
@@ -1509,7 +1509,7 @@ AbckitInst *IcreateLoadArrayStatic(AbckitGraph *graph, AbckitInst *arrayRef, Abc
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "IcreateLoadArrayStatic" << '\n';
 
-    if (returnTypeId == ABCKIT_TYPE_ID_INVALID || IsDynamic(graph->function->m->target) ||
+    if (returnTypeId == ABCKIT_TYPE_ID_INVALID || IsDynamic(graph->function->owningModule->target) ||
         arrayRef->impl->GetType() != compiler::DataType::REFERENCE ||
         (idx->impl->GetType() != compiler::DataType::INT32 && idx->impl->GetType() != compiler::DataType::INT64)) {
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
@@ -1534,7 +1534,7 @@ static AbckitInst *IcreateStoreArrayBody(AbckitInst *arrayRef, AbckitInst *idx, 
                                          AbckitTypeId valueTypeId, bool isWide)
 {
     auto *graph = arrayRef->graph;
-    if (valueTypeId == ABCKIT_TYPE_ID_INVALID || IsDynamic(graph->function->m->target) ||
+    if (valueTypeId == ABCKIT_TYPE_ID_INVALID || IsDynamic(graph->function->owningModule->target) ||
         arrayRef->impl->GetType() != compiler::DataType::REFERENCE) {
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
@@ -1593,7 +1593,7 @@ AbckitInst *IcreateLenArrayStatic(AbckitGraph *graph, AbckitInst *arr)
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "IcreateLenArrayStatic" << '\n';
 
-    if (IsDynamic(graph->function->m->target) || arr->impl->GetType() != compiler::DataType::REFERENCE) {
+    if (IsDynamic(graph->function->owningModule->target) || arr->impl->GetType() != compiler::DataType::REFERENCE) {
         SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
@@ -1701,52 +1701,6 @@ AbckitInst *IcreateThrowStatic(AbckitGraph *graph, AbckitInst *input0)
     intrImpl->AppendInput(input0->impl, compiler::DataType::REFERENCE);
     intrImpl->AddImm(graph->impl->GetAllocator(), IC_SLOT_VALUE);
     return CreateInstFromImpl(graph, intrImpl);
-}
-
-AbckitInst *IcreateCatchPhiStatic(AbckitGraph *graph, AbckitBasicBlock *catchBegin, size_t argCount, std::va_list args)
-{
-    auto *instImpl = graph->impl->CreateInstCatchPhi();
-    auto *catchPhi = CreateInstFromImpl(graph, instImpl);
-
-    BBaddInstFrontStatic(catchBegin, catchPhi);
-
-    if (argCount == 0) {
-        auto type = IsDynamic(graph->function->m->target) ? compiler::DataType::ANY : compiler::DataType::REFERENCE;
-        instImpl->SetIsAcc();
-        instImpl->SetType(type);
-        return catchPhi;
-    }
-
-    std::vector<compiler::DataType::Type> types;
-
-    for (size_t index = 0; index < argCount; ++index) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-        AbckitInst *inputOrThrowable = va_arg(args, AbckitInst *);
-        if (index % 2U == 0) {
-            types.push_back(inputOrThrowable->impl->GetType());
-            catchPhi->impl->AppendInput(inputOrThrowable->impl);
-        } else {
-            catchPhi->impl->CastToCatchPhi()->AppendThrowableInst(inputOrThrowable->impl);
-        }
-    }
-
-    ASSERT(!types.empty());
-
-    if (IsDynamic(graph->function->m->target)) {
-        catchPhi->impl->SetType(compiler::DataType::ANY);
-    } else {
-        for (int i = 1, j = types.size(); i < j; ++i) {
-            if (types[0] != types[i]) {
-                LIBABCKIT_LOG(DEBUG) << "All inputs of a catchPhi should be of the same type " << '\n';
-                SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
-                catchBegin->impl->EraseInst(instImpl, true);
-                return nullptr;
-            }
-        }
-        catchPhi->impl->SetType(types[0]);
-    }
-
-    return catchPhi;
 }
 
 AbckitInst *IcreateSubStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
@@ -1994,7 +1948,8 @@ AbckitInst *IcreateLoadStringStatic(AbckitGraph *graph, AbckitString *str)
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << GetStringOffset(graph, str) << '\n';
     auto intrinsicId = compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING;
-    auto dataType = IsDynamic(graph->function->m->target) ? compiler::DataType::ANY : compiler::DataType::REFERENCE;
+    auto dataType =
+        IsDynamic(graph->function->owningModule->target) ? compiler::DataType::ANY : compiler::DataType::REFERENCE;
     auto loadStringImpl = graph->impl->CreateInstIntrinsic(dataType, 0, intrinsicId);
     auto *loadString = CreateInstFromImpl(graph, loadStringImpl);
     loadStringImpl->AddImm(graph->impl->GetAllocator(), GetStringOffset(graph, str));

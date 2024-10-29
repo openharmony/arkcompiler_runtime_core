@@ -65,7 +65,7 @@ def stress_exec(cmd, **kwargs):
         'timeout': 600,
         'print_output': False,
         'print_command': True,
-        'env': None,
+        'env': {},
         'repeats': 1,
     }
     kwargs = {**default_kwargs, **kwargs}
@@ -74,9 +74,10 @@ def stress_exec(cmd, **kwargs):
         logging.debug('$ {0}> %s', kwargs['cwd'], " ".join(cmd))
 
     ct = kwargs['timeout']
+    sub_env = {**os.environ.copy(), **kwargs['env']}
     for _ in range(kwargs['repeats']):
         return_code, stdout, stderr = __exec_impl(cmd, cwd=kwargs['cwd'], timeout=ct,
-                                                  print_output=kwargs['print_output'], env=kwargs['env'])
+                                                  print_output=kwargs['print_output'], env=sub_env)
         if return_code != -1:
             break
         ct = ct + 60

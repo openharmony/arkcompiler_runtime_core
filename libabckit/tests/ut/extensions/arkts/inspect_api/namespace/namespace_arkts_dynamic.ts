@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 namespace N {
-    function F() {}
+    function f(): void {}
 }
 
 namespace N2 {
-    function F2() {}
+    function f2(): void {}
 }

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
 
 class A {
     foo1() : long {
@@ -31,20 +30,3 @@ class A {
         return 7;
     }
 }
-
-// After AOP:
-
-// class A {
-//     foo1() : long {
-//         return 10;
-//     }
-//     foo2() : number {
-//         return 12.16;
-//     }
-//     foo3() : long {
-//         return -4;
-//     }
-//     foo4() : void {
-//         return;
-//     }
-// }

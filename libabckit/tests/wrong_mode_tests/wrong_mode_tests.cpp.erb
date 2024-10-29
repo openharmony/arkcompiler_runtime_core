@@ -27,21 +27,21 @@
 namespace libabckit::test {
 
 % case domain
-% when "ArktsInspectApiImpl"
+% when "ArktsInspectApi"
 %    getter = "AbckitGetArkTsInspectApiImpl"
-% when "ArktsModifyApiImpl"
+% when "ArktsModifyApi"
 %    getter = "AbckitGetArkTsModifyApiImpl"
 % else
 %    getter = "AbckitGet" + domain
 % end
 %
 % domain_var = 'g_' + domain[0].downcase + domain[1...-1]
-static auto <%= domain_var %> = <%= getter %>(1);
+static auto <%= domain_var %> = <%= getter %>(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitWrongModeTests<%=domain%><%=iteration%> : public ::testing::Test {};
 
 % slice_start = index
-% slice_end = index + slice_size
+% slice_end = index + slice_size - 1
 % api_funcs_arr[slice_start..slice_end].each do |api_func|
 // Test: test-kind=api, api=<%= domain %>::<%= api_func %>,
 // abc-kind=NoABC, category=negative-mode

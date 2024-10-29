@@ -25,28 +25,28 @@ logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Abckit status script")
+    parser = argparse.ArgumentParser(description='Abckit status script')
     parser.add_argument(
-        "--print-implemented",
-        action="store_true",
+        '--print-implemented',
+        action='store_true',
         default=False,
-        help=f"Print list of implemented API and exit")
+        help=f'Print list of implemented API and exit')
     return parser.parse_args()
 args = get_args()
 
-API_PATTERN = "^[\w,\d,_, ,*]+\(\*([\w,\d,_]+)\)\(.*"
-domain_patterns = ["struct Abckit\S*Api\s\{", "struct Abckit\S*ApiStatic\s\{", "struct Abckit\S*ApiDynamic\s\{"]
-libabckit_dir = os.path.join(script_dir, "..")
-abckit_tests = os.path.join(libabckit_dir, "tests")
+API_PATTERN = r'^[\w,\d,_, ,*]+\(\*([\w,\d,_]+)\)\(.*'
+domain_patterns = [r'struct Abckit\S*Api\s\{', r'struct Abckit\S*ApiStatic\s\{', r'struct Abckit\S*ApiDynamic\s\{']
+libabckit_dir = os.path.join(script_dir, '..')
+abckit_tests = os.path.join(libabckit_dir, 'tests')
 
 sources = {
-    "include/c/ir_core.h",
-    "include/c/metadata_core.h",
-    "include/c/extensions/arkts/metadata_arkts.h",
-    "include/c/extensions/js/metadata_js.h",
-    "src/include_v2/c/isa/isa_static.h",
-    "include/c/isa/isa_dynamic.h",
-    "include/c/abckit.h"
+    'include/c/ir_core.h',
+    'include/c/metadata_core.h',
+    'include/c/extensions/arkts/metadata_arkts.h',
+    'include/c/extensions/js/metadata_js.h',
+    'src/include_v2/c/isa/isa_static.h',
+    'include/c/isa/isa_dynamic.h',
+    'include/c/abckit.h'
 }
 
 TS = 'TS'
@@ -91,24 +91,22 @@ def update_domain(old_domain, l):
     new_domain = domain_match(l.strip())
     if not new_domain:
         return old_domain
-    return re.search('struct Abckit(.*)\s\{',
-            new_domain.strip()).group(1)
+    return re.search(r'struct Abckit(.*)\s\{', new_domain.strip()).group(1)
 
 
 def collect_api(path):
     api = {}
-    domain = ""
+    domain = ''
     with open(path) as f:
         for l in f.readlines():
             domain = update_domain(domain, l)
 
             if not re.fullmatch(API_PATTERN, l.strip()):
                 continue
-            # CC-OFFNXT(G.FIO.05) regexp false positive
-            if re.fullmatch('\/\/' + API_PATTERN, l.strip()):
+            if re.fullmatch(r'^\/\/' + API_PATTERN, l.strip()):
                 continue
-            func_name = re.search('^[\w,\d,_, ,*]+\(\*([\w,\d,_]+)\)\(.*', l.strip()).group(1)
-            if func_name == "cb":
+            func_name = re.search(r'^[\w,\d,_, ,*]+\(\*([\w,\d,_]+)\)\(.*', l.strip()).group(1)
+            if func_name == 'cb':
                 continue
             check(domain)
             api[f'{domain}Impl::{func_name}'] = API(func_name, domain)
@@ -118,10 +116,10 @@ def collect_api(path):
 def check_test_anno_line(line):
     mul_lines = False
     anno_line = False
-    if re.fullmatch("^\/\/ Test: test-kind=.*\n", line):
+    if re.fullmatch(r'^\/\/ Test: test-kind=.*\n', line):
         anno_line = True
         mul_lines = line.strip()[-1] == ','
-    return {"is_annotation_line" : anno_line, "mul_annotation_lines": mul_lines}
+    return {'is_annotation_line' : anno_line, 'mul_annotation_lines': mul_lines}
 
 
 def get_full_annotation(it, annotation_start):
@@ -130,7 +128,7 @@ def get_full_annotation(it, annotation_start):
     while next_anno_line:
         new_line = next(it)
         annotation += new_line.replace('//', '').strip()
-        if not re.fullmatch("^\/\/.*,$", new_line):
+        if not re.fullmatch(r'^\/\/.*,$', new_line):
             next_anno_line = False
     return annotation
 
@@ -179,20 +177,20 @@ class Test:
 
 
 def is_first_test_line(line):
-    if re.fullmatch("TEST_F\(.*,.*\n", line):
+    if re.fullmatch(r'TEST_F\(.*,.*\n', line):
         return True
     return False
 
 
 def get_test_from_annotation(api, annotation):
     test = Test(annotation)
-    if "api=" in annotation and test.api != 'ApiImpl::GetLastError':
+    if 'api=' in annotation and test.api != 'ApiImpl::GetLastError':
         check(test.api in api, f'No such API: {test.api}')
     return test
 
 
 def collect_tests(path, api):
-    with open(path, "r") as f:
+    with open(path, 'r') as f:
         lines = f.readlines()
         it = iter(lines)
         tests = []
@@ -211,13 +209,13 @@ def collect_tests(path, api):
                 continue
 
             info = check_test_anno_line(line)
-            if not info.get("is_annotation_line"):
+            if not info.get('is_annotation_line'):
                 annotation = ''
                 continue
             ano_count += 1
             annotation += line.strip()
 
-            if info.get("mul_annotation_lines"):
+            if info.get('mul_annotation_lines'):
                 annotation = get_full_annotation(it, line)
             else:
                 annotation = line.strip()
@@ -267,7 +265,7 @@ def main(api) :
     tests = []
     for dirpath, _, filenames in os.walk(abckit_tests):
         for name in filenames:
-            if name.endswith(".cpp"):
+            if name.endswith('.cpp'):
                 tests += collect_tests(os.path.join(dirpath, name), api)
 
     api = get_tests_statistics(api, tests)
@@ -304,23 +302,23 @@ def main(api) :
     logging.debug('Total Tests:                                            %s', len(tests))
     logging.debug('')
     logging.debug('Total API tests:                                        %s',
-                  len(list(filter(lambda t: t.kind == "api", tests))))
+                  len(list(filter(lambda t: t.kind == 'api', tests))))
     logging.debug('Positive/Negative/NullArg/WrongCtx/WrongMode API tests: %s/%s/%s/%s/%s',
-                  api_test_category("positive"),
-                  api_test_category("negative"),
-                  api_test_category("negative-nullptr"),
-                  api_test_category("negative-file"),
-                  api_test_category("negative-mode"))
+                  api_test_category('positive'),
+                  api_test_category('negative'),
+                  api_test_category('negative-nullptr'),
+                  api_test_category('negative-file'),
+                  api_test_category('negative-mode'))
     logging.debug('ArkTS1/ArkTS2/JS/TS/NoABC API tests:                    %s/%s/%s/%s/%s',
                   api_lang(ARKTS1), api_lang(ARKTS2), api_lang(JS), api_lang(TS), api_lang(NO_ABC))
     logging.debug('')
     logging.debug('Total scenario tests:                                   %s',
-                  len(list(filter(lambda t: t.kind == "scenario", tests))))
+                  len(list(filter(lambda t: t.kind == 'scenario', tests))))
     logging.debug('ArkTS1/ArkTS2/JS/TS scenario tests:                     %s/%s/%s/%s',
                   scenario_lang(ARKTS1), scenario_lang(ARKTS2), scenario_lang(JS), scenario_lang(TS))
     logging.debug('')
     logging.debug('Internal tests:                                         %s',
-                  len(list(filter(lambda t: t.kind == "internal", tests))))
+                  len(list(filter(lambda t: t.kind == 'internal', tests))))
 
 
 collected_api = {}

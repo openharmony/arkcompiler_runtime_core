@@ -18,18 +18,7 @@ ark_gen_file("abckit_options_gen_h") {
   template_file = "$ark_root_dynamic/templates/options/options.h.erb"
   data_file = "$abckit_root/src/options.yaml"
   requires = [ "$ark_root_dynamic/templates/common.rb" ]
-  output_file = "$target_gen_dir/generated/tmp/abckit_options_gen.h"
-}
-
-action("abckit_options_h") {
-  script = "$abckit_root/scripts/fix_options.sh"
-  args = [
-    rebase_path("$target_gen_dir/generated/tmp/abckit_options_gen.h"),
-    rebase_path("$target_gen_dir/generated/abckit_options_gen.h"),
-  ]
-  inputs = [ "$abckit_root/src/options.yaml" ]
-  outputs = [ "$target_gen_dir/generated/abckit_options_gen.h" ]
-  deps = [ ":abckit_options_gen_h" ]
+  output_file = "$target_gen_dir/generated/abckit_options_gen.h"
 }
 
 action("crop_abckit_intrinsics_yaml") {
@@ -57,7 +46,7 @@ concat_yamls("abckit_concat_intrinsics_yaml") {
 }
 
 group("libabckit_header_deps") {
-  deps = [ ":abckit_options_h" ]
+  deps = [ ":abckit_options_gen_h" ]
 }
 
 ohos_source_set("libabckit_source_set") {

@@ -41,41 +41,41 @@ enum class TryCatchScenario {
 };
 }  // namespace
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCatchPhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static.abc",
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
                                             "catchphi_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "CATCH\nCATCH\n"));
 
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static.abc",
-        ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static_modified.abc", "foo",
+        ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
+        ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified.abc", "foo",
         [](AbckitFile * /*file*/, AbckitCoreFunction *method, AbckitGraph *graph) {
             auto *oldCall = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
             EXPECT_NE(oldCall, nullptr);
             auto *log = helpers::FindMethodByName(g_implI->functionGetFile(method), "LogError");
-            auto *catchPhi = g_statG->iCreateCatchPhi(graph, g_implG->iGetBasicBlock(oldCall), 0);
+            auto *catchPhi = g_implG->bbCreateCatchPhi(g_implG->iGetBasicBlock(oldCall), 0);
             auto *newCall = g_statG->iCreateCallStatic(graph, log, 1, catchPhi);
             g_implG->iInsertBefore(newCall, oldCall);
         },
         [&]([[maybe_unused]] AbckitGraph *graph) {});
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static_modified.abc",
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified.abc",
                                        "catchphi_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "Error: abckit_error\nCATCH\n\\[Error: abckit_error\\]\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCatchPhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticValid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static.abc",
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
                                             "catchphi_static/ETSGLOBAL", "main0");
     EXPECT_TRUE(helpers::Match(output, "75\n13\n"));
 
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static.abc",
-        ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static_modified_noacc.abc", "bar",
+        ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
+        ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified_noacc.abc", "bar",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             struct VisitorData {
                 const AbckitGraphApi *implG;
@@ -97,27 +97,27 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticValid)
             AbckitInst *returnInst = g_implG->bbGetFirstInst(returnBB);
             ASSERT_NE(returnInst, nullptr);
             auto constantI64Impl = g_implG->gCreateConstantI32(graph, 42);
-            AbckitInst *catchPhi = g_statG->iCreateCatchPhi(graph, returnBB, 2, constantI64Impl, throwableCall);
+            AbckitInst *catchPhi = g_implG->bbCreateCatchPhi(returnBB, 2, constantI64Impl, throwableCall);
             ASSERT_NE(catchPhi, nullptr);
             g_implG->iSetInput(returnInst, catchPhi, 0);
         },
         [&]([[maybe_unused]] AbckitGraph *ctxG) {});
 
-    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static_modified_noacc.abc",
+    output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified_noacc.abc",
                                        "catchphi_static/ETSGLOBAL", "main0");
     EXPECT_TRUE(helpers::Match(output, "75\n42\n"));
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCatchPhi, abc-kind=ArkTS2, category=negative
+// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=negative
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticInvalid)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static.abc",
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
                                             "catchphi_static/ETSGLOBAL", "main0");
     EXPECT_TRUE(helpers::Match(output, "75\n13\n"));
 
     helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static.abc",
-        ABCKIT_ABC_DIR "ut/isa/isa_static/catchphi/catchphi_static_modified_noacc_neg.abc", "bar",
+        ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
+        ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static_modified_noacc_neg.abc", "bar",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             struct VisitorData {
                 const AbckitGraphApi *implG;
@@ -140,8 +140,8 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticInvalid)
             ASSERT_NE(returnInst, nullptr);
             auto constantI64Impl = g_implG->gCreateConstantI64(graph, 42);
             // Mix integer and reference types as input
-            AbckitInst *catchPhi = g_statG->iCreateCatchPhi(graph, returnBB, 4, constantI64Impl, throwableCall,
-                                                            throwableCall, throwableCall);
+            AbckitInst *catchPhi =
+                g_implG->bbCreateCatchPhi(returnBB, 4, constantI64Impl, throwableCall, throwableCall, throwableCall);
             ASSERT_EQ(catchPhi, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
             // Call no side-effect API to clear last error

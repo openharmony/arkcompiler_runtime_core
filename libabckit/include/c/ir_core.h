@@ -139,6 +139,14 @@ struct AbckitGraphApi {
     AbckitInst *(*gGetParameter)(AbckitGraph *graph, uint32_t index);
 
     /**
+     * @brief Returns number of instruction parameters under given `graph`.
+     * @return uint32_t corresponding to number of instruction parameters.
+     * @param [ in ] graph - Graph to be inspected.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
+     */
+    uint32_t (*gGetNumberOfParameters)(AbckitGraph *graph);
+
+    /**
      * @brief Wraps basic blocks from `tryFirstBB` to `tryLastBB` into try,
      * inserts basic blocks from `catchBeginBB` to `catchEndBB` into graph.
      * Basic blocks from `catchBeginBB` to `catchEndBB` are used for exception handling.
@@ -406,7 +414,7 @@ struct AbckitGraphApi {
      * @param [ in ] basicBlock - basic block to clear.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `basicBlock` is NULL.
      */
-    void (*bbClear)(AbckitBasicBlock *basicBlock);
+    void (*bbRemoveAllInsts)(AbckitBasicBlock *basicBlock);
 
     /**
      * @brief Returns first instruction from `basicBlock`.
@@ -573,6 +581,17 @@ struct AbckitGraphApi {
      * @note Allocates
      */
     AbckitInst *(*bbCreatePhi)(AbckitBasicBlock *basicBlock, size_t argCount, ...);
+
+    /**
+     * @brief Creates CatchPhi instruction and sets it at the beginning of basic block `catchBegin`.
+     * @return Pointer to created `AbckitInst`.
+     * @param [ in ] catchBegin - Basic block at the beginning of which the instruction will be inserted.
+     * @param [ in ] argCount - Number of instruction's inputs
+     * @param [ in ] ... - Instructions that are inputs of the new instruction.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `catchBegin` is NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph` is not DYNAMIC.
+     */
+    AbckitInst *(*bbCreateCatchPhi)(AbckitBasicBlock *catchBegin, size_t argCount, ...);
 
     /**
      * @brief Removes instruction from it's basic block.

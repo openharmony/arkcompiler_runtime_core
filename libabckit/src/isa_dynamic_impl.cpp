@@ -226,7 +226,6 @@ AbckitIsaApiDynamic g_isaApiDynamicImpl = {
     IcreateDYNAMICReturn,
     IcreateDYNAMICReturnundefined,
     IcreateDYNAMICIf,
-    IcreateDYNAMICCatchPhi,
 };
 
 }  // namespace libabckit

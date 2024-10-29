@@ -583,7 +583,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongImport)
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newID = new AbckitCoreImportDescriptor();
             newID->impl = std::make_unique<AbckitArktsImportDescriptor>();
-            newID->importingModule = method->m;
+            newID->importingModule = method->owningModule;
             helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -651,7 +651,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongExport)
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newED = new AbckitCoreExportDescriptor();
             newED->impl = std::make_unique<AbckitArktsExportDescriptor>();
-            newED->exportingModule = method->m;
+            newED->exportingModule = method->owningModule;
             helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -1343,16 +1343,21 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModule, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, FileAddExternalModule)
+// Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV1, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, fileAddExternalModuleArktsV1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(INPUT_PATH, &file);
 
-    AbckitArktsExternalModuleCreateParams params {};
+    AbckitArktsV1ExternalModuleCreateParams params {};
     params.name = "ExternalModule";
-    g_implArkM->fileAddExternalModule(file, &params);
+    AbckitArktsModule *arkTsModule = g_implArkM->fileAddExternalModuleArktsV1(file, &params);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(arkTsModule, nullptr);
+
+    AbckitCoreModule *coreModule = g_implArkI->arktsModuleToCoreModule(arkTsModule);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(coreModule, nullptr);
 
     helpers::ModuleByNameContext ctxFinder = {nullptr, params.name};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);

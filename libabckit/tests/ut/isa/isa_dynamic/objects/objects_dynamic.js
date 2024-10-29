@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
 
 class Test {
     test() {
@@ -22,14 +21,3 @@ class Test {
 
 let a = new Test();
 a.test();
-
-// After AOP:
-
-// class Test {
-//   test() {
-//     print({})
-//   }
-// }
-
-// let a = new Test()
-// a.test()

@@ -60,14 +60,14 @@ TEST_F(LibAbcKitJSInspectApiModulesTest, DynamicFillModule)
     ASSERT_NE(ctxFinder.module, nullptr);
     auto *m = ctxFinder.module;
 
-    EXPECT_NE(m->GetJSImpl()->impl.record, nullptr);
-    EXPECT_NE(m->GetJSImpl()->impl.moduleLiteralArray, nullptr);
-    EXPECT_EQ(m->GetJSImpl()->impl.moduleRequestsOffset, 1);
-    EXPECT_EQ(m->GetJSImpl()->impl.regularImportsOffset, 5U);
-    EXPECT_EQ(m->GetJSImpl()->impl.namespaceImportsOffset, 18U);
-    EXPECT_EQ(m->GetJSImpl()->impl.localExportsOffset, 25U);
-    EXPECT_EQ(m->GetJSImpl()->impl.indirectExportsOffset, 40U);
-    EXPECT_EQ(m->GetJSImpl()->impl.starExportsOffset, 47U);
+    EXPECT_NE(m->GetJsImpl()->impl.record, nullptr);
+    EXPECT_NE(m->GetJsImpl()->impl.moduleLiteralArray, nullptr);
+    EXPECT_EQ(m->GetJsImpl()->impl.moduleRequestsOffset, 1);
+    EXPECT_EQ(m->GetJsImpl()->impl.regularImportsOffset, 5U);
+    EXPECT_EQ(m->GetJsImpl()->impl.namespaceImportsOffset, 18U);
+    EXPECT_EQ(m->GetJsImpl()->impl.localExportsOffset, 25U);
+    EXPECT_EQ(m->GetJsImpl()->impl.indirectExportsOffset, 40U);
+    EXPECT_EQ(m->GetJsImpl()->impl.starExportsOffset, 47U);
 
     // Request Modules
     EXPECT_EQ(m->md.size(), 3U);
@@ -88,35 +88,35 @@ TEST_F(LibAbcKitJSInspectApiModulesTest, DynamicFillModule)
     idx = 0;
     EXPECT_EQ(m->id[idx]->importingModule, m);
     EXPECT_EQ(m->id[idx]->importedModule, m->md[1]);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_TRUE(m->id[idx]->GetJSImpl()->payload.GetDynId().isRegularImport);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_TRUE(m->id[idx]->GetJsImpl()->payload.GetDynId().isRegularImport);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
     idx++;
     EXPECT_EQ(m->id[idx]->importingModule, m);
     EXPECT_EQ(m->id[idx]->importedModule, m->md[2U]);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_TRUE(m->id[idx]->GetJSImpl()->payload.GetDynId().isRegularImport);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_TRUE(m->id[idx]->GetJsImpl()->payload.GetDynId().isRegularImport);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
     idx++;
     EXPECT_EQ(m->id[idx]->importingModule, m);
     EXPECT_EQ(m->id[idx]->importedModule, m->md[1]);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_TRUE(m->id[idx]->GetJSImpl()->payload.GetDynId().isRegularImport);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_TRUE(m->id[idx]->GetJsImpl()->payload.GetDynId().isRegularImport);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
     idx++;
     EXPECT_EQ(m->id[idx]->importingModule, m);
     EXPECT_EQ(m->id[idx]->importedModule, m->md[0]);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_TRUE(m->id[idx]->GetJSImpl()->payload.GetDynId().isRegularImport);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_TRUE(m->id[idx]->GetJsImpl()->payload.GetDynId().isRegularImport);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->payload.GetDynId().moduleRecordIndexOff, idx);
     idx++;
 
     // Namespace imports
     EXPECT_EQ(m->id[idx]->importingModule, m);
     EXPECT_EQ(m->id[idx]->importedModule, m->md[0]);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_FALSE(m->id[idx]->GetJSImpl()->payload.GetDynId().isRegularImport);
-    EXPECT_EQ(m->id[idx]->GetJSImpl()->payload.GetDynId().moduleRecordIndexOff, 0);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_FALSE(m->id[idx]->GetJsImpl()->payload.GetDynId().isRegularImport);
+    EXPECT_EQ(m->id[idx]->GetJsImpl()->payload.GetDynId().moduleRecordIndexOff, 0);
 
     // Exports
     EXPECT_EQ(m->ed.size(), 10U);
@@ -127,60 +127,60 @@ TEST_F(LibAbcKitJSInspectApiModulesTest, DynamicFillModule)
     // Combined StarExport
     EXPECT_EQ(m->ed[idx]->exportingModule, m);
     EXPECT_EQ(m->ed[idx]->exportedModule, m->md[0]);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().kind,
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().kind,
               AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().hasServiceImport, true);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().serviceNamespaceImportIdx, 1);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, idx);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().hasServiceImport, true);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().serviceNamespaceImportIdx, 1);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, idx);
     idx++;
     EXPECT_EQ(m->ed[idx]->exportingModule, m);
     EXPECT_EQ(m->ed[idx]->exportedModule, m->md[1]);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().kind,
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().kind,
               AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().hasServiceImport, true);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().serviceNamespaceImportIdx, 2U);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, idx);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().hasServiceImport, true);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().serviceNamespaceImportIdx, 2U);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, idx);
 
     idx++;
     while (idx < 7U) {
         EXPECT_EQ(m->ed[idx]->exportingModule, m);
         EXPECT_EQ(m->ed[idx]->exportedModule, m);
-        EXPECT_EQ(m->ed[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-        EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().kind,
+        EXPECT_EQ(m->ed[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+        EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().kind,
                   AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT);
-        EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().hasServiceImport, false);
-        EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, idx);
+        EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().hasServiceImport, false);
+        EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, idx);
         idx++;
     }
 
     // Indirect Exports
     EXPECT_EQ(m->ed[idx]->exportingModule, m);
     EXPECT_EQ(m->ed[idx]->exportedModule, m->md[0]);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().kind,
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().kind,
               AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_INDIRECT_EXPORT);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().hasServiceImport, false);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, 0);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().hasServiceImport, false);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, 0);
     idx++;
     EXPECT_EQ(m->ed[idx]->exportingModule, m);
     EXPECT_EQ(m->ed[idx]->exportedModule, m->md[0]);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().kind,
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().kind,
               AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_INDIRECT_EXPORT);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().hasServiceImport, false);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, 1);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().hasServiceImport, false);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, 1);
     idx++;
 
     // Star Exports
     EXPECT_EQ(m->ed[idx]->exportingModule, m);
     EXPECT_EQ(m->ed[idx]->exportedModule, m->md[1]);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().kind,
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->kind, AbckitImportExportDescriptorKind::UNTYPED);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().kind,
               AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().hasServiceImport, false);
-    EXPECT_EQ(m->ed[idx]->GetJSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, 0);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().hasServiceImport, false);
+    EXPECT_EQ(m->ed[idx]->GetJsImpl()->payload.GetDynamicPayload().moduleRecordIndexOff, 0);
 
     g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/extensions/js/inspect_api/modules/JSmodules_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP
 
 function foo() {
     console.log("foo")
@@ -25,17 +24,3 @@ function bar() {
 function main() {
     foo()
 }
-
-// After AOP
-//
-// function foo() {
-//     console.log("foo")
-// }
-//
-// function bar() {
-//     console.log("bar")
-// }
-//
-// function main() {
-//     bar()
-// }

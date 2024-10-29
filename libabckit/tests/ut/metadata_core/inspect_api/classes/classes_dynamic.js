@@ -16,3 +16,7 @@ class C1 {
     M1() {}
     static M2() {}
 }
+
+function f() {
+    class C2 { }
+}

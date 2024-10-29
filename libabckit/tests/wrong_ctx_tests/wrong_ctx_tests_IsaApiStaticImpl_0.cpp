@@ -32,53 +32,11 @@ static auto g_isaApiStaticImp = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE
 
 class LibAbcKitWrongCtxTestsIsaApiStaticImpl0 : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateXorI,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateInitObject)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateXorI)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateInitObject);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateSubI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateSubI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateSubI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateDiv,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateDiv)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateDiv);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateSub,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateSub)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateSub);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCast,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCast)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCast);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateDivI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateDivI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateDivI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArray,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStoreArray)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateStoreArray);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateXorI);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateCheckCast,
@@ -88,165 +46,25 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCheckCast)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCheckCast);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShl,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsUndefined,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShl)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateIsUndefined)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShl);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateIsUndefined);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateXorI,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateDivI,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateXorI)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateDivI)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateXorI);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateDivI);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateInitObject,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCallStatic)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateInitObject)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCallStatic);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallVirtual,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCallVirtual)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCallVirtual);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateOrI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateOrI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateOrI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateXor,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateXor)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateXor);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAdd,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAdd)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAdd);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIf,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateIf)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateIf);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShr,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAShr)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAShr);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturn,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateReturn)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateReturn);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadArray,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateLoadArray)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateLoadArray);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateOr,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateOr)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateOr);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArrayWide,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStoreArrayWide)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateStoreArrayWide);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAndI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAndI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAndI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShr,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShr)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShr);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAddI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAddI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAddI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShlI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShlI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShlI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNeg,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateNeg)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateNeg);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMod,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateMod)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateMod);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMul,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateMul)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateMul);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLenArray,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateLenArray)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateLenArray);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateModI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateModI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateModI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateThrow,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateThrow)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateThrow);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateInitObject);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewObject,
@@ -256,11 +74,39 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateNewObject)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateNewObject);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsUndefined,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShlI,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateIsUndefined)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShlI)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateIsUndefined);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShlI);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateXor,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateXor)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateXor);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallVirtual,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCallVirtual)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCallVirtual);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCast,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCast)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCast);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMod,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateMod)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateMod);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateMulI,
@@ -270,32 +116,18 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateMulI)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateMulI);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewArray,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShr,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateNewArray)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShr)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateNewArray);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShr);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShrI,
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAdd,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShrI)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAdd)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShrI);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAnd,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAnd)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAnd);
-}
-
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateEquals,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateEquals)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateEquals);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAdd);
 }
 
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateNot,
@@ -305,13 +137,6 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateNot)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateNot);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShrI,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAShrI)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAShrI);
-}
-
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsInstance,
 // abc-kind=NoABC, category=negative-file
 TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateIsInstance)
@@ -319,11 +144,186 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateIsInstance)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateIsInstance);
 }
 
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShr,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAShr)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAShr);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArray,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStoreArray)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateStoreArray);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAddI,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAddI)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAddI);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShrI,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShrI)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShrI);
+}
+
 // Test: test-kind=api, api=IsaApiStaticImpl::iCreateCmp,
 // abc-kind=NoABC, category=negative-file
 TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCmp)
 {
     helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCmp);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateDiv,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateDiv)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateDiv);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateCallStatic,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateCallStatic)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateCallStatic);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateMul,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateMul)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateMul);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateModI,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateModI)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateModI);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNewArray,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateNewArray)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateNewArray);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateOr,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateOr)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateOr);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAndI,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAndI)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAndI);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAnd,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAnd)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAnd);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLenArray,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateLenArray)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateLenArray);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateThrow,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateThrow)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateThrow);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateNeg,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateNeg)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateNeg);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateAShrI,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateAShrI)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateAShrI);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadArray,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateLoadArray)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateLoadArray);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateReturn,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateReturn)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateReturn);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateEquals,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateEquals)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateEquals);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateSub,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateSub)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateSub);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateSubI,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateSubI)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateSubI);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateOrI,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateOrI)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateOrI);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIf,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateIf)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateIf);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateStoreArrayWide,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateStoreArrayWide)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateStoreArrayWide);
+}
+
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateShl,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiStaticImpl0, iCreateShl)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiStaticImp->iCreateShl);
 }
 
 }  // namespace libabckit::test

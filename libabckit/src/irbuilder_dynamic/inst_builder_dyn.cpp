@@ -179,7 +179,7 @@ void InstBuilder::SetTypeRec(compiler::Inst *inst, compiler::DataType::Type type
     }
 }
 
-// CC-OFFNXT(WordsTool.190 V8) sensitive word conflict
+// CC-OFFNXT(WordsTool.190) sensitive word conflict
 /**
  * Remove vreg from SaveState for the case
  * BB 1

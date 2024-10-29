@@ -61,7 +61,7 @@ bool IsMain(const std::string &funcName);
 bool IsFunction(const std::string &funcName);
 bool IsCtor(const std::string &funcName);
 bool IsStatic(const std::string &funcName);
-bool IsAnonymous(const std::string &funcName);
+bool IsAnonymousName(const std::string &funcName);
 
 panda::pandasm::Function *GetDynFunction(AbckitCoreFunction *function);
 panda::pandasm::Function *GetDynFunction(AbckitCoreClass *klass);

@@ -242,19 +242,6 @@ struct AbckitIsaApiStatic {
                              enum AbckitIsaApiStaticConditionCode cc /* in */);
 
     /**
-     * @brief iCreateCatchPhi.
-     * @return AbckitInst *.
-     * @param [ in ] AbckitGraph *graph .
-     * @param [ in ]  AbckitBasicBlock *catchBegin .
-     * @param [ in ] size_t argCount .
-     * @param  ... .
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitBasicBlock *catchBegin  is NULL.
-     */
-    AbckitInst *(*iCreateCatchPhi)(AbckitGraph *graph /* in */, AbckitBasicBlock *catchBegin /* in */,
-                                   size_t argCount /* in */, ... /* catchPhi inputs */);
-
-    /**
      * @brief iCreateNeg.
      * @return AbckitInst *.
      * @param [ in ] AbckitGraph *graph .

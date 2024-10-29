@@ -18,7 +18,7 @@
 
 namespace libabckit {
 
-// CC-OFFNXT(WordsTool.95 google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark;
 

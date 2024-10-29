@@ -22,10 +22,10 @@
 
 namespace libabckit::test {
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestScanSubclasses)
+TEST_F(AbckitScenarioTest, LibAbcKitTestScanSubclasses)
 {
     // CC-OFFNXT(G.NAM.03) project code style
     constexpr auto VERSION = ABCKIT_VERSION_RELEASE_1_0_0;

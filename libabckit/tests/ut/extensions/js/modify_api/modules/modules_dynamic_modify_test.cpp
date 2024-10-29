@@ -317,7 +317,7 @@ static void AddImportFromDynamicModuleImpl(AbckitCoreModule *module, void *data)
         ASSERT_EQ(userTransformerData->alias, strAlias);
         ASSERT_EQ(g_implI->importDescriptorGetImportedModule(gotImport), ctxFinder.module);
         ASSERT_EQ(g_implI->importDescriptorGetImportingModule(gotImport), module);
-        ASSERT_EQ(gotImport->GetJSImpl()->payload.GetDynId().isRegularImport, userTransformerData->isRegular);
+        ASSERT_EQ(gotImport->GetJsImpl()->payload.GetDynId().isRegularImport, userTransformerData->isRegular);
     }
 
     ASSERT_EQ(existed, true);
@@ -367,7 +367,7 @@ static void DynamicModuleAddExportImpl(AbckitCoreModule *module, void *data)
         auto strAlias = helpers::AbckitStringToString(expAlias);
         ASSERT_EQ(userTransformerData->name, strName);
         ASSERT_EQ(userTransformerData->alias, strAlias);
-        ASSERT_EQ(userTransformerData->kind, gotExport->GetJSImpl()->payload.GetDynamicPayload().kind);
+        ASSERT_EQ(userTransformerData->kind, gotExport->GetJsImpl()->payload.GetDynamicPayload().kind);
         if (userTransformerData->kind == AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT) {
             ASSERT_EQ(g_implI->exportDescriptorGetExportedModule(gotExport), module);
         } else {
@@ -664,7 +664,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleRemoveWrongImport)
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newID = new AbckitCoreImportDescriptor();
             newID->impl = std::make_unique<AbckitJsImportDescriptor>();
-            newID->importingModule = method->m;
+            newID->importingModule = method->owningModule;
             helpers::ModuleByNameContext ctxFinder = {nullptr, "JSmodules_dynamic_modify"};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -732,7 +732,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleRemoveWrongExport)
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newED = new AbckitCoreExportDescriptor();
             newED->impl = std::make_unique<AbckitJsExportDescriptor>();
-            newED->exportingModule = method->m;
+            newED->exportingModule = method->owningModule;
             helpers::ModuleByNameContext ctxFinder = {nullptr, "JSmodules_dynamic_modify"};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -1617,6 +1617,14 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, FileAddExternalModule)
     params.name = "ExternalModule";
     g_implJsM->fileAddExternalModule(file, &params);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+
+    AbckitJsModule *jsModule = g_implJsM->fileAddExternalModule(file, &params);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(jsModule, nullptr);
+
+    AbckitCoreModule *coreModule = g_implJsI->jsModuleToCoreModule(jsModule);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(coreModule, nullptr);
 
     helpers::ModuleByNameContext ctxFinder = {nullptr, params.name};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);

@@ -843,28 +843,29 @@ TEST_F(LibAbcKitIrInstTest, IgetLiteralArray_2)
         auto *bb = g_implG->bbGetSuccBlock(start, 0);
         auto *inst = g_implG->bbGetFirstInst(bb);
         auto *litArr = g_implG->iGetLiteralArray(inst);
+
+        // Test that iGetLiteralArray returns same pointer for same instruction
+        auto *litArr2 = g_implG->iGetLiteralArray(inst);
+        ASSERT_EQ(litArr, litArr2);
+
         uint32_t counter = 0;
         g_implI->literalArrayEnumerateElements(
             litArr, &counter, [](AbckitFile * /*file*/, AbckitLiteral *lit, void *data) {
                 if (*(reinterpret_cast<uint32_t *>(data)) == 2U) {
-                    [[maybe_unused]] auto *str = g_implI->literalGetString(lit);
-                    // CC-OFFNXT(G.FMT.02)
+                    auto *str = g_implI->literalGetString(lit);
                     EXPECT_TRUE(std::string_view(helpers::AbckitStringToString(str)) == "aa");
                     return true;
                 }
                 // CC-OFFNXT(G.FMT.02)
                 if (*(reinterpret_cast<uint32_t *>(data)) == 3U) {
-                    [[maybe_unused]] auto val = g_implI->literalGetU32(lit);
-                    // CC-OFFNXT(G.FMT.02)
+                    auto val = g_implI->literalGetU32(lit);
                     EXPECT_TRUE(val == 10U);
                     return true;
                 }
                 // CC-OFFNXT(G.FMT.02)
                 (*(reinterpret_cast<uint32_t *>(data)))++;
-                // CC-OFFNXT(G.FMT.02)
                 return true;
             });
-        // CC-OFFNXT(G.FMT.02)
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
     helpers::TransformMethod(file, "test", cb);

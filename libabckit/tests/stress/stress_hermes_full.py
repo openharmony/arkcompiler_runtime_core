@@ -84,10 +84,10 @@ def main():
         return 1
 
     if not stress_common.check_fail_list(FAIL_LIST_PATH, fail_list):
-        logging.debug('Failures/Total: {0}/%s', len(fail_list), len(results))
+        logging.debug('Failures/Total: %s/%s', len(fail_list), len(results))
 
     logging.debug('ABCKit: no regressions')
-    logging.debug('Failures/Total: {0}/%s', len(fail_list), len(results))
+    logging.debug('Failures/Total: %s/%s', len(fail_list), len(results))
     return 0
 
 

@@ -22,10 +22,10 @@
 
 namespace libabckit::test {
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestParameterCheck)
+TEST_F(AbckitScenarioTest, LibAbcKitTestParameterCheck)
 {
     static constexpr auto VERSION = ABCKIT_VERSION_RELEASE_1_0_0;
     static constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/parameter_check/dynamic/parameter_check.abc";

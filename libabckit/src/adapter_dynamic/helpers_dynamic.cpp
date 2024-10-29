@@ -31,10 +31,10 @@ namespace fs = std::filesystem;
 namespace fs = std::experimental::filesystem;
 #endif
 
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace panda;
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace libabckit;
 
@@ -184,7 +184,7 @@ AbckitModulePayloadDyn *GetModulePayload(AbckitCoreModule *module)
 {
     switch (module->target) {
         case ABCKIT_TARGET_JS:
-            return &(module->GetJSImpl()->impl);
+            return &(module->GetJsImpl()->impl);
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             return &(module->GetArkTSImpl()->impl.GetDynModule());
@@ -522,7 +522,7 @@ bool IsStatic(const std::string &funcName)
     return funcName.find("*#") != std::string::npos;
 }
 
-bool IsAnonymous(const std::string &funcName)
+bool IsAnonymousName(const std::string &funcName)
 {
     if (IsMain(funcName)) {
         return false;
@@ -546,9 +546,9 @@ static std::string DemangleScopeName(const std::string &mangled, const AbckitLit
 
 panda::pandasm::Function *GetDynFunction(AbckitCoreFunction *function)
 {
-    switch (function->m->target) {
+    switch (function->owningModule->target) {
         case ABCKIT_TARGET_JS:
-            return function->GetJSImpl()->impl;
+            return function->GetJsImpl()->impl;
         case ABCKIT_TARGET_ARK_TS_V1:
             return function->GetArkTSImpl()->GetDynamicImpl();
         default:
@@ -558,9 +558,9 @@ panda::pandasm::Function *GetDynFunction(AbckitCoreFunction *function)
 
 panda::pandasm::Function *GetDynFunction(AbckitCoreClass *klass)
 {
-    switch (klass->m->target) {
+    switch (klass->owningModule->target) {
         case ABCKIT_TARGET_JS:
-            return klass->GetJSImpl()->impl;
+            return klass->GetJsImpl()->impl;
         case ABCKIT_TARGET_ARK_TS_V1:
             return klass->GetArkTSImpl()->impl.GetDynamicClass();
         default:
@@ -572,7 +572,7 @@ AbckitModulePayloadDyn *GetDynModulePayload(AbckitCoreModule *mod)
 {
     switch (mod->target) {
         case ABCKIT_TARGET_JS:
-            return &mod->GetJSImpl()->impl;
+            return &mod->GetJsImpl()->impl;
         case ABCKIT_TARGET_ARK_TS_V1:
             return &mod->GetArkTSImpl()->impl.GetDynModule();
         default:
@@ -584,7 +584,7 @@ AbckitDynamicImportDescriptorPayload *GetDynImportDescriptorPayload(AbckitCoreIm
 {
     switch (id->importingModule->target) {
         case ABCKIT_TARGET_JS:
-            return &id->GetJSImpl()->payload.GetDynId();
+            return &id->GetJsImpl()->payload.GetDynId();
         case ABCKIT_TARGET_ARK_TS_V1:
             return &id->GetArkTSImpl()->payload.GetDynId();
         default:
@@ -597,7 +597,7 @@ AbckitDynamicExportDescriptorPayload *GetDynExportDescriptorPayload(AbckitCoreEx
     AbckitDynamicExportDescriptorPayload *edPayload = nullptr;
     switch (ed->exportingModule->target) {
         case ABCKIT_TARGET_JS:
-            edPayload = &ed->GetJSImpl()->payload.GetDynamicPayload();
+            edPayload = &ed->GetJsImpl()->payload.GetDynamicPayload();
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             edPayload = &ed->GetArkTSImpl()->payload.GetDynamicPayload();
