@@ -503,7 +503,7 @@ if __name__ == "__main__":
     print('clang-tidy proc_count: ' + str(process_count))
     conf_file_path = arguments.panda_dir
     if arguments.check_libabckit:
-        conf_file_path += "/libabckit/"
+        conf_file_path = os.path.join(conf_file_path, "libabckit")
     if not check_file_list(files_list, conf_file_path, arguments.build_dir, arguments.header_filter, process_count):
         sys.exit("Failed: Clang-tidy get errors")
 
