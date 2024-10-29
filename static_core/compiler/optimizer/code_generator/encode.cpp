@@ -101,6 +101,17 @@ void Encoder::EncodeFastPathDynamicCast([[maybe_unused]] Reg dst, [[maybe_unused
     SetFalseResult();
 }
 
+void Encoder::EncodeJsDoubleToCharCast([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeJsDoubleToCharCast([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src, [[maybe_unused]] Reg tmp,
+                                       [[maybe_unused]] uint32_t failureResult)
+{
+    SetFalseResult();
+}
+
 void Encoder::EncodeCast([[maybe_unused]] Reg dst, [[maybe_unused]] bool dstSigned, [[maybe_unused]] Reg src,
                          [[maybe_unused]] bool srcSigned)
 {

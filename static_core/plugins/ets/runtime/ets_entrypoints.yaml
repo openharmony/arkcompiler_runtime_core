@@ -740,6 +740,74 @@
     - uint32_t            # string data size
     - uint16_t            # char to look up
 
+- name: CreateStringFromCharCodeTlab
+  entrypoint: CreateStringFromCharCodeTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # array of numbers (f64)
+    - ark::Class*         # string class pointer
+
+- name: CreateStringFromCharCodeTlabCompressed
+  entrypoint: CreateStringFromCharCodeTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # string (result)
+    - ark::ObjectHeader*  # array of numbers (f64)
+    - ark::Class*         # string class pointer
+
+- name: CreateStringFromCharCodeSlowPath
+  entrypoint: CreateStringFromCharCodeEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # array of numbers (f64)
+
+- name: CreateStringFromCharCode2Arg
+  entrypoint: CreateStringFromCharCodeEntrypoint
+  bridge: odd_saved2
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - ark::ObjectHeader*       # array of numbers (f64)
+
+- name: CreateStringFromCharCodeSingleTlab
+  entrypoint: CreateStringFromCharCodeSingleTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - ark::Class*              # string class pointer
+
+- name: CreateStringFromCharCodeSingleTlabCompressed
+  entrypoint: CreateStringFromCharCodeSingleTlabCompressed
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+    - ark::Class*              # string class pointer
+
+- name: CreateStringFromCharCodeSingleSlowPath
+  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+  bridge: slow_path
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+
+- name: CreateStringFromCharCodeSingle2Arg
+  entrypoint: CreateStringFromCharCodeSingleEntrypoint
+  bridge: odd_saved2
+  properties: []
+  signature:
+    - ark::coretypes::String*  # resulting string
+    - uint64_t                 # number (double after a bitcast to uin64_t), char code
+
 - name: StringRepeat
   entrypoint: StringRepeatTlab
   bridge: none

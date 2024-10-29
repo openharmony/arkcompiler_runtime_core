@@ -89,6 +89,7 @@ static bool InstHasRuntimeCall(const Inst *inst)
     }
     return false;
 }
+
 /*
  * We determine runtime calls manually, not using MethodProperties::HasRuntimeCalls, because we need to ignore
  * SLOW_PATH_ENTRY intrinsic, since it doesn't require LR to be preserved.
@@ -394,5 +395,25 @@ void CodegenFastPath::EmitSlowPathEntryIntrinsic(IntrinsicInst *inst, [[maybe_un
 {
     ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY);
     CreateTailCall(inst, false);
+}
+
+void CodegenFastPath::EmitJsCastDoubleToCharIntrinsic([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_JS_CAST_DOUBLE_TO_CHAR);
+    auto srcReg = src[FIRST_OPERAND];
+
+    CHECK_EQ(srcReg.GetSize(), BITS_PER_UINT64);
+    CHECK_EQ(dst.GetSize(), BITS_PER_UINT32);
+    dst = dst.As(INT32_TYPE);
+
+    auto enc {GetEncoder()};
+    if (g_options.IsCpuFeatureEnabled(CpuFeature::JSCVT)) {
+        // no failure may occur
+        enc->EncodeJsDoubleToCharCast(dst, srcReg);
+    } else {
+        constexpr uint32_t FAILURE_RESULT_FLAG = (1U << 16U);
+        ScopedTmpRegU32 tmp(enc);
+        enc->EncodeJsDoubleToCharCast(dst, srcReg, tmp, FAILURE_RESULT_FLAG);
+    }
 }
 }  // namespace ark::compiler

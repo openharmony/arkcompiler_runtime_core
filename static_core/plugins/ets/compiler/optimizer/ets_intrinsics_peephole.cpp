@@ -419,6 +419,29 @@ bool Peepholes::PeepholeGetTypeInfo([[maybe_unused]] GraphVisitor *v, IntrinsicI
     return true;
 }
 
+bool Peepholes::PeepholeStringFromCharCodeSingle([[maybe_unused]] GraphVisitor *v, IntrinsicInst *intrinsic)
+{
+    ASSERT(intrinsic->GetInputsCount() == 2U);
+    ASSERT(intrinsic->GetInput(1U).GetInst()->IsSaveState());
+    auto graph = intrinsic->GetBasicBlock()->GetGraph();
+    if (graph->IsBytecodeOptimizer() || graph->GetArch() == Arch::AARCH32) {
+        return false;
+    }
+
+    auto pc = intrinsic->GetPc();
+    auto *charCode = intrinsic->GetInput(0).GetInst();
+    auto charCodeInt = graph->CreateInstBitcast(DataType::UINT64, pc, charCode);
+    auto *createStringInst = graph->CreateInstIntrinsic(
+        DataType::REFERENCE, pc, RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE);
+    createStringInst->SetInputs(graph->GetAllocator(),
+                                {{charCodeInt, DataType::UINT64}, {intrinsic->GetSaveState(), DataType::NO_TYPE}});
+    intrinsic->InsertBefore(charCodeInt);
+    intrinsic->ReplaceUsers(createStringInst);
+    intrinsic->RemoveInputs();
+    intrinsic->GetBasicBlock()->ReplaceInst(intrinsic, createStringInst);
+    return true;
+}
+
 #ifdef PANDA_ETS_INTEROP_JS
 
 bool Peepholes::TryFuseGetPropertyAndCast(IntrinsicInst *intrinsic, RuntimeInterface::IntrinsicId newId)

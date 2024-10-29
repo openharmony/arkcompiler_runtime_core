@@ -273,6 +273,13 @@ void Codegen::EmitReverseIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe
     GetEncoder()->SetFalseResult();
 }
 
+void Codegen::EmitJsCastDoubleToCharIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                              [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
 void Codegen::EmitMarkWordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
                                     [[maybe_unused]] SRCREGS src)
 {

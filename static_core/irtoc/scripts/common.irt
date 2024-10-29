@@ -201,6 +201,7 @@ module Constants
     STRING_CLASS_SIZE = "sizeof(coretypes::String)"
     STRING_CLASS_SIZE_WITH_ALIGNMENT = "sizeof(coretypes::String) + TLAB_ALIGNMENT - 1"
     STRING_MUTF8_1B_MAX = "0x7f"
+    STRING_MUTF8_1B_MIN = "0x01"
     STRING_LENGTH_OFFSET = "ark::coretypes::STRING_LENGTH_OFFSET"
     STRING_HASHCODE_OFFSET = "ark::coretypes::STRING_HASHCODE_OFFSET"
     STRING_DATA_OFFSET = "ark::coretypes::STRING_DATA_OFFSET"

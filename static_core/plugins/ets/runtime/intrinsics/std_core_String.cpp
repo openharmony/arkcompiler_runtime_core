@@ -25,6 +25,7 @@
 #include "runtime/entrypoints/string_index_of.h"
 #include "runtime/arch/memory_helpers.h"
 #include "plugins/ets/runtime/types/ets_string.h"
+#include "plugins/ets/runtime/types/ets_escompat_array.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
@@ -504,6 +505,19 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
 {
     ASSERT(thisStr != nullptr);
     return thisStr->EndsWith(suffix, endIndex);
+}
+
+EtsString *StdCoreStringFromCharCode(ObjectHeader *array)
+{
+    ASSERT(array != nullptr);
+    auto *charCodes = EtsBoxedDoubleArray::FromEtsObject(EtsObject::FromCoreType(array));
+    ASSERT(charCodes->GetData() != nullptr);
+    return EtsString::CreateNewStringFromCharCode(charCodes->GetData());
+}
+
+EtsString *StdCoreStringFromCharCodeSingle(EtsDouble charCode)
+{
+    return EtsString::CreateNewStringFromCharCode(charCode);
 }
 
 /* the allocation routine to create an unitialized string of the given size */

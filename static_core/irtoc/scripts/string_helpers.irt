@@ -371,7 +371,7 @@ end  # def GenerateCreateStringFromStringTlab
 ###
 # Checks if starting from arr_data the specified number of chars (char_count) can be compressed
 #
-# Utf16 char is ASCII if (uft16_char - 1U < utf::UTF8_1B_MAX)
+# Utf16 char is ASCII if (utf16_char - 1U < utf::UTF8_1B_MAX)
 # See runtime/include/coretypes/string.h - IsASCIICharacter
 #
 scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
@@ -406,7 +406,7 @@ scoped_macro(:is_array_of_compressable_chars) do |arr_data, char_count|
 Label(:CanBeCompressedLoop)
     i5 := Phi(i4, i6).u64
     ch := Load(arr_data, ShlI(i5).Imm(1).u64).u16
-    If(SubI(ch).Imm(1).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely.b {
+    If(SubI(ch).Imm(Constants::STRING_MUTF8_1B_MIN).u16, Cast(Constants::STRING_MUTF8_1B_MAX).u16).AE.Unlikely.b {
       compressable3 := Cast(0).b
       Goto(:CanBeCompressedLoopDone)
     }

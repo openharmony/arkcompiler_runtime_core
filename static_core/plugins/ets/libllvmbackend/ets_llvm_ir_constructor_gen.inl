@@ -414,3 +414,24 @@ bool LLVMIrConstructor::EmitStringIndexOfAfter(Inst *inst)
     ValueMapAdd(inst, charIndex);
     return true;
 }
+
+bool LLVMIrConstructor::EmitStringFromCharCode(Inst *inst)
+{
+    ASSERT(GetGraph()->GetRuntime()->IsCompressedStringsEnabled());
+    auto getEntryId = [inst]() {
+        switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
+            case RuntimeInterface::IntrinsicId::INTRINSIC_STD_CORE_STRING_FROM_CHAR_CODE:
+                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_TLAB_COMPRESSED;
+            case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_ETS_STRING_FROM_CHAR_CODE_SINGLE:
+                return RuntimeInterface::EntrypointId::CREATE_STRING_FROM_CHAR_CODE_SINGLE_TLAB_COMPRESSED;
+            default:
+                UNREACHABLE();
+        }
+    };
+    auto klassOffset = GetGraph()->GetRuntime()->GetStringClassPointerTlsOffset(GetGraph()->GetArch());
+    auto klass = llvmbackend::runtime_calls::LoadTLSValue(&builder_, arkInterface_, klassOffset, builder_.getPtrTy());
+    auto call = CreateFastPathCall(inst, getEntryId(), {GetInputValue(inst, 0), klass});
+    MarkAsAllocation(call);
+    ValueMapAdd(inst, call);
+    return true;
+}

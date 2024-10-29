@@ -349,9 +349,6 @@ intrinsics:
   signature:
       ret: void*
       args: [ u16, u16* ]
-  signature:
-      ret: void
-      args: []
   description: Find u16 char in 32-byte block of memory addressed by the second operand
 
 - name: MemCharU16X8UsingSimd
@@ -368,7 +365,20 @@ intrinsics:
   signature:
       ret: void*
       args: [ u16, u16* ]
-  signature:
-      ret: void
-      args: []
   description: Find u16 char in 16-byte block of memory addressed by the second operand
+
+- name: JsCastDoubleToChar
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: []
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [amd64, arm64]
+  codegen_func: "EmitJsCastDoubleToCharIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitJsCastDoubleToChar
+  signature:
+    ret: u32
+    args: [ f64 ]
+  description: Converts double to a pair of a flag (0 - success, 1 - failure) and a Utf16 symbol code taking javascript semantic into account. Both values are packed into a u32

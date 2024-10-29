@@ -31,6 +31,7 @@ class << Options
       opts.on("--input=PATH", "Input files, separated by ':' symbol") { |v| self.input_files = v.split(':') }
       opts.on('-D=STR', 'C++ definitions that will be used for compiling output file') { |v| (self.definitions ||= []) << v }
       opts.on("--arch=ARCH", "Target architecture") { |v| self.arch = v }
+      opts.on('--cpu-features=FEATURE,FEATURE', 'Supported CPU Features') { |v| self.cpu_features = v.split(',').map { |f| f.to_sym }}
       opts.on('--ir-api=API', 'API to emit during C++ code generation') { |v| self.ir_api = v }
       opts.on('--isa=PATH', 'ISA YAML file') { |v| self.isa = v }
       opts.on('--plugins=PATH', 'Plugins file') { |v| self.plugins = v }
@@ -97,6 +98,16 @@ class << Options
     raise "Arch info not found for #{self.arch}" unless arch_info
     self.arch_info = OpenStruct.new(arch_info)
 
+    # Determine CPU features. Notice: default-enabled CPU features ('sse42') must be reflected here.
+    # See the 'compiler/compiler.yaml' file.
+    if self.cpu_features.nil?
+      self.cpu_features = [:sse42]
+    end
+    possible_features = %w[none crc32 sse42 jscvt atomics]
+    self.cpu_features.each do |feature|
+      raise "Wrong cpu feature: #{feature}" unless possible_features.include?(feature.to_s)
+    end
+
     raise 'Supported IR APIs: ir-constructor, ir-builder, ir-inline' unless self.ir_api =~ /^ir-(constructor|builder|inline)$/
   end
 
@@ -115,6 +126,22 @@ class << Options
       x86_64: "Arch::X86_64"
     }
     @cpp_arch_map[self.arch]
+  end
+
+  def crc32_feature_enabled?
+    self.cpu_features.include?(:crc32)
+  end
+
+  def sse42_feature_enabled?
+    self.cpu_features.include?(:sse42)
+  end
+
+  def jscvt_feature_enabled?
+    self.cpu_features.include?(:jscvt)
+  end
+
+  def atomics_feature_enabled?
+    self.cpu_features.include?(:atomics)
   end
 
 end
