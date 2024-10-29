@@ -1,0 +1,143 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    - decl: |-
+          class Cls {
+              // no constraints
+              foo<T, U>(p: T, q: U): [T, U] {
+                  return [p, q]
+              }
+          }
+      use: |-
+          let cls = new Cls()
+          let z = cls.foo(1.0, true)
+          assert(typeof z == 'object' && typeof z[0] == 'number' && typeof z[1] == 'boolean')
+          assert(z[0] == 1.0 && z[1])
+
+          let y = cls.foo(new Error(), "abc")
+          assert(typeof y == 'object' && typeof y[0] == 'object' && typeof y[1] == 'string')
+          assert(y[0] instanceof Error && y[1] == "abc")
+
+          let x = cls.foo(z, y)
+          assert(x[0][0] == 1.0 && x[0][1] && x[1][0] instanceof Error && x[1][1] == "abc")
+
+          let w = cls.foo(null, undefined)
+          assert(w[0] === null && w[1] === undefined)
+
+    - decl: |-
+          class Cls {
+              // no constraints, function arguments with tuple
+              foo<T, U>(p: T, q: U): [T, U] {
+                  return [p, q]
+              }
+          }
+      use: |-
+          let cls = new Cls()
+          let v = cls.foo((p: number): number => p * p, (p: number): number => p + p)
+          assert(v[0](5.0) == 25.0 && v[1](42.0) == 84.0)
+
+    - decl: |-
+          class Cls {
+              // no constraints, union
+              foo<T, U>(p: T, q: U): T|U {
+                  return p!.toString() > q!.toString() ? p : q
+              }
+          }
+      use: |-
+          let cls = new Cls()
+
+          let v = cls.foo(1.0, 11.0)
+          assert(v as number == 11.0)
+
+          let w = cls.foo(["a", "b", "c", "d"], [1, 2])
+          assert((w as string[]).length == 4)
+
+    - decl: |-
+          class Bar {
+              static bar<T>(p: T): Array<T> {
+                  let x = Array<T>(5)
+                  return x.fill(p)
+              }
+          }
+
+          class Foo {
+              // no constraints
+              foo<T, U>(p: T, q: U): [Array<T>, Array<U>] {
+                  return [Bar.bar(p), Bar.bar(q)]
+              }
+          }
+      use: |-
+          let err = new Error()
+          let z = new Foo().foo(42f, err)
+          assert(z[0][0] == 42f && z[0][4] == 42f && z[1][0] == err && z[1][4] == err)
+
+    - decl: |-
+          class A {}
+          class B extends A {}
+
+          class Cls {
+              // with class type constraints
+              foo<T extends U, U extends Object>(p: T, q: U): boolean {
+                  return p.toString() + q.toString() > ""
+              }
+          }
+      use: |-
+          let cls = new Cls()
+          assert(cls.foo(new Object(), new Object()))
+          assert(cls.foo(new A(), new Object()))
+          assert(cls.foo(new B(), new Object()))
+          assert(cls.foo(new A(), new A()))
+          assert(cls.foo(new B(), new A()))
+          assert(cls.foo(new B(), new B()))
+
+    - decl: |-
+          class A {}
+          class B extends A {}
+          class C extends A {}
+          class Cls {
+              // with union type constraints
+              foo<T extends B|C, U extends number|never|B|null|boolean>(p: T, q: U): boolean {
+                  return "" + p + q > ""
+              }
+          }
+      use: |-
+          let cls = new Cls
+          assert(cls.foo(new C(), true))
+          assert(cls.foo(new B(), new B()))
+          assert(cls.foo(new C(), 42.0))
+          assert(cls.foo(new B(), null))
+
+    - decl: |-
+          class D {
+              fld1: number = 0
+              fld2: number = 0
+              fld3: number = 0
+          }
+          class C {
+              fld3: number = 0
+              fld4: number = 0
+              fld5: number = 0
+          }
+          class Cls {
+              // with keyof type constraints
+              foo<T extends keyof D, U extends keyof C>(p: T, q: U): string {
+                  return p + q
+              }
+          }
+      use: |-
+          let cls = new Cls
+          assert(cls.foo('fld3', 'fld3') == 'fld3fld3')
+          assert(cls.foo('fld1', 'fld5') == 'fld1fld5')
+          assert(cls.foo('fld2', 'fld4') == 'fld2fld4')

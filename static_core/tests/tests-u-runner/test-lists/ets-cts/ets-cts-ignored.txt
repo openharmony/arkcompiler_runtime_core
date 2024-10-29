@@ -1770,8 +1770,32 @@
 07.expressions/01.evaluation_of_expressions/05.evaluation_of_other_expressions/ase_9.sts
 # end of 19908 fails
 
+# 20213 Generic instantiation depends on arguments order
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_n_3.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_n_3.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_n_3.sts
 
+# 20214 Generic lambda is not supported by compiler
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_0.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_1.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_2.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_3.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_4.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_5.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_6.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/lmbd_7.sts
 
+# 20215 es2panda aborts on function types in generic type arguments
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_1.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_1.sts
+
+# 20218 es2panda aborts on conditional expression in generic function
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_2.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_2.sts
+
+# 17453 keyof if not implemented yet
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/func_6.sts
+05.generics/02.generic_instantiations/01.implicit_generic_instantiations/meth_6.sts
 
 # 16623: cannot call static method from abstract class
 09.classes/06.method_declarations/01.static_methods/static_method_in_abstract_class_1.sts
