@@ -19,17 +19,11 @@ desc: >-
     if it does, then the entire indexing-Expression equals undefined.
 ---*/
 
-function test(b: boolean) {
-    if (!b) {
-        throw new Error()
-    }
-}
-
 function refNullish(): Record<string, number>|null {
     let res: Record<string, number>|null= { "magic": 42 }
     return res
 }
 
 function main() {
-    test(refNullish()?.["magic"] == 42)
+    assert(refNullish()?.["magic"] == 42)
 }

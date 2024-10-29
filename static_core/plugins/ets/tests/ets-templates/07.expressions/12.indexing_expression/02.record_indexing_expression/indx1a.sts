@@ -19,17 +19,12 @@ desc: >-
     an array type, or on the Record type; a compile-time error occurs otherwise.
 ---*/
 
-function test(b: boolean) {
-    if (!b) {
-        throw new Error()
-    }
-}
-
 function refNotNullish(): Record<string, number> {
     let res: Record<string, number> = { "magic": 42 }
     return res
 }
 
 function main() {
-    test(refNotNullish()?.["magic"] == 42)
+    assert(refNotNullish()["magic"] == 42)
+    assert(refNotNullish()?.["magic"] == 42)
 }
