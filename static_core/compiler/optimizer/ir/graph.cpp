@@ -639,7 +639,13 @@ void MarkLoopExits(const Graph *graph, Marker marker)
 {
     for (auto block : graph->GetBlocksRPO()) {
         if (block->GetSuccsBlocks().size() == MAX_SUCCS_NUM) {
-            if (block->GetSuccessor(0)->GetLoop() != block->GetSuccessor(1)->GetLoop()) {
+            auto thisLoop = block->GetLoop();
+            auto loop0 = block->GetSuccessor(0)->GetLoop();
+            auto loop1 = block->GetSuccessor(1)->GetLoop();
+            if (loop0 != thisLoop && !loop0->IsInside(thisLoop)) {
+                block->SetMarker(marker);
+            }
+            if (loop1 != thisLoop && !loop1->IsInside(thisLoop)) {
                 block->SetMarker(marker);
             }
         } else if (block->GetSuccsBlocks().size() > MAX_SUCCS_NUM) {

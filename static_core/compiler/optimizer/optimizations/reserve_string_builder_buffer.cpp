@@ -510,7 +510,7 @@ uint64_t ReserveStringBuilderBuffer::FindLongestPathLength(Inst *instance, Basic
             appendCallsCount = std::max(appendCallsCount, blockWeightsMap_[succ]);
         } else if (succ->GetLoop() == block->GetLoop()) {
             // Same loop case
-            appendCallsCount = std::max(appendCallsCount, FindLongestPathLength(instance, succ, visited));
+            appendCallsCount = std::max(appendCallsCount, FindLongestPathLength(instance, succ, visited, stopAtBlock));
         } else if (succ->GetLoop()->GetOuterLoop() == block->GetLoop()) {
             // Edge from block to succ cr1osses loop boundary: e.g block is loop preheader, succ is loop header
             ASSERT(succ == succ->GetLoop()->GetHeader());

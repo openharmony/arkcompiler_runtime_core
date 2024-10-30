@@ -91,6 +91,7 @@ end
 class SearchScope
 
   attr_reader :lines
+  attr_reader :current_index
 
   def initialize(lines, name)
     @lines = lines

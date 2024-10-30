@@ -321,6 +321,20 @@ void ValNum::FindEqualVnOrCreateNew(Inst *inst)
         SetInstValNum(inst);
         return;
     }
+
+    // If there will be LoopUnroll pass, avoid preheader modification:
+    if (inst->GetOpcode() == Opcode::Compare && !GetGraph()->IsBytecodeOptimizer() &&
+        g_options.IsCompilerDeferPreheaderTransform() && !GetGraph()->IsUnrollComplete()) {
+        auto bb = inst->GetBasicBlock();
+        if (bb->IsLoopPreHeader() && inst->HasSingleUser() && inst->GetFirstUser()->GetInst() == bb->GetLastInst() &&
+            bb->GetLastInst()->GetOpcode() == Opcode::IfImm) {
+            COMPILER_LOG(DEBUG, VN_OPT) << " The inst with id " << inst->GetId()
+                                        << " is in preheader and thus deferred";
+            SetInstValNum(inst);
+            return;
+        }
+    }
+
     auto obj = GetGraph()->GetLocalAllocator()->New<VnObject>();
     obj->Add(inst);
     COMPILER_LOG(DEBUG, VN_OPT) << " Equivalent instructions are searched for inst with id " << inst->GetId();

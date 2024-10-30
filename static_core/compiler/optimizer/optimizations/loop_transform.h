@@ -121,9 +121,6 @@ protected:
     {
 #ifndef __clang_analyzer__
         if constexpr (EXIT_POINT != LoopExitPoint::ALL_LOOP) {
-            if (!loop->GetInnerLoops().empty()) {
-                return false;
-            }
             for (auto block : loop->GetBlocks()) {
                 if (!VisitBlockInLoop(block, loop, marker)) {
                     return false;

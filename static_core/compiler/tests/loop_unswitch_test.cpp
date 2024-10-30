@@ -340,8 +340,6 @@ Graph *LoopUnswitchTest::BuildExpectedSameCondition()
         CONSTANT(3U, 0U).i64();
         CONSTANT(4U, 1U).i64();
 
-        BASIC_BLOCK(14U, 29U) {}
-
         BASIC_BLOCK(29U, 16U, 18U)
         {
             INST(40U, Opcode::IfImm).SrcType(DataType::BOOL).CC(CC_EQ).Imm(0U).Inputs(0U);

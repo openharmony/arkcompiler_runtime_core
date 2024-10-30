@@ -466,7 +466,7 @@ bool IsLoopSingleBackEdgeExitPoint(Loop *loop)
             continue;
         }
         for (auto succ : block->GetSuccsBlocks()) {
-            if (succ->GetLoop() != loop) {
+            if (succ->GetLoop() != loop && !succ->GetLoop()->IsInside(loop)) {
                 return false;
             }
         }

@@ -112,7 +112,7 @@ function uber_reserve38(cond: boolean) : string
                 sb.append("-")
             break
             default:
-                assert false
+                sb.append("Unreachable")
         }
     }
     sb.append(nullString)
