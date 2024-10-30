@@ -92,24 +92,27 @@ TEST_F(ItemsPoolGTest, test_1)
     ASSERT_EQ(currentPos, data);
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
 // NOLINTBEGIN(cppcoreguidelines-pro-bounds-pointer-arithmetic)
 TEST_F(ItemsPoolGTest, test_2)
 {
     // clang-format off
-// |  INDEX  | Step1 | Step2 | Step3 | Step4 | Step5 | Step6 | Step7 | Step8 | Step9 | Step10| Step11| Step12| Step13| Step14| Step15| Step16| Step17| Step18| Step19|
-// +=========+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+
-// |   000   | item0 | item0 | item0 | item0 | item0 | item0 | item0 | item0 | item0 | item0 | item0 | item0 |       |       |       |       |       | item13| item13|
-// |   001   |       | item1 | item1 |       | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 | item3 |
-// |   010   |       |       | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 | item2 |
-// |   011   |       |       |       |       |       | item4 | item4 | item4 | item4 | item4 | item4 | item4 | item4 | item4 |       | item11| item11| item11| item11|
-// |   100   |       |       |       |       |       |       | item5 | item5 | item5 | item5 | item5 | item5 | item5 |       |       |       | item12| item12| item12|
-// |   101   |       |       |       |       |       |       |       | item6 | item6 | item6 | item6 | item6 | item6 | item6 | item6 | item6 | item6 | item6 | item6 |
-// |   110   |       |       |       |       |       |       |       |       | item7 | item7 | item7 | item7 | item7 | item7 | item7 | item7 | item7 | item7 | item7 |
-// |   111   |       |       |       |       |       |       |       |       |       | item8 | item8 | item8 | item8 | item8 | item8 | item8 | item8 | item8 | item8 |
-// +=========+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+=======+
-// |free_list|       |       |       |       |       |       |       |       |       |       |       |       |   0   |   4   |   3   |   4   |   0   |       |       |
-// |         |       |       |       |       |       |       |       |       |       |       |       |       |       |   0   |   4   |   0   |       |       |       |
-// |         |       |       |       |       |       |       |       |       |       |       |       |       |       |       |   0   |       |       |       |       |
+// S = Step
+// i = item
+// |  INDEX  | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10| S11| S12| S13| S14| S15| S16| S17| S18| S19|
+// +=========+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
+// |   000   | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 | i0 |    |    |    |    |    | i13| i13|
+// |   001   |    | i1 | i1 |    | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 | i3 |
+// |   010   |    |    | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 | i2 |
+// |   011   |    |    |    |    |    | i4 | i4 | i4 | i4 | i4 | i4 | i4 | i4 | i4 |    | i11| i11| i11| i11|
+// |   100   |    |    |    |    |    |    | i5 | i5 | i5 | i5 | i5 | i5 | i5 |    |    |    | i12| i12| i12|
+// |   101   |    |    |    |    |    |    |    | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 | i6 |
+// |   110   |    |    |    |    |    |    |    |    | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 | i7 |
+// |   111   |    |    |    |    |    |    |    |    |    | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 | i8 |
+// +=========+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+====+
+// |free_list|    |    |    |    |    |    |    |    |    |    |    |    |  0 |  4 |  3 |  4 |  0 |    |    |
+// |         |    |    |    |    |    |    |    |    |    |    |    |    |    |  0 |  4 |  0 |    |    |    |
+// |         |    |    |    |    |    |    |    |    |    |    |    |    |    |    |  0 |    |    |    |    |
     // clang-format on
 
     auto pool = ItemsPoolTest::CreatePool();
@@ -269,6 +272,7 @@ TEST_F(ItemsPoolGTest, test_2)
     ASSERT_EQ(uintptr_t(item8), uintptr_t(data + 7U));
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
 TEST_F(ItemsPoolGTest, test_3)
 {
     // clang-format off
