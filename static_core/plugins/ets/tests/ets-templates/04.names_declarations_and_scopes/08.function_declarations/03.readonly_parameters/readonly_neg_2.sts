@@ -22,6 +22,6 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function foo(a: readonly {{c.type}}) {}
+function foo(a: readonly {{c}}) {}
 
 {% endfor %}

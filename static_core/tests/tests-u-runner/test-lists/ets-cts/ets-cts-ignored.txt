@@ -185,7 +185,7 @@
 09.classes/04.access_modifiers/01.private_access_modifier/private_member_access_in_class_2.sts
 09.classes/04.access_modifiers/01.private_access_modifier/private_member_access_in_class_3.sts
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_interface_access.sts
-09.classes/04.access_modifiers/02.internal_access_modifier/internal_interface_access_in_package.sts
+09.classes/04.access_modifiers/02.internal_access_modifier/Test/Test/internal_interface_access_in_package.sts
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_2.sts
 09.classes/04.access_modifiers/02.internal_access_modifier/internal_member_access_3.sts
 09.classes/04.access_modifiers/03.protected_access_modifier/protected_interface_access_in_class.sts
@@ -2138,24 +2138,10 @@
 # end es2panda
 
 ### ES2PANDA_FAIL - fails of negative, compile-only
-### Issue 19678
-03.types/08.reference_types/11.union_types/ut_n_17.sts
-03.types/08.reference_types/12.nullish_types/nullable_types_operations_5.sts
-03.types/08.reference_types/12.nullish_types/nullable_types_operations_6.sts
-03.types/08.reference_types/12.nullish_types/nullable_types_operations_7.sts
-06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/decl_var/decl-var_n_6.sts
-### end of Issue 19678
-### 19950
-03.types/08.reference_types/11.union_types/ut_n_22.sts
 ### Issue 19679
 08.statements/15.try_statements/02.finally_clause/finally_n_2.sts
 17.experimental_features/06.statements/02.multiple_catch_clauses_in_try_statements/finally_n_2.sts
 ### end of Issue 19679
-### Issue 19684
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_15.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_16.sts
-15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_17.sts
-### end of Issue 19684
 ### Issue 19951
 15.semantic_rules/07.overloading_and_overriding/03.overloading_for_functions/function_import_neg_19.sts
 ### Issue 19685
@@ -2312,29 +2298,14 @@
 ### end of Issue 19680
 ### end of ES2PANDA_FAIL - fails of negative, compile-only
 
-# panda#19396
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_105.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_114.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_123.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_126.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_129.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_132.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_141.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_15.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_24.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_33.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_42.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_51.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_6.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_60.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_69.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_78.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_87.sts
-05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_96.sts
-07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_incorrect_1.sts
-07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_incorrect_2.sts
-07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_incorrect_3.sts
-02.lexical_elements/10.comments/multi_line_comment2_n.sts
-02.lexical_elements/10.comments/multi_line_comment3_n.sts
-02.lexical_elements/10.comments/multi_line_comment5_n.sts
-# end of panda#19396
+# panda#19881
+08.statements/05.if_statements/if_neg_2.sts
+08.statements/05.if_statements/if_neg_4.sts
+08.statements/07.while_statements_and_do_statements/neg_3.sts
+08.statements/07.while_statements_and_do_statements/neg_5.sts
+08.statements/07.while_statements_and_do_statements/neg_6.sts
+08.statements/07.while_statements_and_do_statements/neg_7.sts
+08.statements/09.for_of_statements/for_of_neg_7.sts
+08.statements/09.for_of_statements/for_of_neg_9.sts
+17.experimental_features/06.statements/01.for-of_type_annotation/for_of_n_6.sts
+# end of panda#19881
