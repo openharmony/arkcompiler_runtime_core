@@ -2455,6 +2455,9 @@
 ### end of Issue 19680
 ### end of ES2PANDA_FAIL - fails of negative, compile-only
 
+# 20510 unclear semantics
+07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum2_neg_3.sts
+
 # panda#19396
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_105.sts
 05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_114.sts
