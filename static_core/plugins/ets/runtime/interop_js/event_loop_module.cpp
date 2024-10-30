@@ -39,15 +39,23 @@ EventLoopCallbackPoster::EventLoopCallbackPoster()
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     auto loop = GetEventLoop();
     async_ = Runtime::GetCurrent()->GetInternalAllocator()->New<uv_async_t>();
-    [[maybe_unused]] auto uvstatus = uv_async_init(loop, async_, AsyncCallbackBody);
+    callbackQueue_ = Runtime::GetCurrent()->GetInternalAllocator()->New<ThreadSafeCallbackQueue>();
+    [[maybe_unused]] auto uvstatus = uv_async_init(loop, async_, AsyncEventToExecuteCallbacks);
     ASSERT(uvstatus == 0);
+    async_->data = callbackQueue_;
 }
 
 EventLoopCallbackPoster::~EventLoopCallbackPoster()
 {
-    if (async_ != nullptr) {
-        PostToEventLoop([]() {});
-    }
+    ASSERT(async_ != nullptr);
+    PostToEventLoop([async = this->async_]() {
+        auto deleter = [](uv_handle_t *handle) {
+            auto *poster = reinterpret_cast<ThreadSafeCallbackQueue *>(handle->data);
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(poster);
+            Runtime::GetCurrent()->GetInternalAllocator()->Delete(handle);
+        };
+        uv_close(reinterpret_cast<uv_handle_t *>(async), deleter);
+    });
 }
 
 void EventLoopCallbackPoster::PostImpl(WrappedCallback &&callback)
@@ -58,24 +66,35 @@ void EventLoopCallbackPoster::PostImpl(WrappedCallback &&callback)
 
 void EventLoopCallbackPoster::PostToEventLoop(WrappedCallback &&callback)
 {
-    async_->data = Runtime::GetCurrent()->GetInternalAllocator()->New<WrappedCallback>(std::move(callback));
     ASSERT(async_ != nullptr);
-    [[maybe_unused]] auto uvstatus = uv_async_send(async_);
-    ASSERT(uvstatus == 0);
-    async_ = nullptr;
+    callbackQueue_->PushCallback(std::move(callback), async_);
 }
 
 /*static*/
-void EventLoopCallbackPoster::AsyncCallbackBody(uv_async_t *async)
+void EventLoopCallbackPoster::AsyncEventToExecuteCallbacks(uv_async_t *async)
 {
-    auto *callback = reinterpret_cast<WrappedCallback *>(async->data);
-    async->data = nullptr;
-    if (callback != nullptr) {
-        (*callback)();
+    auto *callbackQueue = reinterpret_cast<ThreadSafeCallbackQueue *>(async->data);
+    ASSERT(callbackQueue != nullptr);
+    callbackQueue->ExecuteAllCallbacks();
+}
+
+void EventLoopCallbackPoster::ThreadSafeCallbackQueue::PushCallback(WrappedCallback &&callback, uv_async_t *async)
+{
+    os::memory::LockHolder lh(lock_);
+    callbackQueue_.push(std::move(callback));
+    ASSERT(async != nullptr);
+    [[maybe_unused]] auto uvstatus = uv_async_send(async);
+    ASSERT(uvstatus == 0);
+}
+
+void EventLoopCallbackPoster::ThreadSafeCallbackQueue::ExecuteAllCallbacks()
+{
+    os::memory::LockHolder lh(lock_);
+    while (!callbackQueue_.empty()) {
+        auto callback = callbackQueue_.front();
+        callback();
+        callbackQueue_.pop();
     }
-    Runtime::GetCurrent()->GetInternalAllocator()->Delete(callback);
-    uv_close(reinterpret_cast<uv_handle_t *>(async),
-             [](uv_handle_t *handle) { Runtime::GetCurrent()->GetInternalAllocator()->Delete(handle); });
 }
 
 PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()

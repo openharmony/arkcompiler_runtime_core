@@ -434,10 +434,8 @@ JSCONVERT_WRAP(Promise)
         }
     } else {
         ASSERT_MANAGED_CODE();
-        auto poster = coro->GetPandaVM()->CreateCallbackPoster();
-        ASSERT(poster);
         RemotePromiseResolver *resolver =
-            Runtime::GetCurrent()->GetInternalAllocator()->New<JsRemotePromiseResolver>(deferred, std::move(poster));
+            Runtime::GetCurrent()->GetInternalAllocator()->New<JsRemotePromiseResolver>(deferred);
         hpromise->SetEtsPromiseResolver(resolver);
     }
     EtsPromiseRef *ref = EtsPromiseRef::Create(coro);

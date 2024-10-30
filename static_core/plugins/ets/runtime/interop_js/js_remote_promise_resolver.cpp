@@ -18,16 +18,19 @@
 
 namespace ark::ets::interop::js {
 
-JsRemotePromiseResolver::JsRemotePromiseResolver(napi_deferred deferred, PandaUniquePtr<CallbackPoster> &&poster)
-    : deferred_(deferred), poster_(std::move(poster))
+JsRemotePromiseResolver::JsRemotePromiseResolver(napi_deferred deferred) : deferred_(deferred)
 {
+    [[maybe_unused]] auto *coro = EtsCoroutine::GetCurrent();
+    ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
+    // post async call to event loop
+    auto *vm = coro->GetPandaVM();
+    ASSERT(vm != nullptr);
+    poster_ = vm->CreateCallbackPoster();
+    ASSERT(poster_ != nullptr);
 }
 
 void JsRemotePromiseResolver::ResolveViaCallback(EtsObject *resolveValue, Action action)
 {
-    [[maybe_unused]] auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
-    // post async call to event loop
     poster_->Post(ResolveRemotePromise, deferred_, resolveValue, action);
 }
 
