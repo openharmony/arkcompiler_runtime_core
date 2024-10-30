@@ -70,7 +70,7 @@ void TransformMethod(AbckitFile *file, const std::string &methodSignature,
 
     UserTransformerData utd({method, userTransformer});
 
-    TransformMethodImpl(g_implI->functionGetFile(method), method, (void *)&utd);
+    TransformMethodImpl(g_implI->functionGetFile(method), method, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
@@ -88,7 +88,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     auto *method = FindMethodByName(file, methodSignature);
     ASSERT_NE(method, nullptr);
     UserTransformerData utd({method, userTransformer});
-    TransformMethodImpl(g_implI->functionGetFile(method), method, (void *)&utd);
+    TransformMethodImpl(g_implI->functionGetFile(method), method, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Validate method
@@ -116,7 +116,7 @@ void TransformMethod(const std::string &inputPath, const std::string &outputPath
     auto *method = FindMethodByName(file, methodSignature);
     ASSERT_NE(method, nullptr);
     UserTransformerData utd({method, userTransformer});
-    TransformMethodImpl(g_implI->functionGetFile(method), method, (void *)&utd);
+    TransformMethodImpl(g_implI->functionGetFile(method), method, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     // Write output
@@ -150,7 +150,7 @@ void InspectMethod(AbckitFile *file, const std::string &methodSignature,
 
     UserInspectorData uid({method, userInspector});
 
-    InspectMethodImpl(g_implI->functionGetFile(method), method, (void *)&uid);
+    InspectMethodImpl(g_implI->functionGetFile(method), method, &uid);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
@@ -167,7 +167,7 @@ void InspectMethod(const std::string &inputPath, const std::string &methodSignat
     auto *method = FindMethodByName(file, methodSignature);
     ASSERT_NE(method, nullptr);
     UserInspectorData uid({method, userInspector});
-    InspectMethodImpl(file, method, (void *)&uid);
+    InspectMethodImpl(file, method, &uid);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->closeFile(file);
@@ -177,8 +177,7 @@ std::vector<AbckitBasicBlock *> BBgetPredBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> predBBs;
     g_implG->bbVisitPredBlocks(
-        bb, (void *)&predBBs,
-        []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+        bb, &predBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
             auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
             preds->emplace_back(succBasicBlock);
         });
@@ -189,8 +188,7 @@ std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> succBBs;
     g_implG->bbVisitSuccBlocks(
-        bb, (void *)&succBBs,
-        []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+        bb, &succBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
             auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
             succs->emplace_back(succBasicBlock);
         });
@@ -335,7 +333,7 @@ static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(Abc
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
             return true;
         });
-        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->moduleEnumerateTopLevelFunctions(m, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
             return true;
         });
@@ -354,19 +352,20 @@ void EnumerateAllMethods(AbckitFile *file, const std::function<void(AbckitCoreFu
 
     cbFunc = [&](AbckitCoreFunction *f) {
         cbUserFunc(f);
-        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->functionEnumerateNestedFunctions(f, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(f);
             return true;
         });
-        g_implI->functionEnumerateNestedClasses(f, (void *)&cbClass, [](AbckitCoreClass *f, void *cb) {
+        g_implI->functionEnumerateNestedClasses(f, &cbClass, [](AbckitCoreClass *f, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(f);
             return true;
         });
     };
 
     cbClass = [&](AbckitCoreClass *c) {
-        g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->classEnumerateMethods(c, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
+
             return true;
         });
     };
@@ -380,8 +379,9 @@ void EnumerateAllMethods(AbckitFile *file, const std::function<void(AbckitCoreFu
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
             return true;
         });
-        g_implI->namespaceEnumerateTopLevelFunctions(n, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->namespaceEnumerateTopLevelFunctions(n, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(f);
+
             return true;
         });
     };

@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_IMPL_H
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_IMPL_H
 
-#include "cpp/headers/core/annotation_interface.h"
+#include "./annotation_interface.h"
 
 namespace abckit::core {
 
@@ -29,7 +29,7 @@ inline std::vector<AnnotationInterfaceField> AnnotationInterface::GetFields()
     using EnumerateData = std::pair<std::vector<core::AnnotationInterfaceField> *, const ApiConfig *>;
     EnumerateData enumerateData(&namespaces, conf);
 
-    conf->cIapi_->annotationInterfaceEnumerateFields(GetView(), (void *)&enumerateData,
+    conf->cIapi_->annotationInterfaceEnumerateFields(GetView(), &enumerateData,
                                                      [](AbckitCoreAnnotationInterfaceField *func, void *data) {
                                                          auto *vec = static_cast<EnumerateData *>(data)->first;
                                                          auto *config = static_cast<EnumerateData *>(data)->second;

@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_GRAPH_IMPL_H
 #define CPP_ABCKIT_GRAPH_IMPL_H
 
-#include "cpp/headers/graph.h"
+#include "./graph.h"
 
 namespace abckit {
 
@@ -37,7 +37,7 @@ inline std::vector<BasicBlock> Graph::GetBlocksRPO() const
     using EnumerateData = std::pair<std::vector<BasicBlock> *, const ApiConfig *>;
     EnumerateData enumerateData(&blocks, conf);
 
-    conf->cGapi_->gVisitBlocksRpo(GetResource(), (void *)&enumerateData, [](AbckitBasicBlock *bb, void *data) {
+    conf->cGapi_->gVisitBlocksRpo(GetResource(), &enumerateData, [](AbckitBasicBlock *bb, void *data) {
         auto *vec = static_cast<EnumerateData *>(data)->first;
         auto *config = static_cast<EnumerateData *>(data)->second;
         vec->push_back(BasicBlock(bb, config));

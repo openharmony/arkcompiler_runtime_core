@@ -20,29 +20,13 @@
 #include <stdbool.h>
 #endif
 
-#include "statuses.h"
+#include "./statuses.h"
+#include "./api_version.h"
+#include "./declarations.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-struct AbckitModifyApi;
-struct AbckitInspectApi;
-struct AbckitGraphApi;
-struct AbckitFile;
-struct AbckitGraph;
-
-#ifndef __cplusplus
-typedef struct AbckitModifyApi AbckitModifyApi;
-typedef struct AbckitInspectApi AbckitInspectApi;
-typedef struct AbckitGraphApi AbckitGraphApi;
-typedef struct AbckitFile AbckitFile;
-typedef struct AbckitGraph AbckitGraph;
-#endif
-
-enum AbckitApiVersion {
-    ABCKIT_VERSION_RELEASE_1_0_0,
-};
 
 /**
  * @brief Struct that holds the pointers to the top-level Abckit API.

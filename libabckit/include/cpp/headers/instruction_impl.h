@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_INSTRUCTION_IMPL_H
 #define CPP_ABCKIT_INSTRUCTION_IMPL_H
 
-#include "cpp/headers/instruction.h"
+#include "./instruction.h"
 
 namespace abckit {
 

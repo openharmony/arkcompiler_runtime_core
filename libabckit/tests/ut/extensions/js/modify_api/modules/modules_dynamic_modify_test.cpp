@@ -971,7 +971,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regular
     utd.alias = "newImportedFunc";
     utd.moduleName = "modules/JSmodule3";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1015,7 +1015,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regular
     utd.alias = "NewImportedFuncAlias";
     utd.moduleName = "modules/JSmodule3";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1063,7 +1063,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regular
     utd.alias = "NewImportedFuncAlias";
     utd.moduleName = "modules/JSmodule4";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1111,7 +1111,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regular
     utd.alias = "newImportedDefaultFuncFromModule4";
     utd.moduleName = "modules/JSmodule4";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1160,7 +1160,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Namespa
     utd.alias = "NewImport";
     utd.moduleName = "modules/JSmodule3";
     utd.isRegular = false;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1209,7 +1209,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Namespa
     utd.alias = "NewImport";
     utd.moduleName = "modules/JSmodule4";
     utd.isRegular = false;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1253,7 +1253,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_LocalExport)
     utd.name = "NewExportedVar";
     utd.alias = "NewExportedVar";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1295,7 +1295,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_LocalExport2)
     utd.name = "NewExportedVar";
     utd.alias = "NewExportedVarAlias";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1337,7 +1337,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_LocalExport3)
     utd.name = "default";
     utd.alias = "NewExportedVarDefault";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1376,14 +1376,14 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_IndirectExport)
     auto module = ctxFinder.module;
     UserTransformerData utd {"NewLocalExportLet", "NewLocalExportLet", "modules/JSmodule1", false,
                              AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_INDIRECT_EXPORT};
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     UserTransformerData utd2 {utd.name, utd.alias, "modules/JSmodule2", true};
     ctxFinder = {nullptr, "JSmodules_dynamic_modify"};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
     TestNoError(ctxFinder.module);
-    AddImportFromDynamicModuleImpl(ctxFinder.module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(ctxFinder.module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1424,7 +1424,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_IndirectExport2)
     auto module = ctxFinder.module;
     UserTransformerData utd = {"NewLocalExportVar", "NewLocalExportVarAlias", "modules/JSmodule4", false,
                                AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_INDIRECT_EXPORT};
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     UserTransformerData utd2 = {utd.alias, "NewLocalExportVarFromModule4", "modules/JSmodule2", true};
@@ -1432,7 +1432,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_IndirectExport2)
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ctxFinder.module, nullptr);
-    AddImportFromDynamicModuleImpl(ctxFinder.module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(ctxFinder.module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1475,7 +1475,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_StarExport)
     utd.name = "*";
     utd.moduleName = "modules/JSmodule3";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     ctxFinder = {nullptr, "JSmodules_dynamic_modify"};
@@ -1484,7 +1484,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_StarExport)
     ASSERT_NE(ctxFinder.module, nullptr);
     module = ctxFinder.module;
     UserTransformerData utd2 = {"*", "NS4", "modules/JSmodule4", false};
-    AddImportFromDynamicModuleImpl(module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1522,7 +1522,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_StarExport2)
     utd.name = "*";
     utd.moduleName = "modules/JSmodule4";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);
@@ -1563,7 +1563,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
     auto module = ctxFinder.module;
     UserTransformerData utd {"*", "NewStarExport", "modules/JSmodule3", false,
                              AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT};
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     ctxFinder = {nullptr, "JSmodules_dynamic_modify"};
@@ -1571,7 +1571,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
     TestNoError(ctxFinder.module);
     module = ctxFinder.module;
     UserTransformerData utd2 {"NewStarExport", "NewStarExport", "modules/JSmodule4", true};
-    AddImportFromDynamicModuleImpl(module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, MODIFIED_PATH);

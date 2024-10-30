@@ -16,22 +16,12 @@
 #ifndef CPP_ABCKIT_FILE_H
 #define CPP_ABCKIT_FILE_H
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/cpp/headers/base_classes.h"
-#include "libabckit/include/cpp/headers/config.h"
-#include "libabckit/include/cpp/headers/declarations.h"
-#include "libabckit/include/cpp/headers/basic_block.h"
-#include "libabckit/include/cpp/headers/instruction.h"
-#include "libabckit/include/cpp/headers/dynamic_isa.h"
-#include "libabckit/include/cpp/headers/value.h"
-#include "libabckit/include/cpp/headers/literal.h"
-#include "libabckit/include/cpp/headers/literal_array.h"
-#include "libabckit/src/include_v2/cpp/headers/static_isa.h"
+#include "./base_classes.h"
+#include "./value.h"
+#include "./literal.h"
+#include "./literal_array.h"
 
-#include "libabckit/include/cpp/headers/core/module.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "./core/module.h"
 
 #include <memory>
 #include <vector>
@@ -160,13 +150,12 @@ private:
         using EnumerateData = std::pair<std::vector<core::Module> *, const ApiConfig *>;
         EnumerateData enumerateData(&modules, conf);
 
-        conf->cIapi_->fileEnumerateModules(GetResource(), (void *)&enumerateData,
-                                           [](AbckitCoreModule *module, void *data) {
-                                               auto *vec = static_cast<EnumerateData *>(data)->first;
-                                               auto *config = static_cast<EnumerateData *>(data)->second;
-                                               vec->push_back(core::Module(module, config));
-                                               return true;
-                                           });
+        conf->cIapi_->fileEnumerateModules(GetResource(), &enumerateData, [](AbckitCoreModule *module, void *data) {
+            auto *vec = static_cast<EnumerateData *>(data)->first;
+            auto *config = static_cast<EnumerateData *>(data)->second;
+            vec->push_back(core::Module(module, config));
+            return true;
+        });
     }
 
     const ApiConfig conf_;

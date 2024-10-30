@@ -759,7 +759,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
                 int newPrintInt;
             } data {g_statG, g_implG, graph, 42};
             g_implG->bbVisitSuccBlocks(
-                ifBB, (void *)&data,
+                ifBB, &data,
                 []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
                     auto *gStatG = static_cast<struct VisitData *>(d)->gStatG;
                     auto *gImplG = static_cast<struct VisitData *>(d)->implG;

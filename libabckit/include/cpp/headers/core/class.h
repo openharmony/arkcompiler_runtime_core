@@ -16,16 +16,10 @@
 #ifndef CPP_ABCKIT_CORE_CLASS_H
 #define CPP_ABCKIT_CORE_CLASS_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/annotation_interface.h"
-#include "cpp/headers/core/function.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "../base_classes.h"
+#include "./function.h"
 
 #include <vector>
-#include <utility>
 
 namespace abckit::core {
 
@@ -56,13 +50,12 @@ private:
         using EnumerateData = std::pair<std::vector<core::Function> *, const ApiConfig *>;
         EnumerateData enumerateData(&methods, conf);
 
-        conf->cIapi_->classEnumerateMethods(GetView(), (void *)&enumerateData,
-                                            [](AbckitCoreFunction *method, void *data) {
-                                                auto *vec = static_cast<EnumerateData *>(data)->first;
-                                                auto *config = static_cast<EnumerateData *>(data)->second;
-                                                vec->push_back(core::Function(method, config));
-                                                return true;
-                                            });
+        conf->cIapi_->classEnumerateMethods(GetView(), &enumerateData, [](AbckitCoreFunction *method, void *data) {
+            auto *vec = static_cast<EnumerateData *>(data)->first;
+            auto *config = static_cast<EnumerateData *>(data)->second;
+            vec->push_back(core::Function(method, config));
+            return true;
+        });
     }
 
     inline void GetAllAnnotationsInner(std::vector<core::Annotation> &anns) const
@@ -72,7 +65,7 @@ private:
         using EnumerateData = std::pair<std::vector<core::Annotation> *, const ApiConfig *>;
         EnumerateData enumerateData(&anns, conf);
 
-        conf->cIapi_->classEnumerateAnnotations(GetView(), (void *)&enumerateData,
+        conf->cIapi_->classEnumerateAnnotations(GetView(), &enumerateData,
                                                 [](AbckitCoreAnnotation *method, void *data) {
                                                     auto *vec = static_cast<EnumerateData *>(data)->first;
                                                     auto *config = static_cast<EnumerateData *>(data)->second;

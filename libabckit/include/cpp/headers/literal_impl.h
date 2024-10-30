@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_LITERAL_IMPL_H
 #define CPP_ABCKIT_LITERAL_IMPL_H
 
-#include "cpp/headers/literal.h"
+#include "./literal.h"
 
 namespace abckit {
 

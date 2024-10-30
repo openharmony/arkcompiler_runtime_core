@@ -25,24 +25,12 @@
 #include <cstddef>
 #include <cstdint>
 #endif /* __cplusplus */
-#include "../../metadata_core.h"
+
+#include "../../declarations.h"
+#include "../../api_version.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
-
-struct AbckitJsModule;
-struct AbckitJsClass;
-struct AbckitJsFunction;
-struct AbckitJsImportDescriptor;
-struct AbckitJsExportDescriptor;
-
-#ifndef __cplusplus
-typedef struct AbckitJsModule AbckitJsModule;
-typedef struct AbckitJsClass AbckitJsClass;
-typedef struct AbckitJsFunction AbckitJsFunction;
-typedef struct AbckitJsImportDescriptor AbckitJsImportDescriptor;
-typedef struct AbckitJsExportDescriptor AbckitJsExportDescriptor;
 #endif /* __cplusplus */
 
 /**

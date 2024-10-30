@@ -54,7 +54,7 @@ static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<bool(Abc
         g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreClass *)> *>(cb))(c);
         });
-        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->moduleEnumerateTopLevelFunctions(m, cbFunc, [](AbckitCoreFunction *f, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(f);
         });
         return !hasError;
@@ -88,7 +88,7 @@ extern "C" int Entry(AbckitFile *file)
     };
 
     cbClass = [&](AbckitCoreClass *c) {
-        g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->classEnumerateMethods(c, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(m);
         });
         return !hasError;
@@ -101,7 +101,7 @@ extern "C" int Entry(AbckitFile *file)
         g_implI->namespaceEnumerateClasses(n, &cbClass, [](AbckitCoreClass *c, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreClass *)> *>(cb))(c);
         });
-        g_implI->namespaceEnumerateTopLevelFunctions(n, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->namespaceEnumerateTopLevelFunctions(n, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(f);
         });
         return !hasError;

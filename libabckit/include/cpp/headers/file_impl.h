@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_FILE_IMPL_H
 #define CPP_ABCKIT_FILE_IMPL_H
 
-#include "cpp/headers/file.h"
+#include "./file.h"
 
 namespace abckit {
 
@@ -29,7 +29,7 @@ inline std::vector<core::Module> File::GetModules() const
     using EnumerateData = std::pair<std::vector<core::Module> *, const ApiConfig *>;
     EnumerateData enumerateData(&modules, conf);
 
-    conf->cIapi_->fileEnumerateModules(GetResource(), (void *)&enumerateData, [](AbckitCoreModule *module, void *data) {
+    conf->cIapi_->fileEnumerateModules(GetResource(), &enumerateData, [](AbckitCoreModule *module, void *data) {
         auto *vec = static_cast<EnumerateData *>(data)->first;
         auto *config = static_cast<EnumerateData *>(data)->second;
         vec->push_back(core::Module(module, config));

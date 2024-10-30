@@ -13,17 +13,11 @@
  * limitations under the License.
  */
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/statuses.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
+#include "../../../include/cpp/abckit_cpp.h"
 
 /*
  * This a canary file to check that the public API conforms to:
- * -std=c99 -pedantic -Wall -Wextra -Werror
+ * -std=c++17 -pedantic -pedantic-errors -Wall -Wextra -Werror
  */
 
 int main(int argc, char **argv)

@@ -16,15 +16,10 @@
 #ifndef CPP_ABCKIT_GRAPH_H
 #define CPP_ABCKIT_GRAPH_H
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/cpp/headers/base_classes.h"
-#include "libabckit/include/cpp/headers/config.h"
-#include "libabckit/include/cpp/headers/declarations.h"
-#include "libabckit/include/cpp/headers/basic_block.h"
-#include "libabckit/include/cpp/headers/dynamic_isa.h"
-#include "libabckit/src/include_v2/cpp/headers/static_isa.h"
+#include "./base_classes.h"
+#include "./basic_block.h"
+#include "./dynamic_isa.h"
+#include "../../../src/include_v2/cpp/headers/static_isa.h"
 
 #include <memory>
 #include <vector>
@@ -88,20 +83,6 @@ private:
         const ApiConfig *conf_;
         const Graph &deleterGraph_;
     };
-
-    inline void GetBlocksRPOInner(std::vector<BasicBlock> &blocks) const
-    {
-        const ApiConfig *conf = GetApiConfig();
-
-        using EnumerateData = std::pair<std::vector<BasicBlock> *, const ApiConfig *>;
-        EnumerateData enumerateData(&blocks, conf);
-
-        conf->cGapi_->gVisitBlocksRpo(GetResource(), (void *)&enumerateData, [](AbckitBasicBlock *bb, void *data) {
-            auto *vec = static_cast<EnumerateData *>(data)->first;
-            auto *config = static_cast<EnumerateData *>(data)->second;
-            vec->push_back(BasicBlock(bb, config));
-        });
-    }
 
     Graph(AbckitGraph *graph, const ApiConfig *conf) : Resource(graph), conf_(conf)
     {

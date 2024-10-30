@@ -25,7 +25,8 @@
 #include <cstdint>
 #endif
 
-#include "metadata_core.h"
+#include "./declarations.h"
+#include "./api_version.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,16 +46,6 @@ enum AbckitIsaType {
      */
     ABCKIT_ISA_TYPE_STATIC,
 };
-
-struct AbckitGraph;
-struct AbckitBasicBlock;
-struct AbckitInst;
-
-#ifndef __cplusplus
-typedef struct AbckitGraph AbckitGraph;
-typedef struct AbckitBasicBlock AbckitBasicBlock;
-typedef struct AbckitInst AbckitInst;
-#endif
 
 enum { ABCKIT_TRUE_SUCC_IDX = 0, ABCKIT_FALSE_SUCC_IDX = 1 };
 

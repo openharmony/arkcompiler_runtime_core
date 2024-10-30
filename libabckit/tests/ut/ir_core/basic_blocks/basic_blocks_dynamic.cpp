@@ -811,7 +811,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocksDynamic)
         };
 
         // CC-OFFNXT(G.FMT.02)
-        g_implG->bbVisitSuccBlocks(ifBB, (void *)&data, simpleCb);
+        g_implG->bbVisitSuccBlocks(ifBB, &data, simpleCb);
     };
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/visit_succ_dynamic.abc",
                              ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/visit_succ_dynamic_modified.abc",

@@ -25,7 +25,8 @@
 #include <cstdint>
 #endif /* __cplusplus */
 
-#include "abckit.h"
+#include "./declarations.h"
+#include "./api_version.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -128,70 +129,7 @@ enum AbckitLiteralTag {
     ABCKIT_LITERAL_TAG_SETTER
 };
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define ABCKIT_VERSION_SIZE 4
-
-struct AbckitGraph;
-
-/*
- * Language-independent top-level entities of the library.
- */
-struct AbckitFile;
-struct AbckitString;
-struct AbckitType;
-struct AbckitValue;
-struct AbckitLiteral;
-struct AbckitLiteralArray;
-
-/*
- * Language abstractions avalilable for the user.
- * Language extensions can provide specializations for these types.
- */
-struct AbckitCoreModule;
-struct AbckitCoreNamespace;
-struct AbckitCoreClass;
-struct AbckitCoreFunction;
-struct AbckitCoreField;
-struct AbckitCoreAnnotation;
-struct AbckitCoreAnnotationElement;
-struct AbckitCoreAnnotationInterface;
-struct AbckitCoreAnnotationInterfaceField;
-struct AbckitCoreImportDescriptor;
-struct AbckitCoreExportDescriptor;
-
-#ifndef __cplusplus
-typedef uint8_t *AbckitFileVersion;
-
-typedef struct AbckitGraph AbckitGraph;
-
-/*
- * Language-independent top-level entities of the library.
- */
-typedef struct AbckitFile AbckitFile;
-typedef struct AbckitString AbckitString;
-typedef struct AbckitType AbckitType;
-typedef struct AbckitValue AbckitValue;
-typedef struct AbckitLiteral AbckitLiteral;
-typedef struct AbckitLiteralArray AbckitLiteralArray;
-
-/*
- * Language abstractions avalilable for the user.
- * Language extensions can provide specializations for these types.
- */
-typedef struct AbckitCoreModule AbckitCoreModule;
-typedef struct AbckitCoreNamespace AbckitCoreNamespace;
-typedef struct AbckitCoreClass AbckitCoreClass;
-typedef struct AbckitCoreFunction AbckitCoreFunction;
-typedef struct AbckitCoreField AbckitCoreField;
-typedef struct AbckitCoreAnnotation AbckitCoreAnnotation;
-typedef struct AbckitCoreAnnotationElement AbckitCoreAnnotationElement;
-typedef struct AbckitCoreAnnotationInterface AbckitCoreAnnotationInterface;
-typedef struct AbckitCoreAnnotationInterfaceField AbckitCoreAnnotationInterfaceField;
-typedef struct AbckitCoreImportDescriptor AbckitCoreImportDescriptor;
-typedef struct AbckitCoreExportDescriptor AbckitCoreExportDescriptor;
-#else
-using AbckitFileVersion = uint8_t *;
-#endif
+enum { ABCKIT_VERSION_SIZE = 4 };
 
 /**
  * @brief Struct that holds the pointers to the non-modifying API for core Abckit types.

@@ -16,14 +16,7 @@
 #ifndef CPP_ABCKIT_INSTRUCTION_H
 #define CPP_ABCKIT_INSTRUCTION_H
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/declarations.h"
-
-#include <memory>
+#include "./base_classes.h"
 
 namespace abckit {
 

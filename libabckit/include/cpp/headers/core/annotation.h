@@ -16,11 +16,8 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_H
 #define CPP_ABCKIT_CORE_ANNOTATION_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/core/annotation_interface.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
+#include "./annotation_interface.h"
+#include "../base_classes.h"
 
 namespace abckit::core {
 

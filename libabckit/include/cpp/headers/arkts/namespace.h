@@ -16,4 +16,26 @@
 #ifndef CPP_ABCKIT_ARKTS_NAMESPACE_H
 #define CPP_ABCKIT_ARKTS_NAMESPACE_H
 
+#include "../core/namespace.h"
+
+namespace abckit::arkts {
+
+class Namespace final : public core::Namespace {
+    // To access private constructor.
+    // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    friend class Module;
+
+public:
+    Namespace(const Namespace &other) = default;
+    Namespace &operator=(const Namespace &other) = default;
+    Namespace(Namespace &&other) = default;
+    Namespace &operator=(Namespace &&other) = default;
+    ~Namespace() override = default;
+
+    // Other API's.
+    // ...
+};
+
+}  // namespace abckit::arkts
+
 #endif  // CPP_ABCKIT_ARKTS_NAMESPACE_H

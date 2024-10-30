@@ -60,7 +60,7 @@ void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(AbckitCore
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
             return true;
         });
-        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->moduleEnumerateTopLevelFunctions(m, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
             return true;
         });
@@ -79,18 +79,18 @@ void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
 
     cbFunc = [&](AbckitCoreFunction *f) {
         cbUserFunc(f);
-        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->functionEnumerateNestedFunctions(f, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             (*reinterpret_cast<CB *>(cb))(f);
             return true;
         });
-        g_implI->functionEnumerateNestedClasses(f, (void *)&cbClass, [](AbckitCoreClass *c, void *cb) {
+        g_implI->functionEnumerateNestedClasses(f, &cbClass, [](AbckitCoreClass *c, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
             return true;
         });
     };
 
     cbClass = [&](AbckitCoreClass *c) {
-        g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->classEnumerateMethods(c, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<CB *>(cb))(m);
             return true;
         });
@@ -105,7 +105,7 @@ void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
             return true;
         });
-        g_implI->namespaceEnumerateTopLevelFunctions(n, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->namespaceEnumerateTopLevelFunctions(n, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             (*reinterpret_cast<CB *>(cb))(f);
             return true;
         });

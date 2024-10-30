@@ -27,9 +27,8 @@
 #include <cstdint>
 #endif
 
-#include "../metadata_core.h"
-#include "../ir_core.h"
-#include "../abckit.h"
+#include "../declarations.h"
+#include "../api_version.h"
 
 #ifdef __cplusplus
 extern "C" {
