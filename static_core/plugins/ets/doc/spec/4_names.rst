@@ -131,6 +131,7 @@ Distinguishable Declarations
     frontend_status: Done
 
 Each declaration in the declaration scope must be *distinguishable*.
+
 A :index:`compile-time error` occurs otherwise.
 
 Declarations are *distinguishable* if they have:

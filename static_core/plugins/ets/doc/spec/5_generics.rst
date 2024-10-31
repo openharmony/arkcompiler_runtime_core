@@ -961,8 +961,9 @@ Record Utility Type
 Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
 to values (of type ``V``).
 
-Type ``K`` is restricted to ``number`` types, type ``string``, union types
-constructed from these types, and literals of these types.
+Type ``K`` is restricted to numeric types, type ``string``, string literal types
+and union types
+constructed from these types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
 type is used in place of this type:
@@ -986,9 +987,8 @@ type is used in place of this type:
 
     type R1 = Record<number, string>   // ok
     type R2 = Record<boolean, string>  // compile-time error
-    type R3 = Record<1 | 2, string>    // compile-time error
-    type R4 = Record<"salary" | "bonus", number> // ok
-    type R4 = Record<1 | true, number> // compile-time error
+    type R3 = Record<"salary" | "bonus", number> // ok
+    type R4 = Record<"salary" | boolean, number> // compile-time error
 
 There are no restrictions on type ``V``.
 

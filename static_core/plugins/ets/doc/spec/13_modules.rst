@@ -236,7 +236,7 @@ run the initialization code.
         ;
 
     selectiveBindings:
-        '{' nameBinding (',' nameBinding)* '}'
+        '{' (nameBinding (',' nameBinding)*)? '}'
         ;
 
     defaultBinding:
@@ -645,6 +645,16 @@ The output of Import with No Binding is as follows:
 - Package initialization code; or
 - MainProgram code.
 
+The import with an empty list of selective bindings has the same semantics as
+just import with no binding at all.
+
+.. code-block:: typescript
+   :linenos:
+
+    import {} from "..."
+    // has the same semantics as 
+    import "..."
+
 .. index::
    import binding
    initialization
@@ -983,8 +993,9 @@ functions (see :ref:`Function Declarations`), or namespaces (see
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | functionWithReceiverDeclaration
+        | accessorWithReceiverDeclaration
         | namespaceDeclaration
-        | extensionFunctionDeclaration
         )
         ;
 
@@ -1064,9 +1075,9 @@ Namespace Declarations
 .. meta:
     frontend_status: None
 
-A *namespace declaration* introduces the name (``identifer`` below)
-to be used as a qualifier for access to each exported entity of a namespace.
-Appropriate syntax is presented below:
+A *namespace declaration* introduces the qualified name to be used as a
+qualifier for access to each exported entity of a namespace. Appropriate
+syntax is presented below:
 
 .. code-block:: abnf
 
