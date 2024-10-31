@@ -30,10 +30,10 @@ export class ArraySort {
    * Specifics of the array to be sorted.
    * @Param "sorted", "sorted_reversed"
    */
-  distribution: String;
+  distribution: String = "sorted";
 
-  ints: int[];
-  intsInitial: int[];
+  ints: int[] = new int[0];
+  intsInitial: int[] = new int[0];
 
   /**
    * Prepare array depending on the distribution variant.

@@ -42,6 +42,7 @@ class Platform(PlatformBase):
         res = self.es2abc.run_es2abc(libark_ts, self.libark_abc)
         if not res or res.ret != 0:
             raise RuntimeError('lib_ark_builtins compilation failed')
+        self.lang = list(self.langs)[0]
         self.push_libs()
 
     @property
@@ -58,10 +59,10 @@ class Platform(PlatformBase):
 
     @property
     def langs(self) -> List[str]:
-        return ['ts']
+        return self.args_langs if self.args_langs else ['ts']
 
     def run_unit(self, bu: BenchUnit) -> None:
-        self.es2abc(bu)
+        self.es2abc.exec_lang(bu, lang=self.lang)
         if self.dry_run_stop(bu):
             return
         self.push_unit(bu, '.abc')

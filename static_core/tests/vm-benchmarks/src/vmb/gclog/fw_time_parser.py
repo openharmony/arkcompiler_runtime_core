@@ -21,9 +21,9 @@ from typing import Optional, Dict
 
 class FwTimeParser:
     PATTERN_TEXT = (
-        r'(?P<fw_start>^\d+) Startup execution started:\s+'
+        r'(?P<fw_start>^\d+)(\s+\w+\s+-)? Startup execution started:\s+'
         r'(?P<vm_start>\d+).*'
-        r'(?P<fw_end>^\d+) Benchmark result:.*'
+        r'(?P<fw_end>^\d+)(\s+\w+\s+-)? Benchmark result:.*'
     )
 
     PATTERN = re.compile(PATTERN_TEXT, re.DOTALL | re.MULTILINE)
