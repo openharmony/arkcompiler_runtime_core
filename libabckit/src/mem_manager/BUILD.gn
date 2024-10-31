@@ -12,25 +12,22 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
-ohos_source_set("libabckit_mem_manager_source_set") {
+ohos_source_set("abckit_mem_manager_source_set") {
   sources = [ "mem_manager.cpp" ]
 
-  include_dirs = [ "$ark_root/static_core" ]
+  include_dirs = [ "$ark_root_static" ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 
   configs = [
-    "$ark_root/static_core:ark_config",
-    "$ark_root/static_core/libpandabase:arkbase_public_config",
+    "$ark_root_static:ark_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
   ]
 
-  configs += [
-    "$abckit_root:libabckit_coverage",
-    "$abckit_root:libabckit_config",
-  ]
+  configs += [ "$abckit_root:abckit_config" ]
 
-  deps = [ "$ark_root/static_core/libpandabase:libarktsbase" ]
+  deps = [ "$ark_root_static/libpandabase:libarktsbase" ]
 }

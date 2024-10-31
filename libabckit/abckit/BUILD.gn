@@ -12,19 +12,21 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
+
 ohos_executable("abckit") {
   sources = [ "abckit.cpp" ]
   include_dirs = [
-    "$ark_root/libabckit/include",
+    "$abckit_root/include",
     "$target_gen_dir",
   ]
   configs = [
-    "$ark_root/libpandabase:arkbase_public_config",
-    "$ark_root/libabckit:libabckit_config",
+    "$ark_root_dynamic/libpandabase:arkbase_public_config",
+    "$abckit_root:abckit_config",
   ]
   deps = [
-    "$ark_root/assembler:libarkassembler",
-    "$ark_root/libabckit:libabckit",
+    "$abckit_root/src:libabckit",
+    "$ark_root_dynamic/assembler:libarkassembler",
   ]
   install_enable = false
   part_name = "runtime_core"

@@ -12,19 +12,20 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
-ark_isa_gen("isa_gen_libabckit") {
+ark_isa_gen("abckit_isa_gen") {
   template_files = [ "inst_builder_dyn_gen.cpp.erb" ]
   sources = "."
   destination = "$target_gen_dir/../generated"
 }
 
-ark_isa_gen("isa_gen_libabckit") {
+ark_isa_gen("abckit_isa_gen") {
   template_files = [
     "bytecode_inst_enum_gen.h.erb",
     "bytecode_inst-inl_gen.h.erb",
   ]
   sources = "."
   destination = "$target_gen_dir/../generated"
-  requires = [ "$ark_root/libpandafile/pandafile_isapi.rb" ]
+  requires = [ "$ark_root_dynamic/libpandafile/pandafile_isapi.rb" ]
 }

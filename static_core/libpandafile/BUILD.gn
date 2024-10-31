@@ -73,11 +73,7 @@ if (ark_static_standalone_build) {
   libarkfile_configs += [ zlib_public_config ]
 }
 
-ohos_source_set("libarktsfile_static") {
-  sources = libarkfile_sources
-
-  public_configs = libarkfile_configs
-
+group("arktsfile_header_deps") {
   deps = [
     ":isa_gen_libarkfile_bytecode_emitter_def_gen_h",
     ":isa_gen_libarkfile_bytecode_emitter_gen_h",
@@ -88,6 +84,16 @@ ohos_source_set("libarktsfile_static") {
     ":libarkfile_file_items_gen_inc",
     ":libarkfile_type_gen_h",
     ":source_lang_enum_h",
+  ]
+}
+
+ohos_source_set("libarktsfile_static") {
+  sources = libarkfile_sources
+
+  public_configs = libarkfile_configs
+
+  deps = [
+    ":arktsfile_header_deps",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libziparchive:libarktsziparchive",
   ]
@@ -128,14 +134,7 @@ ohos_source_set("libarktsfile_frontend_set_static") {
   public_configs = libarkfile_configs
 
   deps = [
-    ":isa_gen_libarkfile_bytecode_emitter_def_gen_h",
-    ":isa_gen_libarkfile_bytecode_emitter_gen_h",
-    ":isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
-    ":isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
-    ":isa_gen_libarkfile_file_format_version_h",
-    ":isa_gen_libarkfile_tests_bytecode_emitter_tests_gen_h",
-    ":libarkfile_file_items_gen_inc",
-    ":libarkfile_type_gen_h",
+    ":arktsfile_header_deps",
     ":source_lang_enum_h",
     "$ark_root/libziparchive:libarktsziparchive_frontend_static",
   ]

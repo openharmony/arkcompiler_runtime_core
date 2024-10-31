@@ -681,7 +681,7 @@ ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
 }
 
 ark_gen("arkruntime_gen_intrinsics") {
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     data = [ "$target_gen_dir/abckit_intrinsics.yaml" ]
   } else {
     data = [ "$target_gen_dir/intrinsics.yaml" ]
@@ -697,9 +697,9 @@ ark_gen("arkruntime_gen_intrinsics") {
   sources = "templates"
   destination = "$target_gen_dir"
   extra_dependencies = [ ":arkruntime_gen_intrinsics_yaml" ]
-  if (enable_libabckit && current_toolchain == host_toolchain) {
+  if (abckit_enable && current_toolchain == host_toolchain) {
     extra_dependencies +=
-        [ "$ark_root/../libabckit:concat_abckit_intrinsics_yaml" ]
+        [ "$ark_root/../libabckit/src:abckit_concat_intrinsics_yaml" ]
   }
 }
 

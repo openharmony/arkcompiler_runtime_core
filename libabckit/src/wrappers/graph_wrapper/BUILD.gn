@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
 
@@ -19,29 +19,32 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
   sources = [ "graph_wrapper.cpp" ]
 
   cross_values_gen_dir = get_label_info(
-          "$ark_root/cross_values:cross_values_getters_generate(${default_toolchain})",
+          "$ark_root_static/cross_values:cross_values_getters_generate(${default_toolchain})",
           "target_gen_dir")
   entrypoints_compiler_gen_dir = get_label_info(
-          "$ark_root/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
+          "$ark_root_static/runtime:arkruntime_gen_entrypoints_entrypoints_compiler_inl",
           "target_gen_dir")
   bytecode_inst_enum_gen_dir = get_label_info(
-          "$ark_root/../libabckit/src/irbuilder_dynamic/templates:isa_gen_libabckit_bytecode_inst_enum_gen_h",
+          "$abckit_root/src/irbuilder_dynamic/templates:abckit_isa_gen_bytecode_inst_enum_gen_h",
           "target_gen_dir")
   intrinsics_gen_dir = get_label_info(
-          "$ark_root/../libabckit/src/templates/dyn_intrinsics:isa_gen_libabckit_dyn_intrinsics_enum_inl",
+          "$abckit_root/src/templates/dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_enum_inl",
           "target_gen_dir")
   reg_encoder_visitors_dir =
-      get_label_info("$ark_root/bytecode_optimizer:reg_encoder_visitors_inc",
-                     "target_gen_dir")
-  codegen_visitors_dyn_dir = get_label_info(
-          "$ark_root/../libabckit/src/codegen/templates_dynamic:codegen_visitors_dyn_inc",
+      get_label_info(
+          "$ark_root_static/bytecode_optimizer:reg_encoder_visitors_inc",
           "target_gen_dir")
-  ins_create_wrapper_dyn_dir = get_label_info(
-          "$ark_root/../libabckit/src/wrappers:isa_gen_libabckit_ins_create_wrapper_api_inc",
+  codegen_visitors_dyn_dir =
+      get_label_info(
+          "$abckit_root/src/codegen/templates_dynamic:codegen_visitors_dyn_inc",
+          "target_gen_dir")
+  ins_create_wrapper_dyn_dir =
+      get_label_info(
+          "$abckit_root/src/wrappers:abckit_isa_gen_ins_create_wrapper_api_inc",
           "target_gen_dir")
   include_dirs = [
-    "$ark_root/runtime/libpandabase",
-    "$ark_root/runtime",
+    "$ark_root_static/runtime/libpandabase",
+    "$ark_root_static/runtime",
     "$entrypoints_compiler_gen_dir/generated",
     "$bytecode_inst_enum_gen_dir/..",
     "$intrinsics_gen_dir/../generated",
@@ -49,24 +52,26 @@ ohos_source_set("libabckit_graph_wrapper_source_set") {
     "$codegen_visitors_dyn_dir/..",
     "$cross_values_gen_dir",
     "$ins_create_wrapper_dyn_dir",
-    "$ark_root",  # this target should not include headers from dynamic runtime,
-                  # so static_core must be listed first
-    "$ark_root/..",
+    "$ark_root_static",  # this target should not include headers from dynamic
+
+    # runtime,
+
+    # so static_core must be listed first
+    "$ark_root_static/..",
   ]
 
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 
   configs = [
-    "$ark_root/:ark_config",
-    "$ark_root/assembler:arkassembler_public_config",
-    "$ark_root/compiler:arkcompiler_public_config",
-    "$ark_root/libpandabase:arkbase_public_config",
-    "$ark_root/libpandafile:arkfile_public_config",
-    "$ark_root/runtime:profiling_gen_public_config",
-    "$abckit_root:libabckit_coverage",
-    "$abckit_root:libabckit_config",
+    "$ark_root_static/:ark_config",
+    "$ark_root_static/assembler:arkassembler_public_config",
+    "$ark_root_static/compiler:arkcompiler_public_config",
+    "$ark_root_static/libpandabase:arkbase_public_config",
+    "$ark_root_static/libpandafile:arkfile_public_config",
+    "$ark_root_static/runtime:profiling_gen_public_config",
+    "$abckit_root:abckit_config",
   ]
 
-  deps = [ "$ark_root/compiler:libarktscompiler" ]
+  deps = [ "$ark_root_static/compiler:libarktscompiler" ]
 }

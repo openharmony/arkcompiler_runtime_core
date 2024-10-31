@@ -13,27 +13,27 @@ Build AbcKit:
 
 ```sh
 # Debug mode
-./ark.py x64.debug libabckit_packages --gn-args="is_standard_system=true enable_libabckit=true"
+./ark.py x64.debug abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
 # Release mode
-./ark.py x64.release libabckit_packages --gn-args="is_standard_system=true enable_libabckit=true"
+./ark.py x64.release abckit_packages --gn-args="is_standard_system=true abckit_enable=true"
 ```
 
 Run unit tests:
 
 ```sh
 # Debug mode
-./ark.py x64.debug libabckit_tests --gn-args="is_standard_system=true enable_libabckit=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true"
 # Release mode
-./ark.py x64.release libabckit_tests --gn-args="is_standard_system=true enable_libabckit=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true"
 ```
 
 Run unit tests with sanitizers:
 
 ```sh
 # Debug mode
-./ark.py x64.debug libabckit_tests --gn-args="is_standard_system=true enable_libabckit=true libabckit_with_sanitizers=true"
+./ark.py x64.debug abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
 # Release mode
-./ark.py x64.release libabckit_tests --gn-args="is_standard_system=true enable_libabckit=true libabckit_with_sanitizers=true"
+./ark.py x64.release abckit_tests --gn-args="is_standard_system=true abckit_enable=true libabckit_with_sanitizers=true"
 ```
 
 # Full tests (`self-check.sh`)

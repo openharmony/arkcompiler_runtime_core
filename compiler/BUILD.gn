@@ -88,12 +88,7 @@ libarkcompiler_configs = [
   "$ark_root/libpandafile:arkfile_public_config",
 ]
 
-ohos_shared_library("libarkcompiler") {
-  stack_protector_ret = false
-  sources = libarkcompiler_sources
-
-  configs = libarkcompiler_configs
-
+group("arkcompiler_header_deps") {
   deps = [
     ":codegen_language_extensions_h",
     ":compiler_events_gen_h",
@@ -109,7 +104,6 @@ ohos_shared_library("libarkcompiler") {
     ":intrinsics_stub_inl",
     ":intrinsics_stub_inl_h",
     ":ir_dyn_base_types_h",
-    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
     ":libarkcompiler_ecma_intrinsics_enum_inl",
     ":libarkcompiler_generate_ecma_inl",
     ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
@@ -129,11 +123,23 @@ ohos_shared_library("libarkcompiler") {
     ":libarkcompiler_opcodes_h_inst_checker_gen_h",
     ":libarkcompiler_opcodes_h_opcodes_h",
     ":source_languages_h",
-    "$ark_root/libpandabase:libarkbase",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
     "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
-    "$ark_root/libpandafile:libarkfile",
     "$ark_root/libpandafile:libarkfile_type_gen_h",
+  ]
+}
+
+ohos_shared_library("libarkcompiler") {
+  stack_protector_ret = false
+  sources = libarkcompiler_sources
+
+  configs = libarkcompiler_configs
+
+  deps = [
+    ":arkcompiler_header_deps",
+    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+    "$ark_root/libpandabase:libarkbase",
+    "$ark_root/libpandafile:libarkfile",
   ]
 
   external_deps = [ sdk_libc_secshared_dep ]
@@ -146,55 +152,18 @@ ohos_shared_library("libarkcompiler") {
   subsystem_name = "arkcompiler"
 }
 
-libarkcompiler_frontend_static_common_deps = [
-  ":codegen_language_extensions_h",
-  ":compiler_events_gen_h",
-  ":compiler_interface_extensions_inl_h",
-  ":compiler_logger_components_inc",
-  ":compiler_options_gen_h",
-  ":cpu_features_gen_inc",
-  ":intrinsics_codegen_ext_inl_h",
-  ":intrinsics_inline_inl",
-  ":intrinsics_ir_build_inl_h",
-  ":intrinsics_ir_build_static_call_inl",
-  ":intrinsics_ir_build_virtual_call_inl",
-  ":intrinsics_stub_inl",
-  ":intrinsics_stub_inl_h",
-  ":ir_dyn_base_types_h",
-  ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
-  ":libarkcompiler_ecma_intrinsics_enum_inl",
-  ":libarkcompiler_generate_ecma_inl",
-  ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_graph_inl",
-  ":libarkcompiler_intrinsics_gen_inl_generate_operations_intrinsic_inst_inl",
-  ":libarkcompiler_intrinsics_gen_inl_get_intrinsics_inl",
-  ":libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
-  ":libarkcompiler_intrinsics_gen_inl_intrinsic_codegen_test_inl",
-  ":libarkcompiler_intrinsics_gen_inl_intrinsic_flags_test_inl",
-  ":libarkcompiler_intrinsics_gen_inl_intrinsics_codegen_inl",
-  ":libarkcompiler_intrinsics_gen_inl_intrinsics_codegen_inl_h",
-  ":libarkcompiler_intrinsics_gen_inl_intrinsics_enum_inl",
-  ":libarkcompiler_intrinsics_gen_inl_intrinsics_flags_inl",
-  ":libarkcompiler_intrinsics_gen_inl_intrinsics_ir_build_inl",
-  ":libarkcompiler_opcodes_h_IR-instructions_md",
-  ":libarkcompiler_opcodes_h_arch_info_gen_h",
-  ":libarkcompiler_opcodes_h_codegen_arm64_gen_inc",
-  ":libarkcompiler_opcodes_h_inst_checker_gen_h",
-  ":libarkcompiler_opcodes_h_opcodes_h",
-  ":source_languages_h",
-  "$ark_root/libpandabase:libarkbase_frontend_static",
-  "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction-inl_gen_h",
-  "$ark_root/libpandafile:isa_gen_libarkfile_bytecode_instruction_enum_gen_h",
-  "$ark_root/libpandafile:libarkfile_frontend_static",
-  "$ark_root/libpandafile:libarkfile_type_gen_h",
-]
-
 ohos_static_library("libarkcompiler_frontend_static") {
   stack_protector_ret = false
   sources = libarkcompiler_sources
 
   configs = libarkcompiler_configs
 
-  deps = libarkcompiler_frontend_static_common_deps
+  deps = [
+    ":arkcompiler_header_deps",
+    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+    "$ark_root/libpandabase:libarkbase_frontend_static",
+    "$ark_root/libpandafile:libarkfile_frontend_static",
+  ]
 
   if (is_arkui_x) {
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]
@@ -217,7 +186,12 @@ ohos_static_library(
 
   defines = [ "IR_FOR_LIBARK_DEFECT_SCAN_AUX" ]
 
-  deps = libarkcompiler_frontend_static_common_deps
+  deps = [
+    ":arkcompiler_header_deps",
+    ":isa_gen_libarkcompiler_inst_builder_gen_cpp",
+    "$ark_root/libpandabase:libarkbase_frontend_static",
+    "$ark_root/libpandafile:libarkfile_frontend_static",
+  ]
 
   if (is_arkui_x) {
     deps += [ "$ark_third_party_root/bounds_checking_function:libsec_static" ]

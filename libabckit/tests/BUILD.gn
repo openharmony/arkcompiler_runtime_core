@@ -14,8 +14,7 @@
 import("//arkcompiler/ets_frontend/es2panda/es2abc_config.gni")
 import("//arkcompiler/ets_frontend/ets2panda/ets2abc_config.gni")
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
-import("//arkcompiler/runtime_core/tests/test_helper.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
 template("create_merge_file") {
   assert(defined(invoker.input_file), "input_file is required!")
@@ -38,6 +37,23 @@ template("create_merge_file") {
 
     outputs = [ invoker.output_file ]
   }
+}
+
+ohos_executable("abckit_canary") {
+  cflags = [
+    "-std=c99",
+    "-pedantic",
+    "-pedantic-errors",
+    "-Wall",
+    "-Wextra",
+    "-Werror",
+    "-Wno-typedef-redefinition",
+  ]
+  sources = [ "canary.c" ]
+  include_dirs = [ "$ark_root_dynamic" ]
+  install_enable = false
+  part_name = "runtime_core"
+  subsystem_name = "arkcompiler"
 }
 
 test_js_path = "//arkcompiler/runtime_core/libabckit/tests/"
@@ -356,7 +372,7 @@ template("libabckit_host_unittest_action") {
   _module_out_path_ = invoker.module_out_path
 
   # unittest for host running
-  action("${_target_name_}Action") {
+  action("${_target_name_}_action") {
     testonly = true
 
     defines = [ "HOST_UT" ]
@@ -366,7 +382,7 @@ template("libabckit_host_unittest_action") {
 
     deps = [ _host_test_target_ ]
 
-    script = "$ark_root/libabckit/scripts/run_script.sh"
+    script = "$abckit_root/scripts/run_script.sh"
 
     args = [
       "--script=" + rebase_path(_root_out_dir_) +
@@ -379,10 +395,11 @@ template("libabckit_host_unittest_action") {
           "/thirdparty/zlib:",
     ]
 
-    if (libabckit_with_sanitizers) {
+    if (abckit_with_sanitizers) {
       args += [ "--env=ASAN_OPTIONS=verify_asan_link_order=0" ]
-      args += [ "--env=LSAN_OPTIONS=suppressions=" + rebase_path("$ark_root") +
-                "/libabckit/tests/sanitizers/ignored_leaks.supp" ]
+      args +=
+          [ "--env=LSAN_OPTIONS=suppressions=" + rebase_path("$abckit_root") +
+            "/tests/sanitizers/ignored_leaks.supp" ]
     }
 
     print(script, string_join(" ", args))
@@ -394,7 +411,7 @@ template("libabckit_host_unittest_action") {
   }
 }
 
-libabckit_host_unittest_action("AbcKitTest") {
+libabckit_host_unittest_action("abckit_gtests") {
   module_out_path = module_output_path
 
   sources = [
@@ -575,19 +592,19 @@ libabckit_host_unittest_action("AbcKitTest") {
   ]
 
   include_dirs = [
-    "$ark_root",
-    "$ark_root/libabckit",
-    "$ark_root/libabckit/include",
-    "$ark_root/libabckit/src",
-    "$ark_root/libabckit/tests",
+    "$ark_root_dynamic",
+    "$abckit_root",
+    "$abckit_root/include",
+    "$abckit_root/src",
+    "$abckit_root/tests",
   ]
 
-  configs = [ "$ark_root/libabckit:libabckit_config" ]
+  configs = [ "$abckit_root:abckit_config" ]
 
   deps = [
     ":abckit_ets_vm_helpers",
     ":abckit_js_vm_helpers",
-    "$ark_root/libabckit:libabckit",
+    "$abckit_root/src:libabckit",
   ]
 
   foreach(file, test_js_files) {
@@ -616,50 +633,32 @@ libabckit_host_unittest_action("AbcKitTest") {
   ]
 }
 
-group("abckit_stress_test_package") {
+group("libabckit_stress_tests_package") {
   deps = [
-    "$ark_root/libabckit/abckit:abckit(${host_toolchain})",
-    "$ark_root/libabckit/abckit/stress_plugin:abckit_stress_plugin(${host_toolchain})",
-    "$ark_root/static_core/verification/verifier:verifier_bin(${host_toolchain})",
+    "$abckit_root/abckit:abckit(${host_toolchain})",
+    "$abckit_root/abckit/stress_plugin:abckit_stress_plugin(${host_toolchain})",
+    "$ark_root_static/verification/verifier:verifier_bin(${host_toolchain})",
   ]
 }
 
-action("abckit_stress_test") {
-  deps = [ ":abckit_stress_test_package" ]
-
-  outputs = [ "$target_gen_dir/abckit_stress_test.txt" ]
-
+action("abckit_stress_tests") {
+  deps = [ ":libabckit_stress_tests_package" ]
+  outputs = [ "$target_gen_dir/abckit_stress_tests.txt" ]
   script = "stress/stress.py"
-}
-
-group("unittest") {
-  testonly = true
-  if (enable_libabckit) {
-    deps = [
-      ":AbcKitTest",
-      ":abckit_stress_test",
-    ]
-  }
-}
-
-group("host_unittest") {
-  testonly = true
-  if (enable_libabckit) {
-    deps = [
-      ":AbcKitTestAction",
-      ":abckit_stress_test",
-    ]
-  }
 }
 
 ohos_source_set("abckit_js_vm_helpers") {
   sources = [ "helpers/helpers_js_runtime.cpp" ]
 
-  deps = [ "$ark_root/assembler:libarkassembler" ]
+  deps = [
+    "$ark_root_dynamic/assembler:libarkassembler",
+    "$js_root:libark_jsruntime_test_set",
+  ]
 
-  if (ark_standalone_build) {
-    deps += [ "$js_root:libark_jsruntime_test_set" ]
-  }
+  include_dirs = [
+    "$ark_root_dynamic",
+    "$abckit_root/src",
+  ]
 
   output_extension = "so"
   part_name = "runtime_core"
@@ -670,18 +669,18 @@ ohos_source_set("abckit_ets_vm_helpers") {
   sources = [ "helpers/helpers_ets_runtime.cpp" ]
 
   include_dirs = [
-    "$ark_root",
-    "$ark_root/libabckit/src",
+    "$ark_root_dynamic",
+    "$abckit_root/src",
   ]
 
   etsstdlib =
-      rebase_path(get_label_info("$ark_root/static_core/plugins/ets:etsstdlib",
+      rebase_path(get_label_info("$ark_root_static/plugins/ets:etsstdlib",
                                  "target_gen_dir")) + "/etsstdlib.abc"
   defines = [ "ABCKIT_ETS_STD_LIB=\"${etsstdlib}\"" ]
 
   deps = [
-    "$ark_root/static_core/plugins/ets:etsstdlib",
-    "$ark_root/static_core/runtime:libarkruntime",
+    "$ark_root_static/plugins/ets:etsstdlib",
+    "$ark_root_static/runtime:libarkruntime",
   ]
 
   output_extension = "so"

@@ -19,7 +19,7 @@ abckit_test = File.join(abckit_root, "/tests/wrong_mode_tests/")
 
 implemented_api_raw = nil
 Dir.chdir(abckit_scripts) do
-  implemented_api_raw = `python get_abckit_status.py --print-implemented`.split(/\n/)
+  implemented_api_raw = `python abckit_status.py --print-implemented`.split(/\n/)
 end
 
 implemented_api_map = {}

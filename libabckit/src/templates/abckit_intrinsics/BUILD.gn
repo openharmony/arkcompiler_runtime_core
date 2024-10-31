@@ -15,10 +15,11 @@ import("//arkcompiler/runtime_core/static_core/ark_config.gni")
 import("//arkcompiler/runtime_core/static_vm_config.gni")
 
 intrinsics_compiler_gen_dir = get_label_info(
-        "$ark_root/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
+        "$ark_root_static/compiler:libarkcompiler_intrinsics_gen_inl_get_intrinsics_names_inl",
         "target_gen_dir")
-isa_gen_dir = get_label_info("$ark_root/isa:isa_combine", "target_gen_dir")
-ark_gen("ark_gen_libabckit") {
+isa_gen_dir =
+    get_label_info("$ark_root_static/isa:isa_combine", "target_gen_dir")
+ark_gen("abckit_ark_gen") {
   data = [
     "../../abckit_compiler_intrinsics.yaml",
     "$isa_gen_dir/isa.yaml",
@@ -26,20 +27,20 @@ ark_gen("ark_gen_libabckit") {
   template_files = [ "inst_builder_abckit_intrinsics.inc.erb" ]
   sources = "."
   api = [
-    "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
-    "$ark_root/isa/isapi.rb",
+    "$ark_root_static/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
+    "$ark_root_static/isa/isapi.rb",
   ]
   extra_dependencies = [
-    "$ark_root/isa:isa_combine",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_yaml",
-    "../dyn_intrinsics:isa_gen_libabckit_dyn_intrinsics_opcodes_inc",
-    ":ark_gen_libabckit_abckit_intrinsics_inl",
+    "$ark_root_static/isa:isa_combine",
+    "$ark_root_static/runtime:arkruntime_gen_intrinsics_yaml",
+    "../dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_opcodes_inc",
+    ":abckit_ark_gen_abckit_intrinsics_inl",
   ]
-  requires = [ "$ark_root/libpandabase/utils.rb" ]
+  requires = [ "$ark_root_static/libpandabase/utils.rb" ]
   destination = "$intrinsics_compiler_gen_dir/generated"
 }
 
-ark_gen("ark_gen_libabckit") {
+ark_gen("abckit_ark_gen") {
   data = [
     "../../abckit_compiler_intrinsics.yaml",
     "$isa_gen_dir/isa.yaml",
@@ -47,21 +48,22 @@ ark_gen("ark_gen_libabckit") {
   template_files = [ "abckit_intrinsics_opcodes.inc.erb" ]
   sources = "."
   api = [
-    "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
-    "$ark_root/isa/isapi.rb",
+    "$ark_root_static/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
+    "$ark_root_static/isa/isapi.rb",
   ]
   extra_dependencies = [
-    "$ark_root/isa:isa_combine",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_yaml",
-    "../dyn_intrinsics/:isa_gen_libabckit_dyn_intrinsics_opcodes_inc",
+    "$ark_root_static/isa:isa_combine",
+    "$ark_root_static/runtime:arkruntime_gen_intrinsics_yaml",
+    "../dyn_intrinsics/:abckit_isa_gen_dyn_intrinsics_opcodes_inc",
   ]
-  requires = [ "$ark_root/libpandabase/utils.rb" ]
+  requires = [ "$ark_root_static/libpandabase/utils.rb" ]
   destination = "$intrinsics_compiler_gen_dir/generated"
 }
 
-bco_gen_dir = get_label_info("$ark_root/bytecode_optimizer:libarktsbytecodeopt",
-                             "target_gen_dir")
-ark_gen("ark_gen_libabckit") {
+bco_gen_dir =
+    get_label_info("$ark_root_static/bytecode_optimizer:libarktsbytecodeopt",
+                   "target_gen_dir")
+ark_gen("abckit_ark_gen") {
   data = [
     "../../abckit_compiler_intrinsics.yaml",
     "$isa_gen_dir/isa.yaml",
@@ -72,14 +74,14 @@ ark_gen("ark_gen_libabckit") {
   ]
   sources = "."
   api = [
-    "$ark_root/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
-    "$ark_root/isa/isapi.rb",
+    "$ark_root_static/compiler/optimizer/templates/intrinsics/compiler_intrinsics.rb",
+    "$ark_root_static/isa/isapi.rb",
   ]
   extra_dependencies = [
-    "$ark_root/isa:isa_combine",
-    "$ark_root/runtime:arkruntime_gen_intrinsics_yaml",
-    "../dyn_intrinsics:isa_gen_libabckit_dyn_intrinsics_cases_inc",
+    "$ark_root_static/isa:isa_combine",
+    "$ark_root_static/runtime:arkruntime_gen_intrinsics_yaml",
+    "../dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_cases_inc",
   ]
-  requires = [ "$ark_root/libpandabase/utils.rb" ]
+  requires = [ "$ark_root_static/libpandabase/utils.rb" ]
   destination = "$bco_gen_dir/generated"
 }

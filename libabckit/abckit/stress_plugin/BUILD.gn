@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
 template("abckit_plugin") {
   ohos_shared_library("${target_name}") {
@@ -24,7 +24,7 @@ template("abckit_plugin") {
                              "include_dirs",
                            ])
 
-    deps = [ "$abckit_root:libabckit" ]
+    deps = [ "$abckit_root/src:libabckit" ]
 
     include_dirs = [ "$abckit_root/include" ]
 

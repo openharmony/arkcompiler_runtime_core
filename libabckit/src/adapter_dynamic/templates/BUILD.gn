@@ -12,9 +12,9 @@
 # limitations under the License.
 
 import("//arkcompiler/runtime_core/ark_config.gni")
-import("//arkcompiler/runtime_core/libabckit/libabckit_config.gni")
+import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
-ark_isa_gen("isa_gen_libabckit") {
+ark_isa_gen("abckit_isa_gen") {
   sources = "$abckit_root/src/adapter_dynamic/templates"
   requires = [ "$abckit_root/scripts/inst_props_api.rb" ]
   template_files = [ "inst_props_helpers_dynamic.inc.erb" ]
