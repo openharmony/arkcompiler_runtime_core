@@ -152,6 +152,11 @@ public:
         return keys_[idx];
     }
 
+    bool HasKey(const Key &key) const noexcept
+    {
+        return valuesMap_.find(key) != valuesMap_.end();
+    }
+
     template <typename T>
     const T *GetValue(const Key &key) const
     {
