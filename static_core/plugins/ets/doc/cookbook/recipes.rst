@@ -29,11 +29,10 @@ Recipes
 
 |CB_ERROR|
 
-|LANG| does not support Objects with name properties that are numbers, or
-computed values. String literals and constant enum string members are allowed
-as property names.
+|LANG| does not support objects with property names that are numbers, or
+strings, or computed values.
 
-Use classes to access data by property names.
+Use classes to access data by property names that are identifiers.
 Use arrays to access data by numeric indices.
 
 |CB_BAD|
@@ -43,8 +42,7 @@ Use arrays to access data by numeric indices.
 
     var x = {"name": 1, 2: 3}
 
-    console.log(x["name"])
-    console.log(x[2])
+    console.log(x["name"], x[2])
 
 |CB_OK|
 ~~~~~~~
@@ -52,10 +50,11 @@ Use arrays to access data by numeric indices.
 .. code-block:: typescript
 
     class X {
-        public name: number = 0
+        name: number
+        two: number
     }
-    let x:X = {name: 1}
-    console.log(x.name)
+    let x:X = {name: 1, two: 2}
+    console.log(x.name, x.two)
 
     let y = [1, 2, 3]
     console.log(y[2])
@@ -115,7 +114,7 @@ and cannot be changed at runtime.
 .. code-block:: typescript
 
     class SomeClass {
-        public someProperty : string = ""
+        someProperty: string = ""
     }
     let o = new SomeClass()
 
@@ -166,6 +165,7 @@ Use the keyword ``private`` instead.
         private foo: number = 42
     }
 
+
 .. _R004:
 
 |CB_R| Use unique names for types and namespaces.
@@ -198,6 +198,8 @@ and distinct from other names, e.g., variable names and function names.
     let X: string
     type T = number[] // X is not allowed here to avoid name collisions
 
+
+
 .. _R005:
 
 |CB_R| Use ``let`` instead of ``var``
@@ -226,7 +228,7 @@ and distinct from other names, e.g., variable names and function names.
     }
 
     console.log(f(true))  // 10
-    console.log(f(false)) // undefined
+    console.log(f(false)) // "undefined"
 
     let upper_let = 0
     {
@@ -242,8 +244,8 @@ and distinct from other names, e.g., variable names and function names.
 
 .. code-block:: typescript
 
-    function f(shouldInitialize: boolean): Object {
-        let x: Object = new Object()
+    function f(shouldInitialize: boolean): number|undefined {
+        let x: number|undefined = undefined
         if (shouldInitialize) {
             x = 10
         }
@@ -251,7 +253,7 @@ and distinct from other names, e.g., variable names and function names.
     }
 
     console.log(f(true))  // 10
-    console.log(f(false)) // {}
+    console.log(f(false)) // "undefined"
 
     let upper_let = 0
     let scoped_var = 0
@@ -291,17 +293,17 @@ message.
 
 .. code-block:: typescript
 
-    let value1 : any
+    let value1: any
     value1 = true
     value1 = 42
 
-    let value2 : unknown
+    let value2: unknown
     value2 = true
     value2 = 42
 
     // Let's assume that we have no information for external_function
     // because it is defined in JavaScript code:
-    let something : any = external_function()
+    let something: any = external_function()
     console.log("someProperty of something:", something.someProperty)
 
 |CB_OK|
@@ -316,7 +318,7 @@ message.
 
     // Let's assume that we have no information for external_function
     // because it is defined in JavaScript code:
-    let something : ESObject = external_function()
+    let something: ESObject = external_function()
     console.log("someProperty of something:", something.someProperty)
 
 |CB_SEE|
@@ -349,7 +351,7 @@ message.
         (someArg: number): string // call signature
     }
 
-    function doSomething(fn: DescribableFunction): void {
+    function doSomething(fn: DescribableFunction) {
         console.log(fn.description + " returned " + fn(6))
     }
 
@@ -360,7 +362,7 @@ message.
 
     class DescribableFunction {
         description: string
-        public invoke(someArg: number): string {
+        invoke(someArg: number): string {
             return someArg.toString()
         }
         constructor() {
@@ -368,7 +370,7 @@ message.
         }
     }
 
-    function doSomething(fn: DescribableFunction): void {
+    function doSomething(fn: DescribableFunction) {
         console.log(fn.description + " returned " + fn.invoke(6))
     }
 
@@ -416,7 +418,7 @@ instead.
 .. code-block:: typescript
 
     class SomeObject {
-        public f: string
+        f: string
         constructor (s: string) {
             this.f = s
         }
@@ -504,7 +506,7 @@ Combine multiple static block statements into a single static block.
         [index: number]: string
     }
 
-    function getStringArray() : StringArray {
+    function getStringArray(): StringArray {
         return ["a", "b", "c"]
     }
 
@@ -517,7 +519,7 @@ Combine multiple static block statements into a single static block.
 .. code-block:: typescript
 
     class X {
-        public f: string[] = []
+        f: string[] = []
     }
 
     let myArray: X = new X()
@@ -603,11 +605,11 @@ Such methods can only return ``this`` explicitly (``return this``).
         }
 
         foo(): this {
-            return this.bar();
+            return this.bar()
         }
 
         bar(): this {
-            return this;
+            return this
         }
     }
 
@@ -624,11 +626,11 @@ Such methods can only return ``this`` explicitly (``return this``).
         }
 
         foo(): this {
-            return this;
+            return this
         }
 
         bar(): this {
-            return this;
+            return this
         }
     }
 
@@ -687,7 +689,8 @@ support the keyword ``infer``.
 |CB_ERROR|
 
 |LANG| does not support declaring class fields in the ``constructor``.
-Declare class fields inside the ``class`` declaration instead.
+Declare class fields inside the ``class`` declaration instead and assign them
+explicitly in the constructor body.
 
 |CB_BAD|
 ~~~~~~~~
@@ -699,11 +702,7 @@ Declare class fields inside the ``class`` declaration instead.
             protected ssn: string,
             private firstName: string,
             private lastName: string
-        ) {
-            this.ssn = ssn
-            this.firstName = firstName
-            this.lastName = lastName
-        }
+        ) {}
 
         getFullName(): string {
             return this.firstName + " " + this.lastName
@@ -905,10 +904,8 @@ and enums.
 
 |CB_ERROR|
 
-Currently, |LANG| does not support structural typing, i.e., the compiler
-cannot compare public APIs of two types and decide whether such types are
-identical. Use other mechanisms (inheritance, interfaces, or type aliases)
-instead.
+Currently, |LANG| does not support structural typing and it is recommened to
+use other mechanisms (inheritance, interfaces, or type aliases) instead.
 
 |CB_BAD|
 ~~~~~~~~
@@ -919,7 +916,7 @@ instead.
         f(): string
     }
 
-    interface I2 { // I2 is structurally equivalent to I1
+    interface I2 { // I2 is structurally compatible to I1
         f(): string
     }
 
@@ -928,7 +925,7 @@ instead.
         s: string = ""
     }
 
-    class Y { // Y is structurally equivalent to X
+    class Y { // Y is structurally compatible to X
         n: number = 0
         s: string = ""
     }
@@ -946,8 +943,7 @@ instead.
         console.log(x.n, x.s)
     }
 
-    // X and Y are equivalent because their public API is equivalent.
-    // Thus the second call is allowed:
+    // As Y is compatible with X the second call is allowed:
     foo(new X())
     foo(new Y())
 
@@ -1009,7 +1005,7 @@ instead.
     console.log("Assign Y to X")
     x = y // ok, both are of the same type
 
-    function foo(c: Common): void {
+    function foo(c: Common) {
         console.log(c.n, c.s)
     }
 
@@ -1163,7 +1159,7 @@ from these types, and literals of these types.
             console.log("Hello")
         }
     }
-    let o7: C4 = {n: 42, s: "foo", f : () => {}}
+    let o7: C4 = {n: 42, s: "foo", f: () => {}}
 
     class Point {
         x: number = 0
@@ -1327,7 +1323,7 @@ a non-inferable type (e.g., untyped object literal).
 
 .. code-block:: typescript
 
-    let a = [{n: 1, s: "1"}, {n: 2, s : "2"}]
+    let a = [{n: 1, s: "1"}, {n: 2, s: "2"}]
 
 |CB_OK|
 ~~~~~~~
@@ -1339,8 +1335,8 @@ a non-inferable type (e.g., untyped object literal).
         s: string = ""
     }
 
-    let a1 = [{n: 1, s: "1"} as C, {n: 2, s : "2"} as C] // a1 is of type "C[]"
-    let a2: C[] = [{n: 1, s: "1"}, {n: 2, s : "2"}]      // ditto
+    let a1 = [{n: 1, s: "1"} as C, {n: 2, s: "2"} as C] // a1 is of type "C[]"
+    let a2: C[] = [{n: 1, s: "1"}, {n: 2, s: "2"}]      // ditto
 
 |CB_SEE|
 ~~~~~~~~
@@ -1588,7 +1584,7 @@ Use the expression ``new ...`` instead of ``as`` to cast a *primitive* type
     // No report is provided during compilation
     // nor during runtime if cast is wrong:
     let c3 = createShape() as Square
-    console.log(c3.y) // undefined
+    console.log(c3.y) // "undefined"
 
     // Important corner case for casting primitives to the boxed counterparts:
     // The left operand is not properly boxed here at runtime
@@ -2318,7 +2314,7 @@ explicitly.
 .. code-block:: typescript
 
     // Explicit return type is required:
-    function f(x: number) : number {
+    function f(x: number): number {
         if (x <= 0) {
             return x
         }
@@ -2422,17 +2418,17 @@ assigned manually.
 
 .. code-block:: typescript
 
-    function addNum(a: number, b: number): void {
+    function addNum(a: number, b: number) {
 
         // nested function:
         function logToConsole(message: String): void {
             console.log(message)
         }
 
-        let result = a + b
+        let sum = a + b
 
         // Invoking the nested function:
-        logToConsole("result is " + result)
+        logToConsole("result is " + sum)
     }
 
 |CB_OK|
@@ -2440,15 +2436,15 @@ assigned manually.
 
 .. code-block:: typescript
 
-    function addNum(a: number, b: number): void {
+    function addNum(a: number, b: number) {
         // Use lambda instead of a nested function:
-        let logToConsole: (message: string) => void = (message: string): void => {
+        const logToConsole: (message: string) => void = (message: string): void => {
             console.log(message)
         }
 
-        let result = a + b
+        let sum = a + b
 
-        logToConsole("result is " + result)
+        logToConsole("result is " + sum)
     }
 
 .. _R093:
@@ -2494,17 +2490,15 @@ static methods. Use ``this`` in instance methods only.
 
     class A {
         count: number = 1
-        m(i: number): void {
+        m(i: number) {
             this.count = i
         }
     }
 
-    function main(): void {
-        let a = new A()
-        console.log(a.count)  // prints "1"
-        a.m(2)
-        console.log(a.count)  // prints "2"
-    }
+    let a = new A()
+    console.log(a.count)  // prints "1"
+    a.m(2)
+    console.log(a.count)  // prints "2"
 
 |CB_SEE|
 ~~~~~~~~
@@ -2547,7 +2541,7 @@ Use the ``async`` / ``await`` mechanism for multitasking.
 
 .. code-block:: typescript
 
-    async function complexNumberProcessing(n : number) : Promise<number> {
+    async function complexNumberProcessing(n: number): Promise<number> {
         // Some complex logic for processing the number here
         return n
     }
@@ -2628,7 +2622,7 @@ appropriate type before use.
         return arg instanceof Foo
     }
 
-    function doStuff(arg: Object): void {
+    function doStuff(arg: Object) {
         if (isFoo(arg)) {
             let fooArg = arg as Foo
             console.log(fooArg.foo)     // OK
@@ -2640,10 +2634,8 @@ appropriate type before use.
         }
     }
 
-    function main(): void {
-        doStuff(new Foo())
-        doStuff(new Bar())
-    }
+    doStuff(new Foo())
+    doStuff(new Bar())
 
 .. _R099:
 
@@ -2669,11 +2661,11 @@ Otherwise, *unpack* data from arrays and objects manually, where necessary.
 
 .. code-block:: typescript
 
-    function foo(x : number, y : number, z : number) {
+    function foo(x: number, y: number, z: number) {
         console.log(x, y, z)
     }
 
-    let args : [number, number, number] = [0, 1, 2]
+    let args: [number, number, number] = [0, 1, 2]
     foo(...args)
 
     let list1 = [1, 2]
@@ -2695,14 +2687,14 @@ Otherwise, *unpack* data from arrays and objects manually, where necessary.
     }
     console.log(sum_numbers(1, 2, 3))
 
-    function log_numbers(x : number, y : number, z : number) {
+    function log_numbers(x: number, y: number, z: number) {
         console.log(x, y, z)
     }
     let numbers: number[] = [1, 2, 3]
     log_numbers(numbers[0], numbers[1], numbers[2])
 
-    let list1 : number[] = [1, 2]
-    let list2 : number[] = [list1[0], list1[1], 3, 4]
+    let list1: number[] = [1, 2]
+    let list2: number[] = [list1[0], list1[1], 3, 4]
 
     class Point2D {
         x: number = 0; y: number = 0
@@ -2720,10 +2712,10 @@ Otherwise, *unpack* data from arrays and objects manually, where necessary.
     let p3d = new Point3D({x: 1, y: 2} as Point2D, 3)
     console.log(p3d.x, p3d.y, p3d.z)
 
-    class DerivedFromArray extends Uint16Array {};
+    class DerivedFromArray extends Uint16Array {}
 
-    let arr1 = [1, 2, 3];
-    let arr2 = new Uint16Array([4, 5, 6]);
+    let arr1 = [1, 2, 3]
+    let arr2 = new Uint16Array([4, 5, 6])
     let arr3 = new DerivedFromArray([7, 8, 9])
     let arr4 = [...arr1, 10, ...arr2, 11, ...arr3]
 
@@ -2780,7 +2772,7 @@ the same parameter lists but different return types).
 .. code-block:: typescript
 
     class MoveStatus {
-        public speed : number
+        speed: number
         constructor() {
             this.speed = 0
         }
@@ -2790,7 +2782,7 @@ the same parameter lists but different return types).
     }
 
     class ShakeStatus {
-        public frequency : number
+        frequency: number
         constructor() {
             this.frequency = 0
         }
@@ -2800,8 +2792,8 @@ the same parameter lists but different return types).
     }
 
     class MoveAndShakeStatus {
-        public speed : number
-        public frequency : number
+        speed: number
+        frequency: number
         constructor() {
             this.speed = 0
             this.frequency = 0
@@ -2809,23 +2801,23 @@ the same parameter lists but different return types).
     }
 
     class C implements Mover, Shaker {
-        private move_status : MoveStatus
-        private shake_status : ShakeStatus
+        private move_status: MoveStatus
+        private shake_status: ShakeStatus
 
         constructor() {
             this.move_status = new MoveStatus()
             this.shake_status = new ShakeStatus()
         }
 
-        public getMoveStatus() : MoveStatus {
+        getMoveStatus(): MoveStatus {
             return this.move_status
         }
 
-        public getShakeStatus() : ShakeStatus {
+        getShakeStatus(): ShakeStatus {
             return this.shake_status
         }
 
-        public getStatus(): MoveAndShakeStatus {
+        getStatus(): MoveAndShakeStatus {
             return {
                 speed: this.move_status.speed,
                 frequency: this.shake_status.frequency
@@ -3278,7 +3270,7 @@ own mechanism to interoperate with |JS|.
 .. code-block:: typescript
 
     declare module "someModule" {
-        export function normalize(s : string) : string;
+        export function normalize(s: string): string
     }
 
 |CB_OK|
@@ -3483,7 +3475,7 @@ Use declaration with initialization instead.
 
 .. code-block:: typescript
 
-    function initialize() : number {
+    function initialize(): number {
         return 10
     }
 
@@ -3581,7 +3573,7 @@ objects with dynamically changed layouts are unsupported.
 .. code-block:: typescript
 
     // file1
-    export let abc : number = 100
+    export let abc: number = 100
 
     // file2
     import * as M from "file1"
@@ -3627,7 +3619,7 @@ For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
 
     type QuantumPerson = Omit<Person, "location">
 
-    let persons : Record<string, Person> = {
+    let persons: Record<string, Person> = {
         "Alice": {
             name: "Alice",
             age: 32,
@@ -3659,9 +3651,9 @@ For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
     }
 
     type OptionalPerson = Person | undefined
-    let persons : Record<string, OptionalPerson> = {
+    let persons: Record<string, OptionalPerson> = {
     // Or:
-    // let persons : Record<string, Person | undefined> = {
+    // let persons: Record<string, Person | undefined> = {
         "Alice": {
             name: "Alice",
             age: 32,
@@ -3711,11 +3703,11 @@ this rule, and their layout cannot be changed at runtime.
         // ...
     }
 
-    function readFileSync(path : string) : number[] {
+    function readFileSync(path: string): number[] {
         return []
     }
 
-    function decodeImageSync(contents : number[]) {
+    function decodeImageSync(contents: number[]) {
         // ...
     }
 
@@ -3735,14 +3727,14 @@ this rule, and their layout cannot be changed at runtime.
 
     async function readImage(
         path: string, callback: (err: Error, image: MyImage) => void
-    ) : Promise<MyImage>
+    ): Promise<MyImage>
     {
         // In real world, the implementation is more complex,
         // involving real network / DB logic, etc.
         return await new MyImage()
     }
 
-    function readImageSync(path: string) : MyImage {
+    function readImageSync(path: string): MyImage {
         return new MyImage()
     }
 
@@ -3798,12 +3790,12 @@ is thus excessive.
 .. code-block:: typescript
 
     class Person {
-        firstName : string
+        firstName: string
 
-        constructor(firstName : string) {
+        constructor(firstName: string) {
             this.firstName = firstName
         }
-        fullName() : string {
+        fullName(): string {
             return this.firstName
         }
     }
@@ -3856,17 +3848,17 @@ literals with corresponding literal types).
 .. code-block:: typescript
 
     // Type 'string':
-    let x : string = "hello"
+    let x: string = "hello"
 
     // Type 'number[]':
-    let y : number[] = [10, 20]
+    let y: number[] = [10, 20]
 
     class Label {
-        text : string = ""
+        text: string = ""
     }
 
     // Type 'Label':
-    let z : Label = {
+    let z: Label = {
         text: "hello"
     }
 
@@ -4267,25 +4259,25 @@ to interop calls and assigned to other variables of type ``ESObject``.
 .. code-block:: typescript
 
     // lib.d.ts
-    declare function foo(): any;
-    declare function bar(a: any): number;
+    declare function foo(): any
+    declare function bar(a: any): number
 
     // main.sts
-    let e0: ESObject = foo(); // CTE - ``ESObject`` typed variable can only be local
+    let e0: ESObject = foo() // CTE - ``ESObject`` typed variable can only be local
 
     function f() {
-        let e1 = foo(); // CTE - type of e1 is `any`
-        let e2: ESObject = 1; // CTE - can't initialize ESObject with not dynamic values
-        let e3: ESObject = {}; // CTE - can't initialize ESObject with not dynamic values
-        let e4: ESObject = []; // CTE - can't initialize ESObject with not dynamic values
-        let e5: ESObject = ""; // CTE - can't initialize ESObject with not dynamic values
+        let e1 = foo()        // CTE - type of e1 is `any`
+        let e2: ESObject = 1  // CTE - can't initialize ESObject with not dynamic values
+        let e3: ESObject = {} // CTE - can't initialize ESObject with not dynamic values
+        let e4: ESObject = [] // CTE - can't initialize ESObject with not dynamic values
+        let e5: ESObject = "" // CTE - can't initialize ESObject with not dynamic values
         e5['prop'] // CTE - can't access dynamic properties of ESObject
-        e5[1] // CTE - can't access dynamic properties of ESObject
-        e5.prop // CTE - can't access dynamic properties of ESObject
+        e5[1]      // CTE - can't access dynamic properties of ESObject
+        e5.prop    // CTE - can't access dynamic properties of ESObject
 
-        let e6: ESObject = foo(); // OK - explicitly annotated as ESObject
-        let e7 = e6; // OK - initialize ESObject with ESObject
-        bar(e7) // OK - ESObject is passed to interop call
+        let e6: ESObject = foo() // OK - explicitly annotated as ESObject
+        let e7 = e6              // OK - initialize ESObject with ESObject
+        bar(e7)                  // OK - ESObject is passed to interop call
     }
 
 |CB_SEE|
@@ -4344,12 +4336,12 @@ These functions are thus excessive.
 .. code-block:: typescript
 
     class Person {
-        firstName : string
+        firstName: string
 
-        constructor(firstName : string) {
+        constructor(firstName: string) {
             this.firstName = firstName
         }
-        fullName() : string {
+        fullName(): string {
             return this.firstName
         }
     }
@@ -4533,7 +4525,7 @@ categories:
 
     @Sendable
     class A {
-        a!: number;
+        a!: number
     }
 
 |CB_COMPLIANT_CODE|
@@ -4543,7 +4535,7 @@ categories:
 
     @Sendable
     class A {
-        a: number = 1;
+        a: number = 1
     }
 
 |CB_SEE|
@@ -4594,20 +4586,20 @@ Only ``Sendable data`` types are allowed as type arguments of generic
     // a.sts
     @Sendable
     export class A {
-        a: number = 1;
+        a: number = 1
     }
 
     @Sendable
     export class B<T> {}
 
     // b.sts
-    import { A, B } from "a";
+    import { A, B } from "a"
 
     @Sendable
     class C<T> {
         a: T | undefined = undefined
-        b: B<T> = new B<T>();
-        c: B<number | undefined> = new B<number | undefined>();
+        b: B<T> = new B<T>()
+        c: B<number | undefined> = new B<number | undefined>()
     }
 
     let c1 = new B<A>()
@@ -4646,7 +4638,7 @@ classes, and functions only can be used inside a ``Sendable`` class body.
 
 .. code-block:: typescript
 
-    let foo: number = 1;
+    let foo: number = 1
 
     function bar() {
         console.log("hello")
@@ -4657,12 +4649,12 @@ classes, and functions only can be used inside a ``Sendable`` class body.
 
     @Sendable
     class B {
-        a: A = new A();     // Invalid, 'A' is not imported
-        b: number = foo;    // Invalid, 'foo' is not imported
+        a: A = new A()     // Invalid, 'A' is not imported
+        b: number = foo    // Invalid, 'foo' is not imported
 
         m(): number {
-            bar();          // Invalid, 'bar' is not imported
-            return foo;     // Invalid, 'foo' is not imported
+            bar()          // Invalid, 'bar' is not imported
+            return foo     // Invalid, 'foo' is not imported
         }
     }
 
@@ -4672,7 +4664,7 @@ classes, and functions only can be used inside a ``Sendable`` class body.
 .. code-block:: typescript
 
     // a.sts
-    export let foo: number = 1;
+    export let foo: number = 1
 
     export function bar() {
         console.log("hello")
@@ -4686,12 +4678,12 @@ classes, and functions only can be used inside a ``Sendable`` class body.
 
     @Sendable
     class B {
-        a: A = new A();
-        b: number = foo;
+        a: A = new A()
+        b: number = foo
 
         m(): number {
-            bar();
-            return foo;
+            bar()
+            return foo
         }
     }
 
@@ -4793,7 +4785,7 @@ objects of type ``Sendable``.
         a: number
 
         constructor(a: number) {
-            this.a = a;
+            this.a = a
         }
     }
 
@@ -4968,20 +4960,20 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
     'use shared'
 
     export enum E { A, B } // Error, regular enum is not sendable
-    export class C {} // Error, class C is not sendable
-    export let v1: C; // Error, v1 has a non-sendable type
+    export class C {}      // Error, class C is not sendable
+    export let v1: C       // Error, v1 has a non-sendable type
 
-    type T1 = C;
-    export { T1 }; // Error, type T1 is aliasing the non-sendable type
-    let v2: T1;
-    export { v2 }; // Error, v2 has a non-sendable type
+    type T1 = C
+    export { T1 } // Error, type T1 is aliasing the non-sendable type
+    let v2: T1
+    export { v2 } // Error, v2 has a non-sendable type
 
-    export { D } from 'b'; // Error, re-exporting non-sendable class
-    export { v3 } from 'b'; // Error, re-exporting variable with non-sendable type
+    export { D } from 'b'  // Error, re-exporting non-sendable class
+    export { v3 } from 'b' // Error, re-exporting variable with non-sendable type
 
     // b.sts
     export class D {}
-    export let v3: D;
+    export let v3: D
 
 |CB_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~
@@ -4996,19 +4988,19 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
     @Sendable
     export class C {}
 
-    export let v1: C;
+    export let v1: C
 
-    type T1 = C;
-    let v2: T1;
-    export { T1, v2 };
+    type T1 = C
+    let v2: T1
+    export { T1, v2 }
 
-    export { D, v3, v4 } from 'b';
+    export { D, v3, v4 } from 'b'
 
     // b.sts
     @Sendable
     export class D {}
-    export let v3: D;
-    export let v4: number;
+    export let v3: D
+    export let v4: number
 
 |CB_SEE|
 ~~~~~~~~
@@ -5042,11 +5034,11 @@ all exported entities explicitly.
     // a.sts
     @Sendable
     export class C {}
-    export let a: number;
+    export let a: number
 
     // b.sts
     'use shared'
-    export * from 'a'; // Error, wildcard export in a shared module
+    export * from 'a' // Error, wildcard export in a shared module
 
 |CB_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~
@@ -5056,11 +5048,11 @@ all exported entities explicitly.
     // a.sts
     @Sendable
     export class C {}
-    export let a: number;
+    export let a: number
 
     // b.sts
     'use shared'
-    export { C, a } from 'a';
+    export { C, a } from 'a'
 
 |CB_SEE|
 ~~~~~~~~
@@ -5106,8 +5098,8 @@ consists of an identifier and an expression.
         a: string = ""
         b: number = 0
     }
-    const a = "Alice";
-    const b = 42;
+    const a = "Alice"
+    const b = 42
 
     let c: C = {
         a,
@@ -5123,8 +5115,8 @@ consists of an identifier and an expression.
         a: string = ""
         b: number = 0
     }
-    const a = "Alice";
-    const b = 42;
+    const a = "Alice"
+    const b = 42
 
     let c: C = {
         a: a,
@@ -5154,11 +5146,11 @@ in interface implementation.
 .. code-block:: typescript
 
     class X {
-        throw?() {};
+        throw?() {}
     }
 
     interface Y {
-        throw?(): void;
+        throw?(): void
     }
 
 |CB_OK|
@@ -5167,9 +5159,9 @@ in interface implementation.
 .. code-block:: typescript
 
     class X {
-        throw() {};
+        throw() {}
     }
 
     interface Y {
-        throw(): void;
+        throw(): void
     }
