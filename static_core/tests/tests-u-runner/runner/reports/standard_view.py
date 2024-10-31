@@ -29,7 +29,7 @@ from runner.enum_types.fail_kind import FailKind
 from runner.utils import write_2_file
 from runner.test_base import Test
 
-_LOGGER = logging.getLogger("runner.reports.standart_view")
+_LOGGER = logging.getLogger("runner.reports.standard_view")
 
 
 class StandardView:

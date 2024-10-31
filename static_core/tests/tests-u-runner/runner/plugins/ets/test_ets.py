@@ -73,7 +73,7 @@ class TestETS(TestFileBased):
 
     @property
     def has_expected(self) -> bool:
-        """True if test.expected file exists"""
+        """ True if test.expected file exists """
         return path.isfile(self.test_expected)
 
     @property
@@ -182,9 +182,8 @@ class TestETS(TestFileBased):
 
             self.expected = expected
 
-
     def _compare_output_with_expected(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
-        "Compares test output with expected"
+        """Compares test output with expected"""
         fail_kind = None
         if not self.report:
             return False, TestReport(output="", error="No test report to compare output", return_code=1), fail_kind

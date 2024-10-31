@@ -38,12 +38,11 @@ class RunnerDeclgenParser(RunnerJS):
 
         static_core_root = Path(config.general.static_core_root)
         symlink_es2panda_test = static_core_root / "tools" / "es2panda" / "test"
-        if symlink_es2panda_test.exists():
-            es2panda_test = symlink_es2panda_test
-        else:
-            es2panda_test = Path(config.general.static_core_root).parent.parent / 'ets_frontend' / 'ets2panda' / 'test'
-            if not es2panda_test.exists():
-                raise Exception(f'There is no path {es2panda_test}')
+        es2panda_test = symlink_es2panda_test if symlink_es2panda_test.exists() else \
+            Path(config.general.static_core_root).parent.parent / 'ets_frontend' / 'ets2panda' / 'test'
+        if not es2panda_test.exists():
+            message = f'There is no path {es2panda_test}'
+            Log.exception_and_raise(_LOGGER, message)
 
         declgen_root = static_core_root / "plugins" / "ets" / "tools" / "declgen_ts2sts"
         self.default_list_root = declgen_root / "test" / "test-lists"

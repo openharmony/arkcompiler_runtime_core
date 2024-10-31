@@ -139,10 +139,10 @@ class Test:
         status = self.status()
         if verbose in [VerboseKind.ALL, VerboseKind.SHORT]:
             is_all = verbose_filter == VerboseFilter.ALL
-            is_ignored = verbose_filter == VerboseFilter.IGNORED and \
-                         status in [TestStatus.NEW_FAILURE, TestStatus.FAILURE_IGNORED, TestStatus.PASSED_IGNORED]
-            is_new = verbose_filter == VerboseFilter.NEW_FAILURES and \
-                     status == TestStatus.NEW_FAILURE
+            is_ignored = (verbose_filter == VerboseFilter.IGNORED and
+                          status in [TestStatus.NEW_FAILURE, TestStatus.FAILURE_IGNORED, TestStatus.PASSED_IGNORED])
+            is_new = (verbose_filter == VerboseFilter.NEW_FAILURES and
+                      status == TestStatus.NEW_FAILURE)
             return is_all or is_ignored or is_new
 
         return verbose == VerboseKind.NONE and status == TestStatus.NEW_FAILURE
@@ -161,10 +161,10 @@ class Test:
         status = self.status()
         if verbose == VerboseKind.NONE:
             is_all = verbose_filter == VerboseFilter.ALL
-            is_ignored = verbose_filter == VerboseFilter.IGNORED and \
-                         status in [TestStatus.NEW_FAILURE, TestStatus.FAILURE_IGNORED, TestStatus.PASSED_IGNORED]
-            is_new = verbose_filter == VerboseFilter.NEW_FAILURES and \
-                     status == TestStatus.NEW_FAILURE
+            is_ignored = (verbose_filter == VerboseFilter.IGNORED and
+                          status in [TestStatus.NEW_FAILURE, TestStatus.FAILURE_IGNORED, TestStatus.PASSED_IGNORED])
+            is_new = (verbose_filter == VerboseFilter.NEW_FAILURES and
+                      status == TestStatus.NEW_FAILURE)
             return is_all or is_ignored or is_new
 
         return True

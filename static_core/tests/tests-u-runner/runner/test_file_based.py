@@ -96,6 +96,7 @@ class TestFileBased(Test):
     # pylint: disable=too-many-locals
     def run_one_step(self, name: str, params: Params, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
+        profraw_file, profdata_file = None, None
         if self.test_env.config.general.coverage.use_llvm_cov:
             params = deepcopy(params)
             profraw_file, profdata_file = self.test_env.coverage.get_uniq_profraw_profdata_file_paths()
@@ -136,7 +137,7 @@ class TestFileBased(Test):
                 error = fail_kind.name
                 return_code = -1
 
-        if self.test_env.config.general.coverage.use_llvm_cov:
+        if self.test_env.config.general.coverage.use_llvm_cov and profdata_file and profraw_file:
             self.test_env.coverage.merge_and_delete_prowraw_files(profraw_file, profdata_file)
 
         report = TestReport(

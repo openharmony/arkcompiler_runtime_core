@@ -14,15 +14,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+import os
 import subprocess
 import sys
 import uuid
-import os
-import logging
-
-from pathlib import Path
-from os import getenv, path, remove
 from multiprocessing import current_process
+from os import getenv, path, remove
+from pathlib import Path
 from typing import Optional, List, Any, TextIO, Union
 
 from runner.logger import Log
@@ -48,6 +47,12 @@ if LLVM_COV_VERSION is not None:
 
 
 class LinuxCommands:
+    @staticmethod
+    def _popen(**kwargs: Any) -> Any:
+        if sys.version_info.major == 3 and sys.version_info.minor >= 6:
+            return subprocess.Popen(encoding=sys.stdout.encoding, **kwargs)
+        return subprocess.Popen(**kwargs)
+
     def run_command(self, command: List[str], stdout: Union[TextIO, int] = subprocess.PIPE) -> Union[TextIO, int]:
         with self._popen(
                 args=command,
@@ -64,17 +69,14 @@ class LinuxCommands:
         command = ['genhtml'] + args
         return self.run_command(command)
 
-    def _popen(self, **kwargs: Any) -> Any:
-        if sys.version_info.major == 3 and sys.version_info.minor >= 6:
-            return subprocess.Popen(encoding=sys.stdout.encoding, **kwargs)
-        return subprocess.Popen(**kwargs)
-
 
 class LlvmCovCommands:
-    def llvm_prof_merge_command(self, args: List[str]) -> List[str]:
+    @staticmethod
+    def llvm_prof_merge_command(args: List[str]) -> List[str]:
         return [LLVM_PROFDATA_BINARY, 'merge'] + args
 
-    def llvm_cov_export_command(self, args: List[str]) -> List[str]:
+    @staticmethod
+    def llvm_cov_export_command(args: List[str]) -> List[str]:
         return [LLVM_COV_PATH_BINARY, 'export'] + args
 
 
@@ -85,7 +87,8 @@ class LlvmCov:
         self.llvm_cov_commands = LlvmCovCommands()
         self.linux_commands = LinuxCommands()
 
-    def do_find(self, search_directory: Path, extension: str) -> List[Path]:
+    @staticmethod
+    def do_find(search_directory: Path, extension: str) -> List[Path]:
         return list(Path(search_directory).rglob(extension))
 
     def get_uniq_profraw_profdata_file_paths(self) -> List[str]:
@@ -111,7 +114,7 @@ class LlvmCov:
     def make_profdata_list_file(self) -> None:
         results = self.do_find(self.coverage_dir.profdata_dir, '*.profdata')
         with os.fdopen(os.open(self.coverage_dir.profdata_files_list_file, os.O_APPEND | os.O_CREAT, 0o755),
-                "a", encoding="utf-8") as the_file:
+                       "a", encoding="utf-8") as the_file:
             for i in results:
                 the_file.write(str(i) + '\n')
 
@@ -124,11 +127,12 @@ class LlvmCov:
 
         bin_dir = f"{self.build_dir}/bin"
 
-        bins = ['ark', 'ark_aot', 'ark_asm', 'ark_disasm', 'c2abc',
-                'c2p', 'es2panda', 'irtoc_ecmascript_fastpath_exec',
-                'irtoc_fastpath_exec', 'irtoc_interpreter_exec',
-                'panda', 'pandasm', 'paoc', 'verifier'
-                ]
+        bins = [
+            'ark', 'ark_aot', 'ark_asm', 'ark_disasm', 'c2abc',
+            'c2p', 'es2panda', 'irtoc_ecmascript_fastpath_exec',
+            'irtoc_fastpath_exec', 'irtoc_interpreter_exec',
+            'panda', 'pandasm', 'paoc', 'verifier'
+        ]
 
         args = ['-format=lcov', '-Xdemangler', 'c++filt', instr_profile]
 
@@ -144,7 +148,7 @@ class LlvmCov:
 
         command = self.llvm_cov_commands.llvm_cov_export_command(args)
 
-        with os.fdopen(os.open(self.coverage_dir.info_file, os.O_WRONLY | os.O_CREAT, 0o755), \
+        with os.fdopen(os.open(self.coverage_dir.info_file, os.O_WRONLY | os.O_CREAT, 0o755),
                        "w", encoding="utf-8") as file_dot_info:
             self.linux_commands.run_command(command, stdout=file_dot_info)
 

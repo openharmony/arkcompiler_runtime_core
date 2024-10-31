@@ -142,11 +142,11 @@ class ESCheckedTestPreparationStep(TestPreparationStep):
 
     def transform(self, force_generated: bool) -> List[str]:
         confs = list(glob(os.path.join(self.test_source_path, "**/*.yaml"), recursive=True))
-        generator_root = Path(self.config.general.static_core_root) / \
-                         "tests" / \
-                         "tests-u-runner" / \
-                         "tools" / \
-                         "generate-es-checked"
+        generator_root = (Path(self.config.general.static_core_root) /
+                          "tests" /
+                          "tests-u-runner" /
+                          "tools" /
+                          "generate-es-checked")
         generator_executable = generator_root / "main.rb"
         res = subprocess.run(
             [
@@ -168,7 +168,7 @@ class ESCheckedTestPreparationStep(TestPreparationStep):
         )
         if res.returncode != 0:
             Log.default(_LOGGER,
-                        'Failed to run es cross-validator, please, make sure that' \
+                        'Failed to run es cross-validator, please, make sure that '
                         'all required tools are installed (see tests-u-runner/readme.md#ets-es-checked-dependencies)')
             Log.exception_and_raise(_LOGGER, f"invalid return code {res.returncode}\n" + res.stdout + res.stderr)
         glob_expression = os.path.join(self.test_gen_path, "**/*.sts")
@@ -215,9 +215,9 @@ class JitStep(TestPreparationStep):
 
     def jit_transform_one_test(self, test_path: str) -> str:
         metadata = get_metadata(Path(test_path))
-        is_convert = not metadata.tags.not_a_test and \
-                     not metadata.tags.compile_only and \
-                     not metadata.tags.no_warmup
+        is_convert = (not metadata.tags.not_a_test and
+                      not metadata.tags.compile_only and
+                      not metadata.tags.no_warmup)
         if not is_convert:
             return test_path
 

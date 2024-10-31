@@ -43,6 +43,31 @@ class XmlView:
             data = data.replace(key, val)
         return data
 
+    @staticmethod
+    def __get_failed_test_case(test_result: Test) -> List[str]:
+        if not isinstance(test_result, TestFileBased) or not test_result.report or test_result.fail_kind is None:
+            return ['<failure>There are no data about the failure</failure>']
+
+        result = []
+        status = f"STATUS: {test_result.fail_kind.name}: "
+        if test_result.report.output:
+            status += str(re.sub(r'\[.*]', '', test_result.report.output.splitlines()[0]))
+        elif test_result.report.error:
+            status += str(re.sub(r'\[.*]', '', test_result.report.error.splitlines()[0]))
+
+        result.append('<failure>')
+        result.append('<![CDATA[')
+        result.append(f"error kind = {test_result.fail_kind.name}")
+        result.append(f"To reproduce:{test_result.reproduce}\n")
+        result.append(f"OUT: {test_result.report.output}")
+        result.append(f"ERR: {test_result.report.error}")
+        result.append(f"return_code = {test_result.report.return_code}")
+        result.append(status)
+        result.append(']]>')
+        result.append('</failure>')
+
+        return result
+
     def create_xml_report(self, results: List[Test], execution_time: float) -> None:
         total = self.__summary.passed + self.__summary.failed + self.__summary.ignored
 
@@ -84,27 +109,3 @@ class XmlView:
         ignore_list_path = self.__report_root / self.__ignore_list_xml
         Log.all(_LOGGER, f"Save {ignore_list_path}")
         write_2_file(ignore_list_path, "\n".join(result))
-
-    def __get_failed_test_case(self, test_result: Test) -> List[str]:
-        if not isinstance(test_result, TestFileBased) or not test_result.report or test_result.fail_kind is None:
-            return ['<failure>There are no data about the failure</failure>']
-
-        result = []
-        status = f"STATUS: {test_result.fail_kind.name}: "
-        if test_result.report.output:
-            status += str(re.sub(r'\[.*\]', '', test_result.report.output.splitlines()[0]))
-        elif test_result.report.error:
-            status += str(re.sub(r'\[.*\]', '', test_result.report.error.splitlines()[0]))
-
-        result.append('<failure>')
-        result.append('<![CDATA[')
-        result.append(f"error kind = {test_result.fail_kind.name}")
-        result.append(f"To reproduce:{test_result.reproduce}\n")
-        result.append(f"OUT: {test_result.report.output}")
-        result.append(f"ERR: {test_result.report.error}")
-        result.append(f"return_code = {test_result.report.return_code}")
-        result.append(status)
-        result.append(']]>')
-        result.append('</failure>')
-
-        return result

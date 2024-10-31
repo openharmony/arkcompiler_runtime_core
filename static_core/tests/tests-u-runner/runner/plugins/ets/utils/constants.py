@@ -19,9 +19,9 @@ import re
 
 # Meta
 META_START_STRING = "/*---"
-META_START_PATTERN = re.compile(r"\/\*---")
+META_START_PATTERN = re.compile(r"/\*---")
 META_END_STRING = "---*/"
-META_END_PATTERN = re.compile(r"---\*\/")
+META_END_PATTERN = re.compile(r"---\*/")
 META_START_COMMENT = "/*"
 META_END_COMMENT = "*/"
 META_COPYRIGHT = "Copyright (c)"

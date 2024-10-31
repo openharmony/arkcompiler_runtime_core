@@ -39,6 +39,7 @@ class UtilASTChecker:
         """
         Class for storing test case parsed from test file
         """
+
         def __init__(self, name: Optional[str], test_type: UtilASTChecker._TestType,
                      checks: dict, line: int, col: int, error_file: str = '') -> None:
             self.name = name
@@ -51,10 +52,11 @@ class UtilASTChecker:
         def __repr__(self) -> str:
             return f'TestCase({self.name}, {self.line}:{self.col}, {self.test_type}, {self.checks}, {self.error_file})'
 
-    class _TestCasesList:
+    class TestCasesList:
         """
         Class for storing test cases parsed from one test file
         """
+
         def __init__(self, tests_list: List[UtilASTChecker._TestCase]):
             self.tests_list = tests_list
             has_error_tests = False
@@ -109,8 +111,8 @@ class UtilASTChecker:
         return expected_error in actual_errors
 
     def parse_define_statement(self, match: re.Match[str],
-                              link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]],
-                              link_sources_map: Dict[str, re.Match[str]]) -> Optional[UtilASTChecker._TestCase]:
+                               link_defs_map: Dict[str, Tuple[UtilASTChecker._TestType, str]],
+                               link_sources_map: Dict[str, re.Match[str]]) -> Optional[UtilASTChecker._TestCase]:
         """
         Parses `@<id> <pattern-type> <pattern>`
         """
@@ -119,7 +121,7 @@ class UtilASTChecker:
         sep2 = match_str.find(' ', sep1 + 1)
         if sep1 == -1 or sep2 == -1:
             Log.exception_and_raise(_LOGGER, 'Wrong definition format: expected '
-                                    f'`/* @@@ <id> <pattern-type> <pattern> */`, got /* @@@ {match_str} */')
+                                             f'`/* @@@ <id> <pattern-type> <pattern> */`, got /* @@@ {match_str} */')
         name = match_str[:sep1]
         pattern_type = UtilASTChecker._TestType(match_str[sep1 + 1:sep2])
         pattern = match_str[sep2 + 1:]
@@ -180,13 +182,15 @@ class UtilASTChecker:
         sep2 = match_str.find(' ', sep1 + 1)
         if sep1 == -1 or sep2 == -1:
             Log.exception_and_raise(_LOGGER, 'Wrong match_at_location format: expected '
-                                    f'`/* @@? <line>:<col> <pattern-type> <pattern> */`, got /* @@? {match_str} */')
+                                             '`/* @@? <line>:<col> <pattern-type> <pattern> */`, '
+                                             f'got /* @@? {match_str} */')
         location = match_str[:sep1]
         loc_sep1 = location.find(':')
         loc_sep2 = location.find(':', loc_sep1 + 1)
         if loc_sep1 == -1:
             Log.exception_and_raise(_LOGGER, 'Wrong match_at_location format: expected '
-                                    f'`/* @@? <line>:<col> <pattern-type> <pattern> */`, got /* @@? {match_str} */')
+                                             '`/* @@? <line>:<col> <pattern-type> <pattern> */`, '
+                                             f'got /* @@? {match_str} */')
         line_str = location[:loc_sep1] if loc_sep2 == -1 else location[loc_sep1 + 1:loc_sep2]
         col_str = location[loc_sep1 + 1:] if loc_sep2 == -1 else location[loc_sep2 + 1:]
         error_file = '' if loc_sep2 == -1 else location[:loc_sep1]
@@ -203,7 +207,7 @@ class UtilASTChecker:
 
         return self.create_test_case(None, pattern_type, pattern, line, col, error_file=error_file)
 
-    def parse_tests(self, file: TextIO) -> UtilASTChecker._TestCasesList:
+    def parse_tests(self, file: TextIO) -> UtilASTChecker.TestCasesList:
         """
         Takes .ets file with tests and parses them into a list of TestCases.
         """
@@ -226,7 +230,7 @@ class UtilASTChecker:
         if len(link_defs_map) or len(link_sources_map):
             Log.exception_and_raise(_LOGGER, 'link defined twice')
 
-        return UtilASTChecker._TestCasesList(test_cases)
+        return UtilASTChecker.TestCasesList(test_cases)
 
     def find_nodes_by_start_location(self, root: dict, line: int, col: int) -> List[dict]:
         """

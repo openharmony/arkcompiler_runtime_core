@@ -28,6 +28,15 @@ class TestDeclgenParser(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
 
+    @staticmethod
+    def es2panda_flags() -> List[str]:
+        # we want "--opt-level=2", but currently it does not work with `--output=/dev/null`
+        return []
+
+    @staticmethod
+    def es2panda_result_validator(_actual_output: str, _: Any, actual_return_code: int) -> bool:
+        return actual_return_code == 0
+
     def do_run(self) -> TestFileBased:
         es2panda_flags = self.es2panda_flags()
         es2panda_flags.extend(self.flags)
@@ -38,10 +47,3 @@ class TestDeclgenParser(TestFileBased):
             result_validator=self.es2panda_result_validator,
         )
         return self
-
-    def es2panda_flags(self) -> List[str]:
-        # we want "--opt-level=2", but currently it does not work with `--output=/dev/null`
-        return []
-
-    def es2panda_result_validator(self, _actual_output: str, _: Any, actual_return_code: int) -> bool:
-        return actual_return_code == 0
