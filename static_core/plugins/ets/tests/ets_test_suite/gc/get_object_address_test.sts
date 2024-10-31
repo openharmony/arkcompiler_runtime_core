@@ -18,7 +18,7 @@ function main(): int {
     let obj = new Object();
     assert GC.getObjectAddress(obj) > 0: "getObjectAddress for regular object must return value > 0";
     assert GC.getObjectAddress("non-movable string") > 0: "getObjectAddress for non-movable must return value > 0";
-    let h_obj : Long[] = new Long[1024 * 1024];
+    let h_obj: long[] = new long[1024 * 64];
     assert GC.getObjectAddress(h_obj) > 0: "getObjectAddress for humongous must return value > 0";
     return 0;
 }
