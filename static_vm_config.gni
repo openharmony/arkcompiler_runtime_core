@@ -14,7 +14,8 @@
 import("//build/config/sanitizers/sanitizers.gni")
 import("//build/ohos_var.gni")
 
-enable_static_vm = true
+enable_arkplatform = false
+enable_static_vm = false
 if (is_asan && use_hwasan) {
   enable_arkplatform = false
   enable_static_vm = false
