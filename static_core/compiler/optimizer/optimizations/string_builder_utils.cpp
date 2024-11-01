@@ -273,4 +273,78 @@ bool IsIntrinsicStringBuilderAppendString(Inst *inst)
     return runtime->IsIntrinsicStringBuilderAppendString(inst->CastToIntrinsic()->GetIntrinsicId());
 }
 
+bool IsUsedOutsideBasicBlock(Inst *inst, BasicBlock *bb)
+{
+    for (auto &user : inst->GetUsers()) {
+        auto userInst = user.GetInst();
+        if (userInst->IsCheck()) {
+            if (!userInst->HasUsers()) {
+                continue;
+            }
+            if (!userInst->HasSingleUser()) {
+                // In case of multi user check-instruction we assume it is used outside current basic block without
+                // actually testing it.
+                return true;
+            }
+            // In case of single user check-instruction we test its the only user.
+            userInst = userInst->GetUsers().Front().GetInst();
+        }
+        if (userInst->GetBasicBlock() != bb) {
+            return true;
+        }
+    }
+    return false;
+}
+
+SaveStateInst *FindFirstSaveState(BasicBlock *block)
+{
+    if (block->IsEmpty()) {
+        return nullptr;
+    }
+
+    for (auto inst : block->Insts()) {
+        if (inst->GetOpcode() == Opcode::SaveState) {
+            return inst->CastToSaveState();
+        }
+    }
+
+    return nullptr;
+}
+
+void RemoveFromInstructionInputs(ArenaVector<InputDesc> &inputDescriptors)
+{
+    // Inputs must be walked in reverse order for removal
+    std::sort(inputDescriptors.begin(), inputDescriptors.end(),
+              [](auto inputDescX, auto inputDescY) { return inputDescX.second > inputDescY.second; });
+
+    for (auto inputDesc : inputDescriptors) {
+        auto inst = inputDesc.first;
+        auto index = inputDesc.second;
+        inst->RemoveInput(index);
+    }
+}
+
+bool BreakStringBuilderAppendChains(BasicBlock *block)
+{
+    // StringBuilder append-call returns 'this' (instance)
+    // Replace all users of append-call with instance itself to support chain calls
+    // like: sb.append(s0).append(s1)...
+    bool isApplied = false;
+    for (auto inst : block->Insts()) {
+        if (!IsStringBuilderAppend(inst) && !IsStringBuilderToString(inst)) {
+            continue;
+        }
+
+        auto instance = inst->GetDataFlowInput(0);
+        for (auto &user : instance->GetUsers()) {
+            auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
+            if (IsStringBuilderAppend(userInst)) {
+                userInst->ReplaceUsers(instance);
+                isApplied = true;
+            }
+        }
+    }
+    return isApplied;
+}
+
 }  // namespace ark::compiler
