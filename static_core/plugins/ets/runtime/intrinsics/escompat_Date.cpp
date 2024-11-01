@@ -75,4 +75,10 @@ extern "C" EtsString *EscompatDateGetLocaleString(EtsString *format, EtsString *
     return EtsString::CreateFromMUtf8(ss.str().c_str());
 }
 
+extern "C" int64_t ChronoGetCpuTime()
+{
+    // NOTE(ipetrov, #15499): Need to change approach when coroutine can migrate to other thread
+    return ark::os::time::GetClockTimeInThreadCpuTime();
+}
+
 }  // namespace ark::ets::intrinsics

@@ -17,135 +17,118 @@ function returnAbc() {
     return (() => "a")() + (() => "b")() + (() => "c")();
 }
 
-function TaskpoolSequenceRunnerTestOrder() {
-    let resultStr: string = "";
-    let func1 = (): string => {
-        resultStr += "1";
-        return resultStr;
-    };
-    let func2 = (): string => {
-        resultStr += "2";
-        return resultStr;
-    }
-    let func3 = (): string => {
-        resultStr += "3";
-        return resultStr;
-    }
-    let runner = new taskpoolSequenceRunner();
-    let task1 = new taskpoolTask(func1);
-    let task2 = new taskpoolTask(func2);
-    let task3 = new taskpoolTask(func3);
-    let p1 = runner.execute(task1);
-    let p2 = runner.execute(task2);
-    let p3 = runner.execute(task3);
-    let res2 = await p2;
-    assert(res2 == "12");
-    let res3 = await p3;
-    assert(res3 == "123");
-    let res1 = await p1;
-    assert(res1 == "1");
-    assert(resultStr == "123");
-}
-
-function TaskpoolSequenceRunnerTestExecuteCommonTask() {
-    let runner = new taskpoolSequenceRunner();
-    let task = new taskpoolTask(returnAbc);
-    taskpool.execute(task);
-    let isErrorOccurred = false;
-    try {
-        runner.execute(task);
-    } catch(e: Error) {
-        isErrorOccurred = true;
-        assert(e.message == "taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask");
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolSequenceRunnerTestExecuteSeqRunnerTask() {
-    let runner1 = new taskpoolSequenceRunner();
-    let runner2 = new taskpoolSequenceRunner();
-    let task = new taskpoolTask(returnAbc);
-    runner1.execute(task);
-    let isErrorOccurred = false;
-    try {
-        runner2.execute(task);
-    } catch(e: Error) {
-        isErrorOccurred = true;
-        assert(e.message == "taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask");
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolSequenceRunnerTestExecuteGroupTask() {
-    let runner = new taskpoolSequenceRunner();
-    let group = new taskpoolTaskGroup();
-    let task = new taskpoolTask(returnAbc);
-    group.addTask(task);
-    let isErrorOccurred = false;
-    try {
-        runner.execute(task);
-    } catch(e: Error) {
-        isErrorOccurred = true;
-        assert(e.message == "taskpool:: SequenceRunner cannot execute groupTask");
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolSequenceRunnerTestCancelNonStartedTask() {
-    let task = new taskpoolTask(returnAbc);
-    let runner = new taskpoolSequenceRunner();
-    let isErrorOccurred = false;
-    try {
-        taskpool.cancel(task);
-        runner.execute(task);
-    } catch(e: Error) {
-        isErrorOccurred = true;
-        assert(e.message == "taskpool:: task is not executed or has been executed");
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolSequenceRunnerTestCancelExecutingTask() {
-    let task = new taskpoolTask(returnAbc);
-    let runner = new taskpoolSequenceRunner();
-    let p = runner.execute(task);
-    try {
-        taskpool.cancel(task);
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: sequenceRunner task has been executed");
-        return;
-    }
-    let isErrorOccurred = false;
-    try {
-        let res = await p;
-    } catch(e: Error) {
-        assert(e.message == "taskpool:: sequenceRunner task has been canceled");
-        isErrorOccurred = true;
-    }
-    assert(isErrorOccurred);
-}
-
-function TaskpoolSequenceRunnerTestCancelExecutedTask() {
-    let task = new taskpoolTask(returnAbc);
-    let runner = new taskpoolSequenceRunner();
-    let isErrorOccurred = false;
-    try {
-        await runner.execute(task);
-        taskpool.cancel(task);
-    } catch(e: Error) {
-        isErrorOccurred = true;
-        assert(e.message == "taskpool:: sequenceRunner task has been executed");
-    }
-    assert(isErrorOccurred);
-}
-
 function main(): int {
-    TaskpoolSequenceRunnerTestOrder();
-    TaskpoolSequenceRunnerTestExecuteCommonTask();
-    TaskpoolSequenceRunnerTestExecuteSeqRunnerTask();
-    TaskpoolSequenceRunnerTestExecuteGroupTask();
-    TaskpoolSequenceRunnerTestCancelNonStartedTask();
-    TaskpoolSequenceRunnerTestCancelExecutingTask();
-    TaskpoolSequenceRunnerTestCancelExecutedTask();
-    return 0;
-} 
+    let seqRunnerSuite = new ArkTestsuite("taskpool.SequenceRunner");
+    seqRunnerSuite.addTest("OrderTest", () =>
+    {
+        let resultStr: string = "";
+        let func1 = (): string => {
+            resultStr += "1";
+            return resultStr;
+        };
+        let func2 = (): string => {
+            resultStr += "2";
+            return resultStr;
+        }
+        let func3 = (): string => {
+            resultStr += "3";
+            return resultStr;
+        }
+        let runner = new taskpoolSequenceRunner();
+        let task1 = new taskpoolTask(func1);
+        let task2 = new taskpoolTask(func2);
+        let task3 = new taskpoolTask(func3);
+        let p1 = runner.execute(task1);
+        let p2 = runner.execute(task2);
+        let p3 = runner.execute(task3);
+        let res2 = await p2;
+        assertEQ(res2, "12");
+        let res3 = await p3;
+        assertEQ(res3, "123");
+        let res1 = await p1;
+        assertEQ(res1, "1");
+        assertEQ(resultStr, "123");
+        assertEQ(task1.isDone(), true);
+        assertEQ(task2.isDone(), true);
+        assertEQ(task3.isDone(), true);
+        // Execute LongTask
+        let longTask = new taskpoolLongTask(returnAbc);
+        let res = await runner.execute(longTask);
+        assertEQ(res, "abc");
+    });
+    seqRunnerSuite.addTest("ExecuteCommonTest", (): void throws => 
+    {
+        let runner = new taskpoolSequenceRunner();
+        let task = new taskpoolTask(returnAbc);
+        taskpool.execute(task);
+        expectError(() => { runner.execute(task) },
+                    new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask"));
+    });
+    seqRunnerSuite.addTest("ExecuteSeqRunnerTaskTest", (): void throws =>
+    {
+        let runner1 = new taskpoolSequenceRunner();
+        let runner2 = new taskpoolSequenceRunner();
+        let task = new taskpoolTask(returnAbc);
+        runner1.execute(task);
+        expectError(() => { runner2.execute(task) },
+                    new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask"));
+    });
+    seqRunnerSuite.addTest("ExecuteGroupTaskTest", (): void throws => {
+        let runner = new taskpoolSequenceRunner();
+        let group = new taskpoolTaskGroup();
+        let task = new taskpoolTask(returnAbc);
+        group.addTask(task);
+        expectError(() => { runner.execute(task) },
+                    new Error("taskpool:: SequenceRunner cannot execute groupTask"));
+    });
+    seqRunnerSuite.addTest("CancelNonStartedTaskTest", (): void throws =>
+    {
+        let task = new taskpoolTask(returnAbc);
+        let runner = new taskpoolSequenceRunner();
+        expectError(() => {
+            taskpool.cancel(task);
+            runner.execute(task);
+        }, new Error("taskpool:: task is not executed or has been executed"));
+    });
+    seqRunnerSuite.addTest("CancelExecutingTaskTest", (): void throws =>
+    {
+        let task = new taskpoolTask(returnAbc);
+        let runner = new taskpoolSequenceRunner();
+        let p = runner.execute(task);
+        try {
+            taskpool.cancel(task);
+        } catch(e: Error) {
+            assertEQ(e.message, "taskpool:: sequenceRunner task has been executed");
+            return;
+        }
+        expectError(() => { let res = await p; },
+                    new Error("taskpool:: sequenceRunner task has been canceled"));
+    });
+    seqRunnerSuite.addTest("CancelExecutedTaskTest", (): void throws =>
+    {
+        let task = new taskpoolTask(returnAbc);
+        let runner = new taskpoolSequenceRunner();
+        expectError(() => {
+            await runner.execute(task);
+            taskpool.cancel(task);
+        }, new Error("taskpool:: sequenceRunner task has been executed"));
+    });
+    seqRunnerSuite.addTest("AddDependentTaskTest", (): void throws =>
+    {
+        let task1 = new taskpoolTask(returnAbc);
+        let task2 = new taskpoolTask(returnAbc);
+        task1.addDependency(task2);
+        let runner = new taskpoolSequenceRunner();
+        expectError(() => { runner.execute(task1) }, new Error("seqRunner:: dependent task not allowed."));
+    });
+    seqRunnerSuite.addTest("AddDependencyExecutedTaskTest", (): void throws =>
+    {
+        let task1 = new taskpoolTask(returnAbc);
+        let task2 = new taskpoolTask(returnAbc);
+        let runner = new taskpoolSequenceRunner();
+        runner.execute(task2);
+        expectError(() => { task1.addDependency(task2) }, new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on"));
+        expectError(() => { task2.addDependency(task1) }, new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency"));
+    });
+    return seqRunnerSuite.run();
+}

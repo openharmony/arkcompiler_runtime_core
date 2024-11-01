@@ -80,7 +80,6 @@ static_core/plugins/ets/isa/                             @mbolshov
 static_core/plugins/ets/libllvmbackend/                  @Prof1983 @romanzhuykov
 static_core/plugins/ets/runtime/                         @semenovaleksandr
 static_core/plugins/ets/runtime/*coroutine*              @dmitriitr @konstanting
-static_core/plugins/ets/runtime/*taskpool*               @dmitriitr @konstanting @ipetrov
 static_core/plugins/ets/runtime/ets_entrypoints*         @Prof1983 @mbolshov
 static_core/plugins/ets/runtime/ets_handle*              @dmitriitr @udav
 static_core/plugins/ets/runtime/ets_libbase_runtime.yaml @Prof1983

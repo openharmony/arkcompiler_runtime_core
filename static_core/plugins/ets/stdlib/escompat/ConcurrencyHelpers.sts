@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-package std.containers;
+package escompat;
 
-/// This class provides api for sync primitives (see SyncPrimitives.sts)
+/**
+ * @class provides api for sync primitives (see std/core/SyncPrimitives.sts) in escompat
+ */
 final class ConcurrencyHelpers {
     // Mutex api
     public static native mutexCreate(): Object;

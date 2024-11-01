@@ -15,8 +15,38 @@
 
 package escompat;
 
+// NOTE(ipetrov, #16281): Make taskpool.Priority when namespaces will be supported
+export enum taskpoolPriority {
+    HIGH = 0,
+    MEDIUM = 1,
+    LOW = 2,
+    IDLE = 3
+}
+
+// NOTE(ipetrov, #16281): Make taskpool.State when namespaces will be supported
+/**
+ * @enum defines the task state
+ * @see taskpool.TaskInfo
+ */
+export enum taskpoolState {
+    /// the task state is waiting
+    WAITING = 1,
+
+    /// the task state is running
+    RUNNING = 2,
+
+    /// the task state is canceled
+    CANCELED = 3
+}
+
+/**
+ * The type of callback to be registered
+ */
 export type taskpoolCallbackFunction = () => void;
 
+/**
+ * The type of callback with error code to be registered
+ */
 export type taskpoolCallbackFunctionWithError = (e: Error) => void;
 
 // NOTE(ipetrov, #16281): Make taskpool.Task when namespaces will be supported
@@ -34,11 +64,12 @@ export class taskpoolTask {
     constructor(name: string, func: Function0<NullishType>) {
         this.name = name;
         this.func = func;
-        this.args = [];
-        // NOTE(ipetrov, #15499): support information about durations
-        this.totalDuration = 0.0;
-        this.ioDuration = 0.0;
-        this.cpuDuration = 0.0;
+        this.totalDuration = 0;
+        this.ioDuration = 0;
+        this.cpuDuration = 0;
+        this.mutex = ConcurrencyHelpers.mutexCreate();
+        this.condVar = ConcurrencyHelpers.condVarCreate();
+        this.dependentTasks = new Set<taskpoolTask>();
         // Each task has unique identifier
         this.id = taskpoolTask.generateId();
     }
@@ -57,7 +88,9 @@ export class taskpoolTask {
      *
      * @returns true if current running task is canceled, false - otherwise
      */
-    static native isCancel(): boolean;
+    static isCanceled(): boolean {
+        return taskpool.isCancel();
+    }
 
     /**
      * Register a callback and call it when the task is enqueued
@@ -104,13 +137,165 @@ export class taskpoolTask {
     }
 
     /**
+     * Add dependencies on the task array for this task
+     * @param tasks An array of dependent tasks
+     * @throws Error if
+     *     - no parameters
+     *     - this task or argument tasks executed (as common or via SequenceRunner)
+     *     - task or argument tasks were added to any group
+     *     - argument tasks add a circular dependency
+     */
+    addDependency(...tasks: taskpoolTask[]): void {
+        if (tasks.length == 0) {
+            throw new Error("addDependency has no params.");
+        }
+        if (this.isSubmitted || this.seqId != 0) {
+            throw new Error("taskpool:: seqRunnerTask or executedTask cannot addDependency");
+        }
+        if (this.groupId != 0) {
+            throw new Error("taskpool:: groupTask cannot addDependency");
+        }
+        for (const task: taskpoolTask of tasks) {
+            if (task.isSubmitted || task.seqId != 0) {
+                throw new Error("taskpool:: seqRunnerTask or executedTask cannot be relied on");
+            }
+            if (task.groupId != 0) {
+                throw new Error("taskpool:: groupTask cannot be relied on");
+            }
+            if (this.id == task.id || taskpoolTask.hasTaskDFS(this, task)) {
+                throw new Error("There is a circular dependency");
+            }
+        }
+        for (const task: taskpoolTask of tasks) {
+            if (task.dependentTasks.has(this)) {
+                continue;
+            }
+            task.dependentTasks.add(this);
+            this.taskDependenciesCount++;
+        }
+        this.isDependent = (this.taskDependenciesCount != 0);
+    }
+
+    /**
+     * Remove dependencies on the task array for this task
+     * @param tasks An array of dependent tasks
+     * @throws Error if
+     *     - no parameters
+     *     - this task or argument tasks executed
+     *     - this task or argument tasks have not dependencies
+     *     - this task does not depend on an argument task 
+     */
+    removeDependency(...tasks: taskpoolTask[]): void {
+        if (tasks.length == 0) {
+            throw new Error("removeDependency has no params.");
+        }
+        if (!this.isDependent) {
+            throw new Error("taskpool:: task has no dependency");
+        } 
+        if (this.isSubmitted) {
+            throw new Error("taskpool:: executedTask cannot removeDependency");
+        }
+        for (const task: taskpoolTask of tasks) {
+            if (task.dependentTasks.size == 0 && !task.isDependent) {
+                throw new Error("taskpool:: task has no dependency");
+            }
+            if (task.isSubmitted) {
+                throw new Error("taskpool:: cannot removeDependency on a dependent and executed task");
+            }
+            if (!task.dependentTasks.has(this)) {
+                throw new Error("The dependency does not exist, ");
+            }
+        }
+        for (let task: taskpoolTask of tasks) {
+            task.dependentTasks.delete(this);
+            this.taskDependenciesCount--;
+        }
+        this.isDependent = (this.taskDependenciesCount != 0);
+    }
+
+    /**
      * @returns true if the task has been completed, false - otherwise
      */
     isDone(): boolean {
-        // NOTE(ipetrov, #15499): Need to support, potentially need to refactor native implementation
-        throw new Error("Does not support");
+        return this.isSubmitted && !taskpool.hasTask(this);
     }
 
+    /**
+     * Set transfer list for this task
+     * @param transfer transfer list of this task
+     * @throws Error if clone list already set
+     */
+    setTransferList(transfer?: ArrayBuffer[]): void {
+        if (this.cloneList != undefined) {
+            throw new Error("An ArrayBuffer cannot be set as both a transfer list and a clone list");
+        }
+        this.transferList = transfer;
+    }
+
+    /**
+     * Set clone list for this task
+     * @param cloneList clone list of this task
+     * @throws Error if transfer list already set
+     */
+    setCloneList(cloneList: Object[] | ArrayBuffer[]): void {
+        if (this.transferList != undefined) {
+            throw new Error("An ArrayBuffer cannot be set as both a transfer list and a clone list");
+        }
+        this.cloneList = cloneList;
+    }
+
+    /**
+     * Send data to host side and trigger the registered callback
+     * @param args arguments for the registered callback
+     * @throws Error if the function is not called from a taskpool task
+     * @throws Error if the callback is not registered
+     */
+    static sendData(...args: Object[]): void {
+        const item: taskpoolTask | undefined = taskpool.getCurrentTask();
+        if (item == undefined) {
+            throw new Error("The function is not called in the TaskPool thread");
+        }
+        const task: taskpoolTask = item;
+        if (task.onReceiveCallback == undefined) {
+            throw new Error("The callback is not registered on the host side");
+        }
+        ConcurrencyHelpers.mutexLock(task.dataMutex);
+        task.argsArray.push(args);
+        ConcurrencyHelpers.mutexUnlock(task.dataMutex);
+    }
+
+    /**
+     * Register a callback for this task to receive and handle data from the taskpool task 
+     */
+    onReceiveData(callback?: Function0<NullishType>): void {
+        this.onReceiveCallback = callback;
+    }
+
+    /// Concurrent function to execute in taskpool
+    func: Function0<NullishType>;
+
+    /// The concurrent function arguments
+    arguments?: NullishType[];
+
+    /// Task name
+    name: string;
+
+    /// Total duration of task execution
+    totalDuration: number;
+
+    /// IO duration of task execution
+    ioDuration: number;
+
+    /// CPU duration of task execution
+    cpuDuration: number;
+
+    /// ----- Internal implementation part -----
+
+    /**
+     * Check that the task can be executed as common task
+     * @throws Error if the task can not be executed as common task 
+     * @see taskpool.execute
+     */
     internal checkExecution(): void {
         if (this.groupId != 0) {
             throw new Error("taskpool:: groupTask cannot execute outside");
@@ -118,30 +303,75 @@ export class taskpoolTask {
         if (this.seqId != 0) {
             throw new Error("taskpool:: seqRunnerTask cannot execute outside");
         }
+        if (this.isSubmitted && (this.isDependent || this.dependentTasks.size != 0)) {
+            throw new Error("taskpool:: executedTask with dependency cannot execute again");
+        }
+    }
+
+    private waitForDependencies(): void {
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        while (this.taskDependenciesCount > 0) {
+            ConcurrencyHelpers.condVarWait(this.condVar, this.mutex);
+        }
+        // Only one instance of the task can be running
+        if (this.isRunning) {
+            ConcurrencyHelpers.condVarWait(this.condVar, this.mutex);
+        }
+        this.isRunning = true;
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+    }
+
+    private notifyDependencies(): void {
+        for (const dependentTask: taskpoolTask of this.dependentTasks) {
+            ConcurrencyHelpers.lockGuard(dependentTask.mutex, () => {
+                dependentTask.taskDependenciesCount--;
+                ConcurrencyHelpers.condVarNotifyOne(dependentTask.condVar, dependentTask.mutex);
+            });
+        }
+        ConcurrencyHelpers.mutexLock(this.mutex);
+        this.isRunning = false;
+        ConcurrencyHelpers.condVarNotifyOne(this.condVar, this.mutex);
+        ConcurrencyHelpers.mutexUnlock(this.mutex);
+    }
+
+    internal getDuration(): number {
+        return (Chrono.nanoNow() - this.startTime) / Chrono.NS_PER_MS;
     }
 
     internal execute(): NullishType {
-        if (!taskpool.taskStarted(this.id, this.groupId)) {
+        this.waitForDependencies();
+        if (!taskpool.taskStarted(this)) {
+            this.notifyDependencies();
             this.throwCancelTaskError();
         }
         this.callUserCallback(this.onStartCallback);
         let result: NullishType = null;
+        this.startTime = Chrono.nanoNow();
+        const startCpuTime: long = Chrono.getCpuTime();
         try {
             result = this.func();
+            this.callUserCallback(this.onSuccessCallback);
         } catch (e: Error) {
             try {
                 this.onFailCallback?.(e);
             } catch (callbackError) {}
             throw e;
         } finally {
-            if (!taskpool.taskFinished(this.id, this.groupId)) {
+            // Save duration stats
+            this.cpuDuration = (Chrono.getCpuTime() - startCpuTime) / Chrono.NS_PER_MS;
+            this.totalDuration = this.getDuration();
+            this.ioDuration = this.totalDuration - this.cpuDuration;
+            // Process the task finishing
+            const notCanceled: boolean = taskpool.taskFinished(this);
+            this.notifyDependencies();
+            if (!notCanceled) {
                 this.throwCancelTaskError();
             }
         }
-        this.callUserCallback(this.onSuccessCallback);
         return result;
     }
 
+    /// @throws Error for the canceled task
     private throwCancelTaskError(): void {
         if (this.groupId != 0) {
             throw new Error("taskpool:: taskGroup has been canceled");
@@ -164,24 +394,92 @@ export class taskpoolTask {
         } catch (e) {}
     }
 
+    /// The task is added to taskpool for execution
     internal enqueue(): void {
         this.isSubmitted = true;
         this.callUserCallback(this.onEnqueueCallback);
     }
 
+    /**
+     * @see taskpool.execute
+     * @see taskpool.SequenceRunner.execute
+     */
+    internal getOnReceivePromise(p: Promise<NullishType>): Promise<NullishType> {
+        if (this.onReceiveCallback == undefined) {
+            return p;
+        }
+        return p.then<NullishType>((value: NullishType): NullishType => {
+            const argsArray: Array<Object[]> = this.extractDataArgs();
+            argsArray.forEach((args: Object[]) => {
+                try {
+                    this.onReceiveCallback!();
+                } catch(e) {}
+            });
+            return value;
+        });
+    }
+
+    /**
+     * Generate new unique identifier for a new task
+     * @see Task.constructor
+     */
     private static native generateId(): long;
 
-    totalDuration: number;
-    ioDuration: number;
-    cpuDuration: number;
-    func: Function0<NullishType>;
-    args: NullishType[];
-    name: string;
+    /**
+     * @see taskpool.Task.addDependency
+     */
+    internal static hasTaskDFS(startTask: taskpoolTask, targetTask: taskpoolTask): boolean {
+        for (const dependentTask: taskpoolTask of startTask.dependentTasks) {
+            if (dependentTask.id == targetTask.id) {
+                return true;
+            }
+            if (taskpoolTask.hasTaskDFS(dependentTask, targetTask)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    /// @see taskpool.Task.getOnReceivePromise
+    internal extractDataArgs(): Array<Object[]> {
+        ConcurrencyHelpers.mutexLock(this.dataMutex);
+        const argsArray: Array<Object[]> = this.argsArray;
+        this.argsArray = new Array<Object[]>();
+        ConcurrencyHelpers.mutexUnlock(this.dataMutex);
+        return argsArray;
+    }
+
+    /// Unique identifier of the task
     internal readonly id: long;
+    /// id of group which contains the task, 0 means the task is not part of any group
     internal groupId: long = 0;
+    /// id of sequence runner which ran the task, 0 means task was not ran via any sequence runner
     internal seqId: long = 0;
+    /// the task has been submitted into taskpool
     internal isSubmitted: boolean = false;
+    /// the task depends on another task
+    internal isDependent: boolean = false;
+    /// Count of tasks which should be executed before this task
+    private taskDependenciesCount: int = 0;
+    /// Set of tasks which can be executed after this task
+    internal dependentTasks: Set<taskpoolTask>;
+    /// identifier of worker which starts to execute the task
+    internal workerId: int = -1;
+    /// an instance of the task is running
+    private isRunning: boolean = false;
+    /// start time of the task
+    private startTime: long = 0;
+
+    // NOTE(ipetrov, #19949): Change to private when bug in frontend will be fixed
+    internal mutex: Object;
+    internal condVar: Object;
+
+    private transferList?: ArrayBuffer[];
+    private cloneList?: Object[] | ArrayBuffer[];
+
+    private onReceiveCallback?: Function0<NullishType>;
+    private dataMutex: Object = ConcurrencyHelpers.mutexCreate();
+    private argsArray: Array<Object[]> = new Array<Object[]>();
 
     private onEnqueueCallback?: taskpoolCallbackFunction;
     private onStartCallback?: taskpoolCallbackFunction;
@@ -193,12 +491,22 @@ export class taskpoolTask {
 /**
  * @class LongTask provides an interface to create a long executing task.
  * The such task can be executed only once
- * @extends Task 
+ * @extends Task
  */
 export class taskpoolLongTask extends taskpoolTask {
+    /**
+     * Create a LongTask instance
+     * @param name The name of long task
+     * @param func Concurrent function to execute in the taskpool
+     */
     constructor(name: string, func: Function0<NullishType>) {
         super(name, func);
     }
+
+    /**
+     * Create a LongTask instance
+     * @param func Concurrent function to execute in the taskpool
+     */
     constructor(func: Function0<NullishType>) {
         super("", func);
     }
@@ -259,6 +567,8 @@ export class taskpoolTaskGroup {
             throw new Error("taskpool:: The interface does not support the long task");
         } else if (task.isSubmitted || task.seqId != 0) {
             throw new Error("taskpool:: taskGroup cannot add seqRunnerTask or executedTask");
+        } else if (task.isDependent || task.dependentTasks.size != 0) {
+            throw new Error("taskpool:: dependent task not allowed.");
         }
         task.groupId = this.id;
         this.tasks.push(task);
@@ -278,7 +588,15 @@ export class taskpoolTaskGroup {
 
     internal readonly id: long;
     internal tasks: Array<taskpoolTask>;
-    internal isSubmitted: boolean = false;
+}
+
+class SeqRunnerImpl {
+    constructor(id: long) {
+        this.id = id;
+        this.seqPromise = Promise.resolve<NullishType>(new Object());
+    }
+    readonly id: long;
+    seqPromise: Promise<NullishType>;
 }
 
 // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
@@ -289,24 +607,43 @@ export class taskpoolSequenceRunner {
     /**
      * Create a SequenceRunner instance
      */
-    constructor(/* priority?: Priority */) {
-        this.id = taskpoolSequenceRunner.generateSeqRunnerId();
-        this.seqPromise = Promise.resolve<NullishType>(new Object());
+    constructor(priority?: taskpoolPriority) {
+        this("", priority);
+    }
+
+    constructor(name: string, priority?: taskpoolPriority) {
+        this.impl = taskpoolSequenceRunner.getOrCreateSeqRunnerImpl(name);
     }
 
     execute(task: taskpoolTask): Promise<NullishType> {
         this.checkExecution(task);
-        task.seqId = this.id;
-        taskpool.taskSubmitted(task.id);
+        task.seqId = this.impl.id;
+        taskpool.taskSubmitted(task);
         task.enqueue();
-        let taskRunner = (value: NullishType): NullishType => {
+        const taskRunner = (value: NullishType): NullishType => {
             return task.execute();
         };
-        this.seqPromise = this.seqPromise.then<NullishType, NullishType>(taskRunner, taskRunner);
-        return this.seqPromise;
+        this.impl.seqPromise = task.getOnReceivePromise(this.impl.seqPromise.then<NullishType, NullishType>(taskRunner, taskRunner));
+        return this.impl.seqPromise;
     }
 
     private static native generateSeqRunnerId(): long;
+
+    private static getOrCreateSeqRunnerImpl(name: string): SeqRunnerImpl {
+        if (name == "") {
+            return new SeqRunnerImpl(taskpoolSequenceRunner.generateSeqRunnerId());
+        }
+        ConcurrencyHelpers.mutexLock(taskpoolSequenceRunner.mutex);
+        let impl: SeqRunnerImpl | undefined = taskpoolSequenceRunner.namedRunners.get(name);
+        // NOTE(ipetrov, #18518): Change to === when scrict equals will be supported into frontend
+        if (impl == undefined) {
+            // No sequence runner with passed name, so create instance and set to named runners set
+            impl = new SeqRunnerImpl(taskpoolSequenceRunner.generateSeqRunnerId());
+            taskpoolSequenceRunner.namedRunners.set(name, impl);
+        }
+        ConcurrencyHelpers.mutexUnlock(taskpoolSequenceRunner.mutex);
+        return impl!;
+    }
 
     private checkExecution(task: taskpoolTask) {
         if (task.groupId != 0) {
@@ -315,14 +652,65 @@ export class taskpoolSequenceRunner {
         if (task.isSubmitted || task.seqId != 0) {
             throw new Error("taskpool:: SequenceRunner cannot execute seqRunnerTask or executedTask");
         }
+        if (task.isDependent || task.dependentTasks.size != 0) {
+            throw new Error("seqRunner:: dependent task not allowed.");
+        }
     }
 
-    internal readonly id: long;
-    private seqPromise: Promise<NullishType>;
+    private impl: SeqRunnerImpl;
+
+    static namedRunners: Map<string, SeqRunnerImpl> = new Map<string, SeqRunnerImpl>();
+    static mutex: Object = ConcurrencyHelpers.mutexCreate();
 }
 
+/**
+ * @class represents internal information about task in taskpool
+ */
+export class taskpoolTaskInfo {
+    /// Unique identifier of task
+    taskId: number = 0;
+
+    /// Task state in taskpool
+    state: taskpoolState = taskpoolState.WAITING;
+
+    /// Duration of task exeuction
+    duration?: number;
+
+    /// Task name
+    name: string = "";
+}
+
+/**
+ * @class represents internal information about worker thread with taskpool tasks
+ */
+export class taskpoolThreadInfo {
+    /// Worker thread id
+    tid: number = -1.0;
+
+    /// Running task identifiers list on current worker thread
+    taskIds?: number[];
+
+    /// Thread priority
+    priority?: taskpoolPriority;
+}
+
+/**
+ * @class represents internal information about taskpool
+ */
+export class taskpoolTaskPoolInfo {
+    /// Array of threads information with taskpool tasks
+    threadInfos: taskpoolThreadInfo[] = new taskpoolThreadInfo[0];
+
+    /// Array of taskpool tasks information
+    taskInfos: taskpoolTaskInfo[] = new taskpoolTaskInfo[0];
+}
+
+type CoroutineId = int;
+type WorkerId = int;
+
 // NOTE(ipetrov, #16281): Temporary solution, make as namespace when namespaces will be supported
-export class taskpool {
+export final class taskpool {
+
     static execute(func: Function0<NullishType>): Promise<NullishType> {
         return launch func();
     }
@@ -381,11 +769,11 @@ export class taskpool {
      * @param task The task for executing
      * @returns Promise for result of executed task
      */
-    static execute(task: taskpoolTask /*, priority?: Priority */): Promise<NullishType> {
+    static execute(task: taskpoolTask, priority?: taskpoolPriority): Promise<NullishType> {
         task.checkExecution();
-        taskpool.taskSubmitted(task.id);
+        taskpool.taskSubmitted(task);
         task.enqueue();
-        return launch task.execute();
+        return task.getOnReceivePromise(launch task.execute());
     }
 
     /**
@@ -394,20 +782,29 @@ export class taskpool {
      * @param group The task group for execution
      * @returns Promise for array of results of executed tasks from the group
      */
-    static execute(group: taskpoolTaskGroup /*, priority?: Priority */): Promise<Array<NullishType>> {
-        let tasksCount: long = group.tasks.length as long;
+    static execute(group: taskpoolTaskGroup, priority?: taskpoolPriority): Promise<Array<NullishType>> {
+        const tasksCount: long = group.tasks.length as int;
         if (tasksCount == 0) {
-            group.isSubmitted = true;
-            return Promise.resolve(new Array<NullishType>());
+            return Promise.resolve<Array<NullishType>>(new Array<NullishType>());
         }
         taskpool.taskGroupSubmitted(group.id, tasksCount);
-        let promises = new Array<Promise<NullishType>>();
-        group.tasks.forEach((task: taskpoolTask, i: number) => {
+        const promises: Array<Promise<NullishType>> = new Array<Promise<NullishType>>();
+        group.tasks.forEach((task: taskpoolTask) => {
+            taskpool.taskSubmitted(task);
             task.enqueue();
-            promises.push(launch task.execute());
+            promises.push(task.getOnReceivePromise(launch task.execute()));
         });
-        group.isSubmitted = true;
         return Promise.all<NullishType>(promises);
+    }
+
+    static executeDelayed(delayTime: number, task: taskpoolTask, priority?: taskpoolPriority): Promise<NullishType> {
+        // NOTE(ipetrov, #20012): implement when setTimeout will be supported for all coroutine
+        throw new Error("Not implemented");
+    }
+
+    static executePeriodically(period: number, task: taskpoolTask, priority?: taskpoolPriority): void {
+        // NOTE(ipetrov, #20012): implement when setInterval will be supported for all coroutine
+        throw new Error("Not implemented");
     }
 
     /**
@@ -418,7 +815,17 @@ export class taskpool {
      * @see Task.isCancel
      */
     static cancel(task: taskpoolTask): void {
-        taskpool.cancelImpl(task.id, task.seqId);
+        ConcurrencyHelpers.lockGuard(taskpool.mutex, () => {
+            if (taskpool.waitingTasks.has(task) || taskpool.runningTasks.has(task)) {
+                taskpool.tasksToBeCanceled.add(task);
+                return;
+            }
+            if (task.seqId != 0) {
+                throw new Error("taskpool:: sequenceRunner task has been executed");
+            } else {
+                throw new Error("taskpool:: task is not executed or has been executed");
+            }
+        });
     }
 
     /**
@@ -428,7 +835,13 @@ export class taskpool {
      * @throws Error if the task group does not exist when it is canceled
      */
     static cancel(group: taskpoolTaskGroup): void {
-        taskpool.cancelGroupImpl(group.id);
+        ConcurrencyHelpers.lockGuard(taskpool.mutex, () => {
+            if (taskpool.waitingGroupTasks.has(group.id) || taskpool.runningGroupTasks.has(group.id)) {
+                taskpool.groupsToBeCanceled.add(group.id);
+                return;
+            }
+            throw new Error("taskpool:: taskGroup is not executed or has been executed");
+        });
     }
 
     /**
@@ -439,17 +852,92 @@ export class taskpool {
      */
     static terminateTask(longTask: taskpoolLongTask): void {}
 
-    private static native cancelImpl(taskId: long, seqId: long): void;
+    /**
+     * @returns taskpool internal information about tasks and threads
+     */
+    static getTaskPoolInfo(): taskpoolTaskPoolInfo {
+        const taskInfos: Array<taskpoolTaskInfo> = new Array<taskpoolTaskInfo>();
+        const threadInfos: Array<taskpoolThreadInfo> = new Array<taskpoolThreadInfo>();
+        ConcurrencyHelpers.mutexLock(taskpool.mutex);
+        // Collect running and canceled tasks info
+        taskpool.runningTasks.forEach((count: int, task: taskpoolTask) => {
+            const taskInfo: taskpoolTaskInfo = new taskpoolTaskInfo();
+            taskInfo.taskId = task.id;
+            taskInfo.name = task.name;
+            taskInfo.state =  (taskpool.isCanceled(task)) ? taskpoolState.CANCELED : taskpoolState.RUNNING;
+            taskInfo.duration = task.getDuration();
+            taskInfos.push(taskInfo);
+        });
+        // Collect waiting and canceled tasks info
+        taskpool.waitingTasks.forEach((count: int, task: taskpoolTask) => {
+            // One task can be submitted to taskpool several time, but only one instance can be running,
+            // so if task is running, it was added with running status
+            if (taskpool.runningTasks.has(task)) {
+                return;
+            }
+            const taskInfo: taskpoolTaskInfo = new taskpoolTaskInfo();
+            taskInfo.taskId = task.id;
+            taskInfo.name = task.name;
+            taskInfo.state =  (taskpool.isCanceled(task)) ? taskpoolState.CANCELED : taskpoolState.WAITING;
+            taskInfos.push(taskInfo);
+        });
+        // Collect worker threads info
+        taskpool.workerToTasks.forEach((tasks: Set<taskpoolTask>, workerId: int) => {
+            const threadInfo: taskpoolThreadInfo = new taskpoolThreadInfo();
+            threadInfo.tid = workerId;
+            const tasksCount: int = tasks.size as int;
+            if (tasksCount == 0) {
+                threadInfos.push(threadInfo);
+                return;
+            }
+            const taskIds: number[] = new number[tasksCount];
+            let currentIndex: int = 0;
+            tasks.forEach((task: taskpoolTask) => {
+                taskIds[currentIndex] = task.id;
+                currentIndex++;
+            });
+            threadInfo.taskIds = taskIds;
+            threadInfo.priority = taskpoolPriority.MEDIUM;
+            threadInfos.push(threadInfo);
+        });
+        ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
+        const taskpoolInfo: taskpoolTaskPoolInfo = new taskpoolTaskPoolInfo();
+        const taskInfosRes: taskpoolTaskInfo[] = new taskpoolTaskInfo[taskInfos.length as int];
+        const threadInfosRes: taskpoolThreadInfo[] = new taskpoolThreadInfo[threadInfos.length as int];
+        taskInfos.forEach((taskInfo: taskpoolTaskInfo, index: number) => {
+            taskInfosRes[index as int] = taskInfo;
+        });
+        threadInfos.forEach((threadInfo: taskpoolThreadInfo, index: number) => {
+            threadInfosRes[index as int] = threadInfo;
+        });
+        taskpoolInfo.taskInfos = taskInfosRes;
+        taskpoolInfo.threadInfos = threadInfosRes;
+        return taskpoolInfo;
+    }
 
-    private static native cancelGroupImpl(groupId: long): void;
+    // NOTE(ipetrov, #17953): Change signature when lambdaN will be supported
+    /**
+     * @returns true if the function is a concurrent function, false - otherwise
+     */
+    static isConcurrent(func: Object): boolean {
+        // Now any function in static ArkTS can be executed concurrently
+        return true;
+    }
+
+    /// ----- Internal implementation part -----
 
     /**
      * @brief Submit task to the taskpool on the execute method
      * @see taskpool.execute
      * @see taskpool.SequenceRunner.execute
-     * @param taskId identifier of the submitted task
+     * @param task submitting task
      */
-    internal static native taskSubmitted(taskId: long): void;
+    internal static taskSubmitted(task: taskpoolTask): void {
+        ConcurrencyHelpers.mutexLock(taskpool.mutex);
+        const count: int = taskpool.waitingTasks.get(task, /* default */ 0);
+        taskpool.waitingTasks.set(task, count + 1);
+        ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
+    }
 
     /**
      * @brief Submit group of tasks to the taskpool on the execute method
@@ -457,18 +945,75 @@ export class taskpool {
      * @param groupId identifier of the submitted group
      * @param tasksCount count of tasks in the passed group 
      */
-    private static native taskGroupSubmitted(groupId: long, tasksCount: long): void;
+    private static taskGroupSubmitted(groupId: long, tasksCount: int): void {
+        ConcurrencyHelpers.mutexLock(taskpool.mutex);
+        const count: int = taskpool.waitingGroupTasks.get(groupId, /* default */ 0);
+        taskpool.waitingGroupTasks.set(groupId, count + tasksCount);
+        ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
+    }
 
     /**
      * @brief Notify the taskpool that the task is started on a coroutine
-     * @param taskId identifier of the started task
-     * @param groupId group identifier of the passed task (0 means task is not group task)
+     * @param task starting task
      * @returns true if task is not cancled by cancel method, false - otherwise
      *
      * @see taskpool.Task.execute
      * @see taskpool.cancel
      */
-    internal static native taskStarted(taskId: long, groupId: long): boolean;
+    internal static taskStarted(task: taskpoolTask): boolean {
+        let isTaskCancel: boolean = false;
+        ConcurrencyHelpers.lockGuard(taskpool.mutex, () => {
+            const cancelByTask: boolean = taskpool.popFromMap(/* extracting task from waiting map */ task,
+                                                            /* pop from */ taskpool.waitingTasks,
+                                                            /* the map can contain the instance of the task */ taskpool.runningTasks,
+                                                            /* set of tasks marked as canceled */ taskpool.tasksToBeCanceled);
+            let cancelByGroup: boolean = false;
+            if (task.groupId != 0) {
+                // If the task is group task then decrement count of waiting task for the group
+                cancelByGroup = taskpool.popFromMap(task.groupId, taskpool.waitingGroupTasks, taskpool.runningGroupTasks, taskpool.groupsToBeCanceled);
+            }
+            if (cancelByGroup || cancelByTask) {
+                isTaskCancel = true;
+                return;
+            }
+            taskpool.pushToRunning(task);
+        });
+        return !isTaskCancel;
+    }
+
+    private static popFromMap<T>(item: T, currentTasksMap: Map<T, int>, possibleTasksMap: Map<T, int>, cancelSet: Set<T>): boolean {
+        const instancesOfTheTask: int = currentTasksMap.get(item)! - 1;
+        if (instancesOfTheTask == 0) {
+            // This is last instance in the map
+            currentTasksMap.delete(item);
+        } else {
+            currentTasksMap.set(item, instancesOfTheTask);
+        }
+        if (cancelSet.has(item)) {
+            if (instancesOfTheTask == 0 && !possibleTasksMap.has(item)) {
+                // No more instances in the taskpool, so delete from cancelSet
+                cancelSet.delete(item);
+            }
+            return true; // was marked as canceled
+        }
+        return false;
+    }
+
+    private static pushToRunning(task: taskpoolTask): void {
+        const runningInstancesOfTheTask: int = taskpool.runningTasks.get(task, /* default */ 0);
+        taskpool.runningTasks.set(task, runningInstancesOfTheTask + 1);
+        if (task.groupId != 0) {
+            const runningTasksOfTheGroup: int = taskpool.runningGroupTasks.get(task.groupId, /* default */ 0);
+            taskpool.runningGroupTasks.set(task.groupId, runningTasksOfTheGroup + 1);
+        }
+        // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
+        taskpool.executingTasks.set(CoroutineExtras.getCoroutineId(), task);
+        const currentWorkerId: int = CoroutineExtras.getWorkerId();
+        task.workerId = currentWorkerId;
+        const workerTasks: Set<taskpoolTask> = taskpool.workerToTasks.get(currentWorkerId, /* default */ new Set<taskpoolTask>());
+        workerTasks.add(task);
+        taskpool.workerToTasks.set(currentWorkerId, workerTasks);
+    }
 
     /**
      * @brief Notify the taskpool that the task is finished on a coroutine
@@ -479,5 +1024,72 @@ export class taskpool {
      * @see taskpool.Task.execute
      * @see taskpool.cancel
      */
-    internal static native taskFinished(taskId: long, groupId: long): boolean;
+    internal static taskFinished(task: taskpoolTask): boolean {
+        let isTaskCanceled: boolean = false;
+        ConcurrencyHelpers.lockGuard(taskpool.mutex, () => {
+            // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
+            taskpool.executingTasks.delete(CoroutineExtras.getCoroutineId());
+            taskpool.workerToTasks.get(task.workerId)!.delete(task);
+            const cancelByTask: boolean = taskpool.popFromMap(task, taskpool.runningTasks, taskpool.waitingTasks, taskpool.tasksToBeCanceled);
+            let cancelByGroup: boolean = false;
+            if (task.groupId != 0) {
+                cancelByGroup = taskpool.popFromMap(task.groupId, taskpool.runningGroupTasks, taskpool.waitingGroupTasks, taskpool.groupsToBeCanceled);
+            }
+            if (cancelByGroup || cancelByTask) {
+                isTaskCanceled = true;
+            }
+        });
+        return !isTaskCanceled;
+    }
+
+    private static getCurrentTaskUnsafe(): taskpoolTask | undefined {
+        // NOTE(ipetrov, #20208): CoroutineExtras is debug functionality, maybe need to create a separate intrinsic
+        return taskpool.executingTasks.get(CoroutineExtras.getCoroutineId());
+    }
+
+    internal static getCurrentTask(): taskpoolTask | undefined {
+        ConcurrencyHelpers.mutexLock(taskpool.mutex);
+        const task: taskpoolTask | undefined = taskpool.getCurrentTaskUnsafe();
+        ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
+        return task;
+    }
+
+    internal static isCancel(): boolean {
+        ConcurrencyHelpers.mutexLock(taskpool.mutex);
+        const item: taskpoolTask | undefined = taskpool.getCurrentTaskUnsafe();
+        if (item == undefined) {
+            ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
+            // No task on current coroutine
+            return false;
+        }
+        const isCanceled: boolean = taskpool.isCanceled(item!);
+        ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
+        return isCanceled;
+    }
+
+    internal static isCanceled(task: taskpoolTask): boolean {
+        return taskpool.tasksToBeCanceled.has(task) || taskpool.groupsToBeCanceled.has(task.groupId);
+    }
+
+    internal static hasTask(task: taskpoolTask): boolean {
+        ConcurrencyHelpers.mutexLock(taskpool.mutex);
+        const result: boolean = taskpool.waitingTasks.has(task) || taskpool.runningTasks.has(task);
+        ConcurrencyHelpers.mutexUnlock(taskpool.mutex);
+        return result;
+    }
+
+    // managed mutex for taskpool containers below
+    private static mutex = ConcurrencyHelpers.mutexCreate();
+    // value is count of tasks
+    private static waitingTasks: Map<taskpoolTask, int> = new Map<taskpoolTask, int>();
+    private static runningTasks: Map<taskpoolTask, int> = new Map<taskpoolTask, int>();
+    private static tasksToBeCanceled: Set<taskpoolTask> = new Set<taskpoolTask>();
+    // key is group id, value is count of associated tasks with this group
+    private static waitingGroupTasks: Map<long, int> = new Map<long, int>();      
+    private static runningGroupTasks: Map<long, int> = new Map<long, int>();
+    private static groupsToBeCanceled: Set<long> = new Set<long>();                    
+    // value is executing task on the associated coroutine
+    private static executingTasks: Map<CoroutineId, taskpoolTask> = new Map<CoroutineId, taskpoolTask>();
+    // value is set of executing tasks on this worker
+    private static workerToTasks: Map<WorkerId, Set<taskpoolTask>> = new Map<WorkerId, Set<taskpoolTask>>();
 }

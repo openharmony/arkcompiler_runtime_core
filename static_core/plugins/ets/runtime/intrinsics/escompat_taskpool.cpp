@@ -13,90 +13,29 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/runtime/ets_vm.h"
-#include "plugins/ets/runtime/ets_exceptions.h"
+#include <atomic>
+#include "libpandabase/os/time.h"
+#include "plugins/ets/runtime/types/ets_primitives.h"
 
-namespace ark::ets::intrinsics {
+namespace ark::ets::intrinsics::taskpool {
+
+static std::atomic<EtsLong> g_taskId = 1;
+static std::atomic<EtsLong> g_taskGroupId = 1;
+static std::atomic<EtsLong> g_seqRunnerId = 1;
 
 extern "C" EtsLong GenerateTaskId()
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return coroutine->GetPandaVM()->GetTaskpool()->GenerateTaskId();
+    return g_taskId++;
 }
 
 extern "C" EtsLong GenerateGroupId()
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return coroutine->GetPandaVM()->GetTaskpool()->GenerateTaskGroupId();
+    return g_taskGroupId++;
 }
 
 extern "C" EtsLong GenerateSeqRunnerId()
 {
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return coroutine->GetPandaVM()->GetTaskpool()->GenerateSeqRunnerId();
+    return g_seqRunnerId++;
 }
 
-extern "C" void TaskpoolTaskSubmitted(EtsLong taskId)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    coroutine->GetPandaVM()->GetTaskpool()->TaskSubmitted(taskId);
-}
-
-extern "C" void TaskpoolGroupSubmitted(EtsLong groupId, EtsLong tasksCount)
-{
-    ASSERT(tasksCount > 0);
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    coroutine->GetPandaVM()->GetTaskpool()->GroupSubmitted(groupId, static_cast<size_t>(tasksCount));
-}
-
-extern "C" EtsBoolean TaskpoolTaskStarted(EtsLong taskId, EtsLong groupId)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return EtsBoolean(
-        coroutine->GetPandaVM()->GetTaskpool()->TaskStarted(coroutine->GetCoroutineId(), taskId, groupId));
-}
-
-extern "C" EtsBoolean TaskpoolTaskFinished(EtsLong taskId, EtsLong groupId)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return EtsBoolean(
-        coroutine->GetPandaVM()->GetTaskpool()->TaskFinished(coroutine->GetCoroutineId(), taskId, groupId));
-}
-
-extern "C" void TaskpoolCancelTask(EtsLong taskId, EtsLong seqId)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    if (!coroutine->GetPandaVM()->GetTaskpool()->CancelTask(taskId)) {
-        // seqId = 0 means task was not added to a task sequence runner
-        const char *messageError = (seqId == 0) ? "taskpool:: task is not executed or has been executed"
-                                                : "taskpool:: sequenceRunner task has been executed";
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ERROR, messageError);
-    }
-}
-
-extern "C" void TaskpoolCancelGroup(EtsLong groupId)
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    if (!coroutine->GetPandaVM()->GetTaskpool()->CancelGroup(groupId)) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::ERROR,
-                          "taskpool:: taskGroup is not executed or has been executed");
-    }
-}
-
-extern "C" EtsBoolean TaskpoolIsTaskCanceled()
-{
-    EtsCoroutine *coroutine = EtsCoroutine::GetCurrent();
-    ASSERT(coroutine != nullptr);
-    return EtsBoolean(coroutine->GetPandaVM()->GetTaskpool()->IsTaskCanceled(coroutine->GetCoroutineId()));
-}
-
-}  // namespace ark::ets::intrinsics
+}  // namespace ark::ets::intrinsics::taskpool
