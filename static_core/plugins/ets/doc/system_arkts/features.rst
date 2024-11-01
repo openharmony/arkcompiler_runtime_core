@@ -17,7 +17,7 @@ This section provides examples for each feature. Pieces of code cause
 ETS-Warnings as the compilation proceeds. The warning messages are included
 as comments to the examples.
 
-If the performance is to improve, then a rewritten version of |LANG| code
+If the performance requires improvement, then a rewritten version of |LANG| code
 appears with specific notes to each line of code that was fixed.
 
 
@@ -33,7 +33,7 @@ Rationale
 |LANG| supports Boxing and Unboxing conversions, though they have performance
 limitations. If the design of the application allows avoiding frequent
 Boxed/Unboxed type conversions, then the developer is to use the appropriate
-type. The performance gain can be as much as double in some applications.
+type. The performance gain can as much as double in some applications.
 
 
 |LANG| Performance Challenges
@@ -188,7 +188,7 @@ Rationale
 By default, all classes in |LANG| can be extended, and all methods can be
 overriden. As a consequence, calling a method requires runtime resolution.
 If a class or a method is not intended to be used further for inheritance,
-the providing the modifier ``final`` is recommended. The usage of ``final``
+then providing the modifier ``final`` is recommended. The usage of ``final``
 allows making calls more efficient, and improves the performance significantly.
 
 |LANG| Performance Challenges

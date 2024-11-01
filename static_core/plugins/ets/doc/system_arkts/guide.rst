@@ -67,7 +67,7 @@ Usage Example
         }
     }
 
-2. Specify an option to the compiler. E.g., add ``--ets-suggest-final`` or ``--ets-suggest-final=true``;
+2. Specify one option to the compiler. E.g., add ``--ets-suggest-final`` or ``--ets-suggest-final=true``;
 3. Compile your file or project with the options so added;
 4. Look through the ETS-Warnings in the output. For the code in the example
    above, "System |LANG|" gives the following warnings:
@@ -113,7 +113,7 @@ continuing the example as above:
 
     class A extends I { // Suggest final }
 
-2. Specify an option to the compiler and enable ``ets-werror``. E.g., add ``--ets-suggest-final --ets-werror``;
+2. Specify one option to the compiler and enable ``ets-werror``. E.g., add ``--ets-suggest-final --ets-werror``;
 3. Compile your file or project with the options so added, and a compile-time error occurs;
 4. Look through the ETS-Warnings in the output. For the code in the example
    above, "System |LANG|" gives the following warnings:

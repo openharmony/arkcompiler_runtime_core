@@ -15,9 +15,9 @@
 Warning Suppression
 ====================
 
-"System |LANG|" has some features to boost performance. However, developers
-need to avoid these checks in some cases. Developers can enable or disable any
-single feature or a group of features.
+"System |LANG|" has some features to boost performance. However, developers can
+enable or disable any single feature or a group of features if wanting to avoid
+checks in some cases.
 
 Developers can also disable checks for certain strings or parts of code by
 using ``ETSNOLINT``. Possible warning-suppressions are as follows:
