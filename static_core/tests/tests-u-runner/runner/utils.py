@@ -125,7 +125,8 @@ def write_2_file(file_path: Union[Path, str], content: str) -> None:
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
     makedirs(path.dirname(file_path), exist_ok=True)
-    with os.fdopen(os.open(file_path, os.O_RDWR | os.O_CREAT, 0o755), mode='w+', encoding="utf-8") as f_handle:
+    f_descriptor = os.open(file_path, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o755)
+    with os.fdopen(f_descriptor, mode='w+', encoding="utf-8") as f_handle:
         f_handle.write(content)
 
 
