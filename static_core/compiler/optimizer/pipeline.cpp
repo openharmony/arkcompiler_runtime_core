@@ -173,6 +173,7 @@ bool Pipeline::RunOptimizations()
         graph->SetUnrollComplete();
     }
     graph->RunPass<Peepholes>();
+    graph->RunPass<Cleanup>(false);
     graph->RunPass<BranchElimination>();
     graph->RunPass<OptimizeStringConcat>();
     graph->RunPass<SimplifyStringBuilder>();
