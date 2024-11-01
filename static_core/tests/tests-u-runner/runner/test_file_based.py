@@ -109,6 +109,7 @@ class TestFileBased(Test):
 
         passed = False
         output = ""
+        fail_kind = None
 
         with subprocess.Popen(
                 cmd,
@@ -122,7 +123,10 @@ class TestFileBased(Test):
                 output, error = process.communicate(timeout=params.timeout)
                 return_code = process.returncode
                 passed = result_validator(output, error, return_code)
-                fail_kind = self.detect_segfault(return_code, params.fail_kind_fail) if not passed else None
+                if not passed:
+                    fail_kind = self.detect_segfault(return_code, params.fail_kind_fail)
+                    error = error.strip()
+                    error = f"{fail_kind.name}{f': {error}' if error else ''}"
             except subprocess.TimeoutExpired:
                 timeout_info = self.get_processes(process.pid, params.gdb_timeout)
                 self.log_cmd(f"Failed by timeout after {params.timeout} sec\n{timeout_info}")
