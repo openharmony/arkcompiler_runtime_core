@@ -59,6 +59,7 @@ static void TransformMethodImpl(AbckitFile *file, AbckitCoreFunction *method, vo
     userTransformerData->userTransformer(file, method, graph);
 
     g_implM->functionSetGraph(method, graph);
+    g_impl->destroyGraph(graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 

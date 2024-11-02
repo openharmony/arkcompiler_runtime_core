@@ -1412,11 +1412,11 @@ BasicBlock *BasicBlock::Clone(Graph *targetGraph) const
 #else
     clone = targetGraph->CreateEmptyBlock();
 #endif
-    clone->SetAllFields(this->GetAllFields());
+    clone->SetAllFields(GetAllFields());
     clone->tryId_ = GetTryId();
-    if (this->IsStartBlock()) {
+    if (IsStartBlock()) {
         targetGraph->SetStartBlock(clone);
-    } else if (this->IsEndBlock()) {
+    } else if (IsEndBlock()) {
         targetGraph->SetEndBlock(clone);
     }
     return clone;

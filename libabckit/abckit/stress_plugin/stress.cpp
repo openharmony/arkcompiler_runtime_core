@@ -41,6 +41,7 @@ static void TransformMethod(AbckitCoreFunction *method)
         return;
     }
     g_implM->functionSetGraph(method, graph);
+    g_impl->destroyGraph(graph);
 }
 
 static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<bool(AbckitCoreNamespace *)> &cbNamespace,

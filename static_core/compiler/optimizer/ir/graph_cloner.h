@@ -16,6 +16,9 @@
 #ifndef COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H
 #define COMPILER_OPTIMIZER_IR_GRAPH_CLONER_H
 
+#include "inst.h"
+#include "optimizer/analysis/loop_analyzer.h"
+#include "optimizer/analysis/rpo.h"
 #include "optimizer/ir/analysis.h"
 #include "optimizer/ir/basicblock.h"
 #include "optimizer/ir/graph.h"
@@ -71,9 +74,9 @@ protected:
     };
 
 public:
-    explicit GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator);
+    PANDA_PUBLIC_API explicit GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator *localAllocator);
 
-    Graph *CloneGraph();
+    PANDA_PUBLIC_API Graph *CloneGraph();
     BasicBlock *CloneLoopHeader(BasicBlock *block, BasicBlock *outer, BasicBlock *replaceablePred);
     Loop *CloneLoop(Loop *loop);
 
@@ -220,7 +223,17 @@ protected:
                 cloneBlocks_[block->GetId()] = clone;
                 CloneInstructions<TYPE, SKIP_SAFEPOINTS>(block, clone, &instCount);
                 if (block->IsTryBegin()) {
+                    clone->SetTryBegin(true);
                     targetGraph->AppendTryBeginBlock(clone);
+                }
+                if (block->IsTryEnd()) {
+                    clone->SetTryEnd(true);
+                }
+                if (block->IsTry()) {
+                    clone->SetTry(true);
+                }
+                if (block->IsCatch()) {
+                    clone->SetCatch(true);
                 }
             }
         }
@@ -296,7 +309,9 @@ private:
     void CopyLoop(Loop *loop, Loop *clonedLoop);
     void CloneLinearOrder(Graph *newGraph);
     void BuildControlFlow();
+    void BuildTryCatchLogic(Graph *newGraph);
     void BuildDataFlow();
+    void CloneConstantsInfo(Graph *newGraph);
     void CloneAnalyses(Graph *newGraph);
     // Loop cloning
     void SplitPreHeader(Loop *loop);
@@ -334,12 +349,19 @@ private:
                 }
             }
 
-            clone->AppendInst(CloneInstruction(inst, instCount, clone->GetGraph()));
+            auto *clonedInst = CloneInstruction(inst, instCount, clone->GetGraph());
+
+            cloneInstMap_[inst] = clonedInst;
+            cloneInstMap_[clonedInst] = inst;
+
+            clone->AppendInst(clonedInst);
         }
 
         if constexpr (TYPE == InstCloneType::CLONE_ALL) {  // NOLINT
             for (auto phi : block->PhiInsts()) {
                 auto phiClone = CloneInstruction(phi, instCount, clone->GetGraph());
+                cloneInstMap_[phi] = phiClone;
+                cloneInstMap_[phiClone] = phi;
                 clone->AppendPhi(phiClone->CastToPhi());
             }
         }
@@ -371,6 +393,7 @@ private:
     ArenaVector<BasicBlock *> cloneBlocks_;
     InstVector cloneInstructions_;
     SaveStateBridgesBuilder ssb_;
+    ArenaMap<const Inst *, const Inst *> cloneInstMap_;
 };
 }  // namespace ark::compiler
 

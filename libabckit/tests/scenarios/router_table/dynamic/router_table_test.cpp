@@ -106,6 +106,7 @@ static void TransformMethod(AbckitCoreFunction *method, VisitHelper &visitor, co
         ld->insertAfterInst = stownByIndex2;
 
         g_implM->functionSetGraph(method, ctxG);
+        g_impl->destroyGraph(ctxG);
     });
 }
 

@@ -75,7 +75,6 @@ void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
     auto res = GraphWrapper::BuildCodeDynamic(graph, func->name);
     auto status = std::get<1>(res);
     if (status != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
-        GraphWrapper::DestroyGraphDynamic(graph);
         statuses::SetLastError(status);
         return;
     }
@@ -84,8 +83,6 @@ void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "============================================ AFTER CODEGEN: " << func->name << '\n';
     LIBABCKIT_LOG_DUMP((reinterpret_cast<pandasm::Function *>(fw))->DebugDump(), DEBUG);
-
-    GraphWrapper::DestroyGraphDynamic(graph);
 
     auto *newFunc = reinterpret_cast<pandasm::Function *>(fw);
     func->ins = newFunc->ins;

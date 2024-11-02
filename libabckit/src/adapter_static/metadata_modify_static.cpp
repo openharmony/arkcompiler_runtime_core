@@ -14,6 +14,7 @@
  */
 
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
+#include "inst.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/logger.h"
@@ -21,12 +22,15 @@
 
 #include "libabckit/src/codegen/codegen_static.h"
 
+#include "optimizer/analysis/liveness_analyzer.h"
+#include "optimizer/analysis/rpo.h"
 #include "src/adapter_static/metadata_inspect_static.h"
 #include "src/adapter_static/abckit_static.h"
 #include "src/adapter_static/helpers_static.h"
 #include "static_core/assembler/assembly-program.h"
 
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
+#include "static_core/compiler/optimizer/ir/graph_cloner.h"
 #include "static_core/compiler/optimizer/analysis/loop_analyzer.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
@@ -71,7 +75,8 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 
     auto *func = function->GetArkTSImpl()->GetStaticImpl();
 
-    auto graphImpl = graph->impl;
+    auto graphImpl =
+        compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
 
     graphImpl->RemoveUnreachableBlocks();
 
@@ -89,7 +94,6 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 
     if (!ark::compiler::GraphChecker(graphImpl).Check()) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": Graph Verifier failed!\n";
-        DestroyGraphStatic(graph);
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
         return;
     }
@@ -124,8 +128,6 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG(DEBUG) << "======================== AFTER CODEGEN ========================\n";
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
-
-    DestroyGraphStatic(graph);
 }
 
 AbckitLiteral *CreateLiteralBoolStatic(AbckitFile *file, bool value)

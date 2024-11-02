@@ -455,9 +455,8 @@ void EliminateBranchWithSuspect(AbckitCoreFunction *method, const std::vector<Co
 
         if (hasGraphChanged) {
             g_implM->functionSetGraph(method, graph);
-        } else {
-            g_impl->destroyGraph(graph);
         }
+        g_impl->destroyGraph(graph);
     });
 }
 
