@@ -61,10 +61,10 @@ The examples below illustrate a class that implements an interface:
 Interface Properties
 --------------------
 
-An interface property can be in a form of a field, a getter, a setter, or both.
+An interface property can have the form of a field, a getter, a setter, or both.
 
-A property field is just a shortcut notation of a getter/setter pair, and
-the following notations are equal:
+A property field is just a shortcut notation of a getter/setter pair. The
+following notations are equal:
 
 .. code-block:: typescript
 
@@ -89,7 +89,7 @@ A class that implements an interface can also use a short or a long notation:
         color: string = ""
     }
 
-The short notation implicitly defines a private field, and a getter and setter:
+The short notation implicitly defines a private field, a getter, and a setter:
 
 .. code-block:: typescript
 
