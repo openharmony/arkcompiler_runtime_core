@@ -297,7 +297,7 @@ function if_chain_with_scopes(x: int): JSValue {
 }
 
 function compare_lists(list: JSValue, expected: int[]): boolean {
-    for (let i: int in expected) {
+    for (let i: int of expected) {
         if (car(list) as int != i) {
             return false;
         }
