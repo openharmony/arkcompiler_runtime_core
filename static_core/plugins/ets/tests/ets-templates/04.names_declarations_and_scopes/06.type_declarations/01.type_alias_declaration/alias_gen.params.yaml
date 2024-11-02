@@ -246,12 +246,12 @@ cases:
           let v2: NestedFunc = (p: string): string => { return p + p }
           let v3: NestedFunc = [v1, v2, (p: string): string => { return p + p }]
             let ok = v3.length == 3 &&
-                (v3 as NestedFunc[])[0].length == 0 &&
+                ((v3 as NestedFunc[])[0] as NestedFunc[]).length == 0 &&
                 ((v3 as NestedFunc[])[1] as Foo)('abc') == 'abcabc' &&
                 ((v3 as NestedFunc[])[2] as Foo)('xyz') == 'xyzxyz'
 
     - defs: |-
-          class C<T> {
+          class C<out T> {
             fld: T
             constructor(p: T) {
                 this.fld = p
@@ -263,7 +263,7 @@ cases:
           let v2: NestedC = new Error()
           let v3: NestedC = new C<String>('A')
           let v4: NestedC = new C<C<Error>>(new C<Error>(new Error()))
-          let v5: NestedC = new C<C<C<String>>>(new C<C<String>>(new C<String>('X')))
+          let v5: NestedC = new C<C<C<NestedC>>>(new C<C<String>>(new C<String>('X')))
           let ok = v1 == 'A' &&
               v2 instanceof Error &&
               v3 instanceof C && v3.fld == 'A' &&
@@ -275,19 +275,42 @@ cases:
       use: |-
           let v1: NestedMap<String> = 'A'
           let v2: NestedMap<Number> = 42.0
-          let v3: NestedMap<String> = new Map<String, String>()
-          let v4: NestedMap<String> = new Map<String, Map<String, String>>()
+          let v3: NestedMap<String> = new Map<String, NestedMap<String>>()
+          let v4: NestedMap<String> = new Map<String, NestedMap<String>>()
           v3.set('A', 'B')
           v4.set('C', v3)
           let ok = v3.get('A') == 'B' &&
-                (v4.get('C') as Map<String, String>).get('A') == 'B'
+                (v4.get('C') as Map<String, NestedMap<String>>).get('A') == 'B'
 
     - defs: |-
           type A<T> = Array<A<T>>
       use: |-
           let v1: A<String> = new Array<A<String>>()
           v1.push(new Array<A<String>>())
-          let v2: A<A<String>> = new Array<A<A<String>>>()
+          let v2: A<String> = new Array<A<String>>()
           v2.push(v1)
-          let ok = (v2.at(0) as Array<A<A<String>>>).length == 1 &&
-              (v2.at(0) as Array<A<A<String>>>) == v1
+          let ok = (v2.at(0) as Array<A<String>>).length == 1 &&
+              (v2.at(0) as Array<A<String>>) == v1
+
+    - defs: |-
+          class A<T, U> {
+              public ok = true;
+          }
+          class B {}
+          type Stuff<T, U> = A<T, Stuff<B, U>>;
+      use: |-
+          let s: Stuff<Int, Char> =  new A<Int, Stuff<B, Char>>();
+          let ok:boolean = (s as A<Int, Stuff<B, Char>>).ok;
+
+    - defs: |-
+          type Matrix<T> = (p: Matrix<Long>) => T;
+      use: |-
+          let a: Matrix<Boolean> = (p: Matrix<Long>):Boolean => {return true};
+          let b: Matrix<Long> = (p: Matrix<Long>):Long => {return 1};
+          let ok:boolean = a(b);
+
+    - defs: |-
+          type Func = (p: int, q: Func) => int;
+      use: |-
+          let a:Func = (p: int, q: Func):int => {return 1};
+          let ok:boolean = a(10, a) == 1;
