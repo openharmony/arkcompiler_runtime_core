@@ -17,134 +17,134 @@ cases:
       to_type: short
       values:
           - { expr: 0b0 as byte, val: 0 as short }
-          - { expr: Byte.MIN_VALUE as byte, val: -128 as short }
-          - { expr: Byte.MAX_VALUE as byte, val: 127 as short }
+          - { expr: Byte.MIN_VALUE, val: -128 as short }
+          - { expr: Byte.MAX_VALUE, val: 127 as short }
 
     - from_type: byte
       to_type: int
       values:
           - { expr: 0b0 as byte, val: 0 }
-          - { expr: Byte.MIN_VALUE as byte, val: -128 }
-          - { expr: Byte.MAX_VALUE as byte, val: 127 }
+          - { expr: Byte.MIN_VALUE, val: -128 }
+          - { expr: Byte.MAX_VALUE, val: 127 }
 
     - from_type: byte
       to_type: long
       values:
           - { expr: 0b0 as byte, val: 0 as long }
-          - { expr: Byte.MIN_VALUE as byte, val: -128 as long }
-          - { expr: Byte.MAX_VALUE as byte, val: 127 as long }
+          - { expr: Byte.MIN_VALUE, val: -128 as long }
+          - { expr: Byte.MAX_VALUE, val: 127 as long }
 
     - from_type: byte
       to_type: float
       values:
           - { expr: 0b0 as byte, val: 0.0 as float }
-          - { expr: Byte.MIN_VALUE as byte, val: -128.0 as float }
-          - { expr: Byte.MAX_VALUE as byte, val: 127.0 as float }
+          - { expr: Byte.MIN_VALUE, val: -128.0 as float }
+          - { expr: Byte.MAX_VALUE, val: 127.0 as float }
 
     - from_type: byte
       to_type: double
       values:
           - { expr: 0b0 as byte, val: 0.0 }
-          - { expr: Byte.MIN_VALUE as byte, val: -128.0 as double }
-          - { expr: Byte.MAX_VALUE as byte, val: 127.0 as double }
+          - { expr: Byte.MIN_VALUE, val: -128.0 as double }
+          - { expr: Byte.MAX_VALUE, val: 127.0 as double }
 
     - from_type: byte
       to_type: number
       values:
           - { expr: 0b0 as byte, val: 0.0 }
-          - { expr: Byte.MIN_VALUE as byte, val: -128.0 as number }
-          - { expr: Byte.MAX_VALUE as byte, val: 127.0 as number }
+          - { expr: Byte.MIN_VALUE, val: -128.0 as number }
+          - { expr: Byte.MAX_VALUE, val: 127.0 as number }
 
     - from_type: byte
       to_type: char
       values:
           - { expr: 0b0 as byte, val: "c'\\u0000'" }
-          - { expr: Byte.MIN_VALUE as byte, val: "c'\\uFF80'" }
-          - { expr: Byte.MAX_VALUE as byte, val: "c'\\u007F'" }
+          - { expr: Byte.MIN_VALUE, val: "c'\\uFF80'" }
+          - { expr: Byte.MAX_VALUE, val: "c'\\u007F'" }
 
     - from_type: short
       to_type: int
       values:
           - { expr: 0b0 as short, val: 0 }
-          - { expr: Short.MIN_VALUE as short, val: -32_768 }
-          - { expr: Short.MAX_VALUE as short, val: 32_767 }
+          - { expr: Short.MIN_VALUE, val: -32_768 }
+          - { expr: Short.MAX_VALUE, val: 32_767 }
 
     - from_type: short
       to_type: long
       values:
           - { expr: 0b0 as short, val: 0 as long }
-          - { expr: Short.MIN_VALUE as short, val: -32_768 as long }
-          - { expr: Short.MAX_VALUE as short, val: 32_767 as long }
+          - { expr: Short.MIN_VALUE, val: -32_768 as long }
+          - { expr: Short.MAX_VALUE, val: 32_767 as long }
 
     - from_type: short
       to_type: float
       values:
           - { expr: 0b0 as short, val: 0.0 as float }
-          - { expr: Short.MIN_VALUE as short, val: -32_768.0 as float }
-          - { expr: Short.MAX_VALUE as short, val: 32_767.0 as float }
+          - { expr: Short.MIN_VALUE, val: -32_768.0 as float }
+          - { expr: Short.MAX_VALUE, val: 32_767.0 as float }
 
     - from_type: short
       to_type: double
       values:
           - { expr: 0b0 as short, val: 0.0 }
-          - { expr: Short.MIN_VALUE as short, val: -32_768.0 as double}
-          - { expr: Short.MAX_VALUE as short, val: 32_767.0 as double }
+          - { expr: Short.MIN_VALUE, val: -32_768.0 as double}
+          - { expr: Short.MAX_VALUE, val: 32_767.0 as double }
 
     - from_type: short
       to_type: number
       values:
           - { expr: 0b0 as short, val: 0.0 }
-          - { expr: Short.MIN_VALUE as short, val: -32_768.0 as number }
-          - { expr: Short.MAX_VALUE as short, val: 32_767.0 as number }
+          - { expr: Short.MIN_VALUE, val: -32_768.0 as number }
+          - { expr: Short.MAX_VALUE, val: 32_767.0 as number }
 
     - from_type: int
       to_type: long
       values:
           - { expr: 0, val: 0 as long }
-          - { expr: Int.MIN_VALUE as int, val: -2147483648 as long }
-          - { expr: Int.MAX_VALUE as int, val: 2147483647 as long }
+          - { expr: Int.MIN_VALUE, val: -2147483648 as long }
+          - { expr: Int.MAX_VALUE, val: 2147483647 as long }
 
     - from_type: int
       to_type: float
       values:
           - { expr: 0, val: 0.0 as float }
-          - { expr: Int.MIN_VALUE as int, val: -2147483600.0 as float } # expected loss of precision
-          - { expr: Int.MAX_VALUE as int, val: 2147483600 as float } # expected loss of precision
+          - { expr: Int.MIN_VALUE, val: -2147483600.0 as float } # expected loss of precision
+          - { expr: Int.MAX_VALUE, val: 2147483600 as float } # expected loss of precision
 
     - from_type: int
       to_type: double
       values:
           - { expr: 0, val: 0.0 }
-          - { expr: Int.MIN_VALUE as int, val: -2147483648.0 as double }
-          - { expr: Int.MAX_VALUE as int, val: 2147483647.0 as double }
+          - { expr: Int.MIN_VALUE, val: -2147483648.0 as double }
+          - { expr: Int.MAX_VALUE, val: 2147483647.0 as double }
 
     - from_type: int
       to_type: number
       values:
           - { expr: 0, val: 0.0 }
-          - { expr: Int.MIN_VALUE as int, val: -2147483648.0 as number }
-          - { expr: Int.MAX_VALUE as int, val: 2147483647.0 as number }
+          - { expr: Int.MIN_VALUE, val: -2147483648.0 as number }
+          - { expr: Int.MAX_VALUE, val: 2147483647.0 as number }
 
     - from_type: long
       to_type: float
       values:
           - { expr: 0 as long, val: 0.0 as float }
-          - { expr: Long.MIN_VALUE as long, val: -9223372000000000000 as float } # expected loss of precision
-          - { expr: Long.MAX_VALUE as long, val: 9223372000000000000 as float } # expected loss of precision
+          - { expr: Long.MIN_VALUE, val: -9223372000000000000 as float } # expected loss of precision
+          - { expr: Long.MAX_VALUE, val: 9223372000000000000 as float } # expected loss of precision
 
     - from_type: long
       to_type: double
       values:
           - { expr: 0 as long, val: 0.0 }
-          - { expr: Long.MIN_VALUE as long, val: -9223372036854775808.0 as double }
-          - { expr: Long.MAX_VALUE as long, val: 9223372036854775807.0 as double }
+          - { expr: Long.MIN_VALUE, val: -9223372036854775808.0 as double }
+          - { expr: Long.MAX_VALUE, val: 9223372036854775807.0 as double }
 
     - from_type: long
       to_type: number
       values:
           - { expr: 0 as long, val: 0.0 }
-          - { expr: Long.MIN_VALUE as long, val: -9223372036854775808.0 as number }
-          - { expr: Long.MAX_VALUE as long, val: 9223372036854775807.0 as number }
+          - { expr: Long.MIN_VALUE, val: -9223372036854775808.0 as number }
+          - { expr: Long.MAX_VALUE, val: 9223372036854775807.0 as number }
 
     - from_type: float
       to_type: double

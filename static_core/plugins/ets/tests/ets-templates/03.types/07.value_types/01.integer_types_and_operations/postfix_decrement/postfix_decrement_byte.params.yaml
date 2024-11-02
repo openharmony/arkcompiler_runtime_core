@@ -16,7 +16,7 @@ values:
 - { value: 1, result: 0 }
 - { value: 2, result: 1 }
 - { value: 0, result: -1 }
-- { value: "Byte.MIN_VALUE as byte", result: "Byte.MAX_VALUE as byte" }
-- { value: "Byte.MAX_VALUE as byte", result: 126 }
+- { value: "Byte.MIN_VALUE", result: "Byte.MAX_VALUE" }
+- { value: "Byte.MAX_VALUE", result: 126 }
 - { value: 123, result: 122 }
 - { value: -123, result: -124 }

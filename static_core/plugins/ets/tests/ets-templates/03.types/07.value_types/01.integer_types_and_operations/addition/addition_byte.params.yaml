@@ -16,12 +16,12 @@ values:
 - { left: 0, right: 1, result: 1 }
 - { left: 1, right: 1, result: 2 }
 - { left: 42, right: 24, result: 66 }
-- { left: 0, right: "Byte.MAX_VALUE as byte", result: "Byte.MAX_VALUE as byte" }
-- { left: 1, right: "Byte.MAX_VALUE as byte", result: 128 }
-- { left: 0, right: "Byte.MIN_VALUE as byte", result: "Byte.MIN_VALUE as byte" }
-- { left: 1, right: "Byte.MIN_VALUE as byte", result: -127 }
+- { left: 0, right: "Byte.MAX_VALUE", result: "Byte.MAX_VALUE" }
+- { left: 1, right: "Byte.MAX_VALUE", result: 128 }
+- { left: 0, right: "Byte.MIN_VALUE", result: "Byte.MIN_VALUE" }
+- { left: 1, right: "Byte.MIN_VALUE", result: -127 }
 - { left: -1, right: 0, result: -1 }
 - { left: -1, right: 1, result: 0 }
-- { left: -1, right: "Byte.MIN_VALUE as byte", result: -129 }
-- { left: -1, right: "Byte.MAX_VALUE as byte", result: 126 }
-- { left: "Byte.MIN_VALUE as byte", right: "Byte.MAX_VALUE as byte", result: -1 }
+- { left: -1, right: "Byte.MIN_VALUE", result: -129 }
+- { left: -1, right: "Byte.MAX_VALUE", result: 126 }
+- { left: "Byte.MIN_VALUE", right: "Byte.MAX_VALUE", result: -1 }

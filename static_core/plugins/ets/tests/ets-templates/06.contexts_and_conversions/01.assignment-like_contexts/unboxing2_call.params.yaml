@@ -54,41 +54,41 @@ cases:
 
   - type: int
     ref_type: Short
-    values: [new Short(Short.MIN_VALUE as short), new Short(255 as short)]
+    values: [new Short(Short.MIN_VALUE), new Short(255 as short)]
 
   - type: long
     ref_type: Short
-    values: [new Short(Short.MIN_VALUE as short), new Short(255 as short)]
+    values: [new Short(Short.MIN_VALUE), new Short(255 as short)]
 
   - type: float
     ref_type: Short
-    values: [new Short(Short.MIN_VALUE as short), new Short(255 as short)]
+    values: [new Short(Short.MIN_VALUE), new Short(255 as short)]
 
   - type: double
     ref_type: Short
-    values: [new Short(Short.MIN_VALUE as short), new Short(255 as short)]
+    values: [new Short(Short.MIN_VALUE), new Short(255 as short)]
 
 
   - type: long
     ref_type: Int
-    values: [new Int(127), new Int(32767), new Int(Int.MAX_VALUE as int)]
+    values: [new Int(127), new Int(32767), new Int(Int.MAX_VALUE)]
 
   - type: float
     ref_type: Int
-    values: [new Int(127), new Int(32767), new Int(Int.MAX_VALUE as int)]
+    values: [new Int(127), new Int(32767), new Int(Int.MAX_VALUE)]
 
   - type: double
     ref_type: Int
-    values: [new Int(127), new Int(32767), new Int(Int.MAX_VALUE as int)]
+    values: [new Int(127), new Int(32767), new Int(Int.MAX_VALUE)]
 
 
   - type: float
     ref_type: Long
-    values: [new Long(Long.MIN_VALUE as long), new Long(9223372036854775807 as long)]
+    values: [new Long(Long.MIN_VALUE), new Long(9223372036854775807 as long)]
 
   - type: double
     ref_type: Long
-    values: [new Long(Long.MIN_VALUE as long), new Long(9223372036854775807 as long)]
+    values: [new Long(Long.MIN_VALUE), new Long(9223372036854775807 as long)]
 
 
   - type: double

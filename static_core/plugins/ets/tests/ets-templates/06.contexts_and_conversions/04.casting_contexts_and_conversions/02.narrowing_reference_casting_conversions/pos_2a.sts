@@ -28,6 +28,6 @@ function foo(p: Object[]|null): Object[] {
 function main(): int {
     let t: TT1[] = [["123", false], ["456", true]]
     let b: Object[]|null = t
-    let d: TT1 = foo(b) as TT1[]
+    let d: TT1[] = foo(b) as TT1[]
     return t == d ? 0 : 1
 }

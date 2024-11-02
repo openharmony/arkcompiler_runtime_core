@@ -14,7 +14,7 @@
 ---
 cases:
     - { type: byte, val: 127 }
-    - { type: short, val: 'Short.MAX_VALUE as short' }
+    - { type: short, val: 'Short.MAX_VALUE' }
     - { type: int, val: 42 }
     - { type: long, val: Long.MIN_VALUE }
     - { type: boolean, val: 'true' }

@@ -20,13 +20,13 @@ values:
 - { left: -1, right: 0, result: "false" }
 - { left: -1, right: -1, result: "true" }
 - { left: -1, right: 1, result: "false" }
-- { left: "Byte.MIN_VALUE as byte", right: 0, result: "false" }
-- { left: "Byte.MIN_VALUE as byte", right: 42, result: "false" }
-- { left: "Byte.MIN_VALUE as byte", right: "Byte.MAX_VALUE as byte", result: "false" }
-- { left: "Byte.MIN_VALUE as byte", right: "Byte.MIN_VALUE as byte", result: "true" }
-- { left: "Byte.MAX_VALUE as byte", right: 0, result: "false" }
-- { left: "Byte.MAX_VALUE as byte", right: 42, result: "false" }
-- { left: "Byte.MAX_VALUE as byte", right: "Byte.MAX_VALUE as byte", result: "true" }
-- { left: "Byte.MAX_VALUE as byte", right: "Byte.MIN_VALUE as byte", result: "false" }
+- { left: "Byte.MIN_VALUE", right: 0, result: "false" }
+- { left: "Byte.MIN_VALUE", right: 42, result: "false" }
+- { left: "Byte.MIN_VALUE", right: "Byte.MAX_VALUE", result: "false" }
+- { left: "Byte.MIN_VALUE", right: "Byte.MIN_VALUE", result: "true" }
+- { left: "Byte.MAX_VALUE", right: 0, result: "false" }
+- { left: "Byte.MAX_VALUE", right: 42, result: "false" }
+- { left: "Byte.MAX_VALUE", right: "Byte.MAX_VALUE", result: "true" }
+- { left: "Byte.MAX_VALUE", right: "Byte.MIN_VALUE", result: "false" }
 - { left: 81, right: 81, result: "true" }
 - { left: -81, right: -81, result: "true" }

@@ -16,9 +16,9 @@
 
 /*---
 desc: >-
-    This approach is based on the concept of truthiness that extends the Boolean
-    logic to operands of non-Boolean types, while the result of an operation
-    is kept boolean.
+    The actual extended semantics of conditional-and and conditional-or expressions
+    is described in the following truth tables (assuming that 'A' and 'B' are any
+    valid expressions)
 ---*/
 enum Color { Red, Green, Blue }
 enum Size { S, M, L }
@@ -26,18 +26,30 @@ enum Size { S, M, L }
 let a: {{a.type}} = {{a.val}};  // {% if a.truthy %}truthy{% else %}falsy{% endif %}
 
 function main() {
-    assert(!a ? {% if a.truthy %}false : true{% else %}true : false{% endif %});
+    assert(!a == {% if a.truthy %}false{% else %}true{% endif %});
 
 {%- for b in cases %}
 {%- if a != b %}
     {
         let b: {{b.type}} = {{b.val}};  // {% if b.truthy %}truthy{% else %}falsy{% endif %}
 {%- if a.truthy %}
-        assert((a && b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
-        assert((a || b) ? true : false);
+    {%- if b.nan %}
+        assert(Number.isNaN(a && b));
+    {%- else %}
+        assert((a && b) == b);
+    {%- endif %}
+        assert((a || b) == a);
 {%- else %}
-        assert(!(a && b) ? false : true);
-        assert((a || b) ? {% if b.truthy %}true : false{% else %}false : true{% endif %});
+    {%- if a.nan %}
+        assert(Number.isNaN(a && b));
+    {%- else %}
+        assert((a && b) == a);
+    {%- endif %}
+    {%- if b.nan %}
+        assert(Number.isNaN(a || b));
+    {%- else %}
+        assert((a || b) == b);
+    {%- endif %}
 {%- endif %}
     }
 {%- endif %}

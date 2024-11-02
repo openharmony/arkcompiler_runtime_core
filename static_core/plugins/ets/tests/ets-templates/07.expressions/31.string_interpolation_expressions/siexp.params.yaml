@@ -13,21 +13,21 @@
 ---
 cases:
     - use: |-
-          const b1: byte = Byte.MIN_VALUE as byte
+          const b1: byte = Byte.MIN_VALUE
           const b2: byte = 0 as byte
-          const b3: byte = Byte.MAX_VALUE as byte
-          const s1: short = Short.MIN_VALUE as short
+          const b3: byte = Byte.MAX_VALUE
+          const s1: short = Short.MIN_VALUE
           const s2: short = 0 as short
-          const s3: short = Short.MAX_VALUE as short
-          const i1: int = Int.MIN_VALUE as int
+          const s3: short = Short.MAX_VALUE
+          const i1: int = Int.MIN_VALUE
           const i2: int = 0 as int
-          const i3: int = Int.MAX_VALUE as int
+          const i3: int = Int.MAX_VALUE
           const l1: long = Long.MIN_VALUE
           const l2: long = 0 as long
           const l3: long = Long.MAX_VALUE
-          const f1: float = Float.MIN_VALUE as float
+          const f1: float = Float.MIN_VALUE
           const f2: float = 0.0 as float
-          const f3: float = Float.MAX_VALUE as float
+          const f3: float = Float.MAX_VALUE
           const n1: number = Number.MIN_VALUE
           const n2: number = 0.0
           const n3: number = Number.MAX_VALUE
@@ -36,21 +36,21 @@ cases:
           const expected = 'A -128 B 0 C 127 D -32768 E 0 F 32767 G -2147483648 H 0 I 2147483647 J -9223372036854775808 K 0 L 9223372036854775807 M 1e-45 N 0 P 3.4028235e+38 Q 5e-324 R 0 S 1.7976931348623157e+308'
 
     - use: |-
-          const b1: Byte = Byte.MIN_VALUE as byte
+          const b1: Byte = Byte.MIN_VALUE
           const b2: Byte = 0 as byte
-          const b3: Byte = Byte.MAX_VALUE as byte
-          const s1: Short = Short.MIN_VALUE as short
+          const b3: Byte = Byte.MAX_VALUE
+          const s1: Short = Short.MIN_VALUE
           const s2: Short = 0 as short
-          const s3: Short = Short.MAX_VALUE as short
-          const i1: Int = Int.MIN_VALUE as int
+          const s3: Short = Short.MAX_VALUE
+          const i1: Int = Int.MIN_VALUE
           const i2: Int = 0 as int
-          const i3: Int = Int.MAX_VALUE as int
+          const i3: Int = Int.MAX_VALUE
           const l1: Long = Long.MIN_VALUE
           const l2: Long = 0 as long
           const l3: Long = Long.MAX_VALUE
-          const f1: Float = Float.MIN_VALUE as float
+          const f1: Float = Float.MIN_VALUE
           const f2: Float = 0.0 as float
-          const f3: Float = Float.MAX_VALUE as float
+          const f3: Float = Float.MAX_VALUE
           const n1: Number = Number.MIN_VALUE
           const n2: Number = 0.0
           const n3: Number = Number.MAX_VALUE

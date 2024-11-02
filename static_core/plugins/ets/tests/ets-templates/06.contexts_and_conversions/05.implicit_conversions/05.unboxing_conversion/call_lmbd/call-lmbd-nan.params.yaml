@@ -18,11 +18,6 @@ cases:
       values:
           - { expr: new Float(Float.NaN) }
 
-    - from_type: Float
-      to_type: double
-      values:
-          - { expr: new Float(Float.NaN) }
-
     - from_type: Double
       to_type: double
       values:

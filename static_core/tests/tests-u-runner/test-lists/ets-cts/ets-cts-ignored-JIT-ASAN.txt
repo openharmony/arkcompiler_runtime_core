@@ -1,3 +1,0 @@
-# 17669 JIT-optimized code gives wrong result
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_obj/comp-clss_26.sts
-06.contexts_and_conversions/05.implicit_conversions/04.boxing_conversion/comp_arr/comp-arr_26.sts

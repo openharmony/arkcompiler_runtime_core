@@ -32,27 +32,27 @@ cases:
 
   - type: Object
     prim_type: short
-    values: [Short.MIN_VALUE as short, 255 as short]
+    values: [Short.MIN_VALUE, 255 as short]
 
   - type: Integral
     prim_type: short
-    values: [Short.MIN_VALUE as short, 255 as short]
+    values: [Short.MIN_VALUE, 255 as short]
 
   - type: Object
     prim_type: int
-    values: [127, 32767, Int.MAX_VALUE as int]
+    values: [127, 32767, Int.MAX_VALUE]
 
   - type: Integral
     prim_type: int
-    values: [127, 32767, Int.MAX_VALUE as int]
+    values: [127, 32767, Int.MAX_VALUE]
 
   - type: Object
     prim_type: long
-    values: [Long.MIN_VALUE as long, 9223372036854775807 as long]
+    values: [Long.MIN_VALUE, 9223372036854775807 as long]
 
   - type: Integral
     prim_type: long
-    values: [Long.MIN_VALUE as long, 9223372036854775807 as long]
+    values: [Long.MIN_VALUE, 9223372036854775807 as long]
 
   - type: Object
     prim_type: float
