@@ -503,7 +503,6 @@ private:
 
     template <RegionFlag REGION_TYPE>
     void *AllocRegular(size_t alignSize);
-    void *AllocRegularPinned(size_t alignSize);
     TLAB *CreateTLABInRegion(Region *region, size_t size);
 
     Region fullRegion_;

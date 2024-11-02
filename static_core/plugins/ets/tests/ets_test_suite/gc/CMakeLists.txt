@@ -113,5 +113,6 @@ if (NOT CMAKE_CROSSCOMPILING)
 endif()
 add_ets_gc_test(FILE heap_info_test.sts OPTIONS MODE "INT")
 add_ets_gc_test(FILE free_heap_size_test.sts OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug" "--run-gc-in-place" "--gc-workers-count=1" MODE "INT")
+add_ets_gc_test(FILE alloc_pinned.sts OPTIONS "--gc-type=g1-gc" "--heap-verifier=fail_on_verification:pre:into:before_g1_concurrent:post" MODE "INT")
 # Running tests via API calls
 add_ets_napi_gc_test(FILE pending_exception_gc_test.sts CPP_SOURCE pending_exception_test.cpp OPTIONS "--gc-type=g1-gc" "--gc-trigger-type=debug-never")
