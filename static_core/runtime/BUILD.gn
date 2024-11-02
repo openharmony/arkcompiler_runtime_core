@@ -332,6 +332,10 @@ ohos_source_set("libarkruntime_set_static") {
     ]
   }
 
+  if (defined(enable_perf_counters)) {
+    sources += [ "tooling/perf_counter.cpp" ]
+  }
+
   if (is_mob) {
     sources += [
       "$ark_root/platforms/mobile/runtime/thread.cpp",
