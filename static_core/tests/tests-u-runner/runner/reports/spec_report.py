@@ -85,7 +85,7 @@ class SpecReport:
 
     @staticmethod
     def __fmt_str(src: str) -> str:
-        "Escape some characters for markdown document"
+        """Escape some characters for Markdown document"""
         res = src.replace("\\", "\\\\")
         res = res.replace("|", "\\|")
         res = res.replace("_", "\\_")
@@ -108,7 +108,7 @@ class SpecReport:
 
     @staticmethod
     def __fmt_num(src: int) -> str:
-        "Replace 0 with space"
+        """Replace 0 with space"""
         return str(src) if src > 0 else ""
 
     def populate_report(self) -> None:

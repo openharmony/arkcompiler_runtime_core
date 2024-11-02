@@ -31,7 +31,7 @@ _LOGGER = logging.getLogger("runner.plugins.astchecker")
 
 class TestASTChecker(TestFileBased):
     def __init__(self, test_env: TestEnv, test_path: str, flags: List[str], test_id: str,
-                 test_cases: UtilASTChecker._TestCasesList) -> None:
+                 test_cases: UtilASTChecker.TestCasesList) -> None:
         TestFileBased.__init__(self, test_env, test_path, flags, test_id)
         self.util = self.test_env.util
         self.test_cases = test_cases
@@ -61,7 +61,6 @@ class TestASTChecker(TestFileBased):
     def es2panda_result_validator(self, actual_output: str, _: Any, return_code: int) -> bool:
         ast_end = actual_output.rfind('}')
         ast = {}
-        error = ''
         if ast_end != -1:
             ast_str = re.sub(r'\bundefined\b', 'null', actual_output[:ast_end + 1])
             ast = json.loads(ast_str)

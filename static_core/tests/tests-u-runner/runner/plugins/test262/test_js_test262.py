@@ -100,7 +100,7 @@ class TestJSTest262(TestFileBased):
             actual_output
         )
 
-        check_abc_file = self.need_exec and (path.exists(output_path) and path.getsize(output_path) > 0) or \
-                         not self.need_exec
+        check_abc_file = (self.need_exec and (path.exists(output_path) and path.getsize(output_path) > 0) or
+                          not self.need_exec)
 
         return bool(passed) and check_abc_file

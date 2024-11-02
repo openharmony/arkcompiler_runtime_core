@@ -120,8 +120,7 @@ class StdlibTemplatesGenerator:
                 key, key_uniq = self.__deduplicate_key_content(key, key_uniq)
             result[key] = text[left:right]
 
-        if size_indices == 1:
-            i = 0
+        i = size_indices - 1
         desc = meta_info[i][2]
         key = desc["desc"]["function"]
         if key in result:

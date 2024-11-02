@@ -89,8 +89,9 @@ class RunnerJSParser(RunnerJS):
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestJSParser:
         if test_file not in self.allowed_tests:
-            raise Exception(f'JSParser is deprecated, creating new tests ({test_file}) is not allowed. '
-                             'Use ASTChecker instead')
+            message = (f'JSParser is deprecated, creating new tests ({test_file}) is not allowed. '
+                       'Use ASTChecker instead')
+            Log.exception_and_raise(_LOGGER, message)
         test = TestJSParser(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))
         test.ignored = is_ignored
         return test

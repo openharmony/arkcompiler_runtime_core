@@ -28,7 +28,6 @@ from runner.runner_base import get_test_id
 from runner.runner_js import RunnerJS
 from runner.enum_types.test_directory import TestDirectory
 
-
 _LOGGER = logging.getLogger("runner.plugins.system.runner_ets_system")
 
 
@@ -48,8 +47,8 @@ class RunnerETSSystem(RunnerJS):
     def __init__(self, config: Config) -> None:
         super().__init__(config, "system")
 
-        symlink_es2panda_test = Path(config.general.static_core_root) / "plugins" \
-                                / "ets" / "tests" / "ets_warnings_tests"
+        symlink_es2panda_test = (Path(config.general.static_core_root) /
+                                 "plugins" / "ets" / "tests" / "ets_warnings_tests")
         if symlink_es2panda_test.exists():
             es2panda_test = symlink_es2panda_test.resolve()
         else:
@@ -104,7 +103,6 @@ class RunnerETSSystem(RunnerJS):
     @property
     def default_work_dir_root(self) -> Path:
         return Path("/tmp") / "ets_warnings_tests"
-
 
     def create_test(self, test_file: str, flags: List[str], is_ignored: bool) -> TestETSSystem:
         test = TestETSSystem(self.test_env, test_file, flags, get_test_id(test_file, self.test_root))

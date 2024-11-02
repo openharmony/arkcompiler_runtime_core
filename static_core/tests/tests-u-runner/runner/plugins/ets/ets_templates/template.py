@@ -16,19 +16,17 @@
 #
 
 import os
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Dict, Any, List, Tuple
+
 import yaml
-
 from jinja2 import Environment, select_autoescape, TemplateSyntaxError
-
-from runner.utils import read_file
-from runner.plugins.ets.utils.exceptions import \
-    InvalidFileFormatException, UnknownTemplateException, InvalidMetaException
 from runner.plugins.ets.utils.constants import META_COPYRIGHT, META_START_STRING, \
     META_END_STRING, META_START_COMMENT, META_END_COMMENT
-
+from runner.plugins.ets.utils.exceptions import \
+    InvalidFileFormatException, UnknownTemplateException, InvalidMetaException
+from runner.utils import read_file
 
 ROOT_PATH = Path(os.path.realpath(os.path.dirname(__file__)))
 BENCH_PATH = ROOT_PATH / "test_template.tpl"
@@ -58,6 +56,22 @@ class Template:
     def is_copyright(self) -> bool:
         return META_COPYRIGHT not in self.text
 
+    @staticmethod
+    def __replace_symbols(text: str) -> str:
+        codes = [('&#39;', "'"), ('&#34;', '"'), ('&gt;', '>'), ('&lt;', '<'), ('&amp;', '&')]
+        for old, new in codes:
+            text = text.replace(old, new)
+        return text
+
+    @staticmethod
+    def __get_in_out_content(text: str, meta_start: str, meta_end: str) -> Tuple[str, str]:
+        start, end = text.find(meta_start), text.find(meta_end)
+        if start > end or start == -1 or end == -1:
+            raise InvalidMetaException("Invalid meta or meta does not exist")
+        inside_content = text[start + len(meta_start):end]
+        outside_content = text[:start] + text[end + len(meta_end):]
+        return inside_content, outside_content
+
     def render_template(self) -> List[str]:
         try:
             template = self.__jinja_env.from_string(self.text)
@@ -83,24 +97,10 @@ class Template:
             code=meta.code.strip())
         return bench_code
 
-    def __get_in_out_content(self, text: str, meta_start: str, meta_end: str) -> Tuple[str, str]:
-        start, end = text.find(meta_start), text.find(meta_end)
-        if start > end or start == -1 or end == -1:
-            raise InvalidMetaException("Invalid meta or meta does not exist")
-        inside_content = text[start + len(meta_start):end]
-        outside_content = text[:start] + text[end + len(meta_end):]
-        return inside_content, outside_content
-
     def __get_meta(self, text: str) -> Meta:
         test_text = self.__replace_symbols(text)
         inside_content, outside_content = self.__get_in_out_content(test_text, META_START_STRING, META_END_STRING)
         return Meta(config=self.__parse_yaml(inside_content), code=outside_content)
-
-    def __replace_symbols(self, text: str) -> str:
-        codes = [("'", '&#39;'), ('"', '&#34;'), ('>', '&gt;'), ('<', '&lt;'), ('&', '&amp;')]
-        for new, old in codes:
-            text = text.replace(old, new)
-        return text
 
     def __parse_yaml(self, text: str) -> Dict[str, Any]:
         try:
