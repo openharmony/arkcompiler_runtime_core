@@ -25,7 +25,8 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
 {
 #if (!defined(PANDA_ASAN_ON)) && (!defined(PANDA_TSAN_ON)) && (defined(__GLIBC__) || defined(PANDA_TARGET_MOBILE))
     size_t oldBytes = ark::os::mem::GetNativeBytesFromMallinfo();
-    // NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-no-malloc,clang-analyzer-unix.Malloc,modernize-loop-convert)
+    // NOLINTBEGIN(readability-magic-numbers,cppcoreguidelines-no-malloc,clang-analyzer-unix.Malloc,
+    // modernize-loop-convert)
     // NOLINTNEXTLINE(modernize-avoid-c-arrays)
     void *p1[1000U];
     for (size_t i = 0; i < 1000U; i++) {
@@ -58,7 +59,8 @@ TEST(Mem, GetNativeBytesFromMallinfoTest)
         free(p2[i]);
         p2[i] = nullptr;
     }
-    // NOLINTEND(readability-magic-numbers,cppcoreguidelines-no-malloc,clang-analyzer-unix.Malloc,modernize-loop-convert)
+    // NOLINTEND(readability-magic-numbers,cppcoreguidelines-no-malloc,clang-analyzer-unix.Malloc,
+    // modernize-loop-convert)
     newBytes = ark::os::mem::GetNativeBytesFromMallinfo();
     ASSERT_TRUE(newBytes < oldBytes);
 #else

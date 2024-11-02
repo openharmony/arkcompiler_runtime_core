@@ -36,6 +36,7 @@ constexpr auto ToUnsigned(T v)
     return static_cast<UnsignedType>(v);
 }
 
+// CC-OFFNXT(G.FMT.10) project code style
 template <typename T, std::enable_if_t<std::is_enum_v<T>> * = nullptr>
 constexpr auto ToUnderlying(T value)
 {

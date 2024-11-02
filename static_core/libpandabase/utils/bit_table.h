@@ -276,6 +276,7 @@ struct BitTableDefault : public BitTableRow<NUM_COLUMNS, BitTableDefault<NUM_COL
     struct ColumnName;                             \
     static constexpr const char *TABLE_NAME = #name
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BIT_TABLE_COLUMN(index, name, upname)                                \
     static constexpr size_t COLUMN_##upname = (index);                       \
@@ -286,10 +287,12 @@ struct BitTableDefault : public BitTableRow<NUM_COLUMNS, BitTableDefault<NUM_COL
     };                                                                       \
     uint32_t Get##name() const                                               \
     {                                                                        \
+        /* CC-OFFNXT(G.PRE.05) function gen */                               \
         return Get(index);                                                   \
     }                                                                        \
     bool Has##name() const                                                   \
     {                                                                        \
+        /* CC-OFFNXT(G.PRE.05) function gen */                               \
         return Get(index) != NO_VALUE;                                       \
     }
 

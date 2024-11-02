@@ -27,6 +27,7 @@ namespace ark::os::dfx_option {
 #define DFX_OPTION_ELEM(D, NAME, STR) D(NAME, DfxOptionHandler::DfxOptionId::NAME##_ID, STR)
 
 #ifdef PANDA_TARGET_UNIX
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DFX_OPTION_LIST(D)                                       \
     DFX_OPTION_ELEM(D, COMPILER_NULLCHECK, "compiler-nullcheck") \

@@ -32,6 +32,7 @@ namespace ark {
     D(X86_64)
 
 enum class Arch {
+// CC-OFFNXT(G.PRE.02) part name
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEF(v) v,
     ARCH_LIST(DEF)
@@ -157,21 +158,27 @@ struct ArchTraits<Arch::NONE> {
     using WordType = void;
 };
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage,-warnings-as-errors)
 #define DEF_ARCH_PROPERTY_GETTER(func_name, property)                                                 \
+    /* CC-OFFNXT(G.PRE.02) namespace member */                                                        \
     constexpr std::remove_const_t<decltype(ArchTraits<Arch::AARCH64>::property)> func_name(Arch arch) \
     {                                                                                                 \
         ASSERT(arch != Arch::NONE);                                                                   \
         if (arch == Arch::X86) {                                                                      \
+            /* CC-OFFNXT(G.PRE.02, G.PRE.05) namespace member, function gen */                        \
             return ArchTraits<Arch::X86>::property;                                                   \
         }                                                                                             \
         if (arch == Arch::X86_64) {                                                                   \
+            /* CC-OFFNXT(G.PRE.02, G.PRE.05) namespace member, function gen */                        \
             return ArchTraits<Arch::X86_64>::property;                                                \
         }                                                                                             \
         if (arch == Arch::AARCH32) {                                                                  \
+            /* CC-OFFNXT(G.PRE.02, G.PRE.05) namespace member, function gen */                        \
             return ArchTraits<Arch::AARCH32>::property;                                               \
         }                                                                                             \
         if (arch == Arch::AARCH64) {                                                                  \
+            /* CC-OFFNXT(G.PRE.02, G.PRE.05) namespace member, function gen */                        \
             return ArchTraits<Arch::AARCH64>::property;                                               \
         }                                                                                             \
         UNREACHABLE();                                                                                \
@@ -195,9 +202,10 @@ constexpr const char *GetArchString(Arch arch)
 {
     switch (arch) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEF(v)    \
-    case Arch::v: \
-        return #v;
+#define DEF(v)                               \
+    /* CC-OFFNXT(G.PRE.02) namespace name */ \
+    case Arch::v:                            \
+        return #v;  // CC-OFF(G.PRE.05, G.PRE.09) code generation
         ARCH_LIST(DEF)
 #undef DEF
         default:

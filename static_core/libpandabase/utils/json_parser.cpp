@@ -248,6 +248,16 @@ bool JsonObject::Parser::GetBool()
     return true;
 }
 
+void JsonObject::Parser::SaveSourceString(std::streampos posStart)
+{
+    auto posEnd = istream_.tellg();
+    auto size = static_cast<size_t>(posEnd - posStart);
+    stringTemp_.resize(size, '\0');
+    istream_.seekg(posStart);
+    istream_.read(&stringTemp_[0], static_cast<std::streamsize>(size));
+    ASSERT(istream_);
+}
+
 bool JsonObject::Parser::GetValue()
 {
     auto symbol = PeekSymbol();
@@ -299,12 +309,7 @@ bool JsonObject::Parser::GetValue()
     }
 
     // Save source string of parsed value:
-    auto posEnd = istream_.tellg();
-    auto size = static_cast<size_t>(posEnd - posStart);
-    stringTemp_.resize(size, '\0');
-    istream_.seekg(posStart);
-    istream_.read(&stringTemp_[0], static_cast<std::streamsize>(size));
-    ASSERT(istream_);
+    SaveSourceString(posStart);
     return res;
 }
 

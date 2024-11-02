@@ -140,6 +140,7 @@
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_FAIL(expr) ark::debug::AssertionFail(expr, __FILE__, __LINE__, __FUNCTION__)
 
+// CC-OFFNXT(G.PRE.06) solid logic
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define ASSERT_OP(lhs, op, rhs)                                                                                \
     do {                                                                                                       \
@@ -185,6 +186,7 @@
 #define ASSERT_PRINT(cond, message)                        \
     do {                                                   \
         if (auto cond_val = cond; UNLIKELY(!(cond_val))) { \
+            /* CC-OFFNXT(G.PRE.02) string arg */           \
             std::cerr << message << std::endl;             \
             ASSERT_FAIL(#cond);                            \
         }                                                  \

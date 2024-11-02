@@ -87,6 +87,7 @@ private:
 
 template <typename T,
           enable_if_t<is_same_v<std::string, T> || is_same_v<double, T> || is_same_v<bool, T> || is_same_v<int, T> ||
+                      // CC-OFFNXT(G.FMT.10) project code style
                       is_same_v<uint32_t, T> || is_same_v<uint64_t, T> || is_same_v<arg_list_t, T>> * = nullptr>
 class PandArg : public PandArgBase {
 public:
@@ -1017,6 +1018,7 @@ private:
     }
 
     template <typename T,
+              // CC-OFFNXT(G.FMT.10) project code style
               enable_if_t<is_same_v<T, int> || is_same_v<T, uint32_t> || is_same_v<T, uint64_t>> * = nullptr>
     bool IsIntegerArgInRange(PandArg<T> *arg, T num)
     {

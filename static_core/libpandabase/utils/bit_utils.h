@@ -29,17 +29,17 @@
 
 #include <securec.h>
 
-#define panda_bit_utils_ctz __builtin_ctz      // NOLINT(cppcoreguidelines-macro-usage)
-#define panda_bit_utils_ctzll __builtin_ctzll  // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_CTZ __builtin_ctz      // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_CTZLL __builtin_ctzll  // NOLINT(cppcoreguidelines-macro-usage)
 
-#define panda_bit_utils_clz __builtin_clz      // NOLINT(cppcoreguidelines-macro-usage)
-#define panda_bit_utils_clzll __builtin_clzll  // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_CLZ __builtin_clz      // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_CLZLL __builtin_clzll  // NOLINT(cppcoreguidelines-macro-usage)
 
-#define panda_bit_utils_ffs __builtin_ffs      // NOLINT(cppcoreguidelines-macro-usage)
-#define panda_bit_utils_ffsll __builtin_ffsll  // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_FFS __builtin_ffs      // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_FFSLL __builtin_ffsll  // NOLINT(cppcoreguidelines-macro-usage)
 
-#define panda_bit_utils_popcount __builtin_popcount      // NOLINT(cppcoreguidelines-macro-usage)
-#define panda_bit_utils_popcountll __builtin_popcountll  // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_POPCOUNT __builtin_popcount      // NOLINT(cppcoreguidelines-macro-usage)
+#define PANDA_BIT_UTILS_POPCOUNTLL __builtin_popcountll  // NOLINT(cppcoreguidelines-macro-usage)
 
 namespace ark {
 
@@ -54,9 +54,9 @@ constexpr int Clz(T x)
     ASSERT(x != 0U);
 
     if (sizeof(T) == sizeof(uint64_t)) {
-        return panda_bit_utils_clzll(x);
+        return PANDA_BIT_UTILS_CLZLL(x);
     }
-    return panda_bit_utils_clz(x) - (std::numeric_limits<uint32_t>::digits - std::numeric_limits<T>::digits);
+    return PANDA_BIT_UTILS_CLZ(x) - (std::numeric_limits<uint32_t>::digits - std::numeric_limits<T>::digits);
 }
 
 template <typename T>
@@ -70,9 +70,9 @@ constexpr int Ctz(T x)
     ASSERT(x != 0U);
 
     if (sizeof(T) == sizeof(uint64_t)) {
-        return panda_bit_utils_ctzll(x);
+        return PANDA_BIT_UTILS_CTZLL(x);
     }
-    return panda_bit_utils_ctz(x);
+    return PANDA_BIT_UTILS_CTZ(x);
 }
 
 template <typename T>
@@ -85,9 +85,9 @@ constexpr int Popcount(T x)
     static_assert(sizeof(T) == sizeof(uint64_t) || sizeof(T) <= sizeof(uint32_t), "Unsupported sizeof(T)");
 
     if (sizeof(T) == sizeof(uint64_t)) {
-        return panda_bit_utils_popcountll(x);
+        return PANDA_BIT_UTILS_POPCOUNTLL(x);
     }
-    return panda_bit_utils_popcount(x);
+    return PANDA_BIT_UTILS_POPCOUNT(x);
 }
 
 // How many bits (minimally) does it take to store the constant 'value'? i.e. 1 for 1, 2 for 2 and 3, 3 for 4 and 5 etc.
@@ -124,9 +124,9 @@ constexpr int Ffs(T x)
     static_assert(sizeof(T) == sizeof(uint64_t) || sizeof(T) <= sizeof(uint32_t), "Unsupported sizeof(T)");
 
     if (sizeof(T) == sizeof(uint64_t)) {
-        return panda_bit_utils_ffsll(x);
+        return PANDA_BIT_UTILS_FFSLL(x);
     }
-    return panda_bit_utils_ffs(x);
+    return PANDA_BIT_UTILS_FFS(x);
 }
 
 template <size_t N, typename T>

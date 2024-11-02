@@ -189,7 +189,7 @@ public:
         }
 
         if (level == Level::FATAL) {
-            std::abort();
+            std::abort();  // CC-OFF(G.FUU.08) fatal error
         }
 
         return false;
@@ -452,36 +452,45 @@ private:
 
 #ifndef NDEBUG
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_SUPPRESSION_CHECK(level, component) \
+#define LOG_SUPPRESSION_CHECK(level, component) \
+    /* CC-OFFNXT(G.PRE.02) namespace member */  \
     !ark::Logger::IsMessageSuppressed(ark::Logger::Level::level, ark::Logger::Component::component)
 #else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_SUPPRESSION_CHECK(level, component) true
+#define LOG_SUPPRESSION_CHECK(level, component) true
 #endif
 
 // Explicit namespace is specified to allow using the logger out of panda namespace.
 // For example, in the main function.
+// clang-format off
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG(level, component, p)                                                                    \
+#define IMPL_LOG(level, component, p)                                                                \
+    /* CC-OFFNXT(G.PRE.02) namespace member */                                                       \
     ark::Logger::IsLoggingOnOrAbort(ark::Logger::Level::level, ark::Logger::Component::component) && \
-        _LOG_SUPPRESSION_CHECK(level, component) &&                                                  \
+        LOG_SUPPRESSION_CHECK(level, component) &&                                                   \
+        /* CC-OFFNXT(G.PRE.02) namespace member */                                                   \
         ark::Logger::Message(ark::Logger::Level::level, ark::Logger::Component::component, p).GetStream()
+// clang-format on
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LOG(level, component) _LOG_##level(component, false)
+#define LOG(level, component) LOG_##level(component, false)
 
+// clang-format off
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_DFX(dfx_component)                                                               \
     ark::Logger::IsLoggingDfxOn() &&                                                         \
         ark::Logger::Message(ark::Logger::Level::ERROR, ark::Logger::DFX, false).GetStream() \
+            /* CC-OFFNXT(G.PRE.02) namespace member */                                       \
             << ark::Logger::StringfromDfxComponent(ark::Logger::LogDfxComponent::dfx_component) << " log:"
+// clang-format on
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define GET_LOG_STREAM(level, component) \
+#define GET_LOG_STREAM(level, component)       \
+    /* CC-OFFNXT(G.PRE.02) namespace member */ \
     ark::Logger::Message(ark::Logger::Level::level, ark::Logger::Component::component, false).GetStream()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define PLOG(level, component) _LOG_##level(component, true)
+#define PLOG(level, component) LOG_##level(component, true)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOG_IF(cond, level, component) (cond) && LOG(level, component)
@@ -492,26 +501,26 @@ private:
 #ifndef NDEBUG
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_DEBUG(component, p) _LOG(DEBUG, component, p)
+#define LOG_DEBUG(component, p) IMPL_LOG(DEBUG, component, p)
 
 #else
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_DEBUG(component, p) false && ark::DummyStream()
+#define LOG_DEBUG(component, p) false && ark::DummyStream()
 
 #endif
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_INFO(component, p) _LOG(INFO, component, p)
+#define LOG_INFO(component, p) IMPL_LOG(INFO, component, p)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_WARNING(component, p) _LOG(WARNING, component, p)
+#define LOG_WARNING(component, p) IMPL_LOG(WARNING, component, p)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_ERROR(component, p) _LOG(ERROR, component, p)
+#define LOG_ERROR(component, p) IMPL_LOG(ERROR, component, p)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define _LOG_FATAL(component, p) _LOG(FATAL, component, p)
+#define LOG_FATAL(component, p) IMPL_LOG(FATAL, component, p)
 
 }  // namespace ark
 

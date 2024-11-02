@@ -16,7 +16,8 @@
 #include "cpu_features.h"
 
 namespace ark::compiler {
-#if defined PANDA_TARGET_MOBILE || defined PANDA_TARGET_OHOS || defined PANDA_TARGET_LINUX || defined PANDA_TARGET_UNIX
+#if defined(PANDA_TARGET_MOBILE) || defined(PANDA_TARGET_OHOS) || defined(PANDA_TARGET_LINUX) || \
+    defined(PANDA_TARGET_UNIX)
 
 #include <asm/hwcap.h>
 #include <sys/auxv.h>

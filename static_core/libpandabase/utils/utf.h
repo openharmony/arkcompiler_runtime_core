@@ -192,7 +192,7 @@ struct Mutf8Less {
     }
 };
 
-static inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
+inline std::pair<uint16_t, uint16_t> SplitUtf16Pair(uint32_t pair)
 {
     constexpr size_t P1_MASK = 0xffff;
     constexpr size_t P2_SHIFT = 16;
