@@ -44,6 +44,8 @@ bool HasUserPhiRecursively(Inst *inst, Marker visited, const FindUserPredicate &
 size_t CountUsers(Inst *inst, const FindUserPredicate &predicate);
 void ResetUserMarkersRecursively(Inst *inst, Marker visited);
 Inst *SkipSingleUserCheckInstruction(Inst *inst);
+bool IsUsedOutsideBasicBlock(Inst *inst, BasicBlock *bb);
+SaveStateInst *FindFirstSaveState(BasicBlock *block);
 
 template <bool ALLOW_INLINED = false>
 bool IsStringBuilderAppend(Inst *inst)
@@ -62,6 +64,11 @@ bool IsStringBuilderAppend(Inst *inst)
 }
 
 bool IsIntrinsicStringBuilderAppendString(Inst *inst);
+
+using InputDesc = std::pair<Inst *, unsigned>;
+void RemoveFromInstructionInputs(ArenaVector<InputDesc> &inputDescriptors);
+bool BreakStringBuilderAppendChains(BasicBlock *block);
+
 }  // namespace ark::compiler
 
 #endif  // COMPILER_OPTIMIZER_OPTIMIZATIONS_STRING_BUILDER_UTILS_H

@@ -181,6 +181,26 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::unsupported_usage_chain_concat17"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::unsupported_usage_chain_concat18"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
 
 //! CHECKER       JIT IR Builder, check String Builders merging
 //! SKIP_IF       @architecture == "arm32"
@@ -349,6 +369,28 @@
 //! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",1
 //! PASS_AFTER    "Codegen"
 //! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::unsupported_usage_chain_concat17"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//!
+//! METHOD        "ETSGLOBAL::unsupported_usage_chain_concat18"
+//! PASS_BEFORE   "BranchElimination"
+//! INST_COUNT    "StringBuilder::<ctor>",1
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",2
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",1
+//! INST_COUNT    "String::concat",1
+//! PASS_AFTER    "SimplifyStringBuilder"
+//! INST_COUNT    "StringBuilder::<ctor>",2
+//! INST_COUNT    "Intrinsic.StdCoreSbAppendString ",3
+//! INST_COUNT    "Intrinsic.StdCoreSbToString",2
+//! INST_NOT      "String::concat"
 
 // Each '+=' operation on strings in tests below is translated into StringBuilder + 2 append calls by frontend
 
@@ -628,6 +670,21 @@ function partially_supported_chain_concat16(a: String, b: String, c: String, d: 
     return abcd;                                    // applied, 3 SBs merged into 1 SB + concat2
 }
 
+function unsupported_usage_chain_concat17(a: String): String {
+    let sb = new StringBuilder();
+    sb.append(a);
+    let result = sb.toString();
+    sb.append(a);
+    return result;                                  // not applied, sb must not be used after sb.toString() appended
+}
+
+function unsupported_usage_chain_concat18(a: String): String {
+    let sb = new StringBuilder();
+    sb.append(a);
+    let result = sb.toString();
+    sb.append(a);
+    return result.concat();                         // not applied, sb must not be used after sb.toString() appended
+}
 
 //! CHECKER       AOT IR Builder, check String Builders merging (chain_concat19 only, with --compiler-inlining=true)
 //! SKIP_IF       @architecture == "arm32"
@@ -686,6 +743,8 @@ function main() {
     assert partially_supported_chain_concat14("ab", "c", "d", "e") == "abcde": "Wrong result at partially_supported_chain_concat14";
     assert supported_chain_concat15("ab", "c", "d", "e") == "abcde": "Wrong result at supported_chain_concat15";
     assert partially_supported_chain_concat16("ab", "c", "d", "e") == "abcde": "Wrong result at partially_supported_chain_concat16";
+    assert unsupported_usage_chain_concat17("abc") == "abc": "Wrong result at unsupported_usage_chain_concat17";
+    assert unsupported_usage_chain_concat18("abc") == "abc": "Wrong result at unsupported_usage_chain_concat18";
 
     chain_concat19();
 }

@@ -22,6 +22,7 @@
 #include "optimizer/ir/graph.h"
 #include "optimizer/ir/inst.h"
 #include "optimizer/pass.h"
+#include "optimizer/optimizations/string_builder_utils.h"
 
 namespace ark::compiler {
 
@@ -273,7 +274,7 @@ private:
     SaveStateBridgesBuilder ssb_ {};
     ArenaStack<Inst *> instructionsStack_;
     ArenaVector<Inst *> instructionsVector_;
-    ArenaVector<std::pair<Inst *, size_t>> inputDescriptors_;
+    ArenaVector<InputDesc> inputDescriptors_;
     ArenaVector<StringBuilderUsage> usages_;
     ArenaVector<ConcatenationLoopMatch> matches_;
     StringBuilderCallsMap stringBuilderCalls_;
