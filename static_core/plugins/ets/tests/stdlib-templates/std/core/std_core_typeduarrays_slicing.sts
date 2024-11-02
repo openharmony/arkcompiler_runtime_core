@@ -18,7 +18,7 @@
 desc:  {function: {{.item.object_type}}_{{.item.objectType}}}
 ---*/
 
-{% include 'utils/test_core_typeduarray_methods.j2' %}
+{% include 'utils/test_core_typeduarray_slicing.j2' %}
 
 
 {% endfor %}
