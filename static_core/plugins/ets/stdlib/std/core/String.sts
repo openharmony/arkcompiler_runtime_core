@@ -1388,7 +1388,7 @@ export final class String extends Object implements Comparable<String>, JSONable
      * index and extending for a given number of characters afterwards.
      */
     public substr(begin: int): String {
-        return this.substring(begin);
+        return this.substr(begin, this.getLength() as int);
     }
 
     public substr(begin: int, length: int): String {

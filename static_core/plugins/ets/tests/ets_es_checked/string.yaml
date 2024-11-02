@@ -121,6 +121,11 @@ sub:
           - paramOf(*inds)
           - paramOf(*inds)
         mandatory: 1
+      - method: substr
+        params:
+          - paramOf(*int_inds)
+          - paramOf(*int_inds)
+        mandatory: 1
       - method: substring
         params:
           - paramOf(*inds)
