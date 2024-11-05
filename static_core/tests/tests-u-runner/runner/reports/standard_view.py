@@ -102,7 +102,7 @@ class StandardView:
             return
         time_edges: List[int] = time_report_options.time_edges[:]
         tests_by_time: List[List[str]] = []
-        for i in range(len(time_edges) + 1):
+        for _ in range(len(time_edges) + 1):
             tests_by_time.append([])
 
         for test_result in results:

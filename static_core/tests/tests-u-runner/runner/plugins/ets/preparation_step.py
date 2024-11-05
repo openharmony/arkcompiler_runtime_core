@@ -84,9 +84,11 @@ class CustomGeneratorTestPreparationStep(TestPreparationStep):
         if self.test_gen_path.exists() and force_generated:
             shutil.rmtree(self.test_gen_path)
         self.test_gen_path.mkdir(exist_ok=True)
-        cmd = [self.config.custom.generator,
-               "--source", self.test_source_path,
-               "--target", self.test_gen_path]
+        cmd = [
+            self.config.custom.generator,
+            "--source", self.test_source_path,
+            "--target", self.test_gen_path
+        ]
         cmd.extend(self.config.custom.generator_options)
         timeout = 300
         result: List[str] = []

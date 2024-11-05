@@ -298,10 +298,7 @@ class Runner(ABC):
             groups = self.config.test_lists.groups.quantity
             n_group = self.config.test_lists.groups.number
             n_group = n_group if n_group <= groups else groups
-            valid_tests = {
-                test for test in valid_tests
-                if get_group_number(test.path, groups) == n_group
-            }
+            valid_tests = {test for test in valid_tests if get_group_number(test.path, groups) == n_group}
 
         self.tests.update(valid_tests)
         Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
