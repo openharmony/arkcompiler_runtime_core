@@ -19,7 +19,7 @@
  tags:
  ---*/
 
-import {StandardExportedClass as GIT1, ClassForExport as GIT2} from "./to_export.sts"}
+import {StandardExportedClass as GIT1, ClassForExport as GIT2} from "./to_export.sts"
 
 function main () {
   let c3 = new GIT1 // OK, `Module initialization code` be printed
