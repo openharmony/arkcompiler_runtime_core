@@ -23,8 +23,6 @@ std/core/std_core_typeduarrays__Uint8Array.sts
 std/core/std_core_typeduarrays__Uint16Array.sts
 std/core/std_core_typeduarrays__Uint32Array.sts
 ### Issue I8PRJS end
-# #14724
-std/core/std_core_typedarrays__BigInt64Array.sts
 ### Issue 11474 ###
 ### Issue 11544 begin
 std/math/std_math_tan_double.sts
@@ -422,6 +420,12 @@ std/core/std_core_typedarrays_bignum__BigInt64Array.sts
 std/core/std_core_typedarrays_bignum__BigUint64Array.sts
 ### Issue 17680 end
 
+### Issue 20130
+std/core/std_core_typeduarrays_ctors__BigUint64Array.sts
+std/core/std_core_typeduarrays_slicing__BigUint64Array.sts
+std/core/std_core_typeduarrays_function2__BigUint64Array.sts
+std/core/std_core_typeduarrays_methods__BigUint64Array.sts
+### Issue 20130 end
 
 ### Failures #15642
 # Type violation in type erasure

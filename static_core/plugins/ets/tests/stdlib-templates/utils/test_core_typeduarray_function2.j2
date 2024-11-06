@@ -29,9 +29,12 @@ function main(): int {
   failures += check(testNonEmptyTypedUArraySetValue(), "Test Set Value to Nonempty Array");
 
   failures += check(testTypedUArrayIncludesOneParamWithNormalNum(), "Test Includes One Param With NormalNum");
-  failures += check(testTypedUArrayIncludesOneParamWithAbnormalNum(), "Test Includes One Param With AbnormalNum");
   failures += check(testTypedUArrayIncludesTwoParamWithNormalIndex(), "Test Includes Two Param With Normal Index");
+
+  {%- if item.objectType != 'BigUint64Array' %}
+  failures += check(testTypedUArrayIncludesOneParamWithAbnormalNum(), "Test Includes One Param With AbnormalNum");
   failures += check(testTypedUArrayIncludesTwoParamWithAbnormalIndex(), "Test Includes Two Param With Abnormal Index");
+  {% endif %}
 
   failures += check(testTypedUArrayJoinWithEmptyArray(), "Test Join With EmptyArray");
   failures += check(testTypedUArrayJoinWithNonEmptyArray(), "Test Join With NonEmptyArray");
@@ -70,11 +73,18 @@ function check(result: number, message: String): number {
   return fail;
 }
 
-const normalSource: {{.item.type}}[] = {{.item.data}};
-const abnormalSource: {{.item.type}}[] = {{.item.abnormalData}};
+const normalSource: {{.item.sourceElementsType}}[] = {{.item.data}};
+const abnormalSource: {{.item.sourceElementsType}}[] = {{.item.abnormalData}};
 
 function testSubarrayWithOutParam(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(10),
+      {{.item.create}}(20),
+      {{.item.create}}(30),
+      {{.item.create}}(40),
+      {{.item.create}}(50),
+      {{.item.create}}(60)
+  ];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -131,7 +141,14 @@ function testSubarrayWithOutParam(): int {
 }
 
 function testSubarrayOneParam(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60];
+  let source: {{.item.type}}[] = [
+    {{.item.create}}(10),
+    {{.item.create}}(20),
+    {{.item.create}}(30),
+    {{.item.create}}(40),
+    {{.item.create}}(50),
+    {{.item.create}}(60)
+  ];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -223,7 +240,14 @@ function testSubarrayOneParam(): int {
 }
 
 function testSubarrayTwoParams(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(10),
+      {{.item.create}}(20),
+      {{.item.create}}(30),
+      {{.item.create}}(40),
+      {{.item.create}}(50),
+      {{.item.create}}(60)
+  ];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -374,7 +398,14 @@ function testSubarrayTwoParams(): int {
 }
 
 function testSubarrayTwoParamsWithOtherNumber(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(10),
+      {{.item.create}}(20),
+      {{.item.create}}(30),
+      {{.item.create}}(40),
+      {{.item.create}}(50),
+      {{.item.create}}(60)
+  ];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -445,7 +476,7 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
 }
 
 function testSubarrayOneLengthTwoParams(): int {
-  let source: {{.item.type}}[] = [10];
+  let source: {{.item.type}}[] = [{{.item.create}}(10)];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -504,20 +535,20 @@ function testNonEmptyTypedUArraySetValue(): number {
   let length = typedUArray.length;
 
   try {
-    typedUArray[0] = 1 as number;
-    typedUArray[1] = 2 as number;
+    typedUArray[0] = {{.item.create}}(1);
+    typedUArray[1] = {{.item.create}}(2);
     {%- if item.objectType == 'Uint8Array' or item.objectType == 'Uint8ClampedArray' %}
-    typedUArray[2] = 255 as number;
-    typedUArray[3] = 257 as number;
-    typedUArray[4] = 512 as number;
+    typedUArray[2] = {{.item.create}}(255);
+    typedUArray[3] = {{.item.create}}(257);
+    typedUArray[4] = {{.item.create}}(512);
     {%- elif item.objectType == 'Uint16Array' %}
-    typedUArray[2] = 65535 as number;
-    typedUArray[3] = 65537 as number;
-    typedUArray[4] = 65536*2 as number;
+    typedUArray[2] = {{.item.create}}(65535);
+    typedUArray[3] = {{.item.create}}(65537);
+    typedUArray[4] = {{.item.create}}(65536*2);
     {%- else %}
-    typedUArray[2] = 4294967295 as number;
-    typedUArray[3] = 4294967297 as number;
-    typedUArray[4] = 4294967296*2 as number;
+    typedUArray[2] = {{.item.create}}(4294967295);
+    typedUArray[3] = {{.item.create}}(4294967297);
+    typedUArray[4] = {{.item.create}}(4294967296*2);
     {%- endif %}
   } catch(e) {
     console.log(e);
@@ -525,17 +556,19 @@ function testNonEmptyTypedUArraySetValue(): number {
   }
 
   {%- if item.objectType == 'Uint8Array' %}
-    let expectedArray: {{.item.type}}[] = [1, 2, 255, 1, 0];
+    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 255, 1, 0];
   {%- elif item.objectType == 'Uint8ClampedArray' %}
-    let expectedArray: {{.item.type}}[] = [1, 2, 255, 255, 255];
+    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 255, 255, 255];
   {%- elif item.objectType == 'Uint16Array' %}
-    let expectedArray: {{.item.type}}[] = [1, 2, 65535, 1, 0];
+    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 65535, 1, 0];
+  {% elif item.objectType == 'BigUint64Array' %}
+    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 4294967295, 4294967297, 4294967296*2]
   {%- else %}
-    let expectedArray: {{.item.type}}[] = [1, 2, 4294967295, 1, 0];
+    let expectedArray: {{.item.sourceElementsType}}[] = [1, 2, 4294967295, 1, 0];
   {%- endif %}
 
   for (let i = 0; i < typedUArray.length; i++) {
-    if (typedUArray[i] != expectedArray[i]) {
+    if (typedUArray[i] != {{.item.create}}(expectedArray[i])) {
       console.log("Test failed. testNonEmptyTypedUArraySetValue: " + JSON.stringify(typedUArray[i]));
       return fail;
     }
@@ -567,10 +600,10 @@ function testTypedUArrayIncludesOneParamWithNormalNum(): number {
     return fail;
   }
 
-  let searchElementArray: {{.item.type}}[] =  {{.item.data}};
+  let searchElementArray: {{.item.sourceElementsType}}[] =  {{.item.data}};
 
   for (let i = 0; i < searchElementArray.length; i++) {
-    if (!typedUArray.includes(searchElementArray[i])) {
+    if (!typedUArray.includes({{.item.create}}(searchElementArray[i]))) {
       console.log("Test failed. testTypedUArrayIncludesOneParamWithNormalNum: typed" + JSON.stringify(typedUArray[i]));
       console.log("Test failed. testTypedUArrayIncludesOneParamWithNormalNum: " + JSON.stringify(searchElementArray[i]));
       return fail;
@@ -588,6 +621,7 @@ function testTypedUArrayIncludesOneParamWithNormalNum(): number {
   return success;
 }
 
+{%- if item.objectType != 'BigUint64Array' %}
 // Test case for typedUArray.includes(searchElement) with abnormal number
 function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
   let ss = new ArrayBuffer(abnormalSource.length as int * {{.item.primitiveSizeBytes}});
@@ -655,10 +689,17 @@ function testTypedUArrayIncludesOneParamWithAbnormalNum(): number {
   }
   return success;
 }
+{% endif %}
 
 // Test case for typedUArray.includes(searchElement, fromIndex)
 function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
-  let source: number[] = [1, 2, 3, 4, 5];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5)
+  ];
   let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
   let typedUArray: {{.item.objectType}};
 
@@ -671,7 +712,7 @@ function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
   }
 
   let fromIndex = 1;
-  let searchElement = 3;
+  let searchElement = {{.item.create}}(3);
   // Test when searchElement exists in the typedUArray with fromIndex specified
   let result = typedUArray.includes(searchElement, fromIndex);
   if (result) {
@@ -681,7 +722,7 @@ function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
     return fail;
   }
   //as int
-  result = typedUArray.includes(searchElement as int, fromIndex as int);
+  result = typedUArray.includes((searchElement{{.item.cast2primitive}}) as int, fromIndex as int);
   if (result) {
     console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
   } else {
@@ -698,7 +739,7 @@ function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
     console.log(`Includes ${searchElement} from index ${fromIndex}? false`);
   }
   //as int
-  result = typedUArray.includes(searchElement as int, fromIndex as int);
+  result = typedUArray.includes((searchElement{{.item.cast2primitive}}) as int, fromIndex as int);
   if (result) {
     console.log(`Includes ${searchElement} from index ${fromIndex}? true`);
     return fail;
@@ -709,9 +750,16 @@ function testTypedUArrayIncludesTwoParamWithNormalIndex(): number {
   return success;
 }
 
+{%- if item.objectType != 'BigUint64Array' %}
 // Test case for typedUArray.includes(searchElement, fromIndex)
 function testTypedUArrayIncludesTwoParamWithAbnormalIndex(): number {
-  let source: number[] = [1, 2, 3, 4, 5];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5)
+  ];
   let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
   let typedUArray: {{.item.objectType}};
 
@@ -723,7 +771,7 @@ function testTypedUArrayIncludesTwoParamWithAbnormalIndex(): number {
     return fail;
   }
 
-  let searchElement = 1;
+  let searchElement = {{.item.create}}(1);
   // Test when searchElement exists in the typedUArray with fromIndex specified
   //fromIndex = undefined,fromIndex = 0
   let result = typedUArray.includes(searchElement, undefined);
@@ -789,6 +837,7 @@ function testTypedUArrayIncludesTwoParamWithAbnormalIndex(): number {
 
   return success;
 }
+{% endif %}
 
 function compareJoinResult(typedUArray:{{.item.objectType}}, separator: string | undefined, expected: string): number {
    const result = typedUArray.join(separator);
@@ -829,7 +878,13 @@ function testTypedUArrayJoinWithEmptyArray(): number {
 }
 
 function testTypedUArrayJoinWithNonEmptyArray(): number {
-  let source: number[] = [1, 2, 3, 4, 5];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5)
+  ];
   let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
   let typedUArray: {{.item.objectType}};
 
@@ -872,7 +927,13 @@ function testTypedUArrayJoinWithNonEmptyArray(): number {
 }
 
 function testTypedUArrayJoinWithNonEmptyArrayAndAbnormalStr(): number {
-  let source: number[] = [1, 2, 3, 4, 5];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5)
+  ];
   let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
   let typedUArray: {{.item.objectType}};
 
@@ -996,7 +1057,13 @@ function testTypedUArrayKeysWithMultipleElementArray(): number {
 
 // Test case for forEach(callbackFn)
 function testTypedUArrayForEach(): number {
-  let source = [1, 2, 3, 4, 5];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5)
+  ];
   let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
   let typedUArray: {{.item.objectType}};
 
@@ -1009,14 +1076,14 @@ function testTypedUArrayForEach(): number {
   }
 
   let resultArray = new {{.item.objectType}}(typedUArray.length);
-  typedUArray.forEach((value: number, index: number, array: {{.item.objectType}}) => {
-    resultArray[index] = value * 2;
+  typedUArray.forEach((value: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
+    resultArray[index] = value * {{.item.create}}(2);
   });
 
   // Compare the modified array with the expected result
   const expectedArray = [2, 4, 6, 8, 10];
   for (let i = 0; i < resultArray.length; i++) {
-    if (resultArray[i] != expectedArray[i]) {
+    if (resultArray[i] != {{.item.create}}(expectedArray[i])) {
       console.log("Test failed. testTypedUArrayForEach: " + JSON.stringify(resultArray[i]));
       return fail;
     }
@@ -1026,7 +1093,13 @@ function testTypedUArrayForEach(): number {
 
 // Test case for forEach(callbackFn: (value: number, index: number) => void)
 function testTypedUArrayForEachValueIndexCallback(): number {
-    let source = [1, 2, 3, 4, 5];
+    let source: {{.item.type}}[] = [
+        {{.item.create}}(1),
+        {{.item.create}}(2),
+        {{.item.create}}(3),
+        {{.item.create}}(4),
+        {{.item.create}}(5)
+    ];
     let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
     let typedUArray: {{.item.objectType}};
 
@@ -1039,14 +1112,14 @@ function testTypedUArrayForEachValueIndexCallback(): number {
     }
 
     let resultArray = new {{.item.objectType}}(typedUArray.length);
-    typedUArray.forEach((value: number, index: number) => {
-      resultArray[index] = value * 2;
+    typedUArray.forEach((value: {{.item.type}}, index: number) => {
+      resultArray[index] = value * {{.item.create}}(2);
     });
 
     // Compare the modified array with the expected result
     const expectedArray = [2, 4, 6, 8, 10];
     for (let i = 0; i < resultArray.length; i++) {
-      if (resultArray[i] != expectedArray[i]) {
+      if (resultArray[i] != {{.item.create}}(expectedArray[i])) {
         console.log("Test failed. testTypedUArrayForEach: " + JSON.stringify(resultArray[i]));
         return fail;
       }
@@ -1056,7 +1129,13 @@ function testTypedUArrayForEachValueIndexCallback(): number {
 
 // Test case for forEach(callbackFn: (value: number) => void)
 function testTypedUArrayForEachValueCallback(): number {
-    let source = [1, 2, 3, 4, 5];
+    let source: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5)
+    ];
     let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
     let typedUArray: {{.item.objectType}};
 
@@ -1070,15 +1149,15 @@ function testTypedUArrayForEachValueCallback(): number {
 
     let resultArray = new {{.item.objectType}}(typedUArray.length);
     let index = 0;
-    typedUArray.forEach((value: number) => {
-      resultArray[index] = value * 2;
+    typedUArray.forEach((value: {{.item.type}}) => {
+      resultArray[index] = value * {{.item.create}}(2);
       index++;
     });
 
     // Compare the modified array with the expected result
     const expectedArray = [2, 4, 6, 8, 10];
     for (let i = 0; i < resultArray.length; i++) {
-      if (resultArray[i] != expectedArray[i]) {
+      if (resultArray[i] != {{.item.create}}(expectedArray[i])) {
         console.log("Test failed. testTypedUArrayForEach: " + JSON.stringify(resultArray[i]));
         return fail;
       }
@@ -1088,7 +1167,13 @@ function testTypedUArrayForEachValueCallback(): number {
 
 // Test case for forEach(callbackFn: () => void)
 function testTypedUArrayForEachNoArgsCallback(): number {
-    let source = [1, 2, 3, 4, 5];
+    let source: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5)
+    ];
     let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
     let typedUArray: {{.item.objectType}};
 
@@ -1103,13 +1188,13 @@ function testTypedUArrayForEachNoArgsCallback(): number {
     let resultArray = new {{.item.objectType}}(typedUArray.length);
     let index = 0;
     typedUArray.forEach(() => {
-        resultArray[index] = typedUArray[index] * 2;
+        resultArray[index] = typedUArray[index] * {{.item.create}}(2);
         index++;
     });
     // Compare the modified array with the expected result
     const expectedArray = [2, 4, 6, 8, 10];
     for (let i = 0; i < resultArray.length; i++) {
-        if (resultArray[i] != expectedArray[i]) {
+        if (resultArray[i] != {{.item.create}}(expectedArray[i])) {
             console.log("Test failed. testTypedUArrayForEachNoArgsCallback: " + JSON.stringify(resultArray[i]));
             return fail;
         }

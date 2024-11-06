@@ -14,6 +14,7 @@
 - {
   objectType: "Int8Array",
   type: "number",
+  elementType: "byte",
   primitiveType: "byte",
   cast2primitive: " as byte",
   create: "",
@@ -24,6 +25,7 @@
 - {
   objectType: "Int16Array",
   type: "number",
+  elementType: "short",
   primitiveType: "short",
   cast2primitive: " as short",
   create: "",
@@ -33,15 +35,18 @@
 - {
   objectType: "Int32Array",
   type: "number",
+  elementType: "int",
   primitiveType: "int",
   cast2primitive: " as int",
   create: "",
   primitiveSizeBytes: 4,
   data: "[Int.MIN_VALUE, -1234567, -7777, -1, 0, 1, 7777, 1234567, Int.MAX_VALUE]"
 }
+
 - {
   objectType: "BigInt64Array",
   type: "BigInt",
+  elementType: "bigint",
   primitiveType: "long",
   cast2primitive: ".getLong()",
   create: "new BigInt",
@@ -52,6 +57,7 @@
 - {
   objectType: "Float64Array",
   type: "number",
+  elementType: "double",
   primitiveType: "double",
   cast2primitive: " as double",
   create: "",
@@ -62,6 +68,7 @@
 - {
   objectType: "Float64Array",
   type: "number",
+  elementType: "double",
   primitiveType: "double",
   cast2primitive: " as double",
   create: "",
@@ -72,6 +79,7 @@
 - {
   objectType: "Float32Array",
   type: "number",
+  elementType: "float",
   primitiveType: "float",
   cast2primitive: " as float",
   create: "",

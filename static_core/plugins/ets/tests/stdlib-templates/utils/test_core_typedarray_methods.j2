@@ -36,6 +36,16 @@ function main(): int {
     failures += check(testNonEmptyTypedArrayReverse(), "Test NonEmpty Array Reverse");
     failures += check(testEmptyTypedArrayReverse(), "Test Empty Array Reverse");
 
+    failures += check(testTypedArrayEvery(), "Test .every method")
+    failures += check(testTypedArraySome(), "Test .some method")
+    failures += check(testTypedArraySort(), "Test .sort method")
+    failures += check(testTypedArrayFindAndFindIndex(), "Test .find and .findIndex method")
+    failures += check(testTypedArrayMap(), "Test .map method")
+    failures += check(testTypedArrayOf(), "Test .of method")
+    failures += check(testTypedArrayIndexOf(), "Test .indexOf method")
+    failures += check(testTypedArrayReduce(), "Test reduce method")
+    failures += check(testTypedArrayReduceRight(), "Test reduceRight method")
+
     if (failures > 0){
         console.log("failed");
         return fail;
@@ -83,11 +93,11 @@ function testTypedArrayIterator(): number {
     let length = typedArray.length;
 
     try {
-        typedArray[0] = 1 as number;
-        typedArray[1] = 2 as number;
-        typedArray[2] = 3 as number;
-        typedArray[3] = 4 as number;
-        typedArray[4] = 5 as number;
+        typedArray[0] = {{.item.create}}(1);
+        typedArray[1] = {{.item.create}}(2);
+        typedArray[2] = {{.item.create}}(3);
+        typedArray[3] = {{.item.create}}(4);
+        typedArray[4] = {{.item.create}}(5);
     } catch(e) {
         console.log(e);
         return fail;
@@ -98,10 +108,10 @@ function testTypedArrayIterator(): number {
     let counter: int = 0;
     while (!next.done) {
         if (next.value == undefined) {
-                return fail;
+            return fail;
         }
-        if (typedArray[counter] as number != (next.value) as number) {    
-                return fail;
+        if (typedArray[counter]{{.item.cast2primitive}} != (next.value!){{.item.cast2primitive}}) {    
+            return fail;
         }
         next = arrayIterator.next()
         counter++
@@ -139,7 +149,12 @@ function testEmptyTypedArrayToString(): number {
 }
 
 function testNonEmptyTypedArrayToString(): number {
-    let source1: number[] = [1, 2, 3, 4, 5];
+    let source1: {{.item.elementType}}[] = [
+        {{.item.create}}(1),
+        {{.item.create}}(2),
+        {{.item.create}}(3),
+        {{.item.create}}(4),
+        {{.item.create}}(5)];
     let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
     let typedArray: {{.item.objectType}};
 
@@ -164,7 +179,6 @@ function testNonEmptyTypedArrayToString(): number {
 }
 
 function testNonEmptyTypedArrayAt(): number {
-    //let source: number[] = [1, 2, 3, 4, 5];
     let ss = new ArrayBuffer(source.length * {{.item.primitiveSizeBytes}});
     let typedArray: {{.item.objectType}};
 
@@ -179,34 +193,35 @@ function testNonEmptyTypedArrayAt(): number {
     let index = 0;
     let length = typedArray.length;
     let atResult = typedArray.at(index);
-    console.log("testNonEmptyTypedArrayAt result: " + atResult);
+    console.log("testNonEmptyTypedArrayAt result [1/3]: " + atResult);
+
     // Assertion
-    if (atResult == new Number(source[index])) {
-        console.log("testNonEmptyTypedArrayAt test passed.");
+    if (atResult == {{.item.create}}(source[index])) {
+        console.log("testNonEmptyTypedArrayAt [1/3] test passed.");
     } else {
-        console.log("testNonEmptyTypedArrayAt test failed.");
+        console.log("testNonEmptyTypedArrayAt [1/3] test failed.");
         return fail;
     }
 
     index = -1;
     atResult = typedArray.at(index);
-    console.log("testNonEmptyTypedArrayAt result: " + atResult);
+    console.log("testNonEmptyTypedArrayAt [2/3] result: " + atResult);
     // Assertion
-    if (atResult == new Number(source[index + length as int])) {
-        console.log("testNonEmptyTypedArrayAt test passed.");
+    if (atResult == {{.item.create}}(source[index + length as int])) {
+        console.log("testNonEmptyTypedArrayAt [2/3] test passed.");
     } else {
-        console.log("testNonEmptyTypedArrayAt test failed.");
+        console.log("testNonEmptyTypedArrayAt [2/3] test failed.");
         return fail;
     }
 
     index = typedArray.length as int;
     atResult = typedArray.at(index);
-    console.log("testNonEmptyTypedArrayAt result: " + atResult);
+    console.log("testNonEmptyTypedArrayAt result [3/3]: " + atResult);
     // Assertion
     if (atResult == undefined) {
-        console.log("testNonEmptyTypedArrayAt test passed.");
+        console.log("testNonEmptyTypedArrayAt [3/3] test passed.");
     } else {
-        console.log("testNonEmptyTypedArrayAt test failed.");
+        console.log("testNonEmptyTypedArrayAt [3/3] test failed.");
         return fail;
     }
     return success;
@@ -235,7 +250,12 @@ function testEmptyTypedArrayAt(): number {
 }
 
 function testNonEmptyTypedArrayReverse(): number {
-    let source1: {{.item.primitiveType}}[] = [5, 3, 1, 4, 2];
+    let source1: {{.item.elementType}}[] = [
+        {{.item.create}}(5),
+        {{.item.create}}(3),
+        {{.item.create}}(1),
+        {{.item.create}}(4),
+        {{.item.create}}(2)];
     let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
     let typedArray: {{.item.objectType}};
 
@@ -249,7 +269,12 @@ function testNonEmptyTypedArrayReverse(): number {
 
     // Test toReversed function
     let reversedArray: {{.item.objectType}} = typedArray.reverse();
-    let expectedArray: {{.item.primitiveType}}[] = [2, 4, 1, 3, 5];
+    let expectedArray: {{.item.elementType}}[] = [
+        {{.item.create}}(2),
+        {{.item.create}}(4),
+        {{.item.create}}(1),
+        {{.item.create}}(3),
+        {{.item.create}}(5)];
     for (let i = 0; i < reversedArray.length; i++) {
         if (reversedArray[i] != expectedArray[i]) {
             console.log("Test failed. testNonEmptyTypedArrayReverse: " + JSON.stringify(reversedArray[i]));
@@ -297,7 +322,7 @@ function testTypedArrayIteratorSingleElement(): number {
     let singleArray = new {{.item.objectType}}(new ArrayBuffer(1 *  {{.item.primitiveSizeBytes}}));
 
     try {
-        singleArray[0] = 99;
+        singleArray[0] = {{.item.create}}(99);
     } catch(e) {
         console.log(e);
         return fail;
@@ -306,7 +331,7 @@ function testTypedArrayIteratorSingleElement(): number {
     let singleIterator = singleArray.$_iterator();
     let singleNext = singleIterator.next();
 
-    if (singleNext.done || singleNext.value != 99) {
+    if (singleNext.done || singleNext.value != {{.item.create}}(99)) {
         return fail;
     }
 
@@ -330,11 +355,11 @@ function testTypedArrayIteratorAfterModification(): number {
   }
 
   try {
-      typedArray[0] = 1;
-      typedArray[1] = 2;
-      typedArray[2] = 3;
-      typedArray[3] = 4;
-      typedArray[4] = 5;
+      typedArray[0] = {{.item.create}}(1);
+      typedArray[1] = {{.item.create}}(2);
+      typedArray[2] = {{.item.create}}(3);
+      typedArray[3] = {{.item.create}}(4);
+      typedArray[4] = {{.item.create}}(5);
   } catch(e) {
       console.log(e);
       return fail;
@@ -343,7 +368,12 @@ function testTypedArrayIteratorAfterModification(): number {
     // Testing iterator after modification
     let arrayIterator = typedArray.$_iterator();
     let next = arrayIterator.next();
-    let expectedValues = [1, 2, 3, 4, 5];
+    let expectedValues: {{.item.elementType}}[] = [
+        {{.item.create}}(1),
+        {{.item.create}}(2),
+        {{.item.create}}(3),
+        {{.item.create}}(4),
+        {{.item.create}}(5)];
     let counter: int = 0;
 
     while (!next.done) {
@@ -362,8 +392,8 @@ function testTypedArrayIteratorAfterModification(): number {
     }
 
     // Modify a value
-    typedArray[0] = 99;
-    if (typedArray.$_iterator().next().value != 99) {
+    typedArray[0] = {{.item.create}}(99);
+    if (typedArray.$_iterator().next().value != {{.item.create}}(99)) {
         return fail;
     }
     return success;
@@ -380,11 +410,11 @@ function testTypedArrayIteratorAfterCompletion(): number {
         return fail;
     }
 
-    typedArray[0] = 1;
-    typedArray[1] = 2;
-    typedArray[2] = 3;
-    typedArray[3] = 4;
-    typedArray[4] = 5;
+    typedArray[0] = {{.item.create}}(1);
+    typedArray[1] = {{.item.create}}(2);
+    typedArray[2] = {{.item.create}}(3);
+    typedArray[3] = {{.item.create}}(4);
+    typedArray[4] = {{.item.create}}(5);
 
     let arrayIterator = typedArray.$_iterator();
     let next = arrayIterator.next();
@@ -401,3 +431,439 @@ function testTypedArrayIteratorAfterCompletion(): number {
 
     return success;
 }
+
+type ObjectTypeAndExpectations<T> = [{{.item.objectType}}, T]
+
+const testTypedArrayEvery = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArrayEvery",
+    [
+        [
+            {{.item.objectType}}.of({{.item.create}}(1), {{.item.create}}(2)),
+            [true, false, true, false, true, false, false]
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+
+        const isTrueEverywhere = array.every(() => true)
+        const isFalseEverywhere = array.every(() => false)
+
+        const isPositive = array.every((x: {{.item.type}}) => x > {{.item.create}}(0))
+        const isNegative = array.every((x: {{.item.type}}) => x < {{.item.create}}(0))
+
+        const isValueEqualToIndexPlus1 = array.every((x: {{.item.type}}, index: number) => x == {{.item.create}}(index + 1))
+        const isValueEqualToIndex = array.every((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
+
+        const rhs = array.reduce((acc: {{.item.type}}, x: {{.item.type}}) => acc + x)
+
+        const isArraySumEqualToIndexPlusValue =
+            array.every(
+                (x: {{.item.type}}, index: number, array: {{.item.objectType}}) => {
+                    return x + {{.item.create}}(index) == rhs
+                })
+
+        let failures = 0
+
+        failures += check(boolToResult(isTrueEverywhere == expected[0]), ".every(() => true)")
+        failures += check(boolToResult(isFalseEverywhere == expected[1]), ".every(() => false)")
+        failures += check(boolToResult(isPositive == expected[2]), ".every(x > 0)")
+        failures += check(boolToResult(isNegative == expected[3]), ".every(x < 0)")
+        failures += check(boolToResult(isValueEqualToIndexPlus1 == expected[4]), ".every((x, index) => x == index + 1)")
+        failures += check(boolToResult(isValueEqualToIndex == expected[5]), ".every((x, index) => x == index)")
+        failures += check(boolToResult(isArraySumEqualToIndexPlusValue == expected[6]), ".every((x, index, arr) => x + index == sum(arr))")
+
+        return failures == 0 ? success: fail
+    }
+)
+
+
+const testTypedArraySome = parametrize<ObjectTypeAndExpectations<boolean[]>>(
+    "testTypedArraySome",
+    [
+        [
+            {{.item.objectType}}.of({{.item.create}}(1), {{.item.create}}(2)),
+            [true, true, false]
+        ] as ObjectTypeAndExpectations<boolean[]>,
+        [
+            {{.item.objectType}}.of({{.item.create}}(-1), {{.item.create}}(-2)),
+            [true, false, false]
+        ] as ObjectTypeAndExpectations<boolean[]>,
+    ],
+    (args: ObjectTypeAndExpectations<boolean[]>): number => {
+        const array = args[0]
+        const expected = args[1]
+
+        const constTrue = array.some(() => true)
+        const hasPositivesSome = array.some((x: {{.item.type}}) => x > {{.item.create}}(0))
+        const hasElementsWithValueEqIndex = array.some((x: {{.item.type}}, index: number) => x == {{.item.create}}(index))
+
+        let failures = 0
+
+        failures += check(boolToResult(constTrue == expected[0]), "const true")
+        failures += check(boolToResult(hasPositivesSome == expected[1]), "has positives")
+        failures += check(boolToResult(hasElementsWithValueEqIndex == expected[2]), "has elements where value == index")
+
+        return failures == 0 ? success: fail
+    }
+)
+
+const testTypedArraySort = parametrize<ObjectTypeAndExpectations<number[]>>(
+    "testTypedArraySort",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(-1),
+                {{.item.create}}(-100),
+                {{.item.create}}(0),
+                {{.item.create}}(111),
+                {{.item.create}}(-50)
+            ),
+            [-100, -50, -1, 0, 111] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(-1),
+                {{.item.create}}(-1),
+                {{.item.create}}(0),
+                {{.item.create}}(-1),
+                {{.item.create}}(2)
+            ),
+            [-1, -1, -1, 0, 2] as number[]
+        ] as ObjectTypeAndExpectations<number[]>,
+    ],
+    (args: ObjectTypeAndExpectations<number[]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const expected = new {{.item.objectType}}(args[1])
+
+        array.sort()
+
+        const isEqualToGold =
+            array.every((x: {{.item.type}}, index: number) => x == expected[index as int])
+
+        // descending
+        array.sort(
+            (x: {{.item.type}}, y: {{.item.type}}) => {
+                return new Number(y - x)
+            }
+        )
+
+        const isEqualToGoldReversed =
+            array.every((x: {{.item.type}}, index: number) => x == expected[expected.length - index - 1])
+
+        let failures = 0
+
+        failures += check(boolToResult(isEqualToGold), "is equal to gold result")
+        failures += check(boolToResult(isEqualToGoldReversed), "is equal to gold reversed result")
+
+        return failures == 0 ? success: fail
+    }
+)
+
+type ApplyFunction<T> =
+    (element: {{.item.type}}, index: number, array: {{.item.objectType}}) => T
+    | (element: {{.item.type}}, index: number) => T
+    | (element: {{.item.type}}) => T
+    | () => T
+type FindCallable = ApplyFunction<boolean>
+
+type ExpectationsOptIN = [{{.item.type}} | undefined, number | undefined]
+type FCAndExpectations = [FindCallable, ExpectationsOptIN]
+
+const testTypedArrayFindAndFindIndex = parametrize<ObjectTypeAndExpectations<FCAndExpectations>>(
+   "testTypedArrayFindAndFindIndex",
+   [
+       [
+           {{.item.objectType}}.of(
+               {{.item.create}}(1),
+               {{.item.create}}(2),
+               {{.item.create}}(-5),
+               {{.item.create}}(111),
+               {{.item.create}}(-50)
+           ),
+           [
+               (element: {{.item.type}}, index: number, array: {{.item.objectType}}) => element < {{.item.create}}(0),
+               [{{.item.create}}(-5), 2 as number] as ExpectationsOptIN
+           ]
+       ] as ObjectTypeAndExpectations<FCAndExpectations>,
+   ],
+   (args: ObjectTypeAndExpectations<FCAndExpectations>): number => {
+       const array = new {{.item.objectType}}(args[0])
+       const cb = args[1][0]
+       const expected = args[1][1]
+
+       let result: ExpectationsOptIN = [undefined, undefined]
+
+       for (let i = 0; i < array.length; ++i) {
+            let cbRes = cb(array[i], i, array)
+            if (cbRes == true) {
+                result = [array[i], i] as ExpectationsOptIN
+                break
+            }
+       }
+       const isEqual = result[0] == expected[0] && result[1] == expected[1]
+
+       let failures = 0
+       failures += check(boolToResult(isEqual), "is equal to [element, index]")
+       return failures == 0 ? success: fail
+   }
+)
+
+
+function testTypedArrayMap(): number {
+    let ta = {{.item.objectType}}.of(
+        {{.item.create}}(1),
+        {{.item.create}}(2),
+        {{.item.create}}(-5),
+        {{.item.create}}(10),
+        {{.item.create}}(-10)
+    )
+
+    let mapWithConst = ta.map((): {{.item.type}} => ta[0])
+    const isMappedWithConst = mapWithConst.every((num: {{.item.type}}) => num == ta[0])
+
+    let squared = ta.map((num: {{.item.type}}) => num * num)
+    const isSquared = squared.every(
+       (num: {{.item.type}}, index: number) => num == ta[index] * ta[index]
+    )
+
+    let mapWithIndex = ta.map((num: {{.item.type}}, index: number) => num + {{.item.create}}(index))
+    const isMappedWithIndex = mapWithIndex.every(
+       (num: {{.item.type}}, index: number) => num == ta[index] + {{.item.create}}(index)
+    )
+
+    let mapWithIndexAndThis = ta.map((num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num)
+    const isMappedWithIndexAndThis = mapWithIndexAndThis.every(
+       (num: {{.item.type}}, index: number, array: {{.item.objectType}}) => num == array[index]
+    )
+
+    let failures = 0
+
+    failures += check(boolToResult(isMappedWithConst), "is equal to constant element at 0 index")
+    failures += check(boolToResult(isSquared), "is equal to newNum := num * num")
+    failures += check(boolToResult(isMappedWithIndex), "is equal to newNum := num + index")
+    failures += check(boolToResult(isMappedWithIndexAndThis), "is equal to newNum := num with full args list")
+
+    return failures == 0 ? success: fail
+}
+
+const testTypedArrayOf = parametrize<{{.item.type}}[]>(
+   "testTypedArrayOf",
+   [
+       [
+           {{.item.create}}(-1),
+           {{.item.create}}(-2),
+           {{.item.create}}(0),
+           {{.item.create}}(3),
+           {{.item.create}}(4)
+       ] as {{.item.type}}[]
+   ],
+   (args: {{.item.type}}[]): number => {
+       const viaCtor = new {{.item.objectType}}(args)
+       const viaOf = {{.item.objectType}}.of(...args)
+
+       const isEqual = viaCtor.every((x: {{.item.type}}, index: number) => x == viaOf[index as int])
+
+       let failures = 0
+       failures += check(boolToResult(isEqual), "result of .of method call is equal to ctor invoke")
+       failures += check(boolToResult(viaCtor.length == viaOf.length), "length of results (using constructor and .of method) must be equal")
+       return failures == 0 ? success: fail
+   }
+)
+
+const testTypedArrayIndexOf = parametrize<ObjectTypeAndExpectations<[{{.item.type}}, number]>>(
+    "testTypedArrayIndexOf",
+    [
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(-1),
+                {{.item.create}}(-2),
+                {{.item.create}}(0),
+                {{.item.create}}(3),
+                {{.item.create}}(4)
+            ),
+            [
+                {{.item.create}}(3), // value to search for
+                3 // expected index
+            ]
+        ] as ObjectTypeAndExpectations<[{{.item.type}}, number]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(10),
+                {{.item.create}}(20),
+                {{.item.create}}(30),
+                {{.item.create}}(40)
+            ),
+            [
+                {{.item.create}}(20), // value to search for
+                1 // expected index
+            ]
+        ] as ObjectTypeAndExpectations<[{{.item.type}}, number]>,
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(2),
+                {{.item.create}}(3)
+            ),
+            [
+                {{.item.create}}(4), // value to search for (not found)
+                -1 // expected result when not found
+            ]
+        ] as ObjectTypeAndExpectations<[{{.item.type}}, number]>,
+    ],
+    (args: ObjectTypeAndExpectations<[{{.item.type}}, number]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const valueToSearch = args[1][0]
+        const expectedIndex = args[1][1]
+
+        const resultIndex = array.indexOf(valueToSearch)
+
+        const isCorrectIndex = resultIndex == expectedIndex
+
+        let failures = 0
+        failures += check(boolToResult(isCorrectIndex), `expected index ${expectedIndex}, got ${resultIndex}`)
+        return failures == 0 ? success : fail
+    }
+)
+
+const testTypedArrayReduce = parametrize<ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>>(
+    "testTypedArrayReduce",
+    [
+        // Test case: Using reduce with an initial value and a simple addition callback
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(2),
+                {{.item.create}}(3),
+                {{.item.create}}(4)
+            ),
+            [
+                {{.item.create}}(10), // Initial value for reduction
+                {{.item.create}}(20)  // Expected result after reduction (10 + 1 + 2 + 3 + 4)
+            ]
+        ] as ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>,
+
+        // Test case: Using reduce without an initial value and a simple addition callback
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(5),
+                {{.item.create}}(10),
+                {{.item.create}}(15)
+            ),
+            [
+                {{.item.create}}(0), // Initial value for reduction
+                {{.item.create}}(30), // Expected result (5 + 10 + 15)
+            ]
+        ] as ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>,
+    ],
+    (args: ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const expectedResult = args[1][1]
+        const initialValue = args[1][0]
+
+        // Test callback signatures:
+
+        // () => {{.item.type}} (No parameters, just returns a constant)
+        const testNoParams = array.reduce((): {{.item.type}} => {{.item.create}}(100), initialValue)
+        const isCorrectNoParams = testNoParams == {{.item.create}}(100)
+
+        // (prev: {{.item.type}}) => {{.item.type}} (Using only the previous value, no current element)
+        const testPrevOnly = array.reduce((prev: {{.item.type}}): {{.item.type}} => prev + {{.item.create}}(1), initialValue)
+        const isCorrectPrevOnly = testPrevOnly == initialValue + {{.item.create}}(array.length)
+
+        // (prev: {{.item.type}}, cur: {{.item.type}}) => {{.item.type}} (Using previous value and current element)
+        const testPrevCur = array.reduce((prev: {{.item.type}}, cur: {{.item.type}}): {{.item.type}} => prev + cur, initialValue)
+        const isCorrectPrevCur = testPrevCur == expectedResult
+
+        // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number) => {{.item.type}} (Using prev, current element, and index)
+        const testPrevCurIndex = array.reduce((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number): {{.item.type}} => prev + cur + {{.item.create}}(curIndex), initialValue)
+        const expectedWithIndices = array.reduce((sum: {{.item.type}}, val: {{.item.type}}, idx: number) => sum + val + {{.item.create}}(idx), initialValue)
+        const isCorrectPrevCurIndex = testPrevCurIndex == {{.item.create}}(expectedWithIndices)
+
+        // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, array: {{.item.objectType}}) => {{.item.type}} (Using prev, current element, index, and array)
+        const testPrevCurIndexArray = array.reduce((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex], initialValue)
+        const expectedResultFull = array.reduce((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx], initialValue)
+        const isCorrectPrevCurIndexArray = testPrevCurIndexArray == {{.item.create}}(expectedResultFull)
+
+        // Validating all results
+        let failures = 0
+        failures += check(boolToResult(isCorrectNoParams), `Expected constant result 100, got ${testNoParams} on noParams`)
+        failures += check(boolToResult(isCorrectPrevOnly), `Expected ${expectedResult + {{.item.create}}(array.length)}, got ${testPrevOnly} on prevOnly`)
+        failures += check(boolToResult(isCorrectPrevCur), `Expected ${expectedResult}, got ${testPrevCur} on prevCur`)
+        failures += check(boolToResult(isCorrectPrevCurIndex), `Expected ${expectedWithIndices}, got ${testPrevCurIndex} on prevCurIndex`)
+        failures += check(boolToResult(isCorrectPrevCurIndexArray), `Expected ${expectedResultFull}, got ${testPrevCurIndexArray} on prevCurIndexArray`)
+
+        return failures == 0 ? success : fail
+    }
+)
+
+const testTypedArrayReduceRight = parametrize<ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>>(
+    "testTypedArrayReduceRight",
+    [
+        // Test case: Using reduceRight with an initial value and a simple addition callback
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(1),
+                {{.item.create}}(2),
+                {{.item.create}}(3),
+                {{.item.create}}(4)
+            ),
+            [
+                {{.item.create}}(10), // Initial value for reduction
+                {{.item.create}}(20)  // Expected result after reduction (10 + 4 + 3 + 2 + 1)
+            ]
+        ] as ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>,
+
+        // Test case: Using reduceRight without an initial value and a simple addition callback
+        [
+            {{.item.objectType}}.of(
+                {{.item.create}}(5),
+                {{.item.create}}(10),
+                {{.item.create}}(15)
+            ),
+            [
+                {{.item.create}}(0), // Initial value for reduction
+                {{.item.create}}(30), // Expected result (15 + 10 + 5)
+            ]
+        ] as ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>,
+    ],
+    (args: ObjectTypeAndExpectations<[{{.item.type}}, {{.item.type}}]>): number => {
+        const array = new {{.item.objectType}}(args[0])
+        const expectedResult = args[1][1]
+        const initialValue = args[1][0]
+
+        // Test callback signatures:
+
+        // () => {{.item.type}} (No parameters, just returns a constant)
+        const testNoParams = array.reduceRight((): {{.item.type}} => {{.item.create}}(100), initialValue)
+        const isCorrectNoParams = testNoParams == {{.item.create}}(100)
+
+        // (prev: {{.item.type}}) => {{.item.type}} (Using only the previous value, no current element)
+        const testPrevOnly = array.reduceRight((prev: {{.item.type}}): {{.item.type}} => prev + {{.item.create}}(1), initialValue)
+        const isCorrectPrevOnly = testPrevOnly == initialValue + {{.item.create}}(array.length)
+
+        // (prev: {{.item.type}}, cur: {{.item.type}}) => {{.item.type}} (Using previous value and current element)
+        const testPrevCur = array.reduceRight((prev: {{.item.type}}, cur: {{.item.type}}): {{.item.type}} => prev + cur, initialValue)
+        const isCorrectPrevCur = testPrevCur == expectedResult
+
+        // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number) => {{.item.type}} (Using prev, current element, and index)
+        const testPrevCurIndex = array.reduceRight((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number): {{.item.type}} => prev + cur + {{.item.create}}(curIndex), initialValue)
+        const expectedWithIndices = array.reduceRight((sum: {{.item.type}}, val: {{.item.type}}, idx: number) => sum + val + {{.item.create}}(idx), initialValue)
+        const isCorrectPrevCurIndex = testPrevCurIndex == {{.item.create}}(expectedWithIndices)
+
+        // (prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, array: {{.item.objectType}}) => {{.item.type}} (Using prev, current element, index, and array)
+        const testPrevCurIndexArray = array.reduceRight((prev: {{.item.type}}, cur: {{.item.type}}, curIndex: number, arr: {{.item.objectType}}): {{.item.type}} => prev + cur + arr[curIndex], initialValue)
+        const expectedResultFull = array.reduceRight((sum: {{.item.type}}, val: {{.item.type}}, idx: number, arr: {{.item.objectType}}) => sum + val + arr[idx], initialValue)
+        const isCorrectPrevCurIndexArray = testPrevCurIndexArray == {{.item.create}}(expectedResultFull)
+
+        // Validating all results
+        let failures = 0
+        failures += check(boolToResult(isCorrectNoParams), `Expected constant result 100, got ${testNoParams} on noParams`)
+        failures += check(boolToResult(isCorrectPrevOnly), `Expected ${expectedResult + {{.item.create}}(array.length)}, got ${testPrevOnly} on prevOnly`)
+        failures += check(boolToResult(isCorrectPrevCur), `Expected ${expectedResult}, got ${testPrevCur} on prevCur`)
+        failures += check(boolToResult(isCorrectPrevCurIndex), `Expected ${expectedWithIndices}, got ${testPrevCurIndex} on prevCurIndex`)
+        failures += check(boolToResult(isCorrectPrevCurIndexArray), `Expected ${expectedResultFull}, got ${testPrevCurIndexArray} on prevCurIndexArray`)
+
+        return failures == 0 ? success : fail
+    }
+)

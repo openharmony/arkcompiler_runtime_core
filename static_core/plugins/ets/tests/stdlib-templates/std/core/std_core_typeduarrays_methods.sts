@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-{% for item in std_core_typeduarrays_function1 %}
+{% for item in std_core_typeduarrays_methods %}
 /*---
 desc:  {function: {{.item.object_type}}_{{.item.objectType}}}
 ---*/
 
+{% include 'utils/test_utils.j2' with context %}
 {% include 'utils/test_core_typeduarray_methods.j2' %}
+
 
 
 {% endfor %}

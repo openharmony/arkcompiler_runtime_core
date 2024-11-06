@@ -29,9 +29,12 @@ function main(): int {
   failures += check(testNonEmptyTypedArraySetValue(), "Test Set Value to Nonempty Array");
 
   failures += check(testTypedArrayIncludesOneParamWithNormalNum(), "Test Includes One Param With NormalNum");
-  failures += check(testTypedArrayIncludesOneParamWithAbnormalNum(), "Test Includes One Param With AbnormalNum");
   failures += check(testTypedArrayIncludesTwoParamWithNormalIndex(), "Test Includes Two Param With Normal Index");
+
+  {%- if item.objectType != 'BigInt64Array' %}
+  failures += check(testTypedArrayIncludesOneParamWithAbnormalNum(), "Test Includes One Param With AbnormalNum");
   failures += check(testTypedArrayIncludesTwoParamWithAbnormalIndex(), "Test Includes Two Param With Abnormal Index");
+  {% endif %}
 
   failures += check(testTypedArrayJoinWithEmptyArray(), "Test Join With EmptyArray");
   failures += check(testTypedArrayJoinWithNonEmptyArray(), "Test Join With NonEmptyArray");
@@ -104,8 +107,8 @@ function testSubarrayWithOutParam(): int {
 
   //Check all the data copied;
   for (let i: int = 0; i< origin.length as int; i++) {
-    let tv = target[i] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -164,8 +167,8 @@ function testSubarrayOneParam(): int {
 
   //Check all the data copied;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -188,8 +191,8 @@ function testSubarrayOneParam(): int {
 
   //Check all the data copied;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -201,8 +204,8 @@ function testSubarrayOneParam(): int {
   /*TypedArrays will support it later
   target[subarrayStart] = 1;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -212,8 +215,8 @@ function testSubarrayOneParam(): int {
 
   origin[subarrayStart] = 2;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -257,8 +260,8 @@ function testSubarrayTwoParams(): int {
 
   //Check all the data copied;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -282,8 +285,8 @@ function testSubarrayTwoParams(): int {
 
   //Check all the data copied;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -305,8 +308,8 @@ function testSubarrayTwoParams(): int {
 
   //Check all the data copied;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -328,8 +331,8 @@ function testSubarrayTwoParams(): int {
 
   //Check all the data copied;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -351,8 +354,8 @@ function testSubarrayTwoParams(): int {
 
   //Check all the data copied;
   for (let i: int = subarrayStart; i< subarrayEnd; i++) {
-    let tv = target[i - subarrayStart] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[i - subarrayStart]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -420,8 +423,8 @@ function testSubarrayTwoParamsWithOtherNumber(): int {
 
   //Check all the data copied;
   for (let i: int = (origin.length + subarrayStart) as int; i< subarrayEnd; i++) {
-    let tv = target[(i - (origin.length + subarrayStart)) as int] as {{.item.primitiveType}};
-    let ov = origin[i] as {{.item.primitiveType}};
+    let tv = target[(i - (origin.length + subarrayStart)) as int]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(source[i] + "->" + tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -520,14 +523,17 @@ function testNonEmptyTypedArraySetValue(): number {
   {%- elif item.objectType == 'Float64Array' %}
     const minValue = Double.MIN_VALUE;
     const maxValue = Double.MAX_VALUE;
+  {% elif item.objectType == 'BigInt64Array' %}
+    const minValue = Long.MIN_VALUE;
+    const maxValue = Long.MAX_VALUE;
   {%- endif %}    
 
   try {
-    typedArray[0] = 1;
-    typedArray[1] = 2;
-    typedArray[2] = minValue;
-    typedArray[3] = maxValue;
-    typedArray[4] = -1;
+    typedArray[0] = {{.item.create}}(1);
+    typedArray[1] = {{.item.create}}(2);
+    typedArray[2] = {{.item.create}}(minValue);
+    typedArray[3] = {{.item.create}}(maxValue);
+    typedArray[4] = {{.item.create}}(-1);
   } catch(e) {
     console.log(e);
     return fail;
@@ -536,7 +542,7 @@ function testNonEmptyTypedArraySetValue(): number {
   let expectedArray: {{.item.primitiveType}}[] = [1, 2, minValue, maxValue, -1];
 
   for (let i = 0; i < typedArray.length; i++) {
-    if (typedArray[i] != expectedArray[i]) {
+    if (typedArray[i] != {{.item.create}}(expectedArray[i])) {
       console.log("Test failed. testNonEmptyTypedArraySetValue: " + typedArray[i]);
       return fail;
     }
@@ -554,7 +560,7 @@ function testNonEmptyTypedArraySetValue(): number {
   return success;
 }
 
-function checkEntries(actual: [Number, Number], expected: [Number, Number], name: string): int {
+function checkEntries(actual: [number, {{.item.type}}], expected: [number, {{.item.type}}], name: string): int {
     let result = (actual[0] == expected[0]) && (actual[1] == expected[1])
     if (result) {
         console.println("PASSED: " + name)
@@ -575,12 +581,18 @@ function assertEq(expr: boolean, expected: boolean, name: string): int {
 
 function testTypedArrayEntries(): int {
     let failures = 0
-    const firstResult = [0, 1] as [Number, Number]
-    const secondResult = [1, 2] as [Number, Number]
-    const numbers = [1 as number, 2 as number]
+    const firstResult = [0 as number, {{.item.create}}(1)] as [number, {{.item.type}}]
+    const secondResult = [1 as number, {{.item.create}}(2)] as [number, {{.item.type}}]
+    const numbers = [{{.item.create}}(1), {{.item.create}}(2)]
     let entries = (new {{.item.objectType}}(numbers)).entries()
-    failures += checkEntries(entries.next().value!, firstResult, "{{.item.objectType}}.entries() - next() #1")
-    failures += checkEntries(entries.next().value!, secondResult, "{{.item.objectType}}.entries() - next() #2")
+
+    let entry1 = entries.next().value!
+    let entry1res: [number, {{.item.type}}] = [entry1[0] as number, {{.item.create}}(entry1[1])]
+    let entry2 = entries.next().value!
+    let entry2res: [number, {{.item.type}}] = [entry2[0] as number, {{.item.create}}(entry2[1])]
+
+    failures += checkEntries(entry1res, firstResult, "{{.item.objectType}}.entries() - next() #1")
+    failures += checkEntries(entry2res, secondResult, "{{.item.objectType}}.entries() - next() #2")
     failures += assertEq(entries.next().done, true, "{{.item.objectType}}.entries() - next() #3 (done)")
     return failures
 }
@@ -619,7 +631,7 @@ function testTypedArrayIncludesOneParamWithNormalNum(): number {
   return success; 
 }
 
-
+{%- if item.objectType != 'BigInt64Array' %}
 // Test case for TypedArray.includes(searchElement) with abnormal number
 function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
   let ss = new ArrayBuffer(abnormalSource.length as int * {{.item.primitiveSizeBytes}});
@@ -682,11 +694,17 @@ function testTypedArrayIncludesOneParamWithAbnormalNum(): number {
   }
   return success; 
 }
-
+{% endif %}
 
 // Test case for TypedArray.includes(searchElement, fromIndex)
 function testTypedArrayIncludesTwoParamWithNormalIndex(): number {
-  let source1: number[] = [1, 2, 3, 4, 5];
+   let source1: {{.item.type}}[] = [
+      {{.item.create}}(1),
+      {{.item.create}}(2),
+      {{.item.create}}(3),
+      {{.item.create}}(4),
+      {{.item.create}}(5),
+  ];
   let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
   let typedArray: {{.item.objectType}};
 
@@ -721,9 +739,16 @@ function testTypedArrayIncludesTwoParamWithNormalIndex(): number {
   return success;
 }
 
+{%- if item.objectType != 'BigInt64Array' %}
 // Test case for TypedArray.includes(searchElement, fromIndex)
 function testTypedArrayIncludesTwoParamWithAbnormalIndex(): number {
-  let source1: number[] = [1, 2, 3, 4, 5];
+  let source1: {{.item.type}}[] = [
+   {{.item.create}}(1),
+   {{.item.create}}(2),
+   {{.item.create}}(3),
+   {{.item.create}}(4),
+   {{.item.create}}(5),
+  ];
   let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
   let typedArray: {{.item.objectType}};
 
@@ -803,6 +828,7 @@ function testTypedArrayIncludesTwoParamWithAbnormalIndex(): number {
 
   return success;
 }
+{% endif %}
 
 function compareJoinResult(typedArray:{{.item.objectType}}, separator: string | undefined, expected: string): number {
    const result = typedArray.join(separator);
@@ -841,7 +867,13 @@ function testTypedArrayJoinWithEmptyArray(): number {
 }
 
 function testTypedArrayJoinWithNonEmptyArray(): number {
-  let source1: number[] = [1, 2, 3, 4, 5];
+  let source1: {{.item.type}}[] = [
+   {{.item.create}}(1),
+   {{.item.create}}(2),
+   {{.item.create}}(3),
+   {{.item.create}}(4),
+   {{.item.create}}(5),
+  ];
   let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
   let typedArray: {{.item.objectType}};
 
@@ -882,7 +914,13 @@ function testTypedArrayJoinWithNonEmptyArray(): number {
 }
 
 function testTypedArrayJoinWithNonEmptyArrayAndAbnormalStr(): number {
-  let source1: number[] = [1, 2, 3, 4, 5];
+  let source1: {{.item.type}}[] = [
+   {{.item.create}}(1),
+   {{.item.create}}(2),
+   {{.item.create}}(3),
+   {{.item.create}}(4),
+   {{.item.create}}(5),
+  ];
   let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
   let typedArray: {{.item.objectType}};
 
@@ -1003,13 +1041,19 @@ function testTypedArrayKeysWithMultipleElementArray(): number {
 }
 
 
-function doubleElementsInArray(element: number, index: number, array: {{.item.objectType}}): {{.item.primitiveType}} {
-   return element * 2 as {{.item.primitiveType}};
+function doubleElementsInArray(element: {{.item.type}}, index: number, array: {{.item.objectType}}): {{.item.primitiveType}} {
+   return (element * {{.item.create}}(2)){{.item.cast2primitive}};
 }
 
 // Test case for forEach(callbackFn)
 function testTypedArrayForEach(): number{
-  let source1 = [1, 2, 3, 4, 5];
+  let source1: {{.item.type}}[] = [
+   {{.item.create}}(1),
+   {{.item.create}}(2),
+   {{.item.create}}(3),
+   {{.item.create}}(4),
+   {{.item.create}}(5),
+  ];
   let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
   let typedArray: {{.item.objectType}};
 
@@ -1022,13 +1066,13 @@ function testTypedArrayForEach(): number{
   }
 
   typedArray.forEach((value, index, array) => {
-    array[index] = value * 2;
+    array[index] = value * {{.item.create}}(2);
   });
 
   // Compare the modified array with the expected result
   const expectedArray = [2, 4, 6, 8, 10];
   for (let i = 0; i < typedArray.length; i++) {
-    if (typedArray[i] != expectedArray[i]) {
+    if (typedArray[i] != {{.item.create}}(expectedArray[i])) {
       console.log("Test failed. testTypedArrayForEach: " + JSON.stringify(typedArray[i]));
       return fail;
     }
@@ -1038,7 +1082,13 @@ function testTypedArrayForEach(): number{
 
 // Test case for forEach(callbackFn: (value: number, index: number) => void)
 function testTypedArrayForEachValueIndexCallback(): number {
-    let source1 = [1, 2, 3, 4, 5];
+    let source1: {{.item.type}}[] = [
+     {{.item.create}}(1),
+     {{.item.create}}(2),
+     {{.item.create}}(3),
+     {{.item.create}}(4),
+     {{.item.create}}(5),
+    ];
     let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
     let typedArray: {{.item.objectType}};
 
@@ -1051,14 +1101,14 @@ function testTypedArrayForEachValueIndexCallback(): number {
     }
 
     typedArray.forEach((value, index) => {
-        typedArray[index] = value * 2;
+        typedArray[index] = value * {{.item.create}}(2);
         console.log("In forEach: " + JSON.stringify(typedArray[index]));
     });
 
     // Compare the modified array with the expected result
     const expectedArray = [2, 4, 6, 8, 10];
     for (let i = 0; i < typedArray.length; i++) {
-      if (typedArray[i] != expectedArray[i]) {
+      if (typedArray[i] != {{.item.create}}(expectedArray[i])) {
         console.log("Test failed. testTypedArrayForEachValueIndexCallback: " + JSON.stringify(typedArray[i]));
         return fail;
       }
@@ -1068,7 +1118,13 @@ function testTypedArrayForEachValueIndexCallback(): number {
 
 // Test case for forEach(callbackFn: (value: number) => void)
 function testTypedArrayForEachValueCallback(): number {
-    let source1 = [1, 2, 3, 4, 5];
+    let source1: {{.item.type}}[] = [
+     {{.item.create}}(1),
+     {{.item.create}}(2),
+     {{.item.create}}(3),
+     {{.item.create}}(4),
+     {{.item.create}}(5),
+    ];
     let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
     let typedArray: {{.item.objectType}};
 
@@ -1082,7 +1138,7 @@ function testTypedArrayForEachValueCallback(): number {
 
     let index = 0;
     typedArray.forEach((value) => {
-        typedArray[index] = value * 2;
+        typedArray[index] = value * {{.item.create}}(2);
         console.log("In forEach: " + JSON.stringify(typedArray[index]));
         index++;
     });
@@ -1090,7 +1146,7 @@ function testTypedArrayForEachValueCallback(): number {
     // Compare the modified array with the expected result
     const expectedArray = [2, 4, 6, 8, 10];
     for (let i = 0; i < typedArray.length; i++) {
-        if (typedArray[i] != expectedArray[i]) {
+        if (typedArray[i] != {{.item.create}}(expectedArray[i])) {
             console.log("Test failed. testTypedArrayForEachValueCallback: " + JSON.stringify(typedArray[i]));
             return fail;
         }
@@ -1100,7 +1156,13 @@ function testTypedArrayForEachValueCallback(): number {
 
 // Test case for forEach(callbackFn: () => void)
 function testTypedArrayForEachNoArgsCallback(): number {
-    let source1 = [1, 2, 3, 4, 5];
+    let source1: {{.item.type}}[] = [
+     {{.item.create}}(1),
+     {{.item.create}}(2),
+     {{.item.create}}(3),
+     {{.item.create}}(4),
+     {{.item.create}}(5),
+    ];
     let ss = new ArrayBuffer(source1.length * {{.item.primitiveSizeBytes}});
     let typedArray: {{.item.objectType}};
 
@@ -1115,13 +1177,13 @@ function testTypedArrayForEachNoArgsCallback(): number {
     let index = 0;
     typedArray.forEach(() => {
         // As forEach without arguments is not valid for typed arrays, this implementation is just for demonstration
-        typedArray[index] = typedArray[index] * 2;
+        typedArray[index] = typedArray[index] * {{.item.create}}(2);
         index++;
     });
     // Compare the modified array with the expected result
     const expectedArray = [2, 4, 6, 8, 10];
     for (let i = 0; i < typedArray.length; i++) {
-        if (typedArray[i] != expectedArray[i]) {
+        if (typedArray[i] != {{.item.create}}(expectedArray[i])) {
             console.log("Test failed. testTypedArrayForEachNoArgsCallback: " + JSON.stringify(typedArray[i]));
             return fail;
         }

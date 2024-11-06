@@ -18,3 +18,22 @@ function print_report(max_test : int, passed : int) : void {
     console.print("PASSED:" + passed)
     console.println();
 }
+
+function parametrize<T>(name: string, inputs: T[], cb: (x: T) => number): () => number {
+    const inner = (): number => {
+        let failures = 0
+        for (let i = 0; i < inputs.length; ++i) {
+            const result = cb(inputs[i])
+            if (result > 0) {
+                console.log("✕ Failed test `" + name + "` on [" + (i+1) + "/" + inputs.length + "] args pair")
+                failures += 1
+            } else {
+                console.log("✓ Passed test `" + name + "` [" + (i+1) + "/" + inputs.length + "]")
+            }
+        }
+        return ((failures > 0) ? 1 : 0) as number
+    }
+    return inner
+}
+
+const boolToResult = (x: boolean, inverse: boolean = false): number => (inverse ? !x : x) ? success : fail;

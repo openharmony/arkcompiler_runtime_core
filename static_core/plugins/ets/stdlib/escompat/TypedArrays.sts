@@ -914,7 +914,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE: This code section is responsible for optimizing for some types
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
         //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
@@ -931,14 +931,14 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
             return result
         }
 
-        // NOTE: Create builtin array as buffer
+        // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int8Array(6)
         let index = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
-                // NOTE: Progressive reallocation
+                // NOTE (templin.konstantin): Progressive reallocation
                 const curLength = (temp.buffer as Buffer).getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
@@ -962,7 +962,7 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int8Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Int8Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int8Array {
         let res = new Int8Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
@@ -1672,19 +1672,6 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array
-     *
-     * @param fn a function to apply for each element of current Int8Array
-     *
-     * @returns a new Int8Array where for each element from current Int8Array fn was applied
-     */
-    public map(fn: (val: number) => number): Int8Array {
-        let newF: (val: number, index: number) => number =
-            (val: number, index: number): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts one argument.
@@ -2220,14 +2207,54 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int8Array where for each element from current Int8Array fn was applied
     */
-    public map(fn: (val: number, index: number) => number): Int8Array {
+    public map(fn: (val: number, index: number, array: Int8Array) => number): Int8Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int8Array.BYTES_PER_ELEMENT as int)
         let res = new Int8Array(resBuf, 0, resBuf.getByteLength() / Int8Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number) as byte)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as byte)
         }
         return res
     }
+
+    /**
+     * Creates a new Int8Array using fn(arr[i], i) over all elements of current Int8Array
+     *
+     * @param fn a function to apply for each element of current Int8Array
+     *
+     * @returns a new Int8Array where for each element from current Int8Array fn was applied
+     */
+    public map(fn: (val: number, index: number) => number): Int8Array {
+        let newF: (val: number, index: number, array: Int8Array) => number =
+            (val: number, index: number, array: Int8Array): number => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Int8Array using fn(arr[i]) over all elements of current Int8Array
+     *
+     * @param fn a function to apply for each element of current Int8Array
+     *
+     * @returns a new Int8Array where for each element from current Int8Array fn was applied
+     */
+    public map(fn: (val: number) => number): Int8Array {
+        let newF: (val: number, index: number, array: Int8Array) => number =
+            (val: number, index: number, array: Int8Array): number => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Int8Array using fn() over all elements of current Int8Array
+     *
+     * @param fn a function to apply for each element of current Int8Array
+     *
+     * @returns a new Int8Array where for each element from current Int8Array fn was applied
+     */
+    public map(fn: () => number): Int8Array {
+        let newF: (val: number, index: number, array: Int8Array) => number =
+            (val: number, index: number, array: Int8Array): number => { return fn() }
+        return this.map(newF)
+    }
+
 
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
@@ -3505,7 +3532,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE: This code section is responsible for optimizing for some types
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
         //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
@@ -3522,14 +3549,14 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
             return result
         }
 
-        // NOTE: Create builtin array as buffer
+        // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int16Array(6)
         let index = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
-                // NOTE: Progressive reallocation
+                // NOTE (templin.konstantin): Progressive reallocation
                 const curLength = (temp.buffer as Buffer).getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
@@ -3553,7 +3580,7 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int16Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Int16Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int16Array {
         let res = new Int16Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
@@ -4263,19 +4290,6 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array
-     *
-     * @param fn a function to apply for each element of current Int16Array
-     *
-     * @returns a new Int16Array where for each element from current Int16Array fn was applied
-     */
-    public map(fn: (val: number) => number): Int16Array {
-        let newF: (val: number, index: number) => number =
-            (val: number, index: number): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts one argument.
@@ -4811,14 +4825,54 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int16Array where for each element from current Int16Array fn was applied
     */
-    public map(fn: (val: number, index: number) => number): Int16Array {
+    public map(fn: (val: number, index: number, array: Int16Array) => number): Int16Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int16Array.BYTES_PER_ELEMENT as int)
         let res = new Int16Array(resBuf, 0, resBuf.getByteLength() / Int16Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number) as short)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as short)
         }
         return res
     }
+
+    /**
+     * Creates a new Int16Array using fn(arr[i], i) over all elements of current Int16Array
+     *
+     * @param fn a function to apply for each element of current Int16Array
+     *
+     * @returns a new Int16Array where for each element from current Int16Array fn was applied
+     */
+    public map(fn: (val: number, index: number) => number): Int16Array {
+        let newF: (val: number, index: number, array: Int16Array) => number =
+            (val: number, index: number, array: Int16Array): number => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Int16Array using fn(arr[i]) over all elements of current Int16Array
+     *
+     * @param fn a function to apply for each element of current Int16Array
+     *
+     * @returns a new Int16Array where for each element from current Int16Array fn was applied
+     */
+    public map(fn: (val: number) => number): Int16Array {
+        let newF: (val: number, index: number, array: Int16Array) => number =
+            (val: number, index: number, array: Int16Array): number => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Int16Array using fn() over all elements of current Int16Array
+     *
+     * @param fn a function to apply for each element of current Int16Array
+     *
+     * @returns a new Int16Array where for each element from current Int16Array fn was applied
+     */
+    public map(fn: () => number): Int16Array {
+        let newF: (val: number, index: number, array: Int16Array) => number =
+            (val: number, index: number, array: Int16Array): number => { return fn() }
+        return this.map(newF)
+    }
+
 
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
@@ -6058,7 +6112,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE: This code section is responsible for optimizing for some types
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
         //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
@@ -6075,14 +6129,14 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
             return result
         }
 
-        // NOTE: Create builtin array as buffer
+        // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Int32Array(6)
         let index = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
-                // NOTE: Progressive reallocation
+                // NOTE (templin.konstantin): Progressive reallocation
                 const curLength = (temp.buffer as Buffer).getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
@@ -6106,7 +6160,7 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Int32Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Int32Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Int32Array {
         let res = new Int32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
@@ -6816,19 +6870,6 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array
-     *
-     * @param fn a function to apply for each element of current Int32Array
-     *
-     * @returns a new Int32Array where for each element from current Int32Array fn was applied
-     */
-    public map(fn: (val: number) => number): Int32Array {
-        let newF: (val: number, index: number) => number =
-            (val: number, index: number): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts one argument.
@@ -7364,14 +7405,54 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Int32Array where for each element from current Int32Array fn was applied
     */
-    public map(fn: (val: number, index: number) => number): Int32Array {
+    public map(fn: (val: number, index: number, array: Int32Array) => number): Int32Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Int32Array.BYTES_PER_ELEMENT as int)
         let res = new Int32Array(resBuf, 0, resBuf.getByteLength() / Int32Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number) as int)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as int)
         }
         return res
     }
+
+    /**
+     * Creates a new Int32Array using fn(arr[i], i) over all elements of current Int32Array
+     *
+     * @param fn a function to apply for each element of current Int32Array
+     *
+     * @returns a new Int32Array where for each element from current Int32Array fn was applied
+     */
+    public map(fn: (val: number, index: number) => number): Int32Array {
+        let newF: (val: number, index: number, array: Int32Array) => number =
+            (val: number, index: number, array: Int32Array): number => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Int32Array using fn(arr[i]) over all elements of current Int32Array
+     *
+     * @param fn a function to apply for each element of current Int32Array
+     *
+     * @returns a new Int32Array where for each element from current Int32Array fn was applied
+     */
+    public map(fn: (val: number) => number): Int32Array {
+        let newF: (val: number, index: number, array: Int32Array) => number =
+            (val: number, index: number, array: Int32Array): number => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Int32Array using fn() over all elements of current Int32Array
+     *
+     * @param fn a function to apply for each element of current Int32Array
+     *
+     * @returns a new Int32Array where for each element from current Int32Array fn was applied
+     */
+    public map(fn: () => number): Int32Array {
+        let newF: (val: number, index: number, array: Int32Array) => number =
+            (val: number, index: number, array: Int32Array): number => { return fn() }
+        return this.map(newF)
+    }
+
 
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
@@ -7830,27 +7911,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * Creates an BigInt64Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<BigInt>) {
-        // NOTE (templin.konstantin): Please remove this code block after
-        //  BigInt.from implementation
-
-        let iterator = elements.$_iterator();
-        let result = new IteratorResult<BigInt>()
-        let length = 0
-        while ((result = iterator.next()).done != true) {
-            ++length
-        }
-        this.byteLength = length * BigInt64Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = length as int
-        this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.byteOffset = 0
-        iterator = elements.$_iterator();
-        let i = 0
-        while ((result = iterator.next()).done != true) {
-            if (__runtimeIsSameReference(result.value, undefined)) {
-                continue
-            }
-            this.setUnsafe(i++, (result.value as BigInt).getLong())
-        }
+        let x = BigInt64Array.from(elements)
+        this.byteLength = x.byteLength
+        this.lengthInt = x.lengthInt
+        this.buffer = x.buffer
+        this.byteOffset = x.byteOffset
     }
 
     /**
@@ -8071,6 +8136,16 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
         this(numbers.length)
         for (let i: int = 0; i < this.lengthInt; ++i) {
             this.setUnsafe(i, this.zeroIfInfinity(numbers[i] as long))
+        }
+    }
+
+    /**
+     * Creates an BigInt64Array from bigint[]
+     */
+    public constructor(numbers: bigint[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i].getLong())
         }
     }
 
@@ -8595,7 +8670,12 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(...items: number[]): BigInt64Array {
-        throw new Error("BigInt64Array.of: not implemented")
+        let res = new BigInt64Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            const isInfinity = (items[i] == Infinity) || (items[i] == -Infinity)
+            res.setUnsafe(i, (isInfinity ? 0 : items[i]) as long)
+        }
+        return res
     }
 
     /**
@@ -8606,7 +8686,11 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(...items: int[]): BigInt64Array {
-        throw new Error("BigInt64Array.of: not implemented")
+        let res = new BigInt64Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i] as long)
+        }
+        return res
     }
 
     /**
@@ -8617,7 +8701,26 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * @returns new BigInt64Array
      */
     public static of(...items: long[]): BigInt64Array {
-        throw new Error("BigInt64Array.of: not implemented")
+        let res = new BigInt64Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i])
+        }
+        return res
+    }
+
+    /**
+     * Returns a new array from a set of elements.
+     *
+     * @param items a set of elements to include in the new array object.
+     *
+     * @returns new BigInt64Array
+     */
+    public static of(...items: bigint[]): BigInt64Array {
+        let res = new BigInt64Array(items.length as int)
+        for (let i: int = 0; i < items.length; i++) {
+            res.setUnsafe(i, items[i].getLong())
+        }
+        return res
     }
 
     /**
@@ -8651,8 +8754,48 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): BigInt64Array {
-        throw new Error("BigInt64Array.from: not implemented")
+    public static from(arrayLike: Iterable<BigInt>, mapfn?: (v: BigInt, k: number) => BigInt): BigInt64Array {
+        if (mapfn == undefined) {
+            mapfn = (v: BigInt, k: number): BigInt => { return v }
+        }
+
+        let iter = arrayLike.$_iterator()
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
+        //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
+        //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
+        //  we can make one pass through the iterator without the need for memory reallocation.
+        const maybeLength = tryGetIteratorLength(arrayLike)
+        if (maybeLength) {
+            const result = new BigInt64Array(maybeLength)
+            for (let i = 0; i < maybeLength; ++i) {
+                const x = iter.next()
+                if (x.done) {
+                    return new BigInt64Array(result.buffer, 0, i)
+                }
+                result.setUnsafe(i, (mapfn)!(x.value!, i).getLong())
+            }
+            return result
+        }
+
+        // NOTE (templin.konstantin): Create builtin array as buffer
+        let temp = new BigInt64Array(6)
+        let index = new int[1]
+        index[0] = 0
+
+        iteratorForEach<BigInt>(iter, (x: BigInt): void => {
+            if (index[0] + 1 > temp.lengthInt) {
+                // NOTE (templin.konstantin): Progressive reallocation
+                const curLength = (temp.buffer as Buffer).getByteLength()
+                const tb = new ArrayBuffer(curLength * 2)
+                for (let i = 0; i < curLength; ++i) {
+                    tb.set(i, (temp.buffer as Buffer).at(i))
+                }
+                temp = new BigInt64Array(tb)
+            }
+            temp.setUnsafe(index[0], (mapfn)!(x, index[0]).getLong())
+            index[0]++
+        })
+        return new BigInt64Array(temp.buffer, 0, index[0])
     }
 
 
@@ -8665,8 +8808,16 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      *
      * @returns new BigInt64Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): BigInt64Array {
-        throw new Error("BigInt64Array.from: not implemented")
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => BigInt): BigInt64Array {
+        let res = new BigInt64Array(arrayLike.length)
+        // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
+        const idx = new int[1]
+        idx[0] = 0
+        iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
+            res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number).getLong())
+            idx[0] += 1
+        })
+        return res
     }
 
     /**
@@ -9358,19 +9509,6 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     }
 
     /**
-     * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array
-     *
-     * @param fn a function to apply for each element of current BigInt64Array
-     *
-     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
-     */
-    public map(fn: (val: BigInt) => BigInt): BigInt64Array {
-        let newF: (val: BigInt, index: number) => BigInt =
-            (val: BigInt, index: number): BigInt => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts one argument.
@@ -9906,14 +10044,54 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
     *
     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
     */
-    public map(fn: (val: BigInt, index: number) => BigInt): BigInt64Array {
+    public map(fn: (val: BigInt, index: number, array: BigInt64Array) => BigInt): BigInt64Array {
         let resBuf = new ArrayBuffer(this.lengthInt * BigInt64Array.BYTES_PER_ELEMENT as int)
         let res = new BigInt64Array(resBuf, 0, resBuf.getByteLength() / BigInt64Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(new BigInt(this.getUnsafe(i)), i as number).getLong())
+            res.set(i, fn(new BigInt(this.getUnsafe(i)), i as number, this).getLong())
         }
         return res
     }
+
+    /**
+     * Creates a new BigInt64Array using fn(arr[i], i) over all elements of current BigInt64Array
+     *
+     * @param fn a function to apply for each element of current BigInt64Array
+     *
+     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
+     */
+    public map(fn: (val: BigInt, index: number) => BigInt): BigInt64Array {
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => BigInt =
+            (val: BigInt, index: number, array: BigInt64Array): BigInt => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new BigInt64Array using fn(arr[i]) over all elements of current BigInt64Array
+     *
+     * @param fn a function to apply for each element of current BigInt64Array
+     *
+     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
+     */
+    public map(fn: (val: BigInt) => BigInt): BigInt64Array {
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => BigInt =
+            (val: BigInt, index: number, array: BigInt64Array): BigInt => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new BigInt64Array using fn() over all elements of current BigInt64Array
+     *
+     * @param fn a function to apply for each element of current BigInt64Array
+     *
+     * @returns a new BigInt64Array where for each element from current BigInt64Array fn was applied
+     */
+    public map(fn: () => BigInt): BigInt64Array {
+        let newF: (val: BigInt, index: number, array: BigInt64Array) => BigInt =
+            (val: BigInt, index: number, array: BigInt64Array): BigInt => { return fn() }
+        return this.map(newF)
+    }
+
 
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
@@ -11170,7 +11348,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE: This code section is responsible for optimizing for some types
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
         //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
@@ -11187,14 +11365,14 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
             return result
         }
 
-        // NOTE: Create builtin array as buffer
+        // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float32Array(6)
         let index = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
-                // NOTE: Progressive reallocation
+                // NOTE (templin.konstantin): Progressive reallocation
                 const curLength = (temp.buffer as Buffer).getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
@@ -11218,7 +11396,7 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float32Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Float32Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float32Array {
         let res = new Float32Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
@@ -11934,19 +12112,6 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array
-     *
-     * @param fn a function to apply for each element of current Float32Array
-     *
-     * @returns a new Float32Array where for each element from current Float32Array fn was applied
-     */
-    public map(fn: (val: number) => number): Float32Array {
-        let newF: (val: number, index: number) => number =
-            (val: number, index: number): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts one argument.
@@ -12482,14 +12647,54 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Float32Array where for each element from current Float32Array fn was applied
     */
-    public map(fn: (val: number, index: number) => number): Float32Array {
+    public map(fn: (val: number, index: number, array: Float32Array) => number): Float32Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Float32Array.BYTES_PER_ELEMENT as int)
         let res = new Float32Array(resBuf, 0, resBuf.getByteLength() / Float32Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number) as float)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as float)
         }
         return res
     }
+
+    /**
+     * Creates a new Float32Array using fn(arr[i], i) over all elements of current Float32Array
+     *
+     * @param fn a function to apply for each element of current Float32Array
+     *
+     * @returns a new Float32Array where for each element from current Float32Array fn was applied
+     */
+    public map(fn: (val: number, index: number) => number): Float32Array {
+        let newF: (val: number, index: number, array: Float32Array) => number =
+            (val: number, index: number, array: Float32Array): number => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Float32Array using fn(arr[i]) over all elements of current Float32Array
+     *
+     * @param fn a function to apply for each element of current Float32Array
+     *
+     * @returns a new Float32Array where for each element from current Float32Array fn was applied
+     */
+    public map(fn: (val: number) => number): Float32Array {
+        let newF: (val: number, index: number, array: Float32Array) => number =
+            (val: number, index: number, array: Float32Array): number => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Float32Array using fn() over all elements of current Float32Array
+     *
+     * @param fn a function to apply for each element of current Float32Array
+     *
+     * @returns a new Float32Array where for each element from current Float32Array fn was applied
+     */
+    public map(fn: () => number): Float32Array {
+        let newF: (val: number, index: number, array: Float32Array) => number =
+            (val: number, index: number, array: Float32Array): number => { return fn() }
+        return this.map(newF)
+    }
+
 
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
@@ -13636,7 +13841,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE: This code section is responsible for optimizing for some types
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
         //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
@@ -13653,14 +13858,14 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
             return result
         }
 
-        // NOTE: Create builtin array as buffer
+        // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new Float64Array(6)
         let index = new int[1]
         index[0] = 0
 
         iteratorForEach<number>(iter, (x: number): void => {
             if (index[0] + 1 > temp.lengthInt) {
-                // NOTE: Progressive reallocation
+                // NOTE (templin.konstantin): Progressive reallocation
                 const curLength = (temp.buffer as Buffer).getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
@@ -13684,7 +13889,7 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      *
      * @returns new Float64Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): Float64Array {
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => number): Float64Array {
         let res = new Float64Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
@@ -14374,19 +14579,6 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     }
 
     /**
-     * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array
-     *
-     * @param fn a function to apply for each element of current Float64Array
-     *
-     * @returns a new Float64Array where for each element from current Float64Array fn was applied
-     */
-    public map(fn: (val: number) => number): Float64Array {
-        let newF: (val: number, index: number) => number =
-            (val: number, index: number): number => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts one argument.
@@ -14922,14 +15114,54 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
     *
     * @returns a new Float64Array where for each element from current Float64Array fn was applied
     */
-    public map(fn: (val: number, index: number) => number): Float64Array {
+    public map(fn: (val: number, index: number, array: Float64Array) => number): Float64Array {
         let resBuf = new ArrayBuffer(this.lengthInt * Float64Array.BYTES_PER_ELEMENT as int)
         let res = new Float64Array(resBuf, 0, resBuf.getByteLength() / Float64Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn(this.getUnsafe(i) as number, i as number) as double)
+            res.set(i, fn(this.getUnsafe(i) as number, i as number, this) as double)
         }
         return res
     }
+
+    /**
+     * Creates a new Float64Array using fn(arr[i], i) over all elements of current Float64Array
+     *
+     * @param fn a function to apply for each element of current Float64Array
+     *
+     * @returns a new Float64Array where for each element from current Float64Array fn was applied
+     */
+    public map(fn: (val: number, index: number) => number): Float64Array {
+        let newF: (val: number, index: number, array: Float64Array) => number =
+            (val: number, index: number, array: Float64Array): number => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Float64Array using fn(arr[i]) over all elements of current Float64Array
+     *
+     * @param fn a function to apply for each element of current Float64Array
+     *
+     * @returns a new Float64Array where for each element from current Float64Array fn was applied
+     */
+    public map(fn: (val: number) => number): Float64Array {
+        let newF: (val: number, index: number, array: Float64Array) => number =
+            (val: number, index: number, array: Float64Array): number => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new Float64Array using fn() over all elements of current Float64Array
+     *
+     * @param fn a function to apply for each element of current Float64Array
+     *
+     * @returns a new Float64Array where for each element from current Float64Array fn was applied
+     */
+    public map(fn: () => number): Float64Array {
+        let newF: (val: number, index: number, array: Float64Array) => number =
+            (val: number, index: number, array: Float64Array): number => { return fn() }
+        return this.map(newF)
+    }
+
 
     /**
      * Determines whether the specified callback function returns true for all elements of an array.

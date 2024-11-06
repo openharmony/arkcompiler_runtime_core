@@ -116,35 +116,11 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * Creates an {{N}}Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<{{subsetTypeValues}}>) {
-        {%- if N != 'BigInt64' %}
         let x = {{N}}Array.from(elements)
         this.byteLength = x.byteLength
         this.lengthInt = x.lengthInt
         this.buffer = x.buffer
         this.byteOffset = x.byteOffset
-        {%- else %}
-        // NOTE (templin.konstantin): Please remove this code block after
-        //  BigInt.from implementation
-
-        let iterator = elements.$_iterator();
-        let result = new IteratorResult<{{subsetTypeValues}}>()
-        let length = 0
-        while ((result = iterator.next()).done != true) {
-            ++length
-        }
-        this.byteLength = length * {{N}}Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = length as int
-        this.buffer = new ArrayBuffer(this.byteLength as int)
-        this.byteOffset = 0
-        iterator = elements.$_iterator();
-        let i = 0
-        while ((result = iterator.next()).done != true) {
-            if (__runtimeIsSameReference(result.value, undefined)) {
-                continue
-            }
-            this.setUnsafe(i++, (result.value as {{subsetTypeValues}}){{numberBigIntToPrimitive}})
-        }
-        {%- endif %}
     }
 
     /**
@@ -377,6 +353,19 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             {%- endif %}
         }
     }
+
+    {%- if N == 'BigInt64' %}
+
+    /**
+     * Creates an {{N}}Array from bigint[]
+     */
+    public constructor(numbers: bigint[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, numbers[i]{{fromElementCompat}})
+        }
+    }
+    {%- endif %}
 
     {%- if (N != 'Float32') and (N != 'Float64') %}
 
@@ -985,6 +974,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
         }
     }
     {%- set uniquePrimitiveTypes = ['number', 'int', T] if T != 'int' else ['number', 'int'] %}
+    {%- set uniquePrimitiveTypes = uniquePrimitiveTypes if N != 'BigInt64' else uniquePrimitiveTypes + ['bigint'] %}
     {%- for argType in uniquePrimitiveTypes %}
         {%- if argType != 'double' %}
 
@@ -996,23 +986,26 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      * @returns new {{N}}Array
      */
     public static of(...items: {{argType}}[]): {{N}}Array {
-    {%- if N != 'BigInt64' %}
         let res = new {{N}}Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
         {%- if argType == 'number' %}
-            {%- if (N != 'Float32') and (N != 'Float64') %}
+            {%- if N == 'BigInt64' %}
+            const isInfinity = (items[i] == Infinity) || (items[i] == -Infinity)
+            res.setUnsafe(i, (isInfinity ? 0 : items[i]) as long)
+            {%- elif (N != 'Float32') and (N != 'Float64') %}
             res.setUnsafe(i, res.zeroIfInfinity(items[i]){{fromElementCompat}})
             {%- else %}
             res.setUnsafe(i, items[i]{{ ' as ' + T if argType != T and T != 'double' else ''}})
             {%- endif %}
         {%- else %}
+            {%- if N == 'BigInt64' and argType == 'bigint' %}
+            res.setUnsafe(i, items[i].getLong())
+            {%- else %}
             res.setUnsafe(i, items[i]{{ ' as ' + T if argType != T else ''}})
+            {%- endif %}
         {%- endif %}
         }
         return res
-    {%- else %}
-        throw new Error("{{N}}Array.of: not implemented")
-    {%- endif %}
     }
         {%- endif %}
     {%- endfor %}
@@ -1052,14 +1045,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static from(arrayLike: Iterable<number>, mapfn?: (v: number, k: number) => number): {{N}}Array {
-    {%- if N != 'BigInt64' %}
+    public static from(arrayLike: Iterable<{{elementCompat}}>, mapfn?: (v: {{elementCompat}}, k: number) => {{elementCompat}}): {{N}}Array {
         if (mapfn == undefined) {
-            mapfn = (v: number, k: number): number => { return v }
+            mapfn = (v: {{elementCompat}}, k: number): {{elementCompat}} => { return v }
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE: This code section is responsible for optimizing for some types
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
         //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
@@ -1071,7 +1063,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 if (x.done) {
                     return new {{N}}Array(result.buffer, 0, i)
                 }
-                {%- if (N != 'Float32') and (N != 'Float64') %}
+                {%- if (N != 'Float32') and (N != 'Float64') and (N != 'BigInt64') %}
                 result.setUnsafe(i, result.zeroIfInfinity((mapfn)!(x.value!, i)){{fromElementCompat}})
                 {%- else %}
                 result.setUnsafe(i, (mapfn)!(x.value!, i){{fromElementCompat}})
@@ -1080,14 +1072,14 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             return result
         }
 
-        // NOTE: Create builtin array as buffer
+        // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new {{N}}Array(6)
         let index = new int[1]
         index[0] = 0
 
-        iteratorForEach<number>(iter, (x: number): void => {
+        iteratorForEach<{{elementCompat}}>(iter, (x: {{elementCompat}}): void => {
             if (index[0] + 1 > temp.lengthInt) {
-                // NOTE: Progressive reallocation
+                // NOTE (templin.konstantin): Progressive reallocation
                 const curLength = (temp.buffer as Buffer).getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
@@ -1095,7 +1087,7 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
                 }
                 temp = new {{N}}Array(tb)
             }
-            {%- if (N != 'Float32') and (N != 'Float64') %}
+            {%- if (N != 'Float32') and (N != 'Float64') and (N != 'BigInt64') %}
             temp.setUnsafe(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])){{fromElementCompat}})
             {%- else %}
             temp.setUnsafe(index[0], (mapfn)!(x, index[0]){{fromElementCompat}})
@@ -1103,9 +1095,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             index[0]++
         })
         return new {{N}}Array(temp.buffer, 0, index[0])
-    {%- else %}
-        throw new Error("{{N}}Array.from: not implemented")
-    {%- endif %}
     }
 
 
@@ -1118,14 +1107,13 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
      *
      * @returns new {{N}}Array
      */
-    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => Number): {{N}}Array {
-    {%- if N != 'BigInt64' %}
+    public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{elementCompat}}): {{N}}Array {
         let res = new {{N}}Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-            {%- if (N != 'Float32') and (N != 'Float64') %}
+            {%- if (N != 'Float32') and (N != 'Float64') and (N != 'BigInt64') %}
             res.setUnsafe(idx[0] as int, res.zeroIfInfinity(mapfn(x as T, idx[0] as number)){{fromElementCompat}})
             {%- else %}
             res.setUnsafe(idx[0] as int, mapfn(x as T, idx[0] as number){{fromElementCompat}})
@@ -1133,9 +1121,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
             idx[0] += 1
         })
         return res
-    {%- else %}
-        throw new Error("{{N}}Array.from: not implemented")
-    {%- endif %}
     }
 
     /**
@@ -1886,19 +1871,6 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     }
 
     /**
-     * Creates a new {{N}}Array using fn(arr[i]) over all elements of current {{N}}Array
-     *
-     * @param fn a function to apply for each element of current {{N}}Array
-     *
-     * @returns a new {{N}}Array where for each element from current {{N}}Array fn was applied
-     */
-    public map(fn: (val: {{elType}}) => {{elType}}): {{N}}Array {
-        let newF: (val: {{elType}}, index: number) => {{elType}} =
-            (val: {{elType}}, index: number): {{elType}} => { return fn(val) }
-        return this.map(newF)
-    }
-
-    /**
      * Determines whether the specified callback function returns true for any element of an array.
      *
      * @param predicate A function that accepts one argument.
@@ -2435,14 +2407,54 @@ export final class {{N}}Array implements Iterable<{{subsetTypeValues}}>, ArrayLi
     *
     * @returns a new {{N}}Array where for each element from current {{N}}Array fn was applied
     */
-    public map(fn: (val: {{elType}}, index: {{idxType}}) => {{elType}}): {{N}}Array {
+    public map(fn: (val: {{elType}}, index: {{idxType}}, array: {{N}}Array) => {{elType}}): {{N}}Array {
         let resBuf = new ArrayBuffer(this.lengthInt * {{N}}Array.BYTES_PER_ELEMENT as int)
         let res = new {{N}}Array(resBuf, 0, resBuf.getByteLength() / {{N}}Array.BYTES_PER_ELEMENT as int)
         for (let i = 0; i < this.lengthInt; ++i) {
-            res.set(i, fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}){{castFromEl}})
+            res.set(i, fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this){{castFromEl}})
         }
         return res
     }
+
+    /**
+     * Creates a new {{N}}Array using fn(arr[i], i) over all elements of current {{N}}Array
+     *
+     * @param fn a function to apply for each element of current {{N}}Array
+     *
+     * @returns a new {{N}}Array where for each element from current {{N}}Array fn was applied
+     */
+    public map(fn: (val: {{elType}}, index: number) => {{elType}}): {{N}}Array {
+        let newF: (val: {{elType}}, index: number, array: {{N}}Array) => {{elType}} =
+            (val: {{elType}}, index: number, array: {{N}}Array): {{elType}} => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new {{N}}Array using fn(arr[i]) over all elements of current {{N}}Array
+     *
+     * @param fn a function to apply for each element of current {{N}}Array
+     *
+     * @returns a new {{N}}Array where for each element from current {{N}}Array fn was applied
+     */
+    public map(fn: (val: {{elType}}) => {{elType}}): {{N}}Array {
+        let newF: (val: {{elType}}, index: number, array: {{N}}Array) => {{elType}} =
+            (val: {{elType}}, index: number, array: {{N}}Array): {{elType}} => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new {{N}}Array using fn() over all elements of current {{N}}Array
+     *
+     * @param fn a function to apply for each element of current {{N}}Array
+     *
+     * @returns a new {{N}}Array where for each element from current {{N}}Array fn was applied
+     */
+    public map(fn: () => {{elType}}): {{N}}Array {
+        let newF: (val: {{elType}}, index: number, array: {{N}}Array) => {{elType}} =
+            (val: {{elType}}, index: number, array: {{N}}Array): {{elType}} => { return fn() }
+        return this.map(newF)
+    }
+
 
     /**
      * Determines whether the specified callback function returns true for all elements of an array.
