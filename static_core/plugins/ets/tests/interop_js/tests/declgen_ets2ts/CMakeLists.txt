@@ -105,7 +105,7 @@ function(create_declgen_ets2ts_test TARGET)
     file(WRITE ${ARKTSCONFIG} ${ARKTSCONFIG_CONTENT})
 
     # NOTE (kkonsw): temporary disabling all other checks
-    set(ETS_VERIFICATOR_ERRORS "NodeHasParentForAll,EveryChildHasValidParentForAll,VariableHasScopeForAll,NodeHasTypeForAll,IdentifierHasVariableForAll,ReferenceTypeAnnotationIsNullForAll,ArithmeticOperationValidForAll,SequenceExpressionHasLastTypeForAll,ForLoopCorrectlyInitializedForAll,VariableHasEnclosingScopeForAll,ModifierAccessValidForAll,ImportExportAccessValid")
+    set(ETS_VERIFICATOR_ERRORS "NodeHasParentForAll:EveryChildHasValidParentForAll:VariableHasScopeForAll:NodeHasTypeForAll:IdentifierHasVariableForAll:ReferenceTypeAnnotationIsNullForAll:ArithmeticOperationValidForAll:SequenceExpressionHasLastTypeForAll:ForLoopCorrectlyInitializedForAll:VariableHasEnclosingScopeForAll:ModifierAccessValidForAll:ImportExportAccessValid")
 
     # Compile source .sts files into .abc and declaration .ts files
     set(ABC_FILES "")
@@ -120,7 +120,7 @@ function(create_declgen_ets2ts_test TARGET)
         add_custom_command(
             OUTPUT ${ABC_PATH} ${DECL_PATH}
             COMMENT "Compiling: ${ETS_SOURCE}"
-            COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=sts --verifier-errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
+            COMMAND $<TARGET_FILE:es2panda> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${ABC_PATH} --extension=sts --verifier-invariants:as-errors=${ETS_VERIFICATOR_ERRORS} ${ETS_SOURCE}
             COMMAND $<TARGET_FILE:declgen_ets2ts> ${ETS_MODULE_KEY} --arktsconfig ${ARKTSCONFIG} --output ${DECL_PATH} --extension=sts ${ETS_SOURCE}
             DEPENDS es2panda declgen_ets2ts ${ETS_SOURCE} ${ARKTSCONFIG}
         )

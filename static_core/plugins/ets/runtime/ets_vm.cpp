@@ -114,7 +114,7 @@ Expected<PandaEtsVM *, PandaString> PandaEtsVM::Create(Runtime *runtime, const R
 
     vm->InitializeGC();
 
-    std::string icuPath = options.GetIcuDataPath();
+    const auto &icuPath = options.GetIcuDataPath();
     if (icuPath == "default") {
         SetIcuDirectory();
     } else {
@@ -166,7 +166,7 @@ PandaEtsVM::PandaEtsVM(Runtime *runtime, const RuntimeOptions &options, mem::Mem
     referenceProcessor_ = allocator->New<mem::ets::EtsReferenceProcessor>(mm_->GetGC());
 
     auto langStr = plugins::LangToRuntimeType(panda_file::SourceLang::ETS);
-    auto coroType = options.GetCoroutineImpl(langStr);
+    const auto &coroType = options.GetCoroutineImpl(langStr);
     if (coroType == "stackful") {
         coroutineManager_ = allocator->New<StackfulCoroutineManager>(EtsCoroutine::Create<Coroutine>);
     } else {

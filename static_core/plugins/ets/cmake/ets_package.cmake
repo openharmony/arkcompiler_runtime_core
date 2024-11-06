@@ -61,7 +61,8 @@ function(do_panda_ets_package TARGET)
         --extension=sts
     )
     if(DEFINED ARG_ETS_VERIFICATOR_ERRORS)
-       list(APPEND ES2PANDA_ARGUMENTS --verifier-errors=${ETS_VERIFICATOR_ERRORS})
+        string(REPLACE "," ":" ARG_ETS_VERIFICATOR_ERRORS, ${ARG_ETS_VERIFICATOR_ERRORS})
+        list(APPEND ES2PANDA_ARGUMENTS --verifier-invariants:as-errors=${ARG_ETS_VERIFICATOR_ERRORS})
     endif()
 
     set(VERIFIER_ARGUMENTS

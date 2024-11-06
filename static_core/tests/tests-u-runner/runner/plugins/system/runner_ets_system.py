@@ -32,15 +32,15 @@ _LOGGER = logging.getLogger("runner.plugins.system.runner_ets_system")
 
 
 class SystemArkTSFlags(Enum):
-    ALL_WARNINGS = ["--ets-warnings-all"]
-    BOOST_EQUALITY_STATEMENTS = ["--ets-boost-equality-statement"]
-    IMPLICIT_BOXING_UNBOXING = ["--ets-implicit-boxing-unboxing"]
-    PROHIBIT_TOP_LEVEL_STATEMENTS = ["--ets-prohibit-top-level-statements"]
-    REMOVE_ASYNC = ["--ets-remove-async"]
-    REMOVE_LAMBDA = ["--ets-remove-lambda"]
-    SUGGEST_FINAL = ["--ets-suggest-final"]
-    SUPPRESSION_TESTS = ["--ets-warnings-all"]
-    WERROR_TESTS = ["--ets-warnings-all", "--ets-werror"]
+    ALL_WARNINGS = ["--ets-warnings"]
+    BOOST_EQUALITY_STATEMENTS = ["--ets-warnings:enable=ets-boost-equality-statement"]
+    IMPLICIT_BOXING_UNBOXING = ["--ets-warnings:enable=ets-implicit-boxing-unboxing"]
+    PROHIBIT_TOP_LEVEL_STATEMENTS = ["--ets-warnings:enable=ets-prohibit-top-level-statements"]
+    REMOVE_ASYNC = ["--ets-warnings:enable=ets-remove-async"]
+    REMOVE_LAMBDA = ["--ets-warnings:enable=ets-remove-lambda"]
+    SUGGEST_FINAL = ["--ets-warnings:enable=ets-suggest-final"]
+    SUPPRESSION_TESTS = ["--ets-warnings"]
+    WERROR_TESTS = ["--ets-warnings:werror"]
 
 
 class RunnerETSSystem(RunnerJS):
