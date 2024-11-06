@@ -415,7 +415,7 @@ export final class Proxy {
     }
 }
 
-export interface ProxyHandler<T> {
+export interface ProxyHandler<T extends Object> {
     get(target: T, name: string): NullishType
 
     set(target: T, name: string, value: NullishType): boolean
@@ -423,7 +423,7 @@ export interface ProxyHandler<T> {
     invoke(target: T, method: Method, args: NullishType[]): NullishType
 }
 
-export abstract class DefaultProxyHandler<T> implements ProxyHandler<T> {
+export abstract class DefaultProxyHandler<T extends Object> implements ProxyHandler<T> {
     override get(target: T, name: string): NullishType {
         return Reflect.get(target, name)
     }

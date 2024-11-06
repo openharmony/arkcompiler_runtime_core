@@ -73,6 +73,25 @@ export class Object {
     }
 
     /**
+     * Returns an array of a given record property names
+     *
+     * @param rec a record
+     * 
+     * @returns an array of strings representing the given record's property names
+     */
+    public static keys(rec: Record<PropertyKey, NullishType>): string[] {
+        const keys = new string[rec.size as int]
+
+        let i = 0
+        for (const key of rec.keys()) {
+            keys[i] = key
+            i++
+        }
+
+        return keys
+    }
+
+    /**
     * Returns the names of the fields of an object
     *
     * @param o an object
@@ -157,6 +176,18 @@ export class Object {
         throw new Error("Invalid object");
     }
 
+    public static values(rec: Record<PropertyKey, NullishType>): NullishType[] {
+        const vals = new NullishType[rec.size as int]
+
+        let i = 0
+        for (let val of rec.values()) {
+            vals[i] = val
+            i++
+        }
+
+        return vals
+    }
+
     /**
     * Returns the values of the fields of an object
     *
@@ -230,6 +261,25 @@ export class Object {
     }
 
     /**
+    * Returns an array of key/values of properties of a record
+    *
+    * @param rec record that contains the fields
+    *
+    * @returns array representation of key/value
+    */
+    public static entries(rec: Record<PropertyKey, NullishType>): EntryType[] {
+        const entries = new EntryType[rec.size as int]
+
+        let i = 0
+        for (const entry of rec.entries()) {
+            entries[i] = entry
+            i++
+        }
+
+        return entries
+    }
+
+    /**
     * Returns an array of key/values of properties of an object
     *
     * @param o object that contains the fields
@@ -299,6 +349,10 @@ export class Object {
         assert(false)
 
         throw new Error("Invalid object")
+    }
+
+    public static getOwnPropertyNames(rec: Record<PropertyKey, NullishType>): string[] {
+        return Object.keys(rec)
     }
 
     /**
