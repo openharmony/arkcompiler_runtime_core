@@ -340,8 +340,7 @@ TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_array)
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_array.js"));
 }
 
-// NOTE(splatov) #17855 fix boxed primitives casts
-TEST_F(EtsInteropScenariosEtsToJs, DISABLED_test_function_arg_type_conflict_boolean)
+TEST_F(EtsInteropScenariosEtsToJs, test_function_arg_type_conflict_boolean)
 {
     ASSERT_EQ(true, RunJsTestSuite("js_suites/test_function_arg_type_conflict_boolean.js"));
 }
