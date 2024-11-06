@@ -680,7 +680,7 @@ void Parser::ParseResetFunctionLabelsAndParams()
                     const auto &debug = curr_func_->ins[v.first - 1].ins_debug;
                     context_.err =
                         Error("Register width mismatch.", debug.line_number, Error::ErrorType::ERR_BAD_NAME_REG, "",
-                              debug.bound_left, debug.bound_right, debug.whole_line);
+                              debug.bound_left, debug.bound_right, "");
                     SetError();
                     break;
                 }
@@ -714,7 +714,7 @@ void Parser::ParseResetFunctionTable()
                         const auto &debug = insn_it->ins_debug;
                         context_.err = Error("Unable to resolve ambiguous function call", debug.line_number,
                                              Error::ErrorType::ERR_FUNCTION_MULTIPLE_ALTERNATIVES, "", debug.bound_left,
-                                             debug.bound_right, debug.whole_line);
+                                             debug.bound_right, "");
                         SetError();
                         break;
                     } else {
@@ -731,7 +731,7 @@ void Parser::ParseResetFunctionTable()
                     const auto &debug = insn_it->ins_debug;
                     context_.err = Error("Function argument mismatch.", debug.line_number,
                                          Error::ErrorType::ERR_FUNCTION_ARGUMENT_MISMATCH, "", debug.bound_left,
-                                         debug.bound_right, debug.whole_line);
+                                         debug.bound_right, "");
                     SetError();
                 }
             }
@@ -2077,7 +2077,6 @@ void Parser::SetOperationInformation()
     context_.ins_number = curr_func_->ins.size();
     auto &curr_debug = curr_func_->ins.back().ins_debug;
     curr_debug.line_number = line_stric_;
-    curr_debug.whole_line = context_.tokens[context_.number - 1].whole_line;
     curr_debug.bound_left = context_.tokens[context_.number - 1].bound_left;
     curr_debug.bound_right = context_.tokens[context_.number - 1].bound_right;
 }
@@ -2148,7 +2147,6 @@ bool Parser::ParseFunctionArg()
     ++context_;
 
     Function::Parameter parameter(type, program_.lang);
-    metadata_ = parameter.metadata.get();
 
     if (*context_ == Token::Type::DEL_LT && !ParseMetaDef()) {
         return false;

@@ -31,6 +31,12 @@
 #include "pgo.h"
 
 namespace panda::pandasm {
+
+void MakeConcurrentModuleRequestsAnnotation(Program *prog);
+void MakeConcurrentModuleRequestsRecord(Program *prog);
+void MakeSlotNumberAnnotation(Program *prog);
+void MakeSlotNumberRecord(Program *prog);
+
 class AsmEmitter {
 public:
     struct PandaFileToPandaAsmMaps {
