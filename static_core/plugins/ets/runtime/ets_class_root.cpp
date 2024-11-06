@@ -17,6 +17,7 @@
 
 namespace ark::ets {
 
+// CC-OFFNXT(huge_cyclomatic_complexity) big switch case
 EtsClassRoot ToEtsClassRoot(ClassRoot classRoot)
 {
     switch (classRoot) {

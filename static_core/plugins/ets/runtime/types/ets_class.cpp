@@ -175,6 +175,19 @@ PandaVector<EtsMethod *> EtsClass::GetMethods()
         }
     };
 
+    auto addDirectMethodsForBaseClass = [&uniqueMethods](EtsClass *c) {
+        auto directMethods = c->GetRuntimeClass()->GetMethods();
+        auto fnum = directMethods.Size();
+        for (uint32_t i = 0; i < fnum; i++) {
+            // Skip constructors
+            if (directMethods[i].IsConstructor()) {
+                continue;
+            }
+            auto name = PandaString(utf::Mutf8AsCString((directMethods[i].GetName().data)));
+            uniqueMethods[name] = EtsMethod::FromRuntimeMethod(&directMethods[i]);
+        }
+    };
+
     if (IsInterface()) {
         addDirectMethods(this);
         EnumerateInterfaces([&](const EtsClass *c) {
@@ -183,16 +196,7 @@ PandaVector<EtsMethod *> EtsClass::GetMethods()
         });
     } else {
         EnumerateBaseClasses([&](EtsClass *c) {
-            auto directMethods = c->GetRuntimeClass()->GetMethods();
-            auto fnum = directMethods.Size();
-            for (uint32_t i = 0; i < fnum; i++) {
-                // Skip constructors
-                if (directMethods[i].IsConstructor()) {
-                    continue;
-                }
-                auto name = PandaString(utf::Mutf8AsCString((directMethods[i].GetName().data)));
-                uniqueMethods[name] = EtsMethod::FromRuntimeMethod(&directMethods[i]);
-            }
+            addDirectMethodsForBaseClass(c);
             return false;
         });
     }
@@ -222,15 +226,11 @@ EtsMethod *EtsClass::ResolveVirtualMethod(const EtsMethod *method) const
     return reinterpret_cast<EtsMethod *>(GetRuntimeClass()->ResolveVirtualMethod(method->GetPandaMethod()));
 }
 
-/* static */
-EtsClass *EtsClass::GetPrimitiveClass(EtsString *name)
+static std::pair<char const *, EtsClassRoot> GetNameAndClassRoot(char hash)
 {
-    if (name == nullptr || name->GetMUtf8Length() < 2) {  // MUtf8Length must be >= 2
-        return nullptr;
-    }
     const char *primitiveName = nullptr;
     EtsClassRoot classRoot;
-    char hash = name->At(0) ^ ((name->At(1) & 0x10) << 1);  // NOLINT
+
     switch (hash) {
         case 'v':
             primitiveName = "void";
@@ -272,7 +272,20 @@ EtsClass *EtsClass::GetPrimitiveClass(EtsString *name)
             break;
     }
 
-    // StringIndexOutOfBoundsException is not thrown by At method above, because index (0, 1) < length (>= 2)
+    return {primitiveName, classRoot};
+}
+
+/* static */
+EtsClass *EtsClass::GetPrimitiveClass(EtsString *name)
+{
+    if (name == nullptr || name->GetMUtf8Length() < 2) {  // MUtf8Length must be >= 2
+        return nullptr;
+    }
+    // StringIndexOutOfBoundsException is not thrown by At method, because index (0, 1) < length (>= 2)
+    // SUPPRESS_CSA_NEXTLINE(alpha.core.WasteObjHeader)
+    char hash = name->At(0) ^ ((name->At(1) & 0x10) << 1);  // NOLINT(hicpp-signed-bitwise, readability-magic-numbers)
+    auto [primitiveName, classRoot] = GetNameAndClassRoot(hash);
+
     if (primitiveName != nullptr && name->IsEqual(primitiveName)) {  // SUPPRESS_CSA(alpha.core.WasteObjHeader)
         return PandaEtsVM::GetCurrent()->GetClassLinker()->GetClassRoot(classRoot);
     }

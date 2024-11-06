@@ -27,6 +27,7 @@ struct NapiImpl {
     static void InitNapi()
     {
         NapiImpl impl;
+// CC-OFFNXT(G.PRE.09) code generation
 #define NAPI_METHOD(name, ...) impl.name = ::name;
         ENUMERATE_NAPI(NAPI_METHOD)
 #undef NAPI_METHOD
@@ -34,6 +35,7 @@ struct NapiImpl {
         Init(impl);
     }
 
+// CC-OFFNXT(G.PRE.09) code generation
 #define NAPI_METHOD(name, ...) napi_status (*name)(PARAMS_PAIR(__VA_ARGS__)) = nullptr;
 
     ENUMERATE_NAPI(NAPI_METHOD)

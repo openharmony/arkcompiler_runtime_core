@@ -43,6 +43,7 @@ std::unique_ptr<SharedReferenceStorage> SharedReferenceStorage::Create()
         INTEROP_LOG(FATAL) << "Cannot allocate MemPool";
         return nullptr;
     }
+    // CC-OFFNXT(G.RES.09) private constructor
     return std::unique_ptr<SharedReferenceStorage>(new SharedReferenceStorage(data, realSize));
 }
 

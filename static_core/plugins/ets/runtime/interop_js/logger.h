@@ -37,6 +37,7 @@
 
 #else
 
+// CC-OFFNXT(G.FUD.06) solid logic, ODR
 inline std::string EtsLogMakeString(const char *fmt, ...)
 {
     va_list ap;      // NOLINT(cppcoreguidelines-pro-type-vararg)

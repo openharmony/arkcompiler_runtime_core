@@ -36,15 +36,14 @@ void NapiImpl::Init(NapiImpl impl)
 #include <node_api_types.h>
 
 // NOTE: napi_fatal_exception() is not public in libace_napi.z.so.
-extern "C" napi_status __attribute__((weak))
+extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_fatal_exception([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value err)
 {
-    INTEROP_LOG(ERROR) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__ << " will be implemented in OHOS 5.0" << std::endl;
-    std::abort();
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__ << " will be implemented in OHOS 5.0" << std::endl;
     return napi_ok;
 }
 
-extern "C" napi_status __attribute__((weak))
+extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (*fun)(void *arg),
                           [[maybe_unused]] void *arg)
 {
@@ -54,14 +53,14 @@ napi_add_env_cleanup_hook([[maybe_unused]] napi_env env, [[maybe_unused]] void (
     return napi_ok;
 }
 
-extern "C" napi_status __attribute__((weak))
+extern "C" napi_status __attribute__((weak))  // CC-OFF(G.FMT.10) project code style
 napi_get_value_string_utf16([[maybe_unused]] napi_env env, [[maybe_unused]] napi_value value,
                             [[maybe_unused]] char16_t *buf, [[maybe_unused]] size_t bufsize,
                             [[maybe_unused]] size_t *result)
 {
-    INTEROP_LOG(ERROR) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
+    INTEROP_LOG(FATAL) << "ETS_INTEROP_GTEST_PLUGIN: " << __func__
                        << " is implemented in later versions of OHOS, please update." << std::endl;
-    std::abort();
+    return napi_ok;
 }
 
 #else
@@ -72,10 +71,11 @@ napi_get_value_string_utf16([[maybe_unused]] napi_env env, [[maybe_unused]] napi
  */
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#define WEAK_SYMBOL(name, ...)                            \
-    extern "C" napi_status name(PARAMS_PAIR(__VA_ARGS__)) \
-    {                                                     \
-        return gNapiImpl.name(EVERY_SECOND(__VA_ARGS__)); \
+#define WEAK_SYMBOL(name, ...)                              \
+    extern "C" napi_status name(PARAMS_PAIR(__VA_ARGS__))   \
+    {                                                       \
+        /* CC-OFFNXT(G.PRE.05, G.PRE.09) code generation */ \
+        return gNapiImpl.name(EVERY_SECOND(__VA_ARGS__));   \
     }
 
 ENUMERATE_NAPI(WEAK_SYMBOL)

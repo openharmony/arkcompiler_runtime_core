@@ -35,17 +35,17 @@ namespace ark::ets::interop::js {
     V(F64)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define TYPEVIS_RAISE_ERROR(val) \
-    do {                         \
-        Error() = (val);         \
-        return;                  \
+#define TYPEVIS_RAISE_ERROR(val)                       \
+    do {                                               \
+        Error() = (val);                               \
+        return; /* CC-OFF(G.PRE.05) code generation */ \
     } while (0)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define TYPEVIS_ABRUPT_ON_ERROR() \
-    do {                          \
-        if (UNLIKELY(!!Error()))  \
-            return;               \
+#define TYPEVIS_ABRUPT_ON_ERROR()                          \
+    do {                                                   \
+        if (UNLIKELY(!!Error()))                           \
+            return; /* CC-OFF(G.PRE.05) code generation */ \
     } while (0)
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -67,6 +67,7 @@ namespace ark::ets::interop::js {
 
 class EtsTypeVisitor {
 public:
+// CC-OFFNXT(G.PRE.09) code generation
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEF_VIS(name) virtual void Visit##name() = 0;
     TYPEVIS_PRIM_TYPES_LIST(DEF_VIS)
@@ -76,9 +77,10 @@ public:
     {
         switch (type.GetId()) {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DELEGATE(name)                          \
-    case ark::panda_file::Type::TypeId::name: { \
-        return Visit##name();                   \
+#define DELEGATE(name)                                               \
+    /* CC-OFFNXT(G.PRE.02) namespace member */                       \
+    case ark::panda_file::Type::TypeId::name: {                      \
+        return Visit##name(); /* CC-OFF(G.PRE.05) code generation */ \
     }
             TYPEVIS_PRIM_TYPES_LIST(DELEGATE)
 #undef DELEGATE

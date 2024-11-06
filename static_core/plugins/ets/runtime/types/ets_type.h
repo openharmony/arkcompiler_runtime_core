@@ -37,6 +37,7 @@ static constexpr const char *SETTER_BEGIN = "<set>";
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline EtsType ConvertPandaTypeToEtsType(panda_file::Type type)
 {
     switch (type.GetId()) {
@@ -70,6 +71,7 @@ inline EtsType ConvertPandaTypeToEtsType(panda_file::Type type)
     UNREACHABLE();
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline panda_file::Type ConvertEtsTypeToPandaType(const EtsType type)
 {
     switch (type) {
@@ -98,6 +100,7 @@ inline panda_file::Type ConvertEtsTypeToPandaType(const EtsType type)
     }
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline std::string ConvertEtsPrimitiveTypeToString(const EtsType type)
 {
     switch (type) {
