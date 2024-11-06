@@ -153,6 +153,9 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
     if (cause == 3_I) {
         return GCTaskCause::OOM_CAUSE;
     }
+    if (cause == 4_I) {
+        return GCTaskCause::CROSSREF_CAUSE;
+    }
     return GCTaskCause::INVALID_CAUSE;
 }
 

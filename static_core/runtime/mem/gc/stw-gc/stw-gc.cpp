@@ -55,7 +55,7 @@ bool StwGC<LanguageConfig>::CheckGCCause(GCTaskCause cause) const
     if (cause == GCTaskCause::YOUNG_GC_CAUSE || cause == GCTaskCause::MIXED) {
         return false;
     }
-    return cause != GCTaskCause::INVALID_CAUSE;
+    return cause != GCTaskCause::CROSSREF_CAUSE && cause != GCTaskCause::INVALID_CAUSE;
 }
 
 template <class LanguageConfig>

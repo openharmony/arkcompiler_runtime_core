@@ -421,6 +421,10 @@ GC *CreateGC(GCType gcType, ObjectAllocatorBase *objectAllocator, const GCSettin
 
 bool GC::CheckGCCause(GCTaskCause cause) const
 {
+    // Cross reference cause is only suitable for XGC
+    if (cause == GCTaskCause::CROSSREF_CAUSE) {
+        return false;
+    }
     return cause != GCTaskCause::INVALID_CAUSE;
 }
 
