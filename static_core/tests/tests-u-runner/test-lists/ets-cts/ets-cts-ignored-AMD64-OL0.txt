@@ -1,3 +1,6 @@
 
+##19929 Leftovers from bit operations on floats, verifier failure with opt-level=0
+06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_61.sts
+
 # 19929
 06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_42.sts

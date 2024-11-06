@@ -1083,8 +1083,7 @@
 # Throwing function types
 17.experimental_features/15.exceptions/01.throwing_functions/lambda.sts
 
-# Leftovers from bit operations on floats, verifier failure with opt-level=0
-06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_61.sts
+#19929 Leftovers from bit operations on floats, verifier failure with opt-level=0
 06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_68.sts
 
 # New failures according to nullablity changes #15642
