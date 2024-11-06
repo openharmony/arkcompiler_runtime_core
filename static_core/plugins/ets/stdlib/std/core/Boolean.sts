@@ -334,7 +334,7 @@ export final class Boolean extends Object implements Comparable<Boolean> {
      *
      * @returns Boolean - true if JSON encodes true literal, false if JSON encodes false literal
      */
-    static createFromJSONValue(json: JSONValue): Boolean {
+    public createFromJSONValue(json: JSONValue): Boolean {
         if (json instanceof JSONFalse) {
             return Boolean.FALSE
         } else if (json instanceof JSONTrue) {

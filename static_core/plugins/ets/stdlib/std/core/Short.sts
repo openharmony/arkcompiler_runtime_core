@@ -299,7 +299,7 @@ export final class Short extends Integral implements Comparable<Short>, JSONable
      *
      * @returns Short - short value decoded from JSON
      */
-    static createFromJSONValue(json: JSONValue): Short {
+    public createFromJSONValue(json: JSONValue): Short {
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Short.MIN_VALUE <= num && num <= Short.MAX_VALUE) {

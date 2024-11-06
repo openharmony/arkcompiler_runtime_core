@@ -18,7 +18,7 @@ package std.core;
 /**
  * Represents boxed long value and related operations
  */
-export final class Long extends Integral implements Comparable<Long>, JSONable<Int> {
+export final class Long extends Integral implements Comparable<Long>, JSONable<Long> {
     private value: long;
 
     /**
@@ -326,7 +326,7 @@ export final class Long extends Integral implements Comparable<Long>, JSONable<I
      *
      * @returns Long - long value decoded from JSON
      */
-    static createFromJSONValue(json: JSONValue): Long {
+    public createFromJSONValue(json: JSONValue): Long {
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Long.MIN_VALUE <= num && num <= Long.MAX_VALUE) {

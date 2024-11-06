@@ -28,14 +28,16 @@ class C {
 }
 
 interface I {
-    static z(): int {
+    z(): int {
         return x * 3;
     }
 }
 
+class D implements I {}
+
 function main(): void {
     assert x == 1
     assert new C().y == 2
-    assert I.z() == 3
+    assert new D().z() == 3
     assert foo() == 0
 }

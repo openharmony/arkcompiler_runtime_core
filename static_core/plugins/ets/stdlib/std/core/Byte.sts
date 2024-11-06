@@ -325,7 +325,7 @@ export final class Byte extends Integral implements Comparable<Byte>, JSONable<B
      *
      * @returns Byte - byte value decoded from JSON
      */
-    static createFromJSONValue(json: JSONValue): Byte {
+    public createFromJSONValue(json: JSONValue): Byte {
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Byte.MIN_VALUE <= num && num <= Byte.MAX_VALUE) {
