@@ -35,6 +35,7 @@ inline MallocMemPool::MallocMemPool() : MemPool("MallocMemPool")
 }
 
 template <class ArenaT, OSPagesAllocPolicy OS_ALLOC_POLICY>
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline ArenaT *MallocMemPool::AllocArenaImpl(size_t size, [[maybe_unused]] SpaceType spaceType,
                                              [[maybe_unused]] AllocatorType allocatorType,
                                              [[maybe_unused]] const void *allocatorAddr)

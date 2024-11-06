@@ -38,7 +38,7 @@ static void *Thread1(void *arg)
     ASSERT(r == index);
     MutexUnlock(&g_y);
     MutexUnlock(&g_x);
-    return 0;
+    return nullptr;
 }
 
 static void *Thread2(void *arg)
@@ -50,7 +50,7 @@ static void *Thread2(void *arg)
     int r = g_shared;
     ASSERT(r == index);
     MutexUnlock(&g_x);
-    return 0;
+    return nullptr;
 }
 
 static void *Thread3(void *arg)
@@ -62,7 +62,7 @@ static void *Thread3(void *arg)
     int r = g_shared;
     ASSERT(r == index);
     MutexUnlock(&g_y);
-    return 0;
+    return nullptr;
 }
 
 int main()

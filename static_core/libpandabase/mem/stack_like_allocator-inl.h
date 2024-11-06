@@ -25,6 +25,7 @@ namespace ark::mem {
 #define LOG_STACK_LIKE_ALLOCATOR(level) LOG(level, ALLOC) << "StackLikeAllocator: "
 
 template <Alignment ALIGNMENT, size_t MAX_SIZE>
+// CC-OFFNXT(G.FUD.06) Splitting this function will degrade readability. Keyword "inline" needs to satisfy ODR rule.
 inline StackLikeAllocator<ALIGNMENT, MAX_SIZE>::StackLikeAllocator(bool usePoolManager, SpaceType spaceType)
     : usePoolManager_(usePoolManager)
 {
@@ -64,6 +65,7 @@ inline StackLikeAllocator<ALIGNMENT, MAX_SIZE>::~StackLikeAllocator()
 
 template <Alignment ALIGNMENT, size_t MAX_SIZE>
 template <bool USE_MEMSET>
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline void *StackLikeAllocator<ALIGNMENT, MAX_SIZE>::Alloc(size_t size)
 {
     ASSERT(AlignUp(size, GetAlignmentInBytes(ALIGNMENT)) == size);
@@ -88,6 +90,7 @@ inline void *StackLikeAllocator<ALIGNMENT, MAX_SIZE>::Alloc(size_t size)
 }
 
 template <Alignment ALIGNMENT, size_t MAX_SIZE>
+// CC-OFFNXT(G.FUD.06) perf critical, ODR
 inline void StackLikeAllocator<ALIGNMENT, MAX_SIZE>::Free(void *mem)
 {
     ASSERT(ToUintPtr(mem) == AlignUp(ToUintPtr(mem), GetAlignmentInBytes(ALIGNMENT)));

@@ -21,7 +21,7 @@
 // then wakes Thread1 and finishes
 // Thread1 also checks, that there is no race on g_shared.
 
-extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
+extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));  // CC-OFF(G.EXP.01-CPP) public API
 
 static struct fmutex g_x;
 static struct CondVar g_c;
