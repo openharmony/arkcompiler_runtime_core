@@ -21,9 +21,12 @@
 #include "plugins/ets/runtime/interop_js/js_convert.h"
 #include "plugins/ets/runtime/interop_js/interop_common.h"
 #include "plugins/ets/runtime/interop_js/code_scopes.h"
+#include "plugins/ets/runtime/interop_js/sts_vm_interface_impl.h"
 #include "plugins/ets/runtime/types/ets_method.h"
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
+
+#include "plugins/ets/runtime/interop_js/hybrid/handshake.h"
 
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
 napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
@@ -172,6 +175,8 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
     promiseInteropConnectMethod =
         promiseInteropClass->GetMethod("connectPromise", "Lstd/core/Promise;J:V")->GetPandaMethod();
     ASSERT(promiseInteropConnectMethod != nullptr);
+
+    stsVMInterface = MakePandaUnique<STSVMInterfaceImpl>();
 }
 
 void InteropCtx::SharedEtsVmState::CacheClasses(EtsClassLinker *etsClassLinker)
@@ -531,6 +536,9 @@ void InteropCtx::Init(EtsCoroutine *coro, napi_env env)
     auto *worker = coro->GetWorker();
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::INTEROP_CTX_PTR>(ctx, Destroy);
     worker->GetLocalStorage().Set<CoroutineWorker::DataIdx::EXTERNAL_IFACES>(&ctx->interfaceTable_);
+#ifdef PANDA_JS_ETS_HYBRID_MODE
+    Handshake::VmHandshake(env, coro, ctx->sharedEtsVmState_->stsVMInterface.get());
+#endif
 }
 
 }  // namespace ark::ets::interop::js

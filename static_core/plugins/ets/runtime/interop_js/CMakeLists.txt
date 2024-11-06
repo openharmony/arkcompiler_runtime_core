@@ -35,6 +35,13 @@ panda_ets_interop_js_plugin(ets_interop_js_napi
         arkruntime
 )
 
+set(ETS_INTEROP_HYBRID_SOURCES)
+if (PANDA_JS_ETS_HYBRID_MODE)
+    list(APPEND ETS_INTEROP_HYBRID_SOURCES
+        ${ETS_EXT_SOURCES}/interop_js/hybrid/handshake.cpp
+    )
+endif(PANDA_JS_ETS_HYBRID_MODE)
+
 panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/intrinsics/std_js_jsruntime.cpp
         ${ETS_EXT_SOURCES}/interop_js/interop_context.cpp
@@ -60,9 +67,11 @@ panda_target_sources(arkruntime_obj PRIVATE
         ${ETS_EXT_SOURCES}/interop_js/js_remote_promise_resolver.cpp
         ${ETS_EXT_SOURCES}/interop_js/stack_info.cpp
         ${ETS_INTEROP_ARCH_SOURCES}
+        ${ETS_INTEROP_HYBRID_SOURCES}
 )
 if(PANDA_TARGET_OHOS)
     panda_target_link_libraries(arkruntime_obj ace_napi.z uv -Wl,--no-undefined)
 else()
+    panda_target_include_directories(arkruntime_obj SYSTEM INTERFACE ${ARKUI_NAPI_HEADERS_PATH})
     panda_target_include_directories(arkruntime_obj SYSTEM INTERFACE ${NAPI_HEADERS_PATH})
 endif()

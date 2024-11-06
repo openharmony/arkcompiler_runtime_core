@@ -20,6 +20,7 @@ if (!defined(ark_standalone_build)) {
 
 ark_root = "//arkcompiler/runtime_core/static_core"
 arkplatform_root = "//arkcompiler/runtime_core/arkplatform"
+arkplatform_include = "$arkplatform_root"
 arkui_root = "//foundation/arkui"
 
 ark_third_party_root = "//third_party"

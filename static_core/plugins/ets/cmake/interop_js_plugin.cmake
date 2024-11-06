@@ -65,6 +65,13 @@ if(NOT PANDA_TARGET_OHOS AND NOT NAPI_HEADERS_PATH)
         message(FATAL_ERROR "By default interop is supported on linux-x64 and OHOS. Set NAPI_HEADERS_PATH to use on other platforms")
     endif()
 
+    if(PANDA_JS_ETS_HYBRID_MODE)
+        set(ARKUI_NAPI_HEADERS_PATH ${PANDA_ROOT}/../../../foundation/arkui/napi)
+        if (NOT EXISTS ${ARKUI_NAPI_HEADERS_PATH})
+            message(FATAL_ERROR "Please use panda js ets hybrid mode in ohos build")
+        endif()
+    endif()
+    # install node
     set(NODE_VERSION "v18.13.0")
     set(DISTRO "linux-x64")
 

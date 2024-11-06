@@ -7,6 +7,7 @@ lib/libarkbytecodeopt.so
 lib/libarkcompiler.so
 lib/libarkdisassembler.so
 lib/libarkfile.so
+lib/libarkplatform.so
 lib/libarkruntime.so
 lib/libetsnative.so
 lib/libarkruntime_static.a
