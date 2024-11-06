@@ -155,3 +155,7 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab3_21.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab3_22.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_ab3_23.sts
+
+# 20423 es2panda aborts due to assertion error when run with '--debug-info'
+07.expressions/06.spread_expression/spex_28.sts
+07.expressions/06.spread_expression/spex_func_27.sts

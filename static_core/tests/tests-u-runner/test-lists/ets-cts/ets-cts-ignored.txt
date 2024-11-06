@@ -1641,6 +1641,201 @@
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_8.sts
 06.contexts_and_conversions/05.implicit_conversions/11.tuple_types_conversion/comp_obj/comp-obj_9.sts
 
+# 20336, 20073 es2panda endlessly outputs identical errors in the console until gets killed by timeout
+07.expressions/06.spread_expression/spex_const_0.sts
+07.expressions/06.spread_expression/spex_const_1.sts
+07.expressions/06.spread_expression/spex_const_10.sts
+07.expressions/06.spread_expression/spex_const_11.sts
+07.expressions/06.spread_expression/spex_const_12.sts
+07.expressions/06.spread_expression/spex_const_13.sts
+07.expressions/06.spread_expression/spex_const_14.sts
+07.expressions/06.spread_expression/spex_const_15.sts
+07.expressions/06.spread_expression/spex_const_16.sts
+07.expressions/06.spread_expression/spex_const_17.sts
+07.expressions/06.spread_expression/spex_const_18.sts
+07.expressions/06.spread_expression/spex_const_19.sts
+07.expressions/06.spread_expression/spex_const_2.sts
+07.expressions/06.spread_expression/spex_const_20.sts
+07.expressions/06.spread_expression/spex_const_21.sts
+07.expressions/06.spread_expression/spex_const_22.sts
+07.expressions/06.spread_expression/spex_const_23.sts
+07.expressions/06.spread_expression/spex_const_24.sts
+07.expressions/06.spread_expression/spex_const_25.sts
+07.expressions/06.spread_expression/spex_const_26.sts
+07.expressions/06.spread_expression/spex_const_27.sts
+07.expressions/06.spread_expression/spex_const_28.sts
+07.expressions/06.spread_expression/spex_const_29.sts
+07.expressions/06.spread_expression/spex_const_3.sts
+07.expressions/06.spread_expression/spex_const_30.sts
+07.expressions/06.spread_expression/spex_const_31.sts
+07.expressions/06.spread_expression/spex_const_4.sts
+07.expressions/06.spread_expression/spex_const_44.sts
+07.expressions/06.spread_expression/spex_const_45.sts
+07.expressions/06.spread_expression/spex_const_5.sts
+07.expressions/06.spread_expression/spex_const_6.sts
+07.expressions/06.spread_expression/spex_const_7.sts
+07.expressions/06.spread_expression/spex_const_8.sts
+07.expressions/06.spread_expression/spex_const_9.sts
+
+# 20003, 20046 Fails on spread expression with tuple, tuples in rest parameters not supported
+07.expressions/06.spread_expression/spex_33.sts
+07.expressions/06.spread_expression/spex_35.sts
+07.expressions/06.spread_expression/spex_41.sts
+07.expressions/06.spread_expression/spex_42.sts
+07.expressions/06.spread_expression/spex_43.sts
+07.expressions/06.spread_expression/spex_44.sts
+07.expressions/06.spread_expression/spex_45.sts
+07.expressions/06.spread_expression/spex_46.sts
+07.expressions/06.spread_expression/spex_47.sts
+07.expressions/06.spread_expression/spex_48.sts
+07.expressions/06.spread_expression/spex_const_32.sts
+07.expressions/06.spread_expression/spex_const_33.sts
+07.expressions/06.spread_expression/spex_const_34.sts
+07.expressions/06.spread_expression/spex_const_35.sts
+07.expressions/06.spread_expression/spex_const_36.sts
+07.expressions/06.spread_expression/spex_const_37.sts
+07.expressions/06.spread_expression/spex_const_38.sts
+07.expressions/06.spread_expression/spex_const_40.sts
+07.expressions/06.spread_expression/spex_const_41.sts
+07.expressions/06.spread_expression/spex_const_42.sts
+07.expressions/06.spread_expression/spex_const_43.sts
+07.expressions/06.spread_expression/spex_const_46.sts
+07.expressions/06.spread_expression/spex_const_47.sts
+07.expressions/06.spread_expression/spex_func_32.sts
+07.expressions/06.spread_expression/spex_func_33.sts
+07.expressions/06.spread_expression/spex_func_34.sts
+07.expressions/06.spread_expression/spex_func_35.sts
+07.expressions/06.spread_expression/spex_func_36.sts
+07.expressions/06.spread_expression/spex_func_37.sts
+07.expressions/06.spread_expression/spex_func_38.sts
+07.expressions/06.spread_expression/spex_func_40.sts
+07.expressions/06.spread_expression/spex_func_41.sts
+07.expressions/06.spread_expression/spex_func_42.sts
+07.expressions/06.spread_expression/spex_func_43.sts
+07.expressions/06.spread_expression/spex_func_44.sts
+07.expressions/06.spread_expression/spex_func_45.sts
+07.expressions/06.spread_expression/spex_func_46.sts
+07.expressions/06.spread_expression/spex_func_47.sts
+07.expressions/06.spread_expression/spex_lmbd_32.sts
+07.expressions/06.spread_expression/spex_lmbd_33.sts
+07.expressions/06.spread_expression/spex_lmbd_34.sts
+07.expressions/06.spread_expression/spex_lmbd_35.sts
+07.expressions/06.spread_expression/spex_lmbd_36.sts
+07.expressions/06.spread_expression/spex_lmbd_37.sts
+07.expressions/06.spread_expression/spex_lmbd_38.sts
+07.expressions/06.spread_expression/spex_lmbd_40.sts
+07.expressions/06.spread_expression/spex_lmbd_41.sts
+07.expressions/06.spread_expression/spex_lmbd_42.sts
+07.expressions/06.spread_expression/spex_lmbd_43.sts
+07.expressions/06.spread_expression/spex_lmbd_44.sts
+07.expressions/06.spread_expression/spex_lmbd_45.sts
+07.expressions/06.spread_expression/spex_lmbd_46.sts
+07.expressions/06.spread_expression/spex_lmbd_47.sts
+07.expressions/06.spread_expression/spex_meth_32.sts
+07.expressions/06.spread_expression/spex_meth_33.sts
+07.expressions/06.spread_expression/spex_meth_34.sts
+07.expressions/06.spread_expression/spex_meth_35.sts
+07.expressions/06.spread_expression/spex_meth_36.sts
+07.expressions/06.spread_expression/spex_meth_37.sts
+07.expressions/06.spread_expression/spex_meth_38.sts
+07.expressions/06.spread_expression/spex_meth_40.sts
+07.expressions/06.spread_expression/spex_meth_41.sts
+07.expressions/06.spread_expression/spex_meth_42.sts
+07.expressions/06.spread_expression/spex_meth_43.sts
+07.expressions/06.spread_expression/spex_meth_44.sts
+07.expressions/06.spread_expression/spex_meth_45.sts
+07.expressions/06.spread_expression/spex_meth_46.sts
+07.expressions/06.spread_expression/spex_meth_47.sts
+
+# 20006 Cannot infer type of array literal containing spread expression of char array
+# 20356 ClassCastError on spread of char array
+07.expressions/06.spread_expression/spex_4.sts
+07.expressions/06.spread_expression/spex_21.sts
+
+# 20008 SegFault on spread expression with floats
+07.expressions/06.spread_expression/spex_5.sts
+07.expressions/06.spread_expression/spex_6.sts
+07.expressions/06.spread_expression/spex_8.sts
+07.expressions/06.spread_expression/spex_9.sts
+
+# 20357 Verifier error when spread of doubles: Bad array element type
+07.expressions/06.spread_expression/spex_10.sts
+
+# 20022 es2panda aborts on spreading array of lambdas
+07.expressions/06.spread_expression/spex_11.sts
+07.expressions/06.spread_expression/spex_func_9.sts
+07.expressions/06.spread_expression/spex_meth_9.sts
+
+# 20024 es2panda fails to infer type of spread expression of enum array
+07.expressions/06.spread_expression/spex_12.sts
+
+# 20358 es2panda aborts on function call in spread expression
+07.expressions/06.spread_expression/spex_18.sts
+07.expressions/06.spread_expression/spex_31.sts
+07.expressions/06.spread_expression/spex_32.sts
+
+# 20360 Verifier error on 'new' expression in spread expression
+07.expressions/06.spread_expression/spex_19.sts
+07.expressions/06.spread_expression/spex_20.sts
+
+# 20361 SegFault on 'this' expression in spread expression
+07.expressions/06.spread_expression/spex_24.sts
+07.expressions/06.spread_expression/spex_25.sts
+
+# 20362 Class linker error: Cannot find class Lf64[]
+07.expressions/06.spread_expression/spex_26.sts
+07.expressions/06.spread_expression/spex_27.sts
+
+# 20364 SegFault on spread expression with enum array
+07.expressions/06.spread_expression/spex_func_10.sts
+07.expressions/06.spread_expression/spex_meth_10.sts
+
+# 20366 Verifier error 41: Bad accumulator type
+07.expressions/06.spread_expression/spex_func_23.sts
+07.expressions/06.spread_expression/spex_func_24.sts
+07.expressions/06.spread_expression/spex_meth_23.sts
+07.expressions/06.spread_expression/spex_meth_24.sts
+
+# 20369 Verifier error on spread of arrays: Verifier error 8: Bad array element type3
+07.expressions/06.spread_expression/spex_func_26.sts
+07.expressions/06.spread_expression/spex_meth_26.sts
+07.expressions/06.spread_expression/spex_7.sts
+
+# 20371 Unexpected Type Error on string array
+07.expressions/06.spread_expression/spex_func_31.sts
+07.expressions/06.spread_expression/spex_meth_31.sts
+
+# 20376 No support for spread arguments in lambda
+07.expressions/06.spread_expression/spex_lmbd_2.sts
+07.expressions/06.spread_expression/spex_lmbd_3.sts
+07.expressions/06.spread_expression/spex_lmbd_4.sts
+07.expressions/06.spread_expression/spex_lmbd_5.sts
+07.expressions/06.spread_expression/spex_lmbd_6.sts
+07.expressions/06.spread_expression/spex_lmbd_7.sts
+07.expressions/06.spread_expression/spex_lmbd_8.sts
+07.expressions/06.spread_expression/spex_lmbd_9.sts
+07.expressions/06.spread_expression/spex_lmbd_10.sts
+07.expressions/06.spread_expression/spex_lmbd_11.sts
+07.expressions/06.spread_expression/spex_lmbd_12.sts
+07.expressions/06.spread_expression/spex_lmbd_13.sts
+07.expressions/06.spread_expression/spex_lmbd_15.sts
+07.expressions/06.spread_expression/spex_lmbd_16.sts
+07.expressions/06.spread_expression/spex_lmbd_17.sts
+07.expressions/06.spread_expression/spex_lmbd_18.sts
+07.expressions/06.spread_expression/spex_lmbd_19.sts
+07.expressions/06.spread_expression/spex_lmbd_20.sts
+07.expressions/06.spread_expression/spex_lmbd_21.sts
+07.expressions/06.spread_expression/spex_lmbd_22.sts
+07.expressions/06.spread_expression/spex_lmbd_23.sts
+07.expressions/06.spread_expression/spex_lmbd_24.sts
+07.expressions/06.spread_expression/spex_lmbd_25.sts
+07.expressions/06.spread_expression/spex_lmbd_26.sts
+07.expressions/06.spread_expression/spex_lmbd_27.sts
+07.expressions/06.spread_expression/spex_lmbd_28.sts
+07.expressions/06.spread_expression/spex_lmbd_29.sts
+07.expressions/06.spread_expression/spex_lmbd_30.sts
+07.expressions/06.spread_expression/spex_lmbd_31.sts
+
 # 18763 es2panda aborts on for-of over a union type array
 08.statements/09.for_of_statements/for_of_28.sts
 17.experimental_features/04.iterable_types/it_11.sts
