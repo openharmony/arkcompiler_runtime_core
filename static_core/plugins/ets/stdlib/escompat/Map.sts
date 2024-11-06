@@ -144,23 +144,37 @@ final class EmptyMapIterator<R> implements IterableIterator<R> {
     }
 }
 
+type MapBucket<K, V> = Array<MapEntry<K, V>> | null
+
 export class Map<K, V> implements ReadonlyMap<K, V> {
     private headEntry: MapEntry<K, V> | undefined = undefined
 
-    private buckets: Array<Array<MapEntry<K, V>>> = new Array<Array<MapEntry<K, V>>>()
+    private buckets: MapBucket<K, V>[] = []
     private sizeVal: int = 0
 
     private static readonly ENTRY_KEY = 0
     private static readonly ENTRY_VAL = 1
 
-    internal static hashOf(a: NullishType): int {
-        if (__runtimeIsSameReference(a, null)) {
+    private static readonly MIN_BUCKETS_COUNT = 8
+
+    private getBucketIndex(k: NullishType): int {
+        if (__runtimeIsSameReference(k, null)) {
             return 0;
         }
-        if (__runtimeIsSameReference(a, undefined)) {
+        if (__runtimeIsSameReference(k, undefined)) {
             return 1;
         }
-        return a!.$_hashCode();
+
+        const keyHash: int = k!.$_hashCode()
+        const t = keyHash >> 31
+
+        return ((keyHash ^ t) - t) & (this.buckets.length - 1)
+    }
+
+    private getInitialBucketsCount(entriesCount: int): int {
+        const bucketsCount = Math.ceilPow2(entriesCount * 4 / 3 + 1)
+
+        return (bucketsCount >= Map.MIN_BUCKETS_COUNT) ? bucketsCount : Map.MIN_BUCKETS_COUNT
     }
 
     /**
@@ -172,20 +186,47 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
             const entriesIter = entries.$_iterator()
             const entriesBuf = new Array<[K, V]>()
             for (let iterRes = entriesIter.next();!iterRes.done;iterRes = entriesIter.next()) {
-                this.buckets.push(new Array<MapEntry<K, V>>())
-
                 const entry = iterRes.value
                 if (entry != null) {
                     entriesBuf.push(entry)
                 }
             }
 
+            const bucketsCount = this.getInitialBucketsCount(entriesBuf.actualLength)
+            this.buckets = new MapBucket<K, V>[bucketsCount]
+
             entriesBuf.forEach((e: [K, V]) => {
                 this.set(e[Map.ENTRY_KEY], e[Map.ENTRY_VAL])
             })
         } else {
-            this.buckets.push(new Array<MapEntry<K, V>>())
+            this.buckets = new MapBucket<K, V>[Map.MIN_BUCKETS_COUNT]
         }
+    }
+
+    /**
+     * Constructs a Map from another Map
+     * @param map another map
+     */
+    constructor(map: Map<K, V>) {
+        const bucketsCount = this.getInitialBucketsCount(map.sizeVal)
+        this.buckets = new MapBucket<K, V>[bucketsCount]
+
+        map.forEach((v: V, k: K) => {
+            this.set(k, v)
+        })
+    }
+
+    /**
+     * Constructs a Map from Array of entries
+     * @param entries Array of entries
+     */
+    constructor(entries: Array<[K, V]>) {
+        const bucketsCount = this.getInitialBucketsCount(entries.actualLength)
+        this.buckets = new MapBucket<K, V>[bucketsCount]
+
+        entries.forEach((entry: [K, V]) => {
+            this.set(entry[Map.ENTRY_KEY], entry[Map.ENTRY_VAL])
+        })
     }
 
     override toString(): String {
@@ -208,23 +249,29 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
         return strBuf.toString()
     }
 
-    private getBucket(v: NullishType): Array<MapEntry<K, V>> {
-        let idx = Map.hashOf(v) % this.buckets.actualLength;
-        idx += this.buckets.actualLength;
-        idx %= this.buckets.actualLength;
-        return this.buckets[idx]
+    private getBucket(k: K): MapBucket<K, V> {
+        return this.buckets[this.getBucketIndex(k)]
+    }
+
+    private getOrCreateBucket(k: K): Array<MapEntry<K, V>> {
+        const idx = this.getBucketIndex(k)
+        const bucket = this.buckets[idx]
+        if (bucket === null) {
+            const newBucket = new Array<MapEntry<K, V>>()
+            this.buckets[idx] = newBucket
+            return newBucket
+        } else {
+            return bucket!
+        }
     }
 
     private rehash(): void {
+        const newSize = this.buckets.length * 2
+        this.buckets = new MapBucket<K, V>[newSize]
+
         const entriesIter = this.mappedIterator<MapEntry<K, V>>((e: MapEntry<K, V>): MapEntry<K, V> => e)
-        const oldSize = this.buckets.length
-        for (let i = 0; i < oldSize; i++) {
-            const a = this.buckets[i]
-            a.length = 0
-            this.buckets.push(new Array<MapEntry<K, V>>())
-        }
         iteratorForEach<MapEntry<K, V>>(entriesIter, (e: MapEntry<K, V>): void => {
-            this.getBucket(e.key).push(e)
+            this.getOrCreateBucket(e.key).push(e)
         })
     }
 
@@ -238,10 +285,10 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     set(key: K, val: V): this {
         // insert into buckets
-        const buck = this.getBucket(key)
-        const buckSize = buck.length
+        const buck = this.getOrCreateBucket(key)
+        const buckSize = buck.actualLength
         for (let i = 0; i < buckSize; i++) {
-            const entry = buck.$_get(i)
+            const entry = buck.$_get_unsafe(i)
             if (__runtimeSameValueZero(entry.key, key)) {
                 entry.val = val
                 return this
@@ -282,13 +329,16 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override has(key: K): boolean {
         const buck = this.getBucket(key)
-        const buckSize = buck.length
-        for (let i = 0; i < buckSize; i++) {
-            const entry = buck.$_get(i)
-            if (__runtimeSameValueZero(entry.key, key)) {
-                return true
+        if (buck !== null) {
+            const buckSize = buck.actualLength
+            for (let i = 0; i < buckSize; i++) {
+                const entry = buck.$_get_unsafe(i)
+                if (__runtimeSameValueZero(entry.key, key)) {
+                    return true
+                }
             }
         }
+
         return false;
     }
 
@@ -307,27 +357,40 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      * @param key the key to remove
      */
     delete(key: K): boolean {
-        return this.deleteImpl(key)
+        if (!this.deleteImpl(key)) {
+            return false
+        }
+
+        this.sizeVal--
+        if (this.sizeVal == 0) {
+            this.headEntry = undefined
+        }
+        return true
     }
 
-    internal deleteImpl(key: K): boolean {
+    private deleteImpl(key: K): boolean {
         const buck = this.getBucket(key)
-        const buckSize = buck.length
-        for (let i = 0; i < buckSize; i++) {
-            const entry = buck.$_get(i)
-            if (__runtimeSameValueZero(entry.key, key)) {
-                entry.prev.next = entry.next
-                entry.next.prev = entry.prev
-                buck.fill(buck.pop()!, i, i + 1)
-                this.sizeVal -= 1
-
-                if (this.sizeVal == 0) {
-                    this.headEntry = undefined
-                }
-
-                return true
-            }
+        if (buck === null) {
+            return false
         }
+
+        const buckSize = buck.actualLength
+        for (let i = 0; i < buckSize; i++) {
+            const entry = buck.$_get_unsafe(i)
+            if (!__runtimeSameValueZero(entry.key, key)) {
+                continue
+            }
+
+            entry.prev.next = entry.next
+            entry.next.prev = entry.prev
+
+            const popped = buck.pop()!
+            if (i != buckSize - 1) {
+                buck[i] = popped
+            }
+            return true
+        }
+
         return false
     }
 
@@ -339,8 +402,7 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
 
         if (this.headEntry !== undefined) {
             this.headEntry = undefined
-            this.buckets = new Array<Array<MapEntry<K, V>>>()
-            this.buckets.push(new Array<MapEntry<K, V>>())
+            this.buckets = new MapBucket<K, V>[Map.MIN_BUCKETS_COUNT]
         }
     }
 
@@ -353,13 +415,16 @@ export class Map<K, V> implements ReadonlyMap<K, V> {
      */
     override get(key: K): V | undefined {
         const buck = this.getBucket(key)
-        const buckSize = buck.length
-        for (let i = 0; i < buckSize; i++) {
-            const entry = buck.$_get(i)
-            if (__runtimeSameValueZero(entry.key, key)) {
-                return entry.val
+        if (buck !== null) {
+            const buckSize = buck.actualLength
+            for (let i = 0; i < buckSize; i++) {
+                const entry = buck.$_get_unsafe(i)
+                if (__runtimeSameValueZero(entry.key, key)) {
+                    return entry.val
+                }
             }
         }
+
         return undefined;
     }
 

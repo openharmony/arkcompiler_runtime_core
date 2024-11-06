@@ -84,7 +84,7 @@ export interface ReadonlySet<T> extends Iterable<T> {
  * Set implementation
  */
 export final class Set<K> implements ReadonlySet<K> {
-    private readonly elements: Map<K, K> = new Map<K, K>()
+    private readonly elements: Map<K, K>
 
     /**
      * Constructs a Set from collection
@@ -92,12 +92,19 @@ export final class Set<K> implements ReadonlySet<K> {
      */
     constructor(elements?: ArrayLike<K> | Iterable<K> | null) {
         if (elements != null) {
-            const elementsIter = elements.$_iterator()
-
-            iteratorForEach<K>(elements.$_iterator(), (elem: K) => {
-                this.elements.set(elem, elem)
-            })
+            const entriesIter = new MappingIterator<K, [K, K]>(elements.$_iterator(), (element: K): [K, K] => [element, element])
+            this.elements = new Map<K, K>(entriesIter)
+        } else {
+            this.elements = new Map<K, K>()
         }
+    }
+
+    /**
+     * Constructs a Set from another Set
+     * @param set another Set
+     */
+    constructor(set: Set<K>) {
+        this.elements = new Map<K, K>(set.elements)
     }
 
     private toStringVals(): String {
@@ -230,5 +237,26 @@ export final class Set<K> implements ReadonlySet<K> {
      */
     override forEach(callbackfn: (k: K, v: K, set: Set<K>) => void): void {
         iteratorForEach<K>(this.keys(), (x: K): void => callbackfn(x, x, this))
+    }
+}
+
+class MappingIterator<I, O> implements IterableIterator<O> {
+    private readonly inputIter: Iterator<I>
+    private readonly mappingFn: (input: I) => O
+
+    constructor(inputIter: Iterator<I>, mappingFn: (input: I) => O) {
+        this.inputIter = inputIter
+        this.mappingFn = mappingFn
+    }
+
+    override next(): IteratorResult<O> {
+        const inputIterRes = this.inputIter.next()
+
+        if (inputIterRes.done) {
+            return new IteratorResult<O>()
+        } else {
+            const output = this.mappingFn(inputIterRes.value as I)
+            return new IteratorResult<O>(output)
+        }
     }
 }
