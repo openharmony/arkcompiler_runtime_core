@@ -113,7 +113,6 @@ function install_vanilla_qemu
 
     pushd "$src_path/$qemu_name"
         ./configure --prefix="$prefix"
-        ninja -C ./build test
         ninja -C ./build install
     popd
 
