@@ -227,6 +227,10 @@ elseif(PANDA_TARGET_AMD64)
         arch/amd64/interpreter_support.S)
 endif()
 
+if (ENABLE_PERF_COUNTERS)
+    list(APPEND SOURCES tooling/perf_counter.cpp)
+endif()
+
 if (PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS)
     list(APPEND SOURCES ${PANDA_ROOT}/platforms/mobile/runtime/thread.cpp)
 else()
