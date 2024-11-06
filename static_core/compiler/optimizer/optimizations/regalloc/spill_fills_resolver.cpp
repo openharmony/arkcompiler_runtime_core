@@ -19,7 +19,7 @@
 
 namespace ark::compiler {
 SpillFillsResolver::SpillFillsResolver(Graph *graph)
-    : SpillFillsResolver(graph, INVALID_REG, MAX_NUM_REGS, MAX_NUM_VREGS)
+    : SpillFillsResolver(graph, GetInvalidReg(), MAX_NUM_REGS, MAX_NUM_VREGS)
 {
 }
 
@@ -315,7 +315,7 @@ void SpillFillsResolver::AddMovesChain(LocationIndex dst, ArenaVector<LocationIn
 SpillFillsResolver::LocationIndex SpillFillsResolver::GetResolver(DataType::Type type)
 {
     // There is a preassigned resolver
-    if (resolver_ != INVALID_REG) {
+    if (resolver_ != GetInvalidReg()) {
         ASSERT(!DataType::IsFloatType(type));
         GetGraph()->SetRegUsage(resolver_, type);
         return resolver_;
@@ -328,12 +328,12 @@ SpillFillsResolver::LocationIndex SpillFillsResolver::GetResolver(DataType::Type
 
     if (DataType::IsFloatType(type)) {
         auto resolverReg = GetGraph()->GetArchTempVReg();
-        ASSERT(resolverReg != INVALID_REG);
+        ASSERT(resolverReg != GetInvalidReg());
         return resolverReg + vregsTableOffset_;
     }
 
     auto resolverReg = GetGraph()->GetArchTempReg();
-    ASSERT(resolverReg != INVALID_REG);
+    ASSERT(resolverReg != GetInvalidReg());
     return resolverReg;
 }
 

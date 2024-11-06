@@ -86,6 +86,11 @@ public:
         return std::move(result_);
     }
 
+    static compiler::Register GetMaxReg()
+    {
+        return compiler::GetInvalidReg() - 1;
+    }
+
     static std::string LabelName(uint32_t id)
     {
         return "label_" + std::to_string(id);

@@ -28,6 +28,10 @@
 namespace ark::compiler {
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph) : RegAllocBase(graph) {}
 RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, size_t regsCount) : RegAllocBase(graph, regsCount) {}
+RegAllocGraphColoring::RegAllocGraphColoring(Graph *graph, LocationMask mask) : RegAllocBase(graph, std::move(mask))
+{
+    ASSERT(!IsFrameSizeLarge() || graph->IsAbcKit());
+}
 
 void RegAllocGraphColoring::FillPhysicalNodes(InterferenceGraph *ig, WorkingRanges *ranges,
                                               ArenaVector<ColorNode *> &physicalNodes)
@@ -286,6 +290,9 @@ bool RegAllocGraphColoring::AllocateRegisters(InterferenceGraph *ig, WorkingRang
     if (GetGraph()->IsBytecodeOptimizer()) {
         BuildIG(ig, ranges);
         BuildBias(ig, PrecolorIG(ig, map));
+        if (IsFrameSizeLarge()) {
+            return ig->AssignColors<VIRTUAL_FRAME_SIZE_LARGE>(map.GetAvailableRegsCount(), map.GetBorder());
+        }
         return ig->AssignColors<VIRTUAL_FRAME_SIZE>(map.GetAvailableRegsCount(), map.GetBorder());
     }
 
@@ -312,7 +319,10 @@ bool RegAllocGraphColoring::AllocateSlots(InterferenceGraph *ig, WorkingRanges *
     ig->SetUseSpillWeight(false);
     BuildIG(ig, stackRanges, true);
     BuildBias(ig, PrecolorIG(ig));
-    return ig->AssignColors<MAX_NUM_STACK_SLOTS>(MAX_NUM_STACK_SLOTS, 0);
+    if (IsFrameSizeLarge()) {
+        return ig->AssignColors<MAX_NUM_STACK_SLOTS_LARGE>(GetMaxNumStackSlots(), 0);
+    }
+    return ig->AssignColors<MAX_NUM_STACK_SLOTS>(GetMaxNumStackSlots(), 0);
 }
 
 /*
@@ -361,7 +371,7 @@ void RegAllocGraphColoring::Remap(const InterferenceGraph &ig, const RegisterMap
         if (!node.IsFixedColor()) {
             // Make interval's register
             auto color = node.GetColor();
-            ASSERT(color != INVALID_REG);
+            ASSERT(color != GetInvalidReg());
             auto reg = map.RegallocToCodegenReg(color);
             interval->SetReg(reg);
         }
@@ -433,12 +443,12 @@ bool RegAllocGraphColoring::Allocate()
 void RegAllocGraphColoring::InitWorkingRanges(WorkingRanges *generalRanges, WorkingRanges *fpRanges)
 {
     for (auto *interval : GetGraph()->GetAnalysis<LivenessAnalyzer>().GetLifeIntervals()) {
-        if (interval->GetReg() == ACC_REG_ID) {
+        if (interval->GetReg() == GetAccReg()) {
             continue;
         }
 
         if (interval->IsPreassigned() && interval->GetReg() == GetGraph()->GetZeroReg()) {
-            ASSERT(interval->GetReg() != INVALID_REG);
+            ASSERT(interval->GetReg() != GetInvalidReg());
             continue;
         }
 

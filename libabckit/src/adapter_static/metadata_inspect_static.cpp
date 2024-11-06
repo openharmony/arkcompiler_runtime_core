@@ -166,6 +166,7 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
 
+    ark::compiler::g_options.SetCompilerFrameSize("default");
     ark::compiler::g_options.SetCompilerUseSafepoint(false);
     auto *func = function->GetArkTSImpl()->GetStaticImpl();
 

@@ -139,7 +139,7 @@ struct InsWrapper {
     constexpr static size_t MAX_CALL_SHORT_ARGS = 2;
     constexpr static size_t MAX_CALL_ARGS = 4;
     constexpr static uint16_t MAX_NON_RANGE_CALL_REG = 15;
-    constexpr static uint16_t MAX_RANGE_CALL_START_REG = 255;
+    constexpr static uint16_t MAX_RANGE_CALL_START_REG = (1U << 12U) * 2 - 1U;
 
     std::string opcode = opcodeInvalid_;
     std::vector<uint16_t> regs;

@@ -31,6 +31,7 @@ class RegAllocGraphColoring : public RegAllocBase {
 public:
     explicit RegAllocGraphColoring(Graph *graph);
     RegAllocGraphColoring(Graph *graph, size_t regsCount);
+    RegAllocGraphColoring(Graph *graph, LocationMask mask);
 
     const char *GetPassName() const override
     {

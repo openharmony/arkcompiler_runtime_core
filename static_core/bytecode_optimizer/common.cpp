@@ -73,7 +73,7 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
     }
 
     // IncI cannot write accumulator.
-    if (binop->GetSrcReg(0U) == compiler::ACC_REG_ID) {
+    if (binop->GetSrcReg(0U) == compiler::GetAccReg()) {
         return false;
     }
 
@@ -87,7 +87,7 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
         }
 
         const uint8_t index = AccReadIndex(uinst);
-        if (uinst->GetInput(index).GetInst() == binop && uinst->GetSrcReg(index) == compiler::ACC_REG_ID) {
+        if (uinst->GetInput(index).GetInst() == binop && uinst->GetSrcReg(index) == compiler::GetAccReg()) {
             return false;
         }
     }

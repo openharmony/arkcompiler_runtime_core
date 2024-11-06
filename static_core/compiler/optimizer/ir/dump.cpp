@@ -1182,7 +1182,7 @@ void Inst::Dump(std::ostream *out, bool newLine) const
     }
     if (GetOpcode() == Opcode::Parameter) {
         auto spillFill = static_cast<const ParameterInst *>(this)->GetLocationData();
-        if (spillFill.DstValue() != INVALID_REG) {
+        if (spillFill.DstValue() != GetInvalidReg()) {
             (*out) << sf_data::ToString(spillFill, GetBasicBlock()->GetGraph()->GetArch());
             if (newLine) {
                 *out << std::endl;

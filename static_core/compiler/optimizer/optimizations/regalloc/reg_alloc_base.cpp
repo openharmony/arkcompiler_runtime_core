@@ -28,7 +28,7 @@
 namespace ark::compiler {
 
 RegAllocBase::RegAllocBase(Graph *graph)
-    : RegAllocBase(graph, graph->GetArchUsedRegs(), graph->GetArchUsedVRegs(), MAX_NUM_STACK_SLOTS)
+    : RegAllocBase(graph, graph->GetArchUsedRegs(), graph->GetArchUsedVRegs(), GetMaxNumStackSlots())
 {
 }
 
@@ -52,6 +52,15 @@ RegAllocBase::RegAllocBase(Graph *graph, size_t regsCount)
       stackUseLastPositions_(graph->GetLocalAllocator()->Adapter())
 {
     GetRegMask().Resize(regsCount);
+}
+
+RegAllocBase::RegAllocBase(Graph *graph, LocationMask mask)
+    : Optimization(graph),
+      regsMask_(std::move(mask)),
+      vregsMask_(graph->GetLocalAllocator()),
+      stackMask_(graph->GetLocalAllocator()),
+      stackUseLastPositions_(graph->GetLocalAllocator()->Adapter())
+{
 }
 
 bool RegAllocBase::RunImpl()
@@ -86,7 +95,7 @@ bool RegAllocBase::RunImpl()
 bool RegAllocBase::Prepare()
 {
     // Set rzero is used for dynamic mask
-    if (auto rzero = GetGraph()->GetZeroReg(); rzero != INVALID_REG) {
+    if (auto rzero = GetGraph()->GetZeroReg(); rzero != GetInvalidReg()) {
         GetRegMask().Set(rzero);
     }
 
@@ -179,7 +188,7 @@ void RegAllocBase::SetType(LifeIntervals *interval)
 void RegAllocBase::SetPreassignedRegisters(LifeIntervals *interval)
 {
     auto inst = interval->GetInst();
-    if (inst->GetDstReg() != INVALID_REG) {
+    if (inst->GetDstReg() != GetInvalidReg()) {
         interval->SetPreassignedReg(inst->GetDstReg());
         return;
     }
@@ -286,7 +295,7 @@ bool TryToSpillConstant(LifeIntervals *interval, Graph *graph)
         return false;
     }
     auto immSlot = graph->AddSpilledConstant(inst->CastToConstant());
-    if (immSlot == INVALID_IMM_TABLE_SLOT) {
+    if (immSlot == GetInvalidImmTableSlot()) {
         return false;
     }
     interval->SetLocation(Location::MakeConstant(immSlot));

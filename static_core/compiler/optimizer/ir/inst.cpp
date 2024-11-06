@@ -786,7 +786,7 @@ bool Inst::IsZeroRegInst() const
 {
     ASSERT(GetBasicBlock() != nullptr);
     ASSERT(GetBasicBlock()->GetGraph() != nullptr);
-    return GetBasicBlock()->GetGraph()->GetZeroReg() != INVALID_REG && IsZeroConstantOrNullPtr(this);
+    return GetBasicBlock()->GetGraph()->GetZeroReg() != GetInvalidReg() && IsZeroConstantOrNullPtr(this);
 }
 
 bool Inst::IsAccRead() const

@@ -1643,7 +1643,7 @@ public:
 
     virtual Register GetSrcReg([[maybe_unused]] unsigned index) const
     {
-        return INVALID_REG;
+        return GetInvalidReg();
     }
 
     User *GetFirstUser() const
@@ -1771,7 +1771,7 @@ private:
     Opcode opcode_ {Opcode::INVALID};
 
     // Destination register type - defined in FieldType
-    Register dstReg_ {INVALID_REG};
+    Register dstReg_ {GetInvalidReg()};
 };
 
 /**
@@ -2431,7 +2431,7 @@ private:
     }
 
 private:
-    std::array<Register, N> srcRegs_ = CreateArray(INVALID_REG, std::make_index_sequence<INPUT_COUNT>());
+    std::array<Register, N> srcRegs_ = CreateArray(GetInvalidReg(), std::make_index_sequence<INPUT_COUNT>());
     Location tmpLocation_ {};
 };
 
@@ -3517,7 +3517,7 @@ public:
 
     Location GetDstLocation() const override
     {
-        if (GetImmTableSlot() != INVALID_IMM_TABLE_SLOT) {
+        if (GetImmTableSlot() != GetInvalidImmTableSlot()) {
             return Location::MakeConstant(GetImmTableSlot());
         }
         return Inst::GetDstLocation();
@@ -3530,7 +3530,7 @@ public:
 private:
     uint64_t value_ {0};
     ConstantInst *nextConst_ {nullptr};
-    ImmTableSlot immSlot_ {INVALID_IMM_TABLE_SLOT};
+    ImmTableSlot immSlot_ {GetInvalidImmTableSlot()};
 };
 
 // Type describing the purpose of the SpillFillInst.

@@ -65,6 +65,7 @@ public:
     NO_COPY_SEMANTIC(CodeGenStatic);
     NO_MOVE_SEMANTIC(CodeGenStatic);
 
+    constexpr static compiler::Register RESERVED_REG = 0U;
     bool RunImpl() override;
     const char *GetPassName() const override
     {
@@ -100,6 +101,11 @@ public:
     static std::string LabelName(uint32_t id)
     {
         return "label_" + std::to_string(id);
+    }
+
+    static compiler::Register GetMaxReg()
+    {
+        return compiler::GetInvalidReg() - 1;
     }
 
     void EmitLabel(const std::string &label)

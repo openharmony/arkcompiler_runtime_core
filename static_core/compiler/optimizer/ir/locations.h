@@ -130,7 +130,7 @@ public:
     bool IsRegisterValid() const
     {
         ASSERT(IsRegister() || IsFpRegister());
-        return GetValue() != INVALID_REG;
+        return GetValue() != GetInvalidReg();
     }
 
     Kind GetKind() const
@@ -153,12 +153,12 @@ public:
 
     bool IsUnallocatedRegister() const
     {
-        return IsAnyRegister() && GetValue() == INVALID_REG;
+        return IsAnyRegister() && GetValue() == GetInvalidReg();
     }
 
     bool IsFixedRegister() const
     {
-        return IsAnyRegister() && GetValue() != INVALID_REG;
+        return IsAnyRegister() && GetValue() != GetInvalidReg();
     }
 
     unsigned GetValue() const
@@ -208,7 +208,7 @@ public:
 
     static Location RequireRegister()
     {
-        return Location(Kind::REGISTER, INVALID_REG);
+        return Location(Kind::REGISTER, GetInvalidReg());
     }
 
     void Dump(std::ostream &stm, Arch arch);

@@ -19,10 +19,10 @@
 namespace ark::compiler {
 RegAllocStat::RegAllocStat(const ArenaVector<LifeIntervals *> &intervals)
 {
-    std::vector<bool> usedRegs(INVALID_REG);
-    std::vector<bool> usedVregs(INVALID_REG);
-    std::vector<bool> usedSlots(INVALID_REG);
-    std::vector<bool> usedVslots(INVALID_REG);
+    std::vector<bool> usedRegs(GetInvalidReg());
+    std::vector<bool> usedVregs(GetInvalidReg());
+    std::vector<bool> usedSlots(GetInvalidReg());
+    std::vector<bool> usedVslots(GetInvalidReg());
 
     for (const auto &interv : intervals) {
         if (interv->IsPhysical()) {

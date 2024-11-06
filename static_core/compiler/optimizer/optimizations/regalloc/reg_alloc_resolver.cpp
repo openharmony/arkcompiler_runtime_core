@@ -368,7 +368,7 @@ void RegAllocResolver::ResolveOutput(Inst *inst)
 
     auto instInterval = liveness_->GetInstLifeIntervals(inst);
     if (instInterval->NoDest()) {
-        inst->SetDstReg(INVALID_REG);
+        inst->SetDstReg(GetInvalidReg());
         return;
     }
 
