@@ -69,10 +69,15 @@ public:
             if (exit->IsEmpty()) {
                 continue;
             }
-            auto last = exit->GetLastInst();
-            if (last->IsReturn()) {
-                ASSERT(retType == compiler::DataType::NO_TYPE || retType == last->GetType());
-                retType = last->GetType();
+            for (auto inst : exit->Insts()) {
+                IntrinsicId id = inst->IsIntrinsic() ? inst->CastToIntrinsic()->GetIntrinsicId() : IntrinsicId::INVALID;
+                auto tailCall = id == IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY || id == IntrinsicId::INTRINSIC_TAIL_CALL;
+                if (inst->IsReturn() || tailCall) {
+                    // Check for return type mismatches, allow mismatch for dynamic methods
+                    ASSERT(unit->GetGraph()->IsDynamicMethod() || retType == compiler::DataType::NO_TYPE ||
+                           retType == inst->GetType());
+                    retType = inst->GetType();
+                }
             }
         }
         return retType;

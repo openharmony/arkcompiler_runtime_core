@@ -1137,7 +1137,7 @@ function(:StringIndexOf,
         LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
         LiveOut(ch).DstReg(regmap[:arg2]).u16
         entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
-        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.b
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.i32
     }
     # 16 <= data size < 32
     If(str_data_size_u16, 32).LT.Unlikely.b {
@@ -1145,14 +1145,14 @@ function(:StringIndexOf,
         LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
         LiveOut(ch).DstReg(regmap[:arg2]).u16
         entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
-        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.b
+        Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.i32
     }
     # 32 <= data size
     LiveOut(str_data).DstReg(regmap[:arg0]).ptr
     LiveOut(str_data_size_u16).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u16
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.i32
   }
 
   IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
@@ -1166,7 +1166,7 @@ function(:StringIndexOf,
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.i32
   }
   # 8 <= data size < 16
   If(str_data_size_u8, 16).LT.Unlikely.b {
@@ -1174,7 +1174,7 @@ function(:StringIndexOf,
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.i32
   }
   # 16 <= data size < 32
   If(str_data_size_u8, 32).LT.Unlikely.b {
@@ -1182,14 +1182,14 @@ function(:StringIndexOf,
     LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.i32
   }
   # 32 <= data size
   LiveOut(str_data).DstReg(regmap[:arg0]).ptr
   LiveOut(str_data_size_u8).DstReg(regmap[:arg1]).u32
   LiveOut(ch).DstReg(regmap[:arg2]).u8
   entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.b
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
 }
 
 
@@ -1237,7 +1237,7 @@ function(:StringIndexOfAfter,
       LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
       LiveOut(ch).DstReg(regmap[:arg2]).u16
       entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_SMALL")
-      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.b
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedSmall").Terminator.i32
     }
     # 16 <= data size < 32
     If(data_size_u16, 32).LT.Unlikely.b {
@@ -1245,14 +1245,14 @@ function(:StringIndexOfAfter,
       LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
       LiveOut(ch).DstReg(regmap[:arg2]).u16
       entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED_MEDIUM")
-      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.b
+      Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressedMedium").Terminator.i32
     }
     # 32 <= data size
     LiveOut(data_ptr_u16).DstReg(regmap[:arg0]).ptr
     LiveOut(data_size_u16).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u16
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_UNCOMPRESSED")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfUncompressed").Terminator.i32
   }
 
   IfImm(Compare(ch, Constants::MAX_U8_VALUE).A.b).Imm(0).NE.Unlikely.b {
@@ -1268,7 +1268,7 @@ function(:StringIndexOfAfter,
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_SMALL")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedSmall").Terminator.i32
   }
   # 8 <= data size < 16
   If(data_size_u8, 16).LT.Unlikely.b {
@@ -1276,7 +1276,7 @@ function(:StringIndexOfAfter,
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_MEDIUM")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedMedium").Terminator.i32
   }
   # 16 <= data size < 32
   If(data_size_u8, 32).LT.Unlikely.b {
@@ -1284,12 +1284,12 @@ function(:StringIndexOfAfter,
     LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
     LiveOut(ch).DstReg(regmap[:arg2]).u8
     entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED_LARGE")
-    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.b
+    Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressedLarge").Terminator.i32
   }
   # 32 <= data size
   LiveOut(data_ptr_u8).DstReg(regmap[:arg0]).ptr
   LiveOut(data_size_u8).DstReg(regmap[:arg1]).u32
   LiveOut(ch).DstReg(regmap[:arg2]).u8
   entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
-  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.b
+  Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
 }

@@ -42,8 +42,10 @@
     CFI_RESTORE(rbx)
 .endm
 
-.macro SAVE_CALLER_GP_REGS fp_reg, paramsnum
+.macro SAVE_CALLER_GP_REGS fp_reg, paramsnum, ret_type
+.ifnc \ret_type,INTEGER
     movq %rax, (-CALLER_REG0_OFFSET + 0)(%\fp_reg)
+.endif
 .ifle \paramsnum-3
     movq %rcx, (-CALLER_REG0_OFFSET + 8)(%\fp_reg)
 .endif
@@ -80,8 +82,10 @@
     movq (-CALLER_REG0_OFFSET + 64)(%\fp_reg), %r8
 .endm
 
-.macro SAVE_CALLER_FP_REGS fp_reg
+.macro SAVE_CALLER_FP_REGS fp_reg, ret_type
+.ifnc \ret_type,FLOAT
     movsd %xmm0, (-CALLER_VREG0_OFFSET + 0)(%\fp_reg)
+.endif
     movsd %xmm1, (-CALLER_VREG0_OFFSET + 8)(%\fp_reg)
     movsd %xmm2, (-CALLER_VREG0_OFFSET + 16)(%\fp_reg)
     movsd %xmm3, (-CALLER_VREG0_OFFSET + 24)(%\fp_reg)
@@ -200,14 +204,14 @@ TYPE_FUNCTION(\name)
     mov %r13, MANAGED_THREAD_FRAME_OFFSET(%THREAD_REG)
 
 .if \mode != RUNTIME_MODE_SLOW_PATH
-    SAVE_CALLER_GP_REGS rbp, \paramsnum
+    SAVE_CALLER_GP_REGS rbp, \paramsnum, \ret_type
 .endif
 
     movq (-CFRAME_FLAGS_SLOT * 8)(%rbp), %r12
     testq $CFRAME_HAS_FLOAT_REGS_FLAG_MASK, %r12
     jz 1f
 
-    SAVE_CALLER_FP_REGS rbp
+    SAVE_CALLER_FP_REGS rbp, \ret_type
 
 1:
     // call to BoundaryFrame bridge
