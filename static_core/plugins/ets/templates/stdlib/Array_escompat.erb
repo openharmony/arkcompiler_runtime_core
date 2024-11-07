@@ -85,7 +85,7 @@ export class Array<T> implements ReadonlyArray<T>, Iterable<T> {
         if (idx >= this.actualLength) {
             throw new RangeError("Out of bounds")
         }
-        this.buffer[idx] = val as Object
+        this.buffer[idx] = val
     }
 
     private $_set_unsafe(idx: int, val: T): void {
