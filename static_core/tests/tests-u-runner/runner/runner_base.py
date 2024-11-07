@@ -67,7 +67,7 @@ def load_list(test_root: str, test_list_path: str, directory: Optional[str] = No
         for line in file:
             test_file = load_test_from_list(test_root, line, directory)
             if test_file:
-                result.append(test_file)
+                result.append(path.normpath(test_file))
 
     return result
 
@@ -284,13 +284,13 @@ class Runner(ABC):
                 self.load_excluded_tests()
                 self.load_ignored_tests()
             if not path.exists(directory):
-                directory = str(path.join(self.test_root, directory))
+                directory = str(path.normpath(path.join(self.test_root, directory)))
             test_files.extend(self.__load_test_files(directory, extension))
 
         self._search_both_excluded_and_ignored_tests()
         self._search_not_used_ignored(test_files)
 
-        all_tests = {self.create_test(test, flags, test in self.ignored_tests) for test in test_files}
+        all_tests = {self.create_test(path.normpath(test), flags, test in self.ignored_tests) for test in test_files}
         not_tests = {t for t in all_tests if isinstance(t, TestETS) and not t.is_valid_test}
         valid_tests = all_tests - not_tests
 
