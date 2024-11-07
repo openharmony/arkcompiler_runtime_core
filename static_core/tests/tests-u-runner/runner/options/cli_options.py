@@ -31,10 +31,11 @@ def is_directory(arg: str) -> str:
 
 
 def make_dir_if_not_exist(arg: str) -> str:
-    if not path.isdir(path.abspath(arg)):
+    arg = path.abspath(path.expanduser(arg))
+    if not path.isdir(arg):
         makedirs(arg)
 
-    return str(path.abspath(arg))
+    return str(arg)
 
 
 def is_file(arg: str) -> str:
