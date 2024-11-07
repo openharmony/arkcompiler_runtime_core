@@ -77,7 +77,48 @@ static ets_int GetEnv([[maybe_unused]] EtsVM *vm, EtsEnv **pEnv, [[maybe_unused]
     return ETS_OK;
 }
 
-static const struct ETS_InvokeInterface S_INVOKE_INTERFACE = {DestroyEtsVM, GetEnv};
+static ets_int AttachThread(EtsVM *vm, EtsEnv **resultEnv)
+{
+    if (vm == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot AttachThread, vm is null";
+        return ETS_ERR;
+    }
+    if (Thread::GetCurrent() != nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot AttachThread, thread has already been attached";
+        return ETS_ERR;
+    }
+    auto *runtime = Runtime::GetCurrent();
+    auto *etsVM = PandaEtsVM::FromEtsVM(vm);
+    auto *coroMan = etsVM->GetCoroutineManager();
+
+    auto *exclusiveCoro = coroMan->CreateExclusiveWorkerForThread(runtime, etsVM);
+    if (exclusiveCoro == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot AttachThread, reached the limit of EAWorkers";
+        return ETS_ERR;
+    }
+    ASSERT(exclusiveCoro == Coroutine::GetCurrent());
+    *resultEnv = PandaEtsNapiEnv::GetCurrent();
+    return ETS_OK;
+}
+
+static ets_int DetachThread(EtsVM *vm)
+{
+    if (vm == nullptr) {
+        LOG(ERROR, RUNTIME) << "Cannot DetachThread, vm is null";
+        return ETS_ERR;
+    }
+    auto *etsVM = PandaEtsVM::FromEtsVM(vm);
+    auto *coroMan = etsVM->GetCoroutineManager();
+    auto result = coroMan->DestroyExclusiveWorker();
+    if (!result) {
+        LOG(ERROR, RUNTIME) << "Cannot DetachThread, thread was not attached";
+        return ETS_ERR;
+    }
+    ASSERT(Thread::GetCurrent() == nullptr);
+    return ETS_OK;
+}
+
+static const struct ETS_InvokeInterface S_INVOKE_INTERFACE = {DestroyEtsVM, GetEnv, AttachThread, DetachThread};
 
 const ETS_InvokeInterface *GetInvokeInterface()
 {

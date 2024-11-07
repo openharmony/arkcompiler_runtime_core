@@ -26,6 +26,7 @@ StackfulCoroutineWorker::StackfulCoroutineWorker(Runtime *runtime, PandaVM *vm, 
       vm_(vm),
       coroManager_(coroManager),
       threadId_(os::thread::GetCurrentThreadId()),
+      exclusiveWorkerCompletionEvent_(coroManager),
       stats_(name),
       name_(std::move(name)),
       id_(id)
@@ -73,14 +74,19 @@ void StackfulCoroutineWorker::WaitForEvent(CoroutineEvent *awaitee)
 
 void StackfulCoroutineWorker::UnblockWaiters(CoroutineEvent *blocker)
 {
-    os::memory::LockHolder lock(waitersLock_);
-    auto w = waiters_.find(blocker);
-    while (w != waiters_.end()) {
-        auto *coro = w->second;
-        waiters_.erase(w);
-        coro->RequestUnblock();
-        AddRunnableCoroutine(coro);
-        w = waiters_.find(blocker);
+    Coroutine *unblockedCoro = nullptr;
+    {
+        os::memory::LockHolder lock(waitersLock_);
+        auto w = waiters_.find(blocker);
+        if (w != waiters_.end()) {
+            unblockedCoro = w->second;
+            waiters_.erase(w);
+            unblockedCoro->RequestUnblock();
+            AddRunnableCoroutine(unblockedCoro);
+        }
+    }
+    if (unblockedCoro != nullptr && InExclusiveMode()) {
+        exclusiveWorkerCompletionEvent_.Happen();
     }
 }
 
@@ -111,6 +117,35 @@ void StackfulCoroutineWorker::FinalizeFiberScheduleLoop()
         // sch loop only
         ASSERT(runnables_.size() == 1);
         SuspendCurrentCoroAndScheduleNext();
+    }
+}
+
+void StackfulCoroutineWorker::CompleteAllExclusiveCoroutines()
+{
+    ASSERT(GetCurrentContext()->GetWorker() == this);
+    ASSERT(InExclusiveMode());
+
+    // G.FMT.04-CPP project code style
+    auto lock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Lock(); }(), ...); };
+    auto unlock = [](auto &&...locks) { ([&]() NO_THREAD_SAFETY_ANALYSIS { locks.Unlock(); }(), ...); };
+
+    ScopedManagedCodeThread n(Coroutine::GetCurrent());
+
+    // CC-OFFNXT(G.CTL.03) false positive
+    while (true) {
+        lock(waitersLock_, runnablesLock_);
+        if (runnables_.size() > 1) {
+            unlock(waitersLock_, runnablesLock_);
+            coroManager_->Schedule();
+        } else if (!waiters_.empty()) {
+            exclusiveWorkerCompletionEvent_.SetNotHappened();
+            exclusiveWorkerCompletionEvent_.Lock();
+            unlock(waitersLock_, runnablesLock_);
+            coroManager_->Await(&exclusiveWorkerCompletionEvent_);
+        } else {
+            unlock(waitersLock_, runnablesLock_);
+            break;
+        }
     }
 }
 

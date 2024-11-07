@@ -28,6 +28,8 @@
 #error "Unsupported target"
 #endif
 
+#include "libpandabase/macros.h"
+
 #include <cstddef>
 #include <cstdint>
 

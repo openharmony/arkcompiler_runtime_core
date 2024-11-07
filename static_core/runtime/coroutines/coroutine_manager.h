@@ -32,6 +32,8 @@ struct CoroutineManagerConfig {
     bool emulateJs = false;
     /// Number of coroutine workers for the N:M mode
     uint32_t workersCount = WORKERS_COUNT_AUTO;
+    /// Limit on the number of exclusive coroutines workers
+    uint32_t exclusiveWorkersLimit = 0;
     /// Collection of performance statistics
     bool enablePerfStats = false;
 };
@@ -199,6 +201,16 @@ public:
 
     /// Try to reset CallbackPoster if it is not used anywhere
     virtual void TryResetCallbackPoster() {}
+
+    virtual Coroutine *CreateExclusiveWorkerForThread([[maybe_unused]] Runtime *runtime, [[maybe_unused]] PandaVM *vm)
+    {
+        return nullptr;
+    }
+
+    virtual bool DestroyExclusiveWorker()
+    {
+        return false;
+    }
 
 protected:
     /// Create native coroutine context instance (implementation dependent)

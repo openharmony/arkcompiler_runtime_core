@@ -498,6 +498,8 @@ ETS_EXPORT ets_int ETS_CreateVM(EtsVM **pVm, EtsEnv **pEnv, EtsVMInitArgs *vmArg
 struct ETS_InvokeInterface {
     ets_int (*DestroyEtsVM)(EtsVM *vm);
     ets_int (*GetEnv)(EtsVM *vm, EtsEnv **pEnv, ets_int version);
+    ets_int (*AttachThread)(EtsVM *vm, EtsEnv **resultEnv);
+    ets_int (*DetachThread)(EtsVM *vm);
 };
 
 struct __EtsVM {
@@ -513,6 +515,16 @@ struct __EtsVM {
     ets_int GetEnv(EtsEnv **pEnv, ets_int version)
     {
         return invoke_interface->GetEnv(this, pEnv, version);
+    }
+
+    ets_int AttachThread(EtsEnv **resultEnv)
+    {
+        return invoke_interface->AttachThread(this, resultEnv);
+    }
+
+    ets_int DetachThread()
+    {
+        return invoke_interface->DetachThread(this);
     }
 #endif
 };

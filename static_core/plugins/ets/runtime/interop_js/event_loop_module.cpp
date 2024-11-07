@@ -36,7 +36,8 @@ uv_loop_t *EventLoopCallbackPoster::GetEventLoop()
 EventLoopCallbackPoster::EventLoopCallbackPoster()
 {
     [[maybe_unused]] auto *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro));
+    [[maybe_unused]] auto *worker = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
+    ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro) || worker->InExclusiveMode());
     auto loop = GetEventLoop();
     async_ = Runtime::GetCurrent()->GetInternalAllocator()->New<uv_async_t>();
     callbackQueue_ = Runtime::GetCurrent()->GetInternalAllocator()->New<ThreadSafeCallbackQueue>();

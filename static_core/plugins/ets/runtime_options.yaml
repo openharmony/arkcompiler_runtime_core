@@ -193,6 +193,13 @@ options:
   default: 0
   description: Number of worker threads for the NxM coroutine scheme (use 0 for auto)
 
+- name: coroutine-e-workers-limit
+  lang:
+    - ets
+  type: uint32_t
+  default: 3
+  description: Limit on the number of exclusive coroutines workers
+
 - name: coroutine-js-mode
   lang:
     - ets
