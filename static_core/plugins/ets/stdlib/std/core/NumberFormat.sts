@@ -15,6 +15,7 @@
 
 package std.core;
 
+// NOTE(aleksander-sotov) Move all code below into the namespace (#20417)
 export class NumberFormat {
 
     /**
