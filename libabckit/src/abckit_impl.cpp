@@ -38,7 +38,7 @@ thread_local std::ostream libabckit::g_nullStream {&g_nB};
 namespace libabckit {
 libabckit::Options g_abckitOptions("");
 
-extern "C" AbckitStatus GetLastError()
+extern "C" AbckitStatus GetAbckitLastError()
 {
     LIBABCKIT_IMPLEMENTED;
     return statuses::GetLastError();
@@ -131,7 +131,7 @@ AbckitApi g_impl = {
     // ========================================
 
     ABCKIT_VERSION_RELEASE_1_0_0,
-    GetLastError,
+    GetAbckitLastError,
 
     // ========================================
     // Inspection API entrypoints

@@ -20,7 +20,7 @@
 #include "optimizer/pass.h"
 
 namespace ark::compiler {
-class Cleanup final : public Optimization {
+class PANDA_PUBLIC_API Cleanup final : public Optimization {
 public:
     explicit Cleanup(Graph *graph, bool lightMode = true)
         : Optimization(graph),

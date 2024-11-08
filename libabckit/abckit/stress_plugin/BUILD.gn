@@ -40,6 +40,12 @@ template("abckit_plugin") {
       configs += invoker.configs
     }
 
+    if (is_mingw || is_win) {
+      output_extension = "dll"
+    } else {
+      output_extension = "so"
+    }
+
     part_name = "runtime_core"
     subsystem_name = "arkcompiler"
   }

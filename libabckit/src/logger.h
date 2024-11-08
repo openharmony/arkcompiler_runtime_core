@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <array>
 #include <algorithm>
 #include <map>
 #include <cstdlib>

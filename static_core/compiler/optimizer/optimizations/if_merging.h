@@ -24,7 +24,7 @@
 namespace ark::compiler {
 class IfMerging : public Optimization {
 public:
-    explicit IfMerging(Graph *graph);
+    PANDA_PUBLIC_API explicit IfMerging(Graph *graph);
 
     NO_MOVE_SEMANTIC(IfMerging);
     NO_COPY_SEMANTIC(IfMerging);

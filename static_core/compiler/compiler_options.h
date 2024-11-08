@@ -37,7 +37,7 @@ enum CpuFeature : uint8_t {
 };
 
 class CompilerOptions;
-extern CompilerOptions g_options;
+PANDA_PUBLIC_API extern CompilerOptions g_options;
 
 /**
  * Extends `compiler::Options`, which may be not sufficient to provide the desired functionality

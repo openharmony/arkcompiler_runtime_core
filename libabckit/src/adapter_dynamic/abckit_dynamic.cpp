@@ -371,7 +371,7 @@ size_t FillRequestIdxSection(ModuleIterateData *data)
     size_t idx = 0;
     auto numModuleRequests = std::get<uint32_t>(data->moduleLitArr->literals_[idx++].value_);
     data->payload->moduleRequestsOffset = idx;
-    auto moduleBasePath = fs::path("./" + std::string(data->m->moduleName->impl)).remove_filename();
+    auto moduleBasePath = fs::path("./" + std::string(data->m->moduleName->impl)).remove_filename().string();
     while (idx < data->payload->moduleRequestsOffset + numModuleRequests) {
         auto relativePathStr = std::get<std::string>(data->moduleLitArr->literals_[idx].value_);
         if (relativePathStr[0] == '@') {
@@ -379,12 +379,12 @@ size_t FillRequestIdxSection(ModuleIterateData *data)
             data->m->md.push_back(TryFindModule(relativePathStr, file));
         } else {
 #ifdef STD_FILESYSTEM_EXPERIMENTAL
-            auto moduleAbsPath = panda::os::GetAbsolutePath((moduleBasePath / fs::path(relativePathStr)).c_str());
+            auto moduleAbsPath = fs::absolute(fs::path(moduleBasePath).append(relativePathStr));
 #else
-            auto moduleAbsPath = fs::weakly_canonical(moduleBasePath / fs::path(relativePathStr));
+            auto moduleAbsPath = fs::weakly_canonical(fs::path(moduleBasePath).append(relativePathStr));
 #endif
-            auto moduleName = Relative(moduleAbsPath, fs::current_path());
-            data->moduleLitArr->literals_[idx++].value_ = "./" + moduleName;
+            auto moduleName = Relative(moduleAbsPath, fs::current_path()).string();
+            data->moduleLitArr->literals_[idx++].value_ = fs::path("./").append(moduleName).string();
             data->m->md.push_back(TryFindModule(moduleName, file));
         }
     }

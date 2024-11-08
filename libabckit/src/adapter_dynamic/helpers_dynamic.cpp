@@ -20,16 +20,13 @@
 #include "libabckit/src/statuses_impl.h"
 #include "assembler/assembly-program.h"
 
+#if defined(_WIN32)
+#include <cwchar>
+#include <codecvt>
+#include <locale>
+#endif
 #include <cstdint>
 #include <memory>
-#if __has_include(<filesystem>)
-#include <filesystem>
-namespace fs = std::filesystem;
-#elif __has_include(<experimental/filesystem>)
-#define STD_FILESYSTEM_EXPERIMENTAL
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#endif
 
 // CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
@@ -212,8 +209,8 @@ bool UpdateModuleLiteralArray(AbckitFile *file, const std::string &recName)
             if (moduleAbsPath[0] == '@') {
                 moduleLitArr->literals_[idx++].value_ = moduleAbsPath;
             } else {
-                auto relativePath = Relative(moduleAbsPath, moduleBasePath.c_str());
-                moduleLitArr->literals_[idx++].value_ = "./" + relativePath;
+                auto relativePath = Relative(moduleAbsPath, moduleBasePath).string();
+                moduleLitArr->literals_[idx++].value_ = fs::path("./").append(relativePath).string();
             }
         }
         mPayload->absPaths = false;
@@ -285,17 +282,17 @@ const panda_file::File *EmitDynamicProgram(AbckitFile *file, pandasm::Program *p
     return pf;
 }
 
-std::string Relative(const std::string &src, const std::string &base)
+fs::path Relative(const fs::path &src, const fs::path &base)
 {
 #ifdef STD_FILESYSTEM_EXPERIMENTAL
     fs::path tmpPath = src;
     fs::path relPath;
-    while (panda::os::GetAbsolutePath(tmpPath.c_str()) != panda::os::GetAbsolutePath(base)) {
+    while (fs::abcolute(tmpPath) != fs::absolute(base)) {
         relPath = relPath.empty() ? tmpPath.filename() : tmpPath.filename() / relPath;
         if (tmpPath == tmpPath.parent_path()) {
             return "";
         }
-        tmpPath = tmpPath.parent_path().c_str();
+        tmpPath = tmpPath.parent_path();
     }
     return relPath;
 #else

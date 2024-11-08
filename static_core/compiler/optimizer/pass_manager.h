@@ -84,12 +84,12 @@ using PredefinedAnalyses =
 
 class PassManager {
 public:
-    PassManager(Graph *graph, PassManager *parentPm);
+    PANDA_PUBLIC_API PassManager(Graph *graph, PassManager *parentPm);
 
-    ArenaAllocator *GetAllocator();
-    ArenaAllocator *GetLocalAllocator();
+    PANDA_PUBLIC_API ArenaAllocator *GetAllocator();
+    PANDA_PUBLIC_API ArenaAllocator *GetLocalAllocator();
 
-    bool RunPass(Pass *pass, size_t localMemSizeBeforePass);
+    PANDA_PUBLIC_API bool RunPass(Pass *pass, size_t localMemSizeBeforePass);
 
     template <typename T, typename... Args>
     bool RunPass(Args... args)

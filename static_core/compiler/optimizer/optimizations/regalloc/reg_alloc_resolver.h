@@ -35,7 +35,7 @@ public:
     ~RegAllocResolver() = default;
 
     void Resolve();
-    bool ResolveCatchPhis();
+    PANDA_PUBLIC_API bool ResolveCatchPhis();
 
 private:
     /*

@@ -94,7 +94,7 @@ struct VnObjHash {
  * The VnObject is key for the instruction.
  * The unordered_map is used for searching equivalent instruction by the key(VnObject).
  */
-class ValNum : public Optimization {
+class PANDA_PUBLIC_API ValNum : public Optimization {
 public:
     explicit ValNum(Graph *graph);
     NO_MOVE_SEMANTIC(ValNum);

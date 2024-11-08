@@ -184,7 +184,7 @@ struct Function {
         return std::any_of(ins.cbegin(), ins.cend(), [](const Ins &insn) { return insn.HasDebugInfo(); });
     }
 
-    void DebugDump() const;
+    PANDA_PUBLIC_API void DebugDump() const;
 };
 // NOLINTEND(misc-non-private-member-variables-in-classes)
 

@@ -46,7 +46,7 @@
  */
 namespace ark::bytecodeopt {
 
-class CheckResolver : public compiler::Optimization {
+class PANDA_PUBLIC_API CheckResolver : public compiler::Optimization {
 public:
     explicit CheckResolver(compiler::Graph *graph) : compiler::Optimization(graph) {}
     ~CheckResolver() override = default;

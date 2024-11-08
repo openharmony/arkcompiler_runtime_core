@@ -23,6 +23,15 @@
 #include "assembler/assembly-emitter.h"
 #include "assembler/assembly-literals.h"
 
+#if __has_include(<filesystem>)
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif __has_include(<experimental/filesystem>)
+#define STD_FILESYSTEM_EXPERIMENTAL
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
+
 namespace libabckit {
 
 struct ModuleUpdateData {
@@ -51,7 +60,7 @@ bool IterateModuleSections(
     const std::function<bool(ModuleIterateData *, std::pair<size_t, size_t>)> &postAction);
 void DumpModuleArray(const panda::pandasm::LiteralArray *moduleLitArr, std::string_view name);
 
-std::string Relative(const std::string &src, const std::string &base);
+fs::path Relative(const fs::path &src, const fs::path &base);
 
 bool IsServiceRecord(const std::string &name);
 bool IsAnnotationInterfaceRecord(const panda::pandasm::Record &rec);

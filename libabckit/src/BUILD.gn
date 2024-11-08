@@ -102,7 +102,12 @@ ohos_shared_library("libabckit") {
     libs = [ "stdc++fs" ]
   }
 
-  output_extension = "so"
+  if (is_mingw || is_win) {
+    output_extension = "dll"
+  } else {
+    output_extension = "so"
+  }
+
   part_name = "runtime_core"
   subsystem_name = "arkcompiler"
 }
