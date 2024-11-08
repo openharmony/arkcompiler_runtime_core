@@ -318,17 +318,17 @@ constructor call:
 
 - Type of each argument corresponding to the rest parameter without the spread
   operator (:ref:`Spread Expression`) must be compatible with the element type
-  of the array rest type parameter. If the rest parameter is a tuple then the
-  number of arguments must be equal to the number of tuple elements and
+  of the array rest type parameter. If the rest parameter is a tuple, then the
+  number of arguments must be equal to the number of tuple elements, and
   argument types must be compatible with the appropriate tuple types;
 
 - If a single argument corresponding to the rest parameter has the spread
   operator (:ref:`Spread Expression`), then the *expression* that follows the
-  operator must refer to 
+  operator must refer to one of the following:
 
-    - an array of a type compatible with the type of the array rest parameter;
+    - An array of a type compatible with the type of the array rest parameter;
       or
-    - a tuple of types compatible with the proper types of the tuple rest
+    - A tuple of types compatible with the proper types of the tuple rest
       parameter.
 
 .. index::
@@ -482,7 +482,7 @@ Other examples are explicit calls to ``instanceof``
    if statement
    conditional expression
 
-In cases like this, the smart compiler can deduce the smart type of an entity
+In like cases, the smart compiler can deduce the smart type of an entity
 without requiring unnecessary casting conversions (see
 :ref:`Cast Expressions`).
 
@@ -1336,10 +1336,11 @@ by calculating partial *better* relation:
 
 **Case 1**. No transformation is *better* than any transformation.
 
-**Case 2**. If argument type is of a numeric type, char, or its boxed
-counterpart, then the candidate with a *shorter* conversion is *better*. E.g.,
-the conversion of ``int`` to ``float`` is *better* than ``int`` to ``double``,
-and ``int`` to ``Int`` is *better* than ``int`` to ``Long``.
+**Case 2**. If argument type is of a numeric type (see :ref:`Numeric Types`),
+char, or its boxed counterpart, then the candidate with a *shorter* conversion
+is *better*. E.g., the conversion of ``int`` to ``float`` is *better* than
+``int`` to ``double``, and ``int`` to ``Int`` is *better* than ``int`` to
+``Long``.
 
 **Case 3**. In case of optional parameters, no parameter is *better*.
 
@@ -1575,9 +1576,8 @@ It affects the semantics of
 
 -  ``for`` statements (see :ref:`For Statements`);
 
--  ``if`` statements (see :ref:`if Statements`);
+-  ``if`` statements (see :ref:`if Statements`).
 
--  assignment (see :ref:`Simple Assignment Operator`).
 
 **Note:** The extended semantics is to be deprecated in one of the future
 versions of the language.

@@ -425,15 +425,15 @@ Casting Contexts and Conversions
     frontend_status: Done
     todo: Does not work for interfaces, eg. let x:iface1 = iface_2_inst as iface1; let x:iface1 = iface1_inst as iface1
 
-Every cast expression (:ref:`Cast Expressions`) introduces *casting
-context* and relies on the application of different conversions. These
+Every cast expression (:ref:`Cast Expressions`) introduces a *casting
+context*, and relies on the application of different conversions. These
 conversions cast an operand in a cast expression to an explicitly specified
 *target type* by using one of the following:
 
 - Identity conversion, if the *target type* is the same as the expression type;
 - :ref:`Implicit Conversions`;
 - :ref:`Numeric Casting Conversions`;
-- :ref:`Narrowing Class or Interface Casting Conversions`;
+- :ref:`Class or Interface Casting Conversions`;
 - :ref:`Casting Conversions from Type Parameter`;
 - :ref:`Casting Conversions from Union`.
 
@@ -458,8 +458,8 @@ Numeric Casting Conversions
 .. meta:
     frontend_status: Done
 
-A *numeric casting conversion* occurs if the *target type* and the expression type
-are both ``numeric`` or ``char``:
+A *numeric casting conversion* occurs if the *target type* and the expression
+type are both ``numeric`` or ``char``:
 
 .. code-block-meta:
    not-subset
@@ -499,9 +499,9 @@ or ``int`` is performed by the following rules:
   *round-toward-zero* mode.
 
 A numeric casting conversion of a floating-point type operand to types
-``short``, ``byte``, or ``char`` is performed in two steps as  follows:
+``short``, ``byte``, or ``char`` is performed in the following two steps:
 
-- First, the casting conversion to ``int`` is performed (see above);
+- The casting conversion to ``int`` is performed first (see above);
 - Then, the ``int`` operand is cast to the target type.
 
 .. index::
@@ -537,19 +537,20 @@ value can differ from that of the original value.
 
 |
 
-.. _Narrowing Class or Interface Casting Conversions:
+.. _Class or Interface Casting Conversions:
 
-Narrowing Class or Interface Casting Conversions
-================================================
+Class or Interface Casting Conversions
+======================================
 
 .. meta:
     frontend_status: Done
 
-This conversion casts an expression of a supertype (superclass or
-superinterface) (see :ref:`Supertyping`) to a subclass or subinterface:
+A *class casting conversion* or *interface casting conversion* occurs if the
+*target type* and the expression type are both of ``class`` or ``interface``
+type. This conversion casts an expression of a supertype (superclass or
+superinterface, see  :ref:`Supertyping`) to a subclass or subinterface:
 
 .. index::
-   narrowing
    expression
    conversion
    operand
@@ -569,26 +570,29 @@ superinterface) (see :ref:`Supertyping`) to a subclass or subinterface:
     let b: Base = new Derived()
     let d: Derived = b as Derived
 
-Compile-time errors for this conversion are the same as in
-:ref:`InstanceOf Expression`.
+If *target type* is not compatible (see :ref:`Type Compatibility`) with the
+expression type then a :index:`compile-time error` occurs.
 
 A runtime error (``ClassCastError``) occurs during this conversion if the
-type of a converted expression cannot be casted to the *target type*:
+type of a converted expression cannot be cast to the *target type*:
 
 .. code-block:: typescript
    :linenos:
 
-    class Base {}
-    class Derived1 extends Base {}
-    class Derived2 extends Base {}
+    interface I {}
+    class A implements I {}
+    class B implements I {}
+    class C {}
 
-    let b: Base = new Derived1()
-    let d = b as Derived2 // runtime error
+    let a: A = new A
+    let i: I = a
+    i as B // Will trigger a runtime error ``ClassCastError``
+    i as C // Compile-time error as C is not compatible with I
+    a as B // Compile-time error as B is not compatible with A
 
 .. index::
    runtime error
    conversion
-   converted expression
    target type
 
 |
@@ -601,9 +605,9 @@ Casting Conversions from Type Parameter
 .. meta:
     frontend_status: Done
 
-A *casting conversion from type parameter* attempts to convert an expression of
-the type parameter to any reference type (see :ref:`Reference Types`) which is
-to be specified as a target type.
+A *casting conversion from a type parameter* attempts to convert an expression
+of the type parameter to any reference type (see :ref:`Reference Types`) which
+is to be specified as a target type.
 
 .. code-block:: typescript
    :linenos:
@@ -616,12 +620,13 @@ to be specified as a target type.
           p as () => void       // OK
           p as T                // OK
           p as S                // OK
-          p as number // compile-time error, cast to the value type
+          p as number // compile-time error, cast to value type
           p as Number // OK use this cast instead of the cast above
        }
     }
 
 |
+
 
 .. _Casting Conversions from Union:
 
@@ -1388,11 +1393,10 @@ Constant to Enumeration Conversions
 .. meta:
     frontend_status: None
 
-A constant value of some integer type is converted to *enumeration* type in
-the following situations:
+A constant value of some integer type is converted to *enumeration* type if
 
--  If enumeration constants are of type ``int``.
--  If a value is equal to the value of an enumeration constant.
+-  enumeration constants are of type ``int``.
+-  a value is equal to the value of an enumeration constant.
 
 This conversion never causes runtime errors.
 
@@ -1404,7 +1408,7 @@ This conversion never causes runtime errors.
     e = 3 // compile-time error, there is no constant with this value
 
     const one = 2
-    e = one // ok, e is set to IntegerEnum.call
+    e = one // ok, e is set to IntegerEnum.c
 
     let x = 1
     e = x // compile-time error, only constant conversions are allowed

@@ -226,9 +226,8 @@ run the initialization code.
 .. code-block:: abnf
 
     importDirective:
-        'import' 
-        (allBinding|selectiveBindings|defaultBinding|typeBinding 'from')?
-        importPath
+        'import' allBinding|selectiveBindings|defaultBinding|typeBinding
+        'from'   importPath
         ;
 
     allBinding:
@@ -236,7 +235,7 @@ run the initialization code.
         ;
 
     selectiveBindings:
-        '{' (nameBinding (',' nameBinding)*)? '}'
+        '{' nameBinding (',' nameBinding)* ','? '}'
         ;
 
     defaultBinding:
@@ -270,7 +269,8 @@ distinguishable in the declaration scope (see
 
 
 **Note**: Import directives are handled by the compiler during compilation, and
-have no effect during program execution.
+have no effect during program execution. Though they ensure that imported
+entities are initialised before use in the current compilation unit.
 
 .. index::
    binding
@@ -609,58 +609,6 @@ and the latter imports only exported types.
    import type
    top-level declaration
 
-|
-
-.. _Import with No Binding:
-
-Import with No Binding
-======================
-
-.. meta:
-    frontend_status: None
-
-Import with No Binding allows initializing the imported module or package
-initialization code right before the code of the current module starts:
-
-.. code-block:: typescript
-   :linenos:
-
-    // File module.sts
-    console.log ("Module initialization code")
-
-    // Folder PackageFolder
-       // File package.sts
-       package P
-       console.log ("Package initialization code")
-
-    // MainProgram.sts
-
-    import "./module.sts"
-    import "./PackageFolder"
-    console.log ("MainProgram code")
-
-The output of Import with No Binding is as follows:
-
-- Module initialization code;
-- Package initialization code; or
-- MainProgram code.
-
-The semantics of import with an empty list of selective bindings is the same
-as that of plain import with no binding at all:
-
-.. code-block:: typescript
-   :linenos:
-
-    import {} from "..."
-    // has the same semantics as 
-    import "..."
-
-.. index::
-   import binding
-   initialization
-   import
-   module
-   package
 
 |
 
@@ -801,8 +749,10 @@ Standard Library Usage
     todo: add escompat to spec and default
 
 All entities exported from the core packages of the standard library (see
-:ref:`Standard Library`) are accessible  as simple names (see :ref:`Accessible`)
-in any compilation unit.
+:ref:`Standard Library`) are accessible as simple names (see :ref:`Accessible`)
+in any compilation unit across all its scopes. Usage of these names as
+programmer-defined entities will lead to a :index:`compile-time error` in 
+accordance to :ref:`Distinguishable Declarations`. 
 
 .. code-block:: typescript
    :linenos:
@@ -816,7 +766,7 @@ in any compilation unit.
         // variable 'console' is defined in the standard library too
 
     }
-
+    
 .. index::
    compilation unit
    entity
@@ -925,8 +875,8 @@ Compilation Unit Initialization
 
 A *compilation unit* is a separate module (see :ref:`Separate Module Initializer`)
 or a package (see :ref:`Package Initializer`) that is initialized once before
-the first use of an entity (function, variable, or type) exported from the
-compilation unit.
+an entity (function, variable, or type), exported from the compilation unit,
+is used for the first time.
 If a compilation unit has any import directive (see :ref:`Import Directives`)
 but the imported entities are not actually used, then the imported compilation
 unit (separate or package) is initialized before the entry point (see
@@ -1017,7 +967,7 @@ functions (see :ref:`Function Declarations`), or namespaces (see
    function
    export
 
-The usage of annotations is defined in :ref:`Using Annotations`.
+The usage of annotations is discussed in :ref:`Using Annotations`.
 
 |
 

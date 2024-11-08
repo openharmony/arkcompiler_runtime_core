@@ -16,30 +16,35 @@
 Contributors
 ############
 
-  Nedoria Aleksei
+Language design lead:
 
-  Bronnikov Georgy
-  
-  Gavrin Evgeny
+- Nedoria Aleksei
 
-  Kanatov Alexey
+Contributors:
 
-  Pavlyuk Alexander
+- Bronnikov Georgy
+- Gavrin Evgeny
+- Kanatov Alexey
+- Nedoria Aleksei
+- Pavlyuk Alexander
+- Polyakov Alexander
+- Rubanov Vladimir
+- Soldatov Anton
+- Solomennikov Dmitry
+- Trubenkov Dmitrii
+- Velikanov Michael
+- Zouev Evgeniy
 
-  Polyakov Alexander
-  
-  Rubanov Vladimir
+Authors of the language specification:
 
-  Soldatov Anton
+- Kanatov Alexey
+- Nedoria Aleksei
+- Trubenkov Dmitrii
+- Zouev Evgeniy
 
-  Solomennikov Dmitry
+Technical writer:
 
-  Trubenkov Dmitrii
-
-  Velikanov Michael
-
-  Zouev Evgeniy
-
+- Baranov Dmitry
 
 .. raw:: pdf
 

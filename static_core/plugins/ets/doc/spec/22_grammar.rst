@@ -25,14 +25,15 @@ Grammar Summary
     indexType: 'number';
 
     type:
-        typeReference
-        | arrayType
-        | tupleType
+        annotationUsage?
+        ( typeReference
+        | 'readonly'? arrayType
+        | 'readonly'? tupleType
         | functionType
         | functionTypeWithReceiver
         | unionType
         | StringLiteral
-        | keyofType
+        )
         | '(' type ')'
         ;
 
@@ -78,10 +79,6 @@ Grammar Summary
         type ('|' type)*
         ;
 
-    keyofType:
-        'keyof' typeReference
-        ;
-
     nullishType:
           type '|' 'null' ('|' 'undefined')?
         | type '|' 'undefined' ('|' 'null')?
@@ -111,7 +108,7 @@ Grammar Summary
         ;
 
     variableDeclaration:
-        identifier ('?')? ':' ('readonly')? type initializer?
+        identifier ('?')? ':' type initializer?
         | identifier initializer
         ;
 
@@ -158,13 +155,18 @@ Grammar Summary
         ;
 
     parameterList:
-        parameter (',' parameter)* (',' optionalParameters|restParameter)?
-        | restParameter
-        | optionalParameters
+        requiredParameters ','?
+        | requiredParameters ',' optionalParameters ','?
+        | optionalParameters ','?
+        | requiredParameters ',' restParameter
+        | restParameter 
         ;
 
+    requiredParameters:
+        parameter (',' parameter)* 
+
     parameter:
-        identifier ':' 'readonly'? type
+        annotationUsage? identifier ':' type
         ;
 
     restParameter:
@@ -177,8 +179,10 @@ Grammar Summary
 
 
     optionalParameter:
-        identifier ':' 'readonly'? type '=' expression
-        | identifier '?' ':' 'readonly'? type
+        annotationUsage?
+        ( identifier ':' type '=' expression
+        | identifier '?' ':' type
+        )
         ;
 
     functionOverloadSignature:
@@ -198,7 +202,7 @@ Grammar Summary
         ;
 
     constraint:
-        'extends' typeReference | keyofType | unionType
+        'extends' typeReference | unionType
         ;
 
     typeParameterDefault:
@@ -452,7 +456,7 @@ Grammar Summary
         ;
 
     lambdaExpression:
-        ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
+        annotationUsage? ('async'|typeParameters)? lambdaSignature '=>' lambdaBody
         ;
 
     lambdaBody:
@@ -476,7 +480,7 @@ Grammar Summary
         ;
 
     lambdaParameter:
-        identifier (':' 'readonly'? type)?
+        identifier (':' type)?
         ;
 
     lambdaRestParameter:
@@ -488,7 +492,7 @@ Grammar Summary
         ;
     
     lambdaOptionalParameter:
-        identifier '?' (':' 'readonly'? type)?
+        identifier '?' (':' type)?
         ;
 
     dynamicImportExpression:
@@ -522,9 +526,11 @@ Grammar Summary
         ;
 
     localDeclaration:
-        variableDeclaration
+        annotationUsage?
+        ( variableDeclaration
         | constantDeclaration
         | typeDeclaration
+        )
         ;
 
     ifStatement:
@@ -658,6 +664,7 @@ Grammar Summary
         ;
 
     classBodyDeclaration:
+        annotationUsage?
         accessModifier?
         ( constructorDeclaration
         | classFieldDeclaration
@@ -745,9 +752,11 @@ Grammar Summary
         ;
 
 
-    interfaceMember
-        : interfaceProperty
+    interfaceMember: 
+        annotationUsage?
+        ( interfaceProperty
         | interfaceMethodDeclaration
+        )
         ;
 
     interfaceProperty:
@@ -831,6 +840,7 @@ Grammar Summary
 
     topDeclaration:
         ('export' 'default'?)?
+        annotationUsage?
         ( typeDeclaration
         | variableDeclarations
         | constantDeclarations
@@ -1034,7 +1044,7 @@ Grammar Summary
         ;
 
     receiverParameter:
-        'this' ':' 'readonly'? type
+        'this' ':' type
         ;
 
     accessorWithReceiverDeclaration:
@@ -1047,7 +1057,7 @@ Grammar Summary
         ;
 
     lambdaExpressionWithReceiver:
-        typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
+        annotationUsage? typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
         returnType? throwMark? '=>' lambdaBody
         ;       
 

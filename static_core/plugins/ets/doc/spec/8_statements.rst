@@ -165,7 +165,7 @@ execution, and actually act as statements:
 The visibility of a local declaration name is determined by the surrounding
 function or method, and by the block scope rules (see :ref:`Scopes`).
 
-The usage of annotations is defined in :ref:`Using Annotations`.
+The usage of annotations is discussed in :ref:`Using Annotations`.
 
 .. index::
    local declaration
@@ -209,10 +209,13 @@ certain conditions:
         ;
 
 
-If an expression represents a condition and is successfully evaluated as
-``true``, then *thenStatement* is executed. Otherwise, *elseStatement* is
-executed (if provided). A :index:`compile-time error` occurs if the expression
-type is not ``boolean``.
+Type of expression must be ``boolean``, or ``Boolean`` or type mentioned in
+:ref:`Extended Conditional Expressions`. Otherwise, a
+:index:`compile-time error` occurs. 
+
+If an expression is successfully evaluated as ``true``, then *thenStatement* is
+executed. Otherwise, *elseStatement* is executed (if provided). 
+
 
 Any ``else`` corresponds to the first ``if`` of an ``if`` statement:
 
@@ -300,6 +303,11 @@ the statement:
         : 'do' statement 'while' '(' expression ')'
         ;
 
+Type of expression must be ``boolean``, or ``Boolean`` or type mentioned in
+:ref:`Extended Conditional Expressions`.
+Otherwise, a :index:`compile-time error` occurs. 
+
+
 .. index::
    while statement
    do statement
@@ -321,7 +329,7 @@ the statement:
 .. code-block:: abnf
 
     forStatement:
-        'for' '(' forInit? ';' expression? ';' forUpdate? ')' statement
+        'for' '(' forInit? ';' forContinue? ';' forUpdate? ')' statement
         ;
 
     forInit:
@@ -329,9 +337,19 @@ the statement:
         | variableDeclarations
         ;
 
+    forContinue:
+        expression
+        ;
+
     forUpdate:
         expressionSequence
         ;
+
+
+Type of forContinue expression must be ``boolean``, or ``Boolean`` or type
+mentioned in :ref:`Extended Conditional Expressions`. Otherwise, a
+:index:`compile-time error` occurs. 
+
 
 .. code-block:: typescript
    :linenos:

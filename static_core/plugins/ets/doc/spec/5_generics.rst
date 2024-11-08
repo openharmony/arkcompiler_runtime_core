@@ -27,8 +27,8 @@ Types used as generic parameters in a generic are called *type parameters*
 (see :ref:`Type Parameters`).
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
-is the action that transforms a *generic* into a real program entity (
-non-generic class, interface, union, array, method, function, or lambda), or
+is the action that transforms a *generic* into a real program entity
+(non-generic class, interface, union, array, method, function, or lambda), or
 into another *generic instantiation*. Instantiation (see
 :ref:`Generic Instantiations`) can be performed either explicitly or
 implicitly.
@@ -109,7 +109,7 @@ specify its *in-* or *out-* variance (see :ref:`Type Parameter Variance`).
         ;
 
     constraint:
-        'extends' typeReference | keyofType | unionType
+        'extends' typeReference | unionType
         ;
 
     typeParameterDefault:
@@ -180,17 +180,14 @@ Type Parameter Constraint
 If possible instantiations need to be constrained, then an individual
 *constraint* can be set for every type parameter.
 
-A constraint of any type parameter can follow the keyword ``extends``.
-The constraint is denoted as a type reference, type ``keyof``, or a union type.
-If no constraint is declared, then the type parameter is not compatible with
-``Object``, and has no methods or fields available for use. Lack of constraint
-effectively means ``extends Object|null|undefined``. 
-If type parameter *T* has type constraint *S*, then the actual type of the
-generic instantiation must be compatible with *S* (see :ref:`Type Compatibility`).
-If the constraint *S* is a non-nullish type (see :ref:`Nullish Types`), then
-*T* is non-nullish too. If the type parameter is constrained with the
-``keyof T``, then valid instantiations of this parameter can be the values of
-the union type created from string names of *T* or the union type itself:
+A constraint of any type parameter can follow the keyword ``extends``. The
+constraint is denoted as a type reference, or a union type. If no constraint is
+declared, then the type parameter is not compatible with ``Object``, and has no
+methods or fields available for use. Lack of constraint effectively means
+``extends Object|null|undefined``. If type parameter *T* has type constraint
+*S*, then the actual type of the generic instantiation must be compatible with
+*S* (see :ref:`Type Compatibility`). If the constraint *S* is a non-nullish
+type (see :ref:`Nullish Types`), then *T* is non-nullish too.
 
 .. index::
    constraint
@@ -236,10 +233,6 @@ the union type created from string names of *T* or the union type itself:
       f2: string = ""
       f3: boolean = false
     }
-    class B<T extends keyof A> {}
-    let b1 = new B<'f1'>    // OK
-    let b2 = new B<'f0'>    // Compile-time error as "f0" does not satisfy the constraint 'keyof A'
-    let b3 = new B<keyof A> // OK
 
 A type parameter of a generic can *depend* on another type parameter
 of the same generic.
@@ -963,8 +956,8 @@ Record Utility Type
 Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
 to values (of type ``V``).
 
-Type ``K`` is restricted to numeric types, type ``string``, string literal
-types, and union types constructed from these types.
+Type ``K`` is restricted to numeric types (see :ref:`Numeric Types`), type
+``string``, string literal types, and union types constructed from these types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
 type is used in place of this type:
