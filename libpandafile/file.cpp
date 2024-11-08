@@ -784,6 +784,9 @@ bool ContainsLiteralArrayInHeader(const std::array<uint8_t, File::VERSION_SIZE> 
 
 bool File::ValidateChecksum(uint32_t *cal_checksum_out) const
 {
+    if (UNLIKELY(GetHeader() == nullptr)) {
+        LOG(FATAL, PANDAFILE) << "Header pointer is nullptr. Abc file is corrupted";
+    }
     constexpr uint32_t CHECKSUM_SIZE = 4U;
     // The checksum calculation does not include magic or checksum, so the offset needs to be added
     constexpr uint32_t FILE_CONTENT_OFFSET = File::MAGIC_SIZE + CHECKSUM_SIZE;
