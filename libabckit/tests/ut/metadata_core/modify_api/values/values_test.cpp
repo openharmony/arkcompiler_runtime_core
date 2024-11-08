@@ -39,7 +39,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueU1_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -54,7 +54,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueDouble_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -69,7 +69,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueString_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -88,7 +88,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateLiteralArrayValue_1)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(arr, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -103,7 +103,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueU1_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_static.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_static_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -118,7 +118,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueDouble_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_static.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_static_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -133,7 +133,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateValueString_2)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(res, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_static.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_static_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -152,7 +152,7 @@ TEST_F(LibAbcKitModifyApiValuesTest, CreateLiteralArrayValue_2)
     ASSERT_NE(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_EQ(arr, nullptr);
     // Write output file
-    g_impl->writeAbc(file, "/tmp/values_static.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/modify_api/values/values_static_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

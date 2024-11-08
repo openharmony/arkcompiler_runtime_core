@@ -20,10 +20,10 @@
 
 namespace libabckit::test {
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestApiScannerDynamic)
+TEST_F(AbckitScenarioTest, LibAbcKitTestApiScannerDynamic)
 {
     const auto version = ABCKIT_VERSION_RELEASE_1_0_0;
     auto *impl = AbckitGetApiImpl(version);

@@ -1135,7 +1135,7 @@ extern "C" AbckitInst *IcreateDYNAMICCallruntimeDefinesendableclass(AbckitGraph 
 
     LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
 
-    LIBABCKIT_WRONG_CTX(graph->file, function->m->file, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, function->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynCallruntimeDefinesendableclassStatic(graph, function, literalArray, imm0, input0);
 }

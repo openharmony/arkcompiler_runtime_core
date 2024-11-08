@@ -47,25 +47,57 @@ auto g_statG = AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 using CB = std::function<void(AbckitCoreFunction *)>;
 
-void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
+void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(AbckitCoreNamespace *)> &cbNamespace,
+                                 std::function<void(AbckitCoreClass *)> &cbClass,
+                                 std::function<void(AbckitCoreFunction *)> &cbFunc)
 {
-    CB cbFunc = [&](AbckitCoreFunction *f) {
-        cbUserFunc(f);
-        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
-            (*reinterpret_cast<CB *>(cb))(m);
+    std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
+        g_implI->moduleEnumerateNamespaces(m, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
+            return true;
+        });
+        g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
+            return true;
+        });
+        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
             return true;
         });
     };
 
-    std::function<void(AbckitCoreClass *)> cbClass = [&](AbckitCoreClass *c) {
+    g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
+        (*reinterpret_cast<std::function<void(AbckitCoreModule *)> *>(cb))(m);
+        return true;
+    });
+}
+
+void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
+{
+    CB cbFunc;
+    std::function<void(AbckitCoreClass *)> cbClass;
+
+    cbFunc = [&](AbckitCoreFunction *f) {
+        cbUserFunc(f);
+        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+            (*reinterpret_cast<CB *>(cb))(f);
+            return true;
+        });
+        g_implI->functionEnumerateNestedClasses(f, (void *)&cbClass, [](AbckitCoreClass *c, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
+            return true;
+        });
+    };
+
+    cbClass = [&](AbckitCoreClass *c) {
         g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<CB *>(cb))(m);
             return true;
         });
     };
 
-    std::function<void(AbckitCoreNamespace *)> cbNamespce = [&](AbckitCoreNamespace *n) {
-        g_implI->namespaceEnumerateNamespaces(n, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+    std::function<void(AbckitCoreNamespace *)> cbNamespace = [&](AbckitCoreNamespace *n) {
+        g_implI->namespaceEnumerateNamespaces(n, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
             return true;
         });
@@ -79,30 +111,8 @@ void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
         });
     };
 
-    std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
-        g_implI->moduleEnumerateNamespaces(m, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
-            return true;
-        });
-        g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
-            return true;
-        });
-        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
-            (*reinterpret_cast<CB *>(cb))(m);
-            return true;
-        });
-    };
-
-    g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
-        (*reinterpret_cast<std::function<void(AbckitCoreModule *)> *>(cb))(m);
-        return true;
-    });
+    EnumerateAllMethodsInModule(file, cbNamespace, cbClass, cbFunc);
 }
-
-}  // namespace
-
-namespace libabckit::test {
 
 struct UserData {
     AbckitString *str1 = nullptr;
@@ -114,7 +124,7 @@ struct UserData {
     AbckitInst *startTime = nullptr;
 };
 
-static void TransformIr(AbckitGraph *graph, UserData *userData)
+void TransformIr(AbckitGraph *graph, UserData *userData)
 {
     // find first inst with opcode ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC
     AbckitInst *callOp = nullptr;
@@ -169,23 +179,26 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
     });
 }
 
-static std::string GetMethodName(AbckitCoreFunction *method)
+std::string GetMethodName(AbckitCoreFunction *method)
 {
     auto mname = g_implI->functionGetName(method);
     std::string fullSig = g_implI->abckitStringToString(mname);
     auto fullName = fullSig.substr(0, fullSig.find(':'));
     return fullName;
 }
+}  // namespace
 
-class LibAbcKitTest : public ::testing::Test {};
+namespace libabckit::test {
+
+class AbckitScenarioTestClean : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestStaticAddLogClean)
+TEST_F(AbckitScenarioTestClean, LibAbcKitTestStaticAddLogClean)
 {
-    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_arkts2/add_log_static.abc",
+    auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static.abc",
                                             "add_log_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output, "buisiness logic...\n"));
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_arkts2/add_log_static.abc");
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static.abc");
     UserData userData;
     EnumerateAllMethods(file, [&](AbckitCoreFunction *method) {
         auto methodName = GetMethodName(method);
@@ -218,11 +231,11 @@ TEST_F(LibAbcKitTest, LibAbcKitTestStaticAddLogClean)
         g_implM->functionSetGraph(method, graph);
     });
 
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_arkts2/add_log_static_modified.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static_modified.abc");
     g_impl->closeFile(file);
 
     output =
-        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_arkts2/add_log_static_modified.abc",
+        helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static_modified.abc",
                                   "add_log_static/ETSGLOBAL", "main");
     EXPECT_TRUE(helpers::Match(output,
                                "file: NOTE; function: handle\n"

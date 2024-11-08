@@ -61,6 +61,8 @@ void ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
 
 void ArkTSFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
                                            bool (*cb)(AbckitCoreFunction *nestedFunc, void *data));
+void ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+                                         bool (*cb)(AbckitCoreClass *nestedClass, void *data));
 void ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 

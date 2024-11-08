@@ -39,7 +39,7 @@ using namespace ark;
 
 namespace libabckit {
 
-[[maybe_unused]] static bool IsAbstract(pandasm::ItemMetadata *meta)
+static bool IsAbstract(pandasm::ItemMetadata *meta)
 {
     uint32_t flags = meta->GetAccessFlags();
     return (flags & ACC_ABSTRACT) != 0U;
@@ -50,17 +50,76 @@ AbckitString *CreateNameString(AbckitFile *file, std::string &name)
     return CreateStringStatic(file, name.data());
 }
 
-void CollectFunction(AbckitFile *file, std::unordered_set<std::string> &globalClassNames,
-                     std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &modulesMap,
-                     const std::string &functionName, ark::pandasm::Function &functionImpl)
+pandasm::Function *FunctionGetImpl(AbckitCoreFunction *function)
+{
+    return function->GetArkTSImpl()->GetStaticImpl();
+}
+
+static void DumpHierarchy(AbckitFile *file)
+{
+    std::function<void(AbckitCoreFunction * f, const std::string &indent)> dumpFunc;
+    std::function<void(AbckitCoreClass * c, const std::string &indent)> dumpClass;
+
+    dumpFunc = [&dumpFunc, &dumpClass](AbckitCoreFunction *f, const std::string &indent = "") {
+        auto fName = FunctionGetImpl(f)->name;
+        LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << fName << std::endl;
+        for (auto &cNested : f->nestedClasses) {
+            dumpClass(cNested.get(), indent + "  ");
+        }
+        for (auto &fNested : f->nestedFunction) {
+            dumpFunc(fNested.get(), indent + "  ");
+        }
+    };
+
+    dumpClass = [&dumpFunc](AbckitCoreClass *c, const std::string &indent = "") {
+        auto cName = c->GetArkTSImpl()->impl.GetStaticClass()->name;
+        LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << cName << std::endl;
+        for (auto &f : c->methods) {
+            dumpFunc(f.get(), indent + "  ");
+        }
+    };
+
+    std::function<void(AbckitCoreNamespace * n, const std::string &indent)> dumpNamespace =
+        [&dumpFunc, &dumpClass, &dumpNamespace](AbckitCoreNamespace *n, const std::string &indent = "") {
+            ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
+            auto &nName = FunctionGetImpl(n->GetArkTSImpl()->f.get())->name;
+            LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << nName << std::endl;
+            for (auto &n : n->namespaces) {
+                dumpNamespace(n.get(), indent + "  ");
+            }
+            for (auto &c : n->classes) {
+                dumpClass(c.get(), indent + "  ");
+            }
+            for (auto &f : n->functions) {
+                dumpFunc(f.get(), indent + "  ");
+            }
+        };
+
+    for (auto &[mName, m] : file->localModules) {
+        LIBABCKIT_LOG_NO_FUNC(DEBUG) << mName << std::endl;
+        for (auto &n : m->namespaces) {
+            dumpNamespace(n.get(), "");
+        }
+        for (auto &[cName, c] : m->ct) {
+            dumpClass(c.get(), "");
+        }
+        for (auto &f : m->functions) {
+            dumpFunc(f.get(), "");
+        }
+    }
+}
+
+std::unique_ptr<AbckitCoreFunction> CollectFunction(
+    AbckitFile *file, std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
+    const std::string &functionName, ark::pandasm::Function &functionImpl)
 {
     auto [moduleName, className] = FuncGetNames(functionName);
     LIBABCKIT_LOG(DEBUG) << "  Found function. module: '" << moduleName << "' class: '" << className << "' function: '"
                          << functionName << "'\n";
-    ASSERT(modulesMap.find(moduleName) != modulesMap.end());
-    auto &functionModule = modulesMap[moduleName];
+    ASSERT(nameToModule.find(moduleName) != nameToModule.end());
+    auto &functionModule = nameToModule[moduleName];
     auto function = std::make_unique<AbckitCoreFunction>();
-    function->m = functionModule.get();
+    function->owningModule = functionModule.get();
     function->impl = std::make_unique<AbckitArktsFunction>();
     function->GetArkTSImpl()->impl = &functionImpl;
     function->GetArkTSImpl()->core = function.get();
@@ -87,51 +146,16 @@ void CollectFunction(AbckitFile *file, std::unordered_set<std::string> &globalCl
         function->annotations.emplace_back(std::move(anno));
     }
 
-    if (globalClassNames.find(className) != globalClassNames.end()) {
-        functionModule->functions.emplace_back(std::move(function));
-    } else {
-        ASSERT(functionModule->ct.find(className) != functionModule->ct.end());
-        auto &klass = functionModule->ct[className];
-        function->klass = klass.get();
-        klass->methods.emplace_back(std::move(function));
-    }
-}
-
-static void CollectFunctions(pandasm::Program *prog, AbckitFile *file,
-                             std::unordered_set<std::string> &globalClassNames,
-                             std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &modulesMap)
-{
-    static const std::string LAMBDA_RECORD_KEY = "LambdaObject";
-    static const std::string INIT_FUNC_NAME = "_$init$_";
-    static const std::string TRIGGER_CCTOR_FUNC_NAME = "_$trigger_cctor$_";
-
-    for (auto &[functionName, functionImpl] : prog->functionTable) {
-        auto [moduleName, className] = FuncGetNames(functionName);
-
-        if (functionImpl.metadata->IsForeign() ||
-            (className.substr(0, LAMBDA_RECORD_KEY.size()) == LAMBDA_RECORD_KEY) ||
-            (functionName.find(INIT_FUNC_NAME, 0) != std::string::npos) ||
-            (functionName.find(TRIGGER_CCTOR_FUNC_NAME, 0) != std::string::npos)) {
-            // NOTE: find and fill AbckitCoreImportDescriptor
-            continue;
-        }
-
-        if (IsAbstract(functionImpl.metadata.get())) {
-            // NOTE: ?
-            continue;
-        }
-
-        CollectFunction(file, globalClassNames, modulesMap, functionName, functionImpl);
-    }
+    return function;
 }
 
 static void CreateModule(AbckitFile *file, std::unordered_set<std::string> &globalClassNames,
-                         std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &modulesMap,
+                         std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
                          const std::string &recordName)
 {
     auto [moduleName, className] = ClassGetNames(recordName);
     if (globalClassNames.find(className) != globalClassNames.end()) {
-        if (modulesMap.find(moduleName) != modulesMap.end()) {
+        if (nameToModule.find(moduleName) != nameToModule.end()) {
             LIBABCKIT_LOG(FATAL) << "Duplicated ETSGLOBAL for module: " << moduleName << '\n';
         }
 
@@ -142,41 +166,95 @@ static void CreateModule(AbckitFile *file, std::unordered_set<std::string> &glob
         m->moduleName = CreateStringStatic(file, moduleName.data());
         m->impl = std::make_unique<AbckitArktsModule>();
         m->GetArkTSImpl()->core = m.get();
-        modulesMap.insert({moduleName, std::move(m)});
+        nameToModule.insert({moduleName, std::move(m)});
     }
 }
 
-void CreateClass(std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &modulesMap,
-                 const std::string &moduleName, const std::string &className, ark::pandasm::Record &record)
+std::unique_ptr<AbckitCoreClass> CreateClass(
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule, const std::string &moduleName,
+    const std::string &className, ark::pandasm::Record &record)
 {
     LIBABCKIT_LOG(DEBUG) << "  Found class. module: '" << moduleName << "' class: '" << className << "'\n";
-    ASSERT(modulesMap.find(moduleName) != modulesMap.end());
-    auto &classModule = modulesMap[moduleName];
+    ASSERT(nameToModule.find(moduleName) != nameToModule.end());
+    auto &classModule = nameToModule[moduleName];
     auto abckitRecord = &record;
     auto klass = std::make_unique<AbckitCoreClass>(classModule.get(), AbckitArktsClass(abckitRecord));
-    classModule->InsertClass(className, std::move(klass));
+    return klass;
 }
 
-// CC-OFFNXT(G.FUD.05) huge function
+static void AssignClasses(std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
+                          std::vector<std::unique_ptr<AbckitCoreClass>> &classes)
+{
+    for (auto &klass : classes) {
+        auto fullName = klass->GetArkTSImpl()->impl.GetStaticClass()->name;
+        auto [moduleName, className] = ClassGetNames(fullName);
+        LIBABCKIT_LOG(DEBUG) << "moduleName, className, fullName: " << moduleName << ", " << className << ", "
+                             << fullName << '\n';
+        auto &classModule = nameToModule[moduleName];
+        classModule->InsertClass(className, std::move(klass));
+    }
+}
+
+static void AssignFunctions(std::unordered_set<std::string> &globalClassNames,
+                            std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> &nameToModule,
+                            [[maybe_unused]] std::unordered_map<std::string, AbckitCoreClass *> &nameToClass,
+                            std::vector<std::unique_ptr<AbckitCoreFunction>> &functions)
+{
+    for (auto &function : functions) {
+        std::string functionName = FunctionGetImpl(function.get())->name;
+        auto [moduleName, className] = FuncGetNames(functionName);
+        auto &functionModule = nameToModule[moduleName];
+        if (globalClassNames.find(className) != globalClassNames.end()) {
+            functionModule->functions.emplace_back(std::move(function));
+        } else {
+            ASSERT(functionModule->ct.find(className) != functionModule->ct.end());
+            auto &klass = functionModule->ct[className];
+            function->parentClass = klass.get();
+            klass->methods.emplace_back(std::move(function));
+        }
+    }
+}
+
+static const std::string LAMBDA_RECORD_KEY = "LambdaObject";
+static const std::string INIT_FUNC_NAME = "_$init$_";
+static const std::string TRIGGER_CCTOR_FUNC_NAME = "_$trigger_cctor$_";
+
+static bool ShouldCreateFuncWrapper(pandasm::Function &functionImpl, const std::string &className,
+                                    const std::string &functionName)
+{
+    if (functionImpl.metadata->IsForeign() || (className.substr(0, LAMBDA_RECORD_KEY.size()) == LAMBDA_RECORD_KEY) ||
+        (functionName.find(INIT_FUNC_NAME, 0) != std::string::npos) ||
+        (functionName.find(TRIGGER_CCTOR_FUNC_NAME, 0) != std::string::npos)) {
+        // NOTE: find and fill AbckitCoreImportDescriptor
+        return false;
+    }
+
+    if (IsAbstract(functionImpl.metadata.get())) {
+        // NOTE: ?
+        return false;
+    }
+
+    return true;
+}
+
 static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
 {
     std::unordered_set<std::string> globalClassNames = {"ETSGLOBAL", "_GLOBAL"};
-    static const std::string LAMBDA_RECORD_KEY = "LambdaObject";
-    static const std::string INIT_FUNC_NAME = "_$init$_";
-    static const std::string TRIGGER_CCTOR_FUNC_NAME = "_$trigger_cctor$_";
     file->program = prog;
 
     // Collect modules
-    std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> modulesMap;
+    std::unordered_map<std::string, std::unique_ptr<AbckitCoreModule>> nameToModule;
     for (auto &[recordName, record] : prog->recordTable) {
         if (record.metadata->IsForeign()) {
             // NOTE: Create AbckitCoreImportDescriptor and AbckitCoreModuleDescriptor
             continue;
         }
-        CreateModule(file, globalClassNames, modulesMap, recordName);
+        CreateModule(file, globalClassNames, nameToModule, recordName);
     }
 
     // Collect classes
+    std::vector<std::unique_ptr<AbckitCoreClass>> classes;
+    std::unordered_map<std::string, AbckitCoreClass *> nameToClass;
     for (auto &[recordName, record] : prog->recordTable) {
         if (record.metadata->IsForeign() || (recordName.find(LAMBDA_RECORD_KEY) != std::string::npos)) {
             // NOTE: find and fill AbckitCoreImportDescriptor
@@ -189,18 +267,33 @@ static void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
         if (globalClassNames.find(className) != globalClassNames.end()) {
             continue;
         }
-        CreateClass(modulesMap, moduleName, className, record);
+        classes.emplace_back(CreateClass(nameToModule, moduleName, className, record));
+        nameToClass[recordName] = classes.back().get();
     }
 
     // Functions
-    CollectFunctions(prog, file, globalClassNames, modulesMap);
+    std::vector<std::unique_ptr<AbckitCoreFunction>> functions;
+    std::unordered_map<std::string, AbckitCoreFunction *> nameToFunction;
+    for (auto &[functionName, functionImpl] : prog->functionTable) {
+        auto [moduleName, className] = FuncGetNames(functionName);
+
+        if (ShouldCreateFuncWrapper(functionImpl, className, functionName)) {
+            functions.emplace_back(CollectFunction(file, nameToModule, functionName, functionImpl));
+            nameToFunction[functionName] = functions.back().get();
+        }
+    }
+
+    AssignClasses(nameToModule, classes);
+    AssignFunctions(globalClassNames, nameToModule, nameToClass, functions);
 
     // NOTE: AbckitCoreExportDescriptor
     // NOTE: AbckitModulePayload
 
-    for (auto &[moduleName, module] : modulesMap) {
+    for (auto &[moduleName, module] : nameToModule) {
         file->localModules.insert({moduleName, std::move(module)});
     }
+
+    DumpHierarchy(file);
 
     // Strings
     for (auto &sImpl : prog->strings) {

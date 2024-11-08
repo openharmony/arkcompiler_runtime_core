@@ -3107,19 +3107,6 @@ struct AbckitIsaApiDynamic {
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph` is not DYNAMIC.
      */
     AbckitInst *(*iCreateIf)(AbckitGraph *graph, AbckitInst *input, enum AbckitIsaApiDynamicConditionCode cc);
-
-    /**
-     * @brief Creates CatchPhi instruction and sets it at the beginning of basic block `catchBegin`.
-     * @return Pointer to created `AbckitInst`.
-     * @param [ in ] graph - Graph where instruction will be inserted.
-     * @param [ in ] catchBegin - Basic block at the beginning of which the instruction will be inserted.
-     * @param [ in ] argCount - Number of instruction's inputs
-     * @param [ in ] ... - Instructions that are inputs of the new instruction.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `catchBegin` is NULL.
-     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `graph` is not DYNAMIC.
-     */
-    AbckitInst *(*iCreateCatchPhi)(AbckitGraph *graph, AbckitBasicBlock *catchBegin, size_t argCount, ...);
 };
 
 /**

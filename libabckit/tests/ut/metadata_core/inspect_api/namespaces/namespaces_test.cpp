@@ -131,19 +131,19 @@ TEST_F(LibAbcKitInspectApiNamespacesTests, NamespaceGetParentNamespace_2)
 // Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_1)
 {
-    GeneralTestNamespaces<FUNCTION>("F0");
+    GeneralTestNamespaces<FUNCTION>("f0");
 }
 
 // Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_2)
 {
-    GeneralTestNamespaces<FUNCTION>("F1", "N1");
+    GeneralTestNamespaces<FUNCTION>("f1", "N1");
 }
 
 // Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitInspectApiNamespacesTests, FunctionGetParentNamespace_3)
 {
-    GeneralTestNamespaces<FUNCTION>("F2", "N2");
+    GeneralTestNamespaces<FUNCTION>("f2", "N2");
 }
 
 // Test: test-kind=api, api=InspectApiImpl::functionGetParentNamespace, abc-kind=ArkTS1, category=positive

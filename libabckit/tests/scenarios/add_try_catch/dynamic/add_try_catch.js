@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
 
 function throwableApi() {
     print('THROW');
@@ -33,30 +32,3 @@ function main() {
 }
 
 main();
-
-// After AOP:
-
-// function throwableApi() {
-//     print('THROW');
-//     throw new Error('DUMMY_ERROR');
-// }
-//
-// class Handler {
-//     run() {
-//         let tmp;
-//         try {
-//             tmp = throwableApi();
-//         } catch(e) {
-//             print(e);
-//             tmp = false;
-//         }
-//         return tmp;
-//     }
-// }
-//
-// function main() {
-//     let c = new Handler();
-//     print(c.run());
-// }
-//
-// main()

@@ -226,7 +226,7 @@ AbckitIsaApiDynamicOpcode GetDynamicOpcode(compiler::Inst *inst)
 size_t GetIntrinicMaxInputsCount(AbckitInst *inst)
 {
     ASSERT(inst->impl->IsIntrinsic());
-    if (IsDynamic(inst->graph->function->m->target)) {
+    if (IsDynamic(inst->graph->function->owningModule->target)) {
         return GetIntrinicMaxInputsCountDyn(inst->impl->CastToIntrinsic());
     }
     return GetIntrinicMaxInputsCountStatic(inst->impl->CastToIntrinsic());
@@ -234,7 +234,7 @@ size_t GetIntrinicMaxInputsCount(AbckitInst *inst)
 
 bool IsCallInst(AbckitInst *inst)
 {
-    if (IsDynamic(inst->graph->function->m->target)) {
+    if (IsDynamic(inst->graph->function->owningModule->target)) {
         return IsCallInstDyn(inst->impl);
     }
     return IsCallInstStatic(inst->impl);
@@ -469,7 +469,7 @@ void SetLastError(AbckitStatus err)
 
 uint32_t GetClassOffset(AbckitGraph *graph, AbckitCoreClass *klass)
 {
-    ASSERT(!IsDynamic(graph->function->m->target));
+    ASSERT(!IsDynamic(graph->function->owningModule->target));
 
     auto *rec = klass->GetArkTSImpl()->impl.GetStaticClass();
     LIBABCKIT_LOG(DEBUG) << "className: " << rec->name << "\n";
@@ -492,7 +492,7 @@ std::string GetFuncName(AbckitCoreFunction *function)
 {
     std::string funcName = "__ABCKIT_INVALID__";
 
-    if (IsDynamic(function->m->target)) {
+    if (IsDynamic(function->owningModule->target)) {
         auto *func = PandasmWrapper::GetWrappedFunction(GetDynFunction(function));
         funcName = func->name;
         delete func;
@@ -508,7 +508,7 @@ std::string GetMangleFuncName(AbckitCoreFunction *function)
 {
     std::string funcName = "__ABCKIT_INVALID__";
 
-    if (IsDynamic(function->m->target)) {
+    if (IsDynamic(function->owningModule->target)) {
         auto *func = PandasmWrapper::GetWrappedFunction(GetDynFunction(function));
         funcName = func->name;
         delete func;
@@ -568,7 +568,7 @@ uint32_t GetStringOffset(AbckitGraph *graph, AbckitString *string)
 uint32_t GetLiteralArrayOffset(AbckitGraph *graph, AbckitLiteralArray *arr)
 {
     std::string arrName = "__ABCKIT_INVALID__";
-    if (IsDynamic(graph->function->m->target)) {
+    if (IsDynamic(graph->function->owningModule->target)) {
         auto litarrTable = PandasmWrapper::GetUnwrappedLiteralArrayTable(graph->file->GetDynamicProgram());
         for (auto &[id, s] : litarrTable) {
             if (s == arr->GetDynamicImpl()) {

@@ -435,8 +435,8 @@ extern "C" AbckitInst *IcreateDYNAMICDefinefunc(AbckitGraph *graph, AbckitCoreFu
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(function->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, function->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(function->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, function->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynDefinefuncStatic(graph, function, imm0);
 }
@@ -452,8 +452,8 @@ extern "C" AbckitInst *IcreateDYNAMICDefinemethod(AbckitGraph *graph, AbckitInst
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
     LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(function->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, function->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(function->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, function->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynDefinemethodStatic(graph, acc, function, imm0);
 }
@@ -471,8 +471,8 @@ extern "C" AbckitInst *IcreateDYNAMICDefineclasswithbuffer(AbckitGraph *graph, A
     LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
 
     LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(function->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, function->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(function->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, function->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynDefineclasswithbufferStatic(graph, function, literalArray, imm0, input0);
 }
@@ -1336,26 +1336,6 @@ extern "C" AbckitInst *IcreateDYNAMICIf(AbckitGraph *graph, AbckitInst *input, A
     return IcreateDynIfStatic(graph, input, cc);
 }
 
-extern "C" AbckitInst *IcreateDYNAMICCatchPhi(AbckitGraph *graph, AbckitBasicBlock *catchBegin, size_t argCount, ...)
-{
-    LIBABCKIT_CLEAR_LAST_ERROR;
-    LIBABCKIT_IMPLEMENTED;
-
-    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(catchBegin, nullptr);
-    LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    va_list args;
-    va_start(args, argCount);
-
-    auto *inst = IcreateCatchPhiStatic(graph, catchBegin, argCount, args);
-
-    va_end(args);
-
-    return inst;
-}
-
 extern "C" AbckitIsaApiDynamicConditionCode IgetDYNAMICConditionCode(AbckitInst *inst)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -1391,7 +1371,7 @@ extern "C" void IsetDYNAMICConditionCode(AbckitInst *inst, AbckitIsaApiDynamicCo
 
     bool ccDynamicResitiction =
         !((cc == ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_NE) || (cc == ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_EQ));
-    if (IsDynamic(inst->graph->function->m->target) && ccDynamicResitiction) {
+    if (IsDynamic(inst->graph->function->owningModule->target) && ccDynamicResitiction) {
         statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         LIBABCKIT_LOG(DEBUG) << "Wrong condition code set for dynamic if\n";
         return;

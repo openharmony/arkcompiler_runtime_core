@@ -34,7 +34,7 @@ static const std::string ROUTER_MAP_FILE_MODULE_NAME = "modules/routerMap";
 static const std::string ROUTER_ANNOTATION_NAME = "Router";
 static const std::string FUNC_MAIN_0 = "func_main_0";
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 struct RouterAnnotation {
     AbckitCoreClass *owner;
@@ -226,7 +226,7 @@ static bool ClassHasAnnotation(VisitHelper &visitor, const UserData &ud)
 }
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestRouterTable)
+TEST_F(AbckitScenarioTest, LibAbcKitTestRouterTable)
 {
     std::string inputPath = ABCKIT_ABC_DIR "scenarios/router_table/dynamic/router_table.abc";
     std::string outputPath = ABCKIT_ABC_DIR "scenarios/router_table/dynamic/router_table_modified.abc";

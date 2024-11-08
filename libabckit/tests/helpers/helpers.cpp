@@ -322,40 +322,12 @@ void ReplaceInst(AbckitInst *what, AbckitInst *with)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-void EnumerateAllMethods(AbckitFile *file, const std::function<void(AbckitCoreFunction *)> &cbUserFunc)
+static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(AbckitCoreNamespace *)> &cbNamespace,
+                                        std::function<void(AbckitCoreClass *)> &cbClass,
+                                        std::function<void(AbckitCoreFunction *)> &cbFunc)
 {
-    std::function<void(AbckitCoreFunction *)> cbFunc = [&](AbckitCoreFunction *f) {
-        cbUserFunc(f);
-        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
-            return true;
-        });
-    };
-
-    std::function<void(AbckitCoreClass *)> cbClass = [&](AbckitCoreClass *c) {
-        g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
-            return true;
-        });
-    };
-
-    std::function<void(AbckitCoreNamespace *)> cbNamespce = [&](AbckitCoreNamespace *n) {
-        g_implI->namespaceEnumerateNamespaces(n, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
-            return true;
-        });
-        g_implI->namespaceEnumerateClasses(n, &cbClass, [](AbckitCoreClass *c, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
-            return true;
-        });
-        g_implI->namespaceEnumerateTopLevelFunctions(n, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(f);
-            return true;
-        });
-    };
-
     std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
-        g_implI->moduleEnumerateNamespaces(m, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+        g_implI->moduleEnumerateNamespaces(m, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
             return true;
         });
@@ -373,6 +345,48 @@ void EnumerateAllMethods(AbckitFile *file, const std::function<void(AbckitCoreFu
         (*reinterpret_cast<std::function<void(AbckitCoreModule *)> *>(cb))(m);
         return true;
     });
+}
+
+void EnumerateAllMethods(AbckitFile *file, const std::function<void(AbckitCoreFunction *)> &cbUserFunc)
+{
+    std::function<void(AbckitCoreFunction *)> cbFunc;
+    std::function<void(AbckitCoreClass *)> cbClass;
+
+    cbFunc = [&](AbckitCoreFunction *f) {
+        cbUserFunc(f);
+        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(f);
+            return true;
+        });
+        g_implI->functionEnumerateNestedClasses(f, (void *)&cbClass, [](AbckitCoreClass *f, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(f);
+            return true;
+        });
+    };
+
+    cbClass = [&](AbckitCoreClass *c) {
+        g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
+            return true;
+        });
+    };
+
+    std::function<void(AbckitCoreNamespace *)> cbNamespace = [&](AbckitCoreNamespace *n) {
+        g_implI->namespaceEnumerateNamespaces(n, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
+            return true;
+        });
+        g_implI->namespaceEnumerateClasses(n, &cbClass, [](AbckitCoreClass *c, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
+            return true;
+        });
+        g_implI->namespaceEnumerateTopLevelFunctions(n, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(f);
+            return true;
+        });
+    };
+
+    EnumerateAllMethodsInModule(file, cbNamespace, cbClass, cbFunc);
 }
 
 void AssertModuleVisitor([[maybe_unused]] AbckitCoreModule *module, [[maybe_unused]] void *data)

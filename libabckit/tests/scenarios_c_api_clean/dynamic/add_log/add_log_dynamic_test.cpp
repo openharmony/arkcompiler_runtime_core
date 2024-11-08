@@ -34,25 +34,57 @@ auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 using CB = std::function<void(AbckitCoreFunction *)>;
 
-void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
+void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(AbckitCoreNamespace *)> &cbNamespace,
+                                 std::function<void(AbckitCoreClass *)> &cbClass,
+                                 std::function<void(AbckitCoreFunction *)> &cbFunc)
 {
-    CB cbFunc = [&](AbckitCoreFunction *f) {
-        cbUserFunc(f);
-        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
-            (*reinterpret_cast<CB *>(cb))(m);
+    std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
+        g_implI->moduleEnumerateNamespaces(m, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
+            return true;
+        });
+        g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
+            return true;
+        });
+        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
             return true;
         });
     };
 
-    std::function<void(AbckitCoreClass *)> cbClass = [&](AbckitCoreClass *c) {
+    g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
+        (*reinterpret_cast<std::function<void(AbckitCoreModule *)> *>(cb))(m);
+        return true;
+    });
+}
+
+void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
+{
+    CB cbFunc;
+    std::function<void(AbckitCoreClass *)> cbClass;
+
+    cbFunc = [&](AbckitCoreFunction *f) {
+        cbUserFunc(f);
+        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+            (*reinterpret_cast<CB *>(cb))(f);
+            return true;
+        });
+        g_implI->functionEnumerateNestedClasses(f, (void *)&cbClass, [](AbckitCoreClass *c, void *cb) {
+            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
+            return true;
+        });
+    };
+
+    cbClass = [&](AbckitCoreClass *c) {
         g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<CB *>(cb))(m);
             return true;
         });
     };
 
-    std::function<void(AbckitCoreNamespace *)> cbNamespce = [&](AbckitCoreNamespace *n) {
-        g_implI->namespaceEnumerateNamespaces(n, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+    std::function<void(AbckitCoreNamespace *)> cbNamespace = [&](AbckitCoreNamespace *n) {
+        g_implI->namespaceEnumerateNamespaces(n, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
             return true;
         });
@@ -66,32 +98,14 @@ void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
         });
     };
 
-    std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
-        g_implI->moduleEnumerateNamespaces(m, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
-            return true;
-        });
-        g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
-            (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
-            return true;
-        });
-        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
-            (*reinterpret_cast<CB *>(cb))(m);
-            return true;
-        });
-    };
-
-    g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
-        (*reinterpret_cast<std::function<void(AbckitCoreModule *)> *>(cb))(m);
-        return true;
-    });
+    EnumerateAllMethodsInModule(file, cbNamespace, cbClass, cbFunc);
 }
 
 }  // namespace
 
 namespace libabckit::test {
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTestClean : public ::testing::Test {};
 
 struct UserData {
     AbckitString *print = nullptr;
@@ -161,10 +175,22 @@ static void CreateEpilog(AbckitInst *inst, AbckitBasicBlock *bb, UserData *userD
     }
 }
 
+std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
+{
+    std::vector<AbckitBasicBlock *> succBBs;
+    g_implG->bbVisitSuccBlocks(
+        bb, (void *)&succBBs,
+        []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+            auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+            succs->emplace_back(succBasicBlock);
+        });
+    return succBBs;
+}
+
 static void TransformIr(AbckitGraph *graph, UserData *userData)
 {
     AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
-    std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
+    std::vector<AbckitBasicBlock *> succBBs = BBgetSuccBlocks(startBB);
     auto *bb = succBBs[0];
 
     // Prolog
@@ -220,13 +246,13 @@ static std::string GetMethodName(AbckitCoreFunction *method)
 
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestDynamicAddLogClean)
+TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddLogClean)
 {
     // ExecuteDynamicAbc is helper function needed for testing. Вoes not affect the logic of IR transformation
-    auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_js/add_log_dynamic.abc",
+    auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic.abc",
                                              "add_log_dynamic");
     EXPECT_TRUE(helpers::Match(output, "abckit\n"));
-    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_js/add_log_dynamic.abc");
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic.abc");
     UserData data = {};
     data.print = g_implM->createString(file, "print");
     data.date = g_implM->createString(file, "Date");
@@ -245,11 +271,11 @@ TEST_F(LibAbcKitTest, LibAbcKitTestDynamicAddLogClean)
     AbckitGraph *graph = g_implI->createGraphFromFunction(handleMethod);
     TransformIr(graph, &data);
     g_implM->functionSetGraph(handleMethod, graph);
-    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_js/add_log_dynamic_modified.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_modified.abc");
     g_impl->closeFile(file);
 
-    output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "scenarios_c_api_clean/add_log_js/add_log_dynamic_modified.abc",
-                                        "add_log_dynamic");
+    output = helpers::ExecuteDynamicAbc(
+        ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_modified.abc", "add_log_dynamic");
     EXPECT_TRUE(helpers::Match(output,
                                "file: src/MyClass, function: MyClass.handle\n"
                                "abckit\n"

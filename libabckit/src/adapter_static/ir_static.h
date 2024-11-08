@@ -33,6 +33,7 @@ namespace libabckit {
 AbckitBasicBlock *GgetStartBasicBlockStatic(AbckitGraph *graph);
 AbckitBasicBlock *GgetEndBasicBlockStatic(AbckitGraph *graph);
 AbckitBasicBlock *GgetBasicBlockStatic(AbckitGraph *graph, uint32_t id);
+uint32_t GgetNumberOfParametersStatic(AbckitGraph *graph);
 AbckitInst *GgetParameterStatic(AbckitGraph *graph, uint32_t index);
 void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitBasicBlock *catchBeginBB,
                            AbckitBasicBlock *catchEndBB);
@@ -67,7 +68,7 @@ uint64_t BBgetPredBlockCountStatic(AbckitBasicBlock *basicBlock);
 uint32_t BBgetIdStatic(AbckitBasicBlock *basicBlock);
 uint32_t BBgetNumberOfInstructionsStatic(AbckitBasicBlock *basicBlock);
 AbckitBasicBlock *BBsplitBlockAfterInstructionStatic(AbckitInst *inst, bool makeEdge);
-void BBclearStatic(AbckitBasicBlock *basicBlock);
+void BBremoveAllInstsStatic(AbckitBasicBlock *basicBlock);
 void BBaddInstFrontStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst);
 void BBaddInstBackStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst);
 void BBdumpStatic(AbckitBasicBlock *basicBlock, int fd);
@@ -85,6 +86,7 @@ bool BBisCatchBeginStatic(AbckitBasicBlock *basicBlock);
 bool BBisCatchStatic(AbckitBasicBlock *basicBlock);
 bool BBcheckDominanceStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominator);
 AbckitInst *BBcreatePhiStatic(AbckitBasicBlock *bb, size_t argCount, std::va_list args);
+AbckitInst *BBcreateCatchPhiStatic(AbckitBasicBlock *catchBegin, size_t argCount, std::va_list args);
 
 // ========================================
 // Api for instruction manipulation
@@ -152,7 +154,6 @@ AbckitInst *IcreateThrowStatic(AbckitGraph *graph, AbckitInst *input0);
 
 AbckitInst *IcreateReturnStatic(AbckitGraph *graph, AbckitInst *input0);
 AbckitInst *IcreateReturnVoidStatic(AbckitGraph *graph);
-AbckitInst *IcreateCatchPhiStatic(AbckitGraph *graph, AbckitBasicBlock *catchBegin, size_t argCount, std::va_list args);
 AbckitInst *GcreateNullPtrStatic(AbckitGraph *graph);
 
 int32_t IgetConstantValueI32Static(AbckitInst *inst);

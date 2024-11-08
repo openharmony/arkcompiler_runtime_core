@@ -27,7 +27,7 @@
 namespace libabckit::test {
 
 class LibAbcKitCppTest : public ::testing::Test {};
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace abckit;
 

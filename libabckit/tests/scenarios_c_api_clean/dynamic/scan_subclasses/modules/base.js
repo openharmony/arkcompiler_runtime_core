@@ -12,36 +12,5 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
-
-class MyClass {
-    handle() {
-        if (1 < 0) {
-            print('abckit');
-        } else {
-            print('abckit');
-        }
-    }
+export class Base {
 }
-
-
-
-// After AOP:
-
-// class MyClass {
-//   handle() {
-//     print('file: har_A/src/MyClass, function: MyClass.handle')
-//     let t1 = Date.getTime()
-//     // business logic
-//     let t2 = Date.getTime()
-//     print('Ellapsed time:')
-//     print(t2 - t1)
-//   }
-// }
-
-function main() {
-    let c = new MyClass();
-    c.handle();
-}
-
-main();

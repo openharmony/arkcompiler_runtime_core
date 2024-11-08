@@ -24,7 +24,7 @@
 #include <generated/opc_to_string.h>
 
 namespace libabckit {
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace panda;
 

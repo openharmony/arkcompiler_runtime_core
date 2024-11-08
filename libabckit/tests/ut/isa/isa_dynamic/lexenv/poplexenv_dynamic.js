@@ -12,15 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
-// {
-//     function foo() { return 0; }
-//     function bar() { return 0; }
-//     print(foo());
-//     print(bar());
-// }
-
-// After AOP:
 
 let a = 2;
 

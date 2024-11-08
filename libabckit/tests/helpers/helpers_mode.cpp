@@ -341,7 +341,7 @@ void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inst, Ab
     auto *graph = OpenWrongModeFile(isDynamic);
     g_dummyInsT1->graph = graph;
     g_dummyModule->file = graph->file;
-    g_dummyMethod->m = g_dummyModule;
+    g_dummyMethod->owningModule = g_dummyModule;
     auto *inst = apiToCheck(graph, g_dummyInsT1, g_dummyMethod, 0);
     ASSERT_EQ(inst, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_MODE);
@@ -403,7 +403,7 @@ void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitCoreFunction *
 {
     auto *graph = OpenWrongModeFile(isDynamic);
     g_dummyModule->file = graph->file;
-    g_dummyMethod->m = g_dummyModule;
+    g_dummyMethod->owningModule = g_dummyModule;
     auto *inst = apiToCheck(graph, g_dummyMethod, 0);
     ASSERT_EQ(inst, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_MODE);
@@ -417,7 +417,7 @@ void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitCoreFunction *
 {
     auto *graph = OpenWrongModeFile(isDynamic);
     g_dummyModule->file = graph->file;
-    g_dummyMethod->m = g_dummyModule;
+    g_dummyMethod->owningModule = g_dummyModule;
     auto *inst = apiToCheck(graph, g_dummyMethod, 0);
     ASSERT_EQ(inst, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_MODE);
@@ -500,7 +500,7 @@ void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitCoreFunction *
     auto *graph = OpenWrongModeFile(isDynamic);
     g_dummyInsT1->graph = graph;
     g_dummyModule->file = graph->file;
-    g_dummyMethod->m = g_dummyModule;
+    g_dummyMethod->owningModule = g_dummyModule;
     auto *inst = apiToCheck(graph, g_dummyMethod, g_dummyLitarr, 0, g_dummyInsT1);
     ASSERT_EQ(inst, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_MODE);
@@ -659,7 +659,7 @@ void TestMode(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *acc, Abc
     auto *graph = OpenWrongModeFile(isDynamic);
     g_dummyInsT1->graph = graph;
     g_dummyModule->file = graph->file;
-    g_dummyMethod->m = g_dummyModule;
+    g_dummyMethod->owningModule = g_dummyModule;
     auto *inst = apiToCheck(graph, g_dummyInsT1, g_dummyMethod, 0);
     ASSERT_EQ(inst, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_MODE);

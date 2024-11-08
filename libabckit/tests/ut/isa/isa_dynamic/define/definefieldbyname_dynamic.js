@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
 
 class A {
     a = 2;
@@ -21,14 +20,3 @@ class A {
 let a = new A();
 print(a.a);
 print(a.b);
-
-// After AOP:
-
-// class A {
-//     a = 2;
-//     b = 4;
-// }
-
-// let a = new A();
-// print(a.a)
-// print(a.b)

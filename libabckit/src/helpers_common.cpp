@@ -68,4 +68,38 @@ bool IsDynamic(AbckitTarget target)
     return target == ABCKIT_TARGET_JS || target == ABCKIT_TARGET_ARK_TS_V1;
 }
 
+static size_t HashCombine(size_t seed, size_t value)
+{
+    const auto m = uint64_t {0xC6A4A7935BD1E995};
+    const uint32_t r = 47;
+
+    value *= m;
+    value ^= value >> r;
+    value *= m;
+
+    seed ^= value;
+    seed *= m;
+    return seed;
+}
+
+AbckitType *GetOrCreateType(AbckitFile *file, AbckitTypeId id, size_t rank, AbckitCoreClass *klass)
+{
+    size_t hash = 0;
+    hash = HashCombine(hash, (size_t)id);
+    hash = HashCombine(hash, rank);
+    hash = HashCombine(hash, reinterpret_cast<size_t>(klass));
+
+    auto &cache = file->types;
+    if (cache.count(hash) == 1) {
+        return cache[hash].get();
+    }
+
+    auto type = std::make_unique<AbckitType>();
+    type->id = id;
+    type->rank = rank;
+    type->klass = klass;
+    cache.insert({hash, std::move(type)});
+    return cache[hash].get();
+}
+
 }  // namespace libabckit

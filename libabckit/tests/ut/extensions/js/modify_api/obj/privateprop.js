@@ -20,12 +20,10 @@ class A {
     }
 
     getT() {
-        // return this.#t;
         return 1;
     }
 
     changeT(x) {
-        // this.#t = x;
         return this.#t;
     }
 }

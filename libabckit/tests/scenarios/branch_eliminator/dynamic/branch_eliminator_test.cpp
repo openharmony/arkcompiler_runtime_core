@@ -64,7 +64,7 @@ static bool MethodHasBranch(const std::string &moduleName, const std::string &me
     return ret;
 }
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 static const std::string DIR = std::string(ABCKIT_ABC_DIR "scenarios/branch_eliminator/dynamic/");
 static const std::string INPUT = DIR + "branch_eliminator.abc";
@@ -114,13 +114,13 @@ static void GeneralBranchEliminatorTest(bool configIsDebugFinal)
 }
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestBranchEliminatorDynamic1)
+TEST_F(AbckitScenarioTest, LibAbcKitTestBranchEliminatorDynamic1)
 {
     GeneralBranchEliminatorTest(false);
 }
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestBranchEliminatorDynamic2)
+TEST_F(AbckitScenarioTest, LibAbcKitTestBranchEliminatorDynamic2)
 {
     GeneralBranchEliminatorTest(true);
 }

@@ -35,12 +35,12 @@ static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implArkM = AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
-static constexpr auto API_CLASS_NAME = "ApiControl";
-static constexpr auto API_METHOD_NAME = "fixOrientationLinearLayout";
-static constexpr auto API_MODULE_NAME = "modules/ApiControl";
-static constexpr auto ANNOTATION_INTERFACE_NAME = "CallSiteReplacement";
+constexpr auto API_CLASS_NAME = "ApiControl";
+constexpr auto API_METHOD_NAME = "fixOrientationLinearLayout";
+constexpr auto API_MODULE_NAME = "modules/ApiControl";
+constexpr auto ANNOTATION_INTERFACE_NAME = "CallSiteReplacement";
 
 struct UserData {
     AbckitString *targetClass;
@@ -182,7 +182,7 @@ static void ClassReplaceCallSite(VisitHelper &visitor, UserData &ud, AbckitCoreC
 }
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestDynamicReplaceCallSite)
+TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicReplaceCallSite)
 {
     std::string inputPath = ABCKIT_ABC_DIR "scenarios/replace_call_site/dynamic/replace_call_site.abc";
     std::string outputPath = ABCKIT_ABC_DIR "scenarios/replace_call_site/dynamic/replace_call_site_modified.abc";

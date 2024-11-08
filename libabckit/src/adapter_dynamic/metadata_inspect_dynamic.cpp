@@ -18,6 +18,7 @@
 #include "libabckit/src/adapter_dynamic/metadata_inspect_dynamic.h"
 #include "libabckit/src/adapter_dynamic/metadata_modify_dynamic.h"
 #include "libabckit/src/adapter_dynamic/helpers_dynamic.h"
+#include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/statuses_impl.h"
@@ -35,7 +36,7 @@
 
 namespace libabckit {
 
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace panda;
 
@@ -67,12 +68,12 @@ void ModuleEnumerateAnonymousFunctionsDynamic(AbckitCoreModule *m, void *data,
 AbckitString *NamespaceGetNameDynamic(AbckitCoreNamespace *n)
 {
     LIBABCKIT_LOG_FUNC;
-    ASSERT(n->m->target == ABCKIT_TARGET_ARK_TS_V1);
+    ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
     auto func = GetDynFunction(n->GetArkTSImpl()->f.get());
     auto name = func->name;
     size_t sharpPos = name.rfind('#');
     ASSERT(sharpPos != std::string::npos);
-    return CreateStringDynamic(n->m->file, name.substr(sharpPos + 1).data());
+    return CreateStringDynamic(n->owningModule->file, name.substr(sharpPos + 1).data());
 }
 
 // ========================================
@@ -84,12 +85,12 @@ AbckitString *ClassGetNameDynamic(AbckitCoreClass *klass)
     LIBABCKIT_LOG_FUNC;
 
     auto func = GetDynFunction(klass);
-    auto mPayload = GetDynModulePayload(klass->m);
+    auto mPayload = GetDynModulePayload(klass->owningModule);
 
     auto *scopesLitArr = mPayload->scopeNamesLiteralArray;
     auto name = GetClassNameFromCtor(func->name, scopesLitArr);
 
-    return CreateStringDynamic(klass->m->file, name.data());
+    return CreateStringDynamic(klass->owningModule->file, name.data());
 }
 
 // ========================================
@@ -103,7 +104,7 @@ AbckitString *FunctionGetNameDynamic(AbckitCoreFunction *function)
     auto name = functionImpl->name;
 
     size_t sharpPos = name.rfind('#');
-    if (!IsAnonymous(name)) {
+    if (!function->isAnonymous) {
         if (sharpPos != std::string::npos) {
             name = name.substr(sharpPos + 1);
         } else {
@@ -112,7 +113,7 @@ AbckitString *FunctionGetNameDynamic(AbckitCoreFunction *function)
         }
     }
 
-    return CreateStringDynamic(function->m->file, name.data());
+    return CreateStringDynamic(function->owningModule->file, name.data());
 }
 
 AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
@@ -123,8 +124,8 @@ AbckitGraph *CreateGraphFromFunctionDynamic(AbckitCoreFunction *function)
     LIBABCKIT_LOG(DEBUG) << func->name << '\n';
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
 
-    auto *file = function->m->file;
-    auto program = function->m->file->GetDynamicProgram();
+    auto *file = function->owningModule->file;
+    auto program = function->owningModule->file->GetDynamicProgram();
 
     auto maps = std::make_unique<pandasm::AsmEmitter::PandaFileToPandaAsmMaps>();
     auto pf = EmitDynamicProgram(file, program, maps.get(), true);
@@ -177,8 +178,7 @@ bool FunctionIsCtorDynamic(AbckitCoreFunction *function)
 bool FunctionIsAnonymousDynamic(AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *func = GetDynFunction(function);
-    return IsAnonymous(func->name);
+    return function->isAnonymous;
 }
 
 bool FunctionIsNativeDynamic(AbckitCoreFunction *function)
@@ -196,7 +196,7 @@ AbckitString *AnnotationInterfaceGetNameDynamic(AbckitCoreAnnotationInterface *a
 {
     LIBABCKIT_LOG_FUNC;
     auto name = pandasm::GetItemName(ai->GetArkTSImpl()->GetDynamicImpl()->name);
-    return CreateStringDynamic(ai->m->file, name.data());
+    return CreateStringDynamic(ai->owningModule->file, name.data());
 }
 
 // ========================================
@@ -396,25 +396,17 @@ AbckitLiteralArray *LiteralGetLiteralArrayDynamic(AbckitLiteral *lit)
     }
 
     auto &litarrs = lit->file->GetDynamicProgram()->literalarray_table;
+    auto &arrName = std::get<std::string>(literal->value_);
 
-    auto &val = std::get<std::string>(literal->value_);
-    if (litarrs.find(val) != litarrs.end()) {
-        for (auto &item : lit->file->litarrs) {
-            if (item->GetDynamicImpl() == &litarrs[val]) {
-                return item.get();
-            }
-        }
-        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
-    }
-
-    panda::pandasm::LiteralArray *impl = nullptr;
-    for (auto &item : lit->file->GetDynamicProgram()->literalarray_table) {
-        if (item.first == val) {
-            impl = &item.second;
-            break;
+    // Search through already created abckit litarrs
+    for (auto &item : lit->file->litarrs) {
+        if (item->GetDynamicImpl() == &litarrs[arrName]) {
+            return item.get();
         }
     }
-    auto litarr = std::make_unique<AbckitLiteralArray>(lit->file, impl);
+
+    // Create new abckit litarrs
+    auto litarr = std::make_unique<AbckitLiteralArray>(lit->file, &litarrs[arrName]);
     lit->file->litarrs.emplace_back(std::move(litarr));
     return lit->file->litarrs[lit->file->litarrs.size() - 1].get();
 }
@@ -518,38 +510,37 @@ AbckitType *ValueGetTypeDynamic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl());
-    auto type = std::make_unique<AbckitType>();
-    type->klass = nullptr;  // NOTE implement logic for classes
+    AbckitTypeId id;
     switch (pVal->GetType()) {
         case pandasm::Value::Type::U1:
-            type->id = ABCKIT_TYPE_ID_U1;
+            id = ABCKIT_TYPE_ID_U1;
             break;
         case pandasm::Value::Type::U8:
-            type->id = ABCKIT_TYPE_ID_U8;
+            id = ABCKIT_TYPE_ID_U8;
             break;
         case pandasm::Value::Type::U16:
-            type->id = ABCKIT_TYPE_ID_U16;
+            id = ABCKIT_TYPE_ID_U16;
             break;
         case pandasm::Value::Type::U32:
-            type->id = ABCKIT_TYPE_ID_U32;
+            id = ABCKIT_TYPE_ID_U32;
             break;
         case pandasm::Value::Type::U64:
-            type->id = ABCKIT_TYPE_ID_U64;
+            id = ABCKIT_TYPE_ID_U64;
             break;
         case pandasm::Value::Type::F64:
-            type->id = ABCKIT_TYPE_ID_F64;
+            id = ABCKIT_TYPE_ID_F64;
             break;
         case pandasm::Value::Type::STRING:
-            type->id = ABCKIT_TYPE_ID_STRING;
+            id = ABCKIT_TYPE_ID_STRING;
             break;
         case pandasm::Value::Type::LITERALARRAY:
-            type->id = ABCKIT_TYPE_ID_LITERALARRAY;
+            id = ABCKIT_TYPE_ID_LITERALARRAY;
             break;
         default:
             LIBABCKIT_UNIMPLEMENTED;
     }
-    value->file->types.emplace_back(std::move(type));
-    return value->file->types.back().get();
+    // NOTE implement logic for classes
+    return GetOrCreateType(value->file, id, 0, nullptr);
 }
 
 bool ValueGetU1Dynamic(AbckitValue *value)
@@ -598,9 +589,18 @@ AbckitLiteralArray *ArrayValueGetLiteralArrayDynamic(AbckitValue *value)
     }
 
     auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetDynamicImpl());
-    auto valImpl = pVal->GetValue<std::string>();
-    auto *prog = value->file->GetDynamicProgram();
-    auto litarr = std::make_unique<AbckitLiteralArray>(value->file, &(prog->literalarray_table[valImpl]));
+    auto arrName = pVal->GetValue<std::string>();
+    auto &litarrs = value->file->GetDynamicProgram()->literalarray_table;
+
+    // Search through already created abckit litarrs
+    for (auto &item : value->file->litarrs) {
+        if (item->GetDynamicImpl() == &litarrs[arrName]) {
+            return item.get();
+        }
+    }
+
+    // Create new abckit litarr
+    auto litarr = std::make_unique<AbckitLiteralArray>(value->file, &(litarrs[arrName]));
     return value->file->litarrs.emplace_back(std::move(litarr)).get();
 }
 

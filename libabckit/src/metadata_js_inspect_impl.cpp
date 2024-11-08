@@ -58,7 +58,7 @@ extern "C" AbckitJsModule *CoreModuleToJsModule(AbckitCoreModule *m)
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(m);
-    return m->GetJSImpl();
+    return m->GetJsImpl();
 }
 
 // ========================================
@@ -79,7 +79,7 @@ extern "C" AbckitJsImportDescriptor *CoreImportDescriptorToJsImportDescriptor(Ab
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(id, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(id->importingModule);
-    return id->GetJSImpl();
+    return id->GetJsImpl();
 }
 
 // ========================================
@@ -100,7 +100,7 @@ extern "C" AbckitJsExportDescriptor *CoreExportDescriptorToJsExportDescriptor(Ab
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(ed, nullptr);
     LIBABCKIT_CHECK_JS_TARGET(ed->exportingModule);
-    return ed->GetJSImpl();
+    return ed->GetJsImpl();
 }
 
 // ========================================
@@ -120,8 +120,8 @@ extern "C" AbckitJsClass *CoreClassToJsClass(AbckitCoreClass *c)
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(c, nullptr);
-    LIBABCKIT_CHECK_JS_TARGET(c->m);
-    return c->GetJSImpl();
+    LIBABCKIT_CHECK_JS_TARGET(c->owningModule);
+    return c->GetJsImpl();
 }
 
 // ========================================
@@ -149,8 +149,8 @@ extern "C" AbckitJsFunction *CoreFunctionToJsFunction(AbckitCoreFunction *m)
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(m, nullptr);
-    LIBABCKIT_CHECK_JS_TARGET(m->m);
-    return m->GetJSImpl();
+    LIBABCKIT_CHECK_JS_TARGET(m->owningModule);
+    return m->GetJsImpl();
 }
 
 // ========================================
@@ -257,7 +257,7 @@ AbckitJsInspectApi g_jsInspectApiImpl = {
 // Module
 // ========================================
 
-void JSModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
+void JsModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
 {
     for (auto &id : m->id) {
         if (!cb(id.get(), data)) {
@@ -266,7 +266,7 @@ void JSModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(Abckit
     }
 }
 
-void JSModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
+void JsModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
 {
     for (auto &ed : m->ed) {
         if (!cb(ed.get(), data)) {
@@ -275,24 +275,24 @@ void JSModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(Abckit
     }
 }
 
-void JSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data))
+void JsModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data))
 {
     ModuleEnumerateClassesHelper(m, data, cb);
 }
 
-void JSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+void JsModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                         bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     ModuleEnumerateTopLevelFunctionsHelper(m, data, cb);
 }
 
-void JSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+void JsModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                          bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     ModuleEnumerateAnonymousFunctionsDynamic(m, data, cb);
 }
 
-void JSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+void JsModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
                                            bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
     ModuleEnumerateAnnotationInterfacesHelper(m, data, cb);
@@ -302,7 +302,7 @@ void JSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
 // Class
 // ========================================
 
-void JSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
+void JsClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     ClassEnumerateMethodsHelper(klass, data, cb);
 }
@@ -311,11 +311,21 @@ void JSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(Abck
 // Function
 // ========================================
 
-void JSFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
+void JsFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
                                         bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
 {
     for (auto &f : function->nestedFunction) {
         if (!cb(f.get(), data)) {
+            break;
+        }
+    }
+}
+
+void JsFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+                                      bool (*cb)(AbckitCoreClass *nestedClass, void *data))
+{
+    for (auto &c : function->nestedClasses) {
+        if (!cb(c.get(), data)) {
             break;
         }
     }

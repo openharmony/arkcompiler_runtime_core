@@ -186,7 +186,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetNameSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, "/tmp/classes_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -256,7 +256,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetName)
         return true;
     });
 
-    g_impl->writeAbc(file, "/tmp/classes_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -341,7 +341,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSmoke)
         return true;
     });
 
-    g_impl->writeAbc(file, "/tmp/classes_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -414,7 +414,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsEmpty)
         return true;
     });
 
-    g_impl->writeAbc(file, "/tmp/classes_empty_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -482,7 +482,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassEnumerateMethodsSeveralMethod
         return true;
     });
 
-    g_impl->writeAbc(file, "/tmp/classes_empty_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_empty_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -542,7 +542,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetFile)
         return true;
     });
 
-    g_impl->writeAbc(file, "/tmp/classes_dynamic.abc");
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic_modified.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -577,7 +577,7 @@ TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetModule)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::classGetModule, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
 {
     AbckitFile *file = nullptr;
@@ -596,6 +596,44 @@ TEST_F(LibAbcKitInspectApiClassesTest, StaticClassGetModule)
         auto moduleName = helpers::AbckitStringToString(moduleNameRaw);
         EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         EXPECT_EQ(moduleName, "classes_static");
+
+        return true;
+    });
+
+    g_impl->writeAbc(file, ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_static_modified.abc");
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
+// Test: test-kind=api, api=InspectApiImpl::classGetParentFunction, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitInspectApiClassesTest, DynamicClassGetParentFunction)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/classes/classes_dynamic.abc", &file);
+
+    g_implI->fileEnumerateModules(file, nullptr, [](AbckitCoreModule *m, [[maybe_unused]] void *data) {
+        helpers::ClassByNameContext c0Finder = {nullptr, "C1"};
+        g_implI->moduleEnumerateClasses(m, &c0Finder, helpers::ClassByNameFinder);
+        EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        EXPECT_NE(c0Finder.klass, nullptr);
+
+        auto parentFunction1 = g_implI->classGetParentFunction(c0Finder.klass);
+        EXPECT_EQ(parentFunction1, nullptr);
+
+        helpers::MethodByNameContext methodFinder = {nullptr, "f"};
+        g_implI->moduleEnumerateTopLevelFunctions(m, &methodFinder, helpers::MethodByNameFinder);
+        EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        EXPECT_NE(methodFinder.method, nullptr);
+
+        helpers::ClassByNameContext c1Finder = {nullptr, "C2"};
+        g_implI->functionEnumerateNestedClasses(methodFinder.method, &c1Finder, helpers::ClassByNameFinder);
+        EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        EXPECT_NE(c1Finder.klass, nullptr);
+
+        auto parentFunc = g_implI->classGetParentFunction(c1Finder.klass);
+        EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        EXPECT_EQ(parentFunc, methodFinder.method);
 
         return true;
     });

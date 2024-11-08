@@ -530,6 +530,20 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetBasicBlock_1)
     g_impl->closeFile(file);
 }
 
+// Test: test-kind=api, api=GraphApiImpl::gGetBasicBlock, abc-kind=ArkTS2, category=negative
+TEST_F(LibAbcKitBasicBlocksTest, GgetBasicBlockBigId)
+{
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc");
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        auto bbVectorSize = g_implG->gGetNumberOfBasicBlocks(graph);
+        auto *bb = g_implG->gGetBasicBlock(graph, bbVectorSize + 1);
+        ASSERT_EQ(bb, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    });
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS2, category=positive
 TEST_F(LibAbcKitBasicBlocksTest, GgetParameter_1)
 {
@@ -539,6 +553,33 @@ TEST_F(LibAbcKitBasicBlocksTest, GgetParameter_1)
         auto *start = g_implG->gGetStartBasicBlock(graph);
         auto *inst = g_implG->bbGetFirstInst(start);
         ASSERT_EQ(inst, g_implG->gGetParameter(graph, 0));
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    });
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS2, category=negative
+TEST_F(LibAbcKitBasicBlocksTest, GgetParameterBigId)
+{
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc");
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        auto size = g_implG->gGetNumberOfParameters(graph);
+        auto *inst = g_implG->gGetParameter(graph, size + 1);
+        ASSERT_EQ(inst, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    });
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::gGetNumberOfParameters, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitBasicBlocksTest, GgetNumberOfParameters)
+{
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc");
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        uint32_t num = g_implG->gGetNumberOfParameters(graph);
+        ASSERT_EQ(num, 2U);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     });
     g_impl->closeFile(file);
@@ -618,8 +659,8 @@ TEST_F(LibAbcKitBasicBlocksTest, BBappendSuccBlock_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbClear, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitBasicBlocksTest, BBclear_1)
+// Test: test-kind=api, api=GraphApiImpl::bbRemoveAllInsts, abc-kind=ArkTS2, category=positive
+TEST_F(LibAbcKitBasicBlocksTest, bbRemoveAllInsts_1)
 {
     AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -629,7 +670,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBclear_1)
         auto *newInst = g_statG->iCreateNeg(graph, constInst);
         g_implG->bbAddInstFront(empty, newInst);
         ASSERT_EQ(g_implG->bbGetNumberOfInstructions(empty), 1);
-        g_implG->bbClear(empty);
+        g_implG->bbRemoveAllInsts(empty);
         ASSERT_EQ(g_implG->bbGetNumberOfInstructions(empty), 0);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     });

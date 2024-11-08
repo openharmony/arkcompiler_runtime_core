@@ -32,116 +32,25 @@ static auto g_isaApiDynamicImp = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEA
 
 class LibAbcKitWrongCtxTestsIsaApiDynamicImpl1 : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfsupernotcorrectcall,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallrange,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateThrowIfsupernotcorrectcall)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateWideCallrange)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateThrowIfsupernotcorrectcall);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateWideCallrange);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateasyncgeneratorobj,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreatereq,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCreateasyncgeneratorobj)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateGreatereq)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCreateasyncgeneratorobj);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateGreatereq);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStthisbyname,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg0,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStthisbyname)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallarg0)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStthisbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStobjbyindex,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateWideStobjbyindex)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateWideStobjbyindex);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyname,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateLdobjbyname)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateLdobjbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShr2,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateShr2)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateShr2);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsin,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateIsin)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateIsin);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdobjbyindex,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateWideLdobjbyindex)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateWideLdobjbyindex);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbynamewithnameset,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStownbynamewithnameset)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStownbynamewithnameset);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLess,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateLess)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateLess);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetmodulenamespace,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateGetmodulenamespace)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateGetmodulenamespace);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsuperbyvalue,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateLdsuperbyvalue)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateLdsuperbyvalue);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallthisrange,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateWideCallthisrange)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateWideCallthisrange);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDec,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateDec)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateDec);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeCallinit,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallruntimeCallinit)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallruntimeCallinit);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNot,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateNot)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateNot);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallarg0);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStglobalvar,
@@ -151,25 +60,123 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStglobalvar)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStglobalvar);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAdd2,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInc,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateAdd2)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateInc)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateAdd2);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateInc);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyindex,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateXor2,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStobjbyindex)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateXor2)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStobjbyindex);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateXor2);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateOr2,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSetobjectwithproto,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateOr2)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateSetobjectwithproto)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateOr2);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateSetobjectwithproto);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateasyncgeneratorobj,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCreateasyncgeneratorobj)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCreateasyncgeneratorobj);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyname,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStownbyname)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStownbyname);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncgeneratorreject,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateAsyncgeneratorreject)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateAsyncgeneratorreject);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetiterator,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateGetiterator)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateGetiterator);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNoteq,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateNoteq)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateNoteq);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIf,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateIf)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateIf);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDelobjprop,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateDelobjprop)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateDelobjprop);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsuperbyname,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateLdsuperbyname)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateLdsuperbyname);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeStsendablevar,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallruntimeStsendablevar)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallruntimeStsendablevar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallarrowrange,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateWideSupercallarrowrange)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateWideSupercallarrowrange);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionresolve,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateAsyncfunctionresolve)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateAsyncfunctionresolve);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeNotifyconcurrentresult,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallruntimeNotifyconcurrentresult)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallruntimeNotifyconcurrentresult);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinesendableclass,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallruntimeDefinesendableclass)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallruntimeDefinesendableclass);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateWideStmodulevar)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateWideStmodulevar);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreater,
@@ -179,32 +186,11 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateGreater)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateGreater);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStsuperbyname,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTrystglobalbyname,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStsuperbyname)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateTrystglobalbyname)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStsuperbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateResumegenerator,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateResumegenerator)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateResumegenerator);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetpropiterator,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateGetpropiterator)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateGetpropiterator);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyvalue,
-// abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStobjbyvalue)
-{
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStobjbyvalue);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateTrystglobalbyname);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMod2,
@@ -214,25 +200,39 @@ TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateMod2)
     helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateMod2);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefineprivateproperty,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLesseq,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallruntimeDefineprivateproperty)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateLesseq)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallruntimeDefineprivateproperty);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateLesseq);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSuspendgenerator,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs2,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateSuspendgenerator)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallargs2)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateSuspendgenerator);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallargs2);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreategeneratorobj,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIsfalse,
 // abc-kind=NoABC, category=negative-file
-TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCreategeneratorobj)
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateCallruntimeIsfalse)
 {
-    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCreategeneratorobj);
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateCallruntimeIsfalse);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateDefinefieldbyname)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateDefinefieldbyname);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvaluewithnameset,
+// abc-kind=NoABC, category=negative-file
+TEST_F(LibAbcKitWrongCtxTestsIsaApiDynamicImpl1, iCreateStownbyvaluewithnameset)
+{
+    helpers_wrong_ctx::TestWrongCtx(g_isaApiDynamicImp->iCreateStownbyvaluewithnameset);
 }
 
 }  // namespace libabckit::test

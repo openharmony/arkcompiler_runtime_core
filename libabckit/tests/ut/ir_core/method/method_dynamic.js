@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP
 
 function foo() {
     print('foo');
@@ -24,14 +23,3 @@ let res = {
     }
 };
 res.method();
-
-// After AOP
-
-// function foo() {
-//     print('foo')
-// }
-//
-// let res = {
-//     method: foo --> this is invalid construction, but method will be a foo function
-// }
-// res.method()

@@ -262,7 +262,6 @@ extern "C" AbckitInst *IcreateDYNAMICSetgeneratorstate(AbckitGraph *graph, Abcki
 extern "C" AbckitInst *IcreateDYNAMICReturn(AbckitGraph *graph, AbckitInst *acc);
 extern "C" AbckitInst *IcreateDYNAMICReturnundefined(AbckitGraph *graph);
 extern "C" AbckitInst *IcreateDYNAMICIf(AbckitGraph *graph, AbckitInst *input, AbckitIsaApiDynamicConditionCode cc);
-extern "C" AbckitInst *IcreateDYNAMICCatchPhi(AbckitGraph *graph, AbckitBasicBlock *catchBegin, size_t argCount, ...);
 extern "C" AbckitIsaApiDynamicConditionCode IgetDYNAMICConditionCode(AbckitInst *inst);
 extern "C" void IsetDYNAMICConditionCode(AbckitInst *inst, AbckitIsaApiDynamicConditionCode cc);
 extern "C" AbckitCoreImportDescriptor *IgetImportDescriptor(AbckitInst *inst);

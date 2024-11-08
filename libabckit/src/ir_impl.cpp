@@ -25,6 +25,7 @@
 #include "libabckit/src/macros.h"
 #include "libabckit/src/logger.h"
 
+#include <cstdint>
 #include <iostream>
 
 namespace libabckit {
@@ -38,7 +39,7 @@ extern "C" AbckitIsaType GgetIsa(AbckitGraph *graph)
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
     LIBABCKIT_BAD_ARGUMENT(graph, ABCKIT_ISA_TYPE_UNSUPPORTED);
-    if (IsDynamic(graph->function->m->target)) {
+    if (IsDynamic(graph->function->owningModule->target)) {
         return AbckitIsaType::ABCKIT_ISA_TYPE_DYNAMIC;
     }
     return AbckitIsaType::ABCKIT_ISA_TYPE_STATIC;
@@ -90,6 +91,16 @@ extern "C" AbckitBasicBlock *GgetBasicBlock(AbckitGraph *graph, uint32_t id)
     LIBABCKIT_IMPLEMENTED;
 
     return GgetBasicBlockStatic(graph, id);
+}
+
+extern "C" uint32_t GgetNumberOfParameters(AbckitGraph *graph)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(graph, 0);
+
+    return GgetNumberOfParametersStatic(graph);
 }
 
 extern "C" AbckitInst *GgetParameter(AbckitGraph *graph, uint32_t index)
@@ -275,11 +286,11 @@ extern "C" void BBaddInstBack(AbckitBasicBlock *basicBlock, AbckitInst *inst)
     BBaddInstBackStatic(basicBlock, inst);
 }
 
-extern "C" void BBclear(AbckitBasicBlock *basicBlock)
+extern "C" void BBremoveAllInsts(AbckitBasicBlock *basicBlock)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
-    return BBclearStatic(basicBlock);
+    return BBremoveAllInstsStatic(basicBlock);
 }
 
 extern "C" AbckitInst *BBgetFirstInst(AbckitBasicBlock *basicBlock)
@@ -422,6 +433,22 @@ extern "C" AbckitInst *BBcreatePhi(AbckitBasicBlock *bb, size_t argCount, ...)
     va_start(args, argCount);
 
     auto *inst = BBcreatePhiStatic(bb, argCount, args);
+    va_end(args);
+    return inst;
+}
+
+extern "C" AbckitInst *BBcreateCatchPhi(AbckitBasicBlock *catchBegin, size_t argCount, ...)
+{
+    LIBABCKIT_CLEAR_LAST_ERROR;
+    LIBABCKIT_IMPLEMENTED;
+
+    LIBABCKIT_BAD_ARGUMENT(catchBegin, nullptr);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
+    std::va_list args;
+    va_start(args, argCount);
+
+    auto inst = BBcreateCatchPhiStatic(catchBegin, argCount, args);
     va_end(args);
     return inst;
 }
@@ -679,9 +706,9 @@ extern "C" void IsetFunction(AbckitInst *inst, AbckitCoreFunction *function)
     LIBABCKIT_BAD_ARGUMENT_VOID(inst);
     LIBABCKIT_BAD_ARGUMENT_VOID(function);
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(function->m);
+    LIBABCKIT_BAD_ARGUMENT_VOID(function->owningModule);
     LIBABCKIT_BAD_ARGUMENT_VOID(inst->graph);
-    LIBABCKIT_WRONG_CTX_VOID(inst->graph->file, function->m->file);
+    LIBABCKIT_WRONG_CTX_VOID(inst->graph->file, function->owningModule->file);
     return IsetFunctionStatic(inst, function);
 }
 
@@ -803,6 +830,7 @@ AbckitGraphApi g_graphApiImpl = {
     GvisitBlocksRPO,
     GgetBasicBlock,
     GgetParameter,
+    GgetNumberOfParameters,
     GinsertTryCatch,
     Gdump,
     GcreateConstantI32,
@@ -832,7 +860,7 @@ AbckitGraphApi g_graphApiImpl = {
     BBsplitBlockAfterInstruction,
     BBaddInstFront,
     BBaddInstBack,
-    BBclear,
+    BBremoveAllInsts,
     BBgetFirstInst,
     BBgetLastInst,
     BBgetNumberOfInstructions,
@@ -850,6 +878,7 @@ AbckitGraphApi g_graphApiImpl = {
     BBisCatch,
     BBdump,
     BBcreatePhi,
+    BBcreateCatchPhi,
 
     // ========================================
     // Api for instruction manipulation

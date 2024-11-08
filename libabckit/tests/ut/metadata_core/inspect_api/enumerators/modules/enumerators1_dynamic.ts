@@ -12,28 +12,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function m1F0() {
-    () => {}
+function m1F0(): void {
+    () => {};
 }
 
-function* m1F1() {}
+function* m1F1(): Iterable<void> {}
 class M1C0 {
-    M1C0F0() {}
-    static M1C0F1() {}
-    async M1C0F2() {}
-    // async *M1C0F3(){}
+    M1C0F0(): void {}
+    static M1C0F1(): void {}
+    async M1C0F2(): Promise<void> {}
 }
 enum M1E0 {}
 
 namespace M1N0 {
-    function m1N0F0() {}
+    function m1N0F0(): void {}
 
-    function* m1N0F1() {}
+    function* m1N0F1(): Iterable<void> {}
     class M1N0C0 {
-        M1N0C0F0() {}
-        static M1N0C0F1() {}
-        async M1N0C0F2() {}
-        // async *M1N0C0F3(){}
+        M1N0C0F0(): void {}
+        static M1N0C0F1(): void {}
+        async M1N0C0F2(): Promise<void> {}
     }
     enum M1N0E0 {}
 }

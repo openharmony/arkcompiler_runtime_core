@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
 
 function ConsoleLogStr(a: string) {
   console.log(a)
@@ -36,24 +35,3 @@ function main() {
   let c = new MyClass();
   c.handle();
 }
-
-// // After AOP:
-//
-// function ConsoleLog(a: string) {
-//   console.log(a)
-// }
-
-// function DateGetTime(): number {
-//   return (new Date()).getTime()
-// }
-//
-// class MyClass {
-//     handle() {
-//         ConsoleLogStr("file: har_A/src/MyClass; function: MyClass.handle")
-//         let t1 = DateGetTime()
-//         // business logic
-//         let t2 = DateGetTime()
-//         ConsoleLogStr("time consume: ")
-//         ConsoleLogNum(t2 - t1)
-//     }
-// }
