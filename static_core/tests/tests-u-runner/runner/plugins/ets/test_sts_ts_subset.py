@@ -40,6 +40,7 @@ class TestTSSubset(TestETS):
         self.npx_folder = path.dirname(self.test_ohos_ts)
         makedirs(self.npx_folder, exist_ok=True)
         shutil.copyfile(self.path, self.test_ohos_ts, follow_symlinks=True)
+        shutil.copymode(self.path, self.test_ohos_ts, follow_symlinks=True)
 
         self.tsc = "tsc"
         self.npx = "npx"

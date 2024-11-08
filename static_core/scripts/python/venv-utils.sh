@@ -14,7 +14,16 @@
 
 set -e
 
-VENV_DIR=${VENV_DIR:-$(realpath ~/.venv-panda)}
+MY_USERNAME=${SUDO_USER}
+if [[ -z "${VENV_DIR}" && -n "${MY_USERNAME}" ]]; then
+    MY_HOME=$(grep "^${MY_USERNAME}:" /etc/passwd | cut -d: -f6)
+    if [[ ! -e "${MY_HOME}" ]]; then
+        MY_HOME=/home/${MY_USERNAME}
+    fi
+    VENV_DIR=${MY_HOME}/.venv-panda
+elif [[ -z "${VENV_DIR}" && -z "${MY_USERNAME}" ]]; then
+    VENV_DIR=/root/.venv-panda
+fi
 
 function activate_venv()
 {

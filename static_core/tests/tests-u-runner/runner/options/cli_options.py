@@ -16,11 +16,12 @@
 
 import argparse
 from os import path, makedirs
-from typing import Type
+from typing import Type, Optional, Union, Sequence
 
 from runner.enum_types.verbose_format import VerboseKind, VerboseFilter
 from runner.reports.report_format import ReportFormat
 from runner.utils import enum_from_str, EnumT
+from runner.path_utils import is_sudo_user
 
 
 def is_directory(arg: str) -> str:
@@ -73,6 +74,18 @@ def add_js_test_suite_args(parser: argparse.ArgumentParser) -> None:
         '--hermes', action='store_true', dest='hermes',
         default=None,
         help='run Hermes tests')
+
+
+class HandleTimeoutAction(argparse.Action):
+    def __call__(self,
+                 _: argparse.ArgumentParser,
+                 namespace: argparse.Namespace,
+                 _2: Optional[Union[str, Sequence]],
+                 option_string: Optional[str] = None) -> None:
+        if is_sudo_user():
+            setattr(namespace, self.dest, True)
+        else:
+            raise argparse.ArgumentTypeError(f"Run under 'sudo' if you use {option_string} option")
 
 
 def add_sts_test_suite_args(parser: argparse.ArgumentParser) -> None:
@@ -337,6 +350,10 @@ def add_general_other_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         '--gdb-timeout', type=check_timeout, default=None,
         dest='gdb_timeout', help='Additional timeout for collecting stack information by gdb. By default 10 sec')
+    parser.add_argument(
+        '--handle-timeout', action=HandleTimeoutAction, default=None, nargs=0,
+        dest='handle_timeout',
+        help='Specify to handle failures by timeout for collecting stack information by gdb. Requires run under sudo')
 
 
 def add_es2panda_args(parser: argparse.ArgumentParser) -> None:

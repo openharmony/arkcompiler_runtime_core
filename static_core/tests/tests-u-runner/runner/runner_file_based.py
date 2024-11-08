@@ -17,7 +17,6 @@
 import logging
 import re
 import subprocess
-from unittest import TestCase
 from abc import abstractmethod
 from datetime import datetime
 from functools import cached_property
@@ -25,28 +24,29 @@ from glob import glob
 from os import path, environ
 from pathlib import Path
 from typing import List, Dict, Optional, Type, Tuple
+from unittest import TestCase
 
 import pytz
-from runner.utils import get_platform_binary_name
+from runner.code_coverage.coverage import LlvmCov
 from runner.enum_types.configuration_kind import ConfigurationKind, SanitizerKind
 from runner.enum_types.fail_kind import FailKind
 from runner.enum_types.params import TestEnv
 from runner.enum_types.qemu import QemuKind
 from runner.logger import Log
 from runner.options.config import Config
-from runner.reports.report_format import ReportFormat
+from runner.path_utils import chown2user
+from runner.plugins.work_dir import WorkDir
 from runner.reports.detailed_report import DetailedReport
+from runner.reports.html_view import HtmlView
+from runner.reports.report_format import ReportFormat
 from runner.reports.spec_report import SpecReport
+from runner.reports.standard_view import StandardView
+from runner.reports.summary import Summary
+from runner.reports.xml_view import XmlView
 from runner.runner_base import Runner
 from runner.test_base import Test
 from runner.test_file_based import TestFileBased
-from runner.code_coverage.coverage import LlvmCov
-from runner.reports.html_view import HtmlView
-from runner.reports.xml_view import XmlView
-from runner.reports.standard_view import StandardView
-from runner.reports.summary import Summary
-from runner.plugins.work_dir import WorkDir
-
+from runner.utils import get_platform_binary_name
 
 INDEX_TITLE = "${Title}"
 INDEX_OPTIONS = "${Options}"
@@ -59,7 +59,6 @@ INDEX_EXCLUDED_OTHER = "${ExcludedByOtherReasons}"
 INDEX_TEST_NAME = "${TestName}"
 INDEX_TEST_ID = "${TestId}"
 INDEX_FAILED_TESTS_LIST = "${FailedTestsList}"
-
 
 _LOGGER = logging.getLogger("runner.runner_file_based")
 
@@ -254,12 +253,7 @@ class RunnerFileBased(Runner):
         )
 
         if results:
-            xml_view = XmlView(self.work_dir.report, summary)
-            execution_time = round((datetime.now(pytz.UTC) - self.start_time).total_seconds(), 3)
-            xml_view.create_xml_report(results, execution_time)
-            xml_view.create_ignore_list(set(results))
-            self.__generate_detailed_report(results)
-            self.__generate_spec_report(results)
+            self.__generate_xml_report(summary, results)
 
         if ReportFormat.HTML in self.test_env.report_formats:
             html_view = HtmlView(self.work_dir.report, self.config, summary)
@@ -267,14 +261,10 @@ class RunnerFileBased(Runner):
 
         summary.passed = summary.passed - summary.ignored_but_passed
 
-        standard_view = StandardView(self.work_dir.report, self.update_excluded, self.excluded_lists, summary)
-        standard_view.summarize_failures(fail_lists)
-        standard_view.create_failures_report(fail_lists)
-        standard_view.create_update_excluded(excluded_but_passed, excluded_still_failed)
-        standard_view.summarize_passed_ignored(ignored_but_passed)
-        standard_view.display_summary(fail_lists)
-        standard_view.create_time_report(results, self.config.time_report)
+        self.__generate_standard_report(summary, fail_lists, ignored_but_passed, excluded_but_passed,
+                                        excluded_still_failed, results)
 
+        chown2user(self.work_dir.root)
         return self.failed
 
     def collect_excluded_test_lists(self, extra_list: Optional[List[str]] = None,
@@ -403,3 +393,25 @@ class RunnerFileBased(Runner):
             aot_args += self.config.ark_aot.aot_args
 
         return ark_aot, aot_args
+
+    def __generate_xml_report(self, summary: Summary, results: List[Test]) -> None:
+        xml_view = XmlView(self.work_dir.report, summary)
+        execution_time = round((datetime.now(pytz.UTC) - self.start_time).total_seconds(), 3)
+        xml_view.create_xml_report(results, execution_time)
+        xml_view.create_ignore_list(set(results))
+        self.__generate_detailed_report(results)
+        self.__generate_spec_report(results)
+
+    def __generate_standard_report(self, summary: Summary,
+                                   fail_lists: Dict[FailKind, List[Test]],
+                                   ignored_but_passed: List[Test],
+                                   excluded_but_passed: List[Test],
+                                   excluded_still_failed: List[Test],
+                                   results: List[Test]) -> None:
+        standard_view = StandardView(self.work_dir.report, self.update_excluded, self.excluded_lists, summary)
+        standard_view.summarize_failures(fail_lists)
+        standard_view.create_failures_report(fail_lists)
+        standard_view.create_update_excluded(excluded_but_passed, excluded_still_failed)
+        standard_view.summarize_passed_ignored(ignored_but_passed)
+        standard_view.display_summary(fail_lists)
+        standard_view.create_time_report(results, self.config.time_report)
