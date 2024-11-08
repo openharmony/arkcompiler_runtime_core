@@ -28,6 +28,7 @@ function main(): int {
     failures += test(testErrorMessage(), "Validate the message of the caught Error");
     failures += test(testErrorWithCause(), "Error object with cause");
     failures += test(testCreateAggregateError(), "Create an AggregateError object with an array of errors");
+    failures += test(testCreateAggregateErrorFromArray(), "Create an AggregateError object with an Array<Error>");
     failures += test(testAggregateErrorMessage(), "Validate the message of the AggregateError");
     failures += test(testEvalError(), "EvalError with message and options");
     failures += test(testRangeError(), "RangeError with message and options");
@@ -76,6 +77,89 @@ function testErrorWithCause(): int {
 
 function testCreateAggregateError(): int {
     let errors = [new Error("Error 1"), new Error("Error 2")];
+    let aggErr = new AggregateError(errors, "Aggregate error message");
+    if (aggErr.errors.length != 2 || aggErr.message != "Aggregate error message") {
+        return fail;
+    }
+
+    // Note(ivan-tyulyandin): the code below has to moved into generated tests
+    // after internal issue #20142 is resolved
+    const errInArr = [new Error]
+    const emptyStr = ""
+    const nonEmptyStr = "text"
+    const errOpts = new ErrorOptions
+    const assertMsg = "length of errors has to be 1"
+
+    // AggregateError(Error)
+    aggErr = new AggregateError(errInArr)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+
+    // AggregateError(Error, undefined)
+    aggErr = new AggregateError(errInArr, undefined)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, Object|undefined>(emptyStr, aggErr.message)
+
+    // AggregateError(Error, undefined, undefined)
+    aggErr = new AggregateError(errInArr, undefined)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, Object|undefined>(emptyStr, aggErr.message)
+    assertEQ<undefined, Object|undefined>(undefined, aggErr.cause)
+
+    // AggregateError(Error, "")
+    aggErr = new AggregateError(errInArr, emptyStr)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, string>(emptyStr, aggErr.message)
+
+    // AggregateError(Error, "text")
+    aggErr = new AggregateError(errInArr, nonEmptyStr)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, string>(nonEmptyStr, aggErr.message)
+
+    // AggregateError(Error, "", undefined)
+    aggErr = new AggregateError(errInArr, emptyStr)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, string>(emptyStr, aggErr.message)
+    assertEQ<undefined, Object|undefined>(undefined, aggErr.cause)
+
+    // AggregateError(Error, "text", undefined)
+    aggErr = new AggregateError(errInArr, nonEmptyStr, undefined)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, string>(nonEmptyStr, aggErr.message)
+    assertEQ<undefined, Object|undefined>(undefined, aggErr.cause)
+
+    // AggregateError(Error, undefined, ErrorOptions)
+    aggErr = new AggregateError(errInArr, undefined, errOpts)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, Object|undefined>(emptyStr, aggErr.message)
+    assertEQ<Object|undefined, Object|undefined>(errOpts.cause, aggErr.cause)
+
+    // AggregateError(Error, "", ErrorOptions)
+    aggErr = new AggregateError(errInArr, emptyStr, errOpts)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, string>(emptyStr, aggErr.message)
+    assertEQ<Object|undefined, Object|undefined>(errOpts.cause, aggErr.cause)
+
+    // AggregateError(Error, "text", ErrorOptions)
+    aggErr = new AggregateError(errInArr, nonEmptyStr, errOpts)
+    assertTrue(aggErr.errors.length == 1, assertMsg)
+    assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
+    assertEQ<string, string>(nonEmptyStr, aggErr.message)
+    assertEQ<Object|undefined, Object|undefined>(errOpts.cause, aggErr.cause)
+
+    return success;
+}
+
+function testCreateAggregateErrorFromArray(): int {
+    let errors = Array.from<Error>([new Error("Error 1"), new Error("Error 2")]);
     let aggErr = new AggregateError(errors, "Aggregate error message");
     if (aggErr.errors.length == 2 && aggErr.message == "Aggregate error message") {
         return success;
