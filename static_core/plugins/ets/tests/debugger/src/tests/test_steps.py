@@ -74,7 +74,7 @@ def check_exit_status(process: RuntimeProcess, log: RichLogger):
     if status != 0:
         msg = f"Runtime exit status is {status}"
         log.warning(msg)
-        warnings.warn(f"Runtime exit status is {status}", RuntimeExitStatusWarning)
+        warnings.warn(msg, RuntimeExitStatusWarning)
 
 
 async def test_run(

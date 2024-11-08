@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-project(ets_test_debugger)
+project(ets_debugger_tests)
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 

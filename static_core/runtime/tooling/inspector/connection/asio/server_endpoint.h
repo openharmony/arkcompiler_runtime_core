@@ -63,6 +63,8 @@ private:
     {
         if (auto connection = GetPinnedConnection()) {
             connection->send(message, websocketpp::frame::opcode::text);
+        } else {
+            LOG(INFO, DEBUGGER) << "Did not send message: " << message;
         }
     }
 
