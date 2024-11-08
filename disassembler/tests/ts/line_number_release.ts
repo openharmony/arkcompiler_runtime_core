@@ -18,6 +18,6 @@ function testRelease(): Object {
     if (flag) {
       flag = !flag;
     }
-    let jsonObj: Object = JSON.parse("");
+    let jsonObj: Object = JSON.parse('');
     return jsonObj;
 }
