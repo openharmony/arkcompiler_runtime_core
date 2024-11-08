@@ -20,6 +20,7 @@
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_runtime_linker.h"
 #include "plugins/ets/runtime/ets_class_linker_extension.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_stubs-inl.h"
@@ -30,6 +31,11 @@ namespace ark::ets::intrinsics {
 EtsString *StdCoreClassGetNameInternal(EtsClass *cls)
 {
     return cls->GetName();
+}
+
+EtsRuntimeLinker *StdCoreClassGetLinker(EtsClass *cls)
+{
+    return EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(cls->GetLoadContext());
 }
 
 EtsClass *StdCoreClassOf(EtsObject *obj)
@@ -97,16 +103,15 @@ EtsObject *StdCoreClassCreateInstance(EtsClass *cls)
     return objHandle.GetPtr();
 }
 
-EtsClass *StdCoreRuntimeLinkerLoadClassInternal(EtsClass *ctxClassObj, EtsString *clsName, uint8_t init)
+EtsClass *StdCoreRuntimeLinkerLoadClass(EtsRuntimeLinker *runtimeLinker, EtsString *clsName, uint8_t init)
 {
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
-    ClassLinkerContext *ctx = ctxClassObj->GetRuntimeClass()->GetLoadContext();
-
     PandaString name = clsName->GetMutf8();
     PandaString descriptor;
     ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
 
+    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
+    EtsClassLinker *linker = coro->GetPandaVM()->GetClassLinker();
+    auto *ctx = runtimeLinker->GetClassLinkerContext();
     EtsClass *klass = linker->GetClass(descriptor.c_str(), false, ctx);
     if (UNLIKELY(klass == nullptr)) {
         ASSERT(coro->HasPendingException());
@@ -114,7 +119,7 @@ EtsClass *StdCoreRuntimeLinkerLoadClassInternal(EtsClass *ctxClassObj, EtsString
     }
 
     if (UNLIKELY(init != 0 && !klass->IsInitialized())) {
-        if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, klass))) {
+        if (UNLIKELY(!linker->InitializeClass(coro, klass))) {
             ASSERT(coro->HasPendingException());
             return nullptr;
         }

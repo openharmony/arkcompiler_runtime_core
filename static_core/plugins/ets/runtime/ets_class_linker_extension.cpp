@@ -18,6 +18,8 @@
 #include "include/method.h"
 #include "libpandabase/macros.h"
 #include "libpandabase/utils/logger.h"
+#include "mem/refstorage/global_object_storage.h"
+#include "mem/refstorage/reference.h"
 #include "plugins/ets/runtime/ets_annotation.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
@@ -26,6 +28,8 @@
 #include "plugins/ets/runtime/napi/ets_napi_helpers.h"
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/types/ets_method.h"
+#include "plugins/ets/runtime/types/ets_runtime_linker.h"
+#include "runtime/class_linker_context.h"
 #include "runtime/include/class_linker_extension.h"
 #include "runtime/include/class_linker-inl.h"
 #include "runtime/include/language_context.h"
@@ -78,6 +82,16 @@ static std::string_view GetClassLinkerErrorDescriptor(ClassLinker::Error error)
             LOG(FATAL, CLASS_LINKER) << "Unhandled class linker error (" << helpers::ToUnderlying(error) << "): ";
             UNREACHABLE();
     }
+}
+
+static EtsRuntimeLinker *GetEtsRuntimeLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+    auto *ref = ctx->GetRefToLinker();
+    if (ref == nullptr) {
+        return nullptr;
+    }
+    return EtsRuntimeLinker::FromCoreType(PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()->Get(ref));
 }
 
 void EtsClassLinkerExtension::ErrorHandler::OnError(ClassLinker::Error error, const PandaString &message)
@@ -453,6 +467,20 @@ EtsClassLinkerExtension::~EtsClassLinkerExtension()
     }
 
     FreeLoadedClasses();
+
+    if (Thread::GetCurrent() == nullptr) {
+        // Do not remove references during runtime destruction
+        return;
+    }
+    EnumerateContexts([objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage()](ClassLinkerContext *ctx) {
+        auto *ref = ctx->GetRefToLinker();
+        if (ref != nullptr) {
+            // Removal could be done in ets-specific ClassLinkerContext,
+            // though no such class in hierarchy exist
+            objectStorage->Remove(ref);
+        }
+        return true;
+    });
 }
 
 const void *EtsClassLinkerExtension::GetNativeEntryPointFor(Method *method) const
@@ -555,6 +583,7 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
 
     InitializeBuiltinSpecialClasses();
 
+    runtimeLinkerClass_ = CacheClass(RUNTIME_LINKER);
     promiseClass_ = CacheClass(PROMISE);
     if (promiseClass_ != nullptr) {
         subscribeOnAnotherPromiseMethod_ = EtsMethod::ToRuntimeMethod(
@@ -590,6 +619,32 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
     coro->SetStringClassPtr(GetClassRoot(ClassRoot::STRING));
     coro->SetArrayU16ClassPtr(GetClassRoot(ClassRoot::ARRAY_U16));
     coro->SetArrayU8ClassPtr(GetClassRoot(ClassRoot::ARRAY_U8));
+}
+
+/* static */
+EtsRuntimeLinker *EtsClassLinkerExtension::GetOrCreateEtsRuntimeLinker(ClassLinkerContext *ctx)
+{
+    ASSERT(ctx != nullptr);
+
+    // CC-OFFNXT(G.CTL.03) false positive
+    while (true) {
+        auto *runtimeLinker = GetEtsRuntimeLinker(ctx);
+        if (runtimeLinker != nullptr) {
+            return runtimeLinker;
+        }
+
+        runtimeLinker = EtsRuntimeLinker::Create(ctx);
+        if (UNLIKELY(runtimeLinker == nullptr)) {
+            LOG(FATAL, CLASS_LINKER) << "Could not allocate EtsRuntimeLinker";
+        }
+        auto *objectStorage = PandaEtsVM::GetCurrent()->GetGlobalObjectStorage();
+        auto *refToLinker = objectStorage->Add(runtimeLinker, mem::Reference::ObjectType::GLOBAL);
+        if (ctx->CompareAndSetRefToLinker(nullptr, refToLinker)) {
+            return runtimeLinker;
+        }
+        objectStorage->Remove(refToLinker);
+    }
+    UNREACHABLE();
 }
 
 }  // namespace ark::ets

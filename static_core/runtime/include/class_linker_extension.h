@@ -327,6 +327,7 @@ private:
     {
         return static_cast<size_t>(root);
     }
+
     ClassLinkerErrorHandler *ResolveErrorHandler(ClassLinkerErrorHandler *errorHandler)
     {
         if (errorHandler == nullptr) {

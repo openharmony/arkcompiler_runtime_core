@@ -77,6 +77,17 @@ class Test {
         assert(Other.getCallerOfItself() != caller);
     }
 
+    static testRuntimeLinkerProperties() {
+        // Check all booted Class refer to the same RuntimeLinker
+        let objectLinker = Class.of(new Object()).getLinker();
+        assert(objectLinker != null);
+        let doubleLinker = Class.of(new Double(1.0)).getLinker();
+        assert(objectLinker == doubleLinker);
+        // Check idempotence
+        let objectLinker2 = Class.of(new Object()).getLinker();
+        assert(objectLinker == objectLinker2);
+    }
+
     static testLoadClass() {
         let linker = Class.ofCaller().getLinker();
         let clsName = cname("LoadTarget");
@@ -130,6 +141,7 @@ class Test {
         Test.testClassProps();
         Test.testRoots();
         Test.testCaller();
+        Test.testRuntimeLinkerProperties();
         Test.testLoadClass();
         Test.testInitialize();
         Test.testCreateInstance();

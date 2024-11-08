@@ -34,9 +34,7 @@ export final class Class {
         return this.superClass
     }
 
-    public getLinker(): RuntimeLinker {
-        return new RuntimeLinker(this)
-    }
+    public native getLinker(): RuntimeLinker
 
     /**
      * Invoke class initializer once if class is not initialized
@@ -62,17 +60,14 @@ export final class Class {
  * Unstable API, represents internal runtime type linking and loading APIs
  */
 export final class RuntimeLinker {
-    private ctxClass: Class // A temporary internal solution to specify lookup scope
+    private classLinkerCtxPtr: long;
 
-    internal constructor(ctxClass: Class) { this.ctxClass = ctxClass }
-    private static native loadClassInternal(ctxClass: Class, clsName: string, init: boolean): Class
+    private constructor() { throw new Error("RuntimeLinker constructor called") }
 
     /**
      * Load Class by name in the context of this RuntimeLinker
      */
-    public loadClass(clsName: string, init: boolean = false): Class {
-        return RuntimeLinker.loadClassInternal(this.ctxClass, clsName, init)
-    }
+    public native loadClass(clsName: string, init: boolean = false): Class
 }
 
 /**

@@ -30,6 +30,7 @@ static constexpr std::string_view BIG_INT                              = "Lescom
 static constexpr std::string_view ASYNC                                = "Lets/coroutine/Async;";
 static constexpr std::string_view EXCEPTION                            = "Lstd/core/Exception;";
 static constexpr std::string_view CLASS                                = "Lstd/core/Class;";
+static constexpr std::string_view RUNTIME_LINKER                       = "Lstd/core/RuntimeLinker;";
 static constexpr std::string_view OBJECT                               = "Lstd/core/Object;";
 static constexpr std::string_view PROMISE                              = "Lstd/core/Promise;";
 static constexpr std::string_view PROMISE_REF                          = "Lstd/core/PromiseRef;";

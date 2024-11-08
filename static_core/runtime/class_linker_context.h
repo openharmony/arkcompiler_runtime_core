@@ -15,10 +15,12 @@
 #ifndef PANDA_RUNTIME_CLASS_LINKER_CONTEXT_H_
 #define PANDA_RUNTIME_CLASS_LINKER_CONTEXT_H_
 
+#include <atomic>
 #include "libpandabase/macros.h"
 #include "libpandabase/mem/object_pointer.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/utils/bit_utils.h"
+#include "mem/refstorage/reference.h"
 #include "runtime/include/class.h"
 #include "runtime/include/mem/panda_containers.h"
 #include "runtime/mem/gc/gc.h"
@@ -137,6 +139,25 @@ public:
         }
     }
 
+    mem::Reference *GetRefToLinker()
+    {
+        // Atomic with relaxed order reason: read of field
+        return refToLinker_.load(std::memory_order_relaxed);
+    }
+
+    void SetRefToLinker(mem::Reference *ref)
+    {
+        // Atomic with release order reason: write to field, other threads should see correct value
+        refToLinker_.store(ref, std::memory_order_release);
+    }
+
+    bool CompareAndSetRefToLinker(mem::Reference *oldRef, mem::Reference *newRef)
+    {
+        // Atomic with release order reason: write to field, other threads should see correct value
+        return refToLinker_.compare_exchange_strong(oldRef, newRef, std::memory_order_release,
+                                                    std::memory_order_relaxed);
+    }
+
     virtual PandaVector<std::string_view> GetPandaFilePaths() const
     {
         return PandaVector<std::string_view>();
@@ -166,6 +187,7 @@ private:
     PandaUnorderedMap<const uint8_t *, Class *, utf::Mutf8Hash, utf::Mutf8Equal> loadedClasses_
         GUARDED_BY(classesLock_);
     PandaVector<ObjectPointer<ObjectHeader>> roots_;
+    std::atomic<mem::Reference *> refToLinker_ {nullptr};
     panda_file::SourceLang lang_ {panda_file::SourceLang::PANDA_ASSEMBLY};
 };
 
