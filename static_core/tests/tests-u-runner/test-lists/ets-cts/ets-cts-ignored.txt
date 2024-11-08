@@ -566,6 +566,12 @@
 03.types/08.reference_types/11.union_types/ut_9.sts
 # end of es2panda fails
 
+# 20483 es2panda aborts on literal type conversion in field initialization expression
+06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_0.sts
+06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_2.sts
+06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_4.sts
+06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_6.sts
+
 # 18883 Failure to distinguish between static and instance instantiate method
 17.experimental_features/05.callable_types/02.callable_types_with_instantiate_method/ct_inst_13.sts
 
