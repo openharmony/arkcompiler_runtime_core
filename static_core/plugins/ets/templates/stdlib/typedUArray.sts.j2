@@ -124,40 +124,11 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * Creates an {{element['name']}}Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<{{element['subsetTypeValues']}}>) {
-        {%- if element.get('name') != 'BigUint64' %}
         let x = {{element['name']}}Array.from(elements)
         this.byteLengthInt = x.byteLengthInt
         this.lengthInt = x.lengthInt
         this.buffer = x.buffer
         this.byteOffsetInt = x.byteOffsetInt
-        {%- else %}
-        // NOTE (templin.konstantin): Please remove this code block after
-        //  BigInt.from implementation
-
-        let iterator = elements.$_iterator();
-        let result = new IteratorResult<{{element['subsetTypeValues']}}>()
-        let length = 0
-        while ((result = iterator.next()).done != true) {
-            ++length
-        }
-        // Setup array fields
-        this.byteLengthInt = length as int * {{element['name']}}Array.BYTES_PER_ELEMENT as int
-        this.lengthInt = length as int
-        this.buffer = new ArrayBuffer(this.byteLengthInt)
-        this.byteOffsetInt = 0
-        iterator = elements.$_iterator();
-        let i = 0
-        while ((result = iterator.next()).done != true) {
-            if (__runtimeIsSameReference(result.value, undefined)) {
-                continue
-            }
-            {%- if element.get('clamped', False) %}
-            this.setUnsafe(i, {{element['name']}}Array.clamp((result.value as {{element['subsetTypeValues']}}){{numberBigIntUndefToPrimitive}}))
-            {%- else %}
-            this.setUnsafe(i, (result.value as {{element['subsetTypeValues']}}){{numberBigIntToPrimitive}})
-            {%- endif %}
-        }
-        {%- endif %}
     }
 
     /**
@@ -388,6 +359,19 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             {%- endif %}
         }
     }
+
+    {%- if element['name'] == 'BigUint64' %}
+
+    /**
+     * Creates an {{element['name']}}Array from bigint[]
+     */
+    public constructor(numbers: bigint[]) {
+        this(numbers.length)
+        for (let i: int = 0; i < this.lengthInt; ++i) {
+            this.setUnsafe(i, {{fromElementCompat % 'numbers[i]'}})
+        }
+    }
+    {%- endif %}
 
 {%- if element.get('name') != 'Uint8Clamped' %}{#- comment: Uint8Array and others, except Uint8Clamped #}
 
@@ -975,6 +959,7 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         }
     }
     {%- set uniquePrimitiveTypes = ['number', 'int',  element['primitiveTypeWide']] if element['primitiveTypeWide'] != 'int' else ['number', 'int'] %}
+    {%- set uniquePrimitiveTypes = uniquePrimitiveTypes if element['name'] != 'BigUint64' else uniquePrimitiveTypes + ['bigint'] %}
     {%- for argType in uniquePrimitiveTypes %}
 
     /**
@@ -985,12 +970,18 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns new {{element['name']}}Array
      */
     public static of(...items: {{argType}}[]): {{element['name']}}Array {
-    {%- if element.get('name') != 'BigUint64' %}
         let res = new {{element['name']}}Array(items.length as int)
         for (let i: int = 0; i < items.length; i++) {
         {%- if element.get('name') != 'Uint8Clamped' %}
-            {%- if argType == 'number' %}
+            {%- if argType == 'bigint' %}
+            res.setUnsafeClamp(i, items[i]{{numberBigIntToPrimitive}})
+            {%- elif argType == 'number' %}
+            {%- if element.get('name') == 'BigUint64' %}
+            const isInfinity = (items[i] == Infinity) || (items[i] == -Infinity)
+            res.setUnsafeClamp(i, ({{asElementCompat % '(isInfinity ? 0 : items[i])'}}){{numberBigIntToPrimitive}})
+            {%- else %}
             res.setUnsafeClamp(i, res.zeroIfInfinity(items[i]) as {{element['primitiveType']}})
+            {%- endif %}
             {%- else %}
             res.setUnsafeClamp(i, items[i]{{ ' as ' + element['primitiveType'] if argType != element['primitiveType'] else ''}})
             {%- endif %}
@@ -999,9 +990,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         {%- endif %}
         }
         return res
-    {%- else %}
-        throw new Error("{{N}}Array.of: not implemented")
-    {%- endif %}
     }
     {%- endfor %}
 
@@ -1041,13 +1029,12 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns new {{element['name']}}Array
      */
     public static from(arrayLike: Iterable<{{element['subsetType']}}>, mapfn?: (v: {{element['subsetType']}}, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
-    {%- if element.get('name') != 'BigUint64' %}
         if (mapfn == undefined) {
-            mapfn = (v: number, k: number): number => { return v }
+            mapfn = (v: {{element['subsetType']}}, k: number): {{element['subsetType']}} => { return v }
         }
 
         let iter = arrayLike.$_iterator()
-        // NOTE: This code section is responsible for optimizing for some types
+        // NOTE (templin.konstantin): This code section is responsible for optimizing for some types
         //  of iterators that we can learn the length of (e.g. ArrayValuesIterator).
         //  We are trying to use "reflection" to find the "__Iterator_getLength" method and if it exists,
         //  we can make one pass through the iterator without the need for memory reallocation.
@@ -1059,7 +1046,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
                 if (x.done) {
                     return new {{element['name']}}Array(result.buffer, 0, i)
                 }
-                {%- if element.get('name') != 'Uint8Clamped' %}
+                {%- if element.get('name') == 'BigUint64' %}
+                result.setUnsafeClamp(i, ((mapfn)!(x.value!, i)){{numberBigIntToPrimitive}})
+                {%- elif element.get('name') != 'Uint8Clamped' %}
                 result.setUnsafeClamp(i, result.zeroIfInfinity((mapfn)!(x.value!, i)) as {{element['primitiveType']}})
                 {%- else %}
                 result.setUnsafeClamp(i, (mapfn)!(x.value!, i) as {{element['primitiveType']}})
@@ -1068,14 +1057,14 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             return result
         }
 
-        // NOTE: Create builtin array as buffer
+        // NOTE (templin.konstantin): Create builtin array as buffer
         let temp = new {{element['name']}}Array(6)
         let index = new int[1]
         index[0] = 0
 
-        iteratorForEach<number>(arrayLike.$_iterator(), (x: number): void => {
+        iteratorForEach<{{element['subsetType']}}>(arrayLike.$_iterator(), (x: {{element['subsetType']}}): void => {
             if (index[0] + 1 > temp.lengthInt) {
-                // NOTE: Progressive reallocation
+                // NOTE (templin.konstantin): Progressive reallocation
                 const curLength = (temp.buffer as Buffer).getByteLength()
                 const tb = new ArrayBuffer(curLength * 2)
                 for (let i = 0; i < curLength; ++i) {
@@ -1083,7 +1072,9 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
                 }
                 temp = new {{element['name']}}Array(tb)
             }
-            {%- if element.get('name') != 'Uint8Clamped' %}
+            {%- if element.get('name') == 'BigUint64' %}
+            temp.setUnsafeClamp(index[0], ((mapfn)!(x, index[0])){{numberBigIntToPrimitive}})
+            {%- elif element.get('name') != 'Uint8Clamped' %}
             temp.setUnsafeClamp(index[0], temp.zeroIfInfinity((mapfn)!(x, index[0])) as {{element['primitiveType']}})
             {%- else %}
             temp.setUnsafeClamp(index[0], (mapfn)!(x, index[0]) as {{element['primitiveType']}})
@@ -1092,9 +1083,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         })
 
         return new {{element['name']}}Array(temp.buffer, 0, index[0])
-    {%- else %}
-        throw new Error("{{element['name']}}Array.from: not implemented")
-    {%- endif %}
     }
 
     /**
@@ -1107,13 +1095,14 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * @returns new {{element['name']}}Array
      */
     public static from<T>(arrayLike: ArrayLike<T>, mapfn: (v: T, k: number) => {{element['subsetType']}}): {{element['name']}}Array {
-    {%- if element.get('name') != 'BigUint64' %}
         let res = new {{element['name']}}Array(arrayLike.length)
         // NOTE (ikorobkov): Please don't replace idx as int[1] with int-variable, because of value of single variable doesn't change (idx++) into lambda call by unknown reason
         const idx = new int[1]
         idx[0] = 0
         iteratorForEach<T>(arrayLike.$_iterator(), (x: T): void => {
-        {%- if element.get('name') != 'Uint8Clamped' %}
+        {%- if element.get('name') == 'BigUint64' %}
+            res.setUnsafeClamp(idx[0], (mapfn(x as T, idx[0] as number)){{numberBigIntToPrimitive}})
+        {%- elif element.get('name') != 'Uint8Clamped' %}
             res.setUnsafeClamp(idx[0], res.zeroIfInfinity(mapfn(x as T, idx[0] as number)) as {{element['primitiveType']}})
         {%- else %}
             res.setUnsafeClamp(idx[0], mapfn(x as T, idx[0] as number) as {{element['primitiveType']}})
@@ -1121,9 +1110,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
             idx[0] += 1
         })
         return res
-    {%- else %}
-        throw new Error("{{element['name']}}Array.from: not implemented")
-    {%- endif %}
     }
 
     /**
@@ -1901,18 +1887,6 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
         this.forEach((value: {{elType}}, index: number, array: {{element['name']}}Array): void => callbackfn(value))
     }
 
-    /**
-     * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array
-     *
-     * @param fn a function to apply for each element of current {{element['name']}}Array
-     *
-     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
-     */
-    public map(fn: (val: {{elType}}) => {{elType}}): {{element['name']}}Array {
-        let newF: (val: {{elType}}, index: number) => {{elType}} =
-            (val: {{elType}}, index: number): {{elType}} => { return fn(val) }
-        return this.map(newF)
-    }
 
     /**
      * Determines whether the specified callback function returns true for any element of an array.
@@ -2396,14 +2370,53 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      *
      * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
      */
-    public map(fn: (val: {{elType}}, index: {{idxType}}) => {{elType}}): {{element['name']}}Array {
+    public map(fn: (val: {{elType}}, index: {{idxType}}, array: {{element['name']}}Array) => {{elType}}): {{element['name']}}Array {
         let resBuf = new ArrayBuffer(this.lengthInt * {{element['name']}}Array.BYTES_PER_ELEMENT as int)
         let res = new {{element['name']}}Array(resBuf)
         for (let i = 0; i < this.lengthInt; i++) {
-            const fnRes = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}})
+            const fnRes = fn({{castToEl % 'this.getUnsafe(i)'}}, i{{castToIdx}}, this)
             res.setUnsafeClamp(i, {{castFromEl % 'fnRes'}})
         }
         return res
+    }
+
+    /**
+     * Creates a new {{element['name']}}Array using fn(arr[i], i) over all elements of current {{element['name']}}Array
+     *
+     * @param fn a function to apply for each element of current {{element['name']}}Array
+     *
+     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
+     */
+    public map(fn: (val: {{elType}}, index: number) => {{elType}}): {{element['name']}}Array {
+        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => {{elType}} =
+            (val: {{elType}}, index: number, array: {{element['name']}}Array): {{elType}} => { return fn(val, index) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new {{element['name']}}Array using fn(arr[i]) over all elements of current {{element['name']}}Array
+     *
+     * @param fn a function to apply for each element of current {{element['name']}}Array
+     *
+     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
+     */
+    public map(fn: (val: {{elType}}) => {{elType}}): {{element['name']}}Array {
+        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => {{elType}} =
+            (val: {{elType}}, index: number, array: {{element['name']}}Array): {{elType}} => { return fn(val) }
+        return this.map(newF)
+    }
+
+    /**
+     * Creates a new {{element['name']}}Array using fn() over all elements of current {{element['name']}}Array
+     *
+     * @param fn a function to apply for each element of current {{element['name']}}Array
+     *
+     * @returns a new {{element['name']}}Array where for each element from current {{element['name']}}Array fn was applied
+     */
+    public map(fn: () => {{elType}}): {{element['name']}}Array {
+        let newF: (val: {{elType}}, index: number, array: {{element['name']}}Array) => {{elType}} =
+            (val: {{elType}}, index: number, array: {{element['name']}}Array): {{elType}} => { return fn() }
+        return this.map(newF)
     }
 
     /**

@@ -13,21 +13,14 @@
 
 - {
   objectType: "BigInt64Array",
-  type: "BigInt",
-  primitiveType: "long",
-  cast2primitive: ".getLong()",
-  create: "new BigInt",
+  primitiveType: "bigint",
   primitiveSizeBytes: 8,
-  data: "[123456789123456789123456789n, BigInt(12345678901234567890), 0n, 9007199254740991n, -9007199254740992n]"
+  data: "[123456789123456789123456789n, new BigInt(12345678901234567890), 0n, 9007199254740991n, -9007199254740992n]"
 }
 
 - {
   objectType: "BigUint64Array",
-  type: "BigInt",
   primitiveType: "long",
-  cast2primitive: ".getLong()",
-  create: "new BigInt",
   primitiveSizeBytes: 8,
   data: "[123456789123456789123456789n, BigInt(12345678901234567890), 0n, 9007199254740991n, 19007199254740992n]"
 }
-

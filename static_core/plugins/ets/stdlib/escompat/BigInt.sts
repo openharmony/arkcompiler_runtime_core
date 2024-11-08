@@ -133,27 +133,6 @@ export final class BigInt {
         return ret
     }
 
-    internal getULong(): long {
-        return BigInt.asUintN(64, this).longValue()
-    }
-
-    internal getLong(): long {
-        let val = this.clone()
-        let bts = val.asBytes()
-        let len = val.length()
-        let res: long = 0;
-
-        for (let i = 0; i < len; i++) {
-            res = res << BigInt.shiftSys
-            res += bts[i]
-        }
-        if (this.negative()) {
-            res *= -1
-        }
-
-        return res
-    }
-
     public equals(to: BigInt): boolean {
         if (this.bytes.length != to.bytes.length) {
             return false;
@@ -262,13 +241,13 @@ export final class BigInt {
         let dividend = this.abs()
         while (dividend > 0n) {
             if (dividend < MAX_REGULAR_INTEGER) {
-                result = StringBuilder.concatStrings((dividend.longValue() as Number).toString(radix), result)
+                result = StringBuilder.concatStrings((dividend.getLong() as Number).toString(radix), result)
                 break
             }
             // NOTE(@aendrewpolyakov, #18313): Rewrite once destructuring assignment got support
             let divisionResult = dividend.operatorDivideInternal(radixBigInt)
             let quotent = divisionResult[0], remainder = divisionResult[1]
-            result = StringBuilder.concatStrings((remainder.longValue() as Number).toString(radix), result)
+            result = StringBuilder.concatStrings((remainder.getLong() as Number).toString(radix), result)
             dividend = quotent
         }
         return result.toString()
@@ -480,7 +459,7 @@ export final class BigInt {
         }
 
         if (divident < MAX_REGULAR_INTEGER) {
-            let dividentLong: long = divident.longValue(), divisorLong: long = divisor.longValue()
+            let dividentLong: long = divident.getLong(), divisorLong: long = divisor.getLong()
             let quotent: int = (dividentLong / divisorLong) as int
             let remainder: long = dividentLong % divisorLong
             return [quotent, new BigInt(remainder)]
@@ -684,7 +663,7 @@ export final class BigInt {
             return lhs;
         }
 
-        let limit:long = other.longValue()
+        let limit:long = other.getLong()
         for (let i:long = 0; i<limit; i++) {
             lhs = lhs + lhs;
         }
@@ -707,7 +686,7 @@ export final class BigInt {
         let bit: long = (1 << (BigInt.shiftSys - 1)) ;
         // it is equal to  len * 8 or len * log2(baseSys)
         let limit: long = this.length() * BigInt.shiftSys;
-        let lval: long = other.longValue()
+        let lval: long = other.getLong()
         limit = limit >= lval ? lval : limit;
 
         let last: long = 0x0;
@@ -1124,7 +1103,16 @@ export final class BigInt {
      *
      * @returns object's value
      */
-    public longValue(): long {
-        return this.doubleValue() as long
+    public getLong(): long {
+        let buff = 0 as long
+        const bytes = this.abs().bytes
+        for (let i = 0; i < bytes.length; ++i) {
+            buff += (bytes[i] as long) * (Math.pow(BigInt.baseSys, i) as long)
+        }
+        return this.negative() ? -buff : buff
+    }
+
+    public getULong(): long {
+        return BigInt.asUintN(64, this).getLong()
     }
 }

@@ -112,7 +112,7 @@ function createEmptyWithIterable(): number {
     let array: Array<Number> = new Array<Number>();
     let target: {{.item.objectType}};
     try {
-        target = new {{.item.objectType}}(array.values() as Iterable<Number>);
+        target = new {{.item.objectType}}(array.values() as Iterable<{{.item.type}}>);
     } catch(e) {
         return fail;
     }
@@ -129,26 +129,26 @@ function createEmptyWithIterable(): number {
 }
 
 function createNonEmptyWithIterable(): number {
-    let array: Array<Number> = new Array<Number>();
-    array.push(1);
-    array.push(2);
-    array.push(3);
-    let target: {{.item.objectType}} = new {{.item.objectType}}(array.values() as Iterable<Number>);
+    let array: Array<{{.item.type}}> = new Array<{{.item.type}}>();
+    array.push({{.item.create}}(1));
+    array.push({{.item.create}}(2));
+    array.push({{.item.create}}(3));
+    let target: {{.item.objectType}} = new {{.item.objectType}}(array.values() as Iterable<{{.item.type}}>);
 
     if (target.length as int == 3 && target.byteOffset as int == 0 && target.byteLength as int == 3*{{.item.primitiveSizeBytes}}){
         return success;
     }
 
-    let exceptArray: Array<Number> = new Array<Number>();
+    let exceptArray: Array<{{.item.type}}> = new Array<{{.item.type}}>();
     for (let value of target) {
         exceptArray.push(value);
         console.log(value); 
     }
     
-    let origin: {{.item.objectType}} = new {{.item.objectType}}(exceptArray.values() as Iterable<Number>);
+    let origin: {{.item.objectType}} = new {{.item.objectType}}(exceptArray.values() as Iterable<{{.item.type}}>);
     for (let i: int = 0; i< target.length as int; i++) {
-        let tv = target[i] as number;
-        let ov = origin[i] as number;
+        let tv = target[i]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -161,12 +161,12 @@ function createNonEmptyWithIterable(): number {
 
 
 function createtypedArrayWithArrayLike(): number {
-    let array = new Array<Number>();
-    array.push(1 as Number);
-    array.push(2 as Number);
-    array.push(3 as Number);
+    let array = new Array<{{.item.type}}>();
+    array.push({{.item.create}}(1 as Number));
+    array.push({{.item.create}}(2 as Number));
+    array.push({{.item.create}}(3 as Number));
     
-    let target: {{.item.objectType}} = new {{.item.objectType}} (array as ArrayLike<Number> );
+    let target: {{.item.objectType}} = new {{.item.objectType}} (array as ArrayLike<{{.item.type}}>);
     if (target.length as int == 3 && target.byteOffset as int == 0){
         return success;
     }

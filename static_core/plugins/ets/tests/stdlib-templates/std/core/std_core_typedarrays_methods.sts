@@ -18,7 +18,9 @@
 desc:  {function: {{.item.object_type}}_{{.item.objectType}}}
 ---*/
 
+{% include 'utils/test_utils.j2' with context %}
 {% include 'utils/test_core_typedarray_methods.j2' %}
+
 
 
 {% endfor %}

@@ -56,8 +56,6 @@ function testTypedUArrayIterator(): number {
     return fail;
   }
 
-  let length = typedUArray.length;
-
   let arrayIterator = typedUArray.$_iterator();
   let next = arrayIterator.next();
   let counter: number = 0;
@@ -65,14 +63,14 @@ function testTypedUArrayIterator(): number {
     if (next.value == undefined) {
         return fail;
     }
-    if (typedUArray[counter] != (next.value!) as BigInt) {  
+    if (typedUArray[counter] != (next.value!) as BigInt) {
         return fail;
     }
     next = arrayIterator.next()
     counter++
   }
 
-  if (counter != typedUArray.length) { 
+  if (counter != typedUArray.length) {
     return fail;
   }
 
