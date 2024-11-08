@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#undef ABCKIT_TEST_ENABLE_MOCK
+
 #include "libabckit/include/cpp/abckit_cpp.h"
 
 #include "helpers/helpers_runtime.h"

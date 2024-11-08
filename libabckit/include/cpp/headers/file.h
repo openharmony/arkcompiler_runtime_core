@@ -36,6 +36,10 @@
 #include <memory>
 #include <vector>
 
+#ifdef ABCKIT_TEST_ENABLE_MOCK
+#include "libabckit/tests/mock_headers/abckit_impl_mock.h"
+#endif
+
 namespace abckit {
 
 class File final : public Resource<AbckitFile *> {
@@ -67,7 +71,11 @@ public:
     File(File &&file) = delete;
     File &operator=(File &&file) = delete;
     File(const std::string &path, std::unique_ptr<IErrorHandler> eh)
+#ifndef ABCKIT_TEST_ENABLE_MOCK
         : Resource(AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)->openAbc(path.c_str())), conf_(std::move(eh))
+#else
+        : Resource(AbckitGetMockApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)->openAbc(path.c_str())), conf_(std::move(eh))
+#endif
     {
         CheckError(&conf_);
         SetDeleter(std::make_unique<FileDeleter>(&conf_, *this));
