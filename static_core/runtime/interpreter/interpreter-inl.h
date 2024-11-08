@@ -3749,8 +3749,7 @@ public:
             uint16_t objVreg = this->GetInst().template GetVReg<FORMAT>();
             ObjectHeader *ctorArg = this->GetFrame()->GetVReg(objVreg).template GetAs<ObjectHeader *>();
 
-            PandaVM *vm = this->GetThread()->GetVM();
-            auto str = vm->CreateString(method, ctorArg);
+            auto str = this->GetThread()->GetVM()->CreateString(method, ctorArg);
             if (LIKELY(str != nullptr)) {
                 this->GetAccAsVReg().SetReference(str);
                 this->template MoveToNextInst<FORMAT, false>();

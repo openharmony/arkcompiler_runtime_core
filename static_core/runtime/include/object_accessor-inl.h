@@ -38,6 +38,7 @@ inline ObjectHeader *ObjectAccessor::GetObject(const void *obj, size_t offset)
 
 /* static */
 template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void ObjectAccessor::SetObject(void *obj, size_t offset, ObjectHeader *value)
 {
     if (NEED_WRITE_BARRIER) {
@@ -80,6 +81,7 @@ inline ObjectHeader *ObjectAccessor::GetObject([[maybe_unused]] const ManagedThr
 
 /* static */
 template <bool IS_VOLATILE /* = false */, bool NEED_WRITE_BARRIER /* = true */, bool IS_DYN /* = false */>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void ObjectAccessor::SetObject(const ManagedThread *thread, void *obj, size_t offset, ObjectHeader *value)
 {
     if (NEED_WRITE_BARRIER) {
@@ -213,6 +215,7 @@ static inline std::memory_order GetComplementMemoryOrder(std::memory_order memor
 /* static */
 // NEED_WRITE_BARRIER = true , IS_DYN = false
 template <bool NEED_WRITE_BARRIER, bool IS_DYN>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline void ObjectAccessor::SetFieldObject(void *obj, size_t offset, ObjectHeader *value, std::memory_order memoryOrder)
 {
     if (NEED_WRITE_BARRIER) {
@@ -261,6 +264,7 @@ inline std::pair<bool, T> ObjectAccessor::CompareAndSetFieldPrimitive(void *obj,
 /* static */
 // NEED_READ_BARRIER = true , IS_DYN = false
 template <bool NEED_WRITE_BARRIER, bool IS_DYN>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline std::pair<bool, ObjectHeader *> ObjectAccessor::CompareAndSetFieldObject(void *obj, size_t offset,
                                                                                 ObjectHeader *oldValue,
                                                                                 ObjectHeader *newValue,
@@ -314,6 +318,7 @@ inline T ObjectAccessor::GetAndSetFieldPrimitive(void *obj, size_t offset, T val
 /* static */
 // NEED_WRITE_BARRIER = true , IS_DYN = false
 template <bool NEED_WRITE_BARRIER, bool IS_DYN>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline ObjectHeader *ObjectAccessor::GetAndSetFieldObject(void *obj, size_t offset, ObjectHeader *value,
                                                           std::memory_order memoryOrder)
 {
@@ -340,6 +345,7 @@ inline ObjectHeader *ObjectAccessor::GetAndSetFieldObject(void *obj, size_t offs
 
 /* static */
 template <typename T>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline T ObjectAccessor::GetAndAddFieldPrimitive([[maybe_unused]] void *obj, [[maybe_unused]] size_t offset,
                                                  [[maybe_unused]] T value,
                                                  [[maybe_unused]] std::memory_order memoryOrder)
@@ -434,6 +440,7 @@ inline void ObjectAccessor::SetDynValueWithoutBarrier(void *obj, size_t offset, 
 }
 
 /* static */
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void ObjectAccessor::SetDynValue(const ManagedThread *thread, void *obj, size_t offset,
                                         coretypes::TaggedType value)
 {
@@ -468,6 +475,7 @@ inline void ObjectAccessor::SetDynPrimitive(const ManagedThread *thread, void *o
     // Don't need post barrier because the value is a primitive.
 }
 
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void ObjectAccessor::SetClass(ObjectHeader *obj, BaseClass *newClass)
 {
     auto *barrierSet = GetBarrierSet();

@@ -103,6 +103,7 @@ bool RegExpExecutor::MatchFailed(bool isMatched)
     return true;
 }
 
+// CC-OFFNXT(G.FUN.01, huge_cyclomatic_complexity, huge_method) big switch case
 // NOLINTNEXTLINE(readability-function-size)
 bool RegExpExecutor::ExecuteInternal(const DynChunk &byteCode, uint32_t pcEnd)
 {

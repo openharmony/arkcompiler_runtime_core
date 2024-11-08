@@ -170,7 +170,7 @@ public:
         const panda_file::File &pf_;
         panda_file::File::EntityId protoId_;
     };
-
+    // CC-OFFNXT(G.FUN.01) solid logic
     PANDA_PUBLIC_API Method(Class *klass, const panda_file::File *pf, panda_file::File::EntityId fileId,
                             panda_file::File::EntityId codeId, uint32_t accessFlags, uint32_t numArgs,
                             const uint16_t *shorty);
@@ -293,6 +293,7 @@ public:
     /*
      * Pop native method frame
      */
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static void ExitNativeMethodFrame(ManagedThread *thread);
 
     Class *GetClass() const
@@ -335,6 +336,7 @@ public:
         --stor16Pair_.hotnessCounter;
     }
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static NO_THREAD_SANITIZE int16_t GetInitialHotnessCounter();
 
     NO_THREAD_SANITIZE void ResetHotnessCounter();
@@ -351,7 +353,7 @@ public:
                                                     coretypes::TaggedValue func = coretypes::TaggedValue::Hole());
 
     template <bool IS_CALL, class AccVRegisterPtrT>
-    NO_THREAD_SANITIZE bool DecrementHotnessCounter(ManagedThread *thread, uintptr_t bytecodeOffset,
+    NO_THREAD_SANITIZE bool DecrementHotnessCounter(ManagedThread *thread, uintptr_t bcOffset,
                                                     [[maybe_unused]] AccVRegisterPtrT cc, bool osr = false,
                                                     coretypes::TaggedValue func = coretypes::TaggedValue::Hole());
 
@@ -458,7 +460,9 @@ public:
     PANDA_PUBLIC_API PandaString GetFullName(bool withSignature = false) const;
     PANDA_PUBLIC_API PandaString GetLineNumberAndSourceFile(uint32_t bcOffset) const;
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static uint32_t GetFullNameHashFromString(const PandaString &str);
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static uint32_t GetClassNameHashFromString(const PandaString &str);
 
     PANDA_PUBLIC_API Proto GetProto() const;
@@ -709,43 +713,53 @@ public:
         return IsConstructor() && IsStatic();
     }
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetAccessFlagsOffset()
     {
         return MEMBER_OFFSET(Method, accessFlags_);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetNumArgsOffset()
     {
         return MEMBER_OFFSET(Method, numArgs_);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetVTableIndexOffset()
     {
         return MEMBER_OFFSET(Method, stor16Pair_) + MEMBER_OFFSET(Storage16Pair, vtableIndex);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetHotnessCounterOffset()
     {
         return MEMBER_OFFSET(Method, stor16Pair_) + MEMBER_OFFSET(Storage16Pair, hotnessCounter);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetClassOffset()
     {
         return MEMBER_OFFSET(Method, classWord_);
     }
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetCompiledEntryPointOffset()
     {
         return MEMBER_OFFSET(Method, compiledEntryPoint_);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetPandaFileOffset()
     {
         return MEMBER_OFFSET(Method, pandaFile_);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetCodeIdOffset()
     {
         return MEMBER_OFFSET(Method, codeId_);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetNativePointerOffset()
     {
         return MEMBER_OFFSET(Method, pointer_);
     }
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static constexpr uint32_t GetShortyOffset()
     {
         return MEMBER_OFFSET(Method, shorty_);
@@ -760,6 +774,7 @@ public:
     template <typename Callback>
     void EnumerateExceptionHandlers(Callback callback) const;
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static inline UniqId CalcUniqId(const panda_file::File *file, panda_file::File::EntityId fileId)
     {
         constexpr uint64_t HALF = 32ULL;
@@ -770,6 +785,7 @@ public:
     }
 
     // for synthetic methods, like array .ctor
+    // CC-OFFNXT(G.INC.10) false positive: static method
     static UniqId CalcUniqId(const uint8_t *classDescr, const uint8_t *name);
 
     UniqId GetUniqId() const
@@ -834,6 +850,7 @@ public:
     template <bool IS_CALL>
     bool TryVerify();
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     inline static VerificationStage GetVerificationStage(uint32_t value)
     {
         return static_cast<VerificationStage>((value & VERIFICATION_STATUS_MASK) >> VERIFICATION_STATUS_SHIFT);
@@ -875,6 +892,7 @@ private:
         return Value(retValue);
     }
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     inline static uint32_t MakeCompilationStatusValue(uint32_t value, CompilationStage newStatus)
     {
         value &= ~COMPILATION_STATUS_MASK;
@@ -882,6 +900,7 @@ private:
         return value;
     }
 
+    // CC-OFFNXT(G.INC.10) false positive: static method
     inline static uint32_t MakeVerificationStageValue(uint32_t value, VerificationStage newStage)
     {
         value &= ~VERIFICATION_STATUS_MASK;
@@ -909,6 +928,10 @@ private:
 
     template <class InvokeHelper, class ValueT>
     ValueT InvokeImpl(ManagedThread *thread, uint32_t numActualArgs, ValueT *args, bool proxyCall);
+
+    template <bool IS_CALL>
+    inline bool DecrementHotnessCounterForTaggedFunction(ManagedThread *thread, uintptr_t bcOffset, bool osr,
+                                                         coretypes::TaggedValue func);
 
 private:
     union PointerInMethod {

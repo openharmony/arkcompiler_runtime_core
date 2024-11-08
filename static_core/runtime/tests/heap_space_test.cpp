@@ -81,6 +81,7 @@ protected:
         NO_COPY_SEMANTIC(GenerationalSpacesHolder);
         NO_MOVE_SEMANTIC(GenerationalSpacesHolder);
 
+        // CC-OFFNXT(G.FUN.01) solid logic
         explicit GenerationalSpacesHolder(size_t initYoungSize = DEFAULT_TEST_YOUNG_SIZE,
                                           size_t youngSize = DEFAULT_TEST_YOUNG_SIZE,
                                           size_t initialHeapSize = DEFAULT_TEST_HEAP_SIZE,

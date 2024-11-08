@@ -74,7 +74,7 @@ bool VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ProcessClassMethod
 }
 
 template <class ProtoCompatibility, class OverridePred>
-std::optional<MethodInfo const *>
+std::optional<MethodInfo const *>  // CC-OFF(G.FMT.07) project code style
 VarianceVTableBuilder<ProtoCompatibility, OverridePred>::ScanConflictingDefaultMethods(const MethodInfo *info)
 {
     // NOTE(vpukhov): test public flag

@@ -28,7 +28,7 @@ namespace ark {
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    mem::GCBarrierSet *
+    mem::GCBarrierSet *  // CC-OFF(G.FMT.10, G.FMT.14) project code style
     ObjectAccessor::GetBarrierSet()
 {
     return Thread::GetCurrent()->GetBarrierSet();
@@ -38,7 +38,7 @@ inline
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    mem::GCBarrierSet *
+    mem::GCBarrierSet *  // CC-OFF(G.FMT.10, G.FMT.14) project code style
     ObjectAccessor::GetBarrierSet(const ManagedThread *thread)
 {
     return thread->GetBarrierSet();
@@ -48,7 +48,7 @@ inline
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    mem::BarrierType
+    mem::BarrierType  // CC-OFF(G.FMT.10) project code style
     ObjectAccessor::GetPreBarrierType(const ManagedThread *thread)
 {
     return thread->GetPreBarrierType();
@@ -58,7 +58,7 @@ inline
 #ifndef PANDA_RUNTIME_OBJECT_ACCESSOR_CPP_
 inline
 #endif
-    mem::BarrierType
+    mem::BarrierType  // CC-OFF(G.FMT.10) project code style
     ObjectAccessor::GetPostBarrierType(const ManagedThread *thread)
 {
     return thread->GetPostBarrierType();

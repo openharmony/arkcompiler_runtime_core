@@ -84,6 +84,7 @@ void LanguageContextBase::ThrowException([[maybe_unused]] ManagedThread *thread,
 }
 
 void LanguageContextBase::SetExceptionToVReg(
+    // CC-OFFNXT(G.FMT.06) false positive
     [[maybe_unused]] interpreter::AccVRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
     [[maybe_unused]] ObjectHeader *obj) const
 {

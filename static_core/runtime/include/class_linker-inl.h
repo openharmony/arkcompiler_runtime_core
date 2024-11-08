@@ -23,6 +23,7 @@
 
 namespace ark {
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline Class *ClassLinker::GetClass(const Method &caller, panda_file::File::EntityId id,
                                     ClassLinkerErrorHandler *errorHandler /* = nullptr */)
 {
@@ -55,6 +56,7 @@ inline void ClassLinker::AddClassRoot(ClassRoot root, Class *klass)
     RemoveCreatedClassInExtension(klass);
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
 inline Class *ClassLinker::GetLoadedClass(const panda_file::File &pf, panda_file::File::EntityId id,
                                           ClassLinkerContext *context)
 {

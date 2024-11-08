@@ -24,6 +24,7 @@
 namespace ark::coretypes {
 
 template <bool VERIFY>
+// CC-OFFNXT(G.FUD.06) perf critical
 inline uint16_t String::At(int32_t index)
 {
     auto length = GetLength();

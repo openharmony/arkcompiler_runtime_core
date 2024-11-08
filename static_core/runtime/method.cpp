@@ -400,23 +400,23 @@ uint32_t Method::FindCatchBlockInPandaFile(const Class *cls, uint32_t pc) const
     uint32_t pcOffset = panda_file::INVALID_OFFSET;
 
     cda.EnumerateTryBlocks([&pcOffset, cls, pc, this](panda_file::CodeDataAccessor::TryBlock &tryBlock) {
-        if ((tryBlock.GetStartPc() <= pc) && ((tryBlock.GetStartPc() + tryBlock.GetLength()) > pc)) {
-            tryBlock.EnumerateCatchBlocks(
-                [this, &pcOffset, &cls](panda_file::CodeDataAccessor::CatchBlock &catchBlock) {
-                    auto typeIdx = catchBlock.GetTypeIdx();
-                    if (typeIdx == panda_file::INVALID_INDEX) {
-                        pcOffset = catchBlock.GetHandlerPc();
-                        return false;
-                    }
+        auto cb = [this, &pcOffset, &cls](panda_file::CodeDataAccessor::CatchBlock &catchBlock) {
+            auto typeIdx = catchBlock.GetTypeIdx();
+            if (typeIdx == panda_file::INVALID_INDEX) {
+                pcOffset = catchBlock.GetHandlerPc();
+                return false;
+            }
 
-                    auto typeId = GetClass()->ResolveClassIndex(typeIdx);
-                    auto *handlerClass = Runtime::GetCurrent()->GetClassLinker()->GetClass(*this, typeId);
-                    if (cls->IsSubClassOf(handlerClass)) {
-                        pcOffset = catchBlock.GetHandlerPc();
-                        return false;
-                    }
-                    return true;
-                });
+            auto typeId = GetClass()->ResolveClassIndex(typeIdx);
+            auto *handlerClass = Runtime::GetCurrent()->GetClassLinker()->GetClass(*this, typeId);
+            if (cls->IsSubClassOf(handlerClass)) {
+                pcOffset = catchBlock.GetHandlerPc();
+                return false;
+            }
+            return true;
+        };
+        if ((tryBlock.GetStartPc() <= pc) && ((tryBlock.GetStartPc() + tryBlock.GetLength()) > pc)) {
+            tryBlock.EnumerateCatchBlocks(cb);
         }
         return pcOffset == panda_file::INVALID_OFFSET;
     });

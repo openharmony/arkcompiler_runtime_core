@@ -30,6 +30,7 @@ class ObjectHeader;
 template <class T>
 class VMHandle;
 class MarkWord;
+class MonitorPool;
 
 /// To avoid inheritance in the `Thread` class we don't use `List` (it forces list element to inherit `ListNode`).
 template <typename T>
@@ -199,6 +200,8 @@ private:
     bool Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &objHandle,
                  bool trylock) NO_THREAD_SAFETY_ANALYSIS;
 
+    void Acquire(MTManagedThread *thread, const VMHandle<ObjectHeader> &objHandle) NO_THREAD_SAFETY_ANALYSIS;
+
     void InitWithOwner(MTManagedThread *thread, ObjectHeader *obj) NO_THREAD_SAFETY_ANALYSIS;
 
     void ReleaseOnFailedInflate(MTManagedThread *thread) NO_THREAD_SAFETY_ANALYSIS;
@@ -208,15 +211,17 @@ private:
         return owner_.compare_exchange_strong(expected, thread);
     }
 
-    static std::optional<ark::Monitor::State> HandleLightLockedState(MarkWord &mark, MTManagedThread *thread,
-                                                                     VMHandle<ObjectHeader> &objHandle,
-                                                                     uint32_t &lightlockRetryCount,
-                                                                     [[maybe_unused]] bool &shouldInflate,
-                                                                     bool trylock);
+    static std::optional<Monitor::State> HandleLightLockedState(MarkWord &mark, MTManagedThread *thread,
+                                                                VMHandle<ObjectHeader> &objHandle,
+                                                                uint32_t &lightlockRetryCount,
+                                                                [[maybe_unused]] bool &shouldInflate, bool trylock);
 
-    static std::optional<ark::Monitor::State> HandleUnlockedState(MarkWord &mark, MTManagedThread *thread,
-                                                                  VMHandle<ObjectHeader> &objHandle,
-                                                                  bool &shouldInflate, bool trylock);
+    static std::optional<Monitor::State> HandleUnlockedState(MarkWord &mark, MTManagedThread *thread,
+                                                             VMHandle<ObjectHeader> &objHandle, bool &shouldInflate,
+                                                             bool trylock);
+
+    static Monitor::State HandleHeavyLockedState(Monitor *monitor, MTManagedThread *thread,
+                                                 VMHandle<ObjectHeader> &objHandle, bool trylock);
 
     MTManagedThread *GetOwner()
     {
@@ -225,6 +230,13 @@ private:
     }
 
     bool DeflateInternal();
+
+    static bool TryAddMonitor(Monitor *monitor, MarkWord &oldMark, MTManagedThread *thread, ObjectHeader *obj,
+                              MonitorPool *monitorPool);
+
+    static State WaitWithHeavyLockedState(MTManagedThread *thread, VMHandle<ObjectHeader> &objHandle, MarkWord &mark,
+                                          ThreadStatus status, uint64_t timeout, uint64_t nanos,
+                                          bool ignoreInterruption);
 
     friend class MonitorPool;
 };

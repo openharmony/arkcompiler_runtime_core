@@ -25,10 +25,10 @@
 #define RESTORE_GLOBAL_REGS()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DISPATCH(DISPATCH_TABLE, OPCODE)                 \
-    do {                                                 \
-        void const *_label = (DISPATCH_TABLE)[(OPCODE)]; \
-        goto *_label;                                    \
+#define DISPATCH(DISPATCH_TABLE, OPCODE)                     \
+    do {                                                     \
+        void const *_label = (DISPATCH_TABLE)[(OPCODE)];     \
+        goto *_label; /* CC-OFF(G.PRE.05) code generation */ \
     } while (0)
 
 #endif

@@ -70,6 +70,7 @@ public:
                                   bool isWideChar = false);
 
     bool ExecuteInternal(const DynChunk &byteCode, uint32_t pcEnd);
+    // CC-OFFNXT(G.FUD.06) perf critical
     inline bool HandleFirstSplit()
     {
         if (GetCurrentPC() == RegExpParser::OP_START_OFFSET && stateStackLen_ == 0 &&
@@ -99,6 +100,7 @@ public:
         return true;
     }
 
+    // CC-OFFNXT(G.FUD.06) perf critical
     inline bool HandleOpChar(const DynChunk &byteCode, uint8_t opCode)
     {
         uint32_t expectedChar;
@@ -124,6 +126,7 @@ public:
         return true;
     }
 
+    // CC-OFFNXT(G.FUD.06) perf critical
     inline bool HandleOpWordBoundary(uint8_t opCode)
     {
         if (IsEOF()) {
@@ -248,6 +251,7 @@ public:
         return true;
     }
 
+    // CC-OFFNXT(G.FUD.06) perf critical
     inline void HandleOpLoop(const DynChunk &byteCode, uint8_t opCode)
     {
         uint32_t quantifyMin = byteCode.GetU32(GetCurrentPC() + LOOP_MIN_OFFSET);
@@ -275,6 +279,7 @@ public:
         }
     }
 
+    // CC-OFFNXT(G.FUD.06) perf critical
     inline bool HandleOpRange32(const DynChunk &byteCode)
     {
         if (IsEOF()) {
@@ -319,6 +324,7 @@ public:
         return true;
     }
 
+    // CC-OFFNXT(G.FUD.06) perf critical
     inline bool HandleOpRange(const DynChunk &byteCode)
     {
         if (IsEOF()) {

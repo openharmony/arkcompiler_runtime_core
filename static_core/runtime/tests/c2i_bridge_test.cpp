@@ -174,8 +174,7 @@ public:
 
         if (isInstance) {
             signature << "Test a0";
-            body << "lda.null\n";
-            body << "jne.obj a0, fail\n";
+            body << "lda.null" << '\n' << "jne.obj a0, fail\n";
             ++argNum;
         }
         auto shortyIt = shorty.begin();
@@ -195,8 +194,7 @@ public:
                 body = GetBodyPrologue(shortyIt, argsIt, args, argNum);
             } else {
                 signature << "i32 a" << argNum;
-                body << "ldai " << *argsIt << '\n';
-                body << "jne a" << argNum << ", fail\n";
+                body << "ldai " << *argsIt << '\n' << "jne a" << argNum << ", fail\n";
             }
             ++shortyIt;
             if (argsIt != args.end()) {
