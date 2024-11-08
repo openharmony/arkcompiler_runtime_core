@@ -10,6 +10,8 @@
 	"gn": "*",
 	"isa": "*",
 	"ldscripts": "*",
+	"libabckit/tests": "*",
+	"libabckit/src/adapter_static": "*",
 	"libark_defect_scan_aux": "*",
 	"libpandabase": "*",
 	"libpandafile": "*",
