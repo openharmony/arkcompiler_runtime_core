@@ -20,6 +20,7 @@ PyYaml==6.0
 tqdm==4.64.0
 PyPDF2==3.0.1
 jinja2-cli==0.8.2
+tox == 4.20.0
 
 # mypy
 mypy==0.991
