@@ -1216,8 +1216,8 @@ InlinedGraph Inlining::BuildGraph(InlineContext *ctx, CallInst *callInst, CallIn
     auto objectTypeApplied = graphInl->RunPass<ObjectTypeCheckElimination>();
     if (peepholeApplied || objectTypeApplied) {
         graphInl->RunPass<BranchElimination>();
-        graphInl->RunPass<Cleanup>();
     }
+    graphInl->RunPass<Cleanup>(false);
     graphInl->RunPass<OptimizeStringConcat>();
     graphInl->RunPass<SimplifyStringBuilder>();
 

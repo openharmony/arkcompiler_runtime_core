@@ -223,12 +223,8 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
     return concatIntrinsic;
 }
 
-bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match)
+bool CheckUnsupportedCases(Inst *instance)
 {
-    // Walk instruction range [begin, end) and fill the match structure with StringBuilder usage instructions found
-
-    auto instance = match.instance;
-
     if (IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
         return false;  // Unsupported case: doesn't look like concatenation pattern
     }
@@ -244,10 +240,21 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
     if (appendCount != appendStringCount) {
         return false;  // Unsupported case: arguments must be strings
     }
-    if (appendCount <= 1 || appendCount > match.appendIntrinsics.size()) {
+    if (appendCount <= 1 || appendCount > ARGS_NUM_4) {
         return false;  // Unsupported case: too many strings concatenated
     }
 
+    return true;
+}
+
+bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match)
+{
+    auto instance = match.instance;
+    if (!CheckUnsupportedCases(instance)) {
+        return false;
+    }
+
+    // Walk instruction range [begin, end) and fill the match structure with StringBuilder usage instructions found
     for (; begin != end; ++begin) {
         if ((*begin)->IsSaveState()) {
             continue;

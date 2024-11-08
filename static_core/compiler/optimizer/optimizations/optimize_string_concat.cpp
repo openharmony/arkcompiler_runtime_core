@@ -31,7 +31,10 @@
 
 namespace ark::compiler {
 
-OptimizeStringConcat::OptimizeStringConcat(Graph *graph) : Optimization(graph) {}
+OptimizeStringConcat::OptimizeStringConcat(Graph *graph)
+    : Optimization(graph), arrayElements_ {graph->GetAllocator()->Adapter()}
+{
+}
 
 RuntimeInterface::IdType GetStringBuilderClassId(Graph *graph)
 {
@@ -78,33 +81,6 @@ void OptimizeStringConcat::InvalidateAnalyses()
 {
     GetGraph()->InvalidateAnalysis<BoundsAnalysis>();
     GetGraph()->InvalidateAnalysis<AliasAnalysis>();
-}
-
-Inst *GetPhiConstantInput(Inst *phi)
-{
-    ASSERT(phi->GetInputsCount() == 2U);  // NOLINT(readability-magic-numbers)
-    ASSERT(phi->GetDataFlowInput(1)->IsPhi());
-    auto inputInst0 = phi->GetDataFlowInput(0);
-    if (inputInst0->IsConst()) {
-        return inputInst0;
-    }
-    if (inputInst0->IsPhi()) {
-        return GetPhiConstantInput(inputInst0);
-    }
-    UNREACHABLE();
-}
-
-Inst *GetArrayLength(Inst *newArray)
-{
-    ASSERT(newArray->GetInputsCount() > 1);
-    auto inputInst1 = newArray->GetDataFlowInput(1);
-    if (inputInst1->IsConst()) {
-        return inputInst1;
-    }
-    if (inputInst1->IsPhi()) {
-        return GetPhiConstantInput(inputInst1);
-    }
-    UNREACHABLE();
 }
 
 Inst *CreateInstructionStringBuilderInstance(Graph *graph, uint32_t pc, SaveStateInst *saveState)
@@ -188,19 +164,31 @@ void OptimizeStringConcat::FixBrokenSaveStates(Inst *source, Inst *target)
     }
 }
 
+void OptimizeStringConcat::CreateAppendArgsIntrinsic(Inst *instance, Inst *arg, SaveStateInst *saveState)
+{
+    auto appendIntrinsic = CreateStringBuilderAppendStringIntrinsic(GetGraph(), instance, arg, saveState);
+    InsertBeforeWithInputs(appendIntrinsic, saveState);
+
+    FixBrokenSaveStates(arg, appendIntrinsic);
+    FixBrokenSaveStates(instance, appendIntrinsic);
+
+    COMPILER_LOG(DEBUG, OPTIMIZE_STRING_CONCAT)
+        << "Insert StringBuilder.append intrinsic (id=" << appendIntrinsic->GetId() << ")";
+}
+
+void OptimizeStringConcat::CreateAppendArgsIntrinsics(Inst *instance, SaveStateInst *saveState)
+{
+    for (auto arg : arrayElements_) {
+        CreateAppendArgsIntrinsic(instance, arg, saveState);
+    }
+}
+
 void OptimizeStringConcat::CreateAppendArgsIntrinsics(Inst *instance, Inst *args, uint64_t arrayLengthValue,
                                                       SaveStateInst *saveState)
 {
     for (uint64_t index = 0; index < arrayLengthValue; ++index) {
         auto arg = CreateLoadArray(GetGraph(), args, index);
-        auto appendIntrinsic = CreateStringBuilderAppendStringIntrinsic(GetGraph(), instance, arg, saveState);
-        InsertBeforeWithInputs(appendIntrinsic, saveState);
-
-        FixBrokenSaveStates(arg, appendIntrinsic);
-        FixBrokenSaveStates(instance, appendIntrinsic);
-
-        COMPILER_LOG(DEBUG, OPTIMIZE_STRING_CONCAT)
-            << "Insert StringBuilder.append intrinsic (id=" << appendIntrinsic->GetId() << ")";
+        CreateAppendArgsIntrinsic(instance, arg, saveState);
     }
 }
 
@@ -278,6 +266,24 @@ BasicBlock *OptimizeStringConcat::CreateAppendArgsLoop(Inst *instance, Inst *str
     return postExit;
 }
 
+bool OptimizeStringConcat::HasStoreArrayUsersOnly(Inst *newArray, Inst *removable)
+{
+    ASSERT(newArray->GetOpcode() == Opcode::NewArray);
+
+    MarkerHolder visited {newArray->GetBasicBlock()->GetGraph()};
+    bool found = HasUserRecursively(newArray, visited.GetMarker(), [newArray, removable](auto &user) {
+        auto userInst = user.GetInst();
+        auto isSaveState = userInst->IsSaveState();
+        auto isCheck = userInst->IsCheck();
+        auto isStoreArray = userInst->GetOpcode() == Opcode::StoreArray && userInst->GetDataFlowInput(0) == newArray;
+        bool isRemovable = userInst == removable;
+        return !isSaveState && !isCheck && !isStoreArray && !isRemovable;
+    });
+
+    ResetUserMarkersRecursively(newArray, visited.GetMarker());
+    return !found;
+}
+
 void OptimizeStringConcat::ReplaceStringConcatWithStringBuilderAppend(Inst *concatCall)
 {
     // Input:
@@ -311,16 +317,17 @@ void OptimizeStringConcat::ReplaceStringConcatWithStringBuilderAppend(Inst *conc
 
     auto toStringCall = CreateStringBuilderToStringIntrinsic(GetGraph(), instance, concatCall->GetSaveState());
 
-    if (args->GetOpcode() == Opcode::NewArray) {
-        auto arrayLength = GetArrayLength(args);
+    auto arrayLength = GetArrayLengthConstant(args);
+    bool collected = args->GetOpcode() == Opcode::NewArray && CollectArrayElements(args, arrayElements_);
+    if (collected) {
+        CreateAppendArgsIntrinsics(instance, concatCall->GetSaveState());
+        InsertBeforeWithSaveState(toStringCall, concatCall->GetSaveState());
+    } else if (args->GetOpcode() == Opcode::NewArray && arrayLength != nullptr) {
         CreateAppendArgsIntrinsics(instance, args, arrayLength->CastToConstant()->GetIntValue(),
                                    concatCall->GetSaveState());
         InsertBeforeWithSaveState(toStringCall, concatCall->GetSaveState());
-
-        COMPILER_LOG(DEBUG, OPTIMIZE_STRING_CONCAT) << "Replace String.concat call (id=" << concatCall->GetId()
-                                                    << ") with StringBuilder instance (id=" << instance->GetId() << ")";
     } else {
-        auto arrayLength = CreateLenArray(GetGraph(), args);
+        arrayLength = CreateLenArray(GetGraph(), args);
         concatCall->GetSaveState()->InsertBefore(arrayLength);
         auto postExit = CreateAppendArgsLoop(instance, str, args, arrayLength->CastToLenArray(), concatCall);
 
@@ -329,10 +336,9 @@ void OptimizeStringConcat::ReplaceStringConcatWithStringBuilderAppend(Inst *conc
 
         InvalidateBlocksOrderAnalyzes(GetGraph());
         GetGraph()->InvalidateAnalysis<LoopAnalyzer>();
-
-        COMPILER_LOG(DEBUG, OPTIMIZE_STRING_CONCAT) << "Replace String.concat call (id=" << concatCall->GetId()
-                                                    << ") with StringBuilder instance (id=" << instance->GetId() << ")";
     }
+    COMPILER_LOG(DEBUG, OPTIMIZE_STRING_CONCAT) << "Replace String.concat call (id=" << concatCall->GetId()
+                                                << ") with StringBuilder instance (id=" << instance->GetId() << ")";
 
     FixBrokenSaveStates(instance, toStringCall);
 
@@ -341,6 +347,11 @@ void OptimizeStringConcat::ReplaceStringConcatWithStringBuilderAppend(Inst *conc
     concatCall->ClearFlag(inst_flags::NO_DCE);
     if (concatCall->GetInput(0).GetInst()->IsCheck()) {
         concatCall->GetInput(0).GetInst()->ClearFlag(inst_flags::NO_DCE);
+    }
+
+    if (collected && HasStoreArrayUsersOnly(args, concatCall)) {
+        CleanupStoreArrayInstructions(args);
+        args->ClearFlag(inst_flags::NO_DCE);
     }
 }
 

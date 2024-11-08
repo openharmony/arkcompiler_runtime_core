@@ -49,14 +49,18 @@ public:
     void InvalidateAnalyses() override;
 
 private:
+    void CreateAppendArgsIntrinsic(Inst *instance, Inst *arg, SaveStateInst *saveState);
+    void CreateAppendArgsIntrinsics(Inst *instance, SaveStateInst *saveState);
     void CreateAppendArgsIntrinsics(Inst *instance, Inst *args, uint64_t arrayLengthValue, SaveStateInst *saveState);
     BasicBlock *CreateAppendArgsLoop(Inst *instance, Inst *str, Inst *args, LengthMethodInst *arrayLength,
                                      Inst *concatCall);
     void FixBrokenSaveStates(Inst *source, Inst *target);
+    bool HasStoreArrayUsersOnly(Inst *newArray, Inst *removable);
     void ReplaceStringConcatWithStringBuilderAppend(Inst *concatCall);
 
 private:
     SaveStateBridgesBuilder ssb_ {};
+    InstVector arrayElements_;
 };
 
 }  // namespace ark::compiler
