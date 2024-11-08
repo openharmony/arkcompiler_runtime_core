@@ -77,7 +77,8 @@ pandasm::Program *Abc2ProgramCompiler::CompileAbcFile()
 void Abc2ProgramCompiler::CompileAbcClass(const panda_file::File::EntityId &record_id,
                                           pandasm::Program &program, std::string &record_name)
 {
-    Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset());
+    Abc2ProgramEntityContainer entity_container(*file_, program, *debug_info_extractor_, record_id.GetOffset(),
+                                                bundle_name_);
     record_name = entity_container.GetFullRecordNameById(record_id);
     panda::Timer::timerStart(EVENT_COMPILE_ABC_FILE_RECORD, record_name);
     AbcClassProcessor class_processor(record_id, entity_container);
