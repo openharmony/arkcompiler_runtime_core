@@ -973,8 +973,8 @@ Field Declarations
     frontend_status: Done
 
 *Field declarations* represent data members in class instances or static data
-members (see :ref:`Static Fields`). Class instance fields are in fact class
-instance variables (see :ref:`Variable Declarations`).
+members (see :ref:`Static Fields`).
+Syntactically, a field declaration is similar to a variable declaration.
 
 .. code-block:: abnf
 
@@ -1290,7 +1290,7 @@ Method Declarations
 
     classMethodDeclaration:
         methodOverloadSignature*
-        methodModifier* typeParameters? identifier signature block?
+        methodModifier* identifier typeParameters? signature block?
         ;
 
     methodModifier:
@@ -2551,17 +2551,8 @@ body of a function, method, or any block delimited by balanced braces in a
 group of zero or more statements.
 
 Names of local classes and interfaces are visible only within the scope they
-are declared in. When declared in a scope, names of local classes and
-interfaces have access to entities visible within this scope, and capture the
-entities they use from this scope. Function/method parameters and local
-variables can be used and thus captured.
-
-A :index:`compile-time error` occurs if:
-
--  A local class or interface declaration has access modifier ``public``,
-   ``protected``, or ``private``.
--  A local class or interface declaration members have access modifier
-   ``public``, ``protected``, ``private``, or ``export``.
+are declared in. Local classes and interfaces have access to and can capture
+surrounding function/method parameters and local variables.
 
 .. index::
    local class
@@ -2583,7 +2574,7 @@ A :index:`compile-time error` occurs if:
    modifier public
    modifier protected
    modifier private
-   modifier export
+   export status
    top-level function
 
 The example below represents local classes and interfaces in a top-level

@@ -394,9 +394,12 @@ Smart Types
    frontend_status: Partly
    todo: implement a dataflow check for loops and try-catch blocks
 
-As every data entity--variable (see :ref:`Variable and Constant Declarations`),
-class variable (see :ref:`Field Declarations`), or local variable (see
-:ref:`Parameter List` and :ref:`Local Declarations`)--of a function or method
+Every data entity
+
+-  a variable (see :ref:`Variable and Constant Declarations`),
+-  a class field (see :ref:`Field Declarations`),
+-  a parameter of a function or method (see :ref:`Parameter List`)
+
 has its static type, which is specified explicitly or inferred at the
 point of declaration. This type defines the set of operations that can
 be applied to the entity (namely, what methods can be called, and what other

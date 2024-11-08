@@ -63,8 +63,8 @@ then this parameter's value is default:
     function multiply(n: number, coeff: number = 2): number {
         return n * coeff
     }
-    multiply(2)    // returns 2*2  
-    multiply(2, 3) // returns 2*3  
+    multiply(2)    // returns 2*2
+    multiply(2, 3) // returns 2*3
 
 |
 

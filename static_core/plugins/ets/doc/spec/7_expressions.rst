@@ -2056,9 +2056,9 @@ For array indexing, the *index expression* must be of a numeric type.
 If *index expression* is of type ``number`` or other floating-point type,
 and the fractional part differs from 0, then errors occur as follows:
 
--  Runtime error, if the situation is identified during program execution;
+-  A runtime error, if the situation is identified during program execution;
    and
--  :index:`Compile-time error`, if the situation is detected during
+-  A :index:`compile-time error`, if the situation is detected during
    compilation.
 
 
@@ -2783,12 +2783,13 @@ equals the *nullish* value:
    nullish value
    lazy operator
 
-A :index:`compile-time error` occurs if the left-hand-side expression is not a
-reference type.
+If the left-hand-side expression is not of a nullish type, then the type of
+a nullish-coalescing expression is the type of this expression. Otherwise,
+the type of a nullish-coalescing expression is a normalized *union type*
+(see :ref:`Union Types`) formed from the following:
 
-The type of a nullish-coalescing expression is *union type* (see
-:ref:`Union Types`) of the non-nullish variant of the types used in the
-left-hand-side and right-hand-side expressions.
+- Non-nullish variant of the type of the left-hand-side expression; and
+- Type of the right-hand-side expression.
 
 The semantics of a nullish-coalescing expression is represented in the
 following example:
@@ -4467,10 +4468,10 @@ following IEEE 754 standard rules:
    widening
    primitive conversion
 
--  The result of '``==``' is ``false`` but the result of '``!=``' is
-   ``true`` if either operand is ``NaN``.
+-  The result of '``==``' or '``===``' is ``false`` but the result of '``!=``'
+   is ``true`` if either operand is ``NaN``.
 
-   The test ``x != x`` is ``true`` only if *x* is ``NaN``.
+   The test ``x != x`` or ``x !== x`` is ``true`` only if *x* is ``NaN``.
 
 -  Positive zero equals negative zero.
 
@@ -4485,12 +4486,12 @@ Based on the above presumptions, the following rules apply to integer operands
 or floating-point operands other than ``NaN``:
 
 -  If the value of the left-hand operand is equal to that of the right-hand
-   operand, then the operator '``==``' produces the value ``true``.
-   Otherwise, the result is ``false``.
+   operand, then the operator '``==``' or '``===``' produces the value
+   ``true``. Otherwise, the result is ``false``.
 
 -  If the value of the left-hand operand is not equal to that of the right-hand
-   operand, then the operator '``!=``' produces the value ``true``.
-   Otherwise, the result is ``false``.
+   operand, then the operator '``!=``' or '``!==``' produces the value
+   ``true``. Otherwise, the result is ``false``.
 
 The following example illustrates *numerical equality*:
 
@@ -4594,11 +4595,11 @@ If an operand is of type ``Boolean``, then the unboxing conversion must be
 performed (see :ref:`Primitive Types Conversions`).
 
 If both operands (after the unboxing conversion is performed if required) are
-either ``true`` or ``false``, then the result of ':math:`==`' is ``true``.
-Otherwise, the result is ``false``.
+either ``true`` or ``false``, then the result of ':math:`==`' or ':math:`===`'
+is ``true``. Otherwise, the result is ``false``.
 
-If both operands are either ``true`` or ``false``, then the result of
-'``!=``' is ``false``. Otherwise, the result is ``true``.
+If both operands are either ``true`` or ``false``, then the result of '``!=``'
+or '``!==``' is ``false``. Otherwise, the result is ``true``.
 
 .. index::
    value equality
@@ -4898,14 +4899,19 @@ Extended Equality with ``null`` or ``undefined``
 to ensure better alignment with |TS|.
 
 Any entity can be compared to ``null`` by using the operators '``==``' and
-'``!=``'. This comparison can return ``true`` only for the entities of
+'``===``'. This comparison can return ``true`` only for the entities of
 *nullable* types if they actually have the ``null`` value during the program
 execution. In all other cases the comparison to ``null`` returns ``false``.
-This situation is to be known at compile time.
 
-Similarly, a comparison to ``undefined`` returns ``false`` if the variable
-being compared is neither type ``undefined`` nor a union type with ``undefined``
-as one of its types.
+Operators  '``!=``' and '``!==``' return ``true`` for any entity of
+*non-nullable* types, and for *nullable* entities if they actually have no
+``null`` value during program execution.
+
+These situations are to be known at compile time.
+
+Similarly, an equality comparison to ``undefined`` returns ``false`` if the
+variable being compared is neither type ``undefined`` nor a union type with
+``undefined`` as one of its types.
 
 The following comparisons evaluate to ``false`` at compile time:
 
@@ -5326,6 +5332,8 @@ Simple Assignment Operator
 
 .. meta:
     frontend_status: Done
+
+A simple assignment expression has the form *E1 = E2*.
 
 A :index:`compile-time error` occurs if the type of the right-hand operand
 (*rhsExpression*) is not compatible (see :ref:`Type Compatibility`) with
@@ -5780,9 +5788,9 @@ The examples below represent different scenarios with standalone expressions:
 
     condition ? new A() : new B() // A | B => A
 
-    condition ? 5 : 6             // 5 | 6
+    condition ? 5 : 6             // int
 
-    condition ? "5" : 6           // "5" | 6
+    condition ? "5" : 6           // "5" | Int
 
 .. index::
    conditional expression

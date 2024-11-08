@@ -505,15 +505,16 @@ Generic Instantiations
     frontend_status: Done
 
 As mentioned before, a generic class, interface, type alias, method, function,
-or lambda declaration defines a set of corresponding non-generic entities. A
-generic entity must be *instantiated* in order to make it a non-generic entity.
-The result of instantiation is a *real*, non-parameterized program entity, e.g.,
-class, interface, union, array, method, function, or lambda that is handled in a
-usual way. Instantiation can also lead to a new definition of a generic entity.
+or lambda declaration defines a set of corresponding non-generic entities. The
+process of instantiation:
 
-Conceptually, a generic class, an interface, a type alias, a method, a
-function, or a lambda defines a set of non-generics classes, interfaces,
-unions, arrays, methods, functions, or lambdas respectively.
+- Allows producing new entities that are either generic or non-generic;
+- Proivides every type parameter with a type argument that can be any kind
+  of type, including the type argument itself.
+
+
+As a result of the instantiation process, a new class, interface, union, array,
+method, function, or lambda is created.
 
 If a value type (see :ref:`Value Types`) is specified as type argument in a
 generic instantiation, then the compiler actually replaces it as follows:
@@ -532,6 +533,12 @@ generic instantiation, then the compiler actually replaces it as follows:
     Array<Color>   // replaced with Array<0|1|2>
     enum Reply {Yes="yes", No="no"}
     Array<Reply>   // replaced with Array<"yes"|"no">
+
+    class A <T> {}
+    class B <U, V> extends A<U> { // Here A<U> is a new generic type
+        field: A<V>               // Here A<V> is a new generic type
+        method (p: A<Object>) {}  // Here A<Object> is a new non-generic type
+    }
 
 **Note**: Built-in arrays are not generics, thus ``number[]`` contains elements
 of type ``number`` but not ``Number``.
@@ -949,8 +956,7 @@ Record Utility Type
 ===================
 
 .. meta:
-    frontend_status: Partly
-    todo: support literals in Record types - #13645
+    frontend_status: Done
 
 Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
 to values (of type ``V``).
@@ -978,9 +984,9 @@ type is used in place of this type:
 .. code-block:: typescript
    :linenos:
 
-    type R1 = Record<number, string> // ok
-    type R2 = Record<boolean, string> // compile-time error
-    type R3 = Record<1 | 2, string> // ok
+    type R1 = Record<number, string>   // ok
+    type R2 = Record<boolean, string>  // compile-time error
+    type R3 = Record<1 | 2, string>    // compile-time error
     type R4 = Record<"salary" | "bonus", number> // ok
     type R4 = Record<1 | true, number> // compile-time error
 
