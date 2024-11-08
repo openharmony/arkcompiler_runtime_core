@@ -306,7 +306,7 @@ cannot be used as identifiers:
    soft keyword
    identifier
    context
-   
+
 +--------------------+-------------------+------------------+------------------+
 |                    |                   |                  |                  |
 +====================+===================+==================+==================+
@@ -350,7 +350,7 @@ keywords*) but are valid identifiers elsewhere:
 +-----------------+--------------------+-------------------+-------------------+
 |   ``declare``   |     ``instanceof`` |     ``readonly``  |     ``type``      |
 +-----------------+--------------------+-------------------+-------------------+
-|   ``finally``   |     ``keyof``      |     ``rethrows``  |     ``typeof``    |   
+|   ``finally``   |     ``keyof``      |     ``rethrows``  |     ``typeof``    |
 +-----------------+--------------------+-------------------+-------------------+
 |   ``from``      |     ``namespace``  |     ``set``       |                   |
 +-----------------+--------------------+-------------------+-------------------+
@@ -473,14 +473,14 @@ Literals
 
 See :ref:`Character Literals` for the experimental ``char literal``.
 
-Every literal is described in details below.
+Each literal is described in detail below.
 
 .. index::
    literal
    char
 
 |
-   
+
 .. _Integer Literals:
 
 Integer Literals
@@ -580,17 +580,49 @@ last symbol of an integer literal.
 
 Integer literals are of integer types that match literals as follows:
 
-- ``int`` if the literal value can be represented by a 32-bit number; or
-- ``long`` otherwise.
+- for *decimal* integer literals:
+
+  + ``int`` if the literal value can be represented
+    by a non-negative 32-bit number, or in other words, 
+    the value is in the range 0..max(int); or
+
+  + ``long`` otherwise.
+
+- for *hex*, *octal* and *binary* integer literals:
+
+  + ``int`` if bit represention of the value fits in 32-bits
+    or in other words, the value is in the 
+    range 0..max(unsigned 32-bit integer); or
+
+  + ``long`` otherwise.
+
+A :index:`compile-time error` occurs if an integer literal value is too
+large for the values of type ``long``.
+
+The concept is represented by the examples below:
+
+.. code-block:: typescript
+   :linenos:
+
+    // literals of type int:
+    1
+    0x7F
+    0x7FFFFFFF // max(int)
+    0x80000000 // min(int)
+
+    // literals of type long:
+    0x7FFF_FFFF_1
+    9223372036854775807 // max(long)
+
+    // compile-time error as value is too large:
+    9223372036854775808 // max(long) + 1
+    0xFFFF_FFFF_FFFF_FFFF_0
 
 
 An integer literal in variable and constant declarations can be implicitly
 converted to another numeric type or type ``char`` (see
-:ref:`Type Compatibility with Initializer`). An explicit cast must be used
-elsewhere (see :ref:`Cast Expressions`).
-
-A :index:`compile-time error` occurs if an integer literal value is too
-large for the values of type ``long``.
+:ref:`Type Compatibility with Initializer`). An casting conversion must be
+used elsewhere (see :ref:`Cast Expressions`).
 
 .. index::
    integer literal
@@ -599,7 +631,6 @@ large for the values of type ``long``.
    constant declaration
    variable declaration
    char
-   explicit cast
    implicit conversion
    cast expression
 
@@ -956,8 +987,8 @@ An example of a multiline string is provided below:
    :linenos:
 
     let sentence = `This is an example of
-                    a multiline string, 
-                    which should be enclosed in 
+                    a multiline string,
+                    which should be enclosed in
                     backticks`
 
 *MultilineString* literals are of the literal type that corresponds to the literal.
@@ -987,7 +1018,7 @@ represented by the keyword ``null``:
 .. code-block:: abnf
 
     NullLiteral:
-        'null' 
+        'null'
         ;
 
 

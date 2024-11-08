@@ -27,10 +27,11 @@ Types used as generic parameters in a generic are called *type parameters*
 (see :ref:`Type Parameters`).
 
 A *generic* must be instantiated in order to be used. *Generic instantiation*
-is the action that converts a *generic* into a real program entity (non-generic
-class, interface, union, array, method, function, or lambda), or into another
-*generic instantiation*. Instantiation (see :ref:`Generic Instantiations`) can
-be performed either explicitly or implicitly.
+is the action that transforms a *generic* into a real program entity (
+non-generic class, interface, union, array, method, function, or lambda), or
+into another *generic instantiation*. Instantiation (see
+:ref:`Generic Instantiations`) can be performed either explicitly or
+implicitly.
 
 |LANG| has special types that look similar to generics syntax-wise, and allow
 creating new types during compilation (see :ref:`Utility Types`).
@@ -174,8 +175,7 @@ Type Parameter Constraint
 =========================
 
 .. meta:
-    frontend_status: Partly
-    todo: support keyof constraint #17436
+    frontend_status: Done
 
 If possible instantiations need to be constrained, then an individual
 *constraint* can be set for every type parameter.
@@ -366,8 +366,7 @@ Type Parameter Variance
 =======================
 
 .. meta:
-    frontend_status: Partly
-    todo: Implement semantic checks, now in/out modifiers are only parsed ang ignored.
+    frontend_status: Done
 
 Normally, two different argument types used to instantiate a generic class or
 interface are handled as different and unrelated types (*invariance*). |LANG|
@@ -506,10 +505,10 @@ Generic Instantiations
 
 As mentioned before, a generic class, interface, type alias, method, function,
 or lambda declaration defines a set of corresponding non-generic entities. The
-process of instantiation:
+process of instantiation is designed to do the following:
 
-- Allows producing new entities that are either generic or non-generic;
-- Proivides every type parameter with a type argument that can be any kind
+- Allow producing new generic or non-generic entities;
+- Proivide every type parameter with a type argument that can be any kind
   of type, including the type argument itself.
 
 
@@ -540,7 +539,7 @@ generic instantiation, then the compiler actually replaces it as follows:
         method (p: A<Object>) {}  // Here A<Object> is a new non-generic type
     }
 
-**Note**: Built-in arrays are not generics, thus ``number[]`` contains elements
+**Note**. Built-in arrays are not generics, thus ``number[]`` contains elements
 of type ``number`` but not ``Number``.
 
 .. index::
@@ -748,6 +747,9 @@ lambdas.
 Utility Types
 *************
 
+.. meta:
+    frontend_status: Done
+
 |LANG| supports several embedded types, called *utility* types. Utility types
 allow constructing new types by adjusting properties of the initial types.
 
@@ -810,7 +812,7 @@ Type ``T`` is not compatible with ``Partial<T>`` (see :ref:`Type Compatibility`)
 and variables of ``Partial<T>`` are to be initialized with valid object
 literals.
 
-**Note**: If class ``T`` has a user-defined getter, setter, or both, then none
+**Note**. If class ``T`` has a user-defined getter, setter, or both, then none
 of those is called when object literal is used with ``Partial<T>`` variables.
 Object literal has its own built-in getters and setters to modify its variables:
 
@@ -961,9 +963,8 @@ Record Utility Type
 Type ``Record<K, V>`` constructs a container that maps keys (of type ``K``)
 to values (of type ``V``).
 
-Type ``K`` is restricted to numeric types, type ``string``, string literal types
-and union types
-constructed from these types.
+Type ``K`` is restricted to numeric types, type ``string``, string literal
+types, and union types constructed from these types.
 
 A :index:`compile-time error` occurs if any other type, or literal of any other
 type is used in place of this type:
@@ -974,7 +975,7 @@ type is used in place of this type:
    value
    container
    union type
-   number type
+   numeric type
    string type
    literal
    compile-time error

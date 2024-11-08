@@ -22,7 +22,7 @@ Every expression written in the |LANG| programming language has a type that
 is inferred (see :ref:`Type Inference`) at compile time.
 
 In most contexts, an expression must be *compatible* with a type expected in
-that context. This type is called the *target type*. 
+that context. This type is called the *target type*.
 
 If no target type is expected in the context, then the expression
 is called a *standalone expression*:
@@ -31,7 +31,7 @@ is called a *standalone expression*:
    :linenos:
 
     let a = expr // no target type is expected
-    
+
     function foo() {
         expr // no target type is expected
     }
@@ -46,7 +46,7 @@ Otherwise, the expression is *non-standalone*:
    :linenos:
 
     let a: number = expr // target type of 'expr' is number
-    
+
     function foo(s: string) {}
     foo(expr) // target type of 'expr' is string
 
@@ -228,7 +228,7 @@ The examples are presented below:
 
       // call contexts:
       function foo(s: string) {}
-      foo("hello")    
+      foo("hello")
 
       // composite literal contexts:
       let a: number[] = [str.length, 11]
@@ -308,7 +308,7 @@ String Operator Contexts
    is converted to type ``string`` with a value that represents the operand in
    the decimal form;
 
--  An operand of a floating-point type (see :ref:`Floating-Point Types and Operations`) 
+-  An operand of a floating-point type (see :ref:`Floating-Point Types and Operations`)
    is converted to type ``string`` with a value that represents the operand in
    the decimal form (without the loss of information);
 
@@ -425,16 +425,16 @@ Casting Contexts and Conversions
     frontend_status: Done
     todo: Does not work for interfaces, eg. let x:iface1 = iface_2_inst as iface1; let x:iface1 = iface1_inst as iface1
 
-*Casting contexts* are applied to cast expressions (:ref:`Cast Expressions`),
-and rely on the application of *casting conversions*.
-
-*Casting conversion* is the conversion of an operand in a cast expression to
-an explicitly specified *target type* by using one of the following:
+Every cast expression (:ref:`Cast Expressions`) introduces *casting
+context* and relies on the application of different conversions. These
+conversions cast an operand in a cast expression to an explicitly specified
+*target type* by using one of the following:
 
 - Identity conversion, if the *target type* is the same as the expression type;
 - :ref:`Implicit Conversions`;
 - :ref:`Numeric Casting Conversions`;
-- :ref:`Narrowing Reference Casting Conversions`;
+- :ref:`Narrowing Class or Interface Casting Conversions`;
+- :ref:`Casting Conversions from Type Parameter`;
 - :ref:`Casting Conversions from Union`.
 
 If there is no applicable conversion, then a :index:`compile-time error`
@@ -443,7 +443,6 @@ occurs.
 .. index::
    casting context
    cast expression
-   casting conversion
    target type
    conversion
    expression type
@@ -459,8 +458,8 @@ Numeric Casting Conversions
 .. meta:
     frontend_status: Done
 
-A *numeric casting conversion* occurs if the *target type* and the expression
-type are both ``numeric`` or ``char``:
+A *numeric casting conversion* occurs if the *target type* and the expression type
+are both ``numeric`` or ``char``:
 
 .. code-block-meta:
    not-subset
@@ -476,8 +475,8 @@ type are both ``numeric`` or ``char``:
 These conversions never cause runtime errors.
 
 Numeric casting conversion of an operand of type ``double`` to target type
-``float`` is performed in compliance with the IEEE 754 rounding rules.
-This conversion can lose precision or range, resulting in the following:
+``float`` is performed in compliance with the IEEE 754 rounding rules. This
+conversion can lose precision or range, resulting in the following:
 
 -  Float zero from a nonzero double; and
 -  Float infinity from a finite double.
@@ -486,8 +485,8 @@ Double ``NaN`` is converted to float ``NaN``.
 
 Double infinity is converted to same-signed floating-point infinity.
 
-A numeric casting conversion of a floating-point type operand to
-target types ``long`` or ``int`` is performed by the following rules:
+A numeric conversion of a floating-point type operand to target types ``long``
+or ``int`` is performed by the following rules:
 
 - If the operand is ``NaN``, then the result is 0 (zero).
 - If the operand is positive infinity, or if the operand is too large for the
@@ -500,13 +499,12 @@ target types ``long`` or ``int`` is performed by the following rules:
   *round-toward-zero* mode.
 
 A numeric casting conversion of a floating-point type operand to types
-``short``, ``byte``, or ``char`` is performed in the following two steps:
+``short``, ``byte``, or ``char`` is performed in two steps as  follows:
 
-- The casting conversion to ``int`` is performed first (see above);
-- Then, the ``int`` operand is casted to the target type.
+- First, the casting conversion to ``int`` is performed (see above);
+- Then, the ``int`` operand is cast to the target type.
 
 .. index::
-   casting conversion
    target type
    numeric
    char
@@ -529,7 +527,6 @@ value can differ from that of the original value.
 
 .. index::
    IEEE 754
-   casting conversion
    floating-point type
    operand
    NaN
@@ -540,32 +537,26 @@ value can differ from that of the original value.
 
 |
 
-.. _Narrowing Reference Casting Conversions:
+.. _Narrowing Class or Interface Casting Conversions:
 
-Narrowing Reference Casting Conversions
-=======================================
+Narrowing Class or Interface Casting Conversions
+================================================
 
 .. meta:
     frontend_status: Done
 
-A *narrowing reference casting conversion* converts an expression of a
-supertype (superclass or superinterface) (see :ref:`Supertyping`) to a
-subclass or subinterface:
+This conversion casts an expression of a supertype (superclass or
+superinterface) (see :ref:`Supertyping`) to a subclass or subinterface:
 
 .. index::
    narrowing
-   reference
    expression
-   casting conversion
    conversion
    operand
-   cast expression
-   casting conversion
    class
    interface
    subclass
    subinterface
-   variable
    superinterface
    superclass
 
@@ -582,7 +573,7 @@ Compile-time errors for this conversion are the same as in
 :ref:`InstanceOf Expression`.
 
 A runtime error (``ClassCastError``) occurs during this conversion if the
-type of a converted expression cannot be converted to the *target type*:
+type of a converted expression cannot be casted to the *target type*:
 
 .. code-block:: typescript
    :linenos:
@@ -602,6 +593,36 @@ type of a converted expression cannot be converted to the *target type*:
 
 |
 
+.. _Casting Conversions from Type Parameter:
+
+Casting Conversions from Type Parameter
+=======================================
+
+.. meta:
+    frontend_status: Done
+
+A *casting conversion from type parameter* attempts to convert an expression of
+the type parameter to any reference type (see :ref:`Reference Types`) which is
+to be specified as a target type.
+
+.. code-block:: typescript
+   :linenos:
+
+    class X<S, T> {
+       method (p: T) {
+          p as Object           // OK
+          p as Object[]         // OK
+          p as [Object, Object] // OK
+          p as () => void       // OK
+          p as T                // OK
+          p as S                // OK
+          p as number // compile-time error, cast to the value type
+          p as Number // OK use this cast instead of the cast above
+       }
+    }
+
+|
+
 .. _Casting Conversions from Union:
 
 Casting Conversions from Union
@@ -614,7 +635,8 @@ A *casting conversion from union* converts an expression of union type to one
 of the types of the union, or to a type that is derived from such one type.
 
 For union type ``U = T``:sub:`1` ``| ... | T``:sub:`N`, the *casting conversion
-from union* converts an expression of type ``U`` to some type ``TT`` (*target type*).
+from union* converts an expression of type ``U`` to some type ``TT``
+(*target type*).
 
 ..
    line 472 initially was *U* = *T*:sub:`1` | ... | *T*:sub:`N`
@@ -637,17 +659,17 @@ A :index:`compile-time error` occurs if target type ``TT`` is not one of
 
     let animal: Animal = new Spitz()
     if (animal instanceof Frog) {
-        let frog: Frog = animal as Frog // Use 'as' conversion here
+        let frog: Frog = animal as Frog // Use casting conversion here
         frog.leap() // Perform an action specific for the particular union type
     }
     if (animal instanceof Spitz) {
-        let dog = animal as Spitz // Use 'as' conversion here
-        dog.sleep() 
+        let dog = animal as Spitz // Use casting conversion here
+        dog.sleep()
           // Perform an action specific for the particular union type derivative
     }
 
 .. index::
-   casting conversion from union
+   conversion from union
    conversion
    expression
    union type
@@ -678,7 +700,7 @@ compatible with the target type, then the conversion causes a
     let b: Base = d // OK, as Derived1 and Derived2 are compatible with Base
 
     let x: Double | Base = ...
-    let y: double = x // Compile-time error, as Base cannot be converted into double 
+    let y: double = x // Compile-time error, as Base cannot be converted into double
 
 .. index::
    target type
@@ -979,7 +1001,7 @@ is true after normalization (see :ref:`Union Types Normalization`):
    compatibility
    value
 
-**Note**: If union type normalization issues a single type or value, then
+**Note**. If union type normalization issues a single type or value, then
 this type or value is used instead of the initial set of union types or values.
 
 This concept is illustrated by the example below:
@@ -987,12 +1009,12 @@ This concept is illustrated by the example below:
 .. code-block:: typescript
    :linenos:
 
-    let u1: string | number | boolean = true 
+    let u1: string | number | boolean = true
     let u2: string | number = 666
-    u1 = u2 // OK 
+    u1 = u2 // OK
     u2 = u1 // compile-time error as type of u1 is not compatible with type of u2
 
-    let u3: "1" | "2" | boolean = "3" 
+    let u3: "1" | "2" | boolean = "3"
        // compile-time error as there is no value "3" among values of u3 type
 
     class Base {}
@@ -1013,7 +1035,7 @@ if ``T`` is compatible with one of ``U``:sub:`i` types.
 .. code-block:: typescript
    :linenos:
 
-    let u: number | string = 1 // ok 
+    let u: number | string = 1 // ok
     u = "aa" // ok
     u = true // compile-time error
 
@@ -1026,7 +1048,7 @@ converted to type ``T``.
 
     let a: "1" | "2" = "1"
     let b: string = a // ok, literals fit type 'string'
-    
+
 
 .. index::
    normalization
@@ -1063,7 +1085,7 @@ and never causes an error.
      function foo (di: DerivedInterface) {
        let bi: BaseInterface = new DerivedClass() /* DerivedClass
            is compatible with BaseInterface */
-       bi = di // DerivedInterface is compatible with BaseInterface 
+       bi = di // DerivedInterface is compatible with BaseInterface
     }
 
 The only exception is the cast to type ``never`` that is forbidden. This cast is
@@ -1079,7 +1101,8 @@ a :index:`compile-time error` as it can cause type-safety violations:
 
     class B { b_method() {} }
     let b: B = n // OK as never is compatible with any type
-    b.b_method() // this breaks type-safety if 'as' cast to never is allowed  
+    b.b_method() /* this breaks type-safety if casting conversion to 'never'
+                    is allowed */
 
 The conversion of array types (see :ref:`Array Types`) also works in accordance
 with the widening style of the type of array elements as shown below:
@@ -1145,7 +1168,7 @@ Character to String Conversions
 .. code-block:: typescript
    :linenos:
 
-    let c: char = c'X' 
+    let c: char = c'X'
     let s: string = c // s contains "X"
 
 This conversion can cause ``OutOfMemoryError`` thrown if the storage available
@@ -1239,13 +1262,13 @@ See :ref:`Type Compatibility` for details.
     }
 
     // Examples with lambda expressions
-    let foo1: (p: Base) => Base = (p: Base): Derived => new Derived() 
+    let foo1: (p: Base) => Base = (p: Base): Derived => new Derived()
      /* OK: identical (invariant) parameter types, and compatible return type */
 
-    let foo2: (p: Base) => Base = (p: Derived): Derived => new Derived() 
+    let foo2: (p: Base) => Base = (p: Derived): Derived => new Derived()
      /* Compile-time error: compatible parameter type(covariance), type unsafe */
 
-    let foo3: (p: Derived) => Base = (p: Base): Derived => new Derived() 
+    let foo3: (p: Derived) => Base = (p: Base): Derived => new Derived()
      /* OK: contravariant parameter types, and compatible return type */
 
     let foo4: (p?: Base) => void = (p: Base): void => {}
@@ -1325,7 +1348,7 @@ This conversion never causes runtime errors.
     enum IntegerEnum {a, b, c}
     let int_enum: IntegerEnum = IntegerEnum.a
     let int_value: int = int_enum // int_value will get the value of 0
-    let number_value: number = int_enum 
+    let number_value: number = int_enum
        /* number_value will get the value of 0 as a result of conversion
           sequence: enumeration -> int - > number  */
 
@@ -1365,10 +1388,11 @@ Constant to Enumeration Conversions
 .. meta:
     frontend_status: None
 
-A constant value of some integer type is converted to *enumeration* type if 
+A constant value of some integer type is converted to *enumeration* type in
+the following situations:
 
--  enumeration constants are of type ``int``.
--  a value is equal to the value of an enumeration constant.
+-  If enumeration constants are of type ``int``.
+-  If a value is equal to the value of an enumeration constant.
 
 This conversion never causes runtime errors.
 
@@ -1378,13 +1402,13 @@ This conversion never causes runtime errors.
     enum IntegerEnum {a, b, c}
     let e: IntegerEnum = 1 // ok, e is set to IntegerEnum.b
     e = 3 // compile-time error, there is no constant with this value
-    
+
     const one = 2
     e = one // ok, e is set to IntegerEnum.call
-    
+
     let x = 1
     e = x // compile-time error, only constant conversions are allowed
-    
+
 |
 
 .. _Literal Type to its Supertype Conversions:

@@ -215,7 +215,7 @@ All |LANG| types are summarized in the following table:
    ========================= ========================= ========================= =========================
 
 
-**Note**: Type ``string`` (see :ref:`Type string`), type ``bigint`` (see
+**Note**. Type ``string`` (see :ref:`Type string`), type ``bigint`` (see
 :ref:`BigInt Type`), literal types (see :ref:`Literal Types`), and all boxed
 types (:ref:`Boxed Types`) have value type semantics in equality expressions
 (:ref:`Equality Expressions`).
@@ -243,7 +243,7 @@ A type can be referred to in source code by the following:
    tuple type (see :ref:`Tuple Types`), function type (see :ref:`Function Types`),
    function type with receiver (see :ref:`Function Types with Receiver`),
    union type (see :ref:`Union Types`), keyof type (see :ref:`Keyof Types`), or
-   type in parenthesis.
+   type in parentheses.
 
 .. index::
    reserved name
@@ -258,7 +258,8 @@ A type can be referred to in source code by the following:
 .. code-block:: abnf
 
     type:
-        typeReference
+        annotationUsage?
+        ( typeReference
         | arrayType
         | tupleType
         | functionType
@@ -266,9 +267,11 @@ A type can be referred to in source code by the following:
         | unionType
         | StringLiteral
         | keyofType
+        )
         | '(' type ')'
         ;
 
+The usage of annotations is defined in :ref:`Using Annotations`.
 
 The use of types is presented by the example below:
 
@@ -333,9 +336,9 @@ Named Types
     frontend_status: Done
 
 Classes, interfaces, enumerations, aliases, type parameters, and predefined
-types (see :ref:`Predefined Types`) except builtin array are named types. Other
-types (i.e., array, function, and union types) are anonymous unless aliased.
-Respective named types are introduced by the following:
+types (see :ref:`Predefined Types`), except builtin array, are named types.
+Other types (i.e., array, function, and union types) are anonymous unless
+aliased. Respective named types are introduced by the following:
 
 -  Class declarations (see :ref:`Classes`),
 -  Interface declarations (see :ref:`Interfaces`),
@@ -463,10 +466,9 @@ Value Types
 Predefined integer types (see :ref:`Integer Types and Operations`),
 floating-point types (see :ref:`Floating-Point Types and Operations`), the
 boolean type (see :ref:`Boolean Types and Operations`), character types
-(see :ref:`Character Type and Operations`), user-defined enumeration
-types (see :ref:`Enumerations`), and literal types (see :ref:`Literal Types`)
-are *value types*. The values of such types do *not* share state with other
-values.
+(see :ref:`Character Type and Operations`), and user-defined enumeration
+types (see :ref:`Enumerations`) are *value types*. The values of such types do
+*not* share state with other values.
 
 .. index::
    value type
@@ -478,7 +480,6 @@ values.
    enumeration
    user-defined type
    enumeration type
-   literal type
    value type
 
 |
@@ -604,9 +605,9 @@ If neither operand is of type ``long``, then:
 If one operand (or neither operand) is of type ``int``, then the numeric
 promotion must be used first to widen it to type ``int``.
 
-Any integer type value can be cast to or from any numeric type.
+Any integer type value can be converted to or from any numeric type.
 
-Casts between integer types and type ``boolean`` are not allowed.
+Conversions between integer types and type ``boolean`` are not allowed.
 
 The integer operators cannot indicate an overflow or an underflow.
 
@@ -795,7 +796,7 @@ Any floating-point type value can be cast to or from any numeric type.
    binary operator
    floating-point type
 
-Casts between floating-point types and type ``boolean`` are not allowed.
+Conversions between floating-point types and type ``boolean`` are not allowed.
 
 Operators on floating-point numbers, except the remainder operator (see
 :ref:`Remainder`), behave in compliance with the IEEE 754 Standard.
@@ -972,107 +973,6 @@ as the result of comparison *x != 0*.
    conversion
    nonzero value
 
-|
-
-.. _Literal Types:
-
-Literal Types
-=============
-
-.. meta:
-    frontend_status: None
-
-Literal types are aligned with some |LANG| literals (see :ref:`Literals`).
-Their names are same as the names of their values, i.e., literals.
-Only three literal types are supported.
-
-.. code-block:: typescript
-   :linenos:
-
-    let a: "string literal" = "string literal"
-    let b: null = null
-    let c: undefined = undefined
-
-    printThem (a, b, c)
-    function printThem (p1: "string literal", p2: null, p3: undefined) {
-        console.log (p1, p2, p3)
-    }
-
-
-.. index::
-   literal type
-   truncation
-
-|
-
-.. _Supertypes of Literal Types:
-
-Supertypes of Literal Types
----------------------------
-
-- The supertype for string literals (see :ref:`String Literals`) is type
-  ``string``.
-
-This affects the overriding as shown in the example below:
-
-.. code-block:: typescript
-   :linenos:
-
-    class Base {
-        foo(p: "1"): string { return "666" }
-    }
-    class Derived extends Base {
-        override foo(p: string): "1" { return "1" }
-    }
-    // Type "1" <: string
-
-    let base: Base = new Derived
-    let result: string = base.foo("1")
-    /* Argument "1" (value) is compatible to type "1" and to the type string in
-       the overridden method
-       Function result of type string accepts "1" (value) of literal type "1"
-    */
-
-
-- Null and undefined literals (see :ref:`Null Literal` and
-  :ref:`Undefined Literal`) have no supertype.
-
-.. code-block:: typescript
-   :linenos:
-
-    let o: Object = new Object
-    o = null      // compile-time error
-    o = undefined // compile-time error
-
-
-.. index::
-   literal type
-   supertype
-   string literal
-   override
-
-|
-
-.. _Operations on Literal Types:
-
-Operations on Literal Types
----------------------------
-
-Operations on variables of literal types are identical to the operations
-of their supertypes. The resulting operation type is the type specified
-for the operation in the supertype. In most cases, it is the supertype
-itself:
-
-.. code-block:: typescript
-   :linenos:
-
-    let s0: "string literal" = "string literal"
-    let s1: string = s0 + s0   // + for string returns string
-
-.. index::
-   literal type
-   variable
-   supertype
 
 |
 
@@ -1092,6 +992,7 @@ Reference Types
 -  *Function* types (see :ref:`Function Types`);
 -  *Union* types (see :ref:`Union Types`);
 -  ``String`` types (see :ref:`Type String`);
+-  Literal types (see :ref:`Literal Types`);
 -  Type ``Never`` (see :ref:`Type never`), type ``null`` (see :ref:`Type null`),
    type ``undefined`` (see :ref:`Type undefined`), type ``void`` (see
    :ref:`Type void`); and
@@ -1105,6 +1006,7 @@ Reference Types
    function type
    union type
    string type
+   literal type
    type never
    type null
    type undefined
@@ -1301,6 +1203,116 @@ also refers to type ``string``).
 
 |
 
+.. _Literal Types:
+
+Literal Types
+=============
+
+.. meta:
+    frontend_status: Partly
+    todo: implement string literal types on runtime part #15276
+
+Literal types are aligned with some |LANG| literals (see :ref:`Literals`).
+Their names are same as the names of their values, i.e., literals.
+Only three literal types are supported.
+
+.. code-block:: typescript
+   :linenos:
+
+    let a: "string literal" = "string literal"
+    let b: null = null
+    let c: undefined = undefined
+
+    printThem (a, b, c)
+    function printThem (p1: "string literal", p2: null, p3: undefined) {
+        console.log (p1, p2, p3)
+    }
+
+
+.. index::
+   literal type
+   truncation
+
+|
+
+.. _Supertypes of Literal Types:
+
+Supertypes of Literal Types
+---------------------------
+
+.. meta:
+    frontend_status: Done
+
+- The supertype for string literals (see :ref:`String Literals`) is type
+  ``string``.
+
+This affects the overriding as shown in the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+    class Base {
+        foo(p: "1"): string { return "666" }
+    }
+    class Derived extends Base {
+        override foo(p: string): "1" { return "1" }
+    }
+    // Type "1" <: string
+
+    let base: Base = new Derived
+    let result: string = base.foo("1")
+    /* Argument "1" (value) is compatible to type "1" and to the type string in
+       the overridden method
+       Function result of type string accepts "1" (value) of literal type "1"
+    */
+
+
+- Null and undefined literals (see :ref:`Null Literal` and
+  :ref:`Undefined Literal`) have no supertype.
+
+.. code-block:: typescript
+   :linenos:
+
+    let o: Object = new Object
+    o = null      // compile-time error
+    o = undefined // compile-time error
+
+
+.. index::
+   literal type
+   supertype
+   string literal
+   override
+
+|
+
+.. _Operations on Literal Types:
+
+Operations on Literal Types
+---------------------------
+
+.. meta:
+    frontend_status: Done
+
+Operations on variables of literal types are identical to the operations
+of their supertypes. The resulting operation type is the type specified
+for the operation in the supertype. In most cases, it is the supertype
+itself:
+
+.. code-block:: typescript
+   :linenos:
+
+    let s0: "string literal" = "string literal"
+    let s1: string = s0 + s0   // + for string returns string
+
+.. index::
+   literal type
+   variable
+   supertype
+
+
+|
+
 .. _Type never:
 
 Type ``never``
@@ -1388,7 +1400,7 @@ A :index:`compile-time error` occurs if:
 
     let x: void // compile-time error - void used as type annotation
 
-    function foo (): void
+    function foo (): void {}
     let y = foo()  // compile-time error - void used as a value
 
 .. index::
@@ -1490,7 +1502,7 @@ in the library documentation. Common to these types is that the operator
 '``[]``' can be applied to variables of all array types, and to their derived
 types.
 
-**Note**: Type ``T[]`` and type ``Array<T>`` are different types.
+**Note**. Type ``T[]`` and type ``Array<T>`` are different types.
 Some methods defined for ``Array<T>`` (e.g., ``at``) can be used for ``T[]``,
 but only if those do not change the array length.
 
@@ -1926,7 +1938,7 @@ The following example represents primitive types:
     type Primitive = number | boolean
     let p: Primitive = 7
     if (p instanceof Number) { // type of 'p' is Number here
-       let i: number = p as number // Explicit conversion from Primitive to number
+       let i: number = p as number // Casting conversion from Primitive to number
     }
 
 The following example represents literal types:
@@ -1949,7 +1961,7 @@ The following example represents literal types:
    primitive type
    literal type
 
-**Note**: A :index:`compile-time error` occurs if an expression of a union type
+**Note**. A :index:`compile-time error` occurs if an expression of a union type
 is compared to a literal value or constant that does not belong to the values
 of the union type:
 
@@ -2007,7 +2019,8 @@ another:
 
 #. All nested union types are linearized.
 #. All type aliases if any are recursively replaced for non-alias types.
-#. Identical types within the union type are replaced for a single type.
+#. Identical types within the union type are replaced for a single type taking
+   into account the priority of the readonly type flag.
 #. If at least one type in the union is ``Object``, then all other non-nullish
    types are removed.
 #. If there is type ``never`` among union types, then it is removed.
@@ -2054,6 +2067,8 @@ is presented in the examples below:
     ( T1 | T2) | (T3 | T4) => T1 | T2 | T3 | T4  // Linearization
 
     number | number => number                    // Identical types elimination
+
+    (number[]) | (readonly number[]) => readonly number[] // Readonly version wins
 
     "1" | string | number => string | number    // Literal type value belongs to another type values
 
@@ -2286,7 +2301,7 @@ that can potentially violate null safety (e.g., access to a property):
    -  Nullish-coalescing expression (see :ref:`Nullish-Coalescing Expression`
       for details).
 
-**Note**: Nullish types are not compatible with type ``Object``:
+**Note**. Nullish types are not compatible with type ``Object``:
 
 .. code-block:: typescript
    :linenos:
@@ -2318,7 +2333,6 @@ that can potentially violate null safety (e.g., access to a property):
    ensure-not-nullish expression
    nullish-coalescing expression
    nullish value
-   cast expression
    safe method call
    safe field access
    safe indexing expression
@@ -2381,7 +2395,7 @@ Default Values for Types
 .. meta:
     frontend_status: Done
 
-**Note**: This is the |LANG|'s experimental feature.
+**Note**. This is the |LANG|'s experimental feature.
 
 Some types use so-called *default values* for variables without explicit
 initialization (see :ref:`Variable Declarations`), including the following:

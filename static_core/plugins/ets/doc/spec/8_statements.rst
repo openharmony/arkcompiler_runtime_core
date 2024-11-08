@@ -155,13 +155,17 @@ execution, and actually act as statements:
 .. code-block:: abnf
 
     localDeclaration:
-        variableDeclaration
+        annotationUsage?
+        ( variableDeclaration
         | constantDeclaration
         | typeDeclaration
+        )
         ;
 
 The visibility of a local declaration name is determined by the surrounding
 function or method, and by the block scope rules (see :ref:`Scopes`).
+
+The usage of annotations is defined in :ref:`Using Annotations`.
 
 .. index::
    local declaration

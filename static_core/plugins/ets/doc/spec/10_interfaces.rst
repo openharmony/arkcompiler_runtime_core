@@ -308,12 +308,16 @@ properties (see :ref:`Interface Properties`) and methods (see
 .. code-block:: abnf
 
     interfaceMember
-        : interfaceProperty
+        : annotationUsage?
+        ( interfaceProperty
         | interfaceMethodDeclaration
+        )
         ;
 
 The scope of declaration of a member *m* that the interface type ``I``
 declares or inherits is specified in :ref:`Scopes`.
+
+The usage of annotations is defined in :ref:`Using Annotations`.
 
 .. index::
    interface body
@@ -569,7 +573,7 @@ direct superinterfaces.
 Semantic checks are described in
 :ref:`Overloading and Overriding in Interfaces`.
 
-**Note**: As any interface property implicitly defines a getter, a setter,
+**Note**. As any interface property implicitly defines a getter, a setter,
 or both, the semantic rules for methods are applied to properties.
 
 Private methods defined in superinterfaces are not accessible (see

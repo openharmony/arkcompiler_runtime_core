@@ -63,9 +63,9 @@ in many OOP languages provides a way to restrict class inheritance and method
 overriding. Making a class *final* prohibits defining classes derived from it,
 whereas making a method *final* prevents it from overriding in derived classes.
 
-Section :ref:`Adding Functionality to Existing Types` defines the ability
-to add new functionality to already defined type. This
-feature can be used for GUI programming (:ref:`Support for GUI Programming`).
+Section :ref:`Adding Functionality to Existing Types` discusses the way to 
+add new functionality to an already defined type. This feature can be used
+for GUI programming (:ref:`Support for GUI Programming`).
 
 Section :ref:`Enumeration Methods` adds methods to declarations of the
 enumeration types. Such methods can help in some kinds of manipulations
@@ -92,7 +92,7 @@ exceptions, *catch* them along the dynamic sequence of function calls, and
 handle them. Some support for exceptions is also provided by the classes from
 the standard library (see :ref:`Standard Library`).
 
-**Note**: The exceptions mechanism is sometimes deprecated for being too
+**Note**. The exceptions mechanism is sometimes deprecated for being too
 time-consuming and unsafe. Some modern languages do not support the
 exceptions mechanism as discussed in this section. That is why the expediency
 of adding this feature to the language is still under discussion.
@@ -708,7 +708,7 @@ abstract or defined in an interface to be implemented later. A
    signature
    async function
 
-**Note**: To support the code compatible with |TS|, the name of the function
+**Note**. To support the code compatible with |TS|, the name of the function
 ``$_iterator`` can be written as ``[Symbol.iterator]``. In this case, the class
 ``iterable`` looks as follows:
 
@@ -773,7 +773,7 @@ valid for the methods ``invoke`` and ``instantiate``.
    method call
    instantiation
 
-**Note**: Only a constructor---not the methods ``invoke`` or ``instantiate``---is
+**Note**. Only a constructor---not the methods ``invoke`` or ``instantiate``---is
 called in a *new expression*:
 
 .. code-block-meta:
@@ -970,7 +970,7 @@ transferred to the first ``catch`` clause if the statement has at least one
 clause is found, then exception or error is propagated to the surrounding
 scope.
 
-**Note**: An exception handled within a *non-throwing* function (see
+**Note**. An exception handled within a *non-throwing* function (see
 :ref:`Non-Throwing Functions`) is never propagated outside that function.
 
 A ``catch`` clause has two parts:
@@ -1054,7 +1054,7 @@ and the handling of other exceptions and errors is different.
 be thrown by the code in the ``try`` block. If no ``catch`` clause can handle
 the situation, then exception or error is propagated to the surrounding scope.
 
-**Note**: If a ``try`` statement (*default catch clause*) is placed inside a
+**Note**. If a ``try`` statement (*default catch clause*) is placed inside a
 *non-throwing* function (see :ref:`Non-Throwing Functions`), then exception
 is never propagated.
 
@@ -1540,16 +1540,18 @@ the method that implements the interface.
 Adding Functionality to Existing Types
 **************************************
 
-|LANG| supports adding functions and accessors to already defined types,
-so its usage looks the same, as if they are methods and accessors of these types.
-The mechanism used is called: :ref:`Functions with Receiver` and
-:ref:`Accessors with Receiver`. This feature is often used to add new
+|LANG| supports adding functions and accessors to already defined types. The
+usage of functions so added looks the same as if they are methods and accessors
+of these types. The mechanism so used is called :ref:`Functions with Receiver`
+and :ref:`Accessors with Receiver`. This feature is often used to add new
 functionality to a class without having to inherit from this class.
-However, it can be used not only for classes but for other types as well.
+However, it can be used not only for classes but also for other types.
 
-Additionally, :ref:`Function Types with Receiver` and
-:ref:`Lambda Expressions with Receiver` can be defined and use,
-making the code more flexible.
+Moreover, :ref:`Function Types with Receiver` and
+:ref:`Lambda Expressions with Receiver` can be defined and used to make the
+code more flexible.
+
+|
 
 .. _Functions with Receiver:
 
@@ -1563,7 +1565,7 @@ Functions with Receiver
 A *function with receiver* declaration is a top-level declaration
 (see :ref:`Top-Level Declarations`) that looks almost the same as 
 :ref:`Function Declarations`, except that the first parameter is mandatory,
-and keyword ``this`` is used as its name:
+and the keyword ``this`` is used as its name:
 
 .. code-block:: abnf
 
@@ -1579,15 +1581,14 @@ and keyword ``this`` is used as its name:
         'this' ':' 'readonly'? type
         ;
 
-There are two ways to call a *function with receiver*:
+There two ways to call a *function with receiver* are as follows:
 
--  as a function call (see :ref:`Function Call Expression`),
-   passing the first parameter in the usual way
+-  Making a function call (see :ref:`Function Call Expression`), and
+   passing the first parameter in the usual way;
 
--  as a method call (see :ref:`Method Call Expression`), where
-   no argument is provided for the first parameter
-   and the ``objectReference`` before
-   the function name is used as the first argument
+-  Making a method call (see :ref:`Method Call Expression`) with
+   no argument provided for the first parameter, and using the
+   ``objectReference`` before the function name as the first argument.
 
 .. code-block:: typescript
    :linenos:
@@ -1607,21 +1608,21 @@ There are two ways to call a *function with receiver*:
       c.foo()
       c.bar(1)
 
-The keyword ``this`` can be used inside a *function with receiver*
-and it corresponds the first parameter.
+The keyword ``this`` can be used inside a *function with receiver*. It
+corresponds to the first parameter. The type of ``this`` parameter is
+called the *receiver type* (see :ref:`Receiver Type`).
 
-The type of ``this`` parameter is called the *receiver type*
-(see :ref:`Receiver Type`). 
-
-
-If the *receiver type* is a class type, ``private`` or ``protected``
-members are not accessible (see :ref:`Accessible`) within the bodies of thee
+If the *receiver type* is a class type, then ``private`` or ``protected``
+members are not accessible (see :ref:`Accessible`) within the body of a
 *function with receiver*. Only ``public`` members can be accessed:
 
 .. index::
    keyword this
-   private
-   protected
+   function with receiver
+   receiver type
+   public member
+   private member
+   protected member
    access
 
 .. code-block:: typescript
@@ -1643,12 +1644,18 @@ members are not accessible (see :ref:`Accessible`) within the bodies of thee
       a.foo() // Ordinary class method is called
       a.bar() // Function with receiver is called
 
-The name of a *function with receiver* cannot be the same as the name of some
-public receiver method or field, otherwise a :index:`compile-time error` occurs.
-It also means, that a *function with receiver* cannot overload a method,
-defined for receiver type.
+The name of a *function with receiver* cannot be the same as the name of a
+public receiver method or field. Otherwise, a :index:`compile-time error` occurs.
+It also means that a *function with receiver* cannot overload a method
+defined for the receiver type.
 
 *Function with receiver* can be generic as in the following example:
+
+.. index::
+   function with receiver
+   public method
+   overload
+   receiver type
 
 .. code-block:: typescript
    :linenos:
@@ -1663,12 +1670,10 @@ defined for receiver type.
           // Explicit instantiation
      }
 
-*Functions with receiver* are dispatched statically; 
-what function is being called is known at compile time based
-on the receiver type specified in its declaration.
-
-They can be applied to receiver of any 
-derived class until it is redefined in the derived class:
+*Functions with receiver* are dispatched statically. What function is being
+called is known at compile time based on the receiver type specified in the
+declaration. A *function with receiver* can be applied to the receiver of any
+derived class until it is redefined within the derived class:
 
 .. code-block:: typescript
    :linenos:
@@ -1687,7 +1692,7 @@ derived class until it is redefined in the derived class:
       d.foo() // `Derived.foo is called` to be printed
 
 As illustrated by the following examples, a *function with receiver* can be
-defined in a compilation unit other than one that defines a receiver type:
+defined in a compilation unit other than the one that defines the receiver type:
 
 .. code-block:: typescript
    :linenos:
@@ -1710,13 +1715,12 @@ defined in a compilation unit other than one that defines a receiver type:
 Receiver Type
 =============
 
-A *receiver type* is a type of *receiver parameter* in functions, function types
-and lamdbas with receiver.
+A *receiver type* is the type of the *receiver parameter* in a function,
+function type, and lamdba with receiver. A *receiver type* may be an interface
+type, a class type, an array type, or a type parameter. Otherwise, a
+:index:`compile-time error` occurs.
 
-A *receiver type* may be an interface type, a class type, an array type
-or a type parameter, otherwise a :index:`compile-time error` occurs.
-
-Using an array type as receiever type is illustrated by the example below:
+The example below represents the use of an array type as receiever type:
 
 .. code-block:: typescript
    :linenos:
@@ -1738,10 +1742,9 @@ Accessors with Receiver
 .. meta:
     frontend_status: None
 
-An *accessor with receiver* declaration is a top-level declaration 
-(see :ref:`Top-Level Declarations`) that can be used as class or interface 
-accessors (see :ref:`Accessor Declarations`)
-for specified receiver type:
+An *accessor with receiver* declaration is a top-level declaration (see
+:ref:`Top-Level Declarations`) that can be used as class or interface accessor
+(see :ref:`Accessor Declarations`) for a specified receiver type:
 
 .. code-block:: abnf
 
@@ -1750,8 +1753,11 @@ for specified receiver type:
         | 'set' identifier '(' receiverParameter ',' parameter ')' block
         ;
 
-A get-accessor (getter) must have a single *received parameter* and an explicit return type. 
-A set-accessor (setter) must have a *received parameter*, and a second parameter and no return type.
+A get-accessor (getter) must have a single *receiver parameter* and an explicit
+return type.
+
+A set-accessor (setter) must have a *receiver parameter*, the one other
+parameter, and no return type.
 
 The use of getters and setters looks the same as the use of fields:
 
@@ -1775,7 +1781,7 @@ The use of getters and setters looks the same as the use of fields:
       console.log(c.fullName) // output: 'Doe John'
       c.fullName = "new name" // compile-time error, as setter is not defined
 
-A :index:`compile-time error` occurs if an accessor is used in form of 
+A :index:`compile-time error` occurs if an accessor is used in the form of
 a function or a method call.
 
 |
@@ -1788,10 +1794,10 @@ Function Types with Receiver
 .. meta:
     frontend_status: None
 
-A *function type with receiver* specifies signature of functions or lambdas with receiver. 
-It is almost the same as a *function type* (see :ref:`Function Types`), 
-except that the first parameter is mandatory,
-and keyword ``this`` is used as its name:
+A *function type with receiver* specifies the signature of a function or lambda
+with receiver. It is almost the same as a *function type* (see :ref:`Function Types`),
+except that the first parameter is mandatory, and the keyword ``this`` is used
+as its name:
 
 .. code-block:: abnf
 
@@ -1799,8 +1805,8 @@ and keyword ``this`` is used as its name:
         '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 'throws'?
         ;
 
-The type of the *receiver parameter* is called a *receiver type*
-(see :ref:`Receiver Type`).
+The type of a *receiver parameter* is called the *receiver type* (see
+:ref:`Receiver Type`).
 
 .. code-block:: typescript
    :linenos:
@@ -1822,7 +1828,7 @@ The type of the *receiver parameter* is called a *receiver type*
 
 
 The usual rule of function type compatibility (see :ref:`Function Types Conversions`)
-are applied to *function type with receiver*, ignoring parameters names. 
+is applied to *function type with receiver*, and parameter names are ignored.
 
 .. code-block:: typescript
    :linenos:
@@ -1843,7 +1849,8 @@ are applied to *function type with receiver*, ignoring parameters names.
       f1 = f2 // ok
 
 The only difference is that only entity of function type with receiver can be 
-used in :ref:`Method Call Expression`. Using definitions from previous example:
+used in :ref:`Method Call Expression`. The definitions from the previous example
+are reused in the example below:
 
 .. code-block:: typescript
    :linenos:
@@ -1865,22 +1872,23 @@ Lambda Expressions with Receiver
 .. meta:
     frontend_status: None
 
-*Lambda expression with receiver* defines an instance of
-a *function type with receiver* (see :ref:`Function Types with Receiver`).
-
-It looks almost the same as ordinary lambda expression
-(see :ref:`Lambda Expressions`), except that the first parameter is mandatory,
-and keyword ``this`` is used as its name:
+*Lambda expression with receiver* defines an instance of a *function type with
+receiver* (see :ref:`Function Types with Receiver`). It looks almost the same
+as an ordinary lambda expression (see :ref:`Lambda Expressions`), except that
+the first parameter is mandatory, and the keyword ``this`` is used as its name:
 
 .. code-block:: abnf
 
     lambdaExpressionWithReceiver:
-        typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
+        annotationUsage? typeParameters? 
+        '(' receiverParameter (',' lambdaParameterList)? ')' 
         returnType? throwMark? '=>' lambdaBody
         ;
 
-The keyword ``this`` can be used inside a *lamdba expression with receiver*
-and it corresponds the first parameter:
+The usage of annotations is defined in :ref:`Using Annotations`.
+
+The keyword ``this`` can be used inside a *lamdba expression with receiver*,
+It corresponds to the first parameter:
 
 .. code-block:: typescript
    :linenos:
@@ -1891,7 +1899,7 @@ and it corresponds the first parameter:
           console.log(this.name)
       }
 
-The use of lambada  is illustrated by the example below:
+The example below represents the use of lambda:
 
 .. code-block:: typescript
    :linenos:
@@ -1966,7 +1974,7 @@ The formal syntax of the *trailing lambda* is presented below:
 Currently, no parameter can be specified for the trailing lambda. Otherwise,
 a :index:`compile-time error` occurs.
 
-**Note**: If a call is followed by a block, and the function or method
+**Note**. If a call is followed by a block, and the function or method
 being called has no last function type parameter, then such block is
 handled as an ordinary block of statements but not as a lambda function.
 
@@ -2042,7 +2050,7 @@ Enumeration Types Conversions
 Every *enum* type is compatible with type ``Object`` (see
 :ref:`Type Compatibility`). Every variable of type ``enum`` can thus be
 assigned into a variable of type ``Object``. The ``instanceof`` check can
-be used to get an enumeration variable back by applying the ``as`` conversion:
+be used to get an enumeration variable back by applying the casting conversion:
 
 .. code-block-meta:
 
@@ -2054,7 +2062,7 @@ be used to get an enumeration variable back by applying the ``as`` conversion:
     let o: Object = c // Autoboxing of enum type to its reference version
     // Such reference version type has no name, but can be detected by instanceof
     if (o instanceof Commands) {
-       c = o as Commands // And explicitly converted back by 'as' conversion
+       c = o as Commands // And cast back by cast operator
     }
 
 .. index::
@@ -2116,7 +2124,7 @@ There are additional methods for instances of any enumeration type:
       console.log(c.valueOf()) // prints 10
       console.log(c.getName()) // prints Green
 
-**Note**: ``c.toString()`` returns the same value as ``c.valueOf().toString()``.
+**Note**. ``c.toString()`` returns the same value as ``c.valueOf().toString()``.
 
 .. index::
    instance
@@ -2759,7 +2767,7 @@ is ``Promise<void>``.
 of the function body if there is no explicit return statement in a function
 with the return ``Promise<void>``.
 
-**Note**: Using type ``Promise<void>`` is not recommended as this type is
+**Note**. Using type ``Promise<void>`` is not recommended as this type is
 supported for the sake of backward |TS| compatibility only.
 
 .. index::
@@ -2797,7 +2805,7 @@ is ``Promise<void>``.
 of the methods body if there is no explicit return statement in a method
 with return type ``Promise<void>``.
 
-**Note**: Using this annotation is not recommended as this type of methods
+**Note**. Using this annotation is not recommended as this type of methods
 is supported for the sake of backward |TS| compatibility only.
 
 .. index::
@@ -3060,15 +3068,14 @@ The result of a cast expression is an instance of type ``T``.
       x.bar() // a call of interface method (not dynamic)
    }
 
-The wrapper must raise an error if an underlying object cannot be converted
-to the target type specified by the cast operator.
+The wrapper must raise an error if an underlying object cannot be cast to the
+target type specified by the cast expression.
 
 .. index::
    wrapper
    underlying object
    cast expression
    interface type
-   cast expression
    instance
    type
    conversion

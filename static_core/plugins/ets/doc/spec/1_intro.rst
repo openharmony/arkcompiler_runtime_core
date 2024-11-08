@@ -579,7 +579,7 @@ as used in other languages, application areas, or industries.
      -- de-nesting of all nested types in a union type to present them in
      the form of a flat line that has no more union types included.
 
-   fit (into)
+   fit into (v.)
      -- belong, or be implicitly convertible (see :ref:`Widening Primitive Conversions`)
      to an entity.
 

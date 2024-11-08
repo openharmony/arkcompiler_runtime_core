@@ -147,7 +147,7 @@ errors in such a context is not recommended.
 The ``try`` statements (see :ref:`Try Statements`) are used to handle
 errors in a manner similar to the handling of exceptions.
 
-**Note**: Not every error can be recovered.
+**Note**. Not every error can be recovered.
 
 .. index::
    compile-time error
