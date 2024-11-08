@@ -1746,7 +1746,7 @@ static void TranslateImmToLabel(pandasm::Ins *paIns, LabelTable *labelTable, con
         size_t idx = GetBytecodeInstructionNumber(BytecodeInstruction(insArr), bcInsDest);
         if (idx != std::numeric_limits<size_t>::max()) {
             if (labelTable->find(idx) == labelTable->end()) {
-                std::stringstream ss {};
+                std::stringstream ss;
                 ss << "jump_label_" << labelTable->size();
                 (*labelTable)[idx] = ss.str();
             }
