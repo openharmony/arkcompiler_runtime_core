@@ -358,7 +358,16 @@ class RichLoggingPlugin:
             self.log_cli_handler.setFormatter(formater)
         else:
             self.log_cli_handler = _RichLoggingNullHandler()
-        self._disable_loggers(loggers_to_disable=self._config.option.logger_disable)
+        RichLoggingPlugin._disable_loggers(loggers_to_disable=self._config.option.logger_disable)
+
+    @staticmethod
+    def _disable_loggers(loggers_to_disable: list[str]) -> None:
+        if not loggers_to_disable:
+            return
+
+        for name in loggers_to_disable:
+            logger = logging.getLogger(name)
+            logger.disabled = True
 
     def set_log_path(self, filename: str) -> None:
         path = Path(filename)
@@ -415,6 +424,7 @@ class RichLoggingPlugin:
 
     @hookimpl(wrapper=True)
     def pytest_runtest_call(self, item: nodes.Item) -> Generator[None, None, None]:
+        # CC-OFFNXT(G.NAM.05) hide redundant logs in logging facility
         __tracebackhide__ = True
         self.log_cli_handler.set_when(_PHASE_CALL)
         yield from self._runtest_for(item, _PHASE_CALL)
@@ -449,6 +459,7 @@ class RichLoggingPlugin:
         return self._config.getoption("--log-cli-level") is not None or self._config.getini("log_cli")
 
     def _runtest_for(self, test_invocation_item: nodes.Item, when: str) -> Generator[None, None, None]:
+        # CC-OFFNXT(G.NAM.05) hide redundant logs in logging facility
         __tracebackhide__ = True
         with CatchingLogs(
             self.report_handler,
@@ -467,14 +478,6 @@ class RichLoggingPlugin:
                 finally:
                     log_content = report_handler.stream.getvalue().strip()
                     test_invocation_item.add_report_section(when, "log", log_content)
-
-    def _disable_loggers(self, loggers_to_disable: list[str]) -> None:
-        if not loggers_to_disable:
-            return
-
-        for name in loggers_to_disable:
-            logger = logging.getLogger(name)
-            logger.disabled = True
 
 
 class _FileHandler(logging.FileHandler):
