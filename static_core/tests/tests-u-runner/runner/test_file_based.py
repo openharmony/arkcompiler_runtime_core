@@ -94,7 +94,7 @@ class TestFileBased(Test):
         return default_fail_kind
 
     # pylint: disable=too-many-locals
-    def run_one_step(self, name: str, params: Params, result_validator: ResultValidator) \
+    def run_one_step(self, name: str, params: Params, result_validator: ResultValidator, no_log: bool = False) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         profraw_file, profdata_file = None, None
         if self.test_env.config.general.coverage.use_llvm_cov:
@@ -144,19 +144,16 @@ class TestFileBased(Test):
         if self.test_env.config.general.coverage.use_llvm_cov and profdata_file and profraw_file:
             self.test_env.coverage.merge_and_delete_prowraw_files(profraw_file, profdata_file)
 
-        report = TestReport(
-            output=output.strip(),
-            error=error.strip(),
-            return_code=return_code
-        )
+        report = TestReport(output.strip(), error.strip(), return_code)
 
-        self.log_cmd(f"Output: '{report.output}'")
-        self.log_cmd(f"Error: '{report.error}'")
-        self.log_cmd(f"Return code: {report.return_code}")
+        if not no_log or report.error or report.return_code != 0:
+            self.log_cmd(f"Output: '{report.output}'")
+            self.log_cmd(f"Error: '{report.error}'")
+            self.log_cmd(f"Return code: {report.return_code}")
 
         return passed, report, fail_kind
 
-    def run_es2panda(self, flags: List[str], test_abc: str, result_validator: ResultValidator) \
+    def run_es2panda(self, flags: List[str], test_abc: str, result_validator: ResultValidator, no_log: bool = False) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = flags[:]
         es2panda_flags.append("--thread=0")
@@ -176,7 +173,7 @@ class TestFileBased(Test):
             fail_kind_other=FailKind.ES2PANDA_OTHER,
         )
 
-        return self.run_one_step("es2panda", params, result_validator)
+        return self.run_one_step("es2panda", params, result_validator, no_log)
 
     def run_runtime(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:

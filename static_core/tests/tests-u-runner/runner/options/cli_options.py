@@ -119,6 +119,10 @@ def add_other_test_suite_args(parser: argparse.ArgumentParser) -> None:
         '--astchecker', action='store_true', dest='astchecker',
         default=None,
         help='run ast checker tests')
+    parser.add_argument(
+        '--srcdumper', action='store_true', dest='srcdumper',
+        default=None,
+        help='run src dumper tests')
 
 
 def add_test_suite_args(parser: argparse.ArgumentParser) -> None:
