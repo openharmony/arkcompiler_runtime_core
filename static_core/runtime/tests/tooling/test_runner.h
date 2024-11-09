@@ -199,13 +199,6 @@ public:
         }
     }
 
-    void InspectRequested(PtObject object, PtObject hints) override
-    {
-        if (test_->inspectRequested) {
-            test_->inspectRequested(object, hints);
-        }
-    }
-
     void ClassLoad(PtThread thread, BaseClass *klass) override
     {
         if (test_->classLoad) {

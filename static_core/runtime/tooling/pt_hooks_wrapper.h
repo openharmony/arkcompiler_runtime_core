@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_PT_HOOKS_WRAPPER_H
-#define PANDA_TOOLING_PT_HOOKS_WRAPPER_H
+#ifndef PANDA_RUNTIME_TOOLING_PT_HOOKS_WRAPPER_H
+#define PANDA_RUNTIME_TOOLING_PT_HOOKS_WRAPPER_H
 
 #include <atomic>
 #include "runtime/include/tooling/debug_interface.h"
@@ -349,18 +349,6 @@ public:
         loadedHooks->ExecutionContextsCleared();
     }
 
-    void InspectRequested(PtObject object, PtObject hints) override
-    {
-        // Atomic with acquire order reason: data race with hooks_
-        auto *loadedHooks = hooks_.load(std::memory_order_acquire);
-        if (loadedHooks == nullptr || !HookIsEnabled(PtHookType::PT_HOOK_TYPE_INSPECT_REQUESTED)) {
-            return;
-        }
-        // Atomic with acquire order reason: data race with vmdeath_did_not_happen_
-        ASSERT(vmdeathDidNotHappen_.load(std::memory_order_acquire));
-        loadedHooks->InspectRequested(object, hints);
-    }
-
     void ClassLoad(PtThread thread, BaseClass *klass) override
     {
         // Atomic with acquire order reason: data race with hooks_
@@ -474,4 +462,4 @@ private:
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_TOOLING_PT_HOOKS_WRAPPER_H
+#endif  // PANDA_RUNTIME_TOOLING_PT_HOOKS_WRAPPER_H

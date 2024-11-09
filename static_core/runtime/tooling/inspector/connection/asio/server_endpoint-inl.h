@@ -20,7 +20,7 @@
 #error Define CONFIG before including this header
 #endif
 
-#include "server_endpoint.h"
+#include "connection/asio/server_endpoint.h"
 
 namespace ark::tooling::inspector {
 template <>  // NOLINTNEXTLINE(misc-definitions-in-headers)

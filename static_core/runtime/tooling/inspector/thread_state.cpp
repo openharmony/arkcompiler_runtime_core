@@ -15,6 +15,14 @@
 
 #include "thread_state.h"
 
+#include <sstream>
+
+#include "macros.h"
+
+#include "debuggable_thread.h"
+#include "error.h"
+#include "types/numeric_id.h"
+
 namespace ark::tooling::inspector {
 std::vector<BreakpointId> ThreadState::GetBreakpointsByLocation(const PtLocation &location) const
 {
@@ -94,11 +102,18 @@ void ThreadState::SetBreakpointsActive(bool active)
     breakpointsActive_ = active;
 }
 
-BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations)
+BreakpointId ThreadState::SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition)
 {
+    ASSERT(!locations.empty());
+
     auto id = nextBreakpointId_++;
     for (auto &location : locations) {
         breakpointLocations_.emplace(location, id);
+    }
+
+    if (condition != nullptr) {
+        ASSERT(locations.size() == 1);
+        breakpointConditions_.AddCondition(id, *condition);
     }
 
     return id;
@@ -112,6 +127,9 @@ void ThreadState::RemoveBreakpoint(BreakpointId id)
         } else {
             ++it;
         }
+    }
+    if (breakpointConditions_.HasCondition(id)) {
+        breakpointConditions_.RemoveCondition(id);
     }
 }
 
@@ -182,45 +200,79 @@ bool ThreadState::OnMethodEntry()
 void ThreadState::OnSingleStep(const PtLocation &location)
 {
     ASSERT(!paused_);
-    if (!breakpointsActive_ || breakpointLocations_.find(location) == breakpointLocations_.end()) {
-        switch (stepKind_) {
-            case StepKind::NONE: {
-                paused_ = false;
-                break;
-            }
 
-            case StepKind::BREAK_ON_START: {
-                paused_ = true;
-                break;
-            }
-
-            case StepKind::CONTINUE_TO: {
-                paused_ = stepLocations_.find(location) != stepLocations_.end();
-                break;
-            }
-
-            case StepKind::PAUSE: {
-                paused_ = true;
-                break;
-            }
-
-            case StepKind::STEP_INTO: {
-                paused_ = stepLocations_.find(location) == stepLocations_.end();
-                break;
-            }
-
-            case StepKind::STEP_OUT: {
-                paused_ = !methodEntered_;
-                break;
-            }
-
-            case StepKind::STEP_OVER: {
-                paused_ = !methodEntered_ && stepLocations_.find(location) == stepLocations_.end();
-                break;
-            }
-        }
-    } else {
+    if (ShouldStopAtBreakpoint(location)) {
         paused_ = true;
+        return;
     }
+
+    switch (stepKind_) {
+        case StepKind::NONE: {
+            paused_ = false;
+            break;
+        }
+
+        case StepKind::BREAK_ON_START: {
+            paused_ = true;
+            break;
+        }
+
+        case StepKind::CONTINUE_TO: {
+            paused_ = stepLocations_.find(location) != stepLocations_.end();
+            break;
+        }
+
+        case StepKind::PAUSE: {
+            paused_ = true;
+            break;
+        }
+
+        case StepKind::STEP_INTO: {
+            paused_ = stepLocations_.find(location) == stepLocations_.end();
+            break;
+        }
+
+        case StepKind::STEP_OUT: {
+            paused_ = !methodEntered_;
+            break;
+        }
+
+        case StepKind::STEP_OVER: {
+            paused_ = !methodEntered_ && stepLocations_.find(location) == stepLocations_.end();
+            break;
+        }
+    }
+}
+
+static std::string DumpBreakpoint(BreakpointId bpId, const PtLocation &loc)
+{
+    std::stringstream ss;
+    ss << "breakpoint #" << bpId << " at " << loc.GetPandaFile() << ':' << loc.GetMethodId() << ':'
+       << loc.GetBytecodeOffset();
+    return ss.str();
+}
+
+bool ThreadState::ShouldStopAtBreakpoint(const PtLocation &location)
+{
+    if (!breakpointsActive_) {
+        return false;
+    }
+
+    auto rng = breakpointLocations_.equal_range(location);
+    for (auto iter = rng.first; iter != rng.second; ++iter) {
+        auto bpId = iter->second;
+        if (!breakpointConditions_.HasCondition(bpId)) {
+            // Should pause unconditionally
+            return true;
+        }
+        auto res = breakpointConditions_.EvaluateCondition(bpId);
+        if (!res) {
+            LOG(WARNING, DEBUGGER) << DumpBreakpoint(bpId, location) << " condition evaluation failure";
+            HandleError(res.Error());
+        } else if (res.Value()) {
+            return true;
+        }
+    }
+    return false;
 }
 }  // namespace ark::tooling::inspector

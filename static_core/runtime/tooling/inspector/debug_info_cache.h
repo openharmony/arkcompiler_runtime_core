@@ -16,17 +16,18 @@
 #ifndef PANDA_TOOLING_INSPECTOR_DEBUG_INFO_CACHE_H
 #define PANDA_TOOLING_INSPECTOR_DEBUG_INFO_CACHE_H
 
-#include "disassembler/disasm_backed_debug_info_extractor.h"
-
-#include "runtime/include/method.h"
-#include "tooling/debugger.h"
-#include "runtime/include/typed_value.h"
-
 #include <memory>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+
+#include "disassembler/disasm_backed_debug_info_extractor.h"
+#include "include/method.h"
+#include "include/typed_value.h"
+#include "runtime/tooling/debugger.h"
+
+#include "types/location.h"
 
 namespace ark::tooling::inspector {
 class DebugInfoCache final {

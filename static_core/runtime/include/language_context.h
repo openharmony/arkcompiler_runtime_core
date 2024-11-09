@@ -28,7 +28,6 @@
 #include "runtime/include/itable_builder.h"
 #include "runtime/include/language_config.h"
 #include "runtime/include/vtable_builder_interface.h"
-#include "runtime/include/tooling/inspector_extension.h"
 #include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/include/stack_walker.h"
 #include "runtime/mem/gc/gc_types.h"
@@ -147,9 +146,7 @@ public:
 
     virtual std::unique_ptr<ClassLinkerExtension> CreateClassLinkerExtension() const;
 
-    virtual std::unique_ptr<tooling::InspectorExtension> CreateInspectorExtension() const;
-
-    virtual PandaUniquePtr<tooling::PtLangExt> CreatePtLangExt() const;
+    virtual std::unique_ptr<tooling::PtLangExt> CreatePtLangExt() const;
 
     virtual void ThrowException(ManagedThread *thread, const uint8_t *mutf8Name, const uint8_t *mutf8Msg) const;
 
@@ -331,12 +328,7 @@ public:
         return base_->CreateClassLinkerExtension();
     }
 
-    std::unique_ptr<tooling::InspectorExtension> CreateInspectorExtension()
-    {
-        return base_->CreateInspectorExtension();
-    }
-
-    PandaUniquePtr<tooling::PtLangExt> CreatePtLangExt()
+    std::unique_ptr<tooling::PtLangExt> CreatePtLangExt()
     {
         return base_->CreatePtLangExt();
     }

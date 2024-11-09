@@ -13,13 +13,7 @@
  * limitations under the License.
  */
 
-#include "tooling/inspector/types/remote_object.h"
-#include "tooling/inspector/types/object_preview.h"
-#include "tooling/inspector/types/property_descriptor.h"
-
-#include "macros.h"
-#include "utils/json_builder.h"
-#include "helpers.h"
+#include "types/remote_object.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -29,6 +23,13 @@
 #include <string>
 #include <utility>
 #include <variant>
+
+#include "libpandafile/helpers.h"
+#include "macros.h"
+#include "utils/json_builder.h"
+
+#include "types/object_preview.h"
+#include "types/property_descriptor.h"
 
 namespace ark::tooling::inspector {
 

@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include "location.h"
-#include "numeric_id.h"
+#include "types/location.h"
+
+#include <cfloat>
+#include <cmath>
+#include <string>
 
 #include "utils/expected.h"
 #include "utils/json_builder.h"
 #include "utils/json_parser.h"
 
-#include <cfloat>
-#include <cmath>
-#include <string>
+#include "types/numeric_id.h"
 
 using namespace std::literals::string_literals;  // NOLINT(google-build-using-namespace)
 

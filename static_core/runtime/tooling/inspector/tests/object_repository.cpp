@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
+#include "object_repository.h"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "common.h"
-#include "json_object_matcher.h"
-#include "object_repository.h"
-#include "tooling/debugger.h"
-#include "runtime_options.h"
-#include "runtime.h"
-#include "types/numeric_id.h"
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
+#include "runtime.h"
+#include "runtime_options.h"
+#include "tooling/debugger.h"
+
+#include "types/numeric_id.h"
+
+#include "common.h"
+#include "json_object_matcher.h"
 
 // NOLINTBEGIN
 

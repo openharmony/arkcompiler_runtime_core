@@ -15,21 +15,21 @@
 
 #include "inspector_server.h"
 
-#include "connection/server.h"
-#include "types/location.h"
-#include "types/numeric_id.h"
-
-#include "console_call_type.h"
-#include "macros.h"
-#include "tooling/pt_thread.h"
-#include "utils/json_builder.h"
-#include "utils/json_parser.h"
-#include "utils/logger.h"
-
 #include <functional>
 #include <regex>
 #include <string>
 #include <utility>
+
+#include "include/console_call_type.h"
+#include "include/tooling/pt_thread.h"
+#include "macros.h"
+#include "utils/json_builder.h"
+#include "utils/json_parser.h"
+#include "utils/logger.h"
+
+#include "connection/server.h"
+#include "types/location.h"
+#include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
 InspectorServer::InspectorServer(Server &server) : server_(server)
@@ -333,9 +333,7 @@ void InspectorServer::OnCallDebuggerResume(std::function<void(PtThread)> &&handl
     });
 }
 
-void InspectorServer::OnCallDebuggerSetBreakpoint(
-    std::function<std::optional<BreakpointId>(PtThread, const std::function<bool(std::string_view)> &, size_t,
-                                              std::set<std::string_view> &)> &&handler)
+void InspectorServer::OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHandler> &&handler)
 {
     // clang-format off
     server_.OnCall("Debugger.setBreakpoint",
@@ -345,6 +343,7 @@ void InspectorServer::OnCallDebuggerSetBreakpoint(
                 LOG(INFO, DEBUGGER) << location.Error();
                 return;
             }
+            auto condition = params.template GetValue<JsonObject::StringT>("condition");
 
             auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
@@ -353,7 +352,7 @@ void InspectorServer::OnCallDebuggerSetBreakpoint(
 
             auto id = handler(
                 thread, [sourceFile](auto fileName) { return fileName == sourceFile; },
-                location->GetLineNumber(), sourceFiles);
+                location->GetLineNumber(), sourceFiles, condition);
             if (!id) {
                 LOG(INFO, DEBUGGER) << "Failed to set breakpoint";
                 return;
@@ -365,9 +364,7 @@ void InspectorServer::OnCallDebuggerSetBreakpoint(
     // clang-format on
 }
 
-void InspectorServer::OnCallDebuggerSetBreakpointByUrl(
-    std::function<std::optional<BreakpointId>(PtThread, const std::function<bool(std::string_view)> &, size_t,
-                                              std::set<std::string_view> &)> &&handler)
+void InspectorServer::OnCallDebuggerSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler)
 {
     server_.OnCall("Debugger.setBreakpointByUrl", [this, handler = std::move(handler)](auto &sessionId, auto &result,
                                                                                        const JsonObject &params) {
@@ -381,7 +378,8 @@ void InspectorServer::OnCallDebuggerSetBreakpointByUrl(
 
         std::function<bool(std::string_view)> sourceFileFilter;
         if (auto url = params.GetValue<JsonObject::StringT>("url")) {
-            sourceFileFilter = [sourceFile = url->find("file://") == 0 ? url->substr(std::strlen("file://")) : *url](
+            static constexpr std::string_view FILE_PREFIX = "file://";
+            sourceFileFilter = [sourceFile = url->find(FILE_PREFIX) == 0 ? url->substr(FILE_PREFIX.size()) : *url](
                                    auto fileName) { return fileName == sourceFile; };
         } else if (auto urlRegex = params.GetValue<JsonObject::StringT>("urlRegex")) {
             sourceFileFilter = [regex = std::regex(*urlRegex)](auto fileName) {
@@ -392,10 +390,12 @@ void InspectorServer::OnCallDebuggerSetBreakpointByUrl(
             return;
         }
 
+        auto condition = params.template GetValue<JsonObject::StringT>("condition");
+
         std::set<std::string_view> sourceFiles;
         auto thread = sessionManager_.GetThreadBySessionId(sessionId);
 
-        auto id = handler(thread, sourceFileFilter, lineNumber, sourceFiles);
+        auto id = handler(thread, sourceFileFilter, lineNumber, sourceFiles, condition);
         if (!id) {
             LOG(INFO, DEBUGGER) << "Failed to set breakpoint";
             return;
@@ -542,15 +542,16 @@ void InspectorServer::OnCallRuntimeEvaluate(std::function<EvaluationResult(PtThr
                 return;
             }
 
-            auto [evalResult, exceptionDetails] = handler(thread, *expressionStr);
-
-            if (!evalResult) {
+            auto optResult = handler(thread, *expressionStr);
+            if (!optResult) {
                 // NOTE(dslynko): might return error instead of `undefined`.
-                LOG(DEBUG, DEBUGGER) << "Evaluation failed for expression: " << *expressionStr;
-                evalResult.emplace(RemoteObject::Undefined());
+                LOG(DEBUG, DEBUGGER) << "Evaluation failed";
+                result.AddProperty("result", RemoteObject::Undefined().ToJson());
+                return;
             }
-            result.AddProperty("result", evalResult->ToJson());
 
+            auto [evalResult, exceptionDetails] = *optResult;
+            result.AddProperty("result", evalResult.ToJson());
             if (exceptionDetails) {
                 result.AddProperty("exceptionDetails", exceptionDetails->ToJson());
             }

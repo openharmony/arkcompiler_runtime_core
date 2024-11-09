@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_RUNTIME_TOOLING_INSPECTOR_DEFAULT_INSPECTOR_EXTENSION_H
-#define PANDA_RUNTIME_TOOLING_INSPECTOR_DEFAULT_INSPECTOR_EXTENSION_H
+#ifndef PANDA_RUNTIME_TOOLING_INSPECTOR_PT_DEFAULT_LANG_EXTENSION_H
+#define PANDA_RUNTIME_TOOLING_INSPECTOR_PT_DEFAULT_LANG_EXTENSION_H
 
-#include "runtime/include/tooling/inspector_extension.h"
+#include "runtime/include/tooling/pt_lang_extension.h"
 
 namespace ark::tooling {
-class StaticDefaultInspectorExtension : public InspectorExtension {
+class PtStaticDefaultExtension : public PtLangExt {
 public:
-    explicit StaticDefaultInspectorExtension(panda_file::SourceLang lang) : lang_(lang) {}
-    ~StaticDefaultInspectorExtension() override = default;
+    explicit PtStaticDefaultExtension(panda_file::SourceLang lang) : lang_(lang) {}
+    ~PtStaticDefaultExtension() override = default;
 
-    NO_COPY_SEMANTIC(StaticDefaultInspectorExtension);
-    NO_MOVE_SEMANTIC(StaticDefaultInspectorExtension);
+    NO_COPY_SEMANTIC(PtStaticDefaultExtension);
+    NO_MOVE_SEMANTIC(PtStaticDefaultExtension);
 
     std::string GetClassName(const ObjectHeader *object) override;
     std::optional<std::string> GetAsString(const ObjectHeader *object) override;
@@ -37,13 +37,13 @@ private:
     panda_file::SourceLang lang_;
 };
 
-class DynamicDefaultInspectorExtension : public InspectorExtension {
+class PtDynamicDefaultExtension : public PtLangExt {
 public:
-    DynamicDefaultInspectorExtension() = default;
-    ~DynamicDefaultInspectorExtension() override = default;
+    PtDynamicDefaultExtension() = default;
+    ~PtDynamicDefaultExtension() override = default;
 
-    NO_COPY_SEMANTIC(DynamicDefaultInspectorExtension);
-    NO_MOVE_SEMANTIC(DynamicDefaultInspectorExtension);
+    NO_COPY_SEMANTIC(PtDynamicDefaultExtension);
+    NO_MOVE_SEMANTIC(PtDynamicDefaultExtension);
 
     std::string GetClassName(const ObjectHeader *object) override;
     std::optional<std::string> GetAsString(const ObjectHeader *object) override;
@@ -53,4 +53,4 @@ public:
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_RUNTIME_TOOLING_INSPECTOR_DEFAULT_INSPECTOR_EXTENSION_H
+#endif  // PANDA_RUNTIME_TOOLING_INSPECTOR_PT_DEFAULT_LANG_EXTENSION_H

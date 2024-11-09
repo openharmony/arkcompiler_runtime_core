@@ -13,12 +13,13 @@
  * limitations under the License.
  */
 
+#include "include/tooling/debug_interface.h"
+#include "include/tooling/vreg_value.h"
 #include "intrinsics.h"
 #include "libpandabase/utils/logger.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/tooling/helpers.h"
 #include "plugins/ets/runtime/types/ets_primitives.h"
-#include "runtime/include/tooling/vreg_value.h"
 
 namespace ark::ets::intrinsics {
 

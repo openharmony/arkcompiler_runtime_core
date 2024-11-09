@@ -37,7 +37,6 @@
 #include "runtime/include/relayout_profiler.h"
 #include "runtime/include/runtime_options.h"
 #include "runtime/include/gc_task.h"
-#include "runtime/include/tooling/debug_interface.h"
 #ifndef PANDA_TARGET_WINDOWS
 #include "runtime/signal_handler.h"
 #endif
@@ -65,6 +64,7 @@ class RuntimeNotificationManager;
 class Trace;
 
 namespace tooling {
+class DebugInterface;
 class MemoryAllocationDumper;
 }  // namespace tooling
 

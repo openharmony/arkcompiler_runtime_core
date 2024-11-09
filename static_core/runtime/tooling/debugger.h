@@ -12,28 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_DEBUG_DEBUG_H
-#define PANDA_RUNTIME_DEBUG_DEBUG_H
+
+#ifndef PANDA_RUNTIME_TOOLING_DEBUGGER_H
+#define PANDA_RUNTIME_TOOLING_DEBUGGER_H
 
 #include <atomic>
 #include <functional>
 #include <memory>
 #include <string_view>
 
-#include "include/method.h"
-#include "include/runtime.h"
-#include "pt_hooks_wrapper.h"
-#include "include/mem/panda_smart_pointers.h"
 #include "include/mem/panda_containers.h"
+#include "include/mem/panda_smart_pointers.h"
+#include "include/method.h"
+#include "include/panda_vm.h"
+#include "include/runtime.h"
 #include "include/runtime_notification.h"
 #include "include/tooling/debug_interface.h"
 #include "libpandabase/os/mutex.h"
 #include "libpandabase/utils/span.h"
-#include "runtime/include/mem/panda_containers.h"
-#include "runtime/include/method.h"
-#include "runtime/include/runtime.h"
-#include "runtime/include/panda_vm.h"
-#include "runtime/include/tooling/debug_interface.h"
+#include "pt_hooks_wrapper.h"
 #include "runtime/thread_manager.h"
 
 namespace ark::tooling {
@@ -139,18 +136,6 @@ public:
     ~Debugger() override
     {
         runtime_->GetNotificationManager()->RemoveListener(this, DEBUG_EVENT_MASK);
-    }
-
-    PtLangExt *GetLangExtension() const override
-    {
-        PT_UNIMPLEMENTED();
-        return nullptr;
-    }
-
-    Expected<PtMethod, Error> GetPtMethod(const PtLocation & /* location */) const override
-    {
-        PT_DEPRECATED();
-        return Unexpected(Error(Error::Type::DEPRECATED, "Method is deprecated"));
     }
 
     std::optional<Error> RegisterHooks(PtHooks *hooks) override
@@ -289,83 +274,39 @@ public:
 
     std::optional<Error> ResumeThread(PtThread thread) const override;
 
-    std::optional<Error> SetVariable([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameDepth,
-                                     [[maybe_unused]] int32_t regNumber,
-                                     [[maybe_unused]] const PtValue &value) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
     std::optional<Error> SetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
                                      const VRegValue &value) const override;
-
-    std::optional<Error> GetVariable([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameDepth,
-                                     [[maybe_unused]] int32_t regNumber,
-                                     [[maybe_unused]] PtValue *result) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
 
     std::optional<Error> GetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
                                      VRegValue *result) const override;
 
-    std::optional<Error> GetProperty([[maybe_unused]] PtObject object, [[maybe_unused]] PtProperty property,
-                                     [[maybe_unused]] PtValue *value) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
+    /**
+     * @brief Loads provided bytecode and executes evaluation method.
+     * File must contain public class with equally named static method taking no arguments.
+     * Name of both class and method must equal source code file name, path to which must be included into binary.
+     * @param thread in which to load and execute method.
+     * @param frameNumber call stack depth in which context to evaluate.
+     * @param expr bytecode with expression.
+     * @param method pointer to save the loaded method in.
+     * @param result pointer to save result in.
+     */
+    std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frameNumber, const ExpressionWrapper &expr,
+                                            Method **method, VRegValue *result) const override;
 
-    std::optional<Error> SetProperty([[maybe_unused]] PtObject object, [[maybe_unused]] PtProperty property,
-                                     [[maybe_unused]] const PtValue &value) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> EvaluateExpression([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameNumber,
-                                            [[maybe_unused]] ExpressionWrapper expr,
-                                            [[maybe_unused]] PtValue *result) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> RetransformClasses([[maybe_unused]] int classCount,
-                                            [[maybe_unused]] const PtClass *classes) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> RedefineClasses([[maybe_unused]] int classCount,
-                                         [[maybe_unused]] const PandaClassDefinition *classes) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
+    /**
+     * @brief Executes the provided evaluation method.
+     * @param thread in which to execute method.
+     * @param frameNumber call stack depth in which context to evaluate.
+     * @param method pointer to the method.
+     * @param result pointer to save result in.
+     */
+    std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frameNumber, Method *method,
+                                            VRegValue *result) const override;
 
     std::optional<Error> RestartFrame([[maybe_unused]] PtThread thread,
                                       [[maybe_unused]] uint32_t frameNumber) const override;
 
     std::optional<Error> SetAsyncCallStackDepth([[maybe_unused]] uint32_t maxDepth) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> AwaitPromise([[maybe_unused]] PtObject promiseObject,
-                                      [[maybe_unused]] PtValue *result) const override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> CallFunctionOn([[maybe_unused]] PtObject object, [[maybe_unused]] PtMethod method,
-                                        [[maybe_unused]] const PandaVector<PtValue> &arguments,
-                                        [[maybe_unused]] PtValue *returnValue) const override
     {
         PT_UNIMPLEMENTED();
         return {};
@@ -380,40 +321,6 @@ public:
 
     std::optional<Error> NotifyFramePop(PtThread thread, uint32_t depth) const override;
 
-    std::optional<Error> SetPropertyAccessWatch([[maybe_unused]] PtClass klass,
-                                                [[maybe_unused]] PtProperty property) override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> ClearPropertyAccessWatch([[maybe_unused]] PtClass klass,
-                                                  [[maybe_unused]] PtProperty property) override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> SetPropertyModificationWatch([[maybe_unused]] PtClass klass,
-                                                      [[maybe_unused]] PtProperty property) override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> ClearPropertyModificationWatch([[maybe_unused]] PtClass klass,
-                                                        [[maybe_unused]] PtProperty property) override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
-
-    std::optional<Error> GetThisVariableByFrame([[maybe_unused]] PtThread thread, [[maybe_unused]] uint32_t frameDepth,
-                                                [[maybe_unused]] PtValue *result) override
-    {
-        PT_UNIMPLEMENTED();
-        return {};
-    }
     std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, ObjectHeader **thisPtr) override;
 
     std::optional<Error> SetPropertyAccessWatch(BaseClass *klass, PtProperty property) override;
@@ -577,4 +484,4 @@ private:
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_RUNTIME_DEBUG_DEBUG_H
+#endif  // PANDA_RUNTIME_TOOLING_DEBUGGER_H

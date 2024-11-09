@@ -16,14 +16,14 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_DESCRIPTOR_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_DESCRIPTOR_H
 
-#include "remote_object.h"
+#include <functional>
+#include <string>
+#include <utility>
 
 #include "macros.h"
 #include "utils/json_builder.h"
 
-#include <functional>
-#include <string>
-#include <utility>
+#include "remote_object.h"
 
 namespace ark::tooling::inspector {
 class PropertyDescriptor {

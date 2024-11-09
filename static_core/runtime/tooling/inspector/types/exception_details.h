@@ -15,13 +15,13 @@
 #ifndef PANDA_TOOLING_INSPECTOR_EXCEPTION_DETAILS_H
 #define PANDA_TOOLING_INSPECTOR_EXCEPTION_DETAILS_H
 
-#include "macros.h"
-#include "numeric_id.h"
-#include "remote_object.h"
-
 #include <functional>
 #include <optional>
 #include <string>
+
+#include "macros.h"
+#include "types/numeric_id.h"
+#include "types/remote_object.h"
 
 namespace ark {
 class JsonObjectBuilder;

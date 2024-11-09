@@ -16,10 +16,10 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_SCOPE_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_SCOPE_H
 
-#include "runtime/tooling/inspector/types/remote_object.h"
-
 #include <optional>
 #include <string>
+
+#include "types/remote_object.h"
 
 namespace ark {
 class JsonObjectBuilder;

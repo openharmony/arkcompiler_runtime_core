@@ -15,10 +15,6 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_H
 
-#include "tooling/inspector/types/numeric_id.h"
-#include "tooling/inspector/types/remote_object_type.h"
-#include "tooling/inspector/types/object_preview.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -27,6 +23,10 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+#include "types/numeric_id.h"
+#include "types/remote_object_type.h"
+#include "types/object_preview.h"
 
 namespace ark {
 class JsonObjectBuilder;

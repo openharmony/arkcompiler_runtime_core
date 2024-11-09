@@ -14,25 +14,23 @@
  */
 
 #include "debugger.h"
+
+#include "evaluation/expression_loader.h"
+#include "include/mem/panda_smart_pointers.h"
 #include "include/stack_walker.h"
+#include "include/stack_walker-inl.h"
+#include "include/thread-inl.h"
 #include "include/thread_scopes.h"
 #include "include/tooling/pt_location.h"
 #include "include/tooling/pt_thread.h"
-#include "pt_scoped_managed_code.h"
 #include "interpreter/frame.h"
-#include "include/mem/panda_smart_pointers.h"
-#include "pt_thread_info.h"
-
 #include "libpandabase/macros.h"
 #include "libpandabase/os/mem.h"
 #include "libpandabase/utils/expected.h"
 #include "libpandabase/utils/span.h"
 #include "libpandafile/bytecode_instruction.h"
-#include "runtime/include/mem/panda_smart_pointers.h"
-#include "runtime/include/stack_walker-inl.h"
-#include "runtime/include/stack_walker.h"
-#include "runtime/include/thread-inl.h"
-#include "runtime/interpreter/frame.h"
+#include "pt_scoped_managed_code.h"
+#include "pt_thread_info.h"
 #include "runtime/handle_scope-inl.h"
 
 namespace ark::tooling {
@@ -436,6 +434,46 @@ std::optional<Error> Debugger::ResumeThread(PtThread thread) const
     MTManagedThread *mtManagedThread = MTManagedThread::CastFromThread(managedThread);
     mtManagedThread->Resume();
 
+    return {};
+}
+
+std::optional<Error> Debugger::EvaluateExpression(PtThread thread, uint32_t frameNumber, const ExpressionWrapper &expr,
+                                                  Method **method, VRegValue *result) const
+{
+    ASSERT_MANAGED_CODE();
+    ASSERT(method != nullptr);
+    ASSERT(result != nullptr);
+    ASSERT(!thread.GetManagedThread()->HasPendingException());
+    // NOTE(dslynko): support custom frame depth
+    ASSERT(frameNumber == 0);
+
+    auto ret = GetPandaFrameByPtThread(thread, frameNumber, nullptr);
+    if (!ret) {
+        return ret.Error();
+    }
+
+    auto *ctx = ret.Value()->GetMethod()->GetClass()->GetLoadContext();
+    auto optMethod = LoadExpressionBytecode(ctx, expr);
+    if (!optMethod) {
+        return optMethod.Error();
+    }
+
+    *method = optMethod.Value();
+    return EvaluateExpression(thread, frameNumber, *method, result);
+}
+
+std::optional<Error> Debugger::EvaluateExpression(PtThread thread, [[maybe_unused]] uint32_t frameNumber,
+                                                  Method *method, VRegValue *result) const
+{
+    ASSERT_MANAGED_CODE();
+    ASSERT(method != nullptr);
+    ASSERT(result != nullptr);
+    ASSERT(!thread.GetManagedThread()->HasPendingException());
+    // NOTE(dslynko): support custom frame depth
+    ASSERT(frameNumber == 0);
+
+    auto value = method->Invoke(thread.GetManagedThread(), nullptr);
+    *result = VRegValue(value.GetAsLong());
     return {};
 }
 

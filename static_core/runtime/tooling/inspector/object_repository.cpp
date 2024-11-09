@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "runtime/tooling/inspector/object_repository.h"
+#include "object_repository.h"
 
+#include "include/tooling/pt_lang_extension.h"
 #include "runtime/handle_scope-inl.h"
-#include "runtime/include/tooling/inspector_extension.h"
 
 namespace ark::tooling::inspector {
 ObjectRepository::ObjectRepository()
-    : extension_(ManagedThread::GetCurrent()->GetLanguageContext().CreateInspectorExtension()),
+    : extension_(ManagedThread::GetCurrent()->GetLanguageContext().CreatePtLangExt()),
       scope_(ManagedThread::GetCurrent())
 {
 }
@@ -87,45 +87,6 @@ RemoteObject ObjectRepository::CreateObject(TypedValue value)
             return CreateObject(value.GetAsReference());
         case panda_file::Type::TypeId::TAGGED:
             return CreateObject(value.GetAsTagged());
-    }
-    UNREACHABLE();
-}
-
-RemoteObject ObjectRepository::CreateObject(Value value, panda_file::Type::TypeId type)
-{
-    ASSERT(ManagedThread::GetCurrent()->GetMutatorLock()->HasLock());
-
-    switch (type) {
-        case panda_file::Type::TypeId::INVALID:
-        case panda_file::Type::TypeId::VOID:
-            return RemoteObject::Undefined();
-        case panda_file::Type::TypeId::U1:
-            return RemoteObject::Boolean(value.template GetAs<bool>());
-        case panda_file::Type::TypeId::I8:
-            return RemoteObject::Number(value.template GetAs<int8_t>());
-        case panda_file::Type::TypeId::U8:
-            return RemoteObject::Number(value.template GetAs<uint8_t>());
-        case panda_file::Type::TypeId::I16:
-            return RemoteObject::Number(value.template GetAs<int16_t>());
-        case panda_file::Type::TypeId::U16:
-            return RemoteObject::Number(value.template GetAs<uint16_t>());
-        case panda_file::Type::TypeId::I32:
-            return RemoteObject::Number(value.template GetAs<int32_t>());
-        case panda_file::Type::TypeId::U32:
-            return RemoteObject::Number(value.template GetAs<uint32_t>());
-        case panda_file::Type::TypeId::F32:
-            return RemoteObject::Number(value.template GetAs<float>());
-        case panda_file::Type::TypeId::F64:
-            return RemoteObject::Number(value.template GetAs<double>());
-        case panda_file::Type::TypeId::I64:
-            return RemoteObject::Number(value.template GetAs<int64_t>());
-        case panda_file::Type::TypeId::U64:
-            return RemoteObject::Number(value.template GetAs<uint64_t>());
-        case panda_file::Type::TypeId::REFERENCE:
-            return CreateObject(value.template GetAs<ObjectHeader *>());
-        case panda_file::Type::TypeId::TAGGED:
-        default:
-            UNREACHABLE();
     }
     UNREACHABLE();
 }

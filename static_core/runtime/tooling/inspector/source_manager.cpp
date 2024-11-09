@@ -14,10 +14,11 @@
  */
 
 #include "source_manager.h"
-#include "types/numeric_id.h"
 
 #include <string>
 #include <string_view>
+
+#include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
 std::pair<ScriptId, bool> SourceManager::GetScriptId(PtThread thread, std::string_view fileName)

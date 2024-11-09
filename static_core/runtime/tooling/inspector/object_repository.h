@@ -16,12 +16,13 @@
 #ifndef PANDA_TOOLING_INSPECTOR_OBJECT_REPOSITORY_H
 #define PANDA_TOOLING_INSPECTOR_OBJECT_REPOSITORY_H
 
-#include "libpandabase/os/mutex.h"
+#include "include/tooling/debug_interface.h"
+#include "include/typed_value.h"
+#include "os/mutex.h"
 #include "runtime/handle_scope.h"
-#include "runtime/include/tooling/debug_interface.h"
-#include "runtime/include/typed_value.h"
-#include "runtime/tooling/inspector/types/numeric_id.h"
-#include "runtime/tooling/inspector/types/property_descriptor.h"
+
+#include "types/numeric_id.h"
+#include "types/property_descriptor.h"
 
 namespace ark::tooling::inspector {
 /**
@@ -41,7 +42,6 @@ public:
     RemoteObject CreateFrameObject(const PtFrame &frame, const std::map<std::string, TypedValue> &locals,
                                    std::optional<RemoteObject> &objThis);
     RemoteObject CreateObject(TypedValue value);
-    RemoteObject CreateObject(Value value, panda_file::Type::TypeId type);
 
     std::vector<PropertyDescriptor> GetProperties(RemoteObjectId id, bool generatePreview);
 
@@ -54,7 +54,7 @@ private:
 
     std::optional<ObjectPreview> CreateObjectPreview(RemoteObject &remobj);
 
-    std::unique_ptr<InspectorExtension> extension_;
+    std::unique_ptr<PtLangExt> extension_;
     HandleScope<ObjectHeader *> scope_;
     RemoteObjectId counter_ {GLOBAL_OBJECT_ID + 1};
     std::map<RemoteObjectId, std::vector<PropertyDescriptor>> frames_;

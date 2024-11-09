@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_PT_THREAD_INFO_H
-#define PANDA_TOOLING_PT_THREAD_INFO_H
+#ifndef PANDA_RUNTIME_TOOLING_PT_THREAD_INFO_H
+#define PANDA_RUNTIME_TOOLING_PT_THREAD_INFO_H
 
 #include <cstdint>
 
 #include "runtime/include/panda_vm.h"
-#include "runtime/include/tooling/pt_object.h"
 #include "runtime/mem/refstorage/global_object_storage.h"
 #include "pt_hook_type_info.h"
 #include "thread_sampling_info.h"
@@ -75,4 +74,4 @@ private:
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_TOOLING_PT_THREAD_INFO_H
+#endif  // PANDA_RUNTIME_TOOLING_PT_THREAD_INFO_H

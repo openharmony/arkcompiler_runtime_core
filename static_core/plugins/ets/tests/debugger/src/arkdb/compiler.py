@@ -56,6 +56,7 @@ class Options:
 class CompilerArguments:
     extension: CompilerExtensions = "sts"
     ets_module: bool = False
+    opt_level: int = 0
     debug_info: bool = True
     dump_dynamic_ast: bool | None = None
     debugger_eval_mode: bool | None = None
@@ -234,6 +235,7 @@ class StringCodeCompiler:
     ) -> ScriptFile:
         args = CompilerArguments(
             ets_module=True,
+            opt_level=0,
             dump_dynamic_ast=ast_parser is not None,
             debugger_eval_mode=True,
             debugger_eval_panda_files=eval_args.eval_panda_files,

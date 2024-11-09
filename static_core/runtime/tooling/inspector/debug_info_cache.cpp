@@ -16,10 +16,9 @@
 #include "debug_info_cache.h"
 
 #include "debug_info_extractor.h"
-#include "optimizer/ir_builder/inst_builder.h"
-#include "tooling/pt_location.h"
-
+#include "include/tooling/pt_location.h"
 #include "libpandabase/utils/bit_utils.h"
+#include "optimizer/ir_builder/inst_builder.h"
 
 namespace ark::tooling::inspector {
 void DebugInfoCache::AddPandaFile(const panda_file::File &file)
@@ -134,8 +133,10 @@ std::vector<PtLocation> DebugInfoCache::GetBreakpointLocations(
             if (entry.line == lineNumber) {
                 sourceFiles.insert(debugInfo.GetSourceFile(methodId));
                 locations.emplace_back(pandaFile->GetFilename().data(), methodId, entry.offset);
+                // Must choose the first found bytecode location in each method
+                return false;
             }
-
+            // Continue search
             return true;
         });
     // clang-format on

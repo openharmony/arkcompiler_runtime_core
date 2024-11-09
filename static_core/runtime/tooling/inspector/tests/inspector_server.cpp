@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
+#include "inspector_server.h"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "common.h"
-#include "connection/server.h"
-#include "types/location.h"
-#include "inspector_server.h"
-#include "utils/json_builder.h"
-#include "json_object_matcher.h"
-#include "runtime.h"
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
+#include "runtime.h"
+#include "types/location.h"
+#include "utils/json_builder.h"
+
+#include "connection/server.h"
+
+#include "common.h"
+#include "json_object_matcher.h"
 
 // NOLINTBEGIN
 
@@ -382,7 +385,8 @@ TEST_F(ServerTest, OnCallDebuggerStepOver)
 
 std::optional<BreakpointId> handlerForSetBreak([[maybe_unused]] PtThread thread,
                                                [[maybe_unused]] const std::function<bool(std::string_view)> &comp,
-                                               size_t line, [[maybe_unused]] std::set<std::string_view> &sources)
+                                               size_t line, [[maybe_unused]] std::set<std::string_view> &sources,
+                                               [[maybe_unused]] const std::string *condition)
 {
     sources.insert("source");
     return BreakpointId(line);
@@ -391,7 +395,8 @@ std::optional<BreakpointId> handlerForSetBreak([[maybe_unused]] PtThread thread,
 std::optional<BreakpointId> handlerForSetBreakEmpty([[maybe_unused]] PtThread thread,
                                                     [[maybe_unused]] const std::function<bool(std::string_view)> &comp,
                                                     [[maybe_unused]] size_t line,
-                                                    [[maybe_unused]] std::set<std::string_view> &sources)
+                                                    [[maybe_unused]] std::set<std::string_view> &sources,
+                                                    [[maybe_unused]] const std::string *condition)
 {
     sources.insert("source");
     return {};

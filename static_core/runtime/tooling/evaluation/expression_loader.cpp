@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+#include "runtime/tooling/evaluation/expression_loader.h"
+
 #include "libpandabase/utils/span.h"
 #include "libpandafile/class_data_accessor.h"
 #include "runtime/include/runtime.h"
-#include "runtime/tooling/inspector/evaluation/base64.h"
-#include "runtime/tooling/inspector/evaluation/helpers.h"
 
-namespace ark::tooling::inspector {
+namespace ark::tooling {
 
 namespace {
 
@@ -138,45 +138,20 @@ Method *LoadFileAndGetEntryMethod(ClassLinkerContext *ctx, std::unique_ptr<const
     return klass->GetDirectMethod(utf::CStringAsMutf8(methodName.c_str()));
 }
 
-bool DecodeBase64Bytecode(const std::string &encoded, std::vector<uint8_t> &decoded)
-{
-    ASSERT(!encoded.empty());
-
-    auto sz = encoded.size();
-    Span encodingInput(reinterpret_cast<const uint8_t *>(encoded.c_str()), sz);
-    auto bytecodeSize = Base64Decoder::DecodedSize(encodingInput);
-    if (!bytecodeSize) {
-        LOG(WARNING, DEBUGGER) << "Invalid base64 encoding of expression";
-        return false;
-    }
-    decoded.resize(*bytecodeSize);
-    return Base64Decoder::Decode(decoded.data(), encodingInput);
-}
-
 }  // namespace
 
-Method *LoadEvaluationPatch(ClassLinkerContext *ctx, const std::string &encodedBytecodeFragment)
+Expected<Method *, Error> LoadExpressionBytecode(ClassLinkerContext *ctx, const std::string &bytecode)
 {
-    ASSERT(ctx != nullptr);
-    ASSERT(!encodedBytecodeFragment.empty());
-
-    std::vector<uint8_t> binaryBytecode;
-    if (!DecodeBase64Bytecode(encodedBytecodeFragment, binaryBytecode)) {
-        LOG(WARNING, DEBUGGER) << "Failed to decode base64 expression";
-        return nullptr;
-    }
-
-    auto pf = ark::panda_file::OpenPandaFileFromMemory(binaryBytecode.data(), binaryBytecode.size());
+    auto pf = ark::panda_file::OpenPandaFileFromMemory(bytecode.data(), bytecode.size());
     if (pf == nullptr) {
-        LOG(WARNING, DEBUGGER) << "Evaluate failed to read bytecode";
-        return nullptr;
+        return Unexpected(Error(Error::Type::INVALID_EXPRESSION, "failed to load panda file"));
     }
 
     auto *method = LoadFileAndGetEntryMethod(ctx, std::move(pf));
-    if (ValidateEvaluationMethod(method)) {
-        return method;
+    if (!ValidateEvaluationMethod(method)) {
+        return Unexpected(Error(Error::Type::INVALID_ENTRY_POINT, "invalid expression bytecode"));
     }
-    return nullptr;
+    return method;
 }
 
-}  // namespace ark::tooling::inspector
+}  // namespace ark::tooling

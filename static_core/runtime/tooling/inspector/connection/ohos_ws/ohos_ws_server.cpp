@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include <string_view>
+#include "connection/ohos_ws/ohos_ws_server.h"
 
-#include "ohos_ws_server.h"
+#include <string_view>
 
 #include "os/thread.h"
 #include "utils/logger.h"

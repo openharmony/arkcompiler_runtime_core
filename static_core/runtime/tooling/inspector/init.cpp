@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+#include <optional>
+
 #ifdef PANDA_TOOLING_ASIO
 #include "connection/asio/asio_server.h"
 #else
@@ -20,9 +23,6 @@
 #endif  // PANDA_TOOLING_ASIO
 
 #include "inspector.h"
-
-#include <cstdint>
-#include <optional>
 
 namespace ark::tooling {
 class DebugInterface;

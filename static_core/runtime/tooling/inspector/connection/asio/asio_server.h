@@ -16,12 +16,12 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_SERVER_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_SERVER_H
 
-#include "asio_config.h"
-#include "server_endpoint.h"
+#include <cstdint>
 
 #include "websocketpp/uri.hpp"
 
-#include <cstdint>
+#include "connection/asio/asio_config.h"
+#include "connection/asio/server_endpoint.h"
 
 namespace ark::tooling::inspector {
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
@@ -38,6 +38,7 @@ public:
 private:
     bool Initialize();
 
+private:
     bool initialized_ {false};
 };
 }  // namespace ark::tooling::inspector

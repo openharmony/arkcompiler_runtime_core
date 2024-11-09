@@ -16,18 +16,21 @@
 #ifndef PANDA_TOOLING_INSPECTOR_THREAD_STATE_H
 #define PANDA_TOOLING_INSPECTOR_THREAD_STATE_H
 
-#include "types/numeric_id.h"
-#include "types/pause_on_exceptions_state.h"
-
-#include "tooling/debugger.h"
-
 #include <unordered_set>
 #include <vector>
 
+#include "runtime/tooling/debugger.h"
+
+#include "evaluation/conditions_storage.h"
+#include "types/numeric_id.h"
+#include "types/pause_on_exceptions_state.h"
+
 namespace ark::tooling::inspector {
+class DebuggableThread;
+
 class ThreadState final {
 public:
-    ThreadState() = default;
+    explicit ThreadState(EvaluationEngine &engine) : breakpointConditions_(engine) {}
     ~ThreadState() = default;
 
     NO_COPY_SEMANTIC(ThreadState);
@@ -49,7 +52,13 @@ public:
     void StepOut();
     void Pause();
     void SetBreakpointsActive(bool active);
-    BreakpointId SetBreakpoint(const std::vector<PtLocation> &locations);
+    /**
+     * @brief Set a breakpoint with optional condition.
+     * @param locations to set breakpoint at, all will have the same BreakpointId.
+     * @param condition pointer to string with panda bytecode, will not be saved.
+     * @returns BreakpointId of set breakpoint.
+     */
+    BreakpointId SetBreakpoint(const std::vector<PtLocation> &locations, const std::string *condition = nullptr);
     void RemoveBreakpoint(BreakpointId id);
     void SetPauseOnExceptions(PauseOnExceptionsState state);
 
@@ -84,6 +93,10 @@ private:
         STEP_OVER
     };
 
+private:
+    bool ShouldStopAtBreakpoint(const PtLocation &location);
+
+private:
     StepKind stepKind_ {StepKind::NONE};
 
     // The set of locations has different semantics for various kinds of stepping:
@@ -97,6 +110,7 @@ private:
     bool breakpointsActive_ {true};
     BreakpointId nextBreakpointId_ {0};
     std::unordered_multimap<PtLocation, BreakpointId, HashLocation> breakpointLocations_;
+    ConditionsStorage breakpointConditions_;
 
     PauseOnExceptionsState pauseOnExceptionsState_ {PauseOnExceptionsState::NONE};
 

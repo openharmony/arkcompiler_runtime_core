@@ -12,57 +12,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_TOOLING_PT_LANG_EXTENSION_H
-#define PANDA_TOOLING_PT_LANG_EXTENSION_H
 
-#include "runtime/include/tooling/pt_object.h"
-#include "runtime/include/tooling/pt_property.h"
-#include "runtime/include/tooling/pt_value.h"
+#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_PT_LANG_EXTENSION_H
+#define PANDA_RUNTIME_INCLUDE_TOOLING_PT_LANG_EXTENSION_H
 
-// NOTE(maksenov): remove this file after refactoring js_runtime
-// NOTE(a.urakov): move here current InspectorExtension instead
+#include "libpandabase/macros.h"
+#include "libpandafile/file_items.h"
+#include "runtime/include/typed_value.h"
+
+#include <optional>
+#include <functional>
+#include <string>
+
 namespace ark::tooling {
-class PtMethod {
-public:
-    PtMethod() = default;
-    explicit PtMethod(void * /* unused */) {}
-};
-
-class PtClass {
-public:
-    PtClass() = default;
-    explicit PtClass(void * /* unused */) {}
-};
-
 class PtLangExt {
+public:
+    using PropertyHandler =
+        std::function<void(const std::string &name, TypedValue value, bool isFinal, bool isAccessor)>;
+
 public:
     PtLangExt() = default;
     virtual ~PtLangExt() = default;
 
-    // PtValue API
-    virtual PtObject ValueToObject(PtValue value) const = 0;
-
-    // PtClass API
-    virtual PtClass GetClass(PtObject object) const = 0;
-    virtual PtClass GetClass(PtProperty property) const = 0;
-    virtual void ReleaseClass(PtClass klass) const = 0;
-    virtual const char *GetClassDescriptor(PtClass klass) const = 0;
-
-    // PtObject API
-    virtual PandaList<PtProperty> GetProperties(PtObject object) const = 0;
-    virtual PtProperty GetProperty(PtObject object, const char *propertyName) const = 0;
-    virtual bool AddProperty(PtObject object, const char *propertyName, PtValue value) const = 0;
-    virtual bool RemoveProperty(PtObject object, const char *propertyName) const = 0;
-
-    // PtProperty API
-    virtual const char *GetPropertyName(PtProperty propery) const = 0;
-    virtual PtValue GetPropertyValue(PtProperty property) const = 0;
-    virtual void SetPropertyPtValue(PtProperty property, PtValue value) const = 0;
-    virtual void ReleasePtValue(const PtValue *value) const = 0;
-
     NO_COPY_SEMANTIC(PtLangExt);
     NO_MOVE_SEMANTIC(PtLangExt);
+
+    virtual std::string GetClassName(const ObjectHeader *object) = 0;
+    virtual std::optional<std::string> GetAsString(const ObjectHeader *object) = 0;
+    virtual std::optional<size_t> GetLengthIfArray(const ObjectHeader *object) = 0;
+    virtual void EnumerateProperties(const ObjectHeader *object, const PropertyHandler &handler) = 0;
+    virtual void EnumerateGlobals(const PropertyHandler &handler) = 0;
+    virtual std::string_view GetThisParameterName() const
+    {
+        return "this";
+    }
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_TOOLING_PT_LANG_EXTENSION_H
+#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_PT_LANG_EXTENSION_H

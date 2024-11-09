@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "runtime/tooling/inspector/types/scope.h"
+#include "types/scope.h"
 
 #include "libpandabase/utils/json_builder.h"
 
