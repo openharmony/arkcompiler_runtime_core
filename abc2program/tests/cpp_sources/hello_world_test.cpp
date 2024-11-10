@@ -839,30 +839,6 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_ins_debug,
     EXPECT_TRUE(ins5.ins_debug.column_number == 11);
 }
 
-/*-------------------------------------- Cases of debug mode above --------------------------------------*/
-/*------------------------------------- Case of json file below -------------------------------------*/
-
-/**
- * @tc.name: abc2program_json_field_test
- * @tc.desc: get json field metadata
- * @tc.type: FUNC
- * @tc.require: issueIAJKTS
- */
-HWTEST_F(Abc2ProgramJsonTest, abc2program_json_field_test, TestSize.Level1)
-{
-    auto it = prog_->record_table.find(JSON_TEST_FILE_NAME);
-    ASSERT(it != prog_->record_table.end());
-    const pandasm::Record &record = it->second;
-    const std::vector<pandasm::Field> &field_list = record.field_list;
-    EXPECT_EQ(field_list.size(), 1);
-    const pandasm::Field &field = field_list[0];
-    EXPECT_EQ(field.name, JSON_FILE_CONTENT);
-    std::optional<pandasm::ScalarValue> val = field.metadata->GetValue();
-    EXPECT_TRUE(val.has_value());
-    auto content = val.value().GetValue<std::string>();
-    EXPECT_EQ(content, "{\n  \"name\" : \"Import json\"\n}");
-}
-
 /**
  * @tc.name: abc2program_hello_world_test_open_abc_file
  * @tc.desc: open a non-existent abc file
@@ -900,9 +876,12 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_driver_run
     const char* args5[] = {"abc2program_options", "--debug", "--debug-file", "debug_file_path"};
     EXPECT_TRUE(driver_.Run(argc5, args5));
     int argc6 = 3;
-    const char* args6[] = {"abc2program_options", HELLO_WORLD_ABC_TEST_FILE_NAME.c_str(),
-                            HELLO_WORLD_DUMP_RESULT_FILE_NAME.c_str()};
+    const char* args6[] = {"abc2program_options", HELLO_WORLD_DEBUG_ABC_TEST_FILE_NAME.c_str(),
+                            HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME.c_str()};
     EXPECT_FALSE(driver_.Run(argc6, args6));
+    if (REMOVE_DUMP_RESULT_FILES) {
+        Abc2ProgramTestUtils::RemoveDumpResultFile(HELLO_WORLD_DEBUG_DUMP_RESULT_FILE_NAME);
+    }
 }
 
 /**
@@ -921,6 +900,30 @@ HWTEST_F(Abc2ProgramHelloWorldDebugTest, abc2program_hello_world_test_Label, Tes
     std::string result_null = test.GetMappedLabel(label2, label_map);
     EXPECT_EQ(result_found, "second_mapped_label");
     EXPECT_EQ(result_null, "");
+}
+
+/*-------------------------------------- Cases of debug mode above --------------------------------------*/
+/*-------------------------------------- Case of json file below ----------------------------------------*/
+
+/**
+ * @tc.name: abc2program_json_field_test
+ * @tc.desc: get json field metadata
+ * @tc.type: FUNC
+ * @tc.require: issueIAJKTS
+ */
+HWTEST_F(Abc2ProgramJsonTest, abc2program_json_field_test, TestSize.Level1)
+{
+    auto it = prog_->record_table.find(JSON_TEST_FILE_NAME);
+    ASSERT(it != prog_->record_table.end());
+    const pandasm::Record &record = it->second;
+    const std::vector<pandasm::Field> &field_list = record.field_list;
+    EXPECT_EQ(field_list.size(), 1);
+    const pandasm::Field &field = field_list[0];
+    EXPECT_EQ(field.name, JSON_FILE_CONTENT);
+    std::optional<pandasm::ScalarValue> val = field.metadata->GetValue();
+    EXPECT_TRUE(val.has_value());
+    auto content = val.value().GetValue<std::string>();
+    EXPECT_EQ(content, "{\n  \"name\" : \"Import json\"\n}");
 }
 
 /**

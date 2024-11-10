@@ -167,10 +167,6 @@ private:
     void SerializeLocalVariableTable(const panda_file::LocalVariableTable &local_variable_table,
                                      const pandasm::Function &method, std::ostream &os) const;
     bool IsModuleLiteralOffset(const panda_file::File::EntityId &id) const;
-    inline void SerializeLanguage(std::ostream &os) const
-    {
-        os << ".language " << panda::panda_file::LanguageToString(file_language_) << "\n\n";
-    }
 
     pandasm::Type PFTypeToPandasmType(const panda_file::Type &type, panda_file::ProtoDataAccessor &pda,
                                       size_t &ref_idx) const;
@@ -188,6 +184,7 @@ private:
     std::string IDToString(BytecodeInstruction bc_ins, panda_file::File::EntityId method_id, size_t idx) const;
 
     panda::panda_file::SourceLang GetRecordLanguage(panda_file::File::EntityId class_id) const;
+    panda::panda_file::SourceLang GetMethodLanguage(panda_file::File::EntityId class_id) const;
     void GetLiteralArrayByOffset(pandasm::LiteralArray *lit_array, panda_file::File::EntityId offset) const;
 
     std::vector<std::string> GetModuleLiteralArray(panda_file::File::EntityId &module_id) const;
@@ -221,8 +218,6 @@ private:
 
         return file_path.substr(pos + 1);
     }
-
-    panda::panda_file::SourceLang file_language_ = panda::panda_file::SourceLang::PANDA_ASSEMBLY;
 
     std::map<std::string, panda_file::File::EntityId> record_name_to_id_;
     std::map<std::string, panda_file::File::EntityId> method_name_to_id_;

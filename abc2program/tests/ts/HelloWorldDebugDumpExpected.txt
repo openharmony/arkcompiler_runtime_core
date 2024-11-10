@@ -1,49 +1,52 @@
-# source binary: out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/HelloWorldDebug.abc
-
-.language ECMAScript
+# source binary: /mnt/data/shixiaowei/oh2/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/HelloWorldDebug.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_1698 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
+_ESModuleRecord_1721 { 21 [ i32:4, string:"./a", string:"./b", string:"./d", string:"./e", i32:1, string:"a", string:"a", method_affiliate:0, i32:1, string:"b", method_affiliate:1, i32:1, string:"c", string:"c", i32:1, string:"e", string:"e", method_affiliate:3, i32:1, method_affiliate:2, ]}
 
-_ESScopeNamesRecord_1674 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
+_ESScopeNamesRecord_1697 { 8 [ tag_value:5, string:"HelloWorld", tag_value:5, string:"Lit", tag_value:5, string:"NestedLiteralArray", tag_value:5, string:"hoo", ]}
 
-_GLOBAL_1778 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
+_GLOBAL_1801 { 6 [ tag_value:5, string:"method", tag_value:22, async_generator_method:.#*@3*#method, tag_value:9, method_affiliate:0, ]}
 
-_GLOBAL_1795 { 2 [ tag_value:2, i32:0, ]}
+_GLOBAL_1818 { 2 [ tag_value:2, i32:0, ]}
 
-_GLOBAL_1804 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
+_GLOBAL_1827 { 8 [ tag_value:5, string:"lit", tag_value:6, method:.#~@1>#lit, tag_value:9, method_affiliate:0, tag_value:2, i32:1, ]}
 
-_GLOBAL_1826 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
+_GLOBAL_1849 { 6 [ tag_value:5, string:"num", tag_value:2, i32:1, tag_value:2, i32:1, ]}
 
-_GLOBAL_1845 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1826, ]}
+_GLOBAL_1868 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, method:.#~@2>#NestedLiteralArray, tag_value:9, method_affiliate:0, tag_value:2, i32:1, tag_value:24, literal_array:_GLOBAL_1849, ]}
 
-_GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_value:2, i32:0, tag_value:5, string:"this", tag_value:2, i32:1, ]}
+_GLOBAL_1895 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_value:2, i32:0, tag_value:5, string:"this", tag_value:2, i32:1, ]}
 
 
 
 # ====================
 # RECORDS
 
+.language ECMAScript
 .record _ESExpectedPropertyCountAnnotation {
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1698
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1721
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_1674
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESScopeNamesRecord_1697
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESSlotNumberAnnotation {
 }
 .record.source_file 
 
+.language ECMAScript
 .record _GLOBAL {
 }
 .record.source_file 
@@ -55,6 +58,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 1
+.language ECMAScript
 .function any .#*#add(any a0, any a1, any a2, any a3, any a4) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -79,6 +83,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::ASYNC_NC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#*#asyncArrowFunc(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -108,6 +113,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::ASYNC_GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 4
+.language ECMAScript
 .function any .#*#asyncGenerateFunc(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -211,6 +217,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 24
+.language ECMAScript
 .function any .#*#foo(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -316,6 +323,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::GENERATOR_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 4
+.language ECMAScript
 .function any .#*#generateFunc(any a0, any a1, any a2) {
 	label@0: mov v0, a0                      # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -384,6 +392,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#*#goo(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -401,13 +410,14 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#*#hoo(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
 	mov v2, a2                               # line: 18446744073709551615           # column: 4294967295
 	fldai 1.230000e+00                       # line: 71           # column: 9
 	trystglobalbyname 0x0, varA              # line: 71           # column: 2
-	createobjectwithbuffer 0x1, _GLOBAL_1778 # line: 72           # column: 12
+	createobjectwithbuffer 0x1, _GLOBAL_1801 # line: 72           # column: 12
 	sta v5                                   # line: 72           # column: 12
 	lda v5                                   # line: 72           # column: 12
 	sta v3                                   # line: 72           # column: 6
@@ -425,6 +435,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::ASYNC_FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#*@3*#method(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -472,6 +483,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
  ExpectedPropertyCount 1
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#~@0=#HelloWorld(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -493,6 +505,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#~@1=#Lit(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -510,6 +523,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::NONE
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#~@1>#lit(any a0, any a1, any a2) {
 	label@0: mov v0, a0                      # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -557,6 +571,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
  ExpectedPropertyCount 1
  _ESSlotNumberAnnotation
  SlotNumber 2
+.language ECMAScript
 .function any .#~@2=#NestedLiteralArray(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -579,6 +594,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::NONE
  _ESSlotNumberAnnotation
  SlotNumber 0
+.language ECMAScript
 .function any .#~@2>#NestedLiteralArray(any a0, any a1, any a2) {
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	mov v1, a1                               # line: 18446744073709551615           # column: 4294967295
@@ -596,8 +612,9 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 28
+.language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
-	newlexenvwithname 0x2, _GLOBAL_1872      # line: 18446744073709551615           # column: 4294967295
+	newlexenvwithname 0x2, _GLOBAL_1895      # line: 18446744073709551615           # column: 4294967295
 	mov v0, a0                               # line: 18446744073709551615           # column: 4294967295
 	lda a1                                   # line: 18446744073709551615           # column: 4294967295
 	stlexvar 0x0, 0x0                        # line: 18446744073709551615           # column: 4294967295
@@ -619,7 +636,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	stmodulevar 0x0                          # line: 17           # column: 11
 	ldhole                                   # line: 21           # column: 17
 	sta v17                                  # line: 21           # column: 17
-	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1795, 0x0, v17 # line: 21           # column: 17
+	defineclasswithbuffer 0x5, .#~@0=#HelloWorld, _GLOBAL_1818, 0x0, v17 # line: 21           # column: 17
 	sta v15                                  # line: 21           # column: 17
 	sta v16                                  # line: 21           # column: 6
 	lda v15                                  # line: 21           # column: 17
@@ -629,7 +646,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	sta v3                                   # line: 21           # column: 6
 	ldhole                                   # line: 25           # column: 10
 	sta v17                                  # line: 25           # column: 10
-	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1804, 0x0, v17 # line: 25           # column: 10
+	defineclasswithbuffer 0x8, .#~@1=#Lit, _GLOBAL_1827, 0x0, v17 # line: 25           # column: 10
 	sta v15                                  # line: 25           # column: 10
 	sta v16                                  # line: 25           # column: 6
 	lda v15                                  # line: 25           # column: 10
@@ -639,7 +656,7 @@ _GLOBAL_1872 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 	sta v4                                   # line: 25           # column: 6
 	ldhole                                   # line: 29           # column: 25
 	sta v17                                  # line: 29           # column: 25
-	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1845, 0x0, v17 # line: 29           # column: 25
+	callruntime.definesendableclass 0xb, .#~@2=#NestedLiteralArray, _GLOBAL_1868, 0x0, v17 # line: 29           # column: 25
 	sta v15                                  # line: 29           # column: 25
 	sta v16                                  # line: 29           # column: 6
 	sta v5                                   # line: 29           # column: 6

@@ -25,7 +25,7 @@ AbcFieldProcessor::AbcFieldProcessor(panda_file::File::EntityId entity_id, Abc2P
                                      pandasm::Record &record)
     : AbcFileEntityProcessor(entity_id, entity_container), record_(record),
       type_converter_(entity_container),
-      field_(pandasm::Field(LANG_ECMA))
+      field_(pandasm::Field(record.language))
 {
     field_data_accessor_ = std::make_unique<panda_file::FieldDataAccessor>(*file_, entity_id_);
 }

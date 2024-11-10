@@ -1,33 +1,40 @@
-# source binary: arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.abc
-
-.language ECMAScript
+# source binary: /mnt/data/shixiaowei/oh2/out/rk3568/clang_x64/obj/arkcompiler/runtime_core/abc2program/tests/InvalidOpcode.abc
 
 # ====================
 # LITERALS
 
-_ESModuleRecord_573 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
+_ESModuleRecord_607 { 6 [ i32:0, i32:0, i32:0, i32:0, i32:0, i32:0, ]}
 
-_ESScopeNamesRecord_569 
+_ESScopeNamesRecord_603 
 
 
 
 # ====================
 # RECORDS
 
+.language ECMAScript
+.record _ESExpectedPropertyCountAnnotation {
+}
+.record.source_file 
+
+.language ECMAScript
 .record _ESModuleRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_573
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESModuleRecord_607
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESScopeNamesRecord {
-	u32 arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_569
+	u32 /mnt/data/shixiaowei/oh2/arkcompiler/runtime_core/abc2program/tests/ts/release-line-number/InvalidOpcode.ts _ESScopeNamesRecord_603
 }
 .record.source_file 
 
+.language ECMAScript
 .record _ESSlotNumberAnnotation {
 }
 .record.source_file 
 
+.language ECMAScript
 .record _GLOBAL {
 }
 .record.source_file 
@@ -39,6 +46,7 @@ _ESScopeNamesRecord_569
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 75
+.language ECMAScript
 .function any .#*#testRelease(any a0, any a1, any a2) {
 	ldai 0x1                                 # line: 17           # column: 0
 	sta v0                                   # line: 17           # column: 0
@@ -210,6 +218,7 @@ _ESScopeNamesRecord_569
 .function_kind FunctionKind::FUNCTION
  _ESSlotNumberAnnotation
  SlotNumber 1
+.language ECMAScript
 .function any .func_main_0(any a0, any a1, any a2) {
 	definefunc 0x0, .#*#testRelease, 0x0     # line: 18446744073709551615           # column: 0
 	ldundefined                              # line: 18446744073709551615           # column: 0

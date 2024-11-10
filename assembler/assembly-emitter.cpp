@@ -1361,7 +1361,9 @@ bool AsmEmitter::MakeItemsForSingleProgram(ItemContainer *items, const Program &
 static void MakeSlotNumberRecord(Program *prog)
 {
     static const std::string SLOT_NUMBER = "_ESSlotNumberAnnotation";
-    pandasm::Record record(SLOT_NUMBER, pandasm::extensions::Language::ECMASCRIPT);
+    // Source files with different file type will share the same slot number record.
+    // Thus the language of this record should be set as default.
+    pandasm::Record record(SLOT_NUMBER, pandasm::extensions::DEFAULT_LANGUAGE);
     record.metadata->AddAccessFlags(panda::ACC_ANNOTATION);
     prog->record_table.emplace(SLOT_NUMBER, std::move(record));
 }
@@ -1390,7 +1392,9 @@ static void MakeSlotNumberAnnotation(Program *prog)
 static void MakeConcurrentModuleRequestsRecord(Program *prog)
 {
     static const std::string CONCURRENT_MODULE_REQUESTS = "_ESConcurrentModuleRequestsAnnotation";
-    pandasm::Record record(CONCURRENT_MODULE_REQUESTS, pandasm::extensions::Language::ECMASCRIPT);
+    // Source files with different file type will share the same slot number record.
+    // Thus the language of this record should be set as default.
+    pandasm::Record record(CONCURRENT_MODULE_REQUESTS, pandasm::extensions::DEFAULT_LANGUAGE);
     record.metadata->AddAccessFlags(panda::ACC_ANNOTATION);
     prog->record_table.emplace(CONCURRENT_MODULE_REQUESTS, std::move(record));
 }
