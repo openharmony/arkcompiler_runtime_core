@@ -19,7 +19,7 @@ cases:
 
     - decl: |-
         let a: string[] = ["a", "b", "c"]
-      expr: 'a[-1]'
+      expr: 'a[4]'
 
     - decl: |-
         let a: int[] = [0, 1, 2]

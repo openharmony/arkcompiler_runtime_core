@@ -26,3 +26,4 @@ type_and_initializer:
     - { type: Boolean, value: 2 }
     - { type: Boolean, value: new Object() }
     - { type: string, value: 'null' }
+    - {type: double, value: "4.9e-324"}
