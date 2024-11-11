@@ -42,4 +42,6 @@ Promise.allSettled<string>([thenable]).then<void, void>((result: PromiseSettledR
     console.log("Test passed.");
 }, (err: Object): void => {
     console.log("Test failed. The promise should not be rejected.");
+}).catch((e: Object): void => {
+    console.log("Test failed: " + e);
 });

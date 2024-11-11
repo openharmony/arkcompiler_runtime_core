@@ -1,4 +1,10 @@
-### Issue 19842 begin
-std/core/PromiseResolveBySelf.sts
-std/core/PromiseAnyPoisonedThen.sts
-### Issue 19842 end
+### Issue 20858 begin
+std/core/PromiseAllSettledMixed.sts
+std/core/PromiseAllSettledPoisonedThen.sts
+std/core/PromiseAllSettledRejectAll.sts
+std/core/PromiseAllSettledRejectDeferred.sts
+std/core/PromiseAllSettledRejectIgnoredDeferred.sts
+std/core/PromiseAllSettledResolve.sts
+std/core/PromiseAllSettledReject.sts
+std/core/PromiseAllSettledRejectIgnored.sts
+### Issue 20858 end

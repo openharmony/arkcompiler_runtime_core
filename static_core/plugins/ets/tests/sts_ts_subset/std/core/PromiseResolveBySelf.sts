@@ -26,6 +26,8 @@ p.then<void, void>((value: Object): void => {
         return;
     }
     console.log("Test failed. The promise should be rejected with a TypeError.");
+}).catch((e: Object): void => {
+    console.log("Test failed: " + e);
 });
 
 resolve!(p);
