@@ -112,6 +112,7 @@ static_core/plugins/ets/runtime/types/*promise*                               @d
 static_core/plugins/ets/runtime/types/*typeapi*                               @smirnovandrei @anton-sysoev
 static_core/plugins/ets/stdlib/escompat/Atomics.sts                           @dmitriitr @konstanting
 static_core/plugins/ets/templates/stdlib/                                     @ivan-tyulyandin @anton-sysoev
+static_core/plugins/ets/tests/benchmarks/                                     @semenovaleksandr @ignatenkooleg
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin @anton-sysoev
