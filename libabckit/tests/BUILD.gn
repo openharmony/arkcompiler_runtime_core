@@ -408,7 +408,6 @@ libabckit_host_unittest_action("abckit_gtests") {
 
   sources = [
     "cpp/tests/cpp_test.cpp",
-    "cpp/tests/cpp_test_mock/cpp_mock_file.cpp",
     "helpers/helpers.cpp",
     "helpers/helpers_mode.cpp",
     "helpers/helpers_nullptr.cpp",
@@ -587,6 +586,53 @@ libabckit_host_unittest_action("abckit_gtests") {
     "wrong_mode_tests/wrong_mode_tests_IsaApiDynamicImpl_1.cpp",
     "wrong_mode_tests/wrong_mode_tests_IsaApiStaticImpl_0.cpp",
   ]
+
+  include_dirs = [
+    "$ark_root_dynamic",
+    "$abckit_root",
+    "$abckit_root/include",
+    "$abckit_root/src",
+    "$abckit_root/tests",
+  ]
+
+  configs = [ "$abckit_root:abckit_config" ]
+
+  deps = [
+    ":abckit_ets_vm_helpers",
+    ":abckit_js_vm_helpers",
+    "$abckit_root/src:libabckit",
+  ]
+
+  foreach(file, test_js_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, test_ts_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  foreach(file, test_ets_files) {
+    deps += [ ":gen_${file}_abc" ]
+  }
+
+  if (is_ohos && is_standard_system) {
+    test_abc_dir = "/data/test"
+  } else {
+    test_abc_dir = rebase_path(target_out_dir)
+  }
+
+  test_js_dir = rebase_path(test_js_path)
+
+  defines = [
+    "ABCKIT_ABC_DIR=\"${test_abc_dir}/\"",
+    "ABCKIT_TEST_DIR=\"${test_js_dir}\"",
+  ]
+}
+
+libabckit_host_unittest_action("abckit_gtests_mock") {
+  module_out_path = module_output_path
+
+  sources = [ "cpp/tests/cpp_test_mock/cpp_mock_file.cpp" ]
 
   include_dirs = [
     "$ark_root_dynamic",

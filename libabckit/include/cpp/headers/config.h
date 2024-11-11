@@ -25,10 +25,6 @@
 
 #include "./utils.h"
 
-#ifdef ABCKIT_TEST_ENABLE_MOCK
-#include "libabckit/tests/mock_headers/abckit_impl_mock.h"
-#endif
-
 #include <memory>
 
 namespace abckit {

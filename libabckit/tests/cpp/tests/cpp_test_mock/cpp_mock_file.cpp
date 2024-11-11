@@ -33,8 +33,13 @@ class LibAbcKitCppMockTest : public ::testing::Test {};
 // Test: test-kind=internal, abc-kind=ArkTS1, category=internal
 TEST_F(LibAbcKitCppMockTest, CppTestMockFile)
 {
-    abckit::File file("abckit.abc");
-    file.WriteAbc("abckit.abc");
+    {
+        abckit::File file("abckit.abc");
+        ASSERT(CheckMockedApi("openAbc"));
+        file.WriteAbc("abckit.abc");
+        ASSERT(CheckMockedApi("writeAbc"));
+    }
+    ASSERT(CheckMockedApi("closeFile"));
 }
 
 }  // namespace libabckit::test
