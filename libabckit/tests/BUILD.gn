@@ -425,6 +425,7 @@ libabckit_host_unittest_action("abckit_gtests") {
 
   sources = [
     "cpp/tests/cpp_test.cpp",
+    "cpp/tests/cpp_test_mock/cpp_mock_file.cpp",
     "helpers/helpers.cpp",
     "helpers/helpers_mode.cpp",
     "helpers/helpers_nullptr.cpp",
