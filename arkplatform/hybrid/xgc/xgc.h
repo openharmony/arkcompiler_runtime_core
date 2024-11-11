@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_ARKPLATFORM_H
-#define PANDA_ARKPLATFORM_H
+#ifndef PANDA_ARKPLATFORM_MEM_XGC_H
+#define PANDA_ARKPLATFORM_MEM_XGC_H
 
-#include <string>
+namespace arkplatform::mem {
 
-namespace arkplatform {
-
-class ArkPlatform {
+class XGC {
 public:
-    static void Create(const std::string &s);
+    static bool Create();
+    static XGC *GetInstance();
+    static bool Destroy();
+
+    XGC(const XGC &) = delete;
+    XGC &operator=(const XGC &) = delete;
+    XGC(XGC &&) = delete;
+    XGC &operator=(XGC &&) = delete;
+    ~XGC() = default;
+
+    void Trigger();
+
+private:
+    XGC() = default;
+    static XGC *xgcInstance_;
 };
 
-}  // namespace arkplatform
+}  // namespace arkplatform::mem
 
-#endif  // PANDA_ARKPLATFORM_H
+#endif  // PANDA_ARKPLATFORM_MEM_XGC_H

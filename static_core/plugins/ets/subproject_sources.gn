@@ -161,7 +161,7 @@ srcs_runtime = [
   "stdlib/native/core/IntlState.cpp",
   "stdlib/native/core/IntlNumberFormat.cpp",
   "stdlib/native/core/IntlFormattersCache.cpp",
-  "stdlib/native/etsstdlib.cpp"
+  "stdlib/native/etsstdlib.cpp",
 ]
 
 configs_runtime = []
@@ -203,7 +203,9 @@ if (ark_ets_interop_js) {
 
   configs_runtime += [ "runtime/interop_js:interop_js_public_config" ]
 
-  if (ark_standalone_build) {
+  if (ark_ets_hybrid) {
+    arkruntime_deps += [ "$arkplatform_root:libarkplatform" ]
+  } else if (ark_standalone_build) {
     arkruntime_deps +=
         [ "$ark_root/plugins/ets/runtime/interop_js:install_nodejs" ]
   }
