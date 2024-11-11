@@ -64,8 +64,10 @@ function copy_into_sdk() {
 function linux_arm64_tools() {
     echo "> Building linux arm64 tools..."
     local linux_arm64_build_dir="$SDK_BUILD_ROOT/linux_arm64_host_tools"
-    local linux_arm64_cmake_args="-DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-qemu-aarch64.cmake"
-    local linux_arm64_build_targets="es2panda e2p_test_plugin"
+    local linux_arm64_cmake_args=" \
+        -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain/cross-clang-14-qemu-aarch64.cmake \
+        -DPANDA_WITH_ECMASCRIPT=ON"
+    local linux_arm64_build_targets="ark ark_aot ark_disasm ark_link es2panda e2p_test_plugin etsnative"
     build_panda "$linux_arm64_build_dir" "$linux_arm64_cmake_args" "$linux_arm64_build_targets"
     copy_into_sdk "$linux_arm64_build_dir" "$PANDA_SDK_PATH/linux_arm64_host_tools" "$SCRIPT_DIR"/linux_arm64_host_tools.txt
 }
