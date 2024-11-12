@@ -2330,13 +2330,6 @@
 15.semantic_rules/07.overloading_and_overriding/02.override-compatible_signatures/override_with_object_4.sts
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/class_method_over_n3_8.sts
 ### end of Issue 19685
-### Issue 19686
-08.statements/04.local_declarations/negative_local_class.sts
-08.statements/11.continue_statements/continue_do1_neg.sts
-08.statements/11.continue_statements/continue_for1_neg.sts
-08.statements/11.continue_statements/continue_for_of1_neg.sts
-08.statements/11.continue_statements/continue_while1_neg.sts
-### end of Issue 19686
 ### Issue 19680
 02.lexical_elements/09.literals/01.integer_literals/incorrect_int_literals_10.sts
 02.lexical_elements/09.literals/01.integer_literals/incorrect_int_literals_17.sts
