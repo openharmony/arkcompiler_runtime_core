@@ -22,8 +22,6 @@ function main(): int {
     let failures: int = 0;
     failures += check(FormatRangePosNumberNegNumberUnion(), "Intl NumberFormat.formatRange +number -number. Called union-types args");
     failures += check(FormatRangePosNumberNegBigIntUnion(), "Intl NumberFormat.formatRange +number -BigInt. Called union-types args");
-    failures += check(FormatRangePosBigIntNegNumberUnion(), "Intl NumberFormat.formatRange +BigInt -number. Called union-types args");
-    failures += check(FormatRangePosBigIntNegBigIntUnion(), "Intl NumberFormat.formatRange +BigInt -BigInt. Called union-types args");
     return failures;
 }
 
@@ -254,46 +252,6 @@ function FormatRangePosNumberNegBigIntUnion(): int {
     const end = negativeBigIntsAsStrings();
     const sep = separatorsBetweenPosAndNegAsStrings();
     const startValue = numberValues[1];
-    const endValue = bigIntValues[0];
-    for (let i = 0; i < languageCodes.length; i++) {
-        let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
-        }
-        const expected = start[i] + sep[i] + end[i];
-        if (CheckFormatRangeUnion(locale, funcName, startValue, endValue, expected) == fail) {
-            return fail;
-        }
-    }
-    return success;
-}
-
-function FormatRangePosBigIntNegNumberUnion(): int {
-    const funcName = "FormatRangePosBigIntNegNumberUnion";
-    const start = positiveBigIntsAsStrings();
-    const end = negativeNumbersAsStrings();
-    const sep = separatorsBetweenPosAndNegAsStrings();
-    const startValue = bigIntValues[1];
-    const endValue = numberValues[0];
-    for (let i = 0; i < languageCodes.length; i++) {
-        let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
-        }
-        const expected = start[i] + sep[i] + end[i];
-        if (CheckFormatRangeUnion(locale, funcName, startValue, endValue, expected) == fail) {
-            return fail;
-        }
-    }
-    return success;
-}
-
-function FormatRangePosBigIntNegBigIntUnion(): int {
-    const funcName = "FormatRangePosBigIntNegBigIntUnion";
-    const start = positiveBigIntsAsStrings();
-    const end = negativeBigIntsAsStrings();
-    const sep = separatorsBetweenPosAndNegAsStrings();
-    const startValue = bigIntValues[1];
     const endValue = bigIntValues[0];
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];

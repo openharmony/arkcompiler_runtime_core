@@ -13,23 +13,15 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/core/Intl.h"
-#include "napi/ets_napi.h"
-#include "plugins/ets/stdlib/native/core/IntlState.h"
-#include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
-#include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
+#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_LOCALE_MATCH_H
+#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_LOCALE_MATCH_H
+
+#include "plugins/ets/runtime/napi/ets_napi.h"
 
 namespace ark::ets::stdlib {
 
-ets_int InitCoreIntl(EtsEnv *env)
-{
-    // Create internal data
-    CreateIntlState();
-
-    // Register Native methods. Stop if an error occurred
-    ets_int err = RegisterIntlNumberFormatNativeMethods(env);
-    err = err == ETS_OK ? RegisterIntlLocaleMatch(env) : err;
-    return err;
-}
+ets_int RegisterIntlLocaleMatch(EtsEnv *env);
 
 }  // namespace ark::ets::stdlib
+
+#endif  //  PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_LOCALE_MATCH_H

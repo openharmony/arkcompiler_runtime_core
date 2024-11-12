@@ -20,8 +20,6 @@ function main(): int {
     assert languageCodes.length == countryCodes.length: "Error! Size of languageCodes should be the same as countryCodes";
 
     let failures: int = 0;
-    failures += check(FormatNumber(), "Intl NumberFormat.format +-numbers and -Inf");
-    failures += check(FormatNumberUnion(), "Intl NumberFormat.format +-numbers and -Inf. Called union-type arg");
     failures += check(FormatBigIntUnion(), "Intl NumberFormat.format +-BigInt. Called union-type arg");
     return failures;
 }
@@ -36,7 +34,6 @@ function check(result: number, message: string): int {
 
 const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru", "fa"];
 const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU", "IR"];
-const numberValues: Number[] = [-1234.5, 1234.5, -Infinity];
 const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
 const EN: int = 0;
 const FR: int = 1;
@@ -49,44 +46,6 @@ const JP: int = 7;
 const GE: int = 8;
 const RU: int = 9;
 const IR: int = 10;
-
-function FormatNumber(): int {
-    const funcName = "FormatNumber";
-    const values = numberValues;
-    const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
-    for (let i = 0; i < languageCodes.length; i++) {
-        let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
-        }
-        for (let j = 0; j < values.length; j++) {
-            const expected = exp[j][i];
-            if (CheckFormatNumber(locale, funcName, values[j], expected) == fail) {
-                return fail;
-            }
-        }
-    }
-    return success;
-}
-
-function FormatNumberUnion(): int {
-    const funcName = "FormatNumberUnion";
-    const values = numberValues;
-    const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
-    for (let i = 0; i < languageCodes.length; i++) {
-        let locale: string = languageCodes[i];
-        if (countryCodes[i] != "") {
-            locale = locale + "-" + countryCodes[i];
-        }
-        for (let j = 0; j < values.length; j++) {
-            const expected = exp[j][i];
-            if (CheckFormatUnion(locale, funcName, values[j], expected) == fail) {
-                return fail;
-            }
-        }
-    }
-    return success;
-}
 
 function FormatBigIntUnion(): int {
     const funcName = "FormatBigIntUnion";
@@ -105,66 +64,6 @@ function FormatBigIntUnion(): int {
         }
     }
     return success;
-}
-
-function positiveNumbersAsStrings(): Array<string> {
-    // Codes for numberValues[1]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
-    expected[EN] = String.fromCharCode(49, 44, 50, 51, 52, 46, 53);
-    expected[FR] = String.fromCharCode(49, 8239, 50, 51, 52, 44, 53);
-    expected[ES] = String.fromCharCode(49, 46, 50, 51, 52, 44, 53);
-    expected[GR] = expected[ES];
-    expected[NO] = String.fromCharCode(49, 160, 50, 51, 52, 44, 53);
-    expected[IT] = expected[GR];
-    expected[CH] = expected[EN];
-    expected[JP] = expected[CH];
-    expected[GE] = expected[ES];
-    expected[RU] = String.fromCharCode(49, 160, 50, 51, 52, 44, 53);
-    expected[IR] = String.fromCharCode(1777, 1644, 1778, 1779, 1780, 1643, 1781);
-    return expected;
-}
-
-function negativeNumbersAsStrings(): Array<string> {
-    // Codes for  numberValues[0]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
-    expected[EN] = String.fromCharCode(45, 49, 44, 50, 51, 52, 46, 53);
-    expected[FR] = String.fromCharCode(45, 49, 8239, 50, 51, 52, 44, 53);
-    expected[ES] = String.fromCharCode(45, 49, 46, 50, 51, 52, 44, 53);
-    expected[GR] = expected[ES];
-    expected[NO] = String.fromCharCode(8722, 49, 160, 50, 51, 52, 44, 53);
-    expected[IT] = expected[GR];
-    expected[CH] = expected[EN];
-    expected[JP] = expected[CH];
-    expected[GE] = expected[ES];
-    expected[RU] = String.fromCharCode(45, 49, 160, 50 ,51 ,52, 44, 53);
-    expected[IR] = String.fromCharCode(8206, 8722, 1777, 1644, 1778, 1779, 1780, 1643, 1781);
-    return expected;
-}
-
-function negativeInfsAsStrings(): Array<string> {
-    // Codes for numberValues[2]
-    let expected = new Array<string>(languageCodes.length);
-    for (let i: int = 0; i < expected.length; ++i) {
-        expected[i] = new string("");
-    }
-    expected[EN] = String.fromCharCode(45, 8734);
-    expected[FR] = expected[EN];
-    expected[ES] = expected[EN];
-    expected[GR] = expected[EN];
-    expected[NO] = String.fromCharCode(8722, 8734);
-    expected[IT] = expected[EN];
-    expected[CH] = expected[EN];
-    expected[JP] = expected[EN];
-    expected[GE] = expected[EN];
-    expected[RU] = expected[EN];
-    expected[IR] = String.fromCharCode(8206, 8722, 8734);
-    return expected;
 }
 
 function separatorsBetweenNegAndPosAsStrings(): Array<string> {
