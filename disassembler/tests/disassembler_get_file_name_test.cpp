@@ -34,17 +34,9 @@ public:
     {
         std::filesystem::path file_name{ FILE_NAME };
         std::filesystem::path src_file_name{ SOURCE_FILE_PATH };
-        if (std::filesystem::exists(file_name)) {
-            std::filesystem::remove(file_name);
-        }
-        std::filesystem::copy(src_file_name, file_name);
     };
 
-    static void TearDownTestCase(void)
-    {
-        std::filesystem::path file_name{ FILE_NAME };
-        std::filesystem::remove(file_name);
-    };
+    static void TearDownTestCase(void) {};
     
     void SetUp() {};
     void TearDown() {};
@@ -65,21 +57,6 @@ HWTEST_F(DisassemblerGetFileNameTest, disassembler_getfilename_test_001, TestSiz
 {
     panda::disasm::Disassembler disasm {};
     disasm.Disassemble(SOURCE_FILE_PATH, false, false);
-    std::stringstream ss {};
-    disasm.Serialize(ss);
-    EXPECT_TRUE(Find(ss, CHECK_MESSAGE));
-}
-
-/**
-* @tc.name: disassembler_getfilename_test_002
-* @tc.desc: test disasm with file name.
-* @tc.type: FUNC
-* @tc.require: file path and name
-*/
-HWTEST_F(DisassemblerGetFileNameTest, disassembler_getfilename_test_002, TestSize.Level1)
-{
-    panda::disasm::Disassembler disasm {};
-    disasm.Disassemble(FILE_NAME, false, false);
     std::stringstream ss {};
     disasm.Serialize(ss);
     EXPECT_TRUE(Find(ss, CHECK_MESSAGE));

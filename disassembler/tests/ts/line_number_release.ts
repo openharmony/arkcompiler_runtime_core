@@ -13,11 +13,55 @@
  * limitations under the License.
  */
 
-let flag = false;
-function testRelease() {
-    if (flag) {
-      flag = !flag;
-    }
-    let jsonObj = JSON.parse("");
-    return jsonObj;
+function testRelease(): Object {
+  let i: number = 1;
+  if (i == 1) {
+    print('111');
+  }
+  i++;
+  if (i == 2) {
+    print('111');
+  }
+  i++;
+  if (i == 3) {
+    print('111');
+  }
+  i++;
+  if (i == 4) {
+    print('111');
+  }
+  i++;
+  if (i == 5) {
+    print('111');
+  }
+  i++;
+  if (i == 6) {
+    print('111');
+  }
+  i++;
+  if (i == 7) {
+    print('111');
+  }
+  i++;
+  if (i == 7) {
+    print('111');
+  }
+  i++;
+  if (i == 9) {
+    print('111');
+  }
+  i++;
+  if (i == 10) {
+    print('111');
+  }
+  i++;
+  if (i == 11) {
+    print('111');
+  }
+  i++;
+  if (i == 12) {
+    print('111');
+  }
+  let jsonObj: Object = JSON.parse('');
+  return jsonObj;
 }

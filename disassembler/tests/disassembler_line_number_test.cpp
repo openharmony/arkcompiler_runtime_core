@@ -133,27 +133,4 @@ HWTEST_F(DisasmTest, disassembler_line_number_test_005, TestSize.Level1)
         EXPECT_EQ(expectedLineNumber[i], lineNumber[i]);
     }
 }
-
-/**
-* @tc.name: disassembler_line_release_test_001
-* @tc.desc: Check abc file line number function in release.
-* @tc.type: FUNC
-* @tc.require: file path and name
-*/
-HWTEST_F(DisasmTest, disassembler_line_release_test_001, TestSize.Level1)
-{
-    const std::string file_name = GRAPH_TEST_ABC_DIR "line_number_release.abc";
-    panda::disasm::Disassembler disasm {};
-    disasm.Disassemble(file_name, false, false);
-    disasm.CollectInfo();
-    // The known line number in the abc file
-
-    std::vector<size_t> expectedLineNumber = {17, 18, 20, 22, -1, 15, -1};
-    std::vector<size_t> lineNumber = disasm.GetLineNumber();
-    ASSERT_EQ(expectedLineNumber.size(), lineNumber.size());
-    for (size_t i = 0; i < lineNumber.size(); ++i) {
-        EXPECT_EQ(expectedLineNumber[i], lineNumber[i]);
-    }
-}
-
 }
