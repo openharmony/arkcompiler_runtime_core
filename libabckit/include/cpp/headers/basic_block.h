@@ -57,12 +57,11 @@ private:
         using EnumerateData = std::pair<std::vector<BasicBlock> *, const ApiConfig *>;
         EnumerateData enumerateData(&bBs, conf);
 
-        conf->cGapi_->bbVisitSuccBlocks(GetView(), &enumerateData,
-                                        []([[maybe_unused]] AbckitBasicBlock *bb, AbckitBasicBlock *succ, void *data) {
-                                            auto *vec = static_cast<EnumerateData *>(data)->first;
-                                            auto *config = static_cast<EnumerateData *>(data)->second;
-                                            vec->push_back(BasicBlock(succ, config));
-                                        });
+        conf->cGapi_->bbVisitSuccBlocks(GetView(), &enumerateData, [](AbckitBasicBlock *succ, void *data) {
+            auto *vec = static_cast<EnumerateData *>(data)->first;
+            auto *config = static_cast<EnumerateData *>(data)->second;
+            vec->push_back(BasicBlock(succ, config));
+        });
     }
 
     BasicBlock(AbckitBasicBlock *bb, const ApiConfig *conf) : View(bb), conf_(conf) {};

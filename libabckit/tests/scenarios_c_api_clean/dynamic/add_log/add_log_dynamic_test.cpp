@@ -179,11 +179,10 @@ static void CreateEpilog(AbckitInst *inst, AbckitBasicBlock *bb, UserData *userD
 std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> succBBs;
-    g_implG->bbVisitSuccBlocks(
-        bb, &succBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-            auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-            succs->emplace_back(succBasicBlock);
-        });
+    g_implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+        auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+        succs->emplace_back(succBasicBlock);
+    });
     return succBBs;
 }
 

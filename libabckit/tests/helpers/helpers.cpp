@@ -176,22 +176,20 @@ void InspectMethod(const std::string &inputPath, const std::string &methodSignat
 std::vector<AbckitBasicBlock *> BBgetPredBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> predBBs;
-    g_implG->bbVisitPredBlocks(
-        bb, &predBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-            auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-            preds->emplace_back(succBasicBlock);
-        });
+    g_implG->bbVisitPredBlocks(bb, &predBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+        auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+        preds->emplace_back(succBasicBlock);
+    });
     return predBBs;
 }
 
 std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> succBBs;
-    g_implG->bbVisitSuccBlocks(
-        bb, &succBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-            auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-            succs->emplace_back(succBasicBlock);
-        });
+    g_implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+        auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+        succs->emplace_back(succBasicBlock);
+    });
     return succBBs;
 }
 
@@ -290,24 +288,26 @@ void ReplaceInst(AbckitInst *what, AbckitInst *with)
     std::vector<AbckitInst *> users;
 
     struct ReplaceContext {
+        AbckitInst *inst = nullptr;
         AbckitInst *oldInput = nullptr;
         AbckitInst *newInput = nullptr;
         std::vector<AbckitInst *> *users = nullptr;
     };
-    ReplaceContext ctx = {what, with, &users};
+    ReplaceContext ctx = {what, what, with, &users};
 
-    g_implG->iVisitUsers(what, &ctx, []([[maybe_unused]] AbckitInst *inst, AbckitInst *user, void *data) {
+    g_implG->iVisitUsers(what, &ctx, [](AbckitInst *user, void *data) {
         auto *users = static_cast<ReplaceContext *>(data)->users;
         users->push_back(user);
     });
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     for (auto *user : users) {
-        g_implG->iVisitInputs(user, &ctx, [](AbckitInst *inst, AbckitInst *input, size_t inputIdx, void *data) {
+        ctx.inst = user;
+        g_implG->iVisitInputs(user, &ctx, [](AbckitInst *input, size_t inputIdx, void *data) {
             auto *ctx = reinterpret_cast<ReplaceContext *>(data);
 
             if (input == ctx->oldInput) {
-                g_implG->iSetInput(inst, ctx->newInput, inputIdx);
+                g_implG->iSetInput(ctx->inst, ctx->newInput, inputIdx);
             }
         });
     }

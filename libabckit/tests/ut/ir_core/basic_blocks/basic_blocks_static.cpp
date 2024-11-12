@@ -355,9 +355,8 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitSuccBlocks(bb, &counter, [](AbckitBasicBlock *, AbckitBasicBlock *, void *data) {
-            (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+        auto cb = [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        g_implG->bbVisitSuccBlocks(bb, &counter, cb);
         // CC-OFFNXT(G.FMT.02)
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -373,9 +372,8 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitPredBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitPredBlocks(bb, &counter, [](AbckitBasicBlock *, AbckitBasicBlock *, void *data) {
-            (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+        auto cb = [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        g_implG->bbVisitPredBlocks(bb, &counter, cb);
 
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -394,9 +392,8 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitDominatedBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitDominatedBlocks(bb, &counter, [](AbckitBasicBlock *, AbckitBasicBlock *, void *data) {
-            (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+        auto cb = [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        g_implG->bbVisitDominatedBlocks(bb, &counter, cb);
 
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -745,35 +742,32 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc",
                                             "basic_blocks_static/ETSGLOBAL", "visit_call");
     EXPECT_TRUE(helpers::Match(output, "0\n1\n"));
-    helpers::TransformMethod(
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc",
-        ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static_visit.abc", "visit_succ_blocks",
-        [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
-            AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
-            AbckitBasicBlock *ifBB = g_implG->bbGetSuccBlock(startBB, 0);
-            std::vector<AbckitBasicBlock *> succBBs;
-            struct VisitData {
-                const AbckitIsaApiStatic *gStatG;
-                const AbckitGraphApi *implG;
-                AbckitGraph *graph;
-                int newPrintInt;
-            } data {g_statG, g_implG, graph, 42};
-            g_implG->bbVisitSuccBlocks(
-                ifBB, &data,
-                []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-                    auto *gStatG = static_cast<struct VisitData *>(d)->gStatG;
-                    auto *gImplG = static_cast<struct VisitData *>(d)->implG;
-                    auto *graph = static_cast<struct VisitData *>(d)->graph;
-                    int newPrintInt = static_cast<struct VisitData *>(d)->newPrintInt++;
-                    auto *curInst = gImplG->bbGetFirstInst(succBasicBlock);
-                    while (curInst != nullptr &&
-                           gStatG->iGetOpcode(curInst) != ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC) {
-                        curInst = gImplG->iGetNext(curInst);
-                    }
-                    ASSERT_NE(curInst, nullptr);
-                    gImplG->iSetInput(curInst, gImplG->gCreateConstantU64(graph, newPrintInt), 1);
-                });
+    auto cb = [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(graph);
+        AbckitBasicBlock *ifBB = g_implG->bbGetSuccBlock(startBB, 0);
+        std::vector<AbckitBasicBlock *> succBBs;
+        struct VisitData {
+            const AbckitIsaApiStatic *gStatG;
+            const AbckitGraphApi *implG;
+            AbckitGraph *graph;
+            int newPrintInt;
+        } data {g_statG, g_implG, graph, 42};
+        g_implG->bbVisitSuccBlocks(ifBB, &data, [](AbckitBasicBlock *succBasicBlock, void *d) {
+            auto *gStatG = static_cast<struct VisitData *>(d)->gStatG;
+            auto *gImplG = static_cast<struct VisitData *>(d)->implG;
+            auto *graph = static_cast<struct VisitData *>(d)->graph;
+            int newPrintInt = static_cast<struct VisitData *>(d)->newPrintInt++;
+            auto *curInst = gImplG->bbGetFirstInst(succBasicBlock);
+            while (curInst != nullptr && gStatG->iGetOpcode(curInst) != ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC) {
+                curInst = gImplG->iGetNext(curInst);
+            }
+            ASSERT_NE(curInst, nullptr);
+            gImplG->iSetInput(curInst, gImplG->gCreateConstantU64(graph, newPrintInt), 1);
         });
+    };
+    auto abcIn = ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc";
+    auto abcOut = ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static_visit.abc";
+    helpers::TransformMethod(abcIn, abcOut, "visit_succ_blocks", cb);
     output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static_visit.abc",
                                        "basic_blocks_static/ETSGLOBAL", "visit_call");
     EXPECT_TRUE(helpers::Match(output, "43\n42\n"));

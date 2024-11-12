@@ -48,12 +48,11 @@ void GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, void (*cb)(AbckitBasi
 // ========================================
 
 void BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *data));
+                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
 void BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *data));
+                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
 void BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominatedBasicBlock,
-                                             void *data));
+                                  void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data));
 AbckitInst *BBgetFirstInstStatic(AbckitBasicBlock *basicBlock);
 AbckitInst *BBgetLastInstStatic(AbckitBasicBlock *basicBlock);
 AbckitGraph *BBgetGraphStatic(AbckitBasicBlock *basicBlock);
@@ -407,9 +406,8 @@ AbckitInst *IgetPrevStatic(AbckitInst *instprev);
 void IinsertAfterStatic(AbckitInst *inst, AbckitInst *next);
 void IinsertBeforeStatic(AbckitInst *inst, AbckitInst *prev);
 bool IcheckDominanceStatic(AbckitInst *inst, AbckitInst *dominator);
-void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *inst, AbckitInst *user, void *data));
-void IvisitInputsStatic(AbckitInst *inst, void *data,
-                        void (*cb)(AbckitInst *inst, AbckitInst *input, size_t inputIdx, void *data));
+void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data));
+void IvisitInputsStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data));
 uint32_t IgetUserCountStatic(AbckitInst *inst);
 void IsetImmediateStatic(AbckitInst *inst, size_t idx, uint64_t imm);
 

@@ -190,8 +190,7 @@ extern "C" AbckitBasicBlock *BBgetPredBlock(AbckitBasicBlock *basicBlock, uint32
 }
 
 extern "C" void BBvisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *predBasicBlock,
-                                             void *data))
+                                  void (*cb)(AbckitBasicBlock *predBasicBlock, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -240,8 +239,7 @@ extern "C" void BBeraseSuccBlock(AbckitBasicBlock *bb, uint32_t index)
 }
 
 extern "C" void BBvisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBasicBlock,
-                                             void *data))
+                                  void (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -332,8 +330,7 @@ extern "C" bool BBcheckDominance(AbckitBasicBlock *basicBlock, AbckitBasicBlock 
 }
 
 extern "C" void BBvisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                       void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominatedBasicBlock,
-                                                  void *data))
+                                       void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -597,7 +594,7 @@ extern "C" uint32_t IgetUserCount(AbckitInst *inst)
     return IgetUserCountStatic(inst);
 }
 
-extern "C" void IvisitUsers(AbckitInst *inst, void *data, void (*cb)(AbckitInst *inst, AbckitInst *user, void *data))
+extern "C" void IvisitUsers(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -628,8 +625,7 @@ extern "C" AbckitInst *IgetInput(AbckitInst *inst, uint32_t index)
     return IgetInputStatic(inst, index);
 }
 
-extern "C" void IvisitInputs(AbckitInst *inst, void *data,
-                             void (*cb)(AbckitInst *inst, AbckitInst *input, size_t inputIdx, void *data))
+extern "C" void IvisitInputs(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;

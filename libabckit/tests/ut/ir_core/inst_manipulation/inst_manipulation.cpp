@@ -707,9 +707,8 @@ TEST_F(LibAbcKitIrInstTest, IvisitUsers_1)
         auto *inst = g_implG->bbGetFirstInst(start);
         auto *inst2 = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(inst)));
         uint32_t counter = 0;
-        g_implG->iVisitUsers(inst2, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
-            (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        g_implG->iVisitUsers(inst2, &counter, cbVisit);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_EQ(counter, 1U);
     };
@@ -721,19 +720,17 @@ TEST_F(LibAbcKitIrInstTest, IvisitUsers_1)
 // Test: test-kind=api, api=GraphApiImpl::iVisitUsers, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitIrInstTest, IvisitUsers_2)
 {
-    helpers::InspectMethod(
-        ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func",
-        [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            auto *start = g_implG->gGetStartBasicBlock(graph);
-            auto *inst = g_implG->bbGetFirstInst(start);
-            auto *inst2 = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(inst))));
-            uint32_t counter = 0;
-            g_implG->iVisitUsers(inst2, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
-                (*(reinterpret_cast<uint32_t *>(data)))++;
-            });
-            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            ASSERT_EQ(counter, 2U);
-        });
+    auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+        auto *start = g_implG->gGetStartBasicBlock(graph);
+        auto *inst = g_implG->bbGetFirstInst(start);
+        auto *inst2 = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(inst))));
+        uint32_t counter = 0;
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        g_implG->iVisitUsers(inst2, &counter, cbVisit);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        ASSERT_EQ(counter, 2U);
+    };
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::iVisitInputs, abc-kind=ArkTS2, category=positive
@@ -742,9 +739,8 @@ TEST_F(LibAbcKitIrInstTest, IvisitInputs_1)
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_IF);
         uint32_t counter = 0;
-        g_implG->iVisitUsers(inst, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
-            (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        g_implG->iVisitUsers(inst, &counter, cbVisit);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_EQ(counter, 0);
     };
@@ -758,9 +754,8 @@ TEST_F(LibAbcKitIrInstTest, IvisitInputs_2)
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_IF);
         uint32_t counter = 0;
-        g_implG->iVisitUsers(inst, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
-            (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        g_implG->iVisitUsers(inst, &counter, cbVisit);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_EQ(counter, 0);
     };

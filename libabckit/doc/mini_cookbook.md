@@ -222,15 +222,14 @@ implG->gVisitBlocksRpo(ctxG, &bbs, [](AbckitBasicBlock *bb, void *data) {
 ```
 
 ```cpp
-implG->bbVisitSuccBlocks(bb, &succBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock,
-    AbckitBasicBlock *succBasicBlock, void *d) {
+implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
     // user lambda
 });
 ```
 
 ```cpp
 implG->bbVisitPredBlocks(bb, &predBBs,
-    []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+    [](AbckitBasicBlock *succBasicBlock, void *d) {
         // user lambda
     });
 
@@ -260,7 +259,7 @@ for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGet
 ```cpp
 std::vector<AbckitBasicBlock *> succBBs;
 implG->bbVisitSuccBlocks(bb, &succBBs,
-    []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+    [](AbckitBasicBlock *succBasicBlock, void *d) {
         auto *succs = (std::vector<AbckitBasicBlock *> *)d;
         succs->emplace_back(succBasicBlock);
     });
@@ -392,7 +391,7 @@ implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
 ```cpp
 std::vector<AbckitBasicBlock *> predBBs;
 implG->bbVisitPredBlocks(bb, &predBBs,
-    []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+    [](AbckitBasicBlock *succBasicBlock, void *d) {
     auto *preds = (std::vector<AbckitBasicBlock *> *)d;
     preds->emplace_back(succBasicBlock);
     });

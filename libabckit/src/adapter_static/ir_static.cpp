@@ -269,6 +269,7 @@ void SetTryBlocks(AbckitGraph *graph, AbckitBasicBlock *tryLastBB, AbckitBasicBl
 }
 
 struct VisitorData {
+    AbckitBasicBlock *cur;
     AbckitBasicBlock *tryBegin;
     AbckitBasicBlock *tryEnd;
     std::unordered_set<AbckitBasicBlock *> *visited;
@@ -279,50 +280,54 @@ void VisitBbs(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitB
               AbckitBasicBlock *tryBeginBB, std::unordered_set<AbckitBasicBlock *> *visited,
               std::queue<AbckitBasicBlock *> *toVisit, VisitorData visitorData)
 {
+    visitorData.cur = tryFirstBB;
+
     // A data to pass into visitors traverse
 
-    BBvisitPredBlocksStatic(tryFirstBB, &visitorData,
-                            [](AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *predBasicBlock, void *data) {
-                                AbckitBasicBlock *tryBeginBB = static_cast<struct VisitorData *>(data)->tryBegin;
+    BBvisitPredBlocksStatic(tryFirstBB, &visitorData, [](AbckitBasicBlock *predBasicBlock, void *data) {
+        AbckitBasicBlock *curBasicBlock = static_cast<struct VisitorData *>(data)->cur;
+        AbckitBasicBlock *tryBeginBB = static_cast<struct VisitorData *>(data)->tryBegin;
 
-                                predBasicBlock->impl->ReplaceSucc(curBasicBlock->impl, tryBeginBB->impl);
-                                curBasicBlock->impl->RemovePred(predBasicBlock->impl);
-                            });
+        predBasicBlock->impl->ReplaceSucc(curBasicBlock->impl, tryBeginBB->impl);
+        curBasicBlock->impl->RemovePred(predBasicBlock->impl);
+    });
 
     BBappendSuccBlockStatic(tryBeginBB, tryFirstBB);
     BBappendSuccBlockStatic(tryBeginBB, catchBeginBB);
 
-    BBvisitPredBlocksStatic(tryLastBB, &visitorData,
-                            [](AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *predBasicBlock, void *data) {
-                                AbckitBasicBlock *tryEndBB = static_cast<struct VisitorData *>(data)->tryEnd;
+    visitorData.cur = tryLastBB;
 
-                                predBasicBlock->impl->ReplaceSucc(curBasicBlock->impl, tryEndBB->impl);
-                                curBasicBlock->impl->RemovePred(predBasicBlock->impl);
-                            });
+    BBvisitPredBlocksStatic(tryLastBB, &visitorData, [](AbckitBasicBlock *predBasicBlock, void *data) {
+        AbckitBasicBlock *curBasicBlock = static_cast<struct VisitorData *>(data)->cur;
+        AbckitBasicBlock *tryEndBB = static_cast<struct VisitorData *>(data)->tryEnd;
+
+        predBasicBlock->impl->ReplaceSucc(curBasicBlock->impl, tryEndBB->impl);
+        curBasicBlock->impl->RemovePred(predBasicBlock->impl);
+    });
 
     toVisit->push(tryBeginBB);
 
     while (!(*toVisit).empty()) {
         AbckitBasicBlock *curBB = toVisit->front();
+        visitorData.cur = curBB;
         toVisit->pop();
         visited->insert(curBB);
         curBB->impl->SetTry(true);
         curBB->impl->SetTryId(tryBeginBB->impl->GetTryId());
-        BBvisitSuccBlocksStatic(curBB, &visitorData,
-                                [](AbckitBasicBlock * /*curBasicBlock*/, AbckitBasicBlock *succBasicBlock, void *data) {
-                                    if (succBasicBlock->impl->IsTryEnd() || succBasicBlock->impl->IsCatchBegin() ||
-                                        succBasicBlock->impl->IsEndBlock()) {
-                                        return;
-                                    }
+        BBvisitSuccBlocksStatic(curBB, &visitorData, [](AbckitBasicBlock *succBasicBlock, void *data) {
+            if (succBasicBlock->impl->IsTryEnd() || succBasicBlock->impl->IsCatchBegin() ||
+                succBasicBlock->impl->IsEndBlock()) {
+                return;
+            }
 
-                                    auto *visited = static_cast<struct VisitorData *>(data)->visited;
-                                    auto *toVisit = static_cast<struct VisitorData *>(data)->toVisit;
+            auto *visited = static_cast<struct VisitorData *>(data)->visited;
+            auto *toVisit = static_cast<struct VisitorData *>(data)->toVisit;
 
-                                    auto it = visited->find(succBasicBlock);
-                                    if (it == visited->end()) {
-                                        toVisit->push(succBasicBlock);
-                                    }
-                                });
+            auto it = visited->find(succBasicBlock);
+            if (it == visited->end()) {
+                toVisit->push(succBasicBlock);
+            }
+        });
     }
 }
 
@@ -379,7 +384,7 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
     std::unordered_set<AbckitBasicBlock *> visited;
     std::queue<AbckitBasicBlock *> toVisit;
 
-    auto visitorData = VisitorData {tryBeginBB, tryEndBB, &visited, &toVisit};
+    auto visitorData = VisitorData {nullptr, tryBeginBB, tryEndBB, &visited, &toVisit};
 
     VisitBbs(tryFirstBB, tryLastBB, catchBeginBB, tryBeginBB, &visited, &toVisit, visitorData);
 
@@ -392,20 +397,19 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
         visited.insert(curBB);
         curBB->impl->SetCatch(true);
         curBB->impl->SetTryId(tryBeginBB->impl->GetTryId());
-        BBvisitSuccBlocksStatic(curBB, &visitorData,
-                                [](AbckitBasicBlock * /*curBasicBlock*/, AbckitBasicBlock *succBasicBlock, void *data) {
-                                    // NOTE(ivagin) if (succBasicBlock->impl->IsCatchEnd()
-                                    if (succBasicBlock->impl->IsCatch() || succBasicBlock->impl->IsTry()) {
-                                        return;
-                                    }
+        BBvisitSuccBlocksStatic(curBB, &visitorData, [](AbckitBasicBlock *succBasicBlock, void *data) {
+            // NOTE(ivagin) if (succBasicBlock->impl->IsCatchEnd()
+            if (succBasicBlock->impl->IsCatch() || succBasicBlock->impl->IsTry()) {
+                return;
+            }
 
-                                    auto *visited = static_cast<struct VisitorData *>(data)->visited;
-                                    auto *toVisit = static_cast<struct VisitorData *>(data)->toVisit;
+            auto *visited = static_cast<struct VisitorData *>(data)->visited;
+            auto *toVisit = static_cast<struct VisitorData *>(data)->toVisit;
 
-                                    if (visited->find(succBasicBlock) == visited->end()) {
-                                        toVisit->push(succBasicBlock);
-                                    }
-                                });
+            if (visited->find(succBasicBlock) == visited->end()) {
+                toVisit->push(succBasicBlock);
+            }
+        });
     }
 
     BBappendSuccBlockStatic(tryEndBB, tryLastBB);
@@ -473,7 +477,7 @@ void GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, void (*cb)(AbckitBasi
 // ========================================
 
 void BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *data))
+                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT_VOID(curBasicBlock)
@@ -484,12 +488,12 @@ void BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
     auto succImpls = bbImpl->GetSuccsBlocks();
     for (auto *succImpl : succImpls) {
         auto *succ = graph->implToBB.at(succImpl);
-        cb(curBasicBlock, succ, data);
+        cb(succ, data);
     }
 }
 
 void BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *data))
+                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT_VOID(curBasicBlock)
@@ -500,7 +504,7 @@ void BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
     auto predImpls = bbImpl->GetPredsBlocks();
     for (auto *predImpl : predImpls) {
         auto *pred = graph->implToBB.at(predImpl);
-        cb(curBasicBlock, pred, data);
+        cb(pred, data);
     }
 }
 
@@ -790,8 +794,7 @@ AbckitBasicBlock *BBgetImmediateDominatorStatic(AbckitBasicBlock *basicBlock)
 }
 
 void BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominatedBasicBlock,
-                                             void *data))
+                                  void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
 {
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
@@ -799,7 +802,7 @@ void BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
 
     for (auto *bbImpl : basicBlock->impl->GetDominatedBlocks()) {
         auto *bb = basicBlock->graph->implToBB.at(bbImpl);
-        cb(basicBlock, bb, data);
+        cb(bb, data);
     }
 }
 
@@ -1210,7 +1213,7 @@ bool IcheckDominanceStatic(AbckitInst *inst, AbckitInst *dominator)
     return inst->impl->IsDominate(dominator->impl);
 }
 
-void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *inst, AbckitInst *user, void *data))
+void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data))
 {
     LIBABCKIT_LOG_FUNC;
 
@@ -1218,7 +1221,7 @@ void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *inst
 
     while (user != nullptr) {
         auto *userInst = inst->graph->implToInst.at(user->GetInst());
-        cb(inst, userInst, data);
+        cb(userInst, data);
         user = user->GetNext();
     }
 }
@@ -1237,14 +1240,13 @@ uint32_t IgetUserCountStatic(AbckitInst *inst)
     return count;
 }
 
-void IvisitInputsStatic(AbckitInst *inst, void *data,
-                        void (*cb)(AbckitInst *inst, AbckitInst *input, size_t inputIdx, void *data))
+void IvisitInputsStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data))
 {
     LIBABCKIT_LOG_FUNC;
     for (size_t i = 0; i < inst->impl->GetInputsCount(); i++) {
         auto *inputImpl = inst->impl->GetInput(i).GetInst();
         auto *input = inst->graph->implToInst.at(inputImpl);
-        cb(inst, input, i, data);
+        cb(input, i, data);
     }
 }
 
