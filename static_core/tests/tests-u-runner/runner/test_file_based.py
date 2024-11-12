@@ -105,12 +105,9 @@ class TestFileBased(Test):
         cmd = self.test_env.cmd_prefix + [params.executor]
         cmd.extend(params.flags)
 
-        logged_cmd = ' '.join(cmd)
-        self.log_cmd(f"Run {name}: {logged_cmd}")
+        self.log_cmd(f"Run {name}: " + ' '.join(cmd))
 
-        passed = False
-        output = ""
-        fail_kind = None
+        passed, output, fail_kind = False, "", None
 
         with subprocess.Popen(
                 cmd,
@@ -147,9 +144,7 @@ class TestFileBased(Test):
         report = TestReport(output.strip(), error.strip(), return_code)
 
         if not no_log or report.error or report.return_code != 0:
-            self.log_cmd(f"Output: '{report.output}'")
-            self.log_cmd(f"Error: '{report.error}'")
-            self.log_cmd(f"Return code: {report.return_code}")
+            self.log_cmd(f"Output: '{report.output}'\nError: '{report.error}'\nReturn code: {report.return_code}")
 
         return passed, report, fail_kind
 

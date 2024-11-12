@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import json
+from dataclasses import dataclass
 from typing import TextIO, Tuple, Optional, List, Dict, Any
 import re
 from enum import Enum
@@ -30,35 +31,41 @@ _LOGGER = logging.getLogger('runner.astchecker.util_astchecker')
 
 
 class UtilASTChecker:
-
-    skip_options = {'SkipErrors' : False, 'SkipWarnings' : False}
+    skip_options = {'SkipErrors': False, 'SkipWarnings': False}
 
     class _TestType(Enum):
         NODE = 'Node'
         ERROR = 'Error'
         WARNING = 'Warning'
 
+    @dataclass
+    class _Pattern:
+        pattern_type: UtilASTChecker._TestType
+        pattern: str
+        line: int
+        col: int
+        error_file: str = ''
+
     class _TestCase:
         """
         Class for storing test case parsed from test file
         """
 
-        def __init__(self, name: Optional[str], test_type: UtilASTChecker._TestType,
-                     checks: dict, line: int, col: int, error_file: str = '') -> None:
+        def __init__(self, name: Optional[str], pattern: UtilASTChecker._Pattern, checks: dict) -> None:
             self.name = name
-            self.line = line
-            self.col = col
-            self.test_type = test_type
+            self.line = pattern.line
+            self.col = pattern.col
+            self.test_type = pattern.pattern_type
             self.checks = checks
-            self.error_file = error_file
+            self.error_file = pattern.error_file
 
         def __repr__(self) -> str:
             return f'TestCase({self.name}, {self.line}:{self.col}, {self.test_type}, {self.checks}, {self.error_file})'
 
         def __eq__(self, other: Any) -> bool:
             return bool(self.name == other.name and self.line == other.line and self.col == other.col
-                    and self.test_type == other.test_type and self.checks == other.checks
-                    and self.error_file == other.error_file)
+                        and self.test_type == other.test_type and self.checks == other.checks
+                        and self.error_file == other.error_file)
 
         def __hash__(self) -> int:
             return hash(self.__repr__())
@@ -85,6 +92,18 @@ class UtilASTChecker:
     def __init__(self) -> None:
         self.regex = re.compile(r'/\*\s*@@\s*(?P<pattern>.*?)\s*\*/', re.DOTALL)
         self.reset_skips()
+
+    @staticmethod
+    def create_test_case(name: Optional[str], pattern: UtilASTChecker._Pattern) -> UtilASTChecker._TestCase:
+        pattern_parsed = {'error': pattern.pattern}
+        if pattern.pattern_type == UtilASTChecker._TestType.NODE:
+            try:
+                pattern_parsed = json.loads(pattern.pattern)
+            except json.JSONDecodeError as ex:
+                Log.exception_and_raise(
+                    _LOGGER,
+                    f'TestCase: {name}.\nThrows JSON error: {ex}.\nJSON data: {pattern.pattern}')
+        return UtilASTChecker._TestCase(name, pattern, pattern_parsed)
 
     @staticmethod
     def get_match_location(match: re.Match, start: bool = False) -> Tuple[int, int]:
@@ -117,19 +136,18 @@ class UtilASTChecker:
         Log.all(_LOGGER, f'No Expected error {expected_error}')
         return False
 
+    @staticmethod
+    def get_actual_errors(error: str) -> set:
+        actual_errors = set()
+        for error_str in error.splitlines():
+            if error_str.strip():
+                error_text, error_loc = error_str.rsplit(' ', 1)
+                actual_errors.add((error_text.strip(), error_loc))
+        return actual_errors
+
     def reset_skips(self) -> None:
         self.skip_options['SkipErrors'] = False
         self.skip_options['SkipWarnings'] = False
-
-    def create_test_case(self, name: Optional[str], pattern_type: UtilASTChecker._TestType,
-                         pattern: str, line: int, col: int, error_file: str = '') -> UtilASTChecker._TestCase:
-        pattern_parsed = {'error': pattern}
-        if pattern_type == UtilASTChecker._TestType.NODE:
-            try:
-                pattern_parsed = json.loads(pattern)
-            except json.JSONDecodeError as ex:
-                Log.exception_and_raise(_LOGGER, f'TestCase: {name}.\nThrows JSON error: {ex}.\nJSON data: {pattern}')
-        return UtilASTChecker._TestCase(name, pattern_type, pattern_parsed, line, col, error_file=error_file)
 
     def check_skip_error(self) -> bool:
         return self.skip_options["SkipErrors"]
@@ -161,7 +179,7 @@ class UtilASTChecker:
             match = link_sources_map[name]
             del link_sources_map[name]
             line, col = self.get_match_location(match)
-            return self.create_test_case(name, pattern_type, pattern, line, col)
+            return self.create_test_case(name, UtilASTChecker._Pattern(pattern_type, pattern, line, col))
 
         link_defs_map[name] = (pattern_type, pattern)
         return None
@@ -188,7 +206,7 @@ class UtilASTChecker:
                 pattern_type, pattern = link_defs_map[name]
                 del link_defs_map[name]
                 line, col = self.get_match_location(match)
-                return self.create_test_case(name, pattern_type, pattern, line, col)
+                return self.create_test_case(name, UtilASTChecker._Pattern(pattern_type, pattern, line, col))
 
             link_sources_map[name] = match
             return None
@@ -197,12 +215,12 @@ class UtilASTChecker:
         pattern_type = UtilASTChecker._TestType(str_match[:sep])
         pattern = str_match[sep + 1:]
         line, col = self.get_match_location(match)
-        return self.create_test_case(None, pattern_type, pattern, line, col)
+        return self.create_test_case(None, UtilASTChecker._Pattern(pattern_type, pattern, line, col))
 
     def parse_skip_statement(self, match: re.Match[str]) -> None:
-        '''
+        """
         Parses `# <skip-option>*`
-        '''
+        """
         match_str = re.sub(r'\s+', ' ', match.group('pattern'))[1:].strip()
         pattern = r"(\w+)\s*=\s*(\w+)"
         matches = re.findall(pattern, match_str)
@@ -245,7 +263,11 @@ class UtilASTChecker:
         line, col = int(line_str), int(col_str)
         pattern_type = UtilASTChecker._TestType(match_str[sep1 + 1:sep2])
         pattern = match_str[sep2 + 1:]
-        return self.create_test_case(None, pattern_type, pattern, line, col, error_file)
+
+        return self.create_test_case(
+            name=None,
+            pattern=UtilASTChecker._Pattern(pattern_type, pattern, line, col, error_file)
+        )
 
     def parse_tests(self, file: TextIO) -> UtilASTChecker.TestCasesList:
         """
@@ -284,8 +306,8 @@ class UtilASTChecker:
         Finds all descendants of `root` with location starting at `loc`
         """
         nodes = []
-        if 'loc' in root and root['loc']['start']['line'] == line and \
-                root['loc']['start']['column'] == col:
+        start = root.get('loc', {}).get('start', {})
+        if start.get('line', None) == line and start.get('column', None) == col:
             nodes.append(root)
 
         for child in root.values():
@@ -305,14 +327,6 @@ class UtilASTChecker:
                 break
         return test_passed
 
-    def get_actual_errors(self, error: str) -> set:
-        actual_errors = set()
-        for error_str in error.splitlines():
-            if error_str.strip():
-                error_text, error_loc = error_str.rsplit(' ', 1)
-                actual_errors.add((error_text.strip(), error_loc))
-        return actual_errors
-
     def run_tests(self, test_file: str, test_cases: TestCasesList, ast: dict, error: str = '') -> bool:
         """
         Takes AST and runs tests on it, returns True if all tests passed
@@ -324,7 +338,6 @@ class UtilASTChecker:
         error_test_passed = True
         warning_test_passed = True
         tests_set = set(test_cases.tests_list)
-
 
         for i, test in enumerate(tests_set):
             if test.test_type == UtilASTChecker._TestType.NODE:

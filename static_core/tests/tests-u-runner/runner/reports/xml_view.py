@@ -93,10 +93,12 @@ class XmlView:
 
             test_cases.append('</testcase>')
 
-        xml_report = [f'<testsuite name="{self.__summary.name}" '
-                      f'tests="{total}" '
-                      f'failures="{xml_failed}" '
-                      f'time="{execution_time}">']
+        xml_report = [
+            f'<testsuite name="{self.__summary.name}" '
+            f'tests="{total}" '
+            f'failures="{xml_failed}" '
+            f'time="{execution_time}">'
+        ]
         xml_report.extend(test_cases)
         xml_report.append('</testsuite>\n')
 

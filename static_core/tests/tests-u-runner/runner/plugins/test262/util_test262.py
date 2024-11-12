@@ -130,14 +130,15 @@ class UtilTest262:
         out_str += "\n"
         out_str += harness
 
-        for include in desc['includes']:
-            out_str += f"//------------ {include} start ------------\n"
-            include_file = os.path.join(test262_dir, 'harness', include)
-            with os.fdopen(os.open(include_file, os.O_RDONLY, 0o755), 'r', encoding="utf-8") as file_handler:
-                harness_str = file_handler.read()
-            out_str += harness_str
-            out_str += f"//------------ {include} end ------------\n"
-            out_str += "\n"
+        if 'includes' in desc:
+            for include in desc['includes']:
+                out_str += f"//------------ {include} start ------------\n"
+                include_file = os.path.join(test262_dir, 'harness', include)
+                with os.fdopen(os.open(include_file, os.O_RDONLY, 0o755), 'r', encoding="utf-8") as file_handler:
+                    harness_str = file_handler.read()
+                out_str += harness_str
+                out_str += f"//------------ {include} end ------------\n"
+                out_str += "\n"
 
         if self.jit and self.jit_preheat_repeats > 1:
             out_str += wrap_with_function(descriptor.get_content(), self.jit_preheat_repeats)

@@ -15,16 +15,17 @@
 # limitations under the License.
 #
 
-from json import JSONDecoder
 import json
 import logging
-from typing import List, Any, Tuple
-from runner.logger import Log
+from json import JSONDecoder
+from typing import List, Any, Tuple, Dict
+
 from runner.descriptor import Descriptor
-from runner.test_file_based import TestFileBased
-from runner.enum_types.params import TestEnv
-from runner.plugins.astchecker.util_astchecker import UtilASTChecker
 from runner.enum_types.fail_kind import FailKind
+from runner.enum_types.params import TestEnv
+from runner.logger import Log
+from runner.plugins.astchecker.util_astchecker import UtilASTChecker
+from runner.test_file_based import TestFileBased
 
 _LOGGER = logging.getLogger("runner.plugins.astchecker")
 
@@ -36,30 +37,8 @@ class TestASTChecker(TestFileBased):
         self.util = self.test_env.util
         self.test_cases = test_cases
 
-    def do_run(self) -> TestFileBased:
-        es2panda_flags = self.flags
-        es2panda_flags.extend(['--output=/dev/null', '--dump-ast'])
-        desc = Descriptor(self.path).get_descriptor()
-
-        if 'flags' in desc and 'dynamic-ast' in desc['flags']:
-            es2panda_flags = ["--dump-dynamic-ast"]
-        else:
-            es2panda_flags = ["--dump-ast"]
-        es2panda_flags.extend(self.flags)
-        if 'flags' in desc and 'module' in desc['flags']:
-            es2panda_flags.append("--module")
-
-        passed, self.report, self.fail_kind = self.run_es2panda(
-            flags=es2panda_flags,
-            test_abc='',
-            result_validator=self.es2panda_result_validator
-        )
-
-        self.passed = ((self.test_cases.has_error_tests or self.test_cases.has_warning_tests)
-                       and self.fail_kind == FailKind.ES2PANDA_OTHER) ^ passed
-        return self
-
-    def handle_error_dump(self, input_string: str) -> Tuple[str, dict]:
+    @staticmethod
+    def handle_error_dump(input_string: str) -> Tuple[str, dict]:
         actual_output = str()
         errors_list = []
         not_handled_errors = []
@@ -87,8 +66,32 @@ class TestASTChecker(TestFileBased):
 
         return errors, json.loads(json.dumps(actual_output))
 
+    def do_run(self) -> TestFileBased:
+        es2panda_flags = self.flags
+        es2panda_flags.extend(['--output=/dev/null', '--dump-ast'])
+        desc = Descriptor(self.path).get_descriptor()
+
+        if 'flags' in desc and 'dynamic-ast' in desc['flags']:
+            es2panda_flags = ["--dump-dynamic-ast"]
+        else:
+            es2panda_flags = ["--dump-ast"]
+        es2panda_flags.extend(self.flags)
+        if 'flags' in desc and 'module' in desc['flags']:
+            es2panda_flags.append("--module")
+
+        passed, self.report, self.fail_kind = self.run_es2panda(
+            flags=es2panda_flags,
+            test_abc='',
+            result_validator=self.es2panda_result_validator
+        )
+
+        self.passed = ((self.test_cases.has_error_tests or self.test_cases.has_warning_tests)
+                       and self.fail_kind == FailKind.ES2PANDA_OTHER) ^ passed
+        return self
+
     def es2panda_result_validator(self, actual_output: str, _: Any, return_code: int) -> bool:
         error = str()
+        dump: Dict[str, Any] = {}
         try:
             error, dump = self.handle_error_dump(actual_output)
         except ValueError as err:
@@ -96,6 +99,6 @@ class TestASTChecker(TestFileBased):
 
         passed = self.util.run_tests(self.path, self.test_cases, dump, error=error)
 
-        if (self.test_cases.has_error_tests and not self.test_cases.skip_errors):
+        if self.test_cases.has_error_tests and not self.test_cases.skip_errors:
             return passed and return_code == 1
         return passed and return_code == 0
