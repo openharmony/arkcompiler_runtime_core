@@ -26,28 +26,77 @@
 
 namespace abckit {
 
+/**
+ * @brief Graph
+ */
 class Graph final : public Resource<AbckitGraph *> {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+
+    /// @brief To access private constructor
     friend class core::Function;
+    /// @brief To access private constructor
     friend class DynamicIsa;
+    /// @brief To access private constructor
     friend class StaticIsa;
 
 public:
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     Graph(const Graph &other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     * @return Graph
+     */
     Graph &operator=(const Graph &other) = delete;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     Graph(Graph &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Graph
+     */
     Graph &operator=(Graph &&other) = default;
+
+    /**
+     * @brief Destructor
+     */
     ~Graph() override = default;
 
+    /**
+     * @brief Get start basic block
+     * @return `BasicBlock`
+     */
     BasicBlock GetStartBb() const;
+
+    /**
+     * @brief Get blocks RPO
+     * @return vector of `BasicBlock`
+     */
     std::vector<BasicBlock> GetBlocksRPO() const;
 
+    /**
+     * @brief Get dyn isa
+     * @return `DynamicIsa`
+     */
     DynamicIsa DynIsa()
     {
         return DynamicIsa(*this);
     }
 
+    /**
+     * @brief Get static isa
+     * @return `StatIsa`
+     */
     StaticIsa StatIsa()
     {
         return StaticIsa(*this);
@@ -57,6 +106,10 @@ public:
     // ...
 
 protected:
+    /**
+     * @brief Get api config
+     * @return `ApiConfig`
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;
@@ -65,13 +118,45 @@ protected:
 private:
     class GraphDeleter final : public IResourceDeleter {
     public:
+        /**
+         * @brief Constructor
+         * @param conf
+         * @param graph
+         */
         GraphDeleter(const ApiConfig *conf, const Graph &graph) : conf_(conf), deleterGraph_(graph) {};
+
+        /**
+         * @brief Deleted constructor
+         * @param other
+         */
         GraphDeleter(const GraphDeleter &other) = delete;
+
+        /**
+         * @brief Deleted constructor
+         * @param other
+         */
         GraphDeleter &operator=(const GraphDeleter &other) = delete;
+
+        /**
+         * @brief Deleted constructor
+         * @param other
+         */
         GraphDeleter(GraphDeleter &&other) = delete;
+
+        /**
+         * @brief Deleted constructor
+         * @param other
+         */
         GraphDeleter &operator=(GraphDeleter &&other) = delete;
+
+        /**
+         * @brief Destructor
+         */
         ~GraphDeleter() override = default;
 
+        /**
+         * @brief Delete resource
+         */
         void DeleteResource() override
         {
             conf_->cApi_->destroyGraph(deleterGraph_.GetResource());

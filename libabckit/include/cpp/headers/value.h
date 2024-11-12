@@ -20,18 +20,53 @@
 
 namespace abckit {
 
+/**
+ * @brief Value
+ */
 class Value : public View<AbckitValue *> {
+    /// @brief abckit::File
     friend class abckit::File;
+    /// @brief abckit::core::Annotation
     friend class abckit::core::Annotation;
+    /// @brief abckit::arkts::Annotation
     friend class abckit::arkts::Annotation;
 
 public:
+    /**
+     * @brief Construct a new Value object
+     * @param other
+     */
     Value(const Value &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Value&
+     */
     Value &operator=(const Value &other) = default;
+
+    /**
+     * @brief Construct a new Value object
+     * @param other
+     */
     Value(Value &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Value&
+     */
     Value &operator=(Value &&other) = default;
+
+    /**
+     * @brief Destroy the Value object
+     */
     ~Value() override = default;
 
+    /**
+     * @brief Get the U1 value
+     * @return bool
+     */
     bool GetU1() const
     {
         bool ret = GetApiConfig()->cIapi_->valueGetU1(GetView());
@@ -39,6 +74,10 @@ public:
         return ret;
     }
 
+    /**
+     * @brief Get the Double object
+     * @return double
+     */
     double GetDouble() const
     {
         double ret = GetApiConfig()->cIapi_->valueGetDouble(GetView());
@@ -47,6 +86,10 @@ public:
     }
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

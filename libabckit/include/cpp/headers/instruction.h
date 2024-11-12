@@ -20,35 +20,112 @@
 
 namespace abckit {
 
+/**
+ * @brief Instruction
+ */
 class Instruction final : public View<AbckitInst *> {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+
+    /// @brief To access private constructor
     friend class BasicBlock;
+    /// @brief To access private constructor
     friend class StaticIsa;
+    /// @brief To access private constructor
     friend class DynamicIsa;
 
 public:
+    /**
+     * @brief Construct a new Instruction object
+     * @param other
+     */
     Instruction(const Instruction &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Instruction
+     */
     Instruction &operator=(const Instruction &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     Instruction(Instruction &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Instruction
+     */
     Instruction &operator=(Instruction &&other) = default;
+
+    /**
+     * @brief Destructor
+     */
     ~Instruction() override = default;
 
+    /**
+     * @brief Inserts `newInst` instruction after `ref` instruction into `ref`'s basic block.
+     * @param inst
+     * @return Instruction&
+     */
     Instruction &InsertAfter(const Instruction &inst);
+
+    /**
+     * @brief Inserts `newInst` instruction before `ref` instruction into `ref`'s basic block.
+     * @param inst
+     * @return Instruction&
+     */
     Instruction &InsertBefore(const Instruction &inst);
+
+    /**
+     * @brief Get the Opcode Dyn object
+     * @return AbckitIsaApiDynamicOpcode
+     */
     AbckitIsaApiDynamicOpcode GetOpcodeDyn() const;
+
+    /**
+     * @brief Get the Opcode Stat object
+     * @return AbckitIsaApiStaticOpcode
+     */
     AbckitIsaApiStaticOpcode GetOpcodeStat() const;
+
+    /**
+     * @brief Get the String object
+     * @return std::string_view
+     */
     std::string_view GetString() const;
+
+    /**
+     * @brief Get the Next object
+     * @return Instruction
+     */
     Instruction GetNext() const;
+
+    /**
+     * @brief Get the Function object
+     * @return core::Function
+     */
     core::Function GetFunction() const;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;
     }
 
 private:
+    /**
+     * @brief Construct a new Instruction object
+     * @param inst
+     * @param conf
+     */
     Instruction(AbckitInst *inst, const ApiConfig *conf) : View(inst), conf_(conf) {};
     const ApiConfig *conf_;
 };

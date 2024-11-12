@@ -452,16 +452,6 @@ struct AbckitGraphApi {
     bool (*bbCheckDominance)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominator);
 
     /**
-     * @brief Enumerates basic blocks successing to the given `basicBlock`, invoking callback `cb` for each basic block.
-     * @return None.
-     * @param [ in ] basicBlock - Basic block to be inspected.
-     * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
-     * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `basicBlock` is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
-     */
-    /**
      * @brief Enumerates basic blocks dominating to the given `basicBlock`, invoking callback `cb` for each basic block.
      * @return None.
      * @param [ in ] basicBlock - Basic block to be inspected.

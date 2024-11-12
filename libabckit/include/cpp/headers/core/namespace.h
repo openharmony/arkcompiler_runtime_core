@@ -22,18 +22,52 @@
 
 namespace abckit::core {
 
+/**
+ * @brief Namespace
+ */
 class Namespace : public View<AbckitCoreNamespace *> {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
+    friend class abckit::File;
+    /// @brief to access private constructor
     friend class Module;
 
 public:
+    /**
+     * @brief Construct a new Namespace object
+     * @param other
+     */
     Namespace(const Namespace &other) = default;
+
+    /**
+     * @brief
+     * @param other
+     * @return Namespace&
+     */
     Namespace &operator=(const Namespace &other) = default;
+
+    /**
+     * @brief Construct a new Namespace object
+     * @param other
+     */
     Namespace(Namespace &&other) = default;
+
+    /**
+     * @brief
+     * @param other
+     * @return Namespace&
+     */
     Namespace &operator=(Namespace &&other) = default;
+
+    /**
+     * @brief Destroy the Namespace object
+     */
     ~Namespace() override = default;
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName() const
     {
         AbckitString *abcName = GetApiConfig()->cIapi_->namespaceGetName(GetView());
@@ -51,6 +85,10 @@ private:
     const ApiConfig *conf_;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

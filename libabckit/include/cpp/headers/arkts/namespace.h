@@ -20,16 +20,42 @@
 
 namespace abckit::arkts {
 
+/**
+ * @brief Namespace
+ */
 class Namespace final : public core::Namespace {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class Module;
 
 public:
+    /**
+     * @brief Constructor
+     * @param other
+     */
     Namespace(const Namespace &other) = default;
+    /**
+     * @brief Consructor
+     * @param other
+     * @return Namespace&
+     */
     Namespace &operator=(const Namespace &other) = default;
+
+    /**
+     * @brief Construct a new Namespace object
+     * @param other
+     */
     Namespace(Namespace &&other) = default;
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Namespace&
+     */
     Namespace &operator=(Namespace &&other) = default;
+
+    /**
+     * @brief Destroy the Namespace object
+     */
     ~Namespace() override = default;
 
     // Other API's.

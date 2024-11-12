@@ -22,22 +22,58 @@
 
 namespace abckit::core {
 
+/**
+ * @brief AnnotationInterfaceField
+ */
 class AnnotationInterfaceField : public View<AbckitCoreAnnotationInterfaceField *> {
+    /// @brief core::Annotation
     friend class core::Annotation;
+    /// @brief arkts::Annotation
     friend class arkts::Annotation;
+    /// @brief core::AnnotationInterface
     friend class core::AnnotationInterface;
+    /// @brief arkts::AnnotationInterface
     friend class arkts::AnnotationInterface;
 
 public:
+    /**
+     * @brief Construct a new Annotation Interface Field object
+     * @param other
+     */
     AnnotationInterfaceField(const AnnotationInterfaceField &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationInterfaceField&
+     */
     AnnotationInterfaceField &operator=(const AnnotationInterfaceField &other) = default;
+
+    /**
+     * @brief Construct a new Annotation Interface Field object
+     * @param other
+     */
     AnnotationInterfaceField(AnnotationInterfaceField &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationInterfaceField&
+     */
     AnnotationInterfaceField &operator=(AnnotationInterfaceField &&other) = default;
+
+    /**
+     * @brief Destroy the Annotation Interface Field object
+     */
     ~AnnotationInterfaceField() override = default;
 
     // Core API's.
     // ...
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName();
 
 private:
@@ -46,6 +82,10 @@ private:
     const ApiConfig *conf_;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

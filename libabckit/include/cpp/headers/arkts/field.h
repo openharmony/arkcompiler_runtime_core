@@ -20,16 +20,44 @@
 
 namespace abckit::arkts {
 
+/**
+ * @brief Field
+ */
 class Field final : public core::Field {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::core::Field;
 
 public:
+    /**
+     * @brief Construct a new Field object
+     * @param other
+     */
     Field(const Field &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Field&
+     */
     Field &operator=(const Field &other) = default;
+
+    /**
+     * @brief Construct a new Field object
+     * @param other
+     */
     Field(Field &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Field&
+     */
     Field &operator=(Field &&other) = default;
+
+    /**
+     * @brief Destroy the Field object
+     */
     ~Field() override = default;
     // Other API.
     // ...

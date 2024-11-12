@@ -24,29 +24,110 @@
 
 namespace abckit::core {
 
+/**
+ * @brief Module
+ */
 class Module : public View<AbckitCoreModule *> {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
     friend class abckit::core::Function;
+    /// @brief to access private constructor
     friend class abckit::core::ImportDescriptor;
 
 public:
+    /**
+     * @brief Construct a new Module object
+     * @param other
+     */
     Module(const Module &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Module&
+     */
     Module &operator=(const Module &other) = default;
+
+    /**
+     * @brief Construct a new Module object
+     * @param other
+     */
     Module(Module &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Module&
+     */
     Module &operator=(Module &&other) = default;
+
+    /**
+     * @brief Destroy the Module object
+     */
     ~Module() override = default;
 
+    /**
+     * @brief Get the Classes name
+     * @return std::string_view
+     */
     std::string_view GetName() const;
+
+    /**
+     * @brief Get the Classes object
+     * @return std::vector<core::Class>
+     */
     std::vector<core::Class> GetClasses() const;
+
+    /**
+     * @brief Get the Top Level Functions object
+     * @return std::vector<core::Function>
+     */
     std::vector<core::Function> GetTopLevelFunctions() const;
+
+    /**
+     * @brief Get the Annotation Interfaces object
+     * @return std::vector<core::AnnotationInterface>
+     */
     std::vector<core::AnnotationInterface> GetAnnotationInterfaces() const;
+
+    /**
+     * @brief Get the Namespaces object
+     *
+     * @return std::vector<core::Namespace>
+     */
     std::vector<core::Namespace> GetNamespaces() const;
+
+    /**
+     * @brief Get the Imports object
+     * @return std::vector<core::ImportDescriptor>
+     */
     std::vector<core::ImportDescriptor> GetImports() const;
+
+    /**
+     * @brief Get the Exports object
+     *
+     * @return std::vector<core::ExportDescriptor>
+     */
     std::vector<core::ExportDescriptor> GetExports() const;
+
+    /**
+     * @brief EnumerateTopLevelFunctions
+     * @param cb
+     */
     void EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
+
+    /**
+     * @brief EnumerateClasses
+     * @param cb
+     */
     void EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
+
+    /**
+     * @brief EnumerateImports
+     * @param cb
+     */
     void EnumerateImports(const std::function<bool(core::ImportDescriptor)> &cb) const;
 
     // Core API's.

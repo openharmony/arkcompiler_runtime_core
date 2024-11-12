@@ -22,32 +22,72 @@
 
 namespace abckit::core {
 
+/**
+ * @brief AnnotationElement
+ */
 class AnnotationElement : public View<AbckitCoreAnnotationElement *> {
+    /// @brief core::Annotation
     friend class core::Annotation;
+    /// @brief arkts::Annotation
     friend class arkts::Annotation;
+    /// @brief core::Module
     friend class core::Module;
+    /// @brief arkts::Module
     friend class arkts::Module;
 
 public:
+    /**
+     * @brief Constructor
+     * @param other
+     */
     AnnotationElement(const AnnotationElement &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return this
+     */
     AnnotationElement &operator=(const AnnotationElement &other) = default;
+
+    /**
+     * @brief Destructor
+     */
     ~AnnotationElement() override = default;
 
     // Core API's.
     // ...
 
+private:
+    /**
+     * Constructor
+     * @param conf
+     * @param anne
+     */
+    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf) : View(anne), conf_(conf) {};
+    const ApiConfig *conf_;
+
 protected:
+    /**
+     * @brief Constructor
+     * @param other
+     */
     AnnotationElement(AnnotationElement &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return this
+     */
     AnnotationElement &operator=(AnnotationElement &&other) = default;
 
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;
     }
-
-private:
-    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf) : View(anne), conf_(conf) {};
-    const ApiConfig *conf_;
 };
 
 }  // namespace abckit::core

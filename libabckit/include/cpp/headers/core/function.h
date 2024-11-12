@@ -25,28 +25,92 @@
 
 namespace abckit::core {
 
+/**
+ * @brief Function
+ */
 class Function : public View<AbckitCoreFunction *> {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class core::Class;
+    /// @brief to access private constructor
     friend class core::Module;
+    /// @brief to access private constructor
     friend class abckit::Instruction;
 
 public:
+    /**
+     * @brief Construct a new Function object
+     * @param other
+     */
     Function(const Function &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Function&
+     */
     Function &operator=(const Function &other) = default;
+
+    /**
+     * @brief Construct a new Function object
+     * @param other
+     */
     Function(Function &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Function&
+     */
     Function &operator=(Function &&other) = default;
+
+    /**
+     * @brief Destroy the Function object
+     */
     ~Function() override = default;
 
+    /**
+     * @brief Get the Graph object
+     * @return Graph
+     */
     Graph GetGraph() const;
+
+    /**
+     * @brief Set the Graph object
+     * @param graph
+     */
     void SetGraph(const Graph &graph);
+
+    /**
+     * @brief Get the name
+     * @return std::string_view
+     */
     std::string_view GetName() const;
+
+    /**
+     * @brief Get the annotation
+     * @return std::vector<core::Annotation>
+     */
     std::vector<core::Annotation> GetAnnotations() const;
+
+    /**
+     * @brief is static
+     * @return bool
+     */
     bool IsStatic() const;
 
     // Core API's.
+    /**
+     * @brief Get the Module object
+     * @return core::Module
+     */
     core::Module GetModule() const;
+
+    /**
+     * @brief Get the Parent Class object
+     *
+     * @return core::Class
+     */
     core::Class GetParentClass() const;
 
 private:

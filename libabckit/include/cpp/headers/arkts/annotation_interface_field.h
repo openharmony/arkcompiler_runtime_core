@@ -20,22 +20,56 @@
 
 namespace abckit::arkts {
 
+/**
+ * @brief AnnotationInterfaceField
+ */
 class AnnotationInterfaceField : public core::AnnotationInterfaceField {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+
+    /// @brief to access private constructor
     friend class arkts::Annotation;
+    /// @brief to access private constructor
     friend class arkts::AnnotationInterface;
 
 public:
+    /**
+     * @brief Construct a new Annotation Interface Field object
+     *
+     * @param other
+     */
     AnnotationInterfaceField(const AnnotationInterfaceField &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationInterfaceField&
+     */
     AnnotationInterfaceField &operator=(const AnnotationInterfaceField &other) = default;
+
+    /**
+     * @brief Construct a new Annotation Interface Field object
+     * @param other
+     */
     AnnotationInterfaceField(AnnotationInterfaceField &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationInterfaceField&
+     */
     AnnotationInterfaceField &operator=(AnnotationInterfaceField &&other) = default;
 
     // CC-OFFNXT(G.FMT.02) project code style
+    /**
+     * @brief Construct a new Annotation Interface Field object
+     * @param coreOther
+     */
     explicit AnnotationInterfaceField(const core::AnnotationInterfaceField &coreOther)
         : core::AnnotationInterfaceField(coreOther) {};
 
+    /**
+     * @brief Destroy the Annotation Interface Field object
+     */
     ~AnnotationInterfaceField() override = default;
     // Other API.
     // ...

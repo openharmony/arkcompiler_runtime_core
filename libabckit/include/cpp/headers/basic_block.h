@@ -25,24 +25,90 @@
 
 namespace abckit {
 
+/**
+ * @brief BasicBlock
+ */
 class BasicBlock final : public View<AbckitBasicBlock *> {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class Graph;
 
 public:
+    /**
+     * @brief Constructor
+     * @param other
+     */
     BasicBlock(const BasicBlock &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return BasicBlock&
+     */
     BasicBlock &operator=(const BasicBlock &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     BasicBlock(BasicBlock &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return BasicBlock&
+     */
     BasicBlock &operator=(BasicBlock &&other) = default;
+
+    /**
+     * @brief Destructor
+     */
     ~BasicBlock() override = default;
 
+    /**
+     * @brief Get the Succ Count object
+     * @return uint64_t
+     */
     uint64_t GetSuccCount() const;
+
+    /**
+     * @brief Get the Succ By Idx object
+     * @param idx
+     * @return BasicBlock
+     */
     BasicBlock GetSuccByIdx(int idx) const;
+
+    /**
+     * @brief Get the Succs object
+     * @return std::vector<BasicBlock>
+     */
     std::vector<BasicBlock> GetSuccs() const;
+
+    /**
+     * @brief
+     * @param inst
+     * @return BasicBlock&
+     */
     BasicBlock &AddInstFront(const Instruction &inst);
+
+    /**
+     * @brief
+     * @param inst
+     * @return BasicBlock&
+     */
     BasicBlock &AddInstBack(const Instruction &inst);
+
+    /**
+     * @brief Get the Instructions object
+     * @return std::vector<Instruction>
+     */
     std::vector<Instruction> GetInstructions() const;
+
+    /**
+     * @brief Get the First Inst object
+     *
+     * @return Instruction
+     */
     Instruction GetFirstInst() const;
 
 protected:
