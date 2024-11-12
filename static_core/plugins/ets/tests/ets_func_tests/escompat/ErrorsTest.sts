@@ -13,81 +13,115 @@
  * limitations under the License.
  */
 
-const success = 0;
-const fail = 1;
-
-class ErrorCause {
-    reason: String = "";
-}
+const success = 0
+const fail = 1
 
 function main(): int {
-    let failures = 0;
+    const suite = new ArkTestsuite("Errors API tests")
 
-    failures += test(testCreateError(), "Create an Error object with a message");
-    failures += test(testThrowError(), "Throw an Error and catch it");
-    failures += test(testErrorMessage(), "Validate the message of the caught Error");
-    failures += test(testErrorWithCause(), "Error object with cause");
-    failures += test(testCreateAggregateError(), "Create an AggregateError object with an array of errors");
-    failures += test(testCreateAggregateErrorFromArray(), "Create an AggregateError object with an Array<Error>");
-    failures += test(testAggregateErrorMessage(), "Validate the message of the AggregateError");
-    failures += test(testEvalError(), "EvalError with message and options");
-    failures += test(testRangeError(), "RangeError with message and options");
-    failures += test(testReferenceError(), "ReferenceError with message and options");
-    failures += test(testSyntaxError(), "SyntaxError with message and options");
-    failures += test(testTypeError(), "TypeError with message and options");
-    failures += test(testURIError(), "URIError with message and options");
-    return test(failures, "All tests run");
+    suite.addTest("Create an Error object with a message", testCreateError)
+    suite.addTest("Throw an Error and catch it", testThrowError)
+    suite.addTest("Validate the message of the caught Error", testErrorMessage)
+    suite.addTest("Error object with cause", testErrorWithCause)
+    suite.addTest("Create an AggregateError object with an array of errors", testCreateAggregateError)
+    suite.addTest("Create an AggregateError object with an Array<Error>", testCreateAggregateErrorFromArray)
+    suite.addTest("Validate the message of the AggregateError", testAggregateErrorMessage)
+    suite.addTest("EvalError with message and options", testEvalError)
+    suite.addTest("RangeError with message and options", testRangeError)
+    suite.addTest("ReferenceError with message and options", testReferenceError)
+    suite.addTest("SyntaxError with message and options", testSyntaxError)
+    suite.addTest("TypeError with message and options", testTypeError)
+    suite.addTest("URIError with message and options", testURIError)
+
+    return suite.run()
 }
 
-function testCreateError(): int {
-    let err = new Error("Test error");
-    let errSc = Error("Test error");
-    if (errSc.message == err.message && err.message == "Test error") {
-        return success;
-    }
-    return fail;
+function checkMessageAndName(
+    err: Error,
+    errSc: Error,
+    expected_message: string,
+    expected_name: string
+): boolean {
+    const result =
+        errSc.message == err.message &&
+        err.message == expected_message &&
+        errSc.name == err.name &&
+        err.name == expected_name
+    return result
 }
 
-function testThrowError(): int {
+function testErrorHelper(
+    factoryUsingConstructor: (x?: string) => Error,
+    factoryUsingStaticInvoke: (x?: string) => Error,
+    name: string,
+    message: string
+) {
+    const errorEmptyMessage = factoryUsingConstructor()
+    const errorStaticEmptyMessage = factoryUsingStaticInvoke()
+    assertTrue(
+        checkMessageAndName(errorEmptyMessage, errorStaticEmptyMessage, "", name),
+        `Error in check "${name}" error class with empty message`
+    )
+    const errorWithMessage = factoryUsingConstructor(message)
+    const errorStaticWithMessage = factoryUsingStaticInvoke(message)
+    assertTrue(
+        checkMessageAndName(
+            errorWithMessage,
+            errorStaticWithMessage,
+            message,
+            name
+        ),
+        `Error in check "${name}" error class with message: "${message}"`
+    )
+}
+
+function testCreateError() {
+    testErrorHelper(
+        (x?: string): Error => new Error(x),
+        (x?: string): Error => Error(x),
+        "Error",
+        "Test Error"
+    )
+    assertEQ(Error("Test Error", new ErrorOptions("Cause")).cause, "Cause")
+}
+
+function testThrowError() {
     try {
-        throw new Error("Test throw");
+        throw new Error("Test throw")
     } catch (err: Error) {
-        return success;
+        return
     }
 }
 
-function testErrorMessage(): int {
+function testErrorMessage() {
     try {
-        throw new Error("Error message test");
+        throw new Error("Error message test")
     } catch (err: Error) {
-        if (err.message == "Error message test") return success;
-        return fail;
+        assertEQ(err.message, "Error message test")
+        return
     }
 }
 
-function testErrorWithCause(): int {
-    let cause: ErrorCause = { reason: "Test cause" };
-    let err = new Error("Test error with cause", new ErrorOptions(cause));
-    let errSc = Error("Test error with cause", new ErrorOptions(cause));
-    if (errSc.cause == err.cause && err.cause == cause) {
-        return success;
-    }
-    return fail;
+function testErrorWithCause() {
+    const options = new ErrorOptions("Test cause")
+    const err = new Error("Test error with cause", options)
+    const errSc = Error("Test error with cause", options)
+    assertEQ(errSc.cause, err.cause)
+    assertEQ(err.cause, options.cause)
 }
 
-function testCreateAggregateError(): int {
-    let errors = [new Error("Error 1"), new Error("Error 2")];
-    let aggErr = new AggregateError(errors, "Aggregate error message");
-    if (aggErr.errors.length != 2 || aggErr.message != "Aggregate error message") {
-        return fail;
-    }
+function testCreateAggregateError() {
+    const errors = [new Error("Error 1"), new Error("Error 2")]
+    let aggErr = new AggregateError(errors, "Aggregate error message")
+    assertEQ(aggErr.errors.length, 2)
+    assertEQ(aggErr.message, "Aggregate error message")
 
     // Note(ivan-tyulyandin): the code below has to moved into generated tests
     // after internal issue #20142 is resolved
-    const errInArr = [new Error]
+    const errInArr = [new Error()]
     const emptyStr = ""
     const nonEmptyStr = "text"
-    const errOpts = new ErrorOptions
+    const errOpts = new ErrorOptions()
     const assertMsg = "length of errors has to be 1"
 
     // AggregateError(Error)
@@ -99,14 +133,14 @@ function testCreateAggregateError(): int {
     aggErr = new AggregateError(errInArr, undefined)
     assertTrue(aggErr.errors.length == 1, assertMsg)
     assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, Object|undefined>(emptyStr, aggErr.message)
+    assertEQ<string, object | undefined>(emptyStr, aggErr.message)
 
     // AggregateError(Error, undefined, undefined)
     aggErr = new AggregateError(errInArr, undefined)
     assertTrue(aggErr.errors.length == 1, assertMsg)
     assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, Object|undefined>(emptyStr, aggErr.message)
-    assertEQ<undefined, Object|undefined>(undefined, aggErr.cause)
+    assertEQ<string, object | undefined>(emptyStr, aggErr.message)
+    assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
 
     // AggregateError(Error, "")
     aggErr = new AggregateError(errInArr, emptyStr)
@@ -125,126 +159,129 @@ function testCreateAggregateError(): int {
     assertTrue(aggErr.errors.length == 1, assertMsg)
     assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
     assertEQ<string, string>(emptyStr, aggErr.message)
-    assertEQ<undefined, Object|undefined>(undefined, aggErr.cause)
+    assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
 
     // AggregateError(Error, "text", undefined)
     aggErr = new AggregateError(errInArr, nonEmptyStr, undefined)
     assertTrue(aggErr.errors.length == 1, assertMsg)
     assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
     assertEQ<string, string>(nonEmptyStr, aggErr.message)
-    assertEQ<undefined, Object|undefined>(undefined, aggErr.cause)
+    assertEQ<undefined, object | undefined>(undefined, aggErr.cause)
 
     // AggregateError(Error, undefined, ErrorOptions)
     aggErr = new AggregateError(errInArr, undefined, errOpts)
     assertTrue(aggErr.errors.length == 1, assertMsg)
     assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
-    assertEQ<string, Object|undefined>(emptyStr, aggErr.message)
-    assertEQ<Object|undefined, Object|undefined>(errOpts.cause, aggErr.cause)
+    assertEQ<string, object | undefined>(emptyStr, aggErr.message)
+    assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
 
     // AggregateError(Error, "", ErrorOptions)
     aggErr = new AggregateError(errInArr, emptyStr, errOpts)
     assertTrue(aggErr.errors.length == 1, assertMsg)
     assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
     assertEQ<string, string>(emptyStr, aggErr.message)
-    assertEQ<Object|undefined, Object|undefined>(errOpts.cause, aggErr.cause)
+    assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
 
     // AggregateError(Error, "text", ErrorOptions)
     aggErr = new AggregateError(errInArr, nonEmptyStr, errOpts)
     assertTrue(aggErr.errors.length == 1, assertMsg)
     assertEQ<Error, Error>(errInArr[0], aggErr.errors[0])
     assertEQ<string, string>(nonEmptyStr, aggErr.message)
-    assertEQ<Object|undefined, Object|undefined>(errOpts.cause, aggErr.cause)
-
-    return success;
+    assertEQ<object | undefined, object | undefined>(errOpts.cause, aggErr.cause)
 }
 
-function testCreateAggregateErrorFromArray(): int {
-    let errors = Array.from<Error>([new Error("Error 1"), new Error("Error 2")]);
-    let aggErr = new AggregateError(errors, "Aggregate error message");
-    if (aggErr.errors.length == 2 && aggErr.message == "Aggregate error message") {
-        return success;
-    }
-    return fail;
+function testCreateAggregateErrorFromArray() {
+    const errors = Array.from<Error>([
+        new Error("Error 1"),
+        new Error("Error 2")
+    ])
+    const aggErr = new AggregateError(errors, "Aggregate error message")
+    assertEQ(aggErr.errors.length, 2)
+    assertEQ(aggErr.message, "Aggregate error message")
 }
 
-function testAggregateErrorMessage(): int {
-    let aggErr = new AggregateError([] as Error[], "Test aggregate error message");
-    if (aggErr.message == "Test aggregate error message") {
-        return success;
-    }
-    return fail;
+function testAggregateErrorMessage() {
+    const aggErr = new AggregateError(
+        [] as Error[],
+        "Test aggregate error message"
+    )
+    assertEQ(aggErr.message, "Test aggregate error message")
 }
 
-function checkMessageAndName(
-    err: Error,
-    errSc: Error,
-    expected_message: string,
-    expected_name: string
-): boolean {
-    return errSc.message == err.message &&
-        err.message == expected_message &&
-        errSc.name == err.name &&
-        err.name == expected_name;
+function testEvalError() {
+    testErrorHelper(
+        (x?: string): Error => new EvalError(x),
+        (x?: string): Error => EvalError(x),
+        "EvalError",
+        "Test EvalError"
+    )
+    assertEQ(
+        EvalError("Test EvalError", new ErrorOptions("Test cause")).cause,
+        "Test cause"
+    )
 }
 
-function testEvalError(): int {
-    let err = new EvalError("Test EvalError", new ErrorOptions("Eval cause"));
-    let errSc = EvalError("Test EvalError", new ErrorOptions("Eval cause"));
-    if (checkMessageAndName(err, errSc, "Test EvalError", "EvalError")) {
-        return success;
-    }
-    return fail;
+function testRangeError() {
+    testErrorHelper(
+        (x?: string): Error => new RangeError(x),
+        (x?: string): Error => RangeError(x),
+        "RangeError",
+        "Test RangeError"
+    )
+    assertEQ(
+        RangeError("Test RangeError", new ErrorOptions("Test cause")).cause,
+        "Test cause"
+    )
 }
 
-function testRangeError(): int {
-    let err = new RangeError("Test RangeError", new ErrorOptions("Range cause"));
-    let errSc = RangeError("Test RangeError", new ErrorOptions("Range cause"));
-    if (checkMessageAndName(err, errSc, "Test RangeError", "RangeError")) {
-        return success;
-    }
-    return fail;
+function testReferenceError() {
+    testErrorHelper(
+        (x?: string): Error => new ReferenceError(x),
+        (x?: string): Error => ReferenceError(x),
+        "ReferenceError",
+        "Test ReferenceError"
+    )
+    assertEQ(
+        ReferenceError("Test ReferenceError", new ErrorOptions("Test cause")).cause,
+        "Test cause"
+    )
 }
 
-function testReferenceError(): int {
-    let err = new ReferenceError("Test ReferenceError", new ErrorOptions("Reference cause"));
-    let errSc = ReferenceError("Test ReferenceError", new ErrorOptions("Reference cause"));
-    if (checkMessageAndName(err, errSc, "Test ReferenceError", "ReferenceError")) {
-        return success;
-    }
-    return fail;
+function testSyntaxError() {
+    testErrorHelper(
+        (x?: string): Error => new SyntaxError(x),
+        (x?: string): Error => SyntaxError(x),
+        "SyntaxError",
+        "Test SyntaxError"
+    )
+    assertEQ(
+        SyntaxError("Test SyntaxError", new ErrorOptions("Test cause")).cause,
+        "Test cause"
+    )
 }
 
-function testSyntaxError(): int {
-    let err = new SyntaxError("Test SyntaxError", new ErrorOptions("Syntax cause"));
-    let errSc = SyntaxError("Test SyntaxError", new ErrorOptions("Reference cause"));
-    if (checkMessageAndName(err, errSc, "Test SyntaxError", "SyntaxError")) {
-        return success;
-    }
-    return fail;
+function testTypeError() {
+    testErrorHelper(
+        (x?: string): Error => new TypeError(x),
+        (x?: string): Error => TypeError(x),
+        "TypeError",
+        "Test TypeError"
+    )
+    assertEQ(
+        TypeError("Test TypeError", new ErrorOptions("Test cause")).cause,
+        "Test cause"
+    )
 }
 
-function testTypeError(): int {
-    let err = new TypeError("Test TypeError", new ErrorOptions("Type cause"));
-    let errSc = TypeError("Test TypeError", new ErrorOptions("Reference cause"));
-    if (checkMessageAndName(err, errSc, "Test TypeError", "TypeError")) {
-        return success;
-    }
-    return fail;
-}
-
-function testURIError(): int {
-    let err = new URIError("Test URIError", new ErrorOptions("URI cause"));
-    let errSc = URIError("Test URIError", new ErrorOptions("Reference cause"));
-    if (checkMessageAndName(err, errSc, "Test URIError", "URIError")) {
-        return success;
-    }
-    return fail;
-}
-
-function test(result: int, message: String): int {
-    if (result == 0) {
-      return success;
-    }
-    console.println("FAILED: " + message);
-    return fail;
+function testURIError() {
+    testErrorHelper(
+        (x?: string): Error => new URIError(x),
+        (x?: string): Error => URIError(x),
+        "URIError",
+        "Test URIError"
+    )
+    assertEQ(
+        URIError("Test URIError", new ErrorOptions("Test cause")).cause,
+        "Test cause"
+    )
 }
