@@ -19,7 +19,6 @@ disasm_test_configs = [
   "$ark_root:ark_config",
   "$ark_root/libpandabase:arkbase_public_config",
   "$ark_root/libpandafile:arkfile_public_config",
-  sdk_libc_secshared_config,
 ]
 
 disasm_test_deps = [
@@ -207,6 +206,7 @@ host_unittest_action("DisasmModuleTest") {
   sources = module_sources
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -221,6 +221,7 @@ host_unittest_action("DisasmDebugTest") {
   sources = script_sources
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -235,6 +236,7 @@ host_unittest_action("DisasmReleaseTest") {
   sources = script_sources
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -265,6 +267,7 @@ host_unittest_action("DisasmScriptTest") {
   sources = script_sources
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
   deps = disasm_test_deps
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
@@ -279,6 +282,7 @@ host_unittest_action("DisasmImmTest") {
   sources = [ "disassembler_imm_tests.cpp" ]
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
+  external_deps = [ sdk_libc_secshared_dep ]
   deps = disasm_test_deps
 }
 
