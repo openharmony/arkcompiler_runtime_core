@@ -25,36 +25,11 @@
 #include <cstdint>
 #endif /* __cplusplus */
 
-#include "../../metadata_core.h"
+#include "../../declarations.h"
+#include "../../api_version.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
-
-struct AbckitArktsModule;
-struct AbckitArktsNamespace;
-struct AbckitArktsClass;
-struct AbckitArktsFunction;
-struct AbckitArktsField;
-struct AbckitArktsAnnotation;
-struct AbckitArktsAnnotationElement;
-struct AbckitArktsAnnotationInterface;
-struct AbckitArktsAnnotationInterfaceField;
-struct AbckitArktsImportDescriptor;
-struct AbckitArktsExportDescriptor;
-
-#ifndef __cplusplus
-typedef struct AbckitArktsModule AbckitArktsModule;
-typedef struct AbckitArktsNamespace AbckitArktsNamespace;
-typedef struct AbckitArktsClass AbckitArktsClass;
-typedef struct AbckitArktsFunction AbckitArktsFunction;
-typedef struct AbckitArktsField AbckitArktsField;
-typedef struct AbckitArktsAnnotation AbckitArktsAnnotation;
-typedef struct AbckitArktsAnnotationElement AbckitArktsAnnotationElement;
-typedef struct AbckitArktsAnnotationInterface AbckitArktsAnnotationInterface;
-typedef struct AbckitArktsAnnotationInterfaceField AbckitArktsAnnotationInterfaceField;
-typedef struct AbckitArktsImportDescriptor AbckitArktsImportDescriptor;
-typedef struct AbckitArktsExportDescriptor AbckitArktsExportDescriptor;
 #endif /* __cplusplus */
 
 /**

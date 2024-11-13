@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_IMPL_H
 #define CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_IMPL_H
 
-#include "cpp/headers/core/import_descriptor.h"
+#include "./import_descriptor.h"
 
 namespace abckit::core {
 

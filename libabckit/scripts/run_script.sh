@@ -16,14 +16,10 @@ set -u
 set -e
 set -o pipefail
 
-TRUE=1
-FALSE=0
-
 ENV_VALUE=""
 SCRIPT_ARGS_VALUE=""
 RUNNER_VALUE=""
 RUNNER_ARGS_VALUE=""
-HELP_VALUE=""
 
 SCRIPT_ARGUMENT="--script"
 SCRIPT_ARGS_OPTION="--script-args"
@@ -32,11 +28,18 @@ RUNNER_ARGS_OPTION="--runner-args"
 ENV_OPTION="--env"
 RET_CODE_OPTION="--ret-code"
 HELP_OPTION="--help"
+DEBUG_OPTION="--help"
+
+declare -i TRUE=1
+declare -i FALSE=0
+
+declare -i HELP_VALUE=$FALSE
+declare -i DEBUG_VALUE=$FALSE
 
 print_help() {
     echo "Usage: run_script.sh ${SCRIPT_ARGUMENT}=                                                        "
     echo "      [${SCRIPT_ARGS_OPTION}=]+ [${RUNNER_ARGS_OPTION}=]+ [${ENV_OPTION}=]+                     "
-    echo "      [${RUNNER_OPTION}=] [${RET_CODE_OPTION}=] [--help]                                        "
+    echo "      [${RUNNER_OPTION}=] [${RET_CODE_OPTION}=] [${HELP_OPTION}] [${DEBUG_OPTION}]              "
     echo "Arguments:                                                                                      "
     echo "      ${SCRIPT_ARGUMENT}      Path for the script to be executed.                               "
     echo "Options:                                                                                        "
@@ -46,11 +49,18 @@ print_help() {
     echo "      ${ENV_OPTION}           Environment for the script execution.                             "
     echo "      ${RET_CODE_OPTION}      Specify expected return code of the command. Set to 0 by default. "
     echo "      ${HELP_OPTION}          Print this message.                                               "
+    echo "      ${DEBUG_OPTION}         Print debug information.                                          "
 }
 
 report_error() {
     echo "[ERROR]/: " "$@"
     exit 1
+}
+
+debug_message() {
+    if [ ${DEBUG_VALUE} -eq ${TRUE} ]; then
+        echo "[DEBUG]/: " "$@"
+    fi
 }
 
 parse_args() {
@@ -89,6 +99,11 @@ parse_args() {
             HELP_VALUE=$TRUE
             shift
             ;;
+        "${DEBUG_OPTION}")
+            # CC-OFFNXT(bc-50008) false positive
+            DEBUG_VALUE=$TRUE
+            shift
+            ;;
         *)
             print_help
             report_error "Recieved unexpected argument: ${i}"
@@ -113,14 +128,14 @@ check_args() {
 }
 
 print_parsed_args() {
-    echo "Parsed arguments:"
-    echo "${SCRIPT_ARGUMENT}=${SCRIPT_VALUE}"
-    echo "${SCRIPT_ARGS_OPTION}=${SCRIPT_ARGS_VALUE}"
-    echo "${RUNNER_OPTION}=${RUNNER_VALUE}"
-    echo "${RUNNER_ARGS_OPTION}=${RUNNER_ARGS_VALUE}"
-    echo "${ENV_OPTION}=${ENV_VALUE}"
-    echo "${RET_CODE_OPTION}=${RET_CODE_VALUE}"
-    echo "${HELP_OPTION}=${HELP_VALUE}"
+    debug_message "Parsed arguments:"
+    debug_message "${SCRIPT_ARGUMENT}=${SCRIPT_VALUE}"
+    debug_message "${SCRIPT_ARGS_OPTION}=${SCRIPT_ARGS_VALUE}"
+    debug_message "${RUNNER_OPTION}=${RUNNER_VALUE}"
+    debug_message "${RUNNER_ARGS_OPTION}=${RUNNER_ARGS_VALUE}"
+    debug_message "${ENV_OPTION}=${ENV_VALUE}"
+    debug_message "${RET_CODE_OPTION}=${RET_CODE_VALUE}"
+    debug_message "${HELP_OPTION}=${HELP_VALUE}"
 }
 
 main() {
@@ -135,7 +150,9 @@ main() {
     check_args
 
     local -i ret_code=0
-    export ${ENV_VALUE?}
+    if [ -n "${ENV_VALUE}" ]; then
+        export ${ENV_VALUE?}
+    fi
     ${RUNNER_VALUE} ${RUNNER_ARGS_VALUE} ${SCRIPT_VALUE} ${SCRIPT_ARGS_VALUE} || ret_code=$?
 
     if [ ! ${ret_code} -eq ${RET_CODE_VALUE} ]; then

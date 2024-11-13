@@ -62,7 +62,7 @@ static void TransformMethod(AbckitCoreFunction *method, VisitHelper &visitor, co
         AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(ctxG);
         std::vector<AbckitBasicBlock *> succBBs;
         g_implG->bbVisitSuccBlocks(
-            startBB, (void *)&succBBs,
+            startBB, &succBBs,
             []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
                 auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
                 succs->emplace_back(succBasicBlock);

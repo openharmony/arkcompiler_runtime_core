@@ -16,13 +16,7 @@
 #ifndef CPP_ABCKIT_LITERAL_ARRAY_H
 #define CPP_ABCKIT_LITERAL_ARRAY_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "libabckit/include/c/metadata_core.h"
-
-#include <vector>
+#include "./base_classes.h"
 
 namespace abckit {
 

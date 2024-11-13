@@ -16,12 +16,13 @@
 #ifndef CPP_ABCKIT_DYNAMIC_ISA_H
 #define CPP_ABCKIT_DYNAMIC_ISA_H
 
-#include "cpp/headers/config.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/instruction.h"
-#include <memory>
+#include "./instruction.h"
+
+#include <string>
 
 namespace abckit {
+
+class Graph;
 
 // Third type of Entity? Or just a view?
 class DynamicIsa final {

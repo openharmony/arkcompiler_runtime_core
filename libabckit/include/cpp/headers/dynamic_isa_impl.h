@@ -16,9 +16,9 @@
 #ifndef CPP_ABCKIT_DYNAMIC_ISA_IMPL_H
 #define CPP_ABCKIT_DYNAMIC_ISA_IMPL_H
 
-#include "cpp/headers/dynamic_isa.h"
-#include "cpp/headers/instruction.h"
-#include "cpp/headers/graph.h"
+#include "./dynamic_isa.h"
+#include "./instruction.h"
+#include "./graph.h"
 
 #include <memory>
 

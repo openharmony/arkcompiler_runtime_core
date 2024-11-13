@@ -16,13 +16,7 @@
 #ifndef CPP_ABCKIT_ARKTS_FUNCTION_H
 #define CPP_ABCKIT_ARKTS_FUNCTION_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/function.h"
-#include "cpp/headers/core/annotation_interface.h"
-#include "cpp/headers/arkts/annotation_interface.h"
+#include "../core/function.h"
 
 namespace abckit::arkts {
 

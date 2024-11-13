@@ -16,10 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_ELEMENT_H
 #define CPP_ABCKIT_CORE_ANNOTATION_ELEMENT_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
+#include "../base_classes.h"
 
 #include <string_view>
 
@@ -34,22 +31,23 @@ class AnnotationElement : public View<AbckitCoreAnnotationElement *> {
 public:
     AnnotationElement(const AnnotationElement &other) = default;
     AnnotationElement &operator=(const AnnotationElement &other) = default;
-    AnnotationElement(AnnotationElement &&other) = default;
-    AnnotationElement &operator=(AnnotationElement &&other) = default;
     ~AnnotationElement() override = default;
 
     // Core API's.
     // ...
 
-private:
-    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf) : View(anne), conf_(conf) {};
-    const ApiConfig *conf_;
-
 protected:
+    AnnotationElement(AnnotationElement &&other) = default;
+    AnnotationElement &operator=(AnnotationElement &&other) = default;
+
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;
     }
+
+private:
+    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf) : View(anne), conf_(conf) {};
+    const ApiConfig *conf_;
 };
 
 }  // namespace abckit::core

@@ -16,15 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_NAMESPACE_H
 #define CPP_ABCKIT_CORE_NAMESPACE_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/annotation_interface.h"
-#include "cpp/headers/core/function.h"
+#include "../base_classes.h"
 
-#include <vector>
-#include <utility>
+#include <string_view>
 
 namespace abckit::core {
 

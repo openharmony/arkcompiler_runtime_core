@@ -16,12 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_FUNCTION_H
 #define CPP_ABCKIT_CORE_FUNCTION_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/graph.h"
-#include "cpp/headers/core/annotation.h"
+#include "../base_classes.h"
+#include "../graph.h"
+#include "./annotation.h"
 
 #include <string_view>
 #include <vector>

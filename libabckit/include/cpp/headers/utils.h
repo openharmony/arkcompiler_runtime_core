@@ -16,9 +16,7 @@
 #ifndef CPP_ABCKIT_UTILS_H
 #define CPP_ABCKIT_UTILS_H
 
-#include "libabckit/include/c/statuses.h"
-#include "statuses_impl.h"
-#include "cpp/headers/declarations.h"
+#include "../../c/statuses.h"
 
 #include <string>
 
@@ -73,8 +71,10 @@ class Exception {
 public:
     explicit Exception(AbckitStatus e) : whatMessage_(StatusToString(e)) {}
 
-    const char *What() const noexcept
+    // CC-OFFNXT(G.NAM.03) made to be compatible with std::runtime_error::what method
+    const char *what() const noexcept  // NOLINT(readability-identifier-naming)
     {
+        // CC-OFFNXT(G.STD.04) made to be compatible with std::runtime_error::what method
         return whatMessage_.c_str();
     }
 

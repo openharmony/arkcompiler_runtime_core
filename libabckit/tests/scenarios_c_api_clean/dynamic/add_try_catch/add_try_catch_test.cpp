@@ -47,7 +47,7 @@ void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(AbckitCore
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
             return true;
         });
-        g_implI->moduleEnumerateTopLevelFunctions(m, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->moduleEnumerateTopLevelFunctions(m, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<std::function<void(AbckitCoreFunction *)> *>(cb))(m);
             return true;
         });
@@ -63,14 +63,14 @@ void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
 {
     CB cbFunc = [&](AbckitCoreFunction *f) {
         cbUserFunc(f);
-        g_implI->functionEnumerateNestedFunctions(f, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->functionEnumerateNestedFunctions(f, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<CB *>(cb))(m);
             return true;
         });
     };
 
     std::function<void(AbckitCoreClass *)> cbClass = [&](AbckitCoreClass *c) {
-        g_implI->classEnumerateMethods(c, (void *)&cbFunc, [](AbckitCoreFunction *m, void *cb) {
+        g_implI->classEnumerateMethods(c, &cbFunc, [](AbckitCoreFunction *m, void *cb) {
             (*reinterpret_cast<CB *>(cb))(m);
             return true;
         });
@@ -85,7 +85,7 @@ void EnumerateAllMethods(AbckitFile *file, const CB &cbUserFunc)
             (*reinterpret_cast<std::function<void(AbckitCoreClass *)> *>(cb))(c);
             return true;
         });
-        g_implI->namespaceEnumerateTopLevelFunctions(n, (void *)&cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->namespaceEnumerateTopLevelFunctions(n, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             (*reinterpret_cast<CB *>(cb))(f);
             return true;
         });
@@ -110,8 +110,7 @@ std::vector<AbckitBasicBlock *> BBgetPredBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> predBBs;
     g_implG->bbVisitPredBlocks(
-        bb, (void *)&predBBs,
-        []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+        bb, &predBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
             auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
             preds->emplace_back(succBasicBlock);
         });
@@ -122,8 +121,7 @@ std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> succBBs;
     g_implG->bbVisitSuccBlocks(
-        bb, (void *)&succBBs,
-        []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+        bb, &succBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
             auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
             succs->emplace_back(succBasicBlock);
         });

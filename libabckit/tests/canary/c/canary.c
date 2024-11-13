@@ -13,22 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_IMPL_H
-#define CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_IMPL_H
+#include "../../../include/c/abckit.h"
+#include "../../../include/c/statuses.h"
+#include "../../../include/c/ir_core.h"
+#include "../../../include/c/metadata_core.h"
+#include "../../../include/c/isa/isa_dynamic.h"
+#include "../../../include/c/extensions/arkts/metadata_arkts.h"
+#include "../../../include/c/extensions/js/metadata_js.h"
 
-#include "./annotation_element.h"
+/*
+ * This a canary file to check that the public API conforms to:
+ * -std=c99 -pedantic -pedantic-errors -Wall -Wextra -Werror
+ */
 
-namespace abckit::arkts {
-
-inline std::string_view AnnotationElement::GetName() const
+int main(int argc, char **argv)
 {
-    AbckitString *abcName = GetApiConfig()->cIapi_->annotationElementGetName(GetView());
-    CheckError(GetApiConfig());
-    std::string_view name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
-    CheckError(GetApiConfig());
-    return name;
+    (void)argc;
+    (void)argv;
+    return 0;
 }
-
-}  // namespace abckit::arkts
-
-#endif  // CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_IMPL_H

@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_FUNCTION_IMPL_H
 #define CPP_ABCKIT_CORE_FUNCTION_IMPL_H
 
-#include "cpp/headers/core/function.h"
+#include "./function.h"
 
 namespace abckit::core {
 
@@ -54,13 +54,12 @@ inline std::vector<core::Annotation> Function::GetAnnotations() const
     using EnumerateData = std::pair<std::vector<core::Annotation> *, const ApiConfig *>;
     EnumerateData enumerateData(&anns, conf);
 
-    conf->cIapi_->functionEnumerateAnnotations(GetView(), (void *)&enumerateData,
-                                               [](AbckitCoreAnnotation *ann, void *data) {
-                                                   auto *vec = static_cast<EnumerateData *>(data)->first;
-                                                   auto *config = static_cast<EnumerateData *>(data)->second;
-                                                   vec->push_back(core::Annotation(ann, config));
-                                                   return true;
-                                               });
+    conf->cIapi_->functionEnumerateAnnotations(GetView(), &enumerateData, [](AbckitCoreAnnotation *ann, void *data) {
+        auto *vec = static_cast<EnumerateData *>(data)->first;
+        auto *config = static_cast<EnumerateData *>(data)->second;
+        vec->push_back(core::Annotation(ann, config));
+        return true;
+    });
 
     CheckError(conf);
 

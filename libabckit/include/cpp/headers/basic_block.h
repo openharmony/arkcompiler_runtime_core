@@ -16,13 +16,8 @@
 #ifndef CPP_ABCKIT_BASIC_BLOCK_H
 #define CPP_ABCKIT_BASIC_BLOCK_H
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/instruction.h"
+#include "./base_classes.h"
+#include "./instruction.h"
 
 #include <cstdint>
 #include <memory>
@@ -62,7 +57,7 @@ private:
         using EnumerateData = std::pair<std::vector<BasicBlock> *, const ApiConfig *>;
         EnumerateData enumerateData(&bBs, conf);
 
-        conf->cGapi_->bbVisitSuccBlocks(GetView(), (void *)&enumerateData,
+        conf->cGapi_->bbVisitSuccBlocks(GetView(), &enumerateData,
                                         []([[maybe_unused]] AbckitBasicBlock *bb, AbckitBasicBlock *succ, void *data) {
                                             auto *vec = static_cast<EnumerateData *>(data)->first;
                                             auto *config = static_cast<EnumerateData *>(data)->second;

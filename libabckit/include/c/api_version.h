@@ -13,7 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef CPP_ABCKIT_V2_H
-#define CPP_ABCKIT_V2_H
+#ifndef API_VERSION_H
+#define API_VERSION_H
 
-#endif  // CPP_ABCKIT_V2_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum AbckitApiVersion {
+    ABCKIT_VERSION_RELEASE_1_0_0,
+};
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

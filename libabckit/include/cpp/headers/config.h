@@ -15,16 +15,15 @@
 #ifndef CPP_ABCKIT_CONFIG_H
 #define CPP_ABCKIT_CONFIG_H
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/c/extensions/arkts/metadata_arkts.h"
-#include "libabckit/include/c/extensions/js/metadata_js.h"
+#include "../../c/abckit.h"
+#include "../../c/metadata_core.h"
+#include "../../c/ir_core.h"
+#include "../../c/isa/isa_dynamic.h"
+#include "../../../src/include_v2/c/isa/isa_static.h"
+#include "../../c/extensions/arkts/metadata_arkts.h"
+#include "../../c/extensions/js/metadata_js.h"
 
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/utils.h"
+#include "./utils.h"
 
 #ifdef ABCKIT_TEST_ENABLE_MOCK
 #include "libabckit/tests/mock_headers/abckit_impl_mock.h"
@@ -33,6 +32,44 @@
 #include <memory>
 
 namespace abckit {
+
+class DynamicIsa;
+class StaticIsa;
+class File;
+class Graph;
+class BasicBlock;
+class Instruction;
+class Value;
+class Literal;
+class LiteralArray;
+
+namespace core {
+class Module;
+class Namespace;
+class Class;
+class Function;
+class Field;
+class Annotation;
+class AnnotationInterface;
+class AnnotationElement;
+class AnnotationInterfaceField;
+class ImportDescriptor;
+class ExportDescriptor;
+}  // namespace core
+
+namespace arkts {
+class Module;
+class Namespace;
+class Class;
+class Function;
+class Field;
+class Annotation;
+class AnnotationInterface;
+class AnnotationElement;
+class AnnotationInterfaceField;
+class ImportDescriptor;
+class ExportDescriptor;
+}  // namespace arkts
 
 // Class containing pointers to underlying C API's,
 // hides C implementation from C++ API user

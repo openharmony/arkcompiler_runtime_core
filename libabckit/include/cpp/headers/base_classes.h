@@ -16,8 +16,7 @@
 #ifndef CPP_ABCKIT_BASE_CLASSES_H
 #define CPP_ABCKIT_BASE_CLASSES_H
 
-#include "cpp/headers/config.h"
-#include "cpp/headers/declarations.h"
+#include "./config.h"
 
 #include <memory>
 
@@ -26,13 +25,12 @@ namespace abckit {
 // Interface to provide global API-related features,
 // a base for every API class defined
 class Entity {
-public:
+protected:
     Entity(const Entity &other) = default;
     Entity &operator=(const Entity &other) = default;
     Entity(Entity &&other) = default;
     Entity &operator=(Entity &&other) = default;
 
-protected:
     Entity() = default;
     virtual ~Entity() = default;
 
@@ -43,6 +41,12 @@ protected:
 template <typename T>
 class View : public Entity {
 public:
+    bool operator==(const View<T> &rhs)
+    {
+        return GetView() == rhs.GetView();
+    }
+
+protected:
     template <typename... Args>
     explicit View(Args &&...a) : view_(std::forward<Args>(a)...)
     {
@@ -53,12 +57,6 @@ public:
     View(View &&other) = default;
     View &operator=(View &&other) = default;
 
-    bool operator==(const View<T> &rhs)
-    {
-        return GetView() == rhs.GetView();
-    }
-
-protected:
     ~View() override = default;
 
     T GetView() const
@@ -79,6 +77,11 @@ private:
 template <typename T>
 class Resource : public Entity {
 public:
+    // No copy for resources
+    Resource(Resource &other) = delete;
+    Resource &operator=(Resource &other) = delete;
+
+protected:
     template <typename... Args>
     explicit Resource(std::unique_ptr<IResourceDeleter> d, Args &&...a)
         : deleter_(std::move(d)), resource_(std::forward<Args>(a)...)
@@ -90,9 +93,6 @@ public:
     {
     }
 
-    // No copy for resources
-    Resource(Resource &other) = delete;
-    Resource &operator=(Resource &other) = delete;
     // Resources are movable
     Resource(Resource &&other)
     {
@@ -117,7 +117,6 @@ public:
         return resource_;
     }
 
-protected:
     ~Resource() override
     {
         if (!released_) {

@@ -77,8 +77,8 @@ group("abckit_tests") {
     deps = [
       ":abckit_documentation",
       ":abckit_status",
-      "tests:abckit_canary",
       "tests:abckit_gtests_action",
+      "tests/canary:abckit_canary",
     ]
   }
 }

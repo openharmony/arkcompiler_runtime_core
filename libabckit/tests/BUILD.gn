@@ -40,23 +40,6 @@ template("create_merge_file") {
   }
 }
 
-ohos_executable("abckit_canary") {
-  cflags = [
-    "-std=c99",
-    "-pedantic",
-    "-pedantic-errors",
-    "-Wall",
-    "-Wextra",
-    "-Werror",
-    "-Wno-typedef-redefinition",
-  ]
-  sources = [ "canary.c" ]
-  include_dirs = [ "$ark_root_dynamic" ]
-  install_enable = false
-  part_name = "runtime_core"
-  subsystem_name = "arkcompiler"
-}
-
 test_js_path = "//arkcompiler/runtime_core/libabckit/tests/"
 
 test_js_files = [

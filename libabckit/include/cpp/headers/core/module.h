@@ -16,18 +16,11 @@
 #ifndef CPP_ABCKIT_CORE_MODULE_H
 #define CPP_ABCKIT_CORE_MODULE_H
 
-#include "cpp/headers/declarations.h"
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/class.h"
-#include "cpp/headers/core/export_descriptor.h"
-#include "cpp/headers/core/import_descriptor.h"
-#include "cpp/headers/core/namespace.h"
-#include "libabckit/include/c/metadata_core.h"
-
-#include <string_view>
-#include <vector>
+#include "../base_classes.h"
+#include "./class.h"
+#include "./export_descriptor.h"
+#include "./import_descriptor.h"
+#include "./namespace.h"
 
 namespace abckit::core {
 
@@ -61,7 +54,7 @@ private:
         using EnumerateData = std::pair<std::vector<core::Class> *, const ApiConfig *>;
         EnumerateData enumerateData(&classes, GetApiConfig());
 
-        conf->cIapi_->moduleEnumerateClasses(GetView(), (void *)&enumerateData, [](AbckitCoreClass *klass, void *data) {
+        conf->cIapi_->moduleEnumerateClasses(GetView(), &enumerateData, [](AbckitCoreClass *klass, void *data) {
             auto *vec = static_cast<EnumerateData *>(data)->first;
             auto *config = static_cast<EnumerateData *>(data)->second;
             vec->push_back(core::Class(klass, config));
@@ -76,7 +69,7 @@ private:
         using EnumerateData = std::pair<std::vector<core::Function> *, const ApiConfig *>;
         EnumerateData enumerateData(&functions, conf);
 
-        conf->cIapi_->moduleEnumerateTopLevelFunctions(GetView(), (void *)&enumerateData,
+        conf->cIapi_->moduleEnumerateTopLevelFunctions(GetView(), &enumerateData,
                                                        [](AbckitCoreFunction *func, void *data) {
                                                            auto *vec = static_cast<EnumerateData *>(data)->first;
                                                            auto *config = static_cast<EnumerateData *>(data)->second;
@@ -92,7 +85,7 @@ private:
         using EnumerateData = std::pair<std::vector<core::AnnotationInterface> *, const ApiConfig *>;
         EnumerateData enumerateData(&ifaces, conf);
 
-        conf->cIapi_->moduleEnumerateAnnotationInterfaces(GetView(), (void *)&enumerateData,
+        conf->cIapi_->moduleEnumerateAnnotationInterfaces(GetView(), &enumerateData,
                                                           [](AbckitCoreAnnotationInterface *func, void *data) {
                                                               auto *vec = static_cast<EnumerateData *>(data)->first;
                                                               auto *config = static_cast<EnumerateData *>(data)->second;
@@ -108,13 +101,12 @@ private:
         using EnumerateData = std::pair<std::vector<core::Namespace> *, const ApiConfig *>;
         EnumerateData enumerateData(&namespaces, conf);
 
-        conf->cIapi_->moduleEnumerateNamespaces(GetView(), (void *)&enumerateData,
-                                                [](AbckitCoreNamespace *func, void *data) {
-                                                    auto *vec = static_cast<EnumerateData *>(data)->first;
-                                                    auto *config = static_cast<EnumerateData *>(data)->second;
-                                                    vec->push_back(core::Namespace(func, config));
-                                                    return true;
-                                                });
+        conf->cIapi_->moduleEnumerateNamespaces(GetView(), &enumerateData, [](AbckitCoreNamespace *func, void *data) {
+            auto *vec = static_cast<EnumerateData *>(data)->first;
+            auto *config = static_cast<EnumerateData *>(data)->second;
+            vec->push_back(core::Namespace(func, config));
+            return true;
+        });
     }
 
     inline void GetImportsInner(std::vector<core::ImportDescriptor> &imports) const
@@ -124,7 +116,7 @@ private:
         using EnumerateData = std::pair<std::vector<core::ImportDescriptor> *, const ApiConfig *>;
         EnumerateData enumerateData(&imports, conf);
 
-        conf->cIapi_->moduleEnumerateImports(GetView(), (void *)&enumerateData,
+        conf->cIapi_->moduleEnumerateImports(GetView(), &enumerateData,
                                              [](AbckitCoreImportDescriptor *func, void *data) {
                                                  auto *vec = static_cast<EnumerateData *>(data)->first;
                                                  auto *config = static_cast<EnumerateData *>(data)->second;
@@ -139,7 +131,7 @@ private:
         using EnumerateData = std::pair<std::vector<core::ExportDescriptor> *, const ApiConfig *>;
         EnumerateData enumerateData(&exports, conf);
 
-        conf->cIapi_->moduleEnumerateExports(GetView(), (void *)&enumerateData,
+        conf->cIapi_->moduleEnumerateExports(GetView(), &enumerateData,
                                              [](AbckitCoreExportDescriptor *func, void *data) {
                                                  auto *vec = static_cast<EnumerateData *>(data)->first;
                                                  auto *config = static_cast<EnumerateData *>(data)->second;
