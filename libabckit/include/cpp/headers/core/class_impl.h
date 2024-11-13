@@ -20,6 +20,16 @@
 
 namespace abckit::core {
 
+inline std::string_view Class::GetName() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitString *cString = conf->cIapi_->classGetName(GetView());
+    CheckError(conf);
+    std::string_view view = conf->cIapi_->abckitStringToString(cString);
+    CheckError(conf);
+    return view;
+}
+
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<core::Function> Class::GetAllMethods() const
 {
@@ -60,6 +70,21 @@ inline std::vector<core::Annotation> Class::GetAnnotations() const
     CheckError(conf);
 
     return anns;
+}
+
+// CC-OFFNXT(G.FUD.06) perf critical
+inline void Class::EnumerateMethods(const std::function<bool(core::Function)> &cb) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    using EnumerateData = std::pair<const std::function<bool(core::Function)> &, const ApiConfig *>;
+    EnumerateData enumerateData(cb, conf);
+
+    conf->cIapi_->classEnumerateMethods(GetView(), &enumerateData, [](AbckitCoreFunction *method, void *data) {
+        const std::function<bool(core::Function)> &callback = static_cast<EnumerateData *>(data)->first;
+        auto *config = static_cast<EnumerateData *>(data)->second;
+        return callback(core::Function(method, config));
+    });
+    CheckError(conf);
 }
 
 }  // namespace abckit::core

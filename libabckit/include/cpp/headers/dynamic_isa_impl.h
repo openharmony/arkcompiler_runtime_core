@@ -19,6 +19,7 @@
 #include "./dynamic_isa.h"
 #include "./instruction.h"
 #include "./graph.h"
+#include "./core/import_descriptor.h"
 
 #include <memory>
 
@@ -54,6 +55,14 @@ inline Instruction DynamicIsa::CreateLoadString(const std::string &str) &&
     AbckitInst *abcLoadstring = conf->cDynapi_->iCreateLoadString(graph_.GetResource(), abcStr);
     CheckError(conf);
     return Instruction(abcLoadstring, conf);
+}
+
+inline core::ImportDescriptor DynamicIsa::GetImportDescriptor(const Instruction &inst)
+{
+    auto *conf = graph_.GetApiConfig();
+    AbckitCoreImportDescriptor *id = conf->cDynapi_->iGetImportDescriptor(inst.GetView());
+    CheckError(conf);
+    return core::ImportDescriptor(id, conf);
 }
 
 }  // namespace abckit

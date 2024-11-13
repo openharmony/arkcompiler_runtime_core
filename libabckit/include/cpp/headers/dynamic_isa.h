@@ -43,6 +43,7 @@ public:
     Instruction CreateCallArg1(const Instruction &acc, const Instruction &input0) &&;
 
     // Other dynamic API methods declarations
+    core::ImportDescriptor GetImportDescriptor(const Instruction &inst);
 
 private:
     explicit DynamicIsa(const Graph &graph) : graph_(graph) {};

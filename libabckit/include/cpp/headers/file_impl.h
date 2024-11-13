@@ -75,6 +75,22 @@ inline abckit::LiteralArray File::CreateLiteralArray(const std::vector<abckit::L
     return abckit::LiteralArray(litaIml, GetApiConfig());
 }
 
+inline void File::EnumerateModules(const std::function<bool(core::Module)> &cb) const
+{
+    const ApiConfig *conf = GetApiConfig();
+
+    using EnumerateData = std::pair<const std::function<bool(core::Module)> &, const ApiConfig *>;
+    EnumerateData enumerateData(cb, conf);
+
+    conf->cIapi_->fileEnumerateModules(GetResource(), &enumerateData, [](AbckitCoreModule *module, void *data) {
+        const std::function<bool(core::Module)> &callback = static_cast<EnumerateData *>(data)->first;
+        auto *config = static_cast<EnumerateData *>(data)->second;
+        return callback(core::Module(module, config));
+    });
+
+    CheckError(conf);
+}
+
 }  // namespace abckit
 
 #endif  // CPP_ABCKIT_FILE_IMPL_H

@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_INSTRUCTION_IMPL_H
 
 #include "./instruction.h"
+#include "./core/function.h"
 
 namespace abckit {
 
@@ -50,6 +51,32 @@ inline AbckitIsaApiStaticOpcode Instruction::GetOpcodeStat() const
     AbckitIsaApiStaticOpcode opc = conf->cStatapi_->iGetOpcode(GetView());
     CheckError(conf);
     return opc;
+}
+
+inline std::string_view Instruction::GetString() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitString *cString = conf->cGapi_->iGetString(GetView());
+    CheckError(conf);
+    std::string_view view = conf->cIapi_->abckitStringToString(cString);
+    CheckError(conf);
+    return view;
+}
+
+inline Instruction Instruction::GetNext() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitInst *inst = conf->cGapi_->iGetNext(GetView());
+    CheckError(conf);
+    return Instruction(inst, conf);
+}
+
+inline core::Function Instruction::GetFunction() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreFunction *func = conf->cGapi_->iGetFunction(GetView());
+    CheckError(conf);
+    return core::Function(func, conf);
 }
 
 }  // namespace abckit

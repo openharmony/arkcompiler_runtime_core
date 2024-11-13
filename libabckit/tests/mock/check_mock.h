@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef ABCKIT_MOCK_C_API
-#define ABCKIT_MOCK_C_API
+#ifndef ABCKIT_CHECK_MOCK
+#define ABCKIT_CHECK_MOCK
 
-#include "mock_global_values.h"
-#include "abckit_impl_mock.h"
+#include <string>
 
-#endif  // ABCKIT_MOCK_C_API
+bool CheckMockedApi(const std::string &apiName);
+
+#endif

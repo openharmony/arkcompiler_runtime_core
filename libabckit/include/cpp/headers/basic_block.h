@@ -41,7 +41,9 @@ public:
     BasicBlock GetSuccByIdx(int idx) const;
     std::vector<BasicBlock> GetSuccs() const;
     BasicBlock &AddInstFront(const Instruction &inst);
+    BasicBlock &AddInstBack(const Instruction &inst);
     std::vector<Instruction> GetInstructions() const;
+    Instruction GetFirstInst() const;
 
 protected:
     const ApiConfig *GetApiConfig() const override

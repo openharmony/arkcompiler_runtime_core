@@ -30,6 +30,7 @@ class Function : public View<AbckitCoreFunction *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     friend class core::Class;
     friend class core::Module;
+    friend class abckit::Instruction;
 
 public:
     Function(const Function &other) = default;
@@ -45,7 +46,8 @@ public:
     bool IsStatic() const;
 
     // Core API's.
-    // ...
+    core::Module GetModule() const;
+    core::Class GetParentClass() const;
 
 private:
     Function(AbckitCoreFunction *func, const ApiConfig *conf) : View(func), conf_(conf) {};

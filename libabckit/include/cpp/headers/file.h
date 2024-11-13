@@ -23,6 +23,7 @@
 
 #include "./core/module.h"
 
+#include <functional>
 #include <memory>
 #include <vector>
 
@@ -57,11 +58,7 @@ public:
     File(File &&file) = delete;
     File &operator=(File &&file) = delete;
     File(const std::string &path, std::unique_ptr<IErrorHandler> eh)
-#ifndef ABCKIT_TEST_ENABLE_MOCK
         : Resource(AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)->openAbc(path.c_str())), conf_(std::move(eh))
-#else
-        : Resource(AbckitGetMockApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)->openAbc(path.c_str())), conf_(std::move(eh))
-#endif
     {
         CheckError(&conf_);
         SetDeleter(std::make_unique<FileDeleter>(&conf_, *this));
@@ -123,6 +120,7 @@ public:
     std::vector<core::Module> GetModules() const;
     // Returns all functions in a file (consider to delete for mainenace reasons)
     std::vector<core::Function> GetAllFunctions() const;
+    void EnumerateModules(const std::function<bool(core::Module)> &cb) const;
 
     // Other API.
 

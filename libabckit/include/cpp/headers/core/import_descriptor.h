@@ -28,6 +28,7 @@ class ImportDescriptor : public View<AbckitCoreImportDescriptor *> {
     friend class abckit::File;
     friend class abckit::core::Module;
     friend class abckit::arkts::Module;
+    friend class abckit::DynamicIsa;
 
 public:
     ImportDescriptor(const ImportDescriptor &other) = default;
@@ -39,7 +40,7 @@ public:
     std::string_view GetName() const;
 
     // Core API's.
-    // ...
+    core::Module GetImportedModule() const;
 
 private:
     ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf) : View(module), conf_(conf) {};

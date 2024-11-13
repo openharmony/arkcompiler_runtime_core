@@ -38,6 +38,9 @@ public:
     Instruction &InsertBefore(const Instruction &inst);
     AbckitIsaApiDynamicOpcode GetOpcodeDyn() const;
     AbckitIsaApiStaticOpcode GetOpcodeStat() const;
+    std::string_view GetString() const;
+    Instruction GetNext() const;
+    core::Function GetFunction() const;
 
 protected:
     const ApiConfig *GetApiConfig() const override

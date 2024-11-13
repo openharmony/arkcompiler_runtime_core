@@ -17,6 +17,8 @@
 #define CPP_ABCKIT_CORE_FUNCTION_IMPL_H
 
 #include "./function.h"
+#include "./class.h"
+#include "./module.h"
 
 namespace abckit::core {
 
@@ -72,6 +74,22 @@ inline bool Function::IsStatic() const
     bool result = conf->cIapi_->functionIsStatic(GetView());
     CheckError(conf);
     return result;
+}
+
+inline core::Module Function::GetModule() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreModule *module = conf->cIapi_->functionGetModule(GetView());
+    CheckError(conf);
+    return core::Module(module, conf_);
+}
+
+inline core::Class Function::GetParentClass() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreClass *klass = conf->cIapi_->functionGetParentClass(GetView());
+    CheckError(conf);
+    return core::Class(klass, conf_);
 }
 
 }  // namespace abckit::core

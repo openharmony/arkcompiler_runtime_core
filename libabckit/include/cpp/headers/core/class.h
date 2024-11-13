@@ -19,6 +19,7 @@
 #include "../base_classes.h"
 #include "./function.h"
 
+#include <functional>
 #include <vector>
 
 namespace abckit::core {
@@ -28,6 +29,7 @@ class Class : public View<AbckitCoreClass *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     friend class Module;
     friend class Namespace;
+    friend class Function;
 
 public:
     Class(const Class &other) = default;
@@ -36,8 +38,10 @@ public:
     Class &operator=(Class &&other) = default;
     ~Class() override = default;
 
+    std::string_view GetName() const;
     std::vector<core::Function> GetAllMethods() const;
     std::vector<core::Annotation> GetAnnotations() const;
+    void EnumerateMethods(const std::function<bool(core::Function)> &cb) const;
 
     // Core API's.
     // ...
