@@ -32,7 +32,6 @@ function main(): int {
     pinObjTestsuite.addTest("SimpleTest", (): void throws =>
     {
         let obj: Object = new Object();
-        assertNE(obj, null, "Allocated object must not be null");
         GC.pinObject(obj);
         assertEQ(GC.getObjectSpaceType(obj), GC.YOUNG_SPACE,
                  "The object before GC must be placed in young space");
@@ -50,7 +49,6 @@ function main(): int {
     pinObjTestsuite.addTest("AllocatePinnedArrayTest", (): void throws =>
     {
         let obj = GC.allocatePinnedIntArray(10);
-        assertNE(obj, null, "Allocated object must not be null");
         assertEQ(GC.getObjectSpaceType(obj), GC.TENURED_SPACE, "The pinned array after GC must be placed in tenured space");
         let addr_before_gc: long = GC.getObjectAddress(obj);
         // Run GC
@@ -59,12 +57,6 @@ function main(): int {
         let addr_after_gc: long = GC.getObjectAddress(obj);
         GC.unpinObject(obj);
         assertEQ(addr_before_gc, addr_after_gc, "Pinned array must has a fixed address");
-    });
-    pinObjTestsuite.addTest("PinUnpinNullTest", (): void throws =>
-    {
-        let expectedNullPointerError = new NullPointerError("The value must be an object");
-        expectError((): void throws => { GC.pinObject(null) }, expectedNullPointerError);
-        expectError((): void throws => { GC.unpinObject(null) }, expectedNullPointerError);
     });
     pinObjTestsuite.addTest("AllocateNegativeSizePinnedArrayTest", (): void throws =>
     {

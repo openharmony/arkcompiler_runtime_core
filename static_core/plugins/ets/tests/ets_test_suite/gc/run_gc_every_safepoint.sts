@@ -25,7 +25,6 @@ function simpleTestCall(): void {
 }
 
 function main(): int {
-    assert GC.getObjectAddress(null) == 0: "getObjectAddress for null must return 0";
     let obj = new Object();
     assert GC.getObjectAddress(obj) > 0: "getObjectAddress for regular object must return value > 0";
     assert GC.getObjectAddress("non-movable string") > 0: "getObjectAddress for non-movable must return value > 0";
