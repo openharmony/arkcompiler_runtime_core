@@ -46,7 +46,7 @@ cases:
               c: C|null
           }
           class C {
-              name: string = ""
+              name: string = "";
               age: number = 0
           }
       use: |-
@@ -134,3 +134,51 @@ cases:
       use: |-
           let a: A = { name: "John" }
           assert a.name == "John"
+
+    - decl: |-
+          class A {
+              age: number;
+              adult: boolean = false
+          }
+      use: |-
+          let v = 42
+          // expressions in field values
+          let a: A = { age: v, adult: v >= 18 }
+          assert(a.age == 42 && a.adult)
+
+    - decl: |-
+          class A {
+              fld1: number;
+              fld2: number;
+              fld3: number
+          }
+      use: |-
+          let v = 42
+          // expressions in field values
+          let a: A = { fld1: v++, fld2: v++, fld3: v++ }
+          assert(v == 45 && a.fld1 == 42 && a.fld2 == 43 && a.fld3 == 44)
+
+    - decl: |-
+          class A {
+              first_name: string|undefined;
+              last_name: string|undefined;
+              full_name: string|undefined
+          }
+          function ln(): string {
+              return "Smith"
+          }
+      use: |-
+          let fn = "John"
+          // expressions in field values
+          let a: A = { first_name: fn, last_name: ln(), full_name: fn + " " + ln() }
+          assert(a.full_name == "John Smith")
+
+    - decl: |-
+          class A {
+              first_name: string|undefined|null = "John";
+              last_name: string|undefined|null = "Smith"
+          }
+      use: |-
+          // expressions in field values
+          let a: A = { first_name: undefined, last_name: null }
+          assert(a.first_name === undefined && a.last_name === null)

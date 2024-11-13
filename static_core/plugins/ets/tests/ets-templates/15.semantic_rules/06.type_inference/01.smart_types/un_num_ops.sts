@@ -28,6 +28,7 @@ tags: [{{c.tags}}]
 let res: boolean = false
 
 function main(): int {
+    res = false
     {{c.code|indent}}
     return (res ? 0 : 1)
 }

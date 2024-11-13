@@ -19,15 +19,15 @@ desc: >-
 ---*/
 
 class A {
-    name: string
-    age: number
+    name: string|null
+    age: number|null
 }
 
 function main(): int {
   let t: number[] = [1, 2, 3, 4, 5]
   let a: A|null = null;
   try {
-      a = { name: "Bob", age: t[5] }
+      a = { name: "Bob", age: t[5] } as A
   } catch (e: ArrayIndexOutOfBoundsError) {
       assert a == null;
       return 0;
