@@ -2248,6 +2248,13 @@
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/default_import_union.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_default_export.sts
 13.compilation_units_packages_and_modules/04.import_directives/04.default_import_binding/multiple_levels_default_export_3.sts
+05.generics/03.utility_types/01.partial_utility_type/module_class_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_class_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_2.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_4.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_interface_0.sts
 
 # es2panda: #15667 Invalid tests, This cases should be allowed
 09.classes/06.method_declarations/requirements_in_overriding_and_hiding/no_throwing_in_abstract_method.sts
@@ -2466,3 +2473,192 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/shadow_function_explicit_name.sts
 ### end of Issue 19680
 ### end of ES2PANDA_FAIL - fails of negative, compile-only
+
+# panda#19396
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_105.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_114.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_123.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_126.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_129.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_132.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_141.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_15.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_24.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_33.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_42.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_51.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_6.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_60.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_69.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_78.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_87.sts
+05.generics/02.generic_instantiations/02.type_arguments/type_arguments_of_parameterized_declarations/wrong_wildcard_bound_96.sts
+07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_incorrect_1.sts
+07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_incorrect_2.sts
+07.expressions/24.relational_expressions/02.string_comparison_operators/string_comparison_incorrect_3.sts
+02.lexical_elements/10.comments/multi_line_comment2_n.sts
+02.lexical_elements/10.comments/multi_line_comment3_n.sts
+02.lexical_elements/10.comments/multi_line_comment5_n.sts
+# end of panda#19396
+
+# panda#19881
+08.statements/05.if_statements/if_neg_2.sts
+08.statements/05.if_statements/if_neg_4.sts
+08.statements/07.while_statements_and_do_statements/neg_3.sts
+08.statements/07.while_statements_and_do_statements/neg_5.sts
+08.statements/07.while_statements_and_do_statements/neg_6.sts
+08.statements/07.while_statements_and_do_statements/neg_7.sts
+08.statements/09.for_of_statements/for_of_neg_7.sts
+08.statements/09.for_of_statements/for_of_neg_9.sts
+17.experimental_features/06.statements/01.for-of_type_annotation/for_of_n_6.sts
+# end of panda#19881
+
+# 20290
+05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_2.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_1.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_2.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_3.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_13.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_14.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_15.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_17.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_18.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_19.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_21.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_22.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_23.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_25.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_26.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_27.sts
+05.generics/03.utility_types/01.partial_utility_type/type_1.sts
+05.generics/03.utility_types/01.partial_utility_type/type_2.sts
+05.generics/03.utility_types/01.partial_utility_type/type_5.sts
+05.generics/03.utility_types/01.partial_utility_type/type_6.sts
+05.generics/03.utility_types/01.partial_utility_type/type_7.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_1.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_10.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_11.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_19.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_21.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_23.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_27.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_3.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_5.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_6.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_7.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_interface_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_1.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_4.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_5.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_6.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_7.sts
+05.generics/03.utility_types/02.required_utility_type/type_10.sts
+05.generics/03.utility_types/02.required_utility_type/type_11.sts
+05.generics/03.utility_types/02.required_utility_type/type_13.sts
+05.generics/03.utility_types/02.required_utility_type/type_14.sts
+05.generics/03.utility_types/02.required_utility_type/type_15.sts
+05.generics/03.utility_types/02.required_utility_type/type_9.sts
+05.generics/03.utility_types/01.partial_utility_type/module_class_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_class_3.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_extends_3.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_interface_3.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_inherit2.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_inherit3.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_interface_2.sts
+
+# 20291: reserve names for Required/Partial/Readonly  
+05.generics/03.utility_types/incorrect_utility_type_usage_0.sts
+05.generics/03.utility_types/incorrect_utility_type_usage_1.sts
+05.generics/03.utility_types/incorrect_utility_type_usage_2.sts
+
+# 20359 interface T should not be compatible to Partial<T>/Required<T>
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_4.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_8.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_9.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_10.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_compatibility_11.sts
+05.generics/03.utility_types/02.required_utility_type/required_compatibility_1.sts
+05.generics/03.utility_types/02.required_utility_type/required_compatibility_0.sts
+
+# 20365: readonly in interface doesn`t work
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_16.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_17.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_20.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_22.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_24.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_25.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_26.sts
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_0.sts
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_reassignment_1.sts
+
+# 20368: union of Readonly compilation failure
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_0.sts
+05.generics/03.utility_types/03.readonly_utility_type/readonly_type_of_union.sts
+
+# 20377 getter/setter for class with required segfault/trap
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_0.sts
+
+# 20379 Abstract class is not compatible with Partial<T>/Required<T>
+05.generics/03.utility_types/01.partial_utility_type/partial_abstract.sts
+05.generics/03.utility_types/02.required_utility_type/required_abstract.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_extends.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_abstract.sts
+
+# 20380 multiple optional parameters in class
+05.generics/03.utility_types/01.partial_utility_type/partial_generic.sts
+
+# 20383 missing CTE for incorrect variable initialization
+05.generics/03.utility_types/01.partial_utility_type/partial_method2.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_method4.sts
+05.generics/03.utility_types/02.required_utility_type/required_method_1.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_3.sts
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_4.sts
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_4.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_interface_3.sts
+
+# 20387 custom getter/setter for interfaces is not working
+05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_0.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_1.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_2.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_getter_and_setter_int_3.sts
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_0.sts
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_1.sts
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_2.sts
+05.generics/03.utility_types/02.required_utility_type/required_getter_and_setter_int_3.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_implements_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_0.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_1.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_2.sts
+05.generics/03.utility_types/01.partial_utility_type/module_implements_3.sts
+
+# 20380 compilation aborted: optional parameter+partial
+05.generics/03.utility_types/01.partial_utility_type/partial_type_10.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_11.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_4.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_5.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_6.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_7.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_8.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_9.sts
+
+# 20398 partial/required/readonly + extend
+05.generics/03.utility_types/01.partial_utility_type/partial_inherit.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_inherit2.sts
+
+# 20401 required:  exported class with optional params
+05.generics/03.utility_types/02.required_utility_type/required_module_class_0.sts
+
+# 20486 interface variable is not available
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_0.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_12.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_13.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_14.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_15.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_18.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_2.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_8.sts
+05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_9.sts
+05.generics/03.utility_types/01.partial_utility_type/type_4.sts
+05.generics/03.utility_types/incorrect_utility_type_1.sts
