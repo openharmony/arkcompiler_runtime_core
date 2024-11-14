@@ -55,21 +55,21 @@ class RunnerSRCDumper(RunnerJS):
         self.collect_ignored_test_lists()
 
         test_dirs: List[TestDirectory] = [
-            TestDirectory('compiler', 'sts', flags=[
+            TestDirectory('compiler/ets', 'sts', flags=[
                 '--extension=sts',
                 '--output=/dev/null',
                 '--exit-after-phase', 'plugins-after-parse',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
 
-            TestDirectory('parser', 'sts', flags=[
+            TestDirectory('parser/ets', 'sts', flags=[
                 '--extension=sts',
                 '--output=/dev/null',
                 '--exit-after-phase', 'plugins-after-parse',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
 
-            TestDirectory('runtime', 'sts', flags=[
+            TestDirectory('runtime/ets', 'sts', flags=[
                 '--extension=sts',
                 '--output=/dev/null',
                 '--exit-after-phase', 'plugins-after-parse',
