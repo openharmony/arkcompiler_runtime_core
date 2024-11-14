@@ -112,7 +112,7 @@ public:
 
     void EvacuateLiveObjects();
     void EvacuateNonHeapRoots();
-    void ScanRemset(const RemSet<> &remset);
+    size_t ScanRemset(const RemSet<> &remset);
 
 private:
     void IterateRefsInMemRange(const MemRange &memRange, Region *region);

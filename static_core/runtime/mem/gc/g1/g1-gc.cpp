@@ -717,9 +717,11 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
         if (this->GetSettings()->G1EnablePauseTimeGoal()) {
             auto endCollectionTime = ark::time::GetCurrentTimeInNanos();
             g1PauseTracker_.AddPauseInNanos(startCollectionTime, endCollectionTime);
-            analytics_.ReportCollectionEnd(task.reason, endCollectionTime, collectionSet_, true);
+            analytics_.ReportCollectionEnd(task.reason, endCollectionTime, collectionSet_,
+                                           singlePassCompactionEnabled_);
         }
         collectionSet_.clear();
+        singlePassCompactionEnabled_ = false;
 
         if (task.reason == GCTaskCause::MIXED) {
             // There was forced a mixed GC. This GC type sets specific settings.
@@ -1135,7 +1137,6 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
 {
     ScopedTiming t(__FUNCTION__, *this->GetTiming());
     RemSet<> remset;
-    singlePassCompactionEnabled_ = true;
     MergeRemSet(&remset);
 
     for (auto *region : remset.GetDirtyRegions()) {
@@ -1177,7 +1178,6 @@ void G1GC<LanguageConfig>::CollectInSinglePass(const GCTask &task)
     SweepRegularVmRefs();
 
     ResetRegionAfterMixedGC();
-    singlePassCompactionEnabled_ = false;
 }
 
 template <class LanguageConfig>
@@ -1190,13 +1190,21 @@ void G1GC<LanguageConfig>::EvacuateCollectionSet(const RemSet<> &remset)
                                              this->GetSettings()->GCMarkingStackNewTasksFrequency());
     G1EvacuateRegionsWorkerState<LanguageConfig> state(this, &refStack);
     state.EvacuateNonHeapRoots();
-    state.ScanRemset(remset);
+
+    auto startProcessing = ark::time::GetCurrentTimeInNanos();
+    auto remsetSize = state.ScanRemset(remset);
+    auto startEvacuation = ark::time::GetCurrentTimeInNanos();
+    auto scanRemsetTime = startEvacuation - startProcessing;
+    analytics_.ReportScanRemsetTime(remsetSize, scanRemsetTime);
+
+    analytics_.ReportEvacuationStart(startEvacuation);
     state.EvacuateLiveObjects();
 
     ASSERT(refStack.Empty());
     if (useGcWorkers) {
         this->GetWorkersTaskPool()->WaitUntilTasksEnd();
     }
+    analytics_.ReportEvacuationEnd(ark::time::GetCurrentTimeInNanos());
 }
 
 template <class LanguageConfig>
@@ -1273,7 +1281,8 @@ void G1GC<LanguageConfig>::RunGC(GCTask &task, const CollectionSet &collectibleR
     uint64_t youngPauseTime;
     {
         time::Timer timer(&youngPauseTime, true);
-        if (SinglePassCompactionAvailable()) {
+        singlePassCompactionEnabled_ = SinglePassCompactionAvailable();
+        if (singlePassCompactionEnabled_) {
             CollectInSinglePass(task);
         } else {
             MixedMarkAndCacheRefs(task, collectibleRegions);
@@ -1295,11 +1304,6 @@ template <class LanguageConfig>
 bool G1GC<LanguageConfig>::SinglePassCompactionAvailable()
 {
     if (!this->GetSettings()->G1SinglePassCompactionEnabled()) {
-        return false;
-    }
-
-    if (this->GetSettings()->G1EnablePauseTimeGoal()) {
-        // pause time goal should be corrected for single pass collection
         return false;
     }
 
