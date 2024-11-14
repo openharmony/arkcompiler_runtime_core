@@ -1,3 +1,0 @@
-### Used only with ARKUI plugin
-arkui/dollar_dollar_10.sts
-### End Of Built-In Component Two Way Value Synchronization

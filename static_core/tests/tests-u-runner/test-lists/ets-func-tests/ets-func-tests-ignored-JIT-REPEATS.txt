@@ -1,8 +1,3 @@
-# #16186
-spec/03.types/References_Types/Bigint/bigint-arithmetic-div-equal-zero.sts
-# #16083
-spec/03.types/References_Types/Bigint/bigint-arithmetic-div-2-operands-zero.sts
-
 # Timeouts. Will be fixed when generics accept primitives as type arguments
 std/core/SortInternalTestShort.sts
 std/core/SortInternalTestInt.sts
