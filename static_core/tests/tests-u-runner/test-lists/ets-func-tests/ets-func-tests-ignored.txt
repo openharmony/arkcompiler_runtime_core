@@ -530,3 +530,32 @@ regression/15588_wrong_readonly_field_return.sts
 ### Issue 20260
 regression/16169_false_unreachable_statement_after_class.sts
 ### Issue 20260 end
+### Issue 19529 begin
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0004.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0007.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0008.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0009.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0012.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0015.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0016.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0017.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-0018.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0004.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0007.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0008.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0009.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0012.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0015.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0016.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0017.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0018.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0027.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0030.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0031.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0032.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0035.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0038.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0039.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0040.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0086.sts
+### Issue 19529 end

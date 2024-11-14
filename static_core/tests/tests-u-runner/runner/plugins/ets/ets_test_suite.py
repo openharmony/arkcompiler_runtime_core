@@ -30,8 +30,14 @@ from runner.options.options_jit import JitOptions
 from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_dir import EtsTestDir
 from runner.plugins.ets.ets_utils import ETSUtils
-from runner.plugins.ets.preparation_step import TestPreparationStep, CtsTestPreparationStep, \
-    FuncTestPreparationStep, ESCheckedTestPreparationStep, JitStep, CopyStep, CustomGeneratorTestPreparationStep
+from runner.plugins.ets.preparation_step import FrontendFuncTestPreparationStep, \
+                                                TestPreparationStep, \
+                                                CtsTestPreparationStep, \
+                                                FuncTestPreparationStep, \
+                                                ESCheckedTestPreparationStep, \
+                                                JitStep, \
+                                                CopyStep, \
+                                                CustomGeneratorTestPreparationStep
 from runner.plugins.ets.runtime_default_ets_test_dir import RuntimeDefaultEtsTestDir
 from runner.plugins.work_dir import WorkDir
 
@@ -232,6 +238,11 @@ class FuncEtsTestSuite(EtsTestSuite):
     def set_preparation_steps(self) -> None:
         self._preparation_steps.append(FuncTestPreparationStep(
             test_source_path=self._ets_test_dir.stdlib_templates,
+            test_gen_path=self.test_root,
+            config=self.config
+        ))
+        self._preparation_steps.append(FrontendFuncTestPreparationStep(
+            test_source_path=self._ets_test_dir.ets_func_tests_templates,
             test_gen_path=self.test_root,
             config=self.config
         ))
