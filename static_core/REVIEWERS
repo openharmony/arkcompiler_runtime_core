@@ -74,6 +74,7 @@ static_core/scripts/code_style/                          @igelhaus @semenovaleks
 static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof1983
 static_core/tests/panda/                                 @igelhaus
+static_core/tests/tests-u-runner/                        @shirunova_viktoria @anton-sysoev
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/libpandabase/tests/genmc/                    @udav
 static_core/libpandabase/tests/ringbuf/                  @udav
