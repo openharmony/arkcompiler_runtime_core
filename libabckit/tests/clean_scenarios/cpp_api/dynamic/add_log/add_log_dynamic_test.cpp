@@ -113,8 +113,7 @@ void CreateEpilog(abckit::Graph &graph, const abckit::BasicBlock &bb, const abck
             continue;
         }
 
-        auto iUndef = inst.GetPrev();
-        auto iDateClass = graph.DynIsa().CreateTryldglobalbyname(userData.date).InsertBefore(iUndef);
+        auto iDateClass = graph.DynIsa().CreateTryldglobalbyname(userData.date).InsertBefore(inst);
 
         auto iDateObj = graph.DynIsa().CreateNewobjrange(iDateClass).InsertAfter(iDateClass);
         auto iGetTime = graph.DynIsa().CreateLdobjbyname(iDateObj, userData.getTime).InsertAfter(iDateObj);

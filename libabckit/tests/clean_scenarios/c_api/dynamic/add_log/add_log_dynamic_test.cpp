@@ -129,10 +129,9 @@ static void CreateEpilog(AbckitInst *inst, AbckitBasicBlock *bb, UserData *userD
     while (inst != nullptr) {
         if (g_dynG->iGetOpcode(inst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED) {
             // Epilog
-            auto *undef = g_implG->iGetPrev(inst);
             auto *dateClass2 = g_dynG->iCreateTryldglobalbyname(graph, userData->date);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            g_implG->iInsertBefore(dateClass2, undef);
+            g_implG->iInsertBefore(dateClass2, inst);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             auto *dateObj2 = g_dynG->iCreateNewobjrange(graph, 1, dateClass2);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

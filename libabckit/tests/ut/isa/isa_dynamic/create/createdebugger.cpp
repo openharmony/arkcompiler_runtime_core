@@ -63,8 +63,7 @@ TEST_F(LibAbcKitIcreateTest, IcreateDebugger)
                   {2},
                   {
                       {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEBUGGER, {}},
-                      {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                      {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{1}, {}, {}}});
             helpers::VerifyGraph(graph, bbSchemas);

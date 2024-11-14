@@ -75,8 +75,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBcreateEmptyBlock_1)
                  {{1},
                   {3},
                   {
-                      {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                      {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                      {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{2}, {}, {}}});
             helpers::VerifyGraph(graph, bbSchemas);
@@ -107,8 +106,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBdisconnectSuccBlock)
              {{0},
               {2},
               {
-                  {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                  {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                  {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
               }},
              {{1}, {}, {}}});
         // CC-OFFNXT(G.FMT.02)
@@ -138,8 +136,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetGraph_1)
              {{0},
               {3},
               {
-                  {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                  {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                  {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
               }},
              {{2, 1}, {}, {}}});
         helpers::VerifyGraph(graph, bbSchemas);
@@ -155,7 +152,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetFirstInst_2)
         auto *start = g_implG->gGetStartBasicBlock(graph);
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
         auto *inst = g_implG->bbGetFirstInst(bb);
-        ASSERT_EQ(g_dynG->iGetOpcode(inst), ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+        ASSERT_EQ(g_dynG->iGetOpcode(inst), ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
     };
     helpers::InspectMethod(CREATE_EMPTY_INPUT_PATH, "test", cb);
 }
@@ -295,8 +292,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstFront_4)
                   {2},
                   {
                       {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEG, {3}},
-                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                      {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{1}, {}, {}}});
             helpers::VerifyGraph(graph, bbSchemas);
@@ -344,8 +340,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstBack_2)
                  {{1},
                   {3},
                   {
-                      {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                      {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{2}, {}, {}}});
             helpers::VerifyGraph(graph, bbSchemas);
@@ -376,8 +371,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBaddInstBack_4)
                  {{0},
                   {2},
                   {
-                      {1, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                      {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                      {1, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{1}, {}, {}}});
             helpers::VerifyGraph(graph, bbSchemas);
@@ -553,7 +547,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBgetNumberOfInstructions_1)
     helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
         auto *start = g_implG->gGetStartBasicBlock(graph);
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
-        ASSERT_EQ(g_implG->bbGetNumberOfInstructions(bb), 2U);
+        ASSERT_EQ(g_implG->bbGetNumberOfInstructions(bb), 1U);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     });
     g_impl->closeFile(file);

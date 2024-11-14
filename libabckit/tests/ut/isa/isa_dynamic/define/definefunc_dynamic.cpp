@@ -85,8 +85,7 @@ TEST_F(LibAbcKitCreateDynDefineFunc, IcreateDefinefunc)
                  {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC, {}},
                  {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {4}},
                  {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {9}},
-                 {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                 {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                 {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
              }},
             {{1}, {}, {}}};
         // CC-OFFNXT(G.FMT.02)

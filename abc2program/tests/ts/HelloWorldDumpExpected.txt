@@ -251,8 +251,7 @@ _GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	jeqz label@71                            # line: 40           # column: 0
 	lda v2                                   # line: 40           # column: 0
 	throw                                    # line: 40           # column: 0
-	label@71: ldundefined                    # line: 18446744073709551615           # column: 0
-	returnundefined                          # line: 66           # column: 0
+	label@71: returnundefined                # line: 66           # column: 0
 .catchall :
 	try_begin_label : label@9
 	try_end_label : label@11
@@ -339,7 +338,6 @@ _GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 0
 .language ECMAScript
 .function any .#*#goo(any a0, any a1, any a2) {
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 68           # column: 0
 }
 
@@ -350,8 +348,7 @@ _GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 .function any .#*#hoo(any a0, any a1, any a2) {
 	fldai 1.230000e+00                       # line: 71           # column: 0
 	trystglobalbyname 0x0, varA              # line: 71           # column: 0
-	createobjectwithbuffer 0x1, _GLOBAL_1590 # line: 72           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
+	createobjectwithbuffer 0x1, _GLOBAL_1518 # line: 72           # column: 0
 	returnundefined                          # line: 73           # column: 0
 }
 
@@ -468,7 +465,6 @@ _GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
  SlotNumber 0
 .language ECMAScript
 .function any .#~@2>#NestedLiteralArray(any a0, any a1, any a2) {
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 31           # column: 0
 }
 
@@ -527,7 +523,6 @@ _GLOBAL_1676 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 	callarg1 0x18, v1                        # line: 90           # column: 0
 	lda v2                                   # line: 92           # column: 0
 	callarg0 0x1a                            # line: 92           # column: 0
-	ldundefined                              # line: 18446744073709551615           # column: 0
 	returnundefined                          # line: 18446744073709551615           # column: 0
 }
 

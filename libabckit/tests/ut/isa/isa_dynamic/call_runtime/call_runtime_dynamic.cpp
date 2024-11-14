@@ -144,8 +144,7 @@ TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeCallinit_1)
         ABCKIT_ABC_DIR "ut/isa/isa_dynamic/call_runtime/callinit_dynamic_modified.abc", "innerConstr",
         [&](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *firstBB = helpers::BBgetSuccBlocks(g_implG->gGetStartBasicBlock(graph))[0];
-            auto *removeInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iRemove(g_implG->iGetNext(removeInst));
+            auto *removeInst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             g_implG->iRemove(removeInst);
 
             auto *ldlexvar = g_dynG->iCreateLdlexvar(graph, 0x0, 0x0);
@@ -167,10 +166,10 @@ TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeCallinit_1)
         auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, defineclasswithbuffer, stringD);
         auto *newobjrange = g_dynG->iCreateNewobjrange(graph, 0x1, ldobjbyname);
 
-        auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+        auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
         // CC-OFFNXT(G.FMT.02)
-        g_implG->iInsertBefore(ldobjbyname, ldundefined);
-        g_implG->iInsertBefore(newobjrange, ldundefined);
+        g_implG->iInsertBefore(ldobjbyname, returnundefined);
+        g_implG->iInsertBefore(newobjrange, returnundefined);
     };
 
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/call_runtime/callinit_dynamic_modified.abc",

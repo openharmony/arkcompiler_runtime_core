@@ -65,13 +65,13 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_1
             auto *callarg10 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameA);
             auto *callarg11 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameB);
 
-            auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createobjectwithbuffer, ldundef);
-            g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-            g_implG->iInsertBefore(ldobjbynameA, ldundef);
-            g_implG->iInsertBefore(ldobjbynameB, ldundef);
-            g_implG->iInsertBefore(callarg10, ldundef);
-            g_implG->iInsertBefore(callarg11, ldundef);
+            auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createobjectwithbuffer, returnundef);
+            g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+            g_implG->iInsertBefore(ldobjbynameA, returnundef);
+            g_implG->iInsertBefore(ldobjbynameB, returnundef);
+            g_implG->iInsertBefore(callarg10, returnundef);
+            g_implG->iInsertBefore(callarg11, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -105,10 +105,10 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_2
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, createobjectwithbuffer);
 
-            auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createobjectwithbuffer, ldundef);
-            g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-            g_implG->iInsertBefore(callarg1, ldundef);
+            auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createobjectwithbuffer, returnundef);
+            g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+            g_implG->iInsertBefore(callarg1, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR
@@ -148,12 +148,12 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithbuffer, IcreateCreateobjectwithbuffer_3
             auto *callthisBar = g_dynG->iCreateCallthis1(graph, ldobjbynameBar, createobjectwithbuffer,
                                                          g_implG->gFindOrCreateConstantU64(graph, 777));
 
-            auto *ldundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createobjectwithbuffer, ldundef);
-            g_implG->iInsertBefore(ldobjbynameFoo, ldundef);
-            g_implG->iInsertBefore(ldobjbynameBar, ldundef);
-            g_implG->iInsertBefore(callthisFoo, ldundef);
-            g_implG->iInsertBefore(callthisBar, ldundef);
+            auto *returnundef = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createobjectwithbuffer, returnundef);
+            g_implG->iInsertBefore(ldobjbynameFoo, returnundef);
+            g_implG->iInsertBefore(ldobjbynameBar, returnundef);
+            g_implG->iInsertBefore(callthisFoo, returnundef);
+            g_implG->iInsertBefore(callthisBar, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR

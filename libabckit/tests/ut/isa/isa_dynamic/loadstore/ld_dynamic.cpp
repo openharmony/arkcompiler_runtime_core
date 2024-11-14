@@ -177,11 +177,11 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTryldglobalbynameValid)
         auto *stringf = g_implM->createString(file, "f", strlen("f"));
         auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, newobjrange, stringf);
         auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyname);
-        auto *ldundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+        auto *returnundefined = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
         // CC-OFFNXT(G.FMT.02)
-        g_implG->iInsertBefore(tryldglobalbyname, ldundefined);
-        g_implG->iInsertBefore(ldobjbyname, ldundefined);
-        g_implG->iInsertBefore(callarg1, ldundefined);
+        g_implG->iInsertBefore(tryldglobalbyname, returnundefined);
+        g_implG->iInsertBefore(ldobjbyname, returnundefined);
+        g_implG->iInsertBefore(callarg1, returnundefined);
     };
 
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/loadstore/tryldglobalbyname.abc",
@@ -229,8 +229,7 @@ TEST_F(LibAbcKitDynLdInstTest, CreateDynTrystglobalbynameValid)
                      {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEARRAYWITHBUFFER, {}},
                      {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYSTGLOBALBYNAME, {4}},
                      {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {3}},
-                     {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                     {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                     {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                  }},
                 {{1}, {}, {}}};
             helpers::VerifyGraph(graph, bbSchemas);

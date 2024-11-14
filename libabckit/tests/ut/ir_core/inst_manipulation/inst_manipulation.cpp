@@ -542,7 +542,6 @@ TEST_F(LibAbcKitIrInstTest, IinsertBefore_4)
                   {2},
                   {
                       {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEG, {3}},
-                      {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
                       {4, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{1}, {}, {}}});
@@ -642,7 +641,6 @@ TEST_F(LibAbcKitIrInstTest, IinsertAfter_2)
                  {{1},
                   {3},
                   {
-                      {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
                       {2, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
                   }},
                  {{2}, {}, {}}});
@@ -1493,8 +1491,7 @@ static void CompareDump1(std::stringstream &ss)
         // CC-OFFNXT(WordsTool.190)
         "\\s+21.any  Intrinsic.callarg1\\s+0x[a-f0-9]+ v3, v8\\s+bc: 0x[a-f0-9]+\n"
         "\\s+26.any  Intrinsic.callrange\\s+0x[a-f0-9]+, 0x4 v4, v22, v23, v24, v25\\s+bc: 0x[a-f0-9]+\n"
-        "\\s+27.any  Intrinsic.ldundefined\\s+bc: 0x[a-f0-9]+\n"
-        "\\s+28.void Intrinsic.returnundefined\\s+bc: 0x[a-f0-9]+\n\n";
+        "\\s+27.void Intrinsic.returnundefined\\s+bc: 0x[a-f0-9]+\n\n";
     EXPECT_TRUE(helpers::Match(ss.str(), expected));
 }
 

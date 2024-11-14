@@ -307,14 +307,13 @@ static void TransformIrAddImportedFunctionCall(AbckitGraph *graph, AbckitFile *f
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto ldExternalModuleVarInst = g_dynG->iCreateLdexternalmodulevar(graph, importFinder.id);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldExternalModuleVarInst, abckitStrName);
     auto callInst = g_dynG->iCreateCallarg0(graph, ldExternalModuleVarInst);
-    g_implG->iInsertBefore(ldExternalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(ldExternalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrAddImportedFunctionCallNS(AbckitGraph *graph, AbckitFile *file, const std::string &funcName,
@@ -328,14 +327,13 @@ static void TransformIrAddImportedFunctionCallNS(AbckitGraph *graph, AbckitFile 
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
     auto getModuleNamespaceInst = g_dynG->iCreateGetmodulenamespace(graph, ctxFinder.module);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     auto ldObjByNameInst = g_dynG->iCreateLdobjbyname(graph, getModuleNamespaceInst, abckitStrName);
     auto callInst = g_dynG->iCreateCallthis0(graph, ldObjByNameInst, getModuleNamespaceInst);
-    g_implG->iInsertBefore(getModuleNamespaceInst, ldundefI);
-    g_implG->iInsertBefore(ldObjByNameInst, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(getModuleNamespaceInst, lastInst);
+    g_implG->iInsertBefore(ldObjByNameInst, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrAddLocalExport(AbckitGraph *graph, AbckitFile *file, const std::string &varName,
@@ -343,7 +341,6 @@ static void TransformIrAddLocalExport(AbckitGraph *graph, AbckitFile *file, cons
 {
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
 
     AbckitString *abckitStr = g_implM->createString(file, "print", strlen("print"));
     auto tryLdGlobalByNameInst = g_dynG->iCreateTryldglobalbyname(graph, abckitStr);
@@ -364,11 +361,11 @@ static void TransformIrAddLocalExport(AbckitGraph *graph, AbckitFile *file, cons
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldLocalModuleVarInst, varNameStr);
     auto callInst = g_dynG->iCreateCallarg1(graph, tryLdGlobalByNameInst, ldLocalModuleVarInst);
 
-    g_implG->iInsertBefore(stModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(tryLdGlobalByNameInst, ldundefI);
-    g_implG->iInsertBefore(ldLocalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(stModuleVarInst, lastInst);
+    g_implG->iInsertBefore(tryLdGlobalByNameInst, lastInst);
+    g_implG->iInsertBefore(ldLocalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrAddIndirectExport(AbckitGraph *graph, AbckitFile *file, const std::string &varName,
@@ -376,7 +373,6 @@ static void TransformIrAddIndirectExport(AbckitGraph *graph, AbckitFile *file, c
 {
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
 
     AbckitString *abckitStr = g_implM->createString(file, "print", strlen("print"));
     auto tryLdGlobalByNameInst = g_dynG->iCreateTryldglobalbyname(graph, abckitStr);
@@ -394,10 +390,10 @@ static void TransformIrAddIndirectExport(AbckitGraph *graph, AbckitFile *file, c
     AbckitString *varNameStr = g_implM->createString(file, varName.c_str(), varName.size());
     auto throwUndef = g_dynG->iCreateThrowUndefinedifholewithname(graph, ldExternalModuleVarInst, varNameStr);
     auto callInst = g_dynG->iCreateCallarg1(graph, tryLdGlobalByNameInst, ldExternalModuleVarInst);
-    g_implG->iInsertBefore(tryLdGlobalByNameInst, ldundefI);
-    g_implG->iInsertBefore(ldExternalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(tryLdGlobalByNameInst, lastInst);
+    g_implG->iInsertBefore(ldExternalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrAddStarExport(AbckitGraph *graph, AbckitFile *file, const std::string &funcName,
@@ -405,7 +401,6 @@ static void TransformIrAddStarExport(AbckitGraph *graph, AbckitFile *file, const
 {
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
 
     helpers::ModuleByNameContext ctxFinder = {nullptr, moduleName.c_str()};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
@@ -416,9 +411,9 @@ static void TransformIrAddStarExport(AbckitGraph *graph, AbckitFile *file, const
     AbckitString *funcNameStr = g_implM->createString(file, funcName.c_str(), funcName.size());
     auto ldObjByNameInst = g_dynG->iCreateLdobjbyname(graph, getModuleNamespaceInst, funcNameStr);
     auto callInst = g_dynG->iCreateCallthis0(graph, ldObjByNameInst, getModuleNamespaceInst);
-    g_implG->iInsertBefore(getModuleNamespaceInst, ldundefI);
-    g_implG->iInsertBefore(ldObjByNameInst, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(getModuleNamespaceInst, lastInst);
+    g_implG->iInsertBefore(ldObjByNameInst, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 static void TransformIrAddStarExportFunc(AbckitGraph *graph, AbckitFile *file, const std::string &exportName,
@@ -426,7 +421,6 @@ static void TransformIrAddStarExportFunc(AbckitGraph *graph, AbckitFile *file, c
 {
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
 
     helpers::ModuleByNameContext ctxFinder = {nullptr, moduleName.c_str()};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
@@ -444,8 +438,8 @@ static void TransformIrAddStarExportFunc(AbckitGraph *graph, AbckitFile *file, c
 
     auto getModuleNamespaceInst = g_dynG->iCreateGetmodulenamespace(graph, ctxFinder.module);           // module3
     auto stModuleVarInst = g_dynG->iCreateStmodulevar(graph, getModuleNamespaceInst, exportFinder.ed);  // NewStarExport
-    g_implG->iInsertBefore(getModuleNamespaceInst, ldundefI);
-    g_implG->iInsertBefore(stModuleVarInst, ldundefI);
+    g_implG->iInsertBefore(getModuleNamespaceInst, lastInst);
+    g_implG->iInsertBefore(stModuleVarInst, lastInst);
 }
 
 static void TransformIrAddStarExportFunc2(AbckitGraph *graph, AbckitFile *file, const std::string &funcName,
@@ -453,7 +447,6 @@ static void TransformIrAddStarExportFunc2(AbckitGraph *graph, AbckitFile *file, 
 {
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    auto ldundefI = g_implG->iGetPrev(lastInst);
 
     helpers::ModuleByNameContext ctxFinder = {nullptr, moduleName.c_str()};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
@@ -470,10 +463,10 @@ static void TransformIrAddStarExportFunc2(AbckitGraph *graph, AbckitFile *file, 
     auto funcNameStr = g_implM->createString(file, funcName.c_str(), funcName.size());
     auto ldObjByNameInst = g_dynG->iCreateLdobjbyname(graph, ldExternalModuleVarInst, funcNameStr);
     auto callInst = g_dynG->iCreateCallthis0(graph, ldObjByNameInst, ldExternalModuleVarInst);
-    g_implG->iInsertBefore(ldExternalModuleVarInst, ldundefI);
-    g_implG->iInsertBefore(throwUndef, ldundefI);
-    g_implG->iInsertBefore(ldObjByNameInst, ldundefI);
-    g_implG->iInsertBefore(callInst, ldundefI);
+    g_implG->iInsertBefore(ldExternalModuleVarInst, lastInst);
+    g_implG->iInsertBefore(throwUndef, lastInst);
+    g_implG->iInsertBefore(ldObjByNameInst, lastInst);
+    g_implG->iInsertBefore(callInst, lastInst);
 }
 
 // ========================================

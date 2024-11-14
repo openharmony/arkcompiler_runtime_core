@@ -169,9 +169,8 @@ static void ValidateIrMain(AbckitGraph *graph, bool isWideMode, bool isWithName)
              {15, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
              {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {6}},
              {17, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {15, 16}},
-             {18, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-             {19, ABCKIT_ISA_API_DYNAMIC_OPCODE_POPLEXENV, {}},
-             {20, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+             {18, ABCKIT_ISA_API_DYNAMIC_OPCODE_POPLEXENV, {}},
+             {19, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
          }},
         {{1}, {}, {}}};
 

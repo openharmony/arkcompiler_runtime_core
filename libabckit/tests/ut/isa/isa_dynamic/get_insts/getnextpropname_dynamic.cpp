@@ -57,9 +57,7 @@ TEST_F(LibAbcKitCreateDynGetNextProp, IcreateGetnextpropname_1)
             g_implG->bbAppendSuccBlock(newFalseBB, newBB);
             g_implG->bbAppendSuccBlock(newEndBB, g_implG->gGetEndBasicBlock(graph));
 
-            auto *ldundefLast = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            auto *returnundef = g_implG->iGetNext(ldundefLast);
-            g_implG->iRemove(ldundefLast);
+            auto *returnundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
             g_implG->iRemove(returnundef);
 
             auto *iterator = g_dynG->iCreateGetpropiterator(graph, createArr);

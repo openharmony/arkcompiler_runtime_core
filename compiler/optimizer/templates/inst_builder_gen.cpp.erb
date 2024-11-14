@@ -262,6 +262,9 @@ void InstBuilder::BuildEcmaAsIntrinsics(const BytecodeInstruction* bc_inst) // N
             auto intrinsic_id = <%= intrinsic_external_js_id %>;
             #endif
             auto inst = GetGraph()->CreateInstIntrinsic(<%= ret_type %>, GetPc(bc_inst->GetAddress()), intrinsic_id);
+%     if inst.no_side_effect?
+            inst->ClearFlag(inst_flags::NO_DCE);
+%     end
 %     if inst.throwing?
             inst->SetFlag(inst_flags::CAN_THROW);
 %     end

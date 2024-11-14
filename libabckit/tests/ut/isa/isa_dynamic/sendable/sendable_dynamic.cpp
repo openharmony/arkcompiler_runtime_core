@@ -247,8 +247,7 @@ static void VerifyIrSendableClass(AbckitGraph *graph, bool isWideMode)
              {3, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLRUNTIME_DEFINESENDABLECLASS, {2}},
              {4, stsendablevar, {3}},
              {5, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {1}},
-             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-             {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+             {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
          }},
         {{1}, {}, {}}};
 

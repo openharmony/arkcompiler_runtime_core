@@ -61,8 +61,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchema(
                  {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {5}},
                  {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, {7, 5}},
                  {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG0, {3}},
-                 {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                 {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
+                 {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}},
              }},
             {{1}, {}, {}}};
 }

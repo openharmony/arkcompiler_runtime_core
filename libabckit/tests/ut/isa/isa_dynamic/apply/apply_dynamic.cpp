@@ -45,13 +45,13 @@ auto g_icreateApplyLambda0 = [](AbckitFile *file, AbckitCoreFunction * /*method*
     auto *ldobjbyname = g_dynG->iCreateLdobjbyname(graph, createemptyarray, stringLength);
     auto *apply = g_dynG->iCreateApply(graph, ldlexvar, ldundefined, createemptyarray);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-    auto *ldundefLast = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-    g_implG->iInsertBefore(ldlexvar, ldundefLast);
-    g_implG->iInsertBefore(ldundefined, ldundefLast);
-    g_implG->iInsertBefore(createemptyarray, ldundefLast);
-    g_implG->iInsertBefore(starrayspread, ldundefLast);
-    g_implG->iInsertBefore(ldobjbyname, ldundefLast);
-    g_implG->iInsertBefore(apply, ldundefLast);
+    auto *returnundefLast = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+    g_implG->iInsertBefore(ldlexvar, returnundefLast);
+    g_implG->iInsertBefore(ldundefined, returnundefLast);
+    g_implG->iInsertBefore(createemptyarray, returnundefLast);
+    g_implG->iInsertBefore(starrayspread, returnundefLast);
+    g_implG->iInsertBefore(ldobjbyname, returnundefLast);
+    g_implG->iInsertBefore(apply, returnundefLast);
 };
 
 auto g_icreateApplyLambda1 = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
@@ -65,11 +65,11 @@ auto g_icreateApplyLambda1 = [](AbckitFile *file, AbckitCoreFunction * /*method*
     auto *createarraywithbuffer = g_dynG->iCreateCreatearraywithbuffer(graph, litArr);
     auto *callarg1 = g_dynG->iCreateCallarg1(graph, definefunctest, createarraywithbuffer);
 
-    auto *ldundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
+    auto *returnundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
     g_implG->iInsertBefore(newlexenv, definefunctest);
-    g_implG->iInsertBefore(stlexvar, ldundef);
-    g_implG->iInsertBefore(createarraywithbuffer, ldundef);
-    g_implG->iInsertBefore(callarg1, ldundef);
+    g_implG->iInsertBefore(stlexvar, returnundef);
+    g_implG->iInsertBefore(createarraywithbuffer, returnundef);
+    g_implG->iInsertBefore(callarg1, returnundef);
 };
 
 }  // namespace
@@ -124,14 +124,14 @@ TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_1)
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, newobjapply, stringA);
             auto *callarg1 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyname2);
 
-            auto *ldundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createemptyarray, ldundef);
-            g_implG->iInsertBefore(starrayspread, ldundef);
-            g_implG->iInsertBefore(ldobjbyname, ldundef);
-            g_implG->iInsertBefore(newobjapply, ldundef);
-            g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-            g_implG->iInsertBefore(ldobjbyname2, ldundef);
-            g_implG->iInsertBefore(callarg1, ldundef);
+            auto *returnundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createemptyarray, returnundef);
+            g_implG->iInsertBefore(starrayspread, returnundef);
+            g_implG->iInsertBefore(ldobjbyname, returnundef);
+            g_implG->iInsertBefore(newobjapply, returnundef);
+            g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+            g_implG->iInsertBefore(ldobjbyname2, returnundef);
+            g_implG->iInsertBefore(callarg1, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/apply/newobjapply_dynamic_modified.abc",
@@ -173,18 +173,18 @@ TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_2)
             auto *ldobjbynameC = g_dynG->iCreateLdobjbyname(graph, newobjapply, stringC);
             auto *callarg1C = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbynameC);
 
-            auto *ldundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(createemptyarray, ldundef);
-            g_implG->iInsertBefore(starrayspread, ldundef);
-            g_implG->iInsertBefore(ldobjbyname, ldundef);
-            g_implG->iInsertBefore(newobjapply, ldundef);
-            g_implG->iInsertBefore(tryldglobalbyname, ldundef);
-            g_implG->iInsertBefore(ldobjbynameA, ldundef);
-            g_implG->iInsertBefore(ldobjbynameB, ldundef);
-            g_implG->iInsertBefore(ldobjbynameC, ldundef);
-            g_implG->iInsertBefore(callarg1A, ldundef);
-            g_implG->iInsertBefore(callarg1B, ldundef);
-            g_implG->iInsertBefore(callarg1C, ldundef);
+            auto *returnundef = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(createemptyarray, returnundef);
+            g_implG->iInsertBefore(starrayspread, returnundef);
+            g_implG->iInsertBefore(ldobjbyname, returnundef);
+            g_implG->iInsertBefore(newobjapply, returnundef);
+            g_implG->iInsertBefore(tryldglobalbyname, returnundef);
+            g_implG->iInsertBefore(ldobjbynameA, returnundef);
+            g_implG->iInsertBefore(ldobjbynameB, returnundef);
+            g_implG->iInsertBefore(ldobjbynameC, returnundef);
+            g_implG->iInsertBefore(callarg1A, returnundef);
+            g_implG->iInsertBefore(callarg1B, returnundef);
+            g_implG->iInsertBefore(callarg1C, returnundef);
         });
 
     output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/apply/newobjapply_dynamic_modified.abc",

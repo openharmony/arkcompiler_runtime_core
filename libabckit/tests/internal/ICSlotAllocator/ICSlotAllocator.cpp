@@ -191,7 +191,6 @@ TEST_F(LibAbcKitInternalTest, LibAbcKitTestICSlotAllocator)
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_SUB2, 0XA},
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, 0X1A},
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, 0XB},
-                                                             {ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, -1},
                                                              {ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, -1}});
             // NOLINTEND(readability-magic-numbers)
         });

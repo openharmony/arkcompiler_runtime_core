@@ -49,8 +49,9 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_1)
             auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER);
             auto *dynamicimport = g_dynG->iCreateDynamicimport(graph, inst);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *ldundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(dynamicimport, ldundefined);
+            auto *returnundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(dynamicimport, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
         [&](AbckitGraph *graph) {
             std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> bbSchemas {
@@ -67,8 +68,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_1)
                   {6, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEOBJECTWITHBUFFER, {}},
                   {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC, {}},
                   {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_DYNAMICIMPORT, {6}},
-                  {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                  {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+                  {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
                 {{1}, {}, {}}};
             helpers::VerifyGraph(graph, bbSchemas);
         });
@@ -94,9 +94,11 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_2)
             auto *loadString = g_dynG->iCreateLoadString(graph, moduleStr);
             auto *dynamicimport = g_dynG->iCreateDynamicimport(graph, loadString);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *ldundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(loadString, ldundefined);
-            g_implG->iInsertBefore(dynamicimport, ldundefined);
+            auto *returnundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(loadString, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(dynamicimport, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
         [&](AbckitGraph *graph) {
             std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> bbSchemas {
@@ -114,8 +116,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_2)
                   {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC, {}},
                   {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING, {}},
                   {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_DYNAMICIMPORT, {8}},
-                  {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                  {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+                  {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
                 {{1}, {}, {}}};
             helpers::VerifyGraph(graph, bbSchemas);
         });
@@ -141,9 +142,11 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_3)
             auto *loadString = g_dynG->iCreateLoadString(graph, moduleStr);
             auto *dynamicimport = g_dynG->iCreateDynamicimport(graph, loadString);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *ldundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(loadString, ldundefined);
-            g_implG->iInsertBefore(dynamicimport, ldundefined);
+            auto *returnundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(loadString, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(dynamicimport, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
         [&](AbckitGraph *graph) {
             std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> bbSchemas {
@@ -161,8 +164,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_3)
                   {7, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINEFUNC, {}},
                   {8, ABCKIT_ISA_API_DYNAMIC_OPCODE_LOADSTRING, {}},
                   {9, ABCKIT_ISA_API_DYNAMIC_OPCODE_DYNAMICIMPORT, {8}},
-                  {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-                  {11, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+                  {10, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
                 {{1}, {}, {}}};
             helpers::VerifyGraph(graph, bbSchemas);
         });
@@ -193,8 +195,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> GetSchema()
               {12, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, {11, 10}},
               {13, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME, {12}},
               {14, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS0, {13, 12}},
-              {15, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-              {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+              {15, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
             {{1}, {}, {}}};
 }
 
@@ -223,14 +224,21 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_4)
             auto *ldobjbyname3 = g_dynG->iCreateLdobjbyname(graph, callthis0, catchStr);
             auto *callthis03 = g_dynG->iCreateCallthis0(graph, ldobjbyname3, callthis0);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            auto *ldundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED);
-            g_implG->iInsertBefore(dynamicimport, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname, ldundefined);
-            g_implG->iInsertBefore(callthis1, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname2, ldundefined);
-            g_implG->iInsertBefore(callthis0, ldundefined);
-            g_implG->iInsertBefore(ldobjbyname3, ldundefined);
-            g_implG->iInsertBefore(callthis03, ldundefined);
+            auto *returnundefined = helpers::FindLastInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED);
+            g_implG->iInsertBefore(dynamicimport, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(ldobjbyname, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(callthis1, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(ldobjbyname2, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(callthis0, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(ldobjbyname3, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+            g_implG->iInsertBefore(callthis03, returnundefined);
+            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         },
         [&](AbckitGraph *graph) { helpers::VerifyGraph(graph, GetSchema()); });
 

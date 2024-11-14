@@ -64,10 +64,7 @@ static void VerifyBbSchem1(AbckitGraph *graph)
          {4},
          {{15, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
           {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {15, 3}}}},
-        {{2, 3},
-         {5},
-         {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-          {21, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+        {{2, 3}, {5}, {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
         {{4}, {}, {}}};
     helpers::VerifyGraph(graph, bbSchemas);
 }
@@ -124,10 +121,7 @@ static void VerifyBbSchem2(AbckitGraph *graph)
          {4},
          {{15, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
           {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {15, 3}}}},
-        {{2, 3},
-         {5},
-         {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-          {21, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+        {{2, 3}, {5}, {{20, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
         {{4}, {}, {}}};
     helpers::VerifyGraph(graph, bbSchemas);
 }
@@ -186,10 +180,7 @@ static void VerifyBbSchem3(AbckitGraph *graph)
          {{14, ABCKIT_ISA_API_DYNAMIC_OPCODE_TRYLDGLOBALBYNAME, {}},
           {16, ABCKIT_ISA_API_DYNAMIC_OPCODE_ADD2, {15, 3}},
           {17, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1, {14, 16}}}},
-        {{2, 3},
-         {5},
-         {{21, ABCKIT_ISA_API_DYNAMIC_OPCODE_LDUNDEFINED, {}},
-          {22, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
+        {{2, 3}, {5}, {{21, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED, {}}}},
         {{4}, {}, {}}};
     helpers::VerifyGraph(graph, bbSchemas);
 }
