@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/etsstdlib.h"
-#include "plugins/ets/stdlib/native/core/Intl.h"
+#include "plugins/ets/stdlib/native/core/IntlState.h"
+#include "libpandabase/macros.h"
 
 namespace ark::ets::stdlib {
 
-// EtsNapiOnLoad needs to implement issue #18135
-ets_int EtsNapiOnLoad(EtsEnv *env)
+// NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
+std::unique_ptr<IntlState> g_intlState {nullptr};
+
+void CreateIntlState()
 {
-    // Initializing components
-    ets_int hasError = ETS_OK;
-    hasError += InitCoreIntl(env);
-    return hasError == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
+    if (g_intlState == nullptr) {
+        g_intlState = std::make_unique<IntlState>();
+        ASSERT(g_intlState != nullptr);
+    }
 }
 
 }  // namespace ark::ets::stdlib

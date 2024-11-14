@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
-#include "plugins/ets/stdlib/native/etsstdlib.h"
 #include "plugins/ets/stdlib/native/core/Intl.h"
+#include "plugins/ets/stdlib/native/core/IntlState.h"
+#include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
 
 namespace ark::ets::stdlib {
 
-// EtsNapiOnLoad needs to implement issue #18135
-ets_int EtsNapiOnLoad(EtsEnv *env)
+ets_int InitCoreIntl(EtsEnv *env)
 {
-    // Initializing components
+    // Create internal data
+    CreateIntlState();
+
+    // Register Native methods
     ets_int hasError = ETS_OK;
-    hasError += InitCoreIntl(env);
-    return hasError == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
+    hasError += RegisterIntlNumberFormatNativeMethods(env);
+    return hasError == ETS_OK ? ETS_OK : ETS_ERR;
 }
 
 }  // namespace ark::ets::stdlib
