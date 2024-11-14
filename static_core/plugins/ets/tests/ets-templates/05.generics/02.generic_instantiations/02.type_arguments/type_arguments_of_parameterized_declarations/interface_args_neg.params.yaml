@@ -102,3 +102,37 @@ cases:
   # not a reference type
   - use: |-
       let v: J<Color> = new A<Color>(Color.Red)
+
+  # use abstract classes and interfaces to instantied array
+  - use: |-
+      let v: J<J<X>[]> = new A<J<X>[]>(new J<X>[0]) // cannot use array creation expression with interfaces.
+
+  - use: |-
+      let v: J<J<X[]>[]> = new A<J<X[]>[]>(new J<X[]>[0]) // cannot use array creation expression with interfaces.
+
+  - use: |-
+      let v: J<J<I>[]> = new A<J<I>[]>(new J<I>[0]) // cannot use array creation expression with interfaces.
+
+  - use: |-
+      let v: J<J<I[]>[]> = new A<J<I[]>[]>(new J<I[]>[0]) // cannot use array creation expression with interfaces.
+
+  - use: |-
+      let v: J<J<I[]|null>[]> = new A<J<I[]|null>[]>(new J<I[]|null>[0]) // cannot use array creation expression with interfaces.
+
+  - use: |-
+      let v: J<J<Color[]>[]> = new A<J<Color[]>[]>(new J<Color[]>[0]) // cannot use array creation expression with interfaces.
+
+  - use: |-
+      let v: J<B> = new A<B>(new J<X>[0]) // cannot use array creation expression with interfaces.
+    decl: |-
+      type B = J<X>[]
+
+  - use: |-
+      let v: J<B> = new A<B>(new J<X[]>[0]) // cannot use array creation expression with interfaces.
+    decl: |-
+      type B = J<X[]>[]
+
+  - use: |-
+      let v: J<J<B>[]> = new A<J<B>[]>(new J<B>[0]) // cannot use array creation expression with interfaces.
+    decl: |-
+      type B = X[]

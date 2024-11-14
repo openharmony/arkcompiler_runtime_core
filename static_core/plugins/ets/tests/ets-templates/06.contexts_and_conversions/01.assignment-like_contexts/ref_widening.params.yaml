@@ -85,20 +85,6 @@ cases:
     dtype: Object
 
   - defs: |-
-      interface I {}
-      class A implements I {}
-    stype: 'I[]'
-    src: 'new I[1]'
-    dtype: Object
-
-  - defs: |-
-      interface I {}
-      class A implements I {}
-    stype: 'I[]'
-    src: 'new I[1]'
-    dtype: 'Object[]'
-
-  - defs: |-
       class A {}
       class B<T> {}
     stype: B<A>

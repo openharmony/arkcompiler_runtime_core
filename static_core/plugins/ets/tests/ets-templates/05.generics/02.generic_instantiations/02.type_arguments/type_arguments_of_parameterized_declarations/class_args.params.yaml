@@ -62,13 +62,9 @@ cases:
 
   - use: |-
       let v: A<A<X[]>[]> = new A<A<X[]>[]>([new A<X[]>(new X[1])])
-  - use: |-
-      let v: A<I[]> = new A<I[]>(new I[0])
 
   - use: |-
       let v: A<A<I>[]> = new A<A<I>[]>([new A<I>(new X())])
-  - use: |-
-      let v: A<A<I[]>[]> = new A<A<I[]>[]>([new A<I[]>(new I[0])])
 
   - use: |-
       let v: A<Color[]> = new A<Color[]>([Color.Red])

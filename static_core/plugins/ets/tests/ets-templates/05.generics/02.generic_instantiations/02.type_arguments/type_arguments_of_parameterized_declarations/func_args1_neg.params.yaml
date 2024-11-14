@@ -28,11 +28,6 @@ cases:
     bound: ' extends X'
 
   - use: |-
-      if (foo <null|X> (null, new X()) !== null) {  // syntax error
-          return 1;
-      }
-
-  - use: |-
       if (foo <Y<X>|null> (null, new Y<X>()) !== null) {  // out of bound
           return 1;
       }
@@ -97,5 +92,12 @@ cases:
       let v: Color = Color.Red
       let q: Color = Color.Blue
       if (foo <Color> (v, q) != q) {
+          return 1;
+      }
+
+  # use interface to create array
+  - use: |-
+      let v: I[] = new I[0] // cannnot use array creation expression with interfaces
+      if (foo <I[]> (v, v) !== v) {
           return 1;
       }

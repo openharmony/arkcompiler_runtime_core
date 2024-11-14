@@ -102,3 +102,10 @@ cases:
   # not a reference type
   - use: |-
       let v: A<Color> = new A<Color>(Color.Red)
+
+    # use interfaces to create array
+  - use: |-
+      let v: A<I[]> = new A<I[]>(new I[0]) // Cannot use array creation expression with interfaces.
+
+  - use: |-
+      let v: A<A<I[]>[]> = new A<A<I[]>[]>([new A<I[]>(new I[0])]) // Cannot use array creation expression with interfaces.

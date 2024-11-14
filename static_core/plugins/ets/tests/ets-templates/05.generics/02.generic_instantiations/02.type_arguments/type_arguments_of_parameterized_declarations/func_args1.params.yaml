@@ -61,12 +61,6 @@ cases:
     bound: ' extends Object[]'
 
   - use: |-
-      let v: I[] = new I[0]
-      if (foo <I[]> (v, v) !== v) {
-          return 1;
-      }
-
-  - use: |-
       let v: Color[] = [Color.Red]
       if (foo <Color[]> (v, [Color.Blue]) !== v) {
           return 1;

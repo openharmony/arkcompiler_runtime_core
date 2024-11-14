@@ -28,18 +28,6 @@ cases:
     bound: ' extends X'
 
   - use: |-
-      if (a.meth<null|X>(null, new X()) !== null) {  // null|X - syntax error
-          return 1
-      }
-
-  - use: |-
-      let v = new X()
-      if (a.meth<X>(v, new X()) !== v) {  // null|X - syntax error in bound
-          return 1
-      }
-    bound: ' extends null|X'
-
-  - use: |-
       if (a.meth<Y<X>|null>(null, new Y<X>()) !== null) { // null is not in Object bound
           return 1
       }
@@ -111,4 +99,16 @@ cases:
       let q = Color.Blue
       if (a.meth<Color>(q, v) != v) {
           return 1;
+      }
+
+  # create array with interfaces
+  - use: |-
+      let v: I[] = new I[0] // cannot use array creation expression with interfaces
+      if (a.meth<I[]>(v, v) !== v) {
+          return 1;
+      }
+  - use: |-
+      let v: I[]|null = new I[0] // cannot use array creation expression with interfaces
+      if (a.meth<I[]>(v, v) !== v) {  // I[]|null is not I[]
+          return 1
       }
