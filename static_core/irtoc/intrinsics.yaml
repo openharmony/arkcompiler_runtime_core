@@ -22,9 +22,9 @@ intrinsics:
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [amd64, arm64, arm32]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitSlowPathEntryIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitSlowPathEntry
   signature:
     ret: void
@@ -38,7 +38,8 @@ intrinsics:
   space: core
   static: true
   codegen_arch: [amd64, arm64, arm32]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitSaveOrRestoreRegsEpIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitNothing
   signature:
     ret: void
@@ -52,7 +53,8 @@ intrinsics:
   space: core
   static: true
   codegen_arch: [amd64, arm64, arm32]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitSaveOrRestoreRegsEpIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitNothing
   signature:
     ret: void
@@ -66,12 +68,13 @@ intrinsics:
   space: core
   static: true
   codegen_arch: [amd64, arm64, arm32]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitUnreachableIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitUnreachable
   signature:
     ret: void
     args: []
-  description: Encode trap instruction
+  description: Emit trap instruction
   set_flags: [terminator]
   clear_flags: [require_state, can_throw, heap_inv]
 
@@ -81,7 +84,8 @@ intrinsics:
   space: core
   static: true
   codegen_arch: [ amd64, arm64, arm32 ]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitTailCallIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitTailCall
   signature:
     ret: void
@@ -96,7 +100,8 @@ intrinsics:
   space: core
   static: true
   codegen_arch: [amd64, arm64, arm32]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitInterpreterReturnIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitInterpreterReturn
   signature:
     ret: void
@@ -109,54 +114,54 @@ intrinsics:
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, arm32]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitMarkWordIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitExclusiveLoadWithAcquire
   signature:
       ret: void
       args: []
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
-  description: Encode load mark word with acquire semantics for exclusive use
+  description: Emit load mark word with acquire semantics for exclusive use
 
 - name: StoreReleaseMarkWordExclusive
   class_name: Irtoc
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, arm32]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitMarkWordIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitExclusiveStoreWithRelease
   signature:
       ret: void
       args: []
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
-  description: Encode store mark word that was loaded for exclusive use with release semantics
+  description: Emit store mark word that was loaded for exclusive use with release semantics
 
 - name: CompareAndSetMarkWord
   class_name: Irtoc
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitMarkWordIntrinsic"
+  codegen_virt: true
   # llvm_codegen_func: unused for arm64
   signature:
       ret: void
       args: []
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
-  description: Encode store mark word using compare and swap
+  description: Emit store mark word using compare and swap
 
 - name: DataMemoryBarrierFull
   class_name: Irtoc
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitDataMemoryBarrierFullIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitMemoryFenceFull
   signature:
       ret: void
@@ -164,44 +169,14 @@ intrinsics:
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
   description: InnerShareable Full (ACQUIRE + RELEASE) barrier. Ensures the order of memory accesses before and after the barrier.
 
-- name: CompressEightUtf16ToUtf8CharsUsingSimd
-  class_name: Irtoc
-  method_name:
-  space: core
-  static: true
-  builtin: true
-  codegen_arch: [arm64]
-  codegen_func: "CreateIrtocIntrinsic"
-  llvm_codegen_func: EmitCompressEightUtf16ToUtf8CharsUsingSimd
-  signature:
-      ret: void
-      args: []
-  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
-  description: Compresses eight Utf16 chars (16 bytes) to Utf8 chars (8 bytes) using SIMD instructions
-
-- name: CompressSixteenUtf16ToUtf8CharsUsingSimd
-  class_name: Irtoc
-  method_name:
-  space: core
-  static: true
-  builtin: true
-  codegen_arch: [arm64]
-  codegen_func: "CreateIrtocIntrinsic"
-  llvm_codegen_func: EmitCompressSixteenUtf16ToUtf8CharsUsingSimd
-  signature:
-      ret: void
-      args: []
-  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
-  description: Compresses sixteen Utf16 chars (32 bytes) to Utf8 chars (16 bytes) using SIMD instructions
-
 - name: WriteTlabStatsSafe
   class_name: Irtoc
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, arm32, amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitWriteTlabStatsSafeIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitWriteTlabStatsSafe
   signature: # the signature is fake
       ret: void
@@ -214,9 +189,9 @@ intrinsics:
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitReverseIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitReverseBytes
   signature:
       ret: u64
@@ -229,9 +204,9 @@ intrinsics:
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitReverseIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitReverseBytes
   signature:
       ret: u32
@@ -244,9 +219,9 @@ intrinsics:
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitReverseIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitReverseHalfWords
   signature:
       ret: f64
@@ -254,14 +229,28 @@ intrinsics:
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
   description: Reverse half-words in the double word
 
+- name: CountLeadingZeroBitsU64
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [arm64, amd64]
+  codegen_func: "CreateCountLeadingZeroBits"
+  llvm_codegen_func: EmitCtlz
+  signature:
+      ret: u64
+      args: [ u64 ]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Count leading zero bits in 64-bit integer
+
 - name: ExpandU8ToU16
   class_name: Irtoc
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitExpandU8ToU16Intrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitExpandU8U16
   signature:
       ret: f64
@@ -274,12 +263,112 @@ intrinsics:
   method_name:
   space: core
   static: true
-  builtin: true
   codegen_arch: [arm64, arm32, amd64]
-  codegen_func: "CreateIrtocIntrinsic"
+  codegen_func: "EmitAtomicByteOrIntrinsic"
+  codegen_virt: true
   llvm_codegen_func: EmitAtomicByteOr
   signature:
       ret: void
       args: [ u64, u8 ]
   clear_flags: [runtime_call, require_state, can_throw, heap_inv]
   description: Atomic bit set on byte in memory, without return
+
+- name: CompressEightUtf16ToUtf8CharsUsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitCompressEightUtf16ToUtf8CharsUsingSimd
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Compresses eight Utf16 chars (16 bytes) to Utf8 chars (8 bytes) using SIMD instructions
+
+- name: CompressSixteenUtf16ToUtf8CharsUsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitCompressSixteenUtf16ToUtf8CharsUsingSimd
+  signature:
+      ret: void
+      args: []
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  description: Compresses sixteen Utf16 chars (32 bytes) to Utf8 chars (16 bytes) using SIMD instructions
+
+- name: MemCharU8X32UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitMemCharU8X32UsingSimd
+  signature:
+      ret: void*
+      args: [ u8, u8* ]
+  description: Find u8 char in 32-byte block of memory addressed by the second operand
+
+- name: MemCharU8X16UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitMemCharU8X16UsingSimd
+  signature:
+      ret: void*
+      args: [ u8, u8* ]
+  description: Find u8 char in 16-byte block of memory addressed by the second operand
+
+- name: MemCharU16X16UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitMemCharU16X16UsingSimd
+  signature:
+      ret: void*
+      args: [ u16, u16* ]
+  signature:
+      ret: void
+      args: []
+  description: Find u16 char in 32-byte block of memory addressed by the second operand
+
+- name: MemCharU16X8UsingSimd
+  class_name: Irtoc
+  method_name:
+  space: core
+  static: true
+  set_flags: [require_tmp]
+  clear_flags: [runtime_call, require_state, can_throw, heap_inv]
+  codegen_arch: [arm64]
+  codegen_func: "EmitSimdIntrinsic"
+  codegen_virt: true
+  llvm_codegen_func: EmitMemCharU16X8UsingSimd
+  signature:
+      ret: void*
+      args: [ u16, u16* ]
+  signature:
+      ret: void
+      args: []
+  description: Find u16 char in 16-byte block of memory addressed by the second operand

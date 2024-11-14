@@ -72,10 +72,10 @@ public:
 
     void GenerateEpilogue() override {}
 
-    void IntrinsicTailCall(IntrinsicInst *inst) override
+    void EmitTailCallIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src) override
     {
-        auto src = ConvertRegister(inst->GetSrcReg(0), DataType::POINTER);  // pointer
-        GetEncoder()->EncodeJump(src);
+        auto ptr = ConvertRegister(inst->GetSrcReg(0), DataType::POINTER);  // pointer
+        GetEncoder()->EncodeJump(ptr);
     }
 };
 

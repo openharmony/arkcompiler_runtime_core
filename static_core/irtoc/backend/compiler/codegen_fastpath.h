@@ -50,11 +50,16 @@ public:
 
     void CreateFrameInfo() override;
 
-    void IntrinsicSlowPathEntry(IntrinsicInst *inst) override;
-    void IntrinsicSaveRegisters(IntrinsicInst *inst) override;
-    void IntrinsicRestoreRegisters(IntrinsicInst *inst) override;
-    void IntrinsicTailCall(IntrinsicInst *inst) override;
-    void IntrinsicSaveTlabStatsSafe(IntrinsicInst *inst, Reg src1, Reg src2, Reg tmp) override;
+    void EmitSimdIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitReverseIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitMarkWordIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitDataMemoryBarrierFullIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitWriteTlabStatsSafeIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitExpandU8ToU16Intrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitAtomicByteOrIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitSaveOrRestoreRegsEpIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitTailCallIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
+    void EmitSlowPathEntryIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
 
 private:
     RegMask GetCallerRegistersToRestore() const;

@@ -195,77 +195,9 @@ void CodegenFastPath::CreateFrameInfo()
     SetFrameInfo(frame);
 }
 
-void CodegenFastPath::IntrinsicSlowPathEntry(IntrinsicInst *inst)
-{
-    CreateTailCall(inst, false);
-}
-
 /*
  * Safe call of the c++ function from the irtoc
  * */
-void CodegenFastPath::IntrinsicSaveTlabStatsSafe([[maybe_unused]] IntrinsicInst *inst, Reg src1, Reg src2, Reg tmp)
-{
-    ASSERT(!inst->HasUsers());
-    ASSERT(tmp.IsValid());
-    ASSERT(tmp != GetRegfile()->GetZeroReg());
-
-    auto regs = GetCallerRegsMask(GetArch(), false) | GetCalleeRegsMask(GetArch(), false);
-    auto vregs = GetCallerRegsMask(GetArch(), true);
-    GetEncoder()->PushRegisters(regs, vregs);
-
-    FillCallParams(src1, src2);
-
-    auto id = RuntimeInterface::EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE;
-    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
-    GetEncoder()->EncodeLdr(tmp, false, entry);
-    GetEncoder()->MakeCall(tmp);
-
-    GetEncoder()->PopRegisters(regs, vregs);
-}
-
-void CodegenFastPath::IntrinsicSaveRegisters([[maybe_unused]] IntrinsicInst *inst)
-{
-    RegMask calleeRegs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
-    // We need to save all caller regs, since caller doesn't care about registers at all (except parameters)
-    auto callerRegs = RegMask(GetCallerRegsMask(GetArch(), false));
-    auto callerVregs = RegMask(GetCallerRegsMask(GetArch(), true));
-    for (auto &input : inst->GetInputs()) {
-        calleeRegs.reset(input.GetInst()->GetDstReg());
-        callerRegs.reset(input.GetInst()->GetDstReg());
-    }
-    if (GetTarget().SupportLinkReg()) {
-        callerRegs.set(GetTarget().GetLinkReg().GetId());
-    }
-    if (!inst->HasUsers()) {
-        callerRegs.set(GetTarget().GetReturnReg(GetPtrRegType()).GetId());
-    }
-    GetEncoder()->PushRegisters(callerRegs | calleeRegs, callerVregs);
-}
-
-void CodegenFastPath::IntrinsicRestoreRegisters([[maybe_unused]] IntrinsicInst *inst)
-{
-    RegMask calleeRegs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
-    // We need to restore all caller regs, since caller doesn't care about registers at all (except parameters)
-    auto callerRegs = RegMask(GetCallerRegsMask(GetArch(), false));
-    auto callerVregs = RegMask(GetCallerRegsMask(GetArch(), true));
-    for (auto &input : inst->GetInputs()) {
-        calleeRegs.reset(input.GetInst()->GetDstReg());
-        callerRegs.reset(input.GetInst()->GetDstReg());
-    }
-    if (GetTarget().SupportLinkReg()) {
-        callerRegs.set(GetTarget().GetLinkReg().GetId());
-    }
-    if (!inst->HasUsers()) {
-        callerRegs.set(GetTarget().GetReturnReg(GetPtrRegType()).GetId());
-    }
-    GetEncoder()->PopRegisters(callerRegs | calleeRegs, callerVregs);
-}
-
-void CodegenFastPath::IntrinsicTailCall(IntrinsicInst *inst)
-{
-    CreateTailCall(inst, true);
-}
-
 void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool isFastpath)
 {
     auto encoder = GetEncoder();
@@ -280,7 +212,7 @@ void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool isFastpath)
     auto tempsMask = GetTarget().GetTempRegsMask();
     for (size_t reg = tempsMask.GetMinRegister(); reg <= tempsMask.GetMaxRegister(); reg++) {
         if (tempsMask.Test(reg)) {
-            GetEncoder()->ReleaseScratchRegister(Reg(reg, INT32_TYPE));
+            encoder->ReleaseScratchRegister(Reg(reg, INT32_TYPE));
         }
     }
 
@@ -319,4 +251,151 @@ void CodegenFastPath::CreateTailCall(IntrinsicInst *inst, bool isFastpath)
     }
 }
 
+void CodegenFastPath::EmitSimdIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto intrinsic = inst->GetIntrinsicId();
+    if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD) {
+        GetEncoder()->EncodeCompressEightUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_SIXTEEN_UTF16_TO_UTF8_CHARS_USING_SIMD) {
+        GetEncoder()->EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_CHAR_U8_X32_USING_SIMD) {
+        GetEncoder()->EncodeMemCharU8X32UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                  ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_CHAR_U16_X16_USING_SIMD) {
+        GetEncoder()->EncodeMemCharU16X16UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                   ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_CHAR_U8_X16_USING_SIMD) {
+        GetEncoder()->EncodeMemCharU8X16UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                  ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_MEM_CHAR_U16_X8_USING_SIMD) {
+        GetEncoder()->EncodeMemCharU16X8UsingSimd(dst, src[FIRST_OPERAND], src[SECOND_OPERAND],
+                                                  ConvertInstTmpReg(inst, DataType::FLOAT64));
+    } else {
+        UNREACHABLE();
+    }
+}
+
+void CodegenFastPath::EmitReverseIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto intrinsic = inst->GetIntrinsicId();
+    if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_BYTES_U64 ||
+        intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_BYTES_U32) {
+        GetEncoder()->EncodeReverseBytes(dst, src[0]);
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_HALF_WORDS) {
+        GetEncoder()->EncodeReverseHalfWords(dst, src[0]);
+    } else {
+        UNREACHABLE();
+    }
+}
+
+void CodegenFastPath::EmitMarkWordIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    auto intrinsic = inst->GetIntrinsicId();
+    if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE) {
+        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
+        GetEncoder()->EncodeLdrExclusive(dst, src[0], true);
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_STORE_RELEASE_MARK_WORD_EXCLUSIVE) {
+        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
+        GetEncoder()->EncodeStrExclusive(dst, src[SECOND_OPERAND], src[0], true);
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_COMPARE_AND_SET_MARK_WORD) {
+        ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
+        GetEncoder()->EncodeCompareAndSwap(dst, src[0], src[SECOND_OPERAND], src[THIRD_OPERAND]);
+    } else {
+        UNREACHABLE();
+    }
+}
+
+void CodegenFastPath::EmitDataMemoryBarrierFullIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                                         [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_DATA_MEMORY_BARRIER_FULL);
+    GetEncoder()->EncodeMemoryBarrier(memory_order::FULL);
+}
+
+/*
+ * Safe call of the c++ function from the irtoc
+ */
+void CodegenFastPath::EmitWriteTlabStatsSafeIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                                      SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_WRITE_TLAB_STATS_SAFE);
+    ASSERT(!inst->HasUsers());
+
+    auto src1 = src[FIRST_OPERAND];
+    auto src2 = src[SECOND_OPERAND];
+    auto tmp = src[THIRD_OPERAND];
+
+    ASSERT(tmp.IsValid());
+    ASSERT(tmp != GetRegfile()->GetZeroReg());
+
+    auto regs = GetCallerRegsMask(GetArch(), false) | GetCalleeRegsMask(GetArch(), false);
+    auto vregs = GetCallerRegsMask(GetArch(), true);
+    GetEncoder()->PushRegisters(regs, vregs);
+
+    FillCallParams(src1, src2);
+
+    auto id = RuntimeInterface::EntrypointId::WRITE_TLAB_STATS_NO_BRIDGE;
+    MemRef entry(ThreadReg(), GetRuntime()->GetEntrypointTlsOffset(GetArch(), id));
+    GetEncoder()->EncodeLdr(tmp, false, entry);
+    GetEncoder()->MakeCall(tmp);
+
+    GetEncoder()->PopRegisters(regs, vregs);
+}
+
+void CodegenFastPath::EmitExpandU8ToU16Intrinsic([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_EXPAND_U8_TO_U16);
+    GetEncoder()->EncodeUnsignedExtendBytesToShorts(dst, src[0]);
+}
+
+void CodegenFastPath::EmitAtomicByteOrIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                                SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_ATOMIC_BYTE_OR);
+    bool fastEncoding = true;
+    if (GetArch() == Arch::AARCH64 && !g_options.IsCpuFeatureEnabled(CpuFeature::ATOMICS)) {
+        fastEncoding = false;
+    }
+    GetEncoder()->EncodeAtomicByteOr(src[FIRST_OPERAND], src[SECOND_OPERAND], fastEncoding);
+}
+
+void CodegenFastPath::EmitSaveOrRestoreRegsEpIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                                       [[maybe_unused]] SRCREGS src)
+{
+    RegMask calleeRegs = GetUsedRegs() & RegMask(GetCalleeRegsMask(GetArch(), false));
+    // We need to restore all caller regs, since caller doesn't care about registers at all (except parameters)
+    auto callerRegs = RegMask(GetCallerRegsMask(GetArch(), false));
+    auto callerVregs = RegMask(GetCallerRegsMask(GetArch(), true));
+    for (auto &input : inst->GetInputs()) {
+        calleeRegs.reset(input.GetInst()->GetDstReg());
+        callerRegs.reset(input.GetInst()->GetDstReg());
+    }
+    if (GetTarget().SupportLinkReg()) {
+        callerRegs.set(GetTarget().GetLinkReg().GetId());
+    }
+    if (!inst->HasUsers()) {
+        callerRegs.set(GetTarget().GetReturnReg(GetPtrRegType()).GetId());
+    }
+    auto intrinsic = inst->GetIntrinsicId();
+    if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_SAVE_REGISTERS_EP) {
+        GetEncoder()->PushRegisters(callerRegs | calleeRegs, callerVregs);
+    } else if (intrinsic == RuntimeInterface::IntrinsicId::INTRINSIC_RESTORE_REGISTERS_EP) {
+        GetEncoder()->PopRegisters(callerRegs | calleeRegs, callerVregs);
+    } else {
+        UNREACHABLE();
+    }
+}
+
+void CodegenFastPath::EmitTailCallIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL);
+    CreateTailCall(inst, true);
+}
+
+void CodegenFastPath::EmitSlowPathEntryIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                                 [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY);
+    CreateTailCall(inst, false);
+}
 }  // namespace ark::compiler

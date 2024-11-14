@@ -40,3 +40,5 @@ bool EmitCharIsWhiteSpace(Inst *inst);
 bool EmitStringStartsWith(Inst *inst);
 bool EmitStringEndsWith(Inst *inst);
 bool EmitStringGetBytesTlab(Inst *inst);
+bool EmitStringIndexOf(Inst *inst);
+bool EmitStringIndexOfAfter(Inst *inst);
