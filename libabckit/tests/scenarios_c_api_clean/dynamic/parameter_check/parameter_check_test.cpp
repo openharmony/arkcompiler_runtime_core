@@ -47,12 +47,10 @@ void AddParamChecker(AbckitCoreFunction *method)
         AbckitInst *arr = g_implG->iGetPrev(idx);
 
         std::vector<AbckitBasicBlock *> succBBs;
-        g_implG->bbVisitSuccBlocks(
-            startBB, &succBBs,
-            []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-                auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-                succs->emplace_back(succBasicBlock);
-            });
+        g_implG->bbVisitSuccBlocks(startBB, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+            auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+            succs->emplace_back(succBasicBlock);
+        });
 
         AbckitString *str = g_implM->createString(file, "length");
 
@@ -209,7 +207,7 @@ inline void EnumerateInstUsers(AbckitInst *inst, const UserCallBack &cb)
 {
     LIBABCKIT_LOG_FUNC;
 
-    g_implG->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *, AbckitInst *user, void *data) {
+    g_implG->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *user, void *data) {
         const auto &cb = *((UserCallBack *)data);
         cb(user);
     });

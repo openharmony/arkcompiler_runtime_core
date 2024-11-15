@@ -104,7 +104,7 @@ inline void EnumerateInstUsers(AbckitInst *inst, const UserCallBack &cb)
 {
     LIBABCKIT_LOG_FUNC;
 
-    g_implG->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *, AbckitInst *user, void *data) {
+    g_implG->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *user, void *data) {
         const auto &cb = *((UserCallBack *)data);
         cb(user);
     });

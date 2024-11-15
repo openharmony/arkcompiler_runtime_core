@@ -122,12 +122,10 @@ void TransformMethod(AbckitCoreFunction *method, VisitHelper &visitor, const Use
         auto ctxG = g_implI->createGraphFromFunction(method);
         AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(ctxG);
         std::vector<AbckitBasicBlock *> succBBs;
-        g_implG->bbVisitSuccBlocks(
-            startBB, &succBBs,
-            []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-                auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-                succs->emplace_back(succBasicBlock);
-            });
+        g_implG->bbVisitSuccBlocks(startBB, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+            auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+            succs->emplace_back(succBasicBlock);
+        });
         AbckitInst *createEmptyArray = FindFirstInst(ctxG, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEEMPTYARRAY);
 
         const auto &routerInfo = ud->routerInfo;

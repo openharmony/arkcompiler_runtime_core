@@ -272,7 +272,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
     void (*bbVisitPredBlocks)(AbckitBasicBlock *basicBlock, void *data,
-                              void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *predBasicBlock, void *data));
+                              void (*cb)(AbckitBasicBlock *predBasicBlock, void *data));
 
     /**
      * @brief Returns the number of basic blocks successing the given `basicBlock`.
@@ -341,7 +341,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
     void (*bbVisitSuccBlocks)(AbckitBasicBlock *basicBlock, void *data,
-                              void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBasicBlock, void *data));
+                              void (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
 
     /**
      * @brief Returns successor of `basicBlock` with index 0.
@@ -472,8 +472,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
     void (*bbVisitDominatedBlocks)(AbckitBasicBlock *basicBlock, void *data,
-                                   void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominatedBasicBlock,
-                                              void *data));
+                                   void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data));
 
     /**
      * @brief Tells if `basicBlock` is start basic block.
@@ -698,7 +697,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*iVisitUsers)(AbckitInst *inst, void *data, void (*cb)(AbckitInst *inst, AbckitInst *user, void *data));
+    void (*iVisitUsers)(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data));
 
     /**
      * @brief Returns number of `inst` inputs.
@@ -728,8 +727,7 @@ struct AbckitGraphApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*iVisitInputs)(AbckitInst *inst, void *data,
-                         void (*cb)(AbckitInst *inst, AbckitInst *input, size_t inputIdx, void *data));
+    void (*iVisitInputs)(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data));
 
     /**
      * @brief Sets `inst` input, overwrites existing input.

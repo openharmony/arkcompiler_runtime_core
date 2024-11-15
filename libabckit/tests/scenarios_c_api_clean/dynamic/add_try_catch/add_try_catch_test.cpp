@@ -109,22 +109,20 @@ struct UserData {
 std::vector<AbckitBasicBlock *> BBgetPredBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> predBBs;
-    g_implG->bbVisitPredBlocks(
-        bb, &predBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-            auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-            preds->emplace_back(succBasicBlock);
-        });
+    g_implG->bbVisitPredBlocks(bb, &predBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+        auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+        preds->emplace_back(succBasicBlock);
+    });
     return predBBs;
 }
 
 std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> succBBs;
-    g_implG->bbVisitSuccBlocks(
-        bb, &succBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-            auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-            succs->emplace_back(succBasicBlock);
-        });
+    g_implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+        auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+        succs->emplace_back(succBasicBlock);
+    });
     return succBBs;
 }
 
