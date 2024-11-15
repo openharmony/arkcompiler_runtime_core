@@ -17,27 +17,27 @@ async function main() {
     console.log('Started...');
     const iterations = 1000000; // this value worked reasonably well in trial runs
 
-    async function checkPromise() {
-        let start;
-        let loopTime = 0;
+    const timeNs = await checkPromise();
+    console.log('Benchmark result: J2j ' + (timeNs));
+}
 
-        for (let i = 0; i < iterations; i++) {
-            await (() => {
-                return new Promise((resolve) => {
-                    start = process.hrtime.bigint();
-                    resolve();
-                });
-            }
-            )().then(() => {
-                loopTime += Number(process.hrtime.bigint() - start);
+async function checkPromise() {
+    let start;
+    let loopTime = 0;
+
+    for (let i = 0; i < iterations; i++) {
+        await (() => {
+            return new Promise((resolve) => {
+                start = process.hrtime.bigint();
+                resolve();
             });
         }
-
-        return loopTime;
+        )().then(() => {
+            loopTime += Number(process.hrtime.bigint() - start);
+        });
     }
 
-    const time_ns = await checkPromise();
-    console.log('Benchmark result: J2j ' + (time_ns));
+    return loopTime;
 }
 
 main();

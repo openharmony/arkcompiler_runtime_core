@@ -38,24 +38,26 @@ async function main() {
         let start;
         let loopTime = 0;
         
-        //NOTE issue(19656) uncomment this after fix global reference storage
         for (let i = 0; i < iterations; i++) {
-            // await (() => {
-            //     console.log(i);
-                
-            //     start = process.hrtime.bigint();
-            //     return promise()
-            // }
-            // )().then(() => {
-            //     loopTime = Number(process.hrtime.bigint() - start);
-            // })
+            await (() => {
+                console.log(i);
+
+                start = process.hrtime.bigint();
+                return promise();
+            }
+            )().then(() => {
+                loopTime = Number(process.hrtime.bigint() - start);
+            });
         }
 
         return loopTime;
     }
 
-    const time_ns = await checkPromise();
-    console.log('Benchmark result: J2a ' + (time_ns));
+    //NOTE issue(19656) enable this after fix global reference storage
+    if (false) {
+        const timeNs = await checkPromise();
+        console.log('Benchmark result: J2a ' + (timeNs));
+    }
     return null;
 }
 
