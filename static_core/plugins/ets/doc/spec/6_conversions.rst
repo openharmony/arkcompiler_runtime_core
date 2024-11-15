@@ -257,9 +257,9 @@ Assignment-like contexts allow using of one of the following:
 
 - :ref:`Function Types Conversions`;
 
-- :ref:`Enumeration to Int Conversions`;
+- :ref:`Enumeration to Constants Type Conversions`;
 
-- :ref:`Enumeration to String Conversions`;
+- :ref:`Constant to Enumeration Conversions`;
 
 - :ref:`Literal Type to its Supertype Conversions`.
 
@@ -486,10 +486,23 @@ Double ``NaN`` is converted to float ``NaN``.
 
 Double infinity is converted to same-signed floating-point infinity.
 
+A numeric casting conversion of a floating-point type operand to
+target types ``long`` or ``int`` is performed by the following rules:
+
+- If the operand is ``NaN``, then the result is 0 (zero).
+- If the operand is positive infinity, or if the operand is too large for the
+  target type, then the result is the largest representable value of the target
+  type.
+- If the operand is negative infinity, or if the operand is too small for
+  the target type, then the result is the smallest representable value of
+  the target type.
+- Otherwise, the result is the value that rounds toward zero by using IEEE 754
+  *round-toward-zero* mode.
+
 A numeric casting conversion of a floating-point type operand to types
 ``short``, ``byte``, or ``char`` is performed in the following two steps:
 
-- The casting conversion to ``int`` is performed first;
+- The casting conversion to ``int`` is performed first (see above);
 - Then, the ``int`` operand is casted to the target type.
 
 .. index::
@@ -506,20 +519,6 @@ A numeric casting conversion of a floating-point type operand to types
    floating-point type
    floating-point infinity
    rounding rules
-
-A numeric casting conversion of a floating-point type operand to
-target types ``long`` or ``int`` is performed by the following rules:
-
-- If the operand is ``NaN``, then the result is 0 (zero).
-- If the operand is positive infinity, or if the operand is too large for the
-  target type, then the result is the largest representable value of the target
-  type.
-- If the operand is negative infinity, or if the operand is too small for
-  the target type, then the result is the smallest representable value of
-  the target type.
-- Otherwise, the result is the value that rounds toward zero by using IEEE 754
-  *round-toward-zero* mode.
-
 
 A numeric casting conversion from an integer type (or char) to a smaller integer
 type (or char) ``I`` discards all bits except the *N* lowest ones, where *N* is
@@ -677,9 +676,6 @@ compatible with the target type, then the conversion causes a
 
     let d: Derived1 | Derived2 = ...
     let b: Base = d // OK, as Derived1 and Derived2 are compatible with Base
-
-    let x: Double | Int = ...
-    let y: double = x // OK, as Double and Int can be converted into double 
 
     let x: Double | Base = ...
     let y: double = x // Compile-time error, as Base cannot be converted into double 
@@ -1310,10 +1306,10 @@ if the following conditions are met:
 
 |
 
-.. _Enumeration to Int Conversions:
+.. _Enumeration to Constants Type Conversions:
 
-Enumeration to Int Conversions
-==============================
+Enumeration to Constants Type Conversions
+=========================================
 
 .. meta:
     frontend_status: Done
@@ -1340,16 +1336,6 @@ This conversion never causes runtime errors.
    runtime error
    type
 
-|
-
-.. _Enumeration to String Conversions:
-
-Enumeration to String Conversions
-=================================
-
-.. meta:
-    frontend_status: Done
-
 A value of ``enumeration`` type is converted to type ``string`` if enumeration
 constants of this type are of type ``string``.
 
@@ -1371,6 +1357,36 @@ This conversion never causes runtime errors.
 
 |
 
+.. _Constant to Enumeration Conversions:
+
+Constant to Enumeration Conversions
+===================================
+
+.. meta:
+    frontend_status: None
+
+A constant value of some integer type is converted to *enumeration* type if 
+
+-  enumeration constants are of type ``int``.
+-  a value is equal to the value of an enumeration constant.
+
+This conversion never causes runtime errors.
+
+.. code-block:: typescript
+   :linenos:
+
+    enum IntegerEnum {a, b, c}
+    let e: IntegerEnum = 1 // ok, e is set to IntegerEnum.b
+    e = 3 // compile-time error, there is no constant with this value
+    
+    const one = 2
+    e = one // ok, e is set to IntegerEnum.call
+    
+    let x = 1
+    e = x // compile-time error, only constant conversions are allowed
+    
+|
+
 .. _Literal Type to its Supertype Conversions:
 
 Literal Type to its Supertype Conversions
@@ -1386,15 +1402,10 @@ never causes a runtime error:
 .. code-block:: typescript
    :linenos:
 
-    function foo (a: 1, b: true, c: 3.14, d: "string literal", e: c'C', f: 123n) {
-       let aa: int = a
-       let bb: boolean = b
-       let cc: double = c
+    function foo(d: "string literal") {
        let dd: string = d
-       let ee: char = e
-       let ff: bigint = f
     }
-    foo (1, true, 3.14, "string literal", c'C', 123n)
+    foo("string literal")
 
 The reverse conversion is not possible.
 

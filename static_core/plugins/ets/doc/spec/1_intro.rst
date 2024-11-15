@@ -48,7 +48,7 @@ The following major aspects characterize the |LANG| language as a whole:
 
    -  Classes with single inheritance,
    -  Interfaces as abstractions to be implemented by classes, and
-   -  Virtual functions (class members) with a dynamically dispatched
+   -  Methods (class instance or interface methods) with a dynamically dispatched
       overriding mechanism.
 
 

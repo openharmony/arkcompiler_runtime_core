@@ -240,7 +240,8 @@ A type can be referred to in source code by the following:
 -  Type reference for a named type (see :ref:`Named Types`), or type alias
    (see :ref:`Type Alias Declaration`);
 -  In-place type definition for an array type (see :ref:`Array Types`),
-   tuple type (see :ref:`Tuple Types`),function type (see :ref:`Function Types`), 
+   tuple type (see :ref:`Tuple Types`), function type (see :ref:`Function Types`),
+   function type with receiver (see :ref:`Function Types with Receiver`),
    union type (see :ref:`Union Types`), keyof type (see :ref:`Keyof Types`), or
    type in parenthesis.
 
@@ -261,6 +262,7 @@ A type can be referred to in source code by the following:
         | arrayType
         | tupleType
         | functionType
+        | functionTypeWithReceiver
         | unionType
         | StringLiteral
         | keyofType

@@ -454,7 +454,8 @@ Literals
 .. meta:
     frontend_status: Done
 
-*Literals* are representations of certain value types.
+*Literals* are values of certain types (see
+:ref:`Predefined Types` and :ref:`Literal Types`).
 
 .. code-block:: abnf
 
@@ -472,15 +473,10 @@ Literals
 
 See :ref:`Character Literals` for the experimental ``char literal``.
 
-Each literal is of its own literal type (see :ref:`Literal Types`). The name of
-this literal type is the literal itself. If an operator is applied to the
-literal, then the literal type is replaced for its supertype (see
-:ref:`Supertypes of Literal Types`), i.e., one of the predefined types (see
-:ref:`Predefined Types`) that corresponds to the literal.
+Every literal is described in details below.
 
 .. index::
    literal
-   value type
    char
 
 |

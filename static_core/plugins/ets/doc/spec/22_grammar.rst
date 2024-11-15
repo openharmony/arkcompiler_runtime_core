@@ -29,6 +29,7 @@ Grammar Summary
         | arrayType
         | tupleType
         | functionType
+        | functionTypeWithReceiver
         | unionType
         | StringLiteral
         | keyofType
@@ -222,6 +223,7 @@ Grammar Summary
         | conditionalExpression
         | stringInterpolation
         | lambdaExpression
+        | lambdaExpressionWithReceiver
         | dynamicImportExpression
         | launchExpression
         | awaitExpression
@@ -796,7 +798,7 @@ Grammar Summary
         ;
 
     selectiveBindings:
-        '{' nameBinding (',' nameBinding)* '}'
+        '{' (nameBinding (',' nameBinding)*)? '}'
         ;
 
     defaultBinding:
@@ -833,7 +835,9 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
-        | extensionFunctionDeclaration
+        | functionWithReceiverDeclaration
+        | accessorWithReceiverDeclaration
+        | namespaceDeclaration
         )
         ;
 
@@ -1000,8 +1004,6 @@ Grammar Summary
         )
         ;
 
-
-
       newArrayInstance:
           'new' arrayElementType dimensionExpression+ (arrayElement)?
           ;
@@ -1023,10 +1025,31 @@ Grammar Summary
         'private'? identifier signature block
         ;
 
-    extensionFunctionDeclaration:
-        'static'? 'function' typeParameters? typeReference '.' identifier
-        signature block
+    functionWithReceiverDeclaration:
+        'function' identifier typeParameters? signatureWithReceiver block
         ;
+
+    signatureWithReceiver:
+        '(' receiverParameter (', ' parameterList)? ')' returnType? throwMark?
+        ;
+
+    receiverParameter:
+        'this' ':' 'readonly'? type
+        ;
+
+    accessorWithReceiverDeclaration:
+          'get' identifier '(' receiverParameter ')' returnType block
+        | 'set' identifier '(' receiverParameter ',' parameter ')' block
+        ;
+        
+    functionTypeWithReceiver:
+        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 'throws'?
+        ;
+
+    lambdaExpressionWithReceiver:
+        typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
+        returnType? throwMark? '=>' lambdaBody
+        ;       
 
     trailingLambdaCall:
         ( objectReference '.' identifier typeArguments?

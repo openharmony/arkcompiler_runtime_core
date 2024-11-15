@@ -21,7 +21,8 @@ Expressions
 This chapter describes the meanings of expressions and the rules for the
 evaluation of  expressions, except for the expressions related to coroutines
 (see :ref:`Create and Launch a Coroutine` for ``launch`` expressions, and
-:ref:`Awaiting a Coroutine` for ``await`` expressions).
+:ref:`Awaiting a Coroutine` for ``await`` expressions) and expressions 
+that are described as experimental (see :ref:`Lambda Expressions with Receiver`).
 
 .. index::
    evaluation
@@ -45,6 +46,7 @@ evaluation of  expressions, except for the expressions related to coroutines
         | conditionalExpression
         | stringInterpolation
         | lambdaExpression
+        | lambdaExpressionWithReceiver
         | dynamicImportExpression
         | launchExpression
         | awaitExpression
@@ -526,13 +528,12 @@ Literal
 .. meta:
     frontend_status: Done
 
-Literals (see :ref:`Literals`) denote fixed and unchanging value. Every literal
-has its own type (see :ref:`Literal Types`).
+Literals (see :ref:`Literals`) denote fixed and unchanging value. The type of
+the literal (see :ref:`Literals`) is the type of the expression.
 
 .. index::
    literal
    value
-   literal type
 
 |
 
@@ -575,6 +576,8 @@ A :index:`compile-time error` occurs if:
 
 -  The name referred by *qualifiedName* is undefined or inaccessible; or
 -  Ambiguity occurs while resolving the name.
+
+The type of the *named reference* is the type of the expression.
 
 .. index::
    named reference
@@ -653,6 +656,8 @@ to provide some initial values:
 An *array literal* is a comma-separated list of *initializer expressions*
 enclosed between '``[``' and '``]``'. A trailing comma after the last
 expression in an array literal is ignored:
+
+The type of the expression is the type of the *array literal*.
 
 .. index::
    array literal
@@ -970,6 +975,8 @@ A :index:`compile-time error` occurs if:
 -  The type of an object literal cannot be inferred from the context; or
 -  The inferred type is not a class or an interface type.
 
+The type of the expression is the type of the *object literal*.
+
 .. index::
    object literal
    inference
@@ -1149,7 +1156,7 @@ occurs if the interface type ``I`` contains a method:
    :linenos:
 
     interface I {
-      name: string = ""
+      name: string
       foo()
     }
     let i : I = {name: "Bob"} // compile-time error, interface has methods
@@ -1330,6 +1337,8 @@ An array or tuple referred by the *expression* is broken by the evaluation into
 a sequence of values. This sequence is used where a spread expression is used.
 It can be an assignment, a call of a function, method, or constructor.
 
+The type of the *spread expression* is a sequence of types of these values.
+
 .. index::
    spread expression
    array literal
@@ -1456,14 +1465,20 @@ the contained expression.
         'this'
         ;
 
-The keyword ``this`` can be used as an expression only in the body of an
-instance method of a class, ``enum``, or interface.
+The keyword ``this`` can be used as an expression in the body of an instance
+method of a class (see :ref:`Method Body`) or interface (see
+:ref:`Default Interface Method Declarations`). The type of *this expression*
+will be the appropriate class or interface type.
 
 It can be used in a lambda expression only if it is allowed in the
 context the lambda expression appears in.
 
 The keyword ``this`` in a direct call expression *this(...)* can only
-be used in the explicit constructor call statement.
+be used in the explicit constructor call statement.  XXX
+
+Also the keyword ``this`` can be used in the body of the functiosn with
+receiver (see :ref:`Functions with Receiver`). The type of *this expression*
+will be the declared type of ``this`` parameter of the function.
 
 A :index:`compile-time error` occurs if the keyword ``this`` appears elsewhere.
 
@@ -1540,7 +1555,7 @@ described in detail in :ref:`Accessing Current Object Fields` and
         objectReference ('.' | '?.') identifier
         ;
 
-A field access expression that contains '``?.``' (see :ref:`Chaining Operator`)
+A *field access expression* that contains '``?.``' (see :ref:`Chaining Operator`)
 is called *safe field access* because it handles nullish object references
 safely.
 
@@ -1553,6 +1568,8 @@ type ``T``. Otherwise, a :index:`compile-time error` occurs.
 Field access expression is valid if the identifier refers to an accessible
 (see :ref:`Accessible`) member field in type ``T``. A :index:`compile-time error`
 occurs otherwise.
+
+The type of the *field access expression* is the type of the member field.
 
 .. index::
    access
@@ -1714,7 +1731,7 @@ Method Call Expression
 .. meta:
     frontend_status: Done
 
-A method call expression calls a static or instance method of a class or
+A *method call expression* calls a static or instance method of a class or
 an interface.
 
 .. index::
@@ -1731,7 +1748,7 @@ an interface.
         ;
 
 The syntax form that has a block associated with the method call is a special
-form called *trailing lambda call* (see :ref:`Trailing Lambda` for details.
+form called *trailing lambda call* (see :ref:`Trailing Lambdas` for details.
 
 A method call with '``?.``' (see :ref:`Chaining Operator`) is called a
 *safe method call* because it handles nullish values safely.
@@ -1857,6 +1874,19 @@ semantic checks must be performed:
    abstract method call
    type argument
 
+
+.. _Type of the method call expression:
+
+Type of the method call expression
+==================================
+
+.. meta:
+    frontend_status: None
+
+The type of the *method call expression* is defined below
+- TBD
+
+
 |
 
 .. _Function Call Expression:
@@ -1878,7 +1908,7 @@ A *function call expression* is used to call a function (see
         ;
 
 A special syntactic form that contains a block associated with the function
-call is called *trailing lambda call* (see :ref:`Trailing Lambda` for details).
+call is called *trailing lambda call* (see :ref:`Trailing Lambdas` for details).
 
 A :index:`compile-time error` occurs if:
 
@@ -1903,8 +1933,8 @@ If the operator '``?.``' (see :ref:`Chaining Operator`) is present, and the
 *expression* evaluates to a nullish value, then:
 
 -  *Arguments* are not evaluated;
--  Call is not performed; and
--  Result of *functionCallExpression* is ``undefined``.
+-  Call is not performed; and thus
+-  The result of *functionCallExpression* is not produced.
 
 The function call is *safe* because it handles nullish values properly.
 
@@ -1972,6 +2002,10 @@ The example below represents different forms of function calls:
     }
 
     ((): void => { console.log ("Lambda is called") }) () // function call uses lambda expression to call it
+
+
+The type of the *function call expression* is defined below
+- TBD
 
 
 |
@@ -2293,9 +2327,10 @@ nullish types. It can be used in the following contexts:
 - :ref:`Indexing Expressions`.
 
 If the value of the expression to the left of '``?.``' is ``undefined`` or
-``null``, then the evaluation of the entire surrounding *primary expression* stops.
-The result of the entire primary expression is then ``undefined``.
-
+``null``, then the evaluation of the entire surrounding *primary expression*
+stops. The result of the entire primary expression is then ``undefined``. Thus
+the type of the entire primary expression is the union ``undefined`` |
+*the non-nullish type of the entire primary expression*.
 
 .. code-block-meta:
 
@@ -2312,9 +2347,11 @@ The result of the entire primary expression is then ``undefined``.
 
     let bob = new Person("Bob")
     console.log(bob.spouse?.name) // prints "undefined"
+       // the type of bob.spouse?.name is undefined|string
 
     bob.spouse = new Person("Alice")
     console.log(bob.spouse?.name) // prints "Alice"
+       // the type of bob.spouse?.name is undefined|string
 
 If an expression is not of a nullish type, then the chaining operator has
 no effect.

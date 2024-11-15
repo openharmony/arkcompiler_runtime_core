@@ -20,7 +20,7 @@ Introduction
 Welcome to the tutorial for |LANG|, a |TS|-based programming language
 designed specifically to build high-performance mobile applications!
 
-|LANG| is optimized to provide better performance and efficiency, while still
+|LANG| is optimized to provide better performance and efficiency, while
 maintaining the familiar syntax of |TS|.
 
 As mobile devices continue to become more prevalent in our daily lives,
@@ -50,14 +50,15 @@ interoperability, making it easy for the developers to integrate the |JS| code
 into their applications, and vice versa, and allowing the developers to leverage
 the power of the new language by using their existing codebases and libraries.
 
-To ensure the best experience for UI app development for OpenHarmony ecosystem,
-|LANG| provides support for |UIFW|, including its declarative syntax, and other
+To ensure the best experience of UI app development for OpenHarmony ecosystem,
+|LANG| provides support for |UIFW|, including its declarative syntax and other
 features. Since this feature is outside the scope of the "stock" |TS|, a verbose
 |UIFW| example is provided in a separate chapter.
 
 This tutorial guides developers through the core features, syntax, and best
-practices of |LANG|. After reading this tutorial through the end, a developer
-will be able to build performant and efficient mobile applications in |LANG|.
+practices of |LANG|. After reading this tutorial from the beginning to the end,
+a developer will be able to build performant and efficient mobile applications
+in |LANG|.
 
 |
 |

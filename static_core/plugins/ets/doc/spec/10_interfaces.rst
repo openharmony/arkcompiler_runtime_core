@@ -56,7 +56,6 @@ support common behaviors without sharing a superclass.
 .. index::
    interface
    instantiation
-   interface
    direct extension
    inheritance
    extension

@@ -353,7 +353,7 @@ following syntax:
     }
 
 A subclass inherits fields and methods, but not constructors,
-from the superclass. It can add its own fields and methods, and override
+from its superclass. It can add its own fields and methods, and override
 methods defined by the superclass. It is illustrated in the example below:
 
 .. code-block:: typescript
@@ -393,8 +393,8 @@ implementation:
 Access to Super
 ~~~~~~~~~~~~~~~
 
-The keyword ``super`` allows to access instance methods,
-and constructors of a superclass. This access is often used to extend basic
+The keyword ``super`` allows accessing instance methods and constructors
+of a superclass. This access is often used to extend basic
 functionality of a subclass with the required behavior that can be taken from
 the superclass:
 
@@ -515,7 +515,7 @@ Constructor Overload Signatures
 
 Overload signatures can be written to specify that a constructor can be called
 in different ways. Writing an overload constructor means that several
-constructor headers have the same name but different signatures, and
+constructor headers have the same name but different signatures, and are
 immediately followed by a single implementation constructor:
 
 .. code-block:: typescript
@@ -684,6 +684,5 @@ Type *K* can be either *string* or *number*, while *V* can be any type:
         "Mary": { age: 21, salary: 20}
     }
 
-|
 
 |

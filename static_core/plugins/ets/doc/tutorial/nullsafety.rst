@@ -41,8 +41,7 @@ A variable that can have a null value is defined with a union type ``T | null``:
 Non-Null Assertion Operator
 -----------------------------
 
-A postfix operator '``!``' can be used to assert that its operand is non-null.
-
+The postfix operator '``!``' can be used to assert that its operand is non-null.
 If applied to a null value, the operator throws an error. Otherwise, the
 type of the value is changed from ``T | null`` to ``T``:
 
@@ -83,7 +82,7 @@ set; otherwise, an empty string is returned:
 Optional Chaining
 -----------------
 
-Optional chaining operator '``?.``' allows writing code where the evaluation
+The optional chaining operator '``?.``' allows writing code where the evaluation
 stops at an expression that partially evaluates to ``null`` or ``undefined``:
 
 .. code-block:: typescript
@@ -106,15 +105,15 @@ stops at an expression that partially evaluates to ``null`` or ``undefined``:
         }
     }
 
-**Note**: the return type of ``getSpouseNick`` must be
-``string | null | undefined``, as the method can return ``null`` or
+**Note**: The return type of ``getSpouseNick`` must be
+``string | null | undefined`` as the method can return ``null`` or
 ``undefined``.
 
 An optional chain can be of any length and contain any number of '``?.``'
 operators.
 
-In the following example, if a person has a spouse, and the spouse has a
-nickname, then the output is the nickname of the person's spouse; otherwise,
+In the example below, if a person has a spouse, and the spouse has a
+nickname, then the output is the nickname of the person's spouse. Otherwise,
 the output is ``undefined``:
 
 .. code-block:: typescript
@@ -132,5 +131,4 @@ the output is ``undefined``:
     let p: Person = new Person("Alice")
     console.log(p.spouse?.nick) // print: undefined
 
-|
 |

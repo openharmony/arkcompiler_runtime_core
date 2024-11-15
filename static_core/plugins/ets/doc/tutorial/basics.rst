@@ -67,8 +67,8 @@ As |LANG| is a statically typed language, the types of all entities, like
 variables and constants, have to be known at compile time.
 
 However, developers do not need to explicitly specify the type of a declared
-entity if a variable, or a constant declaration contains an initial value.
-All cases that allow the type to be inferred automatically are specified in
+entity if a variable or a constant declaration contains an initial value.
+All cases that allow inferring type automatically are specified in
 the |LANG| Specification.
 
 Both variable declarations are valid, and both variables are of the ``string``
@@ -97,10 +97,10 @@ Numeric Types
 ~~~~~~~~~~~~~
 
 |LANG| has numeric types ``number`` and ``Number``. Any integer and
-floating-point values can be assigned to a variable of these types.
+floating-point value can be assigned to a variable of these types.
 
 Numeric literals include integer literals and floating-point literals
-with the decimal base.
+with the decimal radix.
 
 Integer literals include the following:
 
@@ -116,11 +116,11 @@ Integer literals include the following:
 
 A floating-point literal includes the following:
 
-* Decimal integer, optionally signed (i.e., prefixed with "+" or "-");
-* Decimal point (".");
+* Decimal integer, optionally signed (i.e., prefixed with '``+``' or '``-``');
+* Decimal point ('``.``');
 * Fractional part (represented by a string of decimal digits);
-* Exponent part that starts with "e" or "E", followed by an optionally
-  signed (i.e., prefixed with "+" or "-") integer.
+* Exponent part that starts with '``e``' or '``E``', followed by an optionally
+  signed (i.e., prefixed with '``+``' or '``-``') integer.
 
 For example:
 
@@ -172,10 +172,10 @@ A ``string`` is a sequence of characters; some characters can be set by using
 escape sequences.
 
 A ``string`` literal consists of zero or more characters enclosed in single
-(') or double quotes (").
+(' \' ') quote or double quotes (' \" ').
 
 A special form of string literals are template literals enclosed in backticks
-(\`):
+(' \` '):
 
 .. code-block:: typescript
 
@@ -221,10 +221,10 @@ assigned to variables of type ``Object``.
 ``array`` Type
 ~~~~~~~~~~~~~~
 
-An ``array`` is an object comprised of the data type elements assignable to
+An ``array`` is an object comprised of data type elements assignable to
 the element type specified in the array declaration.
 The value of an ``array`` is set by using *array composite literal* that is
-a list of zero or more expressions enclosed in square brackets ([]).
+a list of zero or more expressions enclosed in square brackets ('``[ ]``').
 Each such expression represents an element of the ``array``.
 The length of the ``array`` is set by the number of expressions.
 The index of the first array element is 0.
@@ -243,7 +243,7 @@ The following example creates the ``array`` with three elements:
 ~~~~~~~~~~~~~
 
 Type ``enum`` is a value type with a defined set of named values called
-enum constants.
+*enum constants*.
 In order to be used, an ``enum`` constant must be prefixed with an ``enum``
 type name:
 
@@ -472,7 +472,7 @@ An ``if`` statement looks as follows:
         // else_statements
     }
 
-All conditional expressions must be of the type ``boolean``, or other types
+All conditional expressions must be of type ``boolean``, or other types
 (``string``, ``number``, etc.). For types other than ``boolean``, implicit
 conversion rules apply as follows:
 
@@ -518,21 +518,20 @@ A ``switch`` statement looks as follows:
         // default_statements
     }
 
-The ``switch`` expression type must be of types ``number``, ``enum``, or
-``string``.
+A ``switch`` expression must be of types ``number``, ``enum``, or ``string``.
 
 Each label must be an expression of the same type as the ``switch`` expression.
 
 If the value of a ``switch`` expression equals the value of a label, then
 the corresponding statements are executed.
 
-If there is no match, and the ``switch`` has the default clause, then the
+If there is no match, and a ``switch`` has a default clause, then
 default statements are executed.
 
-An optional ``break`` statement allows breaking out of the ``switch`` and
+An optional ``break`` statement allows breaking out of a ``switch``, and
 then executing the statement that follows the ``switch``.
 
-If there is no ``break``, then the next statements in the ``switch`` is
+If there is no ``break``, then the next statement in a ``switch`` is
 executed.
 
 |
