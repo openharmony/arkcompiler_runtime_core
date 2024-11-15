@@ -136,5 +136,6 @@ void ApiModifier::AddParamChecker(AbckitCoreFunction *method)
         implG_->bbAppendSuccBlock(ifBB, falseBB);
 
         implM_->functionSetGraph(method, graph);
+        impl_->destroyGraph(graph);
     });
 }

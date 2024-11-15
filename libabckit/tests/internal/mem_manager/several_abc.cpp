@@ -46,6 +46,7 @@ TEST_F(LibAbcKitMemoryHandling, OpenAbcStatic)
         auto *graph = g_implI->createGraphFromFunction(method);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         g_implM->functionSetGraph(method, graph);
+        g_impl->destroyGraph(graph);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
 
@@ -83,6 +84,7 @@ TEST_F(LibAbcKitMemoryHandling, OpenAbcDynamic)
         auto *graph = g_implI->createGraphFromFunction(method);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         g_implM->functionSetGraph(method, graph);
+        g_impl->destroyGraph(graph);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
 

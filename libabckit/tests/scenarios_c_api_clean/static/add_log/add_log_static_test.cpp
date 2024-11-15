@@ -229,6 +229,7 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestStaticAddLogClean)
         AbckitGraph *graph = g_implI->createGraphFromFunction(method);
         TransformIr(graph, &userData);
         g_implM->functionSetGraph(method, graph);
+        g_impl->destroyGraph(graph);
     });
 
     g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/static/add_log/add_log_static_modified.abc");

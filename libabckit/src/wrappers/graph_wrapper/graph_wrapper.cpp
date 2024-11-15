@@ -32,6 +32,7 @@
 #include "static_core/bytecode_optimizer/reg_encoder.h"
 #include "static_core/compiler/optimizer/ir/graph.h"
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
+#include "static_core/compiler/optimizer/ir/graph_cloner.h"
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/try_catch_resolving.h"
@@ -99,7 +100,9 @@ std::tuple<AbckitGraph *, AbckitStatus> GraphWrapper::BuildGraphDynamic(FileWrap
 
 std::tuple<void *, AbckitStatus> GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName)
 {
-    auto graphImpl = graph->impl;
+    auto graphImpl =
+        compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
+    ;
     graphImpl->RemoveUnreachableBlocks();
 
     CheckInvalidOpcodes(graphImpl, true);

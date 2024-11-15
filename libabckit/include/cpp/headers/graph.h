@@ -74,9 +74,7 @@ private:
 
         void DeleteResource() override
         {
-            // NOTE(nsizov): add Graph destroying when C API will stop delete graph on functionSetGraph
-            (void)conf_;
-            (void)deleterGraph_;
+            conf_->cApi_->destroyGraph(deleterGraph_.GetResource());
         }
 
     private:

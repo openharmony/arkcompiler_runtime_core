@@ -193,6 +193,7 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddTryCatchClean)
     TransformIr(graph, &uData);
 
     g_implM->functionSetGraph(runMethod, graph);
+    g_impl->destroyGraph(graph);
     g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch_modified.abc");
     g_impl->closeFile(file);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);

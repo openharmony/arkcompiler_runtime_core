@@ -105,9 +105,8 @@ void BranchEliminator::EliminateBranchWithSuspect(AbckitCoreFunction *method, co
 
         if (hasGraphChanged) {
             implM_->functionSetGraph(method, graph);
-        } else {
-            impl_->destroyGraph(graph);
         }
+        impl_->destroyGraph(graph);
     });
 }
 

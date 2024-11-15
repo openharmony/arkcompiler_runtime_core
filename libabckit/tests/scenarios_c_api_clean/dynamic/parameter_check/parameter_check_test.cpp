@@ -75,6 +75,7 @@ void AddParamChecker(AbckitCoreFunction *method)
         g_implG->bbAppendSuccBlock(ifBB, falseBB);
 
         g_implM->functionSetGraph(method, graph);
+        g_impl->destroyGraph(graph);
     });
 }
 

@@ -262,6 +262,7 @@ void ReplaceCallSite(AbckitCoreFunction *method, UserData &userData)
         }
     });
     g_implM->functionSetGraph(method, ctxG);
+    g_impl->destroyGraph(ctxG);
 }
 
 void CollectAnnoInfo(std::vector<std::tuple<AbckitCoreClass *, AbckitCoreFunction *, AbckitCoreAnnotation *>> &infos,

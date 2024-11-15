@@ -453,6 +453,7 @@ void GrunPassRemoveUnreachableBlocksStatic(AbckitGraph *graph)
 {
     LIBABCKIT_LOG_FUNC;
     graph->impl->RemoveUnreachableBlocks();
+    graph->impl->InvalidateAnalysis<compiler::LoopAnalyzer>();
 }
 
 void GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, void (*cb)(AbckitBasicBlock *bb, void *data))

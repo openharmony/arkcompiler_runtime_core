@@ -131,6 +131,7 @@ void ReplaceCallSite(AbckitCoreFunction *method, UserData &userData)
         }
     });
     g_implM->functionSetGraph(method, ctxG);
+    g_impl->destroyGraph(ctxG);
 }
 
 static void CollectAnnoInfo(

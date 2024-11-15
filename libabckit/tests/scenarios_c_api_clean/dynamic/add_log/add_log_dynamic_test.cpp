@@ -272,6 +272,7 @@ TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddLogClean)
     TransformIr(graph, &data);
     g_implM->functionSetGraph(handleMethod, graph);
     g_impl->writeAbc(file, ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_log/add_log_dynamic_modified.abc");
+    g_impl->destroyGraph(graph);
     g_impl->closeFile(file);
 
     output = helpers::ExecuteDynamicAbc(

@@ -208,9 +208,7 @@ AbckitType *d_type = implI->valueGetType(res_d); // val_d->id == ABCKIT_TYPE_ID_
 ```cpp
 AbckitGraph *graph = implI->createGraphFromFunction(method);
 // ...
-implM->functionSetGraph(method, graph); // save with changes
-// or
-impl->destroyGraph(graph); // without changes
+impl->destroyGraph(graph);
 ```
 
 ## _Graph traversal_
