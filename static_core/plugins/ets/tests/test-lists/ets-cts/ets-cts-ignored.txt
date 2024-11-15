@@ -2326,3 +2326,10 @@
 
 # 17053 Cannot create array of nullish tuples
 07.expressions/04.array_literal/array_literal_13.sts
+
+# 20761 no support for package initializer
+13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/init_once/test.sts
+
+# 20763 cyclic dependencies don't cause comile-time error
+13.compilation_units_packages_and_modules/07.compilation_unit_initialization/module/cyclic_dependency/test.sts
+13.compilation_units_packages_and_modules/07.compilation_unit_initialization/package/cyclic_dependency/pkgA/test.sts
