@@ -523,7 +523,7 @@ export function setTimeout(func: () => void): int {
  * @returns int - timer id
  */
 export function setTimeout(func: () => void, delayMs: int): int {
-    startTimer(func as Object, delayMs, true);
+    return startTimer(func as Object, delayMs, true);
 }
 
 /**
