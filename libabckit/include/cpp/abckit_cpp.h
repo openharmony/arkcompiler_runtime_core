@@ -16,6 +16,10 @@
 #ifndef CPP_ABCKIT_H
 #define CPP_ABCKIT_H
 
+#ifdef ABCKIT_TEST_ENABLE_MOCK
+#include "../../tests/mock_headers/mock_c_api.h"
+#endif
+
 #include "./headers/utils.h"
 #include "./headers/graph.h"
 #include "./headers/instruction.h"

@@ -16,59 +16,56 @@
 #ifndef ABCKIT_IMPL_MOCK
 #define ABCKIT_IMPL_MOCK
 
-#include "ir_impl.h"
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/statuses.h"
-#include "logger.h"
-#include "metadata_inspect_impl.h"
+#include "mock_global_values.h"
+
+#include "../../src/ir_impl.h"
+#include "../../include/c/metadata_core.h"
+#include "../../include/c/statuses.h"
+#include "../../src/logger.h"
+#include "../../src/metadata_inspect_impl.h"
+
+#include "../../include/c/abckit.h"
 
 #include <cstring>
+#include <gtest/gtest.h>
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define DEFAULT_PATH "abckit.abc"
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-cstyle-cast)
-#define DEFAUIT_FILE ((AbckitFile *)0xdeadffff)
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-cstyle-cast)
-#define DEFAUIT_GRAPH ((AbckitGraph *)0xdeadeeee)
+namespace libabckit::mock {
 
-namespace libabckit {
+// NOLINTBEGIN(readability-identifier-naming)
 
-inline AbckitStatus GetLastErrorMock()
+inline AbckitStatus getLastError()
 {
     LIBABCKIT_IMPLEMENTED;
     return libabckit::statuses::GetLastError();
 }
 
-inline AbckitFile *OpenAbcMock(const char *path)
+inline AbckitFile *openAbc(const char *path)
 {
-    LIBABCKIT_LOG(DEBUG) << "Tested " << LIBABCKIT_FUNC_NAME << "\n";
-    ASSERT(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
-    (void)path;
-    return DEFAUIT_FILE;
+    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
+    return DEFAULT_FILE;
 }
 
-inline void WriteAbcMock(AbckitFile *file, const char *path)
+inline void writeAbc(AbckitFile *file, const char *path)
 {
-    LIBABCKIT_LOG(DEBUG) << "Tested " << LIBABCKIT_FUNC_NAME << "\n";
-    ASSERT(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
-    ASSERT(file == DEFAUIT_FILE);
-    (void)file;
-    (void)path;
+    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
+    EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
-inline void CloseFileMock(AbckitFile *file)
+inline void closeFile(AbckitFile *file)
 {
-    LIBABCKIT_LOG(DEBUG) << "Tested " << LIBABCKIT_FUNC_NAME << "\n";
-    ASSERT(file == DEFAUIT_FILE);
-    (void)file;
+    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
-inline void DestroyGraphMock(AbckitGraph *graph)
+inline void destroyGraph(AbckitGraph *graph)
 {
-    LIBABCKIT_LOG(DEBUG) << "Tested " << LIBABCKIT_FUNC_NAME << "\n";
-    ASSERT(graph == DEFAUIT_GRAPH);
-    (void)graph;
+    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
 }
+
+// NOLINTEND(readability-identifier-naming)
 
 static AbckitApi g_impl = {
     // ========================================
@@ -76,30 +73,30 @@ static AbckitApi g_impl = {
     // ========================================
 
     ABCKIT_VERSION_RELEASE_1_0_0,
-    GetLastErrorMock,
+    getLastError,
 
     // ========================================
     // Inspection API entrypoints
     // ========================================
 
-    OpenAbcMock,
-    WriteAbcMock,
-    CloseFileMock,
+    openAbc,
+    writeAbc,
+    closeFile,
 
     // // ========================================
     // // IR API entrypoints
     // // ========================================
 
-    DestroyGraphMock,
+    destroyGraph,
 };
 
-}  // namespace libabckit
+}  // namespace libabckit::mock
 
 inline extern AbckitApi const *AbckitGetMockApiImpl(AbckitApiVersion version)
 {
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
-            return &libabckit::g_impl;
+            return &libabckit::mock::g_impl;
         default:
             libabckit::statuses::SetLastError(ABCKIT_STATUS_UNKNOWN_API_VERSION);
             return nullptr;

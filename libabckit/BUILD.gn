@@ -78,6 +78,7 @@ group("abckit_tests") {
       ":abckit_documentation",
       ":abckit_status",
       "tests:abckit_gtests_action",
+      "tests:abckit_gtests_mock_action",
       "tests/canary:abckit_canary",
     ]
   }

@@ -26,10 +26,6 @@
 #include <memory>
 #include <vector>
 
-#ifdef ABCKIT_TEST_ENABLE_MOCK
-#include "libabckit/tests/mock_headers/abckit_impl_mock.h"
-#endif
-
 namespace abckit {
 
 class File final : public Resource<AbckitFile *> {
