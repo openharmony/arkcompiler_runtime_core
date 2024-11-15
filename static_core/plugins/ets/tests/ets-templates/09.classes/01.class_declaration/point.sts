@@ -19,7 +19,8 @@ tags: [compile-only]
 ---*/
 
 class Point {
-  public x: double, y: double;
+  public x: double;
+  public y: double;
   public length(): double {
     return (this.x * this.x + this.y * this.y);
   }
