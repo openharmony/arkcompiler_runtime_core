@@ -23,6 +23,48 @@ from arkdb.debug import StopOnPausedType
 from arkdb.logs import RichLogger
 
 
+async def test_for_steps_in_functions(
+    run_and_stop_on_breakpoint: StopOnPausedType,
+    log: RichLogger,
+) -> None:
+    line_number_after_step_into: Final[int] = 6
+    line_number_after_step_over: Final[int] = 7
+    line_number_after_step_out: Final[int] = 12
+    code = """\
+function baz(a: int): int {
+    a = a + 1;
+    return a;
+}
+
+function bar(a: int): int {
+    a = baz(a);
+    a = a + 1;
+    return a;
+}
+
+function foo(a: int): int {
+    a = bar(a);             // #BP
+    a = a + 1;
+    return a;
+}
+
+function main(): int {
+    let a: int = 1;
+    a = foo(a);
+    return 0;
+}
+"""
+    async with run_and_stop_on_breakpoint(code) as paused_step:
+        client = paused_step.client
+
+        paused = await client.step_into()
+        assert paused.call_frames[0].location.line_number == line_number_after_step_into
+        paused = await client.step_over()
+        assert paused.call_frames[0].location.line_number == line_number_after_step_over
+        paused = await client.step_out()
+        assert paused.call_frames[0].location.line_number == line_number_after_step_out
+
+
 @mark.parametrize(
     "start,end_condition,update_statement",
     [
