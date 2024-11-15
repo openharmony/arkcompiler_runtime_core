@@ -561,5 +561,6 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/t
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0038.sts
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0039.sts
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0040.sts
+spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0041.sts
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0086.sts
 ### Issue 19529 end

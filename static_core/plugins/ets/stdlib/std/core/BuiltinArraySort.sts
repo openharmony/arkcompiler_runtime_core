@@ -228,12 +228,12 @@ function test_sortCopy(arr: boolean[]): boolean[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: boolean, r: boolean): boolean {
+function test_sortAllOnCmpFwd_boolean(l: boolean, r: boolean): boolean {
     return ((l) ? 1 : 0) < ((r) ? 1 : 0)
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: boolean, r: boolean): boolean {
+function test_sortAllOnCmpInv_boolean(l: boolean, r: boolean): boolean {
     return ((r) ? 1 : 0) < ((l) ? 1 : 0)
 }
 
@@ -285,15 +285,15 @@ export function test_sortAllOn(arr: boolean[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_boolean`
     if (true) {
         const sorts = new Array<test_SortDataboolean>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_boolean)
         sorts.push(new test_SortDataboolean("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_boolean)
         sorts.push(new test_SortDataboolean("insertion", insertion))
 
         const bcnt = test_sortCopy(arr)
@@ -301,7 +301,7 @@ export function test_sortAllOn(arr: boolean[]) {
         sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_boolean)
         sorts.push(new test_SortDataboolean("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -313,20 +313,20 @@ export function test_sortAllOn(arr: boolean[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
+                    throw new Error("sorts est_sortAllOnCmpFwd_boolean are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_boolean`
     if (true) {
         const sorts = new Array<test_SortDataboolean>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_boolean)
         sorts.push(new test_SortDataboolean("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_boolean)
         sorts.push(new test_SortDataboolean("insertion", insertion))
 
         const bcnt = test_sortCopy(arr)
@@ -334,7 +334,7 @@ export function test_sortAllOn(arr: boolean[]) {
         sorts.push(new test_SortDataboolean("bools cnt()", bcnt))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_boolean)
         sorts.push(new test_SortDataboolean("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -346,7 +346,7 @@ export function test_sortAllOn(arr: boolean[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
+                    throw new Error("sorts est_sortAllOnCmpInv_boolean are not equal: " + sort0.name + ' ' + sortS.name + ' for boolean')
                 }
             }
         }
@@ -962,12 +962,12 @@ function test_sortCopy(arr: byte[]): byte[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: byte, r: byte): boolean {
+function test_sortAllOnCmpFwd_byte(l: byte, r: byte): boolean {
     return l < r
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: byte, r: byte): boolean {
+function test_sortAllOnCmpInv_byte(l: byte, r: byte): boolean {
     return r < l
 }
 
@@ -1030,31 +1030,31 @@ export function test_sortAllOn(arr: byte[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_byte`
     if (true) {
         const sorts = new Array<test_SortDatabyte>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_byte)
         sorts.push(new test_SortDatabyte("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_byte)
         sorts.push(new test_SortDatabyte("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_byte)
         sorts.push(new test_SortDatabyte("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_byte)
         sorts.push(new test_SortDatabyte("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_byte)
         sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_byte)
         sorts.push(new test_SortDatabyte("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -1066,36 +1066,36 @@ export function test_sortAllOn(arr: byte[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
+                    throw new Error("sorts est_sortAllOnCmpFwd_byte are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_byte`
     if (true) {
         const sorts = new Array<test_SortDatabyte>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_byte)
         sorts.push(new test_SortDatabyte("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_byte)
         sorts.push(new test_SortDatabyte("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_byte)
         sorts.push(new test_SortDatabyte("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_byte)
         sorts.push(new test_SortDatabyte("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_byte)
         sorts.push(new test_SortDatabyte("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_byte)
         sorts.push(new test_SortDatabyte("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -1107,7 +1107,7 @@ export function test_sortAllOn(arr: byte[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
+                    throw new Error("sorts est_sortAllOnCmpInv_byte are not equal: " + sort0.name + ' ' + sortS.name + ' for byte')
                 }
             }
         }
@@ -1707,12 +1707,12 @@ function test_sortCopy(arr: short[]): short[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: short, r: short): boolean {
+function test_sortAllOnCmpFwd_short(l: short, r: short): boolean {
     return l < r
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: short, r: short): boolean {
+function test_sortAllOnCmpInv_short(l: short, r: short): boolean {
     return r < l
 }
 
@@ -1772,31 +1772,31 @@ export function test_sortAllOn(arr: short[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_short`
     if (true) {
         const sorts = new Array<test_SortDatashort>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_short)
         sorts.push(new test_SortDatashort("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_short)
         sorts.push(new test_SortDatashort("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_short)
         sorts.push(new test_SortDatashort("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_short)
         sorts.push(new test_SortDatashort("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_short)
         sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_short)
         sorts.push(new test_SortDatashort("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -1808,36 +1808,36 @@ export function test_sortAllOn(arr: short[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
+                    throw new Error("sorts est_sortAllOnCmpFwd_short are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_short`
     if (true) {
         const sorts = new Array<test_SortDatashort>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_short)
         sorts.push(new test_SortDatashort("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_short)
         sorts.push(new test_SortDatashort("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_short)
         sorts.push(new test_SortDatashort("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_short)
         sorts.push(new test_SortDatashort("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_short)
         sorts.push(new test_SortDatashort("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_short)
         sorts.push(new test_SortDatashort("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -1849,7 +1849,7 @@ export function test_sortAllOn(arr: short[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
+                    throw new Error("sorts est_sortAllOnCmpInv_short are not equal: " + sort0.name + ' ' + sortS.name + ' for short')
                 }
             }
         }
@@ -2449,12 +2449,12 @@ function test_sortCopy(arr: int[]): int[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: int, r: int): boolean {
+function test_sortAllOnCmpFwd_int(l: int, r: int): boolean {
     return l < r
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: int, r: int): boolean {
+function test_sortAllOnCmpInv_int(l: int, r: int): boolean {
     return r < l
 }
 
@@ -2514,31 +2514,31 @@ export function test_sortAllOn(arr: int[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_int`
     if (true) {
         const sorts = new Array<test_SortDataint>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_int)
         sorts.push(new test_SortDataint("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_int)
         sorts.push(new test_SortDataint("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_int)
         sorts.push(new test_SortDataint("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_int)
         sorts.push(new test_SortDataint("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_int)
         sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_int)
         sorts.push(new test_SortDataint("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -2550,36 +2550,36 @@ export function test_sortAllOn(arr: int[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
+                    throw new Error("sorts est_sortAllOnCmpFwd_int are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_int`
     if (true) {
         const sorts = new Array<test_SortDataint>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_int)
         sorts.push(new test_SortDataint("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_int)
         sorts.push(new test_SortDataint("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_int)
         sorts.push(new test_SortDataint("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_int)
         sorts.push(new test_SortDataint("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_int)
         sorts.push(new test_SortDataint("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_int)
         sorts.push(new test_SortDataint("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -2591,7 +2591,7 @@ export function test_sortAllOn(arr: int[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
+                    throw new Error("sorts est_sortAllOnCmpInv_int are not equal: " + sort0.name + ' ' + sortS.name + ' for int')
                 }
             }
         }
@@ -3191,12 +3191,12 @@ function test_sortCopy(arr: long[]): long[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: long, r: long): boolean {
+function test_sortAllOnCmpFwd_long(l: long, r: long): boolean {
     return l < r
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: long, r: long): boolean {
+function test_sortAllOnCmpInv_long(l: long, r: long): boolean {
     return r < l
 }
 
@@ -3256,31 +3256,31 @@ export function test_sortAllOn(arr: long[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_long`
     if (true) {
         const sorts = new Array<test_SortDatalong>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_long)
         sorts.push(new test_SortDatalong("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_long)
         sorts.push(new test_SortDatalong("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_long)
         sorts.push(new test_SortDatalong("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_long)
         sorts.push(new test_SortDatalong("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_long)
         sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_long)
         sorts.push(new test_SortDatalong("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -3292,36 +3292,36 @@ export function test_sortAllOn(arr: long[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
+                    throw new Error("sorts est_sortAllOnCmpFwd_long are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_long`
     if (true) {
         const sorts = new Array<test_SortDatalong>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_long)
         sorts.push(new test_SortDatalong("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_long)
         sorts.push(new test_SortDatalong("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_long)
         sorts.push(new test_SortDatalong("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_long)
         sorts.push(new test_SortDatalong("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_long)
         sorts.push(new test_SortDatalong("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_long)
         sorts.push(new test_SortDatalong("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -3333,7 +3333,7 @@ export function test_sortAllOn(arr: long[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
+                    throw new Error("sorts est_sortAllOnCmpInv_long are not equal: " + sort0.name + ' ' + sortS.name + ' for long')
                 }
             }
         }
@@ -3933,12 +3933,12 @@ function test_sortCopy(arr: float[]): float[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: float, r: float): boolean {
+function test_sortAllOnCmpFwd_float(l: float, r: float): boolean {
     return l < r
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: float, r: float): boolean {
+function test_sortAllOnCmpInv_float(l: float, r: float): boolean {
     return r < l
 }
 
@@ -3998,31 +3998,31 @@ export function test_sortAllOn(arr: float[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_float`
     if (true) {
         const sorts = new Array<test_SortDatafloat>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_float)
         sorts.push(new test_SortDatafloat("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_float)
         sorts.push(new test_SortDatafloat("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_float)
         sorts.push(new test_SortDatafloat("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_float)
         sorts.push(new test_SortDatafloat("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_float)
         sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_float)
         sorts.push(new test_SortDatafloat("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -4034,36 +4034,36 @@ export function test_sortAllOn(arr: float[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
+                    throw new Error("sorts est_sortAllOnCmpFwd_float are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_float`
     if (true) {
         const sorts = new Array<test_SortDatafloat>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_float)
         sorts.push(new test_SortDatafloat("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_float)
         sorts.push(new test_SortDatafloat("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_float)
         sorts.push(new test_SortDatafloat("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_float)
         sorts.push(new test_SortDatafloat("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_float)
         sorts.push(new test_SortDatafloat("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_float)
         sorts.push(new test_SortDatafloat("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -4075,7 +4075,7 @@ export function test_sortAllOn(arr: float[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
+                    throw new Error("sorts est_sortAllOnCmpInv_float are not equal: " + sort0.name + ' ' + sortS.name + ' for float')
                 }
             }
         }
@@ -4675,12 +4675,12 @@ function test_sortCopy(arr: double[]): double[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: double, r: double): boolean {
+function test_sortAllOnCmpFwd_double(l: double, r: double): boolean {
     return l < r
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: double, r: double): boolean {
+function test_sortAllOnCmpInv_double(l: double, r: double): boolean {
     return r < l
 }
 
@@ -4740,31 +4740,31 @@ export function test_sortAllOn(arr: double[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_double`
     if (true) {
         const sorts = new Array<test_SortDatadouble>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_double)
         sorts.push(new test_SortDatadouble("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_double)
         sorts.push(new test_SortDatadouble("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_double)
         sorts.push(new test_SortDatadouble("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_double)
         sorts.push(new test_SortDatadouble("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_double)
         sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_double)
         sorts.push(new test_SortDatadouble("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -4776,36 +4776,36 @@ export function test_sortAllOn(arr: double[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
+                    throw new Error("sorts est_sortAllOnCmpFwd_double are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_double`
     if (true) {
         const sorts = new Array<test_SortDatadouble>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_double)
         sorts.push(new test_SortDatadouble("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_double)
         sorts.push(new test_SortDatadouble("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_double)
         sorts.push(new test_SortDatadouble("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_double)
         sorts.push(new test_SortDatadouble("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_double)
         sorts.push(new test_SortDatadouble("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_double)
         sorts.push(new test_SortDatadouble("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -4817,7 +4817,7 @@ export function test_sortAllOn(arr: double[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
+                    throw new Error("sorts est_sortAllOnCmpInv_double are not equal: " + sort0.name + ' ' + sortS.name + ' for double')
                 }
             }
         }
@@ -5417,12 +5417,12 @@ function test_sortCopy(arr: char[]): char[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: char, r: char): boolean {
+function test_sortAllOnCmpFwd_char(l: char, r: char): boolean {
     return l < r
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: char, r: char): boolean {
+function test_sortAllOnCmpInv_char(l: char, r: char): boolean {
     return r < l
 }
 
@@ -5482,31 +5482,31 @@ export function test_sortAllOn(arr: char[]) {
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpFwd`
+    // block for comparator `est_sortAllOnCmpFwd_char`
     if (true) {
         const sorts = new Array<test_SortDatachar>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpFwd_char)
         sorts.push(new test_SortDatachar("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpFwd_char)
         sorts.push(new test_SortDatachar("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpFwd_char)
         sorts.push(new test_SortDatachar("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpFwd_char)
         sorts.push(new test_SortDatachar("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpFwd_char)
         sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpFwd)
+        sort_subarray(just, test_sortAllOnCmpFwd_char)
         sorts.push(new test_SortDatachar("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -5518,36 +5518,36 @@ export function test_sortAllOn(arr: char[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpFwd are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
+                    throw new Error("sorts est_sortAllOnCmpFwd_char are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
                 }
             }
         }
     }
-    // block for comparator `est_sortAllOnCmpInv`
+    // block for comparator `est_sortAllOnCmpInv_char`
     if (true) {
         const sorts = new Array<test_SortDatachar>()
         const bubbled = test_sortCopy(arr)
-        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv)
+        bubbleSort(bubbled, 0, bubbled.length, test_sortAllOnCmpInv_char)
         sorts.push(new test_SortDatachar("bubble", bubbled))
 
         const insertion = test_sortCopy(arr)
-        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv)
+        insertionSort(insertion, 0, insertion.length, test_sortAllOnCmpInv_char)
         sorts.push(new test_SortDatachar("insertion", insertion))
 
         const heaped = test_sortCopy(arr)
-        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv)
+        heapSort(heaped, 0, heaped.length, test_sortAllOnCmpInv_char)
         sorts.push(new test_SortDatachar("heap", heaped))
 
         const quicked = test_sortCopy(arr)
-        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv)
+        quickSortImpl3(quicked, 0, quicked.length, quicked.length, test_sortAllOnCmpInv_char)
         sorts.push(new test_SortDatachar("quick", quicked))
 
         const quickedInsertion = test_sortCopy(arr)
-        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv)
+        quickSortImpl40(quickedInsertion, 0, quickedInsertion.length, quickedInsertion.length, test_sortAllOnCmpInv_char)
         sorts.push(new test_SortDatachar("quick with insertion", quickedInsertion))
 
         const just = test_sortCopy(arr)
-        sort_subarray(just, test_sortAllOnCmpInv)
+        sort_subarray(just, test_sortAllOnCmpInv_char)
         sorts.push(new test_SortDatachar("sort()", just))
 
         let sort0 = sorts.at(0)!
@@ -5559,7 +5559,7 @@ export function test_sortAllOn(arr: char[]) {
                     test_printArr(sort0.arr, 0, arr.length)
                     console.println(sortS.name + ': ')
                     test_printArr(sortS.arr, 0, arr.length)
-                    throw new Error("sorts est_sortAllOnCmpInv are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
+                    throw new Error("sorts est_sortAllOnCmpInv_char are not equal: " + sort0.name + ' ' + sortS.name + ' for char')
                 }
             }
         }
