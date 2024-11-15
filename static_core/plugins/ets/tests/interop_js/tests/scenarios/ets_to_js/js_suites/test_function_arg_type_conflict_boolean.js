@@ -20,6 +20,6 @@ const functionArgTypeConflictEts = etsMod.getFunction('functionArgTypeConflictBo
 
 {
 	let result = functionArgTypeConflictEts();
-	ASSERT_TRUE(result instanceof Boolean);
+	ASSERT_TRUE(typeof result === 'boolean');
 	ASSERT_TRUE(result.valueOf());
 }
