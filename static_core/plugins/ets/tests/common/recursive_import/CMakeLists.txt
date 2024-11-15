@@ -35,7 +35,6 @@ add_dependencies(recursive_import recursive_import_4)
 run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/case_5_main-is-not-part-of-circle/foo0.sts ${CMAKE_CURRENT_BINARY_DIR}/case_5_main-is-not-part-of-circle recursive_import_5 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/case_5_main-is-not-part-of-circle/foo1.sts;${CMAKE_CURRENT_SOURCE_DIR}/case_5_main-is-not-part-of-circle/foo2.sts;${CMAKE_CURRENT_SOURCE_DIR}/case_5_main-is-not-part-of-circle/foo3.sts)
 add_dependencies(recursive_import recursive_import_5)
 
-# uncomment when internal issue: #18780 is resolved
-# run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/recursive_import_binds_all.sts ${CMAKE_CURRENT_BINARY_DIR} recursive_import_binds_all
-#                  EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/packages/recursive/package_module_1.sts;${CMAKE_CURRENT_SOURCE_DIR}/packages/recursive/subpackage/subpackage_module_1.sts
-# )
+run_int_ets_code(${CMAKE_CURRENT_SOURCE_DIR}/recursive_import_binds_all.sts ${CMAKE_CURRENT_BINARY_DIR} recursive_import_binds_all
+                 EXPORT_FILES ${CMAKE_CURRENT_SOURCE_DIR}/packages/recursive/package_module_1.sts;${CMAKE_CURRENT_SOURCE_DIR}/packages/recursive/subpackage/subpackage_module_1.sts
+)
