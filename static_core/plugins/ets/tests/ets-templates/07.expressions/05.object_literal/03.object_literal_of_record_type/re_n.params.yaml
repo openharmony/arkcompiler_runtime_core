@@ -14,22 +14,42 @@
 ---
 cases:
     - use: |-
-          let a: Record< 1|2|3|4|5, number> = {
-              1: 1,
-              2: 2,
-              3: 3,
-              4: 4,
-              5: 5,
-              6: 6
-          } // CTE, extra key
+          let a: Record< "1"|"2"|"3"|"4"|"5", number> = {
+              "1": 1,
+              "2": 2,
+              "3": 3,
+              "4": 4,
+              "5": 5,
+              "6": 6
+          } // CTE, extra key "6"
 
     - use: |-
-          let a: Record< 1|2|3|4|5, number> = {
+          let a: Record< "1"|"2"|"3"|"4"|"5", number> = {
+              "1": 1,
+              "2": 2,
+              "3": 3,
+              "4": 4,
+          } // CTE, missing key "5"
+
+    - use: |-
+          let a: Record<string, number> = {
+              "1": 1,
+              "2": 2,
+              null: 3,
+          } // CTE, wrong key
+
+    - use: |-
+          let a: Record<string, number> = {
+              "1": 1,
+              "2": 2,
+              undefined: 3,
+          } // CTE, wrong key
+
+    - use: |-
+          let a: Record<string, number> = {
               1: 1,
-              2: 2,
-              3: 3,
-              4: 4,
-          } // CTE, missing key
+              "a": 2,
+          } // CTE, wrong key type
 
     - use: |-
           let a: Record<number, number> = {
@@ -41,7 +61,10 @@ cases:
           let a: Record<number | boolean, number> = {
               1: 1,
               true: 2,
-          } // CTE, wrong key type
+          } // CTE, wrong key type, boolean is not allowed
+
+    - use: |-
+          let a: Record<Error, string> = {} // CTE, wrong key type, Error is not allowed
 
     - use: |-
           let a: Record<number, number> = {
@@ -50,21 +73,64 @@ cases:
           } // CTE, wrong value type
 
     - use: |-
+          let a: Record<number, string> = {
+              1: "1",
+              2: "x",
+              3: null,
+          } // CTE, wrong value type
+
+    - use: |-
+          let a: Record<number, string> = {
+              1: "1",
+              2: "x",
+              3: undefined,
+          } // CTE, wrong value type
+
+    - use: |-
+          let a: Record<string, number> = {
+              "1": 1,
+              "1": 2,
+              "2": 3,
+          } // CTE, duplicate key
+
+    - use: |-
           let a: Record<number, number> = {
               1: 1,
               1: 2,
               2: 3,
-          } // CTE, dup key
+          } // CTE, duplicate key
 
     - use: |-
           let a: Record<number, number> = {
               1: 1,
               2: 3,
           }
-          let b = a["a"]  // CTE, wrong key type
+          let b = a["1"]  // CTE, wrong key type
 
     - use: |-
-          let a: Record<-10 | 2 | number, string> = {
+          let a: Record<string, number> = {
+              "1": 1,
+              "2": 3,
+          }
+          let b = a[1]  // CTE, wrong key type
+
+    - use: |-
+          let a: Record<number | "10" | "2", string> = {
               1: "Jan",
-              -10: "Dec",
-          }  // CTE, missing key
+              2: "Feb",
+              "10": "Dec",
+          }  // CTE, missing required key
+
+    - use: |-
+          let a: Record<"10" | "1", string> = {
+              "1": "Jan",
+              "10": "Dec",
+          }
+          let b = a["2"]  // CTE, wrong key
+
+    - use: |-
+          let a: Record<"10" | "1", string> = {
+              "1": "Jan",
+              "10": "Dec",
+          }
+          let b = a[2]  // CTE, wrong key

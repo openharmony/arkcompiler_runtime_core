@@ -20,17 +20,11 @@ desc: >-
 tags: [compile-only, negative]
 ---*/
 
-function test(b: boolean) {
-    if (!b) {
-        throw new Error()
-    }
-}
-
 function refNullish(): Record<string, number>|undefined {
     let res: Record<string, number>|undefined = { "magic": 42 }
     return res
 }
 
 function main() {
-    test(refNullish()["magic"] == 42) // CTE expected
+    assert(refNullish()["magic"] == 42) // CTE expected
 }

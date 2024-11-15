@@ -14,41 +14,97 @@
 ---
 cases:
     - use: |-
+          // empty records
           let a: Record<number, string> = {}
           let b: Record<number, string> = {}
-          assert a instanceof Record
-          assert b instanceof record
-          assert a != b
+          assert(a instanceof Record)
+          assert(b instanceof Record)
+          assert(a != b)
 
     - use: |-
+          // number to string
           let a: Record<number, string> = {
-              1: "Jan",
-              2: "Feb",
-              -10: "Dec",
+              0: "Zero",
+              1: "One",
+              3.14159: "PI",
           }
-          assert a[1] == "Jan"
-          assert a[2] == "Feb"
-          assert a[-10] == "Dec"
+          assert(a[0] == "Zero")
+          assert(a[1] == "One")
+          assert(a[3.14159] == "PI")
+          assert(a[42] == undefined)
           a = {}
-          assert a[1] == undefined
-          assert a[2] == undefined
-          assert a[-10] == undefined
+          assert(a[0] == undefined)
+          assert(a[1] == undefined)
+          assert(a[3.14159] == undefined)
+
+    - decl: |-
+          function foo(p: string): string {
+              return p + p
+          }
+      use: |-
+          // number to string expression
+          let a: Record<number, string> = {
+              0: foo("Zero"),
+              1: foo("One"),
+              3.14159: "P" + foo("I"),
+          }
+          assert(a[0] == "ZeroZero")
+          assert(a[1] == "OneOne")
+          assert(a[3.14159] == "PII")
+          assert(a[42] == undefined)
+          a = {}
+          assert(a[0] == undefined)
+          assert(a[1] == undefined)
+          assert(a[3.14159] == undefined)
 
     - use: |-
-          let a: Record<-10 | 2 | number, string> = {
-              1: "Jan",
-              2: "Feb",
-              -10: "Dec",
+          // string to number
+          let a: Record<string, number> = {
+              "Zero": 0b0,
+              "One": 1.0,
+              "Two": 2e00,
+              "Minus PI": -3.14159,
           }
-          assert a[1] == "Jan"
-          assert a[2] == "Feb"
-          assert a[-10] == "Dec"
+          assert(a["Zero"] == 0)
+          assert(a["One"] == 1)
+          assert(a["Two"] == 2)
+          assert(a["Minus PI"] == -3.14159)
+          assert(a["PI"] == undefined)
           a = {}
-          assert a[1] == undefined
-          assert a[2] == undefined
-          assert a[-10] == undefined
+          assert(a["Zero"] == undefined)
+          assert(a["One"] == undefined)
+          assert(a["Two"] == undefined)
+          assert(a["Minus PI"] == undefined)
 
     - use: |-
+          // string literals to number
+          let a: Record<"Zero" | "One" | "Two", number> = {
+              "Zero": 0b0,
+              "One": 1.0,
+              "Two": 2e00,
+          }
+          assert(a["Zero"] == 0)
+          assert(a["One"] == 1)
+          assert(a["Two"] == 2)
+
+    - use: |-
+          // string literals and string to number
+          let a: Record<string | "Zero" | "One" | "Two", number> = {
+              "": 0x00,
+              " ": 0x01,
+              "One": 1.0,
+              "Two": 2e00,
+              "PI constant value": 3.14159,
+          }
+          assert(a["Zero"] == undefined)
+          assert(a["One"] == 1)
+          assert(a["Two"] == 2)
+          assert(a[""] == 0)
+          assert(a[" "] == 1)
+          assert(a["PI constant value"] == 3.14159)
+
+    - use: |-
+          // string literals to Record
           let a: Record<"a" | "b" | "c", Record<number, boolean>> = {
               "c": { 1: false,
                      42: true,
@@ -58,26 +114,68 @@ cases:
                      42: false,
               },
           }
-          assert a["a"][1]
-          assert a["b"][123] === undefined
-          assert a["c"][42]
+          assert(a["a"][1]!)
+          assert(!(a["a"][42]!))
+          assert(a["b"][123] == undefined)
+          assert(!(a["c"][1]!))
+          assert(a["c"][42]!)
+
+    - use: |-
+          // string to Record
+          let a: Record<string, Record<number, boolean>> = {
+              "c": { 1: false,
+                     42: true,
+              },
+              "b": {},
+          }
+          assert(a["a"]![1]!)
+          assert(!(a["a"]![42]!))
+          assert(a["b"]![123] == undefined)
+          assert(!(a["c"]![1]!))
+          assert(a["c"]![42]!)
+
+    - use: |-
+          // short to Error
+          let a: Record<Short, Error> = {
+              1: new Error,
+              22: new Error,
+              333: new Error,
+          }
+          assert(a[1] instanceof Error && a[22] instanceof Error && a[333] instanceof Error)
+          assert(a[1] != a[22] && a[1] != a[333])
+          assert(a[2] == undefined)
+
+    - use: |-
+          // byte to union
+          let a: Record<Byte, Double | Boolean | null> = {
+              0: 3.14159,
+              50: false,
+              100: null,
+              127: 127.0,
+          }
+          assert(a[0] == 3.14159)
+          assert(a[50] == false)
+          assert(a[100] == null)
+          assert(a[127] == 127.0)
+          assert(a[1] == undefined)
 
     - decl: |-
+          // union to union
           enum Color { Red, Green, Blue }
-          type Keys = "A" | 1 | "B" | 2
+          type Keys = "A" | "B"
           type Values = Color | string
       use: |-
           let a: Record<Keys, Values> = {
-              1: Color.Red,
-              2: "green",
               "A" : Color.Blue,
               "B": "green"
             }
-          assert a[1] == Color.Red
-          assert a[2] == a["B"]
-          assert a["A"] == Color.Blue
+          assert(a["A"] == Color.Blue)
+          assert(a["B"] == "green")
+          a["A"] = Color.Red
+          assert(a["A"] == Color.Red)
 
     - decl: |-
+          // infer Record type from function signature
           type R = Record<string, string>
           function foo(p: R): R {
               if (p["A"] == "B") {
@@ -87,18 +185,84 @@ cases:
               }
           }
       use: |-
-          assert foo({ "A": "B" })["exitCode"] == "0"
-          assert foo({ "A": "C" })["exitCode"] == "1"
+          assert(foo({ "A": "B" })["exitCode"] == "0")
+          assert(foo({ "A": "C" })["exitCode"] == "1")
 
-    - decl: |-
-          type func = (p: number) => R
-          type R = Record<number, func | boolean>
-          function foo(p: number): R {
-              if (p == 0) {
-                  return { p: true }
-              } else {
-                  return { p: foo }
-              }
+    - use: |-
+          // string to array
+          let r: Record<string, string[]> = {
+              "\u0000": [""],
+              "\u0001": ["", "1"],
+              "\u0002": ["", "1", "2"],
+              "wrong key": [] as string[]
           }
-      use: |-
-          assert foo(1)[1](2)[2](3)[3](0)[0]
+          assert(r["\u0000"]![0] == "")
+          assert(r["\u0001"]![0] == "")
+          assert(r["\u0001"]![1] == "1")
+          assert(r["\u0002"]![0] == "")
+          assert(r["\u0002"]![1] == "1")
+          assert(r["\u0002"]![2] == "2")
+          assert(r["wrong key"]!.length == 0)
+          assert(r["bad key"] == undefined)
+
+    - use: |-
+          // string literals to tuple
+          let r: Record<"Q"|"W"|"E", [number, bigint]> = {
+              "Q": [1e0, 1n],
+              "W": [1e10, 111111111n],
+              "E": [1e20, 111111111111111111n]
+          }
+          assert(r["Q"][0] == 1)
+          assert(r["Q"][1] == 1n)
+          assert(r["W"][0] == 1e10)
+          assert(r["W"][1] == 111111111n)
+          assert(r["E"][0] == 1e20)
+          assert(r["E"][1] == 111111111111111111n)
+
+    - use: |-
+          // string literals to function
+          let r: Record<"add" | "mul", (p: number) => number> = {
+              "add": (p: number): number => p + p,
+              "mul": (p: number): number => p * p
+          }
+          assert(r["add"](42) == 84)
+          assert(r["mul"](12) == 144)
+          r["add"] = (p: number): number => p + p + p
+          assert(r["add"](3) == 9)
+
+    - use: |-
+          // string to function
+          let r: Record<string, (p: number) => number> = {
+              "add": (p: number): number => p + p,
+              "mul": (p: number): number => p * p
+          }
+          assert(r["add"]!(42) == 84)
+          assert(r["mul"]!(12) == 144)
+          assert(r["div"] == undefined)
+
+    - use: |-
+          // number to union
+          let r: Record<number, string|double|null|undefined> = {
+              1: "1",
+              2: 2.5,
+              3: null,
+              4: undefined,
+          }
+          assert(r[1] == "1")
+          assert(r[2] == 2.5)
+          assert(r[3] == null)
+          assert(r[4] == undefined)
+          assert(r[5] == undefined)
+
+    - use: |-
+          // string literals to union
+          let r: Record<"1"|"2"|"3"|"4", Char|Boolean|Long|Error> = {
+              "1": c'1',
+              "2": false,
+              "3": Long.MAX_VALUE,
+              "4": new Error()
+          }
+          assert(r["1"] == c'1')
+          assert(r["2"] == false)
+          assert(r["3"] == Long.MAX_VALUE)
+          assert(r["4"] instanceof Error)

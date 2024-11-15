@@ -753,17 +753,28 @@
 07.expressions/05.object_literal/02.object_literal_of_interface_type/spec_ex1.sts
 # end of es2panda fails
 
-# es2panda fails:#13844 7.6.3 Object Literal of Record Type is not implemented
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_0.sts
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_1.sts
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_6.sts
+# 20309 Cannot infer Record value type in spec example
 07.expressions/05.object_literal/03.object_literal_of_record_type/spec_ex2.sts
-# end of es2panda fails
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_7.sts
 
-#19926
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_2.sts
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_3.sts
-07.expressions/05.object_literal/03.object_literal_of_record_type/re_4.sts
+# 20328 Unexpected CTE in Record indexing expression: Value is possibly nullish
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_6.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_13.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_14.sts
+
+# XXXXX Cannot use Byte, Short values in K
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_8.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_9.sts
+
+# 20548 SegFault when use an expression in Record value
+07.expressions/12.indexing_expression/02.record_indexing_expression/ind_0.sts
+
+# 20547 Unexpected token '#' in auxiliary_tmp.sts
+07.expressions/05.object_literal/03.object_literal_of_record_type/re_10.sts
+
+# 20330 Compiler doesn't respect type argument for Array<T>
+05.generics/03.utility_types/04.record_utility_type/rec_3.sts
+05.generics/03.utility_types/04.record_utility_type/rec_4.sts
 
 # es2panda fails: panda#14140
 17.experimental_features/01.character_type_and_literals/02.character_types_and_operations/ch_n_0.sts
