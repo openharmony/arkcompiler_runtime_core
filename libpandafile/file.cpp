@@ -37,6 +37,7 @@
 #include "utils/utf.h"
 #include "utils/span.h"
 #include "zip_archive.h"
+#include "zlib.h"
 
 namespace panda::panda_file {
 // NOLINTNEXTLINE(readability-identifier-naming, modernize-avoid-c-arrays)
@@ -762,4 +763,37 @@ File::EntityId File::GetClassIdFromClassHashTable(const uint8_t *mutf8_name) con
     return File::EntityId();
 }
 
+bool File::ValidateChecksum() const
+{
+    if (UNLIKELY(GetHeader() == nullptr)) {
+        LOG(FATAL, PANDAFILE) << "Header pointer is nullptr. Abc file is corrupted";
+    }
+    constexpr uint32_t MAGIC_SIZE = 8U;
+    constexpr uint32_t CHECKSUM_SIZE = 4U;
+    // The checksum calculation does not include magic or checksum, so the offset needs to be added
+    constexpr uint32_t FILE_CONTENT_OFFSET = MAGIC_SIZE + CHECKSUM_SIZE;
+    uint32_t file_size = GetHeader()->file_size;
+    uint32_t cal_checksum = adler32(1, GetBase() + FILE_CONTENT_OFFSET, file_size - FILE_CONTENT_OFFSET);
+    return GetHeader()->checksum == cal_checksum;
+}
+
+void File::ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::string_view& tag) const
+{
+    if (UNLIKELY(cond)) {
+#ifndef SUPPORT_KNOWN_EXCEPTION
+        bool is_checksum_match = ValidateChecksum();
+        if (!is_checksum_match) {
+            LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted.";
+        }
+
+        if (!tag.empty()) {
+            LOG(FATAL, PANDAFILE) << msg << ", from method: " << tag;
+        } else {
+            LOG(FATAL, PANDAFILE) << msg;
+        }
+#else
+        throw helpers::FileAccessException(msg);
+#endif
+    }
+}
 }  // namespace panda::panda_file
