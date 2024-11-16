@@ -41,6 +41,21 @@ public:
     std::vector<uint8_t> literal_id_in_test_constant_pool = {0x0f, 0x00};
     // The known jump instruction in the abc file
     std::vector<uint8_t> jump_ins_id_in_test_constant_pool = {0x4f, 0x0c};
+
+    void TestVerifierWithAbcVersionTampered(const std::string &file_name,
+                                            std::array<uint8_t, panda_file::File::VERSION_SIZE> &original_version)
+    {
+        panda::verifier::Verifier ver {file_name};
+
+        ver.CollectIdInfos();
+        if (panda_file::IsVersionLessOrEqual(original_version, panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION)) {
+            EXPECT_TRUE(ver.VerifyConstantPoolIndex());
+            EXPECT_TRUE(ver.VerifyConstantPool());
+        } else {
+            EXPECT_TRUE(ver.VerifyConstantPoolIndex());
+            EXPECT_TRUE(ver.VerifyConstantPool());
+        }
+    }
 };
 
 /**
@@ -105,6 +120,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
     std::ifstream base_file_02(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file_02.is_open());
     std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    std::array<uint8_t, panda_file::File::VERSION_SIZE> version {buffer_0[12], buffer_0[13],
+                                                                 buffer_0[14], buffer_0[15]};
     buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
     buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
     buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
@@ -113,12 +130,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_002, TestSize.Level1)
     GenerateModifiedAbc(buffer_0, target_file_name_02);
     base_file_02.close();
 
-    {
-        panda::verifier::Verifier ver {target_file_name_02};
-        ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
-        EXPECT_FALSE(ver.VerifyConstantPool());
-    }
+    TestVerifierWithAbcVersionTampered(target_file_name_02, version);
 }
 
 /**
@@ -168,6 +180,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
     std::ifstream base_file_02(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file_02.is_open());
     std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    std::array<uint8_t, panda_file::File::VERSION_SIZE> version {buffer_0[12], buffer_0[13],
+                                                                 buffer_0[14], buffer_0[15]};
     buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
     buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
     buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
@@ -176,11 +190,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_003, TestSize.Level1)
     GenerateModifiedAbc(buffer_0, target_file_name_02);
     base_file_02.close();
 
-    {
-        panda::verifier::Verifier ver {target_file_name_02};
-        ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
-    }
+    TestVerifierWithAbcVersionTampered(target_file_name_02, version);
 }
 
 /**
@@ -230,6 +240,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
     std::ifstream base_file_02(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file_02.is_open());
     std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    std::array<uint8_t, panda_file::File::VERSION_SIZE> version {buffer_0[12], buffer_0[13],
+                                                                 buffer_0[14], buffer_0[15]};
     buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
     buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
     buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
@@ -238,11 +250,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_004, TestSize.Level1)
     GenerateModifiedAbc(buffer_0, target_file_name_02);
     base_file_02.close();
 
-    {
-        panda::verifier::Verifier ver {target_file_name_02};
-        ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
-    }
+    TestVerifierWithAbcVersionTampered(target_file_name_02, version);
 }
 
 /**
@@ -291,6 +299,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
     std::ifstream base_file_02(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file_02.is_open());
     std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    std::array<uint8_t, panda_file::File::VERSION_SIZE> version {buffer_0[12], buffer_0[13],
+                                                                 buffer_0[14], buffer_0[15]};
     buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
     buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
     buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
@@ -299,11 +309,7 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_006, TestSize.Level1)
     GenerateModifiedAbc(buffer_0, target_file_name_02);
     base_file_02.close();
 
-    {
-        panda::verifier::Verifier ver {target_file_name_02};
-        ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
-    }
+    TestVerifierWithAbcVersionTampered(target_file_name_02, version);
 }
 
 /**
@@ -390,6 +396,8 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
     std::ifstream base_file_02(base_file_name, std::ios::binary);
     EXPECT_TRUE(base_file_02.is_open());
     std::vector<unsigned char> buffer_0(std::istreambuf_iterator<char>(base_file_02), {});
+    std::array<uint8_t, panda_file::File::VERSION_SIZE> version {buffer_0[12], buffer_0[13],
+                                                                 buffer_0[14], buffer_0[15]};
     buffer_0[12] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[0]);
     buffer_0[13] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[1]);
     buffer_0[14] = static_cast<unsigned char>(panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION[2]);
@@ -401,7 +409,11 @@ HWTEST_F(VerifierConstantPool, verifier_constant_pool_008, TestSize.Level1)
     {
         panda::verifier::Verifier ver {target_file_name_02};
         ver.CollectIdInfos();
-        EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+        if (panda_file::IsVersionLessOrEqual(version, panda_file::LAST_CONTAINS_LITERAL_IN_HEADER_VERSION)) {
+            EXPECT_TRUE(ver.VerifyConstantPoolIndex());
+        } else {
+            EXPECT_FALSE(ver.VerifyConstantPoolIndex());
+        }
     }
 }
 

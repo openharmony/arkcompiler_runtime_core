@@ -48,6 +48,8 @@ foreach(file, verifier_test_js_files) {
     src_js = rebase_path(test_js)
     dst_file = rebase_path(test_abc)
 
+    extra_args = [ "--source-file=${file}" ]
+
     in_puts = [ test_js ]
     out_puts = [ test_abc ]
   }
@@ -60,6 +62,8 @@ foreach(file, verifier_test_ts_files) {
 
     src_js = rebase_path(test_ts)
     dst_file = rebase_path(test_abc)
+
+    extra_args = [ "--source-file=${file}" ]
 
     in_puts = [ test_ts ]
     out_puts = [ test_abc ]
