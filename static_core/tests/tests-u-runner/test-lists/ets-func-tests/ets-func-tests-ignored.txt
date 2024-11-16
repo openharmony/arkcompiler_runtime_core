@@ -564,3 +564,5 @@ spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/t
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0041.sts
 spec/15.Semantic_Rules/Compatibility_Features/Extended_Conditional_Expressions/test-ext-cond-expr-false-0086.sts
 ### Issue 19529 end
+# Issue 20687
+spec/05.Generics/tuple_as_generic_args_0030.sts
