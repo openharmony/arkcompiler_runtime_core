@@ -26,6 +26,16 @@
 
 namespace abckit::core {
 
+inline std::string_view Module::GetName() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitString *cString = conf->cIapi_->moduleGetName(GetView());
+    CheckError(conf);
+    std::string_view view = conf->cIapi_->abckitStringToString(cString);
+    CheckError(conf);
+    return view;
+}
+
 inline std::vector<core::Class> Module::GetClasses() const
 {
     std::vector<core::Class> classes;
@@ -90,6 +100,48 @@ inline std::vector<core::ExportDescriptor> Module::GetExports() const
     CheckError(GetApiConfig());
 
     return exports;
+}
+
+inline void Module::EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    using EnumerateData = std::pair<const std::function<bool(core::Function)> &, const ApiConfig *>;
+    EnumerateData enumerateData(cb, GetApiConfig());
+
+    conf->cIapi_->moduleEnumerateTopLevelFunctions(GetView(), &enumerateData, [](AbckitCoreFunction *func, void *data) {
+        const std::function<bool(core::Function)> &callback = static_cast<EnumerateData *>(data)->first;
+        auto *config = static_cast<EnumerateData *>(data)->second;
+        return callback(core::Function(func, config));
+    });
+    CheckError(conf);
+}
+
+inline void Module::EnumerateClasses(const std::function<bool(core::Class)> &cb) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    using EnumerateData = std::pair<const std::function<bool(core::Class)> &, const ApiConfig *>;
+    EnumerateData enumerateData(cb, GetApiConfig());
+
+    conf->cIapi_->moduleEnumerateClasses(GetView(), &enumerateData, [](AbckitCoreClass *klass, void *data) {
+        const std::function<bool(core::Class)> &callback = static_cast<EnumerateData *>(data)->first;
+        auto *config = static_cast<EnumerateData *>(data)->second;
+        return callback(core::Class(klass, config));
+    });
+    CheckError(conf);
+}
+
+inline void Module::EnumerateImports(const std::function<bool(core::ImportDescriptor)> &cb) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    using EnumerateData = std::pair<const std::function<bool(core::ImportDescriptor)> &, const ApiConfig *>;
+    EnumerateData enumerateData(cb, GetApiConfig());
+
+    conf->cIapi_->moduleEnumerateImports(GetView(), &enumerateData, [](AbckitCoreImportDescriptor *func, void *data) {
+        const std::function<bool(core::ImportDescriptor)> &callback = static_cast<EnumerateData *>(data)->first;
+        auto *config = static_cast<EnumerateData *>(data)->second;
+        return callback(core::ImportDescriptor(func, config));
+    });
+    CheckError(conf);
 }
 
 }  // namespace abckit::core

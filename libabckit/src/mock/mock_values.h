@@ -16,12 +16,6 @@
 #ifndef ABCKIT_MOCK_GLOBAL_VALUES
 #define ABCKIT_MOCK_GLOBAL_VALUES
 
-#include <queue>
-#include <string>
-#include <iostream>
-
-#include "libpandabase/macros.h"
-
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DEFAULT_PATH "abckit.abc"
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -88,18 +82,5 @@
 #define DEFAULT_TYPE ((AbckitType *)0xdead0021)
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage, cppcoreguidelines-pro-type-cstyle-cast)
 #define DEFAULT_FILE_VERSION ((AbckitFileVersion)0xdead0022)
-
-// CC-OFFNXT(G.NAM.03) false positive
-static std::queue<std::string> g_calledFuncs;
-
-inline bool CheckMockedApi(const std::string &apiName)
-{
-    if (g_calledFuncs.empty()) {
-        return false;
-    }
-    auto apiStr = std::move(g_calledFuncs.front());
-    g_calledFuncs.pop();
-    return apiStr == apiName;
-}
 
 #endif  // ABCKIT_MOCK_GLOBAL_VALUES

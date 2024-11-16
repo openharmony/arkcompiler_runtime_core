@@ -117,7 +117,6 @@ public:
 
 protected:
     explicit ApiConfig(std::unique_ptr<IErrorHandler> eh)
-#ifndef ABCKIT_TEST_ENABLE_MOCK
         : cApi_(AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cIapi_(AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cMapi_(AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
@@ -127,17 +126,6 @@ protected:
           cDynapi_(AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cStatapi_(AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           eh_(std::move(eh)) {};
-#else
-        : cApi_(AbckitGetMockApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          cIapi_(AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          cMapi_(AbckitGetModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          cArktsIapi_(AbckitGetArktsInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          cArktsMapi_(AbckitGetArktsModifyApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          cGapi_(AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          cDynapi_(AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          cStatapi_(AbckitGetIsaApiStaticImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
-          eh_(std::move(eh)) {};
-#endif
 
 private:
     // NOTE(nsizov): make getters for these pointers

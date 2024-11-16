@@ -13,18 +13,10 @@
  * limitations under the License.
  */
 
-#define ABCKIT_TEST_ENABLE_MOCK
-
-#include "libabckit/include/cpp/abckit_cpp.h"
-
-#include "helpers/helpers_runtime.h"
-#include "helpers/helpers.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "include/cpp/abckit_cpp.h"
+#include "../check_mock.h"
 
 #include <gtest/gtest.h>
-#include <string_view>
 
 namespace libabckit::test {
 
@@ -35,11 +27,11 @@ TEST_F(LibAbcKitCppMockTest, CppTestMockFile)
 {
     {
         abckit::File file("abckit.abc");
-        ASSERT(CheckMockedApi("openAbc"));
+        ASSERT_TRUE(CheckMockedApi("openAbc"));
         file.WriteAbc("abckit.abc");
-        ASSERT(CheckMockedApi("writeAbc"));
+        ASSERT_TRUE(CheckMockedApi("writeAbc"));
     }
-    ASSERT(CheckMockedApi("closeFile"));
+    ASSERT_TRUE(CheckMockedApi("closeFile"));
 }
 
 }  // namespace libabckit::test

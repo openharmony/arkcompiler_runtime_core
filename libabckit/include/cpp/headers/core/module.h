@@ -28,6 +28,8 @@ class Module : public View<AbckitCoreModule *> {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     friend class abckit::File;
+    friend class abckit::core::Function;
+    friend class abckit::core::ImportDescriptor;
 
 public:
     Module(const Module &other) = default;
@@ -36,12 +38,16 @@ public:
     Module &operator=(Module &&other) = default;
     ~Module() override = default;
 
+    std::string_view GetName() const;
     std::vector<core::Class> GetClasses() const;
     std::vector<core::Function> GetTopLevelFunctions() const;
     std::vector<core::AnnotationInterface> GetAnnotationInterfaces() const;
     std::vector<core::Namespace> GetNamespaces() const;
     std::vector<core::ImportDescriptor> GetImports() const;
     std::vector<core::ExportDescriptor> GetExports() const;
+    void EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
+    void EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
+    void EnumerateImports(const std::function<bool(core::ImportDescriptor)> &cb) const;
 
     // Core API's.
     // ...

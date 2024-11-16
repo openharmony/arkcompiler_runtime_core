@@ -69,9 +69,24 @@ inline std::vector<Instruction> BasicBlock::GetInstructions() const
     return insts;
 }
 
+inline Instruction BasicBlock::GetFirstInst() const
+{
+    auto *conf = GetApiConfig();
+    auto *inst = conf->cGapi_->bbGetFirstInst(GetView());
+    CheckError(conf);
+    return Instruction(inst, conf);
+}
+
 inline BasicBlock &BasicBlock::AddInstFront(const Instruction &inst)
 {
     GetApiConfig()->cGapi_->bbAddInstFront(GetView(), inst.GetView());
+    CheckError(GetApiConfig());
+    return *this;
+}
+
+inline BasicBlock &BasicBlock::AddInstBack(const Instruction &inst)
+{
+    GetApiConfig()->cGapi_->bbAddInstBack(GetView(), inst.GetView());
     CheckError(GetApiConfig());
     return *this;
 }

@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef ABCKIT_IMPL_MOCK
-#define ABCKIT_IMPL_MOCK
+#include "mock/abckit_mock.h"
+#include "mock/mock_values.h"
 
-#include "mock_global_values.h"
+#include "include/c/metadata_core.h"
+#include "include/c/statuses.h"
+#include "include/c/abckit.h"
 
-#include "../../src/ir_impl.h"
-#include "../../include/c/metadata_core.h"
-#include "../../include/c/statuses.h"
-#include "../../src/logger.h"
-#include "../../src/metadata_inspect_impl.h"
-
-#include "../../include/c/abckit.h"
-
-#include <cstring>
 #include <gtest/gtest.h>
 
 namespace libabckit::mock {
@@ -35,33 +28,32 @@ namespace libabckit::mock {
 
 inline AbckitStatus getLastError()
 {
-    LIBABCKIT_IMPLEMENTED;
-    return libabckit::statuses::GetLastError();
+    return ABCKIT_STATUS_NO_ERROR;
 }
 
 inline AbckitFile *openAbc(const char *path)
 {
-    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    g_calledFuncs.push(__func__);
     EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
     return DEFAULT_FILE;
 }
 
 inline void writeAbc(AbckitFile *file, const char *path)
 {
-    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    g_calledFuncs.push(__func__);
     EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
 inline void closeFile(AbckitFile *file)
 {
-    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
 inline void destroyGraph(AbckitGraph *graph)
 {
-    g_calledFuncs.push(LIBABCKIT_FUNC_NAME);
+    g_calledFuncs.push(__func__);
     EXPECT_TRUE(graph == DEFAULT_GRAPH);
 }
 
@@ -83,24 +75,16 @@ static AbckitApi g_impl = {
     writeAbc,
     closeFile,
 
-    // // ========================================
-    // // IR API entrypoints
-    // // ========================================
+    // ========================================
+    // IR API entrypoints
+    // ========================================
 
     destroyGraph,
 };
 
 }  // namespace libabckit::mock
 
-inline extern AbckitApi const *AbckitGetMockApiImpl(AbckitApiVersion version)
+AbckitApi const *AbckitGetMockApiImpl([[maybe_unused]] AbckitApiVersion version)
 {
-    switch (version) {
-        case ABCKIT_VERSION_RELEASE_1_0_0:
-            return &libabckit::mock::g_impl;
-        default:
-            libabckit::statuses::SetLastError(ABCKIT_STATUS_UNKNOWN_API_VERSION);
-            return nullptr;
-    }
+    return &libabckit::mock::g_impl;
 }
-
-#endif
