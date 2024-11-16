@@ -1009,7 +1009,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_015, TestSize.Level1)
 
     ScalarValue insn_order_anno(ScalarValue::Create<panda::pandasm::Value::Type::ANNOTATION>(annotation));
 
-    panda::pandasm::MakeSlotNumberRecord(&program.Value());
     program.Value().record_table.at("R").field_list[0].metadata->SetValue(insn_order_anno);
     auto pf4 = AsmEmitter::Emit(program.Value());
     EXPECT_NE(pf4, nullptr);
@@ -1199,15 +1198,14 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
     auto source = R"(
         .function any foo(any a0) <noimpl>
     )";
+    auto res = p.Parse(source);
+    EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
+
+    std::vector<Program *> progs;
+    progs.push_back(&res.Value());
 
     // api 11
     {
-        auto res = p.Parse(source);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-
-        std::vector<Program *> progs;
-        progs.push_back(&res.Value());
-
         std::string descriptor;
         const std::string filename_api11 = "source_021_api11.abc";
         auto is_emitted = AsmEmitter::EmitPrograms(filename_api11, progs, false, 11);
@@ -1234,12 +1232,6 @@ HWTEST_F(AssemblyEmitterTest, assembly_emitter_test_021, TestSize.Level1)
 
     // api 12
     {
-        auto res = p.Parse(source);
-        EXPECT_EQ(p.ShowError().err, Error::ErrorType::ERR_NONE);
-
-        std::vector<Program *> progs;
-        progs.push_back(&res.Value());
-
         std::string descriptor;
         const std::string filename_api12 = "source_021_api12.abc";
         auto is_emitted = AsmEmitter::EmitPrograms(filename_api12, progs, false, 12);

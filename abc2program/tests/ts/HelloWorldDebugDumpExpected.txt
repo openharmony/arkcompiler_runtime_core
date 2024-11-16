@@ -26,10 +26,6 @@ _GLOBAL_1799 { 10 [ tag_value:2, i32:2, tag_value:5, string:"4newTarget", tag_va
 # ====================
 # RECORDS
 
-.record _ESConcurrentModuleRequestsAnnotation {
-}
-.record.source_file  
-
 .record _ESModuleRecord {
 	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_3278
 }
