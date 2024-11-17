@@ -36,6 +36,7 @@ class GeneralOptions:
     __DEFAULT_VERBOSE_FILTER = VerboseFilter.NEW_FAILURES
     __DEFAULT_QEMU = QemuKind.NONE
     __DEFAULT_GDB_TIMEOUT = 10
+    __DEFAULT_HANDLE_TIMEOUT = False
 
     def __str__(self) -> str:
         return _to_str(self, 1)
@@ -181,6 +182,11 @@ class GeneralOptions:
     def gdb_timeout(self) -> int:
         return self.__DEFAULT_GDB_TIMEOUT
 
+    @cached_property
+    @value(yaml_path="general.handle-timeout", cli_name="handle_timeout", cast_to_type=_to_bool)
+    def handle_timeout(self) -> bool:
+        return self.__DEFAULT_HANDLE_TIMEOUT
+
     coverage = CoverageOptions()
 
     def get_command_line(self) -> str:
@@ -210,6 +216,8 @@ class GeneralOptions:
             self.qemu_cmd_line,
             self.__to_cli_with_default('--gdb-timeout', self.gdb_timeout,
                                        GeneralOptions.__DEFAULT_GDB_TIMEOUT),
+            self.__to_cli_with_default('--handle-timeout', self.handle_timeout,
+                                       GeneralOptions.__DEFAULT_HANDLE_TIMEOUT),
             self.coverage.get_command_line(),
         ]
         return ' '.join(options)
@@ -235,5 +243,6 @@ class GeneralOptions:
             "qemu": self.qemu.value.upper(),
             "with-js": self.with_js,
             "generate_only": self.generate_only,
-            "gdb-timeout": self.gdb_timeout
+            "gdb-timeout": self.gdb_timeout,
+            "handle-timeout": self.handle_timeout
         }

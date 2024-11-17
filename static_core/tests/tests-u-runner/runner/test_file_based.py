@@ -17,10 +17,10 @@
 
 import logging
 import subprocess
-from unittest import TestCase
 from copy import deepcopy
 from os import path, remove
 from typing import List, Callable, Tuple, Optional
+from unittest import TestCase
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
@@ -62,10 +62,12 @@ class TestFileBased(Test):
     def verifier_args(self) -> List[str]:
         return self.test_env.verifier_args
 
-    @staticmethod
-    def get_processes(pid: int, gdb_timeout: int) -> str:
+    def get_processes(self, pid: int, gdb_timeout: int) -> str:
+        if not self.test_env.config.general.handle_timeout:
+            return "There is a timeout failure. If you want to investigate threads, rerun with option " \
+                   "--handle-timeout and under 'sudo'"
+
         cmd = [
-            "sudo",
             "gdb", "--batch", "-p", str(pid),
             "-ex", 'info threads',
             "-ex", 'thread apply all bt',

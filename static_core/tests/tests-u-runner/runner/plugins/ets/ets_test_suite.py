@@ -27,6 +27,7 @@ from typing import List, Any
 from runner.logger import Log
 from runner.options.config import Config
 from runner.options.options_jit import JitOptions
+from runner.path_utils import is_sudo_user, chown2user
 from runner.plugins.ets.ets_suites import EtsSuites
 from runner.plugins.ets.ets_test_dir import EtsTestDir
 from runner.plugins.ets.ets_utils import ETSUtils
@@ -106,6 +107,8 @@ class EtsTestSuite(ABC):
             tests = step.transform(force_generate)
 
         util.create_report(self.test_root, tests)
+        if is_sudo_user():
+            chown2user(self.test_root)
         if len(tests) == 0:
             Log.exception_and_raise(_LOGGER, "Failed generating and updating tests for ets templates or stdlib")
 

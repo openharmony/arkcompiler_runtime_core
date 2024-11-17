@@ -39,4 +39,10 @@ EXIT_CODE=$?
 set -e
 deactivate_venv
 
+if [[ -n "${MY_USERNAME}" ]]; then
+    MY_UID=$(id -u "${MY_USERNAME}")
+    MY_GID=$(id -g "${MY_USERNAME}")
+    chown -R "${MY_UID}":"${MY_GID}" /tmp/runner.log
+fi
+
 exit ${EXIT_CODE}
