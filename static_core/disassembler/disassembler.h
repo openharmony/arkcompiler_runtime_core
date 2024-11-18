@@ -87,10 +87,15 @@ private:
 
     void GetRecord(pandasm::Record &record, const panda_file::File::EntityId &recordId);
     void AddMethodToTables(const panda_file::File::EntityId &methodId);
+    void GetLiteralArrayByOffset(pandasm::LiteralArray *litArray, panda_file::File::EntityId offset) const;
     void GetLiteralArray(pandasm::LiteralArray *litArray, size_t index);
     template <typename T>
     void FillLiteralArrayData(pandasm::LiteralArray *litArray, const panda_file::LiteralTag &tag,
                               const panda_file::LiteralDataAccessor::LiteralValue &value) const;
+    std::variant<bool, uint8_t, uint16_t, uint32_t, uint64_t, float, double, std::string> ParseLiteralValue(
+        const panda_file::LiteralDataAccessor::LiteralValue &value, const panda_file::LiteralTag &tag) const;
+    std::string ParseStringData(const panda_file::LiteralDataAccessor::LiteralValue &value) const;
+    std::string ParseLiteralArrayData(const panda_file::LiteralDataAccessor::LiteralValue &value) const;
     void FillLiteralData(pandasm::LiteralArray *litArray, const panda_file::LiteralDataAccessor::LiteralValue &value,
                          const panda_file::LiteralTag &tag) const;
 
@@ -237,6 +242,12 @@ private:
         return res.str();
     }
 
+    void DumpLiteralArray(const pandasm::LiteralArray &literalArray, std::stringstream &ss) const;
+    template <typename T, pandasm::Value::Type VALUE_TYPE>
+    void SetMetadata(panda_file::FieldDataAccessor &accessor, pandasm::Field *field) const;
+    void SerializeFieldValue(const pandasm::Field &f, std::stringstream &ss) const;
+    void GetMetadataFieldValue(panda_file::FieldDataAccessor &fieldAccessor, pandasm::Field *field) const;
+    std::string SerializeLiterals(const pandasm::LiteralArray::Literal &literal) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(BytecodeInstruction::Opcode o) const;
     pandasm::Opcode BytecodeOpcodeToPandasmOpcode(uint8_t o) const;
     void CollectExternalFields(const panda_file::FieldDataAccessor &fieldAccessor);
