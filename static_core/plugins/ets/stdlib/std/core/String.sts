@@ -1014,27 +1014,7 @@ export final class String extends Object implements Comparable<String>, JSONable
     *
     * @returns this string that is repeated count times
     */
-    public repeat(count: int): String {
-        if (count == 0) {
-            return new String();
-        }
-        if (count < 0) {
-            throw new RangeError("repeat: count is negative")
-        }
-        let length: int = this.getLength();
-        let resChars: char[] = new char[length * count];
-        for (let i: int = 0; i < length; i++) {
-            resChars[i] = this.charAt(i);
-        }
-        try {
-            for (let repeat = 1; repeat < count; repeat++) {
-                copyWithin(resChars, repeat * length, 0, length);
-            }
-        } catch (e) {
-            throw new Error("impossible")
-        }
-        return new String(resChars);
-    }
+    public native repeat(count: int): String;
 
     /**
      * The `toString()` method returns the string representation of the given String

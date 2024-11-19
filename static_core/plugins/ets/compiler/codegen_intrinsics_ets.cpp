@@ -534,4 +534,11 @@ void Codegen::CreateStringIndexOfAfter(IntrinsicInst *inst, Reg dst, SRCREGS src
     enc->BindLabel(charNotFoundLabel);
 }
 
+void Codegen::CreateStringRepeat([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
+{
+    ASSERT(IsCompressedStringsEnabled());
+    auto entrypointId = EntrypointId::STRING_REPEAT;
+    CallFastPath(inst, entrypointId, dst, {}, src[FIRST_OPERAND], src[SECOND_OPERAND]);
+}
+
 }  // namespace ark::compiler

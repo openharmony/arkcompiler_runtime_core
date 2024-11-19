@@ -148,6 +148,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_3.sts)
         if (NOT PANDA_PRODUCT_BUILD)
             panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_allocations.sts JITINTERFACE true)
+            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_repeat.sts JITINTERFACE true)
         endif()
         # LoadAndInitClass in AOT mode for arm32 is not supported
         # NOTE(pantos) Issue #17103 reassign readonly property

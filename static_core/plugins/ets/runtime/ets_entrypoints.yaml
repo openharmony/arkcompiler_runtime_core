@@ -11,7 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# This file describes copmiler-to-runtime entrypoints.
+# This file describes compiler-to-runtime entrypoints.
 # Fields:
 #  * properties:
 #    - no_return: entrypoint doesn't jump back to the caller.
@@ -739,3 +739,30 @@
     - void*               # u16 string data ptr
     - uint32_t            # string data size
     - uint16_t            # char to look up
+
+- name: StringRepeat
+  entrypoint: StringRepeatTlab
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - ark::ObjectHeader*  # resulting array of uint8
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # count
+
+- name: StringRepeatUsual
+  entrypoint: StdCoreStringRepeat
+  bridge: entrypoint
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # resulting array of uint8
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # count
+
+- name: StringRepeatSlowPath
+  entrypoint: StdCoreStringRepeat
+  bridge: slow_path
+  properties: [intrinsic]
+  signature:
+    - ark::ObjectHeader*  # resulting array of uint8
+    - ark::ObjectHeader*       # src string
+    - int32_t                  # count

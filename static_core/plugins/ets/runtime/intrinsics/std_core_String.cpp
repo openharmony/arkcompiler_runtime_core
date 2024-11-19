@@ -23,6 +23,7 @@
 #include "napi/ets_napi.h"
 #include "runtime/handle_scope-inl.h"
 #include "runtime/entrypoints/string_index_of.h"
+#include "runtime/arch/memory_helpers.h"
 #include "plugins/ets/runtime/types/ets_string.h"
 #include "plugins/ets/runtime/ets_exceptions.h"
 #include "plugins/ets/runtime/ets_language_context.h"
@@ -513,6 +514,81 @@ EtsBoolean StdCoreStringEndsWith(EtsString *thisStr, EtsString *suffix, EtsInt e
 {
     ASSERT(thisStr != nullptr);
     return thisStr->EndsWith(suffix, endIndex);
+}
+
+/* the allocation routine to create an unitialized string of the given size */
+extern "C" EtsString *AllocateStringObject(size_t length, bool compressed)
+{
+    auto ctx = Runtime::GetCurrent()->GetLanguageContext(panda_file::SourceLang::ETS);
+    auto vm = Runtime::GetCurrent()->GetPandaVM();
+    ASSERT(vm != nullptr);
+    auto *stringClass = Runtime::GetCurrent()->GetClassLinker()->GetExtension(ctx)->GetClassRoot(ClassRoot::STRING);
+    size_t size =
+        compressed ? coretypes::String::ComputeSizeMUtf8(length) : coretypes::String::ComputeSizeUtf16(length);
+    auto string = reinterpret_cast<EtsString *>(vm->GetHeapManager()->AllocateObject(
+        stringClass, size, DEFAULT_ALIGNMENT, nullptr, mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT));
+    if (string != nullptr) {
+        // After setting length we should have a full barrier, so this write should happens-before barrier
+        TSAN_ANNOTATE_IGNORE_WRITES_BEGIN();
+        auto len = ToNativePtr<uint32_t>(ToUintPtr(string) + coretypes::String::GetLengthOffset());
+        auto hashcode = ToNativePtr<uint32_t>(ToUintPtr(string) + coretypes::String::GetHashcodeOffset());
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        len[0] = compressed ? (length << 1U) : (length << 1U) | 1U;
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        hashcode[0] = 0U;
+        TSAN_ANNOTATE_IGNORE_WRITES_END();
+        // Witout full memory barrier it is possible that architectures with
+        // weak memory order can try fetching string legth before it's set
+        arch::FullMemoryBarrier();
+    }
+    return string;
+}
+
+EtsString *StdCoreStringRepeat(EtsString *str, EtsInt count)
+{
+    auto length = str->GetLength();
+
+    if (UNLIKELY(count < 0)) {
+        PandaString message = "repeat: count is negative";
+        auto coroutine = EtsCoroutine::GetCurrent();
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::RANGE_ERROR, message);
+        return nullptr;
+    }
+
+    if (length == 0 || count == 0) {
+        return EtsString::CreateFromUtf8(nullptr, 0);
+    }
+
+    auto thread = ManagedThread::GetCurrent();
+    [[maybe_unused]] HandleScope<ObjectHeader *> scope(thread);
+    VMHandle<coretypes::String> sHandle(thread, str->GetCoreType());
+
+    int size = length * count;
+    auto compressed = str->GetCoreType()->IsMUtf8();
+    auto rep = AllocateStringObject(size, compressed);
+    if (UNLIKELY(rep == nullptr)) {
+        PandaString message = "repeat: memory allocation failed";
+        auto coroutine = EtsCoroutine::GetCurrent();
+        ThrowEtsException(coroutine, panda_file_items::class_descriptors::OUT_OF_MEMORY_ERROR, message);
+        return nullptr;
+    }
+
+    if (compressed) {
+        auto strData = sHandle.GetPtr()->GetDataMUtf8();
+        auto repData = rep->GetDataMUtf8();
+        for (int i = 0; i < count; ++i) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            std::copy_n(strData, length, repData + i * length);
+        }
+    } else {
+        auto strData = sHandle.GetPtr()->GetDataUtf16();
+        auto repData = rep->GetDataUtf16();
+        for (int i = 0; i < count; ++i) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            std::copy_n(strData, length, repData + i * length);
+        }
+    }
+    return rep;
 }
 
 }  // namespace ark::ets::intrinsics
