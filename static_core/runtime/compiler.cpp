@@ -877,6 +877,7 @@ bool Compiler::CompileMethod(Method *method, uintptr_t bytecodeOffset, bool osr,
             }
             auto thread = MTManagedThread::GetCurrent();
             // NOTE(asoldatov): Remove this workaround for invoking compiler from ECMA VM
+            // Issue: #20680
             if (thread != nullptr) {
                 static constexpr uint64_t SLEEP_MS = 10;
                 thread->TimedWait(ThreadStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
@@ -1006,8 +1007,13 @@ uint8_t CompileMethodImpl(coretypes::String *fullMethodName, panda_file::SourceL
             ASSERT(!method->HasCompiledCode());
             compiler->CompileMethod(method, 0, false, TaggedValue::Hole());
         }
-        static constexpr uint64_t SLEEP_MS = 10;
-        MTManagedThread::GetCurrent()->TimedWait(ThreadStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
+        // NOTE(asoldatov): Remove this workaround for invoking compiler from ECMA VM
+        // Issue: #20680
+        auto thread = MTManagedThread::GetCurrent();
+        if (thread != nullptr) {
+            static constexpr uint64_t SLEEP_MS = 10;
+            thread->TimedWait(ThreadStatus::IS_COMPILER_WAITING, SLEEP_MS, 0);
+        }
     }
     static constexpr uint8_t COMPILATION_FAILED = 5;
     return (status == Method::COMPILED ? 0 : COMPILATION_FAILED);
