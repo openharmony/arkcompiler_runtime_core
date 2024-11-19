@@ -1963,9 +1963,6 @@
 # es2panda: #16409 Cannot declare class without body (ambient declarations)
 14.ambient_declarations/ambient_declarations_56.sts
 
-# es2panda: #16410 Cannot declare function with optional parameters (ambient declarations)
-14.ambient_declarations/ambient_declarations_7.sts
-
 # es2panda: #16415 Cannot declare static field in generic ambient class
 14.ambient_declarations/ambient_declarations_24.sts
 
