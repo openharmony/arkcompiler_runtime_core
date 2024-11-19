@@ -471,7 +471,7 @@ AbckitModifyApi g_modifyApiImpl = {
 extern "C" AbckitModifyApi const *AbckitGetModifyApiImpl(AbckitApiVersion version)
 {
 #ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
-    // return mock api
+    return AbckitGetMockModifyApiImpl(version);
 #endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:

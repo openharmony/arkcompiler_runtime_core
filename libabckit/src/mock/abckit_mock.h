@@ -20,10 +20,21 @@
 #include <queue>
 
 #include "../../include/c/abckit.h"
+#include "../../include/c/metadata_core.h"
+#include "../../include/c/isa/isa_dynamic.h"
+#include "../../src/include_v2/c/isa/isa_static.h"
+#include "../../include/c/extensions/arkts/metadata_arkts.h"
 
 // CC-OFFNXT(G.NAM.01) false positive
 extern std::queue<std::string> g_calledFuncs;
 
 AbckitApi const *AbckitGetMockApiImpl(AbckitApiVersion version);
+AbckitInspectApi const *AbckitGetMockInspectApiImpl(AbckitApiVersion version);
+AbckitModifyApi const *AbckitGetMockModifyApiImpl(AbckitApiVersion version);
+AbckitIsaApiDynamic const *AbckitGetMockIsaApiDynamicImpl(AbckitApiVersion version);
+AbckitIsaApiStatic const *AbckitGetMockIsaApiStaticImpl(AbckitApiVersion version);
+AbckitArktsInspectApi const *AbckitGetMockArktsInspectApiImpl(AbckitApiVersion version);
+AbckitArktsModifyApi const *AbckitGetMockArktsModifyApiImpl(AbckitApiVersion version);
+AbckitGraphApi const *AbckitGetMockGraphApiImpl(AbckitApiVersion version);
 
 #endif

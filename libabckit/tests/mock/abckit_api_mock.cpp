@@ -16,7 +16,6 @@
 #include "mock/abckit_mock.h"
 #include "mock/mock_values.h"
 
-#include "include/c/metadata_core.h"
 #include "include/c/statuses.h"
 #include "include/c/abckit.h"
 
@@ -26,32 +25,32 @@ namespace libabckit::mock {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-inline AbckitStatus getLastError()
+inline AbckitStatus GetLastError()
 {
     return ABCKIT_STATUS_NO_ERROR;
 }
 
-inline AbckitFile *openAbc(const char *path)
+inline AbckitFile *OpenAbc(const char *path)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
     return DEFAULT_FILE;
 }
 
-inline void writeAbc(AbckitFile *file, const char *path)
+inline void WriteAbc(AbckitFile *file, const char *path)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(strncmp(path, DEFAULT_PATH, sizeof(DEFAULT_PATH)) == 0);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
-inline void closeFile(AbckitFile *file)
+inline void CloseFile(AbckitFile *file)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
 }
 
-inline void destroyGraph(AbckitGraph *graph)
+inline void DestroyGraph(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(graph == DEFAULT_GRAPH);
@@ -65,22 +64,24 @@ static AbckitApi g_impl = {
     // ========================================
 
     ABCKIT_VERSION_RELEASE_1_0_0,
-    getLastError,
+    GetLastError,
 
     // ========================================
     // Inspection API entrypoints
     // ========================================
 
-    openAbc,
-    writeAbc,
-    closeFile,
+    OpenAbc,
+    WriteAbc,
+    CloseFile,
 
     // ========================================
     // IR API entrypoints
     // ========================================
 
-    destroyGraph,
+    DestroyGraph,
 };
+
+// NOLINTEND(readability-identifier-naming)
 
 }  // namespace libabckit::mock
 

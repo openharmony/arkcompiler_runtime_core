@@ -442,7 +442,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
 extern "C" AbckitArktsModifyApi const *AbckitGetArktsModifyApiImpl(AbckitApiVersion version)
 {
 #ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
-    // return mock api
+    return AbckitGetMockArktsModifyApiImpl(version);
 #endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:

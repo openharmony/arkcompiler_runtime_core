@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "include/cpp/abckit_cpp.h"
+#include "../../../include/cpp/abckit_cpp.h"
 #include "../check_mock.h"
 
 #include <gtest/gtest.h>
@@ -27,11 +27,33 @@ TEST_F(LibAbcKitCppMockTest, CppTestMockFile)
 {
     {
         abckit::File file("abckit.abc");
-        ASSERT_TRUE(CheckMockedApi("openAbc"));
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
         file.WriteAbc("abckit.abc");
-        ASSERT_TRUE(CheckMockedApi("writeAbc"));
+        ASSERT_TRUE(CheckMockedApi("WriteAbc"));
     }
-    ASSERT_TRUE(CheckMockedApi("closeFile"));
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
+}
+
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+TEST_F(LibAbcKitCppMockTest, CppTestMockFileEnumerateModules)
+{
+    {
+        abckit::File file("abckit.abc");
+        ASSERT_TRUE(CheckMockedApi("OpenAbc"));
+
+        std::vector<abckit::core::Module> modules;
+
+        file.EnumerateModules([&](const abckit::core::Module &md) -> bool {
+            modules.push_back(md);
+            return true;
+        });
+
+        ASSERT_TRUE(CheckMockedApi("FileEnumerateModules"));
+
+        file.WriteAbc("abckit.abc");
+        ASSERT_TRUE(CheckMockedApi("WriteAbc"));
+    }
+    ASSERT_TRUE(CheckMockedApi("CloseFile"));
 }
 
 }  // namespace libabckit::test
