@@ -27,6 +27,8 @@ class Field final : public core::Field {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::core::Field;
+    /// @brief abckit::DefaultHash<Field>
+    friend class abckit::DefaultHash<Field>;
 
 public:
     /**

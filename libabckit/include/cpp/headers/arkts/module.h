@@ -28,6 +28,8 @@ class Module final : public core::Module {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief abckit::DefaultHash<Module>
+    friend class abckit::DefaultHash<Module>;
 
 public:
     /**

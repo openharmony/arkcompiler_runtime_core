@@ -102,6 +102,22 @@ inline std::vector<core::ExportDescriptor> Module::GetExports() const
     return exports;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
+inline void Module::EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const
+{
+    struct Payload {
+        const std::function<bool(core::Namespace)> &callback;
+        const ApiConfig *config;
+    };
+    Payload payload {cb, GetApiConfig()};
+
+    GetApiConfig()->cIapi_->moduleEnumerateNamespaces(GetView(), &payload, [](AbckitCoreNamespace *ns, void *data) {
+        const auto &payload = *static_cast<Payload *>(data);
+        return payload.callback(core::Namespace(ns, payload.config));
+    });
+    CheckError(GetApiConfig());
+}
+
 inline void Module::EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const
 {
     const ApiConfig *conf = GetApiConfig();

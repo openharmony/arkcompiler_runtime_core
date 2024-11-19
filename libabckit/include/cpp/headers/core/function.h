@@ -20,6 +20,7 @@
 #include "../graph.h"
 #include "./annotation.h"
 
+#include <functional>
 #include <string_view>
 #include <vector>
 
@@ -33,9 +34,13 @@ class Function : public View<AbckitCoreFunction *> {
     /// @brief to access private constructor
     friend class core::Class;
     /// @brief to access private constructor
+    friend class core::Namespace;
+    /// @brief to access private constructor
     friend class core::Module;
     /// @brief to access private constructor
     friend class abckit::Instruction;
+    /// @brief abckit::DefaultHash<Function>
+    friend class abckit::DefaultHash<Function>;
 
 public:
     /**
@@ -112,6 +117,18 @@ public:
      * @return core::Class
      */
     core::Class GetParentClass() const;
+
+    /**
+     * @brief Enumeraterated nested functions
+     * @param cb - Callback that will be invoked.
+     */
+    void EnumerateNestedFunctions(const std::function<bool(core::Function)> &cb) const;
+
+    /**
+     * @brief Enumerates nested classes
+     * @param cb - Callback that will be invoked.
+     */
+    void EnumerateNestedClasses(const std::function<bool(core::Class)> &cb) const;
 
 private:
     Function(AbckitCoreFunction *func, const ApiConfig *conf) : View(func), conf_(conf) {};

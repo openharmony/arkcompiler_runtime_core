@@ -25,6 +25,7 @@
 
 #include "./utils.h"
 
+#include <cstdint>
 #include <memory>
 
 namespace abckit {
@@ -205,6 +206,24 @@ inline void CheckError(const ApiConfig *conf)
         conf->eh_->HandleError(abckit::Exception(status));
     }
 }
+
+// Class implement default hash function for all View's
+/**
+ * @brief DefaultHash<T>
+ */
+template <typename T>
+class DefaultHash {
+public:
+    /**
+     * Operator ()
+     * @param t
+     * @return uintptr_t
+     */
+    virtual uintptr_t operator()(const T &t) const
+    {
+        return reinterpret_cast<uintptr_t>(t.GetView());
+    }
+};
 
 }  // namespace abckit
 

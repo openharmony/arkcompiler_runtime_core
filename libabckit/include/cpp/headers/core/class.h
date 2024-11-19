@@ -35,6 +35,8 @@ class Class : public View<AbckitCoreClass *> {
     friend class Namespace;
     /// @brief to access private constructor
     friend class Function;
+    /// @brief abckit::DefaultHash<Class>
+    friend class abckit::DefaultHash<Class>;
 
 public:
     /**

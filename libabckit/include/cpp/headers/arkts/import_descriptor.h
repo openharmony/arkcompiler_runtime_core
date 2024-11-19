@@ -27,6 +27,8 @@ class ImportDescriptor final : public core::ImportDescriptor {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief abckit::DefaultHash<ImportDescriptor>
+    friend class abckit::DefaultHash<ImportDescriptor>;
 
 public:
     /**

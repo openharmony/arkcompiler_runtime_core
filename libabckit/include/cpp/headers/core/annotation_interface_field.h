@@ -34,6 +34,8 @@ class AnnotationInterfaceField : public View<AbckitCoreAnnotationInterfaceField 
     friend class core::AnnotationInterface;
     /// @brief arkts::AnnotationInterface
     friend class arkts::AnnotationInterface;
+    /// @brief abckit::DefaultHash<AnnotationInterfaceField>
+    friend class abckit::DefaultHash<AnnotationInterfaceField>;
 
 public:
     /**

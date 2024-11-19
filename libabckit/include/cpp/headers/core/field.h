@@ -29,6 +29,8 @@ class Field : public View<AbckitCoreField *> {
     friend class Module;
     /// @brief to access private constructor
     friend class Namespace;
+    /// @brief abckit::DefaultHash<Field>
+    friend class abckit::DefaultHash<Field>;
 
 public:
     /**

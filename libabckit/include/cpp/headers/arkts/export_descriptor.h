@@ -29,6 +29,8 @@ class ExportDescriptor final : public core::ExportDescriptor {
     friend class core::Module;
     /// @brief to access private constructor
     friend class arkts::Module;
+    /// @brief abckit::DefaultHash<ExportDescriptor>
+    friend class abckit::DefaultHash<ExportDescriptor>;
 
 public:
     /**

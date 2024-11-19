@@ -33,6 +33,8 @@ class Annotation : public View<AbckitCoreAnnotation *> {
     friend class core::Class;
     /// @brief arkts::Class
     friend class arkts::Class;
+    /// @brief abckit::DefaultHash<Annotation>
+    friend class abckit::DefaultHash<Annotation>;
 
 public:
     /**

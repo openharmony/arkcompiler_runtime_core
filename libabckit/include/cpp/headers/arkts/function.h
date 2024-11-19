@@ -27,6 +27,8 @@ class Function final : public core::Function {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class Class;
+    /// @brief abckit::DefaultHash<Function>
+    friend class abckit::DefaultHash<Function>;
 
 public:
     /**

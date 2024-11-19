@@ -92,6 +92,38 @@ inline core::Class Function::GetParentClass() const
     return core::Class(klass, conf_);
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
+inline void Function::EnumerateNestedFunctions(const std::function<bool(core::Function)> &cb) const
+{
+    struct Payload {
+        const std::function<bool(core::Function)> &callback;
+        const ApiConfig *config;
+    } payload {cb, GetApiConfig()};
+
+    GetApiConfig()->cIapi_->functionEnumerateNestedFunctions(
+        GetView(), &payload, [](AbckitCoreFunction *nestedFunc, void *data) {
+            const auto &payload = *static_cast<Payload *>(data);
+            return payload.callback(core::Function(nestedFunc, payload.config));
+        });
+    CheckError(GetApiConfig());
+}
+
+// CC-OFFNXT(G.FUD.06) perf critical
+inline void Function::EnumerateNestedClasses(const std::function<bool(core::Class)> &cb) const
+{
+    struct Payload {
+        const std::function<bool(core::Class)> &callback;
+        const ApiConfig *config;
+    } payload {cb, GetApiConfig()};
+
+    GetApiConfig()->cIapi_->functionEnumerateNestedClasses(
+        GetView(), &payload, [](AbckitCoreClass *nestedClass, void *data) {
+            const auto &payload = *static_cast<Payload *>(data);
+            return payload.callback(core::Class(nestedClass, payload.config));
+        });
+    CheckError(GetApiConfig());
+}
+
 }  // namespace abckit::core
 
 #endif  // CPP_ABCKIT_CORE_FUNCTION_IMPL_H

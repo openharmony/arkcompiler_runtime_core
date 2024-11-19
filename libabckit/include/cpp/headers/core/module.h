@@ -35,6 +35,8 @@ class Module : public View<AbckitCoreModule *> {
     friend class abckit::core::Function;
     /// @brief to access private constructor
     friend class abckit::core::ImportDescriptor;
+    /// @brief abckit::DefaultHash<Module>
+    friend class abckit::DefaultHash<Module>;
 
 public:
     /**
@@ -111,6 +113,12 @@ public:
      * @return std::vector<core::ExportDescriptor>
      */
     std::vector<core::ExportDescriptor> GetExports() const;
+
+    /**
+     * @brief EnumerateNamespaces
+     * @param cb
+     */
+    void EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const;
 
     /**
      * @brief EnumerateTopLevelFunctions

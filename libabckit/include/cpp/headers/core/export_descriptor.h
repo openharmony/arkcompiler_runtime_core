@@ -33,6 +33,8 @@ class ExportDescriptor : public View<AbckitCoreExportDescriptor *> {
     friend class abckit::core::Module;
     /// @brief to access private constructor
     friend class abckit::arkts::Module;
+    /// @brief abckit::DefaultHash<ExportDescriptor>
+    friend class abckit::DefaultHash<ExportDescriptor>;
 
 public:
     /**

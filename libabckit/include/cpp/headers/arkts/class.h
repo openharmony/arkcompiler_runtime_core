@@ -30,6 +30,8 @@ class Class final : public core::Class {
     friend class Module;
     /// @brief to access private constructor
     friend class Namespace;
+    /// @brief abckit::DefaultHash<Class>
+    friend class abckit::DefaultHash<Class>;
 
 public:
     /**

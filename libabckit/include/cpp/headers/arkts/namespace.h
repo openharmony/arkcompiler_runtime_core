@@ -27,6 +27,8 @@ class Namespace final : public core::Namespace {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class Module;
+    /// @brief abckit::DefaultHash<Namespace>
+    friend class abckit::DefaultHash<Namespace>;
 
 public:
     /**

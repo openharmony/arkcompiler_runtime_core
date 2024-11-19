@@ -27,6 +27,8 @@ namespace abckit {
 class Literal : public View<AbckitLiteral *> {
     /// @brief abckit::File
     friend class abckit::File;
+    /// @brief abckit::DefaultHash<Literal>
+    friend class abckit::DefaultHash<Literal>;
 
 public:
     /**

@@ -34,6 +34,8 @@ class AnnotationElement : public View<AbckitCoreAnnotationElement *> {
     friend class core::Module;
     /// @brief arkts::Module
     friend class arkts::Module;
+    /// @brief abckit::DefaultHash<AnnotationElement>
+    friend class abckit::DefaultHash<AnnotationElement>;
 
 public:
     /**

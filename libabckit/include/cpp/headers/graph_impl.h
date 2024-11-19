@@ -48,6 +48,22 @@ inline std::vector<BasicBlock> Graph::GetBlocksRPO() const
     return blocks;
 }
 
+// CC-OFFNXT(G.FUD.06) perf critical
+inline void Graph::EnumerateBasicBlocksRpo(const std::function<void(BasicBlock)> &cb) const
+{
+    struct Payload {
+        const std::function<void(BasicBlock)> &callback;
+        const ApiConfig *config;
+    };
+    Payload payload {cb, GetApiConfig()};
+
+    GetApiConfig()->cGapi_->gVisitBlocksRpo(GetResource(), &payload, [](AbckitBasicBlock *bb, void *data) -> void {
+        const auto &payload = *static_cast<Payload *>(data);
+        payload.callback(BasicBlock(bb, payload.config));
+    });
+    CheckError(GetApiConfig());
+}
+
 }  // namespace abckit
 
 #endif  // CPP_ABCKIT_GRAPH_IMPL_H

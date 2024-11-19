@@ -35,6 +35,8 @@ class ImportDescriptor : public View<AbckitCoreImportDescriptor *> {
     friend class abckit::arkts::Module;
     /// @brief to access private constructor
     friend class abckit::DynamicIsa;
+    /// @brief abckit::DefaultHash<ImportDescriptor>
+    friend class abckit::DefaultHash<ImportDescriptor>;
 
 public:
     /**

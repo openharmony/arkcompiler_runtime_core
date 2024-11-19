@@ -172,6 +172,7 @@ test_js_files = [
   "scenarios_c_api_clean/dynamic/api_scanner/api_scanner",
   "scenarios_c_api_clean/dynamic/branch_eliminator/branch_eliminator",
   "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch",
+  "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic",
 
   "internal/ICSlotAllocator/ICSlotAllocator",
   "internal/implementation_api/abc_dynamic",
@@ -476,6 +477,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "scenarios_c_api_clean/dynamic/router_table/router_table_test.cpp",
     "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses_test.cpp",
     "scenarios_c_api_clean/static/add_log/add_log_static_test.cpp",
+    "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic_test.cpp",
     "ut/extensions/arkts/inspect_api/api_casts/api_casts.cpp",
     "ut/extensions/arkts/inspect_api/modules/modules_dynamic_test.cpp",
     "ut/extensions/arkts/inspect_api/namespace/namespace_arkts.cpp",

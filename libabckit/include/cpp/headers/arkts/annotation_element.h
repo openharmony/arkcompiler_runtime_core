@@ -31,6 +31,8 @@ class AnnotationElement : public core::AnnotationElement {
     friend class arkts::Function;
     /// @brief to access private constructor
     friend class arkts::Annotation;
+    /// @brief abckit::DefaultHash<AnnotationElement>
+    friend class abckit::DefaultHash<AnnotationElement>;
 
 public:
     /**

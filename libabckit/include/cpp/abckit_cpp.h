@@ -57,6 +57,7 @@
 #include "./headers/core/annotation_interface_field_impl.h"
 #include "./headers/core/annotation_interface_impl.h"
 #include "./headers/core/module_impl.h"
+#include "./headers/core/namespace_impl.h"
 #include "./headers/core/class_impl.h"
 #include "./headers/core/function_impl.h"
 #include "./headers/core/export_descriptor_impl.h"
@@ -72,5 +73,7 @@
 #include "./headers/graph_impl.h"
 #include "./headers/instruction_impl.h"
 #include "./headers/literal_impl.h"
+
+#include "./headers/hash_specializations.h"
 
 #endif  // CPP_ABCKIT
