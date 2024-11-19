@@ -114,7 +114,8 @@ private:
     {
         ASSERT(Thread::GetCurrent() == nullptr);
         [[maybe_unused]] EtsEnv *workerEnv = nullptr;
-        [[maybe_unused]] auto status = vm_->AttachThread(&workerEnv);
+        [[maybe_unused]] void *resultJsEnv = nullptr;
+        [[maybe_unused]] auto status = vm_->AttachThread(&workerEnv, &resultJsEnv);
         ASSERT(status == ETS_OK);
 
         event.Fire();

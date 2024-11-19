@@ -21,11 +21,18 @@
 #include "runtime/interpreter/frame.h"
 #include "plugins/ets/runtime/job_queue.h"
 
+namespace ark {
+class Coroutine;
+}  // namespace ark
+
 namespace ark::ets {
 
 class ExternalIfaceTable {
 public:
+    using JSEnv = void *;
     using ClearInteropHandleScopesFunction = std::function<void(Frame *)>;
+    using CreateJSRuntimeFunction = std::function<JSEnv()>;
+    using CreateInteropCtxFunction = std::function<void(Coroutine *, JSEnv)>;
 
     NO_COPY_SEMANTIC(ExternalIfaceTable);
     NO_MOVE_SEMANTIC(ExternalIfaceTable);
@@ -53,9 +60,39 @@ public:
         clearInteropHandleScopes_ = func;
     }
 
+    void SetCreateJSRuntimeFunction(CreateJSRuntimeFunction &&cb)
+    {
+        ASSERT(!createJSRuntime_);
+        createJSRuntime_ = std::move(cb);
+    }
+
+    void *CreateJSRuntime()
+    {
+        void *jsEnv = nullptr;
+        if (createJSRuntime_) {
+            jsEnv = createJSRuntime_();
+        }
+        return jsEnv;
+    }
+
+    void SetCreateInteropCtxFunction(CreateInteropCtxFunction &&cb)
+    {
+        ASSERT(!createInteropCtx_);
+        createInteropCtx_ = std::move(cb);
+    }
+
+    void CreateInteropCtx(Coroutine *coro, JSEnv jsEnv)
+    {
+        if (createInteropCtx_) {
+            createInteropCtx_(coro, jsEnv);
+        }
+    }
+
 private:
     PandaUniquePtr<JobQueue> jobQueue_ = nullptr;
     ClearInteropHandleScopesFunction clearInteropHandleScopes_ = nullptr;
+    CreateJSRuntimeFunction createJSRuntime_ = nullptr;
+    CreateInteropCtxFunction createInteropCtx_ = nullptr;
 };
 
 }  // namespace ark::ets

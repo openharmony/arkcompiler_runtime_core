@@ -41,6 +41,7 @@ set(ETS_RUNTIME_SOURCES
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Double.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_Float.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_SyncPrimitives.cpp
+    ${ETS_EXT_SOURCES}/intrinsics/std_core_ExclusiveLauncher.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_String.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_StringBuilder.cpp
     ${ETS_EXT_SOURCES}/intrinsics/std_core_gc.cpp

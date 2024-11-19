@@ -322,16 +322,33 @@ public:
         callbackPosterFactory_ = MakePandaUnique<FactoryImpl>(args...);
     }
 
-    /// @brief Uses CallbackPosterFactory to create a CallbackPoster
-    PandaUniquePtr<CallbackPoster> CreateCallbackPoster()
+    /**
+     * @brief Uses CallbackPosterFactory to create a CallbackPoster
+     * @param target - coroutine that contains context and env, for which a poster will be created
+     */
+    PandaUniquePtr<CallbackPoster> CreateCallbackPoster(Coroutine *target)
     {
-        auto *coro = EtsCoroutine::GetCurrent();
-        auto *worker = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
-        if (!coro->GetPandaVM()->GetCoroutineManager()->IsMainWorker(coro) && !worker->InExclusiveMode()) {
+        auto *worker = target->GetContext<StackfulCoroutineContext>()->GetWorker();
+        if (!worker->IsMainWorker() && !worker->InExclusiveMode()) {
             return nullptr;
         }
         ASSERT(callbackPosterFactory_ != nullptr);
-        return callbackPosterFactory_->CreatePoster();
+        return callbackPosterFactory_->CreatePoster(target);
+    }
+
+    using RunEventLoopFunction = std::function<void(Coroutine *)>;
+
+    void SetRunEventLoopFunction(RunEventLoopFunction &&cb)
+    {
+        ASSERT(!runEventLoop_);
+        runEventLoop_ = std::move(cb);
+    }
+
+    void RunEventLoop(Coroutine *coro)
+    {
+        if (runEventLoop_) {
+            runEventLoop_(coro);
+        }
     }
 
     EtsObjectStateTable *GetEtsObjectStateTable() const
@@ -403,6 +420,7 @@ private:
     LongToStringCache *longToStringCache_ {nullptr};
 
     PandaUniquePtr<EtsObjectStateTable> objStateTable_ {nullptr};
+    RunEventLoopFunction runEventLoop_ = nullptr;
 
     NO_MOVE_SEMANTIC(PandaEtsVM);
     NO_COPY_SEMANTIC(PandaEtsVM);

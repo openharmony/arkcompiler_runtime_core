@@ -22,6 +22,7 @@ namespace ark::ets {
 /*static*/
 EtsMutex *EtsMutex::Create(EtsCoroutine *coro)
 {
+    EtsHandleScope scope(coro);
     auto *klass = coro->GetPandaVM()->GetClassLinker()->GetMutexClass();
     auto hMutex = EtsHandle<EtsMutex>(coro, EtsMutex::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
@@ -59,6 +60,7 @@ bool EtsMutex::IsHeld()
 /*static*/
 EtsEvent *EtsEvent::Create(EtsCoroutine *coro)
 {
+    EtsHandleScope scope(coro);
     auto *klass = coro->GetPandaVM()->GetClassLinker()->GetEventClass();
     auto hEvent = EtsHandle<EtsEvent>(coro, EtsEvent::FromEtsObject(EtsObject::Create(coro, klass)));
     auto *waitersList = EtsWaitersList::Create(coro);
@@ -93,6 +95,7 @@ void EtsEvent::Fire()
 /* static */
 EtsCondVar *EtsCondVar::Create(EtsCoroutine *coro)
 {
+    EtsHandleScope scope(coro);
     auto *classLinker = coro->GetPandaVM()->GetClassLinker();
     auto *klass = classLinker->GetCondVarClass();
     auto hCondVar = EtsHandle<EtsCondVar>(coro, EtsCondVar::FromEtsObject(EtsObject::Create(klass)));

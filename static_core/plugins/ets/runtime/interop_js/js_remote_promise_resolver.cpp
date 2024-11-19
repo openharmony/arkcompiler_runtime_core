@@ -25,7 +25,7 @@ JsRemotePromiseResolver::JsRemotePromiseResolver(napi_deferred deferred) : defer
     // post async call to event loop
     auto *vm = coro->GetPandaVM();
     ASSERT(vm != nullptr);
-    poster_ = vm->CreateCallbackPoster();
+    poster_ = vm->CreateCallbackPoster(coro);
     ASSERT(poster_ != nullptr);
 }
 

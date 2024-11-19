@@ -25,6 +25,10 @@
 #include "runtime/include/runtime.h"
 #include "runtime/mem/local_object_handle.h"
 
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+napi_status __attribute__((weak)) napi_create_runtime(napi_env env, napi_env *resultEnv);
+#endif
+
 namespace ark::ets::interop::js {
 
 namespace descriptors = panda_file_items::class_descriptors;
@@ -214,6 +218,23 @@ void InteropCtx::InitExternalInterfaces()
     // should be called in the deoptimization and exception handlers
     interfaceTable_.SetClearInteropHandleScopesFunction(
         [this](Frame *frame) { this->DestroyLocalScopeForTopFrame(frame); });
+#if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
+    interfaceTable_.SetCreateJSRuntimeFunction([env = jsEnv_]() -> ExternalIfaceTable::JSEnv {
+        napi_env resultJsEnv = nullptr;
+        [[maybe_unused]] auto status = napi_create_runtime(env, &resultJsEnv);
+        ASSERT(status == napi_ok);
+        return resultJsEnv;
+    });
+#endif
+    interfaceTable_.SetCreateInteropCtxFunction([](Coroutine *coro, ExternalIfaceTable::JSEnv jsEnv) {
+        auto env = static_cast<napi_env>(jsEnv);
+        auto *etsCoro = static_cast<EtsCoroutine *>(coro);
+        InteropCtx::Init(etsCoro, env);
+        // It's a hack and we should use INTEROP_CODE_SCOPE to set napi_env and allocate records.
+        // Will be fixed in near future.
+        InteropCtx::Current()->SetJSEnv(env);
+        InteropCtx::Current()->CallStack().AllocRecord(etsCoro->GetCurrentFrame(), nullptr);
+    });
 }
 
 InteropCtx::InteropCtx(EtsCoroutine *coro, napi_env env) : constStringStorage_(this), stackInfoManager_(this, coro)

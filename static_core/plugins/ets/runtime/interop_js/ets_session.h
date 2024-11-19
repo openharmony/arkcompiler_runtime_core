@@ -55,10 +55,11 @@ private:
         // there is a double check under mutex that pointer is equal to nullptr
         // Atomic with acq_rel order reason: sync Start/End session in other threads
         if (transitionCount_.fetch_add(1, std::memory_order_acq_rel) == 0) {
-            // interop with js is allowed only from MAIN worker and Exclusive coro
             [[maybe_unused]] auto *worker = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
+            // interop with js is allowed only from MAIN worker and Exclusive coro
             ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro) || worker->InExclusiveMode());
-            auto poster = coro->GetPandaVM()->CreateCallbackPoster();
+            auto poster = coro->GetPandaVM()->CreateCallbackPoster(coro);
+            ASSERT(poster != nullptr);
             coro->GetCoroutineManager()->SetCallbackPoster(std::move(poster));
         }
     }

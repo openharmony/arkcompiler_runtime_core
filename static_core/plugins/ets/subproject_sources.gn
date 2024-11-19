@@ -116,6 +116,7 @@ srcs_runtime = [
   "runtime/intrinsics/std_core_Class.cpp",
   "runtime/intrinsics/std_core_Console.cpp",
   "runtime/intrinsics/std_core_Double.cpp",
+  "runtime/intrinsics/std_core_ExclusiveLauncher.cpp",
   "runtime/intrinsics/std_core_Float.cpp",
   "runtime/intrinsics/std_core_Promise.cpp",
   "runtime/intrinsics/std_core_StackTrace.cpp",

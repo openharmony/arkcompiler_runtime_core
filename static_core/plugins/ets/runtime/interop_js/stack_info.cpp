@@ -40,7 +40,7 @@ namespace ark::ets::interop::js {
 StackInfoManagerOhos::StackInfoManagerOhos(InteropCtx *ctx, EtsCoroutine *coro) : StackInfoManagerBase {ctx, coro} {}
 
 // NOLINTNEXTLINE(modernize-use-equals-default)
-StackInfoManagerOhos::~StackInfoManagerOhos() {};
+StackInfoManagerOhos::~StackInfoManagerOhos() {}
 
 void StackInfoManagerOhos::InitStackInfoIfNeeded()
 {

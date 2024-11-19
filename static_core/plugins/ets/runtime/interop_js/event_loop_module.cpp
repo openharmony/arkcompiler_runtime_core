@@ -21,11 +21,12 @@
 namespace ark::ets::interop::js {
 
 /*static*/
-uv_loop_t *EventLoopCallbackPoster::GetEventLoop()
+uv_loop_t *EventLoop::GetEventLoop([[maybe_unused]] Coroutine *coro)
 {
     uv_loop_t *loop = nullptr;
 #if defined(PANDA_TARGET_OHOS) || defined(PANDA_JS_ETS_HYBRID_MODE)
-    [[maybe_unused]] auto nstatus = napi_get_uv_event_loop(InteropCtx::Current()->GetJSEnv(), &loop);
+    [[maybe_unused]] auto nstatus =
+        napi_get_uv_event_loop(InteropCtx::Current(coro)->GetJsEnvForEventLoopCallbacks(), &loop);
     ASSERT(nstatus == napi_ok);
 #else
     loop = uv_default_loop();
@@ -33,12 +34,29 @@ uv_loop_t *EventLoopCallbackPoster::GetEventLoop()
     return loop;
 }
 
-EventLoopCallbackPoster::EventLoopCallbackPoster()
+void EventLoop::RunEventLoop(Coroutine *coro, RunMode mode)
 {
-    [[maybe_unused]] auto *coro = EtsCoroutine::GetCurrent();
-    [[maybe_unused]] auto *worker = coro->GetContext<StackfulCoroutineContext>()->GetWorker();
-    ASSERT(coro->GetCoroutineManager()->IsMainWorker(coro) || worker->InExclusiveMode());
-    auto loop = GetEventLoop();
+    auto *loop = GetEventLoop(coro);
+    switch (mode) {
+        case EventLoop::RUN_DEFAULT:
+            uv_run(loop, UV_RUN_DEFAULT);
+            break;
+        case EventLoop::RUN_ONCE:
+            uv_run(loop, UV_RUN_ONCE);
+            break;
+        case EventLoop::RUN_NOWAIT:
+            uv_run(loop, UV_RUN_NOWAIT);
+            break;
+        default:
+            UNREACHABLE();
+    };
+}
+
+EventLoopCallbackPoster::EventLoopCallbackPoster(Coroutine *target)
+{
+    [[maybe_unused]] auto *worker = target->GetContext<StackfulCoroutineContext>()->GetWorker();
+    ASSERT(worker->IsMainWorker() || worker->InExclusiveMode());
+    auto loop = EventLoop::GetEventLoop(target);
     // These resources will be deleted in the event loop callback after Runtime destruction,
     // so we need to use a standard allocator
     async_ = new uv_async_t();
@@ -119,9 +137,9 @@ bool EventLoopCallbackPoster::ThreadSafeCallbackQueue::IsEmpty()
     return callbackQueue_.empty();
 }
 
-PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster()
+PandaUniquePtr<CallbackPoster> EventLoopCallbackPosterFactoryImpl::CreatePoster(Coroutine *target)
 {
-    auto poster = MakePandaUnique<EventLoopCallbackPoster>();
+    auto poster = MakePandaUnique<EventLoopCallbackPoster>(target);
     ASSERT(poster != nullptr);
     return poster;
 }

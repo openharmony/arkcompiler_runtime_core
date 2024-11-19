@@ -23,6 +23,10 @@
 #include "runtime/include/external_callback_poster.h"
 #include "libpandabase/os/mutex.h"
 
+namespace ark {
+class Coroutine;
+}  // namespace ark
+
 namespace ark::ets::interop::js {
 
 class EventLoopCallbackPoster : public CallbackPoster {
@@ -46,12 +50,10 @@ class EventLoopCallbackPoster : public CallbackPoster {
 
 public:
     static_assert(PANDA_ETS_INTEROP_JS);
-    EventLoopCallbackPoster();
+    explicit EventLoopCallbackPoster(Coroutine *target);
     ~EventLoopCallbackPoster() override;
     NO_COPY_SEMANTIC(EventLoopCallbackPoster);
     NO_MOVE_SEMANTIC(EventLoopCallbackPoster);
-
-    static uv_loop_t *GetEventLoop();
 
 private:
     void PostImpl(WrappedCallback &&callback) override;
@@ -72,7 +74,16 @@ public:
     NO_MOVE_SEMANTIC(EventLoopCallbackPosterFactoryImpl);
 
     /// @brief Method should create a unique instance of CallbackPoster with inputted strategy of posting
-    PandaUniquePtr<CallbackPoster> CreatePoster() override;
+    PandaUniquePtr<CallbackPoster> CreatePoster(Coroutine *target) override;
+};
+
+class EventLoop {
+public:
+    enum RunMode { RUN_DEFAULT = 0, RUN_ONCE, RUN_NOWAIT };
+
+    static uv_loop_t *GetEventLoop(Coroutine *coro);
+
+    static void RunEventLoop(Coroutine *coro, RunMode mode = RunMode::RUN_DEFAULT);
 };
 
 }  // namespace ark::ets::interop::js

@@ -16,6 +16,7 @@
 #ifndef PANDA_RUNTIME_COROUTINES_COROUTINE_WORKER_H
 #define PANDA_RUNTIME_COROUTINES_COROUTINE_WORKER_H
 
+#include "include/external_callback_poster.h"
 #include "runtime/include/runtime.h"
 #include "runtime/coroutines/local_storage.h"
 
@@ -48,10 +49,27 @@ public:
         return localStorage_;
     }
 
+    void SetCallbackPoster(PandaUniquePtr<CallbackPoster> poster)
+    {
+        ASSERT(!callbackPoster_);
+        callbackPoster_ = std::move(poster);
+    }
+
+    void ResetCallbackPoster()
+    {
+        callbackPoster_.reset();
+    }
+
+    CallbackPoster *GetCallbackPoster()
+    {
+        return callbackPoster_.get();
+    }
+
 private:
     Runtime *runtime_ = nullptr;
     PandaVM *vm_ = nullptr;
     LocalStorage localStorage_;
+    PandaUniquePtr<CallbackPoster> callbackPoster_;
 };
 
 }  // namespace ark

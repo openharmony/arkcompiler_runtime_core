@@ -197,6 +197,19 @@ static void RegisterEventLoopModule()
     auto coro = EtsCoroutine::GetCurrent();
     ASSERT(coro == coro->GetPandaVM()->GetCoroutineManager()->GetMainThread());
     coro->GetPandaVM()->CreateCallbackPosterFactory<EventLoopCallbackPosterFactoryImpl>();
+    coro->GetPandaVM()->SetRunEventLoopFunction([](Coroutine *target) { EventLoop::RunEventLoop(target); });
+}
+
+static void InitInteropContext(napi_env env)
+{
+    auto coro = EtsCoroutine::GetCurrent();
+    ScopedManagedCodeThread scoped(coro);
+    napi_add_env_cleanup_hook(
+        env, [](void *) { DestroyRuntime(); }, nullptr);
+    InteropCtx::Init(coro, env);
+    auto mainPoster = coro->GetPandaVM()->CreateCallbackPoster(coro);
+    ASSERT(mainPoster != nullptr);
+    coro->GetWorker()->SetCallbackPoster(std::move(mainPoster));
 }
 
 static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
@@ -245,11 +258,7 @@ static napi_value CreateEtsRuntime(napi_env env, napi_callback_info info)
     res &= RegisterTimerModule(env);
     RegisterEventLoopModule();
     if (res) {
-        auto coro = EtsCoroutine::GetCurrent();
-        ScopedManagedCodeThread scoped(coro);
-        napi_add_env_cleanup_hook(
-            env, [](void *) { DestroyRuntime(); }, nullptr);
-        InteropCtx::Init(coro, env);
+        InitInteropContext(env);
     }
     napi_value napiRes;
     NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));
@@ -362,11 +371,7 @@ static napi_value CreateRuntime(napi_env env, napi_callback_info info)
     res &= RegisterTimerModule(env);
     RegisterEventLoopModule();
     if (res) {
-        auto coro = EtsCoroutine::GetCurrent();
-        ScopedManagedCodeThread scoped(coro);
-        napi_add_env_cleanup_hook(
-            env, [](void *) { DestroyRuntime(); }, nullptr);
-        InteropCtx::Init(coro, env);
+        InitInteropContext(env);
     }
     napi_value napiRes;
     NAPI_ASSERT_OK(napi_get_boolean(env, res, &napiRes));

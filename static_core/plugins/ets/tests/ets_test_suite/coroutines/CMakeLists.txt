@@ -333,3 +333,18 @@ add_ets_coroutines_test(FILE stats.sts
                         MODE "INT"
 )
 
+add_ets_coroutines_test(FILE elauncher_id.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)
+
+add_ets_coroutines_test(FILE eworker_id.sts
+                        SKIP_ARM32_COMPILER
+                        IMPL "STACKFUL"
+                        OPTION_SETS_STACKFUL "DEFAULT"
+                        WORKERS "AUTO"
+                        MODE "INT"
+)

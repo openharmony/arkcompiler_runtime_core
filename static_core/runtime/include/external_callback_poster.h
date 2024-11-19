@@ -23,6 +23,8 @@
 
 namespace ark {
 
+class Coroutine;
+
 /// @brief Interface of class that should post a callback to remote side
 class CallbackPoster {
 public:
@@ -54,7 +56,7 @@ public:
     NO_COPY_SEMANTIC(CallbackPosterFactoryIface);
     NO_MOVE_SEMANTIC(CallbackPosterFactoryIface);
 
-    virtual PandaUniquePtr<CallbackPoster> CreatePoster() = 0;
+    virtual PandaUniquePtr<CallbackPoster> CreatePoster(Coroutine *target) = 0;
 };
 
 }  // namespace ark
