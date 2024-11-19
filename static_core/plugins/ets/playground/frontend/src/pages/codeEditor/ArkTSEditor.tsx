@@ -22,6 +22,10 @@ import {selectSyntax} from '../../store/selectors/syntax';
 import {setCodeAction} from '../../store/actions/code';
 import {AppDispatch} from '../../store';
 import debounce from 'lodash.debounce';
+import * as monaco from 'monaco-editor';
+import { loader } from '@monaco-editor/react';
+
+loader.config({ monaco });
 
 const ArkTSEditor: React.FC = () => {
     let backendSyntax = useSelector(selectSyntax);

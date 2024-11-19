@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
-window.runEnv = {
-    apiUrl: '/',
-};
+{
+    "presets": [
+        "@babel/preset-env",
+        "@babel/preset-react",
+        "@babel/preset-typescript"
+    ]
+}

@@ -13,6 +13,16 @@
  * limitations under the License.
  */
 
-window.runEnv = {
-    apiUrl: '/',
+module.exports = {
+    editor: {
+        create: jest.fn(),
+        setModelLanguage: jest.fn(),
+        createModel: jest.fn(),
+        getModel: jest.fn(),
+    },
+    languages: {
+        register: jest.fn(),
+        setLanguageConfiguration: jest.fn(),
+        setMonarchTokensProvider: jest.fn(),
+    },
 };

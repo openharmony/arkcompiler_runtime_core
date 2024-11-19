@@ -69,106 +69,106 @@ export const handleResponseLogs = createAsyncThunk(
     'logs/compileLogs',
     async (response: IApiResponse, thunkAPI) => {
         const state: RootState = thunkAPI.getState() as RootState;
-        const logsState = state?.logs;
-    if (response?.data?.compile) {
-        if (response?.data?.compile.exit_code !== 0 && response?.data?.compile.error) {
-            thunkAPI.dispatch(setCompileErrLogs(logsState?.compileErr?.concat({
-                message: response?.data?.compile.error,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setErrLogs(logsState?.err?.concat({
-                message: response?.data?.compile.error,
-                isRead: false,
-                from: ELogType.COMPILE_ERR
-            })));
-        } else if (response?.data?.compile.exit_code === 0) {
-            thunkAPI.dispatch(setCompileOutLogs(logsState?.compileOut?.concat({
-                message: response?.data?.compile?.output || 'Compile successful!',
-                isRead: false
-            })));
-            thunkAPI.dispatch(setOutLogs(logsState?.out?.concat({
-                message: response?.data?.compile?.output || 'Compile successful!',
-                isRead: false,
-                from: ELogType.COMPILE_OUT
-            })));
-        } else if (response?.data?.compile.exit_code !== 0 && response?.data?.compile.output) {
-            thunkAPI.dispatch(setCompileErrLogs(logsState?.compileErr?.concat({
-                message: response?.data?.compile.output,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setErrLogs(logsState?.err?.concat({
-                message: response?.data?.compile.output,
-                isRead: false,
-                from: ELogType.COMPILE_ERR
-            })));
-        }
-    }
+        const logsState = state.logs;
 
-    if ('run' in response?.data) {
-        if (response?.data?.run?.exit_code !== 0 && response?.data?.run?.error) {
-            thunkAPI.dispatch(setRunErrLogs(logsState?.runErr?.concat({
-                message: response?.data?.run.error,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setErrLogs(logsState?.err?.concat({
-                message: response?.data?.run.error,
-                isRead: false,
-                from: ELogType.RUN_ERR
-            })));
-        } else if (response?.data?.run?.exit_code === 0 && response?.data?.run.output) {
-            thunkAPI.dispatch(setRunOutLogs(logsState?.runOut?.concat({
-                message: response?.data?.run.output,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setOutLogs(logsState?.out?.concat({
-                message: response?.data?.run.output,
-                isRead: false,
-                from: ELogType.RUN_OUT
-            })));
-        } else if (response?.data?.run?.exit_code !== 0 && response?.data?.run?.output) {
-            thunkAPI.dispatch(setRunErrLogs(logsState?.runErr?.concat({
-                message: response?.data?.run.output,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setErrLogs(logsState?.err?.concat({
-                message: response?.data?.run.output,
-                isRead: false,
-                from: ELogType.RUN_ERR
-            })));
-        }
-    }
+        const handleLog = (
+            data: ICompileData | IRunData | IDisassemblyData | undefined,
+            logTypeOut: ELogType,
+            logTypeErr: ELogType,
+            successMessage: string,
+            setOutAction: (logs: ILog[]) => { payload: ILog[]; type: string },
+            setErrAction: (logs: ILog[]) => { payload: ILog[]; type: string }
+        ) => {
+            if (!data) return;
 
-    if (response?.data?.disassembly) {
-        if (response?.data?.disassembly?.exit_code !== 0 && response?.data?.disassembly?.error) {
-            thunkAPI.dispatch(setDisasmErrLogs(logsState?.disasmErr?.concat({
-                message: response?.data?.disassembly.error,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setErrLogs(logsState?.err?.concat({
-                message: response?.data?.disassembly.error,
-                isRead: false,
-                from: ELogType.DISASM_ERR
-            })));
-        } else if (response?.data?.disassembly?.exit_code === 0 && response?.data?.disassembly?.output) {
-            thunkAPI.dispatch(setDisasmOutLogs(logsState?.disasmOut?.concat({
-                message: response?.data?.disassembly.output,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setOutLogs(logsState?.out?.concat({
-                message: response?.data?.disassembly.output,
-                isRead: false,
-                from: ELogType.DISASM_OUT
-            })));
-        } else if (response?.data?.disassembly?.exit_code !== 0 && response?.data?.disassembly?.output) {
-            thunkAPI.dispatch(setDisasmErrLogs(logsState?.disasmErr?.concat({
-                message: response?.data?.disassembly.output,
-                isRead: false
-            })));
-            thunkAPI.dispatch(setErrLogs(logsState?.err?.concat({
-                message: response?.data?.disassembly.output,
-                isRead: false,
-                from: ELogType.DISASM_ERR
-            })));
-        }
-    }}
+            if (data.exit_code === 0 && data.output) {
+                thunkAPI.dispatch(setOutAction(
+                    logsState.out.concat({
+                        message: data.output,
+                        isRead: false,
+                        from: logTypeOut
+                    })
+                ));
+                thunkAPI.dispatch(setOutLogs(
+                    logsState.out.concat({
+                        message: data.output,
+                        isRead: false,
+                        from: logTypeOut
+                    })
+                ));
+            } else if (data.exit_code === 0) {
+                thunkAPI.dispatch(setOutAction(
+                    logsState.out.concat({
+                        message: successMessage,
+                        isRead: false,
+                        from: logTypeOut
+                    })
+                ));
+                thunkAPI.dispatch(setOutLogs(
+                    logsState.out.concat({
+                        message: successMessage,
+                        isRead: false,
+                        from: logTypeOut
+                    })
+                ));
+            } else if (data.exit_code !== 0 && data.error) {
+                thunkAPI.dispatch(setErrAction(
+                    logsState.err.concat({
+                        message: data.error,
+                        isRead: false,
+                        from: logTypeErr
+                    })
+                ));
+                thunkAPI.dispatch(setErrLogs(
+                    logsState.err.concat({
+                        message: data.error,
+                        isRead: false,
+                        from: logTypeErr
+                    })
+                ));
+            } else if (data.exit_code !== 0 && data.output) {
+                thunkAPI.dispatch(setErrAction(
+                    logsState.err.concat({
+                        message: data.output,
+                        isRead: false,
+                        from: logTypeErr
+                    })
+                ));
+                thunkAPI.dispatch(setErrLogs(
+                    logsState.err.concat({
+                        message: data.output,
+                        isRead: false,
+                        from: logTypeErr
+                    })
+                ));
+            }
+        };
+
+        handleLog(
+            response.data.compile,
+            ELogType.COMPILE_OUT,
+            ELogType.COMPILE_ERR,
+            'Compile successful!',
+            setCompileOutLogs,
+            setCompileErrLogs
+        );
+
+        handleLog(
+            response.data.run,
+            ELogType.RUN_OUT,
+            ELogType.RUN_ERR,
+            'Run successful!',
+            setRunOutLogs,
+            setRunErrLogs
+        );
+
+        handleLog(
+            response.data.disassembly,
+            ELogType.DISASM_OUT,
+            ELogType.DISASM_ERR,
+            'Disassembly successful!',
+            setDisasmOutLogs,
+            setDisasmErrLogs
+        );
+    }
 );

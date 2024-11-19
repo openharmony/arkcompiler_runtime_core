@@ -28,6 +28,5 @@ declare module '*.json';
 interface Window {
     runEnv: {
         apiUrl: string;
-        isProm: boolean;
     };
 }
