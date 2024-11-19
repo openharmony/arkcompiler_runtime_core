@@ -74,7 +74,7 @@ function positiveNumbersAsStrings(): Array<string> {
 function negativeNumbersAsStrings(): Array<string> {
     // Codes for  numberValues[0]
     let expected = new Array<string>(languageCodes.length);
-        for (let i: int = 0; i < expected.length; ++i) {
+    for (let i: int = 0; i < expected.length; ++i) {
         expected[i] = new string("");
     }
     expected[EN] = String.fromCharCode(45, 49, 44, 50, 51, 52, 46, 53);
@@ -94,7 +94,7 @@ function negativeNumbersAsStrings(): Array<string> {
 function negativeInfsAsStrings(): Array<string> {
     // Codes for numberValues[2]
     let expected = new Array<string>(languageCodes.length);
-        for (let i: int = 0; i < expected.length; ++i) {
+    for (let i: int = 0; i < expected.length; ++i) {
         expected[i] = new string("");
     }
     expected[EN] = String.fromCharCode(45, 8734);
@@ -172,7 +172,7 @@ function positiveBigIntsAsStrings(): Array<string> {
 function negativeBigIntsAsStrings(): Array<string> {
     // Codes for bigIntValues[0]
     let expected = new Array<string>(languageCodes.length);
-        for (let i: int = 0; i < expected.length; ++i) {
+    for (let i: int = 0; i < expected.length; ++i) {
         expected[i] = new string("");
     }
     expected[EN] = String.fromCharCode(45, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
