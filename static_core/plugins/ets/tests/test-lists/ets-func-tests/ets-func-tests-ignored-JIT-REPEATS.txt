@@ -1,4 +1,4 @@
-# Timeouts. Will be fixed when generics accept primitives as type arguments
+# #15592 Timeouts. Will be fixed when generics accept primitives as type arguments
 std/core/SortInternalTestShort.sts
 std/core/SortInternalTestInt.sts
 std/core/SortInternalTestByte.sts

@@ -447,11 +447,6 @@ spec/09.classes/constructor-inheritance/issue14720_5.sts
 spec/09.classes/9.6.Method_Declarations/Issue-14273_0.sts
 spec/09.classes/9.6.Method_Declarations/Issue-14273_3.sts
 
-
-### Issue 15763
-spec/classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/interface_overriding_05.sts
-### Issue 15763 end
-
 ### Type Erasure
 std/containers/BuiltinArrayMapTest.sts
 
@@ -477,13 +472,12 @@ spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_07_04.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_00.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_01.sts
 spec/05.Generics/genericTypeArgumentWithDefaultParameterValue_08_02.sts
-spec/05.Generics/issue14751.sts
 spec/05.Generics/issue15089_05.sts
 spec/05.Generics/issue15089_06.sts
 spec/05.Generics/issue15089_08.sts
 spec/05.Generics/wrongUsingInT.sts
 ###  Issue 16696 end
-### Issue 16269
+### Issue #15808
 spec/10.Interfaces/method_overiding_0005.sts
 # Issue 16622
 spec/09.classes/9.6.Method_Declarations/10.Overriding_by_Instance_Methods/interfaces_overriding/override_static_instance_0011.sts
