@@ -1241,6 +1241,46 @@
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/union_equality_operators/eq_2.sts
 07.expressions/25.equality_expressions/06.reference_equality_based_on_actual_type/type_parameter_equality_operators/eq2_2.sts
 
+# 7.33 Dynamic Import Expression is not implemented yet
+07.expressions/33.dynamic_import_expression/imp_01a.sts
+07.expressions/33.dynamic_import_expression/imp_01b.sts
+07.expressions/33.dynamic_import_expression/imp_01c.sts
+07.expressions/33.dynamic_import_expression/imp_01d.sts
+07.expressions/33.dynamic_import_expression/imp_01k.sts
+07.expressions/33.dynamic_import_expression/imp_02a.sts
+07.expressions/33.dynamic_import_expression/imp_02b.sts
+07.expressions/33.dynamic_import_expression/imp_02c.sts
+07.expressions/33.dynamic_import_expression/imp_02d.sts
+07.expressions/33.dynamic_import_expression/imp_03a.sts
+07.expressions/33.dynamic_import_expression/imp_03b.sts
+07.expressions/33.dynamic_import_expression/imp_03c.sts
+07.expressions/33.dynamic_import_expression/imp_03d.sts
+07.expressions/33.dynamic_import_expression/imp_04a.sts
+07.expressions/33.dynamic_import_expression/imp_04b.sts
+07.expressions/33.dynamic_import_expression/imp_04c.sts
+07.expressions/33.dynamic_import_expression/imp_04d.sts
+07.expressions/33.dynamic_import_expression/imp_05a.sts
+07.expressions/33.dynamic_import_expression/imp_05b.sts
+07.expressions/33.dynamic_import_expression/imp_05c.sts
+07.expressions/33.dynamic_import_expression/imp_05d.sts
+07.expressions/33.dynamic_import_expression/imp_06a.sts
+07.expressions/33.dynamic_import_expression/imp_06b.sts
+07.expressions/33.dynamic_import_expression/imp_06c.sts
+07.expressions/33.dynamic_import_expression/imp_06d.sts
+07.expressions/33.dynamic_import_expression/imp_07a.sts
+07.expressions/33.dynamic_import_expression/imp_07b.sts
+07.expressions/33.dynamic_import_expression/imp_07c.sts
+07.expressions/33.dynamic_import_expression/imp_07d.sts
+07.expressions/33.dynamic_import_expression/imp_10a.sts
+07.expressions/33.dynamic_import_expression/imp_10b.sts
+07.expressions/33.dynamic_import_expression/imp_10c.sts
+07.expressions/33.dynamic_import_expression/imp_10d.sts
+07.expressions/33.dynamic_import_expression/imp_10e.sts
+07.expressions/33.dynamic_import_expression/imp_10f.sts
+07.expressions/33.dynamic_import_expression/imp_11a.sts
+07.expressions/33.dynamic_import_expression/imp_11b.sts
+07.expressions/33.dynamic_import_expression/imp_neg_0.sts
+
 # 15704, 19950 Constant Narrowing Integer Conversion is not implemented
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_0.sts
 06.contexts_and_conversions/05.implicit_conversions/03.constant_narrowing_integer_conversion/assn_var/assn-var_1.sts
