@@ -203,3 +203,20 @@ export final class IllegalArgumentException extends Exception {
         super(s, cause);
     }
 }
+
+/**
+ * @class Represents runtime exception 
+ */
+export final class RuntimeException extends Exception {
+    constructor() {
+        super();
+    }
+
+    constructor(s: String) {
+        super(s);
+    }
+
+    constructor(s: String, cause: Object) {
+        super(s, cause);
+    }
+}
