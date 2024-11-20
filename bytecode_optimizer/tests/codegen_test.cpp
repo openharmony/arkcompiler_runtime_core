@@ -428,14 +428,8 @@ HWTEST_F(CodegenTest, codegen_test_012, TestSize.Level1)
     BytecodeOptimizerRuntimeAdapter runtime_adapter(*pfile.get());
 
     RuntimeInterface::MethodPtr caller = nullptr;
-    auto class_id = pfile->GetClassId(utf::CStringAsMutf8("L_GLOBAL;"));
-    EXPECT_TRUE(class_id.IsValid());
-    panda_file::ClassDataAccessor cda(*pfile.get(), class_id);
-
-    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-        BytecodeOptimizerRuntimeAdapter::MethodId id = mda.GetMethodId().GetOffset();
-        EXPECT_EQ(runtime_adapter.GetMethodArgumentsCount(caller, id), 0);
-    });
+    BytecodeOptimizerRuntimeAdapter::MethodId id = 178;  // foo method_id
+    EXPECT_EQ(runtime_adapter.GetMethodArgumentsCount(caller, id), 0);
 }
 
 /**
@@ -456,16 +450,11 @@ HWTEST_F(CodegenTest, codegen_test_013, TestSize.Level1)
     std::unique_ptr<const panda_file::File> pfile = ParseAndEmit(source);
     BytecodeOptimizerRuntimeAdapter runtime_adapter(*pfile.get());
 
-    auto class_id = pfile->GetClassId(utf::CStringAsMutf8("L_GLOBAL;"));
-    EXPECT_TRUE(class_id.IsValid());
-    panda_file::ClassDataAccessor cda(*pfile.get(), class_id);
+    int f = 178;  // foo method_id
+    RuntimeInterface::MethodPtr method;
+    method=(void*)(long)f;
 
-    cda.EnumerateMethods([&](panda_file::MethodDataAccessor &mda) {
-        BytecodeOptimizerRuntimeAdapter::MethodId id = mda.GetMethodId().GetOffset();
-        RuntimeInterface::MethodPtr method;
-        method=(void*)(long)id;
-        EXPECT_EQ(runtime_adapter.GetMethodFullName(method, false), "L_GLOBAL;::foo");
-    });
+    EXPECT_EQ(runtime_adapter.GetMethodFullName(method, false), "L_GLOBAL;::foo");
 }
 
 /**

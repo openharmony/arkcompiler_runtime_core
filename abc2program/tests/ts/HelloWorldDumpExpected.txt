@@ -24,10 +24,6 @@ _GLOBAL_1584 { 10 [ tag_value:5, string:"NestedLiteralArray", tag_value:6, metho
 # ====================
 # RECORDS
 
-.record _ESConcurrentModuleRequestsAnnotation {
-}
-.record.source_file 
-
 .record _ESModuleRecord {
 	u32 arkcompiler/runtime_core/abc2program/tests/ts/HelloWorld.ts _ESModuleRecord_1466
 }

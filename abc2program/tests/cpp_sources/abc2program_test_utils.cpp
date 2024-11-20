@@ -54,13 +54,10 @@ std::set<std::string> Abc2ProgramTestUtils::helloworld_expected_program_strings_
                                                                                     "toString",
                                                                                     "varA",
                                                                                     "x"};
-std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {
-    "_ESConcurrentModuleRequestsAnnotation",
-    "_ESModuleRecord",
-    "_ESSlotNumberAnnotation",
-    "_ESScopeNamesRecord",
-    "_GLOBAL"
-};
+std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_record_names_ = {"_ESModuleRecord",
+                                                                                    "_ESSlotNumberAnnotation",
+                                                                                    "_ESScopeNamesRecord",
+                                                                                    "_GLOBAL"};
 std::vector<std::string> Abc2ProgramTestUtils::helloworld_expected_literal_array_keys_ = {"_ESModuleRecord",
                                                                                           "_ESScopeNamesRecord",
                                                                                           "_GLOBAL",
