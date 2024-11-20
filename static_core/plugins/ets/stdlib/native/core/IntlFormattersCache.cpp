@@ -19,11 +19,10 @@ namespace ark::ets::stdlib {
 
 IntlFormattersCache::IntlFormattersCache()
 {
-    // NOLINTNEXTLINE(cert-msc51-cpp)
-    std::srand(time(nullptr));
-    ASSERT(MAX_SIZE_CACHE > 0U);
+    ASSERT(MAX_SIZE_CACHE > 1U);
     ASSERT(ERASE_RATIO > 0);
     ASSERT(ERASE_RATIO < 1);
+    ASSERT(ERASE_AMOUNT > 0);
 }
 
 icu::number::LocalizedNumberFormatter &IntlFormattersCache::NumFmtsCacheInvalidation(const std::string &locTag,
@@ -87,10 +86,10 @@ void IntlFormattersCache::EraseRandFmtsGroupByEraseRatio()
     os::memory::LockHolder lh(mtx_);
     // Remove random N "neighbours" items (group) from cache_ if size is maximum
     if (cache_.size() == MAX_SIZE_CACHE) {
-        constexpr auto ERASE_AMOUNT = std::max(1U, static_cast<uint32_t>(MAX_SIZE_CACHE * ERASE_RATIO));
-        // NOLINTNEXTLINE(cert-msc50-cpp)
-        static auto delta = static_cast<uint32_t>(std::rand() % (MAX_SIZE_CACHE - ERASE_AMOUNT + 1U));
-        // delta is in range [0; MAX_SIZE_CACHE - ERASE_AMOUNT]
+        // NOLINTNEXTLINE(cert-msc51-cpp)
+        static std::minstd_rand simpleRand(std::time(nullptr));
+        auto delta = static_cast<uint32_t>(simpleRand() % (MAX_SIZE_CACHE - ERASE_AMOUNT + 1U));
+        // delta is in random range [0; MAX_SIZE_CACHE - ERASE_AMOUNT]
         auto firstIt = cache_.begin();
         std::advance(firstIt, delta);
         auto lastIt = firstIt;
