@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import multiprocessing
 import os
 import stat
@@ -20,27 +21,25 @@ import sys
 import re
 from functools import lru_cache
 import random
-from typing import List, Dict, Any, Tuple, TextIO, Final
+from typing import List, Dict, Any, Tuple
 import logging
 
 import stress_common
 from stress_test import Test, Result
-from stress import StressJSTest, EXCLUDED_TESTS
+from stress_test262 import Test262StressTest, EXCLUDED_TESTS
 from stress_common import SCRIPT_DIR, collect_from
-
-FAIL_LIST_PATH = os.path.join(SCRIPT_DIR, 'fail_list_full.json')
-OPTIONS_LIST_PATH = os.path.join(SCRIPT_DIR, 'options_list.json')
-
-logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
 
 class Descriptor:
+
     def __init__(self, input_file: str) -> None:
         self.input_file = input_file
-        self.header = re.compile(
-            r"/\*---(?P<header>.+)---\*/", re.DOTALL)
+        self.header = re.compile(r"/\*---(?P<header>.+)---\*/", re.DOTALL)
         self.includes = re.compile(r"includes:\s+\[(?P<includes>.+)]")
         self.content = self.get_content()
+
+    def get_fail_list_path(self) -> str:
+        return os.path.join(SCRIPT_DIR, 'fail_list_harness_with_runtime.json')
 
     def get_content(self) -> str:
         with open(self.input_file, "r", encoding="utf-8") as file_pointer:
@@ -60,7 +59,9 @@ class Descriptor:
 
         includes = []
         match = self.includes.search(header)
-        includes += [incl.strip() for incl in match.group("includes").split(",")] if match else []
+        includes += [
+            incl.strip() for incl in match.group("includes").split(",")
+        ] if match else []
 
         result["includes"] = includes
         return result
@@ -89,13 +90,15 @@ def read_import(src: str) -> str:
     return code
 
 
-class StressJSFull(StressJSTest):
+class Test262StressTestWithRuntime(Test262StressTest):
 
-    def __init__(self, repeats: int, options_list, args) -> None:
-        super().__init__(options_list, args)
+    def __init__(self, repeats: int, args) -> None:
+        super().__init__(args)
         self.repeats = 3 if repeats is None else repeats
         self.build_dir = args.build_dir
-        logging.debug('Repeats: %s with timeout: %s', self.repeats, self.timeout)
+        logger = stress_common.create_logger()
+        logger.debug('Repeats: %s with timeout: %s', self.repeats,
+                     self.timeout)
 
     def compile_single(self, src: str) -> Tuple[str, str, int]:
         self.prepare_single(src)
@@ -111,20 +114,20 @@ class StressJSFull(StressJSTest):
 
         test_result_one = self.run_js_test_single(r1p)  # Run test once
 
-        cmd = [stress_common.STRESS, '--input-file', test.abc, '--output-file', stress_abc]
-        if test.source in self.options_list:
-            cmd += [self.options_list[test.source][0], self.options_list[test.source][1]]
-        result: stress_common.ExecRes = stress_common.stress_exec(cmd, allow_error=True, print_command=False,
-                                                                  env={"OUT_DIR": self.build_dir})
+        result = stress_common.run_abckit(self.build_dir, test.source,
+                                          test.abc, stress_abc)
+
         if result.returncode != 0:
-            error = stress_common.parse_stdout(result.returncode, result.stdout)
+            error = stress_common.parse_stdout(result.returncode,
+                                               result.stdout)
             return Result(test.source, error)
         # Stress test passed
 
         if test_result_one.result == -1:  # First attempt JS Test failed with timeout. This bypass next test
             return Result(test.source, "0")
 
-        test_result_two = self.run_js_test_single(r2p, self.repeats)  # Run test with defined repeats
+        test_result_two = self.run_js_test_single(
+            r2p, self.repeats)  # Run test with defined repeats
 
         if test_result_two.result == 0:
             return Result(test.source, "0")
@@ -138,72 +141,55 @@ class StressJSFull(StressJSTest):
     def prepare_single(self, src: str) -> None:
         flags = os.O_WRONLY | os.O_CREAT
         mode = stat.S_IWUSR | stat.S_IRUSR
-        with os.fdopen(os.open(src.replace("[", "_").replace("]", "_") + ".mjs", flags, mode), 'w') as out:
+        with os.fdopen(
+                os.open(
+                    src.replace("[", "_").replace("]", "_") + ".mjs", flags,
+                    mode), 'w') as out:
             with os.fdopen(os.open(src, os.O_RDONLY), 'r') as sf:
                 out.write(get_harness_code(self.js_dir))
-                for include in Descriptor(src).parse_descriptor().get('includes', []):
-                    imp = os.path.abspath(os.path.join(self.js_dir, 'harness', include))
+                for include in Descriptor(src).parse_descriptor().get(
+                        'includes', []):
+                    imp = os.path.abspath(
+                        os.path.join(self.js_dir, 'harness', include))
                     out.write(read_import(imp) + "\n")
                 out.write(sf.read())
 
     def collect(self) -> List[str]:
+        logger = stress_common.create_logger()
         tests: List[str] = []
         sp = os.path.join(self.js_dir, 'test')
-        tests.extend(collect_from(sp, lambda name: name.endswith('.js') and not name.startswith('.')))
+        tests.extend(
+            collect_from(
+                sp, lambda name: name.endswith('.js') and not name.startswith(
+                    '.')))
         sp = os.path.join(self.js_dir, 'implementation-contributed')
-        tests.extend(collect_from(sp, lambda name: name.endswith('.js') and not name.startswith('.')))
+        tests.extend(
+            collect_from(
+                sp, lambda name: name.endswith('.js') and not name.startswith(
+                    '.')))
         random.shuffle(tests)
 
-        logging.debug('Total tests: %s', len(tests))
+        logger.debug('Total tests: %s', len(tests))
         for excluded in EXCLUDED_TESTS:
             tests = list(filter(lambda name: excluded not in name, tests))
-        logging.debug('Tests after exclude: %s', len(tests))
+        logger.debug('Tests after exclude: %s', len(tests))
 
         return tests
 
     def build(self) -> List[Test]:
+        logger = stress_common.create_logger()
         tests: List[str] = self.collect()
 
-        logging.debug('Running compiler...')
+        logger.debug('Running compiler...')
         compiled_tests: List[Test] = []
         counter = 0
         with multiprocessing.pool.ThreadPool(stress_common.NPROC) as pool:
-            for js_path, abc_path, retcode in pool.imap(self.compile_single, tests, chunksize=20):
+            for js_path, abc_path, retcode in pool.imap(self.compile_single,
+                                                        tests,
+                                                        chunksize=20):
                 if retcode == 0:
                     compiled_tests.append(Test(js_path, abc_path))
                 counter += 1
-                sys.stdout.write(f'{counter}/{len(tests)}    \r')  # CC-OFF(G.LOG.02) progress print
 
-        logging.debug('Tests successfully compiled: %s', len(compiled_tests))
+        logger.debug('Tests successfully compiled: %s', len(compiled_tests))
         return compiled_tests
-
-
-def main():
-    logging.debug('ABCKit stress test')
-    args = stress_common.get_args()
-    test = StressJSFull(args.repeats, stress_common.get_options_list(OPTIONS_LIST_PATH), args)
-    test.prepare()
-
-    tests: List[Test] = test.build()
-    results = test.run(tests)
-
-    fail_list = stress_common.get_fail_list(results)
-
-    if args.update_fail_list:
-        stress_common.update_fail_list(FAIL_LIST_PATH, fail_list)
-        logging.debug('Failures/Total: {}/%s', len(fail_list), len(results))
-        return 0
-
-    if not stress_common.check_regression_errors(FAIL_LIST_PATH, fail_list):
-        return 1
-
-    if not stress_common.check_fail_list(FAIL_LIST_PATH, fail_list):
-        logging.debug('Failures/Total: %s/%s', len(fail_list), len(results))
-
-    logging.debug('ABCKit: no regressions')
-    logging.debug('Failures/Total: %s/%s', len(fail_list), len(results))
-    return 0
-
-
-if __name__ == '__main__':
-    sys.exit(main())

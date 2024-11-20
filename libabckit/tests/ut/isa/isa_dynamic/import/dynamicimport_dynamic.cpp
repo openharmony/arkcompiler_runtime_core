@@ -34,7 +34,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynamicImport : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/import/dynamicimport_dynamic.abc",
@@ -78,7 +78,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_1)
     EXPECT_TRUE(helpers::Match(output, ""));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/import/dynamicimport_dynamic.abc",
@@ -125,7 +125,7 @@ TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_2)
     EXPECT_TRUE(helpers::Match(output, ""));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_3)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/import/dynamicimport_dynamic.abc",
@@ -198,7 +198,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> GetSchema()
             {{1}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynamicImport, IcreateDynamicimport_4)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/import/dynamicimport_dynamic.abc",

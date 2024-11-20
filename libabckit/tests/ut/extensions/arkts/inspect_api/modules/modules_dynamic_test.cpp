@@ -40,7 +40,7 @@ class LibAbcKitArkTSInspectApiModulesTest : public ::testing::Test {};
 // ========================================
 
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
-// Test: test-kind=internal, abc-kind=ArkTS1, category=positive
+// Test: test-kind=internal, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitArkTSInspectApiModulesTest, DynamicFillModule)
 {
     auto output = helpers::ExecuteDynamicAbc(

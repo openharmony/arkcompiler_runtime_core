@@ -136,19 +136,19 @@ void TemplateTestFunction(const std::string &inputResult, const std::string &out
 
 class LibAbcKitClassesAPITest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iSetClass, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iSetClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitClassesAPITest, LibAbcKitTestIsetClassIsInstanceTrue)
 {
     TemplateTestFunction("false\ntrue\n", "true\ntrue\n", "foo", TransformIrForIsetClass);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iSetClass, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iSetClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitClassesAPITest, LibAbcKitTestIsetClassIsInstanceFalse)
 {
     TemplateTestFunction("false\ntrue\n", "false\nfalse\n", "bar", TransformIrForIsetClass);
 }
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iGetClass, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iGetClass, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitClassesAPITest, LibAbcKitTestIgetClassIsInstance)
 {
     TemplateTestFunction("false\ntrue\n", "true\ntrue\n", "foo", TransformIrForIgetClass);

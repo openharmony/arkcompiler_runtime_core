@@ -131,7 +131,7 @@ void CreateLoopStatic(AbckitGraph *graph, AbckitCoreFunction *consoleLogInt)
 
 class LibAbcKitLoopStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopTestStatic)
 {
     auto output =
@@ -148,7 +148,7 @@ TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopTestStatic)
                                        "loop_static/ETSGLOBAL", "main");
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreatePhi, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitLoopStaticTest, LibAbcKitLoopDynamic)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/ir_core/loops/loop_dynamic.abc", "loop_dynamic");

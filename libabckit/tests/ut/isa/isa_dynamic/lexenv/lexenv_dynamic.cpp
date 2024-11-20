@@ -239,55 +239,56 @@ static void TestLexEnvVar(bool isWideMode, bool isWithName = false)
     EXPECT_TRUE(helpers::Match(output, "2\n4\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenv, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, NewLexenv)
 {
     TestLexEnvVar(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, StLexvar)
 {
     TestLexEnvVar(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, LdLexvar)
 {
     TestLexEnvVar(false);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenv, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideNewLexenv)
 {
     TestLexEnvVar(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideStLexvar)
 {
     TestLexEnvVar(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlexvar, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlexvar, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideLdLexvar)
 {
     TestLexEnvVar(true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenvwithname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenvwithname, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, NewLexenvWithName)
 {
     TestLexEnvVar(false, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenvwithname, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenvwithname, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, WideNewLexenvWithName)
 {
     TestLexEnvVar(true, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreatePoplexenv, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreatePoplexenv, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynLexEnvVar, PopLexenv)
 {
     TestLexEnvVar(false);

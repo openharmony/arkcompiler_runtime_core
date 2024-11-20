@@ -60,85 +60,85 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 
 class LibAbcKitCreateDynBinInstTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAdd2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAdd2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynAdd2Valid)
 {
     ValidTest(g_dynG->iCreateAdd2, ABCKIT_ISA_API_DYNAMIC_OPCODE_ADD2, "12\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMul2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMul2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynMul2Valid)
 {
     ValidTest(g_dynG->iCreateMul2, ABCKIT_ISA_API_DYNAMIC_OPCODE_MUL2, "20\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMod2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMod2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynMod2Valid)
 {
     ValidTest(g_dynG->iCreateMod2, ABCKIT_ISA_API_DYNAMIC_OPCODE_MOD2, "0\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDiv2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDiv2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynDiv2Valid)
 {
     ValidTest(g_dynG->iCreateDiv2, ABCKIT_ISA_API_DYNAMIC_OPCODE_DIV2, "5\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSub2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSub2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynSub2Valid)
 {
     ValidTest(g_dynG->iCreateSub2, ABCKIT_ISA_API_DYNAMIC_OPCODE_SUB2, "8\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateExp, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateExp, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynExpValid)
 {
     ValidTest(g_dynG->iCreateExp, ABCKIT_ISA_API_DYNAMIC_OPCODE_EXP, "100\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateEq, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateEq, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynEqValid)
 {
     ValidTest(g_dynG->iCreateEq, ABCKIT_ISA_API_DYNAMIC_OPCODE_EQ, "false\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNoteq, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNoteq, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynNoteqValid)
 {
     ValidTest(g_dynG->iCreateNoteq, ABCKIT_ISA_API_DYNAMIC_OPCODE_NOTEQ, "true\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLess, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLess, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynLessValid)
 {
     ValidTest(g_dynG->iCreateLess, ABCKIT_ISA_API_DYNAMIC_OPCODE_LESS, "false\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLesseq, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLesseq, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynLesseqValid)
 {
     ValidTest(g_dynG->iCreateLesseq, ABCKIT_ISA_API_DYNAMIC_OPCODE_LESSEQ, "false\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreater, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreater, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynGreaterValid)
 {
     ValidTest(g_dynG->iCreateGreater, ABCKIT_ISA_API_DYNAMIC_OPCODE_GREATER, "true\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreatereq, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreatereq, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynGreatereqValid)
 {
     ValidTest(g_dynG->iCreateGreatereq, ABCKIT_ISA_API_DYNAMIC_OPCODE_GREATEREQ, "true\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStrictnoteq, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStrictnoteq, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynStrictnoteqValid)
 {
     ValidTest(g_dynG->iCreateStrictnoteq, ABCKIT_ISA_API_DYNAMIC_OPCODE_STRICTNOTEQ, "true\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStricteq, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStricteq, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstTest, CreateDynStricteqValid)
 {
     ValidTest(g_dynG->iCreateStricteq, ABCKIT_ISA_API_DYNAMIC_OPCODE_STRICTEQ, "false\n");

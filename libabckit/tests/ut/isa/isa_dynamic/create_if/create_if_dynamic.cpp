@@ -213,7 +213,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> GetSchema()
             {{2, 3}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIf, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIf, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfDynamicTest, LibAbcKitTestCreateIfDyn)
 {
     helpers::TransformMethod(
@@ -245,7 +245,7 @@ TEST_F(LibAbcKitCreateIfDynamicTest, LibAbcKitTestCreateIfDynNeg)
     EXPECT_TRUE(helpers::Match(output, "0\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetConditionCode, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iGetConditionCode, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfDynamicTest, LibAbcKitTestGetConditionCode)
 {
     helpers::TransformMethod(
@@ -277,7 +277,7 @@ TEST_F(LibAbcKitCreateIfDynamicTest, LibAbcKitTestGetConditionCodeNeg)
     EXPECT_TRUE(helpers::Match(output, "0\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iSetConditionCode, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iSetConditionCode, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateIfDynamicTest, LibAbcKitTestSetConditionCode)
 {
     helpers::TransformMethod(

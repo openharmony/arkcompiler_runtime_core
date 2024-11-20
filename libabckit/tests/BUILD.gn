@@ -753,18 +753,12 @@ libabckit_host_unittest_action("abckit_gtests") {
   ]
 }
 
-group("libabckit_stress_tests_package") {
+group("abckit_stress_tests_package") {
   deps = [
     "$abckit_root/abckit:abckit(${host_toolchain})",
-    "$abckit_root/abckit/stress_plugin:abckit_stress_plugin(${host_toolchain})",
+    "$abckit_root/tests/stress/abckit_plugin:abckit_stress_plugin(${host_toolchain})",
     "$ark_root_static/verification/verifier:verifier_bin(${host_toolchain})",
   ]
-}
-
-action("abckit_stress_tests") {
-  deps = [ ":libabckit_stress_tests_package" ]
-  outputs = [ "$target_gen_dir/abckit_stress_tests.txt" ]
-  script = "stress/stress.py"
 }
 
 group("abckit_stress_tests_apps") {

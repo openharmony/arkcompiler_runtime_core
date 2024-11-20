@@ -55,7 +55,7 @@ void TransformIsUndefinedIr(AbckitGraph *graph)
 
 class LibAbcKitIsUndefinedStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsUndefined, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsUndefined, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIsUndefinedStaticTest, LibAbcKitTestIsUndefined)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_undefined/is_undefined_static.abc",

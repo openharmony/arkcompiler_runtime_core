@@ -169,7 +169,7 @@ namespace libabckit::test {
 
 class AbckitScenarioTestClean : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddTryCatchClean)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios_c_api_clean/dynamic/add_try_catch/add_try_catch.abc";

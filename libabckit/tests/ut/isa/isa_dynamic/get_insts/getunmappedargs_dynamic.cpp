@@ -34,7 +34,7 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynGetunmappedargs : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetunmappedargs, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetunmappedargs, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/get_insts/getunmappedargs_dynamic.abc",
@@ -67,7 +67,7 @@ TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_1)
     EXPECT_TRUE(helpers::Match(output, "1\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetunmappedargs, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetunmappedargs, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/get_insts/getunmappedargs_dynamic.abc",

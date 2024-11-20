@@ -26,21 +26,18 @@ logging.basicConfig(format='%(message)s', level=logging.DEBUG)
 
 def get_args():
     parser = argparse.ArgumentParser(description='Abckit status script')
-    parser.add_argument(
-        '--print-implemented',
-        action='store_true',
-        default=False,
-        help=f'Print list of implemented API and exit')
-    parser.add_argument(
-        '--cppapi',
-        action='store_true',
-        default=False,
-        help=f'Fill table with tests for cpp api')
-    parser.add_argument(
-        '--capi',
-        action='store_true',
-        default=False,
-        help=f'Fill table with tests for c api')
+    parser.add_argument('--print-implemented',
+                        action='store_true',
+                        default=False,
+                        help=f'Print list of implemented API and exit')
+    parser.add_argument('--cppapi',
+                        action='store_true',
+                        default=False,
+                        help=f'Fill table with tests for cpp api')
+    parser.add_argument('--capi',
+                        action='store_true',
+                        default=False,
+                        help=f'Fill table with tests for c api')
     return parser.parse_args()
 
 
@@ -58,32 +55,21 @@ specs = ['public:', 'private:', 'protected:']
 libabckit_dir = script_dir.rsplit('/', 1)[0]
 abckit_tests = os.path.join(libabckit_dir, 'tests')
 
-c_sources = {
-    'include/c',
-    'src/include_v2/c/isa'
-}
+c_sources = {'include/c', 'src/include_v2/c/isa'}
 
 c_tests = {
-    'tests/canary',
-    'tests/helpers',
-    'tests/internal',
-    'tests/null_args_tests',
-    'tests/sanitizers',
-    'tests/scenarios',
-    'tests/scenarios_c_api_clean',
-    'tests/stress',
-    'tests/ut tests/wrong_ctx_tests',
-    'tests/wrong_mode_tests'
+    'tests/canary', 'tests/helpers', 'tests/internal', 'tests/null_args_tests',
+    'tests/sanitizers', 'tests/scenarios', 'tests/scenarios_c_api_clean',
+    'tests/stress', 'tests/ut tests/wrong_ctx_tests', 'tests/wrong_mode_tests'
 }
 
-cpp_sources = {
-    'include/cpp'
-}
+cpp_sources = {'include/cpp'}
 
 cpp_tests = {
     'tests/cpp/tests',
     'tests/mock',
     'tests/regression',
+    'tests/scenarios_cpp_api_clean'
 }
 
 TS = 'TS'
@@ -114,6 +100,7 @@ def get_full_annotation(it, annotation_start):
 
 
 class Test:
+
     def __init__(self, s):
         err = f'Wrong test annotation: "{s}"'
 
@@ -121,7 +108,7 @@ class Test:
         self.abc_kind = ''
         self.api = ''
         self.category = ''
-        self.extension = 'c'
+        self.extension = ''
 
         check('// Test:' in s, err)
         s = s.replace('// Test:', '')
@@ -138,12 +125,8 @@ class Test:
                 self.api = value
             elif key == 'category':
                 possible_values = [
-                    'positive',
-                    'negative-mode',
-                    'negative-nullptr',
-                    'negative-file',
-                    'internal',
-                    'negative'
+                    'positive', 'negative-mode', 'negative-nullptr',
+                    'negative-file', 'internal', 'negative'
                 ]
                 check(value in possible_values, err)
                 self.category = value
@@ -168,7 +151,8 @@ def is_first_test_line(line):
 
 def get_test_from_annotation(api, annotation):
     test = Test(annotation)
-    if ('api=' in annotation or 'mock=' in annotation) and test.api != 'ApiImpl::GetLastError':
+    if ('api=' in annotation
+            or 'mock=' in annotation) and test.api != 'ApiImpl::GetLastError':
         check(test.api in api, f'No such API: {test.api}')
     return test
 
@@ -189,7 +173,8 @@ def collect_tests_from_path(path, api):
 
             if is_first_test_line(line):
                 test_count += 1
-                check(test_count <= ano_count, f'Test has no annotation:\n{path}\n{line}\n')
+                check(test_count <= ano_count,
+                      f'Test has no annotation:\n{path}\n{line}\n')
                 continue
 
             info = check_test_anno_line(line)
@@ -216,13 +201,15 @@ def collect_tests(path, api):
     for dirpath, _, filenames in os.walk(f'{libabckit_dir}/{path}'):
         for name in filenames:
             if name.endswith('.cpp'):
-                tests += collect_tests_from_path(os.path.join(dirpath, name), api)
+                tests += collect_tests_from_path(os.path.join(dirpath, name),
+                                                 api)
     return tests
 
 
 def get_tests_statistics(api, tests):
     for test in tests:
-        if (test.kind != 'api' and test.kind != 'mock') or test.api == 'ApiImpl::GetLastError':
+        if (test.kind != 'api' and test.kind
+                != 'mock') or test.api == 'ApiImpl::GetLastError':
             continue
         if test.abc_kind == ARKTS1:
             api[test.api].arkts1_tests += 1
@@ -260,6 +247,7 @@ def check(cond, msg=''):
 
 
 class API:
+
     def __init__(self, name, domain, sig='', extension=''):
         self.name = name
         self.domain = domain
@@ -335,15 +323,19 @@ def collect_api(path, extension):
             continue
 
         if re.search(r'struct Abckit(.*)Api(.*)\s\{', signature):
-            domain = re.search(r'struct Abckit(.*)\s\{', signature.strip()).group(1)
+            domain = re.search(r'struct Abckit(.*)\s\{',
+                               signature.strip()).group(1)
             domain = f'{domain}Impl'
 
         elif re.match(r'class .+ {', signature):
-            if match := re.search(r'class (.+) .+ : .+ {', signature, re.IGNORECASE):
+            if match := re.search(r'class (.+) .+ : .+ {', signature,
+                                  re.IGNORECASE):
                 domain = match.group(1)
-            elif match := re.search(r'class (.+) : .+ {', signature, re.IGNORECASE):
+            elif match := re.search(r'class (.+) : .+ {', signature,
+                                    re.IGNORECASE):
                 domain = match.group(1)
-            elif match := re.search(r'class (.+) (.+){', signature, re.IGNORECASE):
+            elif match := re.search(r'class (.+) (.+){', signature,
+                                    re.IGNORECASE):
                 domain = match.group(1)
             elif match := re.search(r'class (.+) {', signature, re.IGNORECASE):
                 domain = match.group(1)
@@ -365,20 +357,42 @@ def collect_api_from_sources(sources, extension):
     apis = {}
     for src in sources:
         for (dirpath, _, filenames) in os.walk(f'{libabckit_dir}/{src}'):
-            headers = list(filter(lambda f: re.fullmatch(r'(.+)(?<!_impl).h$', f), filenames))
+            headers = list(
+                filter(lambda f: re.fullmatch(r'(.+)(?<!_impl).h$', f),
+                       filenames))
             for file in headers:
-                apis = dict(apis.items() | collect_api(os.path.join(dirpath, file), extension).items())
+                apis = dict(apis.items() | collect_api(
+                    os.path.join(dirpath, file), extension).items())
     return apis
+
+
+def api_test_category(tests, name):
+    return len(
+        list(
+            filter(lambda t: t.kind == 'api' and t.category == name,
+                   tests)))
+
+
+def api_lang(tests, name):
+    return len(
+        list(
+            filter(lambda t: t.kind == 'api' and t.abc_kind == name,
+                   tests)))
+
+
+def scenario_lang(tests, name):
+    return len(
+        list(
+            filter(lambda t: t.kind == 'scenario' and t.abc_kind == name,
+                   tests)))
 
 
 def print_cppapi_stat(tests_pathes, api, expected=0):
     tests = []
     for p in tests_pathes:
-        tests += list(filter(lambda t: t.extension == 'cpp', collect_tests(p, api)))
+        tests += list(
+            filter(lambda t: t.extension == 'cpp', collect_tests(p, api)))
     api = get_tests_statistics(api, tests)
-
-    def scenario_lang(name):
-        return len(list(filter(lambda t: t.kind == 'scenario' and t.abc_kind == name, tests)))
 
     def api_tests_kind(kind):
         return list(filter(lambda t: t.kind == kind, tests))
@@ -388,7 +402,8 @@ def print_cppapi_stat(tests_pathes, api, expected=0):
             return 0
         return array[i]
 
-    mock_tests_apis = list(dict.fromkeys(t.api for t in api_tests_kind("mock")))
+    mock_tests_apis = list(dict.fromkeys(t.api
+                                         for t in api_tests_kind("mock")))
     api_tests_apis = list(dict.fromkeys(t.api for t in api_tests_kind("api")))
     internal_tests = list(filter(lambda t: t.kind == 'internal', tests))
     regression_tests = list(filter(lambda t: t.kind == 'regression', tests))
@@ -403,9 +418,12 @@ def print_cppapi_stat(tests_pathes, api, expected=0):
 
     logging.debug(f'>>> CPP EXTENSION <<<\n')
 
-    logging.debug('Total API:                                              %s/%s', len(api), expected)
+    logging.debug(
+        'Total API:                                              %s/%s',
+        len(api), expected)
     logging.debug('')
-    logging.debug('Total Tests:                                            %s', len(tests))
+    logging.debug('Total Tests:                                            %s',
+                  len(tests))
     logging.debug('')
     logging.debug('Total API\'S with api tests:                             %s/%s',
                   len(api_tests_apis), expected)
@@ -415,8 +433,12 @@ def print_cppapi_stat(tests_pathes, api, expected=0):
                   len(internal_tests))
     logging.debug('Total regression tests:                                   %s',
                   len(regression_tests))
-    logging.debug('ArkTS1/ArkTS2/JS/TS scenario tests:                     %s/%s/%s/%s',
-                  scenario_lang(ARKTS1), scenario_lang(ARKTS2), scenario_lang(JS), scenario_lang(TS))
+    logging.debug('Total scenario tests:                                     %s',
+                  len(list(filter(lambda t: t.kind == 'scenario', tests))))
+    logging.debug(
+        'ArkTS1/ArkTS2/JS/TS scenario tests:                     %s/%s/%s/%s',
+        scenario_lang(tests, ARKTS1), scenario_lang(tests, ARKTS2), scenario_lang(tests, JS),
+        scenario_lang(tests, TS))
     logging.debug(f'\n------------------------------------------------------------------\n')
 
 
@@ -424,7 +446,8 @@ def print_capi_stat(tests_pathes, api):
     csv = ''
     tests = []
     for p in tests_pathes:
-        tests += list(filter(lambda t: t.extension == 'c', collect_tests(p, api)))
+        tests += list(
+            filter(lambda t: t.extension == 'c', collect_tests(p, api)))
     api = get_tests_statistics(api, tests)
     for name in api:
         csv += (
@@ -441,45 +464,49 @@ def print_capi_stat(tests_pathes, api):
                  'negative_tests,negative_nullptr_tests,negative_ctx_tests,other_tests\n'))
         f.write(csv)
 
-    def api_test_category(name):
-        return len(list(filter(lambda t: t.kind == 'api' and t.category == name, tests)))
+    log_capi_stat(api, tests)
 
-    def api_lang(name):
-        return len(list(filter(lambda t: t.kind == 'api' and t.abc_kind == name, tests)))
 
-    def scenario_lang(name):
-        return len(list(filter(lambda t: t.kind == 'scenario' and t.abc_kind == name, tests)))
+def log_capi_stat(api, tests):
 
     logging.debug('>>> C <<<\n')
 
-    logging.debug('Total API:                                              %s', len(api))
+    logging.debug('Total API:                                              %s',
+                  len(api))
     logging.debug('')
-    logging.debug('Total Tests:                                            %s', len(tests))
+    logging.debug('Total Tests:                                            %s',
+                  len(tests))
     logging.debug('')
     logging.debug('Total API tests:                                        %s',
                   len(list(filter(lambda t: t.kind == 'api', tests))))
-    logging.debug('Positive/Negative/NullArg/WrongCtx/WrongMode API tests: %s/%s/%s/%s/%s',
-                  api_test_category('positive'),
-                  api_test_category('negative'),
-                  api_test_category('negative-nullptr'),
-                  api_test_category('negative-file'),
-                  api_test_category('negative-mode'))
-    logging.debug('ArkTS1/ArkTS2/JS/TS/NoABC API tests:                    %s/%s/%s/%s/%s',
-                  api_lang(ARKTS1), api_lang(ARKTS2), api_lang(JS), api_lang(TS), api_lang(NO_ABC))
+    logging.debug(
+        'Positive/Negative/NullArg/WrongCtx/WrongMode API tests: %s/%s/%s/%s/%s',
+        api_test_category(tests, 'positive'), api_test_category(tests, 'negative'),
+        api_test_category(tests, 'negative-nullptr'),
+        api_test_category(tests, 'negative-file'), api_test_category(tests, 'negative-mode'))
+    logging.debug(
+        'ArkTS1/ArkTS2/JS/TS/NoABC API tests:                    %s/%s/%s/%s/%s',
+        api_lang(tests, ARKTS1), api_lang(tests, ARKTS2), api_lang(tests, JS), api_lang(tests, TS),
+        api_lang(tests, NO_ABC))
     logging.debug('')
     logging.debug('Total scenario tests:                                   %s',
                   len(list(filter(lambda t: t.kind == 'scenario', tests))))
-    logging.debug('ArkTS1/ArkTS2/JS/TS scenario tests:                     %s/%s/%s/%s',
-                  scenario_lang(ARKTS1), scenario_lang(ARKTS2), scenario_lang(JS), scenario_lang(TS))
+    logging.debug(
+        'ArkTS1/ArkTS2/JS/TS scenario tests:                     %s/%s/%s/%s',
+        scenario_lang(tests, ARKTS1), scenario_lang(tests, ARKTS2), scenario_lang(tests, JS),
+        scenario_lang(tests, TS))
     logging.debug('')
     logging.debug('Internal tests:                                         %s',
                   len(list(filter(lambda t: t.kind == 'internal', tests))))
-    logging.debug(f'\n------------------------------------------------------------------\n')
+    logging.debug(
+        f'\n------------------------------------------------------------------\n'
+    )
 
 
 cpp_api, c_api = {}, {}
 if args.cppapi:
-    cpp_api = dict(cpp_api.items() | collect_api_from_sources(cpp_sources, 'cpp').items())
+    cpp_api = dict(cpp_api.items()
+                   | collect_api_from_sources(cpp_sources, 'cpp').items())
 c_api = dict(c_api.items() | collect_api_from_sources(c_sources, 'c').items())
 
 if args.print_implemented:

@@ -29,7 +29,7 @@ static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitInspectApiFilesTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=InspectApiImpl::fileGetVersion, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=InspectApiImpl::fileGetVersion, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiFilesTest, StaticFileGetVersion)
 {
     LIBABCKIT_LOG(DEBUG) << "StaticFileGetVersion source: " << ABCKIT_TEST_DIR "ut/metadata_core/inspect_api/files\n";
@@ -47,7 +47,7 @@ TEST_F(LibAbcKitInspectApiFilesTest, StaticFileGetVersion)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::fileGetVersion, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::fileGetVersion, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileGetVersion)
 {
     LIBABCKIT_LOG(DEBUG) << "StaticFileGetVersion source: " << ABCKIT_TEST_DIR "ut/metadata_core/inspect_api/files\n";
@@ -65,7 +65,7 @@ TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileGetVersion)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::fileEnumerateModules, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::fileEnumerateModules, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileEnumerateModules)
 {
     AbckitFile *file = nullptr;
@@ -90,7 +90,8 @@ TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileEnumerateModules)
 }
 
 // NOTE: fix after ets2bundle integrated into abckit unit tests
-// Test: test-kind=api, api=InspectApiImpl::fileEnumerateExternalModules, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::fileEnumerateExternalModules, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiFilesTest, DISABLED_DynamicFileEnumerateExternalModules)
 {
     AbckitFile *file = nullptr;

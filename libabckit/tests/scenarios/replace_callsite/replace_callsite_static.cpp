@@ -69,7 +69,7 @@ void TransformIR(ReplaceContext *rctx)
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestReplaceCallSite)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/replace_callsite/replace_callsite_static.abc";

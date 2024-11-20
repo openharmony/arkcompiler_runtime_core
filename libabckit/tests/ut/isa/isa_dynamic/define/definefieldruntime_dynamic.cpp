@@ -36,7 +36,8 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynDefineFieldRuntime : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyvalue_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldruntime_dynamic.abc",
@@ -70,7 +71,8 @@ TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyvalu
     EXPECT_TRUE(helpers::Match(output, "val3\nundefined\nundefined\nundefined\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyvalue_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldruntime_dynamic.abc",
@@ -103,7 +105,8 @@ TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyvalu
     EXPECT_TRUE(helpers::Match(output, "undefined\nval3\nundefined\nundefined\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyindex, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyindex_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldruntime_dynamic.abc",
@@ -132,7 +135,8 @@ TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyinde
     EXPECT_TRUE(helpers::Match(output, "undefined\nundefined\nval3\nundefined\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyindex, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyindex, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineFieldRuntime, IcreateCallruntimeDefinefieldbyindex_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definefieldruntime_dynamic.abc",

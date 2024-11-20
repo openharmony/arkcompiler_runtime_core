@@ -65,7 +65,7 @@ void TransformIR(AbckitGraph *graph)
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticParameterCheck)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/parameter_check/parameter_check_static.abc",

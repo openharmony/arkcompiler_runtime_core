@@ -65,7 +65,7 @@ void TransformIrStatic2(AbckitGraph *graph)
 }
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, StaticSetInput)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static.abc",
@@ -101,7 +101,7 @@ TEST_F(LibAbcKitIrInstInputsTest, StaticSetInput)
     EXPECT_TRUE(helpers::Match(output, "10 20\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, StaticSetInputs)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/inst_inputs/inst_inputs_static.abc",
@@ -168,7 +168,7 @@ void TransformIrDynamic2(AbckitGraph *graph)
 }
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInput, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInput)
 {
     helpers::TransformMethod(
@@ -199,7 +199,7 @@ TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInput)
         });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iSetInputs, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitIrInstInputsTest, DynamicSetInputs)
 {
     auto cb = [](AbckitGraph *graph) {

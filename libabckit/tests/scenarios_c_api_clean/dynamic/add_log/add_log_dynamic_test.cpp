@@ -246,7 +246,7 @@ static std::string GetMethodName(AbckitCoreFunction *method)
 }
 
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTestClean, LibAbcKitTestDynamicAddLogClean)
 {
     // ExecuteDynamicAbc is helper function needed for testing. Вoes not affect the logic of IR transformation

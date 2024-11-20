@@ -119,7 +119,8 @@ static void FillUndefBB(AbckitGraph *graph, AbckitBasicBlock *bbUndef)
     g_implG->bbAddInstBack(bbUndef, ifInst2);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithexcludedkeys_1)
 {
     auto output =
@@ -171,7 +172,8 @@ TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithex
     EXPECT_TRUE(helpers::Match(output, "value\nage\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateobjectwithexcludedkeys, IcreateCreateobjectwithexcludedkeys_2)
 {
     auto output =

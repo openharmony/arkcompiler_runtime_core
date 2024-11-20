@@ -66,7 +66,7 @@ enum class TryCatchScenario {
 }
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::gInsertTryCatch, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gInsertTryCatch, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynamicTryCatchTest, TryCatchWrapPositive)
 {
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, "insert_try_catch_dynamic_wrapper");
@@ -101,7 +101,7 @@ TEST_F(LibAbcKitDynamicTryCatchTest, TryCatchWrapPositive)
     EXPECT_TRUE(helpers::Match(output, "TRY\nTHROW\nINNER_CATCH\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gInsertTryCatch, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gInsertTryCatch, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitDynamicTryCatchTest, TryCatchWrapPositiveTwoBBs)
 {
     auto output = helpers::ExecuteDynamicAbc(INPUT_PATH, "insert_try_catch_dynamic_wrapper");
@@ -157,7 +157,7 @@ TEST_F(LibAbcKitDynamicTryCatchTest, TryCatchWrapPositiveTwoBBs)
     EXPECT_TRUE(helpers::Match(output, "TRY\nTHROW\nINNER_CATCH_BB1\nINNER_CATCH_BB2\n"));
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal, extension=c
 TEST_F(LibAbcKitDynamicTryCatchTest, InsertTryCatchValid)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/ir_core/insert_try_catch/insert_try_catch_dynamic.abc",

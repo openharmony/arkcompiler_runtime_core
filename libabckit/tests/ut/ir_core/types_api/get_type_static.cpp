@@ -59,7 +59,7 @@ static void InspectMethodStaticValid(AbckitGraph *graph)
     CheckTypeOfInst(addInst, ABCKIT_TYPE_ID_F64);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::iGetType, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::iGetType, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitGetTypeStaticTest, GetTypeStatic)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/types_api/get_type_static.abc", "foo",

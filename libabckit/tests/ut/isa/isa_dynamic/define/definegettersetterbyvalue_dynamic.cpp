@@ -34,7 +34,8 @@ static auto g_dynG = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
 class LibAbcKitCreateDynDefineGetterSetter : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_1)
 {
     auto output =
@@ -74,7 +75,8 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_1)
     EXPECT_TRUE(helpers::Match(output, "getter\n123\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_2)
 {
     auto output =
@@ -110,7 +112,8 @@ TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_2)
     EXPECT_TRUE(helpers::Match(output, "setter\n5\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynDefineGetterSetter, IcreateDefinegettersetterbyvalue_3)
 {
     auto output =

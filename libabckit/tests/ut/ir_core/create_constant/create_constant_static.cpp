@@ -96,7 +96,7 @@ static void VerifyTransformations(AbckitGraph *graph)
 
 class LibAbcKitCreateConstantTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantU64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantU64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantU64Valid)
 {
     helpers::TransformMethod(
@@ -108,7 +108,7 @@ TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantU64Valid)
         [](AbckitGraph *graph) { VerifyTransformations(graph); });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantF64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantF64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantF64Valid)
 {
     helpers::TransformMethod(
@@ -120,7 +120,7 @@ TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantF64Valid)
         [](AbckitGraph *graph) { VerifyTransformations(graph); });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantI64Valid)
 {
     helpers::TransformMethod(
@@ -132,7 +132,7 @@ TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantI64Valid)
         [](AbckitGraph *graph) { VerifyTransformations(graph); });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantU64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantU64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantU64Unconnected)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/create_constant/create_constant_static.abc", "foo4",
@@ -141,7 +141,7 @@ TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantU64Unconnected)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantI64Unconnected)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/create_constant/create_constant_static.abc", "foo4",
@@ -150,7 +150,7 @@ TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantI64Unconnected)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantF64, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantF64, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantF64Unconnected)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/create_constant/create_constant_static.abc", "foo4",
@@ -159,7 +159,7 @@ TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantF64Unconnected)
                            });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI32, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI32, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantI32Valid)
 {
     helpers::TransformMethod(
@@ -171,7 +171,7 @@ TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantI32Valid)
         [](AbckitGraph *graph) { VerifyTransformations(graph); });
 }
 
-// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI32, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::gFindOrCreateConstantI32, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitCreateConstantTest, StaticCreateConstantI32Unconnected)
 {
     helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/create_constant/create_constant_static.abc", "foo4",

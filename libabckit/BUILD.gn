@@ -99,7 +99,7 @@ group("abckit_tests_full") {
       ":abckit_check_clang_format",
       ":abckit_check_clang_tidy",
       ":abckit_tests",
-      "tests:abckit_stress_tests",
+      "tests/stress:abckit_stress_tests",
     ]
   }
 }

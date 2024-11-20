@@ -67,7 +67,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> CreateBBSchema(
             {{1}, {}, {}}};
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinemethod, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinemethod, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynDefineMethod, IcreateDefinemethod)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/define/definemethod_dynamic.abc",

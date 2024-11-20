@@ -68,7 +68,7 @@ struct UserData {
     AbckitFile *file = nullptr;
 };
 
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString)
 {
     UserData userData = {};
@@ -91,7 +91,7 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString)
         []([[maybe_unused]] AbckitGraph *graph) {});
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString2)
 {
     UserData userData = {};
@@ -139,7 +139,7 @@ TEST_F(LibAbcKitModifyApiStringsTest, StaticCreateString2)
         });
 }
 
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString)
 {
     UserData userData = {};
@@ -164,7 +164,7 @@ TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString)
 }
 
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
-// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=ModifyApiImpl::createString, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitModifyApiStringsTest, DynamicCreateString2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/metadata_core/modify_api/strings/strings_dynamic.abc",

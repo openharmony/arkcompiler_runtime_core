@@ -170,7 +170,7 @@ static AbckitTarget GetFileTarget(AbckitFile *file, const char *moduleName)
 // Modules Tests
 // ========================================
 
-// Test: test-kind=api, api=InspectApiImpl::moduleGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetName)
 {
     AbckitFile *file = nullptr;
@@ -194,7 +194,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetName)
 }
 
 // NOTE: fix after ets2bundle integrated into abckit unit tests
-// Test: test-kind=api, api=InspectApiImpl::moduleIsExternal, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleIsExternal, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleIsExternal)
 {
     AbckitFile *file = nullptr;
@@ -225,7 +225,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleIsExternal)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetFile)
 {
     AbckitFile *file = nullptr;
@@ -253,7 +253,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetFile)
 // Imports
 // ========================================
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateImports, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateImports, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateImports)
 {
     AbckitFile *file = nullptr;
@@ -277,7 +277,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateImports)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetName)
 {
     AbckitFile *file = nullptr;
@@ -312,7 +312,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetAlias, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetAlias, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetAlias)
 {
     AbckitFile *file = nullptr;
@@ -342,7 +342,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetAlias)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetFile)
 {
     AbckitFile *file = nullptr;
@@ -371,7 +371,8 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportingModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportingModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportingModule)
 {
     AbckitFile *file = nullptr;
@@ -400,7 +401,8 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportingModule
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportedModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::importDescriptorGetImportedModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportedModule)
 {
     AbckitFile *file = nullptr;
@@ -449,7 +451,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicImportDescriptorGetImportedModule)
 // Exports
 // ========================================
 
-// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateExports, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleEnumerateExports, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateExports)
 {
     AbckitFile *file = nullptr;
@@ -473,7 +475,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleEnumerateExports)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetName, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetName, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetName)
 {
     AbckitFile *file = nullptr;
@@ -514,7 +516,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetName)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetAlias, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetAlias, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetAlias)
 {
     AbckitFile *file = nullptr;
@@ -551,7 +553,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetAlias)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetFile, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetFile, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetFile)
 {
     AbckitFile *file = nullptr;
@@ -580,7 +582,8 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetFile)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportingModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportingModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportingModule)
 {
     AbckitFile *file = nullptr;
@@ -609,7 +612,8 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportingModule
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportedModule, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::exportDescriptorGetExportedModule, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportedModule)
 {
     AbckitFile *file = nullptr;
@@ -659,7 +663,8 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicExportDescriptorGetExportedModule)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::fileEnumerateExternalModules, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::fileEnumerateExternalModules, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicFileEnumerateExternalModules)
 {
     AbckitFile *file = nullptr;
@@ -685,7 +690,7 @@ TEST_F(LibAbcKitInspectApiModulesTest, DynamicFileEnumerateExternalModules)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-// Test: test-kind=api, api=InspectApiImpl::moduleGetTarget, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=InspectApiImpl::moduleGetTarget, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitInspectApiModulesTest, DynamicModuleGetTarget)
 {
     AbckitFile *jsFile = nullptr;

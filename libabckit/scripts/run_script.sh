@@ -20,6 +20,7 @@ ENV_VALUE=""
 SCRIPT_ARGS_VALUE=""
 RUNNER_VALUE=""
 RUNNER_ARGS_VALUE=""
+RET_CODE_VALUE=0
 
 SCRIPT_ARGUMENT="--script"
 SCRIPT_ARGS_OPTION="--script-args"
@@ -81,6 +82,7 @@ parse_args() {
             shift
             ;;
         "${RET_CODE_OPTION}"=*)
+            # CC-OFFNXT(bc-50008) false positive
             RET_CODE_VALUE="${i#*=}"
             shift
             ;;
@@ -110,11 +112,6 @@ parse_args() {
             ;;
         esac
     done
-
-    if [ -z "$RET_CODE_VALUE" ]; then
-        RET_CODE_VALUE=0
-    fi
-
 }
 
 check_args() {

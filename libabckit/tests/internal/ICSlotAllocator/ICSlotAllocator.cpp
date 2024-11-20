@@ -148,7 +148,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
     TransformIrEpilog(graph, userData, time, callInst);
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal, extension=c
 TEST_F(LibAbcKitInternalTest, LibAbcKitTestICSlotAllocator)
 {
     auto output =

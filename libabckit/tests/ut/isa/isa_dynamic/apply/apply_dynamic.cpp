@@ -76,7 +76,7 @@ auto g_icreateApplyLambda1 = [](AbckitFile *file, AbckitCoreFunction * /*method*
 
 class LibAbcKitCreateDynApply : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateApply, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateApply, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynApply, IcreateApply)
 {
     auto output =
@@ -96,7 +96,7 @@ TEST_F(LibAbcKitCreateDynApply, IcreateApply)
     EXPECT_TRUE(helpers::Match(output, "1 2\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjapply, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjapply, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/apply/newobjapply_dynamic.abc",
@@ -139,7 +139,7 @@ TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_1)
     EXPECT_TRUE(helpers::Match(output, "1\n"));
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjapply, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjapply, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynApply, IcreateNewobjapply_2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/apply/newobjapply_dynamic.abc",

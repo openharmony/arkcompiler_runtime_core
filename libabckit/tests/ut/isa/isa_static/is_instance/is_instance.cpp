@@ -59,7 +59,7 @@ void TransformIsInstanceIr(AbckitGraph *graph, AbckitFile *file, AbckitCoreClass
 
 class LibAbcKitIsInstanceStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsInstance, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateIsInstance, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitIsInstanceStaticTest, LibAbcKitTestIsInstance)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/is_instance/is_instance_static.abc",

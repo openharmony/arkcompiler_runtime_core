@@ -94,7 +94,7 @@ auto g_libAbcKitTestStaticBranchEliminationLambda0 = [](AbckitFile *file, Abckit
 
 class AbckitScenarioTest : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestStaticBranchElimination)
 {
     constexpr auto INPUT_PATH = ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination.abc";

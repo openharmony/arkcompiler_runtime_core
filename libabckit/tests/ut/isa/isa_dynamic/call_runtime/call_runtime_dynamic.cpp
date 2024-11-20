@@ -70,7 +70,8 @@ auto g_icreateCallruntimeCallinit1Lambda = [](AbckitFile *file, AbckitCoreFuncti
 
 class LibAbcKitCreateDynCallsRuntime : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeTopropertykey, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeTopropertykey, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeTopropertykey_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/call_runtime/topropertykey_dynamic.abc",
@@ -126,7 +127,8 @@ TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeTopropertykey_1)
 }
 
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeCallinit, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeCallinit, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCallsRuntime, IcreateCallruntimeCallinit_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/call_runtime/callinit_dynamic.abc",

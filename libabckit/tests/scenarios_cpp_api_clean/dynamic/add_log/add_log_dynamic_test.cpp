@@ -140,7 +140,7 @@ void TransformIr(abckit::Graph &graph, const UserData &userData)
 class AbckitScenarioCPPTestClean : public ::testing::Test {};
 
 // CC-OFFNXT(huge_method, C_RULE_ID_FUNCTION_SIZE) test, solid logic
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitScenarioCPPTestClean, LibAbcKitTestDynamicAddLogClean)
 {
     const std::string testSandboxPath = ABCKIT_ABC_DIR "scenarios_cpp_api_clean/dynamic/add_log/";

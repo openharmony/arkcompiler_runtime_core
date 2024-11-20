@@ -288,7 +288,7 @@ namespace libabckit::test {
 
 class AbckitScenarioTestClean : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTestClean, LibAbcKitTestParameterCheckClean)
 {
     constexpr const auto INPUT_PATH =

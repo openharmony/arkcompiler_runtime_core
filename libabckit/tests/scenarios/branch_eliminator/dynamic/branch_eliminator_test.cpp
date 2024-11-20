@@ -113,13 +113,13 @@ static void GeneralBranchEliminatorTest(bool configIsDebugFinal)
     ASSERT_EQ(output, expectOutput2);
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestBranchEliminatorDynamic1)
 {
     GeneralBranchEliminatorTest(false);
 }
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(AbckitScenarioTest, LibAbcKitTestBranchEliminatorDynamic2)
 {
     GeneralBranchEliminatorTest(true);

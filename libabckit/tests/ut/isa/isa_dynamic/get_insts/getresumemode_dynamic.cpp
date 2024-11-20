@@ -91,7 +91,7 @@ auto g_icreateGetresumemode1Lambda = [](AbckitFile * /*file*/, AbckitCoreFunctio
 
 class LibAbcKitCreateDynGetResumeMode : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetresumemode, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetresumemode, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynGetResumeMode, IcreateGetresumemode_1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "ut/isa/isa_dynamic/get_insts/getresumemode_dynamic.abc",

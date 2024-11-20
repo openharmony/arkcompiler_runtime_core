@@ -59,19 +59,19 @@ static void ValidTest(AbckitInst *(*binaryInstToCheck)(AbckitGraph *graph, Abcki
 
 class LibAbcKitCreateDynBinInstShiftsTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShl2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShl2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstShiftsTest, CreateDynShl2Valid)
 {
     ValidTest(g_dynG->iCreateShl2, ABCKIT_ISA_API_DYNAMIC_OPCODE_SHL2, "40\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAshr2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAshr2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstShiftsTest, CreateDynAshr2Valid)
 {
     ValidTest(g_dynG->iCreateAshr2, ABCKIT_ISA_API_DYNAMIC_OPCODE_ASHR2, "2\n");
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShr2, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShr2, abc-kind=ArkTS1, category=positive, extension=c
 TEST_F(LibAbcKitCreateDynBinInstShiftsTest, CreateDynShr2Valid)
 {
     ValidTest(g_dynG->iCreateShr2, ABCKIT_ISA_API_DYNAMIC_OPCODE_SHR2, "2\n");

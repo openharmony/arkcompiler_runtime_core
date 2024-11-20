@@ -151,7 +151,7 @@ namespace libabckit::test {
 
 class AbckitScenarioCppTestClean : public ::testing::Test {};
 
-// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
+// Test: test-kind=scenario, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(AbckitScenarioCppTestClean, LibAbcKitTestScanSubclassesClean)
 {
     const std::string inputPath = ABCKIT_ABC_DIR "scenarios_cpp_api_clean/dynamic/scan_subclasses/scan_subclasses.abc";

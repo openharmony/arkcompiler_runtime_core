@@ -52,7 +52,7 @@ void TransformLoadUndefinedIr(AbckitGraph *graph)
 
 class LibAbcKitLoadUndefinedStaticTest : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadUndefined, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=IsaApiStaticImpl::iCreateLoadUndefined, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitLoadUndefinedStaticTest, LibAbcKitTestLoadUndefined)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/isa/isa_static/load_undefined/load_undefined_static.abc",

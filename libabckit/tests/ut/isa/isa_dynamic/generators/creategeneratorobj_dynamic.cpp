@@ -76,7 +76,8 @@ static void TransformIr(AbckitGraph *graph)
     }
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreategeneratorobj, abc-kind=ArkTS1, category=positive
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreategeneratorobj, abc-kind=ArkTS1, category=positive,
+// extension=c
 TEST_F(LibAbcKitCreateDynCreateGeneratorObjInstTest, CreateDynCreategeneratorobjValid)
 {
     auto output = helpers::ExecuteDynamicAbc(

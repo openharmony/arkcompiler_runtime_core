@@ -41,7 +41,7 @@ enum class TryCatchScenario {
 };
 }  // namespace
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
@@ -66,7 +66,7 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiStaticValid)
     EXPECT_TRUE(helpers::Match(output, "Error: abckit_error\nCATCH\n\\[Error: abckit_error\\]\n"));
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive
+// Test: test-kind=api, api=GraphApiImpl::bbCreateCatchPhi, abc-kind=ArkTS2, category=positive, extension=c
 TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticValid)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_static.abc",
