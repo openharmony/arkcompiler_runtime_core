@@ -192,4 +192,9 @@ Method *EtsClassLinker::GetSubscribeOnAnotherPromiseMethod()
     return ext_->GetSubscribeOnAnotherPromiseMethod();
 }
 
+Method *EtsClassLinker::GetFinalizationRegistryExecCleanupMethod()
+{
+    return ext_->GetFinalizationRegistryExecCleanupMethod();
+}
+
 }  // namespace ark::ets

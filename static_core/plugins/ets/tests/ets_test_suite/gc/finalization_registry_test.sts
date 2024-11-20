@@ -24,7 +24,7 @@ let emptyArgCallbackRegistry: FinalizationRegistry<Int> | null = null;
 
 function doFullGC() {
     try {
-        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE));
+        GC.waitForFinishGC(GC.startGC(GC.FULL_CAUSE, GC.IN_PLACE_MODE));
     } catch (e) {
         assert false : "Unexpected exception during GC";
     }
@@ -96,6 +96,9 @@ function main(): void {
     // Check that we successfully remove FinalizationRegistry instance
     // elemets and this cause no error during collection.
     doFullGC();
+    // We need to switch from main coroutine to coroutine created by FinalizationRegistry because 
+    // if main coro is executed first, the test will return false
+    Coroutine.Schedule()
 
     // Check that all callbacks have been called correctly.
     assert removed_object_callbacks[0] == true : "First callback hasn't been called";

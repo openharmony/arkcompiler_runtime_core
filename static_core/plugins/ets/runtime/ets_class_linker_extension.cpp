@@ -591,6 +591,12 @@ void EtsClassLinkerExtension::InitializeBuiltinClasses()
         c->SetWeakReference();
     });
     CacheClass(WEAK_REF, [](auto *c) { c->SetWeakReference(); });
+    finalizationRegistryClass_ = CacheClass(FINALIZATION_REGISTRY);
+    if (finalizationRegistryClass_ != nullptr) {
+        finalizationRegistryExecCleanupMethod_ = EtsMethod::ToRuntimeMethod(
+            EtsClass::FromRuntimeClass(finalizationRegistryClass_)->GetMethod("execCleanup"));
+        ASSERT(finalizationRegistryExecCleanupMethod_ != nullptr);
+    }
 
     auto coro = EtsCoroutine::GetCurrent();
     coro->SetPromiseClass(promiseClass_);

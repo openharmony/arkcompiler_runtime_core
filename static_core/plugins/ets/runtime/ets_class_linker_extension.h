@@ -255,6 +255,11 @@ public:
         return subscribeOnAnotherPromiseMethod_;
     }
 
+    Method *GetFinalizationRegistryExecCleanupMethod()
+    {
+        return finalizationRegistryExecCleanupMethod_;
+    }
+
     static EtsClassLinkerExtension *FromCoreType(ClassLinkerExtension *ext)
     {
         ASSERT(ext->GetLanguage() == panda_file::SourceLang::ETS);
@@ -330,6 +335,8 @@ private:
     Class *arrayAsListIntClass_ = nullptr;
     Class *jsvalueClass_ = nullptr;
     Class *finalizableWeakClass_ = nullptr;
+    Class *finalizationRegistryClass_ = nullptr;
+    Method *finalizationRegistryExecCleanupMethod_ = nullptr;
     Class *runtimeLinkerClass_ = nullptr;
     Class *bootRuntimeLinkerClass_ = nullptr;
     Class *abcRuntimeLinkerClass_ = nullptr;

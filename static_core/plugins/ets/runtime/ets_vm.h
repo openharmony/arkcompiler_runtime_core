@@ -415,8 +415,8 @@ private:
     mem::Reference *finalizableWeakRefList_ {nullptr};
     os::memory::Mutex finalizableWeakRefListLock_;
     NativeLibraryProvider nativeLibraryProvider_;
-    os::memory::Mutex finalizationRegistryLock_;
-    PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
+    size_t finRegLastIndex_ {0};
+    mem::Reference *registeredFinalizationRegistryInstancesRef_ {nullptr};
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
     os::memory::Mutex rootProviderlock_;
     PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);

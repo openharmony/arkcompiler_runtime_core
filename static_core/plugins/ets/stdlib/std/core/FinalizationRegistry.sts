@@ -26,8 +26,30 @@ export final class FinalizationRegistry<T> {
     // Contains chains of used and free trimplet indexes, [0] serves as uselist head
     private idxarr: int[] = [];
     private freeidx: int = -1;
+    private static finalizationRegistryLock = new Mutex();
+    private mutex = new Mutex();
 
     private static readonly FIRST_SIZE = 32;
+
+    private static execCleanup(array: (WeakRef<FinalizationRegistry<T>> | undefined)[]): void {
+        FinalizationRegistry.finalizationRegistryLock.lock();
+        try {
+            for (let i = 0; i < array.length; i++) {
+                if (array[i]?.deref() !== undefined) {
+                    try {
+                        FinalizationRegistry.finalizationRegistryLock.unlock();
+                        array[i]!.deref()!.cleanup();
+                    } finally {
+                        FinalizationRegistry.finalizationRegistryLock.lock();
+                    }
+                } else {
+                    array[i] = undefined;
+                }
+            }
+        } finally {
+            FinalizationRegistry.finalizationRegistryLock.unlock();
+        }
+    }
 
     private init_arrays(size: int): void {
         assert size > 1;
@@ -76,9 +98,11 @@ export final class FinalizationRegistry<T> {
      */
     public getSize(): int {
         let count: int;
-        for (let i = this.idxarr[0]; i != -1; i = this.idxarr[i]) {
-            count++;
-        }
+        this.mutex.lockGuard(() => {
+            for (let i = this.idxarr[0]; i != -1; i = this.idxarr[i]) {
+                count++;
+            }
+        });
         return count;
     }
 
@@ -94,7 +118,9 @@ export final class FinalizationRegistry<T> {
         this.init_arrays(FinalizationRegistry.FIRST_SIZE);
         this.callbackWithArg = callback_value;
         this.isCallbackWithArg = true;
-        FinalizationRegistry.registerInstance(this);
+        FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
+            FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
+        });
     }
 
     /**
@@ -110,7 +136,9 @@ export final class FinalizationRegistry<T> {
         this.init_arrays(FinalizationRegistry.FIRST_SIZE);
         this.callbackWithoutArg = callback_value;
         this.isCallbackWithArg = false;
-        FinalizationRegistry.registerInstance(this);
+        FinalizationRegistry.finalizationRegistryLock.lockGuard(() => {
+            FinalizationRegistry.registerInstance(new WeakRef<Object>(this));
+        });
     }
 
     /**
@@ -128,14 +156,16 @@ export final class FinalizationRegistry<T> {
      * this registred callback if provided
      */
     public register(object: Object, callbackArg: T, token?: Object): void {
-        let refObject = new WeakRef<Object>(object);
-        let refToken?: WeakRef<Object>;
-        if (token != undefined) {
-            refToken = new WeakRef<Object>(token);
-        }
-        let free_index = this.allocTrimplet();
-        // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations
-        this.setTrimplet(free_index, refObject, callbackArg, refToken);
+        this.mutex.lockGuard(() => {
+            let refObject = new WeakRef<Object>(object);
+            let refToken?: WeakRef<Object>;
+            if (token != undefined) {
+                refToken = new WeakRef<Object>(token);
+            }
+            let free_index = this.allocTrimplet();
+            // NOTE: GC and thus cleanup function can be triggered here after JIT/AOT optimizations
+            this.setTrimplet(free_index, refObject, callbackArg, refToken);
+        });
     }
 
     /**
@@ -144,32 +174,50 @@ export final class FinalizationRegistry<T> {
      * @param token all registered callbacks with this token will be removed
      */
     public unregister(token: Object): void {
-        let prev = 0;
-        for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
-            let refToken = this.getToken(i);
-            if (refToken != undefined && refToken.deref() == token) {
-                this.freeNextTrimplet(prev);
-                i = prev; // iterator rollback
+        this.mutex.lockGuard(() => {
+            let prev = 0;
+            for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
+                let refToken = this.getToken(i);
+                if (refToken != undefined && refToken.deref() == token) {
+                    this.freeNextTrimplet(prev);
+                    i = prev; // iterator rollback
+                }
             }
-        }
+        });
     }
 
     private cleanup(): void {
-        let prev = 0;
-        for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
-            let object = this.getObject(i);
-            if (object != undefined && object.deref() == undefined) {
-                // Remove from trimplet first to prevent
-                // calling it again in separate thread
-                let arg: T | undefined = this.getCallbackArg(i);
-                this.freeNextTrimplet(prev);
-                i = prev; // iterator rollback
-                if (this.isCallbackWithArg) {
-                    this.callbackWithArg(arg!);
-                } else {
-                    this.callbackWithoutArg();
+        this.mutex.lock();
+        try {
+            let prev = 0;
+            for (let i = this.idxarr[prev]; i != -1; prev = i, i = this.idxarr[i]) {
+                let object = this.getObject(i);
+                if (object != undefined && object.deref() == undefined) {
+                    // Remove from trimplet first to prevent
+                    // calling it again in separate thread
+                    let arg: T | undefined = this.getCallbackArg(i);
+                    this.freeNextTrimplet(prev);
+                    i = prev; // iterator rollback
+                    try {
+                        this.mutex.unlock();
+                        if (this.isCallbackWithArg) {
+                            this.callbackWithArg(arg!);
+                        } else {
+                            this.callbackWithoutArg();
+                        }
+                    } catch (e) {
+                        if (e instanceof Error) {
+                            if (e.stack) {
+                                console.log(e.stack);
+                            }
+                        }
+                    } finally {
+                        this.mutex.lock();
+                    }
                 }
             }
+        } finally {
+            this.mutex.unlock();
         }
     }
 
