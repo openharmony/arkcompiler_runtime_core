@@ -27,7 +27,7 @@ namespace abckit::core {
 /**
  * @brief Class
  */
-class Class : public View<AbckitCoreClass *> {
+class Class : public ViewInResource<AbckitCoreClass *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class Module;
@@ -100,36 +100,31 @@ public:
 private:
     inline void GetAllMethodsInner(std::vector<core::Function> &methods) const
     {
-        const ApiConfig *conf = GetApiConfig();
+        Payload<std::vector<core::Function> *> payload {&methods, GetApiConfig(), GetResource()};
 
-        using EnumerateData = std::pair<std::vector<core::Function> *, const ApiConfig *>;
-        EnumerateData enumerateData(&methods, conf);
-
-        conf->cIapi_->classEnumerateMethods(GetView(), &enumerateData, [](AbckitCoreFunction *method, void *data) {
-            auto *vec = static_cast<EnumerateData *>(data)->first;
-            auto *config = static_cast<EnumerateData *>(data)->second;
-            vec->push_back(core::Function(method, config));
+        GetApiConfig()->cIapi_->classEnumerateMethods(GetView(), &payload, [](AbckitCoreFunction *method, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Function> *> *>(data);
+            payload.data->push_back(core::Function(method, payload.config, payload.resource));
             return true;
         });
     }
 
     inline void GetAllAnnotationsInner(std::vector<core::Annotation> &anns) const
     {
-        const ApiConfig *conf = GetApiConfig();
+        Payload<std::vector<core::Annotation> *> payload {&anns, GetApiConfig(), GetResource()};
 
-        using EnumerateData = std::pair<std::vector<core::Annotation> *, const ApiConfig *>;
-        EnumerateData enumerateData(&anns, conf);
-
-        conf->cIapi_->classEnumerateAnnotations(GetView(), &enumerateData,
-                                                [](AbckitCoreAnnotation *method, void *data) {
-                                                    auto *vec = static_cast<EnumerateData *>(data)->first;
-                                                    auto *config = static_cast<EnumerateData *>(data)->second;
-                                                    vec->push_back(core::Annotation(method, config));
-                                                    return true;
-                                                });
+        GetApiConfig()->cIapi_->classEnumerateAnnotations(
+            GetView(), &payload, [](AbckitCoreAnnotation *method, void *data) {
+                const auto &payload = *static_cast<Payload<std::vector<core::Annotation> *> *>(data);
+                payload.data->push_back(core::Annotation(method, payload.config, payload.resource));
+                return true;
+            });
     }
 
-    Class(AbckitCoreClass *klass, const ApiConfig *conf) : View(klass), conf_(conf) {};
+    Class(AbckitCoreClass *klass, const ApiConfig *conf, const File *file) : ViewInResource(klass), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

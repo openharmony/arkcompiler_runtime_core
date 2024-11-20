@@ -25,7 +25,7 @@ namespace abckit::core {
 /**
  * @brief ImportDescriptor
  */
-class ImportDescriptor : public View<AbckitCoreImportDescriptor *> {
+class ImportDescriptor : public ViewInResource<AbckitCoreImportDescriptor *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::File;
@@ -35,10 +35,20 @@ class ImportDescriptor : public View<AbckitCoreImportDescriptor *> {
     friend class abckit::arkts::Module;
     /// @brief to access private constructor
     friend class abckit::DynamicIsa;
+    /// @brief to access private constructor
+    friend class abckit::Instruction;
     /// @brief abckit::DefaultHash<ImportDescriptor>
     friend class abckit::DefaultHash<ImportDescriptor>;
 
 public:
+    /**
+     * @brief Construct a new empty Import Descriptor object
+     */
+    ImportDescriptor() : ViewInResource(nullptr), conf_(nullptr)
+    {
+        SetResource(nullptr);
+    };
+
     /**
      * @brief Construct a new Import Descriptor object
      * @param other
@@ -84,7 +94,11 @@ public:
     core::Module GetImportedModule() const;
 
 private:
-    ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf) : View(module), conf_(conf) {};
+    ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf, const File *file)
+        : ViewInResource(module), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

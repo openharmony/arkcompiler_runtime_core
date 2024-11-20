@@ -28,7 +28,7 @@ namespace abckit {
 /**
  * @brief BasicBlock
  */
-class BasicBlock final : public View<AbckitBasicBlock *> {
+class BasicBlock final : public ViewInResource<AbckitBasicBlock *, const Graph *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class Graph;
@@ -113,6 +113,46 @@ public:
      */
     Instruction GetFirstInst() const;
 
+    /**
+     * @brief Returns last instruction.
+     * @return `Instruction`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Instruction GetLastInst() const;
+
+    /**
+     * @brief Enumerates basic blocks successing to the current `BasicBlock`, invoking callback `cb` for each basic
+     * block.
+     * @param [ in ] cb - Callback that will be invoked.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `BasicBlock` is false.
+     */
+    void VisitSuccBlocks(const std::function<void(BasicBlock)> &cb) const;
+
+    /**
+     * @brief Appends successor to the end of current successors list.
+     * @param [ in ] succBlock - Basic block to be inserted.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `BasicBlock` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `succBlock` is false.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `Graph`s owning current `BasicBlock` and `succBlock`.
+     * differs.
+     */
+    void AppendSuccBlock(const BasicBlock &succBlock);
+
+    /**
+     * @brief Deletes the successor and shifts the rest if there were successors with a larger index.
+     * @param [ in ] index - Index of successor to be deleted.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `BasicBlock` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `index` is larger than current `BasicBlock` successors quantity.
+     */
+    void EraseSuccBlock(uint32_t index);
+
+    /**
+     * @brief Returns graph owning current `BasicBlock`.
+     * @return Pointer to `Graph`. It should be nullptr if current `Graph` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `BasicBlock` is false.
+     */
+    const Graph *GetGraph() const;
+
 protected:
     const ApiConfig *GetApiConfig() const override
     {
@@ -122,19 +162,18 @@ protected:
 private:
     void GetSuccsInner(std::vector<BasicBlock> &bBs) const
     {
-        const ApiConfig *conf = GetApiConfig();
+        Payload<std::vector<BasicBlock> *> payload {&bBs, GetApiConfig(), GetResource()};
 
-        using EnumerateData = std::pair<std::vector<BasicBlock> *, const ApiConfig *>;
-        EnumerateData enumerateData(&bBs, conf);
-
-        conf->cGapi_->bbVisitSuccBlocks(GetView(), &enumerateData, [](AbckitBasicBlock *succ, void *data) {
-            auto *vec = static_cast<EnumerateData *>(data)->first;
-            auto *config = static_cast<EnumerateData *>(data)->second;
-            vec->push_back(BasicBlock(succ, config));
+        GetApiConfig()->cGapi_->bbVisitSuccBlocks(GetView(), &payload, [](AbckitBasicBlock *succ, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<BasicBlock> *> *>(data);
+            payload.data->push_back(BasicBlock(succ, payload.config, payload.resource));
         });
     }
 
-    BasicBlock(AbckitBasicBlock *bb, const ApiConfig *conf) : View(bb), conf_(conf) {};
+    BasicBlock(AbckitBasicBlock *bb, const ApiConfig *conf, const Graph *graph) : ViewInResource(bb), conf_(conf)
+    {
+        SetResource(graph);
+    };
     const ApiConfig *conf_;
 };
 

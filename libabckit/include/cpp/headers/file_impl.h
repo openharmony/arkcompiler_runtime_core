@@ -23,20 +23,16 @@ namespace abckit {
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<core::Module> File::GetModules() const
 {
-    const ApiConfig *conf = GetApiConfig();
     std::vector<core::Module> modules;
+    Payload<std::vector<core::Module> *> payload {&modules, GetApiConfig(), this};
 
-    using EnumerateData = std::pair<std::vector<core::Module> *, const ApiConfig *>;
-    EnumerateData enumerateData(&modules, conf);
-
-    conf->cIapi_->fileEnumerateModules(GetResource(), &enumerateData, [](AbckitCoreModule *module, void *data) {
-        auto *vec = static_cast<EnumerateData *>(data)->first;
-        auto *config = static_cast<EnumerateData *>(data)->second;
-        vec->push_back(core::Module(module, config));
+    GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Module> *> *>(data);
+        payload.data->push_back(core::Module(module, payload.config, payload.resource));
         return true;
     });
 
-    CheckError(conf);
+    CheckError(GetApiConfig());
 
     return modules;
 }
@@ -77,18 +73,15 @@ inline abckit::LiteralArray File::CreateLiteralArray(const std::vector<abckit::L
 
 inline void File::EnumerateModules(const std::function<bool(core::Module)> &cb) const
 {
-    const ApiConfig *conf = GetApiConfig();
+    std::vector<core::Module> modules;
+    Payload<const std::function<bool(core::Module)> &> payload {cb, GetApiConfig(), this};
 
-    using EnumerateData = std::pair<const std::function<bool(core::Module)> &, const ApiConfig *>;
-    EnumerateData enumerateData(cb, conf);
-
-    conf->cIapi_->fileEnumerateModules(GetResource(), &enumerateData, [](AbckitCoreModule *module, void *data) {
-        const std::function<bool(core::Module)> &callback = static_cast<EnumerateData *>(data)->first;
-        auto *config = static_cast<EnumerateData *>(data)->second;
-        return callback(core::Module(module, config));
+    GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
+        const auto &payload = *static_cast<Payload<const std::function<bool(core::Module)> &> *>(data);
+        return payload.data(core::Module(module, payload.config, payload.resource));
     });
 
-    CheckError(conf);
+    CheckError(GetApiConfig());
 }
 
 }  // namespace abckit

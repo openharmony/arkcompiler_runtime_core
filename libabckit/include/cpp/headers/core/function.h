@@ -29,7 +29,7 @@ namespace abckit::core {
 /**
  * @brief Function
  */
-class Function : public View<AbckitCoreFunction *> {
+class Function : public ViewInResource<AbckitCoreFunction *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class core::Class;
@@ -43,6 +43,14 @@ class Function : public View<AbckitCoreFunction *> {
     friend class abckit::DefaultHash<Function>;
 
 public:
+    /**
+     * @brief Construct a new empty Function object
+     */
+    Function() : ViewInResource(nullptr), conf_(nullptr)
+    {
+        SetResource(nullptr);
+    };
+
     /**
      * @brief Construct a new Function object
      * @param other
@@ -75,10 +83,10 @@ public:
     ~Function() override = default;
 
     /**
-     * @brief Get the Graph object
-     * @return Graph
+     * @brief Create the `Graph` object
+     * @return Created `Graph`
      */
-    Graph GetGraph() const;
+    Graph CreateGraph() const;
 
     /**
      * @brief Set the Graph object
@@ -91,6 +99,13 @@ public:
      * @return std::string_view
      */
     std::string_view GetName() const;
+
+    /**
+     * @brief Returns binary file that the given current `Function` is a part of.
+     * @return Pointer to the `File`. It should be nullptr if current `Function` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Function` is false.
+     */
+    const File *GetFile() const;
 
     /**
      * @brief Get the annotation
@@ -131,7 +146,10 @@ public:
     void EnumerateNestedClasses(const std::function<bool(core::Class)> &cb) const;
 
 private:
-    Function(AbckitCoreFunction *func, const ApiConfig *conf) : View(func), conf_(conf) {};
+    Function(AbckitCoreFunction *func, const ApiConfig *conf, const File *file) : ViewInResource(func), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

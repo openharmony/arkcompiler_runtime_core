@@ -23,21 +23,17 @@ namespace abckit::core {
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<AnnotationInterfaceField> AnnotationInterface::GetFields()
 {
-    const ApiConfig *conf = GetApiConfig();
     std::vector<core::AnnotationInterfaceField> namespaces;
+    Payload<std::vector<core::AnnotationInterfaceField> *> payload {&namespaces, GetApiConfig(), GetResource()};
 
-    using EnumerateData = std::pair<std::vector<core::AnnotationInterfaceField> *, const ApiConfig *>;
-    EnumerateData enumerateData(&namespaces, conf);
+    GetApiConfig()->cIapi_->annotationInterfaceEnumerateFields(
+        GetView(), &payload, [](AbckitCoreAnnotationInterfaceField *func, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::AnnotationInterfaceField> *> *>(data);
+            payload.data->push_back(core::AnnotationInterfaceField(func, payload.config, payload.resource));
+            return true;
+        });
 
-    conf->cIapi_->annotationInterfaceEnumerateFields(GetView(), &enumerateData,
-                                                     [](AbckitCoreAnnotationInterfaceField *func, void *data) {
-                                                         auto *vec = static_cast<EnumerateData *>(data)->first;
-                                                         auto *config = static_cast<EnumerateData *>(data)->second;
-                                                         vec->push_back(core::AnnotationInterfaceField(func, config));
-                                                         return true;
-                                                     });
-
-    CheckError(conf);
+    CheckError(GetApiConfig());
 
     return namespaces;
 }

@@ -25,7 +25,7 @@ namespace abckit::core {
 /**
  * @brief AnnotationElement
  */
-class AnnotationElement : public View<AbckitCoreAnnotationElement *> {
+class AnnotationElement : public ViewInResource<AbckitCoreAnnotationElement *, const File *> {
     /// @brief core::Annotation
     friend class core::Annotation;
     /// @brief arkts::Annotation
@@ -64,8 +64,13 @@ private:
      * Constructor
      * @param conf
      * @param anne
+     * @param file
      */
-    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf) : View(anne), conf_(conf) {};
+    AnnotationElement(AbckitCoreAnnotationElement *anne, const ApiConfig *conf, const File *file)
+        : ViewInResource(anne), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

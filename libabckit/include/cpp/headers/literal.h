@@ -24,7 +24,7 @@ namespace abckit {
 /**
  * @brief Literal
  */
-class Literal : public View<AbckitLiteral *> {
+class Literal : public ViewInResource<AbckitLiteral *, const File *> {
     /// @brief abckit::File
     friend class abckit::File;
     /// @brief abckit::DefaultHash<Literal>
@@ -85,7 +85,10 @@ protected:
     }
 
 private:
-    Literal(AbckitLiteral *lit, const ApiConfig *conf) : View(lit), conf_(conf) {};
+    Literal(AbckitLiteral *lit, const ApiConfig *conf, const File *file) : ViewInResource(lit), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 };
 

@@ -25,7 +25,7 @@ namespace abckit::core {
 /**
  * @brief ExportDescriptor
  */
-class ExportDescriptor : public View<AbckitCoreExportDescriptor *> {
+class ExportDescriptor : public ViewInResource<AbckitCoreExportDescriptor *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::File;
@@ -78,7 +78,11 @@ public:
     // ...
 
 private:
-    ExportDescriptor(AbckitCoreExportDescriptor *module, const ApiConfig *conf) : View(module), conf_(conf) {};
+    ExportDescriptor(AbckitCoreExportDescriptor *module, const ApiConfig *conf, const File *file)
+        : ViewInResource(module), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

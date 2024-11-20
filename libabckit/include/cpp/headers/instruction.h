@@ -25,7 +25,7 @@ namespace abckit {
 /**
  * @brief Instruction
  */
-class Instruction final : public View<AbckitInst *> {
+class Instruction final : public ViewInResource<AbckitInst *, const Graph *> {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
 
@@ -37,6 +37,8 @@ class Instruction final : public View<AbckitInst *> {
     friend class DynamicIsa;
     /// @brief abckit::DefaultHash<Instruction>
     friend class abckit::DefaultHash<Instruction>;
+    /// @brief To access private constructor
+    friend class Graph;
 
 public:
     /**
@@ -146,6 +148,13 @@ public:
      */
     void VisitUsers(const std::function<void(Instruction)> &cb) const;
 
+    /**
+     * @brief Returns import descriptor of `Instruction`.
+     * @return `core::ImportDescriptor`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `Instruction` is false.
+     */
+    core::ImportDescriptor GetImportDescriptorDyn() const;
+
 protected:
     /**
      * @brief Get the Api Config object
@@ -161,8 +170,12 @@ private:
      * @brief Construct a new Instruction object
      * @param inst
      * @param conf
+     * @param graph
      */
-    Instruction(AbckitInst *inst, const ApiConfig *conf) : View(inst), conf_(conf) {};
+    Instruction(AbckitInst *inst, const ApiConfig *conf, const Graph *graph) : ViewInResource(inst), conf_(conf)
+    {
+        SetResource(graph);
+    };
     const ApiConfig *conf_;
 };
 

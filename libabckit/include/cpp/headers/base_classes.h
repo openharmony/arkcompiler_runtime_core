@@ -79,6 +79,16 @@ public:
     }
 
     /**
+     * Operator !=
+     * @param rhs
+     * @return bool
+     */
+    bool operator!=(const View<T> &rhs) const
+    {
+        return GetView() != rhs.GetView();
+    }
+
+    /**
      * Operator bool
      * @return bool
      */
@@ -143,6 +153,98 @@ protected:
 
 private:
     T view_;
+};
+
+/**
+ * @brief ViewInResource
+ */
+template <typename T, typename R, typename = std::enable_if_t<std::is_pointer_v<R>>>
+class ViewInResource : public View<T> {
+public:
+    /**
+     * Operator bool
+     * @return bool
+     */
+    explicit operator bool() const
+    {
+        return resource_ != nullptr && *static_cast<const View<T> *>(this);
+    }
+
+protected:
+    /**
+     * Constructor
+     * @param ...a
+     */
+    template <typename... Args>
+    explicit ViewInResource(Args &&...a) : View<T>(std::forward<Args>(a)...)
+    {
+    }
+
+    // Can move and copy views in resource
+
+    /**
+     * @brief Constructor
+     */
+    ViewInResource(const ViewInResource &) = default;
+
+    /**
+     * @brief Constructor
+     * @return ViewInResource
+     */
+    ViewInResource &operator=(const ViewInResource &) = default;
+
+    /**
+     * @brief Constructor
+     */
+    ViewInResource(ViewInResource &&) = default;
+
+    /**
+     * @brief Constructor
+     * @return ViewInResource
+     */
+    ViewInResource &operator=(ViewInResource &&) = default;
+
+    ~ViewInResource() override = default;
+
+    /**
+     * Get resource
+     * @return T
+     */
+    R GetResource() const
+    {
+        return resource_;
+    }
+
+    /**
+     * Set resource
+     * @param newResource
+     */
+    void SetResource(R newResource)
+    {
+        resource_ = newResource;
+    }
+
+    /**
+     * @brief Struct for using in callbacks
+     */
+    template <typename D>
+    struct Payload {
+        /**
+         * @brief data
+         */
+        D data;
+        /**
+         * @brief config
+         */
+        const ApiConfig *config;
+        /**
+         * @brief resource
+         */
+        R resource;
+    };
+
+private:
+    R resource_;
 };
 
 // Resource - ptr semantics

@@ -26,7 +26,7 @@ namespace abckit::core {
 /**
  * @brief Namespace
  */
-class Namespace : public View<AbckitCoreNamespace *> {
+class Namespace : public ViewInResource<AbckitCoreNamespace *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class abckit::File;
@@ -102,7 +102,10 @@ public:
     void EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
 
 private:
-    Namespace(AbckitCoreNamespace *ns, const ApiConfig *conf) : View(ns), conf_(conf) {};
+    Namespace(AbckitCoreNamespace *ns, const ApiConfig *conf, const File *file) : ViewInResource(ns), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

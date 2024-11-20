@@ -53,7 +53,7 @@ inline arkts::AnnotationElement Annotation::AddAndGetElement(const abckit::Value
         name.data(), val.GetView()
     };
     auto *coreAnni = AddAndGetElementImpl(&params);
-    core::AnnotationElement element(coreAnni, GetApiConfig());
+    core::AnnotationElement element(coreAnni, GetApiConfig(), GetResource());
     return arkts::AnnotationElement(element);
 }
 

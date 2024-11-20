@@ -23,7 +23,7 @@ namespace abckit {
 /**
  * @brief Value
  */
-class Value : public View<AbckitValue *> {
+class Value : public ViewInResource<AbckitValue *, const File *> {
     /// @brief abckit::File
     friend class abckit::File;
     /// @brief abckit::core::Annotation
@@ -98,7 +98,10 @@ protected:
     }
 
 private:
-    explicit Value(AbckitValue *val, const ApiConfig *conf) : View(val), conf_(conf) {};
+    explicit Value(AbckitValue *val, const ApiConfig *conf, const File *file) : ViewInResource(val), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 };
 
