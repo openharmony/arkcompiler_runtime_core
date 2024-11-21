@@ -31,8 +31,11 @@ class Runner:
         self._exec_timeout = timeout
         _build = Path(build).expanduser()
         bin_path = _build / "bin"
-        self._arkts_version = None
-        self._playground_version = None
+        self._version = {
+            "ark": "",
+            "playground": "",
+            "es2panda": ""
+        }
         self.disasm_bin = str(bin_path / "ark_disasm")
         self.ark_bin = str(bin_path / "ark")
         self.es2panda = str(bin_path / "es2panda")
@@ -60,15 +63,17 @@ class Runner:
             await stsfile.write(code)
             return str(stsfile.name)
 
-    async def get_versions(self) -> Tuple[str, str]:
+    async def get_versions(self) -> Tuple[str, str, str]:
         """Get arkts_playground package and ark versions
         :rtype: Tuple[str, str]
         """
-        if not self._arkts_version:
+        if not self._version["ark"]:
             await self._get_arkts_version()
-        if not self._playground_version:
+        if not self._version["playground"]:
             self._get_playground_version()
-        return self._playground_version, self._arkts_version
+        if not self._version["es2panda"]:
+            await self._get_es2panda_version()
+        return self._version["playground"], self._version["ark"], self._version['es2panda']
 
     async def compile_arkts(self, code: str, options: list, disasm: bool = False) -> Dict[str, Any]:
         """Compile code and make disassemble if disasm argument is True
@@ -107,6 +112,8 @@ class Runner:
         :rtype: Dict[str, Any]
         """
         stdout, stderr, retcode = await self._execute_cmd(self.disasm_bin, input_file, output_file)
+        if retcode == -11:
+            stderr += "disassembly: Segmentation fault"
         result = {"output": stdout, "error": stderr, "code": None, "exit_code": 0}
         if retcode != 0:
             result["exit_code"] = retcode
@@ -121,6 +128,8 @@ class Runner:
         """
         options.extend(["--extension=sts", f"--output={filename}.abc", filename])
         stdout, stderr, retcode = await self._execute_cmd(self.es2panda, *options)
+        if retcode == -11:
+            stderr += "compilation: Segmentation fault"
         return {"output": stdout, "error": stderr, "exit_code": retcode}
 
     async def _execute_cmd(self, cmd, *args) -> Tuple[str, str, int | None]:
@@ -146,16 +155,23 @@ class Runner:
         :rtype: None
         """
         output, _, _ = await self._execute_cmd(self.ark_bin, "--version")
-        self._arkts_version = output
+        self._version["ark"] = output
+
+    async def _get_es2panda_version(self):
+        """Get ark version
+        :rtype: None
+        """
+        _, stderr, _ = await self._execute_cmd(self.es2panda, "--version")
+        self._version["es2panda"] = stderr
 
     def _get_playground_version(self) -> None:
         """Get arkts_playground package version
         :rtype: None
         """
         try:
-            self._playground_version = version("arkts_playground")
+            self._version["playground"] = version("arkts_playground")
         except PackageNotFoundError:
-            self._playground_version = "not installed"
+            self._version["playground"] = "not installed"
 
     async def _run(self, abcfile_name: str) -> Dict[str, Any]:
         """Runs abc file
@@ -163,6 +179,8 @@ class Runner:
         """
         run_cmd = [f"--boot-panda-files={self.stdlib_abc}", "--load-runtimes=ets", abcfile_name, "ETSGLOBAL::main"]
         stdout, stderr, retcode = await self._execute_cmd(self.ark_bin, *run_cmd)
+        if retcode == -11:
+            stderr += "run: Segmentation fault"
         return {"output": stdout, "error": stderr, "exit_code": retcode}
 
     def _validate(self):

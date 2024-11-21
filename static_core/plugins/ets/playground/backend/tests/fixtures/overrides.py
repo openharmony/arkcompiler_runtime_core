@@ -65,7 +65,7 @@ class FakeRunner:
         return res
 
     async def get_versions(self):
-        return "playground_ver", "arkts_ver"
+        return "playground_ver", "arkts_ver", "es2panda_ver"
 
 
 def override_get_runner():

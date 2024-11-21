@@ -58,5 +58,5 @@ async def compile_run_arkts_code(body: CompileRequestModel,
             tags=["run"],
             description="Return playground version and Ark compiler version")
 async def get_versions(runner: Annotated[Runner, Depends(get_runner)]) -> VersionsResponse:
-    playground_ver, ark_ver = await runner.get_versions()
-    return VersionsResponse(backendVersion=playground_ver, arktsVersion=ark_ver)
+    playground_ver, ark_ver, es2panda_ver = await runner.get_versions()
+    return VersionsResponse(backendVersion=playground_ver, arktsVersion=ark_ver, es2pandaVersion=es2panda_ver)

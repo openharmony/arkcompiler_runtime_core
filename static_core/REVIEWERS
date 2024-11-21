@@ -60,6 +60,7 @@ static_core/libpandabase/mem/                            @dmitriitr @udav
 static_core/libpandabase/os/*mem*                        @dmitriitr @udav
 static_core/libpandabase/tests/*mem*                     @udav
 static_core/platforms/**/*mem*                           @dmitriitr @udav
+static_core/plugins/ets/playground                       @anton-sysoev
 static_core/runtime/arch/                                @Prof1983
 static_core/runtime/bridge/                              @Prof1983
 static_core/runtime/coroutines/                          @dmitriitr @konstanting
