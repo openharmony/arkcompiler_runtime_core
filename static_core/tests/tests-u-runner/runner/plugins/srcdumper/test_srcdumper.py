@@ -38,15 +38,14 @@ class TestSRCDumper(TestFileBased):
         self.original_ast: str = ""
         self.dumped_ast: str = ""
 
-        # pylint: disable=invalid-name
-        self.pc = PathConverter(test_id, test_env.config.general.work_dir)
+        self.path_conv = PathConverter(test_id, test_env.config.general.work_dir)
 
 
     def do_run(self) -> TestFileBased:
         if self.check_for_parser_error():
             return self
 
-        self.pc.init_artefact_dirs()
+        self.path_conv.init_artefact_dirs()
         self.compile_original_with_dump_src()
         self.compile_original_with_dump_ast()
         self.compile_dumped_with_dump_ast()
@@ -101,7 +100,11 @@ class TestSRCDumper(TestFileBased):
         )
 
         with os.fdopen(
-            os.open(self.pc.dumped_src_path(), os.O_WRONLY | os.O_CREAT | os.O_TRUNC, mode=511), "w", encoding="utf-8"
+            os.open(
+                self.path_conv.dumped_src_path(),
+                os.O_WRONLY | os.O_CREAT | os.O_TRUNC, mode=511),
+                "w",
+                encoding="utf-8"
         ) as file:
             file.writelines(self.report.output.splitlines(keepends=True)[1:])
 
@@ -128,7 +131,7 @@ class TestSRCDumper(TestFileBased):
 
         old_path = self.path
         es2panda_flags = self.flags + ['--dump-after-phases', 'plugins-after-parse']
-        self.path = self.pc.dumped_src_path()
+        self.path = self.path_conv.dumped_src_path()
 
         self.passed, self.report, self.fail_kind = self.run_es2panda(
             flags=es2panda_flags,

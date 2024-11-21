@@ -43,117 +43,104 @@ class AstComparator:
 
     @staticmethod
     def normalize_ast(ast: dict) -> dict:
-        ast = AstComparator.remove_loc_nodes(ast)
-        ast = AstComparator.remove_empty_statements(ast)
-        ast = AstComparator.remove_duplicate_undefined_types(ast)
-        ast = AstComparator.flatten_block_statements(ast)
-        ast = AstComparator.replace_null_literals(ast)
+        AstComparator.remove_loc_nodes(ast)
+        AstComparator.remove_empty_statements(ast)
+        AstComparator.replace_null_literals(ast)
+        AstComparator.flatten_block_statements(ast)
+        AstComparator.remove_duplicate_undefined_types(ast)
 
         return ast
 
 
     @staticmethod
-    def remove_loc_nodes(ast: Any) -> Any:
+    def remove_loc_nodes(ast: Any) -> None:
         """Removes all 'loc' keys from dictionaries within the AST."""
 
         if isinstance(ast, list):
-            return [AstComparator.remove_loc_nodes(item) for item in ast]
+            for item in ast:
+                AstComparator.remove_loc_nodes(item)
 
-        if isinstance(ast, dict):
-            new_ast = {}
-            for key, value in ast.items():
-                if key != "loc":
-                    new_ast[key] = AstComparator.remove_loc_nodes(value)
-            return new_ast
-
-        return ast
+        elif isinstance(ast, dict):
+            if "loc" in ast.keys():
+                ast.pop("loc")
+            for value in ast.values():
+                AstComparator.remove_loc_nodes(value)
 
 
     @staticmethod
-    def remove_empty_statements(ast: Any) -> Any:
+    def remove_empty_statements(ast: Any) -> None:
         """Removes all EmptyStatement nodes from the AST."""
 
         if isinstance(ast, list):
-            return [AstComparator.remove_empty_statements(item) for item in ast
-                    if not (isinstance(item, dict) and item.get("type") == "EmptyStatement")]
+            for i in range(len(ast) - 1, -1, -1):
+                if isinstance(ast[i], dict) and ast[i].get("type") == "EmptyStatement":
+                    ast.pop(i)
+                else:
+                    AstComparator.remove_empty_statements(ast[i])
 
-        if isinstance(ast, dict):
-            new_ast = {}
-            for key, value in ast.items():
-                new_ast[key] = AstComparator.remove_empty_statements(value)
-            return new_ast
-
-        return ast
+        elif isinstance(ast, dict):
+            for value in ast.values():
+                AstComparator.remove_empty_statements(value)
 
 
     @staticmethod
-    def flatten_block_statements(ast: Any) -> Any:
+    def flatten_block_statements(ast: Any) -> None:
         """Flattens BlockStatement nodes where possible."""
 
         if isinstance(ast, list):
-            nodes = []
-            for item in ast:
-                if isinstance(item, dict) and item.get("type") == "BlockStatement":
-                    nodes.extend(AstComparator.flatten_block_statements(item.get("statements", [])))
+            for i in range(len(ast) - 1, -1, -1):
+                if isinstance(ast[i], dict) and ast[i].get("type") == "BlockStatement":
+                    AstComparator.flatten_block_statements(ast[i].get("statements"))
+                    ast.extend(ast[i].get("statements", []))
+                    ast.pop(i)
                 else:
-                    nodes.append(AstComparator.flatten_block_statements(item))
-            return nodes
+                    AstComparator.flatten_block_statements(ast[i])
 
-        if isinstance(ast, dict):
-            new_ast = {}
+        elif isinstance(ast, dict):
             for key, value in ast.items():
                 if not isinstance(value, dict) or value.get("type") != "BlockStatement":
-                    new_ast[key] = AstComparator.flatten_block_statements(value)
-                elif (statements := value.get("statements")) and len(statements) == 1:
-                    new_ast[key] = AstComparator.flatten_block_statements(statements[0])
+                    AstComparator.flatten_block_statements(value)
+                elif (statements := value.get("statements", [])) and len(statements) == 1:
+                    AstComparator.flatten_block_statements(statements[0])
+                    ast[key] = statements[0]
                 else:
-                    new_ast[key] = AstComparator.flatten_block_statements(value)
-            return new_ast
-
-        return ast
+                    AstComparator.flatten_block_statements(value)
 
 
     @staticmethod
-    def remove_duplicate_undefined_types(ast: Any) -> Any:
+    def remove_duplicate_undefined_types(ast: Any) -> None:
         """Removes duplicate ETSUndefinedType nodes from lists within the AST."""
 
         if isinstance(ast, list):
-            nodes = []
             seen_undefined = False
-            for item in ast:
-                if not isinstance(item, dict) or item.get("type") != "ETSUndefinedType":
-                    nodes.append(AstComparator.remove_duplicate_undefined_types(item))
+            for i in range(len(ast) - 1, -1, -1):
+                if not isinstance(ast[i], dict) or ast[i].get("type") != "ETSUndefinedType":
+                    AstComparator.remove_duplicate_undefined_types(ast[i])
                 elif not seen_undefined:
-                    nodes.append(item)
                     seen_undefined = True
-            return nodes
+                else:
+                    ast.pop(i)
 
-        if isinstance(ast, dict):
-            new_ast = {}
-            for key, value in ast.items():
-                new_ast[key] = AstComparator.remove_duplicate_undefined_types(value)
-            return new_ast
-
-        return ast
+        elif isinstance(ast, dict):
+            for value in ast.values():
+                AstComparator.remove_duplicate_undefined_types(value)
 
 
     @staticmethod
-    def replace_null_literals(ast: Any) -> Any:
+    def replace_null_literals(ast: Any) -> None:
         """Replaces all NullLiteral values with ETSNullType."""
 
         if isinstance(ast, list):
-            return [AstComparator.replace_null_literals(item) for item in ast]
+            for item in ast:
+                AstComparator.replace_null_literals(item)
 
-        if isinstance(ast, dict):
-            new_ast = {}
-            for key, value in ast.items():
-                if value in ("ETSNullType", "NullLiteral"):
-                    return "ETSNullType or NullLiteral"
+        elif isinstance(ast, dict):
+            if ast.get("type") in ("ETSNullType", "NullLiteral"):
+                ast.clear()
+                ast["type"] = "ETSNullType or NullLiteral"
 
-                new_ast[key] = AstComparator.replace_null_literals(value)
-            return new_ast
-
-        return ast
+            for value in ast.values():
+                AstComparator.replace_null_literals(value)
 
 
     def run(self) -> Tuple[bool, TestReport, Optional[FailKind]]:
