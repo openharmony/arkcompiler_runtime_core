@@ -350,7 +350,7 @@ Value imported from JS to ArkTS 2.0, should be converted explicitly using ``as``
   let val = jsSymbol; // ok, val is ESObject
 
 Limitations
-***********
+************
 
 Object wrapper types
 ====================
@@ -384,7 +384,7 @@ Solutions
   let b = a.valueOf() as int; // ok
 
 Copy semantic
-=============
+**************
 
 -  Primitive type value is copied from JS VM to ArkTS VM by value so there is no connection with JS VM after compilation and no side effects.
    E.g. if Prototype is changed in JS VM it won't be changed in ArkTS VM.
@@ -419,7 +419,7 @@ Copy semantic
   let num = a as number; // num is just static number with val 3
 
 Solutions
----------
+*********
 
 - Instead of importing primitive types, global contex can be imported instead of them and manipulation can be done through global context
 
