@@ -13,4 +13,7 @@
 
 declare_args() {
   system_base_dir = "/dev/null"
+  if (!defined(product_name)) {
+    product_name = "rk3568"
+  }
 }

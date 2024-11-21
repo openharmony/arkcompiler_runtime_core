@@ -48,5 +48,5 @@ openssl,https://gitee.com/openharmony/third_party_openssl,branch,OpenHarmony-4.0
 arkcompiler/toolchain,https://gitee.com/openharmony/arkcompiler_toolchain,branch,master,no_patches,no_submodules
 
 # ARK plugins:
-icu,https://gitee.com/openharmony/third_party_icu,branch,OpenHarmony-3.2-Beta3,no_patches,no_submodules
+icu,https://gitee.com/openharmony/third_party_icu,branch,OpenHarmony-5.0.1-Release,no_patches,no_submodules
 typescript,https://gitee.com/openharmony/third_party_typescript,branch,OpenHarmony-4.1-Release,no_patches,no_submodules
