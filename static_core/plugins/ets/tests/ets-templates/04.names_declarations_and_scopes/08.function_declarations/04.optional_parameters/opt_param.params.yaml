@@ -128,7 +128,7 @@ cases:
     - decl: |-
           // expect NPE if argument omitted
           function foo(a: int, b?: Int): int {
-              return a + b
+              return a + b!
           }
       call: |-
           assert foo(1, 2) == 3
@@ -140,9 +140,14 @@ cases:
           }
 
     - decl: |-
+          type XYZ=number
+          function foo(p?: XYZ) {}  // primitive with alias
+      call: foo(1.55)
+
+    - decl: |-
           // check type of argument with default
           function foo(a?: Object) {
-              assert a instanceof Object|null
+              assert a instanceof Object|undefined
           }
       call: |-
           foo(new Object())
@@ -164,7 +169,7 @@ cases:
           function foo(a?: f) {
               assert a === undefined
               a = (t: number): number[] => { return [t]; }
-              let x = a(42.0)
+              let x = a!(42.0)
               assert x instanceof number[] && x[0] == 42.0
           }
       call: foo()
@@ -173,7 +178,7 @@ cases:
           // check that argument with undefined-default optional can be assigned an undefined value
           type f = (p: number) => number[]
           function foo(a?: f) {
-              let x = a(42.0)
+              let x = a!(42.0)
               assert x instanceof number[] && x[0] == 42.0
               a = undefined
               assert a === undefined
@@ -215,7 +220,7 @@ cases:
 
     - decl: |-
           function foo(p?: int): int {
-              return 2 * p;
+              return p === undefined ? 0 : 2 * p;
           }
       call: |-
           assert foo() == 0

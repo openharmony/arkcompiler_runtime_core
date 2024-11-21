@@ -14,8 +14,7 @@
  */
 
 /*---
-desc: Second oprand is value type and third operand are reference type
-tags: [negative, compile-only]
+desc: Second operand is value type and third operand are reference type
 ---*/
 
 class A {}
@@ -26,4 +25,5 @@ function main(): void {
   let b: B = new B();
 
   let x = true ? a : b;
+  assert(x instanceof Int|B)
 }

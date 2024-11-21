@@ -15,7 +15,7 @@ limitations under the License.
 
 /*---
 desc: Function with null type parameter
-tags: [compile-only, negative]
+tags: [compile-only]
 ---*/
 
 function f(a: null) {}

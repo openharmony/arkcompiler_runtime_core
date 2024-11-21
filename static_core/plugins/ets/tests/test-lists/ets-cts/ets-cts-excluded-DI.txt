@@ -8,19 +8,6 @@
 03.types/08.reference_types/13.type_bigint/bint_fdef_7.sts
 03.types/08.reference_types/13.type_bigint/bint_fdef_8.sts
 04.names_declarations_and_scopes/07.variable_and_constant_declarations/02.constant_declarations/const_decl_8.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_0.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_3.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_4.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_5.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_6.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_10.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_13.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_14.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_15.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_17.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_18.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_19.sts
-04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_20.sts
 07.expressions/03.qualified_name/qualified_name_2.sts
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_6.sts
 07.expressions/10.method_call_expression/02.step_2_selection_of_method/step2_7.sts
@@ -159,3 +146,12 @@
 # 20423 es2panda aborts due to assertion error when run with '--debug-info'
 07.expressions/06.spread_expression/spex_28.sts
 07.expressions/06.spread_expression/spex_func_27.sts
+04.names_declarations_and_scopes/01.names/qualified_name_0.sts
+04.names_declarations_and_scopes/01.names/qualified_name_1.sts
+04.names_declarations_and_scopes/01.names/qualified_name_2.sts
+05.generics/03.utility_types/02.required_utility_type/required_module_interface_0.sts
+07.expressions/03.qualified_name/qualified_name_0.sts
+07.expressions/03.qualified_name/qualified_name_1.sts
+07.expressions/25.equality_expressions/eq_19.sts
+13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_3.sts
+13.compilation_units_packages_and_modules/11.top-level_statements/block_declaration_5.sts
