@@ -30,7 +30,7 @@ from vmb.platform import PlatformBase
 
 __all__ = ['main', 'VERSION']
 
-VERSION = '0.0.3'
+VERSION = '0.0.4'
 log = logging.getLogger("vmb")
 # Inject new log level above info
 logging.addLevelName(PASS_LOG_LEVEL, "PASS")

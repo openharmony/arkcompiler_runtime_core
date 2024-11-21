@@ -118,7 +118,7 @@ class ToolBase(CrossShell, ABC):
     def get_cmd_path(cmd: str, env_var: str = '') -> Optional[str]:
         # use specifically requested
         p: Optional[str] = os.environ.get(env_var, '')
-        # . or use default
+        # or use default
         if not p:
             p = shutil.which(cmd)
         if not p or (not os.path.isfile(p)):

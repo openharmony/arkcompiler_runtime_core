@@ -37,6 +37,7 @@ class Platform(PlatformBase):
         self.es2panda = self.tools_get('es2panda')
         self.paoc = self.tools_get('paoc')
         self.ark = self.tools_get('ark')
+        self.nark = self.tools_get('nark')
         # always aot etsstdlib
         if OptFlags.AOT_SKIP_LIBS in self.flags:
             log.info('Skipping aot compilation of libs')
@@ -64,7 +65,7 @@ class Platform(PlatformBase):
 
     @property
     def required_tools(self) -> List[str]:
-        return ['es2panda', 'ark', 'paoc']
+        return ['es2panda', 'ark', 'paoc', 'nark']
 
     @property
     def langs(self) -> List[str]:
@@ -76,8 +77,9 @@ class Platform(PlatformBase):
 
     def run_unit(self, bu: BenchUnit) -> None:
         self.es2panda(bu)
-        if OptFlags.AOT in self.flags:
-            self.paoc(bu)
+        self.nark(bu)
         if self.dry_run_stop(bu):
             return
+        if OptFlags.AOT in self.flags:
+            self.paoc(bu)
         self.ark(bu)
