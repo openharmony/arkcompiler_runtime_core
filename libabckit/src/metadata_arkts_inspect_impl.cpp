@@ -594,7 +594,7 @@ void ArkTSAnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, 
 extern "C" AbckitArktsInspectApi const *AbckitGetArktsInspectApiImpl(AbckitApiVersion version)
 {
 #ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
-    // return mock api
+    return AbckitGetMockArktsInspectApiImpl(version);
 #endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:

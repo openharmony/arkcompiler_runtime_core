@@ -409,7 +409,14 @@ libabckit_host_unittest_action("abckit_mock_gtests") {
   sources = [
     # mock infrastructure
     "mock/abckit_api_mock.cpp",
+    "mock/arkts_inspect_api_impl_mock.cpp",
+    "mock/arkts_modify_api_impl_mock.cpp",
     "mock/check_mock.cpp",
+    "mock/graph_api_impl_mock.cpp",
+    "mock/isa_api_dynamic_impl_mock.cpp",
+    "mock/isa_api_static_impl_mock.cpp",
+    "mock/metadata_inspect_impl_mock.cpp",
+    "mock/metadata_modify_impl_mock.cpp",
 
     #mock tests
     "mock/tests/cpp_mock_file.cpp",

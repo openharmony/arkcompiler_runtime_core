@@ -896,7 +896,7 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
 extern "C" AbckitIsaApiStatic const *AbckitGetIsaApiStaticImpl(AbckitApiVersion version)
 {
 #ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
-    // return mock api
+    return AbckitGetMockIsaApiStaticImpl(version);
 #endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
