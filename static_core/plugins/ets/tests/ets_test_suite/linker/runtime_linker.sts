@@ -89,6 +89,10 @@ class Test {
         let cls2 = linker.loadClass(clsName, true);
         assert(LoadTarget_init == true);
         assert(cls2 == cls);
+
+        expectThrow(() => { linker.loadClass(cname("does.not.exist"), false) },
+            (e) => e instanceof ClassNotFoundException
+        );
     }
 
     static testInitialize() {
