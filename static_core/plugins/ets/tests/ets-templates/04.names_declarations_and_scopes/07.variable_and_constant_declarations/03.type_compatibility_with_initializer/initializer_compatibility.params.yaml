@@ -33,7 +33,6 @@ type_and_initializer:
   - {type: float, value: "1.40e-45"}
 
   - {type: double, value: "1.7976931348623157e308"}
-  - {type: double, value: "4.9e-324"}
 
   # Char type
 

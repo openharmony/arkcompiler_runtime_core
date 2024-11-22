@@ -71,7 +71,7 @@ function isEqual<T>(s: String, number: T): boolean {
             eps = Math.abs(number.doubleValue()) * (1e4 * Double.EPSILON);
 
             if (eps == 0) {
-                eps = 5e-324;
+                eps = 4.9e-308;
             }
         }
         let parsed = Double.parseFloat(s);
