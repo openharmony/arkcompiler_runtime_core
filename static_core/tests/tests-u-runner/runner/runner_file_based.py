@@ -296,6 +296,8 @@ class RunnerFileBased(Runner):
         full_template_name += f"(-OL{self.config.es2panda.opt_level})?"
         if self.config.es2panda.debug_info:
             full_template_name += "(-DI)?"
+        if self.config.es2panda.is_fullastverifier():
+            full_template_name += "(-FULLASTV)?"
         if self.conf_kind == ConfigurationKind.JIT and self.config.ark.jit.num_repeats > 1:
             full_template_name += "(-(repeats|REPEATS))?"
         full_template_name += f"(-{self.build_type.value})?"
