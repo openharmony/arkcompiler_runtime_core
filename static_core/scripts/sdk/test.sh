@@ -21,8 +21,10 @@ SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
 
 BUILD_DIR=${BUILD_DIR:-'.'}
 mkdir -p "$BUILD_DIR" && cd "$BUILD_DIR"
-
-OHOS_SDK_NATIVE_URL=${OHOS_SDK_NATIVE_URL:-'https://contentcenter-drcn.dbankcdn.com/pub_1/DevEcoSpace_1_900_9/4a/v3/oidhh45PQ-qFyqu2pO5Kmw/nZgBfyRtTzuaBczj9WgsWQ.zip'}
+OHOS_SDK_ARCH_NAME=ohos-sdk.tar.gz
+SDK_VERSION_STAGE='Beta1'
+OHOS_SDK_VERSION='4.0.8.2'
+OHOS_SDK_NATIVE_URL=${OHOS_SDK_NATIVE_URL:-'http://download.ci.openharmony.cn/version/Master_Version/OpenHarmony_4.0.8.2/20230615_141012/version-Master_Version-OpenHarmony_4.0.8.2-20230615_141012-ohos-sdk-full.tar.gz'}
 
 # Search for default OHOS SDK native or download it
 if [ -z "$OHOS_SDK_NATIVE" ]; then
@@ -37,8 +39,11 @@ if [ -z "$OHOS_SDK_NATIVE" ]; then
             echo "Error: OHOS SDK not found, please set OHOS_SDK_NATIVE or OHOS_SDK_NATIVE_URL environment variable"
             exit 1
         fi
-        curl --retry 5 -Lo ohos-sdk-native.zip "${OHOS_SDK_NATIVE_URL}"
-        unzip -q ohos-sdk-native.zip
+
+        curl --retry 5 -Lo "${OHOS_SDK_ARCH_NAME}" "${OHOS_SDK_NATIVE_URL}"
+        tar -xf "${OHOS_SDK_ARCH_NAME}"
+        unzip -q ohos-sdk/linux/native-linux-x64-$OHOS_SDK_VERSION-$SDK_VERSION_STAGE.zip
+        rm "${OHOS_SDK_ARCH_NAME}"
         OHOS_SDK_NATIVE=native
     fi
 fi
