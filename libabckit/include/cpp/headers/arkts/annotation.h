@@ -20,25 +20,76 @@
 
 namespace abckit::arkts {
 
+/**
+ * @brief Annotation
+ */
 class Annotation : public core::Annotation {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class arkts::Class;
+    /// @brief to access private constructor
     friend class arkts::Function;
 
 public:
+    /**
+     * @brief Construct a new Annotation object
+     * @param other
+     */
     Annotation(const Annotation &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Annotation&
+     */
     Annotation &operator=(const Annotation &other) = default;
+
+    /**
+     * @brief Construct a new Annotation object
+     * @param other
+     */
     Annotation(Annotation &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Annotation&
+     */
     Annotation &operator=(Annotation &&other) = default;
 
     // CC-OFFNXT(G.FMT.02) project code style
+    /**
+     * @brief Construct a new Annotation object
+     * @param coreOther
+     */
     explicit Annotation(const core::Annotation &coreOther) : core::Annotation(coreOther) {};
 
+    /**
+     * @brief Destroy the Annotation object
+     */
     ~Annotation() override = default;
 
+    /**
+     * @brief Add element
+     * @param val
+     * @param name
+     * @return arkts::Annotation&
+     */
     arkts::Annotation &AddElement(const abckit::Value &val, const std::string &name);
+
+    /**
+     * @brief add and get element
+     * @param val
+     * @param name
+     * @return arkts::AnnotationElement
+     */
     arkts::AnnotationElement AddAndGetElement(const abckit::Value &val, const std::string_view name);
+
+    /**
+     * @brief add and get element impl
+     * @param params
+     * @return AbckitCoreAnnotationElement*
+     */
     AbckitCoreAnnotationElement *AddAndGetElementImpl(AbckitArktsAnnotationElementCreateParams *params);
 
     // Other API.

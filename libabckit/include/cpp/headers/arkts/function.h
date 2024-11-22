@@ -20,22 +20,58 @@
 
 namespace abckit::arkts {
 
+/**
+ * @brief Function
+ */
 class Function final : public core::Function {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class Class;
 
 public:
+    /**
+     * @brief Construct a new Function object
+     * @param other
+     */
     Function(const Function &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Function&
+     */
     Function &operator=(const Function &other) = default;
+
+    /**
+     * @brief Construct a new Function object
+     * @param other
+     */
     Function(Function &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Function&
+     */
     Function &operator=(Function &&other) = default;
 
     // CC-OFFNXT(G.FMT.02) project code style
+    /**
+     * @brief Construct a new Function object
+     * @param coreOther
+     */
     explicit Function(const core::Function &coreOther) : core::Function(coreOther) {};
 
+    /**
+     * @brief Destroy the Function object
+     */
     ~Function() override = default;
 
+    /**
+     * @brief Add annotation
+     * @param iface
+     * @return arkts::Function&
+     */
     arkts::Function &AddAnnotation(const arkts::AnnotationInterface &iface);
 
     // Other API.

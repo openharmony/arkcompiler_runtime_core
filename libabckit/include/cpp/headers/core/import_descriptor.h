@@ -22,24 +22,63 @@
 
 namespace abckit::core {
 
+/**
+ * @brief ImportDescriptor
+ */
 class ImportDescriptor : public View<AbckitCoreImportDescriptor *> {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
     friend class abckit::core::Module;
+    /// @brief to access private constructor
     friend class abckit::arkts::Module;
+    /// @brief to access private constructor
     friend class abckit::DynamicIsa;
 
 public:
+    /**
+     * @brief Construct a new Import Descriptor object
+     * @param other
+     */
     ImportDescriptor(const ImportDescriptor &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ImportDescriptor&
+     */
     ImportDescriptor &operator=(const ImportDescriptor &other) = default;
+
+    /**
+     * @brief Construct a new Import Descriptor object
+     * @param other
+     */
     ImportDescriptor(ImportDescriptor &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ImportDescriptor&
+     */
     ImportDescriptor &operator=(ImportDescriptor &&other) = default;
+
+    /**
+     * @brief Destroy the Import Descriptor object
+     */
     ~ImportDescriptor() override = default;
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName() const;
 
     // Core API's.
+    /**
+     * @brief Get the Imported Module object
+     * @return core::Module
+     */
     core::Module GetImportedModule() const;
 
 private:
@@ -47,6 +86,10 @@ private:
     const ApiConfig *conf_;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

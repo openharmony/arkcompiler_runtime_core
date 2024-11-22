@@ -20,17 +20,50 @@
 
 namespace abckit {
 
+/**
+ * @brief Type
+ */
 class Type : public View<AbckitType *> {
+    /// @brief abckit::File
     friend class abckit::File;
 
 public:
+    /**
+     * @brief Construct a new Type object
+     * @param other
+     */
     Type(const Type &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Type&
+     */
     Type &operator=(const Type &other) = default;
+
+    /**
+     * @brief Construct a new Type object
+     * @param other
+     */
     Type(Type &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Type&
+     */
     Type &operator=(Type &&other) = default;
+
+    /**
+     * @brief Destroy the Type object
+     */
     ~Type() override = default;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

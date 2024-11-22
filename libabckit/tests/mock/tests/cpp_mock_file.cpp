@@ -22,7 +22,7 @@ namespace libabckit::test {
 
 class LibAbcKitCppMockTest : public ::testing::Test {};
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=mock, api=File::WriteAbc, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppMockTest, CppTestMockFile)
 {
     {

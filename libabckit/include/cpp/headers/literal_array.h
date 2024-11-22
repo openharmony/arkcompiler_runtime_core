@@ -20,18 +20,53 @@
 
 namespace abckit {
 
+/**
+ * @brief LiteralArray
+ */
 class LiteralArray : public View<AbckitLiteralArray *> {
+    /// @brief abckit::File
     friend class abckit::File;
+    /// @brief abckit::Literal
     friend class abckit::Literal;
 
 public:
+    /**
+     * @brief Construct a new Literal Array object
+     * @param other
+     */
     LiteralArray(const LiteralArray &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return LiteralArray&
+     */
     LiteralArray &operator=(const LiteralArray &other) = default;
+
+    /**
+     * @brief Construct a new Literal Array object
+     * @param other
+     */
     LiteralArray(LiteralArray &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return LiteralArray&
+     */
     LiteralArray &operator=(LiteralArray &&other) = default;
+
+    /**
+     * @brief Destroy the Literal Array object
+     *
+     */
     ~LiteralArray() override = default;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

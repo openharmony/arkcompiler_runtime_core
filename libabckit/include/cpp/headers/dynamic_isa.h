@@ -25,24 +25,81 @@ namespace abckit {
 class Graph;
 
 // Third type of Entity? Or just a view?
+/**
+ * @brief DynamicIsa
+ */
 class DynamicIsa final {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /**
+     * Field to access private constructor
+     */
     friend class Graph;
 
 public:
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     DynamicIsa(const DynamicIsa &other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     * @return DynamicIsa
+     */
     DynamicIsa &operator=(const DynamicIsa &other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     DynamicIsa(DynamicIsa &&other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     * @return DynamicIsa
+     */
     DynamicIsa &operator=(DynamicIsa &&other) = delete;
+
+    /**
+     * @brief Destructor
+     */
     ~DynamicIsa() = default;
 
     // Rvalue annotated so we can call it only in callchain context
+
+    /**
+     * @brief Creates instruction with opcode LOAD_STRING. This instruction loads the string `str` into `acc`.
+     * @param str to load
+     * @return `Instruction`
+     */
     Instruction CreateLoadString(const std::string &str) &&;
+
+    /**
+     * @brief Creates instruction with opcode TRYLDGLOBALBYNAME. Loads the global variable of the name `string`.
+     * If the global variable `string` does not exist, an exception is thrown.
+     * @param str to load
+     * @return `Instruction`
+     */
     Instruction CreateTryldglobalbyname(const std::string &str) &&;
+
+    /**
+     * @brief Creates instruction with opcode CALLARG1. This instruction invokes the function object stored in `acc`
+     * with `input0` argument
+     * @param [ in ] acc - Inst containing function object.
+     * @param [ in ] input0 - Inst containing argument.
+     * @return `Instruction`
+     */
     Instruction CreateCallArg1(const Instruction &acc, const Instruction &input0) &&;
 
     // Other dynamic API methods declarations
+    /**
+     * @brief Get the Import Descriptor object
+     * @param inst
+     * @return core::ImportDescriptor
+     */
     core::ImportDescriptor GetImportDescriptor(const Instruction &inst);
 
 private:

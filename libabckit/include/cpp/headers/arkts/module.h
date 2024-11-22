@@ -20,16 +20,45 @@
 
 namespace abckit::arkts {
 
+/**
+ * @brief Module
+ */
 class Module final : public core::Module {
     // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::File;
 
 public:
+    /**
+     * @brief Construct a new Module object
+     * @param other
+     */
     Module(const Module &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Module&
+     */
     Module &operator=(const Module &other) = default;
+
+    /**
+     * @brief Construct a new Module object
+     * @param other
+     */
     Module(Module &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Module&
+     */
     Module &operator=(Module &&other) = default;
+
+    /**
+     * @brief Destroy the Module object
+     */
     ~Module() override = default;
     // Other API.
     // ...

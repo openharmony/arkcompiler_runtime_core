@@ -69,6 +69,9 @@ class ExportDescriptor;
 
 // Class containing pointers to underlying C API's,
 // hides C implementation from C++ API user
+/**
+ * @brief ApiConfig
+ */
 class ApiConfig final {
     // Befrend with all core entities so they have an access to config
     friend DynamicIsa;
@@ -82,40 +85,95 @@ class ApiConfig final {
     friend Literal;
     friend LiteralArray;
 
+    /// \relates abckit::core::Module
     friend core::Module;
+    /// \relates abckit::core::Namespace
     friend core::Namespace;
+    /// \relates abckit::core::Class
     friend core::Class;
+    /// \relates abckit::core::Function
     friend core::Function;
+    /// \relates abckit::core::Field
     friend core::Field;
+    /// \relates abckit::core::Annotation
     friend core::Annotation;
+    /// \relates abckit::core::AnnotationInterface
     friend core::AnnotationInterface;
+    /// \relates abckit::core::AnnotationElement
     friend core::AnnotationElement;
+    /// \relates abckit::core::AnnotationInterfaceField
     friend core::AnnotationInterfaceField;
+    /// \relates abckit::core::ImportDescriptor
     friend core::ImportDescriptor;
+    /// \relates abckit::core::ExportDescriptor
     friend core::ExportDescriptor;
 
+    /// \relates abckit::arkts::Module
     friend arkts::Module;
+    /// \relates abckit::arkts::Namespace
     friend arkts::Namespace;
+    /// \relates abckit::arkts::Class
     friend arkts::Class;
+    /// \relates abckit::arkts::Function
     friend arkts::Function;
+    /// \relates abckit::arkts::Field
     friend arkts::Field;
+    /// \relates abckit::arkts::Annotation
     friend arkts::Annotation;
+    /// \relates abckit::arkts::AnnotationInterface
     friend arkts::AnnotationInterface;
+    /// \relates abckit::arkts::AnnotationElement
     friend arkts::AnnotationElement;
+    /// \relates abckit::arkts::AnnotationInterfaceField
     friend arkts::AnnotationInterfaceField;
+    /// \relates abckit::arkts::ImportDescriptor
     friend arkts::ImportDescriptor;
+    /// \relates abckit::arkts::ExportDescriptor
     friend arkts::ExportDescriptor;
 
+    /**
+     * Check error
+     * @param conf
+     */
     friend void CheckError(const ApiConfig *conf);
 
 public:
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     ApiConfig(const ApiConfig &other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     * @return ApiConfig
+     */
     ApiConfig &operator=(const ApiConfig &other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     */
     ApiConfig(ApiConfig &&other) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param other
+     * @return ApiConfig
+     */
     ApiConfig &operator=(ApiConfig &&other) = delete;
+
+    /**
+     * @brief Destructor
+     */
     ~ApiConfig() = default;
 
 protected:
+    /**
+     * @brief Constructor
+     * @param eh - unique ptr to IErrorHandler
+     */
     explicit ApiConfig(std::unique_ptr<IErrorHandler> eh)
         : cApi_(AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),
           cIapi_(AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)),

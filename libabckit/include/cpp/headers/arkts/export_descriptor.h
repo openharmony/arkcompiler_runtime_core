@@ -20,17 +20,46 @@
 
 namespace abckit::arkts {
 
+/**
+ * @brief ExportDescriptor
+ */
 class ExportDescriptor final : public core::ExportDescriptor {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class core::Module;
+    /// @brief to access private constructor
     friend class arkts::Module;
 
 public:
+    /**
+     * @brief Construct a new Export Descriptor object
+     * @param other
+     */
     ExportDescriptor(const ExportDescriptor &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ExportDescriptor&
+     */
     ExportDescriptor &operator=(const ExportDescriptor &other) = default;
+
+    /**
+     * @brief Construct a new Export Descriptor object
+     * @param other
+     */
     ExportDescriptor(ExportDescriptor &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ExportDescriptor&
+     */
     ExportDescriptor &operator=(ExportDescriptor &&other) = default;
+
+    /**
+     * @brief Destroy the Export Descriptor object
+     */
     ~ExportDescriptor() override = default;
     // Other API.
     // ...
