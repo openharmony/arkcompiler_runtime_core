@@ -32,6 +32,8 @@ class BasicBlock final : public ViewInResource<AbckitBasicBlock *, const Graph *
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class Graph;
+    /// @brief to access private constructor
+    friend class Instruction;
     /// @brief abckit::DefaultHash<BasicBlock>
     friend class abckit::DefaultHash<BasicBlock>;
 
@@ -91,14 +93,14 @@ public:
      * @param inst
      * @return BasicBlock&
      */
-    BasicBlock &AddInstFront(const Instruction &inst);
+    const BasicBlock &AddInstFront(const Instruction &inst) const;
 
     /**
      * @brief
      * @param inst
      * @return BasicBlock&
      */
-    BasicBlock &AddInstBack(const Instruction &inst);
+    const BasicBlock &AddInstBack(const Instruction &inst) const;
 
     /**
      * @brief Get the Instructions object
@@ -136,7 +138,7 @@ public:
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `Graph`s owning current `BasicBlock` and `succBlock`.
      * differs.
      */
-    void AppendSuccBlock(const BasicBlock &succBlock);
+    void AppendSuccBlock(const BasicBlock &succBlock) const;
 
     /**
      * @brief Deletes the successor and shifts the rest if there were successors with a larger index.
@@ -144,7 +146,7 @@ public:
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `BasicBlock` is false.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `index` is larger than current `BasicBlock` successors quantity.
      */
-    void EraseSuccBlock(uint32_t index);
+    void EraseSuccBlock(uint32_t index) const;
 
     /**
      * @brief Returns graph owning current `BasicBlock`.

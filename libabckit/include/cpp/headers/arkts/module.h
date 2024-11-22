@@ -17,6 +17,10 @@
 #define CPP_ABCKIT_ARKTS_MODULE_H
 
 #include "../core/module.h"
+#include "../base_concepts.h"
+#include "./import_descriptor.h"
+
+#include <string_view>
 
 namespace abckit::arkts {
 
@@ -30,8 +34,16 @@ class Module final : public core::Module {
     friend class abckit::File;
     /// @brief abckit::DefaultHash<Module>
     friend class abckit::DefaultHash<Module>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<Module>;
 
 public:
+    /**
+     * @brief Constructor Arkts API Module from the Core API with compatibility check
+     * @param other - Core API Module
+     */
+    explicit Module(const core::Module &other);
+
     /**
      * @brief Construct a new Module object
      * @param other
@@ -64,6 +76,30 @@ public:
     ~Module() override = default;
     // Other API.
     // ...
+
+    /**
+     * @brief Adds import from one ArktsV1 module to another ArktsV1 module.
+     * @return Pointer to the newly created import descriptor.
+     * @param [ in ] imported - The module the `importing` module imports from.
+     * @param [ in ] name - Import name. For namespace imports equals to "*". For default imports equals to "default".
+     * For regular imports is the same as in user code.
+     * @param [ in ] alias - Alias name for the import. For namespace imports is the same as in user code. For default
+     * import is the same as the default import name in user code. For regular imports is the same as in user code.
+     * @note Allocates
+     */
+    ImportDescriptor AddImportFromArktsV1ToArktsV1(const Module &imported, std::string_view name,
+                                                   std::string_view alias);
+
+private:
+    /**
+     * @brief Converts underlying module from Core to Arkts target
+     * @return AbckitArktsModule* - converted module
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsModule *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<Module> targetChecker_;
 };
 
 }  // namespace abckit::arkts

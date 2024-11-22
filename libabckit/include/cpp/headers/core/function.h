@@ -42,6 +42,10 @@ class Function : public ViewInResource<AbckitCoreFunction *, const File *> {
     /// @brief abckit::DefaultHash<Function>
     friend class abckit::DefaultHash<Function>;
 
+protected:
+    /// @brief Core API View type
+    using CoreViewT = Function;
+
 public:
     /**
      * @brief Construct a new empty Function object
@@ -92,7 +96,7 @@ public:
      * @brief Set the Graph object
      * @param graph
      */
-    void SetGraph(const Graph &graph);
+    void SetGraph(const Graph &graph) const;
 
     /**
      * @brief Get the name
@@ -144,6 +148,14 @@ public:
      * @param cb - Callback that will be invoked.
      */
     void EnumerateNestedClasses(const std::function<bool(core::Class)> &cb) const;
+
+    /**
+     * @brief Enumerates annotations of function `func`, invoking callback `cb` for each annotation.
+     * The return value of `cb` used as a signal to continue (true) or early-exit (false) enumeration.
+     * @param cb - Callback that will be invoked.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.
+     */
+    void EnumerateAnnotations(const std::function<bool(core::Annotation)> &cb) const;
 
 private:
     Function(AbckitCoreFunction *func, const ApiConfig *conf, const File *file) : ViewInResource(func), conf_(conf)

@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_FUNCTION_H
 
 #include "../core/function.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -29,8 +30,16 @@ class Function final : public core::Function {
     friend class Class;
     /// @brief abckit::DefaultHash<Function>
     friend class abckit::DefaultHash<Function>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<Function>;
 
 public:
+    /**
+     * @brief Constructor Arkts API Function from the Core API with compatibility check
+     * @param other - Core API Function
+     */
+    explicit Function(const core::Function &other);
+
     /**
      * @brief Construct a new Function object
      * @param other
@@ -57,13 +66,6 @@ public:
      */
     Function &operator=(Function &&other) = default;
 
-    // CC-OFFNXT(G.FMT.02) project code style
-    /**
-     * @brief Construct a new Function object
-     * @param coreOther
-     */
-    explicit Function(const core::Function &coreOther) : core::Function(coreOther) {};
-
     /**
      * @brief Destroy the Function object
      */
@@ -78,6 +80,17 @@ public:
 
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts underlying function from Core to Arkts target
+     * @return AbckitArktsFunction* - converted function
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsFunction *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<Function> targetChecker_;
 };
 
 }  // namespace abckit::arkts

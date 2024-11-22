@@ -18,11 +18,10 @@
 #include "helpers/helpers.h"
 #include "helpers/helpers_runtime.h"
 
+#include <gtest/gtest.h>
+
 #include <optional>
 #include <string_view>
-#include <regex>
-
-#include <gtest/gtest.h>
 
 namespace libabckit::test {
 

@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_NAMESPACE_H
 
 #include "../core/namespace.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -29,8 +30,16 @@ class Namespace final : public core::Namespace {
     friend class Module;
     /// @brief abckit::DefaultHash<Namespace>
     friend class abckit::DefaultHash<Namespace>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<Namespace>;
 
 public:
+    /**
+     * @brief Constructor Arkts API Namespace from the Core API with compatibility check
+     * @param other - Core API Namespace
+     */
+    explicit Namespace(const core::Namespace &other);
+
     /**
      * @brief Constructor
      * @param other
@@ -62,6 +71,17 @@ public:
 
     // Other API's.
     // ...
+
+private:
+    /**
+     * @brief Converts underlying namespace from Core to Arkts target
+     * @return AbckitArktsNamespace* - converted namespace
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsNamespace *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<Namespace> targetChecker_;
 };
 
 }  // namespace abckit::arkts

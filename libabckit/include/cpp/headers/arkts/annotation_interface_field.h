@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_FIELD_H
 
 #include "../core/annotation_interface_field.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -32,8 +33,16 @@ class AnnotationInterfaceField : public core::AnnotationInterfaceField {
     friend class arkts::AnnotationInterface;
     /// @brief abckit::DefaultHash<AnnotationInterfaceField>
     friend class abckit::DefaultHash<AnnotationInterfaceField>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<AnnotationInterfaceField>;
 
 public:
+    /**
+     * @brief Constructor Arkts API AnnotationInterfaceField from the Core API with compatibility check
+     * @param other - Core API AnnotationInterfaceField
+     */
+    explicit AnnotationInterfaceField(const core::AnnotationInterfaceField &other);
+
     /**
      * @brief Construct a new Annotation Interface Field object
      *
@@ -61,20 +70,23 @@ public:
      */
     AnnotationInterfaceField &operator=(AnnotationInterfaceField &&other) = default;
 
-    // CC-OFFNXT(G.FMT.02) project code style
-    /**
-     * @brief Construct a new Annotation Interface Field object
-     * @param coreOther
-     */
-    explicit AnnotationInterfaceField(const core::AnnotationInterfaceField &coreOther)
-        : core::AnnotationInterfaceField(coreOther) {};
-
     /**
      * @brief Destroy the Annotation Interface Field object
      */
     ~AnnotationInterfaceField() override = default;
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts annotation interface field from Core to Arkts target
+     * @return AbckitArktsAnnotationInterfaceField* - converted annotation interface field
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsAnnotationInterfaceField *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<AnnotationInterfaceField> targetChecker_;
 };
 
 }  // namespace abckit::arkts

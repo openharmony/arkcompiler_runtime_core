@@ -35,6 +35,10 @@ class AnnotationInterface : public ViewInResource<AbckitCoreAnnotationInterface 
     /// @brief abckit::DefaultHash<AnnotationInterface>
     friend class abckit::DefaultHash<AnnotationInterface>;
 
+protected:
+    /// @brief Core API View type
+    using CoreViewT = AnnotationInterface;
+
 public:
     /**
      * @brief Construct a new Annotation Interface object

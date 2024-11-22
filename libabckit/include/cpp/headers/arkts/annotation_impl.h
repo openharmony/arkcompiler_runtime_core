@@ -22,24 +22,29 @@
 
 namespace abckit::arkts {
 
+inline AbckitArktsAnnotation *Annotation::TargetCast() const
+{
+    auto ret = GetApiConfig()->cArktsIapi_->coreAnnotationToArktsAnnotation(GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline Annotation::Annotation(const core::Annotation &coreOther) : core::Annotation(coreOther), targetChecker_(this) {}
+
 inline arkts::Annotation &Annotation::AddElement(const abckit::Value &val, const std::string &name)
 {
     struct AbckitArktsAnnotationElementCreateParams params {
         name.c_str(), val.GetView()
     };
-    AbckitArktsAnnotation *arktsAnn = GetApiConfig()->cArktsIapi_->coreAnnotationToArktsAnnotation(GetView());
-    CheckError(GetApiConfig());
-    GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(arktsAnn, &params);
+    GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(TargetCast(), &params);
     CheckError(GetApiConfig());
     return *this;
 }
 
 inline AbckitCoreAnnotationElement *Annotation::AddAndGetElementImpl(AbckitArktsAnnotationElementCreateParams *params)
 {
-    AbckitArktsAnnotation *arktsAnn = GetApiConfig()->cArktsIapi_->coreAnnotationToArktsAnnotation(GetView());
-    CheckError(GetApiConfig());
     AbckitArktsAnnotationElement *arktsAnni =
-        GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(arktsAnn, params);
+        GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(TargetCast(), params);
     CheckError(GetApiConfig());
     AbckitCoreAnnotationElement *coreAnni =
         GetApiConfig()->cArktsIapi_->arktsAnnotationElementToCoreAnnotationElement(arktsAnni);

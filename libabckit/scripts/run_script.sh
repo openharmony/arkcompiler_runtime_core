@@ -28,7 +28,7 @@ RUNNER_ARGS_OPTION="--runner-args"
 ENV_OPTION="--env"
 RET_CODE_OPTION="--ret-code"
 HELP_OPTION="--help"
-DEBUG_OPTION="--help"
+DEBUG_OPTION="--debug"
 
 declare -i TRUE=1
 declare -i FALSE=0

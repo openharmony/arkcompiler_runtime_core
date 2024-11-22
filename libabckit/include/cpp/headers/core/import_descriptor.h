@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_H
 
 #include "../base_classes.h"
+#include "./module.h"
 
 #include <string_view>
 
@@ -39,6 +40,10 @@ class ImportDescriptor : public ViewInResource<AbckitCoreImportDescriptor *, con
     friend class abckit::Instruction;
     /// @brief abckit::DefaultHash<ImportDescriptor>
     friend class abckit::DefaultHash<ImportDescriptor>;
+
+protected:
+    /// @brief Core API View type
+    using CoreViewT = ImportDescriptor;
 
 public:
     /**
@@ -66,7 +71,7 @@ public:
      * @brief Construct a new Import Descriptor object
      * @param other
      */
-    ImportDescriptor(ImportDescriptor &&other) = default;
+    ImportDescriptor(ImportDescriptor &&other) = default;  // CC-OFF(G.CLS.07-CPP) plan to break polymorphism
 
     /**
      * @brief Constructor
@@ -93,14 +98,6 @@ public:
      */
     core::Module GetImportedModule() const;
 
-private:
-    ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf, const File *file)
-        : ViewInResource(module), conf_(conf)
-    {
-        SetResource(file);
-    };
-    const ApiConfig *conf_;
-
 protected:
     /**
      * @brief Get the Api Config object
@@ -110,6 +107,11 @@ protected:
     {
         return conf_;
     }
+
+private:
+    ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf, const File *file);
+
+    const ApiConfig *conf_;
 };
 
 }  // namespace abckit::core

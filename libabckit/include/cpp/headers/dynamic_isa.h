@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_DYNAMIC_ISA_H
 
 #include "./instruction.h"
+#include "./core/import_descriptor.h"
 
 #include <string>
 #include <string_view>
@@ -76,7 +77,7 @@ public:
      * @param str to load
      * @return `Instruction`
      */
-    Instruction CreateLoadString(std::string_view str) &&;
+    Instruction CreateLoadString(std::string_view str) const &&;
 
     /**
      * @brief Creates instruction with opcode TRYLDGLOBALBYNAME. Loads the global variable of the name `string`.
@@ -84,7 +85,7 @@ public:
      * @param str to load
      * @return `Instruction`
      */
-    Instruction CreateTryldglobalbyname(std::string_view str) &&;
+    Instruction CreateTryldglobalbyname(std::string_view str) const &&;
 
     /**
      * @brief Creates instruction with opcode CALLARG1. This instruction invokes the function object stored in `acc`
@@ -93,7 +94,7 @@ public:
      * @param [ in ] input0 - Inst containing argument.
      * @return `Instruction`
      */
-    Instruction CreateCallArg1(const Instruction &acc, const Instruction &input0) &&;
+    Instruction CreateCallArg1(const Instruction &acc, const Instruction &input0) const &&;
 
     /**
      * @brief Creates instruction with opcode TRYLDGLOBALBYNAME. Loads the global variable of the name `str`.
@@ -102,16 +103,43 @@ public:
      * @param [ in ] str - String containing name of global variable.
      * @return `Instruction`
      */
-    Instruction CreateLdObjByName(const Instruction &acc, std::string_view str) &&;
+    Instruction CreateLdObjByName(const Instruction &acc, std::string_view str) const &&;
 
     /**
      * @brief Creates instruction with opcode CALLTHIS0.
-     * Sets the value of this as `input0`, invokes the function object stored in returned instruction.
+     * Sets the value of this as `input0`, invokes the function object stored in `acc`.
+     * @return Created `Instruction`
      * @param [ in ] acc - Function object.
      * @param [ in ] input0 - This object.
-     * @return `Instruction`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Graph` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `Graph` owning one of `Instruction`s and current `Graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if current `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
      */
-    Instruction CreateCallThis0(const Instruction &acc, const Instruction &input0) &&;
+    Instruction CreateCallThis0(const Instruction &acc, const Instruction &input0) const &&;
+
+    /**
+     * @brief Creates instruction with opcode CALLTHIS2.
+     * Sets the value of this as `input0`,
+     * invokes the function object stored in `acc` with arguments `input1`, `input2`.
+     * @return Created `Instruction`.
+     * @param [ in ] acc - Function object.
+     * @param [ in ] input0 - This object.
+     * @param [ in ] input1 - First argument.
+     * @param [ in ] input2 - Second argument.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Graph` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input1` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input2` is a `View` over NULL.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `Graph` owning one of `Instruction`s and current `Graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if current `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateCallThis2(const Instruction &acc, const Instruction &input0, const Instruction &input1,
+                                const Instruction &input2) const &&;
 
     /**
      * @brief Creates instruction with opcode SUB2. This instruction computes the binary operation `input0 - acc`, and
@@ -121,7 +149,7 @@ public:
      * @param [ in ] input0 - Inst containing left operand.
      * @return `Instruction`
      */
-    Instruction CreateSub2(const Instruction &acc, const Instruction &input0) &&;
+    Instruction CreateSub2(const Instruction &acc, const Instruction &input0) const &&;
 
     /**
      * @brief Creates instruction with opcode GREATEREQ. This instruction computes the binary operation `input0 >= acc`.
@@ -135,7 +163,7 @@ public:
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `Graph`'s mode is not DYNAMIC.
      * @note Allocates
      */
-    Instruction CreateGreatereq(const Instruction &acc, const Instruction &input0) &&;
+    Instruction CreateGreatereq(const Instruction &acc, const Instruction &input0) const &&;
 
     /**
      * @brief Creates instruction with opcode IF.
@@ -148,7 +176,7 @@ public:
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `File`s owning `Graph` and `input` are differ.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `Graph`'s mode is not DYNAMIC.
      */
-    Instruction CreateIf(const Instruction &input, enum AbckitIsaApiDynamicConditionCode cc) &&;
+    Instruction CreateIf(const Instruction &input, enum AbckitIsaApiDynamicConditionCode cc) const &&;
 
     /**
      * @brief Creates instruction with opcode RETURN. This instruction returns `acc`.
@@ -158,7 +186,7 @@ public:
      * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `File`s owning `Graph` and `acc` are differ.
      * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `Graph`'s mode is not DYNAMIC.
      */
-    Instruction CreateReturn(const Instruction &acc) &&;
+    Instruction CreateReturn(const Instruction &acc) const &&;
 
     /**
      * @brief Creates instruction with opcode NEWOBJRANGE. This instruction invokes the constructor of `instClass` with
@@ -169,7 +197,78 @@ public:
      * @return `Instruction`
      */
     template <class... Instructions>
-    Instruction CreateNewobjrange(const Instruction &instClass, Instructions &&...instArgs) &&;
+    Instruction CreateNewobjrange(const Instruction &instClass, Instructions &&...instArgs) const &&;
+
+    /**
+     * @brief Creates instruction with opcode LDEXTERNALMODULEVAR. Loads the external module variable.
+     * @return Created `Instruction`.
+     * @param [ in ] idesc - Import descriptor to load.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `File` owning `idesc` and `File` owning `this->GetGraph()` differs.`
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if this `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateLdExternalModuleVar(const core::ImportDescriptor &idesc) const &&;
+
+    /**
+     * @brief Creates instruction with opcode THROW_UNDEFINEDIFHOLEWITHNAME. This instruction throws the exception that
+     * `string` is `undefined` if `acc` is hole.
+     * @return Created `Instruction`.
+     * @param [ in ] acc - Inst containing value of the object.
+     * @param [ in ] string - String for exception.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(acc)` results in `false`
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if this `Graph` and `Graph` owning `acc` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if this `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateThrowUndefinedIfHoleWithName(const Instruction &acc, std::string_view string) const &&;
+
+    /**
+     * @brief Creates instruction with opcode LDTRUE. This instruction loads `true` into `acc`.
+     * @return Created `Instruction`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if this `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateLdTrue() const &&;
+
+    /**
+     * @brief Creates instruction with opcode LDFALSE. This instruction loads `false` into `acc`.
+     * @return Created `Instruction`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if this `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateLdFalse() const &&;
+    /**
+     * @brief Creates instruction with opcode STOWNBYINDEX. Stores `acc` to object `input0`'s property of the key
+     * `imm0`.
+     * @return Created `Instruction`.
+     * @param [ in ] acc - Object to store.
+     * @param [ in ] input0 - Destination object.
+     * @param [ in ] imm0 - Index.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is false.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `AbckitGraph` owning one of `AbckitInst` and current `Graph`
+     * differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if this `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateStownByIndex(const Instruction &acc, const Instruction &input0, uint64_t imm0) const &&;
+
+    /**
+     * @brief Creates instruction with opcode CREATEARRAYWITHBUFFER. This instruction creates an array using literal
+     * array indexed by `literalArray`.
+     * @return Created `Instruction`.
+     * @param [ in ] literalArray - Literal array used in array creation.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `literalArray` is false.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if this `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateCreateArrayWithBuffer(const abckit::LiteralArray &literalArray) const &&;
 
     // Other dynamic API methods declarations
 
@@ -178,7 +277,7 @@ public:
      * @param inst
      * @return core::ImportDescriptor
      */
-    core::ImportDescriptor GetImportDescriptor(const Instruction &inst);
+    core::ImportDescriptor GetImportDescriptor(const Instruction &inst) const;
 
 private:
     explicit DynamicIsa(const Graph &graph) : graph_(graph) {};

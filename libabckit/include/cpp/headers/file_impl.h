@@ -68,7 +68,7 @@ inline abckit::LiteralArray File::CreateLiteralArray(const std::vector<abckit::L
     AbckitLiteralArray *litaIml =
         GetApiConfig()->cMapi_->createLiteralArray(GetResource(), litsImpl.data(), litsImpl.size());
     CheckError(GetApiConfig());
-    return abckit::LiteralArray(litaIml, GetApiConfig());
+    return abckit::LiteralArray(litaIml, GetApiConfig(), this);
 }
 
 inline bool File::EnumerateModules(const std::function<bool(core::Module)> &cb) const

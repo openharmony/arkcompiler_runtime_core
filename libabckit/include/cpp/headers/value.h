@@ -28,6 +28,8 @@ class Value : public ViewInResource<AbckitValue *, const File *> {
     friend class abckit::File;
     /// @brief abckit::core::Annotation
     friend class abckit::core::Annotation;
+    /// @brief for access to a private constructor
+    friend class abckit::core::AnnotationElement;
     /// @brief abckit::arkts::Annotation
     friend class abckit::arkts::Annotation;
     /// @brief abckit::DefaultHash<Value>
@@ -69,23 +71,21 @@ public:
      * @brief Get the U1 value
      * @return bool
      */
-    bool GetU1() const
-    {
-        bool ret = GetApiConfig()->cIapi_->valueGetU1(GetView());
-        CheckError(GetApiConfig());
-        return ret;
-    }
+    bool GetU1() const;
 
     /**
      * @brief Get the Double object
      * @return double
      */
-    double GetDouble() const
-    {
-        double ret = GetApiConfig()->cIapi_->valueGetDouble(GetView());
-        CheckError(GetApiConfig());
-        return ret;
-    }
+    double GetDouble() const;
+
+    /**
+     * @brief Returns string value that given `Value` holds.
+     * @return std::string_view of the stored value.
+     * @note Set `ABCKIT_STATUS_TODO` error if `value` type id differs from `ABCKIT_TYPE_ID_STRING`.
+     * @note Allocates
+     */
+    std::string_view GetString() const;
 
 protected:
     /**

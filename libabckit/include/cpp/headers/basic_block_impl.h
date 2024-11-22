@@ -82,14 +82,14 @@ inline Instruction BasicBlock::GetLastInst() const
     return Instruction(inst, conf, GetResource());
 }
 
-inline BasicBlock &BasicBlock::AddInstFront(const Instruction &inst)
+inline const BasicBlock &BasicBlock::AddInstFront(const Instruction &inst) const
 {
     GetApiConfig()->cGapi_->bbAddInstFront(GetView(), inst.GetView());
     CheckError(GetApiConfig());
     return *this;
 }
 
-inline BasicBlock &BasicBlock::AddInstBack(const Instruction &inst)
+inline const BasicBlock &BasicBlock::AddInstBack(const Instruction &inst) const
 {
     GetApiConfig()->cGapi_->bbAddInstBack(GetView(), inst.GetView());
     CheckError(GetApiConfig());
@@ -108,13 +108,13 @@ inline void BasicBlock::VisitSuccBlocks(const std::function<void(BasicBlock)> &c
     CheckError(GetApiConfig());
 }
 
-inline void BasicBlock::AppendSuccBlock(const BasicBlock &succBlock)
+inline void BasicBlock::AppendSuccBlock(const BasicBlock &succBlock) const
 {
     GetApiConfig()->cGapi_->bbAppendSuccBlock(GetView(), succBlock.GetView());
     CheckError(GetApiConfig());
 }
 
-inline void BasicBlock::EraseSuccBlock(uint32_t index)
+inline void BasicBlock::EraseSuccBlock(uint32_t index) const
 {
     GetApiConfig()->cGapi_->bbEraseSuccBlock(GetView(), index);
     CheckError(GetApiConfig());

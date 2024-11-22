@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_EXPORT_DESCRIPTOR_H
 
 #include "../core/export_descriptor.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -31,8 +32,16 @@ class ExportDescriptor final : public core::ExportDescriptor {
     friend class arkts::Module;
     /// @brief abckit::DefaultHash<ExportDescriptor>
     friend class abckit::DefaultHash<ExportDescriptor>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<ExportDescriptor>;
 
 public:
+    /**
+     * @brief Constructor Arkts API ExportDescriptor from the Core API with compatibility check
+     * @param other - Core API ExportDescriptor
+     */
+    explicit ExportDescriptor(const core::ExportDescriptor &other);
+
     /**
      * @brief Construct a new Export Descriptor object
      * @param other
@@ -65,6 +74,17 @@ public:
     ~ExportDescriptor() override = default;
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts export descriptor from Core to Arkts target
+     * @return AbckitArktsExportDescriptor* - converted export descriptor
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsExportDescriptor *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<ExportDescriptor> targetChecker_;
 };
 
 }  // namespace abckit::arkts

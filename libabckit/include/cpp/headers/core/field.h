@@ -32,6 +32,10 @@ class Field : public View<AbckitCoreField *> {
     /// @brief abckit::DefaultHash<Field>
     friend class abckit::DefaultHash<Field>;
 
+protected:
+    /// @brief Core API View type
+    using CoreViewT = Field;
+
 public:
     /**
      * @brief Construct a new Field object

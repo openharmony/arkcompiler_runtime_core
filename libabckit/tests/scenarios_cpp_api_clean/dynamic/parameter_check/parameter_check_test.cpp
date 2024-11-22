@@ -39,7 +39,7 @@ void AddParamChecker(const abckit::core::Function &method)
 {
     abckit::Graph graph = method.CreateGraph();
 
-    TransformMethod(method, [&](const abckit::File *file, abckit::core::Function method) {
+    TransformMethod(method, [&](const abckit::File *file, const abckit::core::Function &method) {
         abckit::BasicBlock startBB = graph.GetStartBb();
         abckit::Instruction idx = startBB.GetLastInst();
         abckit::Instruction arr = idx.GetPrev();
