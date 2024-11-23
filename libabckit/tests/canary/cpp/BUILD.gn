@@ -153,6 +153,12 @@ abckit_standalone_canary("abckit_canary_cpp_headers_core_namespace") {
   extension = "cpp"
 }
 
+abckit_standalone_canary("abckit_canary_cpp_headers_core_namespace_impl") {
+  configs = [ ":abckit_canary_cpp_config" ]
+  input_file = "$abckit_root/include/cpp/headers/core/namespace_impl.h"
+  extension = "cpp"
+}
+
 abckit_standalone_canary(
     "abckit_canary_cpp_headers_core_annotation_interface") {
   configs = [ ":abckit_canary_cpp_config" ]
@@ -357,9 +363,16 @@ abckit_standalone_canary("abckit_canary_cpp_abckit_cpp") {
   extension = "cpp"
 }
 
+abckit_standalone_canary("abckit_canary_cpp_hash_specializations") {
+  configs = [ ":abckit_canary_cpp_config" ]
+  input_file = "$abckit_root/include/cpp/headers/hash_specializations.h"
+  extension = "cpp"
+}
+
 group("abckit_canary_cpp_standalone") {
   deps = [
     ":abckit_canary_cpp_abckit_cpp",
+    ":abckit_canary_cpp_hash_specializations",
     ":abckit_canary_cpp_headers_arkts_annotation",
     ":abckit_canary_cpp_headers_arkts_annotation_element",
     ":abckit_canary_cpp_headers_arkts_annotation_element_impl",
@@ -396,6 +409,7 @@ group("abckit_canary_cpp_standalone") {
     ":abckit_canary_cpp_headers_core_module",
     ":abckit_canary_cpp_headers_core_module_impl",
     ":abckit_canary_cpp_headers_core_namespace",
+    ":abckit_canary_cpp_headers_core_namespace_impl",
     ":abckit_canary_cpp_headers_dynamic_isa",
     ":abckit_canary_cpp_headers_dynamic_isa_impl",
     ":abckit_canary_cpp_headers_file",

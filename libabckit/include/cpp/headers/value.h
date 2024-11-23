@@ -30,6 +30,8 @@ class Value : public View<AbckitValue *> {
     friend class abckit::core::Annotation;
     /// @brief abckit::arkts::Annotation
     friend class abckit::arkts::Annotation;
+    /// @brief abckit::DefaultHash<Value>
+    friend class abckit::DefaultHash<Value>;
 
 public:
     /**

@@ -102,6 +102,12 @@ public:
         return StaticIsa(*this);
     }
 
+    /**
+     * @brief EnumerateBasicBlocksRpo
+     * @param cb
+     */
+    void EnumerateBasicBlocksRpo(const std::function<void(BasicBlock)> &cb) const;
+
     // Other Graph API's
     // ...
 

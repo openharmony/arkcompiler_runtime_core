@@ -29,6 +29,8 @@ class Annotation : public core::Annotation {
     friend class arkts::Class;
     /// @brief to access private constructor
     friend class arkts::Function;
+    /// @brief abckit::DefaultHash<Annotation>
+    friend class abckit::DefaultHash<Annotation>;
 
 public:
     /**

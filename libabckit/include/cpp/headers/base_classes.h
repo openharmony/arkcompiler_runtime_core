@@ -19,6 +19,7 @@
 #include "./config.h"
 
 #include <memory>
+#include <type_traits>
 
 namespace abckit {
 
@@ -31,29 +32,25 @@ class Entity {
 public:
     /**
      * @brief Constructor
-     * @param other
      */
-    Entity(const Entity &other) = default;
+    Entity(const Entity &) = default;
 
     /**
      * @brief Constructor
-     * @param other
      * @return Entity
      */
-    Entity &operator=(const Entity &other) = default;
+    Entity &operator=(const Entity &) = default;
 
     /**
      * @brief Constructor
-     * @param other
      */
-    Entity(Entity &&other) = default;
+    Entity(Entity &&) = default;
 
     /**
      * @brief Constructor
-     * @param other
      * @return Entity
      */
-    Entity &operator=(Entity &&other) = default;
+    Entity &operator=(Entity &&) = default;
 
     Entity() = default;
     virtual ~Entity() = default;
@@ -65,11 +62,10 @@ public:
     virtual const ApiConfig *GetApiConfig() const = 0;
 };
 
-// View - value semantics
 /**
  * @brief View
  */
-template <typename T>
+template <typename T, typename = std::enable_if_t<std::is_pointer_v<T>>>
 class View : public Entity {
 public:
     /**
@@ -77,9 +73,18 @@ public:
      * @param rhs
      * @return bool
      */
-    bool operator==(const View<T> &rhs)
+    bool operator==(const View<T> &rhs) const
     {
         return GetView() == rhs.GetView();
+    }
+
+    /**
+     * Operator bool
+     * @return bool
+     */
+    explicit operator bool() const
+    {
+        return view_ != nullptr;
     }
 
 protected:
@@ -95,29 +100,25 @@ protected:
 
     /**
      * @brief Constructor
-     * @param other
      */
-    View(const View &other) = default;
+    View(const View &) = default;
 
     /**
      * @brief Constructor
-     * @param other
      * @return View
      */
-    View &operator=(const View &other) = default;
+    View &operator=(const View &) = default;
 
     /**
      * @brief Constructor
-     * @param other
      */
-    View(View &&other) = default;
+    View(View &&) = default;
 
     /**
      * @brief Constructor
-     * @param other
      * @return View
      */
-    View &operator=(View &&other) = default;
+    View &operator=(View &&) = default;
 
 protected:
     ~View() override = default;
@@ -154,16 +155,14 @@ public:
     // No copy for resources
     /**
      * @brief Deleted constructor
-     * @param other
      */
-    Resource(Resource &other) = delete;
+    Resource(Resource &) = delete;
 
     /**
      * @brief Deleted constructor
      * @return Resource&
-     * @param other
      */
-    Resource &operator=(Resource &other) = delete;
+    Resource &operator=(Resource &) = delete;
 
 protected:
     /**

@@ -23,6 +23,7 @@
 
 #include <gtest/gtest.h>
 #include <string_view>
+#include <unordered_set>
 
 namespace libabckit::test {
 
@@ -294,6 +295,34 @@ TEST_F(LibAbcKitCppTest, CppTest10)
 
     ASSERT_TRUE(exportNames.size() == 1);
     ASSERT_EQ(exportNames[0], "bar");
+}
+
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+TEST_F(LibAbcKitCppTest, CppTest11)
+{
+    abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
+
+    // Test checks that Module is hashable
+    std::unordered_set<abckit::core::Module> moduleSet;
+
+    for (auto &mdl : file.GetModules()) {
+        moduleSet.insert(mdl);
+    }
+}
+
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+TEST_F(LibAbcKitCppTest, CppTest12)
+{
+    abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
+    abckit::core::Function func = file.GetAllFunctions()[0];
+    abckit::Graph graph = func.GetGraph();
+    abckit::BasicBlock bb = graph.GetStartBb();
+    abckit::Instruction inst = bb.GetFirstInst();
+    while (inst) {
+        ASSERT_TRUE(inst);
+        inst = inst.GetNext();
+    }
+    ASSERT_FALSE(inst);
 }
 
 }  // namespace libabckit::test

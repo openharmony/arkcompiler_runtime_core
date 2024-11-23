@@ -32,6 +32,8 @@ class BasicBlock final : public View<AbckitBasicBlock *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
     friend class Graph;
+    /// @brief abckit::DefaultHash<BasicBlock>
+    friend class abckit::DefaultHash<BasicBlock>;
 
 public:
     /**

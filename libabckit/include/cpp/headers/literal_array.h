@@ -28,6 +28,8 @@ class LiteralArray : public View<AbckitLiteralArray *> {
     friend class abckit::File;
     /// @brief abckit::Literal
     friend class abckit::Literal;
+    /// @brief abckit::DefaultHash<LiteralArray>
+    friend class abckit::DefaultHash<LiteralArray>;
 
 public:
     /**

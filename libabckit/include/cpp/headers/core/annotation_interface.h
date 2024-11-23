@@ -32,6 +32,8 @@ class AnnotationInterface : public View<AbckitCoreAnnotationInterface *> {
     friend class core::Annotation;
     /// @brief core::Module
     friend class core::Module;
+    /// @brief abckit::DefaultHash<AnnotationInterface>
+    friend class abckit::DefaultHash<AnnotationInterface>;
 
 public:
     /**

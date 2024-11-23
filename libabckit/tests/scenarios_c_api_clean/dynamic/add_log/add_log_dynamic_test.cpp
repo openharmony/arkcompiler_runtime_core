@@ -176,7 +176,7 @@ static void CreateEpilog(AbckitInst *inst, AbckitBasicBlock *bb, UserData *userD
     }
 }
 
-std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
+static std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
 {
     std::vector<AbckitBasicBlock *> succBBs;
     g_implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {

@@ -18,6 +18,7 @@
 
 #include "../base_classes.h"
 
+#include <functional>
 #include <string_view>
 
 namespace abckit::core {
@@ -31,6 +32,8 @@ class Namespace : public View<AbckitCoreNamespace *> {
     friend class abckit::File;
     /// @brief to access private constructor
     friend class Module;
+    /// @brief abckit::DefaultHash<Namespace>
+    friend class abckit::DefaultHash<Namespace>;
 
 public:
     /**
@@ -79,6 +82,24 @@ public:
 
     // Core API's.
     // ...
+
+    /**
+     * @brief EnumerateNamespaces
+     * @param cb
+     */
+    void EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const;
+
+    /**
+     * @brief EnumerateClasses
+     * @param cb
+     */
+    void EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
+
+    /**
+     * @brief EnumerateTopLevelFunctions
+     * @param cb
+     */
+    void EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
 
 private:
     Namespace(AbckitCoreNamespace *ns, const ApiConfig *conf) : View(ns), conf_(conf) {};

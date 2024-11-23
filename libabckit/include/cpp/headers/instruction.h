@@ -18,6 +18,8 @@
 
 #include "./base_classes.h"
 
+#include <functional>
+
 namespace abckit {
 
 /**
@@ -33,6 +35,8 @@ class Instruction final : public View<AbckitInst *> {
     friend class StaticIsa;
     /// @brief To access private constructor
     friend class DynamicIsa;
+    /// @brief abckit::DefaultHash<Instruction>
+    friend class abckit::DefaultHash<Instruction>;
 
 public:
     /**
@@ -105,10 +109,42 @@ public:
     Instruction GetNext() const;
 
     /**
+     * @brief Get the Prev object
+     * @return Instruction
+     */
+    Instruction GetPrev() const;
+
+    /**
      * @brief Get the Function object
      * @return core::Function
      */
     core::Function GetFunction() const;
+
+    /**
+     * @brief Returns number of inputs.
+     * @return Number of inputs.
+     */
+    uint32_t GetInputCount() const;
+
+    /**
+     * @brief Returns `inst` input under given `index`.
+     * @param [ in ] index - Index of input to be returned.
+     * @return input `Instruction`
+     */
+    Instruction GetInput(uint32_t index) const;
+
+    /**
+     * @brief Sets input, overwrites existing input.
+     * @param [ in ] index - Index of input to be set.
+     * @param [ in ] input - Input instruction to be set.
+     */
+    void SetInput(uint32_t index, const Instruction &input);
+
+    /**
+     * @brief Enumerates `insts` user instructions, invoking callback `cb` for each user instruction.
+     * @param cb - Callback that will be invoked.
+     */
+    void VisitUsers(const std::function<void(Instruction)> &cb) const;
 
 protected:
     /**

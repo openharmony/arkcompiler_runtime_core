@@ -30,6 +30,8 @@ class AnnotationInterfaceField : public core::AnnotationInterfaceField {
     friend class arkts::Annotation;
     /// @brief to access private constructor
     friend class arkts::AnnotationInterface;
+    /// @brief abckit::DefaultHash<AnnotationInterfaceField>
+    friend class abckit::DefaultHash<AnnotationInterfaceField>;
 
 public:
     /**
