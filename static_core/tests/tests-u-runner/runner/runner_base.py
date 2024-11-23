@@ -127,7 +127,7 @@ class Runner(ABC):
         # directory where list files (files with list of ignored, excluded, and other tests) are located
         # it's either set explicitly to the absolute value or
         # the current folder (where this python file is located!) parent
-        self.default_list_root = Path(config.general.static_core_root) / 'tests' / 'tests-u-runner' / 'test-lists'
+        self.default_list_root = Path(config.general.static_core_root) / 'plugins' / 'ets' / 'tests' / 'test-lists'
         self.list_root = config.general.list_root
         if self.list_root is not None:
             Log.summary(_LOGGER, f"LIST_ROOT set to '{self.list_root}'")

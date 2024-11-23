@@ -36,6 +36,7 @@ class RunnerJSTest262(RunnerJS):
         RunnerJS.__init__(self, config, "test262")
         self.ignored_name_prefix = "test262"
 
+        self.default_list_root = Path(config.general.static_core_root) / 'tests' / 'test-lists'
         self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
         Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
 

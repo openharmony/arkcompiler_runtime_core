@@ -74,6 +74,7 @@ static_core/scripts/code_style/                          @igelhaus @semenovaleks
 static_core/tests/benchmarks/                            @igelhaus
 static_core/tests/checked/                               @Prof1983
 static_core/tests/panda/                                 @igelhaus
+static_core/tests/test-lists/                            @shirunova_viktoria @kuchkovairina
 static_core/tests/tests-u-runner/                        @shirunova_viktoria @anton-sysoev
 static_core/tests/verifier-tests/                        @igelhaus
 static_core/libpandabase/tests/genmc/                    @udav
@@ -117,6 +118,7 @@ static_core/plugins/ets/tests/benchmarks/                                     @s
 static_core/plugins/ets/tests/checked/                                        @Prof1983
 static_core/plugins/ets/tests/ets_es_checked/                                 @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/tests/stdlib-templates/                               @ivan-tyulyandin @anton-sysoev
+static_core/plugins/ets/tests/test-lists/                                     @shirunova_viktoria @kuchkovairina
 static_core/plugins/ets/tools/declgen_ts2sts/                                 @semenovaleksandr
 static_core/tests/tests-u-runner/tools/generate-es-checked/                   @ivan-tyulyandin @anton-sysoev
 static_core/plugins/ets/stdlib/std/containers/BlockingQueue.sts               @konstanting

@@ -1,1 +1,0 @@
-test262-ignored-IRTOC-TSAN.txt
