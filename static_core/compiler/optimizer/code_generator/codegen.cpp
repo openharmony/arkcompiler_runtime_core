@@ -2301,6 +2301,40 @@ void Codegen::TryInsertImplicitNullCheck(Inst *inst, size_t prevOffset)
     CreateStackMap(nullcheck, inst);
 }
 
+void Codegen::CreateMemmoveUnchecked([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    auto entrypointId = EntrypointId::INVALID;
+    switch (inst->GetIntrinsicId()) {
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_1_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_1_BYTE;
+            break;
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_2_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_2_BYTE;
+            break;
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_4_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_4_BYTE;
+            break;
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_8_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_8_BYTE;
+            break;
+
+        default:
+            UNREACHABLE();
+            break;
+    }
+    ASSERT(entrypointId != EntrypointId::INVALID);
+    auto srcObj = src[FIRST_OPERAND];
+    auto dstObj = src[SECOND_OPERAND];
+    auto dstStart = src[THIRD_OPERAND];
+    auto srcStart = src[FOURTH_OPERAND];
+    auto srcEnd = src[FIFTH_OPERAND];
+    CallFastPath(inst, entrypointId, INVALID_REGISTER, RegMask::GetZeroMask(), srcObj, dstObj, dstStart, srcStart,
+                 srcEnd);
+}
+
 void Codegen::CreateFloatIsInf([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     GetEncoder()->EncodeIsInf(dst, src[0]);

@@ -1175,6 +1175,54 @@ entrypoints:
     - int32_t
     - int32_t
 
+- name: ArrayCopyToUnchecked_1Byte
+  entrypoint: ArrayCopyToUnchecked1Byte
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayCopyToUnchecked_2Byte
+  entrypoint: ArrayCopyToUnchecked2Byte
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayCopyToUnchecked_4Byte
+  entrypoint: ArrayCopyToUnchecked4Byte
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
+- name: ArrayCopyToUnchecked_8Byte
+  entrypoint: ArrayCopyToUnchecked8Byte
+  bridge: none
+  properties: [irtoc]
+  signature:
+    - void
+    - ark::ObjectHeader*
+    - ark::ObjectHeader*
+    - int32_t
+    - int32_t
+    - int32_t
+
 - name: ArraycopyBigloop
   entrypoint: TryBigCopy
   bridge: none

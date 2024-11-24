@@ -14,16 +14,20 @@
  */
 
 #include "compiler_logger.h"
+#include "optimizer/analysis/alias_analysis.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/countable_loop_parser.h"
 #include "optimizer/optimizations/loop_idioms.h"
+
+// CC-OFFNXT(G.PRE.02) necessary macro
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LOG_ARRAYMOVE(level) COMPILER_LOG(level, LOOP_TRANSFORM) << "[Arraymove] "
 
 namespace ark::compiler {
 bool LoopIdioms::RunImpl()
 {
     if (GetGraph()->GetArch() == Arch::AARCH32) {
-        // There is only one supported idiom and intrinsic
-        // emitted for it could not be encoded on Arm32.
+        // Supported idioms and intrinsics emitted for them could not be encoded on Arm32.
         return false;
     }
     GetGraph()->RunPass<LoopAnalyzer>();
@@ -39,9 +43,10 @@ void LoopIdioms::InvalidateAnalyses()
 
 bool LoopIdioms::TransformLoop(Loop *loop)
 {
-    if (TryTransformArrayInitIdiom(loop)) {
-        isApplied_ = true;
-        return true;
+    if (loop->GetInnerLoops().empty()) {
+        if (TryTransformArrayInitIdiom(loop) || TryTransformArrayMoveIdiom(loop)) {
+            isApplied_ = true;
+        }
     }
     return false;
 }
@@ -75,7 +80,7 @@ Inst *ExtractArrayInitInitialIndexValue(PhiInst *index)
     return index->GetPhiInput(pred);
 }
 
-bool AllUsesWithinLoop(Inst *inst, Loop *loop)
+bool AllUsesWithinLoop(Inst *inst, const Loop *loop)
 {
     for (auto &user : inst->GetUsers()) {
         if (user.GetInst()->GetBasicBlock()->GetLoop() != loop) {
@@ -108,6 +113,335 @@ bool IsLoopContainsArrayInitIdiom(StoreInst *store, Loop *loop, CountableLoopInf
     return loopInfo.constStep == 1UL && loopInfo.index == storeIdx && loopInfo.normalizedCc == ConditionCode::CC_LT &&
            AllUsesWithinLoop(storeIdx, loop) && AllUsesWithinLoop(loopInfo.update, loop) &&
            AllUsesWithinLoop(loopInfo.ifImm->GetInput(0).GetInst(), loop);
+}
+
+bool IsLoopContainsArrayMoveIdiom(StoreInst *store, Loop *loop, CountableLoopInfo &loopInfo)
+{
+    auto storeIdx = store->GetIndex();
+
+    return loopInfo.constStep == 1UL && loopInfo.index == storeIdx && loopInfo.normalizedCc == ConditionCode::CC_LT &&
+           AllUsesWithinLoop(storeIdx, loop) && AllUsesWithinLoop(loopInfo.update, loop) &&
+           AllUsesWithinLoop(loopInfo.ifImm->GetInput(0).GetInst(), loop);
+}
+
+// NOLINTNEXTLINE(fuchsia-multiple-inheritance)
+class ArrayMoveParser : private CountableLoopParser, private MarkerHolder {
+public:
+    explicit ArrayMoveParser(Loop *loop) : CountableLoopParser(*loop), MarkerHolder(loop->GetHeader()->GetGraph()) {}
+
+    bool Parse()
+    {
+        // Check loop shape:
+        if (!CountableLoopParser::Parse() || loopInfo_.constStep != 1) {
+            LOG_ARRAYMOVE(DEBUG) << "Loop shape doesn't match";
+            return false;
+        }
+
+        if (!FindStoreLoad() || !CheckOffsets() || !CheckLoopIsolation()) {
+            LOG_ARRAYMOVE(DEBUG) << "Dataflow pattern doesn't match";
+            return false;
+        }
+
+        return true;
+    }
+
+    bool FindStoreLoad()
+    {
+        for (auto inst : loop_.GetHeader()->Insts()) {
+            if (inst->GetOpcode() != Opcode::StoreArray) {
+                continue;
+            }
+            auto store = inst->CastToStoreArray();
+            auto storedValue = store->GetStoredValue();
+            if (storedValue->GetOpcode() != Opcode::LoadArray || storedValue->GetBasicBlock() != loop_.GetHeader()) {
+                return false;
+            }
+            store_.inst = store;
+            load_.inst = storedValue->CastToLoadArray();
+            return DataType::GetTypeSize(store_.inst->GetType(), GetGraph()->GetArch()) ==
+                   DataType::GetTypeSize(load_.inst->GetType(), GetGraph()->GetArch());
+        }
+        return false;
+    }
+
+    // Check and extract `Add/Sub(loopIndex, loopInvariant)` combination:
+    template <typename T>
+    bool ExtractInductionVariableOffset(T *desc)
+    {
+        auto inductionVar = desc->inst->GetIndex();
+        if (inductionVar == loopInfo_.index) {
+            desc->idxOffset = inductionVar->GetBasicBlock()->GetGraph()->FindOrCreateConstant(0);
+            return true;
+        }
+
+        auto chkInputs = [inductionVar, this](size_t i0, size_t i1) {
+            return (inductionVar->GetInput(i0).GetInst() == loopInfo_.index) &&
+                   (inductionVar->GetInput(i1).GetInst()->GetBasicBlock()->GetLoop() != &loop_);
+        };
+
+        if (inductionVar->GetOpcode() == Opcode::Add) {
+            for (size_t i = 0; i < 2U; i++) {
+                if (chkInputs(i, 1 - i)) {
+                    desc->idxOffset = inductionVar->GetInput(1 - i).GetInst();
+                    return true;
+                }
+            }
+        }
+
+        if (inductionVar->GetOpcode() == Opcode::Sub) {
+            if (chkInputs(0, 1)) {
+                desc->idxOffset = inductionVar->GetInput(1).GetInst();
+                desc->idxOffsetNegate = true;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool CheckOffsets()
+    {
+        if (!ExtractInductionVariableOffset(&store_)) {
+            return false;
+        }
+        if (!ExtractInductionVariableOffset(&load_)) {
+            return false;
+        }
+        ASSERT(store_.idxOffset->GetBasicBlock()->GetLoop() != &loop_);
+        ASSERT(load_.idxOffset->GetBasicBlock()->GetLoop() != &loop_);
+        return true;
+    }
+
+    bool CheckLoopIsolation()
+    {
+        auto compare = loopInfo_.ifImm->GetInput(0).GetInst();
+        ASSERT(compare->GetOpcode() == Opcode::Compare);
+        std::array<Inst *, 8U> matched = {
+            loopInfo_.ifImm,        compare,     loopInfo_.update,       loopInfo_.index, load_.inst,
+            load_.inst->GetIndex(), store_.inst, store_.inst->GetIndex()};
+
+        for (Inst *inst : matched) {
+            ASSERT(inst->GetBasicBlock()->GetLoop() == &loop_);
+            if (!AllUsesWithinLoop(inst, &loop_)) {
+                LOG_ARRAYMOVE(DEBUG) << "Inst '" << inst->GetId() << ".' used outside";
+                return false;
+            }
+            inst->SetMarker(GetMarker());
+        }
+
+        for (auto inst : loop_.GetHeader()->AllInsts()) {
+            if (inst->IsMarked(GetMarker())) {
+                continue;
+            }
+            if ((inst->IsCall() && static_cast<CallInst *>(inst)->IsInlined()) ||
+                inst->GetOpcode() == Opcode::ReturnInlined) {
+                continue;
+            }
+            auto opcode = inst->GetOpcode();
+            if (opcode == Opcode::NOP || opcode == Opcode::SaveState || opcode == Opcode::SafePoint) {
+                continue;
+            }
+            LOG_ARRAYMOVE(DEBUG) << "Inst '" << inst->GetId() << ".' breaks pattern";
+            return false;
+        }
+        return true;
+    }
+
+    template <RuntimeInterface::IntrinsicId ID = RuntimeInterface::IntrinsicId::INVALID>
+    IntrinsicInst *CreateIntrinsic()
+    {
+        if constexpr (ID == RuntimeInterface::IntrinsicId::LIB_CALL_MEM_COPY) {
+            return GetGraph()->CreateInstIntrinsic(DataType::VOID, store_.inst->GetPc(), ID);
+        } else {
+            auto id = RuntimeInterface::IntrinsicId::INVALID;
+            switch (store_.inst->GetType()) {
+                case DataType::BOOL:
+                case DataType::INT8:
+                case DataType::UINT8:
+                    id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_1_BYTE;
+                    break;
+                case DataType::INT16:
+                case DataType::UINT16:
+                    id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_2_BYTE;
+                    break;
+                case DataType::INT32:
+                case DataType::UINT32:
+                case DataType::FLOAT32:
+                    id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_4_BYTE;
+                    break;
+                case DataType::INT64:
+                case DataType::UINT64:
+                case DataType::FLOAT64:
+                    id = RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_8_BYTE;
+                    break;
+                default:
+                    LOG_ARRAYMOVE(DEBUG) << "Store has unsupported type " << store_.inst->GetType();
+                    return nullptr;
+            }
+            return GetGraph()->CreateInstIntrinsic(DataType::VOID, store_.inst->GetPc(), id);
+        }
+        UNREACHABLE();
+    }
+
+    bool TryReplaceLoop()
+    {
+        auto aliasType = CheckRefAlias();
+        if (aliasType == NO_ALIAS) {
+            return ReplaceLoopCompletely();
+        }
+        LOG_ARRAYMOVE(DEBUG) << "Overlapping regions are not supported";
+        return false;
+    }
+
+    AliasType CheckRefAlias()
+    {
+        auto src = load_.inst->GetDataFlowInput(0);
+        auto dst = store_.inst->GetDataFlowInput(0);
+        auto &aa = GetGraph()->GetValidAnalysis<AliasAnalysis>();
+        auto aliasType = aa.CheckRefAlias(src, dst);
+        if ((aliasType == MAY_ALIAS) && (dst->GetOpcode() == Opcode::NewArray) &&
+            (src->GetOpcode() == Opcode::Parameter)) {
+            aliasType = NO_ALIAS;
+        }
+        return aliasType;
+    }
+
+    template <typename T>
+    void NegateIfNeeded(T *desc, BasicBlock *b)
+    {
+        if (desc->idxOffsetNegate) {
+            auto offset = desc->idxOffset;
+            auto neg = GetGraph()->CreateInstNeg(offset->GetType(), offset->GetPc(), offset);
+            b->AppendInst(neg);
+            desc->idxOffset = neg;
+        }
+    }
+
+    void PatchRange(Inst **srcStart, Inst **srcEnd, BasicBlock *newB)
+    {
+        auto one = GetGraph()->FindOrCreateConstant(1);
+        switch (loopInfo_.normalizedCc) {
+            case CC_GE: {
+                // Transform interval [e,s] to [e, s + 1)
+                ASSERT(!loopInfo_.isInc);
+                std::swap(*srcStart, *srcEnd);
+                auto add = GetGraph()->CreateInstAdd((*srcEnd)->GetType(), (*srcEnd)->GetPc(), (*srcEnd), one);
+                newB->AppendInst(add);
+                *srcEnd = add;
+                break;
+            }
+            case CC_GT: {
+                //  Transform interval (e,s] to [e + 1, s + 1)
+                ASSERT(!loopInfo_.isInc);
+                std::swap(*srcStart, *srcEnd);
+                auto addStart =
+                    GetGraph()->CreateInstAdd((*srcStart)->GetType(), (*srcStart)->GetPc(), (*srcStart), one);
+                auto addEnd = GetGraph()->CreateInstAdd((*srcEnd)->GetType(), (*srcEnd)->GetPc(), (*srcEnd), one);
+                newB->AppendInst(addStart);
+                newB->AppendInst(addEnd);
+                *srcStart = addStart;
+                *srcEnd = addEnd;
+                break;
+            }
+            case CC_LE: {
+                //  Transform interval [s,e] to [s, e + 1)
+                ASSERT(loopInfo_.isInc);
+                auto add = GetGraph()->CreateInstAdd((*srcEnd)->GetType(), (*srcEnd)->GetPc(), (*srcEnd), one);
+                newB->AppendInst(add);
+                *srcEnd = add;
+                break;
+            }
+            case CC_LT: {
+                // [s,e) => s' = s, e' = e;
+                ASSERT(loopInfo_.isInc);
+                break;
+            }
+            default:
+                UNREACHABLE();
+        }
+    }
+
+    bool ReplaceLoopCompletely()
+    {
+        auto mmove = CreateIntrinsic();
+        if (mmove == nullptr) {
+            return false;
+        }
+        auto newB = GetGraph()->CreateEmptyBlock(store_.inst->GetPc());
+        // 1. Normalize 'load_index/store_index == Sub(idx, c)' -> 'load_index/store_index == Add(idx, Neg(c))':
+        NegateIfNeeded(&load_, newB);
+        NegateIfNeeded(&store_, newB);
+        // 2. Calculate start/end value of load_index:
+        //    i.e. define [s,e) or [s,e] or [e,s] or (e,s]
+        Inst *srcStart =
+            GetGraph()->CreateInstAdd(DataType::INT32, load_.inst->GetPc(), loopInfo_.init, load_.idxOffset);
+        newB->AppendInst(srcStart);
+        Inst *srcEnd = GetGraph()->CreateInstAdd(DataType::INT32, load_.inst->GetPc(), loopInfo_.test, load_.idxOffset);
+        newB->AppendInst(srcEnd);
+        // 3. Handle cases of 'srcStart > srcEnd' and patch range enclosing.
+        //    i.e. normalize [s,e), [s,e], [e,s], (e,s] -> [s',e').
+        PatchRange(&srcStart, &srcEnd, newB);
+
+        // 4. Calculate 'dstStart' based on 'srcStart' and idxOffsets' diff:
+        auto offsDiff =
+            GetGraph()->CreateInstSub(DataType::INT32, store_.inst->GetPc(), store_.idxOffset, load_.idxOffset);
+        newB->AppendInst(offsDiff);
+        auto dstStart = GetGraph()->CreateInstAdd(DataType::INT32, store_.inst->GetPc(), srcStart, offsDiff);
+        newB->AppendInst(dstStart);
+
+        newB->AppendInst(mmove);
+        mmove->ClearFlag(inst_flags::Flags::REQUIRE_STATE);
+        mmove->ClearFlag(inst_flags::Flags::RUNTIME_CALL);
+        mmove->ClearFlag(inst_flags::Flags::CAN_THROW);
+        mmove->SetInputs(GetGraph()->GetAllocator(), {{load_.inst->GetArray(), DataType::REFERENCE},
+                                                      {store_.inst->GetArray(), DataType::REFERENCE},
+                                                      {dstStart, dstStart->GetType()},
+                                                      {srcStart, srcStart->GetType()},
+                                                      {srcEnd, srcEnd->GetType()}});
+        auto header = loop_.GetHeader();
+        auto preheader = loop_.GetPreHeader();
+        auto outside = header->GetSuccessor(0) != header ? header->GetSuccessor(0) : header->GetSuccessor(1);
+        preheader->SetNextLoop(nullptr);
+        preheader->ReplaceSucc(header, newB);
+        outside->ReplacePred(header, newB);
+        header->Clear();
+        GetGraph()->EraseBlock(header);
+        LOG_ARRAYMOVE(DEBUG) << "Replaced loop " << loop_.GetId();
+
+        return true;
+    }
+
+    Graph *GetGraph()
+    {
+        return loop_.GetHeader()->GetGraph();
+    }
+
+private:
+    template <typename T>
+    struct ArrayAccessDescr {
+        T *inst {};
+        Inst *idxOffset {};
+        bool idxOffsetNegate {false};
+    };
+
+    ArrayAccessDescr<LoadInst> load_;
+    ArrayAccessDescr<StoreInst> store_;
+};
+
+bool LoopIdioms::TryTransformArrayMoveIdiom(Loop *loop)
+{
+    ASSERT(loop->GetInnerLoops().empty());
+    if (loop->GetBlocks().size() != 1) {
+        return false;
+    }
+
+    LOG_ARRAYMOVE(DEBUG) << "Check loop " << loop->GetId();
+    ArrayMoveParser arrayMoveParser(loop);
+    if (!arrayMoveParser.Parse()) {
+        return false;
+    }
+    LOG_ARRAYMOVE(DEBUG) << "Found in loop " << loop->GetId();
+
+    return arrayMoveParser.TryReplaceLoop();
 }
 
 bool LoopIdioms::TryTransformArrayInitIdiom(Loop *loop)

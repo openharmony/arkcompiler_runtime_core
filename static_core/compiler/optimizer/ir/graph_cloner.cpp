@@ -649,7 +649,8 @@ void GraphCloner::BuildClonedLoopHeaderDataFlow(const BasicBlock &block, BasicBl
             auto inputIndex = userIt->GetIndex();
             ++userIt;
             ASSERT(user->GetBasicBlock() != nullptr);
-            if (user->GetBasicBlock()->GetLoop() != block.GetLoop()) {
+            auto userLoop = user->GetBasicBlock()->GetLoop();
+            if (userLoop != block.GetLoop() && !userLoop->IsInside(block.GetLoop())) {
                 user->SetInput(inputIndex, resolverPhi);
             }
         }
@@ -757,13 +758,13 @@ void GraphCloner::UpdateUsersForClonedLoopHeader(Inst *inst, BasicBlock *outerBl
         auto inputIdx = userIt->GetIndex();
         ++userIt;
         ASSERT(user->GetBasicBlock() != nullptr);
-        if (user->GetBasicBlock()->GetLoop() == instBlock->GetLoop()) {
+        auto userLoop = user->GetBasicBlock()->GetLoop();
+        if (userLoop == instBlock->GetLoop() || userLoop->IsInside(instBlock->GetLoop())) {
             // user inside loop
             // skip users that will be moved to the loop-exit block
-            if (user->GetBasicBlock()->IsLoopHeader() && !user->IsPhi()) {
+            if (user->GetBasicBlock() == instBlock && !user->IsPhi()) {
                 continue;
             }
-            ASSERT(user->GetBasicBlock() != instBlock || user->IsPhi());
             user->SetInput(inputIdx, phiIn);
         } else {
             // user outside loop

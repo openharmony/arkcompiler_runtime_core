@@ -138,6 +138,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         # inlining of the following intrinsics is only enabled for these two targets
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isFinite.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isNaN.sts)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/idiom_memmove.sts)
         # CallLaunch isn't supported for arm32 (need to fix storing args in stack)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/launch_test.sts SUPPORT_RELEASE true)
         # AOT mode for arm32 is not supported

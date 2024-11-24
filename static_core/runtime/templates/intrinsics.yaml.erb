@@ -19,8 +19,8 @@
   safepoint_after_call: <%= intrinsic.respond_to?(:safepoint_after_call) && intrinsic.safepoint_after_call %>
   private: <%= intrinsic.respond_to?(:private) && intrinsic.private %>
 % compiler_only = intrinsic.respond_to?(:compiler_only) && intrinsic.compiler_only
-% raise "incorrect naming of compiler_only intrinisc" if compiler_only and not intrinsic.name.start_with?("Compiler")
-% raise "incorrect naming of not compiler_only intrinisc" if not compiler_only and intrinsic.name.start_with?("Compiler")
+% raise "incorrect naming of compiler_only intrinsic" if compiler_only and not intrinsic.name.start_with?("Compiler")
+% raise "incorrect naming of not compiler_only intrinsic" if not compiler_only and intrinsic.name.start_with?("Compiler")
   compiler_only: <%= compiler_only %>
   signature:
 % stackrange = intrinsic.signature.respond_to?(:stackrange) && intrinsic.signature.stackrange
