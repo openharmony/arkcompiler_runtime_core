@@ -107,12 +107,12 @@ chapters:
 
 # File format and ISA versioning
 min_version: 0.0.0.2
-version: 13.0.0.0
+version: 13.0.1.0
 
 # 0 is default value, alaways reflects to the newest version.
-# Due to historical reasons, bytecode version is upgraded to 13.0.0.0 in API16.
-api_version_map: [[0, 13.0.0.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.6.0], [13, 12.0.6.0],
-                  [14, 12.0.6.0], [15, 12.0.6.0], [16, 13.0.0.0]]
+# Due to historical reasons, bytecode version is upgraded to 13.0.1.0 in API16.
+api_version_map: [[0, 13.0.1.0], [9, 9.0.0.0], [10, 9.0.0.0], [11, 11.0.2.0], [12, 12.0.6.0], [13, 12.0.6.0],
+                  [14, 12.0.6.0], [15, 12.0.6.0], [16, 13.0.1.0]]
 
 # When delete bytecode or having any incompatible modification on bytecode,
 # please add the incompatible version in this list for prompting error message.
@@ -277,7 +277,7 @@ isa_information:
       last_throw_prefixed_opcode_idx: 0x09
       last_wide_prefixed_opcode_idx: 0x13
       last_deprecated_prefixed_opcode_idx: 0x2e
-      last_callruntime_prefixed_opcode_idx: 0x19
+      last_callruntime_prefixed_opcode_idx: 0x1b
 
 prefixes:
   - name: throw
@@ -1003,6 +1003,16 @@ groups:
         format: [pref_op_id_16]
         prefix: throw
         properties: [string_id, conditional_throw]
+      - sig: callruntime.ldsendablelocalmodulevar imm:u8
+        acc: out:top
+        opcode_idx: [0x1a]
+        format: [pref_op_imm_8]
+        prefix: callruntime
+      - sig: callruntime.wideldsendablelocalmodulevar imm:u16
+        acc: out:top
+        opcode_idx: [0x1b]
+        format: [pref_op_imm_16]
+        prefix: callruntime
 
   - title: call instructions
     description: call
