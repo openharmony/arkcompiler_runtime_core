@@ -229,6 +229,13 @@ public:
         return ToUintPtr(curFreePosition_) - ToUintPtr(memoryStartAddr_);
     }
 
+    size_t GetFreeSize() const
+    {
+        ASSERT(ToUintPtr(curFreePosition_) >= ToUintPtr(memoryStartAddr_));
+        ASSERT(ToUintPtr(curFreePosition_) <= ToUintPtr(memoryEndAddr_));
+        return ToUintPtr(memoryEndAddr_) - ToUintPtr(curFreePosition_);
+    }
+
     MemRange GetMemRangeForOccupiedMemory() const
     {
         return MemRange(ToUintPtr(memoryStartAddr_), ToUintPtr(curFreePosition_) - 1);
@@ -276,13 +283,6 @@ public:
     }
 
 private:
-    size_t GetFreeSize()
-    {
-        ASSERT(ToUintPtr(curFreePosition_) >= ToUintPtr(memoryStartAddr_));
-        ASSERT(ToUintPtr(curFreePosition_) <= ToUintPtr(memoryEndAddr_));
-        return ToUintPtr(memoryEndAddr_) - ToUintPtr(curFreePosition_);
-    }
-
     TLAB *nextTlab_;
     TLAB *prevTlab_;
     // NOTE(aemelenko): Maybe use OBJECT_POINTER_SIZE here for heap allocation.

@@ -111,6 +111,24 @@ PandaVector<Region *> RegionAllocatorBase<LockConfigT>::GetAllRegions()
     return vector;
 }
 
+template <typename LockConfigT>
+double RegionAllocatorBase<LockConfigT>::CalculateDeadObjectsRatio()
+{
+    os::memory::LockHolder lock(this->regionLock_);
+    size_t totalSize = 0;
+    size_t deadObjectSize = 0;
+    size_t count = 0;
+    GetSpace()->IterateRegions([&count, &totalSize, &deadObjectSize](Region *region) {
+        count++;
+        totalSize += region->Size();
+        deadObjectSize += region->GetGarbageBytes();
+    });
+    if (totalSize == 0) {
+        return 0;
+    }
+    return static_cast<double>(deadObjectSize) / totalSize;
+}
+
 template <typename AllocConfigT, typename LockConfigT>
 RegionAllocator<AllocConfigT, LockConfigT>::RegionAllocator(MemStatsType *memStats, GenerationalSpaces *spaces,
                                                             SpaceType spaceType, size_t initSpaceSize, bool extend,
@@ -352,6 +370,31 @@ PandaVector<Region *> RegionAllocator<AllocConfigT, LockConfigT>::GetAllSpecific
         }
     });
     return vector;
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+double RegionAllocator<AllocConfigT, LockConfigT>::CalculateInternalOldFragmentation()
+{
+    constexpr RegionFlag REGIONS_TYPE = RegionFlag::IS_OLD;
+    size_t totalFreeSize = 0;
+    size_t totalAllocatedSize = 0;
+    this->GetSpace()->IterateRegions([this, &totalFreeSize, &totalAllocatedSize](Region *region) {
+        if (!region->HasFlag(REGIONS_TYPE)) {
+            return;
+        }
+        if (IsInCurrentRegion<false, REGIONS_TYPE>(region)) {
+            return;
+        }
+        size_t allocatedBytes = region->GetAllocatedBytes();
+        size_t regionSize = region->Size();
+        ASSERT(regionSize >= allocatedBytes);
+        totalFreeSize += regionSize - allocatedBytes;
+        totalAllocatedSize += allocatedBytes;
+    });
+    if (totalAllocatedSize == 0) {
+        return 0;
+    }
+    return static_cast<double>(totalFreeSize) / totalAllocatedSize;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
@@ -650,6 +693,32 @@ void *RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::New
     return nullptr;
 }
 
+template <typename AllocConfigT, typename LockConfigT, typename ObjectAllocator>
+double RegionNonmovableAllocator<AllocConfigT, LockConfigT, ObjectAllocator>::CalculateDeadObjectsRatio()
+{
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    os::memory::LockHolder lock(this->regionLock_);
+    size_t totalSize = 0;
+    size_t liveObjectSize = 0;
+    size_t count = 0;
+    this->GetSpace()->IterateRegions([&count, &totalSize, &liveObjectSize](Region *region) {
+        count++;
+        totalSize += region->Size();
+        liveObjectSize += region->GetLiveBytes();
+    });
+    if (totalSize == 0) {
+        return 0;
+    }
+    auto allocatedBytes = objectAllocator_.GetAllocatedBytes();
+    ASSERT(allocatedBytes >= liveObjectSize);
+    auto deadObjectSize = allocatedBytes - liveObjectSize;
+    return static_cast<double>(deadObjectSize) / totalSize;
+#else
+    LOG(FATAL, ALLOC) << "Not implemented. Requires build with define PANDA_MEASURE_FRAGMENTATION";
+    UNREACHABLE();
+#endif  // #ifdef PANDA_MEASURE_FRAGMENTATION
+}
+
 template <typename AllocConfigT, typename LockConfigT>
 RegionHumongousAllocator<AllocConfigT, LockConfigT>::RegionHumongousAllocator(MemStatsType *memStats,
                                                                               GenerationalSpaces *spaces,
@@ -733,6 +802,25 @@ void RegionHumongousAllocator<AllocConfigT, LockConfigT>::ResetRegion(Region *re
     ASSERT(region->HasFlag(RegionFlag::IS_FREE));
     region->RmvFlag(RegionFlag::IS_FREE);
     this->GetSpace()->FreeRegion(region);
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+double RegionHumongousAllocator<AllocConfigT, LockConfigT>::CalculateInternalFragmentation()
+{
+    size_t totalFreeSize = 0;
+    size_t totalAllocatedSize = 0;
+    this->GetSpace()->IterateRegions([&totalFreeSize, &totalAllocatedSize](Region *region) {
+        auto allocatedBytes = region->GetAllocatedBytes();
+        auto regionSize = region->Size();
+        ASSERT(regionSize >= allocatedBytes);
+        auto freeSize = regionSize - allocatedBytes;
+        totalFreeSize += freeSize;
+        totalAllocatedSize += allocatedBytes;
+    });
+    if (totalAllocatedSize == 0) {
+        return 0;
+    }
+    return static_cast<double>(totalFreeSize) / totalAllocatedSize;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
