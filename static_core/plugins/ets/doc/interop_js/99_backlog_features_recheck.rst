@@ -1,5 +1,5 @@
 ..
-    Copyright (c) 2024 Huawei Device Co., Ltd.
+    Copyright (c) 2025 Huawei Device Co., Ltd.
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
     You may obtain a copy of the License at
@@ -9,9 +9,13 @@
     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     See the License for the specific language governing permissions and
     limitations under the License.
-    
-Backlog
-########
+
++++++++++++++++++++++++++++++++++++++++++
+Backlog(not related features for interop)
++++++++++++++++++++++++++++++++++++++++++
+
+Backlog JS
+##########
 
 ``eval``
 ********
@@ -19,7 +23,7 @@ Backlog
 Strict mode
 ***********
 
-You can declare the strict mode by adding ``'use strict';`` or ``"use strict";`` at the beginning of a program. 
+You can declare the strict mode by adding ``'use strict';`` or ``"use strict";`` at the beginning of a program.
 This is an opportunity to make writing code safer and neater by limiting the use of some functions available in the language.
 A complete program may be composed of both strict mode and non-strict mode source text units.
 
@@ -96,7 +100,7 @@ Strict mode changes both syntax and runtime behavior. Changes generally fall int
 
     * no ``this`` substitution
 
-    In sloppy mode, function calls like f() would pass ``the global object`` as the ``this`` value. In strict mode, it is now ``undefined``. 
+    In sloppy mode, function calls like f() would pass ``the global object`` as the ``this`` value. In strict mode, it is now ``undefined``.
     When a function was called with call or apply, if the value was a primitive value, this one was boxed into an object (or the global object for undefined and null). In strict mode, the value is passed directly without conversion or replacement.
 
 * changes anticipating future ECMAScript evolution
@@ -111,7 +115,7 @@ It's about the <script> tag. In HTML, JavaScript code is inserted between <scrip
 
 ..     <script>
 ..     document.getElementById("demo").innerHTML = "My First JavaScript";
-..     </script> 
+..     </script>
 
 
 Template literals
@@ -136,19 +140,29 @@ To supply a function of your own, precede the template literal with a function n
     tagFunction`string text ${expression} string text`
 
 
-Destructing assignment
-**********************
+Function hoisting  (empty)
+**************************
 
-Destructuring Assignment is a syntax that allows you to extract data from arrays and objects.
+Description
+^^^^^^^^^^^
+
+Hoisting is a behavior in which a function or a variable can be used before declaration.
 
 .. code-block:: javascript
     :linenos:
 
-    const user = {firstName: 'Adrian', lastName: 'Mejia'};  
+    sqr0(5); /* hoisting */
+    // function declaration
+    function sqr0 (val) { return val * val; }
 
-    function getFullName({ firstName, lastName }) {      
-    return `${firstName} ${lastName}`; 
-    } 
+Backlog ArkTS
+#############
 
-    console.log(getFullName(user));
-    // Adrian Mejia
+Shadowing by parameter
+**********************
+
+New Expressions
+***************
+
+Unary/Binary Expressions, Multiplicative Expressions
+****************************************************
