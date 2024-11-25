@@ -29,6 +29,8 @@ function main(): int {
     failures += check(createtypedUArrayWithNegativeLength(),"Create default non empty {{.item.objectType}} with wrong negative length");
     failures += check(createtypedUArrayWithNegativeInfinityLength(),"Create default non empty {{.item.objectType}} with infinity negative length");
     failures += check(createtypedUArrayWithPositiveInfinityLength(),"Create default non empty {{.item.objectType}} with infinity positive length");
+    failures += check(createtypedUArrayWithNegativeNaNLength(),"Create empty {{.item.objectType}} with negative NaN length");
+    failures += check(createtypedUArrayWithPositiveNaNLength(),"Create empty {{.item.objectType}} with positive NaN length");
     failures += check(createEmptyWithIterable(),"Create default empty {{.item.objectType}} from Iterable");
     failures += check(createNonEmptyWithIterable(),"Create default non empty {{.item.objectType}} from Iterable");
 
@@ -121,8 +123,7 @@ function createtypedUArrayWithNegativeLength(): number {
   try {
     let target: {{.item.objectType}} = new {{.item.objectType}}(-1 as number);
   } catch(e) {
-    // NOTE(zaytsevaekaterina): replace RangeError with TypeError after internal issue #20834 is resolved
-    if (e instanceof RangeError) { 
+    if (e instanceof TypeError) { 
       return success;
     }
     return fail;
@@ -134,8 +135,7 @@ function createtypedUArrayWithNegativeInfinityLength(): number {
   try {
     let target: {{.item.objectType}} = new {{.item.objectType}}(Number.NEGATIVE_INFINITY);
   } catch(e) {
-    // NOTE(zaytsevaekaterina): replace RangeError with TypeError after internal issue #20834 is resolved
-    if (e instanceof RangeError) {
+    if (e instanceof TypeError) {
       return success;
     }
     return fail;
@@ -147,12 +147,23 @@ function createtypedUArrayWithPositiveInfinityLength(): number {
   try {
     let target: {{.item.objectType}} = new {{.item.objectType}}(Number.POSITIVE_INFINITY);
   } catch(e) {
-    // NOTE(zaytsevaekaterina): replace Error with TypeError after internal issue #20834 is resolved
-    if (e instanceof Error) {
+    if (e instanceof TypeError) {
       return success;
     }
     return fail;
   }
+  return fail;
+}
+
+function createtypedUArrayWithNegativeNaNLength(): number {
+  let target: {{.item.objectType}} = new {{.item.objectType}}(-NaN);
+  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+  return fail;
+}
+
+function createtypedUArrayWithPositiveNaNLength(): number {
+  let target: {{.item.objectType}} = new {{.item.objectType}}(+NaN);
+  if (target.length as int == 0 && target.byteOffset as int == 0) return success;
   return fail;
 }
 

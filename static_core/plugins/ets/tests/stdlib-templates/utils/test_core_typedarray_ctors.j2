@@ -27,6 +27,8 @@ function main(): int {
     failures += check(createTypedArrayWithNegativeLength(),"Create default non empty {{.item.objectType}} with wrong negative length");
     failures += check(createTypedArrayWithNegativeInfinityLength(),"Create default non empty {{.item.objectType}} with negative infinity length");
     failures += check(createTypedArrayWithPositiveInfinityLength(),"Create default non empty {{.item.objectType}} with positive infinity length");
+    failures += check(createTypedArrayWithPositiveNaNLength(),"Create empty {{.item.objectType}} with positive NaN length");
+    failures += check(createTypedArrayWithNegativeNaNLength(),"Create empty {{.item.objectType}} with negative NaN length");
     failures += check(createNonEmptyWithFloatingLength(),"Create default non empty {{.item.objectType}} with floating length");
     failures += check(createEmptyWithIterable(),"Create default empty {{.item.objectType}} from Iterable");
     failures += check(createNonEmptyWithIterable(),"Create default non empty {{.item.objectType}} from Iterable");
@@ -121,8 +123,7 @@ function createTypedArrayWithNegativeLength(): number {
     try {
         let target: {{.item.objectType}} = new {{.item.objectType}}(-1 as number);
     } catch(e) {
-        // NOTE(zaytsevaekaterina): replace RangeError with TypeError after internal issue #20834 is resolved
-        if (e instanceof RangeError) { 
+        if (e instanceof TypeError) { 
             return success;
         }
         return fail;
@@ -134,8 +135,7 @@ function createTypedArrayWithNegativeInfinityLength(): number {
     try {
         let target: {{.item.objectType}} = new {{.item.objectType}}(Number.NEGATIVE_INFINITY);
     } catch(e) {
-        // NOTE(zaytsevaekaterina): replace RangeError with TypeError after internal issue #20834 is resolved
-        if (e instanceof RangeError) { 
+        if (e instanceof TypeError) { 
             return success;
         }
         return fail;
@@ -147,12 +147,23 @@ function createTypedArrayWithPositiveInfinityLength(): number {
     try {
         let target: {{.item.objectType}} = new {{.item.objectType}}(Number.POSITIVE_INFINITY);
     } catch(e) {
-        // NOTE(zaytsevaekaterina): replace Error with TypeError after internal issue #20834 is resolved
-        if (e instanceof Error) { 
+        if (e instanceof TypeError) { 
             return success;
         }
         return fail;
     }
+    return fail;
+}
+
+function createTypedArrayWithPositiveNaNLength(): number {
+    let target: {{.item.objectType}} = new {{.item.objectType}}(+NaN);
+    if (target.length as int == 0 && target.byteOffset as int == 0) return success;
+    return fail;
+}
+
+function createTypedArrayWithNegativeNaNLength(): number {
+    let target: {{.item.objectType}} = new {{.item.objectType}}(-NaN);
+    if (target.length as int == 0 && target.byteOffset as int == 0) return success;
     return fail;
 }
 
