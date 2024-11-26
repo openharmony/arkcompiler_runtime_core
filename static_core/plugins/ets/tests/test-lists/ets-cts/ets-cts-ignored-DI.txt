@@ -1,0 +1,24 @@
+# 17816 cannot overload a function from a package
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_0.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_1.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_2.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_8.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_9.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_10.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_11.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_12.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_14.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_15.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_17.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_20.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_22.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_23.sts
+17.experimental_features/19.packages/03.import_and_overloading_of_function_names/pkgs_a_3.sts
+# es2panda fails: panda#12554
+04.names_declarations_and_scopes/01.names/qualified_name_0.sts
+04.names_declarations_and_scopes/01.names/qualified_name_1.sts
+04.names_declarations_and_scopes/01.names/qualified_name_2.sts
+
+07.expressions/03.qualified_name/qualified_name_0.sts
+07.expressions/03.qualified_name/qualified_name_1.sts
+07.expressions/25.equality_expressions/eq_19.sts
