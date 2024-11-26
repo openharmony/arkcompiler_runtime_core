@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-{% for p in primitives %}
+{%- for c in cases %}
+
 /*---
 desc: >-
-    The predefined value types are called primitive types. Primitive type names are reserved, i.e., they cannot be used for
-    user-defined type names.
-tags: [negative, compile-only]
+    A union type is a reference type created as a combination of other types or values.
+    Values of union types can be valid values of all types and values of literals the
+    union was created from.
+tags: [compile-only, negative]
 ---*/
+{{c.decl}}
 
-type {{p}} = Object;
-
-function main() {}
+function main() {
+    {{c.use|indent}}
+}
 {%- endfor %}

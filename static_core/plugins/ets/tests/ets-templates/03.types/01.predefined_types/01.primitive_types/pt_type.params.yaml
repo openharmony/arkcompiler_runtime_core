@@ -13,14 +13,15 @@
 
 ---
 primitives:
-  - boolean
-  - byte
-  - char
-  - double
-  - float
-  - int
-  - long
-  - number
-  - short
-  - undefined
-  - void
+  - 'boolean'
+  - 'byte'
+  - 'char'
+  - 'double'
+  - 'float'
+  - 'int'
+  - 'long'
+  - 'number'
+  - 'short'
+  - 'undefined'
+  - 'null'
+  - 'void'
