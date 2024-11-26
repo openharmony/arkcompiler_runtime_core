@@ -189,11 +189,17 @@ public:
         return GetClass()->IsArrayClass();
     }
 
-    uint32_t GetHashCode() = delete;
+    // NOTE(ipetrov, #20886): Support separated Interop and Hash states
+    /**
+     * Get hash code if object has been already hashed,
+     * or generate and set hash code in the object header and return it
+     * @return hash code for the object
+     */
+    uint32_t GetHashCode();
 
     inline bool IsHashed() const
     {
-        return GetMark().GetState() == MarkWord::STATE_HASHED;
+        return AtomicGetMark().GetState() == MarkWord::STATE_HASHED;
     }
 
     inline uint32_t GetInteropHash() const
