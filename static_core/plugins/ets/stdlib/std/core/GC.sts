@@ -37,6 +37,7 @@ export final class GC {
     public static readonly THRESHOLD_CAUSE = 1;
     public static readonly MIXED_CAUSE = 2;
     public static readonly FULL_CAUSE = 3;
+    public static readonly CROSSREF_CAUSE = 4;
 
     public static readonly NOT_IN_PLACE_MODE: boolean = false;
     public static readonly IN_PLACE_MODE: boolean = true;

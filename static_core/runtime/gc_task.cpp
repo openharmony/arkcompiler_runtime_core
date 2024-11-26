@@ -71,6 +71,9 @@ std::ostream &operator<<(std::ostream &os, const GCTaskCause &cause)
         case GCTaskCause::OOM_CAUSE:
             os << "OOM";
             break;
+        case GCTaskCause::CROSSREF_CAUSE:
+            os << "Crossref";
+            break;
         default:
             LOG(FATAL, GC) << "Unknown gc cause";
             break;
