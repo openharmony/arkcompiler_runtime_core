@@ -41,20 +41,26 @@ struct CapturedData {
 };
 
 template <class InstCallBack>
+inline bool VisitInst(AbckitBasicBlock *bb, void *data)
+{
+    auto *captured = reinterpret_cast<CapturedData *>(data);
+    const auto &cb = *reinterpret_cast<InstCallBack *>(captured->callback);
+    auto *implG = captured->gImplG;
+    for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGetNext(inst)) {
+        cb(inst);
+    }
+    return true;
+}
+
+template <class InstCallBack>
 inline void EnumerateGraphInsts(AbckitGraph *graph, const InstCallBack &cb)
 {
     LIBABCKIT_LOG_FUNC;
 
     CapturedData captured {(void *)(&cb), g_implG};
 
-    g_implG->gVisitBlocksRpo(graph, &captured, [](AbckitBasicBlock *bb, void *data) {
-        auto *captured = reinterpret_cast<CapturedData *>(data);
-        const auto &cb = *((InstCallBack *)(captured->callback));
-        auto *implG = captured->gImplG;
-        for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGetNext(inst)) {
-            cb(inst);
-        }
-    });
+    g_implG->gVisitBlocksRpo(graph, &captured,
+                             [](AbckitBasicBlock *bb, void *data) { return VisitInst<InstCallBack>(bb, data); });
 }
 
 template <class InstCallBack>
@@ -75,6 +81,7 @@ inline void EnumerateInstUsers(AbckitInst *inst, const UserCallBack &cb)
     g_implG->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *user, void *data) {
         const auto &cb = *((UserCallBack *)data);
         cb(user);
+        return true;
     });
 }
 
@@ -193,6 +200,7 @@ AbckitInst *FindFirstInst(AbckitGraph *graph, AbckitIsaApiDynamicOpcode opcode)
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
     for (auto *bb : bbs) {
         auto *curInst = g_implG->bbGetFirstInst(bb);
@@ -204,6 +212,42 @@ AbckitInst *FindFirstInst(AbckitGraph *graph, AbckitIsaApiDynamicOpcode opcode)
         }
     }
     return nullptr;
+}
+
+struct VisitData {
+    AbckitGraph *ctxG = nullptr;
+    UserData *ud = nullptr;
+    AbckitCoreImportDescriptor *ci = nullptr;
+    AbckitInst *newInst = nullptr;
+};
+
+bool VisitBlock(AbckitBasicBlock *bb, void *data)
+{
+    auto *vData = reinterpret_cast<VisitData *>(data);
+    auto *inst = g_implG->bbGetFirstInst(bb);
+    while (inst != nullptr) {
+        if (g_dynG->iGetOpcode(inst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1) {
+            auto *ldExternal = g_dynG->iCreateLdexternalmodulevar(vData->ctxG, vData->ci);
+            auto *classThrow = g_dynG->iCreateThrowUndefinedifholewithname(
+                vData->ctxG, ldExternal, g_implI->classGetName(vData->ud->classToReplace));
+            auto *constInst = g_implG->gCreateConstantI32(vData->ctxG, 5);
+            auto *ldobj = g_dynG->iCreateLdobjbyname(vData->ctxG, ldExternal,
+                                                     g_implI->functionGetName(vData->ud->methodToReplace));
+
+            auto *staticCall = g_dynG->iCreateCallthis2(vData->ctxG, ldobj, ldExternal, vData->newInst, constInst);
+
+            if (inst == nullptr) {
+                return false;
+            }
+
+            g_implG->iInsertAfter(ldExternal, inst);
+            g_implG->iInsertAfter(classThrow, ldExternal);
+            g_implG->iInsertAfter(ldobj, classThrow);
+            g_implG->iInsertAfter(staticCall, ldobj);
+        }
+        inst = g_implG->iGetNext(inst);
+    }
+    return true;
 }
 
 void ReplaceCallSite(AbckitCoreFunction *method, UserData &userData)
@@ -224,43 +268,13 @@ void ReplaceCallSite(AbckitCoreFunction *method, UserData &userData)
     auto *coreImport = g_implArkI->arktsImportDescriptorToCoreImportDescriptor(newImport);
     auto ctxG = g_implI->createGraphFromFunction(method);
 
-    struct VisitData {
-        AbckitGraph *ctxG = nullptr;
-        UserData *ud = nullptr;
-        AbckitCoreImportDescriptor *ci = nullptr;
-        AbckitInst *newInst = nullptr;
-    };
-
     VisitData vd;
     vd.ctxG = ctxG;
     vd.ci = coreImport;
     vd.ud = &userData;
     vd.newInst = FindFirstInst(ctxG, ABCKIT_ISA_API_DYNAMIC_OPCODE_NEWOBJRANGE);
 
-    g_implG->gVisitBlocksRpo(ctxG, &vd, [](AbckitBasicBlock *bb, void *data) {
-        auto *vData = reinterpret_cast<VisitData *>(data);
-        auto *inst = g_implG->bbGetFirstInst(bb);
-        while (inst != nullptr) {
-            if (g_dynG->iGetOpcode(inst) == ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLTHIS1) {
-                auto *ldExternal = g_dynG->iCreateLdexternalmodulevar(vData->ctxG, vData->ci);
-                auto *classThrow = g_dynG->iCreateThrowUndefinedifholewithname(
-                    vData->ctxG, ldExternal, g_implI->classGetName(vData->ud->classToReplace));
-                auto *constInst = g_implG->gCreateConstantI32(vData->ctxG, 5);
-                auto *ldobj = g_dynG->iCreateLdobjbyname(vData->ctxG, ldExternal,
-                                                         g_implI->functionGetName(vData->ud->methodToReplace));
-
-                auto *staticCall = g_dynG->iCreateCallthis2(vData->ctxG, ldobj, ldExternal, vData->newInst, constInst);
-
-                ASSERT_NE(inst, nullptr);
-
-                g_implG->iInsertAfter(ldExternal, inst);
-                g_implG->iInsertAfter(classThrow, ldExternal);
-                g_implG->iInsertAfter(ldobj, classThrow);
-                g_implG->iInsertAfter(staticCall, ldobj);
-            }
-            inst = g_implG->iGetNext(inst);
-        }
-    });
+    g_implG->gVisitBlocksRpo(ctxG, &vd, [](AbckitBasicBlock *bb, void *data) -> bool { return VisitBlock(bb, data); });
     g_implM->functionSetGraph(method, ctxG);
     g_impl->destroyGraph(ctxG);
 }

@@ -112,6 +112,7 @@ std::vector<AbckitBasicBlock *> BBgetPredBlocks(AbckitBasicBlock *bb)
     g_implG->bbVisitPredBlocks(bb, &predBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
         auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
         preds->emplace_back(succBasicBlock);
+        return true;
     });
     return predBBs;
 }
@@ -122,6 +123,7 @@ std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
     g_implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
         auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
         succs->emplace_back(succBasicBlock);
+        return true;
     });
     return succBBs;
 }

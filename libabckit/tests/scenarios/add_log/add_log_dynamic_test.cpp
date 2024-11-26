@@ -147,6 +147,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
 
         auto *visitData = reinterpret_cast<VisitData *>(data);
         CreateEpilog(inst, bb, visitData->ud, visitData->time);
+        return true;
     });
 }
 

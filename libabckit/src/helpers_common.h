@@ -20,13 +20,13 @@
 
 namespace libabckit {
 
-void ModuleEnumerateClassesHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
-void ModuleEnumerateTopLevelFunctionsHelper(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateClassesHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
+bool ModuleEnumerateTopLevelFunctionsHelper(AbckitCoreModule *m, void *data,
                                             bool (*cb)(AbckitCoreFunction *function, void *data));
-void ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
                                                bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
-void ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data,
+bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data,
                                  bool (*cb)(AbckitCoreFunction *method, void *data));
 
 bool IsDynamic(AbckitTarget target);

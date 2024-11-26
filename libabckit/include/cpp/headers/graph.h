@@ -121,7 +121,7 @@ public:
      * @brief EnumerateBasicBlocksRpo
      * @param cb
      */
-    void EnumerateBasicBlocksRpo(const std::function<void(BasicBlock)> &cb) const;
+    void EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)> &cb) const;
 
     /**
      * @brief Creates I32 constant instruction and inserts it in start basic block of current `Graph`.

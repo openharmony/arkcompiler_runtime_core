@@ -71,17 +71,19 @@ inline abckit::LiteralArray File::CreateLiteralArray(const std::vector<abckit::L
     return abckit::LiteralArray(litaIml, GetApiConfig());
 }
 
-inline void File::EnumerateModules(const std::function<bool(core::Module)> &cb) const
+inline bool File::EnumerateModules(const std::function<bool(core::Module)> &cb) const
 {
     std::vector<core::Module> modules;
     Payload<const std::function<bool(core::Module)> &> payload {cb, GetApiConfig(), this};
 
-    GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
-        const auto &payload = *static_cast<Payload<const std::function<bool(core::Module)> &> *>(data);
-        return payload.data(core::Module(module, payload.config, payload.resource));
-    });
+    auto isNormalExit =
+        GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Module)> &> *>(data);
+            return payload.data(core::Module(module, payload.config, payload.resource));
+        });
 
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 }  // namespace abckit

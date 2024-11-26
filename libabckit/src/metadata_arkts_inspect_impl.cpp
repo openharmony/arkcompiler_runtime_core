@@ -399,45 +399,48 @@ AbckitArktsInspectApi g_arktsInspectApiImpl = {
 // Module
 // ========================================
 
-void ArkTSModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
+bool ArkTSModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
 {
     for (auto &id : m->id) {
         if (!cb(id.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ArkTSModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
+bool ArkTSModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
 {
     for (auto &ed : m->ed) {
         if (!cb(ed.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ArkTSModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data))
+bool ArkTSModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data))
 {
     for (auto &n : m->namespaces) {
         if (!cb(n.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ArkTSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data))
+bool ArkTSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data))
 {
-    ModuleEnumerateClassesHelper(m, data, cb);
+    return ModuleEnumerateClassesHelper(m, data, cb);
 }
 
-void ArkTSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                            bool (*cb)(AbckitCoreFunction *function, void *data))
 {
-    ModuleEnumerateTopLevelFunctionsHelper(m, data, cb);
+    return ModuleEnumerateTopLevelFunctionsHelper(m, data, cb);
 }
 
-void ArkTSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                             bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     switch (m->target) {
@@ -450,139 +453,147 @@ void ArkTSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
     }
 }
 
-void ArkTSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
                                               bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
-    ModuleEnumerateAnnotationInterfacesHelper(m, data, cb);
+    return ModuleEnumerateAnnotationInterfacesHelper(m, data, cb);
 }
 
 // ========================================
 // Module
 // ========================================
 
-void ArkTSNamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
+bool ArkTSNamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
                                        bool (*cb)(AbckitCoreNamespace *n, void *data))
 {
     for (auto &subn : n->namespaces) {
         if (!cb(subn.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ArkTSNamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
+bool ArkTSNamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     for (auto &c : n->classes) {
         if (!cb(c.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
+bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
                                               bool (*cb)(AbckitCoreFunction *func, void *data))
 {
     for (auto &f : n->functions) {
         if (!cb(f.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================
 // Class
 // ========================================
 
-void ArkTSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
+bool ArkTSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
 {
-    ClassEnumerateMethodsHelper(klass, data, cb);
+    return ClassEnumerateMethodsHelper(klass, data, cb);
 }
 
-void ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
+bool ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
-    LIBABCKIT_BAD_ARGUMENT_VOID(klass)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     for (auto &annotation : klass->annotations) {
         if (!cb(annotation.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================
 // Function
 // ========================================
 
-void ArkTSFunctionEnumerateNestedFunctions([[maybe_unused]] AbckitCoreFunction *function, [[maybe_unused]] void *data,
+bool ArkTSFunctionEnumerateNestedFunctions([[maybe_unused]] AbckitCoreFunction *function, [[maybe_unused]] void *data,
                                            [[maybe_unused]] bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
 {
-    // There is no nested functions in ArkTS
+    return false;  // There is no nested functions in ArkTS
 }
 
-void ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+bool ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
                                          bool (*cb)(AbckitCoreClass *nestedClass, void *data))
 {
     for (auto &c : function->nestedClasses) {
         if (!cb(c.get(), data)) {
-            break;
+            return false;
         }
     }
+    return true;
 }
 
-void ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
+bool ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
-    LIBABCKIT_BAD_ARGUMENT_VOID(function)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(function, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     for (auto &annotation : function->annotations) {
         if (!cb(annotation.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================
 // Annotation
 // ========================================
 
-void ArkTSAnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
+bool ArkTSAnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
                                       bool (*cb)(AbckitCoreAnnotationElement *ae, void *data))
 {
-    LIBABCKIT_BAD_ARGUMENT_VOID(anno)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(anno, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(anno->ai)
+    LIBABCKIT_BAD_ARGUMENT(anno->ai, false)
 
     AbckitCoreModule *m = anno->ai->owningModule;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(m->file)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(m->file, false)
 
     for (auto &elem : anno->elements) {
         if (!cb(elem.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================
 // AnnotationInterface
 // ========================================
 
-void ArkTSAnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
+bool ArkTSAnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
                                              bool (*cb)(AbckitCoreAnnotationInterfaceField *fld, void *data))
 {
-    LIBABCKIT_BAD_ARGUMENT_VOID(ai)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(ai, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     for (auto &ed : ai->fields) {
         if (!cb(ed.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 }  // namespace libabckit

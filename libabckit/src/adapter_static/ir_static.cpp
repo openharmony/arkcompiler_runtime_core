@@ -290,6 +290,7 @@ void VisitBbs(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitB
 
         predBasicBlock->impl->ReplaceSucc(curBasicBlock->impl, tryBeginBB->impl);
         curBasicBlock->impl->RemovePred(predBasicBlock->impl);
+        return true;
     });
 
     BBappendSuccBlockStatic(tryBeginBB, tryFirstBB);
@@ -303,6 +304,7 @@ void VisitBbs(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitB
 
         predBasicBlock->impl->ReplaceSucc(curBasicBlock->impl, tryEndBB->impl);
         curBasicBlock->impl->RemovePred(predBasicBlock->impl);
+        return true;
     });
 
     toVisit->push(tryBeginBB);
@@ -317,7 +319,7 @@ void VisitBbs(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitB
         BBvisitSuccBlocksStatic(curBB, &visitorData, [](AbckitBasicBlock *succBasicBlock, void *data) {
             if (succBasicBlock->impl->IsTryEnd() || succBasicBlock->impl->IsCatchBegin() ||
                 succBasicBlock->impl->IsEndBlock()) {
-                return;
+                return false;
             }
 
             auto *visited = static_cast<struct VisitorData *>(data)->visited;
@@ -327,6 +329,7 @@ void VisitBbs(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitB
             if (it == visited->end()) {
                 toVisit->push(succBasicBlock);
             }
+            return true;
         });
     }
 }
@@ -400,7 +403,7 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
         BBvisitSuccBlocksStatic(curBB, &visitorData, [](AbckitBasicBlock *succBasicBlock, void *data) {
             // NOTE(ivagin) if (succBasicBlock->impl->IsCatchEnd()
             if (succBasicBlock->impl->IsCatch() || succBasicBlock->impl->IsTry()) {
-                return;
+                return false;
             }
 
             auto *visited = static_cast<struct VisitorData *>(data)->visited;
@@ -409,6 +412,7 @@ void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLa
             if (visited->find(succBasicBlock) == visited->end()) {
                 toVisit->push(succBasicBlock);
             }
+            return true;
         });
     }
 
@@ -460,53 +464,62 @@ void GrunPassRemoveUnreachableBlocksStatic(AbckitGraph *graph)
     graph->impl->InvalidateAnalysis<compiler::LoopAnalyzer>();
 }
 
-void GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, void (*cb)(AbckitBasicBlock *bb, void *data))
+bool GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *bb, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(graph)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(graph, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     std::stringstream ss;
     for (auto *bbImpl : graph->impl->GetBlocksRPO()) {
         auto *bb = graph->implToBB.at(bbImpl);
-        cb(bb, data);
+        if (!cb(bb, data)) {
+            return false;
+        }
     }
+    return true;
 }
 
 // ========================================
 // Api for basic block manipulation
 // ========================================
 
-void BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
+bool BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
+                             bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(curBasicBlock)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(curBasicBlock, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     auto *graph = curBasicBlock->graph;
     auto *bbImpl = curBasicBlock->impl;
     auto succImpls = bbImpl->GetSuccsBlocks();
     for (auto *succImpl : succImpls) {
         auto *succ = graph->implToBB.at(succImpl);
-        cb(succ, data);
+        if (!cb(succ, data)) {
+            return false;
+        }
     }
+    return true;
 }
 
-void BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
+bool BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
+                             bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(curBasicBlock)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(curBasicBlock, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     auto *graph = curBasicBlock->graph;
     auto *bbImpl = curBasicBlock->impl;
     auto predImpls = bbImpl->GetPredsBlocks();
     for (auto *predImpl : predImpls) {
         auto *pred = graph->implToBB.at(predImpl);
-        cb(pred, data);
+        if (!cb(pred, data)) {
+            return false;
+        }
     }
+    return true;
 }
 
 AbckitBasicBlock *BBcreateEmptyStatic(AbckitGraph *graph)
@@ -794,17 +807,20 @@ AbckitBasicBlock *BBgetImmediateDominatorStatic(AbckitBasicBlock *basicBlock)
     return basicBlock->graph->implToBB.at(bb);
 }
 
-void BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
+bool BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
+                                  bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(basicBlock)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(basicBlock, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     for (auto *bbImpl : basicBlock->impl->GetDominatedBlocks()) {
         auto *bb = basicBlock->graph->implToBB.at(bbImpl);
-        cb(bb, data);
+        if (!cb(bb, data)) {
+            return false;
+        }
     }
+    return true;
 }
 
 void BBinsertSuccBlockStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *succBlock, uint32_t index)
@@ -1214,7 +1230,7 @@ bool IcheckDominanceStatic(AbckitInst *inst, AbckitInst *dominator)
     return inst->impl->IsDominate(dominator->impl);
 }
 
-void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data))
+bool IvisitUsersStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data))
 {
     LIBABCKIT_LOG_FUNC;
 
@@ -1222,9 +1238,12 @@ void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user
 
     while (user != nullptr) {
         auto *userInst = inst->graph->implToInst.at(user->GetInst());
-        cb(userInst, data);
+        if (!cb(userInst, data)) {
+            return false;
+        }
         user = user->GetNext();
     }
+    return true;
 }
 
 uint32_t IgetUserCountStatic(AbckitInst *inst)
@@ -1241,14 +1260,17 @@ uint32_t IgetUserCountStatic(AbckitInst *inst)
     return count;
 }
 
-void IvisitInputsStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data))
+bool IvisitInputsStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data))
 {
     LIBABCKIT_LOG_FUNC;
     for (size_t i = 0; i < inst->impl->GetInputsCount(); i++) {
         auto *inputImpl = inst->impl->GetInput(i).GetInst();
         auto *input = inst->graph->implToInst.at(inputImpl);
-        cb(input, i, data);
+        if (!cb(input, i, data)) {
+            return false;
+        }
     }
+    return true;
 }
 
 uint64_t IgetInputCountStatic(AbckitInst *inst)

@@ -131,6 +131,7 @@ void TransformIr(AbckitGraph *graph, UserData *userData)
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
     for (auto *bb : bbs) {
         auto *curInst = g_implG->bbGetFirstInst(bb);
@@ -176,6 +177,7 @@ void TransformIr(AbckitGraph *graph, UserData *userData)
             }
             inst = g_implG->iGetNext(inst);
         }
+        return true;
     });
 }
 

@@ -45,6 +45,7 @@ inline std::vector<BasicBlock> Graph::GetBlocksRPO() const
     GetApiConfig()->cGapi_->gVisitBlocksRpo(GetResource(), &payload, [](AbckitBasicBlock *bb, void *data) {
         const auto &payload = *static_cast<Payload<std::vector<BasicBlock> *> *>(data);
         payload.data->push_back(BasicBlock(bb, payload.config, payload.resource));
+        return true;
     });
 
     CheckError(GetApiConfig());
@@ -53,13 +54,14 @@ inline std::vector<BasicBlock> Graph::GetBlocksRPO() const
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void Graph::EnumerateBasicBlocksRpo(const std::function<void(BasicBlock)> &cb) const
+inline void Graph::EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)> &cb) const
 {
     Payload<const std::function<void(BasicBlock)> &> payload {cb, GetApiConfig(), this};
 
-    GetApiConfig()->cGapi_->gVisitBlocksRpo(GetResource(), &payload, [](AbckitBasicBlock *bb, void *data) -> void {
+    GetApiConfig()->cGapi_->gVisitBlocksRpo(GetResource(), &payload, [](AbckitBasicBlock *bb, void *data) -> bool {
         const auto &payload = *static_cast<Payload<const std::function<void(BasicBlock)> &> *>(data);
         payload.data(BasicBlock(bb, payload.config, payload.resource));
+        return true;
     });
     CheckError(GetApiConfig());
 }

@@ -38,13 +38,14 @@ inline void EnumerateModuleFunctions(const abckit::core::Module &mod,
 }
 
 inline void EnumerateFunctionInsts(const abckit::core::Function &func,
-                                   const std::function<void(abckit::Instruction)> &cb)
+                                   const std::function<bool(abckit::Instruction)> &cb)
 {
     abckit::Graph graph = func.CreateGraph();
     graph.EnumerateBasicBlocksRpo([&](const abckit::BasicBlock &bb) {
         for (auto inst = bb.GetFirstInst(); inst; inst = inst.GetNext()) {
             cb(inst);
         }
+        return true;
     });
 }
 
@@ -97,15 +98,14 @@ bool IsLoadApi(const abckit::core::ImportDescriptor &id, size_t apiIndex, const 
         return true;
     }
 
-    bool found = false;
-    inst.VisitUsers([&](const abckit::Instruction &user) {
-        if (!found && user.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME) {
-            auto str = std::string(user.GetString());
-            found = str == prop;
+    return !inst.VisitUsers([&](const abckit::Instruction &user) {
+        if (user.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME) {
+            if (std::string(user.GetString()) == prop) {
+                return false;
+            }
         }
+        return true;
     });
-
-    return found;
 }
 
 void AddApiUsage(size_t apiIndex, const UsageInfo &usage, ApiUsageMap *apiUsages)
@@ -134,6 +134,7 @@ void CollectUsageInMethod(const abckit::core::Function &method, SuspectsMap &sus
                 AddApiUsage(apiIndex, usage, apiUsages);
             }
         }
+        return true;
     });
 }
 

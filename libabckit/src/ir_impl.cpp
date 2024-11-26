@@ -77,8 +77,8 @@ extern "C" uint32_t GgetNumberOfBasicBlocks(AbckitGraph *graph)
     return GgetNumberOfBasicBlocksStatic(graph);
 }
 
-extern "C" void GvisitBlocksRPO([[maybe_unused]] AbckitGraph *graph, [[maybe_unused]] void *data,
-                                [[maybe_unused]] void (*cb)(AbckitBasicBlock *bb, void *data))
+extern "C" bool GvisitBlocksRPO([[maybe_unused]] AbckitGraph *graph, [[maybe_unused]] void *data,
+                                [[maybe_unused]] bool (*cb)(AbckitBasicBlock *bb, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -189,8 +189,8 @@ extern "C" AbckitBasicBlock *BBgetPredBlock(AbckitBasicBlock *basicBlock, uint32
     return BBgetPredBlockStatic(basicBlock, index);
 }
 
-extern "C" void BBvisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *predBasicBlock, void *data))
+extern "C" bool BBvisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
+                                  bool (*cb)(AbckitBasicBlock *predBasicBlock, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -238,8 +238,8 @@ extern "C" void BBeraseSuccBlock(AbckitBasicBlock *bb, uint32_t index)
     BBeraseSuccBlockStatic(bb, index);
 }
 
-extern "C" void BBvisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
+extern "C" bool BBvisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
+                                  bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -329,13 +329,13 @@ extern "C" bool BBcheckDominance(AbckitBasicBlock *basicBlock, AbckitBasicBlock 
     return BBcheckDominanceStatic(basicBlock, dominator);
 }
 
-extern "C" void BBvisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                       void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
+extern "C" bool BBvisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
+                                       bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    BBvisitDominatedBlocksStatic(basicBlock, data, cb);
+    return BBvisitDominatedBlocksStatic(basicBlock, data, cb);
 }
 
 extern "C" bool BBisStart(AbckitBasicBlock *basicBlock)
@@ -594,15 +594,15 @@ extern "C" uint32_t IgetUserCount(AbckitInst *inst)
     return IgetUserCountStatic(inst);
 }
 
-extern "C" void IvisitUsers(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data))
+extern "C" bool IvisitUsers(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(inst)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(inst, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
-    IvisitUsersStatic(inst, data, cb);
+    return IvisitUsersStatic(inst, data, cb);
 }
 
 extern "C" uint32_t IgetInputCount(AbckitInst *inst)
@@ -625,15 +625,15 @@ extern "C" AbckitInst *IgetInput(AbckitInst *inst, uint32_t index)
     return IgetInputStatic(inst, index);
 }
 
-extern "C" void IvisitInputs(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data))
+extern "C" bool IvisitInputs(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(inst)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(inst, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
-    IvisitInputsStatic(inst, data, cb);
+    return IvisitInputsStatic(inst, data, cb);
 }
 
 extern "C" void IsetInput(AbckitInst *inst, AbckitInst *input, uint32_t index)

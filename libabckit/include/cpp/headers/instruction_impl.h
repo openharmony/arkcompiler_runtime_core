@@ -111,15 +111,19 @@ inline void Instruction::SetInput(uint32_t index, const Instruction &input)
     CheckError(conf);
 }
 
-inline void Instruction::VisitUsers(const std::function<void(Instruction)> &cb) const
+inline bool Instruction::VisitUsers(const std::function<bool(Instruction)> &cb) const
 {
-    Payload<const std::function<void(Instruction)> &> payload {cb, GetApiConfig(), GetResource()};
+    Payload<const std::function<bool(Instruction)> &> payload {cb, GetApiConfig(), GetResource()};
 
-    GetApiConfig()->cGapi_->iVisitUsers(GetView(), &payload, [](AbckitInst *user, void *data) {
-        const auto &payload = *static_cast<Payload<const std::function<void(Instruction)> &> *>(data);
-        return payload.data(Instruction(user, payload.config, payload.resource));
+    auto isNormalExit = GetApiConfig()->cGapi_->iVisitUsers(GetView(), &payload, [](AbckitInst *user, void *data) {
+        const auto &payload = *static_cast<Payload<const std::function<bool(Instruction)> &> *>(data);
+        if (!payload.data(Instruction(user, payload.config, payload.resource))) {
+            return false;
+        };
+        return true;
     });
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 inline core::ImportDescriptor Instruction::GetImportDescriptorDyn() const

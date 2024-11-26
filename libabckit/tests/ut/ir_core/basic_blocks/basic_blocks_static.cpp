@@ -355,7 +355,10 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        auto cb = [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        auto cb = [](AbckitBasicBlock *, void *data) {
+            (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
+        };
         g_implG->bbVisitSuccBlocks(bb, &counter, cb);
         // CC-OFFNXT(G.FMT.02)
         ASSERT_EQ(counter, 1);
@@ -372,7 +375,10 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitPredBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        auto cb = [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        auto cb = [](AbckitBasicBlock *, void *data) {
+            (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
+        };
         g_implG->bbVisitPredBlocks(bb, &counter, cb);
 
         ASSERT_EQ(counter, 1);
@@ -392,7 +398,10 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitDominatedBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        auto cb = [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; };
+        auto cb = [](AbckitBasicBlock *, void *data) {
+            (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
+        };
         g_implG->bbVisitDominatedBlocks(bb, &counter, cb);
 
         ASSERT_EQ(counter, 1);
@@ -752,7 +761,7 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
             AbckitGraph *graph;
             int newPrintInt;
         } data {g_statG, g_implG, graph, 42};
-        g_implG->bbVisitSuccBlocks(ifBB, &data, [](AbckitBasicBlock *succBasicBlock, void *d) {
+        g_implG->bbVisitSuccBlocks(ifBB, &data, [](AbckitBasicBlock *succBasicBlock, void *d) -> bool {
             auto *gStatG = static_cast<struct VisitData *>(d)->gStatG;
             auto *gImplG = static_cast<struct VisitData *>(d)->implG;
             auto *graph = static_cast<struct VisitData *>(d)->graph;
@@ -761,8 +770,11 @@ TEST_F(LibAbcKitBasicBlocksTest, BBvisitSuccBlocksStatic_2)
             while (curInst != nullptr && gStatG->iGetOpcode(curInst) != ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC) {
                 curInst = gImplG->iGetNext(curInst);
             }
-            ASSERT_NE(curInst, nullptr);
+            if (curInst == nullptr) {
+                return false;
+            }
             gImplG->iSetInput(curInst, gImplG->gCreateConstantU64(graph, newPrintInt), 1);
+            return true;
         });
     };
     auto abcIn = ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/basic_blocks_static.abc";

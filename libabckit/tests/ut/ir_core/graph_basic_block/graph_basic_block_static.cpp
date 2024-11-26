@@ -99,6 +99,7 @@ static void VerifyGraphVisitBlocks(AbckitFile *file)
     // Collect basic blocks
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
 
     ASSERT_EQ(bbs.size(), 3U);

@@ -44,21 +44,22 @@ using namespace panda;
 // Module
 // ========================================
 
-void ModuleEnumerateAnonymousFunctionsDynamic(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateAnonymousFunctionsDynamic(AbckitCoreModule *m, void *data,
                                               bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     for (auto &function : m->functions) {
         if (!FunctionIsAnonymousDynamic(function.get())) {
             continue;
         }
         if (!cb(function.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================
@@ -482,7 +483,7 @@ AbckitLiteralTag LiteralGetTagDynamic(AbckitLiteral *lit)
     }
 }
 
-void LiteralArrayEnumerateElementsDynamic(AbckitLiteralArray *litArr, void *data,
+bool LiteralArrayEnumerateElementsDynamic(AbckitLiteralArray *litArr, void *data,
                                           bool (*cb)(AbckitFile *file, AbckitLiteral *lit, void *data))
 {
     LIBABCKIT_LOG_FUNC;
@@ -491,15 +492,16 @@ void LiteralArrayEnumerateElementsDynamic(AbckitLiteralArray *litArr, void *data
     size_t size = arrImpl->literals_.size();
     if (size % 2U != 0) {
         statuses::SetLastError(ABCKIT_STATUS_TODO);
-        return;
+        return false;
     }
 
     for (size_t idx = 1; idx < size; idx += 2U) {
         auto litImpl = arrImpl->literals_[idx];
         if (!cb(litArr->file, GetOrCreateLiteralDynamic(litArr->file, litImpl), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================

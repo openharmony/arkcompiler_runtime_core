@@ -180,6 +180,7 @@ std::vector<AbckitBasicBlock *> BBgetPredBlocks(AbckitBasicBlock *bb)
     g_implG->bbVisitPredBlocks(bb, &predBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
         auto *preds = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
         preds->emplace_back(succBasicBlock);
+        return true;
     });
     return predBBs;
 }
@@ -190,6 +191,7 @@ std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
     g_implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
         auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
         succs->emplace_back(succBasicBlock);
+        return true;
     });
     return succBBs;
 }
@@ -210,6 +212,7 @@ AbckitInst *FindFirstInst(AbckitGraph *graph, AbckitIsaApiStaticOpcode opcode,
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
     for (auto *bb : bbs) {
         auto *curInst = g_implG->bbGetFirstInst(bb);
@@ -229,6 +232,7 @@ AbckitInst *FindFirstInst(AbckitGraph *graph, AbckitIsaApiDynamicOpcode opcode,
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
     for (auto *bb : bbs) {
         auto *curInst = g_implG->bbGetFirstInst(bb);
@@ -248,6 +252,7 @@ AbckitInst *FindLastInst(AbckitGraph *graph, AbckitIsaApiDynamicOpcode opcode,
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
     AbckitInst *res {nullptr};
     for (auto *bb : bbs) {
@@ -268,6 +273,7 @@ AbckitInst *FindLastInst(AbckitGraph *graph, AbckitIsaApiStaticOpcode opcode,
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
     AbckitInst *res {nullptr};
     for (auto *bb : bbs) {
@@ -299,6 +305,7 @@ void ReplaceInst(AbckitInst *what, AbckitInst *with)
     g_implG->iVisitUsers(what, &ctx, [](AbckitInst *user, void *data) {
         auto *users = static_cast<ReplaceContext *>(data)->users;
         users->push_back(user);
+        return true;
     });
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -310,6 +317,7 @@ void ReplaceInst(AbckitInst *what, AbckitInst *with)
             if (input == ctx->oldInput) {
                 g_implG->iSetInput(ctx->inst, ctx->newInput, inputIdx);
             }
+            return true;
         });
     }
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -321,7 +329,7 @@ void ReplaceInst(AbckitInst *what, AbckitInst *with)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
-static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(AbckitCoreNamespace *)> &cbNamespace,
+static bool EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(AbckitCoreNamespace *)> &cbNamespace,
                                         std::function<void(AbckitCoreClass *)> &cbClass,
                                         std::function<void(AbckitCoreFunction *)> &cbFunc)
 {
@@ -340,7 +348,7 @@ static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<void(Abc
         });
     };
 
-    g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
+    return g_implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
         (*reinterpret_cast<std::function<void(AbckitCoreModule *)> *>(cb))(m);
         return true;
     });
@@ -584,9 +592,9 @@ static void FindMethodInNamespace(AbckitCoreNamespace *n, MethodAndName *mn)
     });
 }
 
-void FindMethodByNameImpl(AbckitFile *file, void *data)
+bool FindMethodByNameImpl(AbckitFile *file, void *data)
 {
-    g_implI->fileEnumerateModules(file, data, [](AbckitCoreModule *m, void *data) {
+    bool earlyExit = g_implI->fileEnumerateModules(file, data, [](AbckitCoreModule *m, void *data) {
         auto moduleName = helpers::AbckitStringToString(g_implI->moduleGetName(m));
         auto mn = static_cast<MethodAndName *>(data);
         auto [funcModule, funcName] = SplitFunctionName(mn->methodName);
@@ -613,6 +621,7 @@ void FindMethodByNameImpl(AbckitFile *file, void *data)
     });
     auto mn = static_cast<MethodAndName *>(data);
     LIBABCKIT_LOG_TEST(DEBUG) << "Method found by name: " << mn->methodName << '\n';
+    return earlyExit;
 }
 
 static void FindNamespaceInNamespaces(AbckitCoreNamespace *n, NamespaceAndName *nn)
@@ -629,9 +638,9 @@ static void FindNamespaceInNamespaces(AbckitCoreNamespace *n, NamespaceAndName *
     });
 }
 
-void FindNamespaceByNameImpl(AbckitFile *file, void *data)
+bool FindNamespaceByNameImpl(AbckitFile *file, void *data)
 {
-    g_implI->fileEnumerateModules(file, data, [](AbckitCoreModule *m, void *data) {
+    return g_implI->fileEnumerateModules(file, data, [](AbckitCoreModule *m, void *data) {
         g_implI->moduleEnumerateNamespaces(m, data, [](AbckitCoreNamespace *n, void *data) {
             auto nn = static_cast<NamespaceAndName *>(data);
             FindNamespaceInNamespaces(n, nn);

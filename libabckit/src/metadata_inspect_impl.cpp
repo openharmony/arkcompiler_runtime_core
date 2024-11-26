@@ -43,30 +43,35 @@ extern "C" AbckitFileVersion FileGetVersion(AbckitFile *file)
     return file->version;
 }
 
-extern "C" void FileEnumerateModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
+extern "C" bool FileEnumerateModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_BAD_ARGUMENT_VOID(file)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(file, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+
+    bool isNormalExit = true;
     for (auto &[moduleName, module] : file->localModules) {
-        cb(module.get(), data);
+        isNormalExit &= cb(module.get(), data);
     }
     for (auto &[moduleName, module] : file->externalModules) {
-        cb(module.get(), data);
+        isNormalExit &= cb(module.get(), data);
     }
+    return isNormalExit;
 }
 
-extern "C" void FileEnumerateExternalModules(AbckitFile *file, void *data,
+extern "C" bool FileEnumerateExternalModules(AbckitFile *file, void *data,
                                              bool (*cb)(AbckitCoreModule *module, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_BAD_ARGUMENT_VOID(file)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(file, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
+    bool isNormalExit = true;
     for (auto &[moduleName, module] : file->externalModules) {
-        cb(module.get(), data);
+        isNormalExit &= cb(module.get(), data);
     }
+    return isNormalExit;
 }
 
 // ========================================
@@ -105,14 +110,14 @@ extern "C" bool ModuleIsExternal(AbckitCoreModule *m)
     return m->isExternal;
 }
 
-extern "C" void ModuleEnumerateImports(AbckitCoreModule *m, void *data,
+extern "C" bool ModuleEnumerateImports(AbckitCoreModule *m, void *data,
                                        bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(m);
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb);
+    LIBABCKIT_BAD_ARGUMENT(m, false);
+    LIBABCKIT_BAD_ARGUMENT(cb, false);
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -124,14 +129,14 @@ extern "C" void ModuleEnumerateImports(AbckitCoreModule *m, void *data,
     }
 }
 
-extern "C" void ModuleEnumerateExports(AbckitCoreModule *m, void *data,
+extern "C" bool ModuleEnumerateExports(AbckitCoreModule *m, void *data,
                                        bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
@@ -144,32 +149,32 @@ extern "C" void ModuleEnumerateExports(AbckitCoreModule *m, void *data,
     }
 }
 
-extern "C" void ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data,
+extern "C" bool ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data,
                                           bool (*cb)(AbckitCoreNamespace *n, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSModuleEnumerateNamespaces(m, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
 }
 
-extern "C" void ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
+extern "C" bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -181,13 +186,13 @@ extern "C" void ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*c
     }
 }
 
-extern "C" void ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+extern "C" bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                                  bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -199,13 +204,13 @@ extern "C" void ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data
     }
 }
 
-extern "C" void ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+extern "C" bool ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                                   bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -217,19 +222,19 @@ extern "C" void ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *dat
     }
 }
 
-extern "C" void ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+extern "C" bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
                                                     bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     switch (ModuleGetTarget(m)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSModuleEnumerateAnnotationInterfaces(m, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -264,61 +269,61 @@ extern "C" AbckitCoreNamespace *NamespaceGetParentNamespace(AbckitCoreNamespace 
     return n->parentNamespace;
 }
 
-extern "C" void NamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
+extern "C" bool NamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
                                              bool (*cb)(AbckitCoreNamespace *klass, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(n)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(n->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSNamespaceEnumerateNamespaces(n, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
 }
 
-extern "C" void NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data,
+extern "C" bool NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data,
                                           bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(n)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(n->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSNamespaceEnumerateClasses(n, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
 }
 
-extern "C" void NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
+extern "C" bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
                                                     bool (*cb)(AbckitCoreFunction *func, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(n)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(n, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(n->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSNamespaceEnumerateTopLevelFunctions(n, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -478,14 +483,14 @@ extern "C" AbckitCoreNamespace *ClassGetParentNamespace(AbckitCoreClass *klass)
     return klass->parentNamespace;
 }
 
-extern "C" void ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
+extern "C" bool ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
                                       bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(klass)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (klass->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
@@ -498,21 +503,21 @@ extern "C" void ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
     }
 }
 
-extern "C" void ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
+extern "C" bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
                                           bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(klass)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(klass, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(klass->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSClassEnumerateAnnotations(klass, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -554,21 +559,21 @@ extern "C" AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterfac
     return nullptr;
 }
 
-extern "C" void AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
+extern "C" bool AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
                                                    bool (*cb)(AbckitCoreAnnotationInterfaceField *fld, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(ai)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(ai, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(ai->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSAnnotationInterfaceEnumerateFields(ai, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -691,14 +696,14 @@ extern "C" AbckitCoreNamespace *FunctionGetParentNamespace(AbckitCoreFunction *f
     return function->parentNamespace;
 }
 
-extern "C" void FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
+extern "C" bool FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
                                                  bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(function)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(function, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(function->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
@@ -711,14 +716,14 @@ extern "C" void FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, v
     }
 }
 
-extern "C" void FunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+extern "C" bool FunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
                                                bool (*cb)(AbckitCoreClass *nestedClass, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(function)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(function, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(function->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
@@ -731,21 +736,21 @@ extern "C" void FunctionEnumerateNestedClasses(AbckitCoreFunction *function, voi
     }
 }
 
-extern "C" void FunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
+extern "C" bool FunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
                                              bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(function)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(function, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     switch (ModuleGetTarget(function->owningModule)) {
         case ABCKIT_TARGET_ARK_TS_V1:
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSFunctionEnumerateAnnotations(function, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -823,14 +828,14 @@ extern "C" AbckitCoreAnnotationInterface *AnnotationGetInterface(AbckitCoreAnnot
     return anno->ai;
 }
 
-extern "C" void AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
+extern "C" bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
                                             bool (*cb)(AbckitCoreAnnotationElement *ae, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(anno)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(anno, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
 
     AbckitCoreModule *m = anno->ai->owningModule;
 
@@ -839,7 +844,7 @@ extern "C" void AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *da
         case ABCKIT_TARGET_ARK_TS_V2:
             return ArkTSAnnotationEnumerateElements(anno, data, cb);
         case ABCKIT_TARGET_JS:
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }
@@ -1031,21 +1036,21 @@ extern "C" const char *AbckitStringToString(AbckitString *value)
 // LiteralArray
 // ========================================
 
-extern "C" void LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *data,
+extern "C" bool LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *data,
                                               bool (*cb)(AbckitFile *file, AbckitLiteral *v, void *data))
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
 
-    LIBABCKIT_BAD_ARGUMENT_VOID(litArr);
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb);
+    LIBABCKIT_BAD_ARGUMENT(litArr, false);
+    LIBABCKIT_BAD_ARGUMENT(cb, false);
 
     switch (litArr->file->frontend) {
         case Mode::DYNAMIC:
             return LiteralArrayEnumerateElementsDynamic(litArr, data, cb);
         case Mode::STATIC:
             statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
-            return;
+            return false;
         default:
             LIBABCKIT_UNREACHABLE;
     }

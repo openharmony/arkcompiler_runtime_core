@@ -99,15 +99,16 @@ struct AbckitGraphApi {
 
     /**
      * @brief Enumerates basic blocks of the `graph` in reverse postorder, invoking callback `cb` for each basic block.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] graph - Graph to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `graph` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*gVisitBlocksRpo)(AbckitGraph *graph, void *data, void (*cb)(AbckitBasicBlock *basicBlock, void *data));
+    bool (*gVisitBlocksRpo)(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *basicBlock, void *data));
 
     /**
      * @brief Returns basic blocks with given `id` of the given `graph`.
@@ -263,16 +264,17 @@ struct AbckitGraphApi {
     /**
      * @brief Enumerates basic blocks preceding to the given `basicBlock`, invoking callback `cb` for each basic
      * block.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] basicBlock - Basic block to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `basicBlock` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*bbVisitPredBlocks)(AbckitBasicBlock *basicBlock, void *data,
-                              void (*cb)(AbckitBasicBlock *predBasicBlock, void *data));
+    bool (*bbVisitPredBlocks)(AbckitBasicBlock *basicBlock, void *data,
+                              bool (*cb)(AbckitBasicBlock *predBasicBlock, void *data));
 
     /**
      * @brief Returns the number of basic blocks successing the given `basicBlock`.
@@ -332,16 +334,17 @@ struct AbckitGraphApi {
 
     /**
      * @brief Enumerates basic blocks successing to the given `basicBlock`, invoking callback `cb` for each basic block.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] basicBlock - Basic block to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `basicBlock` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*bbVisitSuccBlocks)(AbckitBasicBlock *basicBlock, void *data,
-                              void (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
+    bool (*bbVisitSuccBlocks)(AbckitBasicBlock *basicBlock, void *data,
+                              bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
 
     /**
      * @brief Returns successor of `basicBlock` with index 0.
@@ -453,16 +456,17 @@ struct AbckitGraphApi {
 
     /**
      * @brief Enumerates basic blocks dominating to the given `basicBlock`, invoking callback `cb` for each basic block.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] basicBlock - Basic block to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `basicBlock` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*bbVisitDominatedBlocks)(AbckitBasicBlock *basicBlock, void *data,
-                                   void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data));
+    bool (*bbVisitDominatedBlocks)(AbckitBasicBlock *basicBlock, void *data,
+                                   bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data));
 
     /**
      * @brief Tells if `basicBlock` is start basic block.
@@ -679,15 +683,16 @@ struct AbckitGraphApi {
 
     /**
      * @brief Enumerates `insts` user instructions, invoking callback `cb` for each user instruction.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] inst - Instruction to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*iVisitUsers)(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data));
+    bool (*iVisitUsers)(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data));
 
     /**
      * @brief Returns number of `inst` inputs.
@@ -709,15 +714,16 @@ struct AbckitGraphApi {
 
     /**
      * @brief Enumerates `insts` input instructions, invoking callback `cb` for each input instruction.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] inst - Instruction to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `inst` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*iVisitInputs)(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data));
+    bool (*iVisitInputs)(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data));
 
     /**
      * @brief Sets `inst` input, overwrites existing input.

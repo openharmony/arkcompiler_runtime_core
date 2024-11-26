@@ -63,13 +63,13 @@ inline uint32_t GgetNumberOfBasicBlocks(AbckitGraph *graph)
     return DEFAULT_U32;
 }
 
-inline void GvisitBlocksRpo(AbckitGraph *graph, void *data, void (*cb)(AbckitBasicBlock *basicBlock, void *data))
+inline bool GvisitBlocksRpo(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *basicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(graph == DEFAULT_GRAPH);
-    (void)data;
     cb(DEFAULT_BB, data);
+    return DEFAULT_BOOL;
 }
 
 inline AbckitBasicBlock *GgetBasicBlock(AbckitGraph *graph, uint32_t id)
@@ -201,14 +201,14 @@ inline AbckitBasicBlock *BBGetPredBlock(AbckitBasicBlock *basicBlock, uint32_t i
     return DEFAULT_BB;
 }
 
-inline void BBVisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
-                              void (*cb)(AbckitBasicBlock *predBasicBlock, void *data))
+inline bool BBVisitPredBlocks(AbckitBasicBlock *basicBlock, void *data,
+                              bool (*cb)(AbckitBasicBlock *predBasicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(basicBlock == DEFAULT_BB);
-    (void)data;
     cb(DEFAULT_BB, data);
+    return DEFAULT_BB;
 }
 
 inline uint64_t BBGetSuccBlockCount(AbckitBasicBlock *basicBlock)
@@ -253,14 +253,14 @@ inline void BBEraseSuccBlock(AbckitBasicBlock *basicBlock, uint32_t index)
     EXPECT_TRUE(index == DEFAULT_U32);
 }
 
-inline void BBVisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
-                              void (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
+inline bool BBVisitSuccBlocks(AbckitBasicBlock *basicBlock, void *data,
+                              bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(basicBlock == DEFAULT_BB);
-    (void)data;
     cb(DEFAULT_BB, data);
+    return DEFAULT_BOOL;
 }
 
 inline AbckitBasicBlock *BBGetTrueBranch(AbckitBasicBlock *basicBlock)
@@ -352,14 +352,14 @@ inline bool BBCheckDominance(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dom
     return DEFAULT_BOOL;
 }
 
-inline void BBVisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
-                                   void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
+inline bool BBVisitDominatedBlocks(AbckitBasicBlock *basicBlock, void *data,
+                                   bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data))
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(basicBlock == DEFAULT_BB);
-    (void)data;
     cb(DEFAULT_BB, data);
+    return DEFAULT_BOOL;
 }
 
 inline bool BBIsStart(AbckitBasicBlock *basicBlock)
@@ -548,13 +548,13 @@ inline uint32_t IgetUserCount(AbckitInst *inst)
     return DEFAULT_U32;
 }
 
-inline void IvisitUsers(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data))
+inline bool IvisitUsers(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data))
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(inst == DEFAULT_INST);
-    (void)data;
     cb(DEFAULT_INST, data);
+    return DEFAULT_BOOL;
 }
 
 inline uint32_t IgetInputCount(AbckitInst *inst)
@@ -574,13 +574,13 @@ inline AbckitInst *IgetInput(AbckitInst *inst, uint32_t index)
     return DEFAULT_INST;
 }
 
-inline void IvisitInputs(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data))
+inline bool IvisitInputs(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data))
 {
     g_calledFuncs.push(__func__);
 
     EXPECT_TRUE(inst == DEFAULT_INST);
-    (void)data;
     cb(DEFAULT_INST, DEFAULT_SIZE_T, data);
+    return DEFAULT_BOOL;
 }
 
 inline void IsetInput(AbckitInst *inst, AbckitInst *input, uint32_t index)

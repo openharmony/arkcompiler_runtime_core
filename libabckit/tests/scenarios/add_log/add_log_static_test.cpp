@@ -86,6 +86,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
             }
             inst = g_implG->iGetNext(inst);
         }
+        return true;
     });
 }
 

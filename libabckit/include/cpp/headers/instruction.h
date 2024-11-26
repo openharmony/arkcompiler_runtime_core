@@ -145,8 +145,9 @@ public:
     /**
      * @brief Enumerates `insts` user instructions, invoking callback `cb` for each user instruction.
      * @param cb - Callback that will be invoked.
+     * @return bool
      */
-    void VisitUsers(const std::function<void(Instruction)> &cb) const;
+    bool VisitUsers(const std::function<bool(Instruction)> &cb) const;
 
     /**
      * @brief Returns import descriptor of `Instruction`.

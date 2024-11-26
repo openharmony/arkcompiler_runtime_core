@@ -167,6 +167,7 @@ private:
         GetApiConfig()->cGapi_->bbVisitSuccBlocks(GetView(), &payload, [](AbckitBasicBlock *succ, void *data) {
             const auto &payload = *static_cast<Payload<std::vector<BasicBlock> *> *>(data);
             payload.data->push_back(BasicBlock(succ, payload.config, payload.resource));
+            return true;
         });
     }
 

@@ -130,7 +130,10 @@ void CreateEpilog(abckit::Graph &graph, const abckit::BasicBlock &bb, const abck
 void TransformIr(abckit::Graph &graph, const UserData &userData)
 {
     const abckit::Instruction iTimeStart = CreateProlog(graph, userData);
-    graph.EnumerateBasicBlocksRpo([&](const abckit::BasicBlock &bb) { CreateEpilog(graph, bb, iTimeStart, userData); });
+    graph.EnumerateBasicBlocksRpo([&](const abckit::BasicBlock &bb) {
+        CreateEpilog(graph, bb, iTimeStart, userData);
+        return true;
+    });
 }
 
 }  // namespace

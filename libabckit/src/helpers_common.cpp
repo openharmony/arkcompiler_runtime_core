@@ -18,49 +18,53 @@
 
 namespace libabckit {
 
-void ModuleEnumerateClassesHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
+bool ModuleEnumerateClassesHelper(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     for (auto &[className, klass] : m->ct) {
         if (!cb(klass.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ModuleEnumerateTopLevelFunctionsHelper(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateTopLevelFunctionsHelper(AbckitCoreModule *m, void *data,
                                             bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &function : m->functions) {
         if (!cb(function.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateAnnotationInterfacesHelper(AbckitCoreModule *m, void *data,
                                                bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &[atName, at] : m->at) {
         if (!cb(at.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
+bool ClassEnumerateMethodsHelper(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data))
 {
     LIBABCKIT_LOG_FUNC;
     for (auto &method : klass->methods) {
         if (!cb(method.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 bool IsDynamic(AbckitTarget target)

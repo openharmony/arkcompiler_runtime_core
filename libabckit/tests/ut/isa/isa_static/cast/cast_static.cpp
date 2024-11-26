@@ -212,7 +212,10 @@ TEST_F(LibAbcKitCastStaticTest, LibAbcKitTestSetTargetType1)
             g_statG->iSetTargetType(cast, ABCKIT_TYPE_ID_F32);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            g_implG->iVisitUsers(cast, nullptr, [](AbckitInst *user, void * /*data*/) { g_implG->iRemove(user); });
+            g_implG->iVisitUsers(cast, nullptr, [](AbckitInst *user, void * /*data*/) {
+                g_implG->iRemove(user);
+                return true;
+            });
 
             AbckitInst *newCast = g_statG->iCreateCast(graph, cast, ABCKIT_TYPE_ID_F64);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
