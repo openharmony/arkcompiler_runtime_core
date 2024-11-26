@@ -127,7 +127,7 @@ export const fetchPutEntity = async function<P, U, T>(
 export const fetchDeleteEntity = async function<U>(
     endpoint: string,
     fallbackValue = false,
-    successCode = 204,
+    successCode = 200,
 ): Promise<IServiceResponse<boolean>> {
     try {
         const apiInstance = getApiInstance();

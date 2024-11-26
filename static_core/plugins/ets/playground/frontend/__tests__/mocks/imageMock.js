@@ -13,6 +13,4 @@
  * limitations under the License.
  */
 
-window.runEnv = {
-    apiUrl: '/',
-};
+module.exports = '';

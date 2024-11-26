@@ -21,6 +21,10 @@ import {useSelector} from 'react-redux';
 import {selectCompileLoading, selectRunLoading, selectRunRes, selectCompileRes} from '../../store/selectors/code';
 import {selectSyntax} from '../../store/selectors/syntax';
 import {asmSyntax} from './syntax';
+import * as monaco from 'monaco-editor';
+import { loader } from '@monaco-editor/react';
+
+loader.config({ monaco });
 
 export const DISASM = 'arkasm';
 

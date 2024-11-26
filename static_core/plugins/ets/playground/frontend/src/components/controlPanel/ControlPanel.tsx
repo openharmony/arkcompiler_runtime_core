@@ -76,6 +76,7 @@ const ControlPanel = (): JSX.Element => {
                 label="Disasm"
                 onChange={handleDisasmChange}
                 className={styles.disasm}
+                data-testid="disasm-checkbox"
             />
             <Popover
                 content={<CompileOptions onClose={handleClosePopover} />}

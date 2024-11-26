@@ -22,6 +22,7 @@
     "html-webpack-plugin": "^5.6.0",
     "lodash.debounce": "^4.0.8",
     "mini-css-extract-plugin": "^2.9.1",
+    "monaco-editor": "^0.52.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-monaco-editor": "^0.56.1",
@@ -40,7 +41,7 @@
     "start": "react-scripts start",
     "startWebPack": "npx webpack serve --env TARGET_STAND=test",
     "build": "react-scripts build",
-    "test": "jest --coverage=true",
+    "test": "jest",
     "test:watch": "jest --coverage=true --watchAll",
     "eject": "react-scripts eject"
   },

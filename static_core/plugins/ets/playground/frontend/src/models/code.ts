@@ -53,37 +53,23 @@ export interface IRunReq {
 }
 
 export const codeModel = {
-    fromApiCompile: (data: ICodeReq): ICodeReq => {
-        return ({
-            compile: {
-                output: data?.compile?.output || '',
-                error: data?.compile?.error || '',
-                exit_code: data?.compile?.exit_code || 0
-            },
-            disassembly: {
-                output: data?.disassembly?.output || '',
-                code: data?.disassembly?.code || '',
-                error: data?.disassembly?.error || '',
-                exit_code: data?.disassembly?.exit_code || 0
-            }
-        });
+    fillDefaults: <T extends Record<keyof T, string | number>>(
+        data: Partial<T>,
+        defaults: T
+    ): T => {
+        return Object.keys(defaults).reduce((acc, key) => {
+            const typedKey = key as keyof T;
+            acc[typedKey] = data[typedKey] ?? defaults[typedKey];
+            return acc;
+        }, { ...defaults });
     },
+    fromApiCompile: (data: ICodeReq): ICodeReq => ({
+        compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '', exit_code: -1 }),
+        disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '', exit_code: -1 }),
+    }),
     fromApiRun: (data: IRunReq): IRunReq => ({
-        compile: {
-            output: data?.compile?.output || '',
-            error: data?.compile?.error || '',
-            exit_code: data?.compile?.exit_code || 0
-        },
-        disassembly: {
-            output: data?.disassembly?.output || '',
-            code: data?.disassembly?.code || '',
-            error: data?.disassembly?.error || '',
-            exit_code: data?.disassembly?.exit_code || 0
-        },
-        run: {
-            output: data?.run?.output || '',
-            error: data?.run?.error || '',
-            exit_code: data?.run?.exit_code || 0
-        }
+        compile: codeModel.fillDefaults(data.compile || {}, { output: '', error: '', exit_code: -1 }),
+        disassembly: codeModel.fillDefaults(data.disassembly || {}, { output: '', code: '', error: '', exit_code: -1 }),
+        run: codeModel.fillDefaults(data.run || {}, { output: '', error: '', exit_code: -1 }),
     }),
 };

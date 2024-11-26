@@ -36,6 +36,20 @@ To start the application in development mode:
 
    The application will be available at: `http://localhost:3000`
 
+### Testing the Application
+
+To run tests for the application:
+
+   ```bash
+   npm test
+   ```
+
+   or if you're using `yarn`:
+
+   ```bash
+   yarn test
+   ```
+
 ### Building the Application
 
 To build the production version of the app:

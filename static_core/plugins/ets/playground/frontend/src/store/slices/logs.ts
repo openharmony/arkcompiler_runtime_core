@@ -43,7 +43,6 @@ const logsSlice = createSlice({
     initialState,
     reducers: {
         setCompileOutLogs(state, action: PayloadAction<ILog[]>) {
-            console.log(action.payload);
             state.compileOut = action.payload;
         },
         setCompileErrLogs(state, action: PayloadAction<ILog[]>) {
