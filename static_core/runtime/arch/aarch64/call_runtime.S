@@ -81,12 +81,17 @@
     CFI_RESTORE(d8)
 .endm
 
-.macro SAVE_CALLER_GP_REGS fp_reg, tmp_reg, paramsnum, mode
+.macro SAVE_CALLER_GP_REGS fp_reg, tmp_reg, paramsnum, mode, ret_type
 .if \mode != RUNTIME_MODE_STUB
     // parameter holding registers are saved by the caller function
 .ifeq \paramsnum
+.ifnc \ret_type,INTEGER
     stp x0,  x1,  [\fp_reg, #-CALLER_REG0_OFFSET+8*0]
 .else
+    add \tmp_reg, \fp_reg, #-CALLER_REG0_OFFSET
+    str x1,  [\tmp_reg, #8*1]
+.endif
+.else // paramsnum > 0
 .if \mode == RUNTIME_MODE_ODD_SAVED
 .ifeq \paramsnum-1
     add \tmp_reg, \fp_reg, #-CALLER_REG0_OFFSET
@@ -114,7 +119,7 @@
 .endif
 .endif // mode == RUNTIME_MODE_ODD_SAVED
 .endif
-.endif // \mode != RUNTIME_MODE_STUB
+.endif // mode != RUNTIME_MODE_STUB
 
     // Save caller saved regs
     // first registers are stored by user of this macro or caller which uses them for arguments
@@ -131,7 +136,6 @@
 .ifnc \ret_type,INTEGER
     ldp x0,  x1,  [\fp_reg, #-CALLER_REG0_OFFSET+8*0]
 .else
-    // do not load x0 here as it can overwrite the result value
     add \tmp_reg, \fp_reg, #-CALLER_REG0_OFFSET
     ldr x1,  [\tmp_reg, #8*1]
 .endif
@@ -146,9 +150,13 @@
     ldr x18, [\fp_reg, #-CALLER_REG0_OFFSET+8*18]
 .endm
 
-.macro SAVE_CALLER_FP_REGS fp_reg, tmp_reg
+.macro SAVE_CALLER_FP_REGS fp_reg, tmp_reg, ret_type
     add \tmp_reg, \fp_reg, #-CALLER_VREG0_OFFSET
+.ifnc \ret_type,FLOAT
     stp d0, d1, [\tmp_reg]
+.else
+    str d1, [\tmp_reg, #8*1]
+.endif
     stp d2, d3, [\tmp_reg, #8*2]
     stp d4, d5, [\tmp_reg, #8*4]
     stp d6, d7, [\tmp_reg, #8*6]
@@ -167,8 +175,7 @@
 .ifnc \ret_type,FLOAT
     ldp d0, d1, [\tmp_reg]
 .else
-    // do not load d0 here as it can overwrite the result value
-    ldr d1,  [\tmp_reg, #8*1]
+    ldr d1, [\tmp_reg, #8*1]
 .endif
     ldp d2, d3, [\tmp_reg, #8*2]
     ldp d4, d5, [\tmp_reg, #8*4]
@@ -236,13 +243,13 @@
     SAVE_CALLEE_FP_REGS sp, BRIDGE_FRAME_SIZE
 
 .if \mode != RUNTIME_MODE_SLOW_PATH
-    SAVE_CALLER_GP_REGS fp, lr, \paramsnum, \mode
+    SAVE_CALLER_GP_REGS fp, lr, \paramsnum, \mode, \ret_type
 .endif
 
     ldr x19, [fp, #(-CFRAME_FLAGS_SLOT * 8)]
     tbz x19, #CFRAME_HAS_FLOAT_REGS_FLAG_BIT, 2f
 
-    SAVE_CALLER_FP_REGS fp, lr
+    SAVE_CALLER_FP_REGS fp, lr, \ret_type
 
 2:
     // The call

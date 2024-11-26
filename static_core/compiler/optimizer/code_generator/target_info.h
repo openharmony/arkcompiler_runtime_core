@@ -462,14 +462,6 @@ public:
         return RegMask(mask);
     }
 
-    constexpr bool FirstParamIsReturnReg(TypeInfo type) const
-    {
-        if (type.IsScalar()) {
-            return GetReturnRegId() == GetParamRegId(0U);
-        }
-        return GetReturnFpRegId() == GetFpParamRegId(0U);
-    }
-
     // NOTE(msherstennikov): Take into account register size
     std::string GetRegName(size_t reg, bool isFp) const
     {

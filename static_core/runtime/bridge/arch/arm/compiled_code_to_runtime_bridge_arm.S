@@ -65,17 +65,36 @@
     CFI_RESTORE(d8)
 .endm
 
-.macro SAVE_CALLER_GP_REGS fp_reg, tmp_reg, paramsnum
+.macro SAVE_CALLER_GP_REGS fp_reg, tmp_reg, paramsnum, ret_type
     add \tmp_reg, \fp_reg, #-CALLER_REG0_OFFSET+4*4
 .ifeq \paramsnum
+#ifdef PANDA_TARGET_ARM32_ABI_HARD
+.ifnc \ret_type,INTEGER
+#else
+.ifc \ret_type,VOID
+#endif
     stmdb \tmp_reg, {r0-r3}
+.else
+    stmdb \tmp_reg, {r2-r3}
 .endif
+.endif
+
 .ifeq \paramsnum-1
+#ifdef PANDA_TARGET_ARM32_ABI_HARD
+.ifnc \ret_type,INTEGER
+#else
+.ifc \ret_type,VOID
+#endif
     stmdb \tmp_reg, {r1-r3}
+.else
+    stmdb \tmp_reg, {r2-r3}
 .endif
+.endif
+
 .ifeq \paramsnum-2
     stmdb \tmp_reg, {r2-r3}
 .endif
+
 .ifeq \paramsnum-3
     str r3, [\tmp_reg, #-4]
 .endif
@@ -95,9 +114,17 @@
 .endif
 .endm
 
-.macro SAVE_CALLER_FP_REGS fp_reg, tmp_reg
-    add \tmp_reg, \fp_reg, #-CALLER_VREG0_OFFSET
-    vstm \tmp_reg, {d0-d7}
+.macro SAVE_CALLER_FP_REGS fp_reg, tmp_reg, ret_type
+    add \tmp_reg, \fp_reg, #-CALLER_VREG0_OFFSET+8*8
+#ifdef PANDA_TARGET_ARM32_ABI_HARD
+.ifnc \ret_type,FLOAT
+    vstmdb \tmp_reg!, {d0-d7}
+.else
+    vstmdb \tmp_reg!, {d1-d7}
+.endif
+#else
+    vstmdb \tmp_reg!, {d0-d7}
+#endif
 .endm
 
 .macro RESTORE_CALLER_FP_REGS fp_reg, tmp_reg, ret_type
@@ -217,7 +244,7 @@
 #endif
 
 .if \mode != RUNTIME_MODE_SLOW_PATH
-      SAVE_CALLER_GP_REGS fp, lr, \paramsnum
+      SAVE_CALLER_GP_REGS fp, lr, \paramsnum, \ret_type
 .endif
 
 #ifndef PANDA_TARGET_ARM32_ABI_SOFT
@@ -225,7 +252,7 @@
       tst r4, #CFRAME_HAS_FLOAT_REGS_FLAG_MASK
       beq 1f
 
-      SAVE_CALLER_FP_REGS fp, lr
+      SAVE_CALLER_FP_REGS fp, lr, \ret_type
 1:
 #endif
 
