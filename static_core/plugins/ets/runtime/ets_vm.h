@@ -60,6 +60,7 @@
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_handle_scope.h"
 #include "plugins/ets/runtime/ets_handle.h"
+#include "plugins/ets/runtime/mem/root_provider.h"
 
 namespace ark::ets {
 
@@ -332,6 +333,9 @@ public:
         return callbackPosterFactory_->CreatePoster();
     }
 
+    void AddRootProvider(mem::RootProvider *provider);
+    void RemoveRootProvider(mem::RootProvider *provider);
+
 protected:
     bool CheckEntrypointSignature(Method *entrypoint) override;
     Expected<int, Runtime::Error> InvokeEntrypointImpl(Method *entrypoint,
@@ -377,6 +381,8 @@ private:
     os::memory::Mutex finalizationRegistryLock_;
     PandaList<EtsObject *> registeredFinalizationRegistryInstances_ GUARDED_BY(finalizationRegistryLock_);
     PandaUniquePtr<CallbackPosterFactoryIface> callbackPosterFactory_;
+    os::memory::Mutex rootProviderlock_;
+    PandaUnorderedSet<mem::RootProvider *> rootProviders_ GUARDED_BY(rootProviderlock_);
     // optional for lazy initialization
     std::optional<std::mt19937> randomEngine_;
     // for JS Atomics

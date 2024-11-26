@@ -159,7 +159,7 @@ InteropCtx::SharedEtsVmState::SharedEtsVmState(PandaEtsVM *vm)
     pandaEtsVm = vm;
     linkerCtx = etsClassLinker->GetEtsClassLinkerExtension()->GetBootContext();
     CacheClasses(etsClassLinker);
-    etsProxyRefStorage = ets_proxy::SharedReferenceStorage::Create();
+    etsProxyRefStorage = ets_proxy::SharedReferenceStorage::Create(pandaEtsVm);
     ASSERT(etsProxyRefStorage.get() != nullptr);
 
     EtsClass *promiseInteropClass =

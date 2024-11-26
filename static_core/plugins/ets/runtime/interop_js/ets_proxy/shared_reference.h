@@ -17,26 +17,19 @@
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_PROXY_SHARED_REFERENCE_H_
 
 #include "plugins/ets/runtime/interop_js/ets_proxy/ets_class_wrapper.h"
-#include "plugins/ets/runtime/interop_js/ets_proxy/ets_object_reference.h"
+#include "plugins/ets/runtime/interop_js/ets_proxy/shared_reference_flags.h"
 
 #include <node_api.h>
 
-namespace ark::mem {
-class Reference;
-}  // namespace ark::mem
-
 namespace ark::ets::interop::js {
 class InteropCtx;
-// Forward declarations to avoid cyclic deps.
-inline mem::GlobalObjectStorage *RefstorFromInteropCtx(InteropCtx *ctx);
 }  // namespace ark::ets::interop::js
 
 namespace ark::ets::interop::js::ets_proxy {
+// Forward declaration
+class SharedReferenceStorage;
 
 class SharedReference {
-private:
-    using FlagsStart = BitField<uint8_t, 0, 0>;
-
 public:
     static constexpr size_t MAX_MARK_BITS = MarkWord::MarkWordRepresentation::HASH_SIZE;
 
@@ -51,18 +44,21 @@ public:
 
     using InitFn = decltype(&SharedReference::InitHybridObject);
 
-    EtsObject *GetEtsObject(InteropCtx *ctx) const
+    EtsObject *GetEtsObject() const
     {
-        ASSERT_MANAGED_CODE();
         ASSERT(etsRef_ != nullptr);
-        return EtsObject::FromCoreType(RefstorFromInteropCtx(ctx)->Get(etsRef_));
+        return etsRef_;
     }
 
-    napi_value GetJsObject(napi_env env) const
+    napi_ref GetJsRef() const
     {
-        napi_value jsValue;
-        NAPI_CHECK_FATAL(napi_get_reference_value(env, jsRef_, &jsValue));
-        return jsValue;
+        return jsRef_;
+    }
+
+    const InteropCtx *GetCtx() const
+    {
+        ASSERT(ctx_ != nullptr);
+        return ctx_;
     }
 
     static void *ExtractMaybeReference(napi_env env, napi_value jsObject)
@@ -85,33 +81,115 @@ public:
         return etsObject->GetInteropHash();
     }
 
-    using FlagsType = FlagsStart::ValueType;
-
-    template <typename F>
-    typename F::ValueType GetField() const
+    bool HasETSFlag() const
     {
-        return F::Get(flags_);
+        return flags_.HasBit<SharedReferenceFlags::Bit::ETS>();
     }
 
-    template <typename F>
-    void SetField(typename F::ValueType value)
+    bool HasJSFlag() const
     {
-        F::Set(value, &flags_);
+        return flags_.HasBit<SharedReferenceFlags::Bit::JS>();
     }
 
-    void SetFlags(FlagsType flags)
+    /**
+     * Empty ref means the ref is not allocated or removed from storage and can't be used
+     * @return true if reference is empty, false - otherwise
+     */
+    bool IsEmpty() const
     {
-        flags_ = flags;
+        return flags_.IsEmpty();
     }
 
-    using HasETSObject = FlagsStart::NextFlag;
-    using HasJSObject = FlagsStart::NextFlag;
+    /**
+     * Mark the reference as live. It's special method for XGC marking
+     * @return true if the method marked the reference, false if the reference has already been marked
+     */
+    bool MarkIfNotMarked();
 
-    static void FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg);
+    /// @return true if the refernce is marked, false - otherwise
+    bool IsMarked() const
+    {
+        return flags_.HasBit<SharedReferenceFlags::Bit::MARK>();
+    }
+
+    /// @class provides forward iterator for SharedReference with chain of contexts and one EtsObject
+    class Iterator {
+    public:
+        // NOLINTBEGIN(readability-identifier-naming)
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = SharedReference *;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type *;
+        using reference = value_type &;
+        // NOLINTEND(readability-identifier-naming)
+
+        friend class SharedReference;
+
+        Iterator &operator++();
+        Iterator operator++(int);  // NOLINT(cert-dcl21-cpp)
+
+        bool operator==(const Iterator &other) const
+        {
+            return ref_ == other.ref_;
+        }
+
+        bool operator!=(const Iterator &other) const
+        {
+            return ref_ != other.ref_;
+        }
+
+        SharedReference *operator*()
+        {
+            return const_cast<SharedReference *>(ref_);
+        }
+
+        const SharedReference *operator*() const
+        {
+            return ref_;
+        }
+
+        SharedReference *operator->()
+        {
+            return const_cast<SharedReference *>(ref_);
+        }
+
+        const SharedReference *operator->() const
+        {
+            return ref_;
+        }
+
+        Iterator() = default;
+        explicit Iterator(const SharedReference *ref) : ref_(ref) {}
+        DEFAULT_COPY_SEMANTIC(Iterator);
+        DEFAULT_NOEXCEPT_MOVE_SEMANTIC(Iterator);
+        ~Iterator() = default;
+
+    private:
+        const SharedReference *ref_ {nullptr};
+    };
+
+    Iterator GetIterator() const
+    {
+        return Iterator(this);
+    }
 
 private:
     friend class SharedReferenceSanity;
-    static void FinalizeJSWeak(napi_env env, void *data, void *hint);
+    friend class SharedReferenceStorage;
+
+    bool InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx);
+
+    void SetETSObject(EtsObject *obj)
+    {
+        ASSERT(obj != nullptr);
+        etsRef_ = obj;
+    }
+
+    /// Unset mark flag from the reference
+    void Unmark()
+    {
+        flags_.Unmark();
+    }
 
     /* Possible values:
      *                 ets_proxy:  {instance,       proxy}
@@ -119,10 +197,11 @@ private:
      *                  js_proxy:  {proxy,          instance}
      *      extensible  js_proxy:  {extender-proxy, proxy-base}
      */
-    mem::Reference *etsRef_ {};
+    EtsObject *etsRef_ {};
     napi_ref jsRef_ {};
+    const InteropCtx *ctx_ {};
 
-    FlagsType flags_ {};
+    SharedReferenceFlags flags_ {};
 };
 
 }  // namespace ark::ets::interop::js::ets_proxy

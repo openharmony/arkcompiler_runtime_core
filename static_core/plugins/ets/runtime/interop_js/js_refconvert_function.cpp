@@ -34,7 +34,7 @@ napi_value EtsLambdaProxyInvoke(napi_env env, napi_callback_info cbinfo)
     auto sharedRef = static_cast<ets_proxy::SharedReference *>(data);
     ASSERT(sharedRef != nullptr);
 
-    auto etsThis = sharedRef->GetEtsObject(ctx);
+    auto *etsThis = sharedRef->GetEtsObject();
     ASSERT(etsThis != nullptr);
     auto method = etsThis->GetClass()->GetMethod("invoke");
     ASSERT(method != nullptr);
@@ -56,22 +56,21 @@ napi_value JSRefConvertFunction::WrapImpl(InteropCtx *ctx, EtsObject *obj)
         NapiScope jsHandleScope(env);
 
         ets_proxy::SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-        if (LIKELY(storage->HasReference(obj))) {
-            ets_proxy::SharedReference *sharedRef = storage->GetReference(obj);
-            ASSERT(sharedRef != nullptr);
-            jsValue = JSValue::CreateRefValue(coro, ctx, sharedRef->GetJsObject(env), napi_function);
+        if (LIKELY(storage->HasReference(obj, env))) {
+            jsValue = JSValue::CreateRefValue(coro, ctx, storage->GetJsObject(obj, env), napi_function);
         } else {
             napi_value jsFn;
-            ets_proxy::SharedReference *payloadSharedRef = storage->GetNextAlloc();
-            NAPI_CHECK_FATAL(
-                napi_create_function(env, "invoke", NAPI_AUTO_LENGTH, EtsLambdaProxyInvoke, payloadSharedRef, &jsFn));
-
-            ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, obj, jsFn);
+            auto preInitCallback = [&env, &jsFn](ets_proxy::SharedReference *uninitializedRef) {
+                ASSERT(uninitializedRef->IsEmpty());
+                NAPI_CHECK_FATAL(napi_create_function(env, "invoke", NAPI_AUTO_LENGTH, EtsLambdaProxyInvoke,
+                                                      uninitializedRef, &jsFn));
+                return jsFn;
+            };
+            ets_proxy::SharedReference *sharedRef = storage->CreateETSObjectRef(ctx, obj, jsFn, preInitCallback);
             if (UNLIKELY(sharedRef == nullptr)) {
                 ASSERT(InteropCtx::SanityJSExceptionPending());
                 return nullptr;
             }
-            ASSERT(payloadSharedRef == sharedRef);
             jsValue = JSValue::CreateRefValue(coro, ctx, jsFn, napi_function);
         }
     }

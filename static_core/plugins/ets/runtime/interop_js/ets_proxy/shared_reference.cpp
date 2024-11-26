@@ -25,103 +25,82 @@ namespace ark::ets::interop::js::ets_proxy {
 
 static void CBDoNothing([[maybe_unused]] napi_env env, [[maybe_unused]] void *data, [[maybe_unused]] void *hint) {}
 
-bool SharedReference::InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
+bool SharedReference::InitRef(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
-    SetFlags(HasETSObject::Encode(true) | HasJSObject::Encode(false));
-
     auto env = ctx->GetJSEnv();
-    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, this, FinalizeJSWeak, nullptr, &jsRef_))) {
+    // Always save link to first reference
+    SharedReference *ref = SharedReferenceStorage::GetCurrent()->GetItemByIndex(refIdx);
+    // NOTE(ipetrov, #20833): Use special OHOS interfaces for cross references
+    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, ref, CBDoNothing, nullptr, &jsRef_))) {
         return false;
     }
+    // NOTE(ipetrov, 20833): Now we always keep the reference, special GC will remove such references
+    // For future we can to provide a solution with correct finalization from finalizeCb in NapiWrap method
+    NAPI_CHECK_FATAL(napi_reference_ref(env, jsRef_, nullptr));
 
     etsObject->SetInteropHash(refIdx);
-    etsRef_ = ctx->Refstor()->Add(etsObject->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    if (UNLIKELY(etsRef_ == nullptr)) {
-        INTEROP_LOG(ERROR) << "REFERENCE STORAGE OVERFLOW";
-        ctx->ThrowJSError(env, "ets refstor overflow");
-        return false;
-    }
+    SetETSObject(etsObject);
+    ctx_ = ctx;
     return true;
+}
+
+bool SharedReference::InitETSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
+{
+    flags_.SetBit<SharedReferenceFlags::Bit::ETS>();
+    return InitRef(ctx, etsObject, jsObject, refIdx);
 }
 
 bool SharedReference::InitJSObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
-    SetFlags(HasETSObject::Encode(false) | HasJSObject::Encode(true));
-
-    auto coro = EtsCoroutine::GetCurrent();
-    auto env = ctx->GetJSEnv();
-    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, this, CBDoNothing, nullptr, &jsRef_))) {
-        return false;
-    }
-    NAPI_CHECK_FATAL(napi_reference_ref(env, jsRef_, nullptr));
-
-    LocalObjectHandle<EtsObject> handle(coro, etsObject);  // object may have no strong refs, so create one
-    handle->SetInteropHash(refIdx);
-    // NOTE(vpukhov): reuse weakref from finalizationRegistry
-    etsRef_ = ctx->Refstor()->Add(etsObject->GetCoreType(), mem::Reference::ObjectType::WEAK);
-
-    auto boxLong = EtsBoxPrimitive<EtsLong>::Create(EtsCoroutine::GetCurrent(), ToUintPtr(this));
-    if (UNLIKELY(boxLong == nullptr ||
-                 !ctx->PushOntoFinalizationRegistry(EtsCoroutine::GetCurrent(), handle.GetPtr(), boxLong))) {
-        NAPI_CHECK_FATAL(napi_delete_reference(env, jsRef_));
-        return false;
-    }
-    return true;
+    flags_.SetBit<SharedReferenceFlags::Bit::JS>();
+    return InitRef(ctx, etsObject, jsObject, refIdx);
 }
 
-// NOTE(vpukhov): Circular interop references
-//                Present solution is dummy and consists of two strong refs
 bool SharedReference::InitHybridObject(InteropCtx *ctx, EtsObject *etsObject, napi_value jsObject, uint32_t refIdx)
 {
-    SetFlags(HasETSObject::Encode(true) | HasJSObject::Encode(true));
-
-    auto env = ctx->GetJSEnv();
-    if (UNLIKELY(napi_ok != NapiWrap(env, jsObject, this, CBDoNothing, nullptr, &jsRef_))) {
-        return false;
-    }
-    NAPI_CHECK_FATAL(napi_reference_ref(env, jsRef_, nullptr));
-
-    etsObject->SetInteropHash(refIdx);
-    etsRef_ = ctx->Refstor()->Add(etsObject->GetCoreType(), mem::Reference::ObjectType::GLOBAL);
-    if (UNLIKELY(etsRef_ == nullptr)) {
-        INTEROP_LOG(ERROR) << "REFERENCE STORAGE OVERFLOW";
-        ctx->ThrowJSError(env, "ets refstor overflow");
-        NAPI_CHECK_FATAL(napi_delete_reference(env, jsRef_));
-        return false;
-    }
-    return true;
+    flags_.SetBit<SharedReferenceFlags::Bit::ETS>();
+    flags_.SetBit<SharedReferenceFlags::Bit::JS>();
+    return InitRef(ctx, etsObject, jsObject, refIdx);
 }
 
-/*static*/
-void SharedReference::FinalizeJSWeak([[maybe_unused]] napi_env env, void *data, [[maybe_unused]] void *hint)
+bool SharedReference::MarkIfNotMarked()
 {
-    if (UNLIKELY(Runtime::GetCurrent() == nullptr)) {
-        // Runtime was destroyed, no need to cleanup
-        return;
-    }
-    EtsCoroutine *coro = EtsCoroutine::GetCurrent();
-    ASSERT(coro != nullptr);
-    InteropCtx *ctx = InteropCtx::Current(coro);
-    ScopedManagedCodeThread scope(coro);
-
-    auto ref = reinterpret_cast<SharedReference *>(data);
-    ASSERT(ref->etsRef_ != nullptr);
-
-    ref->GetEtsObject(ctx)->DropInteropHash();
-    ctx->Refstor()->Remove(ref->etsRef_);
-    ctx->GetSharedRefStorage()->RemoveReference(ref);
+    bool wasNotMarked = true;
+    SharedReference *currentRef = this;
+    uint32_t index;
+    do {
+        wasNotMarked = currentRef->flags_.SetBit<SharedReferenceFlags::Bit::MARK>();
+        index = currentRef->flags_.GetNextIndex();
+        if (index == 0U) {
+            break;
+        }
+        currentRef = SharedReferenceStorage::GetCurrent()->GetItemByIndex(index);
+        ASSERT(!currentRef->flags_.IsEmpty());
+    } while (wasNotMarked);
+    return wasNotMarked;
 }
 
-/*static*/
-void SharedReference::FinalizeETSWeak(InteropCtx *ctx, EtsObject *cbarg)
+SharedReference::Iterator &SharedReference::Iterator::operator++()
 {
-    ASSERT(cbarg->GetClass()->GetRuntimeClass() == ctx->GetBoxLongClass());
-    auto boxLong = FromEtsObject<EtsBoxPrimitive<EtsLong>>(cbarg);
+    uint32_t index = ref_->flags_.GetNextIndex();
+    if (index == 0U) {
+        ref_ = nullptr;
+    } else {
+        ref_ = SharedReferenceStorage::GetCurrent()->GetItemByIndex(index);
+    }
+    return *this;
+}
 
-    auto sharedRef = ToNativePtr<SharedReference>(static_cast<uintptr_t>(boxLong->GetValue()));
-
-    NAPI_CHECK_FATAL(napi_delete_reference(ctx->GetJSEnv(), sharedRef->jsRef_));
-    ctx->GetSharedRefStorage()->RemoveReference(sharedRef);
+SharedReference::Iterator SharedReference::Iterator::operator++(int)  // NOLINT(cert-dcl21-cpp)
+{
+    auto result = *this;
+    auto index = ref_->flags_.GetNextIndex();
+    if (index == 0U) {
+        ref_ = nullptr;
+    } else {
+        ref_ = SharedReferenceStorage::GetCurrent()->GetItemByIndex(index);
+    }
+    return result;
 }
 
 }  // namespace ark::ets::interop::js::ets_proxy

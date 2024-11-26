@@ -16,7 +16,10 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H_
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ITEM_POOL_H_
 
+#include <atomic>
+
 #include "libpandabase/macros.h"
+#include "libpandabase/mem/mem.h"
 #include "libpandabase/utils/math_helpers.h"
 
 namespace ark::ets::interop::js::ets_proxy {
@@ -30,9 +33,10 @@ class ItemsPool {
     union PaddedItem {
         Item item;
         PaddedItem *next;
+        std::atomic<size_t> size;  // For the 0 index
         std::array<uint8_t, helpers::math::GetPowerOfTwoValue32(sizeof(Item))> aligned;
 
-        PaddedItem()
+        PaddedItem()  // NOLINT(cppcoreguidelines-pro-type-member-init)
         {
             new (&item) Item();
         }
@@ -49,7 +53,7 @@ class ItemsPool {
 
     static PaddedItem *GetPaddedItem(Item *item)
     {
-        ASSERT(uintptr_t(item) % PADDED_ITEM_SIZE == 0);
+        ASSERT(ToUintPtr(item) % PADDED_ITEM_SIZE == 0);
         return reinterpret_cast<PaddedItem *>(item);
     }
 
@@ -58,27 +62,29 @@ public:
 
     ItemsPool(void *data, size_t size)
         : data_(reinterpret_cast<PaddedItem *>(data)),
-          dataEnd_(reinterpret_cast<PaddedItem *>(uintptr_t(data_) + size)),
+          dataEnd_(reinterpret_cast<PaddedItem *>(ToUintPtr(data_) + size)),
           currentPos_(reinterpret_cast<PaddedItem *>(data))
     {
         ASSERT(data != nullptr);
+        ASSERT(size > 0U);
         ASSERT(size % PADDED_ITEM_SIZE == 0);
+        ASSERT(MaxSize() <= MAX_POOL_SIZE);
+        // Always use 0 index as special internal space for count of allocated references
+        ++currentPos_;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        ASSERT(Capacity() == 1);
+        // Atomic with relaxed order reason: data race with size loading with no synchronization or ordering constraints
+        data_->size.store(0U, std::memory_order_relaxed);
     }
     ~ItemsPool() = default;
-
-    Item *GetNextAlloc() const
-    {
-        if (freeList_ != nullptr) {
-            return &freeList_->item;
-        }
-        return (currentPos_ < dataEnd_) ? &currentPos_->item : nullptr;
-    }
 
     Item *AllocItem()
     {
         if (freeList_ != nullptr) {
             PaddedItem *newItem = freeList_;
             freeList_ = freeList_->next;
+            // Atomic with relaxed order reason: data race with size loading with no synchronization or ordering
+            // constraints
+            data_->size.fetch_add(1U, std::memory_order_relaxed);
             return &(new (newItem) PaddedItem())->item;
         }
 
@@ -89,40 +95,64 @@ public:
 
         PaddedItem *newItem = currentPos_;
         ++currentPos_;  // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        // Atomic with relaxed order reason: data race with size loading with no synchronization or ordering constraints
+        data_->size.fetch_add(1U, std::memory_order_relaxed);
         return &(new (newItem) PaddedItem())->item;
     }
 
     void FreeItem(Item *item)
     {
+        ASSERT(item != nullptr);
         PaddedItem *paddedItem = GetPaddedItem(item);
+        ASSERT_PRINT(paddedItem != data_, "0 index is reserved by the item pool, but try to free it");
         paddedItem->~PaddedItem();
         paddedItem->next = freeList_;
         freeList_ = paddedItem;
+        // Atomic with relaxed order reason: data race with size loading with no synchronization or ordering constraints
+        data_->size.fetch_sub(1U, std::memory_order_relaxed);
     }
 
     //  This method only checks the validity of the item in the allocated interval
     //  This method does not check whether the item has been allocated or not
     bool IsValidItem(const Item *item) const
     {
-        if (UNLIKELY(!IsAligned<alignof(Item)>(uintptr_t(item)))) {
+        if (UNLIKELY(!IsAligned<alignof(Item)>(ToUintPtr(item)))) {
             return false;
         }
-        auto addr = uintptr_t(item);
-        return uintptr_t(data_) <= addr && addr < uintptr_t(dataEnd_);
+        auto addr = ToUintPtr(item);
+        return ToUintPtr(data_) < addr && addr < ToUintPtr(currentPos_);
     }
 
     inline uint32_t GetIndexByItem(Item *item)
     {
         ASSERT(IsValidItem(item));
-        ASSERT(uintptr_t(item) % PADDED_ITEM_SIZE == 0);
+        ASSERT(ToUintPtr(item) % PADDED_ITEM_SIZE == 0);
 
         PaddedItem *paddedItem = GetPaddedItem(item);
         return paddedItem - data_;
     }
 
-    inline Item *GetItemByIndex(uint32_t idx)
+    ALWAYS_INLINE size_t Size() const
     {
-        ASSERT(idx < MAX_INDEX);
+        // Atomic with relaxed order reason: data race with size with no synchronization or ordering constraints
+        return data_->size.load(std::memory_order_relaxed);
+    }
+
+    ALWAYS_INLINE size_t Capacity() const
+    {
+        return currentPos_ - data_;
+    }
+
+    ALWAYS_INLINE size_t MaxSize() const
+    {
+        // 0 index is reserved by the item pool
+        return (dataEnd_ - data_) - 1U;
+    }
+
+    ALWAYS_INLINE Item *GetItemByIndex(uint32_t idx) const
+    {
+        ASSERT(idx > 0U);
+        ASSERT_PRINT(idx < Capacity(), "index: " << idx << ", capacity: " << Capacity());
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic,cppcoreguidelines-pro-type-union-access)
         return &data_[idx].item;
     }

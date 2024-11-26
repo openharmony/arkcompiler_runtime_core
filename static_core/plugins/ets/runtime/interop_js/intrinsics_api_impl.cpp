@@ -29,10 +29,8 @@ void JSRuntimeFinalizationRegistryCallback(EtsObject *cbarg)
 {
     auto coro = EtsCoroutine::GetCurrent();
     auto ctx = InteropCtx::Current(coro);
-    if (cbarg->GetClass()->GetRuntimeClass() == ctx->GetJSValueClass()) {
-        return JSValue::FinalizeETSWeak(ctx, cbarg);
-    }
-    return ets_proxy::SharedReference::FinalizeETSWeak(ctx, cbarg);
+    ASSERT(cbarg->GetClass()->GetRuntimeClass() == ctx->GetJSValueClass());
+    return JSValue::FinalizeETSWeak(ctx, cbarg);
 }
 
 JSValue *JSRuntimeNewJSValueDouble(double v)
@@ -234,7 +232,7 @@ uint8_t JSRuntimeInstanceOfStatic(JSValue *etsJsValue, EtsClass *etsCls)
     }();
 
     if (sharedRef != nullptr) {
-        EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
+        EtsObject *etsObject = sharedRef->GetEtsObject();
         return static_cast<uint8_t>(etsCls->IsAssignableFrom(etsObject->GetClass()));
     }
 

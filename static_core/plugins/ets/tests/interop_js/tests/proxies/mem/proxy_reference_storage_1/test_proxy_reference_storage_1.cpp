@@ -24,7 +24,8 @@ class SharedReferenceStorage1GTest : public js::testing::EtsInteropTest {
 public:
     void SetUp() override
     {
-        storage_ = SharedReferenceStorage::Create();
+        storage_ = SharedReferenceStorage::GetCurrent();
+        ASSERT_NE(storage_, nullptr);
         auto ctx = InteropCtx::Current();
         ctx->SetJSEnv(GetJsEnv());
 
@@ -70,7 +71,7 @@ public:
     }
 
 protected:
-    PandaUniquePtr<SharedReferenceStorage> storage_ {};  // NOLINT(misc-non-private-member-variables-in-classes)
+    SharedReferenceStorage *storage_ {nullptr};  // NOLINT(misc-non-private-member-variables-in-classes)
 
 private:
     static constexpr size_t MAX_OBJECTS = 128;
@@ -82,9 +83,9 @@ TEST_F(SharedReferenceStorage1GTest, test_0)
 {
     EtsObject *etsObject = NewEtsObject();
 
-    ASSERT_EQ(storage_->HasReference(etsObject), false);
+    ASSERT_EQ(SharedReference::HasReference(etsObject), false);
     SharedReference *ref = CreateReference(etsObject);
-    ASSERT_EQ(storage_->HasReference(etsObject), true);
+    ASSERT_EQ(SharedReference::HasReference(etsObject), true);
 
     SharedReference *refX = storage_->GetReference(etsObject);
     SharedReference *refY = GetReference((void *)ref);

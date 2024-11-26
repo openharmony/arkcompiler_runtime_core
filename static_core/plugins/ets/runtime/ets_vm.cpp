@@ -630,6 +630,20 @@ void HandleEmptyArguments(const PandaVector<Value> &arguments, const GCRootVisit
     }
 }
 
+void PandaEtsVM::AddRootProvider(mem::RootProvider *provider)
+{
+    os::memory::LockHolder lock(rootProviderlock_);
+    ASSERT(rootProviders_.find(provider) == rootProviders_.end());
+    rootProviders_.insert(provider);
+}
+
+void PandaEtsVM::RemoveRootProvider(mem::RootProvider *provider)
+{
+    os::memory::LockHolder lock(rootProviderlock_);
+    ASSERT(rootProviders_.find(provider) != rootProviders_.end());
+    rootProviders_.erase(provider);
+}
+
 void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
 {
     GetThreadManager()->EnumerateThreads([visitor](ManagedThread *thread) {
@@ -650,6 +664,12 @@ void PandaEtsVM::VisitVmRoots(const GCRootVisitor &visitor)
     visitor(mem::GCRoot(mem::RootType::ROOT_VM, doubleToStringCache_->GetCoreType()));
     visitor(mem::GCRoot(mem::RootType::ROOT_VM, floatToStringCache_->GetCoreType()));
     visitor(mem::GCRoot(mem::RootType::ROOT_VM, longToStringCache_->GetCoreType()));
+    {
+        os::memory::LockHolder lock(rootProviderlock_);
+        for (auto *rootProvider : rootProviders_) {
+            rootProvider->VisitRoots(visitor);
+        }
+    }
 }
 
 template <bool REF_CAN_BE_NULL>
@@ -719,6 +739,12 @@ void PandaEtsVM::UpdateVmRefs()
             if ((entry->GetCoreType())->IsForwarded()) {
                 entry = EtsObject::FromCoreType(ark::mem::GetForwardAddress(entry->GetCoreType()));
             }
+        }
+    }
+    {
+        os::memory::LockHolder lock(rootProviderlock_);
+        for (auto *rootProvider : rootProviders_) {
+            rootProvider->UpdateRefs();
         }
     }
 }

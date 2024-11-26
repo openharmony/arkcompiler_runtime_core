@@ -220,7 +220,6 @@ public:
 
     inline void DropInteropHash()
     {
-        ASSERT_MANAGED_CODE();
         MarkWord oldMark = AtomicGetMark();
         ASSERT(oldMark.GetState() == MarkWord::STATE_HASHED);
         MarkWord newMark = oldMark.DecodeFromUnlocked();

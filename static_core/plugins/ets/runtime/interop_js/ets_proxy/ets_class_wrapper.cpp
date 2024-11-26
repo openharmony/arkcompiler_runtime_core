@@ -55,10 +55,8 @@ napi_value EtsClassWrapper::Wrap(InteropCtx *ctx, EtsObject *etsObject)
     ASSERT(etsClass_ == etsObject->GetClass());
 
     SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-    if (LIKELY(storage->HasReference(etsObject))) {
-        SharedReference *sharedRef = storage->GetReference(etsObject);
-        ASSERT(sharedRef != nullptr);
-        return sharedRef->GetJsObject(env);
+    if (LIKELY(storage->HasReference(etsObject, env))) {
+        return storage->GetJsObject(etsObject, env);
     }
 
     napi_value jsValue;
@@ -80,7 +78,7 @@ EtsObject *EtsClassWrapper::Unwrap(InteropCtx *ctx, napi_value jsValue)
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     if (LIKELY(sharedRef != nullptr)) {
-        EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
+        EtsObject *etsObject = sharedRef->GetEtsObject();
         if (UNLIKELY(!etsClass_->IsAssignableFrom(etsObject->GetClass()))) {
             ThrowJSErrorNotAssignable(env, etsObject->GetClass(), etsClass_);
             return nullptr;
@@ -112,12 +110,12 @@ EtsObject *EtsClassWrapper::UnwrapEtsProxy(InteropCtx *ctx, napi_value jsValue)
     // Check if object has SharedReference
     SharedReference *sharedRef = ctx->GetSharedRefStorage()->GetReference(env, jsValue);
     if (LIKELY(sharedRef != nullptr)) {
-        EtsObject *etsObject = sharedRef->GetEtsObject(ctx);
+        EtsObject *etsObject = sharedRef->GetEtsObject();
         if (UNLIKELY(!etsClass_->IsAssignableFrom(etsObject->GetClass()))) {
             ThrowJSErrorNotAssignable(env, etsObject->GetClass(), etsClass_);
             return nullptr;
         }
-        if (UNLIKELY(!sharedRef->GetField<SharedReference::HasETSObject>())) {
+        if (UNLIKELY(!sharedRef->HasETSFlag())) {
             InteropCtx::ThrowJSTypeError(env, std::string("JS object in context of EtsProxy of class ") +
                                                   etsClass_->GetDescriptor());
             return nullptr;
@@ -150,7 +148,7 @@ EtsObject *EtsClassWrapper::CreateJSBuiltinProxy(InteropCtx *ctx, napi_value jsV
         ASSERT(InteropCtx::SanityJSExceptionPending());
         return nullptr;
     }
-    return sharedRef->GetEtsObject(ctx);  // fetch again after gc
+    return sharedRef->GetEtsObject();  // fetch again after gc
 }
 
 /*static*/
@@ -173,10 +171,8 @@ public:
     napi_value WrapImpl(InteropCtx *ctx, EtsObject *etsObject)
     {
         SharedReferenceStorage *storage = ctx->GetSharedRefStorage();
-        INTEROP_FATAL_IF(!storage->HasReference(etsObject));
-        SharedReference *sharedRef = storage->GetReference(etsObject);
-        ASSERT(sharedRef != nullptr);
-        return sharedRef->GetJsObject(ctx->GetJSEnv());
+        INTEROP_FATAL_IF(!storage->HasReference(etsObject, ctx->GetJSEnv()));
+        return storage->GetJsObject(etsObject, ctx->GetJSEnv());
     }
 
     EtsObject *UnwrapImpl(InteropCtx *ctx, [[maybe_unused]] napi_value jsValue)
