@@ -26,7 +26,7 @@ cases:
     - decl: |-
           class A {}
           interface B {
-              ref: A = new A()
+              ref: A
           }
       use: |-
           let a: A = {}
@@ -40,14 +40,14 @@ cases:
 
     - decl: |-
           interface A {
-              b: B|null
+              b: B
           }
           interface B {
-              c: C|null
+              c: C
           }
           interface C {
-              name: string = ""
-              age: number = 0
+              name: string;
+              age: number
           }
       use: |-
           let a: A = { b: { c: { age: 42, name: "John" }}}
@@ -56,7 +56,7 @@ cases:
 
     - decl: |-
           interface A {
-              arr: string[] = new string[2]
+              arr: string[]
           }
           function foo(a: A): A {
               return { arr: [ a.arr[1], a.arr[0] ]}
@@ -69,10 +69,13 @@ cases:
 
     - decl: |-
           interface A {
-              name: string|null = null
+              name: string|null
+          }
+          class B implements A {
+              name: string|null
           }
       use: |-
-          let arr: A[] = new A[2]
+          let arr: A[] = new B[2]
           arr[0] = { name: "John" }
           arr[1] = { name: "Jack" }
           assert arr[0] instanceof A && arr[0].name == "John"
@@ -80,7 +83,7 @@ cases:
 
     - decl: |-
           interface A {
-              name: string|null = null
+              name: string|null
           }
       use: |-
           let arr: A[] = [ { name: "John" }, { name: null } ]
@@ -89,7 +92,7 @@ cases:
 
     - decl: |-
           interface A {
-              name: string|null = null
+              name: string|null
           }
           interface B extends A {
               age: number
@@ -104,11 +107,11 @@ cases:
 
     - decl: |-
           interface A {
-              age: number = 42
+              age: number
           }
       use: |-
           let a: A = {}
-          assert a instanceof A && a.age == 42
+          assert a instanceof A && a.age == 0
 
     - decl: |-
           interface A {}
@@ -118,21 +121,59 @@ cases:
 
     - decl: |-
           interface A {
-              age: number = 1
+              age: number
           }
           interface B {
-              age: number = 2
+              age: number
           }
       use: |-
           let v: Object[] = [ {} as A, {} as B, {} ]
-          assert v[0] instanceof A && (v[0] as A).age == 1
-          assert v[1] instanceof B && (v[1] as B).age == 2
+          assert v[0] instanceof A && (v[0] as A).age == 0
+          assert v[1] instanceof B && (v[1] as B).age == 0
           assert v[2] instanceof Object
 
     - decl: |-
           interface A {
-              readonly name: string|null = ""
+              readonly name: string|null
           }
       use: |-
           let a: A = { name: "John" }
           assert a.name == "John"
+
+    - decl: |-
+          interface A {
+              age: number;
+              adult: boolean
+          }
+      use: |-
+          let v = 42
+          // expressions in field values
+          let a: A = { age: v, adult: v >= 18 }
+          assert(a.age == 42 && a.adult)
+
+    - decl: |-
+          interface A {
+              fld1: number;
+              fld2: number;
+              fld3: number
+          }
+      use: |-
+          let v = 42
+          // expressions in field values
+          let a: A = { fld1: v++, fld2: v++, fld3: v++ }
+          assert(v == 45 && a.fld1 == 42 && a.fld2 == 43 && a.fld3 == 44)
+
+    - decl: |-
+          interface A {
+              first_name: string|undefined;
+              last_name: string|undefined;
+              full_name: string|undefined
+          }
+          function ln(): string {
+              return "Smith"
+          }
+      use: |-
+          let fn = "John"
+          // expressions in field values
+          let a: A = { first_name: fn, last_name: ln(), full_name: fn + " " + ln() }
+          assert(a.full_name == "John Smith")

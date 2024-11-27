@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,14 +19,20 @@ assert: >-
     A return statement may be used in the body of a constructor if it does not include an expression.
     Except for the possibility of explicit constructor invocations, and the prohibition on explicitly
     returning a value, the body of a constructor is like the body of a method.
-tags: [compile-only, negative]
 ---*/
 
 class A {
-  public x: int;
+    x: int;
 
-  public constructor() {
-    this.x = 5;
-    return this;
-  }
+    constructor(p: int) {
+        if (p == 0) {
+            return;
+        }
+        this.x = p + 1;
+    }
+}
+
+function main() {
+    assert(new A(42).x == 43)
+    assert(new A(0).x == 0)
 }

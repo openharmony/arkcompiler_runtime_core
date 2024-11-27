@@ -59,59 +59,59 @@ cases:
           res = a.meth(v) == '42.01'
 
     # class field
-    - decl: |-
+    - tags: 'compile-only, negative'
+      decl: |-
           class A {
               fld: number|string|boolean = false
               constructor(p: number) {
                   this.fld = p
-                  this.fld = this.fld / 2
+                  this.fld = this.fld / 2  // CTE: smart casting isn't supported here because of multi-threading
               }
           }
       code: |-
           let a: A = new A(42.0)
           res = a.fld as number == 21.0
-      tags: 'compile-only, negative'
 
-    - decl: |-
+    - tags: 'compile-only, negative'
+      decl: |-
           class A {
               fld: number|string|boolean = false
               constructor(p: string) {
                   this.fld = p
-                  this.fld = this.fld + this.fld
+                  this.fld = this.fld.substr(0, 1)  // CTE: smart casting isn't supported here because of multi-threading
               }
           }
       code: |-
-          let a: A = new A('1')
-          res = a.fld as string == '11'
-      tags: 'compile-only, negative'
+          let a: A = new A('123')
+          res = a.fld as string == '1'
 
-    - decl: |-
+    - tags: 'compile-only, negative'
+      decl: |-
           class A {
               fld: number|string|boolean = false
               meth(p: number) {
                   this.fld = p
-                  this.fld = this.fld / 2
+                  this.fld = this.fld / 2  // CTE: smart casting isn't supported here because of multi-threading
               }
           }
       code: |-
           let a: A = new A()
           a.meth(42.0)
           res = a.fld as number == 21.0
-      tags: 'compile-only, negative'
 
-    - decl: |-
+    - tags: 'compile-only, negative'
+      decl: |-
           class A {
               fld: number|string|boolean = false
               meth(p: string) {
                   this.fld = p
-                  this.fld = this.fld + this.fld
+                  this.fld = this.fld.substr(0, 1)  // CTE: smart casting isn't supported here because of multi-threading
               }
           }
       code: |-
           let a: A = new A()
-          a.meth('1')
-          res = a.fld as string == '11'
-      tags: 'compile-only, negative'
+          a.meth('123')
+          res = a.fld as string == '1'
 
     # array literal element
     - code: |-

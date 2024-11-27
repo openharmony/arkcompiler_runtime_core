@@ -374,8 +374,6 @@
 03.types/07.value_types/01.integer_types_and_operations/multiplication/multiplication_char_7.sts
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_byte.sts
 03.types/07.value_types/01.integer_types_and_operations/remainder/remainder_by_zero_short.sts
-07.expressions/05.object_literal/04.object_literal_evaluation/ex1.sts
-07.expressions/05.object_literal/04.object_literal_evaluation/ex2.sts
 09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_In_interface.sts
 09.classes/01.class_declaration/class_modifiers_inner_classes_and_static_classes/static_inner_class_declaration_in_class.sts
 09.classes/04.access_modifiers/access_modifiers_10.sts
@@ -1922,6 +1920,15 @@
 # 18118 No ClassCastError on casting to a wrong function type
 06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_union/cce_5.sts
 
+# 20715 Smart cast fails to find out the parameter type
+15.semantic_rules/06.type_inference/01.smart_types/comb_13.sts
+15.semantic_rules/06.type_inference/01.smart_types/comb_13a.sts
+15.semantic_rules/06.type_inference/01.smart_types/comb_13b.sts
+15.semantic_rules/06.type_inference/01.smart_types/comb_13d.sts
+15.semantic_rules/06.type_inference/01.smart_types/comb_10a.sts
+15.semantic_rules/06.type_inference/01.smart_types/comb_12a.sts
+15.semantic_rules/06.type_inference/01.smart_types/comb_12b.sts
+
 # 18335 Smart cast doesn't work in while statement
 15.semantic_rules/06.type_inference/01.smart_types/while_stmt_0.sts
 15.semantic_rules/06.type_inference/01.smart_types/while_stmt_10.sts
@@ -1942,8 +1949,21 @@
 15.semantic_rules/06.type_inference/01.smart_types/un1_15.sts
 15.semantic_rules/06.type_inference/01.smart_types/un1_17.sts
 
+# 20668 Segfault when CTE expected on a call of a nullish type
+15.semantic_rules/06.type_inference/01.smart_types/un1_16.sts
+
 10.interfaces/05.interface_properties/external_interface_with_property_0.sts
 10.interfaces/05.interface_properties/external_interface_with_property_1.sts
+
+# 20683 No CTE on duplicate fields in object literal
+07.expressions/05.object_literal/01.object_literal_of_class_type/cl_n_7.sts
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_n_3.sts
+
+# 20685 Segfault on readonly field in object literal of interface type
+07.expressions/05.object_literal/02.object_literal_of_interface_type/in_10.sts
+
+# 20737 Compiler complains on return statement without expression in constructor
+09.classes/09.constructor_declaration/03.constructor_body/constructor_with_return_expression3.sts
 
 # 14673,16369, 14338 Function, method, constructor overload signatures
 15.semantic_rules/04.type_compatibility/classes_compatibility_2.sts
@@ -2369,7 +2389,6 @@
 10.interfaces/05.interface_properties/readonly_simple_form_1.sts
 13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/negative_selective_exports_0.sts
 13.compilation_units_packages_and_modules/10.export_directives/01.selective_export_directive/negative_selective_exports_1.sts
-15.semantic_rules/06.type_inference/01.smart_types/un1_16.sts
 15.semantic_rules/07.overloading_and_overriding/04.overloading_and_overriding_in_classes/access_modifier_over_25.sts
 17.experimental_features/02.array_creation_expressions/01.runtime_evaluation_of_array_creation_expressions/expr_n_1.sts
 17.experimental_features/03.indexable_types/cte_10.sts

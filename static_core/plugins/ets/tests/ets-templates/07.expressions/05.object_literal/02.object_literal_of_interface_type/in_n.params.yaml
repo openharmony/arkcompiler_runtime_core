@@ -15,14 +15,14 @@
 cases:
     - decl: |-
           interface A {
-              name: string|null = ""
+              name: string|null
           }
       use: |-
           let a: A = { age: 42 } // CTE, no such field
 
     - decl: |-
           interface A {
-              name: string|null = ""
+              name: string|null;
               foo(): void
           }
       use: |-
@@ -30,7 +30,14 @@ cases:
 
     - decl: |-
           class B {
-              name: string|null = ""
+              name: string|null
           }
       use: |-
           let b: B = { name: 0 }  // CTE, type is wrong
+
+    - decl: |-
+          interface A {
+              name: string|null
+          }
+      use: |-
+          let a: A = { name: "John", name: "James" } // CTE, duplicate field
