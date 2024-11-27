@@ -2076,6 +2076,8 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_1.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_3.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_4.sts
+03.types/07.value_types/05.literal_types/overriding_literal_types_0.sts
+03.types/07.value_types/05.literal_types/overriding_literal_types_1.sts
 # end of es2panda fails
 
 #19909
@@ -2400,6 +2402,7 @@
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/shadow_function_alias.sts
 17.experimental_features/19.packages/03.import_and_overloading_of_function_names/shadow_function_explicit_name.sts
 ### end of Issue 19680
+
 ### end of ES2PANDA_FAIL - fails of negative, compile-only
 
 # 20510 unclear semantics
@@ -2593,3 +2596,13 @@
 05.generics/03.utility_types/01.partial_utility_type/partial_type_interface_9.sts
 05.generics/03.utility_types/01.partial_utility_type/type_4.sts
 05.generics/03.utility_types/incorrect_utility_type_1.sts
+
+# 20643 literal type as const assertion
+03.types/07.value_types/05.literal_types/as_const_0.sts
+03.types/07.value_types/05.literal_types/as_const_1.sts
+03.types/07.value_types/05.literal_types/as_const_2.sts
+# end of 20643
+
+# 20774 rest parameter doesn`t work with tuples
+03.types/07.value_types/05.literal_types/function_literal_type_18.sts
+# end of 20774
