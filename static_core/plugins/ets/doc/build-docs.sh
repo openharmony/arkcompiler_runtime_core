@@ -30,6 +30,7 @@ BUILD_SPEC=no
 BUILD_STDLIB=no
 BUILD_TUTORIAL=no
 BUILD_SYSTEM_ARKTS=no
+BUILD_INTEROP_JS=no
 
 function print_help()
 {
@@ -69,6 +70,7 @@ TARGETS
     * stdlib
     * tutorial
     * system ArkTS
+    * interop_js
 
     Following aliases are supported:
 
@@ -178,6 +180,11 @@ for i in "$@"; do
 
         BUILD_SYSTEM_ARKTS=yes
         ;;
+    interop_js)
+        BUILD_SOMETHING=yes
+
+        BUILD_INTEROP_JS=yes
+        ;;
 
     # Alias build targets:
 
@@ -189,6 +196,7 @@ for i in "$@"; do
         BUILD_STDLIB=yes
         BUILD_TUTORIAL=yes
         BUILD_SYSTEM_ARKTS=yes
+        BUILD_INTEROP_JS=yes
         ;;
     guides)
         BUILD_SOMETHING=yes
@@ -197,6 +205,7 @@ for i in "$@"; do
         BUILD_STDLIB=yes
         BUILD_TUTORIAL=yes
         BUILD_SYSTEM_ARKTS=yes
+        BUILD_INTEROP_JS=yes
         ;;
 
     *)
@@ -214,6 +223,7 @@ if [[ "${BUILD_SOMETHING}" == "no" ]] ; then
     BUILD_STDLIB=yes
     BUILD_TUTORIAL=yes
     BUILD_SYSTEM_ARKTS=yes
+    BUILD_INTEROP_JS=yes
 fi
 
 check_ubuntu_version
@@ -250,6 +260,10 @@ fi
 
 if [[ "${BUILD_SYSTEM_ARKTS}" == "yes" ]]; then
     build_sphinx_document system_arkts "${SCRIPT_DIR}/system_arkts"
+fi
+
+if [[ "${BUILD_INTEROP_JS}" == "yes" ]]; then
+    build_sphinx_document interop_js "${SCRIPT_DIR}/interop_js"
 fi
 
 echo "Build succeeded, please find documents in ${BUILD_DIR}"
