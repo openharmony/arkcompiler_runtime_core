@@ -28,7 +28,7 @@
 #include <unordered_map>
 #include <memory>
 #include <iterator>
-#include <cstdlib>
+#include <random>
 
 namespace ark::ets::stdlib {
 
@@ -62,6 +62,7 @@ private:
     CacheUMap cache_ GUARDED_BY(mtx_);
     static constexpr uint32_t MAX_SIZE_CACHE = 512U;
     static constexpr double ERASE_RATIO = 0.1;  // Erase 10% of MAX_SIZE_CACHE
+    static constexpr uint32_t ERASE_AMOUNT = std::max(1U, static_cast<uint32_t>(MAX_SIZE_CACHE *ERASE_RATIO));
 
     void EraseRandFmtsGroupByEraseRatio();
 };
