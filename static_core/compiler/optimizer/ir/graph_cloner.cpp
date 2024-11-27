@@ -145,6 +145,26 @@ void GraphCloner::BuildControlFlow()
     }
 }
 
+void GraphCloner::CloneThrowableInstHandlers(Graph *newGraph)
+{
+    for (auto *block : GetGraph()->GetVectorBlocks()) {
+        if (block == nullptr) {
+            continue;
+        }
+        for (auto *inst : block->AllInsts()) {
+            if (!GetGraph()->IsInstThrowable(inst)) {
+                continue;
+            }
+
+            auto *clonedInst = GetClone(inst);
+            for (auto *catchBlock : GetGraph()->GetThrowableInstHandlers(inst)) {
+                auto *clonedCatchBlock = GetClone(catchBlock);
+                newGraph->AppendThrowableInst(clonedInst, clonedCatchBlock);
+            }
+        }
+    }
+}
+
 void GraphCloner::BuildTryCatchLogic(Graph *newGraph)
 {
     // Connect every tryInst to corresponding tryEndBlock
@@ -158,12 +178,13 @@ void GraphCloner::BuildTryCatchLogic(Graph *newGraph)
         }
     }
 
-    auto fixThrowables = [&newGraph, this](const CatchPhiInst *originalInst, Inst *clonedInst, BasicBlock *clone) {
+    CloneThrowableInstHandlers(newGraph);
+
+    auto fixThrowables = [this](const CatchPhiInst *originalInst, CatchPhiInst *clonedInst) {
         if (originalInst->GetThrowableInsts() != nullptr) {
             for (int i = 0, j = originalInst->GetThrowableInsts()->size(); i < j; ++i) {
                 auto *clonedThrowable = cloneInstMap_[originalInst->GetThrowableInst(i)];
-                clonedInst->CastToCatchPhi()->AppendThrowableInst(clonedThrowable);
-                newGraph->AppendThrowableInst(clonedThrowable, clone);
+                clonedInst->AppendThrowableInst(clonedThrowable);
             }
         }
     };
@@ -177,7 +198,7 @@ void GraphCloner::BuildTryCatchLogic(Graph *newGraph)
         Inst *inst = clone->GetFirstInst();
         while (inst != nullptr) {
             if (inst->IsCatchPhi() && !inst->CastToCatchPhi()->IsAcc()) {
-                fixThrowables(cloneInstMap_[inst]->CastToCatchPhi(), inst, clone);
+                fixThrowables(cloneInstMap_[inst]->CastToCatchPhi(), inst->CastToCatchPhi());
             }
             inst = inst->GetNext();
         }
