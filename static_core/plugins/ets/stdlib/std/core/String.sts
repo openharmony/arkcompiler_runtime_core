@@ -29,28 +29,28 @@ export final class String extends Object implements Comparable<String>, JSONable
     /**
      * Constructs an empty String
      */
-    public constructor() {}
+    public native constructor()
 
     /**
      * Constructs String from chars array initializer
      *
      * @param data initializer
      */
-    public constructor(data: char[]) {}
+    public native constructor(data: char[])
 
     /**
      * Constructs String from another String
      *
      * @param otherStr initializer
      */
-    public constructor(otherStr: String) {}
+    public native constructor(otherStr: String)
 
     /**
      * Constructs String from NullishType
      *
      * @param object initializer
      */
-    public constructor(object: NullishType) {}
+    public native constructor(object: NullishType)
 
     /**
      * Creates a new instance of a String
