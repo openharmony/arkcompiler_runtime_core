@@ -230,7 +230,7 @@ public:
     }
 
     template <bool INCLUDE_CURRENT_REGION>
-    PandaPriorityQueue<std::pair<uint32_t, Region *>> GetTopGarbageRegions();
+    PandaVector<std::pair<uint32_t, Region *>> GetTopGarbageRegions(double garbageThreshold);
 
     /**
      * Return a vector of all regions with the specific type.

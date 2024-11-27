@@ -114,9 +114,9 @@ public:
     const std::vector<MemRange> &GetYoungSpaceMemRanges() final;
 
     template <bool INCLUDE_CURRENT_REGION>
-    PandaPriorityQueue<std::pair<uint32_t, Region *>> GetTopGarbageRegions()
+    PandaVector<std::pair<uint32_t, Region *>> GetTopGarbageRegions(double garbageThreshold = 0.0)
     {
-        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>();
+        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(garbageThreshold);
     }
 
     std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final;

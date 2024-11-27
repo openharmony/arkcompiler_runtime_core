@@ -323,11 +323,12 @@ TLAB *RegionAllocator<AllocConfigT, LockConfigT>::CreateTLABInRegion(Region *reg
 
 template <typename AllocConfigT, typename LockConfigT>
 template <bool INCLUDE_CURRENT_REGION>
-PandaPriorityQueue<std::pair<uint32_t, Region *>> RegionAllocator<AllocConfigT, LockConfigT>::GetTopGarbageRegions()
+PandaVector<std::pair<uint32_t, Region *>> RegionAllocator<AllocConfigT, LockConfigT>::GetTopGarbageRegions(
+    double garbageThreshold)
 {
-    PandaPriorityQueue<std::pair<uint32_t, Region *>> queue;
+    PandaVector<std::pair<uint32_t, Region *>> topGarbageRegions;
     this->GetSpace()->IterateRegions([&](Region *region) {
-        if (region->HasFlag(IS_EDEN) || region->HasFlag(RegionFlag::IS_RESERVED) || region->HasPinnedObjects()) {
+        if (region->HasFlag(IS_EDEN) || region->HasFlag(RegionFlag::IS_RESERVED)) {
             return;
         }
         if constexpr (!INCLUDE_CURRENT_REGION) {
@@ -336,9 +337,16 @@ PandaPriorityQueue<std::pair<uint32_t, Region *>> RegionAllocator<AllocConfigT, 
             }
         }
         auto garbageBytes = region->GetGarbageBytes();
-        queue.push(std::pair<uint32_t, Region *>(garbageBytes, region));
+        if (region->GetLiveBytes() == 0U) {
+            // Assign a huge value to garbage bytes for an empty region, to place it to the end of the array
+            garbageBytes = DEFAULT_REGION_SIZE;
+        }
+        if (static_cast<double>(garbageBytes) / region->GetAllocatedBytes() >= garbageThreshold) {
+            topGarbageRegions.emplace_back(std::make_pair(garbageBytes, region));
+        }
     });
-    return queue;
+    std::sort(topGarbageRegions.begin(), topGarbageRegions.end());
+    return topGarbageRegions;
 }
 
 template <typename AllocConfigT, typename LockConfigT>
