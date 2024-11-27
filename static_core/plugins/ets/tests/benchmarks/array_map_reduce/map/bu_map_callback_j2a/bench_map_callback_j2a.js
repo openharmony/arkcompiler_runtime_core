@@ -40,8 +40,8 @@ function main() {
         bench.test();
     }
     const end = process.hrtime.bigint();
-    let time_ns = end - start;
-    console.log('Benchmark result: MapCallbackJ2a ' + time_ns);
+    let timeNs = end - start;
+    console.log('Benchmark result: MapCallbackJ2a ' + timeNs);
 
     return null;
 }
