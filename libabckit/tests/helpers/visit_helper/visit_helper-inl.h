@@ -138,6 +138,7 @@ inline void VisitHelper::EnumerateGraphInsts(AbckitGraph *graph, const InstCallB
         for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGetNext(inst)) {
             cb(inst);
         }
+        return true;
     });
 }
 
@@ -162,15 +163,17 @@ inline void VisitHelper::EnumerateInstInputs(AbckitInst *inst, const InputCallBa
     implG_->iVisitInputs(inst, (void *)(&cb), [](AbckitInst *input, void *data) {
         const auto &cb = *((InputCallBack *)data);
         cb(input);
+        return true;
     });
 }
 
 template <class UserCallBack>
 inline void VisitHelper::EnumerateInstUsers(AbckitInst *inst, const UserCallBack &cb)
 {
-    implG_->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *user, void *data) {
+    implG_->iVisitUsers(inst, (bool *)(&cb), [](AbckitInst *user, void *data) {
         const auto &cb = *((UserCallBack *)data);
         cb(user);
+        return true;
     });
 }
 

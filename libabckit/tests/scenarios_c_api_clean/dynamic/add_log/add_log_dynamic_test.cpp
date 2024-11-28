@@ -182,6 +182,7 @@ static std::vector<AbckitBasicBlock *> BBgetSuccBlocks(AbckitBasicBlock *bb)
     g_implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
         auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
         succs->emplace_back(succBasicBlock);
+        return true;
     });
     return succBBs;
 }
@@ -232,6 +233,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
 
         auto *visitData = reinterpret_cast<VisitData *>(data);
         CreateEpilog(inst, bb, visitData->ud, visitData->time);
+        return true;
     });
 }
 

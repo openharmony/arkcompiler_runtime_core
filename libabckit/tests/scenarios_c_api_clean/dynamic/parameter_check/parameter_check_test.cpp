@@ -50,6 +50,7 @@ void AddParamChecker(AbckitCoreFunction *method)
         g_implG->bbVisitSuccBlocks(startBB, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
             auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
             succs->emplace_back(succBasicBlock);
+            return true;
         });
 
         AbckitString *str = g_implM->createString(file, "length");
@@ -186,20 +187,26 @@ inline void EnumerateFunctionInsts(AbckitCoreFunction *func, const InstCallBack 
 }
 
 template <class InstCallBack>
+inline bool VisitBlock(AbckitBasicBlock *bb, void *data)
+{
+    auto *captured = reinterpret_cast<CapturedData *>(data);
+    const auto &cb = *reinterpret_cast<InstCallBack *>(captured->callback);
+    auto *implG = captured->gImplG;
+    for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGetNext(inst)) {
+        cb(inst);
+    }
+    return true;
+}
+
+template <class InstCallBack>
 inline void EnumerateGraphInsts(AbckitGraph *graph, const InstCallBack &cb)
 {
     LIBABCKIT_LOG_FUNC;
 
     CapturedData captured {(void *)(&cb), g_implG};
 
-    g_implG->gVisitBlocksRpo(graph, &captured, [](AbckitBasicBlock *bb, void *data) {
-        auto *captured = reinterpret_cast<CapturedData *>(data);
-        const auto &cb = *((InstCallBack *)(captured->callback));
-        auto *implG = captured->gImplG;
-        for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGetNext(inst)) {
-            cb(inst);
-        }
-    });
+    g_implG->gVisitBlocksRpo(graph, &captured,
+                             [](AbckitBasicBlock *bb, void *data) { return VisitBlock<InstCallBack>(bb, data); });
 }
 
 template <class UserCallBack>
@@ -210,6 +217,7 @@ inline void EnumerateInstUsers(AbckitInst *inst, const UserCallBack &cb)
     g_implG->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *user, void *data) {
         const auto &cb = *((UserCallBack *)data);
         cb(user);
+        return true;
     });
 }
 

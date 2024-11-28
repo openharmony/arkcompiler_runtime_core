@@ -393,8 +393,10 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitSuccBlocks(bb, &counter,
-                                   [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; });
+        g_implG->bbVisitSuccBlocks(bb, &counter, [](AbckitBasicBlock *, void *data) {
+            (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
+        });
         // CC-OFFNXT(G.FMT.02)
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -410,8 +412,10 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitPredBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitPredBlocks(bb, &counter,
-                                   [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; });
+        g_implG->bbVisitPredBlocks(bb, &counter, [](AbckitBasicBlock *, void *data) {
+            (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
+        });
 
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -429,8 +433,10 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitDominatedBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitDominatedBlocks(
-            bb, &counter, [](AbckitBasicBlock *, void *data) { (*(reinterpret_cast<uint32_t *>(data)))++; });
+        g_implG->bbVisitDominatedBlocks(bb, &counter, [](AbckitBasicBlock *, void *data) {
+            (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
+        });
 
         ASSERT_EQ(counter, 1);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -790,7 +796,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocksDynamic)
         } data {g_dynG, graph, 42};
 
         // CC-OFFNXT(G.FMT.02)
-        auto simpleCb = [](AbckitBasicBlock *succBasicBlock, void *d) {
+        auto simpleCb = [](AbckitBasicBlock *succBasicBlock, void *d) -> bool {
             // CC-OFFNXT(G.FMT.02)
             auto *gDynG = static_cast<struct VisitData *>(d)->gDynG;
             auto *graph = static_cast<struct VisitData *>(d)->graph;
@@ -801,9 +807,11 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocksDynamic)
                    gDynG->iGetOpcode(curInst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1) {
                 curInst = g_implG->iGetNext(curInst);
             }
-            // CC-OFFNXT(G.FMT.02)
-            ASSERT_NE(curInst, nullptr);
+            if (curInst == nullptr) {
+                return false;
+            }
             g_implG->iSetInput(curInst, g_implG->gCreateConstantU64(graph, newPrintInt), 1);
+            return true;
         };
 
         // CC-OFFNXT(G.FMT.02)

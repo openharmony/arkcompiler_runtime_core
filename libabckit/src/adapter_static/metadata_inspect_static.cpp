@@ -52,20 +52,21 @@ namespace libabckit {
 // Module
 // ========================================
 
-void ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
                                              bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &function : m->functions) {
         if (!FunctionIsAnonymousStatic(function.get())) {
             continue;
         }
         if (!cb(function.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================

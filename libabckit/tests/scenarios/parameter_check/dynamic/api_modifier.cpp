@@ -111,6 +111,7 @@ void ApiModifier::AddParamChecker(AbckitCoreFunction *method)
         implG_->bbVisitSuccBlocks(startBB, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
             auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
             succs->emplace_back(succBasicBlock);
+            return true;
         });
 
         AbckitString *str = implM_->createString(file, "length");

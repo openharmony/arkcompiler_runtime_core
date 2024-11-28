@@ -107,6 +107,7 @@ inline void EnumerateInstUsers(AbckitInst *inst, const UserCallBack &cb)
     g_implG->iVisitUsers(inst, (void *)(&cb), [](AbckitInst *user, void *data) {
         const auto &cb = *((UserCallBack *)data);
         cb(user);
+        return true;
     });
 }
 
@@ -127,6 +128,7 @@ inline void EnumerateGraphInsts(AbckitGraph *graph, const InstCallBack &cb)
         for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGetNext(inst)) {
             cb(inst);
         }
+        return true;
     });
 }
 

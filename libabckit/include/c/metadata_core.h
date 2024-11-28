@@ -154,28 +154,30 @@ struct AbckitInspectApi {
     /**
      * @brief Enumerates modules that are defined in binary file `file`, invoking callback `cb` for each of such
      * modules.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] file - Binary file to enumerate local modules in.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*fileEnumerateModules)(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data));
+    bool (*fileEnumerateModules)(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data));
 
     /**
      * @brief Enumerates modules that are defined in other binary file, but are referenced in binary file `file`,
      * invoking callback `cb` for each of such modules.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] file - Binary file to enumerate external modules in.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*fileEnumerateExternalModules)(AbckitFile *file, void *data,
+    bool (*fileEnumerateExternalModules)(AbckitFile *file, void *data,
                                          bool (*cb)(AbckitCoreModule *module, void *data));
 
     /* ========================================
@@ -399,11 +401,12 @@ struct AbckitInspectApi {
     /**
      * @brief Enumerates elements of the literal array `litArr`, invoking callback `cb` for each of it's
      * elements.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] litArr - Literal array to enumerate elements in.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `litArr` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for literal emitted not for target
@@ -411,7 +414,7 @@ struct AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_TODO` error if invoked for literal emitted for target `ABCKIT_TARGET_ARK_TS_V1` and it
      * has odd number of elements.
      */
-    void (*literalArrayEnumerateElements)(AbckitLiteralArray *litArr, void *data,
+    bool (*literalArrayEnumerateElements)(AbckitLiteralArray *litArr, void *data,
                                           bool (*cb)(AbckitFile *file, AbckitLiteral *lit, void *data));
 
     /* ========================================
@@ -457,91 +460,98 @@ struct AbckitInspectApi {
 
     /**
      * @brief Enumerates imports of the module `m`, invoking callback `cb` for each import.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*moduleEnumerateImports)(AbckitCoreModule *m, void *data,
+    bool (*moduleEnumerateImports)(AbckitCoreModule *m, void *data,
                                    bool (*cb)(AbckitCoreImportDescriptor *i, void *data));
 
     /**
      * @brief Enumerates exports of the module `m`, invoking callback `cb` for each export.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*moduleEnumerateExports)(AbckitCoreModule *m, void *data,
+    bool (*moduleEnumerateExports)(AbckitCoreModule *m, void *data,
                                    bool (*cb)(AbckitCoreExportDescriptor *i, void *data));
 
     /**
      * @brief Enumerates namespaces of the module `m`, invoking callback `cb` for each namespace.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*moduleEnumerateNamespaces)(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data));
+    bool (*moduleEnumerateNamespaces)(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data));
 
     /**
      * @brief Enumerates classes of the module `m`, invoking callback `cb` for each class.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*moduleEnumerateClasses)(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
+    bool (*moduleEnumerateClasses)(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
 
     /**
      * @brief Enumerates top level functions of the module `m`, invoking callback `cb` for each top level function.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*moduleEnumerateTopLevelFunctions)(AbckitCoreModule *m, void *data,
+    bool (*moduleEnumerateTopLevelFunctions)(AbckitCoreModule *m, void *data,
                                              bool (*cb)(AbckitCoreFunction *function, void *data));
 
     /**
      * @brief Enumerates anonymous functions of the module `m`, invoking callback `cb` for each anonymous function.
-     * @return None.
+     * @return`false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*moduleEnumerateAnonymousFunctions)(AbckitCoreModule *m, void *data,
+    bool (*moduleEnumerateAnonymousFunctions)(AbckitCoreModule *m, void *data,
                                               bool (*cb)(AbckitCoreFunction *function, void *data));
 
     /**
      * @brief Enumerates annotation interfaces of the module `m`, invoking callback `cb` for each annotation interface.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] m - Module to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `m` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*moduleEnumerateAnnotationInterfaces)(AbckitCoreModule *m, void *data,
+    bool (*moduleEnumerateAnnotationInterfaces)(AbckitCoreModule *m, void *data,
                                                 bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
     /* ========================================
@@ -568,41 +578,44 @@ struct AbckitInspectApi {
     /**
      * @brief Enumerates namespaces defined inside of the namespace `n`, invoking callback `cb` for each inner
      * namespace.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] n - Namespace to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*namespaceEnumerateNamespaces)(AbckitCoreNamespace *n, void *data,
+    bool (*namespaceEnumerateNamespaces)(AbckitCoreNamespace *n, void *data,
                                          bool (*cb)(AbckitCoreNamespace *klass, void *data));
 
     /**
      * @brief Enumerates classes of the namespace `n`, invoking callback `cb` for each class.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] n - Namespace to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*namespaceEnumerateClasses)(AbckitCoreNamespace *n, void *data,
+    bool (*namespaceEnumerateClasses)(AbckitCoreNamespace *n, void *data,
                                       bool (*cb)(AbckitCoreClass *klass, void *data));
 
     /**
      * @brief Enumerates top level functions of the namespace `n`, invoking callback `cb` for each top level function.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] n - Namespace to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `n` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*namespaceEnumerateTopLevelFunctions)(AbckitCoreNamespace *n, void *data,
+    bool (*namespaceEnumerateTopLevelFunctions)(AbckitCoreNamespace *n, void *data,
                                                 bool (*cb)(AbckitCoreFunction *function, void *data));
 
     /* ========================================
@@ -753,28 +766,30 @@ struct AbckitInspectApi {
 
     /**
      * @brief Enumerates methods of class `klass`, invoking callback `cb` for each method.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] klass - Class to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*classEnumerateMethods)(AbckitCoreClass *klass, void *data,
+    bool (*classEnumerateMethods)(AbckitCoreClass *klass, void *data,
                                   bool (*cb)(AbckitCoreFunction *method, void *data));
 
     /**
      * @brief Enumerates annotations of class `klass`, invoking callback `cb` for each annotation.
-     * @return None.
+     * @return false` if was early exited. Otherwise - `true`.
      * @param [ in ] klass - Class to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `klass` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*classEnumerateAnnotations)(AbckitCoreClass *klass, void *data,
+    bool (*classEnumerateAnnotations)(AbckitCoreClass *klass, void *data,
                                       bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
     /* ========================================
@@ -832,41 +847,44 @@ struct AbckitInspectApi {
 
     /**
      * @brief Enumerates nested functions of function `func`, invoking callback `cb` for each nested function.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] func - Function to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*functionEnumerateNestedFunctions)(AbckitCoreFunction *func, void *data,
+    bool (*functionEnumerateNestedFunctions)(AbckitCoreFunction *func, void *data,
                                              bool (*cb)(AbckitCoreFunction *nestedFunc, void *data));
 
     /**
      * @brief Enumerates nested classes of function `func`, invoking callback `cb` for each nested class.
-     * @return None.
+     * @return false` if was early exited. Otherwise - `true`.
      * @param [ in ] func - Function to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*functionEnumerateNestedClasses)(AbckitCoreFunction *func, void *data,
+    bool (*functionEnumerateNestedClasses)(AbckitCoreFunction *func, void *data,
                                            bool (*cb)(AbckitCoreClass *nestedClass, void *data));
 
     /**
      * @brief Enumerates annotations of function `func`, invoking callback `cb` for each annotation.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] func - Function to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `func` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*functionEnumerateAnnotations)(AbckitCoreFunction *func, void *data,
+    bool (*functionEnumerateAnnotations)(AbckitCoreFunction *func, void *data,
                                          bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
     /**
@@ -924,15 +942,16 @@ struct AbckitInspectApi {
 
     /**
      * @brief Enumerates elements of the annotation `anno`, invoking the callback for each element.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] anno - Annotation to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*annotationEnumerateElements)(AbckitCoreAnnotation *anno, void *data,
+    bool (*annotationEnumerateElements)(AbckitCoreAnnotation *anno, void *data,
                                         bool (*cb)(AbckitCoreAnnotationElement *ae, void *data));
 
     /* ========================================
@@ -1003,15 +1022,16 @@ struct AbckitInspectApi {
 
     /**
      * @brief Enumerates fields of annotation interface `ai`, invoking callback `cb` for each field.
-     * @return None.
+     * @return `false` if was early exited. Otherwise - `true`.
      * @param [ in ] ai - Annotation interface to be inspected.
      * @param [ in, out ] data - Pointer to the user-defined data that will be passed to the callback `cb` each time
      * it is invoked.
-     * @param [ in ] cb - Callback that will be invoked.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      */
-    void (*annotationInterfaceEnumerateFields)(AbckitCoreAnnotationInterface *ai, void *data,
+    bool (*annotationInterfaceEnumerateFields)(AbckitCoreAnnotationInterface *ai, void *data,
 
                                                bool (*cb)(AbckitCoreAnnotationInterfaceField *fld, void *data));
 

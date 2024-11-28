@@ -41,18 +41,18 @@ uint32_t GgetNumberOfBasicBlocksStatic(AbckitGraph *graph);
 void GdumpStatic(AbckitGraph *graph, int fd);
 void GrunPassRemoveUnreachableBlocksStatic(AbckitGraph *graph);
 void IdumpStatic(AbckitInst *inst, int fd);
-void GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, void (*cb)(AbckitBasicBlock *bb, void *data));
+bool GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *bb, void *data));
 
 // ========================================
 // Api for basic block manipulation
 // ========================================
 
-void BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
-void BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
-void BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data));
+bool BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
+                             bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
+bool BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
+                             bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
+bool BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
+                                  bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data));
 AbckitInst *BBgetFirstInstStatic(AbckitBasicBlock *basicBlock);
 AbckitInst *BBgetLastInstStatic(AbckitBasicBlock *basicBlock);
 AbckitGraph *BBgetGraphStatic(AbckitBasicBlock *basicBlock);
@@ -406,8 +406,8 @@ AbckitInst *IgetPrevStatic(AbckitInst *instprev);
 void IinsertAfterStatic(AbckitInst *inst, AbckitInst *next);
 void IinsertBeforeStatic(AbckitInst *inst, AbckitInst *prev);
 bool IcheckDominanceStatic(AbckitInst *inst, AbckitInst *dominator);
-void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *user, void *data));
-void IvisitInputsStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *input, size_t inputIdx, void *data));
+bool IvisitUsersStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data));
+bool IvisitInputsStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data));
 uint32_t IgetUserCountStatic(AbckitInst *inst);
 void IsetImmediateStatic(AbckitInst *inst, size_t idx, uint64_t imm);
 

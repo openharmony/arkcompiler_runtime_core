@@ -72,6 +72,7 @@ auto g_libAbcKitTestStaticBranchEliminationLambda0 = [](AbckitFile *file, Abckit
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
 
     for (auto i = bbs.rbegin(), j = bbs.rend(); i != j; ++i) {

@@ -65,6 +65,7 @@ void VisitAllBBs(AbckitGraph *graph, std::unordered_map<std::string, int> &metho
 {
     g_implG->gVisitBlocksRpo(graph, &methodsMap, [](AbckitBasicBlock *bb, void *data) {
         EnumerateInsts(bb, reinterpret_cast<std::unordered_map<std::string, int> *>(data));
+        return true;
     });
 }
 

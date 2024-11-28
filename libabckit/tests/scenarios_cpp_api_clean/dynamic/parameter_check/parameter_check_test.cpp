@@ -115,6 +115,7 @@ inline void EnumerateFunctionInsts(const abckit::core::Function &func,
         for (auto inst = bb.GetFirstInst(); inst; inst = inst.GetNext()) {
             cb(inst);
         }
+        return true;
     });
 }
 
@@ -148,7 +149,9 @@ abckit::core::Function GetSubclassMethod(const abckit::core::ImportDescriptor &i
             auto method = user.GetFunction();
             auto klass = method.GetParentClass();
             foundMethod = GetMethodToModify(klass, methodInfo);
+            return false;
         }
+        return true;
     });
 
     return foundMethod;

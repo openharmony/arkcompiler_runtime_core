@@ -26,7 +26,7 @@ namespace libabckit {
 // Module
 // ========================================
 
-void ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
                                              bool (*cb)(AbckitCoreFunction *function, void *data));
 
 // ========================================

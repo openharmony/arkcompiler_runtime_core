@@ -24,60 +24,60 @@ namespace libabckit {
 // Module
 // ========================================
 
-void ArkTSModuleEnumerateImports(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateImports(AbckitCoreModule *m, void *data,
                                  bool (*cb)(AbckitCoreImportDescriptor *i, void *data));
-void ArkTSModuleEnumerateExports(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateExports(AbckitCoreModule *m, void *data,
                                  bool (*cb)(AbckitCoreExportDescriptor *e, void *data));
-void ArkTSModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data));
-void ArkTSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data));
-void ArkTSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data));
+bool ArkTSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data));
+bool ArkTSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                            bool (*cb)(AbckitCoreFunction *function, void *data));
-void ArkTSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                             bool (*cb)(AbckitCoreFunction *function, void *data));
-void ArkTSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+bool ArkTSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
                                               bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
 // ========================================
 // Namespace
 // ========================================
 
-void ArkTSNamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
+bool ArkTSNamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
                                        bool (*cb)(AbckitCoreNamespace *klass, void *data));
-void ArkTSNamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
-void ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
+bool ArkTSNamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data, bool (*cb)(AbckitCoreClass *klass, void *data));
+bool ArkTSNamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
                                               bool (*cb)(AbckitCoreFunction *func, void *data));
 
 // ========================================
 // Class
 // ========================================
 
-void ArkTSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
-void ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
+bool ArkTSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
+bool ArkTSClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
                                     bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 // ========================================
 // Function
 // ========================================
 
-void ArkTSFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
+bool ArkTSFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
                                            bool (*cb)(AbckitCoreFunction *nestedFunc, void *data));
-void ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+bool ArkTSFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
                                          bool (*cb)(AbckitCoreClass *nestedClass, void *data));
-void ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
+bool ArkTSFunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
                                        bool (*cb)(AbckitCoreAnnotation *anno, void *data));
 
 // ========================================
 // Annotation
 // ========================================
 
-void ArkTSAnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
+bool ArkTSAnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
                                       bool (*cb)(AbckitCoreAnnotationElement *ae, void *data));
 
 // ========================================
 // AnnotationInterface
 // ========================================
 
-void ArkTSAnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
+bool ArkTSAnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
                                              bool (*cb)(AbckitCoreAnnotationInterfaceField *fld, void *data));
 
 }  // namespace libabckit

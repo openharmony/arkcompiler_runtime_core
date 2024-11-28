@@ -44,6 +44,7 @@ inline std::vector<BasicBlock> BasicBlock::GetSuccs() const
     GetApiConfig()->cGapi_->bbVisitSuccBlocks(GetView(), &payload, [](AbckitBasicBlock *succ, void *data) {
         const auto &payload = *static_cast<Payload<std::vector<BasicBlock> *> *>(data);
         payload.data->push_back(BasicBlock(succ, payload.config, payload.resource));
+        return true;
     });
 
     CheckError(GetApiConfig());
@@ -101,7 +102,8 @@ inline void BasicBlock::VisitSuccBlocks(const std::function<void(BasicBlock)> &c
 
     GetApiConfig()->cGapi_->bbVisitSuccBlocks(GetView(), &payload, [](AbckitBasicBlock *succ, void *data) {
         const auto &payload = *static_cast<Payload<const std::function<void(BasicBlock)> &> *>(data);
-        return payload.data(BasicBlock(succ, payload.config, payload.resource));
+        payload.data(BasicBlock(succ, payload.config, payload.resource));
+        return true;
     });
     CheckError(GetApiConfig());
 }

@@ -86,8 +86,9 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticValid)
                 const AbckitGraphApi *gImplG = static_cast<struct VisitorData *>(data)->implG;
                 if (gImplG->bbIsCatchBegin(curBB)) {
                     static_cast<struct VisitorData *>(data)->returnBB = curBB;
-                    return;
+                    return false;
                 }
+                return true;
             });
 
             auto *throwableCall = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);
@@ -128,8 +129,9 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticInvalid)
                 const AbckitGraphApi *gImplG = static_cast<struct VisitorData *>(data)->implG;
                 if (gImplG->bbIsCatchBegin(curBB)) {
                     static_cast<struct VisitorData *>(data)->returnBB = curBB;
-                    return;
+                    return false;
                 }
+                return true;
             });
 
             auto *throwableCall = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_CALL_STATIC);

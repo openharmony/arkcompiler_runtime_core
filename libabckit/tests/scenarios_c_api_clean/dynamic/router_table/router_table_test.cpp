@@ -103,6 +103,7 @@ AbckitInst *FindFirstInst(AbckitGraph *graph, AbckitIsaApiDynamicOpcode opcode)
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
     for (auto *bb : bbs) {
         auto *curInst = g_implG->bbGetFirstInst(bb);
@@ -125,6 +126,7 @@ void TransformMethod(AbckitCoreFunction *method, VisitHelper &visitor, const Use
         g_implG->bbVisitSuccBlocks(startBB, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
             auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
             succs->emplace_back(succBasicBlock);
+            return true;
         });
         AbckitInst *createEmptyArray = FindFirstInst(ctxG, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEEMPTYARRAY);
 

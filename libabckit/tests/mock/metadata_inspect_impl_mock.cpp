@@ -38,18 +38,18 @@ inline AbckitFileVersion FileGetVersion(AbckitFile *file)
     return DEFAULT_FILE_VERSION;
 }
 
-inline void FileEnumerateModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
+inline bool FileEnumerateModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    cb(DEFAULT_CORE_MODULE, data);
+    return cb(DEFAULT_CORE_MODULE, data);
 }
 
-inline void FileEnumerateExternalModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
+inline bool FileEnumerateExternalModules(AbckitFile *file, void *data, bool (*cb)(AbckitCoreModule *module, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(file == DEFAULT_FILE);
-    cb(DEFAULT_CORE_MODULE, data);
+    return cb(DEFAULT_CORE_MODULE, data);
 }
 
 // ========================================
@@ -84,58 +84,58 @@ inline bool ModuleIsExternal(AbckitCoreModule *m)
     return true;
 }
 
-inline void ModuleEnumerateImports(AbckitCoreModule *m, void *data,
+inline bool ModuleEnumerateImports(AbckitCoreModule *m, void *data,
                                    bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
-    cb(DEFAULT_CORE_IMPORT_DESCRIPTOR, data);
+    return cb(DEFAULT_CORE_IMPORT_DESCRIPTOR, data);
 }
 
-inline void ModuleEnumerateExports(AbckitCoreModule *m, void *data,
+inline bool ModuleEnumerateExports(AbckitCoreModule *m, void *data,
                                    bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
-    cb(DEFAULT_CORE_EXPORT_DESCRIPTOR, data);
+    return cb(DEFAULT_CORE_EXPORT_DESCRIPTOR, data);
 }
 
-inline void ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data))
+inline bool ModuleEnumerateNamespaces(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreNamespace *n, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
-    cb(DEFAULT_CORE_NAMESPACE, data);
+    return cb(DEFAULT_CORE_NAMESPACE, data);
 }
 
-inline void ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
+inline bool ModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
-    cb(DEFAULT_CORE_CLASS, data);
+    return cb(DEFAULT_CORE_CLASS, data);
 }
 
-inline void ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+inline bool ModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                              bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
-    cb(DEFAULT_CORE_FUNCTION, data);
+    return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline void ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+inline bool ModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                               bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
-    cb(DEFAULT_CORE_FUNCTION, data);
+    return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline void ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+inline bool ModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
                                                 bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(m == DEFAULT_CORE_MODULE);
-    cb(DEFAULT_CORE_ANNOTATION_INTERFACE, data);
+    return cb(DEFAULT_CORE_ANNOTATION_INTERFACE, data);
 }
 
 // ========================================
@@ -156,28 +156,28 @@ inline AbckitCoreNamespace *NamespaceGetParentNamespace(AbckitCoreNamespace *n)
     return DEFAULT_CORE_NAMESPACE;
 }
 
-inline void NamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
+inline bool NamespaceEnumerateNamespaces(AbckitCoreNamespace *n, void *data,
                                          bool (*cb)(AbckitCoreNamespace *klass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
-    cb(DEFAULT_CORE_NAMESPACE, data);
+    return cb(DEFAULT_CORE_NAMESPACE, data);
 }
 
-inline void NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data,
+inline bool NamespaceEnumerateClasses(AbckitCoreNamespace *n, void *data,
                                       bool (*cb)(AbckitCoreClass *klass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
-    cb(DEFAULT_CORE_CLASS, data);
+    return cb(DEFAULT_CORE_CLASS, data);
 }
 
-inline void NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
+inline bool NamespaceEnumerateTopLevelFunctions(AbckitCoreNamespace *n, void *data,
                                                 bool (*cb)(AbckitCoreFunction *func, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(n == DEFAULT_CORE_NAMESPACE);
-    cb(DEFAULT_CORE_FUNCTION, data);
+    return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
 // ========================================
@@ -297,20 +297,20 @@ inline AbckitCoreNamespace *ClassGetParentNamespace(AbckitCoreClass *klass)
     return DEFAULT_CORE_NAMESPACE;
 }
 
-inline void ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
+inline bool ClassEnumerateMethods(AbckitCoreClass *klass, void *data,
                                   bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
-    cb(DEFAULT_CORE_FUNCTION, data);
+    return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline void ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
+inline bool ClassEnumerateAnnotations(AbckitCoreClass *klass, void *data,
                                       bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
-    cb(DEFAULT_CORE_ANNOTATION, data);
+    return cb(DEFAULT_CORE_ANNOTATION, data);
 }
 
 // ========================================
@@ -338,12 +338,12 @@ inline AbckitString *AnnotationInterfaceGetName(AbckitCoreAnnotationInterface *a
     return DEFAULT_STRING;
 }
 
-inline void AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
+inline bool AnnotationInterfaceEnumerateFields(AbckitCoreAnnotationInterface *ai, void *data,
                                                bool (*cb)(AbckitCoreAnnotationInterfaceField *fld, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(ai == DEFAULT_CORE_ANNOTATION_INTERFACE);
-    cb(DEFAULT_CORE_ANNOTATION_INTERFACE_FIELD, data);
+    return cb(DEFAULT_CORE_ANNOTATION_INTERFACE_FIELD, data);
 }
 
 // ========================================
@@ -431,28 +431,28 @@ inline AbckitCoreNamespace *FunctionGetParentNamespace(AbckitCoreFunction *funct
     return DEFAULT_CORE_NAMESPACE;
 }
 
-inline void FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
+inline bool FunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
                                              bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
-    cb(DEFAULT_CORE_FUNCTION, data);
+    return cb(DEFAULT_CORE_FUNCTION, data);
 }
 
-inline void FunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+inline bool FunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
                                            bool (*cb)(AbckitCoreClass *nestedClass, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
-    cb(DEFAULT_CORE_CLASS, data);
+    return cb(DEFAULT_CORE_CLASS, data);
 }
 
-inline void FunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
+inline bool FunctionEnumerateAnnotations(AbckitCoreFunction *function, void *data,
                                          bool (*cb)(AbckitCoreAnnotation *anno, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(function == DEFAULT_CORE_FUNCTION);
-    cb(DEFAULT_CORE_ANNOTATION, data);
+    return cb(DEFAULT_CORE_ANNOTATION, data);
 }
 
 inline AbckitGraph *CreateGraphFromFunction(AbckitCoreFunction *function)
@@ -500,12 +500,12 @@ inline AbckitCoreAnnotationInterface *AnnotationGetInterface(AbckitCoreAnnotatio
     return DEFAULT_CORE_ANNOTATION_INTERFACE;
 }
 
-inline void AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
+inline bool AnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
                                         bool (*cb)(AbckitCoreAnnotationElement *ae, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(anno == DEFAULT_CORE_ANNOTATION);
-    cb(DEFAULT_CORE_ANNOTATION_ELEMENT, data);
+    return cb(DEFAULT_CORE_ANNOTATION_ELEMENT, data);
 }
 
 // ========================================
@@ -619,12 +619,12 @@ inline const char *AbckitStringToString(AbckitString *value)
 // LiteralArray
 // ========================================
 
-inline void LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *data,
+inline bool LiteralArrayEnumerateElements(AbckitLiteralArray *litArr, void *data,
                                           bool (*cb)(AbckitFile *file, AbckitLiteral *v, void *data))
 {
     g_calledFuncs.push(__func__);
     EXPECT_TRUE(litArr == DEFAULT_LITERAL_ARRAY);
-    cb(DEFAULT_FILE, DEFAULT_LITERAL, data);
+    return cb(DEFAULT_FILE, DEFAULT_LITERAL, data);
 }
 
 // ========================================

@@ -229,9 +229,10 @@ public:
 
     /**
      * @brief EnumerateModules
+     * @return bool
      * @param cb
      */
-    void EnumerateModules(const std::function<bool(core::Module)> &cb) const;
+    bool EnumerateModules(const std::function<bool(core::Module)> &cb) const;
 
     // Other API.
 

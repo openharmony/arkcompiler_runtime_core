@@ -257,78 +257,82 @@ AbckitJsInspectApi g_jsInspectApiImpl = {
 // Module
 // ========================================
 
-void JsModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
+bool JsModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data))
 {
     for (auto &id : m->id) {
         if (!cb(id.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void JsModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
+bool JsModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data))
 {
     for (auto &ed : m->ed) {
         if (!cb(ed.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
-void JsModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data))
+bool JsModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data))
 {
-    ModuleEnumerateClassesHelper(m, data, cb);
+    return ModuleEnumerateClassesHelper(m, data, cb);
 }
 
-void JsModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+bool JsModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                         bool (*cb)(AbckitCoreFunction *function, void *data))
 {
-    ModuleEnumerateTopLevelFunctionsHelper(m, data, cb);
+    return ModuleEnumerateTopLevelFunctionsHelper(m, data, cb);
 }
 
-void JsModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+bool JsModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                          bool (*cb)(AbckitCoreFunction *function, void *data))
 {
-    ModuleEnumerateAnonymousFunctionsDynamic(m, data, cb);
+    return ModuleEnumerateAnonymousFunctionsDynamic(m, data, cb);
 }
 
-void JsModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+bool JsModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
                                            bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data))
 {
-    ModuleEnumerateAnnotationInterfacesHelper(m, data, cb);
+    return ModuleEnumerateAnnotationInterfacesHelper(m, data, cb);
 }
 
 // ========================================
 // Class
 // ========================================
 
-void JsClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
+bool JsClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *function, void *data))
 {
-    ClassEnumerateMethodsHelper(klass, data, cb);
+    return ClassEnumerateMethodsHelper(klass, data, cb);
 }
 
 // ========================================
 // Function
 // ========================================
 
-void JsFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
+bool JsFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
                                         bool (*cb)(AbckitCoreFunction *nestedFunc, void *data))
 {
     for (auto &f : function->nestedFunction) {
         if (!cb(f.get(), data)) {
-            break;
+            return false;
         }
     }
+    return true;
 }
 
-void JsFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+bool JsFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
                                       bool (*cb)(AbckitCoreClass *nestedClass, void *data))
 {
     for (auto &c : function->nestedClasses) {
         if (!cb(c.get(), data)) {
-            break;
+            return false;
         }
     }
+    return true;
 }
 
 }  // namespace libabckit
