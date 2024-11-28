@@ -40,19 +40,19 @@ export interface ILog {
 }
 
 export interface ICompileData {
-    exit_code: number;
+    exit_code?: number;
     output?: string;
     error?: string;
 }
 
 export interface IRunData {
-    exit_code: number;
+    exit_code?: number;
     output?: string;
     error?: string;
 }
 
 export interface IDisassemblyData {
-    exit_code: number;
+    exit_code?: number;
     output?: string;
     error?: string;
 }
@@ -68,9 +68,7 @@ export interface IApiResponse {
 export const handleResponseLogs = createAsyncThunk(
     'logs/compileLogs',
     async (response: IApiResponse, thunkAPI) => {
-        const state: RootState = thunkAPI.getState() as RootState;
-        const logsState = state.logs;
-
+        
         const handleLog = (
             data: ICompileData | IRunData | IDisassemblyData | undefined,
             logTypeOut: ELogType,
@@ -79,8 +77,10 @@ export const handleResponseLogs = createAsyncThunk(
             setOutAction: (logs: ILog[]) => { payload: ILog[]; type: string },
             setErrAction: (logs: ILog[]) => { payload: ILog[]; type: string }
         ) => {
-            if (!data) return;
+            const state: RootState = thunkAPI.getState() as RootState;
+            const logsState = state.logs;
 
+            if (!data) return;
             if (data.exit_code === 0 && data.output) {
                 thunkAPI.dispatch(setOutAction(
                     logsState.out.concat({
@@ -111,7 +111,7 @@ export const handleResponseLogs = createAsyncThunk(
                         from: logTypeOut
                     })
                 ));
-            } else if (data.exit_code !== 0 && data.error) {
+            } else if ((data.exit_code !== 0 || !data.exit_code) && data.error) {
                 thunkAPI.dispatch(setErrAction(
                     logsState.err.concat({
                         message: data.error,
@@ -126,17 +126,17 @@ export const handleResponseLogs = createAsyncThunk(
                         from: logTypeErr
                     })
                 ));
-            } else if (data.exit_code !== 0 && data.output) {
+            } else if (data.exit_code && data.exit_code !== 0) {
                 thunkAPI.dispatch(setErrAction(
                     logsState.err.concat({
-                        message: data.output,
+                        message: data.output || `Exit code: ${data.exit_code}`,
                         isRead: false,
                         from: logTypeErr
                     })
                 ));
                 thunkAPI.dispatch(setErrLogs(
                     logsState.err.concat({
-                        message: data.output,
+                        message: data.output || `Exit code: ${data.exit_code}`,
                         isRead: false,
                         from: logTypeErr
                     })

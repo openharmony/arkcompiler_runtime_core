@@ -37,8 +37,8 @@ describe('codeModel', () => {
             const result = codeModel.fromApiCompile(mockData);
 
             expect(result).toEqual({
-                compile: { output: '', error: '', exit_code: -1 },
-                disassembly: { output: '', code: '', error: '', exit_code: -1 },
+                compile: { output: '', error: '', exit_code: undefined },
+                disassembly: { output: '', code: '', error: '', exit_code: undefined },
             });
         });
     });
@@ -65,9 +65,9 @@ describe('codeModel', () => {
             const result = codeModel.fromApiRun(mockData);
 
             expect(result).toEqual({
-                compile: { output: '', error: '', exit_code: -1 },
-                disassembly: { output: '', code: '', error: '', exit_code: -1 },
-                run: { output: '', error: '', exit_code: -1 },
+                compile: { output: '', error: '', exit_code: undefined },
+                disassembly: { output: '', code: '', error: '', exit_code: undefined },
+                run: { output: '', error: '', exit_code: undefined },
             });
         });
     });

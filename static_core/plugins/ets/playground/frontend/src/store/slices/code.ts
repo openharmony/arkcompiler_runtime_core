@@ -27,7 +27,7 @@ interface IState {
 const initialState: IState = {
     isRunLoading: false,
     isCompileLoading: false,
-    code: '',
+    code: 'function main(): void {\n\tconsole.log("Hello, ArkTS!");\n}',
     compileRes: null,
     runRes: null
 };

@@ -19,13 +19,29 @@ export type Theme = 'light' | 'dark';
 interface IState {
     theme: Theme;
     primaryColor: string;
-    disasm: boolean
+    disasm: boolean;
+    versions: Versions;
+    versionsLoading: boolean;
+}
+
+export interface Versions {
+    frontend?: string;
+    backendVersion?: string;
+    arktsVersion?: string;
+    es2panda?: string;
 }
 
 const initialState: IState = {
     theme: (localStorage.getItem('theme') as Theme) || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'),
     disasm: false,
-    primaryColor: '#e32b49'
+    primaryColor: '#e32b49',
+    versions: {
+        frontend: '',
+        backendVersion: '',
+        arktsVersion: '',
+        es2panda: ''
+    },
+    versionsLoading: false
 };
 
 const appStateSlice = createSlice({
@@ -41,6 +57,12 @@ const appStateSlice = createSlice({
         setDisasm: (state, action: PayloadAction<boolean>) => {
             state.disasm = action.payload;
         },
+        setVersions(state, action: PayloadAction<Versions>) {
+            state.versions = action.payload;
+        },
+        setVersionsLoading(state, action: PayloadAction<boolean>) {
+            state.versionsLoading = action.payload;
+        },
     },
 });
 
@@ -48,6 +70,8 @@ export const {
     setTheme,
     setDisasm,
     setPrimaryColor,
+    setVersions,
+    setVersionsLoading
 } = appStateSlice.actions;
 
 export default appStateSlice.reducer;
