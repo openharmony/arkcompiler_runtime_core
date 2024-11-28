@@ -116,7 +116,7 @@ public:
     /**
      * @brief Creates instruction with opcode SUB2. This instruction computes the binary operation `input0 - acc`, and
      * stores the result in returned instruction.
-     * @return Pointer to created `AbckitInst`.
+     * @return Created `Instruction`.
      * @param [ in ] acc - Inst containing right operand.
      * @param [ in ] input0 - Inst containing left operand.
      * @return `Instruction`
@@ -124,8 +124,45 @@ public:
     Instruction CreateSub2(const Instruction &acc, const Instruction &input0) &&;
 
     /**
+     * @brief Creates instruction with opcode GREATEREQ. This instruction computes the binary operation `input0 >= acc`.
+     * @return Created `Instruction`.
+     * @param [ in ] acc - Inst containing right operand.
+     * @param [ in ] input0 - Inst containing left operand.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input0` is false.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `Graph` owning `acc` and current `Graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if `Graph` owning `input0` and current `Graph` differs.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `Graph`'s mode is not DYNAMIC.
+     * @note Allocates
+     */
+    Instruction CreateGreatereq(const Instruction &acc, const Instruction &input0) &&;
+
+    /**
+     * @brief Creates instruction with opcode IF.
+     * @return Created `Instruction`.
+     * @param [ in ] input - Instruction that will be compared to zero.
+     * @param [ in ] cc - Condition code.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `input` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cc` is `ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_NONE` or
+     * if `cc` is not `ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_EQ` or `ABCKIT_ISA_API_DYNAMIC_CONDITION_CODE_CC_NE`.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `File`s owning `Graph` and `input` are differ.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `Graph`'s mode is not DYNAMIC.
+     */
+    Instruction CreateIf(const Instruction &input, enum AbckitIsaApiDynamicConditionCode cc) &&;
+
+    /**
+     * @brief Creates instruction with opcode RETURN. This instruction returns `acc`.
+     * @return Created `Instruction`.
+     * @param [ in ] acc - Instruction to be returned.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `acc` is false.
+     * @note Set `ABCKIT_STATUS_WRONG_CTX` error if corresponding `File`s owning `Graph` and `acc` are differ.
+     * @note Set `ABCKIT_STATUS_WRONG_MODE` error if `Graph`'s mode is not DYNAMIC.
+     */
+    Instruction CreateReturn(const Instruction &acc) &&;
+
+    /**
      * @brief Creates instruction with opcode NEWOBJRANGE. This instruction invokes the constructor of `instClass` with
-     * arguments `instArgs...` to create a class instance, and stores the instance in returned instruction`.
+     * arguments `instArgs...` to create a class instance, and stores the instance in returned `Instruction`.
      * @tparam Instructions - a parameter pack for abckit::Instruction
      * @param [ in ] instClass - Inst containing class object
      * @param [ in ] instArgs - Insts containing constructor arguments

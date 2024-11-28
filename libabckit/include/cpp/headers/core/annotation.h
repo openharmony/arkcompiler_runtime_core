@@ -24,7 +24,7 @@ namespace abckit::core {
 /**
  * @brief Annotation
  */
-class Annotation : public View<AbckitCoreAnnotation *> {
+class Annotation : public ViewInResource<AbckitCoreAnnotation *, const File *> {
     /// @brief core::Function
     friend class core::Function;
     /// @brief arkts::Function
@@ -77,13 +77,17 @@ public:
      */
     core::AnnotationInterface GetInterface()
     {
-        AnnotationInterface iface(GetApiConfig()->cIapi_->annotationGetInterface(GetView()), GetApiConfig());
+        AnnotationInterface iface(GetApiConfig()->cIapi_->annotationGetInterface(GetView()), GetApiConfig(),
+                                  GetResource());
         CheckError(GetApiConfig());
         return iface;
     }
 
 private:
-    Annotation(AbckitCoreAnnotation *ann, const ApiConfig *conf) : View(ann), conf_(conf) {};
+    Annotation(AbckitCoreAnnotation *ann, const ApiConfig *conf, const File *file) : ViewInResource(ann), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:

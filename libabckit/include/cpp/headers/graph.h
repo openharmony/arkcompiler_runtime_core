@@ -73,10 +73,25 @@ public:
     ~Graph() override = default;
 
     /**
+     * @brief Returns binary file that the current `Graph` is a part of.
+     * @return Pointer to the `File`
+     */
+    const File *GetFile() const
+    {
+        return file_;
+    }
+
+    /**
      * @brief Get start basic block
      * @return `BasicBlock`
      */
     BasicBlock GetStartBb() const;
+
+    /**
+     * @brief Returns end basic block of current `Graph`.
+     * @return End `BasicBlock`.
+     */
+    BasicBlock GetEndBb() const;
 
     /**
      * @brief Get blocks RPO
@@ -108,6 +123,21 @@ public:
      */
     void EnumerateBasicBlocksRpo(const std::function<void(BasicBlock)> &cb) const;
 
+    /**
+     * @brief Creates I32 constant instruction and inserts it in start basic block of current `Graph`.
+     * @return Created `Instruction`.
+     * @param [ in ] val - value of created constant instruction.
+     * @note Allocates
+     */
+    Instruction CreateConstantI32(int32_t val);
+
+    /**
+     * @brief Creates empty basic block.
+     * @return Created `BasicBlock`.
+     * @note Allocates
+     */
+    BasicBlock CreateEmptyBb();
+
     // Other Graph API's
     // ...
 
@@ -120,6 +150,25 @@ protected:
     {
         return conf_;
     }
+
+    /**
+     * @brief Struct for using in callbacks
+     */
+    template <typename D>
+    struct Payload {
+        /**
+         * @brief data
+         */
+        D data;
+        /**
+         * @brief config
+         */
+        const ApiConfig *config;
+        /**
+         * @brief resource
+         */
+        const Graph *resource;
+    };
 
 private:
     class GraphDeleter final : public IResourceDeleter {
@@ -173,12 +222,13 @@ private:
         const Graph &deleterGraph_;
     };
 
-    Graph(AbckitGraph *graph, const ApiConfig *conf) : Resource(graph), conf_(conf)
+    Graph(AbckitGraph *graph, const ApiConfig *conf, const File *file) : Resource(graph), conf_(conf), file_(file)
     {
         SetDeleter(std::make_unique<GraphDeleter>(conf_, *this));
     };
     // for interop with API
     const ApiConfig *conf_;
+    const File *file_;
 };
 
 }  // namespace abckit

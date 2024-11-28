@@ -55,12 +55,25 @@ inline std::string StatusToString(AbckitStatus status)
     }
     return "Unsupported status type";
 }
+// NOLINTEND(performance-unnecessary-value-param)
 
 #ifdef ABCKIT_USE_EXCEPTIONS
+/**
+ * @brief Exception
+ */
 class Exception : public std::runtime_error {
 public:
+    /**
+     * @brief Constructor
+     * @param e - status
+     */
     explicit Exception(AbckitStatus e) : std::runtime_error(StatusToString(e)) {}
 
+    /**
+     * @brief what
+     * @return what
+     */
+    // NOLINTNEXTLINE(readability-identifier-naming)
     virtual const char *what() const noexcept override
     {
         return std::runtime_error::what();
@@ -79,13 +92,13 @@ public:
      */
     explicit Exception(AbckitStatus e) : whatMessage_(StatusToString(e)) {}
 
-    // CC-OFFNXT(G.NAM.03) made to be compatible with std::runtime_error::what method
-    // NOLINT(readability-identifier-naming)
     /**
-     * @brief What
+     * @brief what
      * @return string
      */
-    const char *What() const noexcept
+    // CC-OFFNXT(G.NAM.03) made to be compatible with std::runtime_error::what method
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    const char *what() const noexcept
     {
         // CC-OFFNXT(G.STD.04) made to be compatible with std::runtime_error::what method
         return whatMessage_.c_str();

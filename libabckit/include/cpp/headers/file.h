@@ -25,6 +25,7 @@
 
 #include <functional>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace abckit {
@@ -117,7 +118,7 @@ public:
     {
         AbckitValue *value = GetApiConfig()->cMapi_->createValueU1(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Value(value, GetApiConfig());
+        return abckit::Value(value, GetApiConfig(), this);
     }
 
     /**
@@ -129,7 +130,7 @@ public:
     {
         AbckitValue *value = GetApiConfig()->cMapi_->createValueDouble(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Value(value, GetApiConfig());
+        return abckit::Value(value, GetApiConfig(), this);
     }
 
     /**
@@ -141,7 +142,7 @@ public:
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralBool(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
     /**
@@ -153,7 +154,7 @@ public:
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralDouble(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
     /**
@@ -165,7 +166,7 @@ public:
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU32(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
     /**
@@ -177,7 +178,7 @@ public:
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralLiteralArray(GetResource(), val.GetView());
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
     /**
@@ -186,6 +187,23 @@ public:
      * @return `LiteralArray`
      */
     abckit::LiteralArray CreateLiteralArray(const std::vector<abckit::Literal> &literals) const;
+
+    /**
+     * @brief Creates string item containing the given C-style null-terminated string `val`.
+     * @return `string_view`.
+     * @param [ in ] val - string to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `val` is empty.
+     * @note Allocates
+     */
+    std::string_view CreateString(const std::string &val) const
+    {
+        const ApiConfig *conf = GetApiConfig();
+        AbckitString *cString = conf->cMapi_->createString(GetResource(), val.c_str());
+        CheckError(conf);
+        std::string_view view = conf->cIapi_->abckitStringToString(cString);
+        CheckError(conf);
+        return view;
+    }
 
     /**
      * @brief Writes `file` to the specified `path`.
@@ -227,6 +245,25 @@ protected:
         return &conf_;
     }
 
+    /**
+     * @brief Struct for using in callbacks
+     */
+    template <typename D>
+    struct Payload {
+        /**
+         * @brief data
+         */
+        D data;
+        /**
+         * @brief config
+         */
+        const ApiConfig *config;
+        /**
+         * @brief resource
+         */
+        const File *resource;
+    };
+
 private:
     inline void GetAllFunctionsInner(std::vector<core::Function> &functions) const
     {
@@ -244,15 +281,11 @@ private:
 
     inline void GetModulesInner(std::vector<core::Module> &modules) const
     {
-        const ApiConfig *conf = GetApiConfig();
+        Payload<std::vector<core::Module> *> payload {&modules, GetApiConfig(), this};
 
-        using EnumerateData = std::pair<std::vector<core::Module> *, const ApiConfig *>;
-        EnumerateData enumerateData(&modules, conf);
-
-        conf->cIapi_->fileEnumerateModules(GetResource(), &enumerateData, [](AbckitCoreModule *module, void *data) {
-            auto *vec = static_cast<EnumerateData *>(data)->first;
-            auto *config = static_cast<EnumerateData *>(data)->second;
-            vec->push_back(core::Module(module, config));
+        GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Module> *> *>(data);
+            payload.data->push_back(core::Module(module, payload.config, payload.resource));
             return true;
         });
     }

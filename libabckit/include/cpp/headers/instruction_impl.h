@@ -18,6 +18,7 @@
 
 #include "./instruction.h"
 #include "./core/function.h"
+#include "./core/import_descriptor.h"
 
 namespace abckit {
 
@@ -68,7 +69,7 @@ inline Instruction Instruction::GetNext() const
     const ApiConfig *conf = GetApiConfig();
     AbckitInst *inst = conf->cGapi_->iGetNext(GetView());
     CheckError(conf);
-    return Instruction(inst, conf);
+    return Instruction(inst, conf, GetResource());
 }
 
 inline Instruction Instruction::GetPrev() const
@@ -76,7 +77,7 @@ inline Instruction Instruction::GetPrev() const
     const ApiConfig *conf = GetApiConfig();
     AbckitInst *inst = conf->cGapi_->iGetPrev(GetView());
     CheckError(conf);
-    return Instruction(inst, conf);
+    return Instruction(inst, conf, GetResource());
 }
 
 inline core::Function Instruction::GetFunction() const
@@ -84,7 +85,7 @@ inline core::Function Instruction::GetFunction() const
     const ApiConfig *conf = GetApiConfig();
     AbckitCoreFunction *func = conf->cGapi_->iGetFunction(GetView());
     CheckError(conf);
-    return core::Function(func, conf);
+    return core::Function(func, conf, GetResource()->GetFile());
 }
 
 inline uint32_t Instruction::GetInputCount() const
@@ -100,7 +101,7 @@ inline Instruction Instruction::GetInput(uint32_t index) const
     const ApiConfig *conf = GetApiConfig();
     AbckitInst *inInst = conf->cGapi_->iGetInput(GetView(), index);
     CheckError(conf);
-    return Instruction(inInst, conf);
+    return Instruction(inInst, conf, GetResource());
 }
 
 inline void Instruction::SetInput(uint32_t index, const Instruction &input)
@@ -112,17 +113,21 @@ inline void Instruction::SetInput(uint32_t index, const Instruction &input)
 
 inline void Instruction::VisitUsers(const std::function<void(Instruction)> &cb) const
 {
-    struct Payload {
-        const std::function<void(Instruction)> &callback;
-        const ApiConfig *config;
-    };
-    Payload payload {cb, GetApiConfig()};
+    Payload<const std::function<void(Instruction)> &> payload {cb, GetApiConfig(), GetResource()};
 
     GetApiConfig()->cGapi_->iVisitUsers(GetView(), &payload, [](AbckitInst *user, void *data) {
-        const auto &payload = *static_cast<Payload *>(data);
-        return payload.callback(Instruction(user, payload.config));
+        const auto &payload = *static_cast<Payload<const std::function<void(Instruction)> &> *>(data);
+        return payload.data(Instruction(user, payload.config, payload.resource));
     });
     CheckError(GetApiConfig());
+}
+
+inline core::ImportDescriptor Instruction::GetImportDescriptorDyn() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreImportDescriptor *id = conf->cDynapi_->iGetImportDescriptor(GetView());
+    CheckError(conf);
+    return core::ImportDescriptor(id, conf, GetResource()->GetFile());
 }
 
 }  // namespace abckit

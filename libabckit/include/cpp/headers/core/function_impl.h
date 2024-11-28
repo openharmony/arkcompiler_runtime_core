@@ -22,12 +22,12 @@
 
 namespace abckit::core {
 
-inline Graph Function::GetGraph() const
+inline Graph Function::CreateGraph() const
 {
     const ApiConfig *conf = GetApiConfig();
     AbckitGraph *graph = conf->cIapi_->createGraphFromFunction(GetView());
     CheckError(conf);
-    return Graph(graph, conf_);
+    return Graph(graph, conf_, GetResource());
 }
 
 inline void Function::SetGraph(const Graph &graph)
@@ -35,6 +35,11 @@ inline void Function::SetGraph(const Graph &graph)
     const ApiConfig *conf = GetApiConfig();
     conf->cMapi_->functionSetGraph(GetView(), graph.GetResource());
     CheckError(conf);
+}
+
+inline const File *Function::GetFile() const
+{
+    return GetResource();
 }
 
 inline std::string_view Function::GetName() const
@@ -50,20 +55,18 @@ inline std::string_view Function::GetName() const
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<core::Annotation> Function::GetAnnotations() const
 {
-    const ApiConfig *conf = GetApiConfig();
     std::vector<core::Annotation> anns;
 
-    using EnumerateData = std::pair<std::vector<core::Annotation> *, const ApiConfig *>;
-    EnumerateData enumerateData(&anns, conf);
+    Payload<std::vector<core::Annotation> *> payload {&anns, GetApiConfig(), GetResource()};
 
-    conf->cIapi_->functionEnumerateAnnotations(GetView(), &enumerateData, [](AbckitCoreAnnotation *ann, void *data) {
-        auto *vec = static_cast<EnumerateData *>(data)->first;
-        auto *config = static_cast<EnumerateData *>(data)->second;
-        vec->push_back(core::Annotation(ann, config));
-        return true;
-    });
+    GetApiConfig()->cIapi_->functionEnumerateAnnotations(
+        GetView(), &payload, [](AbckitCoreAnnotation *ann, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Annotation> *> *>(data);
+            payload.data->push_back(core::Annotation(ann, payload.config, payload.resource));
+            return true;
+        });
 
-    CheckError(conf);
+    CheckError(GetApiConfig());
 
     return anns;
 }
@@ -81,7 +84,7 @@ inline core::Module Function::GetModule() const
     const ApiConfig *conf = GetApiConfig();
     AbckitCoreModule *module = conf->cIapi_->functionGetModule(GetView());
     CheckError(conf);
-    return core::Module(module, conf_);
+    return core::Module(module, conf_, GetResource());
 }
 
 inline core::Class Function::GetParentClass() const
@@ -89,21 +92,18 @@ inline core::Class Function::GetParentClass() const
     const ApiConfig *conf = GetApiConfig();
     AbckitCoreClass *klass = conf->cIapi_->functionGetParentClass(GetView());
     CheckError(conf);
-    return core::Class(klass, conf_);
+    return core::Class(klass, conf_, GetResource());
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
 inline void Function::EnumerateNestedFunctions(const std::function<bool(core::Function)> &cb) const
 {
-    struct Payload {
-        const std::function<bool(core::Function)> &callback;
-        const ApiConfig *config;
-    } payload {cb, GetApiConfig()};
+    Payload<const std::function<bool(core::Function)> &> payload {cb, GetApiConfig(), GetResource()};
 
     GetApiConfig()->cIapi_->functionEnumerateNestedFunctions(
         GetView(), &payload, [](AbckitCoreFunction *nestedFunc, void *data) {
-            const auto &payload = *static_cast<Payload *>(data);
-            return payload.callback(core::Function(nestedFunc, payload.config));
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Function)> &> *>(data);
+            return payload.data(core::Function(nestedFunc, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
 }
@@ -111,15 +111,12 @@ inline void Function::EnumerateNestedFunctions(const std::function<bool(core::Fu
 // CC-OFFNXT(G.FUD.06) perf critical
 inline void Function::EnumerateNestedClasses(const std::function<bool(core::Class)> &cb) const
 {
-    struct Payload {
-        const std::function<bool(core::Class)> &callback;
-        const ApiConfig *config;
-    } payload {cb, GetApiConfig()};
+    Payload<const std::function<bool(core::Class)> &> payload {cb, GetApiConfig(), GetResource()};
 
     GetApiConfig()->cIapi_->functionEnumerateNestedClasses(
         GetView(), &payload, [](AbckitCoreClass *nestedClass, void *data) {
-            const auto &payload = *static_cast<Payload *>(data);
-            return payload.callback(core::Class(nestedClass, payload.config));
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Class)> &> *>(data);
+            return payload.data(core::Class(nestedClass, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
 }

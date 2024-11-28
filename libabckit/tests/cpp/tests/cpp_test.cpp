@@ -41,7 +41,7 @@ TEST_F(LibAbcKitCppTest, CppTest1)
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
     for (auto function : file.GetAllFunctions()) {
-        abckit::Graph graph = function.GetGraph();
+        abckit::Graph graph = function.CreateGraph();
         abckit::BasicBlock curBB = graph.GetStartBb().GetSuccByIdx(0);
 
         // Insert `print("Func start: " + funcName)`
@@ -315,7 +315,7 @@ TEST_F(LibAbcKitCppTest, CppTest12)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
     abckit::core::Function func = file.GetAllFunctions()[0];
-    abckit::Graph graph = func.GetGraph();
+    abckit::Graph graph = func.CreateGraph();
     abckit::BasicBlock bb = graph.GetStartBb();
     abckit::Instruction inst = bb.GetFirstInst();
     while (inst) {

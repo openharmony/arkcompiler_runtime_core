@@ -36,7 +36,7 @@ class GTestAssertErrorHandler final : public abckit::IErrorHandler {
 public:
     void HandleError(abckit::Exception &&err) override
     {
-        EXPECT_TRUE(false) << "Abckit expection raised: " << err.What();
+        EXPECT_TRUE(false) << "Abckit expection raised: " << err.what();
     }
 };
 
@@ -171,7 +171,7 @@ TEST_F(AbckitScenarioCPPTestClean, LibAbcKitTestDynamicAddLogClean)
         });
         EXPECT_TRUE(handleMethod.has_value());
 
-        abckit::Graph graph = handleMethod->GetGraph();
+        abckit::Graph graph = handleMethod->CreateGraph();
         TransformIr(graph, data);
         handleMethod->SetGraph(graph);
 
