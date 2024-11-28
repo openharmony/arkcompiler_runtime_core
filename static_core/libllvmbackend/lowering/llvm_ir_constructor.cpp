@@ -2161,6 +2161,7 @@ llvm::Value *LLVMIrConstructor::CreateRoundArm64(Inst *inst, bool is64)
     auto lessThan = builder_.CreateICmpSLT(round, zero);
     builder_.CreateCondBr(lessThan, negative, done);
 
+    // CC-OFFNXT(C_RULE_ID_HORIZON_SPACE_SHIELD) false-positive
     // Negative input case, add 1 iff "input - round(input) == 0.5"
     SetCurrentBasicBlock(negative);
     // frinta instruction

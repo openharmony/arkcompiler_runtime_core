@@ -158,5 +158,6 @@
   "verification/util/bit_vector.h": "*",
   "verification/type/type_type.cpp": "*",
   "compiler/optimizer/ir/visitor.inc": {"G.INC.02": "*", "G.INC.04-CPP": "*"},
+  "libllvmbackend/lowering/llvm_ir_constructor.cpp": {"G.FMT.13-CPP": [1]},
   "*": ["G.CMT.03", "G.FMT.03-CPP", "G.FMT.04", "G.FMT.11", "G.NAM.03", "huge_headerfile", "huge_non_headerfile", "bc-30001"]
 }
