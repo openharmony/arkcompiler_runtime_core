@@ -361,7 +361,7 @@ class UtilASTChecker:
             if actual_error[0].split()[0] == "Warning:" and not self.check_skip_warning():
                 Log.all(_LOGGER, f'Unexpected warning {actual_error}')
                 failed_tests += 1
-            if ((actual_error[0].split()[0] == "TypeError:" or actual_error[0].split()[0] == "SyntaxError:")
+            if (actual_error[0].split()[0] in ("TypeError:", "SyntaxError:", "Error:")
                     and not self.check_skip_error()):
                 Log.all(_LOGGER, f'Unexpected error {actual_error}')
                 failed_tests += 1
