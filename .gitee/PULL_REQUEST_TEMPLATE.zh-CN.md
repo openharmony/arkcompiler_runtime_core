@@ -59,5 +59,6 @@
 - [ ] 不涉及
 
 ##### **九、当前GGW中忽略的失败测试套**
+1."runtime_core/libpandabase/tests:host_unittest"
 
 **Email:** chenqiuyao@huawei.com
