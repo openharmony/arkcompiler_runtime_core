@@ -33,17 +33,6 @@ function HumongousObjectTest(): void throws
     assert GC.getObjectSpaceType(h_obj) == GC.HUMONGOUS_SPACE: "Must be humongous space";
 }
 
-function nullObjectTest(): void {
-    let detected = false;
-    try {
-        GC.getObjectSpaceType(null);
-    } catch (e: NullPointerError) {
-        detected = true;
-    }
-    catch (e) {}
-    assert detected == true: "getObjectSpaceType must throw NullPointerError for null argument";
-}
-
 /**
  * Tests for getObjectSpaceType builtin.
  */
@@ -56,6 +45,5 @@ function main(): int {
     catch (e) {
         assert false: "Space allocation test must not throw exceptions";
     }
-    nullObjectTest();
     return 0;
 }

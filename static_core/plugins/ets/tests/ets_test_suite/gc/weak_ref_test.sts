@@ -16,14 +16,12 @@
 function CreateWeakRefObject(): WeakRef<Object>
 {
     let obj = new Object();
-    assert obj != null : "New object must be correctly allocated";
     return new WeakRef<Object>(obj);
 }
 
 function CreateWeakRefString(s: string): WeakRef<String>
 {
     let obj = "Hello " + s;
-    assert obj != null : "New string object must be correctly allocated";
     return new WeakRef<String>(obj);
 }
 

@@ -2066,6 +2066,16 @@ intrinsics:
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdGCGetObjectAddress
 
+  - name: StdGetObjectSize
+    space: ets
+    class_name: std.core.GC
+    method_name: getObjectSize
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::StdGetObjectSize
+
   - name: StdGCPinObject
     space: ets
     class_name: std.core.GC
