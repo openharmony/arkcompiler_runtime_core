@@ -165,10 +165,12 @@ srcs_runtime = [
   "stdlib/native/init_native_methods.cpp",
   "stdlib/native/escompat/Process.cpp",
   "stdlib/native/core/Intl.cpp",
+  "stdlib/native/core/IntlCommon.cpp",
   "stdlib/native/core/IntlState.cpp",
   "stdlib/native/core/IntlNumberFormat.cpp",
   "stdlib/native/core/IntlFormattersCache.cpp",
   "stdlib/native/core/IntlLocaleMatch.cpp",
+  "stdlib/native/core/IntlCollator.cpp",
   "stdlib/native/etsstdlib.cpp"
 ]
 

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,8 +18,10 @@
 #include "plugins/ets/stdlib/native/core/IntlState.h"
 #include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
 #include "plugins/ets/stdlib/native/core/IntlLocaleMatch.h"
+#include "plugins/ets/stdlib/native/core/IntlCollator.h"
+#include "plugins/ets/stdlib/native/core/IntlCommon.h"
 
-namespace ark::ets::stdlib {
+namespace ark::ets::stdlib::intl {
 
 ets_int InitCoreIntl(EtsEnv *env)
 {
@@ -29,7 +31,8 @@ ets_int InitCoreIntl(EtsEnv *env)
     // Register Native methods. Stop if an error occurred
     ets_int err = RegisterIntlNumberFormatNativeMethods(env);
     err = err == ETS_OK ? RegisterIntlLocaleMatch(env) : err;
+    err = err == ETS_OK ? RegisterIntlCollator(env) : err;
     return err;
 }
 
-}  // namespace ark::ets::stdlib
+}  // namespace ark::ets::stdlib::intl
