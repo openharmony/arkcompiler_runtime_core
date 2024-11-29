@@ -26,6 +26,7 @@ BUILD_TYPE=debug
 
 # Build targets:
 BUILD_COOKBOOK=no
+BUILD_RUNTIME=no
 BUILD_SPEC=no
 BUILD_STDLIB=no
 BUILD_TUTORIAL=no
@@ -66,6 +67,7 @@ TARGETS
     targets (they are included into 'all' alias):
 
     * cookbook
+    * runtime
     * spec
     * stdlib
     * tutorial
@@ -160,6 +162,11 @@ for i in "$@"; do
 
         BUILD_COOKBOOK=yes
         ;;
+    runtime)
+        BUILD_SOMETHING=yes
+
+        BUILD_RUNTIME=yes
+        ;;
     spec)
         BUILD_SOMETHING=yes
 
@@ -192,6 +199,7 @@ for i in "$@"; do
         BUILD_SOMETHING=yes
 
         BUILD_COOKBOOK=yes
+        BUILD_RUNTIME=yes
         BUILD_SPEC=yes
         BUILD_STDLIB=yes
         BUILD_TUTORIAL=yes
@@ -219,6 +227,7 @@ if [[ "${BUILD_SOMETHING}" == "no" ]] ; then
     BUILD_SOMETHING=yes
 
     BUILD_COOKBOOK=yes
+    BUILD_RUNTIME=yes
     BUILD_SPEC=yes
     BUILD_STDLIB=yes
     BUILD_TUTORIAL=yes
@@ -248,6 +257,10 @@ if [[ "${BUILD_COOKBOOK}" == "yes" ]]; then
         --recipes="${SCRIPT_DIR}/cookbook/recipes.rst"
 
     build_sphinx_document cookbook "${SCRIPT_DIR}/cookbook"
+fi
+
+if [[ "${BUILD_RUNTIME}" == "yes" ]]; then
+    build_sphinx_document runtime "${SCRIPT_DIR}/runtime"
 fi
 
 if [[ "${BUILD_STDLIB}" == "yes" ]]; then
