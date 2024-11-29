@@ -126,12 +126,16 @@ function(irtoc_compile)
         if (NOT LLVM_LINK)
             message(FATAL_ERROR "LLVM_LINK is required but was not set")
         endif()
+        if(PANDA_BUILD_LLVM_BINARIES)
+            # LLVM_LINK is set, but binary might not be build yet 
+            set(llvm-link-dependency x86_64-llvm-link)
+        endif()
         add_custom_command(
                 OUTPUT ${llvm_inline_module_bc}
                 COMMAND ${LLVM_LINK} ${ARG_LLVM_BACKEND_INLINE_MODULE_FILES} -o ${llvm_inline_module_bc}
                 COMMAND_EXPAND_LISTS
                 COMMENT "Linking ${ARG_OUTPUT}"
-                DEPENDS ${ARG_LLVM_BACKEND_INLINE_MODULE_FILES} irtoc_int_llvm_inl_module
+                DEPENDS ${ARG_LLVM_BACKEND_INLINE_MODULE_FILES} irtoc_int_llvm_inl_module ${llvm-link-dependency}
         )
         set(command_comment "Building ${IRTOC_OUTPUT}")
         string(APPEND command_comment ", ${IRTOC_OUTPUT_LLVM}")

@@ -24,6 +24,8 @@ BUILD_TYPE_DEBUG="Debug"
 export OHOS_SDK_NATIVE="$(realpath "$1")"
 export SDK_BUILD_ROOT="$(realpath "$2")"
 export PANDA_SDK_BUILD_TYPE="${3:-"$BUILD_TYPE_RELEASE"}"
+export PANDA_LLVM_BACKEND="${4:-"OFF"}"
+export PANDA_BUILD_LLVM_BINARIES="${5:-"OFF"}"
 
 function usage() {
     echo "$(basename "${BASH_SOURCE[0]}") path/to/ohos/sdk/native path/to/panda/sdk/destination build_type:[$BUILD_TYPE_RELEASE,$BUILD_TYPE_FAST_VERIFY,$BUILD_TYPE_DEBUG]"
