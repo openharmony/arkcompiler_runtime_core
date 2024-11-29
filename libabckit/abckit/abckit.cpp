@@ -30,7 +30,7 @@ namespace fs = std::experimental::filesystem;
 
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 
-void PrintHelp(panda::PandArgParser &paParser)
+static void PrintHelp(panda::PandArgParser &paParser)
 {
     std::cerr << "Usage:" << std::endl;
     std::cerr << "abckit --plugin-path <libabckitplugin.so> --input-file <input.abc> [--output-file <output.abc>]"
@@ -39,7 +39,7 @@ void PrintHelp(panda::PandArgParser &paParser)
     std::cerr << paParser.GetHelpString() << std::endl;
 }
 
-bool ProcessArgs(panda::PandArgParser &paParser, int /*argc*/, const char ** /*argv*/)
+static bool ProcessArgs(panda::PandArgParser &paParser, int /*argc*/, const char ** /*argv*/)
 {
     if (libabckit::g_abckitOptions.GetInputFile().empty()) {
         std::cerr << "ERROR: --input-file is required\n";

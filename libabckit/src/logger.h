@@ -235,8 +235,6 @@ private:
 };
 }  // namespace libabckit
 
-extern thread_local libabckit::Logger::MODE g_abckitGlobalMode;
-
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_LOG_STREAM(level) libabckit::Logger::Message(#level)
@@ -252,15 +250,15 @@ extern thread_local libabckit::Logger::MODE g_abckitGlobalMode;
 // CC-OFFNXT(G.DCL.01) public API
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LIBABCKIT_LOG_(level)                          \
-    libabckit::Logger::Initialize(g_abckitGlobalMode); \
+#define LIBABCKIT_LOG_(level)                                             \
+    libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
     *LIBABCKIT_LOG_STREAM(level) << libabckit::Logger::msgPrefix_ << "[" << LIBABCKIT_FUNC_NAME << "] "
 
 // CC-OFFNXT(G.DCL.01) public API
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define LIBABCKIT_LOG_NO_FUNC_(level)                  \
-    libabckit::Logger::Initialize(g_abckitGlobalMode); \
+#define LIBABCKIT_LOG_NO_FUNC_(level)                                     \
+    libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE); \
     *LIBABCKIT_LOG_STREAM(level) << libabckit::Logger::msgPrefix_
 
 // CC-OFFNXT(G.PRE.02) necessary macro
@@ -303,7 +301,7 @@ extern thread_local libabckit::Logger::MODE g_abckitGlobalMode;
 // CC-OFFNXT(G.PRE.02) necessary macro
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_LOG_TEST(level)                                                               \
-    libabckit::Logger::Initialize(g_abckitGlobalMode);                                          \
+    libabckit::Logger::Initialize(libabckit::Logger::MODE::RELEASE_MODE);                       \
     *LIBABCKIT_LOG_STREAM(level) << LIBABCKIT_PREFIX_TEST << "[" << LIBABCKIT_FUNC_NAME << "] " \
                                  << " "
 
