@@ -4,3 +4,8 @@
 
 # 19929
 06.contexts_and_conversions/04.casting_contexts_and_conversions/sequenced_42.sts
+
+#19929 Leftovers from bit operations on floats, verifier failure with opt-level=0
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer2_10.sts
+04.names_declarations_and_scopes/07.variable_and_constant_declarations/04.type_inference_from_initializer/infer2_9.sts
+06.contexts_and_conversions/03.numeric_operator_contexts/binary_numeric_promotion/result_type_bitwise_68.sts

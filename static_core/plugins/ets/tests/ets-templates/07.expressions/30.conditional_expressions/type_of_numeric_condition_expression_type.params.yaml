@@ -13,6 +13,5 @@
 
 --- # List of operands
 operands:
- - {first: "true", second: "10 as short", third: "new Byte(5 as Byte)", check: "x instanceof Short" } 
+ - {first: "true", second: "10 as short", third: "new Byte(5 as Byte)", check: "x instanceof Short && x instanceof Short|Byte" }
  - {first: "true", second: "new Int(10)", third: "20", check: "x instanceof Int" }
- 

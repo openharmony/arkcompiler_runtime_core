@@ -1100,7 +1100,7 @@
     status: No testable assertions
 17.8.1:
     title: Native Functions
-    status: ''
+    status: 'Finished'
 17.8.2:
     title: Native Methods
     status: ''
@@ -1220,7 +1220,7 @@
     status: ''
 17.19.3:
     title: Import and Overloading of Function Names
-    status: ''
+    status: 'Finished'
 '17.20':
     title: Generics Experimental
     status: No testable assertions

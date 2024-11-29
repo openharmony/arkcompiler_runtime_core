@@ -17,7 +17,6 @@
 
 /*---
 desc: Type of a numeric conditional expression
-tags: [compile-only, negative]
 ---*/
 
 function main(): void {
