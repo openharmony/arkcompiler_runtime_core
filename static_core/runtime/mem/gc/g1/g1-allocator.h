@@ -257,6 +257,31 @@ public:
         objectAllocator_->SetDesiredEdenLength(edenLength);
     }
 
+    double CalculateNonMovableExternalFragmentation()
+    {
+        return nonmovableAllocator_->CalculateExternalFragmentation();
+    }
+
+    double CalculateInternalOldFragmentation()
+    {
+        return objectAllocator_->CalculateInternalOldFragmentation();
+    }
+
+    double CalculateInternalHumongousFragmentation()
+    {
+        return humongousObjectAllocator_->CalculateInternalFragmentation();
+    }
+
+    double CalculateOldDeadObjectsRatio()
+    {
+        return objectAllocator_->CalculateDeadObjectsRatio();
+    }
+
+    double CalculateNonMovableDeadObjectsRatio()
+    {
+        return nonmovableAllocator_->CalculateDeadObjectsRatio();
+    }
+
 private:
     Alignment CalculateAllocatorAlignment(size_t align) final;
 

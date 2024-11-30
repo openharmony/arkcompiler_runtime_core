@@ -164,6 +164,14 @@ public:
         return AllocatorType::RUNSLOTS_ALLOCATOR;
     }
 
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    size_t GetAllocatedBytes() const
+    {
+        // Atomic with relaxed order reason: order is not required
+        return allocatedBytes_.load(std::memory_order_relaxed);
+    }
+#endif
+
 private:
     using RunSlotsType = RunSlots<typename LockConfigT::RunSlotsLock>;
 
@@ -429,6 +437,10 @@ private:
     SpaceType typeAllocation_;
 
     MemStatsType *memStats_;
+
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    std::atomic_size_t allocatedBytes_ {0};
+#endif
 
     template <typename T>
     friend class PygoteSpaceAllocator;

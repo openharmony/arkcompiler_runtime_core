@@ -708,11 +708,19 @@ void G1GC<LanguageConfig>::RunPhasesImpl(ark::GCTask &task)
                 // Check there is no concurrent mark running by another thread.
                 EnsurePreWrbDisabledInThreads();
 
+                if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
+                    PrintFragmentationMetrics("Before GC fragmentation metrics");
+                }
+
                 if (NeedFullGC(task)) {
                     task.collectionType = GCCollectionType::FULL;
                     RunFullGC(task);
                 } else {
                     TryRunMixedGC(task);
+                }
+
+                if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
+                    PrintFragmentationMetrics("After GC fragmentation metrics");
                 }
             }
         }
@@ -1736,6 +1744,14 @@ void G1GC<LanguageConfig>::ConcurrentMarking(ark::GCTask &task)
             isMixedGcRequired_.store(true, std::memory_order_release);
         }
 
+        if (this->GetSettings()->LogDetailedGCInfoEnabled()) {
+            LOG_INFO_GC << "Old dead obj ratio " << this->GetG1ObjectAllocator()->CalculateOldDeadObjectsRatio();
+#ifdef PANDA_MEASURE_FRAGMENTATION
+            LOG_INFO_GC << "Nonmovable dead obj ratio "
+                        << this->GetG1ObjectAllocator()->CalculateNonMovableDeadObjectsRatio();
+#endif
+        }
+
         {
             ScopedTiming t("Concurrent Sweep", *this->GetTiming());
             ConcurrentScope concurrentScope(this);
@@ -2659,6 +2675,17 @@ size_t G1GC<LanguageConfig>::GetUniqueRemsetRefsCount() const
         count += v->size();
     }
     return count;
+}
+
+template <class LanguageConfig>
+void G1GC<LanguageConfig>::PrintFragmentationMetrics(const char *title)
+{
+    LOG_INFO_GC << title;
+    LOG_INFO_GC << "Internal Old fragmentation " << this->GetG1ObjectAllocator()->CalculateInternalOldFragmentation();
+    LOG_INFO_GC << "Internal humongous fragmentation "
+                << this->GetG1ObjectAllocator()->CalculateInternalHumongousFragmentation();
+    LOG_INFO_GC << "Nonmovable external fragmentation "
+                << this->GetG1ObjectAllocator()->CalculateNonMovableExternalFragmentation();
 }
 
 TEMPLATE_CLASS_LANGUAGE_CONFIG(G1GC);

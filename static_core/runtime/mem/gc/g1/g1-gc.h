@@ -480,6 +480,8 @@ private:
     void ExecuteEnqueueRemsetsTask(GCUpdateRefsWorkersTask<false>::MovedObjectsRange *movedObjectsRange);
     void ExecuteEvacuateTask(typename G1EvacuateRegionsTask<Ref>::StackType *stack);
 
+    void PrintFragmentationMetrics(const char *title);
+
     G1GCPauseMarker<LanguageConfig> marker_;
     G1GCConcurrentMarker<LanguageConfig> concMarker_;
     G1GCMixedMarker<LanguageConfig> mixedMarker_;
