@@ -256,8 +256,7 @@ export abstract class Value extends Object {
         } else if (t instanceof TupleType) {
             throw new Error("Not implemented")
         }
-        // NOTE(shumilov-petr): throw `unknown type` exception
-        assert(false)
+        throw new Error("Unknown type")
     }
 
     // -----
