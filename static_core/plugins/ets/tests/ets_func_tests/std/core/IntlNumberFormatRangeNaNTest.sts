@@ -24,6 +24,7 @@ function main(): int {
     failures += check(FormatRangeNumberNaNUnion(), "Intl NumberFormat.formatRange -number NaN. Called union-types args");
     failures += check(FormatRangeNaNBigIntUnion(), "Intl NumberFormat.formatRange NaN +BigInt. Called union-types args");
     failures += check(FormatRangeBigIntNaNUnion(), "Intl NumberFormat.formatRange -BigInt NaN. Called union-types args");
+    failures += check(FormatRangeNaNNaNUnion(), "Intl NumberFormat.formatRange NaN NaN. Called union-types args");
     return failures;
 }
 
@@ -132,6 +133,23 @@ function FormatRangeBigIntNaNUnion(): int {
     const startValue = bigIntValues[0];
     const endValue = NaN;
     const expected = "TypeError: Invalid end: NaN";
+    for (let i = 0; i < languageCodes.length; i++) {
+        let locale: string = languageCodes[i];
+        if (countryCodes[i] != "") {
+            locale = locale + "-" + countryCodes[i];
+        }
+        if (CheckFormatRangeNaNUnion(locale, funcName, startValue, endValue, expected) == fail) {
+            return fail;
+        }
+    }
+    return success;
+}
+
+function FormatRangeNaNNaNUnion(): int {
+    const funcName = "FormatRangeNaNNaNUnion";
+    const startValue = NaN;
+    const endValue = NaN;
+    const expected = "TypeError: Invalid start: NaN";
     for (let i = 0; i < languageCodes.length; i++) {
         let locale: string = languageCodes[i];
         if (countryCodes[i] != "") {

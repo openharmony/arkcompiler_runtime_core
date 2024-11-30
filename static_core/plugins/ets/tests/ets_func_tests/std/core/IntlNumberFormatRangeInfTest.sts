@@ -307,7 +307,7 @@ function FormatRangeNegInfNegInfUnion(): int {
     left[FR] = String.fromCharCode(8771);
     left[ES] = left[EN];
     left[GR] = left[EN];
-    left[NO] = String.fromCharCode(99, 97, 46, 32);
+    left[NO] = String.fromCharCode(99, 97, 46);
     left[IT] = left[ES];
     left[CH] = left[ES];
     left[JP] = String.fromCharCode(32004);
@@ -319,10 +319,6 @@ function FormatRangeNegInfNegInfUnion(): int {
     const leftValue = -Infinity;
     const righValue = -Infinity;
     for (let i = 0; i < languageCodes.length; i++) {
-        // NOTE(ikorobkov): testing FR and JP locales is skipped until issue #20312 will be fixed
-        if (i == FR || i == JP)  {
-            continue;
-        }
         let locale: string = languageCodes[i];
         if (countryCodes[i] != "") {
             locale = locale + "-" + countryCodes[i];
