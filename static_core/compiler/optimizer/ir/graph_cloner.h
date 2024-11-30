@@ -383,6 +383,9 @@ private:
 
     bool IsInstLoopHeaderPhi(Inst *inst, Loop *loop);
 
+    // clone throwable inst -> catch blocks mapping
+    void CloneThrowableInstHandlers(Graph *newGraph);
+
 protected:
     Marker cloneMarker_ {UNDEF_MARKER};  // NOLINT(misc-non-private-member-variables-in-classes)
 

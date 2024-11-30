@@ -55,7 +55,7 @@ static void EnumerateAllMethodsInModule(AbckitFile *file, std::function<bool(Abc
         g_implI->moduleEnumerateClasses(m, &cbClass, [](AbckitCoreClass *c, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreClass *)> *>(cb))(c);
         });
-        g_implI->moduleEnumerateTopLevelFunctions(m, cbFunc, [](AbckitCoreFunction *f, void *cb) {
+        g_implI->moduleEnumerateTopLevelFunctions(m, &cbFunc, [](AbckitCoreFunction *f, void *cb) {
             return (*reinterpret_cast<std::function<bool(AbckitCoreFunction *)> *>(cb))(f);
         });
         return !hasError;
