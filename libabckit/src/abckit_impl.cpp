@@ -31,7 +31,6 @@
 #include <iostream>
 
 libabckit::Logger *libabckit::Logger::logger_ = nullptr;
-thread_local libabckit::Logger::MODE g_abckitGlobalMode {libabckit::Logger::MODE::RELEASE_MODE};
 thread_local libabckit::NullBuffer libabckit::g_nB {};
 thread_local std::ostream libabckit::g_nullStream {&g_nB};
 
