@@ -15,6 +15,7 @@
 
 #include "plugins/ets/runtime/types/ets_object.h"
 #include "plugins/ets/runtime/ets_coroutine.h"
+#include "runtime/handle_base-inl.h"
 
 namespace ark::ets {
 
@@ -35,6 +36,27 @@ EtsObject *EtsObject::Create(EtsClass *klass)
 EtsObject *EtsObject::CreateNonMovable(EtsClass *klass)
 {
     return static_cast<EtsObject *>(ObjectHeader::CreateNonMovable(klass->GetRuntimeClass()));
+}
+
+uint32_t EtsObject::GetHashCode()
+{
+    while (true) {
+        MarkWord currentMarkWord = AtomicGetMark();
+        switch (currentMarkWord.GetState()) {
+            case MarkWord::STATE_HASHED: {
+                return currentMarkWord.GetHash();
+            }
+            case MarkWord::STATE_UNLOCKED: {
+                auto hashMark = currentMarkWord.DecodeFromHash(GenerateHashCode());
+                ASSERT(hashMark.GetState() == MarkWord::STATE_HASHED);
+                AtomicSetMark(currentMarkWord, hashMark);
+                break;
+            }
+            default: {
+                LOG(FATAL, RUNTIME) << "Error on GetHashCode(): invalid state " << currentMarkWord.GetState();
+            }
+        }
+    }
 }
 
 }  // namespace ark::ets
