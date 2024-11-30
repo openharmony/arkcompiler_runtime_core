@@ -30,7 +30,7 @@ inline Graph Function::CreateGraph() const
     return Graph(graph, conf_, GetResource());
 }
 
-inline void Function::SetGraph(const Graph &graph)
+inline void Function::SetGraph(const Graph &graph) const
 {
     const ApiConfig *conf = GetApiConfig();
     conf->cMapi_->functionSetGraph(GetView(), graph.GetResource());
@@ -117,6 +117,19 @@ inline void Function::EnumerateNestedClasses(const std::function<bool(core::Clas
         GetView(), &payload, [](AbckitCoreClass *nestedClass, void *data) {
             const auto &payload = *static_cast<Payload<const std::function<bool(core::Class)> &> *>(data);
             return payload.data(core::Class(nestedClass, payload.config, payload.resource));
+        });
+    CheckError(GetApiConfig());
+}
+
+inline void Function::EnumerateAnnotations(const std::function<bool(core::Annotation)> &cb) const
+{
+    using PayloadT = Payload<const std::function<bool(core::Annotation)> &>;
+    PayloadT payload {cb, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cIapi_->functionEnumerateAnnotations(
+        GetView(), &payload, [](AbckitCoreAnnotation *ann, void *data) {
+            const auto &payload = *static_cast<PayloadT *>(data);
+            return payload.data(core::Annotation(ann, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
 }

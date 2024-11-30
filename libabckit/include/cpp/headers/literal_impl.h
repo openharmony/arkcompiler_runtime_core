@@ -29,7 +29,7 @@ inline bool Literal::GetBool() const
 
 inline abckit::LiteralArray Literal::GetLiteralArray() const
 {
-    LiteralArray ret(GetApiConfig()->cIapi_->literalGetLiteralArray(GetView()), GetApiConfig());
+    LiteralArray ret(GetApiConfig()->cIapi_->literalGetLiteralArray(GetView()), GetApiConfig(), GetResource());
     CheckError(GetApiConfig());
     return ret;
 }

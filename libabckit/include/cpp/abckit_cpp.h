@@ -56,6 +56,8 @@
 // implementations
 #include "./headers/core/annotation_interface_field_impl.h"
 #include "./headers/core/annotation_interface_impl.h"
+#include "./headers/core/annotation_element_impl.h"
+#include "./headers/core/annotation_impl.h"
 #include "./headers/core/module_impl.h"
 #include "./headers/core/namespace_impl.h"
 #include "./headers/core/class_impl.h"
@@ -63,9 +65,15 @@
 #include "./headers/core/export_descriptor_impl.h"
 #include "./headers/core/import_descriptor_impl.h"
 
+#include "./headers/arkts/annotation_interface_field_impl.h"
+#include "./headers/arkts/annotation_interface_impl.h"
 #include "./headers/arkts/annotation_element_impl.h"
 #include "./headers/arkts/annotation_impl.h"
 #include "./headers/arkts/function_impl.h"
+#include "./headers/arkts/module_impl.h"
+#include "./headers/arkts/class_impl.h"
+#include "./headers/arkts/export_descriptor_impl.h"
+#include "./headers/arkts/import_descriptor_impl.h"
 
 #include "./headers/dynamic_isa_impl.h"
 #include "./headers/basic_block_impl.h"
@@ -73,6 +81,7 @@
 #include "./headers/graph_impl.h"
 #include "./headers/instruction_impl.h"
 #include "./headers/literal_impl.h"
+#include "./headers/value_impl.h"
 
 #include "./headers/hash_specializations.h"
 

@@ -20,6 +20,18 @@
 
 namespace abckit::arkts {
 
+inline AbckitArktsAnnotationElement *AnnotationElement::TargetCast() const
+{
+    auto ret = GetApiConfig()->cArktsIapi_->coreAnnotationElementToArktsAnnotationElement(GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline AnnotationElement::AnnotationElement(const core::AnnotationElement &coreOther)
+    : core::AnnotationElement(coreOther), targetChecker_(this)
+{
+}
+
 inline std::string_view AnnotationElement::GetName() const
 {
     AbckitString *abcName = GetApiConfig()->cIapi_->annotationElementGetName(GetView());

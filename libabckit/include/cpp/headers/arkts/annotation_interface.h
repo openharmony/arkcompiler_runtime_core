@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_ANNOTATION_INTERFACE_H
 
 #include "../core/annotation_interface.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -31,8 +32,16 @@ class AnnotationInterface : public core::AnnotationInterface {
     friend class arkts::Function;
     /// @brief abckit::DefaultHash<AnnotationInterface>
     friend class abckit::DefaultHash<AnnotationInterface>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<AnnotationInterface>;
 
 public:
+    /**
+     * @brief Constructor Arkts API AnnotationInterface from the Core API with compatibility check
+     * @param other - Core API AnnotationInterface
+     */
+    explicit AnnotationInterface(const core::AnnotationInterface &other);
+
     /**
      * @brief Construct a new Annotation Interface object
      * @param other
@@ -59,19 +68,23 @@ public:
      */
     AnnotationInterface &operator=(AnnotationInterface &&other) = default;
 
-    // CC-OFFNXT(G.FMT.02) project code style
-    /**
-     * @brief Construct a new Annotation Interface object
-     * @param coreOther
-     */
-    explicit AnnotationInterface(const core::AnnotationInterface &coreOther) : core::AnnotationInterface(coreOther) {};
-
     /**
      * @brief Destroy the Annotation Interface object
      */
     ~AnnotationInterface() override = default;
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts annotation interface from Core to Arkts target
+     * @return AbckitArktsAnnotationInterface* - converted annotation interface
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsAnnotationInterface *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<AnnotationInterface> targetChecker_;
 };
 
 }  // namespace abckit::arkts

@@ -40,7 +40,7 @@ TEST_F(LibAbcKitCppTest, CppTest1)
 
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    for (auto function : file.GetAllFunctions()) {
+    for (const auto &function : file.GetAllFunctions()) {
         abckit::Graph graph = function.CreateGraph();
         abckit::BasicBlock curBB = graph.GetStartBb().GetSuccByIdx(0);
 

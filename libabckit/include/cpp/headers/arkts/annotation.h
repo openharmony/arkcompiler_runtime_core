@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_ANNOTATION_H
 
 #include "../core/annotation.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -31,8 +32,16 @@ class Annotation : public core::Annotation {
     friend class arkts::Function;
     /// @brief abckit::DefaultHash<Annotation>
     friend class abckit::DefaultHash<Annotation>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<Annotation>;
 
 public:
+    /**
+     * @brief Constructor Arkts API Annotation from the Core API with compatibility check
+     * @param other - Core API Annotation
+     */
+    explicit Annotation(const core::Annotation &other);
+
     /**
      * @brief Construct a new Annotation object
      * @param other
@@ -59,13 +68,6 @@ public:
      */
     Annotation &operator=(Annotation &&other) = default;
 
-    // CC-OFFNXT(G.FMT.02) project code style
-    /**
-     * @brief Construct a new Annotation object
-     * @param coreOther
-     */
-    explicit Annotation(const core::Annotation &coreOther) : core::Annotation(coreOther) {};
-
     /**
      * @brief Destroy the Annotation object
      */
@@ -87,15 +89,26 @@ public:
      */
     arkts::AnnotationElement AddAndGetElement(const abckit::Value &val, const std::string_view name);
 
+    // Other API.
+    // ...
+
+private:
+    /**
+     * @brief Converts annotation from Core to Arkts target
+     * @return AbckitArktsAnnotation* - converted annotation
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsAnnotation *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<Annotation> targetChecker_;
+
     /**
      * @brief add and get element impl
      * @param params
      * @return AbckitCoreAnnotationElement*
      */
     AbckitCoreAnnotationElement *AddAndGetElementImpl(AbckitArktsAnnotationElementCreateParams *params);
-
-    // Other API.
-    // ...
 };
 
 }  // namespace abckit::arkts

@@ -36,6 +36,10 @@ class ExportDescriptor : public ViewInResource<AbckitCoreExportDescriptor *, con
     /// @brief abckit::DefaultHash<ExportDescriptor>
     friend class abckit::DefaultHash<ExportDescriptor>;
 
+protected:
+    /// @brief Core API View type
+    using CoreViewT = ExportDescriptor;
+
 public:
     /**
      * @brief Construct a new Export Descriptor object

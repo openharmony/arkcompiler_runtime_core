@@ -17,8 +17,19 @@
 #define CPP_ABCKIT_GRAPH_IMPL_H
 
 #include "./graph.h"
+#include "./dynamic_isa.h"
 
 namespace abckit {
+
+inline DynamicIsa Graph::DynIsa()
+{
+    return DynamicIsa(*this);
+}
+
+inline StaticIsa Graph::StatIsa()
+{
+    return StaticIsa(*this);
+}
 
 inline BasicBlock Graph::GetStartBb() const
 {
@@ -66,19 +77,26 @@ inline void Graph::EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)>
     CheckError(GetApiConfig());
 }
 
-inline Instruction Graph::CreateConstantI32(int32_t val)
+inline Instruction Graph::CreateConstantI32(int32_t val) const
 {
     AbckitInst *inst = GetApiConfig()->cGapi_->gCreateConstantI32(GetResource(), val);
     CheckError(GetApiConfig());
     return Instruction(inst, GetApiConfig(), this);
 }
 
-inline BasicBlock Graph::CreateEmptyBb()
+inline BasicBlock Graph::CreateEmptyBb() const
 {
     const ApiConfig *conf = GetApiConfig();
     AbckitBasicBlock *bb = conf->cGapi_->bbCreateEmpty(GetResource());
     CheckError(conf);
     return BasicBlock(bb, conf, this);
+}
+
+inline void Graph::RunPassRemoveUnreachableBlocks() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    conf->cGapi_->gRunPassRemoveUnreachableBlocks(GetResource());
+    CheckError(conf);
 }
 
 }  // namespace abckit

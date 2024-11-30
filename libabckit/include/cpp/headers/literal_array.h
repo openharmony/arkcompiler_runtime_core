@@ -23,13 +23,15 @@ namespace abckit {
 /**
  * @brief LiteralArray
  */
-class LiteralArray : public View<AbckitLiteralArray *> {
+class LiteralArray : public ViewInResource<AbckitLiteralArray *, const File *> {
     /// @brief abckit::File
     friend class abckit::File;
     /// @brief abckit::Literal
     friend class abckit::Literal;
     /// @brief abckit::DefaultHash<LiteralArray>
     friend class abckit::DefaultHash<LiteralArray>;
+    /// @brief abckit::DynamicIsa
+    friend class abckit::DynamicIsa;
 
 public:
     /**
@@ -75,7 +77,10 @@ protected:
     }
 
 private:
-    LiteralArray(AbckitLiteralArray *lita, const ApiConfig *conf) : View(lita), conf_(conf) {};
+    LiteralArray(AbckitLiteralArray *lita, const ApiConfig *conf, const File *file) : ViewInResource(lita), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 };
 

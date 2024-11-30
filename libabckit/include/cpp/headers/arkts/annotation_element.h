@@ -17,6 +17,7 @@
 #define CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_H
 
 #include "../core/annotation_element.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
@@ -33,8 +34,16 @@ class AnnotationElement : public core::AnnotationElement {
     friend class arkts::Annotation;
     /// @brief abckit::DefaultHash<AnnotationElement>
     friend class abckit::DefaultHash<AnnotationElement>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<AnnotationElement>;
 
 public:
+    /**
+     * @brief Constructor Arkts API AnnotationElement from the Core API with compatibility check
+     * @param other - Core API AnnotationElement
+     */
+    explicit AnnotationElement(const core::AnnotationElement &other);
+
     /**
      * @brief Construct a new Annotation Element object
      * @param other
@@ -61,13 +70,6 @@ public:
      */
     AnnotationElement &operator=(AnnotationElement &&other) = default;
 
-    // CC-OFFNXT(G.FMT.02) project code style
-    /**
-     * @brief Construct a new Annotation Element object
-     * @param coreOther
-     */
-    explicit AnnotationElement(const core::AnnotationElement &coreOther) : core::AnnotationElement(coreOther) {};
-
     /**
      * @brief Destroy the Annotation Element object
      */
@@ -81,6 +83,17 @@ public:
 
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts annotation element from Core to Arkts target
+     * @return AbckitArktsAnnotationElement* - converted annotation element
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsAnnotationElement *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<AnnotationElement> targetChecker_;
 };
 
 }  // namespace abckit::arkts

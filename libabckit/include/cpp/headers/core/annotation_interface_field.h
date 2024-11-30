@@ -37,6 +37,10 @@ class AnnotationInterfaceField : public ViewInResource<AbckitCoreAnnotationInter
     /// @brief abckit::DefaultHash<AnnotationInterfaceField>
     friend class abckit::DefaultHash<AnnotationInterfaceField>;
 
+protected:
+    /// @brief Core API View type
+    using CoreViewT = AnnotationInterfaceField;
+
 public:
     /**
      * @brief Construct a new Annotation Interface Field object

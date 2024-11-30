@@ -35,6 +35,10 @@ class Namespace : public ViewInResource<AbckitCoreNamespace *, const File *> {
     /// @brief abckit::DefaultHash<Namespace>
     friend class abckit::DefaultHash<Namespace>;
 
+protected:
+    /// @brief Core API View type
+    using CoreViewT = Namespace;
+
 public:
     /**
      * @brief Construct a new Namespace object

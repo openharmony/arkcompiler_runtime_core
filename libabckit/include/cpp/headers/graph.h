@@ -19,6 +19,7 @@
 #include "./base_classes.h"
 #include "./basic_block.h"
 #include "./dynamic_isa.h"
+#include "./instruction.h"
 #include "../../../src/include_v2/cpp/headers/static_isa.h"
 
 #include <memory>
@@ -100,22 +101,16 @@ public:
     std::vector<BasicBlock> GetBlocksRPO() const;
 
     /**
-     * @brief Get dyn isa
+     * @brief Get dynamic ISA
      * @return `DynamicIsa`
      */
-    DynamicIsa DynIsa()
-    {
-        return DynamicIsa(*this);
-    }
+    DynamicIsa DynIsa();
 
     /**
-     * @brief Get static isa
+     * @brief Get static ISA
      * @return `StatIsa`
      */
-    StaticIsa StatIsa()
-    {
-        return StaticIsa(*this);
-    }
+    StaticIsa StatIsa();
 
     /**
      * @brief EnumerateBasicBlocksRpo
@@ -129,17 +124,23 @@ public:
      * @param [ in ] val - value of created constant instruction.
      * @note Allocates
      */
-    Instruction CreateConstantI32(int32_t val);
+    Instruction CreateConstantI32(int32_t val) const;
 
     /**
      * @brief Creates empty basic block.
      * @return Created `BasicBlock`.
      * @note Allocates
      */
-    BasicBlock CreateEmptyBb();
+    BasicBlock CreateEmptyBb() const;
 
     // Other Graph API's
     // ...
+
+    /**
+     * @brief Removes all basic blocks unreachable from start basic block.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
+     */
+    void RunPassRemoveUnreachableBlocks() const;
 
 protected:
     /**

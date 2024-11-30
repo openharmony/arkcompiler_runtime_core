@@ -114,7 +114,7 @@ public:
      * @param val
      * @return `Value`
      */
-    abckit::Value CreateValueU1(bool val)
+    abckit::Value CreateValueU1(bool val) const
     {
         AbckitValue *value = GetApiConfig()->cMapi_->createValueU1(GetResource(), val);
         CheckError(GetApiConfig());
@@ -126,7 +126,7 @@ public:
      * @param val
      * @return `Value`
      */
-    abckit::Value CreateValueDouble(double val)
+    abckit::Value CreateValueDouble(double val) const
     {
         AbckitValue *value = GetApiConfig()->cMapi_->createValueDouble(GetResource(), val);
         CheckError(GetApiConfig());
@@ -138,7 +138,7 @@ public:
      * @param val
      * @return `Value`
      */
-    abckit::Literal CreateLiteralBool(bool val)
+    abckit::Literal CreateLiteralBool(bool val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralBool(GetResource(), val);
         CheckError(GetApiConfig());
@@ -150,7 +150,7 @@ public:
      * @param val
      * @return `Value`
      */
-    abckit::Literal CreateLiteralDouble(double val)
+    abckit::Literal CreateLiteralDouble(double val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralDouble(GetResource(), val);
         CheckError(GetApiConfig());
@@ -162,7 +162,7 @@ public:
      * @param val
      * @return `Literal`
      */
-    abckit::Literal CreateLiteralU32(double val)
+    abckit::Literal CreateLiteralU32(double val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU32(GetResource(), val);
         CheckError(GetApiConfig());
@@ -174,7 +174,7 @@ public:
      * @param val
      * @return `Literal`
      */
-    abckit::Literal CreateLiteralLiteralArray(const abckit::LiteralArray &val)
+    abckit::Literal CreateLiteralLiteralArray(const abckit::LiteralArray &val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralLiteralArray(GetResource(), val.GetView());
         CheckError(GetApiConfig());
@@ -182,7 +182,7 @@ public:
     }
 
     /**
-     * @brief Creates literal array value item with size `size` from the given value items array `value`.
+     * @brief Creates literal array value item from the given value items array `literals`.
      * @param literals
      * @return `LiteralArray`
      */
@@ -206,10 +206,24 @@ public:
     }
 
     /**
+     * @brief Creates literal containing the given string `val`.
+     * @return `Literal`.
+     * @param [ in ] val - string that will be stored in the literal to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `val` is empty.
+     * @note Allocates
+     */
+    abckit::Literal CreateLiteralString(const std::string &val) const
+    {
+        AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralString(GetResource(), val.c_str());
+        CheckError(GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
+    }
+
+    /**
      * @brief Writes `file` to the specified `path`.
      * @param path - path to file
      */
-    void WriteAbc(const std::string &path)
+    void WriteAbc(const std::string &path) const
     {
         GetApiConfig()->cApi_->writeAbc(GetResource(), path.c_str());
         CheckError(GetApiConfig());
