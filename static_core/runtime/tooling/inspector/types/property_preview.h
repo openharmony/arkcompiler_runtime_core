@@ -16,33 +16,32 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_PREVIEW_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_PREVIEW_H
 
+#include "tooling/inspector/types/remote_object_type.h"
+#include "tooling/inspector/json_serialization/serializable.h"
+
 #include <optional>
 #include <string>
 
-#include "types/remote_object_type.h"
-
 namespace ark::tooling::inspector {
 
-class PropertyPreview final {
+class PropertyPreview final : public JsonSerializable {
 public:
-    PropertyPreview(std::string name, RemoteObjectType type) : name_(std::move(name)), type_(type) {}
+    PropertyPreview(std::string name, RemoteObjectType type) : name_(std::move(name)), type_(std::move(type)) {}
 
     PropertyPreview(std::string name, RemoteObjectType type, const std::string &value)
-        : PropertyPreview(std::move(name), type)
+        : PropertyPreview(std::move(name), std::move(type))
     {
         value_ = value;
     }
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const
+    void Serialize(JsonObjectBuilder &builder) const override
     {
-        auto property = type_.ToJson();
-        AddProperty(property, "name", name_);
+        type_.Serialize(builder);
+        builder.AddProperty("name", name_);
 
         if (value_) {
-            AddProperty(property, "value", *value_);
+            builder.AddProperty("value", *value_);
         }
-
-        return property;
     }
 
 private:

@@ -23,11 +23,11 @@ namespace ark::tooling::inspector {
 
 class PropertyDescriptor;
 
-class ObjectPreview final {
+class ObjectPreview final : public JsonSerializable {
 public:
     ObjectPreview(RemoteObjectType type, const std::vector<PropertyDescriptor> &properties);
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const;
+    void Serialize(JsonObjectBuilder &builder) const override;
 
 private:
     RemoteObjectType type_;

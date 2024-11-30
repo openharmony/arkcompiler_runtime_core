@@ -16,17 +16,15 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_DESCRIPTOR_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_PROPERTY_DESCRIPTOR_H
 
-#include <functional>
-#include <string>
-#include <utility>
-
 #include "macros.h"
-#include "utils/json_builder.h"
+
+#include "tooling/inspector/types/remote_object.h"
+#include "tooling/inspector/json_serialization/serializable.h"
 
 #include "remote_object.h"
 
 namespace ark::tooling::inspector {
-class PropertyDescriptor {
+class PropertyDescriptor final : public JsonSerializable {
 public:
     PropertyDescriptor(std::string name, RemoteObject value) : name_(std::move(name)), value_(std::move(value)) {}
 
@@ -107,25 +105,23 @@ public:
         writable_ = writable;
     }
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const
+    void Serialize(JsonObjectBuilder &builder) const override
     {
-        return [this](JsonObjectBuilder &jsonBuilder) {
-            jsonBuilder.AddProperty("name", name_);
+        builder.AddProperty("name", name_);
 
-            if (symbol_) {
-                jsonBuilder.AddProperty("symbol", symbol_->ToJson());
-            }
+        if (symbol_) {
+            builder.AddProperty("symbol", *symbol_);
+        }
 
-            if (isAccessor_) {
-                jsonBuilder.AddProperty("get", value_.ToJson());
-            } else {
-                jsonBuilder.AddProperty("value", value_.ToJson());
-                jsonBuilder.AddProperty("writable", writable_);
-            }
+        if (isAccessor_) {
+            builder.AddProperty("get", value_);
+        } else {
+            builder.AddProperty("value", value_);
+            builder.AddProperty("writable", writable_);
+        }
 
-            jsonBuilder.AddProperty("configurable", configurable_);
-            jsonBuilder.AddProperty("enumerable", enumerable_);
-        };
+        builder.AddProperty("configurable", configurable_);
+        builder.AddProperty("enumerable", enumerable_);
     }
 
 private:

@@ -16,6 +16,8 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_LOCATION_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_LOCATION_H
 
+#include "tooling/inspector/json_serialization/serializable.h"
+
 #include <cstddef>
 #include <functional>
 #include <string>
@@ -30,7 +32,7 @@ class JsonObjectBuilder;
 }  // namespace ark
 
 namespace ark::tooling::inspector {
-class Location {
+class Location final : public JsonSerializable {
 public:
     Location(ScriptId scriptId, size_t lineNumber) : scriptId_(scriptId), lineNumber_(lineNumber) {}
 
@@ -51,7 +53,7 @@ public:
         lineNumber_ = lineNumber;
     }
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const;
+    void Serialize(JsonObjectBuilder &builder) const override;
 
 private:
     ScriptId scriptId_;

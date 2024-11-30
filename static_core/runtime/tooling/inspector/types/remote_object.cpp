@@ -116,48 +116,46 @@ RemoteObjectType RemoteObject::GetType() const
     UNREACHABLE();
 }
 
-std::function<void(JsonObjectBuilder &)> RemoteObject::ToJson() const
+void RemoteObject::Serialize(JsonObjectBuilder &builder) const
 {
-    auto result = GetType().ToJson();
+    GetType().Serialize(builder);
 
     if (std::holds_alternative<std::nullptr_t>(value_)) {
-        AddProperty(result, "value", nullptr);
+        builder.AddProperty("value", nullptr);
     } else if (auto boolean = std::get_if<bool>(&value_)) {
-        AddProperty(result, "value", *boolean);
+        builder.AddProperty("value", *boolean);
     } else if (auto number = std::get_if<RemoteObjectType::NumberT>(&value_)) {
         if (auto integer = std::get_if<int32_t>(number)) {
-            AddProperty(result, "value", *integer);
+            builder.AddProperty("value", *integer);
         } else if (auto floatingPoint = std::get_if<double>(number)) {
-            AddProperty(result, "value", *floatingPoint);
+            builder.AddProperty("value", *floatingPoint);
         } else {
             UNREACHABLE();
         }
     } else if (auto bigint = std::get_if<RemoteObjectType::BigIntT>(&value_)) {
-        AddProperty(result, "unserializableValue", GetDescription(*bigint));
+        builder.AddProperty("unserializableValue", GetDescription(*bigint));
     } else if (auto string = std::get_if<std::string>(&value_)) {
-        AddProperty(result, "value", *string);
+        builder.AddProperty("value", *string);
     } else if (auto symbol = std::get_if<RemoteObjectType::SymbolT>(&value_)) {
-        AddProperty(result, "description", symbol->description);
+        builder.AddProperty("description", symbol->description);
     } else if (auto object = std::get_if<RemoteObjectType::ObjectT>(&value_)) {
-        AddProperty(result, "className", object->className);
-        AddProperty(result, "description", GetDescription(*object));
+        builder.AddProperty("className", object->className);
+        builder.AddProperty("description", GetDescription(*object));
     } else if (auto array = std::get_if<RemoteObjectType::ArrayT>(&value_)) {
-        AddProperty(result, "className", array->className);
-        AddProperty(result, "description", GetDescription(*array));
+        builder.AddProperty("className", array->className);
+        builder.AddProperty("description", GetDescription(*array));
     } else if (auto function = std::get_if<RemoteObjectType::FunctionT>(&value_)) {
-        AddProperty(result, "className", function->className);
-        AddProperty(result, "description", GetDescription(*function));
+        builder.AddProperty("className", function->className);
+        builder.AddProperty("description", GetDescription(*function));
     }
 
     if (auto objectId = GetObjectId()) {
-        AddProperty(result, "objectId", std::to_string(*objectId));
+        builder.AddProperty("objectId", std::to_string(*objectId));
     }
 
     if (preview_.has_value()) {
-        AddProperty(result, "preview", preview_->ToJson());
+        builder.AddProperty("preview", *preview_);
     }
-
-    return result;
 }
 
 }  // namespace ark::tooling::inspector

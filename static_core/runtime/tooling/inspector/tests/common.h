@@ -24,7 +24,7 @@ template <typename T>
 inline JsonObject ToJson(const T &object)
 {
     JsonObjectBuilder jsonBuilder;
-    object.ToJson()(jsonBuilder);
+    object.Serialize(jsonBuilder);
     return JsonObject(std::move(jsonBuilder).Build());
 }
 
