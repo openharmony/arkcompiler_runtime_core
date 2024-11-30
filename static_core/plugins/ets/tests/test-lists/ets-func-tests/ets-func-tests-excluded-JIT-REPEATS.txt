@@ -102,8 +102,4 @@ spec/03.types/References_Types/Bigint/bigint-arithmetic-expr-4-operands.sts
 # Process test causes failure on timeout - see issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/I9W32L
 escompat/ProcessTest.sts
 # End issue https://gitee.com/openharmony/arkcompiler_runtime_core/issues/I9W32L
- 
-# Skipping due to JIT tests timeout ( unpredictable GC wait time )
-escompat/WeakMapGCTest.sts
-escompat/WeakSetGCTest.sts
-# End Skipping due to JIT tests timeout
+

@@ -25,6 +25,9 @@ inline constexpr std::string_view ATTR_ACCESS_VAL_PUBLIC = "public";
 inline constexpr std::string_view ATTR_ACCESS_VAL_PROTECTED = "protected";
 inline constexpr std::string_view ATTR_ACCESS_VAL_PRIVATE = "private";
 
+inline constexpr std::string_view ATTR_ACCESS_FUNCTION = "access.function";
+inline constexpr std::string_view ATTR_ACCESS_FIELD = "access.field";
+
 inline constexpr std::string_view ATTR_EXTENDS = "ets.extends";
 inline constexpr std::string_view ATTR_IMPLEMENTS = "ets.implements";
 

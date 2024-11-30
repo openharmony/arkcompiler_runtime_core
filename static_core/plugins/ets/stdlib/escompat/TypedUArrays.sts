@@ -108,11 +108,23 @@ export class Uint8ClampedArray implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Uint8ClampedArray with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Uint8ClampedArray.from(elements)
-        this.byteLengthInt = x.byteLengthInt
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffsetInt = x.byteOffsetInt
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLengthInt = arr.length as int * Uint8ClampedArray.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.byteOffsetInt = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, Uint8ClampedArray.clamp(arr.$_get(i).intValue()))
+            }
+        } else {
+            let x = Uint8ClampedArray.from(elements)
+            this.byteLengthInt = x.byteLengthInt
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffsetInt = x.byteOffsetInt
+        }
     }
 
     /**
@@ -2698,11 +2710,23 @@ export class Uint8Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Uint8Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Uint8Array.from(elements)
-        this.byteLengthInt = x.byteLengthInt
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffsetInt = x.byteOffsetInt
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLengthInt = arr.length as int * Uint8Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.byteOffsetInt = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).intValue())
+            }
+        } else {
+            let x = Uint8Array.from(elements)
+            this.byteLengthInt = x.byteLengthInt
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffsetInt = x.byteOffsetInt
+        }
     }
 
     /**
@@ -5305,11 +5329,23 @@ export class Uint16Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Uint16Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Uint16Array.from(elements)
-        this.byteLengthInt = x.byteLengthInt
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffsetInt = x.byteOffsetInt
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLengthInt = arr.length as int * Uint16Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.byteOffsetInt = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).intValue())
+            }
+        } else {
+            let x = Uint16Array.from(elements)
+            this.byteLengthInt = x.byteLengthInt
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffsetInt = x.byteOffsetInt
+        }
     }
 
     /**
@@ -7904,11 +7940,23 @@ export class Uint32Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Uint32Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Uint32Array.from(elements)
-        this.byteLengthInt = x.byteLengthInt
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffsetInt = x.byteOffsetInt
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLengthInt = arr.length as int * Uint32Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.byteOffsetInt = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).longValue())
+            }
+        } else {
+            let x = Uint32Array.from(elements)
+            this.byteLengthInt = x.byteLengthInt
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffsetInt = x.byteOffsetInt
+        }
     }
 
     /**
@@ -10545,11 +10593,23 @@ export class BigUint64Array implements Iterable<BigInt>, ArrayLike<BigInt> {
      * Creates an BigUint64Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<BigInt>) {
-        let x = BigUint64Array.from(elements)
-        this.byteLengthInt = x.byteLengthInt
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffsetInt = x.byteOffsetInt
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLengthInt = arr.length as int * BigUint64Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.byteOffsetInt = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).longValue())
+            }
+        } else {
+            let x = BigUint64Array.from(elements)
+            this.byteLengthInt = x.byteLengthInt
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffsetInt = x.byteOffsetInt
+        }
     }
 
     /**

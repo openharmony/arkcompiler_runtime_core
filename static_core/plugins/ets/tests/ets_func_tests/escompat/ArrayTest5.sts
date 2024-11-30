@@ -24,88 +24,106 @@ function main(): int {
     return check(failures, "All tests run");
 }
 
-function length(): int {
-    const a = new Array<number>();
-    if (a.length != 0) {
-        return fail;
-    }
-    let threw = false;
-    try {
-        a.length = 12;
-    } catch (e) {
-        threw = true;
-    }
-    if (!threw) {
-        return fail;
-    }
-    if (a.length != 0) {
-        return fail;
-    }
+function newProxy<T>(a: Array<T>): Array<T> {
+    class Handler<T> extends DefaultArrayProxyHandler<T> {}
 
-    a.pushECMA(1, 2, 3, 4, 5);
-    if (a.length != 5) {
-        return fail;
-    }
-    a.length = 3
-    if (a.length != 3) {
-        return fail
-    }
-    if (a[0] != 1 || a[1] != 2 || a[2] != 3) {
-        return fail;
-    }
-    a.length = 0
-    if (a.length != 0) {
-        return fail
-    }
-    return success;
+    return Proxy.create<T>(a, new Handler<T>())
+}
+
+function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {
+    let failures = 0
+
+    failures += testFn(newArrayFn())
+    failures += testFn(newProxy(newArrayFn()))
+
+    return failures
+}
+
+function length(): int {
+    return check(() => new Array<number>, (a: Array<number>) => {
+        if (a.length != 0) {
+            return fail;
+        }
+        let threw = false;
+        try {
+            a.length = 12;
+        } catch (e) {
+            threw = true;
+        }
+        if (!threw) {
+            return fail;
+        }
+        if (a.length != 0) {
+            return fail;
+        }
+
+        a.pushECMA(1, 2, 3, 4, 5);
+        if (a.length != 5) {
+            return fail;
+        }
+        a.length = 3
+        if (a.length != 3) {
+            return fail
+        }
+        if (a[0] != 1 || a[1] != 2 || a[2] != 3) {
+            return fail;
+        }
+        a.length = 0
+        if (a.length != 0) {
+            return fail
+        }
+        return success;
+    })
 }
 
 function shiftUnshift(): int {
-    const a = new Array<number>()
-    if (a.shift() !== undefined) {
-        return fail;
-    }
-    a.unshift(3, 2, 1)
-    if (a.length != 3) {
-        return fail;
-    }
-    a.unshift(6, 5, 4)
-    if (a.length != 6) {
-        return fail;
-    }
-    for (let i = 5; i >= 0; i--) {
-        if (a.shift()! != i + 1) {
-            return fail
-        }
-        if (a.length != i) {
+    return check(() => new Array<number>, (a: Array<number>) => {
+        if (a.shift() !== undefined) {
             return fail;
         }
-    }
-    return success;
+        a.unshift(3, 2, 1)
+        if (a.length != 3) {
+            return fail;
+        }
+        a.unshift(6, 5, 4)
+        if (a.length != 6) {
+            return fail;
+        }
+        for (let i = 5; i >= 0; i--) {
+            if (a.shift()! != i + 1) {
+                return fail
+            }
+            if (a.length != i) {
+                return fail;
+            }
+        }
+        return success;
+    })
 }
 
 function pushPop(): int {
-    const a = new Array<number>()
-    if (a.pop() !== undefined) {
-        return fail;
-    }
-    a.pushECMA(1, 2, 3)
-    if (a.length != 3) {
-        return fail;
-    }
-    a.pushECMA(4, 5, 6)
-    if (a.length != 6) {
-        return fail;
-    }
-    for (let i = 5; i >= 0; i--) {
-        if (a.pop()! != i + 1) {
-            return fail
-        }
-        if (a.length != i) {
+    return check(() => new Array<number>, (a: Array<number>) => {
+        if (a.pop() !== undefined) {
             return fail;
         }
-    }
-    return success;
+        a.pushECMA(1, 2, 3)
+        if (a.length != 3) {
+            return fail;
+        }
+        a.pushECMA(4, 5, 6)
+        if (a.length != 6) {
+            return fail;
+        }
+        for (let i = 5; i >= 0; i--) {
+            if (a.pop()! != i + 1) {
+                return fail
+            }
+            if (a.length != i) {
+                return fail;
+            }
+        }
+        return success;
+    })
 }
 
 

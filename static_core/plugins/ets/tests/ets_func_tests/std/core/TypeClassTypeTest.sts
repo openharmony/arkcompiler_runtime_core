@@ -15,10 +15,8 @@
 
 function test(result: boolean, name: String): int {
     if (result) {
-        console.println("PASSED: " + name)
         return 0
     }
-    console.println("FAILED: " + name)
     return 1
 }
 
@@ -85,18 +83,37 @@ final class HTMLWriter extends Writer {
     }
 }
 
-function findMethodByName(ct: ClassType, name: string): Method | null {
-    for (let i = 0; i < ct.getMethodsNum(); ++i) {
-        let method = ct.getMethod(i)
-        if (method.getName() == name) {
-            return method
+function findMethodsByName(type: ClassType, names: Array<string>): Array<Method | null> {
+    const methods = new Array<Method | null>()
+    const namesLength = names.length as int
+
+    const foundMethods = new Map<string, Method>()
+    const methodsNum = type.getMethodsNum()
+    for (let i = methodsNum - 1; i >= 0; i--) {
+        const method = type.getMethod(i)
+        for (let nameIdx = 0; nameIdx < namesLength; nameIdx++) {
+            if (names[nameIdx] == method.getName()) {
+                foundMethods.set(method.getName(), method)
+            }
         }
     }
-    return null
+
+    for (let methodIdx = 0; methodIdx < namesLength; methodIdx++) {
+        const methodName = names[methodIdx]
+        const method = foundMethods.get(methodName)
+        methods.push(method === undefined ? null : method)
+    }
+
+    return methods
+}
+
+function findMethodsByName(type: ClassType, ...names: string[]): Array<Method | null> {
+    const methodNames = new Array<string>()
+    methodNames.push(...names)
+    return findMethodsByName(type, methodNames)
 }
 
 function testFields(ct: ClassType): int {
-    console.log("        Fields:")
     let failures = 0
     for (let i = 0; i < ct.getFieldsNum(); ++i) {
         let field = ct.getField(i);
@@ -106,7 +123,6 @@ function testFields(ct: ClassType): int {
 }
 
 function testAllFieldsAreOwn(ct: ClassType): int {
-    console.log("         Own Fields:")
     let failures = test(ct.getOwnFieldsNum() == ct.getFieldsNum(), "   OwnFieldsNum == FieldsNum")
     for (let i = 0; i < ct.getOwnFieldsNum(); ++i) {
         let field = ct.getOwnField(i);
@@ -117,16 +133,28 @@ function testAllFieldsAreOwn(ct: ClassType): int {
 
 function testClassExtendsObject(ct: ClassType): int {
     let failures = 0
-    let objectMethods = ObjectType.getMethodsNum()
-    for (let i = 0; i < objectMethods; ++i) {
+    let objectMethodsNum = ObjectType.getMethodsNum()
+    const objectMethodNames = new Array<string>()
+    for (let i = 0; i < objectMethodsNum; ++i) {
         let objectMethodName = ObjectType.getMethod(i).getName()
-        failures += test(findMethodByName(ct, objectMethodName) != null,  "       " + objectMethodName + " method")
+        objectMethodNames.push(objectMethodName)
     }
+
+    const methods = findMethodsByName(ct, objectMethodNames)
+    for (let i = 0; i < objectMethodsNum; ++i) {
+        const objectMethodName = objectMethodNames[i]
+        failures += test(methods[i] != null,  "       " + objectMethodName + " method")
+    }
+
     return failures
 }
 
 function testPoint(): int {
     let pt = Type.of(new Point()) as ClassType
+
+    const pointMethods = findMethodsByName(pt, "add", "serialize")
+    const addMethod = pointMethods[0]
+    const serializeMethod = pointMethods[1]
 
     return test(pt.getName() == "Point",                                    "ClassName: Point") +
             test(pt.hasEmptyConstructor(),                                  "   doesn't have empty constuctor") +
@@ -139,8 +167,8 @@ function testPoint(): int {
             testAllFieldsAreOwn(pt) +
             test(pt.getMethodsNum() == 2 + ObjectType.getMethodsNum(),      "   2 Methods: ") +
             testClassExtendsObject(pt) +
-            test(findMethodByName(pt, "add") != null,                       "       Point.add method") +
-            test(findMethodByName(pt, "serialize") != null,                 "       Serializable.serialize method") +
+            test(addMethod != null,                       "       Point.add method") +
+            test(serializeMethod != null,                 "       Serializable.serialize method") +
             test(pt.getConstructorsNum() == 2,                              "   2 Constructor:") +
             test(pt.getConstructor(0).getName() == "constructor",           "       default") +
             test(pt.getConstructor(1).getName() == "constructor",           "       default") +
@@ -150,6 +178,10 @@ function testPoint(): int {
 
 function testPoint3D(): int {
     let pt = Type.of(new Point3D(1.0, 2.0, 3.0)) as ClassType
+
+    const pointMethods = findMethodsByName(pt, "add", "serialize")
+    const addMethod = pointMethods[0]
+    const serializeMethod = pointMethods[1]
 
     return test(pt.getName() == "Point3D",                                  "ClassName: Point3D") +
             test(!pt.hasEmptyConstructor(),                                 "   doesn't have empty constructor") +
@@ -167,14 +199,18 @@ function testPoint3D(): int {
             test(pt.getOwnField(2).equals(pt.getFieldByName("state")),      "       state field") +
             test(pt.getMethodsNum() == 2 + ObjectType.getMethodsNum(),      "   2 Methods:") +
             testClassExtendsObject(pt) +
-            test(findMethodByName(pt, "add") != null,                       "       Point.add method") +
-            test(findMethodByName(pt, "serialize") != null,                 "       Serializable.serialize method") +
+            test(addMethod != null,                       "       Point.add method") +
+            test(serializeMethod != null,                 "       Serializable.serialize method") +
             test(pt.getConstructorsNum() == 2,                              "   2 Constructors") +
             testFields(pt)
 }
 
 function testHTMLWriter(): int {
     let wt = Type.of(new HTMLWriter(1)) as ClassType
+
+    const writerMethods = findMethodsByName(wt, "write", "getState")
+    const writeMethod = writerMethods[0]
+    const getStateMethod = writerMethods[1]
 
     return test(wt.getName() == "HTMLWriter",                               "ClassName: HTMLWriter") +
             test(!wt.hasEmptyConstructor(),                                 "   doesn't have empty constructor") +
@@ -185,8 +221,8 @@ function testHTMLWriter(): int {
             testAllFieldsAreOwn(wt) +
             test(wt.getMethodsNum() == 2 + ObjectType.getMethodsNum(),      "   5 methods:") +
             testClassExtendsObject(wt) +
-            test(findMethodByName(wt, "write") != null,                     "       HTMLWriter.add method") +
-            test(findMethodByName(wt, "getState") != null,                  "       HTMLWriter.getState method") +
+            test(writeMethod != null,                     "       HTMLWriter.add method") +
+            test(getStateMethod != null,                  "       HTMLWriter.getState method") +
             test(wt.getConstructorsNum() == 1,                              "   1 Constructor:") +
             test(wt.getConstructor(0).getName() == "constructor",           "       default") +
             test(wt.isFinal(),                                              "   final") +
@@ -194,7 +230,6 @@ function testHTMLWriter(): int {
 }
 
 function testMake(): int {
-    console.log("        Make:")
     let failures = 0
     let pt = Type.of(new Point()) as ClassType
     let wt = Type.of(new HTMLWriter(0)) as ClassType

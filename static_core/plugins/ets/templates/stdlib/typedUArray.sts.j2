@@ -124,11 +124,27 @@ export class {{element['name']}}Array implements Iterable<{{element['subsetTypeV
      * Creates an {{element['name']}}Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<{{element['subsetTypeValues']}}>) {
-        let x = {{element['name']}}Array.from(elements)
-        this.byteLengthInt = x.byteLengthInt
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffsetInt = x.byteOffsetInt
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLengthInt = arr.length as int * {{element['name']}}Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLengthInt)
+            this.byteOffsetInt = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                {%- if element.get('clamped', False) %}
+                this.setUnsafe(i, {{element['name']}}Array.clamp(arr.$_get(i).{{element['primitiveType']}}Value()))
+                {%- else %}
+                this.setUnsafe(i, arr.$_get(i).{{element['primitiveType']}}Value())
+                {%- endif %}
+            }
+        } else {
+            let x = {{element['name']}}Array.from(elements)
+            this.byteLengthInt = x.byteLengthInt
+            this.lengthInt = x.lengthInt
+            this.buffer = x.buffer
+            this.byteOffsetInt = x.byteOffsetInt
+        }
     }
 
     /**

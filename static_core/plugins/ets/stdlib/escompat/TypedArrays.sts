@@ -98,11 +98,23 @@ export final class Int8Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Int8Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Int8Array.from(elements)
-        this.byteLength = x.byteLength
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffset = x.byteOffset
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLength = arr.length as int * Int8Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).byteValue())
+            }
+        } else {
+          let x = Int8Array.from(elements)
+          this.byteLength = x.byteLength
+          this.lengthInt = x.lengthInt
+          this.buffer = x.buffer
+          this.byteOffset = x.byteOffset
+        }
     }
 
     /**
@@ -2709,11 +2721,23 @@ export final class Int16Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Int16Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Int16Array.from(elements)
-        this.byteLength = x.byteLength
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffset = x.byteOffset
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLength = arr.length as int * Int16Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).shortValue())
+            }
+        } else {
+          let x = Int16Array.from(elements)
+          this.byteLength = x.byteLength
+          this.lengthInt = x.lengthInt
+          this.buffer = x.buffer
+          this.byteOffset = x.byteOffset
+        }
     }
 
     /**
@@ -5331,11 +5355,23 @@ export final class Int32Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Int32Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Int32Array.from(elements)
-        this.byteLength = x.byteLength
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffset = x.byteOffset
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLength = arr.length as int * Int32Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).intValue())
+            }
+        } else {
+          let x = Int32Array.from(elements)
+          this.byteLength = x.byteLength
+          this.lengthInt = x.lengthInt
+          this.buffer = x.buffer
+          this.byteOffset = x.byteOffset
+        }
     }
 
     /**
@@ -7911,11 +7947,23 @@ export final class BigInt64Array implements Iterable<BigInt>, ArrayLike<BigInt> 
      * Creates an BigInt64Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<BigInt>) {
-        let x = BigInt64Array.from(elements)
-        this.byteLength = x.byteLength
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffset = x.byteOffset
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<BigInt>(items as ArrayLike<BigInt>)
+            this.byteLength = arr.length as int * BigInt64Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, this.zeroIfInfinity(arr.$_get(i)).getLong())
+            }
+        } else {
+          let x = BigInt64Array.from(elements)
+          this.byteLength = x.byteLength
+          this.lengthInt = x.lengthInt
+          this.buffer = x.buffer
+          this.byteOffset = x.byteOffset
+        }
     }
 
     /**
@@ -10550,11 +10598,23 @@ export final class Float32Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Float32Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Float32Array.from(elements)
-        this.byteLength = x.byteLength
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffset = x.byteOffset
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLength = arr.length as int * Float32Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).floatValue())
+            }
+        } else {
+          let x = Float32Array.from(elements)
+          this.byteLength = x.byteLength
+          this.lengthInt = x.lengthInt
+          this.buffer = x.buffer
+          this.byteOffset = x.byteOffset
+        }
     }
 
     /**
@@ -13153,11 +13213,23 @@ export final class Float64Array implements Iterable<Number>, ArrayLike<Number> {
      * Creates an Float64Array with respect to data accessed via Iterable<Number> interface
      */
     public constructor(elements: Iterable<Number>) {
-        let x = Float64Array.from(elements)
-        this.byteLength = x.byteLength
-        this.lengthInt = x.lengthInt
-        this.buffer = x.buffer
-        this.byteOffset = x.byteOffset
+        const items: Object = elements as Object
+        if (items instanceof ArrayLike) {
+            const arr = Types.identity_cast<Number>(items as ArrayLike<Number>)
+            this.byteLength = arr.length as int * Float64Array.BYTES_PER_ELEMENT as int
+            this.lengthInt = arr.length as int
+            this.buffer = new ArrayBuffer(this.byteLength as int)
+            this.byteOffset = 0
+            for (let i: int = 0; i < this.lengthInt; ++i) {
+                this.setUnsafe(i, arr.$_get(i).doubleValue())
+            }
+        } else {
+          let x = Float64Array.from(elements)
+          this.byteLength = x.byteLength
+          this.lengthInt = x.lengthInt
+          this.buffer = x.buffer
+          this.byteOffset = x.byteOffset
+        }
     }
 
     /**
