@@ -113,4 +113,8 @@ def test_compile_api(playground_client, code, disasm, run_compile, options):
 
 def test_get_version_api(playground_client):
     resp = playground_client.get("/versions")
-    assert resp.json() == {"arktsVersion": "arkts_ver", "backendVersion": "playground_ver"}
+    assert resp.json() == {
+        "arktsVersion": "arkts_ver",
+        "backendVersion": "playground_ver",
+        "es2pandaVersion": "es2panda_ver"
+    }

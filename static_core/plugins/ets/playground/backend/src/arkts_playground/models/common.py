@@ -35,3 +35,4 @@ class DisasmResponse(BaseModel):
 class VersionsResponse(BaseModel):
     backend_version: Optional[str] = Field(alias="backendVersion")
     arkts_version: Optional[str] = Field(alias="arktsVersion")
+    es2panda_version: Optional[str] = Field(alias="es2pandaVersion")

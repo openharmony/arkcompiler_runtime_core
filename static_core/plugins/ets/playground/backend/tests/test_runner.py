@@ -150,6 +150,31 @@ async def test_run_when_compile_failed(monkeypatch, ark_build):
     assert res == expected
 
 
+@pytest.mark.asyncio
+async def test_run_when_compile_segfault(monkeypatch, ark_build):
+    mocker = MockAsyncSubprocess(
+        [
+            FakeCommand(opts=["--extension=sts"],
+                        expected=str(ark_build[1]),
+                        stdout=b"compile error",
+                        return_code=-11)
+        ]
+    )
+    monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
+    r = Runner(ark_build[0])
+    res = await r.compile_run_arkts("code", [], False)
+    expected = {
+        "compile": {
+            "error": "compilation: Segmentation fault",
+            "exit_code": -11,
+            "output": "compile error"
+        },
+        "disassembly": None,
+        "run": None
+    }
+    assert res == expected
+
+
 async def test_run_disasm_failed(monkeypatch, ark_build, ):
     mocker = MockAsyncSubprocess(
         [
@@ -223,6 +248,10 @@ async def test_get_versions(monkeypatch, ark_build):
                         expected=str(ark_build[3]),
                         stdout=b"arkts ver",
                         return_code=1),
+            FakeCommand(opts=["--version"],
+                        expected=str(ark_build[1]),
+                        stderr=b"es2panda ver",
+                        return_code=1),
         ]
     )
     monkeypatch.setattr("asyncio.create_subprocess_exec", mocker.create_subprocess_exec())
@@ -230,5 +259,5 @@ async def test_get_versions(monkeypatch, ark_build):
 
     r = Runner(ark_build[0])
     res = await r.get_versions()
-    expected = "1.2.3", "arkts ver"
+    expected = "1.2.3", "arkts ver", "es2panda ver"
     assert res == expected
