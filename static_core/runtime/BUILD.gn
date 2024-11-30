@@ -385,6 +385,7 @@ ohos_source_set("libarkruntime_set_static") {
     "$ark_root/libpandafile:libarkfile_type_gen_h",
     "$ark_root/libpandafile:libarktsfile",
     "$ark_root/libziparchive:libarktsziparchive",
+    "$ark_root/platforms/target_defaults:arktarget_options",
     "$ark_root/runtime/asm_defines:asm_defines_generator",
   ]
 

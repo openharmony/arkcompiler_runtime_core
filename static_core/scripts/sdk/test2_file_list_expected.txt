@@ -49,6 +49,7 @@ build-sdk/sdk/linux_host_tools/lib/libarkdisassembler.so
 build-sdk/sdk/linux_host_tools/lib/libarkfile.so
 build-sdk/sdk/linux_host_tools/lib/libarklinker.so
 build-sdk/sdk/linux_host_tools/lib/libarkruntime.so
+build-sdk/sdk/linux_host_tools/lib/libarktarget_options.so
 build-sdk/sdk/linux_host_tools/lib/libarkziparchive.so
 build-sdk/sdk/linux_host_tools/lib/libc_secshared.so
 build-sdk/sdk/linux_host_tools/lib/libe2p_test_plugin.so
@@ -84,6 +85,7 @@ build-sdk/sdk/ohos_arm64/lib/libarkdisassembler.so
 build-sdk/sdk/ohos_arm64/lib/libarkfile.so
 build-sdk/sdk/ohos_arm64/lib/libarkruntime.so
 build-sdk/sdk/ohos_arm64/lib/libarkruntime_static.a
+build-sdk/sdk/ohos_arm64/lib/libarktarget_options.so
 build-sdk/sdk/ohos_arm64/lib/libarkziparchive.so
 build-sdk/sdk/ohos_arm64/lib/libc_secshared.so
 build-sdk/sdk/ohos_arm64/lib/libdprof.a

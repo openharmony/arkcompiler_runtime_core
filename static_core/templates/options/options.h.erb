@@ -18,6 +18,7 @@
 #define PANDA_<%= Common::module.name.upcase %>_OPTIONS_GEN_H
 
 #include "utils/pandargs.h"
+#include "platforms/target_defaults/default_target_options.h"
 #include "macros.h"
 
 #include <optional>
@@ -40,7 +41,16 @@ public:
         std::string msg_;
     };
 
-    explicit Options(const std::string &exe_path) : exe_dir_(GetExeDir(exe_path)) {}
+    explicit Options(const std::string &exe_path) :
+        exe_dir_(GetExeDir(exe_path))
+% Common::options.each do |op|
+%   next if op.sub_option?
+%   next if op.deprecated?
+%   if (op.default_value.is_a?(Hash))
+        ,<%= op.field_name %>{"<%= op.name %>", ark::default_target_options::<%= op.getter_name %>({<% op.default_value.each_with_index do |(key, value), index| %> { "<%= key %>", <%= value.is_a?(Integer) ? value : "\"#{value}\"" %>}<%= "," unless index == op.default_value.size - 1 %> <% end %>}) , <%= op.full_description %>}
+% end
+% end
+    {}
 
     // NOLINTBEGIN(readability-function-size)
     void AddOptions(PandArgParser *parser) {
@@ -163,6 +173,7 @@ private:
     }
 
 % Common::options.each do |op|
+%   next if (op.default_value.is_a?(Hash))
 %   next unless op.need_default_constant
     static constexpr <%= op.type %> <%= op.default_constant_name %> = <%= op.default %>;
 
@@ -170,7 +181,9 @@ private:
     std::string exe_dir_;
     PandArg<bool> version_{"version", false, R"(Ark version, file format version and minimum supported file format version)"};
 % Common::options.each do |op|
-% if defined? op.delimiter
+% if (op.default_value.is_a?(Hash))
+    PandArg<<%= op.type %>> <%= op.field_name %>;
+% elsif defined? op.delimiter
     PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>, "<%= op.delimiter %>"};
 % elsif defined? op.range
 %   min, max = op.range.match('(\d+)\D*(\d+)').captures;

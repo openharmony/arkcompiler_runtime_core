@@ -24,8 +24,8 @@
 #error "Unsupported platform"
 #endif
 
-#include "os/error.h"
-#include "utils/expected.h"
+#include "libpandabase/os/error.h"
+#include "libpandabase/utils/expected.h"
 
 #include <string_view>
 

@@ -10,6 +10,7 @@ lib/libarkfile.so
 lib/libarkruntime.so
 lib/libetsnative.so
 lib/libarkruntime_static.a
+lib/libarktarget_options.so
 lib/libarkziparchive.so
 lib/libc_secshared.so
 lib/libdprof.a
