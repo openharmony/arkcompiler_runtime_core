@@ -75,6 +75,11 @@ class Tool(ToolBase):
         gclog = ''
         libs = ':'.join([str(f) for f in self.x_libs(bu, '.abc')])
         options = f'--panda-files={libs} ' if libs else ''
+        native_dir = bu.path.joinpath('native')
+        if native_dir.exists():
+            natives = native_dir if Target.HOST == self.target \
+                else bu.device_path
+            options += f'--ets.native-library-path={natives} '
         abc = self.x_src(bu, '.abc')
         an_files = [str(f) for f in self.x_libs(bu, '.an')] + \
                    [str(abc.with_suffix('.an'))]

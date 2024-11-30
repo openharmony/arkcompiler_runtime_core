@@ -36,6 +36,7 @@ class Platform(PlatformBase):
         self.es2panda = self.tools_get('es2panda')
         self.paoc = self.tools_get('paoc')
         self.ark = self.tools_get('ark')
+        self.nark = self.tools_get('nark')
         # always aot etsstdlib
         if OptFlags.AOT_SKIP_LIBS in self.flags:
             log.info('Skipping aot compilation of libs')
@@ -63,7 +64,7 @@ class Platform(PlatformBase):
 
     @property
     def required_tools(self) -> List[str]:
-        return ['es2panda', 'ark', 'paoc']
+        return ['es2panda', 'ark', 'paoc', 'nark']
 
     @property
     def langs(self) -> List[str]:
@@ -73,8 +74,21 @@ class Platform(PlatformBase):
     def gc_parcer(self) -> Optional[Type]:
         return ArkGcLogParser
 
+    def push_unit(self, bu: BenchUnit, *ext) -> None:
+        """Override PlatformBase::Push bench unit to device."""
+        super().push_unit(bu, *ext)
+        native_dir = bu.path.joinpath('native')
+        if not native_dir.exists():
+            return
+        if not bu.device_path:
+            return  # make linter happy
+        for f in native_dir.glob('*.so'):
+            p = f.resolve()
+            self.x_sh.push(p, bu.device_path.joinpath(f.name))
+
     def run_unit(self, bu: BenchUnit) -> None:
         self.es2panda(bu)
+        self.nark(bu)
         if self.dry_run_stop(bu):
             return
         self.push_unit(bu, '.abc')
