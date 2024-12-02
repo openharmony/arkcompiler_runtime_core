@@ -1293,3 +1293,77 @@ function(:StringIndexOfAfter,
   entrypoint = get_entrypoint_offset("STRING_INDEX_OF_COMPRESSED")
   Intrinsic(:TAIL_CALL).AddImm(entrypoint).MethodAsImm("StringIndexOfCompressed").Terminator.i32
 }
+
+function(:StringRepeatTlab,
+        params: {str: 'ref', cnt: 'i32'},
+        regmap: $full_regmap,
+        regalloc_set: $panda_mask,
+        mode: [:FastPath]) {
+
+  if Options.arch == :arm32
+    Intrinsic(:UNREACHABLE).Terminator.void
+    next
+  end
+
+  count := Cast(cnt).u32
+  IfImm(Compare(count, 0).LT.b).Imm(0).NE {
+    Goto(:SlowPathEntrypoint)
+  }
+
+  IfImm(Compare(count, 0).EQ.b).Imm(0).NE {
+    klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+    new_str := allocate_string_tlab(klass, Cast(0).u64);
+    Return(new_str).ptr
+  }
+
+  IfImm(Compare(count, 1).EQ.b).Imm(0).NE {
+    Return(Cast(str).ptr).ptr
+  }
+
+  length := LoadI(str).Imm(Constants::STRING_LENGTH_OFFSET).u32;
+  klass := LoadI(str).Imm(Constants::OBJECT_CLASS_OFFSET).ref
+  old_buf := AddI(str).Imm(Constants::STRING_DATA_OFFSET).ptr
+  uncompressed := AndI(length).Imm(1).u32
+  length := Shl(ShrI(length).Imm(1).u32, uncompressed).u32
+  size := Mul(length, count).u32
+  new_str := allocate_string_tlab(klass, Cast(size).u64);
+  new_buf := AddI(new_str).Imm(Constants::STRING_DATA_OFFSET).ptr
+
+  If(new_str, 0).EQ {
+    Goto(:SlowPathEntrypoint)
+  }
+
+  i0 := Cast(0).u32
+Label(:outer)
+  i := Phi(i0, i1).u32
+  If(i, count).GE {
+    Goto(:End)
+  }
+  offset := Mul(i, length).u32
+
+  j0 := Cast(0).u32
+  Label(:inner)
+    j := Phi(j0, j1).u32
+    If(j, length).GE {
+      Goto(:endInner)
+    }
+    Store(new_buf, Add(offset, j).u32, Load(old_buf, j).u8).u8
+    j1 := AddI(j).Imm(1).u32
+    Goto(:inner)
+  Label(:endInner)
+  i1 := AddI(i).Imm(1).u32
+  Goto(:outer)
+
+Label(:End)
+  # shift left if it was a compressed string
+  # mark the (unset) lowest bit with uncompressed
+  compress := Neg(SubI(uncompressed).Imm(1).u32).u32
+  length := Or(Shl(size, compress).u32, uncompressed).u32
+  StoreI(new_str, length).Imm(Constants::STRING_LENGTH_OFFSET).u32
+  Return(new_str).ptr
+
+Label(:SlowPathEntrypoint)
+  entrypoint = get_entrypoint_offset("STRING_REPEAT_SLOW_PATH")
+  Intrinsic(:SLOW_PATH_ENTRY, str, count).AddImm(entrypoint).MethodAsImm("StringRepeatUsualBridge").Terminator.ptr
+  Intrinsic(:UNREACHABLE).Terminator.void if defines.DEBUG
+}

@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+/* the irtoc-based implementations that use TLAB-allocation fallback
+ * to the corresponding c++ implementation in the case TLAB is not
+ * available, to be sure a test is testing the irtoc implementation we
+ * have to enforce the use of TLAB via --no-async-jit=false and ensure
+ * the function is run in compiled mode by using compileMethod() */
+
 //! CHECKER      Use TLAB for string from chars allocations
 //! RUN          options: "--no-async-jit=false --compiler-enable-jit=true --compiler-enable-tlab-events=true --compiler-check-final=true", env: "LD_LIBRARY_PATH=../../../../../../lib", entry: "ETSGLOBAL::testCreateStringFromChars"
 //! EVENT        /TlabAlloc,.*,40/
@@ -290,4 +296,3 @@ function testStringBuilderAppend() : int {
     compileMethod("ETSGLOBAL::StringBuilderAppend");
     return StringBuilderAppend();
 }
-

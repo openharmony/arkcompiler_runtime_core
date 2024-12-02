@@ -42,3 +42,7 @@ bool EmitStringEndsWith(Inst *inst);
 bool EmitStringGetBytesTlab(Inst *inst);
 bool EmitStringIndexOf(Inst *inst);
 bool EmitStringIndexOfAfter(Inst *inst);
+bool EmitStringRepeat(Inst *inst)
+{
+    return EmitFastPath(inst, RuntimeInterface::EntrypointId::STRING_REPEAT, 2U);
+}
