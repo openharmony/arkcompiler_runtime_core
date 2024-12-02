@@ -16,6 +16,8 @@
 #ifndef LIBPANDAFILE_HELPERS_H
 #define LIBPANDAFILE_HELPERS_H
 
+#include "file.h"
+#include "file_error.h"
 #include "macros.h"
 #include "utils/bit_helpers.h"
 #include "utils/leb128.h"
@@ -32,7 +34,6 @@ namespace panda::panda_file::helpers {
 constexpr size_t UINT_BYTE2_SHIFT = 8U;
 constexpr size_t UINT_BYTE3_SHIFT = 16U;
 constexpr size_t UINT_BYTE4_SHIFT = 24U;
-constexpr const char *INVALID_SPAN_OFFSET = "Invalid span offset";
 
 class FileAccessException : public std::exception {
 public:
@@ -60,14 +61,18 @@ private:
 #endif
 
 template <size_t width>
-inline auto Read(Span<const uint8_t> *sp)
+inline auto Read(Span<const uint8_t> *sp, const File *file = nullptr)
 {
     constexpr size_t BYTE_WIDTH = std::numeric_limits<uint8_t>::digits;
     constexpr size_t BITWIDTH = BYTE_WIDTH * width;
     using unsigned_type = panda::helpers::TypeHelperT<BITWIDTH, false>;
 
     unsigned_type result = 0;
-    THROW_IF(sp->Size() < width, INVALID_SPAN_OFFSET);
+    if (file != nullptr) {
+        file->ThrowIfWithCheck(sp->Size() < width, FileError::NOT_ENOUGH_SPAN_SIZE);
+    } else {
+        THROW_IF(sp->Size() < width, FileError::NOT_ENOUGH_SPAN_SIZE);
+    }
 
     for (size_t i = 0; i < width; i++) {
         unsigned_type tmp = static_cast<unsigned_type>((*sp)[i]) << (i * BYTE_WIDTH);
@@ -78,11 +83,15 @@ inline auto Read(Span<const uint8_t> *sp)
 }
 
 template <>
-inline auto Read<sizeof(uint16_t)>(Span<const uint8_t> *sp)
+inline auto Read<sizeof(uint16_t)>(Span<const uint8_t> *sp, const File *file)
 {
     uint16_t result = 0;
-    THROW_IF(sp->Size() < sizeof(uint16_t), INVALID_SPAN_OFFSET);
-
+    if (file != nullptr) {
+        file->ThrowIfWithCheck(sp->Size() < sizeof(uint16_t), FileError::NOT_ENOUGH_SPAN_SIZE);
+    } else {
+        THROW_IF(sp->Size() < sizeof(uint16_t), FileError::NOT_ENOUGH_SPAN_SIZE);
+    }
+    
     auto *p = sp->data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     result = *(p++);
@@ -93,10 +102,14 @@ inline auto Read<sizeof(uint16_t)>(Span<const uint8_t> *sp)
 }
 
 template <>
-inline auto Read<sizeof(uint32_t)>(Span<const uint8_t> *sp)
+inline auto Read<sizeof(uint32_t)>(Span<const uint8_t> *sp, const File *file)
 {
     uint32_t result = 0;
-    THROW_IF(sp->Size() < sizeof(uint32_t), INVALID_SPAN_OFFSET);
+    if (file != nullptr) {
+        file->ThrowIfWithCheck(sp->Size() < sizeof(uint32_t), FileError::NOT_ENOUGH_SPAN_SIZE);
+    } else {
+        THROW_IF(sp->Size() < sizeof(uint32_t), FileError::NOT_ENOUGH_SPAN_SIZE);
+    }
 
     auto *p = sp->data();
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
@@ -112,20 +125,52 @@ inline auto Read<sizeof(uint32_t)>(Span<const uint8_t> *sp)
 }
 
 template <size_t width>
-inline auto Read(Span<const uint8_t> sp)
+inline auto Read(Span<const uint8_t> sp, const File *file = nullptr)
 {
-    return Read<width>(&sp);
+    return Read<width>(&sp, file);
 }
 
-inline uint32_t ReadULeb128(Span<const uint8_t> *sp)
+inline uint32_t ReadULeb128(Span<const uint8_t> *sp, const File *file = nullptr,
+                            std::optional<File::EntityId> code_id = std::nullopt)
 {
-    THROW_IF(sp->Size() == 0U, INVALID_SPAN_OFFSET);
+    if (file != nullptr) {
+        file->ThrowIfWithCheck(sp->Size() == 0U, FileError::SPAN_SIZE_IS_ZERO);
+    } else {
+        THROW_IF(sp->Size() == 0U, FileError::SPAN_SIZE_IS_ZERO);
+    }
 
     uint32_t result;
     size_t n;
     bool is_full;
+    /**
+     * Decode an unsigned 32-bit integer using LEB128 variable-length encoding format
+     * result: the decoded value
+     * n: number of bytes used in decoding
+     * is_full: Indicates whether the decoding is valid. For uint32_t type, the first 4 bytes
+     *          use 7 bits each (28 bits in total), and the 5th byte can only use the remaining
+     *          4 bits (value must be <16). If the fifth byte uses more than 4 bits, it indicates
+     *          invalid decoding.
+     */
     std::tie(result, n, is_full) = leb128::DecodeUnsigned<uint32_t>(sp->data());
-    THROW_IF(!is_full || sp->Size() < n, INVALID_SPAN_OFFSET);
+
+    if (!is_full || sp->Size() < n) {
+        LOG(ERROR, PANDAFILE) << "LEB128 bytes (invalid span): ";
+        const uint8_t* data = sp->data();
+        for (size_t i = 0; i < std::min(n, sp->Size()); i++) {
+            LOG(ERROR, PANDAFILE) << std::hex << static_cast<int>(data[i]) << " ";
+        }
+        LOG(ERROR, PANDAFILE) << "\nDecoded value: " << std::dec << result
+                              << ", Expected bytes: " << n
+                              << ", Actual span size: " << sp->Size();
+    }
+
+    if (file != nullptr) {
+        file->ThrowIfWithCheck(!is_full, FileError::INVALID_LEB128_ENCODING, FileError::READULEB128, code_id);
+        file->ThrowIfWithCheck(sp->Size() < n, FileError::NOT_ENOUGH_SPAN_SIZE, FileError::READULEB128, code_id);
+    } else {
+        THROW_IF(!is_full, FileError::INVALID_LEB128_ENCODING);
+        THROW_IF(sp->Size() < n, FileError::NOT_ENOUGH_SPAN_SIZE);
+    }
     *sp = sp->SubSpan(n);
     return result;
 }
@@ -152,13 +197,19 @@ inline void SkipULeb128(Span<const uint8_t> *sp)
     }
 }
 
-inline int32_t ReadLeb128(Span<const uint8_t> *sp)
+inline int32_t ReadLeb128(Span<const uint8_t> *sp, const File *file = nullptr)
 {
     uint32_t result;
     size_t n;
     bool is_full;
     std::tie(result, n, is_full) = leb128::DecodeSigned<int32_t>(sp->data());
-    THROW_IF(!is_full || sp->Size() < n, INVALID_SPAN_OFFSET);
+    if (file != nullptr) {
+        file->ThrowIfWithCheck(!is_full, FileError::INVALID_LEB128_ENCODING);
+        file->ThrowIfWithCheck(sp->Size() < n, FileError::NOT_ENOUGH_SPAN_SIZE);
+    } else {
+        THROW_IF(!is_full, FileError::INVALID_LEB128_ENCODING);
+        THROW_IF(sp->Size() < n, FileError::NOT_ENOUGH_SPAN_SIZE);
+    }
     *sp = sp->SubSpan(n);
     return result;
 }

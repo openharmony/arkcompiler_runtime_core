@@ -24,7 +24,7 @@ ModuleDataAccessor::ModuleDataAccessor(const panda_file::File &panda_file, panda
 
     auto module_sp = sp.SubSpan(panda_file::ID_SIZE);  // skip literalnum
 
-    num_module_requests_ = panda_file::helpers::Read<panda_file::ID_SIZE>(&module_sp);
+    num_module_requests_ = panda_file::helpers::Read<panda_file::ID_SIZE>(&module_sp, &panda_file_);
 
     for (size_t idx = 0; idx < num_module_requests_; idx++) {
         auto value = static_cast<uint32_t>(panda_file::helpers::Read<sizeof(uint32_t)>(&module_sp));

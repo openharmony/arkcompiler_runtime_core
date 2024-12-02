@@ -28,6 +28,7 @@ host_unittest_action("LibPandaFileTest") {
     "file_item_container_test.cpp",
     "file_items_test.cpp",
     "file_test.cpp",
+    "helpers_test.cpp",
     "pgo_test.cpp",
   ]
 

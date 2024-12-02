@@ -22,16 +22,16 @@ MethodDataAccessor::MethodDataAccessor(const File &panda_file, File::EntityId me
 {
     auto sp = panda_file_.GetSpanFromId(method_id);
 
-    class_idx_ = helpers::Read<IDX_SIZE>(&sp);
-    proto_idx_ = helpers::Read<IDX_SIZE>(&sp);
+    class_idx_ = helpers::Read<IDX_SIZE>(&sp, &panda_file_);
+    proto_idx_ = helpers::Read<IDX_SIZE>(&sp, &panda_file_);
 
     class_off_ = panda_file.ResolveClassIndex(method_id, class_idx_).GetOffset();
     if (proto_idx_ != INVALID_INDEX_16) {
         proto_off_ = panda_file.ResolveProtoIndex(method_id, proto_idx_).GetOffset();
     }
 
-    name_off_ = helpers::Read<ID_SIZE>(&sp);
-    access_flags_ = helpers::ReadULeb128(&sp);
+    name_off_ = helpers::Read<ID_SIZE>(&sp, &panda_file_);
+    access_flags_ = helpers::ReadULeb128(&sp, &panda_file_);
 
     is_external_ = panda_file_.IsExternal(method_id);
 

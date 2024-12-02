@@ -17,6 +17,7 @@
 #define LIBPANDAFILE_DEBUG_DATA_ACCESSOR_H
 
 #include "file.h"
+#include "helpers.h"
 
 #include "utils/span.h"
 

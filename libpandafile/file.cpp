@@ -780,19 +780,28 @@ bool File::ValidateChecksum(uint32_t *cal_checksum_out) const
     return GetHeader()->checksum == cal_checksum;
 }
 
-void File::ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::string_view& tag) const
+void File::ThrowIfWithCheck(bool cond, const std::string_view& msg, const std::string_view& tag,
+                            std::optional<File::EntityId> offset) const
 {
     if (UNLIKELY(cond)) {
 #ifndef SUPPORT_KNOWN_EXCEPTION
         uint32_t cal_checksum = 0;
         bool is_checksum_match = ValidateChecksum(&cal_checksum);
-        if (!is_checksum_match) {
+        bool is_offset_valid = offset.has_value();
+        if ((!is_checksum_match) && is_offset_valid) {
+            LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted. "
+                                         << "Offset: " << offset.value().GetOffset() << ", "
+                                         << "Expected checksum: 0x" << std::hex << GetHeader()->checksum
+                                         << ", Actual checksum: 0x" << std::hex << cal_checksum;
+        } else if (!is_checksum_match) {
             LOG(FATAL, PANDAFILE) << msg << ", checksum mismatch. The abc file has been corrupted. "
                                          << "Expected checksum: 0x" << std::hex << GetHeader()->checksum
                                          << ", Actual checksum: 0x" << std::hex << cal_checksum;
         }
 
-        if (!tag.empty()) {
+        if (!tag.empty() && is_offset_valid) {
+            LOG(FATAL, PANDAFILE) << msg << ", from method: " << tag << ", offset: " << offset.value().GetOffset();
+        } else if (!tag.empty()) {
             LOG(FATAL, PANDAFILE) << msg << ", from method: " << tag;
         } else {
             LOG(FATAL, PANDAFILE) << msg;

@@ -14,6 +14,7 @@
  */
 
 #include "class_data_accessor.h"
+#include "file_error.h"
 
 namespace panda::panda_file {
 
@@ -22,35 +23,36 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
 {
     ASSERT(!panda_file.IsExternal(class_id));
     auto sp = panda_file_.GetSpanFromId(class_id_);
-    name_.utf16_length = helpers::ReadULeb128(&sp);
+    name_.utf16_length = helpers::ReadULeb128(&sp, &panda_file_);
     name_.data = sp.data();
 
     size_t size = utf::Mutf8Size(name_.data) + 1;  // + 1 for null byte
-    panda_file_.ThrowIfWithCheck(sp.Size() < size, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
+    panda_file_.ThrowIfWithCheck(sp.Size() < size, FileError::NOT_ENOUGH_SP_SIZE, FileError::CLASS_DATA_ACCESSOR);
     sp = sp.SubSpan(size);
 
-    super_class_off_ = helpers::Read<ID_SIZE>(&sp);
+    super_class_off_ = helpers::Read<ID_SIZE>(&sp, &panda_file_);
 
-    access_flags_ = helpers::ReadULeb128(&sp);
-    num_fields_ = helpers::ReadULeb128(&sp);
-    num_methods_ = helpers::ReadULeb128(&sp);
+    access_flags_ = helpers::ReadULeb128(&sp, &panda_file_);
+    num_fields_ = helpers::ReadULeb128(&sp, &panda_file_);
+    num_methods_ = helpers::ReadULeb128(&sp, &panda_file_);
 
-    panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
+    panda_file_.ThrowIfWithCheck(sp.Size() == 0U, FileError::SPAN_SIZE_IS_ZERO, FileError::CLASS_DATA_ACCESSOR);
     auto tag = static_cast<ClassTag>(sp[0]);
 
     while (tag != ClassTag::NOTHING && tag < ClassTag::SOURCE_LANG) {
-        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, FileError::SPAN_SIZE_IS_ZERO, FileError::CLASS_DATA_ACCESSOR);
         sp = sp.SubSpan(1);
 
         if (tag == ClassTag::INTERFACES) {
-            num_ifaces_ = helpers::ReadULeb128(&sp);
+            num_ifaces_ = helpers::ReadULeb128(&sp, &panda_file_);
             ifaces_offsets_sp_ = sp;
             size_t scale = IDX_SIZE * num_ifaces_;
-            panda_file_.ThrowIfWithCheck(sp.Size() < scale, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
+            panda_file_.ThrowIfWithCheck(sp.Size() < scale, FileError::NOT_ENOUGH_SP_SIZE,
+                                         FileError::CLASS_DATA_ACCESSOR);
             sp = sp.SubSpan(scale);
         }
 
-        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, FileError::SPAN_SIZE_IS_ZERO, FileError::CLASS_DATA_ACCESSOR);
         tag = static_cast<ClassTag>(sp[0]);
     }
 
@@ -59,7 +61,8 @@ ClassDataAccessor::ClassDataAccessor(const File &panda_file, File::EntityId clas
     if (tag == ClassTag::NOTHING) {
         annotations_sp_ = sp;
         source_file_sp_ = sp;
-        panda_file_.ThrowIfWithCheck(sp.Size() < TAG_SIZE, File::INVALID_FILE_OFFSET, File::CLASS_DATA_ACCESSOR);
+        panda_file_.ThrowIfWithCheck(sp.Size() < TAG_SIZE, FileError::NOT_ENOUGH_SP_SIZE,
+                                     FileError::CLASS_DATA_ACCESSOR);
         fields_sp_ = sp.SubSpan(TAG_SIZE);  // skip NOTHING tag
     }
 }

@@ -19,6 +19,7 @@
 #include "file.h"
 #include "file_items.h"
 #include "field_data_accessor.h"
+#include "helpers.h"
 #include "method_data_accessor.h"
 
 namespace panda::panda_file {

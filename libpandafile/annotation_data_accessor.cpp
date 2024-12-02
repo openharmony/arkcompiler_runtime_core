@@ -14,6 +14,7 @@
  */
 
 #include "annotation_data_accessor.h"
+#include "file_error.h"
 #include "file_items.h"
 
 namespace panda::panda_file {
@@ -22,14 +23,14 @@ AnnotationDataAccessor::AnnotationDataAccessor(const File &panda_file, File::Ent
     : panda_file_(panda_file), annotation_id_(annotation_id)
 {
     auto sp = panda_file_.GetSpanFromId(annotation_id_);
-    auto class_idx = helpers::Read<IDX_SIZE>(&sp);
+    auto class_idx = helpers::Read<IDX_SIZE>(&sp, &panda_file_);
     class_off_ = panda_file_.ResolveClassIndex(annotation_id_, class_idx).GetOffset();
-    count_ = helpers::Read<COUNT_SIZE>(&sp);
+    count_ = helpers::Read<COUNT_SIZE>(&sp, &panda_file_);
     size_ = ID_SIZE + COUNT_SIZE + count_ * (ID_SIZE + VALUE_SIZE) + count_ * TYPE_TAG_SIZE;
 
     elements_sp_ = sp;
     size_t size = count_ * (ID_SIZE + VALUE_SIZE);
-    panda_file_.ThrowIfWithCheck(sp.Size() < size, File::INVALID_FILE_OFFSET, File::ANNOTATION_DATA_ACCESSOR);
+    panda_file_.ThrowIfWithCheck(sp.Size() < size, FileError::NOT_ENOUGH_SP_SIZE, FileError::ANNOTATION_DATA_ACCESSOR);
     elements_tags_ = sp.SubSpan(size);
 }
 
@@ -37,8 +38,8 @@ AnnotationDataAccessor::Elem AnnotationDataAccessor::GetElement(size_t i) const
 {
     ASSERT(i < count_);
     auto sp = elements_sp_.SubSpan(i * (ID_SIZE + VALUE_SIZE));
-    uint32_t name = helpers::Read<ID_SIZE>(&sp);
-    uint32_t value = helpers::Read<VALUE_SIZE>(&sp);
+    uint32_t name = helpers::Read<ID_SIZE>(&sp, &panda_file_);
+    uint32_t value = helpers::Read<VALUE_SIZE>(&sp, &panda_file_);
     return AnnotationDataAccessor::Elem(panda_file_, File::EntityId(name), value);
 }
 
@@ -46,7 +47,7 @@ AnnotationDataAccessor::Tag AnnotationDataAccessor::GetTag(size_t i) const
 {
     ASSERT(i < count_);
     auto sp = elements_tags_.SubSpan(i * TYPE_TAG_SIZE);
-    auto item = static_cast<char>(helpers::Read<TYPE_TAG_SIZE>(&sp));
+    auto item = static_cast<char>(helpers::Read<TYPE_TAG_SIZE>(&sp, &panda_file_));
     return AnnotationDataAccessor::Tag(item);
 }
 

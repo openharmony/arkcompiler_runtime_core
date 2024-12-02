@@ -14,6 +14,7 @@
  */
 
 #include "field_data_accessor.h"
+#include "file_error.h"
 
 namespace panda::panda_file {
 
@@ -33,7 +34,7 @@ FieldDataAccessor::FieldDataAccessor(const File &panda_file, File::EntityId fiel
     is_external_ = panda_file_.IsExternal(field_id_);
 
     if (!is_external_) {
-        access_flags_ = helpers::ReadULeb128(&sp);
+        access_flags_ = helpers::ReadULeb128(&sp, &panda_file_);
         tagged_values_sp_ = sp;
         size_ = 0;
     } else {
@@ -44,18 +45,18 @@ FieldDataAccessor::FieldDataAccessor(const File &panda_file, File::EntityId fiel
 
 std::optional<FieldDataAccessor::FieldValue> FieldDataAccessor::GetValueInternal()
 {
-    panda_file_.ThrowIfWithCheck(tagged_values_sp_.Size() == 0U, File::INVALID_FILE_OFFSET, File::FIELD_DATA_ACCESSOR);
+    panda_file_.ThrowIfWithCheck(tagged_values_sp_.Size() == 0U, FileError::SPAN_SIZE_IS_ZERO, FileError::FIELD_DATA_ACCESSOR);
 
     auto sp = tagged_values_sp_;
     auto tag = static_cast<FieldTag>(sp[0]);
     FieldValue value;
 
     if (tag == FieldTag::INT_VALUE) {
-        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::FIELD_DATA_ACCESSOR);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, FileError::SPAN_SIZE_IS_ZERO, FileError::FIELD_DATA_ACCESSOR);
         sp = sp.SubSpan(1);
         value = static_cast<uint32_t>(helpers::ReadLeb128(&sp));
     } else if (tag == FieldTag::VALUE) {
-        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, File::INVALID_FILE_OFFSET, File::FIELD_DATA_ACCESSOR);
+        panda_file_.ThrowIfWithCheck(sp.Size() == 0U, FileError::SPAN_SIZE_IS_ZERO, FileError::FIELD_DATA_ACCESSOR);
         sp = sp.SubSpan(1);
 
         switch (GetType()) {

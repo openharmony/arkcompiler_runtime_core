@@ -14,6 +14,7 @@
  */
 
 #include "code_data_accessor.h"
+#include "file_error.h"
 
 namespace panda::panda_file {
 
@@ -39,12 +40,12 @@ CodeDataAccessor::CodeDataAccessor(const File &panda_file, File::EntityId code_i
 {
     auto sp = panda_file_.GetSpanFromId(code_id_);
 
-    num_vregs_ = helpers::ReadULeb128(&sp);
-    num_args_ = helpers::ReadULeb128(&sp);
-    code_size_ = helpers::ReadULeb128(&sp);
-    tries_size_ = helpers::ReadULeb128(&sp);
+    num_vregs_ = helpers::ReadULeb128(&sp, &panda_file_, code_id_);
+    num_args_ = helpers::ReadULeb128(&sp, &panda_file_, code_id_);
+    code_size_ = helpers::ReadULeb128(&sp, &panda_file_, code_id_);
+    tries_size_ = helpers::ReadULeb128(&sp, &panda_file_, code_id_);
     instructions_ptr_ = sp.data();
-    panda_file_.ThrowIfWithCheck(sp.Size() < code_size_, File::INVALID_FILE_OFFSET);
+    panda_file_.ThrowIfWithCheck(sp.Size() < code_size_, FileError::NOT_ENOUGH_SP_SIZE);
     sp = sp.SubSpan(code_size_);
     try_blocks_sp_ = sp;
 }

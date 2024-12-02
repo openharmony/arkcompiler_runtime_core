@@ -22,8 +22,8 @@ DebugInfoDataAccessor::DebugInfoDataAccessor(const File &panda_file, File::Entit
 {
     auto sp = panda_file_.GetSpanFromId(debug_info_id_);
 
-    line_start_ = helpers::ReadULeb128(&sp);
-    num_params_ = helpers::ReadULeb128(&sp);
+    line_start_ = helpers::ReadULeb128(&sp, &panda_file_);
+    num_params_ = helpers::ReadULeb128(&sp, &panda_file_);
     parameters_sp_ = sp;
 }
 

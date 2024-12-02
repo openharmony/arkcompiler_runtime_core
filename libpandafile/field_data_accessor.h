@@ -18,6 +18,7 @@
 
 #include "file.h"
 #include "file_items.h"
+#include "helpers.h"
 #include "modifiers.h"
 #include "type.h"
 

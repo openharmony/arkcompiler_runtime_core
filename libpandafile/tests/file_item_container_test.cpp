@@ -20,6 +20,7 @@
 #include "debug_info_extractor.h"
 #include "field_data_accessor-inl.h"
 #include "file.h"
+#include "file_error.h"
 #include "file_item_container.h"
 #include "file_writer.h"
 #include "helpers.h"
@@ -1310,10 +1311,10 @@ HWTEST(ItemContainer, ThrowIfWithCheckTest, testing::ext::TestSize.Level0)
     auto file = File::Open(file_name);
     EXPECT_NE(file, nullptr);
 
-    file->ThrowIfWithCheck(0U > 1U, File::INVALID_FILE_OFFSET);
+    file->ThrowIfWithCheck(0U > 1U, FileError::INVALID_FILE_OFFSET);
 
 #ifdef HOST_UT
-    EXPECT_DEATH(file->ThrowIfWithCheck(1U > 0U, File::INVALID_FILE_OFFSET),
+    EXPECT_DEATH(file->ThrowIfWithCheck(1U > 0U, FileError::INVALID_FILE_OFFSET),
                  "F/pandafile: Invalid file offset");
 #endif
 
@@ -1329,7 +1330,7 @@ HWTEST(ItemContainer, ThrowIfWithCheckTest, testing::ext::TestSize.Level0)
     GenerateModifiedAbc(buffer, file_name);
 
 #ifdef HOST_UT
-    EXPECT_DEATH(file->ThrowIfWithCheck(1U > 0U, File::INVALID_FILE_OFFSET),
+    EXPECT_DEATH(file->ThrowIfWithCheck(1U > 0U, FileError::INVALID_FILE_OFFSET),
                  "F/pandafile: Invalid file offset, checksum mismatch. The abc file has been corrupted.");
 #endif
 
