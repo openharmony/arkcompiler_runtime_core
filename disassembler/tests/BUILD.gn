@@ -202,6 +202,17 @@ module_sources = [
   "disassembler_system_annotations_test.cpp",
 ]
 
+disasm_module_test_action_files = [
+  "module-requests-annotation-import",
+  "module-regular-import",
+  "module-namespace-import",
+  "module-local-export",
+  "module-indirect-export",
+  "module-start-export",
+  "module-regular-import-local-export",
+  "slot-number-annotation",
+]
+
 host_unittest_action("DisasmModuleTest") {
   module_out_path = module_output_path
   sources = module_sources
@@ -211,10 +222,28 @@ host_unittest_action("DisasmModuleTest") {
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
-  foreach(file, disasm_module_test_js_files) {
+  foreach(file, disasm_module_test_action_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 }
+
+disasm_debug_script_test_action_files = [
+  "column-number1",
+  "column-number2",
+  "column-number3",
+  "column-number4",
+  "column-number5",
+  "column-number6",
+  "line-number1",
+  "line-number2",
+  "line-number3",
+  "line-number4",
+  "line-number5",
+  "module-requests-annotation-import",
+  "script-string1",
+  "script-string2",
+  "slot-number-annotation",
+]
 
 host_unittest_action("DisasmDebugTest") {
   module_out_path = module_output_path
@@ -225,14 +254,14 @@ host_unittest_action("DisasmDebugTest") {
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
-  foreach(file, disasm_column_test_js_files) {
+  foreach(file, disasm_debug_script_test_action_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 }
 
 host_unittest_action("DisasmReleaseTest") {
   module_out_path = module_output_path
-  sources = script_sources
+  sources = [ "disassembler_line_number_release_test.cpp" ]
   include_dirs = disasm_include_dirs
   configs = disasm_test_configs
   deps = disasm_test_deps
@@ -269,7 +298,7 @@ host_unittest_action("DisasmScriptTest") {
   test_abc_dir = rebase_path(target_out_dir)
   defines = [ "GRAPH_TEST_ABC_DIR=\"${test_abc_dir}/\"" ]
 
-  foreach(file, disasm_test_js_files) {
+  foreach(file, disasm_debug_script_test_action_files) {
     deps += [ ":gen_${file}_abc" ]
   }
 }
