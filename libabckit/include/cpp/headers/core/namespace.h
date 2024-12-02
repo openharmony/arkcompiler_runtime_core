@@ -31,7 +31,11 @@ class Namespace : public ViewInResource<AbckitCoreNamespace *, const File *> {
     /// @brief to access private constructor
     friend class abckit::File;
     /// @brief to access private constructor
-    friend class Module;
+    friend class core::Module;
+    /// @brief to access private constructor
+    friend class core::Class;
+    /// @brief to access private constructor
+    friend class core::Function;
     /// @brief abckit::DefaultHash<Namespace>
     friend class abckit::DefaultHash<Namespace>;
 
@@ -57,7 +61,7 @@ public:
      * @brief Construct a new Namespace object
      * @param other
      */
-    Namespace(Namespace &&other) = default;
+    Namespace(Namespace &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief
@@ -73,37 +77,58 @@ public:
 
     /**
      * @brief Get the Name object
-     * @return std::string_view
+     * @return `std::string`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName() const
+    std::string GetName() const
     {
         AbckitString *abcName = GetApiConfig()->cIapi_->namespaceGetName(GetView());
         CheckError(GetApiConfig());
-        std::string_view name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
+        std::string name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
         CheckError(GetApiConfig());
         return name;
     }
 
-    // Core API's.
-    // ...
+    /**
+     * @brief Returns parent namespace.
+     * @return `core::Namespace` or NULL if namespace has no parent namespace.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Namespace GetParentNamespace() const
+    {
+        AbckitCoreNamespace *parent = GetApiConfig()->cIapi_->namespaceGetParentNamespace(GetView());
+        return Namespace(parent, GetApiConfig(), GetResource());
+    }
 
     /**
-     * @brief EnumerateNamespaces
-     * @param cb
+     * @brief Enumerates namespaces defined inside of the Namespace, invoking callback `cb` for each inner
+     * namespace.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
      */
-    void EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const;
+    bool EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const;
 
     /**
-     * @brief EnumerateClasses
-     * @param cb
+     * @brief Enumerates classes of the Namespace, invoking callback `cb` for each class.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
      */
-    void EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
+    bool EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
 
     /**
-     * @brief EnumerateTopLevelFunctions
-     * @param cb
+     * @brief Enumerates top level functions of the Namespace, invoking callback `cb` for each top level function.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if 'cb' is false.
      */
-    void EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
+    bool EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
 
 private:
     Namespace(AbckitCoreNamespace *ns, const ApiConfig *conf, const File *file) : ViewInResource(ns), conf_(conf)

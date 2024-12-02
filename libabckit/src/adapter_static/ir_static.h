@@ -66,7 +66,7 @@ uint64_t BBgetSuccBlockCountStatic(AbckitBasicBlock *basicBlock);
 uint64_t BBgetPredBlockCountStatic(AbckitBasicBlock *basicBlock);
 uint32_t BBgetIdStatic(AbckitBasicBlock *basicBlock);
 uint32_t BBgetNumberOfInstructionsStatic(AbckitBasicBlock *basicBlock);
-AbckitBasicBlock *BBsplitBlockAfterInstructionStatic(AbckitInst *inst, bool makeEdge);
+AbckitBasicBlock *BBsplitBlockAfterInstructionStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst, bool makeEdge);
 void BBremoveAllInstsStatic(AbckitBasicBlock *basicBlock);
 void BBaddInstFrontStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst);
 void BBaddInstBackStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst);
@@ -96,10 +96,10 @@ AbckitInst *IcreateCallStaticStatic(AbckitGraph *graph, AbckitCoreFunction *inpu
 AbckitInst *IcreateCallVirtualStatic(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreFunction *inputFunction,
                                      size_t argCount, va_list argp);
 AbckitInst *IcreateLoadStringStatic(AbckitGraph *graph, AbckitString *str);
-AbckitInst *GcreateConstantI32Static(AbckitGraph *graph, int32_t value);
-AbckitInst *GcreateConstantI64Static(AbckitGraph *graph, int64_t value);
-AbckitInst *GcreateConstantU64Static(AbckitGraph *graph, uint64_t value);
-AbckitInst *GcreateConstantF64Static(AbckitGraph *graph, double value);
+AbckitInst *GfindOrCreateConstantI32Static(AbckitGraph *graph, int32_t value);
+AbckitInst *GfindOrCreateConstantI64Static(AbckitGraph *graph, int64_t value);
+AbckitInst *GfindOrCreateConstantU64Static(AbckitGraph *graph, uint64_t value);
+AbckitInst *GfindOrCreateConstantF64Static(AbckitGraph *graph, double value);
 
 AbckitInst *IcreateCmpStatic(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1);
 AbckitInst *IcreateNegStatic(AbckitGraph *graph, AbckitInst *input0);
@@ -410,6 +410,7 @@ bool IvisitUsersStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user
 bool IvisitInputsStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data));
 uint32_t IgetUserCountStatic(AbckitInst *inst);
 void IsetImmediateStatic(AbckitInst *inst, size_t idx, uint64_t imm);
+AbckitBitImmSize IgetImmediateSizeStatic(AbckitInst *inst, size_t idx);
 
 uint64_t IgetInputCountStatic(AbckitInst *inst);
 AbckitInst *IgetInputStatic(AbckitInst *inst, size_t index);
@@ -431,6 +432,7 @@ AbckitInst *IcreateIfDynamicStatic(AbckitGraph *graph, AbckitInst *input0, Abcki
                                    AbckitIsaApiDynamicConditionCode cc);
 AbckitInst *IcreateTryStatic(AbckitGraph *graph);
 AbckitBasicBlock *IgetBasicBlockStatic(AbckitInst *inst);
+AbckitGraph *IgetGraphStatic(AbckitInst *inst);
 AbckitCoreModule *IgetModuleStatic(AbckitInst *inst);
 uint32_t GetImportDescriptorIdxDynamic(AbckitGraph *graph, AbckitCoreImportDescriptor *id);
 uint32_t GetExportDescriptorIdxDynamic(AbckitGraph *graph, AbckitCoreExportDescriptor *ed);

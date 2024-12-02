@@ -35,7 +35,7 @@ void AbcKitInstBuilder::AbcKitBuildStoreObject(const BytecodeInstruction *bcInst
 
 void AbcKitInstBuilder::BuildIsUndefined(const BytecodeInstruction *bcInst)
 {
-    BuildDefaultAbcKitIntrinsic(bcInst, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_UNDEFINED);
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_UNDEFINED);
 }
 
 void AbcKitInstBuilder::BuildLoadStatic(const BytecodeInstruction *bcInst, DataType::Type type)
@@ -65,12 +65,12 @@ void AbcKitInstBuilder::BuildStoreArray(const BytecodeInstruction *bcInst, DataT
 
 void AbcKitInstBuilder::BuildNewArray(const BytecodeInstruction *bcInst)
 {
-    BuildDefaultAbcKitIntrinsic(bcInst, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_NEW_ARRAY);
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_NEW_ARRAY);
 }
 
 void AbcKitInstBuilder::BuildNewObject(const BytecodeInstruction *bcInst)
 {
-    BuildDefaultAbcKitIntrinsic(bcInst, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_NEW_OBJECT);
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_NEW_OBJECT);
 }
 
 void AbcKitInstBuilder::BuildInitObject(const BytecodeInstruction *bcInst, bool isRange)
@@ -80,17 +80,17 @@ void AbcKitInstBuilder::BuildInitObject(const BytecodeInstruction *bcInst, bool 
 
 void AbcKitInstBuilder::BuildCheckCast(const BytecodeInstruction *bcInst)
 {
-    BuildDefaultAbcKitIntrinsic(bcInst, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_CHECK_CAST);
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_CHECK_CAST);
 }
 
 void AbcKitInstBuilder::BuildIsInstance(const BytecodeInstruction *bcInst)
 {
-    BuildDefaultAbcKitIntrinsic(bcInst, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_INSTANCE);
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_IS_INSTANCE);
 }
 
 void AbcKitInstBuilder::BuildThrow(const BytecodeInstruction *bcInst)
 {
-    BuildDefaultAbcKitIntrinsic(bcInst, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_THROW);
+    BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_THROW);
 }
 
 // NOLINTNEXTLINE(misc-definitions-in-headers)
@@ -117,7 +117,7 @@ void AbcKitInstBuilder::AbcKitBuildLoadFromPool(const BytecodeInstruction *bcIns
     } else {
         // NOLINTNEXTLINE(readability-magic-numbers)
         static_assert(OPCODE == Opcode::LoadString);
-        BuildDefaultAbcKitIntrinsic(bcInst, compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING);
+        BuildDefaultAbcKitIntrinsic(bcInst, ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING);
         return;
     }
     if (!GetGraph()->IsDynamicMethod() || GetGraph()->IsBytecodeOptimizer()) {

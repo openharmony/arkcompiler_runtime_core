@@ -50,7 +50,7 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinefieldbyname_1)
             ASSERT_NE(name, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-            auto *constant = g_implG->gCreateConstantI32(graph, 4);
+            auto *constant = g_implG->gFindOrCreateConstantI32(graph, 4);
             ASSERT_NE(constant, nullptr);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
@@ -138,7 +138,7 @@ TEST_F(LibAbcKitCreateDynDefineField, IcreateDefinepropertybyname_1)
                                  ASSERT_NE(name, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
-                                 auto *constant = g_implG->gCreateConstantI32(graph, 4);
+                                 auto *constant = g_implG->gFindOrCreateConstantI32(graph, 4);
                                  ASSERT_NE(constant, nullptr);
                                  ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 

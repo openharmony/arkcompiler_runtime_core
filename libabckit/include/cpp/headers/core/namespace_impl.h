@@ -23,40 +23,45 @@
 namespace abckit::core {
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void Namespace::EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const
+inline bool Namespace::EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const
 {
     Payload<const std::function<bool(core::Namespace)> &> payload {cb, GetApiConfig(), GetResource()};
 
-    GetApiConfig()->cIapi_->namespaceEnumerateNamespaces(GetView(), &payload, [](AbckitCoreNamespace *ns, void *data) {
-        const auto &payload = *static_cast<Payload<const std::function<bool(core::Namespace)> &> *>(data);
-        return payload.data(core::Namespace(ns, payload.config, payload.resource));
-    });
+    bool isNormalExit = GetApiConfig()->cIapi_->namespaceEnumerateNamespaces(
+        GetView(), &payload, [](AbckitCoreNamespace *ns, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Namespace)> &> *>(data);
+            return payload.data(core::Namespace(ns, payload.config, payload.resource));
+        });
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void Namespace::EnumerateClasses(const std::function<bool(core::Class)> &cb) const
+inline bool Namespace::EnumerateClasses(const std::function<bool(core::Class)> &cb) const
 {
     Payload<const std::function<bool(core::Class)> &> payload {cb, GetApiConfig(), GetResource()};
 
-    GetApiConfig()->cIapi_->namespaceEnumerateClasses(GetView(), &payload, [](AbckitCoreClass *ns, void *data) {
-        const auto &payload = *static_cast<Payload<const std::function<bool(core::Class)> &> *>(data);
-        return payload.data(core::Class(ns, payload.config, payload.resource));
-    });
+    bool isNormalExit =
+        GetApiConfig()->cIapi_->namespaceEnumerateClasses(GetView(), &payload, [](AbckitCoreClass *ns, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Class)> &> *>(data);
+            return payload.data(core::Class(ns, payload.config, payload.resource));
+        });
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void Namespace::EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const
+inline bool Namespace::EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const
 {
     Payload<const std::function<bool(core::Function)> &> payload {cb, GetApiConfig(), GetResource()};
 
-    GetApiConfig()->cIapi_->namespaceEnumerateTopLevelFunctions(
+    bool isNormalExit = GetApiConfig()->cIapi_->namespaceEnumerateTopLevelFunctions(
         GetView(), &payload, [](AbckitCoreFunction *func, void *data) {
             const auto &payload = *static_cast<Payload<const std::function<bool(core::Function)> &> *>(data);
             return payload.data(core::Function(func, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 }  // namespace abckit::core

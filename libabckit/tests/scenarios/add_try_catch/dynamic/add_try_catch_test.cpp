@@ -47,8 +47,10 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
     AbckitInst *initInst = g_implG->bbGetFirstInst(bb);
     AbckitInst *prevRetInst = g_implG->iGetPrev(g_implG->bbGetLastInst(bb));
 
-    AbckitBasicBlock *tryBegin = g_implG->bbSplitBlockAfterInstruction(initInst, true);
-    AbckitBasicBlock *tryEnd = g_implG->bbSplitBlockAfterInstruction(prevRetInst, true);
+    AbckitBasicBlock *tryBegin =
+        g_implG->bbSplitBlockAfterInstruction(g_implG->iGetBasicBlock(initInst), initInst, true);
+    AbckitBasicBlock *tryEnd =
+        g_implG->bbSplitBlockAfterInstruction(g_implG->iGetBasicBlock(prevRetInst), prevRetInst, true);
 
     // Fill catchBlock
     AbckitBasicBlock *catchBlock = g_implG->bbCreateEmpty(graph);

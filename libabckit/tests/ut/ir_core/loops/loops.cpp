@@ -41,9 +41,9 @@ void CreateLoopDynamic(AbckitGraph *graph, AbckitFile *file)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    AbckitInst *forConst = g_implG->gCreateConstantU64(graph, 0xa);
-    AbckitInst *zero = g_implG->gCreateConstantU64(graph, 0x0);
-    AbckitInst *forStep = g_implG->gCreateConstantU64(graph, 0x2);
+    AbckitInst *forConst = g_implG->gFindOrCreateConstantU64(graph, 0xa);
+    AbckitInst *zero = g_implG->gFindOrCreateConstantU64(graph, 0x0);
+    AbckitInst *forStep = g_implG->gFindOrCreateConstantU64(graph, 0x2);
 
     g_implG->bbAddInstBack(startBB, forConst);
     g_implG->bbAddInstBack(startBB, zero);
@@ -89,9 +89,9 @@ void CreateLoopStatic(AbckitGraph *graph, AbckitCoreFunction *consoleLogInt)
     std::vector<AbckitBasicBlock *> succBBs = helpers::BBgetSuccBlocks(startBB);
     AbckitBasicBlock *endBB = g_implG->gGetEndBasicBlock(graph);
 
-    AbckitInst *forConst = g_implG->gCreateConstantU64(graph, 0xa);
-    AbckitInst *zero = g_implG->gCreateConstantU64(graph, 0x0);
-    AbckitInst *forStep = g_implG->gCreateConstantU64(graph, 0x1);
+    AbckitInst *forConst = g_implG->gFindOrCreateConstantU64(graph, 0xa);
+    AbckitInst *zero = g_implG->gFindOrCreateConstantU64(graph, 0x0);
+    AbckitInst *forStep = g_implG->gFindOrCreateConstantU64(graph, 0x1);
 
     g_implG->bbAddInstBack(startBB, forConst);
     g_implG->bbAddInstBack(startBB, zero);

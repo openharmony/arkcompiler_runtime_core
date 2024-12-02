@@ -18,15 +18,13 @@
 #include "src/adapter_dynamic/runtime_adapter_dynamic.h"
 #include "dyn_intrinsics_opcodes.inc"
 
-using namespace ark;
-
 namespace libabckit {
 
 // NOLINTNEXTLINE(readability-function-size)
-static inline AbckitIsaApiStaticOpcode GetStaticIntrinsicOpcode(compiler::IntrinsicInst *inst) {
+static inline AbckitIsaApiStaticOpcode GetStaticIntrinsicOpcode(ark::compiler::IntrinsicInst *inst) {
     switch(inst->GetIntrinsicId()) {
 % Compiler::intrinsics.select {|intrinsic| intrinsic.space == "abckit" }.each do |intrinsic|
-        case compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
+        case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
             return ABCKIT_ISA_API_STATIC_OPCODE_<%= intrinsic.class_name.upcase %>;
 % end
         default: {
@@ -36,12 +34,12 @@ static inline AbckitIsaApiStaticOpcode GetStaticIntrinsicOpcode(compiler::Intrin
     }
 }
 
-static inline AbckitIsaApiDynamicOpcode GetDynamicIntrinsicOpcode(compiler::IntrinsicInst *inst) {
+static inline AbckitIsaApiDynamicOpcode GetDynamicIntrinsicOpcode(ark::compiler::IntrinsicInst *inst) {
     return GetDYNIntrinsicOpcode(inst);
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-static inline size_t GetIntrinicMaxInputsCountStatic(compiler::IntrinsicInst *inst) {
+static inline size_t GetIntrinicMaxInputsCountStatic(ark::compiler::IntrinsicInst *inst) {
     switch(inst->GetIntrinsicId()) {
 % Compiler::intrinsics.select {|intrinsic| intrinsic.space == "abckit" }.each do |intrinsic|
         case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>: {
@@ -66,12 +64,12 @@ static inline size_t GetIntrinicMaxInputsCountStatic(compiler::IntrinsicInst *in
     }
 }
 
-static inline size_t GetIntrinicMaxInputsCountDyn(compiler::IntrinsicInst *inst) {
+static inline size_t GetIntrinicMaxInputsCountDyn(ark::compiler::IntrinsicInst *inst) {
     return GetIntrinicDYNMaxInputsCount(inst);
 }
 
 // NOLINTNEXTLINE(readability-function-size)
-static inline bool IsCallInstStatic(compiler::Inst *inst) {
+static inline bool IsCallInstStatic(ark::compiler::Inst *inst) {
     if (!inst->IsIntrinsic()) {
         return inst->IsCall();
     }

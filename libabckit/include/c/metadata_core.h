@@ -238,7 +238,7 @@ struct AbckitInspectApi {
      * @return Boolean value that is stored in the `value`.
      * @param [ in ] value - Value item to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
-     * @note Set `ABCKIT_STATUS_TODO` error if `value` type id differs from `ABCKIT_TYPE_ID_U1`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` type id differs from `ABCKIT_TYPE_ID_U1`.
      */
     bool (*valueGetU1)(AbckitValue *value);
 
@@ -247,7 +247,7 @@ struct AbckitInspectApi {
      * @return Double value that is stored in the `value`.
      * @param [ in ] value - Value item to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
-     * @note Set `ABCKIT_STATUS_TODO` error if `value` type id differs from `ABCKIT_TYPE_ID_F64`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` type id differs from `ABCKIT_TYPE_ID_F64`.
      */
     double (*valueGetDouble)(AbckitValue *value);
 
@@ -256,7 +256,7 @@ struct AbckitInspectApi {
      * @return Pointer to the `AbckitString` value that is stored in the `value`.
      * @param [ in ] value - Value item to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
-     * @note Set `ABCKIT_STATUS_TODO` error if `value` type id differs from `ABCKIT_TYPE_ID_STRING`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` type id differs from `ABCKIT_TYPE_ID_STRING`.
      * @note Allocates
      */
     AbckitString *(*valueGetString)(AbckitValue *value);
@@ -266,7 +266,7 @@ struct AbckitInspectApi {
      * @return Pointer to the `AbckitLiteralArray`.
      * @param [ in ] value - Value item to be inspected.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` is NULL.
-     * @note Set `ABCKIT_STATUS_TODO` error if `value` type id differs from `ABCKIT_TYPE_ID_LITERALARRAY`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `value` type id differs from `ABCKIT_TYPE_ID_LITERALARRAY`.
      */
     AbckitLiteralArray *(*arrayValueGetLiteralArray)(AbckitValue *value);
 
@@ -411,8 +411,6 @@ struct AbckitInspectApi {
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is NULL.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if invoked for literal emitted not for target
      * `ABCKIT_TARGET_ARK_TS_V1` or `ABCKIT_TARGET_JS`..
-     * @note Set `ABCKIT_STATUS_TODO` error if invoked for literal emitted for target `ABCKIT_TARGET_ARK_TS_V1` and it
-     * has odd number of elements.
      */
     bool (*literalArrayEnumerateElements)(AbckitLiteralArray *litArr, void *data,
                                           bool (*cb)(AbckitFile *file, AbckitLiteral *lit, void *data));
@@ -1043,7 +1041,7 @@ struct AbckitInspectApi {
      * @brief Returns binary file that the given interface field `fld` is a part of.
      * @return Pointer to the `AbckitFile`.
      * @param [ in ] fld - Annotation interface field to be inspected.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `fld` is NULL.
      */
     AbckitFile *(*annotationInterfaceFieldGetFile)(AbckitCoreAnnotationInterfaceField *fld);
 

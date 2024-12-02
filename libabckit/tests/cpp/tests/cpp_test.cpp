@@ -32,6 +32,25 @@ class LibAbcKitCppTest : public ::testing::Test {};
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace abckit;
 
+// CC-OFFNXT(G.FUD.06) perf critical
+inline std::vector<core::Function> GetAllFunctions(const File *file)
+{
+    std::vector<core::Function> functions;
+
+    for (auto &module : file->GetModules()) {
+        for (auto &klass : module.GetClasses()) {
+            for (auto &function : klass.GetAllMethods()) {
+                functions.push_back(function);
+            }
+        }
+        for (auto &function : module.GetTopLevelFunctions()) {
+            functions.push_back(function);
+        }
+    }
+
+    return functions;
+}
+
 // Test: test-kind=api, api=BasicBlock::AddInstFront, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest1)
 {
@@ -40,26 +59,26 @@ TEST_F(LibAbcKitCppTest, CppTest1)
 
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    for (const auto &function : file.GetAllFunctions()) {
+    for (const auto &function : GetAllFunctions(&file)) {
         abckit::Graph graph = function.CreateGraph();
         abckit::BasicBlock curBB = graph.GetStartBb().GetSuccByIdx(0);
 
         // Insert `print("Func start: " + funcName)`
-        std::string funcStart = "Func start: " + std::string(function.GetName());
+        std::string funcStart = "Func start: " + function.GetName();
         abckit::Instruction loadString = graph.DynIsa().CreateLoadString(funcStart);
         curBB.AddInstFront(loadString);
         abckit::Instruction print = graph.DynIsa().CreateTryldglobalbyname("print").InsertAfter(loadString);
-        graph.DynIsa().CreateCallArg1(print, loadString).InsertAfter(print);
+        graph.DynIsa().CreateCallarg1(print, loadString).InsertAfter(print);
 
         // Find all `return` instructions
-        std::string funcEnd = "Func end: " + std::string(function.GetName());
+        std::string funcEnd = "Func end: " + function.GetName();
 
         auto instCb = [&](const abckit::Instruction &inst) {
-            AbckitIsaApiDynamicOpcode opcode = inst.GetOpcodeDyn();
+            AbckitIsaApiDynamicOpcode opcode = inst.GetGraph()->DynIsa().GetOpcode(inst);
             if (opcode == ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN ||
                 opcode == ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURNUNDEFINED) {
                 abckit::Instruction endStr = graph.DynIsa().CreateLoadString(funcEnd).InsertBefore(inst);
-                graph.DynIsa().CreateCallArg1(print, endStr).InsertBefore(inst);
+                graph.DynIsa().CreateCallarg1(print, endStr).InsertBefore(inst);
             }
         };
 
@@ -96,7 +115,7 @@ TEST_F(LibAbcKitCppTest, CppTest2)
 
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    std::vector<abckit::core::Function> allFunctions = file.GetAllFunctions();
+    std::vector<abckit::core::Function> allFunctions = GetAllFunctions(&file);
 
     auto findFunctionsWithAnnotationInterface = [&funcs = allFunctions](std::vector<abckit::core::Function> &found,
                                                                         const std::string &annoName) {
@@ -194,7 +213,7 @@ TEST_F(LibAbcKitCppTest, CppTest6)
 
     std::vector<abckit::core::Function> funcs;
 
-    for (auto &func : file.GetAllFunctions()) {
+    for (auto &func : GetAllFunctions(&file)) {
         if (func.GetName() != "foo") {
             continue;
         }
@@ -229,7 +248,7 @@ TEST_F(LibAbcKitCppTest, CppTest7)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    std::vector<std::string_view> nsNames;
+    std::vector<std::string> nsNames;
 
     for (auto &mdl : file.GetModules()) {
         for (auto &ns : mdl.GetNamespaces()) {
@@ -246,7 +265,7 @@ TEST_F(LibAbcKitCppTest, CppTest8)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    std::vector<std::string_view> annFieldNames;
+    std::vector<std::string> annFieldNames;
 
     for (auto &mdl : file.GetModules()) {
         for (auto &anni : mdl.GetAnnotationInterfaces()) {
@@ -268,7 +287,7 @@ TEST_F(LibAbcKitCppTest, CppTest9)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    std::vector<std::string_view> importNames;
+    std::vector<std::string> importNames;
 
     for (auto &mdl : file.GetModules()) {
         for (auto &imp : mdl.GetImports()) {
@@ -285,7 +304,7 @@ TEST_F(LibAbcKitCppTest, CppTest10)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    std::vector<std::string_view> exportNames;
+    std::vector<std::string> exportNames;
 
     for (auto &mdl : file.GetModules()) {
         for (auto &exp : mdl.GetExports()) {
@@ -314,7 +333,7 @@ TEST_F(LibAbcKitCppTest, CppTest11)
 TEST_F(LibAbcKitCppTest, CppTest12)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
-    abckit::core::Function func = file.GetAllFunctions()[0];
+    abckit::core::Function func = GetAllFunctions(&file)[0];
     abckit::Graph graph = func.CreateGraph();
     abckit::BasicBlock bb = graph.GetStartBb();
     abckit::Instruction inst = bb.GetFirstInst();

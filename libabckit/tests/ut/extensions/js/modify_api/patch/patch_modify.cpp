@@ -55,7 +55,7 @@ static std::vector<helpers::BBSchema<AbckitIsaApiDynamicOpcode>> g_expectedShema
 
 static void LoadStorePatchTest(AbckitGraph *graph)
 {
-    AbckitInst *a = g_implG->gCreateConstantI32(graph, 4);
+    AbckitInst *a = g_implG->gFindOrCreateConstantI32(graph, 4);
     AbckitInst *patch = g_dynG->iCreateWideStpatchvar(graph, a, 0);
     AbckitInst *lda = g_dynG->iCreateWideLdpatchvar(graph, 0);
     AbckitInst *ret = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_RETURN);

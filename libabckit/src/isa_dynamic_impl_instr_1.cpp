@@ -435,7 +435,7 @@ extern "C" AbckitInst *IcreateDYNAMICDefinefunc(AbckitGraph *graph, AbckitCoreFu
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(function->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(function->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, function->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynDefinefuncStatic(graph, function, imm0);
@@ -452,7 +452,7 @@ extern "C" AbckitInst *IcreateDYNAMICDefinemethod(AbckitGraph *graph, AbckitInst
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
 
     LIBABCKIT_WRONG_CTX(graph, acc->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(function->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(function->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, function->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynDefinemethodStatic(graph, acc, function, imm0);
@@ -471,7 +471,7 @@ extern "C" AbckitInst *IcreateDYNAMICDefineclasswithbuffer(AbckitGraph *graph, A
     LIBABCKIT_BAD_ARGUMENT(input0, nullptr);
 
     LIBABCKIT_WRONG_CTX(graph, input0->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(function->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(function->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, function->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::DYNAMIC, nullptr);
     return IcreateDynDefineclasswithbufferStatic(graph, function, literalArray, imm0, input0);

@@ -36,13 +36,13 @@ const std::string FUNC_MAIN_0 = "func_main_0";
 struct RouterAnnotation {
     abckit::core::Class owner;
     abckit::core::Annotation anno;
-    std::string_view scheme;
-    std::string_view path;
+    std::string scheme;
+    std::string path;
 };
 
 struct UserData {
-    std::string_view classStr;
-    std::string_view moduleStr;
+    std::string classStr;
+    std::string moduleStr;
     RouterAnnotation routerInfo;
 };
 
@@ -52,7 +52,7 @@ abckit::Instruction FindFirstInst(const abckit::Graph &graph, AbckitIsaApiDynami
     for (const auto &bb : bbs) {
         auto curInst = bb.GetFirstInst();
         while (curInst) {
-            if (curInst.GetOpcodeDyn() == opcode) {
+            if (curInst.GetGraph()->DynIsa().GetOpcode(curInst) == opcode) {
                 return curInst;
             }
             curInst = curInst.GetNext();
@@ -71,22 +71,22 @@ void TransformMethod(const abckit::core::Function &method, const UserData &ud,
     abckit::Instruction createEmptyArray = FindFirstInst(ctxG, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEEMPTYARRAY);
 
     const auto &routerInfo = ud.routerInfo;
-    std::string fullPath = std::string(routerInfo.scheme) + std::string(routerInfo.path);
+    std::string fullPath = routerInfo.scheme + routerInfo.path;
     auto arr = std::vector<abckit::Literal>();
     auto filePtr = method.GetFile();
     abckit::Literal str = filePtr->CreateLiteralString(fullPath);
     arr.emplace_back(str);
 
     auto litArr = filePtr->CreateLiteralArray(arr);
-    auto createArrayWithBuffer = ctxG.DynIsa().CreateCreateArrayWithBuffer(litArr);
+    auto createArrayWithBuffer = ctxG.DynIsa().CreateCreatearraywithbuffer(litArr);
 
     auto insertAfterInst = createEmptyArray;
 
-    auto ldExternal = ctxG.DynIsa().CreateLdExternalModuleVar(coreImport);
-    auto classThrow = ctxG.DynIsa().CreateThrowUndefinedIfHoleWithName(ldExternal, routerInfo.owner.GetName());
+    auto ldExternal = ctxG.DynIsa().CreateLdexternalmodulevar(coreImport);
+    auto classThrow = ctxG.DynIsa().CreateThrowUndefinedifholewithname(ldExternal, routerInfo.owner.GetName());
     auto newObj = ctxG.DynIsa().CreateNewobjrange(ldExternal);
-    auto stownByIndex1 = ctxG.DynIsa().CreateStownByIndex(newObj, createArrayWithBuffer, 1);
-    auto stownByIndex2 = ctxG.DynIsa().CreateStownByIndex(createArrayWithBuffer, createEmptyArray, idx++);
+    auto stownByIndex1 = ctxG.DynIsa().CreateStownbyindex(newObj, createArrayWithBuffer, 1);
+    auto stownByIndex2 = ctxG.DynIsa().CreateStownbyindex(createArrayWithBuffer, createEmptyArray, idx++);
 
     createArrayWithBuffer.InsertAfter(insertAfterInst);
     ldExternal.InsertAfter(createArrayWithBuffer);
@@ -155,8 +155,8 @@ void CollectClassInfo(std::vector<UserData> &udContainer, const abckit::core::Mo
             return true;
         }
 
-        std::string_view scheme;
-        std::string_view path;
+        std::string scheme;
+        std::string path;
         anno.EnumerateElements([&](const abckit::core::AnnotationElement &annoElem) -> bool {
             auto annoElemName = annoElem.GetName();
             auto value = annoElem.GetValue();

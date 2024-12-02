@@ -28,7 +28,7 @@ void CodeGenStatic::VisitIntrinsic(GraphVisitor *visitor, Inst *instBase)
 % end
 #include "codegen_call_intrinsics_static.inc"
 % Compiler::intrinsics.select {|intrinsic| intrinsic.space == "abckit" }.each do |intrinsic|
-        case compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
+        case ark::compiler::RuntimeInterface::IntrinsicId::<%= intrinsic.entrypoint_name %>:
 %   if intrinsic.class_name == 'Equals'
             VisitEtsEquals(visitor, instBase);
 %   else

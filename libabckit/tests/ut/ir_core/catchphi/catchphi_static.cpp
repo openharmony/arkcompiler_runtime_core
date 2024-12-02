@@ -97,7 +97,7 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticValid)
             ASSERT_NE(returnBB, nullptr);
             AbckitInst *returnInst = g_implG->bbGetFirstInst(returnBB);
             ASSERT_NE(returnInst, nullptr);
-            auto constantI64Impl = g_implG->gCreateConstantI32(graph, 42);
+            auto constantI64Impl = g_implG->gFindOrCreateConstantI32(graph, 42);
             AbckitInst *catchPhi = g_implG->bbCreateCatchPhi(returnBB, 2, constantI64Impl, throwableCall);
             ASSERT_NE(catchPhi, nullptr);
             g_implG->iSetInput(returnInst, catchPhi, 0);
@@ -140,7 +140,7 @@ TEST_F(LibAbcKitStaticCatchPhiTest, CatchPhiNoAccStaticInvalid)
             ASSERT_NE(returnBB, nullptr);
             AbckitInst *returnInst = g_implG->bbGetFirstInst(returnBB);
             ASSERT_NE(returnInst, nullptr);
-            auto constantI64Impl = g_implG->gCreateConstantI64(graph, 42);
+            auto constantI64Impl = g_implG->gFindOrCreateConstantI64(graph, 42);
             // Mix integer and reference types as input
             AbckitInst *catchPhi =
                 g_implG->bbCreateCatchPhi(returnBB, 4, constantI64Impl, throwableCall, throwableCall, throwableCall);

@@ -95,7 +95,7 @@ TEST_F(LibAbcKitDynamicCatchPhiTest, CatchPhiNoAccDynamicValid)
         ABCKIT_ABC_DIR "ut/ir_core/catchphi/catchphi_dynamic_noacc_modified.abc", "main",
         [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
             auto *print = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1);
-            auto constantI64Impl = g_implG->gCreateConstantI32(graph, 42);
+            auto constantI64Impl = g_implG->gFindOrCreateConstantI32(graph, 42);
             auto *catchPhi = g_implG->bbCreateCatchPhi(g_implG->iGetBasicBlock(print), 2, constantI64Impl, print);
             g_implG->iSetInput(print, catchPhi, 1);
         },

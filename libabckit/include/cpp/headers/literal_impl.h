@@ -16,6 +16,9 @@
 #ifndef CPP_ABCKIT_LITERAL_IMPL_H
 #define CPP_ABCKIT_LITERAL_IMPL_H
 
+#include <cstdint>
+#include <string_view>
+#include "literal_array.h"
 #include "./literal.h"
 
 namespace abckit {
@@ -32,6 +35,80 @@ inline abckit::LiteralArray Literal::GetLiteralArray() const
     LiteralArray ret(GetApiConfig()->cIapi_->literalGetLiteralArray(GetView()), GetApiConfig(), GetResource());
     CheckError(GetApiConfig());
     return ret;
+}
+
+inline uint8_t Literal::GetU8() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetU8(GetView());
+    CheckError(GetApiConfig());
+    return val;
+}
+
+inline uint16_t Literal::GetU16() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetU16(GetView());
+    CheckError(GetApiConfig());
+    return val;
+}
+
+inline uint32_t Literal::GetU32() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetU32(GetView());
+    CheckError(GetApiConfig());
+    return val;
+}
+
+inline uint64_t Literal::GetU64() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetU64(GetView());
+    CheckError(GetApiConfig());
+    return val;
+}
+
+inline float Literal::GetFloat() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetFloat(GetView());
+    CheckError(GetApiConfig());
+    return val;
+}
+
+inline double Literal::GetDouble() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetDouble(GetView());
+    CheckError(GetApiConfig());
+    return val;
+}
+
+inline uint16_t Literal::GetMethodAffiliate() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetMethodAffiliate(GetView());
+    CheckError(GetApiConfig());
+    return val;
+}
+
+inline std::string Literal::GetString() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetString(GetView());
+    CheckError(GetApiConfig());
+    auto str = GetApiConfig()->cIapi_->abckitStringToString(val);
+    CheckError(GetApiConfig());
+    return str;
+}
+
+inline std::string Literal::GetMethod() const
+{
+    auto val = GetApiConfig()->cIapi_->literalGetMethod(GetView());
+    CheckError(GetApiConfig());
+    auto str = GetApiConfig()->cIapi_->abckitStringToString(val);
+    CheckError(GetApiConfig());
+    return str;
+}
+
+inline enum AbckitLiteralTag Literal::GetTag() const
+{
+    auto tag = GetApiConfig()->cIapi_->literalGetTag(GetView());
+    CheckError(GetApiConfig());
+    return tag;
 }
 
 }  // namespace abckit

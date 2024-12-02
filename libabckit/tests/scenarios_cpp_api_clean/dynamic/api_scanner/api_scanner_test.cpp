@@ -13,9 +13,15 @@
  * limitations under the License.
  */
 
+#include "libabckit/include/cpp/abckit_cpp.h"
+
+#include "helpers/helpers.h"
+#include "helpers/helpers_runtime.h"
+
 #include <gtest/gtest.h>
 
-#include "libabckit/include/cpp/abckit_cpp.h"
+#include <optional>
+#include <string_view>
 
 namespace {
 
@@ -66,10 +72,10 @@ using SuspectsMap = std::unordered_map<abckit::core::ImportDescriptor, size_t>;
 
 std::string GetMethodName(const abckit::core::Function &method)
 {
-    auto methodName = std::string(method.GetName());
+    auto methodName = method.GetName();
     auto cls = method.GetParentClass();
     if (cls) {
-        auto className = std::string(cls.GetName());
+        auto className = cls.GetName();
         return className + '.' + methodName;
     };
     return methodName;
@@ -84,11 +90,11 @@ bool IsLoadApi(const abckit::core::ImportDescriptor &id, size_t apiIndex, const 
     // or
     // 1. ldExternalModuleVar (import {bar} from "./modules/myApi")
 
-    if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
+    if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR) {
         return false;
     }
 
-    abckit::core::ImportDescriptor instId = inst.GetImportDescriptorDyn();
+    abckit::core::ImportDescriptor instId = inst.GetGraph()->DynIsa().GetImportDescriptor(inst);
     if (instId != id) {
         return false;
     }
@@ -99,8 +105,8 @@ bool IsLoadApi(const abckit::core::ImportDescriptor &id, size_t apiIndex, const 
     }
 
     return !inst.VisitUsers([&](const abckit::Instruction &user) {
-        if (user.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME) {
-            if (std::string(user.GetString()) == prop) {
+        if (user.GetGraph()->DynIsa().GetOpcode(user) == ABCKIT_ISA_API_DYNAMIC_OPCODE_LDOBJBYNAME) {
+            if (user.GetString() == prop) {
                 return false;
             }
         }
@@ -125,7 +131,7 @@ void CollectUsageInMethod(const abckit::core::Function &method, SuspectsMap &sus
 {
     auto methodName = GetMethodName(method);
     auto mod = method.GetModule();
-    auto source = std::string(mod.GetName());
+    auto source = mod.GetName();
     UsageInfo usage = {source, methodName, 0};
     EnumerateFunctionInsts(method, [&](const abckit::Instruction &inst) {
         for (const auto &[id, apiIndex] : suspects) {
@@ -141,9 +147,9 @@ void CollectUsageInMethod(const abckit::core::Function &method, SuspectsMap &sus
 bool GetSuspects(const abckit::core::Module &mod, SuspectsMap *suspects, std::vector<ApiInfo> &apiList)
 {
     mod.EnumerateImports([&](const abckit::core::ImportDescriptor &id) -> bool {
-        auto importName = std::string(id.GetName());
+        auto importName = id.GetName();
         auto importedModule = id.GetImportedModule();
-        auto source = std::string(importedModule.GetName());
+        auto source = importedModule.GetName();
         for (size_t i = 0; i < apiList.size(); ++i) {
             const auto api = apiList[i];
             if (source != api.source) {

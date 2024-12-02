@@ -19,19 +19,23 @@
 #include "./import_descriptor.h"
 #include "./function.h"
 #include "./module.h"
-
 namespace abckit::core {
 
-inline std::string_view ImportDescriptor::GetName() const
+inline const File *ImportDescriptor::GetFile() const
+{
+    return GetResource();
+}
+
+inline std::string ImportDescriptor::GetName() const
 {
     AbckitString *abcName = GetApiConfig()->cIapi_->importDescriptorGetName(GetView());
     CheckError(GetApiConfig());
-    std::string_view name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
+    std::string name = GetApiConfig()->cIapi_->abckitStringToString(abcName);
     CheckError(GetApiConfig());
     return name;
 }
 
-inline core::Module ImportDescriptor::GetImportedModule() const
+inline Module ImportDescriptor::GetImportedModule() const
 {
     AbckitCoreModule *module = GetApiConfig()->cIapi_->importDescriptorGetImportedModule(GetView());
     CheckError(GetApiConfig());
@@ -43,6 +47,22 @@ inline ImportDescriptor::ImportDescriptor(AbckitCoreImportDescriptor *module, co
 {
     SetResource(file);
 };
+
+inline Module ImportDescriptor::GetImportingModule() const
+{
+    AbckitCoreModule *module = GetApiConfig()->cIapi_->importDescriptorGetImportingModule(GetView());
+    CheckError(GetApiConfig());
+    return core::Module(module, conf_, GetResource());
+}
+
+inline std::string ImportDescriptor::DescriptorGetAlias() const
+{
+    AbckitString *abcAlias = GetApiConfig()->cIapi_->importDescriptorGetAlias(GetView());
+    CheckError(GetApiConfig());
+    std::string alias = GetApiConfig()->cIapi_->abckitStringToString(abcAlias);
+    CheckError(GetApiConfig());
+    return alias;
+}
 
 }  // namespace abckit::core
 

@@ -357,7 +357,7 @@ static void TransformIrAddLocalExport(AbckitGraph *graph, AbckitFile *file, cons
     g_implI->moduleEnumerateExports(ctxFinder.module, &exportFinder, helpers::ExportByAliasFinder);
     ASSERT_NE(exportFinder.ed, nullptr);
 
-    auto constant = g_implG->gCreateConstantI32(graph, 5);
+    auto constant = g_implG->gFindOrCreateConstantI32(graph, 5);
     auto stModuleVarInst = g_dynG->iCreateStmodulevar(graph, constant, exportFinder.ed);
     auto ldLocalModuleVarInst = g_dynG->iCreateLdlocalmodulevar(graph, exportFinder.ed);
     AbckitString *varNameStr = g_implM->createString(file, varName.c_str());

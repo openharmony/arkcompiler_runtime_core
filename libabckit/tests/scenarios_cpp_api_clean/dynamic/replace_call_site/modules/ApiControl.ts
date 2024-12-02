@@ -22,7 +22,7 @@ import {
 }
 
 export class ApiControl {
-    @ #CallSiteReplacement({
+    @__$$ETS_ANNOTATION$$__CallSiteReplacement({
         targetClass: 'LinearLayout',
         methodName: 'setOrientation'
     })

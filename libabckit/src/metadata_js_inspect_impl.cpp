@@ -337,8 +337,15 @@ bool JsFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
 
 }  // namespace libabckit
 
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+#include "./mock/abckit_mock.h"
+#endif
+
 extern "C" AbckitJsInspectApi const *AbckitGetJsInspectApiImpl(AbckitApiVersion version)
 {
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+    return AbckitGetMockJsInspectApiImpl(version);
+#endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
             return &libabckit::g_jsInspectApiImpl;

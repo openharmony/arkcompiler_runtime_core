@@ -18,6 +18,7 @@
 
 #include "../core/class.h"
 #include "../base_concepts.h"
+#include "./annotation_interface.h"
 
 namespace abckit::arkts {
 
@@ -39,9 +40,9 @@ class Class final : public core::Class {
 public:
     /**
      * @brief Constructor Arkts API Class from the Core API with compatibility check
-     * @param other - Core API Class
+     * @param coreOther - Core API Class
      */
-    explicit Class(const core::Class &other);
+    explicit Class(const core::Class &coreOther);
 
     /**
      * @brief Construct a new Class object
@@ -77,11 +78,23 @@ public:
     /**
      * @brief Remove annotation from the class declaration.
      * @param [ in ] anno - Annotation to remove.
+     * @return New state of Class.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Class` is false.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `anno` is false.
      * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if current `Class` doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
      */
-    void RemoveAnnotation(const arkts::Annotation &anno) const;
+    Class RemoveAnnotation(arkts::Annotation anno) const;
+
+    /**
+     * @brief Add annotation to the class declaration.
+     * @return Newly created annotation.
+     * @param [ in ] ai - Annotation Interface that is used to create the annotation.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is NULL.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `ai` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if class Class doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    Annotation AddAnnotation(AnnotationInterface ai);
 
     // Other API.
     // ...

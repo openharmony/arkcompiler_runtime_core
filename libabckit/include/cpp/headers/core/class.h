@@ -18,7 +18,6 @@
 
 #include "../base_classes.h"
 #include "./function.h"
-#include "./module.h"
 
 #include <functional>
 #include <vector>
@@ -31,13 +30,17 @@ namespace abckit::core {
 class Class : public ViewInResource<AbckitCoreClass *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
-    friend class Module;
+    friend Module;
     /// @brief to access private constructor
-    friend class Namespace;
+    friend Namespace;
     /// @brief to access private constructor
     friend class Function;
+    /// @brief to access private constructor
+    friend class abckit::Type;
     /// @brief abckit::DefaultHash<Class>
-    friend class abckit::DefaultHash<Class>;
+    friend abckit::DefaultHash<Class>;
+    /// @brief to access private constructor
+    friend File;
 
 protected:
     /// @brief Core API View type
@@ -48,7 +51,7 @@ public:
      * @brief Construct a new Class object
      * @param other
      */
-    Class(const Class &other) = default;
+    Class(const Class &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -61,7 +64,7 @@ public:
      * @brief Construct a new Class object
      * @param other
      */
-    Class(Class &&other) = default;
+    Class(Class &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -76,10 +79,18 @@ public:
     ~Class() override = default;
 
     /**
-     * @brief Get Class name
-     * @return std::string_view
+     * @brief Returns binary file that the Class is a part of.
+     * @return Pointer to the `File`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName() const;
+    const File *GetFile() const;
+
+    /**
+     * @brief Get Class name
+     * @return `std::string`
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetName() const;
 
     /**
      * @brief Returns module for this `Class`.
@@ -91,36 +102,57 @@ public:
     /**
      * @brief Get the All Methods object
      * @return std::vector<core::Function>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Function> GetAllMethods() const;
 
     /**
      * @brief Get the Annotations object
      * @return std::vector<core::Annotation>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     std::vector<core::Annotation> GetAnnotations() const;
 
     /**
-     * @brief EnumerateMethods
-     * @param cb
+     * @brief Enumerates methods of Class, invoking callback `cb` for each method.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    void EnumerateMethods(const std::function<bool(core::Function)> &cb) const;
+    bool EnumerateMethods(const std::function<bool(core::Function)> &cb) const;
 
     /**
-     * @brief Enumerates annotations of current `Class`, invoking callback `cb` for each annotation.
-     * @param [ in ] cb - Callback that will be invoked.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if current `Class` is false.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is not valid.
+     * @brief Enumerates annotations of Class, invoking callback `cb` for each annotation.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @return false` if was early exited. Otherwise - `true`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is false.
      */
-    void EnumerateAnnotations(const std::function<bool(core::Annotation)> &cb) const;
+    bool EnumerateAnnotations(const std::function<bool(core::Annotation)> &cb) const;
 
+    /**
+     * @brief Returns parent function for class.
+     * @return `core::Function`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Function GetParentFunction() const;
+
+    /**
+     * @brief Returns parent namespace for class.
+     * @return `core::Namespace`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    Namespace GetParentNamespace() const;
     // Core API's.
     // ...
 
 private:
-    inline void GetAllMethodsInner(std::vector<core::Function> &methods) const;
+    inline bool GetAllMethodsInner(std::vector<core::Function> &methods) const;
 
-    inline void GetAllAnnotationsInner(std::vector<core::Annotation> &anns) const;
+    inline bool GetAllAnnotationsInner(std::vector<core::Annotation> &anns) const;
 
     Class(AbckitCoreClass *klass, const ApiConfig *conf, const File *file);
 

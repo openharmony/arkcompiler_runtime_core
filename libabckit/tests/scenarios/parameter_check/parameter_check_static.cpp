@@ -55,7 +55,7 @@ void TransformIR(AbckitGraph *graph)
 
     AbckitBasicBlock *falseBB = g_implG->bbCreateEmpty(graph);
     g_implG->bbAppendSuccBlock(ifBB, falseBB);
-    auto *constm1 = g_implG->gCreateConstantI32(graph, -1);
+    auto *constm1 = g_implG->gFindOrCreateConstantI32(graph, -1);
 
     g_implG->bbAppendSuccBlock(falseBB, endBB);
 

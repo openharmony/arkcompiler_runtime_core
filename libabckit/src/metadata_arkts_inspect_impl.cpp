@@ -563,12 +563,12 @@ bool ArkTSAnnotationEnumerateElements(AbckitCoreAnnotation *anno, void *data,
     LIBABCKIT_BAD_ARGUMENT(anno, false)
     LIBABCKIT_BAD_ARGUMENT(cb, false)
 
-    LIBABCKIT_BAD_ARGUMENT(anno->ai, false)
+    LIBABCKIT_INTERNAL_ERROR(anno->ai, false)
 
     AbckitCoreModule *m = anno->ai->owningModule;
 
     LIBABCKIT_BAD_ARGUMENT(m, false)
-    LIBABCKIT_BAD_ARGUMENT(m->file, false)
+    LIBABCKIT_INTERNAL_ERROR(m->file, false)
 
     for (auto &elem : anno->elements) {
         if (!cb(elem.get(), data)) {

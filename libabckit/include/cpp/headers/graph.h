@@ -40,6 +40,8 @@ class Graph final : public Resource<AbckitGraph *> {
     friend class DynamicIsa;
     /// @brief To access private constructor
     friend class StaticIsa;
+    /// @brief To access private constructor
+    friend class BasicBlock;
 
 public:
     /**
@@ -74,6 +76,12 @@ public:
     ~Graph() override = default;
 
     /**
+     * @brief Returns ISA type for a graph.
+     * @return ISA of the graph.
+     */
+    AbckitIsaType GetIsa() const;
+
+    /**
      * @brief Returns binary file that the current `Graph` is a part of.
      * @return Pointer to the `File`
      */
@@ -95,6 +103,12 @@ public:
     BasicBlock GetEndBb() const;
 
     /**
+     * @brief Returns number of basic blocks in a `graph`.
+     * @return Number of basic blocks in a `graph`.
+     */
+    inline uint32_t GetNumBbs() const;
+
+    /**
      * @brief Get blocks RPO
      * @return vector of `BasicBlock`
      */
@@ -104,19 +118,66 @@ public:
      * @brief Get dynamic ISA
      * @return `DynamicIsa`
      */
-    DynamicIsa DynIsa();
+    DynamicIsa DynIsa() const;
 
     /**
      * @brief Get static ISA
      * @return `StatIsa`
      */
-    StaticIsa StatIsa();
+    StaticIsa StatIsa() const;
 
     /**
      * @brief EnumerateBasicBlocksRpo
+     * @return New state of `graph`.
      * @param cb
      */
-    void EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)> &cb) const;
+    const Graph &EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)> &cb) const;
+
+    /**
+     * @brief Returns basic blocks with given `id` of a graph.
+     * @return BasicBlock with given `id`.
+     * @param [ in ] bbId - ID of basic block.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is no basic block with given `id` in `graph`.
+     */
+    BasicBlock GetBasicBlock(uint32_t bbId) const;
+
+    /**
+     * @brief Returns parameter instruction under given `index` of a `graph`.
+     * @return Parameter instruction under given `index` of a `graph`.
+     * @param [ in ] index - Index of the parameter.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if there is no parameter under given `index` in `graph`.
+     */
+    Instruction GetParameter(uint32_t index) const;
+
+    /**
+     * @brief Returns number of instruction parameters under a `graph`.
+     * @return uint32_t corresponding to number of instruction parameters.
+     */
+    uint32_t GetNumberOfParameters() const;
+
+    /**
+     * @brief Wraps basic blocks from `tryFirstBB` to `tryLastBB` into try,
+     * inserts basic blocks from `catchBeginBB` to `catchEndBB` into graph.
+     * Basic blocks from `catchBeginBB` to `catchEndBB` are used for exception handling.
+     * @return New state of `graph`.
+     * @param [ in ] tryBegin - Start basic block to wrap into try.
+     * @param [ in ] tryEnd - End basic block to wrap into try.
+     * @param [ in ] catchBegin - Start basic block to handle exception.
+     * @param [ in ] catchEnd - End basic block to handle exception.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `tryBegin` is Empty.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `tryEnd` is Empty.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `catchBegin` is Empty.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `catchEnd` is Empty.
+     */
+    const Graph &InsertTryCatch(BasicBlock tryBegin, BasicBlock tryEnd, BasicBlock catchBegin,
+                                BasicBlock catchEnd) const;
+
+    /**
+     * @brief Dumps a `graph` into given file descriptor.
+     * @return New state of `graph`.
+     * @param [ in ] fd - File descriptor where dump is written.
+     */
+    const Graph &Dump(int32_t fd) const;
 
     /**
      * @brief Creates I32 constant instruction and inserts it in start basic block of current `Graph`.
@@ -124,7 +185,31 @@ public:
      * @param [ in ] val - value of created constant instruction.
      * @note Allocates
      */
-    Instruction CreateConstantI32(int32_t val) const;
+    Instruction FindOrCreateConstantI32(int32_t val) const;
+
+    /**
+     * @brief Creates I64 constant instruction and inserts it in start basic block of current `Graph`.
+     * @return Created `Instruction`.
+     * @param [ in ] val - value of created constant instruction.
+     * @note Allocates
+     */
+    Instruction FindOrCreateConstantI64(int64_t val) const;
+
+    /**
+     * @brief Creates U64 constant instruction and inserts it in start basic block of current `Graph`.
+     * @return Created `Instruction`.
+     * @param [ in ] val - value of created constant instruction.
+     * @note Allocates
+     */
+    Instruction FindOrCreateConstantU64(uint64_t val) const;
+
+    /**
+     * @brief Creates F64 constant instruction and inserts it in start basic block of current `Graph`.
+     * @return Created `Instruction`.
+     * @param [ in ] val - value of created constant instruction.
+     * @note Allocates
+     */
+    Instruction FindOrCreateConstantF64(double val) const;
 
     /**
      * @brief Creates empty basic block.
@@ -133,14 +218,12 @@ public:
      */
     BasicBlock CreateEmptyBb() const;
 
-    // Other Graph API's
-    // ...
-
     /**
      * @brief Removes all basic blocks unreachable from start basic block.
+     * @return New state of `graph`.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`
      */
-    void RunPassRemoveUnreachableBlocks() const;
+    const Graph &RunPassRemoveUnreachableBlocks() const;
 
 protected:
     /**

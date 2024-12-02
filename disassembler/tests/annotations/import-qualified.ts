@@ -15,20 +15,20 @@
 
 import * as Namespace1 from "./a"
 
-@#Namespace1.Anno()
+@__$$ETS_ANNOTATION$$__Namespace1.Anno()
 class A {}
 
-@#Namespace1.Anno
+@__$$ETS_ANNOTATION$$__Namespace1.Anno
 class B {}
 
-@#Namespace1.Anno1({a: 1, b: "string"})
+@__$$ETS_ANNOTATION$$__Namespace1.Anno1({a: 1, b: "string"})
 class C {}
 
-@#Namespace1.Namespace2.Namespace3.Anno2()
+@__$$ETS_ANNOTATION$$__Namespace1.Namespace2.Namespace3.Anno2()
 class D {}
 
-@#Namespace1.Namespace2.Namespace3.Anno2
+@__$$ETS_ANNOTATION$$__Namespace1.Namespace2.Namespace3.Anno2
 class E {}
 
-@#Namespace1.Namespace2.Namespace3.Anno3({a: 1, b: "string"})
+@__$$ETS_ANNOTATION$$__Namespace1.Namespace2.Namespace3.Anno3({a: 1, b: "string"})
 class F {}

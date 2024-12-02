@@ -38,9 +38,9 @@ class ExportDescriptor final : public core::ExportDescriptor {
 public:
     /**
      * @brief Constructor Arkts API ExportDescriptor from the Core API with compatibility check
-     * @param other - Core API ExportDescriptor
+     * @param coreOther - Core API ExportDescriptor
      */
-    explicit ExportDescriptor(const core::ExportDescriptor &other);
+    explicit ExportDescriptor(const core::ExportDescriptor &coreOther);
 
     /**
      * @brief Construct a new Export Descriptor object

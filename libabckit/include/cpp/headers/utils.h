@@ -49,7 +49,8 @@ inline std::string StatusToString(AbckitStatus status)
             return "Unsupported feature";
         case ABCKIT_STATUS_WRONG_CTX:
             return "Wrong context";
-        case ABCKIT_STATUS_TODO:
+        case ABCKIT_STATUS_INTERNAL_ERROR:
+            return "Internal error";
         default:
             break;
     }

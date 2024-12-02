@@ -51,7 +51,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicIcreateNewobjrange)
             AbckitInst *defineClass =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER);
 
-            AbckitInst *a = g_implG->gCreateConstantI32(graph, 3);
+            AbckitInst *a = g_implG->gFindOrCreateConstantI32(graph, 3);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(a, nullptr);
             AbckitInst *storeThis = g_dynG->iCreateNewobjrange(graph, 3, defineClass, a, a);
@@ -85,7 +85,7 @@ TEST_F(LibAbcKitJSModifyApiModulesTest, DynamicIcreateWideNewobjrange)
             AbckitInst *defineClass =
                 helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER);
 
-            AbckitInst *a = g_implG->gCreateConstantI32(graph, 4);
+            AbckitInst *a = g_implG->gFindOrCreateConstantI32(graph, 4);
             ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             ASSERT_NE(a, nullptr);
             AbckitInst *storeThis = g_dynG->iCreateWideNewobjrange(graph, 3, defineClass, a, a);

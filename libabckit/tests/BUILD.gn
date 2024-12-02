@@ -141,6 +141,7 @@ test_js_files = [
   "ut/isa/isa_dynamic/async/asynciterator_dynamic",
   "ut/isa/isa_dynamic/apply/apply_dynamic",
   "ut/isa/isa_dynamic/apply/newobjapply_dynamic",
+  "ut/isa/isa_dynamic/immsize/immsize_dynamic",
 
   "ut/ir_core/graph/graph_dynamic",
   "ut/ir_core/inst_manipulation/inst_manipulation_dynamic",
@@ -175,6 +176,7 @@ test_js_files = [
   "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic",
   "scenarios_cpp_api_clean/dynamic/branch_eliminator/branch_eliminator",
   "scenarios_cpp_api_clean/dynamic/api_scanner/api_scanner",
+  "scenarios_cpp_api_clean/dynamic/add_try_catch/add_try_catch",
   "scenarios_cpp_api_clean/dynamic/parameter_check/parameter_check",
   "scenarios_cpp_api_clean/dynamic/scan_subclasses/scan_subclasses",
 
@@ -184,6 +186,7 @@ test_js_files = [
   "internal/mem_manager/abc_dynamic_2",
 
   "wrong_mode_tests/mode_test_dynamic",
+  "wrong_imm_tests/wrong_imm_test_dynamic",
 ]
 
 test_ts_files = [
@@ -211,6 +214,9 @@ test_ts_files = [
 
   "scenarios_cpp_api_clean/dynamic/replace_call_site/replace_call_site",
   "scenarios_cpp_api_clean/dynamic/router_table/router_table",
+
+  "regression/issue_IB1YEI/issue_IB1YEI",
+  "regression/issue_IB2T4M/issue_IB2T4M",
 ]
 
 test_ets_files = [
@@ -417,17 +423,47 @@ libabckit_host_unittest_action("abckit_mock_gtests") {
   sources = [
     # mock infrastructure
     "mock/abckit_api_mock.cpp",
+    "mock/abckit_values_mock.cpp",
     "mock/arkts_inspect_api_impl_mock.cpp",
     "mock/arkts_modify_api_impl_mock.cpp",
     "mock/check_mock.cpp",
     "mock/graph_api_impl_mock.cpp",
     "mock/isa_api_dynamic_impl_mock.cpp",
     "mock/isa_api_static_impl_mock.cpp",
+    "mock/js_inspect_api_impl_mock.cpp",
+    "mock/js_modify_api_impl_mock.cpp",
     "mock/metadata_inspect_impl_mock.cpp",
     "mock/metadata_modify_impl_mock.cpp",
 
     #mock tests
+    "mock/tests/arkts/cpp_api_annotation.cpp",
+    "mock/tests/arkts/cpp_api_annotation_element.cpp",
+    "mock/tests/arkts/cpp_api_annotation_interface.cpp",
+    "mock/tests/arkts/cpp_api_class.cpp",
+    "mock/tests/arkts/cpp_api_function.cpp",
+    "mock/tests/arkts/cpp_api_module.cpp",
+    "mock/tests/arkts/cpp_api_namespace.cpp",
+    "mock/tests/core/cpp_api_annotation.cpp",
+    "mock/tests/core/cpp_api_annotation_element.cpp",
+    "mock/tests/core/cpp_api_annotation_interface.cpp",
+    "mock/tests/core/cpp_api_annotation_interface_field.cpp",
+    "mock/tests/core/cpp_api_class.cpp",
+    "mock/tests/core/cpp_api_export_descriptor.cpp",
+    "mock/tests/core/cpp_api_function.cpp",
+    "mock/tests/core/cpp_api_import_descriptor.cpp",
+    "mock/tests/core/cpp_api_module.cpp",
+    "mock/tests/core/cpp_api_namespace.cpp",
+    "mock/tests/cpp_api_file.cpp",
+    "mock/tests/cpp_api_literal_array.cpp",
+    "mock/tests/cpp_mock_bb.cpp",
+    "mock/tests/cpp_mock_dyn_isa_0.cpp",
+    "mock/tests/cpp_mock_dyn_isa_1.cpp",
     "mock/tests/cpp_mock_file.cpp",
+    "mock/tests/cpp_mock_graph.cpp",
+    "mock/tests/cpp_mock_instruction.cpp",
+    "mock/tests/cpp_mock_literal.cpp",
+    "mock/tests/cpp_mock_type.cpp",
+    "mock/tests/cpp_mock_value.cpp",
   ]
 
   include_dirs = [
@@ -449,6 +485,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "helpers/helpers_mode.cpp",
     "helpers/helpers_nullptr.cpp",
     "helpers/helpers_wrong_ctx.cpp",
+    "helpers/helpers_wrong_imm.cpp",
     "helpers/visit_helper/visit_helper.cpp",
     "internal/ICSlotAllocator/ICSlotAllocator.cpp",
     "internal/implementation_api/abc_stuff.cpp",
@@ -465,6 +502,9 @@ libabckit_host_unittest_action("abckit_gtests") {
     "null_args_tests/null_args_tests_JsInspectApiImpl_0.cpp",
     "null_args_tests/null_args_tests_JsModifyApiImpl_0.cpp",
     "null_args_tests/null_args_tests_ModifyApiImpl_0.cpp",
+    "regression/issue_IB1YEI/c_api/issue_IB1YEI.cpp",
+    "regression/issue_IB1YEI/cpp_api/issue_IB1YEI.cpp",
+    "regression/issue_IB2T4M/c_api/issue_IB2T4M.cpp",
     "scenarios/add_log/add_log_dynamic_test.cpp",
     "scenarios/add_log/add_log_static_test.cpp",
     "scenarios/add_try_catch/dynamic/add_try_catch_test.cpp",
@@ -492,6 +532,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "scenarios_c_api_clean/dynamic/scan_subclasses/scan_subclasses_test.cpp",
     "scenarios_c_api_clean/static/add_log/add_log_static_test.cpp",
     "scenarios_cpp_api_clean/dynamic/add_log/add_log_dynamic_test.cpp",
+    "scenarios_cpp_api_clean/dynamic/add_try_catch/add_try_catch.cpp",
     "scenarios_cpp_api_clean/dynamic/api_scanner/api_scanner_test.cpp",
     "scenarios_cpp_api_clean/dynamic/branch_eliminator/branch_eliminator_test.cpp",
     "scenarios_cpp_api_clean/dynamic/parameter_check/parameter_check_test.cpp",
@@ -562,6 +603,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "ut/isa/isa_dynamic/get_insts/getresumemode_dynamic.cpp",
     "ut/isa/isa_dynamic/get_insts/gettemplateobject_dynamic.cpp",
     "ut/isa/isa_dynamic/get_insts/getunmappedargs_dynamic.cpp",
+    "ut/isa/isa_dynamic/immsize/immsize_dynamic.cpp",
     "ut/isa/isa_dynamic/import/dynamicimport_dynamic.cpp",
     "ut/isa/isa_dynamic/instanceof/instanceof_dynamic.cpp",
     "ut/isa/isa_dynamic/isin/isin_dynamic.cpp",
@@ -626,6 +668,7 @@ libabckit_host_unittest_action("abckit_gtests") {
     "wrong_ctx_tests/wrong_ctx_tests_IsaApiDynamicImpl_1.cpp",
     "wrong_ctx_tests/wrong_ctx_tests_IsaApiStaticImpl_0.cpp",
     "wrong_ctx_tests/wrong_ctx_tests_ModifyApiImpl_0.cpp",
+    "wrong_imm_tests/wrong_imm_tests_IsaApiDynamicImpl_0.cpp",
     "wrong_mode_tests/wrong_mode_tests_IsaApiDynamicImpl_0.cpp",
     "wrong_mode_tests/wrong_mode_tests_IsaApiDynamicImpl_1.cpp",
     "wrong_mode_tests/wrong_mode_tests_IsaApiStaticImpl_0.cpp",

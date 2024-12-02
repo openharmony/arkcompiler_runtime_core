@@ -38,9 +38,9 @@ class Annotation : public core::Annotation {
 public:
     /**
      * @brief Constructor Arkts API Annotation from the Core API with compatibility check
-     * @param other - Core API Annotation
+     * @param coreOther - Core API Annotation
      */
-    explicit Annotation(const core::Annotation &other);
+    explicit Annotation(const core::Annotation &coreOther);
 
     /**
      * @brief Construct a new Annotation object
@@ -77,9 +77,9 @@ public:
      * @brief Add element
      * @param val
      * @param name
-     * @return arkts::Annotation&
+     * @return arkts::Annotation
      */
-    arkts::Annotation &AddElement(const abckit::Value &val, const std::string &name);
+    arkts::Annotation AddElement(const abckit::Value &val, std::string_view name) const;
 
     /**
      * @brief add and get element
@@ -87,10 +87,31 @@ public:
      * @param name
      * @return arkts::AnnotationElement
      */
-    arkts::AnnotationElement AddAndGetElement(const abckit::Value &val, const std::string_view name);
+    arkts::AnnotationElement AddAndGetElement(const abckit::Value &val, std::string_view name) const;
 
     // Other API.
     // ...
+
+    /**
+     * @brief Add annotation element to the existing annotation.
+     * @return Newly created annotation element.
+     * @param [ in ] value - value is used to create the annotation element.
+     * @param [ in ] name - name is used to create the annotation element.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error view itself is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Annotation doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     * @note Allocates
+     */
+    AnnotationElement AddAnnotationElement(std::string_view name, Value value) const;
+
+    /**
+     * @brief Remove annotation element `elem` from the annotation.
+     * @param [ in ] elem - Annotation element to remove from the annotation.
+     * @return New state of Annotation.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `elem` is false.
+     * @note Set `ABCKIT_STATUS_UNSUPPORTED` error if Annotation  doesn't have `ABCKIT_TARGET_ARK_TS_V1` target.
+     */
+    Annotation RemoveAnnotationElement(AnnotationElement elem) const;
 
 private:
     /**
@@ -108,7 +129,7 @@ private:
      * @param params
      * @return AbckitCoreAnnotationElement*
      */
-    AbckitCoreAnnotationElement *AddAndGetElementImpl(AbckitArktsAnnotationElementCreateParams *params);
+    AbckitCoreAnnotationElement *AddAndGetElementImpl(AbckitArktsAnnotationElementCreateParams *params) const;
 };
 
 }  // namespace abckit::arkts

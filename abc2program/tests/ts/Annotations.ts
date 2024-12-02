@@ -28,8 +28,8 @@ const enum E {
   f: E = 2
 }
 
-@#Anno()
+@__$$ETS_ANNOTATION$$__Anno()
 class A {}
 
-@#Anno({a: 5, b: [1, 2, 3], c: "def", d: true, e: [2, 1], f: 3})
+@__$$ETS_ANNOTATION$$__Anno({a: 5, b: [1, 2, 3], c: "def", d: true, e: [2, 1], f: 3})
 class B {}

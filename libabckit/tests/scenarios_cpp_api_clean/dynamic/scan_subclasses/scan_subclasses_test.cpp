@@ -14,7 +14,8 @@
  */
 
 #include "libabckit/include/cpp/abckit_cpp.h"
-
+#include "helpers/helpers.h"
+#include "helpers/helpers_runtime.h"
 #include <gtest/gtest.h>
 
 #include <optional>
@@ -36,8 +37,8 @@ using ClassCallback = std::function<bool(abckit::core::Class)>;
 using NamespaceCallback = std::function<bool(abckit::core::Namespace)>;
 
 struct ClassMeta {
-    std::string_view modulePath;
-    std::string_view className;
+    std::string modulePath;
+    std::string className;
 
     friend bool operator==(const ClassMeta &lhs, const ClassMeta &rhs)
     {
@@ -100,14 +101,15 @@ std::vector<abckit::core::ImportDescriptor> GetImportDescriptors(const abckit::c
 std::optional<ClassMeta> FindClassMetaFromLoadApi(const abckit::core::ImportDescriptor &idesc,
                                                   const abckit::Instruction &inst)
 {
-    if (inst.GetOpcodeDyn() != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR ||
-        inst.GetImportDescriptorDyn() != idesc) {
+    if (inst.GetGraph()->DynIsa().GetOpcode(inst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_LDEXTERNALMODULEVAR ||
+        inst.GetGraph()->DynIsa().GetImportDescriptor(inst) != idesc) {
         return std::nullopt;
     }
 
     std::optional<ClassMeta> definedClass;
     inst.VisitUsers([&](const abckit::Instruction &user) -> bool {
-        if (!definedClass && user.GetOpcodeDyn() == ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER) {
+        if (!definedClass &&
+            user.GetGraph()->DynIsa().GetOpcode(user) == ABCKIT_ISA_API_DYNAMIC_OPCODE_DEFINECLASSWITHBUFFER) {
             auto klass = user.GetFunction().GetParentClass();
             auto mod = klass.GetModule();
             definedClass = {mod.GetName(), klass.GetName()};

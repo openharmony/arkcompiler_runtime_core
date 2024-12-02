@@ -26,9 +26,9 @@ namespace abckit::core {
 class Field : public View<AbckitCoreField *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
     /// @brief to access private constructor
-    friend class Module;
+    friend class core::Module;
     /// @brief to access private constructor
-    friend class Namespace;
+    friend class core::Namespace;
     /// @brief abckit::DefaultHash<Field>
     friend class abckit::DefaultHash<Field>;
 

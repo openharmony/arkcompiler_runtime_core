@@ -318,7 +318,7 @@ extern "C" AbckitInst *IcreateNewArray(AbckitGraph *graph, AbckitCoreClass *inpu
     LIBABCKIT_BAD_ARGUMENT(inputSize, nullptr);
 
     LIBABCKIT_WRONG_CTX(graph, inputSize->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputClass->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(inputClass->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, inputClass->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
@@ -333,7 +333,7 @@ extern "C" AbckitInst *IcreateNewObject(AbckitGraph *graph, AbckitCoreClass *inp
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputClass, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputClass->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(inputClass->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, inputClass->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
     return IcreateNewObjectStatic(graph, inputClass);
@@ -347,7 +347,7 @@ extern "C" AbckitInst *IcreateInitObject(AbckitGraph *graph, AbckitCoreFunction 
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputFunction, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputFunction->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(inputFunction->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, inputFunction->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
@@ -523,7 +523,7 @@ extern "C" AbckitInst *IcreateCallStatic(AbckitGraph *graph, AbckitCoreFunction 
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputFunction, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputFunction->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(inputFunction->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, inputFunction->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
@@ -546,7 +546,7 @@ extern "C" AbckitInst *IcreateCallVirtual(AbckitGraph *graph, AbckitInst *inputO
     LIBABCKIT_BAD_ARGUMENT(inputFunction, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
     LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputFunction->owningModule, nullptr);
+    LIBABCKIT_INTERNAL_ERROR(inputFunction->owningModule, nullptr);
     LIBABCKIT_WRONG_CTX(graph->file, inputFunction->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 

@@ -16,9 +16,10 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_H
 #define CPP_ABCKIT_CORE_ANNOTATION_H
 
-#include "../base_classes.h"
-
 #include <functional>
+
+#include "./annotation_element.h"
+#include "../base_classes.h"
 
 namespace abckit::core {
 
@@ -28,12 +29,16 @@ namespace abckit::core {
 class Annotation : public ViewInResource<AbckitCoreAnnotation *, const File *> {
     /// @brief core::Function
     friend class core::Function;
+    /// @brief core::AnnotationElement
+    friend class core::AnnotationElement;
     /// @brief arkts::Function
     friend class arkts::Function;
     /// @brief core::Class
     friend class core::Class;
     /// @brief arkts::Class
     friend class arkts::Class;
+    /// @brief arkts::Function
+    friend class arkts::Function;
     /// @brief abckit::DefaultHash<Annotation>
     friend class abckit::DefaultHash<Annotation>;
 
@@ -46,7 +51,7 @@ public:
      * @brief Construct a new Annotation object
      * @param other
      */
-    Annotation(const Annotation &other) = default;
+    Annotation(const Annotation &other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -59,7 +64,7 @@ public:
      * @brief Construct a new Annotation object
      * @param other
      */
-    Annotation(Annotation &&other) = default;
+    Annotation(Annotation &&other) = default;  // CC-OFF(G.CLS.07): design decision, detail: base_concepts.h
 
     /**
      * @brief Constructor
@@ -77,18 +82,21 @@ public:
     // ...
 
     /**
-     * @brief Get the Interface object
+     * @brief Get the Interface of Annotation
      * @return core::AnnotationInterface
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     core::AnnotationInterface GetInterface() const;
 
     /**
-     * @brief Enumerates elements of the this `Annotation`, invoking the callback for each element.
-     * The return value of `cb` used as a signal to continue (true) or early-exit (false) enumeration.
-     * @param cb - Callback that will be invoked.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `bool(*this)` results in `false`.
+     * @brief Enumerates elements of the Annotation, invoking the callback for each element.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    void EnumerateElements(const std::function<bool(core::AnnotationElement)> &cb) const;
+    bool EnumerateElements(const std::function<bool(core::AnnotationElement)> &cb) const;
 
 private:
     Annotation(AbckitCoreAnnotation *ann, const ApiConfig *conf, const File *file) : ViewInResource(ann), conf_(conf)

@@ -37,6 +37,7 @@
 
 #include <cstdarg>
 #include <cstdint>
+#include <limits>
 
 namespace {
 constexpr uint32_t IC_SLOT_VALUE = 0xF;
@@ -78,7 +79,7 @@ AbckitInst *IcreateDynTryldglobalbynameStatic(AbckitGraph *graph, AbckitString *
 {
     LIBABCKIT_LOG_FUNC;
     return CreateDynInst(graph, GetStringOffset(graph, string),
-                         compiler::IntrinsicInst::IntrinsicId::DYN_TRYLDGLOBALBYNAME_IMM8_ID16);
+                         compiler::IntrinsicInst::IntrinsicId::DYN_TRYLDGLOBALBYNAME_IMM16_ID16);
 }
 
 AbckitInst *IcreateDynLdobjbynameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string)
@@ -91,6 +92,12 @@ AbckitInst *IcreateDynLdobjbynameStatic(AbckitGraph *graph, AbckitInst *acc, Abc
 AbckitInst *IcreateDynNewobjrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args, compiler::IntrinsicInst::IntrinsicId::DYN_NEWOBJRANGE_IMM16_IMM8_V8);
 }
@@ -98,6 +105,12 @@ AbckitInst *IcreateDynNewobjrangeStatic(AbckitGraph *graph, size_t argCount, std
 AbckitInst *IcreateDynDefinefuncStatic(AbckitGraph *graph, AbckitCoreFunction *function, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, GetMethodOffset(graph, function), imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINEFUNC_IMM16_ID16_IMM8);
 }
@@ -339,8 +352,19 @@ AbckitInst *IcreateDynThrowUndefinedifholeStatic(AbckitGraph *graph, AbckitInst 
 AbckitInst *IcreateDynThrowIfsupernotcorrectcallStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
-    return CreateDynInst(graph, acc, imm0,
-                         compiler::IntrinsicInst::IntrinsicId::DYN_THROW_IFSUPERNOTCORRECTCALL_PREF_IMM8, false);
+    AbckitInst *inst {nullptr};
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize <= AbckitBitImmSize::BITSIZE_8) {
+        inst = CreateDynInst(graph, acc, imm0,
+                             compiler::IntrinsicInst::IntrinsicId::DYN_THROW_IFSUPERNOTCORRECTCALL_PREF_IMM8, false);
+    } else if (imm0BitSize <= AbckitBitImmSize::BITSIZE_16) {
+        inst = CreateDynInst(graph, acc, imm0,
+                             compiler::IntrinsicInst::IntrinsicId::DYN_THROW_IFSUPERNOTCORRECTCALL_PREF_IMM16, false);
+    } else {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+    }
+    return inst;
 }
 
 AbckitInst *IcreateDynThrowUndefinedifholewithnameStatic(AbckitGraph *graph, AbckitInst *acc, AbckitString *string)
@@ -354,6 +378,12 @@ AbckitInst *IcreateDynCallruntimeCreateprivatepropertyStatic(AbckitGraph *graph,
                                                              AbckitLiteralArray *literalArray)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, GetLiteralArrayOffset(graph, literalArray),
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_CREATEPRIVATEPROPERTY_PREF_IMM16_ID16,
                          false);
@@ -363,10 +393,17 @@ AbckitInst *IcreateDynDefineclasswithbufferStatic(AbckitGraph *graph, AbckitCore
                                                   AbckitLiteralArray *literalArray, uint64_t imm0, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, GetMethodOffset(graph, function), GetLiteralArrayOffset(graph, literalArray), imm0,
                          input0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINECLASSWITHBUFFER_IMM16_ID16_ID16_IMM16_V8);
+    ;
 }
 
 AbckitInst *IcreateDynCallruntimeDefinesendableclassStatic(AbckitGraph *graph, AbckitCoreFunction *function,
@@ -374,6 +411,12 @@ AbckitInst *IcreateDynCallruntimeDefinesendableclassStatic(AbckitGraph *graph, A
                                                            AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(
         graph, GetMethodOffset(graph, function), GetLiteralArrayOffset(graph, literalArray), imm0, input0,
@@ -496,12 +539,19 @@ AbckitInst *IcreateDynStownbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, Ab
 {
     LIBABCKIT_LOG_FUNC;
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
-    return CreateDynInst(graph, acc, input0, input1, compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYVALUE_IMM8_V8_V8);
+    return CreateDynInst(graph, acc, input0, input1,
+                         compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYVALUE_IMM16_V8_V8);
 }
 
 AbckitInst *IcreateDynStownbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYINDEX_IMM16_V8_IMM16);
@@ -510,6 +560,12 @@ AbckitInst *IcreateDynStownbyindexStatic(AbckitGraph *graph, AbckitInst *acc, Ab
 AbckitInst *IcreateDynWideStownbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_32) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_STOWNBYINDEX_PREF_V8_IMM32, false);
@@ -530,7 +586,7 @@ AbckitInst *IcreateDynStownbynamewithnamesetStatic(AbckitGraph *graph, AbckitIns
     LIBABCKIT_LOG_FUNC;
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, GetStringOffset(graph, string),
-                         compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYNAMEWITHNAMESET_IMM8_ID16_V8);
+                         compiler::IntrinsicInst::IntrinsicId::DYN_STOWNBYNAMEWITHNAMESET_IMM16_ID16_V8);
 }
 
 AbckitInst *IcreateDynCreateemptyobjectStatic(AbckitGraph *graph)
@@ -550,14 +606,25 @@ AbckitInst *IcreateDynStobjbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, Ab
 AbckitInst *IcreateDynStobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
-    // CC-OFFNXT(WordsTool.190) sensitive word conflict
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, input0, imm0,
-                         compiler::IntrinsicInst::IntrinsicId::DYN_STOBJBYINDEX_IMM8_V8_IMM16);
+                         compiler::IntrinsicInst::IntrinsicId::DYN_STOBJBYINDEX_IMM16_V8_IMM16);
 }
 
 AbckitInst *IcreateDynWideStobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_32) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_STOBJBYINDEX_PREF_V8_IMM32, false);
@@ -661,7 +728,7 @@ AbckitInst *IcreateDynGetresumemodeStatic(AbckitGraph *graph, AbckitInst *acc)
 AbckitInst *IcreateDynGettemplateobjectStatic(AbckitGraph *graph, AbckitInst *acc)
 {
     LIBABCKIT_LOG_FUNC;
-    return CreateDynInst(graph, acc, compiler::IntrinsicInst::IntrinsicId::DYN_GETTEMPLATEOBJECT_IMM8);
+    return CreateDynInst(graph, acc, compiler::IntrinsicInst::IntrinsicId::DYN_GETTEMPLATEOBJECT_IMM16);
 }
 
 AbckitInst *IcreateDynGetnextpropnameStatic(AbckitGraph *graph, AbckitInst *input0)
@@ -781,7 +848,7 @@ AbckitInst *IcreateDynStthisbyvalueStatic(AbckitGraph *graph, AbckitInst *acc, A
 {
     LIBABCKIT_LOG_FUNC;
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
-    return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_STTHISBYVALUE_IMM8_V8);
+    return CreateDynInst(graph, acc, input0, compiler::IntrinsicInst::IntrinsicId::DYN_STTHISBYVALUE_IMM16_V8);
 }
 
 AbckitInst *IcreateDynAsyncgeneratorrejectStatic(AbckitGraph *graph, AbckitInst *acc, AbckitInst *input0)
@@ -870,6 +937,12 @@ AbckitInst *IcreateDynCreateobjectwithexcludedkeysStatic(AbckitGraph *graph, Abc
                                                          uint64_t imm0, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, input1, imm0, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CREATEOBJECTWITHEXCLUDEDKEYS_IMM8_V8_V8, false);
@@ -879,6 +952,12 @@ AbckitInst *IcreateDynWideCreateobjectwithexcludedkeysStatic(AbckitGraph *graph,
                                                              uint64_t imm0, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, input0, input1, imm0, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_CREATEOBJECTWITHEXCLUDEDKEYS_PREF_IMM16_V8_V8,
@@ -889,6 +968,12 @@ AbckitInst *IcreateDynCallruntimeDefinefieldbyindexStatic(AbckitGraph *graph, Ab
                                                           AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_32) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_DEFINEFIELDBYINDEX_PREF_IMM8_IMM32_V8);
@@ -897,6 +982,12 @@ AbckitInst *IcreateDynCallruntimeDefinefieldbyindexStatic(AbckitGraph *graph, Ab
 AbckitInst *IcreateDynCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     auto intrImpl = graph->impl->CreateInstIntrinsic(
         compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLTHISRANGE_IMM8_IMM8_V8);
@@ -917,6 +1008,12 @@ AbckitInst *IcreateDynCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, s
 AbckitInst *IcreateDynWideCallthisrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     auto intrImpl = graph->impl->CreateInstIntrinsic(
         compiler::DataType::ANY, 0, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_CALLTHISRANGE_PREF_IMM16_V8);
@@ -936,6 +1033,12 @@ AbckitInst *IcreateDynWideCallthisrangeStatic(AbckitGraph *graph, AbckitInst *ac
 AbckitInst *IcreateDynSupercallarrowrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_SUPERCALLARROWRANGE_IMM8_IMM8_V8);
@@ -944,6 +1047,12 @@ AbckitInst *IcreateDynSupercallarrowrangeStatic(AbckitGraph *graph, AbckitInst *
 AbckitInst *IcreateDynCallrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args, compiler::IntrinsicInst::IntrinsicId::DYN_CALLRANGE_IMM8_IMM8_V8);
 }
@@ -951,6 +1060,12 @@ AbckitInst *IcreateDynCallrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_
 AbckitInst *IcreateDynWideCallrangeStatic(AbckitGraph *graph, AbckitInst *acc, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_CALLRANGE_PREF_IMM16_V8, false);
@@ -960,6 +1075,12 @@ AbckitInst *IcreateDynWideSupercallarrowrangeStatic(AbckitGraph *graph, AbckitIn
                                                     std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_SUPERCALLARROWRANGE_PREF_IMM16_V8, false);
@@ -969,6 +1090,13 @@ AbckitInst *IcreateDynStprivatepropertyStatic(AbckitGraph *graph, AbckitInst *ac
                                               AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, acc, input0, imm0, imm1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_STPRIVATEPROPERTY_IMM8_IMM16_IMM16_V8);
@@ -977,6 +1105,13 @@ AbckitInst *IcreateDynCallruntimeDefineprivatepropertyStatic(AbckitGraph *graph,
                                                              uint64_t imm1, AbckitInst *input0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(
         graph, acc, input0, imm0, imm1,
@@ -1038,12 +1173,32 @@ AbckitInst *IcreateDynDefinegettersetterbyvalueStatic(AbckitGraph *graph, Abckit
 AbckitInst *IcreateDynStlexvarStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
-    return CreateDynInst(graph, acc, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_STLEXVAR_IMM8_IMM8, false);
+    AbckitInst *inst {nullptr};
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize <= AbckitBitImmSize::BITSIZE_4 && imm1BitSize <= AbckitBitImmSize::BITSIZE_4) {
+        inst =
+            CreateDynInst(graph, acc, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_STLEXVAR_IMM4_IMM4, false);
+    } else if (imm0BitSize <= AbckitBitImmSize::BITSIZE_8 && imm1BitSize <= AbckitBitImmSize::BITSIZE_8) {
+        inst =
+            CreateDynInst(graph, acc, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_STLEXVAR_IMM8_IMM8, false);
+    } else {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+    }
+    return inst;
 }
 
 AbckitInst *IcreateDynWideStlexvarStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, imm1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_STLEXVAR_PREF_IMM16_IMM16, false);
 }
@@ -1051,12 +1206,26 @@ AbckitInst *IcreateDynWideStlexvarStatic(AbckitGraph *graph, AbckitInst *acc, ui
 AbckitInst *IcreateDynTestinStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_TESTIN_IMM8_IMM16_IMM16);
 }
 
 AbckitInst *IcreateDynLdprivatepropertyStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, imm1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_LDPRIVATEPROPERTY_IMM8_IMM16_IMM16);
 }
@@ -1064,11 +1233,29 @@ AbckitInst *IcreateDynLdprivatepropertyStatic(AbckitGraph *graph, AbckitInst *ac
 AbckitInst *IcreateDynLdlexvarStatic(AbckitGraph *graph, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
-    return CreateDynInst(graph, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_LDLEXVAR_IMM8_IMM8, false);
+    AbckitInst *inst {nullptr};
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize <= AbckitBitImmSize::BITSIZE_4 && imm1BitSize <= AbckitBitImmSize::BITSIZE_4) {
+        inst = CreateDynInst(graph, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_LDLEXVAR_IMM4_IMM4, false);
+    } else if (imm0BitSize <= AbckitBitImmSize::BITSIZE_8 && imm1BitSize <= AbckitBitImmSize::BITSIZE_8) {
+        inst = CreateDynInst(graph, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_LDLEXVAR_IMM8_IMM8, false);
+    } else {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+    }
+    return inst;
 }
 AbckitInst *IcreateDynWideLdlexvarStatic(AbckitGraph *graph, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, imm1, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_LDLEXVAR_PREF_IMM16_IMM16,
                          false);
 }
@@ -1104,24 +1291,49 @@ AbckitInst *IcreateDynLdsuperbynameStatic(AbckitGraph *graph, AbckitInst *acc, A
 AbckitInst *IcreateDynWideStpatchvarStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_STPATCHVAR_PREF_IMM16, false);
 }
 
 AbckitInst *IcreateDynSetgeneratorstateStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_SETGENERATORSTATE_IMM8, false);
 }
 
 AbckitInst *IcreateDynLdobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_LDOBJBYINDEX_IMM16_IMM16);
+    ;
 }
 
 AbckitInst *IcreateDynWideLdobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_32) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_LDOBJBYINDEX_PREF_IMM32,
                          false);
 }
@@ -1129,6 +1341,12 @@ AbckitInst *IcreateDynWideLdobjbyindexStatic(AbckitGraph *graph, AbckitInst *acc
 AbckitInst *IcreateDynSupercallthisrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_SUPERCALLTHISRANGE_IMM8_IMM8_V8);
@@ -1137,6 +1355,12 @@ AbckitInst *IcreateDynSupercallthisrangeStatic(AbckitGraph *graph, size_t argCou
 AbckitInst *IcreateDynWideSupercallthisrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_SUPERCALLTHISRANGE_PREF_IMM16_V8, false);
@@ -1145,6 +1369,12 @@ AbckitInst *IcreateDynWideSupercallthisrangeStatic(AbckitGraph *graph, size_t ar
 AbckitInst *IcreateDynWideNewobjrangeStatic(AbckitGraph *graph, size_t argCount, std::va_list args)
 {
     LIBABCKIT_LOG_FUNC;
+    auto argCountBitSize = GetBitLengthUnsigned(argCount);
+    if (argCountBitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     // CC-OFFNXT(WordsTool.190) sensitive word conflict
     return CreateDynInst(graph, argCount, args,
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_NEWOBJRANGE_PREF_IMM16_V8, false);
@@ -1153,24 +1383,48 @@ AbckitInst *IcreateDynWideNewobjrangeStatic(AbckitGraph *graph, size_t argCount,
 AbckitInst *IcreateDynWideLdpatchvarStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_LDPATCHVAR_PREF_IMM16, false);
 }
 
 AbckitInst *IcreateDynNewlexenvStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_NEWLEXENV_IMM8, false);
 }
 
 AbckitInst *IcreateDynWideNewlexenvStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_NEWLEXENV_PREF_IMM16, false);
 }
 
 AbckitInst *IcreateDynNewlexenvwithnameStatic(AbckitGraph *graph, uint64_t imm0, AbckitLiteralArray *literalArray)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, GetLiteralArrayOffset(graph, literalArray),
                          compiler::IntrinsicInst::IntrinsicId::DYN_NEWLEXENVWITHNAME_IMM8_ID16, false);
 }
@@ -1178,7 +1432,12 @@ AbckitInst *IcreateDynNewlexenvwithnameStatic(AbckitGraph *graph, uint64_t imm0,
 AbckitInst *IcreateDynWideNewlexenvwithnameStatic(AbckitGraph *graph, uint64_t imm0, AbckitLiteralArray *literalArray)
 {
     LIBABCKIT_LOG_FUNC;
-
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, GetLiteralArrayOffset(graph, literalArray),
                          compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_NEWLEXENVWITHNAME_PREF_IMM16_ID16, false);
 }
@@ -1186,18 +1445,36 @@ AbckitInst *IcreateDynWideNewlexenvwithnameStatic(AbckitGraph *graph, uint64_t i
 AbckitInst *IcreateDynCopyrestargsStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_COPYRESTARGS_IMM8, false);
 }
 
 AbckitInst *IcreateDynWideCopyrestargsStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_WIDE_COPYRESTARGS_PREF_IMM16, false);
 }
 
 AbckitInst *IcreateDynCallruntimeLdsendableclassStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_LDSENDABLECLASS_PREF_IMM16,
                          false);
 }
@@ -1205,6 +1482,12 @@ AbckitInst *IcreateDynCallruntimeLdsendableclassStatic(AbckitGraph *graph, uint6
 AbckitInst *IcreateDynCallruntimeLdsendableexternalmodulevarStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_LDSENDABLEEXTERNALMODULEVAR_PREF_IMM8,
                          false);
@@ -1213,6 +1496,12 @@ AbckitInst *IcreateDynCallruntimeLdsendableexternalmodulevarStatic(AbckitGraph *
 AbckitInst *IcreateDynCallruntimeWideldsendableexternalmodulevarStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(
         graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_WIDELDSENDABLEEXTERNALMODULEVAR_PREF_IMM16,
         false);
@@ -1221,6 +1510,12 @@ AbckitInst *IcreateDynCallruntimeWideldsendableexternalmodulevarStatic(AbckitGra
 AbckitInst *IcreateDynCallruntimeNewsendableenvStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_NEWSENDABLEENV_PREF_IMM8,
                          false);
 }
@@ -1228,6 +1523,12 @@ AbckitInst *IcreateDynCallruntimeNewsendableenvStatic(AbckitGraph *graph, uint64
 AbckitInst *IcreateDynCallruntimeWidenewsendableenvStatic(AbckitGraph *graph, uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_WIDENEWSENDABLEENV_PREF_IMM16, false);
 }
@@ -1235,14 +1536,33 @@ AbckitInst *IcreateDynCallruntimeWidenewsendableenvStatic(AbckitGraph *graph, ui
 AbckitInst *IcreateDynCallruntimeStsendablevarStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
-    return CreateDynInst(graph, acc, imm0, imm1,
-                         compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_STSENDABLEVAR_PREF_IMM4_IMM4, false);
+    AbckitInst *inst {nullptr};
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize <= AbckitBitImmSize::BITSIZE_4 && imm1BitSize <= AbckitBitImmSize::BITSIZE_4) {
+        inst = CreateDynInst(graph, acc, imm0, imm1,
+                             compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_STSENDABLEVAR_PREF_IMM4_IMM4, false);
+    } else if (imm0BitSize <= AbckitBitImmSize::BITSIZE_8 && imm1BitSize <= AbckitBitImmSize::BITSIZE_8) {
+        inst = CreateDynInst(graph, acc, imm0, imm1,
+                             compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_STSENDABLEVAR_PREF_IMM8_IMM8, false);
+    } else {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+    }
+    return inst;
 }
 
 AbckitInst *IcreateDynCallruntimeWidestsendablevarStatic(AbckitGraph *graph, AbckitInst *acc, uint64_t imm0,
                                                          uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, acc, imm0, imm1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_WIDESTSENDABLEVAR_PREF_IMM16_IMM16,
                          false);
@@ -1251,13 +1571,32 @@ AbckitInst *IcreateDynCallruntimeWidestsendablevarStatic(AbckitGraph *graph, Abc
 AbckitInst *IcreateDynCallruntimeLdsendablevarStatic(AbckitGraph *graph, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
-    return CreateDynInst(graph, imm0, imm1,
-                         compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_LDSENDABLEVAR_PREF_IMM4_IMM4, false);
+    AbckitInst *inst {nullptr};
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize <= AbckitBitImmSize::BITSIZE_4 && imm1BitSize <= AbckitBitImmSize::BITSIZE_4) {
+        inst = CreateDynInst(graph, imm0, imm1,
+                             compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_LDSENDABLEVAR_PREF_IMM4_IMM4, false);
+    } else if (imm0BitSize <= AbckitBitImmSize::BITSIZE_8 && imm1BitSize <= AbckitBitImmSize::BITSIZE_8) {
+        inst = CreateDynInst(graph, imm0, imm1,
+                             compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_LDSENDABLEVAR_PREF_IMM8_IMM8, false);
+    } else {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+    }
+    return inst;
 }
 
 AbckitInst *IcreateDynCallruntimeWideldsendablevarStatic(AbckitGraph *graph, uint64_t imm0, uint64_t imm1)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    auto imm1BitSize = GetBitLengthUnsigned(imm1);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_16 || imm1BitSize > AbckitBitImmSize::BITSIZE_16) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     return CreateDynInst(graph, imm0, imm1,
                          compiler::IntrinsicInst::IntrinsicId::DYN_CALLRUNTIME_WIDELDSENDABLEVAR_PREF_IMM16_IMM16,
                          false);
@@ -1405,6 +1744,12 @@ AbckitInst *IcreateDynDefinemethodStatic(AbckitGraph *graph, AbckitInst *acc, Ab
                                          uint64_t imm0)
 {
     LIBABCKIT_LOG_FUNC;
+    auto imm0BitSize = GetBitLengthUnsigned(imm0);
+    if (imm0BitSize > AbckitBitImmSize::BITSIZE_8) {
+        LIBABCKIT_LOG(DEBUG) << "Immediate type overflow\n";
+        SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
+    }
     auto methodOffset = GetMethodOffset(graph, function);
     return CreateDynInst(graph, acc, methodOffset, imm0,
                          compiler::IntrinsicInst::IntrinsicId::DYN_DEFINEMETHOD_IMM16_ID16_IMM8, true);

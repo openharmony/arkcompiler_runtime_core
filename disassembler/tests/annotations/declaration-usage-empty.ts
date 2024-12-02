@@ -15,11 +15,11 @@
 
 @interface Anno {}
 
-@#Anno
+@__$$ETS_ANNOTATION$$__Anno
 class A {
-    @#Anno()
+    @__$$ETS_ANNOTATION$$__Anno()
     foo() {}
 
-    @#Anno({})
+    @__$$ETS_ANNOTATION$$__Anno({})
     bar() {}
 }

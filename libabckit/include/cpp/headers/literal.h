@@ -16,7 +16,9 @@
 #ifndef CPP_ABCKIT_LITERAL_H
 #define CPP_ABCKIT_LITERAL_H
 
+#include <string>
 #include "./base_classes.h"
+#include "./core/function.h"
 #include "./literal_array.h"
 
 namespace abckit {
@@ -27,6 +29,8 @@ namespace abckit {
 class Literal : public ViewInResource<AbckitLiteral *, const File *> {
     /// @brief abckit::File
     friend class abckit::File;
+    /// @brief abckit::LiteralArray
+    friend class abckit::LiteralArray;
     /// @brief abckit::DefaultHash<Literal>
     friend class abckit::DefaultHash<Literal>;
 
@@ -63,16 +67,99 @@ public:
     ~Literal() override = default;
 
     /**
-     * @brief Get the Bool object
-     * @return bool
+     * @brief Get the Literal Array object
+     * @return abckit::LiteralArray
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    abckit::LiteralArray GetLiteralArray() const;
+
+    /**
+     * @brief Returns binary file that the LiteralArray is a part of.
+     * @return pointer to File.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    const File *GetFile() const
+    {
+        return GetResource();
+    };
+
+    /**
+     * @brief Returns boolean value for Literal.
+     * @return Boolean value of the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
     bool GetBool() const;
 
     /**
-     * @brief Get the Literal Array object
-     * @return abckit::LiteralArray
+     * @brief Returns byte value for Literal.
+     * @return Byte value of the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    abckit::LiteralArray GetLiteralArray() const;
+    uint8_t GetU8() const;
+
+    /**
+     * @brief Returns short value for Literal.
+     * @return Short value of the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    uint16_t GetU16() const;
+
+    /**
+     * @brief Returns integer value for Literal.
+     * @return Short value of the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    uint32_t GetU32() const;
+
+    /**
+     * @brief Returns long value for Literal.
+     * @return Short value of the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    uint64_t GetU64() const;
+
+    /**
+     * @brief Returns method affiliate value for the Literal.
+     * @return uint16_t containing method affiliate оffset that is stored in the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    uint16_t GetMethodAffiliate() const;
+
+    /**
+     * @brief Returns float value that is stored in Literal.
+     * @return float value for Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    float GetFloat() const;
+
+    /**
+     * @brief Returns double value that is stored in Literal.
+     * @return float value for Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    double GetDouble() const;
+
+    /**
+     * @brief Returns string value for Literal.
+     * @return std::string that holds the string value of the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetString() const;
+
+    /**
+     * @brief Returns method descriptor that is stored in Literal.
+     * @return std::string that holds the string value of the Literal.
+     * @note Allocates
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    std::string GetMethod() const;
+
+    /**
+     * @brief Returns type tag that the Literal has.
+     * @return Tag of the Literal.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     */
+    enum AbckitLiteralTag GetTag() const;
 
 protected:
     /**

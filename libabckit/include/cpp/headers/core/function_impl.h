@@ -19,6 +19,8 @@
 #include "./function.h"
 #include "./class.h"
 #include "./module.h"
+#include "../config.h"
+#include "../graph.h"
 
 namespace abckit::core {
 
@@ -30,11 +32,12 @@ inline Graph Function::CreateGraph() const
     return Graph(graph, conf_, GetResource());
 }
 
-inline void Function::SetGraph(const Graph &graph) const
+inline Function Function::SetGraph(const Graph &graph) const
 {
     const ApiConfig *conf = GetApiConfig();
     conf->cMapi_->functionSetGraph(GetView(), graph.GetResource());
     CheckError(conf);
+    return *this;
 }
 
 inline const File *Function::GetFile() const
@@ -42,14 +45,14 @@ inline const File *Function::GetFile() const
     return GetResource();
 }
 
-inline std::string_view Function::GetName() const
+inline std::string Function::GetName() const
 {
     const ApiConfig *conf = GetApiConfig();
     AbckitString *cString = conf->cIapi_->functionGetName(GetView());
     CheckError(conf);
-    std::string_view view = conf->cIapi_->abckitStringToString(cString);
+    std::string str = conf->cIapi_->abckitStringToString(cString);
     CheckError(conf);
-    return view;
+    return str;
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
@@ -96,42 +99,79 @@ inline core::Class Function::GetParentClass() const
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void Function::EnumerateNestedFunctions(const std::function<bool(core::Function)> &cb) const
+inline bool Function::EnumerateNestedFunctions(const std::function<bool(core::Function)> &cb) const
 {
     Payload<const std::function<bool(core::Function)> &> payload {cb, GetApiConfig(), GetResource()};
 
-    GetApiConfig()->cIapi_->functionEnumerateNestedFunctions(
+    bool isNormalExit = GetApiConfig()->cIapi_->functionEnumerateNestedFunctions(
         GetView(), &payload, [](AbckitCoreFunction *nestedFunc, void *data) {
             const auto &payload = *static_cast<Payload<const std::function<bool(core::Function)> &> *>(data);
             return payload.data(core::Function(nestedFunc, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void Function::EnumerateNestedClasses(const std::function<bool(core::Class)> &cb) const
+inline bool Function::EnumerateNestedClasses(const std::function<bool(core::Class)> &cb) const
 {
     Payload<const std::function<bool(core::Class)> &> payload {cb, GetApiConfig(), GetResource()};
 
-    GetApiConfig()->cIapi_->functionEnumerateNestedClasses(
+    bool isNormalExit = GetApiConfig()->cIapi_->functionEnumerateNestedClasses(
         GetView(), &payload, [](AbckitCoreClass *nestedClass, void *data) {
             const auto &payload = *static_cast<Payload<const std::function<bool(core::Class)> &> *>(data);
             return payload.data(core::Class(nestedClass, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
-inline void Function::EnumerateAnnotations(const std::function<bool(core::Annotation)> &cb) const
+inline Function Function::GetParentFunction() const
 {
-    using PayloadT = Payload<const std::function<bool(core::Annotation)> &>;
-    PayloadT payload {cb, GetApiConfig(), GetResource()};
+    auto *func = GetApiConfig()->cIapi_->functionGetParentFunction(GetView());
+    CheckError(GetApiConfig());
+    return Function(func, GetApiConfig(), GetResource());
+}
 
-    GetApiConfig()->cIapi_->functionEnumerateAnnotations(
-        GetView(), &payload, [](AbckitCoreAnnotation *ann, void *data) {
-            const auto &payload = *static_cast<PayloadT *>(data);
-            return payload.data(core::Annotation(ann, payload.config, payload.resource));
+inline core::Namespace Function::GetParentNamespace() const
+{
+    auto *ns = GetApiConfig()->cIapi_->functionGetParentNamespace(GetView());
+    CheckError(GetApiConfig());
+    return Namespace(ns, GetApiConfig(), GetResource());
+}
+
+inline bool Function::EnumerateAnnotations(const std::function<bool(core::Annotation)> &cb) const
+{
+    Payload<const std::function<bool(core::Annotation)> &> payload {cb, GetApiConfig(), GetResource()};
+
+    bool isNormalExit = GetApiConfig()->cIapi_->functionEnumerateAnnotations(
+        GetView(), &payload, [](AbckitCoreAnnotation *anno, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Annotation)> &> *>(data);
+            return payload.data(core::Annotation(anno, payload.config, payload.resource));
         });
     CheckError(GetApiConfig());
+    return isNormalExit;
+}
+
+inline bool Function::IsCtor() const
+{
+    auto isCtor = GetApiConfig()->cIapi_->functionIsCtor(GetView());
+    CheckError(GetApiConfig());
+    return isCtor;
+}
+
+inline bool Function::IsAnonymous() const
+{
+    auto isAnonymous = GetApiConfig()->cIapi_->functionIsAnonymous(GetView());
+    CheckError(GetApiConfig());
+    return isAnonymous;
+}
+
+inline Function Function::SetGraph(Graph &graph) const
+{
+    GetApiConfig()->cMapi_->functionSetGraph(GetView(), graph.GetResource());
+    CheckError(GetApiConfig());
+    return *this;
 }
 
 }  // namespace abckit::core

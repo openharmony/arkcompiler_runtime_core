@@ -115,7 +115,7 @@ static void TransformIrCreateInitObject(AbckitGraph *graph, size_t numArg)
 
     AbckitBasicBlock *mainBB = g_implG->bbGetSuccBlock(g_implG->gGetStartBasicBlock(graph), 0);
     AbckitInst *lastInst = g_implG->bbGetLastInst(mainBB);
-    AbckitInst *constantInst = numArg > 0 ? g_implG->gCreateConstantI64(graph, 0x1) : nullptr;
+    AbckitInst *constantInst = numArg > 0 ? g_implG->gFindOrCreateConstantI64(graph, 0x1) : nullptr;
     if (constantInst != nullptr) {
         g_implG->iInsertBefore(constantInst, lastInst);
     }

@@ -344,6 +344,14 @@ void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *, AbckitInst *))
     apiToCheck(g_abckitBasicblock, nullptr);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
+void TestNullptr(AbckitBasicBlock *(*apiToCheck)(AbckitBasicBlock *, AbckitInst *, bool))
+{
+    apiToCheck(nullptr, g_abckitInst, false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+
+    apiToCheck(g_abckitBasicblock, nullptr, false);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
 void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *, AbckitBasicBlock *))
 {
     apiToCheck(nullptr, g_abckitBasicblock);
@@ -620,6 +628,11 @@ void TestNullptr(void (*apiToCheck)(AbckitInst *))
 void TestNullptr(void (*apiToCheck)(AbckitInst *, size_t, uint64_t))
 {
     apiToCheck(nullptr, 0, 0);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+}
+void TestNullptr(AbckitBitImmSize (*apiToCheck)(AbckitInst *, size_t))
+{
+    apiToCheck(nullptr, 0);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
 }
 void TestNullptr(void (*apiToCheck)(AbckitInst *, AbckitInst *, uint32_t))

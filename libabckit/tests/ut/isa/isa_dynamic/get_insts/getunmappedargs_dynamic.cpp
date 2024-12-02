@@ -44,7 +44,8 @@ TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_1)
     auto cb = [](AbckitFile *file, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *getunmappedargs = g_dynG->iCreateGetunmappedargs(graph);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-        auto *ldobjbyvalue = g_dynG->iCreateLdobjbyvalue(graph, g_implG->gCreateConstantU64(graph, 0), getunmappedargs);
+        auto *ldobjbyvalue =
+            g_dynG->iCreateLdobjbyvalue(graph, g_implG->gFindOrCreateConstantU64(graph, 0), getunmappedargs);
         // CC-OFFNXT(G.FMT.02)
         auto *stringPrint = g_implM->createString(file, "print");
         auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
@@ -82,11 +83,11 @@ TEST_F(LibAbcKitCreateDynGetunmappedargs, IcreateGetunmappedargs_2)
             auto *stringPrint = g_implM->createString(file, "print");
             auto *tryldglobalbyname = g_dynG->iCreateTryldglobalbyname(graph, stringPrint);
             auto *ldobjbyvalue0 =
-                g_dynG->iCreateLdobjbyvalue(graph, g_implG->gCreateConstantU64(graph, 0), getunmappedargs);
+                g_dynG->iCreateLdobjbyvalue(graph, g_implG->gFindOrCreateConstantU64(graph, 0), getunmappedargs);
             auto *ldobjbyvalue1 =
-                g_dynG->iCreateLdobjbyvalue(graph, g_implG->gCreateConstantU64(graph, 1), getunmappedargs);
+                g_dynG->iCreateLdobjbyvalue(graph, g_implG->gFindOrCreateConstantU64(graph, 1), getunmappedargs);
             auto *ldobjbyvalue2 =
-                g_dynG->iCreateLdobjbyvalue(graph, g_implG->gCreateConstantU64(graph, 2), getunmappedargs);
+                g_dynG->iCreateLdobjbyvalue(graph, g_implG->gFindOrCreateConstantU64(graph, 2), getunmappedargs);
             auto *callarg10 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue0);
             auto *callarg11 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue1);
             auto *callarg12 = g_dynG->iCreateCallarg1(graph, tryldglobalbyname, ldobjbyvalue2);

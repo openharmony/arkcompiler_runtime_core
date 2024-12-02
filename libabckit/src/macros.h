@@ -46,6 +46,22 @@
     }
 // CC-OFFNXT(G.PRE.02) code readability
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_INTERNAL_ERROR(argument, returnValue)       \
+    if ((argument) == nullptr) {                              \
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR); \
+        /* CC-OFFNXT(G.PRE.05) code generation */             \
+        return returnValue;                                   \
+    }
+// CC-OFFNXT(G.PRE.02) code readability
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define LIBABCKIT_INTERNAL_ERROR_VOID(argument)               \
+    if ((argument) == nullptr) {                              \
+        statuses::SetLastError(ABCKIT_STATUS_INTERNAL_ERROR); \
+        /* CC-OFFNXT(G.PRE.05) code generation */             \
+        return;                                               \
+    }
+// CC-OFFNXT(G.PRE.02) code readability
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LIBABCKIT_WRONG_CTX(lhs, rhs, returnvalue)       \
     if ((lhs) != (rhs)) {                                \
         statuses::SetLastError(ABCKIT_STATUS_WRONG_CTX); \

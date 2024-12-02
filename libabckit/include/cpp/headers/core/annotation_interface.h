@@ -18,9 +18,10 @@
 
 #include "../base_classes.h"
 #include "./annotation_interface_field.h"
+#include "../config.h"
 
 #include <vector>
-#include <string_view>
+#include <string>
 
 namespace abckit::core {
 
@@ -30,8 +31,12 @@ namespace abckit::core {
 class AnnotationInterface : public ViewInResource<AbckitCoreAnnotationInterface *, const File *> {
     /// @brief core::Annotation
     friend class core::Annotation;
+    /// @brief arkts::AnnotationInterface
+    friend class arkts::Module;
     /// @brief core::Module
     friend class core::Module;
+    /// @brief core::AnnotationInterfaceField
+    friend class core::AnnotationInterfaceField;
     /// @brief abckit::DefaultHash<AnnotationInterface>
     friend class abckit::DefaultHash<AnnotationInterface>;
 
@@ -44,7 +49,7 @@ public:
      * @brief Construct a new Annotation Interface object
      * @param other
      */
-    AnnotationInterface(const AnnotationInterface &other) = default;
+    AnnotationInterface(const AnnotationInterface &other) = default;  // CC-OFF(G.CLS.07): design decision
 
     /**
      * @brief Constructor
@@ -57,7 +62,7 @@ public:
      * @brief Construct a new Annotation Interface object
      * @param other
      */
-    AnnotationInterface(AnnotationInterface &&other) = default;
+    AnnotationInterface(AnnotationInterface &&other) = default;  // CC-OFF(G.CLS.07): design decision
 
     /**
      * @brief Constructor
@@ -75,27 +80,56 @@ public:
     // ...
 
     /**
-     * @brief Get the Name object
-     * @return std::string_view
+     * @brief Returns binary file that the given Annotation Interface is a part of.
+     * @return Pointer to the `File`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::string_view GetName();
+    const File *GetFile() const;
+
+    /**
+     * @brief Returns name for annotation interface.
+     * @return `std::string`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Allocates
+     */
+    std::string GetName() const;
 
     /**
      * @brief Get the Fields object
      * @return std::vector<AnnotationInterfaceField>
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
      */
-    std::vector<AnnotationInterfaceField> GetFields();
+    std::vector<AnnotationInterfaceField> GetFields() const;
+
+    /**
+     * @brief Returns module for annotation interface.
+     * @return `core::Module`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+
+     */
+    core::Module GetModule() const;
+
+    /**
+     * @brief Enumerates fields of Annotation Interface, invoking callback `cb` for each field.
+     * @return `false` if was early exited. Otherwise - `true`.
+     * @param [ in ] cb - Callback that will be invoked. Should return `false` on early exit and `true` when iterations
+     * should continue.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if view itself is false.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `cb` is false.
+     */
+    bool EnumerateFields(const std::function<bool(core::AnnotationInterfaceField)> &cb) const;
 
 private:
     template <typename AnnotationPayload>
-    inline void GetFieldsInner(AnnotationPayload annPayload)
+    inline bool GetFieldsInner(AnnotationPayload annPayload)
     {
-        GetApiConfig()->cIapi_->annotationInterfaceEnumerateFields(
+        auto isNormalExit = GetApiConfig()->cIapi_->annotationInterfaceEnumerateFields(
             GetView(), &annPayload, [](AbckitCoreAnnotationInterfaceField *func, void *data) {
                 const auto &payload = *static_cast<AnnotationPayload *>(data);
                 payload.vec->push_back(core::AnnotationInterfaceField(func, payload.config, payload.file));
                 return true;
             });
+        return isNormalExit;
     }
 
     AnnotationInterface(AbckitCoreAnnotationInterface *anni, const ApiConfig *conf, const File *file)

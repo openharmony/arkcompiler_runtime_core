@@ -23,11 +23,11 @@
 #include <cstring>
 #include <gtest/gtest.h>
 
-namespace libabckit::mock {
+namespace libabckit::mock::isa_api_static {
 
 // NOLINTBEGIN(readability-identifier-naming)
 
-inline AbckitCoreClass *IgetClass(AbckitInst *inst)
+AbckitCoreClass *IgetClass(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -35,7 +35,7 @@ inline AbckitCoreClass *IgetClass(AbckitInst *inst)
     return DEFAULT_CORE_CLASS;
 }
 
-inline void IsetClass(AbckitInst *inst, AbckitCoreClass *klass)
+void IsetClass(AbckitInst *inst, AbckitCoreClass *klass)
 {
     g_calledFuncs.push(__func__);
 
@@ -43,7 +43,7 @@ inline void IsetClass(AbckitInst *inst, AbckitCoreClass *klass)
     EXPECT_TRUE(klass == DEFAULT_CORE_CLASS);
 }
 
-inline enum AbckitIsaApiStaticConditionCode IgetConditionCode(AbckitInst *inst)
+enum AbckitIsaApiStaticConditionCode IgetConditionCode(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -51,7 +51,7 @@ inline enum AbckitIsaApiStaticConditionCode IgetConditionCode(AbckitInst *inst)
     return DEFAULT_ENUM_ISA_STATIC_CONDITION_CODE;
 }
 
-inline void IsetConditionCode(AbckitInst *inst, enum AbckitIsaApiStaticConditionCode cc)
+void IsetConditionCode(AbckitInst *inst, enum AbckitIsaApiStaticConditionCode cc)
 {
     g_calledFuncs.push(__func__);
 
@@ -59,7 +59,7 @@ inline void IsetConditionCode(AbckitInst *inst, enum AbckitIsaApiStaticCondition
     EXPECT_TRUE(cc == DEFAULT_ENUM_ISA_STATIC_CONDITION_CODE);
 }
 
-inline enum AbckitIsaApiStaticOpcode IgetOpcode(AbckitInst *inst)
+AbckitIsaApiStaticOpcode IgetOpcode(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -67,7 +67,7 @@ inline enum AbckitIsaApiStaticOpcode IgetOpcode(AbckitInst *inst)
     return DEFAULT_ENUM_ISA_API_STATIC_OPCODE;
 }
 
-inline void IsetTargetType(AbckitInst *inst, AbckitTypeId t)
+void IsetTargetType(AbckitInst *inst, AbckitTypeId t)
 {
     g_calledFuncs.push(__func__);
 
@@ -75,7 +75,7 @@ inline void IsetTargetType(AbckitInst *inst, AbckitTypeId t)
     EXPECT_TRUE(t == DEFAULT_TYPE_ID);
 }
 
-inline enum AbckitTypeId IgetTargetType(AbckitInst *inst)
+enum AbckitTypeId IgetTargetType(AbckitInst *inst)
 {
     g_calledFuncs.push(__func__);
 
@@ -83,7 +83,7 @@ inline enum AbckitTypeId IgetTargetType(AbckitInst *inst)
     return DEFAULT_ENUM_TYPE_ID;
 }
 
-inline AbckitInst *IcreateCmp(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateCmp(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -93,7 +93,7 @@ inline AbckitInst *IcreateCmp(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateLoadString(AbckitGraph *graph, AbckitString *str)
+AbckitInst *IcreateLoadString(AbckitGraph *graph, AbckitString *str)
 {
     g_calledFuncs.push(__func__);
 
@@ -102,7 +102,7 @@ inline AbckitInst *IcreateLoadString(AbckitGraph *graph, AbckitString *str)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateReturn(AbckitGraph *graph, AbckitInst *input0)
+AbckitInst *IcreateReturn(AbckitGraph *graph, AbckitInst *input0)
 {
     g_calledFuncs.push(__func__);
 
@@ -111,8 +111,8 @@ inline AbckitInst *IcreateReturn(AbckitGraph *graph, AbckitInst *input0)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateIf(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
-                             enum AbckitIsaApiStaticConditionCode cc)
+AbckitInst *IcreateIf(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1,
+                      enum AbckitIsaApiStaticConditionCode cc)
 {
     g_calledFuncs.push(__func__);
 
@@ -123,7 +123,7 @@ inline AbckitInst *IcreateIf(AbckitGraph *graph, AbckitInst *input0, AbckitInst 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateNeg(AbckitGraph *graph, AbckitInst *input0)
+AbckitInst *IcreateNeg(AbckitGraph *graph, AbckitInst *input0)
 {
     g_calledFuncs.push(__func__);
 
@@ -132,7 +132,7 @@ inline AbckitInst *IcreateNeg(AbckitGraph *graph, AbckitInst *input0)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateNot(AbckitGraph *graph, AbckitInst *input0)
+AbckitInst *IcreateNot(AbckitGraph *graph, AbckitInst *input0)
 {
     g_calledFuncs.push(__func__);
 
@@ -141,17 +141,7 @@ inline AbckitInst *IcreateNot(AbckitGraph *graph, AbckitInst *input0)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateAdd(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
-{
-    g_calledFuncs.push(__func__);
-
-    EXPECT_TRUE(graph == DEFAULT_GRAPH);
-    EXPECT_TRUE(input0 == DEFAULT_INST);
-    EXPECT_TRUE(input1 == DEFAULT_INST);
-    return DEFAULT_INST;
-}
-
-inline AbckitInst *IcreateSub(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateAdd(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -161,7 +151,7 @@ inline AbckitInst *IcreateSub(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateMul(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateSub(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -171,7 +161,7 @@ inline AbckitInst *IcreateMul(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateDiv(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateMul(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -181,7 +171,7 @@ inline AbckitInst *IcreateDiv(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateMod(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateDiv(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -191,7 +181,7 @@ inline AbckitInst *IcreateMod(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateShl(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateMod(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -201,7 +191,7 @@ inline AbckitInst *IcreateShl(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateShr(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateShl(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -211,7 +201,7 @@ inline AbckitInst *IcreateShr(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateAShr(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateShr(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -221,7 +211,7 @@ inline AbckitInst *IcreateAShr(AbckitGraph *graph, AbckitInst *input0, AbckitIns
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateAnd(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateAShr(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -231,7 +221,7 @@ inline AbckitInst *IcreateAnd(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateOr(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateAnd(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -241,7 +231,7 @@ inline AbckitInst *IcreateOr(AbckitGraph *graph, AbckitInst *input0, AbckitInst 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateXor(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateOr(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -251,7 +241,17 @@ inline AbckitInst *IcreateXor(AbckitGraph *graph, AbckitInst *input0, AbckitInst
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateCast(AbckitGraph *graph, AbckitInst *input0, AbckitTypeId targetType)
+AbckitInst *IcreateXor(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(input0 == DEFAULT_INST);
+    EXPECT_TRUE(input1 == DEFAULT_INST);
+    return DEFAULT_INST;
+}
+
+AbckitInst *IcreateCast(AbckitGraph *graph, AbckitInst *input0, AbckitTypeId targetType)
 {
     g_calledFuncs.push(__func__);
 
@@ -261,7 +261,7 @@ inline AbckitInst *IcreateCast(AbckitGraph *graph, AbckitInst *input0, AbckitTyp
     return DEFAULT_INST;
 }
 
-inline AbckitInst *GcreateNullPtr(AbckitGraph *graph)
+AbckitInst *GcreateNullPtr(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -269,7 +269,7 @@ inline AbckitInst *GcreateNullPtr(AbckitGraph *graph)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateNewArray(AbckitGraph *graph, AbckitCoreClass *inputClass, AbckitInst *inputSize)
+AbckitInst *IcreateNewArray(AbckitGraph *graph, AbckitCoreClass *inputClass, AbckitInst *inputSize)
 {
     g_calledFuncs.push(__func__);
 
@@ -279,7 +279,7 @@ inline AbckitInst *IcreateNewArray(AbckitGraph *graph, AbckitCoreClass *inputCla
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateNewObject(AbckitGraph *graph, AbckitCoreClass *inputClass)
+AbckitInst *IcreateNewObject(AbckitGraph *graph, AbckitCoreClass *inputClass)
 {
     g_calledFuncs.push(__func__);
 
@@ -288,7 +288,7 @@ inline AbckitInst *IcreateNewObject(AbckitGraph *graph, AbckitCoreClass *inputCl
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateInitObject(AbckitGraph *graph, AbckitCoreFunction *function, size_t argCount, ...)
+AbckitInst *IcreateInitObject(AbckitGraph *graph, AbckitCoreFunction *function, size_t argCount, ...)
 {
     g_calledFuncs.push(__func__);
 
@@ -298,8 +298,7 @@ inline AbckitInst *IcreateInitObject(AbckitGraph *graph, AbckitCoreFunction *fun
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateLoadArray(AbckitGraph *graph, AbckitInst *arrayRef, AbckitInst *idx,
-                                    AbckitTypeId returnTypeId)
+AbckitInst *IcreateLoadArray(AbckitGraph *graph, AbckitInst *arrayRef, AbckitInst *idx, AbckitTypeId returnTypeId)
 {
     g_calledFuncs.push(__func__);
 
@@ -310,21 +309,8 @@ inline AbckitInst *IcreateLoadArray(AbckitGraph *graph, AbckitInst *arrayRef, Ab
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateStoreArray(AbckitGraph *graph, AbckitInst *arrayRef, AbckitInst *idx, AbckitInst *value,
-                                     AbckitTypeId returnTypeId)
-{
-    g_calledFuncs.push(__func__);
-
-    EXPECT_TRUE(graph == DEFAULT_GRAPH);
-    EXPECT_TRUE(arrayRef == DEFAULT_INST);
-    EXPECT_TRUE(idx == DEFAULT_INST);
-    EXPECT_TRUE(value == DEFAULT_INST);
-    EXPECT_TRUE(returnTypeId == DEFAULT_TYPE_ID);
-    return DEFAULT_INST;
-}
-
-inline AbckitInst *IcreateStoreArrayWide(AbckitGraph *graph, AbckitInst *arrayRef, AbckitInst *idx, AbckitInst *value,
-                                         AbckitTypeId returnTypeId)
+AbckitInst *IcreateStoreArray(AbckitGraph *graph, AbckitInst *arrayRef, AbckitInst *idx, AbckitInst *value,
+                              AbckitTypeId returnTypeId)
 {
     g_calledFuncs.push(__func__);
 
@@ -336,7 +322,20 @@ inline AbckitInst *IcreateStoreArrayWide(AbckitGraph *graph, AbckitInst *arrayRe
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateLenArray(AbckitGraph *graph, AbckitInst *arr)
+AbckitInst *IcreateStoreArrayWide(AbckitGraph *graph, AbckitInst *arrayRef, AbckitInst *idx, AbckitInst *value,
+                                  AbckitTypeId returnTypeId)
+{
+    g_calledFuncs.push(__func__);
+
+    EXPECT_TRUE(graph == DEFAULT_GRAPH);
+    EXPECT_TRUE(arrayRef == DEFAULT_INST);
+    EXPECT_TRUE(idx == DEFAULT_INST);
+    EXPECT_TRUE(value == DEFAULT_INST);
+    EXPECT_TRUE(returnTypeId == DEFAULT_TYPE_ID);
+    return DEFAULT_INST;
+}
+
+AbckitInst *IcreateLenArray(AbckitGraph *graph, AbckitInst *arr)
 {
     g_calledFuncs.push(__func__);
 
@@ -345,7 +344,7 @@ inline AbckitInst *IcreateLenArray(AbckitGraph *graph, AbckitInst *arr)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateLoadConstArray(AbckitGraph *graph, AbckitLiteralArray *literalArray)
+AbckitInst *IcreateLoadConstArray(AbckitGraph *graph, AbckitLiteralArray *literalArray)
 {
     g_calledFuncs.push(__func__);
 
@@ -354,7 +353,7 @@ inline AbckitInst *IcreateLoadConstArray(AbckitGraph *graph, AbckitLiteralArray 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateCheckCast(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
+AbckitInst *IcreateCheckCast(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
 {
     g_calledFuncs.push(__func__);
 
@@ -364,7 +363,7 @@ inline AbckitInst *IcreateCheckCast(AbckitGraph *graph, AbckitInst *inputObj, Ab
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateIsInstance(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
+AbckitInst *IcreateIsInstance(AbckitGraph *graph, AbckitInst *inputObj, AbckitType *targetType)
 {
     g_calledFuncs.push(__func__);
 
@@ -374,7 +373,7 @@ inline AbckitInst *IcreateIsInstance(AbckitGraph *graph, AbckitInst *inputObj, A
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateLoadUndefined(AbckitGraph *graph)
+AbckitInst *IcreateLoadUndefined(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -382,7 +381,7 @@ inline AbckitInst *IcreateLoadUndefined(AbckitGraph *graph)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateReturnVoid(AbckitGraph *graph)
+AbckitInst *IcreateReturnVoid(AbckitGraph *graph)
 {
     g_calledFuncs.push(__func__);
 
@@ -390,7 +389,7 @@ inline AbckitInst *IcreateReturnVoid(AbckitGraph *graph)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateEquals(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
+AbckitInst *IcreateEquals(AbckitGraph *graph, AbckitInst *input0, AbckitInst *input1)
 {
     g_calledFuncs.push(__func__);
 
@@ -400,7 +399,7 @@ inline AbckitInst *IcreateEquals(AbckitGraph *graph, AbckitInst *input0, AbckitI
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateCallStatic(AbckitGraph *graph, AbckitCoreFunction *function, size_t argCount, ...)
+AbckitInst *IcreateCallStatic(AbckitGraph *graph, AbckitCoreFunction *function, size_t argCount, ...)
 {
     g_calledFuncs.push(__func__);
 
@@ -410,8 +409,8 @@ inline AbckitInst *IcreateCallStatic(AbckitGraph *graph, AbckitCoreFunction *fun
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateCallVirtual(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreFunction *function,
-                                      size_t argCount, ...)
+AbckitInst *IcreateCallVirtual(AbckitGraph *graph, AbckitInst *inputObj, AbckitCoreFunction *function, size_t argCount,
+                               ...)
 {
     g_calledFuncs.push(__func__);
 
@@ -422,7 +421,7 @@ inline AbckitInst *IcreateCallVirtual(AbckitGraph *graph, AbckitInst *inputObj, 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateAddI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateAddI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -432,7 +431,7 @@ inline AbckitInst *IcreateAddI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateSubI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateSubI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -442,7 +441,7 @@ inline AbckitInst *IcreateSubI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateMulI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateMulI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -452,7 +451,7 @@ inline AbckitInst *IcreateMulI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateDivI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateDivI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -462,7 +461,7 @@ inline AbckitInst *IcreateDivI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateModI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateModI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -472,7 +471,7 @@ inline AbckitInst *IcreateModI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateShlI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateShlI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -482,7 +481,7 @@ inline AbckitInst *IcreateShlI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateShrI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateShrI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -492,7 +491,7 @@ inline AbckitInst *IcreateShrI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateAShrI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateAShrI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -502,7 +501,7 @@ inline AbckitInst *IcreateAShrI(AbckitGraph *graph, AbckitInst *input0, uint64_t
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateAndI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateAndI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -512,7 +511,7 @@ inline AbckitInst *IcreateAndI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateOrI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateOrI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -522,7 +521,7 @@ inline AbckitInst *IcreateOrI(AbckitGraph *graph, AbckitInst *input0, uint64_t i
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateXorI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
+AbckitInst *IcreateXorI(AbckitGraph *graph, AbckitInst *input0, uint64_t imm)
 {
     g_calledFuncs.push(__func__);
 
@@ -532,7 +531,7 @@ inline AbckitInst *IcreateXorI(AbckitGraph *graph, AbckitInst *input0, uint64_t 
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateThrow(AbckitGraph *graph, AbckitInst *acc)
+AbckitInst *IcreateThrow(AbckitGraph *graph, AbckitInst *acc)
 {
     g_calledFuncs.push(__func__);
 
@@ -541,7 +540,7 @@ inline AbckitInst *IcreateThrow(AbckitGraph *graph, AbckitInst *acc)
     return DEFAULT_INST;
 }
 
-inline AbckitInst *IcreateIsUndefined(AbckitGraph *graph, AbckitInst *inputObj)
+AbckitInst *IcreateIsUndefined(AbckitGraph *graph, AbckitInst *inputObj)
 {
     g_calledFuncs.push(__func__);
 
@@ -609,9 +608,9 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
 
 // NOLINTEND(readability-identifier-naming)
 
-}  // namespace libabckit::mock
+}  // namespace libabckit::mock::isa_api_static
 
 AbckitIsaApiStatic const *AbckitGetMockIsaApiStaticImpl([[maybe_unused]] AbckitApiVersion version)
 {
-    return &libabckit::mock::g_isaApiStaticImpl;
+    return &libabckit::mock::isa_api_static::g_isaApiStaticImpl;
 }

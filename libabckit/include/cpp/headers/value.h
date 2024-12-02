@@ -16,6 +16,7 @@
 #ifndef CPP_ABCKIT_VALUE_H
 #define CPP_ABCKIT_VALUE_H
 
+#include <string_view>
 #include "./base_classes.h"
 
 namespace abckit {
@@ -27,13 +28,17 @@ class Value : public ViewInResource<AbckitValue *, const File *> {
     /// @brief abckit::File
     friend class abckit::File;
     /// @brief abckit::core::Annotation
-    friend class abckit::core::Annotation;
-    /// @brief for access to a private constructor
-    friend class abckit::core::AnnotationElement;
+    friend class core::Annotation;
+    /// @brief abckit::core::Annotation
+    friend class core::AnnotationElement;
+    /// @brief abckit::core::AnnotationInterfaceField
+    friend class core::AnnotationInterfaceField;
     /// @brief abckit::arkts::Annotation
-    friend class abckit::arkts::Annotation;
+    friend class arkts::Annotation;
     /// @brief abckit::DefaultHash<Value>
     friend class abckit::DefaultHash<Value>;
+    /// @brief arkts::AnnotationInterface
+    friend class arkts::AnnotationInterface;
 
 public:
     /**
@@ -68,24 +73,49 @@ public:
     ~Value() override = default;
 
     /**
-     * @brief Get the U1 value
-     * @return bool
+     * @brief Returns boolean value that value holds.
+     * @return Boolean value that is stored in the value.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if value is NULL.
+     * @note Set `ABCKIT_STATUS_TODO` error if value type id differs from `ABCKIT_TYPE_ID_U1`.
      */
     bool GetU1() const;
 
     /**
-     * @brief Get the Double object
-     * @return double
+     * @brief Returns double value that value holds.
+     * @return Double value that is stored in the value.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if value is NULL.
+     * @note Set `ABCKIT_STATUS_TODO` error if value type id differs from `ABCKIT_TYPE_ID_F64`.
      */
     double GetDouble() const;
 
     /**
-     * @brief Returns string value that given `Value` holds.
-     * @return std::string_view of the stored value.
-     * @note Set `ABCKIT_STATUS_TODO` error if `value` type id differs from `ABCKIT_TYPE_ID_STRING`.
-     * @note Allocates
+     * @brief Returns binary file that the Value is a part of.
+     * @return Pointer to the file that contains value.
      */
-    std::string_view GetString() const;
+    const File *GetFile() const;
+
+    /**
+     * @brief Returns type that value has.
+     * @return Pointer to the `AbckitType` that corresponds to provided value.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if value is NULL.
+     */
+    Type GetType() const;
+
+    /**
+     * @brief Returns literal array that value holds.
+     * @return Pointer to the `AbckitLiteralArray`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if value is NULL.
+     * @note Set `ABCKIT_STATUS_TODO` error if value type id differs from `ABCKIT_TYPE_ID_LITERALARRAY`.
+     */
+    abckit::LiteralArray GetLiteralArray() const;
+
+    /**
+     * @brief Returns string that value holds.
+     * @return `std::string`.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if value is NULL.
+     * @note Set `ABCKIT_STATUS_TODO` error if value type id differs from `ABCKIT_TYPE_ID_LITERALARRAY`.
+     */
+    std::string GetString() const;
 
 protected:
     /**

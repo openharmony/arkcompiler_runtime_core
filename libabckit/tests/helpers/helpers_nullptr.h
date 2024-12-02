@@ -67,6 +67,7 @@ void TestNullptr(AbckitArktsImportDescriptor *(*apiToCheck)(AbckitArktsModule *,
 void TestNullptr(void (*apiToCheck)(AbckitArktsModule *, AbckitArktsExportDescriptor *));
 void TestNullptr(void (*apiToCheck)(AbckitArktsModule *, AbckitArktsImportDescriptor *));
 void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *, AbckitInst *));
+void TestNullptr(AbckitBasicBlock *(*apiToCheck)(AbckitBasicBlock *, AbckitInst *, bool));
 void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *, AbckitBasicBlock *));
 void TestNullptr(bool (*apiToCheck)(AbckitBasicBlock *, AbckitBasicBlock *));
 void TestNullptr(void (*apiToCheck)(AbckitBasicBlock *));
@@ -116,6 +117,7 @@ void TestNullptr(AbckitString *(*apiToCheck)(AbckitInst *));
 void TestNullptr(AbckitType *(*apiToCheck)(AbckitInst *));
 void TestNullptr(void (*apiToCheck)(AbckitInst *));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, size_t, uint64_t));
+void TestNullptr(AbckitBitImmSize (*apiToCheck)(AbckitInst *, size_t));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, AbckitInst *, uint32_t));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, size_t, ...));
 void TestNullptr(void (*apiToCheck)(AbckitInst *, AbckitLiteralArray *));

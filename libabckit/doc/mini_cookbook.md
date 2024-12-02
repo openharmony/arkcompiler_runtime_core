@@ -282,7 +282,7 @@ AbckitBasicBlock *empty = implG->bbCreateEmpty(ctxG);
 ### _Create insts with const_
 
 ```cpp
-AbckitInst *new_inst = implG->gCreateConstantI64(ctxG, 1U);
+AbckitInst *new_inst = implG->gFindOrCreateConstantI64(ctxG, 1U);
 ```
 
 ### _Connect and disconnect blocks_

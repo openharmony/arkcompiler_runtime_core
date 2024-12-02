@@ -40,9 +40,9 @@ class AnnotationElement : public core::AnnotationElement {
 public:
     /**
      * @brief Constructor Arkts API AnnotationElement from the Core API with compatibility check
-     * @param other - Core API AnnotationElement
+     * @param coreOther - Core API AnnotationElement
      */
-    explicit AnnotationElement(const core::AnnotationElement &other);
+    explicit AnnotationElement(const core::AnnotationElement &coreOther);
 
     /**
      * @brief Construct a new Annotation Element object
@@ -77,9 +77,9 @@ public:
 
     /**
      * @brief Get the Name object
-     * @return std::string_view
+     * @return std::string
      */
-    std::string_view GetName() const;
+    std::string GetName() const;
 
     // Other API.
     // ...

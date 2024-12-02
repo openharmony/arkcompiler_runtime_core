@@ -21,7 +21,7 @@ import {
     path: string;
 }
 
-@ #Router({
+@__$$ETS_ANNOTATION$$__Router({
     scheme: 'handle1',
     path: '/xxx'
 })

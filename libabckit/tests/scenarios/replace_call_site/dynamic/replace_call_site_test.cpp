@@ -91,7 +91,7 @@ bool VisitBlock(AbckitBasicBlock *bb, void *data)
             auto *ldExternal = g_dynG->iCreateLdexternalmodulevar(vData->ctxG, vData->ci);
             auto *classThrow = g_dynG->iCreateThrowUndefinedifholewithname(
                 vData->ctxG, ldExternal, g_implI->classGetName(vData->ud->classToReplace));
-            auto *constInst = g_implG->gCreateConstantI32(vData->ctxG, 5);
+            auto *constInst = g_implG->gFindOrCreateConstantI32(vData->ctxG, 5);
             auto *ldobj = g_dynG->iCreateLdobjbyname(vData->ctxG, ldExternal,
                                                      g_implI->functionGetName(vData->ud->methodToReplace));
 

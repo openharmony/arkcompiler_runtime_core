@@ -53,8 +53,8 @@ struct CtxGInternalDynamic {
     AbckitRuntimeAdapterDynamic *runtimeAdapter;
 };
 
-std::tuple<AbckitGraph *, AbckitStatus> GraphWrapper::BuildGraphDynamic(FileWrapper *pf, AbckitIrInterface *irInterface,
-                                                                        AbckitFile *file, uint32_t methodOffset)
+AbckitGraph *GraphWrapper::BuildGraphDynamic(FileWrapper *pf, AbckitIrInterface *irInterface, AbckitFile *file,
+                                             uint32_t methodOffset)
 {
     ark::compiler::g_options.SetCompilerUseSafepoint(false);
     ark::compiler::g_options.SetCompilerFrameSize("large");
@@ -72,13 +72,16 @@ std::tuple<AbckitGraph *, AbckitStatus> GraphWrapper::BuildGraphDynamic(FileWrap
         delete allocator;
         delete localAllocator;
         delete adapter;
-        return {nullptr, AbckitStatus::ABCKIT_STATUS_TODO};
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_MEMORY_ALLOCATION);
+        return nullptr;
     }
     graphImpl->SetDynamicMethod();
     graphImpl->SetAbcKit();
     if (!graphImpl->RunPass<IrBuilderDynamic>()) {
         LIBABCKIT_LOG(DEBUG) << "IrBuilder failed!\n";
-        return {nullptr, AbckitStatus::ABCKIT_STATUS_TODO};
+        // Input file with bad bytecode
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return nullptr;
     }
     graphImpl->RunPass<ark::bytecodeopt::CheckResolver>();
     graphImpl->RunPass<ark::compiler::Cleanup>();
@@ -95,63 +98,81 @@ std::tuple<AbckitGraph *, AbckitStatus> GraphWrapper::BuildGraphDynamic(FileWrap
     auto *ctxGInternal = new CtxGInternalDynamic {allocator, localAllocator, irInterface, adapter};
     graph->internal = ctxGInternal;
 
-    return {graph, AbckitStatus::ABCKIT_STATUS_NO_ERROR};
+    return graph;
 }
 
-std::tuple<void *, AbckitStatus> GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName)
+// false positive
+// NOLINTNEXTLINE(readability-non-const-parameter)
+static bool RunPreliminaryPasses(ark::compiler::Graph *graphImpl, uint16_t *icSlotNumber)
 {
-    auto graphImpl =
-        compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
-    ;
     graphImpl->RemoveUnreachableBlocks();
 
     CheckInvalidOpcodes(graphImpl, true);
 
-    LIBABCKIT_LOG(DEBUG) << "============================================\n";
-    LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
-    LIBABCKIT_LOG(DEBUG) << "============================================\n";
-
     graphImpl->InvalidateAnalysis<compiler::LoopAnalyzer>();
 
     if (!ark::compiler::GraphChecker(graphImpl).Check()) {
-        LIBABCKIT_LOG(DEBUG) << funcName << ": Graph Verifier failed!\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
-        return {nullptr, ABCKIT_STATUS_TODO};
+        LIBABCKIT_LOG(DEBUG) << ": Graph Verifier failed!\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_BAD_ARGUMENT);
+        return false;
     }
 
     graphImpl->InvalidateAnalysis<compiler::DominatorsTree>();
 
     if (!graphImpl->RunPass<compiler::DominatorsTree>()) {
-        LIBABCKIT_LOG(DEBUG) << funcName << ": ICDominatorsTree failed!\n";
-        return {nullptr, ABCKIT_STATUS_TODO};
+        LIBABCKIT_LOG(DEBUG) << ": ICDominatorsTree failed!\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
     }
 
-    uint16_t icSlotNumber = 0;
-    if (!graphImpl->RunPass<ICSlotAllocator>(&icSlotNumber)) {
-        LIBABCKIT_LOG(DEBUG) << funcName << ": ICSlotAllocator failed!\n";
-        return {nullptr, ABCKIT_STATUS_TODO};
+    if (!graphImpl->RunPass<ICSlotAllocator>(icSlotNumber)) {
+        LIBABCKIT_LOG(DEBUG) << ": ICSlotAllocator failed!\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
     }
 
     graphImpl->RunPass<compiler::MoveConstants>();
 
     if (!AllocateRegisters(graphImpl, CodeGenDynamic::RESERVED_REG)) {
-        LIBABCKIT_LOG(DEBUG) << funcName << ": RegAllocGraphColoring failed!\n";
-        return {nullptr, ABCKIT_STATUS_TODO};
+        LIBABCKIT_LOG(DEBUG) << ": RegAllocGraphColoring failed!\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
     }
 
     if (!graphImpl->RunPass<bytecodeopt::RegEncoder>()) {
-        LIBABCKIT_LOG(DEBUG) << funcName << ": RegEncoder failed!\n";
-        return {nullptr, ABCKIT_STATUS_TODO};
+        LIBABCKIT_LOG(DEBUG) << ": RegEncoder failed!\n";
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
     }
 
+    return true;
+}
+
+void *GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName)
+{
+    LIBABCKIT_LOG(DEBUG) << "Building code for function " << funcName;
+
+    auto graphImpl =
+        compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
+
+    LIBABCKIT_LOG(DEBUG) << "BEFORE======================================\n";
+    LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
+
+    uint16_t icSlotNumber = 0;
+    if (!RunPreliminaryPasses(graphImpl, &icSlotNumber)) {
+        return nullptr;
+    }
+
+    LIBABCKIT_LOG(DEBUG) << "AFTER=======================================\n";
     LIBABCKIT_LOG_DUMP(graphImpl->Dump(&std::cerr), DEBUG);
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
 
     FunctionWrapper *wrFunc = PandasmWrapper::CreateWrappedFunction();
     if (!graphImpl->RunPass<CodeGenDynamic>(wrFunc, graph->irInterface)) {
         LIBABCKIT_LOG(DEBUG) << funcName << ": Code generation failed!\n";
-        return {nullptr, ABCKIT_STATUS_TODO};
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return nullptr;
     }
 
     wrFunc->valueOfFirstParam =
@@ -159,7 +180,7 @@ std::tuple<void *, AbckitStatus> GraphWrapper::BuildCodeDynamic(AbckitGraph *gra
     wrFunc->regsNum = static_cast<size_t>(wrFunc->valueOfFirstParam + 1U);
     wrFunc->slotsNum = static_cast<size_t>(icSlotNumber);
 
-    return {PandasmWrapper::GetPandasmFunction(wrFunc), ABCKIT_STATUS_NO_ERROR};
+    return PandasmWrapper::GetPandasmFunction(wrFunc);
 }
 
 void GraphWrapper::CreateGraphWrappers(AbckitGraph *graph)

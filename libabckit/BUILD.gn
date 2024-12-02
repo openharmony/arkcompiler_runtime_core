@@ -105,6 +105,10 @@ group("abckit_tests_full") {
 
 action("abckit_status") {
   script = "scripts/abckit_status.py"
+  args = [
+    "--cppapi",
+    "--capi",
+  ]
   outputs = [ "$target_gen_dir/abckit_status.csv" ]
 }
 

@@ -42,11 +42,17 @@ def get_args():
         default=False,
         help=f'Fill table with tests for c api')
     return parser.parse_args()
+
+
 args = get_args()
 
 API_PATTERN = r'^[\w,\d,_, ,*]+\(\*([\w,\d,_]+)\)\(.*'
+CPP_API_PATTERN = r'.+ \**\&*[\w\d]+\('
 PUBLIC_API_PATTERN = r'^(?!explicit)(.+) (?!~)[\&\*]*(?!operator)(.+)\(.*'
-domain_patterns = [r'struct Abckit\S*Api\s\{', r'struct Abckit\S*ApiStatic\s\{', r'struct Abckit\S*ApiDynamic\s\{']
+domain_patterns = [
+    r'struct Abckit\S*Api\s\{', r'struct Abckit\S*ApiStatic\s\{',
+    r'struct Abckit\S*ApiDynamic\s\{'
+]
 specs = ['public:', 'private:', 'protected:']
 
 libabckit_dir = script_dir.rsplit('/', 1)[0]
@@ -77,6 +83,7 @@ cpp_sources = {
 cpp_tests = {
     'tests/cpp/tests',
     'tests/mock',
+    'tests/regression',
 }
 
 TS = 'TS'
@@ -92,7 +99,7 @@ def check_test_anno_line(line):
     if re.fullmatch(r'^\/\/ Test: test-kind=.*\n', line):
         anno_line = True
         mul_lines = line.strip()[-1] == ','
-    return {'is_annotation_line' : anno_line, 'mul_annotation_lines': mul_lines}
+    return {'is_annotation_line': anno_line, 'mul_annotation_lines': mul_lines}
 
 
 def get_full_annotation(it, annotation_start):
@@ -122,7 +129,7 @@ class Test:
         for entry in entries:
             key, value = entry.strip().split('=')
             if key == 'test-kind':
-                check(value in ['api', 'scenario', 'internal', 'mock'], err)
+                check(value in ['api', 'scenario', 'internal', 'mock', 'regression'], err)
                 self.kind = value
             elif key == 'abc-kind':
                 check(value in [ARKTS1, ARKTS2, JS, TS, NO_ABC], err)
@@ -293,6 +300,19 @@ def determine_doclet(it, line):
         line = next_line(it)
 
 
+def check_oop(sign):
+    if ' = default' in sign or ' = delete' in sign:
+        if any([x in sign for x in [' = default', ' = delete', ' : ', 'operator']]):
+            return False
+    return True
+
+
+def cut_cpp_sign(sign):
+    name_with_return = re.search(r'[^\s] [^\(]+', sign.strip()).group(0)
+    name = re.search(r' [^\s]([\w\d]+)$', name_with_return).group(0).strip()
+    return re.search(r'[^\**\&*]([\w\d]+)$', name).group(0).strip()
+
+
 def collect_api(path, extension):
     apis = {}
     domain = ''
@@ -329,14 +349,12 @@ def collect_api(path, extension):
                 domain = match.group(1)
 
         elif (re.match(PUBLIC_API_PATTERN, signature)) and accsess == "public:":
-            if re.match(API_PATTERN, signature.strip()):
+            if re.match(API_PATTERN, signature.strip()) and check_oop(signature):
                 api_name = re.search(r'^[\w,\d,_, ,*]+\(\*([\w,\d,_]+)\)\(.*', signature.strip()).group(1)
-            elif 'operator' not in signature:
-                api_name = re.search(r'(.+) [\&\*]*(.+)\(', signature, re.IGNORECASE)
-                api_name = api_name.group(2) if api_name else ''
+            elif re.match(CPP_API_PATTERN, signature.strip()) and check_oop(signature):
+                api_name = cut_cpp_sign(signature)
             else:
                 continue
-
             apis[f'{domain}::{api_name}'] = API(api_name, domain, signature, extension)
         else:
             continue
@@ -373,12 +391,13 @@ def print_cppapi_stat(tests_pathes, api, expected=0):
     mock_tests_apis = list(dict.fromkeys(t.api for t in api_tests_kind("mock")))
     api_tests_apis = list(dict.fromkeys(t.api for t in api_tests_kind("api")))
     internal_tests = list(filter(lambda t: t.kind == 'internal', tests))
+    regression_tests = list(filter(lambda t: t.kind == 'regression', tests))
 
     csv = ''
     for i in range(max(len(mock_tests_apis), len(api_tests_apis))):
         csv += f'{get_element(mock_tests_apis, i)},{get_element(api_tests_apis, i)}\n'
     with os.fdopen(os.open(os.path.join(libabckit_dir, 'scripts/abckit_cppapi_status.csv'),
-                            os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o755), 'w+') as f:
+                           os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o755), 'w+') as f:
         f.write(('mock_tests_apis,api_tests_apis\n'))
         f.write(csv)
 
@@ -392,14 +411,16 @@ def print_cppapi_stat(tests_pathes, api, expected=0):
                   len(api_tests_apis), expected)
     logging.debug('Total API\'S with mock tests:                            %s/%s',
                   len(mock_tests_apis), expected)
-    logging.debug('Total internal tests:                                   %s',
+    logging.debug('Total internal tests:                                     %s',
                   len(internal_tests))
+    logging.debug('Total regression tests:                                   %s',
+                  len(regression_tests))
     logging.debug('ArkTS1/ArkTS2/JS/TS scenario tests:                     %s/%s/%s/%s',
                   scenario_lang(ARKTS1), scenario_lang(ARKTS2), scenario_lang(JS), scenario_lang(TS))
     logging.debug(f'\n------------------------------------------------------------------\n')
 
 
-def print_capi_stat(tests_pathes, api) :
+def print_capi_stat(tests_pathes, api):
     csv = ''
     tests = []
     for p in tests_pathes:
@@ -414,10 +435,10 @@ def print_capi_stat(tests_pathes, api) :
         )
 
     with os.fdopen(os.open(os.path.join(libabckit_dir, 'scripts/abckit_capi_status.csv'),
-                            os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o755), 'w+') as f:
+                           os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o755), 'w+') as f:
         f.write(('api,extension,dynamic_positive_tests,static_positive_tests,'
-        'arkts1_tests,arkts2_tests,js_tests,ts_tests,no_abc_tests,positive_tests,'
-        'negative_tests,negative_nullptr_tests,negative_ctx_tests,other_tests\n'))
+                 'arkts1_tests,arkts2_tests,js_tests,ts_tests,no_abc_tests,positive_tests,'
+                 'negative_tests,negative_nullptr_tests,negative_ctx_tests,other_tests\n'))
         f.write(csv)
 
     def api_test_category(name):

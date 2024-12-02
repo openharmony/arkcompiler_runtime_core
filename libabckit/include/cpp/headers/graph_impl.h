@@ -16,19 +16,32 @@
 #ifndef CPP_ABCKIT_GRAPH_IMPL_H
 #define CPP_ABCKIT_GRAPH_IMPL_H
 
+#include <cstdint>
 #include "./graph.h"
 #include "./dynamic_isa.h"
+#include "basic_block.h"
+#include "config.h"
+
+// NOLINTBEGIN(performance-unnecessary-value-param)
 
 namespace abckit {
 
-inline DynamicIsa Graph::DynIsa()
+inline DynamicIsa Graph::DynIsa() const
 {
     return DynamicIsa(*this);
 }
 
-inline StaticIsa Graph::StatIsa()
+inline StaticIsa Graph::StatIsa() const
 {
     return StaticIsa(*this);
+}
+
+inline AbckitIsaType Graph::GetIsa() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitIsaType type = conf->cGapi_->gGetIsa(GetResource());
+    CheckError(conf);
+    return type;
 }
 
 inline BasicBlock Graph::GetStartBb() const
@@ -45,6 +58,14 @@ inline BasicBlock Graph::GetEndBb() const
     AbckitBasicBlock *bb = conf->cGapi_->gGetEndBasicBlock(GetResource());
     CheckError(conf);
     return BasicBlock(bb, conf, this);
+}
+
+inline uint32_t Graph::GetNumBbs() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    uint32_t bbs = conf->cGapi_->gGetNumberOfBasicBlocks(GetResource());
+    CheckError(conf);
+    return bbs;
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
@@ -65,7 +86,7 @@ inline std::vector<BasicBlock> Graph::GetBlocksRPO() const
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
-inline void Graph::EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)> &cb) const
+inline const Graph &Graph::EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)> &cb) const
 {
     Payload<const std::function<void(BasicBlock)> &> payload {cb, GetApiConfig(), this};
 
@@ -75,11 +96,71 @@ inline void Graph::EnumerateBasicBlocksRpo(const std::function<bool(BasicBlock)>
         return true;
     });
     CheckError(GetApiConfig());
+    return *this;
 }
 
-inline Instruction Graph::CreateConstantI32(int32_t val) const
+inline BasicBlock Graph::GetBasicBlock(uint32_t bbId) const
 {
-    AbckitInst *inst = GetApiConfig()->cGapi_->gCreateConstantI32(GetResource(), val);
+    AbckitBasicBlock *bb = GetApiConfig()->cGapi_->gGetBasicBlock(GetResource(), bbId);
+    CheckError(GetApiConfig());
+    return BasicBlock(bb, GetApiConfig(), this);
+}
+
+inline Instruction Graph::GetParameter(uint32_t index) const
+{
+    AbckitInst *inst = GetApiConfig()->cGapi_->gGetParameter(GetResource(), index);
+    CheckError(GetApiConfig());
+    return Instruction(inst, GetApiConfig(), this);
+}
+
+inline uint32_t Graph::GetNumberOfParameters() const
+{
+    uint32_t number = GetApiConfig()->cGapi_->gGetNumberOfParameters(GetResource());
+    CheckError(GetApiConfig());
+    return number;
+}
+
+inline const Graph &Graph::InsertTryCatch(BasicBlock tryBegin, BasicBlock tryEnd, BasicBlock catchBegin,
+                                          BasicBlock catchEnd) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    conf->cGapi_->gInsertTryCatch(tryBegin.GetView(), tryEnd.GetView(), catchBegin.GetView(), catchEnd.GetView());
+    CheckError(conf);
+    return *this;
+}
+
+inline const Graph &Graph::Dump(int32_t fd) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    conf->cGapi_->gDump(GetResource(), fd);
+    CheckError(conf);
+    return *this;
+}
+
+inline Instruction Graph::FindOrCreateConstantI32(int32_t val) const
+{
+    AbckitInst *inst = GetApiConfig()->cGapi_->gFindOrCreateConstantI32(GetResource(), val);
+    CheckError(GetApiConfig());
+    return Instruction(inst, GetApiConfig(), this);
+}
+
+inline Instruction Graph::FindOrCreateConstantI64(int64_t val) const
+{
+    AbckitInst *inst = GetApiConfig()->cGapi_->gFindOrCreateConstantI64(GetResource(), val);
+    CheckError(GetApiConfig());
+    return Instruction(inst, GetApiConfig(), this);
+}
+
+inline Instruction Graph::FindOrCreateConstantU64(uint64_t val) const
+{
+    AbckitInst *inst = GetApiConfig()->cGapi_->gFindOrCreateConstantU64(GetResource(), val);
+    CheckError(GetApiConfig());
+    return Instruction(inst, GetApiConfig(), this);
+}
+
+inline Instruction Graph::FindOrCreateConstantF64(double val) const
+{
+    AbckitInst *inst = GetApiConfig()->cGapi_->gFindOrCreateConstantF64(GetResource(), val);
     CheckError(GetApiConfig());
     return Instruction(inst, GetApiConfig(), this);
 }
@@ -92,13 +173,16 @@ inline BasicBlock Graph::CreateEmptyBb() const
     return BasicBlock(bb, conf, this);
 }
 
-inline void Graph::RunPassRemoveUnreachableBlocks() const
+inline const Graph &Graph::RunPassRemoveUnreachableBlocks() const
 {
     const ApiConfig *conf = GetApiConfig();
     conf->cGapi_->gRunPassRemoveUnreachableBlocks(GetResource());
     CheckError(conf);
+    return *this;
 }
 
 }  // namespace abckit
+
+// NOLINTEND(performance-unnecessary-value-param)
 
 #endif  // CPP_ABCKIT_GRAPH_IMPL_H

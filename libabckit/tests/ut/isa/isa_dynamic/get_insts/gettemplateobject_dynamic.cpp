@@ -43,14 +43,14 @@ auto g_icreateGettemplateobject1Lambda = [](AbckitFile *file, AbckitCoreFunction
     auto *createemptyarray2 = g_dynG->iCreateCreateemptyarray(graph);
     auto *helloStr = g_implM->createString(file, "Hello ");
     auto *loadStringHello = g_dynG->iCreateLoadString(graph, helloStr);
-    auto *const0 = g_implG->gCreateConstantU64(graph, 0);
+    auto *const0 = g_implG->gFindOrCreateConstantU64(graph, 0);
     auto *definefieldbyvalue1 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadStringHello, const0, createemptyarray1);
     auto *definefieldbyvalue2 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadStringHello, const0, createemptyarray2);
     auto *str2 = g_implM->createString(file, "!");
     auto *loadString2 = g_dynG->iCreateLoadString(graph, str2);
-    auto *const1 = g_implG->gCreateConstantU64(graph, 1);
+    auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 1);
     auto *definefieldbyvalue3 =
         g_dynG->iCreateCallruntimeDefinefieldbyvalue(graph, loadString2, const1, createemptyarray1);
     auto *definefieldbyvalue4 =

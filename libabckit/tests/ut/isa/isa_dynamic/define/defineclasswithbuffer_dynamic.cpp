@@ -192,7 +192,7 @@ TEST_F(LibAbcKitCreateDynDefineClass, IcreateDefineclasswithbuffer_4)
             auto *newobj = g_dynG->iCreateNewobjrange(graph, 1, instDefine);
             auto *stringMethod = g_implM->createString(file, "newClassMethod2");
             auto *ldobjbyname2 = g_dynG->iCreateLdobjbyname(graph, newobj, stringMethod);
-            auto *const1 = g_implG->gCreateConstantU64(graph, 5);
+            auto *const1 = g_implG->gFindOrCreateConstantU64(graph, 5);
             auto *callthis = g_dynG->iCreateCallthis1(graph, ldobjbyname2, newobj, const1);
             g_implG->iInsertBefore(instDefine, ldundefined);
             g_implG->iInsertBefore(ldobjbyname, ldundefined);

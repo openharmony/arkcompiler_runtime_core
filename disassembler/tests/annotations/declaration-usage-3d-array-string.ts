@@ -17,8 +17,8 @@
     a: string[][][];
 }
 
-@#Anno({a: [[["Hello", "world", "!"]]]})
+@__$$ETS_ANNOTATION$$__Anno({a: [[["Hello", "world", "!"]]]})
 class A {
-    @#Anno({a: [[new Array<string>()]]})
+    @__$$ETS_ANNOTATION$$__Anno({a: [[new Array<string>()]]})
     foo() {}
 }

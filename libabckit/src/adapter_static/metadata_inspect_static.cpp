@@ -99,7 +99,7 @@ AbckitString *FunctionGetNameStatic(AbckitCoreFunction *function)
     return CreateStringStatic(function->owningModule->file, croppedName.data());
 }
 
-bool SetMethodOffset(pandasm::Function *func, pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
+bool GetMethodOffset(pandasm::Function *func, pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
                      uint32_t *methodOffset)
 {
     auto funcFullName = pandasm::MangleFunctionName(func->name, func->params, func->returnType);
@@ -110,10 +110,10 @@ bool SetMethodOffset(pandasm::Function *func, pandasm::AsmEmitter::PandaFileToPa
     }
     if (*methodOffset == 0) {
         LIBABCKIT_LOG(DEBUG) << "methodOffset == 0\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
-        return true;
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
+        return false;
     }
-    return false;
+    return true;
 }
 
 void RemoveInsts(compiler::Graph *graphImpl)
@@ -145,7 +145,6 @@ static void DeleteGraphArgs(ArenaAllocator *allocator, ArenaAllocator *localAllo
     delete localAllocator;
     delete adapter;
     delete irInterface;
-    statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
 }
 
 static AbckitGraph *CreateGraph(AbckitCoreFunction *function, AbckitIrInterface *irInterface,
@@ -181,13 +180,13 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
     auto maps = std::make_unique<pandasm::AsmEmitter::PandaFileToPandaAsmMaps>();
     auto pf = pandasm::AsmEmitter::Emit(*program, maps.get()).release();
     if (pf == nullptr) {
-        LIBABCKIT_LOG(DEBUG) << "pf == nullptr\n";
-        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
+        LIBABCKIT_LOG(DEBUG) << "FAILURE: " << pandasm::AsmEmitter::GetLastError() << '\n';
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return nullptr;
     }
 
     uint32_t methodOffset = 0;
-    if (SetMethodOffset(func, maps.get(), &methodOffset)) {
+    if (!GetMethodOffset(func, maps.get(), &methodOffset)) {
         return nullptr;
     }
 
@@ -203,8 +202,8 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
         compiler::Graph::GraphArgs {allocator, localAllocator, Arch::NONE, methodPtr, adapter}, nullptr, false, false,
         true);
     if (graphImpl == nullptr) {
-        LIBABCKIT_LOG(DEBUG) << "graph == nullptr\n";
         DeleteGraphArgs(allocator, localAllocator, adapter, irInterface);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_MEMORY_ALLOCATION);
         return nullptr;
     }
     graphImpl->SetLanguage(SourceLanguage::ETS);
@@ -215,8 +214,8 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
 
     bool irBuilderRes = graphImpl->RunPass<ark::compiler::IrBuilder>();
     if (!irBuilderRes) {
-        LIBABCKIT_LOG(DEBUG) << "!irBuilderRes\n";
         DeleteGraphArgs(allocator, localAllocator, adapter, irInterface);
+        statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_INTERNAL_ERROR);
         return nullptr;
     }
 
@@ -439,7 +438,7 @@ AbckitLiteralTag LiteralGetTagStatic(AbckitLiteral *lit)
 AbckitType *ValueGetTypeStatic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetStaticImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     AbckitTypeId id;
     switch (pVal->GetType()) {
         case pandasm::Value::Type::U1:
@@ -474,11 +473,11 @@ bool ValueGetU1Static(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     if (ValueGetTypeStatic(value)->id != ABCKIT_TYPE_ID_U1) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return false;
     }
 
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetStaticImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     return pVal->GetValue<bool>();
 }
 
@@ -486,11 +485,11 @@ double ValueGetDoubleStatic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     if (ValueGetTypeStatic(value)->id != ABCKIT_TYPE_ID_F64) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return 0.0;
     }
 
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetStaticImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     return pVal->GetValue<double>();
 }
 
@@ -498,11 +497,11 @@ AbckitString *ValueGetStringStatic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     if (ValueGetTypeStatic(value)->id != ABCKIT_TYPE_ID_STRING) {
-        statuses::SetLastError(ABCKIT_STATUS_TODO);
+        statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
 
-    auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetStaticImpl());
+    auto *pVal = reinterpret_cast<pandasm::ScalarValue *>(value->val.get());
     auto valImpl = pVal->GetValue<std::string>();
     return CreateStringStatic(value->file, valImpl.data());
 }
@@ -510,7 +509,7 @@ AbckitString *ValueGetStringStatic(AbckitValue *value)
 AbckitLiteralArray *ArrayValueGetLiteralArrayStatic(AbckitValue * /*value*/)
 {
     LIBABCKIT_LOG_FUNC;
-    statuses::SetLastError(ABCKIT_STATUS_TODO);
+    statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
     return nullptr;
 }
 
