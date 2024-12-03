@@ -113,7 +113,7 @@ class LlvmCov:
 
     def make_profdata_list_file(self) -> None:
         results = self.do_find(self.coverage_dir.profdata_dir, '*.profdata')
-        with os.fdopen(os.open(self.coverage_dir.profdata_files_list_file, os.O_APPEND | os.O_CREAT, 0o755),
+        with os.fdopen(os.open(self.coverage_dir.profdata_files_list_file, os.O_WRONLY | os.O_CREAT, 0o755),
                        "a", encoding="utf-8") as the_file:
             for i in results:
                 the_file.write(str(i) + '\n')

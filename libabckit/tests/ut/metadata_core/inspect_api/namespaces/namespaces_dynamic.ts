@@ -14,17 +14,17 @@
  */
 namespace N1 {
     namespace N2 {
-        function F2() {}
+        function f2(): void {}
         class C2 {
-            M2() {}
+            M2(): void {}
         }
     }
     class C1 {
-        M1() {}
+        M1(): void {}
     }
 
-    function F1() {}
+    function f1(): void {}
 }
 
-function F0() {}
+function f0(): void {}
 class C0 {}

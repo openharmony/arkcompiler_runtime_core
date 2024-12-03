@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
+#include "session_manager.h"
+
 #include <string>
 
-#include "session_manager.h"
-#include "runtime_options.h"
+#include "gtest/gtest.h"
+
 #include "runtime.h"
+#include "runtime_options.h"
 
 // NOLINTBEGIN
 

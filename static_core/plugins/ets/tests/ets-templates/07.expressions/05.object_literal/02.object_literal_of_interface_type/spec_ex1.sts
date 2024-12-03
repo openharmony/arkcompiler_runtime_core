@@ -21,7 +21,7 @@ tags: [compile-only]
 ---*/
 
 interface Person {
-    name: string = ""
-    age: number = 0
+    name: string
+    age: number
 }
 let b: Person = {name: "Bob", age: 25}

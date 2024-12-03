@@ -250,7 +250,8 @@ ohos_source_set("libarkruntime_set_static") {
     "timing.cpp",
     "tooling/debug_inf.cpp",
     "tooling/debugger.cpp",
-    "tooling/default_inspector_extension.cpp",
+    "tooling/evaluation/expression_loader.cpp",
+    "tooling/pt_default_lang_extension.cpp",
     "tooling/pt_thread.cpp",
     "tooling/sampler/lock_free_queue.cpp",
     "tooling/sampler/sample_writer.cpp",
@@ -332,6 +333,10 @@ ohos_source_set("libarkruntime_set_static") {
     ]
   }
 
+  if (defined(enable_perf_counters)) {
+    sources += [ "tooling/perf_counter.cpp" ]
+  }
+
   if (is_mob) {
     sources += [
       "$ark_root/platforms/mobile/runtime/thread.cpp",
@@ -380,6 +385,7 @@ ohos_source_set("libarkruntime_set_static") {
     "$ark_root/libpandafile:libarkfile_type_gen_h",
     "$ark_root/libpandafile:libarktsfile",
     "$ark_root/libziparchive:libarktsziparchive",
+    "$ark_root/platforms/target_defaults:arktarget_options",
     "$ark_root/runtime/asm_defines:asm_defines_generator",
   ]
 
@@ -681,7 +687,7 @@ ark_gen("arkruntime_gen_entrypoints_compiler_checksum") {
 }
 
 ark_gen("arkruntime_gen_intrinsics") {
-  if (abckit_enable && current_toolchain == host_toolchain) {
+  if (abckit_enable) {
     data = [ "$target_gen_dir/abckit_intrinsics.yaml" ]
   } else {
     data = [ "$target_gen_dir/intrinsics.yaml" ]
@@ -697,7 +703,7 @@ ark_gen("arkruntime_gen_intrinsics") {
   sources = "templates"
   destination = "$target_gen_dir"
   extra_dependencies = [ ":arkruntime_gen_intrinsics_yaml" ]
-  if (abckit_enable && current_toolchain == host_toolchain) {
+  if (abckit_enable) {
     extra_dependencies +=
         [ "$ark_root/../libabckit/src:abckit_concat_intrinsics_yaml" ]
   }

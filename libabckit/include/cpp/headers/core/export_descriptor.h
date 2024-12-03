@@ -16,41 +16,84 @@
 #ifndef CPP_ABCKIT_CORE_EXPORT_DESCRIPTOR_H
 #define CPP_ABCKIT_CORE_EXPORT_DESCRIPTOR_H
 
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "../base_classes.h"
 
 #include <string_view>
-#include <vector>
 
 namespace abckit::core {
 
-class ExportDescriptor : public View<AbckitCoreExportDescriptor *> {
-    // To access private constructor.
+/**
+ * @brief ExportDescriptor
+ */
+class ExportDescriptor : public ViewInResource<AbckitCoreExportDescriptor *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
     friend class abckit::core::Module;
+    /// @brief to access private constructor
     friend class abckit::arkts::Module;
+    /// @brief abckit::DefaultHash<ExportDescriptor>
+    friend class abckit::DefaultHash<ExportDescriptor>;
+
+protected:
+    /// @brief Core API View type
+    using CoreViewT = ExportDescriptor;
 
 public:
+    /**
+     * @brief Construct a new Export Descriptor object
+     * @param other
+     */
     ExportDescriptor(const ExportDescriptor &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ExportDescriptor&
+     */
     ExportDescriptor &operator=(const ExportDescriptor &other) = default;
+
+    /**
+     * @brief Construct a new Export Descriptor object
+     * @param other
+     */
     ExportDescriptor(ExportDescriptor &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ExportDescriptor&
+     */
     ExportDescriptor &operator=(ExportDescriptor &&other) = default;
+
+    /**
+     * @brief Destroy the Export Descriptor object
+     */
     ~ExportDescriptor() override = default;
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName() const;
 
     // Core API's.
     // ...
 
 private:
-    ExportDescriptor(AbckitCoreExportDescriptor *module, const ApiConfig *conf) : View(module), conf_(conf) {};
+    ExportDescriptor(AbckitCoreExportDescriptor *module, const ApiConfig *conf, const File *file)
+        : ViewInResource(module), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

@@ -82,7 +82,7 @@ enum ConditionCode {
 ConditionCode GetInverseConditionCode(ConditionCode code);
 ConditionCode InverseSignednessConditionCode(ConditionCode code);
 bool IsSignedConditionCode(ConditionCode code);
-ConditionCode SwapOperandsConditionCode(ConditionCode code);
+PANDA_PUBLIC_API ConditionCode SwapOperandsConditionCode(ConditionCode code);
 
 template <typename T>
 bool Compare(ConditionCode cc, T lhs, T rhs)
@@ -426,7 +426,7 @@ public:
     NO_COPY_SEMANTIC(User);
     NO_MOVE_SEMANTIC(User);
 
-    Inst *GetInst();
+    PANDA_PUBLIC_API Inst *GetInst();
     const Inst *GetInst() const
     {
         return const_cast<User *>(this)->GetInst();
@@ -651,10 +651,10 @@ public:
     }
 
     /// Append new input (and user accordingly)
-    unsigned Append(Inst *inst);
+    PANDA_PUBLIC_API unsigned Append(Inst *inst);
 
     /// Remove input and user with index `index`.
-    void Remove(unsigned index);
+    PANDA_PUBLIC_API void Remove(unsigned index);
 
     /// Reallocate inputs/users storage to a new one with specified capacity.
     void Reallocate(size_t newCapacity = 0);
@@ -724,7 +724,7 @@ protected:
 };
 
 /// Base instruction class
-class Inst : public MarkerSet, public InstBase {
+class PANDA_PUBLIC_API Inst : public MarkerSet, public InstBase {
 public:
     // Used for SFINAE for inputs deduction during CreateInst-calls
     template <typename... Ds>
@@ -1099,7 +1099,7 @@ public:
         return GetFlag(inst_flags::NO_NULLPTR);
     }
 
-    virtual bool IsPropagateLiveness() const;
+    PANDA_PUBLIC_API virtual bool IsPropagateLiveness() const;
 
     // Returns true if the instruction doesn't have side effects(call runtime, throw e.t.c.)
     virtual bool IsSafeInst() const
@@ -1191,7 +1191,7 @@ public:
         SetInput(GetInputsCount() - 1, inst);
     }
 
-    virtual uint32_t GetInliningDepth() const;
+    PANDA_PUBLIC_API virtual uint32_t GetInliningDepth() const;
 
     bool IsZeroRegInst() const;
 
@@ -1199,7 +1199,7 @@ public:
     bool IsMovableObject();
 
     /// Return instruction clone
-    virtual Inst *Clone(const Graph *targetGraph) const;
+    PANDA_PUBLIC_API virtual Inst *Clone(const Graph *targetGraph) const;
 
     uintptr_t GetFlagsMask() const
     {
@@ -1248,7 +1248,7 @@ public:
         return GetFlag(inst_flags::TERMINATOR);
     }
 
-    void InsertBefore(Inst *inst);
+    PANDA_PUBLIC_API void InsertBefore(Inst *inst);
     void InsertAfter(Inst *inst);
 
     /// Return true if instruction has dynamic operands storage.
@@ -1609,8 +1609,8 @@ public:
         vn_ = vn;
     }
     void Dump(std::ostream *out, bool newLine = true) const;
-    virtual bool DumpInputs(std::ostream *out) const;
-    virtual void DumpOpcode(std::ostream *out) const;
+    PANDA_PUBLIC_API virtual bool DumpInputs(std::ostream *out) const;
+    PANDA_PUBLIC_API virtual void DumpOpcode(std::ostream *out) const;
     void DumpBytecode(std::ostream *out) const;
 
 #ifdef PANDA_COMPILER_DEBUG_INFO
@@ -1643,7 +1643,7 @@ public:
 
     virtual Register GetSrcReg([[maybe_unused]] unsigned index) const
     {
-        return INVALID_REG;
+        return GetInvalidReg();
     }
 
     User *GetFirstUser() const
@@ -1771,7 +1771,7 @@ private:
     Opcode opcode_ {Opcode::INVALID};
 
     // Destination register type - defined in FieldType
-    Register dstReg_ {INVALID_REG};
+    Register dstReg_ {GetInvalidReg()};
 };
 
 /**
@@ -2421,7 +2421,7 @@ public:
         return tmpLocation_;
     }
 
-    Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 
 private:
     template <typename T, std::size_t... IS>
@@ -2431,7 +2431,7 @@ private:
     }
 
 private:
-    std::array<Register, N> srcRegs_ = CreateArray(INVALID_REG, std::make_index_sequence<INPUT_COUNT>());
+    std::array<Register, N> srcRegs_ = CreateArray(GetInvalidReg(), std::make_index_sequence<INPUT_COUNT>());
     Location tmpLocation_ {};
 };
 
@@ -2510,7 +2510,7 @@ private:
 };
 
 /// Unary operation instruction
-class UnaryOperation : public FixedInputsInst<1> {
+class PANDA_PUBLIC_API UnaryOperation : public FixedInputsInst<1> {
 public:
     using FixedInputsInst::FixedInputsInst;
 
@@ -2528,7 +2528,7 @@ public:
         return true;
     }
 
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     Inst *Evaluate();
 };
@@ -2579,7 +2579,7 @@ public:
 
 /// Binary operation instruction with c immidiate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class BinaryImmOperation : public FixedInputsInst<1>, public ImmediateMixin {
+class PANDA_PUBLIC_API BinaryImmOperation : public FixedInputsInst<1>, public ImmediateMixin {
 public:
     using FixedInputsInst::FixedInputsInst;
 
@@ -2602,8 +2602,8 @@ public:
         return GetType();
     }
 
-    void SetVnObject(VnObject *vnObj) override;
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     bool IsSafeInst() const override
     {
@@ -2625,7 +2625,9 @@ public:
 
 /// Unary operation that shifts its own operand prior the application.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class UnaryShiftedRegisterOperation : public FixedInputsInst<1>, public ImmediateMixin, public ShiftTypeMixin {
+class PANDA_PUBLIC_API UnaryShiftedRegisterOperation : public FixedInputsInst<1>,
+                                                       public ImmediateMixin,
+                                                       public ShiftTypeMixin {
 public:
     using FixedInputsInst::FixedInputsInst;
 
@@ -2640,14 +2642,16 @@ public:
         return GetType();
     }
 
-    void SetVnObject(VnObject *vnObj) override;
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
     Inst *Clone(const Graph *targetGraph) const override;
 };
 
 /// Binary operation that shifts its second operand prior the application.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class BinaryShiftedRegisterOperation : public FixedInputsInst<2U>, public ImmediateMixin, public ShiftTypeMixin {
+class PANDA_PUBLIC_API BinaryShiftedRegisterOperation : public FixedInputsInst<2U>,
+                                                        public ImmediateMixin,
+                                                        public ShiftTypeMixin {
 public:
     using FixedInputsInst::FixedInputsInst;
 
@@ -2662,9 +2666,9 @@ public:
         return GetType();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
-    Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 };
 
 class SpillFillInst;
@@ -2817,7 +2821,7 @@ private:
 
 /// ResolveStatic
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ResolveStaticInst : public FixedInputsInst1, public MethodDataMixin {
+class PANDA_PUBLIC_API ResolveStaticInst : public FixedInputsInst1, public MethodDataMixin {
 public:
     using Base = FixedInputsInst1;
     using Base::Base;
@@ -2844,12 +2848,12 @@ public:
         return instClone;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// ResolveVirtual
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ResolveVirtualInst : public FixedInputsInst2, public MethodDataMixin {
+class PANDA_PUBLIC_API ResolveVirtualInst : public FixedInputsInst2, public MethodDataMixin {
 public:
     using Base = FixedInputsInst2;
     using Base::Base;
@@ -2883,10 +2887,10 @@ public:
         return instClone;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
-class InitStringInst : public FixedInputsInst2 {
+class PANDA_PUBLIC_API InitStringInst : public FixedInputsInst2 {
 public:
     using Base = FixedInputsInst2;
     using Base::Base;
@@ -2924,7 +2928,7 @@ public:
         return GetField<StringCtorTypeField>();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -2940,7 +2944,7 @@ private:
 
 /// Call instruction
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CallInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public MethodDataMixin {
+class PANDA_PUBLIC_API CallInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public MethodDataMixin {
 public:
     using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
@@ -2968,7 +2972,7 @@ public:
         return (*inputTypes_)[index];
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     void SetCanNativeException(bool isNative)
     {
@@ -2980,7 +2984,7 @@ public:
         return GetField<IsNativeExceptionFlag>();
     }
 
-    Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 
     bool IsRuntimeCall() const override
     {
@@ -2993,7 +2997,7 @@ protected:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CallIndirectInst : public InputTypesMixin<DynamicInputsInst> {
+class PANDA_PUBLIC_API CallIndirectInst : public InputTypesMixin<DynamicInputsInst> {
 public:
     using Base = InputTypesMixin<DynamicInputsInst>;
     using Base::Base;
@@ -3008,7 +3012,7 @@ public:
         return (*inputTypes_)[index];
     }
 
-    Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 };
 
 /// Length methods instruction
@@ -3042,7 +3046,7 @@ public:
 
 /// Compare instruction
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CompareInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
+class PANDA_PUBLIC_API CompareInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
 public:
     using BaseInst = InstWithOperandsType<ConditionMixin<FixedInputsInst2>>;
     using BaseInst::BaseInst;
@@ -3057,8 +3061,8 @@ public:
         SetCc(cc);
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -3140,7 +3144,7 @@ protected:
 };
 
 /// CompareAnyTypeInst instruction
-class CompareAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
+class PANDA_PUBLIC_API CompareAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
@@ -3157,8 +3161,8 @@ public:
         return GetInput(index).GetInst()->GetType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3169,7 +3173,7 @@ public:
 };
 
 /// GetAnyTypeName instruction
-class GetAnyTypeNameInst : public AnyTypeMixin<FixedInputsInst0> {
+class PANDA_PUBLIC_API GetAnyTypeNameInst : public AnyTypeMixin<FixedInputsInst0> {
 public:
     using BaseInst = AnyTypeMixin<FixedInputsInst0>;
     using BaseInst::BaseInst;
@@ -3180,8 +3184,8 @@ public:
         SetAnyType(anyType);
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3192,7 +3196,7 @@ public:
 };
 
 /// CastAnyTypeValueInst instruction
-class CastAnyTypeValueInst : public AnyTypeMixin<FixedInputsInst1> {
+class PANDA_PUBLIC_API CastAnyTypeValueInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
@@ -3214,7 +3218,7 @@ public:
         return AnyBaseTypeToDataType(GetAnyType());
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3226,7 +3230,7 @@ public:
 };
 
 /// CastValueToAnyTypeInst instruction
-class CastValueToAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
+class PANDA_PUBLIC_API CastValueToAnyTypeInst : public AnyTypeMixin<FixedInputsInst1> {
 public:
     using BaseInst = AnyTypeMixin<FixedInputsInst1>;
     using BaseInst::BaseInst;
@@ -3243,7 +3247,7 @@ public:
         return GetInput(index).GetInst()->GetType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3255,7 +3259,7 @@ public:
 };
 
 /// AnyTypeCheckInst instruction
-class AnyTypeCheckInst : public AnyTypeMixin<FixedInputsInst2> {
+class PANDA_PUBLIC_API AnyTypeCheckInst : public AnyTypeMixin<FixedInputsInst2> {
 public:
     using BaseInst = AnyTypeMixin<FixedInputsInst2>;
     using BaseInst::BaseInst;
@@ -3271,7 +3275,7 @@ public:
         return (index == 0) ? DataType::ANY : DataType::NO_TYPE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -3289,7 +3293,7 @@ enum class HclassChecks {
     IS_FUNCTION,
     IS_NOT_CLASS_CONSTRUCTOR,
 };
-class HclassCheckInst : public AnyTypeMixin<FixedInputsInst2> {
+class PANDA_PUBLIC_API HclassCheckInst : public AnyTypeMixin<FixedInputsInst2> {
 public:
     using BaseInst = AnyTypeMixin<FixedInputsInst2>;
     using BaseInst::BaseInst;
@@ -3325,7 +3329,7 @@ public:
         return GetField<CheckFunctionIsNotClassConstructor>();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     void ExtendFlags(Inst *inst);
 
@@ -3349,7 +3353,7 @@ protected:
  * Available types: INT64, FLOAT32, FLOAT64, ANY. All integer types are stored as INT64 value.
  * Once type of constant is set, it can't be changed anymore.
  */
-class ConstantInst : public FixedInputsInst<0> {
+class PANDA_PUBLIC_API ConstantInst : public FixedInputsInst<0> {
 public:
     using FixedInputsInst::FixedInputsInst;
 
@@ -3517,20 +3521,20 @@ public:
 
     Location GetDstLocation() const override
     {
-        if (GetImmTableSlot() != INVALID_IMM_TABLE_SLOT) {
+        if (GetImmTableSlot() != GetInvalidImmTableSlot()) {
             return Location::MakeConstant(GetImmTableSlot());
         }
         return Inst::GetDstLocation();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 
 private:
     uint64_t value_ {0};
     ConstantInst *nextConst_ {nullptr};
-    ImmTableSlot immSlot_ {INVALID_IMM_TABLE_SLOT};
+    ImmTableSlot immSlot_ {GetInvalidImmTableSlot()};
 };
 
 // Type describing the purpose of the SpillFillInst.
@@ -3543,7 +3547,7 @@ enum SpillFillType {
     SPLIT_MOVE,
 };
 
-class SpillFillInst : public FixedInputsInst0 {
+class PANDA_PUBLIC_API SpillFillInst : public FixedInputsInst0 {
 public:
     explicit SpillFillInst(ArenaAllocator *allocator, Opcode opcode, SpillFillType type = UNKNOWN)
         : FixedInputsInst0(opcode), spillFills_(allocator->Adapter()), sfType_(type)
@@ -3631,7 +3635,7 @@ public:
         sfType_ = type;
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
 #ifndef NDEBUG
     Inst *Clone(const Graph *targetGraph) const override
@@ -3651,7 +3655,7 @@ private:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ParameterInst : public FixedInputsInst<0>, public LocationDataMixin {
+class PANDA_PUBLIC_API ParameterInst : public FixedInputsInst<0>, public LocationDataMixin {
 public:
     using FixedInputsInst::FixedInputsInst;
     static constexpr uint16_t DYNAMIC_NUM_ARGS = std::numeric_limits<uint16_t>::max();
@@ -3679,9 +3683,9 @@ public:
     {
         argRefNumber_ = argRefNumber;
     }
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 
 private:
     uint16_t argNumber_ {0};
@@ -3699,7 +3703,7 @@ inline bool IsZeroConstantOrNullPtr(const Inst *inst)
 }
 
 /// Phi instruction
-class PhiInst : public AnyTypeMixin<DynamicInputsInst> {
+class PANDA_PUBLIC_API PhiInst : public AnyTypeMixin<DynamicInputsInst> {
 public:
     using BaseInst = AnyTypeMixin<DynamicInputsInst>;
     using BaseInst::BaseInst;
@@ -3748,8 +3752,8 @@ public:
     /// Get input instruction corresponding to the given basic block, can't be null.
     Inst *GetPhiInput(BasicBlock *bb);
     Inst *GetPhiDataflowInput(BasicBlock *bb);
-    bool DumpInputs(std::ostream *out) const override;
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     // Get index of the given block in phi inputs
     size_t GetPredBlockIndex(const BasicBlock *block) const;
@@ -3776,7 +3780,7 @@ struct SaveStateImm {
  * Aims to save pbc registers before calling something that can raise exception
  */
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class SaveStateInst : public DynamicInputsInst {
+class PANDA_PUBLIC_API SaveStateInst : public DynamicInputsInst {
 public:
     using DynamicInputsInst::DynamicInputsInst;
 
@@ -3788,7 +3792,7 @@ public:
     {
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     void AppendBridge(Inst *inst)
     {
@@ -3962,7 +3966,7 @@ private:
 };
 
 /// Load value from array or string
-class LoadInst : public ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>> {
+class PANDA_PUBLIC_API LoadInst : public ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>> {
 public:
     using Base = ArrayInstMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
@@ -4134,7 +4138,7 @@ public:
     }
 
     // StoreArray call barriers twice,so we need to save input register for second call
-    bool IsPropagateLiveness() const override
+    PANDA_PUBLIC_API bool IsPropagateLiveness() const override
     {
         return GetType() == DataType::REFERENCE;
     }
@@ -4142,7 +4146,8 @@ public:
 
 /// Load value from array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadInstI : public VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>, public ImmediateMixin {
+class PANDA_PUBLIC_API LoadInstI : public VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>,
+                                   public ImmediateMixin {
 public:
     using Base = VolatileMixin<ArrayInstMixin<NeedBarrierMixin<FixedInputsInst1>>>;
     using Base::Base;
@@ -4178,7 +4183,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4197,7 +4202,7 @@ public:
 
 /// Load value from pointer with offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public ImmediateMixin {
+class PANDA_PUBLIC_API LoadMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public ImmediateMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
@@ -4228,7 +4233,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4246,7 +4251,7 @@ public:
 
 /// Store value into array element, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
@@ -4290,7 +4295,7 @@ public:
         return clone;
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     // StoreArrayI call barriers twice,so we need to save input register for second call
     bool IsPropagateLiveness() const override
@@ -4301,7 +4306,7 @@ public:
 
 /// Store value into pointer by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreMemInstI : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public ImmediateMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
@@ -4337,7 +4342,7 @@ public:
         }
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4350,7 +4355,7 @@ public:
 
 /// Bounds check, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class BoundsCheckInstI : public ArrayInstMixin<FixedInputsInst<2U>>, public ImmediateMixin {
+class PANDA_PUBLIC_API BoundsCheckInstI : public ArrayInstMixin<FixedInputsInst<2U>>, public ImmediateMixin {
 public:
     using Base = ArrayInstMixin<FixedInputsInst<2U>>;
     using Base::Base;
@@ -4365,7 +4370,7 @@ public:
         SetIsArray(isArray);
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4439,14 +4444,14 @@ private:
 
 /// Return immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ReturnInstI : public FixedInputsInst<0>, public ImmediateMixin {
+class PANDA_PUBLIC_API ReturnInstI : public FixedInputsInst<0>, public ImmediateMixin {
 public:
     using FixedInputsInst::FixedInputsInst;
 
     ReturnInstI(Opcode opcode, uint64_t imm) : FixedInputsInst(opcode), ImmediateMixin(imm) {}
     ReturnInstI(Inst::Initializer t, uint64_t imm) : FixedInputsInst(std::move(t)), ImmediateMixin(imm) {}
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4476,7 +4481,7 @@ private:
 };
 
 /// Monitor instruction
-class MonitorInst : public FixedInputsInst2 {
+class PANDA_PUBLIC_API MonitorInst : public FixedInputsInst2 {
 public:
     using Base = FixedInputsInst2;
     using Base::Base;
@@ -4510,7 +4515,7 @@ public:
         return DataType::REFERENCE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
 protected:
     using Exit = LastField::NextFlag;
@@ -4521,7 +4526,7 @@ protected:
 #include "intrinsics_flags.inl"
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public TypeIdMixin {
+class PANDA_PUBLIC_API IntrinsicInst : public InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>, public TypeIdMixin {
 public:
     using Base = InlinedInstMixin<InputTypesMixin<DynamicInputsInst>>;
     using Base::Base;
@@ -4636,7 +4641,7 @@ public:
         SetField<MethodFirstInput>(true);
     }
 
-    Inst *Clone(const Graph *targetGraph) const override;
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override;
 
     bool CanBeInlined()
     {
@@ -4655,8 +4660,8 @@ public:
 
     uint32_t GetTypeId() = delete;  // only method field of TypeIdMixin is used
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     void DumpImms(std::ostream *out) const;
 
@@ -4678,7 +4683,7 @@ private:
 #include <can_encode_builtin.inl>
 
 /// Cast instruction
-class CastInst : public InstWithOperandsType<FixedInputsInst1> {
+class PANDA_PUBLIC_API CastInst : public InstWithOperandsType<FixedInputsInst1> {
 public:
     using BaseInst = InstWithOperandsType<FixedInputsInst1>;
     using BaseInst::BaseInst;
@@ -4695,11 +4700,11 @@ public:
         return type != DataType::NO_TYPE ? type : GetInput(0).GetInst()->GetType();
     }
 
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
-    Inst *Clone(const Graph *targetGraph) const override
+    PANDA_PUBLIC_API Inst *Clone(const Graph *targetGraph) const override
     {
         auto clone = static_cast<CastInst *>(FixedInputsInst::Clone(targetGraph));
         ASSERT(clone->GetOperandsType() == GetOperandsType());
@@ -4710,7 +4715,7 @@ public:
 };
 
 /// Cmp instruction
-class CmpInst : public InstWithOperandsType<FixedInputsInst2> {
+class PANDA_PUBLIC_API CmpInst : public InstWithOperandsType<FixedInputsInst2> {
 public:
     using BaseInst = InstWithOperandsType<FixedInputsInst2>;
     using BaseInst::BaseInst;
@@ -4757,9 +4762,9 @@ public:
         return GetOperandsType();
     }
 
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4775,9 +4780,9 @@ protected:
 
 /// Load value from instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>,
-                       public TypeIdMixin,
-                       public FieldMixin {
+class PANDA_PUBLIC_API LoadObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>,
+                                        public TypeIdMixin,
+                                        public FieldMixin {
 public:
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>>;
     using Base::Base;
@@ -4804,7 +4809,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4825,7 +4830,7 @@ public:
 
 /// Load value from memory by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>> {
+class PANDA_PUBLIC_API LoadMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>> {
 public:
     using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
     using Base::Base;
@@ -4856,8 +4861,8 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -4899,7 +4904,7 @@ public:
 
 /// Resolve instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ResolveObjectFieldInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API ResolveObjectFieldInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
@@ -4931,12 +4936,13 @@ public:
         return g_options.GetCompilerSchedLatencyLong();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Load value from resolved instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>,
+                                                     public TypeIdMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
@@ -4974,14 +4980,14 @@ public:
         return g_options.GetCompilerSchedLatencyLong();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Store value into instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>,
-                        public TypeIdMixin,
-                        public FieldMixin {
+class PANDA_PUBLIC_API StoreObjectInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>,
+                                         public TypeIdMixin,
+                                         public FieldMixin {
 public:
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>>;
     using Base::Base;
@@ -5024,12 +5030,13 @@ public:
         return GetType() == DataType::REFERENCE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Store value into resolved instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>, public TypeIdMixin {
+class PANDA_PUBLIC_API StoreResolvedObjectFieldInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>,
+                                                      public TypeIdMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>;
     using Base::Base;
@@ -5060,7 +5067,7 @@ public:
         return DataType::UINT32;  // field offset
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5081,7 +5088,7 @@ public:
 
 /// Store value in memory by offset
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>> {
+class PANDA_PUBLIC_API StoreMemInst : public ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>> {
 public:
     using Base = ScaleMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
@@ -5116,8 +5123,8 @@ public:
         return input0Type;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5130,7 +5137,9 @@ public:
 
 /// Load static field from class.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public TypeIdMixin, public FieldMixin {
+class PANDA_PUBLIC_API LoadStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>,
+                                        public TypeIdMixin,
+                                        public FieldMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
@@ -5148,7 +5157,7 @@ public:
         return GetNeedBarrier() || GetVolatile() || Inst::IsBarrier();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -5175,7 +5184,7 @@ public:
 
 /// Resolve static instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ResolveObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API ResolveObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
@@ -5207,12 +5216,13 @@ public:
         return g_options.GetCompilerSchedLatencyLong();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Load value from resolved static instance field
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadResolvedObjectFieldStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadResolvedObjectFieldStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>,
+                                                           public TypeIdMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst1>>;
     using Base::Base;
@@ -5250,14 +5260,14 @@ public:
         return g_options.GetCompilerSchedLatencyLong();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Store value into static field.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>,
-                        public TypeIdMixin,
-                        public FieldMixin {
+class PANDA_PUBLIC_API StoreStaticInst : public VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>,
+                                         public TypeIdMixin,
+                                         public FieldMixin {
 public:
     using Base = VolatileMixin<NeedBarrierMixin<FixedInputsInst2>>;
     using Base::Base;
@@ -5276,7 +5286,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier() || GetVolatile();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -5306,7 +5316,7 @@ public:
 
 /// Store value into unresolved static field.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class UnresolvedStoreStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
+class PANDA_PUBLIC_API UnresolvedStoreStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
@@ -5322,7 +5332,7 @@ public:
         return true;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -5346,7 +5356,8 @@ public:
 
 /// Store value into resolved static field.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreResolvedObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
+class PANDA_PUBLIC_API StoreResolvedObjectFieldStaticInst : public NeedBarrierMixin<FixedInputsInst2>,
+                                                            public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
@@ -5380,12 +5391,12 @@ public:
         return clone;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Create new object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class NewObjectInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
+class PANDA_PUBLIC_API NewObjectInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
@@ -5409,7 +5420,7 @@ public:
         return DataType::NO_TYPE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5422,7 +5433,7 @@ public:
 
 /// Create new array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class NewArrayInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
+class PANDA_PUBLIC_API NewArrayInst : public NeedBarrierMixin<FixedInputsInst3>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst3>;
     using Base::Base;
@@ -5457,7 +5468,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5469,7 +5480,7 @@ public:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadConstArrayInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadConstArrayInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
@@ -5491,7 +5502,7 @@ public:
         return DataType::NO_TYPE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5503,7 +5514,9 @@ public:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class FillConstArrayInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin, public ImmediateMixin {
+class PANDA_PUBLIC_API FillConstArrayInst : public NeedBarrierMixin<FixedInputsInst2>,
+                                            public TypeIdMixin,
+                                            public ImmediateMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
@@ -5525,7 +5538,7 @@ public:
         return index == 0 ? DataType::REFERENCE : DataType::NO_TYPE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5539,8 +5552,8 @@ public:
 
 /// Checkcast
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class CheckCastInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
-                      public TypeIdMixin {
+class PANDA_PUBLIC_API CheckCastInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
+                                       public TypeIdMixin {
 public:
     using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
@@ -5567,7 +5580,7 @@ public:
         return DataType::NO_TYPE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5582,8 +5595,8 @@ public:
 
 /// Is instance
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class IsInstanceInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
-                       public TypeIdMixin {
+class PANDA_PUBLIC_API IsInstanceInst : public OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>,
+                                        public TypeIdMixin {
 public:
     using Base = OmitNullCheckMixin<ClassTypeMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
@@ -5620,12 +5633,12 @@ public:
         return clone;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Load data from constant pool.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadFromPool : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadFromPool : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
@@ -5646,7 +5659,7 @@ public:
         return GetNeedBarrier() || Inst::IsBarrier();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5659,7 +5672,7 @@ public:
 
 /// Load data from dynamic constant pool.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadFromPoolDynamic : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API LoadFromPoolDynamic : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
@@ -5676,7 +5689,7 @@ public:
         return DataType::ANY;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5696,7 +5709,7 @@ public:
         SetField<StringFlag>(v);
     }
 
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
 protected:
     using StringFlag = LastField::NextFlag;
@@ -5705,7 +5718,7 @@ protected:
 
 /// Initialization or loading of the class.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class ClassInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
+class PANDA_PUBLIC_API ClassInst : public NeedBarrierMixin<FixedInputsInst1>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst1>;
     using Base::Base;
@@ -5721,7 +5734,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5753,7 +5766,7 @@ private:
 
 /// Loading of the runtime class.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class RuntimeClassInst : public NeedBarrierMixin<FixedInputsInst0>, public TypeIdMixin {
+class PANDA_PUBLIC_API RuntimeClassInst : public NeedBarrierMixin<FixedInputsInst0>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst0>;
     using Base::Base;
@@ -5769,7 +5782,7 @@ public:
         return GetNeedBarrier() || Inst::IsBarrier();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -5785,7 +5798,7 @@ public:
         return klass_;
     }
 
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     void SetClass(RuntimeInterface::ClassPtr klass)
     {
@@ -5798,7 +5811,7 @@ private:
 
 /// Get global var address inst
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class GlobalVarInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
+class PANDA_PUBLIC_API GlobalVarInst : public NeedBarrierMixin<FixedInputsInst2>, public TypeIdMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst2>;
     using Base::Base;
@@ -5824,7 +5837,7 @@ public:
         return clone;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -5846,7 +5859,7 @@ private:
 
 /// Get object pointer from the specific source.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadImmediateInst : public FixedInputsInst<0> {
+class PANDA_PUBLIC_API LoadImmediateInst : public FixedInputsInst<0> {
 public:
     using Base = FixedInputsInst;
     using Base::Base;
@@ -5981,9 +5994,9 @@ public:
         return obj_;
     }
 
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
 private:
     uint64_t obj_ {0};
@@ -5993,7 +6006,7 @@ private:
 
 /// Get function from the specific source.
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class FunctionImmediateInst : public FixedInputsInst<0> {
+class PANDA_PUBLIC_API FunctionImmediateInst : public FixedInputsInst<0> {
 public:
     using Base = FixedInputsInst;
     using Base::Base;
@@ -6017,8 +6030,8 @@ public:
         functionPtr_ = ptr;
     }
 
-    void SetVnObject(VnObject *vnObj) override;
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
 private:
     uintptr_t functionPtr_ {0};
@@ -6026,7 +6039,7 @@ private:
 
 /// Get object from the specific source(handle).
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadObjFromConstInst : public FixedInputsInst<0> {
+class PANDA_PUBLIC_API LoadObjFromConstInst : public FixedInputsInst<0> {
 public:
     using Base = FixedInputsInst;
     using Base::Base;
@@ -6050,8 +6063,8 @@ public:
         objectPtr_ = ptr;
     }
 
-    void SetVnObject(VnObject *vnObj) override;
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
 private:
     uintptr_t objectPtr_ {0};
@@ -6059,7 +6072,7 @@ private:
 
 /// Select instruction
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class SelectInst : public ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>> {
+class PANDA_PUBLIC_API SelectInst : public ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>> {
 public:
     using Base = ConditionMixin<InstWithOperandsType<FixedInputsInst<4U>>>;
     using Base::Base;
@@ -6076,8 +6089,8 @@ public:
         }
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -6099,7 +6112,8 @@ public:
 
 /// SelectImm with comparison with immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class SelectImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst3>>, public ImmediateMixin {
+class PANDA_PUBLIC_API SelectImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst3>>,
+                                       public ImmediateMixin {
 public:
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst3>>;
     using Base::Base;
@@ -6124,8 +6138,8 @@ public:
         return GetOperandsType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6139,7 +6153,7 @@ public:
 
 /// Conditional jump instruction
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class IfInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
+class PANDA_PUBLIC_API IfInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst2>> {
 public:
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst2>>;
     using Base::Base;
@@ -6162,9 +6176,9 @@ public:
         return GetOperandsType();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6191,7 +6205,8 @@ private:
 
 /// IfImm instruction with immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class IfImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst1>>, public ImmediateMixin {
+class PANDA_PUBLIC_API IfImmInst : public InstWithOperandsType<ConditionMixin<FixedInputsInst1>>,
+                                   public ImmediateMixin {
 public:
     using Base = InstWithOperandsType<ConditionMixin<FixedInputsInst1>>;
     using Base::Base;
@@ -6209,9 +6224,9 @@ public:
         SetCc(cc);
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
-    void SetVnObject(VnObject *vnObj) override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void SetVnObject(VnObject *vnObj) override;
 
     DataType::Type GetInputType([[maybe_unused]] size_t index) const override
     {
@@ -6249,7 +6264,7 @@ private:
 
 /// Load element from a pair of values, using index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadPairPartInst : public FixedInputsInst1, public ImmediateMixin {
+class PANDA_PUBLIC_API LoadPairPartInst : public FixedInputsInst1, public ImmediateMixin {
 public:
     using FixedInputsInst1::FixedInputsInst1;
 
@@ -6262,7 +6277,7 @@ public:
         return GetImm();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6279,7 +6294,8 @@ public:
 
 /// Load a pair of consecutive values from array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadArrayPairInst : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>, public ImmediateMixin {
+class PANDA_PUBLIC_API LoadArrayPairInst : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>,
+                                           public ImmediateMixin {
 public:
     using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst2, 2U>>;
     using Base::Base;
@@ -6333,12 +6349,12 @@ public:
         return 0;
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 };
 
 /// Load a pair of consecutive values from object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadObjectPairInst
+class PANDA_PUBLIC_API LoadObjectPairInst
     : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>>>,
       public TypeIdMixin2,
       public FieldMixin2 {
@@ -6384,12 +6400,12 @@ public:
         return g_options.GetCompilerSchedLatencyLong();
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Store a pair of consecutive values to array
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreArrayPairInst : public NeedBarrierMixin<FixedInputsInst<4U>>, public ImmediateMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst<4U>>;
     using Base::Base;
@@ -6445,14 +6461,14 @@ public:
         return clone;
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 };
 
 /// Store a pair of consecutive values to object
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreObjectPairInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>,
-                            public TypeIdMixin2,
-                            public FieldMixin2 {
+class PANDA_PUBLIC_API StoreObjectPairInst : public ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>,
+                                             public TypeIdMixin2,
+                                             public FieldMixin2 {
 public:
     using Base = ObjectTypeMixin<VolatileMixin<NeedBarrierMixin<FixedInputsInst3>>>;
     using Base::Base;
@@ -6495,12 +6511,13 @@ public:
         return GetType() == DataType::REFERENCE;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 /// Load a pair of consecutive values from array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class LoadArrayPairInstI : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>, public ImmediateMixin {
+class PANDA_PUBLIC_API LoadArrayPairInstI : public NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>,
+                                            public ImmediateMixin {
 public:
     using Base = NeedBarrierMixin<MultipleOutputMixin<FixedInputsInst1, 2U>>;
     using Base::Base;
@@ -6521,7 +6538,7 @@ public:
     {
         return Inst::IsBarrier() || GetNeedBarrier();
     }
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     DataType::Type GetInputType(size_t index) const override
     {
@@ -6552,7 +6569,7 @@ public:
 
 /// Store a pair of consecutive values to array, using array index as immediate
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class StoreArrayPairInstI : public NeedBarrierMixin<FixedInputsInst3>, public ImmediateMixin {
+class PANDA_PUBLIC_API StoreArrayPairInstI : public NeedBarrierMixin<FixedInputsInst3>, public ImmediateMixin {
 public:
     using Base = NeedBarrierMixin<FixedInputsInst3>;
     using Base::Base;
@@ -6601,7 +6618,7 @@ public:
         return Inst::IsBarrier() || GetNeedBarrier();
     }
 
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 
     Inst *Clone(const Graph *targetGraph) const override
     {
@@ -6612,7 +6629,7 @@ public:
 };
 
 /// CatchPhiInst instruction
-class CatchPhiInst : public DynamicInputsInst {
+class PANDA_PUBLIC_API CatchPhiInst : public DynamicInputsInst {
 public:
     using DynamicInputsInst::DynamicInputsInst;
 
@@ -6660,7 +6677,7 @@ private:
     ArenaVector<const Inst *> *throwInsts_ {nullptr};
 };
 
-class TryInst : public FixedInputsInst0 {
+class PANDA_PUBLIC_API TryInst : public FixedInputsInst0 {
 public:
     using FixedInputsInst0::FixedInputsInst0;
 
@@ -6704,7 +6721,7 @@ private:
     BasicBlock *tryEndBb_ {nullptr};
 };
 
-TryInst *GetTryBeginInst(const BasicBlock *tryBeginBb);
+PANDA_PUBLIC_API TryInst *GetTryBeginInst(const BasicBlock *tryBeginBb);
 
 /// Mixin for Deoptimize instructions
 template <typename T>
@@ -6771,7 +6788,7 @@ protected:
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeInst : public DeoptimizeTypeMixin<FixedInputsInst1> {
+class PANDA_PUBLIC_API DeoptimizeInst : public DeoptimizeTypeMixin<FixedInputsInst1> {
 public:
     using Base = DeoptimizeTypeMixin<FixedInputsInst1>;
     using Base::Base;
@@ -6788,11 +6805,11 @@ public:
         return clone;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeIfInst : public DeoptimizeTypeMixin<FixedInputsInst2> {
+class PANDA_PUBLIC_API DeoptimizeIfInst : public DeoptimizeTypeMixin<FixedInputsInst2> {
     using Base = DeoptimizeTypeMixin<FixedInputsInst2>;
 
 public:
@@ -6824,11 +6841,12 @@ public:
         }
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeCompareInst : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>> {
+class PANDA_PUBLIC_API DeoptimizeCompareInst
+    : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>> {
 public:
     using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst3>>>;
     using Base::Base;
@@ -6864,12 +6882,13 @@ public:
         }
     }
 
-    void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class DeoptimizeCompareImmInst : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>,
-                                 public ImmediateMixin {
+class PANDA_PUBLIC_API DeoptimizeCompareImmInst
+    : public InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>,
+      public ImmediateMixin {
 public:
     using Base = InstWithOperandsType<DeoptimizeTypeMixin<ConditionMixin<FixedInputsInst2>>>;
     using Base::Base;
@@ -6906,8 +6925,8 @@ public:
         return clone;
     }
 
-    void DumpOpcode(std::ostream *out) const override;
-    bool DumpInputs(std::ostream *out) const override;
+    PANDA_PUBLIC_API void DumpOpcode(std::ostream *out) const override;
+    PANDA_PUBLIC_API bool DumpInputs(std::ostream *out) const override;
 };
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)

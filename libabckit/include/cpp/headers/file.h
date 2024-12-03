@@ -16,28 +16,23 @@
 #ifndef CPP_ABCKIT_FILE_H
 #define CPP_ABCKIT_FILE_H
 
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/isa/isa_dynamic.h"
-#include "libabckit/src/include_v2/c/isa/isa_static.h"
-#include "libabckit/include/cpp/headers/base_classes.h"
-#include "libabckit/include/cpp/headers/config.h"
-#include "libabckit/include/cpp/headers/declarations.h"
-#include "libabckit/include/cpp/headers/basic_block.h"
-#include "libabckit/include/cpp/headers/instruction.h"
-#include "libabckit/include/cpp/headers/dynamic_isa.h"
-#include "libabckit/include/cpp/headers/value.h"
-#include "libabckit/include/cpp/headers/literal.h"
-#include "libabckit/include/cpp/headers/literal_array.h"
-#include "libabckit/src/include_v2/cpp/headers/static_isa.h"
+#include "./base_classes.h"
+#include "./value.h"
+#include "./literal.h"
+#include "./literal_array.h"
 
-#include "libabckit/include/cpp/headers/core/module.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "./core/module.h"
 
+#include <functional>
 #include <memory>
+#include <string_view>
 #include <vector>
 
 namespace abckit {
 
+/**
+ * @brief File
+ */
 class File final : public Resource<AbckitFile *> {
 private:
     class FileDeleter final : public IResourceDeleter {
@@ -60,83 +55,229 @@ private:
     };
 
 public:
+    /**
+     * @brief Constructor
+     * @param path
+     */
     explicit File(const char *path) : File(std::string(path)) {};
+
+    /**
+     * @brief Constructor
+     * @param path
+     */
     explicit File(const std::string &path) : File(path, std::make_unique<DefaultErrorHandler>()) {}
+
+    /**
+     * @brief Deleted constructor
+     * @param file
+     */
     File(const File &file) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param file
+     * @return File
+     */
     File &operator=(const File &file) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param file
+     */
     File(File &&file) = delete;
+
+    /**
+     * @brief Deleted constructor
+     * @param file
+     * @return File
+     */
     File &operator=(File &&file) = delete;
+
+    /**
+     * @brief Constructor
+     * @param path
+     * @param eh
+     */
     File(const std::string &path, std::unique_ptr<IErrorHandler> eh)
         : Resource(AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0)->openAbc(path.c_str())), conf_(std::move(eh))
     {
         CheckError(&conf_);
         SetDeleter(std::make_unique<FileDeleter>(&conf_, *this));
     }
-
+    /**
+     * @brief Destructor
+     */
     ~File() override = default;
 
-    abckit::Value CreateValueU1(bool val)
+    /**
+     * @brief Creates value item `AbckitValue` containing the given boolean value `value`.
+     * @param val
+     * @return `Value`
+     */
+    abckit::Value CreateValueU1(bool val) const
     {
         AbckitValue *value = GetApiConfig()->cMapi_->createValueU1(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Value(value, GetApiConfig());
+        return abckit::Value(value, GetApiConfig(), this);
     }
 
-    abckit::Value CreateValueDouble(double val)
+    /**
+     * @brief Creates value item containing the given double value `value`.
+     * @param val
+     * @return `Value`
+     */
+    abckit::Value CreateValueDouble(double val) const
     {
         AbckitValue *value = GetApiConfig()->cMapi_->createValueDouble(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Value(value, GetApiConfig());
+        return abckit::Value(value, GetApiConfig(), this);
     }
 
-    abckit::Literal CreateLiteralBool(bool val)
+    /**
+     * @brief Creates value item containing the given bool value `value`.
+     * @param val
+     * @return `Value`
+     */
+    abckit::Literal CreateLiteralBool(bool val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralBool(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
-    abckit::Literal CreateLiteralDouble(double val)
+    /**
+     * @brief Creates value item containing the given bool value `value`.
+     * @param val
+     * @return `Value`
+     */
+    abckit::Literal CreateLiteralDouble(double val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralDouble(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
-    abckit::Literal CreateLiteralU32(double val)
+    /**
+     * @brief Creates literal containing the given double value `value`.
+     * @param val
+     * @return `Literal`
+     */
+    abckit::Literal CreateLiteralU32(double val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralU32(GetResource(), val);
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
-    abckit::Literal CreateLiteralLiteralArray(const abckit::LiteralArray &val)
+    /**
+     * @brief Creates literal containing the given literal array `litarr`.
+     * @param val
+     * @return `Literal`
+     */
+    abckit::Literal CreateLiteralLiteralArray(const abckit::LiteralArray &val) const
     {
         AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralLiteralArray(GetResource(), val.GetView());
         CheckError(GetApiConfig());
-        return abckit::Literal(literal, GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
     }
 
+    /**
+     * @brief Creates literal array value item from the given value items array `literals`.
+     * @param literals
+     * @return `LiteralArray`
+     */
     abckit::LiteralArray CreateLiteralArray(const std::vector<abckit::Literal> &literals) const;
 
-    void WriteAbc(const std::string &path)
+    /**
+     * @brief Creates string item containing the given C-style null-terminated string `val`.
+     * @return `string_view`.
+     * @param [ in ] val - string to be set.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `val` is empty.
+     * @note Allocates
+     */
+    std::string_view CreateString(const std::string &val) const
+    {
+        const ApiConfig *conf = GetApiConfig();
+        AbckitString *cString = conf->cMapi_->createString(GetResource(), val.c_str());
+        CheckError(conf);
+        std::string_view view = conf->cIapi_->abckitStringToString(cString);
+        CheckError(conf);
+        return view;
+    }
+
+    /**
+     * @brief Creates literal containing the given string `val`.
+     * @return `Literal`.
+     * @param [ in ] val - string that will be stored in the literal to be created.
+     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `val` is empty.
+     * @note Allocates
+     */
+    abckit::Literal CreateLiteralString(const std::string &val) const
+    {
+        AbckitLiteral *literal = GetApiConfig()->cMapi_->createLiteralString(GetResource(), val.c_str());
+        CheckError(GetApiConfig());
+        return abckit::Literal(literal, GetApiConfig(), this);
+    }
+
+    /**
+     * @brief Writes `file` to the specified `path`.
+     * @param path - path to file
+     */
+    void WriteAbc(const std::string &path) const
     {
         GetApiConfig()->cApi_->writeAbc(GetResource(), path.c_str());
         CheckError(GetApiConfig());
     }
 
-    // Returns a vector of core::Module's in a particular file
+    /**
+     * @brief Returns a vector of core::Module's in a particular file
+     * @return vector of `Module`.
+     */
     std::vector<core::Module> GetModules() const;
-    // Returns all functions in a file (consider to delete for mainenace reasons)
+
+    /**
+     * @brief Returns all functions in a file (consider to delete for mainenace reasons)
+     * @return vector of `Function`.
+     */
     std::vector<core::Function> GetAllFunctions() const;
+
+    /**
+     * @brief EnumerateModules
+     * @return bool
+     * @param cb
+     */
+    bool EnumerateModules(const std::function<bool(core::Module)> &cb) const;
 
     // Other API.
 
 protected:
+    /**
+     * @brief Get api config
+     * @return ApiConfig
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return &conf_;
     }
+
+    /**
+     * @brief Struct for using in callbacks
+     */
+    template <typename D>
+    struct Payload {
+        /**
+         * @brief data
+         */
+        D data;
+        /**
+         * @brief config
+         */
+        const ApiConfig *config;
+        /**
+         * @brief resource
+         */
+        const File *resource;
+    };
 
 private:
     inline void GetAllFunctionsInner(std::vector<core::Function> &functions) const
@@ -155,18 +296,13 @@ private:
 
     inline void GetModulesInner(std::vector<core::Module> &modules) const
     {
-        const ApiConfig *conf = GetApiConfig();
+        Payload<std::vector<core::Module> *> payload {&modules, GetApiConfig(), this};
 
-        using EnumerateData = std::pair<std::vector<core::Module> *, const ApiConfig *>;
-        EnumerateData enumerateData(&modules, conf);
-
-        conf->cIapi_->fileEnumerateModules(GetResource(), (void *)&enumerateData,
-                                           [](AbckitCoreModule *module, void *data) {
-                                               auto *vec = static_cast<EnumerateData *>(data)->first;
-                                               auto *config = static_cast<EnumerateData *>(data)->second;
-                                               vec->push_back(core::Module(module, config));
-                                               return true;
-                                           });
+        GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
+            const auto &payload = *static_cast<Payload<std::vector<core::Module> *> *>(data);
+            payload.data->push_back(core::Module(module, payload.config, payload.resource));
+            return true;
+        });
     }
 
     const ApiConfig conf_;

@@ -16,9 +16,9 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_EVENT_LOOP_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_EVENT_LOOP_H
 
-#include "os/mutex.h"
-
 #include <atomic>
+
+#include "os/mutex.h"
 
 namespace ark::tooling::inspector {
 class EventLoop {

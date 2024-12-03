@@ -30,480 +30,18 @@ static auto g_isaApiDynamicImp = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEA
 
 class LibAbcKitWrongModeTestsIsaApiDynamicImpl1 : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDelobjprop,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthisbyvalue,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateDelobjprop)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdthisbyvalue)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateDelobjprop, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdthisbyvalue, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStmodulevar,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdtrue,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStmodulevar)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdtrue)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStmodulevar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnan,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdnan)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdnan, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefunc,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateDefinefunc)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateDefinefunc, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStobjbyindex,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStobjbyindex)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStobjbyindex, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyindex,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStobjbyindex)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStobjbyindex, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyindex,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeDefinefieldbyindex)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeDefinefieldbyindex, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs2,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallargs2)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallargs2, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreatereq,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateGreatereq)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateGreatereq, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCreateobjectwithexcludedkeys)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCreateobjectwithexcludedkeys, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnull,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdnull)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdnull, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeStsendablevar,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeStsendablevar)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeStsendablevar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowNotexists,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowNotexists)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowNotexists, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCopyrestargs,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCopyrestargs)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCopyrestargs, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLess,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLess)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLess, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthisbyname,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdthisbyname)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdthisbyname, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsymbol,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdsymbol)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdsymbol, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthisrange,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallthisrange)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallthisrange, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyobject,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCreateemptyobject)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCreateemptyobject, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNoteq,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNoteq)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNoteq, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturn,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateReturn)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateReturn, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnewtarget,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdnewtarget)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdnewtarget, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenvwithname,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNewlexenvwithname)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNewlexenvwithname, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInc,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateInc)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateInc, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallarrowrange,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideSupercallarrowrange)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideSupercallarrowrange, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStmodulevar)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStmodulevar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCreateobjectwithexcludedkeys,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideCreateobjectwithexcludedkeys)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideCreateobjectwithexcludedkeys, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWideldsendablevar,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeWideldsendablevar)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeWideldsendablevar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallthisrange,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSupercallthisrange)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSupercallthisrange, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumeric,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTonumeric)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTonumeric, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateApply,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateApply)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateApply, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionawaituncaught,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateAsyncfunctionawaituncaught)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateAsyncfunctionawaituncaught, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCatchPhi,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCatchPhi)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCatchPhi, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendableexternalmodulevar,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeLdsendableexternalmodulevar)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeLdsendableexternalmodulevar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeCreateprivateproperty,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeCreateprivateproperty)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeCreateprivateproperty, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNot,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNot)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNot, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfalse,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdfalse)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdfalse, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg0,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallarg0)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallarg0, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenvwithname,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideNewlexenvwithname)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideNewlexenvwithname, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallrange,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideCallrange)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideCallrange, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvaluewithnameset,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbyvaluewithnameset)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbyvaluewithnameset, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTryldglobalbyname,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTryldglobalbyname)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTryldglobalbyname, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateEq,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateEq)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateEq, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdexternalmodulevar,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdexternalmodulevar)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdexternalmodulevar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdinfinity,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdinfinity)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdinfinity, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyname,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbyname)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbyname, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStownbyindex,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStownbyindex)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStownbyindex, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIstrue,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeIstrue)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeIstrue, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShr2,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateShr2)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateShr2, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStthisbyvalue,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStthisbyvalue)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStthisbyvalue, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetunmappedargs,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateGetunmappedargs)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateGetunmappedargs, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateResumegenerator,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateResumegenerator)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateResumegenerator, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlocalmodulevar,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideLdlocalmodulevar)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideLdlocalmodulevar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallspread,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSupercallspread)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSupercallspread, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncgeneratorresolve,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateAsyncgeneratorresolve)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateAsyncgeneratorresolve, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionenter,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateAsyncfunctionenter)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateAsyncfunctionenter, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIsfalse,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeIsfalse)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeIsfalse, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAshr2,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateAshr2)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateAshr2, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlexvar,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdlexvar)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdlexvar, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvalue,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbyvalue)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbyvalue, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsuperbyvalue,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdsuperbyvalue)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdsuperbyvalue, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStrictnoteq,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStrictnoteq)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStrictnoteq, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewobjrange,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideNewobjrange)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideNewobjrange, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideGetmodulenamespace,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideGetmodulenamespace)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideGetmodulenamespace, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdprivateproperty,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdprivateproperty)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdprivateproperty, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStprivateproperty,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStprivateproperty)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStprivateproperty, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyvalue,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeDefinefieldbyvalue)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeDefinefieldbyvalue, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeNotifyconcurrentresult,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallruntimeNotifyconcurrentresult)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallruntimeNotifyconcurrentresult, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdtrue, true);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdundefined,
@@ -513,67 +51,60 @@ TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdundefined)
     helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdundefined, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallarrowrange,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLess,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSupercallarrowrange)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLess)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSupercallarrowrange, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLess, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowDeletesuperproperty,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLesseq,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowDeletesuperproperty)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLesseq)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowDeletesuperproperty, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLesseq, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfunction,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLoadString,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdfunction)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLoadString)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdfunction, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLoadString, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfsupernotcorrectcall,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMod2,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowIfsupernotcorrectcall)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateMod2)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowIfsupernotcorrectcall, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateMod2, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrow,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMul2,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrow)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateMul2)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrow, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateMul2, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreatearraywithbuffer,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNeg,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCreatearraywithbuffer)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNeg)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCreatearraywithbuffer, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNeg, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSetgeneratorstate,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenv,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSetgeneratorstate)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNewlexenv)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSetgeneratorstate, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNewlexenv, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsfalse,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenvwithname,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateIsfalse)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNewlexenvwithname)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateIsfalse, true);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinemethod,
-// abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateDefinemethod)
-{
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateDefinemethod, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNewlexenvwithname, true);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjapply,
@@ -583,32 +114,95 @@ TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNewobjapply)
     helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNewobjapply, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifholewithname,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjrange,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowUndefinedifholewithname)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNewobjrange)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowUndefinedifholewithname, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNewobjrange, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthis,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNot,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateLdthis)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNot)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateLdthis, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNot, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIf,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNoteq,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateIf)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateNoteq)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateIf, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateNoteq, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallrange,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateOr2,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallrange)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateOr2)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallrange, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateOr2, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreatePoplexenv,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreatePoplexenv)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreatePoplexenv, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateResumegenerator,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateResumegenerator)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateResumegenerator, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturn,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateReturn)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateReturn, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturnundefined,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateReturnundefined)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateReturnundefined, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSetgeneratorstate,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSetgeneratorstate)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSetgeneratorstate, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSetobjectwithproto,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSetobjectwithproto)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSetobjectwithproto, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShl2,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateShl2)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateShl2, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShr2,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateShr2)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateShr2, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStarrayspread,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStarrayspread)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStarrayspread, true);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStglobalvar,
@@ -618,11 +212,410 @@ TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStglobalvar)
     helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStglobalvar, true);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis0,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStlexvar,
 // abc-kind=NoABC, category=negative-mode
-TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateCallthis0)
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStlexvar)
 {
-    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateCallthis0, true);
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStlexvar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStmodulevar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStmodulevar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStmodulevar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyindex,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStobjbyindex)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStobjbyindex, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStobjbyname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStobjbyname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyvalue,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStobjbyvalue)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStobjbyvalue, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyindex,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbyindex)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbyindex, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbyname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbyname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbynamewithnameset,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbynamewithnameset)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbynamewithnameset, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvalue,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbyvalue)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbyvalue, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvaluewithnameset,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStownbyvaluewithnameset)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStownbyvaluewithnameset, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStprivateproperty,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStprivateproperty)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStprivateproperty, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStricteq,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStricteq)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStricteq, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStrictnoteq,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStrictnoteq)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStrictnoteq, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStsuperbyname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStsuperbyname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStsuperbyname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStsuperbyvalue,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStsuperbyvalue)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStsuperbyvalue, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStthisbyname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStthisbyname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStthisbyname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStthisbyvalue,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateStthisbyvalue)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateStthisbyvalue, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSub2,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSub2)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSub2, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallarrowrange,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSupercallarrowrange)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSupercallarrowrange, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallspread,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSupercallspread)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSupercallspread, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallthisrange,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSupercallthisrange)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSupercallthisrange, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSuspendgenerator,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateSuspendgenerator)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateSuspendgenerator, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTestin,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTestin)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTestin, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrow,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrow)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrow, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowConstassignment,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowConstassignment)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowConstassignment, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowDeletesuperproperty,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowDeletesuperproperty)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowDeletesuperproperty, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfnotobject,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowIfnotobject)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowIfnotobject, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowIfsupernotcorrectcall,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowIfsupernotcorrectcall)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowIfsupernotcorrectcall, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowNotexists,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowNotexists)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowNotexists, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowPatternnoncoercible,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowPatternnoncoercible)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowPatternnoncoercible, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifhole,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowUndefinedifhole)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowUndefinedifhole, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifholewithname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateThrowUndefinedifholewithname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateThrowUndefinedifholewithname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumber,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTonumber)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTonumber, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumeric,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTonumeric)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTonumeric, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTryldglobalbyname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTryldglobalbyname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTryldglobalbyname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTrystglobalbyname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTrystglobalbyname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTrystglobalbyname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTypeof,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateTypeof)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateTypeof, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallrange,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideCallrange)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideCallrange, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallthisrange,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideCallthisrange)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideCallthisrange, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCopyrestargs,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideCopyrestargs)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideCopyrestargs, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCreateobjectwithexcludedkeys,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideCreateobjectwithexcludedkeys)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideCreateobjectwithexcludedkeys, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideGetmodulenamespace,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideGetmodulenamespace)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideGetmodulenamespace, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdexternalmodulevar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideLdexternalmodulevar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideLdexternalmodulevar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlexvar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideLdlexvar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideLdlexvar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdlocalmodulevar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideLdlocalmodulevar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideLdlocalmodulevar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdobjbyindex,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideLdobjbyindex)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideLdobjbyindex, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdpatchvar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideLdpatchvar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideLdpatchvar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenv,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideNewlexenv)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideNewlexenv, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenvwithname,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideNewlexenvwithname)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideNewlexenvwithname, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewobjrange,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideNewobjrange)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideNewobjrange, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStlexvar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStlexvar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStlexvar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStmodulevar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStmodulevar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStobjbyindex,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStobjbyindex)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStobjbyindex, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStownbyindex,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStownbyindex)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStownbyindex, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStpatchvar,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideStpatchvar)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideStpatchvar, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallarrowrange,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideSupercallarrowrange)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideSupercallarrowrange, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideSupercallthisrange,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateWideSupercallthisrange)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateWideSupercallthisrange, true);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateXor2,
+// abc-kind=NoABC, category=negative-mode
+TEST_F(LibAbcKitWrongModeTestsIsaApiDynamicImpl1, iCreateXor2)
+{
+    helpers_mode::TestMode(g_isaApiDynamicImp->iCreateXor2, true);
 }
 
 }  // namespace libabckit::test

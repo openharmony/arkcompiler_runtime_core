@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-function foo(a, b) {
+function foo(a: number, b: number): number {
     return a * b;
 }
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "ohos_ws_server_endpoint.h"
+#include "connection/ohos_ws/ohos_ws_server_endpoint.h"
 
 namespace ark::tooling::inspector {
 OhosWsServerEndpoint::OhosWsServerEndpoint() noexcept

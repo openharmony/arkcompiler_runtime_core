@@ -17,30 +17,38 @@
 #include "generated/generate_ecma.inl"
 #include "static_core/runtime/include/coretypes/tagged_value.h"
 
-// CC-OFFNXT(G.INC.08-CPP) generated file requires namespace
-// CC-OFFNXT(WordsTool.95 google) sensitive word conflict
-// NOLINTNEXTLINE(google-build-using-namespace)
-using namespace ark;
-
 namespace libabckit {
 
-void DoLda(compiler::Register reg, std::vector<InsWrapper> &result)
+void DoLda(ark::compiler::Register reg, std::vector<InsWrapper> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(PandasmWrapper::Create_LDA_Wrapper(reg));
+    if (reg != ark::compiler::GetAccReg()) {
+        if (reg > ark::compiler::INVALID_REG) {
+            ASSERT(ark::compiler::IsFrameSizeLarge());
+            result.emplace_back(PandasmWrapper::Create_MOV_Wrapper(CodeGenDynamic::RESERVED_REG, reg));
+            result.emplace_back(PandasmWrapper::Create_LDA_Wrapper(CodeGenDynamic::RESERVED_REG));
+        } else {
+            result.emplace_back(PandasmWrapper::Create_LDA_Wrapper(reg));
+        }
     }
 }
 
-void DoSta(compiler::Register reg, std::vector<InsWrapper> &result)
+void DoSta(ark::compiler::Register reg, std::vector<InsWrapper> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(PandasmWrapper::Create_STA_Wrapper(reg));
+    if (reg != ark::compiler::GetAccReg()) {
+        if (reg > ark::compiler::INVALID_REG) {
+            ASSERT(ark::compiler::IsFrameSizeLarge());
+            result.emplace_back(PandasmWrapper::Create_STA_Wrapper(CodeGenDynamic::RESERVED_REG));
+            result.emplace_back(PandasmWrapper::Create_MOV_Wrapper(reg, CodeGenDynamic::RESERVED_REG));
+        } else {
+            result.emplace_back(PandasmWrapper::Create_STA_Wrapper(reg));
+        }
     }
 }
 
-void CodeGenDynamic::AppendCatchBlock(uint32_t typeId, const compiler::BasicBlock *tryBegin,
-                                      const compiler::BasicBlock *tryEnd, const compiler::BasicBlock *catchBegin,
-                                      const compiler::BasicBlock *catchEnd)
+void CodeGenDynamic::AppendCatchBlock(uint32_t typeId, const ark::compiler::BasicBlock *tryBegin,
+                                      const ark::compiler::BasicBlock *tryEnd,
+                                      const ark::compiler::BasicBlock *catchBegin,
+                                      const ark::compiler::BasicBlock *catchEnd)
 {
     auto cb = FunctionWrapper::CatchBlockWrapper();
     if (typeId != 0) {
@@ -53,7 +61,7 @@ void CodeGenDynamic::AppendCatchBlock(uint32_t typeId, const compiler::BasicBloc
     catchBlocks_.emplace_back(cb);
 }
 
-void CodeGenDynamic::VisitTryBegin(const compiler::BasicBlock *bb)
+void CodeGenDynamic::VisitTryBegin(const ark::compiler::BasicBlock *bb)
 {
     ASSERT(bb->IsTryBegin());
     auto tryInst = GetTryBeginInst(bb);
@@ -124,7 +132,7 @@ void CodeGenDynamic::EmitJump(const BasicBlock *bb)
     switch (bb->GetLastInst()->GetOpcode()) {
         case Opcode::If:
         case Opcode::IfImm:
-            ASSERT(bb->GetSuccsBlocks().size() == compiler::MAX_SUCCS_NUM);
+            ASSERT(bb->GetSuccsBlocks().size() == ark::compiler::MAX_SUCCS_NUM);
             sucBb = bb->GetFalseSuccessor();
             break;
         default:
@@ -138,17 +146,18 @@ void CodeGenDynamic::AddLineNumber([[maybe_unused]] const Inst *inst, [[maybe_un
 
 void CodeGenDynamic::AddColumnNumber([[maybe_unused]] const Inst *inst, [[maybe_unused]] const uint32_t idx) {}
 
-void CodeGenDynamic::EncodeSpillFillData(const compiler::SpillFillData &sf)
+void CodeGenDynamic::EncodeSpillFillData(const ark::compiler::SpillFillData &sf)
 {
-    if (sf.SrcType() != compiler::LocationType::REGISTER || sf.DstType() != compiler::LocationType::REGISTER) {
+    if (sf.SrcType() != ark::compiler::LocationType::REGISTER ||
+        sf.DstType() != ark::compiler::LocationType::REGISTER) {
         std::cerr << "EncodeSpillFillData with unknown move type, src_type: " << static_cast<int>(sf.SrcType())
                   << " dst_type: " << static_cast<int>(sf.DstType());
         success_ = false;
         UNREACHABLE();
         return;
     }
-    ASSERT(sf.GetType() != compiler::DataType::NO_TYPE);
-    ASSERT(sf.SrcValue() != compiler::INVALID_REG && sf.DstValue() != compiler::INVALID_REG);
+    ASSERT(sf.GetType() != ark::compiler::DataType::NO_TYPE);
+    ASSERT(sf.SrcValue() != ark::compiler::GetInvalidReg() && sf.DstValue() != ark::compiler::GetInvalidReg());
 
     if (sf.SrcValue() == sf.DstValue()) {
         return;
@@ -186,17 +195,17 @@ void CodeGenDynamic::VisitConstant(GraphVisitor *visitor, Inst *inst)
     InsWrapper movi;
     movi.regs.emplace_back(inst->GetDstReg());
     switch (type) {
-        case compiler::DataType::INT64:
-        case compiler::DataType::UINT64:
+        case ark::compiler::DataType::INT64:
+        case ark::compiler::DataType::UINT64:
             enc->result_.emplace_back(PandasmWrapper::Create_LDAI_Wrapper(inst->CastToConstant()->GetInt64Value()));
             DoSta(inst->GetDstReg(), enc->result_);
             break;
-        case compiler::DataType::FLOAT64:
+        case ark::compiler::DataType::FLOAT64:
             enc->result_.emplace_back(PandasmWrapper::Create_FLDAI_Wrapper(inst->CastToConstant()->GetDoubleValue()));
             DoSta(inst->GetDstReg(), enc->result_);
             break;
-        case compiler::DataType::INT32:
-        case compiler::DataType::UINT32:
+        case ark::compiler::DataType::INT32:
+        case ark::compiler::DataType::UINT32:
             enc->result_.emplace_back(PandasmWrapper::Create_LDAI_Wrapper(inst->CastToConstant()->GetInt32Value()));
             DoSta(inst->GetDstReg(), enc->result_);
             break;
@@ -207,10 +216,10 @@ void CodeGenDynamic::VisitConstant(GraphVisitor *visitor, Inst *inst)
     }
 }
 
-void CodeGenDynamic::EncodeSta(compiler::Register reg, compiler::DataType::Type type)
+void CodeGenDynamic::EncodeSta(ark::compiler::Register reg, ark::compiler::DataType::Type type)
 {
     std::string opc;
-    if (type != compiler::DataType::ANY) {
+    if (type != ark::compiler::DataType::ANY) {
         UNREACHABLE();
         std::cerr << "EncodeSta with unknown type" << type;
         success_ = false;
@@ -240,10 +249,10 @@ void CodeGenDynamic::VisitIf(GraphVisitor *v, Inst *instBase)
     DoLda(inst->GetSrcReg(notZeroConstIdx), enc->result_);
     auto label = LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
     switch (inst->GetCc()) {
-        case compiler::CC_NE:
+        case ark::compiler::CC_NE:
             enc->result_.emplace_back(PandasmWrapper::Create_JNEZ_Wrapper(label));
             return;
-        case compiler::CC_EQ:
+        case ark::compiler::CC_EQ:
             enc->result_.emplace_back(PandasmWrapper::Create_JEQZ_Wrapper(label));
             return;
         default:
@@ -268,10 +277,10 @@ void CodeGenDynamic::IfImmZero(GraphVisitor *v, Inst *instBase)
     DoLda(inst->GetSrcReg(0), enc->result_);
     auto label = LabelName(inst->GetBasicBlock()->GetTrueSuccessor()->GetId());
     switch (inst->GetCc()) {
-        case compiler::CC_EQ:
+        case ark::compiler::CC_EQ:
             enc->result_.emplace_back(PandasmWrapper::Create_JEQZ_Wrapper(label));
             return;
-        case compiler::CC_NE:
+        case ark::compiler::CC_NE:
             enc->result_.emplace_back(PandasmWrapper::Create_JNEZ_Wrapper(label));
             return;
         default:
@@ -291,9 +300,7 @@ void CodeGenDynamic::VisitLoadStringIntrinsic(GraphVisitor *v, Inst *instBase)
     auto inst = instBase->CastToIntrinsic();
     enc->result_.emplace_back(
         PandasmWrapper::Create_LDA_STR_Wrapper(enc->irInterface_->GetStringIdByOffset(inst->GetImm(0))));
-    if (inst->GetDstReg() != compiler::ACC_REG_ID) {
-        enc->result_.emplace_back(PandasmWrapper::Create_STA_Wrapper(inst->GetDstReg()));
-    }
+    DoSta(inst->GetDstReg(), enc->result_);
 }
 
 void CodeGenDynamic::VisitReturn(GraphVisitor *v, Inst *instBase)
@@ -302,7 +309,7 @@ void CodeGenDynamic::VisitReturn(GraphVisitor *v, Inst *instBase)
     auto enc = static_cast<CodeGenDynamic *>(v);
     auto inst = instBase->CastToReturn();
     switch (inst->GetType()) {
-        case compiler::DataType::ANY: {
+        case ark::compiler::DataType::ANY: {
 #if defined(PANDA_WITH_ECMASCRIPT)
             auto test_arg = IsEcmaConstTemplate(inst->GetInput(0).GetInst());
             if (test_arg.has_value() && test_arg->IsUndefined()) {
@@ -315,7 +322,7 @@ void CodeGenDynamic::VisitReturn(GraphVisitor *v, Inst *instBase)
             break;
         }
         default:
-            std::cerr << "Codegen for " << compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
+            std::cerr << "Codegen for " << ark::compiler::GetOpcodeString(inst->GetOpcode()) << " failed";
             enc->success_ = false;
     }
 }
@@ -325,7 +332,7 @@ void CodeGenDynamic::VisitIntrinsic(GraphVisitor *visitor, Inst *instBase)
 {
     ASSERT(instBase->IsIntrinsic());
     if (instBase->CastToIntrinsic()->GetIntrinsicId() ==
-        compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING) {
+        ark::compiler::RuntimeInterface::IntrinsicId::INTRINSIC_ABCKIT_LOAD_STRING) {
         VisitLoadStringIntrinsic(visitor, instBase);
         return;
     }

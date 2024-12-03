@@ -86,13 +86,14 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
             }
             inst = g_implG->iGetNext(inst);
         }
+        return true;
     });
 }
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestStaticAddLog)
+TEST_F(AbckitScenarioTest, LibAbcKitTestStaticAddLog)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/add_log/add_log_static.abc",
                                             "add_log_static/ETSGLOBAL", "main");

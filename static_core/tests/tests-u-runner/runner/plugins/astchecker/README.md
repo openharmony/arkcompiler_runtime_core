@@ -6,7 +6,7 @@ Tests are defined according to the following grammar:
 
 ```
 <checker-statement>: "/*" "@@" <directive> "*/"
-<directive>: <match-pattern> | <match-at-location-pattern> | <define-pattern> 
+<directive>: <match-pattern> | <match-at-location-pattern> | <define-pattern> | <skip-option>*
 <match-pattern>: <id> | <builtin-pattern>
 <match-at-location-pattern>: "?" <location> <builtin-pattern>
 <define-pattern>: "@" <id> <builtin-pattern>
@@ -15,6 +15,9 @@ Tests are defined according to the following grammar:
 <id>: [a-zA-Z0-9_]+
 <line>: [0-9]+
 <col>: [0-9]+
+<skip-option>: <key> '=' <val>
+<key>: "SkipErrors"|"SkipWarnings"
+<val>: "true"|"false"
 ```
 
 ## Test types by definition
@@ -92,4 +95,57 @@ function foo(): void {
 }
 
 /* @@? 2:19 Error TypeError: Index fractional part should be zero. */
+```
+
+## Errors and Warnings skipping
+
+By default "SkipErrors" and "SkipWarnings" are set to "false"
+
+If the option "SkipErrors" is set to "true" there is no matching of expected errors with actual ones:
+```
+function foo(): void {
+  let a = new int[5.1]
+}
+
+/* @@? 2:19 Error TypeError: Index fractional part should be zero. */
+/* @@# SkipErrors = true  */
+```
+
+If the option "SkipWarnings" is set to "true" there is no matching of expected warnings with actual ones:
+```
+function main(): void {
+    try {
+        try {
+            throw new Exception();
+        } catch (e) {}
+        finally {
+            throw new Exception();
+        }
+    } catch (e) {}
+}
+
+/* @@? 6:17 Warning Warning: Finally clause cannot complete normally  */
+/* @@# SkipWarnings = true  */
+```
+
+Both options can be set to "true" at the same time:
+```
+function foo(): void {
+  let a = new int[5.1]
+}
+
+function main(): void {
+    try {
+        try {
+            throw new Exception();
+        } catch (e) {}
+        finally {
+            throw new Exception();
+        }
+    } catch (e) {}
+}
+
+/* @@? 2:19 Error TypeError: Index fractional part should be zero. */
+/* @@? 10:17 Warning Warning: Finally clause cannot complete normally  */
+/* @@# SkipErrors = true  SkipWarnings = true  */
 ```

@@ -16,30 +16,65 @@
 #ifndef CPP_ABCKIT_CORE_NAMESPACE_H
 #define CPP_ABCKIT_CORE_NAMESPACE_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/annotation_interface.h"
-#include "cpp/headers/core/function.h"
+#include "../base_classes.h"
 
-#include <vector>
-#include <utility>
+#include <functional>
+#include <string_view>
 
 namespace abckit::core {
 
-class Namespace : public View<AbckitCoreNamespace *> {
-    // To access private constructor.
+/**
+ * @brief Namespace
+ */
+class Namespace : public ViewInResource<AbckitCoreNamespace *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
+    friend class abckit::File;
+    /// @brief to access private constructor
     friend class Module;
+    /// @brief abckit::DefaultHash<Namespace>
+    friend class abckit::DefaultHash<Namespace>;
+
+protected:
+    /// @brief Core API View type
+    using CoreViewT = Namespace;
 
 public:
+    /**
+     * @brief Construct a new Namespace object
+     * @param other
+     */
     Namespace(const Namespace &other) = default;
+
+    /**
+     * @brief
+     * @param other
+     * @return Namespace&
+     */
     Namespace &operator=(const Namespace &other) = default;
+
+    /**
+     * @brief Construct a new Namespace object
+     * @param other
+     */
     Namespace(Namespace &&other) = default;
+
+    /**
+     * @brief
+     * @param other
+     * @return Namespace&
+     */
     Namespace &operator=(Namespace &&other) = default;
+
+    /**
+     * @brief Destroy the Namespace object
+     */
     ~Namespace() override = default;
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName() const
     {
         AbckitString *abcName = GetApiConfig()->cIapi_->namespaceGetName(GetView());
@@ -52,11 +87,36 @@ public:
     // Core API's.
     // ...
 
+    /**
+     * @brief EnumerateNamespaces
+     * @param cb
+     */
+    void EnumerateNamespaces(const std::function<bool(core::Namespace)> &cb) const;
+
+    /**
+     * @brief EnumerateClasses
+     * @param cb
+     */
+    void EnumerateClasses(const std::function<bool(core::Class)> &cb) const;
+
+    /**
+     * @brief EnumerateTopLevelFunctions
+     * @param cb
+     */
+    void EnumerateTopLevelFunctions(const std::function<bool(core::Function)> &cb) const;
+
 private:
-    Namespace(AbckitCoreNamespace *ns, const ApiConfig *conf) : View(ns), conf_(conf) {};
+    Namespace(AbckitCoreNamespace *ns, const ApiConfig *conf, const File *file) : ViewInResource(ns), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

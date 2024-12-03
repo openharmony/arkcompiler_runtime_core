@@ -16,7 +16,7 @@
 #ifndef PANDA_TOOLING_INSPECTOR_ERROR_H
 #define PANDA_TOOLING_INSPECTOR_ERROR_H
 
-#include "tooling/debug_interface.h"
+#include "include/tooling/debug_interface.h"
 
 #include <optional>
 

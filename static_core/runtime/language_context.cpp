@@ -27,7 +27,7 @@
 #include "runtime/include/thread.h"
 #include "runtime/mem/gc/gc.h"
 #include "runtime/mem/vm_handle.h"
-#include "runtime/tooling/default_inspector_extension.h"
+#include "runtime/tooling/pt_default_lang_extension.h"
 
 namespace ark {
 std::pair<Method *, uint32_t> LanguageContextBase::GetCatchMethodAndOffset(Method *method, ManagedThread *thread) const
@@ -60,21 +60,16 @@ std::unique_ptr<ClassLinkerExtension> LanguageContextBase::CreateClassLinkerExte
     return nullptr;
 }
 
-std::unique_ptr<tooling::InspectorExtension> LanguageContextBase::CreateInspectorExtension() const
+std::unique_ptr<tooling::PtLangExt> LanguageContextBase::CreatePtLangExt() const
 {
-    std::unique_ptr<tooling::InspectorExtension> result;
+    std::unique_ptr<tooling::PtLangExt> result;
 
     if (GetLanguageType() == LangTypeT::LANG_TYPE_STATIC) {
-        result = std::make_unique<tooling::StaticDefaultInspectorExtension>(GetLanguage());
+        result = std::make_unique<tooling::PtStaticDefaultExtension>(GetLanguage());
     } else {
-        result = std::make_unique<tooling::DynamicDefaultInspectorExtension>();
+        result = std::make_unique<tooling::PtDynamicDefaultExtension>();
     }
     return result;
-}
-
-PandaUniquePtr<tooling::PtLangExt> LanguageContextBase::CreatePtLangExt() const
-{
-    return nullptr;
 }
 
 void LanguageContextBase::ThrowException([[maybe_unused]] ManagedThread *thread,
@@ -84,6 +79,7 @@ void LanguageContextBase::ThrowException([[maybe_unused]] ManagedThread *thread,
 }
 
 void LanguageContextBase::SetExceptionToVReg(
+    // CC-OFFNXT(G.FMT.06) false positive
     [[maybe_unused]] interpreter::AccVRegister &vreg,  // NOLINTNEXTLINE(google-runtime-references)
     [[maybe_unused]] ObjectHeader *obj) const
 {

@@ -72,6 +72,11 @@ class Intrinsic < SimpleDelegator
   def is_stackrange?
     signature.stackrange == true
   end
+
+  def is_codegen_virtual?
+    respond_to?(:codegen_virt) && codegen_virt == true
+  end
+
 end
 
 module Compiler

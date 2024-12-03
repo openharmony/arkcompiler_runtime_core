@@ -29,8 +29,8 @@ namespace libabckit {
 // File
 // ========================================
 
-extern "C" AbckitArktsModule *FileAddExternalModule(AbckitFile *file,
-                                                    const struct AbckitArktsExternalModuleCreateParams *params)
+extern "C" AbckitArktsModule *FileAddExternalModuleArktsV1(AbckitFile *file,
+                                                           const struct AbckitArktsV1ExternalModuleCreateParams *params)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -40,7 +40,7 @@ extern "C" AbckitArktsModule *FileAddExternalModule(AbckitFile *file,
 
     switch (file->frontend) {
         case Mode::DYNAMIC:
-            return FileAddExternalModuleDynamic(file, params);
+            return FileAddExternalArkTsV1Module(file, params);
         case Mode::STATIC:
             statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
             return nullptr;
@@ -183,7 +183,7 @@ extern "C" AbckitArktsAnnotation *ClassAddAnnotation(AbckitArktsClass *klass,
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
-    switch (klass->core->m->target) {
+    switch (klass->core->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
             return ClassAddAnnotationDynamic(klass->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -202,7 +202,7 @@ extern "C" void ClassRemoveAnnotation(AbckitArktsClass *klass, AbckitArktsAnnota
     LIBABCKIT_BAD_ARGUMENT_VOID(klass);
     LIBABCKIT_BAD_ARGUMENT_VOID(anno);
 
-    switch (klass->core->m->target) {
+    switch (klass->core->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
             return ClassRemoveAnnotationDynamic(klass->core, anno->core);
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -226,7 +226,7 @@ extern "C" AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddField(
     LIBABCKIT_BAD_ARGUMENT(ai, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
-    switch (ai->core->m->target) {
+    switch (ai->core->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
             return AnnotationInterfaceAddFieldDynamic(ai->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -246,7 +246,7 @@ extern "C" void AnnotationInterfaceRemoveField(AbckitArktsAnnotationInterface *a
     LIBABCKIT_BAD_ARGUMENT_VOID(ai);
     LIBABCKIT_BAD_ARGUMENT_VOID(field);
 
-    switch (ai->core->m->target) {
+    switch (ai->core->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
             return AnnotationInterfaceRemoveFieldDynamic(ai->core, field->core);
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -270,7 +270,7 @@ extern "C" AbckitArktsAnnotation *FunctionAddAnnotation(AbckitArktsFunction *fun
     LIBABCKIT_BAD_ARGUMENT(function, nullptr);
     LIBABCKIT_BAD_ARGUMENT(params, nullptr);
 
-    switch (function->core->m->target) {
+    switch (function->core->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
             return FunctionAddAnnotationDynamic(function->core, params);
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -289,7 +289,7 @@ extern "C" void FunctionRemoveAnnotation(AbckitArktsFunction *function, AbckitAr
     LIBABCKIT_BAD_ARGUMENT_VOID(function);
     LIBABCKIT_BAD_ARGUMENT_VOID(anno);
 
-    switch (function->core->m->target) {
+    switch (function->core->owningModule->target) {
         case ABCKIT_TARGET_ARK_TS_V1:
             return FunctionRemoveAnnotationDynamic(function->core, anno->core);
         case ABCKIT_TARGET_ARK_TS_V2:
@@ -315,7 +315,7 @@ extern "C" AbckitArktsAnnotationElement *AnnotationAddAnnotationElement(
 
     LIBABCKIT_BAD_ARGUMENT(anno->core->ai, nullptr);
 
-    AbckitCoreModule *module = anno->core->ai->m;
+    AbckitCoreModule *module = anno->core->ai->owningModule;
 
     LIBABCKIT_BAD_ARGUMENT(module, nullptr);
     LIBABCKIT_BAD_ARGUMENT(module->file, nullptr);
@@ -341,7 +341,7 @@ extern "C" void AnnotationRemoveAnnotationElement(AbckitArktsAnnotation *anno, A
 
     LIBABCKIT_BAD_ARGUMENT_VOID(anno->core->ai);
 
-    AbckitCoreModule *module = anno->core->ai->m;
+    AbckitCoreModule *module = anno->core->ai->owningModule;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(module);
     LIBABCKIT_BAD_ARGUMENT_VOID(module->file);
@@ -379,7 +379,7 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
     // File
     // ========================================
 
-    FileAddExternalModule,
+    FileAddExternalModuleArktsV1,
 
     // ========================================
     // Module
@@ -435,8 +435,15 @@ AbckitArktsModifyApi g_arktsModifyApiImpl = {
 
 }  // namespace libabckit
 
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+#include "./mock/abckit_mock.h"
+#endif
+
 extern "C" AbckitArktsModifyApi const *AbckitGetArktsModifyApiImpl(AbckitApiVersion version)
 {
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+    return AbckitGetMockArktsModifyApiImpl(version);
+#endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
             return &libabckit::g_arktsModifyApiImpl;

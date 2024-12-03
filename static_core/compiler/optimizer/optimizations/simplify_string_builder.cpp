@@ -223,12 +223,8 @@ IntrinsicInst *SimplifyStringBuilder::CreateConcatIntrinsic(
     return concatIntrinsic;
 }
 
-bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match)
+bool CheckUnsupportedCases(Inst *instance)
 {
-    // Walk instruction range [begin, end) and fill the match structure with StringBuilder usage instructions found
-
-    auto instance = match.instance;
-
     if (IsUsedOutsideBasicBlock(instance, instance->GetBasicBlock())) {
         return false;  // Unsupported case: doesn't look like concatenation pattern
     }
@@ -244,10 +240,21 @@ bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &
     if (appendCount != appendStringCount) {
         return false;  // Unsupported case: arguments must be strings
     }
-    if (appendCount <= 1 || appendCount > match.appendIntrinsics.size()) {
+    if (appendCount <= 1 || appendCount > ARGS_NUM_4) {
         return false;  // Unsupported case: too many strings concatenated
     }
 
+    return true;
+}
+
+bool SimplifyStringBuilder::MatchConcatenation(InstIter &begin, const InstIter &end, ConcatenationMatch &match)
+{
+    auto instance = match.instance;
+    if (!CheckUnsupportedCases(instance)) {
+        return false;
+    }
+
+    // Walk instruction range [begin, end) and fill the match structure with StringBuilder usage instructions found
     for (; begin != end; ++begin) {
         if ((*begin)->IsSaveState()) {
             continue;
@@ -1279,15 +1286,28 @@ bool SimplifyStringBuilder::HasInputInst(Inst *inputInst, Inst *inst) const
 
 bool SimplifyStringBuilder::HasAppendInstructionUser(Inst *inst) const
 {
+    Loop *instLoop = inst->GetBasicBlock()->GetLoop();
     for (auto &user : inst->GetUsers()) {
-        auto userInst = SkipSingleUserCheckInstruction(user.GetInst());
-        if (userInst->IsSaveState()) {
+        auto appendInst = SkipSingleUserCheckInstruction(user.GetInst());
+        if (!IsStringBuilderAppend(appendInst) || appendInst->GetDataFlowInput(1) != inst ||
+            appendInst->GetBasicBlock()->GetLoop() != instLoop) {
             continue;
         }
 
-        if (IsStringBuilderAppend(userInst)) {
-            return true;
+        auto instance = appendInst->GetDataFlowInput(0);
+        if (!IsStringBuilderInstance(instance) || instance->GetBasicBlock() != appendInst->GetBasicBlock()) {
+            continue;
         }
+
+        // Cycle through instructions from appendInst to sb (backwards) and make sure no other appends in between
+        auto currentInst = appendInst->GetPrev();
+        while (currentInst != nullptr && currentInst != instance) {
+            if (IsStringBuilderAppend(currentInst) && currentInst->GetDataFlowInput(0) == instance) {
+                return false;
+            }
+            currentInst = currentInst->GetPrev();
+        }
+        return true;
     }
 
     return false;
@@ -1464,6 +1484,42 @@ Inst *SimplifyStringBuilder::UpdateIntermediateValue(const StringBuilderUsage &u
     return intermediateValue;
 }
 
+bool SimplifyStringBuilder::MatchTemporaryInstruction(ConcatenationLoopMatch &match,
+                                                      ConcatenationLoopMatch::TemporaryInstructions &temp,
+                                                      Inst *appendInstruction, const Inst *accValue,
+                                                      Marker appendInstructionVisited)
+{
+    // Arrange single append instruction to one of the two groups (substructures of ConcatenationLoopMatch):
+    //  'temp' group - temporary instructions to be erased from loop
+    //  'loop' group - append-call instructions to be kept inside loop
+
+    ASSERT(appendInstruction->GetInputsCount() > 1);
+    auto appendArg = appendInstruction->GetDataFlowInput(1);
+    if ((appendArg->IsPhi() && IsDataFlowInput(appendArg, temp.intermediateValue)) ||
+        appendArg == temp.intermediateValue || appendArg == accValue) {
+        // Append-call needs to be removed, if its argument is either accumulated value, or intermediate value;
+        // or intermediate value is data flow input of argument
+
+        if (temp.appendAccValue == nullptr) {
+            temp.appendAccValue = appendInstruction;
+        } else {
+            // Does not look like string concatenation pattern
+            temp.Clear();
+            return false;
+        }
+        appendInstruction->SetMarker(appendInstructionVisited);
+    } else {
+        if (temp.appendAccValue != nullptr) {
+            // First appendee should be acc value
+            temp.Clear();
+            return false;
+        }
+        // Keep append-call inside loop otherwise
+        match.loop.appendInstructions.push_back(appendInstruction);
+    }
+    return true;
+}
+
 void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage &usage, ConcatenationLoopMatch &match,
                                                        Inst *accValue, Inst *intermediateValue,
                                                        Marker appendInstructionVisited)
@@ -1479,24 +1535,12 @@ void SimplifyStringBuilder::MatchTemporaryInstructions(const StringBuilderUsage 
     temp.ctorCall = usage.ctorCall;
 
     for (auto appendInstruction : usage.appendInstructions) {
-        ASSERT(appendInstruction->GetInputsCount() > 1);
-        auto appendArg = appendInstruction->GetDataFlowInput(1);
-        if ((appendArg->IsPhi() && IsDataFlowInput(appendArg, intermediateValue)) || appendArg == intermediateValue ||
-            appendArg == accValue) {
-            // Append-call needs to be removed, if its argument is either accumulated value, or intermediate value;
-            // or intermediate value is data flow input of argument
-
-            if (temp.appendAccValue == nullptr) {
-                temp.appendAccValue = appendInstruction;
-            } else {
-                // Does not look like string concatenation pattern
-                temp.Clear();
-                break;
-            }
-            appendInstruction->SetMarker(appendInstructionVisited);
-        } else {
-            // Keep append-call inside loop otherwise
-            match.loop.appendInstructions.push_back(appendInstruction);
+        bool isMatchStillValid =
+            MatchTemporaryInstruction(match, temp, appendInstruction, accValue, appendInstructionVisited);
+        if (!isMatchStillValid) {
+            // Doesn't look like concatenation pattern. Clean entire match
+            match.Clear();
+            return;
         }
     }
 

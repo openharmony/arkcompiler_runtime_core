@@ -36,6 +36,21 @@ function main(): int {
 const d: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 const dd: Number[] = [1, 0, 3, 4, 0, 6];
 
+function newProxy<T>(a: Array<T>): Array<T> {
+    class Handler<T> extends DefaultArrayProxyHandler<T> {}
+
+    return Proxy.create<T>(a, new Handler<T>())
+}
+
+function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {
+    let failures = 0
+
+    failures += testFn(newArrayFn())
+    failures += testFn(newProxy(newArrayFn()))
+
+    return failures
+}
+
 function reduceRightFuncArg4ArrayNumber(): int {
     let fn = (a: number, b: number, index: number, arr: Array<Number>): number => {
         if (index < 0 || index >= arr.length) {
@@ -43,24 +58,25 @@ function reduceRightFuncArg4ArrayNumber(): int {
         }
         return a + b + arr.at(index)!;
     }
-    let arrEmpty = new Array<Number>;
-    let hasException: boolean = false;
-    try {
-        let res = arrEmpty.reduceRight(fn);
-        return fail;
-    } catch(e) {
-        hasException = true;
-    }
-    if (hasException == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.reduceRight(fn);
-    if (res != 994) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let hasException: boolean = false;
+        try {
+            let res = arr.reduceRight(fn);
+            return fail;
+        } catch(e) {
+            hasException = true;
+        }
+        if (hasException == false) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.reduceRight(fn);
+        if (res != 994) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceRightFuncArg3(): int {
@@ -70,47 +86,49 @@ function reduceRightFuncArg3(): int {
         }
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let hasException: boolean = false;
-    try {
-        let res = arrEmpty.reduceRight(fn);
-        return fail;
-    } catch(e) {
-        hasException = true;
-    }
-    if (hasException == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.reduceRight(fn);
-    if (res != 503) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let hasException: boolean = false;
+        try {
+            let res = arr.reduceRight(fn);
+            return fail;
+        } catch(e) {
+            hasException = true;
+        }
+        if (hasException == false) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.reduceRight(fn);
+        if (res != 503) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceRightFuncArg2(): int {
     let fn = (a: number, b: number): number => {
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let hasException: boolean = false;
-    try {
-        let res = arrEmpty.reduceRight(fn);
-        return fail;
-    } catch(e) {
-        hasException = true;
-    }
-    if (hasException == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.reduceRight(fn);
-    if (res != 503) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let hasException: boolean = false;
+        try {
+            let res = arr.reduceRight(fn);
+            return fail;
+        } catch(e) {
+            hasException = true;
+        }
+        if (hasException == false) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.reduceRight(fn);
+        if (res != 503) { return fail; }
+        return success;
+    })
 }
 
 function reduceRightFuncArg4ArrayNumberWithInitialValue(): int {
@@ -120,20 +138,21 @@ function reduceRightFuncArg4ArrayNumberWithInitialValue(): int {
         }
         return a + b + arr.at(index)!;
     }
-    let arrEmpty = new Array<Number>;
-    let initialValue = 0.0;
-    let res = arrEmpty.reduce(fn, initialValue);
-    if (res != initialValue) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    initialValue = -arr.at(0)!;
-    res = arr.reduce(fn, initialValue);
-    if (res != 996) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let initialValue = 0.0;
+        let res = arr.reduce(fn, initialValue);
+        if (res != initialValue) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        initialValue = -arr.at(0)!;
+        res = arr.reduce(fn, initialValue);
+        if (res != 996) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceRightFuncArg3WithInitialValue(): int {
@@ -143,90 +162,96 @@ function reduceRightFuncArg3WithInitialValue(): int {
         }
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let initialValue = 0.0;
-    let res = arrEmpty.reduce(fn, initialValue);
-    if (res != initialValue) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    initialValue = -arr.at(0)!;
-    res = arr.reduce(fn, initialValue);
-    if (res != 493) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let initialValue = 0.0;
+        let res = arr.reduce(fn, initialValue);
+        if (res != initialValue) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        initialValue = -arr.at(0)!;
+        res = arr.reduce(fn, initialValue);
+        if (res != 493) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceRightFuncArg2WithInitialValue(): int {
     let fn = (a: number, b: number): number => {
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let initialValue = 0.0;
-    let res = arrEmpty.reduce(fn, initialValue);
-    if (res != initialValue) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    initialValue = -arr.at(0)!;
-    res = arr.reduce(fn, initialValue);
-    if (res != 493) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let initialValue = 0.0;
+        let res = arr.reduce(fn, initialValue);
+        if (res != initialValue) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        initialValue = -arr.at(0)!;
+        res = arr.reduce(fn, initialValue);
+        if (res != 493) { return fail; }
+        return success;
+    })
 }
 
 function forEachFuncArg3ArrayNumber(): int {
-    let s = new String;
-    let fn = (a: number, index: number, arr: Array<Number>): void => {
-        if (index < 0 && index >= arr.length) {
-            s = "";
-        } else {
-            let tmp = arr.at(index)! + a;
-            s += (tmp as Number).toString() + ",";
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let s = new String;
+        let fn = (a: number, index: number, arr: Array<Number>): void => {
+            if (index < 0 && index >= arr.length) {
+                s = "";
+            } else {
+                let tmp = arr.at(index)! + a;
+                s += (tmp as Number).toString() + ",";
+            }
         }
-    }
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    arr.forEach(fn);
-    if (s != "20,-2,474,-10,296,130,6,68,0,24,") { return fail; }
-    return success;
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        arr.forEach(fn);
+        if (s != "20,-2,474,-10,296,130,6,68,0,24,") { return fail; }
+        return success;
+    })
 }
 
 function forEachFuncArg2(): int {
-    let s = new String;
-    let fn = (a: number, index: number): void => {
-        if (index < 0) {
-            s = "";
-        } else {
-            s += (a as Number).toString() + ",";
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let s = new String;
+        let fn = (a: number, index: number): void => {
+            if (index < 0) {
+                s = "";
+            } else {
+                s += (a as Number).toString() + ",";
+            }
         }
-    }
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    arr.forEach(fn);
-    if (s != "10,-1,237,-5,148,65,3,34,0,12,") { return fail; }
-    return success;
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        arr.forEach(fn);
+        if (s != "10,-1,237,-5,148,65,3,34,0,12,") { return fail; }
+        return success;
+    })
 }
 
 function forEachFuncArg1(): int {
-    let s = new String;
-    let fn = (a: number): void => {
-        s += (a as Number).toString() + ",";
-    }
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    arr.forEach(fn);
-    if (s != "10,-1,237,-5,148,65,3,34,0,12,") { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let s = new String;
+        let fn = (a: number): void => {
+            s += (a as Number).toString() + ",";
+        }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        arr.forEach(fn);
+        if (s != "10,-1,237,-5,148,65,3,34,0,12,") { return fail; }
+        return success;
+    })
 }
 
 function sortFunc(): int {
@@ -234,56 +259,58 @@ function sortFunc(): int {
         let res: number = a - b;
         return res;
     }
-    let arrEmpty = new Array<Number>;
-    let res0 = arrEmpty.sort(fn);
-    if (res0.length > 0) { return fail; }
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.sort(fn);
-    if (res.length != arr.length)   { return fail; }
-    for (let i: int = 0; i < res.length; ++i) {
-        if (res.at(i) == undefined) { return fail; }
-    }
-    if (res.at(0)! != -5)  { return fail; }
-    if (res.at(1)! != -1)  { return fail; }
-    if (res.at(2)! != -0)  { return fail; }
-    if (res.at(3)! != 3)   { return fail; }
-    if (res.at(4)! != 10)  { return fail; }
-    if (res.at(5)! != 12)  { return fail; }
-    if (res.at(6)! != 34)  { return fail; }
-    if (res.at(7)! != 65)  { return fail; }
-    if (res.at(8)! != 148) { return fail; }
-    if (res.at(9)! != 237) { return fail; }
-    return success;
+
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let res0 = arr.sort(fn);
+        if (res0.length > 0) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.sort(fn);
+        if (res.length != arr.length)   { return fail; }
+        for (let i: int = 0; i < res.length; ++i) {
+            if (res.at(i) == undefined) { return fail; }
+        }
+        if (res.at(0)! != -5)  { return fail; }
+        if (res.at(1)! != -1)  { return fail; }
+        if (res.at(2)! != -0)  { return fail; }
+        if (res.at(3)! != 3)   { return fail; }
+        if (res.at(4)! != 10)  { return fail; }
+        if (res.at(5)! != 12)  { return fail; }
+        if (res.at(6)! != 34)  { return fail; }
+        if (res.at(7)! != 65)  { return fail; }
+        if (res.at(8)! != 148) { return fail; }
+        if (res.at(9)! != 237) { return fail; }
+        return success;
+    })
 }
 
 function toSortedFunc(): int {
     let fn = (a: number, b: number): number => { return a - b; }
-    let arrEmpty = new Array<Number>;
-    let res0 = arrEmpty.sort(fn);
-    if (res0.length > 0) { return fail; }
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.toSorted(fn);
-    if (res.length != arr.length)   { return fail; }
-    for (let i: int = 0; i < res.length; ++i) {
-        if (res.at(i) == undefined) { return fail; }
-    }
-    if (res.at(0)! != -5)  { return fail; }
-    if (res.at(1)! != -1)  { return fail; }
-    if (res.at(2)! != -0)  { return fail; }
-    if (res.at(3)! != 3)   { return fail; }
-    if (res.at(4)! != 10)  { return fail; }
-    if (res.at(5)! != 12)  { return fail; }
-    if (res.at(6)! != 34)  { return fail; }
-    if (res.at(7)! != 65)  { return fail; }
-    if (res.at(8)! != 148) { return fail; }
-    if (res.at(9)! != 237) { return fail; }
-    return success;
+
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let res0 = arr.sort(fn);
+        if (res0.length > 0) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.toSorted(fn);
+        if (res.length != arr.length)   { return fail; }
+        for (let i: int = 0; i < res.length; ++i) {
+            if (res.at(i) == undefined) { return fail; }
+        }
+        if (res.at(0)! != -5)  { return fail; }
+        if (res.at(1)! != -1)  { return fail; }
+        if (res.at(2)! != -0)  { return fail; }
+        if (res.at(3)! != 3)   { return fail; }
+        if (res.at(4)! != 10)  { return fail; }
+        if (res.at(5)! != 12)  { return fail; }
+        if (res.at(6)! != 34)  { return fail; }
+        if (res.at(7)! != 65)  { return fail; }
+        if (res.at(8)! != 148) { return fail; }
+        if (res.at(9)! != 237) { return fail; }
+        return success;
+    })
 }
 
 function check(result: int, message: String): int {

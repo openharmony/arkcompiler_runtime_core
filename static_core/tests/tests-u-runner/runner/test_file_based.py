@@ -17,10 +17,10 @@
 
 import logging
 import subprocess
-from unittest import TestCase
 from copy import deepcopy
 from os import path, remove
 from typing import List, Callable, Tuple, Optional
+from unittest import TestCase
 
 from runner.enum_types.configuration_kind import ConfigurationKind
 from runner.enum_types.fail_kind import FailKind
@@ -62,10 +62,12 @@ class TestFileBased(Test):
     def verifier_args(self) -> List[str]:
         return self.test_env.verifier_args
 
-    @staticmethod
-    def get_processes(pid: int, gdb_timeout: int) -> str:
+    def get_processes(self, pid: int, gdb_timeout: int) -> str:
+        if not self.test_env.config.general.handle_timeout:
+            return "There is a timeout failure. If you want to investigate threads, rerun with option " \
+                   "--handle-timeout and under 'sudo'"
+
         cmd = [
-            "sudo",
             "gdb", "--batch", "-p", str(pid),
             "-ex", 'info threads',
             "-ex", 'thread apply all bt',
@@ -94,7 +96,7 @@ class TestFileBased(Test):
         return default_fail_kind
 
     # pylint: disable=too-many-locals
-    def run_one_step(self, name: str, params: Params, result_validator: ResultValidator) \
+    def run_one_step(self, name: str, params: Params, result_validator: ResultValidator, no_log: bool = False) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         profraw_file, profdata_file = None, None
         if self.test_env.config.general.coverage.use_llvm_cov:
@@ -105,11 +107,9 @@ class TestFileBased(Test):
         cmd = self.test_env.cmd_prefix + [params.executor]
         cmd.extend(params.flags)
 
-        logged_cmd = ' '.join(cmd)
-        self.log_cmd(f"Run {name}: {logged_cmd}")
+        self.log_cmd(f"Run {name}: " + ' '.join(cmd))
 
-        passed = False
-        output = ""
+        passed, output, fail_kind = False, "", None
 
         with subprocess.Popen(
                 cmd,
@@ -123,7 +123,10 @@ class TestFileBased(Test):
                 output, error = process.communicate(timeout=params.timeout)
                 return_code = process.returncode
                 passed = result_validator(output, error, return_code)
-                fail_kind = self.detect_segfault(return_code, params.fail_kind_fail) if not passed else None
+                if not passed:
+                    fail_kind = self.detect_segfault(return_code, params.fail_kind_fail)
+                    error = error.strip()
+                    error = f"{fail_kind.name}{f': {error}' if error else ''}"
             except subprocess.TimeoutExpired:
                 timeout_info = self.get_processes(process.pid, params.gdb_timeout)
                 self.log_cmd(f"Failed by timeout after {params.timeout} sec\n{timeout_info}")
@@ -140,19 +143,14 @@ class TestFileBased(Test):
         if self.test_env.config.general.coverage.use_llvm_cov and profdata_file and profraw_file:
             self.test_env.coverage.merge_and_delete_prowraw_files(profraw_file, profdata_file)
 
-        report = TestReport(
-            output=output.strip(),
-            error=error.strip(),
-            return_code=return_code
-        )
+        report = TestReport(output.strip(), error.strip(), return_code)
 
-        self.log_cmd(f"Output: '{report.output}'")
-        self.log_cmd(f"Error: '{report.error}'")
-        self.log_cmd(f"Return code: {report.return_code}")
+        if not no_log or report.error or report.return_code != 0:
+            self.log_cmd(f"Output: '{report.output}'\nError: '{report.error}'\nReturn code: {report.return_code}")
 
         return passed, report, fail_kind
 
-    def run_es2panda(self, flags: List[str], test_abc: str, result_validator: ResultValidator) \
+    def run_es2panda(self, flags: List[str], test_abc: str, result_validator: ResultValidator, no_log: bool = False) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:
         es2panda_flags = flags[:]
         es2panda_flags.append("--thread=0")
@@ -172,7 +170,7 @@ class TestFileBased(Test):
             fail_kind_other=FailKind.ES2PANDA_OTHER,
         )
 
-        return self.run_one_step("es2panda", params, result_validator)
+        return self.run_one_step("es2panda", params, result_validator, no_log)
 
     def run_runtime(self, test_an: str, test_abc: str, result_validator: ResultValidator) \
             -> Tuple[bool, TestReport, Optional[FailKind]]:

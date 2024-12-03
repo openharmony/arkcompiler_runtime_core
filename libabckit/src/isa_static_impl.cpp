@@ -92,25 +92,6 @@ extern "C" AbckitInst *IcreateIf(AbckitGraph *graph, AbckitInst *input0, AbckitI
     return IcreateIfStaticStatic(graph, input0, input1, cc);
 }
 
-extern "C" AbckitInst *IcreateCatchPhi(AbckitGraph *graph, AbckitBasicBlock *catchBegin, size_t argCount, ...)
-{
-    LIBABCKIT_CLEAR_LAST_ERROR;
-    LIBABCKIT_IMPLEMENTED;
-
-    LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(catchBegin, nullptr);
-    LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
-    va_list args;
-    va_start(args, argCount);
-
-    auto *inst = IcreateCatchPhiStatic(graph, catchBegin, argCount, args);
-
-    va_end(args);
-    return inst;
-}
-
 extern "C" AbckitInst *IcreateNeg(AbckitGraph *graph, AbckitInst *input0)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -337,8 +318,8 @@ extern "C" AbckitInst *IcreateNewArray(AbckitGraph *graph, AbckitCoreClass *inpu
     LIBABCKIT_BAD_ARGUMENT(inputSize, nullptr);
 
     LIBABCKIT_WRONG_CTX(graph, inputSize->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputClass->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, inputClass->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputClass->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, inputClass->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
     statuses::SetLastError(ABCKIT_STATUS_UNSUPPORTED);
@@ -352,8 +333,8 @@ extern "C" AbckitInst *IcreateNewObject(AbckitGraph *graph, AbckitCoreClass *inp
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputClass, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputClass->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, inputClass->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputClass->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, inputClass->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
     return IcreateNewObjectStatic(graph, inputClass);
 }
@@ -366,8 +347,8 @@ extern "C" AbckitInst *IcreateInitObject(AbckitGraph *graph, AbckitCoreFunction 
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputFunction, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputFunction->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, inputFunction->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputFunction->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, inputFunction->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -542,8 +523,8 @@ extern "C" AbckitInst *IcreateCallStatic(AbckitGraph *graph, AbckitCoreFunction 
 
     LIBABCKIT_BAD_ARGUMENT(graph, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputFunction, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputFunction->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, inputFunction->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputFunction->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, inputFunction->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -565,8 +546,8 @@ extern "C" AbckitInst *IcreateCallVirtual(AbckitGraph *graph, AbckitInst *inputO
     LIBABCKIT_BAD_ARGUMENT(inputFunction, nullptr);
     LIBABCKIT_BAD_ARGUMENT(inputObj, nullptr);
     LIBABCKIT_WRONG_CTX(graph, inputObj->graph, nullptr);
-    LIBABCKIT_BAD_ARGUMENT(inputFunction->m, nullptr);
-    LIBABCKIT_WRONG_CTX(graph->file, inputFunction->m->file, nullptr);
+    LIBABCKIT_BAD_ARGUMENT(inputFunction->owningModule, nullptr);
+    LIBABCKIT_WRONG_CTX(graph->file, inputFunction->owningModule->file, nullptr);
     LIBABCKIT_WRONG_MODE(graph, Mode::STATIC, nullptr);
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
@@ -801,7 +782,7 @@ extern "C" void IsetConditionCode(AbckitInst *inst, AbckitIsaApiStaticConditionC
 
     bool ccDynamicResitiction =
         !((cc == ABCKIT_ISA_API_STATIC_CONDITION_CODE_CC_NE) || (cc == ABCKIT_ISA_API_STATIC_CONDITION_CODE_CC_EQ));
-    if (IsDynamic(inst->graph->function->m->target) && ccDynamicResitiction) {
+    if (IsDynamic(inst->graph->function->owningModule->target) && ccDynamicResitiction) {
         statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         LIBABCKIT_LOG(DEBUG) << "Wrong condition code set for dynamic if\n";
         return;
@@ -861,7 +842,6 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
     IcreateLoadString,
     IcreateReturn,
     IcreateIf,
-    IcreateCatchPhi,
     IcreateNeg,
     IcreateNot,
     IcreateAdd,
@@ -909,8 +889,15 @@ AbckitIsaApiStatic g_isaApiStaticImpl = {
 
 }  // namespace libabckit
 
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+#include "./mock/abckit_mock.h"
+#endif
+
 extern "C" AbckitIsaApiStatic const *AbckitGetIsaApiStaticImpl(AbckitApiVersion version)
 {
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+    return AbckitGetMockIsaApiStaticImpl(version);
+#endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
             return &libabckit::g_isaApiStaticImpl;

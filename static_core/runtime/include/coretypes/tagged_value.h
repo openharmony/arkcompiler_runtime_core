@@ -389,6 +389,7 @@ private:
     TaggedType value_;
 };
 
+// CC-OFFNXT(G.FUD.06) solid logic
 inline int32_t JsCastDoubleToInt(double d, size_t bits)
 {
     int32_t ret = 0;

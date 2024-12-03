@@ -53,7 +53,8 @@ public:
 
     void PopRecord()
     {
-        ASSERT(curAddr_ >= startAddr_ && curAddr_ <= endAddr_);
+        ASSERT(curAddr_ >= startAddr_);
+        ASSERT(curAddr_ <= endAddr_);
         if (LIKELY(curAddr_ > startAddr_)) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             (curAddr_--)->~Record();
@@ -79,7 +80,8 @@ private:
 
     Record *Alloc()
     {
-        ASSERT(curAddr_ >= startAddr_ && curAddr_ <= endAddr_);
+        ASSERT(curAddr_ >= startAddr_);
+        ASSERT(curAddr_ <= endAddr_);
         if (LIKELY(curAddr_ < endAddr_)) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
             return curAddr_++;

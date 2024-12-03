@@ -18,6 +18,7 @@
 #include "libpandabase/os/time.h"
 #include "libpandabase/utils/type_converter.h"
 #include "runtime/mem/gc/card_table.h"
+#include <numeric>
 
 namespace ark::mem {
 G1Analytics::G1Analytics(uint64_t now) : previousYoungCollectionEnd_(now) {}
@@ -101,6 +102,12 @@ void G1Analytics::ReportSurvivedBytesRatio(const CollectionSet &collectionSet)
     }
 }
 
+void G1Analytics::ReportScanRemsetTime(size_t remsetSize, uint64_t time)
+{
+    remsetSize_ = remsetSize;
+    scanRemsetTime_ = time;
+}
+
 size_t G1Analytics::GetPromotedRegions() const
 {
     // Atomic with relaxed order reason: data race with no synchronization or ordering constraints imposed
@@ -154,8 +161,9 @@ static void DumpPauseMetric(const char *msg, uint64_t actual, uint64_t predictio
 }
 
 void G1Analytics::ReportCollectionEnd(GCTaskCause cause, uint64_t endTime, const CollectionSet &collectionSet,
-                                      bool dump)
+                                      bool singlePassCompactionEnabled, bool dump)
 {
+    previousWasSinglePassCompaction_ = singlePassCompactionEnabled;
     auto edenLength = collectionSet.Young().size();
     auto appTime = (currentYoungCollectionStart_ - previousYoungCollectionEnd_) / ark::os::time::MICRO_TO_NANO;
     auto allocationRate = static_cast<double>(edenLength) / appTime;
@@ -168,65 +176,133 @@ void G1Analytics::ReportCollectionEnd(GCTaskCause cause, uint64_t endTime, const
     allocationRateSeq_.Add(allocationRate);
 
     if (cause != GCTaskCause::EXPLICIT_CAUSE && edenLength == collectionSet.size() && edenLength > 0) {
-        auto liveObjectsPerRegion = static_cast<double>(liveObjects_) / edenLength;
-        liveObjectsSeq_.Add(liveObjectsPerRegion);
-
-        auto evacuationTime = (evacuationEnd_ - evacuationStart_) / ark::os::time::MICRO_TO_NANO;
-        auto compactedRegions = edenLength - promotedRegions_;
-        if (compactedRegions > 0) {
-            auto copiedBytesPerRegion = static_cast<double>(copiedBytes_) / compactedRegions;
-            copiedBytesSeq_.Add(copiedBytesPerRegion);
-            auto estimatedPromotionTime = EstimatePromotionTimeInMicros(promotedRegions_);
-            if (evacuationTime > estimatedPromotionTime) {
-                auto copyingBytesRate = static_cast<double>(copiedBytes_) / (evacuationTime - estimatedPromotionTime);
-                copyingBytesRateSeq_.Add(copyingBytesRate);
-            }
-        }
-
-        auto traversedObjects = liveObjects_ + totalRemsetRefsCount_;
-        auto markingTime = (markingEnd_ - markingStart_) / ark::os::time::MICRO_TO_NANO;
-        auto markingRate = static_cast<double>(traversedObjects) / markingTime;
-        markingRateSeq_.Add(markingRate);
-
-        auto updateRefsTime = (updateRefsEnd_ - updateRefsStart_) / ark::os::time::MICRO_TO_NANO;
-        auto updateRefsRate = static_cast<double>(traversedObjects) / updateRefsTime;
-        updateRefsRateSeq_.Add(updateRefsRate);
-
-        ASSERT(edenLength != 0);
-        promotionSeq_.Add(static_cast<double>(promotedRegions_) / edenLength);
-
-        auto pauseTimeSum = markingTime + evacuationTime + updateRefsTime;
-        auto otherTime = pauseTime - pauseTimeSum;
-        otherSeq_.Add(otherTime);
-
-        if (dirtyCardsCount_ > 0) {
-            auto scanDirtyCardsTime = (scanDirtyCardsEnd_ - scanDirtyCardsStart_) / ark::os::time::MICRO_TO_NANO;
-            scanDirtyCardsRateSeq_.Add(static_cast<double>(dirtyCardsCount_) / scanDirtyCardsTime);
-        }
-
-        if (cause != GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) {
-            // it can be too early after previous pause and skew statistics
-            remsetRefsSeq_.Add(totalRemsetRefsCount_);
-        }
-
-        if (remsetSize_ > 0) {
-            remsetRefsPerChunkSeq_.Add(static_cast<double>(remsetRefsCount_) / remsetSize_);
+        if (singlePassCompactionEnabled) {
+            ReportSinglePassCompactionEnd(cause, pauseTime, edenLength);
+        } else {
+            ReportMarkingCollectionEnd(cause, pauseTime, edenLength);
         }
     }
 
     previousYoungCollectionEnd_ = endTime;
 }
 
+void G1Analytics::ReportMarkingCollectionEnd(GCTaskCause cause, uint64_t pauseTime, size_t edenLength)
+{
+    ASSERT(edenLength != 0);
+    auto liveObjectsPerRegion = static_cast<double>(liveObjects_) / edenLength;
+    liveObjectsSeq_.Add(liveObjectsPerRegion);
+
+    auto evacuationTime = (evacuationEnd_ - evacuationStart_) / ark::os::time::MICRO_TO_NANO;
+    auto compactedRegions = edenLength - promotedRegions_;
+    if (compactedRegions > 0) {
+        UpdateCopiedBytesStat(compactedRegions);
+        auto estimatedPromotionTime = EstimatePromotionTimeInMicros(promotedRegions_);
+        if (evacuationTime > estimatedPromotionTime) {
+            UpdateCopiedBytesRateStat(evacuationTime - estimatedPromotionTime);
+        }
+    }
+
+    auto traversedObjects = liveObjects_ + totalRemsetRefsCount_;
+    auto markingTime = (markingEnd_ - markingStart_) / ark::os::time::MICRO_TO_NANO;
+    auto markingRate = static_cast<double>(traversedObjects) / markingTime;
+    markingRateSeq_.Add(markingRate);
+
+    auto updateRefsTime = (updateRefsEnd_ - updateRefsStart_) / ark::os::time::MICRO_TO_NANO;
+    auto updateRefsRate = static_cast<double>(traversedObjects) / updateRefsTime;
+    updateRefsRateSeq_.Add(updateRefsRate);
+
+    ASSERT(edenLength != 0);
+    promotionSeq_.Add(static_cast<double>(promotedRegions_) / edenLength);
+
+    auto pauseTimeSum = markingTime + evacuationTime + updateRefsTime;
+    auto otherTime = pauseTime - pauseTimeSum;
+    otherSeq_[MARKING_COLLECTION].Add(otherTime);
+
+    if (dirtyCardsCount_ > 0) {
+        auto scanDirtyCardsTime = (scanDirtyCardsEnd_ - scanDirtyCardsStart_) / ark::os::time::MICRO_TO_NANO;
+        scanDirtyCardsRateSeq_.Add(static_cast<double>(dirtyCardsCount_) / scanDirtyCardsTime);
+    }
+
+    if (cause != GCTaskCause::HEAP_USAGE_THRESHOLD_CAUSE) {
+        // it can be too early after previous pause and skew statistics
+        remsetRefsSeq_.Add(totalRemsetRefsCount_);
+    }
+
+    if (remsetSize_ > 0) {
+        remsetRefsPerChunkSeq_.Add(static_cast<double>(remsetRefsCount_) / remsetSize_);
+    }
+}
+
+void G1Analytics::ReportSinglePassCompactionEnd([[maybe_unused]] GCTaskCause cause, uint64_t pauseTime,
+                                                size_t edenLength)
+{
+    ASSERT(edenLength != 0);
+    auto evacuationTime = (evacuationEnd_ - evacuationStart_) / ark::os::time::MICRO_TO_NANO;
+    UpdateCopiedBytesStat(edenLength);
+    UpdateCopiedBytesRateStat(evacuationTime);
+    remsetSizeSeq_.Add(static_cast<double>(remsetSize_) / edenLength);
+    auto scanRemsetTime = scanRemsetTime_ / ark::os::time::MICRO_TO_NANO;
+    remsetScanRateSeq_.Add(static_cast<double>(remsetSize_) / scanRemsetTime);
+    auto pauseTimeSum = evacuationTime + scanRemsetTime;
+    auto otherTime = pauseTime - pauseTimeSum;
+    otherSeq_[SINGLE_PASS_COMPACTION].Add(otherTime);
+}
+
+void G1Analytics::UpdateCopiedBytesStat(size_t compactedRegions)
+{
+    ASSERT(compactedRegions != 0);
+    auto copiedBytesPerRegion = static_cast<double>(copiedBytes_) / compactedRegions;
+    copiedBytesSeq_.Add(copiedBytesPerRegion);
+}
+
+void G1Analytics::UpdateCopiedBytesRateStat(uint64_t compactionTime)
+{
+    ASSERT(compactionTime != 0);
+    auto copyingBytesRate = static_cast<double>(copiedBytes_) / compactionTime;
+    copyingBytesRateSeq_.Add(copyingBytesRate);
+}
+
 void G1Analytics::DumpMetrics(const CollectionSet &collectionSet, uint64_t pauseTime, double allocationRate) const
 {
     DumpMetric("allocation_rate", allocationRate * DEFAULT_REGION_SIZE, PredictAllocationRate() * DEFAULT_REGION_SIZE);
 
+    auto edenLength = collectionSet.Young().size();
+    auto predictedYoungPause = PredictYoungCollectionTimeInMicros(edenLength);
+
+    if (previousWasSinglePassCompaction_) {
+        DumpSinglePassCompactionMetrics(edenLength, pauseTime);
+    } else {
+        DumpMarkingCollectionMetrics(edenLength, pauseTime);
+    }
+
+    DumpMetric("young_pause_time", pauseTime, predictedYoungPause);
+    if (edenLength < collectionSet.size()) {
+        DumpMetric("mixed_pause_time", pauseTime, predictedMixedPause_);
+    }
+}
+
+void G1Analytics::DumpSinglePassCompactionMetrics(size_t edenLength, uint64_t pauseTime) const
+{
+    ASSERT(edenLength != 0);
+    auto evacuationTime = (evacuationEnd_ - evacuationStart_) / ark::os::time::MICRO_TO_NANO;
+    auto copiedBytesPerRegion = static_cast<double>(copiedBytes_) / edenLength;
+    DumpMetric("copied_bytes_per_region", copiedBytesPerRegion, predictor_.Predict(copiedBytesSeq_));
+    auto copyingBytesRate = static_cast<double>(copiedBytes_) / evacuationTime;
+    DumpMetric("copying_bytes_rate", copyingBytesRate, predictor_.Predict(copyingBytesRateSeq_));
+    auto expectedCopiedBytes = edenLength * predictor_.Predict(copiedBytesSeq_);
+    auto expectedCopyingTime = PredictCopyingTimeInMicros(expectedCopiedBytes);
+    DumpPauseMetric("copying_time", evacuationTime, expectedCopyingTime, pauseTime);
+    auto scanRemsetTime = scanRemsetTime_ / ark::os::time::MICRO_TO_NANO;
+    DumpPauseMetric("scan_remset_time", scanRemsetTime, PredictRemsetScanTimeInMicros(edenLength), pauseTime);
+    auto otherTime = pauseTime - evacuationTime - scanRemsetTime;
+    DumpPauseMetric("other_time", otherTime, PredictOtherTime(SINGLE_PASS_COMPACTION), pauseTime);
+}
+
+void G1Analytics::DumpMarkingCollectionMetrics(size_t edenLength, uint64_t pauseTime) const
+{
     auto expectedRemsetRefsCount = predictor_.Predict(remsetRefsSeq_);
     DumpMetric("total_remset_refs_count", static_cast<double>(totalRemsetRefsCount_), expectedRemsetRefsCount);
     DumpMetric("remset_refs_count", static_cast<double>(remsetRefsCount_), expectedRemsetRefsCount);
-
-    auto edenLength = collectionSet.Young().size();
-    auto predictedYoungPause = PredictYoungCollectionTimeInMicros(edenLength);
     auto liveObjectsPerRegion =
         edenLength > 0 ? static_cast<double>(liveObjects_) / edenLength : std::numeric_limits<double>::quiet_NaN();
     DumpMetric("live_objects_per_region", liveObjectsPerRegion, predictor_.Predict(liveObjectsSeq_));
@@ -275,45 +351,58 @@ void G1Analytics::DumpMetrics(const CollectionSet &collectionSet, uint64_t pause
     DumpPauseMetric("update_refs_time", updateRefsTime, expectedUpdateRefsTime, pauseTime);
 
     auto otherTime = pauseTime - markingTime - evacuationTime - updateRefsTime;
-    DumpPauseMetric("other_time", otherTime, static_cast<uint64_t>(predictor_.Predict(otherSeq_)), pauseTime);
-
-    DumpMetric("young_pause_time", pauseTime, predictedYoungPause);
-    if (edenLength < collectionSet.size()) {
-        DumpMetric("mixed_pause_time", pauseTime, predictedMixedPause_);
-    }
+    DumpPauseMetric("other_time", otherTime, PredictOtherTime(MARKING_COLLECTION), pauseTime);
 }
 
 uint64_t G1Analytics::PredictYoungCollectionTimeInMicros(size_t edenLength) const
 {
-    auto expectedPromotedRegions = PredictPromotedRegions(edenLength);
-    auto expectedCompactedRegions = edenLength - expectedPromotedRegions;
-    auto expectedCopiedBytes = expectedCompactedRegions * predictor_.Predict(copiedBytesSeq_);
-    auto expectedLiveObjects = edenLength * predictor_.Predict(liveObjectsSeq_);
+    ASSERT(edenLength > 0);
+    if (previousWasSinglePassCompaction_) {
+        return PredictYoungSinglePassCompactionTimeInMicros(edenLength);
+    }
+
     auto expectedRemsetRefsCount = predictor_.Predict(remsetRefsSeq_);
-    auto otherTime = predictor_.Predict(otherSeq_);
-    return PredictMarkingTimeInMicros(expectedLiveObjects, expectedRemsetRefsCount) +
-           PredictCopyingTimeInMicros(expectedCopiedBytes) +
-           PredictUpdateRefsTimeInMicros(expectedLiveObjects, expectedRemsetRefsCount) +
-           EstimatePromotionTimeInMicros(expectedPromotedRegions) + otherTime;
+    return PredictYoungMarkingCollectionTimeInMicros(edenLength, expectedRemsetRefsCount);
 }
 
 uint64_t G1Analytics::PredictYoungCollectionTimeInMicros(const CollectionSet &collectionSet) const
 {
     ASSERT(collectionSet.Young().size() == collectionSet.size());
     auto edenLength = collectionSet.Young().size();
+    if (previousWasSinglePassCompaction_) {
+        return PredictYoungSinglePassCompactionTimeInMicros(edenLength);
+    }
+
+    auto remsetSize = std::accumulate(collectionSet.begin(), collectionSet.end(), 0,
+                                      [](size_t acc, auto *region) { return acc + region->GetRemSetSize(); });
+    auto expectedRemsetRefsCount = PredictRemsetRefsCount(remsetSize);
+    return PredictYoungMarkingCollectionTimeInMicros(edenLength, expectedRemsetRefsCount);
+}
+
+uint64_t G1Analytics::PredictYoungMarkingCollectionTimeInMicros(size_t edenLength, size_t expectedRemsetRefsCount) const
+{
     auto expectedPromotedRegions = PredictPromotedRegions(edenLength);
     auto expectedCompactedRegions = edenLength - expectedPromotedRegions;
     auto expectedCopiedBytes = expectedCompactedRegions * predictor_.Predict(copiedBytesSeq_);
     auto expectedLiveObjects = edenLength * predictor_.Predict(liveObjectsSeq_);
-    size_t remsetSize = 0;
-    std::for_each(collectionSet.begin(), collectionSet.end(),
-                  [&remsetSize](auto *region) { remsetSize += region->GetRemSetSize(); });
-    auto expectedRemsetRefsCount = PredictRemsetRefsCount(remsetSize);
-    auto otherTime = predictor_.Predict(otherSeq_);
+    auto otherTime = PredictOtherTime(MARKING_COLLECTION);
     return PredictMarkingTimeInMicros(expectedLiveObjects, expectedRemsetRefsCount) +
            PredictCopyingTimeInMicros(expectedCopiedBytes) +
            PredictUpdateRefsTimeInMicros(expectedLiveObjects, expectedRemsetRefsCount) +
            EstimatePromotionTimeInMicros(expectedPromotedRegions) + otherTime;
+}
+
+uint64_t G1Analytics::PredictYoungSinglePassCompactionTimeInMicros(size_t edenLength) const
+{
+    auto expectedCopiedBytes = edenLength * predictor_.Predict(copiedBytesSeq_);
+    auto otherTime = PredictOtherTime(SINGLE_PASS_COMPACTION);
+    return PredictCopyingTimeInMicros(expectedCopiedBytes) + PredictRemsetScanTimeInMicros(edenLength) + otherTime;
+}
+
+uint64_t G1Analytics::PredictRemsetScanTimeInMicros(size_t edenLength) const
+{
+    auto expectedRemsetSize = edenLength * predictor_.Predict(remsetSizeSeq_);
+    return PredictTime(expectedRemsetSize, remsetScanRateSeq_);
 }
 
 uint64_t G1Analytics::PredictOldCollectionTimeInMicros(Region *region) const
@@ -368,5 +457,10 @@ uint64_t G1Analytics::PredictCopyingTimeInMicros(size_t copiedBytes) const
 double G1Analytics::PredictSurvivedBytesRatio() const
 {
     return predictor_.Predict(survivedBytesRatioSeq_);
+}
+
+uint64_t G1Analytics::PredictOtherTime(StatType type) const
+{
+    return predictor_.Predict(otherSeq_[type]);
 }
 }  // namespace ark::mem

@@ -87,8 +87,8 @@ function testSliceWithOutParam(): int {
 
     //Check all the data copied;
     for (let i: int = 0; i< origin.length as int; i++) {
-        let tv = target[i] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -147,8 +147,8 @@ function testSliceOneParam(): int {
 
     //Check all the data copied;
     for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i - sliceStart]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -171,8 +171,8 @@ function testSliceOneParam(): int {
 
     //Check all the data copied;
     for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i - sliceStart]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -216,8 +216,8 @@ function testSliceTwoParams(): int {
 
     //Check all the data copied;
     for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i - sliceStart]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -241,8 +241,8 @@ function testSliceTwoParams(): int {
 
     //Check all the data copied;
     for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i - sliceStart]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -264,8 +264,8 @@ function testSliceTwoParams(): int {
 
     //Check all the data copied;
     for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i - sliceStart]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -287,8 +287,8 @@ function testSliceTwoParams(): int {
 
     //Check all the data copied;
     for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i - sliceStart]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -310,8 +310,8 @@ function testSliceTwoParams(): int {
 
     //Check all the data copied;
     for (let i: int = sliceStart; i< sliceEnd; i++) {
-        let tv = target[i - sliceStart] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[i - sliceStart]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -379,8 +379,8 @@ function testSliceTwoParamsWithOtherNumber(): int {
 
     //Check all the data copied;
     for (let i: int = (origin.length + sliceStart) as int; i< sliceEnd; i++) {
-        let tv = target[(i - (origin.length + sliceStart)) as int] as {{.item.primitiveType}};
-        let ov = origin[i] as {{.item.primitiveType}};
+        let tv = target[(i - (origin.length + sliceStart)) as int]{{.item.cast2primitive}};
+        let ov = origin[i]{{.item.cast2primitive}};
         console.log(source[i] + "->" + tv + "->" + ov);
         if (tv != ov) {
             console.log("Array data mismatch");
@@ -406,7 +406,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
 }
 
 function testSliceOneLengthTwoParams(): int {
-    let source1: {{.item.primitiveType}}[] = [10];
+    let source1: {{.item.type}}[] = [{{.item.create}}(10)];
     let ss = new ArrayBuffer(source1.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};

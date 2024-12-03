@@ -31,14 +31,13 @@
 #include <iostream>
 
 libabckit::Logger *libabckit::Logger::logger_ = nullptr;
-thread_local libabckit::Logger::MODE g_abckitGlobalMode {libabckit::Logger::MODE::RELEASE_MODE};
 thread_local libabckit::NullBuffer libabckit::g_nB {};
 thread_local std::ostream libabckit::g_nullStream {&g_nB};
 
 namespace libabckit {
 libabckit::Options g_abckitOptions("");
 
-extern "C" AbckitStatus GetLastError()
+extern "C" AbckitStatus GetAbckitLastError()
 {
     LIBABCKIT_IMPLEMENTED;
     return statuses::GetLastError();
@@ -119,7 +118,7 @@ extern "C" void DestroyGraph(AbckitGraph *graph)
 
     LIBABCKIT_BAD_ARGUMENT_VOID(graph);
 
-    if (IsDynamic(graph->function->m->target)) {
+    if (IsDynamic(graph->function->owningModule->target)) {
         return DestroyGraphDynamic(graph);
     }
     DestroyGraphStatic(graph);
@@ -131,7 +130,7 @@ AbckitApi g_impl = {
     // ========================================
 
     ABCKIT_VERSION_RELEASE_1_0_0,
-    GetLastError,
+    GetAbckitLastError,
 
     // ========================================
     // Inspection API entrypoints
@@ -150,8 +149,15 @@ AbckitApi g_impl = {
 
 }  // namespace libabckit
 
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+#include "./mock/abckit_mock.h"
+#endif
+
 extern "C" AbckitApi const *AbckitGetApiImpl(AbckitApiVersion version)
 {
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+    return AbckitGetMockApiImpl(version);
+#endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
             return &libabckit::g_impl;

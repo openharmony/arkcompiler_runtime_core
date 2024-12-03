@@ -92,6 +92,7 @@ class Option < SimpleDelegator
   end
 
   def default_value
+    return default.to_h if (default.is_a?(Hash) || default.is_a?(OpenStruct))
     return default_constant_name if need_default_constant
     return '{' + default.map { |e| expand_string(e) }.join(', ') + '}' if type == 'arg_list_t'
     return expand_string(default) if type == 'std::string'
@@ -104,7 +105,11 @@ class Option < SimpleDelegator
     if defined? possible_values
       full_desc += '. Possible values: ' + possible_values.inspect
     end
-    Common::to_raw(full_desc + '. Default: ' + default.inspect)
+    if (default.is_a?(Hash) || default.is_a?(OpenStruct))
+      Common::to_raw(full_desc + '. Default: {' + default.to_h.map{ |k, v| "#{k}: #{v}" }.join(", ") + '}')
+    else
+      Common::to_raw(full_desc + '. Default: ' + default.inspect)
+    end
   end
 
   def expand_string(s)

@@ -1,2 +1,0 @@
-#18868
-built-ins/RegExp/from-regexp-like-get-flags-err.js

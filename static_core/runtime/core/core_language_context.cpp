@@ -100,7 +100,7 @@ void CoreLanguageContext::ThrowException(ManagedThread *thread, const uint8_t *m
 }
 
 PandaUniquePtr<ITableBuilder> CoreLanguageContext::CreateITableBuilder(
-    [[maybe_unused]] ClassLinkerErrorHandler *errHandler) const
+    [[maybe_unused]] ClassLinkerErrorHandler *errHandler) const  // CC-OFF(G.FMT.06) false positive
 {
     return MakePandaUnique<CoreITableBuilder>();
 }

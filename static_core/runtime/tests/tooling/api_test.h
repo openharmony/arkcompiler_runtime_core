@@ -46,7 +46,6 @@ using ExceptionRevokedCallback = std::function<bool(ExceptionWrapper, ExceptionI
 using ExecutionContextCreatedCallback = std::function<bool(ExecutionContextWrapper)>;
 using ExecutionContextDestroyedCallback = std::function<bool(ExecutionContextWrapper)>;
 using ExecutionContextsClearedCallback = std::function<bool()>;
-using InspectRequestedCallback = std::function<bool(PtObject, PtObject)>;
 using ClassLoadCallback = std::function<bool(PtThread, BaseClass *)>;
 using ClassPrepareCallback = std::function<bool(PtThread, BaseClass *)>;
 using MonitorWaitCallback = std::function<bool(PtThread, ObjectHeader *, int64_t)>;
@@ -139,7 +138,6 @@ struct ApiTest {
     ExecutionContextCreatedCallback executionContextCreated;
     ExecutionContextDestroyedCallback executionContextDestroyed;
     ExecutionContextsClearedCallback executionContextCleared;
-    InspectRequestedCallback inspectRequested;
     ClassLoadCallback classLoad;
     ClassPrepareCallback classPrepare;
     MonitorWaitCallback monitorWait;

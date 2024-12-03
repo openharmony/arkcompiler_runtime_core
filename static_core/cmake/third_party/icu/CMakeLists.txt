@@ -197,6 +197,8 @@ set(ICUUC_SOURCES
     ${ICU_ROOT}/icu4c/source/common/utf_impl.cpp
     ${ICU_ROOT}/icu4c/source/common/bytestrie.cpp
     ${ICU_ROOT}/icu4c/source/common/unifilt.cpp
+    ${ICU_ROOT}/icu4c/source/common/emojiprops.cpp
+    ${ICU_ROOT}/icu4c/source/common/lstmbe.cpp
     ${ICU_ROOT}/icu4c/source/ohos/init_data.cpp
 )
 
@@ -441,6 +443,7 @@ set(ICUI18N_SOURCES
     ${ICU_ROOT}/icu4c/source/i18n/measunit.cpp
     ${ICU_ROOT}/icu4c/source/i18n/fphdlimp.cpp
     ${ICU_ROOT}/icu4c/source/i18n/numparse_symbols.cpp
+    ${ICU_ROOT}/icu4c/source/i18n/displayoptions.cpp
 )
 
 set(ICUUC_CFLAGS_CC

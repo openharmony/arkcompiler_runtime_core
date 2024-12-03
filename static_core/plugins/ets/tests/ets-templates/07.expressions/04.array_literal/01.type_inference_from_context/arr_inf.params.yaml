@@ -80,37 +80,3 @@ cases:
           assert new A().foo([new A(), new A(), new Object()]) == 2
           assert new A().foo(["aaa", new A(), new Object()]) == 1
 
-    - decl: |-
-          class A {}
-          class B extends A {}
-          class C extends B {}
-          function foo(p: B[]): int {
-              return p.length
-          }
-      use: |-
-          assert foo([new B(), new C()]) == 2
-
-    - decl: |-
-          export class My {
-              private a: double[] = [1, 1];
-              private b: double[];
-              private c: double[];
-              constructor() {
-                  this.b = [1 as double, 1];
-                  this.c = [1, 1];
-              }
-              public check(): boolean {
-                  return this.a[0] == 1.0 && this.a[1] == 1.0 &&
-                      this.b[0] == 1.0 && this.b[1] == 1.0 &&
-                      this.c[0] == 1.0 && this.c[1] == 1.0
-              }
-          }
-      use: |-
-          let v = new My()
-          assert(v.check())
-
-    - decl: |-
-          type IAN = int[]|null
-      use: |-
-          let v: IAN[] = [[1, 2, 3], null]
-          assert (v[0].length == 3 && v[1] == null)

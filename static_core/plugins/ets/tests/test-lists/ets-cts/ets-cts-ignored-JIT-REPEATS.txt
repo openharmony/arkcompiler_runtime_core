@@ -1,0 +1,5 @@
+ # panda#17445
+06.contexts_and_conversions/05.implicit_conversions/06.widening_union_conversion/comp_arr/comp-arr-wd_6.ets
+
+# 17142 Compilation fails on multiple then/catch in Promise chain
+17.experimental_features/16.coroutines/03.promise_class/p_5.sts

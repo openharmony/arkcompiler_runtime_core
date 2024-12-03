@@ -20,8 +20,6 @@ class A {
     }
 
     changeT() {
-        // this.#t = this.#p
-        // return this.#t;
         return 1;
     }
 }

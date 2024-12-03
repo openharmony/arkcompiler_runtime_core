@@ -15,9 +15,9 @@
 
 #include "gtest/gtest.h"
 
-#include "source_manager.h"
-#include "runtime_options.h"
 #include "runtime.h"
+#include "runtime_options.h"
+#include "source_manager.h"
 
 // NOLINTBEGIN
 

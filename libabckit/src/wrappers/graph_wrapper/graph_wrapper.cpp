@@ -29,14 +29,11 @@
 #include "static_core/assembler/assembly-record.h"
 #include "static_core/assembler/mangling.h"
 #include "static_core/bytecode_optimizer/check_resolver.h"
-#include "static_core/bytecode_optimizer/reg_acc_alloc.h"
 #include "static_core/bytecode_optimizer/reg_encoder.h"
 #include "static_core/compiler/optimizer/ir/graph.h"
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
+#include "static_core/compiler/optimizer/ir/graph_cloner.h"
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
-#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc.h"
-#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_resolver.h"
-#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/try_catch_resolving.h"
 #include "static_core/libpandabase/utils/arch.h"
@@ -45,7 +42,7 @@
 #include <iostream>
 
 namespace libabckit {
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark;
 
@@ -60,6 +57,7 @@ std::tuple<AbckitGraph *, AbckitStatus> GraphWrapper::BuildGraphDynamic(FileWrap
                                                                         AbckitFile *file, uint32_t methodOffset)
 {
     ark::compiler::g_options.SetCompilerUseSafepoint(false);
+    ark::compiler::g_options.SetCompilerFrameSize("large");
 
     auto *allocator = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER);
     auto *localAllocator = new ArenaAllocator(SpaceType::SPACE_TYPE_COMPILER, nullptr, true);
@@ -78,9 +76,8 @@ std::tuple<AbckitGraph *, AbckitStatus> GraphWrapper::BuildGraphDynamic(FileWrap
     }
     graphImpl->SetDynamicMethod();
     graphImpl->SetAbcKit();
-    bool irBuilderRes = graphImpl->RunPass<IrBuilderDynamic>();
-    if (!irBuilderRes) {
-        LIBABCKIT_LOG(DEBUG) << "!irBuilderRes\n";
+    if (!graphImpl->RunPass<IrBuilderDynamic>()) {
+        LIBABCKIT_LOG(DEBUG) << "IrBuilder failed!\n";
         return {nullptr, AbckitStatus::ABCKIT_STATUS_TODO};
     }
     graphImpl->RunPass<ark::bytecodeopt::CheckResolver>();
@@ -103,7 +100,9 @@ std::tuple<AbckitGraph *, AbckitStatus> GraphWrapper::BuildGraphDynamic(FileWrap
 
 std::tuple<void *, AbckitStatus> GraphWrapper::BuildCodeDynamic(AbckitGraph *graph, const std::string &funcName)
 {
-    auto graphImpl = graph->impl;
+    auto graphImpl =
+        compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
+    ;
     graphImpl->RemoveUnreachableBlocks();
 
     CheckInvalidOpcodes(graphImpl, true);
@@ -134,10 +133,8 @@ std::tuple<void *, AbckitStatus> GraphWrapper::BuildCodeDynamic(AbckitGraph *gra
     }
 
     graphImpl->RunPass<compiler::MoveConstants>();
-    graphImpl->RunPass<bytecodeopt::RegAccAlloc>();
-    compiler::RegAllocResolver(graphImpl).ResolveCatchPhis();
 
-    if (!graphImpl->RunPass<compiler::RegAllocGraphColoring>(compiler::VIRTUAL_FRAME_SIZE)) {
+    if (!AllocateRegisters(graphImpl, CodeGenDynamic::RESERVED_REG)) {
         LIBABCKIT_LOG(DEBUG) << funcName << ": RegAllocGraphColoring failed!\n";
         return {nullptr, ABCKIT_STATUS_TODO};
     }

@@ -18,7 +18,7 @@
 
 const NUMBER_OF_FREE_REGIONS = 2;
 
-function cor(numObjToCreate: int, humongousSize: int): Object | null {
+function cor(numObjToCreate: int, humongousSize: int): Object|null {
     let localGarbage = new ArrayAsListObject();
     try {
         for (let i = 0; i < numObjToCreate; i++) {
@@ -26,7 +26,9 @@ function cor(numObjToCreate: int, humongousSize: int): Object | null {
         }
     }
     catch(e: OutOfMemoryError) {
-        console.println("Catched OOM, just return");
+        // NOTE: return null and localGarbage will be collected by GC
+        // but as alternative it is possible to return localGarbage with
+        // already allocated objects before OOM occurs
         return null;
     }
     catch(e) {
@@ -36,15 +38,14 @@ function cor(numObjToCreate: int, humongousSize: int): Object | null {
 };
 
 class TestHumongousStress {
-    private static corArray = new ArrayAsListObject();
     private static GARBAGE = new ArrayAsListObject();
 
     regionSize: int;
     humongousSize: int;
     threadsCount: int;
 
-    constructor (regionSizeInMb: int, threadsCount: int, humongousSizeMultiplier: double) {
-        this.regionSize = regionSizeInMb * 1024 * 1024;
+    constructor (regionSizeInMb: double, threadsCount: int, humongousSizeMultiplier: double) {
+        this.regionSize = (regionSizeInMb * 1024 * 1024) as int;
         this.humongousSize = (this.regionSize * humongousSizeMultiplier) as int;
         this.threadsCount = threadsCount;
     }
@@ -58,10 +59,7 @@ class TestHumongousStress {
             }
         }
         catch(e: OutOfMemoryError) {
-            let numOfObj = TestHumongousStress.GARBAGE.size();
-            for(let i = 0; i < numOfObj; i++) {
-                TestHumongousStress.GARBAGE.popFront();
-            }
+            TestHumongousStress.GARBAGE = new ArrayAsListObject();
         }
         catch(e) {
             assert false : "Some other error: " + e.toString();
@@ -75,49 +73,85 @@ class TestHumongousStress {
         let lastCoroutuneNumObjects = maxObjects - objPerCoroutine * (this.threadsCount - 1);
         assert this.threadsCount > 0 && objPerCoroutine > 0;
 
-        let corArrayTmp = new Promise<Object>[this.threadsCount - 1];
+        let corArrayTmp = new Array<Promise<Object|null>>();
         for(let i = 0; i < this.threadsCount - 1; i++) {
-            corArrayTmp[i] = launch cor(objPerCoroutine, this.humongousSize);
+            corArrayTmp.push(launch cor(objPerCoroutine, this.humongousSize));
         }
         let corArrayLast = launch cor(lastCoroutuneNumObjects, this.humongousSize);
 
         Coroutine.Schedule();
 
         for(let i = 0; i < this.threadsCount - 1; i++) {
-            let tmp = (await corArrayTmp[i]) as ArrayAsListObject;
+            let tmp = await corArrayTmp[i];
             if(tmp == null) {
-                console.println("Null is returned. Not enough memory.Finish.");
-                return;
+                // Null is returned. Not enough memory. Finish current test.
+                continue;
             }
-            for(let j = 0; j < objPerCoroutine; j++) {
-                TestHumongousStress.GARBAGE.pushBack(tmp.popFront());
+            let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
+            for(let j = 0; j < numOfReturnedObjects; j++) {
+                try {
+                    TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
+                }
+                catch(e: OutOfMemoryError) {
+                    continue;
+                }
+                catch(e) {
+                    assert false : "Some other error: " + e.toString();
+                }
             }
         }
-        let tmp = (await corArrayLast) as ArrayAsListObject;
+        let tmp = await corArrayLast;
         if(tmp == null) {
-                console.println("Null is returned. Not enough memory.Finish.");
+                // Null is returned. Not enough memory. Finish current test.
                 return;
             }
-        for(let j = 0; j < objPerCoroutine; j++) {
-            TestHumongousStress.GARBAGE.pushBack(tmp.popFront());
+        let numOfReturnedObjects = (tmp as ArrayAsListObject).size();
+        for(let j = 0; j < numOfReturnedObjects; j++) {
+            try {
+                TestHumongousStress.GARBAGE.pushBack((tmp as ArrayAsListObject).popFront());
+            }
+            catch(e: OutOfMemoryError) {
+                continue;
+            }
+            catch(e) {
+                assert false : "Some other error: " + e.toString();
+            }
         }
     }
 
     public clear(): void {
-        let numOfObj = TestHumongousStress.GARBAGE.size();
-        for(let i = 0; i < numOfObj; i++) {
-            TestHumongousStress.GARBAGE.popFront();
-        }
+        TestHumongousStress.GARBAGE = new ArrayAsListObject();
     }
 }
 
 function main(): void {
     let tests = new ArrayAsListObject();
+
     tests.pushBack(new TestHumongousStress(4, 3, 1.1));
     tests.pushBack(new TestHumongousStress(16, 5, 2.1));
     tests.pushBack(new TestHumongousStress(32, 4, 0.6));
 
-    for (let i = 0; i < tests.size(); i++) {
+    tests.pushBack(new TestHumongousStress(4, 12, 1.1));
+    tests.pushBack(new TestHumongousStress(16, 7, 2.1));
+    tests.pushBack(new TestHumongousStress(32, 18, 0.6));
+
+    tests.pushBack(new TestHumongousStress(16, 3, 1.1));
+    tests.pushBack(new TestHumongousStress(48, 2, 2.1));
+
+    tests.pushBack(new TestHumongousStress(4, 3, 1.1));
+    tests.pushBack(new TestHumongousStress(16, 3, 2.1));
+    tests.pushBack(new TestHumongousStress(32, 3, 0.6));
+
+    tests.pushBack(new TestHumongousStress(0.2, 3, 1.1));
+    tests.pushBack(new TestHumongousStress(0.5, 5, 2.1));
+    tests.pushBack(new TestHumongousStress(0.7, 4, 0.6));
+
+    tests.pushBack(new TestHumongousStress(1, 7, 0.6));
+
+    tests.pushBack(new TestHumongousStress(0.01, 19, 1.1));
+    tests.pushBack(new TestHumongousStress(0.001, 39, 1.1));
+
+    while(tests.size() > 0) {
         let tst = tests.popFront() as TestHumongousStress;
         tst.run();
         tst.clear();

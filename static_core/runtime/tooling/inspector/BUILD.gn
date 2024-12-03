@@ -22,7 +22,8 @@ libarkinspector_sources = [
   "debug_info_cache.cpp",
   "debuggable_thread.cpp",
   "error.cpp",
-  "evaluation/helpers.cpp",
+  "evaluation/conditions_storage.cpp",
+  "evaluation/evaluation_engine.cpp",
   "init.cpp",
   "inspector.cpp",
   "inspector_server.cpp",
@@ -76,6 +77,7 @@ ohos_shared_library("libarkinspector") {
   sources = libarkinspector_sources
   include_dirs = [
     "$ark_root/runtime/include",
+    "$ark_root/runtime/tooling/inspector",
     get_label_info("$ark_root/assembler:isa_gen_libarkassembler",
                    "target_gen_dir"),
     get_label_info("$ark_root/disassembler:disasm_plugins_inc",

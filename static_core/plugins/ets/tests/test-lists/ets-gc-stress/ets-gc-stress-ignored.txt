@@ -1,0 +1,5 @@
+# #20150
+test_stress_gc_humongous.sts
+test_stress_gc_humongous_bq.sts
+# #20621
+test_gc_old_longrun.sts

@@ -25,36 +25,11 @@
 #include <cstdint>
 #endif /* __cplusplus */
 
-#include "../../metadata_core.h"
+#include "../../declarations.h"
+#include "../../api_version.h"
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
-
-struct AbckitArktsModule;
-struct AbckitArktsNamespace;
-struct AbckitArktsClass;
-struct AbckitArktsFunction;
-struct AbckitArktsField;
-struct AbckitArktsAnnotation;
-struct AbckitArktsAnnotationElement;
-struct AbckitArktsAnnotationInterface;
-struct AbckitArktsAnnotationInterfaceField;
-struct AbckitArktsImportDescriptor;
-struct AbckitArktsExportDescriptor;
-
-#ifndef __cplusplus
-typedef struct AbckitArktsModule AbckitArktsModule;
-typedef struct AbckitArktsNamespace AbckitArktsNamespace;
-typedef struct AbckitArktsClass AbckitArktsClass;
-typedef struct AbckitArktsFunction AbckitArktsFunction;
-typedef struct AbckitArktsField AbckitArktsField;
-typedef struct AbckitArktsAnnotation AbckitArktsAnnotation;
-typedef struct AbckitArktsAnnotationElement AbckitArktsAnnotationElement;
-typedef struct AbckitArktsAnnotationInterface AbckitArktsAnnotationInterface;
-typedef struct AbckitArktsAnnotationInterfaceField AbckitArktsAnnotationInterfaceField;
-typedef struct AbckitArktsImportDescriptor AbckitArktsImportDescriptor;
-typedef struct AbckitArktsExportDescriptor AbckitArktsExportDescriptor;
 #endif /* __cplusplus */
 
 /**
@@ -445,7 +420,7 @@ struct AbckitArktsDynamicModuleExportCreateParams {
 /**
  * @brief Struct that is used to create new external modules.
  */
-struct AbckitArktsExternalModuleCreateParams {
+struct AbckitArktsV1ExternalModuleCreateParams {
     /**
      * @brief Name of the created external module
      */
@@ -461,16 +436,16 @@ struct AbckitArktsModifyApi {
      * ======================================== */
 
     /**
-     * @brief Creates an external Arkts module and adds it to the file `file`.
-     * @return AbckitArktsModule *.
+     * @brief Creates an external Arkts module with target `ABCKIT_TARGET_ARK_TS_V1` and adds it to the file `file`.
+     * @return Pointer to the newly created module.
      * @param [ in ] file - Binary file to .
      * @param [ in ] params - Data that is used to create the external module.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `file` is NULL.
      * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if `params` is NULL.
      * @note Allocates
      */
-    AbckitArktsModule *(*fileAddExternalModule)(AbckitFile *file,
-                                                const struct AbckitArktsExternalModuleCreateParams *params);
+    AbckitArktsModule *(*fileAddExternalModuleArktsV1)(AbckitFile *file,
+                                                       const struct AbckitArktsV1ExternalModuleCreateParams *params);
 
     /* ========================================
      * Module

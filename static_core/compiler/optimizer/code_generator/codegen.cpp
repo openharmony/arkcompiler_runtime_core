@@ -258,108 +258,93 @@ void Codegen::Convert(ArenaVector<Reg> *regsUsage, const ArenaVector<bool> *mask
     }
 }
 
-void Codegen::IntrinsicSlowPathEntry([[maybe_unused]] IntrinsicInst *inst)
+#ifdef IRTOC_INTRINSICS_ENABLED
+void Codegen::EmitSimdIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                [[maybe_unused]] SRCREGS src)
 {
-    GetEncoder()->SetFalseResult();
-}
-void Codegen::IntrinsicCallRuntimeSaveAll([[maybe_unused]] IntrinsicInst *inst)
-{
-    GetEncoder()->SetFalseResult();
-}
-void Codegen::IntrinsicSaveRegisters([[maybe_unused]] IntrinsicInst *inst)
-{
-    GetEncoder()->SetFalseResult();
-}
-void Codegen::IntrinsicRestoreRegisters([[maybe_unused]] IntrinsicInst *inst)
-{
-    GetEncoder()->SetFalseResult();
-}
-void Codegen::IntrinsicTailCall([[maybe_unused]] IntrinsicInst *inst)
-{
-    GetEncoder()->SetFalseResult();
-}
-void Codegen::IntrinsicSaveTlabStatsSafe([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg src1,
-                                         [[maybe_unused]] Reg src2, [[maybe_unused]] Reg tmp)
-{
+    ASSERT(0);
     GetEncoder()->SetFalseResult();
 }
 
-void Codegen::EmitAtomicByteOr(Reg addr, Reg value)
+void Codegen::EmitReverseIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                   [[maybe_unused]] SRCREGS src)
 {
-    bool fastEncoding = true;
-    if (GetArch() == Arch::AARCH64 && !g_options.IsCpuFeatureEnabled(CpuFeature::ATOMICS)) {
-        fastEncoding = false;
-    }
-    GetEncoder()->EncodeAtomicByteOr(addr, value, fastEncoding);
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
 }
 
-#ifdef INTRINSIC_SLOW_PATH_ENTRY_ENABLED
-// CC-OFFNXT(huge_method, G.FUN.01) big switch-case
-// NOLINTNEXTLINE(readability-function-size)
-void Codegen::CreateIrtocIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
+void Codegen::EmitMarkWordIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                    [[maybe_unused]] SRCREGS src)
 {
-    switch (inst->GetIntrinsicId()) {
-        case RuntimeInterface::IntrinsicId::INTRINSIC_SLOW_PATH_ENTRY:
-            IntrinsicSlowPathEntry(inst);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_UNREACHABLE:
-            GetEncoder()->EncodeAbort();
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_SAVE_REGISTERS_EP:
-            IntrinsicSaveRegisters(inst);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_RESTORE_REGISTERS_EP:
-            IntrinsicRestoreRegisters(inst);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_TAIL_CALL:
-            IntrinsicTailCall(inst);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_INTERPRETER_RETURN:
-            GetCallingConvention()->GenerateNativeEpilogue(*GetFrameInfo(), []() {});
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_LOAD_ACQUIRE_MARK_WORD_EXCLUSIVE:
-            ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
-            GetEncoder()->EncodeLdrExclusive(dst, src[0], true);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_STORE_RELEASE_MARK_WORD_EXCLUSIVE:
-            ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
-            GetEncoder()->EncodeStrExclusive(dst, src[SECOND_OPERAND], src[0], true);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPARE_AND_SET_MARK_WORD:
-            ASSERT(GetRuntime()->GetObjMarkWordOffset(GetArch()) == 0);
-            GetEncoder()->EncodeCompareAndSwap(dst, src[0], src[SECOND_OPERAND], src[THIRD_OPERAND]);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_DATA_MEMORY_BARRIER_FULL:
-            GetEncoder()->EncodeMemoryBarrier(memory_order::FULL);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_EIGHT_UTF16_TO_UTF8_CHARS_USING_SIMD:
-            GetEncoder()->EncodeCompressEightUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPRESS_SIXTEEN_UTF16_TO_UTF8_CHARS_USING_SIMD:
-            GetEncoder()->EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd(src[FIRST_OPERAND], src[SECOND_OPERAND]);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_WRITE_TLAB_STATS_SAFE:
-            IntrinsicSaveTlabStatsSafe(inst, src[FIRST_OPERAND], src[SECOND_OPERAND], src[THIRD_OPERAND]);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_BYTES_U64:
-        case RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_BYTES_U32:
-            GetEncoder()->EncodeReverseBytes(dst, src[0]);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_REVERSE_HALF_WORDS:
-            GetEncoder()->EncodeReverseHalfWords(dst, src[0]);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_EXPAND_U8_TO_U16:
-            GetEncoder()->EncodeUnsignedExtendBytesToShorts(dst, src[0]);
-            break;
-        case RuntimeInterface::IntrinsicId::INTRINSIC_ATOMIC_BYTE_OR:
-            EmitAtomicByteOr(src[FIRST_OPERAND], src[SECOND_OPERAND]);
-            break;
-        default:
-            UNREACHABLE();
-            break;
-    }
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
 }
-#endif
+
+void Codegen::EmitDataMemoryBarrierFullIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                                 [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitWriteTlabStatsSafeIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                              [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitExpandU8ToU16Intrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                         [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitAtomicByteOrIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                        [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitSaveOrRestoreRegsEpIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                               [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitTailCallIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                    [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+void Codegen::EmitSlowPathEntryIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                         [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(0);
+    GetEncoder()->SetFalseResult();
+}
+
+/* It is the same for CodegenFastPath and CodegenInterpreter */
+void Codegen::EmitUnreachableIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                       [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_UNREACHABLE);
+    GetEncoder()->EncodeAbort();
+}
+
+/* It is the same for CodegenFastPath and CodegenInterpreter */
+void Codegen::EmitInterpreterReturnIntrinsic([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst,
+                                             [[maybe_unused]] SRCREGS src)
+{
+    ASSERT(inst->GetIntrinsicId() == RuntimeInterface::IntrinsicId::INTRINSIC_INTERPRETER_RETURN);
+    GetCallingConvention()->GenerateNativeEpilogue(*GetFrameInfo(), []() {});
+}
+#endif  // IRTOC_INTRINSICS_ENABLED
 
 bool Codegen::BeginMethod()
 {
@@ -2316,19 +2301,43 @@ void Codegen::TryInsertImplicitNullCheck(Inst *inst, size_t prevOffset)
     CreateStackMap(nullcheck, inst);
 }
 
+void Codegen::CreateMemmoveUnchecked([[maybe_unused]] IntrinsicInst *inst, [[maybe_unused]] Reg dst, SRCREGS src)
+{
+    auto entrypointId = EntrypointId::INVALID;
+    switch (inst->GetIntrinsicId()) {
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_1_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_1_BYTE;
+            break;
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_2_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_2_BYTE;
+            break;
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_4_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_4_BYTE;
+            break;
+
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_8_BYTE:
+            entrypointId = EntrypointId::ARRAY_COPY_TO_UNCHECKED_8_BYTE;
+            break;
+
+        default:
+            UNREACHABLE();
+            break;
+    }
+    ASSERT(entrypointId != EntrypointId::INVALID);
+    auto srcObj = src[FIRST_OPERAND];
+    auto dstObj = src[SECOND_OPERAND];
+    auto dstStart = src[THIRD_OPERAND];
+    auto srcStart = src[FOURTH_OPERAND];
+    auto srcEnd = src[FIFTH_OPERAND];
+    CallFastPath(inst, entrypointId, INVALID_REGISTER, RegMask::GetZeroMask(), srcObj, dstObj, dstStart, srcStart,
+                 srcEnd);
+}
+
 void Codegen::CreateFloatIsInf([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
 {
     GetEncoder()->EncodeIsInf(dst, src[0]);
-}
-
-void Codegen::CreateFloatIsInteger([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    GetEncoder()->EncodeIsInteger(dst, src[0]);
-}
-
-void Codegen::CreateFloatIsSafeInteger([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)
-{
-    GetEncoder()->EncodeIsSafeInteger(dst, src[0]);
 }
 
 void Codegen::CreateStringEquals([[maybe_unused]] IntrinsicInst *inst, Reg dst, SRCREGS src)

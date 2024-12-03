@@ -24,7 +24,7 @@ namespace libabckit {
 // Module
 // ========================================
 
-void ModuleEnumerateAnonymousFunctionsDynamic(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateAnonymousFunctionsDynamic(AbckitCoreModule *m, void *data,
                                               bool (*cb)(AbckitCoreFunction *function, void *data));
 
 // ========================================
@@ -93,7 +93,7 @@ double LiteralGetDoubleDynamic(AbckitLiteral *lit);
 AbckitLiteralArray *LiteralGetLiteralArrayDynamic(AbckitLiteral *lit);
 AbckitString *LiteralGetStringDynamic(AbckitLiteral *lit);
 AbckitLiteralTag LiteralGetTagDynamic(AbckitLiteral *lit);
-void LiteralArrayEnumerateElementsDynamic(AbckitLiteralArray *litArr, void *data,
+bool LiteralArrayEnumerateElementsDynamic(AbckitLiteralArray *litArr, void *data,
                                           bool (*cb)(AbckitFile *file, AbckitLiteral *lit, void *data));
 
 // ========================================

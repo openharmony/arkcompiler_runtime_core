@@ -26,8 +26,8 @@
 
 namespace ark {
 
-os::memory::Mutex g_traceLock;  // NOLINT(fuchsia-statically-constructed-objects)
-Trace *volatile Trace::singletonTrace_ = nullptr;
+os::memory::Mutex g_traceLock;                     // NOLINT(fuchsia-statically-constructed-objects)
+Trace *volatile Trace::singletonTrace_ = nullptr;  // CC-OFF(G.FMT.15) pointer CV qualifier
 bool Trace::isTracing_ = false;
 // NOLINTNEXTLINE(fuchsia-statically-constructed-objects)
 LanguageContext Trace::ctx_ = LanguageContext(nullptr);

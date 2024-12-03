@@ -55,6 +55,7 @@ using ark::llvmbackend::irtoc_function_utils::IsPtrIgnIrtocFunction;
 #endif
 using ark::llvmbackend::utils::CreateLoadClassFromObject;
 
+static constexpr unsigned VECTOR_SIZE_2 = 2;
 static constexpr unsigned VECTOR_SIZE_8 = 8;
 static constexpr unsigned VECTOR_SIZE_16 = 16;
 
@@ -147,6 +148,260 @@ inline std::string GetTypeName(llvm::Type *type)
 namespace ark::compiler {
 
 #include <can_compile_intrinsics_gen.inl>
+
+class MemCharSimdLowering {
+public:
+    MemCharSimdLowering(MemCharSimdLowering &&) = delete;
+    MemCharSimdLowering(const MemCharSimdLowering &) = delete;
+    MemCharSimdLowering &operator=(const MemCharSimdLowering &) = delete;
+    MemCharSimdLowering &operator=(MemCharSimdLowering &&) = delete;
+    MemCharSimdLowering() = delete;
+    ~MemCharSimdLowering() = default;
+
+    MemCharSimdLowering(llvm::Value *ch, llvm::Value *addr, llvm::IRBuilder<> *builder, llvm::Function *func);
+
+    template <bool MEM_BLOCK_SIZE_256_BITS>
+    llvm::Value *Generate(llvm::VectorType *vecTy);
+
+    llvm::VectorType *GetU64X2Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt64Ty(), VECTOR_SIZE_2, false);
+    }
+    llvm::VectorType *GetU16X8Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt16Ty(), VECTOR_SIZE_8, false);
+    }
+    llvm::VectorType *GetU8X16Ty() const
+    {
+        return llvm::VectorType::get(builder_->getInt8Ty(), VECTOR_SIZE_16, false);
+    }
+
+private:
+    static const uint64_t UL64 = 64UL;
+    static const uint64_t UL128 = 128UL;
+    static const uint64_t UL192 = 192UL;
+
+    void GenLoadAndFastCheck128(llvm::VectorType *vecTy);
+    void GenLoadAndFastCheck256(llvm::VectorType *vecTy);
+    llvm::Value *GenFindChar128(llvm::IntegerType *charTy);
+    llvm::Value *GenFindChar256(llvm::IntegerType *charTy);
+    static llvm::SmallVector<int> ShuffleMask(llvm::Type *charTy)
+    {
+        ASSERT(charTy->isIntegerTy(8U) || charTy->isIntegerTy(16U));
+        static constexpr std::initializer_list<int> MASK_U8 {15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+        static constexpr std::initializer_list<int> MASK_U16 {7, 6, 5, 4, 3, 2, 1, 0};
+        return {charTy->isIntegerTy(8U) ? MASK_U8 : MASK_U16};
+    }
+
+private:
+    llvm::Value *ch_;
+    llvm::Value *addr_;
+    llvm::IRBuilder<> *builder_;
+    llvm::Function *func_;
+
+    llvm::BasicBlock *lastBb_ = nullptr;
+    llvm::BasicBlock *foundBb_ = nullptr;
+    llvm::BasicBlock *inspectV1D0Bb_ = nullptr;
+    llvm::BasicBlock *inspectV1D1Bb_ = nullptr;
+    llvm::BasicBlock *inspectV2D0Bb_ = nullptr;
+    llvm::BasicBlock *inspectV2D1Bb_ = nullptr;
+    llvm::BasicBlock *clzV1D0Bb_ = nullptr;
+    llvm::BasicBlock *clzV1D1Bb_ = nullptr;
+    llvm::BasicBlock *clzV2D0Bb_ = nullptr;
+    llvm::Value *vcmpeq1_ = nullptr;
+    llvm::Value *vcmpeq2_ = nullptr;
+};
+
+MemCharSimdLowering::MemCharSimdLowering(llvm::Value *ch, llvm::Value *addr, llvm::IRBuilder<> *builder,
+                                         llvm::Function *func)
+    : ch_(ch), addr_(addr), builder_(builder), func_(func)
+{
+    ASSERT(addr_ != nullptr);
+    ASSERT(builder_ != nullptr);
+    ASSERT(func_ != nullptr);
+}
+
+void MemCharSimdLowering::GenLoadAndFastCheck128(llvm::VectorType *vecTy)
+{
+    auto *module = func_->getParent();
+    auto addpId = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_addp;
+    auto addp = llvm::Intrinsic::getDeclaration(module, addpId, {GetU64X2Ty()});
+    // Read 16-byte chunk of memory
+    auto vld1 = builder_->CreateLoad(vecTy, addr_);
+    // Prepare the search pattern
+    auto insert = builder_->CreateInsertElement(vecTy, ch_, 0UL);
+    auto pattern = builder_->CreateShuffleVector(insert, ShuffleMask(vecTy->getElementType()));
+    // Compare
+    vcmpeq1_ = builder_->CreateSExt(builder_->CreateICmpEQ(vld1, pattern), vecTy);
+    // Do fast check and give up if char is not there
+    auto v64x2 = builder_->CreateBitCast(vcmpeq1_, GetU64X2Ty());
+    auto vaddp = builder_->CreateCall(addp, {v64x2, v64x2});
+    auto low64 = builder_->CreateBitCast(builder_->CreateExtractElement(vaddp, 0UL), builder_->getInt64Ty());
+    auto charIsNotThere = builder_->CreateICmpEQ(low64, llvm::Constant::getNullValue(low64->getType()));
+    builder_->CreateCondBr(charIsNotThere, lastBb_, inspectV1D0Bb_);
+}
+
+void MemCharSimdLowering::GenLoadAndFastCheck256(llvm::VectorType *vecTy)
+{
+    auto *module = func_->getParent();
+    auto ld1Id = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_ld1x2;
+    auto addpId = llvm::Intrinsic::AARCH64Intrinsics::aarch64_neon_addp;
+    auto ld1 = llvm::Intrinsic::getDeclaration(module, ld1Id, {vecTy, addr_->getType()});
+    auto addp1 = llvm::Intrinsic::getDeclaration(module, addpId, {vecTy});
+    auto addp2 = llvm::Intrinsic::getDeclaration(module, addpId, {GetU64X2Ty()});
+    // Read 32-byte chunk of memory
+    auto vld1 = builder_->CreateCall(ld1, {addr_});
+    auto v1 = builder_->CreateExtractValue(vld1, {0});
+    auto v2 = builder_->CreateExtractValue(vld1, {1});
+    // Prepare the search pattern
+    auto insert = builder_->CreateInsertElement(vecTy, ch_, 0UL);
+    auto pattern = builder_->CreateShuffleVector(insert, ShuffleMask(vecTy->getElementType()));
+    // Compare
+    vcmpeq1_ = builder_->CreateSExt(builder_->CreateICmpEQ(v1, pattern), vecTy);
+    vcmpeq2_ = builder_->CreateSExt(builder_->CreateICmpEQ(v2, pattern), vecTy);
+    // Do fast check and give up if char is not there
+    auto vaddp = builder_->CreateCall(addp1, {vcmpeq1_, vcmpeq2_});
+    auto v64x2 = builder_->CreateBitCast(vaddp, GetU64X2Ty());
+    vaddp = builder_->CreateCall(addp2, {v64x2, v64x2});
+    auto low64 = builder_->CreateBitCast(builder_->CreateExtractElement(vaddp, 0UL), builder_->getInt64Ty());
+    auto charIsNotThere = builder_->CreateICmpEQ(low64, llvm::Constant::getNullValue(low64->getType()));
+    builder_->CreateCondBr(charIsNotThere, lastBb_, inspectV1D0Bb_);
+}
+
+llvm::Value *MemCharSimdLowering::GenFindChar128(llvm::IntegerType *charTy)
+{
+    ASSERT(vcmpeq1_ != nullptr && vcmpeq2_ == nullptr);
+    auto i64Ty = builder_->getInt64Ty();
+    constexpr uint32_t DWORD_SIZE = 64U;
+    // Inspect low 64-bit part of vcmpeq1
+    builder_->SetInsertPoint(inspectV1D0Bb_);
+    auto vcmpeq1 = builder_->CreateBitCast(vcmpeq1_, GetU64X2Ty());
+    auto v1d0 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq1, 0UL), i64Ty);
+    auto v1d0IsZero = builder_->CreateICmpEQ(v1d0, llvm::Constant::getNullValue(v1d0->getType()));
+    builder_->CreateCondBr(v1d0IsZero, inspectV1D1Bb_, clzV1D0Bb_);
+    builder_->SetInsertPoint(clzV1D0Bb_);
+    auto rev10 = builder_->CreateUnaryIntrinsic(llvm::Intrinsic::bswap, v1d0, nullptr);
+    auto pos10 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, rev10, builder_->getFalse(), nullptr);
+    builder_->CreateBr(foundBb_);
+    // Inspect high 64-bit part of vcmpeq1
+    builder_->SetInsertPoint(inspectV1D1Bb_);
+    auto v1d1 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq1, 1UL), i64Ty);
+    auto rev11 = builder_->CreateUnaryIntrinsic(llvm::Intrinsic::bswap, v1d1, nullptr);
+    auto clz11 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, rev11, builder_->getFalse(), nullptr);
+    auto pos11 = builder_->CreateAdd(clz11, llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(DWORD_SIZE, UL64)));
+    builder_->CreateBr(foundBb_);
+    // Compute a pointer to the char
+    builder_->SetInsertPoint(foundBb_);
+    auto nbits = builder_->CreatePHI(i64Ty, 2U);
+    nbits->addIncoming(pos10, clzV1D0Bb_);
+    nbits->addIncoming(pos11, inspectV1D1Bb_);
+    auto nbytes = builder_->CreateLShr(nbits, charTy->isIntegerTy(8U) ? 3UL : 4UL);
+    auto foundCharPtr = builder_->CreateInBoundsGEP(charTy, addr_, nbytes);
+    builder_->CreateBr(lastBb_);
+    return foundCharPtr;
+}
+
+llvm::Value *MemCharSimdLowering::GenFindChar256(llvm::IntegerType *charTy)
+{
+    ASSERT(vcmpeq1_ != nullptr);
+    ASSERT(vcmpeq2_ != nullptr);
+    auto i64Ty = builder_->getInt64Ty();
+    constexpr uint32_t DWORD_SIZE = 64U;
+    // Inspect low 64-bit part of vcmpeq1
+    builder_->SetInsertPoint(inspectV1D0Bb_);
+    auto vcmpeq1 = builder_->CreateBitCast(vcmpeq1_, GetU64X2Ty());
+    auto v1d0 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq1, 0UL), i64Ty);
+    auto v1d0IsZero = builder_->CreateICmpEQ(v1d0, llvm::Constant::getNullValue(v1d0->getType()));
+    builder_->CreateCondBr(v1d0IsZero, inspectV1D1Bb_, clzV1D0Bb_);
+    builder_->SetInsertPoint(clzV1D0Bb_);
+    auto rev10 = builder_->CreateUnaryIntrinsic(llvm::Intrinsic::bswap, v1d0, nullptr);
+    auto pos10 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, rev10, builder_->getFalse(), nullptr);
+    builder_->CreateBr(foundBb_);
+    // Inspect high 64-bit part of vcmpeq1
+    builder_->SetInsertPoint(inspectV1D1Bb_);
+    auto v1d1 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq1, 1UL), i64Ty);
+    auto v1d1IsZero = builder_->CreateICmpEQ(v1d1, llvm::Constant::getNullValue(v1d1->getType()));
+    builder_->CreateCondBr(v1d1IsZero, inspectV2D0Bb_, clzV1D1Bb_);
+    builder_->SetInsertPoint(clzV1D1Bb_);
+    auto rev11 = builder_->CreateUnaryIntrinsic(llvm::Intrinsic::bswap, v1d1, nullptr);
+    auto clz11 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, rev11, builder_->getFalse(), nullptr);
+    auto pos11 = builder_->CreateAdd(clz11, llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(DWORD_SIZE, UL64)));
+    builder_->CreateBr(foundBb_);
+    // Inspect low 64-bit part of vcmpeq2
+    builder_->SetInsertPoint(inspectV2D0Bb_);
+    auto vcmpeq2 = builder_->CreateBitCast(vcmpeq2_, GetU64X2Ty());
+    auto v2d0 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq2, 0UL), i64Ty);
+    auto v2d0IsZero = builder_->CreateICmpEQ(v2d0, llvm::Constant::getNullValue(v2d0->getType()));
+    builder_->CreateCondBr(v2d0IsZero, inspectV2D1Bb_, clzV2D0Bb_);
+    builder_->SetInsertPoint(clzV2D0Bb_);
+    auto rev20 = builder_->CreateUnaryIntrinsic(llvm::Intrinsic::bswap, v2d0, nullptr);
+    auto clz20 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, rev20, builder_->getFalse(), nullptr);
+    auto pos20 = builder_->CreateAdd(clz20, llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(DWORD_SIZE, UL128)));
+    builder_->CreateBr(foundBb_);
+    // Inspect high 64-bit part of vcmpeq2
+    builder_->SetInsertPoint(inspectV2D1Bb_);
+    auto v2d1 = builder_->CreateBitCast(builder_->CreateExtractElement(vcmpeq2, 1UL), i64Ty);
+    auto rev21 = builder_->CreateUnaryIntrinsic(llvm::Intrinsic::bswap, v2d1, nullptr);
+    auto clz21 = builder_->CreateBinaryIntrinsic(llvm::Intrinsic::ctlz, rev21, builder_->getFalse(), nullptr);
+    auto pos21 = builder_->CreateAdd(clz21, llvm::Constant::getIntegerValue(i64Ty, llvm::APInt(DWORD_SIZE, UL192)));
+    builder_->CreateBr(foundBb_);
+    // Compute a pointer to the char
+    builder_->SetInsertPoint(foundBb_);
+    auto nbits = builder_->CreatePHI(i64Ty, 4U);
+    nbits->addIncoming(pos10, clzV1D0Bb_);
+    nbits->addIncoming(pos11, clzV1D1Bb_);
+    nbits->addIncoming(pos20, clzV2D0Bb_);
+    nbits->addIncoming(pos21, inspectV2D1Bb_);
+    auto nbytes = builder_->CreateLShr(nbits, charTy->isIntegerTy(8U) ? 3UL : 4UL);
+    auto foundCharPtr = builder_->CreateInBoundsGEP(charTy, addr_, nbytes);
+    builder_->CreateBr(lastBb_);
+    return foundCharPtr;
+}
+
+template <bool MEM_BLOCK_SIZE_256_BITS>
+llvm::Value *MemCharSimdLowering::Generate(llvm::VectorType *vecTy)
+{
+    auto *charTy = llvm::cast<llvm::IntegerType>(vecTy->getElementType());
+    ASSERT(vecTy == GetU8X16Ty() || vecTy == GetU16X8Ty());
+    auto &context = func_->getContext();
+    auto firstBb = builder_->GetInsertBlock();
+    lastBb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_last", func_);
+    foundBb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_found", func_);
+    inspectV1D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d0", func_);
+    inspectV1D1Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
+    clzV1D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
+    llvm::Value *foundCharPtr = nullptr;
+    if constexpr (MEM_BLOCK_SIZE_256_BITS) {
+        inspectV2D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v2d0", func_);
+        inspectV2D1Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v2d1", func_);
+        clzV1D1Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
+        clzV2D0Bb_ = llvm::BasicBlock::Create(context, "mem_char_using_simd_inspect_v1d1", func_);
+        GenLoadAndFastCheck256(vecTy);
+        foundCharPtr = GenFindChar256(charTy);
+    } else {
+        GenLoadAndFastCheck128(vecTy);
+        foundCharPtr = GenFindChar128(charTy);
+    }
+    ASSERT(foundCharPtr != nullptr);
+    // The result is either a pointer to the char or null
+    builder_->SetInsertPoint(lastBb_);
+    auto result = builder_->CreatePHI(builder_->getPtrTy(), 2U);
+    result->addIncoming(llvm::Constant::getNullValue(builder_->getPtrTy()), firstBb);
+    result->addIncoming(foundCharPtr, foundBb_);
+    // Cleanup and return
+    lastBb_ = nullptr;
+    foundBb_ = nullptr;
+    inspectV1D0Bb_ = nullptr;
+    inspectV1D1Bb_ = nullptr;
+    inspectV2D0Bb_ = nullptr;
+    inspectV2D1Bb_ = nullptr;
+    clzV1D0Bb_ = nullptr;
+    clzV1D1Bb_ = nullptr;
+    clzV2D0Bb_ = nullptr;
+    vcmpeq1_ = nullptr;
+    vcmpeq2_ = nullptr;
+    return result;
+}
 
 static void MarkNormalBlocksRecursive(BasicBlock *block, Marker normal)
 {
@@ -485,6 +740,22 @@ bool LLVMIrConstructor::EmitIsInf(Inst *inst)
     return true;
 }
 
+bool LLVMIrConstructor::EmitMemmoveUnchecked(Inst *inst)
+{
+    switch (inst->CastToIntrinsic()->GetIntrinsicId()) {
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_1_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_1_BYTE, 5U);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_2_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_2_BYTE, 5U);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_4_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_4_BYTE, 5U);
+        case RuntimeInterface::IntrinsicId::INTRINSIC_COMPILER_MEMMOVE_UNCHECKED_8_BYTE:
+            return EmitFastPath(inst, RuntimeInterface::EntrypointId::ARRAY_COPY_TO_UNCHECKED_8_BYTE, 5U);
+        default:
+            UNREACHABLE();
+    }
+}
+
 bool LLVMIrConstructor::EmitUnreachable([[maybe_unused]] Inst *inst)
 {
     auto bb = GetCurrentBasicBlock();
@@ -705,6 +976,54 @@ bool LLVMIrConstructor::EmitCompressEightUtf16ToUtf8CharsUsingSimd(Inst *inst)
 bool LLVMIrConstructor::EmitCompressSixteenUtf16ToUtf8CharsUsingSimd(Inst *inst)
 {
     CreateCompressUtf16ToUtf8CharsUsingSimd<VECTOR_SIZE_16>(inst);
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemCharU8X16UsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(inst->GetInputType(0) == DataType::UINT8);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+
+    MemCharSimdLowering memCharLowering(GetInputValue(inst, 0), GetInputValue(inst, 1), GetBuilder(), GetFunc());
+    ValueMapAdd(inst, memCharLowering.Generate<false>(memCharLowering.GetU8X16Ty()));
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemCharU8X32UsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(inst->GetInputType(0) == DataType::UINT8);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+
+    MemCharSimdLowering memCharLowering(GetInputValue(inst, 0), GetInputValue(inst, 1), GetBuilder(), GetFunc());
+    ValueMapAdd(inst, memCharLowering.Generate<true>(memCharLowering.GetU8X16Ty()));
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemCharU16X8UsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(inst->GetInputType(0) == DataType::UINT16);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+
+    MemCharSimdLowering memCharLowering(GetInputValue(inst, 0), GetInputValue(inst, 1), GetBuilder(), GetFunc());
+    ValueMapAdd(inst, memCharLowering.Generate<false>(memCharLowering.GetU16X8Ty()));
+    return true;
+}
+
+bool LLVMIrConstructor::EmitMemCharU16X16UsingSimd(Inst *inst)
+{
+    ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
+    ASSERT(inst->GetInputType(0) == DataType::UINT16);
+    ASSERT(inst->GetInputType(1) == DataType::POINTER);
+
+    MemCharSimdLowering memCharLowering(GetInputValue(inst, 0), GetInputValue(inst, 1), GetBuilder(), GetFunc());
+    ValueMapAdd(inst, memCharLowering.Generate<true>(memCharLowering.GetU16X8Ty()));
     return true;
 }
 
@@ -1842,6 +2161,7 @@ llvm::Value *LLVMIrConstructor::CreateRoundArm64(Inst *inst, bool is64)
     auto lessThan = builder_.CreateICmpSLT(round, zero);
     builder_.CreateCondBr(lessThan, negative, done);
 
+    // CC-OFFNXT(C_RULE_ID_HORIZON_SPACE_SHIELD) false-positive
     // Negative input case, add 1 iff "input - round(input) == 0.5"
     SetCurrentBasicBlock(negative);
     // frinta instruction
@@ -2316,6 +2636,7 @@ template <uint32_t VECTOR_SIZE>
 void LLVMIrConstructor::CreateCompressUtf16ToUtf8CharsUsingSimd(Inst *inst)
 {
     ASSERT(GetGraph()->GetArch() == Arch::AARCH64);
+    ASSERT(GetGraph()->GetMode().IsFastPath());
     ASSERT(inst->GetInputType(0) == DataType::POINTER);
     ASSERT(inst->GetInputType(1) == DataType::POINTER);
     static_assert(VECTOR_SIZE == VECTOR_SIZE_8 || VECTOR_SIZE == VECTOR_SIZE_16, "Unexpected vector size");

@@ -580,7 +580,7 @@ void GraphChecker::CheckPhiInputs(Inst *phiInst)
 
 bool GraphChecker::CheckInstRegUsageSaved(const Inst *inst, Register reg) const
 {
-    if (reg == ACC_REG_ID) {
+    if (reg == GetAccReg()) {
         return true;
     }
     auto graph = inst->GetBasicBlock()->GetGraph();

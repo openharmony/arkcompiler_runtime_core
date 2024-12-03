@@ -15,6 +15,7 @@
 
 #include "common.h"
 #include "bytecode_optimizer/reg_acc_alloc.h"
+#include <gtest/gtest.h>
 #include "bytecode_optimizer/optimize_bytecode.h"
 
 namespace ark::bytecodeopt::test {

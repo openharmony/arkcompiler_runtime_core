@@ -57,7 +57,7 @@ TEST_F(LibAbcKitInspectApiFilesTest, DynamicFileGetVersion)
 
     AbckitFileVersion version = g_implI->fileGetVersion(file);
     // NOLINTNEXTLINE(readability-magic-numbers)
-    std::array<uint8_t, ABCKIT_VERSION_SIZE> expectedVersion = {13, 0, 0, 0};
+    std::array<uint8_t, ABCKIT_VERSION_SIZE> expectedVersion = {12, 0, 6, 0};
     const auto versionsEquality = std::memcmp(expectedVersion.data(), version, sizeof(uint8_t) * ABCKIT_VERSION_SIZE);
     ASSERT_EQ(versionsEquality, 0);
 

@@ -94,6 +94,7 @@ std::unique_ptr<JSProxy> JSProxy::Create(EtsClass *etsClass, Span<Method *> targ
 
     ASSERT(IsProxyClass(proxyCls));
 
+    // CC-OFFNXT(G.RES.09) private constructor
     auto jsProxy = std::unique_ptr<JSProxy>(new JSProxy(EtsClass::FromRuntimeClass(proxyCls)));
     return jsProxy;
 }

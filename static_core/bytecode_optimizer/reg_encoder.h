@@ -75,7 +75,7 @@ struct RegContent {
     // NOLINTNEXTLINE(misc-non-private-member-variables-in-classes)
     compiler::DataType::Type type;
 
-    RegContent() : reg(compiler::INVALID_REG), type(compiler::DataType::NO_TYPE) {}
+    RegContent() : reg(compiler::GetInvalidReg()), type(compiler::DataType::NO_TYPE) {}
     RegContent(compiler::Register r, compiler::DataType::Type t) : reg(r), type(t) {}
 
     bool operator==(const RegContent &other) const
@@ -98,7 +98,7 @@ using ark::compiler::Inst;
 using ark::compiler::Opcode;
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class RegEncoder : public compiler::Optimization, public compiler::GraphVisitor {
+class PANDA_PUBLIC_API RegEncoder : public compiler::Optimization, public compiler::GraphVisitor {
 public:
     explicit RegEncoder(compiler::Graph *graph) : compiler::Optimization(graph) {}
 
@@ -160,40 +160,47 @@ private:
     void InsertSpills();
     void InsertSpillsForInst(compiler::Inst *inst);
     void InsertSpillsForDynInputsInst(compiler::Inst *inst);
+    bool InsertSpillsForDynRangeInst(compiler::Inst *inst, size_t nargs, size_t start);
     size_t GetStartInputIndex(compiler::Inst *inst);
+    void RenumberDstReg(compiler::Inst *inst, size_t temp, size_t rangeTemp = 0, bool largeTemp = false);
 
     compiler::Register GetNumArgsFromGraph() const
     {
         auto adapter = GetGraph()->GetRuntime();
         auto method = GetGraph()->GetMethod();
         auto numArgs = adapter->GetMethodTotalArgumentsCount(method);
-        ASSERT(numArgs <= compiler::VIRTUAL_FRAME_SIZE);
+        ASSERT(numArgs <= compiler::GetFrameSize());
         return numArgs;
     }
 
     compiler::Register GetNumLocalsFromGraph() const
     {
         auto numLocals = GetGraph()->GetStackSlotsCount();
-        ASSERT(numLocals <= compiler::VIRTUAL_FRAME_SIZE);
+        ASSERT(numLocals <= compiler::GetFrameSize());
         return numLocals;
     }
 
     compiler::Register GetNumRegs() const
     {
         auto numRegs = GetNumLocalsFromGraph() + GetNumArgsFromGraph();
-        ASSERT(numRegs <= compiler::VIRTUAL_FRAME_SIZE);
+        ASSERT(numRegs <= compiler::GetFrameSize());
         return numRegs;
     }
 
     void SaveNumLocalsToGraph(uint32_t numLocals) const
     {
-        ASSERT(numLocals <= compiler::VIRTUAL_FRAME_SIZE);
+        ASSERT(numLocals <= compiler::GetFrameSize());
         GetGraph()->SetStackSlotsCount(numLocals);
     }
 
     bool GetStatus() const
     {
         return success_;
+    }
+
+    bool CheckStatus() const
+    {
+        return !GetGraph()->IsAbcKit() || success_;
     }
 
     static void CallHelper(compiler::GraphVisitor *visitor, Inst *inst)

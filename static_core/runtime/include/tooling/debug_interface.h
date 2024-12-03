@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef PANDA_RUNTIME_DEBUG_DEBUG_INTERFACE_H
-#define PANDA_RUNTIME_DEBUG_DEBUG_INTERFACE_H
+#ifndef PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INTERFACE_H
+#define PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INTERFACE_H
 
 #include <cstdint>
 #include <list>
@@ -31,18 +31,13 @@
 #include "runtime/include/thread.h"
 #include "runtime/include/tooling/pt_location.h"
 #include "runtime/include/tooling/pt_macros.h"
-#include "runtime/include/tooling/pt_object.h"
 #include "runtime/include/tooling/pt_property.h"
 #include "runtime/include/tooling/pt_thread.h"
-#include "runtime/include/tooling/pt_value.h"
 #include "runtime/include/tooling/vreg_value.h"
-#include "runtime/interpreter/frame.h"
-#include "runtime/include/tooling/pt_lang_extension.h"
 #include "runtime/include/typed_value.h"
+#include "runtime/interpreter/frame.h"
 
 namespace ark::tooling {
-class PtLangExt;
-
 class Error {
 public:
     enum class Type {
@@ -155,13 +150,6 @@ struct ThreadInfo {
     int32_t priority;
     bool isDaemon;
     ThreadGroup threadGroup;
-};
-
-// NOLINTNEXTLINE(cppcoreguidelines-pro-type-member-init)
-struct PandaClassDefinition {
-    PtClass klass;
-    uint32_t classByteCount;
-    const unsigned char *classBytes;
 };
 
 enum PauseReason {
@@ -367,37 +355,7 @@ public:
 
     virtual void Paused(PauseReason /* reason */) {}
     virtual void Breakpoint(PtThread /* thread */, const PtLocation & /* location */) {}
-    virtual void Exception(PtThread /* thread */, const PtLocation & /* location */, PtObject /* exceptionObject */,
-                           const PtLocation & /* catchLocation */)
-    {
-    }
-    virtual void ExceptionCatch(PtThread /* thread */, const PtLocation & /* location */,
-                                PtObject /* exceptionObject */)
-    {
-    }
-    virtual void FramePop(PtThread /* thread */, PtMethod /* method */, bool /* wasPoppedByException */) {}
-    virtual void MethodEntry(PtThread /* thread */, PtMethod /* method */) {}
-
-    virtual void MethodExit(PtThread /* thread */, PtMethod /* method */, bool /* wasPoppedByException */,
-                            PtValue /* returnValue */)
-    {
-    }
-    virtual void PropertyAccess(PtThread /* thread */, const PtLocation & /* location */, PtObject /* object */,
-                                PtProperty /* property */)
-    {
-    }
-    virtual void PropertyModification(PtThread /* thread */, const PtLocation & /* location */, PtObject /* object */,
-                                      PtProperty /* property */, PtValue /* newValue */)
-    {
-    }
-    virtual void MonitorWait(PtThread /* thread */, PtObject /* object */, int64_t /* timeout */) {}
-    virtual void MonitorWaited(PtThread /* thread */, PtObject /* object */, bool /* timedOut */) {}
-    virtual void MonitorContendedEnter(PtThread /* thread */, PtObject /* object */) {}
-    virtual void MonitorContendedEntered(PtThread /* thread */, PtObject /* object */) {}
-    virtual void ObjectAlloc(PtClass /* klass */, PtObject /* object */, PtThread /* thread */, size_t /* size */) {}
     virtual void SingleStep(PtThread /* thread */, const PtLocation & /* location */) {}
-    virtual void ClassLoad(PtThread /* thread */, PtClass /* klass */) {}
-    virtual void ClassPrepare(PtThread /* thread */, PtClass /* klass */) {}
 
     // NOLINTNEXTLINE(performance-unnecessary-value-param)
     virtual void ExceptionRevoked(ExceptionWrapper /* reason */, ExceptionID /* exceptionId */) {}
@@ -409,8 +367,6 @@ public:
     virtual void ExecutionContextDestroyed(ExecutionContextWrapper /* context */) {}
 
     virtual void ExecutionContextsCleared() {}
-
-    virtual void InspectRequested(PtObject /* object */, PtObject /* hints */) {}
 
     // * * * * *
     // Deprecated hooks end
@@ -507,10 +463,6 @@ public:
 
     virtual ~DebugInterface() = default;
 
-    virtual PtLangExt *GetLangExtension() const = 0;
-
-    virtual Expected<PtMethod, Error> GetPtMethod(const PtLocation &location) const = 0;
-
     virtual std::optional<Error> GetThreadList(PandaVector<PtThread> *threadList) const = 0;
 
     virtual std::optional<Error> SetVariable(PtThread /* thread */, uint32_t /* frameDepth */, int32_t /* regNumber */,
@@ -525,23 +477,18 @@ public:
         return {};
     }
 
-    virtual std::optional<Error> GetProperty(PtObject thisObject, PtProperty property, PtValue *value) const = 0;
+    virtual std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frameNumber,
+                                                    const ExpressionWrapper &expr, Method **method,
+                                                    VRegValue *result) const = 0;
 
-    virtual std::optional<Error> SetProperty(PtObject thisObject, PtProperty property, const PtValue &value) const = 0;
-
-    virtual std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frameNumber, ExpressionWrapper expr,
-                                                    PtValue *result) const = 0;
+    virtual std::optional<Error> EvaluateExpression(PtThread thread, uint32_t frameNumber, Method *method,
+                                                    VRegValue *result) const = 0;
 
     virtual std::optional<Error> GetThreadInfo(PtThread thread, ThreadInfo *infoPtr) const = 0;
 
     virtual std::optional<Error> RestartFrame(PtThread thread, uint32_t frameNumber) const = 0;
 
     virtual std::optional<Error> SetAsyncCallStackDepth(uint32_t maxDepth) const = 0;
-
-    virtual std::optional<Error> AwaitPromise(PtObject promiseObject, PtValue *result) const = 0;
-
-    virtual std::optional<Error> CallFunctionOn(PtObject object, PtMethod method, const PandaVector<PtValue> &arguments,
-                                                PtValue *result) const = 0;
 
     virtual std::optional<Error> GetProperties(uint32_t *countPtr, char ***propertyPtr) const = 0;
 
@@ -573,28 +520,9 @@ public:
         return {};
     }
 
-    // * * * * *
-    // Deprecated API
-    // * * * * *
-    virtual std::optional<Error> GetThisVariableByFrame(PtThread thread, uint32_t frameDepth, PtValue *value) = 0;
-    virtual std::optional<Error> SetPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
-    virtual std::optional<Error> ClearPropertyAccessWatch(PtClass klass, PtProperty property) = 0;
-    virtual std::optional<Error> SetPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
-    virtual std::optional<Error> ClearPropertyModificationWatch(PtClass klass, PtProperty property) = 0;
-    virtual std::optional<Error> RetransformClasses(int classCount, const PtClass *classes) const = 0;
-    virtual std::optional<Error> RedefineClasses(int classCount, const PandaClassDefinition *classes) const = 0;
-    virtual std::optional<Error> SetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
-                                             const PtValue &value) const = 0;
-    virtual std::optional<Error> GetVariable(PtThread thread, uint32_t frameDepth, int32_t regNumber,
-                                             PtValue *value) const = 0;
-
-    // * * * * *
-    // Deprecated API ends
-    // * * * * *
-
     NO_COPY_SEMANTIC(DebugInterface);
     NO_MOVE_SEMANTIC(DebugInterface);
 };
 }  // namespace ark::tooling
 
-#endif  // PANDA_RUNTIME_DEBUG_DEBUG_INTERFACE_H
+#endif  // PANDA_RUNTIME_INCLUDE_TOOLING_DEBUG_INTERFACE_H

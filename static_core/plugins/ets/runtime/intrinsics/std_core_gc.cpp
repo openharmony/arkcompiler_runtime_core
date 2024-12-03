@@ -153,6 +153,9 @@ static GCTaskCause GCCauseFromInt(EtsInt cause)
     if (cause == 3_I) {
         return GCTaskCause::OOM_CAUSE;
     }
+    if (cause == 4_I) {
+        return GCTaskCause::CROSSREF_CAUSE;
+    }
     return GCTaskCause::INVALID_CAUSE;
 }
 
@@ -358,13 +361,7 @@ extern "C" EtsDoubleArray *StdGCAllocatePinnedDoubleArray(EtsLong length)
 
 extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
 {
-    if (obj == nullptr) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        ASSERT(coroutine != nullptr);
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_ERROR, "Non heap object");
-        return SpaceTypeToIndex(SpaceType::SPACE_TYPE_UNDEFINED);
-    }
-
+    ASSERT(obj != nullptr);
     auto *vm = Thread::GetCurrent()->GetVM();
     SpaceType objSpaceType =
         PoolManager::GetMmapMemPool()->GetSpaceTypeForAddr(static_cast<void *>(obj->GetCoreType()));
@@ -381,13 +378,9 @@ extern "C" EtsInt StdGCGetObjectSpaceType(EtsObject *obj)
 
 extern "C" void StdGCPinObject(EtsObject *obj)
 {
+    ASSERT(obj != nullptr);
     auto *coroutine = EtsCoroutine::GetCurrent();
     ASSERT(coroutine != nullptr);
-    if (obj == nullptr) {
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
-                          "The value must be an object");
-        return;
-    }
 
     auto *vm = coroutine->GetVM();
     auto *gc = vm->GetGC();
@@ -401,21 +394,21 @@ extern "C" void StdGCPinObject(EtsObject *obj)
 
 extern "C" void StdGCUnpinObject(EtsObject *obj)
 {
-    if (obj == nullptr) {
-        auto *coroutine = EtsCoroutine::GetCurrent();
-        ASSERT(coroutine != nullptr);
-        ThrowEtsException(coroutine, panda_file_items::class_descriptors::NULL_POINTER_ERROR,
-                          "The value must be an object");
-        return;
-    }
-
+    ASSERT(obj != nullptr);
     auto *vm = Thread::GetCurrent()->GetVM();
     vm->GetHeapManager()->UnpinObject(obj->GetCoreType());
 }
 
 extern "C" EtsLong StdGCGetObjectAddress(EtsObject *obj)
 {
-    return obj == nullptr ? 0 : reinterpret_cast<EtsLong>(obj->GetCoreType());
+    ASSERT(obj != nullptr);
+    return reinterpret_cast<EtsLong>(obj);
+}
+
+extern "C" EtsLong StdGetObjectSize(EtsObject *obj)
+{
+    ASSERT(obj != nullptr);
+    return static_cast<EtsLong>(obj->GetCoreType()->ObjectSize());
 }
 
 // Function schedules GC before n-th allocation by setting counter to the specific GC trigger.

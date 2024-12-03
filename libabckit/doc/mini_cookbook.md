@@ -14,16 +14,20 @@ auto implG = AbckitGetGraphApiImpl(version); // language-independent graph api
 auto dynG = AbckitGetIsaApiDynamicImpl(version); // language-dependent graph api
 auto statG = AbckitGetIsaApiStaticImpl(version); // language-dependent graph api
 ```
+
 One static instance of each at the beginning of the .cpp file is enough
 
 ## Errors
+
 Every API in libabckit sets error value after execution. You can get it with `impl->getLastError()`. If there are no errors, the return value will be ABCKIT_STATUSNO_ERROR.
 Сheck the execution status with:
+
 ```cpp
 assert(impl->getLastError() == ABCKIT_STATUSNO_ERROR);
 ```
 
 ## Strings in LibAbcKit
+
 Here is an useful example of a custom function for working with strings in libabckit:
 
 ```cpp
@@ -46,7 +50,7 @@ std::string AbckitStringToString(AbckitFile *file, AbckitString *str)
 
 ## Open/Close/Write
 
-### *Open file*
+### _Open file_
 
 Mandatory and only entry point
 
@@ -56,7 +60,7 @@ AbckitFile *file = implI->openAbc(path_to_abc);
 
 Make sure that you have used the WriteAbc() or CloseFile() function after working with the file. This way you will avoid memory leaks
 
-### *Write or Close*
+### _Write or Close_
 
 ```cpp
 impl->writeAbc(file, path_to_output_file); // save changes and close
@@ -67,6 +71,7 @@ impl->closeFile(file); // close without saving changes
 ## Traversing
 
 libabckit objects hierarchy:
+
 1. file contains modules ("file" is ".abc file" and "module" is the abstract of "source code file")
 2. module contains: namespaces, top level classes, top level functions
 3. namespace contains: nested namespaces, classes, functions
@@ -75,12 +80,14 @@ libabckit objects hierarchy:
 
 <!-- file module  class  function -> introduce hierarchy -->
 
-All the enumerators in libabckit accepts libabckit object, void* data with user data and callback lambda:
+All the enumerators in libabckit accepts libabckit object, void\* data with user data and callback lambda:
+
 ```cpp
 void XXXEnumerateYYY(AbckitCoreXXX* xxx, void *data, bool(*cb)(AbckitCoreYYY* yyy, void *data))
 ```
 
-### *Enumerate methods from class*
+### _Enumerate methods from class_
+
 ```cpp
 // AbckitCoreClass *klass
 implI->classEnumerateMethods(klass, data, [](AbckitCoreMethod *method, void *data) {
@@ -88,7 +95,8 @@ implI->classEnumerateMethods(klass, data, [](AbckitCoreMethod *method, void *dat
 });
 ```
 
-### *Collect all top level classes from module*
+### _Collect all top level classes from module_
+
 ```cpp
 // AbckitCoreModule *module
 std::vector<AbckitCoreClass *> classes;
@@ -100,13 +108,15 @@ implI->moduleEnumerateClasses(module, (void*)&classes, [](AbckitCoreClass *klass
 
 ## Inspecting
 
-### *Get method's parent class*
+### _Get method's parent class_
+
 ```cpp
 // AbckitCoreMethod *method
 AbckitCoreClass *klass = implI->functionGetParentClass(method);
 ```
 
-### *Get value*
+### _Get value_
+
 <!-- Test: LiteralGetU32_2 -->
 
 ```cpp
@@ -118,7 +128,7 @@ void GetValues(AbckitValue *u32_res, AbckitValue *double_res, AbckitValue *strin
 }
 ```
 
-### *Get module name*
+### _Get module name_
 
 ```cpp
 // AbckitCoreModule *mod
@@ -127,11 +137,10 @@ AbckitString *GetModuleName(AbckitCoreModule *mod) {
 }
 ```
 
-
 ## Metadata Lang API
 
+### _Add annotation for arkts method_
 
-### *Add annotation for arkts method*
 ```cpp
 void AddAnno(AbckitModifyContext *file, AbckitCoreMethod *method) {
     auto mod = implI->functionGetModule(method);
@@ -157,7 +166,8 @@ void AddAnno(AbckitModifyContext *file, AbckitCoreMethod *method) {
 }
 ```
 
-### *Cast AbckitArtksXXX -> AbckitXXX / AbckitXXX -> AbckitArktsXXX*
+### _Cast AbckitArtksXXX -> AbckitXXX / AbckitXXX -> AbckitArktsXXX_
+
 ```cpp
 AbckitCoreModule *CastToAbcKit(AbckitArktsInspectApi implArkI, AbckitArktsModule *mod) {
     return implArkI->arkTsModuleToCoreModule(mod); }
@@ -168,7 +178,7 @@ AbckitArktsAnnotation *CastToArkTS(AbckitArktsInspectApi implArkI, AbckitCoreAnn
 
 ## Modification
 
-### *Create values*
+### _Create values_
 
 ```cpp
 AbckitLiteral *res1 = implM->createLiteralString(file, "asdf");
@@ -181,7 +191,8 @@ AbckitValue *res_u = implM->createValueU1(file, true);
 AbckitValue *res_d = implM->createValueDouble(file, 1.2);
 ```
 
-### *Get value type*
+### _Get value type_
+
 <!-- Test: ValueGetType_1 -->
 
 ```cpp
@@ -192,39 +203,39 @@ AbckitType *d_type = implI->valueGetType(res_d); // val_d->id == ABCKIT_TYPE_ID_
 
 # Graph
 
+## _Create and destroy graph_
 
-## *Create and destroy graph*
 ```cpp
 AbckitGraph *graph = implI->createGraphFromFunction(method);
 // ...
-implM->functionSetGraph(method, graph); // save with changes
-// or
-impl->destroyGraph(graph); // without changes
+impl->destroyGraph(graph);
 ```
 
-## *Graph traversal*
+## _Graph traversal_
+
 ```cpp
 implG->gVisitBlocksRpo(ctxG, &bbs, [](AbckitBasicBlock *bb, void *data) {
     // user lambda
 });
 ```
+
 ```cpp
-implG->bbVisitSuccBlocks(bb, (void *)&succBBs, []([[maybe_unused]] AbckitBasicBlock *curBasicBlock,
-    AbckitBasicBlock *succBasicBlock, void *d) {
+implG->bbVisitSuccBlocks(bb, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
     // user lambda
 });
 ```
+
 ```cpp
-implG->bbVisitPredBlocks(bb, (void *)&predBBs,
-    []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+implG->bbVisitPredBlocks(bb, &predBBs,
+    [](AbckitBasicBlock *succBasicBlock, void *d) {
         // user lambda
     });
 
 // ...
 ```
 
+### _Collect all basic blocks from graph_
 
-### *Collect all basic blocks from graph*
 ```cpp
 std::vector<AbckitBasicBlock *> bbs;
 implG->gVisitBlocksRPO(ctxG, &bbs, [](AbckitBasicBlock *bb, void *data) {
@@ -232,7 +243,8 @@ implG->gVisitBlocksRPO(ctxG, &bbs, [](AbckitBasicBlock *bb, void *data) {
 });
 ```
 
-### *Collect all inst in basic block*
+### _Collect all inst in basic block_
+
 ```cpp
 std::vector<AbckitInst *> insts;
 for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGetNext(inst)) {
@@ -240,11 +252,12 @@ for (auto *inst = implG->bbGetFirstInst(bb); inst != nullptr; inst = implG->iGet
 }
 ```
 
-### *Collect block's succs*
+### _Collect block's succs_
+
 ```cpp
 std::vector<AbckitBasicBlock *> succBBs;
-implG->bbVisitSuccBlocks(bb, (void *)&succBBs,
-    []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+implG->bbVisitSuccBlocks(bb, &succBBs,
+    [](AbckitBasicBlock *succBasicBlock, void *d) {
         auto *succs = (std::vector<AbckitBasicBlock *> *)d;
         succs->emplace_back(succBasicBlock);
     });
@@ -252,24 +265,30 @@ implG->bbVisitSuccBlocks(bb, (void *)&succBBs,
 
 ## Graph inspecting
 
-### *Get method*
+### _Get method_
+
 ```cpp
 AbckitCoreMethod *method = implG->iGetFunction(curInst);
 ```
 
 ## Graph modification
 
-### *Create basic block*
+### _Create basic block_
+
 ```cpp
 AbckitBasicBlock *empty = implG->bbCreateEmpty(ctxG);
 ```
-### *Create insts with const*
+
+### _Create insts with const_
+
 ```cpp
 AbckitInst *new_inst = implG->gCreateConstantI64(ctxG, 1U);
 ```
 
-### *Connect and disconnect blocks*
+### _Connect and disconnect blocks_
+
 <!-- Test: BBcreateEmptyBlock_1 -->
+
 ```cpp
 auto *start = implG->gGetStartBasicBlock(ctxG);
 auto *bb = implG->bbCreateEmpty(ctxG);
@@ -278,16 +297,17 @@ implG->bbInsertSuccBlock(start, bb, 0);
 implG->bbEraseSuccBlock(start, 0);
 ```
 
-### *Insert instructions*
+### _Insert instructions_
+
 ```cpp
 implG->bbAddInstBack(bb, some_inst_1);
 implG->iInsertAfter(some_inst_1, some_inst_2);
 ```
 
-
 ## Graph-lang
 
-### *Create instructions*
+### _Create instructions_
+
 ```cpp
 // for static
 AbckitInst *neg_inst = statG->iCreateNeg(ctxG, new_inst);
@@ -300,7 +320,7 @@ AbckitInst *add_inst = dynG->iCreateAdd2(ctxG, neg_inst, new_inst);
 AbckitInst *ret = dynG->iCreateReturnundefined(ctxG);
 ```
 
-### *Create 'print("Hello")' for ArkTS1.0*
+### _Create 'print("Hello")' for ArkTS1.0_
 
 ```cpp
 AbckitInst *str = dynG->iCreateLoadString(ctxG, implM->createString(file, "Hello"));
@@ -308,10 +328,9 @@ AbckitInst *print = dynG->iCreateTryldglobalbyname(ctxG, implM->createString(fil
 AbckitInst *callArg = dynG->iCreateCallarg1(ctxG, print, str);
 ```
 
-
 # User scenarios
 
-### *Enumerate the names of methods from the module*
+### _Enumerate the names of methods from the module_
 
 ```cpp
 std::vector<std::string> functionNames;
@@ -328,9 +347,9 @@ std::function<void(AbckitCoreClass *)> cbClass = [&](AbckitCoreClass *c) {
     });
 };
 
-std::function<void(AbckitCoreNamespace *)> cbNamespce;
-cbNamespce = [&](AbckitCoreNamespace *n) {
-    implI->namespaceEnumerateNamespaces(n, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+std::function<void(AbckitCoreNamespace *)> cbNamespace;
+cbNamespace = [&](AbckitCoreNamespace *n) {
+    implI->namespaceEnumerateNamespaces(n, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
         (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
         return true;
     });
@@ -345,7 +364,7 @@ cbNamespce = [&](AbckitCoreNamespace *n) {
 };
 
 std::function<void(AbckitCoreModule *)> cbModule = [&](AbckitCoreModule *m) {
-    implI->moduleEnumerateNamespaces(m, &cbNamespce, [](AbckitCoreNamespace *n, void *cb) {
+    implI->moduleEnumerateNamespaces(m, &cbNamespace, [](AbckitCoreNamespace *n, void *cb) {
         (*reinterpret_cast<std::function<void(AbckitCoreNamespace *)> *>(cb))(n);
         return true;
     });
@@ -365,12 +384,12 @@ implI->fileEnumerateModules(file, &cbModule, [](AbckitCoreModule *m, void *cb) {
 });
 ```
 
+### _Collect predecessor basic blocks_
 
-### *Collect predecessor basic blocks*
 ```cpp
 std::vector<AbckitBasicBlock *> predBBs;
-implG->bbVisitPredBlocks(bb, (void *)&predBBs,
-    []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
+implG->bbVisitPredBlocks(bb, &predBBs,
+    [](AbckitBasicBlock *succBasicBlock, void *d) {
     auto *preds = (std::vector<AbckitBasicBlock *> *)d;
     preds->emplace_back(succBasicBlock);
     });

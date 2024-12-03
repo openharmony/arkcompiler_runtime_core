@@ -225,7 +225,9 @@ bool Verifier::CheckConstantPoolActions(const verifier::ActionType type, panda_f
 bool Verifier::CollectIdInInstructions(const panda_file::File::EntityId &method_id)
 {
     panda_file::MethodDataAccessor method_accessor(*file_, method_id);
-    ASSERT(method_accessor.GetCodeId().has_value());
+    if (!method_accessor.GetCodeId().has_value()) {
+        return false;
+    }
     panda_file::CodeDataAccessor code_accessor(*file_, method_accessor.GetCodeId().value());
     const auto ins_size = code_accessor.GetCodeSize();
     const auto ins_arr = code_accessor.GetInstructions();

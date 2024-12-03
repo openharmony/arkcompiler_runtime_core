@@ -13,10 +13,11 @@
 
 add_custom_target(ets_checked_tests COMMENT "Running sts core tests with checkers")
 add_dependencies(ets_checked_tests ark)
+add_subdirectory(jitinterface)
 
 function(panda_add_checked_test_ets)
     set(prefix ARG)
-    set(singleValues NAME FILE SUPPORT_RELEASE LIBCORE)
+    set(singleValues NAME FILE SUPPORT_RELEASE LIBCORE JITINTERFACE)
     set(multiValues AUX_FILES EXT_FILES)
     cmake_parse_arguments(${prefix} "" "${singleValues}" "${multiValues}" ${ARGN})
 
@@ -115,6 +116,10 @@ function(panda_add_checked_test_ets)
                       COMMENT "Running ${TEST_NAME} checked test"
                       DEPENDS ${BINARY_FILE} ${EXT_FILES})
 
+    if (DEFINED ARG_JITINTERFACE)
+        add_dependencies(${TEST_NAME} jitinterface)
+    endif()
+
     add_dependencies(ets_checked_tests ${TEST_NAME})
 
     foreach(AUX_FILE ${ARG_AUX_FILES})
@@ -133,6 +138,7 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         # inlining of the following intrinsics is only enabled for these two targets
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isFinite.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_isNaN.sts)
+        panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/idiom_memmove.sts)
         # CallLaunch isn't supported for arm32 (need to fix storing args in stack)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/launch_test.sts SUPPORT_RELEASE true)
         # AOT mode for arm32 is not supported
@@ -140,6 +146,10 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_1.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_2.sts)
         panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/inlining_test/inlining_order_3.sts)
+        if (NOT PANDA_PRODUCT_BUILD)
+            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_allocations.sts JITINTERFACE true)
+            panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/string_tlab_repeat.sts JITINTERFACE true)
+        endif()
         # LoadAndInitClass in AOT mode for arm32 is not supported
         # NOTE(pantos) Issue #17103 reassign readonly property
         # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/optimize_load_readonly_static.sts)
@@ -243,11 +253,12 @@ if (PANDA_TARGET_AMD64 OR NOT PANDA_ARM64_TESTS_WITH_SANITIZER)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_catch_assert3.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare1.sts)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare2.sts)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare3.sts)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare4.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare5.sts)
-    panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare6.sts)
+    # NOTE(vpukhov): #19653 typeof in frontend and runtime differ
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare2.sts)
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare3.sts)
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare4.sts)
+    # panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_typeof_compare6.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_async_lock_callback.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_async_lock_callback1.sts)
     panda_add_checked_test_ets(FILE ${CMAKE_CURRENT_SOURCE_DIR}/ets_promise_launch.sts)

@@ -114,7 +114,8 @@ class StressJSFull(StressJSTest):
         cmd = [stress_common.STRESS, '--input-file', test.abc, '--output-file', stress_abc]
         if test.source in self.options_list:
             cmd += [self.options_list[test.source][0], self.options_list[test.source][1]]
-        result: stress_common.ExecRes = stress_common.stress_exec(cmd, allow_error=True, print_command=False, env={"OUT_DIR": self.build_dir})
+        result: stress_common.ExecRes = stress_common.stress_exec(cmd, allow_error=True, print_command=False,
+                                                                  env={"OUT_DIR": self.build_dir})
         if result.returncode != 0:
             error = stress_common.parse_stdout(result.returncode, result.stdout)
             return Result(test.source, error)
@@ -129,7 +130,8 @@ class StressJSFull(StressJSTest):
             return Result(test.source, "0")
 
         if test_result_one.result != test_result_two.result:
-            return Result(test.source, f'JS Test result changed. Was {test_result_one.result}, now {test_result_two.result}')
+            msg = f'JS Test result changed. Was {test_result_one.result}, now {test_result_two.result}'
+            return Result(test.source, msg)
 
         return Result(test.source, "0")
 

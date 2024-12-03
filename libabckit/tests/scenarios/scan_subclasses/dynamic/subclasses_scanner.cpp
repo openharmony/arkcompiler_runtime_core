@@ -67,6 +67,7 @@ bool SubclassesScanner::IsLoadApi(AbckitCoreImportDescriptor *id, AbckitInst *in
     return found;
 }
 
+// CC-OFFNXT(G.INC.12-CPP) false positive. this function can not be made static.
 void SubclassesScanner::GetImportDescriptors(
     AbckitCoreModule *mod, std::vector<std::pair<AbckitCoreImportDescriptor *, size_t>> &importDescriptors)
 {

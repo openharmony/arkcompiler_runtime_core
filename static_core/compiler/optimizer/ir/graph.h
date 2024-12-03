@@ -146,7 +146,7 @@ inline GraphMode operator|(GraphMode a, GraphMode b)
 
 using EncodeDataType = Span<uint8_t>;
 
-class Graph final : public MarkerMgr {
+class PANDA_PUBLIC_API Graph final : public MarkerMgr {
 public:
     struct GraphArgs {
         ArenaAllocator *allocator;
@@ -306,9 +306,9 @@ public:
 
     const BoundsRangeInfo *GetBoundsRangeInfo() const;
 
-    const ArenaVector<BasicBlock *> &GetBlocksRPO() const;
+    PANDA_PUBLIC_API const ArenaVector<BasicBlock *> &GetBlocksRPO() const;
 
-    const ArenaVector<BasicBlock *> &GetBlocksLinearOrder() const;
+    PANDA_PUBLIC_API const ArenaVector<BasicBlock *> &GetBlocksLinearOrder() const;
 
     template <class Callback>
     void VisitAllInstructions(Callback callback);
@@ -535,7 +535,7 @@ public:
 
     void SetRegUsage(Register reg, DataType::Type type)
     {
-        ASSERT(reg != INVALID_REG);
+        ASSERT(reg != GetInvalidReg());
         if (DataType::IsFloatType(type)) {
             SetUsedReg<DataType::FLOAT64>(reg);
         } else {
@@ -719,14 +719,14 @@ public:
     {
         // Constant already in the table
         auto currentSlot = constInst->GetImmTableSlot();
-        if (currentSlot != INVALID_IMM_TABLE_SLOT) {
+        if (currentSlot != GetInvalidImmTableSlot()) {
             ASSERT(spilledConstants_[currentSlot] == constInst);
             return currentSlot;
         }
 
         auto count = spilledConstants_.size();
-        if (count >= MAX_NUM_IMM_SLOTS) {
-            return INVALID_IMM_TABLE_SLOT;
+        if (count >= GetMaxNumImmSlots()) {
+            return GetInvalidImmTableSlot();
         }
         spilledConstants_.push_back(constInst);
         constInst->SetImmTableSlot(count);
@@ -737,7 +737,7 @@ public:
     {
         auto slot = std::find(spilledConstants_.begin(), spilledConstants_.end(), constInst);
         if (slot == spilledConstants_.end()) {
-            return INVALID_IMM_TABLE_SLOT;
+            return GetInvalidImmTableSlot();
         }
         return std::distance(spilledConstants_.begin(), slot);
     }
@@ -749,7 +749,7 @@ public:
 
     bool HasAvailableConstantSpillSlots() const
     {
-        return GetSpilledConstantsCount() < MAX_NUM_IMM_SLOTS;
+        return GetSpilledConstantsCount() < GetMaxNumImmSlots();
     }
 
     auto begin()  // NOLINT(readability-identifier-naming)
@@ -801,7 +801,7 @@ public:
     }
 
     bool HasLoop() const;
-    bool HasIrreducibleLoop() const;
+    PANDA_PUBLIC_API bool HasIrreducibleLoop() const;
     bool HasInfiniteLoop() const;
     bool HasFloatRegs() const;
 
@@ -878,7 +878,7 @@ public:
     }
 
     void RemoveThrowableInst(const Inst *inst);
-    void ReplaceThrowableInst(Inst *oldInst, Inst *newInst);
+    PANDA_PUBLIC_API void ReplaceThrowableInst(Inst *oldInst, Inst *newInst);
 
     const auto &GetThrowableInstHandlers(const Inst *inst) const
     {
@@ -1290,7 +1290,7 @@ public:
         explicit ParameterList(const Graph *graph) : graph_(graph) {}
 
         // NOLINTNEXTLINE(readability-identifier-naming)
-        Iterator begin();
+        PANDA_PUBLIC_API Iterator begin();
         // NOLINTNEXTLINE(readability-identifier-naming)
         static Iterator end()
         {

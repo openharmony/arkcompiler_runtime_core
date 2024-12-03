@@ -29,7 +29,7 @@ namespace ark::panda_file {
 
 class FieldDataAccessor {
 public:
-    FieldDataAccessor(const File &pandaFile, File::EntityId fieldId);
+    PANDA_PUBLIC_API FieldDataAccessor(const File &pandaFile, File::EntityId fieldId);
 
     ~FieldDataAccessor() = default;
 
@@ -164,7 +164,7 @@ public:
 private:
     using FieldValue = std::variant<uint32_t, uint64_t>;
 
-    std::optional<FieldValue> GetValueInternal();
+    PANDA_PUBLIC_API std::optional<FieldValue> GetValueInternal();
 
     void SkipValue();
 

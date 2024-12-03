@@ -112,6 +112,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, DynamicFunctionGetName)
         "m0N0F1",
         "m0N0F2",
         "m0F0",
+        "methods_dynamic.#*@0*#m0F0F0",
         "m0F1",
         "m0F2",
         "methods_dynamic.#*@0*#",
@@ -256,6 +257,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, DynamicFunctionIsStatic)
         "m0N0F1",
         "m0N0F2",
         "m0F0",
+        "methods_dynamic.#*@0*#m0F0F0",
         "m0F1",
         "m0F2",
         "methods_dynamic.#*@0*#",
@@ -329,6 +331,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, DynamicFunctionIsAnonymous)
     std::set<std::string> anonymousMethods = {
         "methods_dynamic.#*@0*#",
         "methods_dynamic.#*@0*#^1",
+        "methods_dynamic.#*@0*#m0F0F0",
     };
 
     helpers::EnumerateAllMethods(file, [&anonymousMethods](AbckitCoreFunction *method) {
@@ -377,6 +380,53 @@ TEST_F(LibAbcKitInspectApiMethodsTest, StaticFunctionIsAnonymous)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 }
 
+// Test: test-kind=api, api=InspectApiImpl::functionGetParentFunction, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitInspectApiMethodsTest, DynamicFunctionGetParentFunction)
+{
+    AbckitFile *file = nullptr;
+    helpers::AssertOpenAbc(ABCKIT_ABC_DIR "ut/metadata_core/inspect_api/methods/methods_dynamic.abc", &file);
+
+    std::unordered_map<std::string, std::string> parentFunctions = {
+        {"M0C0F1", ""},
+        {"M0C0", ""},
+        {"M0C0F0", ""},
+        {"M0C0F2", ""},
+        {"M0N0C0F1", ""},
+        {"M0N0C0", ""},
+        {"M0N0C0F0", ""},
+        {"M0N0C0F2", ""},
+        {"m0N0N0F0", ""},
+        {"m0N0F0", ""},
+        {"m0N0F1", ""},
+        {"m0N0F2", ""},
+        {"m0F0", ""},
+        {"methods_dynamic.#*@0*#m0F0F0", ""},
+        {"m0F1", ""},
+        {"m0F2", ""},
+        {"methods_dynamic.#*@0*#", ""},
+        {"methods_dynamic.#*@0*#^1", ""},
+        {"func_main_0", ""},
+    };
+
+    helpers::EnumerateAllMethods(file, [&parentFunctions](AbckitCoreFunction *method) {
+        auto methodName = helpers::AbckitStringToString(g_implI->functionGetName(method));
+        ASSERT_EQ(parentFunctions.count(methodName.data()), 1);
+        AbckitCoreFunction *parentFunction = g_implI->functionGetParentFunction(method);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        if (parentFunction == nullptr) {
+            ASSERT_EQ(parentFunctions.at(methodName.data()), "");
+        } else {
+            auto className = helpers::AbckitStringToString(g_implI->functionGetName(parentFunction));
+            ASSERT_EQ(parentFunctions.at(methodName.data()), className);
+        }
+        parentFunctions.erase(methodName.data());
+    });
+    ASSERT_TRUE(parentFunctions.empty());
+
+    g_impl->closeFile(file);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+}
+
 // Test: test-kind=api, api=InspectApiImpl::functionGetParentClass, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitInspectApiMethodsTest, DynamicFunctionGetParentClass)
 {
@@ -399,6 +449,7 @@ TEST_F(LibAbcKitInspectApiMethodsTest, DynamicFunctionGetParentClass)
         {"m0F0", ""},
         {"m0F1", ""},
         {"m0F2", ""},
+        {"methods_dynamic.#*@0*#m0F0F0", ""},
         {"methods_dynamic.#*@0*#", ""},
         {"methods_dynamic.#*@0*#^1", ""},
         {"func_main_0", ""},

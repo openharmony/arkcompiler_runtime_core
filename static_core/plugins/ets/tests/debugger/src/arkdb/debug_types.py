@@ -25,7 +25,7 @@ from typing import Any, Dict, Generic, List, Literal, TypeVar, Union
 import trio
 from cdp import debugger, runtime
 
-from arkdb.compiler import CompileError, EvaluateCompileExpressionArgs
+from arkdb.compiler import CompileError, EvaluateCompileExpressionArgs, StringCodeCompiler
 from arkdb.compiler_verification.expression_verifier import ExpressionVerifier
 from arkdb.debug_client import DebuggerClient
 from arkdb.logs import logger
@@ -191,6 +191,22 @@ class Frame(Wrap[debugger.CallFrame]):
         return self.locator.remote_object(self.data.this) if self.data.this is not None else None
 
 
+def compile_expression(
+    code_compiler: StringCodeCompiler,
+    eval_args: EvaluateCompileExpressionArgs,
+    verifier: ExpressionVerifier | None = None,
+    allow_compiler_failure: bool = False,
+):
+    try:
+        compiled_expression = code_compiler.compile_expression(eval_args)
+    except CalledProcessError as e:
+        if allow_compiler_failure:
+            raise CompileError(e.output) from e
+    if verifier is not None:
+        verifier(compiled_expression)
+    return base64.b64encode(compiled_expression.panda_file.read_bytes()).decode("utf-8")
+
+
 class Paused(Wrap[debugger.Paused]):
     def frame(self, id: Union[int, debugger.CallFrameId] = 0) -> Frame:
         frame_id = id if isinstance(id, debugger.CallFrameId) else debugger.CallFrameId(str(id))
@@ -233,25 +249,19 @@ class Paused(Wrap[debugger.Paused]):
         # Must be 1-based.
         paused_code_line = self.data.call_frames[0].location.line_number + 1
 
-        try:
-            compiled_expression = self.client.code_compiler.compile_expression(
-                EvaluateCompileExpressionArgs(
-                    ets_expression=expression,
-                    eval_panda_files=abc_files,
-                    eval_source=paused_file,
-                    eval_line=paused_code_line,
-                    eval_log_level="debug",
-                    ast_parser=verifier.ast_parser if verifier else None,
-                )
-            )
-        except CalledProcessError as e:
-            if allow_compiler_failure:
-                raise CompileError(e.output) from e
-
-        if verifier is not None:
-            verifier(compiled_expression)
-
-        compiled_expression_bytecode = base64.b64encode(compiled_expression.panda_file.read_bytes()).decode("utf-8")
+        compiled_expression_bytecode = compile_expression(
+            self.client.code_compiler,
+            EvaluateCompileExpressionArgs(
+                ets_expression=expression,
+                eval_panda_files=abc_files,
+                eval_source=paused_file,
+                eval_line=paused_code_line,
+                eval_log_level="debug",
+                ast_parser=verifier.ast_parser if verifier else None,
+            ),
+            verifier=verifier,
+            allow_compiler_failure=allow_compiler_failure,
+        )
 
         return await self.client.evaluate(compiled_expression_bytecode)
 

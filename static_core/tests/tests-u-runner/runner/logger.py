@@ -16,10 +16,11 @@
 #
 
 import logging
-from os import path, makedirs
+from pathlib import Path
 from typing import NoReturn, Type, Optional
 
 from runner.enum_types.verbose_format import VerboseKind
+from runner.path_utils import chown2user
 
 SUMMARY_LOG_LEVEL = 21
 NONE_LOG_LEVEL = 22
@@ -32,11 +33,13 @@ class Log:
     def setup(verbose: VerboseKind, report_root: str) -> logging.Logger:
         logger = logging.getLogger("runner")
 
-        log_path = report_root if report_root is not None else \
-            path.join(path.sep, "tmp")
-        makedirs(log_path, exist_ok=True)
+        log_path: Path = Path(report_root) if report_root is not None else \
+            Path("/") / "tmp"
+        log_path.mkdir(exist_ok=True)
+        log_path = log_path / "runner.log"
+        log_path.unlink(missing_ok=True)
 
-        file_handler = logging.FileHandler(path.join(log_path, "runner.log"))
+        file_handler = logging.FileHandler(log_path)
         console_handler = logging.StreamHandler()
 
         if verbose == VerboseKind.ALL:
@@ -60,6 +63,9 @@ class Log:
         logger.addHandler(file_handler)
         logger.addHandler(console_handler)
         logger.addHandler(logging.NullHandler())
+
+        chown2user(log_path.parent, recursive=False)
+        chown2user(log_path)
 
         return logger
 

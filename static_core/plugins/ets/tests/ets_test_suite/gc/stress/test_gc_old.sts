@@ -48,9 +48,9 @@ class TestGCOld {
     private static nodes : long = 0;
     private static actuallyMut : long = 0;
     private static mutatorSum : long = 0;
-    private static aexport : int[];
+    private static aexport : int[] = [];
 
-    private static trees : (TreeNode | null)[];
+    private static trees : (TreeNode | null)[] = [null];
     private static where : int = 0;
     private static rnd = new Random();
 
@@ -214,12 +214,12 @@ class TestGCOld {
         TestGCOld.doReplaceTreeWork(full, partial, dir);
     }
 
-    public static main(): void {
-        TestGCOld.size = 50;
-        TestGCOld.workUnits = 1;
-        TestGCOld.promoteRate = 20;
-        TestGCOld.ptrMutRate = 10;
-        TestGCOld.steps = 100;
+    public static main(size: int, workUnits: int, promoteRate: int, ptrMutRate: int, steps: int): void {
+        TestGCOld.size = size;
+        TestGCOld.workUnits = workUnits;
+        TestGCOld.promoteRate = promoteRate;
+        TestGCOld.ptrMutRate = ptrMutRate;
+        TestGCOld.steps = steps;
 
         console.println(TestGCOld.size + " megabytes of live storage");
         console.println(TestGCOld.workUnits + " work units per step");
@@ -261,5 +261,6 @@ class TestGCOld {
 }
 
 function main(): void {
-    TestGCOld.main();
+    TestGCOld.main(50, 1, 20, 10, 1000);
+    TestGCOld.main(50, 5, 20, 1, 500);
 }

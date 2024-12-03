@@ -346,35 +346,37 @@ keywords*) but are valid identifiers elsewhere:
 +-----------------+--------------------+-------------------+-------------------+
 |                 |                    |                   |                   |
 +=================+====================+===================+===================+
-|   ``catch``     |    ``get``         |    ``of``         |    ``struct``     |
+|   ``catch``     |     ``in``         |     ``out``       |    ``throws``     |
 +-----------------+--------------------+-------------------+-------------------+
-|   ``declare``   |    ``in``          |    ``out``        |    ``throws``     |
+|   ``declare``   |     ``instanceof`` |     ``readonly``  |     ``type``      |
 +-----------------+--------------------+-------------------+-------------------+
-|   ``instanceof``|    ``readonly``    |    ``type``       |    ``finally``    |   
+|   ``finally``   |     ``keyof``      |     ``rethrows``  |     ``typeof``    |   
 +-----------------+--------------------+-------------------+-------------------+
-|   ``keyof``     |    ``rethrows``    |    ``typeof``     |    ``from``       |
+|   ``from``      |     ``namespace``  |     ``set``       |                   |
 +-----------------+--------------------+-------------------+-------------------+
-|   ``namespace`` |    ``set``         |                   |                   |
+|   ``get``       |     ``of``         |     ``struct``    |                   |
 +-----------------+--------------------+-------------------+-------------------+
 
-
-3. The following words cannot be used as user-defined type names but are
-not otherwise restricted:
+3. The following words cannot be used as user-defined type names but are not
+otherwise restricted:
 
 .. index::
    user-defined type name
 
-+---------------+---------------+---------------+
-|               |               |               |
-+===============+===============+===============+
-| ``boolean``   | ``double``    | ``number``    |
-+---------------+---------------+---------------+
-| ``byte``      | ``float``     | ``short``     |
-+---------------+---------------+---------------+
-| ``bigint``    | ``int``       | ``string``    |
-+---------------+---------------+---------------+
-| ``char``      | ``long``      | ``void``      |
-+---------------+---------------+---------------+
++---------------+---------------+---------------+---------------+---------------+---------------+
+|               |               |               |               |               |               |
++===============+===============+===============+===============+===============+===============+
+| ``boolean``   | ``double``    | ``number``    | ``Boolean``   | ``Double``    | ``Number``    |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``byte``      | ``float``     | ``object``    | ``Byte``      | ``Float``     | ``Object``    |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``bigint``    | ``int``       | ``short``     | ``Bigint``    | ``Int``       | ``Short``     |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``char``      | ``long``      | ``string``    | ``Char``      | ``Long``      | ``String``    |
++---------------+---------------+---------------+---------------+---------------+---------------+
+| ``void``      |               |               |               |               |               |
++---------------+---------------+---------------+---------------+---------------+---------------+
+
 
 See also :ref:`Reserved Names of TS Types`.
 
@@ -425,20 +427,22 @@ The following character sequences represent operators and punctuators:
    square bracket
    keyword
 
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
-|       |        |        | ``&=``   |        | ``==``  | ``??``  |       |       |
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
-| ``+`` | ``&``  | ``+=`` | ``|=``   |        | ``<``   | ``?.``  | ``(`` | ``)`` |
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
-| ``-`` | ``|``  | ``-=`` | ``^=``   | ``&&`` | ``>``   | ``!.``  | ``[`` | ``]`` |
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
-| ``*`` | ``^``  | ``*=`` | ``<<=``  | ``||`` | ``===`` | ``<=``  | ``{`` | ``}`` |
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
-| ``/`` | ``>>`` | ``/=`` | ``>>=``  | ``++`` | ``=``   | ``>=``  | ``,`` | ``;`` |
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
-| ``%`` | ``<<`` | ``%=`` | ``>>>=`` | ``--`` | ``!``   | ``...`` | ``.`` | ``:`` |
-+-------+--------+--------+----------+--------+---------+---------+-------+-------+
++-------+--------+--------+----------+--------+---------+---------+
++-------+--------+--------+----------+--------+---------+---------+
+| ``+`` | ``&``  | ``+=`` | ``|=``   | ``&=`` | ``<``   | ``?.``  |
++-------+--------+--------+----------+--------+---------+---------+
+| ``-`` | ``|``  | ``-=`` | ``^=``   | ``&&`` | ``>``   | ``!``   |
++-------+--------+--------+----------+--------+---------+---------+
+| ``*`` | ``^``  | ``*=`` | ``<<=``  | ``||`` | ``===`` | ``<=``  |
++-------+--------+--------+----------+--------+---------+---------+
+| ``/`` | ``>>`` | ``/=`` | ``>>=``  | ``++`` | ``==``  | ``>=``  |
++-------+--------+--------+----------+--------+---------+---------+
+| ``%`` | ``<<`` | ``%=`` | ``>>>=`` | ``--`` | ``=``   | ``...`` |
++-------+--------+--------+----------+--------+---------+---------+
+| ``(`` | ``)``  | ``[``  | ``]``    | ``{``  | ``}``   | ``??``  |
++-------+--------+--------+----------+--------+---------+---------+
+| ``,`` | ``;``  | ``.``  | ``:``    | ``!=`` | ``!==`` |         |
++-------+--------+--------+----------+--------+---------+---------+
 
 |
 
@@ -450,7 +454,8 @@ Literals
 .. meta:
     frontend_status: Done
 
-*Literals* are representations of certain value types.
+*Literals* are values of certain types (see
+:ref:`Predefined Types` and :ref:`Literal Types`).
 
 .. code-block:: abnf
 
@@ -468,15 +473,10 @@ Literals
 
 See :ref:`Character Literals` for the experimental ``char literal``.
 
-Each literal is of its own literal type (see :ref:`Literal Types`). The name of
-this literal type is the literal itself. If an operator is applied to the
-literal, then the literal type is replaced for its supertype (see
-:ref:`Supertypes of Literal Types`), i.e., one of the predefined types (see
-:ref:`Predefined Types`) that corresponds to the literal.
+Every literal is described in details below.
 
 .. index::
    literal
-   value type
    char
 
 |
@@ -578,20 +578,18 @@ last symbol of an integer literal.
    integer
    underscore character
 
-Integer literals are of literal types that match the literals. If an operator
-is applied to a literal, then the literal type is replaced for the following
-types:
+Integer literals are of integer types that match literals as follows:
 
 - ``int`` if the literal value can be represented by a 32-bit number; or
 - ``long`` otherwise.
 
 
-In variable and constant declarations, an integer literal can be implicitly
+An integer literal in variable and constant declarations can be implicitly
 converted to another numeric type or type ``char`` (see
 :ref:`Type Compatibility with Initializer`). An explicit cast must be used
 elsewhere (see :ref:`Cast Expressions`).
 
-A :index:`compile-time error` occurs if a value of an integer literal is too
+A :index:`compile-time error` occurs if an integer literal value is too
 large for the values of type ``long``.
 
 .. index::
@@ -600,7 +598,6 @@ large for the values of type ``long``.
    long
    constant declaration
    variable declaration
-   integer literal
    char
    explicit cast
    implicit conversion
@@ -658,19 +655,18 @@ Underscore characters in such positions do not change the values of literals.
 However, the underscore character must be neither the very first nor the very
 last symbol of an integer literal.
 
-Floating-point literals are of the literal type that corresponds to the literal
-itself.  If an operator is applied to the literal, then the literal type is
-replaced for the following types:
+Floating-point literals are of floating-point types that match literals as
+follows:
 
 - ``float`` if *float type suffix* is present; or
 - ``double`` otherwise (type ``number`` is an alias to ``double``).
 
 
-A :index:`compile-time error` occurs if a non-zero floating-point literal is
-too large for its type.
-
 A floating-point literal in variable and constant declarations can be implicitly
 converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
+
+A :index:`compile-time error` occurs if a non-zero floating-point literal is
+too large for its type.
 
 .. index::
    floating-point literal
@@ -696,9 +692,7 @@ converted to type ``float`` (see :ref:`Type Compatibility with Initializer`).
 ``BigInt`` literals represent integer numbers with unlimited number of digits.
 ``BigInt`` literals use decimal radix only.
 
-``BigInt`` literals are always of the literal type that corresponds to the
-literal itself. If an operator is applied to the literal, then the literal type
-is replaced for ``bigint`` (see :ref:`BigInt Type`).
+``BigInt`` literals are always of the ``bigint`` type (see :ref:`BigInt Type`).
 
 A ``BigInt`` literal is a sequence of digits followed by the symbol '``n``':
 
@@ -768,8 +762,8 @@ are both possible as seen below:
 .. meta:
     frontend_status: Done
 
-The two ``Boolean`` literal values are represented by the keywords
-``true`` and ``false``.
+The two ``Boolean`` literal values are represented by the keywords ``true`` and
+``false``.
 
 .. code-block:: abnf
 
@@ -777,9 +771,7 @@ The two ``Boolean`` literal values are represented by the keywords
         'true' | 'false'
         ;
 
-``Boolean`` literals are of the literal type that corresponds to the literal.
-If an operator is applied to the literal, then the literal type is replaced
-for ``boolean``.
+``Boolean`` literals are of the ``boolean`` type.
 
 .. index::
    keyword

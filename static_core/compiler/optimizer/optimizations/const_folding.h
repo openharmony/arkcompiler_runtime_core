@@ -45,7 +45,7 @@ bool ConstFoldingLoadStatic(Inst *inst);
 // NB: casting may be required to create constants of the desired array type for creating LiteralArrays (in Bytecode
 // Optimizer ConstArrayResolver pass) If a constant is used to initialize an array (is_literal_data == true), it must be
 // able to be cast to the appropriate types
-ConstantInst *ConstFoldingCastConst(Inst *inst, Inst *input, bool isLiteralData = false);
+PANDA_PUBLIC_API ConstantInst *ConstFoldingCastConst(Inst *inst, Inst *input, bool isLiteralData = false);
 
 ConstantInst *ConstFoldingCreateIntConst(Inst *inst, uint64_t value, bool isLiteralData = false);
 }  // namespace ark::compiler

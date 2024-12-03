@@ -114,9 +114,9 @@ public:
     const std::vector<MemRange> &GetYoungSpaceMemRanges() final;
 
     template <bool INCLUDE_CURRENT_REGION>
-    PandaPriorityQueue<std::pair<uint32_t, Region *>> GetTopGarbageRegions()
+    PandaVector<std::pair<uint32_t, Region *>> GetTopGarbageRegions(double garbageThreshold = 0.0)
     {
-        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>();
+        return objectAllocator_->template GetTopGarbageRegions<INCLUDE_CURRENT_REGION>(garbageThreshold);
     }
 
     std::vector<MarkBitmap *> &GetYoungSpaceBitmaps() final;
@@ -255,6 +255,31 @@ public:
     void SetDesiredEdenLength(size_t edenLength)
     {
         objectAllocator_->SetDesiredEdenLength(edenLength);
+    }
+
+    double CalculateNonMovableExternalFragmentation()
+    {
+        return nonmovableAllocator_->CalculateExternalFragmentation();
+    }
+
+    double CalculateInternalOldFragmentation()
+    {
+        return objectAllocator_->CalculateInternalOldFragmentation();
+    }
+
+    double CalculateInternalHumongousFragmentation()
+    {
+        return humongousObjectAllocator_->CalculateInternalFragmentation();
+    }
+
+    double CalculateOldDeadObjectsRatio()
+    {
+        return objectAllocator_->CalculateDeadObjectsRatio();
+    }
+
+    double CalculateNonMovableDeadObjectsRatio()
+    {
+        return nonmovableAllocator_->CalculateDeadObjectsRatio();
     }
 
 private:

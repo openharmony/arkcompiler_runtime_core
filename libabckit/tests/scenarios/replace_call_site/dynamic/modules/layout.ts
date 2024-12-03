@@ -15,7 +15,7 @@
 export class LinearLayout {
     num_: number;
 
-    setOrientation(num: number) {
+    setOrientation(num: number): void {
         this.num_ = num;
     }
 

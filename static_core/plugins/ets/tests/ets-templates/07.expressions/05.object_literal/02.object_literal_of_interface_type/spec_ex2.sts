@@ -21,7 +21,7 @@ tags: [compile-only, negative]
 ---*/
 
 interface I {
-    name: string = ""
+    name: string
     foo(): void
 }
 

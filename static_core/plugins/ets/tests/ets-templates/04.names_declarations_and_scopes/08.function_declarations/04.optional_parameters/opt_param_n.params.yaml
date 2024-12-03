@@ -14,11 +14,6 @@
 ---
 cases:
     - decl: |-
-          type XYZ=number
-          function foo(p?: XYZ) {}  // CTE, primitive with alias
-      call: foo(1.55)
-
-    - decl: |-
           function foo(p?: Object, q: Object) {}  // CTE, default before required
       call: foo(new Object(), new Object())
 

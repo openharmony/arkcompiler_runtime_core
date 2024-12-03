@@ -55,6 +55,11 @@ template("ohos_shared_library") {
                "install_images",
                "part_name",
                "external_deps",
+               "innerapi_tags",
+               "branch_protector_ret",
+               "subsystem_name",
+               "relative_install_dir",
+               "install_enable",
              ])
 
   shared_library("${target_name}") {
@@ -63,7 +68,6 @@ template("ohos_shared_library") {
                            [
                              "configs",
                              "remove_configs",
-                             "public_configs",
                              "relative_install_dir",
                              "subsystem_name",
                              "install_enable",
@@ -72,9 +76,6 @@ template("ohos_shared_library") {
 
     if (defined(invoker.configs)) {
       configs += invoker.configs
-    }
-    if (defined(invoker.public_configs)) {
-      configs += invoker.public_configs
     }
 
     if (defined(invoker.remove_configs)) {
@@ -92,6 +93,7 @@ template("ohos_static_library") {
              [
                "part_name",
                "external_deps",
+               "branch_protector_ret",
              ])
 
   static_library("${target_name}") {
@@ -100,7 +102,6 @@ template("ohos_static_library") {
                            [
                              "configs",
                              "remove_configs",
-                             "public_configs",
                              "relative_install_dir",
                              "subsystem_name",
                              "install_enable",
@@ -108,10 +109,6 @@ template("ohos_static_library") {
 
     if (defined(invoker.configs)) {
       configs += invoker.configs
-    }
-
-    if (defined(invoker.public_configs)) {
-      configs += invoker.public_configs
     }
 
     if (defined(invoker.remove_configs)) {

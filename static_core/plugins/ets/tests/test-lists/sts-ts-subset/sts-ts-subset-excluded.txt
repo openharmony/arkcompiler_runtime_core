@@ -1,0 +1,8 @@
+### Issue 19835 begin
+std/core/PromiseResolve2.sts
+std/core/PromiseReject.sts
+### Issue 19835 end
+
+### Issue 19841 begin
+std/core/PromiseSequence7.sts
+### Issue 19841 end

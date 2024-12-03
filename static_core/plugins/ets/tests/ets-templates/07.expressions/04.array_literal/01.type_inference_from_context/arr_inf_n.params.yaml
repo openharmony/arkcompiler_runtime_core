@@ -21,3 +21,13 @@ cases:
 
     - use: |-
           let a: string[] = ["a", null]  // wrong type
+
+    - decl: |-
+        class A {}
+        class B extends A {}
+        class C extends B {}
+        function foo(p: B[]): int {
+            return p.length
+        }
+      use: |-
+        assert foo([new B(), new C()] as A[]) == 2 // A[] is super type of B[]

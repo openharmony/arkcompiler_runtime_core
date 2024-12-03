@@ -17,28 +17,25 @@ const success: int = 0;
 const fail:    int = 1;
 
 function main(): int {
-  let failures: int = 0;
+    let failures: int = 0;
 
-  failures += check(createTAFromNonEmptyArrayBufferOneParamNoOffset(),"Create default empty {{.item.objectType}} from non empty source one param");
-  failures += check(createTAFromNonEmptyArrayBufferTwoParams(),"Create default empty {{.item.objectType}} from non empty source two params");
+    failures += check(createArrayFromArray(), "Create Array object from source array");
+    failures += check(createArrayFromArrayWithOffset(), "Create Array object from source array with given offset");
 
-  failures += check(createArrayFromArray(), "Create Array object from source array");
-  failures += check(createArrayFromArrayWithOffset(), "Create Array object from source array with given offset");
+    failures += check(createFilteredArrayFromGiven(), "Create Array object from source array with applied filter");
 
-  failures += check(createFilteredArrayFromGiven(), "Create Array object from source array with applied filter");
-
-  failures += check(testLastIndexOfNotFound(), "Try to find missed item");
-  failures += check(testLastIndexOf4(), "Try to find last item at 4");
-  failures += check(testLastIndexOf3(), "Try to find last item at 3");
+    failures += check(testLastIndexOfNotFound(), "Try to find missed item");
+    failures += check(testLastIndexOf4(), "Try to find last item at 4");
+    failures += check(testLastIndexOf3(), "Try to find last item at 3");
 
 
-  failures += check(testMap(), "Try to Array map function");
+    failures += check(testMap(), "Try to Array map function");
 
-  failures += check(createArray_Set_And_Get(), "Create Array from source data");
+    failures += check(createArraySetAndGet(), "Create Array from source data");
 
-  {% for ci in copyWithin -%}
-  failures += check({{.ci.name}}(), "Test262: {{.ci.name}}");
-  {%+ endfor %}
+    {% for ci in copyWithin -%}
+    failures += check({{.ci.name}}(), "Test262: {{.ci.name}}");
+    {%+ endfor %}
 
 
     if (failures > 0) { return fail; }
@@ -53,21 +50,7 @@ function check(result: int, message: String): int {
     return fail;
 }
 
-function createTAFromNonEmptyArrayBufferTwoParams(): int {
-    let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});  // Buffer 5-items length;
-    let target: {{.item.objectType}};
-    try {
-        target = new {{.item.objectType}}(ss, 0, 0);
-    } catch(e) {
-        return fail;
-    }
-
-    if (target.byteLength as int == 5*{{.item.primitiveSizeBytes}} && target.byteOffset as int == 0) { return success; }
-    console.println("Error: Actual bytes length: " + target.byteLength);
-    return fail;
-}
-
-const source: {{.item.type}}[] = {{.item.data}};
+const source: {{.item.primitiveType}}[] = {{.item.data}};
 
 function createArraySetAndGet(): int {
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
@@ -79,14 +62,14 @@ function createArraySetAndGet(): int {
     }
     for (let i: int = 0; i < source.length as int; i++) {
         try {
-            target.set(i, source[i] as {{.item.type}});
+            target.set(i, source[i] as {{.item.primitiveType}});
         } catch(e) {
             console.print("Catched exception at insert via set(int, {{.item.type}})");
             return fail;
         }
     }
     for (let i: int = 0; i < source.length as int; i++) {
-        let back = target[i] as {{.item.type}};
+        let back = target[i]{{.item.cast2primitive}};
         if (back != source[i]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
             return fail;
@@ -106,7 +89,7 @@ function createArraySetAndGet(): int {
     }
     for (let i: int = 0; i < source.length; i++) {
         try {
-            target2[i as number] = source[i] as {{.item.type}};
+            target2[i as number] = source[i] as {{.item.primitiveType}};
         } catch(e) {
             console.print("Catched exception at insert via $_set(number, {{.item.type}})");
             return fail;
@@ -140,11 +123,11 @@ function createArrayFromArray(): int {
 
     let acc: int = 0;
 
-    let sumExp: {{.item.type}} = 0;
-    let sumAct: {{.item.type}} = 0;
+    let sumExp: {{.item.primitiveType}} = 0;
+    let sumAct: {{.item.primitiveType}} = 0;
     for (let i: int = 0; i < source.length as int; i++) {
         sumExp += source[i];
-        sumAct += target[i] as {{.item.type}};
+        sumAct += target[i]{{.item.cast2primitive}};
     }
 
     if (sumAct != sumExp) {
@@ -153,7 +136,7 @@ function createArrayFromArray(): int {
     }
 
     for (let i: int = 0; i < source.length as int; i++) {
-        let back = target[i] as {{.item.type}};
+        let back = target[i]{{.item.cast2primitive}};
 
         if (back != source[i]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
@@ -184,7 +167,7 @@ function createArrayFromArrayWithOffset(): int {
     let acc: int = 0;
 
     for (let i: int = offset; i < source.length as int; i++) {
-        let back = target[i] as {{.item.type}};
+        let back = target[i]{{.item.cast2primitive}};;
 
         if (back != source[i-offset]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
@@ -206,14 +189,13 @@ function createFilteredArrayFromGiven(): int {
 
     let target: {{.item.objectType}};
     try {
-        target = origin.filter((val: {{.item.type}}, index: int): boolean => { return val > 0});
+        target = origin.filter((val: {{.item.type}}, index: number): boolean => { return val{{.item.cast2primitive}} > 0});
     } catch(e) {
         return fail;
     }
-
-    let targetIdx = 0
+    let targetIdx = 0 as int
     for (let originIdx = 0; originIdx < origin.length as int; originIdx++) {
-        if (origin[originIdx] as {{.item.type}} <= 0) {
+        if (origin[originIdx]{{.item.cast2primitive}} <= 0) {
             continue;
         }
         if (targetIdx >= target.length as int) {
@@ -245,14 +227,16 @@ function testLastIndexOfNotFound(): int {
     return fail;
   }
 
-  let nf: number = target.lastIndexOf(11);
+  let nf: number = target.lastIndexOf({{.item.create}}(11));
 
   if (nf == -1) { return success; }
   return fail;
 }
 
 function testLastIndexOf4(): int {
-    let source: {{.item.type}}[] = [10, 20, 50, 50, 50, 60];
+    let source: {{.item.primitiveType}}[] = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
+                                             50 as {{.item.primitiveType}}, 50 as {{.item.primitiveType}},
+                                             50 as {{.item.primitiveType}}, 60 as {{.item.primitiveType}}];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let target: {{.item.objectType}};
@@ -265,14 +249,16 @@ function testLastIndexOf4(): int {
         return fail;
     }
 
-    let result: number = target.lastIndexOf(50, 5);
+    let result: number = target.lastIndexOf({{.item.create}}(50), 5);
     if (result == 4) { return success; }
 
     return fail;
 }
 
 function testLastIndexOf3(): int {
-    let source: {{.item.type}}[] = [10, 20, 50, 50, 50, 60];
+    let source: {{.item.primitiveType}}[] = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
+                                             50 as {{.item.primitiveType}}, 50 as {{.item.primitiveType}},
+                                             50 as {{.item.primitiveType}}, 60 as {{.item.primitiveType}}];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let target: {{.item.objectType}};
@@ -285,7 +271,7 @@ function testLastIndexOf3(): int {
         return fail;
     }
 
-    let result: number = target.lastIndexOf(50, 3);
+    let result: number = target.lastIndexOf({{.item.create}}(50), 3);
 
     if (result == 3) { return success; }
     return fail;
@@ -294,7 +280,9 @@ function testLastIndexOf3(): int {
 
 
 function testMap(): int {
-    let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60];
+    let source: {{.item.primitiveType}}[] = [10 as {{.item.primitiveType}}, 20 as {{.item.primitiveType}},
+                                             50 as {{.item.primitiveType}}, 50 as {{.item.primitiveType}},
+                                             50 as {{.item.primitiveType}}, 60 as {{.item.primitiveType}}];
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};
@@ -308,7 +296,7 @@ function testMap(): int {
 
     let target: {{.item.objectType}};
     try {
-        target = origin.map((val: {{.item.type}}, index: int): {{.item.type}} => { return -val });
+        target = origin.map((val: {{.item.type}}, index: number): {{.item.type}} => { return val + {{.item.create}}(1) });
     } catch(e) {
         console.println(e);
         return fail;
@@ -320,7 +308,7 @@ function testMap(): int {
     }
 
     for (let i: int = 0; i< source.length as int; i++) {
-        if (target[i] as {{.item.type}} != -source[i]) {
+        if (target[i]{{.item.cast2primitive}} != source[i] + 1) {
             console.println("Array data mismatch");
             return fail;
         }
@@ -328,7 +316,7 @@ function testMap(): int {
     return success;
 }
 
-function createFromSource(source: {{.item.type}}[]): {{.item.objectType}} throws {
+function createFromSource(source: {{.item.primitiveType}}[]): {{.item.objectType}} throws {
     let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
     let origin: {{.item.objectType}};
@@ -354,13 +342,13 @@ function dump(source: {{.item.type}}[], origin: {{.item.objectType}}): void {
 }
 
 
-function assertArrayEqualsToTypedArray(source: {{.item.type}}[], origin: {{.item.objectType}}): int {
+function assertArrayEqualsToTypedArray(source: {{.item.primitiveType}}[], origin: {{.item.objectType}}): int {
     if (origin.length as int != source.length as int) {
         return fail;
     }
     for (let i: int; i< origin.length; i++) {
-        let tv: {{.item.type}} = origin[i] as {{.item.type}};
-        let sv: {{.item.type}} = source[i];
+        let tv: {{.item.primitiveType}} = origin[i]{{.item.cast2primitive}};;
+        let sv: {{.item.primitiveType}} = source[i];
         if (tv != sv) {
             console.println("Unexpected data changed at [" + i + "] " + sv + "->" + tv);
             return fail;
@@ -369,13 +357,17 @@ function assertArrayEqualsToTypedArray(source: {{.item.type}}[], origin: {{.item
     return success;
 }
 
-const src: {{.item.type}}[] = [1,  2,  3,  4,  5];
+const src: {{.item.primitiveType}}[] = [1 as {{.item.primitiveType}},
+                               2 as {{.item.primitiveType}},
+                               3 as {{.item.primitiveType}},
+                               4 as {{.item.primitiveType}},
+                               5 as {{.item.primitiveType}}];
 
 {%+ for ci in copyWithin %}
 function {{.ci.name}}(): int {
     let origin: {{.item.objectType}};
 
-    let expected: {{.item.type}}[] = [{%+ for ea in ci.expected %}{{.ea}}, {% endfor %}];
+    let expected: {{.item.primitiveType}}[] = [{%+ for ea in ci.expected %}{{.ea}} as {{.item.primitiveType}}, {% endfor %}];
 
     try {
         origin = createFromSource(src);

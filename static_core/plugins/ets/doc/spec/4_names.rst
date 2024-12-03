@@ -131,6 +131,7 @@ Distinguishable Declarations
     frontend_status: Done
 
 Each declaration in the declaration scope must be *distinguishable*.
+
 A :index:`compile-time error` occurs otherwise.
 
 Declarations are *distinguishable* if they have:
@@ -463,10 +464,7 @@ Type Alias Declaration
 ======================
 
 .. meta:
-    frontend_status: Partly
-    todo: implement recursive type alias feature
-    todo: type alias can be as local declaration now, but the spec says it can be only topDeclaration
-    todo: type alias name shouldn't be handled as variable name (eg: type foo = Double; let foo : int = 0 --> now error)
+    frontend_status: Done
 
 Type aliases enable using meaningful and concise notations by providing the
 following:
@@ -702,32 +700,24 @@ variable is determined as follows:
     let f = (p: number) => b + p
     let x // compile-time error -- either type or initializer
 
-Every variable in a program must have an initial value before it can be used.
-The initial value can be identified as follows:
-
--  Each method or function parameter is initialized to the corresponding
-   argument value provided by the caller of the method or function.
--  Each constructor parameter is initialized to the corresponding
-   argument value as provided by:
-
-   + Class instance creation expression (see :ref:`New Expressions`); or
-   + Explicit constructor call (see :ref:`Explicit Constructor Call`).
-
--  An exception parameter is initialized to the thrown object (see
-   :ref:`Throw Statements`) that represents exception or error.
+Every variable in a program must have an initial value before it can be used:
 
 - If the *initializer* of a variable is specified explicitly, then its
   execution produces the initial value for this variable.
 
 - Otherwise, the following situations are possible:
 
-   + Each static variable of class is initialized by the execution of the class
-     initializer (see :ref:`Class Initializer`).
-   + Each class variable is initialized either with a *default value* (see
-     :ref:`Default Values for Types`), or by the execution of a class
-     constructor (see :ref:`Constructor Declaration`).
-   + Each local variable or array element is initialized with a *default value*
-     (see :ref:`Default Values for Types`) at the time it is created.
+   + If a type of a variable is ``T`` and ``T`` has a *default value*
+     (see :ref:`Default Values for Types`), it is initialized with the 
+     default value.
+   + If a type of a variable is ``T[]``
+     (or multidimensional array with elements of type ``T``)
+     and *T* has a *default value* (see :ref:`Default Values for Types`), 
+     all array elements are initialized with the default value.
+   + If a variable does not have a default value, its value must be set 
+     by :ref:`Simple Assignment Operator` before any attempt to use its 
+     value. Note, the variable of an array type must be initalized as whole
+     by single assignment.
 
 Otherwise, the variable is not initialized, and a :index:`compile-time error`
 occurs.
@@ -963,12 +953,12 @@ If the type of the initializer expression cannot be inferred, then a
     let b = cond ? 1 : 2         // type of 'b' is int
     let c = cond ? 3 : 3.14      // type of 'c' is double
     let d = cond ? "one" : "two" // type of 'd' is string
-    let e = cond ? 1 : "one"     // type of 'e' is int | string
+    let e = cond ? 1 : "one"     // type of 'e' is Int | string
 
-    const bb = cond ? 1 : 2         // type of 'bb' is 1 | 2
-    const cc = cond ? 3 : 3.14      // type of 'cc' is 3 | 3.14
+    const bb = cond ? 1 : 2         // type of 'bb' is int 
+    const cc = cond ? 3 : 3.14      // type of 'cc' is double
     const dd = cond ? "one" : "two" // type of 'dd' is "one" | "two"
-    const ee = cond ? 1 : "one"     // type of 'ee' is 1 | "one"
+    const ee = cond ? 1 : "one"     // type of 'ee' is Int | "one"
 
     let f = {name: "aa"} // compile-time error
 

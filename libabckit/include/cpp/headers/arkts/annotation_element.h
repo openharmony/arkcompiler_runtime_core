@@ -16,39 +16,84 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/annotation_element.h"
-#include "metadata_inspect_impl.h"
-
-#include <string_view>
+#include "../core/annotation_element.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
+/**
+ * @brief AnnotationElement
+ */
 class AnnotationElement : public core::AnnotationElement {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class arkts::Class;
+    /// @brief to access private constructor
     friend class arkts::Function;
+    /// @brief to access private constructor
     friend class arkts::Annotation;
+    /// @brief abckit::DefaultHash<AnnotationElement>
+    friend class abckit::DefaultHash<AnnotationElement>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<AnnotationElement>;
 
 public:
+    /**
+     * @brief Constructor Arkts API AnnotationElement from the Core API with compatibility check
+     * @param other - Core API AnnotationElement
+     */
+    explicit AnnotationElement(const core::AnnotationElement &other);
+
+    /**
+     * @brief Construct a new Annotation Element object
+     * @param other
+     */
     AnnotationElement(const AnnotationElement &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationElement&
+     */
     AnnotationElement &operator=(const AnnotationElement &other) = default;
+
+    /**
+     * @brief Construct a new Annotation Element object
+     * @param other
+     */
     AnnotationElement(AnnotationElement &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationElement&
+     */
     AnnotationElement &operator=(AnnotationElement &&other) = default;
 
-    // CC-OFFNXT(G.FMT.02) project code style
-    explicit AnnotationElement(const core::AnnotationElement &coreOther) : core::AnnotationElement(coreOther) {};
-
+    /**
+     * @brief Destroy the Annotation Element object
+     */
     ~AnnotationElement() override = default;
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName() const;
 
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts annotation element from Core to Arkts target
+     * @return AbckitArktsAnnotationElement* - converted annotation element
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsAnnotationElement *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<AnnotationElement> targetChecker_;
 };
 
 }  // namespace abckit::arkts

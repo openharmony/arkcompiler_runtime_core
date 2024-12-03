@@ -59,12 +59,12 @@ cases:
     - from_type: double
       to_type: byte
       values:
-          - { sval: '-4.9E-324', dval: '0' }
+          - { sval: '-4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: byte
       values:
-          - { sval: '4.9E-324', dval: '0' }
+          - { sval: '4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: short
@@ -112,12 +112,12 @@ cases:
     - from_type: double
       to_type: short
       values:
-          - { sval: '-4.9E-324', dval: '0' }
+          - { sval: '-4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: short
       values:
-          - { sval: '4.9E-324', dval: '0' }
+          - { sval: '4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: int
@@ -165,12 +165,12 @@ cases:
     - from_type: double
       to_type: int
       values:
-          - { sval: '-4.9E-324', dval: '0' }
+          - { sval: '-4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: int
       values:
-          - { sval: '4.9E-324', dval: '0' }
+          - { sval: '4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: long
@@ -218,12 +218,12 @@ cases:
     - from_type: double
       to_type: long
       values:
-          - { sval: '-4.9E-324', dval: '0' }
+          - { sval: '-4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: long
       values:
-          - { sval: '4.9E-324', dval: '0' }
+          - { sval: '4.9E-308', dval: '0' }
 
     - from_type: double
       to_type: float
@@ -270,12 +270,12 @@ cases:
     - from_type: double
       to_type: float
       values:
-          - { sval: '-4.9E-324', dval: '-0.0f' }
+          - { sval: '-4.9E-308', dval: '-0.0f' }
 
     - from_type: double
       to_type: float
       values:
-          - { sval: '4.9E-324', dval: '0.0f' }
+          - { sval: '4.9E-308', dval: '0.0f' }
 
     - from_type: double
       to_type: double
@@ -298,10 +298,10 @@ cases:
           - { sval: '-3.1415926', dval: '-3.1415926' }
           - { sval: '-1.0', dval: '-1.0' }
           - { sval: '-2.2250738585072014E-308', dval: '-2.2250738585072014E-308' }
-          - { sval: '-4.9E-324', dval: '-4.9E-324' }
+          - { sval: '-4.9E-308', dval: '-4.9E-308' }
           - { sval: '-0.0', dval: '0.0' }
           - { sval: '0.0', dval: '0.0' }
-          - { sval: '4.9E-324', dval: '4.9E-324' }
+          - { sval: '4.9E-308', dval: '4.9E-308' }
           - { sval: '2.2250738585072014E-308', dval: '2.2250738585072014E-308' }
           - { sval: '1.0', dval: '1.0' }
           - { sval: '3.1415926', dval: '3.1415926' }
@@ -367,12 +367,12 @@ cases:
     - from_type: double
       to_type: char
       values:
-          - { sval: '-4.9E-324', dval: "c'\\u0000'" }
+          - { sval: '-4.9E-308', dval: "c'\\u0000'" }
 
     - from_type: double
       to_type: char
       values:
-          - { sval: '4.9E-324', dval: "c'\\u0000'" }
+          - { sval: '4.9E-308', dval: "c'\\u0000'" }
 
     - from_type: float
       to_type: byte

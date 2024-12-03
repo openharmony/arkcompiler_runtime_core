@@ -31,6 +31,7 @@ inline uintptr_t HandleStorage<T>::GetNodeAddress(uint32_t index) const
 }
 
 template <typename T>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline uintptr_t HandleStorage<T>::NewHandle(T value)
 {
     uint32_t nid = lastIndex_ >> NODE_BLOCK_SIZE_LOG2;
@@ -82,6 +83,7 @@ void HandleStorage<T>::ZapFreedHandles()
 }
 
 template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject()
 {
     if (lastIndex_ == 0) {
@@ -102,6 +104,7 @@ inline void HandleStorage<coretypes::TaggedType>::UpdateHeapObject()
 }
 
 template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
 {
     if (lastIndex_ == 0) {
@@ -126,6 +129,7 @@ inline void HandleStorage<coretypes::TaggedType>::VisitGCRoots([[maybe_unused]] 
 }
 
 template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void HandleStorage<ObjectHeader *>::UpdateHeapObject()
 {
     if (lastIndex_ == 0) {
@@ -150,6 +154,7 @@ inline void HandleStorage<ObjectHeader *>::UpdateHeapObject()
 }
 
 template <>
+// CC-OFFNXT(G.FUD.06) solid logic
 inline void HandleStorage<ObjectHeader *>::VisitGCRoots([[maybe_unused]] const ObjectVisitor &cb)
 {
     if (lastIndex_ == 0) {

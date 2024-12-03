@@ -16,12 +16,13 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_TOOLING_HELPERS_H
 #define PANDA_PLUGINS_ETS_RUNTIME_TOOLING_HELPERS_H
 
+#include <string_view>
+
+#include "include/tooling/pt_thread.h"
+#include "include/tooling/vreg_value.h"
 #include "libpandabase/utils/bit_utils.h"
-#include "runtime/include/tooling/pt_thread.h"
 #include "type.h"
 #include "types/ets_primitives.h"
-
-#include <string_view>
 
 namespace ark::ets::tooling {
 

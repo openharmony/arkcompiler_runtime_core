@@ -395,13 +395,13 @@ function test_sortCopy(arr: {{T}}[]): {{T}}[] {
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpFwd(l: {{T}}, r: {{T}}): boolean {
+function test_sortAllOnCmpFwd_{{T}}(l: {{T}}, r: {{T}}): boolean {
 {%- set mapMPArg = '%s' if T != 'boolean' else '((%s) ? 1 : 0)' %}
     return {{mapMPArg % 'l'}} < {{mapMPArg % 'r'}}
 }
 
 /** note: used for tests, {@link test_sortAllOn} */
-function test_sortAllOnCmpInv(l: {{T}}, r: {{T}}): boolean {
+function test_sortAllOnCmpInv_{{T}}(l: {{T}}, r: {{T}}): boolean {
     return {{mapMPArg % 'r'}} < {{mapMPArg % 'l'}}
 }
 
@@ -420,7 +420,7 @@ function test_printArr(arr: {{T}}[], startIndex: int, endIndex: int) {
  * is located here. All related entities are prefixed whith `test_` to stand out
  */
 export function test_sortAllOn(arr: {{T}}[]) {
-    {%- for name, arg in [('', ''), ('_subarray', ', test_sortAllOnCmpFwd'), ('_subarray', ', test_sortAllOnCmpInv')] %}
+    {%- for name, arg in [('', ''), ('_subarray', ', test_sortAllOnCmpFwd_' + T), ('_subarray', ', test_sortAllOnCmpInv_' + T)] %}
     // block for comparator `{{arg[3:]}}`
     if (true) {
         const sorts = new Array<test_SortData{{T}}>()
@@ -440,7 +440,7 @@ export function test_sortAllOn(arr: {{T}}[]) {
 
         {% if T == 'boolean' %}
         const bcnt = test_sortCopy(arr)
-            {%- if arg != ', test_sortAllOnCmpInv' %}
+            {%- if arg != ', test_sortAllOnCmpInv_' + T %}
         countSortBools(bcnt, 0, bcnt.length)
             {%- else %}
         countSortBoolsInv(bcnt, 0, bcnt.length)

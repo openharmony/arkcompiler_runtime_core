@@ -65,3 +65,11 @@ cases:
           }
       use: |-
           let b: B = { name: "John" }  // CTE, not a member field
+
+    - decl: |-
+          class A {
+              name: string|null;
+              age: number = 0
+          }
+      use: |-
+          let a: A = { name: "John", age: 42, name: "James" } // CTE, duplicate field

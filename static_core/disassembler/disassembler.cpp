@@ -17,9 +17,11 @@
 #include "class_data_accessor.h"
 #include "field_data_accessor.h"
 #include "libpandafile/type_helper.h"
+#include "literal_data_accessor.h"
 #include "mangling.h"
 #include "utils/logger.h"
 
+#include <cstdint>
 #include <iomanip>
 
 #include "get_language_specific_metadata.inc"
@@ -416,53 +418,108 @@ void Disassembler::FillLiteralData(pandasm::LiteralArray *litArray,
                                    const panda_file::LiteralTag &tag) const
 {
     pandasm::LiteralArray::Literal lit;
+    if (tag == panda_file::LiteralTag::TAGVALUE) {
+        return;
+    }
     lit.tag = tag;
+    lit.value = ParseLiteralValue(value, tag);
+    litArray->literals.push_back(lit);
+}
+
+std::variant<bool, uint8_t, uint16_t, uint32_t, uint64_t, float, double, std::string> Disassembler::ParseLiteralValue(
+    const panda_file::LiteralDataAccessor::LiteralValue &value, const panda_file::LiteralTag &tag) const
+{
     switch (tag) {
-        case panda_file::LiteralTag::BOOL: {
-            lit.value = std::get<bool>(value);
-            break;
-        }
+        case panda_file::LiteralTag::BOOL:
+            return std::get<bool>(value);
         case panda_file::LiteralTag::ACCESSOR:
-        case panda_file::LiteralTag::NULLVALUE: {
-            lit.value = std::get<uint8_t>(value);
-            break;
-        }
-        case panda_file::LiteralTag::METHODAFFILIATE: {
-            lit.value = std::get<uint16_t>(value);
-            break;
-        }
-        case panda_file::LiteralTag::INTEGER: {
-            lit.value = std::get<uint32_t>(value);
-            break;
-        }
-        case panda_file::LiteralTag::BIGINT: {
-            lit.value = std::get<uint64_t>(value);
-            break;
-        }
-        case panda_file::LiteralTag::FLOAT: {
-            lit.value = std::get<float>(value);
-            break;
-        }
-        case panda_file::LiteralTag::DOUBLE: {
-            lit.value = std::get<double>(value);
-            break;
-        }
+        case panda_file::LiteralTag::NULLVALUE:
+            return std::get<uint8_t>(value);
+        case panda_file::LiteralTag::METHODAFFILIATE:
+            return std::get<uint16_t>(value);
+        case panda_file::LiteralTag::INTEGER:
+            return std::get<uint32_t>(value);
+        case panda_file::LiteralTag::BIGINT:
+            return std::get<uint64_t>(value);
+        case panda_file::LiteralTag::FLOAT:
+            return std::get<float>(value);
+        case panda_file::LiteralTag::DOUBLE:
+            return std::get<double>(value);
         case panda_file::LiteralTag::STRING:
         case panda_file::LiteralTag::METHOD:
-        case panda_file::LiteralTag::GENERATORMETHOD: {
-            auto strData = file_->GetStringData(panda_file::File::EntityId(std::get<uint32_t>(value)));
-            lit.value = StringDataToString(strData);
-            break;
-        }
-        case panda_file::LiteralTag::TAGVALUE: {
-            return;
-        }
-        default: {
+        case panda_file::LiteralTag::GENERATORMETHOD:
+            return ParseStringData(value);
+        case panda_file::LiteralTag::LITERALARRAY:
+            return ParseLiteralArrayData(value);
+        default:
             LOG(ERROR, DISASSEMBLER) << "Unsupported literal with tag 0x" << std::hex << static_cast<uint32_t>(tag);
             UNREACHABLE();
-        }
     }
-    litArray->literals.push_back(lit);
+}
+
+std::string Disassembler::ParseStringData(const panda_file::LiteralDataAccessor::LiteralValue &value) const
+{
+    auto strData = file_->GetStringData(panda_file::File::EntityId(std::get<uint32_t>(value)));
+    return StringDataToString(strData);
+}
+
+std::string Disassembler::ParseLiteralArrayData(const panda_file::LiteralDataAccessor::LiteralValue &value) const
+{
+    std::stringstream ss;
+    ss << "0x" << std::hex << std::get<uint32_t>(value);
+    return ss.str();
+}
+
+void Disassembler::GetLiteralArrayByOffset(pandasm::LiteralArray *litArray, panda_file::File::EntityId offset) const
+{
+    panda_file::LiteralDataAccessor litArrayAccessor(*file_, file_->GetLiteralArraysId());
+    auto processLiteralValue = [this, litArray](const panda_file::LiteralDataAccessor::LiteralValue &value,
+                                                const panda_file::LiteralTag &tag) {
+        switch (tag) {
+            case panda_file::LiteralTag::ARRAY_U1: {
+                FillLiteralArrayData<bool>(litArray, tag, value);
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_I8:
+            case panda_file::LiteralTag::ARRAY_U8: {
+                FillLiteralArrayData<uint8_t>(litArray, tag, value);
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_I16:
+            case panda_file::LiteralTag::ARRAY_U16: {
+                FillLiteralArrayData<uint16_t>(litArray, tag, value);
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_I32:
+            case panda_file::LiteralTag::ARRAY_U32: {
+                FillLiteralArrayData<uint32_t>(litArray, tag, value);
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_I64:
+            case panda_file::LiteralTag::ARRAY_U64: {
+                FillLiteralArrayData<uint64_t>(litArray, tag, value);
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_F32: {
+                FillLiteralArrayData<float>(litArray, tag, value);
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_F64: {
+                FillLiteralArrayData<double>(litArray, tag, value);
+                break;
+            }
+            case panda_file::LiteralTag::ARRAY_STRING: {
+                FillLiteralArrayData<uint32_t>(litArray, tag, value);
+                break;
+            }
+            default: {
+                FillLiteralData(litArray, value, tag);
+                break;
+            }
+        }
+    };
+
+    litArrayAccessor.EnumerateLiteralVals(offset, processLiteralValue);
 }
 
 void Disassembler::GetLiteralArray(pandasm::LiteralArray *litArray, const size_t index)
@@ -470,54 +527,7 @@ void Disassembler::GetLiteralArray(pandasm::LiteralArray *litArray, const size_t
     LOG(DEBUG, DISASSEMBLER) << "\n[getting literal array]\nindex: " << index;
 
     panda_file::LiteralDataAccessor litArrayAccessor(*file_, file_->GetLiteralArraysId());
-
-    // clang-format off
-    litArrayAccessor.EnumerateLiteralVals(index,
-                                          [this, litArray](const panda_file::LiteralDataAccessor::LiteralValue &value,
-                                                           const panda_file::LiteralTag &tag) {
-                                            switch (tag) {
-                                                case panda_file::LiteralTag::ARRAY_U1: {
-                                                    FillLiteralArrayData<bool>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                case panda_file::LiteralTag::ARRAY_I8:
-                                                case panda_file::LiteralTag::ARRAY_U8: {
-                                                    FillLiteralArrayData<uint8_t>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                case panda_file::LiteralTag::ARRAY_I16:
-                                                case panda_file::LiteralTag::ARRAY_U16: {
-                                                    FillLiteralArrayData<uint16_t>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                case panda_file::LiteralTag::ARRAY_I32:
-                                                case panda_file::LiteralTag::ARRAY_U32: {
-                                                    FillLiteralArrayData<uint32_t>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                case panda_file::LiteralTag::ARRAY_I64:
-                                                case panda_file::LiteralTag::ARRAY_U64: {
-                                                    FillLiteralArrayData<uint64_t>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                case panda_file::LiteralTag::ARRAY_F32: {
-                                                    FillLiteralArrayData<float>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                case panda_file::LiteralTag::ARRAY_F64: {
-                                                    FillLiteralArrayData<double>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                case panda_file::LiteralTag::ARRAY_STRING: {
-                                                    FillLiteralArrayData<uint32_t>(litArray, tag, value);
-                                                    break;
-                                                }
-                                                default: {
-                                                    FillLiteralData(litArray, value, tag);
-                                                }
-                                            }
-                                        });
-    // clang-format on
+    GetLiteralArrayByOffset(litArray, litArrayAccessor.GetLiteralArrayId(index));
 }
 
 void Disassembler::GetLiteralArrays()
@@ -962,6 +972,60 @@ void Disassembler::GetMetaData(pandasm::Record *record, const panda_file::File::
     }
 }
 
+template <typename T, pandasm::Value::Type VALUE_TYPE>
+void Disassembler::SetMetadata(panda_file::FieldDataAccessor &accessor, pandasm::Field *field) const
+{
+    std::optional<T> val = accessor.GetValue<T>();
+    if (val.has_value()) {
+        field->metadata->SetValue(pandasm::ScalarValue::Create<VALUE_TYPE>(val.value()));
+    }
+}
+
+void Disassembler::GetMetadataFieldValue(panda_file::FieldDataAccessor &fieldAccessor, pandasm::Field *field) const
+{
+    static const std::unordered_map<panda_file::Type::TypeId,
+                                    std::function<void(panda_file::FieldDataAccessor &, pandasm::Field *)>>
+        HANDLERS = {
+            {panda_file::Type::TypeId::U1,
+             [this](auto &accessor, auto *f) { SetMetadata<bool, pandasm::Value::Type::U1>(accessor, f); }},
+            {panda_file::Type::TypeId::U8,
+             [this](auto &accessor, auto *f) { SetMetadata<uint8_t, pandasm::Value::Type::U8>(accessor, f); }},
+            {panda_file::Type::TypeId::U16,
+             [this](auto &accessor, auto *f) { SetMetadata<uint16_t, pandasm::Value::Type::U16>(accessor, f); }},
+            {panda_file::Type::TypeId::U32,
+             [this](auto &accessor, auto *f) { SetMetadata<uint32_t, pandasm::Value::Type::U32>(accessor, f); }},
+            {panda_file::Type::TypeId::F64,
+             [this](auto &accessor, auto *f) { SetMetadata<double, pandasm::Value::Type::F64>(accessor, f); }},
+            {panda_file::Type::TypeId::I8,
+             [this](auto &accessor, auto *f) { SetMetadata<int8_t, pandasm::Value::Type::I8>(accessor, f); }},
+            {panda_file::Type::TypeId::I16,
+             [this](auto &accessor, auto *f) { SetMetadata<int16_t, pandasm::Value::Type::I16>(accessor, f); }},
+            {panda_file::Type::TypeId::I32,
+             [this](auto &accessor, auto *f) { SetMetadata<int32_t, pandasm::Value::Type::I32>(accessor, f); }},
+            {panda_file::Type::TypeId::I64,
+             [this](auto &accessor, auto *f) { SetMetadata<int64_t, pandasm::Value::Type::I64>(accessor, f); }},
+        };
+
+    auto it = HANDLERS.find(field->type.GetId());
+    if (it != HANDLERS.end()) {
+        it->second(fieldAccessor, field);
+    } else if (field->type.GetId() == panda_file::Type::TypeId::REFERENCE &&
+               field->type.GetName() == "std/core/String") {
+        std::optional<uint32_t> stringOffsetVal = fieldAccessor.GetValue<uint32_t>();
+        if (stringOffsetVal.has_value()) {
+            std::string_view val {reinterpret_cast<const char *>(
+                file_->GetStringData(panda_file::File::EntityId(stringOffsetVal.value())).data)};
+            field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::STRING>(val));
+        }
+    } else if (field->type.GetRank() > 0) {
+        std::optional<uint32_t> litarrayOffsetVal = fieldAccessor.GetValue<uint32_t>();
+        if (litarrayOffsetVal.has_value()) {
+            field->metadata->SetValue(pandasm::ScalarValue::Create<pandasm::Value::Type::LITERALARRAY>(
+                std::string_view {std::to_string(litarrayOffsetVal.value())}));
+        }
+    }
+}
+
 void Disassembler::GetMetaData(pandasm::Field *field, const panda_file::File::EntityId &fieldId) const
 {
     LOG(DEBUG, DISASSEMBLER) << "[getting metadata]\nfield id: " << fieldId << " (0x" << std::hex << fieldId << ")";
@@ -991,6 +1055,7 @@ void Disassembler::GetMetaData(pandasm::Field *field, const panda_file::File::En
 
     SetEntityAttribute(
         field, [&fieldAccessor]() { return fieldAccessor.IsFinal(); }, "final");
+    GetMetadataFieldValue(fieldAccessor, field);
 }
 
 std::string Disassembler::AnnotationTagToString(const char tag) const
@@ -1323,10 +1388,58 @@ std::string Disassembler::LiteralTagToString(const panda_file::LiteralTag &tag) 
             return "method";
         case panda_file::LiteralTag::GENERATORMETHOD:
             return "generator_method";
+        case panda_file::LiteralTag::LITERALARRAY:
+            return "lit_offset";
         default:
             LOG(ERROR, DISASSEMBLER) << "Unsupported literal with tag 0x" << std::hex << static_cast<uint32_t>(tag);
             UNREACHABLE();
     }
+}
+
+std::string Disassembler::SerializeLiterals(const pandasm::LiteralArray::Literal &lit) const
+{
+    std::stringstream res {};
+    const auto &val = lit.value;
+    switch (lit.tag) {
+        case panda_file::LiteralTag::BOOL: {
+            res << (std::get<bool>(val));
+            break;
+        }
+        case panda_file::LiteralTag::INTEGER: {
+            res << (bit_cast<int32_t>(std::get<uint32_t>(val)));
+            break;
+        }
+        case panda_file::LiteralTag::DOUBLE: {
+            res << (std::get<double>(val));
+            break;
+        }
+        case panda_file::LiteralTag::STRING: {
+            res << "\"" << (std::get<std::string>(val)) << "\"";
+            break;
+        }
+        case panda_file::LiteralTag::METHOD:
+        case panda_file::LiteralTag::GENERATORMETHOD: {
+            res << (std::get<std::string>(val));
+            break;
+        }
+        case panda_file::LiteralTag::NULLVALUE:
+        case panda_file::LiteralTag::ACCESSOR: {
+            res << (static_cast<int16_t>(bit_cast<int8_t>(std::get<uint8_t>(val))));
+            break;
+        }
+        case panda_file::LiteralTag::METHODAFFILIATE: {
+            res << (std::get<uint16_t>(val));
+            break;
+        }
+        case panda_file::LiteralTag::LITERALARRAY: {
+            res << (std::get<std::string>(val));
+            break;
+        }
+        default:
+            UNREACHABLE();
+    }
+    res << ", ";
+    return res.str();
 }
 
 std::string Disassembler::LiteralValueToString(const pandasm::LiteralArray::Literal &lit) const
@@ -1369,6 +1482,10 @@ std::string Disassembler::LiteralValueToString(const pandasm::LiteralArray::Lite
         std::stringstream res {};
         res << "\"" << std::get<std::string>(lit.value) << "\"";
         return res.str();
+    }
+
+    if (lit.IsLiteralArrayValue()) {
+        return SerializeLiterals(lit);
     }
 
     UNREACHABLE();
@@ -1436,6 +1553,76 @@ void Disassembler::SerializeUnionFields(const pandasm::Record &record, std::ostr
     os << "\n";
 }
 
+void Disassembler::DumpLiteralArray(const pandasm::LiteralArray &literalArray, std::stringstream &ss) const
+{
+    ss << "[";
+    bool firstItem = true;
+    for (const auto &item : literalArray.literals) {
+        if (!firstItem) {
+            ss << ", ";
+        } else {
+            firstItem = false;
+        }
+
+        switch (item.tag) {
+            case panda_file::LiteralTag::INTEGER: {
+                ss << std::get<uint32_t>(item.value);  // CC-OFF(G.EXP.30-CPP) false positive
+                break;
+            }
+            case panda_file::LiteralTag::DOUBLE: {
+                ss << std::get<double>(item.value);
+                break;
+            }
+            case panda_file::LiteralTag::BOOL: {
+                ss << std::get<bool>(item.value);
+                break;
+            }
+            case panda_file::LiteralTag::STRING: {
+                ss << "\"" << std::get<std::string>(item.value) << "\"";
+                break;
+            }
+            case panda_file::LiteralTag::LITERALARRAY: {
+                std::string offsetStr = std::get<std::string>(item.value);
+                const int hexBase = 16;
+                uint32_t litArrayOffset = std::stoi(offsetStr, nullptr, hexBase);
+                pandasm::LiteralArray litArray;
+                GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
+                DumpLiteralArray(litArray, ss);
+                break;
+            }
+            default: {
+                UNREACHABLE();
+                break;
+            }
+        }
+    }
+    ss << "]";
+}
+
+void Disassembler::SerializeFieldValue(const pandasm::Field &f, std::stringstream &ss) const
+{
+    if (f.type.GetId() == panda_file::Type::TypeId::U32) {
+        ss << " = 0x" << std::hex << f.metadata->GetValue().value().GetValue<uint32_t>();
+    } else if (f.type.GetId() == panda_file::Type::TypeId::U8) {
+        ss << " = 0x" << std::hex << static_cast<uint32_t>(f.metadata->GetValue().value().GetValue<uint8_t>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::F64) {
+        ss << " = " << static_cast<double>(f.metadata->GetValue().value().GetValue<double>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::U1) {
+        ss << " = " << static_cast<bool>(f.metadata->GetValue().value().GetValue<bool>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::I32) {
+        ss << " = " << static_cast<bool>(f.metadata->GetValue().value().GetValue<int>());
+    } else if (f.type.GetId() == panda_file::Type::TypeId::REFERENCE && f.type.GetName() == "std/core/String") {
+        ss << " = \"" << static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()) << "\"";
+    } else if (f.type.GetRank() > 0) {
+        uint32_t litArrayOffset =
+            std::stoi(static_cast<std::string>(f.metadata->GetValue().value().GetValue<std::string>()));
+        pandasm::LiteralArray litArray;
+        GetLiteralArrayByOffset(&litArray, panda_file::File::EntityId(litArrayOffset));
+        ss << " = ";
+        DumpLiteralArray(litArray, ss);
+    }
+}
+
 void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &os, bool printInformation,
                                    bool isUnion) const
 {
@@ -1456,6 +1643,9 @@ void Disassembler::SerializeFields(const pandasm::Record &record, std::ostream &
             ss << "\t";
         }
         ss << f.type.GetPandasmName() << " " << f.name;
+        if (f.metadata->GetValue().has_value()) {
+            SerializeFieldValue(f, ss);
+        }
         if (!isUnion && recordInTable) {
             const auto fieldIter = recordIter->second.fieldAnnotations.find(f.name);
             if (fieldIter != recordIter->second.fieldAnnotations.end()) {
@@ -1746,7 +1936,7 @@ static void TranslateImmToLabel(pandasm::Ins *paIns, LabelTable *labelTable, con
         size_t idx = GetBytecodeInstructionNumber(BytecodeInstruction(insArr), bcInsDest);
         if (idx != std::numeric_limits<size_t>::max()) {
             if (labelTable->find(idx) == labelTable->end()) {
-                std::stringstream ss {};
+                std::stringstream ss;
                 ss << "jump_label_" << labelTable->size();
                 (*labelTable)[idx] = ss.str();
             }

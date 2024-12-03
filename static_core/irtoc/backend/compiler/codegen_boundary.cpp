@@ -141,21 +141,21 @@ void CodegenBoundary::CreateFrameInfo()
     SetFrameInfo(frame);
 }
 
-void CodegenBoundary::IntrinsicTailCall(IntrinsicInst *inst)
+void CodegenBoundary::EmitTailCallIntrinsic(IntrinsicInst *inst, [[maybe_unused]] Reg dst, [[maybe_unused]] SRCREGS src)
 {
     auto location = inst->GetLocation(0);
     ASSERT(location.IsFixedRegister() && location.IsRegisterValid());
-    auto src = Reg(location.GetValue(), GetTarget().GetPtrRegType());
+    auto addr = Reg(location.GetValue(), GetTarget().GetPtrRegType());
     RegMask liveoutMask = GetLiveOut(inst->GetBasicBlock());
     ScopedTmpReg target(GetEncoder());
-    if (!liveoutMask.Test(src.GetId())) {
+    if (!liveoutMask.Test(addr.GetId())) {
         ASSERT(target.GetReg().IsValid());
-        GetEncoder()->EncodeMov(target, src);
-        src = target.GetReg();
+        GetEncoder()->EncodeMov(target, addr);
+        addr = target.GetReg();
     }
-    ASSERT(src.IsValid());
+    ASSERT(addr.IsValid());
     RemoveBoundaryFrame(inst->GetBasicBlock());
-    GetEncoder()->EncodeJump(src);
+    GetEncoder()->EncodeJump(addr);
 }
 
 void CodegenBoundary::RemoveBoundaryFrame(const BasicBlock *bb) const

@@ -32,8 +32,8 @@ static auto g_implG = AbckitGetGraphApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 class LibAbcKitArkTSInspectApiNamespace : public ::testing::Test {};
 
 static const std::unordered_map<std::string, std::string> NAMESPACE_TO_FUNC = {
-    {"N", "F"},
-    {"N2", "F2"},
+    {"N", "f"},
+    {"N2", "f2"},
 };
 
 // Test: test-kind=api, api=ArktsInspectApiImpl::arktsV1NamespaceGetConstructor, abc-kind=ArkTS2, category=positive

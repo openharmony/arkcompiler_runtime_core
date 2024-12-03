@@ -989,6 +989,7 @@ export class JSONParser {
                     throw new SyntaxError("Expected \",\" or \"" + JSONObject.END_CHAR + "\" at " + this.getCurPosDescr() + ", got \"" + this.curChar + "\"")
             }
         }
+        return res
     }
 
     private parse(res: JSONArray): JSONArray {
@@ -1013,6 +1014,7 @@ export class JSONParser {
                     throw new SyntaxError("Expected , or " + JSONArray.END_CHAR + " at " + this.getCurPosDescr() + ", got " + this.curChar)
             }
         }
+        return res
     }
 
     private parse(res: JSONNumber): JSONNumber {
@@ -1049,7 +1051,6 @@ export class JSONParser {
                     resBuilder.append(JSONParser.ESCAPED_CHARS[escapedCharIndex])
                 } else {
                     throw new SyntaxError("Bad escape sequence \\" + this.curChar + " at " + this.getCurPosDescr())
-                    return res
                 }
             }
             hasMetEscape = this.curChar == c'\\'
@@ -1289,7 +1290,7 @@ export class JSONNull extends JSONValue {
 }
 
 export interface JSONable<T> {
-    static createFromJSONValue(json: JSONValue): T {
+    createFromJSONValue(json: JSONValue): T {
         throw new JSONTypeError("createFromJSONValue was not overrided")
     }
 }

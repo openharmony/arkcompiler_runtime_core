@@ -72,7 +72,7 @@ constexpr uint64_t operator"" _GB(long double count)
     return static_cast<uint64_t>(count * (1ULL << SHIFT_GB));
 }
 
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-runtime-int)
 constexpr uint64_t operator"" _GB(unsigned long long count)
 {

@@ -16,45 +16,102 @@
 #ifndef CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_H
 #define CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_H
 
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "libabckit/include/c/abckit.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "../base_classes.h"
+#include "./module.h"
 
 #include <string_view>
-#include <vector>
 
 namespace abckit::core {
 
-class ImportDescriptor : public View<AbckitCoreImportDescriptor *> {
-    // To access private constructor.
+/**
+ * @brief ImportDescriptor
+ */
+class ImportDescriptor : public ViewInResource<AbckitCoreImportDescriptor *, const File *> {
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
     friend class abckit::core::Module;
+    /// @brief to access private constructor
     friend class abckit::arkts::Module;
+    /// @brief to access private constructor
+    friend class abckit::DynamicIsa;
+    /// @brief to access private constructor
+    friend class abckit::Instruction;
+    /// @brief abckit::DefaultHash<ImportDescriptor>
+    friend class abckit::DefaultHash<ImportDescriptor>;
+
+protected:
+    /// @brief Core API View type
+    using CoreViewT = ImportDescriptor;
 
 public:
+    /**
+     * @brief Construct a new empty Import Descriptor object
+     */
+    ImportDescriptor() : ViewInResource(nullptr), conf_(nullptr)
+    {
+        SetResource(nullptr);
+    };
+
+    /**
+     * @brief Construct a new Import Descriptor object
+     * @param other
+     */
     ImportDescriptor(const ImportDescriptor &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ImportDescriptor&
+     */
     ImportDescriptor &operator=(const ImportDescriptor &other) = default;
-    ImportDescriptor(ImportDescriptor &&other) = default;
+
+    /**
+     * @brief Construct a new Import Descriptor object
+     * @param other
+     */
+    ImportDescriptor(ImportDescriptor &&other) = default;  // CC-OFF(G.CLS.07-CPP) plan to break polymorphism
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ImportDescriptor&
+     */
     ImportDescriptor &operator=(ImportDescriptor &&other) = default;
+
+    /**
+     * @brief Destroy the Import Descriptor object
+     */
     ~ImportDescriptor() override = default;
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName() const;
 
     // Core API's.
-    // ...
-
-private:
-    ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf) : View(module), conf_(conf) {};
-    const ApiConfig *conf_;
+    /**
+     * @brief Get the Imported Module object
+     * @return core::Module
+     */
+    core::Module GetImportedModule() const;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;
     }
+
+private:
+    ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf, const File *file);
+
+    const ApiConfig *conf_;
 };
 
 }  // namespace abckit::core

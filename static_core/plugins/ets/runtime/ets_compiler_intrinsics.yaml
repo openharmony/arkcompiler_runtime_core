@@ -30,7 +30,7 @@ intrinsics:
       ret: ref
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameObj
-    clear_flags: [  ]
+    clear_flags: [ acc_read ]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameI32
@@ -41,7 +41,7 @@ intrinsics:
       ret: i32 
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameI32
-    clear_flags: [  ]
+    clear_flags: [ acc_read ]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameI64
@@ -52,7 +52,7 @@ intrinsics:
       ret: i64
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameI64
-    clear_flags: [  ]
+    clear_flags: [ acc_read ]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameF32
@@ -63,7 +63,7 @@ intrinsics:
       ret: f32
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameF32
-    clear_flags: [  ]
+    clear_flags: [ acc_read ]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsLdObjByNameF64
@@ -74,7 +74,7 @@ intrinsics:
       ret: f64
       args: [ method, i32, u32, ref ]
     impl: ark::ets::intrinsics::CompilerEtsLdObjByNameF64
-    clear_flags: [  ]
+    clear_flags: [ acc_read ]
     peephole_func: PeepholeLdObjByName
 
   - name: CompilerEtsStObjByNameObj

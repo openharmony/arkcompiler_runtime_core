@@ -50,7 +50,13 @@ EtsMethod *EtsMethod::FromTypeDescriptor(const PandaString &td)
     }
     ASSERT(td[0] == CLASS_TYPE_PREFIX);
     auto type = classLinker->GetClass(td.c_str());
-    return type->GetMethod(LAMBDA_METHOD_NAME);
+
+    auto method = type->GetMethod(LAMBDA_METHOD_NAME);
+    if (method != nullptr) {
+        return method;
+    }
+
+    return type->GetMethod(FN_INVOKE_METHOD_NAME);
 }
 
 EtsValue EtsMethod::Invoke(napi::ScopedManagedCodeFix *s, Value *args)

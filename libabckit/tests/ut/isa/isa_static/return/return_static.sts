@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
 
 class A {
     foo(a: long) : long {
@@ -30,20 +29,3 @@ function main() {
     console.log(a.foo(10))
     a.foo1(10)
 }
-
-// After AOP 1:
-
-// class A {
-//     foo(a: long) : long {
-//         return 5;
-//     }
-// }
-
-// After AOP 1:
-
-// class A {
-//     foo1(a: long) : void {
-//          console.log(a)
-//          return;
-//     }
-// }

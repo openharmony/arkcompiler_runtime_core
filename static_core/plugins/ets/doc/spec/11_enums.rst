@@ -79,9 +79,9 @@ A :index:`compile-time error` occurs if ``integer`` and ``string`` type
 enumeration constants are combined in one enumeration.
 
 Any enumeration constant is of type ``enumeration``. The implicit conversion
-(see :ref:`Enumeration to Int Conversions`, :ref:`Enumeration to String Conversions`)
+(see :ref:`Enumeration to Constants Type Conversions`)
 of the enumeration constant to integer types or type *string* depends on the
-type of enumeration.
+type of constants.
 
 In addition, all enumeration constant names must be unique. Otherwise,
 a :index:`compile-time error` occurs.

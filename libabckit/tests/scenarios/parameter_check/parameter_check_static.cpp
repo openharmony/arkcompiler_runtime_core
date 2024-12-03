@@ -64,10 +64,10 @@ void TransformIR(AbckitGraph *graph)
     g_implG->bbAddInstBack(falseBB, ret);
 }
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestStaticParameterCheck)
+TEST_F(AbckitScenarioTest, LibAbcKitTestStaticParameterCheck)
 {
     auto output = helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/parameter_check/parameter_check_static.abc",
                                             "parameter_check_static/ETSGLOBAL", "main");

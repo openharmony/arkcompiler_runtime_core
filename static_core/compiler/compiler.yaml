@@ -700,6 +700,15 @@ options:
   description: Store and load values from successive stack slots as pair of values during SpillFill encoding.
   tags: [perf]
 
+- name: compiler-frame-size
+  type: std::string
+  default: default
+  possible_values:
+    - default
+    - large
+  description: Set virtual frame size. Large frame size is used for AbcKit tool. Default is used for other cases.
+  tags: [perf]
+
 - name: compiler-cpu-features
   type: arg_list_t
   default: [sse42]

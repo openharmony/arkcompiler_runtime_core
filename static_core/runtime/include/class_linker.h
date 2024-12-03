@@ -171,10 +171,21 @@ public:
     template <class Callback>
     void EnumerateContextsForDump(const Callback &cb, std::ostream &os)
     {
+        auto findParent = [](ClassLinkerContext *parent, ClassLinkerContext *ctxPtr, size_t &parentIndex,
+                             bool &founded) {
+            if (parent == ctxPtr) {
+                founded = true;
+                return false;
+            }
+            parentIndex++;
+            return true;
+        };
+
         size_t registerIndex = 0;
         ClassLinkerContext *parent = nullptr;
         ClassLinkerExtension *ext = nullptr;
-        auto enumCallback = [&registerIndex, &parent, &cb, &os, &ext](ClassLinkerContext *ctx) {
+
+        auto enumCallback = [&registerIndex, &parent, &cb, &os, &ext, &findParent](ClassLinkerContext *ctx) {
             os << "#" << registerIndex << " ";
             if (!cb(ctx, os, parent)) {
                 return true;
@@ -182,13 +193,8 @@ public:
             if (parent != nullptr) {
                 size_t parentIndex = 0;
                 bool founded = false;
-                ext->EnumerateContexts([parent, &parentIndex, &founded](ClassLinkerContext *ctxPtr) {
-                    if (parent == ctxPtr) {
-                        founded = true;
-                        return false;
-                    }
-                    parentIndex++;
-                    return true;
+                ext->EnumerateContexts([parent, &parentIndex, &founded, &findParent](ClassLinkerContext *ctxPtr) {
+                    return findParent(parent, ctxPtr, parentIndex, founded);
                 });
                 if (founded) {
                     os << "|Parent class loader: #" << parentIndex << "\n";

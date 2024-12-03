@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_BASIC_BLOCK_IMPL_H
 #define CPP_ABCKIT_BASIC_BLOCK_IMPL_H
 
-#include "cpp/headers/basic_block.h"
+#include "./basic_block.h"
 
 namespace abckit {
 
@@ -32,26 +32,22 @@ inline BasicBlock BasicBlock::GetSuccByIdx(int idx) const
     const ApiConfig *conf = GetApiConfig();
     AbckitBasicBlock *abcBB = conf->cGapi_->bbGetSuccBlock(GetView(), idx);
     CheckError(conf);
-    return BasicBlock(abcBB, conf);
+    return BasicBlock(abcBB, conf, GetResource());
 }
 
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<BasicBlock> BasicBlock::GetSuccs() const
 {
-    const ApiConfig *conf = GetApiConfig();
     std::vector<BasicBlock> bBs;
+    Payload<std::vector<BasicBlock> *> payload {&bBs, GetApiConfig(), GetResource()};
 
-    using EnumerateData = std::pair<std::vector<BasicBlock> *, const ApiConfig *>;
-    EnumerateData enumerateData(&bBs, conf);
+    GetApiConfig()->cGapi_->bbVisitSuccBlocks(GetView(), &payload, [](AbckitBasicBlock *succ, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<BasicBlock> *> *>(data);
+        payload.data->push_back(BasicBlock(succ, payload.config, payload.resource));
+        return true;
+    });
 
-    conf->cGapi_->bbVisitSuccBlocks(GetView(), (void *)&enumerateData,
-                                    []([[maybe_unused]] AbckitBasicBlock *bb, AbckitBasicBlock *succ, void *data) {
-                                        auto *vec = static_cast<EnumerateData *>(data)->first;
-                                        auto *config = static_cast<EnumerateData *>(data)->second;
-                                        vec->push_back(BasicBlock(succ, config));
-                                    });
-
-    CheckError(conf);
+    CheckError(GetApiConfig());
 
     return bBs;
 }
@@ -63,18 +59,65 @@ inline std::vector<Instruction> BasicBlock::GetInstructions() const
     auto *inst = conf->cGapi_->bbGetFirstInst(GetView());
     CheckError(conf);
     while (inst != nullptr) {
-        insts.push_back(Instruction(inst, conf));
+        insts.push_back(Instruction(inst, conf, GetResource()));
         inst = conf->cGapi_->iGetNext(inst);
         CheckError(conf);
     }
     return insts;
 }
 
-inline BasicBlock &BasicBlock::AddInstFront(const Instruction &inst)
+inline Instruction BasicBlock::GetFirstInst() const
+{
+    auto *conf = GetApiConfig();
+    auto *inst = conf->cGapi_->bbGetFirstInst(GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, GetResource());
+}
+
+inline Instruction BasicBlock::GetLastInst() const
+{
+    auto *conf = GetApiConfig();
+    auto *inst = conf->cGapi_->bbGetLastInst(GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, GetResource());
+}
+
+inline const BasicBlock &BasicBlock::AddInstFront(const Instruction &inst) const
 {
     GetApiConfig()->cGapi_->bbAddInstFront(GetView(), inst.GetView());
     CheckError(GetApiConfig());
     return *this;
+}
+
+inline const BasicBlock &BasicBlock::AddInstBack(const Instruction &inst) const
+{
+    GetApiConfig()->cGapi_->bbAddInstBack(GetView(), inst.GetView());
+    CheckError(GetApiConfig());
+    return *this;
+}
+
+inline void BasicBlock::VisitSuccBlocks(const std::function<void(BasicBlock)> &cb) const
+{
+    Payload<const std::function<void(BasicBlock)> &> payload {cb, GetApiConfig(), GetResource()};
+
+    GetApiConfig()->cGapi_->bbVisitSuccBlocks(GetView(), &payload, [](AbckitBasicBlock *succ, void *data) {
+        const auto &payload = *static_cast<Payload<const std::function<void(BasicBlock)> &> *>(data);
+        payload.data(BasicBlock(succ, payload.config, payload.resource));
+        return true;
+    });
+    CheckError(GetApiConfig());
+}
+
+inline void BasicBlock::AppendSuccBlock(const BasicBlock &succBlock) const
+{
+    GetApiConfig()->cGapi_->bbAppendSuccBlock(GetView(), succBlock.GetView());
+    CheckError(GetApiConfig());
+}
+
+inline void BasicBlock::EraseSuccBlock(uint32_t index) const
+{
+    GetApiConfig()->cGapi_->bbEraseSuccBlock(GetView(), index);
+    CheckError(GetApiConfig());
 }
 
 }  // namespace abckit

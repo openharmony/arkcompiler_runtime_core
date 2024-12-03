@@ -39,7 +39,7 @@
 #include "runtime/mem/gc/gc_settings.h"
 #include "runtime/include/mem/allocator.h"
 #include "plugins/ets/runtime/ets_panda_file_items.h"
-#include "plugins/ets/runtime/tooling/ets_inspector_extension.h"
+#include "plugins/ets/runtime/tooling/pt_ets_extension.h"
 
 #include "ets_class_linker_extension.h"
 #include "ets_vm.h"
@@ -331,9 +331,9 @@ public:
     {
     }
 
-    std::unique_ptr<tooling::InspectorExtension> CreateInspectorExtension() const override
+    std::unique_ptr<tooling::PtLangExt> CreatePtLangExt() const override
     {
-        return std::make_unique<EtsInspectorExtension>();
+        return std::make_unique<PtEtsExtension>();
     }
 };
 

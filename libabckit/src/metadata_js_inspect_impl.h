@@ -24,28 +24,30 @@ namespace libabckit {
 // Module
 // ========================================
 
-void JSModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data));
-void JSModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data));
-void JSModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data));
-void JSModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
+bool JsModuleEnumerateImports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreImportDescriptor *i, void *data));
+bool JsModuleEnumerateExports(AbckitCoreModule *m, void *data, bool (*cb)(AbckitCoreExportDescriptor *e, void *data));
+bool JsModuleEnumerateClasses(AbckitCoreModule *m, void *data, bool cb(AbckitCoreClass *klass, void *data));
+bool JsModuleEnumerateTopLevelFunctions(AbckitCoreModule *m, void *data,
                                         bool (*cb)(AbckitCoreFunction *function, void *data));
-void JSModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
+bool JsModuleEnumerateAnonymousFunctions(AbckitCoreModule *m, void *data,
                                          bool (*cb)(AbckitCoreFunction *function, void *data));
-void JSModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
+bool JsModuleEnumerateAnnotationInterfaces(AbckitCoreModule *m, void *data,
                                            bool (*cb)(AbckitCoreAnnotationInterface *ai, void *data));
 
 // ========================================
 // Class
 // ========================================
 
-void JSClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
+bool JsClassEnumerateMethods(AbckitCoreClass *klass, void *data, bool (*cb)(AbckitCoreFunction *method, void *data));
 
 // ========================================
 // Function
 // ========================================
 
-void JSFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
+bool JsFunctionEnumerateNestedFunctions(AbckitCoreFunction *function, void *data,
                                         bool (*cb)(AbckitCoreFunction *nestedFunc, void *data));
+bool JsFunctionEnumerateNestedClasses(AbckitCoreFunction *function, void *data,
+                                      bool (*cb)(AbckitCoreClass *nestedClass, void *data));
 
 }  // namespace libabckit
 

@@ -20,21 +20,3 @@ class MyClass {
 
 let c = new MyClass();
 print(c.foo());
-
-//   // After AOP:
-
-//   class MyClass {
-//     foo() {
-//       let b = 0
-//       let c = 1
-//       if (b != c) {
-//           return 0
-//       }
-//       return undefined
-//     }
-//   }
-
-//
-//   let c = new MyClass();
-//   print(c.foo());
-//

@@ -12,39 +12,40 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-function m0F0() {
-    (() => {
-        console.log(1)
+function m0F0(): void {
+    ((): void => {
+        console.log(1);
     })();
-    (() => {
-        console.log(2)
+    ((): void => {
+        console.log(2);
     })();
+    let m0F0F0 = ((): void => {
+        console.log(3);
+    });
 }
 
-function* m0F1() {}
+function* m0F1(): Iterable<void> {}
 async function m0F2() {}
 class M0C0 {
-    M0C0F0() {}
-    static M0C0F1() {}
-    async M0C0F2() {}
-    // async *M0C0F3(){}
+    M0C0F0(): void {}
+    static M0C0F1(): void {}
+    async M0C0F2(): Promise<void> {}
 }
 enum M0E0 {}
 
 namespace M0N0 {
-    function m0N0F0() {}
+    function m0N0F0(): void {}
 
-    function* m0N0F1() {}
-    async function m0N0F2() {}
+    function* m0N0F1(): Iterable<void> {}
+    async function m0N0F2(): Promise<void> {}
     class M0N0C0 {
-        M0N0C0F0() {}
-        static M0N0C0F1() {}
-        async M0N0C0F2() {}
-        // async *M0N0C0F3(){}
+        M0N0C0F0(): void {}
+        static M0N0C0F1(): void {}
+        async M0N0C0F2(): Promise<void> {}
     }
     enum M0N0E0 {}
 
     namespace M0N0N0 {
-        function m0N0N0F0() {}
+        function m0N0N0F0(): void {}
     }
 }

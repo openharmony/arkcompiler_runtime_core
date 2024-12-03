@@ -16,7 +16,7 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_OHOS_OHOS_WS_SERVER_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_OHOS_OHOS_WS_SERVER_H
 
-#include "ohos_ws_server_endpoint.h"
+#include "connection/ohos_ws/ohos_ws_server_endpoint.h"
 
 namespace ark::tooling::inspector {
 // JSON-RPC server processing only one connection at time.

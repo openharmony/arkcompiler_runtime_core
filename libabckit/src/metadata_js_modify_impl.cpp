@@ -28,8 +28,8 @@ namespace libabckit {
 // File
 // ========================================
 
-extern "C" AbckitJsModule *FileAddExternalModuleDYNAMIC(AbckitFile *file,
-                                                        const struct AbckitJsExternalModuleCreateParams *params)
+extern "C" AbckitJsModule *FileAddExternalModule(AbckitFile *file,
+                                                 const struct AbckitJsExternalModuleCreateParams *params)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -42,14 +42,14 @@ extern "C" AbckitJsModule *FileAddExternalModuleDYNAMIC(AbckitFile *file,
         return nullptr;
     }
 
-    return FileAddExternalModuleDynamic(file, params);
+    return FileAddExternalJsModule(file, params);
 }
 
 // ========================================
 // Module
 // ========================================
 
-extern "C" AbckitJsImportDescriptor *ModuleAddImportFromJSToJS(
+extern "C" AbckitJsImportDescriptor *ModuleAddImportFromJsToJs(
     AbckitJsModule *importing /* assert(importing.target === AbckitTarget_ArkTS_v2) */,
     AbckitJsModule *imported /* assert(importing.target === AbckitTarget_ArkTS_v2) */,
     const struct AbckitJsImportFromDynamicModuleCreateParams *params)
@@ -64,7 +64,7 @@ extern "C" AbckitJsImportDescriptor *ModuleAddImportFromJSToJS(
     return ModuleAddImportFromDynamicModuleDynamic(importing->core, imported->core, params);
 }
 
-extern "C" void ModuleRemoveImportDYNAMIC(AbckitJsModule *m, AbckitJsImportDescriptor *i)
+extern "C" void ModuleRemoveImportJs(AbckitJsModule *m, AbckitJsImportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -75,7 +75,7 @@ extern "C" void ModuleRemoveImportDYNAMIC(AbckitJsModule *m, AbckitJsImportDescr
     return ModuleRemoveImportDynamic(m->core, i);
 }
 
-extern "C" AbckitJsExportDescriptor *ModuleAddExportFromJSToJS(AbckitJsModule *exporting, AbckitJsModule *exported,
+extern "C" AbckitJsExportDescriptor *ModuleAddExportFromJsToJs(AbckitJsModule *exporting, AbckitJsModule *exported,
                                                                const AbckitJsDynamicModuleExportCreateParams *params)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
@@ -87,7 +87,7 @@ extern "C" AbckitJsExportDescriptor *ModuleAddExportFromJSToJS(AbckitJsModule *e
     return DynamicModuleAddExportDynamic(exporting->core, exported != nullptr ? exported->core : nullptr, params);
 }
 
-extern "C" void ModuleRemoveExportDYNAMIC(AbckitJsModule *m, AbckitJsExportDescriptor *i)
+extern "C" void ModuleRemoveExportJs(AbckitJsModule *m, AbckitJsExportDescriptor *i)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
     LIBABCKIT_IMPLEMENTED;
@@ -136,13 +136,13 @@ AbckitJsModifyApi g_jsModifyApiImpl = {
     // File
     // ========================================
 
-    FileAddExternalModuleDYNAMIC,
+    FileAddExternalModule,
 
     // ========================================
     // Module
     // ========================================
 
-    ModuleAddImportFromJSToJS, ModuleRemoveImportDYNAMIC, ModuleAddExportFromJSToJS, ModuleRemoveExportDYNAMIC,
+    ModuleAddImportFromJsToJs, ModuleRemoveImportJs, ModuleAddExportFromJsToJs, ModuleRemoveExportJs,
 
     // ========================================
     // Class

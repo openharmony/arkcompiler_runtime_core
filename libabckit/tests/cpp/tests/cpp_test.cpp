@@ -23,15 +23,16 @@
 
 #include <gtest/gtest.h>
 #include <string_view>
+#include <unordered_set>
 
 namespace libabckit::test {
 
 class LibAbcKitCppTest : public ::testing::Test {};
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace abckit;
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=api, api=BasicBlock::AddInstFront, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest1)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc", "cpp_test_dynamic");
@@ -39,8 +40,8 @@ TEST_F(LibAbcKitCppTest, CppTest1)
 
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
 
-    for (auto function : file.GetAllFunctions()) {
-        abckit::Graph graph = function.GetGraph();
+    for (const auto &function : file.GetAllFunctions()) {
+        abckit::Graph graph = function.CreateGraph();
         abckit::BasicBlock curBB = graph.GetStartBb().GetSuccByIdx(0);
 
         // Insert `print("Func start: " + funcName)`
@@ -87,7 +88,7 @@ TEST_F(LibAbcKitCppTest, CppTest1)
                                "Func end: func_main_0\n"));
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=api, api=Function::AddAnnotation, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest2)
 {
     auto output = helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc", "cpp_test_dynamic");
@@ -151,7 +152,7 @@ TEST_F(LibAbcKitCppTest, CppTest2)
     EXPECT_TRUE(helpers::Match(output, "foo logic\nbar logic\n"));
 }
 
-// Test: test-kind=internal, abc-kind=JS, category=internal
+// Test: test-kind=api, api=File::CreateValueU1, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest3)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_js.abc");
@@ -161,7 +162,7 @@ TEST_F(LibAbcKitCppTest, CppTest3)
     file.WriteAbc(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_js_modified_3.abc");
 }
 
-// Test: test-kind=internal, abc-kind=JS, category=internal
+// Test: test-kind=api, api=File::CreateLiteralBool, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest4)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_js.abc");
@@ -171,7 +172,7 @@ TEST_F(LibAbcKitCppTest, CppTest4)
     file.WriteAbc(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_js_modified_4.abc");
 }
 
-// Test: test-kind=internal, abc-kind=JS, category=internal
+// Test: test-kind=api, api=File::CreateLiteralArray, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest5)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_js.abc");
@@ -186,7 +187,7 @@ TEST_F(LibAbcKitCppTest, CppTest5)
     file.WriteAbc(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_js_modified_5.abc");
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=api, api=Annotation::AddAndGetElement, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest6)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
@@ -223,7 +224,7 @@ TEST_F(LibAbcKitCppTest, CppTest6)
     file.WriteAbc(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic_mofdified_6.abc");
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=api, api=Module::GetNamespaces, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest7)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
@@ -240,7 +241,7 @@ TEST_F(LibAbcKitCppTest, CppTest7)
     ASSERT_EQ(nsNames[0], "MyNamespace");
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=api, api=AnnotationInterface::GetFields, abc-kind=ArkTS1, category=internal, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest8)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
@@ -262,7 +263,7 @@ TEST_F(LibAbcKitCppTest, CppTest8)
     ASSERT_EQ(annFieldNames[3U], "str");
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=api, api=ImportDescriptor::GetName, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest9)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
@@ -279,7 +280,7 @@ TEST_F(LibAbcKitCppTest, CppTest9)
     ASSERT_EQ(importNames[0], "TsExport");
 }
 
-// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+// Test: test-kind=api, api=Module::GetExports, abc-kind=ArkTS1, category=positive, extension=cpp
 TEST_F(LibAbcKitCppTest, CppTest10)
 {
     abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
@@ -294,6 +295,34 @@ TEST_F(LibAbcKitCppTest, CppTest10)
 
     ASSERT_TRUE(exportNames.size() == 1);
     ASSERT_EQ(exportNames[0], "bar");
+}
+
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+TEST_F(LibAbcKitCppTest, CppTest11)
+{
+    abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
+
+    // Test checks that Module is hashable
+    std::unordered_set<abckit::core::Module> moduleSet;
+
+    for (auto &mdl : file.GetModules()) {
+        moduleSet.insert(mdl);
+    }
+}
+
+// Test: test-kind=internal, abc-kind=ArkTS1, category=internal
+TEST_F(LibAbcKitCppTest, CppTest12)
+{
+    abckit::File file(ABCKIT_ABC_DIR "cpp/tests/cpp_test_dynamic.abc");
+    abckit::core::Function func = file.GetAllFunctions()[0];
+    abckit::Graph graph = func.CreateGraph();
+    abckit::BasicBlock bb = graph.GetStartBb();
+    abckit::Instruction inst = bb.GetFirstInst();
+    while (inst) {
+        ASSERT_TRUE(inst);
+        inst = inst.GetNext();
+    }
+    ASSERT_FALSE(inst);
 }
 
 }  // namespace libabckit::test

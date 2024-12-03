@@ -52,8 +52,7 @@ config("arkcompiler_public_config") {
 
   if (abckit_enable) {
     intrinsics_gen_dir =
-        get_label_info(":libarkcompiler_intrinsics_gen_inl(${host_toolchain})",
-                       "target_gen_dir")
+        get_label_info(":libarkcompiler_intrinsics_gen_inl", "target_gen_dir")
     include_dirs += [ "$intrinsics_gen_dir/generated" ]
   }
 
@@ -187,7 +186,7 @@ if (!is_mac) {
 
 libarkcompiler_sources += [ "$target_gen_dir/generated/inst_builder_gen.cpp" ]
 
-if (abckit_enable && current_toolchain == host_toolchain) {
+if (abckit_enable) {
   libabckit_path = "$ark_root/../libabckit"
   libabckit_deps = [ "$libabckit_path/src/templates/abckit_intrinsics:abckit_ark_gen_inst_builder_abckit_intrinsics_inc" ]
   libabckit_includes = [
@@ -301,7 +300,7 @@ ohos_shared_library("libarktscompiler") {
     "$ark_root/compiler/optimizer/code_generator",
   ]
 
-  if (abckit_enable && current_toolchain == host_toolchain) {
+  if (abckit_enable) {
     include_dirs += libabckit_includes
     deps += libabckit_deps
   }
@@ -346,7 +345,7 @@ ohos_source_set("libarktscompiler_frontend_static") {
     "$ark_root/compiler/optimizer/code_generator",
   ]
 
-  if (abckit_enable && current_toolchain == host_toolchain) {
+  if (abckit_enable) {
     include_dirs += libabckit_includes
     deps += libabckit_deps
   }
@@ -372,7 +371,7 @@ ark_isa_gen("isa_gen_libarkcompiler") {
 
 ark_gen("libarkcompiler_intrinsics_gen_inl") {
   gen_runtime_path = "$target_gen_dir/../runtime"
-  if (abckit_enable && current_toolchain == host_toolchain) {
+  if (abckit_enable) {
     data = [ "$gen_runtime_path/abckit_intrinsics.yaml" ]
   } else {
     data = [ "$gen_runtime_path/intrinsics.yaml" ]
@@ -401,7 +400,7 @@ ark_gen("libarkcompiler_intrinsics_gen_inl") {
   ]
   requires = [ "$ark_root/libpandabase/utils.rb" ]
   extra_dependencies = [ "$ark_root/runtime:arkruntime_gen_intrinsics_yaml" ]
-  if (abckit_enable && current_toolchain == host_toolchain) {
+  if (abckit_enable) {
     extra_dependencies += [
       "$libabckit_path/src/templates/dyn_intrinsics:abckit_isa_gen_dyn_intrinsics_enum_inc",
       "$libabckit_path/src/templates/dyn_intrinsics:abckit_isa_gen_get_dyn_intrinsics_names_inc",

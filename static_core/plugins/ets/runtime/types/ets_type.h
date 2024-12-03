@@ -30,6 +30,7 @@ static constexpr const char *NULL_TYPE_DESC = "Null";
 static constexpr const char *LAMBDA_PREFIX = "LambdaObject";
 static constexpr const char *STD_CORE_FUNCTION_PREFIX = "std.core.Function";
 static constexpr const char *LAMBDA_METHOD_NAME = "invoke";
+static constexpr const char *FN_INVOKE_METHOD_NAME = "invoke0";
 static constexpr const char *CONSTRUCTOR_NAME = "constructor";
 static constexpr char TYPE_DESC_DELIMITER = ';';
 static constexpr const char *GETTER_BEGIN = "<get>";
@@ -37,6 +38,7 @@ static constexpr const char *SETTER_BEGIN = "<set>";
 
 enum class EtsType { BOOLEAN, BYTE, CHAR, SHORT, INT, LONG, FLOAT, DOUBLE, OBJECT, UNKNOWN, VOID };
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline EtsType ConvertPandaTypeToEtsType(panda_file::Type type)
 {
     switch (type.GetId()) {
@@ -70,6 +72,7 @@ inline EtsType ConvertPandaTypeToEtsType(panda_file::Type type)
     UNREACHABLE();
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline panda_file::Type ConvertEtsTypeToPandaType(const EtsType type)
 {
     switch (type) {
@@ -98,6 +101,7 @@ inline panda_file::Type ConvertEtsTypeToPandaType(const EtsType type)
     }
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline std::string ConvertEtsPrimitiveTypeToString(const EtsType type)
 {
     switch (type) {

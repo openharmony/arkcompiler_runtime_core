@@ -88,7 +88,7 @@ export class URIError extends Error {
  * need to be wrapped in a single error.
  */
 export class AggregateError extends Error {
-    errors: Error[] = [];
+    errors: Array<Error>
 
     /**
      * The AggregateError() constructor creates AggregateError
@@ -106,22 +106,20 @@ export class AggregateError extends Error {
      *
      */
     constructor(errors: Iterable<Error>, message?: String, options?: ErrorOptions) {
-        super("AggregateError", message, options);
-        let iteratorList = new ArrayAsListObject()
-        iteratorForEach<Error>(errors.$_iterator(), (x: Error) : void => {
-            iteratorList.pushBack(x)
-        })
-        this.errors = iteratorList.toArray() as Error[]
+        super("AggregateError", message, options)
+        this.errors = Array.from<Error>(errors)
     }
 
-
-    //NOTE(kirill-mitkin): Used in Promise, need to remove
-    constructor(errors: Error[], message: String) {
-        super("AggregateError", message, undefined)
-        this.errors = errors
+    constructor(errors: Error[], message?: String, options?: ErrorOptions) {
+        super("AggregateError", message, options)
+        this.errors = Array.from<Error>(errors)
     }
 
     static invoke(errors: Iterable<Error>, message?: String, options?: ErrorOptions): AggregateError {
+        return new AggregateError(errors, message, options)
+    }
+
+    static invoke(errors: Error[], message?: String, options?: ErrorOptions): AggregateError {
         return new AggregateError(errors, message, options)
     }
 

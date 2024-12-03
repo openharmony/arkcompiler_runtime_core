@@ -16,18 +16,6 @@
 #ifndef PANDA_TOOLING_INSPECTOR_INSPECTOR_SERVER_H
 #define PANDA_TOOLING_INSPECTOR_INSPECTOR_SERVER_H
 
-#include "session_manager.h"
-#include "source_manager.h"
-#include "types/numeric_id.h"
-
-#include "console_call_type.h"
-#include "tooling/inspector/evaluation/helpers.h"
-#include "tooling/inspector/types/pause_on_exceptions_state.h"
-#include "tooling/inspector/types/property_descriptor.h"
-#include "tooling/inspector/types/remote_object.h"
-#include "tooling/inspector/types/scope.h"
-#include "tooling/pt_thread.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <deque>
@@ -37,14 +25,31 @@
 #include <string_view>
 #include <vector>
 
+#include "console_call_type.h"
+#include "include/tooling/pt_thread.h"
+
+#include "session_manager.h"
+#include "source_manager.h"
+#include "types/exception_details.h"
+#include "types/location.h"
+#include "types/numeric_id.h"
+#include "types/pause_on_exceptions_state.h"
+#include "types/property_descriptor.h"
+#include "types/remote_object.h"
+#include "types/scope.h"
+
 namespace ark::tooling::inspector {
 class Server;  // NOLINT(fuchsia-virtual-inheritance)
 
 class InspectorServer final {
 public:
+    using SetBreakpointHandler = std::optional<BreakpointId>(PtThread, const std::function<bool(std::string_view)> &,
+                                                             size_t, std::set<std::string_view> &, const std::string *);
     using FrameInfoHandler = std::function<void(FrameId, std::string_view, std::string_view, size_t,
                                                 const std::vector<Scope> &, const std::optional<RemoteObject> &)>;
+    using EvaluationResult = std::optional<std::pair<RemoteObject, std::optional<ExceptionDetails>>>;
 
+public:
     explicit InspectorServer(Server &server);
     ~InspectorServer() = default;
 
@@ -78,12 +83,8 @@ public:
     void OnCallDebuggerRemoveBreakpoint(std::function<void(PtThread, BreakpointId)> &&handler);
     void OnCallDebuggerRestartFrame(std::function<void(PtThread, FrameId)> &&handler);
     void OnCallDebuggerResume(std::function<void(PtThread)> &&handler);
-    void OnCallDebuggerSetBreakpoint(
-        std::function<std::optional<BreakpointId>(PtThread, const std::function<bool(std::string_view)> &, size_t,
-                                                  std::set<std::string_view> &)> &&handler);
-    void OnCallDebuggerSetBreakpointByUrl(
-        std::function<std::optional<BreakpointId>(PtThread, const std::function<bool(std::string_view)> &, size_t,
-                                                  std::set<std::string_view> &)> &&handler);
+    void OnCallDebuggerSetBreakpoint(std::function<SetBreakpointHandler> &&handler);
+    void OnCallDebuggerSetBreakpointByUrl(std::function<SetBreakpointHandler> &&handler);
     void OnCallDebuggerSetBreakpointsActive(std::function<void(PtThread, bool)> &&handler);
     void OnCallDebuggerSetPauseOnExceptions(std::function<void(PtThread, PauseOnExceptionsState)> &&handler);
     void OnCallDebuggerStepInto(std::function<void(PtThread)> &&handler);
@@ -104,6 +105,7 @@ private:
         size_t lineNumber;
     };
 
+private:
     void SendTargetAttachedToTarget(const std::string &sessionId);
     void EnumerateCallFrames(JsonArrayBuilder &callFrames, PtThread thread,
                              const std::function<void(const FrameInfoHandler &)> &enumerateFrames);

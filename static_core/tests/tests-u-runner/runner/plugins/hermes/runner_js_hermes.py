@@ -35,6 +35,7 @@ class RunnerJSHermes(RunnerJS):
     def __init__(self, config: Config) -> None:
         RunnerJS.__init__(self, config, "hermes")
 
+        self.default_list_root = Path(config.general.static_core_root) / 'tests' / 'test-lists'
         self.list_root = self.list_root if self.list_root else path.join(self.default_list_root, self.name)
         Log.all(_LOGGER, f"LIST_ROOT set to {self.list_root}")
         self.explicit_list = self.recalculate_explicit_list(config.test_lists.explicit_list)

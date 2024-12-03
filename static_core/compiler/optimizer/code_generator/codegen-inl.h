@@ -106,15 +106,14 @@ void Codegen::CallEntrypoint(Inst *inst, EntrypointId id, Reg dstReg, RegMask pr
     // parameter regs: their initial values must be stored by the caller
     // Other caller regs stored in bridges
     FillOnlyParameters(&liveRegs, sizeof...(Args), IS_FASTPATH);
-
-    if (IS_FASTPATH && retRegAlive && dstReg.IsValid()) {
+    // When value stored in target return register outlives current call, it must be stored too
+    if (retRegAlive && dstReg.IsValid()) {
         Reg retReg = GetTarget().GetReturnReg(dstReg.GetType());
         if (dstReg.GetId() != retReg.GetId()) {
             GetEncoder()->SetRegister(&liveRegs, nullptr, retReg, true);
         }
     }
 
-    GetEncoder()->SetRegister(&liveRegs, nullptr, dstReg, false);
     SaveCallerRegisters(liveRegs, VRegMask(), true);
 
     if (sizeof...(Args) != 0) {
@@ -127,12 +126,8 @@ void Codegen::CallEntrypoint(Inst *inst, EntrypointId id, Reg dstReg, RegMask pr
     }
     if (dstReg.IsValid()) {
         ASSERT(dstReg.IsScalar());
+        GetEncoder()->SetRegister(&liveRegs, nullptr, dstReg, false);
         Reg retReg = GetTarget().GetReturnReg(dstReg.GetType());
-        if (!IS_FASTPATH && retRegAlive && dstReg.GetId() != retReg.GetId() &&
-            (!GetTarget().FirstParamIsReturnReg(retReg.GetType()) || sizeof...(Args) == 0U)) {
-            GetEncoder()->SetRegister(&liveRegs, nullptr, retReg, true);
-        }
-
         // We must:
         //  sign extended INT8 and INT16 to INT32
         //  zero extended UINT8 and UINT16 to UINT32
@@ -331,12 +326,20 @@ void Codegen::CreateStubCall(Inst *inst, RuntimeInterface::IntrinsicId intrinsic
 {
     VRegMask liveVregs;
     RegMask liveRegs;
-    AddParamRegsInLiveMasks(&liveRegs, &liveVregs, params...);
     auto enc = GetEncoder();
-    {
-        SCOPED_DISASM_STR(this, "Save caller saved regs");
-        SaveCallerRegisters(liveRegs, liveVregs, true);
+
+    AddParamRegsInLiveMasks(&liveRegs, &liveVregs, params...);
+
+    if (dst.IsValid()) {
+        ASSERT(dst.IsScalar());
+        enc->SetRegister(&liveRegs, &liveVregs, dst, false);
+        Reg retVal = GetTarget().GetReturnReg(dst.GetType());
+        if (dst.GetId() != retVal.GetId()) {
+            enc->SetRegister(&liveRegs, &liveVregs, retVal, true);
+        }
     }
+
+    SaveCallerRegisters(liveRegs, liveVregs, true);
 
     FillCallParams(std::forward<Args>(params)...);
     CallIntrinsic(inst, intrinsicId);
@@ -347,18 +350,10 @@ void Codegen::CreateStubCall(Inst *inst, RuntimeInterface::IntrinsicId intrinsic
 
     if (dst.IsValid()) {
         Reg retVal = GetTarget().GetReturnReg(dst.GetType());
-        if (dst.GetId() != retVal.GetId()) {
-            enc->SetRegister(&liveRegs, &liveVregs, retVal, true);
-        }
-        ASSERT(dst.IsScalar());
         enc->EncodeMov(dst, retVal);
     }
 
-    {
-        SCOPED_DISASM_STR(this, "Restore caller saved regs");
-        enc->SetRegister(&liveRegs, &liveVregs, dst, false);
-        LoadCallerRegisters(liveRegs, liveVregs, true);
-    }
+    LoadCallerRegisters(liveRegs, liveVregs, true);
 }
 
 template <typename T>

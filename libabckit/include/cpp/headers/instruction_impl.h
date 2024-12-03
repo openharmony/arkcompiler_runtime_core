@@ -16,11 +16,13 @@
 #ifndef CPP_ABCKIT_INSTRUCTION_IMPL_H
 #define CPP_ABCKIT_INSTRUCTION_IMPL_H
 
-#include "cpp/headers/instruction.h"
+#include "./instruction.h"
+#include "./core/function.h"
+#include "./core/import_descriptor.h"
 
 namespace abckit {
 
-inline Instruction &Instruction::InsertAfter(const Instruction &inst)
+inline const Instruction &Instruction::InsertAfter(const Instruction &inst) const
 {
     const ApiConfig *conf = GetApiConfig();
     conf->cGapi_->iInsertAfter(GetView(), inst.GetView());
@@ -28,12 +30,18 @@ inline Instruction &Instruction::InsertAfter(const Instruction &inst)
     return *this;
 }
 
-inline Instruction &Instruction::InsertBefore(const Instruction &inst)
+inline const Instruction &Instruction::InsertBefore(const Instruction &inst) const
 {
     const ApiConfig *conf = GetApiConfig();
     conf->cGapi_->iInsertBefore(GetView(), inst.GetView());
     CheckError(conf);
     return *this;
+}
+
+inline void Instruction::Remove() const
+{
+    GetApiConfig()->cGapi_->iRemove(GetView());
+    CheckError(GetApiConfig());
 }
 
 inline AbckitIsaApiDynamicOpcode Instruction::GetOpcodeDyn() const
@@ -50,6 +58,116 @@ inline AbckitIsaApiStaticOpcode Instruction::GetOpcodeStat() const
     AbckitIsaApiStaticOpcode opc = conf->cStatapi_->iGetOpcode(GetView());
     CheckError(conf);
     return opc;
+}
+
+inline AbckitIsaApiDynamicConditionCode Instruction::GetConditionCodeDyn() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitIsaApiDynamicConditionCode dcc = conf->cDynapi_->iGetConditionCode(GetView());
+    CheckError(conf);
+    return dcc;
+}
+
+inline int64_t Instruction::GetConstantValueI64() const
+{
+    int64_t ret = GetApiConfig()->cGapi_->iGetConstantValueI64(GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline std::string_view Instruction::GetString() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitString *cString = conf->cGapi_->iGetString(GetView());
+    CheckError(conf);
+    std::string_view view = conf->cIapi_->abckitStringToString(cString);
+    CheckError(conf);
+    return view;
+}
+
+inline Instruction Instruction::GetNext() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitInst *inst = conf->cGapi_->iGetNext(GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, GetResource());
+}
+
+inline Instruction Instruction::GetPrev() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitInst *inst = conf->cGapi_->iGetPrev(GetView());
+    CheckError(conf);
+    return Instruction(inst, conf, GetResource());
+}
+
+inline core::Function Instruction::GetFunction() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreFunction *func = conf->cGapi_->iGetFunction(GetView());
+    CheckError(conf);
+    return core::Function(func, conf, GetResource()->GetFile());
+}
+
+inline BasicBlock Instruction::GetBasicBlock() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitBasicBlock *bb = conf->cGapi_->iGetBasicBlock(GetView());
+    CheckError(conf);
+    return BasicBlock(bb, conf, GetResource());
+}
+
+inline uint32_t Instruction::GetInputCount() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    uint32_t count = conf->cGapi_->iGetInputCount(GetView());
+    CheckError(conf);
+    return count;
+}
+
+inline Instruction Instruction::GetInput(uint32_t index) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitInst *inInst = conf->cGapi_->iGetInput(GetView(), index);
+    CheckError(conf);
+    return Instruction(inInst, conf, GetResource());
+}
+
+inline void Instruction::SetInput(uint32_t index, const Instruction &input) const
+{
+    const ApiConfig *conf = GetApiConfig();
+    conf->cGapi_->iSetInput(GetView(), input.GetView(), index);
+    CheckError(conf);
+}
+
+inline bool Instruction::VisitUsers(const std::function<bool(Instruction)> &cb) const
+{
+    Payload<const std::function<bool(Instruction)> &> payload {cb, GetApiConfig(), GetResource()};
+
+    auto isNormalExit = GetApiConfig()->cGapi_->iVisitUsers(GetView(), &payload, [](AbckitInst *user, void *data) {
+        const auto &payload = *static_cast<Payload<const std::function<bool(Instruction)> &> *>(data);
+        if (!payload.data(Instruction(user, payload.config, payload.resource))) {
+            return false;
+        };
+        return true;
+    });
+    CheckError(GetApiConfig());
+    return isNormalExit;
+}
+
+inline uint32_t Instruction::GetUserCount() const
+{
+    uint32_t count = GetApiConfig()->cGapi_->iGetUserCount(GetView());
+    CheckError(GetApiConfig());
+    return count;
+}
+
+inline core::ImportDescriptor Instruction::GetImportDescriptorDyn() const
+{
+    const ApiConfig *conf = GetApiConfig();
+    AbckitCoreImportDescriptor *id = conf->cDynapi_->iGetImportDescriptor(GetView());
+    CheckError(conf);
+    return core::ImportDescriptor(id, conf, GetResource()->GetFile());
 }
 
 }  // namespace abckit

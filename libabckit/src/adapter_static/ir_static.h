@@ -33,6 +33,7 @@ namespace libabckit {
 AbckitBasicBlock *GgetStartBasicBlockStatic(AbckitGraph *graph);
 AbckitBasicBlock *GgetEndBasicBlockStatic(AbckitGraph *graph);
 AbckitBasicBlock *GgetBasicBlockStatic(AbckitGraph *graph, uint32_t id);
+uint32_t GgetNumberOfParametersStatic(AbckitGraph *graph);
 AbckitInst *GgetParameterStatic(AbckitGraph *graph, uint32_t index);
 void GinsertTryCatchStatic(AbckitBasicBlock *tryFirstBB, AbckitBasicBlock *tryLastBB, AbckitBasicBlock *catchBeginBB,
                            AbckitBasicBlock *catchEndBB);
@@ -40,19 +41,18 @@ uint32_t GgetNumberOfBasicBlocksStatic(AbckitGraph *graph);
 void GdumpStatic(AbckitGraph *graph, int fd);
 void GrunPassRemoveUnreachableBlocksStatic(AbckitGraph *graph);
 void IdumpStatic(AbckitInst *inst, int fd);
-void GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, void (*cb)(AbckitBasicBlock *bb, void *data));
+bool GvisitBlocksRPOStatic(AbckitGraph *graph, void *data, bool (*cb)(AbckitBasicBlock *bb, void *data));
 
 // ========================================
 // Api for basic block manipulation
 // ========================================
 
-void BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *data));
-void BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
-                             void (*cb)(AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *data));
-void BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
-                                  void (*cb)(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominatedBasicBlock,
-                                             void *data));
+bool BBvisitSuccBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
+                             bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
+bool BBvisitPredBlocksStatic(AbckitBasicBlock *curBasicBlock, void *data,
+                             bool (*cb)(AbckitBasicBlock *succBasicBlock, void *data));
+bool BBvisitDominatedBlocksStatic(AbckitBasicBlock *basicBlock, void *data,
+                                  bool (*cb)(AbckitBasicBlock *dominatedBasicBlock, void *data));
 AbckitInst *BBgetFirstInstStatic(AbckitBasicBlock *basicBlock);
 AbckitInst *BBgetLastInstStatic(AbckitBasicBlock *basicBlock);
 AbckitGraph *BBgetGraphStatic(AbckitBasicBlock *basicBlock);
@@ -67,7 +67,7 @@ uint64_t BBgetPredBlockCountStatic(AbckitBasicBlock *basicBlock);
 uint32_t BBgetIdStatic(AbckitBasicBlock *basicBlock);
 uint32_t BBgetNumberOfInstructionsStatic(AbckitBasicBlock *basicBlock);
 AbckitBasicBlock *BBsplitBlockAfterInstructionStatic(AbckitInst *inst, bool makeEdge);
-void BBclearStatic(AbckitBasicBlock *basicBlock);
+void BBremoveAllInstsStatic(AbckitBasicBlock *basicBlock);
 void BBaddInstFrontStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst);
 void BBaddInstBackStatic(AbckitBasicBlock *basicBlock, AbckitInst *inst);
 void BBdumpStatic(AbckitBasicBlock *basicBlock, int fd);
@@ -85,6 +85,7 @@ bool BBisCatchBeginStatic(AbckitBasicBlock *basicBlock);
 bool BBisCatchStatic(AbckitBasicBlock *basicBlock);
 bool BBcheckDominanceStatic(AbckitBasicBlock *basicBlock, AbckitBasicBlock *dominator);
 AbckitInst *BBcreatePhiStatic(AbckitBasicBlock *bb, size_t argCount, std::va_list args);
+AbckitInst *BBcreateCatchPhiStatic(AbckitBasicBlock *catchBegin, size_t argCount, std::va_list args);
 
 // ========================================
 // Api for instruction manipulation
@@ -152,7 +153,6 @@ AbckitInst *IcreateThrowStatic(AbckitGraph *graph, AbckitInst *input0);
 
 AbckitInst *IcreateReturnStatic(AbckitGraph *graph, AbckitInst *input0);
 AbckitInst *IcreateReturnVoidStatic(AbckitGraph *graph);
-AbckitInst *IcreateCatchPhiStatic(AbckitGraph *graph, AbckitBasicBlock *catchBegin, size_t argCount, std::va_list args);
 AbckitInst *GcreateNullPtrStatic(AbckitGraph *graph);
 
 int32_t IgetConstantValueI32Static(AbckitInst *inst);
@@ -406,9 +406,8 @@ AbckitInst *IgetPrevStatic(AbckitInst *instprev);
 void IinsertAfterStatic(AbckitInst *inst, AbckitInst *next);
 void IinsertBeforeStatic(AbckitInst *inst, AbckitInst *prev);
 bool IcheckDominanceStatic(AbckitInst *inst, AbckitInst *dominator);
-void IvisitUsersStatic(AbckitInst *inst, void *data, void (*cb)(AbckitInst *inst, AbckitInst *user, void *data));
-void IvisitInputsStatic(AbckitInst *inst, void *data,
-                        void (*cb)(AbckitInst *inst, AbckitInst *input, size_t inputIdx, void *data));
+bool IvisitUsersStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *user, void *data));
+bool IvisitInputsStatic(AbckitInst *inst, void *data, bool (*cb)(AbckitInst *input, size_t inputIdx, void *data));
 uint32_t IgetUserCountStatic(AbckitInst *inst);
 void IsetImmediateStatic(AbckitInst *inst, size_t idx, uint64_t imm);
 

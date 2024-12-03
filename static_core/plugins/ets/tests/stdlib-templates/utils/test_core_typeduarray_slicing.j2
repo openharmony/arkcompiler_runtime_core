@@ -51,12 +51,18 @@ function check(result: number, message: String): number {
   return fail;
 }
 
-const normalSource: {{.item.type}}[] = {{.item.data}};
-const abnormalSource: {{.item.type}}[] = {{.item.abnormalData}};
-
+const normalSource: {{.item.sourceElementsType}}[] = {{.item.data}};
+const abnormalSource: {{.item.sourceElementsType}}[] = {{.item.abnormalData}};
 
 function testSliceWithOutParam(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(10),
+      {{.item.create}}(20),
+      {{.item.create}}(30),
+      {{.item.create}}(40),
+      {{.item.create}}(50),
+      {{.item.create}}(60),
+  ];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -114,7 +120,14 @@ function testSliceWithOutParam(): int {
 }
 
 function testSliceOneParam(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(10),
+      {{.item.create}}(20),
+      {{.item.create}}(30),
+      {{.item.create}}(40),
+      {{.item.create}}(50),
+      {{.item.create}}(60)
+  ]
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -183,7 +196,16 @@ function testSliceOneParam(): int {
 }
 
 function testSliceTwoParams(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(10),
+      {{.item.create}}(20),
+      {{.item.create}}(30),
+      {{.item.create}}(40),
+      {{.item.create}}(50),
+      {{.item.create}}(60),
+      {{.item.create}}(70),
+      {{.item.create}}(80)
+  ]
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -334,7 +356,16 @@ function testSliceTwoParams(): int {
 }
 
 function testSliceTwoParamsWithOtherNumber(): int {
-  let source: {{.item.type}}[] = [10, 20, 30, 40, 50, 60, 70, 80];
+  let source: {{.item.type}}[] = [
+      {{.item.create}}(10),
+      {{.item.create}}(20),
+      {{.item.create}}(30),
+      {{.item.create}}(40),
+      {{.item.create}}(50),
+      {{.item.create}}(60),
+      {{.item.create}}(70),
+      {{.item.create}}(80)
+  ]
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};
@@ -405,7 +436,7 @@ function testSliceTwoParamsWithOtherNumber(): int {
 }
 
 function testSliceOneLengthTwoParams(): int {
-  let source: {{.item.type}}[] = [10];
+  let source: {{.item.type}}[] = [{{.item.create}}(10)];
   let ss = new ArrayBuffer(source.length as int * {{.item.primitiveSizeBytes}});
 
   let origin: {{.item.objectType}};

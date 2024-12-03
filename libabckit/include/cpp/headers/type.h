@@ -16,26 +16,54 @@
 #ifndef CPP_ABCKIT_TYPE_H
 #define CPP_ABCKIT_TYPE_H
 
-#include "cpp/headers/core/annotation.h"
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "./base_classes.h"
 
 namespace abckit {
 
+/**
+ * @brief Type
+ */
 class Type : public View<AbckitType *> {
+    /// @brief abckit::File
     friend class abckit::File;
 
 public:
+    /**
+     * @brief Construct a new Type object
+     * @param other
+     */
     Type(const Type &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Type&
+     */
     Type &operator=(const Type &other) = default;
+
+    /**
+     * @brief Construct a new Type object
+     * @param other
+     */
     Type(Type &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Type&
+     */
     Type &operator=(Type &&other) = default;
+
+    /**
+     * @brief Destroy the Type object
+     */
     ~Type() override = default;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

@@ -16,41 +16,85 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_FIELD_H
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_FIELD_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "../base_classes.h"
 
-#include <string>
 #include <string_view>
 
 namespace abckit::core {
 
-class AnnotationInterfaceField : public View<AbckitCoreAnnotationInterfaceField *> {
+/**
+ * @brief AnnotationInterfaceField
+ */
+class AnnotationInterfaceField : public ViewInResource<AbckitCoreAnnotationInterfaceField *, const File *> {
+    /// @brief core::Annotation
     friend class core::Annotation;
+    /// @brief arkts::Annotation
     friend class arkts::Annotation;
+    /// @brief core::AnnotationInterface
     friend class core::AnnotationInterface;
+    /// @brief arkts::AnnotationInterface
     friend class arkts::AnnotationInterface;
+    /// @brief abckit::DefaultHash<AnnotationInterfaceField>
+    friend class abckit::DefaultHash<AnnotationInterfaceField>;
+
+protected:
+    /// @brief Core API View type
+    using CoreViewT = AnnotationInterfaceField;
 
 public:
+    /**
+     * @brief Construct a new Annotation Interface Field object
+     * @param other
+     */
     AnnotationInterfaceField(const AnnotationInterfaceField &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationInterfaceField&
+     */
     AnnotationInterfaceField &operator=(const AnnotationInterfaceField &other) = default;
+
+    /**
+     * @brief Construct a new Annotation Interface Field object
+     * @param other
+     */
     AnnotationInterfaceField(AnnotationInterfaceField &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return AnnotationInterfaceField&
+     */
     AnnotationInterfaceField &operator=(AnnotationInterfaceField &&other) = default;
+
+    /**
+     * @brief Destroy the Annotation Interface Field object
+     */
     ~AnnotationInterfaceField() override = default;
 
     // Core API's.
     // ...
 
+    /**
+     * @brief Get the Name object
+     * @return std::string_view
+     */
     std::string_view GetName();
 
 private:
-    AnnotationInterfaceField(AbckitCoreAnnotationInterfaceField *anni, const ApiConfig *conf)
-        : View(anni), conf_(conf) {};
+    AnnotationInterfaceField(AbckitCoreAnnotationInterfaceField *anni, const ApiConfig *conf, const File *file)
+        : ViewInResource(anni), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;

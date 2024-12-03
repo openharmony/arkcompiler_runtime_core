@@ -52,15 +52,14 @@ namespace libabckit {
 extern "C" void FunctionSetGraph(AbckitCoreFunction *function, AbckitGraph *graph)
 {
     LIBABCKIT_CLEAR_LAST_ERROR;
-    ;
     LIBABCKIT_IMPLEMENTED;
 
     LIBABCKIT_BAD_ARGUMENT_VOID(function)
     LIBABCKIT_BAD_ARGUMENT_VOID(graph)
 
-    LIBABCKIT_WRONG_CTX_VOID(function->m->file, graph->file);
+    LIBABCKIT_WRONG_CTX_VOID(function->owningModule->file, graph->file);
 
-    if (IsDynamic(function->m->target)) {
+    if (IsDynamic(function->owningModule->target)) {
         FunctionSetGraphDynamic(function, graph);
     } else {
         FunctionSetGraphStatic(function, graph);
@@ -85,13 +84,7 @@ extern "C" AbckitType *CreateType(AbckitFile *file, AbckitTypeId id)
         statuses::SetLastError(ABCKIT_STATUS_BAD_ARGUMENT);
         return nullptr;
     }
-    auto type = std::make_unique<AbckitType>();
-    type->rank = 0;
-    type->id = id;
-    type->klass = nullptr;
-    file->types.emplace_back(std::move(type));
-    auto res = file->types.back().get();
-    return res;
+    return GetOrCreateType(file, id, 0, nullptr);
 }
 
 extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *klass)
@@ -101,13 +94,7 @@ extern "C" AbckitType *CreateReferenceType(AbckitFile *file, AbckitCoreClass *kl
 
     LIBABCKIT_BAD_ARGUMENT(file, nullptr);
     LIBABCKIT_BAD_ARGUMENT(klass, nullptr);
-    auto type = std::make_unique<AbckitType>();
-    type->id = AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE;
-    type->rank = 0;
-    type->klass = klass;
-    file->types.emplace_back(std::move(type));
-    auto res = file->types.back().get();
-    return res;
+    return GetOrCreateType(file, AbckitTypeId::ABCKIT_TYPE_ID_REFERENCE, 0, klass);
 }
 
 // ========================================
@@ -477,8 +464,15 @@ AbckitModifyApi g_modifyApiImpl = {
 
 }  // namespace libabckit
 
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+#include "./mock/abckit_mock.h"
+#endif
+
 extern "C" AbckitModifyApi const *AbckitGetModifyApiImpl(AbckitApiVersion version)
 {
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+    return AbckitGetMockModifyApiImpl(version);
+#endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
             return &libabckit::g_modifyApiImpl;

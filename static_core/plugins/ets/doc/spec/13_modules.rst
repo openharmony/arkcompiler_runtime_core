@@ -236,7 +236,7 @@ run the initialization code.
         ;
 
     selectiveBindings:
-        '{' nameBinding (',' nameBinding)* '}'
+        '{' (nameBinding (',' nameBinding)*)? '}'
         ;
 
     defaultBinding:
@@ -645,6 +645,16 @@ The output of Import with No Binding is as follows:
 - Package initialization code; or
 - MainProgram code.
 
+The import with an empty list of selective bindings has the same semantics as
+just import with no binding at all.
+
+.. code-block:: typescript
+   :linenos:
+
+    import {} from "..."
+    // has the same semantics as 
+    import "..."
+
 .. index::
    import binding
    initialization
@@ -983,8 +993,9 @@ functions (see :ref:`Function Declarations`), or namespaces (see
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
+        | functionWithReceiverDeclaration
+        | accessorWithReceiverDeclaration
         | namespaceDeclaration
-        | extensionFunctionDeclaration
         )
         ;
 
@@ -1064,14 +1075,14 @@ Namespace Declarations
 .. meta:
     frontend_status: None
 
-A *namespace declaration* introduces the name (``identifer`` below)
-to be used as a qualifier for access to each exported entity of a namespace.
-Appropriate syntax is presented below:
+A *namespace declaration* introduces the qualified name to be used as a
+qualifier for access to each exported entity of a namespace. Appropriate
+syntax is presented below:
 
 .. code-block:: abnf
 
     namespaceDeclaration:
-        'namespace' identifier '{' topDeclaration* '}'
+        'namespace' qualifiedName '{' topDeclaration* '}'
         ;
 
 
@@ -1139,6 +1150,59 @@ An example of usage is presented below:
     if (ExternalSpace.variable == ExternalSpace.EmbeddedSpace.constant) {
         ExternalSpace.variable = 4321
     }
+
+**Note**: Namespaces with identical namespace names in a single compilation
+units (including embedded namespaces cases) form a single namespace:
+
+.. code-block:: typescript
+   :linenos:
+
+    // One source file
+    namespace A {
+        function foo() { ... }
+        function bar() { ... }
+        namespace C {
+            function too() { ... }
+        }
+    }
+
+    namespace B { ... }
+
+    namespace A {
+        function goo() { bar() }  // bar()  belongs to the same namespace
+        function foo() { ... }  // Compile-time error as foo() was already defined
+    }
+
+    namespace A.C {
+        function moo() { too() }  // too()  belongs to the same namespace
+    }
+
+
+    // File1
+    package P
+    namespace A {
+        function foo() { ... }
+        function bar() { ... }
+    }
+
+    // File2
+    package P
+    namespace A {
+        function goo() { bar() }  // bar()  belongs to the same namespace
+        function foo() { ... }  // Compile-time error as foo() was already defined
+    }
+
+**Note**: A namespace name can be a qualified name:
+
+
+.. code-block:: typescript
+   :linenos:
+
+    namespace A.B.C {
+        export function foo() { ... }
+    }
+
+    A.B.C.foo() // Valid function call
 
 |
 

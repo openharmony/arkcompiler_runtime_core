@@ -24,11 +24,11 @@ namespace ark::abc2program {
 
 class Abc2ProgramDriver {
 public:
-    int Run(int argc, const char **argv);
-    bool Run(const std::string &inputFilePath, const std::string &outputFilePath);
-    bool Compile(const std::string &inputFilePath);
-    const pandasm::Program &GetProgram() const;
-    pandasm::Program &GetProgram();
+    PANDA_PUBLIC_API int Run(int argc, const char **argv);
+    PANDA_PUBLIC_API bool Run(const std::string &inputFilePath, const std::string &outputFilePath);
+    PANDA_PUBLIC_API bool Compile(const std::string &inputFilePath);
+    PANDA_PUBLIC_API const pandasm::Program &GetProgram() const;
+    PANDA_PUBLIC_API pandasm::Program &GetProgram();
 
 private:
     bool Dump(const std::string &outputFilePath);

@@ -14,7 +14,7 @@
  */
 
 #include "plugins/ets/stdlib/native/etsstdlib.h"
-#include "plugins/ets/stdlib/native/core/IntlNumberFormat.h"
+#include "plugins/ets/stdlib/native/core/Intl.h"
 
 namespace ark::ets::stdlib {
 
@@ -23,7 +23,7 @@ ets_int EtsNapiOnLoad(EtsEnv *env)
 {
     // Initializing components
     ets_int hasError = ETS_OK;
-    hasError += InitCoreIntlNumberFormat(env);
+    hasError += InitCoreIntl(env);
     return hasError == ETS_OK ? ETS_NAPI_VERSION_1_0 : ETS_ERR;
 }
 

@@ -34,7 +34,7 @@ static const std::string ROUTER_MAP_FILE_MODULE_NAME = "modules/routerMap";
 static const std::string ROUTER_ANNOTATION_NAME = "Router";
 static const std::string FUNC_MAIN_0 = "func_main_0";
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 struct RouterAnnotation {
     AbckitCoreClass *owner;
@@ -61,12 +61,11 @@ static void TransformMethod(AbckitCoreFunction *method, VisitHelper &visitor, co
         auto ctxG = g_implI->createGraphFromFunction(method);
         AbckitBasicBlock *startBB = g_implG->gGetStartBasicBlock(ctxG);
         std::vector<AbckitBasicBlock *> succBBs;
-        g_implG->bbVisitSuccBlocks(
-            startBB, (void *)&succBBs,
-            []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock, void *d) {
-                auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
-                succs->emplace_back(succBasicBlock);
-            });
+        g_implG->bbVisitSuccBlocks(startBB, &succBBs, [](AbckitBasicBlock *succBasicBlock, void *d) {
+            auto *succs = reinterpret_cast<std::vector<AbckitBasicBlock *> *>(d);
+            succs->emplace_back(succBasicBlock);
+            return true;
+        });
         AbckitInst *createEmptyArray = helpers::FindFirstInst(ctxG, ABCKIT_ISA_API_DYNAMIC_OPCODE_CREATEEMPTYARRAY);
 
         const auto &routerInfo = ud->routerInfo;
@@ -106,6 +105,7 @@ static void TransformMethod(AbckitCoreFunction *method, VisitHelper &visitor, co
         ld->insertAfterInst = stownByIndex2;
 
         g_implM->functionSetGraph(method, ctxG);
+        g_impl->destroyGraph(ctxG);
     });
 }
 
@@ -226,7 +226,7 @@ static bool ClassHasAnnotation(VisitHelper &visitor, const UserData &ud)
 }
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestRouterTable)
+TEST_F(AbckitScenarioTest, LibAbcKitTestRouterTable)
 {
     std::string inputPath = ABCKIT_ABC_DIR "scenarios/router_table/dynamic/router_table.abc";
     std::string outputPath = ABCKIT_ABC_DIR "scenarios/router_table/dynamic/router_table_modified.abc";

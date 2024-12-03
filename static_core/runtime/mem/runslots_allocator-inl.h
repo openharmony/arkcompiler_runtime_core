@@ -122,6 +122,10 @@ inline void *RunSlotsAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Al
         ASAN_UNPOISON_MEMORY_REGION(allocatedMem, size);
         AllocConfigT::OnAlloc(runSlotSize, typeAllocation_, memStats_);
         AllocConfigT::MemoryInit(allocatedMem);
+#ifdef PANDA_MEASURE_FRAGMENTATION
+        // Atomic with relaxed order reason: order is not required
+        allocatedBytes_.fetch_add(runSlotSize, std::memory_order_relaxed);
+#endif
     }
     return allocatedMem;
 }
@@ -167,6 +171,10 @@ inline bool RunSlotsAllocator<AllocConfigT, LockConfigT>::FreeUnsafeInternal(Run
      * slot.
      */
     AllocConfigT::OnFree(runSlotSize, typeAllocation_, memStats_);
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    // Atomic with relaxed order reason: order is not required
+    allocatedBytes_.fetch_sub(runSlotSize, std::memory_order_relaxed);
+#endif
     ASAN_POISON_MEMORY_REGION(mem, runSlotSize);
     ASSERT(!(runslotsWasFull && runslots->IsEmpty()));  // Runslots has more that one slot inside.
     if (runslotsWasFull) {

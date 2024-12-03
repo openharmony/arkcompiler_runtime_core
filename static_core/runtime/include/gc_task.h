@@ -39,6 +39,7 @@ enum class GCTaskCause : uint8_t {
     MIXED,           // startGC(mixed). In this case we ignore garbage percentage for tenured regions.
     EXPLICIT_CAUSE,  // System.gc
     OOM_CAUSE,       // if all heap is full
+    CROSSREF_CAUSE,
 };
 
 /**

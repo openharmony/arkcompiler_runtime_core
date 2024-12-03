@@ -1,0 +1,302 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+    # Record key is a union of string literal types
+    - use: |-
+          // key is a union of literal types
+          let idx: short = 0
+          let r: Record<"1"|"2"|"3", Short> = {
+              "1": (idx += 1),
+              "2": idx++,
+              "3": ++idx,
+          }
+          assert(idx == 3)
+          assert(r["1"] == 1 && r["2"] == 1 && r["3"] == 3)
+          r["1"] = 10
+          r["2"] = 20
+          r["3"] = 30
+          assert(r["1"] == 10 && r["2"] == 20 && r["3"] == 30)
+
+    - tags: 'compile-only, negative'
+      use: |-
+          // key is a union of literal types
+          let idx: Short = 0
+          let r: Record<"11"|"12"|"13", Short> = {
+              "11": idx,
+              "12": idx,
+              "13": idx,
+          }
+          let i = "11"
+          assert(r[i] == 0)  // CTE expected, expression is not permitted in index
+
+    - tags: 'compile-only, negative'
+      decl: |-
+          function foo(p: string): string {
+              return p + "2"
+          }
+      use: |-
+          // key is a union of literal types
+          let idx: Short = 0
+          let r: Record<"11"|"12"|"13", Short> = {
+              "11": idx,
+              "12": idx,
+              "13": idx,
+          }
+          r[foo("1")] = 99   // CTE expected, expression is not permitted in index
+          assert(r["12"] == 99)
+
+    - tags: 'compile-only, negative'
+      use: |-
+          // key is a union of literal types
+          let idx: Byte = 0
+          let r: Record<" "|"  "|"   ", Byte> = {
+              " "   : idx,
+              "  "  : idx,
+              "   " : idx,
+          }
+          assert(r["?"] == undefined)  // CTE expected, unknown key
+
+    - tags: 'compile-only, negative'
+      use: |-
+          // key is a union of literal types
+          let idx: Byte = 0
+          let r: Record<" "|"  "|"   ", Byte> = {
+              " "   : idx,
+              "  "  : idx,
+              "   " : idx,
+          }
+          r[""] = ++idx;  // CTE expected, unknown key
+          assert(r[" "] == idx)
+
+    # Record key is a union of string literal types and string
+    - use: |-
+          // key is a union of literal types and string, literals in indices
+          let idx: int = 0
+          let r: Record<"1"|"2"|"3"|string, Int> = {
+              "1": idx + 1,
+              "2": idx + 2,
+          }
+          assert(r["1"] == 1 && r["2"] == 2 && r["3"] == undefined)
+          r["1"] = 90
+          r["3"] = 92
+          assert(r["1"] == 90 && r["2"] == 2 && r["3"] == 92)
+
+    - use: |-
+          // key is a union of literal types and string, expression in index
+          let idx: int = 0
+          let r: Record<string|"1"|"2"|"3", Int> = {
+              "1": idx + 1,
+              "2": idx + 2,
+          }
+          let i1 = "1"
+          let i2 = "2"
+          assert(r[i1] == 1 && r[i2] == 2 && r[i1 + i2] == undefined)
+
+    - decl: |-
+          function foo(p: int): string {
+              return "" + p
+          }
+      use: |-
+          // key is a union of literal types and string, expression in index
+          let idx: number = 0
+          let r: Record<"1"|"2"|"3"|string, Number> = {
+              "1": idx + 1,
+              "2": idx + 2,
+          }
+          assert(r[foo(1)] == 1 && r[foo(2)] == 2 && r[foo(3)] == undefined)
+          r[foo(1)] = 99
+          assert(r["1"] == 99 && r["2"] == 2 && r["3"] == undefined)
+
+    - tags: 'compile-only, negative'
+      use: |-
+          // key is a union of literal types and string
+          let idx: int = 0
+          let r: Record<"1"|"2"|"3"|string, Int> = {
+              "1": idx + 1,
+              "2": idx + 2,
+          }
+          assert(r[1] == undefined)  // CTE: wrong key type
+
+    - tags: 'compile-only, negative'
+      use: |-
+          // key is a union of literal types and string
+          let idx: int = 0
+          let r: Record<"1"|"2"|"3"|string, Int> = {
+              "1": idx + 1,
+              "2": idx + 2,
+          }
+          r[2] = 99 // CTE: wrong key type
+          assert(r["2"] == 2)
+
+    # Record key is of numeric type
+    - use: |-
+          // key is of numeric type
+          const b0: byte = 0, b_max = Byte.MAX_VALUE, b_min: byte = Byte.MIN_VALUE
+          let r: Record<Byte, Byte|null> = {}
+          r[b0] = null
+          r[b_max] = b_max
+          r[b_min] = b_min
+          assert(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
+          assert(r[99 as byte] === undefined)
+
+    - use: |-
+          // key is of numeric type, constants
+          const s0: short = 0, s_max = Short.MAX_VALUE, s_min = Short.MIN_VALUE
+          let r: Record<Short, Short|undefined> = {}
+          r[s0] = undefined
+          r[s_min] = s_min
+          r[s_max] = s_max
+          assert(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
+          assert(r[99 as short] === undefined)
+
+    - decl: |-
+          let v0 = 0, v1 = 1, v_max = Int.MAX_VALUE, v_min = Int.MIN_VALUE
+      use: |-
+          // key is of numeric type, variables
+          let r: Record<Int, Int|null|undefined> = { 1: v1 }
+          r[v0] = null
+          r[v1] = undefined
+          r[v_min] = v_min
+          r[v_max] = v_max
+          assert(r[v0] === null && r[v1] === undefined && r[v_min] == v_min && r[v_max] == v_max)
+          assert(r[99] === undefined)
+
+    - decl: |-
+          function foo(p: int): long {
+              let arr: long[] = [0, Long.MIN_VALUE, Long.MAX_VALUE, 99]
+              return arr[p]
+          }
+      use: |-
+          // key is of numeric type, function call expressions
+          let r: Record<Long, Long> = {}
+          r[foo(0)] = new Long()
+          r[foo(1)] = Long.MIN_VALUE
+          r[foo(2)] = Long.MAX_VALUE
+          assert(r[foo(0)] == 0 && r[foo(1)] == Long.MIN_VALUE && r[foo(2)] == Long.MAX_VALUE)
+          assert(r[foo(3)] === undefined)
+
+    - decl: |-
+          let arr: float[] = [0f, Float.MIN_VALUE, Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY, Float.NaN]
+      use: |-
+          // key is of numeric type, array access expressions
+          let r: Record<Float, Float|string> = { 1f: 1f }
+          r[arr[0]] = 0f
+          r[arr[1]] = Float.MIN_VALUE
+          r[arr[2]] = Float.MAX_VALUE
+          r[arr[3]] = Float.NEGATIVE_INFINITY
+          r[arr[4]] = Float.POSITIVE_INFINITY
+          r[arr[5]] = Float.NaN
+          assert(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
+          assert(r[arr[3]] == Float.NEGATIVE_INFINITY && r[arr[4]] == Float.POSITIVE_INFINITY)
+          assert(Float.isNaN(r[arr[5]] as Float) && r[99f] === undefined)
+          r[arr[3]] = "3"
+          r[arr[4]] = "4"
+          r[arr[5]] = "5"
+          assert(r[arr[0]] == 0f && r[arr[1]] == Float.MIN_VALUE && r[arr[2]] == Float.MAX_VALUE)
+          assert(r[arr[3]] == "3" && r[arr[4]] == "4")
+          assert(r[arr[5]] == "5" && r[99f] === undefined)
+
+    # Record key is a union of numeric and string
+    - use: |-
+          // key is a union of numeric and string
+          const b0: byte = 0, b_max = Byte.MAX_VALUE, b_min: byte = Byte.MIN_VALUE
+          let r: Record<byte|string, Byte|null> = {}
+          r[b0] = null
+          r[b_max] = b_max
+          r[b_min] = b_min
+          r["" + b0] = null
+          r["" + b_max] = b_max
+          r["" + b_min] = b_min
+          assert(r[b0] === null && r[b_max] == b_max && r[b_min] == b_min)
+          assert(r["" + b0] === null && r["" + b_max] == b_max && r["" + b_min] == b_min)
+          assert(r[99 as byte] === undefined)
+          assert(r["99"] === undefined)
+
+    - use: |-
+          // key is of numeric type, constants
+          const s0: short = 0, s_max = Short.MAX_VALUE, s_min = Short.MIN_VALUE
+          let r: Record<String|Short, Short|undefined> = {}
+          r[s0] = undefined
+          r[s_min] = s_min
+          r[s_max] = s_max
+          r["" + s0] = undefined
+          r["" + s_min] = s_min
+          r["" + s_max] = s_max
+          assert(r[s0] === undefined && r[s_min] == s_min && r[s_max] == s_max)
+          assert(r["" + s0] === undefined && r["" + s_min] == s_min && r["" + s_max] == s_max)
+          assert(r[99 as short] === undefined)
+          assert(r["99"] === undefined)
+
+    - decl: |-
+          let arr: Double[] = [0.0, Double.MIN_VALUE, Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NaN]
+      use: |-
+          // key is of numeric type, array access expressions
+          let r: Record<Double|string, Double|string> = { 1.0: 1.0 }
+          // double -> double
+          r[arr[0]] = 0.0
+          r[arr[1]] = Double.MIN_VALUE
+          r[arr[2]] = Double.MAX_VALUE
+          r[arr[3]] = Double.NEGATIVE_INFINITY
+          r[arr[4]] = Double.POSITIVE_INFINITY
+          r[arr[5]] = Double.NaN
+          assert(r[arr[0]] == 0.0 && r[arr[1]] == Double.MIN_VALUE && r[arr[2]] == Double.MAX_VALUE)
+          assert(r[arr[3]] == Double.NEGATIVE_INFINITY && r[arr[4]] == Double.POSITIVE_INFINITY)
+          assert(Double.isNaN(r[arr[5]] as Double) && r[99.0] === undefined)
+          // double -> string
+          r[arr[3]] = "3"
+          r[arr[4]] = "4"
+          r[arr[5]] = "5"
+          assert(r[arr[0]] == 0.0 && r[arr[1]] == Double.MIN_VALUE && r[arr[2]] == Double.MAX_VALUE)
+          assert(r[arr[3]] == "3" && r[arr[4]] == "4")
+          assert(r[arr[5]] == "5" && r[99.0] === undefined)
+          // string -> double
+          r["" + arr[0]] = 0.0
+          r["" + arr[1]] = Double.MIN_VALUE
+          r["" + arr[2]] = Double.MAX_VALUE
+          r["" + arr[3]] = Double.NEGATIVE_INFINITY
+          r["" + arr[4]] = Double.POSITIVE_INFINITY
+          r["" + arr[5]] = Double.NaN
+          assert(r["" + arr[0]] == 0.0 && r["" + arr[1]] == Double.MIN_VALUE && r["" + arr[2]] == Double.MAX_VALUE)
+          assert(r["" + arr[3]] == Double.NEGATIVE_INFINITY && r["" + arr[4]] == Double.POSITIVE_INFINITY)
+          assert(Double.isNaN(r["" + arr[5]] as Double) && r["99"] === undefined)
+          // string -> string
+          r["" + arr[3]] = "3"
+          r["" + arr[4]] = "4"
+          r["" + arr[5]] = "5"
+          assert(r["" + arr[0]] == 0.0 && r["" + arr[1]] == Double.MIN_VALUE && r["" + arr[2]] == Double.MAX_VALUE)
+          assert(r["" + arr[3]] == "3" && r["" + arr[4]] == "4")
+          assert(r["" + arr[5]] == "5" && r["99"] === undefined)
+
+    - use: |-
+          // key is a union of number and string
+          let r: Record<number|string, Number|undefined> = {
+              0: 0,
+              1: 1,
+              2: 2,
+              "0": 10,
+              "1": 11,
+              "2": 12,
+          }
+          assert(r[0] == 0 && r[1] == 1 && r[2] == 2 && r["0"] == 10 && r["1"] == 11 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
+          r[1] = 100
+          r["1"] = r[1]! + 1
+          assert(r[0] == 0 && r[1] == 100 && r[2] == 2 && r["0"] == 10 && r["1"] == 101 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
+          r["0"] = 300
+          r[0] = r["0"]! + 1
+          assert(r[0] == 301 && r[1] == 100 && r[2] == 2 && r["0"] == 300 && r["1"] == 101 && r["2"] == 12 && r[3] == undefined && r["3"] == undefined)
+          r["2"] = undefined
+          assert(r[0] == 301 && r[1] == 100 && r[2] == 2 && r["0"] == 300 && r["1"] == 101 && r["2"] == undefined && r[3] == undefined && r["3"] == undefined)
+          r[2] = undefined
+          assert(r[0] == 301 && r[1] == 100 && r[2] == undefined && r["0"] == 300 && r["1"] == 101 && r["2"] == undefined && r[3] == undefined && r["3"] == undefined)

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "server_endpoint_base.h"
+#include "connection/server_endpoint_base.h"
 
 #include "utils/logger.h"
 

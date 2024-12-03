@@ -16,18 +16,6 @@
 #ifndef PANDA_TOOLING_INSPECTOR_INSPECTOR_H
 #define PANDA_TOOLING_INSPECTOR_INSPECTOR_H
 
-#include "debug_info_cache.h"
-#include "inspector_server.h"
-#include "debuggable_thread.h"
-#include "types/numeric_id.h"
-
-#include "tooling/debug_interface.h"
-#include "tooling/inspector/object_repository.h"
-#include "tooling/inspector/types/pause_on_exceptions_state.h"
-#include "tooling/inspector/types/property_descriptor.h"
-#include "tooling/inspector/types/remote_object.h"
-#include "tooling/pt_thread.h"
-
 #include <array>
 #include <atomic>
 #include <cstddef>
@@ -38,6 +26,18 @@
 #include <string_view>
 #include <thread>
 #include <vector>
+
+#include "include/tooling/debug_interface.h"
+#include "include/tooling/pt_thread.h"
+
+#include "debug_info_cache.h"
+#include "debuggable_thread.h"
+#include "inspector_server.h"
+#include "object_repository.h"
+#include "types/numeric_id.h"
+#include "types/pause_on_exceptions_state.h"
+#include "types/property_descriptor.h"
+#include "types/remote_object.h"
 
 namespace ark::tooling {
 class DebugInterface;
@@ -80,7 +80,8 @@ private:
                                             bool restrictToFunction);
     std::optional<BreakpointId> SetBreakpoint(PtThread thread,
                                               const std::function<bool(std::string_view)> &sourceFilesFilter,
-                                              size_t lineNumber, std::set<std::string_view> &sourceFiles);
+                                              size_t lineNumber, std::set<std::string_view> &sourceFiles,
+                                              const std::string *condition);
     void RemoveBreakpoint(PtThread thread, BreakpointId id);
 
     void SetPauseOnExceptions(PtThread thread, PauseOnExceptionsState state);
@@ -100,7 +101,7 @@ private:
 
     void NotifyExecutionEnded();
 
-    EvaluationResult Evaluate(PtThread thread, const std::string &bcFragment);
+    InspectorServer::EvaluationResult Evaluate(PtThread thread, const std::string &bytecodeBase64);
 
     ALWAYS_INLINE bool CheckVmDead() REQUIRES_SHARED(vmDeathLock_)
     {
@@ -116,6 +117,8 @@ private:
     std::optional<ExceptionDetails> CreateExceptionDetails(PtThread thread, RemoteObject &&exception);
 
     size_t GetNewExceptionId();
+
+    DebuggableThread *GetDebuggableThread(PtThread thread);
 
 private:
     bool breakOnStart_;

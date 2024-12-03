@@ -16,21 +16,29 @@
 #ifndef CPP_ABCKIT_ARKTS_FUNCTION_IMPL_H
 #define CPP_ABCKIT_ARKTS_FUNCTION_IMPL_H
 
-#include "cpp/headers/arkts/function.h"
+#include "./function.h"
+#include "./annotation_interface.h"
 
 namespace abckit::arkts {
 
+inline AbckitArktsFunction *Function::TargetCast() const
+{
+    auto ret = GetApiConfig()->cArktsIapi_->coreFunctionToArktsFunction(GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
 inline arkts::Function &Function::AddAnnotation(const arkts::AnnotationInterface &iface)
 {
-    auto *arktsImpl = GetApiConfig()->cArktsIapi_->coreFunctionToArktsFunction(GetView());
-    CheckError(GetApiConfig());
     const AbckitArktsAnnotationCreateParams paramsImpl {
         GetApiConfig()->cArktsIapi_->coreAnnotationInterfaceToArktsAnnotationInterface(iface.GetView())};
     CheckError(GetApiConfig());
-    GetApiConfig()->cArktsMapi_->functionAddAnnotation(arktsImpl, &paramsImpl);
+    GetApiConfig()->cArktsMapi_->functionAddAnnotation(TargetCast(), &paramsImpl);
     CheckError(GetApiConfig());
     return *this;
 }
+
+inline Function::Function(const core::Function &coreOther) : core::Function(coreOther), targetChecker_(this) {};
 
 }  // namespace abckit::arkts
 

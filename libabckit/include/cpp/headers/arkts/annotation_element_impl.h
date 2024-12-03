@@ -16,9 +16,21 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_IMPL_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_ELEMENT_IMPL_H
 
-#include "cpp/headers/arkts/annotation_element.h"
+#include "./annotation_element.h"
 
 namespace abckit::arkts {
+
+inline AbckitArktsAnnotationElement *AnnotationElement::TargetCast() const
+{
+    auto ret = GetApiConfig()->cArktsIapi_->coreAnnotationElementToArktsAnnotationElement(GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline AnnotationElement::AnnotationElement(const core::AnnotationElement &coreOther)
+    : core::AnnotationElement(coreOther), targetChecker_(this)
+{
+}
 
 inline std::string_view AnnotationElement::GetName() const
 {

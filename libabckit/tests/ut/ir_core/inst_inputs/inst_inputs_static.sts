@@ -23,23 +23,3 @@ function foo(a:long, b:long) {
 function main() {
     foo(1, 2);
 }
-
-// Before AOP:
-// function foo(a:int, b:int) {
-//     ConsoleLog(a, b)
-// }
-//
-// function main() {
-//     foo(1, 2);
-// }
-//
-// After AOP:
-//
-// function foo(a:int, b:int) {
-//     ConsoleLog(10, 20)
-// }
-//
-// function main() {
-//     foo(1, 2);
-// }
-

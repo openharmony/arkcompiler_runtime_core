@@ -131,7 +131,7 @@ private:
     unsigned number_;
     float weight_ {};
     uint16_t bias_ = NO_BIAS;  // Bias is a group of nodes for coalescing
-    Register color_ = INVALID_REG;
+    Register color_ = GetInvalidReg();
     bool physical_ {};
     bool fixed_ {};
 };
@@ -244,7 +244,7 @@ public:
 
     struct Bias {
         unsigned callsites = 0;
-        Register color = INVALID_REG;
+        Register color = GetInvalidReg();
     };
 
     Bias &AddBias() noexcept
@@ -255,7 +255,7 @@ public:
     void UpdateBiasData(Bias *bias, const ColorNode &node)
     {
         ASSERT(bias != nullptr);
-        if (node.GetColor() != INVALID_REG) {
+        if (node.GetColor() != GetInvalidReg()) {
             bias->color = node.GetColor();
         }
         bias->callsites += node.GetCallsiteIntersectCount();
@@ -305,7 +305,7 @@ public:
                 << "Visit Node " << node.GetNumber() << "; LI: " << node.GetLifeIntervals()->ToString()
                 << "; SW: " << node.GetSpillWeight();
             // Skip colored
-            if (node.GetColor() != INVALID_REG) {
+            if (node.GetColor() != GetInvalidReg()) {
                 continue;
             }
 
@@ -314,7 +314,7 @@ public:
 
             // Try bias color first if free
             size_t tryColor;
-            if (node.HasBias() && biases_[node.GetBias()].color != INVALID_REG &&
+            if (node.HasBias() && biases_[node.GetBias()].color != GetInvalidReg() &&
                 !nbrColors[biases_[node.GetBias()].color]) {
                 tryColor = biases_[node.GetBias()].color;
                 COMPILER_LOG(DEBUG, REGALLOC) << "Bias color chosen " << tryColor;
@@ -338,7 +338,7 @@ public:
                 }
 
                 // Assign bias color if first observed in component
-                if (node.HasBias() && biases_[node.GetBias()].color == INVALID_REG) {
+                if (node.HasBias() && biases_[node.GetBias()].color == GetInvalidReg()) {
                     biases_[node.GetBias()].color = tryColor;
                     COMPILER_LOG(DEBUG, REGALLOC) << "Set bias color " << tryColor;
                 }
@@ -366,13 +366,13 @@ private:
             auto &nbrNode = GetNode(nbrId);
 
             // Collect neighbour color
-            if (nbrNode.GetColor() != INVALID_REG && HasEdge(id, nbrId)) {
+            if (nbrNode.GetColor() != GetInvalidReg() && HasEdge(id, nbrId)) {
                 ASSERT(nbrNode.GetColor() < nbrColors->size());
                 nbrColors->set(nbrNode.GetColor());
             } else if (nbrId != id && nbrNode.HasBias() && HasEdge(id, nbrId)) {
                 // Collect biased neighbour color
                 ASSERT(nbrNode.GetBias() < GetBiasCount());
-                if (biases_[nbrNode.GetBias()].color != INVALID_REG) {
+                if (biases_[nbrNode.GetBias()].color != GetInvalidReg()) {
                     nbrBiasColors->set(biases_[nbrNode.GetBias()].color);
                 }
             }

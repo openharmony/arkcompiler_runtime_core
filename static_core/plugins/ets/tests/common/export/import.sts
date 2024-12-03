@@ -13,11 +13,23 @@
  * limitations under the License.
  */
 
-import { a, foo, bar } from "./selective_export"
+import { a, foo, bar, COPT} from "./selective_export"
+
+function foo(i: Required<COPT>) {
+    let v: int = 0;
+    if(i.j != undefined) {
+        v += 1
+    }
+    if (i.i != 0) {
+        v += 2;
+    }
+    return v;
+}
 
 function main() : void
 {
     let sum: int = a + foo() + bar();
     const result: int = 7;
     assert sum == result : "expected: " + result + " actual: " + sum;
+    assert( foo( {i: 1.9, j: "some str"} ) == 3 )
 }

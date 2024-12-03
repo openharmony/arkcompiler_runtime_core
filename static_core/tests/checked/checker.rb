@@ -198,7 +198,7 @@ class Checker
   end
 
   def append_line(line)
-    @code << line
+    @code << line + "\n"
   end
 
   def RUN(**args)
@@ -587,7 +587,6 @@ class Checker
 
   def METHOD(method)
     return if @options.release
-
     @ir_files = Dir["#{@cwd}/ir_dump/*#{method.gsub(/::|[<>]/, '_')}*.ir"]
     @ir_files.sort!
     raise_error "IR dumps not found for method: #{method.gsub(/::|[<>]/, '_')}" if @ir_files.empty?
@@ -643,6 +642,8 @@ class Checker
   end
 
   def clear_data
+   $current_method = nil
+   $current_pass = nil
    if !@options.keep_data
       FileUtils.rm_rf("#{@cwd}/ir_dump")
       FileUtils.rm_rf("#{@cwd}/events.csv")
@@ -656,11 +657,12 @@ def read_checks(options)
   checks = []
   check = nil
   check_llvm = nil
-  checker_start = "#{options.command_token} CHECKER"
-  disabled_checker_start = "#{options.command_token} DISABLED_CHECKER"
+  command_token = /[ ]*#{options.command_token}(.*)/
+  checker_start = /[ ]*#{options.command_token} CHECKER[ ]*(.*)/
+  disabled_checker_start = /[ ]*#{options.command_token} DISABLED_CHECKER[ ]*(.*)/
   File.readlines(options.source).each do |line|
     if check
-      unless line.start_with? options.command_token
+      unless line.start_with? command_token
         check = nil
         check_llvm = nil
         next
@@ -669,12 +671,12 @@ def read_checks(options)
       if line.include? "RUN_AOT"
         checks << check_llvm
       end
-      check.append_line(line[options.command_token.size..-1]) unless check == :disabled_check
-      check_llvm.append_line(line[options.command_token.size..-1]) unless check == :disabled_check
+      check.append_line(command_token.match(line)[1]) unless check == :disabled_check
+      check_llvm.append_line(command_token.match(line)[1]) unless check == :disabled_check
     else
-      next unless line.start_with? options.command_token
+      next unless line.start_with? command_token
       if line.start_with? checker_start
-        name = line.split(' ', 3)[2].strip
+        name = command_token.match(line)[1]
         raise "Checker with name '#{name}'' already exists" if checks.any? { |x| x.name == name }
 
         check = Checker.new(options, name)

@@ -22,7 +22,7 @@
 #include "optimizer/ir/analysis.h"
 
 namespace ark::compiler {
-class Licm : public Optimization {
+class PANDA_PUBLIC_API Licm : public Optimization {
 public:
     explicit Licm(Graph *graph, uint32_t hoistLimit = std::numeric_limits<uint32_t>::max());
     NO_MOVE_SEMANTIC(Licm);

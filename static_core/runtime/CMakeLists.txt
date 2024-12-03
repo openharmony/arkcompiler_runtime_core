@@ -29,7 +29,8 @@ set(SOURCES
     class_linker_extension.cpp
     class_initializer.cpp
     tooling/debugger.cpp
-    tooling/default_inspector_extension.cpp
+    tooling/evaluation/expression_loader.cpp
+    tooling/pt_default_lang_extension.cpp
     tooling/pt_thread.cpp
     tooling/debug_inf.cpp
     tooling/tools.cpp
@@ -225,6 +226,10 @@ elseif(PANDA_TARGET_AMD64)
         arch/amd64/common_amd64.S
         arch/amd64/osr_amd64.S
         arch/amd64/interpreter_support.S)
+endif()
+
+if (ENABLE_PERF_COUNTERS)
+    list(APPEND SOURCES tooling/perf_counter.cpp)
 endif()
 
 if (PANDA_TARGET_MOBILE_WITH_NATIVE_LIBS)
@@ -578,7 +583,7 @@ panda_target_include_directories(arkruntime_obj
     PUBLIC ${VERIFIER_INCLUDE_DIR}
 )
 
-panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager)
+panda_target_link_libraries(arkruntime_obj arkbase arkfile arkcompiler dprof arkaotmanager arktarget_options)
 if (NOT PANDA_TARGET_OHOS)
   panda_target_link_libraries(arkruntime_obj atomic)
 endif()

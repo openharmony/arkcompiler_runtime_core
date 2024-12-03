@@ -866,18 +866,19 @@ public:
                 if (retType.IsPrimitive()) {
                     continue;
                 }
-            } else {
-                if (retType.IsReference()) {
+                return &m;
+            }
+
+            if (retType.IsReference()) {
+                continue;
+            }
+            if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
+                if (retType.GetBitWidth() != coretypes::INT64_BITS) {
                     continue;
                 }
-                if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
-                    if (retType.GetBitWidth() != coretypes::INT64_BITS) {
-                        continue;
-                    }
-                } else {
-                    if (retType.GetBitWidth() > coretypes::INT32_BITS) {
-                        continue;
-                    }
+            } else {
+                if (retType.GetBitWidth() > coretypes::INT32_BITS) {
+                    continue;
                 }
             }
             return &m;
@@ -905,19 +906,20 @@ public:
                 if (m.GetArgType(1).IsPrimitive()) {
                     continue;
                 }
-            } else {
-                auto arg1 = m.GetArgType(1);
-                if (arg1.IsReference()) {
+                return &m;
+            }
+
+            auto arg1 = m.GetArgType(1);
+            if (arg1.IsReference()) {
+                continue;
+            }
+            if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
+                if (arg1.GetBitWidth() != coretypes::INT64_BITS) {
                     continue;
                 }
-                if constexpr (panda_file::Type(FIELD_TYPE).GetBitWidth() == coretypes::INT64_BITS) {
-                    if (arg1.GetBitWidth() != coretypes::INT64_BITS) {
-                        continue;
-                    }
-                } else {
-                    if (arg1.GetBitWidth() > coretypes::INT32_BITS) {
-                        continue;
-                    }
+            } else {
+                if (arg1.GetBitWidth() > coretypes::INT32_BITS) {
+                    continue;
                 }
             }
             return &m;
@@ -938,6 +940,9 @@ private:
 
     template <FindFilter FILTER>
     Field *FindDeclaredField(panda_file::File::EntityId id) const;
+
+    template <FindFilter FILTER, class Pred>
+    Field *FindFieldInInterfaces(const Class *kls, Pred pred) const;
 
     template <FindFilter FILTER, class Pred>
     Field *FindField(Pred pred) const;

@@ -291,7 +291,7 @@ export final class Int extends Integral implements Comparable<Int>, JSONable<Int
      *
      * @returns Int - int value decoded from JSON
      */
-    static createFromJSONValue(json: JSONValue): Int {
+    public createFromJSONValue(json: JSONValue): Int {
         if (json instanceof JSONNumber) {
             let num = (json as JSONNumber).value
             if (Double.isInteger(num) && Int.MIN_VALUE <= num && num <= Int.MAX_VALUE) {

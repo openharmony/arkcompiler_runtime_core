@@ -121,6 +121,8 @@ panda::pandasm::Function *GetDynFunction(AbckitCoreFunction *function);
 AbckitModulePayloadDyn *GetDynModulePayload(AbckitCoreModule *mod);
 AbckitDynamicImportDescriptorPayload *GetDynImportDescriptorPayload(AbckitCoreImportDescriptor *id);
 AbckitDynamicExportDescriptorPayload *GetDynExportDescriptorPayload(AbckitCoreExportDescriptor *ed);
+void FixPreassignedRegisters(ark::compiler::Graph *graph);
+bool AllocateRegisters(ark::compiler::Graph *graph, uint8_t reservedReg);
 
 AbckitLiteral *GetOrCreateLiteralBoolStatic(AbckitFile *file, bool value);
 AbckitLiteral *GetOrCreateLiteralU8Static(AbckitFile *file, uint8_t value);

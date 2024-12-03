@@ -16,49 +16,92 @@
 #ifndef CPP_ABCKIT_VALUE_H
 #define CPP_ABCKIT_VALUE_H
 
-#include "cpp/headers/core/annotation.h"
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "libabckit/include/c/metadata_core.h"
+#include "./base_classes.h"
 
 namespace abckit {
 
-class Value : public View<AbckitValue *> {
+/**
+ * @brief Value
+ */
+class Value : public ViewInResource<AbckitValue *, const File *> {
+    /// @brief abckit::File
     friend class abckit::File;
+    /// @brief abckit::core::Annotation
     friend class abckit::core::Annotation;
+    /// @brief for access to a private constructor
+    friend class abckit::core::AnnotationElement;
+    /// @brief abckit::arkts::Annotation
     friend class abckit::arkts::Annotation;
+    /// @brief abckit::DefaultHash<Value>
+    friend class abckit::DefaultHash<Value>;
 
 public:
+    /**
+     * @brief Construct a new Value object
+     * @param other
+     */
     Value(const Value &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Value&
+     */
     Value &operator=(const Value &other) = default;
+
+    /**
+     * @brief Construct a new Value object
+     * @param other
+     */
     Value(Value &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Value&
+     */
     Value &operator=(Value &&other) = default;
+
+    /**
+     * @brief Destroy the Value object
+     */
     ~Value() override = default;
 
-    bool GetU1() const
-    {
-        bool ret = GetApiConfig()->cIapi_->valueGetU1(GetView());
-        CheckError(GetApiConfig());
-        return ret;
-    }
+    /**
+     * @brief Get the U1 value
+     * @return bool
+     */
+    bool GetU1() const;
 
-    double GetDouble() const
-    {
-        double ret = GetApiConfig()->cIapi_->valueGetDouble(GetView());
-        CheckError(GetApiConfig());
-        return ret;
-    }
+    /**
+     * @brief Get the Double object
+     * @return double
+     */
+    double GetDouble() const;
+
+    /**
+     * @brief Returns string value that given `Value` holds.
+     * @return std::string_view of the stored value.
+     * @note Set `ABCKIT_STATUS_TODO` error if `value` type id differs from `ABCKIT_TYPE_ID_STRING`.
+     * @note Allocates
+     */
+    std::string_view GetString() const;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;
     }
 
 private:
-    explicit Value(AbckitValue *val, const ApiConfig *conf) : View(val), conf_(conf) {};
+    explicit Value(AbckitValue *val, const ApiConfig *conf, const File *file) : ViewInResource(val), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 };
 

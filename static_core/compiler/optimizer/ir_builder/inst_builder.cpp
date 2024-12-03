@@ -153,7 +153,7 @@ void InstBuilder::Prepare(bool isInlinedGraph)
         }
         auto type = GetCurrentMethodArgumentType(i);
         auto regNum = GetRuntime()->GetMethodRegistersCount(GetMethod()) + i;
-        ASSERT(!GetGraph()->IsBytecodeOptimizer() || regNum != INVALID_REG);
+        ASSERT(!GetGraph()->IsBytecodeOptimizer() || regNum != GetInvalidReg());
 
         paramInst->SetType(type);
         // This parameter in virtual method is implicit, so skipped
@@ -402,7 +402,7 @@ void InstBuilder::SetParamSpillFill(Graph *graph, ParameterInst *paramInst, size
                                     DataType::Type type)
 {
     if (graph->IsBytecodeOptimizer()) {
-        auto regSrc = static_cast<Register>(VIRTUAL_FRAME_SIZE - numArgs + i);
+        auto regSrc = static_cast<Register>(GetFrameSize() - numArgs + i);
         DataType::Type regType;
         if (DataType::IsReference(type)) {
             regType = DataType::REFERENCE;
@@ -420,7 +420,7 @@ void InstBuilder::SetParamSpillFill(Graph *graph, ParameterInst *paramInst, size
             uint16_t slot = i + CallConvDynInfo::FIXED_SLOT_COUNT;
             ASSERT(slot <= UINT8_MAX);
             paramInst->SetLocationData(
-                {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, INVALID_REG, DataType::UINT64});
+                {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, GetInvalidReg(), DataType::UINT64});
         } else {
             paramInst->SetLocationData(graph->GetDataForNativeParam(type));
         }

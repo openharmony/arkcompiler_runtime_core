@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "event_loop.h"
+#include "connection/event_loop.h"
 
 #include "macros.h"
 

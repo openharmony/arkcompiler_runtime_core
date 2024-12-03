@@ -109,7 +109,7 @@ static void FillAnalyticsUndefinedBehaviorTest(G1Analytics &analytics, const Col
     }
     {
         const uint64_t delta = 10'000'000;
-        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet, false);
     }
 }
 
@@ -174,7 +174,7 @@ static void FillAnalyticsPause0AllPromotedUndefinedBehaviorTest(G1Analytics &ana
     }
     {
         const uint64_t delta = 10'000'000;
-        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet, false);
     }
 }
 
@@ -224,7 +224,7 @@ static void FillAnalyticsPause1AllPromotedUndefinedBehaviorTest(G1Analytics &ana
     }
     {
         const uint64_t delta = 10'000'000;
-        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet, false);
     }
 }
 
@@ -303,7 +303,7 @@ static void FillAnalyticsPause0PredictionTest(G1Analytics &analytics, const Coll
     }
     {
         const uint64_t delta = 10'000'000;
-        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet, false);
     }
 }
 
@@ -357,7 +357,7 @@ static void FillAnalyticsPause1PredictionTest(G1Analytics &analytics, const Coll
         analytics.ReportUpdateRefsEnd(now + delta);
     }
     const uint64_t delta = 10'000'000;
-    analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+    analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet, false);
 }
 
 static void FillAnalyticsPause2PredictionTest(G1Analytics &analytics, const CollectionSet &collectionSet, uint64_t now)
@@ -408,7 +408,7 @@ static void FillAnalyticsPause2PredictionTest(G1Analytics &analytics, const Coll
         analytics.ReportUpdateRefsEnd(now + delta);
     }
     const uint64_t delta = 11'000'000;
-    analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet);
+    analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + delta, collectionSet, false);
 }
 
 TEST_F(G1AnalyticsTest, PredictionTest)
@@ -462,5 +462,58 @@ TEST_F(G1AnalyticsTest, PredictionTest)
     const double expectedAllocationRate = 0.001151;
     const double maxError = 1e-6;
     ASSERT_NEAR(expectedAllocationRate, analytics.PredictAllocationRate(), maxError);
+}
+
+TEST_F(G1AnalyticsTest, SinglePassCompactionPredictionTest)
+{
+    uint64_t now = START_TIME;
+    const auto startTimeDelta = -20'000'000;
+    auto startTime = now + startTimeDelta;
+    const uint64_t nextPauseDelta = 20'000'000;
+    G1Analytics analytics(startTime);
+
+    {
+        const size_t edenLength = 16;
+        auto collectionSet = CreateCollectionSet(edenLength);
+        analytics.ReportCollectionStart(now);
+
+        const size_t remsetSize = 100;
+        const uint64_t scanRemsetTime = 2'000'000;
+        analytics.ReportScanRemsetTime(remsetSize, scanRemsetTime);
+        analytics.ReportEvacuationStart(now);
+        const uint64_t evacuationDuration = 7'000'000;
+        analytics.ReportEvacuationEnd(now + evacuationDuration);
+        const size_t evacuatedBytes = 2 * 1024 * 1024;
+        analytics.ReportEvacuatedBytes(evacuatedBytes);
+
+        const uint64_t pauseDuration = 10'000'000;
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + pauseDuration, collectionSet, true);
+
+        const uint64_t expectedTime = 9'999;
+        ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
+    }
+
+    now += nextPauseDelta;
+
+    {
+        const size_t edenLength = 20;
+        auto collectionSet = CreateCollectionSet(edenLength);
+        analytics.ReportCollectionStart(now);
+
+        const size_t remsetSize = 80;
+        const uint64_t scanRemsetTime = 1'000'000;
+        analytics.ReportScanRemsetTime(remsetSize, scanRemsetTime);
+        analytics.ReportEvacuationStart(now);
+        const uint64_t evacuationDuration = 6'000'000;
+        analytics.ReportEvacuationEnd(now + evacuationDuration);
+        const size_t evacuatedBytes = 2 * 1024 * 1024;
+        analytics.ReportEvacuatedBytes(evacuatedBytes);
+
+        const uint64_t pauseDuration = 8'000'000;
+        analytics.ReportCollectionEnd(GCTaskCause::YOUNG_GC_CAUSE, now + pauseDuration, collectionSet, true);
+
+        const uint64_t expectedTime = 10'762;
+        ASSERT_EQ(expectedTime, analytics.PredictYoungCollectionTimeInMicros(edenLength));
+    }
 }
 }  // namespace ark::mem

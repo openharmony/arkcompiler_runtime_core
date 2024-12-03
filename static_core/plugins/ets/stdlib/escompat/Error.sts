@@ -16,9 +16,9 @@
 package escompat;
 
 export class ErrorOptions {
-    cause: Object | undefined = undefined
+    cause: Object | undefined
 
-    constructor(cause: Object | undefined) {
+    constructor(cause: Object | undefined = undefined) {
         this.cause = cause
     }
 }

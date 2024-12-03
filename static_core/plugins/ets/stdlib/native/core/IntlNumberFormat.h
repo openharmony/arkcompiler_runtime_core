@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_NUMBER_FORMAT_H
-#define PANDA_PLUGINS_ETS_RUNTIME_INTRINSICS_STD_CORE_INTL_NUMBER_FORMAT_H
+#ifndef PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLNUMBERFORMAT_H
+#define PANDA_PLUGINS_ETS_STDLIB_NATIVE_CORE_INTLNUMBERFORMAT_H
 
 #include "plugins/ets/runtime/napi/ets_napi.h"
 
 namespace ark::ets::stdlib {
 
-ets_int InitCoreIntlNumberFormat(EtsEnv *env);
+ets_int RegisterIntlNumberFormatNativeMethods(EtsEnv *env);
 
 }  // namespace ark::ets::stdlib
 

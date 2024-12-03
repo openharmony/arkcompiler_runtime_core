@@ -16,7 +16,7 @@
 #ifndef PANDA_TOOLING_INSPECTOR_SESSION_MANAGER_H
 #define PANDA_TOOLING_INSPECTOR_SESSION_MANAGER_H
 
-#include "tooling/pt_thread.h"
+#include "include/tooling/pt_thread.h"
 
 namespace ark::tooling::inspector {
 class SessionManager {

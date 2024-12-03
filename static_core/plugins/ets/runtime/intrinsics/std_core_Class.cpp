@@ -108,6 +108,11 @@ EtsClass *StdCoreRuntimeLinkerLoadClassInternal(EtsClass *ctxClassObj, EtsString
     ClassHelper::GetDescriptor(utf::CStringAsMutf8(name.c_str()), &descriptor);
 
     EtsClass *klass = linker->GetClass(descriptor.c_str(), false, ctx);
+    if (UNLIKELY(klass == nullptr)) {
+        ASSERT(coro->HasPendingException());
+        return nullptr;
+    }
+
     if (UNLIKELY(init != 0 && !klass->IsInitialized())) {
         if (UNLIKELY(!coro->GetPandaVM()->GetClassLinker()->InitializeClass(coro, klass))) {
             ASSERT(coro->HasPendingException());

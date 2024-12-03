@@ -19,23 +19,3 @@ function foo(a, b) {
 function main() {
     foo(1, 2);
 }
-
-// After AOP:
-
-// function foo(a:int, b:int) {
-//     console.log(b)
-// }
-//
-// function main() {
-//     foo(1, 2);
-// }
-//
-// Or
-//
-// function foo(a:int, b:int) {
-//     console.log(a)
-// }
-//
-// function main() {
-//     foo(10, 20);
-// }

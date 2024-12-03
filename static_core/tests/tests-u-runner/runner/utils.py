@@ -19,15 +19,15 @@ import logging
 import os
 import random
 import shutil
+import zipfile
 from enum import Enum
 from filecmp import cmp
 from itertools import tee
 from os import makedirs, path, remove
-from typing import TypeVar, Callable, Optional, Type, Union, Any, List, Iterator, Tuple, Iterable
 from pathlib import Path
+from typing import TypeVar, Callable, Optional, Type, Union, Any, List, Iterator, Tuple, Iterable
 from urllib import request
 from urllib.error import URLError
-import zipfile
 
 from runner.logger import Log
 
@@ -110,6 +110,7 @@ def copy(source_path: Union[Path, str], dest_path: Union[Path, str], remove_if_e
         if path.exists(dest_path) and remove_if_exist:
             shutil.rmtree(dest_path)
         shutil.copytree(source_path, dest_path, dirs_exist_ok=not remove_if_exist)
+        shutil.copymode(source_path, dest_path)
     except OSError as ex:
         Log.exception_and_raise(_LOGGER, str(ex))
 
@@ -125,7 +126,8 @@ def write_2_file(file_path: Union[Path, str], content: str) -> None:
     write content to file if file exists it will be truncated. if file does not exist it wil be created
     """
     makedirs(path.dirname(file_path), exist_ok=True)
-    with os.fdopen(os.open(file_path, os.O_RDWR | os.O_CREAT, 0o755), mode='w+', encoding="utf-8") as f_handle:
+    f_descriptor = os.open(file_path, os.O_RDWR | os.O_CREAT | os.O_TRUNC, 0o755)
+    with os.fdopen(f_descriptor, mode='w+', encoding="utf-8") as f_handle:
         f_handle.write(content)
 
 

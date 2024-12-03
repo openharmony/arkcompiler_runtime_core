@@ -32,7 +32,7 @@ enables users to dynamically create objects of array type by using runtime
 expressions that provide the array size. This is a useful addition to other
 array-related features of the language, such as array literals.
 
-The construct can also be used to create multi-dimensional arrays.
+The construct can also be used to create multidimensional arrays.
 
 The feature *function and method overloading* is supported in many
 (if not all) modern programming languages. Overloading functions/methods
@@ -63,8 +63,8 @@ in many OOP languages provides a way to restrict class inheritance and method
 overriding. Making a class *final* prohibits defining classes derived from it,
 whereas making a method *final* prevents it from overriding in derived classes.
 
-Section :ref:`Extension Functions` defines the ability to extend a class or an
-interface with new functionality without having to inherit from the class. This
+Section :ref:`Adding Functionality to Existing Types` defines the ability
+to add new functionality to already defined type. This
 feature can be used for GUI programming (:ref:`Support for GUI Programming`).
 
 Section :ref:`Enumeration Methods` adds methods to declarations of the
@@ -216,10 +216,7 @@ The examples are presented below:
       c'\x7F'
       c'\u0000'
 
-``Character Literals`` are of literal types corresponding to the literals. If
-an operator is applied to the literal, then the literal type is replaced for
-``char``.
-
+``Character Literals`` are of type ``char``.
 
 .. index::
    char literal
@@ -475,7 +472,7 @@ as follows:
    type is a class type, then its *parameterless* constructor is used to
    create the value of each element.
 
-#. When a multi-dimensional array is created, the array creation effectively
+#. When a multidimensional array is created, the array creation effectively
    executes a set of nested loops of depth *n-1*, and creates an implied
    array of arrays.
 
@@ -1000,7 +997,7 @@ A ``catch`` clause has two parts:
 
 *Default catch clause* is a ``catch`` clause with the exception parameter type
 omitted. Such a ``catch`` clause handles any exception or error that is not
-handled by any previous clause. The type of that parameter is union 
+handled by any previous clause. The type of that parameter is union
 ``Exception`` | ``Error``.
 
 A :index:`compile-time error` occurs if:
@@ -1538,63 +1535,91 @@ the method that implements the interface.
 
 |
 
-.. _Extension Functions:
+.. _Adding Functionality to Existing Types:
 
-Extension Functions
-*******************
+Adding Functionality to Existing Types
+**************************************
+
+|LANG| supports adding functions and accessors to already defined types,
+so its usage looks the same, as if they are methods and accessors of these types.
+The mechanism used is called: :ref:`Functions with Receiver` and
+:ref:`Accessors with Receiver`. This feature is often used to add new
+functionality to a class without having to inherit from this class.
+However, it can be used not only for classes but for other types as well.
+
+Additionally, :ref:`Function Types with Receiver` and
+:ref:`Lambda Expressions with Receiver` can be defined and use,
+making the code more flexible.
+
+.. _Functions with Receiver:
+
+Functions with Receiver
+=======================
 
 .. meta:
-    frontend_status: Partly
-    todo: static extension functions, import/export of them, extension function for primitive types
+    frontend_status: None
+    todo: import/export of them, function with receiver of primitive types or array
 
-The *extension function* mechanism allows using a special form of top-level
-functions as extensions of class or interface. Syntactically, *extension* adds
-a new functionality.
-
-*Extensions* can be called in the usual way like methods of the original class.
-However, *extensions* do not actually modify the classes they extend. No new
-member is inserted into a class; only new *extension functions* are callable
-with the *dot-notation* on variables of the class. *Extension functions* are
-dispatched statically; what *extension function* is being called is already
-known at compile time based on the receiver type specified in the extension
-function declaration.
-
-.. index::
-   function
-   class extension
-   interface extension
-   functionality
-   function call
-   original class
-   class member
-   extension function
-   callable function
-   dot-notation
-   notation
-   receiver type
-   extension function declaration
-
-*Extension functions* specify names, signatures, and bodies:
+A *function with receiver* declaration is a top-level declaration
+(see :ref:`Top-Level Declarations`) that looks almost the same as 
+:ref:`Function Declarations`, except that the first parameter is mandatory,
+and keyword ``this`` is used as its name:
 
 .. code-block:: abnf
 
-    extensionFunctionDeclaration:
-        'static'? 'function' typeParameters? typeReference '.' identifier
-        signature block
+    functionWithReceiverDeclaration:
+        'function' identifier typeParameters? signatureWithReceiver block
         ;
 
-The keyword ``this`` inside an extension function corresponds to the receiver
-object (i.e., ``typeReference`` before the dot).
+    signatureWithReceiver:
+        '(' receiverParameter (', ' parameterList)? ')' returnType? throwMark?
+        ;
 
-Class or interface referred by *typeReference*, and ``private`` or ``protected``
-members are not accessible (see :ref:`Accessible`) within the bodies of their
-*extension functions*. Only ``public`` members can be accessed:
+    receiverParameter:
+        'this' ':' 'readonly'? type
+        ;
+
+There are two ways to call a *function with receiver*:
+
+-  as a function call (see :ref:`Function Call Expression`),
+   passing the first parameter in the usual way
+
+-  as a method call (see :ref:`Method Call Expression`), where
+   no argument is provided for the first parameter
+   and the ``objectReference`` before
+   the function name is used as the first argument
+
+.. code-block:: typescript
+   :linenos:
+
+      class C {}
+
+      function foo(this: C) {}
+      function bar(this: C, n: number): void {}
+
+      let c = new C()
+
+      // as a function call:
+      foo(c)
+      bar(c, 1)
+
+      // as a method call:
+      c.foo()
+      c.bar(1)
+
+The keyword ``this`` can be used inside a *function with receiver*
+and it corresponds the first parameter.
+
+The type of ``this`` parameter is called the *receiver type*
+(see :ref:`Receiver Type`). 
+
+
+If the *receiver type* is a class type, ``private`` or ``protected``
+members are not accessible (see :ref:`Accessible`) within the bodies of thee
+*function with receiver*. Only ``public`` members can be accessed:
 
 .. index::
    keyword this
-   extension function
-   receiver object
-   type reference
    private
    protected
    access
@@ -1604,11 +1629,11 @@ members are not accessible (see :ref:`Accessible`) within the bodies of their
 
       class A {
           foo () { ... this.bar() ... }
-                       // Extension function bar() is accessible
+                       // function bar() is accessible here
           protected member_1 ...
           private member_2 ...
       }
-      function A.bar () { ...
+      function bar(this: A) { ...
          this.foo() // Method foo() is accessible as it is public
          this.member_1 // Compile-time error as member_1 is not accessible
          this.member_2 // Compile-time error as member_2 is not accessible
@@ -1616,199 +1641,283 @@ members are not accessible (see :ref:`Accessible`) within the bodies of their
       }
       let a = new A()
       a.foo() // Ordinary class method is called
-      a.bar() // Class extension function is called
+      a.bar() // Function with receiver is called
 
-*Extension functions* can be generic as in the following example:
+The name of a *function with receiver* cannot be the same as the name of some
+public receiver method or field, otherwise a :index:`compile-time error` occurs.
+It also means, that a *function with receiver* cannot overload a method,
+defined for receiver type.
+
+*Function with receiver* can be generic as in the following example:
 
 .. code-block:: typescript
    :linenos:
 
-     function <T> B<T>.foo(p: T) {
+     function foo<T>(this: B<T>, p: T) {
           console.log (p)
      }
      function demo (p1: B<SomeClass>, p2: B<BaseClass>) {
-         p1.foo (new SomeClass())
+         p1.foo(new SomeClass())
            // Type inference should determine the instantiating type
-         p2.foo <BaseClass>(new DerivedClass())
+         p2.foo<BaseClass>(new DerivedClass())
           // Explicit instantiation
      }
 
-*Extension functions* are top-level functions that can call one another.
-The form of such calls depends on whether ``static`` was or was not used while
-declaring. This affects the kind of receiver to be used for the call:
+*Functions with receiver* are dispatched statically; 
+what function is being called is known at compile time based
+on the receiver type specified in its declaration.
 
--  *Static extension function* requires the name of type (class or interface).
--  *Non-static extension function* requires a variable (as in the examples
-   below).
-
-.. index::
-   extension function
-   top-level function
-   function call
-   receiver
-   static extension function
-   name
-   non-static extension function
-   variable
-
-.. code-block:: typescript
-   :linenos:
-
-      class A {
-          foo () { ...
-             this.bar() // Non-static extension function is called with this.
-             A.goo() // Static extension function is called with class name receiver
-             ...
-          }
-      }
-      function A.bar () { ...
-         this.foo() // Method foo() is called
-         A.goo() // Other static extension function is called with class name receiver
-         ...
-      }
-      static function A.goo () { ...
-         this.foo() // Compile-time error as instance members are not accessible
-         this.bar() // Compile-time error as instance extension functions are not accessible
-         ...
-      }
-      let a = new A()
-      a.foo() // Ordinary class method is called
-      a.bar() // Class instance extension function is called
-      A.goo() // Static extension function is called
-
-*Extension functions* are dispatched statically, and remain active for all
-derived classes until the next definition of the *extension function* for the
-derived class is found:
+They can be applied to receiver of any 
+derived class until it is redefined in the derived class:
 
 .. code-block:: typescript
    :linenos:
 
       class Base { ... }
       class Derived extends Base { ... }
-      function Base.foo () { console.log ("Base.foo is called") }
-      function Derived.foo () { console.log ("Derived.foo is called") }
+
+      function foo(this: Base) { console.log ("Base.foo is called") }
+      function foo(this: Derived) { console.log ("Derived.foo is called") }
 
       let b: Base = new Base()
       b.foo() // `Base.foo is called` to be printed
-         b = new Derived()
+      b = new Derived()
       b.foo() // `Base.foo is called` to be printed
       let d: Derived = new Derived()
       d.foo() // `Derived.foo is called` to be printed
 
-As illustrated by the following examples, an *extension function* can be:
-
--  Put into a compilation unit other than class or interface; and
--  Imported by using a name of the *extension function*.
-
-.. index::
-   extension function
-   class
-   interface
-   import
+As illustrated by the following examples, a *function with receiver* can be
+defined in a compilation unit other than one that defines a receiver type:
 
 .. code-block:: typescript
    :linenos:
 
       // file a.sts
-      import {bar} from "a.sts" // import name 'bar'
       class A {
-          foo () { ...
-             this.bar() // Non-static extension function is called with this.
-             A.goo() // static extension function is called with class name receiver
-             ...
-          }
+          foo() { ... }
       }
 
       // file ext.sts
-      import {A} from "a.sts" // import name 'A'
-      function A.bar () { ...
+      import {A} from "a.sts" // name 'A' is imported
+      function bar(this: A) () {
          this.foo() // Method foo() is called
-         ...
       }
-
-If an *extension function* and a type method have the same name and signature,
-then calls to that name are routed to the method:
-
-.. index::
-   extension function
-   method
-   signature
-   call
-
-.. code-block:: typescript
-   :linenos:
-
-      class A {
-          foo () { console.log ("Method A.foo is called") }
-      }
-      function A.foo () { console.log ("Extension A.foo is called") }
-      let a = new A()
-      a.foo() // Method is called, `Method A.foo is called` to be printed out
-
-The precedence between methods and *extension functions* can be expressed
-by the following formula:
-
-  derived type instance method <
-  base type instance method <
-  derived type extension function <
-  base type extension function.
-
-In other words, the priority of standard object-oriented semantics is higher
-than that of type extension functions:
-
-.. index::
-   extension function
-   instance method
-   semantics
-
-.. code-block:: typescript
-   :linenos:
-
-      class Base {
-         foo () { console.log ("Method Base.foo is called") }
-      }
-      class Derived extends Base {
-         override foo () { console.log ("Method Derived.foo is called") }
-      }
-      function Base.foo () { console.log ("Extension Base.foo is called") }
-      function Derived.foo () { console.log ("Extension Derived.foo is called") }
-
-      let b: Base = new Base()
-      b.foo() // `Method Base.foo is called` to be printed
-      b = new Derived()
-      b.foo() // `Method Derived.foo is called` to be printed
-      let d: Derived = new Derived()
-      d.foo() // `Method Derived.foo is called` to be printed
-
-If an *extension function* and another top-level function have the same name
-and signature, then calls to this name are routed to a proper function in
-accordance with the form of the call. *Extension functions* cannot be called
-without a receiver as they have access to ``this``:
-
-.. code-block:: typescript
-   :linenos:
-
-      class A { ... }
-      function A.foo () { console.log ("Extension A.foo is called") }
-      function foo () { console.log ("Top-level foo is called") }
-      let a = new A()
-      a.foo() // Extension function is called, `Extension A.foo is called` to be printed out
-      foo () // Top-level function is called, `Top-level foo is called` to be printed out
-
-.. index::
-   extension function
-   top-level function
-   signature
-   function
-   receiver
-   access
 
 |
 
-.. _Trailing Lambda:
+.. _Receiver Type:
 
-Trailing Lambda
-***************
+Receiver Type
+=============
+
+A *receiver type* is a type of *receiver parameter* in functions, function types
+and lamdbas with receiver.
+
+A *receiver type* may be an interface type, a class type, an array type
+or a type parameter, otherwise a :index:`compile-time error` occurs.
+
+Using an array type as receiever type is illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+      function addElements(this: number[], ...s: number[]) { 
+       ...
+      }
+
+      let x: number[] = [1, 2]
+      x.addElements(3, 4) 
+
+|
+
+.. _Accessors with Receiver:
+
+Accessors with Receiver
+=======================
+
+.. meta:
+    frontend_status: None
+
+An *accessor with receiver* declaration is a top-level declaration 
+(see :ref:`Top-Level Declarations`) that can be used as class or interface 
+accessors (see :ref:`Accessor Declarations`)
+for specified receiver type:
+
+.. code-block:: abnf
+
+    accessorWithReceiverDeclaration:
+          'get' identifier '(' receiverParameter ')' returnType block
+        | 'set' identifier '(' receiverParameter ',' parameter ')' block
+        ;
+
+A get-accessor (getter) must have a single *received parameter* and an explicit return type. 
+A set-accessor (setter) must have a *received parameter*, and a second parameter and no return type.
+
+The use of getters and setters looks the same as the use of fields:
+
+.. code-block:: typescript
+   :linenos:
+
+      class Person {
+        firstName: string
+        lastName: string
+        constructor (first: string, last: string) {...}
+        ...
+      }
+
+      get fullName(this: C): string {
+        return this.LastName + ' ' + this.FirstName
+      }
+
+      let c = new C("John", "Doe")
+
+      // as a method call:
+      console.log(c.fullName) // output: 'Doe John'
+      c.fullName = "new name" // compile-time error, as setter is not defined
+
+A :index:`compile-time error` occurs if an accessor is used in form of 
+a function or a method call.
+
+|
+
+.. _Function Types with Receiver:
+
+Function Types with Receiver
+============================
+
+.. meta:
+    frontend_status: None
+
+A *function type with receiver* specifies signature of functions or lambdas with receiver. 
+It is almost the same as a *function type* (see :ref:`Function Types`), 
+except that the first parameter is mandatory,
+and keyword ``this`` is used as its name:
+
+.. code-block:: abnf
+
+    functionTypeWithReceiver:
+        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 'throws'?
+        ;
+
+The type of the *receiver parameter* is called a *receiver type*
+(see :ref:`Receiver Type`).
+
+.. code-block:: typescript
+   :linenos:
+
+      class A {...}
+
+      type FA = (this: A) => boolean
+      type FN = (this: number[], max: number) => number
+
+*Function type with receiver* can be generic as in the following example:
+
+.. code-block:: typescript
+   :linenos:
+
+      class B<T> {...}
+
+      type FB<T> = (this: B<T>, x: T): void
+      type FBS = (this: B<string>, x: string): void
+
+
+The usual rule of function type compatibility (see :ref:`Function Types Conversions`)
+are applied to *function type with receiver*, ignoring parameters names. 
+
+.. code-block:: typescript
+   :linenos:
+
+      class A {...}
+
+      type F1 = (this: A) => boolean
+      type F2 = (a: A) => boolean
+
+      function foo(this: A) => boolean {}
+      function goo(a: A) => boolean {}
+      
+      let f1: F1 = foo // ok
+      f1 = goo // ok
+
+      let f2: F2 = goo // ok
+      f2 = foo // ok
+      f1 = f2 // ok
+
+The only difference is that only entity of function type with receiver can be 
+used in :ref:`Method Call Expression`. Using definitions from previous example:
+
+.. code-block:: typescript
+   :linenos:
+
+      let a = new A()
+      a.f1() // ok, function type with receiver
+      f1(a)  // ok
+      
+      a.f2() // compile-time error
+      f2(a) // ok
+
+|
+
+.. _Lambda Expressions with Receiver:
+
+Lambda Expressions with Receiver
+================================
+
+.. meta:
+    frontend_status: None
+
+*Lambda expression with receiver* defines an instance of
+a *function type with receiver* (see :ref:`Function Types with Receiver`).
+
+It looks almost the same as ordinary lambda expression
+(see :ref:`Lambda Expressions`), except that the first parameter is mandatory,
+and keyword ``this`` is used as its name:
+
+.. code-block:: abnf
+
+    lambdaExpressionWithReceiver:
+        typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
+        returnType? throwMark? '=>' lambdaBody
+        ;
+
+The keyword ``this`` can be used inside a *lamdba expression with receiver*
+and it corresponds the first parameter:
+
+.. code-block:: typescript
+   :linenos:
+
+      class A { name = "Bob" }
+
+      let show = (this: a): void {
+          console.log(this.name)
+      }
+
+The use of lambada  is illustrated by the example below:
+
+.. code-block:: typescript
+   :linenos:
+
+      class A { 
+        name: string
+        constructor (n: string) {
+            this.name = n
+        }
+      }
+      
+      function apply(aa: A[], f: (this: A) => void) {
+        for (let a of aa) {
+            a.f()
+        }
+      }
+
+      let aa: A[] = [new A("aa"), new A("bb")]  
+      foo(aa, (this: A) => { console.log(this.name)} ) // output: "aa" "bb"
+
+|
+
+.. _Trailing Lambdas:
+
+Trailing Lambdas
+****************
 
 .. meta:
     frontend_status: Done

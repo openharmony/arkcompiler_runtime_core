@@ -1,0 +1,3 @@
+# #20623
+test_stress_gc_humongous.sts
+test_stress_gc_humongous_bq.sts

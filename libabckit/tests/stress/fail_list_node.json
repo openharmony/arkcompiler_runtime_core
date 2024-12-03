@@ -1,13 +1,9 @@
 {
-  "/tmp/abckit_nodejs/deps/v8/test/mjsunit/asm/embenchen/zlib.js": "139",
   "/tmp/abckit_nodejs/deps/v8/test/mjsunit/regress/wasm/regress-810973b.js": "137",
-  "/tmp/abckit_nodejs/deps/v8/test/mjsunit/third_party/regexp-pcre/regexp-pcre.js": "RegAllocGraphColoring failed!",
-  "/tmp/abckit_nodejs/test/fixtures/snapshot/typescript.js": "-1",
-  "/tmp/abckit_nodejs/tools/eslint/node_modules/@babel/types/lib/asserts/generated/index.js": "RegAllocGraphColoring failed!",
-  "/tmp/abckit_nodejs/tools/eslint/node_modules/@babel/types/lib/builders/generated/index.js": "RegAllocGraphColoring failed!",
-  "/tmp/abckit_nodejs/tools/eslint/node_modules/@babel/types/lib/validators/generated/index.js": "RegAllocGraphColoring failed!",
+  "/tmp/abckit_nodejs/test/fixtures/snapshot/typescript.js": "timeout",
   "/tmp/abckit_nodejs/tools/eslint/node_modules/@stylistic/eslint-plugin-js/dist/newline-per-chained-call.js": "ASSERTION FAILED: nameToFunction.count(parentName) == 1",
   "/tmp/abckit_nodejs/tools/eslint/node_modules/eslint/lib/rules/newline-per-chained-call.js": "ASSERTION FAILED: nameToFunction.count(parentName) == 1",
   "/tmp/abckit_nodejs/tools/eslint/node_modules/eslint/lib/rules/object-shorthand.js": "ASSERTION FAILED: nameToFunction.count(parentName) == 1",
-  "/tmp/abckit_nodejs/tools/eslint/node_modules/eslint/lib/rules/prefer-arrow-callback.js": "ASSERTION FAILED: nameToFunction.count(parentName) == 1"
+  "/tmp/abckit_nodejs/tools/eslint/node_modules/eslint/lib/rules/prefer-arrow-callback.js": "ASSERTION FAILED: nameToFunction.count(parentName) == 1",
+  "/tmp/abckit_nodejs/deps/npm/node_modules/@npmcli/arborist/lib/query-selector-all.js": "ASSERTION FAILED: nameToClass.count(parentName) == 1"
 }

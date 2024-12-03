@@ -14,10 +14,10 @@
  */
 import {
     LinearLayout
-} from './modules/layout'
+} from './modules/layout';
 
 class MyClass {
-    foo() {
+    foo(): void {
         let appColumn = new LinearLayout();
         appColumn.setOrientation(3);
         print(appColumn.getOrientation());

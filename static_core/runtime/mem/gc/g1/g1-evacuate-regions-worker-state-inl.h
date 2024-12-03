@@ -184,10 +184,15 @@ void G1EvacuateRegionsWorkerState<LanguageConfig>::EvacuateNonHeapRoots()
 }
 
 template <typename LanguageConfig>
-void G1EvacuateRegionsWorkerState<LanguageConfig>::ScanRemset(const RemSet<> &remset)
+size_t G1EvacuateRegionsWorkerState<LanguageConfig>::ScanRemset(const RemSet<> &remset)
 {
-    auto remsetVisitor = [this](Region *region, const MemRange &range) { IterateRefsInMemRange(range, region); };
+    size_t remsetSize = 0;
+    auto remsetVisitor = [this, &remsetSize](Region *region, const MemRange &range) {
+        IterateRefsInMemRange(range, region);
+        remsetSize++;
+    };
     remset.Iterate([](Region *r) { return !r->HasFlag(IS_COLLECTION_SET); }, remsetVisitor);
+    return remsetSize;
 }
 
 template <class LanguageConfig>

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
+
 {
     function foo() {
         return 0;
@@ -24,15 +24,3 @@
     print(foo());
     print(bar());
 }
-
-// After AOP:
-// var x;
-// var y;
-// {
-//     function foo() { return x + 1; }
-//     function bar() { return y + 1; }
-//     let x = 1
-//     let y = 3
-//     print(foo());
-//     print(bar());
-// }

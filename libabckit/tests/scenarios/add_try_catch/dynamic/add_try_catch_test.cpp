@@ -26,7 +26,7 @@
 
 namespace libabckit::test {
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 static auto g_impl = AbckitGetApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
 static auto g_implI = AbckitGetInspectApiImpl(ABCKIT_VERSION_RELEASE_1_0_0);
@@ -52,7 +52,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
 
     // Fill catchBlock
     AbckitBasicBlock *catchBlock = g_implG->bbCreateEmpty(graph);
-    AbckitInst *catchPhi = g_dynG->iCreateCatchPhi(graph, catchBlock, 0);
+    AbckitInst *catchPhi = g_implG->bbCreateCatchPhi(catchBlock, 0);
     AbckitInst *print = g_dynG->iCreateTryldglobalbyname(graph, userData->print);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implG->bbAddInstBack(catchBlock, print);
@@ -73,7 +73,7 @@ static void TransformIr(AbckitGraph *graph, UserData *userData)
 }
 
 // Test: test-kind=scenario, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestDynamicAddTryCatch)
+TEST_F(AbckitScenarioTest, LibAbcKitTestDynamicAddTryCatch)
 {
     auto output =
         helpers::ExecuteDynamicAbc(ABCKIT_ABC_DIR "scenarios/add_try_catch/dynamic/add_try_catch.abc", "add_try_catch");

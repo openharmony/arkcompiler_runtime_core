@@ -40,12 +40,7 @@ uint8_t StdCoreRuntimeIsSameReference([[maybe_unused]] ObjectHeader *header, Ets
 EtsInt StdCoreRuntimeGetHashCode([[maybe_unused]] ObjectHeader *header, EtsObject *source)
 {
     ASSERT(source != nullptr);
-    if (source->IsHashed()) {
-        return source->GetInteropHash();
-    }
-    auto hash = ObjectHeader::GenerateHashCode();
-    source->SetInteropHash(hash);
-    return bit_cast<EtsInt>(hash);
+    return bit_cast<EtsInt>(source->GetHashCode());
 }
 
 static char const *ReferenceTypeString(EtsCoroutine *coro, EtsObject *obj)

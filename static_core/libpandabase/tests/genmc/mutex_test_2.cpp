@@ -23,7 +23,7 @@
 // Copy of mutex storage, after complete implementation should totally replace mutex::current_tid
 thread_local pthread_t current_tid;
 
-extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));
+extern "C" void __VERIFIER_assume(int) __attribute__((__nothrow__));  // CC-OFF(G.EXP.01-CPP) public API
 
 static struct fmutex g_x;
 static int g_shared;

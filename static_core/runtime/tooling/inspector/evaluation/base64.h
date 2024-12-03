@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef PANDA_TOOLING_INSPECTOR_BASE64_H
-#define PANDA_TOOLING_INSPECTOR_BASE64_H
-
-#include "libpandabase/macros.h"
-#include "libpandabase/utils/span.h"
+#ifndef PANDA_TOOLING_INSPECTOR_EVALUATION_BASE64_H
+#define PANDA_TOOLING_INSPECTOR_EVALUATION_BASE64_H
 
 #include <array>
 #include <optional>
 #include <string>
+
+#include "libpandabase/macros.h"
+#include "libpandabase/utils/span.h"
 
 namespace ark::tooling::inspector {
 class Base64Decoder final {
@@ -40,6 +40,20 @@ public:
             --sz;
         }
         return sz;
+    }
+
+    static bool Decode(const std::string &encoded, std::string &decoded)
+    {
+        ASSERT(!encoded.empty());
+
+        auto sz = encoded.size();
+        Span encodingInput(reinterpret_cast<const uint8_t *>(encoded.c_str()), sz);
+        auto bytecodeSize = Base64Decoder::DecodedSize(encodingInput);
+        if (!bytecodeSize) {
+            return false;
+        }
+        decoded.resize(*bytecodeSize);
+        return Base64Decoder::Decode(reinterpret_cast<uint8_t *>(decoded.data()), encodingInput);
     }
 
     static bool Decode(uint8_t *output, Span<const uint8_t> input)
@@ -134,4 +148,4 @@ private:
 };
 }  // namespace ark::tooling::inspector
 
-#endif  // PANDA_TOOLING_INSPECTOR_BASE64_H
+#endif  // PANDA_TOOLING_INSPECTOR_EVALUATION_BASE64_H

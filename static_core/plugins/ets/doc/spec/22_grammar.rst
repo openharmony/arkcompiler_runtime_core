@@ -25,26 +25,15 @@ Grammar Summary
     indexType: 'number';
 
     type:
-        predefinedType
-        | typeReference
+        typeReference
         | arrayType
         | tupleType
         | functionType
+        | functionTypeWithReceiver
         | unionType
-        | literalType
+        | StringLiteral
         | keyofType
         | '(' type ')'
-        ;
-
-    predefinedType:
-        'number' | 'byte' | 'short' | 'int' | 'long' | 'float' | 'double'
-        | 'bigint'
-        | 'char' | 'boolean'
-        | 'object' | 'string' | 'void' | 'never' |'undefined'
-        ;
-
-    literalType:
-        Literal
         ;
 
     typeReference:
@@ -234,6 +223,7 @@ Grammar Summary
         | conditionalExpression
         | stringInterpolation
         | lambdaExpression
+        | lambdaExpressionWithReceiver
         | dynamicImportExpression
         | launchExpression
         | awaitExpression
@@ -808,7 +798,7 @@ Grammar Summary
         ;
 
     selectiveBindings:
-        '{' nameBinding (',' nameBinding)* '}'
+        '{' (nameBinding (',' nameBinding)*)? '}'
         ;
 
     defaultBinding:
@@ -845,7 +835,9 @@ Grammar Summary
         | variableDeclarations
         | constantDeclarations
         | functionDeclaration
-        | extensionFunctionDeclaration
+        | functionWithReceiverDeclaration
+        | accessorWithReceiverDeclaration
+        | namespaceDeclaration
         )
         ;
 
@@ -1012,8 +1004,6 @@ Grammar Summary
         )
         ;
 
-
-
       newArrayInstance:
           'new' arrayElementType dimensionExpression+ (arrayElement)?
           ;
@@ -1035,10 +1025,31 @@ Grammar Summary
         'private'? identifier signature block
         ;
 
-    extensionFunctionDeclaration:
-        'static'? 'function' typeParameters? typeReference '.' identifier
-        signature block
+    functionWithReceiverDeclaration:
+        'function' identifier typeParameters? signatureWithReceiver block
         ;
+
+    signatureWithReceiver:
+        '(' receiverParameter (', ' parameterList)? ')' returnType? throwMark?
+        ;
+
+    receiverParameter:
+        'this' ':' 'readonly'? type
+        ;
+
+    accessorWithReceiverDeclaration:
+          'get' identifier '(' receiverParameter ')' returnType block
+        | 'set' identifier '(' receiverParameter ',' parameter ')' block
+        ;
+        
+    functionTypeWithReceiver:
+        '(' receiverParameter (',' ftParameterList)? ')' ftReturnType 'throws'?
+        ;
+
+    lambdaExpressionWithReceiver:
+        typeParameters? '(' receiverParameter (',' lambdaParameterList)? ')' 
+        returnType? throwMark? '=>' lambdaBody
+        ;       
 
     trailingLambdaCall:
         ( objectReference '.' identifier typeArguments?

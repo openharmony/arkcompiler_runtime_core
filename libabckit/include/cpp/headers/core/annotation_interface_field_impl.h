@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_FIELD_IMPL_H
 #define CPP_ABCKIT_CORE_ANNOTATION_INTERFACE_FIELD_IMPL_H
 
-#include "cpp/headers/core/annotation_interface_field.h"
+#include "./annotation_interface_field.h"
 
 namespace abckit::core {
 

@@ -1046,6 +1046,7 @@ String *String::AllocStringObject(size_t length, bool compressed, const Language
                   vm->GetHeapManager()->AllocateObject(stringClass, size, DEFAULT_ALIGNMENT, thread,
                                                        mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT, pinned))
             : reinterpret_cast<String *>(vm->GetHeapManager()->AllocateNonMovableObject(
+                  // CC-OFFNXT(G.FMT.06) project code style
                   stringClass, size, DEFAULT_ALIGNMENT, thread, mem::ObjectAllocatorBase::ObjMemInitPolicy::NO_INIT));
     if (string != nullptr) {
         // After setting length we should have a full barrier, so this write should happens-before barrier

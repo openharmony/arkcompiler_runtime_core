@@ -1579,6 +1579,7 @@ export final class Date {
      */
     public setTimezoneOffset(value: int): long {
         this.TZOffset = value;
+        return this.TZOffset
     }
 
     /**

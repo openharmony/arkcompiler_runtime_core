@@ -30,7 +30,8 @@ namespace ark::compiler {
 class RegAllocGraphColoring : public RegAllocBase {
 public:
     explicit RegAllocGraphColoring(Graph *graph);
-    RegAllocGraphColoring(Graph *graph, size_t regsCount);
+    PANDA_PUBLIC_API RegAllocGraphColoring(Graph *graph, size_t regsCount);
+    PANDA_PUBLIC_API RegAllocGraphColoring(Graph *graph, LocationMask mask);
 
     const char *GetPassName() const override
     {

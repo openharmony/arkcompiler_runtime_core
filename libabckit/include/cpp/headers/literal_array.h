@@ -16,35 +16,71 @@
 #ifndef CPP_ABCKIT_LITERAL_ARRAY_H
 #define CPP_ABCKIT_LITERAL_ARRAY_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "libabckit/include/c/metadata_core.h"
-
-#include <vector>
+#include "./base_classes.h"
 
 namespace abckit {
 
-class LiteralArray : public View<AbckitLiteralArray *> {
+/**
+ * @brief LiteralArray
+ */
+class LiteralArray : public ViewInResource<AbckitLiteralArray *, const File *> {
+    /// @brief abckit::File
     friend class abckit::File;
+    /// @brief abckit::Literal
     friend class abckit::Literal;
+    /// @brief abckit::DefaultHash<LiteralArray>
+    friend class abckit::DefaultHash<LiteralArray>;
+    /// @brief abckit::DynamicIsa
+    friend class abckit::DynamicIsa;
 
 public:
+    /**
+     * @brief Construct a new Literal Array object
+     * @param other
+     */
     LiteralArray(const LiteralArray &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return LiteralArray&
+     */
     LiteralArray &operator=(const LiteralArray &other) = default;
+
+    /**
+     * @brief Construct a new Literal Array object
+     * @param other
+     */
     LiteralArray(LiteralArray &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return LiteralArray&
+     */
     LiteralArray &operator=(LiteralArray &&other) = default;
+
+    /**
+     * @brief Destroy the Literal Array object
+     *
+     */
     ~LiteralArray() override = default;
 
 protected:
+    /**
+     * @brief Get the Api Config object
+     * @return const ApiConfig*
+     */
     const ApiConfig *GetApiConfig() const override
     {
         return conf_;
     }
 
 private:
-    LiteralArray(AbckitLiteralArray *lita, const ApiConfig *conf) : View(lita), conf_(conf) {};
+    LiteralArray(AbckitLiteralArray *lita, const ApiConfig *conf, const File *file) : ViewInResource(lita), conf_(conf)
+    {
+        SetResource(file);
+    };
     const ApiConfig *conf_;
 };
 

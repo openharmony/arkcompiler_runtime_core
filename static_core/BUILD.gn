@@ -95,14 +95,25 @@ group("ark_host_windows_tools_packages") {
 group("ark_host_mac_tools_packages") {
   deps = plugin_ark_host_mac_tools_packages
   if (host_os == "mac") {
-    deps += [
-      "$ark_root/assembler:arkts_asm(//build/toolchain/mac:clang_x64)",
-      "$ark_root/disassembler:arkts_disasm(//build/toolchain/mac:clang_x64)",
-      "$ark_root/libpandabase:libarktsbase(//build/toolchain/mac:clang_x64)",
-      "$ark_root/libpandafile:libarktsfile(//build/toolchain/mac:clang_x64)",
-      "$ark_root/libziparchive:libarktsziparchive(//build/toolchain/mac:clang_x64)",
-      "$ark_root/static_linker:ark_link(//build/toolchain/mac:clang_x64)",
-    ]
+    if (host_cpu == "arm64") {
+      deps += [
+        "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/libpandabase:libarktsbase($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/libpandafile:libarktsfile($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/libziparchive:libarktsziparchive($build_root/toolchain/mac:clang_arm64)",
+        "$ark_root/static_linker:ark_link($build_root/toolchain/mac:clang_arm64)",
+      ]
+    } else {
+      deps += [
+        "$ark_root/assembler:arkts_asm($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/disassembler:arkts_disasm($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/libpandabase:libarktsbase($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/libpandafile:libarktsfile($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/libziparchive:libarktsziparchive($build_root/toolchain/mac:clang_x64)",
+        "$ark_root/static_linker:ark_link($build_root/toolchain/mac:clang_x64)",
+      ]
+    }
   }
 }
 

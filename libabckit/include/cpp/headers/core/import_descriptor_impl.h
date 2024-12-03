@@ -16,7 +16,9 @@
 #ifndef CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_IMPL_H
 #define CPP_ABCKIT_CORE_IMPORT_DESCRIPTOR_IMPL_H
 
-#include "cpp/headers/core/import_descriptor.h"
+#include "./import_descriptor.h"
+#include "./function.h"
+#include "./module.h"
 
 namespace abckit::core {
 
@@ -28,6 +30,19 @@ inline std::string_view ImportDescriptor::GetName() const
     CheckError(GetApiConfig());
     return name;
 }
+
+inline core::Module ImportDescriptor::GetImportedModule() const
+{
+    AbckitCoreModule *module = GetApiConfig()->cIapi_->importDescriptorGetImportedModule(GetView());
+    CheckError(GetApiConfig());
+    return core::Module(module, conf_, GetResource());
+}
+
+inline ImportDescriptor::ImportDescriptor(AbckitCoreImportDescriptor *module, const ApiConfig *conf, const File *file)
+    : ViewInResource(module), conf_(conf)
+{
+    SetResource(file);
+};
 
 }  // namespace abckit::core
 

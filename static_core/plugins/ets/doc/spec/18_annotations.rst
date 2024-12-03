@@ -173,7 +173,7 @@ The choice of types for annotation fields is limited to the following:
 - Type ``boolean``;
 - Type ``string``;
 - Enumeration types;
-- Array of above types, e.g., ``string[]``.
+- Array of above types, e.g., ``string[]``, including multi-dimensional arrays, like ``string[][]``.
 
 A :index:`compile-time error` occurs if any other type is used as type of an
 *annotation field*.
@@ -564,53 +564,6 @@ modifies semantics of the declaration it is applied to.
    declaration
 
 |
-
-.. _Annotation namespace:
-
-Annotation ``namespace``
-========================
-
-The ``namespace`` annotation specifies that the marked namespace
-corresponds to ambient namespace of some declaration module (see
-:ref:`Implementing Ambient Namespace Declaration` for details).
-
-This annotation has a single field ``address: string`` that denotes the
-ambient namespace in some way. The syntax of an address string is
-implementation-dependent.
-
-.. code-block:: typescript
-   :linenos:
-
-    //=== io.d.sts
-    declare namespace IO {
-        class File {}
-
-        function open(filename: string): File
-    }
-
-    //=== files.sts
-
-    @namespace({address: "io.d.ts"})
-    namespace IO {
-      class File {/*body*/}
-
-      function open(filename: string): File {/*body*/}
-    }
-
-The annotation can be applied to namespaces only. A :index:`compile-time error`
-occurs otherwise.
-
-**Note**: As an annotation has only one field, a short notation can be used
-(see :ref:`Using Single Field Annotations`).
-
-.. index::
-   annotation
-   namespace
-   ambient namespace
-   string
-   declaration module
-   field
-   notation
 
 .. raw:: pdf
 

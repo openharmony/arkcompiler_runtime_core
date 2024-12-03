@@ -16,7 +16,7 @@
 #ifndef CPP_ABCKIT_LITERAL_IMPL_H
 #define CPP_ABCKIT_LITERAL_IMPL_H
 
-#include "cpp/headers/literal.h"
+#include "./literal.h"
 
 namespace abckit {
 
@@ -29,7 +29,7 @@ inline bool Literal::GetBool() const
 
 inline abckit::LiteralArray Literal::GetLiteralArray() const
 {
-    LiteralArray ret(GetApiConfig()->cIapi_->literalGetLiteralArray(GetView()), GetApiConfig());
+    LiteralArray ret(GetApiConfig()->cIapi_->literalGetLiteralArray(GetView()), GetApiConfig(), GetResource());
     CheckError(GetApiConfig());
     return ret;
 }

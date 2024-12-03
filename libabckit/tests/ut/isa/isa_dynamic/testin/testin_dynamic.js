@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
+
 class A {
     #a;
     static foo(obj) {
@@ -22,14 +22,3 @@ class A {
 
 print(A.foo(new A()));
 print(A.foo({}));
-
-// After AOP:
-// class A {
-//     #a;
-//     static foo(obj) {
-//         return #a in obj;
-//     }
-// }
-
-// print(A.foo(new A()))
-// print(A.foo())

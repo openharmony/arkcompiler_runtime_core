@@ -14,6 +14,7 @@
  */
 
 #include "libabckit/src/adapter_static/metadata_modify_static.h"
+#include "inst.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"
 #include "libabckit/src/logger.h"
@@ -21,25 +22,25 @@
 
 #include "libabckit/src/codegen/codegen_static.h"
 
+#include "optimizer/analysis/liveness_analyzer.h"
+#include "optimizer/analysis/rpo.h"
 #include "src/adapter_static/metadata_inspect_static.h"
 #include "src/adapter_static/abckit_static.h"
 #include "src/adapter_static/helpers_static.h"
 #include "static_core/assembler/assembly-program.h"
 
 #include "static_core/compiler/optimizer/ir/graph_checker.h"
+#include "static_core/compiler/optimizer/ir/graph_cloner.h"
 #include "static_core/compiler/optimizer/analysis/loop_analyzer.h"
-#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_graph_coloring.h"
 #include "static_core/compiler/optimizer/optimizations/cleanup.h"
 #include "static_core/compiler/optimizer/optimizations/move_constants.h"
-#include "static_core/compiler/optimizer/optimizations/regalloc/reg_alloc_resolver.h"
 #include "static_core/compiler/optimizer/optimizations/lowering.h"
-#include "static_core/bytecode_optimizer/reg_acc_alloc.h"
 #include "static_core/bytecode_optimizer/reg_encoder.h"
 
 #include <cstdint>
 #include <string>
 
-// CC-OFFNXT(WordsTool.95 google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark;
 
@@ -74,7 +75,8 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 
     auto *func = function->GetArkTSImpl()->GetStaticImpl();
 
-    auto graphImpl = graph->impl;
+    auto graphImpl =
+        compiler::GraphCloner(graph->impl, graph->impl->GetAllocator(), graph->impl->GetLocalAllocator()).CloneGraph();
 
     graphImpl->RemoveUnreachableBlocks();
 
@@ -92,7 +94,6 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
 
     if (!ark::compiler::GraphChecker(graphImpl).Check()) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": Graph Verifier failed!\n";
-        DestroyGraphStatic(graph);
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
         return;
     }
@@ -102,10 +103,8 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
     graphImpl->RunPass<compiler::Cleanup>(false);
 
     graphImpl->RunPass<compiler::MoveConstants>();
-    graphImpl->RunPass<bytecodeopt::RegAccAlloc>();
-    compiler::RegAllocResolver(graphImpl).ResolveCatchPhis();
 
-    if (!graphImpl->RunPass<compiler::RegAllocGraphColoring>(compiler::VIRTUAL_FRAME_SIZE)) {
+    if (!AllocateRegisters(graphImpl, CodeGenStatic::RESERVED_REG)) {
         LIBABCKIT_LOG(DEBUG) << func->name << ": RegAllocGraphColoring failed!\n";
         statuses::SetLastError(AbckitStatus::ABCKIT_STATUS_TODO);
         return;
@@ -129,8 +128,6 @@ void FunctionSetGraphStatic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG(DEBUG) << "======================== AFTER CODEGEN ========================\n";
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
     LIBABCKIT_LOG(DEBUG) << "============================================\n";
-
-    DestroyGraphStatic(graph);
 }
 
 AbckitLiteral *CreateLiteralBoolStatic(AbckitFile *file, bool value)
@@ -253,8 +250,7 @@ AbckitLiteralArray *CreateLiteralArrayStatic(AbckitFile *file, AbckitLiteral **v
     // NOLINTNEXTLINE(cert-msc51-cpp)
     uint32_t arrayOffset = 0;
     while (prog->literalarrayTable.find(std::to_string(arrayOffset)) != prog->literalarrayTable.end()) {
-        LIBABCKIT_LOG(DEBUG) << "generating new arrayOffset\n";
-        arrayOffset = std::stoi(prog->literalarrayTable.rbegin()->first) + 1;
+        arrayOffset++;
     }
     auto arrayName = std::to_string(arrayOffset);
 

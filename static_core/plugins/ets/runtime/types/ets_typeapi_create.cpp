@@ -167,6 +167,12 @@ const std::pair<std::string, std::string> &TypeCreatorCtx::DeclarePrimitive(cons
         objectTypeName += "Long";
     } else if (primTypeName == "u16") {
         objectTypeName += "Char";
+    } else if (primTypeName == "void") {
+        objectTypeName += "Void";
+    } else if (primTypeName == "f32") {
+        objectTypeName += "Float";
+    } else if (primTypeName == "f64") {
+        objectTypeName += "Double";
     } else {
         UNREACHABLE();
     }

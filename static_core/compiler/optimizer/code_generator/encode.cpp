@@ -578,6 +578,30 @@ void Encoder::EncodeCompressSixteenUtf16ToUtf8CharsUsingSimd([[maybe_unused]] Re
     SetFalseResult();
 }
 
+void Encoder::EncodeMemCharU8X32UsingSimd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg ch,
+                                          [[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeMemCharU16X16UsingSimd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg ch,
+                                           [[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeMemCharU8X16UsingSimd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg ch,
+                                          [[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
+void Encoder::EncodeMemCharU16X8UsingSimd([[maybe_unused]] Reg dst, [[maybe_unused]] Reg ch,
+                                          [[maybe_unused]] Reg srcAddr, [[maybe_unused]] Reg tmp)
+{
+    SetFalseResult();
+}
+
 void Encoder::EncodeUnsignedExtendBytesToShorts([[maybe_unused]] Reg dst, [[maybe_unused]] Reg src)
 {
     SetFalseResult();

@@ -72,6 +72,7 @@ auto g_libAbcKitTestStaticBranchEliminationLambda0 = [](AbckitFile *file, Abckit
     std::vector<AbckitBasicBlock *> bbs;
     g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
         reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+        return true;
     });
 
     for (auto i = bbs.rbegin(), j = bbs.rend(); i != j; ++i) {
@@ -91,10 +92,10 @@ auto g_libAbcKitTestStaticBranchEliminationLambda0 = [](AbckitFile *file, Abckit
 
 }  // namespace
 
-class LibAbcKitTest : public ::testing::Test {};
+class AbckitScenarioTest : public ::testing::Test {};
 
 // Test: test-kind=scenario, abc-kind=ArkTS2, category=positive
-TEST_F(LibAbcKitTest, LibAbcKitTestStaticBranchElimination)
+TEST_F(AbckitScenarioTest, LibAbcKitTestStaticBranchElimination)
 {
     auto output =
         helpers::ExecuteStaticAbc(ABCKIT_ABC_DIR "scenarios/static_branch_elimination/static_branch_elimination.abc",

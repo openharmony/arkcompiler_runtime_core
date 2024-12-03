@@ -16,17 +16,17 @@
 #ifndef PANDA_TOOLING_INSPECTOR_SOURCE_MANAGER_H
 #define PANDA_TOOLING_INSPECTOR_SOURCE_MANAGER_H
 
-#include "types/numeric_id.h"
-
-#include "os/mutex.h"
-#include "tooling/pt_thread.h"
-
 #include <map>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
+
+#include "include/tooling/pt_thread.h"
+#include "os/mutex.h"
+
+#include "types/numeric_id.h"
 
 namespace ark::tooling::inspector {
 class SourceManager final {

@@ -154,6 +154,85 @@ static auto g_modifyVregSource = R"(
     }
 )";
 
+[[maybe_unused]] static constexpr std::array<uint64_t, 3> FRAME_VALUES = {0x123456789abcdef, 0xaaaabbbbccccdddd,
+                                                                          0xabcdef20};
+
+int WalkIfZeroRun(StackWalker &walker)
+{
+    bool success = false;
+    bool wasSet = false;
+    HOOK_ASSERT(!walker.IsCFrame(), return 1);
+    success = walker.IterateVRegsWithInfo([&wasSet, &walker](const auto &regInfo, const auto &reg) {
+        if (!regInfo.IsAccumulator()) {
+            HOOK_ASSERT(reg.GetLong() == 27L, return false);
+            walker.SetVRegValue(regInfo, FRAME_VALUES[0]);
+            wasSet = true;
+        }
+        return true;
+    });
+    HOOK_ASSERT(success, return 1);
+    HOOK_ASSERT(wasSet, return 1);
+
+    walker.NextFrame();
+    HOOK_ASSERT(walker.IsCFrame(), return 1);
+    success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
+        if (!regInfo.IsAccumulator()) {
+            HOOK_ASSERT(reg.GetLong() == 27L, return false);
+            walker.SetVRegValue(regInfo, FRAME_VALUES[1]);
+        }
+        return true;
+    });
+    HOOK_ASSERT(success, return 1);
+
+    walker.NextFrame();
+    HOOK_ASSERT(walker.IsCFrame(), return 1);
+    success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
+        if (!regInfo.IsAccumulator()) {
+            HOOK_ASSERT(reg.GetLong() == 27L, return true);
+            walker.SetVRegValue(regInfo, FRAME_VALUES[2U]);
+        }
+        return true;
+    });
+    HOOK_ASSERT(success, return 1);
+
+    return 0;
+}
+
+int WalkIfOneRun(StackWalker &walker)
+{
+    bool success = false;
+    HOOK_ASSERT(!walker.IsCFrame(), return 1);
+    success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
+        if (!regInfo.IsAccumulator()) {
+            HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[0]), return true);
+        }
+        return true;
+    });
+    HOOK_ASSERT(success, return 1);
+
+    walker.NextFrame();
+    HOOK_ASSERT(walker.IsCFrame(), return 1);
+    success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
+        if (!regInfo.IsAccumulator()) {
+            HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[1]), return true);
+        }
+        return true;
+    });
+    HOOK_ASSERT(success, return 1);
+
+    walker.NextFrame();
+    HOOK_ASSERT(walker.IsCFrame(), return 1);
+    success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
+        if (!regInfo.IsAccumulator()) {
+            HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[2U]), return true);
+        }
+        return true;
+    });
+    HOOK_ASSERT(success, return 1);
+
+    return 0;
+}
+
 TEST_F(StackWalkerTest, ModifyVreg)
 {
     auto source = g_modifyVregSource;
@@ -163,77 +242,19 @@ TEST_F(StackWalkerTest, ModifyVreg)
     runner.GetCompilerOptions().SetCompilerNonOptimizing(true);
     runner.GetCompilerOptions().SetCompilerRematConst(false);
     runner.GetCompilerOptions().SetCompilerRegex("(?!_GLOBAL::testb|_GLOBAL::hook).*");
-    [[maybe_unused]] static constexpr std::array<uint64_t, 3> FRAME_VALUES = {0x123456789abcdef, 0xaaaabbbbccccdddd,
-                                                                              0xabcdef20};
+
     static int runCount = 0;
     runner.Run(source, [](uintptr_t lr, [[maybe_unused]] uintptr_t fp) -> int {
         StackWalker walker(reinterpret_cast<void *>(fp), true, lr);
-        bool success = false;
         walker.NextFrame();
         if (runCount == 0) {
-            bool wasSet = false;
-            HOOK_ASSERT(!walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([&wasSet, &walker](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == 27L, return false);
-                    walker.SetVRegValue(regInfo, FRAME_VALUES[0]);
-                    wasSet = true;
-                }
-                return true;
-            });
-            HOOK_ASSERT(success, return 1);
-            HOOK_ASSERT(wasSet, return 1);
-
-            walker.NextFrame();
-            HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == 27L, return false);
-                    walker.SetVRegValue(regInfo, FRAME_VALUES[1]);
-                }
-                return true;
-            });
-            HOOK_ASSERT(success, return 1);
-
-            walker.NextFrame();
-            HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([&walker](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == 27L, return true);
-                    walker.SetVRegValue(regInfo, FRAME_VALUES[2U]);
-                }
-                return true;
-            });
-            HOOK_ASSERT(success, return 1);
+            if (WalkIfZeroRun(walker) != 0) {
+                return 1;
+            }
         } else if (runCount == 1) {
-            HOOK_ASSERT(!walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[0]), return true);
-                }
-                return true;
-            });
-            HOOK_ASSERT(success, return 1);
-
-            walker.NextFrame();
-            HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[1]), return true);
-                }
-                return true;
-            });
-            HOOK_ASSERT(success, return 1);
-
-            walker.NextFrame();
-            HOOK_ASSERT(walker.IsCFrame(), return 1);
-            success = walker.IterateVRegsWithInfo([](const auto &regInfo, const auto &reg) {
-                if (!regInfo.IsAccumulator()) {
-                    HOOK_ASSERT(reg.GetLong() == bit_cast<int64_t>(FRAME_VALUES[2U]), return true);
-                }
-                return true;
-            });
-            HOOK_ASSERT(success, return 1);
+            if (WalkIfOneRun(walker) != 0) {
+                return 1;
+            }
         } else {
             return 1;
         }

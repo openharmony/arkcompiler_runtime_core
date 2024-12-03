@@ -49,8 +49,8 @@ class Tool(ToolBase):
                 continue
             res = self.sh.run(
                 f'{self.tsc} '
-                '--target es6 '
-                '--module es6 '
+                '--target es2022 '
+                '--module es2022 '
                 f'{self.custom} '
                 f'--outDir {bu.path} {ts}', measure_time=True)
             js = ts.with_suffix('.js')

@@ -102,6 +102,8 @@ public:
         this->GetSpace()->template ReleaseEmptyRegions<REGION_TYPE, OS_PAGES_POLICY>();
     }
 
+    virtual double CalculateDeadObjectsRatio();
+
 protected:
     void ClearRegionsPool()
     {
@@ -230,7 +232,7 @@ public:
     }
 
     template <bool INCLUDE_CURRENT_REGION>
-    PandaPriorityQueue<std::pair<uint32_t, Region *>> GetTopGarbageRegions();
+    PandaVector<std::pair<uint32_t, Region *>> GetTopGarbageRegions(double garbageThreshold);
 
     /**
      * Return a vector of all regions with the specific type.
@@ -239,6 +241,8 @@ public:
      */
     template <RegionFlag REGIONS_TYPE>
     PandaVector<Region *> GetAllSpecificRegions();
+
+    double CalculateInternalOldFragmentation();
 
     /**
      * Iterate over all regions with type /param regions_type_from
@@ -577,6 +581,13 @@ public:
         return this->GetRegion(object)->GetLiveBitmap()->AtomicTest(const_cast<ObjectHeader *>(object));
     }
 
+    double CalculateExternalFragmentation()
+    {
+        return objectAllocator_.CalculateExternalFragmentation();
+    }
+
+    double CalculateDeadObjectsRatio() override;
+
 private:
     void *NewRegionAndRetryAlloc(size_t objectSize, Alignment align);
 
@@ -653,6 +664,8 @@ public:
     {
         return this->GetSpace()->template IsLive<true>(object);
     }
+
+    double CalculateInternalFragmentation();
 
 private:
     void ResetRegion(Region *region);

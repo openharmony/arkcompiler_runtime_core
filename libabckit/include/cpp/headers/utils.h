@@ -16,9 +16,7 @@
 #ifndef CPP_ABCKIT_UTILS_H
 #define CPP_ABCKIT_UTILS_H
 
-#include "libabckit/include/c/statuses.h"
-#include "statuses_impl.h"
-#include "cpp/headers/declarations.h"
+#include "../../c/statuses.h"
 
 #include <string>
 
@@ -57,24 +55,52 @@ inline std::string StatusToString(AbckitStatus status)
     }
     return "Unsupported status type";
 }
+// NOLINTEND(performance-unnecessary-value-param)
 
 #ifdef ABCKIT_USE_EXCEPTIONS
+/**
+ * @brief Exception
+ */
 class Exception : public std::runtime_error {
 public:
+    /**
+     * @brief Constructor
+     * @param e - status
+     */
     explicit Exception(AbckitStatus e) : std::runtime_error(StatusToString(e)) {}
 
+    /**
+     * @brief what
+     * @return what
+     */
+    // NOLINTNEXTLINE(readability-identifier-naming)
     virtual const char *what() const noexcept override
     {
         return std::runtime_error::what();
     }
 };
 #else
+
+/**
+ * @brief Exception
+ */
 class Exception {
 public:
+    /**
+     * @brief Constructor
+     * @param e - status
+     */
     explicit Exception(AbckitStatus e) : whatMessage_(StatusToString(e)) {}
 
-    const char *What() const noexcept
+    /**
+     * @brief what
+     * @return string
+     */
+    // CC-OFFNXT(G.NAM.03) made to be compatible with std::runtime_error::what method
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    const char *what() const noexcept
     {
+        // CC-OFFNXT(G.STD.04) made to be compatible with std::runtime_error::what method
         return whatMessage_.c_str();
     }
 
@@ -83,27 +109,97 @@ private:
 };
 #endif
 
+/**
+ * @brief IErrorHandler
+ */
 class IErrorHandler {
 public:
+    /**
+     * Сonstructor
+     */
     IErrorHandler() = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     IErrorHandler(const IErrorHandler &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return IErrorHandler
+     */
     IErrorHandler &operator=(const IErrorHandler &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     IErrorHandler(IErrorHandler &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return IErrorHandler
+     */
     IErrorHandler &operator=(IErrorHandler &&other) = default;
+
+    /**
+     * @brief Destructor
+     */
     virtual ~IErrorHandler() = default;
 
+    //! @cond Doxygen_Suppress
     virtual void HandleError(Exception &&e) = 0;
+    //! @endcond
 };
 
+/**
+ * @brief DefaultErrorHandler
+ */
 class DefaultErrorHandler final : public IErrorHandler {
 public:
+    /**
+     * Сonstructor
+     */
     DefaultErrorHandler() = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     DefaultErrorHandler(const DefaultErrorHandler &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return DefaultErrorHandler
+     */
     DefaultErrorHandler &operator=(const DefaultErrorHandler &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     DefaultErrorHandler(DefaultErrorHandler &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return DefaultErrorHandler
+     */
     DefaultErrorHandler &operator=(DefaultErrorHandler &&other) = default;
+
+    /**
+     * @brief Destructor
+     */
     ~DefaultErrorHandler() override = default;
 
+    /**
+     * Handle error
+     * @param e - exception
+     */
     void HandleError([[maybe_unused]] Exception &&e) override
     {
 // Default behaviour - do nothing.
@@ -114,27 +210,96 @@ public:
     }
 };
 
+/**
+ * @brief IResourceDeleter
+ */
 class IResourceDeleter {
 public:
+    /**
+     * Сonstructor
+     */
     IResourceDeleter() = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     IResourceDeleter(const IResourceDeleter &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return IResourceDeleter
+     */
     IResourceDeleter &operator=(const IResourceDeleter &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     IResourceDeleter(IResourceDeleter &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return IResourceDeleter
+     */
     IResourceDeleter &operator=(IResourceDeleter &&other) = default;
+
+    /**
+     * @brief Destructor
+     */
     virtual ~IResourceDeleter() = default;
 
+    //! @cond Doxygen_Suppress
     virtual void DeleteResource() = 0;
+    //! @endcond
 };
 
+/**
+ * @brief DefaultResourceDeleter
+ */
 class DefaultResourceDeleter final : public IResourceDeleter {
 public:
+    /**
+     * Сonstructor
+     */
     DefaultResourceDeleter() = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     DefaultResourceDeleter(const DefaultResourceDeleter &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return `DefaultResourceDeleter`
+     */
     DefaultResourceDeleter &operator=(const DefaultResourceDeleter &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     */
     DefaultResourceDeleter(DefaultResourceDeleter &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return `DefaultResourceDeleter`
+     */
     DefaultResourceDeleter &operator=(DefaultResourceDeleter &&other) = default;
+
+    /**
+     * Destructor
+     */
     ~DefaultResourceDeleter() override = default;
 
+    /**
+     * @brief Delete resource
+     */
     void DeleteResource() override
     { /* Do nothing by default. Debug log here, probably? */
     }

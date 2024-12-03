@@ -529,7 +529,7 @@ Register Graph::GetZeroReg() const
 {
     auto regfile = GetRegisters();
     if (regfile == nullptr) {
-        return INVALID_REG;
+        return GetInvalidReg();
     }
     auto reg = regfile->GetZeroReg();
     if (reg == INVALID_REGISTER) {
@@ -688,7 +688,7 @@ SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
             regType = DataType::UINT32;
         }
         auto loc = reg.IsFloat() ? LocationType::FP_REGISTER : LocationType::REGISTER;
-        return SpillFillData(SpillFillData {loc, LocationType::INVALID, reg.GetId(), INVALID_REG, regType});
+        return SpillFillData(SpillFillData {loc, LocationType::INVALID, reg.GetId(), GetInvalidReg(), regType});
     }
     ASSERT(std::holds_alternative<uint8_t>(param));
     auto slot = std::get<uint8_t>(param);
@@ -701,7 +701,7 @@ SpillFillData Graph::GetDataForNativeParam(DataType::Type type)
         regType = DataType::UINT64;
     }
     return SpillFillData(
-        SpillFillData {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, INVALID_REG, regType});
+        SpillFillData {LocationType::STACK_PARAMETER, LocationType::INVALID, slot, GetInvalidReg(), regType});
 #endif
 }
 

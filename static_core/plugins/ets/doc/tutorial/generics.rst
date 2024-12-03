@@ -23,7 +23,7 @@ variety of types rather than a single type.
 Generic Classes and Interfaces
 ------------------------------
 
-A class and an interface can be defined as generics, adding parameters to the
+A class and an interface can be defined as generics that add parameters to
 type definition, like the type parameter ``Element`` in the following example:
 
 .. code-block:: typescript
@@ -37,7 +37,7 @@ type definition, like the type parameter ``Element`` in the following example:
         }
     }
 
-To use type *Stack*, the type argument must be specified for each type
+To use type ``Stack``, the type argument must be specified for each type
 parameter:
 
 .. code-block:: typescript
@@ -75,7 +75,7 @@ method (i.e., it must be hashable):
     }
 
 In the above example, the ``Key`` type extends ``Hashable``, and all methods
-of ``Hashable`` interface can be called for keys.
+of a ``Hashable`` interface can be called for keys.
 
 |
 
@@ -101,7 +101,7 @@ defined as a generic with a type parameter:
         return x[x.length - 1]
     }
 
-The function defined so can be used with any array.
+The function so defined can be used with any array.
 
 In a function call, type argument can be set explicitly or implicitly:
 
@@ -121,9 +121,9 @@ Generic Defaults
 ----------------
 
 Type parameters of generic types can have defaults.
-It allows simply using the generic type name rather than specifying the actual
-type arguments. In the example below, it is illustrated for both classes and
-functions:
+Defaults allow simply using a generic type name rather than specifying actual
+type arguments. It is illustrated for both classes and functions in the example
+below:
 
 .. code-block:: typescript
 
@@ -143,5 +143,4 @@ functions:
 
 |
 
-|
-|
+

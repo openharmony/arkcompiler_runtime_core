@@ -256,8 +256,7 @@ export abstract class Value extends Object {
         } else if (t instanceof TupleType) {
             throw new Error("Not implemented")
         }
-        // NOTE(shumilov-petr): throw `unknown type` exception
-        assert(false)
+        throw new Error("Unknown type")
     }
 
     // -----
@@ -417,6 +416,7 @@ export final class ClassValue extends Value {
         if (!ft.assignableFrom(vt)) {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
+
         if (ft instanceof BooleanType && val instanceof BooleanValue) {
             ValueAPISetFieldByNameBoolean(this.data, name, (val as BooleanValue).getValueData())
         } else if (ft instanceof ByteType && val instanceof ByteValue) {
@@ -433,15 +433,24 @@ export final class ClassValue extends Value {
             ValueAPISetFieldByNameDouble(this.data, name, (val as DoubleValue).getValueData())
         } else if (ft instanceof LongType && val instanceof LongValue) {
             ValueAPISetFieldByNameLong(this.data, name, (val as LongValue).getValueData())
-        } else if (ft instanceof StringType && val instanceof StringValue) {
+        } else if (ft.assignableFrom(StringType.REF) && val instanceof StringValue) {
             ValueAPISetFieldByNameObject(this.data, name, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
             ValueAPISetFieldByNameObject(this.data, name, (val as ArrayValue).getData()!)
-        } else if (ft instanceof ClassType && val instanceof ClassValue) {
-            ValueAPISetFieldByNameObject(this.data, name, (val as ClassValue).getData()!)
+        } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
+            ValueAPISetFieldByNameObject(this.data, name, val.getData()!)
+        } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
+            ValueAPISetFieldByNameObject(this.data, name, (val as LambdaValue).getData()!)
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
+    }
+
+    private isAssignableToObject(v: Value): boolean {
+        return v instanceof ClassValue 
+            || v instanceof LambdaValue 
+            || v instanceof StringValue 
+            || v instanceof ArrayValue
     }
 
     /**
@@ -484,8 +493,10 @@ export final class ClassValue extends Value {
             ValueAPISetFieldObject(this.data, i, (val as StringValue).getData()! as string)
         } else if (ft instanceof ArrayType && val instanceof ArrayValue) {
             ValueAPISetFieldObject(this.data, i, (val as ArrayValue).getData()!)
-        } else if (ft instanceof ClassType && val instanceof ClassValue) {
+        } else if (ft instanceof ClassType && this.isAssignableToObject(val)) {
             ValueAPISetFieldObject(this.data, i, (val as ClassValue).getData()!)
+        } else if (ft instanceof LambdaType && val instanceof LambdaValue) {
+            ValueAPISetFieldObject(this.data, i, val.getData()!)
         } else {
             throw new Error("Cannot assign field of type " + ft + " with value of type " + vt)
         }
@@ -495,13 +506,11 @@ export final class ClassValue extends Value {
         if (depth == 0) {
             return this.typ.getName() + " {...}"
         }
-        // If class has user-overrided `toString`
-        const mnum = this.typ.getMethodsNum()
-        for (let i = 0; i < mnum; i++) {
-            const m = this.typ.getMethod(i)
-            if (m.getName() == OBJECT_TO_STRING_MEMBER_NAME && !m.getType().getReceiverType().equals(ObjectType)) {
-                return this.data.toString()
-            }
+
+        const thisStr = this.data.toString()
+        const objStr = new Object().toString()
+        if (thisStr != objStr) {
+            return thisStr
         }
         const fnum = this.getFieldsNum()
         if (fnum == 0) {

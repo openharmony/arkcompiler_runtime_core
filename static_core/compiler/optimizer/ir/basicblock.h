@@ -68,16 +68,16 @@ public:
 
 public:
     void SetId(uint32_t id);
-    uint32_t GetId() const;
+    PANDA_PUBLIC_API uint32_t GetId() const;
 
-    ArenaVector<BasicBlock *> &GetPredsBlocks();
-    const ArenaVector<BasicBlock *> &GetPredsBlocks() const;
+    PANDA_PUBLIC_API ArenaVector<BasicBlock *> &GetPredsBlocks();
+    PANDA_PUBLIC_API const ArenaVector<BasicBlock *> &GetPredsBlocks() const;
 
-    SuccsVector &GetSuccsBlocks();
-    const SuccsVector &GetSuccsBlocks() const;
+    PANDA_PUBLIC_API SuccsVector &GetSuccsBlocks();
+    PANDA_PUBLIC_API const SuccsVector &GetSuccsBlocks() const;
 
-    BasicBlock *GetSuccessor(size_t index) const;
-    BasicBlock *GetPredecessor(size_t index) const;
+    PANDA_PUBLIC_API BasicBlock *GetSuccessor(size_t index) const;
+    PANDA_PUBLIC_API BasicBlock *GetPredecessor(size_t index) const;
 
     template <bool INVERT = false>
     void SwapTrueFalseSuccessors()
@@ -98,26 +98,26 @@ public:
     void SetHotness(int64_t hotness);
     int64_t GetHotness() const;
 
-    BasicBlock *GetTrueSuccessor() const;
-    BasicBlock *GetFalseSuccessor() const;
+    PANDA_PUBLIC_API BasicBlock *GetTrueSuccessor() const;
+    PANDA_PUBLIC_API BasicBlock *GetFalseSuccessor() const;
 
     // Get index of the given block in predecessor container
-    size_t GetPredBlockIndex(const BasicBlock *block) const;
+    PANDA_PUBLIC_API size_t GetPredBlockIndex(const BasicBlock *block) const;
     // Get index of the given block in successor container
-    size_t GetSuccBlockIndex(const BasicBlock *block) const;
+    PANDA_PUBLIC_API size_t GetSuccBlockIndex(const BasicBlock *block) const;
     // Get basic block by its index in predecessors container
-    BasicBlock *GetPredBlockByIndex(size_t index) const;
+    PANDA_PUBLIC_API BasicBlock *GetPredBlockByIndex(size_t index) const;
 
-    bool IsStartBlock() const;
-    bool IsEndBlock() const;
+    PANDA_PUBLIC_API bool IsStartBlock() const;
+    PANDA_PUBLIC_API bool IsEndBlock() const;
     bool IsPseudoControlFlowBlock() const;
 
-    Graph *GetGraph();
-    const Graph *GetGraph() const;
+    PANDA_PUBLIC_API Graph *GetGraph();
+    PANDA_PUBLIC_API const Graph *GetGraph() const;
     void SetGraph(Graph *graph);
 
-    void SetGuestPc(uint32_t guestPc);
-    uint32_t GetGuestPc() const;
+    PANDA_PUBLIC_API void SetGuestPc(uint32_t guestPc);
+    PANDA_PUBLIC_API uint32_t GetGuestPc() const;
 
     /**
      * Split block after the given instruction. Current block will contain instructions before the splitting line and
@@ -126,21 +126,21 @@ public:
      * @param make_edge whether to make control flow edge from first block to the second one
      * @return return created basic block
      */
-    BasicBlock *SplitBlockAfterInstruction(Inst *inst, bool makeEdge);
+    PANDA_PUBLIC_API BasicBlock *SplitBlockAfterInstruction(Inst *inst, bool makeEdge);
 
     // Add successor in the list
-    void AddSucc(BasicBlock *succ, bool canAddEmptyBlock = false);
-    bool HasSucc(BasicBlock *succ);
+    PANDA_PUBLIC_API void AddSucc(BasicBlock *succ, bool canAddEmptyBlock = false);
+    PANDA_PUBLIC_API bool HasSucc(BasicBlock *succ);
 
     void ReplacePred(BasicBlock *prevPred, BasicBlock *newPred);
-    void ReplaceSucc(const BasicBlock *prevSucc, BasicBlock *newSucc, bool canAddEmptyBlock = false);
+    PANDA_PUBLIC_API void ReplaceSucc(const BasicBlock *prevSucc, BasicBlock *newSucc, bool canAddEmptyBlock = false);
     void ReplaceTrueSuccessor(BasicBlock *newSucc);
     void ReplaceFalseSuccessor(BasicBlock *newSucc);
 
     BasicBlock *InsertNewBlockToSuccEdge(BasicBlock *succ);
     BasicBlock *InsertEmptyBlockBefore();
 
-    void InsertBlockBeforeSucc(BasicBlock *block, BasicBlock *succ);
+    PANDA_PUBLIC_API void InsertBlockBeforeSucc(BasicBlock *block, BasicBlock *succ);
 
     // Remove empty block with one successor
     void RemoveEmptyBlock(bool irrLoop = false);
@@ -158,30 +158,30 @@ public:
     template <bool TO_END>
     void AddInst(Inst *inst);
     // Insert new instruction(NOT PHI) in BasicBlock at the start of instructions
-    void PrependInst(Inst *inst);
+    PANDA_PUBLIC_API void PrependInst(Inst *inst);
     // Insert new instruction(NOT PHI) in BasicBlock at the end of instructions
-    void AppendInst(Inst *inst);
+    PANDA_PUBLIC_API void AppendInst(Inst *inst);
     void AppendInsts(std::initializer_list<Inst *> &&insts);
     // Append range of instructions(NOT PHI) in BasicBlock at the end of instructions
     // It is implied that for instructions within range was already called correctly SetBasicBlock() and
     // range_last should dominate range_first.
     void AppendRangeInst(Inst *rangeFirst, Inst *rangeLast);
     // Insert new PHI instruction in BasicBlock at the end of PHI instructions
-    void AppendPhi(Inst *inst);
+    PANDA_PUBLIC_API void AppendPhi(Inst *inst);
     // Insert instruction after given instruction
-    void InsertAfter(Inst *inst, Inst *after);
+    PANDA_PUBLIC_API void InsertAfter(Inst *inst, Inst *after);
     // Insert instruction before given instruction
-    void InsertBefore(Inst *inst, Inst *before);
+    PANDA_PUBLIC_API void InsertBefore(Inst *inst, Inst *before);
     // Insert range of instructions before given instruction.
     // It is implied that for instructions within range was already called correctly SetBasicBlock() and
     // range_last should dominate range_first.
     void InsertRangeBefore(Inst *rangeFirst, Inst *rangeLast, Inst *before);
     // Remove instruction from instructions chain. All other data keep unmodified.
-    void EraseInst(Inst *inst, [[maybe_unused]] bool willBeMoved = false);
+    PANDA_PUBLIC_API void EraseInst(Inst *inst, [[maybe_unused]] bool willBeMoved = false);
     // Remove instructions from instructions chain, remove its inputs and check that it hasn't users.
-    void RemoveInst(Inst *inst);
+    PANDA_PUBLIC_API void RemoveInst(Inst *inst);
     // Replace old_inst in BasicBlock to new_inst
-    void ReplaceInst(Inst *oldInst, Inst *newInst);
+    PANDA_PUBLIC_API void ReplaceInst(Inst *oldInst, Inst *newInst);
     // Replace inst by deoptimization
     void ReplaceInstByDeoptimize(Inst *inst);
     // Replace inst with overflow check on corresponding inst (e.g. AddOverflowCheck -> Add)
@@ -190,13 +190,13 @@ public:
 
     bool IsEndWithThrowOrDeoptimize() const;
     bool IsEndWithThrow() const;
-    Inst *GetFirstInst() const;
-    Inst *GetLastInst() const;
-    Inst *GetFirstPhi() const;
+    PANDA_PUBLIC_API Inst *GetFirstInst() const;
+    PANDA_PUBLIC_API Inst *GetLastInst() const;
+    PANDA_PUBLIC_API Inst *GetFirstPhi() const;
 
-    void Clear();
-    bool IsEmpty() const;
-    bool HasPhi() const;
+    PANDA_PUBLIC_API void Clear();
+    PANDA_PUBLIC_API bool IsEmpty() const;
+    PANDA_PUBLIC_API bool HasPhi() const;
 
     void SetDominator(BasicBlock *dominator);
     void ClearDominator();
@@ -207,27 +207,27 @@ public:
     void RemoveDominatedBlock(BasicBlock *block);
     void ClearDominatedBlocks();
 
-    BasicBlock *GetDominator() const;
-    const ArenaVector<BasicBlock *> &GetDominatedBlocks() const;
-    bool IsDominate(const BasicBlock *other) const;
+    PANDA_PUBLIC_API BasicBlock *GetDominator() const;
+    PANDA_PUBLIC_API const ArenaVector<BasicBlock *> &GetDominatedBlocks() const;
+    PANDA_PUBLIC_API bool IsDominate(const BasicBlock *other) const;
 
-    void RemovePred(const BasicBlock *pred);
-    void RemovePred(size_t index);
-    void RemoveSucc(BasicBlock *succ);
+    PANDA_PUBLIC_API void RemovePred(const BasicBlock *pred);
+    PANDA_PUBLIC_API void RemovePred(size_t index);
+    PANDA_PUBLIC_API void RemoveSucc(BasicBlock *succ);
 
-    void Dump(std::ostream *out) const;
+    PANDA_PUBLIC_API void Dump(std::ostream *out) const;
 
-    Loop *GetLoop() const;
+    PANDA_PUBLIC_API Loop *GetLoop() const;
     void SetLoop(Loop *loop);
     bool IsLoopValid() const;
-    bool IsLoopHeader() const;
+    PANDA_PUBLIC_API bool IsLoopHeader() const;
     bool IsLoopPostExit() const;
     bool IsTryCatch() const;
 
     void SetNextLoop(Loop *loop);
     Loop *GetNextLoop() const;
-    bool IsLoopPreHeader() const;
-    void InsertBlockBefore(BasicBlock *block);
+    PANDA_PUBLIC_API bool IsLoopPreHeader() const;
+    PANDA_PUBLIC_API void InsertBlockBefore(BasicBlock *block);
 
     template <typename Accessor>
     typename Accessor::ValueType GetField() const
@@ -252,28 +252,28 @@ public:
     void SetMonitorBlock(bool v);
     bool GetMonitorBlock() const;
 
-    void SetCatch(bool v);
-    bool IsCatch() const;
+    PANDA_PUBLIC_API void SetCatch(bool v);
+    PANDA_PUBLIC_API bool IsCatch() const;
 
-    void SetCatchBegin(bool v);
-    bool IsCatchBegin() const;
+    PANDA_PUBLIC_API void SetCatchBegin(bool v);
+    PANDA_PUBLIC_API bool IsCatchBegin() const;
 
-    void SetTry(bool v);
-    bool IsTry() const;
+    PANDA_PUBLIC_API void SetTry(bool v);
+    PANDA_PUBLIC_API bool IsTry() const;
 
-    void SetTryBegin(bool v);
-    bool IsTryBegin() const;
+    PANDA_PUBLIC_API void SetTryBegin(bool v);
+    PANDA_PUBLIC_API bool IsTryBegin() const;
 
-    void SetTryEnd(bool v);
-    bool IsTryEnd() const;
+    PANDA_PUBLIC_API void SetTryEnd(bool v);
+    PANDA_PUBLIC_API bool IsTryEnd() const;
 
     void SetOsrEntry(bool v);
     bool IsOsrEntry() const;
 
     void CopyTryCatchProps(BasicBlock *block);
 
-    uint32_t GetTryId() const;
-    void SetTryId(uint32_t tryId);
+    PANDA_PUBLIC_API uint32_t GetTryId() const;
+    PANDA_PUBLIC_API void SetTryId(uint32_t tryId);
 
     template <class Callback>
     void EnumerateCatchHandlers(const Callback &callback) const
@@ -299,7 +299,7 @@ public:
     BasicBlock *Clone(Graph *targetGraph) const;
 
     void SetNeedsJump(bool v);
-    bool NeedsJump() const;
+    PANDA_PUBLIC_API bool NeedsJump() const;
     bool IsIfBlock() const;
 
     Inst *GetFistThrowableInst() const;
@@ -308,21 +308,21 @@ public:
     void InvalidateLoopIfIrreducible();
 
     // Member functions to iterate instructions. `Safe` means that you can delete instructions when iterating
-    PhiInstIter PhiInsts() const;
-    InstIter Insts() const;
-    AllInstIter AllInsts() const;
+    PANDA_PUBLIC_API PhiInstIter PhiInsts() const;
+    PANDA_PUBLIC_API InstIter Insts() const;
+    PANDA_PUBLIC_API AllInstIter AllInsts() const;
 
     InstReverseIter InstsReverse() const;
 
-    PhiInstSafeIter PhiInstsSafe() const;
+    PANDA_PUBLIC_API PhiInstSafeIter PhiInstsSafe() const;
     InstSafeIter InstsSafe() const;
-    AllInstSafeIter AllInstsSafe() const;
+    PANDA_PUBLIC_API AllInstSafeIter AllInstsSafe() const;
 
     PhiInstSafeReverseIter PhiInstsSafeReverse() const;
     InstSafeReverseIter InstsSafeReverse() const;
     AllInstSafeReverseIter AllInstsSafeReverse() const;
 
-    uint32_t CountInsts() const;
+    PANDA_PUBLIC_API uint32_t CountInsts() const;
 
 private:
     using MonitorEntryBlock = BitField<bool, 0>;           //  block with MonitorEntry

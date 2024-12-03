@@ -112,6 +112,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierInst)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);
 }
@@ -132,6 +133,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBB)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);
 }
@@ -152,6 +154,7 @@ TEST_F(LibAbcKitGraphVerifierTest, LibAbcKitTestGraphVerifierBinInst)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     g_implM->functionSetGraph(method, graph);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_TODO);
+    g_impl->destroyGraph(graph);
 
     g_impl->closeFile(file);
 }

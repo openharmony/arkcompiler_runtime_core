@@ -493,7 +493,7 @@ export final class Char extends Object implements Comparable<Char>, JSONable<Cha
      *
      * @returns char - char value decoded from JSON
      */
-    static createFromJSONValue(json: JSONValue): Char {
+    public createFromJSONValue(json: JSONValue): Char {
         if (json instanceof JSONString) {
             let str = (json as JSONString).value
             if (str.getLength() == 1) {

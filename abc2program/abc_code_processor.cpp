@@ -60,6 +60,14 @@ void AbcCodeProcessor::FillInsWithoutLabels()
     const auto bc_ins_last = bc_ins.JumpTo(ins_size_);
     uint32_t inst_pc = 0;
     uint32_t inst_idx = 0;
+    uint32_t inst_cnt = 0;
+    while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
+        inst_cnt++;
+        bc_ins = bc_ins.GetNext();
+    }
+    inst_cnt++;  // AbcCodeProcessor::AddDummyEndIns() may add an instruction.
+    function_.ins.reserve(inst_cnt);
+    bc_ins = BytecodeInstruction(ins_arr);
     while (bc_ins.GetAddress() != bc_ins_last.GetAddress()) {
         pandasm::Ins pa_ins = code_converter_->BytecodeInstructionToPandasmInstruction(bc_ins, method_id_);
         /*

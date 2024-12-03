@@ -41,7 +41,7 @@
 
 namespace libabckit {
 
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace panda;
 
@@ -75,7 +75,6 @@ void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
     auto res = GraphWrapper::BuildCodeDynamic(graph, func->name);
     auto status = std::get<1>(res);
     if (status != AbckitStatus::ABCKIT_STATUS_NO_ERROR) {
-        GraphWrapper::DestroyGraphDynamic(graph);
         statuses::SetLastError(status);
         return;
     }
@@ -84,8 +83,6 @@ void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
     LIBABCKIT_LOG_FUNC;
     LIBABCKIT_LOG(DEBUG) << "============================================ AFTER CODEGEN: " << func->name << '\n';
     LIBABCKIT_LOG_DUMP((reinterpret_cast<pandasm::Function *>(fw))->DebugDump(), DEBUG);
-
-    GraphWrapper::DestroyGraphDynamic(graph);
 
     auto *newFunc = reinterpret_cast<pandasm::Function *>(fw);
     func->ins = newFunc->ins;
@@ -111,12 +108,13 @@ void FunctionSetGraphDynamic(AbckitCoreFunction *function, AbckitGraph *graph)
     delete newFunc;
 }
 
-AbckitJsModule *FileAddExternalModuleDynamic(AbckitFile *file, const struct AbckitJsExternalModuleCreateParams *params)
+AbckitJsModule *FileAddExternalJsModule(AbckitFile *file, const struct AbckitJsExternalModuleCreateParams *params)
 {
     auto m = std::make_unique<AbckitCoreModule>();
     m->impl = std::make_unique<AbckitJsModule>();
     m->file = file;
     m->target = ABCKIT_TARGET_JS;
+    m->GetJsImpl()->core = m.get();
 
     auto *prog = file->GetDynamicProgram();
 
@@ -134,18 +132,19 @@ AbckitJsModule *FileAddExternalModuleDynamic(AbckitFile *file, const struct Abck
     m->isExternal = true;
     auto modulePayloadDyn = AbckitModulePayloadDyn();
     modulePayloadDyn.absPaths = false;
-    m->GetJSImpl()->impl = modulePayloadDyn;
+    m->GetJsImpl()->impl = modulePayloadDyn;
     file->externalModules.insert({params->name, std::move(m)});
-    return file->externalModules[params->name]->GetJSImpl();
+    return file->externalModules[params->name]->GetJsImpl();
 }
 
-AbckitArktsModule *FileAddExternalModuleDynamic(AbckitFile *file,
-                                                const struct AbckitArktsExternalModuleCreateParams *params)
+AbckitArktsModule *FileAddExternalArkTsV1Module(AbckitFile *file,
+                                                const struct AbckitArktsV1ExternalModuleCreateParams *params)
 {
     auto m = std::make_unique<AbckitCoreModule>();
     m->impl = std::make_unique<AbckitArktsModule>();
     m->file = file;
     m->target = ABCKIT_TARGET_ARK_TS_V1;
+    m->GetArkTSImpl()->core = m.get();
 
     auto *prog = file->GetDynamicProgram();
 
@@ -347,12 +346,12 @@ AbckitJsImportDescriptor *ModuleAddImportFromDynamicModuleDynamic(
     auto payload = AbckitCoreImportDescriptorPayload();
     payload.impl = payloadDyn;
     id->impl = std::make_unique<AbckitJsImportDescriptor>();
-    id->GetJSImpl()->payload = payload;
-    id->GetJSImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
-    id->GetJSImpl()->core = id.get();
+    id->GetJsImpl()->payload = payload;
+    id->GetJsImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
+    id->GetJsImpl()->core = id.get();
     importing->id.push_back(std::move(id));
 
-    return importing->id[importing->id.size() - 1]->GetJSImpl();
+    return importing->id[importing->id.size() - 1]->GetJsImpl();
 }
 
 template <class T>
@@ -547,11 +546,11 @@ AbckitJsExportDescriptor *DynamicModuleAddExportDynamic(AbckitCoreModule *export
     auto payload = AbckitCoreExportDescriptorPayload();
     payload.impl = payloadDyn;
     ed->impl = std::make_unique<AbckitJsExportDescriptor>();
-    ed->GetJSImpl()->payload = payload;
-    ed->GetJSImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
-    ed->GetJSImpl()->core = ed.get();
+    ed->GetJsImpl()->payload = payload;
+    ed->GetJsImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
+    ed->GetJsImpl()->core = ed.get();
     exporting->ed.push_back(std::move(ed));
-    return exporting->ed[exporting->ed.size() - 1]->GetJSImpl();
+    return exporting->ed[exporting->ed.size() - 1]->GetJsImpl();
 }
 
 void ModuleRemoveExportDynamic(AbckitCoreModule *m, AbckitArktsExportDescriptor *i)
@@ -566,7 +565,6 @@ void ModuleRemoveExportDynamic(AbckitCoreModule *m, AbckitArktsExportDescriptor 
     }
 
     auto idxOffset = 0;
-    ;
     auto gap = 0;
     auto mPayload = GetDynModulePayload(m);
     switch (i->payload.GetDynamicPayload().kind) {
@@ -604,7 +602,6 @@ void ModuleRemoveExportDynamic(AbckitCoreModule *m, AbckitJsExportDescriptor *i)
     }
 
     auto idxOffset = 0U;
-    ;
     auto gap = 0U;
     auto mPayload = GetDynModulePayload(m);
     switch (i->payload.GetDynamicPayload().kind) {
@@ -722,8 +719,7 @@ AbckitLiteralArray *CreateLiteralArrayDynamic(AbckitFile *file, AbckitLiteral **
     // NOLINTNEXTLINE(cert-msc51-cpp)
     uint32_t arrayOffset = 0;
     while (prog->literalarray_table.find(std::to_string(arrayOffset)) != prog->literalarray_table.end()) {
-        LIBABCKIT_LOG(DEBUG) << "generating new arrayOffset\n";
-        arrayOffset = std::stoi(prog->literalarray_table.rbegin()->first) + 1;
+        arrayOffset++;
     }
     auto arrayName = std::to_string(arrayOffset);
 
@@ -813,7 +809,7 @@ AbckitArktsAnnotationInterface *ModuleAddAnnotationInterfaceDynamic(
     prog->record_table.emplace(name, std::move(progRecord));
     pandasm::Record &record = prog->record_table.find(name)->second;
     auto ai = std::make_unique<AbckitCoreAnnotationInterface>();
-    ai->m = m;
+    ai->owningModule = m;
     ai->impl = std::make_unique<AbckitArktsAnnotationInterface>();
     ai->GetArkTSImpl()->impl = &record;
     ai->GetArkTSImpl()->core = ai.get();
@@ -911,19 +907,19 @@ AbckitArktsAnnotationElement *AnnotationAddAnnotationElementDynamic(AbckitCoreAn
 
     auto annoElem = std::make_unique<AbckitCoreAnnotationElement>();
     annoElem->ann = anno;
-    annoElem->name = CreateStringDynamic(anno->ai->m->file, progAnnoElem.GetName().data());
+    annoElem->name = CreateStringDynamic(anno->ai->owningModule->file, progAnnoElem.GetName().data());
     annoElem->value = std::move(abcValue);
 
     if (std::holds_alternative<AbckitCoreFunction *>(anno->owner)) {
         auto *func = std::get<AbckitCoreFunction *>(anno->owner);
         auto progOwner = func->GetArkTSImpl()->GetDynamicImpl();
         progOwner->metadata->AddAnnotationElementByName(name, std::move(progAnnoElem));
-        annoElem->value->file = func->m->file;
+        annoElem->value->file = func->owningModule->file;
     } else if (std::holds_alternative<AbckitCoreClass *>(anno->owner)) {
         auto *klass = std::get<AbckitCoreClass *>(anno->owner);
         auto progOwner = klass->GetArkTSImpl()->impl.GetDynamicClass();
         progOwner->metadata->AddAnnotationElementByName(name, std::move(progAnnoElem));
-        annoElem->value->file = klass->m->file;
+        annoElem->value->file = klass->owningModule->file;
     }
 
     annoElem->impl = std::make_unique<AbckitArktsAnnotationElement>();
@@ -1006,7 +1002,7 @@ AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddFieldDynamic(
 
     auto field = std::make_unique<AbckitCoreAnnotationInterfaceField>();
     field->ai = ai;
-    field->name = CreateStringDynamic(ai->m->file, name);
+    field->name = CreateStringDynamic(ai->owningModule->file, name);
     field->type = type;
     field->value = value;
 
@@ -1016,7 +1012,7 @@ AbckitArktsAnnotationInterfaceField *AnnotationInterfaceAddFieldDynamic(
 
     auto record = ai->GetArkTSImpl()->GetDynamicImpl();
 
-    auto prog = ai->m->file->GetDynamicProgram();
+    auto prog = ai->owningModule->file->GetDynamicProgram();
     auto progField = pandasm::Field(prog->lang);
 
     progField.name = name;

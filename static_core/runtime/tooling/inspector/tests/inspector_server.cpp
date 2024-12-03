@@ -13,18 +13,21 @@
  * limitations under the License.
  */
 
+#include "inspector_server.h"
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "common.h"
-#include "connection/server.h"
-#include "types/location.h"
-#include "inspector_server.h"
-#include "utils/json_builder.h"
-#include "json_object_matcher.h"
-#include "runtime.h"
 #include "assembly-emitter.h"
 #include "assembly-parser.h"
+#include "runtime.h"
+#include "types/location.h"
+#include "utils/json_builder.h"
+
+#include "connection/server.h"
+
+#include "common.h"
+#include "json_object_matcher.h"
 
 // NOLINTBEGIN
 
@@ -235,8 +238,8 @@ static JsonObject CreatePossibleBreakpointsRequest(ScriptId startScriptId, size_
                                                    size_t end, bool restrictToFunction)
 {
     JsonObjectBuilder params;
-    params.AddProperty("start", Location(startScriptId, start).ToJson());
-    params.AddProperty("end", Location(endScriptId, end).ToJson());
+    params.AddProperty("start", Location(startScriptId, start));
+    params.AddProperty("end", Location(endScriptId, end));
     params.AddProperty("restrictToFunction", restrictToFunction);
     return JsonObject(std::move(params).Build());
 }
@@ -382,7 +385,8 @@ TEST_F(ServerTest, OnCallDebuggerStepOver)
 
 std::optional<BreakpointId> handlerForSetBreak([[maybe_unused]] PtThread thread,
                                                [[maybe_unused]] const std::function<bool(std::string_view)> &comp,
-                                               size_t line, [[maybe_unused]] std::set<std::string_view> &sources)
+                                               size_t line, [[maybe_unused]] std::set<std::string_view> &sources,
+                                               [[maybe_unused]] const std::string *condition)
 {
     sources.insert("source");
     return BreakpointId(line);
@@ -391,7 +395,8 @@ std::optional<BreakpointId> handlerForSetBreak([[maybe_unused]] PtThread thread,
 std::optional<BreakpointId> handlerForSetBreakEmpty([[maybe_unused]] PtThread thread,
                                                     [[maybe_unused]] const std::function<bool(std::string_view)> &comp,
                                                     [[maybe_unused]] size_t line,
-                                                    [[maybe_unused]] std::set<std::string_view> &sources)
+                                                    [[maybe_unused]] std::set<std::string_view> &sources,
+                                                    [[maybe_unused]] const std::string *condition)
 {
     sources.insert("source");
     return {};
@@ -408,7 +413,7 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpoint)
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObjectBuilder params;
-        params.AddProperty("location", Location(scriptId, start).ToJson());
+        params.AddProperty("location", Location(scriptId, start));
         handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()),
                     JsonProperties(JsonProperty<JsonObject::StringT> {"breakpointId", std::to_string(start)},
@@ -433,7 +438,7 @@ TEST_F(ServerTest, OnCallDebuggerSetBreakpoint)
     EXPECT_CALL(server, OnCallMock("Debugger.setBreakpoint", testing::_)).WillOnce([&](testing::Unused, auto handler) {
         JsonObjectBuilder res;
         JsonObjectBuilder params;
-        params.AddProperty("location", Location(scriptId, start).ToJson());
+        params.AddProperty("location", Location(scriptId, start));
         handler(g_sessionId, res, JsonObject(std::move(params).Build()));
         ASSERT_THAT(JsonObject(std::move(res).Build()), JsonProperties());
     });

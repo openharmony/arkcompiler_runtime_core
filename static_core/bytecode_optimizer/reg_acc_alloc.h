@@ -22,7 +22,7 @@
 
 namespace ark::bytecodeopt {
 
-class RegAccAlloc : public compiler::Optimization {
+class PANDA_PUBLIC_API RegAccAlloc : public compiler::Optimization {
     using Optimization::Optimization;
 
 public:

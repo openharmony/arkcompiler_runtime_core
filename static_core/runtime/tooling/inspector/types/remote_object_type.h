@@ -16,16 +16,16 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_TYPE_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_TYPE_H
 
-#include "tooling/inspector/types/json_build_helpers.h"
-#include "tooling/inspector/types/numeric_id.h"
 #include "utils/json_builder.h"
+#include "tooling/inspector/types/numeric_id.h"
+#include "tooling/inspector/json_serialization/serializable.h"
 
 #include <variant>
 #include <optional>
 
 namespace ark::tooling::inspector {
 
-class RemoteObjectType final {
+class RemoteObjectType final : public JsonSerializable {
 public:
     using NumberT = std::variant<int32_t, double>;
 
@@ -68,17 +68,13 @@ public:
         return RemoteObjectType("accessor");
     }
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const
+    void Serialize(JsonObjectBuilder &builder) const override
     {
-        std::function<void(JsonObjectBuilder &)> result = [](auto &) {};
-
-        AddProperty(result, "type", type_);
+        builder.AddProperty("type", type_);
 
         if (subtype_ != nullptr) {
-            AddProperty(result, "subtype", subtype_);
+            builder.AddProperty("subtype", subtype_);
         }
-
-        return result;
     }
 
 private:

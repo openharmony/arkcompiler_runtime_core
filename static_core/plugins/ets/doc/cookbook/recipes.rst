@@ -29,11 +29,10 @@ Recipes
 
 |CB_ERROR|
 
-|LANG| does not support Objects with name properties that are numbers, or
-computed values. String literals and constant enum string members are allowed
-as property names.
+|LANG| does not support objects with property names that are numbers, or
+strings, or computed values.
 
-Use classes to access data by property names.
+Use classes to access data by property names that are identifiers.
 Use arrays to access data by numeric indices.
 
 |CB_BAD|
@@ -43,8 +42,7 @@ Use arrays to access data by numeric indices.
 
     var x = {"name": 1, 2: 3}
 
-    console.log(x["name"])
-    console.log(x[2])
+    console.log(x["name"], x[2])
 
 |CB_OK|
 ~~~~~~~
@@ -52,10 +50,11 @@ Use arrays to access data by numeric indices.
 .. code-block:: typescript
 
     class X {
-        public name: number = 0
+        name: number
+        two: number
     }
-    let x:X = {name: 1}
-    console.log(x.name)
+    let x:X = {name: 1, two: 2}
+    console.log(x.name, x.two)
 
     let y = [1, 2, 3]
     console.log(y[2])
@@ -115,7 +114,7 @@ and cannot be changed at runtime.
 .. code-block:: typescript
 
     class SomeClass {
-        public someProperty : string = ""
+        someProperty: string = ""
     }
     let o = new SomeClass()
 
@@ -166,6 +165,7 @@ Use the keyword ``private`` instead.
         private foo: number = 42
     }
 
+
 .. _R004:
 
 |CB_R| Use unique names for types and namespaces.
@@ -198,6 +198,8 @@ and distinct from other names, e.g., variable names and function names.
     let X: string
     type T = number[] // X is not allowed here to avoid name collisions
 
+
+
 .. _R005:
 
 |CB_R| Use ``let`` instead of ``var``
@@ -226,7 +228,7 @@ and distinct from other names, e.g., variable names and function names.
     }
 
     console.log(f(true))  // 10
-    console.log(f(false)) // undefined
+    console.log(f(false)) // "undefined"
 
     let upper_let = 0
     {
@@ -242,8 +244,8 @@ and distinct from other names, e.g., variable names and function names.
 
 .. code-block:: typescript
 
-    function f(shouldInitialize: boolean): Object {
-        let x: Object = new Object()
+    function f(shouldInitialize: boolean): number|undefined {
+        let x: number|undefined = undefined
         if (shouldInitialize) {
             x = 10
         }
@@ -251,7 +253,7 @@ and distinct from other names, e.g., variable names and function names.
     }
 
     console.log(f(true))  // 10
-    console.log(f(false)) // {}
+    console.log(f(false)) // "undefined"
 
     let upper_let = 0
     let scoped_var = 0
@@ -281,8 +283,8 @@ types explicitly.
 If your |LANG| code has to interoperate with the standard |TS| or |JS| code,
 and no type information is available (or if type information is impossible
 to obtain), then you can use a special ``ESObject`` type to work with dynamic
-objects. Note that such objects must be avoided at all cost as they reduce
-type checking (i.e., the code is less stable and more error-prone) and have
+objects. Note that you must avoid such objects at all cost as they reduce
+type checking (i.e., the code is less stable and more error-prone) and cause
 severe runtime overhead. The usage of ``ESObject`` still produces a warning
 message.
 
@@ -291,17 +293,17 @@ message.
 
 .. code-block:: typescript
 
-    let value1 : any
+    let value1: any
     value1 = true
     value1 = 42
 
-    let value2 : unknown
+    let value2: unknown
     value2 = true
     value2 = 42
 
     // Let's assume that we have no information for external_function
     // because it is defined in JavaScript code:
-    let something : any = external_function()
+    let something: any = external_function()
     console.log("someProperty of something:", something.someProperty)
 
 |CB_OK|
@@ -316,7 +318,7 @@ message.
 
     // Let's assume that we have no information for external_function
     // because it is defined in JavaScript code:
-    let something : ESObject = external_function()
+    let something: ESObject = external_function()
     console.log("someProperty of something:", something.someProperty)
 
 |CB_SEE|
@@ -349,7 +351,7 @@ message.
         (someArg: number): string // call signature
     }
 
-    function doSomething(fn: DescribableFunction): void {
+    function doSomething(fn: DescribableFunction) {
         console.log(fn.description + " returned " + fn(6))
     }
 
@@ -360,7 +362,7 @@ message.
 
     class DescribableFunction {
         description: string
-        public invoke(someArg: number): string {
+        invoke(someArg: number): string {
             return someArg.toString()
         }
         constructor() {
@@ -368,7 +370,7 @@ message.
         }
     }
 
-    function doSomething(fn: DescribableFunction): void {
+    function doSomething(fn: DescribableFunction) {
         console.log(fn.description + " returned " + fn.invoke(6))
     }
 
@@ -416,7 +418,7 @@ instead.
 .. code-block:: typescript
 
     class SomeObject {
-        public f: string
+        f: string
         constructor (s: string) {
             this.f = s
         }
@@ -445,7 +447,7 @@ instead.
 |CB_ERROR|
 
 |LANG| does not allow having several static blocks for class initialization.
-Combine multiple static block statements into one static block.
+Combine multiple static block statements into a single static block.
 
 |CB_BAD|
 ~~~~~~~~
@@ -504,7 +506,7 @@ Combine multiple static block statements into one static block.
         [index: number]: string
     }
 
-    function getStringArray() : StringArray {
+    function getStringArray(): StringArray {
         return ["a", "b", "c"]
     }
 
@@ -517,7 +519,7 @@ Combine multiple static block statements into one static block.
 .. code-block:: typescript
 
     class X {
-        public f: string[] = []
+        f: string[] = []
     }
 
     let myArray: X = new X()
@@ -586,7 +588,7 @@ as a workaround.
 
 |CB_ERROR|
 
-|LANG| allows type notation using the ``this`` keyword only for a return type
+|LANG| allows type notation using the keyword ``this``  only for a return type
 of an instance method of a class or struct.
 Such methods can only return ``this`` explicitly (``return this``).
 
@@ -603,11 +605,11 @@ Such methods can only return ``this`` explicitly (``return this``).
         }
 
         foo(): this {
-            return this.bar();
+            return this.bar()
         }
 
         bar(): this {
-            return this;
+            return this
         }
     }
 
@@ -624,11 +626,11 @@ Such methods can only return ``this`` explicitly (``return this``).
         }
 
         foo(): this {
-            return this;
+            return this
         }
 
         bar(): this {
-            return this;
+            return this
         }
     }
 
@@ -646,8 +648,8 @@ Such methods can only return ``this`` explicitly (``return this``).
 |CB_ERROR|
 
 |LANG| does not support conditional type aliases. Introduce a new type with
-constraints explicitly, or rewrite logic using ``Object``. The keyword
-``infer`` is not supported.
+constraints explicitly, or rewrite logic using ``Object``. |LANG| does not
+support the keyword ``infer``.
 
 |CB_BAD|
 ~~~~~~~~
@@ -687,7 +689,8 @@ constraints explicitly, or rewrite logic using ``Object``. The keyword
 |CB_ERROR|
 
 |LANG| does not support declaring class fields in the ``constructor``.
-Declare class fields inside the ``class`` declaration instead.
+Declare class fields inside the ``class`` declaration instead and assign them
+explicitly in the constructor body.
 
 |CB_BAD|
 ~~~~~~~~
@@ -699,11 +702,7 @@ Declare class fields inside the ``class`` declaration instead.
             protected ssn: string,
             private firstName: string,
             private lastName: string
-        ) {
-            this.ssn = ssn
-            this.firstName = firstName
-            this.lastName = lastName
-        }
+        ) {}
 
         getFullName(): string {
             return this.firstName + " " + this.lastName
@@ -790,7 +789,7 @@ Declare class fields inside the ``class`` declaration instead.
 
 |CB_ERROR|
 
-|LANG| does not support indexed access types. Use the type name instead.
+|LANG| does not support indexed access types. Use type name instead.
 
 |CB_BAD|
 ~~~~~~~~
@@ -823,14 +822,15 @@ Declare class fields inside the ``class`` declaration instead.
 |CB_ERROR|
 
 |LANG| does not support dynamic field declaration and access. Declare all
-object fields immediately in the class. Access only those class fields
-that are either declared in the class, or accessible via inheritance. Accessing
+object fields right in a class. Access only those class fields
+that are either declared in a class, or accessible by inheritance. Accessing
 any other fields is prohibited, and causes compile-time errors.
 
-To access a field, use ``obj.field`` syntax. Indexed access (``obj["field"]``)
-is not supported, except all typed arrays found in the standard library (e.g.,
-``Int32Array``) that support access to their elements through
-``container[index]`` syntax, tuples, ``Record`` objects, and enums.
+To access a field, use ``obj.field`` syntax. |LANG| does not support indexed
+access (``obj["field"]``), except indexed access to all typed arrays found in
+the standard library (e.g., ``Int32Array``) that support access to their
+elements through ``container[index]`` syntax, tuples, ``Record`` objects,
+and enums.
 
 |CB_BAD|
 ~~~~~~~~
@@ -904,10 +904,8 @@ is not supported, except all typed arrays found in the standard library (e.g.,
 
 |CB_ERROR|
 
-Currently, |LANG| does not support structural typing, i.e., the compiler
-cannot compare public APIs of two types and decide whether such types are
-identical. Use other mechanisms (inheritance, interfaces, or type aliases)
-instead.
+Currently, |LANG| does not support structural typing and it is recommened to
+use other mechanisms (inheritance, interfaces, or type aliases) instead.
 
 |CB_BAD|
 ~~~~~~~~
@@ -918,7 +916,7 @@ instead.
         f(): string
     }
 
-    interface I2 { // I2 is structurally equivalent to I1
+    interface I2 { // I2 is structurally compatible to I1
         f(): string
     }
 
@@ -927,7 +925,7 @@ instead.
         s: string = ""
     }
 
-    class Y { // Y is structurally equivalent to X
+    class Y { // Y is structurally compatible to X
         n: number = 0
         s: string = ""
     }
@@ -945,8 +943,7 @@ instead.
         console.log(x.n, x.s)
     }
 
-    // X and Y are equivalent because their public API is equivalent.
-    // Thus the second call is allowed:
+    // As Y is compatible with X the second call is allowed:
     foo(new X())
     foo(new Y())
 
@@ -1008,7 +1005,7 @@ instead.
     console.log("Assign Y to X")
     x = y // ok, both are of the same type
 
-    function foo(c: Common): void {
+    function foo(c: Common) {
         console.log(c.n, c.s)
     }
 
@@ -1030,9 +1027,9 @@ instead.
 |CB_ERROR|
 
 |LANG| allows omitting generic type parameters if it is possible to infer
-a concrete type from the parameters passed to the function. A compile-time
+a specific type from the parameters passed to the function. A compile-time
 error occurs otherwise. In particular, inference of generic type parameters
-based only on function return types is prohibited.
+based on function return types only is prohibited.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1113,11 +1110,11 @@ string literals instead.
 
 |LANG| supports the usage of object literals if the compiler can infer
 what classes or interfaces such literals correspond to.
-A compile-time error occurs otherwise. Using literals to initialize classes
-and interfaces is not supported specifically for the initialization of the
-following:
+A compile-time error occurs otherwise. |LANG| does not support using literals
+to initialize classes and interfaces--and particularly so for the initialization
+of the following:
 
-* Anything that has ``any``, ``Object``, or ``object`` type;
+* Anything with type ``any``, ``Object``, or ``object``;
 * Classes or interfaces with methods;
 * Classes that declare a ``constructor`` with parameters;
 * Classes with ``readonly`` fields.
@@ -1162,7 +1159,7 @@ from these types, and literals of these types.
             console.log("Hello")
         }
     }
-    let o7: C4 = {n: 42, s: "foo", f : () => {}}
+    let o7: C4 = {n: 42, s: "foo", f: () => {}}
 
     class Point {
         x: number = 0
@@ -1326,7 +1323,7 @@ a non-inferable type (e.g., untyped object literal).
 
 .. code-block:: typescript
 
-    let a = [{n: 1, s: "1"}, {n: 2, s : "2"}]
+    let a = [{n: 1, s: "1"}, {n: 2, s: "2"}]
 
 |CB_OK|
 ~~~~~~~
@@ -1338,8 +1335,8 @@ a non-inferable type (e.g., untyped object literal).
         s: string = ""
     }
 
-    let a1 = [{n: 1, s: "1"} as C, {n: 2, s : "2"} as C] // a1 is of type "C[]"
-    let a2: C[] = [{n: 1, s: "1"}, {n: 2, s : "2"}]      // ditto
+    let a1 = [{n: 1, s: "1"} as C, {n: 2, s: "2"} as C] // a1 is of type "C[]"
+    let a2: C[] = [{n: 1, s: "1"}, {n: 2, s: "2"}]      // ditto
 
 |CB_SEE|
 ~~~~~~~~
@@ -1445,8 +1442,8 @@ explicitly.
 
 |CB_ERROR|
 
-|LANG| does not allow specifying a class in implements clause. Only interfaces
-can be specified.
+|LANG| does not allow specifying a class in the ``implements`` clause. Only
+interfaces can be specified.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1487,9 +1484,9 @@ can be specified.
 
 |CB_ERROR|
 
-|LANG| does not support re-assigning a method for objects. In the statically
-types languages, the layout of objects is fixed, and all instances of the same
-object must share the same code of each method.
+|LANG| does not support re-assigning a method for objects. In statically-typed
+languages, the layout of objects is fixed, and all instances of the same
+object must share identical code of each method.
 
 To add specific behavior for certain objects, create separate wrapper functions,
 or use inheritance.
@@ -1562,9 +1559,9 @@ or use inheritance.
 
 |LANG| supports the keyword ``as`` as the only syntax for type casts.
 Incorrect cast causes a compile-time error, or runtime ``ClassCastException``.
-``<type>`` syntax for type casts is not supported.
+|LANG| does not support the ``<type>`` syntax for type casts.
 
-Use the expression ``new ...`` instead of ``as`` to cast a **primitive** type
+Use the expression ``new ...`` instead of ``as`` to cast a *primitive* type
 (e.g., a ``number`` or a ``boolean``) to a reference type.
 
 |CB_BAD|
@@ -1587,14 +1584,14 @@ Use the expression ``new ...`` instead of ``as`` to cast a **primitive** type
     // No report is provided during compilation
     // nor during runtime if cast is wrong:
     let c3 = createShape() as Square
-    console.log(c3.y) // undefined
+    console.log(c3.y) // "undefined"
 
     // Important corner case for casting primitives to the boxed counterparts:
     // The left operand is not properly boxed here at runtime
     // because "as" has no runtime effect in TypeScript
     let e1 = (5.0 as Number) instanceof Number // false
 
-    // Number object is created and instanceof works as expected:
+    // Number object is created, and instanceof acts as expected:
     let e2 = (new Number(5.0)) instanceof Number // true
 
 |CB_OK|
@@ -1615,7 +1612,7 @@ Use the expression ``new ...`` instead of ``as`` to cast a **primitive** type
     // ClassCastException during runtime is thrown:
     let c3 = createShape() as Square
 
-    // Number object is created, and instanceof works as expected:
+    // Number object is created, and instanceof acts as expected:
     let e2 = (new Number(5.0)) instanceof Number // true
 
 .. _R054:
@@ -1647,9 +1644,9 @@ Do not use JSX since no alternative is provided to rewrite it.
 |CB_ERROR|
 
 |LANG| allows unary operators to work on numeric types only. A compile-time
-error occurs if these operators are applied to a non-numeric type. Unlike in
-|TS|, implicit casting of strings in this context is not supported, and must
-be done explicitly.
+error occurs if these operators are applied to a non-numeric type. Unlike |TS|,
+|LANG| does not support implicit casting of strings. Use explicit casting for
+strings instead  in |LANG|.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1766,8 +1763,8 @@ changed at runtime. Thus, deleting a property makes no sense.
 
 |CB_ERROR|
 
-|LANG| supports ``typeof`` operator only in the expression context. Using
-``typeof`` to specify type notations is not supported.
+|LANG| supports ``typeof`` operator only in an *expression* context. |LANG| does
+not support using ``typeof`` to specify type notations.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1820,9 +1817,8 @@ In |TS|, the left-hand side of an ``instanceof`` expression must be of type
 ``any``, an object type, or a type parameter. Otherwise, the result is
 ``false``.
 
-In |LANG|, the left-hand side expression can be of any reference type.
-Otherwise, a compile-time error occurs. In addition, the left operand cannot
-be a type in |LANG|.
+In |LANG|, the left-hand side expression can be of any reference type, and the
+left operand cannot be a type. Otherwise, a compile-time error occurs.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1919,9 +1915,9 @@ to check whether certain class members exist.
 
 |CB_ERROR|
 
-|LANG| supports destructuring assignment for arrays and tuples. Object
-destructuring and spread operator are not supported. Use other idioms
-(e.g., a temporary variable where applicable) as replacement.
+|LANG| supports destructuring assignment for arrays and tuples. |LANG| does not
+support Object destructuring and the spread operator. Use other idioms instead,
+e.g., a temporary variable where applicable.
 
 |CB_BAD|
 ~~~~~~~~
@@ -1984,8 +1980,8 @@ destructuring and spread operator are not supported. Use other idioms
 |LANG| supports the comma operator '``,``' only in ``for`` loops. It is
 useless otherwise as it makes the execution order harder to understand.
 
-Note that this rule is applied to the "comma operator" only. Comma is allowed
-in other cases where it is used to delimit variable declarations or parameters
+Note that this rule is applied to the *comma operator* only.
+You may use comma in other cases to delimit variable declarations or parameters
 of a function call.
 
 |CB_BAD|
@@ -2030,9 +2026,10 @@ of a function call.
 |CB_ERROR|
 
 |LANG| supports destructuring variable declarations for arrays and tuples.
-Object destructuring and spread operator are not supported. This is a dynamic
-feature relying on structural compatibility. In addition, names in destructuring
-declarations must be equal to properties within destructured classes.
+|LANG| does not support Object destructuring and the spread operator. This is
+a dynamic feature that relies on structural compatibility. In addition, names
+in destructuring declarations must be equal to properties within destructured
+classes.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2089,7 +2086,7 @@ declarations must be equal to properties within destructured classes.
 |CB_ERROR|
 
 In |TS|, catch clause variable type annotation must be ``any`` or ``unknown``
-if specified. As |LANG| does not support these types, omit type annotations.
+if specified. Omit type annotations as |LANG| does not support these types.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2135,8 +2132,8 @@ if specified. As |LANG| does not support these types, omit type annotations.
 
 |LANG| does not support the iteration over object contents by the
 ``for .. in`` loop. Iteration over object properties at runtime is considered
-redundant as object layout cannot be changed at runtime after being known
-at compile time. For arrays, iterate with the regular ``for`` loop.
+redundant as object layout is known at compile time, and cannot be changed at
+runtime after. You can iterate arrays with the regular ``for`` loop.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2247,8 +2244,8 @@ classes to achieve that same behavior.
 |CB_ERROR|
 
 |LANG| supports throwing only objects of the class ``Error`` or any
-derived class. Throwing an arbitrary type (i.e., a ``number`` or ``string``)
-is prohibited.
+derived class. |LANG| forbids throwing an arbitrary type (i.e., a ``number``
+or ``string``).
 
 |CB_BAD|
 ~~~~~~~~
@@ -2317,7 +2314,7 @@ explicitly.
 .. code-block:: typescript
 
     // Explicit return type is required:
-    function f(x: number) : number {
+    function f(x: number): number {
         if (x <= 0) {
             return x
         }
@@ -2351,8 +2348,9 @@ explicitly.
 |CB_ERROR|
 
 |LANG| supports unpacking arrays and tuples passed as function parameters.
-Unpacking properties from objects is not supported. |LANG| requires parameters
-to be passed directly to the function, and local names to be assigned manually.
+|LANG| does not support unpacking properties from objects.
+Parameters must be passed to the function directly, and local names must be
+assigned manually.
 
 |CB_BAD|
 ~~~~~~~~
@@ -2420,17 +2418,17 @@ to be passed directly to the function, and local names to be assigned manually.
 
 .. code-block:: typescript
 
-    function addNum(a: number, b: number): void {
+    function addNum(a: number, b: number) {
 
         // nested function:
         function logToConsole(message: String): void {
             console.log(message)
         }
 
-        let result = a + b
+        let sum = a + b
 
         // Invoking the nested function:
-        logToConsole("result is " + result)
+        logToConsole("result is " + sum)
     }
 
 |CB_OK|
@@ -2438,15 +2436,15 @@ to be passed directly to the function, and local names to be assigned manually.
 
 .. code-block:: typescript
 
-    function addNum(a: number, b: number): void {
+    function addNum(a: number, b: number) {
         // Use lambda instead of a nested function:
-        let logToConsole: (message: string) => void = (message: string): void => {
+        const logToConsole: (message: string) => void = (message: string): void => {
             console.log(message)
         }
 
-        let result = a + b
+        let sum = a + b
 
-        logToConsole("result is " + result)
+        logToConsole("result is " + sum)
     }
 
 .. _R093:
@@ -2462,7 +2460,7 @@ to be passed directly to the function, and local names to be assigned manually.
 
 |CB_ERROR|
 
-|LANG| does not support the usage of ``this`` inside stand-alone functions and
+|LANG| does not support using ``this`` inside stand-alone functions and
 static methods. Use ``this`` in instance methods only.
 
 |CB_BAD|
@@ -2492,17 +2490,15 @@ static methods. Use ``this`` in instance methods only.
 
     class A {
         count: number = 1
-        m(i: number): void {
+        m(i: number) {
             this.count = i
         }
     }
 
-    function main(): void {
-        let a = new A()
-        console.log(a.count)  // prints "1"
-        a.m(2)
-        console.log(a.count)  // prints "2"
-    }
+    let a = new A()
+    console.log(a.count)  // prints "1"
+    a.m(2)
+    console.log(a.count)  // prints "2"
 
 |CB_SEE|
 ~~~~~~~~
@@ -2545,7 +2541,7 @@ Use the ``async`` / ``await`` mechanism for multitasking.
 
 .. code-block:: typescript
 
-    async function complexNumberProcessing(n : number) : Promise<number> {
+    async function complexNumberProcessing(n: number): Promise<number> {
         // Some complex logic for processing the number here
         return n
     }
@@ -2626,7 +2622,7 @@ appropriate type before use.
         return arg instanceof Foo
     }
 
-    function doStuff(arg: Object): void {
+    function doStuff(arg: Object) {
         if (isFoo(arg)) {
             let fooArg = arg as Foo
             console.log(fooArg.foo)     // OK
@@ -2638,10 +2634,8 @@ appropriate type before use.
         }
     }
 
-    function main(): void {
-        doStuff(new Foo())
-        doStuff(new Bar())
-    }
+    doStuff(new Foo())
+    doStuff(new Bar())
 
 .. _R099:
 
@@ -2656,22 +2650,22 @@ appropriate type before use.
 
 |CB_ERROR|
 
-The only supported scenario for the spread operator is to spread an array or
-class derived from array into the rest parameter or array literal.
-Otherwise, manually "unpack" data from arrays and objects, where necessary.
-All typed arrays from the standard library (e.g., ``Int32Array``)
-are also supported.
+|LANG| only supports the scenario in which the spread operator spreads an array
+(or class derived from an array) into a rest parameter or an array literal.
+Otherwise, *unpack* data from arrays and objects manually, where necessary.
+|LANG| also supports all typed arrays from the standard library (e.g.,
+``Int32Array``).
 
 |CB_BAD|
 ~~~~~~~~
 
 .. code-block:: typescript
 
-    function foo(x : number, y : number, z : number) {
+    function foo(x: number, y: number, z: number) {
         console.log(x, y, z)
     }
 
-    let args : [number, number, number] = [0, 1, 2]
+    let args: [number, number, number] = [0, 1, 2]
     foo(...args)
 
     let list1 = [1, 2]
@@ -2693,14 +2687,14 @@ are also supported.
     }
     console.log(sum_numbers(1, 2, 3))
 
-    function log_numbers(x : number, y : number, z : number) {
+    function log_numbers(x: number, y: number, z: number) {
         console.log(x, y, z)
     }
     let numbers: number[] = [1, 2, 3]
     log_numbers(numbers[0], numbers[1], numbers[2])
 
-    let list1 : number[] = [1, 2]
-    let list2 : number[] = [list1[0], list1[1], 3, 4]
+    let list1: number[] = [1, 2]
+    let list2: number[] = [list1[0], list1[1], 3, 4]
 
     class Point2D {
         x: number = 0; y: number = 0
@@ -2718,10 +2712,10 @@ are also supported.
     let p3d = new Point3D({x: 1, y: 2} as Point2D, 3)
     console.log(p3d.x, p3d.y, p3d.z)
 
-    class DerivedFromArray extends Uint16Array {};
+    class DerivedFromArray extends Uint16Array {}
 
-    let arr1 = [1, 2, 3];
-    let arr2 = new Uint16Array([4, 5, 6]);
+    let arr1 = [1, 2, 3]
+    let arr2 = new Uint16Array([4, 5, 6])
     let arr3 = new DerivedFromArray([7, 8, 9])
     let arr4 = [...arr1, 10, ...arr2, 11, ...arr3]
 
@@ -2778,7 +2772,7 @@ the same parameter lists but different return types).
 .. code-block:: typescript
 
     class MoveStatus {
-        public speed : number
+        speed: number
         constructor() {
             this.speed = 0
         }
@@ -2788,7 +2782,7 @@ the same parameter lists but different return types).
     }
 
     class ShakeStatus {
-        public frequency : number
+        frequency: number
         constructor() {
             this.frequency = 0
         }
@@ -2798,8 +2792,8 @@ the same parameter lists but different return types).
     }
 
     class MoveAndShakeStatus {
-        public speed : number
-        public frequency : number
+        speed: number
+        frequency: number
         constructor() {
             this.speed = 0
             this.frequency = 0
@@ -2807,23 +2801,23 @@ the same parameter lists but different return types).
     }
 
     class C implements Mover, Shaker {
-        private move_status : MoveStatus
-        private shake_status : ShakeStatus
+        private move_status: MoveStatus
+        private shake_status: ShakeStatus
 
         constructor() {
             this.move_status = new MoveStatus()
             this.shake_status = new ShakeStatus()
         }
 
-        public getMoveStatus() : MoveStatus {
+        getMoveStatus(): MoveStatus {
             return this.move_status
         }
 
-        public getShakeStatus() : ShakeStatus {
+        getShakeStatus(): ShakeStatus {
             return this.shake_status
         }
 
-        public getStatus(): MoveAndShakeStatus {
+        getStatus(): MoveAndShakeStatus {
             return {
                 speed: this.move_status.speed,
                 frequency: this.shake_status.frequency
@@ -2934,7 +2928,7 @@ extend interfaces.
 
 |CB_ERROR|
 
-|LANG| does not support the usage of the constructor function type.
+|LANG| does not support using the constructor function type.
 Use lambdas instead.
 
 |CB_BAD|
@@ -3177,7 +3171,7 @@ a statement.
 
 |CB_ERROR|
 
-|LANG| does not support importing via ``require`` and ``import`` assignments.
+|LANG| does not support importing by the ``require`` and ``import`` assignments.
 Use regular ``import`` instead.
 
 |CB_BAD|
@@ -3276,7 +3270,7 @@ own mechanism to interoperate with |JS|.
 .. code-block:: typescript
 
     declare module "someModule" {
-        export function normalize(s : string) : string;
+        export function normalize(s: string): string
     }
 
 |CB_OK|
@@ -3356,10 +3350,10 @@ Use ordinary export syntax instead.
 
 |CB_ERROR|
 
-|LANG| does not support universal module definitions (UMD) because the language
-has no concept of *script* (as opposed to *module*). Besides, import is not
-a runtime but a compile-time feature in |LANG|. Use ordinary syntax for
-``export`` and ``import`` instead.
+|LANG| does not support *universal module definitions* (UMD) because the
+concept of *script* (as opposed to *module*) is not provided in the language.
+Besides, import is a compile-time rather than a runtime feature in |LANG|.
+Use ordinary syntax for ``export`` and ``import`` instead.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3405,8 +3399,8 @@ a runtime but a compile-time feature in |LANG|. Use ordinary syntax for
 
 |CB_ERROR|
 
-|LANG| does not support ``new.target`` because the language has no concept
-of runtime prototype inheritance.
+|LANG| does not support ``new.target`` because the concept of runtime prototype
+inheritance is not provided in the language.
 This feature is considered not applicable to static typing.
 
 |CB_BAD|
@@ -3481,7 +3475,7 @@ Use declaration with initialization instead.
 
 .. code-block:: typescript
 
-    function initialize() : number {
+    function initialize(): number {
         return 10
     }
 
@@ -3502,10 +3496,10 @@ Use declaration with initialization instead.
 
 |CB_ERROR|
 
-Prototype assignment is not supported because |LANG| has no concept of
-runtime prototype inheritance. This feature is considered not applicable
-to static typing. Use the classes and / or interfaces mechanism instead
-to statically *combine* methods to data.
+|LANG| does not support prototype assignment because the concept of runtime
+prototype inheritance is not provided in the language. This feature is
+considered not applicable to static typing. Use the classes and / or interfaces
+mechanism instead to statically *combine* methods to data.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3560,7 +3554,7 @@ to statically *combine* methods to data.
 |CB_WARNING|
 
 |LANG| does not support both global scope and ``globalThis`` because untyped
-objects with dynamically changed layouts are not supported.
+objects with dynamically changed layouts are unsupported.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3579,7 +3573,7 @@ objects with dynamically changed layouts are not supported.
 .. code-block:: typescript
 
     // file1
-    export let abc : number = 100
+    export let abc: number = 100
 
     // file2
     import * as M from "file1"
@@ -3625,7 +3619,7 @@ For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
 
     type QuantumPerson = Omit<Person, "location">
 
-    let persons : Record<string, Person> = {
+    let persons: Record<string, Person> = {
         "Alice": {
             name: "Alice",
             age: 32,
@@ -3657,9 +3651,9 @@ For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
     }
 
     type OptionalPerson = Person | undefined
-    let persons : Record<string, OptionalPerson> = {
+    let persons: Record<string, OptionalPerson> = {
     // Or:
-    // let persons : Record<string, Person | undefined> = {
+    // let persons: Record<string, Person | undefined> = {
         "Alice": {
             name: "Alice",
             age: 32,
@@ -3690,7 +3684,7 @@ For type ``Record<K, V>``, an indexing expression *rec[index]* is of type
 |CB_ERROR|
 
 |LANG| does not support declaring properties on functions because objects
-with dynamically changing layouts are not supported. Function objects follow
+with dynamically changing layouts are unsupported. Function objects follow
 this rule, and their layout cannot be changed at runtime.
 
 |CB_BAD|
@@ -3709,11 +3703,11 @@ this rule, and their layout cannot be changed at runtime.
         // ...
     }
 
-    function readFileSync(path : string) : number[] {
+    function readFileSync(path: string): number[] {
         return []
     }
 
-    function decodeImageSync(contents : number[]) {
+    function decodeImageSync(contents: number[]) {
         // ...
     }
 
@@ -3733,14 +3727,14 @@ this rule, and their layout cannot be changed at runtime.
 
     async function readImage(
         path: string, callback: (err: Error, image: MyImage) => void
-    ) : Promise<MyImage>
+    ): Promise<MyImage>
     {
         // In real world, the implementation is more complex,
         // involving real network / DB logic, etc.
         return await new MyImage()
     }
 
-    function readImageSync(path: string) : MyImage {
+    function readImageSync(path: string): MyImage {
         return new MyImage()
     }
 
@@ -3763,11 +3757,11 @@ this rule, and their layout cannot be changed at runtime.
 |CB_WARNING|
 
 |LANG| does not allow using standard library function ``Function.bind``.
-The standard library requires this API to explicitly set ``this`` parameter
+The standard library requires this API to explicitly set the parameter ``this``
 for the called function.
 The semantics of ``this`` in |LANG| is restricted to the conventional OOP
-style, and the usage of ``this`` in stand-alone functions is prohibited.
-This function is thus excessive.
+style. Using ``this`` in stand-alone functions is prohibited. This function
+is thus excessive.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3796,12 +3790,12 @@ This function is thus excessive.
 .. code-block:: typescript
 
     class Person {
-        firstName : string
+        firstName: string
 
-        constructor(firstName : string) {
+        constructor(firstName: string) {
             this.firstName = firstName
         }
-        fullName() : string {
+        fullName(): string {
             return this.firstName
         }
     }
@@ -3830,9 +3824,9 @@ This function is thus excessive.
 
 |CB_ERROR|
 
-|LANG| does not support ``as const`` assertions as literal types are not
-supported altogether, unlike in standard |TS| where ``as const`` annotates
-literals with corresponding literal types.
+|LANG| does not support ``as const`` assertions because literal types are
+unsupported altogether (unlike in standard |TS| where ``as const`` annotates
+literals with corresponding literal types).
 
 |CB_BAD|
 ~~~~~~~~
@@ -3854,17 +3848,17 @@ literals with corresponding literal types.
 .. code-block:: typescript
 
     // Type 'string':
-    let x : string = "hello"
+    let x: string = "hello"
 
     // Type 'number[]':
-    let y : number[] = [10, 20]
+    let y: number[] = [10, 20]
 
     class Label {
-        text : string = ""
+        text: string = ""
     }
 
     // Type 'Label':
-    let z : Label = {
+    let z: Label = {
         text: "hello"
     }
 
@@ -3881,10 +3875,10 @@ literals with corresponding literal types.
 
 |CB_ERROR|
 
-|LANG| does not support import assertions because import is not a runtime but
-a compile-time feature in the language, and asserting correctness of imported
-APIs at runtime makes no sense in a statically typed language. Use ordinary
-``import`` syntax instead.
+|LANG| does not support import assertions because import is a compile-time
+rather than a runtime feature in the language, and asserting correctness of
+imported APIs at runtime makes no sense in a statically typed language.
+Use the ordinary ``import`` syntax instead.
 
 |CB_BAD|
 ~~~~~~~~
@@ -3922,8 +3916,8 @@ APIs at runtime makes no sense in a statically typed language. Use ordinary
 
 |LANG| does not allow using some APIs from the |TS|/|JS| standard libraries.
 Most of the restricted APIs are related to handling objects dynamically, which
-is not compatible with static typing. The usage of the following APIs is
-prohibited:
+is not compatible with static typing. |LANG| forbids the usage of the following
+APIs:
 
 Properties and functions of the global object: ``eval``;
 
@@ -3948,7 +3942,7 @@ Properties and functions of the global object: ``eval``;
 ``handler.preventExtensions()``, ``handler.set()``,
 ``handler.setPrototypeOf()``.
 
-The following APIs are partially supported:
+|LANG| supports the following APIs partially:
 
 ``Object.assign(target: Record<string, Object | null | undefined>``,
 ``...source: Object[]): Record<string, Object | null | undefined>``.
@@ -3976,8 +3970,8 @@ The following APIs are partially supported:
 
 |CB_ERROR|
 
-Type checker is not optional in |LANG|. The code must be typed explicitly and
-correctly to be compiled and to run.
+Type checker is not optional in |LANG|: the code must be typed explicitly and
+correctly to compile and run.
 When porting from the standard |TS|, turn on the following flags:
 
 -  ``noImplicitReturns``,
@@ -4045,10 +4039,10 @@ When porting from the standard |TS|, turn on the following flags:
 
 |CB_ERROR|
 
-Type checker in |LANG| is not optional, the code must be typed explicitly and
-correctly to be compiled and to run. 'Suppressing' type checker in-place
-with special comments is not allowed. In particular, ``@ts-ignore`` and
-``@ts-nocheck`` annotations are not supported.
+Type checker in |LANG| is not optional: the code must be typed explicitly and
+correctly to compile and run. |LANG| does not allow *suppressing* type checker
+in place with special comments. |LANG| does not support ``@ts-ignore`` and
+``@ts-nocheck`` annotations in particular.
 
 |CB_BAD|
 ~~~~~~~~
@@ -4093,8 +4087,8 @@ with special comments is not allowed. In particular, ``@ts-ignore`` and
 |CB_ERROR|
 
 Currently, the codebase implemented in the standard |TS| language must not
-depend on |LANG| through importing the |LANG| codebase. Imports in the reverse
-direction are supported.
+depend on |LANG| through importing the |LANG| codebase. |LANG| does not support
+imports in the reverse direction.
 
 |CB_BAD|
 ~~~~~~~~
@@ -4265,25 +4259,25 @@ to interop calls and assigned to other variables of type ``ESObject``.
 .. code-block:: typescript
 
     // lib.d.ts
-    declare function foo(): any;
-    declare function bar(a: any): number;
+    declare function foo(): any
+    declare function bar(a: any): number
 
     // main.sts
-    let e0: ESObject = foo(); // CTE - ``ESObject`` typed variable can only be local
+    let e0: ESObject = foo() // CTE - ``ESObject`` typed variable can only be local
 
     function f() {
-        let e1 = foo(); // CTE - type of e1 is `any`
-        let e2: ESObject = 1; // CTE - can't initialize ESObject with not dynamic values
-        let e3: ESObject = {}; // CTE - can't initialize ESObject with not dynamic values
-        let e4: ESObject = []; // CTE - can't initialize ESObject with not dynamic values
-        let e5: ESObject = ""; // CTE - can't initialize ESObject with not dynamic values
+        let e1 = foo()        // CTE - type of e1 is `any`
+        let e2: ESObject = 1  // CTE - can't initialize ESObject with not dynamic values
+        let e3: ESObject = {} // CTE - can't initialize ESObject with not dynamic values
+        let e4: ESObject = [] // CTE - can't initialize ESObject with not dynamic values
+        let e5: ESObject = "" // CTE - can't initialize ESObject with not dynamic values
         e5['prop'] // CTE - can't access dynamic properties of ESObject
-        e5[1] // CTE - can't access dynamic properties of ESObject
-        e5.prop // CTE - can't access dynamic properties of ESObject
+        e5[1]      // CTE - can't access dynamic properties of ESObject
+        e5.prop    // CTE - can't access dynamic properties of ESObject
 
-        let e6: ESObject = foo(); // OK - explicitly annotated as ESObject
-        let e7 = e6; // OK - initialize ESObject with ESObject
-        bar(e7) // OK - ESObject is passed to interop call
+        let e6: ESObject = foo() // OK - explicitly annotated as ESObject
+        let e7 = e6              // OK - initialize ESObject with ESObject
+        bar(e7)                  // OK - ESObject is passed to interop call
     }
 
 |CB_SEE|
@@ -4311,9 +4305,9 @@ to interop calls and assigned to other variables of type ``ESObject``.
 
 |LANG| does not allow using standard library functions ``Function.apply``
 and ``Function.call``. These APIs are needed in the standard library to
-explicitly set ``this`` parameter for a called function.
-The semantics of ``this`` in |LANG| is restricted to the conventional OOP
-style, and the usage of ``this`` in stand-alone functions is prohibited.
+explicitly set the parameter ``this`` for the called function.
+The semantics of ``this`` in |LANG| is restricted to the conventional OOP style.
+Using ``this`` in stand-alone functions is prohibited.
 These functions are thus excessive.
 
 |CB_BAD|
@@ -4342,12 +4336,12 @@ These functions are thus excessive.
 .. code-block:: typescript
 
     class Person {
-        firstName : string
+        firstName: string
 
-        constructor(firstName : string) {
+        constructor(firstName: string) {
             this.firstName = firstName
         }
-        fullName() : string {
+        fullName(): string {
             return this.firstName
         }
     }
@@ -4531,7 +4525,7 @@ categories:
 
     @Sendable
     class A {
-        a!: number;
+        a!: number
     }
 
 |CB_COMPLIANT_CODE|
@@ -4541,7 +4535,7 @@ categories:
 
     @Sendable
     class A {
-        a: number = 1;
+        a: number = 1
     }
 
 |CB_SEE|
@@ -4592,20 +4586,20 @@ Only ``Sendable data`` types are allowed as type arguments of generic
     // a.sts
     @Sendable
     export class A {
-        a: number = 1;
+        a: number = 1
     }
 
     @Sendable
     export class B<T> {}
 
     // b.sts
-    import { A, B } from "a";
+    import { A, B } from "a"
 
     @Sendable
     class C<T> {
         a: T | undefined = undefined
-        b: B<T> = new B<T>();
-        c: B<number | undefined> = new B<number | undefined>();
+        b: B<T> = new B<T>()
+        c: B<number | undefined> = new B<number | undefined>()
     }
 
     let c1 = new B<A>()
@@ -4636,15 +4630,15 @@ Only ``Sendable data`` types are allowed as type arguments of generic
 
 |LANG| does not support sharing closures at runtime. Therefore, ``Sendable``
 classes are not allowed to capture local variable, or use a function or class
-from the same module, as otherwise a closure is created. Only imported
-variables, classes, and functions can be used inside a ``Sendable`` class body.
+from the same module, as otherwise a closure is created. Imported variables,
+classes, and functions only can be used inside a ``Sendable`` class body.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: typescript
 
-    let foo: number = 1;
+    let foo: number = 1
 
     function bar() {
         console.log("hello")
@@ -4655,12 +4649,12 @@ variables, classes, and functions can be used inside a ``Sendable`` class body.
 
     @Sendable
     class B {
-        a: A = new A();     // Invalid, 'A' is not imported
-        b: number = foo;    // Invalid, 'foo' is not imported
+        a: A = new A()     // Invalid, 'A' is not imported
+        b: number = foo    // Invalid, 'foo' is not imported
 
         m(): number {
-            bar();          // Invalid, 'bar' is not imported
-            return foo;     // Invalid, 'foo' is not imported
+            bar()          // Invalid, 'bar' is not imported
+            return foo     // Invalid, 'foo' is not imported
         }
     }
 
@@ -4670,7 +4664,7 @@ variables, classes, and functions can be used inside a ``Sendable`` class body.
 .. code-block:: typescript
 
     // a.sts
-    export let foo: number = 1;
+    export let foo: number = 1
 
     export function bar() {
         console.log("hello")
@@ -4684,12 +4678,12 @@ variables, classes, and functions can be used inside a ``Sendable`` class body.
 
     @Sendable
     class B {
-        a: A = new A();
-        b: number = foo;
+        a: A = new A()
+        b: number = foo
 
         m(): number {
-            bar();
-            return foo;
+            bar()
+            return foo
         }
     }
 
@@ -4791,7 +4785,7 @@ objects of type ``Sendable``.
         a: number
 
         constructor(a: number) {
-            this.a = a;
+            this.a = a
         }
     }
 
@@ -4818,8 +4812,8 @@ objects of type ``Sendable``.
 
 **Note: This rule describes the restrictions of an ArkTS-specific feature**
 
-|LANG| does not allow declaring properties in ``Sendable`` classes by using
-computed values.
+|LANG| does not allow using computed values to declare properties in
+``Sendable`` classes.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -4966,20 +4960,20 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
     'use shared'
 
     export enum E { A, B } // Error, regular enum is not sendable
-    export class C {} // Error, class C is not sendable
-    export let v1: C; // Error, v1 has a non-sendable type
+    export class C {}      // Error, class C is not sendable
+    export let v1: C       // Error, v1 has a non-sendable type
 
-    type T1 = C;
-    export { T1 }; // Error, type T1 is aliasing the non-sendable type
-    let v2: T1;
-    export { v2 }; // Error, v2 has a non-sendable type
+    type T1 = C
+    export { T1 } // Error, type T1 is aliasing the non-sendable type
+    let v2: T1
+    export { v2 } // Error, v2 has a non-sendable type
 
-    export { D } from 'b'; // Error, re-exporting non-sendable class
-    export { v3 } from 'b'; // Error, re-exporting variable with non-sendable type
+    export { D } from 'b'  // Error, re-exporting non-sendable class
+    export { v3 } from 'b' // Error, re-exporting variable with non-sendable type
 
     // b.sts
     export class D {}
-    export let v3: D;
+    export let v3: D
 
 |CB_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~
@@ -4994,19 +4988,19 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
     @Sendable
     export class C {}
 
-    export let v1: C;
+    export let v1: C
 
-    type T1 = C;
-    let v2: T1;
-    export { T1, v2 };
+    type T1 = C
+    let v2: T1
+    export { T1, v2 }
 
-    export { D, v3, v4 } from 'b';
+    export { D, v3, v4 } from 'b'
 
     // b.sts
     @Sendable
     export class D {}
-    export let v3: D;
-    export let v4: number;
+    export let v3: D
+    export let v4: number
 
 |CB_SEE|
 ~~~~~~~~
@@ -5029,8 +5023,8 @@ Only ``Sendable`` entities can be exported in shared modules in |LANG|.
 
 **Note: This rule describes the restrictions of an ArkTS-specific feature**
 
-|LANG| does not allow using wildcard exports in shared modules. All exported
-entities must be explicitly specified.
+|LANG| does not allow using wildcard exports in shared modules. Specify
+all exported entities explicitly.
 
 |CB_NON_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -5040,11 +5034,11 @@ entities must be explicitly specified.
     // a.sts
     @Sendable
     export class C {}
-    export let a: number;
+    export let a: number
 
     // b.sts
     'use shared'
-    export * from 'a'; // Error, wildcard export in a shared module
+    export * from 'a' // Error, wildcard export in a shared module
 
 |CB_COMPLIANT_CODE|
 ~~~~~~~~~~~~~~~~~~~
@@ -5054,11 +5048,11 @@ entities must be explicitly specified.
     // a.sts
     @Sendable
     export class C {}
-    export let a: number;
+    export let a: number
 
     // b.sts
     'use shared'
-    export { C, a } from 'a';
+    export { C, a } from 'a'
 
 |CB_SEE|
 ~~~~~~~~
@@ -5104,8 +5098,8 @@ consists of an identifier and an expression.
         a: string = ""
         b: number = 0
     }
-    const a = "Alice";
-    const b = 42;
+    const a = "Alice"
+    const b = 42
 
     let c: C = {
         a,
@@ -5121,8 +5115,8 @@ consists of an identifier and an expression.
         a: string = ""
         b: number = 0
     }
-    const a = "Alice";
-    const b = 42;
+    const a = "Alice"
+    const b = 42
 
     let c: C = {
         a: a,
@@ -5152,11 +5146,11 @@ in interface implementation.
 .. code-block:: typescript
 
     class X {
-        throw?() {};
+        throw?() {}
     }
 
     interface Y {
-        throw?(): void;
+        throw?(): void
     }
 
 |CB_OK|
@@ -5165,9 +5159,9 @@ in interface implementation.
 .. code-block:: typescript
 
     class X {
-        throw() {};
+        throw() {}
     }
 
     interface Y {
-        throw(): void;
+        throw(): void
     }

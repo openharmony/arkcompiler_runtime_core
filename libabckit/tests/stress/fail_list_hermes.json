@@ -1,10 +1,4 @@
 {
-  "/tmp/abckit_hermes/test/BCGen/HBC/es6/tagged-template-long.js": "RegAllocGraphColoring failed!",
   "/tmp/abckit_hermes/test/BCGen/HBC/many_args.js": "137",
-  "/tmp/abckit_hermes/test/BCGen/HBC/spill.js": "RegAllocGraphColoring failed!",
-  "/tmp/abckit_hermes/test/BCGen/HBC/spill_for_in.js": "RegAllocGraphColoring failed!",
-  "/tmp/abckit_hermes/test/hermes/generator.js": "RegEncoder failed!",
-  "/tmp/abckit_hermes/test/hermes/many_args.js": "137",
-  "/tmp/abckit_hermes/test/hermes/regress-resume-generator-changes-op1.js": "RegAllocGraphColoring failed!",
-  "/tmp/abckit_hermes/test/hermes/tagged-template-long.js": "RegAllocGraphColoring failed!"
+  "/tmp/abckit_hermes/test/hermes/many_args.js": "137"
 }

@@ -83,7 +83,7 @@ class LseVisitor;
  * candidate is a store, we do nothing.  If among aliased accesses only loads,
  * we simply replace MUST_ALIASed loads with the corresponding candidate.
  */
-class Lse : public Optimization {
+class PANDA_PUBLIC_API Lse : public Optimization {
     using Optimization::Optimization;
 
 public:

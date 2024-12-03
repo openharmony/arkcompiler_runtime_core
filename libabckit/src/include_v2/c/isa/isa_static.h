@@ -25,9 +25,9 @@
 #include <cstdint>
 #endif
 
-#include "libabckit/include/c/metadata_core.h"
-#include "libabckit/include/c/ir_core.h"
-#include "libabckit/include/c/abckit.h"
+#include "../../../../include/c/metadata_core.h"
+#include "../../../../include/c/ir_core.h"
+#include "../../../../include/c/abckit.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -240,19 +240,6 @@ struct AbckitIsaApiStatic {
      */
     AbckitInst *(*iCreateIf)(AbckitGraph *graph /* in */, AbckitInst *input0 /* in */, AbckitInst *input1 /* in */,
                              enum AbckitIsaApiStaticConditionCode cc /* in */);
-
-    /**
-     * @brief iCreateCatchPhi.
-     * @return AbckitInst *.
-     * @param [ in ] AbckitGraph *graph .
-     * @param [ in ]  AbckitBasicBlock *catchBegin .
-     * @param [ in ] size_t argCount .
-     * @param  ... .
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitGraph *graph  is NULL.
-     * @note Set `ABCKIT_STATUS_BAD_ARGUMENT` error if AbckitBasicBlock *catchBegin  is NULL.
-     */
-    AbckitInst *(*iCreateCatchPhi)(AbckitGraph *graph /* in */, AbckitBasicBlock *catchBegin /* in */,
-                                   size_t argCount /* in */, ... /* catchPhi inputs */);
 
     /**
      * @brief iCreateNeg.

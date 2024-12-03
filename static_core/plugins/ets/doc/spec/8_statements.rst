@@ -144,8 +144,7 @@ Local Declarations
 ******************
 
 .. meta:
-    frontend_status: Partly
-    todo: implement local enum and type alias declaration
+    frontend_status: Done
 
 Local declarations define new mutable or immutable variables or types within
 the enclosing context.

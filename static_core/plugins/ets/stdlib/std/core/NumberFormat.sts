@@ -15,6 +15,7 @@
 
 package std.core;
 
+// NOTE(aleksander-sotov) Move all code below into the namespace (#20417)
 export class NumberFormat {
 
     /**
@@ -32,7 +33,7 @@ export class NumberFormat {
     /**
      * Formats a number according to the locale and formatting options of this Intl.NumberFormat object.
      *
-     * @param value a number to format.
+     * @param value A number to format.
      *
      * @returns string representing the given number formatted according to the locale and formatting options of this Intl.NumberFormat object.
      */
@@ -49,13 +50,52 @@ export class NumberFormat {
      */
     public format(value: number | bigint): string {
         if (value instanceof BigInt) {
-            return NumberFormat.formatDecimal(this.locale, value.toString());
+            return NumberFormat.formatDecStr(this.locale, value.toString());
         }
-        return this.format(value);
+        return NumberFormat.formatDouble(this.locale, value);
+    }
+
+    /**
+     * Formats a range of numbers according to the locale and formatting options of this Intl.NumberFormat object.
+     *
+     * @param start Start range to format a number or BigInt
+     *
+     * @param end End range to format a number or BigInt
+     *
+     * @throws TypeError if start or end is NaN
+     *
+     * @returns A string representing the given range of numbers formatted according to the locale and formatting options of this Intl.NumberFormat object.
+     */
+    public formatRange(start: number | bigint, end: number | bigint): string {
+        let isStartBigInt: boolean = false;
+        if (start instanceof BigInt) {
+            isStartBigInt = true;
+        } else if (isNaN(start as number)) {
+            throw new TypeError("Invalid start: NaN");
+        }
+        let isEndBigInt: boolean = false;
+        if (end instanceof BigInt) {
+            isEndBigInt = true;
+        } else if (isNaN(end as number)) {
+            throw new TypeError("Invalid end: NaN");
+        }
+
+        if (!isStartBigInt && !isEndBigInt) {
+            return NumberFormat.formatRangeDoubleDouble(this.locale, start as double, end as double);
+        } else if (!isStartBigInt && isEndBigInt) {
+            return NumberFormat.formatRangeDoubleDecStr(this.locale, start as double, (end as BigInt).toString());
+        } else if (isStartBigInt && !isEndBigInt) {
+            return NumberFormat.formatRangeDecStrDouble(this.locale, (start as BigInt).toString(), end as double);
+        }
+        return NumberFormat.formatRangeDecStrDecStr(this.locale, (start as BigInt).toString(), (end as BigInt).toString());
     }
 
     private static native formatDouble(locale: string, value: double): string;
-    private static native formatDecimal(locale: string, value: string): string;
+    private static native formatDecStr(locale: string, value: string): string;
+    private static native formatRangeDoubleDouble(locale: string, start: number, end: number): string;
+    private static native formatRangeDoubleDecStr(locale: string, start: number, end: string): string;
+    private static native formatRangeDecStrDouble(locale: string, start: string, end: number): string;
+    private static native formatRangeDecStrDecStr(locale: string, start: string, end: string): string;
 
     private locale: String;
 }

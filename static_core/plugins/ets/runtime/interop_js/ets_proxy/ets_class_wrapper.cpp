@@ -495,6 +495,7 @@ std::unique_ptr<EtsClassWrapper> EtsClassWrapper::Create(InteropCtx *ctx, EtsCla
 {
     auto env = ctx->GetJSEnv();
 
+    // CC-OFFNXT(G.RES.09) private constructor
     // NOLINTNEXTLINE(readability-identifier-naming)
     auto _this = std::unique_ptr<EtsClassWrapper>(new EtsClassWrapper(etsClass));
     if (!_this->SetupHierarchy(ctx, jsBuiltinName)) {

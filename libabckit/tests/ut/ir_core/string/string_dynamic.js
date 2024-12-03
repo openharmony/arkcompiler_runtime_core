@@ -12,18 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP
 
 function foo() {
     return 'string';
 }
 
 print(foo());
-
-// After AOP
-//
-// function foo() {
-//     return 'STRING'
-// }
-//
-// print(foo())

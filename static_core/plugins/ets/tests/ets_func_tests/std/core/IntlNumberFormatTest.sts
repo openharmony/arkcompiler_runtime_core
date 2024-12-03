@@ -13,19 +13,20 @@
  * limitations under the License.
  */
 
-const success : number = 0;
-const fail    : number = 1;
+const success: int = 0;
+const fail: int = 1;
 
 function main(): int {
-    assert languageCode.length == countryCode.length: "Error! Size of languageCode should be the same as countryCode";
+    assert languageCodes.length == countryCodes.length: "Error! Size of languageCodes should be the same as countryCodes";
 
-    let failures: number = 0;
-    failures += check(NumberFormatFormatDouble(), "Intl NumberFormat.format with double");
-    failures += check(NumberFormatFormatBigInt(), "Intl NumberFormat.format with BigInt");
-    return check(failures, "All tests run") as int;
+    let failures: int = 0;
+    failures += check(FormatNumber(), "Intl NumberFormat.format +-numbers and -Inf");
+    failures += check(FormatNumberUnion(), "Intl NumberFormat.format +-numbers and -Inf. Called union-type arg");
+    failures += check(FormatBigIntUnion(), "Intl NumberFormat.format +-BigInt. Called union-type arg");
+    return failures;
 }
 
-function check(result: number, message: string): number {
+function check(result: number, message: string): int {
     if (result == 0) {
         return success;
     }
@@ -33,220 +34,272 @@ function check(result: number, message: string): number {
     return fail;
 }
 
-const languageCode: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru", "fa"];
-const countryCode: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU", "IR"];
+const languageCodes: string[] = [ "en", "fr", "ca", "el", "no", "it", "zh", "ja", "de", "ru", "fa"];
+const countryCodes: string[] = [ "US", "FR", "ES", "GR", "NO",  "",   "CN", "JP", "GE", "RU", "IR"];
+const numberValues: Number[] = [-1234.5, 1234.5, -Infinity];
+const bigIntValues = Array.of<BigInt>(-123456789000123456789000n, 123456789000123456789000n);
+const EN: int = 0;
+const FR: int = 1;
+const ES: int = 2;
+const GR: int = 3;
+const NO: int = 4;
+const IT: int = 5;
+const CH: int = 6;
+const JP: int = 7;
+const GE: int = 8;
+const RU: int = 9;
+const IR: int = 10;
 
-function checkFormatDouble(expectedByCountry: Array<Map<number, Array<int>>>, values: number[]): number {
-    for (let i = 0; i < languageCode.length; i++) {
-        for (let valueIdx = 0; valueIdx < values.length; valueIdx++) {
-            let locale: string = languageCode[i];
-            if (countryCode[i] != "") {
-                locale = locale + "-" + countryCode[i];
-            }
-            let nf: NumberFormat;
-            try {
-                nf = new NumberFormat(locale);
-            } catch(e) {
-                console.log("checkFormatDouble. Crashed call \"nf = new NumberFormat(" + locale + ")\"");
+function FormatNumber(): int {
+    const funcName = "FormatNumber";
+    const values = numberValues;
+    const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
+    for (let i = 0; i < languageCodes.length; i++) {
+        let locale: string = languageCodes[i];
+        if (countryCodes[i] != "") {
+            locale = locale + "-" + countryCodes[i];
+        }
+        for (let j = 0; j < values.length; j++) {
+            const expected = exp[j][i];
+            if (CheckFormatNumber(locale, funcName, values[j], expected) == fail) {
                 return fail;
-            }
-
-            let str: string;
-            try {
-                str = nf.format(values[valueIdx]);
-            } catch(e) {
-                console.log("checkFormatDouble. Crashed call \"nf.format\". " + valueIdx + " valueIdx");
-                return fail;
-            }
-
-            if (str == "") {
-                console.log("checkFormatDouble. Got: "  + locale + " value is " + values[valueIdx]);
-                console.log("checkFormatDouble. Detected on " +  valueIdx + " valueIdx, " + i + " languageCode");
-                return fail;
-            }
-
-            for (let j = 0; j < str.length; ++j) {
-                const a = expectedByCountry[i].get(values[valueIdx]);
-                const code = str.codePointAt(j);
-                if ((a == undefined) || (code == undefined)) {
-                    console.log("checkFormatDouble. Got: "  + locale + " test data is " + a);
-                    console.log("checkFormatDouble. Got: str.codePointAt is " + code);
-                    console.log("checkFormatDouble. Detected on " + valueIdx + " valueIdx, " + i + " languageCode");
-                    return fail;
-                }
-                if (code.intValue() != a.at(j)!) {
-                    let arr = new Array<Number>(str.length);
-                    for (let ii = 0; ii < str.length; ++ii) {
-                        arr[ii] = str.codePointAt(ii)!;
-                    }
-                    console.log("checkFormatDouble. Got: " + locale + " \"" + str + "\" codes: " + arr.join(","));
-                    console.log("checkFormatDouble. Expected: codes: " + a);
-                    console.log("checkFormatDouble. Detected on " + j + " symbol, " + valueIdx + " valueIdx, " + i + " languageCode");
-                    return fail;
-                }
             }
         }
     }
     return success;
 }
 
-function checkFormatBigInt(expectedByCountry: Array<Map<BigInt, Array<int>>>, values: Array<BigInt>): number {
-    for (let i = 0; i < languageCode.length; i++) {
-        for (let valueIdx = 0; valueIdx < values.length; valueIdx++) {
-            let locale: string = languageCode[i];
-            if (countryCode[i] != "") {
-                locale = locale + "-" + countryCode[i];
-            }
-            let nf: NumberFormat;
-            try {
-                nf = new NumberFormat(locale);
-            } catch(e) {
-                console.log("checkFormatBigInt. Crashed call \"nf = new NumberFormat(" + locale + ")\"");
+function FormatNumberUnion(): int {
+    const funcName = "FormatNumberUnion";
+    const values = numberValues;
+    const exp = Array.of<Array<string>>(negativeNumbersAsStrings(), positiveNumbersAsStrings(), negativeInfsAsStrings());
+    for (let i = 0; i < languageCodes.length; i++) {
+        let locale: string = languageCodes[i];
+        if (countryCodes[i] != "") {
+            locale = locale + "-" + countryCodes[i];
+        }
+        for (let j = 0; j < values.length; j++) {
+            const expected = exp[j][i];
+            if (CheckFormatUnion(locale, funcName, values[j], expected) == fail) {
                 return fail;
-            }
-
-            let str: string;
-            try {
-                str = nf.format(new BigInt(values[valueIdx]));
-            } catch(e) {
-                console.log("checkFormatBigInt. Сrashed call \"nf.format\". " + valueIdx + " valueIdx");
-                return fail;
-            }
-
-            if (str == "") {
-                console.log("checkFormatBigInt. Got: "  + locale + " value is " + values[valueIdx]);
-                console.log("checkFormatBigInt. Detected on " +  valueIdx + " valueIdx, " + i + " languageCode");
-                return fail;
-            }
-
-            for (let j = 0; j < str.length; ++j) {
-                const a = expectedByCountry[i].get(values[valueIdx]);
-                const code = str.codePointAt(j);
-                if ((a == undefined) || (code == undefined)) {
-                    console.log("checkFormatBigInt. Got: "  + locale + " test data is " + a);
-                    console.log("checkFormatBigInt. Got: str.codePointAt is " + code);
-                    console.log("checkFormatBigInt. Detected on " + j + " symbol, " + valueIdx + " valueIdx, " + i + " languageCode");
-                    return fail;
-                }
-                if (code.intValue() != a.at(j)!) {
-                    let arr = new Array<Number>(str.length);
-                    for (let ii = 0; ii < str.length; ++ii) {
-                        arr[ii] = str.codePointAt(ii)!;
-                    }
-                    console.log("checkFormatBigInt. Got: " + locale + " \"" + str + "\" codes: " + arr.join(","));
-                    console.log("checkFormatBigInt. Expected: codes: " + a);
-                    console.log("checkFormatBigInt. Detected on " + j + " symbol, " + valueIdx + " valueIdx, " + i + " languageCode");
-                    return fail;
-                }
             }
         }
     }
     return success;
 }
 
-function NumberFormatFormatDouble(): number {
-    const values: double[] = [-Infinity, 1234.5, -3];
-
-    const expectedEN = new Map<double, Array<int>>;
-    expectedEN.set(values[0], Array.of<int>(45, 8734));
-    expectedEN.set(values[1], Array.of<int>(49, 44, 50, 51, 52, 46, 53));
-    expectedEN.set(values[2], Array.of<int>(45, 51));
-
-    const expectedFR = new Map<double, Array<int>>;
-    expectedFR.set(values[0], expectedEN.get(values[0])!);
-    expectedFR.set(values[1], Array.of<int>(49, 8239, 50, 51, 52, 44, 53));
-    expectedFR.set(values[2], expectedEN.get(values[2])!);
-
-    const expectedES = new Map<double, Array<int>>;
-    expectedES.set(values[0], expectedEN.get(values[0])!);
-    expectedES.set(values[1], Array.of<int>(49, 46, 50, 51, 52, 44, 53));
-    expectedES.set(values[2], expectedEN.get(values[2])!);
-
-    const expectedGR = new Map<double, Array<int>>(expectedES);
-    const expectedNO = new Map<double, Array<int>>;
-    expectedNO.set(values[0], Array.of<int>(8722, 8734));
-    expectedNO.set(values[1], Array.of<int>(49, 160, 50, 51, 52, 44, 53));
-    expectedNO.set(values[2], Array.of<int>(8722, 51));
-
-    const expectedIT = new Map<double, Array<int>>(expectedGR);
-    const expectedCH = new Map<double, Array<int>>(expectedEN);
-    const expectedJP = new Map<double, Array<int>>(expectedEN);
-    const expectedGE = new Map<double, Array<int>>(expectedES);
-
-    const expectedRU = new Map<double, Array<int>>;
-    expectedRU.set(values[0], Array.of<int>(45, 8734));
-    expectedRU.set(values[1], expectedNO.get(values[1])!);
-    expectedRU.set(values[2], expectedEN.get(values[2])!);
-
-    const expectedIR = new Map<double, Array<int>>;
-    expectedIR.set(values[0], Array.of<int>(8206, 8722, 8734));
-    expectedIR.set(values[1], Array.of<int>(1777, 1644, 1778, 1779, 1780, 1643, 1781));
-    expectedIR.set(values[2], Array.of<int>(8206, 8722, 1779));
-
-    const expectedByCountry = new Array<Map<double, Array<int>>>(countryCode.length);
-    expectedByCountry[0] = expectedEN;
-    expectedByCountry[1] = expectedFR;
-    expectedByCountry[2] = expectedES;
-    expectedByCountry[3] = expectedGR;
-    expectedByCountry[4] = expectedNO;
-    expectedByCountry[5] = expectedIT;
-    expectedByCountry[6] = expectedCH;
-    expectedByCountry[7] = expectedJP;
-    expectedByCountry[8] = expectedGE;
-    expectedByCountry[9] = expectedRU;
-    expectedByCountry[10] = expectedIR;
-
-    return checkFormatDouble(expectedByCountry, values);
+function FormatBigIntUnion(): int {
+    const funcName = "FormatBigIntUnion";
+    const values = bigIntValues;
+    const exp = Array.of<Array<string>>(negativeBigIntsAsStrings(), positiveBigIntsAsStrings());
+    for (let i = 0; i < languageCodes.length; i++) {
+        let locale: string = languageCodes[i];
+        if (countryCodes[i] != "") {
+            locale = locale + "-" + countryCodes[i];
+        }
+        for (let j = 0; j < values.length; j++) {
+            const expected = exp[j][i];
+            if (CheckFormatUnion(locale, funcName, values[j], expected) == fail) {
+                return fail;
+            }
+        }
+    }
+    return success;
 }
 
-function NumberFormatFormatBigInt(): number {
-    const values = new Array<BigInt>(2);
-    values[0] = new BigInt(-123456789000123456789000n);
-    values[1] = new BigInt(123456789000123456789000n);
-    let a: Array<int>;
+function positiveNumbersAsStrings(): Array<string> {
+    // Codes for numberValues[1]
+    let expected = new Array<string>(languageCodes.length);
+    for (let i: int = 0; i < expected.length; ++i) {
+        expected[i] = new string("");
+    }
+    expected[EN] = String.fromCharCode(49, 44, 50, 51, 52, 46, 53);
+    expected[FR] = String.fromCharCode(49, 8239, 50, 51, 52, 44, 53);
+    expected[ES] = String.fromCharCode(49, 46, 50, 51, 52, 44, 53);
+    expected[GR] = expected[ES];
+    expected[NO] = String.fromCharCode(49, 160, 50, 51, 52, 44, 53);
+    expected[IT] = expected[GR];
+    expected[CH] = expected[EN];
+    expected[JP] = expected[CH];
+    expected[GE] = expected[ES];
+    expected[RU] = String.fromCharCode(49, 160, 50, 51, 52, 44, 53);
+    expected[IR] = String.fromCharCode(1777, 1644, 1778, 1779, 1780, 1643, 1781);
+    return expected;
+}
 
-    const expectedEN = new Map<BigInt, Array<int>>;
-    expectedEN.set(values[0], a = Array.of<int>(45, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48));
-    expectedEN.set(values[1], a.slice(1));
+function negativeNumbersAsStrings(): Array<string> {
+    // Codes for  numberValues[0]
+    let expected = new Array<string>(languageCodes.length);
+    for (let i: int = 0; i < expected.length; ++i) {
+        expected[i] = new string("");
+    }
+    expected[EN] = String.fromCharCode(45, 49, 44, 50, 51, 52, 46, 53);
+    expected[FR] = String.fromCharCode(45, 49, 8239, 50, 51, 52, 44, 53);
+    expected[ES] = String.fromCharCode(45, 49, 46, 50, 51, 52, 44, 53);
+    expected[GR] = expected[ES];
+    expected[NO] = String.fromCharCode(8722, 49, 160, 50, 51, 52, 44, 53);
+    expected[IT] = expected[GR];
+    expected[CH] = expected[EN];
+    expected[JP] = expected[CH];
+    expected[GE] = expected[ES];
+    expected[RU] = String.fromCharCode(45, 49, 160, 50 ,51 ,52, 44, 53);
+    expected[IR] = String.fromCharCode(8206, 8722, 1777, 1644, 1778, 1779, 1780, 1643, 1781);
+    return expected;
+}
 
-    const expectedFR = new Map<BigInt, Array<int>>;
-    expectedFR.set(values[0], a = Array.of<int>(45, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48));
-    expectedFR.set(values[1], a.slice(1));
+function negativeInfsAsStrings(): Array<string> {
+    // Codes for numberValues[2]
+    let expected = new Array<string>(languageCodes.length);
+    for (let i: int = 0; i < expected.length; ++i) {
+        expected[i] = new string("");
+    }
+    expected[EN] = String.fromCharCode(45, 8734);
+    expected[FR] = expected[EN];
+    expected[ES] = expected[EN];
+    expected[GR] = expected[EN];
+    expected[NO] = String.fromCharCode(8722, 8734);
+    expected[IT] = expected[EN];
+    expected[CH] = expected[EN];
+    expected[JP] = expected[EN];
+    expected[GE] = expected[EN];
+    expected[RU] = expected[EN];
+    expected[IR] = String.fromCharCode(8206, 8722, 8734);
+    return expected;
+}
 
-    const expectedES = new Map<BigInt, Array<int>>;
-    expectedES.set(values[0], a = Array.of<int>(45, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48));
-    expectedES.set(values[1], a.slice(1));
+function separatorsBetweenNegAndPosAsStrings(): Array<string> {
+    let separators = new Array<string>(languageCodes.length);
+    for (let i: int = 0; i < separators.length; ++i) {
+        separators[i] = new string("");
+    }
+    separators[EN] = String.fromCharCode(32, 8211, 32);
+    separators[FR] = separators[EN];
+    separators[ES] = String.fromCharCode(32, 45, 32);
+    separators[GR] = separators[EN];
+    separators[NO] = separators[EN];
+    separators[IT] = separators[ES];
+    separators[CH] = separators[ES];
+    separators[JP] = String.fromCharCode(32, 65374, 32);
+    separators[GE] = separators[EN];
+    separators[RU] = separators[EN];
+    separators[IR] = separators[EN];
+    return separators;
+}
 
-    const expectedGR = new Map<BigInt, Array<int>>(expectedES);
-    const expectedNO = new Map<BigInt, Array<int>>;
-    expectedNO.set(values[0], a = Array.of<int>(8722, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48));
-    expectedNO.set(values[1], a.slice(1));
+function positiveBigIntsAsStrings(): Array<string> {
+    // Codes for bigIntValues[1]
+    let expected = new Array<string>(languageCodes.length);
+    for (let i: int = 0; i < expected.length; ++i) {
+        expected[i] = new string("");
+    }
+    expected[EN] = String.fromCharCode(49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
+    expected[FR] = String.fromCharCode(49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
+    expected[ES] = String.fromCharCode(49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
+    expected[GR] = expected[ES];
+    expected[NO] = String.fromCharCode(49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[IT] = expected[GR];
+    expected[CH] = expected[EN];
+    expected[JP] = expected[CH];
+    expected[GE] = expected[ES];
+    expected[RU] = String.fromCharCode(49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[IR] = String.fromCharCode(1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776);
+    return expected;
+}
 
-    const expectedIT = new Map<BigInt, Array<int>>(expectedGR);
-    const expectedCH = new Map<BigInt, Array<int>>(expectedEN);
-    const expectedJP = new Map<BigInt, Array<int>>(expectedEN);
-    const expectedGE = new Map<BigInt, Array<int>>(expectedES);
+function negativeBigIntsAsStrings(): Array<string> {
+    // Codes for bigIntValues[0]
+    let expected = new Array<string>(languageCodes.length);
+    for (let i: int = 0; i < expected.length; ++i) {
+        expected[i] = new string("");
+    }
+    expected[EN] = String.fromCharCode(45, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48, 44, 49, 50, 51, 44, 52, 53, 54, 44, 55, 56, 57, 44, 48, 48, 48);
+    expected[FR] = String.fromCharCode(45, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48, 8239, 49, 50, 51, 8239, 52, 53, 54, 8239, 55, 56, 57, 8239, 48, 48, 48);
+    expected[ES] = String.fromCharCode(45, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48, 46, 49, 50, 51, 46, 52, 53, 54, 46, 55, 56, 57, 46, 48, 48, 48);
+    expected[GR] = expected[ES];
+    expected[NO] = String.fromCharCode(8722, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[IT] = expected[GR];
+    expected[CH] = expected[EN];
+    expected[JP] = expected[CH];
+    expected[GE] = expected[ES];
+    expected[RU] = String.fromCharCode(45, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48);
+    expected[IR] = String.fromCharCode(8206, 8722, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776);
+    return expected;
+}
 
-    const expectedRU = new Map<BigInt, Array<int>>;
-    expectedRU.set(values[0], a = Array.of<int>(45, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48, 160, 49, 50, 51, 160, 52, 53, 54, 160, 55, 56, 57, 160, 48, 48, 48));
-    expectedRU.set(values[1], a.slice(1));
+function CheckFormatNumber(locale: string, funcName: string, value: number, expected: string): int {
+    let nf: NumberFormat;
+    try {
+        nf = new NumberFormat(locale);
+    } catch(e) {
+        console.log(funcName + ". Crashed call \"nf = new NumberFormat(" + locale + ")\"");
+        return fail;
+    }
 
-    const expectedIR = new Map<BigInt, Array<int>>;
-    expectedIR.set(values[0], a = Array.of<int>(8206, 8722, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776, 1644, 1777, 1778, 1779, 1644, 1780, 1781, 1782, 1644, 1783, 1784, 1785, 1644, 1776, 1776, 1776));
-    expectedIR.set(values[1], a.slice(2));
+    let str: string;
+    try {
+        str = nf.format(value);
+    } catch(e) {
+        console.log(funcName + ". Crashed call \"nf.format\". " + locale );
+        return fail;
+    }
 
-    const expectedByCountry = new Array<Map<BigInt, Array<int>>>(countryCode.length);
-    expectedByCountry[0] = expectedEN;
-    expectedByCountry[1] = expectedFR;
-    expectedByCountry[2] = expectedES;
-    expectedByCountry[3] = expectedGR;
-    expectedByCountry[4] = expectedNO;
-    expectedByCountry[5] = expectedIT;
-    expectedByCountry[6] = expectedCH;
-    expectedByCountry[7] = expectedJP;
-    expectedByCountry[8] = expectedGE;
-    expectedByCountry[9] = expectedRU;
-    expectedByCountry[10] = expectedIR;
+    if (str == "") {
+        console.log(funcName + ". Got empty str result. " + locale);
+        return fail;
+    }
 
-    return checkFormatBigInt(expectedByCountry, values);
+    if (expected != str) {
+        let arr = new Array<Number>(str.length);
+        for (let ii = 0; ii < str.length; ++ii) {
+            arr[ii] = str.codePointAt(ii)!;
+        }
+        console.log(funcName + ". Got: \"" + str + "\" Codes: " + arr.join(","));
+        arr = new Array<Number>(expected.length);
+        for (let ii = 0; ii < expected.length; ++ii) {
+            arr[ii] = expected.codePointAt(ii)!;
+        }
+        console.log(funcName + ". Exp: Codes: " + arr.join(","));
+        console.log(funcName + ". Detected on " + locale);
+        return fail;
+    }
+    return success;
+}
+
+function CheckFormatUnion(locale: string, funcName: string, value: number | bigint, expected: string): int {
+    let nf: NumberFormat;
+    try {
+        nf = new NumberFormat(locale);
+    } catch(e) {
+        console.log(funcName + ". Crashed call \"nf = new NumberFormat(" + locale + ")\"");
+        return fail;
+    }
+
+    let str: string;
+    try {
+        str = nf.format(value);
+    } catch(e) {
+        console.log(funcName + ". Crashed call \"nf.format\". " + locale );
+        return fail;
+    }
+
+    if (str == "") {
+        console.log(funcName + ". Got empty str result. " + locale);
+        return fail;
+    }
+
+    if (expected != str) {
+        let arr = new Array<Number>(str.length);
+        for (let ii = 0; ii < str.length; ++ii) {
+            arr[ii] = str.codePointAt(ii)!;
+        }
+        console.log(funcName + ". Got: \"" + str + "\" Codes: " + arr.join(","));
+        arr = new Array<Number>(expected.length);
+        for (let ii = 0; ii < expected.length; ++ii) {
+            arr[ii] = expected.codePointAt(ii)!;
+        }
+        console.log(funcName + ". Exp: Codes: " + arr.join(","));
+        console.log(funcName + ". Detected on " + locale);
+        return fail;
+    }
+    return success;
 }

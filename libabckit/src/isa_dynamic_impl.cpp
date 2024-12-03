@@ -226,13 +226,19 @@ AbckitIsaApiDynamic g_isaApiDynamicImpl = {
     IcreateDYNAMICReturn,
     IcreateDYNAMICReturnundefined,
     IcreateDYNAMICIf,
-    IcreateDYNAMICCatchPhi,
 };
 
 }  // namespace libabckit
 
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+#include "./mock/abckit_mock.h"
+#endif
+
 extern "C" AbckitIsaApiDynamic const *AbckitGetIsaApiDynamicImpl(AbckitApiVersion version)
 {
+#ifdef ABCKIT_ENABLE_MOCK_IMPLEMENTATION
+    return AbckitGetMockIsaApiDynamicImpl(version);
+#endif
     switch (version) {
         case ABCKIT_VERSION_RELEASE_1_0_0:
             return &libabckit::g_isaApiDynamicImpl;

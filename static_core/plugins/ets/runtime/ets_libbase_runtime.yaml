@@ -852,6 +852,9 @@ intrinsics:
       ret: i32
       args: [u16]
     impl: ark::ets::intrinsics::StdCoreStringIndexOf
+    codegen_arch: [arm64]
+    codegen_func: CreateStringIndexOf
+    llvm_codegen_func: EmitStringIndexOf
     safe_intrinsic: true
 
   - name: StdCoreStringIndexOfAfter
@@ -863,6 +866,10 @@ intrinsics:
       ret: i32
       args: [u16, i32]
     impl: ark::ets::intrinsics::StdCoreStringIndexOfAfter
+    codegen_arch: [arm64]
+    codegen_func: CreateStringIndexOfAfter
+    llvm_codegen_func: EmitStringIndexOfAfter
+    need_param_locations: true
     safe_intrinsic: true
 
   - name: StdCoreStringIndexOfString
@@ -1060,6 +1067,19 @@ intrinsics:
     codegen_arch: [arm64, amd64]
     codegen_func: CreateStringEndsWith
     llvm_codegen_func: EmitStringEndsWith
+
+  - name: StdCoreStringRepeat
+    space: ets
+    class_name: std.core.String
+    method_name: repeat
+    static: false
+    signature:
+      ret: std.core.String
+      args: [ i32 ]
+    impl: ark::ets::intrinsics::StdCoreStringRepeat
+    codegen_arch: [arm64, amd64]
+    codegen_func: CreateStringRepeat
+    llvm_codegen_func: EmitStringRepeat
 
 ##########################
 # std.core.StringBuilder #
@@ -2058,6 +2078,16 @@ intrinsics:
       ret: i64
       args: [ std.core.Object ]
     impl: ark::ets::intrinsics::StdGCGetObjectAddress
+
+  - name: StdGetObjectSize
+    space: ets
+    class_name: std.core.GC
+    method_name: getObjectSize
+    static: true
+    signature:
+      ret: i64
+      args: [ std.core.Object ]
+    impl: ark::ets::intrinsics::StdGetObjectSize
 
   - name: StdGCPinObject
     space: ets

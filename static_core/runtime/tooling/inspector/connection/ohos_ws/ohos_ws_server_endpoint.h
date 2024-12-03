@@ -16,9 +16,9 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_OHOS_WS_OHOS_WS_SERVER_ENDPOINT_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_OHOS_WS_OHOS_WS_SERVER_ENDPOINT_H
 
-#include "tooling/inspector/connection/server_endpoint_base.h"
-
 #include "server/websocket_server.h"
+
+#include "connection/server_endpoint_base.h"
 
 namespace ark::tooling::inspector {
 // Server endpoint based on OHOS websocket implementation
@@ -36,8 +36,12 @@ protected:
 private:
     void SendMessage(const std::string &message) override
     {
+        auto wasSent = false;
         if (endpoint_.IsConnected()) {
-            endpoint_.SendReply(message);
+            wasSent = endpoint_.SendReply(message);
+        }
+        if (!wasSent) {
+            LOG(INFO, DEBUGGER) << "Did not send message: " << message;
         }
     }
 };

@@ -30,7 +30,7 @@ public:
 
     void CreateFrameInfo() override;
 
-    void IntrinsicTailCall(IntrinsicInst *inst) override;
+    void EmitTailCallIntrinsic(IntrinsicInst *inst, Reg dst, SRCREGS src) override;
 
 private:
     void RemoveBoundaryFrame(const BasicBlock *bb) const;

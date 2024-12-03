@@ -128,6 +128,10 @@ inline void *FreeListAllocator<AllocConfigT, LockConfigT>::Alloc(size_t size, Al
     }
     ASAN_UNPOISON_MEMORY_REGION(ToVoidPtr(memoryPointer), size);
     AllocConfigT::MemoryInit(ToVoidPtr(memoryPointer));
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    // Atomic with relaxed order reason: order is not required
+    allocatedBytes_.fetch_add(memoryBlock->GetSize(), std::memory_order_relaxed);
+#endif
     return ToVoidPtr(memoryPointer);
 }
 
@@ -183,6 +187,10 @@ void FreeListAllocator<AllocConfigT, LockConfigT>::FreeUnsafe(void *mem)
     ASAN_POISON_MEMORY_REGION(newFreeListElement, newFreeListElement->GetSize() + sizeof(MemoryBlockHeader));
     AddToSegregatedList(newFreeListElement);
     LOG_FREELIST_ALLOCATOR(DEBUG) << "Freed memory at addr " << std::hex << mem;
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    // Atomic with relaxed order reason: order is not required
+    allocatedBytes_.fetch_sub(memoryHeader->GetSize(), std::memory_order_relaxed);
+#endif
 }
 
 // NOTE(aemelenko): We can create a mutex for each pool to increase performance,
@@ -787,6 +795,36 @@ bool FreeListAllocator<AllocConfigT, LockConfigT>::IsLive(const ObjectHeader *ob
         currentMemHeader = currentMemHeader->GetNextUsedHeader();
     }
     return false;
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+double FreeListAllocator<AllocConfigT, LockConfigT>::CalculateExternalFragmentation()
+{
+    return segregatedList_.CalculateExternalFragmentation();
+}
+
+template <typename AllocConfigT, typename LockConfigT>
+double FreeListAllocator<AllocConfigT, LockConfigT>::SegregatedList::CalculateExternalFragmentation()
+{
+    size_t totalFreeSize = 0;
+    size_t maxFreeBlockSize = 0;
+    for (size_t index = 0; index < SEGREGATED_LIST_SIZE; index++) {
+        auto *current = GetFirstBlock(index);
+        while (current != nullptr) {
+            auto blockSize = current->GetSize();
+            totalFreeSize += blockSize;
+            if (blockSize > maxFreeBlockSize) {
+                maxFreeBlockSize = blockSize;
+            }
+            current = current->GetNextFree();
+        }
+    }
+
+    if (totalFreeSize == 0) {
+        return 0;
+    }
+
+    return 1.0 - static_cast<double>(maxFreeBlockSize) / totalFreeSize;
 }
 
 #undef LOG_FREELIST_ALLOCATOR

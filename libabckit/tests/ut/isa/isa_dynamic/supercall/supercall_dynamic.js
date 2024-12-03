@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
+
 class A {
     constructor(obj) {
         print(obj);
@@ -38,19 +38,3 @@ class D extends C {
 }
 
 new D(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16);
-
-
-// After AOP:
-// class A {
-//     constructor(obj) {
-//         print(obj)
-//     }
-// }
-// class B extends A {
-//     constructor(obj) {
-//         super(obj)
-//         print(obj)
-//     }
-// }
-
-// new B(1);

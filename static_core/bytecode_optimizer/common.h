@@ -40,6 +40,7 @@ bool IsAbcKitIntrinsicRange(compiler::RuntimeInterface::IntrinsicId intrinsicId)
 bool IsCall(compiler::Inst *inst);
 
 bool CanConvertToIncI(const compiler::BinaryImmOperation *binop);
+
 }  // namespace ark::bytecodeopt
 
 #endif  // PANDA_BYTECODE_OPTIMIZER_COMMON_H

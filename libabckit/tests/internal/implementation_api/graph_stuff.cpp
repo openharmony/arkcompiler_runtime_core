@@ -64,6 +64,7 @@ TEST_F(LibAbcKitGraphStuff, FunctionSetGraphStatic)
                 EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
                 g_implM->functionSetGraph(methodCtxFinder.method, graph);
+                g_impl->destroyGraph(graph);
                 EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             }
         }
@@ -103,6 +104,7 @@ TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionStatic)
                 EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
                 g_implM->functionSetGraph(methodCtxFinder.method, graph);
+                g_impl->destroyGraph(graph);
                 EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
             }
         }
@@ -175,6 +177,7 @@ TEST_F(LibAbcKitGraphStuff, CreateGraphFromFunctionDynamic)
         auto *graph = g_implI->createGraphFromFunction(found);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         g_implM->functionSetGraph(found, graph);
+        g_impl->destroyGraph(graph);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     }
 
@@ -203,6 +206,7 @@ TEST_F(LibAbcKitGraphStuff, FunctionSetGraphDynamic)
         auto *graph = g_implI->createGraphFromFunction(found);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         g_implM->functionSetGraph(found, graph);
+        g_impl->destroyGraph(graph);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     }
 

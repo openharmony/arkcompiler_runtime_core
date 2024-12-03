@@ -27,8 +27,8 @@ public:
     explicit G1Analytics(uint64_t now);
 
     void ReportCollectionStart(uint64_t time);
-    void ReportCollectionEnd(GCTaskCause gcCause, uint64_t endTime, const CollectionSet &collectionSet,
-                             bool dump = false);
+    void ReportCollectionEnd(GCTaskCause cause, uint64_t endTime, const CollectionSet &collectionSet,
+                             bool singlePassCompactionEnabled, bool dump = false);
 
     void ReportEvacuatedBytes(size_t bytes);
     void ReportRemsetSize(size_t remsetSize, size_t remsetRefsCount);
@@ -43,6 +43,7 @@ public:
     void ReportPromotedRegion();
     void ReportLiveObjects(size_t num);
     void ReportSurvivedBytesRatio(const CollectionSet &collectionSet);
+    void ReportScanRemsetTime(size_t remsetSize, uint64_t time);
     double PredictAllocationRate() const;
     uint64_t PredictYoungCollectionTimeInMicros(size_t edenLength) const;
     uint64_t PredictYoungCollectionTimeInMicros(const CollectionSet &collectionSet) const;
@@ -57,6 +58,7 @@ public:
     }
 
 private:
+    enum StatType { MARKING_COLLECTION = 0, SINGLE_PASS_COMPACTION, COUNT };
     size_t GetPromotedRegions() const;
     size_t GetEvacuatedBytes() const;
     double PredictPromotedRegions(size_t edenLength) const;
@@ -65,6 +67,10 @@ private:
     uint64_t PredictMarkingTimeInMicros(size_t liveObjects, size_t remsetRefsCount) const;
     uint64_t PredictCopyingTimeInMicros(size_t copiedBytes) const;
     size_t PredictRemsetRefsCount(size_t remsetSize) const;
+    uint64_t PredictRemsetScanTimeInMicros(size_t edenLength) const;
+    uint64_t PredictYoungSinglePassCompactionTimeInMicros(size_t edenLength) const;
+    uint64_t PredictYoungMarkingCollectionTimeInMicros(size_t edenLength, size_t expectedRemsetRefsCount) const;
+    uint64_t PredictOtherTime(StatType type) const;
 
     uint64_t PredictTime(size_t volume, ark::Sequence rateSeq) const
     {
@@ -73,6 +79,12 @@ private:
     }
 
     void DumpMetrics(const CollectionSet &collectionSet, uint64_t pauseTime, double allocationRate) const;
+    void DumpSinglePassCompactionMetrics(size_t edenLength, uint64_t pauseTime) const;
+    void DumpMarkingCollectionMetrics(size_t edenLength, uint64_t pauseTime) const;
+    void ReportMarkingCollectionEnd(GCTaskCause gcCause, uint64_t pauseTime, size_t edenLength);
+    void ReportSinglePassCompactionEnd(GCTaskCause gcCause, uint64_t pauseTime, size_t edenLength);
+    void UpdateCopiedBytesStat(size_t compactedRegions);
+    void UpdateCopiedBytesRateStat(uint64_t compactionTime);
 
     static constexpr uint64_t DEFAULT_PROMOTION_COST = 50;
     const uint64_t promotionCost_ {DEFAULT_PROMOTION_COST};
@@ -91,6 +103,7 @@ private:
     uint64_t scanDirtyCardsStart_ {0};
     uint64_t scanDirtyCardsEnd_ {0};
     uint64_t predictedMixedPause_ {0};
+    uint64_t scanRemsetTime_ {0};
     ark::Sequence allocationRateSeq_;
     ark::Sequence copiedBytesSeq_;
     ark::Sequence copyingBytesRateSeq_;
@@ -100,15 +113,18 @@ private:
     ark::Sequence markingRateSeq_;
     ark::Sequence updateRefsRateSeq_;
     ark::Sequence promotionSeq_;
-    ark::Sequence otherSeq_;
+    std::array<ark::Sequence, StatType::COUNT> otherSeq_;
     ark::Sequence liveObjectsSeq_;
     ark::Sequence scanDirtyCardsRateSeq_;
     ark::Sequence survivedBytesRatioSeq_;
+    ark::Sequence remsetSizeSeq_;
+    ark::Sequence remsetScanRateSeq_;
     static constexpr double DEFAULT_CONFIDENCE_FACTOR = 0.5;
     G1Predictor predictor_ {DEFAULT_CONFIDENCE_FACTOR};
     std::atomic<size_t> copiedBytes_ {0};
     std::atomic<size_t> promotedRegions_ {0};
     std::atomic<size_t> liveObjects_ {0};
+    bool previousWasSinglePassCompaction_ {false};
 };
 }  // namespace ark::mem
 #endif

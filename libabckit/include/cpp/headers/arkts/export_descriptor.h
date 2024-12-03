@@ -16,29 +16,75 @@
 #ifndef CPP_ABCKIT_ARKTS_EXPORT_DESCRIPTOR_H
 #define CPP_ABCKIT_ARKTS_EXPORT_DESCRIPTOR_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/module.h"
-#include "cpp/headers/core/export_descriptor.h"
+#include "../core/export_descriptor.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
+/**
+ * @brief ExportDescriptor
+ */
 class ExportDescriptor final : public core::ExportDescriptor {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class core::Module;
+    /// @brief to access private constructor
     friend class arkts::Module;
+    /// @brief abckit::DefaultHash<ExportDescriptor>
+    friend class abckit::DefaultHash<ExportDescriptor>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<ExportDescriptor>;
 
 public:
+    /**
+     * @brief Constructor Arkts API ExportDescriptor from the Core API with compatibility check
+     * @param other - Core API ExportDescriptor
+     */
+    explicit ExportDescriptor(const core::ExportDescriptor &other);
+
+    /**
+     * @brief Construct a new Export Descriptor object
+     * @param other
+     */
     ExportDescriptor(const ExportDescriptor &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ExportDescriptor&
+     */
     ExportDescriptor &operator=(const ExportDescriptor &other) = default;
+
+    /**
+     * @brief Construct a new Export Descriptor object
+     * @param other
+     */
     ExportDescriptor(ExportDescriptor &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ExportDescriptor&
+     */
     ExportDescriptor &operator=(ExportDescriptor &&other) = default;
+
+    /**
+     * @brief Destroy the Export Descriptor object
+     */
     ~ExportDescriptor() override = default;
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts export descriptor from Core to Arkts target
+     * @return AbckitArktsExportDescriptor* - converted export descriptor
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsExportDescriptor *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<ExportDescriptor> targetChecker_;
 };
 
 }  // namespace abckit::arkts

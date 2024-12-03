@@ -17,6 +17,7 @@
 #include "libabckit/src/adapter_static/metadata_inspect_static.h"
 #include "assembler/annotation.h"
 #include "libabckit/include/c/statuses.h"
+#include "libabckit/src/helpers_common.h"
 #include "libabckit/src/macros.h"
 #include "libabckit/src/metadata_inspect_impl.h"
 #include "libabckit/src/ir_impl.h"
@@ -41,7 +42,7 @@
 #include <cstdint>
 #include <iostream>
 
-// CC-OFFNXT(WordsTool.95 google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace ark;
 
@@ -51,20 +52,21 @@ namespace libabckit {
 // Module
 // ========================================
 
-void ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
+bool ModuleEnumerateAnonymousFunctionsStatic(AbckitCoreModule *m, void *data,
                                              bool (*cb)(AbckitCoreFunction *function, void *data))
 {
     LIBABCKIT_LOG_FUNC;
-    LIBABCKIT_BAD_ARGUMENT_VOID(m)
-    LIBABCKIT_BAD_ARGUMENT_VOID(cb)
+    LIBABCKIT_BAD_ARGUMENT(m, false)
+    LIBABCKIT_BAD_ARGUMENT(cb, false)
     for (auto &function : m->functions) {
         if (!FunctionIsAnonymousStatic(function.get())) {
             continue;
         }
         if (!cb(function.get(), data)) {
-            return;
+            return false;
         }
     }
+    return true;
 }
 
 // ========================================
@@ -81,7 +83,7 @@ AbckitString *ClassGetNameStatic(AbckitCoreClass *klass)
     auto *record = klass->GetArkTSImpl()->impl.GetStaticClass();
     auto [moduleName, className] = ClassGetNames(record->name);
 
-    return CreateStringStatic(klass->m->file, className.data());
+    return CreateStringStatic(klass->owningModule->file, className.data());
 }
 
 // ========================================
@@ -94,7 +96,7 @@ AbckitString *FunctionGetNameStatic(AbckitCoreFunction *function)
 
     auto functionName = pandasm::MangleFunctionName(functionImpl->name, functionImpl->params, functionImpl->returnType);
     auto croppedName = FuncNameCropModule(functionName);
-    return CreateStringStatic(function->m->file, croppedName.data());
+    return CreateStringStatic(function->owningModule->file, croppedName.data());
 }
 
 bool SetMethodOffset(pandasm::Function *func, pandasm::AsmEmitter::PandaFileToPandaAsmMaps *maps,
@@ -150,7 +152,7 @@ static AbckitGraph *CreateGraph(AbckitCoreFunction *function, AbckitIrInterface 
                                 ark::compiler::Graph *graphImpl, AbckitRuntimeAdapterStatic *adapter)
 {
     auto graph = new AbckitGraph;
-    graph->file = function->m->file;
+    graph->file = function->owningModule->file;
     graph->function = function;
     graph->irInterface = irInterface;
     graph->impl = graphImpl;
@@ -166,13 +168,14 @@ AbckitGraph *CreateGraphFromFunctionStatic(AbckitCoreFunction *function)
 {
     LIBABCKIT_LOG_FUNC;
 
+    ark::compiler::g_options.SetCompilerFrameSize("default");
     ark::compiler::g_options.SetCompilerUseSafepoint(false);
     auto *func = function->GetArkTSImpl()->GetStaticImpl();
 
     LIBABCKIT_LOG_DUMP(func->DebugDump(), DEBUG);
     LIBABCKIT_LOG(DEBUG) << func->name << '\n';
 
-    auto *file = function->m->file;
+    auto *file = function->owningModule->file;
     auto program = file->GetStaticProgram();
 
     auto maps = std::make_unique<pandasm::AsmEmitter::PandaFileToPandaAsmMaps>();
@@ -437,35 +440,34 @@ AbckitType *ValueGetTypeStatic(AbckitValue *value)
 {
     LIBABCKIT_LOG_FUNC;
     auto *pVal = static_cast<pandasm::ScalarValue *>(value->GetStaticImpl());
-    auto type = std::make_unique<AbckitType>();
-    type->klass = nullptr;  // NOTE implement logic for classes
+    AbckitTypeId id;
     switch (pVal->GetType()) {
         case pandasm::Value::Type::U1:
-            type->id = ABCKIT_TYPE_ID_U1;
+            id = ABCKIT_TYPE_ID_U1;
             break;
         case pandasm::Value::Type::U8:
-            type->id = ABCKIT_TYPE_ID_U8;
+            id = ABCKIT_TYPE_ID_U8;
             break;
         case pandasm::Value::Type::U16:
-            type->id = ABCKIT_TYPE_ID_U16;
+            id = ABCKIT_TYPE_ID_U16;
             break;
         case pandasm::Value::Type::U32:
-            type->id = ABCKIT_TYPE_ID_U32;
+            id = ABCKIT_TYPE_ID_U32;
             break;
         case pandasm::Value::Type::U64:
-            type->id = ABCKIT_TYPE_ID_U64;
+            id = ABCKIT_TYPE_ID_U64;
             break;
         case pandasm::Value::Type::F64:
-            type->id = ABCKIT_TYPE_ID_F64;
+            id = ABCKIT_TYPE_ID_F64;
             break;
         case pandasm::Value::Type::STRING:
-            type->id = ABCKIT_TYPE_ID_STRING;
+            id = ABCKIT_TYPE_ID_STRING;
             break;
         default:
             LIBABCKIT_UNIMPLEMENTED;
     }
-    value->file->types.emplace_back(std::move(type));
-    return value->file->types.back().get();
+    // NOTE implement logic for classes
+    return GetOrCreateType(value->file, id, 0, nullptr);
 }
 
 bool ValueGetU1Static(AbckitValue *value)

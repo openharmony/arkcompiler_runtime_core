@@ -16,27 +16,23 @@
 #ifndef CPP_ABCKIT_FILE_IMPL_H
 #define CPP_ABCKIT_FILE_IMPL_H
 
-#include "cpp/headers/file.h"
+#include "./file.h"
 
 namespace abckit {
 
 // CC-OFFNXT(G.FUD.06) perf critical
 inline std::vector<core::Module> File::GetModules() const
 {
-    const ApiConfig *conf = GetApiConfig();
     std::vector<core::Module> modules;
+    Payload<std::vector<core::Module> *> payload {&modules, GetApiConfig(), this};
 
-    using EnumerateData = std::pair<std::vector<core::Module> *, const ApiConfig *>;
-    EnumerateData enumerateData(&modules, conf);
-
-    conf->cIapi_->fileEnumerateModules(GetResource(), (void *)&enumerateData, [](AbckitCoreModule *module, void *data) {
-        auto *vec = static_cast<EnumerateData *>(data)->first;
-        auto *config = static_cast<EnumerateData *>(data)->second;
-        vec->push_back(core::Module(module, config));
+    GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
+        const auto &payload = *static_cast<Payload<std::vector<core::Module> *> *>(data);
+        payload.data->push_back(core::Module(module, payload.config, payload.resource));
         return true;
     });
 
-    CheckError(conf);
+    CheckError(GetApiConfig());
 
     return modules;
 }
@@ -72,7 +68,22 @@ inline abckit::LiteralArray File::CreateLiteralArray(const std::vector<abckit::L
     AbckitLiteralArray *litaIml =
         GetApiConfig()->cMapi_->createLiteralArray(GetResource(), litsImpl.data(), litsImpl.size());
     CheckError(GetApiConfig());
-    return abckit::LiteralArray(litaIml, GetApiConfig());
+    return abckit::LiteralArray(litaIml, GetApiConfig(), this);
+}
+
+inline bool File::EnumerateModules(const std::function<bool(core::Module)> &cb) const
+{
+    std::vector<core::Module> modules;
+    Payload<const std::function<bool(core::Module)> &> payload {cb, GetApiConfig(), this};
+
+    auto isNormalExit =
+        GetApiConfig()->cIapi_->fileEnumerateModules(GetResource(), &payload, [](AbckitCoreModule *module, void *data) {
+            const auto &payload = *static_cast<Payload<const std::function<bool(core::Module)> &> *>(data);
+            return payload.data(core::Module(module, payload.config, payload.resource));
+        });
+
+    CheckError(GetApiConfig());
+    return isNormalExit;
 }
 
 }  // namespace abckit

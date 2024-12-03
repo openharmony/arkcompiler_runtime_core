@@ -16,11 +16,11 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_WS_LOGGER_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_WS_LOGGER_H
 
-#include "utils/logger.h"
+#include <string>
 
 #include "websocketpp/logger/levels.hpp"
 
-#include <string>
+#include "utils/logger.h"
 
 namespace ark::tooling::inspector {
 class WsLogger {

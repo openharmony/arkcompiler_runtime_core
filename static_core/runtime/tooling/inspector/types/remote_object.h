@@ -15,10 +15,6 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_REMOTE_OBJECT_H
 
-#include "tooling/inspector/types/numeric_id.h"
-#include "tooling/inspector/types/remote_object_type.h"
-#include "tooling/inspector/types/object_preview.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -28,13 +24,17 @@
 #include <utility>
 #include <vector>
 
+#include "types/numeric_id.h"
+#include "types/remote_object_type.h"
+#include "types/object_preview.h"
+
 namespace ark {
 class JsonObjectBuilder;
 }  // namespace ark
 
 namespace ark::tooling::inspector {
 
-class RemoteObject {
+class RemoteObject final : public JsonSerializable {
 public:
     static RemoteObject Undefined()
     {
@@ -114,7 +114,7 @@ public:
 
     std::optional<RemoteObjectId> GetObjectId() const;
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const;
+    void Serialize(JsonObjectBuilder &builder) const override;
 
     RemoteObjectType GetType() const;
 

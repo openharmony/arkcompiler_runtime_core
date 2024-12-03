@@ -24,6 +24,7 @@
 
 namespace ark::coretypes {
 
+// CC-OFFNXT(G.FUN.01) solid logic
 static Array *AllocateArray(ark::BaseClass *arrayClass, size_t elemSize, ArraySizeT length, ark::SpaceType spaceType,
                             bool pinned = false, const PandaVM *vm = Thread::GetCurrent()->GetVM())
 {

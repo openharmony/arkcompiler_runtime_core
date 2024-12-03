@@ -39,176 +39,191 @@ function main(): int {
 const d: Number[] = [10, -1, 237, -5, 148, 65, 3, 34, 0, 12];
 const dd: Number[] = [1, 0, 3, 4, 0, 6];
 
+function newProxy<T>(a: Array<T>): Array<T> {
+    class Handler<T> extends DefaultArrayProxyHandler<T> {}
+
+    return Proxy.create<T>(a, new Handler<T>())
+}
+
+function check<T>(newArrayFn: () => Array<T>, testFn: (a: Array<T>) => int): int {
+    let failures = 0
+
+    failures += testFn(newArrayFn())
+    failures += testFn(newProxy(newArrayFn()))
+
+    return failures
+}
+
 function everyFuncArg3ArrayNumber(): int {
     let fnTrue = (elem: number, index: number, arr: Array<Number>): boolean => {
         return arr.at(index)! == elem && elem < 238;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.every(fnTrue) == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    if (arr.every(fnTrue) == false) { return fail; }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.every(fnTrue) == false) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        if (arr.every(fnTrue) == false) { return fail; }
 
-    let fnFalse = (elem: number, index: number, arr: Array<Number>): boolean => {
-        return arr.at(index)! == elem && elem < -238;
-    }
-    if (arr.every(fnFalse) == true) { return fail; }
-    return success;
+        let fnFalse = (elem: number, index: number, arr: Array<Number>): boolean => {
+            return arr.at(index)! == elem && elem < -238;
+        }
+        if (arr.every(fnFalse) == true) { return fail; }
+        return success;
+    })
 }
 
 function everyFuncArg2(): int {
     let fnTrue = (elem: number, index: number): boolean => {
         return index >= 0 && elem < 238;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.every(fnTrue) == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    if (arr.every(fnTrue) == false) { return fail; }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.every(fnTrue) == false) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        if (arr.every(fnTrue) == false) { return fail; }
 
-    let fnFalse = (elem: number, index: number): boolean => {
-        return index >= 0 && elem < -238;
-    }
-    if (arr.every(fnFalse) == true) { return fail; }
-    return success;
+        let fnFalse = (elem: number, index: number): boolean => {
+            return index >= 0 && elem < -238;
+        }
+        if (arr.every(fnFalse) == true) { return fail; }
+        return success;
+    })
 }
 
 function everyFuncArg1(): int {
     let fnTrue = (elem: number): boolean => {
         return elem < 238;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.every(fnTrue) == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    if (arr.every(fnTrue) == false) { return fail; }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.every(fnTrue) == false) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        if (arr.every(fnTrue) == false) { return fail; }
 
-    let fnFalse = (elem: number): boolean => {
-        return elem < -238;
-    }
-    if (arr.every(fnFalse) == true) { return fail; }
-    return success;
+        let fnFalse = (elem: number): boolean => {
+            return elem < -238;
+        }
+        if (arr.every(fnFalse) == true) { return fail; }
+        return success;
+    })
 }
 
 function someFuncArg2(): int {
     let fnTrue = (v: number, index: number): boolean => {
         return index >= 0 && v < -4;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.some(fnTrue) == true) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    if (arr.some(fnTrue) == false) { return fail; }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.some(fnTrue) == true) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        if (arr.some(fnTrue) == false) { return fail; }
 
-    let fnFalse = (v: number, index: number): boolean => {
-        return index >= 0 && v < -238;
-    }
-    if (arr.some(fnFalse) == true) { return fail; }
-    return success;
+        let fnFalse = (v: number, index: number): boolean => {
+            return index >= 0 && v < -238;
+        }
+        if (arr.some(fnFalse) == true) { return fail; }
+        return success;
+    })
 }
 
 function someFuncArg1(): int {
     let fnTrue = (v: number): boolean => {
         return v < -4;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.some(fnTrue) == true) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    if (arr.some(fnTrue) == false) { return fail; }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.some(fnTrue) == true) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        if (arr.some(fnTrue) == false) { return fail; }
 
-    let fnFalse = (v: number): boolean => {
-        return v < -238;
-    }
-    if (arr.some(fnFalse) == true) { return fail; }
-    return success;
+        let fnFalse = (v: number): boolean => {
+            return v < -238;
+        }
+        if (arr.some(fnFalse) == true) { return fail; }
+        return success;
+    })
 }
 
 function filterFuncArg3ArrayNumber(): int {
     let fnTrue = (v: number, index: number, arr: Array<Number>): boolean => {
         return (arr.at(index)! == v) && v > -1000;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.filter(fnTrue).length != 0) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.filter(fnTrue);
-    if (res.length != arr.length) { return fail; }
-    for (let i: int = 0; i < arr.length; ++i) {
-        if (res.at(i) != arr.at(i)) { return fail; }
-    }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.filter(fnTrue).length != 0) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.filter(fnTrue);
+        if (res.length != arr.length) { return fail; }
+        for (let i: int = 0; i < arr.length; ++i) {
+            if (res.at(i) != arr.at(i)) { return fail; }
+        }
 
-    let fnFalse = (v: Number, index: number, arr: Array<Number>): boolean => {
-        return arr.at(index)! == v && v == undefined;
-    }
-    if (arr.filter(fnFalse).length != 0) { return fail; }
-    return success;
+        let fnFalse = (v: Number, index: number, arr: Array<Number>): boolean => {
+            return arr.at(index)! == v && v == undefined;
+        }
+        if (arr.filter(fnFalse).length != 0) { return fail; }
+        return success;
+    })
 }
 
 function filterFuncArg2(): int {
     let fnTrue = (v: number, index: number): boolean => {
         return index >= 0 && v > -1000;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.filter(fnTrue).length != 0) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.filter(fnTrue);
-    if (res.length != arr.length) { return fail; }
-    for (let i: int = 0; i < arr.length; ++i) {
-        if (res.at(i) != arr.at(i)) { return fail; }
-    }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.filter(fnTrue).length != 0) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.filter(fnTrue);
+        if (res.length != arr.length) { return fail; }
+        for (let i: int = 0; i < arr.length; ++i) {
+            if (res.at(i) != arr.at(i)) { return fail; }
+        }
 
-    let fnFalse = (v: Number, index: number): boolean => {
-        return index >= 0 && v == undefined;
-    }
-    if (arr.filter(fnFalse).length != 0) { return fail; }
-    return success;
+        let fnFalse = (v: Number, index: number): boolean => {
+            return index >= 0 && v == undefined;
+        }
+        if (arr.filter(fnFalse).length != 0) { return fail; }
+        return success;
+    })
 }
 
 function filterFuncArg1(): int {
     let fnTrue = (v: number): boolean => {
         return v > -1000;
     }
-    let arrEmpty = new Array<Number>;
-    if (arrEmpty.filter(fnTrue).length != 0) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.filter(fnTrue);
-    if (res.length != arr.length) { return fail; }
-    for (let i: int = 0; i < arr.length; ++i) {
-        if (res.at(i) != arr.at(i)) { return fail; }
-    }
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        if (arr.filter(fnTrue).length != 0) { return fail; }
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.filter(fnTrue);
+        if (res.length != arr.length) { return fail; }
+        for (let i: int = 0; i < arr.length; ++i) {
+            if (res.at(i) != arr.at(i)) { return fail; }
+        }
 
-    let fnFalse = (v: Number): boolean => {
-        return v == undefined;
-    }
-    if (arr.filter(fnFalse).length != 0) { return fail; }
-    return success;
+        let fnFalse = (v: Number): boolean => {
+            return v == undefined;
+        }
+        if (arr.filter(fnFalse).length != 0) { return fail; }
+        return success;
+    })
 }
 
 function reduceFuncArg4ArrayNumber(): int {
@@ -218,24 +233,25 @@ function reduceFuncArg4ArrayNumber(): int {
         }
         return new Number(a + b + (arr.at(index) as Number));
     }
-    let arrEmpty = new Array<Number>;
-    let hasException: boolean = false;
-    try {
-        let res = arrEmpty.reduce(fn);
-        return fail;
-    } catch(e) {
-        hasException = true;
-    }
-    if (hasException == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.reduce(fn);
-    if (res != 996) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let hasException: boolean = false;
+        try {
+            let res = arr.reduce(fn);
+            return fail;
+        } catch(e) {
+            hasException = true;
+        }
+        if (hasException == false) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.reduce(fn);
+        if (res != 996) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceFuncArg3(): int {
@@ -245,48 +261,50 @@ function reduceFuncArg3(): int {
         }
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let hasException: boolean = false;
-    try {
-        let res = arrEmpty.reduce(fn);
-        return fail;
-    } catch(e) {
-        hasException = true;
-    }
-    if (hasException == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.reduce(fn);
-    if (res != 503) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let hasException: boolean = false;
+        try {
+            let res = arr.reduce(fn);
+            return fail;
+        } catch(e) {
+            hasException = true;
+        }
+        if (hasException == false) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.reduce(fn);
+        if (res != 503) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceFuncArg2(): int {
     let fn = (a: number, b: number): number => {
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let hasException: boolean = false;
-    try {
-        let res = arrEmpty.reduce(fn);
-        return fail;
-    } catch(e) {
-        hasException = true;
-    }
-    if (hasException == false) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    let res = arr.reduce(fn);
-    if (res != 503) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let hasException: boolean = false;
+        try {
+            let res = arr.reduce(fn);
+            return fail;
+        } catch(e) {
+            hasException = true;
+        }
+        if (hasException == false) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        let res = arr.reduce(fn);
+        if (res != 503) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceFuncArg4ArrayNumberWithInitialValue(): int {
@@ -296,20 +314,21 @@ function reduceFuncArg4ArrayNumberWithInitialValue(): int {
         }
         return a + b + arr.at(index)!;
     }
-    let arrEmpty = new Array<Number>;
-    let initialValue = 0.0;
-    let res = arrEmpty.reduce(fn, initialValue);
-    if (res != initialValue) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    initialValue = -arr.at(0)!;
-    res = arr.reduce(fn, initialValue);
-    if (res != 996) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let initialValue = 0.0;
+        let res = arr.reduce(fn, initialValue);
+        if (res != initialValue) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        initialValue = -arr.at(0)!;
+        res = arr.reduce(fn, initialValue);
+        if (res != 996) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceFuncArg3WithInitialValue(): int {
@@ -319,38 +338,40 @@ function reduceFuncArg3WithInitialValue(): int {
         }
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let initialValue = 0.0;
-    let res = arrEmpty.reduce(fn, initialValue);
-    if (res != initialValue) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    res = arr.reduce(fn, initialValue);
-    if (res != 503) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let initialValue = 0.0;
+        let res = arr.reduce(fn, initialValue);
+        if (res != initialValue) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        res = arr.reduce(fn, initialValue);
+        if (res != 503) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function reduceFuncArg2WithInitialValue(): int {
     let fn = (a: number, b: number): number => {
         return a + b;
     }
-    let arrEmpty = new Array<Number>;
-    let initialValue = 0.0;
-    let res = arrEmpty.reduce(fn, initialValue);
-    if (res != initialValue) { return fail; }
 
-    let arr = new Array<Number>;
-    for (let i: int = 0; i < d.length; ++i) {
-        arr.push(d[i]);
-    }
-    res = arr.reduce(fn, initialValue);
-    if (res != 503) { return fail; }
-    if (res ==  -1) { return fail; }
-    return success;
+    return check(() => new Array<Number>, (arr: Array<Number>) => {
+        let initialValue = 0.0;
+        let res = arr.reduce(fn, initialValue);
+        if (res != initialValue) { return fail; }
+
+        for (let i: int = 0; i < d.length; ++i) {
+            arr.push(d[i]);
+        }
+        res = arr.reduce(fn, initialValue);
+        if (res != 503) { return fail; }
+        if (res ==  -1) { return fail; }
+        return success;
+    })
 }
 
 function check(result: int, message: String): int {

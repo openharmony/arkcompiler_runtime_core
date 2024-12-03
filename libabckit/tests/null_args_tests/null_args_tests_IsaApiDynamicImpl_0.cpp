@@ -34,480 +34,11 @@ static auto g_isaApiDynamicImp = AbckitGetIsaApiDynamicImpl(ABCKIT_VERSION_RELEA
 
 class LibAbcKitNullptrTestsIsaApiDynamicImpl0 : public ::testing::Test {};
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateiterresultobj,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAdd2,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateiterresultobj)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAdd2)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateiterresultobj);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateResumegenerator,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateResumegenerator)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateResumegenerator);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStprivateproperty,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStprivateproperty)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStprivateproperty);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg0,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallarg0)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallarg0);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWideldsendableexternalmodulevar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeWideldsendableexternalmodulevar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeWideldsendableexternalmodulevar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIstrue,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeIstrue)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeIstrue);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetOpcode,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iGetOpcode)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iGetOpcode);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetModule,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iGetModule)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iGetModule);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionreject,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAsyncfunctionreject)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAsyncfunctionreject);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStthisbyname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStthisbyname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStthisbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallthisrange,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateSupercallthisrange)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateSupercallthisrange);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStobjbyvalue,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStobjbyvalue)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStobjbyvalue);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsin,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateIsin)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateIsin);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIf,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateIf)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateIf);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdobjbyindex,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideLdobjbyindex)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideLdobjbyindex);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnan,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdnan)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdnan);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallarrowrange,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateSupercallarrowrange)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateSupercallarrowrange);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInc,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateInc)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateInc);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreatereq,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGreatereq)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGreatereq);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStownbyname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStownbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTrystglobalbyname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateTrystglobalbyname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateTrystglobalbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateMul2,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateMul2)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateMul2);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStrictnoteq,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStrictnoteq)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStrictnoteq);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjrange,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateNewobjrange)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateNewobjrange);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefinegettersetterbyvalue)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefinegettersetterbyvalue);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLoadString,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLoadString)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLoadString);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenv,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateNewlexenv)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateNewlexenv);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLesseq,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLesseq)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLesseq);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStmodulevar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideStmodulevar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideStmodulevar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSupercallspread,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateSupercallspread)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateSupercallspread);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlexvar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdlexvar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdlexvar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeCreateprivateproperty,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeCreateprivateproperty)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeCreateprivateproperty);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifhole,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateThrowUndefinedifhole)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateThrowUndefinedifhole);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewlexenvwithname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateNewlexenvwithname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateNewlexenvwithname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCopyrestargs,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideCopyrestargs)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideCopyrestargs);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvalue,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStownbyvalue)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStownbyvalue);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdpatchvar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideLdpatchvar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideLdpatchvar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefinefieldbyname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefinefieldbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStricteq,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStricteq)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStricteq);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdprivateproperty,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdprivateproperty)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdprivateproperty);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iGetExportDescriptor,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iGetExportDescriptor)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iGetExportDescriptor);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyindex,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeDefinefieldbyindex)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeDefinefieldbyindex);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyarray,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateemptyarray)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateemptyarray);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLess,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLess)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLess);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenv,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideNewlexenv)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideNewlexenv);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdtrue,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdtrue)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdtrue);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTonumeric,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateTonumeric)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateTonumeric);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetasynciterator,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetasynciterator)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetasynciterator);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowUndefinedifholewithname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateThrowUndefinedifholewithname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateThrowUndefinedifholewithname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCopyrestargs,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCopyrestargs)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCopyrestargs);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStobjbyindex,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideStobjbyindex)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideStobjbyindex);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetnextpropname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetnextpropname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetnextpropname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateApply,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateApply)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateApply);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthisbyname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdthisbyname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdthisbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsfalse,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateIsfalse)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateIsfalse);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendablevar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeLdsendablevar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeLdsendablevar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSetgeneratorstate,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateSetgeneratorstate)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateSetgeneratorstate);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWideldsendablevar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeWideldsendablevar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeWideldsendablevar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdglobalvar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdglobalvar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdglobalvar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateobjectwithbuffer)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateobjectwithbuffer);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNewobjapply,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateNewobjapply)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateNewobjapply);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStlexvar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStlexvar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStlexvar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInstanceof,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateInstanceof)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateInstanceof);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateReturn,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateReturn)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateReturn);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDynamicimport)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDynamicimport);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbynamewithnameset,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStownbynamewithnameset)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStownbynamewithnameset);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTryldglobalbyname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateTryldglobalbyname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateTryldglobalbyname);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStownbyindex,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideStownbyindex)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideStownbyindex);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAdd2);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAnd2,
@@ -517,25 +48,11 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAnd2)
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAnd2);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateShl2,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateApply,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateShl2)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateApply)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateShl2);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideStlexvar,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideStlexvar)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideStlexvar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideNewlexenvwithname,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideNewlexenvwithname)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideNewlexenvwithname);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateApply);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAshr2,
@@ -545,53 +62,39 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAshr2)
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAshr2);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStownbyvaluewithnameset,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionawaituncaught,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStownbyvaluewithnameset)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAsyncfunctionawaituncaught)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStownbyvaluewithnameset);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAsyncfunctionawaituncaught);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis3,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionenter,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallthis3)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAsyncfunctionenter)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallthis3);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAsyncfunctionenter);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetresumemode,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionreject,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetresumemode)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAsyncfunctionreject)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetresumemode);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAsyncfunctionreject);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStglobalvar,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncfunctionresolve,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStglobalvar)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAsyncfunctionresolve)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStglobalvar);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAsyncfunctionresolve);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendableexternalmodulevar,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncgeneratorreject,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeLdsendableexternalmodulevar)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAsyncgeneratorreject)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeLdsendableexternalmodulevar);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateStarrayspread,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateStarrayspread)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateStarrayspread);
-}
-
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfalse,
-// abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdfalse)
-{
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdfalse);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAsyncgeneratorreject);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAsyncgeneratorresolve,
@@ -601,25 +104,158 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAsyncgeneratorresolve)
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAsyncgeneratorresolve);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateAdd2,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg0,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateAdd2)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallarg0)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateAdd2);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallarg0);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdinfinity,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallarg1,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdinfinity)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallarg1)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdinfinity);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallarg1);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSub2,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs2,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateSub2)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallargs2)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateSub2);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallargs2);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallargs3,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallargs3)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallargs3);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallrange,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallrange)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallrange);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeCallinit,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeCallinit)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeCallinit);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeCreateprivateproperty,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeCreateprivateproperty)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeCreateprivateproperty);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyindex,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeDefinefieldbyindex)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeDefinefieldbyindex);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinefieldbyvalue,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeDefinefieldbyvalue)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeDefinefieldbyvalue);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefineprivateproperty,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeDefineprivateproperty)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeDefineprivateproperty);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeDefinesendableclass,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeDefinesendableclass)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeDefinesendableclass);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIsfalse,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeIsfalse)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeIsfalse);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIstrue,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeIstrue)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeIstrue);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendableclass,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeLdsendableclass)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeLdsendableclass);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendableexternalmodulevar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeLdsendableexternalmodulevar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeLdsendableexternalmodulevar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendablevar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeLdsendablevar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeLdsendablevar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeNewsendableenv,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeNewsendableenv)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeNewsendableenv);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeNotifyconcurrentresult,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeNotifyconcurrentresult)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeNotifyconcurrentresult);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeStsendablevar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeStsendablevar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeStsendablevar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeTopropertykey,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeTopropertykey)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeTopropertykey);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWideldsendableexternalmodulevar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeWideldsendableexternalmodulevar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeWideldsendableexternalmodulevar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWideldsendablevar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeWideldsendablevar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeWideldsendablevar);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWidenewsendableenv,
@@ -629,18 +265,109 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeWidenewsendabl
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeWidenewsendableenv);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthis,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeWidestsendablevar,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdthis)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeWidestsendablevar)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdthis);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeWidestsendablevar);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateTestin,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis0,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateTestin)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallthis0)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateTestin);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallthis0);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis1,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallthis1)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallthis1);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis2,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallthis2)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallthis2);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis3,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallthis3)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallthis3);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthisrange,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallthisrange)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallthisrange);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCopydataproperties,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCopydataproperties)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCopydataproperties);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCopyrestargs,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCopyrestargs)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCopyrestargs);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreatearraywithbuffer,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreatearraywithbuffer)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreatearraywithbuffer);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateasyncgeneratorobj,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateasyncgeneratorobj)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateasyncgeneratorobj);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyarray,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateemptyarray)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateemptyarray);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateemptyobject,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateemptyobject)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateemptyobject);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreategeneratorobj,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreategeneratorobj)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreategeneratorobj);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateiterresultobj,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateiterresultobj)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateiterresultobj);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithbuffer,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreateobjectwithbuffer)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreateobjectwithbuffer);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreateobjectwithexcludedkeys,
@@ -657,46 +384,137 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDebugger)
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDebugger);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateThrowConstassignment,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDec,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateThrowConstassignment)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDec)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateThrowConstassignment);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDec);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCatchPhi,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefineclasswithbuffer,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCatchPhi)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefineclasswithbuffer)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCatchPhi);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefineclasswithbuffer);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCreategeneratorobj,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefieldbyname,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCreategeneratorobj)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefinefieldbyname)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCreategeneratorobj);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefinefieldbyname);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideLdexternalmodulevar,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinefunc,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideLdexternalmodulevar)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefinefunc)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideLdexternalmodulevar);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefinefunc);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateSuspendgenerator,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinegettersetterbyvalue,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateSuspendgenerator)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefinegettersetterbyvalue)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateSuspendgenerator);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefinegettersetterbyvalue);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateNeg,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinemethod,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateNeg)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefinemethod)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateNeg);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefinemethod);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDefinepropertybyname,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDefinepropertybyname)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDefinepropertybyname);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDelobjprop,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDelobjprop)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDelobjprop);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDiv2,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDiv2)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDiv2);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateDynamicimport,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateDynamicimport)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateDynamicimport);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateEq,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateEq)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateEq);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateExp,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateExp)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateExp);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetasynciterator,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetasynciterator)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetasynciterator);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetiterator,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetiterator)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetiterator);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetmodulenamespace,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetmodulenamespace)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetmodulenamespace);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetnextpropname,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetnextpropname)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetnextpropname);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetpropiterator,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetpropiterator)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetpropiterator);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetresumemode,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetresumemode)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetresumemode);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGettemplateobject,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGettemplateobject)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGettemplateobject);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGetunmappedargs,
@@ -706,32 +524,158 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGetunmappedargs)
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGetunmappedargs);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeLdsendableclass,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreater,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeLdsendableclass)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGreater)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeLdsendableclass);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGreater);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallruntimeIsfalse,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateGreatereq,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallruntimeIsfalse)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateGreatereq)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallruntimeIsfalse);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateGreatereq);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateCallthis0,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIf,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateCallthis0)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateIf)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateCallthis0);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateIf);
 }
 
-// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateWideCallrange,
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInc,
 // abc-kind=NoABC, category=negative-nullptr
-TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideCallrange)
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateInc)
 {
-    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateWideCallrange);
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateInc);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateInstanceof,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateInstanceof)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateInstanceof);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsfalse,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateIsfalse)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateIsfalse);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIsin,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateIsin)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateIsin);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateIstrue,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateIstrue)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateIstrue);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdbigint,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdbigint)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdbigint);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdexternalmodulevar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdexternalmodulevar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdexternalmodulevar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfalse,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdfalse)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdfalse);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdfunction,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdfunction)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdfunction);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdglobal,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdglobal)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdglobal);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdglobalvar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdglobalvar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdglobalvar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdhole,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdhole)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdhole);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdinfinity,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdinfinity)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdinfinity);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlexvar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdlexvar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdlexvar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdlocalmodulevar,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdlocalmodulevar)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdlocalmodulevar);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnan,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdnan)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdnan);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnewtarget,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdnewtarget)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdnewtarget);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdnull,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdnull)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdnull);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyindex,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdobjbyindex)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdobjbyindex);
 }
 
 // Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyname,
@@ -739,6 +683,55 @@ TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateWideCallrange)
 TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdobjbyname)
 {
     helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdobjbyname);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdobjbyvalue,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdobjbyvalue)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdobjbyvalue);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdprivateproperty,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdprivateproperty)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdprivateproperty);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsuperbyname,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdsuperbyname)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdsuperbyname);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsuperbyvalue,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdsuperbyvalue)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdsuperbyvalue);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdsymbol,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdsymbol)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdsymbol);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthis,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdthis)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdthis);
+}
+
+// Test: test-kind=api, api=IsaApiDynamicImpl::iCreateLdthisbyname,
+// abc-kind=NoABC, category=negative-nullptr
+TEST_F(LibAbcKitNullptrTestsIsaApiDynamicImpl0, iCreateLdthisbyname)
+{
+    helpers_nullptr::TestNullptr(g_isaApiDynamicImp->iCreateLdthisbyname);
 }
 
 }  // namespace libabckit::test

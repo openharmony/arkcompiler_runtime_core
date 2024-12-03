@@ -67,7 +67,7 @@ def load_list(test_root: str, test_list_path: str, directory: Optional[str] = No
         for line in file:
             test_file = load_test_from_list(test_root, line, directory)
             if test_file:
-                result.append(test_file)
+                result.append(path.normpath(test_file))
 
     return result
 
@@ -123,14 +123,14 @@ class Runner(ABC):
         # or the current folder (where this python file is located!) parent
         self.test_root = config.general.test_root
         if self.test_root is not None:
-            Log.summary(_LOGGER, f"TEST_ROOT set to {self.test_root}")
+            Log.summary(_LOGGER, f"TEST_ROOT set to '{self.test_root}'")
         # directory where list files (files with list of ignored, excluded, and other tests) are located
         # it's either set explicitly to the absolute value or
         # the current folder (where this python file is located!) parent
-        self.default_list_root = Path(config.general.static_core_root) / 'tests' / 'tests-u-runner' / 'test-lists'
+        self.default_list_root = Path(config.general.static_core_root) / 'plugins' / 'ets' / 'tests' / 'test-lists'
         self.list_root = config.general.list_root
         if self.list_root is not None:
-            Log.summary(_LOGGER, f"LIST_ROOT set to {self.list_root}")
+            Log.summary(_LOGGER, f"LIST_ROOT set to '{self.list_root}'")
 
         # runner init time
         self.start_time = datetime.now(pytz.UTC)
@@ -244,7 +244,7 @@ class Runner(ABC):
         tests = []
         for list_name in lists:
             list_path = correct_path(self.list_root, list_name)
-            Log.summary(_LOGGER, f"Loading tests from the list {list_path}")
+            Log.summary(_LOGGER, f"Loading tests from the list '{list_path}'")
             TestCase().assertTrue(self.test_root, "TEST_ROOT not set to correct value")
             tests.extend(load_list(self.test_root, list_path, directory))
         return tests
@@ -265,13 +265,15 @@ class Runner(ABC):
     def add_directories(self, test_dirs: List[TestDirectory]) -> None:
         for test_dir in test_dirs:
             self.add_directory(test_dir)
+        if not self.tests:
+            Log.exception_and_raise(_LOGGER, "No tests have been loaded")
 
     # Browse the directory, search for files with the specified extension
     # and add them as tests
     def add_directory(self, test_dir: TestDirectory) -> None:
         directory, extension, flags = test_dir
         directory = str(directory)
-        Log.summary(_LOGGER, f"Loading tests from the directory {directory}")
+        Log.all(_LOGGER, f"Loading tests from the directory '{directory}'")
         test_files = []
         if self.explicit_test is not None:
             if self.explicit_test.startswith(directory) or path.isdir(directory):
@@ -284,13 +286,13 @@ class Runner(ABC):
                 self.load_excluded_tests()
                 self.load_ignored_tests()
             if not path.exists(directory):
-                directory = str(path.join(self.test_root, directory))
+                directory = str(path.normpath(path.join(self.test_root, directory)))
             test_files.extend(self.__load_test_files(directory, extension))
 
         self._search_both_excluded_and_ignored_tests()
         self._search_not_used_ignored(test_files)
 
-        all_tests = {self.create_test(test, flags, test in self.ignored_tests) for test in test_files}
+        all_tests = {self.create_test(path.normpath(test), flags, test in self.ignored_tests) for test in test_files}
         not_tests = {t for t in all_tests if isinstance(t, TestETS) and not t.is_valid_test}
         valid_tests = all_tests - not_tests
 
@@ -298,13 +300,10 @@ class Runner(ABC):
             groups = self.config.test_lists.groups.quantity
             n_group = self.config.test_lists.groups.number
             n_group = n_group if n_group <= groups else groups
-            valid_tests = {
-                test for test in valid_tests
-                if get_group_number(test.path, groups) == n_group
-            }
+            valid_tests = {test for test in valid_tests if get_group_number(test.path, groups) == n_group}
 
         self.tests.update(valid_tests)
-        Log.all(_LOGGER, f"Loaded {len(self.tests)} tests")
+        Log.default(_LOGGER, f"Loaded {len(valid_tests)} tests from directory '{directory}'")
 
     def _search_both_excluded_and_ignored_tests(self) -> None:
         already_excluded = [test for test in self.ignored_tests if test in self.excluded_tests]

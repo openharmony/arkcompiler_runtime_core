@@ -172,6 +172,7 @@ static std::unique_ptr<ClassLinker> CreateClassLinker([[maybe_unused]] ManagedTh
     return classLinker;
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
 TEST_F(InterpreterTest, TestMov)
 {
     BytecodeEmitter emitter;
@@ -963,6 +964,106 @@ PandaString GetArrayClassName(panda_file::Type::TypeId componentTypeId)
 }
 
 template <panda_file::Type::TypeId COMPONENT_TYPE_ID>
+// CC-OFFNXT(G.FUN.01, huge_method) big switch case
+static void PrepareEmitterForNonRefType(BytecodeEmitter &emitter, size_t loadIdx)
+{
+    switch (COMPONENT_TYPE_ID) {
+        case panda_file::Type::TypeId::U1:
+        case panda_file::Type::TypeId::U8: {
+            emitter.Starr8(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.Ldarru8(1);
+            break;
+        }
+        case panda_file::Type::TypeId::I8: {
+            emitter.Starr8(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.Ldarr8(1);
+            break;
+        }
+        case panda_file::Type::TypeId::U16: {
+            emitter.Starr16(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.Ldarru16(1);
+            break;
+        }
+        case panda_file::Type::TypeId::I16: {
+            emitter.Starr16(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.Ldarr16(1);
+            break;
+        }
+        case panda_file::Type::TypeId::U32:
+        case panda_file::Type::TypeId::I32: {
+            emitter.Starr(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.Ldarr(1);
+            break;
+        }
+        case panda_file::Type::TypeId::U64:
+        case panda_file::Type::TypeId::I64: {
+            emitter.StarrWide(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.LdarrWide(1);
+            break;
+        }
+        case panda_file::Type::TypeId::F32: {
+            emitter.Fstarr32(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.Fldarr32(1);
+            break;
+        }
+        case panda_file::Type::TypeId::F64: {
+            emitter.FstarrWide(1, 2U);
+            emitter.Ldai(loadIdx);
+            emitter.FldarrWide(1);
+            break;
+        }
+        default: {
+            UNREACHABLE();
+            break;
+        }
+    }
+}
+
+template <panda_file::Type::TypeId COMPONENT_TYPE_ID>
+void PrepareEmitterForArrayTest(BytecodeEmitter &emitter, int64_t arrayLength, size_t loadIdx, size_t storeIdx,
+                                const ArrayComponentTypeHelperT<COMPONENT_TYPE_ID> &storeValue)
+{
+    emitter.Movi(0, arrayLength);
+    emitter.Newarr(1, 0, RuntimeInterface::TYPE_ID.AsIndex());
+
+    if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::REFERENCE) {
+        emitter.LdaObj(4U);
+    } else if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::F32) {
+        emitter.Fldai(bit_cast<int32_t>(storeValue));
+    } else if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::F64) {
+        emitter.FldaiWide(bit_cast<int64_t>(storeValue));
+    } else {
+        emitter.LdaiWide(static_cast<int64_t>(storeValue));
+    }
+
+    emitter.Movi(2U, storeIdx);
+
+    if constexpr (COMPONENT_TYPE_ID != panda_file::Type::TypeId::REFERENCE) {
+        PrepareEmitterForNonRefType<COMPONENT_TYPE_ID>(emitter, loadIdx);
+    } else {
+        emitter.StarrObj(1, 2U);
+        emitter.Ldai(loadIdx);
+        emitter.LdarrObj(1);
+    }
+
+    if constexpr (COMPONENT_TYPE_ID != panda_file::Type::TypeId::REFERENCE) {
+        emitter.StaWide(3U);
+    } else {
+        emitter.StaObj(3U);
+    }
+
+    emitter.Lenarr(1);
+    emitter.Return();
+}
+
+template <panda_file::Type::TypeId COMPONENT_TYPE_ID>
 static void TestArray()
 {
     std::ostringstream ss;
@@ -988,93 +1089,7 @@ static void TestArray()
     const auto storeValue = GetStoreValue<ComponentType>(elemClass);
     const auto loadValue = GetLoadValue<ComponentType>(elemClass);
 
-    emitter.Movi(0, ARRAY_LENGTH);
-    emitter.Newarr(1, 0, RuntimeInterface::TYPE_ID.AsIndex());
-
-    if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::REFERENCE) {
-        emitter.LdaObj(4U);
-    } else if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::F32) {
-        emitter.Fldai(bit_cast<int32_t>(storeValue));
-    } else if constexpr (COMPONENT_TYPE_ID == panda_file::Type::TypeId::F64) {
-        emitter.FldaiWide(bit_cast<int64_t>(storeValue));
-    } else {
-        emitter.LdaiWide(static_cast<int64_t>(storeValue));
-    }
-
-    emitter.Movi(2U, STORE_IDX);
-
-    if constexpr (COMPONENT_TYPE_ID != panda_file::Type::TypeId::REFERENCE) {
-        switch (COMPONENT_TYPE_ID) {
-            case panda_file::Type::TypeId::U1:
-            case panda_file::Type::TypeId::U8: {
-                emitter.Starr8(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.Ldarru8(1);
-                break;
-            }
-            case panda_file::Type::TypeId::I8: {
-                emitter.Starr8(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.Ldarr8(1);
-                break;
-            }
-            case panda_file::Type::TypeId::U16: {
-                emitter.Starr16(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.Ldarru16(1);
-                break;
-            }
-            case panda_file::Type::TypeId::I16: {
-                emitter.Starr16(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.Ldarr16(1);
-                break;
-            }
-            case panda_file::Type::TypeId::U32:
-            case panda_file::Type::TypeId::I32: {
-                emitter.Starr(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.Ldarr(1);
-                break;
-            }
-            case panda_file::Type::TypeId::U64:
-            case panda_file::Type::TypeId::I64: {
-                emitter.StarrWide(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.LdarrWide(1);
-                break;
-            }
-            case panda_file::Type::TypeId::F32: {
-                emitter.Fstarr32(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.Fldarr32(1);
-                break;
-            }
-            case panda_file::Type::TypeId::F64: {
-                emitter.FstarrWide(1, 2U);
-                emitter.Ldai(LOAD_IDX);
-                emitter.FldarrWide(1);
-                break;
-            }
-            default: {
-                UNREACHABLE();
-                break;
-            }
-        }
-    } else {
-        emitter.StarrObj(1, 2U);
-        emitter.Ldai(LOAD_IDX);
-        emitter.LdarrObj(1);
-    }
-
-    if constexpr (COMPONENT_TYPE_ID != panda_file::Type::TypeId::REFERENCE) {
-        emitter.StaWide(3U);
-    } else {
-        emitter.StaObj(3U);
-    }
-
-    emitter.Lenarr(1);
-    emitter.Return();
+    PrepareEmitterForArrayTest<COMPONENT_TYPE_ID>(emitter, ARRAY_LENGTH, LOAD_IDX, STORE_IDX, storeValue);
 
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
@@ -1195,339 +1210,138 @@ TEST_F(InterpreterTest, TestNewobj)
     EXPECT_EQ(obj, f->GetAccAsVReg().GetReference());
 }
 
-TEST_F(InterpreterTest, TestInitobj)
+static auto GetMethodHanlder1(Method *ctor, bool &hasErrors, ObjectHeader *obj, StaticFrameHandler &frameHandler)
 {
-    {
-        BytecodeEmitter emitter;
-
-        emitter.InitobjShort(0, 2U, RuntimeInterface::METHOD_ID.AsIndex());
-        emitter.ReturnObj();
-
-        std::vector<uint8_t> bytecode;
-        ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
-
-        auto f = CreateFrame(16U, nullptr, nullptr);
-        InitializeFrame(f.get());
-
-        auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
-        auto methodData = CreateMethod(cls, f.get(), bytecode);
-        auto method = std::move(methodData.first);
-        f->SetMethod(method.get());
-
-        pandasm::Parser p;
-        auto source = R"(
-            .record R {}
-
-            .function void R.ctor(R a0, i32 a1, i32 a2) <static> {
-                return.void
-            }
-        )";
-
-        auto res = p.Parse(source);
-        auto classPf = pandasm::AsmEmitter::Emit(res.Value());
-
-        auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
-        ASSERT_NE(classLinker, nullptr);
-
-        classLinker->AddPandaFile(std::move(classPf));
-
-        PandaString descriptor;
-
-        auto *thread = ManagedThread::GetCurrent();
-        auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-        Class *objectClass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));
-        ASSERT_TRUE(classLinker->InitializeClass(thread, objectClass));
-
-        Method *ctor = objectClass->GetMethods().data();
-        ObjectHeader *obj = AllocObject(objectClass);
-
-        auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0).Set(10U);
-        frameHandler.GetVReg(2U).Set(20U);
-
-        bool hasErrors = false;
-
-        RuntimeInterface::SetupInvokeMethodHandler(
-            [&]([[maybe_unused]] ManagedThread *t, Method *m, Value *args) -> Value {
-                if (m != ctor) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                Span<Value> sp(args, m->GetNumArgs());
-                if (sp[0].GetAs<ObjectHeader *>() != obj) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[1].GetAs<int32_t>() != frameHandler.GetVReg(0).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                return Value(nullptr);
-            });
-
-        RuntimeInterface::SetupResolvedMethod(ctor);
-        RuntimeInterface::SetupResolvedClass(objectClass);
-        RuntimeInterface::SetupObjectClass(objectClass);
-        RuntimeInterface::SetupObject(obj);
-
-        Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
-
-        ASSERT_FALSE(hasErrors);
-
-        RuntimeInterface::SetupInvokeMethodHandler({});
-        RuntimeInterface::SetupResolvedMethod(nullptr);
-        RuntimeInterface::SetupResolvedClass(nullptr);
-        RuntimeInterface::SetupObjectClass(nullptr);
-        RuntimeInterface::SetupObject(nullptr);
-
-        EXPECT_EQ(obj, f->GetAccAsVReg().GetReference());
-    }
-
-    {
-        BytecodeEmitter emitter;
-
-        emitter.Initobj(0U, 2U, 3U, 5U, RuntimeInterface::METHOD_ID.AsIndex());
-        emitter.ReturnObj();
-
-        std::vector<uint8_t> bytecode;
-        ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
-
-        auto f = CreateFrame(16U, nullptr, nullptr);
-        InitializeFrame(f.get());
-
-        auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
-        auto methodData = CreateMethod(cls, f.get(), bytecode);
-        auto method = std::move(methodData.first);
-        f->SetMethod(method.get());
-
-        pandasm::Parser p;
-        auto source = R"(
-            .record R {}
-
-            .function void R.ctor(R a0, i32 a1, i32 a2, i32 a3, i32 a4) <static> {
-                return.void
-            }
-        )";
-
-        auto res = p.Parse(source);
-        auto classPf = pandasm::AsmEmitter::Emit(res.Value());
-
-        auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
-        ASSERT_NE(classLinker, nullptr);
-
-        classLinker->AddPandaFile(std::move(classPf));
-
-        PandaString descriptor;
-
-        auto *thread = ManagedThread::GetCurrent();
-        auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-        Class *objectClass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));
-        ASSERT_TRUE(classLinker->InitializeClass(thread, objectClass));
-
-        Method *ctor = objectClass->GetMethods().data();
-        ObjectHeader *obj = AllocObject(objectClass);
-
-        auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(0U).Set(10U);
-        frameHandler.GetVReg(2U).Set(20U);
-        frameHandler.GetVReg(3U).Set(30U);
-        frameHandler.GetVReg(5U).Set(40U);
-
-        bool hasErrors = false;
-
-        RuntimeInterface::SetupInvokeMethodHandler(
-            [&]([[maybe_unused]] ManagedThread *t, Method *m, Value *args) -> Value {
-                if (m != ctor) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                Span<Value> sp(args, m->GetNumArgs());
-                if (sp[0].GetAs<ObjectHeader *>() != obj) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[1].GetAs<int32_t>() != frameHandler.GetVReg(0).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[3U].GetAs<int32_t>() != frameHandler.GetVReg(3U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[4U].GetAs<int32_t>() != frameHandler.GetVReg(5U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                return Value(nullptr);
-            });
-
-        RuntimeInterface::SetupResolvedMethod(ctor);
-        RuntimeInterface::SetupResolvedClass(objectClass);
-        RuntimeInterface::SetupObjectClass(objectClass);
-        RuntimeInterface::SetupObject(obj);
-
-        Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
-
-        ASSERT_FALSE(hasErrors);
-
-        RuntimeInterface::SetupInvokeMethodHandler({});
-        RuntimeInterface::SetupResolvedMethod(nullptr);
-        RuntimeInterface::SetupResolvedClass(nullptr);
-        RuntimeInterface::SetupObjectClass(nullptr);
-        RuntimeInterface::SetupObject(nullptr);
-
-        EXPECT_EQ(obj, f->GetAccAsVReg().GetReference());
-    }
-
-    {
-        BytecodeEmitter emitter;
-
-        emitter.InitobjRange(2U, RuntimeInterface::METHOD_ID.AsIndex());
-        emitter.ReturnObj();
-
-        std::vector<uint8_t> bytecode;
-        ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
-
-        auto f = CreateFrame(16U, nullptr, nullptr);
-        InitializeFrame(f.get());
-
-        auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
-        auto methodData = CreateMethod(cls, f.get(), bytecode);
-        auto method = std::move(methodData.first);
-        f->SetMethod(method.get());
-
-        pandasm::Parser p;
-        auto source = R"(
-            .record R {}
-
-            .function void R.ctor(R a0, i32 a1, i32 a2, i32 a3, i32 a4, i32 a5) <static> {
-                return.void
-            }
-        )";
-
-        auto res = p.Parse(source);
-        auto classPf = pandasm::AsmEmitter::Emit(res.Value());
-
-        auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
-        ASSERT_NE(classLinker, nullptr);
-
-        classLinker->AddPandaFile(std::move(classPf));
-
-        PandaString descriptor;
-
-        auto *thread = ManagedThread::GetCurrent();
-        auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
-        Class *objectClass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));
-        ASSERT_TRUE(classLinker->InitializeClass(thread, objectClass));
-
-        Method *ctor = objectClass->GetMethods().data();
-        ObjectHeader *obj = AllocObject(objectClass);
-
-        auto frameHandler = StaticFrameHandler(f.get());
-        frameHandler.GetVReg(2U).Set(10U);
-        frameHandler.GetVReg(3U).Set(20U);
-        frameHandler.GetVReg(4U).Set(30U);
-        frameHandler.GetVReg(5U).Set(40U);
-        frameHandler.GetVReg(6U).Set(50U);
-
-        bool hasErrors = false;
-
-        RuntimeInterface::SetupInvokeMethodHandler(
-            [&]([[maybe_unused]] ManagedThread *t, Method *m, Value *args) -> Value {
-                if (m != ctor) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                Span<Value> sp(args, m->GetNumArgs());
-                if (sp[0].GetAs<ObjectHeader *>() != obj) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[1U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(3U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[3U].GetAs<int32_t>() != frameHandler.GetVReg(4U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[4U].GetAs<int32_t>() != frameHandler.GetVReg(5U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                if (sp[5U].GetAs<int32_t>() != frameHandler.GetVReg(6U).Get()) {
-                    hasErrors = true;
-                    return Value(nullptr);
-                }
-
-                return Value(nullptr);
-            });
-
-        RuntimeInterface::SetupResolvedMethod(ctor);
-        RuntimeInterface::SetupResolvedClass(objectClass);
-        RuntimeInterface::SetupObjectClass(objectClass);
-        RuntimeInterface::SetupObject(obj);
-
-        Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
-
-        ASSERT_FALSE(hasErrors);
-
-        RuntimeInterface::SetupInvokeMethodHandler({});
-        RuntimeInterface::SetupResolvedMethod(nullptr);
-        RuntimeInterface::SetupResolvedClass(nullptr);
-        RuntimeInterface::SetupObjectClass(nullptr);
-        RuntimeInterface::SetupObject(nullptr);
-
-        EXPECT_EQ(obj, f->GetAccAsVReg().GetReference());
-    }
+    return [ctor, &hasErrors, obj, &frameHandler]([[maybe_unused]] ManagedThread *t, Method *m, Value *args) -> Value {
+        if (m != ctor) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        Span<Value> sp(args, m->GetNumArgs());
+        if (sp[0].GetAs<ObjectHeader *>() != obj) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[1].GetAs<int32_t>() != frameHandler.GetVReg(0).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        return Value(nullptr);
+    };
 }
 
-void TestLoadStoreField(bool isStatic)
+static auto GetMethodHanlder2(Method *ctor, bool &hasErrors, ObjectHeader *obj, StaticFrameHandler &frameHandler)
+{
+    return [ctor, &hasErrors, obj, &frameHandler]([[maybe_unused]] ManagedThread *t, Method *m, Value *args) -> Value {
+        if (m != ctor) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        Span<Value> sp(args, m->GetNumArgs());
+        if (sp[0].GetAs<ObjectHeader *>() != obj) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[1].GetAs<int32_t>() != frameHandler.GetVReg(0).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[3U].GetAs<int32_t>() != frameHandler.GetVReg(3U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[4U].GetAs<int32_t>() != frameHandler.GetVReg(5U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        return Value(nullptr);
+    };
+}
+
+static auto GetMethodHanlder3(Method *ctor, bool &hasErrors, ObjectHeader *obj, StaticFrameHandler &frameHandler)
+{
+    return [ctor, &hasErrors, obj, &frameHandler]([[maybe_unused]] ManagedThread *t, Method *m, Value *args) -> Value {
+        if (m != ctor) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        Span<Value> sp(args, m->GetNumArgs());
+        if (sp[0].GetAs<ObjectHeader *>() != obj) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[1U].GetAs<int32_t>() != frameHandler.GetVReg(2U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[2U].GetAs<int32_t>() != frameHandler.GetVReg(3U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[3U].GetAs<int32_t>() != frameHandler.GetVReg(4U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[4U].GetAs<int32_t>() != frameHandler.GetVReg(5U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        if (sp[5U].GetAs<int32_t>() != frameHandler.GetVReg(6U).Get()) {
+            hasErrors = true;
+            return Value(nullptr);
+        }
+
+        return Value(nullptr);
+    };
+}
+
+static void SetupRuntimeInterface(Method *ctor, Class *objectClass, ObjectHeader *obj)
+{
+    RuntimeInterface::SetupResolvedMethod(ctor);
+    RuntimeInterface::SetupResolvedClass(objectClass);
+    RuntimeInterface::SetupObjectClass(objectClass);
+    RuntimeInterface::SetupObject(obj);
+}
+
+static void CleanUpRuntimeInterface()
+{
+    RuntimeInterface::SetupInvokeMethodHandler({});
+    RuntimeInterface::SetupResolvedMethod(nullptr);
+    RuntimeInterface::SetupResolvedClass(nullptr);
+    RuntimeInterface::SetupObjectClass(nullptr);
+    RuntimeInterface::SetupObject(nullptr);
+}
+
+TEST_F(InterpreterTest, TestInitobj1)
 {
     BytecodeEmitter emitter;
 
-    if (isStatic) {
-        emitter.Ldstatic(RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaWide(1U);
-        emitter.LdaWide(2U);
-        emitter.Ststatic(RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.Ldstatic(RuntimeInterface::FIELD_ID.AsIndex());
-    } else {
-        emitter.Ldobj(0, RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaWide(1U);
-        emitter.LdaWide(2U);
-        emitter.Stobj(0, RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.Ldobj(0, RuntimeInterface::FIELD_ID.AsIndex());
-    }
-    emitter.ReturnWide();
+    emitter.InitobjShort(0, 2U, RuntimeInterface::METHOD_ID.AsIndex());
+    emitter.ReturnObj();
 
     std::vector<uint8_t> bytecode;
     ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
@@ -1541,6 +1355,271 @@ void TestLoadStoreField(bool isStatic)
     f->SetMethod(method.get());
 
     pandasm::Parser p;
+    auto source = R"(
+        .record R {}
+
+        .function void R.ctor(R a0, i32 a1, i32 a2) <static> {
+            return.void
+        }
+    )";
+
+    auto res = p.Parse(source);
+    auto classPf = pandasm::AsmEmitter::Emit(res.Value());
+
+    auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
+    ASSERT_NE(classLinker, nullptr);
+
+    classLinker->AddPandaFile(std::move(classPf));
+
+    PandaString descriptor;
+
+    auto *thread = ManagedThread::GetCurrent();
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    Class *objectClass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));
+    ASSERT_TRUE(classLinker->InitializeClass(thread, objectClass));
+
+    Method *ctor = objectClass->GetMethods().data();
+    ObjectHeader *obj = AllocObject(objectClass);
+
+    auto frameHandler = StaticFrameHandler(f.get());
+    frameHandler.GetVReg(0).Set(10U);
+    frameHandler.GetVReg(2U).Set(20U);
+
+    bool hasErrors = false;
+
+    RuntimeInterface::SetupInvokeMethodHandler(GetMethodHanlder1(ctor, hasErrors, obj, frameHandler));
+
+    SetupRuntimeInterface(ctor, objectClass, obj);
+
+    Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
+
+    ASSERT_FALSE(hasErrors);
+
+    CleanUpRuntimeInterface();
+
+    EXPECT_EQ(obj, f->GetAccAsVReg().GetReference());
+}
+
+TEST_F(InterpreterTest, TestInitobj2)
+{
+    BytecodeEmitter emitter;
+
+    emitter.Initobj(0U, 2U, 3U, 5U, RuntimeInterface::METHOD_ID.AsIndex());
+    emitter.ReturnObj();
+
+    std::vector<uint8_t> bytecode;
+    ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
+
+    auto f = CreateFrame(16U, nullptr, nullptr);
+    InitializeFrame(f.get());
+
+    auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto methodData = CreateMethod(cls, f.get(), bytecode);
+    auto method = std::move(methodData.first);
+    f->SetMethod(method.get());
+
+    pandasm::Parser p;
+    auto source = R"(
+        .record R {}
+
+        .function void R.ctor(R a0, i32 a1, i32 a2, i32 a3, i32 a4) <static> {
+            return.void
+        }
+    )";
+
+    auto res = p.Parse(source);
+    auto classPf = pandasm::AsmEmitter::Emit(res.Value());
+
+    auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
+    ASSERT_NE(classLinker, nullptr);
+
+    classLinker->AddPandaFile(std::move(classPf));
+
+    PandaString descriptor;
+
+    auto *thread = ManagedThread::GetCurrent();
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    Class *objectClass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));
+    ASSERT_TRUE(classLinker->InitializeClass(thread, objectClass));
+
+    Method *ctor = objectClass->GetMethods().data();
+    ObjectHeader *obj = AllocObject(objectClass);
+
+    auto frameHandler = StaticFrameHandler(f.get());
+    frameHandler.GetVReg(0U).Set(10U);
+    frameHandler.GetVReg(2U).Set(20U);
+    frameHandler.GetVReg(3U).Set(30U);
+    frameHandler.GetVReg(5U).Set(40U);
+
+    bool hasErrors = false;
+
+    RuntimeInterface::SetupInvokeMethodHandler(GetMethodHanlder2(ctor, hasErrors, obj, frameHandler));
+
+    SetupRuntimeInterface(ctor, objectClass, obj);
+
+    Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
+
+    ASSERT_FALSE(hasErrors);
+
+    CleanUpRuntimeInterface();
+
+    EXPECT_EQ(obj, f->GetAccAsVReg().GetReference());
+}
+
+TEST_F(InterpreterTest, TestInitobj3)
+{
+    BytecodeEmitter emitter;
+
+    emitter.InitobjRange(2U, RuntimeInterface::METHOD_ID.AsIndex());
+    emitter.ReturnObj();
+
+    std::vector<uint8_t> bytecode;
+    ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
+
+    auto f = CreateFrame(16U, nullptr, nullptr);
+    InitializeFrame(f.get());
+
+    auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto methodData = CreateMethod(cls, f.get(), bytecode);
+    auto method = std::move(methodData.first);
+    f->SetMethod(method.get());
+
+    pandasm::Parser p;
+    auto source = R"(
+        .record R {}
+
+        .function void R.ctor(R a0, i32 a1, i32 a2, i32 a3, i32 a4, i32 a5) <static> {
+            return.void
+        }
+    )";
+
+    auto res = p.Parse(source);
+    auto classPf = pandasm::AsmEmitter::Emit(res.Value());
+
+    auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
+    ASSERT_NE(classLinker, nullptr);
+
+    classLinker->AddPandaFile(std::move(classPf));
+
+    PandaString descriptor;
+
+    auto *thread = ManagedThread::GetCurrent();
+    auto *ext = classLinker->GetExtension(panda_file::SourceLang::PANDA_ASSEMBLY);
+    Class *objectClass = ext->GetClass(ClassHelper::GetDescriptor(utf::CStringAsMutf8("R"), &descriptor));
+    ASSERT_TRUE(classLinker->InitializeClass(thread, objectClass));
+
+    Method *ctor = objectClass->GetMethods().data();
+    ObjectHeader *obj = AllocObject(objectClass);
+
+    auto frameHandler = StaticFrameHandler(f.get());
+    frameHandler.GetVReg(2U).Set(10U);
+    frameHandler.GetVReg(3U).Set(20U);
+    frameHandler.GetVReg(4U).Set(30U);
+    frameHandler.GetVReg(5U).Set(40U);
+    frameHandler.GetVReg(6U).Set(50U);
+
+    bool hasErrors = false;
+
+    RuntimeInterface::SetupInvokeMethodHandler(GetMethodHanlder3(ctor, hasErrors, obj, frameHandler));
+
+    SetupRuntimeInterface(ctor, objectClass, obj);
+
+    Execute(ManagedThread::GetCurrent(), bytecode.data(), f.get());
+
+    ASSERT_FALSE(hasErrors);
+
+    CleanUpRuntimeInterface();
+
+    EXPECT_EQ(obj, f->GetAccAsVReg().GetReference());
+}
+
+constexpr float FLOAT_VALUE = 1.0;
+constexpr double DOUBLE_VALUE = 2.0F;
+
+// CC-OFFNXT(G.FUN.01, huge_method) big switch case
+static void SetPrimitive(StaticFrameHandler &frameHandler, Field &field, int64_t &value)
+{
+    switch (field.GetTypeId()) {
+        case panda_file::Type::TypeId::U1: {
+            value = std::numeric_limits<uint8_t>::max();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::I8: {
+            value = std::numeric_limits<int8_t>::min();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::U8: {
+            value = std::numeric_limits<uint8_t>::max();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::I16: {
+            value = std::numeric_limits<int16_t>::min();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::U16: {
+            value = std::numeric_limits<uint16_t>::max();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::I32: {
+            value = std::numeric_limits<int32_t>::min();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::U32: {
+            value = std::numeric_limits<uint32_t>::max();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::I64: {
+            value = std::numeric_limits<int64_t>::min();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::U64: {
+            value = std::numeric_limits<uint64_t>::max();
+            frameHandler.GetVReg(2U).SetPrimitive(value);
+            break;
+        }
+        case panda_file::Type::TypeId::F32: {
+            frameHandler.GetVReg(2U).SetPrimitive(FLOAT_VALUE);
+            break;
+        }
+        case panda_file::Type::TypeId::F64: {
+            frameHandler.GetVReg(2U).SetPrimitive(DOUBLE_VALUE);
+            break;
+        }
+        default: {
+            UNREACHABLE();
+            break;
+        }
+    }
+}
+
+static void CheckValues(Field &field, Frame *f, int64_t &value, std::ostringstream &ss)
+{
+    switch (field.GetTypeId()) {
+        case panda_file::Type::TypeId::F32: {
+            EXPECT_EQ(f->GetAccAsVReg().GetFloat(), FLOAT_VALUE) << ss.str();
+            break;
+        }
+        case panda_file::Type::TypeId::F64: {
+            EXPECT_EQ(f->GetAccAsVReg().GetDouble(), DOUBLE_VALUE) << ss.str();
+            break;
+        }
+        default: {
+            EXPECT_EQ(f->GetAccAsVReg().GetLong(), value) << ss.str();
+            break;
+        }
+    }
+}
+
+static std::string GetSourceForFieldTest(bool isStatic)
+{
     std::string source;
 
     if (isStatic) {
@@ -1577,8 +1656,48 @@ void TestLoadStoreField(bool isStatic)
         )";
     }
 
-    auto res = p.Parse(source);
-    auto classPf = pandasm::AsmEmitter::Emit(res.Value());
+    return source;
+}
+
+static void PrepareEmitterForFieldTest(bool isStatic, BytecodeEmitter &emitter)
+{
+    if (isStatic) {
+        emitter.Ldstatic(RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.StaWide(1U);
+        emitter.LdaWide(2U);
+        emitter.Ststatic(RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.Ldstatic(RuntimeInterface::FIELD_ID.AsIndex());
+    } else {
+        emitter.Ldobj(0, RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.StaWide(1U);
+        emitter.LdaWide(2U);
+        emitter.Stobj(0, RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.Ldobj(0, RuntimeInterface::FIELD_ID.AsIndex());
+    }
+    emitter.ReturnWide();
+}
+
+void TestLoadStoreField(bool isStatic)
+{
+    BytecodeEmitter emitter;
+
+    PrepareEmitterForFieldTest(isStatic, emitter);
+
+    std::vector<uint8_t> bytecode;
+    ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS);
+
+    auto f = CreateFrame(16U, nullptr, nullptr);
+    InitializeFrame(f.get());
+
+    auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto methodData = CreateMethod(cls, f.get(), bytecode);
+    auto method = std::move(methodData.first);
+    f->SetMethod(method.get());
+
+    pandasm::Parser p;
+    std::string source = GetSourceForFieldTest(isStatic);
+
+    auto classPf = pandasm::AsmEmitter::Emit(p.Parse(source).Value());
 
     auto classLinker = CreateClassLinker(ManagedThread::GetCurrent());
     ASSERT_NE(classLinker, nullptr);
@@ -1598,80 +1717,13 @@ void TestLoadStoreField(bool isStatic)
         frameHandler.GetVReg(0).SetReference(obj);
     }
 
-    std::vector<panda_file::Type::TypeId> types {
-        panda_file::Type::TypeId::U1,  panda_file::Type::TypeId::I8,  panda_file::Type::TypeId::U8,
-        panda_file::Type::TypeId::I16, panda_file::Type::TypeId::U16, panda_file::Type::TypeId::I32,
-        panda_file::Type::TypeId::U32, panda_file::Type::TypeId::I64, panda_file::Type::TypeId::U64,
-        panda_file::Type::TypeId::F32, panda_file::Type::TypeId::F64};
-
     Span<Field> fields = isStatic ? objectClass->GetStaticFields() : objectClass->GetInstanceFields();
     for (Field &field : fields) {
         std::ostringstream ss;
         ss << "Test field " << reinterpret_cast<const char *>(field.GetName().data);
 
-        constexpr float FLOAT_VALUE = 1.0;
-        constexpr double DOUBLE_VALUE = 2.0F;
         int64_t value = 0;
-
-        switch (field.GetTypeId()) {
-            case panda_file::Type::TypeId::U1: {
-                value = std::numeric_limits<uint8_t>::max();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::I8: {
-                value = std::numeric_limits<int8_t>::min();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::U8: {
-                value = std::numeric_limits<uint8_t>::max();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::I16: {
-                value = std::numeric_limits<int16_t>::min();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::U16: {
-                value = std::numeric_limits<uint16_t>::max();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::I32: {
-                value = std::numeric_limits<int32_t>::min();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::U32: {
-                value = std::numeric_limits<uint32_t>::max();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::I64: {
-                value = std::numeric_limits<int64_t>::min();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::U64: {
-                value = std::numeric_limits<uint64_t>::max();
-                frameHandler.GetVReg(2U).SetPrimitive(value);
-                break;
-            }
-            case panda_file::Type::TypeId::F32: {
-                frameHandler.GetVReg(2U).SetPrimitive(FLOAT_VALUE);
-                break;
-            }
-            case panda_file::Type::TypeId::F64: {
-                frameHandler.GetVReg(2U).SetPrimitive(DOUBLE_VALUE);
-                break;
-            }
-            default: {
-                UNREACHABLE();
-                break;
-            }
-        }
+        SetPrimitive(frameHandler, field, value);
 
         RuntimeInterface::SetupResolvedField(&field);
 
@@ -1679,63 +1731,14 @@ void TestLoadStoreField(bool isStatic)
 
         RuntimeInterface::SetupResolvedField(nullptr);
 
-        switch (field.GetTypeId()) {
-            case panda_file::Type::TypeId::F32: {
-                EXPECT_EQ(f->GetAccAsVReg().GetFloat(), FLOAT_VALUE) << ss.str();
-                break;
-            }
-            case panda_file::Type::TypeId::F64: {
-                EXPECT_EQ(f->GetAccAsVReg().GetDouble(), DOUBLE_VALUE) << ss.str();
-                break;
-            }
-            default: {
-                EXPECT_EQ(f->GetAccAsVReg().GetLong(), value) << ss.str();
-                break;
-            }
-        }
+        CheckValues(field, f.get(), value, ss);
 
         EXPECT_EQ(frameHandler.GetVReg(1).GetLong(), 0) << ss.str();
     }
 }
 
-void TestLoadStoreObjectField(bool isStatic)
+static std::string GetSourceForObjectFieldTest(bool isStatic)
 {
-    BytecodeEmitter emitter;
-
-    std::ostringstream ss;
-    ss << "Test load/store ";
-    if (isStatic) {
-        ss << "static ";
-    }
-    ss << "object field";
-
-    if (isStatic) {
-        emitter.LdstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaObj(1U);
-        emitter.LdaObj(2U);
-        emitter.StstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.LdstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
-    } else {
-        emitter.LdobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.StaObj(1U);
-        emitter.LdaObj(2U);
-        emitter.StobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
-        emitter.LdobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
-    }
-    emitter.ReturnObj();
-
-    std::vector<uint8_t> bytecode;
-    ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
-
-    auto f = CreateFrame(16U, nullptr, nullptr);
-    InitializeFrame(f.get());
-
-    auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
-    auto methodData = CreateMethod(cls, f.get(), bytecode);
-    auto method = std::move(methodData.first);
-    f->SetMethod(method.get());
-
-    pandasm::Parser p;
     std::string source;
 
     if (isStatic) {
@@ -1751,6 +1754,54 @@ void TestLoadStoreObjectField(bool isStatic)
             }
         )";
     }
+
+    return source;
+}
+
+static void PrepareEmitter(BytecodeEmitter &emitter, bool isStatic)
+{
+    if (isStatic) {
+        emitter.LdstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.StaObj(1U);
+        emitter.LdaObj(2U);
+        emitter.StstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.LdstaticObj(RuntimeInterface::FIELD_ID.AsIndex());
+    } else {
+        emitter.LdobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.StaObj(1U);
+        emitter.LdaObj(2U);
+        emitter.StobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
+        emitter.LdobjObj(0, RuntimeInterface::FIELD_ID.AsIndex());
+    }
+    emitter.ReturnObj();
+}
+
+void TestLoadStoreObjectField(bool isStatic)
+{
+    BytecodeEmitter emitter;
+
+    std::ostringstream ss;
+    ss << "Test load/store ";
+    if (isStatic) {
+        ss << "static ";
+    }
+    ss << "object field";
+
+    PrepareEmitter(emitter, isStatic);
+
+    std::vector<uint8_t> bytecode;
+    ASSERT_EQ(emitter.Build(&bytecode), BytecodeEmitter::ErrorCode::SUCCESS) << ss.str();
+
+    auto f = CreateFrame(16U, nullptr, nullptr);
+    InitializeFrame(f.get());
+
+    auto cls = CreateClass(panda_file::SourceLang::PANDA_ASSEMBLY);
+    auto methodData = CreateMethod(cls, f.get(), bytecode);
+    auto method = std::move(methodData.first);
+    f->SetMethod(method.get());
+
+    pandasm::Parser p;
+    std::string source = GetSourceForObjectFieldTest(isStatic);
 
     auto res = p.Parse(source);
     auto classPf = pandasm::AsmEmitter::Emit(res.Value());
@@ -1921,6 +1972,7 @@ auto GetArrayDescriptor(const char *name, int rank)
     return ClassHelper::GetArrayDescriptor(utf::CStringAsMutf8(name), rank, &descriptor);
 }
 
+// CC-OFFNXT(G.FUN.01, huge_method) solid logic
 TEST_F(InterpreterTest, TestIsInstance)
 {
     auto emitterFactory = []() {
@@ -2735,6 +2787,13 @@ Frame *CreateFrameWithSize(uint32_t size, uint32_t nregs, Method *method, Frame 
     return new (Frame::FromExt(frame, extSz)) Frame(frame, method, prev, nregs);
 }
 
+static inline void RunTask(ark::mem::GC *gc)
+{
+    ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
+    GCTask task(GCTaskCause::OOM_CAUSE);
+    task.Run(*gc);
+}
+
 #if defined(PANDA_TARGET_ARM32) && defined(NDEBUG)
 DEATH_TEST_F(InterpreterWithSTWTest, DISABLED_TestCreateFrame)
 #else
@@ -2788,9 +2847,8 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
         frameHandler2.GetVReg(i).SetReference(ark::mem::AllocNonMovableObject());
     }
 
-    size_t extSz = CORE_EXT_FRAME_DATA_SIZE;
     size_t allocSz = sizeof(interpreter::VRegister) * vregNum2;
-    memset_s(ToVoidPtr(ToUintPtr(f2) + extSz + sizeof(Frame)), allocSz, 0xff, allocSz);
+    memset_s(ToVoidPtr(ToUintPtr(f2) + CORE_EXT_FRAME_DATA_SIZE + sizeof(Frame)), allocSz, 0xff, allocSz);
 
     ark::mem::GC *gc = Runtime::GetCurrent()->GetPandaVM()->GetGC();
 
@@ -2805,11 +2863,7 @@ DEATH_TEST_F(InterpreterWithSTWTest, TestCreateFrame)
     f2 = CreateFrameWithSize(Frame::GetActualSize<false>(vregNum2), vregNum2, method1.get(), f1.get(),
                              ManagedThread::GetCurrent());
 
-    {
-        ScopedNativeCodeThread sn(ManagedThread::GetCurrent());
-        GCTask task(GCTaskCause::OOM_CAUSE);
-        task.Run(*gc);
-    }
+    RunTask(gc);
 
     ark::FreeFrameInterp(f2, ManagedThread::GetCurrent());
 }

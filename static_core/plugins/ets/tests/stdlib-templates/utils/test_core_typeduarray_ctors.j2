@@ -76,10 +76,8 @@ function check(result: number, message: String): number {
   return fail;
 }
 
-const normalSource: {{.item.type}}[] = {{.item.data}};
-const abnormalSource: {{.item.type}}[] = {{.item.abnormalData}};
-
-
+const normalSource: {{.item.sourceElementsType}}[] = {{.item.data}};
+const abnormalSource: {{.item.sourceElementsType}}[] = {{.item.abnormalData}};
 
 function createDefault(): number {
   let target: {{.item.objectType}} = new {{.item.objectType}}();
@@ -111,10 +109,10 @@ function createtypedUArrayWithWrongLength(): number {
 }
 
 function createEmptyWithIterable(): number {
-  let array: Array<Number> = new Array<Number>();
+  let array: Array<{{.item.type}}> = new Array<{{.item.type}}>();
   let target: {{.item.objectType}};
   try {
-    target = new {{.item.objectType}}(array.values() as Iterable<Number>);
+    target = new {{.item.objectType}}(array.values() as Iterable<{{.item.type}}>);
   } catch(e) {
     return fail;
   }
@@ -132,26 +130,26 @@ function createEmptyWithIterable(): number {
 }
 
 function createNonEmptyWithIterable(): number {
-  let array: Array<Number> = new Array<Number>();
-  array.push(1);
-  array.push(2);
-  array.push(3);
-  let target: {{.item.objectType}} = new {{.item.objectType}}(array.values() as Iterable<Number>);
+  let array: Array<{{.item.type}}> = new Array<{{.item.type}}>();
+  array.push({{.item.create}}(1));
+  array.push({{.item.create}}(2));
+  array.push({{.item.create}}(3));
+  let target: {{.item.objectType}} = new {{.item.objectType}}(array.values() as Iterable<{{.item.type}}>);
 
   if (target.length as int == 3 && target.byteOffset as int == 0 && target.byteLength as int == 3*{{.item.primitiveSizeBytes}}){
     return success;
   }
 
-  let exceptArray: Array<Number> = new Array<Number>();
+  let exceptArray: Array<{{.item.type}}> = new Array<{{.item.type}}>();
   for (let value of target) {
     exceptArray.push(value);
     console.log(value);
   }
 
-  let origin: {{.item.objectType}} = new {{.item.objectType}}(exceptArray.values() as Iterable<Number>);
+  let origin: {{.item.objectType}} = new {{.item.objectType}}(exceptArray.values() as Iterable<{{.item.type}}>);
   for (let i: int = 0; i< target.length as int; i++) {
-    let tv = target[i] as number;
-    let ov = origin[i] as number;
+    let tv = target[i]{{.item.cast2primitive}};
+    let ov = origin[i]{{.item.cast2primitive}};
     console.log(tv + "->" + ov);
     if (tv != ov) {
       console.log("Array data mismatch");
@@ -161,14 +159,186 @@ function createNonEmptyWithIterable(): number {
   return fail;
 }
 
+function testTypedUArrayIterator(): number {
+  let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});
+  let typedUArray: {{.item.objectType}};
+
+  try {
+    typedUArray = new {{.item.objectType}}(ss);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  let length = typedUArray.length;
+
+  try {
+    typedUArray[0] = {{.item.create}}(1);
+    typedUArray[1] = {{.item.create}}(2);
+    typedUArray[2] = {{.item.create}}(3);
+    typedUArray[3] = {{.item.create}}(4);
+    typedUArray[4] = {{.item.create}}(5);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  let arrayIterator = typedUArray.$_iterator();
+  let next = arrayIterator.next();
+  let counter: number = 0;
+  while (!next.done) {
+    if (next.value == undefined) {
+        return fail;
+    }
+    if (typedUArray[counter] != (next.value!)) {
+        return fail;
+    }
+    next = arrayIterator.next()
+    counter++
+  }
+
+  if (counter != typedUArray.length) {
+    return fail;
+  }
+
+  return success;
+}
+
+function testTypedUArrayIteratorEmptyArray(): number {
+  let emptyArray = new {{.item.objectType}}(new ArrayBuffer(0));
+  let emptyIterator = emptyArray.$_iterator();
+  let emptyNext = emptyIterator.next();
+
+  if (!emptyNext.done || emptyNext.value != undefined) {
+    return fail;
+  }
+
+  return success;
+}
+
+function testTypedUArrayIteratorSingleElement(): number {
+  let singleArray = new {{.item.objectType}}(new ArrayBuffer(1 *  {{.item.primitiveSizeBytes}}));
+
+  try {
+    singleArray[0] = {{.item.create}}(99);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  let singleIterator = singleArray.$_iterator();
+  let singleNext = singleIterator.next();
+
+  if (singleNext.done || singleNext.value != {{.item.create}}(99)) {
+    return fail;
+  }
+
+  singleNext = singleIterator.next();
+  if (!singleNext.done || singleNext.value != undefined) {
+    return fail;
+  }
+
+  return success;
+}
+
+function testTypedUArrayIteratorAfterModification(): number {
+  let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});
+  let typedUArray: {{.item.objectType}};
+
+  try {
+    typedUArray = new {{.item.objectType}}(ss);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  try {
+    typedUArray[0] = {{.item.create}}(1);
+    typedUArray[1] = {{.item.create}}(2);
+    typedUArray[2] = {{.item.create}}(3);
+    typedUArray[3] = {{.item.create}}(4);
+    typedUArray[4] = {{.item.create}}(5);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  // Testing iterator after modification
+  let arrayIterator = typedUArray.$_iterator();
+  let next = arrayIterator.next();
+  let expectedValues: {{.item.type}}[] = [
+    {{.item.create}}(1),
+    {{.item.create}}(2),
+    {{.item.create}}(3),
+    {{.item.create}}(4),
+    {{.item.create}}(5),
+  ];
+  let counter: int = 0;
+
+  while (!next.done) {
+    if (next.value == undefined) {
+      return fail;
+    }
+    if (expectedValues[counter] != next.value) {
+      return fail;
+    }
+    next = arrayIterator.next();
+    counter++;
+  }
+
+  if (counter != typedUArray.length) {
+    return fail;
+  }
+
+  // Modify a value
+  typedUArray[0] = {{.item.create}}(99);
+  if(typedUArray.$_iterator().next().value != {{.item.create}}(99)){
+    return fail;
+  }
+
+  return success;
+}
+
+function testTypedUArrayIteratorAfterCompletion(): number {
+  let ss = new ArrayBuffer(5 * {{.item.primitiveSizeBytes}});
+  let typedUArray: {{.item.objectType}};
+
+  try {
+    typedUArray = new {{.item.objectType}}(ss);
+  } catch(e) {
+    console.log(e);
+    return fail;
+  }
+
+  typedUArray[0] = {{.item.create}}(1);
+  typedUArray[1] = {{.item.create}}(2);
+  typedUArray[2] = {{.item.create}}(3);
+  typedUArray[3] = {{.item.create}}(4);
+  typedUArray[4] = {{.item.create}}(5);
+
+  let arrayIterator = typedUArray.$_iterator();
+  let next = arrayIterator.next();
+
+  while (!next.done) {
+    next = arrayIterator.next();
+  }
+
+  // Check iterator after completion
+  next = arrayIterator.next();
+  if (!next.done || next.value != undefined) {
+    return fail;
+  }
+
+  return success;
+}
 
 function createtypedUArrayWithArrayLike(): number {
-  let array = new Array<Number>();
-  array.push(1 as Number);
-  array.push(2 as Number);
-  array.push(3 as Number);
+  let array = new Array<{{.item.type}}>();
+  array.push({{.item.create}}(1 as Number));
+  array.push({{.item.create}}(2 as Number));
+  array.push({{.item.create}}(3 as Number));
 
-  let target: {{.item.objectType}} = new {{.item.objectType}} (array as ArrayLike<Number> );
+  let target: {{.item.objectType}} = new {{.item.objectType}} (array as ArrayLike<{{.item.type}}>);
   if (target.length as int == 3 && target.byteOffset as int == 0){
     return success;
   }

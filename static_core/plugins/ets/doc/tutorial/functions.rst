@@ -63,8 +63,8 @@ then this parameter's value is default:
     function multiply(n: number, coeff: number = 2): number {
         return n * coeff
     }
-    multiply(2)    // returns 2*2  
-    multiply(2, 3) // returns 2*3  
+    multiply(2)    // returns 2*2
+    multiply(2, 3) // returns 2*3
 
 |
 
@@ -198,7 +198,7 @@ An arrow function is usually defined inside another function. As an inner
 function, it can access all variables defined in the outer function.
 
 To capture the context, an inner function forms a closure of its environment.
-The closure allows accessing the inner function from outside its own
+The closure allows accessing the inner function from the outside of its own
 environment:
 
 .. code-block:: typescript
@@ -220,8 +220,8 @@ Function Overload Signatures
 ----------------------------
 
 Overload signatures can be written to specify that a function can be called
-in different ways. Writing an overload signature means that several functions'
-headers have the same name but different signatures, and are immediately
+in different ways. Writing an overload signature means that the functions'
+several headers have the same name but different signatures, and are immediately
 followed by a single implementation function:
 
 .. code-block:: typescript
@@ -239,4 +239,3 @@ An error occurs if two overload signatures have identical parameter lists.
 
 |
 
-|

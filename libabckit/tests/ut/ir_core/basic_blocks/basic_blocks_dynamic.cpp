@@ -393,8 +393,9 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitSuccBlocks(bb, &counter, [](AbckitBasicBlock *, AbckitBasicBlock *, void *data) {
+        g_implG->bbVisitSuccBlocks(bb, &counter, [](AbckitBasicBlock *, void *data) {
             (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
         });
         // CC-OFFNXT(G.FMT.02)
         ASSERT_EQ(counter, 1);
@@ -411,8 +412,9 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitPredBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitPredBlocks(bb, &counter, [](AbckitBasicBlock *, AbckitBasicBlock *, void *data) {
+        g_implG->bbVisitPredBlocks(bb, &counter, [](AbckitBasicBlock *, void *data) {
             (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
         });
 
         ASSERT_EQ(counter, 1);
@@ -431,8 +433,9 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitDominatedBlocks_1)
         auto *bb = helpers::BBgetSuccBlocks(start)[0];
 
         uint32_t counter = 0;
-        g_implG->bbVisitDominatedBlocks(bb, &counter, [](AbckitBasicBlock *, AbckitBasicBlock *, void *data) {
+        g_implG->bbVisitDominatedBlocks(bb, &counter, [](AbckitBasicBlock *, void *data) {
             (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
         });
 
         ASSERT_EQ(counter, 1);
@@ -567,6 +570,20 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetBasicBlock_1)
     g_impl->closeFile(file);
 }
 
+// Test: test-kind=api, api=GraphApiImpl::gGetBasicBlock, abc-kind=ArkTS1, category=negative
+TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetBasicBlockBigId)
+{
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::TransformMethod(file, "test", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        auto bbVectorSize = g_implG->gGetNumberOfBasicBlocks(graph);
+        auto *bb = g_implG->gGetBasicBlock(graph, bbVectorSize + 1);
+        ASSERT_EQ(bb, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    });
+    g_impl->closeFile(file);
+}
+
 // Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetParameter_1)
 {
@@ -576,6 +593,33 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetParameter_1)
         auto *start = g_implG->gGetStartBasicBlock(graph);
         auto *inst = g_implG->bbGetFirstInst(start);
         ASSERT_EQ(inst, g_implG->gGetParameter(graph, 0));
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    });
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::gGetParameter, abc-kind=ArkTS1, category=negative
+TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetParameterBigId)
+{
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        auto size = g_implG->gGetNumberOfParameters(graph);
+        auto *inst = g_implG->gGetParameter(graph, size + 1);
+        ASSERT_EQ(inst, nullptr);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_BAD_ARGUMENT);
+    });
+    g_impl->closeFile(file);
+}
+
+// Test: test-kind=api, api=GraphApiImpl::gGetNumberOfParameters, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitBasicBlocksDynamicTest, GgetNumberOfParameters)
+{
+    AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    helpers::TransformMethod(file, "test2", [](AbckitFile *, AbckitCoreFunction *, AbckitGraph *graph) {
+        uint32_t num = g_implG->gGetNumberOfParameters(graph);
+        ASSERT_EQ(num, 4U);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     });
     g_impl->closeFile(file);
@@ -655,8 +699,8 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBappendSuccBlock_1)
     g_impl->closeFile(file);
 }
 
-// Test: test-kind=api, api=GraphApiImpl::bbClear, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitBasicBlocksDynamicTest, BBclear_1)
+// Test: test-kind=api, api=GraphApiImpl::bbRemoveAllInsts, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitBasicBlocksDynamicTest, bbRemoveAllInsts_1)
 {
     AbckitFile *file = g_impl->openAbc(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/create_empty_dynamic.abc");
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -666,7 +710,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBclear_1)
         auto *newInst = g_dynG->iCreateNeg(graph, constInst);
         g_implG->bbAddInstFront(empty, newInst);
         ASSERT_EQ(g_implG->bbGetNumberOfInstructions(empty), 1);
-        g_implG->bbClear(empty);
+        g_implG->bbRemoveAllInsts(empty);
         ASSERT_EQ(g_implG->bbGetNumberOfInstructions(empty), 0);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     });
@@ -752,8 +796,7 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocksDynamic)
         } data {g_dynG, graph, 42};
 
         // CC-OFFNXT(G.FMT.02)
-        auto simpleCb = []([[maybe_unused]] AbckitBasicBlock *curBasicBlock, AbckitBasicBlock *succBasicBlock,
-                           void *d) {
+        auto simpleCb = [](AbckitBasicBlock *succBasicBlock, void *d) -> bool {
             // CC-OFFNXT(G.FMT.02)
             auto *gDynG = static_cast<struct VisitData *>(d)->gDynG;
             auto *graph = static_cast<struct VisitData *>(d)->graph;
@@ -764,13 +807,15 @@ TEST_F(LibAbcKitBasicBlocksDynamicTest, BBvisitSuccBlocksDynamic)
                    gDynG->iGetOpcode(curInst) != ABCKIT_ISA_API_DYNAMIC_OPCODE_CALLARG1) {
                 curInst = g_implG->iGetNext(curInst);
             }
-            // CC-OFFNXT(G.FMT.02)
-            ASSERT_NE(curInst, nullptr);
+            if (curInst == nullptr) {
+                return false;
+            }
             g_implG->iSetInput(curInst, g_implG->gCreateConstantU64(graph, newPrintInt), 1);
+            return true;
         };
 
         // CC-OFFNXT(G.FMT.02)
-        g_implG->bbVisitSuccBlocks(ifBB, (void *)&data, simpleCb);
+        g_implG->bbVisitSuccBlocks(ifBB, &data, simpleCb);
     };
     helpers::TransformMethod(ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/visit_succ_dynamic.abc",
                              ABCKIT_ABC_DIR "ut/ir_core/basic_blocks/js_src/visit_succ_dynamic_modified.abc",

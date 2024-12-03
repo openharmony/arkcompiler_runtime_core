@@ -16,27 +16,76 @@
 #ifndef CPP_ABCKIT_ARKTS_IMPORT_DESCRIPTOR_H
 #define CPP_ABCKIT_ARKTS_IMPORT_DESCRIPTOR_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/import_descriptor.h"
+#include "../core/import_descriptor.h"
+#include "../base_concepts.h"
 
 namespace abckit::arkts {
 
+/**
+ * @brief ImportDescriptor
+ */
 class ImportDescriptor final : public core::ImportDescriptor {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::File;
+    /// @brief to access private constructor
+    friend class abckit::arkts::Module;
+    /// @brief abckit::DefaultHash<ImportDescriptor>
+    friend class abckit::DefaultHash<ImportDescriptor>;
+    /// @brief to access private TargetCast
+    friend class abckit::traits::TargetCheckCast<ImportDescriptor>;
 
 public:
+    /**
+     * @brief Constructor Arkts API ImportDescriptor from the Core API with compatibility check
+     * @param other - Core API ImportDescriptor
+     */
+    explicit ImportDescriptor(const core::ImportDescriptor &other);
+
+    /**
+     * @brief Construct a new Import Descriptor object
+     * @param other
+     */
     ImportDescriptor(const ImportDescriptor &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ImportDescriptor&
+     */
     ImportDescriptor &operator=(const ImportDescriptor &other) = default;
+
+    /**
+     * @brief Construct a new Import Descriptor object
+     * @param other
+     */
     ImportDescriptor(ImportDescriptor &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return ImportDescriptor&
+     */
     ImportDescriptor &operator=(ImportDescriptor &&other) = default;
+
+    /**
+     * @brief Destroy the Import Descriptor object
+     */
     ~ImportDescriptor() override = default;
+
     // Other API.
     // ...
+
+private:
+    /**
+     * @brief Converts underlying import descriptor from Core to Arkts target
+     * @return AbckitArktsImportDescriptor* - converted import descriptor
+     * @note Set `ABCKIT_STATUS_WRONG_TARGET` error if `this` is does not have `ABCKIT_TARGET_ARK_TS_V1` or
+     * `ABCKIT_TARGET_ARK_TS_V2` target.
+     */
+    AbckitArktsImportDescriptor *TargetCast() const;
+
+    ABCKIT_NO_UNIQUE_ADDRESS traits::TargetCheckCast<ImportDescriptor> targetChecker_;
 };
 
 }  // namespace abckit::arkts

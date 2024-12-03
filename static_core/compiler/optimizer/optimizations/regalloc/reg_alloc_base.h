@@ -26,11 +26,12 @@ namespace ark::compiler {
 void ConnectIntervals(SpillFillInst *spillFill, const LifeIntervals *src, const LifeIntervals *dst);
 bool TryToSpillConstant(LifeIntervals *interval, Graph *graph);
 
-class RegAllocBase : public Optimization {
+class PANDA_PUBLIC_API RegAllocBase : public Optimization {
 public:
     explicit RegAllocBase(Graph *graph);
     RegAllocBase(Graph *graph, size_t regsCount);
     RegAllocBase(Graph *graph, const RegMask &regMask, const VRegMask &vregMask, size_t slotsCount);
+    RegAllocBase(Graph *graph, LocationMask mask);
 
     NO_MOVE_SEMANTIC(RegAllocBase);
     NO_COPY_SEMANTIC(RegAllocBase);
@@ -92,7 +93,7 @@ public:
 protected:
     StackSlot GetNextStackSlot(LifeIntervals *interval)
     {
-        return !GetStackMask().AllSet() ? GetNextStackSlotImpl(interval) : INVALID_STACK_SLOT;
+        return !GetStackMask().AllSet() ? GetNextStackSlotImpl(interval) : GetInvalidStackSlot();
     }
 
     StackSlot GetNextStackSlotImpl(LifeIntervals *interval)
@@ -112,7 +113,7 @@ protected:
             stackUseLastPositions_[slot] = interval->GetEnd();
             return slot;
         }
-        return INVALID_STACK_SLOT;
+        return GetInvalidStackSlot();
     }
 
     void PrepareIntervals();

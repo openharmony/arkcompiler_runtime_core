@@ -16,28 +16,35 @@
 #ifndef CPP_ABCKIT_ARKTS_ANNOTATION_IMPL_H
 #define CPP_ABCKIT_ARKTS_ANNOTATION_IMPL_H
 
-#include "cpp/headers/arkts/annotation.h"
+#include "./annotation.h"
+#include "./annotation_element.h"
+#include "../value.h"
 
 namespace abckit::arkts {
+
+inline AbckitArktsAnnotation *Annotation::TargetCast() const
+{
+    auto ret = GetApiConfig()->cArktsIapi_->coreAnnotationToArktsAnnotation(GetView());
+    CheckError(GetApiConfig());
+    return ret;
+}
+
+inline Annotation::Annotation(const core::Annotation &coreOther) : core::Annotation(coreOther), targetChecker_(this) {}
 
 inline arkts::Annotation &Annotation::AddElement(const abckit::Value &val, const std::string &name)
 {
     struct AbckitArktsAnnotationElementCreateParams params {
         name.c_str(), val.GetView()
     };
-    AbckitArktsAnnotation *arktsAnn = GetApiConfig()->cArktsIapi_->coreAnnotationToArktsAnnotation(GetView());
-    CheckError(GetApiConfig());
-    GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(arktsAnn, &params);
+    GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(TargetCast(), &params);
     CheckError(GetApiConfig());
     return *this;
 }
 
 inline AbckitCoreAnnotationElement *Annotation::AddAndGetElementImpl(AbckitArktsAnnotationElementCreateParams *params)
 {
-    AbckitArktsAnnotation *arktsAnn = GetApiConfig()->cArktsIapi_->coreAnnotationToArktsAnnotation(GetView());
-    CheckError(GetApiConfig());
     AbckitArktsAnnotationElement *arktsAnni =
-        GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(arktsAnn, params);
+        GetApiConfig()->cArktsMapi_->annotationAddAnnotationElement(TargetCast(), params);
     CheckError(GetApiConfig());
     AbckitCoreAnnotationElement *coreAnni =
         GetApiConfig()->cArktsIapi_->arktsAnnotationElementToCoreAnnotationElement(arktsAnni);
@@ -51,7 +58,7 @@ inline arkts::AnnotationElement Annotation::AddAndGetElement(const abckit::Value
         name.data(), val.GetView()
     };
     auto *coreAnni = AddAndGetElementImpl(&params);
-    core::AnnotationElement element(coreAnni, GetApiConfig());
+    core::AnnotationElement element(coreAnni, GetApiConfig(), GetResource());
     return arkts::AnnotationElement(element);
 }
 

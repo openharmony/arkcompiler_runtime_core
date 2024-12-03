@@ -33,9 +33,12 @@ def check_version(yaml_file, cur_version):
             
             if file_version == cur_version:
                 print("No change in version!")
+                exit(0)
             else:
                 print(f"[IMPORTANT] Version change detected ({cur_version} -> {file_version}), please contact the relevant domain.")
+                exit(1)
     except Exception as e:
         print(f"Error reading file: {e}")
+        exit(1)
 
 check_version(isa_file_path, CURRENT_VERSION)

@@ -53,6 +53,7 @@ constexpr bool IsHeapSpace(SpaceType spaceType)
            (spaceType == SpaceType::SPACE_TYPE_NON_MOVABLE_OBJECT);
 }
 
+// CC-OFFNXT(G.FUD.06) switch-case, ODR
 inline const char *SpaceTypeToString(SpaceType type)
 {
     switch (type) {

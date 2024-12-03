@@ -17,6 +17,7 @@
 #define PANDA_TOOLING_INSPECTOR_TYPES_SCOPE_H
 
 #include "runtime/tooling/inspector/types/remote_object.h"
+#include "runtime/tooling/inspector/json_serialization/serializable.h"
 
 #include <optional>
 #include <string>
@@ -26,13 +27,13 @@ class JsonObjectBuilder;
 }  // namespace ark
 
 namespace ark::tooling::inspector {
-class Scope {
+class Scope final : public JsonSerializable {
 public:
     enum class Type { GLOBAL, LOCAL };
 
     Scope(Type type, RemoteObject object, std::optional<std::string> name = {});
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const;
+    void Serialize(JsonObjectBuilder &builder) const override;
 
 private:
     Type type_;

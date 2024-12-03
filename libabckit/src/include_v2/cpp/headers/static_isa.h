@@ -16,12 +16,11 @@
 #ifndef CPP_ABCKIT_STATIC_ISA_H
 #define CPP_ABCKIT_STATIC_ISA_H
 
-#include "cpp/headers/config.h"
-#include "cpp/headers/declarations.h"
-
 #include <memory>
 
 namespace abckit {
+
+class Graph;
 
 class StaticIsa final {
     // To access private constructor.

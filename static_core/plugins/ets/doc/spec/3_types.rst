@@ -83,10 +83,11 @@ Predefined types include the following:
      - Boolean type: ``boolean``;
 
 
--  Reference types: ``object``, ``string``, ``[]`` (``array``), ``bigint``,
-   ``void``, ``never``, and ``undefined``;
+-  Built-in reference types: ``object``, ``string``, ``[]`` (``array``),
+   ``bigint``, ``void``, ``never``, ``null``, ``undefined``;
 
--  Class types: ``Object``, ``String``, ``Array<T>``, and ``BigInt``.
+-  Class types: ``Object``, ``String``, ``Array<T>``, ``BigInt``, and boxed
+   types (see :ref:`Boxed Types`).
 
 .. index::
    predefined type
@@ -196,30 +197,32 @@ All |LANG| types are summarized in the following table:
    *Value Types*             *Reference Types*         *Value Types*             *Reference Types*
    (Primitive Types)
    ========================= ========================= ========================= =========================
-   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types,        class types,            
-   ``short``, ``int``,       ``Short``, ``Int``,       literal types             interface types,
+   ``number``, ``byte``,     ``Number``, ``Byte``,     enumeration types         class types,            
+   ``short``, ``int``,       ``Short``, ``Int``,                                 interface types,
    ``long``, ``float``,      ``Long``, ``Float``,                                array types,   
    ``double``, ``char``,     ``Double``, ``Char``,                               function types,          
-   ``boolean``, ``string``,  ``Boolean``,                                        tuple types,             
-   ``bigint``                ``String``, ``string``,                             union types,             
-                                                                                 literal types,           
-                             ``BigInt``, ``bigint``,                             type parameters          
-                                                                                                          
-                             ``Object``, ``object``,                                                      
-                                                                                                          
+   ``boolean``               ``Boolean``, ``never``,                             tuple types,             
+
+                             ``String``, ``string``,                             union types,             
+
+                             ``BigInt``, ``bigint``,                             literal types,           
+
+                             ``Object``, ``object``,                             type parameters          
+
                              ``void``, ``null``,                                                          
-                             ``never``                                                                    
+
+                             ``undefined``, ``[]``                                                          
    ========================= ========================= ========================= =========================
 
 
-**Note**: Type ``string`` (see :ref:`Type string`) and type ``bigint`` (see
-:ref:`BigInt Type`) have dual semantics. It affects some types in several
-categories in the table above.
-
+**Note**: Type ``string`` (see :ref:`Type string`), type ``bigint`` (see
+:ref:`BigInt Type`), literal types (see :ref:`Literal Types`), and all boxed
+types (:ref:`Boxed Types`) have value type semantics in equality expressions
+(:ref:`Equality Expressions`).
 
 .. index::
    type string
-   BigInt type
+   type bigint
    semantics
 
 |
@@ -234,12 +237,13 @@ Using Types
 
 A type can be referred to in source code by the following:
 
--  Reserved name for a primitive type;
 -  Type reference for a named type (see :ref:`Named Types`), or type alias
    (see :ref:`Type Alias Declaration`);
 -  In-place type definition for an array type (see :ref:`Array Types`),
-   function type (see :ref:`Function Types`), tuple type (see :ref:`Tuple Types`),
-   or union type (see :ref:`Union Types`).
+   tuple type (see :ref:`Tuple Types`), function type (see :ref:`Function Types`),
+   function type with receiver (see :ref:`Function Types with Receiver`),
+   union type (see :ref:`Union Types`), keyof type (see :ref:`Keyof Types`), or
+   type in parenthesis.
 
 .. index::
    reserved name
@@ -254,26 +258,15 @@ A type can be referred to in source code by the following:
 .. code-block:: abnf
 
     type:
-        predefinedType
-        | typeReference
+        typeReference
         | arrayType
         | tupleType
         | functionType
+        | functionTypeWithReceiver
         | unionType
-        | literalType
+        | StringLiteral
         | keyofType
         | '(' type ')'
-        ;
-
-    predefinedType:
-        'number' | 'byte' | 'short' | 'int' | 'long' | 'float' | 'double'
-        | 'bigint'
-        | 'char' | 'boolean'
-        | 'object' | 'string' | 'void' | 'never' |'undefined'
-        ;
-
-    literalType:
-        Literal
         ;
 
 
@@ -282,11 +275,14 @@ The use of types is presented by the example below:
 .. code-block:: typescript
    :linenos:
 
-    let b: boolean  // using primitive value type name
-    let n: number   // using primitive value type name
-    let o: Object   // using predefined class type name
+    let n: number   // using identifier as a primitive value type name
+    let o: Object   // using identifier as a predefined class type name
     let a: number[] // using array type
-    let l: 1        // using literal type
+    let t: [number, number] // using tuple type
+    let f: ()=>number       // using function type
+    let u: number|string    // using union type
+    let l: "xyz"            // using string literal type
+    let k: keyof ("A"|"Z")  // using keyof type
 
 Parentheses in types (where a type is a combination of array, function, or
 union types) are used to specify the required type structure.
@@ -298,7 +294,6 @@ has the lowest precedence as presented in the following example:
    function type
    union type
    type structure
-   symbol
    construct
    precedence
    parenthesis
@@ -337,9 +332,10 @@ Named Types
 .. meta:
     frontend_status: Done
 
-Classes, interfaces, enumerations, aliases, and type parameters are named types.
-Other types (i.e., array, function, and union types) are anonymous. Respective
-named types are introduced by the following:
+Classes, interfaces, enumerations, aliases, type parameters, and predefined
+types (see :ref:`Predefined Types`) except builtin array are named types. Other
+types (i.e., array, function, and union types) are anonymous unless aliased.
+Respective named types are introduced by the following:
 
 -  Class declarations (see :ref:`Classes`),
 -  Interface declarations (see :ref:`Interfaces`),
@@ -986,41 +982,22 @@ Literal Types
 .. meta:
     frontend_status: None
 
-Literal types are aligned with |LANG| literals (see :ref:`Literals`), and
-their names are the same as the names of their values, i.e., the literals.
+Literal types are aligned with some |LANG| literals (see :ref:`Literals`).
+Their names are same as the names of their values, i.e., literals.
+Only three literal types are supported.
 
 .. code-block:: typescript
    :linenos:
 
-    let a: 1 = 1
-    let b: true = true
-    let c: 3.14 = 3.14
-    let d: "string literal" = "string literal"
-    let e: c'C' = c'C'
-    let f: 123n = 123n
-    let g: null = null
-    let h: undefined = undefined
+    let a: "string literal" = "string literal"
+    let b: null = null
+    let c: undefined = undefined
 
-    printThem (a, b, c, d, e, f, g, h)
-    function printThem (
-        p1: 1, p2: true, p3: 3.14, p4: "string literal",
-        p5: c"C", p6: 123n, p7: null, p8: undefined
-    ) {
-        console.log (p1, p2, p3, p4, p5, p6, p7, p8)
+    printThem (a, b, c)
+    function printThem (p1: "string literal", p2: null, p3: undefined) {
+        console.log (p1, p2, p3)
     }
 
-In case of numeric forms of literal types, *0*'s with no meaning are truncated:
-
-.. code-block:: typescript
-   :linenos:
-
-    // a1 and a2 have the same type 1
-    let a1: 1 = 0001
-    let a2: 0001 = 1
-
-    // b1 and b2 have the same type 3.14
-    let b1: 3.14 = 3.140000
-    let b1: 3.1400000 = 3.140
 
 .. index::
    literal type
@@ -1033,21 +1010,8 @@ In case of numeric forms of literal types, *0*'s with no meaning are truncated:
 Supertypes of Literal Types
 ---------------------------
 
-- For integer literals (see :ref:`Integer Literals`) their supertype is ``int``
-  or ``long`` depending on the value of the literal. 
-- For floating-point literals (see :ref:`Floating-Point Literals`) their
-  supertype is ``float`` (if *float type suffix* is present) or
-  ``double``.
-- For bigint literals (see :ref:`BigInt Literals`) their supertype is
-  ``bigint``.
-- For boolean literals (see :ref:`Boolean Literals`) their supertype is
-  ``boolean``.
-- For string literals (see :ref:`String Literals`) their supertype is
+- The supertype for string literals (see :ref:`String Literals`) is type
   ``string``.
-- For character literals (see :ref:`Character Literals`) their supertype is
-  ``char``.
-- For other literals their supertype is ``Object`` (see
-  :ref:`Object Class Type`).
 
 This affects the overriding as shown in the example below:
 
@@ -1055,31 +1019,36 @@ This affects the overriding as shown in the example below:
    :linenos:
 
     class Base {
-        foo(p: 1): int { return 666 }
+        foo(p: "1"): string { return "666" }
     }
     class Derived extends Base {
-        override foo(p: int): 1 { return 1 }
+        override foo(p: string): "1" { return "1" }
     }
-    // Type 1 <: int
+    // Type "1" <: string
 
     let base: Base = new Derived
-    let result: int = base.foo(1)
-    /* Argument 1 (value) is compatible to type 1 and to the type int in
+    let result: string = base.foo("1")
+    /* Argument "1" (value) is compatible to type "1" and to the type string in
        the overridden method
-       Function result of type int accepts 1 (value) of literal type 1
+       Function result of type string accepts "1" (value) of literal type "1"
     */
+
+
+- Null and undefined literals (see :ref:`Null Literal` and
+  :ref:`Undefined Literal`) have no supertype.
+
+.. code-block:: typescript
+   :linenos:
+
+    let o: Object = new Object
+    o = null      // compile-time error
+    o = undefined // compile-time error
+
 
 .. index::
    literal type
    supertype
-   floating-point literal
-   float
-   integer literal
-   float type suffix
    string literal
-   bigint literal
-   boolean literal
-   character literal
    override
 
 |
@@ -1097,19 +1066,8 @@ itself:
 .. code-block:: typescript
    :linenos:
 
-    let a: 1 = 1
-    let b: true = true
-    let c: 3.14 = 3.14
-    let d: "string literal" = "string literal"
-    let e: c"C" = c"C"
-    let f: 123n = 123n
-
-    let x: int = a + a       // + for int returns int
-    let y: boolean = b || b  // || for boolean returns boolean
-    let z: double = c * c    // * for double returns double
-    let s: string = d + d    // + for string returns string
-    let t: int = e + e       // + for char returns char
-    let u: bigint = f + f    // + for bigint returns bigint
+    let s0: "string literal" = "string literal"
+    let s1: string = s0 + s0   // + for string returns string
 
 .. index::
    literal type
@@ -1262,13 +1220,14 @@ can be seen in the reference of the other variable.
 .. meta:
     frontend_status: Done
 
-All classes, interfaces, string types, arrays, unions, function types, and enum
-types are compatible (see :ref:`Type Compatibility`) with class ``Object``, and
-all inherit (see :ref:`Inheritance`) the methods of the class ``Object``. Full
-description of all methods of class ``Object`` is given in the standard library
-(see :ref:`Standard Library`) description.
+All classes, interfaces, string and bigint types, arrays, unions except nullish
+ones, tuples, type parameters, function types, and enum types are compatible
+(see :ref:`Type Compatibility`) with class ``Object``, and all inherit (see
+:ref:`Inheritance`) the methods of the class ``Object``. Full description of
+all methods of class ``Object`` is given in the standard library (see
+:ref:`Standard Library`) description.
 
-The method ``toString`` as used in the examples in this document returns a
+The method ``toString`` is used in the examples in this document returns a
 string representation of the object.
 
 Using ``Object`` is recommended in all cases (although the name ``object``
@@ -1817,7 +1776,7 @@ the access to tuple elements.
 .. code-block:: typescript
    :linenos:
 
-   let tuple: [number, number, string, boolean, Object] = 
+   let tuple: [number, number, string, boolean, Object] =
               [     6,      7,  "abc",    true,    666]
    tuple[0] = 666
    console.log (tuple[0], tuple[4]) // `666 666` be printed
@@ -1869,18 +1828,12 @@ types. Valid values of all types the union is created from are the values of a
 A :index:`compile-time error` occurs if the type in the right-hand side of a
 union type declaration leads to a circular reference.
 
-If a *union* uses a primitive type (see *Primitive types* in
-:ref:`Types by Category`) then automatic boxing (see :ref:`Boxing Conversions`)
-occurs to keep the reference nature of the type.
+If a *union* uses a primitive type (see :ref:`Primitive Types`), then every such
+type is replaced for its boxed version (see :ref:`Boxed Types`) to keep the
+reference nature of the *union* type.
 
-A :index:`compile-time error` occurs if a *union* type contains:
-
--  More than one numeric type; or
--  More than one literal numeric type, and the values (see
-   :ref:`Numerical Equality Operators`) of such types are equal to each other.
-
-The reduced form of *union* types allows defining a type that has one literal
-type (see :ref:`Literal Types`) only:
+If a *union* type contains more than one numeric type, then a
+:index:`compile-time error` occurs.
 
 .. index::
    union type
@@ -1893,14 +1846,12 @@ type (see :ref:`Literal Types`) only:
    primitive type
    literal type
    primitive type
-   automatic boxing
+
+
+Examples of incorrect union types are represented below:
 
 .. code-block:: typescript
    :linenos:
-
-   type T = 3    // Literal type aliased
-   let t1: T = 3 // OK
-   let t2: T = 2 // Compile-time error
 
    type BadUnion1 = int | double // Compile-time error
    type BadUnion2 = Int | Double // Compile-time error
@@ -1908,16 +1859,25 @@ type (see :ref:`Literal Types`) only:
    let x = cond? new Int (): new Double /* Compile-time error as conditional
         expression contains an invalid union type Int | Double */
 
-   type GoodUnion1 = 1 | 2      // OK
-   type GoodUnion2 = 1 | 2.0    // OK
-   type GoodUnion3 = 1 | "2"    // OK
-   type BadUnion4  = 1 | 1.0    // Compile-time error, values match each other
+   type BadUnion4 = 1 | 2      // Compile-time error
+   type BadUnion5 = 1 | 2.0    // Compile-time error
+   type BadUnion6 = 1 | 1.0    // Compile-time error
 
 
-A typical example of the *union* type usage is represented below:
+A typical examples of the *union* type usage are represented below:
 
 .. code-block:: typescript
    :linenos:
+
+   type OperationResult = "Done" | "Not done"
+   function do_action(): OperationResult {
+      if (someCondition) {
+         return "Done"
+      } else {
+         return "Not done"
+      }
+   }
+
 
     class Cat {
       // ...
@@ -1974,12 +1934,12 @@ The following example represents literal types:
 .. code-block:: typescript
    :linenos:
 
-    type BMW_ModelCode = 325 | 530 | 735
-    let car_code: BMW_ModelCode = 325
-    if (car_code == 325){
-       car_code = 530
-    } else if (car_code == 530){
-       car_code = 735
+    type BMW_ModelCode = "325" | "530" | "735"
+    let car_code: BMW_ModelCode = "325"
+    if (car_code == "325"){
+       car_code = "530"
+    } else if (car_code == "530"){
+       car_code = "735"
     } else {
        // pension :-)
     }
@@ -1996,15 +1956,15 @@ of the union type:
 .. code-block:: typescript
    :linenos:
 
-    type BMW_ModelCode = 325 | 530 | 735
-    let car_code: BMW_ModelCode = 325
-    if (car_code == 666){ ... }
+    type BMW_ModelCode = "325" | "530" | "735"
+    let car_code: BMW_ModelCode = "325"
+    if (car_code == "666"){ ... }
     /*
-       compile-time error as 666 does not belong to
+       compile-time error as "666" does not belong to
        values of literal type BMW_ModelCode
     */
 
-    function model_code_test (code: number) {
+    function model_code_test (code: string) {
        if (car_code == code) { ... }
        // This test is to be resolved during program execution
     }
@@ -2051,14 +2011,8 @@ another:
 #. If at least one type in the union is ``Object``, then all other non-nullish
    types are removed.
 #. If there is type ``never`` among union types, then it is removed.
-#. Any numeric literal type is removed if its value fits into the numeric
-   type in a union.
 #. If after boxing (see :ref:`Boxing Conversions`) a primitive type equals
    another union type, then the initial type is removed.
-#. If the value of the literal type in a union type belongs to the values of a
-   type that is part of the union, then the literal type is removed.
-#. If the numeric value of a literal type belongs to the unboxed type of one of
-   union numeric class type, then the literal type is removed.
 #. This step is performed recursively until no mutually compatible types remain
    (see :ref:`Type Compatibility`), or the union type is reduced to a single
    type:
@@ -2099,25 +2053,11 @@ is presented in the examples below:
 
     ( T1 | T2) | (T3 | T4) => T1 | T2 | T3 | T4  // Linearization
 
-    1 | 1 | 1  =>  1                             // Identical types elimination
-    number | number => number                    
+    number | number => number                    // Identical types elimination
 
-    number | Number => Number                    // The same after boxing
-    Int | float => Int | Float => Float          // Boxing for numeric value type + heaviest left
-    Int | 3.14  => Int | 3.14                    // No changes
+    "1" | string | number => string | number    // Literal type value belongs to another type values
 
-    int|short|float|2 => float                   // The largest numeric type stays
-    int|long|2.71828 => long|2.71828             // The largest numeric type stays and the literal
-    1 | number | number => number                
-    int | double | short => double 
-
-    Byte | Int | Long => Long                   // The heaviest type left
-    Int | 3.14 | Float => Int | Float           // 3.14 belongs to unboxed Float
-
-
-    1 | string | number => string | number       // Literal type value belongs to another type values
-
-    1 | Object => Object                         // Object wins
+    "1" | Object => Object                      // Object wins
     AnyNonNullishType | Object => Object         
 
     class Base {}
@@ -2345,6 +2285,29 @@ that can potentially violate null safety (e.g., access to a property):
 
    -  Nullish-coalescing expression (see :ref:`Nullish-Coalescing Expression`
       for details).
+
+**Note**: Nullish types are not compatible with type ``Object``:
+
+.. code-block:: typescript
+   :linenos:
+
+   function nullish (
+      o: Object, nullish1: null, nullish2: undefined, nullish3: null|undefined,
+      nullish4: AnyClassOrInterfaceType|null|undefined
+   ) {
+      o = nullish1 /* compile-time error - type 'null' is not compatible with
+                      Object */
+      o = nullish2 /* compile-time error - type 'undefined' is not compatible
+                      with Object */
+      o = nullish3 /* compile-time error - type 'null|undefined' is not
+                      compatible with Object */
+      o = nullish4 /* compile-time error - type
+                      'AnyClassOrInterfaceType|null|undefined' is not
+                      compatible with Object */
+   }
+
+
+
 
 .. index::
    method call

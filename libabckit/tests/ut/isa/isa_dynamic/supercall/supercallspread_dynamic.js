@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-// Before AOP:
+
 class A {
     constructor(x, y) {
         print(x + y);
@@ -28,20 +28,3 @@ class B extends A {
 let arr = [1, 2];
 
 new B(arr);
-
-// After AOP:
-// class A {
-//     constructor(x, y) {
-//         print(x + y)
-//     }
-// }
-// class B extends A {
-//     constructor(arr) {
-//         super(...arr)
-//         print(arr)
-//     }
-// }
-
-// let arr = [1, 2]
-
-// new B(arr);

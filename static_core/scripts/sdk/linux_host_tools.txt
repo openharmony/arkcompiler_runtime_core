@@ -12,6 +12,7 @@ lib/libarkdisassembler.so
 lib/libarkfile.so
 lib/libarklinker.so
 lib/libarkruntime.so
+lib/libarktarget_options.so
 lib/libetsnative.so
 lib/libarkziparchive.so
 lib/libc_secshared.so

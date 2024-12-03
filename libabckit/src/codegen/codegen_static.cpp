@@ -45,7 +45,7 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
     }
 
     // IncI cannot write accumulator.
-    if (binop->GetSrcReg(0U) == compiler::ACC_REG_ID) {
+    if (binop->GetSrcReg(0U) == compiler::GetAccReg()) {
         return false;
     }
 
@@ -59,7 +59,7 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
         }
 
         const uint8_t index = AccReadIndex(uinst);
-        if (uinst->GetInput(index).GetInst() == binop && uinst->GetSrcReg(index) == compiler::ACC_REG_ID) {
+        if (uinst->GetInput(index).GetInst() == binop && uinst->GetSrcReg(index) == compiler::GetAccReg()) {
             return false;
         }
     }
@@ -83,43 +83,79 @@ bool CanConvertToIncI(const compiler::BinaryImmOperation *binop)
 
 void DoLdaObj(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(pandasm::Create_LDA_OBJ(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(pandasm::Create_MOV_OBJ(CodeGenStatic::RESERVED_REG, reg));
+            result.emplace_back(pandasm::Create_LDA_OBJ(CodeGenStatic::RESERVED_REG));
+        } else {
+            result.emplace_back(pandasm::Create_LDA_OBJ(reg));
+        }
     }
 }
 
 void DoLda(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(pandasm::Create_LDA(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(pandasm::Create_MOV(CodeGenStatic::RESERVED_REG, reg));
+            result.emplace_back(pandasm::Create_LDA(CodeGenStatic::RESERVED_REG));
+        } else {
+            result.emplace_back(pandasm::Create_LDA(reg));
+        }
     }
 }
 
 void DoLda64(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(pandasm::Create_LDA_64(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(pandasm::Create_MOV_64(CodeGenStatic::RESERVED_REG, reg));
+            result.emplace_back(pandasm::Create_LDA_64(CodeGenStatic::RESERVED_REG));
+        } else {
+            result.emplace_back(pandasm::Create_LDA_64(reg));
+        }
     }
 }
 
 void DoStaObj(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(pandasm::Create_STA_OBJ(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(pandasm::Create_STA_OBJ(CodeGenStatic::RESERVED_REG));
+            result.emplace_back(pandasm::Create_MOV_OBJ(reg, CodeGenStatic::RESERVED_REG));
+        } else {
+            result.emplace_back(pandasm::Create_STA_OBJ(reg));
+        }
     }
 }
 
 void DoSta(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(pandasm::Create_STA(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(pandasm::Create_STA(CodeGenStatic::RESERVED_REG));
+            result.emplace_back(pandasm::Create_MOV(reg, CodeGenStatic::RESERVED_REG));
+        } else {
+            result.emplace_back(pandasm::Create_STA(reg));
+        }
     }
 }
 
 void DoSta64(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
-        result.emplace_back(pandasm::Create_STA_64(reg));
+    if (reg != compiler::GetAccReg()) {
+        if (reg > compiler::INVALID_REG) {
+            ASSERT(compiler::IsFrameSizeLarge());
+            result.emplace_back(pandasm::Create_STA_64(CodeGenStatic::RESERVED_REG));
+            result.emplace_back(pandasm::Create_MOV_64(reg, CodeGenStatic::RESERVED_REG));
+        } else {
+            result.emplace_back(pandasm::Create_STA_64(reg));
+        }
     }
 }
 
@@ -134,14 +170,16 @@ void DoSta(compiler::DataType::Type type, compiler::Register reg, std::vector<pa
 
 void DoLdaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    ASSERT(reg <= compiler::INVALID_REG);
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_LDA_DYN(reg));
     }
 }
 
 void DoStaDyn(compiler::Register reg, std::vector<pandasm::Ins> &result)
 {
-    if (reg != compiler::ACC_REG_ID) {
+    ASSERT(reg <= compiler::INVALID_REG);
+    if (reg != compiler::GetAccReg()) {
         result.emplace_back(pandasm::Create_STA_DYN(reg));
     }
 }
@@ -257,7 +295,7 @@ void CodeGenStatic::EncodeSpillFillData(const compiler::SpillFillData &sf)
         return;
     }
     ASSERT(sf.GetType() != compiler::DataType::NO_TYPE);
-    ASSERT(sf.SrcValue() != compiler::INVALID_REG && sf.DstValue() != compiler::INVALID_REG);
+    ASSERT(sf.SrcValue() != compiler::GetInvalidReg() && sf.DstValue() != compiler::GetInvalidReg());
 
     if (sf.SrcValue() == sf.DstValue()) {
         return;
@@ -317,7 +355,7 @@ static void VisitConstant32(compiler::Inst *inst, std::vector<pandasm::Ins> &res
         case compiler::DataType::UINT16:
         case compiler::DataType::INT32:
         case compiler::DataType::UINT32:
-            if (dstReg == compiler::ACC_REG_ID) {
+            if (dstReg == compiler::GetAccReg()) {
                 pandasm::Ins ldai = pandasm::Create_LDAI(inst->CastToConstant()->GetInt32Value());
                 res.emplace_back(ldai);
             } else {
@@ -326,7 +364,7 @@ static void VisitConstant32(compiler::Inst *inst, std::vector<pandasm::Ins> &res
             }
             break;
         case compiler::DataType::FLOAT32:
-            if (dstReg == compiler::ACC_REG_ID) {
+            if (dstReg == compiler::GetAccReg()) {
                 pandasm::Ins ldai = pandasm::Create_FLDAI(inst->CastToConstant()->GetFloatValue());
                 res.emplace_back(ldai);
             } else {
@@ -351,7 +389,7 @@ static void VisitConstant64(compiler::Inst *inst, std::vector<pandasm::Ins> &res
     switch (type) {
         case compiler::DataType::INT64:
         case compiler::DataType::UINT64:
-            if (dstReg == compiler::ACC_REG_ID) {
+            if (dstReg == compiler::GetAccReg()) {
                 pandasm::Ins ldai = pandasm::Create_LDAI_64(inst->CastToConstant()->GetInt64Value());
                 res.emplace_back(ldai);
             } else {
@@ -360,7 +398,7 @@ static void VisitConstant64(compiler::Inst *inst, std::vector<pandasm::Ins> &res
             }
             break;
         case compiler::DataType::FLOAT64:
-            if (dstReg == compiler::ACC_REG_ID) {
+            if (dstReg == compiler::GetAccReg()) {
                 pandasm::Ins ldai = pandasm::Create_FLDAI_64(inst->CastToConstant()->GetDoubleValue());
                 res.emplace_back(ldai);
             } else {
@@ -534,8 +572,8 @@ void CodeGenStatic::CallHandler(GraphVisitor *visitor, Inst *inst, std::string m
     } else {
         for (size_t i = start; i < sfCount; ++i) {
             auto reg = inst->GetSrcReg(i);
-            ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::ACC_REG_ID);
-            if (reg == compiler::ACC_REG_ID) {
+            ASSERT(reg < NUM_COMPACTLY_ENCODED_REGS || reg == compiler::GetAccReg());
+            if (reg == compiler::GetAccReg()) {
                 ASSERT(inst->IsCallOrIntrinsic());
                 ins.imms.emplace_back(static_cast<int64_t>(i));
                 ins.opcode = ChooseCallAccOpcode(ins.opcode);
@@ -546,7 +584,7 @@ void CodeGenStatic::CallHandler(GraphVisitor *visitor, Inst *inst, std::string m
     }
     ins.ids.emplace_back(std::move(methodId));
     enc->result_.emplace_back(ins);
-    if (inst->GetDstReg() != compiler::INVALID_REG && inst->GetDstReg() != compiler::ACC_REG_ID) {
+    if (inst->GetDstReg() != compiler::GetInvalidReg() && inst->GetDstReg() != compiler::GetAccReg()) {
         enc->EncodeSta(inst->GetDstReg(), inst->GetType());
     }
 }
@@ -1310,7 +1348,7 @@ void CodeGenStatic::VisitStoreObjectIntrinsic(GraphVisitor *v, Inst *instBase)
     compiler::Register vs = inst->GetSrcReg(0U);
     std::string id = enc->irInterface_->GetFieldIdByOffset(inst->GetImm(0));
 
-    bool isAccType = (vs == compiler::ACC_REG_ID);
+    bool isAccType = (vs == compiler::GetAccReg());
 
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:
@@ -1394,7 +1432,7 @@ void CodeGenStatic::VisitLoadObjectIntrinsic(GraphVisitor *v, Inst *instBase)
     compiler::Register vd = inst->GetDstReg();
     std::string id = enc->irInterface_->GetFieldIdByOffset(inst->GetImm(0));
 
-    bool isAccType = (inst->GetDstReg() == compiler::ACC_REG_ID);
+    bool isAccType = (inst->GetDstReg() == compiler::GetAccReg());
 
     switch (inst->GetType()) {
         case compiler::DataType::BOOL:

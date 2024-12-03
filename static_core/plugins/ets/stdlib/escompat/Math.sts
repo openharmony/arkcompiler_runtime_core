@@ -264,6 +264,37 @@ export class Math {
     }
 
     /**
+     * Rounding-up argument value to the closest integral power of 2
+     * Thus, Math.ceilPow2(n) is the least power of 2 that is >= n
+     * 
+     * @param n 32-bit integer
+     * 
+     * @returns Argument value rounded-up to the closest integral power of 2
+     * @example
+     * ```
+     * Math.ceilPow2(1334) == 2048
+     * Math.ceilPow2(0) == 0
+     * Math.ceilPow2(1) == 1
+     * Math.ceilPow2(2) == 2
+     * ```
+     */
+    public static ceilPow2(n: int): int {
+        if (n < 0) {
+            throw new RangeError("Round-up to the Next Power of 2 function is undefined for negative arguments")
+        }
+
+        let r = n - 1
+
+        r |= r >> 1
+        r |= r >> 2
+        r |= r >> 4
+        r |= r >> 8
+        r |= r >> 16
+
+        return r + 1
+    }
+
+    /**
      * Cosine of `x`
      *
      * @param x Angle in radians

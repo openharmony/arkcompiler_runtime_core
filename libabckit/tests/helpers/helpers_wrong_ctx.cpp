@@ -66,7 +66,7 @@ void TestWrongCtx(void (*apiToCheck)(AbckitCoreFunction *method, AbckitGraph *co
     g_dummyModulE1->file = g_dummyFilE1;
     g_dummyModulE2->file = g_dummyFilE2;
 
-    g_dummyMethoD2->m = g_dummyModulE2;
+    g_dummyMethoD2->owningModule = g_dummyModulE2;
 
     apiToCheck(g_dummyMethoD2, g_dummyGrapH1);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_WRONG_CTX);
@@ -171,8 +171,8 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitCoreFuncti
     g_dummyModulE1->file = g_dummyFilE1;
     g_dummyModulE2->file = g_dummyFilE2;
 
-    g_dummyMethoD1->m = g_dummyModulE1;
-    g_dummyMethoD2->m = g_dummyModulE2;
+    g_dummyMethoD1->owningModule = g_dummyModulE1;
+    g_dummyMethoD2->owningModule = g_dummyModulE2;
 
     g_dummyGrapH1->file = g_dummyFilE1;
     g_dummyGrapH2->file = g_dummyFilE2;
@@ -304,8 +304,8 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitCoreFuncti
     g_dummyModulE1->file = g_dummyFilE1;
     g_dummyModulE2->file = g_dummyFilE2;
 
-    g_dummyMethoD1->m = g_dummyModulE1;
-    g_dummyMethoD2->m = g_dummyModulE2;
+    g_dummyMethoD1->owningModule = g_dummyModulE1;
+    g_dummyMethoD2->owningModule = g_dummyModulE2;
 
     g_dummyInsT1->graph = g_dummyGrapH1;
     g_dummyInsT2->graph = g_dummyGrapH2;
@@ -393,8 +393,8 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitCoreFuncti
     g_dummyModulE1->file = g_dummyFilE1;
     g_dummyModulE2->file = g_dummyFilE2;
 
-    g_dummyMethoD1->m = g_dummyModulE1;
-    g_dummyMethoD2->m = g_dummyModulE2;
+    g_dummyMethoD1->owningModule = g_dummyModulE1;
+    g_dummyMethoD2->owningModule = g_dummyModulE2;
 
     g_dummyGrapH1->file = g_dummyFilE1;
     g_dummyGrapH2->file = g_dummyFilE2;
@@ -410,8 +410,8 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *acc,
     g_dummyModulE1->file = g_dummyFilE1;
     g_dummyModulE2->file = g_dummyFilE2;
 
-    g_dummyMethoD1->m = g_dummyModulE1;
-    g_dummyMethoD2->m = g_dummyModulE2;
+    g_dummyMethoD1->owningModule = g_dummyModulE1;
+    g_dummyMethoD2->owningModule = g_dummyModulE2;
 
     g_dummyInsT1->graph = g_dummyGrapH1;
     g_dummyInsT2->graph = g_dummyGrapH2;
@@ -584,7 +584,7 @@ void TestWrongCtx(void (*apiToCheck)(AbckitInst *input0, AbckitCoreFunction *met
 {
     g_dummyModulE2->file = g_dummyFilE2;
 
-    g_dummyMethoD2->m = g_dummyModulE2;
+    g_dummyMethoD2->owningModule = g_dummyModulE2;
 
     g_dummyInsT1->graph = g_dummyGrapH1;
 
@@ -616,8 +616,8 @@ void TestWrongCtx(AbckitInst *(*apiToCheck)(AbckitGraph *graph, AbckitInst *inpu
     g_dummyModulE1->file = g_dummyFilE1;
     g_dummyModulE2->file = g_dummyFilE2;
 
-    g_dummyMethoD1->m = g_dummyModulE1;
-    g_dummyMethoD2->m = g_dummyModulE2;
+    g_dummyMethoD1->owningModule = g_dummyModulE1;
+    g_dummyMethoD2->owningModule = g_dummyModulE2;
 
     g_dummyInsT1->graph = g_dummyGrapH1;
     g_dummyInsT2->graph = g_dummyGrapH2;

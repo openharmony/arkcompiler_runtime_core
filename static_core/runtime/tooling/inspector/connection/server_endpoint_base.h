@@ -16,10 +16,10 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_ENDPOINT_BASE_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_SERVER_ENDPOINT_BASE_H
 
-#include "endpoint_base.h"
-#include "server.h"
-
 #include <functional>
+
+#include "connection/endpoint_base.h"
+#include "connection/server.h"
 
 namespace ark::tooling::inspector {
 // Base class for server endpoints implementations.

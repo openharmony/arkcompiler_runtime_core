@@ -16,7 +16,7 @@
 package std.core;
 
 /**
- * GC defines methods with GC-specific behavior
+ * @class GC defines methods with GC-specific behavior
  */
 export final class GC {
     /**
@@ -37,6 +37,7 @@ export final class GC {
     public static readonly THRESHOLD_CAUSE = 1;
     public static readonly MIXED_CAUSE = 2;
     public static readonly FULL_CAUSE = 3;
+    public static readonly CROSSREF_CAUSE = 4;
 
     public static readonly NOT_IN_PLACE_MODE: boolean = false;
     public static readonly IN_PLACE_MODE: boolean = true;
@@ -63,9 +64,7 @@ export final class GC {
      * The function triggers specific GC
      *
      * @param cause cause of requested GC
-     *
      * @param callback callback is called in concurrent phase
-     *
      * @param inPlaceMode run GC in place mode
      *
      * @throws IllegalArgumentException if cause of GC is invalid or
@@ -84,13 +83,11 @@ export final class GC {
      * The function triggers specific GC
      *
      * @param cause cause of requested GC
-     *
      * @param inPlaceMode run GC in place mode
      *
      * @throws IllegalArgumentException if cause of GC is invalid or
      *         current GC does not support requested cause
      * @throws UnsupportedOperationException if current GC does not support requested cause
-     *
      * @throws IllegalStateException if try to run threshold GC collection not in place after calling postponeGCStart
      *
      * @returns id of started GC.
@@ -117,12 +114,10 @@ export final class GC {
      * Another call may reset the counter. In this case the last counter will be used to trigger the GC.
      *
      * @param counter number of allocation for trigger GC
-     *
      * @param cause cause of requested GC
      *
      * @throws IllegalArgumentException if cause of GC is invalid or
      *         current GC does not support requested cause
-     *
      * @throws UnsupportedOperationException if VM is running with incorrect GC trigger
      */
     public static native scheduleGcAfterNthAlloc(counter: int, cause: int): void throws;
@@ -144,7 +139,6 @@ export final class GC {
      * @see postponeGCEnd
      *
      * @throws UnsupportedOperationException if GC doesn't support postponing
-     *
      * @throws IllegalStateException if it called after calling postponeGCStart
      *         without calling postponeGCEnd
      */
@@ -157,7 +151,6 @@ export final class GC {
      * @see postponeGCStart
      *
      * @throws UnsupportedOperationException if GC doesn't support postponing
-     *
      * @throws IllegalStateException if it called without calling postponeGCStart
      */
     public static native postponeGCEnd(): void;
@@ -169,11 +162,9 @@ export final class GC {
      *
      * @see unpinObject
      *
-     * @throws NullPointerError if object is null
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
      */
-    public static native pinObject(obj: Object | null): void throws;
+    public static native pinObject(obj: Object): void throws;
 
     /**
      * Unpin pinned object - now GC can move such object if it need
@@ -181,14 +172,11 @@ export final class GC {
      * @note Unpinning of non-pinned object is unspecified behavior
      *
      * @see pinObject
-     *
      * @see allocatePinned<PrimitiveType>Array
      *
      * @param obj pinned object for unpinning
-     *
-     * @throws NullPointerError if object is null
      */
-    public static native unpinObject(obj: Object | null): void;
+    public static native unpinObject(obj: Object): void;
 
     /**
      * Allocate array of boolean and pin (GC will not move pinned array)
@@ -198,9 +186,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of boolean
@@ -215,9 +201,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of byte
@@ -232,9 +216,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of char
@@ -249,9 +231,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of short
@@ -266,9 +246,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of int
@@ -283,9 +261,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of long
@@ -300,9 +276,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of float
@@ -317,9 +291,7 @@ export final class GC {
      * @see unpinObject
      *
      * @throws NegativeArraySizeError if length is negative
-     *
      * @throws UnsupportedOperationException if used GC does not support pinning
-     *
      * @throws OutOfMemoryError if VM has not enough heap space for array allocation
      *
      * @returns pinned array of double
@@ -331,11 +303,9 @@ export final class GC {
      *
      * @param obj object for which space type is requested
      *
-     * @throws NullPointerError if object is null
-     *
      * @returns type of space which contains object-argument
      */
-    public static native getObjectSpaceType(obj: Object | null): int;
+    public static native getObjectSpaceType(obj: Object): int;
 
     /**
      * Returns object address
@@ -344,7 +314,13 @@ export final class GC {
      *
      * @returns address of object
      */
-    public static native getObjectAddress(obj: Object | null): long;
+    public static native getObjectAddress(obj: Object): long;
+
+    /**
+     * @param obj object for which size is requested
+     * @returns size of the object in bytes
+     */
+    public static native getObjectSize(obj: Object): long;
 
     /**
      * @throws NegativeArraySizeError if size is negative

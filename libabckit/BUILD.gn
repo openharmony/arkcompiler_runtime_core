@@ -16,6 +16,7 @@ import("//arkcompiler/runtime_core/libabckit/abckit_config.gni")
 
 config("abckit_config") {
   cflags_cc = [ "-std=c++17" ]
+  cflags_c = [ "-std=c99" ]
 
   cflags = [
     "-pedantic",
@@ -62,11 +63,17 @@ config("abckit_config") {
   configs = [ sdk_libc_secshared_config ]
 }
 
+config("abckit_mock_config") {
+  defines = [ "ABCKIT_ENABLE_MOCK_IMPLEMENTATION" ]
+
+  configs = [ ":abckit_config" ]
+}
+
 group("abckit_packages") {
   if (abckit_enable) {
     deps = [
       "abckit:abckit(${host_toolchain})",
-      "src:libabckit(${host_toolchain})",
+      "src:libabckit",
     ]
   }
 }
@@ -77,8 +84,9 @@ group("abckit_tests") {
     deps = [
       ":abckit_documentation",
       ":abckit_status",
-      "tests:abckit_canary",
       "tests:abckit_gtests_action",
+      "tests:abckit_mock_gtests_action",
+      "tests/canary:abckit_canary",
     ]
   }
 }

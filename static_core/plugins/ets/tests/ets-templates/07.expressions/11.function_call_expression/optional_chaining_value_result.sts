@@ -21,9 +21,13 @@ class A {
     public x: int = 5;
 }
 
-function getX(): int {
+function foo(a?: A|null): Int|undefined{
+  return a?.x
+}
+
+function getX(): Int|undefined {
     let a: A|null = new A();
-    return a?.x;
+    return foo(a);
 }
 
 function main(): void {

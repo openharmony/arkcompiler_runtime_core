@@ -29,6 +29,8 @@ set(intrinsics_tests
     string_trim
     string_startswith
     string_endswith
+    string_indexof
+    string_repeat
     char_isuppercase
     abs
     min

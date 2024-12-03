@@ -16,11 +16,11 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_SERVER_ENDPOINT_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_SERVER_ENDPOINT_H
 
-#include "tooling/inspector/connection/server_endpoint_base.h"
-
 #include "websocketpp/common/connection_hdl.hpp"
 #include "websocketpp/frame.hpp"
 #include "websocketpp/server.hpp"
+
+#include "connection/server_endpoint_base.h"
 
 namespace ark::tooling::inspector {
 // Server endpoint based on websocketpp implementation.
@@ -63,6 +63,8 @@ private:
     {
         if (auto connection = GetPinnedConnection()) {
             connection->send(message, websocketpp::frame::opcode::text);
+        } else {
+            LOG(INFO, DEBUGGER) << "Did not send message: " << message;
         }
     }
 

@@ -15,4 +15,6 @@
 
 function main(): void {
     console.log(null, undefined, 11, "123", new Object())
+    let arr = new Array<string | null | undefined>(3)
+    console.log(arr)
 }

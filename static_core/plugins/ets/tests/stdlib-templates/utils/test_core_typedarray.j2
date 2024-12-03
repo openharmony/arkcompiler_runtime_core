@@ -111,7 +111,7 @@ function createArraySetAndGet(): int {
             continue;
         }
     {%- endif %}
-        let back = target[i] as {{.item.primitiveType}};
+        let back = target[i]{{.item.cast2primitive}};
         if (back != source[i]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
             return fail;
@@ -174,7 +174,7 @@ function createArrayFromArray(): int {
         }
     {%- endif %}
         sumExp += source[i]
-        sumAct += target[i] as {{.item.primitiveType}}
+        sumAct += target[i]{{.item.cast2primitive}}
     }
 
     if (sumAct != sumExp) {
@@ -188,7 +188,7 @@ function createArrayFromArray(): int {
             continue;
         }
     {%- endif %}
-        let back = target[i] as {{.item.primitiveType}};
+        let back = target[i]{{.item.cast2primitive}};
         if (back != source[i]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
             acc++;
@@ -223,7 +223,7 @@ function createArrayFromArrayWithOffset(): int {
             continue;
         }
     {%- endif %}
-        let back = target[i] as {{.item.primitiveType}};
+        let back = target[i]{{.item.cast2primitive}};
         if (back != source[i-offset]) {
             console.println("Data mismatch for {{.item.objectType}} " + " expected: " + source[i] + " at " + i + " but actual: " + back);
             acc++;
@@ -251,7 +251,7 @@ function createFilteredArrayFromGiven(): int {
 
     let targetIdx = 0
     for (let originIdx = 0; originIdx < origin.length as int; originIdx++) {
-        if (origin[originIdx] as {{.item.primitiveType}} <= 0) {
+        if (origin[originIdx]{{.item.cast2primitive}} <= (0 as long)) {
             continue
         }
         if (targetIdx >= target.length as int) {
@@ -283,7 +283,7 @@ function testLastIndexOfNotFound(): int {
         return fail;
     }
 
-    let nf: number = target.lastIndexOf(11 as {{.item.primitiveType}});
+    let nf: number = target.lastIndexOf({{.item.create}}(11));
 
     if (nf == -1) { return success; }
     return fail;
@@ -304,7 +304,7 @@ function testLastIndexOf4(): int {
         return fail;
     }
 
-    let result: number = target.lastIndexOf(50 as {{.item.primitiveType}}, 5);
+    let result: number = target.lastIndexOf({{.item.create}}(50), 5);
     if (result == 4) { return success; }
 
     return fail;
@@ -325,7 +325,7 @@ function testLastIndexOf3(): int {
         return fail;
     }
 
-    let result: number = target.lastIndexOf(50 as {{.item.primitiveType}}, 3);
+    let result: number = target.lastIndexOf({{.item.create}}(50), 3);
 
     if (result == 3) { return success; }
     return fail;
@@ -370,7 +370,7 @@ function testMap(): int {
             continue;
         }
     {%- endif %}
-        if (target[i] as {{.item.primitiveType}} != -source[i]) {
+        if (target[i]{{.item.cast2primitive}} != -source[i]) {
             console.println("Array data mismatch");
             return fail;
         }
@@ -378,25 +378,25 @@ function testMap(): int {
     return success;
 }
 
-class SimpleIterator implements IterableIterator<number> {
+class SimpleIterator implements IterableIterator<{{.item.type}}> {
     public isCalledLengthMethod: boolean = false
     private idx: number = 0
-    private retval: number
+    private retval: {{.item.type}}
 
-    constructor (retval: number) {
+    constructor (retval: {{.item.type}}) {
         this.retval = retval
     }
 
-    override $_iterator(): IterableIterator<number> {
+    override $_iterator(): IterableIterator<{{.item.type}}> {
         return this;
     }
 
-    override next(): IteratorResult<number> {
+    override next(): IteratorResult<{{.item.type}}> {
         if (this.idx >= 5) {
-            return new IteratorResult<number>()
+            return new IteratorResult<{{.item.type}}>()
         }
         this.idx++
-        return new IteratorResult<number>(false, this.retval)
+        return new IteratorResult<{{.item.type}}>(false, this.retval)
     }
 
     public __Iterator_getLength(): int {
@@ -407,7 +407,7 @@ class SimpleIterator implements IterableIterator<number> {
 }
 
 function testTAFromWithSizeableIterator(): int {
-    let retval = 9
+    let retval = {{.item.create}}(9)
     let it = new SimpleIterator(retval)
     if (it.isCalledLengthMethod) {
         console.log("Error: Test iterator has called length method")
@@ -449,7 +449,7 @@ function dump(source: {{.item.primitiveType}}[], origin: {{.item.objectType}}): 
     for (let i: int = 0; i < source.length as int; i++) { console.print(source[i] + " "); }
     console.println();
     console.print("Passed: ");
-    for (let i: int = 0; i < origin.length as int; i++) { console.print(origin[i] as {{.item.primitiveType}} + " "); }
+    for (let i: int = 0; i < origin.length as int; i++) { console.print(origin[i]{{.item.cast2primitive}} + " "); }
     console.println();
 }
 
@@ -459,7 +459,7 @@ function assertArrayEqualsToTypedArray(source: {{.item.primitiveType}}[], origin
         return fail;
     }
     for (let i: int; i < origin.length; i++) {
-        let tv: {{.item.primitiveType}} = origin[i] as {{.item.primitiveType}};
+        let tv: {{.item.primitiveType}} = origin[i]{{.item.cast2primitive}};
         let sv: {{.item.primitiveType}} = source[i] as {{.item.primitiveType}};
         if (tv != sv) {
             console.println("Unexpected data changed at [" + i + "] " + sv + "->" + tv);

@@ -707,9 +707,11 @@ TEST_F(LibAbcKitIrInstTest, IvisitUsers_1)
         auto *inst = g_implG->bbGetFirstInst(start);
         auto *inst2 = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(inst)));
         uint32_t counter = 0;
-        g_implG->iVisitUsers(inst2, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) {
             (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+            return true;
+        };
+        g_implG->iVisitUsers(inst2, &counter, cbVisit);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_EQ(counter, 1U);
     };
@@ -721,19 +723,20 @@ TEST_F(LibAbcKitIrInstTest, IvisitUsers_1)
 // Test: test-kind=api, api=GraphApiImpl::iVisitUsers, abc-kind=ArkTS1, category=positive
 TEST_F(LibAbcKitIrInstTest, IvisitUsers_2)
 {
-    helpers::InspectMethod(
-        ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func",
-        [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
-            auto *start = g_implG->gGetStartBasicBlock(graph);
-            auto *inst = g_implG->bbGetFirstInst(start);
-            auto *inst2 = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(inst))));
-            uint32_t counter = 0;
-            g_implG->iVisitUsers(inst2, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
-                (*(reinterpret_cast<uint32_t *>(data)))++;
-            });
-            ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
-            ASSERT_EQ(counter, 2U);
-        });
+    auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
+        auto *start = g_implG->gGetStartBasicBlock(graph);
+        auto *inst = g_implG->bbGetFirstInst(start);
+        auto *inst2 = g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(g_implG->iGetNext(inst))));
+        uint32_t counter = 0;
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) {
+            (*(reinterpret_cast<uint32_t *>(data)))++;
+            return true;
+        };
+        g_implG->iVisitUsers(inst2, &counter, cbVisit);
+        ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+        ASSERT_EQ(counter, 2U);
+    };
+    helpers::InspectMethod(ABCKIT_ABC_DIR "ut/ir_core/inst_manipulation/inst_manipulation_dynamic.abc", "func", cb);
 }
 
 // Test: test-kind=api, api=GraphApiImpl::iVisitInputs, abc-kind=ArkTS2, category=positive
@@ -742,9 +745,11 @@ TEST_F(LibAbcKitIrInstTest, IvisitInputs_1)
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_STATIC_OPCODE_IF);
         uint32_t counter = 0;
-        g_implG->iVisitUsers(inst, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) {
             (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+            return true;
+        };
+        g_implG->iVisitUsers(inst, &counter, cbVisit);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_EQ(counter, 0);
     };
@@ -758,9 +763,11 @@ TEST_F(LibAbcKitIrInstTest, IvisitInputs_2)
     auto cb = [](AbckitFile * /*file*/, AbckitCoreFunction * /*method*/, AbckitGraph *graph) {
         auto *inst = helpers::FindFirstInst(graph, ABCKIT_ISA_API_DYNAMIC_OPCODE_IF);
         uint32_t counter = 0;
-        g_implG->iVisitUsers(inst, &counter, [](AbckitInst * /*inst*/, AbckitInst * /*input*/, void *data) {
+        auto cbVisit = [](AbckitInst * /*input*/, void *data) {
             (*(reinterpret_cast<uint32_t *>(data)))++;
-        });
+            return true;
+        };
+        g_implG->iVisitUsers(inst, &counter, cbVisit);
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
         ASSERT_EQ(counter, 0);
     };
@@ -843,28 +850,29 @@ TEST_F(LibAbcKitIrInstTest, IgetLiteralArray_2)
         auto *bb = g_implG->bbGetSuccBlock(start, 0);
         auto *inst = g_implG->bbGetFirstInst(bb);
         auto *litArr = g_implG->iGetLiteralArray(inst);
+
+        // Test that iGetLiteralArray returns same pointer for same instruction
+        auto *litArr2 = g_implG->iGetLiteralArray(inst);
+        ASSERT_EQ(litArr, litArr2);
+
         uint32_t counter = 0;
         g_implI->literalArrayEnumerateElements(
             litArr, &counter, [](AbckitFile * /*file*/, AbckitLiteral *lit, void *data) {
                 if (*(reinterpret_cast<uint32_t *>(data)) == 2U) {
-                    [[maybe_unused]] auto *str = g_implI->literalGetString(lit);
-                    // CC-OFFNXT(G.FMT.02)
+                    auto *str = g_implI->literalGetString(lit);
                     EXPECT_TRUE(std::string_view(helpers::AbckitStringToString(str)) == "aa");
                     return true;
                 }
                 // CC-OFFNXT(G.FMT.02)
                 if (*(reinterpret_cast<uint32_t *>(data)) == 3U) {
-                    [[maybe_unused]] auto val = g_implI->literalGetU32(lit);
-                    // CC-OFFNXT(G.FMT.02)
+                    auto val = g_implI->literalGetU32(lit);
                     EXPECT_TRUE(val == 10U);
                     return true;
                 }
                 // CC-OFFNXT(G.FMT.02)
                 (*(reinterpret_cast<uint32_t *>(data)))++;
-                // CC-OFFNXT(G.FMT.02)
                 return true;
             });
-        // CC-OFFNXT(G.FMT.02)
         ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     };
     helpers::TransformMethod(file, "test", cb);
@@ -898,6 +906,7 @@ TEST_F(LibAbcKitIrInstTest, IgetId_2)
         std::vector<AbckitBasicBlock *> bbs;
         g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
             reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+            return true;
         });
         // CC-OFFNXT(G.FMT.02)
         for (auto *bb : bbs) {
@@ -941,6 +950,7 @@ TEST_F(LibAbcKitIrInstTest, IgetId_4)
         std::vector<AbckitBasicBlock *> bbs;
         g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
             reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+            return true;
         });
         for (auto *bb : bbs) {
             auto *curInst = g_implG->bbGetFirstInst(bb);
@@ -1307,6 +1317,7 @@ TEST_F(LibAbcKitIrInstTest, IcheckIsCall_1)
         std::vector<AbckitBasicBlock *> bbs;
         g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
             reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+            return true;
         });
         // CC-OFFNXT(G.FMT.02)
         std::set<AbckitIsaApiDynamicOpcode> callInsns = {
@@ -1342,6 +1353,7 @@ TEST_F(LibAbcKitIrInstTest, IcheckIsCall_2)
             std::vector<AbckitBasicBlock *> bbs;
             g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
                 reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+                return true;
             });
             std::set<AbckitIsaApiStaticOpcode> callInsns = {ABCKIT_ISA_API_STATIC_OPCODE_INITOBJECT,
                                                             ABCKIT_ISA_API_STATIC_OPCODE_CALL_VIRTUAL,
@@ -1365,11 +1377,11 @@ static void CompareDump1(std::stringstream &ss)
 {
     auto expected =
         "\\s+0.any  Parameter\\s+arg 0\\s+\n"
-        "r251 -> r251 \\[u64\\]\n"
+        "r8187 -> r8187 \\[u64\\]\n"
         "\\s+1.any  Parameter\\s+arg 1\\s+\n"
-        "r252 -> r252 \\[u64\\]\n"
+        "r8188 -> r8188 \\[u64\\]\n"
         "\\s+2.any  Parameter\\s+arg 2\\s+\n"
-        "r253 -> r253 \\[u64\\]\n"
+        "r8189 -> r8189 \\[u64\\]\n"
         "\\s+12.i32  Constant\\s+0x0 -> \\(v13\\)\\s+\n"
         "\\s+18.i32  Constant\\s+0x1 -> \\(v19\\)\\s+\n"
         "\\s+22.i32  Constant\\s+0x4 -> \\(v26\\)\\s+\n"
@@ -1418,6 +1430,7 @@ TEST_F(LibAbcKitIrInstTest, Idump_1)
         std::vector<AbckitBasicBlock *> bbs;
         g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
             reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+            return true;
         });
         for (auto *bb : bbs) {
             auto *curInst = g_implG->bbGetFirstInst(bb);
@@ -1477,6 +1490,7 @@ TEST_F(LibAbcKitIrInstTest, Idump_2)
         std::vector<AbckitBasicBlock *> bbs;
         g_implG->gVisitBlocksRpo(graph, &bbs, [](AbckitBasicBlock *bb, void *data) {
             reinterpret_cast<std::vector<AbckitBasicBlock *> *>(data)->emplace_back(bb);
+            return true;
         });
         for (auto *bb : bbs) {
             auto *curInst = g_implG->bbGetFirstInst(bb);

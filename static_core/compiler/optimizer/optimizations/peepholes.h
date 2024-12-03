@@ -30,7 +30,7 @@ namespace ark::compiler {
 #define PEEPHOLE_IS_APPLIED(visitor, inst) (visitor)->SetIsApplied((inst), true, __FILE__, __LINE__)
 
 // NOLINTNEXTLINE(fuchsia-multiple-inheritance)
-class Peepholes : public Optimization, public GraphVisitor {
+class PANDA_PUBLIC_API Peepholes : public Optimization, public GraphVisitor {
     using Optimization::Optimization;
 
 public:

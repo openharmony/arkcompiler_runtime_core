@@ -247,3 +247,9 @@ sequenceDiagram
         DebuggableThread-->>-Inspector: 
     Inspector-->>-InspectorServer: 
 ```
+
+## Runtime perspective
+
+The diagram below represents high-level scheme of communication between ArkTS Runtime and Inspector debugger.
+
+![](./images/inspector-debugger-sequence.svg)

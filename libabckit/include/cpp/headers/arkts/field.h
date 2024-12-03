@@ -16,24 +16,50 @@
 #ifndef CPP_ABCKIT_ARKTS_FIELD_H
 #define CPP_ABCKIT_ARKTS_FIELD_H
 
-#include "libabckit/include/c/abckit.h"
-#include "cpp/headers/declarations.h"
-#include "cpp/headers/config.h"
-#include "cpp/headers/base_classes.h"
-#include "cpp/headers/core/field.h"
+#include "../core/field.h"
 
 namespace abckit::arkts {
 
+/**
+ * @brief Field
+ */
 class Field final : public core::Field {
-    // To access private constructor.
     // We restrict constructors in order to prevent C/C++ API mix-up by user.
+    /// @brief to access private constructor
     friend class abckit::core::Field;
+    /// @brief abckit::DefaultHash<Field>
+    friend class abckit::DefaultHash<Field>;
 
 public:
+    /**
+     * @brief Construct a new Field object
+     * @param other
+     */
     Field(const Field &other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Field&
+     */
     Field &operator=(const Field &other) = default;
+
+    /**
+     * @brief Construct a new Field object
+     * @param other
+     */
     Field(Field &&other) = default;
+
+    /**
+     * @brief Constructor
+     * @param other
+     * @return Field&
+     */
     Field &operator=(Field &&other) = default;
+
+    /**
+     * @brief Destroy the Field object
+     */
     ~Field() override = default;
     // Other API.
     // ...

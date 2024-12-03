@@ -15,27 +15,29 @@
 #ifndef PANDA_TOOLING_INSPECTOR_EXCEPTION_DETAILS_H
 #define PANDA_TOOLING_INSPECTOR_EXCEPTION_DETAILS_H
 
-#include "macros.h"
-#include "numeric_id.h"
-#include "remote_object.h"
+#include "tooling/inspector/json_serialization/serializable.h"
 
 #include <functional>
 #include <optional>
 #include <string>
+
+#include "macros.h"
+#include "types/numeric_id.h"
+#include "types/remote_object.h"
 
 namespace ark {
 class JsonObjectBuilder;
 }  // namespace ark
 
 namespace ark::tooling::inspector {
-class ExceptionDetails final {
+class ExceptionDetails final : public JsonSerializable {
 public:
     ExceptionDetails(size_t exceptionId, std::string text, size_t lineNumber, size_t columnNumber)
         : exceptionId_(exceptionId), text_(std::move(text)), lineNumber_(lineNumber), columnNumber_(columnNumber)
     {
     }
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const;
+    void Serialize(JsonObjectBuilder &builder) const override;
 
     size_t GetExceptionId() const
     {

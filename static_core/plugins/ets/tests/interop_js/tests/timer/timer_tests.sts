@@ -70,9 +70,13 @@ function testSetTimeout(): void {
     globalTest!.checkpoint(0);
     let start = Date.now();
     setTimeout((): void => {
-        let end = Date.now();
-        if (end - start < delay) {
-            globalTest!.fail("The callback is called after " + (end - start) + "ms. Expected to be called after " + delay + "ms at least.");
+        // To get time Date.now and libuv uses clock_gettime under the hood, but with different parameters. Date.now() uses CLOCK_REALTIME, but libuv uses CLOCK_MONOTONIC.
+        // When we calculate time interval there may be an error. For example time interval measured by Date.now may be 5.9ms round to 5
+        // and time interval measured by libuv is 6.1 round to 6.
+        // To avoid such error just add +1 to time interval.
+        let spentTime = Date.now() - start + 1;
+        if (spentTime < delay) {
+            globalTest!.fail("The callback is called after " + spentTime + "ms. Expected to be called after " + delay + "ms at least.");
         }
         globalTest!.checkpoint(2);
     }, delay);
@@ -99,9 +103,13 @@ function testSetInterval(): void {
     let start = Date.now();
     let timerId: int;
     timerId = setInterval((): void => {
-        let end = Date.now();
-        if (end - start < delay) {
-            globalTest!.fail("The callback is called after " + (end - start) + "ms. Expected to be called after " + delay + "ms at least.");
+        // To get time Date.now and libuv uses clock_gettime under the hood, but with different parameters. Date.now() uses CLOCK_REALTIME, but libuv uses CLOCK_MONOTONIC.
+        // When we calculate time interval there may be an error. For example time interval measured by Date.now may be 5.9ms round to 5
+        // and time interval measured by libuv is 6.1 round to 6.
+        // To avoid such error just add +1 to time interval.
+        let spentTime = Date.now() - start + 1;
+        if (spentTime < delay) {
+            globalTest!.fail("The callback is called after " + spentTime + "ms. Expected to be called after " + delay + "ms at least.");
         }
         if (checkpoint == 5) {
             clearInterval(timerId);

@@ -19,21 +19,21 @@ desc: >-
 ---*/
 
 class A {
-    name: string
+    name: string = ""
     age: number
     getAge(): number {
         return this.age
     }
 }
 
-function foo(a: A): number {
-    return a.getAge()
+function foo(a: A|null): number {
+    return a!.getAge()
 }
 
 function main(): int {
   let a: A|null = null;
   try {
-      a = { name: "Bob", age: foo(a as A) }
+      a = { name: "Bob", age: foo(a) } as A
   } catch (e: NullPointerError) {
       assert a == null;
       return 0;

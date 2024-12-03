@@ -44,6 +44,7 @@ private:
     bool EmitStringConcat4(Inst *inst);
     bool EmitStringCompareTo(Inst *inst);
     bool EmitIsInf(Inst *inst);
+    bool EmitMemmoveUnchecked(Inst *inst);
     bool EmitUnreachable(Inst *inst);
     bool EmitNothing(Inst *inst);
     bool EmitSlowPathEntry(Inst *inst);
@@ -53,6 +54,10 @@ private:
     bool EmitTailCall(Inst *inst);
     bool EmitCompressEightUtf16ToUtf8CharsUsingSimd(Inst *inst);
     bool EmitCompressSixteenUtf16ToUtf8CharsUsingSimd(Inst *inst);
+    bool EmitMemCharU8X16UsingSimd(Inst *inst);
+    bool EmitMemCharU8X32UsingSimd(Inst *inst);
+    bool EmitMemCharU16X8UsingSimd(Inst *inst);
+    bool EmitMemCharU16X16UsingSimd(Inst *inst);
     bool EmitReverseBytes(Inst *inst);
     bool EmitMemoryFenceFull(Inst *inst);
     bool EmitMemoryFenceRelease(Inst *inst);
@@ -89,6 +94,11 @@ public:
     llvm::Function *GetFunc()
     {
         return func_;
+    }
+
+    llvm::IRBuilder<> *GetBuilder()
+    {
+        return &builder_;
     }
 
     const ArenaVector<BasicBlock *> &GetBlocksToVisit() const override

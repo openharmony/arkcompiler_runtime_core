@@ -16,11 +16,11 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_CONFIG_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_ASIO_ASIO_CONFIG_H
 
-#include "ws_logger.h"
-
 #include "websocketpp/config/asio_no_tls.hpp"
 #include "websocketpp/logger/levels.hpp"
 #include "websocketpp/transport/asio/endpoint.hpp"
+
+#include "connection/asio/ws_logger.h"
 
 namespace ark::tooling::inspector {
 // NOLINTBEGIN(readability-identifier-naming)

@@ -14,6 +14,7 @@
  */
 
 #include "compiler_logger.h"
+#include "inst.h"
 #include "optimizer/analysis/dominators_tree.h"
 #include "optimizer/analysis/loop_analyzer.h"
 #include "optimizer/analysis/linear_order.h"
@@ -26,7 +27,8 @@ GraphCloner::GraphCloner(Graph *graph, ArenaAllocator *allocator, ArenaAllocator
       allocator_(allocator),
       localAllocator_(localAllocator),
       cloneBlocks_(allocator->Adapter()),
-      cloneInstructions_(allocator->Adapter())
+      cloneInstructions_(allocator->Adapter()),
+      cloneInstMap_(allocator->Adapter())
 {
 }
 
@@ -40,7 +42,9 @@ Graph *GraphCloner::CloneGraph()
     newGraph->SetAotData(GetGraph()->GetAotData());
     CloneBlocksAndInstructions<InstCloneType::CLONE_ALL, false>(GetGraph()->GetVectorBlocks(), newGraph);
     BuildControlFlow();
+    BuildTryCatchLogic(newGraph);
     BuildDataFlow();
+    CloneConstantsInfo(newGraph);
     newGraph->GetPassManager()->SetCheckMode(GetGraph()->GetPassManager()->IsCheckMode());
     // Clone all flags
     newGraph->SetBitFields(GetGraph()->GetBitFields());
@@ -141,6 +145,66 @@ void GraphCloner::BuildControlFlow()
     }
 }
 
+void GraphCloner::CloneThrowableInstHandlers(Graph *newGraph)
+{
+    for (auto *block : GetGraph()->GetVectorBlocks()) {
+        if (block == nullptr) {
+            continue;
+        }
+        for (auto *inst : block->AllInsts()) {
+            if (!GetGraph()->IsInstThrowable(inst)) {
+                continue;
+            }
+
+            auto *clonedInst = GetClone(inst);
+            for (auto *catchBlock : GetGraph()->GetThrowableInstHandlers(inst)) {
+                auto *clonedCatchBlock = GetClone(catchBlock);
+                newGraph->AppendThrowableInst(clonedInst, clonedCatchBlock);
+            }
+        }
+    }
+}
+
+void GraphCloner::BuildTryCatchLogic(Graph *newGraph)
+{
+    // Connect every tryInst to corresponding tryEndBlock
+    for (auto *tryBegin : newGraph->GetTryBeginBlocks()) {
+        TryInst *tryInst = GetTryBeginInst(tryBegin);
+        ASSERT(tryInst != nullptr);
+        for (auto block : newGraph->GetBlocksRPO()) {
+            if (block->IsTryEnd() && (block->GetTryId() == tryBegin->GetTryId())) {
+                tryInst->SetTryEndBlock(block);
+            }
+        }
+    }
+
+    CloneThrowableInstHandlers(newGraph);
+
+    auto fixThrowables = [this](const CatchPhiInst *originalInst, CatchPhiInst *clonedInst) {
+        if (originalInst->GetThrowableInsts() != nullptr) {
+            for (int i = 0, j = originalInst->GetThrowableInsts()->size(); i < j; ++i) {
+                auto *clonedThrowable = cloneInstMap_[originalInst->GetThrowableInst(i)];
+                clonedInst->AppendThrowableInst(clonedThrowable);
+            }
+        }
+    };
+
+    // Restore catchPhi's and throwables
+    for (BasicBlock *clone : cloneBlocks_) {
+        // Skip nullptrs and non-catch blocks
+        if (clone == nullptr || !clone->IsCatch()) {
+            continue;
+        }
+        Inst *inst = clone->GetFirstInst();
+        while (inst != nullptr) {
+            if (inst->IsCatchPhi() && !inst->CastToCatchPhi()->IsAcc()) {
+                fixThrowables(cloneInstMap_[inst]->CastToCatchPhi(), inst->CastToCatchPhi());
+            }
+            inst = inst->GetNext();
+        }
+    }
+}
+
 /// Clone the whole graph data-flow
 void GraphCloner::BuildDataFlow()
 {
@@ -166,6 +230,33 @@ void GraphCloner::BuildDataFlow()
                 auto predBlock = GetGraph()->GetVectorBlocks()[index];
                 instClone->AppendInput(GetClone(phi->GetPhiInput(predBlock)));
             }
+        }
+    }
+}
+
+void GraphCloner::CloneConstantsInfo(Graph *newGraph)
+{
+    // Restore firstConstInst_ logic
+    BasicBlock *startBB = newGraph->GetStartBlock();
+    Inst *inst = startBB->GetFirstInst();
+    // Find first const if any
+    while (inst != nullptr) {
+        if (inst->IsConst()) {
+            newGraph->SetFirstConstInst(inst->CastToConstant());
+            break;
+        }
+        inst = inst->GetNext();
+    }
+    if (inst == nullptr) {
+        return;
+    }
+    // Put another constants in chain if any
+    ConstantInst *constInst = inst->CastToConstant();
+    ASSERT(constInst->GetBasicBlock() == startBB);
+    while ((inst = inst->GetNext()) != nullptr) {
+        if (inst->IsConst()) {
+            constInst->SetNextConst(inst->CastToConstant());
+            constInst = inst->CastToConstant();
         }
     }
 }
@@ -579,7 +670,8 @@ void GraphCloner::BuildClonedLoopHeaderDataFlow(const BasicBlock &block, BasicBl
             auto inputIndex = userIt->GetIndex();
             ++userIt;
             ASSERT(user->GetBasicBlock() != nullptr);
-            if (user->GetBasicBlock()->GetLoop() != block.GetLoop()) {
+            auto userLoop = user->GetBasicBlock()->GetLoop();
+            if (userLoop != block.GetLoop() && !userLoop->IsInside(block.GetLoop())) {
                 user->SetInput(inputIndex, resolverPhi);
             }
         }
@@ -687,13 +779,13 @@ void GraphCloner::UpdateUsersForClonedLoopHeader(Inst *inst, BasicBlock *outerBl
         auto inputIdx = userIt->GetIndex();
         ++userIt;
         ASSERT(user->GetBasicBlock() != nullptr);
-        if (user->GetBasicBlock()->GetLoop() == instBlock->GetLoop()) {
+        auto userLoop = user->GetBasicBlock()->GetLoop();
+        if (userLoop == instBlock->GetLoop() || userLoop->IsInside(instBlock->GetLoop())) {
             // user inside loop
             // skip users that will be moved to the loop-exit block
-            if (user->GetBasicBlock()->IsLoopHeader() && !user->IsPhi()) {
+            if (user->GetBasicBlock() == instBlock && !user->IsPhi()) {
                 continue;
             }
-            ASSERT(user->GetBasicBlock() != instBlock || user->IsPhi());
             user->SetInput(inputIdx, phiIn);
         } else {
             // user outside loop

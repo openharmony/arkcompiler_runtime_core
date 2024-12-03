@@ -123,7 +123,7 @@ struct AbckitCoreAnnotationInterface {
     /*
      * To refer to the properties of the origin module.
      */
-    AbckitCoreModule *m = nullptr;
+    AbckitCoreModule *owningModule = nullptr;
 
     /*
      * Contains annotation interface fields
@@ -274,12 +274,17 @@ struct AbckitCoreClass {
     /*
      * To refer to the properties of the origin module.
      */
-    AbckitCoreModule *m = nullptr;
+    AbckitCoreModule *owningModule = nullptr;
 
     /*
      * To refer to the properties of the parent namepsace.
      */
-    AbckitCoreNamespace *n = nullptr;
+    AbckitCoreNamespace *parentNamespace = nullptr;
+
+    /*
+     * To refer to the properties of the parent function.
+     */
+    AbckitCoreFunction *parentFunction = nullptr;
 
     /*
      * To store class methods.
@@ -299,7 +304,7 @@ struct AbckitCoreClass {
     {
         return std::get<std::unique_ptr<AbckitArktsClass>>(impl).get();
     }
-    AbckitJsClass *GetJSImpl()
+    AbckitJsClass *GetJsImpl()
     {
         return std::get<std::unique_ptr<AbckitJsClass>>(impl).get();
     }
@@ -308,13 +313,13 @@ struct AbckitCoreClass {
     {
         klass.core = this;
         impl = std::make_unique<AbckitJsClass>(klass);
-        m = module;
+        owningModule = module;
     }
     AbckitCoreClass(AbckitCoreModule *module, AbckitArktsClass klass)
     {
         klass.core = this;
         impl = std::make_unique<AbckitArktsClass>(klass);
-        m = module;
+        owningModule = module;
     }
 };
 
@@ -342,12 +347,12 @@ struct AbckitCoreFunction {
     /*
      * To refer to the properties of the origin module.
      */
-    AbckitCoreModule *m = nullptr;
+    AbckitCoreModule *owningModule = nullptr;
 
     /*
      * To refer to the properties of the parent namepsace.
      */
-    AbckitCoreNamespace *n = nullptr;
+    AbckitCoreNamespace *parentNamespace = nullptr;
 
     /*
      * To be able to refer to the class where method is defined.
@@ -355,7 +360,12 @@ struct AbckitCoreFunction {
      * - Dynamic: pandasm::Function with js file name.
      * - Static: pandasm::Record with name `L/.../ETSGLOBAL`.
      */
-    AbckitCoreClass *klass = nullptr;
+    AbckitCoreClass *parentClass = nullptr;
+
+    /*
+     * To be able to refer to the class where method is defined.
+     */
+    AbckitCoreFunction *parentFunction = nullptr;
 
     /*
      * To store links to the wrapped annotations.
@@ -363,6 +373,9 @@ struct AbckitCoreFunction {
     std::vector<std::unique_ptr<AbckitCoreAnnotation>> annotations;
 
     std::vector<std::unique_ptr<AbckitCoreFunction>> nestedFunction;
+    std::vector<std::unique_ptr<AbckitCoreClass>> nestedClasses;
+
+    bool isAnonymous = false;
 
     std::variant<std::unique_ptr<AbckitJsFunction>, std::unique_ptr<AbckitArktsFunction>> impl;
 
@@ -370,7 +383,7 @@ struct AbckitCoreFunction {
     {
         return std::get<std::unique_ptr<AbckitArktsFunction>>(impl).get();
     }
-    AbckitJsFunction *GetJSImpl()
+    AbckitJsFunction *GetJsImpl()
     {
         return std::get<std::unique_ptr<AbckitJsFunction>>(impl).get();
     }
@@ -385,11 +398,17 @@ struct AbckitArktsNamespace {
 };
 
 struct AbckitCoreNamespace {
-    explicit AbckitCoreNamespace(AbckitCoreModule *m) : m(m) {}
+    explicit AbckitCoreNamespace(AbckitCoreModule *owningModule) : owningModule(owningModule) {}
 
-    AbckitCoreModule *m = nullptr;
+    /*
+     * To refer to the properties of the origin module.
+     */
+    AbckitCoreModule *owningModule = nullptr;
 
-    AbckitCoreNamespace *n = nullptr;
+    /*
+     * To be able to refer to the namespace where method is defined.
+     */
+    AbckitCoreNamespace *parentNamespace = nullptr;
 
     /*
      * To store links to the wrapped methods.
@@ -514,7 +533,7 @@ struct AbckitCoreModule {
     {
         return std::get<std::unique_ptr<AbckitArktsModule>>(impl).get();
     }
-    AbckitJsModule *GetJSImpl()
+    AbckitJsModule *GetJsImpl()
     {
         return std::get<std::unique_ptr<AbckitJsModule>>(impl).get();
     }
@@ -612,9 +631,8 @@ struct AbckitFile {
     }
 
     AbcKitLiterals literals;
-    // NOTE: these vectors grows infinitely (even for same values)
+    std::unordered_map<size_t, std::unique_ptr<AbckitType>> types;
     std::vector<std::unique_ptr<AbckitValue>> values;
-    std::vector<std::unique_ptr<AbckitType>> types;
     std::vector<std::unique_ptr<AbckitLiteralArray>> litarrs;
 
     /*
@@ -736,7 +754,7 @@ struct AbckitCoreImportDescriptor {
     {
         return std::get<std::unique_ptr<AbckitArktsImportDescriptor>>(impl).get();
     }
-    AbckitJsImportDescriptor *GetJSImpl()
+    AbckitJsImportDescriptor *GetJsImpl()
     {
         return std::get<std::unique_ptr<AbckitJsImportDescriptor>>(impl).get();
     }
@@ -857,7 +875,7 @@ struct AbckitCoreExportDescriptor {
     {
         return std::get<std::unique_ptr<AbckitArktsExportDescriptor>>(impl).get();
     }
-    AbckitJsExportDescriptor *GetJSImpl()
+    AbckitJsExportDescriptor *GetJsImpl()
     {
         return std::get<std::unique_ptr<AbckitJsExportDescriptor>>(impl).get();
     }

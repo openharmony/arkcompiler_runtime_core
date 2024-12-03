@@ -16,20 +16,30 @@
 #ifndef PANDA_TOOLING_INSPECTOR_CONNECTION_ENDPOINT_BASE_H
 #define PANDA_TOOLING_INSPECTOR_CONNECTION_ENDPOINT_BASE_H
 
-#include "macros.h"
-#include "utils/json_builder.h"
-#include "utils/logger.h"
-
 #include <functional>
 #include <optional>
 #include <string>
 #include <unordered_map>
+
+#include "macros.h"
+#include "utils/json_builder.h"
+#include "utils/logger.h"
 
 namespace ark {
 class JsonObject;
 }  // namespace ark
 
 namespace ark::tooling::inspector {
+enum class InspectorErrorCode {
+    PARSE_ERROR = -32700,
+    INTERNAL_ERROR = -32603,
+    INVALID_PARAMS = -32602,
+    METHOD_NOT_FOUND = -32601,
+    INVALID_REQUEST = -32600,
+    SESSION_NOT_FOUND = -32001,
+    SERVER_ERROR = -32000,
+};
+
 // Base class implementation of JSON-RPC endpoint handling the Inspector protocol.
 class EndpointBase {
 public:
@@ -81,6 +91,8 @@ private:
         LOG(DEBUG, DEBUGGER) << "Sending " << message;
         SendMessage(message);
     }
+
+    void HandleUnsupportedMethod(std::optional<double> optId, const std::string &method);
 
     os::memory::Mutex methodHandlersMutex_;
     std::unordered_map<std::string, MethodHandler> methodHandlers_ GUARDED_BY(methodHandlersMutex_);

@@ -15,6 +15,7 @@
 #ifndef PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_INTEROP_RUNTIME_INTERFACE_INL_H
 #define PANDA_PLUGINS_ETS_RUNTIME_INTEROP_JS_ETS_INTEROP_RUNTIME_INTERFACE_INL_H
 
+// CC-OFFNXT(G.NAM.01) false positive
 static std::pair<IntrinsicId, compiler::DataType::Type> GetInfoForInteropConvert(panda_file::Type::TypeId typeId)
 {
     switch (typeId) {
@@ -52,6 +53,7 @@ static std::pair<IntrinsicId, compiler::DataType::Type> GetInfoForInteropConvert
 
 void GetInfoForInteropCallArgsConversion(
     MethodPtr methodPtr, uint32_t skipArgs,
+    // CC-OFFNXT(G.NAM.01) false positive
     ArenaVector<std::pair<IntrinsicId, compiler::DataType::Type>> *intrinsics) const override
 {
     auto method = MethodCast(methodPtr);
@@ -81,6 +83,7 @@ compiler::RuntimeInterface::IntrinsicId GetInteropRefReturnValueConvertIntrinsic
     return IntrinsicId::INTRINSIC_COMPILER_CONVERT_LOCAL_TO_REF_TYPE;
 }
 
+// CC-OFFNXT(G.FMT.07) project code style
 std::optional<std::pair<compiler::RuntimeInterface::IntrinsicId, compiler::DataType::Type>>
 GetInfoForInteropCallRetValueConversion(MethodPtr methodPtr) const override
 {

@@ -1,0 +1,122 @@
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+---
+cases:
+  # type argument is class
+  - use: |-
+      let v: A<X> = new A<X>(new X())
+
+  - use: |-
+      let v: A<X> = new A<X>(new X())
+    bound: ' extends X'
+
+  - use: |-
+      let v: A<X|null> = new A<X|null>(null)
+
+  - use: |-
+      let v: A<A<X>> = new A<A<X>>(new A<X>(new X()))
+
+  - use: |-
+      let v: A<A<X>> = new A<A<X>>(new A<X>(new X()))
+    bound: ' extends Object|null'
+
+  # type argument is interface
+  - use: |-
+      let v: A<I> = new A<I>(new X())
+
+  - use: |-
+      let v: A<A<I>> = new A<A<I>>(new A<I>(new X()))
+    bound: ' extends Object'
+
+  - use: |-
+      let v: A<A<I>|null> = new A<A<I>|null>(null)
+
+  # type argument is array of classes, interfaces, enums
+  - use: |-
+      let v: A<X[]> = new A<X[]>(new X[0])
+
+  - use: |-
+      let v: A<X[]> = new A<X[]>(new X[0])
+    bound: ' extends Object[]'
+
+  - use: |-
+      let v: A<X[]|null> = new A<X[]|null>(null)
+
+  - use: |-
+      let v: A<X[]|null> = new A<X[]|null>(null)
+    bound: ' extends X[]|null'
+
+  - use: |-
+      let v: A<A<X>[]> = new A<A<X>[]>([new A<X>(new X())])
+
+  - use: |-
+      let v: A<A<X[]>[]> = new A<A<X[]>[]>([new A<X[]>(new X[1])])
+
+  - use: |-
+      let v: A<A<I>[]> = new A<A<I>[]>([new A<I>(new X())])
+
+  - use: |-
+      let v: A<Color[]> = new A<Color[]>([Color.Red])
+    bound: ' extends Color[]|null'
+
+  - use: |-
+      let v: A<A<Color[]>[]> = new A<A<Color[]>[]>([new A<Color[]>([Color.Red])])
+  - use: |-
+      let v: A<int[]> = new A<int[]>([1, 2, 3])
+
+  # type argument is alias
+  - use: |-
+      let v: A<B> = new A<B>(new X())
+    decl: |-
+      type B = X
+
+  - use: |-
+      let v: A<B|null> = new A<B|null>(null)
+    decl: |-
+      type B = X
+
+  - use: |-
+      let v: A<B> = new A<B>(new A<X>(new X()))
+    decl: |-
+      type B = A<X>
+
+  - use: |-
+      let v: A<B> = new A<B>(new X[0])
+    decl: |-
+      type B = X[]
+
+  - use: |-
+      let v: A<B> = new A<B>([new A<X>(new X())])
+    decl: |-
+      type B = A<X>[]
+
+  - use: |-
+      let v: A<B> = new A<B>([new A<X>(new X())])
+    decl: |-
+      type B = A<X|null>[]
+    bound: ' extends Object|null'
+
+  - use: |-
+      let v: A<B> = new A<B>([new A<X[]>(new X[1])])
+    decl: |-
+      type B = A<X[]>[]
+
+  - use: |-
+      let v: A<A<B>[]> = new A<A<B>[]>([new A<B>([new X()])])
+    decl: |-
+      type B = X[]
+
+  # Boxed to Reference type
+  - use: |-
+      let v: A<int> = new A<int>(1)

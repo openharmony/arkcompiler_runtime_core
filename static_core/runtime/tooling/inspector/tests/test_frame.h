@@ -16,15 +16,15 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TEST_TEST_FRAME_H
 #define PANDA_TOOLING_INSPECTOR_TEST_TEST_FRAME_H
 
-#include "macros.h"
-#include "method.h"
-#include "tooling/debug_interface.h"
-#include "tooling/pt_thread.h"
-#include "utils/list.h"
-
 #include <cstddef>
 #include <cstdint>
 #include <vector>
+
+#include "include/method.h"
+#include "include/tooling/debug_interface.h"
+#include "include/tooling/pt_thread.h"
+#include "macros.h"
+#include "utils/list.h"
 
 // NOLINTBEGIN
 

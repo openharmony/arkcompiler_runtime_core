@@ -44,8 +44,6 @@ compiler verifying code correctness, eliminating many runtime type checks,
 and improving performance. To achieve this, the usage of type ``any`` is
 prohibited in |LANG|.
 
-|
-
 Example
 ~~~~~~~
 
@@ -55,7 +53,7 @@ Example
     // Not supported:
     //
 
-    let res : any = some_api_function("hello", "world")
+    let res: any = some_api_function("hello", "world")
 
     // What is `res`? A numeric error code? Some string? An object?
     // How should we work with it?
@@ -65,11 +63,11 @@ Example
     //
 
     class CallResult {
-        public succeeded() : boolean { ... }
-        public errorMessage() : string { ... }
+        succeeded(): boolean { ... }
+        errorMessage(): string { ... }
     }
 
-    let res : CallResult = some_api_function("hello", "world")
+    let res: CallResult = some_api_function("hello", "world")
     if (!res.succeeded()) {
         console.log("Call failed: " + res.errorMessage())
     }
@@ -93,7 +91,7 @@ Changing Object Layout in Runtime Is Prohibited
 -----------------------------------------------
 
 To achieve maximum performance benefits, |LANG| requires the layout of objects
-to not change during program execution. In other words, it is prohibited to do
+not to change during program execution. In other words, it is prohibited to do
 the following:
 
 - Add new properties or methods to objects;
@@ -112,10 +110,10 @@ Example
 .. code-block:: typescript
 
     class Point {
-        public x : number = 0
-        public y : number = 0
+        x: number = 0
+        y: number = 0
 
-        constructor(x : number, y : number) {
+        constructor(x: number, y: number) {
             this.x = x
             this.y = y
         }
@@ -157,7 +155,7 @@ Example
     (p4 as any).x = "Hello!" // OK in TypeScript, compile-time error in ArkTS
 
     // Usage of Point objects which is compliant with the class definition:
-    function distance(p1 : Point, p2 : Point) : number {
+    function distance(p1: Point, p2: Point): number {
         return Math.sqrt(
           (p2.x - p1.x) * (p2.x - p1.x) + (p2.y - p1.y) * (p2.y - p1.y)
         )
@@ -207,9 +205,9 @@ Rationale and Impact
 ~~~~~~~~~~~~~~~~~~~~
 
 Loading language operators with extra semantics overcomplicates the language
-specification, makes the developers remember all possible corner cases with
-appropriate handling rules, and in some cases causes some undesired runtime
-overhead.
+specification, makes developers remember all possible corner cases with
+appropriate handling rules, and causes some undesired runtime overhead in
+certain cases.
 
 According to our observations and experiments, this feature is not popular
 already in |TS|. It is used in less than 1% of real-world codebases, and such
@@ -225,22 +223,23 @@ perform better at the cost of low-effort changes.
 Structural Typing Is Not Supported (Yet)
 ----------------------------------------
 
-Assume that two unrelated classes ``T`` and ``U`` have the same public API:
+Assume that two unrelated classes ``T`` and ``U`` have the same or compatible
+sets of public properties and no non-public ones:
 
 .. code-block:: typescript
 
     class T {
-        public name : string = ""
+        name: string = ""
 
-        public greet() : void {
+        greet() {
             console.log("Hello, " + this.name)
         }
     }
 
     class U {
-        public name : string = ""
+        name: string = ""
 
-        public greet() : void {
+        greet() {
             console.log("Greetings, " + this.name)
         }
     }
@@ -249,28 +248,29 @@ Can we assign a value of ``T`` to a variable of ``U``?
 
 .. code-block:: typescript
 
-    let u : U = new T() // Is this allowed?
+    let u: U = new T() // Is this allowed?
 
 Can we pass a value of ``T`` to a function that accepts a parameter of ``U``?
 
 .. code-block:: typescript
 
-    function greeter(u : U) {
+    function greeter(u: U) {
         console.log("To " + u.name)
         u.greet()
     }
 
-    let t : T = new T()
+    let t: T = new T()
     greeter(t) // Is this allowed?
 
 In other words, we are to take one of the following approaches:
 
 - ``T`` and ``U`` are not related by inheritance or any common interface, but
-  are "somewhat equivalent" since they have the same public API, and thus the
-  answer to both questions above is "yes";
+  ``T`` is compatible with ``U`` since ``T`` has the same or wider set of
+  public properties to ``U``, and thus the answer to both questions above is
+  "yes";
 - ``T`` and ``U`` are not related by inheritance or any common interface, and
-  must be considered totally different types at any time, and thus the answer
-  to both questions above is "no".
+  must be considered totally different (non-compatible) types at any time, and
+  thus the answer to both questions above is "no".
 
 The languages that take the first approach are said to support structural
 typing. The languages that take the second approach do not support structural

@@ -43,7 +43,7 @@ public:
 
     explicit Options(const std::string &exe_path) : exe_dir_(GetExeDir(exe_path)) {}
 
-    void AddOptions(PandArgParser *parser) {
+    void AddOptions(panda::PandArgParser *parser) {
         parser->Add(&version);
 % Common::options.each do |op|
 %   next if op.sub_option?
@@ -167,20 +167,20 @@ private:
 
 % end
     std::string exe_dir_;
-    PandArg<bool> version{"version", false, R"(Ark version, file format version and minimum supported file format version)"};
+    panda::PandArg<bool> version{"version", false, R"(Ark version, file format version and minimum supported file format version)"};
 % Common::options.each do |op|
 % if defined? op.delimiter
-    PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>, "<%= op.delimiter %>"};
+    panda::PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>, "<%= op.delimiter %>"};
 % elsif defined? op.range
 %   min, max = op.range.match('(\d+)\D*(\d+)').captures;
 %   if op.default.to_i > max.to_i || op.default.to_i < min.to_i
 %     abort "FAILED: Default value of argument " + op.name + " has out of range default parameter"
 %   end
-    PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>, <%= min.to_i %>, <%= max.to_i %>};
+    panda::PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>, <%= min.to_i %>, <%= max.to_i %>};
 % elsif op.has_sub_options
-    PandArgCompound <%= op.field_name %>{"<%= op.name %>", <%= op.full_description %>, {<%= op.sub_options.map{|o| '&' + o.field_name}.join(', ') %>}};
+    panda::PandArgCompound <%= op.field_name %>{"<%= op.name %>", <%= op.full_description %>, {<%= op.sub_options.map{|o| '&' + o.field_name}.join(', ') %>}};
 % else
-    PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>};
+    panda::PandArg<<%= op.type %>> <%= op.field_name %>{"<%= op.name %>", <%= op.default_value %>, <%= op.full_description %>};
 % end
 % end
 };

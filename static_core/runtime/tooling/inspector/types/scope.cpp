@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "runtime/tooling/inspector/types/scope.h"
+#include "types/scope.h"
 
 #include "libpandabase/utils/json_builder.h"
 
@@ -36,14 +36,12 @@ Scope::Scope(Scope::Type type, RemoteObject object, std::optional<std::string> n
 {
 }
 
-std::function<void(JsonObjectBuilder &)> Scope::ToJson() const
+void Scope::Serialize(JsonObjectBuilder &builder) const
 {
-    return [this](JsonObjectBuilder &jsonBuilder) {
-        jsonBuilder.AddProperty("type", GetTypeString(type_));
-        jsonBuilder.AddProperty("object", object_.ToJson());
-        if (name_) {
-            jsonBuilder.AddProperty("name", *name_);
-        }
-    };
+    builder.AddProperty("type", GetTypeString(type_));
+    builder.AddProperty("object", object_);
+    if (name_) {
+        builder.AddProperty("name", *name_);
+    }
 }
 }  // namespace ark::tooling::inspector

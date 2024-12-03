@@ -469,7 +469,7 @@ export final class Float extends Floating implements Comparable<Float>, JSONable
      *
      * @returns Float - float value decoded from JSON
      */
-    static createFromJSONValue(json: JSONValue): Float {
+    public createFromJSONValue(json: JSONValue): Float {
         if (json instanceof JSONNumber) {
             let val = (json as JSONNumber).value
             if (-Float.MAX_VALUE <= val && val <= Float.MAX_VALUE) {

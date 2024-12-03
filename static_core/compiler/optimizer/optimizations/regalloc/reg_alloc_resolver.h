@@ -35,7 +35,7 @@ public:
     ~RegAllocResolver() = default;
 
     void Resolve();
-    bool ResolveCatchPhis();
+    PANDA_PUBLIC_API bool ResolveCatchPhis();
 
 private:
     /*
@@ -57,11 +57,11 @@ private:
 
     bool CanStoreToAccumulator(const Inst *inst) const
     {
-        return graph_->IsBytecodeOptimizer() && inst->GetDstReg() == ACC_REG_ID;
+        return graph_->IsBytecodeOptimizer() && inst->GetDstReg() == GetAccReg();
     }
     bool CanReadFromAccumulator(const Inst *inst, size_t inputNumber) const
     {
-        return graph_->IsBytecodeOptimizer() && inst->GetSrcReg(inputNumber) == ACC_REG_ID;
+        return graph_->IsBytecodeOptimizer() && inst->GetSrcReg(inputNumber) == GetAccReg();
     }
 
     void PropagateCallerMasks(SaveStateInst *saveState);

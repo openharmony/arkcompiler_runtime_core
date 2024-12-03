@@ -49,10 +49,11 @@ class ReportGenerator:
         for report_format in list(self.__test_env.report_formats):
             report_path = path.join(report_root,
                                     f"{test_result.test_id}.report-{self.__test_env.timestamp}.{report_format.value}")
-            report = format_to_report[report_format](test_result)
-            Log.all(_LOGGER, f"{self.__test_id}: Report is saved to {report_path}")
-            write_2_file(report_path, report.make_report())
-            reports_format_to_paths[report_format] = report_path
+            if report_format in format_to_report:
+                report = format_to_report[report_format](test_result)
+                Log.all(_LOGGER, f"{self.__test_id}: Report is saved to {report_path}")
+                write_2_file(report_path, report.make_report())
+                reports_format_to_paths[report_format] = report_path
 
         return reports_format_to_paths
 

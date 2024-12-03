@@ -179,6 +179,16 @@ public:
         return AllocatorType::FREELIST_ALLOCATOR;
     }
 
+    double CalculateExternalFragmentation();
+
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    size_t GetAllocatedBytes() const
+    {
+        // Atomic with relaxed order reason: order is not required
+        return allocatedBytes_.load(std::memory_order_relaxed);
+    }
+#endif
+
 private:
     using MemoryBlockHeader = ark::mem::freelist::MemoryBlockHeader;
     using FreeListHeader = ark::mem::freelist::FreeListHeader;
@@ -252,6 +262,7 @@ private:
         void AddMemoryBlock(FreeListHeader *freelistHeader);
         FreeListHeader *FindMemoryBlock(size_t size);
         void ReleaseFreeMemoryBlocks();
+        double CalculateExternalFragmentation();
 
     private:
         static constexpr size_t SEGREGATED_LIST_SIZE = PANDA_FREELIST_ALLOCATOR_SEGREGATED_LIST_SIZE;
@@ -334,6 +345,10 @@ private:
     LockConfigT allocFreeLock_;
 
     MemStatsType *memStats_;
+
+#ifdef PANDA_MEASURE_FRAGMENTATION
+    std::atomic_size_t allocatedBytes_ {0};
+#endif
 
     friend class FreeListAllocatorTest;
     template <InternalAllocatorConfig CONFIG>

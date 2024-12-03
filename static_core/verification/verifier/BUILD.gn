@@ -41,6 +41,7 @@ ohos_executable("verifier_bin") {
     "$ark_root/libpandabase:generate_version_file",
     "$ark_root/libpandabase:libarktsbase",
     "$ark_root/libpandafile:libarktsfile",
+    "$ark_root/platforms/target_defaults:arktarget_options",
     "$ark_root/runtime:libarkruntime",
   ]
 

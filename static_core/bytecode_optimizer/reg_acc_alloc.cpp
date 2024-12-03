@@ -52,7 +52,7 @@ static bool IsAccWriteInInst(compiler::Inst *inst)
     if (!inst->IsConst()) {
         return true;
     }
-    if (inst->GetDstReg() == compiler::ACC_REG_ID) {
+    if (inst->GetDstReg() == compiler::GetAccReg()) {
         return true;
     }
     return false;
@@ -65,7 +65,7 @@ static bool IsAccReadFromReg(compiler::Inst *srcInst, compiler::Inst *inst)
         return false;
     }
     compiler::Inst *input = inst->GetInput(AccReadIndex(inst)).GetInst();
-    return (input != srcInst && input->GetDstReg() != compiler::ACC_REG_ID);
+    return (input != srcInst && input->GetDstReg() != compiler::GetAccReg());
 }
 
 /// Decide if accumulator register gets dirty between two instructions.
@@ -179,7 +179,7 @@ bool RegAccAlloc::CanUserReadAcc(compiler::Inst *inst, compiler::Inst *user) con
 
     for (auto &input : user->GetInputs()) {
         auto inputInst = input.GetInst();
-        if (inputInst != user && inputInst->GetDstReg() == compiler::ACC_REG_ID) {
+        if (inputInst != user && inputInst->GetDstReg() == compiler::GetAccReg()) {
             return false;
         }
         if (inst->IsPhi() && inputInst->IsConst() &&
@@ -261,7 +261,7 @@ void RegAccAlloc::SetNeedLda(compiler::Inst *inst, bool need)
         return;
     }
 
-    compiler::Register reg = need ? compiler::INVALID_REG : compiler::ACC_REG_ID;
+    compiler::Register reg = need ? compiler::GetInvalidReg() : compiler::GetAccReg();
     inst->SetSrcReg(AccReadIndex(inst), reg);
 }
 
@@ -288,9 +288,9 @@ static void InitRegistersForInst(compiler::Inst *inst)
         inst->SetFlag(compiler::inst_flags::ACC_WRITE);
     }
     for (size_t i = 0; i < inst->GetInputsCount(); ++i) {
-        inst->SetSrcReg(i, compiler::INVALID_REG);
+        inst->SetSrcReg(i, compiler::GetInvalidReg());
         if (MaybeRegDst(inst)) {
-            inst->SetDstReg(compiler::INVALID_REG);
+            inst->SetDstReg(compiler::GetInvalidReg());
         }
     }
 }
@@ -370,7 +370,7 @@ void RegAccAlloc::MarkInstruction(compiler::Inst *inst)
     }
 
     if (useAccDstReg) {
-        inst->SetDstReg(compiler::ACC_REG_ID);
+        inst->SetDstReg(compiler::GetAccReg());
     } else if (MaybeRegDst(inst)) {
         ClearAccForInstAndUsers(inst);
     }
@@ -397,7 +397,7 @@ void RegAccAlloc::MarkInstructions()
             if (!IsAccWriteBetween(input, inst)) {
                 continue;
             }
-            input->SetDstReg(compiler::INVALID_REG);
+            input->SetDstReg(compiler::GetInvalidReg());
             SetNeedLda(inst, true);
 
             if (MaybeRegDst(input)) {

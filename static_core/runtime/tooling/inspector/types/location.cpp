@@ -13,16 +13,17 @@
  * limitations under the License.
  */
 
-#include "location.h"
-#include "numeric_id.h"
+#include "types/location.h"
+
+#include <cfloat>
+#include <cmath>
+#include <string>
 
 #include "utils/expected.h"
 #include "utils/json_builder.h"
 #include "utils/json_parser.h"
 
-#include <cfloat>
-#include <cmath>
-#include <string>
+#include "types/numeric_id.h"
 
 using namespace std::literals::string_literals;  // NOLINT(google-build-using-namespace)
 
@@ -52,11 +53,10 @@ Expected<Location, std::string> Location::FromJsonProperty(const JsonObject &obj
     return Location(*scriptId, lineNumberTrunc + 1);
 }
 
-std::function<void(JsonObjectBuilder &)> Location::ToJson() const
+void Location::Serialize(JsonObjectBuilder &builder) const
 {
-    return [this](JsonObjectBuilder &jsonBuilder) {
-        jsonBuilder.AddProperty("scriptId", std::to_string(scriptId_));
-        jsonBuilder.AddProperty("lineNumber", lineNumber_ - 1);
-    };
+    builder.AddProperty("scriptId", std::to_string(scriptId_));
+    builder.AddProperty("lineNumber", lineNumber_ - 1);
 }
+
 }  // namespace ark::tooling::inspector

@@ -583,7 +583,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongImport)
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newID = new AbckitCoreImportDescriptor();
             newID->impl = std::make_unique<AbckitArktsImportDescriptor>();
-            newID->importingModule = method->m;
+            newID->importingModule = method->owningModule;
             helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -651,7 +651,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleRemoveWrongExport)
         [](AbckitFile *file, AbckitCoreFunction *method, AbckitGraph *) {
             auto *newED = new AbckitCoreExportDescriptor();
             newED->impl = std::make_unique<AbckitArktsExportDescriptor>();
-            newED->exportingModule = method->m;
+            newED->exportingModule = method->owningModule;
             helpers::ModuleByNameContext ctxFinder = {nullptr, MAIN_MODULE_NAME};
             g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
             EXPECT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
@@ -686,7 +686,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regu
     utd.alias = "newImportedFunc";
     utd.moduleName = "modules/module3";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -731,7 +731,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regu
     utd.alias = "NewImportedFuncAlias";
     utd.moduleName = "modules/module3";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -780,7 +780,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regu
     utd.alias = "NewImportedFuncAlias";
     utd.moduleName = "modules/module4";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -829,7 +829,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Regu
     utd.alias = "newImportedDefaultFuncFromModule4";
     utd.moduleName = "modules/module4";
     utd.isRegular = true;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -879,7 +879,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Name
     utd.alias = "NewImport";
     utd.moduleName = "modules/module3";
     utd.isRegular = false;
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -925,7 +925,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, ModuleAddImportFromDynamicModule_Name
     ASSERT_NE(ctxFinder.module, nullptr);
     auto module = ctxFinder.module;
     UserTransformerData utd = {"*", "NewImport", "modules/module4", false};
-    AddImportFromDynamicModuleImpl(module, (void *)&utd);
+    AddImportFromDynamicModuleImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -970,7 +970,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_LocalExport)
     utd.name = "NewExportedVar";
     utd.alias = "NewExportedVar";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1013,7 +1013,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_LocalExport2)
     utd.name = "NewExportedVar";
     utd.alias = "NewExportedVarAlias";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1056,7 +1056,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_LocalExport3)
     utd.name = "default";
     utd.alias = "NewExportedVarDefault";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_LOCAL_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1100,7 +1100,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_IndirectExport
     utd.alias = "NewLocalExportLet";
     utd.moduleName = "modules/module1";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_INDIRECT_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     UserTransformerData utd2;
@@ -1112,7 +1112,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_IndirectExport
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ctxFinder.module, nullptr);
-    AddImportFromDynamicModuleImpl(ctxFinder.module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(ctxFinder.module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1156,7 +1156,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_IndirectExport
     utd.alias = "NewLocalExportVarAlias";
     utd.moduleName = "modules/module4";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_INDIRECT_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     UserTransformerData utd2 = {utd.alias, "NewLocalExportVarFromModule4", "modules/module2", true};
@@ -1164,7 +1164,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_IndirectExport
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ctxFinder.module, nullptr);
-    AddImportFromDynamicModuleImpl(ctxFinder.module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(ctxFinder.module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1205,7 +1205,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport)
     auto module = ctxFinder.module;
     UserTransformerData utd = {"*", "", "modules/module3", false,
                                AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT};
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     ctxFinder = {nullptr, MAIN_MODULE_NAME};
@@ -1214,7 +1214,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport)
     ASSERT_NE(ctxFinder.module, nullptr);
     module = ctxFinder.module;
     UserTransformerData utd2 = {"*", "NS4", "modules/module4", false};
-    AddImportFromDynamicModuleImpl(module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1258,7 +1258,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport2)
     utd.name = "*";
     utd.moduleName = "modules/module4";
     utd.kind = AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT;
-    DynamicModuleAddExportImpl(module, (void *)&utd);
+    DynamicModuleAddExportImpl(module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1300,7 +1300,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
     ASSERT_NE(ctxFinder.module, nullptr);
     UserTransformerData utd = {"*", "NewStarExport", "modules/module3", false,
                                AbckitDynamicExportKind::ABCKIT_DYNAMIC_EXPORT_KIND_STAR_EXPORT};
-    DynamicModuleAddExportImpl(ctxFinder.module, (void *)&utd);
+    DynamicModuleAddExportImpl(ctxFinder.module, &utd);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     ctxFinder = {nullptr, MAIN_MODULE_NAME};
@@ -1308,7 +1308,7 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
     ASSERT_NE(ctxFinder.module, nullptr);
     UserTransformerData utd2 = {"NewStarExport", "NewStarExport", "modules/module4", true};
-    AddImportFromDynamicModuleImpl(ctxFinder.module, (void *)&utd2);
+    AddImportFromDynamicModuleImpl(ctxFinder.module, &utd2);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
 
     g_impl->writeAbc(file, OUTPUT_PATH);
@@ -1343,16 +1343,21 @@ TEST_F(LibAbcKitArkTSModifyApiModulesTest, DynamicModuleAddExport_StarExport3)
     EXPECT_TRUE(helpers::Match(output, expected));
 }
 
-// Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModule, abc-kind=ArkTS1, category=positive
-TEST_F(LibAbcKitArkTSModifyApiModulesTest, FileAddExternalModule)
+// Test: test-kind=api, api=ArktsModifyApiImpl::fileAddExternalModuleArktsV1, abc-kind=ArkTS1, category=positive
+TEST_F(LibAbcKitArkTSModifyApiModulesTest, fileAddExternalModuleArktsV1)
 {
     AbckitFile *file = nullptr;
     helpers::AssertOpenAbc(INPUT_PATH, &file);
 
-    AbckitArktsExternalModuleCreateParams params {};
+    AbckitArktsV1ExternalModuleCreateParams params {};
     params.name = "ExternalModule";
-    g_implArkM->fileAddExternalModule(file, &params);
+    AbckitArktsModule *arkTsModule = g_implArkM->fileAddExternalModuleArktsV1(file, &params);
     ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(arkTsModule, nullptr);
+
+    AbckitCoreModule *coreModule = g_implArkI->arktsModuleToCoreModule(arkTsModule);
+    ASSERT_EQ(g_impl->getLastError(), ABCKIT_STATUS_NO_ERROR);
+    ASSERT_NE(coreModule, nullptr);
 
     helpers::ModuleByNameContext ctxFinder = {nullptr, params.name};
     g_implI->fileEnumerateModules(file, &ctxFinder, helpers::ModuleByNameFinder);

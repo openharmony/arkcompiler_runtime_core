@@ -16,18 +16,18 @@
 #ifndef PANDA_TOOLING_INSPECTOR_TYPES_OBJECT_PREVIEW_H
 #define PANDA_TOOLING_INSPECTOR_TYPES_OBJECT_PREVIEW_H
 
-#include "tooling/inspector/types/remote_object_type.h"
-#include "tooling/inspector/types/property_preview.h"
+#include "types/remote_object_type.h"
+#include "types/property_preview.h"
 
 namespace ark::tooling::inspector {
 
 class PropertyDescriptor;
 
-class ObjectPreview final {
+class ObjectPreview final : public JsonSerializable {
 public:
     ObjectPreview(RemoteObjectType type, const std::vector<PropertyDescriptor> &properties);
 
-    std::function<void(JsonObjectBuilder &)> ToJson() const;
+    void Serialize(JsonObjectBuilder &builder) const override;
 
 private:
     RemoteObjectType type_;

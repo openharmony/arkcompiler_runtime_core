@@ -171,8 +171,6 @@ private:
     bool HaveGarbageRegions();
     size_t GetOldCollectionSetCandidatesNumber();
 
-    bool HaveGarbageRegions(const PandaPriorityQueue<std::pair<uint32_t, Region *>> &regions);
-
     template <RegionFlag REGION_TYPE, bool FULL_GC>
     void DoRegionCompacting(Region *region, bool useGcWorkers,
                             PandaVector<PandaVector<ObjectHeader *> *> *movedObjectsVector);
@@ -378,11 +376,11 @@ private:
 
     /// Return collectible regions
     CollectionSet GetCollectibleRegions(ark::GCTask const &task, bool isMixed);
+    template <typename Predicate>
+    void DrainOldRegions(CollectionSet &collectionSet, Predicate pred);
     void AddOldRegionsMaxAllowed(CollectionSet &collectionSet);
     void AddOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet);
-    uint64_t AddMoreOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet,
-                                                     PandaPriorityQueue<std::pair<uint32_t, Region *>> candidates,
-                                                     uint64_t gcPauseTimeBudget);
+    uint64_t AddMoreOldRegionsAccordingPauseTimeGoal(CollectionSet &collectionSet, uint64_t gcPauseTimeBudget);
     void ReleasePagesInFreePools();
 
     CollectionSet GetFullCollectionSet();
@@ -482,6 +480,8 @@ private:
     void ExecuteEnqueueRemsetsTask(GCUpdateRefsWorkersTask<false>::MovedObjectsRange *movedObjectsRange);
     void ExecuteEvacuateTask(typename G1EvacuateRegionsTask<Ref>::StackType *stack);
 
+    void PrintFragmentationMetrics(const char *title);
+
     G1GCPauseMarker<LanguageConfig> marker_;
     G1GCConcurrentMarker<LanguageConfig> concMarker_;
     G1GCMixedMarker<LanguageConfig> mixedMarker_;
@@ -511,6 +511,8 @@ private:
     double g1PromotionRegionAliveRate_ {0.0};
     bool g1TrackFreedObjects_ {false};
     bool isExplicitConcurrentGcEnabled_ {false};
+    // There are may be some regions with pinned objects that GC cannot collect
+    PandaVector<std::pair<uint32_t, Region *>> topGarbageRegions_ {};
     CollectionSet collectionSet_;
     // Max size of unique_refs_from_remsets_ buffer. It should be enough to store
     // almost all references to the collection set.

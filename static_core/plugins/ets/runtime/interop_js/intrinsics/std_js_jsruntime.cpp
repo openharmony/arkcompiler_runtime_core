@@ -218,13 +218,16 @@ void *CompilerConvertVoidToLocalIntrinsic()
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CONVERT_LOCAL_VALUE(type, cpptype)                        \
+    /* CC-OFFNXT(G.PRE.02) part name */                           \
     void *CompilerConvert##type##ToLocalIntrinsic(cpptype etsVal) \
     {                                                             \
+        /* CC-OFFNXT(G.PRE.05) code generation */                 \
         return ConvertToLocal<JSConvert##type>(etsVal);           \
     }                                                             \
                                                                   \
     cpptype CompilerConvertLocalTo##type##Intrinsic(void *val)    \
     {                                                             \
+        /* CC-OFFNXT(G.PRE.05) code generation */                 \
         return ConvertFromLocal<JSConvert##type>(val);            \
     }
 

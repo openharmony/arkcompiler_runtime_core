@@ -16,6 +16,7 @@
 #include "libabckit/include/c/metadata_core.h"
 #include "libabckit/src/adapter_dynamic/abckit_dynamic.h"
 #include "libabckit/src/adapter_dynamic/helpers_dynamic.h"
+#include "libabckit/src/helpers_common.h"
 #include "libabckit/src/logger.h"
 #include "libabckit/src/statuses_impl.h"
 #include "libabckit/src/ir_impl.h"
@@ -47,7 +48,7 @@ namespace fs = std::experimental::filesystem;
 
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace panda;
-// CC-OFFNXT(WordsTool.95 Google) sensitive word conflict
+// CC-OFFNXT(WordsTool.95) sensitive word conflict
 // NOLINTNEXTLINE(google-build-using-namespace)
 using namespace libabckit;
 
@@ -126,8 +127,8 @@ bool FillExportDescriptor(ModuleIterateData *data, uint16_t idx, size_t recordIn
     switch (data->m->target) {
         case ABCKIT_TARGET_JS:
             ed->impl = std::make_unique<AbckitJsExportDescriptor>();
-            ed->GetJSImpl()->core = ed.get();
-            ed->GetJSImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
+            ed->GetJsImpl()->core = ed.get();
+            ed->GetJsImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             ed->impl = std::make_unique<AbckitArktsExportDescriptor>();
@@ -155,7 +156,7 @@ bool FillExportDescriptor(ModuleIterateData *data, uint16_t idx, size_t recordIn
     payload.impl = payloadDyn;
     switch (data->m->target) {
         case ABCKIT_TARGET_JS:
-            ed->GetJSImpl()->payload = payload;
+            ed->GetJsImpl()->payload = payload;
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             ed->GetArkTSImpl()->payload = payload;
@@ -172,7 +173,7 @@ void SetIdImpl(ModuleIterateData *data, std::unique_ptr<AbckitCoreImportDescript
     switch (data->m->target) {
         case ABCKIT_TARGET_JS:
             id->impl = std::make_unique<AbckitJsImportDescriptor>();
-            id->GetJSImpl()->core = id.get();
+            id->GetJsImpl()->core = id.get();
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             id->impl = std::make_unique<AbckitArktsImportDescriptor>();
@@ -190,7 +191,7 @@ void SetIdModule(ModuleIterateData *data, std::unique_ptr<AbckitCoreImportDescri
     id->importedModule = TryFindModule(importedModuleName, data->m->file);
     switch (data->m->target) {
         case ABCKIT_TARGET_JS:
-            id->GetJSImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
+            id->GetJsImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             id->GetArkTSImpl()->kind = AbckitImportExportDescriptorKind::UNTYPED;
@@ -248,7 +249,7 @@ std::pair<size_t, size_t> FillImportSection(ModuleIterateData *data, size_t idx,
         payload.impl = payloadDyn;
         switch (data->m->target) {
             case ABCKIT_TARGET_JS:
-                id->GetJSImpl()->payload = payload;
+                id->GetJsImpl()->payload = payload;
                 break;
             case ABCKIT_TARGET_ARK_TS_V1:
                 id->GetArkTSImpl()->payload = payload;
@@ -265,9 +266,9 @@ std::pair<size_t, size_t> FillImportSection(ModuleIterateData *data, size_t idx,
 bool FindJSTarget(const std::unique_ptr<AbckitCoreExportDescriptor> &ed, ModuleIterateData *data,
                   const std::string &serviceName)
 {
-    if (ed->GetJSImpl()->payload.GetDynamicPayload().hasServiceImport) {
+    if (ed->GetJsImpl()->payload.GetDynamicPayload().hasServiceImport) {
         auto offset = data->payload->namespaceImportsOffset +
-                      ed->GetJSImpl()->payload.GetDynamicPayload().serviceNamespaceImportIdx * 2;
+                      ed->GetJsImpl()->payload.GetDynamicPayload().serviceNamespaceImportIdx * 2;
         auto namespaceLocalName = std::get<std::string>(data->moduleLitArr->literals_[offset].value_);
         if (serviceName == namespaceLocalName) {
             return true;
@@ -322,7 +323,7 @@ bool SetRecordIndexOff(size_t &i, ModuleIterateData *data, std::basic_string<cha
         auto *starExport = FindStarExport(data, name);
         switch (starExport->exportingModule->target) {
             case ABCKIT_TARGET_JS: {
-                starExport->GetJSImpl()->payload.GetDynamicPayload().moduleRecordIndexOff = (*recordIndexOff)++;
+                starExport->GetJsImpl()->payload.GetDynamicPayload().moduleRecordIndexOff = (*recordIndexOff)++;
                 break;
             }
             case ABCKIT_TARGET_ARK_TS_V1: {
@@ -370,7 +371,7 @@ size_t FillRequestIdxSection(ModuleIterateData *data)
     size_t idx = 0;
     auto numModuleRequests = std::get<uint32_t>(data->moduleLitArr->literals_[idx++].value_);
     data->payload->moduleRequestsOffset = idx;
-    auto moduleBasePath = fs::path("./" + std::string(data->m->moduleName->impl)).remove_filename();
+    auto moduleBasePath = fs::path("./" + std::string(data->m->moduleName->impl)).remove_filename().string();
     while (idx < data->payload->moduleRequestsOffset + numModuleRequests) {
         auto relativePathStr = std::get<std::string>(data->moduleLitArr->literals_[idx].value_);
         if (relativePathStr[0] == '@') {
@@ -378,12 +379,12 @@ size_t FillRequestIdxSection(ModuleIterateData *data)
             data->m->md.push_back(TryFindModule(relativePathStr, file));
         } else {
 #ifdef STD_FILESYSTEM_EXPERIMENTAL
-            auto moduleAbsPath = panda::os::GetAbsolutePath((moduleBasePath / fs::path(relativePathStr)).c_str());
+            auto moduleAbsPath = fs::absolute(fs::path(moduleBasePath).append(relativePathStr));
 #else
-            auto moduleAbsPath = fs::weakly_canonical(moduleBasePath / fs::path(relativePathStr));
+            auto moduleAbsPath = fs::weakly_canonical(fs::path(moduleBasePath).append(relativePathStr));
 #endif
-            auto moduleName = Relative(moduleAbsPath, fs::current_path());
-            data->moduleLitArr->literals_[idx++].value_ = "./" + moduleName;
+            auto moduleName = Relative(moduleAbsPath, fs::current_path()).string();
+            data->moduleLitArr->literals_[idx++].value_ = fs::path("./").append(moduleName).string();
             data->m->md.push_back(TryFindModule(moduleName, file));
         }
     }
@@ -424,7 +425,7 @@ void CreateModuleImpl(AbckitCoreModule *m)
     switch (m->target) {
         case ABCKIT_TARGET_JS:
             m->impl = std::make_unique<AbckitJsModule>();
-            m->GetJSImpl()->core = m;
+            m->GetJsImpl()->core = m;
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             m->impl = std::make_unique<AbckitArktsModule>();
@@ -473,7 +474,7 @@ std::unique_ptr<AbckitCoreModule> CreateModule(pandasm::Program *prog, const pan
     modulePayloadDyn.absPaths = true;
     switch (m->target) {
         case ABCKIT_TARGET_JS:
-            m->GetJSImpl()->impl = modulePayloadDyn;
+            m->GetJsImpl()->impl = modulePayloadDyn;
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             m->GetArkTSImpl()->impl.impl = modulePayloadDyn;
@@ -530,14 +531,19 @@ std::string DemangleScope(const std::string &mangledName, const AbckitLiteralArr
 }
 
 /*
- * This function consumes full mangled name and returnes full parent name, for example:
- * - enumerators0_dynamic.#&@2&A&B~C>D*E*#F -> enumerators0_dynamic.#&@2&A&B~C>D*#E
- * - enumerators0_dynamic.#&@2&A&B~C>D*#E -> enumerators0_dynamic.#&@2&A&B~C>#D
- * - enumerators0_dynamic.#&@2&A&B~C>#D -> enumerators0_dynamic.#&@2&A&B~C=#C
- * - enumerators0_dynamic.#&@2&A&B~C=#C -> enumerators0_dynamic.#&@2&A&#B
- * - enumerators0_dynamic.#&@2&A&#B -> enumerators0_dynamic.#&@2&#A
- * - enumerators0_dynamic.#&@2&#A -> enumerators0_dynamic.#&#M0N0
- * - enumerators0_dynamic.#&#M0N0 -> enumerators0_dynamic
+ * This function consumes full mangled name and returns full parent name, for example:
+ * - module.#&@2&A&B~C>D*E*#F -> module.#&@2&A&B~C>D*#E
+ * - module.#&@2&A&B~C>D*#E -> module.#&@2&A&B~C>#D
+ * - module.#&@2&A&B~C>#D -> module.#&@2&A&B~C=#C
+ * - module.#&@2&A&B~C=#C -> module.#&@2&A&#B
+ * - module.#&@2&A&#B -> module.#&@2&#A
+ * - module.#&@2&#A -> module.#&#M0N0
+ * - module.#&#M0N0 -> module
+ * NOTE: There is single function name for both constructor and class (for example "module.#~C=#C")
+ *       For class parent is scope where this class was declared ("module")
+ *       For constructor parent is class itself ("module.#~C=#C"))
+ *       So for functions "GetFunctionParentKindAndName" should be used instead of "GetParentKindAndName" to handle this
+ * case
  */
 std::pair<ParentKind, std::string> GetParentKindAndName(const std::string &name, const AbckitLiteralArray *scopeNames)
 {
@@ -580,6 +586,15 @@ std::pair<ParentKind, std::string> GetParentKindAndName(const std::string &name,
     return {ParentKind::MODULE, moduleName};
 }
 
+std::pair<ParentKind, std::string> GetFunctionParentKindAndName(const std::string &name,
+                                                                const AbckitLiteralArray *scopeNames)
+{
+    if (IsCtor(name)) {
+        return {ParentKind::CLASS, name};
+    }
+    return GetParentKindAndName(name, scopeNames);
+}
+
 std::unique_ptr<AbckitCoreNamespace> CreateNamespace(pandasm::Function &func, AbckitFile *file)
 {
     std::string &functionName = func.name;
@@ -589,7 +604,7 @@ std::unique_ptr<AbckitCoreNamespace> CreateNamespace(pandasm::Function &func, Ab
     ASSERT(m->target == ABCKIT_TARGET_ARK_TS_V1);
 
     auto namespaceFunc = std::make_unique<AbckitCoreFunction>();
-    namespaceFunc->m = m.get();
+    namespaceFunc->owningModule = m.get();
     namespaceFunc->impl = std::make_unique<AbckitArktsFunction>();
     namespaceFunc->GetArkTSImpl()->impl = &func;
     namespaceFunc->GetArkTSImpl()->core = namespaceFunc.get();
@@ -603,23 +618,33 @@ std::unique_ptr<AbckitCoreNamespace> CreateNamespace(pandasm::Function &func, Ab
     return n;
 }
 
+AbckitLiteralArray *GetScopeNamesArray(AbckitCoreModule *m)
+{
+    switch (m->target) {
+        case ABCKIT_TARGET_JS:
+            return m->GetJsImpl()->impl.scopeNamesLiteralArray;
+        case ABCKIT_TARGET_ARK_TS_V1:
+            return m->GetArkTSImpl()->impl.GetDynModule().scopeNamesLiteralArray;
+        default:
+            LIBABCKIT_UNREACHABLE;
+    }
+}
+
 void AssignNamespacesToParent(std::vector<std::unique_ptr<AbckitCoreNamespace>> &namespaces,
                               std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace)
 {
     for (auto &n : namespaces) {
-        ASSERT(n->m->target == ABCKIT_TARGET_ARK_TS_V1);
+        ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
         panda::pandasm::Function *func = n->GetArkTSImpl()->f->GetArkTSImpl()->GetDynamicImpl();
-        ;
-        auto [kind, parentName] =
-            GetParentKindAndName(func->name, n->m->GetArkTSImpl()->impl.GetDynModule().scopeNamesLiteralArray);
+        auto [kind, parentName] = GetParentKindAndName(func->name, GetScopeNamesArray(n->owningModule));
         switch (kind) {
             case ParentKind::MODULE:
-                n->m->namespaces.emplace_back(std::move(n)).get();
+                n->owningModule->namespaces.emplace_back(std::move(n)).get();
                 break;
             case ParentKind::NAMESPACE: {
                 ASSERT(nameToNamespace.count(parentName) == 1);
                 auto *parentNamespace = nameToNamespace[parentName];
-                n->n = nameToNamespace[parentName];
+                n->parentNamespace = nameToNamespace[parentName];
                 parentNamespace->namespaces.emplace_back(std::move(n)).get();
                 break;
             }
@@ -629,9 +654,9 @@ void AssignNamespacesToParent(std::vector<std::unique_ptr<AbckitCoreNamespace>> 
     }
 }
 
-void CreateClass(const std::string &functionName, panda::pandasm::Function &function, AbckitFile *file,
-                 std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
-                 std::unordered_map<std::string, AbckitCoreClass *> &nameToClass)
+std::unique_ptr<AbckitCoreClass> CreateClass(const std::string &functionName, panda::pandasm::Function &function,
+                                             AbckitFile *file,
+                                             std::unordered_map<std::string, AbckitCoreClass *> &nameToClass)
 {
     std::string moduleName = pandasm::GetOwnerName(functionName);
     ASSERT(file->localModules.count(moduleName) != 0);
@@ -639,40 +664,63 @@ void CreateClass(const std::string &functionName, panda::pandasm::Function &func
 
     auto abckitFunction = &function;
     std::unique_ptr<AbckitCoreClass> c;
-    AbckitLiteralArray *scopeNamesLiteralArray;
+
     switch (m->target) {
         case ABCKIT_TARGET_JS:
             c = std::make_unique<AbckitCoreClass>(m.get(), AbckitJsClass(abckitFunction));
-            scopeNamesLiteralArray = m->GetJSImpl()->impl.scopeNamesLiteralArray;
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             c = std::make_unique<AbckitCoreClass>(m.get(), AbckitArktsClass(abckitFunction));
-            scopeNamesLiteralArray = m->GetArkTSImpl()->impl.GetDynModule().scopeNamesLiteralArray;
             break;
         default:
             LIBABCKIT_UNREACHABLE;
     }
     ASSERT(nameToClass.count(functionName) == 0);
     nameToClass[functionName] = c.get();
+    return c;
+}
 
-    auto [kind, parentName] = GetParentKindAndName(functionName, scopeNamesLiteralArray);
-    switch (kind) {
-        case ParentKind::MODULE:
-            m->InsertClass(functionName, std::move(c));
-            break;
-        case ParentKind::NAMESPACE: {
-            ASSERT(nameToNamespace.count(parentName) != 0);
-            auto *n = nameToNamespace[parentName];
-            c->n = n;
-            n->classes.emplace_back(std::move(c));
-            break;
+void AssignClassesToParent(std::vector<std::unique_ptr<AbckitCoreClass>> &klasses,
+                           std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
+                           std::unordered_map<std::string, AbckitCoreFunction *> &nameToFunction)
+{
+    for (auto &klass : klasses) {
+        std::string name;
+        switch (klass->owningModule->target) {
+            case ABCKIT_TARGET_JS:
+                name = klass->GetJsImpl()->impl->name;
+                break;
+            case ABCKIT_TARGET_ARK_TS_V1:
+                name = klass->GetArkTSImpl()->impl.GetDynamicClass()->name;
+                break;
+            default:
+                LIBABCKIT_UNREACHABLE;
         }
-        case ParentKind::FUNCTION:
-        case ParentKind::CLASS:
-            m->InsertClass(functionName, std::move(c));
-            break;
-        default:
-            LIBABCKIT_UNREACHABLE;
+        auto [kind, parentName] = GetParentKindAndName(name, GetScopeNamesArray(klass->owningModule));
+        switch (kind) {
+            case ParentKind::MODULE:
+                klass->owningModule->InsertClass(name, std::move(klass));
+                break;
+            case ParentKind::NAMESPACE: {
+                ASSERT(nameToNamespace.count(parentName) != 0);
+                auto *n = nameToNamespace[parentName];
+                klass->parentNamespace = n;
+                n->classes.emplace_back(std::move(klass));
+                break;
+            }
+            case ParentKind::FUNCTION: {
+                ASSERT(nameToFunction.count(parentName) != 0);
+                auto *f = nameToFunction[parentName];
+                klass->parentFunction = f;
+                f->nestedClasses.emplace_back(std::move(klass));
+                break;
+            }
+            case ParentKind::CLASS:
+                klass->owningModule->InsertClass(name, std::move(klass));
+                break;
+            default:
+                LIBABCKIT_UNREACHABLE;
+        }
     }
 }
 
@@ -682,7 +730,7 @@ void CreateAnnotationInterface(AbckitFile *file, const std::string &recName, pan
     std::string moduleName = pandasm::GetOwnerName(recName);
     ASSERT(file->localModules.count(moduleName) != 0);
     auto &module = file->localModules[moduleName];
-    ai->m = module.get();
+    ai->owningModule = module.get();
     ai->impl = std::make_unique<AbckitArktsAnnotationInterface>();
     ai->GetArkTSImpl()->impl = &rec;
     ai->GetArkTSImpl()->core = ai.get();
@@ -697,13 +745,7 @@ void CreateAnnotationInterface(AbckitFile *file, const std::string &recName, pan
         aiField->ai = ai.get();
         aiField->name = CreateNameString(field.name, file);
 
-        auto type = std::make_unique<AbckitType>();
-
-        type->id = PandaTypeToAbcKitTypeId(field.type);
-        type->rank = field.type.GetRank();
-        type->klass = nullptr;
-        aiField->type = type.get();
-        file->types.emplace_back(std::move(type));
+        aiField->type = GetOrCreateType(file, PandaTypeToAbcKitTypeId(field.type), field.type.GetRank(), nullptr);
 
         if (field.metadata->GetValue().has_value()) {
             auto abcval = std::make_unique<AbckitValue>();
@@ -727,8 +769,8 @@ void SetImpl(std::unique_ptr<AbckitCoreFunction> &function, panda::pandasm::Func
     switch (m->target) {
         case ABCKIT_TARGET_JS:
             function->impl = std::make_unique<AbckitJsFunction>();
-            function->GetJSImpl()->impl = &functionImpl;
-            function->GetJSImpl()->core = function.get();
+            function->GetJsImpl()->impl = &functionImpl;
+            function->GetJsImpl()->core = function.get();
             break;
         case ABCKIT_TARGET_ARK_TS_V1:
             function->impl = std::make_unique<AbckitArktsFunction>();
@@ -740,25 +782,13 @@ void SetImpl(std::unique_ptr<AbckitCoreFunction> &function, panda::pandasm::Func
     }
 }
 
-std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionName,
-                                                   panda::pandasm::Function &functionImpl, AbckitFile *file)
+void CreateFunctionAnnotations(AbckitFile *file, panda::pandasm::Function &functionImpl, AbckitCoreFunction *function)
 {
-    LIBABCKIT_LOG(DEBUG) << functionName << '\n';
-    std::string moduleName = pandasm::GetOwnerName(functionName);
-    ASSERT(file->localModules.count(moduleName) != 0);
-    auto &m = file->localModules[moduleName];
-
-    auto function = std::make_unique<AbckitCoreFunction>();
-    function->m = m.get();
-    SetImpl(function, functionImpl, m);
-    ASSERT(file->nameToFunction.count(functionImpl.name) == 0);
-    file->nameToFunction[functionImpl.name] = function.get();
-
     for (auto &annoImpl : functionImpl.metadata->GetAnnotations()) {
         if (libabckit::IsServiceRecord(annoImpl.GetName())) {
             continue;
         }
-        ASSERT(function->m->target != ABCKIT_TARGET_JS);
+        ASSERT(function->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
         auto anno = std::make_unique<AbckitCoreAnnotation>();
         std::string aiModuleName = pandasm::GetOwnerName(annoImpl.GetName());
         std::string aiName = pandasm::GetItemName(annoImpl.GetName());
@@ -780,40 +810,64 @@ std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionNa
 
             anno->elements.emplace_back(std::move(annoElem));
         }
-        anno->owner = function.get();
+        anno->owner = function;
         function->annotations.emplace_back(std::move(anno));
     }
+}
+
+std::unique_ptr<AbckitCoreFunction> CreateFunction(const std::string &functionName,
+                                                   panda::pandasm::Function &functionImpl, AbckitFile *file)
+{
+    std::string moduleName = pandasm::GetOwnerName(functionName);
+    ASSERT(file->localModules.count(moduleName) != 0);
+    auto &m = file->localModules[moduleName];
+
+    auto function = std::make_unique<AbckitCoreFunction>();
+    function->owningModule = m.get();
+    auto [kind, _] = GetFunctionParentKindAndName(functionName, GetScopeNamesArray(function->owningModule));
+    if (m->target == ABCKIT_TARGET_ARK_TS_V1) {
+        function->isAnonymous = kind == ParentKind::FUNCTION;
+    } else {
+        function->isAnonymous = IsAnonymousName(functionName);
+    }
+    SetImpl(function, functionImpl, m);
+    ASSERT(file->nameToFunction.count(functionImpl.name) == 0);
+    file->nameToFunction[functionImpl.name] = function.get();
+
+    CreateFunctionAnnotations(file, functionImpl, function.get());
 
     return function;
 }
 
-void SetFunctions(std::unique_ptr<AbckitCoreFunction> &f, std::string &name, AbckitLiteralArray *scopeNamesLiteralArray,
-                  std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
-                  std::unordered_map<std::string, AbckitCoreClass *> &nameToClass,
-                  std::unordered_map<std::string, AbckitCoreFunction *> &nameToFunction)
+void AssignFunction(std::unique_ptr<AbckitCoreFunction> &f, std::string &name,
+                    AbckitLiteralArray *scopeNamesLiteralArray,
+                    std::unordered_map<std::string, AbckitCoreNamespace *> &nameToNamespace,
+                    std::unordered_map<std::string, AbckitCoreClass *> &nameToClass,
+                    std::unordered_map<std::string, AbckitCoreFunction *> &nameToFunction)
 {
-    auto [kind, parentName] = GetParentKindAndName(name, scopeNamesLiteralArray);
+    auto [kind, parentName] = GetFunctionParentKindAndName(name, scopeNamesLiteralArray);
     switch (kind) {
         case ParentKind::MODULE:
-            f->m->functions.emplace_back(std::move(f));
+            f->owningModule->functions.emplace_back(std::move(f));
             return;
         case ParentKind::NAMESPACE: {
             ASSERT(nameToNamespace.count(parentName) == 1);
             auto *n = nameToNamespace[parentName];
-            f->n = n;
+            f->parentNamespace = n;
             n->functions.emplace_back(std::move(f));
             return;
         }
         case ParentKind::CLASS: {
             ASSERT(nameToClass.count(parentName) == 1);
             auto *c = nameToClass[parentName];
-            f->klass = c;
+            f->parentClass = c;
             c->methods.emplace_back(std::move(f));
             return;
         }
         case ParentKind::FUNCTION: {
             ASSERT(nameToFunction.count(parentName) == 1);
             auto *parentF = nameToFunction[parentName];
+            f->parentFunction = parentF;
             parentF->nestedFunction.emplace_back(std::move(f));
             return;
         }
@@ -828,28 +882,28 @@ void AssignFunctionsToParent(std::vector<std::unique_ptr<AbckitCoreFunction>> &f
     for (auto &f : functions) {
         std::string name;
         AbckitLiteralArray *scopeNamesLiteralArray;
-        switch (f->m->target) {
+        switch (f->owningModule->target) {
             case ABCKIT_TARGET_JS:
-                name = f->GetJSImpl()->impl->name;
-                scopeNamesLiteralArray = f->m->GetJSImpl()->impl.scopeNamesLiteralArray;
+                name = f->GetJsImpl()->impl->name;
+                scopeNamesLiteralArray = f->owningModule->GetJsImpl()->impl.scopeNamesLiteralArray;
                 break;
             case ABCKIT_TARGET_ARK_TS_V1:
                 name = f->GetArkTSImpl()->GetDynamicImpl()->name;
-                scopeNamesLiteralArray = f->m->GetArkTSImpl()->impl.GetDynModule().scopeNamesLiteralArray;
+                scopeNamesLiteralArray = f->owningModule->GetArkTSImpl()->impl.GetDynModule().scopeNamesLiteralArray;
                 break;
             default:
                 LIBABCKIT_UNREACHABLE;
         }
 
-        if (IsAnonymous(name)) {
-            f->m->functions.emplace_back(std::move(f));
+        if (f->isAnonymous) {
+            f->owningModule->functions.emplace_back(std::move(f));
             continue;
         }
 
         if (IsCtor(name)) {
             ASSERT(nameToClass.count(name) == 1);
             auto *c = nameToClass[name];
-            f->klass = c;
+            f->parentClass = c;
             for (auto &anno : f->annotations) {
                 anno->owner = c;
                 c->annotations.emplace_back(std::move(anno));
@@ -859,22 +913,27 @@ void AssignFunctionsToParent(std::vector<std::unique_ptr<AbckitCoreFunction>> &f
             continue;
         }
 
-        SetFunctions(f, name, scopeNamesLiteralArray, nameToNamespace, nameToClass, nameToFunction);
+        AssignFunction(f, name, scopeNamesLiteralArray, nameToNamespace, nameToClass, nameToFunction);
     }
 }
 
 void DumpHierarchy(AbckitFile *file)
 {
-    std::function<void(AbckitCoreFunction * f, const std::string &indent)> dumpFunc =
-        [&dumpFunc](AbckitCoreFunction *f, const std::string &indent = "") {
-            auto fName = GetDynFunction(f)->name;
-            LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << fName << std::endl;
-            for (auto &fNested : f->nestedFunction) {
-                dumpFunc(fNested.get(), indent + "  ");
-            }
-        };
+    std::function<void(AbckitCoreFunction * f, const std::string &indent)> dumpFunc;
+    std::function<void(AbckitCoreClass * c, const std::string &indent)> dumpClass;
 
-    auto dumpClass = [&dumpFunc](AbckitCoreClass *c, const std::string &indent = "") {
+    dumpFunc = [&dumpFunc, &dumpClass](AbckitCoreFunction *f, const std::string &indent = "") {
+        auto fName = GetDynFunction(f)->name;
+        LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << fName << std::endl;
+        for (auto &cNested : f->nestedClasses) {
+            dumpClass(cNested.get(), indent + "  ");
+        }
+        for (auto &fNested : f->nestedFunction) {
+            dumpFunc(fNested.get(), indent + "  ");
+        }
+    };
+
+    dumpClass = [&dumpFunc](AbckitCoreClass *c, const std::string &indent = "") {
         auto cName = GetDynFunction(c)->name;
         LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << cName << std::endl;
         for (auto &f : c->methods) {
@@ -884,7 +943,7 @@ void DumpHierarchy(AbckitFile *file)
 
     std::function<void(AbckitCoreNamespace * n, const std::string &indent)> dumpNamespace =
         [&dumpFunc, &dumpClass, &dumpNamespace](AbckitCoreNamespace *n, const std::string &indent = "") {
-            ASSERT(n->m->target == ABCKIT_TARGET_ARK_TS_V1);
+            ASSERT(n->owningModule->target == ABCKIT_TARGET_ARK_TS_V1);
             auto &nName = GetDynFunction(n->GetArkTSImpl()->f.get())->name;
             LIBABCKIT_LOG_NO_FUNC(DEBUG) << indent << nName << std::endl;
             for (auto &n : n->namespaces) {
@@ -904,7 +963,7 @@ void DumpHierarchy(AbckitFile *file)
             dumpNamespace(n.get(), "");
         }
         for (auto &[cName, c] : m->ct) {
-            dumpClass(c.get());
+            dumpClass(c.get(), "");
         }
         for (auto &f : m->functions) {
             dumpFunc(f.get(), "");
@@ -1049,12 +1108,13 @@ void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
     CollectNamespaces(prog, file, &namespaces, &nameToNamespace);
 
     // Collect classes
+    std::vector<std::unique_ptr<AbckitCoreClass>> classes;
     std::unordered_map<std::string, AbckitCoreClass *> nameToClass;
     for (auto &[functionName, function] : prog->function_table) {
         if (!libabckit::IsCtor(functionName)) {
             continue;
         }
-        CreateClass(functionName, function, file, nameToNamespace, nameToClass);
+        classes.emplace_back(CreateClass(functionName, function, file, nameToClass));
     }
 
     // Collect functions
@@ -1069,6 +1129,9 @@ void CreateWrappers(pandasm::Program *prog, AbckitFile *file)
         ASSERT(nameToFunction.count(function.name) == 0);
         nameToFunction[function.name] = functions.back().get();
     }
+
+    // Assign parents
+    AssignClassesToParent(classes, nameToNamespace, nameToFunction);
     AssignFunctionsToParent(functions, nameToNamespace, nameToClass, nameToFunction);
 
     LIBABCKIT_LOG_DUMP(DumpHierarchy(file), DEBUG);
