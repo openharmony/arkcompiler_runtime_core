@@ -17,8 +17,8 @@ limitations under the License.
 
 /*---
 desc: >-
-          Mixed override-compatibility between types of different kinds is always false, except the compatibility with class type
-          Object as any type is a subtype of Object.
+          Mixed override-compatibility between types of different kinds is always false,
+          except the compatibility with class type Object as any type is a subtype of Object.
 tags: [{{c.tags}}]
 ---*/
 
@@ -34,7 +34,7 @@ class Derived extends Base {
 
 function main(): void {
     {{c.call}}
-    assert(res == {{c.result}})
+    assertEQ(res, {{c.result}})
 }
 
 {% endfor %}

@@ -16,8 +16,8 @@ limitations under the License.
 {% for c in cases %}
 /*---
 desc: >-
-    A static method is defined in a subinterface I2 with the same name as the static method in a superinterface I1.
-    If signatures are overload-equivalent, then the static method in the subclass hides the previous static method.
+    A method is defined in a subinterface with the same name as the method in the superinterface.
+    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
     Otherwise, overloading is used.
 ---*/
 

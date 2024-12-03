@@ -56,7 +56,7 @@ class Derived extends Base {
 
 function main() {
     Derived.foo({{c.call}});
-    assert(res == {{c.res}});
+    assertEQ( res, {{c.res}} );
 }
 
 {%- endfor %}

@@ -17,8 +17,9 @@ limitations under the License.
 
 /*---
 desc: >-
-    Two instance methods or two static methods with the same name are defined in the same interface.
-    If signatures are overload-equivalent, then a compile-time error occurs. Otherwise, overloading is used.
+    A method is defined in a subinterface with the same name as the method in the superinterface.
+    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
+    Otherwise, overloading is used.
 ---*/
 
 let res: number = 0;

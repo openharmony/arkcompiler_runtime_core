@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,18 @@
  * limitations under the License.
  */
 
-{% for core_type in core_types %}
+{% for c in cases %}
 
 /*---
 desc: |-
       All entities exported from the core packages of the standard library (see Standard Library)
       are accessible as simple names (see Accessible) in any compilation unit.
-params: "{{core_type}}"
-tags: [compile-only]
 ---*/
 
+{{c.decl}}
+
 function main(): void {
-  let myObj {{core_type}}
+  {{c.call}}
 }
 
 {% endfor %}

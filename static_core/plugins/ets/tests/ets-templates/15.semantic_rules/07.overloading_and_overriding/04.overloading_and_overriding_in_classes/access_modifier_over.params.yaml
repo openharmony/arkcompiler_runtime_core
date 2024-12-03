@@ -21,7 +21,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
@@ -30,7 +30,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     decl: |-
@@ -39,7 +39,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Public member can be overridden and/or implemented by the public one.
     tags: negative, compile-only
@@ -103,7 +103,7 @@ cases:
       }
     use: |-
       new Derived().internal_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Internal member can be overridden by the internal one only
     tags: negative, compile-only
@@ -138,7 +138,7 @@ cases:
       }
     use: |-
       new Derived().protected_foo(new Number());
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     decl: |-
@@ -147,7 +147,7 @@ cases:
       }
     use: |-
       new Derived().protected_foo(new Number());
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - doc: Protected member can be overridden by the protected or public one.
     tags: negative, compile-only
@@ -221,7 +221,7 @@ cases:
       }
     use: |-
       new Derived().public_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -229,7 +229,7 @@ cases:
       }
     use: |-
       new Derived().private_foo();
-      assert(res == 11);
+      assertEQ( res, 11);
 
   # overload-equivalent, expected to fail without 'override' keyword
   - tags: negative, compile-only
@@ -302,9 +302,9 @@ cases:
     use: |-
       let a = new Derived();
       a.public_foo();
-      assert(res == 1);
+      assertEQ( res, 1);
       a.public_foo(new Number());
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -313,9 +313,9 @@ cases:
     use: |-
       let a = new Derived();
       a.protected_foo(new Number());
-      assert(res == 2);
+      assertEQ( res, 2);
       a.protected_foo("some str");
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -324,9 +324,9 @@ cases:
     use: |-
       let a = new Derived();
       a.protected_foo(new Number());
-      assert(res == 2);
+      assertEQ( res, 2);
       a.protected_foo(new Number(), "some str");
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -335,9 +335,9 @@ cases:
     use: |-
       let a = new Derived();
       a.protected_foo(new Number());
-      assert(res == 2);
+      assertEQ( res, 2);
       a.protected_foo(1 as number);
-      assert(res == 11);
+      assertEQ( res, 11);
 
   - decl: |-
       class Derived extends Base {
@@ -346,6 +346,6 @@ cases:
     use: |-
       let a = new Derived();
       a.protected_foo(new Number());
-      assert(res == 2);
+      assertEQ( res, 2);
       a.protected_foo(new Gen2<Number, String>());
-      assert(res == 11);
+      assertEQ( res, 11);

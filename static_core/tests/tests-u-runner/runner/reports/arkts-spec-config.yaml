@@ -986,7 +986,7 @@
     status: Finished
 '15.7':
     title: Overloading and Overriding
-    status: ''
+    status: No testable assertions
 15.7.1:
     title: Overload-Equivalent Signatures
     status: ''

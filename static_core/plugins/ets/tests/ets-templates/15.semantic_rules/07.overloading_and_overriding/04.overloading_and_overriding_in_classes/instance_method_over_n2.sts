@@ -18,7 +18,8 @@
 /*---
 desc: >-
     An instance method is defined in a subclass with the same name as the instance method in a superclass.
-    If signatures are override-compatible, then overriding is used. Otherwise, overloading is used.
+    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used. Otherwise,
+    overloading is used.
 tags: [{{c.tags}}]
 ---*/
 
@@ -55,7 +56,7 @@ class Derived extends Base {
 
 function main() {
     new Derived().foo({{c.call}});
-    assert(res == {{c.res}});
+    assertEQ( res, {{c.res}} );
 }
 
 {%- endfor %}
