@@ -1,3 +1,183 @@
+# 20905 Multiline string literals not supported
+03.types/08.reference_types/12.union_types/ut_6.sts
+03.types/08.reference_types/12.union_types/ut_7.sts
+
+# 20907 No CTE when multiple numeric types in a union
+03.types/08.reference_types/12.union_types/ut_n_0.sts
+03.types/08.reference_types/12.union_types/ut_n_1.sts
+03.types/08.reference_types/12.union_types/ut_n_2.sts
+03.types/08.reference_types/12.union_types/ut_n_3.sts
+03.types/08.reference_types/12.union_types/ut_n2_0.sts
+03.types/08.reference_types/12.union_types/ut_n2_1.sts
+03.types/08.reference_types/12.union_types/ut_n2_10.sts
+03.types/08.reference_types/12.union_types/ut_n2_102.sts
+03.types/08.reference_types/12.union_types/ut_n2_107.sts
+03.types/08.reference_types/12.union_types/ut_n2_11.sts
+03.types/08.reference_types/12.union_types/ut_n2_112.sts
+03.types/08.reference_types/12.union_types/ut_n2_117.sts
+03.types/08.reference_types/12.union_types/ut_n2_12.sts
+03.types/08.reference_types/12.union_types/ut_n2_13.sts
+03.types/08.reference_types/12.union_types/ut_n2_14.sts
+03.types/08.reference_types/12.union_types/ut_n2_16.sts
+03.types/08.reference_types/12.union_types/ut_n2_2.sts
+03.types/08.reference_types/12.union_types/ut_n2_20.sts
+03.types/08.reference_types/12.union_types/ut_n2_21.sts
+03.types/08.reference_types/12.union_types/ut_n2_22.sts
+03.types/08.reference_types/12.union_types/ut_n2_23.sts
+03.types/08.reference_types/12.union_types/ut_n2_24.sts
+03.types/08.reference_types/12.union_types/ut_n2_25.sts
+03.types/08.reference_types/12.union_types/ut_n2_26.sts
+03.types/08.reference_types/12.union_types/ut_n2_27.sts
+03.types/08.reference_types/12.union_types/ut_n2_28.sts
+03.types/08.reference_types/12.union_types/ut_n2_29.sts
+03.types/08.reference_types/12.union_types/ut_n2_3.sts
+03.types/08.reference_types/12.union_types/ut_n2_30.sts
+03.types/08.reference_types/12.union_types/ut_n2_31.sts
+03.types/08.reference_types/12.union_types/ut_n2_32.sts
+03.types/08.reference_types/12.union_types/ut_n2_33.sts
+03.types/08.reference_types/12.union_types/ut_n2_34.sts
+03.types/08.reference_types/12.union_types/ut_n2_37.sts
+03.types/08.reference_types/12.union_types/ut_n2_4.sts
+03.types/08.reference_types/12.union_types/ut_n2_40.sts
+03.types/08.reference_types/12.union_types/ut_n2_41.sts
+03.types/08.reference_types/12.union_types/ut_n2_42.sts
+03.types/08.reference_types/12.union_types/ut_n2_43.sts
+03.types/08.reference_types/12.union_types/ut_n2_44.sts
+03.types/08.reference_types/12.union_types/ut_n2_47.sts
+03.types/08.reference_types/12.union_types/ut_n2_50.sts
+03.types/08.reference_types/12.union_types/ut_n2_51.sts
+03.types/08.reference_types/12.union_types/ut_n2_52.sts
+03.types/08.reference_types/12.union_types/ut_n2_53.sts
+03.types/08.reference_types/12.union_types/ut_n2_54.sts
+03.types/08.reference_types/12.union_types/ut_n2_57.sts
+03.types/08.reference_types/12.union_types/ut_n2_6.sts
+03.types/08.reference_types/12.union_types/ut_n2_61.sts
+03.types/08.reference_types/12.union_types/ut_n2_66.sts
+03.types/08.reference_types/12.union_types/ut_n2_71.sts
+03.types/08.reference_types/12.union_types/ut_n2_76.sts
+03.types/08.reference_types/12.union_types/ut_n2_80.sts
+03.types/08.reference_types/12.union_types/ut_n2_81.sts
+03.types/08.reference_types/12.union_types/ut_n2_82.sts
+03.types/08.reference_types/12.union_types/ut_n2_83.sts
+03.types/08.reference_types/12.union_types/ut_n2_84.sts
+03.types/08.reference_types/12.union_types/ut_n2_85.sts
+03.types/08.reference_types/12.union_types/ut_n2_86.sts
+03.types/08.reference_types/12.union_types/ut_n2_87.sts
+03.types/08.reference_types/12.union_types/ut_n2_88.sts
+03.types/08.reference_types/12.union_types/ut_n2_89.sts
+03.types/08.reference_types/12.union_types/ut_n2_92.sts
+03.types/08.reference_types/12.union_types/ut_n2_97.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_n_4.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_40.sts
+
+# 20909 SegFault on `new null()`, `new undefined()`
+03.types/01.predefined_types/01.primitive_types/pt_constructor_9.sts
+03.types/01.predefined_types/01.primitive_types/pt_constructor_10.sts
+
+# XXXXX Aborts on assignment of char to union normalized to string
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_10.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_15.sts
+
+# XXXXX Unexpected 'Value is possibly nullish' error
+03.types/08.reference_types/12.union_types/ut_11.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_6.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_8.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_28.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_31.sts
+
+# XXXXX Unexpected 'Indexed access is not supported for such expression type' error
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_23.sts
+
+# XXXXX Indexed access is not supported for such expression type.
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_33.sts
+
+# 20936 Access to common union method doesn't work
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_spec_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_1.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_10.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_11.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_12.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_2.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_3.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_4.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_5.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_6.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_7.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_8.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth1_9.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_1.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_10.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_11.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_12.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_2.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_3.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_4.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_5.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_6.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_7.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_8.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth2_9.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_1.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_10.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_11.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_12.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_2.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_4.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_5.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_6.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_7.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_8.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_meth3_9.sts
+
+# 20935 Runtime aborts on access to common field with generics
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_11.sts
+
+# 20933 No access to common union members if members are of a union type
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_5.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_6.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_5.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_6.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_0.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_5.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_6.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_3.sts
+
+#  20948 No access to common union members if members are of a function type
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_10.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_10.sts
+
+#  20948 No access to common union members if members are of a tuple type
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_8.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_8.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_8.sts
+
+#  20948 Cannot access common union type fields of Record type
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld1_9.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_9.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_9.sts
+
+# 20939 Unexpected NoSuchFieldError for a field in a superclass
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_1.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_2.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_4.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_7.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_12.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_1.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_2.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_4.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_7.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld2_11.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_11.sts
+
+# 20940 SegFault when accessing common union members
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_10.sts
+03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_fld3_12.sts
+
 # es2panda fails: panda#14423 Boxed floating values are different from the same unboxed
 07.expressions/31.string_interpolation_expressions/siexp_1.sts
 # end of es2panda fails
@@ -429,12 +609,12 @@
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_3.sts
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_4.sts
 02.lexical_elements/09.literals/03.bigint_literals/bigint_func_5.sts
-03.types/08.reference_types/07.function_types/function_type_2.sts
-03.types/08.reference_types/07.function_types/function_type_3.sts
-03.types/08.reference_types/07.function_types/function_type_4.sts
-03.types/08.reference_types/07.function_types/function_type_5.sts
-03.types/08.reference_types/07.function_types/function_type_6.sts
-03.types/08.reference_types/07.function_types/function_type_7.sts
+03.types/08.reference_types/08.function_types/function_type_2.sts
+03.types/08.reference_types/08.function_types/function_type_3.sts
+03.types/08.reference_types/08.function_types/function_type_4.sts
+03.types/08.reference_types/08.function_types/function_type_5.sts
+03.types/08.reference_types/08.function_types/function_type_6.sts
+03.types/08.reference_types/08.function_types/function_type_7.sts
 17.experimental_features/07.function_and_method_overloading/01.function_overloading/fn_overloading_30.sts
 04.names_declarations_and_scopes/08.function_declarations/04.optional_parameters/opt_param_2.sts
 04.names_declarations_and_scopes/08.function_declarations/09.function_overload_signatures/overload.sts
@@ -478,36 +658,6 @@
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_7.sts
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_8.sts
 07.expressions/24.relational_expressions/05.enumeration_relational_operators/enum_tup_9.sts
-
-# es2panda fails: Union Types not implemented, #15233, #19926, 19950
-03.types/08.reference_types/11.union_types/spec_ex1.sts
-03.types/08.reference_types/11.union_types/spec_ex3.sts
-03.types/08.reference_types/11.union_types/spec_ex5.sts
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_1.sts
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_2.sts
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_3.sts
-03.types/08.reference_types/11.union_types/union_types_normalization/norm_5.sts
-03.types/08.reference_types/11.union_types/ut_0.sts
-03.types/08.reference_types/11.union_types/ut_1.sts
-03.types/08.reference_types/11.union_types/ut_10.sts
-03.types/08.reference_types/11.union_types/ut_11.sts
-03.types/08.reference_types/11.union_types/ut_12.sts
-03.types/08.reference_types/11.union_types/ut_2.sts
-03.types/08.reference_types/11.union_types/ut_23.sts
-03.types/08.reference_types/11.union_types/ut_24.sts
-03.types/08.reference_types/11.union_types/ut_25.sts
-03.types/08.reference_types/11.union_types/ut_26.sts
-03.types/08.reference_types/11.union_types/ut_28.sts
-03.types/08.reference_types/11.union_types/ut_29.sts
-03.types/08.reference_types/11.union_types/ut_3.sts
-03.types/08.reference_types/11.union_types/ut_30.sts
-03.types/08.reference_types/11.union_types/ut_32.sts
-03.types/08.reference_types/11.union_types/ut_33.sts
-03.types/08.reference_types/11.union_types/ut_5.sts
-03.types/08.reference_types/11.union_types/ut_6.sts
-03.types/08.reference_types/11.union_types/ut_8.sts
-03.types/08.reference_types/11.union_types/ut_9.sts
-# end of es2panda fails
 
 # 20483 es2panda aborts on literal type conversion in field initialization expression
 06.contexts_and_conversions/05.implicit_conversions/14.literal_type_conversions/decl_field/decl-field2_0.sts
@@ -944,6 +1094,13 @@
 
 # es2panda fails: panda:#18918 No CTE on using primitive types as alias names
 04.names_declarations_and_scopes/06.type_declarations/01.type_alias_declaration/alias_neg_4.sts
+03.types/01.predefined_types/01.primitive_types/pt_type_1.sts
+03.types/01.predefined_types/01.primitive_types/pt_type_2.sts
+03.types/01.predefined_types/01.primitive_types/pt_type_3.sts
+03.types/01.predefined_types/01.primitive_types/pt_type_4.sts
+03.types/01.predefined_types/01.primitive_types/pt_type_5.sts
+03.types/01.predefined_types/01.primitive_types/pt_type_6.sts
+03.types/01.predefined_types/01.primitive_types/pt_type_8.sts
 # end of es2panda fails
 
 # Disable struct test according I8EM2T
@@ -962,24 +1119,24 @@
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/pos_2a.sts
 
 #15241 Cannot use tuple type in type parameter constraint
-03.types/08.reference_types/10.tuple_types/tt_9.sts
+03.types/08.reference_types/11.tuple_types/tt_9.sts
 
 # 18095 CTE expected on casting to type parameter
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen1.sts
 06.contexts_and_conversions/04.casting_contexts_and_conversions/02.narrowing_reference_casting_conversions/neg_gen2.sts
 
 # 15242 Ensure-Not-Nullish expression for nullish tuple not recognized
-03.types/08.reference_types/10.tuple_types/tt_17.sts
+03.types/08.reference_types/11.tuple_types/tt_17.sts
 
 # es2panda fails: panda#15191 es2panda complains on tuple type value in function call argument
-03.types/08.reference_types/10.tuple_types/tt_6.sts
-03.types/08.reference_types/10.tuple_types/tt_7.sts
-03.types/08.reference_types/10.tuple_types/tt_8.sts
+03.types/08.reference_types/11.tuple_types/tt_6.sts
+03.types/08.reference_types/11.tuple_types/tt_7.sts
+03.types/08.reference_types/11.tuple_types/tt_8.sts
 # 19950
-03.types/08.reference_types/10.tuple_types/tt_10.sts
+03.types/08.reference_types/11.tuple_types/tt_10.sts
 
 # es2panda fails: panda#15188 es2panda aborts on union in tuple type
-03.types/08.reference_types/10.tuple_types/tt2_31.sts
+03.types/08.reference_types/11.tuple_types/tt2_31.sts
 
 # es2panda fails: panda:14623 Cannot reference 'this' in this context
 17.experimental_features/12.trailing_lambda/trlambda_met_1.sts
@@ -1826,10 +1983,10 @@
 # end of es2panda fails
 
 # 18115 CTE on a union type variable in instanceof
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_union/un2_0.sts
+06.contexts_and_conversions/04.casting_contexts_and_conversions/04.casting_conversions_from_union/un2_0.sts
 
 # 18118 No ClassCastError on casting to a wrong function type
-06.contexts_and_conversions/04.casting_contexts_and_conversions/03.casting_conversions_from_union/cce_5.sts
+06.contexts_and_conversions/04.casting_contexts_and_conversions/04.casting_conversions_from_union/cce_5.sts
 
 # 20715 Smart cast fails to find out the parameter type
 15.semantic_rules/06.type_inference/01.smart_types/comb_13.sts
@@ -1987,8 +2144,8 @@
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_1.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_3.sts
 15.semantic_rules/07.overloading_and_overriding/05.overloading_and_overriding_in_interfaces/multiple_interfaces_inheritance_4.sts
-03.types/07.value_types/05.literal_types/overriding_literal_types_0.sts
-03.types/07.value_types/05.literal_types/overriding_literal_types_1.sts
+03.types/08.reference_types/04.literal_types/overriding_literal_types_0.sts
+03.types/08.reference_types/04.literal_types/overriding_literal_types_1.sts
 # end of es2panda fails
 
 #19909
@@ -2315,13 +2472,13 @@
 05.generics/03.utility_types/incorrect_utility_type_1.sts
 
 # 20643 literal type as const assertion
-03.types/07.value_types/05.literal_types/as_const_0.sts
-03.types/07.value_types/05.literal_types/as_const_1.sts
-03.types/07.value_types/05.literal_types/as_const_2.sts
+03.types/08.reference_types/04.literal_types/as_const_0.sts
+03.types/08.reference_types/04.literal_types/as_const_1.sts
+03.types/08.reference_types/04.literal_types/as_const_2.sts
 # end of 20643
 
 # 20774 rest parameter doesn`t work with tuples
-03.types/07.value_types/05.literal_types/function_literal_type_18.sts
+03.types/08.reference_types/04.literal_types/function_literal_type_18.sts
 # end of 20774
 
 # 17053 Cannot create array of nullish tuples

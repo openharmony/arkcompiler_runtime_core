@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-{% for p in primitives %}
+{%- for c in cases %}
+
 /*---
-desc: >-
-    The predefined value types are called primitive types. Primitive type names are reserved, i.e., they cannot be used for
-    user-defined type names.
-tags: [negative, compile-only]
+desc: Access to common union members.
+tags: [{{c.tags}}]
 ---*/
+{{c.decl}}
 
-type {{p}} = Object;
-
-function main() {}
+function main() {
+    {{c.use|indent}}
+}
 {%- endfor %}

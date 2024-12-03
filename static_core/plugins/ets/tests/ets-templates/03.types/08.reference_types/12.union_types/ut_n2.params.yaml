@@ -12,16 +12,16 @@
 # limitations under the License.
 
 ---
-primitives:
-  - 'boolean'
-  - 'byte'
-  - 'char'
-  - 'double'
-  - 'float'
-  - 'int'
-  - 'long'
-  - 'number'
-  - 'short'
-  - 'undefined'
-  - 'null'
-  - 'void'
+types:
+    - byte
+    - short
+    - int
+    - long
+    - float
+    - double
+    - Byte
+    - Short
+    - Int
+    - Long
+    - Float
+    - Double

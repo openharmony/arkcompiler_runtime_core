@@ -33,16 +33,16 @@
 escompat/ArrayTest.sts
 
 # 17744 Tests creating BigInt from Double.MAX_VALUE don't fit in 300 sec timeout
-03.types/08.reference_types/13.type_bigint/bint_8.sts
-03.types/08.reference_types/13.type_bigint/bint_args_8.sts
-03.types/08.reference_types/13.type_bigint/bint_arr_8.sts
-03.types/08.reference_types/13.type_bigint/bint_clss_8.sts
-03.types/08.reference_types/13.type_bigint/bint_fdef_8.sts
-03.types/08.reference_types/13.type_bigint/bint_fld_8.sts
-03.types/08.reference_types/13.type_bigint/bint_fld_gen_8.sts
-03.types/08.reference_types/13.type_bigint/bint_lmbd_8.sts
-03.types/08.reference_types/13.type_bigint/bint_tup_8.sts
-03.types/08.reference_types/13.type_bigint/bint_un_8.sts
+03.types/08.reference_types/14.type_bigint/bint_8.sts
+03.types/08.reference_types/14.type_bigint/bint_args_8.sts
+03.types/08.reference_types/14.type_bigint/bint_arr_8.sts
+03.types/08.reference_types/14.type_bigint/bint_clss_8.sts
+03.types/08.reference_types/14.type_bigint/bint_fdef_8.sts
+03.types/08.reference_types/14.type_bigint/bint_fld_8.sts
+03.types/08.reference_types/14.type_bigint/bint_fld_gen_8.sts
+03.types/08.reference_types/14.type_bigint/bint_lmbd_8.sts
+03.types/08.reference_types/14.type_bigint/bint_tup_8.sts
+03.types/08.reference_types/14.type_bigint/bint_un_8.sts
 
 # es2panda: 16707 error working with string
 08.statements/08.for_statements/for_loop_parameters_12.sts

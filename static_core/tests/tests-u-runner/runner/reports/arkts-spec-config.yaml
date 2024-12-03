@@ -126,9 +126,6 @@
 3.7.4:
     title: Boolean Types and Operations
     status: Finished
-3.7.5:
-    title: Literal Types
-    status: Finished
 '3.8':
     title: Reference Types
     status: ''
@@ -142,33 +139,36 @@
     title: Type string
     status: Finished
 3.8.4:
-    title: Type never
+    title: Literal Types
     status: Finished
 3.8.5:
-    title: Type void
+    title: Type never
     status: Finished
 3.8.6:
-    title: Array Types
+    title: Type void
     status: Finished
 3.8.7:
-    title: Function Types
+    title: Array Types
     status: Finished
 3.8.8:
-    title: Type null
+    title: Function Types
     status: Finished
 3.8.9:
-    title: Type undefined
+    title: Type null
     status: Finished
 3.8.10:
-    title: Tuple Types
+    title: Type undefined
     status: Finished
 3.8.11:
-    title: Union Types
+    title: Tuple Types
     status: Finished
 3.8.12:
-    title: Nullish Types
+    title: Union Types
     status: Finished
 3.8.13:
+    title: Nullish Types
+    status: Finished
+3.8.14:
     title: Type BigInt
     status: Finished
 '3.9':
@@ -307,9 +307,12 @@
     title: Numeric Casting Conversions
     status: ''
 6.4.2:
-    title: Narrowing Reference Casting Conversions
+    title: Narrowing Class or Interface Casting Conversions
     status: ''
 6.4.3:
+    title: Casting Conversions from Type Parameter
+    status: ''
+6.4.4:
     title: Casting Conversions from Union
     status: ''
 '6.5':
@@ -439,7 +442,7 @@
     title: 'Step 3: Checking Method Modifiers'
     status: ''
 7.10.4:
-    title: Type of the method call expression
+    title: Type of Method Call Expression
     status: ''
 '7.11':
     title: Function Call Expression
@@ -1100,7 +1103,7 @@
     status: No testable assertions
 17.8.1:
     title: Native Functions
-    status: 'Finished'
+    status: Finished
 17.8.2:
     title: Native Methods
     status: ''
@@ -1220,7 +1223,7 @@
     status: ''
 17.19.3:
     title: Import and Overloading of Function Names
-    status: 'Finished'
+    status: Finished
 '17.20':
     title: Generics Experimental
     status: No testable assertions
