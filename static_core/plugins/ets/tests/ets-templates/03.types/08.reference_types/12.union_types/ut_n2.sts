@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-{% for p in primitives %}
-/*---
-desc: >-
-    The predefined value types are called primitive types. Primitive type names are reserved, i.e., they cannot be used for
-    user-defined type names.
-tags: [negative, compile-only]
----*/
+{%- for t1 in types %}
+{%- for t2 in types %}
+{%- if t1.upper() != t2.upper() %}
 
-type {{p}} = Object;
+/*---
+desc: If a union type contains more than one numeric type, then a compile-time error occurs.
+tags: [compile-only, negative]
+---*/
+type UT1 = {{t1}} | {{t2}}
+let v: UT1 = 0
 
 function main() {}
+{%- endif %}
+{%- endfor %}
 {%- endfor %}
