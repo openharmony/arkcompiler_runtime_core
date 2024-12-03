@@ -82,6 +82,13 @@ class RunnerSRCDumper(RunnerJS):
                 '--exit-after-phase', 'plugins-after-parse',
                 f'--arktsconfig={self.arktsconfig}'
             ]),
+
+            TestDirectory('srcdump', 'sts', flags=[
+                '--extension=sts',
+                '--output=/dev/null',
+                '--exit-after-phase', 'plugins-after-parse',
+                f'--arktsconfig={self.arktsconfig}'
+            ]),
         ]
 
         self.add_directories(test_dirs)
