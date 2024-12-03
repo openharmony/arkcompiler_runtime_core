@@ -2,7 +2,7 @@
 
 ark_js_napi_cli is a CLI tool to execute JS abc files (similar to `ark_js_vm`) based on `arkui/napi`.
 
-## How to build
+## How to build (workaround)
 
 1. Add ark_js_napi_cli to ark_host_linux_tools_packages in ohos:
 ```bash
