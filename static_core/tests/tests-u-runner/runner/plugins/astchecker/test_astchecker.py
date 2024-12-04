@@ -44,9 +44,9 @@ class TestASTChecker(TestFileBased):
         not_handled_errors = []
         lines = input_string.splitlines()
         for line in lines:
-            if line.startswith("Warning") or line.startswith("SyntaxError") or line.startswith("TypeError"):
+            if line.split()[0] in ("Warning:", "SyntaxError:", "TypeError:", "Error:"):
                 errors_list.append(line)  # Add the line to the errors list
-            if line.startswith("Error:"):
+            else:
                 not_handled_errors.append(line)
 
         errors = "\n".join(errors_list)
