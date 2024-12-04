@@ -22,6 +22,7 @@ interface IState {
     disasm: boolean;
     versions: Versions;
     versionsLoading: boolean;
+    clearLogsEachRun: boolean;
 }
 
 export interface Versions {
@@ -41,7 +42,8 @@ const initialState: IState = {
         arktsVersion: '',
         es2panda: ''
     },
-    versionsLoading: false
+    versionsLoading: false,
+    clearLogsEachRun: localStorage.getItem('clearLogsEachRun') === 'false' ? false : true,
 };
 
 const appStateSlice = createSlice({
@@ -63,6 +65,10 @@ const appStateSlice = createSlice({
         setVersionsLoading(state, action: PayloadAction<boolean>) {
             state.versionsLoading = action.payload;
         },
+        setClearLogsEachRun(state, action: PayloadAction<boolean>) {
+            state.clearLogsEachRun = action.payload;
+            localStorage.setItem('clearLogsEachRun', String(action.payload));
+        },
     },
 });
 
@@ -71,7 +77,8 @@ export const {
     setDisasm,
     setPrimaryColor,
     setVersions,
-    setVersionsLoading
+    setVersionsLoading,
+    setClearLogsEachRun,
 } = appStateSlice.actions;
 
 export default appStateSlice.reducer;

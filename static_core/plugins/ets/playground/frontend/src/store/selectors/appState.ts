@@ -21,3 +21,4 @@ export const primaryColor = (state: RootState): string => state.appState.primary
 export const withDisasm = (state: RootState): boolean => state.appState.disasm;
 export const versions = (state: RootState): Versions => state.appState.versions;
 export const isVersionsLoading = (state: RootState): boolean => state.appState.versionsLoading;
+export const clearLogsEachRun = (state: RootState): boolean => state.appState.clearLogsEachRun;

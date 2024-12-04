@@ -21,8 +21,8 @@ import styles from './styles.module.scss';
 import { useClickOutside } from '../../utils/useClickOutside';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch } from '../../store';
-import { fetchVersions } from '../../store/actions/appState';
-import { versions } from '../../store/selectors/appState';
+import { fetchVersions, setClearLogsAction } from '../../store/actions/appState';
+import { clearLogsEachRun, versions } from '../../store/selectors/appState';
 import { Versions } from '../../store/slices/appState';
 
 export const primaryColors = ['#e32b49', '#da70d6', '#0F6894', '#1C6E42', '#935610', '#634DBF', '#00A396', '#D1980B'];
@@ -31,7 +31,9 @@ const exampleMenu = (
     theme: string,
     toggleTheme: () => void,
     togglePrimaryColor: (val: string) => void,
-    versionsData: Versions
+    versionsData: Versions,
+    autoClearLogs: boolean,
+    handleClearLogs: (next: boolean) => void,
 ): JSX.Element => (
     <Menu className={styles.menu}>
         <MenuItem
@@ -64,6 +66,26 @@ const exampleMenu = (
                 />))}
         </div>
         <div className={styles.hr} />
+        <MenuItem
+            icon="disable"
+            text="Auto clear logs"
+            className={styles.menuItem}
+            labelElement={
+                <Switch
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>): void => {
+                        e.stopPropagation();
+                    }}
+                    onClick={(e: React.MouseEvent<HTMLInputElement, MouseEvent>): void => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }}
+                    checked={!!autoClearLogs}
+                    className={styles.switch}
+                />
+            }
+            onClick={(): void => handleClearLogs(!autoClearLogs)}
+        />
+        <div className={styles.hr} />
         <div className={styles.versionsContainer}>
             <pre className={styles.preTag}>
                 <span className={styles.versionTitle}>frontend:</span>
@@ -90,6 +112,7 @@ const Header = (): JSX.Element => {
     const { theme, toggleTheme, togglePrimaryColor } = useTheme();
     const dispatch = useDispatch<AppDispatch>();
     const versionsData = useSelector(versions);
+    const autoClearLogs = useSelector(clearLogsEachRun);
 
     useEffect(() => {
         dispatch(fetchVersions());
@@ -102,6 +125,9 @@ const Header = (): JSX.Element => {
     };
     const handleOpenPopover = (): void => {
         setIsOpen(true);
+    };
+    const handleClearLogs = (next: boolean): void => {
+        dispatch(setClearLogsAction(next));
     };
 
     useClickOutside(popoverRef, handleClosePopover);
@@ -116,7 +142,14 @@ const Header = (): JSX.Element => {
         >
             <span className={cx({[styles.title]: true})}>ArkTS playground</span>
             <Popover
-                content={exampleMenu(theme, toggleTheme, togglePrimaryColor, versionsData)}
+                content={exampleMenu(
+                    theme,
+                    toggleTheme,
+                    togglePrimaryColor,
+                    versionsData,
+                    autoClearLogs,
+                    handleClearLogs,
+                )}
                 placement="bottom"
                 className={styles.settings}
                 popoverClassName={styles.pop}

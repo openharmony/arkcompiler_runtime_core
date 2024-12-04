@@ -13,20 +13,26 @@
  * limitations under the License.
  */
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {ILog} from '../../models/logs';
 import styles from './styles.module.scss';
 import {Icon} from '@blueprintjs/core';
 import cx from 'classnames';
+import { AppDispatch } from '../../store';
+import { useDispatch } from 'react-redux';
+import { setOutLogs, setErrLogs } from '../../store/slices/logs';
 
 
 interface IProps {
     logArr: ILog[]
     clearFilters: () => void
+    logType: 'out' | 'err';
 }
 
-const LogsView = ({logArr, clearFilters}: IProps): JSX.Element => {
+const LogsView = ({logArr, clearFilters, logType}: IProps): JSX.Element => {
     const [logs, setLogs] = useState<ILog[]>(logArr);
+    const dispatch = useDispatch<AppDispatch>();
+    const containerRef = useRef<HTMLDivElement | null>(null);
 
     const handleFilter = (val: string): void => {
         if (!val) {
@@ -40,11 +46,44 @@ const LogsView = ({logArr, clearFilters}: IProps): JSX.Element => {
         setLogs(logArr);
     }, [logArr]);
 
+    useEffect(() => {
+        if (!containerRef.current) {
+            return undefined;
+        }
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        const logIndex = Number(entry.target.getAttribute('data-index'));
+    
+                        if (logIndex !== undefined && !logs[logIndex].isRead) {
+                            const updatedLogs = [...logs];
+                            updatedLogs[logIndex] = { ...updatedLogs[logIndex], isRead: true };
+                            setLogs(updatedLogs);
+                            if (logType === 'out') {
+                                dispatch(setOutLogs(updatedLogs));
+                            } else if (logType === 'err') {
+                                dispatch(setErrLogs(updatedLogs));
+                            }
+                        }
+                    }
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        containerRef.current.querySelectorAll('[data-index]').forEach((el): void => observer.observe(el));
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [logs, dispatch, logType]);
+
     return (
         <div className={styles.container}>
-            <div className={styles.containerLogs}>
+            <div className={styles.containerLogs} ref={containerRef}>
                 {logs.map((log: ILog, index) => (
-                    <span key={index} className={styles.rowContainer}>
+                    <pre key={index} data-index={index} className={styles.rowContainer}>
                         <span
                             className={cx({
                                 [styles.tag]: true,
@@ -53,7 +92,7 @@ const LogsView = ({logArr, clearFilters}: IProps): JSX.Element => {
                             [{log?.from?.includes('Err') ? 'ERR' : 'LOG'}]:
                         </span>
                         <span className={styles.logText}>{log.message}</span>
-                    </span>
+                    </pre>
                 ))}
             </div>
             <div className={styles.filterContainer}>

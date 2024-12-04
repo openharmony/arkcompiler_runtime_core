@@ -27,7 +27,8 @@ describe('appStateSlice reducer', () => {
             es2panda: '',
             frontend: '',
         },
-        versionsLoading: false
+        versionsLoading: false,
+        clearLogsEachRun: true
     };
 
     it('should return the initial state when passed an empty action', () => {
@@ -35,27 +36,30 @@ describe('appStateSlice reducer', () => {
     });
 
     it('should handle setTheme action', () => {
-        const previousState = { ...initialState, theme: 'light' as Theme };
+        const previousState = { ...initialState, theme: 'light' as Theme, clearLogsEachRun: true };
         expect(reducer(previousState, setTheme('dark'))).toEqual({
             ...previousState,
             theme: 'dark',
+            clearLogsEachRun: true,
         });
     });
 
     it('should handle setPrimaryColor action', () => {
-        const previousState = { ...initialState, primaryColor: '#ffffff' };
+        const previousState = { ...initialState, primaryColor: '#ffffff', clearLogsEachRun: true };
         const newColor = '#ff5733';
         expect(reducer(previousState, setPrimaryColor(newColor))).toEqual({
             ...previousState,
             primaryColor: newColor,
+            clearLogsEachRun: true,
         });
     });
 
     it('should handle setDisasm action', () => {
-        const previousState = { ...initialState, disasm: false };
+        const previousState = { ...initialState, disasm: false, clearLogsEachRun: true };
         expect(reducer(previousState, setDisasm(true))).toEqual({
             ...previousState,
             disasm: true,
+            clearLogsEachRun: true,
         });
     });
 });

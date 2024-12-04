@@ -18,6 +18,7 @@ import {setCode, setCompileLoading, setCompileRes, setRunLoading, setRunRes} fro
 import {codeService} from '../../services/code';
 import {handleResponseLogs} from '../../models/logs';
 import { RootState } from '..';
+import { clearErrLogs, clearOutLogs } from './logs';
 
 export const fetchCompileCode = createAsyncThunk(
     '@code/compileCode',
@@ -30,6 +31,10 @@ export const fetchCompileCode = createAsyncThunk(
         const appState = state?.appState || false;
         const logsState = state?.logs || [];
         const optionsState = state.options || {};
+        if (appState.clearLogsEachRun) {
+            thunkAPI.dispatch(clearOutLogs());
+            thunkAPI.dispatch(clearErrLogs());
+        }
         const response = await codeService.fetchCompile({
             code: codeState?.code,
             options: optionsState?.pickedOptions,
@@ -55,6 +60,10 @@ export const fetchRunCode = createAsyncThunk(
         const appState = state?.appState || false;
         const logsState = state?.logs;
         const optionsState = state?.options || {};
+        if (appState.clearLogsEachRun) {
+            thunkAPI.dispatch(clearOutLogs());
+            thunkAPI.dispatch(clearErrLogs());
+        }
         const response = await codeService.fetchRun({
             code: codeState?.code,
             options: optionsState?.pickedOptions,

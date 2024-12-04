@@ -28,3 +28,21 @@ Object.defineProperty(window, 'matchMedia', {
         dispatchEvent: jest.fn(),
     })),
 });
+
+global.IntersectionObserver = class IntersectionObserver {
+    root: Element | null = null;
+    rootMargin: string = '';
+    thresholds: ReadonlyArray<number> = [];
+
+    constructor(callback: IntersectionObserverCallback, options?: IntersectionObserverInit) {}
+
+    observe(target: Element): void {}
+
+    unobserve(target: Element): void {}
+
+    disconnect(): void {}
+
+    takeRecords(): IntersectionObserverEntry[] {
+        return [];
+    }
+};

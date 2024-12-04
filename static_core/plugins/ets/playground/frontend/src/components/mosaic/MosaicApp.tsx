@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import React, {useCallback, useLayoutEffect, useState} from 'react';
+import React, {useCallback, useEffect, useLayoutEffect, useState} from 'react';
 import {Mosaic, MosaicWindow} from 'react-mosaic-component';
 import 'react-mosaic-component/react-mosaic-component.css';
 import '@blueprintjs/core/lib/css/blueprint.css';
@@ -48,6 +48,8 @@ const MosaicApp = (): JSX.Element => {
     const outLogsSelector = useSelector(selectOutLogs);
     const errLogsSelector = useSelector(selectErrLogs);
     const dispatch = useDispatch<AppDispatch>();
+    const [outLogsCount, setOutLogsCount] = useState(0);
+    const [errLogsCount, setErrLogsCount] = useState(0);
 
     useLayoutEffect(() => {
         dispatch(fetchOptions());
@@ -58,6 +60,10 @@ const MosaicApp = (): JSX.Element => {
         setActiveTab(newTab);
     };
 
+    useEffect(() => {
+        setOutLogsCount(outLogsSelector?.filter(el => !el?.isRead).length);
+        setErrLogsCount(errLogsSelector?.filter(el => !el?.isRead).length);
+    }, [outLogsSelector, errLogsSelector]);
 
     const header = useCallback((id: string): JSX.Element => {
         switch (id) {
@@ -71,13 +77,19 @@ const MosaicApp = (): JSX.Element => {
                     onChange={(tabId): void => handleTabChange(tabId as 'output' | 'err')}
                     selectedTabId={activeTab}
                 >
-                    <Tab id="output" title="Output" className={styles.tab} />
-                    <Tab id="err" title="Error" className={styles.tab} />
+                    <Tab id="output" className={styles.tab}>
+                        Output
+                        {outLogsCount > 0 && <div className={styles.notif} />}
+                    </Tab>
+                    <Tab id="err" className={styles.tab}>
+                        Error
+                        {errLogsCount > 0 && <div className={styles.notif} />}
+                    </Tab>
                 </Tabs>);
             default:
                 return <></>;
         }
-    }, [activeTab]);
+    }, [activeTab, outLogsCount, errLogsCount]);
 
     const handleClearOutLogs = (): void => {
         dispatch(clearOutLogs());
@@ -108,7 +120,7 @@ const MosaicApp = (): JSX.Element => {
                                 [styles.codeContainer]: true,
                                 [styles.part]: withDisasmRender
                             })}>
-                                <div className={styles.code}>
+                                <div className={cx(styles.code, 'monaco-editor')}>
                                     <ArkTSEditor />
                                 </div>
                                 {withDisasmRender && <div className={styles.disasm}>
@@ -118,9 +130,17 @@ const MosaicApp = (): JSX.Element => {
                         ) : TITLE_MAP[id] === 'Logs' ? (
                             <div className={styles.tabContent}>
                                 {activeTab === 'output' ? (
-                                    <LogsView logArr={outLogsSelector} clearFilters={handleClearOutLogs} />
+                                    <LogsView
+                                        logArr={outLogsSelector}
+                                        logType='out'
+                                        clearFilters={handleClearOutLogs}
+                                    />
                                 ) : (
-                                    <LogsView logArr={errLogsSelector} clearFilters={handleClearErrLogs} />
+                                    <LogsView
+                                        logArr={errLogsSelector}
+                                        logType='err'
+                                        clearFilters={handleClearErrLogs}
+                                    />
                                 )}
                             </div>
                         ) : (

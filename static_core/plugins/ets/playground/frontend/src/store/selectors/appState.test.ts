@@ -22,7 +22,8 @@ export const mockAllState: RootState = {
         primaryColor: '#e32b49',
         disasm: false,
         versions: {},
-        versionsLoading: false
+        versionsLoading: false,
+        clearLogsEachRun: false
     },
     options: {
         isLoading: false,
