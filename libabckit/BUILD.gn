@@ -86,6 +86,7 @@ group("abckit_tests") {
       ":abckit_status",
       "tests:abckit_gtests_action",
       "tests:abckit_mock_gtests_action",
+      "tests:abckit_stress_tests_apps",
       "tests/canary:abckit_canary",
     ]
   }
