@@ -1,0 +1,112 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import {
+    jsArr,
+    jsArrCopy,
+    jsArrOther,
+    jsArrowFoo,
+    jsArrowFooCopy,
+    jsArrowFooOther,
+    jsFoo,
+    jsFooOther,
+} from 'import';
+
+const MS2NS = 1000000;
+
+export class A2j {
+
+    state: number = 0;
+    totalTime: number = 0;
+    runsLeft: number = MS2NS;
+    noEqual: string = '==';
+    equal: string = '!=';
+
+    public setup(): void {
+        console.log('starting');
+    }
+
+    bench(): int {
+        return 1;
+    }
+
+    message(data: string): void {
+        console.log('Benchmark result: A2j ' + data);
+    }
+
+    test(): number {
+        this.setup();
+        this.bench();
+
+        //NOTE: issue(19194) enable below after fix compare arrays
+        if (false) {
+            this.comparisonObject(this.runsLeft, jsArr, jsArr, this.equal, 'array ');
+            this.comparisonObject(this.runsLeft, jsArr, jsArrCopy, this.equal, 'array by link ');
+        }
+
+        this.comparisonObject(this.runsLeft, jsArr, jsArrOther, this.noEqual, 'different arrays ');
+
+        this.comparisonObject(this.runsLeft, jsArrowFoo, jsArrowFoo, this.equal, 'arrow function ');
+
+        this.comparisonObject(this.runsLeft, jsArrowFoo, jsArrowFooCopy, this.equal, 'arrow function by link ');
+
+        this.comparisonObject(this.runsLeft, jsArrowFoo, jsArrowFooOther, this.noEqual, 'different arrow functions ');
+
+        //NOTE: issue (19133) enable below after fix comparison functions
+        if (false) {
+            this.comparisonObject(this.runsLeft, jsFoo, jsFoo, this.equal, 'function ');
+            this.comparisonObject(this.runsLeft, jsFoo, jsFooOther, this.noEqual, 'different functions ');
+        }
+
+        return this.totalTime;
+    }
+
+    comparisonObject(iterations: number, valueA: JSValue, valueB: JSValue, compare: string, target: string): void {
+        let start: long;
+        let loopTime: long = 0;
+
+        while (iterations > 0) {
+            start = Chrono.nanoNow();
+
+            if (compare == this.equal && valueA !== valueB) throw Error();
+            if (compare == this.noEqual && valueA === valueB) throw Error();
+
+            loopTime += Chrono.nanoNow() - start;
+            iterations = iterations - 1;
+        }
+
+        this.message(target + loopTime);
+
+        this.totalTime += loopTime;
+    }
+
+    comparison<T>(iterations: number, valueA: T, valueB: T, compare: string, target: string): void {
+        let start: long;
+        let loopTime: long = 0;
+
+        while (iterations > 0) {
+            start = Chrono.nanoNow();
+            if (compare == this.equal && valueA != valueB) throw Error();
+            if (compare == this.noEqual && valueA == valueB) throw Error();
+
+            loopTime += Chrono.nanoNow() - start;
+            iterations = iterations - 1;
+        }
+
+        this.message(target + loopTime);
+
+        this.totalTime += loopTime;
+    }
+}
