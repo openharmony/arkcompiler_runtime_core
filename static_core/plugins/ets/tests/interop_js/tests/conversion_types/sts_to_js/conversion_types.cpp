@@ -18,11 +18,21 @@
 
 namespace ark::ets::interop::js::testing {
 
-class EtsConversionIntEtsToJsTest : public EtsInteropTest {};
-// NOTE issue (17741) - enable this after fix import bigInt
-TEST_F(EtsConversionIntEtsToJsTest, DISABLED_check_conversion_int)
+class EtsConversionTypesEtsToJsTest : public EtsInteropTest {};
+
+TEST_F(EtsConversionTypesEtsToJsTest, check_conversion_int)
 {
     ASSERT_TRUE(RunJsTestSuite("check_conversion_int.js"));
+}
+// NOTE(srokashevich): enable after fix #21057
+TEST_F(EtsConversionTypesEtsToJsTest, DISABLED_check_conversion_string)
+{
+    ASSERT_TRUE(RunJsTestSuite("check_conversion_string.js"));
+}
+
+TEST_F(EtsConversionTypesEtsToJsTest, check_conversion_null_and_undefined)
+{
+    ASSERT_TRUE(RunJsTestSuite("check_conversion_null_and_undefined.js"));
 }
 
 }  // namespace ark::ets::interop::js::testing
