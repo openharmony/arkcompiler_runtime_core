@@ -184,6 +184,9 @@
                         "header_files": [],
                         "header_base": "//arkcompiler/runtime_core/verifier"
                     }
+                },
+                {
+                    "name": "//arkcompiler/runtime_core/panda_guard:panda_guard_static"
                 }
             ],
             "test": [
