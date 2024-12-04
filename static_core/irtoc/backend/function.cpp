@@ -159,7 +159,7 @@ void Function::ReportCompilationStatistic(std::ostream *out)
 {
     ASSERT(out != nullptr);
     ASSERT(!g_options.Validate());
-    std::string statsLevel = g_options.GetIrtocLlvmStats();
+    const auto &statsLevel = g_options.GetIrtocLlvmStats();
     if (statsLevel == "none") {
         return;
     }

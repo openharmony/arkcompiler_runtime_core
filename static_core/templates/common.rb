@@ -24,15 +24,38 @@ class String
   end
 end
 
+class OpenStruct
+  # Versions prior to 2.7.1 lack of `to_h` overload, so define something similar:
+  def to_stringhash
+    h = {}
+    each_pair { |k, v| h[k.to_s] = v }
+    h
+  end
+end
+
 class Option < SimpleDelegator
   def initialize(data)
     super
-    if has_sub_options
+    if has_sub_options?
       raise "Compound option should not have `type` field, it is always bool" if respond_to?(:type)
       raise "Compound option should not have `default` field, it is always `false``" if respond_to?(:default)
       self[:type] = 'bool'
       self[:default] = 'false'
     end
+  end
+
+  def raise(msg)
+    super "in '#{name}': #{msg}"
+  end
+
+  def fix(options)
+    if has_sub_options?
+      sub_options.map { |subopt| subopt.fix(options) }
+      return
+    end
+    fix_references(options)
+    flatten_lists_of_option_values
+    verify
   end
 
   def fix_references(options)
@@ -45,6 +68,23 @@ class Option < SimpleDelegator
     end
   end
 
+  def flatten_lists_of_option_values
+    if self[:possible_values].is_a? OpenStruct
+      self[:possible_values] = possible_values.to_stringhash.flatten(2)
+    end
+  end
+
+  def verify
+    if respond_to? :default
+      supported_default_types = [String, Array, TrueClass, FalseClass, Integer, Float]
+      if not supported_default_types.member? self[:default].class
+        raise "Syntax error, 'default' should be of #{supported_default_types} type, got '#{self[:default].class}'"
+      elsif (self[:default].is_a? Array) != (type == 'arg_list_t')
+        raise "Syntax error, 'Array'-default should be used with 'arg_list_t'-options"
+      end
+    end
+  end
+
   def field_name
     name.tr('-', '_').tr('.', '_') + '_'
   end
@@ -54,8 +94,25 @@ class Option < SimpleDelegator
     sub_option? ? (self.parent.camel_name + n) : n
   end
 
+  def view_type
+    case type
+    when 'std::string'
+      'const std::string &'
+    when 'arg_list_t'
+      'const arg_list_t &'
+    else
+      type
+    end
+  end
+  
+  def getter_signature
+    ret_type = view_type
+    ret_type += ' ' if ret_type[-1] != '&'
+    ret_type + getter_name + '([[maybe_unused]] std::string_view lang = "") const'
+  end
+
   def getter_name
-    type == 'bool' ? 'Is' + camel_name : 'Get' + camel_name
+    (type == 'bool' ? 'Is' : 'Get') + camel_name
   end
 
   def setter_name
@@ -66,8 +123,23 @@ class Option < SimpleDelegator
     respond_to?(:parent)
   end
 
-  def has_sub_options
+  def has_sub_options?
     respond_to?(:sub_options)
+  end
+
+  def has_enum?
+    respond_to?(:enum)
+  end
+
+  def flat_enum
+    raise "'enum' has invalid type" if !enum.is_a?(Array) && !enum.is_a?(OpenStruct)
+    return enum if enum.is_a?(Array)
+    enum.to_h.values.flatten
+  end
+
+  def sub_enums
+    return {} if enum.is_a?(Array)
+    enum.to_stringhash
   end
 
   def deprecated?
@@ -92,24 +164,34 @@ class Option < SimpleDelegator
   end
 
   def default_value
-    return default.to_h if (default.is_a?(Hash) || default.is_a?(OpenStruct))
-    return default_constant_name if need_default_constant
-    return '{' + default.map { |e| expand_string(e) }.join(', ') + '}' if type == 'arg_list_t'
-    return expand_string(default) if type == 'std::string'
-    default
+    if default_target_specific?
+      raise "Syntax error, 'default_target_specific' should be of 'OpenStruct' class, got '#{default_target_specific.class}'" unless default_target_specific.is_a?(OpenStruct)
+      res = "ark::default_target_options::#{getter_name }({"
+      default_target_specific.each_pair { |k, v| res += "{#{expand_string k.to_s}, #{v}}," }
+      res += "})"
+    else
+      return default_constant_name if need_default_constant
+      return '{' + default.map { |e| expand_string(e) }.join(', ') + '}' if type == 'arg_list_t'
+      return expand_string(default) if type == 'std::string'
+      default
+    end
   end
 
   def full_description
     full_desc = description
     full_desc.prepend("[DEPRECATED] ") if deprecated?
     if defined? possible_values
-      full_desc += '. Possible values: ' + possible_values.inspect
+      full_desc += "." unless full_desc[-1] == "."
+      full_desc += ' Possible values: ' + possible_values.inspect
     end
-    if (default.is_a?(Hash) || default.is_a?(OpenStruct))
-      Common::to_raw(full_desc + '. Default: {' + default.to_h.map{ |k, v| "#{k}: #{v}" }.join(", ") + '}')
+    full_desc += "." unless full_desc[-1] == "."
+    if default_target_specific?
+      full_desc += " Default (target specific):\n"
+      default_target_specific.each_pair{ |k, v| full_desc += " on '#{k.to_s}': #{v}\n" }
     else
-      Common::to_raw(full_desc + '. Default: ' + default.inspect)
+      full_desc += ' Default: ' + default.inspect
     end
+    Common::to_raw(full_desc)
   end
 
   def expand_string(s)
@@ -129,8 +211,12 @@ class Option < SimpleDelegator
     Common::to_raw(s)
   end
 
+  def default_target_specific?
+    respond_to? :default_target_specific
+  end
+
   def need_default_constant
-    type == 'int' || type == 'double' || type == 'uint32_t' || type == 'uint64_t'
+    (type == 'int' || type == 'double' || type == 'uint32_t' || type == 'uint64_t') && !default_target_specific?
   end
 
   def default_constant_name
@@ -172,7 +258,7 @@ module Common
   module_function
 
   def create_sub_options(option, options)
-    return unless option.has_sub_options
+    return unless option.has_sub_options?
     raise "Only boolean option can have sub options: #{option.name}" unless option.type == 'bool'
     sub_options = []
     option.sub_options.each_with_object(sub_options) do |sub_option, sub_options|
@@ -186,6 +272,7 @@ module Common
   def options
     @options ||= @data.options.each_with_object([]) do |option, options|
       option_hash = option.to_h
+      new_option = nil
       if option_hash.include?(:lang)
         lang_spec_option = option_hash.clone
         lang_spec_option.delete(:lang)
@@ -193,18 +280,19 @@ module Common
         option.lang.each do |lang|
           lang_spec_option[:description] = "#{option.description}. Only for #{lang}"
           lang_spec_option[:name] = "#{lang}.#{option.name}"
-          options << Option.new(OpenStruct.new(lang_spec_option))
-          create_sub_options(options[-1], options)
+          new_option = Option.new(OpenStruct.new(lang_spec_option))
+          create_sub_options(new_option, options)
+          options << new_option
         end
         main_option = option_hash.clone
         main_option[:name] = "#{option.name}"
-        options << Option.new(OpenStruct.new(main_option))
-        create_sub_options(options[-1], options)
+        new_option = Option.new(OpenStruct.new(main_option))
       else
-        options << Option.new(option)
-        create_sub_options(options[-1], options)
+        new_option = Option.new(option)
       end
-      options.last.fix_references(@data.options)
+      create_sub_options(new_option, options)
+      options << new_option
+      options.last.fix(@data.options)
     end
     @options
   end

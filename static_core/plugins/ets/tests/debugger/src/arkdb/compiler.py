@@ -59,7 +59,6 @@ class CompilerArguments:
     opt_level: int = 0
     debug_info: bool = True
     dump_dynamic_ast: bool | None = None
-    debugger_eval_mode: bool | None = None
     debugger_eval_panda_files: list[Path] | None = None
     debugger_eval_source: Path | None = None
     debugger_eval_line: int | None = None
@@ -70,14 +69,20 @@ class CompilerArguments:
         if isinstance(arg, bool):
             return str(arg).lower()
         if isinstance(arg, list):
-            return ",".join(str(f) for f in arg)
+            return ":".join(str(f) for f in arg)
         return str(arg)
+
+    @staticmethod
+    def to_cli_key(key: str) -> str:
+        if key.startswith("debugger_eval_"):
+            return f"--debugger-eval:{key[len('debugger_eval_'):].replace('_', '-')}"
+        return f"--{key.replace('_', '-')}"
 
     def to_arguments_list(self) -> list[str]:
         result = []
         for key, value in vars(self).items():
             if value is not None:
-                result.append(f"--{key.replace('_', '-')}={CompilerArguments.arg_to_str(value)}")
+                result.append(f"{CompilerArguments.to_cli_key(key)}={CompilerArguments.arg_to_str(value)}")
         return result
 
 
@@ -237,7 +242,6 @@ class StringCodeCompiler:
             ets_module=True,
             opt_level=0,
             dump_dynamic_ast=ast_parser is not None,
-            debugger_eval_mode=True,
             debugger_eval_panda_files=eval_args.eval_panda_files,
             debugger_eval_source=eval_args.eval_source,
             debugger_eval_line=eval_args.eval_line,

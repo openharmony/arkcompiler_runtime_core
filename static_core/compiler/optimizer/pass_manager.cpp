@@ -75,7 +75,7 @@ std::string PassManager::GetFileName([[maybe_unused]] const char *passName, [[ma
     std::stringstream ssFullpath;
     ASSERT(GetGraph()->GetRuntime() != nullptr);
 
-    std::string folderName(g_options.GetCompilerDumpFolder());
+    const auto &folderName(g_options.GetCompilerDumpFolder());
 
     os::CreateDirectories(folderName);
     constexpr auto IMM_3 = 3;
