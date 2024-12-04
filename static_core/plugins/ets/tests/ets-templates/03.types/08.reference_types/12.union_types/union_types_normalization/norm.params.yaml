@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -57,10 +57,9 @@ cases:
           type OE = Object | Error
           type NU = OE | Numeric | undefined
           type UT = OE | Integral | undefined | NU  // => Object | undefined
-          let v: UT
       pos:
           - |-
-              v = new Error()
+              let v: UT = new Error()
               assertTrue(v instanceof Error)
               v = undefined
               assertTrue(v === undefined)
@@ -70,15 +69,14 @@ cases:
               assertTrue(v instanceof Object)
       neg:
           - |-
-              v = null
+              let v: UT = null
 
     - decl: |-
           type L = Long | long
           type UT = null | (Object | null) | (L | Object) | Error | 'A'  // => Object | null
-          let v: UT
       pos:
           - |-
-              v = new Error()
+              let v: UT = new Error()
               assertTrue(v instanceof Error)
               v = null
               assertTrue(v === null)
@@ -94,7 +92,7 @@ cases:
               assertEQ(v, Long.MIN_VALUE)
       neg:
           - |-
-              v = undefined
+              let v: UT = undefined
 
     - decl: |-
           type AB = 'A' | 'B'
@@ -163,10 +161,9 @@ cases:
 
     - decl: |-
           type UT = string|never|string[]|String   // => string|string[]
-          let v: UT = ''
       pos:
           - |-
-              v = 'abc'
+              let v: UT = 'abc'
               assertEQ(v, 'abc')
               v = ['a', 'b', 'c']
               assertTrue(v instanceof string[] && v[0] == 'a' && v[2] == 'c')
@@ -174,66 +171,67 @@ cases:
               assertEQ(v, '\uFFFF')
       neg:
           - |-
-              v = null
+              let v: UT = null
           - |-
-              v = undefined
+              let v: UT = undefined
           - |-
-              v = new Object()
+              let v: UT = new Object()
           - |-
-              v = new Char[2]
+              let v: UT = new Char[2]
 
     - decl: |-
           type U1 = number[] | string[]
           type U2 = (readonly number[]) | (readonly string[])
           type UT = U1 | U2  // => readonly string[]|readonly number[]
-          let v: UT|undefined
       pos:
           - |-
-              v = [1.0, 2.0]
+              let v: UT|undefined = [1.0, 2.0]
               assertTrue(v[0] == 1.0 && v[1] == 2.0)
               v = ['a', 'b']
               assertTrue(v[0] == 'a' && v[1] == 'b')
       neg:
           - |-
-              v = [1.0, 2.0]
+              let v: UT|undefined = [1.0, 2.0]
               v[0] = 3.0  // CTE, readonly array
           - |-
-              v = ['a', 'b']
+              let v: UT|undefined = ['a', 'b']
               v[1] = 'c'  // CTE, readonly array
 
     - decl: |-
           type U1 = (readonly Object[])
           type U2 = null | Object[]
           type UT = U1 | U2 | Error[]  // => readonly Object[]|null
-          let v: UT
+
       pos:
           - |-
-              v = [new Error('a'), new Error('b')]
+              let v: UT = [new Error('a'), new Error('b')]
               assertTrue(v instanceof Object[] && v.length == 2)
               v = [new Number(1.0), new Number(2.0)]
               assertTrue(v instanceof Object[] && v.length == 2)
       neg:
           - |-
-              v = [new Object(), new Object()]
+              let v: UT = [new Object(), new Object()]
               v[0] = new Object()  // CTE, readonly array
 
     - decl: |-
           type U1 = [number, string]
           type U2 = (readonly [number, string])
           type UT = number | U1 | U2  // => number|readonly [number, string]
-          let v: UT = 0.0
       pos:
           - |-
+              let v: UT = 0.0
               let tup: [number, string] = [42.0, 'a']
               v = tup
               assertTrue(v[0] == 42.0 && v[1] == 'a')
       neg:
           - |-
+              let v: UT = 0.0
               let tup: [number, string] = [42.0, 'a']
               v = tup
               assertTrue(v[0] == 42.0 && v[1] == 'a')
               v[0] = 33.0  // CTE, readonly tuple
           - |-
+              let v: UT = 0.0
               let tup: [number, string] = [42.0, 'a']
               v = tup
               assertTrue(v[0] == 42.0 && v[1] == 'a')

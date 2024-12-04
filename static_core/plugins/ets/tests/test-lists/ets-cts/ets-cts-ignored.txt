@@ -69,22 +69,19 @@
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_n_4.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_40.sts
 
+# 22987 es2panda aborts when name of the declaration clashes with the predefined type or standard library entity name.
+04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n8.sts
+04.names_declarations_and_scopes/03.distinguishable_declarations/spec_decl_n10.sts
+
 # XXXXX Aborts on assignment of char to union normalized to string
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_10.sts
 03.types/08.reference_types/12.union_types/union_types_normalization/norm_15.sts
 
-# XXXXX Unexpected 'Value is possibly nullish' error
-03.types/08.reference_types/12.union_types/ut_11.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_6.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_8.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_28.sts
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_31.sts
-
-# XXXXX Unexpected 'Indexed access is not supported for such expression type' error
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_23.sts
-
-# XXXXX Indexed access is not supported for such expression type.
-03.types/08.reference_types/12.union_types/union_types_normalization/norm_33.sts
+# XXXXX Readonly arrays and readonly tuples not supported
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_29.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_30.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_34.sts
+03.types/08.reference_types/12.union_types/union_types_normalization/norm_35.sts
 
 # 20936 Access to common union method doesn't work
 03.types/08.reference_types/12.union_types/access_to_common_union_members/cm_spec_0.sts

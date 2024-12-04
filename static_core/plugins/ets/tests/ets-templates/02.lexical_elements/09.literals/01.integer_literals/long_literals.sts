@@ -14,17 +14,17 @@
  */
 
 /*---
-desc: Correct int literals with bases 16, 10, 8 and 2
+desc: Correct long literals with bases 16, 10, 8 and 2
 ---*/
 
 {% for c in cases %}
 let v{{loop.index}} = {{c['lit']}}
-let b{{loop.index}} = new Int({{c['lit']}})
+let b{{loop.index}} = new Long({{c['lit']}})
 {% endfor %}
 
 function main(): void {
 {% for c in cases %}
     assertEQ(v{{loop.index}}, {{c['val']}})
-    assertEQ(b{{loop.index}}.intValue(), {{c['val']}})
+    assertEQ(b{{loop.index}}.longValue(), {{c['val']}})
 {% endfor %}
 }

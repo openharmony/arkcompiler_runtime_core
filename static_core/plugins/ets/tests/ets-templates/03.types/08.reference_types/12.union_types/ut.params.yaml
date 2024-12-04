@@ -180,9 +180,8 @@ cases:
 
     - decl: |-
           type UT = string[] | char[] | string | char
-          let v: UT|undefined
       use: |-
-          v = 'abc'
+          let v: UT|undefined = 'abc'
           assertTrue(v instanceof String && v == 'abc')
           v = c'\u0001'
           assertTrue(v instanceof Char && v == c'\u0001')
