@@ -15,14 +15,8 @@ limitations under the License.
 
 /*---
 desc: >-
-    Signatures S1 with n parameters, and S2 with m parameters are overload-equivalent if:
-    • n = m;
-    • Parameter type at some position in S1 is a type parameter (see Type Parameters), and a parameter type at the
-    same position in S2 is any reference type or type parameter;
-    • Parameter type at some position in S1 is a generic type G <T1, ..., Tn>, and a parameter type at the same
-    position in S2 is also G with any list of type arguments;
-    • All other parameter types in S1 are equal to parameter types in the same positions in S2.
-    The following signatures are not overload-equivalent.
+    The correctness check for functions overloading is performed if two or more functions with the same name are acces-
+    sible (see Accessible) in a scope (see Scopes).
 ---*/
 
 let res: number = 0;
@@ -38,6 +32,6 @@ function foo({{c.arg}}): void {
 function main(): void {
     {% for d in cases %}
     foo({{d.call}});
-    assert(res == {{d.res}});
+    assertEQ(res, {{d.res}});
     {% endfor %}
 }

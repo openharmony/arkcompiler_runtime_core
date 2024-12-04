@@ -16,10 +16,9 @@
 {%- for c in cases %}
 /*---
 desc: >-
-    If two methods of an interface (declared or inherited in any combination)
-    have the same name but different signatures that are not override-equivalent
-    (see Inheriting Methods with Override-Equivalent Signatures), then such method
-    name is considered overloaded.
+    Two methods with the same name are defined in the same interface.
+    If signatures are override-compatible (see Override-Compatible Signatures), A compile-time error occurs.
+    Otherwise, overloading is used.
 ---*/
 {{c.decl}}
 

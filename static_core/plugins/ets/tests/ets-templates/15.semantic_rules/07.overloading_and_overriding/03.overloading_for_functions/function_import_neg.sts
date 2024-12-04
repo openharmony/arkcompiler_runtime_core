@@ -17,11 +17,15 @@ limitations under the License.
 
 /*---
 desc: >-
-    A function can be declared in or imported to the scope. It is not allowed to mix functions declared and imported, or
-    imported from different compilation units to prevent uncontrolled overloading. To be more precise, a compile-time
-    error occurs for functions with the same name, if
+    A function can be declared in, or imported to a scope. To prevent uncontrolled overloading, mixing functions that
+    are declared and imported, or imported from different compilation units, is not allowed. In particular, a compile-time
+    error occurs to same-name functions if:
     • Functions are imported from different compilation units;
-    • Some functions are imported and others are declared.
+    • Some functions are imported, while others are declared.
+    It means that only the functions declared in the scope can be overloaded. The semantic check for these functions is as
+    follows:
+    • If signatures of functions are overload-equivalent, then a compile-time error occurs.
+    • Otherwise, overloading is valid.
 files: [./modules/{{c.file_a}}.sts {% if c.file_b %},./modules/{{c.file_b}}.sts{% endif %} ]
 tags: [negative, compile-only]
 ---*/
@@ -30,7 +34,5 @@ import {foo} from "./modules/{{c.file_a}}.sts"
 {% if c.file_b %}
 import {foo} from "./modules/{{c.file_b}}.sts"
 {% endif %}
-
-function main(): void { }
 
 {% endfor %}

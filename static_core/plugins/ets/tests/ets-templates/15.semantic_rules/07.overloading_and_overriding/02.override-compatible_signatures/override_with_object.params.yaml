@@ -633,7 +633,7 @@ cases:
     result: 2
 
   # override-incompatible return value (contravariance)
-    base: |-
+  - base: |-
       foo(): [Object, Base] {
           res = 1;  
           return [ new Object(), new Base()];

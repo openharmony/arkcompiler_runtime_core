@@ -17,20 +17,18 @@ limitations under the License.
 
 /*---
 desc: >-
-    Signatures S1 with n parameters, and S2 with m parameters are overload-equivalent if:
-    • n = m;
-    • Parameter type at some position in S1 is a type parameter (see Type Parameters), and a parameter type at the
-    same position in S2 is any reference type or type parameter;
-    • Parameter type at some position in S1 is a generic type G <T1, ..., Tn>, and a parameter type at the same
-    position in S2 is also G with any list of type arguments;
-    • All other parameter types in S1 are equal to parameter types in the same positions in S2.
-    Parameter names and return types do not influence overload-equivalence.
-    The following signatures are overload-equivalent, CTE expected.
+    A function can be declared in, or imported to a scope. To prevent uncontrolled overloading, mixing functions that
+    are declared and imported, or imported from different compilation units, is not allowed. In particular, a compile-time
+    error occurs to same-name functions if:
+    • Functions are imported from different compilation units;
+    • Some functions are imported, while others are declared.
+    It means that only the functions declared in the scope can be overloaded. The semantic check for these functions is as
+    follows:
+    • If signatures of functions are overload-equivalent, then a compile-time error occurs.
+    • Otherwise, overloading is valid.
 tags: [compile-only, negative]
 ---*/
 
 {{c.decl}}
-
-function main(): void {}
 
 {% endfor %}

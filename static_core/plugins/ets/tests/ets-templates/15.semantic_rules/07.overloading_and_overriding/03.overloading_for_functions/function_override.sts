@@ -13,28 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ---*/
 
-{% for c in cases %}
-
 /*---
 desc: >-
-          Mixed override-compatibility between types of different kinds is always false, except the compatibility with class type
-          Object as any type is a subtype of Object.
-tags: [compile-only, negative]
+    Overloading must only be considered for functions because inheritance for functions is not defined.
+tags: [negative, compile-only]
 ---*/
 
-let res: number = 0;
+function foo() {}
 
-class Base {
-    {{c.base}}
-}
-
-class Derived extends Base {
-    {{c.derived}}
-}
-
-function main(): void {
-    {{c.call}}
-    assertEQ(res, {{c.result}})
-}
-
-{% endfor %}
+override function foo() {}

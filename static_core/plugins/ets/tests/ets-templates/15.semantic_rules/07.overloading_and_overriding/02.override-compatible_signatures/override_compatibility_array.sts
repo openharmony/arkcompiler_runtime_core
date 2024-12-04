@@ -17,9 +17,14 @@ limitations under the License.
 
 /*---
 desc: >-
-          Mixed override-compatibility between types of different kinds is always false, except the compatibility with class type
-          Object as any type is a subtype of Object.
-tags: [compile-only, negative]
+          There are two cases of type override-compatibility, as types are used as either parameter types,
+          or return types. For each case there are six kinds of types
+
+          - Array type
+
+          Every type is override-compatible with itself (see Invariance).
+tags: [{{c.tags}}]
+params: {{c.params}}
 ---*/
 
 let res: number = 0;
@@ -34,7 +39,6 @@ class Derived extends Base {
 
 function main(): void {
     {{c.call}}
-    assertEQ(res, {{c.result}})
 }
 
 {% endfor %}

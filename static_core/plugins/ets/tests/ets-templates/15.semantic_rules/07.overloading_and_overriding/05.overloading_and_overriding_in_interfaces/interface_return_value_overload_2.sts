@@ -15,8 +15,9 @@ limitations under the License.
 
 /*---
 desc: >-
-    An instance method is defined in a subinterface J with the same name as the instance method in the superinterface I.
-    If signatures are override-compatible, then overriding is used. Otherwise, overloading is used.
+    A method is defined in a subinterface with the same name as the method in the superinterface.
+    If signatures are override-compatible (see Override-Compatible Signatures), then overriding is used.
+    Otherwise, overloading is used.
 tags: [compile-only, negative]
 ---*/
 
